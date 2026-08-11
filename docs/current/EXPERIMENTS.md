@@ -49,6 +49,12 @@ registration packets themselves live under `review/active/` — one home, not tw
   Two things still gate the sweep: the §7 cost ceiling, and §8's predictions
   as their own commit →
   `review/active/eb17p-registration-draft-2026-08-08.md`.
+- **Shop companion channel re-run** — **DRAFT, awaiting countersign, unrun.**
+  The channel's world moved ([USER] restored slot 2's Uncommon floor,
+  `CONSTANTS_VERSION` 9) and the instrument's two defects were repaired, both
+  on 2026-08-10; the packet asks to re-measure in the new world. Predictions
+  are explicit [USER] slots and are still blank →
+  `review/active/shop-rerun-registration-2026-08-10.md`.
 - **Kokomi stability band (D5)** — no band is declared yet (the declaration
   is QUEUE `S4-G6`; until it lands, the band rides DARK, `band = None`); its
   grading playtest is `docs/current/playtest/kokomi-playtest-protocol.md`

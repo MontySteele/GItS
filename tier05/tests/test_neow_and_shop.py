@@ -244,8 +244,11 @@ def test_shop_stocks_and_sells_a_relic_whose_effect_applies(monkeypatch):
 
     # The shop stocked AND sold the relic ...
     relic_buys = [p for p in res.shop if p.get("buy") == "relic"]
+    # "visit" joined every shop record on 2026-08-10 (the P1 attribution
+    # repair: the run-level offer and purchase logs had no join key). This run
+    # walks into one shop, so the stamp is 0.
     assert relic_buys == [{"buy": "relic", "id": "strawberry",
-                           "price": 150}]
+                           "price": 150, "visit": 0}]
     assert "strawberry" in res.relics               # ... and it is a run relic
 
     # ... and its +7 max-HP effect APPLIED at the shop: fights before the shop

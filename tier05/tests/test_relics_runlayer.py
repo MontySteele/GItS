@@ -160,7 +160,10 @@ def test_book_of_five_rings_heals_after_five_cards(monkeypatch):
     from tier05 import shop
 
     def _noop_shop(rng, character, deck_ids, gold, archetype, policy,
-                   removal_uses=0, n_offers=None):
+                   removal_uses=0, n_offers=None, **kw):
+        # **kw absorbs the additive per-visit bookkeeping model.resolve_shop
+        # now passes (visit=...); a stub that pins the signature would fail on
+        # every future additive field, and this one models "no shop happened".
         return shop.ShopOutcome(deck_ids=list(deck_ids), gold=gold,
                                 removal_uses=removal_uses, purchases=[])
     monkeypatch.setattr(shop, "visit_shop", _noop_shop)

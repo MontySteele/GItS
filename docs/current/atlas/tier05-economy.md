@@ -106,10 +106,15 @@ roll_banner / character_pool`, `shop.visit_shop / companion_shop_offer`,
 
 - **R59** (`tier0/DECISIONS.md:1777`) — shop companion slot 2 is wildcard-nation
   at an **Uncommon floor** on renormalized reward odds; guaranteed-Rare rejected
-  as brittle against banner thinning (`shop.py:171-179`).
-- **R60** (`:1796`) — the C# `ColorlessCardPool` stays populated so its last
-  fallback rung exists; tier 0.5 models no base colorless pool, so its ladder's
-  last rung **drops the slot** instead — recorded, not faked (`shop.py:118-127`).
+  as brittle against banner thinning. R116/NC-10 removed that floor; **[USER]
+  restored it 2026-08-10** (S4-G10 close-out, `CONSTANTS_VERSION` 9), so both
+  slots read `SHOP_COMPANION_RARITY_ODDS` and differ by nation only.
+- **R60** (`:1796`) — the C# `ColorlessCardPool` stays populated for its six
+  non-shop consumers. It is **no longer the shop's last fallback rung**: [USER]
+  ruled on 2026-08-10 that the mod matches the sim and **omits** an unfillable
+  slot, so both ladders end the same way. The omission happens before any
+  `MerchantCardEntry` is constructed — `Populate` still has no no-card path and
+  is still never handed one.
 - **R61** (`:1813`) — "Tier 0.5 models economy channels." Companions become
   shoppable here because an unmeasured governor is a design claim with no
   instrument.

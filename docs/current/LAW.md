@@ -107,13 +107,26 @@ combat grammar comes with us. (principles §1)
 - **Free reward channel is enabler-grade and stochastic,** nation-weighted ~50%
   same-nation; its value is capability (off-element access), not per-energy
   stats — a whiff is never a dead pick. (principles §4.1, §4.7)
-- **Shop is the paid premium channel, two colorless slots:** slot 1 = home-region,
-  guaranteed Uncommon-or-higher (`SHOP_COMPANION_RARITY_ODDS` renormalizes over
-  the ≥Uncommon pool); slot 2 = wildcard, any nation, unrestricted rarity.
-  (principles §4.7; R116 NC-10; R117/R118 Q16)
+- **Shop is the paid premium channel, two colorless slots, both Uncommon-or-higher:**
+  slot 1 = home-region, slot 2 = wildcard nation. Both roll
+  `SHOP_COMPANION_RARITY_ODDS` (reward odds renormalized over the ≥Uncommon pool);
+  the **nation filter is the only difference between the slots**. Slot 2's floor was
+  removed by R116/NC-10 and **restored 2026-08-10** — the paid channel does not sell
+  Commons. (principles §4.7; R59; R116 NC-10; R117/R118 Q16; [USER] 2026-08-10)
+- **An empty companion slot is omitted, never faked, in both engines.** When the
+  fallback ladder runs out (no drawable companion at any nation or band) the slot is
+  not created; the mod does not substitute a base colorless card. Omission happens
+  upstream of `MerchantCardEntry.Populate`, which has no no-card path.
+  ([USER] 2026-08-10; R59, R60)
 - **Gold price is the balance governor, never a stat nerf.** Companion pricing is
   50/75/150 by rarity; the ×1.15 colorless surcharge applies to `ColorlessCardPool`
   only, so companions are exempt. (principles §4.7; R61, R63)
+- **Price, shelf composition, and shelf order JOINTLY govern the premium channel.**
+  Price alone is not the governor: what is on the shelf (the rarity floor) and when
+  the player is asked (companions resolve before the relic shelf, so they get first
+  claim on the purse) move the same outcome, and a channel tuned on price alone is
+  tuned on one of three levers. Amends the older "pricing is the governor" thesis,
+  which stands as the pricing half of it. ([USER] 2026-08-10, S4-G10)
 - **Neutral action-energy / draw / thin are legal enabler-grade companion utility**
   (one-shot, Exhaust-gated, costed) — the pool must let any character draft a
   kit-gap fix. **Burst-meter (`burst_energy`) generation stays character-kit-scoped**

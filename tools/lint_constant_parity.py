@@ -115,18 +115,20 @@ MIRRORED: dict[str, object] = {
     "CompanionSlot.UncommonOdds": C.RARITY_ODDS["uncommon"],
     "CompanionSlot.SameNationShare": C.SAME_NATION_REWARD_SHARE,
     "CompanionSlot.NationWeight": C.NATION_WEIGHTS["mondstadt"],
-    # §4.7 shop channel, respecified by NC-10 (R116). The two slots read two
-    # tables now: slot 1 the reward odds CONDITIONED on >= Uncommon (its
-    # floor), slot 2 the reward odds themselves ("any companion card").
-    # SlotTwoUncommonOdds used to hold the conditioned value and now holds
-    # the unconditioned one -- the rename of the CONCEPT is why the constant
-    # kept its name and changed its mirror.
+    # §4.7 shop channel. BOTH slots read the reward odds CONDITIONED on
+    # >= Uncommon since [USER] restored slot 2's floor on 2026-08-10
+    # (CONSTANTS_VERSION 9), so both mirrors point at the same tier0 entry.
+    #
+    # SlotTwoUncommonOdds has now held both readings: the conditioned value
+    # before R116, the unconditioned 0.35 between R116 and the restoration,
+    # and the conditioned value again. `SlotTwoCommonOdds` was its companion
+    # in the middle period and is DELETED from the patch -- a Common is no
+    # longer a reachable shop draw, so a mirror for it would pin a number the
+    # mod does not use.
     "MerchantInventory_CompanionColorlessSlots_Patch.SlotOneUncommonOdds":
         C.SHOP_COMPANION_RARITY_ODDS["uncommon"],
-    "MerchantInventory_CompanionColorlessSlots_Patch.SlotTwoCommonOdds":
-        C.RARITY_ODDS["common"],
     "MerchantInventory_CompanionColorlessSlots_Patch.SlotTwoUncommonOdds":
-        C.RARITY_ODDS["uncommon"],
+        C.SHOP_COMPANION_RARITY_ODDS["uncommon"],
 
     # Furina.
     "FurinaResourceConstants.FanfareDecayFraction": C.FANFARE_DECAY_FRACTION,

@@ -75,29 +75,34 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
     private const float SlotOneUncommonOdds = 0.875f;
 
     /// <summary>
-    /// SLOT 2's table: tier0 RARITY_ODDS itself, UNCONDITIONED. "Any
-    /// companion card" (R116) is the absence of a filter, and the absence of
-    /// a filter is the reward table with nothing cut out of it -- so this
-    /// slot can offer a Common, at the Common band, which it could not
-    /// before. Pricing needs no new number here: MerchantCardEntry.GetCost
-    /// already carries 50/75/150 by rarity.
+    /// SLOT 2's Uncommon share -- THE SAME CONDITIONED TABLE AS SLOT 1 since
+    /// [USER] restored the floor on 2026-08-10 (CONSTANTS_VERSION 9).
+    ///
+    /// It was 0.35f between R116 and that ruling, alongside a
+    /// `SlotTwoCommonOdds = 0.60f`: NC-10 read "any companion card" as the
+    /// absence of a filter, so the slot rolled tier0 RARITY_ODDS itself and
+    /// could sell a Common at the 50-gold band. [USER] closed the S4-G10
+    /// agenda item ("should slot 2 carry a rarity floor at all?") by
+    /// restoring R59's floor -- the paid premium channel does not sell
+    /// Commons -- so the Common constant is GONE, not merely unused, and this
+    /// one carries the conditioned value. The slots now differ by NATION and
+    /// by nothing else. tier05/shop.py moved in the same commit.
     /// </summary>
-    private const float SlotTwoCommonOdds = 0.60f;
-
-    /// <summary>Slot 2's Uncommon share of tier0 RARITY_ODDS.</summary>
-    private const float SlotTwoUncommonOdds = 0.35f;
+    private const float SlotTwoUncommonOdds = 0.875f;
 
     /// <summary>
     /// The bands each slot may fall back through when its drawn corner is
-    /// empty, IN TABLE ORDER -- slot 1 keeps its floor even on the fallback
-    /// rung, slot 2 has none to keep. Mirrors the odds dicts tier05/shop.py
-    /// walks for the same rung.
+    /// empty, IN TABLE ORDER. Both slots keep the floor on the fallback rung
+    /// now, so the two arrays hold the same bands and differ only in name --
+    /// kept as two so the slots stay separately addressable if a stated split
+    /// is ever ruled (see tier0/constants.py). Mirrors the odds dict
+    /// tier05/shop.py walks for the same rung.
     /// </summary>
     private static readonly CardRarity[] SlotOneRarities =
         { CardRarity.Uncommon, CardRarity.Rare };
 
     private static readonly CardRarity[] SlotTwoRarities =
-        { CardRarity.Common, CardRarity.Uncommon, CardRarity.Rare };
+        { CardRarity.Uncommon, CardRarity.Rare };
 
     /// <summary>
     /// F2. This was a bare `AccessTools.FieldRefAccess<...>("_colorlessCardEntries")`
@@ -174,22 +179,26 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
             slotOneRarity, CompanionPool.HomeNation(player), slot: 1,
             fallbackRarities: SlotOneRarities);
 
-        // --- Slot 2: ANY COMPANION CARD (NC-10 / R116). No nation, no floor,
-        // full reward odds -- so this slot offers Commons now, priced at the
-        // Common band. R59 read the floor as covering both slots on the
-        // argument that a ~60%-Common wildcard is worse than the guaranteed
-        // Rare it replaces; R116 heard that argument and specified the slot
-        // anyway. ---
-        var slotTwoRoll = player.PlayerRng.Shops.NextFloat();
-        var slotTwoRarity = slotTwoRoll < SlotTwoCommonOdds
-            ? CardRarity.Common
-            : slotTwoRoll < SlotTwoCommonOdds + SlotTwoUncommonOdds
-                ? CardRarity.Uncommon
-                : CardRarity.Rare;
+        // --- Slot 2: ANY NATION, UNCOMMON OR HIGHER. The wildcard slot, with
+        // R59's rarity floor RESTORED by [USER] on 2026-08-10 after R116 had
+        // removed it. R59's argument -- a ~60%-Common wildcard is worse than
+        // the guaranteed Rare it replaces, and the paid channel should not
+        // sell Commons -- is the one that stands. One roll, one table, same
+        // as slot 1; the nation filter is the whole difference between the
+        // slots. ---
+        var slotTwoRarity = player.PlayerRng.Shops.NextFloat() < SlotTwoUncommonOdds
+            ? CardRarity.Uncommon
+            : CardRarity.Rare;
         AddSlot(__instance, player, entries, slotTwoRarity, nation: null, slot: 2,
             fallbackRarities: SlotTwoRarities);
 
-        return false;   // both slots stocked; skip the base colorless fill
+        // Skip the base colorless fill. Both slots are normally stocked; a
+        // slot whose ladder ran out is OMITTED (see AddSlot), which leaves
+        // the merchant with fewer colorless entries rather than with a base
+        // card the sim never models. Falling through to the base fill instead
+        // is not the alternative -- that would restock BOTH slots from the
+        // colorless pool, including the one that filled fine.
+        return false;
     }
 
     /// <summary>
@@ -206,14 +215,34 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
     ///
     /// The ladder is deliberate. Widen the NATION before dropping the RARITY,
     /// because R59 ratified the floor and §4.7 only ever described slot 1's
-    /// nation as falling through. The last rung is a single base colorless
-    /// entry for THIS SLOT ONLY -- a bounded, shop-scoped read of the pool
-    /// R60 keeps populated, so the shop degrades to base rather than to
-    /// nothing.
+    /// nation as falling through.
+    ///
+    /// THE LAST RUNG IS OMISSION, AND OMISSION HAPPENS UPSTREAM OF Populate
+    /// ([USER] 2026-08-10). It used to be a single base colorless entry for
+    /// this slot, which is where the mod and tier05/shop.py disagreed: the
+    /// sim models no base colorless pool, so it drops the slot. Two engines
+    /// with two different last rungs is two different games on paper even
+    /// when the rung is unreachable, so the divergence was ruled shut in the
+    /// SIM'S favour -- the mod omits the slot too.
+    ///
+    /// WHY THIS DOES NOT REOPEN THE SOFTLOCK. The hard constraint above is
+    /// about Populate: it has no "no card" path, and CreateForMerchant ends
+    /// in Rng.NextItem over a filtered list that must not be empty. This
+    /// method only ever reaches `new MerchantCardEntry(...)` / `Populate()`
+    /// on a `candidates` list it has just checked is non-empty; the omission
+    /// branch RETURNS BEFORE constructing anything, so no entry exists to
+    /// populate, no null is handed to Populate, and nothing is added to
+    /// `entries`. The slot is not created rather than created empty. The
+    /// merchant's entry list is built by iteration, so a shorter list is a
+    /// shorter shelf -- the same shape the base game produces when a pool
+    /// runs thin -- and never an entry in an unpopulated state.
     ///
     /// Live corner today: Fontaine designs ZERO Rare companions, so Furina's
     /// slot 1 can never roll one. That is exactly the brittleness R59 cites
     /// and it is why the floor is Uncommon rather than a guaranteed Rare.
+    /// Reaching the omission rung is strictly harder than that: it needs the
+    /// roster to supply no drawable companion at ANY nation in EITHER band,
+    /// which `tools/lint_companion_shop_coverage.py` fails the build over.
     /// </summary>
     private static void AddSlot(
         MerchantInventory inventory, Player player,
@@ -272,27 +301,24 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
 
         if (candidates.Count == 0)
         {
-            // Last rung: one base colorless entry, this slot only (R60 keeps
-            // that pool populated precisely so this rung exists).
+            // LAST RUNG: OMIT THE SLOT ([USER] 2026-08-10). Return before any
+            // MerchantCardEntry is constructed -- see the reachability
+            // argument in this method's doc comment. Populate is never
+            // reached on this path because there is nothing to populate; the
+            // slot simply does not exist this visit, which is what
+            // tier05/shop.py has always done and is now what both engines do.
+            //
+            // This replaces a base-colorless fallback entry (R60 kept
+            // ColorlessCardPool populated partly for that rung; its six
+            // non-shop consumers, including all three GetDistinctForCombat
+            // sites, are untouched by this and R60's no-emptying rule still
+            // stands).
             Log.Warn($"[{KleeMod.ModId}] shop slot {slot} has NO drawable "
-                   + "companion at any nation or rarity; falling back to a base "
-                   + "colorless card for this slot. The companion roster cannot "
-                   + "fill the shop -- this is a content bug, not a shop bug.");
-            var basePool = ModelDb.CardPool<ColorlessCardPool>()
-                .GetUnlockedCards(player.UnlockState, player.RunState.CardMultiplayerConstraint)
-                .ToList();
-            // chosenRarity, not rarity. Every other reader of this ladder
-            // prices off chosenRarity -- the slot's ACTUAL rarity -- and this
-            // one rung read the requested rarity instead. Today the two are
-            // provably equal here (chosenRarity only moves on a rung that
-            // found candidates, and reaching this branch means none did), so
-            // this is a correctness repair rather than a behaviour change:
-            // add one more rung above that downgrades and succeeds partially,
-            // and the old line would silently price a downgraded card at the
-            // original rarity. Fixed 2026-07-29.
-            var baseEntry = new MerchantCardEntry(player, inventory, basePool, chosenRarity);
-            baseEntry.Populate();
-            entries.Add(baseEntry);
+                   + "companion at any nation or rarity; the slot is OMITTED "
+                   + "this visit. The companion roster cannot fill the shop -- "
+                   + "this is a content bug, not a shop bug, and "
+                   + "lint_companion_shop_coverage should have failed the "
+                   + "build before a player ever saw it.");
             return;
         }
 

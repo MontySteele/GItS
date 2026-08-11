@@ -762,21 +762,30 @@ SHOP_REMOVAL_PRICE_STEP = 25     # §5: "rising per use" -- +25 each removal
 #                                  only bites once multi-act adds a 2nd shop.
 SHOP_CARD_OFFERS = 3             # "a few cards" (§5). OPEN NUMBER -- §8 does
 #                                  not fix a count; 3 mirrors REWARD_CARD_OFFERS.
-# --- §4.7 companion channel (R59/R61, respecified by R116/NC-10) ----------
+# --- §4.7 companion channel (R59/R61, respecified by R116/NC-10, slot-2
+# --- floor RESTORED by [USER] 2026-08-10) ---------------------------------
 # The shop's TWO colorless slots carry companions.
 #
-# THE SPEC, verbatim from R116: "Slot 1 should be 'Uncommon or higher from
-# the home region'; slot 2 should be 'any companion card'." Slot 1 keeps the
-# floor and the nation; slot 2 keeps NEITHER. That supersedes R59's reading
-# of the floor as covering both slots -- the paragraph that used to stand
-# here argued a wildcard at full reward odds would make this shop worse than
-# base's guaranteed-Rare slot 2, and NC-10 ruled the spec anyway. It is
-# recorded rather than deleted because it was the live reasoning until R116.
+# WHERE THE SLOTS STAND TODAY. Slot 1 = home region, Uncommon-or-higher.
+# Slot 2 = any nation, Uncommon-or-higher. The NATION is what separates the
+# slots; the RARITY FLOOR is common to both.
+#
+# HISTORY, kept because it is the reasoning that moved. R59 read the floor as
+# covering both slots, on the argument that a wildcard at full reward odds
+# (~60% Common) makes this shop worse than base's guaranteed-Rare slot 2.
+# R116/NC-10 respecified slot 2 as "any companion card" -- no nation, no
+# floor -- and Commons became drawable at the 50-gold band. [USER] closed
+# that out on 2026-08-10 (S4-G10 agenda item "should slot 2 carry a rarity
+# floor at all?") by RESTORING the floor per R59's original rationale: the
+# paid premium channel is not a place to sell Commons. Slot 2 therefore reads
+# SHOP_COMPANION_RARITY_ODDS again, exactly as it did before R116.
+# This changes the shop world in both engines -> CONSTANTS_VERSION 8 -> 9.
 SHOP_COMPANION_SLOTS = 2
-# SLOT 1's odds: RARITY_ODDS CONDITIONED on >= Uncommon, i.e. renormalized
+# BOTH SLOTS' odds: RARITY_ODDS CONDITIONED on >= Uncommon, i.e. renormalized
 # over the rarities that survive the floor -- 0.35/0.40 and 0.05/0.40. That
 # is the only reading of "Uncommon or higher" that introduces no new number,
-# and the values below are unchanged from when the floor covered both slots.
+# and the values below are unchanged from when the floor covered both slots
+# the first time.
 #
 # THE ALTERNATIVE READING, surfaced and NOT chosen (R116 required this
 # explicitly: "a renormalization chosen by an implementer is a balance value
@@ -794,11 +803,11 @@ SHOP_COMPANION_SLOTS = 2
 # its own row in its own window. No value changed by the ruling: the
 # conditioning was already the identity on these numbers.
 SHOP_COMPANION_RARITY_ODDS = {"uncommon": 0.875, "rare": 0.125}
-# SLOT 2's odds are RARITY_ODDS itself, unconditioned -- "any companion
-# card" is the absence of a filter, and the absence of a filter is the
-# reward table with nothing cut out of it. No second constant: the shop
-# reads RARITY_ODDS directly, so the two slots visibly share one source and
-# the conditioning above stays legible as conditioning.
+# SLOT 2 reads THIS SAME TABLE ([USER] 2026-08-10). Between R116 and that
+# ruling it read RARITY_ODDS itself, unconditioned, and could offer a Common
+# at the Common band; the floor's restoration puts both slots back on one
+# table. There is still no second constant -- the two slots differ by NATION
+# only, and one table is what makes that visible.
 # Priced by DRAWN RARITY (§4.7: gold is the balance governor, not a stat nerf).
 # These are the REAL StS2 shop bands, read off MerchantCardEntry.GetCost, so
 # the sim and the mod charge the same gold for the same companion. They are
@@ -810,11 +819,16 @@ SHOP_COMPANION_RARITY_ODDS = {"uncommon": 0.875, "rare": 0.125}
 # (see klee-mod CompanionPool), so neither side charges the colorless
 # surcharge. Both sides agree; both are ~15% under base's premium channel.
 #
-# The COMMON band (50) joins the table under R116/NC-10, which opened slot 2
+# The COMMON band (50) joined the table under R116/NC-10, which opened slot 2
 # to any companion card and therefore to Commons. It is READ OFF THE SAME
 # METHOD as the other two, not invented: `MerchantCardEntry.GetCost`'s IL
 # carries `ldc.i4 150`, `ldc.i4.s 75`, `ldc.i4.s 50` and the 1.15 colorless
 # multiplier, in that order. Same provenance, same paragraph, no new number.
+# INERT since the floor was restored ([USER] 2026-08-10): with both slots on
+# SHOP_COMPANION_RARITY_ODDS no shop draw can be a Common, so nothing indexes
+# this entry today. It is KEPT rather than deleted because it is a fact about
+# `GetCost`, not a choice of ours -- deleting it would mean re-reading the IL
+# to bring the band back, and both engines still price by drawn rarity.
 SHOP_COMPANION_PRICE = {"common": 50, "uncommon": 75, "rare": 150}
 # W2 relic granting cadence: shops stock 1-2 Common-pool relics for sale at
 # this price. NEW economy number (relics were a stub before W2); auto-take-all
@@ -987,7 +1001,29 @@ BANNER_FEATURED_SLOTS = 3
 # income powers, income pinned before Salon upkeep (EB-2's parity target).
 # Latent at the bump -- no encounter or ratified deck carries the powers;
 # cells move only through the Ancient door.
-CONSTANTS_VERSION = 8
+# CONSTANTS_VERSION 9 ([USER] 2026-08-10, S4-G10 close-out): the shop's
+# SLOT-2 RARITY FLOOR IS RESTORED -- slot 2 rolls SHOP_COMPANION_RARITY_ODDS
+# (Uncommon-or-better) again instead of RARITY_ODDS, in BOTH engines
+# (`tier05/shop.py`, `klee-mod/.../MerchantCompanionSlots.cs`), per R59's
+# original rationale. Commons leave the paid channel entirely: the 50-gold
+# band is now unreachable and the shop's cheapest companion is 75.
+# Bumped on the CONSTANTS 5 criterion ("comparability decides, not edit
+# size"): a shelf that stops offering ~60%-Common wildcards changes what a
+# purse buys at every visit, so every §4.7 shop number measured under C6-C8
+# -- the whole SHOP-P1/P2/P3 cell included -- is archive, not a cheaper
+# sample of this world. Archive banners go where the numbers are published;
+# nothing is rewritten (R101b).
+# Landing WITH the bump, deliberately, so the re-run is one window and not
+# two: the `exp_shop_companion_channel` instrument fixes (per-visit purchase
+# attribution, true slot-2 purchase rarity, gold/affordability/crowd-out
+# logging). An instrument fix moves no world, but it lands inside C9's
+# boundary so the corrected cell has exactly one world to cite.
+# FURTHER ERRATA MAY JOIN C9 while it is open: until a number is published
+# under this stamp, an erratum that lands here widens this entry rather than
+# opening C10.
+# DRAFTER_VERSION and RUNTEMPLATE correctly do NOT bump: no offer-time price
+# and no map/route shape changed.
+CONSTANTS_VERSION = 9
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

@@ -117,8 +117,11 @@ def test_buys_a_card_the_policy_would_draft(monkeypatch):
     out = shop.visit_shop(random.Random(0), "klee", deck, 300,
                           "demolition", draft.assigned_policy,
                           companions=False)
+    # "visit" joined every purchase record on 2026-08-10 (the P1 attribution
+    # repair -- the offer and purchase logs are flattened across a run's shops
+    # and had no join key). It defaults to 0 for a direct call like this one.
     assert out.purchases == [{"buy": "card", "id": "mine_toss",
-                              "price": C.SHOP_CARD_PRICE}]
+                              "price": C.SHOP_CARD_PRICE, "visit": 0}]
     assert out.gold == 300 - C.SHOP_CARD_PRICE
     assert out.deck_ids.count("mine_toss") == deck.count("mine_toss") + 1
 
@@ -128,10 +131,13 @@ def test_no_buy_when_gold_short(monkeypatch):
                         lambda rng, ch, n=C.SHOP_CARD_OFFERS:
                         [loader.get_card("mine_toss")])
     deck = loader.starting_deck("klee")
-    # `companions=False`, like its sibling above. NC-10 (R116) opened shop
-    # slot 2 to Commons at the 50-gold band, so a purse one gold short of a
-    # CARD is no longer short of everything on the shelf -- and this test's
-    # question is about the card channel, not about what else is for sale.
+    # `companions=False`, like its sibling above. The flag matters here
+    # because the companion shelf is priced differently from the card shelf,
+    # so a purse one gold short of a CARD is not necessarily short of
+    # everything for sale -- and this test's question is about the card
+    # channel. (It mattered most while R116 let slot 2 sell 50-gold Commons;
+    # [USER] restored that floor on 2026-08-10 and the cheapest companion is
+    # 75 again, but the isolation is the right shape either way.)
     out = shop.visit_shop(random.Random(0), "klee", deck,
                           C.SHOP_CARD_PRICE - 1, "demolition",
                           draft.assigned_policy, companions=False)
@@ -176,8 +182,10 @@ def test_removal_removes_a_known_dead_card(monkeypatch):
     deck = loader.starting_deck("klee")              # 4x kaboom
     out = shop.visit_shop(random.Random(0), "klee", deck, 300,
                           "demolition", _skip, removal_uses=0)
+    # "visit": the per-visit join key added 2026-08-10 (see the sibling note
+    # above); 0 on a direct call.
     assert out.purchases == [{"buy": "removal", "id": "kaboom",
-                              "price": C.SHOP_REMOVAL_PRICE}]
+                              "price": C.SHOP_REMOVAL_PRICE, "visit": 0}]
     assert out.deck_ids.count("kaboom") == deck.count("kaboom") - 1
     assert out.removal_uses == 1
     # Rising price: the Nth removal costs base + N*step.
