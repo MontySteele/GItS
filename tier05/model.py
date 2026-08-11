@@ -771,7 +771,8 @@ def _setup_run(character: str, archetype: str, pilot_id: str,
                policy: DraftPolicy, seed: int, slot_mode: str,
                relics: list[str] | None, grant_relics: bool,
                grant_potions: bool, n_acts: int | None,
-               route_name: str) -> _RunCtx:
+               route_name: str,
+               force_cards: list[str] | None = None) -> _RunCtx:
     """Run start: the slot mode, the three rng streams, the starting deck and
     the seeded/Neow relics and the potion bag. Everything up to the first
     node. Argument meanings are documented on run_one, the public entry."""
@@ -837,6 +838,26 @@ def _setup_run(character: str, archetype: str, pilot_id: str,
     res = RunResult(seed=seed, won=False, death_node=None, hp_by_node=[],
                     deck_ids=deck_ids, node_kinds=[], banner=banner,
                     n_acts=n, route=route_name)
+    # EB-17p deck injection, LAST in run start and deliberately so. Two
+    # run-start relic effects consume the MAIN rng stream in a way that
+    # depends on how big the deck is -- `_pickup_upgrade` shuffles the
+    # upgradable deck indices (relics.py:433-445) and `grant_random_common`
+    # rolls off the same stream (:424-430). Injecting before them would
+    # desynchronise the shared stream at floor zero and destroy the seed
+    # pairing before the first node is even entered. Injecting here leaves
+    # run start byte-identical between a forced arm and its control: same
+    # map, same seeded/Neow relics, same gold, one extra card.
+    #
+    # Appended to `deck_ids`, which IS the list object `res.deck_ids` holds,
+    # so the injection is visible to every downstream deck read without a
+    # second write.
+    for cid in force_cards or ():
+        # Fail loudly HERE, on a typo, rather than as a KeyError deep inside
+        # a worker process halfway through a batch -- the contract Cell's
+        # __post_init__ gives a plan id. peek_card is the read-only door and
+        # consumes no randomness, so this validation cannot move a run.
+        loader.peek_card(cid)
+        deck_ids.append(cid)
     return _RunCtx(character=character, archetype=archetype, policy=policy,
                    rng=rng, pilot=pilot, banner=banner,
                    route_policy=route.POLICIES[route_name], res=res,
@@ -854,7 +875,8 @@ def run_one(character: str, archetype: str, pilot_id: str,
             grant_relics: bool = False,
             grant_potions: bool = False,
             n_acts: int | None = None,
-            route_name: str = "hunter") -> RunResult:
+            route_name: str = "hunter",
+            force_cards: list[str] | None = None) -> RunResult:
     """slot_mode: the draft-sim spec's three modes (§3, "build all three
     now") -- 'standard' (1 companion offer), 'choose3' (every companion slot
     is a pick of three), or 'pity(k)' (k screens without taking a companion
@@ -888,10 +910,24 @@ def run_one(character: str, archetype: str, pilot_id: str,
     never constructed and potions are never passed to build_player_from_ids, so
     the potions=None path is byte-identical to the pre-potion model.
 
+    force_cards (EB-17p): card ids appended to the deck at the END of run
+    start, after every run-start relic effect has drawn from the main stream.
+    Default None, which is the world we have -- a None batch is
+    element-for-element identical to the pre-seam batch, pinned by
+    `tier05/tests/test_eb17p_force_cards.py`. This is a DECK change, not a
+    drafter change: the drafter scores a different deck by the same function,
+    so a forced arm and its control run at the same RT/D/P/C stamp.
+
+    ASSIGNMENT ONLY, never enforcement. The run layer may still upgrade a
+    forced copy (a smith node rewrites the id in place) or remove it at a
+    rest node. Reads keyed on a forced id must pool `X` with `X+`, and the
+    estimand any experiment builds on this seam is intent-to-treat.
+
     EB-41: the walk itself is this function; run start, the per-act setup and
     each node kind are phases on `_RunCtx` above."""
     ctx = _setup_run(character, archetype, pilot_id, policy, seed, slot_mode,
-                     relics, grant_relics, grant_potions, n_acts, route_name)
+                     relics, grant_relics, grant_potions, n_acts, route_name,
+                     force_cards)
     res = ctx.res
 
     # RUNTEMPLATE_VERSION 6 (§11): the fixed 11-node spine is gone. Each act
@@ -942,14 +978,16 @@ def _run_range(character: str, archetype: str, pilot_id: str,
                policy: DraftPolicy, seed: int, lo: int, hi: int,
                slot_mode: str, relics: list[str] | None,
                grant_relics: bool, grant_potions: bool,
-               n_acts: int | None, route_name: str) -> list[RunResult]:
+               n_acts: int | None, route_name: str,
+               force_cards: list[str] | None = None) -> list[RunResult]:
     """Runs [lo, hi) of the batch. Each is a pure function of `seed + i`."""
     out = []
     for i in range(lo, hi):
         r = run_one(character, archetype, pilot_id, policy, seed + i,
                     slot_mode=slot_mode, relics=relics,
                     grant_relics=grant_relics, grant_potions=grant_potions,
-                    n_acts=n_acts, route_name=route_name)
+                    n_acts=n_acts, route_name=route_name,
+                    force_cards=force_cards)
         # draft_regret: sampled re-score in the final-deck context, using
         # a DEDICATED rng stream so sampling can't perturb run decisions.
         r.regret_samples = draft.draft_regret(
@@ -1008,7 +1046,8 @@ def run_many(character: str, archetype: str, pilot_id: str,
              grant_potions: bool = False,
              n_acts: int | None = None,
              jobs: int = 1,
-             route_name: str = "hunter") -> list[RunResult]:
+             route_name: str = "hunter",
+             force_cards: list[str] | None = None) -> list[RunResult]:
     """`jobs` > 1 spreads the batch over that many worker PROCESSES;
     `jobs=0` means one per CPU.
 
@@ -1025,7 +1064,7 @@ def run_many(character: str, archetype: str, pilot_id: str,
     """
     common = (character, archetype, pilot_id, seed)
     tail = (slot_mode, relics, grant_relics, grant_potions, n_acts,
-            route_name)
+            route_name, force_cards)
     workers = min((os.cpu_count() or 1) if jobs == 0 else jobs, runs)
     name = _policy_name(policy)
     if workers <= 1 or name is None:

@@ -80,3 +80,115 @@ def wilson95(successes: int, trials: int,
     half = (z * math.sqrt(p * (1 - p) / trials
                           + z * z / (4 * trials * trials)) / denom)
     return max(0.0, center - half), min(1.0, center + half)
+
+
+# ---------------------------------------------------------------------------
+# PAIRED arithmetic (EB-17p, 2026-08-10)
+#
+# Two arms run on the SAME seeds are not two independent samples, and reading
+# them with `wilson95` throws away the whole reason the pairing was bought.
+# These live here, beside the other two, for the reason this file exists at
+# all: the five hand-rolled `_percentile` copies were five because there was
+# nowhere for the first one to go. An experiment script that hand-rolls a
+# McNemar is the same mistake with a different name.
+# ---------------------------------------------------------------------------
+
+
+def discordant_counts(pairs) -> tuple[int, int, int, int]:
+    """Split seed-matched binary pairs into the 2x2 McNemar table.
+
+    `pairs` is a sequence of `(treated, control)` outcomes, each truthy for a
+    win. Returns `(b, c, both, neither)`:
+
+        b   treated won, control lost
+        c   control won, treated lost
+        both / neither   the CONCORDANT pairs
+
+    All four are returned because a delta printed without its discordant
+    counts cannot be checked: `b=3, c=1` and `b=300, c=100` give the same
+    point estimate on wildly different evidence, and the concordant counts are
+    what tell a reader how much of the pairing actually bit.
+    """
+    b = c = both = neither = 0
+    for t, k in pairs:
+        if t and k:
+            both += 1
+        elif t and not k:
+            b += 1
+        elif k and not t:
+            c += 1
+        else:
+            neither += 1
+    return b, c, both, neither
+
+
+def mcnemar_exact(b: int, c: int) -> float:
+    """Two-sided EXACT McNemar p-value on the discordant counts.
+
+    Under the null the `b + c` discordant pairs are a fair coin, so the test
+    is the two-sided exact binomial at p = 0.5. Exact rather than the usual
+    chi-square approximation because this repo measures cells with winrates in
+    the single-digit percent, where the discordant count can be small enough
+    for the approximation to be the wrong shape -- and an exact test costs
+    nothing at these sizes.
+
+    No discordant pairs at all returns 1.0: the arms never once disagreed, so
+    there is no evidence of a difference. It is NOT a zero p-value and it is
+    not an error.
+    """
+    if b < 0 or c < 0:
+        raise ValueError(f"discordant counts must be non-negative: {b}, {c}")
+    n = b + c
+    if n == 0:
+        return 1.0
+    k = min(b, c)
+    tail = sum(math.comb(n, i) for i in range(k + 1)) * 0.5 ** n
+    # Doubling the smaller tail is the standard two-sided construction for a
+    # symmetric null; clamped because at b == c the two tails overlap on the
+    # centre and the doubled sum exceeds 1.
+    return min(1.0, 2.0 * tail)
+
+
+def paired_bootstrap_delta(pairs, rng, resamples: int = 10000,
+                           conf: float = 0.95) -> tuple[float, float]:
+    """Percentile bootstrap interval on the PAIRED delta, resampling PAIRS.
+
+    `pairs` is a sequence of `(treated, control)` values; the statistic is
+    `mean(treated) - mean(control)`. The resampling unit is the PAIR, not the
+    run: resampling the two arms independently would reconstruct the unpaired
+    interval and quietly undo the design.
+
+    The values may be the booleans `discordant_counts` takes (a winrate
+    delta) or any real number (acts completed, deck size, fights). One
+    function for both because it is the same estimator either way, and a
+    second copy for the continuous case is exactly how this file's five
+    `_percentile` copies started. The BINARY case additionally gets
+    `mcnemar_exact` as its test; the continuous case has this interval only.
+
+    `rng` is passed in and never constructed here. Bootstrap resampling is NEW
+    sampling, and the repo's rule (`exp_reactions_corpus`) is that new sampling
+    runs on its own dedicated stream with its own seed, never the run seed --
+    a bootstrap sharing a stream with the sim is a bootstrap that can move a
+    fight. Making the caller supply the generator is how that rule is kept
+    visible at the call site instead of buried in a default.
+
+    Returns `(lo, hi)`. An empty sample returns `(0.0, 0.0)`, the `percentile`
+    convention: a report line for a cohort of nothing prints a zero beside a
+    visible `n` rather than crashing.
+    """
+    rows = [(float(t), float(k)) for t, k in pairs]
+    n = len(rows)
+    if n == 0:
+        return 0.0, 0.0
+    if resamples <= 0:
+        raise ValueError(f"resamples must be positive: {resamples}")
+    deltas = []
+    for _ in range(resamples):
+        s_t = s_k = 0.0
+        for _ in range(n):
+            t, k = rows[rng.randrange(n)]
+            s_t += t
+            s_k += k
+        deltas.append((s_t - s_k) / n)
+    alpha = (1.0 - conf) / 2.0
+    return percentile(deltas, alpha), percentile(deltas, 1.0 - alpha)

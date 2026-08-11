@@ -90,6 +90,16 @@ class Cell:
     # may show one pilot without saying which, and a rule enforced by the
     # mandatory stamp line cannot be forgotten by the next script.
     pilot_override: str | None = None
+    # Card ids injected into the deck at the END of run start (EB-17p's
+    # `force_cards` seam, model.run_one). A TUPLE, not a list, because a Cell
+    # is frozen and a mutable field in a frozen object is a stamp that can
+    # stop describing its own rows.
+    #
+    # A field rather than a call-site argument, for the pilot_override
+    # reason: it lands in `stamp()`, so a forced arm can never print a line
+    # that claims to be the control. None -- every ratified cell -- passes
+    # nothing to the model and is byte-identical to the pre-seam world.
+    force_cards: tuple[str, ...] | None = None
 
     def __post_init__(self) -> None:
         # Fails loudly on an archetype the character does not have. This is
@@ -145,8 +155,14 @@ class Cell:
         # reader has to be warned about.
         pilot = ("" if self.pilot_override is None
                  else f" pilot={self.pilot_override}")
-        return (f"cell={self.name} seed={self.seed} runs={self.runs}{pilot} "
-                f"RT{v['RT']}/D{v['D']}/P{v['P']}/C{v['C']}")
+        # Same rule as the pilot, for the same reason: named ONLY when it is
+        # not the default. Printing `forced=` on every line would rewrite
+        # every stamp on record, and the case the reader must be warned about
+        # is exactly the divergent one.
+        forced = ("" if not self.force_cards
+                  else f" forced={'+'.join(self.force_cards)}")
+        return (f"cell={self.name} seed={self.seed} runs={self.runs}{pilot}"
+                f"{forced} RT{v['RT']}/D{v['D']}/P{v['P']}/C{v['C']}")
 
     def describe(self, subject: str | None = None,
                  varying: tuple[str, ...] = ()) -> str:
@@ -200,7 +216,9 @@ class Cell:
             self.character, self.archetype, self.pilot,
             draft.POLICIES[self.policy], self.runs, self.seed,
             grant_relics=self.realistic, grant_potions=self.realistic,
-            n_acts=self.n_acts, jobs=self.jobs, route_name=self.route)
+            n_acts=self.n_acts, jobs=self.jobs, route_name=self.route,
+            force_cards=(list(self.force_cards) if self.force_cards
+                         else None))
 
     def arm(self) -> dict:
         """Run the cell and reduce it to the standard summary row.
