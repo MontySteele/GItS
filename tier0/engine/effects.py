@@ -879,6 +879,11 @@ def _deploy_salon_members(state: CombatState, amount: int,
 
 def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
     cap = fx.get("max_stacks")
+    # `never_reduces` (EB-26 D2, ruled 2026-08-10, option (d)): an opt-in apply
+    # mode. The application raises the stack toward ITS OWN cap and never
+    # lowers a standing higher one. Absent on every other row in every sheet,
+    # and absent means today's behaviour exactly.
+    floor = bool(fx.get("never_reduces", False))
     if "amount_formula" in fx:                 # Dominate, MoltenFist
         amount = _power_amount_formula(state, fx["amount_formula"])
     else:
@@ -925,7 +930,7 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
             state.player.powers["kurage_summon"] = turns
             state.emit("kurage_refreshed", turns=turns)
         powers.apply_power(state, state.player, fx["power"], amount,
-                           max_stacks=cap)
+                           max_stacks=cap, never_reduces=floor)
     else:
         # `times` re-picks the target EVERY pass. BouncingFlask throws three
         # separate flasks at three separately-rolled random enemies, so
@@ -946,7 +951,7 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
         for _ in range(times):
             for enemy in _pick_targets(state, target):
                 powers.apply_power(state, enemy, fx["power"], amount,
-                                   max_stacks=cap)
+                                   max_stacks=cap, never_reduces=floor)
 
 
 def _op_apply_aura(state: CombatState, fx: dict, card: Card) -> None:
