@@ -125,6 +125,7 @@ python3 tools/gen_roster_cards.py --check
 python3 tools/lint_pool_membership.py       tools/lint_ancient_coverage.py
 python3 tools/suggest_role_tempo_tags.py --check    tools/lint_role_tempo_coverage.py --gate
 python3 tools/lint_roster_registry.py       tools/lint_vendor_pin.py       tools/art_coverage.py
+python3 tools/lint_r_numbers.py             tools/lint_docs_lifecycle.py
 ```
 
 Local-only (not in CI): `lint_text_encoding.py`, `lint_generated_structure.py`,
