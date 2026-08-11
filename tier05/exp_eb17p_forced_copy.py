@@ -279,6 +279,19 @@ def print_card(cid: str, res: dict) -> None:
         print("    the forced arm never drew or played the family")
     else:
         report.print_card_flow(f"forced({cid})", flow)
+        # The FAMILY-POOLED line, printed because §5.2 requires every read to
+        # pool `X` with `X+` and `card_flow_profile` keys by bare id -- so the
+        # instrument hands back two rows where the registration asks one
+        # question. Reconstructing the pooled rate by hand from two printed
+        # rows is how a grade gets argued about instead of recorded.
+        pooled = flow["pooled"]
+        rate = ("n/a" if pooled["dead_in_hand_rate"] is None
+                else _pct(pooled["dead_in_hand_rate"]))
+        pwd = ("n/a" if pooled["played_when_drawn_rate"] is None
+               else _pct(pooled["played_when_drawn_rate"]))
+        print(f"    POOLED {cid} + {cid}+   draws {pooled['draws']}  "
+              f"plays {pooled['plays']}  "
+              f"played-when-drawn {pwd}  dead-in-hand {rate}")
     print("  -- 6.1 unpaired Wilson intervals (continuity ONLY, not the "
           "test) --")
     row = res["vs_control"]
@@ -295,14 +308,39 @@ def _flow_for(results: list, cid: str) -> dict:
     The instrument pools every card the cohort saw; the registered read is
     about one family, and printing 90 rows around it is how the row that
     matters gets scrolled away.
+
+    A `pooled` block is added alongside `by_card`. `card_flow_profile` keys by
+    BARE id, so a family that got smithed comes back as two rows -- and §5.2's
+    rule is that every read pools `X` with `X+`, because a smith node rewrites
+    the id in place and a read keyed on the bare id would score an upgraded
+    forced copy as an absent one. The pooled block is that rule applied to the
+    instrument's own output; it introduces no new measurement, only the
+    addition §5.2 already requires. RATES are recomputed from the pooled
+    counts rather than averaged from the two rows, because averaging two rates
+    with different denominators is a different and wrong number.
     """
     flow = metrics.card_flow_profile(
         [s for r in results for s in r.fight_stats])
     if not flow:
         return {}
     fam = _family(cid)
-    return dict(flow, by_card={k: v for k, v in flow["by_card"].items()
-                               if k in fam})
+    by_card = {k: v for k, v in flow["by_card"].items() if k in fam}
+    draws = sum(r["draws"] for r in by_card.values())
+    pooled = {
+        "draws": draws,
+        "plays": sum(r["plays"] for r in by_card.values()),
+        "played_when_drawn": sum(r["played_when_drawn"]
+                                 for r in by_card.values()),
+        "dead_in_hand": sum(r["dead_in_hand"] for r in by_card.values()),
+    }
+    # None, not 0.0, on a family the arm never drew: an undefined rate is not
+    # a zero rate, and a trigger that reads "at least 25% dead" must not fire
+    # or clear on a card nobody ever saw.
+    pooled["played_when_drawn_rate"] = (
+        pooled["played_when_drawn"] / draws if draws else None)
+    pooled["dead_in_hand_rate"] = (
+        pooled["dead_in_hand"] / draws if draws else None)
+    return dict(flow, by_card=by_card, pooled=pooled)
 
 
 # --- main ------------------------------------------------------------------
