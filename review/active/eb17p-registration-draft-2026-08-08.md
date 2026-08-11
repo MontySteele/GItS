@@ -5,9 +5,10 @@
 > filler arm, pair by pair. [USER] also accepted `N = 2400` and chose the
 > filler (§5.1).
 >
-> **Still not launched.** Two things stand between this packet and the
-> sweep: the cost ceiling in §7 is not yet set, and §8's predictions must be
-> committed on their own before any seed in the registered range is run.
+> **Still not launched.** One thing stands between this packet and the sweep:
+> the cost ceiling in §7 is not yet set. §8's predictions and the §8.1
+> redesign trigger were committed on their own on 2026-08-10, before any seed
+> in the registered range was run.
 > **Nothing below is a prediction that has been graded, a number that has
 > been read, or a measurement that has been run.** No measurement was run to
 > produce this document. The mechanism probe described in §11 ran on a
@@ -418,23 +419,65 @@ For **each** swept card, [USER] states a direction and a threshold — for
 **both** co-primaries, because §6.1b is graded and an ungraded co-primary is
 just a number nobody committed to:
 
+**WRITTEN BY [USER], 2026-08-10, before any seed in the registered range was
+run.** [USER] adopted an external GPT recommendation for these directions.
+The rows below are [USER]'s statements put into the table's columns; the exact
+words are in this commit's message, which is where [USER]'s verbatim text
+lives.
+
 | card | §6.1 sign of Δ vs control | threshold (pp) that counts as a real move | §6.1b sign of Δ vs filler | confidence |
 |---|---|---|---|---|
-| `friendly_visit` | ____ | ____ | ____ | ____ |
-| `study_buddy` | ____ | ____ | ____ | ____ |
-| `borrowed_brilliance` | ____ | ____ | ____ | ____ |
-| `elemental_ecstasy` | ____ | ____ | ____ | ____ |
-| `kaboom` (filler, negative control) | ____ | ____ | — (it is the baseline) | ____ |
+| `friendly_visit` | **positive** | **+2 pp** — expected to reach or exceed it | **positive**, at or above +2 pp | "likely" |
+| `study_buddy` | **positive** | **+2 pp** — expected to land *below* it | **positive**, below +2 pp | "probably" |
+| `borrowed_brilliance` | **positive** | **+2 pp** — expected to reach or exceed it | **positive**, at or above +2 pp | "likely" |
+| `elemental_ecstasy` ("Sweet Dreams") | **null** | **±2 pp** — expected to land inside the band | **null to slightly positive**, inside ±2 pp | stated flatly |
+| `kaboom` (filler, negative control) | **near-null, slightly negative** | **±2 pp** — expected to land inside the band, on the negative side | — (it is the baseline) | "probably" |
 
-The filler has no §6.1b cell, by construction: a card cannot be compared with
-itself. Its §6.1 row *is* the dilution prediction, and it is the number every
-other row is read against.
+**How the §6.1b column was derived, and by whom.** [USER] wrote directions
+against the control and one statement about the filler ("near-null, probably
+slightly negative through dilution"). The filler column follows from those two
+by arithmetic, not by a second judgement: if the filler's own Δ is near zero
+or slightly negative, then a card's Δ against the filler is its Δ against the
+control plus a small non-negative amount. So every direction carries over, and
+the two "at least +2 pp" cards keep their threshold. This derivation is
+recorded here so a grader can see that the §6.1b column is not an independent
+prediction that could be scored as a separate success.
 
-Plus one statement that is not per-card:
+**One arm, two names.** "Sweet Dreams" and "Elemental Ecstasy" are the same
+card. The sheet renamed it for display on 2026-07-20 and kept the id
+(`docs/klee-cards.yaml:168-172`: *"ID stays elemental_ecstasy. Future greps:
+try BOTH names."*). There is one registered arm here, not two.
 
-- **[USER] SLOT — the redesign trigger.** The register's rule is "do not use
-  raw pick rate as the redesign trigger". What *is* the trigger, in terms of
-  the columns in §6? Stated now or the grade is descriptive only.
+### 8.1 The redesign trigger — [USER], 2026-08-10
+
+A card is a **redesign candidate** if **either** clause holds:
+
+- **(a)** the filler-adjusted result is confidently below −2 percentage
+  points; **or**
+- **(b)** the card performs no better than filler while being dead in hand at
+  least 25% of the time.
+
+**Bound to §6's columns, so the grade is mechanical:**
+
+| clause | the column it reads | the reading |
+|---|---|---|
+| (a) | §6.1b `delta_vs_filler(X)` and its paired-bootstrap interval | fires when the interval's **upper** bound is below −2 pp — that is what "confidently" means here, and it is a stricter test than the point estimate alone |
+| (b), first half | §6.1b `delta_vs_filler(X)` | fires when the delta is at or below zero |
+| (b), second half | §6.5 `dead_in_hand_rate`, **family-pooled** (`X` + `X+`), over the forced arm | fires at 0.25 or above |
+
+`dead_in_hand_rate` is `dead_in_hand / draws`: of the times the card was
+drawn, the share that ended a combat unplayed in hand. "At least 25% of the
+time" is therefore read against **draws**, not against fights or runs. The
+family-pooled figure is the one that counts, per §5.2, and the sweep script
+prints it as its own line so the number is read rather than reconstructed.
+
+**Both clauses are expressible in columns this sweep already measures**, which
+is what makes the trigger gradeable as registered. Checked before these
+predictions were committed.
+
+**The trigger names a candidate, not a verdict.** Firing it does not redesign
+anything. Whether to redesign, reprice or retire a card is a design act,
+downstream of the grade, and [USER]'s (§1, "Not asked here").
 
 **A trigger must be expressible in §6's columns.** If a proposed trigger names
 a quantity this sweep does not measure, it cannot be graded as registered, and
@@ -454,8 +497,9 @@ author of the predictions before the grade is recorded.
 2. Land the §10 engineering prerequisites with their byte-identity pins,
    suite green. **DONE.**
 3. [USER] fills the §7 cost ceiling. **OPEN — the sweep cannot launch without
-   it.**
+   it. This is now the only open slot.**
 4. §8's predictions are committed — their own commit, nothing else in it.
+   **DONE — [USER], 2026-08-10.**
 5. Run the sweep at the pinned stamp. Report only; read nothing into it.
 6. Blind grade against §8; the grade is its own commit.
 7. Any design act (redesign, reprice, retire) is downstream of the grade and
@@ -576,9 +620,10 @@ relic pickups) were found rather than assumed.
 
 `COUNTERSIGN` — [USER], 2026-08-10, with the §6.1b addendum.
 
-Filled on countersign: §5.1 filler (`kaboom`) and §7 `N` (2,400).
-Still open before the sweep may launch: **the §7 cost ceiling**, and **§8's
-predictions as their own commit**.
+Filled on countersign: §5.1 filler (`kaboom`) and §7 `N` (2,400). §8's
+predictions and the §8.1 trigger were committed on their own on 2026-08-10.
+Still open before the sweep may launch: **the §7 cost ceiling**, and nothing
+else.
 
 — drafted 2026-08-08, branch `eb17p-registration`; amended 2026-08-10 on
 branch `sitting-prep-2026-08-08` to record the countersign, fill the two
