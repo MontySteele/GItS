@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
+using KleeMod.Cards;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -10,6 +11,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
 
@@ -564,22 +566,98 @@ public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// The sheet's stack cap (kokomi-cards.yaml, `max_stacks: 6`), enforced
-    /// engine-side in the sim at apply_power (`new = min(new, max_stacks)`).
-    /// Clamped on the RESULTING COUNTER rather than on the delta, following
+    /// The card whose application is in flight, captured from the ONE hook
+    /// that carries it. <see cref="TryModifyPowerAmountReceived"/> is handed
+    /// the applier CREATURE and no card (decompiled
+    /// PowerCmd.Apply/ModifyAmount: Hook.ModifyPowerAmountReceived takes no
+    /// cardSource), and the composition rule is a property of the ROW, not of
+    /// the power -- so the row's identity has to arrive some other way.
+    /// Hook.BeforePowerAmountChanged is awaited immediately before the modify
+    /// hooks on BOTH application paths and does carry it.
+    ///
+    /// Set on every application, including to null, so it can never go stale:
+    /// a non-card source (relic, potion, enemy) clears it and takes the
+    /// default read.
+    /// </summary>
+    private CardModel? _applyingCard;
+
+    /// <summary>
+    /// The title of the card that last applied this ward, so the power tooltip
+    /// names the card the player actually played. Before this, the class hard-
+    /// coded the Rare's title in its <see cref="Localization"/>, so a second
+    /// card applying the same power displayed "Vigil of the Deep" in the power
+    /// bar -- a live defect the moment the ward stopped being Rare-only
+    /// (EB-26 §7.1).
+    ///
+    /// Stored as the LocString rather than the card, so nothing here holds a
+    /// combat card alive past its pile, and the fallback stays the registered
+    /// loc entry for an application with no card behind it.
+    /// </summary>
+    private LocString? _sourceTitle;
+
+    public override LocString Title => _sourceTitle ?? base.Title;
+
+    public override Task BeforePowerAmountChanged(
+        PowerModel power, decimal amount, Creature target, Creature? applier,
+        CardModel? cardSource)
+    {
+        if (power is PreventExhaustWardPower && target == Owner)
+        {
+            _applyingCard = cardSource;
+            if (amount > 0 && cardSource != null)
+            {
+                _sourceTitle = cardSource.TitleLocString;
+            }
+        }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// The FIRST application creates this instance, and a model that is not in
+    /// the combat yet does not receive
+    /// <see cref="BeforePowerAmountChanged"/> -- so the title of the card that
+    /// opened the ward is captured here instead. Same value, the other path.
+    /// </summary>
+    public override Task BeforeApplied(
+        Creature target, decimal amount, Creature? applier,
+        CardModel? cardSource)
+    {
+        if (target == Owner && amount > 0 && cardSource != null)
+        {
+            _sourceTitle = cardSource.TitleLocString;
+        }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// How two applications of the ward compose. Clamped on the RESULTING
+    /// COUNTER rather than on the delta, following
     /// <see cref="SalonMemberPower"/>.
     ///
-    /// This row uses the SINGLE-APPLICATION encoding -- max_stacks EQUALS the
-    /// applied amount, and the upgrade moves both together (6/6 -> 8/8, see
-    /// kokomi-upgrades.yaml and tier0's
-    /// test_vigil_upgrade_moves_the_cap_with_the_amount). Under that encoding
-    /// min(Amount + amount, amount) is just `amount`, so the ward SETS rather
-    /// than adds: a second copy re-asserts the magnitude instead of doubling
-    /// it. The magnitude is the knob, not the copy count.
+    /// TWO modes, exactly mirroring the sim's `apply_power`
+    /// (tier0/engine/powers.py) and picked by the applying ROW, which is why
+    /// <see cref="_applyingCard"/> exists:
     ///
-    /// Deriving the cap from the application instead of hard-coding 6 is what
-    /// keeps the upgraded copy at its printed 8 -- a literal cap would swallow
-    /// the upgrade, which is the exact defect the sim's pass-2 errata fixed.
+    /// 1. DEFAULT (no sheet field) -- the cap bounds the running total:
+    ///    min(Amount + amount, cap). Every row of this power that does not ask
+    ///    otherwise uses the SINGLE-APPLICATION encoding, max_stacks EQUALS the
+    ///    applied amount and the upgrade moves both together (6/6 -> 8/8, see
+    ///    kokomi-upgrades.yaml and tier0's
+    ///    test_vigil_upgrade_moves_the_cap_with_the_amount). Under that
+    ///    encoding min(Amount + amount, amount) is just `amount`, so the ward
+    ///    SETS rather than adds: a second copy re-asserts the magnitude instead
+    ///    of doubling it. The magnitude is the knob, not the copy count.
+    ///    Deriving the cap from the application rather than hard-coding 6 is
+    ///    what keeps the upgraded copy at its printed 8.
+    ///
+    /// 2. FLOOR-NOT-CLAMP (<see cref="INeverReducingApplier"/>, sheet
+    ///    `never_reduces: true`; EB-26 D2 ruled 2026-08-10 option (d)) -- the
+    ///    application raises the stack toward the CARD'S OWN cap and never
+    ///    lowers a higher standing stack:
+    ///    max(Amount, min(Amount + amount, card cap)). This is what lets a
+    ///    lesser uncommon ward top a Rare ward up without a card ever being a
+    ///    downgrade to play. Without it, `vigil_of_the_deep+` (8) followed by
+    ///    the lesser ward (3) left 3.
     /// </summary>
     public override bool TryModifyPowerAmountReceived(
         PowerModel canonicalPower, Creature target, decimal amount,
@@ -591,7 +669,17 @@ public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
             return false;
         }
         if (amount <= 0) return false;      // removal still lands in full
-        modifiedAmount = amount - Amount;
+        if (_applyingCard is INeverReducingApplier floorApplier)
+        {
+            var raised = System.Math.Max(
+                Amount,
+                System.Math.Min(Amount + amount, floorApplier.NeverReducingCap));
+            modifiedAmount = raised - Amount;
+        }
+        else
+        {
+            modifiedAmount = amount - Amount;
+        }
         return modifiedAmount != amount;
     }
 }
