@@ -6,7 +6,15 @@
 > invariant and trap carrying a file:line or DECISIONS.md cite. Purpose: stop every
 > future session from re-deriving this context from scratch. These are maps, not
 > reviews — no design opinions, no proposals. If a doc contradicts the code, the
-> code and DECISIONS.md win; fix the atlas doc on next touch.
+> code and the rulings win; fix the atlas doc on next touch.
+
+> **Resolving ruling citations (atlas-wide).** `tier0/DECISIONS.md` and the
+> other DECISIONS ledgers are not in HEAD — the R/D namespace is frozen at tag
+> `pre-simplification-2026-08-06`, and every `R<n>` / `D<n>` / `DECISIONS.md`
+> citation in these docs resolves there:
+> `git show pre-simplification-2026-08-06:tier0/DECISIONS.md`. Rulings issued
+> after the tag (R138 onward) live in the commit messages of their date. Only
+> a citation whose content diverged from the tag copy names its own commit.
 
 | doc | scope | rulings cited |
 |---|---|---|
