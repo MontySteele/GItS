@@ -36,7 +36,8 @@ def _copy_plain(val):
 # these and shares the rest; test_state.py pins the list against the
 # dataclass definition so a new mutable field cannot be added silently.
 _MUTABLE_FIELDS = ("effects", "solve", "tempo_band", "archetypes", "tags",
-                   "companion", "sly", "upgrade", "enchant_effects")
+                   "companion", "sly", "upgrade", "enchant_effects",
+                   "enchant_first_play_effects")
 
 # Card fields that a sheet row may NEVER declare again, with the reason the
 # author needs. House pattern: a caught mistake becomes a lint, so the next
@@ -225,8 +226,23 @@ class Card:
     # run-wide enchantment SUBSYSTEM (grant screens, enchanting relics) is
     # outside the parity world with relics and events; these two fields are
     # the whole mechanic. Ratified as open house design space.
+    # R82 REOPENED ([USER], 2026-08-10, M7): the run layer now attaches
+    # NAMED enchantments to deck cards from events (tier0/content/
+    # enchantments.py), and five of the eight names it needs are not
+    # expressible as flat damage plus an on-play effect list. The fields
+    # below are that minimal extension -- still per-instance, still no
+    # registry, still nothing that looks up an enchantment by name. Every
+    # one is inert on a card with no enchantment, so the frozen battery and
+    # all existing content stay byte-identical.
     enchant_damage: int = 0       # flat rider on this attack's damage
     enchant_effects: list[dict] = field(default_factory=list)  # after own fx
+    enchant_block: int = 0        # Nimble: once per play, not per block row
+    enchant_damage_mult: float = 1.0        # Corrupted: x1.5 on this attack
+    enchant_first_play_damage: int = 0      # Vigorous: first play of a combat
+    enchant_first_play_effects: list[dict] = field(default_factory=list)
+    #                                       Sown / Swift: first play of a combat
+    enchant_top_of_draw: bool = False       # Perfect Fit: shuffle placement
+    enchant_played_this_combat: bool = False   # the first-play gate itself
     # --- Status cards (multi-act §10.2 injection op; engine/statuses.py).
     # type == "status" cards are UNPLAYABLE (combat.card_playable) and exist
     # only inside a combat: enemies inject them into the player's piles; the
@@ -236,6 +252,12 @@ class Card:
     status_eot_damage: int = 0    # Burn/Wither: damage at end of player turn
     #                               while in hand (blockable, StS-real)
     status_draw_damage: int = 0   # Toxic (§10.3 ratified): HP loss on draw
+    # Normality (Field of Man-Sized Holes, 2026-08-10): "you cannot play more
+    # than 3 cards this turn", read WHILE IN HAND by combat.card_playable.
+    # A hand cap rather than a per-card gate, which is why it lives here and
+    # not in `requires` -- the curse restricts every OTHER card, never itself
+    # (it is a status and unplayable by type already).
+    status_play_cap: int = 0
     # DEPRECATED (ruled R20, 2026-07-20): a parallel M9 session introduced
     # inline `upgrade:` fields on klee-cards.yaml rows; the ruling made
     # *-upgrades.yaml sheets the ONE upgrade convention. Tier 0 IGNORES
@@ -568,6 +590,11 @@ class CombatState:
         default_factory=lambda: random.Random(4 * 10 ** 9))
     turn: int = 0
     cards_played_this_turn: int = 0
+    # Set once at fight start from the built deck: does any card impose a
+    # per-turn play cap (Normality)? Keeps combat.card_playable -- the
+    # pilot's hot path -- from walking the hand on every check in the 100%
+    # of fights where nothing does.
+    hand_play_cap: bool = False
     log: list[dict] = field(default_factory=list)          # event stream for metrics
     # Formula / conditional context (reset per card play in resolve_card)
     detonations_total: int = 0            # The Big One formula
@@ -747,7 +774,17 @@ class CombatState:
 
     def shuffle_discard_into_draw(self) -> None:
         self.rng.shuffle(self.player.discard_pile)
-        self.player.draw_pile = self.player.discard_pile + self.player.draw_pile
+        merged = self.player.discard_pile + self.player.draw_pile
+        # Perfect Fit (R82 reopened): "whenever this would be shuffled into
+        # your Draw Pile, place it on the top instead." The combat-START
+        # shuffle is handled by combat.surface_innate, which rides the same
+        # flag; this is the mid-combat reshuffle, the other place a card is
+        # shuffled in. Order among top-placed cards stays shuffle-relative,
+        # exactly as innate's does -- no hidden second sort.
+        if any(c.enchant_top_of_draw for c in merged):
+            merged = ([c for c in merged if c.enchant_top_of_draw]
+                      + [c for c in merged if not c.enchant_top_of_draw])
+        self.player.draw_pile = merged
         self.player.discard_pile = []
 
     def draw(self, n: int, from_hand_draw: bool = False) -> None:

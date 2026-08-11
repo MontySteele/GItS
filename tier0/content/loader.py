@@ -14,6 +14,7 @@ from pathlib import Path
 import yaml
 
 from tier0 import constants as C
+from tier0.content import enchantments
 from tier0.content import local_reference
 from tier0.content import upgrades
 from tier0.engine.state import Card, Enemy, Player
@@ -336,10 +337,23 @@ def _card_prototype(card_id: str) -> Card:
     it is a pure function of the id, so it is memoized here and only the
     cheap per-caller copy remains. Cleared with the card index (`reload`).
     """
-    if card_id.endswith(upgrades.SUFFIX):
-        base = copy.deepcopy(_card_index()[card_id[:-len(upgrades.SUFFIX)]])
-        return upgrades.apply_upgrade(base)
-    return _card_index()[card_id]
+    plain, ench, amount = enchantments.split(card_id)
+    if plain.endswith(upgrades.SUFFIX):
+        base = copy.deepcopy(_card_index()[plain[:-len(upgrades.SUFFIX)]])
+        card = upgrades.apply_upgrade(base)
+    else:
+        card = _card_index()[plain]
+    if ench is None:
+        return card
+    # R82 reopened: the enchantment is the OUTER decoration, applied to the
+    # already-upgraded form, so the two are independent and either order of
+    # acquisition lands on the same card. `card` may be the shared index
+    # prototype here, hence the copy.
+    card = copy.deepcopy(card)
+    enchantments.apply(card, ench, amount)
+    card.id = card_id
+    card.name = f"{card.name} ({enchantments.CATALOG[ench].label})"
+    return card
 
 
 def get_card(card_id: str) -> Card:

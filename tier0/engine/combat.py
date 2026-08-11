@@ -26,7 +26,8 @@ def _base_card_id(card_id: str) -> str:
     itself (upgrades.SUFFIX); C# carries it as a flag beside a base ModelId.
     Anywhere the two sides must agree on card IDENTITY rather than card
     STATE, the sim has to strip the suffix to see what C# sees."""
-    from tier0.content import upgrades        # late import, avoids a cycle
+    from tier0.content import enchantments, upgrades   # late: avoids a cycle
+    card_id, _, _ = enchantments.split(card_id)   # an enchantment is STATE too
     if card_id.endswith(upgrades.SUFFIX):
         return card_id[:-len(upgrades.SUFFIX)]
     return card_id
@@ -136,6 +137,20 @@ def _settle_phases(state: CombatState) -> None:
 def card_playable(state: CombatState, card: Card) -> bool:
     if card.type == "status":
         return False        # §10.2 injected statuses: unplayable clogs
+    # Normality: "you cannot play more than 3 cards this turn", read off
+    # whatever cap-bearing card is IN HAND. Gated on a per-combat flag set at
+    # fight start so the battery -- where nothing carries a cap -- never even
+    # walks the hand; this function is on the pilot's hot path.
+    # KNOWN GAP, stated not hidden: the real curse exempts REPLAYS (Echo
+    # Form and friends still fire past the cap). Ours has no replay concept
+    # at this seam, so a replay-heavy deck is capped slightly harder than the
+    # real game caps it -- the harsh direction, unusually, and the reason it
+    # is written down.
+    if state.hand_play_cap:
+        cap = min((c.status_play_cap for c in state.player.hand
+                   if c.status_play_cap), default=0)
+        if cap and state.cards_played_this_turn >= cap:
+            return False
     if card.requires == "burst_energy_full":
         if state.player.burst_energy < state.player.burst_max:
             return False
@@ -937,10 +952,19 @@ def surface_innate(draw_pile: list) -> None:
     """Innate (R37): innate cards surface to the TOP of the shuffled draw
     pile, so the first hand contains them (base-game semantics; hand-size
     overflow degrades to "drawn first", which is also base-game). Order
-    among innate cards stays shuffle-relative -- no hidden second sort."""
-    innate = [c for c in draw_pile if c.innate]
+    among innate cards stays shuffle-relative -- no hidden second sort.
+
+    Perfect Fit (R82 reopened) rides the same placement: "whenever this would
+    be shuffled into your Draw Pile, place it on the top instead", and the
+    combat-start shuffle is one of exactly two places that happens (the other
+    is state.shuffle_discard_into_draw). Sharing the site rather than adding
+    a second pass is what keeps the two from disagreeing about order.
+    """
+    def tops(c):
+        return c.innate or c.enchant_top_of_draw
+    innate = [c for c in draw_pile if tops(c)]
     if innate:
-        draw_pile[:] = innate + [c for c in draw_pile if not c.innate]
+        draw_pile[:] = innate + [c for c in draw_pile if not tops(c)]
 
 
 def _run_rounds(state: CombatState, pilot: Pilot) -> None:
@@ -1017,6 +1041,12 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     player.spotlight = None
     state.rng.shuffle(player.draw_pile)
     surface_innate(player.draw_pile)
+    # Per-combat gates that are pure functions of the built deck. Both are
+    # False/off for every character and every battery deck, so both are dead
+    # branches everywhere except a run that met the event that grants them.
+    state.hand_play_cap = any(c.status_play_cap for c in player.draw_pile)
+    for c in player.draw_pile:
+        c.enchant_played_this_combat = False
     # Combat-side relics: clear per-combat counters at true fight start. Dead
     # branch on the battery (relic_effects empty); the combat_start_* effects
     # themselves fire on the first player turn (see _player_turn).

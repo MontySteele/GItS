@@ -111,7 +111,14 @@ def _upgrade_index() -> dict[str, dict]:
 
 
 def has_upgrade(card_id: str) -> bool:
-    """Can this card be upgraded AND can the sim express the result?"""
+    """Can this card be upgraded AND can the sim express the result?
+
+    An enchantment mark is looked PAST (R82 reopened): enchanting a card
+    never costs it its upgrade path, and the two decorations compose in
+    either order (see content/enchantments.py).
+    """
+    from tier0.content import enchantments      # late: enchantments imports us
+    card_id = enchantments.split(card_id)[0]
     delta = _upgrade_index().get(card_id)
     return (isinstance(delta, dict)
             and bool(delta)
