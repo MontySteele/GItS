@@ -1,5 +1,9 @@
 # Sitting agenda — 2026-08-08
 
+> **2026-08-10 — HISTORICAL.** Most items below were ruled at the 2026-08-10
+> sitting (R138–R174). `docs/current/QUEUE.md` is current and governs; this
+> agenda is kept as the walking order that was used, not as a live register.
+
 > **Lifecycle: ACTIVE.** This is a walking order, not a register.
 > `docs/current/QUEUE.md` stays the single source of truth. Every item below
 > points at its QUEUE row. It repeats nothing from that row as fact.
