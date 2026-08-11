@@ -87,6 +87,70 @@ def test_the_rider_weak_widens_with_fan_of_knives():
     assert e2.powers.get("weak", 0) == 1
 
 
+SPARK_COND = {"op": "conditional", "if": "has_spark",
+              "then": [{"op": "block", "amount": 3}]}
+
+
+def _play_block_card(state, fx, rider=2):
+    c = card("nimble_card", fx=fx, enchant_block=rider)
+    state.player.hand.append(c)
+    combat.play_card(state, c)
+    return c
+
+
+def test_the_block_rider_lands_once_per_PLAY_not_once_per_block_row():
+    """Nimble is 'Block gained from this card', once. _op_block re-enters for
+    every Block row -- including a row nested under a conditional -- so the
+    latch has to live on the state for the whole card play, not inside one
+    call. Asserted with the conditional both live and dead: the second row
+    must not be able to buy a second rider when it fires."""
+    fx = [{"op": "block", "amount": 6}, SPARK_COND]
+    dead = make_state()
+    _play_block_card(dead, fx)
+    assert dead.player.block == 6 + 2          # rider once, branch skipped
+
+    live = make_state()
+    live.player.sparks = 1
+    _play_block_card(live, fx)
+    assert live.player.block == 6 + 3 + 2      # BOTH rows, rider still once
+
+
+def test_the_block_rider_is_shared_by_block_and_block_next_turn():
+    """A card that gains Block both ways collects the rider once IN TOTAL:
+    the published text counts the card, not the op."""
+    state = make_state()
+    _play_block_card(state, [{"op": "block", "amount": 4},
+                             {"op": "block_next_turn", "amount": 4}])
+    assert state.player.block == 4 + 2
+    assert state.player.powers.get("block_next_turn", 0) == 4
+
+
+def test_the_block_rider_rides_a_block_next_turn_only_card():
+    """Two Kokomi skills gain Block ONLY through block_next_turn. The rider
+    applied in _op_block alone made Nimble silently inert on them."""
+    state = make_state()
+    _play_block_card(state, [{"op": "block_next_turn", "amount": 5}])
+    assert state.player.block == 0
+    assert state.player.powers.get("block_next_turn", 0) == 5 + 2
+
+
+def test_an_inner_free_play_does_not_eat_the_outer_cards_rider():
+    """The _FREE_PLAY_CONTEXT hazard: a card free-played in the middle of an
+    outer card's resolution runs its own resolve_card, which resets the
+    latch. Both cards must collect their own rider exactly once."""
+    state = make_state()
+    inner = card("inner", fx=[{"op": "block", "amount": 1}], enchant_block=2)
+    state.player.draw_pile.append(inner)
+    outer = card("outer", enchant_block=2,
+                 fx=[{"op": "block", "amount": 3},
+                     {"op": "autoplay_from_draw", "amount": 1},
+                     {"op": "block", "amount": 3}])
+    state.player.hand.append(outer)
+    combat.play_card(state, outer)
+    #   outer 3 + rider 2, inner 1 + rider 2, outer 3 (rider already spent)
+    assert state.player.block == 3 + 2 + 1 + 2 + 3
+
+
 def test_a_clone_of_an_enchanted_card_keeps_its_enchantment():
     """The Nightmare/Anger question from the design pass: what is copied is
     the INSTANCE, so a clone of an enchanted card is itself enchanted --

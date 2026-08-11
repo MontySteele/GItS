@@ -110,6 +110,43 @@ def test_an_unenchanted_card_carries_no_rider_at_all():
             and not card.enchant_played_this_combat)
 
 
+def _skill(fx):
+    from tier0.engine.state import Card
+    return Card(id="s", name="s", cost=1, type="skill", effects=fx)
+
+
+def test_nimble_targets_only_a_skill_that_actually_gains_block():
+    """The published text is 'Block gained from this card', and 83 of the
+    repo's 134 skills gain none -- on those, Nimble is silently inert. The
+    event picker takes the drafter's best LEGAL card, so a loose predicate
+    is not corrected downstream; it has to be right here."""
+    inert = _skill([{"op": "draw", "amount": 2}])
+    assert not enchantments.eligible(inert, "nimble")
+    plain = _skill([{"op": "block", "amount": 5}])
+    assert enchantments.eligible(plain, "nimble")
+
+
+def test_nimble_sees_block_next_turn_and_block_under_a_conditional():
+    """Both the Kokomi shape (Block only via block_next_turn) and a Block row
+    that only exists inside a conditional branch."""
+    later = _skill([{"op": "block_next_turn", "amount": 4}])
+    assert enchantments.eligible(later, "nimble")
+    nested = _skill([{"op": "conditional", "if": "has_spark",
+                      "then": [{"op": "block", "amount": 3}]}])
+    assert enchantments.eligible(nested, "nimble")
+    else_only = _skill([{"op": "conditional", "if": "has_spark",
+                         "then": [{"op": "draw", "amount": 1}],
+                         "else": [{"op": "block", "amount": 3}]}])
+    assert enchantments.eligible(else_only, "nimble")
+
+
+def test_nimble_still_refuses_a_block_granting_non_skill():
+    from tier0.engine.state import Card
+    power = Card(id="p", name="p", cost=1, type="power",
+                 effects=[{"op": "block", "amount": 5}])
+    assert not enchantments.eligible(power, "nimble")
+
+
 def test_a_card_holds_exactly_one_enchantment_and_never_swaps_it():
     once = enchantments.decorate("kaboom", "sharp", 2)
     with pytest.raises(ValueError):
