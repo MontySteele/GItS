@@ -68,6 +68,11 @@ shell_of_sanctuary: {block: +4}          # 11->15, spirited_away-parity
 exposing_current:  {vulnerable: +1}      # 2->3 (surprise_visit-parity; the R51 rider sharpens, the Exhaust stays)
 all_streams_flow:  {damage: +3}          # 5->8 base; the 1-per-2-Charge read never moves (resource-curve law)
 tidal_lure:        {block: +2}           # played 4->6; Sly Vulnerable stays 1 (header gap note)
+watch_of_the_shallows: {power_amount: +2} # ward 3->5 (vigil_of_the_deep-parity slope). max_stacks does NOT ride
+                                         # along: the applier only carries the cap when cap == amount, and this
+                                         # row's cap is the POOL's ward ceiling, not its magnitude. So the
+                                         # upgrade buys magnitude and the ceiling stays where the Rare put it,
+                                         # with the row's `never_reduces` mode keeping the bigger ward on top.
 
 # ---- v0.5 PARTIAL-FILL COMMONS (+12) ----
 # Same laws as above: one number each, no cost reductions at common, and the RESOURCE CURVE NEVER MOVES —

@@ -1,14 +1,17 @@
-# EB-26 / P4 — the Kokomi lesser ward, DRAFT candidate
+# EB-26 / P4 — the Kokomi lesser ward, LANDED
 
-> **DRAFT ONLY. NOTHING HERE IS RATIFIED AND NOTHING HERE IS IN THE MEASURED
-> POOL.** No row was added to `docs/kokomi-cards.yaml`, no delta to
-> `docs/kokomi-upgrades.yaml`, no C# was generated, no art was claimed. An
-> unratified card in the sheet enters every drafting arm and moves every
-> Kokomi number in the repo, which is the opposite of what a candidate is for
-> — the same posture `brief-kokomi-pool-fill.md` took for its 15 proposals.
+> **STATUS 2026-08-10: D2 RESOLVED and the candidate LANDED.** [USER] ruled
+> D2 as **option (d)**, the floor-not-clamp apply mode (§7.2(d)), and
+> `watch_of_the_shallows` is now a real row in `docs/kokomi-cards.yaml` with
+> its upgrade in `docs/kokomi-upgrades.yaml`, its generated C#
+> (`WatchOfTheShallows.cs`), and the engine + mod support the mode needed. §8
+> is the landing record; §1–§7 are kept as written, as the drafting record
+> that the ruling answers.
 >
-> Drafted under BACKLOG `EB-55`. The ratify / revise / drop call is QUEUE
-> `EB-26`, and it is [USER]'s.
+> **Still open after this landing** — D1 (the name, an eye-read only [USER]
+> can do), D7(b) (P3 is unowned), and the re-baseline, which QUEUES BEHIND
+> EB-22 (§8.5). Drafted under BACKLOG `EB-55`; the ratify call was QUEUE
+> `EB-26`.
 
 ---
 
@@ -585,11 +588,10 @@ still open, and the list below is the complete ask.
   lore text by eye before they ship — applies to this row, and `S4-G11` is
   ruled to have no substitute. So this needs an eye-read, and the eye is
   [USER]'s.
-- **D2 — the stack cap (REOPENED by this addendum).** Now a choice between
-  (a) cap 8, (b) cap 6 with the trap accepted, (c) per-application cap
-  (engine surgery), (d) a floor mode. §7.2 and §7.3 above. The §4.1
-  recommendation of cap 6 was made against the unupgraded Rare only and does
-  not stand on its own.
+- **D2 — the stack cap. RESOLVED 2026-08-10 by [USER]: option (d), the
+  floor-not-clamp apply mode.** Built and landed; §8 is the record. `max_stacks`
+  keeps its running-total meaning for every existing row, and the card carries
+  the new opt-in field.
 - **D3 — magnitude and cost: 3 at 1 energy.** Unchanged (§5).
 - **D4 — lane: `archetypes: [generic]`.** Unchanged (§5).
 - **D5 — `tempo_band`.** Unchanged (§5).
@@ -604,3 +606,158 @@ still open, and the list below is the complete ask.
   P4, and **neither P3 option was ever explicitly chosen**. P3 is outside
   `EB-26`'s scope as written. It is open, and it belongs to nobody. Naming an
   owner is the ask; it is not answered by ratifying this card.
+
+---
+
+## 8. Landing record (2026-08-10)
+
+D2 was ruled **(d), the floor-not-clamp apply mode**, and this section is what
+was built against that ruling. §1-§7 are unedited: they are the drafting record
+the ruling answers, and the two cells §7.1 called wrong are now closed by code
+rather than by prose.
+
+### 8.1 The field: `never_reduces: true`
+
+An **opt-in boolean on the `apply_power` effect**, absent everywhere else, and
+absent means exactly today's behaviour. The name was chosen over an enum
+(`apply_mode: floor`) on the sheet's own conventions: effect-level opt-in flags
+here are booleans (`consumes_aura: true`, `applies_element: true`), while the
+enum-valued fields (`guard`, `scope`, `member`) exist to pick among several
+named values and this mode has exactly one. `never_reduces` also states the
+rule in the words the ruling used — an application never reduces a standing
+stack — so the row reads as a sentence rather than as a term needing a
+glossary.
+
+**`max_stacks` is untouched.** It still bounds the running total for every row
+in every sheet; the new flag only says the application may not push a HIGHER
+standing stack down to reach that bound. No pinned test was re-ruled.
+
+| site | change |
+| --- | --- |
+| `tier0/engine/powers.py` | `apply_power(..., never_reduces=False)`; after the clamp, `new = max(new, standing)` |
+| `tier0/engine/effects.py` | `_op_apply_power` reads the field and passes it on both the self and the enemy branch |
+| `tools/gen_klee_cards.py` | field in `APPLY_POWER_FIELDS`; new `NEVER_REDUCES_POWERS` allowlist; a row is refused by name if the power has no C# floor implementation, or if it asks for the mode with no `max_stacks` to raise toward |
+
+The engine precedent the ruling named is the same shape: `effects.py:915-925`
+takes `max(standing, new)` on the Ceremonial Garment refresh, added by the
+2026-07-26 audit because assigning pulled an upgraded summon's duration down.
+
+### 8.2 The matrix, re-run against the shipped row
+
+`tier0/tests/test_kokomi.py` (real cards through `combat.play_card` on a
+loader-built Kokomi) and `tier0/tests/test_pin_engine_powers.py` (the engine
+chokepoint direct). Every cell of §7.1, both orders, both upgrade states:
+
+| order | after 1st | after 2nd | was, before the ruling |
+| --- | --- | --- | --- |
+| `vigil` -> candidate | 6 | **6** | 6 |
+| `vigil` -> candidate+ | 6 | **6** | 6 |
+| `vigil+` -> candidate | 8 | **8** | 6 (the DROP) |
+| `vigil+` -> candidate+ | 8 | **8** | 6 (the DROP) |
+| candidate -> `vigil` | 3 | 6 | 6 |
+| candidate+ -> `vigil` | 5 | 6 | 6 |
+| candidate -> `vigil+` | 3 | 8 | 8 |
+| candidate+ -> `vigil+` | 5 | 8 | 8 |
+
+Copies of one card, four plays: candidate `3, 6, 6, 6`; candidate+
+`5, 6, 6, 6`. The floor raises a stack, it does not remove the cap, so the
+lesser ward still never reaches the Rare's number on copy count — which is
+exactly what separates (d) from (a).
+
+**Regression, and it is the point of "default off":** a row WITHOUT the field
+is the old behaviour byte for byte, including the part that looks like the same
+defect — plain `vigil` played on top of `vigil+` still clamps 8 down to 6,
+because that is what `max_stacks` means and the ruling did not move it. Pinned
+in both files.
+
+### 8.3 C# parity — the live defect in `PreventExhaustWardPower`
+
+§7.1 recorded that the mod implemented NEITHER reading (the power became
+whatever the last card printed) and showed the Rare's tooltip on any applier.
+Both are fixed in `klee-mod/KleeCode/Powers/KuragePowers.cs`.
+
+The obstacle, and the answer. `TryModifyPowerAmountReceived` is handed the
+applier CREATURE and no card, so the power could not know which ROW was
+applying — and both the mode and the cap are properties of the row, not of the
+power. Decompiling `PowerCmd` settles where the row's identity is available:
+`Hook.ModifyPowerAmountReceived` takes no `cardSource`, but
+`Hook.BeforePowerAmountChanged` does, and it is awaited immediately before the
+modify hooks on **both** application paths (`Apply` and `ModifyAmount`). So:
+
+- the generated card declares the mode — `INeverReducingApplier`, carrying the
+  row's cap as `NeverReducingCap`
+  (`klee-mod/KleeCode/Cards/INeverReducingApplier.cs`, emitted by the generator
+  only for rows carrying the field);
+- the power captures the applying card in `BeforePowerAmountChanged`, and in
+  `BeforeApplied`, which covers the FIRST application — the instance is not in
+  the combat yet, so it does not receive the broadcast hook;
+- `TryModifyPowerAmountReceived` then computes
+  `max(Amount, min(Amount + amount, card cap))` for a floor applier, and the
+  running-total clamp otherwise.
+
+The default branch is unchanged in *behaviour*: under the single-application
+encoding every non-floor row of this power has cap == amount, so
+`min(Amount + amount, amount)` is `amount` — the set-to-incoming line that was
+already there. It is now documented as the clamp it implements rather than as a
+rule of its own.
+
+**Tooltip.** The power overrides `Title` with the applying card's own
+`TitleLocString`, captured on the same two hooks, so the power bar names the
+card the player actually played. The class's registered loc entry stays as the
+fallback for an application with no card behind it (there is none today).
+
+**How the C# was verified, and what is still owed.** `dotnet build` on
+`klee-mod/KleeCode` is green against the real game assembly (0 errors), and the
+hook contract above is decompile-verified against `sts2.dll` — the ordering and
+the missing `cardSource` are read off the decompiled `PowerCmd.Apply` /
+`PowerCmd.ModifyAmount`, not assumed. The Harmony bite-check covers patch
+ARMING, not power behaviour, so it has nothing to say about this change.
+**A live in-game check of the two fixed behaviours — ward composition and the
+tooltip title — is OWED**, and can only run on the art-bearing main checkout
+with the game installed.
+
+### 8.4 What landed, and what the gates said
+
+- `docs/kokomi-cards.yaml` — the row, in the uncommon Generic block (now 3),
+  with `never_reduces: true`. Pool 61 -> **62** (5 / 27 / **20** / 10).
+- `docs/kokomi-upgrades.yaml` — `power_amount: +2` (ward 3 -> 5). The cap does
+  not ride along, so the ceiling stays where the Rare put it.
+- Generated: `WatchOfTheShallows.cs`, the `KokomiCardRoster` entry,
+  `manifest.json`; `gen_roster_cards.py --check` clean.
+- Full suite `tier0/tests tier05/tests` green; the softlock lints (handwritten
+  / constant / op parity, pool membership, ancient coverage, role-tempo
+  `--check` and `--gate`, roster registry, vendor pin, art coverage) green.
+- One lint fix rode along as hygiene: `lint_sheet_comments` read the docket id
+  `EB-26` in a sheet comment as a cited card number. Docket ids now skip with
+  the other ruling refs.
+- **D5 could not land as drafted.** `tempo_band` is a MACHINE-LANDED tag (R91)
+  and the drift gate requires it to equal the classifier's output, which reads
+  this row `fight: [late] / run: [late]`, as it reads every other Kokomi power.
+  The sheet carries the classifier's bands and says so beside the row. The
+  drafted `run: early` claim needs the classifier RULE to move, which is a
+  design call and is not smuggled in under a card landing.
+- **Art is an open debt:** `art_coverage` now carries
+  `uncommon 1 watch_of_the_shallows` on its bill. No `art/plan.tsv` row, no
+  claimed source; Kokomi's art scarcity is the standing constraint.
+
+### 8.5 Re-measurement — D7(a), and why nothing was run
+
+**No rebaseline was run, deliberately.** EXPERIMENTS D4 is one variable per
+measurement window, and `EB-22`'s Kokomi pool fill has not landed yet. Two
+card-pool changes inside one window make neither readable, so **EB-26's
+rebaseline queues behind EB-22's**: EB-22 lands and takes its window, and the
+Kokomi read that follows carries both rows. Under option (d) that is a cheap
+deferral — the card's power level is the single-copy card minus the trap, so
+nothing about it wants a window of its own.
+
+### 8.6 Still owed
+
+1. **D1, the name.** `Watch of the Shallows` is authored flavor, not
+   wiki-verified canon. It is unique against the internal and reserved
+   namespaces; S4-G11 says a name is read by eye before it ships and has no
+   substitute. The eye is [USER]'s, and the sheet row carries the flag.
+2. **D7(b), P3.** Still unowned. Naming an owner is the ask, and landing this
+   card did not answer it.
+3. **The rebaseline**, behind EB-22 (§8.5).
+4. **The live in-game check** of the C# ward composition and tooltip (§8.3),
+   and the art bill (§8.4).

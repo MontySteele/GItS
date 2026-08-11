@@ -73,6 +73,7 @@ public static class KokomiCardRoster
         ModelDb.Card<VigilOfTheDeep>(),
         ModelDb.Card<VotiveOffering>(),
         ModelDb.Card<VowOfTides>(),
+        ModelDb.Card<WatchOfTheShallows>(),
         ModelDb.Card<WatersEdge>(),
         ModelDb.Card<Waterspout>(),
         ModelDb.Card<WhisperedWord>(),

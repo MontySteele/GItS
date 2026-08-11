@@ -7,8 +7,8 @@
     "namespace": "KleeMod.Cards.Kokomi.Generated"
   },
   "coverage": {
-    "total": 61,
-    "generated": 60,
+    "total": 62,
+    "generated": 61,
     "blocked": 1
   },
   "generated": [
@@ -69,6 +69,7 @@
     "vigil_of_the_deep",
     "votive_offering",
     "vow_of_tides",
+    "watch_of_the_shallows",
     "waters_edge",
     "waterspout",
     "whispered_word"

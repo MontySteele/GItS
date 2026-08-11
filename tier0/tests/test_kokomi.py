@@ -698,6 +698,92 @@ def test_vigil_upgrade_moves_the_cap_with_the_amount():
     assert fx["amount"] == 8 and fx["max_stacks"] == 8
 
 
+# --- EB-26 / P4: the lesser ward and the floor-not-clamp apply mode ---
+#
+# [USER] ruled D2 on 2026-08-10 as option (d): `never_reduces` is an opt-in
+# apply mode where an application raises the stack toward ITS OWN cap and never
+# lowers a higher standing one. The matrix below is the addendum's §7.1 table,
+# re-asserted against the shipped row: it is the whole reason the mode exists,
+# because before it `vigil_of_the_deep+` (8) followed by the lesser ward (3)
+# left 3 -- a card that was a downgrade to play.
+
+def _play_ward(st, card_id):
+    """Play a ward card by sheet id and return the standing stack."""
+    card = loader.get_card(card_id)
+    st.player.hand.append(card)
+    st.player.energy = 3
+    combat.play_card(st, card)
+    return st.player.powers.get("prevent_exhaust_ward", 0)
+
+
+def test_lesser_ward_statlines_are_the_ruled_ones():
+    """3 at cost 1 with the POOL's ceiling of 6, upgrading to 5.
+
+    The cap does NOT ride along with the upgrade: `max_stacks` only follows
+    the amount on the single-application encoding (cap == amount), and this
+    row's cap is the pool's ward ceiling rather than its magnitude.
+    """
+    card = loader.get_card("watch_of_the_shallows")
+    (fx,) = [f for f in card.effects if f.get("power") == "prevent_exhaust_ward"]
+    assert card.cost == 1 and fx["amount"] == 3
+    assert fx["max_stacks"] == 6 and fx["never_reduces"] is True
+
+    (upped,) = [f for f in loader.get_card("watch_of_the_shallows+").effects
+                if f.get("power") == "prevent_exhaust_ward"]
+    assert upped["amount"] == 5
+    assert upped["max_stacks"] == 6 and upped["never_reduces"] is True
+
+
+def test_lesser_ward_alone_lands_its_printed_amount():
+    assert _play_ward(kokomi_state(), "watch_of_the_shallows") == 3
+
+
+def test_lesser_ward_copies_stop_at_the_pools_ceiling():
+    """Copies top up toward 6 and stop there -- the floor mode raises a
+    stack, it does not remove the cap."""
+    st = kokomi_state()
+    assert [_play_ward(st, "watch_of_the_shallows") for _ in range(4)] \
+        == [3, 6, 6, 6]
+    st = kokomi_state()
+    assert [_play_ward(st, "watch_of_the_shallows+") for _ in range(4)] \
+        == [5, 6, 6, 6]
+
+
+def test_lesser_ward_never_lowers_a_standing_vigil():
+    """The two cells the addendum's matrix got wrong before the ruling: the
+    UPGRADED Rare stands at 8, and the lesser ward -- either face -- must
+    leave it there rather than clamping it down to its own cap of 6."""
+    for lesser in ("watch_of_the_shallows", "watch_of_the_shallows+"):
+        st = kokomi_state()
+        assert _play_ward(st, "vigil_of_the_deep+") == 8
+        assert _play_ward(st, lesser) == 8
+
+        st = kokomi_state()
+        assert _play_ward(st, "vigil_of_the_deep") == 6
+        assert _play_ward(st, lesser) == 6
+
+
+def test_lesser_ward_then_vigil_still_tops_up():
+    """The other order is unchanged: the Rare is a running-total clamp row,
+    so it raises whatever the lesser ward left standing to its own number."""
+    for rare, expected in (("vigil_of_the_deep", 6), ("vigil_of_the_deep+", 8)):
+        for lesser, opened in (("watch_of_the_shallows", 3),
+                               ("watch_of_the_shallows+", 5)):
+            st = kokomi_state()
+            assert _play_ward(st, lesser) == opened
+            assert _play_ward(st, rare) == expected
+
+
+def test_vigil_is_untouched_by_the_ruling():
+    """REGRESSION: a row WITHOUT the field behaves exactly as before -- the
+    cap still clamps the running total in BOTH directions, so the plain Rare
+    played on top of the upgraded one still sets the ward to 6. That is the
+    shipped meaning of `max_stacks` and the ruling did not move it."""
+    st = kokomi_state()
+    assert _play_ward(st, "vigil_of_the_deep+") == 8
+    assert _play_ward(st, "vigil_of_the_deep") == 6
+
+
 # --- v0.5 partial fill: threshold reads and the deck-size accounting ---
 
 def test_charge_threshold_predicate_reads_the_bank_and_never_spends_it():

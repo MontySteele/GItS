@@ -209,6 +209,7 @@ kokomi	quiet_harbor	uncommon	assist	payoff	block,velocity	block,velocity		early	
 kokomi	driftglass	uncommon	assist,generic	glue	frontload	frontload		early	early						
 kokomi	undertow	uncommon	assist	payoff	frontload,scaling,velocity	frontload,scaling,velocity		early,mid,late	late			exhaust_pile			
 kokomi	pearl_current	uncommon	generic	payoff	block	block		late	late						
+kokomi	watch_of_the_shallows	uncommon	generic	payoff	sustain	sustain		late	late						
 kokomi	the_tide_remembers	uncommon	priest,generic	payoff	frontload,scaling	frontload,scaling		mid,late	late	aoe		exhaust_pile			
 kokomi	ceremonial_garment	rare	generic	payoff	scaling	scaling		late	late			burst,charge			
 kokomi	nereids_ascension	rare	priest,generic	payoff	frontload,scaling	frontload,scaling		mid,late	late	aoe		charge			

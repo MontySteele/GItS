@@ -55,8 +55,13 @@ HEADER = re.compile(r"^#")
 # alternative below cannot do the job: on "2026-07-24" it consumes only
 # "2026-07" and leaves "-24" behind, which NUM then reads as a cited 24. The
 # docstring has always promised dates are skipped; this makes that true.
+# Docket ids (`EB-26`, `EB-30m`) join the ruling refs for the same reason: a
+# sheet comment citing the item that produced the row is naming a register
+# entry, never a card number. Matched before the generic `\d+[-–]\d+` range,
+# which would otherwise read "EB-26" as a range and leave the 26 behind.
 SKIP = re.compile(
     r"\d{4}-\d{2}-\d{2}|"
+    r"(?<![A-Za-z])EB-\d+[a-z]*|"
     r"§[\d.]+\w?|v[\d.]+|(?<![A-Za-z])[AR]\d+|DECISIONS \d+|"
     r"Guardrail \d+|flag \d+|\d+-star|\d+%|\d+[-–]\d+")
 NUM = re.compile(r"(?<![\w.])(\d+)")
