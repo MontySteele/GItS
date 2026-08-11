@@ -66,6 +66,12 @@
 |---|---|---|---|
 | `M10` | **COUNTERSIGNED 2026-08-10 (R165)** — the C2 grading countersign is given. The sprint **closes only after [USER]'s later full card review**, which is what keeps this row open. Neuvillette **ships as-is** to unblock, and carries a redesign owed later. Still inside the row: the companion art picks (Navia / Clorinde / Neuvillette / Arlecchino) and the v1.7 lore/naming eyes-on audit, both non-delegable | OPEN — countersigned, closes on the full card review | user-queue §10; R165 |
 
+## 7. Design calls raised by a graded measurement
+
+| ID | Decision needed | Status | Provenance |
+|---|---|---|---|
+| `M17` | **`EB-17p` fired its redesign trigger on two cards — `borrowed_brilliance` and `elemental_ecstasy` — under §8.1's dead-in-hand clause. Redesign them, or accept them as they stand.** The sweep ran and was graded blind 2026-08-10 against predictions committed ahead of it (`eb67706`): **3 PREDICTED / 1 SPLIT / 1 MISS**, the miss being `borrowed_brilliance` on the **wrong sign**. `friendly_visit` came back PREDICTED-strong (+3.04 / +4.46). **Read §13.8's instrument caveat before designing against this:** un-upgraded `borrowed_brilliance` recorded **40,396 draws and 0 plays**, and that row cannot separate *pilot refusal* from *an unsatisfiable play condition* — a redesign argued from that row alone is arguing from an instrument reading, not from the card. The design act is the only thing left of the experiment; the measurement itself is complete | OPEN — design act | → review/active/eb17p-registration-draft-2026-08-08.md §13, §13.8; results `review/active/eb17p-results-2026-08-10.txt`; minted 2026-08-10 |
+
 ---
 
 ## Not carried here

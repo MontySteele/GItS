@@ -43,14 +43,17 @@ registration packets themselves live under `review/active/` — one home, not tw
   countersigned; the open step is authoring the kickoff predictions (`Q-C` in
   `docs/current/QUEUE.md`) *before* any number is read →
   `review/active/payoff-reach-reregistration.md`.
-- **EB-17p force-first-copy paired winrate** — **COUNTERSIGNED COMPLETE
-  2026-08-10; launching.** `N` = 2400 pairs, Strike as the filler negative
-  control, a 4h wall-clock ceiling with stop-and-report, §8 predictions
-  committed ahead of any run (`eb67706`), §6.1b a co-primary. §10 prerequisites
-  landed and the `force_cards` seam is pinned. §11.1 discloses a 12-pair read on
-  registered seeds 11–22; **[USER] ruled it immaterial (R173)** and the
-  registered range runs unchanged →
-  `review/active/eb17p-registration-draft-2026-08-08.md`.
+- **EB-17p force-first-copy paired winrate** — **RUN AND GRADED 2026-08-10.**
+  Countersigned complete (`N` = 2400 pairs, Strike filler, 4h ceiling, §6.1b
+  co-primary), §8 predictions committed ahead of the run (`eb67706`), graded
+  blind in §13: **3 PREDICTED / 1 SPLIT / 1 MISS** (`borrowed_brilliance`, wrong
+  sign). §11.1's disclosed 12-pair read was **ruled immaterial (R173)** and the
+  registered range ran unchanged. **The measurement is closed; what stays open is
+  a design act** — §8.1's redesign trigger fired for `borrowed_brilliance` and
+  `elemental_ecstasy`, now QUEUE `M17`, and it must be read with §13.8's
+  instrument caveat →
+  `review/active/eb17p-registration-draft-2026-08-08.md` §13;
+  `review/active/eb17p-results-2026-08-10.txt`.
 - **Shop rerun (`S4-G10` / `C9`)** — registration **DRAFTED in the
   `shop-floor-2026-08-10` worktree, awaiting [USER] countersign** at QUEUE
   `M14`; the packet lands in HEAD with that branch (BACKLOG `EB-79`) →
