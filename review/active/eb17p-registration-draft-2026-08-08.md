@@ -5,10 +5,10 @@
 > filler arm, pair by pair. [USER] also accepted `N = 2400` and chose the
 > filler (§5.1).
 >
-> **Still not launched.** One thing stands between this packet and the sweep:
-> the cost ceiling in §7 is not yet set. §8's predictions and the §8.1
-> redesign trigger were committed on their own on 2026-08-10, before any seed
-> in the registered range was run.
+> **All slots filled; cleared to launch.** §5.1's filler, §7's `N` and §7's
+> cost ceiling are set, and §8's predictions and §8.1's redesign trigger were
+> committed on their own on 2026-08-10, before any seed in the registered
+> range was run.
 > **Nothing below is a prediction that has been graded, a number that has
 > been read, or a measurement that has been run.** No measurement was run to
 > produce this document. The mechanism probe described in §11 ran on a
@@ -400,12 +400,17 @@ resolve, not an estimate of what it will resolve. If the arms turn out to be
 strongly correlated the real resolution is better than 1.9 pp; the packet
 declines to claim that in advance.
 
-> **[USER] SLOT — cost ceiling** (wall-clock / jobs budget the sweep may
-> spend before it must stop and report): `__________`
->
-> **Proposed: 4h wall-clock, stop-and-report — awaiting [USER]
-> confirmation.** Left blank deliberately. The sweep does not launch until
-> this line is filled: it is the last open slot in the packet.
+> **COST CEILING = 4 hours wall-clock, stop-and-report** — confirmed by
+> [USER] on 2026-08-10.
+
+Stop-and-report means what it says: if the sweep is still running at four
+hours it **stops and reports what it has**, and the partial result is graded
+as partial. It is not extended, and the arms that finished are not quietly
+promoted to the whole answer. A stop at the ceiling names how many pairs each
+arm actually completed, and any grade drawn from fewer than the registered
+`N = 2,400` pairs quotes its own realised MDE rather than §7's.
+
+This was the last open slot in the packet.
 
 ## 8. Predictions — [USER], before any number is read
 
@@ -496,8 +501,8 @@ author of the predictions before the grade is recorded.
    addendum.
 2. Land the §10 engineering prerequisites with their byte-identity pins,
    suite green. **DONE.**
-3. [USER] fills the §7 cost ceiling. **OPEN — the sweep cannot launch without
-   it. This is now the only open slot.**
+3. [USER] fills the §7 cost ceiling. **DONE — [USER], 2026-08-10.** 4 hours
+   wall-clock, stop-and-report.
 4. §8's predictions are committed — their own commit, nothing else in it.
    **DONE — [USER], 2026-08-10.**
 5. Run the sweep at the pinned stamp. Report only; read nothing into it.
@@ -657,8 +662,8 @@ seed range, not an edit to this section.
 
 Filled on countersign: §5.1 filler (`kaboom`) and §7 `N` (2,400). §8's
 predictions and the §8.1 trigger were committed on their own on 2026-08-10.
-Still open before the sweep may launch: **the §7 cost ceiling**, and nothing
-else.
+The §7 cost ceiling was confirmed the same day. **No slot is open; the packet
+is cleared to launch.**
 
 — drafted 2026-08-08, branch `eb17p-registration`; amended 2026-08-10 on
 branch `sitting-prep-2026-08-08` to record the countersign, fill the two
