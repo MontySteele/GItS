@@ -716,7 +716,7 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
-    # Charlotte, Enduring Frosthelm: pre-emptive block that lands at the
+    # Charlotte, First-Person Shutter: pre-emptive block that lands at the
     # start of the player's NEXT turn (after the turn-start block reset).
     # Sustain-over-time identity without true healing (R8-shaped).
     # Spotlight scales it at play time (printed Block is printed Block).

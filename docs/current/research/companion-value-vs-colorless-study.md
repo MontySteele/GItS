@@ -282,7 +282,7 @@ Base colorless let *any* character draft a fixer to patch a kit gap; the compani
 
 | Role | Draftable from the pool? | Source |
 |---|---|---|
-| Card draw | ✅ | Companions: Lynette *Box Trick* (draw 2, pure neutral glue), Charlotte, Sucrose |
+| Card draw | ✅ | Companions: Lynette *Bogglecat Box* (draw 2, pure neutral glue), Charlotte, Sucrose |
 | Block splash | ✅ | Companions: Charlotte, Dahlia, Barbara, Bennett |
 | Permanent thin/removal | ✅ | Shop card-removal *service* (not a colorless card — unaffected) |
 | In-combat exhaust/thin | ⚠️ lesser gap | No neutral Purity-analog companion; character-scoped only (Klee). Low priority — permanent removal covers the main need |

@@ -54,7 +54,7 @@ public sealed class BarbaraShiningIdol : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Barbara — Shining Idol"),
+        ("title", "Barbara — Shining Miracle♪"),
         ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to a random enemy. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 

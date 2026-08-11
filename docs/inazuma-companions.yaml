@@ -26,16 +26,22 @@
 # Later scope: Kazuha (Sly/discard flavor), Heizou, Ayaka, Ayato, Yoimiya, Yae Miko 5-stars (banner roll per v1.8).
 
 # ---------- GOROU (Geo | buffer/general | the literal adjutant) ----------
-- {id: gorou_inuzaka_charge, name: "Gorou — Inuzaka Charge", star: 4, rarity: common, role_c: applier, element: geo, cost: 0, type: attack, exhaust: true,
+- {id: gorou_inuzaka_charge, name: "Gorou — Inuzaka All-Round Defense", star: 4, rarity: common, role_c: applier, element: geo, cost: 0, type: attack, exhaust: true,
    effects: [{op: damage, amount: 6, target: enemy, applies_element: false}]}
    # The vanguard's opening arrow. Geo leaves no aura in the reaction table (Crystallize CONSUMES); applies_element
    # false is explicit so no cadence dial can re-tag it. Starter attack-slot card (randomized_starter).
+   # RENAMED to canon 2026-08-10 ([USER], QUEUE N3+N4): "Inuzaka" was canon but "Inuzaka Charge" was not — his
+   # Elemental Skill is "Inuzaka All-Round Defense", the skill that plants the General's War Banner two rows down.
+   # Display-only: ids are not slugs of titles here, so `gorou_inuzaka_charge` and its art key are unchanged.
 - {id: gorou_war_banner, name: "Gorou — General's War Banner", star: 4, rarity: common, role_c: buffer, element: geo, cost: 1, type: skill,
    effects: [{op: block, amount: 4}, {op: buff_next_attack, amount: 3}]}
    # His DEF-banner identity: hold the line, then hit harder. Def-adjacent buffer per kickoff §4.
-- {id: gorou_heart_of_the_clan, name: "Gorou — Heart of the Clan", star: 4, rarity: uncommon, role_c: buffer, element: geo, cost: 1, type: skill,
+- {id: gorou_heart_of_the_clan, name: "Gorou — Forward Unto Victory", star: 4, rarity: uncommon, role_c: buffer, element: geo, cost: 1, type: skill,
    effects: [{op: block, amount: 3}, {op: apply_power, power: metallicize, amount: 2, target: self}]}
    # The standing banner: 2 Block a turn while the fight lasts. Sustain-through-armor, never healing (the law).
+   # RENAMED to canon 2026-08-10 ([USER], QUEUE N3+N4): "Heart of the Clan" named no Gorou talent. [USER] picked
+   # his Burst, "Forward Unto Victory" — checked against reserved-card-names.txt, every card sheet and the relic
+   # titles before it was taken. Display-only: id `gorou_heart_of_the_clan` and its art key are unchanged.
 
 # ---------- SAYU (Anemo | healer -> Block per law | the sleepy ninja) ----------
 - {id: sayu_yoohoo_windwheel, name: "Sayu — Yoohoo Art: Fuuin Dash", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 1, type: attack,

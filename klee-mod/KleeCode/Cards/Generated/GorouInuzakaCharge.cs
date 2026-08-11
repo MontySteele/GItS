@@ -50,7 +50,7 @@ public sealed class GorouInuzakaCharge : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Gorou — Inuzaka Charge"),
+        ("title", "Gorou — Inuzaka All-Round Defense"),
         ("description", "Deal {CalculatedDamage:diff()} damage."),
     };
 

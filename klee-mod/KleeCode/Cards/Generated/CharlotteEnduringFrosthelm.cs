@@ -47,7 +47,7 @@ public sealed class CharlotteEnduringFrosthelm : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Charlotte — Enduring Frosthelm"),
+        ("title", "Charlotte — First-Person Shutter"),
         ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. At the start of your next turn, gain 4 [gold]Block[/gold]."),
     };
 

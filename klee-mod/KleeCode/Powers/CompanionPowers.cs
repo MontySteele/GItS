@@ -537,7 +537,7 @@ public sealed class NextAttackUpPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Charlotte, Enduring Frosthelm (tier0 op block_next_turn) uses the game's
+/// Charlotte, First-Person Shutter (tier0 op block_next_turn) uses the game's
 /// OWN BlockNextTurnPower -- no mod power needed. Verified by decompile
 /// against the sim: it grants Amount Block from AfterBlockCleared (the hook
 /// that fires right after the turn's block reset, which is exactly where
@@ -575,7 +575,7 @@ public sealed class ShatterBonusPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Metallicize -- Gorou, Heart of the Clan (Inazuma roster, playtest sprint).
+/// Metallicize -- Gorou, Forward Unto Victory (Inazuma roster, playtest sprint).
 ///
 /// TIMING IS THE SIM'S, NOT THE TABLETOP CONVENTION. Slay the Spire's
 /// Metallicize grants Block at END of turn; tier0's grants it at turn START

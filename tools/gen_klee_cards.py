@@ -249,7 +249,7 @@ APPLY_AURA_FIELDS = {"op", "element", "target"}
 SWIRL_FIELDS = {"op", "target"}
 BUFF_NEXT_FIELDS = {"op", "amount"}
 
-# Charlotte, Enduring Frosthelm (tier0 _op_block_next_turn).
+# Charlotte, First-Person Shutter (tier0 _op_block_next_turn).
 BLOCK_NEXT_TURN_FIELDS = {"op", "amount"}
 
 # --- small ops (2026-07-20 batch) --------------------------------------------

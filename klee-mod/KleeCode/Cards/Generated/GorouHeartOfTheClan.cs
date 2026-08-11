@@ -47,7 +47,7 @@ public sealed class GorouHeartOfTheClan : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Gorou — Heart of the Clan"),
+        ("title", "Gorou — Forward Unto Victory"),
         ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. At the start of your turn, gain {PowerAmount:diff()} Block."),
     };
 
