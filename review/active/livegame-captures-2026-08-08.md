@@ -1,3 +1,8 @@
+<!--
+lifecycle: active
+owner: EB-53, EB-52
+exit_when: the capture rows close and the eyes-on (17a) is given
+-->
 # Live-game capture packet — 2026-08-08
 
 > **Lifecycle: REFERENCE** — a capture manifest, not a maintained page. It says

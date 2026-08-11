@@ -63,7 +63,7 @@ zero mechanics** (ratified). Nothing else novel ships in her v1.
   **no numeric Spotlight bonus**. **GUEST CAST** designates the
   **Companion category**, not one character: companion cards receive the
   empowerment multiplier and Spotlight texture, and generate no Fanfare
-  (`review/active/red-pen-2026-07-26.md` R2(a); LAW "Character identity —
+  (`git show 9c5e1d2:review/active/red-pen-2026-07-26.md` R2(a); LAW "Character identity —
   Furina").
 - Every card gains a **`character:` schema field** (shared schema change,
   not Furina-private — Columbina inherits it). Companion cards carry their

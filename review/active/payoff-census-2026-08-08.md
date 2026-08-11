@@ -1,3 +1,8 @@
+<!--
+lifecycle: active
+owner: Q-C
+exit_when: the rubric is ratified and the aims + predictions are committed
+-->
 # The canonical payoff census — rubric + census + candidate bands
 
 **R137 step (2a).** BACKLOG `EB-56`, closed by this packet.

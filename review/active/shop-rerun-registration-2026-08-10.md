@@ -1,3 +1,8 @@
+<!--
+lifecycle: active
+owner: M14
+exit_when: the rerun is countersigned, run, and graded — leaves HEAD with the grade
+-->
 # Shop companion channel — re-run registration (DRAFT, awaiting countersign)
 
 > **Status: DRAFT. Nothing here has been run.** No number in this document was

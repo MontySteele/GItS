@@ -1,3 +1,8 @@
+<!--
+lifecycle: active
+owner: Q-C, EB-43
+exit_when: the sweep is run and graded — registration and grade leave HEAD together
+-->
 # Payoff-reach / RARITY_ODDS sprint — clean re-registration (~~DRAFT~~ **SIGNED / COUNTERSIGNED 2026-08-06**)
 
 > # SIGNED / COUNTERSIGNED — 2026-08-06 (`Q18` / R121)

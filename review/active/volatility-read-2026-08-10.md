@@ -1,3 +1,8 @@
+<!--
+lifecycle: active
+owner: S4-G6
+exit_when: the band is declared
+-->
 # Volatility read — 2026-08-10
 
 **What this is.** A fresh reading of the five HP-volatility metrics, for every

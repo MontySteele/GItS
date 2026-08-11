@@ -31,7 +31,7 @@
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `S4-G7` | **Choose Furina's remedy direction (R153: she gets three plans):** rebalance the weak plans until viable, or expand salon to contain multiple archetypes. Unfenced — the `R107`/`F1` fence dropped with R138. Headline standing read: salon separates from both other plans and still sits below the `real_ironclad` floor. Decision packet: BACKLOG `EB-81` | OPEN — direction pick | R107/F1; R153 → review/active/sitting-reads-2026-08-08.md §1 |
+| `S4-G7` | **Choose Furina's remedy direction (R153: she gets three plans):** rebalance the weak plans until viable, or expand salon to contain multiple archetypes. Unfenced — the `R107`/`F1` fence dropped with R138. Headline standing read: salon separates from both other plans and still sits below the `real_ironclad` floor. Decision packet: BACKLOG `EB-81` | OPEN — direction pick | R107/F1; R153 `git show 9c5e1d2:review/active/sitting-reads-2026-08-08.md` §1 |
 | `Q-C` (payoff-reach) | **Ratify the amended rubric text** (including the Necrobinder third-spelling sub-question), then **commit the aims + the Q-A/Q-B direction-and-threshold predictions** — in that order, before any sprint number is read. Tentative aims sit in packet §7.2, NOT ratified | OPEN — ratify, then predict | R137; R155 → review/active/payoff-census-2026-08-08.md §7 |
 
 ## 2. Kokomi — band, playtest, and levers
@@ -39,7 +39,7 @@
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
 | `S4-G6` | **Declare Kokomi's HP stability band from design intent**, before her confirmatory playtest (may not be revised against it). Deferred past the post-wave **exploratory** run (R156; R175 — the confirmatory `DEC-D5` run follows the declaration). Finding to carry in: the inversion — Kokomi is worst on time-spent-low while Furina is the flattest | OPEN — declare, after the post-wave exploratory run | `DEC-D5` clauses 2–4; R156; R175 → review/active/volatility-read-2026-08-10.md |
-| `S4-G13` | **Which lever to pull on Kokomi's general power lift, and whether** — after the post-wave observation (R154: a lift is needed; suspected cause, assist's missing internal payoffs — *"she really has two archetypes not three"*). The candidate is built by BACKLOG `EB-74` and **nothing is pulled** until the observation lands. Headline read: all three plans sit below the Ironclad floor without interval overlap; assist below even the Silent floor | OPEN — pull-or-not, gated on the post-wave observation | R154 → review/active/sitting-reads-2026-08-08.md §2 |
+| `S4-G13` | **Which lever to pull on Kokomi's general power lift, and whether** — after the post-wave observation (R154: a lift is needed; suspected cause, assist's missing internal payoffs — *"she really has two archetypes not three"*). The candidate is built by BACKLOG `EB-74` and **nothing is pulled** until the observation lands. Headline read: all three plans sit below the Ironclad floor without interval overlap; assist below even the Silent floor | OPEN — pull-or-not, gated on the post-wave observation | R154 `git show 9c5e1d2:review/active/sitting-reads-2026-08-08.md` §2 |
 | `S4-G14` | **Play the Kokomi confirmatory protocol run deliberately against the written question list** (exploratory runs cannot be graded). Sequence (R175): post-wave exploratory run → `S4-G6` band declaration → this run. `OT-1` is retired (R152 — *"Neap Tide"* is a sprint name, not a card; the kit-level answer stands provisionally, no lever pulled) | OPEN — table time; gated on the `EB-53` remnant | R115; R152; R175 → `docs/current/playtest/kokomi-playtest-protocol.md` |
 
 ## 3. Shop, pricing, and money
@@ -77,7 +77,7 @@
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `M17` | **`EB-17p`'s redesign trigger fired on `borrowed_brilliance` and `elemental_ecstasy` (§8.1 dead-in-hand): redesign them, or accept them as they stand.** Graded blind 2026-08-10: 3 PREDICTED / 1 SPLIT / 1 MISS (`borrowed_brilliance`, wrong sign). §13.8's instrument caveat is RESOLVED (R176): the 40,396-draws / 0-plays row was pilot refusal, and under `P7` the base card plays ~6.1% — **design against P7 behaviour, not the pre-P7 row.** Two faithful routes: the design act now, or defer it behind a re-registered `P7` re-measure of the five-card sweep; an unregistered re-grade of the frozen §13 is not one | OPEN — design act | minted 2026-08-10; R176 → review/active/eb17p-registration-draft-2026-08-08.md §13 |
+| `M17` | **`EB-17p`'s redesign trigger fired on `borrowed_brilliance` and `elemental_ecstasy` (§8.1 dead-in-hand): redesign them, or accept them as they stand.** Graded blind 2026-08-10: 3 PREDICTED / 1 SPLIT / 1 MISS (`borrowed_brilliance`, wrong sign). §13.8's instrument caveat is RESOLVED (R176): the 40,396-draws / 0-plays row was pilot refusal, and under `P7` the base card plays ~6.1% — **design against P7 behaviour, not the pre-P7 row.** Two faithful routes: the design act now, or defer it behind a re-registered `P7` re-measure of the five-card sweep; an unregistered re-grade of the frozen §13 is not one | OPEN — design act | minted 2026-08-10; R176 `git show 9c5e1d2:review/active/eb17p-registration-draft-2026-08-08.md` §13 (results: same commit, `eb17p-results-2026-08-10.txt`) |
 
 ---
 

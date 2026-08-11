@@ -43,17 +43,6 @@ registration packets themselves live under `review/active/` — one home, not tw
   countersigned; the open step is authoring the kickoff predictions (`Q-C` in
   `docs/current/QUEUE.md`) *before* any number is read →
   `review/active/payoff-reach-reregistration.md`.
-- **EB-17p force-first-copy paired winrate** — **RUN AND GRADED 2026-08-10.**
-  Countersigned complete (`N` = 2400 pairs, Strike filler, 4h ceiling, §6.1b
-  co-primary), §8 predictions committed ahead of the run (`eb67706`), graded
-  blind in §13: **3 PREDICTED / 1 SPLIT / 1 MISS** (`borrowed_brilliance`, wrong
-  sign). §11.1's disclosed 12-pair read was **ruled immaterial (R173)** and the
-  registered range ran unchanged. **The measurement is closed; what stays open is
-  a design act** — §8.1's redesign trigger fired for `borrowed_brilliance` and
-  `elemental_ecstasy`, now QUEUE `M17`, and it must be read with §13.8's
-  instrument caveat →
-  `review/active/eb17p-registration-draft-2026-08-08.md` §13;
-  `review/active/eb17p-results-2026-08-10.txt`.
 - **Shop companion channel re-run (`S4-G10` / `C9`)** — **DRAFT, awaiting
   [USER] countersign at QUEUE `M14`, unrun.** The packet is in HEAD as of the
   `shop-floor-2026-08-10` merge. The channel's world moved ([USER] restored slot 2's

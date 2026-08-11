@@ -55,9 +55,14 @@ git show <commit>:<path>
   design / taste / behavior call → `QUEUE.md`; false positive or
   non-actionable → nowhere permanent. Raw audit output is PR text or a temp
   artifact, never committed prose.
-- **Closed items leave HEAD.** No strikethroughs, no supersession banners —
-  edit in place. [USER]'s verbatim words belong in the commit message, not a
-  doc. The one exception is existing LAW, not a carve-out: a published
+- **Closed items leave HEAD in the same commit that closes them (R178).**
+  Exit is part of close, never a later sweep — "close now, clean later"
+  is how cleanup sweeps become necessary. No strikethroughs, no supersession
+  banners — edit in place. [USER]'s verbatim words belong in the commit
+  message, not a doc. Every file under `review/active/` carries a
+  `lifecycle / owner / exit_when` block; when its owning row closes, the
+  packet leaves HEAD in that same commit (`tools/lint_docs_lifecycle.py`
+  enforces both). The one exception is existing LAW, not a carve-out: a published
   measurement record stands as published, struck rather than rewritten
   (R101b).
 - **One worktree per workstream, sibling directories only.** Never link a

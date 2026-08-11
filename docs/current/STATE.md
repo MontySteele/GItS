@@ -17,7 +17,7 @@
   run-layer numbers are archived, never compared across template versions
   unlabeled.
 - **Kokomi meter-20 — RATIFIED (R139, 2026-08-10)** on the fresh
-  `RT9/D14/P6/C8` read (`review/active/sitting-reads-2026-08-08.md` §3). **The
+  `RT9/D14/P6/C8` read (`git show 9c5e1d2:review/active/sitting-reads-2026-08-08.md` §3). **The
   current build is the comparison baseline from now on** — the dead v0.3 W1
   comparator is not rebuilt, and later Kokomi numbers are compared against this
   state, not against the archived world.
@@ -154,6 +154,6 @@ alone at its current rarity; as a companion card it is close to "what if I
 high-roll a colorless option". **Trigger:** playtest shows it overperforming),
 `W6` Kokomi P4/P3 prevention-on-curve design review (EB-26 `D7(b)`, R172 —
 ex-BACKLOG `EB-80`. **Trigger:** the post-wave Kokomi playtest shows she needs
-more warding; evidence packet `review/active/eb26-lesser-ward-draft.md` §5).
+more warding; evidence `git show 9c5e1d2:review/active/eb26-lesser-ward-draft.md` §5).
 (Migrated from the retired watch-items docket, frozen at tag
 `pre-simplification-2026-08-06`; `W5` added 2026-08-10; `W6` 2026-08-11.)
