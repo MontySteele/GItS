@@ -75,7 +75,9 @@ combat grammar comes with us. (principles §1)
   pool is removed, but ship reality is a shop-only override (R60 phase 1); full
   removal needs a seven-consumer audit and is deferred, not rejected — treat the
   pool as sole-colorless in design, but do not assume the base pool is gone in
-  code. (principles §4.7; R60)
+  code. **R60 phase 2 is graded ACCEPTABLE for v1 and is not scheduled** — the
+  remaining in-combat colorless fantasy leak stands as a known, priced v1
+  condition rather than an open defect. (principles §4.7; R60; R149)
 - **Companion cards route power through your character, never around them**
   (Applier / Buffer / Trigger). **The delete-test always holds, unmodified, no
   detector carve-outs:** removing your character's own cards from a winning deck
@@ -103,17 +105,35 @@ combat grammar comes with us. (principles §1)
   must gut the deck). This is distinct from **generated Guest Star cameos**, which
   are minted mid-combat and are neither draftable nor banner-governed
   (equal-rarity, this-combat-only, Exhausting — see the Furina Guest Star
-  guardrails). (principles §4.2, §4.3, §4.5; furina §9)
+  guardrails). **Amendment (R160):** a personal-pool companion may also enter by
+  an **optional, visible run-start offer** — the randomized-starter family, not
+  new Neow machinery. The offer is **declinable**: taking it is a choice the
+  player makes, on the same footing as choosing a different Ancient door, so it
+  does not make the card mandatory kit. (principles §4.2, §4.3, §4.5; furina §9;
+  R160)
 - **Free reward channel is enabler-grade and stochastic,** nation-weighted ~50%
   same-nation; its value is capability (off-element access), not per-energy
   stats — a whiff is never a dead pick. (principles §4.1, §4.7)
-- **Shop is the paid premium channel, two colorless slots:** slot 1 = home-region,
-  guaranteed Uncommon-or-higher (`SHOP_COMPANION_RARITY_ODDS` renormalizes over
-  the ≥Uncommon pool); slot 2 = wildcard, any nation, unrestricted rarity.
-  (principles §4.7; R116 NC-10; R117/R118 Q16)
+- **Shop is the paid premium channel, two colorless slots, both Uncommon-or-higher:**
+  slot 1 = home-region, slot 2 = wildcard nation. Both roll
+  `SHOP_COMPANION_RARITY_ODDS` (reward odds renormalized over the ≥Uncommon pool);
+  the **nation filter is the only difference between the slots**. Slot 2's floor was
+  removed by R116/NC-10 and **restored 2026-08-10** — the paid channel does not sell
+  Commons. (principles §4.7; R59; R116 NC-10; R117/R118 Q16; [USER] 2026-08-10)
+- **An empty companion slot is omitted, never faked, in both engines.** When the
+  fallback ladder runs out (no drawable companion at any nation or band) the slot is
+  not created; the mod does not substitute a base colorless card. Omission happens
+  upstream of `MerchantCardEntry.Populate`, which has no no-card path.
+  ([USER] 2026-08-10; R59, R60)
 - **Gold price is the balance governor, never a stat nerf.** Companion pricing is
   50/75/150 by rarity; the ×1.15 colorless surcharge applies to `ColorlessCardPool`
   only, so companions are exempt. (principles §4.7; R61, R63)
+- **Price, shelf composition, and shelf order JOINTLY govern the premium channel.**
+  Price alone is not the governor: what is on the shelf (the rarity floor) and when
+  the player is asked (companions resolve before the relic shelf, so they get first
+  claim on the purse) move the same outcome, and a channel tuned on price alone is
+  tuned on one of three levers. Amends the older "pricing is the governor" thesis,
+  which stands as the pricing half of it. ([USER] 2026-08-10, S4-G10)
 - **Neutral action-energy / draw / thin are legal enabler-grade companion utility**
   (one-shot, Exhaust-gated, costed) — the pool must let any character draft a
   kit-gap fix. **Burst-meter (`burst_energy`) generation stays character-kit-scoped**
@@ -232,6 +252,10 @@ combat grammar comes with us. (principles §1)
   **declared design intent, not a measured acceptance gate** — the measured axis
   numbers stay reportable-only (see Design governance). **Every character clears
   solo; co-op is amplified, never required.** (principles Pillars 3–4)
+- **Co-op mechanics arrive as multiplayer-only CARDS, never as modifications to a
+  character's base kit.** A character's basic functionality is identical solo and
+  in co-op; co-op depth is added by a few multiplayer-only cards — the route
+  StS2's own beta branch took. (R144)
 - **All art and audio is original or commissioned "in the StS style"** — no
   extracted HoYoverse assets ship publicly (placeholder art in private builds is
   fine). Naming: constellations for rares/upgrades, talent names for relics,
@@ -296,10 +320,12 @@ combat grammar comes with us. (principles §1)
 - **The simulator's authority is relative deltas and structural findings, not
   absolute human-play winrates;** a ratification resting on an absolute winrate
   rests on the wrong number. (principles §7)
-- **Seven-axis numbers are reportable, not load-bearing:** six axes are
+- **Seven-axis numbers are reportable, not load-bearing:** **all seven** axes are
   permanently CLOSED as reportable-only (never a gate, target, or justification
-  to move a value). Only the Fanfare axis stays open — that open decision (B-G1)
-  is `QUEUE.md`, not a rule. (principles §7; D3; R90 Q7)
+  to move a value). There is **no "Fanfare axis"** — R118's term names no axis;
+  Fanfare is a Furina mechanic that falls under **scaling**, and the per-axis
+  disposition therefore collapses to one disposition for all seven. (principles
+  §7; D3; R90 Q7; R118; R138)
 - **Every archetype passes aura-starvation / bricking checks in the sim before
   implementation;** test packages model plausible drafts, never monocultures.
   (principles Guardrail 4)
@@ -369,9 +395,16 @@ combat grammar comes with us. (principles §1)
 - **Art dedupe (`art_lint` L1):** effective pick = auto or shortlist rank 1 unless
   red-pen resolves; register-crossing reuse is legal; known collisions sit in a
   `PENDING_RED_PEN` allowlist until resolved, then the entry is deleted so the
-  lint guards the resolution. **No Spine for v1** (script-less layered rigs) —
-  though the authorized animation-path spike may reopen the licence question.
-  (klee-mod art addendum; animation-sprint-2)
+  lint guards the resolution. **No Spine** — the animation-path spike ran, the
+  licence question was reopened and **answered: no purchase.** Rigs are
+  **Godot-native**, and how far native gets us is the thing being found out.
+  (klee-mod art addendum; animation-sprint-2; R141)
+- **Crop reuse is judged by eye, per card — there is no numeric crop-reuse cap.**
+  **Environment art counts as a card face** when the location is central to the
+  card and the composition is distinct (a random hallway still does not).
+  **Exactly one** hand-cropped `Character Details` Rare is allowed, and it rides
+  an approved-exception entry in `art_lint` rather than an edit around the ban.
+  (R151)
 
 ## Process constraints that bind design
 

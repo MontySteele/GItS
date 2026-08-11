@@ -47,7 +47,7 @@ public sealed class LynetteBoxTrick : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Lynette — Box Trick"),
+        ("title", "Lynette — Bogglecat Box"),
         ("description", "Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 

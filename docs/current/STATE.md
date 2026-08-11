@@ -16,6 +16,11 @@
   the live run model is now the real StS2 map (see Versions below). Older
   run-layer numbers are archived, never compared across template versions
   unlabeled.
+- **Kokomi meter-20 — RATIFIED (R139, 2026-08-10)** on the fresh
+  `RT9/D14/P6/C8` read (`review/active/sitting-reads-2026-08-08.md` §3). **The
+  current build is the comparison baseline from now on** — the dead v0.3 W1
+  comparator is not rebuilt, and later Kokomi numbers are compared against this
+  state, not against the archived world.
 - **Roster slot 4 — Zhongli countersigned (R108), not yet scheduled.** The deep
   dive is unblocked; the pre-slot-4 gate is the roster registry (`tier0/roster.py`).
 
@@ -74,8 +79,8 @@ are never comparable across a stamp boundary unless labeled.
 
 | stamp | value | source | meaning |
 |---|---|---|---|
-| `C` `CONSTANTS_VERSION` | **8** | `tier0/constants.py` | EB-30m/R127: `charge_per_turn` / `encore_per_turn` income powers, income pinned before the Salon upkeep (EB-2's parity target). Latent at the bump — no encounter or ratified deck carries them. C7 was R128's Test Subject mechanics (Enrage / Painful Stabs / Nemesis-Intangible, per-hit cap at direct-HP sites). |
-| `RT` `RUNTEMPLATE_VERSION` | **9** | `tier0/constants.py` | EB-30m: the Darv/Dusty Tome act-2 event — the single Ancient acquisition door, grants upgraded; act-2 event-pool odds move for every character. v8 was R125/R126 (widened tag shield reaches the smith + event upgrade; Orobas Ancient weights live). |
+| `C` `CONSTANTS_VERSION` | **9** | `tier0/constants.py` | Slot-2 rarity floor restored ([USER] 2026-08-10, S4-G10 close-out): the shop's wildcard companion slot rolls Uncommon-or-better again in **both** engines, so Commons leave the paid channel and the 50-gold band is unreachable. Every §4.7 shop number taken under C6–C8 is archive. The `exp_shop_companion_channel` instrument repairs land inside the same window deliberately, so the corrected cell has one world to cite; further errata may join C9 until a number is quoted under it. **Erratum joined 2026-08-10 under that clause (no number had been published): the X7/X8 rarity promotions (R161, R162)** — `friendly_visit`, `chain_fuse`, `careful_arrangement` all Common → Uncommon, costs and numbers unchanged; Klee's pool now reads 29 Common / 28 Uncommon (was 32/25, total still 76) and `secret_stash`'s derived demolition-Common add-pool drops two entries. C8 was EB-30m/R127's `charge_per_turn` / `encore_per_turn` income powers (latent at the bump). |
+| `RT` `RUNTEMPLATE_VERSION` | **10** | `tier0/constants.py` | R82 reopened ([USER] 2026-08-10, M7): the enchant events. Five events built on Enchant join the pools — Sapphire Seed (act 1), Field of Man-Sized Holes / Stone of All Time / Symbiote (act 2; Symbiote also act 3), Self-Help Book (all acts) — so event-pool odds move in **every** act for **every** character, and the enchantment vocabulary enters the run layer. Enchantments are post-draft only, so `D` and `P` are untouched. v9 event numbers do not carry across. v9 was EB-30m's Darv/Dusty Tome act-2 event (the single Ancient acquisition door, grants upgraded). |
 | `D` `DRAFTER_VERSION` | **14** | `tier0/constants.py` | Generic-limb `core_complete` now requires an on-plan payoff. Held at 14 — the payoff-reach registration's pin (R121, six-step order; R125 widened the shield under the restores-not-redefines argument, no bump). |
 | `P` `POLICY_VERSION` | **6** | `tier05/draft.py` | EB-29t: Enrage skill tax + Intangible per-hit cap (the promoted Test Subject reads). v5 was EB-24p's `reaction_triggered_this_turn` read; v4 was R124's both-Spotlight-modes read. |
 
@@ -144,5 +149,8 @@ open decisions, and nothing is tuned on the strength of being watched. Each
 returns to [USER] only when its trigger fires: `W1` X4 (block-side Guest Cast),
 `W2` X6 (salon power level), `W3` X12 (co-op reaction potency — instrument
 unblocked since `O-1` closed; a new reading runs under EXPERIMENTS law),
-`W4` X5 (fanfare floor). (Migrated from the
-retired watch-items docket, frozen at tag `pre-simplification-2026-08-06`.)
+`W4` X5 (fanfare floor), `W5` `lynette_box_trick` (X7, R161 — deliberately left
+alone at its current rarity; as a companion card it is close to "what if I
+high-roll a colorless option". **Trigger:** playtest shows it overperforming).
+(Migrated from the retired watch-items docket, frozen at tag
+`pre-simplification-2026-08-06`; `W5` added 2026-08-10.)

@@ -340,7 +340,7 @@ from these tables. Do not re-fetch it (see the ratification note in §1).
 |---|---|---|
 | `dahlia_favonian_favor` | Dahlia — Favonian Favor | Same Dahlia family source as the shipped `dahlia_sacramental_shower`, wider support/blessing crop; use contain if cover clips the head/hat. |
 | `fischl_oz` | Fischl — Oz, at Your Side | Fischl/Oz source with Oz dominant and readable; differentiate from the existing Nightrider attack. |
-| `barbara_shining_idol` | Barbara — Shining Idol | Wider support/idol crop with melody or healing field; not the same framing as `barbara_melody`. |
+| `barbara_shining_idol` | Barbara — Shining Miracle♪ | Wider support/idol crop with melody or healing field; not the same framing as `barbara_melody`. |
 | `sucrose_astable` | Sucrose — Astable Anemohypostasis | Alchemical/Anemo experiment crop with apparatus or vortex prominent. |
 | `bennett_fantastic_voyage` | Bennett — Fantastic Voyage | Burst/support field crop, wider and more triumphant than the existing Passion attack. |
 | `diona_icy_paws` | Diona — Icy Paws | Icy shield/paw motif; preserve Diona's figure rather than filling with a generic Cryo icon. |
@@ -369,10 +369,10 @@ mechanically distinct crops.
 | `chevreuse_vanguards_valor` | Chevreuse — Vanguard's Valor | Support crop emphasizing command/valor rather than the projectile. |
 | `chevreuse_bursting_grenades` | Chevreuse — Ring of Bursting Grenades | Wide signature crop preserving grenade ring and musket flash. |
 | `lynette_enigmatic_feint` | Lynette — Enigmatic Feint | Defensive/evasive close crop, reserved expression and misdirection. |
-| `lynette_box_trick` | Lynette — Box Trick | Prop/box and Anemo trick prominent; medium crop. |
+| `lynette_box_trick` | Lynette — Bogglecat Box | Prop/box and Anemo trick prominent; medium crop. |
 | `lynette_astonishing_shift` | Lynette — Magic Trick: Astonishing Shift | Wide signature magic-stage crop with full shift effect. |
 | `charlotte_freezing_point` | Charlotte — Framing: Freezing Point Composition | Camera/action crop and Cryo impact. |
-| `charlotte_enduring_frosthelm` | Charlotte — Enduring Frosthelm | Protective/support crop with frost field or guard silhouette. |
+| `charlotte_enduring_frosthelm` | Charlotte — First-Person Shutter | Protective/support crop with frost field or guard silhouette. |
 | `charlotte_snappy_silhouette` | Charlotte — Snappy Silhouette | Wide signature journalism/photo composition with clear camera identity. |
 | `freminet_pers_deploy` | Freminet — Pers, Deploy! | Pers-forward action crop; companion/device must remain visible. |
 | `freminet_pressurized_floe` | Freminet — Pressurized Floe: Backstroke | Underwater/flowing Cryo attack crop distinct from Pers. |

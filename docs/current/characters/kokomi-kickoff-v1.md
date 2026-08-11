@@ -167,7 +167,7 @@ lore/naming audit ([USER]-gated, as always).
 - Priest — Charge scaling and finisher payoff; wants Exhaust density, Rare
   heals as premium Charge, the prevention power.
 - Assist — Sly/discard glue: draw and energy velocity, low internal payoff
-  by design (Box Trick philosophy: honest glue no archetype warps around).
+  by design (Bogglecat Box philosophy: honest glue no archetype warps around).
   Feeds both other lanes.
 
 Elite-axis declaration (proposed, [USER]-gated): A2 Scaling + A4 Utility.

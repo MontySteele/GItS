@@ -621,6 +621,20 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         # enchanted Shiv hits harder while an ordinary one in the same hand
         # does not. Flat, folded in with current_attack_bonus.
         base += card.enchant_damage
+        # Vigorous (R82 reopened): the same flat rider, but only on the
+        # card's FIRST play each combat. The gate is cleared at the end of
+        # the play that consumed it (resolve_card_play), so every hit of a
+        # multi-hit first play collects it -- which is what "the first time
+        # this card is played, it deals X additional damage" says.
+        if (card.enchant_first_play_damage
+                and not card.enchant_played_this_combat):
+            base += card.enchant_first_play_damage
+        # Corrupted: "deal 50% more damage". A MULTIPLIER, applied to the
+        # card's own printed-and-riden damage and before strength/vulnerable,
+        # which is where every other enchantment term sits. Truncated, the
+        # engine's convention for a fractional damage term.
+        if card.enchant_damage_mult != 1.0:
+            base = int(base * card.enchant_damage_mult)
         # Arlecchino, Masque of the Red Death: flat rider on YOUR Attacks.
         # Sits with current_attack_bonus rather than in modify_damage_dealt so
         # it reads only card Attacks -- bombs, Oz and Kurage pulses are not
@@ -705,8 +719,15 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     times = fx.get("times", 1)
     times = (_runtime_count(state, times, card)
              if isinstance(times, str) else times)
+    # Nimble (R82 reopened): "increases Block gained from this card by X" --
+    # ONCE per play, not once per row, so a two-row block card does not
+    # collect it twice. Not Spotlight-scaled (Spotlight scales printed
+    # numbers; an enchantment is not printed), but Frail does bite it, which
+    # is what "Block gained" means.
+    rider = card.enchant_block
     for _ in range(times):
-        amount = _spotlight_scale(state, card, raw)
+        amount = _spotlight_scale(state, card, raw) + rider
+        rider = 0
         # Frail bites each printed card-block gain before the refpower funnel.
         amount = powers.modify_block_gained(state.player, amount)
         state.player.block += amount
@@ -716,7 +737,7 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
-    # Charlotte, Enduring Frosthelm: pre-emptive block that lands at the
+    # Charlotte, First-Person Shutter: pre-emptive block that lands at the
     # start of the player's NEXT turn (after the turn-start block reset).
     # Sustain-over-time identity without true healing (R8-shaped).
     # Spotlight scales it at play time (printed Block is printed Block).
@@ -879,6 +900,11 @@ def _deploy_salon_members(state: CombatState, amount: int,
 
 def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
     cap = fx.get("max_stacks")
+    # `never_reduces` (EB-26 D2, ruled 2026-08-10, option (d)): an opt-in apply
+    # mode. The application raises the stack toward ITS OWN cap and never
+    # lowers a standing higher one. Absent on every other row in every sheet,
+    # and absent means today's behaviour exactly.
+    floor = bool(fx.get("never_reduces", False))
     if "amount_formula" in fx:                 # Dominate, MoltenFist
         amount = _power_amount_formula(state, fx["amount_formula"])
     else:
@@ -925,7 +951,7 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
             state.player.powers["kurage_summon"] = turns
             state.emit("kurage_refreshed", turns=turns)
         powers.apply_power(state, state.player, fx["power"], amount,
-                           max_stacks=cap)
+                           max_stacks=cap, never_reduces=floor)
     else:
         # `times` re-picks the target EVERY pass. BouncingFlask throws three
         # separate flasks at three separately-rolled random enemies, so
@@ -946,7 +972,7 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
         for _ in range(times):
             for enemy in _pick_targets(state, target):
                 powers.apply_power(state, enemy, fx["power"], amount,
-                                   max_stacks=cap)
+                                   max_stacks=cap, never_reduces=floor)
 
 
 def _op_apply_aura(state: CombatState, fx: dict, card: Card) -> None:
@@ -2447,6 +2473,21 @@ def resolve_card(state: CombatState, card: Card) -> None:
     # damage half of the rider is in _op_damage (it must ride each hit).
     if card.enchant_effects:
         _resolve_effects(state, card.enchant_effects, card)
+    # First-play-only riders (R82 reopened): Sown's Energy and Swift's draw.
+    # Fired after the ordinary rider, then the gate closes for the rest of
+    # the combat. The gate is a per-INSTANCE field and the run layer rebuilds
+    # every card from its deck id each fight, so "each combat" needs no reset
+    # of its own -- but combat start clears it anyway, for the tier-0 paths
+    # that replay one built player across fights.
+    if (card.enchant_first_play_effects
+            and not card.enchant_played_this_combat):
+        _resolve_effects(state, card.enchant_first_play_effects, card)
+    # Guarded rather than set unconditionally: a card with no first-play
+    # rider must come out of a play byte-identical to the way it went in,
+    # or two value-equal twins (state.remove_instance's whole warning)
+    # would stop being twins the moment one of them is played.
+    if card.enchant_first_play_damage or card.enchant_first_play_effects:
+        card.enchant_played_this_combat = True
 
 
 def flat_attack_bonus(state: CombatState, card: Card, cost: int) -> int:

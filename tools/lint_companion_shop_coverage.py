@@ -98,7 +98,28 @@ CHARACTERS = ["klee", "furina", "kokomi"]
 REQUIRED_RUNGS = [
     ("widen the nation", r"Draw\(rarity,\s*null\)"),
     ("drop the rarity", r"Draw\(other,\s*null\)"),
-    ("base colorless last rung", r"ColorlessCardPool"),
+    # LAST RUNG: OMIT THE SLOT ([USER] 2026-08-10). This used to look for
+    # `ColorlessCardPool` -- the base-colorless fallback entry the mod built
+    # when nothing was drawable. That rung is gone: the mod now returns before
+    # constructing a MerchantCardEntry, matching tier05/shop.py, which has
+    # always dropped the slot.
+    #
+    # MATCHED ON THE RETURN, NOT ON A WORD, for the same reason BANNER_CALL is
+    # matched on the call: the file still explains the old rung in prose, and
+    # a pattern that a comment can satisfy is a tripwire that cannot fire. The
+    # regex below requires the `return;` that sits inside the empty-candidates
+    # branch -- delete the branch and the match goes with it.
+    ("omit the slot (last rung)", r'OMITTED[\s\S]{0,800}?"\);\s*return;'),
+]
+
+# The other half of the same ruling: the rung that was REMOVED must stay
+# removed. A base-colorless fallback entry is the divergence [USER] closed on
+# 2026-08-10 (the mod leaked a base card where the sim omits the slot), and
+# re-adding it is the same one-line change in reverse. Matched on the CALL,
+# so the file's prose account of the old rung does not satisfy it.
+FORBIDDEN_RUNGS = [
+    ("base colorless fallback entry (removed 2026-08-10)",
+     r"ModelDb\s*\.?\s*CardPool<\s*ColorlessCardPool\s*>"),
 ]
 
 
@@ -140,12 +161,11 @@ def main() -> int:
     slots = C.SHOP_COMPANION_SLOTS
     rarities = list(C.SHOP_COMPANION_RARITY_ODDS)
 
-    # NC-10 (R116): slot 2 is "any companion card", so the wildcard side of
-    # this lint has to look at every band the reward table can draw, not just
-    # the two that survive slot 1's floor. Commons became drawable the day
-    # that ruling landed, and an empty Common tier is the same softlock class
-    # this file exists to prevent.
-    wild_rarities = list(C.RARITY_ODDS)
+    # The wildcard side reads the SAME bands as the home-region side again:
+    # [USER] restored slot 2's Uncommon floor on 2026-08-10, so Commons are
+    # no longer a shop draw and a thin Common tier is no longer this lint's
+    # problem. Between R116 and that ruling this read `C.RARITY_ODDS`.
+    wild_rarities = list(C.SHOP_COMPANION_RARITY_ODDS)
 
     for character in CHARACTERS:
         home = loader.character_nation(character)
@@ -199,6 +219,13 @@ def main() -> int:
                     "Every rung is what stands between a thin roster corner "
                     "and finding 24's black-screen softlock; restore it or "
                     "retire this check with a ruling, not a deletion")
+        for label, pattern in FORBIDDEN_RUNGS:
+            if re.search(pattern, src):
+                findings.append(
+                    f"{PATCH.name}: the '{label}' is back. It was removed by "
+                    "ruling because it made the mod and tier05/shop.py two "
+                    "different games on the same rung; re-adding it needs a "
+                    "ruling of its own, and the sim would have to move too")
 
     for note in notes:
         print(f"note: {note}")

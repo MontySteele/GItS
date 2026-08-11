@@ -171,9 +171,12 @@ sweep is now **L12** in `art_lint`, and it immediately turned up three
 
 | Pair | Status |
 |---|---|
-| `blazing_delight` == `true_spark_knight` | shipped Klee art, allowlisted, **wants a re-pick** |
 | `catalytic_conversion` == `spark_collection` | already in `PENDING_RED_PEN` for a related L1 |
-| `crowd_work` == `standing_ovation` | shipped Furina art, allowlisted, **wants a re-pick** |
+| `crowd_work` == `standing_ovation` | shipped Furina art, allowlisted, **wants a re-pick** — blocked on a `standing_ovation` CARD contact sheet (BACKLOG `EB-76`) |
+
+`blazing_delight` == `true_spark_knight` was the third pair when this was
+written; it was **retired 2026-07-25** and is not a live collision. Removed here
+2026-08-10 so the list matches the lint (R167).
 
 They are allowlisted as *known defects*, not exemptions — the gate now holds
 the line while they wait for a ruling.

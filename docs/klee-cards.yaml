@@ -30,10 +30,15 @@
    effects: [{op: damage, amount: 16, target: enemy}]}
 - {id: blast_radius, name: "Blast Radius", cost: 1, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
    effects: [{op: damage, amount: 9, target: all_enemies}]}
-- {id: chain_fuse, name: "Chain Fuse", cost: 1, type: skill, rarity: common, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
+- {id: chain_fuse, name: "Chain Fuse", cost: 1, type: skill, rarity: uncommon, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: modify_bombs, scope: placed_this_turn, bonus: 3}, {op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 4}]}
-- {id: careful_arrangement, name: "Careful Arrangement", cost: 1, type: skill, rarity: common, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition], role: glue,
+- {id: careful_arrangement, name: "Careful Arrangement", cost: 1, type: skill, rarity: uncommon, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition], role: glue,
    effects: [{op: move_bombs, target: enemy, bonus: 2}]}
+   # RARITY ERRATUM X8, ruled R162 (2026-08-10), landed into C9's open window. chain_fuse and
+   # careful_arrangement move Common -> Uncommon. Costs, amounts and tags are untouched -- this is a
+   # DRAFT-FREQUENCY change only: both cards are demolition ratchets whose value is conditional on
+   # bombs already being on the board, which is exactly the shape that should be drafted at the
+   # uncommon band rather than showing up as filler in every common roll. lint-ok
 - {id: bomb_voyage, name: "Bomb Voyage", cost: 2, type: skill, rarity: common, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 3, target: random_enemies, bomb_damage: 5}]}
 # Spark (11) — snap added v0.6 per M7 ruling R1 (margin-supply content fix)
@@ -84,8 +89,13 @@
    # The rework sim (tools/archive/klee_rework_sim.py, the machine-readable source for these bodies) resurrects
    # it to 13-43% picked across arms at a winrate delta inside ±1% — bought pick rate, paid nothing.
    # Cost 0, common, skill and skill_tag all stand: the shape was never the problem.
-- {id: friendly_visit, name: "Friendly Visit", cost: 1, type: skill, rarity: common, solve: [block, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [reaction], role: glue,
+- {id: friendly_visit, name: "Friendly Visit", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [reaction], role: glue,
    effects: [{op: block, amount: 5}, {op: cost_mod, scope: companion_cards, delta: -1, duration: this_turn}, {op: draw, amount: 1}]}
+   # RARITY ERRATUM X7, ruled R161 (2026-08-10), landed into C9's open window. Common -> Uncommon;
+   # the block, the cost_mod and the draw are all unchanged. This is the companion cost_mod writer --
+   # the one card that discounts the paid channel's output -- and EB-17p graded it PREDICTED-strong
+   # (+3.04 / +4.46 forced-first-copy winrate) on 2026-08-10, which is the measured reason the
+   # promotion lands rather than being deferred again. lint-ok
 # Generic block/utility (6)
 - {id: hide_and_seek, name: "Hide and Seek", cost: 1, type: skill, rarity: common, solve: [block, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
    effects: [{op: block, amount: 7}, {op: scry_discard, amount: 2}]}

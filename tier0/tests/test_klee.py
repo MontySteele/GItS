@@ -41,8 +41,13 @@ def test_pool_composition():
     for c in _klee_pool():
         by_rarity.setdefault(c.rarity, []).append(c)
     assert len(by_rarity["basic"]) == 4           # template §3.4 allows 4-5
-    assert len(by_rarity["common"]) == 32         # 31 + snap (M7 R1)
-    assert len(by_rarity["uncommon"]) == 25
+    # 32 -> 29 and 25 -> 28 under the X7/X8 rarity erratum (R161, R162,
+    # landed 2026-08-10 into C9's open window): friendly_visit, chain_fuse
+    # and careful_arrangement were promoted Common -> Uncommon, costs and
+    # numbers unchanged. Three cards moved across the line, so the two
+    # counters move by three in opposite directions and the total holds.
+    assert len(by_rarity["common"]) == 29         # 32 - 3 (R161/R162)
+    assert len(by_rarity["uncommon"]) == 28       # 25 + 3 (R161/R162)
     assert len(by_rarity["rare"]) == 15
     assert sum(len(v) for v in by_rarity.values()) == 76
     kit = [c for c in by_rarity["rare"] if c.kit_card]

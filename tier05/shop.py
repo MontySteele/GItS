@@ -100,17 +100,20 @@ def companion_shop_offer(
         rng: random.Random, character: str,
         banner: frozenset[str] | None = None) -> list[tuple[Card, int]]:
     """The §4.7 companion channel: TWO priced slots (R59/R61, respecified by
-    R116/NC-10).
+    R116/NC-10, slot-2 floor RESTORED by [USER] 2026-08-10).
 
     Slot 1 draws the character's HOME NATION at an Uncommon floor -- the
-    targeted "buy your dream support" slot. Slot 2 is "any companion card":
-    no nation and NO FLOOR, so it rolls the full reward odds and can offer a
-    Common at the Common band. That is R116's spec and it supersedes R59's
-    reading of the floor as covering both slots; the shop is now a real Rare
-    source in slot 1's math and a real Common source in slot 2's, which is
-    cross-noted to the companion-pricing docket because it moves the
-    acquisition assumptions that docket prices against. Returns
-    ``(card, price)`` pairs because the two slots are priced by DRAWN RARITY,
+    targeted "buy your dream support" slot. Slot 2 draws ANY NATION at the
+    SAME Uncommon floor. The two slots differ by nation and by nothing else.
+
+    THE FLOOR ON SLOT 2 CAME BACK ON 2026-08-10. R116/NC-10 had removed it
+    ("any companion card"), which let slot 2 roll the full reward odds and
+    sell a Common at the 50-gold band. [USER] closed the S4-G10 agenda item
+    "should slot 2 carry a rarity floor at all?" by restoring R59's reading:
+    the paid premium channel does not sell Commons. Both engines moved
+    together and the shop world bumped to CONSTANTS_VERSION 9, so no §4.7
+    number measured before that date is comparable with one measured after.
+    Returns ``(card, price)`` pairs because the two slots are priced by DRAWN RARITY,
     which is the whole balance story: §4.7 lets the paid channel roll
     payoff-grade 5-stars precisely because gold, not a stat nerf, is the
     governor.
@@ -123,13 +126,14 @@ def companion_shop_offer(
         home nation @ rarity -> any nation @ rarity -> any nation @ the other
         rarity -> the slot is OMITTED.
 
-    THE LAST RUNG DIVERGES FROM THE MOD, deliberately and it is recorded here
-    rather than faked: the C# side falls back to one base colorless card for
-    that slot (R60 keeps ColorlessCardPool populated exactly so that rung
-    exists). tier 0.5 models no base colorless pool at all, so it drops the
-    slot instead. The divergence is unreachable today -- it needs a rarity with
-    no companion at ANY nation -- and inventing a base-colorless surrogate to
-    match would be faking content the sim does not have.
+    THE LAST RUNG NO LONGER DIVERGES ([USER] 2026-08-10). It used to: the C#
+    side fell back to one base colorless card for that slot, while tier 0.5 --
+    which models no base colorless pool at all -- dropped the slot. The
+    divergence was unreachable (it needs a rarity with no companion at ANY
+    nation), but an unreachable divergence is still two different games on
+    paper, so it was ruled shut in the SIM'S favour: the mod now omits the
+    slot too. See `MerchantCompanionSlots.AddSlot` for how the mod omits it
+    without ever handing `MerchantCardEntry.Populate` a no-card path.
 
     Live corner worth knowing (UPDATED 2026-07-25, R64): Fontaine used to
     design ZERO Rare companions, so Furina's slot 1 could never roll one and
@@ -155,27 +159,31 @@ def companion_shop_offer(
     offers: list[tuple[Card, int]] = []
     taken: list[Card] = []
     for slot in range(C.SHOP_COMPANION_SLOTS):
-        # NC-10 (R116, Errata Batch 2 item 6): slot 1 is "Uncommon or higher
-        # from the home region"; slot 2 is "any companion card" -- no nation
-        # and no floor. The two slots differ in BOTH filters, so they read
-        # different odds tables: slot 1 the floor's conditioned odds, slot 2
-        # RARITY_ODDS itself. See tier0/constants.py for the conditioning and
-        # for the stated-split reading that was surfaced and not chosen.
-        # RESOLVED BY Q16, 2026-08-06 (R117 rider / R118, verbatim
-        # "Condition."): the conditioning shipped here IS the ruled reading;
-        # the stated-split alternative was declined. No value changed.
+        # ONE TABLE, TWO NATIONS ([USER] 2026-08-10, CONSTANTS_VERSION 9).
+        # Slot 1 is "Uncommon or higher from the home region"; slot 2 is
+        # "Uncommon or higher from any region". The slots differ in the NATION
+        # filter only, so they read the same conditioned odds -- which is why
+        # `odds` is no longer a per-slot choice.
+        #
+        # WHAT MOVED. R116/NC-10 had slot 2 on RARITY_ODDS itself (no floor,
+        # Commons drawable at the 50-gold band); [USER] restored R59's floor
+        # on 2026-08-10 and slot 2 came back to this table. The conditioning
+        # inside the table is still Q16's ruled reading (R118, verbatim
+        # "Condition."); that ruling is untouched here, only its scope grew
+        # back to both slots.
         nation = home if slot == 0 else None
-        odds = C.SHOP_COMPANION_RARITY_ODDS if slot == 0 else C.RARITY_ODDS
+        odds = C.SHOP_COMPANION_RARITY_ODDS
         rarity = _roll_companion_rarity(rng, odds)
         cards = eligible(rarity, nation, taken)
         if not cards and nation is not None:
             cards = eligible(rarity, None, taken)
         if not cards:
-            # The rarity rung, generalized because slot 2's table now has
-            # three entries instead of two: try the slot's OWN remaining
-            # rarities, in the table's order. Order is the odds table's, not
-            # a preference of this function's -- picking a "best" fallback
-            # rarity would be a balance choice hiding in an error path.
+            # The rarity rung: try the table's OWN remaining rarities, in the
+            # table's order. Order is the odds table's, not a preference of
+            # this function's -- picking a "best" fallback rarity would be a
+            # balance choice hiding in an error path. Since the floor came
+            # back to slot 2 the table is two-entry again for both slots, so
+            # this rung can no longer drop a slot below Uncommon.
             for other in odds:
                 if other == rarity:
                     continue
@@ -194,11 +202,13 @@ def companion_shop_offer(
 def _roll_companion_rarity(rng: random.Random, odds: dict) -> str:
     """One draw from a rarity table.
 
-    NC-10 (R116) gave the two slots different tables -- slot 1 the reward
-    odds conditioned on >= Uncommon, slot 2 the reward odds themselves -- so
-    the table is an argument now rather than a constant this function reads.
-    The fallback returns the table's FIRST key, which is the table's own
-    commonest rarity in both cases; it is only reachable on float slop.
+    NC-10 (R116) gave the two slots different tables and made the table an
+    argument rather than a constant this function reads. [USER]'s 2026-08-10
+    floor restoration put both slots back on one table, but the argument
+    STAYS an argument: a per-slot table is the shape a future stated split
+    would need (see tier0/constants.py), and re-hardcoding the read would
+    have to be undone to get there. The fallback returns the table's FIRST
+    key, the table's own commonest rarity; it is only reachable on float slop.
     """
     roll = rng.random()
     acc = 0.0
@@ -216,9 +226,19 @@ class ShopOutcome:
     removal_uses: int
     purchases: list[dict] = field(default_factory=list)   # buy log
     # What the companion channel OFFERED this visit: {slot, id, rarity,
-    # price}. The buy log alone cannot grade P1, because a slot that was never
-    # offered and a slot that was offered and declined are the same absence in
-    # it -- and the difference is exactly what a buy RATE means.
+    # price, visit, gold_at_visit, affordable}. The buy log alone cannot grade
+    # P1, because a slot that was never offered and a slot that was offered
+    # and declined are the same absence in it -- and the difference is exactly
+    # what a buy RATE means.
+    #
+    # `visit` IS THE JOIN KEY (added 2026-08-10). Both lists are flattened
+    # onto the RunResult across every shop the run walks into, and until this
+    # field existed there was no way to say which offer a purchase answered:
+    # the P1 instrument matched on slot alone and therefore credited a buy at
+    # shop 3 to the offers at shops 1 and 2 as well. `gold_at_visit` and
+    # `affordable` are the money read -- "was the preferred card ever simply
+    # priced out" is unanswerable from a purchase log, which only ever records
+    # what the purse COULD reach.
     companion_offers: list[dict] = field(default_factory=list)
 
 
@@ -227,7 +247,8 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
                removal_uses: int = 0,
                n_offers: int = C.SHOP_CARD_OFFERS,
                companions: bool = True,
-               banner: frozenset[str] | None = None) -> ShopOutcome:
+               banner: frozenset[str] | None = None,
+               visit: int = 0) -> ShopOutcome:
     """Resolve one shop visit. Returns the mutated deck, remaining gold, the
     running removal count and a per-purchase log.
 
@@ -243,8 +264,16 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
     that turning it on also consumes rng, so the two arms diverge downstream
     rather than being strictly paired. Character-card offers are rolled FIRST
     so their draw sequence is untouched by the flag, which is what keeps the
-    channel-off arm identical to every archived shop number."""
+    channel-off arm identical to every archived shop number.
+
+    ``visit`` is this shop's INDEX WITHIN THE RUN (0-based), stamped onto
+    every record this call emits. It is pure bookkeeping -- nothing reads it
+    to decide anything, and it consumes no rng -- but without it the run-level
+    offer and purchase logs cannot be joined, which is the defect that made
+    the P1 buy rate wrong (see ShopOutcome.companion_offers). Callers that do
+    not care may leave it at 0."""
     deck_ids = list(deck_ids)
+    gold_at_visit = gold
     # Read-only: the policy only SCORES the held deck (a bought card is
     # appended by id), so the shared prototypes are safe here.
     deck_cards = [loader.peek_card(cid) for cid in deck_ids]
@@ -271,8 +300,17 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
             shelf.append(card)
             price_of[id(card)] = price
             slot_of[id(card)] = slot
-            companion_offers.append({"slot": slot, "id": card.id,
-                                     "rarity": card.rarity, "price": price})
+            companion_offers.append(
+                {"slot": slot, "id": card.id, "rarity": card.rarity,
+                 "price": price, "visit": visit,
+                 # Money at the door, and whether THIS offer was inside it.
+                 # Measured at visit START, before the character shelf spends
+                 # anything: "could the player have had it" is the question,
+                 # and by the time the companion slots are evaluated the purse
+                 # has already been narrowed by choices the player made with
+                 # this offer visible.
+                 "gold_at_visit": gold_at_visit,
+                 "affordable": price <= gold_at_visit})
 
     while shelf and gold >= min(price_of[id(c)] for c in shelf):
         pick = policy(rng, deck_cards, shelf, archetype)
@@ -290,10 +328,18 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
         gold -= price
         deck_ids.append(pick.id)
         deck_cards.append(pick)
-        record = {"buy": "card", "id": pick.id, "price": price}
+        record = {"buy": "card", "id": pick.id, "price": price,
+                  "visit": visit}
         if id(pick) in slot_of:
             record["channel"] = "companion"
             record["slot"] = slot_of[id(pick)]
+            # TRUE rarity, logged rather than inferred. The instrument used
+            # to recover slot-2 rarity from the price band with a two-way
+            # `>= 150 ? rare : uncommon` split, which silently folded every
+            # Common purchase into the "uncommon" bucket for as long as slot 2
+            # could sell Commons. A price band is not a rarity; the card knows
+            # its own.
+            record["rarity"] = pick.rarity
         purchases.append(record)
         shelf.remove(pick)
 
@@ -304,7 +350,8 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
         gold -= price
         deck_ids.remove(dead.id)
         removal_uses += 1
-        purchases.append({"buy": "removal", "id": dead.id, "price": price})
+        purchases.append({"buy": "removal", "id": dead.id, "price": price,
+                          "visit": visit})
 
     return ShopOutcome(deck_ids=deck_ids, gold=gold,
                        removal_uses=removal_uses, purchases=purchases,

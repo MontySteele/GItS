@@ -249,7 +249,7 @@ APPLY_AURA_FIELDS = {"op", "element", "target"}
 SWIRL_FIELDS = {"op", "target"}
 BUFF_NEXT_FIELDS = {"op", "amount"}
 
-# Charlotte, Enduring Frosthelm (tier0 _op_block_next_turn).
+# Charlotte, First-Person Shutter (tier0 _op_block_next_turn).
 BLOCK_NEXT_TURN_FIELDS = {"op", "amount"}
 
 # --- small ops (2026-07-20 batch) --------------------------------------------
@@ -609,6 +609,10 @@ ENEMY_APPLY_POWERS = {"weak", "vulnerable"}
 # generator does not understand -- fail loudly (UNPARSEABLE discipline).
 APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
                       "splash_procs_per_turn",
+                      # EB-26 D2 (ruled 2026-08-10, option (d)): floor-not-clamp.
+                      # Opt-in; see NEVER_REDUCES_POWERS below for why it is
+                      # not free to put on any row.
+                      "never_reduces",
                       # Salon v2: the typed-member rider on salon_member
                       # deploys (rework plan §1).
                       "member",
@@ -616,6 +620,14 @@ APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
                       # element and aura consumption live in the POWER's C#
                       # implementation; the fields are documentation.
                       "summon_element", "consumes_aura"}
+
+# Powers whose C# class implements the floor-not-clamp read (EB-26 D2). The
+# sim honours `never_reduces` at its own chokepoint for ANY power, but the mod
+# cannot: the composition rule lives in each power's
+# TryModifyPowerAmountReceived, so a row asking for the mode on a power that
+# does not implement it would ship a sim/mod split. Blocked by name instead
+# (same UNPARSEABLE discipline as an unknown field).
+NEVER_REDUCES_POWERS = {"prevent_exhaust_ward"}
 
 # The C# each `member:` value emits. `random` is a NULL, which
 # SalonMemberPower.Deploy resolves per iteration off the shared combat RNG
@@ -1180,6 +1192,16 @@ def blocked_reason(
             if "member" in eff and eff["member"] not in SALON_MEMBER_CS:
                 return (f"salon member '{eff['member']}' is not one of "
                         f"{sorted(SALON_MEMBER_CS)}")
+            # EB-26 D2 option (d). The mode is only expressible where the C#
+            # power implements it, and it is meaningless without a cap to
+            # raise the stack toward -- refuse both shapes by name.
+            if eff.get("never_reduces"):
+                if power not in NEVER_REDUCES_POWERS:
+                    return (f"never_reduces on power '{power}', which has no "
+                            "floor-not-clamp implementation in C# "
+                            f"(implemented: {sorted(NEVER_REDUCES_POWERS)})")
+                if eff.get("max_stacks") is None:
+                    return "never_reduces without max_stacks (no ceiling to raise toward)"
             cap = APPLY_POWERS[power][1]
             if eff.get("max_stacks") != cap and not (eff.get("max_stacks") is None and cap is None):
                 # Cap drift between the sheet and the C# power class const.
@@ -5155,6 +5177,15 @@ def emit(
     # energy when played (KleeElementalHooks.AfterCardPlayed reads the marker).
     if "skill_tag" in card.get("tags", []):
         interfaces += ", ISkillTagCard"
+    # EB-26 D2 option (d). The apply mode is a property of the ROW, and the
+    # mod's only per-application channel is the cardSource -- so the card
+    # declares the mode and its ceiling, and the power reads it off the card
+    # that applied it (KuragePowers.PreventExhaustWardPower).
+    never_reduces_eff = next(
+        (eff for eff in card.get("effects", [])
+         if eff.get("op") == "apply_power" and eff.get("never_reduces")), None)
+    if never_reduces_eff:
+        interfaces += ", INeverReducingApplier"
 
     ind = "\n        "
     vars_cs = (",".join(f"{ind}    {v}" for v in vars_)).lstrip()
@@ -5235,6 +5266,13 @@ def emit(
             "\n    /// <summary>Roster identity used by character-aware mechanics "
             "such as Spotlight.</summary>\n"
             f'    public string CharacterId => "{profile.character_id}";\n'
+        )
+    if never_reduces_eff:
+        element_member += (
+            "\n    /// <summary>Sheet `never_reduces: true` (EB-26 D2, floor-not-clamp):\n"
+            "    /// this application raises the power toward NeverReducingCap and\n"
+            "    /// never lowers a higher standing stack.</summary>\n"
+            f"    public int NeverReducingCap => {int(never_reduces_eff['max_stacks'])};\n"
         )
     if is_companion(card):
         personal = card.get("personal_pool")

@@ -78,3 +78,60 @@ def test_single_application_over_the_cap_lands_exactly_on_the_cap():
     powers.apply_power(state, enemy, "prevent_exhaust_ward", 9, max_stacks=6)
 
     assert enemy.powers["prevent_exhaust_ward"] == 6
+
+
+# --- floor-not-clamp: the opt-in apply mode (EB-26 D2, [USER] 2026-08-10) ---
+#
+# `never_reduces` does NOT change what `max_stacks` means. The cap still bounds
+# the running total, which is what the two pins above assert; the flag only
+# says the application may not push a HIGHER standing stack down to get there.
+# Default off, and off is the behaviour the whole sheet already has.
+
+def test_never_reduces_leaves_a_higher_standing_stack_alone():
+    state = make_state()
+    p = state.player
+    p.powers["prevent_exhaust_ward"] = 8
+
+    powers.apply_power(state, p, "prevent_exhaust_ward", 3, max_stacks=6,
+                       never_reduces=True)
+
+    assert p.powers["prevent_exhaust_ward"] == 8
+
+
+def test_never_reduces_still_stops_at_its_own_cap():
+    """A floor is not an uncap: applications still land no higher than the
+    cap they were given."""
+    state = make_state()
+    p = state.player
+
+    powers.apply_power(state, p, "prevent_exhaust_ward", 4, max_stacks=6,
+                       never_reduces=True)
+    assert p.powers["prevent_exhaust_ward"] == 4
+
+    powers.apply_power(state, p, "prevent_exhaust_ward", 4, max_stacks=6,
+                       never_reduces=True)
+    assert p.powers["prevent_exhaust_ward"] == 6
+
+
+def test_the_default_still_clamps_a_higher_standing_stack_down():
+    """REGRESSION: the same application WITHOUT the flag is unchanged -- the
+    running-total clamp lowers a standing 8 to the cap of 6."""
+    state = make_state()
+    p = state.player
+    p.powers["prevent_exhaust_ward"] = 8
+
+    powers.apply_power(state, p, "prevent_exhaust_ward", 3, max_stacks=6)
+
+    assert p.powers["prevent_exhaust_ward"] == 6
+
+
+def test_never_reduces_is_inert_without_a_cap():
+    """No cap, nothing to clamp: an uncapped application already only adds,
+    so the flag cannot change it."""
+    state = make_state()
+    p = state.player
+    p.powers["metallicize"] = 3
+
+    powers.apply_power(state, p, "metallicize", 2, never_reduces=True)
+
+    assert p.powers["metallicize"] == 5

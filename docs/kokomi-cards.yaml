@@ -52,7 +52,7 @@
 # Element: hydro | Cadence: CATALYST (RULED R52, ask N1): every attack applies hydro — the pool's co-op/reaction
 #   voice, and the structural third of elite A6 (application uptime comes from the cadence, not authored lines).
 # Archetypes (kickoff §3): commander (conscription engine) | priest (Charge/exhaust density) | assist (Sly/discard
-#   glue, LOW INTERNAL PAYOFF BY DESIGN — Box Trick philosophy) | generic.
+#   glue, LOW INTERNAL PAYOFF BY DESIGN — Bogglecat Box philosophy) | generic.
 # Statline this sheet targets (R51): A1 weak ~1.5-2, A2 ELITE, A6 ELITE (the ruled second axis — Weak/Vulnerable
 #   ONLY as riders on exhaust/Sly engine pieces, never a spammable cheap AoE debuff like Furina's commanding_gaze;
 #   uncommon-gated so no such shape exists at common), A4 LOW BY DESIGN (the stability band owns the healer
@@ -203,7 +203,8 @@
    # act-1 AoE wall regardless of assembled-deck quality; standing_room_only is the ratified precedent). Added at
    # kickoff REVIEW after the first battery — deliberately NOT in any measured package, so the v0.1 battery numbers
    # stand unlabeled; packaging it is sheet-pass material. Catalyst cadence makes this mass hydro application —
-   # joins the hydro-convergence WATCHLIST alongside undercurrent/standing_room_only. PROPOSED.
+   # but NOT a convergence-cell member: M12(a) RULED 2026-08-10 (R147) that the cell is
+   # TWO -- {rain_of_roses, guest_neuvillette_judgment} -- and undercurrent/standing_room_only both departed. PROPOSED.
 - {id: jade_bulwark, name: "Pearl Bulwark", cost: 1, type: skill, rarity: common, solve: [block], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
    effects: [{op: block, amount: 6}]}
    # Graceful Retreat parity exactly (6 at common, under Klee's Hide and Seek) — the stability character does NOT
@@ -505,12 +506,30 @@
    # NOT A DOMINATION PAIR with driftglass: driftglass is larger on an empty pile and its bell is damage; this
    # is larger on a full one and its bell is tempo. They cross somewhere around four exhausted cards, which is
    # a real drafting question rather than a strictly-better answer.
-# Generic (2)
+# Generic (3)
 - {id: pearl_current, name: "Pearl Current", cost: 1, type: power, rarity: uncommon, solve: [block], tempo_band: {fight: [late], run: [late]}, archetypes: [generic], role: payoff,
    effects: [{op: apply_power, power: metallicize, amount: 3, target: self}]}
    # Standing guard: 3 Block at the start of every turn, forever. The generic lane's only power, and the one
    # card in the pool that pays a player who does nothing — deliberate, because every other engine she has
    # demands cards, and a deck that runs out of cards should not immediately run out of defence.
+- {id: watch_of_the_shallows, name: "Watch of the Shallows", cost: 1, type: power, rarity: uncommon, solve: [sustain], tempo_band: {fight: [late], run: [late]}, archetypes: [generic], role: payoff,
+   effects: [{op: apply_power, power: prevent_exhaust_ward, amount: 3, target: self, max_stacks: 6, never_reduces: true, note: "first unblocked hit each turn: prevent up to 3, Exhaust a random draw-pile card"}]}
+   # P4, the LESSER WARD (EB-26; kickoff §2.4 band; sheetpass v0.2 §4 asked for an uncommon lesser ward, same
+   # latch, so the stability identity exists before a Rare shows). Same power, same once-per-turn latch, same
+   # price in future draws — half the magnitude of vigil_of_the_deep and a cost step under it, so the Rare keeps
+   # the premium read and this is the on-curve one. The proc is still an Exhaust -> Charge: getting attacked
+   # fuels the finisher from act one, not from whenever a Rare shows.
+   # max_stacks 6 is the POOL'S ward ceiling, not this row's amount, and `never_reduces` is what makes that safe:
+   # apply_power clamps the running TOTAL, so without the floor mode this card would LOWER a standing upgraded
+   # Vigil when played after it. With it, the application only ever tops the ward up toward 6 and a bigger
+   # standing ward is left alone. [USER] ruled the mode 2026-08-10 (EB-26 D2, option (d)).
+   # TEMPO BANDS ARE THE CLASSIFIER'S, not the draft's. The packet (D5) proposed fight [mid, late] / run [early,
+   # late] on the strength of the cost step under the Rare; tempo_band is a LANDED tag (R91) and the drift gate
+   # requires it to equal suggest_role_tempo_tags' output, which reads this row exactly as it reads every other
+   # Kokomi power. Moving the band means moving the classifier rule, which is a design call, not a landing.
+   # NAME (D1, STILL OPEN): "Watch of the Shallows" is AUTHORED FLAVOR, not wiki-verified canon — built as the
+   # lesser twin of Vigil of the Deep (shallows/deep, watch/vigil). Unique against the internal and reserved
+   # namespaces, but S4-G11 (names read by eye before they ship) has no substitute: the eye-read is [USER]'s.
 - {id: the_tide_remembers, name: "The Tide Remembers", cost: 2, type: attack, rarity: uncommon, solve: [frontload, scaling], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [priest, generic], role: payoff,
    effects: [{op: damage, amount: 4, target: all_enemies},
              {op: conditional, if: exhaust_pile_at_least_6, then: [{op: damage, amount: 5, target: all_enemies}]}]}

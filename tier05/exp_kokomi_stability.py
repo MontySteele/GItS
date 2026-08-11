@@ -44,19 +44,30 @@ from tier05 import cells, run_metrics
 
 BASE = cells.CANONICAL.but(name="kokomi-stability")
 
-#: Kokomi's three plans, then the contrasts. Klee is the roster's declared HP
-#: VOLATILITY pole (kickoff: "Furina = HP volatility, Kokomi = HP stability"),
-#: so her reaction arm is the far end of the axis rather than a neutral
-#: reference; `ref_ironclad` is the neutral one, and `furina/salon` is included
-#: because it is the roster's strongest arm and the question "is flatness a
-#: winning trait here" needs the leader in the table.
+#: Every roster arm plus the three anchors -- the same 12-arm set
+#: `exp_roster_anchors.ARMS` uses, so a stability row and a winrate row for the
+#: same arm come from the same world and the same arm list.
+#:
+#: FURINA is the roster's declared HP VOLATILITY pole (kickoff §1, standing:
+#: "Furina = HP volatility, Kokomi = HP stability"), so her arms are the far
+#: end of the axis Kokomi is read against. Klee is NOT a pole in either
+#: direction; two archived 2026-07/08 docs called her "the roster's declared
+#: HP-volatility pole" and that label was wrong against the standing kickoff
+#: line (`docs/current/characters/kokomi-kickoff-v1.md:30`). `ref_ironclad`,
+#: `real_ironclad` and `real_silent` are the neutral references.
 ARMS: tuple[tuple[str, str], ...] = (
+    ("klee", "demolition"),
+    ("klee", "spark"),
+    ("klee", "reaction"),
+    ("furina", "salon"),
+    ("furina", "spotlight"),
+    ("furina", "fanfare"),
     ("kokomi", "priest"),
     ("kokomi", "commander"),
     ("kokomi", "assist"),
-    ("klee", "reaction"),
-    ("furina", "salon"),
     ("ref_ironclad", "generic"),
+    ("real_ironclad", "generic"),
+    ("real_silent", "generic"),
 )
 
 
@@ -64,7 +75,7 @@ def main(argv: list[str] | None = None) -> int:
     base, _ = cells.parse_overrides(
         list(sys.argv[1:] if argv is None else argv), BASE)
     cells.print_header(base, "KOKOMI STABILITY BAND -- REPORTED, NOT BANDED",
-                       f"{len(ARMS)} arms; Kokomi's three plans + 3 contrasts")
+                       f"{len(ARMS)} arms; every roster plan + 3 anchors")
     print("  Every value is a FRACTION OF MAX HP, so rows are comparable "
           "without rescaling.")
     print("  BAND NOT DECLARED. Every column is REPORTED. Declaring an "

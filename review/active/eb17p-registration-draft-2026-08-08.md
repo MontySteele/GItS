@@ -1,14 +1,20 @@
-# EB-17p — force-first-copy PAIRED winrate: pre-registration (DRAFT)
+# EB-17p — force-first-copy PAIRED winrate: pre-registration (COUNTERSIGNED)
 
-> **Lifecycle: DRAFT — [USER] countersign REQUIRED before anything here
-> operates.** Pre-registration drafts are a [USER]-gated class
-> (`docs/current/EXPERIMENTS.md`, "Pre-registration + blind grading").
-> **Nothing below is a prediction that has been graded, a number that has
-> been read, or a measurement that has been run.** No measurement was run to
-> produce this document. The mechanism probe described in §11 ran on a
-> THROWAWAY seed set that §4 excludes from the registration, and no number
-> from it appears anywhere in this packet — only the statement that the
-> harness executes.
+> **Lifecycle: COUNTERSIGNED by [USER] on 2026-08-10, with an addendum.**
+> The addendum is §6.1b: the report must also compare each card against the
+> filler arm, pair by pair. [USER] also accepted `N = 2400` and chose the
+> filler (§5.1).
+>
+> **RUN AND GRADED, 2026-08-10.** Every slot was filled and §8's predictions
+> were committed on their own before any seed in the registered range was
+> run. The sweep then ran at the pinned stamp and was graded blind against
+> them. **The results and the grade are §13, and §1–§12 are the packet as it
+> stood before the read** — they were not edited to fit the outcome. The
+> mechanism probe in §11 ran on a THROWAWAY seed set that §4 excludes, and no
+> number from it appears anywhere in this packet.
+>
+> One read of registered seeds happened before the sweep and is declared in
+> §11.1.
 
 **Provenance.** `docs/current/BACKLOG.md` row `EB-17p`, whose phrase is the
 register's own: *"two decks on the same seeds, one with a copy forced in, one
@@ -185,18 +191,28 @@ The four cards the register names, in its order
 | `study_buddy` | Study Buddy | uncommon | 1 | Block 6 + replay-next-companion |
 | `borrowed_brilliance` | Borrowed Brilliance | uncommon | 1 | free temp copy of a companion in hand |
 | `elemental_ecstasy` | "Sweet Dreams" | uncommon | 2 | aura refresh + per-aura draw + conditional Block 8 |
-| **`FILLER`** | *[USER] slot, §5.1* | — | — | **deck-size negative control** |
+| **`kaboom`** | "Kaboom!" | basic | 1 | **deck-size negative control (§5.1)** |
 
-**5.1 The filler arm (negative control) — [USER] SLOT.** Every treated arm
-adds a card, so every treated arm also *dilutes* the deck by one. Without a
-filler arm, dilution and card effect are confounded and a null read is
-unreadable. The filler is a card whose effect is understood and whose value is
-not what the sweep is about — the obvious candidate is a duplicate of the
-character's own starting Strike (`loader.starting_deck`), but *which* card the
-filler is, is a **[USER] choice**, because picking it is picking the baseline
-every other row is read against.
+**5.1 The filler arm (negative control) — FILLED, [USER], 2026-08-10.** Every
+treated arm adds a card, so every treated arm also *dilutes* the deck by one.
+Without a filler arm, dilution and card effect are confounded and a null read
+is unreadable. The filler has to be a card whose effect is already understood
+and whose value is not what the sweep is about, because picking it is picking
+the baseline every other row is read against.
 
-> **[USER] SLOT — FILLER**: `______________________`
+> **FILLER = `kaboom`** — a duplicate of Klee's own starting Strike, the
+> §5.1 candidate, chosen by [USER] on 2026-08-10.
+
+`kaboom` ("Kaboom!", basic, cost 1) is Klee's basic Attack and appears four
+times in her printed starter (`tier0/content/characters/klee.yaml:45`), one of
+which the run-start randomiser replaces. Forcing a fifth copy therefore adds
+nothing the deck did not already hold — it changes the deck's *size* and its
+*ratio of basics to everything else*, and nothing else. That is exactly the
+quantity the other four rows need held up beside them.
+
+A test pins this so it cannot rot: if Klee's starter ever stops containing
+`kaboom`, the negative control has quietly become a real card and
+`tier05/tests/test_eb17p_force_cards.py` fails.
 
 **5.2 Card-id family.** Every read pools `X` with `X+` (`upgrades.SUFFIX`),
 because a smith node rewrites the id in place (`tier05/model.py:510`). A read
@@ -215,6 +231,59 @@ Per card `X`, over the `N` seed-matched pairs:
 - Unpaired Wilson intervals per arm (`tier05.stats.wilson95`) are printed for
   continuity with every other roster table, and are explicitly **not** the
   test.
+
+### 6.1b Co-primary (Q1, addendum) — card versus filler
+
+**Added by [USER] on countersign, 2026-08-10.** For each swept card `X` other
+than the filler itself:
+
+`delta_vs_filler(X) = winrate(forced(X)) − winrate(forced(FILLER))`
+
+paired by seed index, over the same `N` pairs, using the same machinery as
+§6.1: exact McNemar on the discordant pairs for the test, a paired bootstrap
+on its own stream for the interval, and the discordant and concordant counts
+printed beside the delta.
+
+**Why it is a co-primary and not a secondary.** §6.1 answers "does adding this
+card change the run", and every treated arm's answer to that folds in one
+extra card of dilution. §6.1b answers the question a redesign actually turns
+on: "is this card worth its slot, compared with a card that does nothing new".
+Neither question subsumes the other, so both are graded, and neither may be
+dropped after the read because the other was more flattering.
+
+**Read the filler row first.** The filler's own §6.1 delta against the control
+is the size of pure dilution in this cell. Every §6.1b number is that
+subtraction already performed, pair by pair; the filler's §6.1 row is what
+tells a reader whether the subtraction was large or negligible in the first
+place.
+
+**What this contrast does NOT inherit.** §2.2's byte-identity guarantee is
+about the *control* arm: `force_cards=None` is provably the world we already
+have, pinned by the S2 test, which is what lets a §6.1 number be set beside
+the roster-anchor table. In §6.1b **both arms are treated**, so neither of
+them is that world. Two consequences, stated now:
+
+- A §6.1b delta is **internally valid and externally unanchored**. It is a
+  clean comparison of two decks, and it may not be quoted against any
+  archived winrate, because neither of its arms is a world any archived
+  number came from.
+- S2 does not certify it. If S2 fires, §6.1 is void; §6.1b would survive as
+  a comparison of two treated arms, and the report must say so rather than
+  presenting a surviving number as if the tripwire had not fired.
+
+The pairing itself does carry over. Both arms inject at the end of run start,
+which consumes no randomness, so `forced(X)` and `forced(FILLER)` enter floor
+1 having drawn identically from the run stream — same map, same relics, same
+gold, one card different. Pairing by seed index is therefore as legitimate
+here as in §6.1. What is weaker is not the pairing but the **anchoring**.
+
+**No multiplicity correction is registered**, for either contrast. Five cards
+times two contrasts is ten readings, and the honest reason there is no
+adjustment is that the grade is not a hunt for a significant row: each card is
+graded against a direction and a threshold [USER] wrote down in §8 before any
+number existed. A row that was not predicted, and turns up significant, is a
+hypothesis for a new registration — not a finding. Any change to that stance
+is a re-registration.
 
 ### 6.2 Secondary run-level
 `delta_act1` (act-1 clear), `delta_acts` (mean acts completed),
@@ -282,10 +351,66 @@ runs because an interval "almost" excluded a threshold is optional stopping;
 the tripwire in §9 (S4) is the only path from a null to more data, and it goes
 back through [USER].
 
-> **[USER] SLOT — `N`** (accept 2,400 or set another): `__________`
->
-> **[USER] SLOT — cost ceiling** (wall-clock / jobs budget the sweep may
-> spend before it must stop and report): `__________`
+> **`N` = 2,400 pairs per card** — the registered default, accepted by [USER]
+> on 2026-08-10. 2,400 runs on each of the six arms; 14,400 runs in total.
+
+### 7.1 Sizing the co-primary (§6.1b), honestly
+
+The table above sizes **card versus control**. The card-versus-filler contrast
+is a different comparison and gets its own statement rather than borrowing
+that one.
+
+**What carries over.** The estimator, the pairing and the arithmetic are
+identical: `SE(Δ) = sqrt(d / N)` with `d` the discordant rate, and the same
+`2.80 × SE` minimum detectable effect at two-sided α = 0.05 and power 0.80.
+`N` is the same 2,400 pairs, because §6.1b reuses the same runs — it costs no
+extra sim time.
+
+**What does not carry over is the lower bound on `d`.** The `d ≈ 0.05`
+column above is the optimistic half of a bracket, and it is optimistic because
+the arms are strongly correlated pair by pair. For card-versus-control there
+is a structural reason to expect that correlation: one arm is the other arm's
+deck with a card added, so a great many seeds resolve identically in both.
+For card-versus-filler, the two decks differ by a **substitution** — `X` in
+one slot, `kaboom` in the other — and the packet has nothing that pins how
+correlated two treated arms are. Asserting the optimistic column here would be
+asserting a number the design does not buy.
+
+So the registered statement for §6.1b is the conservative one only:
+
+| pairs `N` | MDE at `d = 0.11` (conservative) | MDE if the arms are as correlated as §7 hopes |
+|---|---|---|
+| **2,400** | **1.9 pp** | not registered — see below |
+
+**At `N = 2,400`, §6.1b resolves a card-versus-filler move of about 1.9
+percentage points or larger.** Anything smaller than that is inside the noise
+this design can see, and a §6.1b null is graded as "no move larger than 1.9
+pp", never as "no difference" (§9, S5).
+
+**The realised `d` is reported, not assumed.** The discordant counts `b` and
+`c` are printed on every §6.1b row, so a reader can compute the achieved
+resolution from the output instead of trusting the bracket. That number is a
+*description* of the sweep, and it may not be used to re-plan `N` afterwards —
+that is optional stopping, and §9's S4 is the only route from a disappointing
+read to more data.
+
+**Limitation stated plainly.** Because the correlation between two treated
+arms is unknown before the read, `1.9 pp` is a ceiling on what §6.1b can
+resolve, not an estimate of what it will resolve. If the arms turn out to be
+strongly correlated the real resolution is better than 1.9 pp; the packet
+declines to claim that in advance.
+
+> **COST CEILING = 4 hours wall-clock, stop-and-report** — confirmed by
+> [USER] on 2026-08-10.
+
+Stop-and-report means what it says: if the sweep is still running at four
+hours it **stops and reports what it has**, and the partial result is graded
+as partial. It is not extended, and the arms that finished are not quietly
+promoted to the whole answer. A stop at the ceiling names how many pairs each
+arm actually completed, and any grade drawn from fewer than the registered
+`N = 2,400` pairs quotes its own realised MDE rather than §7's.
+
+This was the last open slot in the packet.
 
 ## 8. Predictions — [USER], before any number is read
 
@@ -295,24 +420,74 @@ authored design-side and appended **as their own commit before any
 measurement runs**. Drafting them here would be exactly the retro-fit the
 payoff-reach authority forbids.
 
-For **each** swept card, [USER] states a direction and a threshold:
+For **each** swept card, [USER] states a direction and a threshold — for
+**both** co-primaries, because §6.1b is graded and an ungraded co-primary is
+just a number nobody committed to:
 
-| card | predicted sign of Δ | threshold (pp) that counts as a real move | confidence |
-|---|---|---|---|
-| `friendly_visit` | ____ | ____ | ____ |
-| `study_buddy` | ____ | ____ | ____ |
-| `borrowed_brilliance` | ____ | ____ | ____ |
-| `elemental_ecstasy` | ____ | ____ | ____ |
-| `FILLER` (negative control) | ____ | ____ | ____ |
+**WRITTEN BY [USER], 2026-08-10, before any seed in the registered range was
+run.** [USER] adopted an external GPT recommendation for these directions.
+The rows below are [USER]'s statements put into the table's columns; the exact
+words are in this commit's message, which is where [USER]'s verbatim text
+lives.
 
-Plus two statements that are not per-card:
+| card | §6.1 sign of Δ vs control | threshold (pp) that counts as a real move | §6.1b sign of Δ vs filler | confidence |
+|---|---|---|---|---|
+| `friendly_visit` | **positive** | **+2 pp** — expected to reach or exceed it | **positive**, at or above +2 pp | "likely" |
+| `study_buddy` | **positive** | **+2 pp** — expected to land *below* it | **positive**, below +2 pp | "probably" |
+| `borrowed_brilliance` | **positive** | **+2 pp** — expected to reach or exceed it | **positive**, at or above +2 pp | "likely" |
+| `elemental_ecstasy` ("Sweet Dreams") | **null** | **±2 pp** — expected to land inside the band | **null to slightly positive**, inside ±2 pp | stated flatly |
+| `kaboom` (filler, negative control) | **near-null, slightly negative** | **±2 pp** — expected to land inside the band, on the negative side | — (it is the baseline) | "probably" |
 
-- **[USER] SLOT — the redesign trigger.** The register's rule is "do not use
-  raw pick rate as the redesign trigger". What *is* the trigger, in terms of
-  the columns in §6? Stated now or the grade is descriptive only.
-- **[USER] SLOT — the filler's expected Δ.** A non-zero prediction for the
-  filler is a prediction about deck dilution, and it is the number every other
-  row is read against.
+**How the §6.1b column was derived, and by whom.** [USER] wrote directions
+against the control and one statement about the filler ("near-null, probably
+slightly negative through dilution"). The filler column follows from those two
+by arithmetic, not by a second judgement: if the filler's own Δ is near zero
+or slightly negative, then a card's Δ against the filler is its Δ against the
+control plus a small non-negative amount. So every direction carries over, and
+the two "at least +2 pp" cards keep their threshold. This derivation is
+recorded here so a grader can see that the §6.1b column is not an independent
+prediction that could be scored as a separate success.
+
+**One arm, two names.** "Sweet Dreams" and "Elemental Ecstasy" are the same
+card. The sheet renamed it for display on 2026-07-20 and kept the id
+(`docs/klee-cards.yaml:168-172`: *"ID stays elemental_ecstasy. Future greps:
+try BOTH names."*). There is one registered arm here, not two.
+
+### 8.1 The redesign trigger — [USER], 2026-08-10
+
+A card is a **redesign candidate** if **either** clause holds:
+
+- **(a)** the filler-adjusted result is confidently below −2 percentage
+  points; **or**
+- **(b)** the card performs no better than filler while being dead in hand at
+  least 25% of the time.
+
+**Bound to §6's columns, so the grade is mechanical:**
+
+| clause | the column it reads | the reading |
+|---|---|---|
+| (a) | §6.1b `delta_vs_filler(X)` and its paired-bootstrap interval | fires when the interval's **upper** bound is below −2 pp — that is what "confidently" means here, and it is a stricter test than the point estimate alone |
+| (b), first half | §6.1b `delta_vs_filler(X)` | fires when the delta is at or below zero |
+| (b), second half | §6.5 `dead_in_hand_rate`, **family-pooled** (`X` + `X+`), over the forced arm | fires at 0.25 or above |
+
+`dead_in_hand_rate` is `dead_in_hand / draws`: of the times the card was
+drawn, the share that ended a combat unplayed in hand. "At least 25% of the
+time" is therefore read against **draws**, not against fights or runs. The
+family-pooled figure is the one that counts, per §5.2, and the sweep script
+prints it as its own line so the number is read rather than reconstructed.
+
+**Both clauses are expressible in columns this sweep already measures**, which
+is what makes the trigger gradeable as registered. Checked before these
+predictions were committed.
+
+**The trigger names a candidate, not a verdict.** Firing it does not redesign
+anything. Whether to redesign, reprice or retire a card is a design act,
+downstream of the grade, and [USER]'s (§1, "Not asked here").
+
+**A trigger must be expressible in §6's columns.** If a proposed trigger names
+a quantity this sweep does not measure, it cannot be graded as registered, and
+the fix is a new column in a re-registration — never a metric quietly added at
+grading time.
 
 ## 9. Grading procedure and stop conditions
 
@@ -322,14 +497,36 @@ before the sweep is launched, and the sweep's report is not opened by the
 author of the predictions before the grade is recorded.
 
 **Order of operations:**
-1. Countersign this packet (or revise it).
-2. Land the §10 engineering prerequisites with their byte-identity pins;
-   suite green.
-3. [USER] commits §8's predictions — their own commit, nothing else in it.
-4. Run the sweep at the pinned stamp. Report only; read nothing into it.
-5. Blind grade against §8; the grade is its own commit.
-6. Any design act (redesign, reprice, retire) is downstream of the grade and
+1. Countersign this packet. **DONE — [USER], 2026-08-10**, with the §6.1b
+   addendum.
+2. Land the §10 engineering prerequisites with their byte-identity pins,
+   suite green. **DONE.**
+3. [USER] fills the §7 cost ceiling. **DONE — [USER], 2026-08-10.** 4 hours
+   wall-clock, stop-and-report.
+4. §8's predictions are committed — their own commit, nothing else in it.
+   **DONE — [USER], 2026-08-10.**
+5. Run the sweep at the pinned stamp. Report only; read nothing into it.
+6. Blind grade against §8; the grade is its own commit.
+7. Any design act (redesign, reprice, retire) is downstream of the grade and
    is [USER]'s.
+
+**Order of reading, at the grade.** The rows are read in this order and no
+other, because reading them in any other order lets one number colour the
+next:
+
+1. The **compliance census** (§6.3), per card. If a card's assignment did not
+   survive, or the control arm drafted it constantly, that card's grade is
+   settled here as *underpowered by contamination* and its deltas are not
+   graded at all (S4).
+2. The **filler's §6.1 row** — the size of pure dilution in this cell.
+3. Each card's **§6.1** delta against control, versus its §8 prediction.
+4. Each card's **§6.1b** delta against filler, versus its §8 prediction.
+5. The §6.2 secondaries, the §6.4 subgroup and the §6.5 card-flow columns, as
+   description.
+
+A card is graded **PREDICTED** only if both co-primaries land as §8 said they
+would. One right and one wrong is graded **SPLIT**, with which half went wrong
+named — not rounded to whichever half agreed.
 
 **Stop conditions / tripwires — the run stops and re-registers if:**
 - **S1.** Any of `RT/D/P/C` differs at launch from `RT9/D14/P6/C8`.
@@ -346,9 +543,25 @@ author of the predictions before the grade is recorded.
   so, the grade is recorded as **underpowered by contamination, not null**,
   and any re-run is a new registration.
 - **S5.** A null read at the registered `N` is graded as **"no move larger
-  than the §7 MDE"** — never as "no effect". The MDE is quoted with it.
+  than the §7 MDE"** — never as "no effect". The MDE is quoted with it, and
+  the two co-primaries quote different ones: §6.1 quotes the §7 table's
+  bracket, §6.1b quotes the single conservative figure in §7.1 (1.9 pp at
+  `N = 2,400`).
 
-## 10. Engineering prerequisites (before execution, after countersign)
+## 10. Engineering prerequisites — LANDED 2026-08-10
+
+All five are built and the suite is green (2,401 passed, 12 xfailed). The
+seam and its pins live in `tier05/model.py`, `tier05/cells.py`,
+`tier05/stats.py`, `tier05/exp_eb17p_forced_copy.py`,
+`tier05/tests/test_eb17p_force_cards.py` and
+`tier05/tests/test_stats_paired.py`.
+
+One addition the draft did not ask for, made because writing the sweep script
+exposed the risk: the script takes a `--smoke` flag that moves every arm onto
+the §4-excluded seed base (`424242`). The registered base seed is 11, and
+"just check it runs" is exactly how a registered range gets read before the
+predictions exist. The safe path is now the flagged one, and the flag prints
+a banner saying nothing below it may be quoted.
 
 1. `force_cards` on `model.run_one` / `run_many` / `_setup_run` / `Cell`,
    applied at the end of `_setup_run` (§2.2), default `None`.
@@ -384,6 +597,44 @@ this packet, and none was recorded.**
 The probe is also where §5.2 (the `X+` rewrite) and §2.2 (the RNG-consuming
 relic pickups) were found rather than assumed.
 
+### 11.1 Declared contamination — a 12-pair read on registered seeds
+
+**What happened.** On 2026-08-10, while building the §10 sweep script, the
+first "does it run" check was executed with the script's default seed base —
+which is the **registered** base, 11. It ran 12 pairs per arm, seeds 11–22,
+and its output (winrates, deltas, McNemar counts, compliance and card-flow
+rows) was displayed to the engineer who wrote the script.
+
+**Recorded here rather than anywhere else.** No number from that check appears
+in any commit, any file, or any part of this packet. It is disclosed because a
+grader reading this packet later has no other way to learn of it, and an
+undisclosed read is the thing pre-registration exists to prevent.
+
+**Why it does not contaminate the predictions.** §8's predictions and §8.1's
+trigger are [USER]'s, and [USER] supplied them in full — in the words quoted
+in their commit message — **before** any code in this session ran. They were
+fixed before the read and were transcribed unchanged, so no retro-fit was
+possible. The read cannot have shaped a prediction that already existed.
+
+**Why it does not contaminate the sweep.** Seeds 11–22 are 12 of the 2,400
+registered pairs and will be re-run as part of the full sweep at the pinned
+stamp. Nothing about them is excluded, adjusted or re-rolled; excluding them
+now would be a post-hoc change to §4's registered range, which would be worse
+than the disclosure.
+
+**What changed as a result.** The sweep script gained a `--smoke` flag that
+moves every arm onto the §4-excluded seed base (`424242`) and prints a banner
+saying nothing below it may be quoted. Every subsequent check ran under it.
+The safe path is now the flagged one; the registered range takes a deliberate
+act to touch.
+
+**Open to [USER].** Whether this read is material to the grade is [USER]'s
+call, not the engineer's. If it is, the remedy is a re-registration of §4's
+seed range, not an edit to this section.
+
+**RULED.** [USER] ruled the disclosure **immaterial**, 2026-08-10 (R173); the
+sweep proceeded on the registered seed range unchanged.
+
 ## 12. Known limits, declared
 
 - **ITT, not per-protocol** (§2.3). A removed or upgraded copy stays in its
@@ -398,15 +649,240 @@ relic pickups) were found rather than assumed.
 - **The shipped within-arm split is not this.** §6.5's `card_flow` columns are
   descriptive companions to Δ, and the instrument's own refusal
   (`metrics.py:960-967`) stands.
+- **The filler contrast is unanchored** (§6.1b). Both of its arms are treated,
+  so a §6.1b delta may not be set beside any archived winrate.
+- **Two copies look alike.** When a treated run ends holding two copies of the
+  swept family, nothing in the record distinguishes the forced copy from a
+  drafted one. §6.3's compliance columns are therefore counts of the
+  **family**, not of the assigned copy, and are labelled that way in the
+  output.
 
 ---
 
 ## Countersign line — one word, [USER]: COUNTERSIGN / REVISE / DECLINE
 
-`__________`
+`COUNTERSIGN` — [USER], 2026-08-10, with the §6.1b addendum.
 
-Countersign additionally requires: §5.1 filler, §7 `N` and cost ceiling, and
-§8's predictions as their own commit before the sweep launches.
+Filled on countersign: §5.1 filler (`kaboom`) and §7 `N` (2,400). §8's
+predictions and the §8.1 trigger were committed on their own on 2026-08-10.
+The §7 cost ceiling was confirmed the same day. **No slot is open; the packet
+is cleared to launch.**
 
-— drafted 2026-08-08, branch `eb17p-registration`. Zero design authority
-exercised; every threshold, direction and taste call is a slot above.
+— drafted 2026-08-08, branch `eb17p-registration`; amended 2026-08-10 on
+branch `sitting-prep-2026-08-08` to record the countersign, fill every slot,
+and add the §6.1b co-primary; run and graded the same day. Zero design
+authority exercised: every threshold, direction and taste call is [USER]'s,
+and the grade in §13 reads the registered columns and stops there. The
+redesign trigger fired for two cards; what to do about that is [USER]'s.
+
+---
+
+## 13. Results and grade — sweep run 2026-08-10
+
+**§8 was not edited to produce this section.** The predictions were committed
+in `eb67706` on 2026-08-10, before the sweep ran; this section compares the
+sweep's output against them and changes nothing above.
+
+**Run.** `PYTHONPATH=. python -m tier05.exp_eb17p_forced_copy --runs 2400
+--jobs 0`, at `RT9/D14/P6/C8`, seed base 11, 2,400 pairs on each of six arms,
+14,400 runs. Wall clock **2 minutes 57 seconds** against a 4-hour ceiling, so
+the stop-and-report rule never engaged and every arm completed its full `N`.
+The raw stamped report is `review/active/eb17p-results-2026-08-10.txt`.
+
+**Tripwires, checked at launch.** S1 clear — the stamp was `RT9/D14/P6/C8`, as
+pinned. S2 clear — the `force_cards=None` byte-identity pin passed with the
+full suite (2,411 passed, 12 xfailed). S3 clear — `DRAFTER_VERSION` was 14, so
+the staged D15 change had not landed. S4 is read per card below.
+
+### 13.1 Compliance first (§6.3), because it decides what may be graded
+
+| card | forced family held at end | upgraded | removed at rest | control acquired it on its own |
+|---|---|---|---|---|
+| `friendly_visit` | 99.04% | 32.83% | 0.00% | 26.04% |
+| `study_buddy` | 98.75% | 74.42% | 0.00% | 29.25% |
+| `borrowed_brilliance` | 98.79% | 26.92% | 0.00% | 3.96% |
+| `elemental_ecstasy` | 97.50% | 26.46% | 0.00% | 15.08% |
+| `kaboom` (filler) | 100.00% | 32.42% | 1.58% | 99.92% |
+
+**S4 did not fire for any of the four cards.** Assignment survived to the
+final deck in 97.5% of runs or better everywhere, and the control arm's own
+acquisition rate — 4% to 29% — attenuates the contrast without collapsing it.
+
+**The filler's two odd-looking columns are structural, not alarming.**
+`kaboom` is a starter card, so "the control arm acquired it on its own" is
+99.92% by construction: every Klee deck already holds it. For the filler the
+compliance question is not *whether* the family is present but *how many
+copies*, and the treated arm ends with a mean of 3.92 copies. §6.4's
+clean-pairs subgroup for `kaboom` is `n = 2` for the same reason and carries
+no information; it is reported and disregarded. Neither is an S4 event.
+
+### 13.2 The filler's row (§6.1) — the size of pure dilution
+
+**`kaboom`: Δ = −1.42 pp**, 95% paired bootstrap [−2.54, −0.25], McNemar
+b = 86, c = 120, p = 0.021. Control winrate 6.83% (164/2400); filler arm 5.42%
+(130/2400).
+
+**Adding one blank card to a Klee reaction deck costs about 1.4 points of
+winrate.** That is what every §6.1 row below has folded into it, and it is why
+§6.1b exists.
+
+### 13.3 The primary rows (§6.1, versus control)
+
+| card | Δ vs control | 95% interval | McNemar b/c | p |
+|---|---|---|---|---|
+| `friendly_visit` | **+3.04 pp** | [+1.71, +4.38] | 173 / 100 | <0.0001 |
+| `study_buddy` | **+0.75 pp** | [−0.54, +2.00] | 132 / 114 | 0.278 |
+| `borrowed_brilliance` | **−1.58 pp** | [−2.75, −0.42] | 83 / 121 | 0.009 |
+| `elemental_ecstasy` | **−1.62 pp** | [−2.75, −0.46] | 82 / 121 | 0.008 |
+| `kaboom` (filler) | **−1.42 pp** | [−2.54, −0.25] | 86 / 120 | 0.021 |
+
+### 13.4 The co-primary rows (§6.1b, versus filler)
+
+| card | Δ vs filler | 95% interval | McNemar b/c | p |
+|---|---|---|---|---|
+| `friendly_visit` | **+4.46 pp** | [+3.25, +5.67] | 164 / 57 | <0.0001 |
+| `study_buddy` | **+2.17 pp** | [+1.08, +3.25] | 115 / 63 | 0.0001 |
+| `borrowed_brilliance` | **−0.17 pp** | [−1.08, +0.75] | 59 / 63 | 0.786 |
+| `elemental_ecstasy` | **−0.21 pp** | [−1.12, +0.67] | 59 / 64 | 0.719 |
+
+**Read together, §6.1 and §6.1b say different things about the same cards, and
+the difference is the dilution.** Two cards that look actively harmful against
+the control — `borrowed_brilliance` and `elemental_ecstasy`, both about
+−1.6 pp — turn out to be indistinguishable from a blank card once dilution is
+taken out. They are not hurting the deck; they are *doing nothing*, and doing
+nothing costs 1.4 points. That distinction is the whole reason [USER] added
+the co-primary on countersign, and it changes the design reading of two of the
+four cards.
+
+### 13.5 Achieved resolution, and a note on the §7.1 hedge
+
+`d` is the realised discordant rate; the MDE is `2.80 × sqrt(d/N)` at
+`N = 2,400`, computed from the sweep's own counts rather than from §7's
+bracket.
+
+| contrast | `d` | achieved MDE |
+|---|---|---|
+| `friendly_visit` vs control | 0.114 | 1.93 pp |
+| `study_buddy` vs control | 0.103 | 1.83 pp |
+| `borrowed_brilliance` vs control | 0.085 | 1.67 pp |
+| `elemental_ecstasy` vs control | 0.085 | 1.66 pp |
+| `kaboom` vs control | 0.086 | 1.67 pp |
+| `friendly_visit` vs filler | 0.092 | 1.73 pp |
+| `study_buddy` vs filler | 0.074 | 1.56 pp |
+| `borrowed_brilliance` vs filler | 0.051 | 1.29 pp |
+| `elemental_ecstasy` vs filler | 0.051 | 1.29 pp |
+
+**§7's bracket was right about the range and wrong about which contrast sat
+where.** The card-versus-control rows landed near the *conservative* end
+(`d ≈ 0.085–0.114` against a conservative bound of 0.11) — the pairing bought
+almost nothing there. The card-versus-filler rows landed at or better than the
+*optimistic* end (`d ≈ 0.051–0.092` against an optimistic bound of 0.05).
+
+§7.1 declined to register the optimistic column for §6.1b on the grounds that
+the correlation between two treated arms was unknown. That refusal was correct
+as discipline and wrong as a guess: the contrast it declined to claim
+resolution for is the one that resolved best. The registered ceiling of 1.9 pp
+held for every row. Recorded here rather than corrected above, because a
+sizing section is what was believed before the read.
+
+### 13.6 The grade, against §8
+
+`friendly_visit` predicted "positive, likely at least +2 pp".
+
+- §6.1 **HIT** — +3.04 pp, positive, at or above the +2 pp threshold. The
+  interval [+1.71, +4.38] does span +2, so "at least 2 pp" is the point
+  estimate's verdict and not the interval's; direction and threshold are both
+  as registered.
+- §6.1b **HIT** — +4.46 pp, and here the whole interval clears +2.
+- **Card grade: PREDICTED.**
+
+`study_buddy` predicted "positive but probably below +2 points".
+
+- §6.1 **HIT** — +0.75 pp, positive, below +2, exactly as registered. Flagged
+  honestly: the interval [−0.54, +2.00] includes zero, so the sweep cannot
+  establish that the card helps at all against the control. "Positive" is the
+  observed sign, not a demonstrated one.
+- §6.1b **MISS** — +2.17 pp, which is positive as predicted but **above** the
+  +2 threshold the prediction placed it below. The interval [+1.08, +3.25]
+  spans +2, so the miss is not decisive either.
+- **Card grade: SPLIT** (§9's rule), with the missing half named: the
+  magnitude against the filler, not the direction.
+
+`borrowed_brilliance` predicted "positive, likely at least +2 points".
+
+- §6.1 **MISS** — −1.58 pp. Wrong sign, and significantly so (p = 0.009). The
+  prediction and the observation are about 3.6 pp apart.
+- §6.1b **MISS** — −0.17 pp against a predicted +2 or better. The card is
+  indistinguishable from a blank card.
+- **Card grade: MISS**, on both co-primaries.
+
+`elemental_ecstasy` ("Sweet Dreams") predicted "null, within ±2 points".
+
+- §6.1 **HIT** — −1.62 pp, inside the ±2 band as registered. Flagged: it is
+  significantly below zero (p = 0.008), so "null" is true as a band statement
+  and not as a claim that nothing happened. What happened is dilution.
+- §6.1b **HIT** — −0.21 pp, inside the band and essentially zero.
+- **Card grade: PREDICTED.**
+
+`kaboom` (filler) predicted "near-null, probably slightly negative through
+dilution".
+
+- §6.1 **HIT** — −1.42 pp: negative, inside ±2, and the mechanism named in the
+  prediction is the one the number shows. Flagged: it is separable from zero
+  (p = 0.021), so dilution is real and small rather than absent.
+- **Card grade: PREDICTED.**
+
+**Tally: 3 PREDICTED, 1 SPLIT, 1 MISS.** The one MISS is
+`borrowed_brilliance`, and it is the largest error in the table.
+
+### 13.7 The redesign trigger (§8.1)
+
+Read exactly as §8.1 binds it, and evaluated per card.
+
+**Clause (a) — §6.1b interval's upper bound below −2 pp: fires for nobody.**
+The lowest upper bound in the table is `elemental_ecstasy`'s at +0.67. No card
+is confidently worse than the filler.
+
+**Clause (b) — Δ vs filler at or below zero AND family-pooled dead-in-hand at
+or above 25%:**
+
+| card | Δ vs filler ≤ 0 | pooled dead-in-hand | fires? |
+|---|---|---|---|
+| `friendly_visit` | no (+4.46) | 45.87% | **no** |
+| `study_buddy` | no (+2.17) | 50.63% | **no** |
+| `borrowed_brilliance` | **yes** (−0.17) | **94.95%** | **YES** |
+| `elemental_ecstasy` | **yes** (−0.21) | **87.07%** | **YES** |
+| `kaboom` (filler) | not applicable — it is the baseline | 37.24% | n/a |
+
+**The trigger fires for `borrowed_brilliance` and `elemental_ecstasy`.**
+
+Both fire on clause (b): they perform no better than a blank card while
+sitting dead in hand the overwhelming majority of the times they are drawn.
+Neither fires on clause (a) — neither is actively harmful once dilution is
+removed. The distinction matters for whatever comes next: the finding is
+"these cards do nothing", not "these cards are traps".
+
+**The trigger names a candidate, not a verdict** (§8.1). Whether to redesign,
+reprice or retire either card is a design act, downstream of this grade, and
+[USER]'s.
+
+### 13.8 One observation that is not a grade, flagged for triage
+
+`borrowed_brilliance` in its **un-upgraded** form was drawn **40,396 times and
+played zero times** — 0 of 28,149 combats in which its first copy was drawn.
+Its upgraded form, which adds `draw 1`, plays 30% of the time. No other card
+in the sweep shows anything like this: the bare forms of `study_buddy` and
+`elemental_ecstasy` play 35% and 10% of the time respectively.
+
+An exact zero across forty thousand draws is not a preference, it is a
+categorical refusal. The engine op is not the cause — `copy_companion_in_hand`
+returns harmlessly when no companion is in hand
+(`tier0/engine/effects.py:1867`), so the card is playable and merely does
+nothing in that case. Whether the pilot never values it, or never has a
+companion in hand when it could, this sweep cannot separate.
+
+**This matters for the grade of that one card.** Its MISS may be measuring a
+pilot-valuation fact rather than the card's design, and a redesign argued from
+this row alone would be arguing from an instrument reading, not a card
+reading. Recorded here, deliberately not filed and deliberately not diagnosed
+further: it is an audit finding, and triaging it is not this grade's job.

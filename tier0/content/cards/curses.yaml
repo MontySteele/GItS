@@ -74,6 +74,20 @@
 # we ship them as plain clogs and say so: both are SOFTER than real, the same
 # safe direction as Decay. The missing half is one line of rules text away.
 
+- id: curse_normality
+  name: "Normality"
+  cost: 0
+  type: status
+  rarity: curse
+  # Field of Man-Sized Holes' Resist branch (R82 reopened, 2026-08-10). The
+  # first curse in this file whose real rules text we can express EXACTLY
+  # rather than softening: "You cannot play more than 3 cards this turn" is a
+  # hand-read cap (engine/state.Card.status_play_cap ->
+  # combat.card_playable), not a rider on a trigger the wiki never publishes.
+  # The one gap is the real card's REPLAY exemption, named at the reading
+  # site -- and it errs harsh rather than soft, unlike Decay/Shame/Doubt.
+  status_play_cap: 3
+
 - id: curse_regret
   name: "Regret"
   cost: 0

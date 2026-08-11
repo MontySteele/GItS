@@ -72,8 +72,6 @@ public sealed class SecretStash : CustomCardModel
                 ModelDb.Card<AmmoScavenging>(),
                 ModelDb.Card<BigBaddaBoom>(),
                 ModelDb.Card<BombVoyage>(),
-                ModelDb.Card<CarefulArrangement>(),
-                ModelDb.Card<ChainFuse>(),
                 ModelDb.Card<DoublePop>(),
                 ModelDb.Card<FishFlavoredBait>(),
                 ModelDb.Card<MineToss>(),

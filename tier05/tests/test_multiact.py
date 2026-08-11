@@ -17,6 +17,7 @@ from tier05 import acts, draft, model
 from tier05 import relics as relic_pool
 
 SEED = 77
+BOUNDARY_SEED = 70   # see test_two_act_run_walks_both_acts_and_heals...
 CHIP = 4          # flat HP loss per stubbed fight -- every fight is won
 
 
@@ -45,8 +46,16 @@ def _skip(rng, deck, offers, archetype):
 def test_two_act_run_walks_both_acts_and_heals_at_the_boundary(monkeypatch):
     _two_acts(monkeypatch)
     monkeypatch.setattr(model, "run_fight", _chip_win)
-    r = model.run_one("klee", "demolition", "demolition", _skip, SEED,
-                      n_acts=2)
+    # A SEED OF ITS OWN, and the reason is the precondition three asserts
+    # down: this test can only see the boundary heal in a run that reaches
+    # the act-1 boss already wounded. Under RUNTEMPLATE 10 (R82 reopened,
+    # 2026-08-10 -- five enchant events joined the pools, so every act's
+    # event odds moved) the file's shared SEED reaches that boss at exactly
+    # max - CHIP, i.e. unwounded, and the full heal correctly heals nothing.
+    # Re-seeded rather than weakened to `>=`, which would have made the
+    # assertion pass whether or not the heal happened at all.
+    r = model.run_one("klee", "demolition", "demolition", _skip,
+                      BOUNDARY_SEED, n_acts=2)
     mx = loader._character_index()["klee"]["hp"]
 
     assert r.won and r.n_acts == 2 and r.acts_completed == 2

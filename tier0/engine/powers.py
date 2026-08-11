@@ -165,7 +165,8 @@ def on_turn_end(state: CombatState, fighter: Fighter) -> None:
 
 def apply_power(state: CombatState, target: Fighter, name: str, stacks: int,
                 max_stacks: int | None = None,
-                applier: Fighter | None = None) -> None:
+                applier: Fighter | None = None,
+                never_reduces: bool = False) -> None:
     # Flawless Strategy (Kokomi kickoff §1 law 3 / §2.5): she CANNOT gain
     # Strength — any positive Strength she would gain becomes Charge
     # instead, at this one chokepoint (cards, companions, intents, potions
@@ -179,9 +180,23 @@ def apply_power(state: CombatState, target: Fighter, name: str, stacks: int,
         resources.gain_charge(state, stacks, "flawless_strategy")
         state.emit("strength_converted", stacks=stacks)
         return
-    new = target.powers.get(name, 0) + stacks
+    standing = target.powers.get(name, 0)
+    new = standing + stacks
     if max_stacks is not None:              # sheet v0.2 stack caps
         new = min(new, max_stacks)
+    # FLOOR-NOT-CLAMP (EB-26 D2, ruled 2026-08-10 option (d)). Opt-in, off for
+    # every row that does not ask for it, so `max_stacks` keeps its
+    # running-total meaning everywhere: the cap still says how high THIS
+    # application may raise the stack, and this flag says the application may
+    # not push it DOWN to get there. A lesser ward played on top of a bigger
+    # standing one is then a no-op instead of a downgrade.
+    #
+    # Same shape the engine already rules elsewhere: effects.py's Ceremonial
+    # Garment refresh takes max(standing, new) for exactly this reason (audit
+    # 2026-07-26 / EPOCH 1 -- assigning pulled an upgraded summon's duration
+    # down and deleted the turn the upgrade had paid for).
+    if never_reduces:
+        new = max(new, standing)
     target.powers[name] = new
     state.emit("apply_power", power=name, stacks=stacks,
                target=getattr(target, "name", "player"))

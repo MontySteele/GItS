@@ -432,10 +432,10 @@ A dry sub-level of the Fontaine Research Institute of Kinetic Energy Engineering
 
 ---
 
-## - [ ] Field of Man-Sized Holes
-*Acts: act2 · not in tier05 pool · base text: `docs/sts2-events-harvest.txt`*
+## - [x] Field of Man-Sized Holes
+*Acts: act2 · SHIPPED in the tier05 act-2 pool (`field_of_man_sized_holes`) · base text: `docs/sts2-events-harvest.txt`*
 
-> **FLAG — [USER] decision needed:** Base's anatomical-mimicry horror has no Teyvat idiom and its payoff is a Perfect Fit Enchant the tier05 effect grammar doesn't model — [USER] sets the tone ceiling and the enchant-op decision before this ships.
+> **CONVERTED (ruled 2026-08-10, M7 -- R82 reopened):** Both branches are exact. **Enter Your Hole** grants **Perfect Fit**, which is a shuffle PLACEMENT rather than an on-play rider — it rides `Card.enchant_top_of_draw` at the engine's two shuffle sites (`combat.surface_innate`, `state.shuffle_discard_into_draw`), sharing innate's placement so the two cannot disagree about order. **Resist** grants **Normality**, and Normality is the first curse in `tier0/content/cards/curses.yaml` expressed EXACTLY rather than softened: its "cannot play more than 3 cards this turn" is a real hand read (`status_play_cap` → `combat.card_playable`), with the base game's replay exemption named at the reading site as the one gap. [USER]'s tone ceiling is untouched by this pass — the flavor variants below ship as written, and nothing here chooses between them.
 
 ### 1. The Hollow Field of Ardravi — Sumeru / Forest Rangers (with Akademiya survey interest) — literal (literal)
 
@@ -460,7 +460,7 @@ Deep in the Chasm's Underground Mines, the old seams have weathered into alcoves
 ## - [ ] Grave of the Forgotten
 *Acts: act3 · not in tier05 pool · base text: `docs/sts2-events-harvest.txt`*
 
-> **FLAG — [USER] decision needed:** The Confront branch is an Enchant (Soul's Power on an Exhaust card, with a lock condition) — blocked on the unmodeled Enchant op regardless of skin.
+> **FLAG — [USER] decision needed (REASON REPLACED 2026-08-10, M7 / R82 reopened):** No longer blocked on Enchant. The Confront branch is BUILT — `souls_power` is in `tier0/content/enchantments.CATALOG` ("this card loses Exhaust", expressed by clearing the printed field, needing no engine surface at all), and the lock condition is that enchantment's own eligibility rule, which the event layer already enforces. What blocks the event is the OTHER branch: **Forgotten Soul** is "whenever you Exhaust a card, deal 1 damage to a random enemy", which needs a `damage_per_exhaust` combat hook the engine does not have. The event-relic admission rule (`tier05/content/relics.yaml`, `event:` header) forbids inventing one and forbids substituting a random relic, so this event waits on a RELIC-hook backlog item, not an enchantment one.
 
 ### 1. The Nameless Cairn — Liyue / Wangsheng Funeral Parlor — solemn funerary rites (literal)
 
@@ -774,10 +774,10 @@ Beneath Gandharva Ville, an Amurta researcher's spore vault has gone two rainy s
 
 ---
 
-## - [ ] Sapphire Seed
-*Acts: act1 · not in tier05 pool · base text: `docs/sts2-events-harvest.txt`*
+## - [x] Sapphire Seed
+*Acts: act1 · SHIPPED in the tier05 act-1 pool (`sapphire_seed`) · base text: `docs/sts2-events-harvest.txt`*
 
-> **FLAG — [USER] decision needed:** The Sown Enchant is unmodeled in the tier05 effect grammar and the keyword must survive re-skinning verbatim — the event is blocked on the enchant op regardless of which skin ships.
+> **CONVERTED (ruled 2026-08-10, M7 -- R82 reopened):** **Sown** is in the catalogue — "the first time you play this card each combat, gain Energy" — carried by `Card.enchant_first_play_effects` behind a per-instance first-play gate. It takes no amount, because the wiki prints none. The keyword survives re-skinning verbatim: the sim row is `enchant: {name: sown}` and the enchantment's own name does the work, so every variant below can end on the bare keyword as written. The other branch (heal 9 + upgrade a card) was always expressible and ships unchanged.
 
 ### 1. The Pearl at Bourou Village — Inazuma / Sangonomiya resistance, Watatsumi Island — loose (loose)
 
@@ -805,10 +805,10 @@ Off the ranger trail in Avidya Forest, a seed the color of deep water rests in a
 
 ---
 
-## - [ ] Self-Help Book
-*Acts: ? · not in tier05 pool · base text: `docs/sts2-events-harvest.txt`*
+## - [x] Self-Help Book
+*Acts: all acts (research §2.1; the harvest page states no location) · SHIPPED in the tier05 all-acts pool (`self_help_book`) · base text: `docs/sts2-events-harvest.txt`*
 
-> **FLAG — [USER] decision needed:** All three real options are type-gated Enchants (Sharp 2 / Nimble 2 / Swift 2) with an availability rule — blocked on the unmodeled Enchant op regardless of skin.
+> **CONVERTED (ruled 2026-08-10, M7 -- R82 reopened):** All four options ship. **Sharp 2** is the enchantment the shipped R82 rider already expressed (flat `enchant_damage`); **Nimble 2** needed a Block twin of it (`enchant_block`, applied once per play rather than once per Block row); **Swift 2** rides the same first-play list as Sown ("the first time you play this card, draw X cards"). The type gate IS the enchantment's own eligibility rule — Sharp wants an Attack, Nimble a Skill, Swift a Power — so an option with no legal target locks itself, and **Move On** carries `if_no_enchant_target: true`, which offers it only when all three are locked. The availability rule is stated as its own inverse rather than approximated.
 
 ### 1. Six Weeks to a Better You, Illuminated — Sumeru / Akademiya (Vahumana dropout bookseller) — literal (literal)
 
@@ -894,10 +894,10 @@ Beneath the ribs of Elynas, a small Melusine nurse in an oversized apron waves y
 
 ---
 
-## - [ ] Stone of All Time
-*Acts: act2 · not in tier05 pool · base text: `docs/sts2-events-harvest.txt`*
+## - [x] Stone of All Time
+*Acts: act2 · SHIPPED in the tier05 act-2 pool (`stone_of_all_time`) · base text: `docs/sts2-events-harvest.txt`*
 
-> **FLAG — [USER] decision needed:** The Push branch is an Enchant (Vigorous 8), a Spire keyword with no Genshin analogue that stays untranslated by name — blocked on the unmodeled Enchant op.
+> **CONVERTED (ruled 2026-08-10, M7 -- R82 reopened):** **Vigorous 8** is in the catalogue — "the first time this card is played, it deals X additional damage" — and it needed a rider field of its own (`enchant_first_play_damage`), because the shipped flat rider pays on every hit of every play. It stays untranslated by name, exactly as the variants below assume. Drink and Lift is `spend_potion: true` + `max_hp: 10`: `spend_potion` already means a RANDOM held potion, actually consumed (NC-8 / R116), and already locks the option when the bag is empty — so "lose a random potion" needed nothing new.
 
 ### 1. The Stone of Every Era — Liyue / Adventurers' Guild — literal (literal)
 
@@ -925,10 +925,10 @@ Deep under the Opera Epiclese, in the machine-gallery that swings the stage, a c
 
 ---
 
-## - [ ] Symbiote
-*Acts: act2/act3 · not in tier05 pool · base text: `docs/sts2-events-harvest.txt`*
+## - [x] Symbiote
+*Acts: act2/act3 · SHIPPED in the tier05 act-2 pool with `also_acts: [3]` (`symbiote`) · base text: `docs/sts2-events-harvest.txt`*
 
-> **FLAG — [USER] decision needed:** The Corrupted Enchant is on the repo's skip-loudly/not-codeable list (docs/current/research/sts2-map-and-events-research.md §3.3) — the event cannot ship until the Enchant op lands, whatever the skin.
+> **CONVERTED (ruled 2026-08-10, M7 -- R82 reopened):** **Corrupted** is the one converted enchantment that is a cost as well as a gain: "deal 50% more damage, but lose 2 HP". The HP half rides the SHIPPED `enchant_effects` list (a self-damage row, the same pipe as Inky's Weak); the damage half needed a multiplier (`enchant_damage_mult`), because 50% is not a flat rider. Recorded rather than averaged: mobalytics publishes "lose 3 HP" and slaythespire.wiki.gg publishes 2 — the wiki is this repo's authority everywhere else in the event layer, so the row carries 2. Known limitation, also stated in `events.yaml`: the option valuation prices any enchantment at exactly one upgrade, so it cannot see Corrupted's RECURRING HP cost and reads the option slightly better than it plays.
 
 ### 1. Defilement at Serpent's Head — Inazuma / Sangonomiya resistance — loose (loose)
 
@@ -1482,7 +1482,7 @@ Below Merusea Village a pale root of Elynas breaks through the seabed stone, and
 ## - [ ] Wood Carvings
 *Acts: act1 · not in tier05 pool · base text: `docs/sts2-events-harvest.txt`*
 
-> **FLAG — [USER] decision needed:** Peck / Slither / Toric Toughness are bare StS2 system terms the fiction cannot absorb (and Slither is another unmodeled Enchant) — [USER] decides whether a mod-wide card-name pass precedes shipping.
+> **FLAG — [USER] decision needed (REASON SHARPENED 2026-08-10, M7 / R82 reopened):** All three options are blocked, and the enchant op is only one of three reasons. **Bird** and **Torus** transform a starter into *Peck* and *Toric Toughness* — named base-game colorless cards that exist in no pool this mod ships, and the deleted colorless pool (design principles §4.7) is not going to supply them. **Snake** enchants with *Slither*, which randomises a card's cost ON DRAW: `state.draw` has no per-card callback and cost is read at play time by `card_cost`, so Slither is new engine machinery rather than a rider — it is named in `tier0/content/enchantments.UNEXPRESSED` rather than approximated. Shipping two of three options is not a conversion, so the event stays whole in the skip list. [USER]'s original naming question (whether a mod-wide card-name pass precedes shipping) is still open and still [USER]'s; it is simply no longer the binding constraint.
 
 ### 1. Votive Carvings of Chinju Forest — Inazuma / Grand Narukami Shrine — literal (literal)
 

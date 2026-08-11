@@ -10,8 +10,8 @@ klee	double_pop	common	demolition	enabler	frontload	frontload		early	early		bomb
 klee	ammo_scavenging	common	demolition	glue	frontload,velocity	frontload,velocity		early	early		bomb			frontload	frontload
 klee	big_badda_boom	common	demolition,generic	glue	frontload	frontload		mid	early						
 klee	blast_radius	common	generic	glue	frontload	frontload		early	early	aoe					
-klee	chain_fuse	common	demolition	enabler	frontload	frontload		early	early		bomb			frontload	frontload
-klee	careful_arrangement	common	demolition	glue	frontload	frontload		mid	early		bomb			frontload	frontload
+klee	chain_fuse	uncommon	demolition	enabler	frontload	frontload		early	early		bomb			frontload	frontload
+klee	careful_arrangement	uncommon	demolition	glue	frontload	frontload		mid	early		bomb			frontload	frontload
 klee	bomb_voyage	common	demolition	enabler	frontload	frontload		mid	early	aoe	bomb			frontload	frontload
 klee	sparkly_treasure	common	spark	enabler	frontload,velocity	frontload,velocity		early	early		spark			frontload,velocity	frontload,velocity
 klee	pocket_fireworks	common	spark	enabler	frontload	frontload		early	early						
@@ -28,7 +28,7 @@ klee	combustion_study	common	reaction	enabler	frontload,velocity	frontload,veloc
 klee	alchemical_curiosity	common	reaction,generic	glue	block,velocity	block,velocity		early	early						
 klee	boom_goes_the_dynamite	common	reaction	payoff	frontload	frontload		mid,late	early,late			aura			
 klee	study_of_explosions	common	reaction	glue	frontload,velocity	frontload,velocity		early	early		burst				frontload,velocity
-klee	friendly_visit	common	reaction	glue	block,velocity	block,velocity		early	early						
+klee	friendly_visit	uncommon	reaction	glue	block,velocity	block,velocity		early	early						
 klee	hide_and_seek	common	generic	glue	block,velocity	block,velocity		early	early						
 klee	sorry_jean	common	demolition,generic	glue	block,frontload	block,frontload		early	early		bomb			frontload	frontload
 klee	spooked	common	generic	glue	block,utility	block,utility		early	early	aoe					
@@ -209,6 +209,7 @@ kokomi	quiet_harbor	uncommon	assist	payoff	block,velocity	block,velocity		early	
 kokomi	driftglass	uncommon	assist,generic	glue	frontload	frontload		early	early						
 kokomi	undertow	uncommon	assist	payoff	frontload,scaling,velocity	frontload,scaling,velocity		early,mid,late	late			exhaust_pile			
 kokomi	pearl_current	uncommon	generic	payoff	block	block		late	late						
+kokomi	watch_of_the_shallows	uncommon	generic	payoff	sustain	sustain		late	late						
 kokomi	the_tide_remembers	uncommon	priest,generic	payoff	frontload,scaling	frontload,scaling		mid,late	late	aoe		exhaust_pile			
 kokomi	ceremonial_garment	rare	generic	payoff	scaling	scaling		late	late			burst,charge			
 kokomi	nereids_ascension	rare	priest,generic	payoff	frontload,scaling	frontload,scaling		mid,late	late	aoe		charge			

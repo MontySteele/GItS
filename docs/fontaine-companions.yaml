@@ -23,9 +23,12 @@
 - {id: lynette_enigmatic_feint, name: "Lynette — Enigmatic Feint", star: 4, rarity: common, role_c: trigger, element: anemo, cost: 1, type: skill,
    effects: [{op: swirl, target: enemy}, {op: block, amount: 5}]}
    # Dash-through. A Defend-sized body keeps the one-energy Swirl live without an aura.
-- {id: lynette_box_trick, name: "Lynette — Box Trick", star: 4, rarity: common, role_c: buffer, element: anemo, cost: 1, type: skill,
+- {id: lynette_box_trick, name: "Lynette — Bogglecat Box", star: 4, rarity: common, role_c: buffer, element: anemo, cost: 1, type: skill,
    effects: [{op: draw, amount: 2}]}
    # Pure velocity glue. Plain by design: the pool's honest draw common; every archetype takes it, none warps around it.
+   # RENAMED to canon 2026-08-10 ([USER], QUEUE N3+N4): the authored "Box Trick" named no Lynette talent; the
+   # Bogglecat Box is the construct her Burst summons. The id stays `lynette_box_trick` — ids are not slugs of
+   # titles here (codegen keys the C# class and the art path off the id), so the rename is display-only.
 - {id: lynette_astonishing_shift, name: "Lynette — Magic Trick: Astonishing Shift", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 1, type: skill,
    effects: [{op: swirl, target: enemy}, {op: damage, amount: 4, target: all_enemies, applies_element: false}]}
    # The stage vanishes, the room reacts. Swirl + AoE rider (untagged damage — Anemo leaves no aura).
@@ -35,13 +38,15 @@
 - {id: charlotte_freezing_point, name: "Charlotte — Framing: Freezing Point Composition", star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: attack,
    effects: [{op: damage, amount: 4, target: enemy, applies_element: true}, {op: draw, amount: 1}]}
    # Her ONE Cryo-applying card (budget). The snapshot is information: light damage, applies Cryo, cantrips.
-- {id: charlotte_enduring_frosthelm, name: "Charlotte — Enduring Frosthelm", star: 4, rarity: common, role_c: buffer, element: cryo, cost: 1, type: skill,
+- {id: charlotte_enduring_frosthelm, name: "Charlotte — First-Person Shutter", star: 4, rarity: common, role_c: buffer, element: cryo, cost: 1, type: skill,
    effects: [{op: block, amount: 4}, {op: block_next_turn, amount: 4}]}
    # REDESIGNED per healing-policy tightening (heal = Rare AND Exhaust; sub-Rare sustain = Block only).
    # Pre-emptive block: 4 now + 4 at start of next turn — sustain-over-time identity without true healing.
-   # "Enduring Frosthelm" is authored flavor, NOT a canon talent — her passives are Moment of Impact /
-   # Diversified Investigation / First-Person Shutter. The title is a [USER] call (QUEUE N3+N4); this
-   # comment only stops the sheet from attesting a talent that does not exist.
+   # RENAMED to canon 2026-08-10 ([USER], QUEUE N3+N4): the shipped "Enduring Frosthelm" named no Charlotte
+   # talent at all. "First-Person Shutter" is [USER]'s pick among her three real passives (Moment of Impact /
+   # Diversified Investigation / First-Person Shutter), and it reads onto the card: she braces behind the
+   # camera and takes the shot. The id stays `charlotte_enduring_frosthelm` — ids are not slugs of titles here
+   # (codegen keys the C# class and the art path off the id), so the rename is display-only.
    # NEW OP: block_next_turn. Spotlighted in a Furina deck the empowered
    # block is still Encore-adjacent tempo; the quiet synergy survives the conversion.
 - {id: charlotte_snappy_silhouette, name: "Charlotte — Snappy Silhouette", star: 4, rarity: uncommon, role_c: buffer, element: cryo, cost: 1, type: skill,

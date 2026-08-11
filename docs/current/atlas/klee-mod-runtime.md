@@ -117,11 +117,14 @@ In-game there is no CLI: `KleeMod.Initialize` is the only entry
 - **R52** (`tier0/DECISIONS.md:1314`) — Kokomi heals no HP, ever; her sustain is
   prevention. Binds every Kokomi power that would otherwise grant healing.
 - **R59 / R60 / R61** (`tier0/DECISIONS.md:1777`, `:1796`, `:1813`) — the shop's two
-  colorless slots carry companions: slot 2 is Uncommon-or-Rare at renormalized odds
-  (mirrored as `SlotTwoUncommonOdds`), the patch REDIRECTS only so
-  `ColorlessCardPool` stays populated for its six non-shop consumers, and pricing
+  colorless slots carry companions: BOTH slots are Uncommon-or-Rare at renormalized
+  odds (`SlotOneUncommonOdds` / `SlotTwoUncommonOdds`, both mirroring
+  `SHOP_COMPANION_RARITY_ODDS`) and differ by nation only; the patch REDIRECTS only,
+  so `ColorlessCardPool` stays populated for its six non-shop consumers; and pricing
   must match tier 0.5's model of the same channel —
-  `Patches/MerchantCompanionSlots.cs:37-41,59,132`.
+  `Patches/MerchantCompanionSlots.cs`. **[USER] 2026-08-10** restored slot 2's floor
+  (R116/NC-10 had removed it, `CONSTANTS_VERSION` 9) and deleted the base-colorless
+  last rung: an unfillable slot is now OMITTED, matching `tier05/shop.py`.
 - **R69** (`tier0/DECISIONS.md:2164`) — the Orobas upgrade DISPLAYS as "Dodoco
   Tales"; the C# type stays `ExplosiveFrags`, because renaming it moves the runtime
   relic id and that is a co-op desync

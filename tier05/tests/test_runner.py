@@ -75,6 +75,7 @@ def test_realistic_runner_enables_both_run_layers(monkeypatch, capsys):
         "n_acts": None,                 # §10.1: default spans RUN_ACTS
         "jobs": 1,                      # serial unless --jobs asks
         "route_name": "hunter",         # §11: elite-seeking is the default
+        "force_cards": None,            # EB-17p: the CLI never forces a card
     }
     assert "realistic (relics + potions)" in capsys.readouterr().out
 
@@ -119,6 +120,7 @@ def test_bare_runner_preserves_historical_defaults(monkeypatch):
         "n_acts": None,                 # §10.1: default spans RUN_ACTS
         "jobs": 1,                      # serial unless --jobs asks
         "route_name": "hunter",         # §11: elite-seeking is the default
+        "force_cards": None,            # EB-17p: the CLI never forces a card
     }
 
 

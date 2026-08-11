@@ -47,7 +47,7 @@ public sealed class BarbaraMelody : CustomCardModel, ICompanionCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Barbara — Soothing Melody"),
+        ("title", "Barbara — Let the Show Begin♪"),
         ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Gain 4 [gold]Burst Energy[/gold]."),
     };
 
