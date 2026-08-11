@@ -279,6 +279,95 @@ def test_canonical_tags_reads_only_the_declared_tag_property():
         "bool ReadsOtherCards => card.Tags.Contains(CardTag.Strike);") == []
 
 
+def test_parse_card_records_the_tokens_a_card_makes_and_names():
+    """`EB-63`. Both facts existed and both were thrown away.
+
+    The create call was matched by TOKEN_CREATE (which `read_pool` already
+    used to find the pool's token TYPES) and then not written down, so nobody
+    could ask which CARD made the token. The hover-tip is the other spelling:
+    the card names the token without making one, which is a mention and never
+    a generation.
+    """
+    source = """
+    public sealed class Fake : CardModel {
+        IEnumerable<IHoverTip> ExtraHoverTips => HoverTipFactory.FromCard<Tok>();
+        public Fake() : base(1, CardType.Skill, CardRarity.Common) { }
+        async Task OnPlay() { await Tok.CreateInHand(base.Owner); }
+    }
+    """
+    card = extract.parse_card(source, "Fake")
+    assert card["creates"] == ["Tok"]
+    assert card["card_refs"] == ["Tok"]
+
+
+def test_parse_card_records_what_a_computed_magnitude_counts():
+    """`EB-63`, the other half: a CalculatedVar's ARGUMENTS.
+
+    The census's P2 predicate says "this card's number is computed at play
+    time" from the presence of the var. What the number is computed FROM lives
+    in the constructor argument and the multiplier lambda, and without those
+    the card is a payoff of nothing nameable -- which is how 24 of the five
+    pools' payoff-shaped cards ended up unattributed.
+    """
+    source = """
+    public sealed class Fake : CardModel {
+        IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[2] {
+            new CalculationBaseVar(0m),
+            new CalculatedVar("CalculatedToks").WithMultiplier(
+                (CardModel card, Creature? _) =>
+                    PileType.Exhaust.GetPile(card.Owner).Cards.Count(
+                        (CardModel c) => c.Tags.Contains(CardTag.Tok)))
+        };
+        public Fake() : base(2, CardType.Skill, CardRarity.Rare) { }
+    }
+    """
+    calc, = extract.parse_card(source, "Fake")["calc_vars"]
+    assert calc["var"] == "CalculatedVar"
+    assert calc["args"] == ['"CalculatedToks"']
+    assert calc["reads"] == ["CardTag.Tok", "PileType.Exhaust"]
+
+
+def test_a_longer_fluent_chain_still_yields_its_reads():
+    """The multiplier is not always the first link after the constructor.
+
+    Four cards put a marker call in front of it. Matching only
+    `.WithMultiplier(` dropped their reads silently, which is the worst shape
+    of extraction bug: the card still appears, with a state of nothing.
+    """
+    source = """
+    public sealed class Fake : CardModel {
+        IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[1] {
+            new CalculatedDamageVar(ValueProp.Move).FromOsty().WithMultiplier(
+                delegate(CardModel card, Creature? _) {
+                    return card.Owner.AllCards.Count(
+                        (CardModel c) => c.Tags.Contains(CardTag.Tok)
+                                         || c is Widget);
+                })
+        };
+        public Fake() : base(1, CardType.Attack, CardRarity.Rare) { }
+    }
+    """
+    calc, = extract.parse_card(source, "Fake")["calc_vars"]
+    assert calc["reads"] == ["CardTag.Tok", "is Widget"]
+
+
+def test_a_calculated_var_without_a_multiplier_reads_nothing():
+    """Fail EMPTY, not wrong. A var whose shape changed must not silently
+    inherit the reads of the next var in the file."""
+    source = """
+    public sealed class Fake : CardModel {
+        IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[1] {
+            new CalculatedDamageVar(ValueProp.Move)
+        };
+        public Fake() : base(1, CardType.Attack, CardRarity.Common) { }
+        async Task OnPlay() { var x = card.Tags.Contains(CardTag.Tok); }
+    }
+    """
+    calc, = extract.parse_card(source, "Fake")["calc_vars"]
+    assert calc["args"] == ["ValueProp.Move"]
+    assert calc["reads"] == []
+
+
 def test_supplement_upgrade_uses_row_shape_not_card_identity():
     row = {"effects": [
         {"op": "conditional", "then": [

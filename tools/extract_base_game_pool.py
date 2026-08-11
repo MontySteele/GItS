@@ -139,6 +139,34 @@ GENERIC_CMD = re.compile(r"\b(\w+Cmd)\.(\w+)<")
 ORB = re.compile(r"<(\w+Orb)>")
 # `CardKeyword.Exhaust` / `.Retain` / `.Ethereal` -- rules on the card.
 KEYWORD = re.compile(r"CardKeyword\.(\w+)")
+# --- the payoff-census reads (EB-63, 2026-08-10) -----------------------------
+# Same additive contract as the block above: nothing the extractor EMITS
+# changes, only what the JSON RECORDS. `tools/payoff_census.py` could not see
+# a card's token layer at all, because the two facts that carry it were
+# computed and then thrown away.
+#
+# (1) TOKEN_CREATE already existed above and `read_pool` already used it to
+#     find token card TYPES for the pool. `parse_card` never wrote down WHICH
+#     card made which token, so "the Silent's shiv cards" was not a set the
+#     census could form.
+# (2) A `new Calculated*Var(...)` says "this card's number is computed at play
+#     time" -- the census's P2 predicate. Its ARGUMENTS say what it is computed
+#     FROM, and they were dropped entirely, so every computed-magnitude card
+#     read as a payoff of nothing in particular.
+#
+# `HoverTipFactory.FromCard<X>` is the third spelling of a token mention: the
+# card NAMES the token without creating one. It is a mention, never a
+# generation -- the same distinction PowerCmd.Apply vs HoverTipFactory.FromPower
+# already draws for powers.
+CALC_VAR = re.compile(r"new (Calculated\w*Var)\(")
+CARD_REF = re.compile(r"\bFromCard<(\w+)>")
+# What a computed magnitude COUNTS, in the three spellings the pools use:
+# a CardTag, a pile, a card type, or a combat-history entry type.
+CALC_READ = re.compile(r"\b(CardTag|PileType|CardType)\.(\w+)|\bOfType<(\w+)>")
+# A fifth spelling, and the only one that is a bare type test: `c is Soul`
+# counts cards of one class in a pile. Restricted to a capitalised identifier
+# so `is null` and friends stay out.
+CALC_IS = re.compile(r"\bis ([A-Z]\w+)\b")
 
 
 def game_dll() -> Path:
@@ -360,6 +388,64 @@ def decompile_character(
     return names, sources
 
 
+def _balanced_end(text: str, open_at: int) -> int:
+    """Index just past the `)` that closes the `(` at `open_at`.
+
+    The decompiler puts a `WithMultiplier` lambda across several lines and
+    nests parentheses inside it, so the end of a call cannot be found by
+    searching for the next `)`.
+    """
+    depth = 0
+    for i in range(open_at, len(text)):
+        if text[i] == "(":
+            depth += 1
+        elif text[i] == ")":
+            depth -= 1
+            if not depth:
+                return i + 1
+    return len(text)
+
+
+def _calculated_vars(src: str) -> list[dict]:
+    """Every `new Calculated*Var(...)` on the card, with what it reads.
+
+    Three fields per entry, and they answer three different questions:
+      `var`   -- which constructor (`CalculatedDamageVar`, `CalculatedVar`...).
+      `args`  -- the constructor's own arguments, verbatim. For the named
+                 shape this is the var's KEY, which is the game's own word
+                 for the quantity being counted.
+      `reads` -- the tags, piles, card types, history entry types and card
+                 classes named anywhere in the var's fluent chain, which is
+                 where the multiplier lambda lives. This is the state the
+                 magnitude is a function of, and it is the half the census
+                 needs: without it a computed-magnitude card is a payoff of
+                 something unnameable.
+
+    THE WHOLE CHAIN, not just `WithMultiplier`. The lambda is not always the
+    first link -- `new CalculatedDamageVar(...).FromOsty().WithMultiplier(...)`
+    puts a marker call in front of it -- so matching one expected method name
+    silently dropped the reads of every card that used a longer chain.
+
+    Recorded verbatim and NOT interpreted here. Deciding which of these reads
+    counts as a layer is the census's rubric, not the extractor's business.
+    """
+    out = []
+    for m in CALC_VAR.finditer(src):
+        open_at = m.end() - 1
+        end = _balanced_end(src, open_at)
+        args = _split_args(src[open_at + 1:end - 1])
+        chain = ""
+        while (link := re.match(r"\s*\.\w+\(", src[end:])):
+            link_open = end + link.end() - 1
+            end = _balanced_end(src, link_open)
+            chain += src[link_open:end]
+        reads = {f"{enum}.{member}" if enum else f"OfType<{entry}>"
+                 for enum, member, entry in CALC_READ.findall(chain)}
+        reads |= {f"is {cls}" for cls in CALC_IS.findall(chain)}
+        out.append({"var": m.group(1), "args": args, "reads": sorted(reads)})
+    return out
+
+
 def parse_card(src: str, name: str) -> dict | None:
     m = CTOR.search(src)
     if not m:
@@ -385,6 +471,12 @@ def parse_card(src: str, name: str) -> dict | None:
         "orbs": sorted(set(ORB.findall(src))),
         "keywords": sorted(set(KEYWORD.findall(src))),
         "mp_only": bool(MP_ONLY.search(src)),
+        # Payoff-census reads (EB-63). Additive: no existing consumer reads
+        # them either.
+        "creates": sorted({token for match in TOKEN_CREATE.findall(src)
+                           for token in match if token}),
+        "card_refs": sorted(set(CARD_REF.findall(src))),
+        "calc_vars": _calculated_vars(src),
     }
 
 

@@ -30,7 +30,12 @@ INPUTS (both local, both gitignored)
   game_ref/<character>.json       tools/extract_base_game_pool.py output. The
                                   MENTION side: every `<XPower>`/`<XOrb>` type
                                   the body names, its Cmd vocabulary, keywords,
-                                  printed vars, rarity, type, cost.
+                                  printed vars, rarity, type, cost -- and,
+                                  since `EB-63`, the token cards it creates or
+                                  names (`creates`, `card_refs`) and what its
+                                  computed magnitudes count (`calc_vars`).
+                                  Re-extract before censusing: an older
+                                  extract is refused, not silently used.
   game_ref/role_tempo_canon.json  tools/canon_role_tempo.py output. Used for
                                   ONE field: `tokens`, the GENERATE side
                                   (`PowerCmd.Apply<X>` / `OrbCmd.Channel<X>`).
@@ -72,10 +77,11 @@ DRAFTABLE = ("common", "uncommon", "rare")
 # file generalises that from the five hand-named packages to every layer the
 # pools actually carry, so no archetype is admitted or erased by hand.
 #
-# Most layers name themselves -- a Power type or an Orb type. Four do not:
+# Most layers name themselves -- a Power type or an Orb type. Six do not:
 # they are command shapes with no type name, and a census that could not see
 # them would miss the summon layer, the star layer and the exhaust layer
-# outright.
+# outright. A seventh source, the token-creation family, is DERIVED per pool
+# rather than listed here -- see `token_markers` below.
 def _any(card: dict, *calls: str) -> bool:
     return any(x in card["cmds"] or x in card["generic_cmds"] for x in calls)
 
@@ -109,21 +115,79 @@ MARKERS = {
                        "CardPileCmd.AddGeneratedCardsToCombat")),
 }
 
+# --- RUBRIC R1(b): the TOKEN-CREATION layer family -------------------------
+#
+# AMENDED 2026-08-10 by [USER]'s ruling on the EB-56 packet. The six markers
+# above are a fixed list, and a whole kind of layer was missing from it: a
+# character whose plan is to CONJURE a card that is not in her own pool. The
+# Silent's shiv is the plain case. Twelve of her cards name the token and
+# eight of them make one, so the layer is as broad as her poison layer -- and
+# the census could not see one card of it, because no marker in the list above
+# is about card creation.
+#
+# THE FAMILY IS DERIVED, NOT LISTED. There is no token name in this file, and
+# there must not be: a committed tool may not carry a table of base-game card
+# names (`tools/extract_base_game_pool.py`, the IP note). Instead the layers of
+# a pool are read off the pool's own extraction -- one layer per token type
+# some card of that pool creates. Whatever the five pools create gets a layer
+# by the same rule, and each layer then faces the same MIN_LAYER admission
+# test as every other layer. Nothing is special-cased for the shiv.
+#
+# WHAT THE EXTRACTION CAN AND CANNOT SEE, stated because it bounds the family.
+# `extract_base_game_pool.TOKEN_CREATE` recognises two creation spellings,
+# `<Token>.CreateInHand(...)` and `CreateCard<Token>`. A pool that makes its
+# token some third way has token MENTIONS in the extract but no token
+# CREATIONS, and admitting such a layer would be the worst available error:
+# with the generate side blind, every enabler of the layer would read as a
+# payoff of it, which is exactly what P1's strict form exists to prevent. So
+# the family is keyed on creation, and a mention-only token is a stated blind
+# spot rather than a bad archetype. The packet names the one that occurs.
+TOKEN_PREFIX = "Token:"
+
+
+def _token_touch(token: str):
+    """MENTION side: the card NAMES the token, in any of three spellings.
+
+    It creates one; or it hover-tips the token's card (`FromCard<Token>`),
+    which is how canon prints "this makes/uses that card" without making one;
+    or its computed magnitude counts cards carrying the token's own CardTag,
+    which is a card literally reading the token count off a pile.
+    """
+    tag = f"CardTag.{token}"
+
+    def touch(card: dict) -> bool:
+        return (token in card["creates"]
+                or token in card["card_refs"]
+                or any(tag in cv["reads"] for cv in card["calc_vars"]))
+    return touch
+
+
+def _token_generate(token: str):
+    """GENERATE side: the card MAKES one. Naming it is not making it."""
+    return lambda card: token in card["creates"]
+
+
+def token_markers(pool: list[dict]) -> dict:
+    """The token layers of ONE pool, derived from that pool's own extract."""
+    return {f"{TOKEN_PREFIX}{token}":
+            (_token_touch(token), _token_generate(token))
+            for token in sorted({t for c in pool for t in c["creates"]})}
+
 MIN_LAYER = 6          # R3(a). See `sensitivity()` -- 5 / 6 / 8 all reported.
 GENERIC_POOLS = 3      # R3(b). Broad in this many pools -> generic, not an
                        # identity. See `archetypes()`.
 
 
-def mentions(card: dict) -> set[str]:
+def mentions(card: dict, markers: dict) -> set[str]:
     """R2, the MENTION side: every layer the card's body so much as names."""
     out = set(card["powers"]) | set(card["orbs"])
-    for marker, (touch, _gen) in MARKERS.items():
+    for marker, (touch, _gen) in markers.items():
         if touch(card):
             out.add(marker)
     return out
 
 
-def generates(card: dict, tokens: list[str]) -> set[str]:
+def generates(card: dict, tokens: list[str], markers: dict) -> set[str]:
     """R2, the GENERATE side: the apply/channel/create half only.
 
     `tokens` is `canon_role_tempo.classify_canon`'s own generate list --
@@ -135,7 +199,7 @@ def generates(card: dict, tokens: list[str]) -> set[str]:
     packet's judgment-call section names the affected cards.
     """
     out = set(tokens)
-    for marker, (_touch, gen) in MARKERS.items():
+    for marker, (_touch, gen) in markers.items():
         if gen(card):
             out.add(marker)
     return out
@@ -182,7 +246,8 @@ def second_hand(layer: str, ment: set[str], gen: set[str]) -> bool:
     return layer in ment and layer not in gen and bool(gen)
 
 
-def classify(card: dict, tokens: list[str], strict_p2: bool = False) -> dict:
+def classify(card: dict, tokens: list[str], markers: dict,
+             strict_p2: bool = False) -> dict:
     """`strict_p2` is THE open rubric choice, and it is [USER]'s to settle.
 
     P2/P3 say "this card's number is computed from state" but not FROM WHICH
@@ -201,7 +266,7 @@ def classify(card: dict, tokens: list[str], strict_p2: bool = False) -> dict:
     self-serving rubric R137 refuses. Both are computed; the packet reports
     the delta; the ratification names one.
     """
-    ment, gen = mentions(card), generates(card, tokens)
+    ment, gen = mentions(card, markers), generates(card, tokens, markers)
     calc, consume = p2_computed_magnitude(card), p3_consumption(card)
     payoff_of, second, generator_of = set(), set(), set()
     for layer in ment:
@@ -304,6 +369,28 @@ def offer_reach(payoffs: list[dict], pool: list[dict]) -> float:
                for r in DRAFTABLE if sizes.get(r))
 
 
+CENSUS_FIELDS = ("creates", "card_refs", "calc_vars")
+
+
+def require_census_fields(pool: list[dict], character: str) -> None:
+    """Refuse a pool extracted BEFORE the token layer existed.
+
+    The three fields below arrived with `EB-63` on 2026-08-10. An extract made
+    before that has none of them, and every token predicate would then read
+    "this card creates nothing" -- so the run would quietly produce the OLD
+    census while claiming the AMENDED rubric. Same failure, and the same
+    refusal, as the pool/canon name check below: a stale input is not a small
+    input, it is a different world.
+    """
+    missing = [f for f in CENSUS_FIELDS if pool and f not in pool[0]]
+    if missing:
+        raise SystemExit(
+            f"STOP: the {character} extract predates the token-creation layer "
+            f"(no {', '.join(missing)} on its cards). Re-run "
+            f"tools/extract_base_game_pool.py --characters "
+            f"Ironclad,Silent,Defect,Necrobinder,Regent before censusing.")
+
+
 def build(game_ref: Path, strict_p2: bool = False) -> dict:
     canon = json.loads((game_ref / "role_tempo_canon.json")
                        .read_text(encoding="utf-8"))["cards"]
@@ -319,7 +406,9 @@ def build(game_ref: Path, strict_p2: bool = False) -> dict:
                 f"{len(missing)} card names -- the two extractions are not of "
                 f"the same pool and the mention/generate split would be "
                 f"joined across worlds. First few: {missing[:5]}")
-        rows = [classify(c, tokens[c["name"]], strict_p2)
+        require_census_fields(pool, character)
+        markers = MARKERS | token_markers(pool)
+        rows = [classify(c, tokens[c["name"]], markers, strict_p2)
                 for c in pool]
         arch = archetypes(rows)
         out[character] = {
@@ -376,7 +465,9 @@ def sensitivity(game_ref: Path) -> dict:
             pool = json.loads((game_ref / f"{character.lower()}.json")
                               .read_text(encoding="utf-8"))
             tokens = {c["name"]: c["tokens"] for c in canon[character]}
-            rows = [classify(c, tokens[c["name"]]) for c in pool]
+            require_census_fields(pool, character)
+            markers = MARKERS | token_markers(pool)
+            rows = [classify(c, tokens[c["name"]], markers) for c in pool]
             per[character] = len(archetypes(rows, k))
         out[k] = per
     return out
