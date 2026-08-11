@@ -102,6 +102,19 @@ an old Klee-only PCK cannot pass validation. Machine paths come from
 `klee-mod/local.props` / `Directory.Build.props`. Depth:
 `docs/current/atlas/klee-mod-build-pck.md`, `klee-mod-runtime.md`.
 
+## Live-play hazards
+
+- **Punch Off soft-lock (upstream — not ours to fix).** Entering the Punch Off
+  event room hangs the game: `PunchOff.PunchEachOther()` instantiates a scene
+  whose GPUParticles RID is null and the engine error-loops on the main thread —
+  no repaint, bridge unreachable, `godot.log` grows without bound. Reproduced
+  2026-08-08 on package `0.2-589`, game `v0.107.1`; not seed-specific. **The run
+  save is poisoned**: `continue` re-enters the room and hangs again — the only
+  exit is `abandon_run` from the main menu. Avoid the event in every live
+  session. Trace + frozen frame:
+  `review/active/livegame-captures-2026-08-08.md` §4. (Ex-BACKLOG `EB-1`,
+  routed here 2026-08-11 — a hazard to route around, not open work.)
+
 ## Lints
 
 CI's `lints` job invokes these directly (the softlock gates):

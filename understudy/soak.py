@@ -1051,6 +1051,11 @@ class RunDriver:
             # THE GRACE PERIOD IS THE WHOLE POINT (see `Session.died`): asked
             # instantly, a game that is crashing right now still reads alive,
             # and the build defect gets filed under a harness-side kind.
+            # Known limitation (ex-BACKLOG EB-12, "Understudy Defect 14"): one
+            # live observation 2026-08-08 of `bridge_unreachable` by timeout
+            # with the process alive -- never reproduced (the 2026-08-08
+            # traversal re-sweep found nothing). Filed, not fixed; reopens on
+            # a second observation.
             kind = ("process_died" if self.session.died()
                     else "bridge_unreachable")
             detail_ = f"{e} [exit code {self.session.exit_code}]"

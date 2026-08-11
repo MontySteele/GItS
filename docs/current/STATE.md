@@ -151,6 +151,9 @@ returns to [USER] only when its trigger fires: `W1` X4 (block-side Guest Cast),
 unblocked since `O-1` closed; a new reading runs under EXPERIMENTS law),
 `W4` X5 (fanfare floor), `W5` `lynette_box_trick` (X7, R161 — deliberately left
 alone at its current rarity; as a companion card it is close to "what if I
-high-roll a colorless option". **Trigger:** playtest shows it overperforming).
+high-roll a colorless option". **Trigger:** playtest shows it overperforming),
+`W6` Kokomi P4/P3 prevention-on-curve design review (EB-26 `D7(b)`, R172 —
+ex-BACKLOG `EB-80`. **Trigger:** the post-wave Kokomi playtest shows she needs
+more warding; evidence packet `review/active/eb26-lesser-ward-draft.md` §5).
 (Migrated from the retired watch-items docket, frozen at tag
-`pre-simplification-2026-08-06`; `W5` added 2026-08-10.)
+`pre-simplification-2026-08-06`; `W5` added 2026-08-10; `W6` 2026-08-11.)
