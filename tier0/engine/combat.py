@@ -126,6 +126,11 @@ def _settle_phases(state: CombatState) -> None:
                 e.counts_for_fatal = True     # the last bar is a real death
             state.emit("phase_change", enemy=e.name, hp=e.hp,
                        remaining=len(e.phases))
+    # EB-58: this is the documented "after every site that can drop enemy HP"
+    # chokepoint, so it is also where an aura on a body that just died stops
+    # counting as uptime. Runs AFTER the revive loop, so a phased knockdown
+    # (fresh bar, aura already cleared above) is never reported as a death.
+    reactions.close_dead_auras(state)
 
 
 def card_playable(state: CombatState, card: Card) -> bool:

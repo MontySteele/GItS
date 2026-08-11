@@ -8,10 +8,20 @@ docs/archive/curtain-call-sprint-log-2026-07-27.md §4 and fixed for the sweep:
               carried a LIVE hydro aura at any point in the turn. An aura
               interval opens at its `aura_applied` (element == hydro) and
               closes at the first later `reaction` consuming that target's
-              aura, an `aura_wasted` expiry on that target, or fight end.
-              Enemy death mid-aura is not separately tracked; the small
-              systematic overcount is identical across cells, which is what
-              the pre-registered ±10% bound compares.
+              aura, an `aura_wasted` expiry on that target, an `aura_ended`
+              on that target (EB-58: the body died -- death CLOSES the
+              interval on the turn of the kill, it is not counted as waste,
+              because an aura on a corpse is no uptime at all), or fight end.
+
+              EB-58 CORRECTION. Before that fix nothing closed a dead
+              target's interval and the reader ran it to the last turn of the
+              fight. That was not a small overcount and it was not identical
+              across cells: it scaled with post-kill fight length, which is
+              exactly what differs between the arms `exp_curtain_call` prints
+              side by side. The ledger fixture read 95.0% where the identical
+              application on a surviving target read 15.0%; AURA_DURATION_TURNS
+              = 2 bounds any honest interval at 3 turns. Uptime numbers read
+              before this fix are not comparable to numbers read after it.
 - applications  count of hydro `aura_applied` events per combat (the raw
               application rate, cell-comparable the same way).
 
@@ -70,7 +80,7 @@ def trace(log: list[dict]) -> AuraTrace:
                 _close(tgt, turn)
         elif ev == "reaction" and e.get("aura") == "hydro":
             _close(tgt, turn)
-        elif ev == "aura_wasted" and e.get("element") == "hydro":
+        elif ev in ("aura_wasted", "aura_ended") and e.get("element") == "hydro":
             _close(tgt, turn)
     for tgt in list(open_at):
         _close(tgt, t.turns)

@@ -131,8 +131,11 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
         KleePck.Path("kokomi/ui/select_portrait_locked.png");
     public override string? CustomIconTexturePath =>
         KleePck.Path("kokomi/ui/char_icon.png");
+    // The halo behind the icon, not a stroke around it -- see the note on
+    // Klee.CustomIconOutlineTexturePath for the measured convention (EB-37).
+    // Derived from the fill by tools/gen_char_icon_outlines.py.
     public override string? CustomIconOutlineTexturePath =>
-        KleePck.Path("kokomi/ui/char_icon.png");
+        KleePck.Path("kokomi/ui/char_icon_outline.png");
     /// <summary>
     /// combat_visuals.tscn, NOT the convention combat.tscn Klee and Furina
     /// use. Hers does not exist -- there is no rig to put in it until the art

@@ -136,7 +136,16 @@ jumpy_dumpty_mk2	ImageGen/images/cards/klee/jumpy_dumpty_mk2.png	500	380	cover	c
 bombs_away	ImageGen/images/cards/klee/bombs_away.png	500	380	cover	center@1.3	auto	1	gif	Kaboom! Plunging Preview.gif	45	vfx
 cluster_charge	ImageGen/images/cards/klee/cluster_charge.png	500	380	cover	top@1.15	auto	1	png	Starlit Sky Firework Card 10.png		splash
 flame_on_the_wick	ImageGen/images/cards/klee/flame_on_the_wick.png	500	380	contain	center	auto	1	png	Item Leisurely Fireworks.png		item
-no_holding_back	ImageGen/images/cards/klee/no_holding_back.png	500	380	cover	top	auto	1	png	Klee Multi Wish.png		splash
+# EB-39 re-hunt (2026-08-08). L6 flagged the incumbent for trimming ~76% of
+# its source -- 'Klee Multi Wish.png' is a 320x1024 banner strip, so a 500x380
+# cover keeps a quarter of the figure. Same clipping round 3 rejected for
+# the_big_one. r1 is UNCHANGED so the shipped bytes do not move; every added row
+# is rank >= 2 by design (art_process promotes only rank 1), so nothing ships
+# without a pick and the pick is [USER]'s.
+no_holding_back	ImageGen/images/cards/klee/no_holding_back.png	500	380	cover	top	shortlist	1	png	Klee Multi Wish.png		splash
+no_holding_back	ImageGen/images/cards/klee/no_holding_back.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Klee Multi Wish.png		splash
+no_holding_back	ImageGen/images/cards/klee/no_holding_back.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Klee Portrait.png		splash
+no_holding_back	ImageGen/images/cards/klee/no_holding_back.png	500	380	cover	center	shortlist	4	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash
 # ---------- CARDS: spark-set additions (taste-pass re-picks applied; da_da_da and
 # hot_hands became shortlists — their sticker candidates need an eyeball) ----------
 snap	ImageGen/images/cards/klee/snap.png	500	380	cover	center	auto	1	png	Icon Emoji Paimon's Paintings 25 Klee 1.png		sticker
@@ -662,6 +671,15 @@ fish_blasting	ImageGen/images/cards/klee/fish_blasting.png	500	380	cover_autocro
 # Furina character-select backdrop -- her own Fontaine namecard so the select
 # screen stops falling back to Klee's red Explosive namecard (2026-07-23).
 furina_select_bg	ImageGen/images/furina/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Namecard Background Furina Banquet.png		splash
+# Furina energy icons (EB-40 / furina-art-pass-requirements sec.8). Klee's two
+# rows with Element Pyro.svg swapped for Hydro -- same sizes, same contain/center,
+# same register. They have NO consumer yet: no C# reads them and Furina's
+# CustomEnergyCounterPath still returns the base game's ironclad counter, because
+# the blocking work is the SCENE, not the art (sec.8 says exactly this). Produced
+# now so the scene work is a pure wiring job, and so the sec.11 smoke-test item
+# ('inspect the 22x22 energy icon at native scale') has something to inspect.
+furina_energy_icon_large	ImageGen/images/furina/ui/energy_icon_74.png	74	74	contain	center	auto	1	svg	Element Hydro.svg		icon
+furina_energy_icon_small	ImageGen/images/furina/ui/energy_icon_22.png	22	22	contain	center	auto	1	svg	Element Hydro.svg		icon
 
 # ---------- COMPANION POWER ICONS (2026-07-24 sweep: these four powers had
 #            no KleePowerIcons case at all and rendered the base placeholder) ----------

@@ -226,6 +226,11 @@ public static class KleeMod
                     // the tip that says what the number is made of.
                     [Cards.KokomiRiderTips.ChargeKey + ".title"] =
                         "Charge scaling",
+                    // EB-64's shape, one key over: Muster had no row and
+                    // shipped as the raw key -- `Reinforcements` rendered
+                    // "card_keywords.KLEEMOD-MUSTER.title" as the keyword name
+                    // on a live shop screen (0.2-634, EB-53 capture session).
+                    [Cards.KokomiRiderTips.MusterKey + ".title"] = "Muster",
                 };
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))

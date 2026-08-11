@@ -386,6 +386,12 @@ GENERATOR_OWNED = {
     "ImageGen/images/kokomi/summon/bake_kurage.png":        "cut_kurage_summon.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
+    # EB-37: derived from each character's own char_icon.png, so a plan row
+    # claiming one of these would be sourcing a halo from the wiki instead of
+    # from the fill it has to agree with.
+    "ImageGen/images/ui/char_icon_outline.png":             "gen_char_icon_outlines.py",
+    "ImageGen/images/furina/ui/char_icon_outline.png":      "gen_char_icon_outlines.py",
+    "ImageGen/images/kokomi/ui/char_icon_outline.png":      "gen_char_icon_outlines.py",
 }
 
 

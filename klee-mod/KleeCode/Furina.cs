@@ -81,8 +81,11 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
         KleePck.Path("furina/ui/select_portrait_locked.png");
     public override string? CustomIconTexturePath =>
         KleePck.Path("furina/ui/char_icon.png");
+    // The halo behind the icon, not a stroke around it -- see the note on
+    // Klee.CustomIconOutlineTexturePath for the measured convention (EB-37).
+    // Derived from the fill by tools/gen_char_icon_outlines.py.
     public override string? CustomIconOutlineTexturePath =>
-        KleePck.Path("furina/ui/char_icon.png");
+        KleePck.Path("furina/ui/char_icon_outline.png");
     // combat.tscn is her animated convention scene (animation sprint 2,
     // Track B2 — she joins Klee on the pck-src authoring channel and off the
     // build_pck.ps1 heredoc). combat_visuals.tscn stays as the fallback that

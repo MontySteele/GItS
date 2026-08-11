@@ -48,7 +48,11 @@ core is suite-gated on synthetic fixtures
 `gen_klee_cards.py` (the roster codegen itself), `art_fetch.py`,
 `art_process.py`, `art_hunt.py`, `art_contact_sheet.py`,
 `gen_kokomi_stills.py` (NO byte-pin twin, unlike Furina's),
-`gen_transition_wipe.py`, `cut_combat_layers.py`, `cut_salon_members.py`,
+`gen_transition_wipe.py`,
+`gen_char_icon_outlines.py` (derives each character's top-panel outline halo
+from their own `char_icon.png`; `--check` re-derives and diffs, and all three
+out-paths are in `art_lint.py`'s L11 producer table),
+`cut_combat_layers.py`, `cut_salon_members.py`,
 `cut_kurage_summon.py` (the Bake-Kurage field entity for the end-of-turn
 docket; hand polygon and `--check` twin, same shape as `cut_salon_members.py`,
 and its out-path is registered in `art_lint.py`'s L11 producer table),

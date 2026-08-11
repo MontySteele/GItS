@@ -66,8 +66,44 @@ def apply_aura(state: CombatState, enemy: Enemy, element: str,
                source=source)
 
 
+def close_dead_auras(state: CombatState) -> None:
+    """End every aura sitting on a corpse, AT THE TURN THE BODY DIED.
+
+    EB-58. `tick_auras` walks `living_enemies` only, so an aura left on a
+    dead enemy (a killing blow applies its own element before the hit lands,
+    and an aura'd enemy can simply be killed) never expired and never emitted
+    anything. Nothing closed the interval, so `tier05.aura_telemetry` ran it
+    to the last turn of the fight: the ledger fixture read 95.0% uptime where
+    the identical application on a surviving target read 15.0%, and
+    AURA_DURATION_TURNS = 2 bounds any honest interval at 3 turns.
+
+    Death CLOSES the interval; it is not folded into `aura_wasted`. A distinct
+    `aura_ended` event keeps the published waste counter (`auras_wasted`)
+    measuring exactly what it always measured -- an aura that timed out on a
+    live body -- while giving the uptime reader an honest terminator. An aura
+    on a corpse is not "wasted uptime", it is no uptime: the body is gone.
+
+    Called from `combat._settle_phases`, the documented chokepoint after every
+    site that can drop enemy HP, so the event lands on the turn of the kill --
+    and again from `tick_auras` as a turn-start backstop. A phased boss has
+    already revived (fresh body, aura cleared) by the time this runs, so a
+    knockdown is not reported as a death here.
+    """
+    for e in state.enemies:
+        if e.aura and not e.alive:
+            state.emit("aura_ended", element=e.aura, target=e.name,
+                       cause="death")
+            e.aura = None
+            e.aura_turns_left = 0
+
+
 def tick_auras(state: CombatState) -> None:
-    """Called at player turn start; expires stale auras (logged as waste)."""
+    """Called at player turn start; expires stale auras (logged as waste).
+
+    Auras on the dead are closed first (EB-58) and never reach the timer:
+    `aura_wasted` stays a live-body expiry.
+    """
+    close_dead_auras(state)
     for e in state.living_enemies:
         if e.aura:
             e.aura_turns_left -= 1
@@ -179,8 +215,31 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
                 state, C.CATALYTIC_BURST_PER_REACTION * bonus, "catalytic")
         state.emit("reaction", reaction=name, trigger=trigger, aura=aura,
                    target=enemy.name,
+                   # PROVISIONAL when an amplifier fired: the multipliers that
+                   # scale the amplified hit have not run yet, so
+                   # effects.deal_damage_to_enemy settles this key through
+                   # settle_amp_delta() once the realized damage is known
+                   # (EB-57). A caller that hits resolve_hit directly with no
+                   # downstream chain keeps this raw value, which is the
+                   # realized uplift for that caller by construction.
                    amp_delta=(out - damage) if out != damage else 0)
     return out
+
+
+def settle_amp_delta(state: CombatState, log_mark: int, realized: int) -> None:
+    """Rewrite the amp delta on the `reaction` event emitted since `log_mark`.
+
+    EB-57. The event is emitted mid-pipeline (the aura is consumed before
+    Vulnerable, Slow, block and the overkill clamp touch the hit), so the
+    only honest place to compute "how much extra damage actually landed
+    because of the amp" is at the bottom of the pipeline. One `resolve_hit`
+    emits at most one `reaction` event, so the first match after the mark is
+    this hit's own. A no-op if the reaction was not an amplifier.
+    """
+    for ev in state.log[log_mark:]:
+        if ev.get("event") == "reaction" and ev.get("amp_delta"):
+            ev["amp_delta"] = int(realized)
+            return
 
 
 def _splash(state: CombatState, enemy: Enemy, amount: int) -> None:
