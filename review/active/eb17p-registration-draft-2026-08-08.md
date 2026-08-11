@@ -5,16 +5,16 @@
 > filler arm, pair by pair. [USER] also accepted `N = 2400` and chose the
 > filler (§5.1).
 >
-> **All slots filled; cleared to launch.** §5.1's filler, §7's `N` and §7's
-> cost ceiling are set, and §8's predictions and §8.1's redesign trigger were
-> committed on their own on 2026-08-10, before any seed in the registered
-> range was run.
-> **Nothing below is a prediction that has been graded, a number that has
-> been read, or a measurement that has been run.** No measurement was run to
-> produce this document. The mechanism probe described in §11 ran on a
-> THROWAWAY seed set that §4 excludes from the registration, and no number
-> from it appears anywhere in this packet — only the statement that the
-> harness executes.
+> **RUN AND GRADED, 2026-08-10.** Every slot was filled and §8's predictions
+> were committed on their own before any seed in the registered range was
+> run. The sweep then ran at the pinned stamp and was graded blind against
+> them. **The results and the grade are §13, and §1–§12 are the packet as it
+> stood before the read** — they were not edited to fit the outcome. The
+> mechanism probe in §11 ran on a THROWAWAY seed set that §4 excludes, and no
+> number from it appears anywhere in this packet.
+>
+> One read of registered seeds happened before the sweep and is declared in
+> §11.1.
 
 **Provenance.** `docs/current/BACKLOG.md` row `EB-17p`, whose phrase is the
 register's own: *"two decks on the same seeds, one with a copy forced in, one
@@ -632,6 +632,9 @@ act to touch.
 call, not the engineer's. If it is, the remedy is a re-registration of §4's
 seed range, not an edit to this section.
 
+**RULED.** [USER] ruled the disclosure **immaterial**, 2026-08-10 (R173); the
+sweep proceeded on the registered seed range unchanged.
+
 ## 12. Known limits, declared
 
 - **ITT, not per-protocol** (§2.3). A removed or upgraded copy stays in its
@@ -666,7 +669,220 @@ The §7 cost ceiling was confirmed the same day. **No slot is open; the packet
 is cleared to launch.**
 
 — drafted 2026-08-08, branch `eb17p-registration`; amended 2026-08-10 on
-branch `sitting-prep-2026-08-08` to record the countersign, fill the two
-filled slots, and add the §6.1b co-primary. Zero design authority exercised:
-every threshold, direction and taste call is [USER]'s, and the two that are
-still open are still slots.
+branch `sitting-prep-2026-08-08` to record the countersign, fill every slot,
+and add the §6.1b co-primary; run and graded the same day. Zero design
+authority exercised: every threshold, direction and taste call is [USER]'s,
+and the grade in §13 reads the registered columns and stops there. The
+redesign trigger fired for two cards; what to do about that is [USER]'s.
+
+---
+
+## 13. Results and grade — sweep run 2026-08-10
+
+**§8 was not edited to produce this section.** The predictions were committed
+in `eb67706` on 2026-08-10, before the sweep ran; this section compares the
+sweep's output against them and changes nothing above.
+
+**Run.** `PYTHONPATH=. python -m tier05.exp_eb17p_forced_copy --runs 2400
+--jobs 0`, at `RT9/D14/P6/C8`, seed base 11, 2,400 pairs on each of six arms,
+14,400 runs. Wall clock **2 minutes 57 seconds** against a 4-hour ceiling, so
+the stop-and-report rule never engaged and every arm completed its full `N`.
+The raw stamped report is `review/active/eb17p-results-2026-08-10.txt`.
+
+**Tripwires, checked at launch.** S1 clear — the stamp was `RT9/D14/P6/C8`, as
+pinned. S2 clear — the `force_cards=None` byte-identity pin passed with the
+full suite (2,411 passed, 12 xfailed). S3 clear — `DRAFTER_VERSION` was 14, so
+the staged D15 change had not landed. S4 is read per card below.
+
+### 13.1 Compliance first (§6.3), because it decides what may be graded
+
+| card | forced family held at end | upgraded | removed at rest | control acquired it on its own |
+|---|---|---|---|---|
+| `friendly_visit` | 99.04% | 32.83% | 0.00% | 26.04% |
+| `study_buddy` | 98.75% | 74.42% | 0.00% | 29.25% |
+| `borrowed_brilliance` | 98.79% | 26.92% | 0.00% | 3.96% |
+| `elemental_ecstasy` | 97.50% | 26.46% | 0.00% | 15.08% |
+| `kaboom` (filler) | 100.00% | 32.42% | 1.58% | 99.92% |
+
+**S4 did not fire for any of the four cards.** Assignment survived to the
+final deck in 97.5% of runs or better everywhere, and the control arm's own
+acquisition rate — 4% to 29% — attenuates the contrast without collapsing it.
+
+**The filler's two odd-looking columns are structural, not alarming.**
+`kaboom` is a starter card, so "the control arm acquired it on its own" is
+99.92% by construction: every Klee deck already holds it. For the filler the
+compliance question is not *whether* the family is present but *how many
+copies*, and the treated arm ends with a mean of 3.92 copies. §6.4's
+clean-pairs subgroup for `kaboom` is `n = 2` for the same reason and carries
+no information; it is reported and disregarded. Neither is an S4 event.
+
+### 13.2 The filler's row (§6.1) — the size of pure dilution
+
+**`kaboom`: Δ = −1.42 pp**, 95% paired bootstrap [−2.54, −0.25], McNemar
+b = 86, c = 120, p = 0.021. Control winrate 6.83% (164/2400); filler arm 5.42%
+(130/2400).
+
+**Adding one blank card to a Klee reaction deck costs about 1.4 points of
+winrate.** That is what every §6.1 row below has folded into it, and it is why
+§6.1b exists.
+
+### 13.3 The primary rows (§6.1, versus control)
+
+| card | Δ vs control | 95% interval | McNemar b/c | p |
+|---|---|---|---|---|
+| `friendly_visit` | **+3.04 pp** | [+1.71, +4.38] | 173 / 100 | <0.0001 |
+| `study_buddy` | **+0.75 pp** | [−0.54, +2.00] | 132 / 114 | 0.278 |
+| `borrowed_brilliance` | **−1.58 pp** | [−2.75, −0.42] | 83 / 121 | 0.009 |
+| `elemental_ecstasy` | **−1.62 pp** | [−2.75, −0.46] | 82 / 121 | 0.008 |
+| `kaboom` (filler) | **−1.42 pp** | [−2.54, −0.25] | 86 / 120 | 0.021 |
+
+### 13.4 The co-primary rows (§6.1b, versus filler)
+
+| card | Δ vs filler | 95% interval | McNemar b/c | p |
+|---|---|---|---|---|
+| `friendly_visit` | **+4.46 pp** | [+3.25, +5.67] | 164 / 57 | <0.0001 |
+| `study_buddy` | **+2.17 pp** | [+1.08, +3.25] | 115 / 63 | 0.0001 |
+| `borrowed_brilliance` | **−0.17 pp** | [−1.08, +0.75] | 59 / 63 | 0.786 |
+| `elemental_ecstasy` | **−0.21 pp** | [−1.12, +0.67] | 59 / 64 | 0.719 |
+
+**Read together, §6.1 and §6.1b say different things about the same cards, and
+the difference is the dilution.** Two cards that look actively harmful against
+the control — `borrowed_brilliance` and `elemental_ecstasy`, both about
+−1.6 pp — turn out to be indistinguishable from a blank card once dilution is
+taken out. They are not hurting the deck; they are *doing nothing*, and doing
+nothing costs 1.4 points. That distinction is the whole reason [USER] added
+the co-primary on countersign, and it changes the design reading of two of the
+four cards.
+
+### 13.5 Achieved resolution, and a note on the §7.1 hedge
+
+`d` is the realised discordant rate; the MDE is `2.80 × sqrt(d/N)` at
+`N = 2,400`, computed from the sweep's own counts rather than from §7's
+bracket.
+
+| contrast | `d` | achieved MDE |
+|---|---|---|
+| `friendly_visit` vs control | 0.114 | 1.93 pp |
+| `study_buddy` vs control | 0.103 | 1.83 pp |
+| `borrowed_brilliance` vs control | 0.085 | 1.67 pp |
+| `elemental_ecstasy` vs control | 0.085 | 1.66 pp |
+| `kaboom` vs control | 0.086 | 1.67 pp |
+| `friendly_visit` vs filler | 0.092 | 1.73 pp |
+| `study_buddy` vs filler | 0.074 | 1.56 pp |
+| `borrowed_brilliance` vs filler | 0.051 | 1.29 pp |
+| `elemental_ecstasy` vs filler | 0.051 | 1.29 pp |
+
+**§7's bracket was right about the range and wrong about which contrast sat
+where.** The card-versus-control rows landed near the *conservative* end
+(`d ≈ 0.085–0.114` against a conservative bound of 0.11) — the pairing bought
+almost nothing there. The card-versus-filler rows landed at or better than the
+*optimistic* end (`d ≈ 0.051–0.092` against an optimistic bound of 0.05).
+
+§7.1 declined to register the optimistic column for §6.1b on the grounds that
+the correlation between two treated arms was unknown. That refusal was correct
+as discipline and wrong as a guess: the contrast it declined to claim
+resolution for is the one that resolved best. The registered ceiling of 1.9 pp
+held for every row. Recorded here rather than corrected above, because a
+sizing section is what was believed before the read.
+
+### 13.6 The grade, against §8
+
+`friendly_visit` predicted "positive, likely at least +2 pp".
+
+- §6.1 **HIT** — +3.04 pp, positive, at or above the +2 pp threshold. The
+  interval [+1.71, +4.38] does span +2, so "at least 2 pp" is the point
+  estimate's verdict and not the interval's; direction and threshold are both
+  as registered.
+- §6.1b **HIT** — +4.46 pp, and here the whole interval clears +2.
+- **Card grade: PREDICTED.**
+
+`study_buddy` predicted "positive but probably below +2 points".
+
+- §6.1 **HIT** — +0.75 pp, positive, below +2, exactly as registered. Flagged
+  honestly: the interval [−0.54, +2.00] includes zero, so the sweep cannot
+  establish that the card helps at all against the control. "Positive" is the
+  observed sign, not a demonstrated one.
+- §6.1b **MISS** — +2.17 pp, which is positive as predicted but **above** the
+  +2 threshold the prediction placed it below. The interval [+1.08, +3.25]
+  spans +2, so the miss is not decisive either.
+- **Card grade: SPLIT** (§9's rule), with the missing half named: the
+  magnitude against the filler, not the direction.
+
+`borrowed_brilliance` predicted "positive, likely at least +2 points".
+
+- §6.1 **MISS** — −1.58 pp. Wrong sign, and significantly so (p = 0.009). The
+  prediction and the observation are about 3.6 pp apart.
+- §6.1b **MISS** — −0.17 pp against a predicted +2 or better. The card is
+  indistinguishable from a blank card.
+- **Card grade: MISS**, on both co-primaries.
+
+`elemental_ecstasy` ("Sweet Dreams") predicted "null, within ±2 points".
+
+- §6.1 **HIT** — −1.62 pp, inside the ±2 band as registered. Flagged: it is
+  significantly below zero (p = 0.008), so "null" is true as a band statement
+  and not as a claim that nothing happened. What happened is dilution.
+- §6.1b **HIT** — −0.21 pp, inside the band and essentially zero.
+- **Card grade: PREDICTED.**
+
+`kaboom` (filler) predicted "near-null, probably slightly negative through
+dilution".
+
+- §6.1 **HIT** — −1.42 pp: negative, inside ±2, and the mechanism named in the
+  prediction is the one the number shows. Flagged: it is separable from zero
+  (p = 0.021), so dilution is real and small rather than absent.
+- **Card grade: PREDICTED.**
+
+**Tally: 3 PREDICTED, 1 SPLIT, 1 MISS.** The one MISS is
+`borrowed_brilliance`, and it is the largest error in the table.
+
+### 13.7 The redesign trigger (§8.1)
+
+Read exactly as §8.1 binds it, and evaluated per card.
+
+**Clause (a) — §6.1b interval's upper bound below −2 pp: fires for nobody.**
+The lowest upper bound in the table is `elemental_ecstasy`'s at +0.67. No card
+is confidently worse than the filler.
+
+**Clause (b) — Δ vs filler at or below zero AND family-pooled dead-in-hand at
+or above 25%:**
+
+| card | Δ vs filler ≤ 0 | pooled dead-in-hand | fires? |
+|---|---|---|---|
+| `friendly_visit` | no (+4.46) | 45.87% | **no** |
+| `study_buddy` | no (+2.17) | 50.63% | **no** |
+| `borrowed_brilliance` | **yes** (−0.17) | **94.95%** | **YES** |
+| `elemental_ecstasy` | **yes** (−0.21) | **87.07%** | **YES** |
+| `kaboom` (filler) | not applicable — it is the baseline | 37.24% | n/a |
+
+**The trigger fires for `borrowed_brilliance` and `elemental_ecstasy`.**
+
+Both fire on clause (b): they perform no better than a blank card while
+sitting dead in hand the overwhelming majority of the times they are drawn.
+Neither fires on clause (a) — neither is actively harmful once dilution is
+removed. The distinction matters for whatever comes next: the finding is
+"these cards do nothing", not "these cards are traps".
+
+**The trigger names a candidate, not a verdict** (§8.1). Whether to redesign,
+reprice or retire either card is a design act, downstream of this grade, and
+[USER]'s.
+
+### 13.8 One observation that is not a grade, flagged for triage
+
+`borrowed_brilliance` in its **un-upgraded** form was drawn **40,396 times and
+played zero times** — 0 of 28,149 combats in which its first copy was drawn.
+Its upgraded form, which adds `draw 1`, plays 30% of the time. No other card
+in the sweep shows anything like this: the bare forms of `study_buddy` and
+`elemental_ecstasy` play 35% and 10% of the time respectively.
+
+An exact zero across forty thousand draws is not a preference, it is a
+categorical refusal. The engine op is not the cause — `copy_companion_in_hand`
+returns harmlessly when no companion is in hand
+(`tier0/engine/effects.py:1867`), so the card is playable and merely does
+nothing in that case. Whether the pilot never values it, or never has a
+companion in hand when it could, this sweep cannot separate.
+
+**This matters for the grade of that one card.** Its MISS may be measuring a
+pilot-valuation fact rather than the card's design, and a redesign argued from
+this row alone would be arguing from an instrument reading, not a card
+reading. Recorded here, deliberately not filed and deliberately not diagnosed
+further: it is an audit finding, and triaging it is not this grade's job.
