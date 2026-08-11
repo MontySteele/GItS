@@ -546,7 +546,13 @@ BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
 # (the damage-estimator, scaling and charge weights below). MOVED, NOT RETUNED
 # at both steps: every value is byte-identical to the literal it replaced.
 # Bump when a weight's VALUE changes; a pure rename or regrouping does not.
-PILOT_WEIGHTS_VERSION = 1
+#
+# v2 = POLICY 7 (EB-17p §13.8, R176, 2026-08-11): `PILOT_COMPANION_COPY_VALUE`
+# = 1.5 joins the set, filed in the policy.py half. Read honestly, the "bump
+# when a VALUE changes" rule covers this -- a weight ENTERING the labeled set
+# changes the set, and a Klee reading taken while the pilot scored
+# `copy_companion_in_hand` at zero is not comparable with one taken after.
+PILOT_WEIGHTS_VERSION = 2
 # Sim-hygiene sprint 2026-07-29 (task 4): the inline scoring weights that had
 # been living as bare floats inside tier0/pilot/policy.py. MOVED, NOT RETUNED
 # -- every value below is byte-identical to the literal it replaced, and the

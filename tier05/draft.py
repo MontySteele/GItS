@@ -1421,7 +1421,22 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # INTANGIBLE_DAMAGE_CAP it will actually deal. Both are universal
 # board-state reads, live for every pilot; only cells whose encounters
 # carry those powers move (act-3 test_subject).
-POLICY_VERSION = 6
+#
+# POLICY_VERSION 7 (R176, 2026-08-11). The pilot values
+# `copy_companion_in_hand` (EB-17p §13.8 resolution): 40,396 draws / 0 plays
+# was pilot SCORING by construction, not an unsatisfiable condition -- the op
+# was worth nothing in `_tempo_value`, so base borrowed_brilliance always
+# scored -0.1 (= -cost_weight x 1) and the hard `best_score <= 0` rule never
+# let it be played, while the drafter kept taking it at 4.0. New
+# `PILOT_COMPANION_COPY_VALUE` = 1.5 in `_tempo_value`, gated on the ENGINE's
+# own companion predicate (`Card.is_companion`, the `comps` selection in
+# `_op_copy_companion_in_hand`) so the two cannot disagree; `study_buddy`'s
+# `replay_next_companion` reads through the same branch. Universal, but only
+# Klee and Furina print either op, so only their cells move -- every Klee
+# tier0.5 number does. C.PILOT_WEIGHTS_VERSION 1 -> 2 in the same edit. The
+# payoff-reach registration's DRAFTER_VERSION = 14 pin is UNTOUCHED: the
+# drafter is not taught anything here, only the pilot.
+POLICY_VERSION = 7
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
 # place a character's archetype vocabulary is declared -- and where it is
