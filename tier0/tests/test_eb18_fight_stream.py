@@ -15,8 +15,15 @@ says it buys --
     linkage is an island; the run's string seed is the same token the game's
     own run history writes as `seed`, so the join costs nothing to either side.
   * `detonations` / `corpse_detonations` -- probe (e) (R118 / Q11) scripted a
-    two-arm run to ask, once, whether a killing blow detonates the bombs on the
-    body it just made. A counter answers it on every fight anybody plays.
+    two-arm run to ask this class of question once. The counter answers a
+    narrower one on every fight anybody plays: how many bombs of a payload
+    landed on a body an EARLIER bomb of that same payload had already killed.
+    The corpse test is read per bomb and before that bomb's damage, so the
+    bomb that lands the kill counts as landing on a live enemy and only the
+    bombs behind it count as corpse detonations -- a single-bomb killing blow
+    is invisible to this counter and records 0. `understudy/README.md:253`
+    fences the read the same way: `> 0` is a fact; `== 0` is not proof of
+    absence.
   * a reader on the tier1 side that reads BOTH granularities, and that a
     machine with no fight logs -- or with logs written before any of this --
     analyses exactly as it did before.

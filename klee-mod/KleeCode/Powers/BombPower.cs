@@ -418,12 +418,15 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// EB-18 — CORPSE DETONATIONS, the same count keyed the same way.
     ///
     /// A corpse detonation is a detonation that resolved on a target that was
-    /// ALREADY DEAD when the charge went off: the killing blow's own
-    /// <see cref="AfterDamageReceived"/> early-detonation firing after the
-    /// blow killed the enemy. Probe (e) (R118 / Q11) asked exactly that
-    /// question of the live game and had to script a fixed two-arm run to
-    /// answer it once; a counter answers it on every fight anybody plays, for
-    /// the price of one bool.
+    /// ALREADY DEAD when the charge went off. The test is read PER BOMB and
+    /// BEFORE that bomb's damage lands (see <see cref="Detonate"/>), which
+    /// fixes the semantics: within one payload, the bomb that lands the kill
+    /// detonated on a LIVE enemy and is NOT counted; every bomb behind it in
+    /// the same payload detonated on a corpse and IS counted. A single-bomb
+    /// killing blow therefore records zero. Probe (e) (R118 / Q11) had to
+    /// script a fixed two-arm run to ask this once; the counter answers the
+    /// payload-trailing case on every fight anybody plays, for the price of
+    /// one bool.
     ///
     /// REPORTS, NEVER GRADES, and touches nothing. It is read only by
     /// `PlayTelemetry` — no card, relic or formula reads it, and in particular

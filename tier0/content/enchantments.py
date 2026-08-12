@@ -76,8 +76,38 @@ def _is_attack(c) -> bool:
     return c.type == "attack"
 
 
-def _is_skill(c) -> bool:
-    return c.type == "skill"
+_BLOCK_OPS = ("block", "block_next_turn")
+
+
+def _grants_block(effects) -> bool:
+    """Does this effect tree contain a Block-granting op, at any depth?
+
+    `conditional` is the one op that nests further effect lists (`then` /
+    `else` -- see engine.effects._op_conditional), so the walk is over those
+    two keys and nothing else.
+    """
+    for fx in effects or ():
+        if fx.get("op") in _BLOCK_OPS:
+            return True
+        if fx.get("op") == "conditional":
+            if _grants_block(fx.get("then")) or _grants_block(fx.get("else")):
+                return True
+    return False
+
+
+def _is_block_skill(c) -> bool:
+    """Nimble's target: a Skill that actually GAINS Block.
+
+    The loose predicate was `type == "skill"`, but 83 of this repo's 134
+    skills grant no Block at all, and the event picker
+    (tier05.events._enchant_targets) chooses the drafter's best LEGAL card
+    rather than its best BLOCK card -- so Nimble routinely welded itself onto
+    a card where its one printed effect could never fire, silently. The
+    tighter predicate is the published text read literally ("Block gained
+    from this card"), and the event targeting follows it for free.
+    """
+    return c.type == "skill" and (_grants_block(c.effects)
+                                  or _grants_block(c.enchant_effects))
 
 
 def _is_power(c) -> bool:
@@ -127,7 +157,7 @@ CATALOG: dict[str, Enchantment] = {
     "nimble": Enchantment(
         "nimble", "Nimble",
         "Increases Block gained from this card by X.",
-        _is_skill,
+        _is_block_skill,
         lambda x: {"enchant_block": x}),
 
     "swift": Enchantment(

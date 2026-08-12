@@ -178,6 +178,16 @@ class RunResult:
     #                    not a purchase. The buy RATE needs both -- and it
     #                    needs "visit" to join them, because both lists are
     #                    flattened across every shop the run walked into.
+    shop_priced_out: list[dict] = field(default_factory=list)
+    #                    2026-08-11: what gold could NOT reach, at the moment
+    #                    it could not -- the preferred pick the policy named
+    #                    and could not pay for, and the shelf entries stranded
+    #                    when the purse ran dry. `shop_companion_offers`
+    #                    measures affordability at the DOOR and is therefore
+    #                    blind to a card that went out of reach mid-visit;
+    #                    both those exits used to be unlogged. Shape and the
+    #                    two kinds (`residual`, `exit`):
+    #                    `shop.ShopOutcome.priced_out`.
     removal_uses: int = 0               # §5: running removal count (rising price)
     relics: list[str] = field(default_factory=list)  # W2: relics GRANTED this
     #                    run (Neow + treasure + elite + boss + shop + events,
@@ -449,6 +459,7 @@ class _RunCtx:
         self.removal_uses = outcome.removal_uses
         self.res.shop.extend(outcome.purchases)
         self.res.shop_companion_offers.extend(outcome.companion_offers)
+        self.res.shop_priced_out.extend(outcome.priced_out)
         self.res.removal_uses = self.removal_uses
         self.res.gold = self.gold
         if self.held is not None:

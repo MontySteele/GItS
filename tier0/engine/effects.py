@@ -704,6 +704,14 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
                                  source=source)
 
 
+def _take_enchant_block(state: CombatState, card: Card) -> int:
+    """The Nimble rider, at most once per card play (0 after it is spent)."""
+    if state.enchant_block_spent_this_card or not card.enchant_block:
+        return 0
+    state.enchant_block_spent_this_card = True
+    return card.enchant_block
+
+
 def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     raw = (_calc_amount(state, fx["amount_formula"], card)
            if "amount_formula" in fx else fx["amount"])
@@ -721,10 +729,13 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
              if isinstance(times, str) else times)
     # Nimble (R82 reopened): "increases Block gained from this card by X" --
     # ONCE per play, not once per row, so a two-row block card does not
-    # collect it twice. Not Spotlight-scaled (Spotlight scales printed
-    # numbers; an enchantment is not printed), but Frail does bite it, which
-    # is what "Block gained" means.
-    rider = card.enchant_block
+    # collect it twice. The latch lives on the STATE, reset per card play,
+    # because _op_block re-enters for every Block row (including rows nested
+    # under a conditional) and a function-local latch only de-duped the
+    # `times` loop. Not Spotlight-scaled (Spotlight scales printed numbers;
+    # an enchantment is not printed), but Frail does bite it, which is what
+    # "Block gained" means.
+    rider = _take_enchant_block(state, card)
     for _ in range(times):
         amount = _spotlight_scale(state, card, raw) + rider
         rider = 0
@@ -744,8 +755,14 @@ def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
     amount = _amount(state, fx["amount"])
     if state.salon_replacements_this_card:
         amount *= C.SALON_REPLACE_DAMAGE_MULT
+    # Nimble rides here too: the published text is "Block gained from this
+    # card", and two Kokomi skills gain Block only (or half) through this op.
+    # Added AFTER the Spotlight scale, exactly as _op_block adds it -- an
+    # enchantment is not a printed number -- and off the SAME per-play latch,
+    # so a card with both ops collects the rider once in total.
     powers.apply_power(state, state.player, "block_next_turn",
-                       _spotlight_scale(state, card, amount))
+                       _spotlight_scale(state, card, amount)
+                       + _take_enchant_block(state, card))
 
 
 def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
@@ -2423,6 +2440,7 @@ def resolve_card(state: CombatState, card: Card) -> None:
     state.exhausted_this_card = 0
     state.block_gains_this_card = 0
     state.block_gained_this_card = 0
+    state.enchant_block_spent_this_card = False
     state.discards_this_card = 0
     state.last_drawn_type = ""
     state.salon_replacements_this_card = 0

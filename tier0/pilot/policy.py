@@ -469,6 +469,18 @@ def _tempo_value(state: CombatState, card: Card) -> float:
             val += fx.get("amount", 1) * C.PILOT_SPARK_VALUE
         elif fx["op"] == "burst_energy":
             val += fx["amount"] / C.PILOT_BURST_DIVISOR
+        elif fx["op"] in ("copy_companion_in_hand", "replay_next_companion"):
+            # POLICY 7 (EB-17p §13.8). Both ops turn a companion you already
+            # hold into a second use of it, and both are DEAD with no companion
+            # in hand: the engine's `_op_copy_companion_in_hand` returns early
+            # on an empty `comps`, and a replay grant expires with the turn
+            # that wrote it. Gated on the SAME predicate the engine selects
+            # with -- `Card.is_companion`, no kit filter -- so the pilot and
+            # the engine cannot disagree about what counts. `amount` is the
+            # copy op's key, `times` the replay op's.
+            if any(c.is_companion for c in state.player.hand):
+                val += (PILOT_COMPANION_COPY_VALUE
+                        * fx.get("amount", fx.get("times", 1)))
     return val
 
 
@@ -604,6 +616,15 @@ STOKE_RUNWAY_TURNS = 2.0    # "fuel it while the runway is under ~2 turns"
 STOKE_FUEL_HUNGRY = 1.2     # per point that CLOSES the runway gap
 STOKE_FUEL_SATED = 0.15     # per point beyond it -- not zero: surplus still
                             # absorbs, which is the whole D8 argument
+
+# POLICY 7 (EB-17p §13.8, R176). A free copy of a companion ALREADY IN HAND is
+# a card you chose to draft, not the blind top of your deck: it is worth more
+# than the flat Draw 1 the tempo term prices at C.PILOT_SPARK_VALUE-scale 0.7.
+# Filed here, not in constants.py, for the C#-parity reason at the head of this
+# block -- and stamped by C.PILOT_WEIGHTS_VERSION all the same, which is why
+# that stamp moves to 2 in the same edit: a weight ENTERING the labeled set
+# changes the set, and two pilot readings across it are not one measurement.
+PILOT_COMPANION_COPY_VALUE = 1.5
 
 # EB-29t (POLICY 6): the promoted Test Subject reads (R128). The Strength an
 # Enrage trigger grants is PERMANENT, but the greedy pilot prices it over a

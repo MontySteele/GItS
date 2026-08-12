@@ -615,6 +615,13 @@ class CombatState:
     # Dexterity and Frail. Kept beside the count rather than replacing it --
     # refpowers reads the count to divide a per-gain allowance.
     block_gained_this_card: int = 0
+    # Nimble (R82 reopened): "increases Block gained from this card by X" is
+    # ONCE per card PLAY, not once per Block row and not once per _op_block
+    # entry -- a two-row card, or a Block row nested under a conditional,
+    # re-enters the op and would collect the rider again off a function-local
+    # latch. Shared by _op_block and _op_block_next_turn so a card carrying
+    # both still collects the rider exactly once.
+    enchant_block_spent_this_card: bool = False
     discards_this_card: int = 0           # CalculatedGamble's draw-back count
     last_drawn_type: str = ""             # EscapePlan's drawn-card branch
     salon_replacements_this_card: int = 0 # overflow count for current card

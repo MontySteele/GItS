@@ -3,7 +3,7 @@
 > **Status: DRAFT. Nothing here has been run.** No number in this document was
 > measured. The instrument was repaired and the shop world was changed on
 > 2026-08-10; this packet asks to re-run the measurement in the new world.
-> **That world is `RT10/D14/P6/C9`, `C9` including the X7/X8 rarity erratum
+> **That world is `RT10/D14/P7/C9`, `C9` including the X7/X8 rarity erratum
 > — §2 enumerates it in full, and it is the world the re-run measures.**
 > The predictions in §5 are deliberately blank — they are [USER]'s to fill in
 > before any seed is run.
@@ -45,15 +45,29 @@ from `CONSTANTS_VERSION` 8 to 9 to record that.
   while slot 2 could sell Commons at 50 gold, every Common purchase was filed
   as an Uncommon. That is precisely the bucket P3 grades, so P3 graded a
   number it had partly invented.
+- **It said "gold was never the constraint" when it did not know that**
+  (found 2026-08-11). The shop wrote down whether each companion offer was
+  affordable *when the player walked in*, and nothing else. But a card can be
+  inside the purse at the door and outside it a moment later, once the same
+  visit has bought something else — and the shop had two exits that recorded
+  nothing at all: the buy loop dropping a card the pilot wanted but could no
+  longer pay for, and the visit ending the instant the purse fell below the
+  cheapest thing left on the shelf. With no offer unaffordable *on arrival*,
+  the report printed "gold was never the constraint" even if both of those
+  had happened at every shop in the run. That line asserted a conclusion the
+  data could not support.
 
-Both are fixed. The purchase and offer records now carry a *visit index* (a
+All three are fixed. The purchase and offer records now carry a *visit index* (a
 plain counter: which shop of this run is this), so a purchase is joined to the
-offer it actually answered; and the purchase record carries the card's true
-rarity instead of a guess from its price.
+offer it actually answered; the purchase record carries the card's true
+rarity instead of a guess from its price; and the shop now keeps a
+*priced-out log* — one line every time gold could not reach a card, written at
+the moment it could not — so the money question is answered by counting
+events rather than by asserting that none occurred.
 
 ## 2. One window, one world
 
-**The registered world is `RT10/D14/P6/C9`, including the X7/X8 rarity
+**The registered world is `RT10/D14/P7/C9`, including the X7/X8 rarity
 erratum.** In plain English, and as the standing requirement for this
 re-run: this is the world the re-run measures. Everything listed below is
 inside one window, and a run of this instrument that does not report this
@@ -65,8 +79,37 @@ What that one window contains, in full:
    shop's wildcard companion slot rolls Uncommon-or-better in both engines;
    Commons leave the paid channel and the 50-gold band is unreachable.
 2. **The instrument fixes** to `exp_shop_companion_channel` — per-visit
-   purchase attribution, true slot-2 purchase rarity, and the
-   gold/affordability/crowd-out logging.
+   purchase attribution, true slot-2 purchase rarity, the
+   gold/affordability/crowd-out logging, and (2026-08-11) the priced-out log
+   described below.
+
+   The priced-out log is what makes Q2 answerable, so here is what it
+   records. Every time the shop cannot reach a card, it writes one line. Each
+   line says which shop of the run it was (`visit`), which card and at what
+   price (`id`, `price`, `rarity`), which door it came from (`channel`:
+   the character shelf or the companion channel, and `slot` for the two
+   companion slots), the gold held at that instant (`gold_now`), the gold
+   held when the visit began (`gold_at_visit`), and how much of it had
+   already been spent at this shop (`spent_before`). Lines come in two kinds,
+   marked by `residual`:
+
+   - **the pilot's preferred pick** — it named a card and could not pay for
+     it. `spent_before` of 0 means the card was out of reach the moment it
+     walked in; anything higher means *this visit's own earlier purchases*
+     put it out of reach, which is the case the arrival check structurally
+     cannot see.
+   - **the stranded shelf** — what was still for sale, and still out of
+     reach, when the visit ended. A field named `exit` says whether the visit
+     ended because the purse fell below the cheapest remaining card
+     (`guard`) or because the pilot stopped wanting anything (`skip`); on a
+     skip, only cards gold could not have covered anyway are written down, so
+     "stranded" never counts a card that was merely declined.
+
+   **This changes nothing about how a run plays.** All randomness in a run
+   comes from one random number generator, and the draft policies sort rather
+   than draw from it; writing a line into a list draws nothing. The proof is
+   an equality, not an argument: the same seeds produce byte-identical runs
+   before and after the log was added.
 3. **The five R82-reopen enchant events**, which arrived with
    `RUNTEMPLATE_VERSION` 10 and move the event-pool odds in every act for
    every character. This is why the stamp reads RT10 and not RT9, and it is
@@ -77,9 +120,33 @@ What that one window contains, in full:
    under `C9`. They are named here because they change what Klee's draft
    offers, and Klee is one of the three characters this cell runs — the
    companion channel is not the only thing competing for the purse.
+5. **`POLICY_VERSION` 7** (R176, `fbe6e13`, 2026-08-11). The pilot — the
+   automatic player that plays the cards the drafter picked — now places a
+   value on two card effects it previously valued at nothing: copying a
+   companion held in hand, and replaying the next companion played
+   (`PILOT_COMPANION_COPY_VALUE` = 1.5 inside `_tempo_value`;
+   `PILOT_WEIGHTS_VERSION` 1 → 2). Cards carrying those effects used to score
+   at or below zero and so were never played at all; now they are reachable.
+   **Said plainly: this moves every Klee tier0.5 number.** Klee (demolition) is
+   one of the three characters this cell runs, so the Klee arm's baseline is
+   not the baseline any P6-era intuition was formed against. **Write the §5
+   predictions knowing that.** The stamp reads `P7`, not `P6`, for this reason,
+   and no pre-P7 Klee number is a cheaper sample of this one.
+6. **The Nimble enchantment repair** (`5c9c01a`, 2026-08-11). Three defects in
+   the enchantment rider that grants Block: it was being bought more than once
+   per card play, it was inert on cards that gain Block *next* turn, and it
+   could weld itself onto a skill that gains no Block at all. This is defect
+   work and it rides inside `RUNTEMPLATE` 10 with no version bump, because it
+   moves no number that this cell reads: the three profiles this cell runs —
+   `klee`/demolition, `furina`/salon, `kokomi`/priest — were re-run on the same
+   seeds either side of the repair and came back byte-identical. It is named
+   here for completeness, not because it changes the world under measurement.
 
 The floor restoration, the instrument repair and the rarity erratum land
 together, in the same commit range, under one stamp (`CONSTANTS_VERSION` 9).
+The pilot change is a separate stamp component (`POLICY_VERSION`), and it
+landed after them, on 2026-08-11; the registered world is the one that holds
+all of it.
 
 On the one-variable rule (EXPERIMENTS, D4: one measurement window contains
 one change to the *world*), stated without softening:
@@ -88,7 +155,9 @@ one change to the *world*), stated without softening:
   what we write down about a game that plays identically either way. The new
   fields are additive: nothing reads them to make a decision and none of them
   draws from the run's random number stream, so a run plays out the same
-  whether or not they are recorded.
+  whether or not they are recorded. That was checked by re-running the cell's
+  own arms on the same seeds and comparing the results before and after: they
+  match exactly.
 - The **slot-2 floor** is the world change this cell is *about*, and it is
   the only change inside the channel under measurement.
 - The **enchant events** and the **rarity promotions** are world changes
@@ -99,6 +168,13 @@ one change to the *world*), stated without softening:
   them is that this cell's absolute numbers are not comparable to any
   pre-C9 read; the within-cell arm contrast, which is what Q1–Q4 ask, is
   unaffected because both arms sit in the same world.
+- The **pilot change (P7)** is the same kind of thing: a world change outside
+  the channel. It is identical in both arms, so it cannot create or hide an
+  arm difference. What it does do is move the Klee arm's absolute level, which
+  is why it is named rather than left to the stamp. Any Klee number from
+  before 2026-08-11 is a different world.
+- The **Nimble repair** is not a world change for this cell at all: the three
+  profiles it runs are byte-identical across it on the same seeds.
 
 Landing them apart would be worse, not better. It would mean either measuring
 the new world with a broken instrument, or measuring the old world with the
@@ -116,13 +192,32 @@ companions actually bought, what fraction are Uncommon and what fraction are
 Rare? This is P3 asked honestly for the first time: with true rarities off the
 purchase record, and in a world where Common is not on the shelf at all.
 
-**Q2 — the money question.** Was a preferred purchase ever priced out? That
-is: did the shop ever offer a companion the player could not afford at the
-moment they walked in? S4-G10 raises this because runs end with roughly 220
-gold unspent, which suggests money is *not* the constraint — but a purchase
-log cannot answer it, since a purchase log only records what the purse could
-already reach. The repaired instrument now records the gold in hand at each
-visit and, for every offer, whether it was affordable at that moment.
+**Q2 — the money question.** Was a preferred purchase ever priced out? S4-G10
+raises this because runs end with roughly 220 gold unspent, which suggests
+money is *not* the constraint. A purchase log cannot settle it, since a
+purchase log only records what the purse could already reach.
+
+The question is now answerable, and in three separate parts rather than one.
+The instrument reports each of them as a count:
+
+1. **Priced out at the door.** How many companion offers cost more than the
+   gold held when the visit began. This is the arrival check that already
+   existed.
+2. **Priced out during the visit.** How many times the pilot named a card it
+   then could not pay for — and, of those, how many were affordable when it
+   walked in and stopped being affordable because it had already bought
+   something else at that same shop. Until 2026-08-11 this event was dropped
+   on the floor; it is now the priced-out log's first kind of line
+   (`spent_before` greater than zero is the "priced out by its own earlier
+   buys" case).
+3. **Left on the shelf.** How many cards were still for sale and still out of
+   reach when the visit ended — the purse having run below the cheapest thing
+   left. This exit was also silent before; it is the log's second kind of
+   line.
+
+Together these are what "was a preferred purchase ever priced out?" actually
+means. Note that part 2 is the *narrowest* reading of "preferred": it is the
+pilot's own top pick at that moment, not merely something on the shelf.
 
 **Q3 — the true P1 buy rate.** With purchases joined to their own visit, what
 fraction of the visits that offered slot 1 ended in a slot-1 purchase? The
@@ -144,14 +239,15 @@ the channel should be re-priced or re-stocked. That is a design call and it is
 
 ## 4. What is measured, and with what
 
-- Instrument: `tier05/exp_shop_companion_channel.py`, as repaired 2026-08-10.
+- Instrument: `tier05/exp_shop_companion_channel.py`, as repaired 2026-08-10
+  and extended with the priced-out log 2026-08-11.
 - Arms: unchanged — `companions` off against `companions` on. That flag is the
   only difference between the two arms; same seeds, same characters, same
   policy, same everything else.
 - Characters: unchanged — `klee`/demolition, `furina`/salon, `kokomi`/priest.
-- World: **`RT10/D14/P6/C9`**, `C9` including the X7/X8 rarity erratum — the
+- World: **`RT10/D14/P7/C9`**, `C9` including the X7/X8 rarity erratum — the
   world enumerated in §2. The report must carry the full run-cell stamp
-  (`RT/D/P/C`) or it is not citable (R68), and it must read `RT10/D14/P6/C9`
+  (`RT/D/P/C`) or it is not citable (R68), and it must read `RT10/D14/P7/C9`
   or it is not *this* registration's measurement.
 - Every output line the instrument printed before the repair still prints, so
   the pre-existing reads stay reproducible. The new reads are printed on lines
@@ -193,6 +289,16 @@ run does not start until they are filled and this packet is countersigned.**
 > binding constraint on a companion purchase? `YES / NO`, and the band for
 > the share of offers that are unaffordable on arrival: `____ % – ____ %`.
 > What result would count as "price is not governing this channel"? `____`
+>
+> *Note on the slot, not a prediction:* the YES/NO stays exactly as written,
+> and the instrument now supports it. Before 2026-08-11 it did not — a `NO`
+> could only ever have been read off the arrival check, which is blind to a
+> card that goes out of reach mid-visit, so the honest answer would have been
+> "unmeasured" no matter what the run printed. The priced-out log closes that
+> gap: `YES` is now falsifiable against three counts (the three parts of Q2
+> in §3), and the run reports all three. The band above still refers to the
+> arrival share specifically; if you want bands on the other two counts as
+> well, write them in here.
 
 > **[USER] SLOT — Q3, true P1 buy rate.** Expected slot-1 buy rate, as a
 > share of the visits that offered slot 1: `____ % – ____ %`. Does the
@@ -223,10 +329,21 @@ run does not start until they are filled and this packet is countersigned.**
 - **Companions get first claim on the purse** by construction: the shop buys
   cards before the relic and potion shelves are offered. Q4 measures the
   consequence; it does not remove it.
-- **Affordability is measured at the door.** "Affordable" means the price was
-  within the gold held when the visit began, before anything else was bought.
-  That answers "could the player have had this at all", which is the S4-G10
-  question; it is not "was there change left afterwards".
+- **Affordability is measured at the door *and* during the visit** (this
+  limit was partly lifted on 2026-08-11). The `affordable` flag on each
+  companion offer still means only what it always meant: the price was within
+  the gold held when the visit began, before anything else was bought. What
+  is no longer missing is the rest of the visit — the priced-out log records
+  a card the pilot wanted and could not pay for after its own earlier
+  purchases, and a card still for sale and still out of reach when the visit
+  ended. So "was there change left afterwards" is now measured too, and it is
+  reported separately from the arrival figure rather than folded into it.
+
+  What remains unmeasured is narrower: the log records the *moments the shop
+  actually reached for a card*. A card the pilot never wanted and could not
+  have afforded either way is counted only if it is still on the shelf at the
+  end; and no counterfactual is computed — nothing says what the run would
+  have bought with more gold.
 - **The drafter is a pilot, not a player.** It buys what its valuation ranks
   highest and it does not save for later. A low buy rate is evidence about
   the drafter as much as about the shop, and that limit applies to P1 and Q3

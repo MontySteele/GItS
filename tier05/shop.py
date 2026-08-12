@@ -236,10 +236,34 @@ class ShopOutcome:
     # field existed there was no way to say which offer a purchase answered:
     # the P1 instrument matched on slot alone and therefore credited a buy at
     # shop 3 to the offers at shops 1 and 2 as well. `gold_at_visit` and
-    # `affordable` are the money read -- "was the preferred card ever simply
-    # priced out" is unanswerable from a purchase log, which only ever records
-    # what the purse COULD reach.
+    # `affordable` are the money read AT THE DOOR -- whether the purse could
+    # have reached this offer at the moment the visit began.
     companion_offers: list[dict] = field(default_factory=list)
+    # Everything the purse could NOT reach, at the moment it could not reach
+    # it (added 2026-08-11). `companion_offers.affordable` is measured at the
+    # door and therefore cannot see a card that went out of reach DURING the
+    # visit; both such exits used to be silent. Two kinds, distinguished by
+    # `residual`:
+    #
+    #   residual=False -- the buy loop's PREFERRED PICK. The policy named this
+    #       card and gold could not cover it, so the entry was dropped and the
+    #       policy re-asked. `spent_before` is the gold already committed this
+    #       visit: 0 means the card was never affordable here at all, >0 means
+    #       earlier purchases in THIS visit priced it out.
+    #   residual=True -- STILL ON THE SHELF and out of reach when the loop
+    #       ended. The loop guard exits the moment gold falls below the
+    #       cheapest remaining entry, so on that exit every survivor was
+    #       stranded; on a policy-skip exit only the survivors that were also
+    #       unaffordable are logged. `exit` says which ("guard" / "skip").
+    #
+    # Shape: {visit, id, price, rarity, channel, slot, gold_now,
+    #         gold_at_visit, spent_before, residual, exit}. `channel` is
+    # "companion" or "character"; `slot` is the companion slot index or None;
+    # `exit` is "pick" on a preferred-pick record and "guard"/"skip" on a
+    # residual one, naming how the buy loop ended.
+    # Nothing reads these to decide anything and appending them draws no rng
+    # (see the module docstring), so the run plays out identically either way.
+    priced_out: list[dict] = field(default_factory=list)
 
 
 def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
@@ -250,7 +274,13 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
                banner: frozenset[str] | None = None,
                visit: int = 0) -> ShopOutcome:
     """Resolve one shop visit. Returns the mutated deck, remaining gold, the
-    running removal count and a per-purchase log.
+    running removal count, a per-purchase log, the companion offer log and a
+    PRICED-OUT log (see ShopOutcome) recording what gold could not reach, at
+    the moment it could not reach it -- both the preferred pick the policy
+    named and could not pay for, and whatever was still on the shelf when the
+    purse ran dry. Together those are the honest answer to "was a preferred
+    purchase ever priced out"; the offer log's `affordable` flag answers only
+    the narrower question of what the purse could reach ON ARRIVAL.
 
     CARDS FIRST, then removal (deterministic order so gold-limited runs are
     replayable). Cards are bought best-first by asking the DRAFT POLICY to
@@ -285,6 +315,7 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
     # character shelf is the flat §5 price, companions are priced by drawn
     # rarity. `id()` keys are safe -- loader.get_card returns a fresh copy per
     # call, so two copies of one card id are still distinct shelf entries.
+    priced_out: list[dict] = []
     shelf = shop_offer(rng, character, n_offers)
     price_of: dict[int, int] = {id(c): C.SHOP_CARD_PRICE for c in shelf}
     # Which companion slot an entry came from. Needed because P1 and P3 are
@@ -312,9 +343,24 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
                  "gold_at_visit": gold_at_visit,
                  "affordable": price <= gold_at_visit})
 
+    def _out_of_reach(card: Card, residual: bool, how: str) -> dict:
+        """One priced-out record. Pure bookkeeping: no rng, no state."""
+        return {"visit": visit, "id": card.id, "price": price_of[id(card)],
+                "rarity": card.rarity,
+                "channel": "companion" if id(card) in slot_of else "character",
+                "slot": slot_of.get(id(card)),
+                "gold_now": gold, "gold_at_visit": gold_at_visit,
+                "spent_before": gold_at_visit - gold,
+                "residual": residual, "exit": how}
+
+    # How the buy loop ended, for the log. "guard" is the default because the
+    # guard is also what stops the loop from starting: walking into a shop too
+    # poor for anything on the shelf is the same exit as running dry inside it.
+    how = "guard"
     while shelf and gold >= min(price_of[id(c)] for c in shelf):
         pick = policy(rng, deck_cards, shelf, archetype)
         if pick is None:                 # policy would skip the shelf -> stop
+            how = "skip"
             break
         price = price_of[id(pick)]
         if price > gold:
@@ -322,7 +368,12 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
             # and re-ask: with a flat shelf this branch is unreachable (the
             # loop guard already proved affordability), so every archived
             # flat-price run is bit-identical. With the companion channel it
-            # is the difference between "too expensive" and "shop over".
+            # is the difference between "too expensive" and "shop over" -- and
+            # that difference is now WRITTEN DOWN rather than merely commented
+            # on. `spent_before` separates "never affordable at this shop"
+            # (0) from "priced out by what this visit already bought" (>0),
+            # which is the only place the second case is visible at all.
+            priced_out.append(_out_of_reach(pick, residual=False, how="pick"))
             shelf.remove(pick)
             continue
         gold -= price
@@ -343,6 +394,19 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
         purchases.append(record)
         shelf.remove(pick)
 
+    # THE SILENT EXIT, LOGGED (2026-08-11). The loop guard above stops the
+    # moment gold falls below the CHEAPEST remaining entry, and everything
+    # still on the shelf at that instant was priced out -- including companion
+    # slots that were affordable at the door and stopped being affordable
+    # because this visit bought something else. That is exactly the case the
+    # door-time `affordable` flag cannot see, and until now nothing recorded
+    # it. On a policy-skip exit the survivors are NOT all stranded (the policy
+    # simply stopped wanting them), so only the ones gold could not have
+    # covered anyway are logged; `exit` keeps the two kinds apart.
+    for card in shelf:
+        if price_of[id(card)] > gold:
+            priced_out.append(_out_of_reach(card, residual=True, how=how))
+
     # --- removal: only a known-dead card, only if affordable (§5) ---
     dead = known_dead_card(deck_cards)
     price = removal_price(removal_uses)
@@ -355,7 +419,8 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
 
     return ShopOutcome(deck_ids=deck_ids, gold=gold,
                        removal_uses=removal_uses, purchases=purchases,
-                       companion_offers=companion_offers)
+                       companion_offers=companion_offers,
+                       priced_out=priced_out)
 
 
 # --- Treasure relic slot: STUB (§1, §5). Relics are NOT modeled this pass.
