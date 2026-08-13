@@ -69,8 +69,8 @@ exactly why STATE reads the artifact.
 - **Furina** — **81 of 82** generated, 1 blocked (`let_the_people_rejoice`,
   intentionally hand-written kit machinery)
   (`klee-mod/KleeCode/Cards/Furina/Generated/manifest.json`).
-- **Kokomi** — **60 of 61** generated, 1 blocked (`KOKOMI_PROFILE`, catalyst
-  Hydro cadence) (`klee-mod/KleeCode/Cards/Kokomi/Generated/manifest.json`).
+- **Kokomi** — **61 of 62** generated, 1 blocked (`ceremonial_garment`,
+  hand-written) (`klee-mod/KleeCode/Cards/Kokomi/Generated/manifest.json`).
 
 ## Version / world stamps
 
