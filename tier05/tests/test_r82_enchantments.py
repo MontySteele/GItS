@@ -393,17 +393,48 @@ def test_sown_refunds_energy_on_the_first_play_only():
     assert state.player.energy == after_first - cost   # no second refund
 
 
-def test_perfect_fit_puts_its_card_on_top_of_every_shuffle():
-    deck = [enchantments.decorate("pop", "perfect_fit")] + ["kaboom"] * 8
-    state = _fight_state(deck)
+def test_perfect_fit_takes_the_reshuffle_and_refuses_the_opening_one():
+    """EB-85 divergence 5: Perfect Fit is NOT an Innate.
+
+    `PerfectFit.ModifyShuffleOrder` opens `if (!isInitialShuffle && ...)`, so
+    the combat-start shuffle is explicitly refused however the printed text
+    reads. tier0 hoisted the card at both sites, which made the enchantment
+    strictly stronger than the game's -- a free Innate on any card.
+
+    The opening shuffle is asserted statistically rather than on one seed: a
+    single hoisted card lands at index 0 every time, and a card that is
+    merely shuffled does not."""
+    top = 0
+    for seed in range(40):
+        state = _fight_state([enchantments.decorate("pop", "perfect_fit")]
+                             + ["kaboom"] * 8)
+        state.rng = random.Random(seed)
+        state.rng.shuffle(state.player.draw_pile)
+        combat.surface_innate(state.player.draw_pile)
+        top += state.player.draw_pile[0].enchant_top_of_draw
+    assert 0 < top < 40, top          # shuffled, not hoisted
+
+    # The mid-combat reshuffle IS the site it rides, every time.
+    for seed in range(10):
+        state = _fight_state([enchantments.decorate("pop", "perfect_fit")]
+                             + ["kaboom"] * 8)
+        state.rng = random.Random(seed)
+        state.player.discard_pile = state.player.draw_pile
+        state.player.draw_pile = []
+        state.shuffle_discard_into_draw()
+        assert state.player.draw_pile[0].enchant_top_of_draw
+
+
+def test_perfect_fit_does_not_borrow_innates_opening_hoist():
+    """The two flags shared one site; only `innate` keeps it."""
+    state = _fight_state(["kaboom"] * 8)
+    fitted = loader.get_card(enchantments.decorate("pop", "perfect_fit"))
+    innate = loader.get_card("kaboom")
+    innate.innate = True
+    state.player.draw_pile = [fitted, innate] + state.player.draw_pile
     state.rng.shuffle(state.player.draw_pile)
     combat.surface_innate(state.player.draw_pile)
-    assert state.player.draw_pile[0].enchant_top_of_draw
-    # ... and again on the mid-combat reshuffle, the other shuffle site.
-    state.player.discard_pile = state.player.draw_pile
-    state.player.draw_pile = []
-    state.shuffle_discard_into_draw()
-    assert state.player.draw_pile[0].enchant_top_of_draw
+    assert state.player.draw_pile[0] is innate
 
 
 def test_normality_caps_the_turn_at_three_plays():

@@ -333,7 +333,7 @@ class Card:
     enchant_first_play_damage: int = 0      # Vigorous: first play of a combat
     enchant_first_play_effects: list[dict] = field(default_factory=list)
     #                                       Sown / Swift: first play of a combat
-    enchant_top_of_draw: bool = False       # Perfect Fit: shuffle placement
+    enchant_top_of_draw: bool = False       # Perfect Fit: RESHUFFLE only
     enchant_played_this_combat: bool = False   # the first-play gate itself
     # --- Status cards (multi-act §10.2 injection op; engine/statuses.py).
     # type == "status" cards are UNPLAYABLE (combat.card_playable) and exist
@@ -868,10 +868,12 @@ class CombatState:
         self.rng.shuffle(self.player.discard_pile)
         merged = self.player.discard_pile + self.player.draw_pile
         # Perfect Fit (R82 reopened): "whenever this would be shuffled into
-        # your Draw Pile, place it on the top instead." The combat-START
-        # shuffle is handled by combat.surface_innate, which rides the same
-        # flag; this is the mid-combat reshuffle, the other place a card is
-        # shuffled in. Order among top-placed cards stays shuffle-relative,
+        # your Draw Pile, place it on the top instead." THIS IS THE ONLY SITE
+        # (EB-85 divergence 5): `PerfectFit.ModifyShuffleOrder` opens with
+        # `if (!isInitialShuffle && cards.Contains(base.Card))`, so the
+        # combat-start shuffle is explicitly refused and combat.surface_innate
+        # no longer rides the flag -- hoisting there made the enchantment a
+        # free Innate. Order among top-placed cards stays shuffle-relative,
         # exactly as innate's does -- no hidden second sort.
         if any(c.enchant_top_of_draw for c in merged):
             merged = ([c for c in merged if c.enchant_top_of_draw]

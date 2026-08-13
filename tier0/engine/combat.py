@@ -964,17 +964,25 @@ def surface_innate(draw_pile: list) -> None:
     overflow degrades to "drawn first", which is also base-game). Order
     among innate cards stays shuffle-relative -- no hidden second sort.
 
-    Perfect Fit (R82 reopened) rides the same placement: "whenever this would
-    be shuffled into your Draw Pile, place it on the top instead", and the
-    combat-start shuffle is one of exactly two places that happens (the other
-    is state.shuffle_discard_into_draw). Sharing the site rather than adding
-    a second pass is what keeps the two from disagreeing about order.
+    PERFECT FIT DOES NOT RIDE THIS SITE (EB-85 divergence 5). Its text --
+    "whenever this would be shuffled into your Draw Pile, place it on the top
+    instead" -- reads like it covers both shuffles, but the implementation
+    refuses the opening one outright:
+
+        public override void ModifyShuffleOrder(Player player,
+                                                List<CardModel> cards,
+                                                bool isInitialShuffle)
+        {
+            if (!isInitialShuffle && cards.Contains(base.Card)) { ... }
+        }
+
+    tier0 hoisted it here as well, which handed the enchantment a free Innate
+    -- a strictly stronger card than the game's. The mid-combat reshuffle is
+    the only place it applies (state.shuffle_discard_into_draw).
     """
-    def tops(c):
-        return c.innate or c.enchant_top_of_draw
-    innate = [c for c in draw_pile if tops(c)]
+    innate = [c for c in draw_pile if c.innate]
     if innate:
-        draw_pile[:] = innate + [c for c in draw_pile if not tops(c)]
+        draw_pile[:] = innate + [c for c in draw_pile if not c.innate]
 
 
 def _run_rounds(state: CombatState, pilot: Pilot) -> None:

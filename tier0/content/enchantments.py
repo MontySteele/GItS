@@ -220,6 +220,11 @@ CATALOG: dict[str, Enchantment] = {
         "Whenever this would be shuffled into your Draw Pile, place it on "
         "the top instead.",
         _anything,
+        # The printed text says "whenever"; the implementation does not. It
+        # is a MID-COMBAT reshuffle placement only -- `ModifyShuffleOrder`
+        # opens `if (!isInitialShuffle && ...)` and refuses the opening
+        # shuffle, so this is not an Innate (EB-85 divergence 5). The one
+        # reading site is state.shuffle_discard_into_draw.
         lambda x: {"enchant_top_of_draw": True}),
 }
 
