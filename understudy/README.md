@@ -385,9 +385,12 @@ asymmetry; all five are limits on what the column can hold:
   Dredge, Hologram, Charge, Cleanse, Graveblast, Seance, Secret Technique,
   Secret Weapon, Seeker Strike) plus Foregone Conclusion and Stratagem. No
   klee-mod card reaches this screen, so the hole is base-game content only.
-  **Fixed in source 2026-08-13** (per-type offer resolver reading
-  `_pile` + `_filter`); this limit lifts for the first package built after
-  that, and the live smoke is still owed — see BACKLOG `EB-14`.
+  **Fixed and shipped in `0.2-820`** (per-type offer resolver reading
+  `_pile` + `_filter`), and smoke-proven live on that package: two
+  `ncombatpilecardselectscreen` rows with non-empty `offered`, matching the
+  soak's rows on round, index, chosen name and offered list. The limit
+  therefore names the packages it applies to and nothing later; records taken
+  on `0.2-738` and earlier still carry the hole.
 
 The `screen` column is spelled differently by the two writers **on purpose**.
 The soak writes what the bridge called the screen (`card_select`,
@@ -400,12 +403,20 @@ only thing this vantage has that the wire's does not. The two vocabularies
 overlap on the bot feed's fallback spelling rather than colliding, and no
 consumer matches on the column — `replay.py` matches on the OFFERED list.
 
-**The live smoke, half done (2026-08-13).** Nothing in this repo can execute
-the C# writer, so this had to be watched in a real game. Three Furina fights
-produced 17 Ethereal Spotlight turns and 17 mod-written rows — one per turn,
-never two — matching the soak's rows on round, index and chosen name, with both
-options in `offered`. **Still unexercised:** the hand surface,
-`NPlayerHand.SelectCards`, i.e. a Kokomi exhaust card. BACKLOG `EB-14`.
+**The live smoke, complete across all three surfaces (2026-08-13).** Nothing in
+this repo can execute the C# writer, so each surface had to be watched in a
+real game. `NChooseACardSelectionScreen` on package `0.2-738`: three Furina
+fights, 17 Ethereal Spotlight turns and 17 mod-written rows — one per turn,
+never two — with both options in `offered`. `NPlayerHand.SelectCards` and
+`NCombatPileCardSelectScreen` on package `0.2-820`: one Kokomi run, seed
+`D95DXF1CFK`, act 1 floor 2, driven with `give_card` grants of Pearl Diver
+(hand-exhaust select) and Hologram (`CardSelectCmd.FromCombatPile`) — **14
+`nplayerhand` rows and 2 `ncombatpilecardselectscreen` rows**, every one of
+them matched row for row by the soak's own column on round, index, chosen name
+and offered list. The spelling split is visible in that pair: the mod writes
+`nplayerhand`, the soak writes `hand_select`. The soak additionally writes
+`index: -1` confirm rows that the mod correctly does not — an empty answer
+records nothing.
 
 **Additions of 2026-08-07 (EB-18), HUMAN FEED ONLY, no renames:** `run_id`,
 `run_instance`, `fight_index`, `encounter`, `detonations`,
