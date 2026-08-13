@@ -56,8 +56,15 @@ In-process (the four doors everything else uses):
   `tier05/runner.py:62` — the R68 single source of truth for plan→pilot; do not
   index `roster.Character.plans` directly.
 
-Live inventory today: 298 cards, 5 character sheets (3 roster + 2 reference),
+Live inventory today: 300 cards, 5 character sheets (3 roster + 2 reference),
 6 encounters, 15 pilot weight sets.
+
+Recipe (recount with `loader._card_index()`, then subtract the side sheet):
+220 personal rows (`docs/klee-cards.yaml` 76, `docs/furina-cards.yaml` 82,
+`docs/kokomi-cards.yaml` 62) + 51 companion rows (17 / 19 / 15) + 29 shared and
+reference rows under `tier0/content/cards/` (curses 10, ironclad_package 6,
+silent 6, ironclad_starter 3, colorless_event 2, tokens 2) = 300. The loader
+index reads **303** — the extra 3 are `ancients.yaml`, acquisition-only.
 
 ## 3. Key invariants
 
