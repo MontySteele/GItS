@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using KleeMod.Cards;
 using KleeMod.Cards.Furina.Generated;
 using KleeMod.Cards.Generated;
 using MegaCrit.Sts2.Core.Commands;
@@ -32,6 +33,16 @@ public static class GuestStarGenerator
         var pool = CompanionRoster.All
             .Concat(GuestStarRoster.All)
             .Where(card => card.Rarity == targetRarity)
+            // personal_pool rows are the owning character's kit, distinct
+            // from a generated cameo (LAW.md 98-110). Honored HERE so no pool
+            // source can forget it: PruneWitchHunt is a shared uncommon
+            // companion whose PersonalPool is "klee", and this generator was
+            // the SOLE consumer that skipped the predicate every other door
+            // applies (CompanionPool.IsOfferable, CompanionSlot,
+            // CompanionBanner, the shop). EB-99; tier0
+            // loader.guest_star_generation_pool carries the twin.
+            .Where(card => card is not ICompanionCard comp
+                           || comp.PersonalPool is null)
             .OrderBy(card => card.Id.ToString())
             .ToList();
         if (pool.Count == 0)

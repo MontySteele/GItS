@@ -366,6 +366,31 @@ def test_masque_bond_is_universal_and_navia_block_cannot_dodge_it():
     assert st.player.block == 0
 
 
+@pytest.mark.parametrize("stacks", (0, 1, 2))
+def test_masque_pays_no_flat_damage_rider_on_attacks(stacks):
+    """EB-98: the ORIGINAL "+N damage on your Attacks" half was deleted on
+    2026-07-25 and replaced by the Strength ratchet plus the Bond, but the
+    rider stayed in _op_damage and was paid on top of the Strength. An Attack
+    now deals its PRINTED number whatever the masque stack count, until a turn
+    start has converted stacks into real Strength. MasqueRedDeathPower carries
+    no damage modifier either, so this is the C#-parity reading as well.
+
+    Read BEFORE any turn start (Strength still 0) so the rider, if it came
+    back, would be the only term able to move the number.
+    """
+    st = make_state(enemies=[make_enemy(hp=300)])
+    st.player.powers["masque_red_death"] = stacks
+    assert st.player.powers.get("strength", 0) == 0
+
+    hp = st.enemies[0].hp
+    _play(st, "big_badda_boom")                    # printed 16, single hit
+    assert hp - st.enemies[0].hp == 16
+
+    hp = st.enemies[0].hp
+    _play(st, "kaboom_beetle_swarm")               # printed 5 x 3, unbombed
+    assert hp - st.enemies[0].hp == 15
+
+
 def test_masque_strength_converts_to_charge_for_kokomi():
     """LAW 3 (Flawless Strategy) says Kokomi cannot gain Strength; it becomes
     Charge at the one chokepoint. Arlecchino routes through the standard path
