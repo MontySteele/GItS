@@ -17,7 +17,7 @@ from tier0 import constants as C
 from tier0.content import enchantments
 from tier0.content import local_reference
 from tier0.content import upgrades
-from tier0.engine.state import Card, Enemy, Player
+from tier0.engine.state import Card, Enemy, Player, sly_riders
 
 CONTENT_DIR = Path(__file__).parent
 # Design sheets in docs/ are the single source of truth for real card
@@ -246,6 +246,13 @@ def _card_index() -> dict[str, Card]:
         raise ValueError(f"duplicate card ids: {sorted(dupes)}")
     for c in cards:
         _validate_effect_vocabulary(c.id, c.effects)
+        # EB-71 (R174): a Sly rider is printed effects too, and was the one
+        # effect list nothing validated -- a typo in it loaded clean and
+        # raised the first time a card effect discarded the row. The
+        # base-game auto-play marker is not an op and is filtered out by
+        # `sly_riders` before the check, so an extracted keyword row still
+        # loads (see state.Card.sly).
+        _validate_effect_vocabulary(c.id, sly_riders(c))
     return index
 
 

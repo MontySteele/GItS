@@ -67,8 +67,9 @@ from __future__ import annotations
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine.state import (Card, CombatState, Enemy, Fighter, Player,
-                                remove_instance)
+from tier0.engine.state import (SLY_AUTOPLAY_OP, Card, CombatState, Enemy,
+                                Fighter, Player, grant_sly_autoplay,
+                                remove_instance, sly_autoplays_permanently)
 
 # ---------------------------------------------------------------------------
 # Powers this module refuses to implement, and the cards they gate.
@@ -734,9 +735,16 @@ def after_card_played(state: CombatState, card: Card, snap: dict) -> None:
     # It marks THE CARD OBJECT, so the skill keeps Sly for the rest of the
     # fight and auto-plays every later time an effect discards it. Single
     # stack type: the power is a switch, not a counter.
+    #
+    # EB-71 (R174): the mark speaks the unified grammar -- an `sly_autoplay`
+    # rider with NO `until`, which is what "for the rest of the fight" means
+    # once the turn sweep below drops only the turn-scoped ones. A card
+    # already PERMANENTLY auto-playing is left alone and emits nothing,
+    # exactly as the boolean did -- and a Skill carrying only Hand Trick's
+    # one-turn grant is still upgraded to permanent here, as it was.
     if card.type == "skill" and p.powers.get("master_planner", 0):
-        if not card.sly_keyword:
-            card.sly_keyword = True
+        if not sly_autoplays_permanently(card):
+            grant_sly_autoplay(card)
             state.emit("master_planner", card=card.id)
 
     # EVERYTHING BELOW IS ATTACK-ONLY (Rage, Juggling). The Silent's four
@@ -1385,12 +1393,24 @@ def reset_turn_counters(state: CombatState) -> None:
     # cost, Pinpoint's discount, HandTrick's granted Sly). Swept across every
     # pile because a freed card that was discarded and redrawn must not come
     # back still free; the combat-scoped delta is deliberately untouched.
+    #
+    # EB-71 (R174): the granted Sly is a rider in the unified `sly` list, so
+    # the sweep drops riders marked `until: turn_end` and leaves everything
+    # else -- the printed keyword, Master Planner's permanent mark, and
+    # Kokomi's authored Assist effects all survive the boundary, exactly as
+    # they did when the grant was its own boolean. The list is rebound only
+    # when something is actually dropped, so the common path allocates
+    # nothing (this loop runs over every pile every turn).
     p = state.player
     for pile in (p.hand, p.draw_pile, p.discard_pile, p.exhaust_pile):
         for held in pile:
             held.free_this_turn = False
             held.cost_delta_this_turn = 0
-            held.sly_this_turn = False
+            if any(fx.get("op") == SLY_AUTOPLAY_OP
+                   and fx.get("until") == "turn_end" for fx in held.sly):
+                held.sly = [fx for fx in held.sly
+                            if not (fx.get("op") == SLY_AUTOPLAY_OP
+                                    and fx.get("until") == "turn_end")]
     state.rupture_pending = 0
 
 

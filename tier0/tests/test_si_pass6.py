@@ -12,7 +12,8 @@ a player-level counter can express.
 
 from tier0 import constants as C
 from tier0.engine import combat, effects, powers, refpowers
-from tier0.engine.state import Card
+from tier0.engine.state import (Card, sly_autoplays,
+                                sly_granted_this_turn)
 from tier0.tests.conftest import make_enemy, make_state
 
 
@@ -191,7 +192,7 @@ def test_granted_sly_auto_plays_the_card_when_it_is_discarded():
                   fx=[{"op": "damage", "amount": 6, "target": "enemy"}])
     state.player.hand.append(victim)
     play(state, [{"op": "grant_sly_this_turn", "card_type": "skill"}])
-    assert victim.sly_this_turn
+    assert sly_granted_this_turn(victim)
     play(state, [{"op": "discard", "amount": 1, "select": "chosen"}])
     assert enemy.hp == 34
 
@@ -204,7 +205,7 @@ def test_the_grant_skips_a_card_that_already_has_it():
     state.player.hand.extend([a, b])
     play(state, [{"op": "grant_sly_this_turn", "card_type": "skill"}])
     play(state, [{"op": "grant_sly_this_turn", "card_type": "skill"}])
-    assert a.sly_this_turn and b.sly_this_turn
+    assert sly_granted_this_turn(a) and sly_granted_this_turn(b)
 
 
 def test_the_grant_only_looks_at_the_named_type():
@@ -212,7 +213,7 @@ def test_the_grant_only_looks_at_the_named_type():
     attack = card("a", type="attack")
     state.player.hand.append(attack)
     play(state, [{"op": "grant_sly_this_turn", "card_type": "skill"}])
-    assert not attack.sly_this_turn
+    assert not sly_autoplays(attack)
 
 
 def test_granted_sly_expires_with_the_turn():
@@ -221,7 +222,7 @@ def test_granted_sly_expires_with_the_turn():
     state.player.hand.append(victim)
     play(state, [{"op": "grant_sly_this_turn", "card_type": "skill"}])
     refpowers.reset_turn_counters(state)
-    assert not victim.sly_this_turn
+    assert not sly_autoplays(victim)
 
 
 # --- created tokens that arrive upgraded ------------------------------------
