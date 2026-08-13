@@ -338,6 +338,47 @@ def test_the_designation_funnel_still_works_when_upgraded():
     assert effects.center_stage_active(st, furina_card())
 
 
+def test_encore_performance_copies_under_both_modes_with_no_designation():
+    """EB-100. The Rare that R124 priced at zero because it never fired.
+
+    `_op_copy_spotlighted_in_hand` gated on the raw `p.spotlight` pointer.
+    Under this relic tier0 stops granting the selector token (tokens.yaml),
+    and that token is the only carrier of `spotlight_designate`, so
+    `p.spotlight` stays None for the whole run while `is_spotlighted` reads
+    True for every Furina card. The C# card asks
+    `SpotlightSystem.IsSpotlighted`, which honours `BothModes` -- so on the
+    same board the game copied and the sim copied nothing.
+
+    The with/without pair is the file's convention and is load-bearing twice
+    over here: WITHOUT the relic and without a designation the op must still
+    be dead (the guard's original job, which `if not targets` does), so a
+    fix that simply deleted the gate and started copying unconditionally
+    fails the second half.
+    """
+    st = furina_state(CURTAIN_NEVER_FALLS)
+    p = st.player
+    p.hand = [loader.get_card("stage_presence")]
+    assert p.spotlight is None, "the upgrade grants no designation"
+    assert effects.is_spotlighted(st, p.hand[0])
+
+    effects.resolve_card(st, loader.get_card("encore_performance"))
+    assert [c.id for c in p.hand] == ["stage_presence", "stage_presence"]
+    assert any(e["event"] == "encore_performance_copy" for e in st.log)
+
+    # Base Furina, same board, no designation: still dead, by design.
+    st_no = furina_state()
+    st_no.player.hand = [loader.get_card("stage_presence")]
+    assert st_no.player.spotlight is None
+    effects.resolve_card(st_no, loader.get_card("encore_performance"))
+    assert len(st_no.player.hand) == 1
+
+    # ...and lighting it the base way still works, so the pair above is not
+    # green because the op is broken in some third direction.
+    st_no.player.spotlight = "furina"
+    effects.resolve_card(st_no, loader.get_card("encore_performance"))
+    assert len(st_no.player.hand) == 2
+
+
 def test_the_upgrade_is_inert_without_the_spotlight_economy():
     """Gated on `ethereal_spotlight` for the same reason `combat_start_spark`
     is gated on `spark_on_detonation`: the starter's own hook is the honest

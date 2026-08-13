@@ -1425,12 +1425,23 @@ def _op_generate_from_pool(state: CombatState, fx: dict, card: Card) -> None:
 def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
                                  card: Card) -> None:
     """Encore Performance (kickoff §9): duplicate a Spotlighted card in
-    hand. Dead without a designation and a drafted target — BY DESIGN
-    (duplication deepens a committed kit; it must not conjure one)."""
+    hand. Dead without a LIT target and a drafted one — BY DESIGN
+    (duplication deepens a committed kit; it must not conjure one).
+
+    EB-100: the question is `is_spotlighted`, never the raw `p.spotlight`
+    pointer. Under Furina's upgraded starter (R2) tier0 stops granting the
+    selector token, so `p.spotlight` stays None for the entire run while
+    every one of her cards reads as lit — and the C# card asks
+    `SpotlightSystem.IsSpotlighted`, which honours `BothModes`
+    (`EncorePerformance.cs:61-64`). On the same board the game copied and
+    the sim copied nothing. The pointer guard was pure redundancy before the
+    upgrade existed (with no designation `is_spotlighted` is False for
+    everything, so `targets` is empty and the check below returns anyway),
+    so it is deleted rather than widened: `if not targets` says the same
+    thing in both worlds and cannot go stale behind a second lighting mode.
+    """
     from tier0.content import loader
     p = state.player
-    if not p.spotlight:
-        return
     targets = [c for c in p.hand if is_spotlighted(state, c)
                and not c.kit_card]
     if not targets:
