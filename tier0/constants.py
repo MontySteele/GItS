@@ -721,7 +721,33 @@ WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
 #      drafter is not taught about them, so DRAFTER_VERSION and
 #      draft.POLICY_VERSION are both untouched and the payoff-reach pin
 #      stands. v9 event numbers do not carry across.
-RUNTEMPLATE_VERSION = 10
+# v11 (the coordinated 2026-08-13 window: EB-82 + EB-85). Two run-layer
+#      changes, batched into ONE bump because both are RUNTEMPLATE content
+#      and neither was quotable alone -- M14 enumerates this window and asked
+#      for exactly one coordinated bump at the end of it.
+#      (a) EB-82, the Grave of the Forgotten conversion. The event joins the
+#      ACT-3 pool (2 own -> 3 own), so act-3 event odds move for every
+#      character the same way v9's single act-2 addition moved act 2; its
+#      Accept branch grants `forgotten_soul`, an EVENT relic no reward, Neow
+#      or Ancient roll can reach, which arms the `damage_per_exhaust` hook
+#      mid-run and puts damage into every later fight of that run.
+#      (b) EB-85, five places where tier0 modelled an enchantment differently
+#      from the class sts2.dll v0.107.1 ships, each re-verified against the
+#      binary before it was touched. THREE move what an enchant event may
+#      TARGET -- Nimble gates on GainsBlock rather than type == "skill", so
+#      Block-granting Attacks are legal; Swift has no type override at all,
+#      so Self-Help Book's third reading is live on Klee's printed starter
+#      after being locked for all of v10; and Nimble never rides
+#      block_next_turn, whose payout passes no card source. TWO move what one
+#      PAYS -- the Nimble rider is collected on EVERY Block gain rather than
+#      once per card play, and Perfect Fit refuses the opening shuffle
+#      instead of acting as a free Innate.
+#      Enchantments remain post-draft only and no drafter or pilot code
+#      moved, so DRAFTER_VERSION and draft.POLICY_VERSION are both untouched
+#      and the payoff-reach D14 pin stands. CONSTANTS_VERSION did not move
+#      either: the window's other two branches (EB-70, EB-83) wrote no code.
+#      No v10 enchant number and no v10 act-3 number carries across.
+RUNTEMPLATE_VERSION = 11
 # DEAD as of v6; kept as the name of the world every pre-§11 measurement was
 # taken in, and still used by tests that pin a node sequence deliberately.
 RUN_NODE_TEMPLATE = "NNNRETN$ERB"
