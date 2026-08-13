@@ -318,6 +318,14 @@ def after_card_exhausted(state: CombatState, card: Card,
             p.energy += card.on_exhaust_energy
             state.emit("energy", amount=card.on_exhaust_energy,
                        source="on_exhaust")
+    # damage_per_exhaust (EB-82). Sits at the same funnel as the Casket
+    # accrual and for the same reason, but outside its relic gate: the two
+    # relics are unrelated and either may be held without the other. Opens
+    # on `relic_effects` being empty, so the battery never reaches it, and
+    # no relic row carries the hook yet -- unused machinery by construction.
+    if p.relic_effects:
+        from tier0.engine import relics           # late import (relics -> here)
+        relics.on_card_exhausted(state)
     n = p.powers.get("feel_no_pain", 0)
     if n:
         gain_block(state, p, n)                  # Unpowered: no Unmovable
@@ -888,6 +896,39 @@ def after_card_drawn(state: CombatState, card: Card,
     if n and not from_hand_draw and state.in_player_turn:
         for enemy in list(state.living_enemies):
             unpowered_damage(state, enemy, n)
+    randomise_cost_on_draw(state, card)
+
+
+def randomise_cost_on_draw(state: CombatState, card: Card) -> None:
+    """The per-INSTANCE on-draw hook (EB-83; the base game's Slither).
+
+    Slither is `AfterCardDrawn` on the ENCHANTMENT, gated on the drawn card
+    being its own and on that card having landed in hand, and it writes
+    `EnergyCost.SetThisCombat(Rng.CombatEnergyCosts.NextInt(4))`. tier0 has
+    no per-card callback registry and is not growing one, so the rider is a
+    field on the instance and this is the site that reads it -- the same
+    shape `status_draw_damage` already takes at the neighbouring line.
+
+    UNUSED MACHINERY as landed: `on_draw_randomise_cost` is None on every
+    card any sheet can produce, so no roll is taken and no randomness is
+    consumed. `tier0.content.enchantments.CATALOG` deliberately still does
+    NOT hold `slither` -- the event that would grant it (Wood Carvings) is
+    blocked on a [USER] call about two base-game colorless cards (QUEUE
+    `M23`), and an enchantment nobody grants is a name with no caller.
+
+    The hand check is the game's and it is load-bearing: a draw that
+    overflows `MAX_HAND_SIZE` never reaches here, but a card the caller
+    routes elsewhere would, and re-rolling a cost for a card that is not in
+    hand is not what the enchantment says.
+    """
+    n = card.on_draw_randomise_cost
+    if not n or n <= 0:
+        return
+    if card not in state.player.hand:
+        return
+    card.cost_set_this_combat = state.rng.randrange(n)
+    state.emit("cost_randomised", card=card.id,
+               amount=card.cost_set_this_combat)
 
 
 def retain_at_flush(state: CombatState, flushing: list[Card]) -> list[Card]:

@@ -31,6 +31,7 @@ HOOK VOCABULARY (combat-scoped -- the ONLY hooks acted on here):
     charge_per_exhaust       {hook, amount}                 Kokomi only (RATE)
     burst_per_exhaust        {hook, amount}                 Kokomi only (RATE)
     spotlight_both_modes     {hook}                         Furina only (FLAG)
+    damage_per_exhaust       {hook, amount}                 unpowered, random enemy
 
 The last three are RULE CHANGES rather than effects, and are dispatched
 differently for that reason -- see "Touch of Orobas" below.
@@ -53,6 +54,7 @@ COMBAT_HOOKS = frozenset({
     "every_n_turns_energy", "every_n_turns_draw",
     "on_first_hp_loss_draw", "card_name_damage_bonus", "conditional_power",
     "charge_per_exhaust", "burst_per_exhaust", "spotlight_both_modes",
+    "damage_per_exhaust",
 })
 
 # Hooks handled in the run layer (tier05/model.py, tier05/relics.py). They may
@@ -229,6 +231,49 @@ def exhaust_accrual(player, charge: int, burst: int) -> tuple[int, int]:
         elif hook == "burst_per_exhaust":
             burst = int(fx["amount"])
     return charge, burst
+
+
+# ---------------------------------------------------------------------------
+# Exhaust payouts.
+# ---------------------------------------------------------------------------
+
+def on_card_exhausted(state: CombatState) -> None:
+    """damage_per_exhaust: "whenever you Exhaust a card, deal X damage to a
+    random enemy" (EB-82; Forgotten Soul, the relic Grave of the Forgotten
+    grants).
+
+    UNUSED MACHINERY as landed. No relic row in `tier05/content/relics.yaml`
+    carries this hook and no event grants one, so the branch is unreachable
+    in play and the frozen battery cannot feel it -- the whole point of
+    building it separately is that the event-relic admission rule forbids
+    inventing an engine hook inline inside a conversion.
+
+    Shape decisions, all of them the existing engine's rather than new:
+
+    * UNPOWERED, like `combat_start_aoe` and Speedster's per-draw hit. The
+      relic is not an attack, so Strength must not scale it and no attack
+      hook may fire off it.
+    * ONE random living enemy per exhaust, drawn from `state.rng` through
+      the same `rng.choice(living)` the `random_enemy` target spec uses. A
+      dead field means no target and no draw at all, so an exhaust with
+      the board already clear consumes no randomness.
+    * Called from the ONE exhaust funnel (`refpowers.after_card_exhausted`),
+      which is what makes "whenever one of your cards is Exhausted"
+      structural rather than per-site discipline -- the same argument the
+      Tamakushi Casket accrual is written on.
+    """
+    p = state.player
+    if not p.relic_effects:
+        return
+    for fx in p.relic_effects:
+        if fx.get("hook") != "damage_per_exhaust":
+            continue
+        amount = int(fx["amount"])
+        living = state.living_enemies
+        if amount <= 0 or not living:
+            continue
+        refpowers.unpowered_damage(state, state.rng.choice(living), amount)
+        state.emit("relic_exhaust_damage", amount=amount)
 
 
 def spotlight_both_modes(player) -> bool:

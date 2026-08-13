@@ -189,6 +189,16 @@ def card_cost(state: CombatState, card: Card) -> int:
         # test_refpowers.test_free_attack_does_not_zero_an_x_cost_attack.
         return state.player.energy
     cost = card.cost
+    # EB-83. An ABSOLUTE combat-scoped set (EnergyCost.SetThisCombat) replaces
+    # the printed cost and the RELATIVE deltas below still stack on top -- the
+    # game's `_localModifiers` list applies in insertion order and an Absolute
+    # entry overwrites the running value at its own position. The one case
+    # that differs is a relative modifier added BEFORE the set, which the game
+    # would discard and this keeps; nothing in this engine writes both to one
+    # instance, and the honest place to record that is here rather than in a
+    # second field. None on every shipped card (unused machinery).
+    if card.cost_set_this_combat is not None:
+        cost = card.cost_set_this_combat
     # PER-INSTANCE cost state, the base game's EnergyCost.AddThisTurn /
     # AddThisCombat / SetToFreeThisTurn. It lives on the CARD OBJECT because
     # that is what the game modifies: two copies of Up My Sleeve in one deck
@@ -1050,6 +1060,11 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     state.hand_play_cap = any(c.status_play_cap for c in player.draw_pile)
     for c in player.draw_pile:
         c.enchant_played_this_combat = False
+        # EB-83: `SetThisCombat` expires at end of combat, so the absolute
+        # cost a randomiser wrote last fight must not survive into this one.
+        # Cleared on the same walk rather than a second pass, for the same
+        # reason the two placements share `surface_innate`.
+        c.cost_set_this_combat = None
     # Combat-side relics: clear per-combat counters at true fight start. Dead
     # branch on the battery (relic_effects empty); the combat_start_* effects
     # themselves fire on the first player turn (see _player_turn).
