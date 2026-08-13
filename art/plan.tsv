@@ -1154,9 +1154,9 @@ watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500
 watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover_autocrop	contain@0.08	shortlist	4	png	Sangonomiya Kokomi Multi Wish.png		splash	kokomi_pool
 warmup_act	ImageGen/images/cards/furina/warmup_act.png	500	380	cover	y0.16	shortlist	5	png	Furina Character Card Golden.png		tcg	furina_pool
 warmup_act	ImageGen/images/cards/furina/warmup_act.png	500	380	cover_autocrop	contain@0.08	shortlist	6	png	Item Furina Vision.png		item	furina_pool
-crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	5	png	Opera Epiclese Courtroom.png		splash	furina_pool
-crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	6	png	Opera Epiclese (The Final Feast).png		splash	furina_pool
+crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	5	png	This Life, Just Like a Light Trickle of Song Still 1 Aether.png		splash	furina_pool
+crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	contain@0.08	shortlist	6	png	Item Theater Tickets.png		item	furina_pool
 tempo_change	ImageGen/images/cards/furina/tempo_change.png	500	380	cover_autocrop	contain@0.08	shortlist	4	png	Item Fontaine Wondrous Machine.png		item	furina_pool
 tempo_change	ImageGen/images/cards/furina/tempo_change.png	500	380	cover_autocrop	contain@0.08	shortlist	5	png	Item Special Clock.png		item	furina_pool
-audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	6	png	FCFH Applause and Cheer.png		splash	furina_pool
-audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	7	png	Opera Epiclese Support Card.png		tcg	furina_pool
+audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	6	png	This Life, Just Like a Light Trickle of Song Still 2 Aether.png		splash	furina_pool
+audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	7	png	The Opera of Noirceur and Blancheur Ticket.png		item	furina_pool
