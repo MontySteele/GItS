@@ -662,8 +662,9 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
     if opt.get("heal"):
         st.hp = min(st.max_hp, st.hp + opt["heal"])
     if opt.get("heal_frac"):
+        # Fractional heals truncate, same as the rest site (EB-110).
         st.hp = min(st.max_hp,
-                    st.hp + round(opt["heal_frac"] * (st.max_hp - st.hp)))
+                    st.hp + int(opt["heal_frac"] * (st.max_hp - st.hp)))
 
     st.log.append(entry)
 

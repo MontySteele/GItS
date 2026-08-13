@@ -547,8 +547,11 @@ class _RunCtx:
             next_fight=bool(nxt) and all(
                 r.kind in ("E", "B") for r in nxt))
         if action == "heal":
+            # The authority truncates: SetCurrentHpInternal is
+            # `CurrentHp = (int)Math.Min(amount, MaxHp)`, so the effective
+            # rest heal is floor(0.3 * MaxHp), not a rounded one.
             self.hp = min(self.max_hp,
-                          self.hp + round(C.REST_HEAL_FRACTION * self.max_hp))
+                          self.hp + int(C.REST_HEAL_FRACTION * self.max_hp))
         elif action == "remove":
             self.deck_ids.remove(target)
         else:                               # M7: rest-site smithing
