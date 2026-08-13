@@ -105,6 +105,12 @@ LOG_DIR = Path(__file__).resolve().parent / "logs" / "soak"
 LOCAL_PROPS = REPO / "klee-mod" / "local.props"
 DEPLOY_BRIDGE = REPO / "klee-mod" / "build" / "deploy_bridge.ps1"
 
+# Where `GitsSpeed.cs` persists the pre-soak `PrefsSave.FastMode` (EB-87),
+# relative to the game directory. It is written on enable and deleted by a
+# successful disable, so its PRESENCE at teardown means the disable never
+# landed and the setting is still changed.
+SPEED_SIDECAR = Path("mods") / "STS2_MCP" / "GitsSpeed.original.json"
+
 STEAM_APPID = "2868840"
 GAME_EXE = "SlayTheSpire2.exe"
 DEFAULT_CHARACTER = "KLEEMOD-FURINA"
@@ -366,6 +372,11 @@ class Session:
         # `Instant` into the ledger as if it were what the user had before the
         # soak started. The ledger is what a person reads to put their game
         # back; it may not launder a change into a baseline.
+        #
+        # `GitsSpeed.cs` now persists its own capture across processes (EB-87),
+        # so the endpoint would answer correctly on its own. This stays as the
+        # belt to that brace: it costs one field and it is what keeps the
+        # ledger honest if a sidecar is ever lost with the mod directory.
         if self.speed_before is None:
             try:
                 self.speed_before = bridge.get_speed()
@@ -443,7 +454,25 @@ class Session:
         self._kill()
         return "process terminated"
 
+    def _read_speed_sidecar(self) -> str | None:
+        """The FastMode `GitsSpeed` still says is outstanding, or None."""
+        p = self.dir / SPEED_SIDECAR
+        if not p.exists():
+            return None
+        try:
+            return json.loads(p.read_text(encoding="utf-8")).get(
+                "original_fast_mode")
+        except Exception:                                    # noqa: BLE001
+            return "unreadable sidecar"
+
     def _remove_bridge(self) -> str:
+        # THE SIDECAR IS READ BEFORE THE DIRECTORY THAT HOLDS IT GOES. It lives
+        # inside `mods/STS2_MCP`, so this step destroys the only durable record
+        # of what FastMode was before the soak; if the disable never landed
+        # (dead wire, killed process) the person putting their game back needs
+        # that value, and it belongs in the ledger rather than in a file this
+        # line is about to delete.
+        outstanding = self._read_speed_sidecar()
         r = subprocess.run(
             ["powershell.exe", "-NoProfile", "-NonInteractive",
              "-ExecutionPolicy", "Bypass", "-File", str(DEPLOY_BRIDGE),
@@ -451,6 +480,11 @@ class Session:
             cwd=str(REPO / "klee-mod"), capture_output=True, text=True)
         if r.returncode != 0:
             raise RuntimeError(r.stderr.strip()[:300] or "deploy_bridge -Remove failed")
+        if outstanding:
+            return (f"mods/STS2_MCP removed -- WARNING: the GitsSpeed sidecar "
+                    f"was still present, so FastMode was NEVER restored and "
+                    f"settings.save is still on Instant. Set it back to "
+                    f"{outstanding} by hand")
         return "mods/STS2_MCP removed"
 
     def _remove_appid(self) -> str:
@@ -546,9 +580,10 @@ class Session:
                 "superseded by a restart; a new launch row and speed row open "
                 "below, and the SESSION's captured original is carried "
                 "forward rather than re-captured -- PrefsSave.FastMode "
-                "persists to settings.save, so the second process would "
-                "otherwise capture the first process's setting as the "
-                "original")
+                "persists to settings.save, so the second process must not "
+                "read the first process's setting back as the original "
+                "(EB-87: the bridge persists its capture in a sidecar, and "
+                "this session keeps its own copy as well)")
             self._speed_entry = None
         self._kill()
         self._launch()
