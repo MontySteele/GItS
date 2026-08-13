@@ -62,7 +62,8 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
 - **`CARD_FIELDS` is deliberately total** — an unknown card-level field blocks
   the card by name rather than being ignored (`:790-837`, `card_level_reason`
   `:840-847`). It caught `innate` and `retain` (`:791-813`); `tempo_band` had to
-  be added or all 219 rows would block (`:827-831`).
+  be added or every personal row would block (`:827-831`) — **220** today
+  (76 / 82 / 62), and the count is read from the sheets, not from this line.
 - **`MECHANICAL_OPS` is a whitelist backed by verified C# call sites**; an op
   outside it blocks (`:200-227`, refused `:996-998`). Per-op field whitelists
   apply the same rule one level down (`:244-268`).

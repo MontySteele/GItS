@@ -64,6 +64,15 @@ jobs:
       # see, silently. Also wired into pytest (test_sheet_lints).
       - name: op parity
         run: python tools/lint_op_parity.py
+      # EB-71 (2026-08-12). The codegen guard for the unified Sly grammar:
+      # `Card.sly` is the one field and the base-game keyword rides it as the
+      # reserved `{op: sly_autoplay}` rider, so a sheet or generator that
+      # revives `sly_keyword` / `sly_this_turn` must fail loudly rather than
+      # generate a class that silently means something else. Pinned by
+      # tier0/tests/test_eb71_cs_parity.py; wired here beside the other
+      # parity lints because that is where a codegen guard belongs.
+      - name: sly grammar
+        run: python tools/lint_sly_grammar.py
       # ALREADY THE GATE Y-8 ASKED FOR (verified 2026-08-06, Track Y). The
       # second sitting's Y-8 asked that `gen_roster_cards.py --check` become
       # "CI job 4" so that the class "sheet changed, generated C# didn't" fails
