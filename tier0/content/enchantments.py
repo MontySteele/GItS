@@ -252,14 +252,25 @@ CATALOG: dict[str, Enchantment] = {
 #       event, and Wood Carvings is not converted yet. Its colorless blocker
 #       is RULED -- R184 chose reskin, so Peck and Toric Toughness are
 #       replaced by equivalent-function companion/Teyvat content and LAW's
-#       colorless clause holds -- but the replacements are not designed and
-#       the conversion is stamped-world content batching in the next RT
-#       window (EB-83). An enchantment nobody grants is a name with no
-#       caller.
+#       colorless clause holds. As of 2026-08-13 (EB-83) that reskin is one
+#       option short of shippable, and not for a design reason: the Peck half
+#       is expressible (1-cost Attack, 2 damage x3), the TORIC TOUGHNESS half
+#       is not. Toric Toughness gives Block at the start of your next 2 turns,
+#       and `block_next_turn` is a one-shot bank popped whole at the next turn
+#       start -- there is no duration-scoped repeating Block power, so the
+#       second turn cannot be expressed. Two of three options is not a
+#       conversion, so no event grants Slither, so this row stays.
+#       An enchantment nobody grants is a name with no caller.
+#
+#       When it does land it needs a companion row in the parity lint:
+#       tools/lint_enchant_parity.GAME_RULES has no `slither` entry and would
+#       report UNMAPPED, and the card fact its CanEnchant reads is NOT on the
+#       wiki's Enchantments page (Slither is absent from that list) -- the
+#       citation has to come from the decompile.
 UNEXPRESSED = {
     "slither": ("randomises cost on DRAW -- the engine hook exists (EB-83); "
-                "no event grants it until the Wood Carvings reskin lands "
-                "(R184)"),
+                "no event grants it, because the Wood Carvings reskin is "
+                "blocked on Toric Toughness's 2-turn Block power (R184)"),
 }
 
 
