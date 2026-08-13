@@ -1,4 +1,6 @@
-# Standing roster re-baseline, 2026-08-13 — the twelve-arm table across `RT10 → RT11`
+# Standing roster re-baseline, 2026-08-13 — the twelve-arm table across `RT10 → RT11`, and again across `RT11/C9 → RT12/C10`
+
+> **Two windows, one document.** Part 1 (§1–§5) is the `RT10 → RT11` re-baseline, published as taken. Part 2 (§6–§10) is the second re-take, owed by the window-2 correctness batch's coordinated bump later the same day. Part 1 is not rewritten and its `RT11` column is Part 2's `RT11` column — the same numbers, from the same run, quoted once.
 
 > **Lifecycle: ACTIVE.** This is the re-baseline the `RUNTEMPLATE` 10 → 11 bump
 > owes. It is descriptive only. It runs, records and reports. It recommends
@@ -191,3 +193,136 @@ other seven printed identically.
 Both runs' full stdout, warnings included, is reproducible from the cell in the
 table above. Nothing in this file is quoted from any run other than the two
 named there.
+
+---
+
+# Part 2 — the `RT11/C9 → RT12/C10` re-take
+
+## 6. Why part 2 exists, and the cell
+
+Both stamp fields moved again on 2026-08-13, hours after part 1 was taken: the
+window-2 correctness batch (`EB-104`, all twelve members) landed under one
+coordinated bump — `RUNTEMPLATE` 11 → **12** for its five run-layer fixes and
+`CONSTANTS` 9 → **10** for its seven tier0 engine fixes. Stamp law makes every
+`RT11/D14/P7/C9` roster number archive at that commit (R68), so the table is
+re-taken. Same script, same n, same seed, same cell in every other respect.
+
+| | |
+|---|---|
+| branch | `overnight-burn-2026-08-12` |
+| **before** column | the `RT11` column of part 1 — **not re-run**, see the note below |
+| **after** HEAD | `18de3fe` — the window-2 stamp-bump commit, taken in the primary checkout |
+| command | `PYTHONPATH=. python -m tier05.exp_roster_anchors --runs 3000 --jobs 0 --seed 20260729` |
+| after cell | `cell=roster-anchors[jobs=0,runs=3000,seed=20260729] seed=20260729 runs=3000 RT12/D14/P7/C10` |
+| route / policy / loadout | `hunter` / `assigned` / realistic, relics + potions, all registered acts |
+| intervals | 95% Wilson (`tier05.stats.wilson95`), computed in-row by the script |
+| errors | none — all twelve arms completed, zero tracebacks |
+
+**Why the `RT11` column was not re-run.** Part 1's `RT11` read was taken at
+`768dae6`. The window-2 merges began at `462013d`. `git diff --name-only
+768dae6 462013d` returns five paths and **not one of them is Python**: two
+register documents, part 1 of this file, and two `klee-mod` C# files that no
+sim run reads. The pre-window sim is therefore byte-identical to the one part 1
+measured, and re-running it would re-derive the same twelve rows from the same
+seed. No spot-check was needed to establish that and none is claimed.
+
+`game_ref/` was present, so both `real_*` anchors are live and no `ref_*`
+substitution was needed. Both crash fixes disclosed in part 1 are present on
+both sides of this comparison too, as they were on both sides of part 1's.
+
+## 7. The twelve arms — run winrate
+
+| arm | `RT11` win | `RT11` 95% | `RT12` win | `RT12` 95% |
+|---|---|---|---|---|
+| `klee / demolition` | 7.4% | [6.5, 8.4] | **6.4%** | [5.6, 7.4] |
+| `klee / spark` | 3.9% | [3.3, 4.7] | **3.9%** | [3.3, 4.7] |
+| `klee / reaction` | 6.4% | [5.5, 7.3] | **5.6%** | [4.8, 6.4] |
+| `furina / salon` | 5.0% | [4.3, 5.8] | **3.9%** | [3.3, 4.7] |
+| `furina / spotlight` | 1.0% | [0.7, 1.4] | **1.0%** | [0.7, 1.4] |
+| `furina / fanfare` | 1.2% | [0.9, 1.7] | **1.1%** | [0.8, 1.6] |
+| `kokomi / priest` | 1.0% | [0.7, 1.4] | **1.1%** | [0.8, 1.6] |
+| `kokomi / commander` | 1.6% | [1.2, 2.1] | **1.5%** | [1.1, 2.0] |
+| `kokomi / assist` | 0.4% | [0.2, 0.7] | **0.5%** | [0.3, 0.8] |
+| `ref_ironclad / generic` | 9.4% | [8.4, 10.5] | **7.5%** | [6.6, 8.5] |
+| `real_ironclad / generic` (floor) | 6.5% | [5.7, 7.5] | **5.5%** | [4.7, 6.3] |
+| `real_silent / generic` (floor) | 1.4% | [1.0, 1.9] | **1.3%** | [0.9, 1.7] |
+
+**Every arm's two intervals overlap**, as they did in part 1 — but two of them
+only just: `ref_ironclad` overlaps on [8.4, 8.5] and `furina / salon` on
+[4.3, 4.7]. Recorded as measured. The largest point movements are
+`ref_ironclad` −1.9 pp, `furina / salon` −1.1 pp and `klee / demolition`
+−1.0 pp. No arm separated from its own `RT11` value at n = 3000.
+
+That is a statement about this sample size and nothing else, and no movement
+here is attributed to any member of the batch. Per R68 the `RT11` column is
+archive from this commit regardless of how far it moved.
+
+## 8. Act-1 clear rate, same cell
+
+| arm | `RT11` act-1 | `RT12` act-1 | `RT12` 95% |
+|---|---|---|---|
+| `klee / demolition` | 84.3% | **83.9%** | [82.6, 85.2] |
+| `klee / spark` | 80.9% | **80.6%** | [79.2, 82.0] |
+| `klee / reaction` | 85.9% | **85.2%** | [83.8, 86.4] |
+| `furina / salon` | 55.2% | **53.6%** | [51.8, 55.4] |
+| `furina / spotlight` | 57.4% | **55.4%** | [53.6, 57.2] |
+| `furina / fanfare` | 50.3% | **48.6%** | [46.8, 50.4] |
+| `kokomi / priest` | 43.7% | **42.3%** | [40.5, 44.0] |
+| `kokomi / commander` | 52.4% | **51.3%** | [49.5, 53.1] |
+| `kokomi / assist` | 34.7% | **33.8%** | [32.1, 35.5] |
+| `ref_ironclad / generic` | 71.1% | **65.5%** | [63.8, 67.2] |
+| `real_ironclad / generic` | 70.9% | **67.2%** | [65.5, 68.8] |
+| `real_silent / generic` | 59.3% | **54.4%** | [52.6, 56.2] |
+
+Unlike part 1, where act-1 clear was unchanged to the printed precision on all
+twelve arms, every arm's act-1 clear is lower here, by 0.3 to 5.6 pp. Recorded
+as measured; no inference is drawn from it in this file.
+
+## 9. Shape columns, same cell
+
+`acts` (mean acts cleared), `deck` (mean final deck size) and `fights` (mean
+fights survived), all twelve arms at `RT12`.
+
+| arm | `acts` | `deck` | `fights` |
+|---|---|---|---|
+| `klee / demolition` | 1.18 | 25.3 | 15.7 |
+| `klee / spark` | 1.03 | 24.2 | 14.5 |
+| `klee / reaction` | 1.17 | 21.7 | 15.5 |
+| `furina / salon` | 0.78 | 21.5 | 11.4 |
+| `furina / spotlight` | 0.67 | 21.3 | 10.7 |
+| `furina / fanfare` | 0.60 | 19.6 | 9.9 |
+| `kokomi / priest` | 0.52 | 21.0 | 9.1 |
+| `kokomi / commander` | 0.66 | 22.0 | 10.4 |
+| `kokomi / assist` | 0.39 | 19.7 | 7.9 |
+| `ref_ironclad / generic` | 1.04 | 21.6 | 14.1 |
+| `real_ironclad / generic` | 0.97 | 21.6 | 13.5 |
+| `real_silent / generic` | 0.65 | 20.8 | 10.7 |
+
+**No `RT11 → RT12` shape deltas are stated, and the omission is deliberate.**
+§3 printed only the six arms whose shape values moved across `RT10 → RT11`, so
+this document holds `RT11` shape values for six arms and not for the other six.
+Stating a delta for half the table and a blank for the rest would read as
+"unchanged" where the truth is "not on record here". The six that are on record
+are `klee / spark` (1.05 / 24.4 / 14.7), `furina / spotlight`
+(0.70 / 21.6 / 10.9), `furina / fanfare` (0.63 / 19.8 / 10.2),
+`kokomi / commander` (0.69 / 22.3 / 10.7), `ref_ironclad`
+(1.17 / 22.4 / 15.4) and `real_ironclad` (1.06 / 22.1 / 14.4); a reader who
+wants the other six can re-derive them at `462013d`.
+
+## 10. What is NOT comparable to this table
+
+- Everything §4 already lists, unchanged.
+- **The `RT10` column of §1**, which was already archive and is two stamp
+  boundaries away from §7.
+- **Any `RT11` roster number published elsewhere.** The `RT11` columns above
+  are reproduced so this comparison is self-contained; that is not a licence to
+  re-quote `RT11` going forward.
+- **§4.7 shop-channel figures of any vintage.** `EB-102` changes which card
+  `rng.choice` lands on in the shop, so the shop channel is renumbered by this
+  window independently of anything in the table above.
+
+## 11. Raw output
+
+Both runs' full stdout, warnings included, is reproducible from the cells in
+§6 and in the part-1 cell table. Nothing in this file is quoted from any run
+other than those named there.
