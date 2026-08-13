@@ -92,11 +92,13 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
   a combat pile out of combat (the game's own path would no-op silently).
 - **The GItS speed endpoint is off by default, gameplay-inert, and reversible**:
   originals are captured on first apply and restored on `{"enabled": false}`;
-  `time_scale` is clamped to [0.1, 20] (`gits/GitsSpeed.cs:8-41`, `:182-215`).
+  `time_scale` is clamped to [0.1, 20] (`gits/GitsSpeed.cs:8-43`, `:190-223`).
   The captured `FastMode` original outlives the process in a
-  `GitsSpeed.original.json` sidecar in the mod directory, written on enable and
-  deleted by a successful disable (EB-87, `:66-142`); `TimeScale` is not
-  persisted because a new process starts at the default.
+  `GitsSpeed.original.conf` sidecar in the mod directory — JSON content under a
+  `.conf` name, because ModManager parses every `*.json` under `mods/` as a
+  manifest — written on enable and deleted by a successful disable
+  (EB-87, `:64-160`); `TimeScale` is not persisted because a new process starts
+  at the default.
 
 ## 4. Rulings that shaped it
 
@@ -147,14 +149,14 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
   (`McpMod.cs:307-310`).
 - **`"enabled"` on the speed endpoint is `ValueKind == True`** — a JSON string
   `"true"` or a `1` reads as **false** and silently disables
-  (`gits/GitsSpeed.cs:272`). `time_scale` is likewise ignored unless it parses as
-  a double (`:274-278`).
+  (`gits/GitsSpeed.cs:280`). `time_scale` is likewise ignored unless it parses as
+  a double (`:282-286`).
 - **`PrefsSave.FastMode` persists to `settings.save`.** Enabling speed and not
   disabling it leaves user-visible state changed; teardown must POST
   `{"enabled": false}` (`gits/GitsSpeed.cs:16-20`). It is also why the capture is
-  persisted across processes rather than re-read (`:21-32`): a restarted process
+  persisted across processes rather than re-read (`:21-34`): a restarted process
   reading `PrefsSave.FastMode` back would capture its OWN change as the
-  baseline. `understudy/soak.py:456-489` reads the sidecar before removing the
+  baseline. `understudy/soak.py:457-489` reads the sidecar before removing the
   mod directory, so an unreverted change is named in the ledger rather than
   deleted with the file that recorded it.
 - **Seeded embark returns an error and does NOT start the run** unless
@@ -186,7 +188,7 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
 3. `vendor/STS2_MCP/McpMod.cs:175-296` — `HandleRequest`: the actual route chain,
    the 409 guard, and the marked local edit.
 4. `vendor/STS2_MCP/gits/` — the GItS-authored code; each file's header is its
-   contract (`GitsSpeed.cs:1-44`, `GitsSeed.cs:1-93`, `GitsResources.cs:1-46`,
+   contract (`GitsSpeed.cs:1-46`, `GitsSeed.cs:1-93`, `GitsResources.cs:1-46`,
    `GitsGiveCard.cs:1-88`).
 5. `vendor/README.md` + `tools/lint_vendor_pin.py:1-35` — the vendoring rules and
    their executable half.

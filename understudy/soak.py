@@ -108,8 +108,9 @@ DEPLOY_BRIDGE = REPO / "klee-mod" / "build" / "deploy_bridge.ps1"
 # Where `GitsSpeed.cs` persists the pre-soak `PrefsSave.FastMode` (EB-87),
 # relative to the game directory. It is written on enable and deleted by a
 # successful disable, so its PRESENCE at teardown means the disable never
-# landed and the setting is still changed.
-SPEED_SIDECAR = Path("mods") / "STS2_MCP" / "GitsSpeed.original.json"
+# landed and the setting is still changed. JSON content under a `.conf` name:
+# ModManager parses every `*.json` under `mods/` as a mod manifest.
+SPEED_SIDECAR = Path("mods") / "STS2_MCP" / "GitsSpeed.original.conf"
 
 STEAM_APPID = "2868840"
 GAME_EXE = "SlayTheSpire2.exe"

@@ -26,6 +26,8 @@
 //     REVERTED. The first capture is therefore written to a sidecar file next
 //     to the mod's own STS2_MCP.conf, a later process restores from the
 //     sidecar instead of re-capturing, and a successful disable deletes it.
+//     The sidecar is JSON content under a `.conf` name on purpose -- a `.json`
+//     under mods/ is parsed as a mod manifest and would break every boot.
 //     TimeScale is NOT persisted and must not be: Engine.TimeScale is a live
 //     Godot property that starts at its default in every new process, so the
 //     per-process capture is already the right original for it.
@@ -59,7 +61,13 @@ public static partial class McpMod
     private const double GitsSpeedMinTimeScale = 0.1;
     private const double GitsSpeedMaxTimeScale = 20.0;
 
-    private const string GitsSpeedSidecarFileName = "GitsSpeed.original.json";
+    // JSON content, but deliberately NOT a `.json` name: ModManager walks
+    // `mods/` recursively and parses every `*.json` under it as a mod
+    // manifest, so a stray one throws on EVERY boot for EVERY mod (LAW;
+    // `klee-mod/build/validate.ps1:50-60` is the executable half). The
+    // bridge's own runtime-written file dodges it the same way, by being
+    // `STS2_MCP.conf`. Never rename this to `.json`.
+    private const string GitsSpeedSidecarFileName = "GitsSpeed.original.conf";
 
     private static bool _gitsSpeedEnabled;
     private static bool _gitsSpeedCaptured;
