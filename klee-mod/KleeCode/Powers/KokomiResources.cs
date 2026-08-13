@@ -38,7 +38,7 @@ public interface IKokomiCharacter
 ///
 /// | C# constant         | sim source                               |
 /// |---------------------|------------------------------------------|
-/// | ChargePerExhaust    | constants.py CHARGE_PER_EXHAUST = 1       |
+/// | ChargePerExhaust    | constants.py CHARGE_PER_EXHAUST = 2       |
 /// | BurstPerExhaust     | constants.py KOKOMI_BURST_PER_EXHAUST=2   |
 /// | BurstPerReaction    | constants.py BURST_PER_REACTION = 5       |
 /// | KurageDuration      | constants.py KURAGE_DURATION = 1          |
@@ -53,7 +53,8 @@ public interface IKokomiCharacter
 /// </summary>
 public static class KokomiConstants
 {
-    public const int ChargePerExhaust = 1;
+    // STAGED 1 -> 2 (EB-74 B-alone); mirrors C.CHARGE_PER_EXHAUST.
+    public const int ChargePerExhaust = 2;
     public const int BurstPerExhaust = 2;
 
     /// <summary>

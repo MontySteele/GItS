@@ -271,7 +271,7 @@ public sealed class PearlOfInsightRelic : CustomRelicModel
     /// upgraded form has to declare its own numbers rather than read the
     /// funnel's.
     /// </summary>
-    public const int ChargePerExhaust = 2;   // = KokomiConstants.ChargePerExhaust * 2
+    public const int ChargePerExhaust = 4;   // STAGED: = KokomiConstants.ChargePerExhaust * 2
     public const int BurstPerExhaust = 4;    // = KokomiConstants.BurstPerExhaust * 2
 
     public PearlOfInsightRelic() : base(autoAdd: false)

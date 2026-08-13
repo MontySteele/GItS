@@ -38,7 +38,10 @@ from tier0.tests.conftest import make_enemy
 # --- the two rows, inlined verbatim from tier05/content/relics.yaml ---------
 
 PEARL_OF_INSIGHT = [
-    {"hook": "charge_per_exhaust", "amount": 2},
+    # STAGED 2 -> 4 (EB-74 B-alone): this fixture is a THIRD copy of the two
+    # numbers, beside tier05/content/relics.yaml and the C# literal, so the
+    # base-rate change moves it too.
+    {"hook": "charge_per_exhaust", "amount": 4},
     {"hook": "burst_per_exhaust", "amount": 4},
 ]
 CURTAIN_NEVER_FALLS = [{"hook": "spotlight_both_modes"}]
@@ -96,12 +99,12 @@ def test_pearl_of_insight_doubles_the_exhaust_rate():
     """The effect, as a with/without delta on the ONE exhaust funnel."""
     st = kokomi_state(PEARL_OF_INSIGHT)
     refpowers.exhaust_card(st, kokomi_card())
-    assert st.player.charge == 2
+    assert st.player.charge == 4          # STAGED: was 2
     assert st.player.burst_energy == 4
 
     st_no = kokomi_state()
     refpowers.exhaust_card(st_no, kokomi_card())
-    assert st_no.player.charge == C.CHARGE_PER_EXHAUST == 1
+    assert st_no.player.charge == C.CHARGE_PER_EXHAUST == 2   # STAGED: was 1
     assert st_no.player.burst_energy == C.KOKOMI_BURST_PER_EXHAUST == 2
 
 
@@ -126,13 +129,14 @@ def test_the_rate_REPLACES_the_base_rather_than_adding_to_it():
     """The replacement semantics, and they are not cosmetic.
 
     C# `ExhaustCharge` is a ternary -- it picks the relic's value or the base
-    value, never their sum. Additive would give 1+2=3 Charge per exhaust,
+    value, never their sum. Additive would give (STAGED) 2+4=6 Charge per
+    exhaust,
     which is a 3x upgrade wearing a 2x tooltip. Same class of defect as the
     original bug (panel and funnel disagreeing), inverted.
     """
     st = kokomi_state(PEARL_OF_INSIGHT)
     refpowers.exhaust_card(st, kokomi_card())
-    assert st.player.charge == 2, "additive would read 3"
+    assert st.player.charge == 4, "additive would read 6"   # STAGED: was 2/3
     assert st.player.burst_energy == 4, "additive would read 6"
 
 
@@ -151,7 +155,8 @@ def test_the_upgrade_rides_the_funnel_and_not_one_exhaust_site():
     st.player.hand.append(burner)
     st.player.energy = 3
     combat.play_card(st, burner)
-    assert st.player.charge == 4          # 2 victims x the doubled rate
+    assert st.player.charge == 8          # 2 victims x the doubled rate
+    #                                       (STAGED: was 4)
 
 
 def test_the_mustered_exhaust_bucket_survives_the_upgrade():
@@ -168,7 +173,7 @@ def test_the_mustered_exhaust_bucket_survives_the_upgrade():
     refpowers.exhaust_card(st, card)
     assert any(ev["event"] == "gain_charge"
                and ev["source"] == "exhaust_muster"
-               and ev["amount"] == 2
+               and ev["amount"] == 4       # STAGED: was 2
                for ev in st.log)
 
 

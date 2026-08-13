@@ -258,7 +258,7 @@ ancient:
     # never removes a starter's own hooks.
     owner: [kokomi]
     effects:
-      - {hook: charge_per_exhaust, amount: 2}
+      - {hook: charge_per_exhaust, amount: 4}   # STAGED: 2 -> 4, R190 invariant (2x base)
       - {hook: burst_per_exhaust, amount: 4}
 
   touch_of_orobas_furina:

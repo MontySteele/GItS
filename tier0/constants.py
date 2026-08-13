@@ -340,8 +340,42 @@ BURST_PER_ENCORE_SPENT = 1    # burst energy per point of Encore spent
 # ids are stable across the lore overlay (only all_streams_flow renamed
 # id-level), and the id now sits on the engine that powers the link it is
 # named for. Relic MECHANICS are unchanged by the rename. ---
-CHARGE_PER_EXHAUST = 1        # kickoff §2.1 base accrual (universal rule:
-                              # every card through the exhaust funnel)
+# --- STAGED, LANDS NOTHING. This change sits on the branch
+# `staged/eb74-lever2-b-alone` and is on no branch that ships. R154 ruled
+# BUILD A LEGAL LEVER-2 CANDIDATE AND PULL NOTHING; S4-G13's pull verb -- which
+# lever, and whether -- is still open to [USER] and gated on the post-wave
+# observation. This is Route 1 of EB-74 §7, the exercised D15 precedent
+# (`staged/d15-spotlight-payoff` stages a version-stamped constants change the
+# same way). Do not merge this branch to satisfy a lint, a rebase or a
+# tidy-up: merging it IS the pull. ---
+#
+# NOTE A9's OBLIGATION, DISCHARGED IN WRITING -- which is the whole reason
+# B-alone is a design act and not an integer edit. The restatement below says
+# these two constants are one wage in two currencies, so they move together OR
+# THE REASON MOVES WITH THEM. Here is the reason, [USER]-adopted:
+#
+#     "preserve the ratified Burst cadence and change one variable."
+#
+# Unpacked, because a quoted sentence is not an argument: KOKOMI_BURST_PER_
+# EXHAUST feeds the Burst meter, and that meter's size was RATIFIED at 20 on a
+# fresh read (R139). Moving Burst accrual moves how often her Burst arrives,
+# which re-opens a settled question this candidate has no business re-opening
+# and puts R139 inside the blast radius. Moving Charge alone leaves the cadence
+# exactly where it was ratified and moves the one thing lever 2 is about --
+# her scaling bank. That is also what lever 2's own text asks for when it
+# demands "its own E-cell", and it is D4's one-variable rule.
+#
+# A9 is not evaded by this. Its warning is against a SILENT partial repeal of
+# the R79 payment; nothing is repealed here, the exhaust verb still pays in
+# both currencies, and one of them now pays more.
+CHARGE_PER_EXHAUST = 2        # kickoff §2.1 base accrual (universal rule:
+                              # every card through the exhaust funnel).
+                              # STAGED 1 -> 2 (EB-74 candidate B-alone). The
+                              # upgraded starter follows to 4 by the R190
+                              # invariant -- see tier05/content/relics.yaml and
+                              # the parity lint's INVARIANTS block, which is
+                              # what makes this a FOUR-number change rather
+                              # than a one-number one.
 KOKOMI_BURST_PER_EXHAUST = 2  # her particle economy: burst energy per
                               # exhaust event (skill_tag 5 + reactions 5
                               # are the shared sources; this is her Salon-
@@ -1072,7 +1106,24 @@ BANNER_FEATURED_SLOTS = 3
 # PREDICTED-strong (+3.04 / +4.46) on the forced-first-copy sweep, 2026-08-10.
 # DRAFTER_VERSION and RUNTEMPLATE correctly do NOT bump: no offer-time price
 # and no map/route shape changed.
-CONSTANTS_VERSION = 9
+# --- STAGED, LANDS NOTHING (see the CHARGE_PER_EXHAUST block above). This
+# bump exists because pulling the staged candidate WOULD move the world and
+# the branch must be complete and machine-checked, not because a world change
+# has happened. `C` on every branch that ships is still 9.
+#
+# C10 (PROPOSED, staged): EB-74 lever-2 candidate B-alone. CHARGE_PER_EXHAUST
+# 1 -> 2, and the Pearl of Insight upgraded rate 2 -> 4 with it under R190's
+# ratified invariant. KOKOMI_BURST_PER_EXHAUST is UNTOUCHED at 2 base / 4
+# upgraded, deliberately -- Note A9's written reason is at the constant.
+# Every Kokomi tier-0.5 number taken under C9 is archived by a pull, and the
+# lever's own text asks for its own E-cell, so the pull opens a measurement
+# window rather than joining one. KNOWN COLLISION, recorded at EB-74 §5.2:
+# EB-69 also moves `C` and is one of the four things EXPERIMENTS names as
+# needing to settle before the payoff-reach freeze -- landing both in one
+# window makes the isolated E-cell impossible, and landing them in two costs
+# two rebaselines. That is a sequencing call for [USER] at the pull, not
+# something this branch may decide by existing.
+CONSTANTS_VERSION = 10
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
