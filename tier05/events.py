@@ -643,7 +643,15 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
     screens = ([opt["card_reward"]] if opt.get("card_reward") else [])
     screens += [C.REWARD_CARD_OFFERS] * opt.get("card_screens", 0)
     for width in screens:
-        offers = _random_pool_cards(rng, st, width)
+        # EB-112: a card screen is a REWARD SCREEN -- the rarity is rolled
+        # per offer through C.RARITY_ODDS (60/35/5) and only then is a card
+        # picked inside that tier. These built their offers by flattening
+        # the whole character pool and drawing uniformly with replacement,
+        # which made Rare 14/71 = 19.7% per offer and let one screen show
+        # the same card twice. `_random_pool_cards` stays for the ops that
+        # genuinely declare a uniform pool draw (`pick_cards`).
+        offers = rewards.roll_card_offers(rng, st.character, width,
+                                          distinct=True)
         if opt.get("upgraded"):
             offers = [loader.peek_card(c.id + upgrades.SUFFIX)
                       if upgrades.has_upgrade(c.id) else c for c in offers]
