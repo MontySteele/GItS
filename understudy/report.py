@@ -31,6 +31,41 @@ from typing import Any
 
 LOG_DIR = Path(__file__).resolve().parent / "logs" / "soak"
 
+
+def console_safe(stream: Any = None) -> None:
+    """Make a text stream survive shipped card titles (EB-93).
+
+    The repo's encoding rule ("every text read/write declares `encoding=`")
+    was written about `open()`, and this file's reads already obey it -- the
+    soak log is UTF-8 and intact. What it does not cover is `sys.stdout`,
+    whose encoding is chosen by the CONSOLE: cp1252 on a default Windows
+    terminal. `render()` quotes card titles verbatim from the wire, and two
+    shipped Barbara titles contain `U+266A MUSIC NOTE`, so on 2026-08-13 a
+    clean N=3 soak ended `UnicodeEncodeError` at the final `print` and
+    exited 1 -- an unattended night reads a green soak as a red one, which
+    is the wrong way round.
+
+    So the declaration is made here instead of being left to the terminal.
+    UTF-8 first, because it is lossless; `backslashreplace` as the fallback
+    and as the error handler either way, because a mangled `\\u266a` in a
+    title is a cosmetic loss and a non-zero exit code is not. Never raises:
+    a stream that cannot be reconfigured (a pipe wrapper, a captured
+    stream in a test) is left exactly as it was.
+    """
+    stream = sys.stdout if stream is None else stream
+    reconfigure = getattr(stream, "reconfigure", None)
+    if reconfigure is None:
+        return
+    try:
+        reconfigure(encoding="utf-8", errors="backslashreplace")
+        return
+    except (ValueError, OSError, AttributeError):
+        pass
+    try:
+        reconfigure(errors="backslashreplace")
+    except (ValueError, OSError, AttributeError):
+        pass
+
 GUARDRAIL = (
     "Every number in this report is a BOT-LIMITED FLOOR (Guardrail-7). "
     "policy_v1 is a heuristic with declared reductions, the seeds are "
@@ -313,6 +348,7 @@ def render(stamp: str | None = None) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
+    console_safe()
     print(render(argv[0] if argv else None))
     return 0
 

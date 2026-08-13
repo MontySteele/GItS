@@ -2006,6 +2006,12 @@ def main(argv: list[str] | None = None) -> int:
                          "default")
     args = ap.parse_args(argv)
 
+    # EB-93: declare the CONSOLE's encoding before anything prints a card
+    # title. The soak's own progress lines quote resolved names too, so this
+    # sits above the run and not just above the report.
+    from understudy import report as _report
+    _report.console_safe()
+
     result = soak(args.runs, args.character, do_setup=not args.no_setup,
                   commit=args.commit, seeds=args.seed,
                   max_fights=args.max_fights,
