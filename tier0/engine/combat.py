@@ -279,6 +279,10 @@ def play_card(state: CombatState, card: Card) -> None:
     state.cards_played_this_turn += 1
     state.emit("play", card=card.id, cost=cost, energy_left=p.energy,
                drawn_turn=drawn_turn, first_copy=first_copy)
+    # EB-101 (races-d): Supporting Cast's draw is RECORDED here and RESOLVED
+    # below `_finish_play`, which is where the mod resolves it. See the block
+    # that sets this, and the one that spends it.
+    pending_spotlight_draw = 0
     if effects.is_spotlighted(state, card):
         # Spotlight texture applies in both modes. Only Center Stage creates
         # Fanfare; Guest Cast spends the light on Companion empowerment.
@@ -309,10 +313,13 @@ def play_card(state: CombatState, card: Card) -> None:
         # tried). spotlight_encore (EVERY play) remains engine-supported
         # as the archived pre-flip rate.
         if state.spotlighted_cards_this_turn == 1:
-            n = p.powers.get("spotlight_draw", 0)
-            if n:
-                state.draw(n)
-                state.emit("extra_draw", amount=n)
+            # EB-101, the RECORD half. The amount is read from the powers
+            # dict HERE, on the mod's `BeforeCardPlayed` clock
+            # (`SpotlightSystem.NotePlay` stores nothing but PendingDraws),
+            # so a card that grants or strips `spotlight_draw` during its own
+            # resolution cannot change the size of its own draw. Only the
+            # DRAW moves below; the read does not.
+            pending_spotlight_draw = p.powers.get("spotlight_draw", 0)
             n = p.powers.get("spotlight_encore_first", 0)
             if n:
                 resources.gain_encore(state, n, "spotlight_encore_first",
@@ -326,6 +333,27 @@ def play_card(state: CombatState, card: Card) -> None:
     if p.burst_max and "skill_tag" in card.tags:
         resources.gain_burst(state, C.BURST_PER_SKILL_TAG, "skill_tag")
     _finish_play(state, card)
+    # EB-101 (races-d), the RESOLVE half -- the surviving member of the
+    # EB-19/NC-9 broadcast-ordering family, whose siblings closed as
+    # races-a/b/c.
+    #
+    # The mod records this draw in `BeforeCardPlayed` and resolves it in
+    # `AfterCardPlayed` (`SpotlightSystem.cs:389-403`), so the triggering
+    # card resolves against a hand WITHOUT the drawn cards. tier0 drew them
+    # above the card's own resolution, so a Spotlighted card that reads the
+    # hand while resolving -- Encore Performance -- selected from a
+    # different-sized pool in each engine, and Director's Cut and Curtain
+    # Cue flip the same way at MAX_HAND_SIZE.
+    #
+    # `BeforeCardPlayed` is not async and carries no PlayerChoiceContext, so
+    # the mod's half cannot move; the movable leg is this one.
+    #
+    # NOT A PARITY CRITERION, deliberately: neither engine's draw consumes
+    # `Rng.CombatTargets` and the two share no RNG stream, so the guarantee
+    # here is structural (a hand size), never a fixed-seed trace match.
+    if pending_spotlight_draw:
+        state.draw(pending_spotlight_draw)
+        state.emit("extra_draw", amount=pending_spotlight_draw)
 
 
 def _finish_play(state: CombatState, card: Card,
