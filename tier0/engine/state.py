@@ -328,7 +328,7 @@ class Card:
     # all existing content stay byte-identical.
     enchant_damage: int = 0       # flat rider on this attack's damage
     enchant_effects: list[dict] = field(default_factory=list)  # after own fx
-    enchant_block: int = 0        # Nimble: once per play, not per block row
+    enchant_block: int = 0        # Nimble: paid on EVERY Block gain (EB-85)
     enchant_damage_mult: float = 1.0        # Corrupted: x1.5 on this attack
     enchant_first_play_damage: int = 0      # Vigorous: first play of a combat
     enchant_first_play_effects: list[dict] = field(default_factory=list)
@@ -707,13 +707,6 @@ class CombatState:
     # Dexterity and Frail. Kept beside the count rather than replacing it --
     # refpowers reads the count to divide a per-gain allowance.
     block_gained_this_card: int = 0
-    # Nimble (R82 reopened): "increases Block gained from this card by X" is
-    # ONCE per card PLAY, not once per Block row and not once per _op_block
-    # entry -- a two-row card, or a Block row nested under a conditional,
-    # re-enters the op and would collect the rider again off a function-local
-    # latch. Shared by _op_block and _op_block_next_turn so a card carrying
-    # both still collects the rider exactly once.
-    enchant_block_spent_this_card: bool = False
     discards_this_card: int = 0           # CalculatedGamble's draw-back count
     last_drawn_type: str = ""             # EscapePlan's drawn-card branch
     salon_replacements_this_card: int = 0 # overflow count for current card

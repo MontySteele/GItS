@@ -98,31 +98,41 @@ def _play_block_card(state, fx, rider=2):
     return c
 
 
-def test_the_block_rider_lands_once_per_PLAY_not_once_per_block_row():
-    """Nimble is 'Block gained from this card', once. _op_block re-enters for
-    every Block row -- including a row nested under a conditional -- so the
-    latch has to live on the state for the whole card play, not inside one
-    call. Asserted with the conditional both live and dead: the second row
-    must not be able to buy a second rider when it fires."""
+def test_the_block_rider_lands_on_EVERY_block_gain_not_once_per_play():
+    """EB-85 divergence 3: the cadence is per Block GAIN.
+
+    The game pays Nimble inside `Hook.ModifyBlock`, which runs once per
+    `CreatureCmd.GainBlock` call, with no latch and no EnchantmentStatus gate
+    -- so a two-row Block card collects it twice. tier0 paid it once per card
+    play off a state latch and under-counted every multi-gain card.
+    Asserted with the conditional both dead and live, because the second row
+    only exists in one of those worlds."""
     fx = [{"op": "block", "amount": 6}, SPARK_COND]
     dead = make_state()
     _play_block_card(dead, fx)
-    assert dead.player.block == 6 + 2          # rider once, branch skipped
+    assert dead.player.block == 6 + 2          # one gain, one rider
 
     live = make_state()
     live.player.sparks = 1
     _play_block_card(live, fx)
-    assert live.player.block == 6 + 3 + 2      # BOTH rows, rider still once
+    assert live.player.block == (6 + 2) + (3 + 2)   # two gains, two riders
 
 
-def test_the_block_rider_is_shared_by_block_and_block_next_turn():
-    """A card that gains Block both ways collects the rider once IN TOTAL:
-    the published text counts the card, not the op."""
+def test_the_block_rider_repeats_across_a_times_loop():
+    """A `times` loop is N separate GainBlock calls in the game, so it is N
+    riders -- the same fact the two-row card asserts, on the other shape."""
+    state = make_state()
+    _play_block_card(state, [{"op": "block", "amount": 4, "times": 3}])
+    assert state.player.block == (4 + 2) * 3
+
+
+def test_a_card_gaining_block_both_ways_pays_the_rider_on_each():
+    """One payout per Block gain, and `block_next_turn` is its own gain."""
     state = make_state()
     _play_block_card(state, [{"op": "block", "amount": 4},
                              {"op": "block_next_turn", "amount": 4}])
     assert state.player.block == 4 + 2
-    assert state.player.powers.get("block_next_turn", 0) == 4
+    assert state.player.powers.get("block_next_turn", 0) == 4 + 2
 
 
 def test_the_block_rider_rides_a_block_next_turn_only_card():
@@ -134,10 +144,13 @@ def test_the_block_rider_rides_a_block_next_turn_only_card():
     assert state.player.powers.get("block_next_turn", 0) == 5 + 2
 
 
-def test_an_inner_free_play_does_not_eat_the_outer_cards_rider():
-    """The _FREE_PLAY_CONTEXT hazard: a card free-played in the middle of an
-    outer card's resolution runs its own resolve_card, which resets the
-    latch. Both cards must collect their own rider exactly once."""
+def test_each_card_pays_its_OWN_rider_through_an_inner_free_play():
+    """The _FREE_PLAY_CONTEXT question, restated for the per-gain cadence.
+
+    The game reads `cardSource.Enchantment` off whichever card is producing
+    the Block, so an inner free-played card pays its own Nimble and the outer
+    card keeps paying its own on every gain of its own. There is no shared
+    entitlement to spend, which is why the latch left _FREE_PLAY_CONTEXT."""
     state = make_state()
     inner = card("inner", fx=[{"op": "block", "amount": 1}], enchant_block=2)
     state.player.draw_pile.append(inner)
@@ -147,8 +160,8 @@ def test_an_inner_free_play_does_not_eat_the_outer_cards_rider():
                      {"op": "block", "amount": 3}])
     state.player.hand.append(outer)
     combat.play_card(state, outer)
-    #   outer 3 + rider 2, inner 1 + rider 2, outer 3 (rider already spent)
-    assert state.player.block == 3 + 2 + 1 + 2 + 3
+    #   outer 3+2, inner 1+2, outer 3+2 -- three gains, three riders
+    assert state.player.block == (3 + 2) + (1 + 2) + (3 + 2)
 
 
 def test_a_clone_of_an_enchanted_card_keeps_its_enchantment():

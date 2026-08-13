@@ -443,10 +443,7 @@ _FREE_PLAY_CONTEXT = (
     # Coverage pass 4's three per-card reads. Same hazard as the rest: a Sly
     # auto-play that discards or gains block in the middle of an outer card
     # would otherwise leave its numbers behind for the outer card to read.
-    "block_gained_this_card", "discards_this_card", "last_drawn_type",
-    # Nimble's once-per-play latch: an inner free-played card must not spend
-    # (or un-spend) the OUTER card's rider entitlement.
-    "enchant_block_spent_this_card")
+    "block_gained_this_card", "discards_this_card", "last_drawn_type")
 
 
 def resolve_free_play(state: CombatState, card: Card,
