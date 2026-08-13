@@ -61,12 +61,12 @@ registration packets themselves live under `review/active/` — one home, not tw
   repaired, both on 2026-08-10; the packet asks to re-measure in the new world.
   Predictions are explicit [USER] slots and are still blank →
   `review/active/shop-rerun-registration-2026-08-10.md`.
-- **The regret margins (`M13` / `EB-72`)** — **DRAFT, awaiting [USER]
+- **The regret margins (`M13`)** — **DRAFT, awaiting [USER]
   countersign at QUEUE `M13`, unrun.** `ROUTE_REGRET_MARGIN` and its drafter
   twin (`draft.DRAFT_REGRET_MARGIN`, the `+1.0`) have no recorded derivation;
   R164 ruled that the measurement is pre-registered and that **`+1.0` is not
-  ratified**. `EB-72` leg (1) landed the distribution printer
-  (`tools/regret_distribution.py`) that made a registration possible at all —
+  ratified**. The distribution printer `tools/regret_distribution.py` landed
+  first and made a registration possible at all —
   the margin-free gap distribution for both numbers, on a read-only pass over
   finished runs, with no stamp movement. The packet's §7 predictions are
   explicit [USER] slots and are still blank, and its §6 lays out four
