@@ -74,6 +74,10 @@ import yaml
 
 REPO = Path(__file__).resolve().parents[1]
 
+sys.path.insert(0, str(REPO))
+
+from tools.effect_walk import sly_autoplays, sly_riders  # noqa: E402
+
 # Known dominations awaiting their scheduled fix. Remove when landed.
 # (cant_catch_me/warm_glow was here; FIXED by the R25 errata batch,
 # 2026-07-20 — CCM block 4 -> 2. The lint now guards the fix.)
@@ -155,11 +159,18 @@ def effect_maps(card: dict) -> tuple[dict, dict] | None:
     build silently dropped -- which made every plain-Block common "dominate"
     a Sly card of equal face. They count as benefits under a ("sly","true")
     key so a Sly line is its own dimension, never conflated with the same
-    op in the played face."""
+    op in the played face.
+
+    EB-71 (R174): the reserved `sly_autoplay` marker is the base-game
+    keyword, not a printed effect. It is INCOMPARABLE rather than a benefit
+    of amount 1 -- what it is worth depends on the card it re-plays, so no
+    signature over it can honestly say one row's copy beats another's."""
+    if sly_autoplays(card):
+        return None
     good: dict = {}
     bad: dict = {}
     tagged = ([(eff, False) for eff in card.get("effects", [])]
-              + [(eff, True) for eff in card.get("sly", [])])
+              + [(eff, True) for eff in sly_riders(card)])
     for eff, from_sly in tagged:
         m = bad if (is_cost(eff) and not from_sly) else good
         eff = dict(eff)

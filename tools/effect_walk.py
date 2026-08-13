@@ -88,6 +88,45 @@ def iter_effects_top(effects: Any) -> Iterator[dict]:
             yield fx
 
 
+# --- the unified Sly grammar (EB-71, R174), sheet-row side ------------------
+#
+# `tier0.engine.state` owns this grammar for Card OBJECTS; these two helpers
+# are the same reading for SHEET ROWS, which is what everything in `tools/`
+# holds. Kept here rather than imported from tier0 because the scanners in
+# this package walk raw yaml (no loader, no dataclass) and because the
+# generator is deliberately tier0-free; `SLY_AUTOPLAY_OP` is pinned against
+# `tier0.engine.state.SLY_AUTOPLAY_OP` in tier0/tests/test_eb71_cs_parity.py
+# the way lint_constant_parity pins the C# mirrors.
+#
+# One `sly:` list carries two things. Ordinary riders are an authored effect
+# list a discard RESOLVES (Kokomi's Assist lane). The reserved marker
+# `{op: sly_autoplay}` is the base-game `CardKeyword.Sly` -- the discarded
+# card is auto-played, which is a card PLAY and not an effect list, so it is
+# never dispatched as an op and never priced as one. A scanner that reads a
+# row's Sly as printed effects wants `sly_riders()`; the marker is worth
+# exactly zero to it.
+SLY_AUTOPLAY_OP = "sly_autoplay"
+
+
+def sly_riders(row: Any) -> list[dict]:
+    """The AUTHORED half of a sheet row's Sly -- the effects a discard runs."""
+    sly = row.get("sly") if isinstance(row, dict) else row
+    if not isinstance(sly, list):
+        return []       # a malformed/retired `sly:` prints no riders; the
+                        # generator blocks the row by name (_sly_marker_reason)
+    return [fx for fx in sly
+            if isinstance(fx, dict) and fx.get("op") != SLY_AUTOPLAY_OP]
+
+
+def sly_autoplays(row: Any) -> bool:
+    """True when a sheet row prints the base-game auto-play keyword."""
+    sly = row.get("sly") if isinstance(row, dict) else row
+    if not isinstance(sly, list):
+        return False
+    return any(isinstance(fx, dict) and fx.get("op") == SLY_AUTOPLAY_OP
+               for fx in sly)
+
+
 def printed_floor(fx: dict) -> int | None:
     """What this effect pays with every meter it reads at ZERO, or None.
 
