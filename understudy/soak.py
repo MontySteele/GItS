@@ -543,8 +543,12 @@ class Session:
         if self._speed_entry:
             self.ledger.revert(
                 self._speed_entry,
-                "superseded by a restart; the setting does not survive the "
-                "process and is re-captured below")
+                "superseded by a restart; a new launch row and speed row open "
+                "below, and the SESSION's captured original is carried "
+                "forward rather than re-captured -- PrefsSave.FastMode "
+                "persists to settings.save, so the second process would "
+                "otherwise capture the first process's setting as the "
+                "original")
             self._speed_entry = None
         self._kill()
         self._launch()

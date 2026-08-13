@@ -172,6 +172,7 @@ def test_the_soak_has_no_grant_verb():
     rewriting before the feature ships."""
     from understudy import soak
     assert not hasattr(soak, "give_card")
-    assert "give_card" not in soak.main.__doc__ if soak.main.__doc__ else True
+    # The source grep below is the strict form of the same claim; the parsed
+    # conditional-expression that used to sit here read like a precedence bug.
     src = (soak.Path(soak.__file__)).read_text(encoding="utf-8")
     assert "give_card" not in src

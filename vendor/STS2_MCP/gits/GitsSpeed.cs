@@ -28,8 +28,9 @@
 //        Omitting it on enable leaves TimeScale alone and uses Instant only.
 //        { "enabled": false } restores both captured originals.
 //
-// Routed from McpMod.HandleRequest - see PROVENANCE.md, which records that
-// one added line as the only edit to an upstream file.
+// Routed from McpMod.HandleRequest - see PROVENANCE.md, which records the
+// three route arms in McpMod.cs and the one StateBuilder.cs line as the whole
+// edit surface on upstream files.
 
 using System;
 using System.Collections.Generic;

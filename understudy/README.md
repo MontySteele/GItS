@@ -107,9 +107,12 @@ must never be a default and must never be a path this repo chooses for you.
 Frames are gitignored for the reason `art/g12_captures/` and
 `art/eb52_captures/` are — a frame of the running game has Tier F art in it.
 
-**The window only, never the desktop.** The rectangle comes from the game
-process's own `MainWindowHandle`; no window, no capture. A whole-screen grab
-would sweep in whatever else the machine happens to be showing.
+**The window's rectangle, never the whole desktop.** The rectangle comes from
+the game process's own `MainWindowHandle`, and three states are named refusals:
+no window, a zero-size rectangle, and a minimised window (Windows parks those
+off-screen at a -32000 origin). One honest limit: the grab is
+`CopyFromScreen` over that rectangle, so anything sitting ON TOP of the game is
+in the frame — it is the game's rectangle, not the game's pixels.
 
 **A frame is MATERIAL, not a finding.** Guardrail-7 and the no-fun rule are
 not changed by the existence of a camera: nothing this directory derives from a

@@ -26,9 +26,17 @@ which variable would enable it.
 
 WHAT IT CAPTURES, AND WHAT IT REFUSES TO
 The GAME WINDOW's rectangle, found from the process's own `MainWindowHandle` --
-never the desktop. A whole-screen grab would sweep in whatever else the machine
-happens to be showing, which is somebody's private business and is not the
-material anybody asked for. No window, no capture: it refuses and says so.
+never the whole desktop. A full-screen grab would sweep in whatever else the
+machine happens to be showing, which is somebody's private business and is not
+the material anybody asked for. Three refusals, each named: no window at all,
+a zero-size rectangle, and a MINIMISED window (Windows parks those at a
+-32000 origin, which is a valid rectangle nowhere on screen).
+
+BE HONEST ABOUT THE ONE THING IT CANNOT DO. The capture is
+`Graphics.CopyFromScreen` over the window's rectangle, which is the screen
+CONTENT under that rectangle -- so a window sitting ON TOP of the game appears
+in the frame. It is the game's rectangle, not the game's pixels. Bring the game
+forward before capturing, and read a frame knowing that.
 
 WHERE FRAMES GO
 `understudy/logs/frames/`, gitignored for the reason `art/g12_captures/` and
@@ -125,6 +133,14 @@ if ($w -le 0 -or $h -le 0) {
     Write-Output 'EMPTY_RECT'
     exit 3
 }
+# A MINIMISED window still has a MainWindowHandle and still reports a positive
+# width and height -- Windows just parks it at a -32000 origin, off every
+# screen. Copying that rectangle would capture whatever is at the top-left of
+# the desktop, which is precisely the grab this leg refuses to make.
+if ($rect.Left -le -30000 -or $rect.Top -le -30000) {
+    Write-Output 'MINIMISED'
+    exit 4
+}
 $bmp = New-Object System.Drawing.Bitmap $w, $h
 $gfx = [System.Drawing.Graphics]::FromImage($bmp)
 $gfx.CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bmp.Size)
@@ -210,8 +226,10 @@ def capture(label: str = "frame", note: str = "",
     if code != 0 or not token.startswith("OK"):
         reason = {
             "NO_WINDOW": f"no visible window for process '{image}'; the game "
-                         f"must be running and not minimised",
+                         f"must be running",
             "EMPTY_RECT": "the window reported a zero-size rectangle",
+            "MINIMISED": "the game window is minimised (parked off-screen at "
+                         "a -32000 origin); restore it and capture again",
         }.get(token, stderr or token or "no output")
         return {"status": "error", "message": reason,
                 "guardrail": GUARDRAIL, "path": str(out)}

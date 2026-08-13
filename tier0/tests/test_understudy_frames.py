@@ -112,6 +112,19 @@ def test_a_zero_size_window_is_its_own_refusal(tmp_path):
     assert report["status"] == "error" and "zero-size" in report["message"]
 
 
+def test_a_minimised_window_is_refused_rather_than_captured(tmp_path):
+    """A minimised window keeps its handle and reports a positive w/h -- it is
+    just parked at a -32000 origin. Copying that rectangle would grab the
+    top-left of the desktop, which is the one capture this leg refuses."""
+    report = frames.capture("x", env={"GITS_UNDERSTUDY_CAPTURE": "1"},
+                            out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
+                            runner=_Runner(4, "MINIMISED"))
+    assert report["status"] == "error" and "minimised" in report["message"]
+    assert not (tmp_path / "m.jsonl").exists(), "a failed capture wrote a row"
+    # and the script really carries the guard the runner is standing in for
+    assert "-30000" in frames.build_script("x", tmp_path / "f.png")
+
+
 def test_the_size_is_read_off_stdout_alone(tmp_path):
     """A non-interactive host writes progress records to STDERR as CLIXML, and
     the first `Add-Type` emits one. Folded into stdout, that blob became the
