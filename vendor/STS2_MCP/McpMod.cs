@@ -260,9 +260,10 @@ public static partial class McpMod
                 else
                     SendError(response, 405, "Method not allowed");
             }
-            // GItS LOCAL EDIT (Understudy W2 + P1.5) - see PROVENANCE.md, which
-            // records every change to an upstream file in this snapshot.
-            // Handlers live in gits/; both are inert until POSTed to.
+            // GItS LOCAL EDIT (Understudy W2 + P1.5 + EB-52) - see
+            // PROVENANCE.md, which records every change to an upstream file in
+            // this snapshot. Handlers live in gits/; all three are inert until
+            // something POSTs to them.
             else if (path == "/api/v1/gits/speed")
             {
                 HandleGitsSpeed(request, response);
@@ -270,6 +271,10 @@ public static partial class McpMod
             else if (path == "/api/v1/gits/seed")
             {
                 HandleGitsSeed(request, response);
+            }
+            else if (path == "/api/v1/gits/give_card")
+            {
+                HandleGitsGiveCard(request, response);
             }
             else
             {

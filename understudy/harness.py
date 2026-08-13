@@ -11,6 +11,14 @@ Understudy W4. Two verbs, and the discipline lives in the order they run in:
         (mine + policy_v0's, at the same state, before anything moves), then
         POST the action and render what came back.
 
+    python -m understudy.harness give-card UNHEARD_CONFESSION --why "EB-52(a)"
+        EB-52's dev door: put a CHOSEN card in the deck through the game's own
+        acquisition path. A SMOKE verb. The run it is used on stops being a run
+        the generators produced, so nothing measured on it is comparable to
+        anything -- the grant, its reason and that sentence all go on the run
+        log. It lives here and NOT in the soak deliberately: the soak's claim
+        is that its runs are generated runs, and this is the attended loop.
+
 The counterfactual is computed inside `act`, not carried over from the last
 `state` call, so a log line can never pair my choice with a policy answer from
 a screen that has since changed.
@@ -423,6 +431,44 @@ def cmd_auto(args) -> int:
     return 0
 
 
+def cmd_give_card(args) -> int:
+    """EB-52's acquisition door, and it is a SMOKE verb, not a measurement one.
+
+    It is here rather than in `soak.py` on purpose. The soak's whole claim is
+    that its runs are runs the game generated; a grant verb inside it would be
+    a way to quietly break that claim on an unattended night. The Phase-0
+    harness is the attended loop -- a person types every verb into it, one at a
+    time -- so this is where a deliberate, logged, one-off intervention
+    belongs.
+
+    THE GRANT IS WRITTEN TO THE RUN LOG BEFORE ANYTHING ELSE IS READ, and it
+    carries the guardrail sentence with it. A log that recorded the effect of a
+    grant without recording the grant is a log that shows a card appearing in a
+    deck from nowhere, which is exactly the shape of the thing nobody would
+    catch six months later.
+    """
+    sess = _session()
+    seed = sess.get("seed") or "unseeded"
+    report = bridge.give_card(args.card_id, count=args.count,
+                              upgraded=args.upgraded, pile=args.pile)
+    append(seed, {
+        "i": -1, "ts": time.time(), "event": "dev_card_grant",
+        "request": {"card_id": args.card_id, "count": args.count,
+                    "upgraded": args.upgraded, "pile": args.pile},
+        "why": args.why,
+        "guardrail": bridge.GRANT_GUARDRAIL,
+        "result": report,
+    })
+    print(f"give_card -> {json.dumps(report, indent=1)}")
+    print()
+    print(f"GUARDRAIL: {bridge.GRANT_GUARDRAIL}")
+    if str(report.get("status")) != "ok":
+        return 1
+    print()
+    print("# confirm by reading the deck; the grant is queued, not instant")
+    return 0
+
+
 def cmd_begin(args) -> int:
     """Stamp the session: the game seed, the speed setting, the start time."""
     seed = args.seed or bridge.current_seed() or "unseeded"
@@ -457,6 +503,21 @@ def main(argv: list[str] | None = None) -> int:
     u.add_argument("--max-steps", type=int, default=25)
     u.add_argument("--settle", type=float, default=1.2)
     u.set_defaults(func=cmd_auto)
+
+    g = sub.add_parser("give-card")
+    g.add_argument("card_id", help="wire id (UNHEARD_CONFESSION) or the exact "
+                                   "printed title; no fuzzy match")
+    g.add_argument("--count", type=int, default=1)
+    g.add_argument("--upgraded", action="store_true")
+    g.add_argument("--pile", default="deck",
+                   choices=list(bridge.GRANT_PILES),
+                   help="deck (default) is the between-rooms deck; the other "
+                        "three are combat piles and need a combat in progress")
+    g.add_argument("--why", default="",
+                   help="one line, logged beside the grant. A grant with no "
+                        "stated reason is a deck change nobody can account "
+                        "for later")
+    g.set_defaults(func=cmd_give_card)
 
     a = sub.add_parser("act")
     a.add_argument("action", help="JSON action body, e.g. '{\"action\":\"end_turn\"}'")

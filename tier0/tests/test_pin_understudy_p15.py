@@ -490,7 +490,7 @@ def test_run_one_takes_the_first_named_seed(monkeypatch, tmp_path):
 
     class _Driver:
         def __init__(self, session, i, stamp, character, commit=None,
-                     chosen_seed=None, max_fights=None):
+                     chosen_seed=None, max_fights=None, hazard_guard=True):
             seen.append(chosen_seed)
             self.defects = []
 
