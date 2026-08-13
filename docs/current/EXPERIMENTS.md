@@ -107,6 +107,17 @@ registration packets themselves live under `review/active/` — one home, not tw
   margin — retained as the standing answer** unless the result shows a margin
   has utility. The predictions themselves are still blank →
   `review/active/regret-margin-registration-2026-08-12.md`.
+- **Charge reads per turn (`EB-78`)** — **DRAFT, unrun, §5's prediction slots
+  blank as [USER]'s.** R188 (2026-08-13) ruled **no** Charge read budget and
+  returned `X9` to the watch register; a watch trigger needs the quantity it
+  watches, and *how many reads a turn contains* was recorded nowhere until the
+  instrument landed on 2026-08-13 (`resources.note_charge_read`, emit-only,
+  tagged per source so the workshop's unsettled §6 scope boundary is not
+  settled by construction). Descriptive: it grades no design and cannot on its
+  own fire a nerf. §5.1 is where "repeatable reads dominant" becomes a number,
+  and it is a [USER] slot. Sequenced after the payoff-reach graded read; it
+  moves no version and opens no window →
+  `review/active/charge-reads-per-turn-registration-2026-08-13.md`.
 - **Kokomi stability band (D5)** — no band is declared yet (the declaration
   is QUEUE `S4-G6`; until it lands, the band rides DARK, `band = None`); its
   grading playtest is `docs/current/playtest/kokomi-playtest-protocol.md`

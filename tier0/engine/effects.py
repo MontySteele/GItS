@@ -101,6 +101,8 @@ def _bonus_formula(state: CombatState, formula: str,
         # Kokomi finisher reads (kickoff §2.2): Charge is READ, never
         # consumed. Rate limits (Rare / Exhaust / cost >= 2) live on the
         # card rows, not here — this is only the arithmetic.
+        resources.note_charge_read(state, "bonus_formula",
+                                   card=card.id if card else None)
         return int(n) * (state.player.charge // int(m))
     if what == "encore" and m.isdigit():
         # Curtain Call C (R85): damage reading the held buffer -- Body
@@ -2474,6 +2476,11 @@ def resolve_card(state: CombatState, card: Card) -> None:
         if p.powers.get("ceremonial_garment", 0) and p.charge:
             KNOB_READS["GARMENT_CHARGE_DIVISOR"] = (
                 KNOB_READS.get("GARMENT_CHARGE_DIVISOR", 0) + 1)
+            # EB-78 (2): the same resolution, tallied for the reads-per-turn
+            # distribution. Sharing this site's condition is the point --
+            # KNOB_READS already established it as the place a real Garment
+            # read happens, as opposed to the pilot's estimate of one.
+            resources.note_charge_read(state, "garment", card=card.id)
         # Garment attack rider (v0.4 §1.3): while the state holds, her
         # attacks ALSO restore the party -- her burst's actual behaviour,
         # translated to Block under the R52 healing law via the Charlotte
@@ -2815,6 +2822,7 @@ def player_turn_end_triggers(state: CombatState) -> None:
         dmg = C.KURAGE_PULSE_BASE + p.charge * multiplier
         KNOB_READS["KURAGE_PULSE_PER_CHARGE"] = (
             KNOB_READS.get("KURAGE_PULSE_PER_CHARGE", 0) + 1)
+        resources.note_charge_read(state, "kurage_pulse")   # EB-78 (2)
         # P2 runaway telemetry (playtest sprint, Track P). Report-only; no
         # rule reads this event. The x4 bank read is the one term in the kit
         # that only ever grows, and [USER]'s standing caveat is "watch act 3".

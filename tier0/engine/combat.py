@@ -562,6 +562,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     state.prevention_used_this_turn = False      # Kokomi ward latch (§2.4)
     state.encore_spend_draws_this_turn = 0       # Gallery Stirs latch (R85)
     state.cards_created_this_turn = 0            # engine_closure window
+    state.charge_reads_this_turn = {}            # EB-78 (2) instrument
 
     for enemy in list(state.living_enemies):     # bombs from last turn go off
         if enemy.bombs:
@@ -761,6 +762,22 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # A turn that ended by killing the last enemy or by the player dying never
     # reaches here, and metrics records -1 there rather than inventing a zero.
     state.emit("turn_close", block=p.block)
+    # INSTRUMENT ONLY (EB-78 (2), the reads-per-turn distribution R188 ruled
+    # a watch trigger would need). One sample per completed player turn, taken
+    # HERE because the Kurage pulse fires inside player_turn_end_triggers
+    # above -- sampling any earlier would systematically drop the one reader
+    # that is once-per-turn by construction. Emitted even at zero, because a
+    # distribution that silently omits its zeros is not a distribution.
+    #
+    # WHAT THIS SAMPLE CANNOT SEE, declared rather than discovered at grading
+    # time: it shares `turn_close`'s own blind spot -- a turn that ended by
+    # killing the last enemy or by the player dying never reaches this line,
+    # so the final turn of most fights contributes no sample. That truncation
+    # is toward the BUSY end (a killing turn is rarely a quiet one), and any
+    # reading of this event states it.
+    state.emit("charge_reads_turn",
+               total=sum(state.charge_reads_this_turn.values()),
+               by_source=dict(state.charge_reads_this_turn))
     powers.on_turn_end(state, p)
     _revive_player_if_needed(state)
 

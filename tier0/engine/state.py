@@ -694,6 +694,14 @@ class CombatState:
     reactions_this_turn: int = 0          # reaction_triggered_this_turn
     encore_spend_draws_this_turn: int = 0  # encore_spend_draw once-per-turn
     #                                        latch (Curtain Call, R85)
+    # INSTRUMENT ONLY (EB-78 (2); resources.note_charge_read writes it and
+    # nothing reads it back). Charge-bank reads this turn, keyed by source --
+    # "garment" / "kurage_pulse" / "bonus_formula" -- so the distribution can
+    # be reported under either reading of the workshop's unsettled §6 scope
+    # boundary. Reset at the top of the player turn, emitted at turn close.
+    # It is NOT a budget: R188 ruled there is none, and no code path consults
+    # this dict to decide whether a read may happen.
+    charge_reads_this_turn: dict[str, int] = field(default_factory=dict)
                                           # (Chevreuse; reset per turn)
     kills_this_card: int = 0              # killed_target
     # Kills that the base game's Fatal gate would honor (Enemy

@@ -266,6 +266,55 @@ def note_fanfare_read(state: CombatState, kind: str,
                at_floor=p.fanfare <= p.fanfare_floor)
 
 
+def note_charge_read(state: CombatState, kind: str,
+                     card: str | None = None) -> None:
+    """The reads-per-turn instrument for Kokomi's Charge bank (EB-78 (2)).
+
+    EMIT-ONLY AND COUNT-ONLY. It reads no game state it can change and
+    writes none: the tally lives on `state.charge_reads_this_turn`, which
+    nothing in the engine, the pilot or the drafter consults. It exists
+    because R188 (2026-08-13) ruled NO read budget and returned X9 to the
+    watch register, and a watch trigger needs the quantity it watches --
+    "how many reads does a turn actually contain" was, until this landed,
+    recorded nowhere at all (workshop packet §7, last bullet; §8, second
+    bullet). note_fanfare_read above is the shape this copies.
+
+    WHAT COUNTS AS A READ, and why the choice is per-source rather than a
+    single total. The workshop's §6 boundary question -- whether printed card
+    readers belong with the two kit sources R163 names -- is NOT settled, and
+    a descriptive instrument must not settle it by construction. So every
+    read is tagged with its source and the distribution is reportable under
+    either scope reading:
+
+      "garment"       the Ceremonial Garment rider, once per attack play per
+                      target while the state holds (workshop §3.1)
+      "kurage_pulse"  the fielded jellyfish's end-of-turn conversion, once
+                      per turn while the summon stands (§3.2)
+      "bonus_formula" a card's own printed N_per_M_charge rider (§3.3)
+
+    A card that prints its own read AND collects the Garment rider therefore
+    tallies TWO reads on one play. That is deliberate and is the ruled
+    reading: R188 ruled the double read INTENDED deckbuilder stacking rather
+    than a dedupe defect, so the instrument must be able to see it happen.
+
+    NOT COUNTED, deliberately: the two pilot valuation sites
+    (`tier0/pilot/policy.py`, workshop §3.4). Those are estimates of what a
+    card is worth, not resolutions -- the same distinction KNOB_READS draws
+    at the Garment divisor, where the tick "counts real resolutions, not
+    estimates". An instrument that counted them would report the pilot's
+    deliberation as if it were the player's turn.
+
+    Threshold reads are also absent, because there are none to skip: the flat
+    printed bonus that keys off the bank clearing a bar is not a proportional
+    read (workshop §3.3) and does not route through `_bonus_formula`'s
+    `N_per_M_charge` branch.
+    """
+    tally = state.charge_reads_this_turn
+    tally[kind] = tally.get(kind, 0) + 1
+    state.emit("charge_read", kind=kind, card=card,
+               bank=state.player.charge, turn=state.turn)
+
+
 # EB-20 (D8's census): what a caller writes when it hands the buffer points
 # or takes them away without saying where from. A BUCKET, not a silence --
 # `gain_encore` and `spend_encore` used to be the only meters in this module
