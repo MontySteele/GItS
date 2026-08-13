@@ -231,6 +231,56 @@ PENDING_BANNED_FAMILY = {
     "curtain_cue",
 }
 
+# L9, APPROVED EXCEPTIONS (R151, 2026-08-10 -- M8.3). Distinct in kind from
+# PENDING_BANNED_FAMILY above: those are UNRESOLVED findings printed while they
+# wait for a taste call. These are RESOLVED -- [USER] looked at the source and
+# ruled it usable despite its family, so the entry records the approval and the
+# lint stops firing on it. The alternative was editing the ban around it, which
+# would have unbanned the whole family.
+#
+# ONE ENTRY, NOT A CATEGORY. The key is the EXACT source title (extension and
+# case immaterial), never a prefix -- a prefix here would re-open the family the
+# L9 ban closed. Cardinality is guarded for free: L1 already forbids two
+# effective card picks sharing one source, so an exact-title exception can be
+# claimed by at most one card.
+#
+# Rot direction: an entry whose title no longer matches any BANNED_SOURCE_
+# FAMILIES prefix is suppressing a finding that can no longer occur (the family
+# was unbanned, or the title was renamed), so it must be DELETED -- pinned by
+# `test_approved_family_exceptions_still_need_their_waiver`.
+APPROVED_FAMILY_EXCEPTIONS = {
+    # R151: "Exactly one hand-cropped `Character Details` Rare is allowed, and
+    # it rides an approved-exception entry in `art_lint` rather than an edit
+    # around the ban." The family ban's own comment names this file as the one
+    # worth having -- Details 1 is Kokomi's key illustration under a burnt-in
+    # wordmark and stat block, and the ban asks for "a DELIBERATE manual crop
+    # with the user's eyes on it, not a shortlist row that slips through on a
+    # title match". This entry is that deliberate act, recorded.
+    #
+    # The exception licenses the SOURCE. Which Rare wears it is a taste call
+    # that is not made here; when a plan row claims this title, L9 stands down
+    # for it and L1 keeps it to one card.
+    "sangonomiya kokomi character details 1":
+        "R151 (2026-08-10, M8.3): [USER] approved exactly one hand-cropped "
+        "`Character Details` Rare for Kokomi. Details 1 only -- the rest of "
+        "the family stays banned.",
+}
+
+
+def _title_key(title: str) -> str:
+    """Normalise a plan-row title for exact-match exception lookup.
+
+    Case and a trailing image extension are immaterial; everything else is
+    significant, because the whole point of an exception is that it names ONE
+    file rather than a family.
+    """
+    key = title.strip().lower()
+    for ext in (".png", ".jpg", ".jpeg", ".gif", ".webp"):
+        if key.endswith(ext):
+            return key[: -len(ext)]
+    return key
+
+
 PENDING_RED_PEN = {
     # RESOLVED 2026-07-27 (Sweep II D1) and therefore REMOVED rather than kept
     # with a note: {kaboom, spark_knight_style}. [USER] ruled that kaboom keeps
@@ -442,10 +492,18 @@ def banned_families(effective) -> list[str]:
     Applies to card portraits only. The sec.8 power/relic/UI sets legitimately
     want icons and wordmarks, and a banned family may still be a fine source
     there, so the rule keys on the output living under /cards/.
+
+    A title in `APPROVED_FAMILY_EXCEPTIONS` is exempt and reported as an
+    approved exception (R151), so the ban stays intact for its family.
     """
     problems = []
     for r in effective:
         title = r["title"]
+        approval = APPROVED_FAMILY_EXCEPTIONS.get(_title_key(title))
+        if approval is not None:
+            print(f"APPROVED EXCEPTION (L9, allowlisted): {r['asset_id']} "
+                  f"wears '{title}' -- {approval}")
+            continue
         for prefix, why in BANNED_SOURCE_FAMILIES:
             if title.lower().startswith(prefix.lower()):
                 msg = (f"L9 {r['asset_id']}: source '{title}' is from the "
