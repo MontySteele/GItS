@@ -157,8 +157,11 @@ In-process: `combat.run_fight(player, enemies, pilot, seed) -> CombatState`
   `sly_riders()`, so the marker is worth exactly zero: the price the keyword
   already carried. Hand Trick grants the rider with `until: turn_end` (swept in
   `refpowers.reset_turn_counters`); Master Planner grants it with no expiry.
-  The C# side still speaks the old shape — the parity leg was explicitly out of
-  R174's scope. Equivalence pins: `tier0/tests/test_eb71_sly_unification.py`.
+  The C# side speaks the same grammar since the parity leg (2026-08-12): the
+  marker emits as `CardKeyword.Sly` on the CanonicalKeywords rail, the authored
+  riders emit as the `AfterCardDiscarded` hook, and `tools/lint_sly_grammar.py`
+  is the standing guard. Equivalence pins:
+  `tier0/tests/test_eb71_sly_unification.py`, `test_eb71_cs_parity.py`.
 - **Phase revives fire at every HP-dropping site**, before `state.over` is
   re-read; kill predicates observe the pre-revive `hp <= 0` but Fatal
   (`counts_for_fatal`) does not — otherwise Feed farms phase-downs and minions

@@ -72,6 +72,16 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
 - **A card's `sly` (discard) branch is re-run through `blocked_reason`** via
   `_sly_view`; an unchecked branch is the same surface with the alarm off
   (`:928-939`, `:4442`).
+- **`sly:` is one list carrying two things** (EB-71, R174, C# leg 2026-08-12).
+  The authored riders (`effect_walk.sly_riders`) become the
+  `AfterCardDiscarded` hook and the `[gold]Sly[/gold]:` line on the face; the
+  reserved `{op: sly_autoplay}` marker is the base game's own `CardKeyword.Sly`
+  and rides `CanonicalKeywords` beside Exhaust/Innate/Retain — no body, no
+  description line, because the game resolves the auto-play itself and a hook
+  beside it would resolve the discard twice. A marker carrying any other key
+  (Hand Trick's `until: turn_end` grant) is runtime state with no C# rail and
+  BLOCKS. Guard: `tools/lint_sly_grammar.py`; pins:
+  `tier0/tests/test_eb71_cs_parity.py`.
 - **Two handwritten sets, not interchangeable**: `HAND_WRITTEN` is Klee-only
   (guarded by `profile is KLEE_PROFILE`), `HAND_WRITTEN_ROSTER` is
   Furina/Kokomi (`:653-676`, `:941-945`).

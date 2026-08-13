@@ -64,7 +64,7 @@ from pathlib import Path
 
 import yaml
 
-from tools.effect_walk import printed_floor
+from tools.effect_walk import printed_floor, sly_riders
 
 REPO = Path(__file__).resolve().parent.parent
 DOCS = REPO / "docs"
@@ -519,7 +519,10 @@ def scan_row(row: dict, character: str = "") -> dict:
     """Everything the classifiers need, read once off one card row."""
     extra_generates = CHARACTER_GENERATES.get(character, {})
     effects = list(row.get("effects") or [])
-    effects += list(row.get("sly") or [])
+    # EB-71 (R174): the AUTHORED riders only. The reserved `sly_autoplay`
+    # marker is the base-game keyword, not an effect line -- classifying it
+    # would derive a role from an op no classifier here knows.
+    effects += sly_riders(row)
     direct: set[str] = set()
     # The roles this card DELIVERS itself, as distinct from `direct`, which
     # also carries the `scaling` a token-modifying Power gets by construction.
