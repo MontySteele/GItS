@@ -335,8 +335,17 @@ the op is an engine change, so it needs its own test and its own byte-identity
 argument for every other card that uses `refresh_all_auras`; it is the only
 option whose blast radius reaches outside the sheet.
 
-**Cost and risk.** C2 is a one-token sheet edit. C1 is an engine edit plus a
-sheet edit plus tests. **Risk, and it is the largest in the packet:** C1 turns
+**Cost and risk.** *(Corrected 2026-08-13 — the original draft called C2 "a
+one-token sheet edit"; that understated it.)* C2 needs a new predicate: the
+condition vocabulary is a closed frozenset (`tier0/engine/effects.py:1730-1747
+PREDICATE_NAMES`) with no any-aura member, enforced both directions by
+`test_content_boundaries.py`, with name-switch sites at `effects.py:1786`,
+`tier0/pilot/policy.py:136`, `tier05/draft.py:82,98`, and
+`tier0/harness/metrics.py:857`; and the card is hand-written in C#
+(`Cards/Generated/manifest.json:125`, `ElementalEcstasy.cs:28`), so the C#
+behavior + tooltip move by hand too. So C2 = predicate vocabulary + C# behavior
++ tooltip + tests — still the smallest option after A, but not one token. C1 is
+all of that plus the engine widening. **Risk, and it is the largest in the packet:** C1 turns
 the card into an aura *generator*, which is what `combustion_study` (the
 archetype's `enabler`) is for — so C1 may make the card step on a neighbour's
 job, and it plausibly changes the card's **`role:`** field, which has a
