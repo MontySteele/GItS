@@ -10,7 +10,7 @@ import pytest
 from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat, effects, powers, resources
-from tier0.engine.state import Card, CombatState, Enemy
+from tier0.engine.state import Card, CombatState, Enemy, Player
 from tier0.harness import metrics
 from tier0.harness.axes import raw_axes
 from tier0.pilot import policy
@@ -397,6 +397,93 @@ def test_the_two_new_cap_writers_also_rewind_between_fights():
     _one_fight(p)
     assert p.fanfare_cap == base_cap
     assert p.fanfare_floor == 0
+
+
+def test_fanfare_cap_base_term_follows_live_max_hp():
+    """EB-97. The ceiling's base term is LIVE max HP, not the sheet's `hp:`.
+
+    LAW.md:189 ("Fanfare is capped at %maxHP") and the mod agree --
+    `FurinaResources.FanfareCap` reads `creature.MaxHp` every time it is
+    asked, and `KleeTests/DerivationPinTests` pins that as the authority.
+    tier0 used to derive the cap ONCE from the printed 60 and re-seat that
+    frozen number every fight, so a max-HP move never reached the ceiling.
+
+    The tier05 shape is the one that bit: `model.py` rebuilds the Player from
+    the sheet and assigns the run's real max HP AFTER construction, so the
+    whole run fought on the printed-HP ceiling. -24 (Decipher) is the audit's
+    own failure case.
+    """
+    p = loader.build_player("furina")
+    printed_cap = p.fanfare_cap
+    assert printed_cap == int(C.FANFARE_CAP_FRACTION * p.max_hp)
+
+    p.max_hp -= 24                            # the event, between fights
+    p.hp = min(p.hp, p.max_hp)
+    _one_fight(p)
+    assert p.fanfare_cap == int(C.FANFARE_CAP_FRACTION * p.max_hp)
+    assert p.fanfare_cap < printed_cap
+    # And it rides back up, so the sync is a derivation and not a one-way
+    # ratchet that only ever remembers the smallest HP the run has seen.
+    p.max_hp += 24
+    _one_fight(p)
+    assert p.fanfare_cap == printed_cap
+
+
+def test_fanfare_cap_rises_mid_fight_when_feed_raises_max_hp():
+    """EB-97, the leg that diverges INSIDE a single combat.
+
+    `gain_max_hp` (Feed, Eat the Egg) raises the mod's ceiling on the very
+    next read because FanfareCap is computed, not stored. The sim's was a
+    stored number seeded before the fight began, so the two engines walked
+    out of one combat holding different ceilings.
+    """
+    st = furina_state()
+    p = st.player
+    cap0, max0 = p.fanfare_cap, p.max_hp
+
+    effects.resolve_card(st, furina_card(
+        effects=[{"op": "gain_max_hp", "amount": 7}]))
+    assert p.max_hp == max0 + 7
+    # +7 buys 3 ceiling, not 3.5: both engines TRUNCATE (C#'s `(int)` cast,
+    # Python's `int()`), so the odd point is dropped on both sides.
+    assert p.fanfare_cap == cap0 + 3 == int(C.FANFARE_CAP_FRACTION * p.max_hp)
+    # The permanent ceiling moved with it -- Feed's max HP survives the fight
+    # in tier05, so the ceiling it bought has to survive the rewind too.
+    _one_fight(p)
+    assert p.fanfare_cap == cap0 + 3
+
+
+def test_max_hp_sync_preserves_a_cap_bonus_riding_on_top():
+    """EB-97's containment. The sync moves the BASE TERM by a delta; it does
+    not re-derive the whole ceiling.
+
+    The mod's shape is `FanfareCapFraction * MaxHp + capBonus`, and the sim
+    has the same two layers -- printed grants (`raise_fanfare_cap`) and every
+    hand-seated cap in the batteries and probes sit on top of the base term.
+    A sync that recomputed `fanfare_cap` outright would silently delete them,
+    which is a second defect wearing the first one's clothes.
+    """
+    st = furina_state()
+    p = st.player
+    base = p.fanfare_cap
+    resources.raise_fanfare_cap(st, 9, "test")
+
+    effects.resolve_card(st, furina_card(
+        effects=[{"op": "gain_max_hp", "amount": 10}]))
+    assert p.fanfare_cap == base + 9 + 5      # the grant is untouched
+
+    # A cap seated by hand is a bonus too as far as the sync is concerned:
+    # it is preserved exactly while max HP holds still.
+    hand_rolled = Player(hp=200, max_hp=200, fanfare_cap=99)
+    _one_fight(hand_rolled)
+    assert hand_rolled.fanfare_cap == 99
+
+    # ... and a character with no Fanfare resource never grows one.
+    klee = loader.build_player("klee")
+    assert klee.fanfare_cap == 0
+    klee.max_hp += 20
+    _one_fight(klee)
+    assert klee.fanfare_cap == 0
 
 
 def test_every_point_past_block_prints_exactly_one_fanfare():

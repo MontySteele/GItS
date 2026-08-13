@@ -17,6 +17,7 @@ from tier0 import constants as C
 from tier0.content import enchantments
 from tier0.content import local_reference
 from tier0.content import upgrades
+from tier0.engine import state as state_mod
 from tier0.engine.state import Card, Enemy, Player, sly_riders
 
 CONTENT_DIR = Path(__file__).parent
@@ -459,7 +460,7 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
                   relic_effects=_starting_relic_effects(spec),
                   kit_cards=_kit_cards(spec),
                   character_id=spec["id"],
-                  fanfare_cap=(int(C.FANFARE_CAP_FRACTION * spec["hp"])
+                  fanfare_cap=(state_mod.fanfare_cap_base_term(spec["hp"])
                                if spec.get("fanfare") else 0))
 
 
@@ -503,7 +504,7 @@ def build_player_from_ids(character_id: str, card_ids: list[str],
                   node_kind=node_kind,
                   kit_cards=_kit_cards(spec),
                   character_id=spec["id"],
-                  fanfare_cap=(int(C.FANFARE_CAP_FRACTION * spec["hp"])
+                  fanfare_cap=(state_mod.fanfare_cap_base_term(spec["hp"])
                                if spec.get("fanfare") else 0))
 
 

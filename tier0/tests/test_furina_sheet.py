@@ -733,6 +733,52 @@ def test_supporting_cast_draws_on_first_spotlighted_play_only():
     assert len(draws) == 1                          # first play only
 
 
+def test_supporting_cast_draw_lands_after_the_triggering_card_resolves():
+    """EB-101 (races-d). The last member of the EB-19/NC-9 ordering family.
+
+    The mod RECORDS this draw in `BeforeCardPlayed` and RESOLVES it in
+    `AfterCardPlayed`, so the triggering card resolves against a hand that
+    does not contain the drawn cards. tier0 drew them first, so a Spotlighted
+    card that reads the hand during its own resolution saw a bigger hand than
+    the game did.
+
+    Encore Performance is the sharpest instance and makes the ordering a
+    BINARY rather than a probability: play it as the turn's first Spotlighted
+    card with an empty hand behind it and a lit card on top of the draw pile.
+    Under the old order the draw lands first and Encore copies it; under the
+    mod's order there is nothing in hand to copy. Director's Cut and Curtain
+    Cue flip the same way, and the class bites at MAX_HAND_SIZE.
+    """
+    st = furina_state()
+    p = st.player
+    p.energy = 9
+    p.spotlight = "furina"
+    p.powers["spotlight_draw"] = 1
+    encore = loader.get_card("encore_performance")
+    p.hand = [encore]                    # nothing else lit in hand
+    p.draw_pile = [loader.get_card("stage_presence")]
+
+    combat.play_card(st, encore)
+
+    # The draw still LANDS -- deferring it must not strand it, which is the
+    # failure mode the deferred-settle machinery is watched for.
+    assert [e["event"] for e in st.log].count("extra_draw") == 1
+    # ...and it landed AFTER resolution, so Encore had no target.
+    assert [c.id for c in p.hand] == ["stage_presence"]
+    assert not any(e["event"] == "encore_performance_copy" for e in st.log)
+
+    # Non-vacuity: the same board with the card already in hand DOES copy, so
+    # the assertion above is about ordering and not about a dead op.
+    st2 = furina_state()
+    st2.player.energy = 9
+    st2.player.spotlight = "furina"
+    encore2 = loader.get_card("encore_performance")
+    st2.player.hand = [encore2, loader.get_card("stage_presence")]
+    combat.play_card(st2, encore2)
+    assert [c.id for c in st2.player.hand] == ["stage_presence",
+                                               "stage_presence"]
+
+
 def test_standing_ovation_pays_encore_per_spotlighted_play():
     # Archived pre-flip rate: the per-play power stays engine-supported.
     st = furina_state()

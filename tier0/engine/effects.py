@@ -17,7 +17,8 @@ from tier0.engine import powers, reactions, resources
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, grant_sly_autoplay,
                                 remove_instance, sly_autoplays,
-                                sly_granted_this_turn, sly_riders)
+                                sly_granted_this_turn, sly_riders,
+                                sync_fanfare_cap_to_max_hp)
 
 
 def _amount(state: CombatState, val) -> int:
@@ -1424,12 +1425,23 @@ def _op_generate_from_pool(state: CombatState, fx: dict, card: Card) -> None:
 def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
                                  card: Card) -> None:
     """Encore Performance (kickoff §9): duplicate a Spotlighted card in
-    hand. Dead without a designation and a drafted target — BY DESIGN
-    (duplication deepens a committed kit; it must not conjure one)."""
+    hand. Dead without a LIT target and a drafted one — BY DESIGN
+    (duplication deepens a committed kit; it must not conjure one).
+
+    EB-100: the question is `is_spotlighted`, never the raw `p.spotlight`
+    pointer. Under Furina's upgraded starter (R2) tier0 stops granting the
+    selector token, so `p.spotlight` stays None for the entire run while
+    every one of her cards reads as lit — and the C# card asks
+    `SpotlightSystem.IsSpotlighted`, which honours `BothModes`
+    (`EncorePerformance.cs:61-64`). On the same board the game copied and
+    the sim copied nothing. The pointer guard was pure redundancy before the
+    upgrade existed (with no designation `is_spotlighted` is False for
+    everything, so `targets` is empty and the check below returns anyway),
+    so it is deleted rather than widened: `if not targets` says the same
+    thing in both worlds and cannot go stale behind a second lighting mode.
+    """
     from tier0.content import loader
     p = state.player
-    if not p.spotlight:
-        return
     targets = [c for c in p.hand if is_spotlighted(state, c)
                and not c.kit_card]
     if not targets:
@@ -2001,6 +2013,10 @@ def _op_gain_max_hp(state: CombatState, fx: dict, card: Card) -> None:
     n = _amount(state, fx["amount"])
     p.max_hp += n
     p.hp += n
+    # EB-97: the Fanfare ceiling rides LIVE max HP, so Feed raises it MID
+    # FIGHT exactly as `FurinaResources.FanfareCap` does -- the one place the
+    # two engines used to diverge inside a single combat.
+    sync_fanfare_cap_to_max_hp(p)
     state.emit("gain_max_hp", amount=n)
 
 
