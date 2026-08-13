@@ -33,6 +33,10 @@ namespace KleeMod.Cards.Generated;
 
 public sealed class PruneWitchHunt : CustomCardModel, ICompanionCard
 {
+    /// <summary>Block arrives from a conditional row, so this card declares no
+    /// BlockVar and BaseLib's auto-detect cannot see it (EB-84).</summary>
+    public override bool GainsBlock => true;
+
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
     /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
