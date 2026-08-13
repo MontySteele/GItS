@@ -487,15 +487,37 @@ def test_generation_pool_guardrails():
         assert pool, rarity
         # equal-rarity clause
         assert all(c.rarity == rarity for c in pool)
-        # shared companions + Guest Star set only; playable characters'
-        # personal cards structurally absent
+        # shared companions + Guest Star set only
         assert all(c.is_companion or c.guest_star for c in pool)
+        # EB-99: assert on personal_pool, which is the field the guardrail is
+        # actually about. The old line asserted `c.character not in ("klee",
+        # "furina")` and passed VACUOUSLY -- prune_witch_hunt is a shared
+        # companion whose `character` is "prune" and whose personal_pool is
+        # "klee", so it was in the uncommon pool the whole time.
+        assert all(c.personal_pool is None for c in pool)
         assert not any(c.character in ("klee", "furina") for c in pool)
         # sub-Rare pools cannot reach drafted 5-stars; the only star-5
         # rows are the banner-exempt Guest Star cameos themselves
         assert all(c.star != 5 or c.guest_star for c in pool)
     # the Guest Star set is actually reachable
     assert any(c.guest_star for c in loader.guest_star_generation_pool("common"))
+
+
+def test_personal_pool_companion_is_excluded_from_generation_pools():
+    """EB-99, stated against the WITNESS row so the guardrail cannot go
+    vacuous again: prune_witch_hunt is simultaneously a shared uncommon
+    companion and Klee's personal-pool card. It must be a candidate on every
+    axis the pool filters except the one that matters, and still be absent.
+    """
+    prune = loader.get_card("prune_witch_hunt")
+    assert prune.is_companion and not prune.kit_card
+    assert prune.rarity == "uncommon"
+    assert prune.personal_pool == "klee"
+
+    assert prune not in loader.guest_star_generation_pool("uncommon")
+    # latent twin: the conscript pool omitted the same predicate, and is
+    # unreachable today only because conscript rows default to Inazuma.
+    assert prune not in loader.companion_pool(prune.nation)
 
 
 def test_generators_exhaust_and_generate_to_hand():
