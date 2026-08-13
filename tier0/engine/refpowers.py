@@ -933,7 +933,13 @@ def randomise_cost_on_draw(state: CombatState, card: Card) -> None:
     n = card.on_draw_randomise_cost
     if not n or n <= 0:
         return
-    if card not in state.player.hand:
+    # IDENTITY, not equality. `Card` is a plain dataclass, so `in` would
+    # compare field by field and two copies of the same card in the deck are
+    # equal -- the drawn instance would be indistinguishable from its twin
+    # sitting in hand. This machinery is per-INSTANCE by construction (the
+    # cost it writes is instance state), and the neighbouring identity checks
+    # in combat.py take the same care.
+    if not any(c is card for c in state.player.hand):
         return
     card.cost_set_this_combat = state.rng.randrange(n)
     state.emit("cost_randomised", card=card.id,

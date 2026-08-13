@@ -54,7 +54,8 @@ def test_a_recorded_divergence_carries_its_reason():
         assert len(why.split()) >= 12, (key, why)
 
 
-def test_the_lint_bites_when_a_card_stops_declaring_that_it_gains_block():
+def test_the_lint_bites_when_a_card_stops_declaring_that_it_gains_block(
+        tmp_path, monkeypatch):
     """The regression that motivated the codegen half.
 
     `Nimble.CanEnchant` gates on `CardModel.GainsBlock`, and BaseLib's
@@ -62,22 +63,33 @@ def test_the_lint_bites_when_a_card_stops_declaring_that_it_gains_block():
     Block row sits inside a `conditional` does not have. Three shipped cards
     are that shape. Without the explicit override the game would never offer
     them Nimble; this asserts the lint would say so rather than pass.
+
+    The broken fixture is built in `tmp_path`, never in the working tree: a
+    test that strips a line out of a TRACKED generated card and restores it in
+    a `finally` leaves that card silently wrong if pytest is killed mid-run,
+    and dirties the tree the manifest-version gate reads. `_source_index` is
+    the one seam needed, so it is the one thing monkeypatched -- every other
+    card still resolves to its real committed source.
     """
     target = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Generated"
               / "PruneWitchHunt.cs")
     original = target.read_text(encoding="utf-8")
     line = "    public override bool GainsBlock => true;\n"
     assert line in original, "the fixture card no longer declares GainsBlock"
-    try:
-        target.write_text(original.replace(line, ""), encoding="utf-8")
-        res = subprocess.run(
-            [sys.executable, str(REPO / "tools" / "lint_enchant_parity.py")],
-            capture_output=True, text=True)
-        assert res.returncode == 1, res.stdout
-        assert "prune_witch_hunt" in res.stdout, res.stdout
-        assert "nimble" in res.stdout, res.stdout
-    finally:
-        target.write_text(original, encoding="utf-8")
+
+    broken = tmp_path / "PruneWitchHunt.cs"
+    broken.write_text(original.replace(line, ""), encoding="utf-8")
+    real = lep._source_index()
+    assert "PruneWitchHunt" in real
+    patched = dict(real, PruneWitchHunt=broken)
+    monkeypatch.setattr(lep, "_source_index", lambda: patched)
+
+    out = "\n".join(lep.findings())
+    assert "prune_witch_hunt" in out, out
+    assert "nimble" in out, out
+    # And the real committed card does NOT trip it -- the bite is the fixture's.
+    monkeypatch.setattr(lep, "_source_index", lambda: real)
+    assert not lep.findings()
 
 
 def test_a_reason_narrow_enough_to_still_catch_the_real_splits():
