@@ -119,8 +119,11 @@ the payoff-reach drafter pin (`D14`), and the R176 pilot change (`P7`).
 because a measurement instrument that changes what it measures is worthless:
 
 - The two gap collectors are **splits of existing loops**, not new arithmetic.
-  The summaries they feed are byte-identical to what those loops produced
-  before, which the suite pins.
+  On the ROUTE side the summary it feeds is byte-identical to what that loop
+  produced before, which the suite pins. On the DRAFT side the split
+  re-associated the comparison (`v > picked + 1.0` became
+  `(max - picked) > 1.0`), which differs at the exact-1.0 float boundary — see
+  §8. Neither collector feeds anything a run reads.
 - Both re-price **finished runs**, after the fact, on **dedicated random
   streams** (the drafter's and the route sampler's own offsets). No run, deck,
   encounter, shop or fight moves because a road not taken got priced
@@ -461,6 +464,15 @@ not start until they are filled and this packet is countersigned.**
   re-scored negative gives a negative gap. Negatives are counted separately by
   the printer and are neither zeros nor regrets. This is a convention, not a
   measurement, and it is disclosed because it moves the low ladder rungs.
+- **The draft-side regret COUNT moved slightly when the collector was split.**
+  The pre-split loop asked `any(v > picked + 1.0)`; the split asks
+  `(max - picked) > 1.0`. These differ at the exact-1.0 float boundary, because
+  `picked + 1.0` can round below a rival's score. The new form is the faithful
+  reading of the MEDIUM-11 invariant ("MORE THAN a full point") and treats a gap
+  of exactly 1.0 as not a regret. Measured incidence at census sample rate is
+  about one screen in 1,400 (120 runs: 197 -> 196). Nothing gates on the count,
+  so this is a reporting difference — but any `draft_regret` figure quoted from
+  before 2026-08-12 was taken under the older comparison.
 - **The sim models one seat.** Nothing here speaks to co-op.
 - **No C# side.** Neither margin exists in the mod; there is no mod-side
   instrument and no prediction here is about the mod's behaviour.

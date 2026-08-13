@@ -1725,8 +1725,17 @@ def draft_regret_gaps(rng: random.Random, decisions: list[dict],
     decision with nothing to regret. A screen with no offers contributes no
     entry.
 
-    `draft_regret` is the count of these above `DRAFT_REGRET_MARGIN`, and is
-    unchanged by the split: same rng, same draws, same order.
+    `draft_regret` is the count of these above `DRAFT_REGRET_MARGIN`. Same rng,
+    same draws, same order -- but NOT bit-identical to the pre-split loop. That
+    loop asked `any(v > picked + 1.0)`; this one asks `(max - picked) > 1.0`,
+    and in floating point those differ at the exact-1.0 boundary. The
+    re-associated form is the faithful reading of MEDIUM-11's invariant ("MORE
+    THAN a full point"), so a gap of exactly 1.0 is NOT a regret; the old form
+    counted some of them, because `picked + 1.0` can round below the rival's
+    score. It is reachable on real data and it moves the count: measured over
+    120 runs at census sample rate, 197 -> 196. Nothing gates on the count, so
+    this is a reporting difference, not a behaviour change. The boundary itself
+    is pinned by `test_regret_distribution.py`.
 
     `sample` is overridable for the same reason the route twin's is (see
     `C.ROUTE_REGRET_SAMPLE`'s comment): the 0.10 default exists to keep the

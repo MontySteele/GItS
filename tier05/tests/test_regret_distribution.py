@@ -212,3 +212,44 @@ def test_the_json_payload_carries_its_stamp():
         run_metrics.ROUTE_REGRET_MARGIN
     assert payload["draft"]["distribution"]["margin"] == \
         draft.DRAFT_REGRET_MARGIN
+
+
+class _AlwaysSample:
+    """An rng whose `random()` always falls under any sample rate."""
+
+    def random(self) -> float:
+        return 0.0
+
+
+class _Offer:
+    def __init__(self, cid: str) -> None:
+        self.id = cid
+
+
+def test_a_gap_of_exactly_one_point_is_not_a_regret(monkeypatch):
+    """The boundary the EB-72 split re-associated, pinned so it stops being
+    untested.
+
+    MEDIUM-11's invariant is MORE THAN a full point, and the split expresses it
+    as `(max - picked) > DRAFT_REGRET_MARGIN`. The pre-split loop asked
+    `any(v > picked + 1.0)`, which is a DIFFERENT predicate in floating point:
+    these two scores are a real pair off klee/demolition seed 18, and
+    `picked + 1.0` rounds BELOW the rival, so the old form counted this screen
+    and the new one does not. Nothing gates on the count; this test exists so
+    the convention is chosen on purpose rather than by rounding.
+    """
+    picked, rival = 0.6666666666666666, 1.6666666666666667
+    # The two forms genuinely disagree here -- that is the whole point.
+    assert rival > picked + 1.0
+    assert not (rival - picked) > 1.0
+
+    scores = {"picked": picked, "rival": rival}
+    monkeypatch.setattr(draft, "score_offer",
+                        lambda card, deck, archetype: scores[card.id])
+    decisions = [{"offers": [_Offer("picked"), _Offer("rival")],
+                  "picked": "picked"}]
+
+    gaps = draft.draft_regret_gaps(_AlwaysSample(), decisions, [], "demolition",
+                                   sample=1.0)
+    assert gaps == [1.0]
+    assert draft.draft_regret(_AlwaysSample(), decisions, [], "demolition") == 0
