@@ -323,8 +323,10 @@ def after_card_exhausted(state: CombatState, card: Card,
     # damage_per_exhaust (EB-82). Sits at the same funnel as the Casket
     # accrual and for the same reason, but outside its relic gate: the two
     # relics are unrelated and either may be held without the other. Opens
-    # on `relic_effects` being empty, so the battery never reaches it, and
-    # no relic row carries the hook yet -- unused machinery by construction.
+    # on `relic_effects` being empty, so the battery never reaches it. The
+    # hook shipped as unused machinery (2026-08-12) and was ARMED by the
+    # Grave of the Forgotten conversion (EB-82): `forgotten_soul` is its one
+    # carrier, and as an event relic it has exactly one source.
     if p.relic_effects:
         from tier0.engine import relics           # late import (relics -> here)
         relics.on_card_exhausted(state)
