@@ -78,11 +78,18 @@ FURINA_DEFERRED_TO_FD: set[str] = set()
 # (sixth-wave brief, Track Y item Y-4), the sheet entry went, and the
 # generator correctly emits the card with no upgrade path.
 #
-# GATE, stated because an entry without one never leaves: FLAG-2 (X3's two
-# adjacent closures) is HELD; when it is ruled, a replacement upgrade delta is
-# authored for `encore_performance` and this entry is deleted together with
-# both curated entries in `tools/lint_upgrade_coverage.py` (SHEET_EXEMPT for
-# layer 1, CODEGEN_DEBT for layer 2). Three registers, one debt, one removal.
+# GATE, stated because an entry without one never leaves: when a replacement
+# upgrade delta is authored for `encore_performance`, this entry is deleted
+# together with both curated entries in `tools/lint_upgrade_coverage.py`
+# (SHEET_EXEMPT for layer 1, CODEGEN_DEBT for layer 2). Three registers, one
+# debt, one removal.
+#
+# This gate used to read "FLAG-2 is HELD; when it is ruled ...". FLAG-2 was
+# discharged on 2026-08-05 by R114 (`d833573`; standing LAW at
+# `LAW.md:309-313`), so that half of the condition has already fired and the
+# clause was false from the day after it was written. The entry stays -- the
+# delta does not exist -- but nothing is waiting on a ruling any more. Whether
+# to author one at all is the open design call at QUEUE `M27`.
 FURINA_UPGRADE_GAP_PENDING_FB1: set[str] = {"encore_performance"}
 
 

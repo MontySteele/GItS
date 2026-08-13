@@ -160,8 +160,10 @@ deep_breath:           {remove: exhaust}     # sugar_rush-exact quality upgrade
 #                      discounted to 0, so the delta had already stopped meaning anything.
 #                      The card now has NO upgrade and that is a registered DEBT, not a
 #                      rule: `tools/lint_upgrade_coverage.py::SHEET_EXEMPT` carries the
-#                      entry and its removal condition (FLAG-2 ruled -> author a real
-#                      replacement delta -> delete the exemption). The line is commented
+#                      entry and its removal condition (author a real replacement delta ->
+#                      delete the exemption). FLAG-2 was discharged 2026-08-05 (R114) and
+#                      is NOT the blocker; whether to author a delta at all is the open
+#                      design call at QUEUE `M27`. The line is commented
 #                      rather than removed so the deleted value stays readable (R101b).
 singer_of_many_waters: {heal: +2}            # A6 (2026-07-28): 6->8; Exhaust NEVER removes (healing law)
 unheard_confession:    {cost: -1}            # A7 (2026-07-28): 2 -> 1. The Block-per-change stays 1;
