@@ -373,10 +373,12 @@ def check_cards(root: Path) -> tuple[list[Finding], list[str]]:
         rows = json.loads(baseline_path.read_text(encoding="utf-8"))
         baseline = {row["name"]: row for row in rows}
         names, sources = extract.read_pool(root, character)
+        # The pool's resolved token types -- see canon_role_tempo's twin call.
+        tokens = set(sources) - set(names)
         current = {}
         unparsed = []
         for name in names:
-            card = extract.parse_card(sources[name], name)
+            card = extract.parse_card(sources[name], name, tokens)
             if card is None:
                 unparsed.append(name)
                 continue

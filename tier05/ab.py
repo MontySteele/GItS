@@ -151,9 +151,9 @@ def run_ab(character: str, archetype: str, pilot_id: str,
     `jobs` is forwarded to run_many; it changes wall-clock only (see there).
     """
     out = {}
-    for name, policy in draft.POLICIES.items():
+    for name in draft.AB_POLICIES:
         results = model.run_many(character, archetype, pilot_id,
-                                 policy, runs, seed,
+                                 draft.POLICIES[name], runs, seed,
                                  grant_relics=grant_relics,
                                  grant_potions=grant_potions,
                                  n_acts=n_acts, jobs=jobs,

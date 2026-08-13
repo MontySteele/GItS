@@ -31,7 +31,7 @@ python3 -m understudy.harness begin                       # stamp seed + speed
 python3 -m understudy.harness state [--raw]               # screen + policy_v0
 python3 -m understudy.harness act '{"action":"end_turn"}' --why "one line"
 python3 -m understudy.harness auto --max-steps 25         # walk mechanical screens
-python3 -m understudy.harness give-card UNHEARD_CONFESSION --why "EB-52(a)"
+python3 -m understudy.harness give-card KLEEMOD-UNHEARD_CONFESSION --why "EB-52(a)"
 GITS_UNDERSTUDY_CAPTURE=1 python3 -m understudy.harness frame --label salon-stage
 
 

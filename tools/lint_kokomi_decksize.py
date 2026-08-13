@@ -35,6 +35,7 @@ import yaml
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from tools.effect_walk import iter_effects as _walk  # noqa: E402
+from tools.effect_walk import sly_riders             # noqa: E402
 
 # Every op that MINTS a card into a pile. The first three were the whole
 # list until the v0.5 sheet fill wanted a Commander common that duplicates
@@ -61,8 +62,10 @@ def _amount(fx: dict) -> int:
 
 def card_delta(row: dict) -> int:
     created = consumed = 0
+    # EB-71 (R174): `sly_riders` drops the reserved auto-play marker, which
+    # mints nothing -- it re-plays the card that was already discarded.
     for fx in list(_walk(row.get("effects", []))) + list(
-            _walk(row.get("sly", []))):
+            _walk(sly_riders(row))):
         op = fx.get("op")
         if op == "copy_companions_played_this_combat":
             # No `amount` field: it copies EVERY unique companion played so

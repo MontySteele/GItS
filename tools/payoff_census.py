@@ -134,14 +134,18 @@ MARKERS = {
 # test as every other layer. Nothing is special-cased for the shiv.
 #
 # WHAT THE EXTRACTION CAN AND CANNOT SEE, stated because it bounds the family.
-# `extract_base_game_pool.TOKEN_CREATE` recognises two creation spellings,
-# `<Token>.CreateInHand(...)` and `CreateCard<Token>`. A pool that makes its
-# token some third way has token MENTIONS in the extract but no token
-# CREATIONS, and admitting such a layer would be the worst available error:
-# with the generate side blind, every enabler of the layer would read as a
-# payoff of it, which is exactly what P1's strict form exists to prevent. So
-# the family is keyed on creation, and a mention-only token is a stated blind
-# spot rather than a bad archetype. The packet names the one that occurs.
+# `extract_base_game_pool` recognises THREE creation spellings:
+# `<Token>.CreateInHand(...)` and `CreateCard<Token>` (`TOKEN_CREATE`), and
+# since R178 the static factory `<Token>.Create(...)` (`TOKEN_FACTORY`, which
+# is admitted only for a name that resolves to a card type). A pool that makes
+# its token some FOURTH way would have token MENTIONS in the extract but no
+# token CREATIONS, and admitting such a layer would be the worst available
+# error: with the generate side blind, every enabler of the layer would read
+# as a payoff of it, which is exactly what P1's strict form exists to prevent.
+# So the family is keyed on creation, and a mention-only token is a stated
+# blind spot rather than a bad archetype. As of R178 no such blind spot is
+# open — the one the packet named (§6.5) was the third spelling, and closing
+# it opened one layer with two payoffs and changed no other pool.
 TOKEN_PREFIX = "Token:"
 
 

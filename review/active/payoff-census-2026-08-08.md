@@ -350,14 +350,25 @@ here has.
 | `LightningOrb` | identity | 9 | 8 | 1 | 0/0/1 | 0 | 0.0019 |
 | `FrostOrb` | identity | 7 | 7 | **0** | 0/0/0 | 0 | 0.0000 |
 
-### Necrobinder — 88 cards · 4 archetypes · 8 unresolved-layer payoffs
+### Necrobinder — 88 cards · 5 archetypes · 7 unresolved-layer payoffs
 
 | archetype | kind | ment | gen | pay | C/U/R | 2nd | reach |
 |---|---|---|---|---|---|---|---|
 | `Exhaust` | generic | 15 | 14 | 1 | 0/0/1 | 0 | 0.0019 |
 | `GeneratedCard` | generic | 7 | 7 | **0** | 0/0/0 | 0 | 0.0000 |
 | `DoomPower` | identity | 13 | 5 | 3 | 0/2/1 | 5 | 0.0214 |
+| **`Token:Soul`** *(new, R178)* | identity | 10 | 6 | 2 | 0/0/2 | 2 | 0.0039 |
 | `Osty` | identity | 9 | 9 | **0** | 0/0/0 | 0 | 0.0000 |
+
+`Token:Soul` is the layer §6.5 refused to open while the extraction was blind
+to this pool's creation spelling. [USER] ruled the extraction should learn it
+(R178), it did, and the layer came in where §6.5 predicted it would: with a
+payoff rather than a zero. Six of the ten mentioning cards mint the token and
+two read it, so it is a normal thin identity layer and not the ten-card
+all-payoff monster the blind read would have produced. Its arrival is why the
+Necrobinder unresolved-payoff count fell by one: the reader that §6.5 named —
+the rare counting tokens in the exhaust pile — is now attributed to a layer
+instead of sitting unresolved.
 
 ### Regent — 88 cards · 4 archetypes · 4 unresolved-layer payoffs
 
@@ -371,11 +382,15 @@ here has.
 ### 3.1 Three things worth saying out loud about that table
 
 - **Not one payoff in any pool is COMMON.** Every payoff the census resolves
-  is uncommon, rare or ancient, in all five pools, across 22 archetypes. That
+  is uncommon, rare or ancient, in all five pools, across 23 archetypes. That
   is not a rounding artefact — it is the strongest single regularity in the
   census, and it is the exact shape Curtain Call's prediction 4 ran into from
-  the other direction. The new token archetype obeys it too: 8 cards make the
-  token, three of them common, and the one card that reads the count is rare.
+  the other direction. Both token archetypes obey it: `Token:Shiv` has 8 cards
+  making the token, three of them common, and the one card that reads the
+  count is rare; `Token:Soul` has 6 makers and **both** its readers are rare.
+  The third-spelling amendment (R178) added an archetype without adding a
+  single common payoff anywhere, which is the strongest available test of the
+  regularity — the one pool that could have broken it did not.
 - **The generate side is enormous and the read side is thin.** Layers run
   6–29 cards wide and cash out through 0–5 of them. Canon builds meters far
   more than it reads them.
@@ -392,9 +407,9 @@ Archetypes admitted per pool, at three settings of the breadth threshold:
 
 | `min_layer` | Ironclad | Silent | Defect | Necrobinder | Regent |
 |---|---|---|---|---|---|
-| 5 | 3 | 5 | 7 | 4 | 6 |
-| **6** *(shipped)* | **3** | **5** | **6** | **4** | **4** |
-| 8 | 3 | 4 | 3 | 3 | 2 |
+| 5 | 3 | 5 | 7 | 5 | 6 |
+| **6** *(shipped)* | **3** | **5** | **6** | **5** | **4** |
+| 8 | 3 | 4 | 3 | 4 | 2 |
 
 6 is the stable middle: dropping to 5 adds only marginal layers to the two
 widest pools; raising to 8 halves Regent. No band in §5 changes sign at any
@@ -407,12 +422,18 @@ strictest setting (8) is worth saying: at 12 mentions it is not a threshold
 artefact. It would be an archetype under any threshold this packet
 considered.
 
+The Necrobinder column is one higher again since R178, at all three settings,
+and for the same reason: `Token:Soul` is 10 cards wide, so it clears 8 too.
+Neither token layer is a threshold artefact, which is worth having tested
+twice — the two were found by different extraction spellings and could easily
+have differed in breadth.
+
 ---
 
 ## 5. THE CANDIDATE BANDS (R137 step 2b)
 
-Derived over **identity archetypes carrying ≥ 1 payoff** — n = 8 under the
-ruled LOOSE rule, n = 6 under STRICT. Generic layers excluded (R3(b));
+Derived over **identity archetypes carrying ≥ 1 payoff** — n = 9 under the
+ruled LOOSE rule, n = 7 under STRICT. Generic layers excluded (R3(b));
 zero-payoff identity layers are a blind-spot finding (§5.3), not a data
 point.
 
@@ -421,8 +442,8 @@ point.
 | | min | p25 | median | p75 | max |
 |---|---|---|---|---|---|
 | **SUPPLY** — draftable payoff cards | 1 | 1 | 1 | 2 | 3 |
-| **OFFER** — P(an offered card is a payoff) | 0.0019 | 0.0019 | 0.0097 | 0.0097 | 0.0214 |
-| **OFFER**, as P(a 3-card reward screen shows ≥ 1) | 0.6% | — | 2.9% | — | 6.3% |
+| **OFFER** — P(an offered card is a payoff) | 0.0019 | 0.0019 | 0.0058 | 0.0097 | 0.0214 |
+| **OFFER**, as P(a 3-card reward screen shows ≥ 1) | 0.6% | — | 1.7% | — | 6.3% |
 
 ### 5.2 The bands
 
@@ -432,7 +453,7 @@ left, supply ceiling on the right. A committed drafter lives between them.
 | band | offer | ceiling | N=15 | N=20 | N=25 |
 |---|---|---|---|---|---|
 | **LOW** (p25) | 0.0019 | 1 | 0.03 – 1 | 0.04 – 1 | 0.05 – 1 |
-| **MEDIUM** (median) | 0.0097 | 1 | 0.15 – 1 | 0.19 – 1 | 0.24 – 1 |
+| **MEDIUM** (median) | 0.0058 | 1 | 0.09 – 1 | 0.12 – 1 | 0.14 – 1 |
 | **HIGH** (p75) | 0.0097 | 2 | 0.15 – 2 | 0.19 – 2 | 0.24 – 2 |
 | **TOP** (max) | 0.0214 | 3 | 0.32 – 3 | 0.43 – 3 | 0.53 – 3 |
 
@@ -461,6 +482,40 @@ it was, and LOW is now a genuinely low bar: a blind drafter taking 20 cards
 expects 0.04 payoffs of a LOW archetype. That is a statement about how rarely
 canon shows you the reader, not about how weak the plan is.
 
+### 5.2b What the THIRD-SPELLING amendment did to the bands (R178, 2026-08-12)
+
+The section above is the earlier amendment and stands as written. This one is
+the extraction change [USER] ruled at §7.1's sub-question, and it moved
+exactly one band.
+
+**Three of the four bands did not move.** LOW, HIGH and TOP are unchanged on
+both axes; so is every supply figure, including the ceiling of the band that
+did move.
+
+**MEDIUM moved down**, offer 0.0097 → 0.0058. The blind-draft floor of a
+MEDIUM archetype at N=20 goes 0.19 → 0.12, and the 3-card-screen reading goes
+2.9% → 1.7%.
+
+**Why it moved is arithmetic again, and it is the same arithmetic.** The band
+population went from 8 to 9, which moves where the median falls. The new
+member's offer figure is 0.0039 — below the old median, because both its
+payoffs are rare. One more low-offer member pulled the middle down. No
+existing archetype's own numbers changed by a single digit; the extract diff
+is six `creates` fields in one pool and nothing else in the other four.
+
+**What this does NOT do.** It does not narrow the space. LOW and TOP are the
+edges and neither moved, so the bracket a roster archetype can be aimed into
+is the same bracket. What changed is where the middle of canon sits inside
+it, and the middle sits lower than the first two issues said.
+
+**The standing caution, restated because it now applies twice.** Both times
+the population grew, the band that moved was the one whose percentile the new
+member landed nearest. The bands are order statistics over nine points. A
+tenth archetype — and §6.3 still holds 22 payoff-shaped cards that could
+supply one — would move a band again, by the same mechanism and with the same
+lack of significance. Aims are placed against the band NAMES and their
+brackets, not against the third decimal place of an offer figure.
+
 ### 5.3 The zeros — identity layers the census resolves no payoff for
 
 `Ironclad/StrengthPower` · `Silent/Discard` · `Silent/WeakPower` ·
@@ -477,20 +532,31 @@ so the exclusion is visible rather than silent.
 
 | | LOOSE (RULED) | STRICT (`--strict-p2`) |
 |---|---|---|
-| identity archetypes in band population | 8 | 6 |
-| SUPPLY min / median / max | 1 / 1 / 3 | 1 / 1 / 2 |
-| OFFER min / median / max | 0.0019 / 0.0097 / 0.0214 | 0.0019 / 0.0097 / 0.0194 |
-| P(3-card screen shows ≥ 1) min / median / max | 0.6% / 2.9% / 6.3% | 0.6% / 2.9% / 5.7% |
+| identity archetypes in band population | 9 | 7 |
+| SUPPLY min / median / max | 1 / 1 / 3 | 1 / 2 / 2 |
+| OFFER min / median / max | 0.0019 / 0.0058 / 0.0214 | 0.0019 / 0.0097 / 0.0194 |
+| P(3-card screen shows ≥ 1) min / median / max | 0.6% / 1.7% / 6.3% | 0.6% / 2.9% / 5.7% |
 
-The median is **identical** on both axes; the spread narrows because STRICT
-drops the two most-attributed cards. **The band survives the attribution
-rule**, which is the one thing that most needed checking before anything is
-aimed inside it — and it is why [USER] could rule LOOSE without the ruling
-deciding the answer.
+**The edges are identical and the middle is not — and the middle stopped
+matching at R178, not before.** Min and max are the same on both axes under
+both rules, so the space the bands describe is the same space however the
+attribution rule falls. What LOOSE and STRICT now disagree about is the
+median: LOOSE reads 0.0058 offer / 1 supply, STRICT reads 0.0097 / 2. The
+mechanism is population size, not disagreement about any card — LOOSE carries
+two low-supply archetypes STRICT drops, and with only nine points the median
+sits on a different member in each.
 
-The new token archetype is in the band population under **both** rules. Its
-one payoff reads the token count without making a token, so STRICT keeps it
-for the same reason LOOSE does. The amendment is not a LOOSE-only effect.
+**What that costs, stated plainly.** Before R178 this section could say the
+median was rule-independent, and it can no longer say that. MEDIUM is the one
+band whose figure depends on which attribution rule is in force, so a MEDIUM
+aim is the one aim that would read differently had [USER] ruled STRICT. LOW,
+HIGH and TOP are unaffected. This is a caveat on one band, not a reopening of
+the ruling: the ruled rule is LOOSE (§2.5), the bands above are the LOOSE
+bands, and nothing here asks for that to be revisited.
+
+Both token archetypes are in the band population under **both** rules. Their
+payoffs read the token count without making a token, so STRICT keeps them for
+the same reason LOOSE does. Neither token amendment is a LOOSE-only effect.
 
 ---
 
@@ -527,13 +593,13 @@ computes its number off something else entirely still reads as an Exhaust
 payoff under LOOSE. Exhaust is generic and excluded from the bands, so the
 error is contained; it is stated anyway.
 
-### 6.3 Unresolved-layer payoffs — 23 cards, and what `EB-63` actually found
+### 6.3 Unresolved-layer payoffs — 22 cards, and what `EB-63` actually found
 
-Ironclad 3 · Silent 5 · Defect 3 · Necrobinder 8 · Regent 4. Every one has a
+Ironclad 3 · Silent 5 · Defect 3 · Necrobinder 7 · Regent 4. Every one has a
 computed magnitude (P2) or spends a resource (P3) but names **no** layer the
 amended rubric admits.
 
-**The census resolves 17 payoff cards and leaves 23 unattributed — 57% of the
+**The census resolves 19 payoff cards and leaves 22 unattributed — 54% of the
 payoff-shaped cards in the five pools still have no archetype in this table.**
 Both axes in §5 are therefore still **lower bounds**, and the supply ceilings
 especially so.
@@ -565,8 +631,8 @@ several raises the attack count — but correlation is not what R4 classifies.
 reading the designer's intent off a card name.** They stay unattributed, and
 that is the rubric working.
 
-**(3) What it did buy is a map of the remaining 23.** Sixteen of them now
-name the state they read. The states cluster into four families that the
+**(3) What it did buy is a map of the remaining 22.** Fifteen of them now
+name the state they read. The states cluster into three families that the
 amended rubric has no layer for:
 
 | family | cards | example of what is counted |
@@ -574,14 +640,22 @@ amended rubric has no layer for:
 | combat-history events | 9 | cards drawn, cards discarded, damage taken, energy spent, stars modified |
 | a pile or a card type | 4 | skills in hand, hand size, attacks played |
 | a card **tag** | 2 | cards carrying a named tag |
-| a card **class** | 1 | cards of one type sitting in the exhaust pile |
 
 The remaining **7** name nothing the extraction can reach: their number comes
 off a property path — the player's own block, the orb queue's length, a
 summoned body's current or maximum HP — with no tag, type or pile name in it.
 
+**A fourth family left this list at R178.** It had one member: the card whose
+number counts cards of one *class* sitting in the exhaust pile. Its class is
+the Necrobinder token, so once the extraction learned that pool's creation
+spelling the token became a layer and the card became that layer's payoff.
+Nothing about the card or the rubric changed — the extraction stopped being
+blind, and one unresolved payoff resolved. That is the whole mechanism by
+which this list shrank, and it is worth noting because it is the cheapest
+kind of progress available here: an extraction fix, not a rubric amendment.
+
 **This is now a rubric question and no longer an extraction one.** Attributing
-those 16 would mean opening three more layer families (history events, piles,
+those 15 would mean opening three more layer families (history events, piles,
 tags). That is a much bigger amendment than the token layer, it is [USER]'s
 call and not this packet's, and it is asked in §7.
 
@@ -599,35 +673,58 @@ call and not this packet's, and it is asked in §7.
   one damage per stack count the same. Same non-goal, same reason, as
   `docs/role-tempo-baseline.md` §7.
 
-### 6.5 The one token layer the amendment deliberately does not open
+### 6.5 The one token layer the amendment deliberately did not open — CLOSED (R178, 2026-08-12)
 
-The Necrobinder pool names a token card in **ten** of its cards — well over
-the breadth threshold — and the census opens no layer for it. This is the
-blind spot §2 R1 warned about, and it has exactly one instance.
+**This section is kept because the prediction it made is now testable against
+the result.** It is not a live blind spot any more.
 
-**Why.** The extraction recognises two spellings of "make a token". That pool
-uses a third. So the extract sees ten cards naming the token and **zero**
-cards making it.
+**The blind spot as it stood.** The Necrobinder pool names a token card in
+**ten** of its cards — well over the breadth threshold — and the census
+opened no layer for it, because the extraction recognised two spellings of
+"make a token" and that pool uses a third. The extract saw ten cards naming
+the token and **zero** cards making it. With the generate side blind, every
+card of the layer would have read as a card that reads without making — R4's
+P1, the payoff test — and the census would have reported a ten-card archetype
+in which nearly every card is a payoff. That is the single most wrong answer
+available, and it is the failure that made P1 strict in the first place
+(§6.1, the strength row). A named blind spot was better than a confident
+wrong archetype.
 
-**Why that is a refusal and not an oversight.** With the generate side blind,
-every card of the layer would look like a card that reads without making —
-which is R4's P1, the payoff test. The census would report a ten-card
-archetype in which nearly every card is a payoff. That is the single most
-wrong answer available, and it is the failure that made P1 strict in the
-first place (§6.1, the strength row). A named blind spot is better than a
-confident wrong archetype.
+**What was ruled.** [USER] answered §7.1's sub-question YES (R178): teach the
+extraction the third spelling. The caution this section raised — that
+widening a shared regex changes what the other tools that use it see — was
+honoured rather than waived, and it is what shaped the implementation.
 
-**What it would take.** Teaching the extraction the third creation spelling.
-It is a small change and it is **not** made here, because widening a shared
-regex changes what the other tools that use it see, and this packet's job was
-the ruling, not a second unruled amendment. It is [USER]'s call in §7.
+**What the third spelling is, and how it was admitted.** A static factory on
+the token's own type, `<Token>.Create(owner, count, combatState)`, whose
+result is handed to `CardPileCmd.AddGeneratedCardsToCombat`. Unlike the two
+existing spellings, that call shape is not self-evidently about cards — the
+same shape constructs visual effects dozens of times across the pools — so it
+is admitted only for a candidate name that RESOLVES to a card type in the
+decompiled project. That resolution is a check `read_pool` already ran on
+every candidate token, so no card-name table enters any committed file and
+the IP line at §0 is where it was.
 
-**What is being given up is not nothing.** The extract now shows that this
-pool prints a *reader* of that token too: one rare counts token cards sitting
-in the exhaust pile. So the layer would very likely have a payoff, not a
-zero, if the creation side were visible. That is the strongest single reason
-to make the small extraction change — and the strongest reason not to guess
-at it in the same pass that carried a ruling.
+**What actually changed, measured rather than argued.** The extract was
+regenerated for all five pools and diffed field by field against the copy the
+first two issues were computed from: **six changed fields, all in one pool,
+all the same field.** Six Necrobinder cards gained `creates: ["Soul"]`.
+Ironclad, Silent, Defect and Regent are byte-identical. The two other tools
+that read this extraction through the same functions —
+`tools/canon_role_tempo.py` and `tools/patch_sentinel.py` — were updated in
+the same change to pass the resolved token set, so all three consumers see
+one extraction rather than two.
+
+**The prediction this section made was right.** It said the layer "would very
+likely have a payoff, not a zero, if the creation side were visible." It has
+two, both rare: the card named below and one more that selects the token out
+of a combat pile. The layer is `Token:Soul`, 10 mentions / 6 generators / 2
+payoffs, and it survives the strictest breadth threshold (§4).
+
+**And the reader it named is the card that moved.** One rare counts token
+cards sitting in the exhaust pile; it sat in §6.3's unresolved list for two
+issues, and it is now that layer's payoff. That is the whole reason §6.3's
+count fell from 23 to 22.
 
 **One related fact, since it is now visible.** Four Necrobinder cards compute
 their number off the summoned body: three read its current or maximum HP, one
@@ -641,10 +738,10 @@ them read is a property path, not a layer this rubric has.
 ## 7. What is still asked of [USER]
 
 Three of the first issue's questions are answered. LOOSE is ruled, §6.1 is
-confirmed, and `EB-63` has run before any aim. Two things remain, and they
-are in order.
+confirmed, and `EB-63` has run before any aim. **§7.1 was ratified 2026-08-12
+(R178), sub-question included.** One thing remains: §7.2.
 
-### 7.1 Ratify the amended rubric TEXT
+### 7.1 Ratify the amended rubric TEXT — **RATIFIED 2026-08-12 (R178)**
 
 §2 is the rubric, and §2's R1 is now longer than it was. What is being
 ratified is the wording of the token-creation family: that a layer is opened
@@ -652,27 +749,36 @@ per token type a pool **creates**, that naming a token is a mention and not a
 generation, and that a token whose creation the extraction cannot see gets a
 named blind spot instead of an archetype (§6.5).
 
-RATIFY / AMEND / REJECT. One sub-question rides along, and it is small:
+**Ratified as written.** The sub-question that rode along —
 
 - **Should the extraction learn the third creation spelling (§6.5)?** Yes
   opens a ten-card layer in the Necrobinder pool, probably with a payoff, and
   probably widens the band population by one. No leaves a named blind spot.
-  Either answer is defensible; neither changes any band that exists today.
+
+— was answered **YES**. The forecast in it was accurate on both counts (the
+layer has payoffs; the population widened by one), and wrong on the third
+clause: *"neither changes any band that exists today"* was written before the
+population size was known, and adding the ninth member moved the MEDIAN, so
+the MEDIUM band moved (§5.2b). The bands above are the post-amendment bands
+and are the ones §7.2's aims are placed against.
 
 ### 7.2 Place the aims — R137 step (2c)
 
-This is the Q-C answer. It is [USER]'s, it has never been in this packet, and
-it is not in this packet now.
+This is the Q-C answer. It is [USER]'s. The band placement was ruled 2026-08-12
+(R185); the formal predictions commit that carries it lives in the
+registration, not this packet.
 
 The bands in §5 are the space. There are four of them — LOW, MEDIUM, HIGH,
 TOP — and each is a bracket, not a number.
 
-**Tentative aims, recorded so they are on the record.** These are what [USER]
-has said out loud so far. They are **TENTATIVE**. Writing them here is not
-the Q-C predictions commit, does not register anything, and does not bind
-anything:
+**Aims RULED 2026-08-12 (R185): the table below is adopted as it stands.**
+[USER] confirmed the packet's aims over a conflicting relayed ordering.
+Writing them here is still not the Q-C predictions commit — per the
+registration's §5, the aims land inside the single predictions commit
+appended there, together with the Q-A/Q-B predictions and the sample plan.
+Until that commit, this table is the ruled content awaiting its vehicle:
 
-| character | archetype | tentative band |
+| character | archetype | ruled band (R185) |
 |---|---|---|
 | Klee | Demolition | MEDIUM |
 | Klee | Reaction | HIGH |
@@ -684,11 +790,22 @@ anything:
 | Kokomi | Commander | HIGH |
 | Kokomi | Assist | LOW |
 
-**One thing to know before they are made final.** LOW moved at the amendment
-and the other three bands did not (§5.2a). LOW's blind-draft floor is now
-0.04 payoffs over a 20-card draft. Three of the nine aims above are LOW, so
-that is the band the amendment touched hardest, and it is the one worth a
-second look before the aims are committed.
+**Two things to know before they are made final.** LOW moved at the first
+amendment and the other three bands did not (§5.2a). LOW's blind-draft floor
+is now 0.04 payoffs over a 20-card draft. Three of the nine aims above are
+LOW. **MEDIUM then moved at the second amendment** (§5.2b, R178) and the
+other three did not: its offer figure fell 0.0097 → 0.0058 and its
+blind-draft floor 0.19 → 0.12 over a 20-card draft. Three of the nine aims
+above are MEDIUM. So between them the two amendments have moved the band
+under **six of the nine** tentative aims, each by the same mechanism — one
+more member shifting a percentile — and neither move says anything about the
+aims themselves. Both are worth a second look before the aims are committed;
+neither is a reason to change one.
+
+**And one thing that is now on the record about MEDIUM specifically.** It is
+the only band whose figure differs between the ruled attribution rule and its
+strict variant (§5.4). A MEDIUM aim is therefore the only aim that would read
+differently had LOOSE not been ruled.
 
 **And the standing caveat.** Both axes remain lower bounds while 23
 payoff-shaped cards sit unattributed (§6.3). The bands are a floor on canon's
@@ -696,6 +813,22 @@ payoff density, not its measured value. That was true at the first issue and
 it is still true; `EB-63` narrowed it by one card and mapped the rest.
 
 — `EB-56`, first issued 2026-08-08; AMENDED and re-issued 2026-08-10 per
-[USER]'s ruling, branch `sitting-prep-2026-08-08`. Zero design authority
+[USER]'s ruling, branch `sitting-prep-2026-08-08`; **RE-EXTRACTED and
+re-issued 2026-08-12 (R178)** — §7.1 ratified, the third creation spelling
+taught, the census regenerated over all five pools, and every figure above
+recomputed from that run rather than carried forward. Zero design authority
 exercised. No measurement was run against the sprint's instrument, and no
 GItS roster number was read to produce this document.
+
+**What the third issue changed, in one place.** Extraction: 6 fields, one
+pool. Census: one new archetype (`Token:Soul`), Necrobinder 4 → 5 archetypes
+and 8 → 7 unresolved payoffs, the five-pool unattributed total 23 → 22 and
+resolved payoffs 17 → 19, the LOOSE band population 8 → 9 and STRICT 6 → 7,
+and one band figure — MEDIUM's offer, 0.0097 → 0.0058. Everything else in
+this document is what it was. The other two tools that read this extraction
+were checked rather than assumed: `tools/canon_role_tempo.py` classifies all
+439 canon cards identically and regenerates `docs/role-tempo-baseline.md` and
+`docs/role-tempo-floors.yaml` byte-for-byte, and `tools/patch_sentinel.py`
+reads no changed field — though it diffs whole extract records against the
+`game_ref/` baselines, so the baselines were regenerated in the same pass and
+it stays clean.

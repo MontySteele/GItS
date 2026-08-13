@@ -303,6 +303,46 @@ def test_parse_card_records_the_tokens_a_card_makes_and_names():
     assert card["card_refs"] == ["Tok"]
 
 
+def test_static_factory_is_a_creation_only_for_a_resolved_token():
+    """R178, the third creation spelling.
+
+    `<Token>.Create(...)` is the shape one base-game pool uses to mint its
+    token, and it is the reason that pool showed ten mentions and zero
+    generations. Unlike its two siblings the shape is NOT self-evidently
+    about cards -- the same call constructs visual effects all over the card
+    sources -- so it counts as a creation only for a name `read_pool` already
+    resolved to a card type. The two halves of that rule are what this pins:
+    admit the resolved name, refuse the unresolved one, and refuse both when
+    the caller passes no resolved set at all.
+    """
+    source = """
+    public sealed class Fake : CardModel {
+        public Fake() : base(1, CardType.Skill, CardRarity.Common) { }
+        async Task OnPlay() {
+            NBigSlashVfx.Create(base.Owner);
+            await CardPileCmd.AddGeneratedCardsToCombat(
+                Tok.Create(base.Owner, 3, base.CombatState),
+                PileType.Draw, base.Owner);
+        }
+    }
+    """
+    # The resolved token set admits Tok and says nothing about the Vfx type,
+    # which is exactly the discrimination the raw regex cannot make.
+    assert extract.parse_card(source, "Fake", {"Tok"})["creates"] == ["Tok"]
+    assert extract.parse_card(source, "Fake", {"Other"})["creates"] == []
+    assert extract.parse_card(source, "Fake")["creates"] == []
+
+
+def test_read_pool_offers_the_factory_spelling_as_a_token_candidate():
+    """The other half of R178: `read_pool` must PROPOSE the name before
+    `parse_card` can be told to accept it. The regex is what proposes."""
+    src = "await CardPileCmd.AddGeneratedCardsToCombat(Tok.Create(o, 3, cs));"
+    assert extract.TOKEN_FACTORY.findall(src) == ["Tok"]
+    # And the two older spellings are untouched by the addition.
+    assert extract.TOKEN_FACTORY.findall("Tok.CreateInHand(o)") == []
+    assert extract.TOKEN_FACTORY.findall("cs.CreateCard<Tok>(o)") == []
+
+
 def test_parse_card_records_what_a_computed_magnitude_counts():
     """`EB-63`, the other half: a CalculatedVar's ARGUMENTS.
 

@@ -89,6 +89,7 @@ import sys
 import tempfile
 import time
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from contextlib import contextmanager
 from pathlib import Path
 
@@ -121,6 +122,24 @@ MP_ONLY = re.compile(
 # spellings a pool card uses to conjure a TOKEN card that is not itself in
 # the pool. Matched on the shape, never on a name.
 TOKEN_CREATE = re.compile(r"\b(\w+)\.CreateInHand\(|CreateCard<(\w+)>")
+# THE THIRD SPELLING (R178, 2026-08-12). A pool may also mint its token
+# through a static factory on the token's own type -- `<Token>.Create(owner,
+# count, combatState)` returning a sequence that is then handed to
+# `CardPileCmd.AddGeneratedCardsToCombat`. One pool uses it and no other, and
+# while it was unrecognised that pool showed token MENTIONS with zero token
+# CREATIONS, which is the shape `payoff_census.py` must refuse to open a layer
+# for (its own comment says why: with the generate side blind, every enabler
+# reads as a payoff).
+#
+# WHY IT IS A SEPARATE REGEX AND NOT A THIRD ALTERNATIVE INSIDE TOKEN_CREATE.
+# `X.Create(` is a far commoner shape than the other two -- the card sources
+# call it on visual-effect types dozens of times -- so unlike its siblings a
+# raw match is NOT self-evidently a token. It is therefore admitted only after
+# the candidate name RESOLVES to a card type in the decompiled project, which
+# is a check `read_pool` already performs on every candidate token and which
+# no name table enters. `parse_card` cannot do that resolution (it sees one
+# card's source and no project root), so it is passed the resolved set.
+TOKEN_FACTORY = re.compile(r"\b(\w+)\.Create\(")
 # --- the Axis-Validity taxonomy reads (Track A, 2026-08-04) ------------------
 # None of these change what the extractor EMITS; they widen what the JSON
 # RECORDS, because tools/canon_role_tempo.py classifies a canon card from its
@@ -342,10 +361,13 @@ def read_pool(root: Path, character: str) -> tuple[list[str], dict[str, str]]:
     # every card that makes one would be permanently unexpressible.
     # Found STRUCTURALLY, from the create-call shapes in the pool's own
     # sources -- no card-name table enters this file.
-    tokens = sorted({name for src in sources.values()
-                     for match in TOKEN_CREATE.findall(src)
-                     for name in match if name}
+    tokens = sorted(({name for src in sources.values()
+                      for match in TOKEN_CREATE.findall(src)
+                      for name in match if name}
+                     | {name for src in sources.values()
+                        for name in TOKEN_FACTORY.findall(src)})
                     - set(names))
+    resolved: list[str] = []
     for name in tokens:
         try:
             sources[name] = _read_decompiled_type(root, f"{CARD_NS}{name}")
@@ -356,9 +378,13 @@ def read_pool(root: Path, character: str) -> tuple[list[str], dict[str, str]]:
             if "multiple decompiled files matched" in str(err.code):
                 raise
             continue
-    if tokens:
+        resolved.append(name)
+    # Report the RESOLVED set, not the candidates: since TOKEN_FACTORY was
+    # added the candidate list carries every visual-effect type the pool
+    # constructs, and printing those as "token card types" would be a lie.
+    if resolved:
         print(f"  token card types referenced by the pool: "
-              f"{', '.join(tokens)}", file=sys.stderr)
+              f"{', '.join(resolved)}", file=sys.stderr)
     # TAG-SCOPED POWERS. Their tier0 name embeds a base-game CardTag,
     # so the committed dial holds only a prefix; complete it here, the
     # one moment the power's own decompiled source is readable. The
@@ -446,7 +472,17 @@ def _calculated_vars(src: str) -> list[dict]:
     return out
 
 
-def parse_card(src: str, name: str) -> dict | None:
+def parse_card(src: str, name: str,
+               token_types: Iterable[str] = ()) -> dict | None:
+    """One card's structural record.
+
+    ``token_types`` is the pool's RESOLVED token set (``read_pool`` computes
+    it as the sources it added beyond the pool's own names). It gates the
+    third creation spelling only -- see ``TOKEN_FACTORY``. Passing nothing
+    keeps the two self-evident spellings and no more, which is what a caller
+    with no project root can honestly claim to have seen.
+    """
+    known_tokens = set(token_types)
     m = CTOR.search(src)
     if not m:
         return None
@@ -474,7 +510,9 @@ def parse_card(src: str, name: str) -> dict | None:
         # Payoff-census reads (EB-63). Additive: no existing consumer reads
         # them either.
         "creates": sorted({token for match in TOKEN_CREATE.findall(src)
-                           for token in match if token}),
+                           for token in match if token}
+                          | {token for token in TOKEN_FACTORY.findall(src)
+                             if token in known_tokens}),
         "card_refs": sorted(set(CARD_REF.findall(src))),
         "calc_vars": _calculated_vars(src),
     }
@@ -1790,7 +1828,7 @@ def run_one(root: Path, character: str, json_out: Path | None,
     cards, failed = [], []
     for i, name in enumerate(names, 1):
         print(f"\r  {i}/{len(names)} {name:<26}", end="", file=sys.stderr)
-        card = parse_card(sources[name], name)
+        card = parse_card(sources[name], name, set(sources) - set(names))
         (cards if card else failed).append(card or name)
     print(f"\r  parsed {len(cards)}/{len(names)}"
           f"{f', {len(failed)} FAILED: {failed}' if failed else ''}"

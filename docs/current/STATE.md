@@ -47,13 +47,14 @@ absent on a fresh clone.
 
 ## Content inventory
 
-Live sim inventory (`docs/current/atlas/tier0-pilot-roster.md` §2): **301 cards
-(3 acquisition-only Ancient side-sheet rows), 5
-character sheets** (3 roster + 2 reference), **6 encounters, 15 pilot weight
-sets**. The battery encounters are frozen (`content/encounters/battery.yaml`,
-FROZEN 2026-07-19). Card sheets: `docs/klee-cards.yaml`, `docs/furina-cards.yaml`,
-`docs/kokomi-cards.yaml` (all three carry the `tempo_band:` field, 219 personal
-rows total). Balance numbers (HP, decks, bands) live in
+Live sim inventory (`docs/current/atlas/tier0-pilot-roster.md` §2): **303 cards
+in the loader index** (of which 3 are acquisition-only Ancient side-sheet rows,
+leaving the 300 the atlas quotes), **5 character sheets** (3 roster + 2
+reference), **6 encounters, 15 pilot weight sets**. The battery encounters are
+frozen (`content/encounters/battery.yaml`, FROZEN 2026-07-19). Card sheets:
+`docs/klee-cards.yaml`, `docs/furina-cards.yaml`, `docs/kokomi-cards.yaml` (all
+three carry the `tempo_band:` field, **220 personal rows** total — 76 / 82 /
+62). Balance numbers (HP, decks, bands) live in
 `tier0/content/characters/*.yaml`, the ratified artifact — not in the registry.
 
 ## Mod card coverage (generated)
@@ -140,7 +141,9 @@ Named here for status only. Open items are in
 - **Animation sprint 2.**
 - **Axis-validity tracks** — Track A / Track E logs.
 - **Kokomi playtest** — unrun.
-- **Payoff-reach re-registration** — R121, running under DRAFTER_VERSION 14.
+- **Payoff-reach re-registration** — R121, pinned at DRAFTER_VERSION 14.
+  Predictions committed 2026-08-13 (R186); the sprint is unrun and waits on the
+  settle-first freeze (EXPERIMENTS).
 
 ## Watch register (dormant)
 

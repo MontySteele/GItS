@@ -48,7 +48,8 @@ REPO = Path(__file__).resolve().parent.parent
 # carry Bomb rules", "how many gain_encore sites are there" -- go through the
 # shared walk like everyone else's.
 sys.path.insert(0, str(REPO))
-from tools.effect_walk import iter_effects  # noqa: E402
+from tools.effect_walk import (SLY_AUTOPLAY_OP, iter_effects,  # noqa: E402
+                               sly_autoplays, sly_riders)
 
 SHEET = REPO / "docs" / "klee-cards.yaml"
 # Mirrors tier0/content/upgrades.py UPGRADE_SHEETS, in the same order.
@@ -986,6 +987,10 @@ def blocked_reason(
     # and debuffed the whole room. An unchecked branch is not a smaller
     # surface; it is the same surface with the alarm disconnected.
     if card.get("sly"):
+        marker_reason = _sly_marker_reason(card)
+        if marker_reason:
+            return marker_reason
+    if sly_riders(card):
         sly_reason = blocked_reason(_sly_view(card), profile)
         if sly_reason:
             return f"sly branch: {sly_reason}"
@@ -4750,7 +4755,13 @@ def build_description(card: dict) -> str:
     # LITERAL: no upgrade delta reaches a Sly branch (upgrades sheet header,
     # "no sly-delta key exists in the applier"), and rendering a {Var:diff()}
     # would print the played face's upgraded number on a line that never moves.
-    if card.get("sly"):
+    # The RESERVED auto-play marker is deliberately absent from this line:
+    # it renders as `CardKeyword.Sly` through the game's own auto-keyword
+    # pipeline, exactly like Exhaust/Innate/Retain, and spelling it into the
+    # description string as well would print the word twice (the A9 note on
+    # the CanonicalKeywords rail is the same reasoning). `_sly_view` already
+    # drops it, so a marker-only row produces no text and no line.
+    if sly_riders(card):
         sly_text = build_description(_sly_view(card)).strip()
         if sly_text:
             parts.append(f"[gold]Sly[/gold]: {sly_text}")
@@ -4782,13 +4793,58 @@ def _sly_view(card: dict) -> dict:
     `DynamicVars.Damage` for the Sly hit and so dealt 8 on discard, and
     drifting_lantern's Sly Block upgraded from 4 to 6 alongside its played
     face. Both contradict the sim, which never moves a Sly number.
+
+    EB-71 (R174), C# leg: the branch is built from `sly_riders(card)`, not
+    from the whole `sly` list. Since the unification the list may also carry
+    the reserved `{op: sly_autoplay}` marker, which is the base-game keyword
+    and NOT an effect -- it emits as `CardKeyword.Sly` on the CanonicalKeywords
+    rail (beside Exhaust/Innate/Retain) and has no body. Feeding it to the
+    effect emitter is exactly the "plausible-looking wrong body" this
+    generator refuses to write.
     """
     view = {**card, "id": card["id"] + "__sly", "_sly_branch": True,
-            "effects": card["sly"], "cost": card.get("cost", 0)}
+            "effects": sly_riders(card), "cost": card.get("cost", 0)}
     # A Sly branch has no Sly branch of its own. Leaving the key in place
     # made build_description recurse into itself forever.
     view.pop("sly", None)
     return view
+
+
+def _sly_marker_reason(card: dict) -> str | None:
+    """Block a row whose Sly list the emitter cannot read as printed text.
+
+    Two failures, both of which used to reach the emitter as an effect and
+    come out the far side as C#:
+
+      * a rider that is not a mapping with an `op` -- the pre-EB-71 spelling
+        `sly: true` lands here, and so does any hand-migrated row that kept a
+        boolean. `Card.from_dict` refuses those by name sim-side; this is the
+        same refusal on the codegen side of the wall.
+      * the reserved auto-play marker carrying anything else. Bare, it is the
+        printed base-game keyword. `until: turn_end` is Hand Trick's RUNTIME
+        grant (state.SLY_AUTOPLAY_THIS_TURN), which no card PRINTS and the
+        mod has no rail for -- a generated card cannot express "Sly until the
+        end of this turn", so a sheet that asks for it must block rather than
+        ship a permanent keyword.
+    """
+    sly = card.get("sly")
+    if not isinstance(sly, list):
+        return (f"sly branch: `sly:` is {sly!r}, not an effect list. Since "
+                f"EB-71 (R174) the base-game keyword is spelled "
+                f"[{{op: {SLY_AUTOPLAY_OP}}}], not a boolean.")
+    for fx in sly:
+        if not isinstance(fx, dict) or not fx.get("op"):
+            return (f"sly branch: rider {fx!r} is not an effect mapping. "
+                    f"Since EB-71 (R174) `sly:` is an effect list; the "
+                    f"base-game keyword is the reserved rider "
+                    f"[{{op: {SLY_AUTOPLAY_OP}}}].")
+        if fx.get("op") == SLY_AUTOPLAY_OP and set(fx) != {"op"}:
+            extra = sorted(set(fx) - {"op"})
+            return (f"sly branch: the reserved {SLY_AUTOPLAY_OP} rider is the "
+                    f"printed base-game keyword and takes no other key; this "
+                    f"row adds {extra}. A turn-scoped grant is runtime state, "
+                    f"not printed text, and has no C# rail.")
+    return None
 
 
 def build_upgrade(card: dict) -> list[str]:
@@ -5207,8 +5263,15 @@ def emit(
     # so the mod hangs it on the card's own AfterCardDiscarded hook -- the
     # effects are the card's, and putting them anywhere else would separate a
     # card's behaviour from the card.
+    # EB-71 (R174), C# leg: the hook carries the AUTHORED riders only. The
+    # reserved marker is the base game's own Sly (CardCmd.DiscardAndDraw ->
+    # CardCmd.AutoPlay, AutoPlayType.SlyDiscard) and the engine already owns
+    # that behaviour once the keyword is on the card; a hook that also
+    # resolved it as effects would skip the card-played events the payoffs
+    # read -- the reading the tech-debt audit (§5) refused sim-side, refused
+    # here for the same reason. A marker-only row emits no hook at all.
     sly_cs = ""
-    if card.get("sly"):
+    if sly_riders(card):
         # _sly_view, not a plain effects swap: see its docstring. Under the
         # card's own id the emitter reached for the played face's DynamicVars
         # and silently printed the wrong number on discard.
@@ -5354,6 +5417,14 @@ def emit(
     # retaining or become it, not both.
     if card.get("retain"):
         keywords.append("CardKeyword.Retain")
+    # EB-71 (R174), C# leg: the reserved `sly_autoplay` rider IS the base-game
+    # keyword, so it rides the same rail rather than being emitted as a body.
+    # The game owns the whole behaviour from the keyword (auto-play the
+    # discarded card for free), which is what tier0's marker stands for; the
+    # authored riders beside it, if any, still emit as AfterCardDiscarded.
+    # Inert on every committed sheet -- no row prints the marker today.
+    if sly_autoplays(card):
+        keywords.append("CardKeyword.Sly")
     if "skill_tag" in card.get("tags", []):
         keywords.append("KleeKeywords.ElementalSkill")
     keywords.extend(aura_keyword_by_element[e] for e in aura_elements)

@@ -169,48 +169,59 @@ def censused():
 
 
 @pool_test
-def test_exactly_one_pool_admits_a_token_layer(censused):
-    """The amendment's whole footprint on the five pools, pinned.
+def test_exactly_two_pools_admit_a_token_layer(censused):
+    """The two amendments' whole footprint on the five pools, pinned.
 
-    Token layers are derived per pool, so several could admit. Only one does:
-    the other pools either create no token, or create several and print too
-    few cards of each to clear the breadth threshold. Recorded as a number so
-    a rubric change that quietly widened the family would fail here.
+    Token layers are derived per pool, so several could admit. Two do -- one
+    per creation spelling the extraction has learned. The other three pools
+    either create no token, or create several and print too few cards of each
+    to clear the breadth threshold. Recorded as a number so a rubric change
+    that quietly widened the family would fail here.
+
+    It was ONE until R178 (2026-08-12), when [USER] ruled the extraction
+    should learn the third creation spelling and the second layer appeared.
     """
     admitted = {char: [layer for layer in blk["archetypes"]
                        if layer.startswith(census.TOKEN_PREFIX)]
                 for char, blk in censused.items()}
-    assert sum(len(v) for v in admitted.values()) == 1, admitted
+    assert sum(len(v) for v in admitted.values()) == 2, admitted
 
 
 @pool_test
-def test_the_admitted_token_layer_has_one_rare_payoff(censused):
-    """The shape of the one token archetype canon prints.
+def test_the_admitted_token_layers_cash_out_through_rares_only(censused):
+    """The shape of the two token archetypes canon prints.
 
-    Twelve cards name the token, eight make one, and exactly one card reads
-    the count -- a rare. The layer is as broad as that pool's poison layer and
-    cashes out through a single card, which is the census's headline shape
-    everywhere else too.
+    The first: twelve cards name the token, eight make one, and exactly one
+    card reads the count -- a rare. The second (R178): ten name it, six make
+    one, two read it, both rare. Each is as broad as a named power layer in
+    its own pool and cashes out through one or two cards, which is the
+    census's headline shape everywhere else too -- and NEITHER prints a common
+    payoff, which is the regularity §3.1 rests on.
     """
-    layer, = [a for blk in censused.values()
-              for name, a in blk["archetypes"].items()
-              if name.startswith(census.TOKEN_PREFIX)]
-    assert layer["mentions"] == 12
-    assert layer["generators"] == 8
-    assert layer["payoffs_by_rarity"] == {"rare": 1}
-    assert layer["kind"] == "identity"
+    layers = sorted(
+        (a for blk in censused.values()
+         for name, a in blk["archetypes"].items()
+         if name.startswith(census.TOKEN_PREFIX)),
+        key=lambda a: -a["mentions"])
+    assert [a["mentions"] for a in layers] == [12, 10]
+    assert [a["generators"] for a in layers] == [8, 6]
+    assert [a["payoffs_by_rarity"] for a in layers] == [{"rare": 1},
+                                                        {"rare": 2}]
+    assert {a["kind"] for a in layers} == {"identity"}
 
 
 @pool_test
-def test_the_amendment_attributes_one_of_the_unattributed(censused):
+def test_the_amendments_attribute_two_of_the_unattributed(censused):
     """R5's unattributed count, pinned at its post-amendment value.
 
-    It was 24 before the token layer and it is 23 after. The number is the
+    24 before any token layer, 23 after the first, and 22 since R178 taught
+    the extraction the third creation spelling -- the card that moved is the
+    rare counting tokens of one class in the exhaust pile. The number is the
     census's own headline limitation, so it is pinned rather than described:
     both axes of the bands are lower bounds while it is this large.
     """
     unattributed = sum(len(blk["unresolved"]) for blk in censused.values())
-    assert unattributed == 23
+    assert unattributed == 22
 
 
 @pool_test

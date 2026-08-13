@@ -1654,9 +1654,68 @@ adaptive_policy.emergent_plan = True
 hybrid_policy = assigned_policy
 
 
-# The A/B pair. hybrid_policy is a diagnostic run on demand (see its
-# docstring), not a third arm of the standing A/B.
-POLICIES = {"assigned": assigned_policy, "adaptive": adaptive_policy}
+# ---------------------------------------------------------------------------
+#  The blind-pick CONTROL (payoff-reach registration §6.5, control C2)
+# ---------------------------------------------------------------------------
+
+def blind_policy(rng: random.Random, deck: list[Card],
+                 offers: list[Card], archetype: str) -> Optional[Card]:
+    """Take uniformly at random from the screen. The offer floor, empirically.
+
+    NOT A PILOT AND NOT AN ARM OF THE STANDING A/B. This is the negative
+    control the payoff-reach registration authorises as its `C2` (the same
+    shape R181 authorised for `M13`'s `C2`): the census computes a blind-draft
+    offer floor ARITHMETICALLY -- `offer x cards drafted` -- and Q-A's
+    prediction is stated against that floor. Comparing a sim number against an
+    arithmetic one is the weakness the control removes: this policy draws the
+    floor from the same run machinery the arms use, so the comparison is
+    like-for-like.
+
+    Uniform over the WHOLE screen and it never skips. That is the definition
+    the floor needs: the census's `offer_reach` is "the chance that ONE offered
+    card is a payoff", scaled by cards drafted, which presumes one card taken
+    per screen with no selection at all. A skip rule, a defense quota, or any
+    scoring here would make this a bad drafter rather than no drafter.
+
+    `POLICY_VERSION` is UNTOUCHED by this addition and that is not an
+    oversight. The stamp's `P` names the shipped pilot/drafting behaviour that
+    every quoted tier-0.5 number was measured through; `assigned` and
+    `adaptive` are byte-identical before and after this edit, so no archived
+    number moves and there is nothing for a bump to archive. A control that
+    only ever runs in its own declared arm adds a row to POLICIES; it does not
+    change what P7 means.
+
+    RNG: the run's MAIN stream is not used. `own_rng` below makes `model` hand
+    this policy a dedicated stream (`seed + 6e9`, the next free offset in
+    understudy/rng.py's registry) for the standing reason every dedicated
+    stream in this repo exists -- drawing picks off the main stream would
+    advance it and renumber every encounter, reward roll and shop after each
+    screen, so the control would not be measuring the same runs the arms
+    measure. Seed-determined either way, so the control replays.
+    """
+    if not offers:
+        return None
+    return rng.choice(offers)
+
+
+# Read by `model._RunCtx`: this policy is handed the dedicated policy stream
+# instead of the run's main rng. Same seam shape as `emergent_plan` above --
+# the model reads a flag the policy declares, rather than knowing its name.
+blind_policy.own_rng = True
+
+
+# The A/B pair, plus the registered control. hybrid_policy is a diagnostic run
+# on demand (see its docstring), not a third arm of the standing A/B; `blind`
+# is a negative control and is never a comparator for a shipped number.
+POLICIES = {"assigned": assigned_policy, "adaptive": adaptive_policy,
+            "blind": blind_policy}
+
+# The STANDING A/B, named separately from the registry above so that adding a
+# control to POLICIES cannot silently enlarge it. `ab.run_ab` used to iterate
+# POLICIES itself, which made "every callable a run may fly" and "the two arms
+# the A/B compares" the same list -- a control landing in a shipped comparison
+# report is precisely the interference a control must not cause.
+AB_POLICIES = ("assigned", "adaptive")
 
 
 def offer_advances_plan(offers: list[Card], deck: list[Card],

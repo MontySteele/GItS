@@ -61,15 +61,28 @@ since moved.
 ### `give-card` — EB-52's dev grant door (attended loop only)
 
 ```
-python -m understudy.harness give-card UNHEARD_CONFESSION --why "EB-52(a)"
+python -m understudy.harness give-card KLEEMOD-UNHEARD_CONFESSION --why "EB-52(a)"
 python -m understudy.harness give-card "Unheard Confession" --pile hand --count 2
 ```
 
-EB-52(a) owes one evidence shape — a Power played and the Fanfare floor rising
-because of it — and its obstacle is **acquisition, not instrumentation**: the
+EB-52(a) owed one evidence shape — a Power played and the Fanfare floor rising
+because of it — and its obstacle was **acquisition, not instrumentation**: the
 floor has been on the wire since P1.5, and three live sessions could not get
 one of the three rare Powers into a deck (six rare draws, P(0 hits) = 36%, an
-ordinary miss). This verb removes that obstacle for a smoke.
+ordinary miss). This verb removed that obstacle, and the shape was taken on
+2026-08-13: `KLEEMOD_FANFARE_FLOOR` read 0 before `Unheard Confession` and 8
+after it, one request either side of the play.
+
+**Grant to `deck`, not to a combat pile.** A combat-pile grant lands in hand and
+then throws on play (`must be added to a CombatState before playing it`),
+wedging the fight — BACKLOG `EB-91`. The deck route is the one the evidence
+above was taken through: grant, let the next combat build its piles, play the
+card normally.
+
+**Ids: use the exact printed Title, or `KLEEMOD-<SHEET_ID_UPPER>`.** The wiki
+search this verb's own refusal recommends throws on every mod card
+(`EB-92`), so it cannot be used to look one up; the grant response echoes the
+real `card_id`, which is the cheapest way to learn a spelling.
 
 It goes through the game's own acquisition path — `RunState.CreateCard` then
 `CardPileCmd.Add`, the same two lines a card reward runs — and mints nothing.
@@ -372,10 +385,12 @@ only thing this vantage has that the wire's does not. The two vocabularies
 overlap on the bot feed's fallback spelling rather than colliding, and no
 consumer matches on the column — `replay.py` matches on the OFFERED list.
 
-**Owed: a live smoke.** Nothing in this repo can execute the C# writer, and no
-run has exercised the new rows in a real game yet. Verify a Furina Ethereal
-Spotlight turn produces one row per turn with both options in `offered`, and
-that a Kokomi exhaust card (the hand surface) produces one.
+**The live smoke, half done (2026-08-13).** Nothing in this repo can execute
+the C# writer, so this had to be watched in a real game. Three Furina fights
+produced 17 Ethereal Spotlight turns and 17 mod-written rows — one per turn,
+never two — matching the soak's rows on round, index and chosen name, with both
+options in `offered`. **Still unexercised:** the hand surface,
+`NPlayerHand.SelectCards`, i.e. a Kokomi exhaust card. BACKLOG `EB-14`.
 
 **Additions of 2026-08-07 (EB-18), HUMAN FEED ONLY, no renames:** `run_id`,
 `run_instance`, `fight_index`, `encounter`, `detonations`,

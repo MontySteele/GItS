@@ -297,6 +297,13 @@ class _RunCtx:
     archetype: str
     policy: DraftPolicy
     rng: random.Random
+    # The DEDICATED draft-policy stream (`seed + 6e9`), handed to a policy that
+    # declares `own_rng` -- today only draft.blind_policy, the payoff-reach
+    # registration's C2 control. Constructed for every run and consumed by
+    # almost none: making it unconditional keeps run start byte-identical
+    # whichever policy is flying, since building a Random draws nothing from
+    # the main stream.
+    policy_rng: random.Random
     pilot: object
     banner: frozenset
     route_policy: Callable
@@ -345,6 +352,21 @@ class _RunCtx:
             return draft.dominant_archetype(
                 [loader.peek_card(cid) for cid in self.deck_ids])
         return self.archetype
+
+    def pick_rng(self) -> random.Random:
+        """The stream the DRAFT POLICY draws from, at all three of its sites.
+
+        A policy that declares `own_rng` gets the dedicated `policy_rng`; every
+        other policy gets the run's own stream, which is the same object it was
+        always handed, so no archived number moves. The flag is read here and
+        nowhere else, so the reward screen, the shop shelf and an event's card
+        offer cannot disagree about which stream a policy is on -- a control
+        that drew from the main stream at one of three sites would renumber
+        exactly the runs it exists to be a control for.
+        """
+        if getattr(self.policy, "own_rng", False):
+            return self.policy_rng
+        return self.rng
 
     def route_state(self) -> route.RouteState:
         return route.RouteState(
@@ -453,7 +475,8 @@ class _RunCtx:
         self.shop_visits += 1
         outcome = shop.visit_shop(self.rng, self.character, self.deck_ids,
                                   self.gold, self.plan(), self.policy,
-                                  self.removal_uses, visit=visit)
+                                  self.removal_uses, visit=visit,
+                                  policy_rng=self.pick_rng())
         self.deck_ids = outcome.deck_ids
         self.gold = outcome.gold
         self.removal_uses = outcome.removal_uses
@@ -551,7 +574,8 @@ class _RunCtx:
             potions=list(self.bag.potions) if self.bag else [],
             potion_slots=self.bag.slots if self.bag else 0)
         events.visit(self.rng, self.act_i, est, self.seen_events,
-                     held=self.held, bag=self.bag, policy=self.policy)
+                     held=self.held, bag=self.bag, policy=self.policy,
+                     policy_rng=self.pick_rng())
         self.hp, self.max_hp, self.gold = est.hp, est.max_hp, est.gold
         self.deck_ids = est.deck_ids
         self.res.events.extend(est.log)
@@ -746,7 +770,8 @@ class _RunCtx:
             plan_live = not draft.core_complete(deck_cards, self.archetype)
             engaging = draft.offer_worth_engaging(offers, deck_cards,
                                                   self.archetype)
-            pick = self.policy(self.rng, deck_cards, offers, self.archetype)
+            pick = self.policy(self.pick_rng(), deck_cards, offers,
+                               self.archetype)
             self.res.decisions.append({
                 "node": i, "offers": offers,
                 "picked": pick.id if pick else None,
@@ -881,7 +906,8 @@ def _setup_run(character: str, archetype: str, pilot_id: str,
         loader.peek_card(cid)
         deck_ids.append(cid)
     return _RunCtx(character=character, archetype=archetype, policy=policy,
-                   rng=rng, pilot=pilot, banner=banner,
+                   rng=rng, policy_rng=random.Random(seed + 6 * 10 ** 9),
+                   pilot=pilot, banner=banner,
                    route_policy=route.POLICIES[route_name], res=res,
                    deck_ids=deck_ids, hp=hp, max_hp=max_hp, gold=gold, n=n,
                    seed_ids=seed_ids, grant_relics=grant_relics,

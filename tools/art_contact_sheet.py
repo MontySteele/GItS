@@ -72,7 +72,18 @@ BATCH_ORDER = ["identity", "salon-fanfare", "spotlight",
 
 
 def card_meta():
-    """id -> {rarity, archetypes} from the canonical sheets. Empty if no yaml."""
+    """id -> {rarity, archetypes, name} from the canonical sheets.
+
+    Empty if no yaml. `name` is the card's DISPLAY name and is used only to
+    label the section heading -- see `render`. The lookup is keyed on the
+    plan's `asset_id` and is EXACT, never fuzzy or prefix-stripped: the plan
+    deliberately carries `power_furina_the_gallery_stirs` (a sigil) alongside
+    `crowd_work` (the card whose display name IS "The Gallery Stirs"), so any
+    name-shaped match would label one asset with the other's card. An id with
+    no sheet row -- every `power_furina_*`, every ui/relic/model asset -- keeps
+    its bare asset_id, which is the correct label for something that is not a
+    card.
+    """
     try:
         import yaml
     except ImportError:                      # stdlib-only fallback
@@ -87,6 +98,7 @@ def card_meta():
                 meta[row["id"]] = {
                     "rarity": row.get("rarity"),
                     "archetypes": set(row.get("archetypes") or ()),
+                    "name": row.get("name"),
                 }
     return meta
 
@@ -136,7 +148,14 @@ def batch_of(asset_id, out_path, meta):
     return "unsorted"
 
 
-def render(assets, title, subtitle):
+def render(assets, title, subtitle, meta=None):
+    # The heading carries the display name next to the asset_id, because
+    # `crowd_work` / `standing_ovation` / `tempo_change` do not tell a reviewer
+    # which card is on screen and the pick is made on the card, not the slug.
+    # The id stays FIRST and verbatim -- it is what picks.tsv must contain --
+    # and the export now reads it from `data-asset` rather than from the
+    # heading text, so decorating the heading cannot corrupt a pick file.
+    meta = meta or {}
     blocks = []
     for aid, cands in assets.items():
         cells = []
@@ -151,12 +170,18 @@ def render(assets, title, subtitle):
             cells.append(
                 f'<label class="cand"><input type="radio" name="{aid}" value="{r["rank"]}"{checked}>'
                 f'<img src="{img}" loading="lazy"><small>r{r["rank"]} · {html.escape(label)}</small></label>')
-        blocks.append(f'<section><h2>{aid}</h2><div class="row">{"".join(cells)}</div></section>')
+        disp = (meta.get(aid) or {}).get("name")
+        named = (f'<span class="nm"> — {html.escape(str(disp))}</span>') if disp else ""
+        blocks.append(
+            f'<section data-asset="{html.escape(aid, quote=True)}">'
+            f'<h2>{html.escape(aid)}{named}</h2>'
+            f'<div class="row">{"".join(cells)}</div></section>')
 
     return f"""<!doctype html><meta charset="utf-8"><title>{html.escape(title)}</title>
 <style>
  body{{font:14px/1.4 -apple-system,sans-serif;margin:2em;background:#1b1b1f;color:#eee}}
  h2{{margin:1.2em 0 .3em;font-size:15px;color:#f8c471}}
+ h2 .nm{{color:#cfd3d8;font-weight:400}}
  .row{{display:flex;gap:12px;flex-wrap:wrap}}
  .cand{{width:260px;cursor:pointer;text-align:center;color:#aaa}}
  .cand img{{width:250px;height:190px;object-fit:contain;background:#111;border:3px solid #333;border-radius:6px;display:block;margin:0 auto 4px}}
@@ -175,7 +200,7 @@ def render(assets, title, subtitle):
 function exportPicks(){{
   let out="";
   document.querySelectorAll("section").forEach(s=>{{
-    const id=s.querySelector("h2").textContent;
+    const id=s.dataset.asset;
     const c=s.querySelector("input:checked");
     if(c) out+=id+"\\t"+c.value+"\\n";
   }});
@@ -244,7 +269,7 @@ def main():
     out = args.out or ROOT / "art" / (
         "contact_sheet.html" if args.batch == "all"
         else f"contact_sheet_{args.batch}.html")
-    out.write_text(render(assets, title, heading), encoding="utf-8")
+    out.write_text(render(assets, title, heading, meta), encoding="utf-8")
     print(f"wrote {out} ({len(assets)} shortlist assets, batch '{args.batch}')")
     return 0
 

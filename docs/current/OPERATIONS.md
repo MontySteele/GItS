@@ -122,6 +122,14 @@ Encoding rule is repo-wide and structural: **every text read/write declares
 `encoding=`** (an omitted encoding is cp1252 on Windows, UTF-8 on CI). The
 content path carries zero encoding debt.
 
+**The rule extends to `sys.stdout`** (EB-93, 2026-08-13). A console's encoding
+is chosen by the terminal, not by the file that prints, so a tool that echoes
+shipped content — card titles carry `♪` — raises `UnicodeEncodeError` on a
+default Windows console and takes the process exit code with it. Any entry
+point that prints content declares the console too:
+`understudy.report.console_safe()` at the top of `main` (UTF-8, falling back to
+`backslashreplace`, never raising).
+
 ## Worktrees — one working directory per workstream
 
 Sessions never share a working directory; collisions happen *before* commit,

@@ -272,7 +272,8 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
                n_offers: int = C.SHOP_CARD_OFFERS,
                companions: bool = True,
                banner: frozenset[str] | None = None,
-               visit: int = 0) -> ShopOutcome:
+               visit: int = 0,
+               policy_rng: random.Random | None = None) -> ShopOutcome:
     """Resolve one shop visit. Returns the mutated deck, remaining gold, the
     running removal count, a per-purchase log, the companion offer log and a
     PRICED-OUT log (see ShopOutcome) recording what gold could not reach, at
@@ -358,7 +359,10 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
     # poor for anything on the shelf is the same exit as running dry inside it.
     how = "guard"
     while shelf and gold >= min(price_of[id(c)] for c in shelf):
-        pick = policy(rng, deck_cards, shelf, archetype)
+        # The shelf is a draft screen, so the policy draws from ITS stream --
+        # the run's own unless the policy declares `own_rng` (model.pick_rng).
+        # Defaulting to `rng` keeps every existing caller byte-identical.
+        pick = policy(policy_rng or rng, deck_cards, shelf, archetype)
         if pick is None:                 # policy would skip the shelf -> stop
             how = "skip"
             break

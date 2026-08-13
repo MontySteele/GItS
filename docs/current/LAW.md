@@ -314,6 +314,22 @@ combat grammar comes with us. (principles §1)
 - **Ancient-tier pool gaps are fixed with real content, never option removal;**
   each character needs one Ancient card, gated by a deploy lint that fails on an
   empty ledger. (klee-mod Ancient ruling)
+- **A material card-sheet edit is a world change and lands under a
+  `CONSTANTS_VERSION` bump.** *"A card-sheet edit that materially changes the
+  drafted or combat world — card additions or removals, cost changes,
+  effect-number changes, rarity moves — is a world change. It lands under a
+  `CONSTANTS_VERSION` bump like any other balance constant, and numbers are not
+  comparable across it."* The sheets sit outside the `RT/D/P/C` stamp, so
+  without this rule two worlds differing in whether a card exists at all are
+  indistinguishable to a reader of the stamp. **Rename amendment:** a
+  *cosmetic* rename is exempt from the bump **only when neither the card id nor
+  the display name is read mechanically** — and the burden is on the renamer to
+  establish that, because at least one relic reads both. `card_name_damage_bonus`
+  matches a **substring** against the card id **OR** the display name
+  (`tier0/engine/relics.py:385-398`); its one carrier is `strike_dummy`,
+  substring `"strike"`, `+3` to attacks only, FROZEN. A rename that adds or
+  removes such a substring on either field moves damage and is not cosmetic.
+  (R179; M15 draft text ratified as written, amended on the rename clause)
 
 ## Design governance & measurement authority
 

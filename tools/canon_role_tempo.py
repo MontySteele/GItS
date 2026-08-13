@@ -538,9 +538,13 @@ def build(from_json: bool) -> dict:
             reader = Reader(root)
             for character in CHARACTERS:
                 names, sources = extract.read_pool(root, character)
+                # The pool's resolved token types -- what `read_pool` added to
+                # `sources` beyond the pool's own names. `parse_card` needs it
+                # to admit the third creation spelling (R178).
+                tokens = set(sources) - set(names)
                 rows = []
                 for name in names:
-                    card = extract.parse_card(sources[name], name)
+                    card = extract.parse_card(sources[name], name, tokens)
                     if card is None:
                         continue
                     rows.append(classify_canon(card, sources[name], reader))

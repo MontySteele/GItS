@@ -62,7 +62,8 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
 - **`CARD_FIELDS` is deliberately total** — an unknown card-level field blocks
   the card by name rather than being ignored (`:790-837`, `card_level_reason`
   `:840-847`). It caught `innate` and `retain` (`:791-813`); `tempo_band` had to
-  be added or all 219 rows would block (`:827-831`).
+  be added or every personal row would block (`:827-831`) — **220** today
+  (76 / 82 / 62), and the count is read from the sheets, not from this line.
 - **`MECHANICAL_OPS` is a whitelist backed by verified C# call sites**; an op
   outside it blocks (`:200-227`, refused `:996-998`). Per-op field whitelists
   apply the same rule one level down (`:244-268`).
@@ -72,6 +73,16 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
 - **A card's `sly` (discard) branch is re-run through `blocked_reason`** via
   `_sly_view`; an unchecked branch is the same surface with the alarm off
   (`:928-939`, `:4442`).
+- **`sly:` is one list carrying two things** (EB-71, R174, C# leg 2026-08-12).
+  The authored riders (`effect_walk.sly_riders`) become the
+  `AfterCardDiscarded` hook and the `[gold]Sly[/gold]:` line on the face; the
+  reserved `{op: sly_autoplay}` marker is the base game's own `CardKeyword.Sly`
+  and rides `CanonicalKeywords` beside Exhaust/Innate/Retain — no body, no
+  description line, because the game resolves the auto-play itself and a hook
+  beside it would resolve the discard twice. A marker carrying any other key
+  (Hand Trick's `until: turn_end` grant) is runtime state with no C# rail and
+  BLOCKS. Guard: `tools/lint_sly_grammar.py`; pins:
+  `tier0/tests/test_eb71_cs_parity.py`.
 - **Two handwritten sets, not interchangeable**: `HAND_WRITTEN` is Klee-only
   (guarded by `profile is KLEE_PROFILE`), `HAND_WRITTEN_ROSTER` is
   Furina/Kokomi (`:653-676`, `:941-945`).
