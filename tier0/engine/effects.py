@@ -639,11 +639,16 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         # engine's convention for a fractional damage term.
         if card.enchant_damage_mult != 1.0:
             base = int(base * card.enchant_damage_mult)
-        # Arlecchino, Masque of the Red Death: flat rider on YOUR Attacks.
-        # Sits with current_attack_bonus rather than in modify_damage_dealt so
-        # it reads only card Attacks -- bombs, Oz and Kurage pulses are not
-        # "your Attacks" and must not collect it.
-        base += state.player.powers.get("masque_red_death", 0)
+        # masque_red_death LEFT this sum at the 2026-07-25 redesign, for the
+        # same reason celestial_gift left flat_attack_bonus at the 2026-07-26
+        # red pen (the note there states the rule). It used to be a flat "+N
+        # damage on your Attacks"; it is now a per-turn STRENGTH ratchet plus
+        # a Bond of Life that eats the first block, and the Strength half is
+        # applied as a real power in player_turn_start_triggers
+        # (powers.deal_damage folds it in after this read). Leaving the rider
+        # here as well paid the companion twice -- once as flat damage, once
+        # as Strength -- and MasqueRedDeathPower carries no damage modifier at
+        # all, so the sim was diverging from the shipped mod on top of that.
         # card_name_damage_bonus relic rider (dead branch on the battery:
         # relic_effects is empty). Flat, folded in BEFORE strength/vulnerable,
         # matching current_attack_bonus above.
