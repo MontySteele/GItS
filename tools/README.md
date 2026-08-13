@@ -32,7 +32,12 @@ its L12 pixel gate is dead on clean checkouts — audit §3.7),
 generated game_ref headers name it),
 `realistic_axis_scores.py`, `burst_defense.py`, `char_stills.py` (library,
 byte-pinned), `gen_furina_stills.py` (byte-pinned, skip-guarded),
-`real_battery_calibration.py` + `klee_survival_sprint.py` (digest only).
+`real_battery_calibration.py` + `klee_survival_sprint.py` (digest only),
+`regret_distribution.py` (EB-72 / QUEUE `M13` — the margin-free route- and
+draft-regret gap distributions; gated by
+`tier05/tests/test_regret_distribution.py`, which pins that the collection
+loops cannot see a margin and that the printer re-prices exactly the sample
+the live run recorded).
 
 ## Advisory (CI-visible, never blocking)
 `patch_sentinel.py` — asks whether the INSTALLED sts2.dll still agrees with the

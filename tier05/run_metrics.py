@@ -145,7 +145,9 @@ def pooled_route_regret(results: list[RunResult]) -> dict:
     NO POOLED PERCENTILES. p50/p90 are not recoverable from per-act summaries,
     and inventing them by averaging act medians would produce a number that
     looks like a distribution read and is not one. A caller that needs the
-    pooled distribution should sample the gaps itself off `route_decisions`.
+    pooled distribution takes the gaps themselves off `route_decisions`, via
+    `route_regret_gaps` -- that is what `tools/regret_distribution.py` does
+    (EB-72), and it is the only surface in the tree that prints them.
     `max_regret` pools honestly (a max of maxes is a max) and is reported."""
     per_act = [d for r in results for d in r.route_regret]
     if not per_act:
@@ -183,12 +185,61 @@ def pooled_route_regret(results: list[RunResult]) -> dict:
 # `p50/p90_regret` and `max_regret` are margin-free and are the reportable
 # numbers; `regretted` / `regret_rate` are the only two keys this threshold
 # touches, and they exist for symmetry with the drafter.
+# R164 (2026-08-10) ruled the shape of the settlement: PRE-REGISTER the
+# measurement, do NOT ratify 1.0. The printer that made a registration
+# possible is `tools/regret_distribution.py` and the packet is
+# `review/active/regret-margin-registration-2026-08-12.md` (EB-72). Neither
+# derives this number; both are careful not to.
 ROUTE_REGRET_MARGIN = 1.0
 # The sample rate is homed in tier0/constants.py beside its draft twin
 # (EB-16w), where the reason for the 1.0 and the no-version-bump reading are
 # written down. Re-exported under the module name it shipped with so callers
 # and tests that reach for `run_metrics.ROUTE_REGRET_SAMPLE` keep working.
 ROUTE_REGRET_SAMPLE = C.ROUTE_REGRET_SAMPLE
+
+
+def route_regret_gaps(rng: random.Random, act_map, decisions: list[dict],
+                      hindsight: route.RouteState, policy_name: str,
+                      sample: float = C.ROUTE_REGRET_SAMPLE
+                      ) -> tuple[list[float], int]:
+    """The RAW gap sample behind `route_regret`, plus the forced-floor count.
+
+    Split out (EB-72) so a caller that needs the POOLED distribution can have
+    the gaps themselves. `pooled_route_regret` refuses to invent p50/p90 from
+    per-act summaries and says so in its docstring -- correctly, because a
+    median of medians is not a median -- and its advice to such a caller is to
+    "sample the gaps itself off `route_decisions`". That advice used to mean
+    re-implementing the loop below, which is exactly how two definitions of one
+    number get into a repo. There is one loop, here, and `route_regret` is a
+    summary OF it.
+
+    NOTHING HERE READS A MARGIN. The gap sample is margin-free by construction:
+    the threshold enters one line later, in `route_regret`, and only to count
+    `regretted` / `regret_rate`. That separation is the whole reason this
+    function exists as its own name -- under R164 the margin is not ratified,
+    so the quotable read has to be reachable without touching it.
+
+    Returns `(gaps, forced)`. `gaps` has one entry per SAMPLED forked decision,
+    in walk order, zeros included: a decision the policy got right in hindsight
+    is a 0.0 in the sample, not an absence from it, and dropping those would
+    turn every percentile into a percentile of the regrets rather than of the
+    decisions.
+    """
+    gaps: list[float] = []
+    forced = 0
+    for d in decisions:
+        options = d["options"]
+        if len(options) < 2:
+            forced += 1
+            continue
+        if rng.random() >= sample:
+            continue
+        picked = d["picked"]
+        taken = route.path_value(act_map, picked, policy_name, hindsight)[0]
+        best_alt = max(route.path_value(act_map, r, policy_name, hindsight)[0]
+                       for r in options if r.id != picked.id)
+        gaps.append(max(0.0, best_alt - taken))
+    return gaps, forced
 
 
 def route_regret(rng: random.Random, act_map, decisions: list[dict],
@@ -236,23 +287,9 @@ def route_regret(rng: random.Random, act_map, decisions: list[dict],
     because a card either regrets or does not, whereas a route regret has a
     magnitude and the magnitude is what an A/B between two policies reads.
     """
-    gaps: list[float] = []
-    forced = regretted = 0
-    for d in decisions:
-        options = d["options"]
-        if len(options) < 2:
-            forced += 1
-            continue
-        if rng.random() >= sample:
-            continue
-        picked = d["picked"]
-        taken = route.path_value(act_map, picked, policy_name, hindsight)[0]
-        best_alt = max(route.path_value(act_map, r, policy_name, hindsight)[0]
-                       for r in options if r.id != picked.id)
-        gap = max(0.0, best_alt - taken)
-        gaps.append(gap)
-        if gap > margin:
-            regretted += 1
+    gaps, forced = route_regret_gaps(rng, act_map, decisions, hindsight,
+                                     policy_name, sample=sample)
+    regretted = sum(1 for g in gaps if g > margin)
     n = len(gaps)
     return {
         "policy": policy_name,
