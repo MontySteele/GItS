@@ -33,6 +33,10 @@ namespace KleeMod.Cards.Furina.Generated;
 
 public sealed class ManyWatersMelody : CustomCardModel, ICharacterCard, ISkillTagCard
 {
+    /// <summary>Block arrives from a conditional row, so this card declares no
+    /// BlockVar and BaseLib's auto-detect cannot see it (EB-84).</summary>
+    public override bool GainsBlock => true;
+
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 

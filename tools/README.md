@@ -18,6 +18,10 @@ Every script, mapped to what actually runs it. "validate" = invoked by
 | `lint_vendor_pin.py` | not a validate.ps1 rule (the bridge is a harness, not shipped) but gated three ways: CI, `test_vendor_pin.py`, and `klee-mod/build/deploy_bridge.ps1` refuses to install a drifted snapshot |
 
 ## Suite-gated (pytest only — no deploy gate)
+`lint_enchant_parity.py` (EB-84 — tier0's enchantment CATALOG against what the
+base game's own eight enchantments will accept on a mod card; the game-side
+rules are transcribed with their decompiled citation and are re-read when the
+pinned build moves. Gated by `test_enchant_parity.py`, red half included),
 `lint_strict_domination.py`, `lint_unique_names.py`, `lint_upgrade_coverage.py`,
 `lint_kokomi_decksize.py`, `lint_companion_shop_coverage.py`,
 `lint_sheet_comments.py` (currently gated on furina-cards.yaml ONLY — 35 open

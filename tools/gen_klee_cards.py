@@ -5237,6 +5237,42 @@ def emit(
     }}
 '''
 
+    # EB-84. `CardModel.GainsBlock` is the game's answer to "does this card
+    # gain Block?", and the base game's Nimble enchantment gates its whole
+    # eligibility on it (`Nimble.CanEnchant` -> `card.GainsBlock`), as does the
+    # Block hover tip. BaseLib's CustomCardModel auto-detects it by looking for
+    # a BlockVar / CalculatedBlockVar in CanonicalVars -- which is exactly
+    # right for a card whose Block is a printed number, and WRONG for a card
+    # whose Block row sits inside a `conditional`: build_vars walks the top
+    # level only, so that card declares no BlockVar, auto-detects to false, and
+    # the game will never offer it Nimble even though the block it does gain
+    # goes through CreatureCmd.GainBlock with the cardPlay attached and would
+    # collect the rider correctly.
+    #
+    # `block_next_turn` deliberately does NOT count. The delayed half is paid
+    # by the base game's own BlockNextTurnPower in AfterBlockCleared, with
+    # `cardPlay: null` -- no cardSource, so no enchantment hook. Declaring
+    # GainsBlock for a card whose only Block arrives that way would offer the
+    # player a Nimble that cannot pay (the base game's Prolong has the same
+    # shape and does not claim it). tier0's `_is_block_skill` DOES count that
+    # op; that divergence is a sim-side finding, not something to paper over
+    # here.
+    gains_block_member = ""
+    if (any(eff.get("op") == "block" for eff in _effects_everywhere(card))
+            and not any("BlockVar(" in v for v in vars_)):
+        # The summary deliberately does NOT spell the declaration block's own
+        # name: lint_generated_structure locates that block by the first
+        # occurrence of the word in the file, so a comment above it that
+        # mentions it moves the scan onto prose and reports every var the card
+        # declares as missing (caught by test_generated_structure on the first
+        # run of this branch).
+        gains_block_member = (
+            "\n    /// <summary>Block arrives from a conditional row, so this "
+            "card declares no\n    /// BlockVar and BaseLib's auto-detect "
+            "cannot see it (EB-84).</summary>\n"
+            "    public override bool GainsBlock => true;\n"
+        )
+
     element_member = ""
     if elemental and is_companion(card):
         element_member = (
@@ -5492,7 +5528,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace {profile.namespace};
 
 public sealed class {cls} : {interfaces}
-{{{element_member}{keywords_member}{tooltip_member}
+{{{gains_block_member}{element_member}{keywords_member}{tooltip_member}
     public override Texture2D? CustomPortrait => {profile.art_loader}.CardPortrait("{card["id"]}");
 
     public override List<(string, string)>? Localization => new()

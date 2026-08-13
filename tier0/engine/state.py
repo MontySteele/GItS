@@ -295,6 +295,17 @@ class Card:
     cost_delta_this_turn: int = 0
     cost_delta_this_combat: int = 0
     free_this_turn: bool = False
+    # EB-83, the on-draw hook. `EnergyCost.SetThisCombat` is the base game's
+    # ABSOLUTE combat-scoped cost modifier -- the one Slither writes when the
+    # card is drawn -- where every field above it is RELATIVE. Kept as its own
+    # field rather than folded into `cost_delta_this_combat` because a delta
+    # cannot express "this card now costs 2" without first knowing what it
+    # costs, and the point of a randomiser is that it does not care.
+    # `on_draw_randomise_cost` is the roll's EXCLUSIVE bound (the game rolls
+    # `NextInt(4)`, i.e. 0..3). Both are None on every card that ships today,
+    # so both are inert and the frozen battery is byte-identical.
+    cost_set_this_combat: int | None = None
+    on_draw_randomise_cost: int | None = None
     # (Hand Trick's one-turn Sly grant used to be its own boolean,
     # `sly_this_turn`. EB-71 folded it into the unified `sly` list above as
     # `SLY_AUTOPLAY_THIS_TURN`, a rider carrying `until: turn_end`; the
