@@ -232,3 +232,21 @@ re-verified 2026-08-07). Defect, Necrobinder and Regent need one
 `--characters` extraction run against the game install
 (`tools/extract_base_game_pool.py`, decompiles once, walks the pools) —
 Windows-batch work, riding the next `EB-47` sitting.
+
+**Status of that note, 2026-08-12 — DISCHARGED.** All five pools are held.
+The R178 re-extraction ran `extract_base_game_pool.py` over
+`Ironclad,Silent,Defect,Necrobinder,Regent`, and the primary checkout's
+gitignored `game_ref/` now carries `ironclad.json`, `silent.json`,
+`defect.json`, `necrobinder.json`, `regent.json` and the derived census
+artefacts. The `EB-47` Windows-batch dependency the note named is closed. The
+note above is left as written (it was correct at its ruling date); this line
+records what changed, per R101b.
+
+**Step (2)'s predictions commit is DRAFTED and awaiting [USER],
+2026-08-12** — `review/active/payoff-reach-predictions-draft-2026-08-12.md`.
+That file is not a registration and nothing in it operates. On [USER]'s
+sign-off its §A block is appended here verbatim as `## 6`, in one commit, and
+that commit is step (2). Aims inside it are RULED (R185); the Q-A / Q-B
+direction-and-threshold predictions and the sample plan are PROPOSED and are
+what the sign-off decides. Until that commit exists, this registration remains
+countersigned and unpredicted, and no number may be read against it.
