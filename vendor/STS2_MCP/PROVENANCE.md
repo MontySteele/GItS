@@ -59,16 +59,17 @@ disagree in either direction.
 
 ## What we changed
 
-**Three lines, across two upstream files.** Everything of substance lives in
+**Four lines, across two upstream files.** Everything of substance lives in
 `gits/`, which the pin lint excludes from the upstream hash list entirely.
 
 | File | Status | Change |
 |---|---|---|
-| `McpMod.cs` | `gits-modified` | Two `else if` arms on the `HandleRequest` route chain — `/api/v1/gits/speed` (W2) and `/api/v1/gits/seed` (P1.5) — marked in-file with `GItS LOCAL EDIT`. Nothing else in the file is touched. |
+| `McpMod.cs` | `gits-modified` | Three `else if` arms on the `HandleRequest` route chain — `/api/v1/gits/speed` (W2), `/api/v1/gits/seed` (P1.5) and `/api/v1/gits/give_card` (EB-52) — marked in-file with `GItS LOCAL EDIT`. Nothing else in the file is touched. |
 | `McpMod.StateBuilder.cs` | `gits-modified` | One line in `BuildPlayerState`, inside the live-combat block: `state["resources"] = GitsResourceSnapshot(combatState)`. Marked in-file with `GItS LOCAL EDIT`. P1.5 spec item 2. |
 | `gits/GitsSpeed.cs` | GItS addition | Work item W2 — the speed affordance. |
 | `gits/GitsSeed.cs` | GItS addition | P1.5 item 1 — the chosen-seed endpoint. Documents in-file why upstream's own `charSelect.Lobby == null` refusal does not describe the game. |
 | `gits/GitsResources.cs` | GItS addition | P1.5 item 2 — a reflection-only reader for BaseLib's custom-resource registry. No compile-time BaseLib reference; a missing BaseLib yields an empty map. |
+| `gits/GitsGiveCard.cs` | GItS addition | EB-52 — the dev-only card-injection route. Selects a card out of `ModelDb.AllCards` and hands it to the game's own acquisition path; mints nothing. |
 
 Everything else is byte-identical to `55e0648`.
 
@@ -80,23 +81,56 @@ for the same reason and one more: a resources map attached out-of-band by a
 patch would not be ATOMIC with the state read it belongs to, and a meter read
 a frame after the hand it describes is a different measurement.
 
-## The P1.5 fork, and what it does NOT change
+## The additions, and what they do NOT change
 
-Neither addition changes a rule. `GitsSeed` selects which run the game's own
-generators produce, through the game's own `StartRunLobby.SetSeed` /
-`NGame.DebugSeedOverride`; `GitsResources` is a serialiser that never writes an
-`Amount`. No constant, generator, reward table or pilot is touched by either.
+**No addition changes a rule.** Each one SELECTS state the game's own
+generators can produce, or reports state the game already holds:
+
+- `GitsSeed` selects which run the game's own generators produce, through the
+  game's own `StartRunLobby.SetSeed` / `NGame.DebugSeedOverride`.
+- `GitsResources` is a serialiser that never writes an `Amount`.
+- `GitsGiveCard` selects a card that is already in `ModelDb.AllCards` — the
+  same registry `McpMod.Wiki.cs` enumerates — and hands it to the game's own
+  acquisition machinery: `RunState.CreateCard(canonical, player)` then
+  `CardPileCmd.Add(card, PileType.Deck)`, which is exactly what
+  `CardReward.OnSelected` and `CardPileCmd.AddCursesToDeck` run. It never
+  constructs a card object of its own, and in-combat grants take the
+  `AddGeneratedCardToCombat` path so the combat-history row is written too.
+
+No constant, generator, reward table or pilot is touched by any of them.
+
+**`GitsGiveCard` is dev-only in a way the wire says out loud.** A run that
+used it is no longer a run the generators produced, so nothing measured on it
+is comparable to anything; every successful grant carries a `guardrail` field
+saying so, and `understudy/bridge.py` stamps the same sentence on the harness
+log. It refuses multiplayer outright (the pile add does not go through the
+action-queue synchronizer, so peers would diverge) and refuses a combat pile
+when no combat is in progress (the game's own path would return an empty list,
+i.e. a silent no-op wearing an `ok`).
 
 ## Refreshing the pin
 
 1. `git clone https://github.com/Gennadiyev/STS2MCP && git checkout <new sha>`
 2. Copy the carried files over this directory (the list is
    `UPSTREAM_MANIFEST.tsv`, `status == upstream`).
-3. Re-apply the `McpMod.cs` route arm above.
+3. Re-apply the `McpMod.cs` route arms above — there are **three** of them now
+   (speed, seed, give_card), all inside one marked block. A refresh that
+   re-applies two of three leaves a handler in `gits/` that nothing routes to,
+   and the pin lint cannot see that: it checks hashes and markers, not whether
+   a route exists. Grep the refreshed `McpMod.cs` for `gits/` and count.
 4. Update `pin`, `pin-subject`, `pin-date` and the environment table here.
 5. `python tools/lint_vendor_pin.py --write`, and **read the diff** — if it
    touches more than you meant, that is the finding.
 6. Rebuild and re-verify against the game version in the table.
+
+**What a refresh may break in `gits/`, which the lint also cannot see.** These
+files name game APIs by hand, and upstream STS2MCP is not what would move them
+— the GAME is. `GitsGiveCard` binds `ModelDb.AllCards`, `RunState.CreateCard`,
+`CardPileCmd.Add` / `AddGeneratedCardToCombat`, `CardCmd.Upgrade` and
+`LocalContext.GetMe`; `GitsSeed` binds `StartRunLobby.SetSeed`,
+`NGame.DebugSeedOverride` and `SeedHelper.CanonicalizeSeed`. A game-version
+bump is the event that invalidates those, and the check is the build: it fails
+loudly, which is the good case.
 
 Upstreaming the speed endpoint stays open; MIT does not require it and this
 sprint did not spend time on it.

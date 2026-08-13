@@ -146,7 +146,7 @@ def test_a_defect_run_forces_a_session_restart(tmp_path, monkeypatch):
 
     class _Driver:
         def __init__(self, session, run_index, stamp, character, commit=None,
-                     chosen_seed=None, max_fights=None):
+                     chosen_seed=None, max_fights=None, hazard_guard=True):
             self.run_index = run_index
             self.chosen_seed = chosen_seed
             self.defects = ([{"kind": "unexpected_start_state"}]

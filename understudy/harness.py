@@ -11,6 +11,22 @@ Understudy W4. Two verbs, and the discipline lives in the order they run in:
         (mine + policy_v0's, at the same state, before anything moves), then
         POST the action and render what came back.
 
+    python -m understudy.harness frame --label salon-stage
+        OFF unless GITS_UNDERSTUDY_CAPTURE=1. One frame of the game window,
+        written to the gitignored understudy/logs/frames/ with a manifest row
+        naming the screen it was taken on. MATERIAL for [USER]'s art sittings
+        and nothing else: Guardrail-7 and the no-fun rule are not changed by
+        the existence of a camera, and no claim about look, legibility or fun
+        may be derived from a frame by anything in this directory.
+
+    python -m understudy.harness give-card UNHEARD_CONFESSION --why "EB-52(a)"
+        EB-52's dev door: put a CHOSEN card in the deck through the game's own
+        acquisition path. A SMOKE verb. The run it is used on stops being a run
+        the generators produced, so nothing measured on it is comparable to
+        anything -- the grant, its reason and that sentence all go on the run
+        log. It lives here and NOT in the soak deliberately: the soak's claim
+        is that its runs are generated runs, and this is the attended loop.
+
 The counterfactual is computed inside `act`, not carried over from the last
 `state` call, so a log line can never pair my choice with a policy answer from
 a screen that has since changed.
@@ -50,7 +66,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from understudy import adapter, bridge, deckwatch, policy_v0
+from understudy import adapter, bridge, deckwatch, frames, policy_v0
 
 LOG_DIR = Path(__file__).resolve().parent / "logs"
 STATE_FILE = LOG_DIR / "_harness_state.json"
@@ -423,6 +439,88 @@ def cmd_auto(args) -> int:
     return 0
 
 
+def cmd_give_card(args) -> int:
+    """EB-52's acquisition door, and it is a SMOKE verb, not a measurement one.
+
+    It is here rather than in `soak.py` on purpose. The soak's whole claim is
+    that its runs are runs the game generated; a grant verb inside it would be
+    a way to quietly break that claim on an unattended night. The Phase-0
+    harness is the attended loop -- a person types every verb into it, one at a
+    time -- so this is where a deliberate, logged, one-off intervention
+    belongs.
+
+    THE GRANT IS WRITTEN TO THE RUN LOG BEFORE ANYTHING ELSE IS READ, and it
+    carries the guardrail sentence with it. A log that recorded the effect of a
+    grant without recording the grant is a log that shows a card appearing in a
+    deck from nowhere, which is exactly the shape of the thing nobody would
+    catch six months later.
+    """
+    sess = _session()
+    seed = sess.get("seed") or "unseeded"
+    report = bridge.give_card(args.card_id, count=args.count,
+                              upgraded=args.upgraded, pile=args.pile)
+    append(seed, {
+        "i": -1, "ts": time.time(), "event": "dev_card_grant",
+        "request": {"card_id": args.card_id, "count": args.count,
+                    "upgraded": args.upgraded, "pile": args.pile},
+        "why": args.why,
+        "guardrail": bridge.GRANT_GUARDRAIL,
+        "result": report,
+    })
+    print(f"give_card -> {json.dumps(report, indent=1)}")
+    print()
+    print(f"GUARDRAIL: {bridge.GRANT_GUARDRAIL}")
+    if str(report.get("status")) != "ok":
+        return 1
+    print()
+    print("# confirm by reading the deck; the grant is queued, not instant")
+    return 0
+
+
+def cmd_frame(args) -> int:
+    """Grab one frame of the game window as MATERIAL for an art sitting.
+
+    OFF unless `GITS_UNDERSTUDY_CAPTURE=1`, and the refusal comes BEFORE the
+    bridge is touched: a disabled leg should cost nothing and reach nothing.
+
+    THE FRAME IS NOT A FINDING. Guardrail-7 and the no-fun rule are unchanged
+    by the existence of a camera: a JSON-state agent still cannot see the
+    screen, and nothing this apparatus derives from a frame is a claim about
+    look, legibility, readability or fun. The frame is for a person to look at.
+    `frames.GUARDRAIL` says exactly that and rides on every manifest row.
+
+    The state read is for the CONTEXT LABEL only -- which screen, which act and
+    floor the frame was taken on. A pile of unlabelled takes is a pile nobody
+    can use, and the alternative (guessing afterwards from the picture) is the
+    thing a bot must not do.
+    """
+    if not frames.enabled():
+        print(frames.DISABLED_NOTE)
+        return 2
+    context: dict[str, Any] = {}
+    try:
+        state = bridge.get_state()
+        run = state.get("run") or {}
+        context = {"state_type": state.get("state_type"),
+                   "menu_screen": state.get("menu_screen"),
+                   "act": run.get("act"), "floor": run.get("floor"),
+                   "seed": _session().get("seed")}
+    except bridge.BridgeError as e:
+        # A frame with no context is still a frame; the missing label is
+        # recorded as missing rather than left to be inferred later.
+        context = {"bridge": f"unreachable: {e}"}
+    report = frames.capture(args.label, note=args.note, context=context)
+    print(json.dumps({k: v for k, v in report.items() if k != "row"}, indent=1))
+    if report["status"] != "ok":
+        return 1
+    seed = _session().get("seed") or "unseeded"
+    append(seed, {"i": -1, "ts": time.time(), "event": "frame_captured",
+                  "path": report["path"], "label": args.label,
+                  "note": args.note, "context": context,
+                  "guardrail": frames.GUARDRAIL})
+    return 0
+
+
 def cmd_begin(args) -> int:
     """Stamp the session: the game seed, the speed setting, the start time."""
     seed = args.seed or bridge.current_seed() or "unseeded"
@@ -457,6 +555,31 @@ def main(argv: list[str] | None = None) -> int:
     u.add_argument("--max-steps", type=int, default=25)
     u.add_argument("--settle", type=float, default=1.2)
     u.set_defaults(func=cmd_auto)
+
+    f = sub.add_parser("frame")
+    f.add_argument("--label", default="frame",
+                   help="what this take is of, e.g. salon-stage. Slugged into "
+                        "the filename")
+    f.add_argument("--note", default="",
+                   help="one line onto the manifest row. NOT a judgment -- a "
+                        "frame is material for a person to look at, and "
+                        "nothing this apparatus says about one is evidence")
+    f.set_defaults(func=cmd_frame)
+
+    g = sub.add_parser("give-card")
+    g.add_argument("card_id", help="wire id (UNHEARD_CONFESSION) or the exact "
+                                   "printed title; no fuzzy match")
+    g.add_argument("--count", type=int, default=1)
+    g.add_argument("--upgraded", action="store_true")
+    g.add_argument("--pile", default="deck",
+                   choices=list(bridge.GRANT_PILES),
+                   help="deck (default) is the between-rooms deck; the other "
+                        "three are combat piles and need a combat in progress")
+    g.add_argument("--why", default="",
+                   help="one line, logged beside the grant. A grant with no "
+                        "stated reason is a deck change nobody can account "
+                        "for later")
+    g.set_defaults(func=cmd_give_card)
 
     a = sub.add_parser("act")
     a.add_argument("action", help="JSON action body, e.g. '{\"action\":\"end_turn\"}'")

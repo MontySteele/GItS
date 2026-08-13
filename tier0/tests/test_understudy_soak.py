@@ -295,6 +295,7 @@ def _driver():
     d.commit = None                      # baseline arm; R99/4b's flag is off
     d.chosen_seed = None                 # read-back arm; P1.5's flag is off
     d.max_fights = None                  # a full run, not a bounded one
+    d.hazard_guard = True                # EB-1's register, on as it ships
     d.memo = soak.policy_v1.Memo()
     d.run_index = 1
     d.stamp = "test"
