@@ -69,7 +69,7 @@ disagree in either direction.
 | `gits/GitsSpeed.cs` | GItS addition | Work item W2 — the speed affordance. EB-87 (2026-08-12): the captured original `FastMode` is persisted to `GitsSpeed.original.conf` in the mod directory (next to the `STS2_MCP.conf` this file's neighbours already write — JSON content under a `.conf` name, because ModManager parses every `*.json` under `mods/` as a manifest), a later process restores from that sidecar instead of re-capturing, and a successful disable deletes it. `PrefsSave.FastMode` persists to `settings.save`, so the per-process capture read back its OWN change after a restart and "restored" the game to `Instant`. `TimeScale` is deliberately not persisted — `Engine.TimeScale` starts at its default in every process, so the live capture is already the right original. |
 | `gits/GitsSeed.cs` | GItS addition | P1.5 item 1 — the chosen-seed endpoint. Documents in-file why upstream's own `charSelect.Lobby == null` refusal does not describe the game. |
 | `gits/GitsResources.cs` | GItS addition | P1.5 item 2 — a reflection-only reader for BaseLib's custom-resource registry. No compile-time BaseLib reference; a missing BaseLib yields an empty map. |
-| `gits/GitsGiveCard.cs` | GItS addition | EB-52 — the dev-only card-injection route. Selects a card out of `ModelDb.AllCards` and hands it to the game's own acquisition path; mints nothing. |
+| `gits/GitsGiveCard.cs` | GItS addition | EB-52 — the dev-only card-injection route. Selects a card out of `ModelDb.AllCards` and hands it to the game's own acquisition path; mints nothing. **EB-91 (2026-08-13): the CARD SCOPE now follows the pile.** Deck grants are created in `player.RunState`; combat-pile grants in `player.Creature.CombatState`, which is what every in-combat generator does (`CollisionCourse`, `CardFactory.GetForCombat`). A run-scoped card handed to `AddGeneratedCardToCombat` arrived in hand and read back fine, then threw `must be added to a CombatState before playing it` out of `CardPileCmd.AddDuringManualCardPlay` and wedged the fight. The `route` field, which reported the static string `card_pile_cmd` for both branches, now names the branch that ran (`run_state_create+card_pile_add` / `combat_state_create+add_generated_to_combat`) and a `scope` field says `run`/`combat`. |
 
 Everything else is byte-identical to `55e0648`.
 
@@ -95,7 +95,9 @@ generators can produce, or reports state the game already holds:
   `CardPileCmd.Add(card, PileType.Deck)`, which is exactly what
   `CardReward.OnSelected` and `CardPileCmd.AddCursesToDeck` run. It never
   constructs a card object of its own, and in-combat grants take the
-  `AddGeneratedCardToCombat` path so the combat-history row is written too.
+  combat scope's `CreateCard` then `AddGeneratedCardToCombat`, which is the
+  pair every in-combat generator in the game runs and which writes the
+  combat-history row too.
 
 No constant, generator, reward table or pilot is touched by any of them.
 
@@ -125,9 +127,12 @@ i.e. a silent no-op wearing an `ok`).
 
 **What a refresh may break in `gits/`, which the lint also cannot see.** These
 files name game APIs by hand, and upstream STS2MCP is not what would move them
-— the GAME is. `GitsGiveCard` binds `ModelDb.AllCards`, `RunState.CreateCard`,
-`CardPileCmd.Add` / `AddGeneratedCardToCombat`, `CardCmd.Upgrade` and
-`LocalContext.GetMe`; `GitsSeed` binds `StartRunLobby.SetSeed`,
+— the GAME is. `GitsGiveCard` binds `ModelDb.AllCards`, `ICardScope.CreateCard`
+on both `RunState` and `Creature.CombatState`, `CardPileCmd.Add` /
+`AddGeneratedCardToCombat`, `CardCmd.Upgrade` and `LocalContext.GetMe`
+(note `ICombatState` declares `CreateCard` itself and does not derive from
+`ICardScope`, so the combat scope is reached with `as` — a game-side merge of
+those two interfaces would silently turn the grant into the refusal branch); `GitsSeed` binds `StartRunLobby.SetSeed`,
 `NGame.DebugSeedOverride` and `SeedHelper.CanonicalizeSeed`. A game-version
 bump is the event that invalidates those, and the check is the build: it fails
 loudly, which is the good case.
