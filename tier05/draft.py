@@ -31,7 +31,7 @@ from typing import Optional
 
 from tier0 import constants as C
 from tier0 import roster
-from tier0.engine.state import Card
+from tier0.engine.state import Card, sly_riders
 
 
 # DRAFTER_VERSION 3: values are expressed in the same rough units as one
@@ -729,11 +729,21 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                   if fx.get("op") == "repeat_this")
     if repeats:
         total *= 1.0 + repeats * STATIC_REPEAT_SHARE
-    if card.sly:
+    riders = sly_riders(card)
+    if riders:
         # v7: a Sly rider is the same printed grammar at half face -- it
         # fires only when a card effect discards this from hand, and the
         # drafter cannot see outlet density at offer time.
-        total += effect_power(card.sly) * STATIC_SLY_SHARE
+        #
+        # EB-71 (R174): `sly_riders` drops the base-game `sly_autoplay`
+        # marker, which the unification moved onto this same field. The
+        # marker is worth EXACTLY ZERO here, which is the price the keyword
+        # already carried (it lived on a boolean this function never read) --
+        # the unification is stamp-free and may not move a drafted number.
+        # Pricing the base-game Sly rider is a real question and a separate,
+        # [USER]-owned one: a change to the priced-op set is a
+        # DRAFTER_VERSION bump.
+        total += effect_power(riders) * STATIC_SLY_SHARE
     # An armed Bomb suppresses one enemy attack action. Do not also price that
     # protection when the same card applies Weak: the two reductions share one
     # branch at runtime and never multiply.

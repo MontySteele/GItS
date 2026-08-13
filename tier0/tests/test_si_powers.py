@@ -17,7 +17,7 @@ in a single-player fight neither can fire at all -- see the last test.
 
 from tier0 import constants as C
 from tier0.engine import combat, effects, powers, refpowers
-from tier0.engine.state import Card
+from tier0.engine.state import Card, sly_autoplays
 from tier0.tests.conftest import make_enemy, make_state
 
 
@@ -405,9 +405,9 @@ def test_master_planner_marks_the_played_skill_sly_for_the_rest_of_combat():
     state = make_state()
     powers.apply_power(state, state.player, "master_planner", 1)
     skill = play(state, [])
-    assert skill.sly_keyword is True
+    assert sly_autoplays(skill)
     attack = play(state, [], type="attack")
-    assert attack.sly_keyword is False
+    assert not sly_autoplays(attack)
 
 
 def test_anticipate_applies_real_dexterity_and_gives_the_whole_lot_back():

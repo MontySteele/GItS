@@ -14,8 +14,10 @@ from typing import Optional
 
 from tier0 import constants as C
 from tier0.engine import powers, reactions, resources
-from tier0.engine.state import (Bomb, Card, CombatState, Enemy,
-                                remove_instance)
+from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
+                                CombatState, Enemy, grant_sly_autoplay,
+                                remove_instance, sly_autoplays,
+                                sly_granted_this_turn, sly_riders)
 
 
 def _amount(state: CombatState, val) -> int:
@@ -1127,14 +1129,22 @@ def _op_grant_sly_this_turn(state: CombatState, fx: dict, card: Card) -> None:
     (`card.Type == Skill && !card.IsSlyThisTurn`), so a second Hand Trick in
     a turn picks a different card rather than wasting itself. Chosen through
     the same `_best_card` pilot surface every other selection uses.
+
+    EB-71 (R174): the grant is the unified `sly_autoplay` rider carrying
+    `until: turn_end`, not a separate `sly_this_turn` boolean. The target
+    filter still asks the NARROW question the boolean answered -- "did a
+    grant already land on this card THIS TURN" -- and deliberately not
+    "is this card Sly at all": a printed-keyword Skill was a legal target
+    before the unification and stays one, so no pick moves.
     """
     want = fx.get("card_type", "skill")
     pool = [c for c in state.player.hand
-            if c.type == want and not c.sly_this_turn and not c.kit_card]
+            if c.type == want and not sly_granted_this_turn(c)
+            and not c.kit_card]
     if not pool:
         return
     pick = _best_card(pool)
-    pick.sly_this_turn = True
+    grant_sly_autoplay(pick, SLY_AUTOPLAY_THIS_TURN)
     state.emit("granted_sly", card=pick.id)
 
 
@@ -1522,26 +1532,27 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
             state.emit("discard", card=victim.id, chosen=True)
         else:
             state.emit("discard", card=victim.id)
-        # Sly (KOKOMI'S Sly, Assist lane, kickoff §2.3 — NOT the base-game
-        # Silent keyword `CardKeyword.Sly`, which auto-plays the card for
-        # free and now lives on `Card.sly_keyword`, handled after this loop.
-        # Two mechanics, one word, BOTH implemented as of 2026-07-27 and
-        # both triggering here; unifying them is filed tech debt. See
-        # docs/silent-anchor-kickoff §6 and state.Card.sly):
-        # fires ONLY on card-effect discards from hand —
-        # this op is the one trigger site. A CHOSEN discard is still a
-        # card-effect discard, so it triggers too. The
-        # end-of-turn hand flush is NOT Sly (a silent turn pays nothing —
-        # the activity-gating law), and draw-pile discards (scry_discard)
-        # are not either; discard_for_sparks is Klee's own verb and no
-        # Klee card carries a sly list. Resolved with the discarded card
-        # as context, AFTER it reaches the discard pile (StS2 order).
-        if victim.sly:
+        # SLY — the one trigger site for BOTH halves of the unified grammar
+        # (EB-71, R174; see state.Card.sly and docs/silent-anchor-kickoff §6).
+        # Fires ONLY on card-effect discards from hand. A CHOSEN discard is
+        # still a card-effect discard, so it triggers too. The end-of-turn
+        # hand flush is NOT Sly (a silent turn pays nothing — the
+        # activity-gating law), and draw-pile discards (scry_discard) are not
+        # either; discard_for_sparks is Klee's own verb and no Klee card
+        # carries a sly list.
+        #
+        # AUTHORED riders (Kokomi's Assist lane) resolve HERE, inline, with
+        # the discarded card as context, AFTER it reaches the discard pile
+        # (StS2 order). The base-game auto-play rider resolves after the
+        # loop instead — see the batch note below.
+        riders = sly_riders(victim)
+        if riders:
             state.emit("sly", card=victim.id)
-            _resolve_effects(state, victim.sly, victim)
-        if victim.sly_keyword or victim.sly_this_turn:
+            _resolve_effects(state, riders, victim)
+        if sly_autoplays(victim):
             sly_batch.append(victim)
-    # BASE-GAME Sly (Card.sly_keyword, ask A4). Deliberately AFTER the loop:
+    # BASE-GAME Sly (the `sly_autoplay` rider, ask A4). Deliberately AFTER
+    # the loop:
     # CardCmd.DiscardAndDraw discards the WHOLE batch first -- each card
     # reaching the pile and firing AfterCardDiscarded, which is the hook
     # Kokomi's `sly` above is standing in for -- and only then auto-plays the

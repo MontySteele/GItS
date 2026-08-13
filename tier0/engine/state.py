@@ -43,6 +43,14 @@ _MUTABLE_FIELDS = ("effects", "solve", "tempo_band", "archetypes", "tags",
 # author needs. House pattern: a caught mistake becomes a lint, so the next
 # person meets the rule instead of the symptom.
 RETIRED_CARD_FIELDS = {
+    "sly_keyword": (
+        "The two Sly mechanics were unified on the standard effect-list "
+        "grammar (EB-71, R174): the base-game keyword is now the reserved "
+        "rider `sly: [{op: sly_autoplay}]` on the same `sly:` field Kokomi's "
+        "Assist lane already used. A row that printed `sly_keyword: true` "
+        "becomes `sly: [{op: sly_autoplay}]`; an EXTRACTED sheet must be "
+        "re-emitted by tools/extract_base_game_pool.py, which writes the new "
+        "shape."),
     "fanfare_cost": (
         "Fanfare is a read-only momentum stat ('The Tide Turns', F-A4) -- "
         "no card spends it, and Encore is Furina's only managed resource. "
@@ -53,15 +61,78 @@ RETIRED_CARD_FIELDS = {
 }
 
 
+# --- the unified Sly grammar (EB-71, R174) --------------------------------
+#
+# `Card.sly` is an effect list. One reserved rider in it means "the base-game
+# keyword": when a card effect discards this card, PLAY it for free rather
+# than resolve a list. `SLY_AUTOPLAY_OP` is deliberately absent from
+# `tier0.engine.effects.OPS` -- it is not an on-play verb, it is never
+# dispatched, and registering it would put an unpriceable entry in front of
+# `tools/lint_op_parity.py`. Everything that reads printed effects reads
+# `sly_riders()`, which filters it out, so the marker is worth exactly zero
+# to the drafter -- the pre-unification price of the keyword, unchanged.
+SLY_AUTOPLAY_OP = "sly_autoplay"
+# The printed keyword (extractor output, Master Planner's permanent mark).
+SLY_AUTOPLAY = {"op": SLY_AUTOPLAY_OP}
+# Hand Trick's grant: the same rider, swept at the turn boundary.
+SLY_AUTOPLAY_THIS_TURN = {"op": SLY_AUTOPLAY_OP, "until": "turn_end"}
+
+
+def sly_autoplays(card: "Card") -> bool:
+    """True when this card's Sly is the base-game auto-play keyword."""
+    return any(fx.get("op") == SLY_AUTOPLAY_OP for fx in card.sly)
+
+
+def sly_autoplays_permanently(card: "Card") -> bool:
+    """True when the auto-play rider on this card has no expiry.
+
+    The narrow question Master Planner asks. Before EB-71 it read the printed
+    `sly_keyword` boolean, which Hand Trick's one-turn grant never set -- so
+    playing a Hand-Tricked Skill under Master Planner upgraded that grant to
+    permanent. Asking `sly_autoplays()` here instead would swallow the
+    upgrade and let the grant expire, which is a live value change.
+    """
+    return any(fx.get("op") == SLY_AUTOPLAY_OP and "until" not in fx
+               for fx in card.sly)
+
+
+def sly_granted_this_turn(card: "Card") -> bool:
+    """True when a TURN-SCOPED auto-play rider is on this instance.
+
+    The narrow question Hand Trick's target filter asks, kept narrow on
+    purpose: before EB-71 it read the `sly_this_turn` boolean, which a
+    PRINTED keyword never set, so a printed-Sly Skill was a legal Hand Trick
+    target. Asking `sly_autoplays()` here instead would quietly shrink the
+    target pool and move combat value.
+    """
+    return any(fx.get("op") == SLY_AUTOPLAY_OP
+               and fx.get("until") == "turn_end" for fx in card.sly)
+
+
+def sly_riders(card: "Card") -> list[dict]:
+    """The AUTHORED half of a card's Sly -- the effects a discard resolves."""
+    return [fx for fx in card.sly if fx.get("op") != SLY_AUTOPLAY_OP]
+
+
+def grant_sly_autoplay(card: "Card", rider: dict = SLY_AUTOPLAY) -> None:
+    """Add the auto-play rider to ONE INSTANCE (rebinding, never appending).
+
+    `Card.sly` is deep-copied per instance, but the sheet-loaded index card is
+    shared until it is copied; rebinding to a fresh list means a grant can
+    never leak backwards into the printed row.
+    """
+    card.sly = list(card.sly) + [dict(rider)]
+
+
 def remove_instance(pile: list, card: "Card") -> bool:
     """Remove exactly THIS instance from the pile; True if it was there.
 
     Card is a dataclass, so `list.remove` / `in` compare by VALUE and two
     fresh copies of the same card are equal twins -- a value-based remove can
     take the twin and leave `card` aliased into two piles. Twins are not
-    interchangeable either: cost_delta_this_combat, free_this_turn and
-    sly_this_turn are per-INSTANCE state. Every remove-from-a-card-pile must
-    go through here.
+    interchangeable either: cost_delta_this_combat, free_this_turn and a
+    granted `sly` rider are per-INSTANCE state. Every remove-from-a-card-pile
+    must go through here.
     """
     for i, c in enumerate(pile):
         if c is card:
@@ -150,24 +221,32 @@ class Card:
     # ask §6.7: a conscripted companion is SELF-sourced for SUPPORT_CARRY /
     # control-provenance purposes — she paid a card of her own deck for it.
     conscripted: bool = False
-    # Kokomi Assist lane (kickoff §2.3 discard verb): Sly — effects that
-    # fire when this card is discarded BY A CARD EFFECT. The end-of-turn
-    # hand flush is NOT a Sly trigger, and neither are draw-pile discards
-    # (scry); both scopings are enforced (and commented) at the one trigger
-    # site in effects._op_discard. Empty on every non-Kokomi card.
+    # SLY -- ONE field, ONE word, one trigger (EB-71, R174; formerly two
+    # near-identical mechanics, `sly` and `sly_keyword`). Effects that fire
+    # when this card is discarded BY A CARD EFFECT. The end-of-turn hand
+    # flush is NOT a Sly trigger, and neither are draw-pile discards (scry);
+    # both scopings are enforced (and commented) at the one trigger site in
+    # effects._op_discard.
+    #
+    # Two shapes ride the one list, and their BEHAVIOUR is unchanged by the
+    # unification:
+    #   * ordinary riders -- Kokomi's Assist lane (kickoff §2.3 discard
+    #     verb): an authored effect list the discard resolves, playing
+    #     nothing. Empty on every non-Kokomi card.
+    #   * `SLY_AUTOPLAY` -- the base-game `CardKeyword.Sly` (ask A4, ruled
+    #     2026-07-27: implement it true to the game): the discarded card is
+    #     AUTO-PLAYED for free (CardCmd.DiscardAndDraw -> CardCmd.AutoPlay,
+    #     AutoPlayType.SlyDiscard), a whole card play that fires the
+    #     card-played hooks, counts toward cards_played_this_turn, and routes
+    #     to its own result pile afterwards.
+    # The autoplay rider is deliberately NOT an entry in the engine's OPS
+    # registry and is never dispatched through `_resolve_effects`: the
+    # tech-debt audit (§5) refused the reading where the keyword resolves an
+    # effect list instead of playing the card, because that skips the
+    # card-played events the Silent's own payoffs read. It is a marker the
+    # one trigger site recognises; `sly_riders()` below is what everything
+    # else reads, so the marker adds no printed value anywhere.
     sly: list[dict] = field(default_factory=list)
-    # BASE-GAME `CardKeyword.Sly` (ask A4, ruled 2026-07-27: implement it
-    # true to the game). A DIFFERENT MECHANIC FROM `sly` ABOVE, wearing the
-    # same word: when this card is discarded from hand by a card effect it
-    # is AUTO-PLAYED for free (CardCmd.DiscardAndDraw -> CardCmd.AutoPlay,
-    # AutoPlayType.SlyDiscard), which is a whole card play -- it fires the
-    # card-played hooks, counts toward cards_played_this_turn, and routes to
-    # its own result pile afterwards. Kokomi's `sly` resolves an authored
-    # effect list instead and plays nothing. The unification of the two is
-    # filed as tech debt (docs/archive/tech-debt-audit-2026-07-26.md); until it
-    # lands, the trigger site in effects._op_discard handles both and the
-    # extractor maps CardKeyword.Sly onto THIS field only.
-    sly_keyword: bool = False
     # Guest Star rows (fontaine-companions.yaml): generated cameos, scoped
     # to a personal pool. Never in shared rewards or the banner roll; the
     # equal-rarity clause on generators is what respects 5-star scarcity.
@@ -216,9 +295,11 @@ class Card:
     cost_delta_this_turn: int = 0
     cost_delta_this_combat: int = 0
     free_this_turn: bool = False
-    # Hand Trick grants Sly for one turn only. Kept separate from the printed
-    # `sly_keyword` so the grant expires without editing what the card prints.
-    sly_this_turn: bool = False
+    # (Hand Trick's one-turn Sly grant used to be its own boolean,
+    # `sly_this_turn`. EB-71 folded it into the unified `sly` list above as
+    # `SLY_AUTOPLAY_THIS_TURN`, a rider carrying `until: turn_end`; the
+    # turn sweep in refpowers.reset_turn_counters drops exactly those riders,
+    # so a granted Sly still expires without editing what the card prints.)
     # Enchantment rider (R82, docs/archive/enchantments-design-2026-07-27.md).
     # Per-INSTANCE like the cost fields above: two Shivs may differ in
     # enchantment, and deepcopy clone sites (Anger/Nightmare shapes) carry

@@ -1192,7 +1192,10 @@ def _sheet_row(card: dict, src: str, prefix: str) -> tuple[dict, dict]:
             raise _Untranslatable(
                 f"CardKeyword.{keyword} has no tier0 Card field "
                 "(the card's printed rule would be silently dropped)")
-        row[field] = True
+        # EB-71 (R174): every keyword but Sly is a boolean field. Sly rides
+        # the unified `sly` effect list as its reserved auto-play rider.
+        row[field] = ([dict(fx) for fx in SLY_AUTOPLAY_ROW]
+                      if field == "sly" else True)
     return row, _upgrade_delta(src, fed)
 
 
@@ -1446,8 +1449,7 @@ def _supplement_upgrade_delta(row: dict, src: str) -> dict:
 
 
 # The printed keyword line. tier0's Card carries a field for four of them
-# (state.py: exhaust, innate, retain, sly_keyword); anything else EXCLUDES
-# the card.
+# (state.py: exhaust, innate, retain, sly); anything else EXCLUDES the card.
 #
 # This table exists because the translator used to look for exactly one
 # keyword -- Exhaust -- and drop the rest without a word (found 2026-07-27,
@@ -1458,13 +1460,23 @@ def _supplement_upgrade_delta(row: dict, src: str) -> dict:
 # CARD; dropping one is exactly the "wrong number wearing the right name"
 # this tool refuses to produce.
 #
-# `Sly` maps onto `sly_keyword`, NOT onto Kokomi's `sly` -- same word, two
-# mechanics (ask A4, ruled 2026-07-27: implement the base-game one as the
-# game has it). Mapping it onto her field would resolve an empty effect list
-# and print a keyword that did nothing, which is the same defect in a new
-# costume.
+# `Sly` used to map onto its own `sly_keyword` boolean, deliberately NOT onto
+# Kokomi's `sly` list -- same word, two mechanics (ask A4, ruled 2026-07-27:
+# implement the base-game one as the game has it), and mapping it onto her
+# field as a bare list would have resolved an empty effect list and printed a
+# keyword that did nothing.
+#
+# EB-71 (R174) unified the two on the standard effect-list grammar, so `Sly`
+# now maps onto the single `sly` field and emits the RESERVED RIDER below
+# rather than `true`. The rider is not an on-play op and is never resolved as
+# one: the engine's discard trigger recognises it and auto-plays the card, so
+# the printed rule is still the base game's whole card play, not an effect
+# list. `SLY_AUTOPLAY_ROW` mirrors `tier0.engine.state.SLY_AUTOPLAY`, which
+# this tool cannot import (it runs standalone against a decompile tree);
+# test_extract_base_game_pool pins the two together.
+SLY_AUTOPLAY_ROW = [{"op": "sly_autoplay"}]
 CARD_KEYWORDS = {"Exhaust": "exhaust", "Innate": "innate", "Retain": "retain",
-                 "Sly": "sly_keyword"}
+                 "Sly": "sly"}
 # ilspy renders a one-element list as a compiler-generated type rather than a
 # `{ ... }` initialiser, so match the whole declaration statement instead of a
 # brace block. Declaration-scoped on purpose: a card that exhausts SOMETHING
