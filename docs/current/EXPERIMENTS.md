@@ -65,11 +65,24 @@ registration packets themselves live under `review/active/` — one home, not tw
   (2026-08-12) split the two**: `elemental_ecstasy` goes to redesign;
   `borrowed_brilliance` is **remeasured first**, by re-running the registered
   **five-card** sweep re-registered under `P7` — never a narrowed single-card
-  experiment. That re-registration is owed and does not exist yet; when it lands
-  it is a NEW packet beside this one. **R101b: this registration and its results
-  file stay unedited** — there is no re-grade of §13 →
+  experiment. **That re-registration is now DRAFTED and has its own pointer
+  below**; it is a NEW packet beside this one. **R101b: this registration and
+  its results file stay unedited** — there is no re-grade of §13 →
   `review/active/eb17p-registration-draft-2026-08-08.md` §13, §13.8;
   `review/active/eb17p-results-2026-08-10.txt`; QUEUE `M17`.
+- **Force-first-copy paired winrate, re-registered under `P7` (`M17`)** —
+  **DRAFT, awaiting [USER] countersign at QUEUE `M17`, unrun.** R180 ordered
+  the **registered five-card** sweep re-run under `P7` — never a narrowed
+  single-card experiment — because §13.8's `borrowed_brilliance` anomaly was
+  pilot refusal that `P7` (R176) resolved, and because §13's Δ figures are `P6`
+  reads. The draft is the parent's instrument and arm set unchanged, re-stamped
+  to `RT10/D14/P7/C9`, with a new descriptive `Q4` on the bare-form play rate.
+  **§8's predictions and §8.1's trigger are explicit [USER] slots and are
+  blank**, so the packet is not cleared to launch. **Sequencing:** it runs
+  *after* the payoff-reach sprint's graded read, per the approved settle-first
+  plan, and before the staged `EB-43`/D15 landing (its own S3) →
+  `review/active/m17-sweep-reregistration-p7-2026-08-13.md`; companion redesign
+  options packet `review/active/m17-elemental-ecstasy-redesign-2026-08-13.md`.
 - **Shop companion channel re-run (`S4-G10` / `C9`)** — **DRAFT, awaiting
   [USER] countersign at QUEUE `M14`, unrun.** The packet is in HEAD as of the
   `shop-floor-2026-08-10` merge. The channel's world moved ([USER] restored slot 2's
