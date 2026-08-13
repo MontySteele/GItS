@@ -18,9 +18,11 @@ from tier0.engine.state import CombatState, Fighter
 # other character ever carries it, so the addition is a dead branch there.
 DECAYING = ("weak", "vulnerable", "frail",
             "ceremonial_garment")            # tick down at a side turn end
-# EB-95: the three base-game duration DEBUFFS. On a player-side creature the
-# authority sets `SkipNextDurationTick` inside `Apply` for these, so a debuff
-# landed during the enemy side is not spent by that same side's tick. A
+# EB-95: the three base-game duration DEBUFFS. When a MONSTER lands one of
+# these on a player-side creature the authority sets `SkipNextDurationTick`
+# inside `Apply`, so the debuff is not spent by the tick at the end of the very
+# side turn that applied it (sts2.xml, `PowerModel.SkipNextDurationTick`: the
+# skip is conditioned on "if a monster applied the power to the player"). A
 # ceremonial_garment is a self-buff, not a Debuff, and takes no skip -- which
 # leaves its player-turn uptime exactly where it was.
 DURATION_DEBUFFS = ("weak", "vulnerable", "frail")
@@ -201,11 +203,27 @@ def apply_power(state: CombatState, target: Fighter, name: str, stacks: int,
     # Debuff freshly landed on a player-side creature. Without it the enemy
     # that applies Vulnerable during its own side turn watches the tick at the
     # end of that same side turn eat the stack it just paid for -- a 1-stack
-    # application would amplify nothing. Set on ANY application (the authority
-    # does not ask who applied it), and consumed by the first tick that would
-    # otherwise decrement the stack.
+    # application would amplify nothing.
+    #
+    # The flag is applier-SENSITIVE. sts2.xml (shipped doc XML,
+    # `P:MegaCrit.Sts2.Core.Models.PowerModel.SkipNextDurationTick`) states the
+    # predicate verbatim: duration-type powers tick "at the end of the monster
+    # side turn, but skipping the first tick if a monster applied the power to
+    # the player". A debuff the PLAYER puts on herself (a self-Frail card) gets
+    # no reprieve and must not be handed an extra enemy round.
+    #
+    # `applier` is resolved the same way refpowers.on_power_applied resolves
+    # it, and for the same reason: callers that cannot know it leave it None,
+    # and the acting side is unambiguous in tier0 -- cards apply powers during
+    # the player turn, intents during the enemy turn. The enemy `debuff` intent
+    # (combat._enemy_turn) passes `applier=enemy` explicitly, so the inference
+    # only decides the unnamed cases.
     if target is state.player and name in DURATION_DEBUFFS and stacks > 0:
-        target.skip_next_duration_tick.add(name)
+        source = applier
+        if source is None and state.in_player_turn:
+            source = state.player
+        if source is not state.player:                # a monster applied it
+            target.skip_next_duration_tick.add(name)
     standing = target.powers.get(name, 0)
     new = standing + stacks
     if max_stacks is not None:              # sheet v0.2 stack caps

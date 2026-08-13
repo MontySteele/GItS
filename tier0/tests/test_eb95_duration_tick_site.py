@@ -7,9 +7,12 @@ supposed to amplify. So an enemy-applied Vulnerable covered one fewer enemy
 round than the game does, and a 1-stack application covered none at all.
 
 The authority ticks duration debuffs at `AfterSideTurnEnd(side == Enemy)` and
-additionally sets `SkipNextDurationTick` inside `Apply` for a Debuff freshly
-landed on a player-side creature, so the application is not eaten by the tick
-at the end of the very side turn that applied it.
+additionally sets `SkipNextDurationTick` inside `Apply` for a Debuff a MONSTER
+freshly lands on a player-side creature, so the application is not eaten by the
+tick at the end of the very side turn that applied it. sts2.xml states the
+predicate verbatim under `PowerModel.SkipNextDurationTick`: ticking "at the end
+of the monster side turn, but skipping the first tick if a monster applied the
+power to the player". A player-applied self-debuff takes no skip.
 
 Two things must NOT move, and are asserted below:
   * enemy-OWNED durations keep ticking at their own turn end (bag_of_marbles
@@ -63,6 +66,33 @@ def test_the_skip_is_spent_once_not_held_forever():
     assert p.powers["vulnerable"] == 1
     refpowers.after_enemy_side_turn_end(state)
     assert p.powers["vulnerable"] == 0
+
+
+def test_a_player_applied_self_debuff_takes_no_skip():
+    """sts2.xml, `PowerModel.SkipNextDurationTick`: the skip fires only "if a
+    monster applied the power to the player". A self-Frail played off the
+    player's own hand therefore ticks at the FIRST enemy side turn end -- an
+    applier-agnostic flag would silently hand every future self-debuff card an
+    extra round of duration against the game.
+
+    Both spellings of a player application are asserted: the explicit
+    `applier=state.player` a card-side caller passes, and the None an
+    effects-side caller leaves for the acting side to resolve.
+    """
+    state = make_state()
+    p = state.player
+
+    powers.apply_power(state, p, "frail", 1, applier=state.player)
+    assert "frail" not in p.skip_next_duration_tick
+    refpowers.after_enemy_side_turn_end(state)
+    assert p.powers.get("frail", 0) == 0
+
+    state.in_player_turn = True                      # a card is resolving
+    powers.apply_power(state, p, "weak", 1)          # applier left unnamed
+    assert "weak" not in p.skip_next_duration_tick
+    state.in_player_turn = False
+    refpowers.after_enemy_side_turn_end(state)
+    assert p.powers.get("weak", 0) == 0
 
 
 def test_enemy_owned_durations_still_tick_at_the_enemy_turn_end():
