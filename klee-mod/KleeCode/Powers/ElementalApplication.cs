@@ -170,6 +170,21 @@ public sealed class KleeElementalHooks : AbstractModel
     }
 
     /// <summary>
+    /// An EXTRA player turn has no preceding enemy turn either, so
+    /// AfterSideTurnEnd above never fires and the window would carry across
+    /// two player turns. This is the other end of the same problem
+    /// BeforeCombatStart below solves, and it is sited here rather than at
+    /// BeforeSideTurnStart because bombs detonate inside that broadcast --
+    /// see ReactionEffects.MarkExtraTurnStart for the full argument and for
+    /// why only the extra-turn player's per-dealer key is dropped.
+    /// </summary>
+    public override Task AfterTakingExtraTurn(Player player)
+    {
+        ReactionEffects.MarkExtraTurnStart(player.Creature);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
     /// The first player turn has no preceding enemy turn, and TotalResolved is
     /// monotonic across combats -- without this, turn 1 of every combat after
     /// the first would inherit a stale window and read "a reaction already
