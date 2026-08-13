@@ -761,7 +761,8 @@ def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
     #     await CreatureCmd.GainBlock(base.Owner, base.Amount,
     #                                 ValueProp.Unpowered, null);
     #
-    # in `AfterBlockCleared`. The trailing null is the card source, so
+    # in `AfterBlockCleared`. The trailing null is the `CardPlay`, and
+    # `GainBlock` passes `cardPlay?.Card` as the card source, so
     # `Hook.ModifyBlock` has no `cardSource.Enchantment` to read and the
     # enchantment is never consulted -- the Block arrives from a POWER on a
     # later turn, not from a card play. tier0 folded the rider into the

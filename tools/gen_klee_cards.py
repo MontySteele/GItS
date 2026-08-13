@@ -5317,9 +5317,10 @@ def emit(
     # `cardPlay: null` -- no cardSource, so no enchantment hook. Declaring
     # GainsBlock for a card whose only Block arrives that way would offer the
     # player a Nimble that cannot pay (the base game's Prolong has the same
-    # shape and does not claim it). tier0's `_is_block_skill` DOES count that
-    # op; that divergence is a sim-side finding, not something to paper over
-    # here.
+    # shape and does not claim it). tier0's own Nimble predicate used to
+    # count that op -- EB-85 divergence 4 -- and it was fixed on the sim side
+    # 2026-08-13 (`enchantments._grants_block`), so the two engines agree
+    # here now and nothing is being papered over.
     gains_block_member = ""
     if (any(eff.get("op") == "block" for eff in _effects_everywhere(card))
             and not any("BlockVar(" in v for v in vars_)):

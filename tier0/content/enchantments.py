@@ -93,9 +93,10 @@ def _grants_block(effects) -> bool:
         await CreatureCmd.GainBlock(base.Owner, base.Amount,
                                     ValueProp.Unpowered, null);
 
-    in `AfterBlockCleared` -- the last argument is the card source, and it is
-    null, so `Hook.ModifyBlock` finds no `cardSource.Enchantment` and Nimble
-    is never paid on that Block. The mod's cards say the same thing from the
+    in `AfterBlockCleared`. That trailing argument is the `CardPlay`, and
+    `GainBlock` derives the card source from it (`cardPlay?.Card`), so a null
+    `CardPlay` means a null `cardSource`: `Hook.ModifyBlock` finds no
+    `cardSource.Enchantment` and Nimble is never paid on that Block. The mod's cards say the same thing from the
     other side: `TidelineWatch` declares no `BlockVar` and no `GainsBlock`
     override, so `CardModel.GainsBlock` is its inherited `false` and
     `Nimble.CanEnchant` refuses the card outright. A card whose ONLY Block
