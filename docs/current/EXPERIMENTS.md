@@ -48,12 +48,16 @@ registration packets themselves live under `review/active/` — one home, not tw
   co-primary), §8 predictions committed ahead of the run (`eb67706`), graded
   blind in §13: **3 PREDICTED / 1 SPLIT / 1 MISS** (`borrowed_brilliance`, wrong
   sign). §11.1's disclosed 12-pair read was **ruled immaterial (R173)** and the
-  registered range ran unchanged. **The measurement is closed; what stays open is
-  a design act** — §8.1's redesign trigger fired for `borrowed_brilliance` and
-  `elemental_ecstasy`, now QUEUE `M17`, and it must be read with §13.8's
-  instrument caveat →
-  `review/active/eb17p-registration-draft-2026-08-08.md` §13;
-  `review/active/eb17p-results-2026-08-10.txt`.
+  registered range ran unchanged. **The measurement is closed.** §8.1's redesign
+  trigger fired for `borrowed_brilliance` and `elemental_ecstasy`, and **R180
+  (2026-08-12) split the two**: `elemental_ecstasy` goes to redesign;
+  `borrowed_brilliance` is **remeasured first**, by re-running the registered
+  **five-card** sweep re-registered under `P7` — never a narrowed single-card
+  experiment. That re-registration is owed and does not exist yet; when it lands
+  it is a NEW packet beside this one. **R101b: this registration and its results
+  file stay unedited** — there is no re-grade of §13 →
+  `review/active/eb17p-registration-draft-2026-08-08.md` §13, §13.8;
+  `review/active/eb17p-results-2026-08-10.txt`; QUEUE `M17`.
 - **Shop companion channel re-run (`S4-G10` / `C9`)** — **DRAFT, awaiting
   [USER] countersign at QUEUE `M14`, unrun.** The packet is in HEAD as of the
   `shop-floor-2026-08-10` merge. The channel's world moved ([USER] restored slot 2's
