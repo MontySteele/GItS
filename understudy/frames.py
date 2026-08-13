@@ -32,11 +32,33 @@ the material anybody asked for. Three refusals, each named: no window at all,
 a zero-size rectangle, and a MINIMISED window (Windows parks those at a
 -32000 origin, which is a valid rectangle nowhere on screen).
 
-BE HONEST ABOUT THE ONE THING IT CANNOT DO. The capture is
-`Graphics.CopyFromScreen` over the window's rectangle, which is the screen
-CONTENT under that rectangle -- so a window sitting ON TOP of the game appears
-in the frame. It is the game's rectangle, not the game's pixels. Bring the game
-forward before capturing, and read a frame knowing that.
+HOW IT CAPTURES, AND WHY IT CHANGED (2026-08-13, EB-97)
+
+It asks the WINDOW for its pixels -- `PrintWindow(hWnd, hdc,
+PW_RENDERFULLCONTENT)` -- and only falls back to reading the screen under the
+window's rectangle if that comes back blank.
+
+That ordering is a defect fix, and the defect is worth stating because the
+frames it produced LOOKED fine. The first version copied the screen at the
+rectangle `GetWindowRect` reported. A PowerShell host is DPI-UNAWARE, so on a
+multi-monitor machine whose displays scale differently, the rectangle it is
+handed is virtualised into the primary display's coordinate space -- and the
+copy lands on the PRIMARY monitor while the game is on the SECOND one. Every
+`frame-20260813-*` frame is a close-up of the desktop wallpaper. Nothing in
+the apparatus could see it: the process was found, the handle was real, the
+rectangle was 1921x1080, the PNG existed and had the right dimensions, and
+the manifest row was written. Existence and dimensions are not verification.
+**A frame is verified by OPENING it and seeing the game.** That is now the
+standard, and it is in this docstring because it is the only check that would
+have caught this.
+
+The script also makes itself per-monitor DPI aware before it asks for
+anything, so the fallback path is right as well as second.
+
+The fallback keeps the old honest caveat: it is the screen CONTENT under the
+window's rectangle, so a window sitting ON TOP of the game appears in the
+frame. `PrintWindow` does not have that problem, which is the other reason it
+goes first. The manifest records which route ran, per frame.
 
 WHERE FRAMES GO
 `understudy/logs/frames/`, gitignored for the reason `art/g12_captures/` and
@@ -116,8 +138,25 @@ public struct GitsRect { public int Left; public int Top; public int Right; publ
 public static class GitsWin {
     [DllImport("user32.dll")]
     public static extern bool GetWindowRect(IntPtr hWnd, out GitsRect lpRect);
+    // PW_RENDERFULLCONTENT = 2. Asks the window to render ITSELF into a device
+    // context, so no screen coordinate, no monitor index and no DPI mapping is
+    // involved anywhere in the path.
+    [DllImport("user32.dll")]
+    public static extern bool PrintWindow(IntPtr hWnd, IntPtr hdcBlt, uint nFlags);
+    [DllImport("user32.dll")]
+    public static extern bool IsIconic(IntPtr hWnd);
+    // Per-monitor-v2. Called BEFORE any rectangle is asked for: an unaware
+    // host is handed virtualised coordinates, which is exactly how this leg
+    // spent a night photographing the wrong monitor.
+    [DllImport("user32.dll")]
+    public static extern bool SetProcessDpiAwarenessContext(IntPtr value);
+    [DllImport("user32.dll")]
+    public static extern bool SetProcessDPIAware();
 }
 "@
+try { [void][GitsWin]::SetProcessDpiAwarenessContext([IntPtr](-4)) }
+catch { try { [void][GitsWin]::SetProcessDPIAware() } catch { } }
+
 $proc = Get-Process -Name '__IMAGE__' -ErrorAction SilentlyContinue |
         Where-Object { $_.MainWindowHandle -ne 0 } |
         Select-Object -First 1
@@ -125,8 +164,9 @@ if (-not $proc) {
     Write-Output 'NO_WINDOW'
     exit 2
 }
+$hwnd = $proc.MainWindowHandle
 $rect = New-Object GitsRect
-[void][GitsWin]::GetWindowRect($proc.MainWindowHandle, [ref]$rect)
+[void][GitsWin]::GetWindowRect($hwnd, [ref]$rect)
 $w = $rect.Right - $rect.Left
 $h = $rect.Bottom - $rect.Top
 if ($w -le 0 -or $h -le 0) {
@@ -134,20 +174,47 @@ if ($w -le 0 -or $h -le 0) {
     exit 3
 }
 # A MINIMISED window still has a MainWindowHandle and still reports a positive
-# width and height -- Windows just parks it at a -32000 origin, off every
-# screen. Copying that rectangle would capture whatever is at the top-left of
-# the desktop, which is precisely the grab this leg refuses to make.
-if ($rect.Left -le -30000 -or $rect.Top -le -30000) {
+# width and height. IsIconic is the direct question; the -32000 origin check
+# stays as the belt to its braces, because a restored-but-parked window is a
+# rectangle nowhere on screen either way.
+if ([GitsWin]::IsIconic($hwnd) -or $rect.Left -le -30000 -or $rect.Top -le -30000) {
     Write-Output 'MINIMISED'
     exit 4
 }
+
+function Test-Blank($bitmap) {
+    # PrintWindow returns true and an all-black surface for some GPU-composited
+    # windows, which is a silent failure wearing a success. Sample a grid: if
+    # every sample is the same colour, the render did not happen.
+    $first = $null
+    for ($x = 4; $x -lt $bitmap.Width; $x += [Math]::Max(1, [int]($bitmap.Width / 16))) {
+        for ($y = 4; $y -lt $bitmap.Height; $y += [Math]::Max(1, [int]($bitmap.Height / 16))) {
+            $c = $bitmap.GetPixel($x, $y).ToArgb()
+            if ($null -eq $first) { $first = $c }
+            elseif ($c -ne $first) { return $false }
+        }
+    }
+    return $true
+}
+
+$route = 'printwindow'
 $bmp = New-Object System.Drawing.Bitmap $w, $h
 $gfx = [System.Drawing.Graphics]::FromImage($bmp)
-$gfx.CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bmp.Size)
+$hdc = $gfx.GetHdc()
+$ok = [GitsWin]::PrintWindow($hwnd, $hdc, 2)
+$gfx.ReleaseHdc($hdc)
+if ((-not $ok) -or (Test-Blank $bmp)) {
+    # Fallback: the screen under the window's rectangle. Now DPI-correct,
+    # because awareness was set above -- but still the screen and not the
+    # window, so anything sitting on top of the game lands in the frame.
+    $route = 'copyfromscreen'
+    $gfx.Clear([System.Drawing.Color]::Black)
+    $gfx.CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bmp.Size)
+}
 $bmp.Save('__OUT__', [System.Drawing.Imaging.ImageFormat]::Png)
 $gfx.Dispose()
 $bmp.Dispose()
-Write-Output ("OK {0} {1}" -f $w, $h)
+Write-Output ("OK {0} {1} {2}" -f $w, $h, $route)
 """
 
 
@@ -233,12 +300,18 @@ def capture(label: str = "frame", note: str = "",
         }.get(token, stderr or token or "no output")
         return {"status": "error", "message": reason,
                 "guardrail": GUARDRAIL, "path": str(out)}
-    size = token[2:].strip()
+    parts = token.split()
+    size = " ".join(parts[1:3])
+    # WHICH ROUTE RAN IS PART OF THE RECORD. `copyfromscreen` frames can carry
+    # an overlapping window; `printwindow` frames cannot. A reader of the
+    # manifest is entitled to know which kind of frame they are looking at.
+    route = parts[3] if len(parts) > 3 else "unknown"
 
     row = {
         "record": "frame", "ts": time.time(),
         "path": str(out), "label": label, "note": note,
         "size": size,
+        "route": route,
         "context": dict(context or {}),
         # ON EVERY ROW, not once at the top of the file. A manifest is read in
         # slices and concatenated with other manifests; a guardrail that lives
@@ -246,8 +319,9 @@ def capture(label: str = "frame", note: str = "",
         "guardrail": GUARDRAIL,
     }
     _append(manifest or MANIFEST, row)
-    return {"status": "ok", "message": f"captured {size}",
-            "guardrail": GUARDRAIL, "path": str(out), "row": row}
+    return {"status": "ok", "message": f"captured {size} via {route}",
+            "guardrail": GUARDRAIL, "path": str(out), "route": route,
+            "row": row}
 
 
 def _append(manifest: Path, row: dict) -> None:
