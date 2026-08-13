@@ -36,6 +36,15 @@ from tier0.engine.state import Card, CombatState
 from tier0.tests.conftest import make_enemy
 
 # --- the two rows, inlined verbatim from tier05/content/relics.yaml ---------
+#
+# INLINED, therefore a THIRD copy of these numbers -- beside the YAML row and
+# the C# literal -- and tier0 may not import tier05 to read the real one. The
+# ratio test below pins this fixture against the base constants, which is worth
+# having, but it cannot notice this fixture drifting from the SHIPPED row.
+# What covers that gap is tools/lint_constant_parity.py's INVARIANTS block
+# (R190, 2026-08-13), which asserts the shipped row is exactly 2x the tier0
+# base in the one place that can see both. Noted here because a green ratio
+# test reads like full coverage and is not.
 
 PEARL_OF_INSIGHT = [
     {"hook": "charge_per_exhaust", "amount": 2},
