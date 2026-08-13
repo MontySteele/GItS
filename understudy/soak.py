@@ -876,12 +876,18 @@ class Defect(Exception):
 class RunDriver:
     """One run, start to game_over, with a watchdog on every action."""
 
+    # P2 leg one. A class attribute so every construction path has it --
+    # including the test doubles that build a driver without running this
+    # __init__ -- and so the OFF state is the default everywhere.
+    sampler: Any = None
+
     def __init__(self, session: Session, run_index: int, stamp: str,
                  character: str = DEFAULT_CHARACTER,
                  commit: str | None = None,
                  chosen_seed: str | None = None,
                  max_fights: int | None = None,
-                 hazard_guard: bool = True):
+                 hazard_guard: bool = True,
+                 p2_capture: bool = False):
         self.session = session
         self.run_index = run_index
         self.character = character
@@ -900,6 +906,12 @@ class RunDriver:
         self.commit = commit
         self.stamp = stamp
         self.memo = policy_v1.Memo()
+        # P2 leg one (R94). OFF unless the soak asked for it; the baseline arm
+        # R98 validated is the arm without it. Capture only -- no model is
+        # called from this loop.
+        if p2_capture:
+            from understudy import p2capture
+            self.sampler = p2capture.Sampler(stamp, run_index, enabled=True)
         self.seed: str | None = None
         self.log = LOG_DIR / f"soak-{stamp}-run{run_index:03d}.jsonl"
         self.actions = 0
@@ -1296,6 +1308,8 @@ class RunDriver:
             "forced_defaults": self._forced_defaults,
             "log": str(self.log),
         }
+        if self.sampler is not None:
+            summary["p2_capture"] = self.sampler.summary()
         self.emit(summary)
         return summary
 
@@ -1627,6 +1641,13 @@ class RunDriver:
                 continue
 
             decision = policy_v1.decide(state, self.memo, commit=self.commit)
+            # P2: a TURN OPENING is the first decision of a combat round, so
+            # the sample is taken here -- after the policy has answered, so
+            # the record carries what policy_v1 actually did rather than a
+            # second evaluation that could differ.
+            if self.sampler is not None:
+                self.sampler.maybe_capture(state, self.memo, decision,
+                                           self.seed)
             if not decision.available or decision.action is None:
                 fallback = _last_resort(state)
                 if fallback is None:
@@ -1851,7 +1872,8 @@ def soak(runs: int, character: str, do_setup: bool,
          commit: str | None = None,
          seeds: list[str] | None = None,
          max_fights: int | None = None,
-         hazard_guard: bool = True) -> dict:
+         hazard_guard: bool = True,
+         p2_capture: bool = False) -> dict:
     from understudy import committed as _committed
     commit = _committed.normalise(commit)          # refuses an unknown word
     stamp = time.strftime("%Y%m%d-%H%M%S")
@@ -1871,7 +1893,8 @@ def soak(runs: int, character: str, do_setup: bool,
             chosen = seeds[(i - 1) % len(seeds)] if seeds else None
             driver = RunDriver(session, i, stamp, character, commit=commit,
                                chosen_seed=chosen, max_fights=max_fights,
-                               hazard_guard=hazard_guard)
+                               hazard_guard=hazard_guard,
+                               **({"p2_capture": True} if p2_capture else {}))
             s = driver.run()
             s["defect_kinds"] = [d["kind"] for d in driver.defects]
             summaries.append(s)
@@ -1998,6 +2021,14 @@ def main(argv: list[str] | None = None) -> int:
                          "rolls. Repeatable; run i takes seed i, cycling. A "
                          "run whose read-back disagrees with its choice files "
                          "a `seed_not_honoured` defect rather than continuing")
+    ap.add_argument("--p2-capture", action="store_true",
+                    help="P2 leg one (R94): at every combat TURN OPENING that "
+                         "trips the hard-state triggers, write the state and "
+                         "both policies' decisions to understudy/logs/p2/ for "
+                         "later LLM comparison. CAPTURE ONLY -- no model is "
+                         "called from the run loop. The thresholds are a "
+                         "PLACEHOLDER, not a ratified definition, and every "
+                         "record says so (understudy/p2capture.py)")
     ap.add_argument("--allow-hazard-events", action="store_true",
                     help="EB-1: drive the events on the hazard register "
                          "instead of stopping the run at them. It exists for "
@@ -2015,7 +2046,8 @@ def main(argv: list[str] | None = None) -> int:
     result = soak(args.runs, args.character, do_setup=not args.no_setup,
                   commit=args.commit, seeds=args.seed,
                   max_fights=args.max_fights,
-                  hazard_guard=not args.allow_hazard_events)
+                  hazard_guard=not args.allow_hazard_events,
+                  p2_capture=args.p2_capture)
     if args.report:
         from understudy import report
         print()
