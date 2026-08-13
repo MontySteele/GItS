@@ -242,11 +242,13 @@ def on_card_exhausted(state: CombatState) -> None:
     random enemy" (EB-82; Forgotten Soul, the relic Grave of the Forgotten
     grants).
 
-    UNUSED MACHINERY as landed. No relic row in `tier05/content/relics.yaml`
-    carries this hook and no event grants one, so the branch is unreachable
-    in play and the frozen battery cannot feel it -- the whole point of
-    building it separately is that the event-relic admission rule forbids
-    inventing an engine hook inline inside a conversion.
+    Built as UNUSED MACHINERY (2026-08-12) and ARMED by the conversion that
+    followed: `forgotten_soul` in `tier05/content/relics.yaml` carries the
+    hook and Grave of the Forgotten's Accept branch is its one source. The
+    order is the point -- the event-relic admission rule forbids inventing an
+    engine hook inline inside a conversion, so the hook shipped first and on
+    its own. The frozen battery still cannot feel it: battery players carry
+    no `relic_effects`, and the function opens on that.
 
     Shape decisions, all of them the existing engine's rather than new:
 

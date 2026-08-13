@@ -16,8 +16,10 @@ Three claims, and the file is laid out as three sections in that order:
   3. the attachment is a decoration on the deck-list ID, so it persists --
      across upgrades, across deck mutations, and across fights in a run.
 
-The two events that did NOT convert are pinned too, in section 4: a skip that
-is not asserted is a skip that quietly un-skips itself.
+Six of the seven have now converted -- Grave of the Forgotten joined them
+once EB-82's `damage_per_exhaust` hook existed to carry Forgotten Soul. The
+one that still has not is pinned in section 4: a skip that is not asserted is
+a skip that quietly un-skips itself.
 """
 
 from __future__ import annotations
@@ -34,7 +36,7 @@ from tier05 import events
 
 
 CONVERTED = ("sapphire_seed", "field_of_man_sized_holes", "stone_of_all_time",
-             "symbiote", "self_help_book")
+             "symbiote", "self_help_book", "grave_of_the_forgotten")
 
 
 def _st(**kw):
@@ -57,10 +59,10 @@ def test_the_catalogue_holds_exactly_the_names_the_events_grant():
             for opt in events.options_of(event):
                 if opt.get("enchant"):
                     granted.add(opt["enchant"]["name"])
-    # Soul's Power is the one registered name no SHIPPED event grants: Grave
-    # of the Forgotten is built but held out of the pool by its relic (see
-    # section 4), and the enchantment is ready for the day that lands.
-    assert granted | {"souls_power"} == set(enchantments.CATALOG)
+    # Soul's Power was the one registered name no shipped event granted; the
+    # day its relic landed (EB-82) arrived, so the catalogue is now exactly
+    # the set of names the pool hands out, with nothing held in reserve.
+    assert granted == set(enchantments.CATALOG)
 
 
 @pytest.mark.parametrize("name,amount,field,expected", [
@@ -322,6 +324,64 @@ def test_the_field_of_holes_resist_branch_grants_the_real_normality():
     assert loader.peek_card("curse_normality").status_play_cap == 3
 
 
+# --- Grave of the Forgotten (EB-82): the branch that waited on a relic -----
+
+def test_the_grave_confront_branch_locks_without_an_exhaust_card():
+    """The wiki's lock, and it is NOT a special case: Klee's printed starter
+    Exhausts nothing, so Soul's Power has no legal target and `available`
+    drops the branch on the enchantment's own eligibility rule."""
+    st = _st()
+    labels = [o["label"] for o in
+              events.available(events.get_event("grave_of_the_forgotten"), st)]
+    assert labels == ["Accept the Forgotten Soul"]
+
+
+def test_the_grave_confront_branch_opens_once_a_card_exhausts():
+    st = _st(deck_ids=list(loader.starting_deck("klee")) + ["sugar_rush"])
+    labels = [o["label"] for o in
+              events.available(events.get_event("grave_of_the_forgotten"), st)]
+    assert labels == ["Accept the Forgotten Soul", "Confront with Truth"]
+
+
+def test_confronting_costs_decay_and_clears_the_cards_exhaust():
+    st = _st(deck_ids=list(loader.starting_deck("klee")) + ["sugar_rush"])
+    event = events.get_event("grave_of_the_forgotten")
+    opt = next(o for o in event["options"] if o["label"] == "Confront with Truth")
+    events.resolve(random.Random(0), event, opt, st)
+    assert "curse_decay" in st.deck_ids
+    enchanted = [c for c in st.deck_ids
+                 if enchantments.enchantment_of(c) == "souls_power"]
+    assert len(enchanted) == 1
+    assert enchantments.split(enchanted[0])[0] == "sugar_rush"
+    assert not loader.peek_card(enchanted[0]).exhaust
+
+
+def test_accepting_grants_forgotten_soul_and_arms_the_exhaust_hook():
+    """The whole reason this event waited: the relic ships only onto a hook
+    the engine already honors, and holding it must put that hook in front of
+    every later fight."""
+    from tier05 import relics as relic_pool
+    held = relic_pool.HeldRelics.empty("klee")
+    st = _st()
+    event = events.get_event("grave_of_the_forgotten")
+    opt = next(o for o in event["options"]
+               if o["label"] == "Accept the Forgotten Soul")
+    events.resolve(random.Random(0), event, opt, st, held=held)
+    assert st.relics_granted == ["forgotten_soul"]
+    assert {"hook": "damage_per_exhaust", "amount": 1} in held.combat_effects
+
+
+def test_forgotten_soul_is_an_event_relic_and_never_a_reward_roll():
+    """§11.2: an event relic has exactly one source, so it must not be
+    reachable through the ordinary reward pool."""
+    from tier05 import relics as relic_pool
+    assert "forgotten_soul" in relic_pool.event_pool()
+    held = relic_pool.HeldRelics.empty("klee")
+    rolled = {relic_pool.roll_relic_reward(random.Random(s), held, "klee")
+              for s in range(200)}
+    assert "forgotten_soul" not in rolled
+
+
 # ---------------------------------------------------------------------------
 # 3. Persistence, and what the rider actually does in a fight.
 # ---------------------------------------------------------------------------
@@ -450,13 +510,12 @@ def test_normality_caps_the_turn_at_three_plays():
 
 
 # ---------------------------------------------------------------------------
-# 4. The two that did not convert, and why.
+# 4. The one that still has not converted, and why.
 # ---------------------------------------------------------------------------
 
-def test_the_two_unconverted_enchant_events_are_still_out_of_every_pool():
+def test_the_last_unconverted_enchant_event_is_still_out_of_every_pool():
     reachable = {e["id"] for act in range(len(C.RUN_ACTS))
                  for e in events.pool_for(act)}
-    assert "grave_of_the_forgotten" not in reachable   # needs a relic hook
     assert "wood_carvings" not in reachable            # needs Slither + 2 cards
 
 

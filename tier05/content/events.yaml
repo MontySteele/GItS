@@ -303,14 +303,44 @@ act2:
       - {label: "Leave"}
 
 # --- act 3: Glory ---------------------------------------------------------
-# The THINNEST pool by far -- 2 own + 3 all-acts -- and the reason is a
+# Still the thinnest pool -- 3 own + 3 all-acts -- and the reason is a
 # finding, not an oversight: Glory's events are relic-shaped. Five of its
 # eight pay out in a named event relic (Forgotten Soul, Big Mushroom,
 # Fragrant Mushroom, Royal Poison, History Course), and under the no-
 # substitution rule an event whose relic we cannot express exactly does not
-# ship. Four of those five are ONE hook away each; they are itemised in the
-# skip list. Act 3 is where the event layer is most worth extending next.
+# ship. Forgotten Soul is the first of those five to convert (EB-82, its hook
+# built first as unused machinery); the other four are ONE hook away each and
+# are itemised in the skip list. Act 3 is still where the event layer is most
+# worth extending next.
 act3:
+  - id: grave_of_the_forgotten
+    name: "Grave of the Forgotten"
+    # EB-82. Both branches are exact, and neither invents anything:
+    #   Accept  -> Forgotten Soul, "whenever you Exhaust a card, deal 1 damage
+    #     to a random enemy". The relic is admitted under the `event:` header
+    #     rule in relics.yaml because `damage_per_exhaust` was BUILT FIRST
+    #     (2026-08-12) and is dispatched from the one exhaust funnel -- this
+    #     conversion arms an existing hook rather than inventing one inline.
+    #   Confront -> Decay plus Soul's Power ("this card loses Exhaust"), which
+    #     un-sets a printed field and needs no engine surface at all.
+    # The wiki's lock -- "Confront is locked if you have no cards with Exhaust
+    # that can be Enchant" -- is NOT a special case here: it falls out of the
+    # enchantment's own eligibility rule, which `available` already enforces
+    # for every enchant option (`_enchant_targets` empty -> option dropped).
+    # Decay is the shipped plain clog, SOFTER than real if the base card does
+    # carry StS1's end-of-turn tick (curses.yaml says so at the row).
+    # KNOWN, not corrected: the valuation prices the relic at a flat RELIC_HP
+    # and cannot see that Forgotten Soul is worth far more to an Exhaust deck
+    # than to any other, exactly as it cannot tell one named card from
+    # another. Inventing a per-relic number here would be a tune.
+    # FLAVOR: labels are the source event's own, PROVISIONAL pending the
+    # S4-G11-pattern eye-read -- the gallery's three variants ship unchosen,
+    # the same way Field of Man-Sized Holes did.
+    options:
+      - {label: "Accept the Forgotten Soul", relic_id: forgotten_soul}
+      - {label: "Confront with Truth", curse: curse_decay,
+         enchant: {name: souls_power}}
+
   - id: the_trial
     name: "The Trial"
     # One event, three sub-trials, one rolled per visit (see `variants` in
@@ -411,18 +441,15 @@ all:
 #     Stone of All Time, Symbiote (act 2 / act 2+3), Self-Help Book (all).
 #     The vocabulary is tier0/content/enchantments.CATALOG -- eight named
 #     enchantments, exactly the ones these events grant, no registry and no
-#     enchantment economy. Two events did NOT convert, and neither is
-#     blocked on Enchant any more:
-#   Grave of the Forgotten   BLOCKED ON A RELIC, not on the enchant op. Its
-#       Confront branch (Decay + Soul's Power on a card that Exhausts) is
-#       fully built and the enchantment is in the CATALOG; its Accept branch
-#       hands out Forgotten Soul -- "whenever you Exhaust a card, deal 1
-#       damage to a random enemy" -- which needs a `damage_per_exhaust`
-#       combat hook the engine does not have. The event-relic admission rule
-#       forbids inventing one (see the `event:` header in
-#       tier05/content/relics.yaml: a named event relic ships only onto a
-#       hook the engine ALREADY honors, and nothing substitutes for it), so
-#       the event waits on that hook and not on this pass.
+#     enchantment economy. Two events did NOT convert in that pass, and
+#     neither was blocked on Enchant. One of the two has since converted:
+#   Grave of the Forgotten   CONVERTED (EB-82, act 3 above). It was blocked
+#       on a RELIC and not on the enchant op: its Accept branch hands out
+#       Forgotten Soul -- "whenever you Exhaust a card, deal 1 damage to a
+#       random enemy" -- and the admission rule (see the `event:` header in
+#       tier05/content/relics.yaml) forbids inventing the hook inline. So
+#       `damage_per_exhaust` was built first, on its own, as unused
+#       machinery; this conversion arms it and adds no engine surface.
 #   Wood Carvings            THREE options, all three blocked, and none of
 #       them by the enchant op alone. Bird and Torus transform a starter into
 #       Peck and Toric Toughness -- named base-game colorless cards that do
