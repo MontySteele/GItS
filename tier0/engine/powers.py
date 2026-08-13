@@ -17,7 +17,13 @@ from tier0.engine.state import CombatState, Fighter
 # remaining in the state; the same tick-down grammar as the debuffs. No
 # other character ever carries it, so the addition is a dead branch there.
 DECAYING = ("weak", "vulnerable", "frail",
-            "ceremonial_garment")            # tick down at owner's turn end
+            "ceremonial_garment")            # tick down at a side turn end
+# EB-95: the three base-game duration DEBUFFS. On a player-side creature the
+# authority sets `SkipNextDurationTick` inside `Apply` for these, so a debuff
+# landed during the enemy side is not spent by that same side's tick. A
+# ceremonial_garment is a self-buff, not a Debuff, and takes no skip -- which
+# leaves its player-turn uptime exactly where it was.
+DURATION_DEBUFFS = ("weak", "vulnerable", "frail")
 # This-turn windows: cleared entirely at their owner's turn end (R16
 # card-mediated Spotlight boosts; a _turn power is a window, not a stack).
 EXPIRING = ("spotlight_mult_bonus_turn", "spotlight_flat_damage_turn")
@@ -150,9 +156,20 @@ def on_turn_start(state: CombatState, fighter: Fighter) -> None:
 
 
 def on_turn_end(state: CombatState, fighter: Fighter) -> None:
-    for name in DECAYING:
-        if fighter.powers.get(name, 0) > 0:
-            fighter.powers[name] -= 1
+    # EB-95: DECAYING ticks are an AfterSideTurnEnd(side == Enemy) event, not
+    # an owner's-turn-end one. For an ENEMY owner the two sites coincide --
+    # this call IS inside the enemy side -- and enemy-owned Vulnerable/Weak
+    # /Frail must keep ticking here, which is what bag_of_marbles and
+    # fear_potion prose depends on. For the PLAYER the two sites are a whole
+    # enemy round apart: combat._player_turn calls this BEFORE _run_rounds
+    # takes the enemy turns that the debuff is supposed to amplify, so ticking
+    # here made every enemy-applied Vulnerable cover one fewer enemy round
+    # than the game, and a 1-stack application cover none at all. The player's
+    # tick lives in refpowers.after_enemy_side_turn_end instead.
+    if fighter is not state.player:
+        for name in DECAYING:
+            if fighter.powers.get(name, 0) > 0:
+                fighter.powers[name] -= 1
     for name in EXPIRING:
         fighter.powers.pop(name, None)
     # StS2 site M (AfterSideTurnEnd) for the base-game parity powers. This is
@@ -180,6 +197,15 @@ def apply_power(state: CombatState, target: Fighter, name: str, stacks: int,
         resources.gain_charge(state, stacks, "flawless_strategy")
         state.emit("strength_converted", stacks=stacks)
         return
+    # EB-95: `SkipNextDurationTick`, set inside the authority's Apply for a
+    # Debuff freshly landed on a player-side creature. Without it the enemy
+    # that applies Vulnerable during its own side turn watches the tick at the
+    # end of that same side turn eat the stack it just paid for -- a 1-stack
+    # application would amplify nothing. Set on ANY application (the authority
+    # does not ask who applied it), and consumed by the first tick that would
+    # otherwise decrement the stack.
+    if target is state.player and name in DURATION_DEBUFFS and stacks > 0:
+        target.skip_next_duration_tick.add(name)
     standing = target.powers.get(name, 0)
     new = standing + stacks
     if max_stacks is not None:              # sheet v0.2 stack caps

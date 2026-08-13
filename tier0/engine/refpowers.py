@@ -1441,8 +1441,23 @@ def after_enemy_side_turn_end(state: CombatState) -> None:
 
     Colossus decrements here too (`if (side == CombatSide.Enemy)`), so its
     stacks read as "turns of protection remaining".
+
+    EB-95: the player's DECAYING durations tick here as well, for the same
+    reason -- ticking them at the player's own turn end spent them before the
+    enemy round they were supposed to cover. Enemy-owned durations are NOT
+    handled here; they tick in powers.on_turn_end, which for an enemy already
+    sits inside the enemy side.
     """
     p = state.player
+    from tier0.engine import powers as _powers    # late import (module graph)
+    for name in _powers.DECAYING:
+        if p.powers.get(name, 0) <= 0:
+            p.skip_next_duration_tick.discard(name)
+            continue
+        if name in p.skip_next_duration_tick:
+            p.skip_next_duration_tick.discard(name)
+            continue
+        p.powers[name] -= 1
     p.powers.pop("flame_barrier", None)
     if p.powers.get("colossus", 0) > 0:
         p.powers["colossus"] -= 1
