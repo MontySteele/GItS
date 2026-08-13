@@ -150,13 +150,30 @@ def _bump_first(candidates, field: str, delta: int) -> bool:
 
 
 def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
-    """Mutate a (deep-copied) base card into its upgraded form."""
-    base_id = card.id
+    """Mutate a (deep-copied) base card into its upgraded form.
+
+    The enchantment mark is looked PAST and then put back, which is the same
+    rule `has_upgrade` above states and the reason the two are read together:
+    `has_upgrade` learned it when R82 reopened and this did not, so from
+    RUNTEMPLATE 10 -- when enchantments entered the run layer and enchanted
+    cards started reaching upgrade sites -- the pair disagreed about the same
+    card. `has_upgrade("x@sharp-2")` answered True off the plain row while
+    this looked up the decorated id, missed, and raised "no applicable
+    upgrade". `_best_upgrade_target` scores its candidates by calling this,
+    so an Ironclad hand holding one enchanted upgradable card killed the run.
+    """
+    from tier0.content import enchantments      # late: enchantments imports us
+    base_id, mark, amount = enchantments.split(card.id)
     delta = _upgrade_index().get(base_id)
     if (not isinstance(delta, dict) or not delta
             or "_unexpressible" in delta or base_id in UNAPPLIABLE):
         raise ValueError(f"no applicable upgrade for {base_id!r}")
-    card.id = base_id + SUFFIX
+    upgraded = base_id + SUFFIX
+    # `decorate` re-attaches the mark INSIDE the suffix (`x@sharp-2+`), which
+    # is the one spelling `split` round-trips; rebuilding it here by hand is
+    # how the two decorations drift apart.
+    card.id = (enchantments.decorate(upgraded, mark, amount) if mark
+               else upgraded)
     card.name = card.name + SUFFIX
 
     top = card.effects

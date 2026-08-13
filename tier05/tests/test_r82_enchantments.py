@@ -146,10 +146,31 @@ def test_nimble_is_not_skill_only_and_takes_a_block_granting_attack():
     dry = Card(id="d", name="d", cost=1, type="attack",
                effects=[{"op": "damage", "amount": 9}])
     assert not enchantments.eligible(dry, "nimble")
+    # The named four are the MOD sheets' rows of this shape (three of them
+    # are companions, which carry their OWN character id, so the set is taken
+    # by excluding the reference ids rather than by naming the three
+    # protagonists). Scoping matters: `_card_index()` also
+    # holds the extracted reference sheets when `game_ref/` is present, and
+    # those carry the base game's OWN Block-granting Attacks (`ic_iron_wave`,
+    # `si_dash`). An unscoped equality is therefore green on CI, where
+    # `game_ref/` does not exist, and red on any primary checkout -- the
+    # environment-dependent assertion this repo has a standing rule against.
+    # The reference rows are asserted separately, and as a PRESENCE rather
+    # than an equality, because their count is a fact about an extracted
+    # artifact rather than about this fix.
+    from tier0 import roster
     live = {c.id for c in loader._card_index().values()
-            if c.type == "attack" and enchantments.eligible(c, "nimble")}
+            if c.type == "attack"
+            and c.character not in roster.REFERENCE_IDS
+            and enchantments.eligible(c, "nimble")}
     assert live == {"warmup_act", "freminet_pressurized_floe",
                     "thoma_crimson_ooyoroi", "itto_superlative_superstrength"}
+    reference = {c.id for c in loader._card_index().values()
+                 if c.type == "attack"
+                 and c.character in roster.REFERENCE_IDS
+                 and enchantments.eligible(c, "nimble")}
+    if reference:                      # only on a checkout holding game_ref/
+        assert "ic_iron_wave" in reference
 
 
 def test_nimble_refuses_a_block_next_turn_only_card():

@@ -13,7 +13,11 @@ the rider is the whole mechanic, and R82 ratified it as open design space
 for house characters too.
 """
 
-from tier0.content import loader
+import copy
+
+import pytest
+
+from tier0.content import enchantments, loader, upgrades
 from tier0.engine import combat, powers, refpowers
 from tier0.engine.state import Card
 from tier0.tests.conftest import make_enemy, make_state
@@ -216,3 +220,35 @@ def test_aggression_survives_an_already_upgraded_enchanted_card():
     assert [ev["reason"] for ev in state.log
             if ev["event"] == "UNIMPLEMENTED" and ev.get("power") == "aggression"] \
         == ["no card-sheet entry for this id; moved unupgraded"]
+
+
+def test_upgrading_an_enchanted_card_keeps_both_decorations():
+    """`has_upgrade` looks past the mark; `apply_upgrade` has to agree.
+
+    R82's reopen taught `has_upgrade` that an enchantment never costs a card
+    its upgrade path, and left `apply_upgrade` looking up the decorated id.
+    The pair only ever meet on an enchanted card, which nothing produced
+    until enchantments entered the run layer at RUNTEMPLATE 10 -- from then
+    on `has_upgrade` answered True off the plain row and `apply_upgrade`
+    raised "no applicable upgrade" on the same card, and since
+    `_best_upgrade_target` SCORES its candidates by calling it, one enchanted
+    upgradable card in hand killed the run.
+
+    The upgraded id must also round-trip, or the next reader of it hits the
+    same class of parse the Aggression pin above covers.
+    """
+    plain = "duck_and_cover"
+    if not upgrades.has_upgrade(plain):
+        pytest.skip(f"{plain} carries no upgrade row on this sheet")
+    decorated = enchantments.decorate(plain, "sharp", 2)
+    assert upgrades.has_upgrade(decorated)
+
+    upped = upgrades.apply_upgrade(copy.deepcopy(loader.get_card(decorated)))
+
+    assert upped.id == enchantments.decorate(plain + upgrades.SUFFIX,
+                                             "sharp", 2)
+    assert enchantments.split(upped.id) == (plain + upgrades.SUFFIX,
+                                            "sharp", 2)
+    # The plain card is untouched by the change: same id it always produced.
+    bare = upgrades.apply_upgrade(copy.deepcopy(loader.get_card(plain)))
+    assert bare.id == plain + upgrades.SUFFIX
