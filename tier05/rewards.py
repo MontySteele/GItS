@@ -189,6 +189,62 @@ def _roll_rarity(rng: random.Random) -> str:
     return "common"
 
 
+# The rarity ladder a screen walks down when the tier it rolled has nothing
+# to offer -- a pool may genuinely lack a tier (the reference pools have no
+# rares at all), and a substituted screen beats an empty one.
+_RARITY_FALLBACK = {"rare": "uncommon", "uncommon": "common"}
+
+
+def roll_card_offers(rng: random.Random, character_id: str, n: int,
+                     card_rarity: str | None = None,
+                     distinct: bool = False) -> list[Card]:
+    """`n` card offers rolled the way a reward screen rolls them: a rarity
+    per offer through `C.RARITY_ODDS` FIRST, then a pick inside that tier.
+
+    This is `roll_rewards`' card half, factored out so the event layer's
+    card screens can share it (EB-112). Event screens flattened the whole
+    character pool and drew uniformly, which put Rare at 14/71 = 19.7% per
+    offer against the 5% the odds table declares.
+
+    `distinct=True` is the event screens' setting: an offer never repeats a
+    card already on the same screen, so a declared N-wide choice really is
+    N cards. When the rolled tier holds nothing new the ladder steps down
+    exactly as an absent tier does. `distinct=False` reproduces
+    `roll_rewards`' historical draw -- same rng consumption, same picks, so
+    archived post-fight numbers are untouched.
+    """
+    pool = character_pool(character_id)
+    if not pool:
+        raise ValueError(
+            f"no draftable cards for character {character_id!r} -- every "
+            "reward card must be owned by the character being offered it. "
+            "Check the id, or that its sheet sets `character`.")
+    offers: list[Card] = []
+    taken: set[str] = set()
+    for _ in range(n):
+        rarity = card_rarity or _roll_rarity(rng)
+        while rarity not in pool:            # ref pool may lack a rarity
+            rarity = _RARITY_FALLBACK[rarity]
+        cands = pool[rarity]
+        if distinct:
+            while all(c.id in taken for c in cands):
+                nxt = _RARITY_FALLBACK.get(rarity)
+                if nxt is None:
+                    break
+                rarity = nxt
+                while rarity not in pool:
+                    rarity = _RARITY_FALLBACK[rarity]
+                cands = pool[rarity]
+            cands = [c for c in cands if c.id not in taken] or [
+                c for cs in pool.values() for c in cs if c.id not in taken]
+            if not cands:
+                break                        # pool smaller than the screen
+        pick = loader.get_card(rng.choice(cands).id)
+        offers.append(pick)
+        taken.add(pick.id)
+    return offers
+
+
 def _nation_weighted_choice(rng: random.Random, cards: list[Card],
                             home_nation: str | None = None) -> Card:
     # §4.1, real as of Furina sprint 1: SAME_NATION_REWARD_SHARE of the
@@ -247,12 +303,8 @@ def roll_rewards(rng: random.Random, character_id: str,
             f"no draftable cards for character {character_id!r} -- every "
             "reward card must be owned by the character being offered it. "
             "Check the id, or that its sheet sets `character`.")
-    offers = []
-    for _ in range(C.REWARD_CARD_OFFERS):
-        rarity = card_rarity or _roll_rarity(rng)
-        while rarity not in pool:            # ref pool may lack a rarity
-            rarity = {"rare": "uncommon", "uncommon": "common"}[rarity]
-        offers.append(loader.get_card(rng.choice(pool[rarity]).id))
+    offers = roll_card_offers(rng, character_id, C.REWARD_CARD_OFFERS,
+                              card_rarity=card_rarity)
     # companion_offers=0 is a CARD-ONLY screen (The Hunt's extra reward): the
     # slot is absent, not empty, so none of the companion machinery runs.
     if companion_offers and character_id not in NO_COMPANION_CHARACTERS:

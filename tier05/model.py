@@ -548,8 +548,11 @@ class _RunCtx:
             next_fight=bool(nxt) and all(
                 r.kind in ("E", "B") for r in nxt))
         if action == "heal":
+            # The authority truncates: SetCurrentHpInternal is
+            # `CurrentHp = (int)Math.Min(amount, MaxHp)`, so the effective
+            # rest heal is floor(0.3 * MaxHp), not a rounded one.
             self.hp = min(self.max_hp,
-                          self.hp + round(C.REST_HEAL_FRACTION * self.max_hp))
+                          self.hp + int(C.REST_HEAL_FRACTION * self.max_hp))
         elif action == "remove":
             self.deck_ids.remove(target)
         else:                               # M7: rest-site smithing
@@ -579,6 +582,15 @@ class _RunCtx:
         self.hp, self.max_hp, self.gold = est.hp, est.max_hp, est.gold
         self.deck_ids = est.deck_ids
         self.res.events.extend(est.log)
+        # EB-111: Book of Five Rings ticks on EVERY card added to the deck
+        # (C# BookOfFiveRings.AfterCardChangedPiles fires on PileType.Deck,
+        # the master deck -- "where cards live between rooms"), not just on
+        # shop buys and reward picks. `est.cards_added` is tallied at the
+        # event add sites; the heal lands here, after the event's own max-HP
+        # moves, so it clamps against the max HP the run leaves with.
+        if self.held is not None and est.cards_added:
+            self.hp = self.held.note_cards_added(est.cards_added, self.hp,
+                                                 self.max_hp)
         if self.grant_relics:
             self.res.relics.extend(est.relics_granted)
         if self.hp <= 0:

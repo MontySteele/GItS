@@ -235,6 +235,17 @@ class EventState:
     potions: list[str] = field(default_factory=list)
     relics_granted: list[str] = field(default_factory=list)
     log: list[dict] = field(default_factory=list)
+    # EB-111: how many cards this visit ADDED to the deck. The run layer
+    # hands the total to `HeldRelics.note_cards_added` so Book of Five Rings
+    # ticks on event adds, which it never did. Counted at each add site
+    # rather than diffed off `len(deck_ids)`, because a net diff undercounts
+    # an option that removes N and adds M -- the game counts M.
+    cards_added: int = 0
+
+    def note_add(self, n: int = 1) -> None:
+        """One door for every event site that puts a card into the deck."""
+        if n > 0:
+            self.cards_added += n
 
 
 # ---------------------------------------------------------------------------
@@ -510,6 +521,7 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
     # BEFORE any add: "Duplicate your entire Deck. Add Bad Luck" copies the
     # deck as it stands, then hands you ONE curse, not two.
     if opt.get("duplicate_deck"):
+        st.note_add(len(st.deck_ids))
         st.deck_ids.extend(list(st.deck_ids))
     for cid in _worst_cards(st, opt.get("remove", 0)):
         st.deck_ids.remove(cid)
@@ -534,10 +546,13 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
                     for c in cs]
             if same:
                 st.deck_ids.append(same[rng.randrange(len(same))].id)
+                st.note_add()
     if opt.get("curse"):
         st.deck_ids.append(opt["curse"])
+        st.note_add()
     if opt.get("add_card"):
         st.deck_ids.append(opt["add_card"])
+        st.note_add()
     if opt.get("add_ancient"):
         # The Dusty Tome grants the card ALREADY UPGRADED (C#
         # DustyTome.AfterObtained), which is why ANCIENT_WITNESS pins these
@@ -557,12 +572,14 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
                 "tier0/content/cards/ancients.yaml (EB-30m / R127)."
             ) from None
         st.deck_ids.append(ancient + upgrades.SUFFIX)
+        st.note_add()
     if opt.get("random_card"):
         spec = opt["random_card"]
         pool = _filtered_pool(st, spec)
         for _ in range(spec.get("n", 1)):
             if pool:
                 st.deck_ids.append(pool[rng.randrange(len(pool))].id)
+                st.note_add()
 
     # Downgrades resolve BEFORE upgrades, the order Reflections states them
     # in -- so a card knocked down here can be picked back up by the upgrade
@@ -623,13 +640,22 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
             pick = (policy or draft.assigned_policy)(
                 policy_rng or rng, deck, offers, st.archetype) or offers[0]
             st.deck_ids.append(pick.id)
+            st.note_add()
             offers.remove(pick)
     # `card_reward: N` is one screen of N offers; `card_screens: N` is N
     # INDEPENDENT screens ("Gain 2 card rewards"), each the standard width.
     screens = ([opt["card_reward"]] if opt.get("card_reward") else [])
     screens += [C.REWARD_CARD_OFFERS] * opt.get("card_screens", 0)
     for width in screens:
-        offers = _random_pool_cards(rng, st, width)
+        # EB-112: a card screen is a REWARD SCREEN -- the rarity is rolled
+        # per offer through C.RARITY_ODDS (60/35/5) and only then is a card
+        # picked inside that tier. These built their offers by flattening
+        # the whole character pool and drawing uniformly with replacement,
+        # which made Rare 14/71 = 19.7% per offer and let one screen show
+        # the same card twice. `_random_pool_cards` stays for the ops that
+        # genuinely declare a uniform pool draw (`pick_cards`).
+        offers = rewards.roll_card_offers(rng, st.character, width,
+                                          distinct=True)
         if opt.get("upgraded"):
             offers = [loader.peek_card(c.id + upgrades.SUFFIX)
                       if upgrades.has_upgrade(c.id) else c for c in offers]
@@ -638,6 +664,7 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
             policy_rng or rng, deck, offers, st.archetype)
         if pick is not None:
             st.deck_ids.append(pick.id)
+            st.note_add()
 
     # --- grants ---
     from tier05 import relics as relic_pool
@@ -666,8 +693,9 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
     if opt.get("heal"):
         st.hp = min(st.max_hp, st.hp + opt["heal"])
     if opt.get("heal_frac"):
+        # Fractional heals truncate, same as the rest site (EB-110).
         st.hp = min(st.max_hp,
-                    st.hp + round(opt["heal_frac"] * (st.max_hp - st.hp)))
+                    st.hp + int(opt["heal_frac"] * (st.max_hp - st.hp)))
 
     st.log.append(entry)
 
