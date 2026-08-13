@@ -326,7 +326,12 @@ def test_a_record_with_no_selectors_still_reads_as_absent_not_empty():
 
 def test_the_row_survives_a_json_round_trip():
     """The emitter quotes by hand. A card title with a quote or a backslash in
-    it must not be able to tear the line the reader parses."""
+    it must not be able to tear the line the reader parses.
+
+    The load-bearing assertion is the second one — the C# escape arm actually
+    existing. The first only fixes the row SHAPE a reader expects; a Python
+    round-trip cannot say anything about a hand-rolled C# writer.
+    """
     row = [1, "nsimplecardselectscreen", 0, 'He said "hi"', ['He said "hi"']]
     assert json.loads(json.dumps({"selectors": [row]}))["selectors"][0] == row
     assert 'case \'"\': sb.Append("\\\\\\"")' in _telemetry()

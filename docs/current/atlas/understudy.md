@@ -157,7 +157,8 @@ Library level: `bridge.get_state/post/current_seed/set_speed/give_card`
   Spotlight choose, multi-select grid). `select_card` **toggles**;
   `preview_showing` is not a reliable landed-selection signal; a multi-select
   screen needs a *different* card each visit; selection state is per-visit and
-  cleared on leaving the screen (`policy_v1.py:108-117,978-984,1031-1037`). **On the wire only** — since EB-14 (2026-08-12) the mod
+  cleared on leaving the screen (`policy_v1.py:108-117,978-984,1031-1037`).
+  **On the wire only** — since EB-14 (2026-08-12) the mod
   writes the same `selectors` rows from inside the game and spells the screen
   with its concrete class name, because that side can tell the three apart
   (`klee-mod/KleeCode/Diagnostics/SelectionTelemetry.cs`;

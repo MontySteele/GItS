@@ -402,6 +402,21 @@ internal static class PlayTelemetry
                     break;
                 }
 
+                // `-1` already MEANS "resolved without naming an option" (a
+                // confirm, a skip) on this column. Reaching it HERE means
+                // something else: the chosen card was not reference-equal to
+                // anything in the recorded offer, i.e. the instrument's own
+                // identity assumption failed. Same value, different fact, so
+                // say so in the log rather than letting it read as a skip.
+                if (index < 0)
+                {
+                    Log.Warn($"[{KleeMod.ModId}] play telemetry selector on "
+                           + $"'{screen}': chosen card '{CardName(card)}' is "
+                           + "not in the recorded offer; row written with "
+                           + "index -1, which on this column also means "
+                           + "'no option named'.");
+                }
+
                 record.Selectors.Add(
                     (record.Turns, screen, index, CardName(card), offeredNames));
             }
