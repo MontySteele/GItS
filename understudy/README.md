@@ -19,15 +19,16 @@ This directory drives the **real game** through the vendored STS2MCP bridge
 | `committed.py` | R99/4b's archetype-committed DRAFT arm — a flagged variant, off by default. Membership comes off the design sheets, so the arm that builds a deck and the reader that grades it agree on what a Fanfare card is |
 | `naming.py` | revision #7: resolved card / target / option NAMES per action |
 | `rng.py` | the dedicated policy stream, and the refusal that keeps a game seed out of it |
-| `harness.py` | `begin` / `state` / `act` — the Phase-0 measurement loop. Also `give-card`, EB-52's dev grant door, which is here and not in the soak on purpose |
+| `harness.py` | `begin` / `state` / `act` — the Phase-0 measurement loop. Also `give-card` (EB-52's dev grant door) and `frame` (window capture, off by default); both are here and not in the soak on purpose |
 | `soak.py` | **P1**: N unattended policy_v1 runs, telemetry, watchdog, reversibility. **P1.5**: chosen seeds, the encore column, the selector channel |
 | `replay.py` | **S7**: drives tier0's combat model through a recorded action sequence and diffs the two instruments' numbers. It reads the SIM. **Track B**: `--use-selectors` reconstructs the Spotlight designation from `fight.selectors` instead of letting tier0's own heuristic stand in, and `--ledger` writes the per-turn Fanfare decomposition |
 | `probe_block.py` | **Track B, probe B2**: a FIXED SCRIPT (no policy) that fixes the Spotlight answer, plays only cards whose wire text prints Block, and reads `player.block` at every decision point |
 | `trace_replay.py` | **P1.5**: reconstruct a recorded fight and compare two recordings of one seed. It reads nothing but JSONL. Named apart from `replay.py` because the two are different instruments, not two halves of one |
 | `hangwatch.py` | **EB-1**: the log-growth / message-pump watchdog. Tells a game that is alive and SPINNING from a wire that merely did not answer, so the spin stops being filed under a harness-side kind |
+| `frames.py` | **OFF by default** (`GITS_UNDERSTUDY_CAPTURE=1`): one PNG of the game WINDOW, for [USER]'s art sittings. Material, never evidence — the guardrail rides on every manifest row |
 | `report.py` | the morning report — defects, outliers, curves. No LLM |
 | `analyze.py` | the Phase-0 divergence analysis |
-| `logs/` | per-run decision JSONL; `phase0-<seed>.jsonl` (committed), `soak/` (gitignored) |
+| `logs/` | per-run decision JSONL; `phase0-<seed>.jsonl` (committed), `soak/` and `frames/` (gitignored) |
 
 ## The two rules this directory exists under
 
@@ -86,6 +87,37 @@ because a deck change nobody can account for later is worse than no smoke.
 runs the game generated; a grant reachable from an unattended overnight loop is
 a way for that claim to quietly become false while nobody is watching.
 `tier0/tests/test_understudy_give_card.py` pins its absence there.
+
+### `frame` — window capture (OFF by default)
+
+```
+GITS_UNDERSTUDY_CAPTURE=1 python -m understudy.harness frame --label salon-stage
+```
+
+One PNG of the **game window's** rectangle, written to the gitignored
+`understudy/logs/frames/` with a manifest row naming the screen, act and floor
+it was taken on. It exists so a sitting (`S4-G17`, `AS2-D5`, `AS2-B5`,
+`AS2-E2`) can be given frames from moments the bot reaches cheaply and a person
+would have to grind for — which is how EB-52's capture packet was assembled by
+hand.
+
+**Env-only and off by default**, the same shape and reasoning as
+`GITS_ILSPY_TREE`: a leg whose output is material sitting on somebody's disk
+must never be a default and must never be a path this repo chooses for you.
+Frames are gitignored for the reason `art/g12_captures/` and
+`art/eb52_captures/` are — a frame of the running game has Tier F art in it.
+
+**The window only, never the desktop.** The rectangle comes from the game
+process's own `MainWindowHandle`; no window, no capture. A whole-screen grab
+would sweep in whatever else the machine happens to be showing.
+
+**A frame is MATERIAL, not a finding.** Guardrail-7 and the no-fun rule are
+not changed by the existence of a camera: nothing this directory derives from a
+frame is a claim about look, legibility, readability or fun. That sentence is
+`frames.GUARDRAIL` and it is written onto every row of the manifest — on every
+row and not once in a header, because manifests get read in slices and
+concatenated. Like `give-card`, the verb is on the ATTENDED harness only; the
+soak takes no pictures.
 
 ## What policy_v0 will not answer
 

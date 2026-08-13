@@ -32,6 +32,7 @@ python3 -m understudy.harness state [--raw]               # screen + policy_v0
 python3 -m understudy.harness act '{"action":"end_turn"}' --why "one line"
 python3 -m understudy.harness auto --max-steps 25         # walk mechanical screens
 python3 -m understudy.harness give-card UNHEARD_CONFESSION --why "EB-52(a)"
+GITS_UNDERSTUDY_CAPTURE=1 python3 -m understudy.harness frame --label salon-stage
 
 
 # P1 soak: N unattended policy_v1 runs, setup/teardown automatic
@@ -176,6 +177,12 @@ Library level: `bridge.get_state/post/current_seed/set_speed/give_card`
   the restart path's `abandon_run` clears the poisoned save. The map on the wire
   carries a node's `type` only, never which event, so avoiding the room is not
   available at all. `--allow-hazard-events` lifts it.
+- **`frames.py` is OFF unless `GITS_UNDERSTUDY_CAPTURE=1`** (env-only, same
+  precedent as `GITS_ILSPY_TREE`), captures the game WINDOW and never the
+  desktop, writes to the gitignored `understudy/logs/frames/`, and stamps
+  `frames.GUARDRAIL` on every manifest row: a frame is MATERIAL for a person,
+  and no look / legibility / readability / fun claim may be derived from one
+  here. The soak takes no pictures.
 - **`give-card` is on the ATTENDED harness and must stay there.** The soak's
   claim is that its runs are generated runs; the absence is pinned by
   `tier0/tests/test_understudy_give_card.py`. Every grant carries the sentence

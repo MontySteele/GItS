@@ -11,6 +11,14 @@ Understudy W4. Two verbs, and the discipline lives in the order they run in:
         (mine + policy_v0's, at the same state, before anything moves), then
         POST the action and render what came back.
 
+    python -m understudy.harness frame --label salon-stage
+        OFF unless GITS_UNDERSTUDY_CAPTURE=1. One frame of the game window,
+        written to the gitignored understudy/logs/frames/ with a manifest row
+        naming the screen it was taken on. MATERIAL for [USER]'s art sittings
+        and nothing else: Guardrail-7 and the no-fun rule are not changed by
+        the existence of a camera, and no claim about look, legibility or fun
+        may be derived from a frame by anything in this directory.
+
     python -m understudy.harness give-card UNHEARD_CONFESSION --why "EB-52(a)"
         EB-52's dev door: put a CHOSEN card in the deck through the game's own
         acquisition path. A SMOKE verb. The run it is used on stops being a run
@@ -58,7 +66,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-from understudy import adapter, bridge, deckwatch, policy_v0
+from understudy import adapter, bridge, deckwatch, frames, policy_v0
 
 LOG_DIR = Path(__file__).resolve().parent / "logs"
 STATE_FILE = LOG_DIR / "_harness_state.json"
@@ -469,6 +477,50 @@ def cmd_give_card(args) -> int:
     return 0
 
 
+def cmd_frame(args) -> int:
+    """Grab one frame of the game window as MATERIAL for an art sitting.
+
+    OFF unless `GITS_UNDERSTUDY_CAPTURE=1`, and the refusal comes BEFORE the
+    bridge is touched: a disabled leg should cost nothing and reach nothing.
+
+    THE FRAME IS NOT A FINDING. Guardrail-7 and the no-fun rule are unchanged
+    by the existence of a camera: a JSON-state agent still cannot see the
+    screen, and nothing this apparatus derives from a frame is a claim about
+    look, legibility, readability or fun. The frame is for a person to look at.
+    `frames.GUARDRAIL` says exactly that and rides on every manifest row.
+
+    The state read is for the CONTEXT LABEL only -- which screen, which act and
+    floor the frame was taken on. A pile of unlabelled takes is a pile nobody
+    can use, and the alternative (guessing afterwards from the picture) is the
+    thing a bot must not do.
+    """
+    if not frames.enabled():
+        print(frames.DISABLED_NOTE)
+        return 2
+    context: dict[str, Any] = {}
+    try:
+        state = bridge.get_state()
+        run = state.get("run") or {}
+        context = {"state_type": state.get("state_type"),
+                   "menu_screen": state.get("menu_screen"),
+                   "act": run.get("act"), "floor": run.get("floor"),
+                   "seed": _session().get("seed")}
+    except bridge.BridgeError as e:
+        # A frame with no context is still a frame; the missing label is
+        # recorded as missing rather than left to be inferred later.
+        context = {"bridge": f"unreachable: {e}"}
+    report = frames.capture(args.label, note=args.note, context=context)
+    print(json.dumps({k: v for k, v in report.items() if k != "row"}, indent=1))
+    if report["status"] != "ok":
+        return 1
+    seed = _session().get("seed") or "unseeded"
+    append(seed, {"i": -1, "ts": time.time(), "event": "frame_captured",
+                  "path": report["path"], "label": args.label,
+                  "note": args.note, "context": context,
+                  "guardrail": frames.GUARDRAIL})
+    return 0
+
+
 def cmd_begin(args) -> int:
     """Stamp the session: the game seed, the speed setting, the start time."""
     seed = args.seed or bridge.current_seed() or "unseeded"
@@ -503,6 +555,16 @@ def main(argv: list[str] | None = None) -> int:
     u.add_argument("--max-steps", type=int, default=25)
     u.add_argument("--settle", type=float, default=1.2)
     u.set_defaults(func=cmd_auto)
+
+    f = sub.add_parser("frame")
+    f.add_argument("--label", default="frame",
+                   help="what this take is of, e.g. salon-stage. Slugged into "
+                        "the filename")
+    f.add_argument("--note", default="",
+                   help="one line onto the manifest row. NOT a judgment -- a "
+                        "frame is material for a person to look at, and "
+                        "nothing this apparatus says about one is evidence")
+    f.set_defaults(func=cmd_frame)
 
     g = sub.add_parser("give-card")
     g.add_argument("card_id", help="wire id (UNHEARD_CONFESSION) or the exact "
