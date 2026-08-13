@@ -221,18 +221,24 @@ def tripwires(cell, static: dict, sim: dict | None) -> list[str]:
     is never a footnote, so it is returned rather than printed inline."""
     fired = []
     v = cell.versions
+    arm = f"{static['character']}/{static['archetype']}"
     stamp = f"RT{v['RT']} / D{v['D']} / P{v['P']} / C{v['C']}"
     if stamp != "RT10 / D14 / P7 / C9":
         fired.append(f"T1: world stamp is {stamp}, registered against "
                      "RT10 / D14 / P7 / C9")
     if static["supply"] == 0:
-        fired.append(f"T4: {static['character']}/{static['archetype']} has "
+        fired.append(f"T4: {arm} has "
                      "zero draftable payoff cards — this is a content "
                      "question for [USER], not a grade")
     if sim is not None:
         lo, hi = DECK_SIZE_WINDOW
+        # T2 and T3 are per-ARM, and §6.5 phrases both as "any arm's ...", so
+        # the arm is named in the message exactly as T4 above names it. It is
+        # not decoration: without it two arms with the same number emit
+        # byte-identical strings and collapse under the de-duplication below,
+        # and a reader cannot tell how many arms fired, nor which.
         if not lo <= sim["decksize"] <= hi:
-            fired.append(f"T2: mean deck size {sim['decksize']:.1f} is "
+            fired.append(f"T2: {arm} mean deck size {sim['decksize']:.1f} is "
                          f"outside {lo}-{hi}; the band floors would be "
                          "extrapolated, not read")
         # The registered statistic is the ARM's realized reach -- §6.4 leg 2's
@@ -245,10 +251,29 @@ def tripwires(cell, static: dict, sim: dict | None) -> list[str]:
         # wanted, but it is a DISTINCT tripwire and goes back through the
         # registration rather than riding under T3's wording.
         if sim["reach"] > REACH_CEILING:
-            fired.append(f"T3: realized reach {sim['reach']:.2f} exceeds the "
-                         f"TOP supply ceiling {REACH_CEILING} — an instrument "
-                         "fault, not a finding")
+            fired.append(f"T3: {arm} realized reach {sim['reach']:.2f} "
+                         f"exceeds the TOP supply ceiling {REACH_CEILING} — "
+                         "an instrument fault, not a finding")
     return fired
+
+
+def dedupe_fired(fired: list[str]) -> list[str]:
+    """Collapse the arm-INDEPENDENT tripwire, and only that one.
+
+    T1 reads the same live stamp for every arm, so it fires nine times or
+    none: a stop is a stop, and repeating it nine times would bury the
+    arm-specific ones under it. It is collapsed to its first occurrence.
+
+    T2/T3/T4 are per-arm and are NOT collapsed. De-duplicating them by message
+    text — which is what this did to the whole list — hid arms: their messages
+    carried a number and no arm name, so two arms at the same figure emitted
+    byte-identical strings and printed as one line. At the registered seed
+    seven arms over the ceiling reported as four. All three now name their arm
+    (T4 always did), so nothing collides by text either; keeping the narrowing
+    is what makes the count honest if a future message ever drops the name.
+    """
+    return ([f for f in dict.fromkeys(fired) if f.startswith("T1")]
+            + [f for f in fired if not f.startswith("T1")])
 
 
 # ---------------------------------------------------------------------------
@@ -342,10 +367,7 @@ def main(argv: list[str] | None = None) -> int:
     for arm in ARMS:
         cell = base.but(character=arm[0], archetype=arm[1])
         fired += tripwires(cell, statics[arm], sims.get(arm))
-    # T1 reads the same live stamp for every arm, so it fires nine times or
-    # none. De-duplicated in order: a stop is a stop, and repeating it nine
-    # times would bury the arm-specific ones under it.
-    fired = list(dict.fromkeys(fired))
+    fired = dedupe_fired(fired)
     if fired:
         print(f"\n  TRIPWIRES FIRED ({len(fired)}) — the sprint STOPS and "
               "re-registers:")

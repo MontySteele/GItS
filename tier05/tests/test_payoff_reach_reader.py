@@ -11,6 +11,7 @@ thing that freezes content.
 from __future__ import annotations
 
 import random
+from types import SimpleNamespace
 
 import pytest
 
@@ -129,6 +130,39 @@ def test_t3_grades_the_arms_realized_reach_and_not_the_per_run_maximum():
     t3 = [f for f in over if f.startswith("T3")]
     assert len(t3) == 1, over
     assert "3.50" in t3[0]              # the mean, printed as a mean
+
+
+def test_two_arms_at_the_same_number_report_as_two_fired_tripwires():
+    """The fired list used to be de-duplicated by exact message text. That is
+    correct for T1 -- one live stamp read nine times -- and wrong for the
+    per-arm tripwires, whose messages carried a number and no arm name: two
+    arms at the same reach emitted byte-identical strings and printed as one
+    line, so the report under-counted the arms that fired.
+
+    Asserted on the COUNT and on both arm names, which is what a reader
+    following §6.5 needs and what the collapse destroyed.
+    """
+    a = reach.static_leg("alpha", "plan", pool=_fixture_pool())
+    b = reach.static_leg("beta", "plan", pool=_fixture_pool())
+    fired = (reach.tripwires(reach.BASE, a, _sim(5.0, 5))
+             + reach.tripwires(reach.BASE, b, _sim(5.0, 5)))
+    fired = reach.dedupe_fired(fired)
+
+    t3 = [f for f in fired if f.startswith("T3")]
+    assert len(t3) == 2, fired
+    assert any("alpha/plan" in f for f in t3)
+    assert any("beta/plan" in f for f in t3)
+
+
+def test_the_arm_independent_stamp_tripwire_is_still_reported_once():
+    """The other half of the same rule: T1 reads one live stamp, so nine arms
+    firing it is one stop, not nine lines burying the arm-specific ones."""
+    stale = SimpleNamespace(versions={"RT": 1, "D": 14, "P": 7, "C": 9})
+    s = reach.static_leg("fixture", "plan", pool=_fixture_pool())
+    fired = reach.dedupe_fired(
+        reach.tripwires(stale, s, _sim(1.0, 1))
+        + reach.tripwires(stale, s, _sim(1.0, 1)))
+    assert len([f for f in fired if f.startswith("T1")]) == 1, fired
 
 
 # --- the band-hit criterion (P5) ------------------------------------------
