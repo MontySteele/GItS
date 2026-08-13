@@ -764,18 +764,21 @@ and are the ones §7.2's aims are placed against.
 
 ### 7.2 Place the aims — R137 step (2c)
 
-This is the Q-C answer. It is [USER]'s, it has never been in this packet, and
-it is not in this packet now.
+This is the Q-C answer. It is [USER]'s. The band placement was ruled 2026-08-12
+(R185); the formal predictions commit that carries it lives in the
+registration, not this packet.
 
 The bands in §5 are the space. There are four of them — LOW, MEDIUM, HIGH,
 TOP — and each is a bracket, not a number.
 
-**Tentative aims, recorded so they are on the record.** These are what [USER]
-has said out loud so far. They are **TENTATIVE**. Writing them here is not
-the Q-C predictions commit, does not register anything, and does not bind
-anything:
+**Aims RULED 2026-08-12 (R185): the table below is adopted as it stands.**
+[USER] confirmed the packet's aims over a conflicting relayed ordering.
+Writing them here is still not the Q-C predictions commit — per the
+registration's §5, the aims land inside the single predictions commit
+appended there, together with the Q-A/Q-B predictions and the sample plan.
+Until that commit, this table is the ruled content awaiting its vehicle:
 
-| character | archetype | tentative band |
+| character | archetype | ruled band (R185) |
 |---|---|---|
 | Klee | Demolition | MEDIUM |
 | Klee | Reaction | HIGH |
