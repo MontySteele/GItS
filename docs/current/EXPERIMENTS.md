@@ -77,10 +77,19 @@ registration packets themselves live under `review/active/` — one home, not tw
   pilot refusal that `P7` (R176) resolved, and because §13's Δ figures are `P6`
   reads. The draft is the parent's instrument and arm set unchanged, re-stamped
   to `RT10/D14/P7/C9`, with a new descriptive `Q4` on the bare-form play rate.
-  **§8's predictions and §8.1's trigger are explicit [USER] slots and are
-  blank**, so the packet is not cleared to launch. **Sequencing:** it runs
-  *after* the payoff-reach sprint's graded read, per the approved settle-first
-  plan, and before the staged `EB-43`/D15 landing (its own S3) →
+  **PARTLY FILLED 2026-08-13 (R189), and deliberately NOT countersigned:**
+  `N` = 2,400 pairs/card, a 4-hour stop-and-report ceiling, §8.1's redesign
+  trigger carried forward unchanged, and the `Q4` materiality threshold at 5%
+  — the last recorded as [USER]'s chosen threshold, **not** evidence-derived.
+  **§8's per-arm prediction table and the direction half of `Q4` stay blank**,
+  so the packet is not cleared to launch; the countersign is withheld until the
+  post-window restamp, because predictions are filled against the settled world
+  and the `RT`/`C` window is open. R189 also chose the **route** —
+  measure-first, so this sweep runs before the `elemental_ecstasy` redesign
+  (Option `C2`), which lands after the graded read as its own `C` bump.
+  **Sequencing:** it runs *after* the payoff-reach sprint's graded read, per the
+  approved settle-first plan, and before the staged `EB-43`/D15 landing (its own
+  S3) →
   `review/active/m17-sweep-reregistration-p7-2026-08-13.md`; companion redesign
   options packet `review/active/m17-elemental-ecstasy-redesign-2026-08-13.md`.
 - **Shop companion channel re-run (`S4-G10` / `C9`)** — **DRAFT, awaiting

@@ -10,10 +10,26 @@
 > packet. Their §13 grade stands as published. Where this packet quotes them it
 > quotes them; it never edits them.
 >
-> **Prediction slots (§8) are BLANK and are [USER]'s.** So is the redesign
-> trigger (§8.1). Per EXPERIMENTS law and the R121 precedent, predictions are
-> authored design-side and land as their own commit **before** any seed in the
-> registered range is run. Nothing in this file may be run until they exist.
+> **Prediction slots (§8) are BLANK and are [USER]'s.** Per EXPERIMENTS law and
+> the R121 precedent, predictions are authored design-side and land as their own
+> commit **before** any seed in the registered range is run. Nothing in this
+> file may be run until they exist.
+>
+> **PARTLY FILLED 2026-08-13 by R189, and STILL NOT COUNTERSIGNED.** Four slots
+> are settled and written in below: §7's `N` (**2,400 pairs per card**), §7's
+> cost ceiling (**4 hours, stop-and-report**), §8.1's redesign trigger
+> (**carried forward unchanged**), and the §8 `Q4` materiality threshold
+> (**5%**). The **route** is settled too: **measure-first** — the sweep runs
+> first, and the `elemental_ecstasy` redesign lands after the graded read as its
+> own `C` bump.
+>
+> **The countersign is deliberately WITHHELD, and that is not an oversight.**
+> R189 ruled that this packet is not signed at `C9`: the `RT`/`C` window is
+> still open, the world will move at its close, and predictions are filled
+> against the SETTLED world. The filled slots above are carried into the
+> post-window restamp, the packet is re-stamped if the world moved, §8's
+> per-arm prediction table is filled **then**, and the countersign comes after
+> that. Signing now would date the packet to a world it will not run in.
 
 ---
 
@@ -297,9 +313,11 @@ contrast the variance is carried by the discordant pairs,
 | **2,400 (proposed default)** | **1.9 pp** | **1.3 pp** | **14,400** |
 | 4,800 | 1.4 pp | 0.9 pp | 28,800 |
 
-> **`N` — PROPOSED at 2,400 pairs per card**, the parent's registered value:
-> 2,400 runs on each of six arms, 14,400 runs total. **[USER] confirms or
-> moves it.**
+> **`N` — FILLED 2026-08-13 (R189): 2,400 pairs per card.** The parent's
+> registered value, confirmed rather than moved: 2,400 runs on each of six arms,
+> 14,400 runs total, conservative MDE **1.9 pp**. Confirming the parent's `N` is
+> what keeps this a like-for-like re-read of the same question rather than a
+> differently-powered new one.
 
 **A note the parent could not have written.** The parent's §7.1 declined to
 register the optimistic column for the card-versus-filler contrast on the
@@ -315,10 +333,11 @@ cross-stamp borrowing §4 forbids.
 runs because an interval "almost" excluded a threshold is optional stopping;
 S4 is the only path from a null to more data, and it goes back through [USER].
 
-> **COST CEILING — [USER] slot. PROPOSED at 4 hours wall-clock,
-> stop-and-report**, the parent's value. The parent's actual run took **2
-> minutes 57 seconds** for the full 14,400 runs, so the ceiling was never
-> approached; it is retained as discipline, not as a live constraint.
+> **COST CEILING — FILLED 2026-08-13 (R189): 4 hours wall-clock,
+> stop-and-report**, the parent's value carried forward. The parent's actual run
+> took **2 minutes 57 seconds** for the full 14,400 runs, so the ceiling was
+> never approached; it is retained as discipline, not as a live constraint, and
+> a ceiling that has never bound is exactly the kind worth keeping.
 
 Stop-and-report means what it says: if the sweep is still running at the
 ceiling it stops and reports what it has, the partial result is graded as
@@ -346,11 +365,23 @@ co-primaries — an ungraded co-primary is just a number nobody committed to.
 | `elemental_ecstasy` ("Sweet Dreams") | **[USER]** | **[USER]** | **[USER]** | **[USER]** |
 | `kaboom` (filler, negative control) | **[USER]** | **[USER]** | — (it is the baseline) | **[USER]** |
 
-**Q4 slot — `borrowed_brilliance` bare-form play rate. [USER].** A direction
-and a threshold for `played_when_drawn_rate` on the un-upgraded form. The
-measured `P7` figure quoted by R180 is ~**6.1%** (60/981); that figure came
-from a different read and is **not** a prediction, and [USER] may set the
-threshold anywhere.
+**Q4 slot — `borrowed_brilliance` bare-form play rate. THRESHOLD FILLED
+2026-08-13 (R189): 5%.** `played_when_drawn_rate` on the un-upgraded form is
+material at or below **5%** — a bare card the pilot plays fewer than one time
+in twenty when it is in hand is a card the pilot is refusing, not a card losing
+a close call.
+
+**Recorded as what it is: [USER]'s chosen materiality threshold, NOT derived
+from evidence.** The measured `P7` figure quoted by R180 is ~**6.1%**
+(60/981); it came from a different read, it is not a prediction, and 5% was not
+computed from it. A grader must not later present this number as if the data
+implied it. That the ruled threshold sits just under the one figure anyone has
+seen is a fact about the threshold, and is written down here rather than
+noticed at grading time.
+
+**The DIRECTION half of this slot is still [USER]'s and is still blank**, along
+with the whole per-arm table above. It is filled at the post-window countersign
+with the rest of §8.
 
 **A note for whoever transcribes [USER]'s words.** In the parent, [USER] wrote
 directions against the control plus one statement about the filler, and the
@@ -359,17 +390,23 @@ was recorded so a grader could see it was not an independent prediction scored
 as a separate success. **If [USER] works the same way this time, record it the
 same way.**
 
-### 8.1 The redesign trigger — **[USER] slot**
+### 8.1 The redesign trigger — **FILLED 2026-08-13 (R189): CARRIED FORWARD UNCHANGED**
 
-The parent's trigger (§8.1 there) was: a card is a redesign candidate if
+The parent's trigger is adopted verbatim as this registration's trigger. Both
+of its clauses are expressible in §6's columns — that was checked before the
+fill, per the first constraint below — so nothing new is owed and no column is
+added at grading time.
+
+The parent's trigger (§8.1 there) was, and now is: a card is a redesign
+candidate if
 **either (a)** the filler-adjusted result is confidently below −2 pp — read as
 the §6.1b interval's **upper** bound below −2 pp — **or (b)** the card performs
 no better than filler (Δ vs filler ≤ 0) while its family-pooled
 `dead_in_hand_rate` is ≥ 25%.
 
-**It is reproduced here as context, not as a filled slot.** [USER] either
-carries it forward verbatim, amends it, or writes a new one. Two constraints
-apply to whatever is written:
+**It was reproduced here as context and is now the filled slot** — [USER]
+carried it forward verbatim rather than amending it. Two constraints applied to
+what was written, and both were checked at the fill:
 
 - **A trigger must be expressible in §6's columns**, or it cannot be graded as
   registered. A trigger naming a quantity this sweep does not measure requires
@@ -541,9 +578,18 @@ listed because "expected to pass" is not "checked").
 
 `________`
 
-**Slots open at this draft:** §7 `N`, §7 cost ceiling, §8's full prediction
-table including the Q4 slot, and §8.1's trigger. **The packet is NOT cleared to
-launch and no seed in the registered range may be run.**
+**Slots FILLED 2026-08-13 by R189:** §7 `N` = 2,400 pairs/card, §7 cost ceiling
+= 4 hours stop-and-report, §8.1's trigger carried forward unchanged, and §8's
+`Q4` materiality threshold = 5%.
+
+**Slots STILL OPEN:** §8's per-arm prediction table (direction, threshold,
+filler sign and confidence for all five arms) and the direction half of the
+`Q4` slot.
+
+**The countersign is WITHHELD by R189 until after the post-window restamp** —
+the world moves at the close of the open `RT`/`C` window and predictions are
+filled against the settled world. **The packet is NOT cleared to launch and no
+seed in the registered range may be run.**
 
 — drafted 2026-08-13 on branch `overnight-burn-2026-08-12`, per QUEUE `M17` /
 R180. Zero design authority exercised: every threshold, direction and taste

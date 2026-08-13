@@ -11,6 +11,34 @@
 > (`review/active/eb17p-registration-draft-2026-08-08.md`) and its results file
 > (`review/active/eb17p-results-2026-08-10.txt`) are **not edited** by this
 > packet. Every figure below is quoted from them; nothing is re-graded.
+>
+> ---
+>
+> **RED-PENNED 2026-08-13 (R189). The direction is chosen; the landing is not
+> scheduled.** §5's four options are decided: **Option C2** — change the Block
+> predicate from `target_has_nonpyro_aura` to an any-aura predicate, so the
+> clause with the biggest number on the card is reachable by Klee's own Pyro
+> application instead of requiring a non-Pyro source she does not print.
+> **A, B, C1 and D are rejected**, and C2 is chosen at the **corrected** cost,
+> not the one the first draft advertised: predicate vocabulary + C# behaviour +
+> tooltip + tests (the 2026-08-13 correction at §5's Option C — it is the
+> smallest remaining option, but it is not one token).
+>
+> **ROUTE: measure-first (§6 Route 1).** The `P7` sweep runs FIRST, against
+> today's sheet, so the `borrowed_brilliance` re-read R180 actually asked for
+> carries one changed variable and not two, and `elemental_ecstasy` is re-read
+> like-for-like alongside it. **This redesign lands AFTER the graded read, as
+> its own `CONSTANTS_VERSION` bump.** It does not land now, and it cannot land
+> inside the payoff-reach freeze.
+>
+> **ONE SUB-SHAPE IS NOT SETTLED AND MUST NOT BE ASSUMED.** Option C2 offers
+> the Block number optionally moved down to compensate — *"PROPOSED at
+> `block 5`"* — and R189 chose C2 without ruling on it. The packet's own §7(2)
+> asks for the numbers to be ratified or moved, and that ask is outstanding.
+> **Whoever implements C2 stops at this question rather than defaulting to
+> either value**, because holding 8 is a straight buff to the card's largest
+> number on a 2-cost uncommon that also draws, and moving to 5 is a design act
+> nobody has made. It goes back to [USER] with the post-sweep landing.
 
 ---
 
