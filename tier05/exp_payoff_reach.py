@@ -235,8 +235,17 @@ def tripwires(cell, static: dict, sim: dict | None) -> list[str]:
             fired.append(f"T2: mean deck size {sim['decksize']:.1f} is "
                          f"outside {lo}-{hi}; the band floors would be "
                          "extrapolated, not read")
-        if sim["max_reach"] > REACH_CEILING:
-            fired.append(f"T3: realized reach {sim['max_reach']} exceeds the "
+        # The registered statistic is the ARM's realized reach -- §6.4 leg 2's
+        # per-arm figure, which is the mean at sim["reach"], the same number
+        # the printer grades and the same grain T2 reads deck size at. It is
+        # NOT the per-run maximum: max_reach is one deck, and one deck is not
+        # an arm. Reading the max here halted the sprint on ordinary data
+        # (four arms fired at 20 runs/arm with maxima 8/5/7/11 while every
+        # arm's mean sat inside the ceiling). A per-deck outlier check may be
+        # wanted, but it is a DISTINCT tripwire and goes back through the
+        # registration rather than riding under T3's wording.
+        if sim["reach"] > REACH_CEILING:
+            fired.append(f"T3: realized reach {sim['reach']:.2f} exceeds the "
                          f"TOP supply ceiling {REACH_CEILING} — an instrument "
                          "fault, not a finding")
     return fired

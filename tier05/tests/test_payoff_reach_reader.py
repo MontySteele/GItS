@@ -100,6 +100,37 @@ def test_an_archetype_with_no_payoffs_reads_zero_and_trips_t4():
     assert any(f.startswith("T4") for f in fired)
 
 
+def _sim(reach_mean: float, max_reach: int, decksize: float = 20.0) -> dict:
+    """The three sim-leg keys `tripwires` reads. Nothing live."""
+    return {"decksize": decksize, "reach": reach_mean, "max_reach": max_reach,
+            "n": 20, "on_plan": reach_mean, "reach_sd": 0.0,
+            "held_none": 0.0, "win": 0.0}
+
+
+def test_t3_grades_the_arms_realized_reach_and_not_the_per_run_maximum():
+    """§6.5 T3 reads "any arm's realized reach", which is the per-ARM figure
+    §6.4 leg 2 defines and the printer grades -- the mean. A per-run maximum
+    is one deck, and one deck is not an arm: reading it halted the sprint on
+    ordinary data, because a deck holding four on-plan payoffs is ordinary
+    against sheets that print 3-14 per archetype.
+
+    Pinned in both directions so a future edit cannot quietly swap the
+    statistic back.
+    """
+    s = reach.static_leg("fixture", "plan", pool=_fixture_pool())
+    assert reach.REACH_CEILING == 3
+
+    # A mean inside the ceiling does NOT fire, however high one deck ran.
+    inside = reach.tripwires(reach.BASE, s, _sim(2.12, 11))
+    assert not any(f.startswith("T3") for f in inside), inside
+
+    # A mean above the ceiling DOES fire, even with no outlier deck at all.
+    over = reach.tripwires(reach.BASE, s, _sim(3.5, 4))
+    t3 = [f for f in over if f.startswith("T3")]
+    assert len(t3) == 1, over
+    assert "3.50" in t3[0]              # the mean, printed as a mean
+
+
 # --- the band-hit criterion (P5) ------------------------------------------
 
 def test_supply_grade_is_the_band_ceiling_plus_or_minus_one_card():
