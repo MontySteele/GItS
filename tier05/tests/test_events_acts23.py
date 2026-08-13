@@ -325,7 +325,7 @@ def test_spend_potion_removes_the_potion_from_the_real_bag():
     ev = _future_of_potions()
     opt = next(o for o in ev["options"] if o.get("spend_potion"))
     bag = potion_pool.PotionBag(potions=["fire_potion", "block_potion"], slots=3)
-    st = _st(potions=list(bag.potions), potion_slots=bag.slots)
+    st = _st(potions=list(bag.potions))
     events.resolve(random.Random(3), ev, opt, st, bag=bag)
     assert len(bag.potions) == 1
     # the same potion left both: the snapshot and the bag stay in agreement
@@ -338,6 +338,6 @@ def test_spend_potion_without_a_bag_still_only_touches_the_snapshot():
     the accounting."""
     ev = _future_of_potions()
     opt = next(o for o in ev["options"] if o.get("spend_potion"))
-    st = _st(potions=["fire_potion"], potion_slots=3)
+    st = _st(potions=["fire_potion"])
     events.resolve(random.Random(3), ev, opt, st)
     assert st.potions == []

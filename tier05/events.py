@@ -227,8 +227,12 @@ class EventState:
     max_hp: int
     gold: int
     deck_ids: list[str]
+    # `potions` is a SNAPSHOT of the bag, for options that read or spend one.
+    # There is deliberately no `potion_slots` mirror: capacity questions go to
+    # the real PotionBag handed to `resolve` as `bag`, which derives its slot
+    # count on read. A snapshotted count was write-only here and could only
+    # ever be a second, staler answer to what the bag already answers.
     potions: list[str] = field(default_factory=list)
-    potion_slots: int = 0
     relics_granted: list[str] = field(default_factory=list)
     log: list[dict] = field(default_factory=list)
 

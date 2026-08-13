@@ -24,7 +24,7 @@ from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine.state import CombatState
 from tier0.tests import test_anchor_lock
-from tier05 import draft, model, potions as potion_pool
+from tier05 import draft, events, model, potions as potion_pool
 from tier05 import maps
 from tier05 import relics as relic_pool
 
@@ -294,3 +294,98 @@ def test_anchor_lock_still_exact():
     test_anchor_lock.test_baseline_is_still_ref_ironclad_starter()
     test_anchor_lock.test_ref_ironclad_spec_is_byte_identical()
     test_anchor_lock.test_ref_ironclad_battery_numbers_locked()
+
+
+# ===========================================================================
+# Slot capacity is DERIVED ON READ (EB-103)
+# ===========================================================================
+
+def _potion_grant_event():
+    """A minimal event whose only option grants one potion."""
+    return {"id": "eb103_probe", "acts": [1],
+            "options": [{"label": "take a potion", "potion": 1}]}
+
+
+def test_a_belt_granted_between_refresh_sites_raises_the_cap_at_the_event():
+    """The EB-103 regression, stated as the row states it.
+
+    `bag.slots` used to be a STORED number that the run layer re-stamped at
+    exactly three places -- the shop, the fight build, and the post-fight drop
+    (and that last one only inside the POTION_DROP_CHANCE branch). A Potion
+    Belt that arrived anywhere else -- a treasure node, an event relic, a boss
+    win, or a won fight that rolled no drop -- was invisible to the very next
+    event, whose grant then hit `bag.full()` against the stale cap, never
+    reached `bag.add`, and was not even recorded as an overflow discard. The
+    potion vanished with no trace in telemetry.
+
+    So: fill the bag to the BASE cap, hand the run a belt the way a treasure
+    node would (straight onto `held`, touching no refresh site), and take an
+    event that grants a potion. The grant must land.
+    """
+    ctx = model._setup_run(CHAR, ARCH, PILOT, draft.assigned_policy, 7,
+                           "standard", None, True, True, 1, "hunter")
+    assert ctx.bag is not None and ctx.held is not None
+    base = ctx.bag.slots
+
+    # Fill to the base cap: full() is True and stays True unless the cap moves.
+    ctx.bag.potions = ["fire_potion"] * base
+    assert ctx.bag.full()
+
+    # The belt arrives at a site with NO slot refresh -- exactly the gap.
+    ctx.hp, ctx.max_hp, ctx.gold = ctx.held.add(
+        "potion_belt", CHAR, ctx.hp, ctx.max_hp, ctx.gold, ctx.deck_ids,
+        random.Random(0))
+    assert ctx.held.potion_slot_bonus() == C.POTION_BELT_BONUS_SLOTS
+    assert ctx.bag.slots == base + C.POTION_BELT_BONUS_SLOTS, (
+        "the bag is still answering with the pre-belt cap")
+    assert not ctx.bag.full()
+
+    # Now take an event that grants a potion, through the real resolver.
+    def _scripted_visit(rng, act, st, seen, held=None, bag=None,
+                        policy=None, policy_rng=None):
+        ev = _potion_grant_event()
+        events.resolve(rng, ev, ev["options"][0], st, held=held, bag=bag,
+                       policy=policy, policy_rng=policy_rng)
+
+    original = model.events.visit
+    try:
+        model.events.visit = _scripted_visit
+        died = ctx.resolve_event(0)
+    finally:
+        model.events.visit = original
+
+    assert died is False
+    assert len(ctx.bag.potions) == base + 1, (
+        f"event grant was dropped: {len(ctx.bag.potions)} potions held "
+        f"against a cap of {ctx.bag.slots}")
+    assert ctx.bag.discarded == [], (
+        "the grant was silently discarded rather than stored")
+
+
+def test_a_full_bag_at_the_true_cap_still_discards():
+    """The control for the test above: deriving the cap must not make the bag
+    unbounded. At the TRUE cap the overflow rule is unchanged -- the drop is
+    rejected and logged, which is what makes the assertion above about the
+    belt and not about the guard being gone."""
+    ctx = model._setup_run(CHAR, ARCH, PILOT, draft.assigned_policy, 7,
+                           "standard", None, True, True, 1, "hunter")
+    ctx.hp, ctx.max_hp, ctx.gold = ctx.held.add(
+        "potion_belt", CHAR, ctx.hp, ctx.max_hp, ctx.gold, ctx.deck_ids,
+        random.Random(0))
+    ctx.bag.potions = ["fire_potion"] * ctx.bag.slots
+    assert ctx.bag.full()
+    assert ctx.bag.add("block_potion") is False
+    assert ctx.bag.discarded == ["block_potion"]
+
+
+def test_bag_capacity_tracks_held_with_no_refresh_call_at_all():
+    """Unit-level: the bag asks its slot function on every read, so nothing
+    has to remember to re-stamp it."""
+    held = relic_pool.HeldRelics.empty(CHAR)
+    bag = potion_pool.PotionBag(potions=[],
+                               slots_fn=lambda: model._potion_slots(held))
+    assert bag.slots == C.POTION_SLOTS
+    held.add("potion_belt", CHAR, 50, 50, 0, [], random.Random(0))
+    assert bag.slots == C.POTION_SLOTS + C.POTION_BELT_BONUS_SLOTS
+    # A fixed-capacity bag is still available and still fixed.
+    assert potion_pool.PotionBag(potions=[], slots=2).slots == 2
