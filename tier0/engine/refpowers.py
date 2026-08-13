@@ -69,7 +69,8 @@ from typing import Optional
 from tier0 import constants as C
 from tier0.engine.state import (SLY_AUTOPLAY_OP, Card, CombatState, Enemy,
                                 Fighter, Player, grant_sly_autoplay,
-                                remove_instance, sly_autoplays_permanently)
+                                remove_instance, sly_autoplays_permanently,
+                                sly_granted_this_turn)
 
 # ---------------------------------------------------------------------------
 # Powers this module refuses to implement, and the cards they gate.
@@ -1406,8 +1407,11 @@ def reset_turn_counters(state: CombatState) -> None:
         for held in pile:
             held.free_this_turn = False
             held.cost_delta_this_turn = 0
-            if any(fx.get("op") == SLY_AUTOPLAY_OP
-                   and fx.get("until") == "turn_end" for fx in held.sly):
+            # The guard asks the helper rather than re-writing its predicate:
+            # what expires at the turn boundary is DEFINED in one place
+            # (state.sly_granted_this_turn), and a second copy here could drift
+            # from it silently.
+            if sly_granted_this_turn(held):
                 held.sly = [fx for fx in held.sly
                             if not (fx.get("op") == SLY_AUTOPLAY_OP
                                     and fx.get("until") == "turn_end")]

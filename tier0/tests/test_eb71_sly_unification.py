@@ -97,13 +97,20 @@ PRE_UNIFICATION_SLY_PRICES = {
 
 
 def test_no_committed_sly_card_changed_its_drafted_price():
+    # COMMITTED only, explicitly. `_card_index()` folds in the gitignored
+    # game_ref/ reference pool when a machine has one, and the Silent's real
+    # pool is exactly where the base-game keyword lives -- so on a box with
+    # game_ref this comparison would otherwise pick up seven `si_*` rows that
+    # a bare clone (and CI) never sees. The assertion is about OUR sheets.
     index = loader._card_index()
+    external = {d["id"] for d in loader._external_cards()}
+    committed = {cid: c for cid, c in index.items() if cid not in external}
     priced = {cid: round(_static_power(c), 10)
-              for cid, c in index.items() if c.sly}
+              for cid, c in committed.items() if c.sly}
     assert priced == PRE_UNIFICATION_SLY_PRICES
     # And the marker is nowhere in the committed world, so nothing else in
     # the pool could have moved through this field either.
-    assert not [cid for cid, c in index.items() if sly_autoplays(c)]
+    assert not [cid for cid, c in committed.items() if sly_autoplays(c)]
 
 
 def test_a_sly_rider_is_vocabulary_checked_at_load_and_the_marker_is_not():

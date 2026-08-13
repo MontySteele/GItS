@@ -1545,7 +1545,7 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
         # the discarded card as context, AFTER it reaches the discard pile
         # (StS2 order). The base-game auto-play rider resolves after the
         # loop instead — see the batch note below.
-        riders = sly_riders(victim)
+        riders = sly_riders(victim) if victim.sly else []
         if riders:
             state.emit("sly", card=victim.id)
             _resolve_effects(state, riders, victim)

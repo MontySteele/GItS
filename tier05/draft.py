@@ -729,7 +729,10 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                   if fx.get("op") == "repeat_this")
     if repeats:
         total *= 1.0 + repeats * STATIC_REPEAT_SHARE
-    riders = sly_riders(card)
+    # `if card.sly` first: this is the draft hot path and the overwhelming
+    # majority of cards have an empty list, so the comprehension inside
+    # `sly_riders` should not allocate for them.
+    riders = sly_riders(card) if card.sly else []
     if riders:
         # v7: a Sly rider is the same printed grammar at half face -- it
         # fires only when a card effect discards this from hand, and the
