@@ -1,23 +1,27 @@
-"""EB-82 / EB-83 — two engine hooks, landed as UNUSED MACHINERY.
+"""EB-82 / EB-83 — two engine hooks, built as UNUSED MACHINERY. One is armed.
 
 Both exist because the event-relic admission rule forbids inventing an
-engine surface inline inside an event conversion. Neither is reachable in
-play as landed:
+engine surface inline inside an event conversion, so each was built first and
+alone:
 
   * `damage_per_exhaust` (EB-82, Forgotten Soul -- "whenever you Exhaust a
-    card, deal 1 damage to a random enemy") is a relic hook, and no relic
-    row in `tier05/content/relics.yaml` carries it.
+    card, deal 1 damage to a random enemy") is a relic hook, and it is now
+    ARMED: Grave of the Forgotten converted onto it, and `forgotten_soul` is
+    the one relic row in `tier05/content/relics.yaml` that carries it.
   * the on-draw cost randomiser (EB-83, the base game's Slither) is a
     per-instance card rider, and no sheet declares it -- `slither` is still
     in `enchantments.UNEXPRESSED` because Wood Carvings is blocked on a
     [USER] call (QUEUE `M23`), so nothing grants it.
 
-So the first thing these tests pin is that the machinery is unreachable;
-the rest drive it by hand, which is the only way it runs today.
+The first tests below pin each hook's reachability -- one carrier for the
+first, none at all for the second. The rest drive both by hand, which is
+still the only way the machinery runs under a unit test.
 """
 
 import random
 from pathlib import Path
+
+import yaml
 
 from tier0.content import enchantments, loader
 from tier0.engine import combat, refpowers, relics
@@ -25,16 +29,28 @@ from tier0.engine.state import Card
 from tier0.tests.conftest import make_enemy, make_state
 
 
-# --- unreachable by construction ------------------------------------------
+# --- what reaches each hook -----------------------------------------------
 
-def test_no_shipped_relic_carries_the_exhaust_damage_hook():
-    """The hook is built; nothing grants it. When a relic row does, this is
-    the test that says the world changed."""
-    pool = Path(relics.__file__).resolve().parents[2] / "tier05" / "content"
-    assert "damage_per_exhaust" not in (pool / "relics.yaml").read_text(
-        encoding="utf-8")
-    # ...but the combat engine already knows the word, so a relic that
-    # carries it will not trip the UNIMPLEMENTED alarm.
+def test_exactly_one_shipped_relic_carries_the_exhaust_damage_hook():
+    """The hook was built first and armed second (EB-82). Forgotten Soul is
+    its only carrier, and it is an EVENT relic -- so the tier 0.5 world moved
+    by one event's worth, not by an addition to any reward pool."""
+    from tier05 import relics as relic_pool
+    carriers = [rid for rid, spec in relic_pool.event_pool().items()
+                if any(fx.get("hook") == "damage_per_exhaust"
+                       for fx in spec["effects"])]
+    assert carriers == ["forgotten_soul"]
+    # ...and no DRAFTABLE row carries it: the reward, Neow and Ancient pools
+    # are untouched, which is what keeps the world's move to one event.
+    raw = yaml.safe_load(
+        (Path(relics.__file__).resolve().parents[2] / "tier05" / "content"
+         / "relics.yaml").read_text(encoding="utf-8"))
+    for group in ("common", "neow", "ancient"):
+        for spec in (raw.get(group) or {}).values():
+            assert all(fx.get("hook") != "damage_per_exhaust"
+                       for fx in (spec.get("effects") or []))
+    # The combat engine already knew the word, so arming it tripped no
+    # UNIMPLEMENTED alarm.
     assert "damage_per_exhaust" in relics.COMBAT_HOOKS
 
 

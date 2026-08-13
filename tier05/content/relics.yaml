@@ -350,6 +350,19 @@ event:
     effects:
       - {hook: every_n_turns_draw, n: 4, amount: 2}
 
+  forgotten_soul:
+    name: "Forgotten Soul"          # Grave of the Forgotten (Glory), Accept
+    # "Whenever you Exhaust a card, deal 1 damage to a random enemy."
+    # ADMITTED under the rule above rather than around it: EB-82 built
+    # `damage_per_exhaust` FIRST, as unused machinery (2026-08-12), so this
+    # row adds no engine surface -- it arms one the engine already honors,
+    # dispatched from the one exhaust funnel (refpowers.after_card_exhausted).
+    # UNPOWERED (the relic is not an attack) and one random LIVING enemy per
+    # exhaust; a dead field draws no randomness, so a fight that ends on an
+    # exhaust cannot renumber later rolls. EXACT: no rider, no approximation.
+    effects:
+      - {hook: damage_per_exhaust, amount: 1}
+
 # --- SKIP: relics whose mechanic tier0 lacks. NOT faked -- listed here so the
 # loader emits a loud UNIMPLEMENTED warning naming the missing mechanic, and
 # get_relic() refuses to hand back a hollow relic. (House rule: never

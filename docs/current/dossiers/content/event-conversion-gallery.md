@@ -457,10 +457,10 @@ Deep in the Chasm's Underground Mines, the old seams have weathered into alcoves
 
 ---
 
-## - [ ] Grave of the Forgotten
-*Acts: act3 · not in tier05 pool · base text: `docs/sts2-events-harvest.txt`*
+## - [x] Grave of the Forgotten
+*Acts: act3 · SHIPPED in the tier05 act-3 pool (`grave_of_the_forgotten`) · base text: `docs/sts2-events-harvest.txt`*
 
-> **FLAG — [USER] decision needed (REASON REPLACED 2026-08-10, M7 / R82 reopened):** No longer blocked on Enchant. The Confront branch is BUILT — `souls_power` is in `tier0/content/enchantments.CATALOG` ("this card loses Exhaust", expressed by clearing the printed field, needing no engine surface at all), and the lock condition is that enchantment's own eligibility rule, which the event layer already enforces. What blocks the event is the OTHER branch: **Forgotten Soul** is "whenever you Exhaust a card, deal 1 damage to a random enemy", which needs a `damage_per_exhaust` combat hook the engine does not have. The event-relic admission rule (`tier05/content/relics.yaml`, `event:` header) forbids inventing one and forbids substituting a random relic, so this event waits on a RELIC-hook backlog item, not an enchantment one.
+> **CONVERTED (EB-82, 2026-08-13):** Both branches are exact. **Confront with Truth** grants **Decay** plus **Soul's Power** — "this card loses Exhaust", expressed by clearing the printed field, needing no engine surface at all — and the wiki's lock ("locked if you have no cards with Exhaust that can be Enchant") is not a special case: it falls out of that enchantment's own eligibility rule, which the event layer already enforces for every enchant option. **Accept the Forgotten Soul** grants **Forgotten Soul**, "whenever you Exhaust a card, deal 1 damage to a random enemy" — the branch that held the event up. Its `damage_per_exhaust` hook was BUILT FIRST and alone, as unused machinery (2026-08-12), because the event-relic admission rule (`tier05/content/relics.yaml`, `event:` header) forbids inventing a hook inline inside a conversion; this pass only arms it. Known and not corrected: the option valuation prices the relic at a flat `RELIC_HP` and cannot see that it is worth far more to an Exhaust deck than to any other. [USER]'s tone ceiling is untouched — the flavor variants below ship as written, the labels are the source event's own, and nothing here chooses between them.
 
 ### 1. The Nameless Cairn — Liyue / Wangsheng Funeral Parlor — solemn funerary rites (literal)
 
