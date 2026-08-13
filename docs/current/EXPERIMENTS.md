@@ -39,10 +39,22 @@ registration packets themselves live under `review/active/` — one home, not tw
 - Pre-registration drafts are a [USER]-gated class; the grade goes in blind.
 
 ## Active registrations (pointers — packets live in `review/active/`)
-- **payoff-reach re-registration** — the `RARITY_ODDS` fence. Q18 is
-  countersigned; the open step is authoring the kickoff predictions (`Q-C` in
-  `docs/current/QUEUE.md`) *before* any number is read →
-  `review/active/payoff-reach-reregistration.md`.
+- **payoff-reach re-registration** — the `RARITY_ODDS` fence. Q18 countersigned
+  (R121); **predictions COMMITTED 2026-08-13 (R186)** as the registration's
+  `## 6`, before any sprint number was read — step (2) of the countersigned
+  execution order is executed and `Q-C` is closed. Committed: the ruled aims
+  (R185), Q-A under its observational reading and Q-B under its arithmetic
+  reading with direction and threshold, the two-leg instrument, the sample
+  plan at the ratified cell (n=600/arm, seed 11, `hunter`, `assigned`,
+  realistic), controls C1 and C2, a 4h ceiling and tripwires T1–T4. **UNRUN,
+  and it does not run yet:** §6.6's approved P12 is **settle first** — the
+  freeze begins only after the open `RT`/`C` window (`M14`'s batch: `EB-70`,
+  the `EB-82` conversion, the `EB-85` batch, `EB-69`) lands and a dependency
+  re-check passes; if the world moved, §6 is re-stamped before the freeze.
+  Owed before the run and named in §6.4/§6.5: the generic reach reader
+  (`tier05/exp_payoff_reach.py`) and the `blind` control policy — **both built
+  2026-08-13**. Steps (3)–(6) run in order and none reorders →
+  `review/active/payoff-reach-reregistration.md` §6.
 - **EB-17p force-first-copy paired winrate** — **RUN AND GRADED 2026-08-10.**
   Countersigned complete (`N` = 2400 pairs, Strike filler, 4h ceiling, §6.1b
   co-primary), §8 predictions committed ahead of the run (`eb67706`), graded
