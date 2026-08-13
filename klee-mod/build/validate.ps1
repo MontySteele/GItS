@@ -26,7 +26,13 @@ param(
     # Prints a loud banner and is never what deploy.ps1 uses -- a fast mode
     # that could be mistaken for a full pass would be the R70 failure class
     # wearing the opposite coat.
-    [switch]$StaticOnly
+    [switch]$StaticOnly,
+    # S16 (EB-105). Run the C# test project, klee-mod/KleeTests. OPTIONAL and
+    # OFF by default, deliberately: it is brand new, it needs the game install
+    # and the Workshop BaseLib the way the bite-check does, and whether a C#
+    # suite may BLOCK a deploy is a [USER] call that has not been made. See
+    # klee-mod/KleeTests/README.md, "Not a deploy gate yet".
+    [switch]$RunCsharpTests
 )
 
 $ErrorActionPreference = 'Stop'
@@ -271,6 +277,21 @@ $venvPython = Join-Path $repoRoot '.venv\Scripts\python.exe'
 # to keep the diagnostics for the failure message instead of discarding them
 # to $null. $LASTEXITCODE is a global automatic and survives the call, so
 # callers check it exactly as before.
+# The same shape for a NON-python executable (S16's `dotnet test`). Named to
+# match tools/build_pck.ps1's helper so one convention covers both scripts --
+# tier0/tests/test_repo_python_convention.py enforces the pair.
+function Invoke-NativeCaptured {
+    param([Parameter(Mandatory = $true)][string]$Exe,
+          [Parameter(ValueFromRemainingArguments = $true)][object[]]$Arguments)
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $Exe @Arguments 2>&1
+    } finally {
+        $ErrorActionPreference = $prev
+    }
+}
+
 function Invoke-RepoPython {
     param([Parameter(Mandatory = $true, ValueFromRemainingArguments = $true)]
           [string[]]$Arguments)
@@ -986,6 +1007,35 @@ if (-not $stagedContractS12) {
                 Fail 'S12' ("res://$rel is in `$pckDeferred but no C# file references " +
                     "it any more. Drop the exemption.")
             }
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------
+# S16. The C# test suite (EB-105), on request only.
+#
+# Every other rule in this file is STATIC: source text, the manifest, the
+# staged layout. S7 runs the Python suite, which cannot import a Godot
+# assembly and so has never had an opinion about the mod's own C# behaviour.
+# klee-mod/KleeTests closes part of that -- constant pins, derivations against
+# real game objects, and the per-seat co-op seams tier 0.5 structurally cannot
+# model.
+#
+# OPT-IN. deploy.ps1 does not pass this switch, so a deploy is unchanged.
+# Promoting it to mandatory is a [USER] decision, not a hygiene fix: it would
+# put the game install and the Workshop BaseLib on the critical path of every
+# deploy, which is the same objection that keeps validate.ps1 itself out of CI.
+# ---------------------------------------------------------------------------
+if ($RunCsharpTests) {
+    $testsProj = Join-Path (Split-Path $PSScriptRoot -Parent) 'KleeTests'
+    if (-not (Test-Path (Join-Path $testsProj 'KleeTests.csproj'))) {
+        Fail 'S16' "KleeTests project not found at $testsProj"
+    } else {
+        Write-Host 'Running the C# test suite (KleeTests)...' -ForegroundColor Cyan
+        $testOut = Invoke-NativeCaptured 'dotnet' 'test' $testsProj '--nologo' '-v' 'q'
+        if ($LASTEXITCODE -ne 0) {
+            $tail = ($testOut | Select-Object -Last 25) -join "`n    "
+            Fail 'S16' "KleeTests not green (dotnet test exit $LASTEXITCODE):`n    $tail"
         }
     }
 }

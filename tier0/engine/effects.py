@@ -17,7 +17,8 @@ from tier0.engine import powers, reactions, resources
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, grant_sly_autoplay,
                                 remove_instance, sly_autoplays,
-                                sly_granted_this_turn, sly_riders)
+                                sly_granted_this_turn, sly_riders,
+                                sync_fanfare_cap_to_max_hp)
 
 
 def _amount(state: CombatState, val) -> int:
@@ -101,6 +102,8 @@ def _bonus_formula(state: CombatState, formula: str,
         # Kokomi finisher reads (kickoff §2.2): Charge is READ, never
         # consumed. Rate limits (Rare / Exhaust / cost >= 2) live on the
         # card rows, not here — this is only the arithmetic.
+        resources.note_charge_read(state, "bonus_formula",
+                                   card=card.id if card else None)
         return int(n) * (state.player.charge // int(m))
     if what == "encore" and m.isdigit():
         # Curtain Call C (R85): damage reading the held buffer -- Body
@@ -637,11 +640,16 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         # engine's convention for a fractional damage term.
         if card.enchant_damage_mult != 1.0:
             base = int(base * card.enchant_damage_mult)
-        # Arlecchino, Masque of the Red Death: flat rider on YOUR Attacks.
-        # Sits with current_attack_bonus rather than in modify_damage_dealt so
-        # it reads only card Attacks -- bombs, Oz and Kurage pulses are not
-        # "your Attacks" and must not collect it.
-        base += state.player.powers.get("masque_red_death", 0)
+        # masque_red_death LEFT this sum at the 2026-07-25 redesign, for the
+        # same reason celestial_gift left flat_attack_bonus at the 2026-07-26
+        # red pen (the note there states the rule). It used to be a flat "+N
+        # damage on your Attacks"; it is now a per-turn STRENGTH ratchet plus
+        # a Bond of Life that eats the first block, and the Strength half is
+        # applied as a real power in player_turn_start_triggers
+        # (powers.deal_damage folds it in after this read). Leaving the rider
+        # here as well paid the companion twice -- once as flat damage, once
+        # as Strength -- and MasqueRedDeathPower carries no damage modifier at
+        # all, so the sim was diverging from the shipped mod on top of that.
         # card_name_damage_bonus relic rider (dead branch on the battery:
         # relic_effects is empty). Flat, folded in BEFORE strength/vulnerable,
         # matching current_attack_bonus above.
@@ -706,14 +714,6 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
                                  source=source)
 
 
-def _take_enchant_block(state: CombatState, card: Card) -> int:
-    """The Nimble rider, at most once per card play (0 after it is spent)."""
-    if state.enchant_block_spent_this_card or not card.enchant_block:
-        return 0
-    state.enchant_block_spent_this_card = True
-    return card.enchant_block
-
-
 def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     raw = (_calc_amount(state, fx["amount_formula"], card)
            if "amount_formula" in fx else fx["amount"])
@@ -729,18 +729,24 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     times = fx.get("times", 1)
     times = (_runtime_count(state, times, card)
              if isinstance(times, str) else times)
-    # Nimble (R82 reopened): "increases Block gained from this card by X" --
-    # ONCE per play, not once per row, so a two-row block card does not
-    # collect it twice. The latch lives on the STATE, reset per card play,
-    # because _op_block re-enters for every Block row (including rows nested
-    # under a conditional) and a function-local latch only de-duped the
-    # `times` loop. Not Spotlight-scaled (Spotlight scales printed numbers;
-    # an enchantment is not printed), but Frail does bite it, which is what
-    # "Block gained" means.
-    rider = _take_enchant_block(state, card)
+    # Nimble (R82 reopened; EB-85 divergence 3 fixed the cadence). The rider
+    # is paid on EVERY Block gain, not once per card play. The game applies
+    # it inside `Hook.ModifyBlock`:
+    #
+    #     if (cardSource != null && cardSource.Enchantment != null) {
+    #         num += enchantment.EnchantBlockAdditive(num); ... }
+    #
+    # with no status gate and no latch of any kind (contrast `Swift`, which
+    # flips `Status = EnchantmentStatus.Disabled` after its first payout), and
+    # `Hook.ModifyBlock` runs once per `CreatureCmd.GainBlock` call. So a
+    # two-row Block card collects Nimble twice, and a `times` loop collects it
+    # per iteration -- each of those is its own GainBlock. tier0 paid it once
+    # per play off a state latch, which under-counted every multi-gain card.
+    # Not Spotlight-scaled (Spotlight scales printed numbers; an enchantment
+    # is not printed), but Frail does bite it, exactly as the hook order does:
+    # the enchant additive lands before the multiplicative listeners.
     for _ in range(times):
-        amount = _spotlight_scale(state, card, raw) + rider
-        rider = 0
+        amount = _spotlight_scale(state, card, raw) + card.enchant_block
         # Frail bites each printed card-block gain before the refpower funnel.
         amount = powers.modify_block_gained(state.player, amount)
         state.player.block += amount
@@ -757,14 +763,21 @@ def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
     amount = _amount(state, fx["amount"])
     if state.salon_replacements_this_card:
         amount *= C.SALON_REPLACE_DAMAGE_MULT
-    # Nimble rides here too: the published text is "Block gained from this
-    # card", and two Kokomi skills gain Block only (or half) through this op.
-    # Added AFTER the Spotlight scale, exactly as _op_block adds it -- an
-    # enchantment is not a printed number -- and off the SAME per-play latch,
-    # so a card with both ops collects the rider once in total.
+    # NIMBLE DOES NOT RIDE HERE (EB-85 divergence 4). This op is the sim's
+    # mirror of `BlockNextTurnPower`, and that power pays out with
+    #
+    #     await CreatureCmd.GainBlock(base.Owner, base.Amount,
+    #                                 ValueProp.Unpowered, null);
+    #
+    # in `AfterBlockCleared`. The trailing null is the `CardPlay`, and
+    # `GainBlock` passes `cardPlay?.Card` as the card source, so
+    # `Hook.ModifyBlock` has no `cardSource.Enchantment` to read and the
+    # enchantment is never consulted -- the Block arrives from a POWER on a
+    # later turn, not from a card play. tier0 folded the rider into the
+    # power's amount, which made `tideline_watch` (inert in game) a boosted
+    # card here. The eligibility half is in `enchantments._grants_block`.
     powers.apply_power(state, state.player, "block_next_turn",
-                       _spotlight_scale(state, card, amount)
-                       + _take_enchant_block(state, card))
+                       _spotlight_scale(state, card, amount))
 
 
 def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
@@ -1417,12 +1430,23 @@ def _op_generate_from_pool(state: CombatState, fx: dict, card: Card) -> None:
 def _op_copy_spotlighted_in_hand(state: CombatState, fx: dict,
                                  card: Card) -> None:
     """Encore Performance (kickoff §9): duplicate a Spotlighted card in
-    hand. Dead without a designation and a drafted target — BY DESIGN
-    (duplication deepens a committed kit; it must not conjure one)."""
+    hand. Dead without a LIT target and a drafted one — BY DESIGN
+    (duplication deepens a committed kit; it must not conjure one).
+
+    EB-100: the question is `is_spotlighted`, never the raw `p.spotlight`
+    pointer. Under Furina's upgraded starter (R2) tier0 stops granting the
+    selector token, so `p.spotlight` stays None for the entire run while
+    every one of her cards reads as lit — and the C# card asks
+    `SpotlightSystem.IsSpotlighted`, which honours `BothModes`
+    (`EncorePerformance.cs:61-64`). On the same board the game copied and
+    the sim copied nothing. The pointer guard was pure redundancy before the
+    upgrade existed (with no designation `is_spotlighted` is False for
+    everything, so `targets` is empty and the check below returns anyway),
+    so it is deleted rather than widened: `if not targets` says the same
+    thing in both worlds and cannot go stale behind a second lighting mode.
+    """
     from tier0.content import loader
     p = state.player
-    if not p.spotlight:
-        return
     targets = [c for c in p.hand if is_spotlighted(state, c)
                and not c.kit_card]
     if not targets:
@@ -1994,6 +2018,10 @@ def _op_gain_max_hp(state: CombatState, fx: dict, card: Card) -> None:
     n = _amount(state, fx["amount"])
     p.max_hp += n
     p.hp += n
+    # EB-97: the Fanfare ceiling rides LIVE max HP, so Feed raises it MID
+    # FIGHT exactly as `FurinaResources.FanfareCap` does -- the one place the
+    # two engines used to diverge inside a single combat.
+    sync_fanfare_cap_to_max_hp(p)
     state.emit("gain_max_hp", amount=n)
 
 
@@ -2451,7 +2479,6 @@ def resolve_card(state: CombatState, card: Card) -> None:
     state.exhausted_this_card = 0
     state.block_gains_this_card = 0
     state.block_gained_this_card = 0
-    state.enchant_block_spent_this_card = False
     state.discards_this_card = 0
     state.last_drawn_type = ""
     state.salon_replacements_this_card = 0
@@ -2474,6 +2501,11 @@ def resolve_card(state: CombatState, card: Card) -> None:
         if p.powers.get("ceremonial_garment", 0) and p.charge:
             KNOB_READS["GARMENT_CHARGE_DIVISOR"] = (
                 KNOB_READS.get("GARMENT_CHARGE_DIVISOR", 0) + 1)
+            # EB-78 (2): the same resolution, tallied for the reads-per-turn
+            # distribution. Sharing this site's condition is the point --
+            # KNOB_READS already established it as the place a real Garment
+            # read happens, as opposed to the pilot's estimate of one.
+            resources.note_charge_read(state, "garment", card=card.id)
         # Garment attack rider (v0.4 §1.3): while the state holds, her
         # attacks ALSO restore the party -- her burst's actual behaviour,
         # translated to Block under the R52 healing law via the Charlotte
@@ -2815,6 +2847,7 @@ def player_turn_end_triggers(state: CombatState) -> None:
         dmg = C.KURAGE_PULSE_BASE + p.charge * multiplier
         KNOB_READS["KURAGE_PULSE_PER_CHARGE"] = (
             KNOB_READS.get("KURAGE_PULSE_PER_CHARGE", 0) + 1)
+        resources.note_charge_read(state, "kurage_pulse")   # EB-78 (2)
         # P2 runaway telemetry (playtest sprint, Track P). Report-only; no
         # rule reads this event. The x4 bank read is the one term in the kit
         # that only ever grows, and [USER]'s standing caveat is "watch act 3".

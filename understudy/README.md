@@ -227,9 +227,10 @@ working.
 
 The kill is a ledger step, not a shortcut around one. The speed row is marked
 **NOT REVERTED** with the captured original in its note, because the wire is
-dead and `PrefsSave.FastMode` persists to `settings.save` — the setting really
-is left changed, and a ledger that laundered that would cost somebody an
-evening. `--no-setup` kills nothing: it did not launch the game and may not
+dead and the live `PrefsSave.FastMode` really is left changed — it persists to
+`prefs.save` (not `settings.save`, which never carries FastMode) only if
+something flushes prefs, which a hard kill does not — and a ledger that
+laundered that would cost somebody an evening. `--no-setup` kills nothing: it did not launch the game and may not
 terminate it, so it reports instead.
 
 ## Chosen seeds (P1.5)
@@ -357,9 +358,9 @@ no longer a bot-feed cut**. The row is the same five columns in the same order
 `understudy/trace_replay.py` read a mod-written row without knowing which feed
 wrote it (checked, not asserted: `tier0/tests/test_eb14_selection_hook.py`).
 
-Four things the human feed's column does **not** contain, declared here
+Five things the human feed's column does **not** contain, declared here
 because a reader of the column will look here and nowhere else. None is a key
-asymmetry; all four are limits on what the column can hold:
+asymmetry; all five are limits on what the column can hold:
 
 - **Local seat only.** A co-op partner's answer arrives as indices through
   `PlayerChoiceSynchronizer` and opens no screen in this process, so a remote
@@ -373,6 +374,23 @@ asymmetry; all four are limits on what the column can hold:
   row would mean inventing one.
 - **An empty answer records nothing**, matching the bot feed, where a skipped
   screen produces no POST and therefore no row.
+- **No combat-pile rows in any package up to and including `0.2-738`.** The
+  grid patch read the offer off `_cards`, and
+  `NCombatPileCardSelectScreen` assigns that field `Array.Empty<CardModel>()`
+  once and never writes it again — so the offer read as empty, the row was
+  dropped, and no warning fired (the field lookup *succeeded*). Every
+  combat-pile selection is therefore **absent** from human-feed records taken
+  on those packages: Liquid Memories, Droplet of Precognition, the Wish /
+  Neow's Fury / Cosmic Indifference Ancients, and ten base cards (Headbutt,
+  Dredge, Hologram, Charge, Cleanse, Graveblast, Seance, Secret Technique,
+  Secret Weapon, Seeker Strike) plus Foregone Conclusion and Stratagem. No
+  klee-mod card reaches this screen, so the hole is base-game content only.
+  **Fixed and shipped in `0.2-820`** (per-type offer resolver reading
+  `_pile` + `_filter`), and smoke-proven live on that package: two
+  `ncombatpilecardselectscreen` rows with non-empty `offered`, matching the
+  soak's rows on round, index, chosen name and offered list. The limit
+  therefore names the packages it applies to and nothing later; records taken
+  on `0.2-738` and earlier still carry the hole.
 
 The `screen` column is spelled differently by the two writers **on purpose**.
 The soak writes what the bridge called the screen (`card_select`,
@@ -385,12 +403,20 @@ only thing this vantage has that the wire's does not. The two vocabularies
 overlap on the bot feed's fallback spelling rather than colliding, and no
 consumer matches on the column — `replay.py` matches on the OFFERED list.
 
-**The live smoke, half done (2026-08-13).** Nothing in this repo can execute
-the C# writer, so this had to be watched in a real game. Three Furina fights
-produced 17 Ethereal Spotlight turns and 17 mod-written rows — one per turn,
-never two — matching the soak's rows on round, index and chosen name, with both
-options in `offered`. **Still unexercised:** the hand surface,
-`NPlayerHand.SelectCards`, i.e. a Kokomi exhaust card. BACKLOG `EB-14`.
+**The live smoke, complete across all three surfaces (2026-08-13).** Nothing in
+this repo can execute the C# writer, so each surface had to be watched in a
+real game. `NChooseACardSelectionScreen` on package `0.2-738`: three Furina
+fights, 17 Ethereal Spotlight turns and 17 mod-written rows — one per turn,
+never two — with both options in `offered`. `NPlayerHand.SelectCards` and
+`NCombatPileCardSelectScreen` on package `0.2-820`: one Kokomi run, seed
+`D95DXF1CFK`, act 1 floor 2, driven with `give_card` grants of Pearl Diver
+(hand-exhaust select) and Hologram (`CardSelectCmd.FromCombatPile`) — **14
+`nplayerhand` rows and 2 `ncombatpilecardselectscreen` rows**, every one of
+them matched row for row by the soak's own column on round, index, chosen name
+and offered list. The spelling split is visible in that pair: the mod writes
+`nplayerhand`, the soak writes `hand_select`. The soak additionally writes
+`index: -1` confirm rows that the mod correctly does not — an empty answer
+records nothing.
 
 **Additions of 2026-08-07 (EB-18), HUMAN FEED ONLY, no renames:** `run_id`,
 `run_instance`, `fight_index`, `encounter`, `detonations`,
@@ -516,7 +542,7 @@ Phase 0 could not do.
 | `reactions_by_turn` | `[[round, reactions resolved since this fight opened]]` — **human feed only**; the wire does not narrate reactions. `ReactionEffects.TotalResolved` is GLOBAL, so in co-op both seats' reactions appear in every seat's row. Measurement only: no reaction constant is read or written |
 | `block_at_turn_end` | `[[round, block]]` as the player ENDED the turn — not the turn-opening block in `hp_trajectory`, which is whatever survived the enemy |
 | `cards_played` | `[[round, card_name], ...]` |
-| `selectors` | **P1.5; BOTH FEEDS since EB-14 (2026-08-12).** `[[round, screen_type, index, chosen_name, [offered names]], ...]` — every selector screen resolved inside this fight. The OFFERED LIST is in the row for the same reason `hand` travels with a card play: "Center Stage" means one thing against `[Center Stage, Guest Cast]` and nothing at all against a list that did not contain Guest Cast. `index: -1` is a selector resolved without naming an option (a confirm, a skip); on the HUMAN feed it additionally covers "the chosen card was not reference-equal to anything in the recorded offer", which the mod logs a warning for when it happens. `overlay` screens are excluded — that is the shape a soft-lock takes, and a screen nobody can answer has no choice to record. The human feed's four declared limits on this column (local seat, in-fight, no bundles, no row for an empty answer) and the deliberate spelling split in `screen_type` are in §"Telemetry schema" above |
+| `selectors` | **P1.5; BOTH FEEDS since EB-14 (2026-08-12).** `[[round, screen_type, index, chosen_name, [offered names]], ...]` — every selector screen resolved inside this fight. The OFFERED LIST is in the row for the same reason `hand` travels with a card play: "Center Stage" means one thing against `[Center Stage, Guest Cast]` and nothing at all against a list that did not contain Guest Cast. `index: -1` is a selector resolved without naming an option (a confirm, a skip); on the HUMAN feed it additionally covers "the chosen card was not reference-equal to anything in the recorded offer", which the mod logs a warning for when it happens. `overlay` screens are excluded — that is the shape a soft-lock takes, and a screen nobody can answer has no choice to record. The human feed's five declared limits on this column (local seat, in-fight, no bundles, no row for an empty answer, no combat-pile rows on packages up to `0.2-738`) and the deliberate spelling split in `screen_type` are in §"Telemetry schema" above |
 | `potions_used` | `[[round, potion_name], ...]` — **bot feed only**; no first-party potion hook exists for the mod side yet |
 | `damage_by_source` | `{card_or_potion_name: total}` |
 | `damage_dealt`, `damage_taken` | totals |

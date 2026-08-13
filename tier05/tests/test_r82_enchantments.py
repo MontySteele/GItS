@@ -16,8 +16,10 @@ Three claims, and the file is laid out as three sections in that order:
   3. the attachment is a decoration on the deck-list ID, so it persists --
      across upgrades, across deck mutations, and across fights in a run.
 
-The two events that did NOT convert are pinned too, in section 4: a skip that
-is not asserted is a skip that quietly un-skips itself.
+Six of the seven have now converted -- Grave of the Forgotten joined them
+once EB-82's `damage_per_exhaust` hook existed to carry Forgotten Soul. The
+one that still has not is pinned in section 4: a skip that is not asserted is
+a skip that quietly un-skips itself.
 """
 
 from __future__ import annotations
@@ -34,7 +36,7 @@ from tier05 import events
 
 
 CONVERTED = ("sapphire_seed", "field_of_man_sized_holes", "stone_of_all_time",
-             "symbiote", "self_help_book")
+             "symbiote", "self_help_book", "grave_of_the_forgotten")
 
 
 def _st(**kw):
@@ -57,10 +59,10 @@ def test_the_catalogue_holds_exactly_the_names_the_events_grant():
             for opt in events.options_of(event):
                 if opt.get("enchant"):
                     granted.add(opt["enchant"]["name"])
-    # Soul's Power is the one registered name no SHIPPED event grants: Grave
-    # of the Forgotten is built but held out of the pool by its relic (see
-    # section 4), and the enchantment is ready for the day that lands.
-    assert granted | {"souls_power"} == set(enchantments.CATALOG)
+    # Soul's Power was the one registered name no shipped event granted; the
+    # day its relic landed (EB-82) arrived, so the catalogue is now exactly
+    # the set of names the pool hands out, with nothing held in reserve.
+    assert granted == set(enchantments.CATALOG)
 
 
 @pytest.mark.parametrize("name,amount,field,expected", [
@@ -115,7 +117,7 @@ def _skill(fx):
     return Card(id="s", name="s", cost=1, type="skill", effects=fx)
 
 
-def test_nimble_targets_only_a_skill_that_actually_gains_block():
+def test_nimble_targets_only_a_card_that_actually_gains_block():
     """The published text is 'Block gained from this card', and 83 of the
     repo's 134 skills gain none -- on those, Nimble is silently inert. The
     event picker takes the drafter's best LEGAL card, so a loose predicate
@@ -126,11 +128,72 @@ def test_nimble_targets_only_a_skill_that_actually_gains_block():
     assert enchantments.eligible(plain, "nimble")
 
 
-def test_nimble_sees_block_next_turn_and_block_under_a_conditional():
-    """Both the Kokomi shape (Block only via block_next_turn) and a Block row
-    that only exists inside a conditional branch."""
+def test_nimble_is_not_skill_only_and_takes_a_block_granting_attack():
+    """EB-85 divergence 1. `Nimble.CanEnchant` is `base.CanEnchant(card) &&
+    card.GainsBlock` with NO `CanEnchantCardType` override, so card type is
+    not part of the rule and a Block-granting Attack is a legal target. Four
+    live sheet rows are that shape; naming them keeps the fix from decaying
+    back into a type check the moment somebody prints a fifth."""
+    from tier0.engine.state import Card
+    attack = Card(id="a", name="a", cost=1, type="attack",
+                  effects=[{"op": "damage", "amount": 5},
+                           {"op": "block", "amount": 5}])
+    assert enchantments.eligible(attack, "nimble")
+    power = Card(id="p", name="p", cost=1, type="power",
+                 effects=[{"op": "block", "amount": 5}])
+    assert enchantments.eligible(power, "nimble")
+    # ... and a card of ANY type that gains none is still refused.
+    dry = Card(id="d", name="d", cost=1, type="attack",
+               effects=[{"op": "damage", "amount": 9}])
+    assert not enchantments.eligible(dry, "nimble")
+    # The named four are the MOD sheets' rows of this shape (three of them
+    # are companions, which carry their OWN character id, so the set is taken
+    # by excluding the reference ids rather than by naming the three
+    # protagonists). Scoping matters: `_card_index()` also
+    # holds the extracted reference sheets when `game_ref/` is present, and
+    # those carry the base game's OWN Block-granting Attacks (`ic_iron_wave`,
+    # `si_dash`). An unscoped equality is therefore green on CI, where
+    # `game_ref/` does not exist, and red on any primary checkout -- the
+    # environment-dependent assertion this repo has a standing rule against.
+    # The reference rows are asserted separately, and as a PRESENCE rather
+    # than an equality, because their count is a fact about an extracted
+    # artifact rather than about this fix.
+    from tier0 import roster
+    live = {c.id for c in loader._card_index().values()
+            if c.type == "attack"
+            and c.character not in roster.REFERENCE_IDS
+            and enchantments.eligible(c, "nimble")}
+    assert live == {"warmup_act", "freminet_pressurized_floe",
+                    "thoma_crimson_ooyoroi", "itto_superlative_superstrength"}
+    reference = {c.id for c in loader._card_index().values()
+                 if c.type == "attack"
+                 and c.character in roster.REFERENCE_IDS
+                 and enchantments.eligible(c, "nimble")}
+    if reference:                      # only on a checkout holding game_ref/
+        assert "ic_iron_wave" in reference
+
+
+def test_nimble_refuses_a_block_next_turn_only_card():
+    """EB-85 divergence 4, the eligibility half. `BlockNextTurnPower` pays
+    out with `CreatureCmd.GainBlock(Owner, Amount, Unpowered, null)` -- no
+    card source -- so `Hook.ModifyBlock` never sees an enchantment and the
+    Block is not "Block gained from this card" at all. The mod agrees from
+    the other side: `TidelineWatch` declares neither a BlockVar nor a
+    GainsBlock override, so the game refuses it the enchantment outright."""
     later = _skill([{"op": "block_next_turn", "amount": 4}])
-    assert enchantments.eligible(later, "nimble")
+    assert not enchantments.eligible(later, "nimble")
+    both = _skill([{"op": "block", "amount": 2},
+                   {"op": "block_next_turn", "amount": 4}])
+    assert enchantments.eligible(both, "nimble")   # the ordinary row carries it
+    live = {c.id for c in loader._card_index().values()
+            if enchantments.eligible(c, "nimble")}
+    assert "tideline_watch" not in live
+
+
+def test_nimble_sees_block_under_a_conditional():
+    """A Block row that only exists inside a conditional branch still counts
+    -- BaseLib's auto-detect misses it, which is why three shipped cards
+    declare `GainsBlock` by hand."""
     nested = _skill([{"op": "conditional", "if": "has_spark",
                       "then": [{"op": "block", "amount": 3}]}])
     assert enchantments.eligible(nested, "nimble")
@@ -138,13 +201,6 @@ def test_nimble_sees_block_next_turn_and_block_under_a_conditional():
                          "then": [{"op": "draw", "amount": 1}],
                          "else": [{"op": "block", "amount": 3}]}])
     assert enchantments.eligible(else_only, "nimble")
-
-
-def test_nimble_still_refuses_a_block_granting_non_skill():
-    from tier0.engine.state import Card
-    power = Card(id="p", name="p", cost=1, type="power",
-                 effects=[{"op": "block", "amount": 5}])
-    assert not enchantments.eligible(power, "nimble")
 
 
 def test_a_card_holds_exactly_one_enchantment_and_never_swaps_it():
@@ -180,14 +236,38 @@ def test_every_converted_event_is_reachable_in_a_run(event_id):
     assert event_id in reachable
 
 
-def test_each_self_help_reading_is_gated_on_its_own_card_type():
+def test_each_self_help_reading_is_gated_on_its_own_enchantment():
+    """Each reading is offered while ITS enchantment has a legal target.
+
+    On Klee's printed starter all three are live. The third one is the EB-85
+    divergence-2 move: Swift's reading needed a Power before this window, and
+    Klee's starter has none, so it was locked here for all of RT10. The
+    game's Swift has no card-level restriction at all, so it is live on any
+    non-empty enchantable deck."""
     event = events.get_event("self_help_book")
-    # Klee's printed starter is Attacks and Skills, no Power at all: the
-    # Attack and Skill readings are live and the Power reading is locked.
     st = _st()
     labels = [o["label"] for o in events.available(event, st)]
-    assert labels == ["Read the Back", "Read a Random Passage"]
+    assert labels == ["Read the Back", "Read a Random Passage",
+                      "Read the Entire Book"]
     assert "Move On" not in labels          # a valid card exists, so no null
+
+
+def test_swift_takes_any_card_type_the_base_rules_allow():
+    """EB-85 divergence 2, the widest of the five. `Enchantments.Swift`
+    overrides HasExtraCardText / ShowAmount / OnPlay and NOTHING else -- no
+    CanEnchant, no CanEnchantCardType -- so base CanEnchant is the entire
+    gate. tier0's `_is_power` came from the granting event's flavor."""
+    from tier0.engine.state import Card
+    for kind in ("attack", "skill", "power"):
+        assert enchantments.eligible(
+            Card(id="x", name="x", cost=1, type=kind), "swift")
+    # The three shared refusals are base CanEnchant's own and still bite.
+    assert not enchantments.eligible(
+        Card(id="s", name="s", cost=1, type="status"), "swift")
+    assert not enchantments.eligible(
+        Card(id="c", name="c", cost=1, type="skill", rarity="curse"), "swift")
+    assert not enchantments.eligible(
+        Card(id="k", name="k", cost=1, type="skill", kit_card=True), "swift")
 
 
 def test_move_on_appears_only_when_every_reading_is_locked():
@@ -265,6 +345,64 @@ def test_the_field_of_holes_resist_branch_grants_the_real_normality():
     assert loader.peek_card("curse_normality").status_play_cap == 3
 
 
+# --- Grave of the Forgotten (EB-82): the branch that waited on a relic -----
+
+def test_the_grave_confront_branch_locks_without_an_exhaust_card():
+    """The wiki's lock, and it is NOT a special case: Klee's printed starter
+    Exhausts nothing, so Soul's Power has no legal target and `available`
+    drops the branch on the enchantment's own eligibility rule."""
+    st = _st()
+    labels = [o["label"] for o in
+              events.available(events.get_event("grave_of_the_forgotten"), st)]
+    assert labels == ["Accept the Forgotten Soul"]
+
+
+def test_the_grave_confront_branch_opens_once_a_card_exhausts():
+    st = _st(deck_ids=list(loader.starting_deck("klee")) + ["sugar_rush"])
+    labels = [o["label"] for o in
+              events.available(events.get_event("grave_of_the_forgotten"), st)]
+    assert labels == ["Accept the Forgotten Soul", "Confront with Truth"]
+
+
+def test_confronting_costs_decay_and_clears_the_cards_exhaust():
+    st = _st(deck_ids=list(loader.starting_deck("klee")) + ["sugar_rush"])
+    event = events.get_event("grave_of_the_forgotten")
+    opt = next(o for o in event["options"] if o["label"] == "Confront with Truth")
+    events.resolve(random.Random(0), event, opt, st)
+    assert "curse_decay" in st.deck_ids
+    enchanted = [c for c in st.deck_ids
+                 if enchantments.enchantment_of(c) == "souls_power"]
+    assert len(enchanted) == 1
+    assert enchantments.split(enchanted[0])[0] == "sugar_rush"
+    assert not loader.peek_card(enchanted[0]).exhaust
+
+
+def test_accepting_grants_forgotten_soul_and_arms_the_exhaust_hook():
+    """The whole reason this event waited: the relic ships only onto a hook
+    the engine already honors, and holding it must put that hook in front of
+    every later fight."""
+    from tier05 import relics as relic_pool
+    held = relic_pool.HeldRelics.empty("klee")
+    st = _st()
+    event = events.get_event("grave_of_the_forgotten")
+    opt = next(o for o in event["options"]
+               if o["label"] == "Accept the Forgotten Soul")
+    events.resolve(random.Random(0), event, opt, st, held=held)
+    assert st.relics_granted == ["forgotten_soul"]
+    assert {"hook": "damage_per_exhaust", "amount": 1} in held.combat_effects
+
+
+def test_forgotten_soul_is_an_event_relic_and_never_a_reward_roll():
+    """§11.2: an event relic has exactly one source, so it must not be
+    reachable through the ordinary reward pool."""
+    from tier05 import relics as relic_pool
+    assert "forgotten_soul" in relic_pool.event_pool()
+    held = relic_pool.HeldRelics.empty("klee")
+    rolled = {relic_pool.roll_relic_reward(random.Random(s), held, "klee")
+              for s in range(200)}
+    assert "forgotten_soul" not in rolled
+
+
 # ---------------------------------------------------------------------------
 # 3. Persistence, and what the rider actually does in a fight.
 # ---------------------------------------------------------------------------
@@ -336,17 +474,48 @@ def test_sown_refunds_energy_on_the_first_play_only():
     assert state.player.energy == after_first - cost   # no second refund
 
 
-def test_perfect_fit_puts_its_card_on_top_of_every_shuffle():
-    deck = [enchantments.decorate("pop", "perfect_fit")] + ["kaboom"] * 8
-    state = _fight_state(deck)
+def test_perfect_fit_takes_the_reshuffle_and_refuses_the_opening_one():
+    """EB-85 divergence 5: Perfect Fit is NOT an Innate.
+
+    `PerfectFit.ModifyShuffleOrder` opens `if (!isInitialShuffle && ...)`, so
+    the combat-start shuffle is explicitly refused however the printed text
+    reads. tier0 hoisted the card at both sites, which made the enchantment
+    strictly stronger than the game's -- a free Innate on any card.
+
+    The opening shuffle is asserted statistically rather than on one seed: a
+    single hoisted card lands at index 0 every time, and a card that is
+    merely shuffled does not."""
+    top = 0
+    for seed in range(40):
+        state = _fight_state([enchantments.decorate("pop", "perfect_fit")]
+                             + ["kaboom"] * 8)
+        state.rng = random.Random(seed)
+        state.rng.shuffle(state.player.draw_pile)
+        combat.surface_innate(state.player.draw_pile)
+        top += state.player.draw_pile[0].enchant_top_of_draw
+    assert 0 < top < 40, top          # shuffled, not hoisted
+
+    # The mid-combat reshuffle IS the site it rides, every time.
+    for seed in range(10):
+        state = _fight_state([enchantments.decorate("pop", "perfect_fit")]
+                             + ["kaboom"] * 8)
+        state.rng = random.Random(seed)
+        state.player.discard_pile = state.player.draw_pile
+        state.player.draw_pile = []
+        state.shuffle_discard_into_draw()
+        assert state.player.draw_pile[0].enchant_top_of_draw
+
+
+def test_perfect_fit_does_not_borrow_innates_opening_hoist():
+    """The two flags shared one site; only `innate` keeps it."""
+    state = _fight_state(["kaboom"] * 8)
+    fitted = loader.get_card(enchantments.decorate("pop", "perfect_fit"))
+    innate = loader.get_card("kaboom")
+    innate.innate = True
+    state.player.draw_pile = [fitted, innate] + state.player.draw_pile
     state.rng.shuffle(state.player.draw_pile)
     combat.surface_innate(state.player.draw_pile)
-    assert state.player.draw_pile[0].enchant_top_of_draw
-    # ... and again on the mid-combat reshuffle, the other shuffle site.
-    state.player.discard_pile = state.player.draw_pile
-    state.player.draw_pile = []
-    state.shuffle_discard_into_draw()
-    assert state.player.draw_pile[0].enchant_top_of_draw
+    assert state.player.draw_pile[0] is innate
 
 
 def test_normality_caps_the_turn_at_three_plays():
@@ -362,13 +531,12 @@ def test_normality_caps_the_turn_at_three_plays():
 
 
 # ---------------------------------------------------------------------------
-# 4. The two that did not convert, and why.
+# 4. The one that still has not converted, and why.
 # ---------------------------------------------------------------------------
 
-def test_the_two_unconverted_enchant_events_are_still_out_of_every_pool():
+def test_the_last_unconverted_enchant_event_is_still_out_of_every_pool():
     reachable = {e["id"] for act in range(len(C.RUN_ACTS))
                  for e in events.pool_for(act)}
-    assert "grave_of_the_forgotten" not in reachable   # needs a relic hook
     assert "wood_carvings" not in reachable            # needs Slither + 2 cards
 
 

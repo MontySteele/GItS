@@ -16,9 +16,11 @@ a defect that had already shipped.
   card can have a perfectly good sheet delta that the generator cannot
   express, in which case OnUpgrade() is an empty method with a comment in it
   and the LIVE card is unupgradable while the SIM's is fine. That is exactly
-  `nicole_celestial_gift`, the card the 2026-07-25 playtest named: it has
-  `{block_per_turn: +2}` in klee-upgrades.yaml, so layer 1 passes it, and its
-  generated OnUpgrade does nothing at all.
+  `nicole_celestial_gift`, the card the 2026-07-25 playtest named: it HAD
+  `{block_per_turn: +2}` in klee-upgrades.yaml, so layer 1 passed it, and its
+  generated OnUpgrade did nothing at all. (Motivating incident, deliberately
+  preserved in the past tense: that delta was superseded twice and the card's
+  live row is `{cost: -1}` since 2026-07-26.)
 
   LAYER 3 -- THE EMITTED C#. Layer 2 asks the manifest and believes it. The
   manifest is written by the generator, so layer 2 believes the generator's
@@ -85,15 +87,33 @@ SHEET_EXEMPT: dict[str, str] = {
     # Layer 1 green for this card. Verified in both directions at landing:
     # disable the entry and L1 reports `encore_performance` at once.
     #
-    # REMOVAL CONDITION: when FLAG-2 (X3's two adjacent closures) is ruled, a
-    # replacement upgrade delta is authored for `encore_performance` and THIS
-    # ENTRY IS DELETED with it. FLAG-2 is HELD; nothing may be built against it,
-    # which is exactly why the delta is deferred and the exemption is carried.
+    # REMOVAL CONDITION: a replacement upgrade delta is authored for
+    # `encore_performance` and THIS ENTRY IS DELETED with it.
+    #
+    # FLAG-2 IS NO LONGER THE BLOCKER, and this comment used to say it was.
+    # The condition was written as a conjunction -- FLAG-2 ruled AND a delta
+    # authored -- and the first conjunct fired on 2026-08-05: R114 discharged
+    # all four held flags (`d833573`; standing LAW at `LAW.md:309-313`, and
+    # `tier0/tests/test_s13_exploit_pins.py:290-298` records the two ratified
+    # fixes). The clause "FLAG-2 is HELD; nothing may be built against it" was
+    # true for the 34 minutes between this entry landing and that ruling, and
+    # survived by omission through the post-R114 sweep that removed the same
+    # restatement from two other files.
+    #
+    # The entry itself is STILL LOAD-BEARING -- no replacement delta exists, so
+    # the lint is correctly green -- but the reason it gave was false, and a
+    # maintainer reading it would correctly conclude the delta was blocked and
+    # never author one. Authoring a replacement for a Rare is a design call and
+    # it is now unblocked and open: QUEUE `M27`. The lint's stale-curation
+    # sweep structurally cannot catch this class: the entry is still needed,
+    # only its stated reason had expired.
     "encore_performance":
         "DEBT -- upgrade emptied by R110/S-1 (X3): `copy_cost_override: 0` is "
         "meaningless on a card that now costs 0. Curated exemption per [USER] "
-        "2026-08-06; replacement delta deferred behind FLAG-2. Gate: FLAG-2 "
-        "ruled -> author the delta -> delete this entry.",
+        "2026-08-06. FLAG-2 was discharged 2026-08-05 (R114) and is NOT the "
+        "blocker; no replacement delta has been authored, which is the open "
+        "design call at QUEUE `M27`. Gate: delta authored -> delete this "
+        "entry.",
 }
 
 # Whole classes are exempted by predicate rather than by listing every id --
@@ -142,8 +162,10 @@ CODEGEN_DEBT: dict[str, str] = {
         "DEBT -- twin of SHEET_EXEMPT's entry, not a second decision. The "
         "sheet delta was deleted by [USER] 2026-08-06 (Y-4) because R110/S-1 "
         "made the card 0-cost, so the generator correctly emits no upgrade "
-        "path. Gate: FLAG-2 ruled -> author the replacement delta -> delete "
-        "THIS ENTRY AND THE SHEET_EXEMPT ENTRY TOGETHER.",
+        "path. FLAG-2 was discharged 2026-08-05 (R114) and is NOT the "
+        "blocker; the replacement delta is the open design call at QUEUE "
+        "`M27`. Gate: delta authored -> delete THIS ENTRY AND THE "
+        "SHEET_EXEMPT ENTRY TOGETHER.",
 }
 
 

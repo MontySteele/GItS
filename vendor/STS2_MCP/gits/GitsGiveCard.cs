@@ -24,9 +24,10 @@
 //   canonical  =  ModelDb.AllCards, matched on Id.Entry
 //                 -- the same registry McpMod.Wiki.cs enumerates, which is
 //                    also where mod-injected cards arrive by construction
-//   instance   =  runState.CreateCard(canonical, player)
+//   instance   =  <scope>.CreateCard(canonical, player)
 //                 -- the game's own instantiation: ToMutable, AddCard(owner),
 //                    AfterCreated. Not `new`, not a clone we assembled.
+//                    THE SCOPE IS THE PILE'S (see below).
 //   handover   =  CardPileCmd.Add(card, PileType.Deck)                (deck)
 //                 CardPileCmd.AddGeneratedCardToCombat(card, pile, player)
 //                                                                  (in combat)
@@ -36,6 +37,48 @@
 // own curse grant runs (`CardPileCmd.AddCursesToDeck` -> `RunState.CreateCard`
 // then `Add`). Every hook, history entry, relic trigger and save-state effect
 // those paths fire, this fires, because it IS those paths.
+//
+// EB-91: THE SCOPE IS PART OF THE PATH, AND GETTING IT WRONG WEDGES THE FIGHT.
+// A card belongs to the `ICardScope` that created it, and the RunState and the
+// CombatState are two different scopes. The first cut of this file created
+// every card in the RUN scope and then handed the combat ones to
+// `AddGeneratedCardToCombat`. The card arrived in hand and read back on the
+// wire, so the grant looked fine -- and then playing it threw
+// `... must be added to a CombatState before playing it` out of
+// `CardPileCmd.AddDuringManualCardPlay`, whose guard is
+// `card.Owner.Creature.CombatState.ContainsCard(card)`. The action queue never
+// drained afterwards and the run ended `no_progress`: an unrecoverable fight,
+// from a grant that answered `ok`.
+//
+// The game's own generation path never had this problem because it never
+// crosses the scopes. Every in-combat generator reads the same two lines --
+// `CollisionCourse` is the shortest of them:
+//
+//     await CardPileCmd.AddGeneratedCardToCombat(
+//         base.CombatState.CreateCard<Debris>(base.Owner),
+//         PileType.Hand, base.Owner);
+//
+// and `CardFactory.GetForCombat` / `GetDistinctForCombat` (the attack potion
+// and Discovery route, which is the closest analogue to what this endpoint
+// does -- an arbitrary canonical card handed into a live combat) do exactly
+// the same with `player.Creature.CombatState.CreateCard(canonical, player)`.
+// So this file now picks the scope from the pile:
+//
+//     PileType.Deck      -> player.RunState                (a run acquisition)
+//     any combat pile    -> player.Creature.CombatState    (a generated card)
+//
+// which is the deck route unchanged -- it is what EB-52(a)'s evidence was
+// taken through -- and the combat route finally being the path it always
+// claimed to be. A combat-scoped card is not in the deck and does not outlive
+// the fight, which is what a generated card IS; `pile: "deck"` remains the
+// route for a grant that should persist.
+//
+// One filter the game applies and this route deliberately does not:
+// `CardFactory.FilterForCombat` drops cards with `CanBeGeneratedInCombat`
+// false and Basic/Ancient/Event rarities. That filter exists to keep the
+// game's own RANDOM generators away from cards nobody designed for it, and
+// this endpoint is not a generator -- it hands over a card the caller named.
+// The refusal list below is the whole of what it declines.
 //
 // WHAT A RUN THAT USED THIS IS, AND IS NOT.
 // It is no longer a run the generators produced. Its deck contains a card no
@@ -153,16 +196,59 @@ public static partial class McpMod
         return byTitle;
     }
 
+    /// <summary>The route label a grant reports, and the ONE place the two
+    /// branches are named. EB-91 found the response reporting the static
+    /// string `card_pile_cmd` for both, which made the wire unable to tell a
+    /// reader which path had run — on the night the combat path was broken,
+    /// that is precisely the field that would have said so.</summary>
+    private static string GitsGiveCardRoute(PileType pile) =>
+        pile == PileType.Deck
+            ? "run_state_create+card_pile_add"
+            : "combat_state_create+add_generated_to_combat";
+
+    /// <summary>The scope a granted card is created in, chosen by its
+    /// destination pile (EB-91). A card belongs to the scope that made it,
+    /// and `CardPileCmd.AddDuringManualCardPlay` checks membership of the
+    /// COMBAT scope before it will play one.</summary>
+    private static ICardScope? GitsGiveCardScope(Player player, PileType pile)
+    {
+        if (pile == PileType.Deck)
+            return player.RunState;
+        // Not CombatManager's state directly: the generators all reach it
+        // through the owner's own creature, and a card must be created in the
+        // combat state its owner is actually in.
+        //
+        // `as` and not a cast: `ICombatState` declares `CreateCard` itself and
+        // does NOT derive from `ICardScope` (`CombatState` implements both
+        // separately), so a state that is not also a card scope is a real
+        // possibility to the compiler. It becomes the refusal above rather
+        // than an InvalidCastException inside a fire-and-forget task.
+        return player.Creature?.CombatState as ICardScope;
+    }
+
     private static async Task GitsGiveCardGrant(
         CardModel canonical, Player player, PileType pile, int count,
         bool upgraded)
     {
+        var scope = GitsGiveCardScope(player, pile);
+        if (scope == null)
+        {
+            // Refused rather than created in the wrong scope. The apply path
+            // already checked `CombatManager.Instance.IsInProgress`, so this
+            // is the narrow race where the combat ended between the check and
+            // the queued grant -- and a card minted into the run scope and
+            // pushed at a dead combat is exactly the EB-91 shape.
+            GD.PrintErr("[STS2 MCP][GItS] give_card: no card scope for pile "
+                        + $"{pile}; grant dropped rather than mis-scoped.");
+            return;
+        }
+
         for (int i = 0; i < count; i++)
         {
             // The game's own instantiation. Never `new`, never a hand-built
             // clone: CreateCard is ToMutable + AddCard(owner) + AfterCreated,
             // and AfterCreated is where a card gets to set itself up.
-            var card = player.RunState.CreateCard(canonical, player);
+            var card = scope.CreateCard(canonical, player);
             if (upgraded)
             {
                 // The game's own upgrade command, which is what a rest-site
@@ -185,7 +271,8 @@ public static partial class McpMod
             }
 
             GD.Print($"[STS2 MCP][GItS] give_card: granted "
-                     + $"{SafeGetText(() => card.Id.Entry)} to {pile}");
+                     + $"{SafeGetText(() => card.Id.Entry)} to {pile} "
+                     + $"via {GitsGiveCardRoute(pile)}");
         }
     }
 
@@ -240,7 +327,8 @@ public static partial class McpMod
             ["count"] = count,
             ["upgraded"] = upgraded,
             ["pile"] = pileName,
-            ["route"] = "card_pile_cmd"
+            ["route"] = GitsGiveCardRoute(pile),
+            ["scope"] = pile == PileType.Deck ? "run" : "combat"
         };
     }
 

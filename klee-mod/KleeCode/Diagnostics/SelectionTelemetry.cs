@@ -68,7 +68,14 @@ namespace KleeMod.Diagnostics;
 ///
 ///   1. `NCardGridSelectionScreen.CardsSelected()` — the abstract base of six
 ///      concrete grids (simple, combat-pile, deck, deck-upgrade,
-///      deck-enchant, deck-transform). One patch, one implementation.
+///      deck-enchant, deck-transform). One patch, one implementation — but
+///      NOT one offer reader: five of the six hold their offered list in
+///      `_cards`, and `NCombatPileCardSelectScreen` does not (it assigns
+///      `Array.Empty` once and keeps the real list in `_pile` + `_filter`).
+///      The offer resolver is therefore per-type; see `OfferedFromPile`.
+///      Note also that the four DECK grids essentially never open inside a
+///      fight, and a row is only recorded against an open fight record, so
+///      in-fight grid coverage is about half, not five-sixths.
 ///   2. `NChooseACardSelectionScreen.CardsSelected()` — a separate class, and
 ///      the load-bearing one: Furina's Ethereal Spotlight opens it every turn
 ///      (Center Stage / Guest Cast).
@@ -144,6 +151,71 @@ internal static class SelectionTelemetry
     private static string Label(object surface) =>
         surface.GetType().Name.ToLowerInvariant();
 
+    /// <summary>`_pile` / `_filter` on `NCombatPileCardSelectScreen`, resolved
+    /// once and cached — the one grid subclass whose offer is NOT in `_cards`.
+    /// </summary>
+    private static FieldInfo? _pileField;
+
+    private static FieldInfo? _filterField;
+
+    private static bool _pileFieldsResolved;
+
+    /// <summary>The combat pile's offer, recomputed the way the screen itself
+    /// recomputes it.
+    ///
+    /// WHY THIS EXISTS AND WHY A `_cards` READ CANNOT WORK HERE.
+    /// `NCombatPileCardSelectScreen.Create` assigns
+    /// `_cards = Array.Empty&lt;CardModel&gt;()` and never writes it again — one
+    /// `_cards` reference in the whole class. The screen's real offer lives in
+    /// `_pile` + `_filter` and is recomputed into `_grid.SetCards(...)` by
+    /// `UpdatePileContents()` on every `_pile.ContentsChanged`. So the
+    /// inherited `_cards` read succeeded, returned an empty list, and
+    /// `Offer()` short-circuited — every combat-pile selection wrote no row,
+    /// with no warning, while the boot report said ARMED. (Decompile read
+    /// pinned to the build: `klee-mod/KleeTests/bin/Debug/sts2.dll`.)
+    ///
+    /// THE SNAPSHOT IS THE OFFER AS OPENED. `_pile.ContentsChanged` can fire
+    /// mid-selection, so a Prefix-time read is the list the player was looking
+    /// at when asked — which is the honest record and is what the bot feed's
+    /// state dump captures.
+    /// </summary>
+    private static IReadOnlyList<CardModel>? OfferedFromPile(object screen)
+    {
+        if (!_pileFieldsResolved)
+        {
+            var t = typeof(NCombatPileCardSelectScreen);
+            _pileField = AccessTools.Field(t, "_pile");
+            _filterField = AccessTools.Field(t, "_filter");
+            _pileFieldsResolved = true;
+        }
+
+        if (_pileField == null || _filterField == null)
+        {
+            if (Warned.Add(typeof(NCombatPileCardSelectScreen)))
+            {
+                Log.Warn($"[{KleeMod.ModId}] selection telemetry: "
+                       + "NCombatPileCardSelectScreen._pile/_filter did not "
+                       + "resolve, so the offered list is unreadable and NO "
+                       + "selector rows are recorded for that screen. Every "
+                       + "other telemetry channel is unaffected.");
+            }
+
+            return null;
+        }
+
+        if (_pileField.GetValue(screen) is not CardPile pile)
+        {
+            return null;
+        }
+
+        // A null filter is the screen's "everything in the pile" case; the
+        // game always passes one, but reading a field is not a guarantee.
+        var filter = _filterField.GetValue(screen) as Func<CardModel, bool>;
+        return filter == null
+            ? pile.Cards.ToList()
+            : pile.Cards.Where(filter).ToList();
+    }
+
     /// <summary>Reads a screen's offered list off its non-public `_cards`
     /// field. Returns null when the lookup is dead or the field is empty.
     /// </summary>
@@ -177,7 +249,11 @@ internal static class SelectionTelemetry
     {
         try
         {
-            var offered = OfferedCards(screen, declaring);
+            // PER-TYPE RESOLVER, not another `_cards` read: one grid subclass
+            // keeps its offer somewhere else entirely. See OfferedFromPile.
+            var offered = screen is NCombatPileCardSelectScreen
+                ? OfferedFromPile(screen)
+                : OfferedCards(screen, declaring);
             return offered == null || offered.Count == 0
                 ? null
                 : new Pending(Label(screen), offered.ToList());
@@ -264,7 +340,10 @@ internal static class SelectionTelemetry
 /// <summary>
 /// Surface 1: the six grid screens, which share one inherited
 /// <c>CardsSelected()</c> on their abstract base — so one patch covers the
-/// simple grid, the combat pile, and the four deck screens.
+/// simple grid, the combat pile, and the four deck screens. One PATCH, but
+/// two offer readers: the combat pile keeps its list in <c>_pile</c> +
+/// <c>_filter</c> rather than <c>_cards</c>, and reading <c>_cards</c> there
+/// made this patch a silent no-op for the whole life of the channel.
 /// </summary>
 [HarmonyPatch(typeof(NCardGridSelectionScreen),
               nameof(NCardGridSelectionScreen.CardsSelected))]

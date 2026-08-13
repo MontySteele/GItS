@@ -17,7 +17,15 @@ from tier0.engine.state import CombatState, Fighter
 # remaining in the state; the same tick-down grammar as the debuffs. No
 # other character ever carries it, so the addition is a dead branch there.
 DECAYING = ("weak", "vulnerable", "frail",
-            "ceremonial_garment")            # tick down at owner's turn end
+            "ceremonial_garment")            # tick down at a side turn end
+# EB-95: the three base-game duration DEBUFFS. When a MONSTER lands one of
+# these on a player-side creature the authority sets `SkipNextDurationTick`
+# inside `Apply`, so the debuff is not spent by the tick at the end of the very
+# side turn that applied it (sts2.xml, `PowerModel.SkipNextDurationTick`: the
+# skip is conditioned on "if a monster applied the power to the player"). A
+# ceremonial_garment is a self-buff, not a Debuff, and takes no skip -- which
+# leaves its player-turn uptime exactly where it was.
+DURATION_DEBUFFS = ("weak", "vulnerable", "frail")
 # This-turn windows: cleared entirely at their owner's turn end (R16
 # card-mediated Spotlight boosts; a _turn power is a window, not a stack).
 EXPIRING = ("spotlight_mult_bonus_turn", "spotlight_flat_damage_turn")
@@ -150,9 +158,20 @@ def on_turn_start(state: CombatState, fighter: Fighter) -> None:
 
 
 def on_turn_end(state: CombatState, fighter: Fighter) -> None:
-    for name in DECAYING:
-        if fighter.powers.get(name, 0) > 0:
-            fighter.powers[name] -= 1
+    # EB-95: DECAYING ticks are an AfterSideTurnEnd(side == Enemy) event, not
+    # an owner's-turn-end one. For an ENEMY owner the two sites coincide --
+    # this call IS inside the enemy side -- and enemy-owned Vulnerable/Weak
+    # /Frail must keep ticking here, which is what bag_of_marbles and
+    # fear_potion prose depends on. For the PLAYER the two sites are a whole
+    # enemy round apart: combat._player_turn calls this BEFORE _run_rounds
+    # takes the enemy turns that the debuff is supposed to amplify, so ticking
+    # here made every enemy-applied Vulnerable cover one fewer enemy round
+    # than the game, and a 1-stack application cover none at all. The player's
+    # tick lives in refpowers.after_enemy_side_turn_end instead.
+    if fighter is not state.player:
+        for name in DECAYING:
+            if fighter.powers.get(name, 0) > 0:
+                fighter.powers[name] -= 1
     for name in EXPIRING:
         fighter.powers.pop(name, None)
     # StS2 site M (AfterSideTurnEnd) for the base-game parity powers. This is
@@ -180,6 +199,31 @@ def apply_power(state: CombatState, target: Fighter, name: str, stacks: int,
         resources.gain_charge(state, stacks, "flawless_strategy")
         state.emit("strength_converted", stacks=stacks)
         return
+    # EB-95: `SkipNextDurationTick`, set inside the authority's Apply for a
+    # Debuff freshly landed on a player-side creature. Without it the enemy
+    # that applies Vulnerable during its own side turn watches the tick at the
+    # end of that same side turn eat the stack it just paid for -- a 1-stack
+    # application would amplify nothing.
+    #
+    # The flag is applier-SENSITIVE. sts2.xml (shipped doc XML,
+    # `P:MegaCrit.Sts2.Core.Models.PowerModel.SkipNextDurationTick`) states the
+    # predicate verbatim: duration-type powers tick "at the end of the monster
+    # side turn, but skipping the first tick if a monster applied the power to
+    # the player". A debuff the PLAYER puts on herself (a self-Frail card) gets
+    # no reprieve and must not be handed an extra enemy round.
+    #
+    # `applier` is resolved the same way refpowers.on_power_applied resolves
+    # it, and for the same reason: callers that cannot know it leave it None,
+    # and the acting side is unambiguous in tier0 -- cards apply powers during
+    # the player turn, intents during the enemy turn. The enemy `debuff` intent
+    # (combat._enemy_turn) passes `applier=enemy` explicitly, so the inference
+    # only decides the unnamed cases.
+    if target is state.player and name in DURATION_DEBUFFS and stacks > 0:
+        source = applier
+        if source is None and state.in_player_turn:
+            source = state.player
+        if source is not state.player:                # a monster applied it
+            target.skip_next_duration_tick.add(name)
     standing = target.powers.get(name, 0)
     new = standing + stacks
     if max_stacks is not None:              # sheet v0.2 stack caps

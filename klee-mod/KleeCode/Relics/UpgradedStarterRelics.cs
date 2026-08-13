@@ -239,8 +239,40 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
 /// </summary>
 public sealed class PearlOfInsightRelic : CustomRelicModel
 {
-    public const int ChargePerExhaust = KokomiConstants.ChargePerExhaust * 2;
-    public const int BurstPerExhaust = KokomiConstants.BurstPerExhaust * 2;
+    /// <summary>
+    /// RATIFIED INVARIANT (R190, 2026-08-13): the upgraded rates are exactly
+    /// TWICE their base rates, in BOTH engines, permanently.
+    ///
+    /// WHY THESE ARE LITERALS AND NOT `KokomiConstants.X * 2`. The expression
+    /// form looks stronger and was weaker. The compiler enforced the doubling
+    /// on THIS side, and nothing at all enforced it on the sim's -- where the
+    /// same two numbers are literals in tier05/content/relics.yaml. So bumping
+    /// a base constant moved C# and left the sim behind, and the parity lint
+    /// was structurally blind to it, because an expression is not a numeric
+    /// literal and `parse_number` cannot read one: both members sat in
+    /// UNMIRRORED with a note saying exactly this, and saying that making them
+    /// literals is what would fix it (EB-74 packet §3f found the same hole
+    /// from the other direction).
+    ///
+    /// As literals they are MIRRORED against the sim's relic row, and
+    /// tools/lint_constant_parity.py additionally asserts that row is 2x the
+    /// tier0 base constant. That closes the loop the compiler could only close
+    /// halfway: C# literal == sim relic row == 2 x tier0 base, checked on every
+    /// suite run. ExplosiveFrags.OpeningSparks is the in-repo precedent for the
+    /// literal-plus-MIRRORED shape.
+    ///
+    /// CONSEQUENCE FOR ANYONE MOVING THE BASE RATE (e.g. EB-74's lever-2
+    /// candidate B, CHARGE_PER_EXHAUST 1 -> 2): you move FOUR numbers, not one.
+    /// The lint tells you so and fails until you have. It must be green
+    /// BEFORE any such change is pulled -- that ordering is part of R190.
+    ///
+    /// This class is the FICTION and the tooltip, never the mechanism: the
+    /// exhaust funnel is keyed to her character identity, which is why the
+    /// upgraded form has to declare its own numbers rather than read the
+    /// funnel's.
+    /// </summary>
+    public const int ChargePerExhaust = 2;   // = KokomiConstants.ChargePerExhaust * 2
+    public const int BurstPerExhaust = 4;    // = KokomiConstants.BurstPerExhaust * 2
 
     public PearlOfInsightRelic() : base(autoAdd: false)
     {

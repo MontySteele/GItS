@@ -144,7 +144,7 @@ index reads **303** — the extra 3 are `ancients.yaml`, acquisition-only.
 - **R37 / R24** — an upgrade must be sim-expressible: Catalytic Converter's
   delta became `{innate: true}` and left `UNAPPLIABLE`, satisfying the
   no-unmeasured-upgrades law rather than waiving it
-  (`klee-mod/DECISIONS.md:992-1004`; `upgrades.py:56-72`, `:140-144`).
+  (`klee-mod/DECISIONS.md:992-1004`; `upgrades.py:77-99`, `:155-160`).
 - **R36** — `discard_for_sparks` grammar: forced discard, 1 spark per card
   *actually* discarded, kit cards exempt; upgrade deltas `{discard, sparks}`
   (`klee-mod/DECISIONS.md:975-990`; `upgrades.py:356-384`).
@@ -213,7 +213,7 @@ index reads **303** — the extra 3 are `ancients.yaml`, acquisition-only.
   (`test_roster_registry.py:39-71`).
 - **`UNAPPLIABLE` is an empty `frozenset` on purpose**, kept so the next
   unexpressible delta has somewhere to be named instead of being tolerated
-  silently (`upgrades.py:66-72`).
+  silently (`upgrades.py:77-99`; the module docstring says the same).
 
 ## 6. Reading order
 

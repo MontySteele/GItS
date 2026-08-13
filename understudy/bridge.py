@@ -142,8 +142,13 @@ def get_seed() -> dict:
 # ------------------------------------------------------ dev card grants ----
 #
 # EB-52. `POST /api/v1/gits/give_card` puts a CHOSEN card in the deck (or in a
-# combat pile) through the game's own acquisition path -- the same
-# `RunState.CreateCard` + `CardPileCmd.Add` pair a card reward runs. It exists
+# combat pile) through the game's own acquisition path -- `RunState.CreateCard`
+# + `CardPileCmd.Add`, the pair a card reward runs, for `pile="deck"`; and
+# `CombatState.CreateCard` + `AddGeneratedCardToCombat`, the pair every
+# in-combat generator runs, for the three combat piles (EB-91: the scope is
+# part of the path, and the response's `route`/`scope` fields say which one
+# ran). A combat-scoped grant is a GENERATED card -- it is not in the deck and
+# does not outlive the fight; `pile="deck"` is the grant that persists. It exists
 # because EB-52(a)'s obstacle is acquisition, not instrumentation: the Fanfare
 # floor is already on the wire, and what could not be arranged in three live
 # sessions was getting one of three RARE Powers into a deck.

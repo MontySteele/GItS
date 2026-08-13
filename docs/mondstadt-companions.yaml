@@ -8,9 +8,10 @@
 # (klee-mod/DECISIONS.md:1524, "the cards should be upgrade-able as per the
 # sheet"). MaxUpgradeLevel 0 is gone; companions emit real upgrade paths from
 # the merged upgrade index, and the mod now reproduces the power curve tier05
-# had already been measuring at rest sites. The only companions that still do
-# not upgrade are the sim's own UNAPPLIABLE set (durin_witchs_flame,
-# nicole_celestial_gift), which is a per-card fact, not a pool law.
+# had already been measuring at rest sites. EVERY companion upgrades today, in
+# both engines: the sim's UNAPPLIABLE set is empty, and the two cards this line
+# used to name as exceptions both carry live deltas (durin_witchs_flame
+# {power_amount: +2}, nicole_celestial_gift {cost: -1} since 2026-07-26).
 # The half that SURVIVED the ruling is kept above: power routes through the
 # player character. That is the design law; "never scale" was an
 # implementation detail that got overruled.

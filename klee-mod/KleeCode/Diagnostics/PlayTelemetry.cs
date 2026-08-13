@@ -82,6 +82,9 @@ internal static class PlayTelemetry
     /// logs already land in, so there is nothing to find and nothing to
     /// create. `GITS_TELEMETRY_INTENT` overrides it, which is how the soak
     /// stamps its committed-draft arm without touching a file the human owns.
+    /// The override is by PRESENCE, not by content: a variable that is set but
+    /// EMPTY declares nothing and the file is NOT consulted, because a harness
+    /// that says "no intent" must not inherit a person's standing declaration.
     ///
     /// READ ONCE PER SESSION, deliberately. A declaration is a statement about
     /// the run you are about to play; re-reading it mid-session would let one
@@ -652,9 +655,23 @@ internal static class PlayTelemetry
     {
         if (_intent != null) return _intent;
         var declared = System.Environment.GetEnvironmentVariable(IntentEnvVar);
-        if (!string.IsNullOrWhiteSpace(declared))
+        if (declared != null)
         {
-            return _intent = Clean(declared!);
+            // SET-BUT-EMPTY IS A DECLARATION OF NOTHING, NOT AN ABSENCE, and
+            // only an ABSENT variable may consult the human's file. The soak
+            // exports `GITS_TELEMETRY_INTENT=""` on every launch that had no
+            // `--commit` (understudy/soak.py), precisely so an operator's
+            // inherited shell variable cannot leak in. Under the old
+            // IsNullOrWhiteSpace test that empty string fell THROUGH to
+            // `intent.txt` -- the human feed's persistent, cross-session
+            // declaration -- so the mod half of a bot soak carried an
+            // archetype nobody declared for it while the soak half carried
+            // "", splitting one soak across `--intent none` and a declared arm
+            // and breaking this class's own "read once so a run's records
+            // cannot disagree with each other" invariant. Same bug shape
+            // f5784f9 fixed for GITS_TELEMETRY_FEED, whose non-empty "bot"
+            // hid it. `Clean("")` is `""`, which is what a column should show.
+            return _intent = Clean(declared);
         }
 
         try

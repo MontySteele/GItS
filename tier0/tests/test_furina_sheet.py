@@ -487,15 +487,37 @@ def test_generation_pool_guardrails():
         assert pool, rarity
         # equal-rarity clause
         assert all(c.rarity == rarity for c in pool)
-        # shared companions + Guest Star set only; playable characters'
-        # personal cards structurally absent
+        # shared companions + Guest Star set only
         assert all(c.is_companion or c.guest_star for c in pool)
+        # EB-99: assert on personal_pool, which is the field the guardrail is
+        # actually about. The old line asserted `c.character not in ("klee",
+        # "furina")` and passed VACUOUSLY -- prune_witch_hunt is a shared
+        # companion whose `character` is "prune" and whose personal_pool is
+        # "klee", so it was in the uncommon pool the whole time.
+        assert all(c.personal_pool is None for c in pool)
         assert not any(c.character in ("klee", "furina") for c in pool)
         # sub-Rare pools cannot reach drafted 5-stars; the only star-5
         # rows are the banner-exempt Guest Star cameos themselves
         assert all(c.star != 5 or c.guest_star for c in pool)
     # the Guest Star set is actually reachable
     assert any(c.guest_star for c in loader.guest_star_generation_pool("common"))
+
+
+def test_personal_pool_companion_is_excluded_from_generation_pools():
+    """EB-99, stated against the WITNESS row so the guardrail cannot go
+    vacuous again: prune_witch_hunt is simultaneously a shared uncommon
+    companion and Klee's personal-pool card. It must be a candidate on every
+    axis the pool filters except the one that matters, and still be absent.
+    """
+    prune = loader.get_card("prune_witch_hunt")
+    assert prune.is_companion and not prune.kit_card
+    assert prune.rarity == "uncommon"
+    assert prune.personal_pool == "klee"
+
+    assert prune not in loader.guest_star_generation_pool("uncommon")
+    # latent twin: the conscript pool omitted the same predicate, and is
+    # unreachable today only because conscript rows default to Inazuma.
+    assert prune not in loader.companion_pool(prune.nation)
 
 
 def test_generators_exhaust_and_generate_to_hand():
@@ -731,6 +753,52 @@ def test_supporting_cast_draws_on_first_spotlighted_play_only():
         combat.play_card(st, hand_card(st, cid))
     draws = [e for e in st.log if e["event"] == "extra_draw"]
     assert len(draws) == 1                          # first play only
+
+
+def test_supporting_cast_draw_lands_after_the_triggering_card_resolves():
+    """EB-101 (races-d). The last member of the EB-19/NC-9 ordering family.
+
+    The mod RECORDS this draw in `BeforeCardPlayed` and RESOLVES it in
+    `AfterCardPlayed`, so the triggering card resolves against a hand that
+    does not contain the drawn cards. tier0 drew them first, so a Spotlighted
+    card that reads the hand during its own resolution saw a bigger hand than
+    the game did.
+
+    Encore Performance is the sharpest instance and makes the ordering a
+    BINARY rather than a probability: play it as the turn's first Spotlighted
+    card with an empty hand behind it and a lit card on top of the draw pile.
+    Under the old order the draw lands first and Encore copies it; under the
+    mod's order there is nothing in hand to copy. Director's Cut and Curtain
+    Cue flip the same way, and the class bites at MAX_HAND_SIZE.
+    """
+    st = furina_state()
+    p = st.player
+    p.energy = 9
+    p.spotlight = "furina"
+    p.powers["spotlight_draw"] = 1
+    encore = loader.get_card("encore_performance")
+    p.hand = [encore]                    # nothing else lit in hand
+    p.draw_pile = [loader.get_card("stage_presence")]
+
+    combat.play_card(st, encore)
+
+    # The draw still LANDS -- deferring it must not strand it, which is the
+    # failure mode the deferred-settle machinery is watched for.
+    assert [e["event"] for e in st.log].count("extra_draw") == 1
+    # ...and it landed AFTER resolution, so Encore had no target.
+    assert [c.id for c in p.hand] == ["stage_presence"]
+    assert not any(e["event"] == "encore_performance_copy" for e in st.log)
+
+    # Non-vacuity: the same board with the card already in hand DOES copy, so
+    # the assertion above is about ordering and not about a dead op.
+    st2 = furina_state()
+    st2.player.energy = 9
+    st2.player.spotlight = "furina"
+    encore2 = loader.get_card("encore_performance")
+    st2.player.hand = [encore2, loader.get_card("stage_presence")]
+    combat.play_card(st2, encore2)
+    assert [c.id for c in st2.player.hand] == ["stage_presence",
+                                               "stage_presence"]
 
 
 def test_standing_ovation_pays_encore_per_spotlighted_play():

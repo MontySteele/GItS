@@ -2,8 +2,10 @@
 
 Player turn: bombs detonate -> auras tick -> power hooks -> draw + energy ->
 pilot plays until done -> discard hand -> power decay.
-Enemy turns: scripted intents, no AI. Asleep enemies skip; frozen enemies
-act at -50% damage (Frozen v2, principles v1.5).
+Enemy turns: scripted intents, no AI. Asleep enemies take no action but are
+still side-turn participants (EB-96: block clear, turn-start and turn-end
+hooks all fire); frozen enemies act at -50% damage (Frozen v2, principles
+v1.5).
 """
 
 from __future__ import annotations
@@ -15,7 +17,7 @@ from tier0 import constants as C
 from tier0.engine import (effects, potions, powers, reactions, refpowers,
                           relics, resources)
 from tier0.engine.state import (Card, CombatState, Enemy, Player,
-                                remove_instance)
+                                remove_instance, sync_fanfare_cap_to_max_hp)
 
 # A pilot is a callable: (state) -> Card | None (None = end turn).
 Pilot = Callable[[CombatState], Card | None]
@@ -279,6 +281,10 @@ def play_card(state: CombatState, card: Card) -> None:
     state.cards_played_this_turn += 1
     state.emit("play", card=card.id, cost=cost, energy_left=p.energy,
                drawn_turn=drawn_turn, first_copy=first_copy)
+    # EB-101 (races-d): Supporting Cast's draw is RECORDED here and RESOLVED
+    # below `_finish_play`, which is where the mod resolves it. See the block
+    # that sets this, and the one that spends it.
+    pending_spotlight_draw = 0
     if effects.is_spotlighted(state, card):
         # Spotlight texture applies in both modes. Only Center Stage creates
         # Fanfare; Guest Cast spends the light on Companion empowerment.
@@ -309,10 +315,13 @@ def play_card(state: CombatState, card: Card) -> None:
         # tried). spotlight_encore (EVERY play) remains engine-supported
         # as the archived pre-flip rate.
         if state.spotlighted_cards_this_turn == 1:
-            n = p.powers.get("spotlight_draw", 0)
-            if n:
-                state.draw(n)
-                state.emit("extra_draw", amount=n)
+            # EB-101, the RECORD half. The amount is read from the powers
+            # dict HERE, on the mod's `BeforeCardPlayed` clock
+            # (`SpotlightSystem.NotePlay` stores nothing but PendingDraws),
+            # so a card that grants or strips `spotlight_draw` during its own
+            # resolution cannot change the size of its own draw. Only the
+            # DRAW moves below; the read does not.
+            pending_spotlight_draw = p.powers.get("spotlight_draw", 0)
             n = p.powers.get("spotlight_encore_first", 0)
             if n:
                 resources.gain_encore(state, n, "spotlight_encore_first",
@@ -326,6 +335,27 @@ def play_card(state: CombatState, card: Card) -> None:
     if p.burst_max and "skill_tag" in card.tags:
         resources.gain_burst(state, C.BURST_PER_SKILL_TAG, "skill_tag")
     _finish_play(state, card)
+    # EB-101 (races-d), the RESOLVE half -- the surviving member of the
+    # EB-19/NC-9 broadcast-ordering family, whose siblings closed as
+    # races-a/b/c.
+    #
+    # The mod records this draw in `BeforeCardPlayed` and resolves it in
+    # `AfterCardPlayed` (`SpotlightSystem.cs:389-403`), so the triggering
+    # card resolves against a hand WITHOUT the drawn cards. tier0 drew them
+    # above the card's own resolution, so a Spotlighted card that reads the
+    # hand while resolving -- Encore Performance -- selected from a
+    # different-sized pool in each engine, and Director's Cut and Curtain
+    # Cue flip the same way at MAX_HAND_SIZE.
+    #
+    # `BeforeCardPlayed` is not async and carries no PlayerChoiceContext, so
+    # the mod's half cannot move; the movable leg is this one.
+    #
+    # NOT A PARITY CRITERION, deliberately: neither engine's draw consumes
+    # `Rng.CombatTargets` and the two share no RNG stream, so the guarantee
+    # here is structural (a hand size), never a fixed-seed trace match.
+    if pending_spotlight_draw:
+        state.draw(pending_spotlight_draw)
+        state.emit("extra_draw", amount=pending_spotlight_draw)
 
 
 def _finish_play(state: CombatState, card: Card,
@@ -443,10 +473,7 @@ _FREE_PLAY_CONTEXT = (
     # Coverage pass 4's three per-card reads. Same hazard as the rest: a Sly
     # auto-play that discards or gains block in the middle of an outer card
     # would otherwise leave its numbers behind for the outer card to read.
-    "block_gained_this_card", "discards_this_card", "last_drawn_type",
-    # Nimble's once-per-play latch: an inner free-played card must not spend
-    # (or un-spend) the OUTER card's rider entitlement.
-    "enchant_block_spent_this_card")
+    "block_gained_this_card", "discards_this_card", "last_drawn_type")
 
 
 def resolve_free_play(state: CombatState, card: Card,
@@ -562,6 +589,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     state.prevention_used_this_turn = False      # Kokomi ward latch (§2.4)
     state.encore_spend_draws_this_turn = 0       # Gallery Stirs latch (R85)
     state.cards_created_this_turn = 0            # engine_closure window
+    state.charge_reads_this_turn = {}            # EB-78 (2) instrument
 
     for enemy in list(state.living_enemies):     # bombs from last turn go off
         if enemy.bombs:
@@ -761,6 +789,22 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # A turn that ended by killing the last enemy or by the player dying never
     # reaches here, and metrics records -1 there rather than inventing a zero.
     state.emit("turn_close", block=p.block)
+    # INSTRUMENT ONLY (EB-78 (2), the reads-per-turn distribution R188 ruled
+    # a watch trigger would need). One sample per completed player turn, taken
+    # HERE because the Kurage pulse fires inside player_turn_end_triggers
+    # above -- sampling any earlier would systematically drop the one reader
+    # that is once-per-turn by construction. Emitted even at zero, because a
+    # distribution that silently omits its zeros is not a distribution.
+    #
+    # WHAT THIS SAMPLE CANNOT SEE, declared rather than discovered at grading
+    # time: it shares `turn_close`'s own blind spot -- a turn that ended by
+    # killing the last enemy or by the player dying never reaches this line,
+    # so the final turn of most fights contributes no sample. That truncation
+    # is toward the BUSY end (a killing turn is rarely a quiet one), and any
+    # reading of this event states it.
+    state.emit("charge_reads_turn",
+               total=sum(state.charge_reads_this_turn.values()),
+               by_source=dict(state.charge_reads_this_turn))
     powers.on_turn_end(state, p)
     _revive_player_if_needed(state)
 
@@ -768,14 +812,35 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
 def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
     if not enemy.alive:
         return
-    if enemy.sleep_turns > 0:
+    # EB-96: a SLEEPING creature is still a side-turn participant. The
+    # authority builds `creaturesStartingTurn` with no Asleep filter
+    # (CombatManager.cs:443-448); sleep suppresses `TakeTurn` and nothing else
+    # (Creature.cs:711-717); AsleepPower itself hangs off
+    # `AfterSideTurnEnd(participants.Contains(Owner))`. So the block clear,
+    # site A, site F and the turn-end tick all fire on a sleep turn -- an
+    # early return above them stalled the sleeper's dot, froze its duration
+    # debuffs and left its temporary Strength never reverting. NC-7/R116
+    # hoisted Frozen's tick out of this function for exactly this reason; the
+    # same shape applies here, one clock at a time.
+    #
+    # The early return WAS load-bearing for two things, and both are kept
+    # below: a sleep turn advances no intent, and it toggles no Nemesis
+    # Intangible (the phase respawn opens the stack, and the respawn sleep
+    # turn must not immediately close it).
+    asleep = enemy.sleep_turns > 0
+    if asleep:
         enemy.sleep_turns -= 1
         state.emit("enemy_sleep", enemy=enemy.name)
-        return
     enemy.block = 0
     powers.on_turn_start(state, enemy)          # site A: metallicize, dot
     refpowers.enemy_side_turn_start(state, enemy)    # site F: poison
     if not enemy.alive:
+        return
+    if asleep:
+        # Site M for a participant that never took its turn. Mirrors the
+        # acting path's `if not enemy.alive: return` above -- a sleeper that
+        # died to its own dot reaches neither.
+        powers.on_turn_end(state, enemy)
         return
     # Crab Rage (§10.2, gated on the spec field -- inert everywhere else):
     # once, at this enemy's first turn start after any ally has died, apply
@@ -967,17 +1032,25 @@ def surface_innate(draw_pile: list) -> None:
     overflow degrades to "drawn first", which is also base-game). Order
     among innate cards stays shuffle-relative -- no hidden second sort.
 
-    Perfect Fit (R82 reopened) rides the same placement: "whenever this would
-    be shuffled into your Draw Pile, place it on the top instead", and the
-    combat-start shuffle is one of exactly two places that happens (the other
-    is state.shuffle_discard_into_draw). Sharing the site rather than adding
-    a second pass is what keeps the two from disagreeing about order.
+    PERFECT FIT DOES NOT RIDE THIS SITE (EB-85 divergence 5). Its text --
+    "whenever this would be shuffled into your Draw Pile, place it on the top
+    instead" -- reads like it covers both shuffles, but the implementation
+    refuses the opening one outright:
+
+        public override void ModifyShuffleOrder(Player player,
+                                                List<CardModel> cards,
+                                                bool isInitialShuffle)
+        {
+            if (!isInitialShuffle && cards.Contains(base.Card)) { ... }
+        }
+
+    tier0 hoisted it here as well, which handed the enchantment a free Innate
+    -- a strictly stronger card than the game's. The mid-combat reshuffle is
+    the only place it applies (state.shuffle_discard_into_draw).
     """
-    def tops(c):
-        return c.innate or c.enchant_top_of_draw
-    innate = [c for c in draw_pile if tops(c)]
+    innate = [c for c in draw_pile if c.innate]
     if innate:
-        draw_pile[:] = innate + [c for c in draw_pile if not tops(c)]
+        draw_pile[:] = innate + [c for c in draw_pile if not c.innate]
 
 
 def _run_rounds(state: CombatState, pilot: Pilot) -> None:
@@ -1048,6 +1121,12 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # alone, and the Hyperbeam's floor drop moves the floor alone and
     # DOWNWARD -- which under the old line would have ADDED ceiling on the way
     # out of every fight it was played in. See Player.fanfare_cap_base.
+    #
+    # EB-97: re-derive the base term from LIVE max HP first. tier05 rebuilds
+    # the Player from the sheet and only THEN assigns the run's real max HP
+    # (`tier05/model.py`), so without this the whole run would fight on the
+    # printed-HP ceiling -- the deviation from LAW.md:189 the mod never had.
+    sync_fanfare_cap_to_max_hp(player)
     player.fanfare_cap = player.fanfare_cap_base
     player.fanfare_floor = 0
     player.charge = 0            # Kokomi: the meter is per-combat (§2.1)

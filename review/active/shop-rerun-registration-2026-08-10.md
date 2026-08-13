@@ -3,7 +3,7 @@
 > **Status: DRAFT. Nothing here has been run.** No number in this document was
 > measured. The instrument was repaired and the shop world was changed on
 > 2026-08-10; this packet asks to re-run the measurement in the new world.
-> **That world is `RT10/D14/P7/C9`, `C9` including the X7/X8 rarity erratum
+> **That world is `RT11/D14/P7/C9`, `C9` including the X7/X8 rarity erratum
 > — §2 enumerates it in full, and it is the world the re-run measures.**
 > The predictions in §5 are deliberately blank — they are [USER]'s to fill in
 > before any seed is run.
@@ -67,7 +67,7 @@ events rather than by asserting that none occurred.
 
 ## 2. One window, one world
 
-**The registered world is `RT10/D14/P7/C9`, including the X7/X8 rarity
+**The registered world is `RT11/D14/P7/C9`, including the X7/X8 rarity
 erratum.** In plain English, and as the standing requirement for this
 re-run: this is the world the re-run measures. Everything listed below is
 inside one window, and a run of this instrument that does not report this
@@ -112,7 +112,7 @@ What that one window contains, in full:
    before and after the log was added.
 3. **The five R82-reopen enchant events**, which arrived with
    `RUNTEMPLATE_VERSION` 10 and move the event-pool odds in every act for
-   every character. This is why the stamp reads RT10 and not RT9, and it is
+   every character. This is why the stamp read `RT10` and not `RT9`, and it is
    why no number from the original cell is a cheaper sample of this one.
 4. **The three rarity promotions** (R161/R162): `friendly_visit`,
    `chain_fuse` and `careful_arrangement` move Common → Uncommon. They joined
@@ -141,6 +141,33 @@ What that one window contains, in full:
    `klee`/demolition, `furina`/salon, `kokomi`/priest — were re-run on the same
    seeds either side of the repair and came back byte-identical. It is named
    here for completeness, not because it changes the world under measurement.
+
+7. **`RUNTEMPLATE_VERSION` 11** (the coordinated 2026-08-13 window,
+   `EB-82` + `EB-85`). **This packet is re-stamped `RT10` → `RT11` for it, on
+   `M14`'s own instruction** — the row says the window lands, the packet is
+   re-stamped if the world moved, and only then is the slate entered. The
+   world moved, so the re-stamp is done and **entering the slate is the next
+   step**; nothing in `§5` has been filled and no seed has been run.
+   What `RT11` adds that this cell can see:
+   - **A third act-3 event.** `grave_of_the_forgotten` joins the act-3 pool
+     (2 own → 3 own), so act-3 event odds move for every character — the same
+     shape of change as item 3, one act further in. Its Accept branch grants
+     an **event** relic, `forgotten_soul`, which no reward, Neow or Ancient
+     roll can reach; the shop cannot sell it and this cell's arms cannot draft
+     it, but a run that took it carries `damage_per_exhaust` into every later
+     fight, which moves how far a run gets and therefore how many shops it
+     visits.
+   - **What an enchant event may target and pay** (five fixes against
+     `sts2.dll` v0.107.1). The one that reaches this cell hardest is Swift:
+     it has no card-type override in the game, so **Self-Help Book's third
+     reading is live on Klee's printed starter**, where it was locked for all
+     of `RT10`. Klee/demolition is one of the three profiles this cell runs.
+   **Unlike item 6, this is not named for completeness.** Item 6 was proved
+   byte-identical on these three profiles either side of the repair; this one
+   is not, and is not claimed to be. Every Klee and Furina number in the
+   `RT10` world is archive for this cell, and the twelve-arm re-baseline taken
+   at the bump — `review/active/sitting-reads-2026-08-13.md` — is the table to
+   author the `§5` predictions against.
 
 The floor restoration, the instrument repair and the rarity erratum land
 together, in the same commit range, under one stamp (`CONSTANTS_VERSION` 9).
@@ -245,9 +272,9 @@ the channel should be re-priced or re-stocked. That is a design call and it is
   only difference between the two arms; same seeds, same characters, same
   policy, same everything else.
 - Characters: unchanged — `klee`/demolition, `furina`/salon, `kokomi`/priest.
-- World: **`RT10/D14/P7/C9`**, `C9` including the X7/X8 rarity erratum — the
+- World: **`RT11/D14/P7/C9`**, `C9` including the X7/X8 rarity erratum — the
   world enumerated in §2. The report must carry the full run-cell stamp
-  (`RT/D/P/C`) or it is not citable (R68), and it must read `RT10/D14/P7/C9`
+  (`RT/D/P/C`) or it is not citable (R68), and it must read `RT11/D14/P7/C9`
   or it is not *this* registration's measurement.
 - Every output line the instrument printed before the repair still prints, so
   the pre-existing reads stay reproducible. The new reads are printed on lines

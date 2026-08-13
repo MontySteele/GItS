@@ -17,6 +17,7 @@ from tier0 import constants as C
 from tier0.content import enchantments
 from tier0.content import local_reference
 from tier0.content import upgrades
+from tier0.engine import state as state_mod
 from tier0.engine.state import Card, Enemy, Player, sly_riders
 
 CONTENT_DIR = Path(__file__).parent
@@ -294,13 +295,24 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
 def guest_star_generation_pool(rarity: str) -> list[Card]:
     """Guest Star generation pool (kickoff §9, guardrails c+d): shared
     companions plus the purpose-built Guest Star set, at EXACTLY the
-    generator's rarity. Playable characters' personal cards are absent by
-    construction (neither companions nor guest_star rows); 5-star shared
-    Rares are unreachable from sub-Rare generators because their rarity
-    is 'rare' (the equal-rarity clause is the banner's bodyguard)."""
+    generator's rarity. 5-star shared Rares are unreachable from sub-Rare
+    generators because their rarity is 'rare' (the equal-rarity clause is the
+    banner's bodyguard).
+
+    personal_pool rows are excluded by an EXPLICIT predicate, honored HERE so
+    no pool source can forget it (the same reason the character generation
+    pool re-checks `generatable`). The docstring used to claim they were
+    absent "by construction", and that was false for a row that is a
+    companion AND personal: prune_witch_hunt is a shared-companion uncommon
+    with PersonalPool "klee", so The Guest List and Command Performance could
+    mint a Klee kit card on Furina. LAW.md:98-110 makes personal-pool
+    companions the character's kit, distinct from generated Guest Star
+    cameos; rewards, the shop and the mod's own IsOfferable all filter, and
+    this was the sole consumer that skipped it (EB-99)."""
     pool = [c for c in _card_index().values()
             if (c.is_companion or c.guest_star)
-            and c.rarity == rarity and not c.kit_card]
+            and c.rarity == rarity and not c.kit_card
+            and c.personal_pool is None]
     if not pool:
         raise ValueError(f"empty guest-star pool at rarity {rarity!r}")
     return sorted(pool, key=lambda c: c.id)
@@ -313,10 +325,17 @@ def companion_pool(nation: str) -> list[Card]:
     conscription pays card identity for a random recruit, and the rare
     hit is the verb's advertised dream. Guest Stars are excluded (they are
     a Furina personal-pool mechanism, kickoff §2.3 differentiation) and so
-    are kit cards, as everywhere."""
+    are kit cards, as everywhere.
+
+    personal_pool rows are excluded by the same explicit predicate the Guest
+    Star pool carries, for the same reason (EB-99). Unreachable today only
+    because conscript rows default to Inazuma and the personal-pool companion
+    that exists is Klee's; the filter is stated rather than inherited from
+    that accident."""
     pool = [c for c in _card_index().values()
             if c.is_companion and c.nation == nation
             and not c.guest_star and not c.kit_card
+            and c.personal_pool is None
             and c.rarity in C.RARITY_ODDS]
     if not pool:
         raise ValueError(f"empty companion pool for nation {nation!r}")
@@ -459,7 +478,7 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
                   relic_effects=_starting_relic_effects(spec),
                   kit_cards=_kit_cards(spec),
                   character_id=spec["id"],
-                  fanfare_cap=(int(C.FANFARE_CAP_FRACTION * spec["hp"])
+                  fanfare_cap=(state_mod.fanfare_cap_base_term(spec["hp"])
                                if spec.get("fanfare") else 0))
 
 
@@ -503,7 +522,7 @@ def build_player_from_ids(character_id: str, card_ids: list[str],
                   node_kind=node_kind,
                   kit_cards=_kit_cards(spec),
                   character_id=spec["id"],
-                  fanfare_cap=(int(C.FANFARE_CAP_FRACTION * spec["hp"])
+                  fanfare_cap=(state_mod.fanfare_cap_base_term(spec["hp"])
                                if spec.get("fanfare") else 0))
 
 

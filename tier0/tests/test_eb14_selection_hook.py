@@ -146,12 +146,33 @@ def test_the_three_selection_surfaces_are_patched():
     """`card_select` is three screens wearing one name (understudy atlas §5),
     and hand selection is a fourth surface that opens no screen at all. The
     six grid screens share one inherited `CardsSelected()`, so they cost one
-    patch between them."""
+    patch between them.
+
+    ONE PATCH IS NOT ONE OFFER READER, and asserting the first used to imply
+    the second here. `NCombatPileCardSelectScreen` assigns
+    `_cards = Array.Empty<CardModel>()` once and never writes it again -- its
+    offer lives in `_pile` + `_filter` -- so the inherited `_cards` read
+    succeeded, returned empty, and every combat-pile selection wrote no row at
+    all while the boot report said ARMED (round-2 correctness audit, 2026-08-13;
+    18 `FromCombatPile` call sites incl. Liquid Memories, three Ancients and
+    ten base cards). The patch count stays 3; the per-type resolver is pinned
+    below."""
     src = _hook()
     for target in ("NCardGridSelectionScreen", "NChooseACardSelectionScreen",
                    "NPlayerHand"):
         assert f"[HarmonyPatch(typeof({target})" in src, target
     assert src.count("[HarmonyPatch(") == 3
+
+
+def test_the_combat_pile_offer_is_read_from_the_pile_not_from_cards():
+    """The combat pile's `_cards` is permanently empty, so a `_cards` read
+    there is a silent no-op. The resolver must branch on the concrete type and
+    recompute `_pile.Cards.Where(_filter)` the way `UpdatePileContents` does."""
+    src = _hook()
+    assert "screen is NCombatPileCardSelectScreen" in src
+    assert 'AccessTools.Field(t, "_pile")' in src
+    assert 'AccessTools.Field(t, "_filter")' in src
+    assert "pile.Cards.Where(filter)" in src
 
 
 def test_the_screen_label_is_the_concrete_type_and_not_a_re_spelling():

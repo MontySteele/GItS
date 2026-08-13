@@ -52,6 +52,17 @@ internal static class ReactionEffects
     /// ordering assumption inside a single broadcast -- and at combat start,
     /// because the first player turn has no preceding enemy turn and the
     /// monotonic counter carries over between combats.
+    ///
+    /// THAT JUSTIFICATION WAS INCOMPLETE, and knowing why is the reason
+    /// <see cref="MarkExtraTurnStart"/> exists. "Earlier broadcast" only
+    /// orders the two hooks WHEN BOTH FIRE. On an extra player turn (Pael's
+    /// Eye) no enemy side turn happens at all: `CombatManager.SwitchSides`
+    /// keeps `CurrentSide == Player` while `_playersTakingExtraTurn` is
+    /// non-empty, and `EndEnemyTurnInternal` is the only path to
+    /// `Hook.AfterTurnEnd(Enemy)`. So this never ran, and the window carried
+    /// across two player turns. This is the sole per-turn window in the mod
+    /// keyed to the enemy-side broadcast; every other one resets on
+    /// `BeforeSideTurnStart(Player)`, which DOES fire on an extra turn.
     /// </summary>
     public static void MarkTurnStart()
     {
@@ -60,6 +71,50 @@ internal static class ReactionEffects
         // inside a single player turn, so there is nothing to carry over and
         // no way for this map to grow across a run.
         DealerReactionsThisTurn.Clear();
+    }
+
+    /// <summary>
+    /// Reopen the window for a player taking an EXTRA turn.
+    ///
+    /// WHY A SEPARATE ENTRY POINT, AND WHY NOT AT BeforeSideTurnStart. The
+    /// obvious move -- rekey the whole window to `BeforeSideTurnStart(Player)`
+    /// like every other per-turn reset in the mod -- is wrong: bombs detonate
+    /// inside that same broadcast (`BombPower.BeforeSideTurnStart` ->
+    /// `Detonate`), so an unordered reset could zero out detonation-triggered
+    /// reactions belonging to the turn that just started. That intra-broadcast
+    /// hazard is exactly what the enemy-turn-end siting was avoiding. The
+    /// clean slot is `AbstractModel.AfterTakingExtraTurn(Player)`, which
+    /// `CombatManager.SwitchFromPlayerToEnemySide` broadcasts AFTER
+    /// `SwitchSides()` and strictly BEFORE `StartTurn()` -- i.e. the same slot
+    /// the enemy-turn-end site occupies on a normal round. (Decompile read
+    /// pinned to the build: `klee-mod/KleeTests/bin/Debug/sts2.dll`.)
+    ///
+    /// WHAT WAS WRONG WITHOUT IT, and it pointed both ways at once. On the
+    /// extra turn `ReactionTriggeredThisTurn` still read true off the previous
+    /// turn, so Chevreuse / Vanguard's Valor and Furina's Audience
+    /// Participation paid a rider with no reaction behind it (a windfall --
+    /// both are `buff_next_attack`); and `DealerReactionsThisTurn[dealer]` was
+    /// still 1, so the first real reaction saw `already == 1`,
+    /// `NoteFirstReaction` was skipped, and Courtroom Drama's once-per-turn
+    /// Vulnerable never applied -- dropping the x1.5 from both the preview and
+    /// the dealt damage. `ReactionsThisTurn` accumulated across both turns.
+    ///
+    /// CO-OP SCOPING IS NOT SETTLED HERE. `_turnStartTotal` is board-scoped by
+    /// red-pen R1 and can simply be re-taken. The per-dealer map cannot:
+    /// `Clear()` would wipe a partner who is NOT taking the extra turn and
+    /// whose count is legitimately current. So only the extra-turn player's
+    /// own key is removed -- the narrow choice that touches no partner state
+    /// and is byte-identical to `Clear()` solo, where there is one player.
+    /// Whether that is the RIGHT co-op reading is a behavior call and is
+    /// [USER]'s (QUEUE); it is deliberately not decided by this line.
+    /// </summary>
+    public static void MarkExtraTurnStart(Creature? extraTurnCreature)
+    {
+        _turnStartTotal = TotalResolved;
+        if (extraTurnCreature != null)
+        {
+            DealerReactionsThisTurn.Remove(extraTurnCreature);
+        }
     }
 
     /// <summary>

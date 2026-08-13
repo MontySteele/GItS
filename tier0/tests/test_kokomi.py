@@ -292,9 +292,14 @@ def test_garment_state_reads_charge_on_attacks():
 
 
 def test_garment_state_decays_per_turn():
+    """EB-95 moved the player's DECAYING tick to the enemy side end. The
+    garment is a self-buff, not a Debuff, so it takes no skip-first flag and
+    its PLAYER-TURN uptime is unchanged -- one tick per round, still."""
     st = kokomi_state()
     st.player.powers["ceremonial_garment"] = 2
     powers.on_turn_end(st, st.player)
+    assert st.player.powers["ceremonial_garment"] == 2
+    refpowers.after_enemy_side_turn_end(st)
     assert st.player.powers["ceremonial_garment"] == 1
 
 

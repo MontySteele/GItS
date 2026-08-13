@@ -11,6 +11,34 @@
 > (`review/active/eb17p-registration-draft-2026-08-08.md`) and its results file
 > (`review/active/eb17p-results-2026-08-10.txt`) are **not edited** by this
 > packet. Every figure below is quoted from them; nothing is re-graded.
+>
+> ---
+>
+> **RED-PENNED 2026-08-13 (R189). The direction is chosen; the landing is not
+> scheduled.** §5's four options are decided: **Option C2** — change the Block
+> predicate from `target_has_nonpyro_aura` to an any-aura predicate, so the
+> clause with the biggest number on the card is reachable by Klee's own Pyro
+> application instead of requiring a non-Pyro source she does not print.
+> **A, B, C1 and D are rejected**, and C2 is chosen at the **corrected** cost,
+> not the one the first draft advertised: predicate vocabulary + C# behaviour +
+> tooltip + tests (the 2026-08-13 correction at §5's Option C — it is the
+> smallest remaining option, but it is not one token).
+>
+> **ROUTE: measure-first (§6 Route 1).** The `P7` sweep runs FIRST, against
+> today's sheet, so the `borrowed_brilliance` re-read R180 actually asked for
+> carries one changed variable and not two, and `elemental_ecstasy` is re-read
+> like-for-like alongside it. **This redesign lands AFTER the graded read, as
+> its own `CONSTANTS_VERSION` bump.** It does not land now, and it cannot land
+> inside the payoff-reach freeze.
+>
+> **ONE SUB-SHAPE IS NOT SETTLED AND MUST NOT BE ASSUMED.** Option C2 offers
+> the Block number optionally moved down to compensate — *"PROPOSED at
+> `block 5`"* — and R189 chose C2 without ruling on it. The packet's own §7(2)
+> asks for the numbers to be ratified or moved, and that ask is outstanding.
+> **Whoever implements C2 stops at this question rather than defaulting to
+> either value**, because holding 8 is a straight buff to the card's largest
+> number on a 2-cost uncommon that also draws, and moving to 5 is a design act
+> nobody has made. It goes back to [USER] with the post-sweep landing.
 
 ---
 
@@ -335,8 +363,17 @@ the op is an engine change, so it needs its own test and its own byte-identity
 argument for every other card that uses `refresh_all_auras`; it is the only
 option whose blast radius reaches outside the sheet.
 
-**Cost and risk.** C2 is a one-token sheet edit. C1 is an engine edit plus a
-sheet edit plus tests. **Risk, and it is the largest in the packet:** C1 turns
+**Cost and risk.** *(Corrected 2026-08-13 — the original draft called C2 "a
+one-token sheet edit"; that understated it.)* C2 needs a new predicate: the
+condition vocabulary is a closed frozenset (`tier0/engine/effects.py:1730-1747
+PREDICATE_NAMES`) with no any-aura member, enforced both directions by
+`test_content_boundaries.py`, with name-switch sites at `effects.py:1786`,
+`tier0/pilot/policy.py:136`, `tier05/draft.py:82,98`, and
+`tier0/harness/metrics.py:857`; and the card is hand-written in C#
+(`Cards/Generated/manifest.json:125`, `ElementalEcstasy.cs:28`), so the C#
+behavior + tooltip move by hand too. So C2 = predicate vocabulary + C# behavior
++ tooltip + tests — still the smallest option after A, but not one token. C1 is
+all of that plus the engine widening. **Risk, and it is the largest in the packet:** C1 turns
 the card into an aura *generator*, which is what `combustion_study` (the
 archetype's `enabler`) is for — so C1 may make the card step on a neighbour's
 job, and it plausibly changes the card's **`role:`** field, which has a

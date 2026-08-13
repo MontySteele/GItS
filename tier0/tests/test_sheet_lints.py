@@ -270,26 +270,44 @@ def test_no_scanner_reads_effects_as_a_flat_list():
     assert "registered flat scan site(s)" in res.stdout
 
 
-def test_the_branch_scan_lint_sees_a_new_flat_loop():
+def test_the_branch_scan_lint_sees_a_new_flat_loop(tmp_path):
     """The red half, on the SOURCE side. Written against a synthetic module
     dropped into the scanned directory rather than by breaking a real one:
     the gate has to fail for a loop it has never seen, which is the only case
-    that matters."""
+    that matters.
+
+    The scanned directory is `tmp_path`, NOT the live `tools/`. It used to be
+    the live tree: the probe was written into `tools/` and unlinked in a
+    `finally`, which is safe until it is not. A hard kill between the write
+    and the unlink, or a second pytest process in the same checkout, leaves an
+    orphan module that the sibling above then reports as an L4 finding against
+    a file that is not in git. That was observed live -- a full-suite run
+    failed with `FLAT EFFECT SCAN _probe_flat_scan_delete_me.py::count_damage`
+    while `git status --porcelain` showed no such file, and the re-run was
+    green.
+
+    `raw_scan_sites` reads the module-global `TOOLS` at call time, so pointing
+    it at `tmp_path` is the whole fix and no scan-root parameter is needed.
+    This is the same idiom the DATA half below uses for `DOCS`/`SHEETS`.
+    `TOOLS` is restored before the closing live-tree assertion, which is the
+    one that must still read the real directory."""
     sys.path.insert(0, str(REPO / "tools"))
     import lint_effect_branch_scans as l4
 
-    probe = REPO / "tools" / "_probe_flat_scan_delete_me.py"
+    probe = tmp_path / "_probe_flat_scan_delete_me.py"
     probe.write_text(
         "def count_damage(card):\n"
         "    return sum(1 for e in card['effects'] if e['op'] == 'damage')\n",
         encoding="utf-8")
+    saved_tools = l4.TOOLS
     try:
+        l4.TOOLS = tmp_path
         findings, _ = l4.source_findings()
     finally:
-        probe.unlink()
+        l4.TOOLS = saved_tools
     assert any("_probe_flat_scan_delete_me.py::count_damage" in f
                and "FLAT EFFECT SCAN" in f for f in findings), findings
-    # ...and green again once it is gone.
+    # ...and green again on the LIVE tree, which never held the probe.
     assert l4.source_findings()[0] == []
 
 

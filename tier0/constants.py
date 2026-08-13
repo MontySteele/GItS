@@ -273,7 +273,23 @@ FANFARE_DECAY_FRACTION = 0.20 # PROPORTIONAL decay, as a fraction of the
 # separately without an ablation arm.
 
 # --- Furina: Salon Members (kickoff §5; Salon v2 rework 2026-07-23,
-# docs/archive/furina-salon-rework-plan.md -- numbers PROPOSED pending red-pen) ---
+# docs/archive/furina-salon-rework-plan.md) ---
+# NUMBERS RATIFIED 2026-08-13 (R187, QUEUE M24). The rework plan's "every
+# NUMBER below is PROPOSED pending red-pen" banner used to sit on this line
+# and it was the last unsigned gate on the six member values; the derivation
+# it was signed against is review/active/eb77-salon-summon-damage-derivation.md.
+# The six values below are UNCHANGED by the countersign -- signing moved no
+# number, so this is not a CONSTANTS_VERSION event. Recorded because the
+# banner's absence is otherwise indistinguishable from nobody having written
+# it: Crabaletta 6/14, Usher 3/9 Block and Chevalmarin 2/+3 Encore are signed
+# as written, the Crabaletta/Usher gap is intended texture rather than a
+# 1:1 damage-for-Block exchange, a pure Salon deck is NOT expected to reach
+# Focus +2 on its own (cross-archetype Fanfare may earn the higher tiers),
+# the directive's upward adjustment reads as satisfied holistically, and
+# Chevalmarin's 2 -> 1 dry truncation is accepted. The paired signing surface
+# is SalonConstants in klee-mod/KleeCode/Powers/SalonPowers.cs; the mod's
+# displayed strings interpolate those constants since EB-86, so a future
+# repricing moves the constants and the tooltip follows.
 # v2 = the full Defect-orb grammar per user directive: members are TYPED
 # (unique slot passive at start of player turn + unique final bow when
 # displaced), the queue is FIFO (deploying into full slots bows the OLDEST
@@ -705,7 +721,68 @@ WINRATE_BAND_MIN_FIGHTS = 1000    # ratification process fix: winrate band
 #      drafter is not taught about them, so DRAFTER_VERSION and
 #      draft.POLICY_VERSION are both untouched and the payoff-reach pin
 #      stands. v9 event numbers do not carry across.
-RUNTEMPLATE_VERSION = 10
+# v11 (the coordinated 2026-08-13 window: EB-82 + EB-85). Two run-layer
+#      changes, batched into ONE bump because both are RUNTEMPLATE content
+#      and neither was quotable alone -- M14 enumerates this window and asked
+#      for exactly one coordinated bump at the end of it.
+#      (a) EB-82, the Grave of the Forgotten conversion. The event joins the
+#      ACT-3 pool (2 own -> 3 own), so act-3 event odds move for every
+#      character the same way v9's single act-2 addition moved act 2; its
+#      Accept branch grants `forgotten_soul`, an EVENT relic no reward, Neow
+#      or Ancient roll can reach, which arms the `damage_per_exhaust` hook
+#      mid-run and puts damage into every later fight of that run.
+#      (b) EB-85, five places where tier0 modelled an enchantment differently
+#      from the class sts2.dll v0.107.1 ships, each re-verified against the
+#      binary before it was touched. THREE move what an enchant event may
+#      TARGET -- Nimble gates on GainsBlock rather than type == "skill", so
+#      Block-granting Attacks are legal; Swift has no type override at all,
+#      so Self-Help Book's third reading is live on Klee's printed starter
+#      after being locked for all of v10; and Nimble never rides
+#      block_next_turn, whose payout passes no card source. TWO move what one
+#      PAYS -- the Nimble rider is collected on EVERY Block gain rather than
+#      once per card play, and Perfect Fit refuses the opening shuffle
+#      instead of acting as a free Innate.
+#      Enchantments remain post-draft only and no drafter or pilot code
+#      moved, so DRAFTER_VERSION and draft.POLICY_VERSION are both untouched
+#      and the payoff-reach D14 pin stands. CONSTANTS_VERSION did not move
+#      either: the window's other two branches (EB-70, EB-83) wrote no code.
+#      No v10 enchant number and no v10 act-3 number carries across.
+# v12 (window 2 of the 2026-08-13 correctness batch, EB-104). FIVE run-layer
+#      behaviour changes, batched into ONE bump for the same reason v8 batched
+#      two: they are all RUNTEMPLATE content, they landed in one window, and
+#      none of them was quotable alone. Every one is a defect fix against a
+#      named authority or against the run layer's own declared grammar -- none
+#      is a tuning choice.
+#      (a) EB-102, RunContext.resolve_shop now receives the run's Featured
+#      Banner. The banner filter existed and the only production visit_shop
+#      call never passed it, so the shop could offer a 5-star the banner had
+#      excluded from every reward screen. It changes which card rng.choice
+#      lands on, so every §4.7 shop-channel figure taken under C9 renumbers.
+#      (b) EB-103, potion capacity is derived from held relics on read instead
+#      of re-stamped at three sites, so a Potion Belt acquired since the last
+#      refresh is visible to resolve_event and its grant is no longer dropped
+#      unlogged.
+#      (c) EB-110, the rest-site heal FLOORS where it rounded. The authority
+#      lands the 30% through SetCurrentHpInternal, whose body truncates; Klee
+#      healed 19 where the game heals 18. Measured at 2.39 HP/run of
+#      one-directional sim-generous bias over 120 three-act runs.
+#      (d) EB-111, Book of Five Rings counts event deck-adds. The relic's
+#      sheet row is unconditional and only two of ~10 add sites were wired;
+#      88 uncounted adds across 64 book-holding runs in 300, ~5 HP/run of
+#      missing healing in the configuration the exp_* scripts run.
+#      (e) EB-112, event card-reward screens roll rarity through RARITY_ODDS
+#      like any other reward screen. The grammar declares card_reward as "an
+#      ordinary reward screen" and it was drawing uniformly from the flattened
+#      pool -- 20.0% Rare per offer against 5.0%, on three shipped options in
+#      acts 1 and 2 for every character. RARITY_ODDS itself is UNMOVED; only
+#      the site that failed to consult it moved.
+#      No drafter or pilot code moved, so DRAFTER_VERSION and
+#      draft.POLICY_VERSION are both untouched and the payoff-reach D14 pin
+#      stands. CONSTANTS_VERSION moves in the SAME window on its own ground
+#      (the tier0 engine half of EB-104) -- see the C10 entry below; the two
+#      fields move once each, together, at the end of the window.
+#      No v11 run-layer number carries across.
+RUNTEMPLATE_VERSION = 12
 # DEAD as of v6; kept as the name of the world every pre-§11 measurement was
 # taken in, and still used by tests that pin a node sequence deliberately.
 RUN_NODE_TEMPLATE = "NNNRETN$ERB"
@@ -1056,7 +1133,59 @@ BANNER_FEATURED_SLOTS = 3
 # PREDICTED-strong (+3.04 / +4.46) on the forced-first-copy sweep, 2026-08-10.
 # DRAFTER_VERSION and RUNTEMPLATE correctly do NOT bump: no offer-time price
 # and no map/route shape changed.
-CONSTANTS_VERSION = 9
+# CONSTANTS_VERSION 10 (window 2 of the 2026-08-13 correctness batch, EB-104).
+# C9's "further errata may join" clause is SPENT: it holds only "until a
+# number is published under this stamp", and the twelve-arm standing table of
+# 2026-08-13 (`review/active/sitting-reads-2026-08-13.md`, commit 445b2ff) is
+# published at RT11/D14/P7/C9. So this opens C10 rather than widening C9.
+# Contents -- the tier0 ENGINE half of the EB-104 batch, seven combat-kernel
+# behaviour fixes, each against a named authority and none of them a tuning
+# choice. The bump criterion is CONSTANTS 5's ("comparability decides, not
+# edit size") and the direct precedent is C6(a)/C7: a duration-tick clock and
+# a set of enemy-turn mechanics are exactly what those bumps carried.
+#   (a) EB-95, player-side duration debuffs tick at the ENEMY side-turn end,
+#   not at the owner's turn end, and the first tick is skipped only when a
+#   MONSTER applied the debuff -- the predicate is verbatim in the shipped
+#   authority doc (PowerModel.SkipNextDurationTick). Enemy-OWNED
+#   Vulnerable/Weak/Frail still tick at their own turn end, which bag_of_marbles
+#   and fear_potion prose depends on. Incoming damage moves on three reachable
+#   encounter rows (Test Subject, Soul Nexus, Hunter Killer).
+#   (b) EB-96, a sleeping enemy is a side-turn PARTICIPANT: block clear,
+#   turn-start and turn-end hooks all run, so its debuffs decay, its dot ticks
+#   and its temp Strength reverts. advance_intent and the Nemesis Intangible
+#   toggle stay suppressed, which is what the early return was load-bearing
+#   for. This moves a FROZEN calibration-battery number (burst_check holds a
+#   sleeper) plus two tier0.5 Act-1 bodies: measured 3.545 -> 3.653 mean turns,
+#   79.70 -> 79.50 mean end HP over 400 seeded fights.
+#   (c) EB-97, the Fanfare cap's base term is LIVE max HP in both engines and
+#   is recomputed on gain_max_hp, per LAW's "Fanfare is capped at %maxHP"; the
+#   C# side gains a named cap-fraction constant so lint_constant_parity can see
+#   the term at all.
+#   (d) EB-98, masque_red_death stops paying the flat-attack rider its
+#   2026-07-25 redesign deleted. Any tier0/tier0.5 number measured with that
+#   companion on board since then overstated damage.
+#   (e) EB-99, Guest Star generation applies the personal_pool filter in BOTH
+#   engines, restoring an already-ratified guardrail; the regression test that
+#   passed vacuously is tightened onto personal_pool.
+#   (f) EB-100, Encore Performance asks whether a card is LIT rather than who
+#   is designated, so it copies under the Orobas both-modes relic as the C#
+#   card does. Every tier0.5 Furina spotlight number taken with that relic in
+#   the pool since R124 priced the Rare at zero.
+#   (g) EB-101, Supporting Cast's first-play draw resolves AFTER the
+#   triggering card, matching SpotlightSystem's BeforeCardPlayed/
+#   AfterCardPlayed split, so a card that reads the hand during its own
+#   resolution sees the same hand in both engines.
+# NO CARD SHEET WAS EDITED in this window, so the R179/M15 card-sheet clause
+# is not the ground for this bump and is recorded as checked, not invoked:
+# no card was added, removed, repriced, renumbered or moved between rarities,
+# and no display name or card id changed (so the strike_dummy substring
+# question does not arise).
+# Every pre-window combat number for every character is archive. Archive
+# banners go where the numbers are published; nothing is rewritten (R101b).
+# DRAFTER_VERSION correctly does NOT bump -- no offer-time price moved and the
+# payoff-reach D14 pin stands; draft.POLICY_VERSION does not move either.
+# RUNTEMPLATE moves in the SAME window on its own ground (11 -> 12, above).
+CONSTANTS_VERSION = 10
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

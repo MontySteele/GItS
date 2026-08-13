@@ -86,7 +86,13 @@ Other structural facts:
 - A Rest Site is always placed on the routes leading to the boss (floor 15 is
   all-Rest, which is how that is enforced).
 - Rest Site options are **Rest (heal 30% max HP, rounded down)** or **Smith
-  (upgrade a card)** — one per site. Same as ours.
+  (upgrade a card)** — one per site. ~~Same as ours.~~
+  **Correction, 2026-08-13 (EB-110):** "Same as ours" was false when
+  published. Ours rounded — `round(0.3 * max_hp)` — where the authority
+  truncates through `SetCurrentHpInternal`
+  (`CurrentHp = (int)Math.Min(amount, MaxHp)`). 36 of the 80 max-HP values
+  in 40..119 diverged; Klee (62 max HP) healed 19 against the game's 18.
+  The sim now floors, so the struck claim reads true from this date forward.
 - Gold: normal 10–20, elite 35–45, chest 42–53, boss 100. (Ours: 10 / 25 /
   40 treasure / 100. The elite and treasure numbers are low.)
 - Elites **always** drop a relic. Elite card rewards have raised rare/uncommon

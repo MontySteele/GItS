@@ -116,11 +116,47 @@ def roll_potion(rng: random.Random) -> str:
 # logged (StS has no "swap" prompt in this model -- a full bag drops the drop).
 # ---------------------------------------------------------------------------
 
-@dataclass
 class PotionBag:
-    potions: list[str] = field(default_factory=list)
-    slots: int = 0
-    discarded: list[str] = field(default_factory=list)   # overflow log
+    """The potions a run holds, and how many it can hold.
+
+    ``slots`` is DERIVED ON READ, never stored. It was a plain field until
+    2026-08-13, refreshed by the run layer at three sites (shop, fight build,
+    post-fight drop) -- so any capacity question asked ANYWHERE ELSE read a
+    stale number. A Potion Belt granted at an event, at a treasure node, at a
+    boss win, or after a fight that rolled no drop was invisible until the
+    next refresh happened to fire, and the event grant did not just overflow:
+    it failed `full()`, never reached `add`, and so was not even logged as a
+    discard. Deriving on read removes the refresh sites and the whole class of
+    gap with them -- there is no cached number left to go stale.
+
+    Constructed one of two ways:
+
+      * ``slots=N`` -- a FIXED capacity. What the tests and any caller with no
+        relics in play want, and the pre-2026-08-13 constructor unchanged.
+      * ``slots_fn=f`` -- a zero-argument callable asked afresh on every read.
+        The run layer passes ``lambda: _potion_slots(held)``, which keeps the
+        module-level ``model._potion_slots`` monkeypatch seam working and
+        keeps this module free of any import of the run model.
+    """
+
+    def __init__(self, potions: Optional[list[str]] = None,
+                 slots: Optional[int] = None,
+                 slots_fn=None,
+                 discarded: Optional[list[str]] = None):
+        if slots is not None and slots_fn is not None:
+            raise ValueError("PotionBag takes slots or slots_fn, not both")
+        self.potions: list[str] = [] if potions is None else potions
+        self.discarded: list[str] = [] if discarded is None else discarded
+        fixed = 0 if slots is None else slots
+        self.slots_fn = slots_fn if slots_fn is not None else (lambda: fixed)
+
+    @property
+    def slots(self) -> int:
+        return self.slots_fn()
+
+    def __repr__(self) -> str:
+        return (f"PotionBag(potions={self.potions!r}, slots={self.slots!r}, "
+                f"discarded={self.discarded!r})")
 
     def free(self) -> int:
         return max(0, self.slots - len(self.potions))

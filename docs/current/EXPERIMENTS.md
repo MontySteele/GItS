@@ -51,6 +51,38 @@ registration packets themselves live under `review/active/` — one home, not tw
   freeze begins only after the open `RT`/`C` window (`M14`'s batch: `EB-70`,
   the `EB-82` conversion, the `EB-85` batch, `EB-69`) lands and a dependency
   re-check passes; if the world moved, §6 is re-stamped before the freeze.
+  **Window status 2026-08-13: the world moved twice and the window is still
+  open.** First the `EB-82` conversion and the `EB-85` batch landed together
+  under one coordinated bump, `RUNTEMPLATE` 10 → **11**. Then window 2 of the
+  correctness batch (`EB-104`, all twelve members) landed under a second
+  coordinated bump, `RUNTEMPLATE` 11 → **12** for its five run-layer fixes and
+  `CONSTANTS` 9 → **10** for its seven tier0 engine fixes — so the live stamp
+  is `RT12/D14/P7/C10`, and §6.6's `RT10` line records what was verified on
+  2026-08-12, not what ships. **The freeze still cannot begin**, because two
+  of the four batch items have not landed: `EB-70` is blocked on unmade design
+  picks at QUEUE `M29`, and `EB-69` waits on the `S4-G11` eye-read. §6 is
+  re-stamped once, when the last of them lands, rather than after each —
+  re-stamping a registration per item is how a one-variable window turns into
+  four. **The dependency re-check passed at both bumps**, and it is recorded so
+  it does not have to be re-derived. Across the whole `RT10 → RT11` window
+  `RARITY_ODDS`, `rewards.character_pool` for all six characters, the nine
+  archetypes' payoff supply/offer figures from `exp_payoff_reach.static_leg`,
+  and `DRAFTER_VERSION = 14` were all **byte-identical** — the fingerprint was
+  taken before the first merge and again after the bump. **The same four were
+  re-taken across `RT11/C9 → RT12/C10` and are byte-identical again**, all four
+  UNMOVED: `RARITY_ODDS` `{common 0.60, uncommon 0.35, rare 0.05}`; the six
+  pools at `klee 29/28/14`, `furina 23/35/18`, `kokomi 27/20/9`,
+  `real_ironclad 19/32/20`, `real_silent 20/35/25`, `ref_ironclad 4/2/—`, id
+  lists included; all nine `static_leg` rows identical to the digit
+  (supply 10/8/7 · 9/10/14 · 13/5/3, with offer and counterfactual unchanged);
+  `DRAFTER_VERSION = 14`. `EB-112` was the one member that could have reached
+  the fence — it changes how an **event** card screen rolls rarity — and it
+  does not: it makes that screen consult `RARITY_ODDS` instead of bypassing it,
+  and `static_leg` is arithmetic over the reward pools and the odds table, so
+  neither the constant nor any static-leg output moves. Nothing in either
+  window touched the payoff role, the sheets' archetype fields or the rarity
+  fence, which is exactly what §6.6's ordering-(i) argument predicted. **`D`
+  did not move and must not be re-pinned.**
   Owed before the run and named in §6.4/§6.5: the generic reach reader
   (`tier05/exp_payoff_reach.py`) and the `blind` control policy — **both built
   2026-08-13**. Steps (3)–(6) run in order and none reorders →
@@ -77,10 +109,19 @@ registration packets themselves live under `review/active/` — one home, not tw
   pilot refusal that `P7` (R176) resolved, and because §13's Δ figures are `P6`
   reads. The draft is the parent's instrument and arm set unchanged, re-stamped
   to `RT10/D14/P7/C9`, with a new descriptive `Q4` on the bare-form play rate.
-  **§8's predictions and §8.1's trigger are explicit [USER] slots and are
-  blank**, so the packet is not cleared to launch. **Sequencing:** it runs
-  *after* the payoff-reach sprint's graded read, per the approved settle-first
-  plan, and before the staged `EB-43`/D15 landing (its own S3) →
+  **PARTLY FILLED 2026-08-13 (R189), and deliberately NOT countersigned:**
+  `N` = 2,400 pairs/card, a 4-hour stop-and-report ceiling, §8.1's redesign
+  trigger carried forward unchanged, and the `Q4` materiality threshold at 5%
+  — the last recorded as [USER]'s chosen threshold, **not** evidence-derived.
+  **§8's per-arm prediction table and the direction half of `Q4` stay blank**,
+  so the packet is not cleared to launch; the countersign is withheld until the
+  post-window restamp, because predictions are filled against the settled world
+  and the `RT`/`C` window is open. R189 also chose the **route** —
+  measure-first, so this sweep runs before the `elemental_ecstasy` redesign
+  (Option `C2`), which lands after the graded read as its own `C` bump.
+  **Sequencing:** it runs *after* the payoff-reach sprint's graded read, per the
+  approved settle-first plan, and before the staged `EB-43`/D15 landing (its own
+  S3) →
   `review/active/m17-sweep-reregistration-p7-2026-08-13.md`; companion redesign
   options packet `review/active/m17-elemental-ecstasy-redesign-2026-08-13.md`.
 - **Shop companion channel re-run (`S4-G10` / `C9`)** — **DRAFT, awaiting
@@ -107,6 +148,17 @@ registration packets themselves live under `review/active/` — one home, not tw
   margin — retained as the standing answer** unless the result shows a margin
   has utility. The predictions themselves are still blank →
   `review/active/regret-margin-registration-2026-08-12.md`.
+- **Charge reads per turn (`EB-78`)** — **DRAFT, unrun, §5's prediction slots
+  blank as [USER]'s.** R188 (2026-08-13) ruled **no** Charge read budget and
+  returned `X9` to the watch register; a watch trigger needs the quantity it
+  watches, and *how many reads a turn contains* was recorded nowhere until the
+  instrument landed on 2026-08-13 (`resources.note_charge_read`, emit-only,
+  tagged per source so the workshop's unsettled §6 scope boundary is not
+  settled by construction). Descriptive: it grades no design and cannot on its
+  own fire a nerf. §5.1 is where "repeatable reads dominant" becomes a number,
+  and it is a [USER] slot. Sequenced after the payoff-reach graded read; it
+  moves no version and opens no window →
+  `review/active/charge-reads-per-turn-registration-2026-08-13.md`.
 - **Kokomi stability band (D5)** — no band is declared yet (the declaration
   is QUEUE `S4-G6`; until it lands, the band rides DARK, `band = None`); its
   grading playtest is `docs/current/playtest/kokomi-playtest-protocol.md`

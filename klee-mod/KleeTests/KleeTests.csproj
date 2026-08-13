@@ -1,0 +1,59 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    EB-105. The mod's first C# test project. Runs HEADLESS (`dotnet test`,
+    no Godot, no game launch) for the same reason the F2 bite-check does:
+    sts2.dll is a plain net9.0 assembly, so its non-visual types can be
+    constructed and its methods called with no scene tree.
+
+    Deliberately NOT referenced by deploy.ps1. validate.ps1 gains an OPTIONAL
+    -RunTests switch; making it mandatory for a deploy is a [USER] call
+    (README.md, "Not a deploy gate yet").
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <AssemblyName>KleeTests</AssemblyName>
+    <RootNamespace>KleeMod.Tests</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <IsPackable>false</IsPackable>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- The game assemblies are not on a NuGet feed and the reference set is resolved from local.props. -->
+    <NoWarn>$(NoWarn);CS8002</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <!-- The mod under test. ProjectReference so `dotnet test` rebuilds klee.dll
+       and can never grade a stale binary. -->
+  <ItemGroup>
+    <ProjectReference Include="..\KleeCode\KleeCode.csproj" />
+  </ItemGroup>
+
+  <!-- Private=TRUE here, unlike KleeCode.csproj and for the same reason the
+       bite-check flips it: this assembly never enters the game directory, and the test host resolves references from its own output folder. Copying sts2.dll into bin/ is how the harness loads real game types at all. GodotSharp is copied because sts2 references it; nothing here may CALL it (see README, the headless boundary). -->
+  <ItemGroup>
+    <Reference Include="sts2">
+      <HintPath>$(GameDataDir)\sts2.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(GameDataDir)\0Harmony.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="GodotSharp">
+      <HintPath>$(GameDataDir)\GodotSharp.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="BaseLib">
+      <HintPath>$(BaseLibDll)</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>

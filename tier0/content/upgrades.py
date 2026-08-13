@@ -12,14 +12,15 @@ replace). A key this module does not know is a loud error -- the sheet
 and the applier drifting apart must fail the suite, not silently ship
 un-upgraded cards.
 
-UNAPPLIABLE lists the sheet entries whose deltas target numbers the
-engine encodes as CONSTANTS rather than card fields (Catalytic
-Conversion's per-reaction energy, Durin's ping, Nicole's per-turn block).
-Those upgrades exist in the design and cannot yet be expressed per-card
-in the Tier 0 DSL. They are skipped -- visibly, and the rest policy
-refuses to spend a rest on them -- rather than approximated, because a
-wrong number wearing the right name is how sim findings stop being
-trustworthy. DSL gap, logged for the M7 report.
+UNAPPLIABLE is the naming slot for sheet entries whose deltas target
+numbers the engine encodes as CONSTANTS rather than card fields. It is
+EMPTY today and deliberately kept empty rather than deleted (see the set
+itself, below, for the history of the three cards that once sat in it and
+how each left). The rule it carries is unconditional and does not depend
+on the set having members: anything named here is skipped -- visibly, and
+the rest policy refuses to spend a rest on it -- rather than
+approximated, because a wrong number wearing the right name is how sim
+findings stop being trustworthy.
 """
 
 from __future__ import annotations
@@ -81,9 +82,14 @@ def _external_pool_for(sheet: Path) -> Path:
 # nicole_celestial_gift LEFT this set with G-C2 (2026-07-25), the same way
 # catalytic_conversion left it with R37: its delta moved from
 # {block_per_turn: +2} -- unexpressible, because CELESTIAL_GIFT_BLOCK is a
-# constant rather than a card field -- to {buff: +2}, which the `buff` grammar
-# already binds to the first top-level apply_power. The R24 no-unmeasured-
+# constant rather than a card field -- to {buff: +2}. The R24 no-unmeasured-
 # upgrades law is satisfied rather than waived.
+#   That {buff: +2} was itself SUPERSEDED on 2026-07-26 by {cost: -1}, ratified
+#   with the card's redesign (docs/klee-upgrades.yaml:111-124 records the
+#   reason). So the delta named above is history, not the live sheet row, and
+#   nothing in the tree binds `buff` for this card any more.
+# durin_witchs_flame was never a member under that id in any reachable commit;
+# it carries {power_amount: +2} and upgrades normally.
 #
 # Kept as an empty set rather than deleted, per the standing curated-set
 # discipline: the invariant "every draftable card has an applicable upgrade"
@@ -144,13 +150,30 @@ def _bump_first(candidates, field: str, delta: int) -> bool:
 
 
 def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
-    """Mutate a (deep-copied) base card into its upgraded form."""
-    base_id = card.id
+    """Mutate a (deep-copied) base card into its upgraded form.
+
+    The enchantment mark is looked PAST and then put back, which is the same
+    rule `has_upgrade` above states and the reason the two are read together:
+    `has_upgrade` learned it when R82 reopened and this did not, so from
+    RUNTEMPLATE 10 -- when enchantments entered the run layer and enchanted
+    cards started reaching upgrade sites -- the pair disagreed about the same
+    card. `has_upgrade("x@sharp-2")` answered True off the plain row while
+    this looked up the decorated id, missed, and raised "no applicable
+    upgrade". `_best_upgrade_target` scores its candidates by calling this,
+    so an Ironclad hand holding one enchanted upgradable card killed the run.
+    """
+    from tier0.content import enchantments      # late: enchantments imports us
+    base_id, mark, amount = enchantments.split(card.id)
     delta = _upgrade_index().get(base_id)
     if (not isinstance(delta, dict) or not delta
             or "_unexpressible" in delta or base_id in UNAPPLIABLE):
         raise ValueError(f"no applicable upgrade for {base_id!r}")
-    card.id = base_id + SUFFIX
+    upgraded = base_id + SUFFIX
+    # `decorate` re-attaches the mark INSIDE the suffix (`x@sharp-2+`), which
+    # is the one spelling `split` round-trips; rebuilding it here by hand is
+    # how the two decorations drift apart.
+    card.id = (enchantments.decorate(upgraded, mark, amount) if mark
+               else upgraded)
     card.name = card.name + SUFFIX
 
     top = card.effects

@@ -328,12 +328,12 @@ class Card:
     # all existing content stay byte-identical.
     enchant_damage: int = 0       # flat rider on this attack's damage
     enchant_effects: list[dict] = field(default_factory=list)  # after own fx
-    enchant_block: int = 0        # Nimble: once per play, not per block row
+    enchant_block: int = 0        # Nimble: paid on EVERY Block gain (EB-85)
     enchant_damage_mult: float = 1.0        # Corrupted: x1.5 on this attack
     enchant_first_play_damage: int = 0      # Vigorous: first play of a combat
     enchant_first_play_effects: list[dict] = field(default_factory=list)
     #                                       Sown / Swift: first play of a combat
-    enchant_top_of_draw: bool = False       # Perfect Fit: shuffle placement
+    enchant_top_of_draw: bool = False       # Perfect Fit: RESHUFFLE only
     enchant_played_this_combat: bool = False   # the first-play gate itself
     # --- Status cards (multi-act §10.2 injection op; engine/statuses.py).
     # type == "status" cards are UNPLAYABLE (combat.card_playable) and exist
@@ -415,12 +415,64 @@ class Bomb:
     turn_placed: int = 0          # for modify_bombs scope: placed_this_turn
 
 
+def fanfare_cap_base_term(max_hp: int) -> int:
+    """The Fanfare ceiling's BASE term, taken from LIVE max HP (EB-97).
+
+    LAW.md:189 says "Fanfare is capped at %maxHP", and the mod reads it that
+    way every time it is asked: `FurinaResources.FanfareCap` computes
+    `FanfareCapFraction * creature.MaxHp + capBonus` from the creature's
+    CURRENT MaxHp. tier0 used to freeze the base term at the sheet's printed
+    `hp` and carry that number through every max-HP move in the run, so a
+    Decipher (-24) or a Feed (+7) never reached the ceiling and the two
+    engines disagreed -- inside a single combat, in Feed's case.
+
+    Truncating `int()` rather than rounding, to match C#'s `(int)` cast on
+    the same product. Clamped at zero because the term is a ceiling and a
+    negative max HP is not a state either engine represents.
+    """
+    return int(C.FANFARE_CAP_FRACTION * max(0, max_hp))
+
+
+def sync_fanfare_cap_to_max_hp(player: "Player") -> None:
+    """Re-derive the cap's base term from the player's live max HP.
+
+    Moves `fanfare_cap` and `fanfare_cap_base` by the SAME delta so every
+    bonus riding on top of the base term survives: the in-combat grants
+    (`raise_fanfare_cap`, `gain_fanfare_floor`) sit in `fanfare_cap` alone
+    and must not be rewound here, and a hand-rolled cap (the batteries, the
+    probes, every test that seats a number directly) is a bonus too as far
+    as this is concerned -- it is preserved exactly while max HP holds still.
+
+    A no-op for a character with no Fanfare resource, and a no-op while max
+    HP has not moved since the last sync.
+
+    Does NOT re-clamp the meter. The mod clamps in `GainFanfare` only, so a
+    meter above a freshly-lowered ceiling stays put until the next gain
+    drags it down -- `resources.gain_fanfare` has the same `min()` and gets
+    there the same way.
+    """
+    if not player.fanfare_cap_base and not player.fanfare_cap:
+        return                                   # no Fanfare resource
+    delta = (fanfare_cap_base_term(player.max_hp)
+             - fanfare_cap_base_term(player.fanfare_cap_hp))
+    player.fanfare_cap_hp = player.max_hp
+    if not delta:
+        return
+    player.fanfare_cap_base = max(0, player.fanfare_cap_base + delta)
+    player.fanfare_cap = max(0, player.fanfare_cap + delta)
+
+
 @dataclass
 class Fighter:
     hp: int
     max_hp: int
     block: int = 0
     powers: dict[str, int] = field(default_factory=dict)   # name -> stacks
+    # EB-95: the authority's `SkipNextDurationTick`, held per power name. A
+    # duration Debuff freshly applied to a player-side creature does not lose
+    # a stack to the AfterSideTurnEnd(enemy) tick that follows the application
+    # within the same enemy side. Only the player ever carries entries.
+    skip_next_duration_tick: set[str] = field(default_factory=set)
 
     @property
     def alive(self) -> bool:
@@ -493,6 +545,13 @@ class Player(Fighter):
     # headroom into every later fight and a Hyperbeam ADDED ceiling on the
     # way out. A snapshot cannot drift no matter how many writers exist.
     fanfare_cap_base: int = 0
+    # The max HP the cap's base term was last derived from (EB-97). Not a
+    # design number -- it is the bookkeeping that lets sync_fanfare_cap_to_
+    # max_hp move the base term by a DELTA and so leave every bonus riding
+    # on top of it (in-combat grants, hand-seated caps) untouched. Seeded in
+    # __post_init__ from the constructed max HP so every build path is right
+    # without knowing about the field.
+    fanfare_cap_hp: int = 0
     # The baseline the meter rests on. Decay clamps here, never below. The
     # "Fanfare +X" keyword raises floor, cap AND current together
     # (resources.gain_fanfare_floor) -- raising the cap alongside the floor
@@ -527,6 +586,12 @@ class Player(Fighter):
         # the cap already, so the two spellings of absent agree.
         if not self.fanfare_cap_base:
             self.fanfare_cap_base = self.fanfare_cap
+        # EB-97: the max HP the seated cap is understood to have come from.
+        # Same reasoning as the line above -- seed it on EVERY construction
+        # path, or a hand-built Furina's first max-HP move would be read as
+        # a move away from 0 and re-derive the whole ceiling.
+        if not self.fanfare_cap_hp:
+            self.fanfare_cap_hp = self.max_hp
 
 
 @dataclass
@@ -694,6 +759,14 @@ class CombatState:
     reactions_this_turn: int = 0          # reaction_triggered_this_turn
     encore_spend_draws_this_turn: int = 0  # encore_spend_draw once-per-turn
     #                                        latch (Curtain Call, R85)
+    # INSTRUMENT ONLY (EB-78 (2); resources.note_charge_read writes it and
+    # nothing reads it back). Charge-bank reads this turn, keyed by source --
+    # "garment" / "kurage_pulse" / "bonus_formula" -- so the distribution can
+    # be reported under either reading of the workshop's unsettled §6 scope
+    # boundary. Reset at the top of the player turn, emitted at turn close.
+    # It is NOT a budget: R188 ruled there is none, and no code path consults
+    # this dict to decide whether a read may happen.
+    charge_reads_this_turn: dict[str, int] = field(default_factory=dict)
                                           # (Chevreuse; reset per turn)
     kills_this_card: int = 0              # killed_target
     # Kills that the base game's Fatal gate would honor (Enemy
@@ -707,13 +780,6 @@ class CombatState:
     # Dexterity and Frail. Kept beside the count rather than replacing it --
     # refpowers reads the count to divide a per-gain allowance.
     block_gained_this_card: int = 0
-    # Nimble (R82 reopened): "increases Block gained from this card by X" is
-    # ONCE per card PLAY, not once per Block row and not once per _op_block
-    # entry -- a two-row card, or a Block row nested under a conditional,
-    # re-enters the op and would collect the rider again off a function-local
-    # latch. Shared by _op_block and _op_block_next_turn so a card carrying
-    # both still collects the rider exactly once.
-    enchant_block_spent_this_card: bool = False
     discards_this_card: int = 0           # CalculatedGamble's draw-back count
     last_drawn_type: str = ""             # EscapePlan's drawn-card branch
     salon_replacements_this_card: int = 0 # overflow count for current card
@@ -875,10 +941,12 @@ class CombatState:
         self.rng.shuffle(self.player.discard_pile)
         merged = self.player.discard_pile + self.player.draw_pile
         # Perfect Fit (R82 reopened): "whenever this would be shuffled into
-        # your Draw Pile, place it on the top instead." The combat-START
-        # shuffle is handled by combat.surface_innate, which rides the same
-        # flag; this is the mid-combat reshuffle, the other place a card is
-        # shuffled in. Order among top-placed cards stays shuffle-relative,
+        # your Draw Pile, place it on the top instead." THIS IS THE ONLY SITE
+        # (EB-85 divergence 5): `PerfectFit.ModifyShuffleOrder` opens with
+        # `if (!isInitialShuffle && cards.Contains(base.Card))`, so the
+        # combat-start shuffle is explicitly refused and combat.surface_innate
+        # no longer rides the flag -- hoisting there made the enchantment a
+        # free Innate. Order among top-placed cards stays shuffle-relative,
         # exactly as innate's does -- no hidden second sort.
         if any(c.enchant_top_of_draw for c in merged):
             merged = ([c for c in merged if c.enchant_top_of_draw]

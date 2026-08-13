@@ -151,12 +151,20 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
   `"true"` or a `1` reads as **false** and silently disables
   (`gits/GitsSpeed.cs:280`). `time_scale` is likewise ignored unless it parses as
   a double (`:282-286`).
-- **`PrefsSave.FastMode` persists to `settings.save`.** Enabling speed and not
+- **`PrefsSave.FastMode` persists to `prefs.save`** — NOT `settings.save`, which
+  backs `SettingsSave` and never carries FastMode
+  (`PrefsSaveManager.fileName = "prefs.save"`, decompile read pinned to
+  `klee-mod/KleeTests/bin/Debug/sts2.dll`). Enabling speed and not
   disabling it leaves user-visible state changed; teardown must POST
   `{"enabled": false}` (`gits/GitsSpeed.cs:16-20`). It is also why the capture is
-  persisted across processes rather than re-read (`:21-34`): a restarted process
-  reading `PrefsSave.FastMode` back would capture its OWN change as the
-  baseline. `understudy/soak.py:457-489` reads the sidecar before removing the
+  persisted across processes rather than re-read (`:21-34`) — **on the narrow
+  path that actually reaches disk**: prefs are flushed only by `NGame.Quit()`
+  (via `_Notification(1006)`, a window close request) and
+  `NSettingsScreen.OnSubmenuClosed`, and `NGame` demotes a persisted `Instant`
+  to `Fast` on every non-editor boot, so a restarted process can never read
+  `Instant` back. What it CAN read back is a laundered `Fast` over a user whose
+  original was `Normal`, and the sidecar is what prevents that.
+  `understudy/soak.py:457-489` reads the sidecar before removing the
   mod directory, so an unreverted change is named in the ledger rather than
   deleted with the file that recorded it.
 - **Seeded embark returns an error and does NOT start the run** unless

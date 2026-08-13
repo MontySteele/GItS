@@ -26,6 +26,47 @@ WHERE EACH REVISION LIVES
   #6 in-combat choice overlay      `_choice_overlay`
   #7 resolved card NAMES           `understudy/naming.py`, attached by `decide`
 
+REVISIONS #8-#10 (2026-08-13, the Act-2 reach pass). Three DEFECT fixes, not
+new preferences: each one restores an input this module already declares it
+reads and was not reading. Named here because R93's convention is that a
+revision has a number, a justification from observed decisions, and a log.
+
+  #8 the plan follows the character   `_plan_for`, `_card_reward`, `_rest`,
+                                      `_score_offers`
+  #9 elites/rests counted per act     `_map` (+ `Memo.elites_taken`)
+  #10 a spent rest site is a decision `_rest`
+
+  #8, from the 20260813-002613 soak, three runs of KLEE: every draft
+  rationale read `score_offer under the SALON plan`, and `Combustion Study`,
+  `Explosives Workshop` and `Catalytic Converter` -- Klee cards -- all scored
+  literally 0.0 while a generic `Dodge Roll` was taken three times. The cause
+  is one line: `ARCHETYPE = policy_v0.ARCHETYPE` and policy_v0's is the
+  string `"salon"`, written when the bot played Furina and correct only for
+  her. A bot playing Klee that drafts for Furina's salon is not a policy, it
+  is a bug, and it is the largest single thing between this bot and Act 2.
+  **Consequence, stated because it is not free: every Klee soak recorded
+  before this date drafted under the wrong plan, so its draft telemetry
+  describes a deck nobody would build. Those numbers are archive.** The
+  Furina arm is unchanged by construction -- `resolve_plan("furina", None)`
+  returns `salon`, the string that was hardcoded.
+
+  #9, from the same soak: all 48 path decisions across three runs print
+  `elite bar 0.55`, including in run 3 AFTER two elites had been taken. The
+  rising bar the arm's own source documents ("55% / 70% / 85%", tier05.route
+  `hunter`) never engages, because `state.get("elites_taken", 0)` reads a key
+  the wire does not carry and never has. The bot therefore takes every elite
+  it is offered above half HP -- 5 of them in 3 runs, at a median 35 HP each
+  out of 62 -- and meets the act boss at 41-44 HP. The count is the arm's own
+  history of its own choices, kept in the Memo where the other carried state
+  already lives.
+
+  #10, same soak, 9 of the 11 "forced defaults": choosing Rest re-serves the
+  rest screen with `options: []`, the arm re-decides, nothing matches, and
+  `_last_resort` proceeds -- counted as "a decision nobody made" when in fact
+  the rest was taken and the screen is SPENT (the HP jumps +18 right before
+  each one). A counter whose entries are 82% bookkeeping cannot do the job
+  that counter exists for.
+
 DETERMINISM
 
 Every arm sorts; none rolls. The RNG handed to the delegated tier05 policies
@@ -65,6 +106,60 @@ from understudy.rng import policy_rng
 CHARACTER = policy_v0.CHARACTER
 ARCHETYPE = policy_v0.ARCHETYPE
 PILOT_ID = policy_v0.PILOT_ID
+
+
+# --------------------- revision #8: the plan follows the character ----------
+
+def _plan_for(state: dict[str, Any]) -> tuple[str, str]:
+    """(character id, assigned plan) for the run on the wire.
+
+    R68's rule is that `tier05.runner.resolve_plan` is the single source of
+    truth for character -> plan, and this asks it rather than deciding. The
+    character comes off the wire's own `player.character` (the DISPLAY name,
+    which is what the game reports: `"Klee"`, `"Sangonomiya Kokomi"`), matched
+    against `tier0.roster` -- the registry, not a table written here, because
+    a second table is a second thing to forget to update when slot 4 lands.
+
+    Falls back to policy_v0's pair when the wire says nothing recognisable
+    (a menu state, a reference anchor, a character this repo does not ship).
+    The fallback is Furina/salon, which is what every caller here used
+    unconditionally until this revision, so an unrecognised run behaves
+    exactly as it did before rather than in some third way.
+    """
+    who = str(((state.get("player") or {}).get("character") or "")).strip()
+    if not who:
+        return CHARACTER, ARCHETYPE
+    from tier0 import roster
+    from tier05 import runner as t5runner
+    key = who.casefold()
+    for ch in roster.ROSTER:
+        if key in (ch.id.casefold(), ch.display.casefold()):
+            try:
+                plan, _pilot = t5runner.resolve_plan(ch.id, None)
+            except ValueError:                               # pragma: no cover
+                return ch.id, ARCHETYPE
+            return ch.id, plan
+    return CHARACTER, ARCHETYPE
+
+
+def _plan(state: dict[str, Any], memo: "Memo | None" = None) -> str:
+    """The assigned plan, resolved once per run and carried on the Memo.
+
+    Cached because it is read on every draft, rest and shop screen and the
+    answer cannot change inside a run; carried on the Memo rather than in a
+    module global because a global would leak between runs of one soak.
+    """
+    if memo is None:
+        return _plan_for(state)[1]
+    if memo.plan is None:
+        who, plan = _plan_for(state)
+        # A menu/game-over state has no character, and resolving there would
+        # freeze the fallback in for the whole run. Only a state that named
+        # somebody gets to fix the answer.
+        if not ((state.get("player") or {}).get("character")):
+            return ARCHETYPE
+        memo.character, memo.plan = who, plan
+    return memo.plan
 
 POLICY_VERSION = "policy_v1"
 
@@ -121,6 +216,17 @@ class Memo:
     # the wire says yes and the play still comes back an error, which a boss
     # debuff produced on a live run ("Card 'Stage Presence' cannot be played").
     rejected: set = field(default_factory=set)
+    # Revision #8. The run's character id and assigned plan, resolved once
+    # from the first state that names somebody.
+    character: str | None = None
+    plan: str | None = None
+    # Revision #9. Elites and rests this ACT, counted from the arm's own
+    # chosen nodes, because the wire carries neither. `act_counted` is the act
+    # the counts belong to; `tier05.route` declares both figures act-local, so
+    # they reset when the act does.
+    elites_taken: int = 0
+    rests_taken: int = 0
+    act_counted: int | None = None
     # How many times revision #1 has already offered a given card this turn.
     # A free-card rule that re-offers a card whose play was rejected is the one
     # way revision #1 could spin, so the offer count is bounded by the number
@@ -617,13 +723,22 @@ def _map(state: dict[str, Any], memo: Memo) -> Decision:
 
     p = state.get("player") or {}
     run = state.get("run") or {}
+    act = int(run.get("act", 1))
+    # REVISION #9. `elites_taken`/`rests_taken` are act-local by tier05.route's
+    # own declaration, so they reset with the act. Reading them off the wire --
+    # which is what this arm did, and what the FROZEN policy_v0 still does --
+    # yields a permanent 0, because no build of this bridge has ever sent
+    # either key. The dial the arm computes from them (`bar`) therefore sat at
+    # its floor value for every path decision ever taken.
+    if memo.act_counted != act:
+        memo.act_counted, memo.elites_taken, memo.rests_taken = act, 0, 0
     st = t5route.RouteState(
         hp=int(p.get("hp", 0)), max_hp=int(p.get("max_hp", 1)),
         gold=int(p.get("gold", 0)),
         deck_size=len(adapter.deck_cards(state)),
-        floor=int(run.get("floor", 0)), act=int(run.get("act", 1)),
-        elites_taken=int(state.get("elites_taken", 0)),
-        rests_taken=int(state.get("rests_taken", 0)))
+        floor=int(run.get("floor", 0)), act=act,
+        elites_taken=memo.elites_taken,
+        rests_taken=memo.rests_taken)
 
     want = {t5route.ELITE: 10.0, t5route.SHOP: 5.0, t5route.TREASURE: 5.0,
             t5route.UNKNOWN: 4.0, t5route.REST: 6.0, t5route.NORMAL: 2.0}
@@ -648,6 +763,16 @@ def _map(state: dict[str, Any], memo: Memo) -> Decision:
 
     best = max(scored, key=lambda t: t[:2])
     memo.next_node_kinds = list(best[4])
+    # REVISION #9. Count what we CHOSE, at the moment we choose it. The count
+    # is the arm's own history; nothing else on the wire can supply it. The
+    # act boss reduces to ELITE in `policy_v0._room_kind` (the rest arm's
+    # `next_fight` depends on that and says so), so the last node of an act
+    # increments the elite count -- harmlessly, since the act ends there and
+    # the counter resets.
+    if best[3] == t5route.ELITE:
+        memo.elites_taken += 1
+    elif best[3] == t5route.REST:
+        memo.rests_taken += 1
     detail = ", ".join(f"[{t[2]}]{t[3]}={t[5]:.1f}+{t[6]:.1f}" for t in scored)
     return Decision(
         category="path",
@@ -687,12 +812,46 @@ def _rest(state: dict[str, Any], memo: Memo) -> Decision:
     # `next_fight` cares about: "the node after this rest is an Elite/Boss".
     kinds = list(memo.next_node_kinds)
     next_fight = t5route.ELITE in kinds
+    archetype = _plan(state, memo)                       # revision #8
     what, which = t5model.rest_action(
         deck_ids, int(p.get("hp", 0)), int(p.get("max_hp", 1)),
-        archetype=ARCHETYPE, next_fight=next_fight)
+        archetype=archetype, next_fight=next_fight)
     blob = state.get("rest_site") or {}
     options = ((blob.get("options") if isinstance(blob, dict) else None)
                or state.get("options") or [])
+
+    # REVISION #10. A SPENT SCREEN IS NOT AN UNANSWERED DECISION. Choosing
+    # Rest re-serves this screen with every option gone, and the arm used to
+    # re-decide, fail to match, and decline -- so `_last_resort` proceeded and
+    # the run recorded a `forced_default`. That counter's job is to name
+    # screens the policy could not answer, and 9 of the 11 entries in the
+    # 20260813-002613 soak were this: a rest that HAD been taken (the HP row
+    # jumps +18 immediately before each one). Proceeding off an exhausted
+    # screen is the only correct move and this arm now owns it.
+    #
+    # GATED ON `can_proceed`, and that gate is EB-13 itself: a rest site with
+    # nothing enabled AND no exit is the bounce that row was filed for, where
+    # posting `proceed` got "No proceed button available or enabled" for every
+    # remaining action of the run. When the screen refuses its own exit this
+    # falls through to the decline below, and `_last_resort` answers the
+    # screen instead. A refused verb is not a fallback.
+    enabled = [o for o in options
+               if not (isinstance(o, dict) and o.get("is_enabled") is False)]
+    can_proceed = bool(blob.get("can_proceed")) if isinstance(blob, dict) \
+        else False
+    if not enabled and can_proceed:
+        return Decision(
+            category="resource",
+            action={"action": "proceed"},
+            label="proceed (rest site spent)",
+            rationale=("this rest site offers no enabled option -- it has "
+                       "already been spent this visit, and proceeding is the "
+                       "only move on the screen"),
+            revision="v1.10",
+            notes={"sim_choice": what, "sim_target": which,
+                   "next_fight": next_fight, "next_node_kinds": kinds,
+                   "option_matched": False, "screen_spent": True,
+                   "archetype": archetype})
     index = policy_v0._match_rest_option(options, what)
     # EB-13. `_match_rest_option` matches on `id`/`name` and does not read
     # `is_enabled`, because the wire key did not exist when it was written and
@@ -736,13 +895,14 @@ def _rest(state: dict[str, Any], memo: Memo) -> Decision:
         action={"action": "choose_rest_option", "index": index},
         label=f"{what}" + (f" ({which})" if which else ""),
         rationale=("R93 #5: tier05.model.rest_action on a deck of "
-                   f"{len(deck_ids)} at {p.get('hp')}/{p.get('max_hp')} HP, "
+                   f"{len(deck_ids)} at {p.get('hp')}/{p.get('max_hp')} HP "
+                   f"under the {archetype} plan, "
                    f"next_fight={next_fight} from the map lookahead "
                    f"{kinds or '(none seen)'}"),
         revision="v1.5",
         notes={"sim_choice": what, "sim_target": which,
                "next_fight": next_fight, "next_node_kinds": kinds,
-               "option_matched": True})
+               "option_matched": True, "archetype": archetype})
 
 
 # ------------------- revision #6: the in-combat choice overlay arm ----------
@@ -1000,7 +1160,7 @@ def _committed_screen(state: dict[str, Any], blob: dict[str, Any], kind: str,
         if approx:
             continue
         try:
-            scored.append((t5draft.score_offer(card, deck, ARCHETYPE), i, card))
+            scored.append((t5draft.score_offer(card, deck, _plan(state)), i, card))
         except Exception:                                    # noqa: BLE001
             continue
     if not scored:
@@ -1103,7 +1263,8 @@ def _choice_overlay(state: dict[str, Any],
             resolved.append((i, card))
     for i, card in resolved:
         try:
-            scores[card.name] = round(t5draft.score_offer(card, deck, ARCHETYPE), 2)
+            scores[card.name] = round(
+                t5draft.score_offer(card, deck, _plan(state)), 2)
         except Exception:                                    # noqa: BLE001
             pass
     if scores:
@@ -1115,7 +1276,8 @@ def _choice_overlay(state: dict[str, Any],
             action={"action": "select_card", "index": pick_i},
             label=f"{pick.name} [{pick_i}]",
             rationale=f"R93 #6 fallback: tier05.draft.score_offer over the "
-                      f"offered options under the {ARCHETYPE} plan: {scores}",
+                      f"offered options under the {_plan(state)} plan: "
+                      f"{scores}",
             revision="v1.6",
             notes={"basis": "score_offer", "scores": scores,
                    "screen_type": screen, "options": names})
@@ -1168,7 +1330,7 @@ def decide(state: dict[str, Any], memo: Memo | None = None,
                 d = _combat(state, memo)
             elif st == "card_reward":
                 d = (_committed_draft(state, commit) if commit
-                     else _from_v0(policy_v0._card_reward(state)))
+                     else _card_reward(state, memo))
             elif st == "map":
                 d = _map(state, memo)
             elif st == "rest_site":
@@ -1190,6 +1352,64 @@ def decide(state: dict[str, Any], memo: Memo | None = None,
     if d.action:
         d.notes = {**d.notes, "names": naming.describe(state, d.action)}
     return d
+
+
+def _card_reward(state: dict[str, Any], memo: Memo) -> Decision:
+    """REVISION #8. policy_v0's draft arm, scored under the RUN's plan.
+
+    Every line of the valuation is still the sim's: `t5draft.assigned_policy`
+    picks and `t5draft.score_offer` prices, exactly as `policy_v0._card_reward`
+    calls them, with `understudy.rng.policy_rng("draft")` as the stream. The
+    single difference is the archetype argument, which was the module constant
+    `"salon"` and is now the plan of the character actually being played.
+
+    Why this is not just a call into policy_v0 with an extra argument: v0 is
+    the counterfactual arm of a measurement already taken (R98) and does not
+    get edited, not even to add a keyword with a default. So the arm is
+    mirrored here, and the mirror is deliberately literal -- if v0's draft
+    logic ever moves, this is a place that has to move with it.
+    """
+    archetype = _plan(state, memo)
+    blob = state.get("card_reward") or {}
+    offers_raw = (blob.get("cards") if isinstance(blob, dict) else None) \
+        or state.get("cards") or state.get("options") or []
+    offers: list = []
+    approx: list[str] = []
+    for e in offers_raw:
+        if not isinstance(e, dict):
+            continue
+        card, is_approx = adapter.resolve_card(e)
+        offers.append(card)
+        if is_approx:
+            approx.append(card.name)
+    if not offers:
+        return _unavailable("draft", "no offers on the wire to score")
+
+    deck = adapter.deck_cards(state)
+    pick = t5draft.assigned_policy(policy_rng("draft"), deck, offers, archetype)
+    from understudy import deckwatch
+    notes = {"approximate_offers": approx, "deck_size": len(deck),
+             "deck_from": deckwatch.provenance(), "archetype": archetype,
+             "character": memo.character}
+
+    if pick is None:
+        return Decision(
+            category="draft", action={"action": "skip_card_reward"},
+            label="skip",
+            rationale=("every offer scored below the skip threshold, or the "
+                       f"late-run lean gate refused all of them, under the "
+                       f"{archetype} plan"),
+            revision="v1.8-plan", notes=notes)
+
+    index = next((i for i, c in enumerate(offers) if c is pick), None)
+    scores = {c.name: round(t5draft.score_offer(c, deck, archetype), 2)
+              for c in offers}
+    return Decision(
+        category="draft",
+        action={"action": "select_card_reward", "card_index": index},
+        label=f"take {pick.name} [{index}]",
+        rationale=f"score_offer under the {archetype} plan: {scores}",
+        revision="v1.8-plan", notes=notes)
 
 
 def _from_v0(cf: policy_v0.Counterfactual) -> Decision:

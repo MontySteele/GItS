@@ -408,19 +408,15 @@ Salon v2 rework plan's "every NUMBER below is PROPOSED pending red-pen", which
 this packet is the draft for. `EB-77`'s premise — "no draft exists in HEAD" —
 is correct; its citation route is not.
 
-**F2 — `SalonMemberPower.Localization` hardcodes all six numbers as string
-literals.** `klee-mod/KleeCode/Powers/SalonPowers.cs:70-93` writes "deals 6
-Hydro damage", "gains 3 Block", "deals 2 Hydro damage", "deals 14", "gains 9
-Block", "grants 3 Encore" — and the same six again in the `smartDescription`
-directly below. The values are correct today. But
-`klee-mod/KleeCode/Cards/SalonMemberTips.cs:99-114` deliberately interpolates
-`SalonConstants.*` for exactly this text, with the comment *"Numbers come from
-SalonConstants, so a repricing cannot leave the tooltip telling the player a
-retired number."* The power's own description does not follow its own rule. If
-Q1 moves any of the six, these two strings are the drift site, and the
-constant-parity gate cannot see them — it compares constants, not prose.
-**Consequence for the countersign: a repricing is a two-file edit, not a
-one-file edit.**
+**F2 — RESOLVED 2026-08-13 (was: `SalonMemberPower.Localization` hardcodes the
+six numbers as string literals).** The hazard this finding named was fixed as
+`EB-86` (commit `2df1af2`): `SalonPowers.cs:67-99` now interpolates
+`SalonConstants.*` in both `description` and `smartDescription`, matching the
+rule `SalonMemberTips.cs` already followed, and that build is deployed
+(`0.2-738`). **Consequence for the countersign: a repricing is a ONE-file edit**
+— `tier0/constants.py` and `SalonConstants.cs` remain the paired signing
+surfaces the derivation names, and the prose follows the constants
+automatically.
 
 **F3 — `"aura": True` on Chevalmarin's tick is inert.**
 `tier0/constants.py:292` carries an `aura` key on her tick spec. No engine code

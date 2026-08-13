@@ -13,8 +13,12 @@ the rider is the whole mechanic, and R82 ratified it as open design space
 for house characters too.
 """
 
-from tier0.content import loader
-from tier0.engine import combat, powers
+import copy
+
+import pytest
+
+from tier0.content import enchantments, loader, upgrades
+from tier0.engine import combat, powers, refpowers
 from tier0.engine.state import Card
 from tier0.tests.conftest import make_enemy, make_state
 
@@ -98,46 +102,63 @@ def _play_block_card(state, fx, rider=2):
     return c
 
 
-def test_the_block_rider_lands_once_per_PLAY_not_once_per_block_row():
-    """Nimble is 'Block gained from this card', once. _op_block re-enters for
-    every Block row -- including a row nested under a conditional -- so the
-    latch has to live on the state for the whole card play, not inside one
-    call. Asserted with the conditional both live and dead: the second row
-    must not be able to buy a second rider when it fires."""
+def test_the_block_rider_lands_on_EVERY_block_gain_not_once_per_play():
+    """EB-85 divergence 3: the cadence is per Block GAIN.
+
+    The game pays Nimble inside `Hook.ModifyBlock`, which runs once per
+    `CreatureCmd.GainBlock` call, with no latch and no EnchantmentStatus gate
+    -- so a two-row Block card collects it twice. tier0 paid it once per card
+    play off a state latch and under-counted every multi-gain card.
+    Asserted with the conditional both dead and live, because the second row
+    only exists in one of those worlds."""
     fx = [{"op": "block", "amount": 6}, SPARK_COND]
     dead = make_state()
     _play_block_card(dead, fx)
-    assert dead.player.block == 6 + 2          # rider once, branch skipped
+    assert dead.player.block == 6 + 2          # one gain, one rider
 
     live = make_state()
     live.player.sparks = 1
     _play_block_card(live, fx)
-    assert live.player.block == 6 + 3 + 2      # BOTH rows, rider still once
+    assert live.player.block == (6 + 2) + (3 + 2)   # two gains, two riders
 
 
-def test_the_block_rider_is_shared_by_block_and_block_next_turn():
-    """A card that gains Block both ways collects the rider once IN TOTAL:
-    the published text counts the card, not the op."""
+def test_the_block_rider_repeats_across_a_times_loop():
+    """A `times` loop is N separate GainBlock calls in the game, so it is N
+    riders -- the same fact the two-row card asserts, on the other shape."""
+    state = make_state()
+    _play_block_card(state, [{"op": "block", "amount": 4, "times": 3}])
+    assert state.player.block == (4 + 2) * 3
+
+
+def test_the_rider_never_rides_block_next_turn():
+    """EB-85 divergence 4. `BlockNextTurnPower.AfterBlockCleared` gains its
+    Block with a null card source, so `Hook.ModifyBlock` finds no
+    `cardSource.Enchantment` and Nimble is not paid on it -- not even on a
+    card that also gains ordinary Block, where the rider is paid once, for
+    the ordinary gain only."""
     state = make_state()
     _play_block_card(state, [{"op": "block", "amount": 4},
                              {"op": "block_next_turn", "amount": 4}])
     assert state.player.block == 4 + 2
     assert state.player.powers.get("block_next_turn", 0) == 4
 
+    # And a card whose ONLY Block arrives that way carries an inert rider,
+    # exactly as it does in game. (It is not an eligible target either --
+    # enchantments._grants_block -- but the engine must not pay one that is
+    # attached some other way.)
+    alone = make_state()
+    _play_block_card(alone, [{"op": "block_next_turn", "amount": 5}])
+    assert alone.player.block == 0
+    assert alone.player.powers.get("block_next_turn", 0) == 5
 
-def test_the_block_rider_rides_a_block_next_turn_only_card():
-    """Two Kokomi skills gain Block ONLY through block_next_turn. The rider
-    applied in _op_block alone made Nimble silently inert on them."""
-    state = make_state()
-    _play_block_card(state, [{"op": "block_next_turn", "amount": 5}])
-    assert state.player.block == 0
-    assert state.player.powers.get("block_next_turn", 0) == 5 + 2
 
+def test_each_card_pays_its_OWN_rider_through_an_inner_free_play():
+    """The _FREE_PLAY_CONTEXT question, restated for the per-gain cadence.
 
-def test_an_inner_free_play_does_not_eat_the_outer_cards_rider():
-    """The _FREE_PLAY_CONTEXT hazard: a card free-played in the middle of an
-    outer card's resolution runs its own resolve_card, which resets the
-    latch. Both cards must collect their own rider exactly once."""
+    The game reads `cardSource.Enchantment` off whichever card is producing
+    the Block, so an inner free-played card pays its own Nimble and the outer
+    card keeps paying its own on every gain of its own. There is no shared
+    entitlement to spend, which is why the latch left _FREE_PLAY_CONTEXT."""
     state = make_state()
     inner = card("inner", fx=[{"op": "block", "amount": 1}], enchant_block=2)
     state.player.draw_pile.append(inner)
@@ -147,8 +168,8 @@ def test_an_inner_free_play_does_not_eat_the_outer_cards_rider():
                      {"op": "block", "amount": 3}])
     state.player.hand.append(outer)
     combat.play_card(state, outer)
-    #   outer 3 + rider 2, inner 1 + rider 2, outer 3 (rider already spent)
-    assert state.player.block == 3 + 2 + 1 + 2 + 3
+    #   outer 3+2, inner 1+2, outer 3+2 -- three gains, three riders
+    assert state.player.block == (3 + 2) + (1 + 2) + (3 + 2)
 
 
 def test_a_clone_of_an_enchanted_card_keeps_its_enchantment():
@@ -169,3 +190,65 @@ def test_a_clone_of_an_enchanted_card_keeps_its_enchantment():
     assert len(clones) == 1
     assert clones[0].enchant_damage == 1
     assert clones[0].enchant_effects == [WEAK_RIDER]
+
+
+def test_aggression_survives_an_already_upgraded_enchanted_card():
+    """RUNTEMPLATE 10 regression: the second `+` landed INSIDE the decoration.
+
+    `_upgraded` reaches an upgraded card by appending `upgrades.SUFFIX` and
+    letting the card index miss, which is how "already upgraded" used to be
+    detected. An enchanted upgraded id decorates as `x@nimble-2+`, so the
+    appended suffix produced `x@nimble-2++` and `enchantments.split` reached
+    `int("2+")` before the index was ever consulted. That ValueError is not
+    "no applicable upgrade", so `_upgraded` re-raised it by design and the run
+    died -- Aggression recalls from the discard pile, so every Ironclad run
+    that had enchanted an upgraded attack crashed instead of scoring, which is
+    what took both `real_*` anchors out of the standing roster table.
+
+    The card is moved unupgraded and the gap is logged, exactly as the plain
+    already-upgraded card has always been.
+    """
+    state = make_state()
+    stuck = card("duck_and_cover@nimble-2+", type="attack")
+    state.player.hand = []
+    state.player.discard_pile = [stuck]
+    state.player.powers["aggression"] = 1
+
+    refpowers.side_turn_start_early(state)
+
+    assert [c.id for c in state.player.hand] == ["duck_and_cover@nimble-2+"]
+    assert [ev["reason"] for ev in state.log
+            if ev["event"] == "UNIMPLEMENTED" and ev.get("power") == "aggression"] \
+        == ["no card-sheet entry for this id; moved unupgraded"]
+
+
+def test_upgrading_an_enchanted_card_keeps_both_decorations():
+    """`has_upgrade` looks past the mark; `apply_upgrade` has to agree.
+
+    R82's reopen taught `has_upgrade` that an enchantment never costs a card
+    its upgrade path, and left `apply_upgrade` looking up the decorated id.
+    The pair only ever meet on an enchanted card, which nothing produced
+    until enchantments entered the run layer at RUNTEMPLATE 10 -- from then
+    on `has_upgrade` answered True off the plain row and `apply_upgrade`
+    raised "no applicable upgrade" on the same card, and since
+    `_best_upgrade_target` SCORES its candidates by calling it, one enchanted
+    upgradable card in hand killed the run.
+
+    The upgraded id must also round-trip, or the next reader of it hits the
+    same class of parse the Aggression pin above covers.
+    """
+    plain = "duck_and_cover"
+    if not upgrades.has_upgrade(plain):
+        pytest.skip(f"{plain} carries no upgrade row on this sheet")
+    decorated = enchantments.decorate(plain, "sharp", 2)
+    assert upgrades.has_upgrade(decorated)
+
+    upped = upgrades.apply_upgrade(copy.deepcopy(loader.get_card(decorated)))
+
+    assert upped.id == enchantments.decorate(plain + upgrades.SUFFIX,
+                                             "sharp", 2)
+    assert enchantments.split(upped.id) == (plain + upgrades.SUFFIX,
+                                            "sharp", 2)
+    # The plain card is untouched by the change: same id it always produced.
+    bare = upgrades.apply_upgrade(copy.deepcopy(loader.get_card(plain)))
+    assert bare.id == plain + upgrades.SUFFIX

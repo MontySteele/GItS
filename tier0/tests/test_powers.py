@@ -1,12 +1,18 @@
-from tier0.engine import powers
+from tier0.engine import powers, refpowers
 from tier0.tests.conftest import make_state
 
 
 def test_weak_vulnerable_decay(state):
+    """EB-95: the player's durations tick at the ENEMY side end, not at the
+    player's own turn end. Stacks written straight into the dict carry no
+    skip flag, so the first enemy-side end spends one."""
     p = state.player
     p.powers["weak"] = 2
     p.powers["vulnerable"] = 1
     powers.on_turn_end(state, p)
+    assert p.powers["weak"] == 2              # the player's turn end does NOT tick
+    assert p.powers["vulnerable"] == 1
+    refpowers.after_enemy_side_turn_end(state)
     assert p.powers["weak"] == 1
     assert p.powers["vulnerable"] == 0
 
