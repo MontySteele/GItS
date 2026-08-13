@@ -68,7 +68,9 @@ STATIC_FANFARE_FLOOR_VALUE = 0.2  # per printed floor point (v9). A floor is
                               # readers the deck happens to hold. PROPOSED.
 STATIC_CHARGE_VALUE = 0.5     # per printed Charge point: the kit Garment
                               # is a universal reader (never-expiring bank,
-                              # +1 damage per 4 Charge while it holds), so
+                              # +1 damage per `GARMENT_CHARGE_DIVISOR` Charge
+                              # while it holds -- 2 since the v0.3 charge-curve
+                              # pass, not the 4 this comment used to say), so
                               # banked points are never dead -- but one
                               # Garment window is all this prices in
 
