@@ -582,6 +582,15 @@ class _RunCtx:
         self.hp, self.max_hp, self.gold = est.hp, est.max_hp, est.gold
         self.deck_ids = est.deck_ids
         self.res.events.extend(est.log)
+        # EB-111: Book of Five Rings ticks on EVERY card added to the deck
+        # (C# BookOfFiveRings.AfterCardChangedPiles fires on PileType.Deck,
+        # the master deck -- "where cards live between rooms"), not just on
+        # shop buys and reward picks. `est.cards_added` is tallied at the
+        # event add sites; the heal lands here, after the event's own max-HP
+        # moves, so it clamps against the max HP the run leaves with.
+        if self.held is not None and est.cards_added:
+            self.hp = self.held.note_cards_added(est.cards_added, self.hp,
+                                                 self.max_hp)
         if self.grant_relics:
             self.res.relics.extend(est.relics_granted)
         if self.hp <= 0:
