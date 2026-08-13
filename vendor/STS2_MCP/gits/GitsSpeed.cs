@@ -15,15 +15,24 @@
 //     here touches damage, RNG, energy, draw, or any balance surface.
 //   * REVERSIBLE. The pre-change FastMode and TimeScale are captured on the
 //     first enable and restored by a disable. PrefsSave.FastMode is
-//     user-visible state that persists to settings.save, so the harness is
+//     user-visible state that persists to prefs.save (NOT settings.save --
+//     that file backs SettingsSave and never carries FastMode; see
+//     PrefsSaveManager.fileName), so the harness is
 //     expected to disable in teardown; `restore_on_disable` is the whole
 //     reason the original values are remembered rather than assumed.
 //   * THE CAPTURED FastMode OUTLIVES THE PROCESS (EB-87). The capture used to
-//     be per-process static only, and PrefsSave.FastMode persists to
-//     settings.save: an unattended soak that restarts the game had its second
-//     process read back `Instant`, record THAT as the original, and "restore"
-//     to it on teardown -- leaving the game on Instant while the ledger said
-//     REVERTED. The first capture is therefore written to a sidecar file next
+//     be per-process static only. CORRECTED 2026-08-13, round-2 correctness
+//     audit: the mechanism first recorded here -- "the second process reads
+//     back `Instant` and records THAT as the original" -- is NOT reproducible.
+//     Prefs reach disk only through NGame.Quit() (a window close request) or
+//     NSettingsScreen.OnSubmenuClosed, neither of which a TerminateProcess
+//     kill reaches; and NGame demotes a persisted `Instant` to `Fast` on every
+//     non-editor boot, so no second process can ever observe `Instant`. The
+//     REAL laundering this guards is one step narrower and still real: if
+//     anything did flush prefs while Instant was live (a settings screen
+//     closed mid-soak), a second process captures the demoted `Fast` as the
+//     original, and a user whose FastMode was `Normal` is silently "restored"
+//     to `Fast`. The first capture is therefore written to a sidecar file next
 //     to the mod's own STS2_MCP.conf, a later process restores from the
 //     sidecar instead of re-capturing, and a successful disable deletes it.
 //     The sidecar is JSON content under a `.conf` name on purpose -- a `.json`
@@ -191,10 +200,11 @@ public static partial class McpMod
     {
         if (!_gitsSpeedCaptured)
         {
-            // The sidecar wins over the live read. After a restart the live
-            // read IS the value we set last process (FastMode persists to
-            // settings.save), so re-capturing would launder our own change
-            // into the baseline -- EB-87.
+            // The sidecar wins over the live read. If anything flushed prefs
+            // while we held Instant, the live read after a restart is our own
+            // change (demoted to Fast at boot), not the user's original, so
+            // re-capturing would launder it into the baseline -- EB-87, with
+            // the mechanism corrected in the header comment 2026-08-13.
             FastModeType? persisted = GitsSpeedReadSidecar();
             if (persisted.HasValue)
             {

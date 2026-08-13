@@ -227,9 +227,10 @@ working.
 
 The kill is a ledger step, not a shortcut around one. The speed row is marked
 **NOT REVERTED** with the captured original in its note, because the wire is
-dead and `PrefsSave.FastMode` persists to `settings.save` — the setting really
-is left changed, and a ledger that laundered that would cost somebody an
-evening. `--no-setup` kills nothing: it did not launch the game and may not
+dead and the live `PrefsSave.FastMode` really is left changed — it persists to
+`prefs.save` (not `settings.save`, which never carries FastMode) only if
+something flushes prefs, which a hard kill does not — and a ledger that
+laundered that would cost somebody an evening. `--no-setup` kills nothing: it did not launch the game and may not
 terminate it, so it reports instead.
 
 ## Chosen seeds (P1.5)

@@ -368,11 +368,12 @@ class Session:
     def _speed_on(self) -> None:
         # THE FIRST CAPTURE OF THE SESSION IS THE SESSION'S ORIGINAL, and a
         # relaunch does not get to overwrite it. `PrefsSave.FastMode` persists
-        # to `settings.save`, so a second process reads back the value the
-        # FIRST one left there -- capturing again after a restart would write
-        # `Instant` into the ledger as if it were what the user had before the
-        # soak started. The ledger is what a person reads to put their game
-        # back; it may not launder a change into a baseline.
+        # to `prefs.save` (NOT `settings.save`, which backs `SettingsSave` and
+        # never carries FastMode), so IF anything flushed prefs while the
+        # harness held Instant, a second process would capture a value the
+        # harness itself put there rather than the user's. The ledger is what
+        # a person reads to put their game back; it may not launder a change
+        # into a baseline.
         #
         # `GitsSpeed.cs` now persists its own capture across processes (EB-87),
         # so the endpoint would answer correctly on its own. This stays as the
@@ -482,10 +483,22 @@ class Session:
         if r.returncode != 0:
             raise RuntimeError(r.stderr.strip()[:300] or "deploy_bridge -Remove failed")
         if outstanding:
+            # THE WARNING CLAIMS ONLY WHAT THE SIDECAR PROVES. Its presence
+            # proves the in-process disable never ran; it says NOTHING about
+            # disk. `SaveManager.SavePrefsFile()` has two callers -- NGame.Quit
+            # (reached only from _Notification(1006), i.e. WM_CLOSE_REQUEST)
+            # and NSettingsScreen.OnSubmenuClosed -- and `_kill()` is
+            # TerminateProcess, which is neither. So on the ordinary teardown
+            # path nothing was flushed and `prefs.save` is already correct.
             return (f"mods/STS2_MCP removed -- WARNING: the GitsSpeed sidecar "
-                    f"was still present, so FastMode was NEVER restored and "
-                    f"settings.save is still on Instant. Set it back to "
-                    f"{outstanding} by hand")
+                    f"was still present, so the in-process FastMode restore "
+                    f"NEVER ran. The process was force-killed, which flushes "
+                    f"no prefs, so `prefs.save` was almost certainly not "
+                    f"written on this path; if a settings screen happened to "
+                    f"be closed during the soak it may hold Instant, which "
+                    f"the next launch silently rewrites to Fast. Captured "
+                    f"original: {outstanding} -- check FastMode in the "
+                    f"in-game settings")
         return "mods/STS2_MCP removed"
 
     def _remove_appid(self) -> str:
@@ -522,9 +535,10 @@ class Session:
         over a process that no longer exists.
 
         THE SPEED ROW IS FAILED, NOT REVERTED, AND THAT IS THE POINT. The wire
-        is dead, so `POST {"enabled": false}` cannot run, and `PrefsSave
-        .FastMode` persists to `settings.save` -- the setting really is left
-        changed. A ledger that quietly marked it reverted because the process
+        is dead, so `POST {"enabled": false}` cannot run, and the live
+        `PrefsSave.FastMode` really is left changed for as long as the process
+        lives (it persists to `prefs.save` only if something flushes prefs,
+        which a hard kill does not). A ledger that quietly marked it reverted because the process
         it belonged to is gone would be lying in the one direction that costs
         somebody an evening wondering why their game animates strangely. The
         captured original travels in the failure note so it can be put back by
@@ -545,7 +559,8 @@ class Session:
             self.ledger.fail(
                 self._speed_entry,
                 "the wire was dead, so the speed endpoint could not be asked "
-                "to restore; FastMode persists to settings.save. Captured "
+                "to restore; the live FastMode is left changed (it reaches "
+                "prefs.save only if something flushes prefs). Captured "
                 f"original: {json.dumps(self.speed_before)}")
             self._speed_entry = None
 
@@ -581,7 +596,8 @@ class Session:
                 "superseded by a restart; a new launch row and speed row open "
                 "below, and the SESSION's captured original is carried "
                 "forward rather than re-captured -- PrefsSave.FastMode "
-                "persists to settings.save, so the second process must not "
+                "persists to prefs.save, so if anything flushed prefs while "
+                "Instant was live the second process must not "
                 "read the first process's setting back as the original "
                 "(EB-87: the bridge persists its capture in a sidecar, and "
                 "this session keeps its own copy as well)")
