@@ -755,14 +755,20 @@ def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
     amount = _amount(state, fx["amount"])
     if state.salon_replacements_this_card:
         amount *= C.SALON_REPLACE_DAMAGE_MULT
-    # Nimble rides here too: the published text is "Block gained from this
-    # card", and two Kokomi skills gain Block only (or half) through this op.
-    # Added AFTER the Spotlight scale, exactly as _op_block adds it -- an
-    # enchantment is not a printed number. One payout, because this op is one
-    # deferred Block gain.
+    # NIMBLE DOES NOT RIDE HERE (EB-85 divergence 4). This op is the sim's
+    # mirror of `BlockNextTurnPower`, and that power pays out with
+    #
+    #     await CreatureCmd.GainBlock(base.Owner, base.Amount,
+    #                                 ValueProp.Unpowered, null);
+    #
+    # in `AfterBlockCleared`. The trailing null is the card source, so
+    # `Hook.ModifyBlock` has no `cardSource.Enchantment` to read and the
+    # enchantment is never consulted -- the Block arrives from a POWER on a
+    # later turn, not from a card play. tier0 folded the rider into the
+    # power's amount, which made `tideline_watch` (inert in game) a boosted
+    # card here. The eligibility half is in `enchantments._grants_block`.
     powers.apply_power(state, state.player, "block_next_turn",
-                       _spotlight_scale(state, card, amount)
-                       + card.enchant_block)
+                       _spotlight_scale(state, card, amount))
 
 
 def _op_draw(state: CombatState, fx: dict, card: Card) -> None:

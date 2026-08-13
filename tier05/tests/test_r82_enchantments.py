@@ -150,11 +150,27 @@ def test_nimble_is_not_skill_only_and_takes_a_block_granting_attack():
                     "thoma_crimson_ooyoroi", "itto_superlative_superstrength"}
 
 
-def test_nimble_sees_block_next_turn_and_block_under_a_conditional():
-    """Both the Kokomi shape (Block only via block_next_turn) and a Block row
-    that only exists inside a conditional branch."""
+def test_nimble_refuses_a_block_next_turn_only_card():
+    """EB-85 divergence 4, the eligibility half. `BlockNextTurnPower` pays
+    out with `CreatureCmd.GainBlock(Owner, Amount, Unpowered, null)` -- no
+    card source -- so `Hook.ModifyBlock` never sees an enchantment and the
+    Block is not "Block gained from this card" at all. The mod agrees from
+    the other side: `TidelineWatch` declares neither a BlockVar nor a
+    GainsBlock override, so the game refuses it the enchantment outright."""
     later = _skill([{"op": "block_next_turn", "amount": 4}])
-    assert enchantments.eligible(later, "nimble")
+    assert not enchantments.eligible(later, "nimble")
+    both = _skill([{"op": "block", "amount": 2},
+                   {"op": "block_next_turn", "amount": 4}])
+    assert enchantments.eligible(both, "nimble")   # the ordinary row carries it
+    live = {c.id for c in loader._card_index().values()
+            if enchantments.eligible(c, "nimble")}
+    assert "tideline_watch" not in live
+
+
+def test_nimble_sees_block_under_a_conditional():
+    """A Block row that only exists inside a conditional branch still counts
+    -- BaseLib's auto-detect misses it, which is why three shipped cards
+    declare `GainsBlock` by hand."""
     nested = _skill([{"op": "conditional", "if": "has_spark",
                       "then": [{"op": "block", "amount": 3}]}])
     assert enchantments.eligible(nested, "nimble")

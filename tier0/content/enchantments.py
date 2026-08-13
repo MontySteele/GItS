@@ -76,7 +76,8 @@ def _is_attack(c) -> bool:
     return c.type == "attack"
 
 
-_BLOCK_OPS = ("block", "block_next_turn")
+# `block_next_turn` is deliberately NOT here -- see _grants_block.
+_BLOCK_OPS = ("block",)
 
 
 def _grants_block(effects) -> bool:
@@ -85,6 +86,21 @@ def _grants_block(effects) -> bool:
     `conditional` is the one op that nests further effect lists (`then` /
     `else` -- see engine.effects._op_conditional), so the walk is over those
     two keys and nothing else.
+
+    `block_next_turn` DOES NOT COUNT (EB-85 divergence 4). It is the sim's
+    mirror of `BlockNextTurnPower`, whose payout is
+
+        await CreatureCmd.GainBlock(base.Owner, base.Amount,
+                                    ValueProp.Unpowered, null);
+
+    in `AfterBlockCleared` -- the last argument is the card source, and it is
+    null, so `Hook.ModifyBlock` finds no `cardSource.Enchantment` and Nimble
+    is never paid on that Block. The mod's cards say the same thing from the
+    other side: `TidelineWatch` declares no `BlockVar` and no `GainsBlock`
+    override, so `CardModel.GainsBlock` is its inherited `false` and
+    `Nimble.CanEnchant` refuses the card outright. A card whose ONLY Block
+    arrives this way is not a Nimble target in game (base game: Prolong);
+    tier0 offered it one and then paid a rider the game does not pay.
     """
     for fx in effects or ():
         if fx.get("op") in _BLOCK_OPS:

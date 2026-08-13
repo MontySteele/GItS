@@ -126,22 +126,26 @@ def test_the_block_rider_repeats_across_a_times_loop():
     assert state.player.block == (4 + 2) * 3
 
 
-def test_a_card_gaining_block_both_ways_pays_the_rider_on_each():
-    """One payout per Block gain, and `block_next_turn` is its own gain."""
+def test_the_rider_never_rides_block_next_turn():
+    """EB-85 divergence 4. `BlockNextTurnPower.AfterBlockCleared` gains its
+    Block with a null card source, so `Hook.ModifyBlock` finds no
+    `cardSource.Enchantment` and Nimble is not paid on it -- not even on a
+    card that also gains ordinary Block, where the rider is paid once, for
+    the ordinary gain only."""
     state = make_state()
     _play_block_card(state, [{"op": "block", "amount": 4},
                              {"op": "block_next_turn", "amount": 4}])
     assert state.player.block == 4 + 2
-    assert state.player.powers.get("block_next_turn", 0) == 4 + 2
+    assert state.player.powers.get("block_next_turn", 0) == 4
 
-
-def test_the_block_rider_rides_a_block_next_turn_only_card():
-    """Two Kokomi skills gain Block ONLY through block_next_turn. The rider
-    applied in _op_block alone made Nimble silently inert on them."""
-    state = make_state()
-    _play_block_card(state, [{"op": "block_next_turn", "amount": 5}])
-    assert state.player.block == 0
-    assert state.player.powers.get("block_next_turn", 0) == 5 + 2
+    # And a card whose ONLY Block arrives that way carries an inert rider,
+    # exactly as it does in game. (It is not an eligible target either --
+    # enchantments._grants_block -- but the engine must not pay one that is
+    # attached some other way.)
+    alone = make_state()
+    _play_block_card(alone, [{"op": "block_next_turn", "amount": 5}])
+    assert alone.player.block == 0
+    assert alone.player.powers.get("block_next_turn", 0) == 5
 
 
 def test_each_card_pays_its_OWN_rider_through_an_inner_free_play():
