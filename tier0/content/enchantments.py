@@ -170,10 +170,20 @@ CATALOG: dict[str, Enchantment] = {
         # The HP loss is the SHIPPED `enchant_effects` list, resolved after
         # the card's own effects -- the same pipe Inky's Weak rides. The
         # damage half needs a multiplier the flat rider could not carry.
-        # NOTE, recorded rather than averaged: mobalytics publishes "lose 3
-        # HP" for this enchantment; slaythespire.wiki.gg publishes 2, and the
-        # wiki is this repo's authority everywhere else in the event layer,
-        # so 2 it is.
+        # BOTH NUMBERS ARE THE BINARY'S, confirmed by the EB-84 sweep and
+        # re-read for EB-85 (sts2.dll v0.107.1,
+        # `Models.Enchantments.Corrupted`): `private const decimal
+        # _damageAmount = 2m` with `CreatureCmd.Damage(..., 2m, ...)` in
+        # OnPlay, and `EnchantDamageMultiplicative` returning `1.5m`. The
+        # sources had disagreed -- mobalytics publishes "lose 3 HP",
+        # slaythespire.wiki.gg publishes 2 -- and the wiki-over-mobalytics
+        # call this row made was right. The DLL is the citation now.
+        #
+        # The multiplier is gated `if (!props.IsPoweredAttack()) return 1m;`,
+        # i.e. it applies to powered Move damage only, which is why the
+        # engine applies it inside the `card.type == "attack"` branch and NOT
+        # to the self-damage row below -- that row is dealt Unblockable |
+        # Unpowered | Move in game, so it fails the same gate.
         lambda x: {"enchant_damage_mult": 1.5,
                    "enchant_effects": [{"op": "damage", "target": "self",
                                         "amount": 2}]}),
