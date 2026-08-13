@@ -265,3 +265,57 @@ def test_conditional_assembly_conditions_only_on_five_stars():
     ca5 = run_metrics.conditional_assembly(results, ["durin_witchs_flame"])
     assert ca5["eligible_rate"] == 1.0
     assert ca5["conditional_rate"] == ca5["unconditional_rate"]
+
+
+# --- the MODEL path, not just the shop function (EB-102) ----------------
+
+
+def test_the_model_path_carries_the_banner_into_the_shop():
+    """`resolve_shop` must pass the run's banner to `visit_shop`.
+
+    The two assertions above test `rewards.roll_rewards` and
+    `shop.companion_shop_offer` DIRECTLY, so both passed for as long as
+    `model.resolve_shop` forgot the `banner=` argument entirely -- the filter
+    was correct and simply never invoked on the only production shop call,
+    which defaulted `banner` to None and no-opped. This test drives the model
+    seam instead: it builds a real run context, replaces the rolled banner
+    with a deliberately exclusionary one, and asserts the exclusion survives
+    the trip through `resolve_shop`.
+
+    Furina because Fontaine is the one over-cap nation (four Rares against
+    BANNER_FEATURED_SLOTS = 3), so an excludable 5-star exists at all.
+    """
+    excluded = set()
+    offered_five_stars = 0
+    for seed in range(60):
+        ctx = model._setup_run("furina", "salon", "salon",
+                               draft.assigned_policy, seed, "standard",
+                               None, False, False, 1, "hunter")
+        # Every designed 5-star EXCEPT Fontaine's -- the shop's slot-1 draw is
+        # the home-nation one, so this is the exclusion most likely to leak.
+        fontaine = {c.id for c in rewards.five_star_roster("fontaine")}
+        assert fontaine, "no Fontaine 5-star exists; the test is vacuous"
+        excluded |= fontaine
+        ctx.banner = frozenset(
+            cid for nation in rewards.designed_nations()
+            for cid in (c.id for c in rewards.five_star_roster(nation))
+            if cid not in fontaine)
+        # Gold is irrelevant to what is OFFERED, but a full purse exercises
+        # the buy loop rather than exiting at the affordability guard.
+        ctx.gold = 10_000
+        ctx.resolve_shop()
+        for rec in ctx.res.shop_companion_offers:
+            card = loader.peek_card(rec["id"])
+            if card.star == 5:
+                offered_five_stars += 1
+                assert card.id in ctx.banner, (
+                    f"seed {seed}: shop offered off-banner {card.id} "
+                    f"through the model path")
+        for buy in ctx.res.shop:
+            cid = buy.get("id")
+            if cid and loader.peek_card(cid).star == 5:
+                assert cid in ctx.banner, (
+                    f"seed {seed}: pilot BOUGHT off-banner {cid}")
+    assert offered_five_stars, (
+        "no 5-star ever reached the shop across 60 seeds; the assertion "
+        "would pass vacuously")

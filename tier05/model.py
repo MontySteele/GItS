@@ -475,7 +475,8 @@ class _RunCtx:
         self.shop_visits += 1
         outcome = shop.visit_shop(self.rng, self.character, self.deck_ids,
                                   self.gold, self.plan(), self.policy,
-                                  self.removal_uses, visit=visit,
+                                  self.removal_uses, banner=self.banner,
+                                  visit=visit,
                                   policy_rng=self.pick_rng())
         self.deck_ids = outcome.deck_ids
         self.gold = outcome.gold
