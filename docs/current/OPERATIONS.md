@@ -95,7 +95,13 @@ python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
 tools\build_pck.ps1            # one character-aware resource pack + klee.pck.contract.txt
 klee-mod\build\deploy.ps1      # stages the pack; rejects a missing/stale/mismatched contract
 klee-mod\build\validate.ps1    # the S-gate deploy validation
+klee-mod\build\validate.ps1 -RunCsharpTests   # ... plus the C# suite (opt-in)
+cd klee-mod\KleeTests && dotnet test           # the C# suite on its own
 ```
+
+`KleeTests` (`EB-105`) runs the shipped `klee.dll` against the real game
+assemblies **headless** — no Godot, no launch. It is opt-in, not a deploy gate;
+its boundary and its co-op coverage are in `klee-mod/KleeTests/README.md`.
 
 After any roster-resource change, run `build_pck.ps1` **before** `deploy.ps1` —
 an old Klee-only PCK cannot pass validation. Machine paths come from

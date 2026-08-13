@@ -123,7 +123,12 @@ contract version is `roster-pck-v3`.
 - **understudy** — the bot playtest bridge driving the real game (Guardrail-7,
   no-fun rule). (`docs/current/atlas/understudy.md`)
 - **klee-mod** — the C# character mod (`KleeCode/`) plus the PCK build/deploy
-  pipeline. (`docs/current/atlas/klee-mod-cards.md`, `klee-mod-runtime.md`,
+  pipeline, and since 2026-08-13 a headless C# test project (`KleeTests/`,
+  `EB-105`). Co-op therefore has a **partial** automated backstop, not none and
+  not a full one: per-seat ownership and attribution are testable; multiplayer
+  transport and anything needing a live `CombatState` are still play-only
+  (`klee-mod/KleeTests/README.md`).
+  (`docs/current/atlas/klee-mod-cards.md`, `klee-mod-runtime.md`,
   `klee-mod-build-pck.md`)
 - **vendor STS2_MCP bridge** — the vendored wire contract the understudy speaks.
   (`docs/current/atlas/vendor-sts2-mcp.md`)
