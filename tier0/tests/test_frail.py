@@ -7,7 +7,7 @@ HARD RULE 7 lock: each assertion below FAILS against the pre-rework code
 is not reduced".
 """
 
-from tier0.engine import effects, powers
+from tier0.engine import effects, powers, refpowers
 from tier0.tests.conftest import make_state
 from tier0.engine.state import Card
 
@@ -33,11 +33,14 @@ def test_no_frail_full_block():
 
 
 def test_frail_decays_like_weak(state):
+    """EB-95: on the player the tick site is the ENEMY side end."""
     p = state.player
     p.powers["frail"] = 2
     powers.on_turn_end(state, p)
+    assert p.powers["frail"] == 2              # player turn end does NOT tick
+    refpowers.after_enemy_side_turn_end(state)
     assert p.powers["frail"] == 1
-    powers.on_turn_end(state, p)
+    refpowers.after_enemy_side_turn_end(state)
     assert p.powers.get("frail", 0) == 0
 
 

@@ -421,6 +421,11 @@ class Fighter:
     max_hp: int
     block: int = 0
     powers: dict[str, int] = field(default_factory=dict)   # name -> stacks
+    # EB-95: the authority's `SkipNextDurationTick`, held per power name. A
+    # duration Debuff freshly applied to a player-side creature does not lose
+    # a stack to the AfterSideTurnEnd(enemy) tick that follows the application
+    # within the same enemy side. Only the player ever carries entries.
+    skip_next_duration_tick: set[str] = field(default_factory=set)
 
     @property
     def alive(self) -> bool:

@@ -2,8 +2,10 @@
 
 Player turn: bombs detonate -> auras tick -> power hooks -> draw + energy ->
 pilot plays until done -> discard hand -> power decay.
-Enemy turns: scripted intents, no AI. Asleep enemies skip; frozen enemies
-act at -50% damage (Frozen v2, principles v1.5).
+Enemy turns: scripted intents, no AI. Asleep enemies take no action but are
+still side-turn participants (EB-96: block clear, turn-start and turn-end
+hooks all fire); frozen enemies act at -50% damage (Frozen v2, principles
+v1.5).
 """
 
 from __future__ import annotations
@@ -782,14 +784,35 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
 def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
     if not enemy.alive:
         return
-    if enemy.sleep_turns > 0:
+    # EB-96: a SLEEPING creature is still a side-turn participant. The
+    # authority builds `creaturesStartingTurn` with no Asleep filter
+    # (CombatManager.cs:443-448); sleep suppresses `TakeTurn` and nothing else
+    # (Creature.cs:711-717); AsleepPower itself hangs off
+    # `AfterSideTurnEnd(participants.Contains(Owner))`. So the block clear,
+    # site A, site F and the turn-end tick all fire on a sleep turn -- an
+    # early return above them stalled the sleeper's dot, froze its duration
+    # debuffs and left its temporary Strength never reverting. NC-7/R116
+    # hoisted Frozen's tick out of this function for exactly this reason; the
+    # same shape applies here, one clock at a time.
+    #
+    # The early return WAS load-bearing for two things, and both are kept
+    # below: a sleep turn advances no intent, and it toggles no Nemesis
+    # Intangible (the phase respawn opens the stack, and the respawn sleep
+    # turn must not immediately close it).
+    asleep = enemy.sleep_turns > 0
+    if asleep:
         enemy.sleep_turns -= 1
         state.emit("enemy_sleep", enemy=enemy.name)
-        return
     enemy.block = 0
     powers.on_turn_start(state, enemy)          # site A: metallicize, dot
     refpowers.enemy_side_turn_start(state, enemy)    # site F: poison
     if not enemy.alive:
+        return
+    if asleep:
+        # Site M for a participant that never took its turn. Mirrors the
+        # acting path's `if not enemy.alive: return` above -- a sleeper that
+        # died to its own dot reaches neither.
+        powers.on_turn_end(state, enemy)
         return
     # Crab Rage (§10.2, gated on the spec field -- inert everywhere else):
     # once, at this enemy's first turn start after any ally has died, apply
