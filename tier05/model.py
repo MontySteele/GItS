@@ -54,8 +54,9 @@ _NODE_KIND_CTX = {"N": "normal", "E": "elite", "B": "boss"}
 
 def _potion_slots(held: "Optional[relic_pool.HeldRelics]") -> int:
     """The run's held-potion capacity: the POTION_SLOTS default, plus any
-    slot-bumping relic bonus (Potion Belt: +2). Recomputed at each use site so
-    a Potion Belt granted MID-RUN raises the cap immediately."""
+    slot-bumping relic bonus (Potion Belt: +2). The bag calls this on EVERY
+    capacity read (PotionBag.slots_fn), so a Potion Belt granted MID-RUN
+    raises the cap immediately, wherever it arrived from."""
     base = C.POTION_SLOTS
     if held is not None:
         base += held.potion_slot_bonus()
@@ -475,7 +476,8 @@ class _RunCtx:
         self.shop_visits += 1
         outcome = shop.visit_shop(self.rng, self.character, self.deck_ids,
                                   self.gold, self.plan(), self.policy,
-                                  self.removal_uses, visit=visit,
+                                  self.removal_uses, banner=self.banner,
+                                  visit=visit,
                                   policy_rng=self.pick_rng())
         self.deck_ids = outcome.deck_ids
         self.gold = outcome.gold
@@ -523,7 +525,6 @@ class _RunCtx:
             # free AND gold allows. The shelf is rolled first (deterministic
             # off the run rng); an unaffordable / no-slot potion is simply
             # not bought (no swap prompt in this model).
-            self.bag.slots = _potion_slots(self.held)
             for _ in range(self.rng.randint(1, 2)):
                 pid = potion_pool.roll_potion(self.rng)
                 if not self.bag.full() and self.gold >= C.POTION_PRICE:
@@ -571,8 +572,7 @@ class _RunCtx:
         est = events.EventState(
             character=self.character, archetype=self.plan(), hp=self.hp,
             max_hp=self.max_hp, gold=self.gold, deck_ids=self.deck_ids,
-            potions=list(self.bag.potions) if self.bag else [],
-            potion_slots=self.bag.slots if self.bag else 0)
+            potions=list(self.bag.potions) if self.bag else [])
         events.visit(self.rng, self.act_i, est, self.seen_events,
                      held=self.held, bag=self.bag, policy=self.policy,
                      policy_rng=self.pick_rng())
@@ -604,7 +604,6 @@ class _RunCtx:
             # so the combat use-policy can drink (offensive drinks gated to
             # elite/boss by node_kind). A COPY of bag.potions goes in; combat
             # mutates the player's own list, which we sync back after the fight.
-            self.bag.slots = _potion_slots(self.held)
             potions_before = list(self.bag.potions)
             player = loader.build_player_from_ids(
                 self.character, self.deck_ids, relic_effects=relic_fx,
@@ -714,7 +713,6 @@ class _RunCtx:
         # full bag discards the drop (logged in bag.discarded).
         if self.grant_potions and self.bag is not None and kind in ("N", "E"):
             if self.rng.random() < C.POTION_DROP_CHANCE:
-                self.bag.slots = _potion_slots(self.held)
                 self.bag.add(potion_pool.roll_potion(self.rng))
         self.res.gold = self.gold
 
@@ -872,11 +870,18 @@ def _setup_run(character: str, archetype: str, pilot_id: str,
                                         deck_ids, rng)
     # Held-potion bag (potion pass). Constructed ONLY on grant_potions runs, so
     # a grant_potions=False run never holds potions and every combat is built
-    # exactly as before. Slot count is recomputed at each use site from `held`
-    # so a Potion Belt granted mid-run raises the cap immediately.
+    # exactly as before. Slot count is derived from `held` on every read, so a
+    # Potion Belt granted mid-run raises the cap immediately.
     bag = None
     if grant_potions:
-        bag = potion_pool.PotionBag(potions=[], slots=_potion_slots(held))
+        # `slots_fn`, not a fixed count: capacity is asked afresh on every
+        # read, so a Potion Belt arriving at ANY site (event, treasure, boss
+        # win, a fight that rolled no drop) raises the cap immediately --
+        # what this function's docstring has always promised. The lambda
+        # resolves `_potion_slots` from module globals at call time, which
+        # keeps the suite's monkeypatch of that name working.
+        bag = potion_pool.PotionBag(potions=[],
+                                    slots_fn=lambda: _potion_slots(held))
     total_acts = acts.n_acts()
     n = total_acts if n_acts is None else n_acts
     if not 1 <= n <= total_acts:
