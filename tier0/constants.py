@@ -273,7 +273,23 @@ FANFARE_DECAY_FRACTION = 0.20 # PROPORTIONAL decay, as a fraction of the
 # separately without an ablation arm.
 
 # --- Furina: Salon Members (kickoff §5; Salon v2 rework 2026-07-23,
-# docs/archive/furina-salon-rework-plan.md -- numbers PROPOSED pending red-pen) ---
+# docs/archive/furina-salon-rework-plan.md) ---
+# NUMBERS RATIFIED 2026-08-13 (R187, QUEUE M24). The rework plan's "every
+# NUMBER below is PROPOSED pending red-pen" banner used to sit on this line
+# and it was the last unsigned gate on the six member values; the derivation
+# it was signed against is review/active/eb77-salon-summon-damage-derivation.md.
+# The six values below are UNCHANGED by the countersign -- signing moved no
+# number, so this is not a CONSTANTS_VERSION event. Recorded because the
+# banner's absence is otherwise indistinguishable from nobody having written
+# it: Crabaletta 6/14, Usher 3/9 Block and Chevalmarin 2/+3 Encore are signed
+# as written, the Crabaletta/Usher gap is intended texture rather than a
+# 1:1 damage-for-Block exchange, a pure Salon deck is NOT expected to reach
+# Focus +2 on its own (cross-archetype Fanfare may earn the higher tiers),
+# the directive's upward adjustment reads as satisfied holistically, and
+# Chevalmarin's 2 -> 1 dry truncation is accepted. The paired signing surface
+# is SalonConstants in klee-mod/KleeCode/Powers/SalonPowers.cs; the mod's
+# displayed strings interpolate those constants since EB-86, so a future
+# repricing moves the constants and the tooltip follows.
 # v2 = the full Defect-orb grammar per user directive: members are TYPED
 # (unique slot passive at start of player turn + unique final bow when
 # displaced), the queue is FIFO (deploying into full slots bows the OLDEST

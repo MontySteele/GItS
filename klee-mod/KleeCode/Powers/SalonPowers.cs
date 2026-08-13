@@ -36,8 +36,14 @@ public static class SalonConstants
     public const int TickEncoreCost = 1;
     public const decimal DryDamageMultiplier = 0.75m;
 
-    // Member tick / bow numbers — PROPOSED pending red-pen; the sim's
-    // C.SALON_MEMBERS table is the source of truth.
+    // Member tick / bow numbers — RATIFIED 2026-08-13 (R187, QUEUE M24);
+    // the sim's C.SALON_MEMBERS table is the source of truth and the parity
+    // lint compares all six by value. These carried "PROPOSED pending
+    // red-pen" from the 2026-07-23 rework until the countersign; no value
+    // moved when the banner came off, so no world stamp moved either. The
+    // derivation signed against is
+    // review/active/eb77-salon-summon-damage-derivation.md, and the sim-side
+    // half of this banner is tier0/constants.py above SALON_MEMBERS.
     public const int CrabalettaTick = 6;
     public const int CrabalettaBow = 14;
     public const int UsherTick = 3;
