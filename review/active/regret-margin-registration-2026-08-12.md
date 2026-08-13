@@ -11,8 +11,18 @@
 > meantime. Nothing here changes that. The `1.0` currently in the code is
 > reported where it is relevant, always labelled as an unratified literal.
 >
-> The predictions in §7 are deliberately blank — they are [USER]'s to fill in
-> before any seed is run.
+> **§7 is PARTLY FILLED as of R181 (2026-08-12).** [USER] settled the four
+> slots that are choices about *what to run and what to do with it* — control
+> C2 authorised, control C3 declined (so Q5 is dropped), both sample rates
+> reported, and Option D carried into the grade as the standing answer unless
+> the result shows the margin earns its keep. The remaining slots are the
+> *numeric and directional predictions*, plus n/seed confirmation and the two
+> tripwire thresholds, and those are still [USER]'s to fill before any seed in
+> the registered range is run. **This packet is not countersigned yet.**
+>
+> **Standing instruction recorded with the fill:** the descriptive measurement
+> runs *later, not urgently*. Nothing in the tree consumes either regret flag,
+> so nothing is waiting on it.
 
 **Plain English is a standing requirement for this packet.** Every term is
 glossed where it first appears, and nothing assumes you have read the code.
@@ -169,10 +179,13 @@ different shapes, "the same 1.0" is two different strictnesses wearing one
 number.
 
 **Q5 — does the counted rate distinguish a worse pipeline from a better
-one?** This is the instrument-validity question, and it is the one that
-decides whether a margin is worth having. A regret rate that reads the same
-for a deliberately bad decision-maker and for the shipped one is not measuring
-decision quality. See §5's controls for what this costs.
+one? — DROPPED 2026-08-12 (R181).** This is the instrument-validity question,
+and it is the one that decides whether a margin is worth having: a regret rate
+that reads the same for a deliberately bad decision-maker and for the shipped
+one is not measuring decision quality. Answering it requires control C3, and
+C3 was declined, so **this question is not asked by this measurement.** It is
+kept on the page because dropping it is a fact about what the run can conclude
+— nothing graded here will establish that either margin is worth having.
 
 **Not asked here.** What the margin should be, whether the current rate is
 good or bad, and whether `regretted` / `regret_rate` should exist at all.
@@ -251,18 +264,26 @@ policies; nothing is added to that list for the primary arms.
   too low is declined, and a decline scores as zero), and a late-run "lean"
   gate that restricts what may be taken at all once the deck is large.
   Whether it reads zero
-  is itself a finding, and it is the honest null for the draft side. **Costs a
-  small addition to the printer; not built. In scope if [USER] wants it —
-  §7 has the slot.**
+  is itself a finding, and it is the honest null for the draft side.
+  **AUTHORISED 2026-08-12 (R181).** It costs a small addition to the printer
+  and is not built; per §9 step 2 that build lands before the run.
 - **C3 — a deliberately bad decision-maker (needed for Q5, not built).** Q5
   cannot be answered without an arm that decides badly on purpose: a route
   policy that walks a lane at random, and a draft policy that picks at random,
   each priced under the *shipped* value function. Both are a few lines, both
   are measurement-only, and both would have to be fenced so they can never be
   a shipped default. **Cost: roughly an hour of build plus one more pass of
-  the six arms. Q5 is dropped if this is not authorised** — and dropping it is
-  a legitimate outcome, since Q5 is the question that would justify having a
-  margin at all rather than the question of what the margin is.
+  the six arms. DECLINED 2026-08-12 (R181), so Q5 IS DROPPED** — recorded here
+  because §7's slot requires the packet to say so. Dropping it is a legitimate
+  outcome and a coherent one beside the Option D lean: Q5 is the question that
+  would justify having a margin at all, and it is not worth that build plus a
+  second pass of six arms to justify a margin nothing currently consumes.
+  **What is given up is stated rather than glossed:** without C3 this
+  measurement cannot show that the counted regret rate separates a bad
+  decision-maker from a good one, so **Option B is off the table for this
+  run** — it is *defined* by that separation — and any later move to adopt a
+  margin on instrument-validity grounds needs C3 built and a fresh
+  registration.
 
 **Cost ceiling.** The whole primary read is cheap: on this machine 100 runs of
 one arm takes about two seconds, so six arms at 600 runs, run twice (default
@@ -385,60 +406,77 @@ numbers exist, and are never revised against the run that grades them. These
 slots are empty on purpose. **Filling them is a [USER] act, and the run does
 not start until they are filled and this packet is countersigned.**
 
-> **[USER] SLOT — Q1(a), the route gap distribution.** Expected median route
+**PARTIAL FILL, 2026-08-12 (R181).** Four slots are settled and are marked
+`FILLED` below. They are the slots that are choices about scope and disposal
+rather than predictions about numbers. Every slot still marked `OPEN` is a
+prediction — or a threshold that a prediction rests on — and none of them is
+settled by what R181 decided; they stay [USER]'s, and no seed in the
+registered range is run until they are filled and the countersign at the foot
+of this packet is signed.
+
+> **[USER] SLOT — Q1(a), the route gap distribution. OPEN.** Expected median route
 > gap: `____`. Expected p90: `____`. Expected share of sampled decisions
 > coming back at exactly zero: `____ % – ____ %`. Acceptance target or
 > diagnostic-only? `____`
 
-> **[USER] SLOT — Q1(b), the draft gap distribution.** Expected median draft
+> **[USER] SLOT — Q1(b), the draft gap distribution. OPEN.** Expected median draft
 > gap: `____`. Expected p90: `____`. Expected zero share: `____ % – ____ %`.
 > Acceptance target or diagnostic-only? `____`
 
-> **[USER] SLOT — Q2, sensitivity.** Prediction: over the ladder this run
+> **[USER] SLOT — Q2, sensitivity. OPEN.** Prediction: over the ladder this run
 > prints, does the counted regret rate change by more than `____` percentage
 > points between the p75 and p95 candidate margins? `YES / NO`.
 
-> **[USER] SLOT — Q3, arms.** Prediction: do the six arms' distributions agree
+> **[USER] SLOT — Q3, arms. OPEN.** Prediction: do the six arms' distributions agree
 > closely enough that one number describes them? `YES / NO / NO PREDICTION`.
 
-> **[USER] SLOT — Q4, the two units.** Prediction: is the same `1.0` a
+> **[USER] SLOT — Q4, the two units. OPEN.** Prediction: is the same `1.0` a
 > comparably strict line on both sides? `YES / NO / NO PREDICTION`. If no,
 > which side is stricter: `ROUTE / DRAFT`.
 
-> **[USER] SLOT — Q5, instrument validity.** Is control **C3** (the
-> deliberately bad decision-maker) authorised? `YES / NO`. If yes: prediction
-> — does the counted rate separate the random decision-maker from the shipped
-> one at the current `1.0`? `YES / NO`. If no, Q5 is dropped and the packet
-> says so.
+> **[USER] SLOT — Q5, instrument validity. FILLED 2026-08-12 (R181).** Is
+> control **C3** (the deliberately bad decision-maker) authorised? **NO.**
+> Q5 is therefore **DROPPED**, and §5's C3 entry says so. The prediction
+> sub-slot does not arise. Consequence carried forward: §6's **Option B is
+> off the table for this run**, since it is defined by the separation C3 would
+> have measured.
 
-> **[USER] SLOT — control C2.** Is the decision-time draft read authorised?
-> `YES / NO`. If yes: prediction — does it come back at or near zero, or do
-> the draft policy's gates put it meaningfully above zero? `NEAR ZERO / ABOVE
-> ZERO / NO PREDICTION`.
+> **[USER] SLOT — control C2. PARTLY FILLED 2026-08-12 (R181).** Is the
+> decision-time draft read authorised? **YES** — it is the cheap one, and it
+> is the honest null for the draft side. Its build lands before the run (§9
+> step 2). **Prediction still OPEN:** does it come back at or near zero, or do
+> the draft policy's two gates (the skip threshold and the late-run lean gate)
+> put it meaningfully above zero? `NEAR ZERO / ABOVE ZERO / NO PREDICTION`.
 
-> **[USER] SLOT — which read Q1 is quoted from.** The default-sample-rate read
-> (which carries the cross-check) or the full draft census (which carries the
-> larger sample)? `DEFAULT / CENSUS / BOTH, reported separately`.
+> **[USER] SLOT — which read Q1 is quoted from. FILLED 2026-08-12 (R181).**
+> **BOTH, reported separately.** The default-sample-rate read carries the
+> cross-check that tripwire T1 is written against; the full draft census
+> carries the larger sample the percentiles need. Neither substitutes for the
+> other and they are never merged into one figure.
 
-> **[USER] SLOT — n and seed.** `RUNS = 600` per arm, `SEED = 11`, six arms.
+> **[USER] SLOT — n and seed. OPEN.** `RUNS = 600` per arm, `SEED = 11`, six arms.
 > Confirmed, or replaced by: `____`.
 
-> **[USER] SLOT — tripwire T4.** Minimum count of *positive* gaps per arm
+> **[USER] SLOT — tripwire T4. OPEN.** Minimum count of *positive* gaps per arm
 > below which the upper ladder is reported as unavailable rather than as a
 > number: `____`.
 
-> **[USER] SLOT — tripwire T5.** What counts as the arms disagreeing enough to
+> **[USER] SLOT — tripwire T5. OPEN.** What counts as the arms disagreeing enough to
 > stop the derivation: `____`.
 
-> **[USER] SLOT — the derivation.** Which of §6's options, if any, is on the
-> table when the grade lands? `A / B / C / D / undecided until the numbers are
-> in`. If **A**: the pipeline the percentile is read off must be named here in
-> full — reading (`A1` all sampled / `A2` positive only; **`A3` is
-> forbidden**), which number (`ROUTE` / `DRAFT`), which arm or pool, which
-> sample rate, which stamp, and the re-derivation rule for later version
-> bumps: `____`
+> **[USER] SLOT — the derivation. FILLED 2026-08-12 (R181).** **Option D —
+> set no margin — is the standing answer, and it is retained unless the result
+> demonstrates that a margin has actual utility.** The lean is toward **no
+> ratified margin**, on two grounds recorded with the fill: nothing in the tree
+> consumes `regretted` / `regret_rate` for any decision (§1), and the route and
+> draft gaps are in different units, so one number across both was never a
+> single strictness (§6's closing note, Q4). **`+1.0` stays unblessed** (R164).
+> Option B is unavailable for this run because C3 was declined. Options A and C
+> are not foreclosed — the grade may still argue one — but the burden sits on
+> the result to show the margin buys something, not on Option D to justify
+> itself.
 
-> **[USER] SLOT — redesign trigger.** What result, if any, reopens the regret
+> **[USER] SLOT — redesign trigger. OPEN.** What result, if any, reopens the regret
 > instrument itself (rather than merely being recorded)? `____`
 
 ## 8. Contamination and known limits

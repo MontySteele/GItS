@@ -65,8 +65,8 @@ registration packets themselves live under `review/active/` — one home, not tw
   repaired, both on 2026-08-10; the packet asks to re-measure in the new world.
   Predictions are explicit [USER] slots and are still blank →
   `review/active/shop-rerun-registration-2026-08-10.md`.
-- **The regret margins (`M13`)** — **DRAFT, awaiting [USER]
-  countersign at QUEUE `M13`, unrun.** `ROUTE_REGRET_MARGIN` and its drafter
+- **The regret margins (`M13`)** — **DRAFT, §7 PARTLY FILLED 2026-08-12
+  (R181), awaiting [USER] countersign at QUEUE `M13`, unrun.** `ROUTE_REGRET_MARGIN` and its drafter
   twin (`draft.DRAFT_REGRET_MARGIN`, the `+1.0`) have no recorded derivation;
   R164 ruled that the measurement is pre-registered and that **`+1.0` is not
   ratified**. The distribution printer `tools/regret_distribution.py` landed
@@ -75,7 +75,12 @@ registration packets themselves live under `review/active/` — one home, not tw
   finished runs, with no stamp movement. The packet's §7 predictions are
   explicit [USER] slots and are still blank, and its §6 lays out four
   derivation options at equal weight — including the upper-percentile
-  derivation, whose circularity is stated there rather than assumed away →
+  derivation, whose circularity is stated there rather than assumed away.
+  **R181 settled the scope slots:** control `C2` authorised (build owed before
+  the run), control `C3` declined so `Q5` is dropped and Option B is
+  unavailable, both sample rates reported separately, and **Option D — no
+  margin — retained as the standing answer** unless the result shows a margin
+  has utility. The predictions themselves are still blank →
   `review/active/regret-margin-registration-2026-08-12.md`.
 - **Kokomi stability band (D5)** — no band is declared yet (the declaration
   is QUEUE `S4-G6`; until it lands, the band rides DARK, `band = None`); its
