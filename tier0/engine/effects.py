@@ -17,7 +17,8 @@ from tier0.engine import powers, reactions, resources
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, grant_sly_autoplay,
                                 remove_instance, sly_autoplays,
-                                sly_granted_this_turn, sly_riders)
+                                sly_granted_this_turn, sly_riders,
+                                sync_fanfare_cap_to_max_hp)
 
 
 def _amount(state: CombatState, val) -> int:
@@ -2001,6 +2002,10 @@ def _op_gain_max_hp(state: CombatState, fx: dict, card: Card) -> None:
     n = _amount(state, fx["amount"])
     p.max_hp += n
     p.hp += n
+    # EB-97: the Fanfare ceiling rides LIVE max HP, so Feed raises it MID
+    # FIGHT exactly as `FurinaResources.FanfareCap` does -- the one place the
+    # two engines used to diverge inside a single combat.
+    sync_fanfare_cap_to_max_hp(p)
     state.emit("gain_max_hp", amount=n)
 
 

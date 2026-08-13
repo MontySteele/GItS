@@ -15,7 +15,7 @@ from tier0 import constants as C
 from tier0.engine import (effects, potions, powers, reactions, refpowers,
                           relics, resources)
 from tier0.engine.state import (Card, CombatState, Enemy, Player,
-                                remove_instance)
+                                remove_instance, sync_fanfare_cap_to_max_hp)
 
 # A pilot is a callable: (state) -> Card | None (None = end turn).
 Pilot = Callable[[CombatState], Card | None]
@@ -1070,6 +1070,12 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # alone, and the Hyperbeam's floor drop moves the floor alone and
     # DOWNWARD -- which under the old line would have ADDED ceiling on the way
     # out of every fight it was played in. See Player.fanfare_cap_base.
+    #
+    # EB-97: re-derive the base term from LIVE max HP first. tier05 rebuilds
+    # the Player from the sheet and only THEN assigns the run's real max HP
+    # (`tier05/model.py`), so without this the whole run would fight on the
+    # printed-HP ceiling -- the deviation from LAW.md:189 the mod never had.
+    sync_fanfare_cap_to_max_hp(player)
     player.fanfare_cap = player.fanfare_cap_base
     player.fanfare_floor = 0
     player.charge = 0            # Kokomi: the meter is per-combat (§2.1)

@@ -77,6 +77,27 @@ public static class FurinaResourceConstants
     /// </summary>
     public const double FanfareDecayFraction = 0.20;
 
+    /// <summary>
+    /// The Fanfare ceiling's BASE term, as a fraction of LIVE MaxHp.
+    /// Mirrors tier0/constants.py FANFARE_CAP_FRACTION.
+    ///
+    /// EXTRACTED, NOT INTRODUCED (EB-97, 2026-08-13). The fraction was an
+    /// inline `/ 2` inside FanfareCap, which meant it was absent from BOTH
+    /// halves of tools/lint_constant_parity.py -- neither MIRRORED nor
+    /// declared UNMIRRORED -- so the gate could not see the number at all
+    /// and a one-sided retune of LAW.md:189's "%maxHP" would have drifted
+    /// silently. That is the exact failure the gate exists to prevent.
+    ///
+    /// double with an `(int)` cast at the use site, to match the sim's
+    /// `int(C.FANFARE_CAP_FRACTION * max_hp)`: both TRUNCATE, so an odd
+    /// max HP rounds the ceiling down in both engines (67 -> 33). Do not
+    /// switch this to Math.Round -- unlike FanfareDecayFraction, which is
+    /// half-to-even on both sides on purpose, this one is floor-on-both.
+    /// The behaviour is byte-identical to the `/ 2` it replaced for every
+    /// non-negative MaxHp.
+    /// </summary>
+    public const double FanfareCapFraction = 0.5;
+
     // FanfareFloorPerPower / FanfareFloorPerPowerRare: DELETED by the Fanfare
     // rework (2026-07-28, Track B, RULED), together with the grant block in
     // FurinaResourceHooks.AfterCardPlayed that read them. Playing a Power no
@@ -352,7 +373,8 @@ public static class FurinaResources
     public static int FanfareCap(Creature creature)
     {
         if (!IsFurina(creature)) return 0;
-        return creature.MaxHp / 2 + (FanfareCapBonusFor(creature)?.Amount ?? 0);
+        return (int)(FurinaResourceConstants.FanfareCapFraction * creature.MaxHp)
+               + (FanfareCapBonusFor(creature)?.Amount ?? 0);
     }
 
     public static void GainFanfare(Creature creature, int amount)

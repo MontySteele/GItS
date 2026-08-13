@@ -415,6 +415,53 @@ class Bomb:
     turn_placed: int = 0          # for modify_bombs scope: placed_this_turn
 
 
+def fanfare_cap_base_term(max_hp: int) -> int:
+    """The Fanfare ceiling's BASE term, taken from LIVE max HP (EB-97).
+
+    LAW.md:189 says "Fanfare is capped at %maxHP", and the mod reads it that
+    way every time it is asked: `FurinaResources.FanfareCap` computes
+    `FanfareCapFraction * creature.MaxHp + capBonus` from the creature's
+    CURRENT MaxHp. tier0 used to freeze the base term at the sheet's printed
+    `hp` and carry that number through every max-HP move in the run, so a
+    Decipher (-24) or a Feed (+7) never reached the ceiling and the two
+    engines disagreed -- inside a single combat, in Feed's case.
+
+    Truncating `int()` rather than rounding, to match C#'s `(int)` cast on
+    the same product. Clamped at zero because the term is a ceiling and a
+    negative max HP is not a state either engine represents.
+    """
+    return int(C.FANFARE_CAP_FRACTION * max(0, max_hp))
+
+
+def sync_fanfare_cap_to_max_hp(player: "Player") -> None:
+    """Re-derive the cap's base term from the player's live max HP.
+
+    Moves `fanfare_cap` and `fanfare_cap_base` by the SAME delta so every
+    bonus riding on top of the base term survives: the in-combat grants
+    (`raise_fanfare_cap`, `gain_fanfare_floor`) sit in `fanfare_cap` alone
+    and must not be rewound here, and a hand-rolled cap (the batteries, the
+    probes, every test that seats a number directly) is a bonus too as far
+    as this is concerned -- it is preserved exactly while max HP holds still.
+
+    A no-op for a character with no Fanfare resource, and a no-op while max
+    HP has not moved since the last sync.
+
+    Does NOT re-clamp the meter. The mod clamps in `GainFanfare` only, so a
+    meter above a freshly-lowered ceiling stays put until the next gain
+    drags it down -- `resources.gain_fanfare` has the same `min()` and gets
+    there the same way.
+    """
+    if not player.fanfare_cap_base and not player.fanfare_cap:
+        return                                   # no Fanfare resource
+    delta = (fanfare_cap_base_term(player.max_hp)
+             - fanfare_cap_base_term(player.fanfare_cap_hp))
+    player.fanfare_cap_hp = player.max_hp
+    if not delta:
+        return
+    player.fanfare_cap_base = max(0, player.fanfare_cap_base + delta)
+    player.fanfare_cap = max(0, player.fanfare_cap + delta)
+
+
 @dataclass
 class Fighter:
     hp: int
@@ -493,6 +540,13 @@ class Player(Fighter):
     # headroom into every later fight and a Hyperbeam ADDED ceiling on the
     # way out. A snapshot cannot drift no matter how many writers exist.
     fanfare_cap_base: int = 0
+    # The max HP the cap's base term was last derived from (EB-97). Not a
+    # design number -- it is the bookkeeping that lets sync_fanfare_cap_to_
+    # max_hp move the base term by a DELTA and so leave every bonus riding
+    # on top of it (in-combat grants, hand-seated caps) untouched. Seeded in
+    # __post_init__ from the constructed max HP so every build path is right
+    # without knowing about the field.
+    fanfare_cap_hp: int = 0
     # The baseline the meter rests on. Decay clamps here, never below. The
     # "Fanfare +X" keyword raises floor, cap AND current together
     # (resources.gain_fanfare_floor) -- raising the cap alongside the floor
@@ -527,6 +581,12 @@ class Player(Fighter):
         # the cap already, so the two spellings of absent agree.
         if not self.fanfare_cap_base:
             self.fanfare_cap_base = self.fanfare_cap
+        # EB-97: the max HP the seated cap is understood to have come from.
+        # Same reasoning as the line above -- seed it on EVERY construction
+        # path, or a hand-built Furina's first max-HP move would be read as
+        # a move away from 0 and re-derive the whole ceiling.
+        if not self.fanfare_cap_hp:
+            self.fanfare_cap_hp = self.max_hp
 
 
 @dataclass
