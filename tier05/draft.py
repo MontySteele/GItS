@@ -1694,18 +1694,65 @@ def offer_worth_engaging(offers: list[Card], deck: list[Card],
                for c in offers)
 
 
+# The hindsight advantage a re-scored rival must clear before the decision it
+# beat is called a regret. UNCALIBRATED and NOT RATIFIED (R164, 2026-08-10:
+# "pre-register the measurement; do NOT ratify +1.0"). It was a bare literal
+# inside the loop below until EB-72 gave it a name; naming it derives nothing
+# and blesses nothing -- it exists so `draft_regret_gaps` can be the
+# margin-free half and this can be the one place the threshold is spelled.
+# Its route twin is `run_metrics.ROUTE_REGRET_MARGIN`, which carries the longer
+# note on why neither number has a provenance. Pinned at its boundary by
+# test_pin_tier05_draft.py (MEDIUM-11).
+DRAFT_REGRET_MARGIN = 1.0
+
+
+def draft_regret_gaps(rng: random.Random, decisions: list[dict],
+                      final_deck: list[Card], archetype: str,
+                      sample: float = C.DRAFT_REGRET_SAMPLE) -> list[float]:
+    """The RAW hindsight gaps behind `draft_regret` (EB-72).
+
+    One entry per SAMPLED screen, in screen order: the best re-score on that
+    screen minus the re-score of the card actually picked, both in the final
+    deck's context. Zeros stay in the sample -- a screen the drafter got right
+    is a 0.0, not an absence from it -- because a percentile taken over only
+    the decisions that already cleared the margin would be a percentile of the
+    threshold as much as of the drafter.
+
+    NOT CLAMPED AT ZERO, and this is the one place a gap can go negative: a
+    SKIPPED screen scores the pick at 0.0 by convention (`draft_regret`'s
+    "skip scores 0"), so a screen where every offer re-scored negative gives a
+    negative gap. Clamping would be tidier and would report a skip as a
+    decision with nothing to regret. A screen with no offers contributes no
+    entry.
+
+    `draft_regret` is the count of these above `DRAFT_REGRET_MARGIN`, and is
+    unchanged by the split: same rng, same draws, same order.
+
+    `sample` is overridable for the same reason the route twin's is (see
+    `C.ROUTE_REGRET_SAMPLE`'s comment): the 0.10 default exists to keep the
+    IN-RUN re-scoring cheap, and a post-hoc reader that wants the whole census
+    of screens should not have to edit a constant to get it. Overriding it
+    changes which screens are re-scored and therefore breaks the equality with
+    the run's own `regret_samples` -- callers that rely on that equality must
+    leave it alone.
+    """
+    gaps: list[float] = []
+    for d in decisions:
+        if rng.random() >= sample:
+            continue
+        rescored = {c.id: score_offer(c, final_deck, archetype)
+                    for c in d["offers"]}
+        if not rescored:
+            continue
+        picked_score = rescored.get(d["picked"], 0.0)   # skip scores 0
+        gaps.append(max(rescored.values()) - picked_score)
+    return gaps
+
+
 def draft_regret(rng: random.Random, decisions: list[dict],
                  final_deck: list[Card], archetype: str) -> int:
     """Post-run re-scoring of sampled decisions in the final-deck context.
     Returns the number of regretted decisions among the sample."""
-    regrets = 0
-    for d in decisions:
-        if rng.random() >= C.DRAFT_REGRET_SAMPLE:
-            continue
-        rescored = {c.id: score_offer(c, final_deck, archetype)
-                    for c in d["offers"]}
-        picked = d["picked"]
-        picked_score = rescored.get(picked, 0.0)     # skip scores 0
-        if any(v > picked_score + 1.0 for v in rescored.values()):
-            regrets += 1
-    return regrets
+    return sum(1 for gap in draft_regret_gaps(rng, decisions, final_deck,
+                                              archetype)
+               if gap > DRAFT_REGRET_MARGIN)
