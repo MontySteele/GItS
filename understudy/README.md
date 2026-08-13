@@ -358,9 +358,9 @@ no longer a bot-feed cut**. The row is the same five columns in the same order
 `understudy/trace_replay.py` read a mod-written row without knowing which feed
 wrote it (checked, not asserted: `tier0/tests/test_eb14_selection_hook.py`).
 
-Four things the human feed's column does **not** contain, declared here
+Five things the human feed's column does **not** contain, declared here
 because a reader of the column will look here and nowhere else. None is a key
-asymmetry; all four are limits on what the column can hold:
+asymmetry; all five are limits on what the column can hold:
 
 - **Local seat only.** A co-op partner's answer arrives as indices through
   `PlayerChoiceSynchronizer` and opens no screen in this process, so a remote
@@ -374,6 +374,20 @@ asymmetry; all four are limits on what the column can hold:
   row would mean inventing one.
 - **An empty answer records nothing**, matching the bot feed, where a skipped
   screen produces no POST and therefore no row.
+- **No combat-pile rows in any package up to and including `0.2-738`.** The
+  grid patch read the offer off `_cards`, and
+  `NCombatPileCardSelectScreen` assigns that field `Array.Empty<CardModel>()`
+  once and never writes it again — so the offer read as empty, the row was
+  dropped, and no warning fired (the field lookup *succeeded*). Every
+  combat-pile selection is therefore **absent** from human-feed records taken
+  on those packages: Liquid Memories, Droplet of Precognition, the Wish /
+  Neow's Fury / Cosmic Indifference Ancients, and ten base cards (Headbutt,
+  Dredge, Hologram, Charge, Cleanse, Graveblast, Seance, Secret Technique,
+  Secret Weapon, Seeker Strike) plus Foregone Conclusion and Stratagem. No
+  klee-mod card reaches this screen, so the hole is base-game content only.
+  **Fixed in source 2026-08-13** (per-type offer resolver reading
+  `_pile` + `_filter`); this limit lifts for the first package built after
+  that, and the live smoke is still owed — see BACKLOG `EB-14`.
 
 The `screen` column is spelled differently by the two writers **on purpose**.
 The soak writes what the bridge called the screen (`card_select`,
@@ -517,7 +531,7 @@ Phase 0 could not do.
 | `reactions_by_turn` | `[[round, reactions resolved since this fight opened]]` — **human feed only**; the wire does not narrate reactions. `ReactionEffects.TotalResolved` is GLOBAL, so in co-op both seats' reactions appear in every seat's row. Measurement only: no reaction constant is read or written |
 | `block_at_turn_end` | `[[round, block]]` as the player ENDED the turn — not the turn-opening block in `hp_trajectory`, which is whatever survived the enemy |
 | `cards_played` | `[[round, card_name], ...]` |
-| `selectors` | **P1.5; BOTH FEEDS since EB-14 (2026-08-12).** `[[round, screen_type, index, chosen_name, [offered names]], ...]` — every selector screen resolved inside this fight. The OFFERED LIST is in the row for the same reason `hand` travels with a card play: "Center Stage" means one thing against `[Center Stage, Guest Cast]` and nothing at all against a list that did not contain Guest Cast. `index: -1` is a selector resolved without naming an option (a confirm, a skip); on the HUMAN feed it additionally covers "the chosen card was not reference-equal to anything in the recorded offer", which the mod logs a warning for when it happens. `overlay` screens are excluded — that is the shape a soft-lock takes, and a screen nobody can answer has no choice to record. The human feed's four declared limits on this column (local seat, in-fight, no bundles, no row for an empty answer) and the deliberate spelling split in `screen_type` are in §"Telemetry schema" above |
+| `selectors` | **P1.5; BOTH FEEDS since EB-14 (2026-08-12).** `[[round, screen_type, index, chosen_name, [offered names]], ...]` — every selector screen resolved inside this fight. The OFFERED LIST is in the row for the same reason `hand` travels with a card play: "Center Stage" means one thing against `[Center Stage, Guest Cast]` and nothing at all against a list that did not contain Guest Cast. `index: -1` is a selector resolved without naming an option (a confirm, a skip); on the HUMAN feed it additionally covers "the chosen card was not reference-equal to anything in the recorded offer", which the mod logs a warning for when it happens. `overlay` screens are excluded — that is the shape a soft-lock takes, and a screen nobody can answer has no choice to record. The human feed's five declared limits on this column (local seat, in-fight, no bundles, no row for an empty answer, no combat-pile rows on packages up to `0.2-738`) and the deliberate spelling split in `screen_type` are in §"Telemetry schema" above |
 | `potions_used` | `[[round, potion_name], ...]` — **bot feed only**; no first-party potion hook exists for the mod side yet |
 | `damage_by_source` | `{card_or_potion_name: total}` |
 | `damage_dealt`, `damage_taken` | totals |
