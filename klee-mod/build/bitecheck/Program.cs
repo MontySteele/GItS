@@ -18,7 +18,7 @@ namespace KleeMod.BiteCheck;
 ///
 /// IT WORKS BECAUSE PATCHING DOES NOT NEED GODOT. sts2.dll is a plain net9.0
 /// assembly. Loading it and applying Harmony patches to its methods needs no
-/// scene tree and no native Godot runtime -- verified: all 14 patch classes arm
+/// scene tree and no native Godot runtime -- verified: all 17 patch classes arm
 /// here exactly as they do in game. What does NOT work is calling anything that
 /// touches Godot objects, so this harness only ever patches and reports.
 ///

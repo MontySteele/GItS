@@ -220,14 +220,53 @@ the human feed (R100/5) — a change of MEANING rather than of key, which is why
 it is called out here as loudly as a rename would be: a reader who assumed
 `interrupted` meant "probably won" was right yesterday and is wrong today.
 
-**Addition of 2026-08-05 (P1.5), BOT FEED ONLY, no renames:** `selectors`.
-The note for this landing is §"Cross-session note" in
-`docs/archive/sprint-understudy-p15-log-2026-08-05.md`. It is a **declared
-asymmetry** (`BOT_ONLY` in `tier0/tests/test_track_b_curves.py`, beside
-`potions_used`): the soak records a selector answer because it POSTED it,
-while the mod sees a card leave a pile rather than an offer being taken from a
-list. **A selector cut is a bot-feed cut** until a mod-side hook into the
-selection screens lands.
+**Addition of 2026-08-05 (P1.5):** `selectors`. The note for this landing is
+§"Cross-session note" in
+`docs/archive/sprint-understudy-p15-log-2026-08-05.md`. It arrived **BOT FEED
+ONLY** — the soak records a selector answer because it POSTED it, while the mod
+saw a card leave a pile rather than an offer being taken from a list — and so
+stood as a declared asymmetry beside `potions_used` for a week.
+
+**`selectors` became a BOTH-FEEDS key on 2026-08-12 (EB-14)**, no rename and
+no change of meaning: the mod-side hook into the selection screens landed
+(`klee-mod/KleeCode/Diagnostics/SelectionTelemetry.cs`), so **a selector cut is
+no longer a bot-feed cut**. The row is the same five columns in the same order
+— `[round, screen, index, chosen, [offered…]]` — and `understudy/replay.py` and
+`understudy/trace_replay.py` read a mod-written row without knowing which feed
+wrote it (checked, not asserted: `tier0/tests/test_eb14_selection_hook.py`).
+
+Four things the human feed's column does **not** contain, declared here
+because a reader of the column will look here and nowhere else. None is a key
+asymmetry; all four are limits on what the column can hold:
+
+- **Local seat only.** A co-op partner's answer arrives as indices through
+  `PlayerChoiceSynchronizer` and opens no screen in this process, so a remote
+  seat's rows are *absent*, not empty. Same fence as `corpse_detonations`:
+  rows present are facts, no rows is not proof nobody chose anything.
+- **In-fight only**, which is exactly the bot feed's scope (`soak.py` records a
+  selector only while a fight record is open). A rest-site smith or a shop
+  removal is outside the channel on both feeds.
+- **No bundle rows.** `NChooseABundleSelectionScreen` offers *bundles*, and a
+  bundle carries no first-party name; filling the bot feed's `bundle_select`
+  row would mean inventing one.
+- **An empty answer records nothing**, matching the bot feed, where a skipped
+  screen produces no POST and therefore no row.
+
+The `screen` column is spelled differently by the two writers **on purpose**.
+The soak writes what the bridge called the screen (`card_select`,
+`hand_select`, `bundle_select`), falling back to the raw screen class name
+lowercased; the mod writes the concrete class name lowercased always
+(`nchooseacardselectionscreen`, `nsimplecardselectscreen`, `nplayerhand`, …).
+`card_select` is *three screens wearing one name* and the mod is the side that
+can tell them apart, so re-spelling it as `card_select` would throw away the
+only thing this vantage has that the wire's does not. The two vocabularies
+overlap on the bot feed's fallback spelling rather than colliding, and no
+consumer matches on the column — `replay.py` matches on the OFFERED list.
+
+**Owed: a live smoke.** Nothing in this repo can execute the C# writer, and no
+run has exercised the new rows in a real game yet. Verify a Furina Ethereal
+Spotlight turn produces one row per turn with both options in `offered`, and
+that a Kokomi exhaust card (the hand surface) produces one.
 
 **Additions of 2026-08-07 (EB-18), HUMAN FEED ONLY, no renames:** `run_id`,
 `run_instance`, `fight_index`, `encounter`, `detonations`,
@@ -353,7 +392,7 @@ Phase 0 could not do.
 | `reactions_by_turn` | `[[round, reactions resolved since this fight opened]]` — **human feed only**; the wire does not narrate reactions. `ReactionEffects.TotalResolved` is GLOBAL, so in co-op both seats' reactions appear in every seat's row. Measurement only: no reaction constant is read or written |
 | `block_at_turn_end` | `[[round, block]]` as the player ENDED the turn — not the turn-opening block in `hp_trajectory`, which is whatever survived the enemy |
 | `cards_played` | `[[round, card_name], ...]` |
-| `selectors` | **P1.5, BOT FEED ONLY.** `[[round, screen_type, index, chosen_name, [offered names]], ...]` — every selector screen resolved inside this fight. The OFFERED LIST is in the row for the same reason `hand` travels with a card play: "Center Stage" means one thing against `[Center Stage, Guest Cast]` and nothing at all against a list that did not contain Guest Cast. `index: -1` is a selector resolved without naming an option (a confirm, a skip). `overlay` screens are excluded — that is the shape a soft-lock takes, and a screen nobody can answer has no choice to record |
+| `selectors` | **P1.5; BOTH FEEDS since EB-14 (2026-08-12).** `[[round, screen_type, index, chosen_name, [offered names]], ...]` — every selector screen resolved inside this fight. The OFFERED LIST is in the row for the same reason `hand` travels with a card play: "Center Stage" means one thing against `[Center Stage, Guest Cast]` and nothing at all against a list that did not contain Guest Cast. `index: -1` is a selector resolved without naming an option (a confirm, a skip). `overlay` screens are excluded — that is the shape a soft-lock takes, and a screen nobody can answer has no choice to record. The human feed's four declared limits on this column (local seat, in-fight, no bundles, no row for an empty answer) and the deliberate spelling split in `screen_type` are in §"Telemetry schema" above |
 | `potions_used` | `[[round, potion_name], ...]` — **bot feed only**; no first-party potion hook exists for the mod side yet |
 | `damage_by_source` | `{card_or_potion_name: total}` |
 | `damage_dealt`, `damage_taken` | totals |
