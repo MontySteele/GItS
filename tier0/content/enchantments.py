@@ -200,13 +200,17 @@ CATALOG: dict[str, Enchantment] = {
 #       read in `refpowers.randomise_cost_on_draw`) as unused machinery, and
 #       a CATALOG row for Slither would now be expressible. It stays out
 #       anyway, on this module's own rule: the row exists to serve a granting
-#       event, and Wood Carvings is still blocked on the two base-game
-#       colorless cards it names (Peck and Toric Toughness), which is a
-#       [USER] call against LAW's colorless clause -- QUEUE `M23`. An
-#       enchantment nobody grants is a name with no caller.
+#       event, and Wood Carvings is not converted yet. Its colorless blocker
+#       is RULED -- R184 chose reskin, so Peck and Toric Toughness are
+#       replaced by equivalent-function companion/Teyvat content and LAW's
+#       colorless clause holds -- but the replacements are not designed and
+#       the conversion is stamped-world content batching in the next RT
+#       window (EB-83). An enchantment nobody grants is a name with no
+#       caller.
 UNEXPRESSED = {
     "slither": ("randomises cost on DRAW -- the engine hook exists (EB-83); "
-                "no event grants it while Wood Carvings is M23-gated"),
+                "no event grants it until the Wood Carvings reskin lands "
+                "(R184)"),
 }
 
 
