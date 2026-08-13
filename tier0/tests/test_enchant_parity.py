@@ -104,5 +104,9 @@ def test_a_reason_narrow_enough_to_still_catch_the_real_splits():
     assert lep.sim_reason("nimble", ordinary, True) is None
     delayed = index["tideline_watch"]             # Skill, block_next_turn only
     assert lep.sim_reason("nimble", delayed, True) == "block-next-turn"
+    # EB-85 divergence 1: a Block-granting Attack is no longer a split at
+    # all -- both engines say eligible -- so there is no excuse to look up,
+    # and if one ever came back it would be a finding, not a known row.
     attack = index["freminet_pressurized_floe"]   # Attack that gains Block
-    assert lep.sim_reason("nimble", attack, False) == "skill-only"
+    assert enchantments.eligible(attack, "nimble")
+    assert lep.sim_reason("nimble", attack, False) is None
