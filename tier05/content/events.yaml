@@ -363,11 +363,18 @@ all:
     name: "Self-Help Book"
     # R82 REOPENED ([USER], 2026-08-10, M7). An all-acts event (research §2.1;
     # the harvest page states no location) and the purest test of the enchant
-    # op: no HP, no gold, no numbers at all -- three type-gated enchantments
-    # and a null branch whose availability is the INVERSE of theirs. Each
-    # reading is offered only while a card of its type is still enchantable,
-    # and Move On appears only when none of the three is, which is the
-    # `if_no_enchant_target` key.
+    # op: no HP, no gold, no numbers at all -- three enchantments on their own
+    # eligibility rules and a null branch whose availability is the INVERSE of
+    # theirs. Each reading is offered only while a legal target for ITS
+    # enchantment is still in the deck, and Move On appears only when none of
+    # the three has one, which is the `if_no_enchant_target` key.
+    #
+    # EB-85 (2026-08-13) moved two of the three gates, because tier0's rules
+    # were narrower than the game's: Nimble is not Skill-only (any card that
+    # GainsBlock) and Swift has no card restriction whatsoever. "Read the
+    # Entire Book" is therefore live on essentially every deck now, where it
+    # used to need a Power -- Klee's printed starter has none, so that
+    # reading was unreachable at run start for the whole of RUNTEMPLATE 10.
     #
     # KNOWN LIMITATION, measured not assumed (400 klee runs, seed 0-399):
     # every enchantment prices at a flat ENCHANT_HP, so all three readings

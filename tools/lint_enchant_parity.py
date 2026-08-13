@@ -103,10 +103,6 @@ KNOWN_DIVERGENCES = {
         "enchantment. A card whose ONLY Block arrives that way is inert under "
         "Nimble in the game (base game: Prolong), so the mod deliberately does "
         "not declare GainsBlock for it."),
-    ("swift", "power-only"): (
-        "tier0's Swift takes `_is_power`; the game's Swift has no override at "
-        "all and may be placed on any card. tier0's narrowing is a modelling "
-        "choice inherited from the granting event's text, not the game's."),
 }
 
 
@@ -182,8 +178,6 @@ def sim_reason(name: str, card, sim_ok: bool) -> str | None:
     """
     if name == "nimble" and sim_ok and "block" not in _ops(card.effects):
         return "block-next-turn"
-    if name == "swift" and not sim_ok and card.type != "power":
-        return "power-only"
     return None
 
 

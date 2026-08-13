@@ -123,10 +123,6 @@ def _gains_block(c) -> bool:
     return _grants_block(c.effects) or _grants_block(c.enchant_effects)
 
 
-def _is_power(c) -> bool:
-    return c.type == "power"
-
-
 def _exhausts(c) -> bool:
     return bool(c.exhaust)
 
@@ -176,7 +172,15 @@ CATALOG: dict[str, Enchantment] = {
     "swift": Enchantment(
         "swift", "Swift",
         "The first time you play this card, draw X cards.",
-        _is_power,
+        # EB-85 divergence 2: NO card-level restriction. The game's `Swift`
+        # overrides `HasExtraCardText`, `ShowAmount` and `OnPlay` and nothing
+        # else -- no `CanEnchant`, no `CanEnchantCardType` -- so base
+        # CanEnchant (Status / Curse / Quest / already-enchanted) is the whole
+        # gate and any card may take it. tier0 took `_is_power`, a narrowing
+        # inherited from the granting event's flavor text rather than the
+        # game. This is the widest of the five: it changes what an enchant
+        # event may target on every character.
+        _anything,
         lambda x: {"enchant_first_play_effects": [{"op": "draw",
                                                    "amount": x}]}),
 

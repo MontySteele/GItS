@@ -197,14 +197,38 @@ def test_every_converted_event_is_reachable_in_a_run(event_id):
     assert event_id in reachable
 
 
-def test_each_self_help_reading_is_gated_on_its_own_card_type():
+def test_each_self_help_reading_is_gated_on_its_own_enchantment():
+    """Each reading is offered while ITS enchantment has a legal target.
+
+    On Klee's printed starter all three are live. The third one is the EB-85
+    divergence-2 move: Swift's reading needed a Power before this window, and
+    Klee's starter has none, so it was locked here for all of RT10. The
+    game's Swift has no card-level restriction at all, so it is live on any
+    non-empty enchantable deck."""
     event = events.get_event("self_help_book")
-    # Klee's printed starter is Attacks and Skills, no Power at all: the
-    # Attack and Skill readings are live and the Power reading is locked.
     st = _st()
     labels = [o["label"] for o in events.available(event, st)]
-    assert labels == ["Read the Back", "Read a Random Passage"]
+    assert labels == ["Read the Back", "Read a Random Passage",
+                      "Read the Entire Book"]
     assert "Move On" not in labels          # a valid card exists, so no null
+
+
+def test_swift_takes_any_card_type_the_base_rules_allow():
+    """EB-85 divergence 2, the widest of the five. `Enchantments.Swift`
+    overrides HasExtraCardText / ShowAmount / OnPlay and NOTHING else -- no
+    CanEnchant, no CanEnchantCardType -- so base CanEnchant is the entire
+    gate. tier0's `_is_power` came from the granting event's flavor."""
+    from tier0.engine.state import Card
+    for kind in ("attack", "skill", "power"):
+        assert enchantments.eligible(
+            Card(id="x", name="x", cost=1, type=kind), "swift")
+    # The three shared refusals are base CanEnchant's own and still bite.
+    assert not enchantments.eligible(
+        Card(id="s", name="s", cost=1, type="status"), "swift")
+    assert not enchantments.eligible(
+        Card(id="c", name="c", cost=1, type="skill", rarity="curse"), "swift")
+    assert not enchantments.eligible(
+        Card(id="k", name="k", cost=1, type="skill", kit_card=True), "swift")
 
 
 def test_move_on_appears_only_when_every_reading_is_locked():
