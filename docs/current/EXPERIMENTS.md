@@ -51,25 +51,38 @@ registration packets themselves live under `review/active/` — one home, not tw
   freeze begins only after the open `RT`/`C` window (`M14`'s batch: `EB-70`,
   the `EB-82` conversion, the `EB-85` batch, `EB-69`) lands and a dependency
   re-check passes; if the world moved, §6 is re-stamped before the freeze.
-  **Window status 2026-08-13: the world moved and the window is still open.**
-  The `EB-82` conversion and the `EB-85` batch landed together under one
-  coordinated bump, `RUNTEMPLATE` 10 → **11** — so the live stamp is
-  `RT11/D14/P7/C9` and §6.6's `RT10` line records what was verified on
+  **Window status 2026-08-13: the world moved twice and the window is still
+  open.** First the `EB-82` conversion and the `EB-85` batch landed together
+  under one coordinated bump, `RUNTEMPLATE` 10 → **11**. Then window 2 of the
+  correctness batch (`EB-104`, all twelve members) landed under a second
+  coordinated bump, `RUNTEMPLATE` 11 → **12** for its five run-layer fixes and
+  `CONSTANTS` 9 → **10** for its seven tier0 engine fixes — so the live stamp
+  is `RT12/D14/P7/C10`, and §6.6's `RT10` line records what was verified on
   2026-08-12, not what ships. **The freeze still cannot begin**, because two
   of the four batch items have not landed: `EB-70` is blocked on unmade design
   picks at QUEUE `M29`, and `EB-69` waits on the `S4-G11` eye-read. §6 is
   re-stamped once, when the last of them lands, rather than after each —
   re-stamping a registration per item is how a one-variable window turns into
-  four. **The dependency re-check for the part that HAS landed passed**, and
-  it is recorded so it does not have to be re-derived: across the whole
-  `RT10 → RT11` window `RARITY_ODDS`, `rewards.character_pool` for all six
-  characters, the nine archetypes' payoff supply/offer figures from
-  `exp_payoff_reach.static_leg`, and `DRAFTER_VERSION = 14` are all
-  **byte-identical** — the fingerprint was taken before the first merge and
-  again after the bump. Nothing in this window touched the payoff role, the
-  sheets' archetype fields or the rarity fence, which is exactly what §6.6's
-  ordering-(i) argument predicted. **`D` did not move and must not be
-  re-pinned.**
+  four. **The dependency re-check passed at both bumps**, and it is recorded so
+  it does not have to be re-derived. Across the whole `RT10 → RT11` window
+  `RARITY_ODDS`, `rewards.character_pool` for all six characters, the nine
+  archetypes' payoff supply/offer figures from `exp_payoff_reach.static_leg`,
+  and `DRAFTER_VERSION = 14` were all **byte-identical** — the fingerprint was
+  taken before the first merge and again after the bump. **The same four were
+  re-taken across `RT11/C9 → RT12/C10` and are byte-identical again**, all four
+  UNMOVED: `RARITY_ODDS` `{common 0.60, uncommon 0.35, rare 0.05}`; the six
+  pools at `klee 29/28/14`, `furina 23/35/18`, `kokomi 27/20/9`,
+  `real_ironclad 19/32/20`, `real_silent 20/35/25`, `ref_ironclad 4/2/—`, id
+  lists included; all nine `static_leg` rows identical to the digit
+  (supply 10/8/7 · 9/10/14 · 13/5/3, with offer and counterfactual unchanged);
+  `DRAFTER_VERSION = 14`. `EB-112` was the one member that could have reached
+  the fence — it changes how an **event** card screen rolls rarity — and it
+  does not: it makes that screen consult `RARITY_ODDS` instead of bypassing it,
+  and `static_leg` is arithmetic over the reward pools and the odds table, so
+  neither the constant nor any static-leg output moves. Nothing in either
+  window touched the payoff role, the sheets' archetype fields or the rarity
+  fence, which is exactly what §6.6's ordering-(i) argument predicted. **`D`
+  did not move and must not be re-pinned.**
   Owed before the run and named in §6.4/§6.5: the generic reach reader
   (`tier05/exp_payoff_reach.py`) and the `blind` control policy — **both built
   2026-08-13**. Steps (3)–(6) run in order and none reorders →
