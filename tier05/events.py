@@ -472,7 +472,7 @@ def _random_pool_cards(rng: random.Random, st: EventState, n: int) -> list:
 
 
 def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
-            held=None, bag=None, policy=None) -> None:
+            held=None, bag=None, policy=None, policy_rng=None) -> None:
     """Apply one option. Mutates `st` (and `held`/`bag` when relics/potions
     are granted). Order is fixed so a seed replays: costs, then gains."""
     entry = {"event": event["id"], "option": opt.get("label", "?")}
@@ -617,7 +617,7 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
             if not offers:
                 break
             pick = (policy or draft.assigned_policy)(
-                rng, deck, offers, st.archetype) or offers[0]
+                policy_rng or rng, deck, offers, st.archetype) or offers[0]
             st.deck_ids.append(pick.id)
             offers.remove(pick)
     # `card_reward: N` is one screen of N offers; `card_screens: N` is N
@@ -631,7 +631,7 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
                       if upgrades.has_upgrade(c.id) else c for c in offers]
         deck = [loader.peek_card(cid) for cid in st.deck_ids]
         pick = (policy or draft.assigned_policy)(
-            rng, deck, offers, st.archetype)
+            policy_rng or rng, deck, offers, st.archetype)
         if pick is not None:
             st.deck_ids.append(pick.id)
 
@@ -669,7 +669,7 @@ def resolve(rng: random.Random, event: dict, opt: dict, st: EventState,
 
 
 def visit(rng: random.Random, act: int, st: EventState, seen: set[str],
-          held=None, bag=None, policy=None) -> None:
+          held=None, bag=None, policy=None, policy_rng=None) -> None:
     """One Unknown-room-turned-event, escalation ladders included."""
     event = roll_event(rng, act, seen, st.character)
     if event is None:
@@ -680,7 +680,8 @@ def visit(rng: random.Random, act: int, st: EventState, seen: set[str],
         opt = choose(rng, event, st)
         if opt is None:
             return
-        resolve(rng, event, opt, st, held=held, bag=bag, policy=policy)
+        resolve(rng, event, opt, st, held=held, bag=bag, policy=policy,
+                policy_rng=policy_rng)
         nxt = opt.get("escalate")
         if not nxt or st.hp <= 0:
             return
