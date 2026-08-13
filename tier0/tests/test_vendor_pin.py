@@ -57,16 +57,27 @@ def test_our_additions_live_apart_from_upstreams_source():
     assert "\tgits/" not in manifest, "our own files must not be listed as upstream's"
     modified = [ln.split("\t")[2] for ln in manifest.splitlines()
                 if "\tgits-modified\t" in ln]
-    # Today: TWO files, three lines between them, recorded in PROVENANCE.md.
-    # This is not a cap -- it is a tripwire, so growth is a thing someone
-    # decided to do.
+    # Today: THREE files, recorded in PROVENANCE.md. This is not a cap -- it
+    # is a tripwire, so growth is a thing someone decided to do.
     #
-    # It grew ONCE, deliberately, and this is that decision written down:
+    # It has grown TWICE, deliberately, and these are those decisions written
+    # down:
+    #
     # P1.5 (2026-08-05, R104) added `state["resources"] = ...` to
     # BuildPlayerState, because a resources map attached out-of-band by a
     # Harmony patch would not be ATOMIC with the state read it belongs to, and
     # a meter read a frame after the hand it describes is a different
     # measurement. Everything else P1.5 added lives in gits/.
-    assert modified == ["McpMod.cs", "McpMod.StateBuilder.cs"], (
+    #
+    # EB-92 (2026-08-13) added two guards to McpMod.Wiki.cs's result
+    # formatter. It is an edit rather than a gits/ addition because there is
+    # nothing to route: the failure is INSIDE upstream's formatting of one
+    # candidate, where a throwing custom model took the whole search down with
+    # a 500. A patch would have to re-implement the method to wrap it. The
+    # guards are upstreamable as they stand -- any mod's custom model can do
+    # this to upstream's wiki -- so this row is expected to shrink again if
+    # the fix ever goes home.
+    assert modified == ["McpMod.cs", "McpMod.StateBuilder.cs",
+                        "McpMod.Wiki.cs"], (
         f"upstream files we have edited changed: {modified}. Update PROVENANCE.md's "
         f"'What we changed' table and this assertion together, deliberately.")

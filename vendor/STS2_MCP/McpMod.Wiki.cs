@@ -81,7 +81,8 @@ public static partial class McpMod
             .OrderByDescending(match => match.Score)
             .ThenBy(match => match.Candidate.Name, StringComparer.OrdinalIgnoreCase)
             .Take(limit)
-            .Select(match => BuildWikiResult(match.Candidate, match.Score))
+            // GItS LOCAL EDIT (EB-92): one candidate may not kill the search.
+            .Select(match => BuildWikiResultSafely(match.Candidate, match.Score))
             .ToList();
 
         return new Dictionary<string, object?>
@@ -174,6 +175,56 @@ public static partial class McpMod
         return byId.Values;
     }
 
+    // GItS LOCAL EDIT (EB-92) -- start.
+    //
+    // Every mod-card query answered `500 Failed to search wiki: Canonical
+    // model of type <a generated class> used in incorrect place`, a DIFFERENT
+    // class each time. The formatter walks `ModelDb.AllCards`, which is where
+    // mod cards live, and reads properties off the CANONICAL instance; a
+    // custom model whose override touches something only a mutable card has
+    // (`CardModel.Owner` asserts mutability in its getter) throws, and one
+    // throw took the whole search with it -- including the base-game rows that
+    // had already formatted fine.
+    //
+    // Two guards, and neither of them fixes the throwing card:
+    //   * the hover-tip list is the property a custom model most plausibly
+    //     overrides, so it is read through a catch and degrades to empty;
+    //   * whatever else a future custom model reaches for, the per-candidate
+    //     catch turns into ONE degraded row carrying id, name, score and the
+    //     error, so the query still answers and the reader can see which card
+    //     is the problem.
+    //
+    // The card that throws is a defect wherever it lives, and this does not
+    // hide it: a degraded row names it. This makes the SEARCH SURFACE work,
+    // which is what `give_card`'s own refusal text tells the caller to use.
+    private static Dictionary<string, object?> BuildWikiResultSafely(
+        WikiCandidate candidate, double score)
+    {
+        try
+        {
+            return BuildWikiResult(candidate, score);
+        }
+        catch (Exception ex)
+        {
+            return new Dictionary<string, object?>
+            {
+                ["item_type"] = candidate.Kind,
+                ["id"] = candidate.Id,
+                ["name"] = candidate.Name,
+                ["score"] = Math.Round(score, 3),
+                ["degraded"] = true,
+                ["error"] = $"{ex.GetType().Name}: {ex.Message}"
+            };
+        }
+    }
+
+    private static object BuildWikiHoverTipsSafely(CardModel card)
+    {
+        try { return BuildHoverTips(card.HoverTips); }
+        catch { return Array.Empty<object>(); }
+    }
+    // GItS LOCAL EDIT (EB-92) -- end.
+
     private static Dictionary<string, object?> BuildWikiResult(WikiCandidate candidate, double score)
     {
         if (candidate.Card != null)
@@ -239,7 +290,8 @@ public static partial class McpMod
             ["is_upgradable"] = card.IsUpgradable,
             ["current_upgrade_level"] = card.CurrentUpgradeLevel,
             ["max_upgrade_level"] = card.MaxUpgradeLevel,
-            ["keywords"] = BuildHoverTips(card.HoverTips)
+            // GItS LOCAL EDIT (EB-92): see BuildWikiHoverTipsSafely.
+            ["keywords"] = BuildWikiHoverTipsSafely(card)
         };
     }
 

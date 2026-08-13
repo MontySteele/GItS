@@ -59,12 +59,13 @@ disagree in either direction.
 
 ## What we changed
 
-**Four lines, across two upstream files.** Everything of substance lives in
+**Four lines across two upstream files, plus EB-92's two guards in a third.** Everything of substance lives in
 `gits/`, which the pin lint excludes from the upstream hash list entirely.
 
 | File | Status | Change |
 |---|---|---|
 | `McpMod.cs` | `gits-modified` | Three `else if` arms on the `HandleRequest` route chain — `/api/v1/gits/speed` (W2), `/api/v1/gits/seed` (P1.5) and `/api/v1/gits/give_card` (EB-52) — marked in-file with `GItS LOCAL EDIT`. Nothing else in the file is touched. |
+| `McpMod.Wiki.cs` | `gits-modified` | EB-92 (2026-08-13) — two guards in the result formatter, marked in-file with `GItS LOCAL EDIT`. Every mod-card query answered `500 ... Canonical model of type <generated class> used in incorrect place`, a different class each time: the formatter walks `ModelDb.AllCards` (where mod cards live) and reads properties off the CANONICAL instance, and one throwing card took the whole search down — including the base-game rows that had formatted fine. `BuildWikiResultSafely` degrades a throwing candidate to one row carrying id/name/score/`error`, and the hover-tip read degrades to empty. Neither guard fixes the throwing card, and the degraded row names it. Upstreamable as-is: any mod's custom model can do this. |
 | `McpMod.StateBuilder.cs` | `gits-modified` | One line in `BuildPlayerState`, inside the live-combat block: `state["resources"] = GitsResourceSnapshot(combatState)`. Marked in-file with `GItS LOCAL EDIT`. P1.5 spec item 2. |
 | `gits/GitsSpeed.cs` | GItS addition | Work item W2 — the speed affordance. EB-87 (2026-08-12): the captured original `FastMode` is persisted to `GitsSpeed.original.conf` in the mod directory (next to the `STS2_MCP.conf` this file's neighbours already write — JSON content under a `.conf` name, because ModManager parses every `*.json` under `mods/` as a manifest), a later process restores from that sidecar instead of re-capturing, and a successful disable deletes it. `PrefsSave.FastMode` persists to `settings.save`, so the per-process capture read back its OWN change after a restart and "restored" the game to `Instant`. `TimeScale` is deliberately not persisted — `Engine.TimeScale` starts at its default in every process, so the live capture is already the right original. |
 | `gits/GitsSeed.cs` | GItS addition | P1.5 item 1 — the chosen-seed endpoint. Documents in-file why upstream's own `charSelect.Lobby == null` refusal does not describe the game. |
