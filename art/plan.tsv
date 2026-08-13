@@ -1141,3 +1141,22 @@ spotlight_guest_cast	ImageGen/images/cards/furina/spotlight_guest_cast.png	500	3
 spotlight_guest_cast	ImageGen/images/cards/furina/spotlight_guest_cast.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Tabletop Troupe Pros Navia.png		splash	furina_pool
 confiscated	ImageGen/images/cards/klee/confiscated.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Klee Shorts 2023-06-12.png		splash
 confiscated	ImageGen/images/cards/klee/confiscated.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Klee Birthday 2022 - Shorts.png		splash
+# --- 2026-08-13 art run 9 (EB-88 / R166 re-hunt / EB-26 gap). Every row below is
+#     rank >= 2 BY DESIGN: art_process promotes only rank 1, so a candidate set
+#     lands without making a pick. Do not renumber to rank 1 without a ruling.
+#     watch_of_the_shallows is a NEW card (EB-26) that arrived after the Kokomi
+#     art pass and therefore has NO rank 1 at all -- art_coverage bills it MISSING
+#     until [USER] picks. Portrait.png is deliberately NOT offered: its five valid
+#     cover anchors (y0.33/0.41/0.50/0.59/0.67) are all claimed and a sixth would
+#     render pixel-identical (L12).
+watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	y0.16	shortlist	2	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
+watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover_autocrop	contain@0.08	shortlist	4	png	Sangonomiya Kokomi Multi Wish.png		splash	kokomi_pool
+warmup_act	ImageGen/images/cards/furina/warmup_act.png	500	380	cover	y0.16	shortlist	5	png	Furina Character Card Golden.png		tcg	furina_pool
+warmup_act	ImageGen/images/cards/furina/warmup_act.png	500	380	cover_autocrop	contain@0.08	shortlist	6	png	Item Furina Vision.png		item	furina_pool
+crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	5	png	Opera Epiclese Courtroom.png		splash	furina_pool
+crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	6	png	Opera Epiclese (The Final Feast).png		splash	furina_pool
+tempo_change	ImageGen/images/cards/furina/tempo_change.png	500	380	cover_autocrop	contain@0.08	shortlist	4	png	Item Fontaine Wondrous Machine.png		item	furina_pool
+tempo_change	ImageGen/images/cards/furina/tempo_change.png	500	380	cover_autocrop	contain@0.08	shortlist	5	png	Item Special Clock.png		item	furina_pool
+audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	6	png	FCFH Applause and Cheer.png		splash	furina_pool
+audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	7	png	Opera Epiclese Support Card.png		tcg	furina_pool
