@@ -53,7 +53,9 @@ in the room will ask.
   relic, as engine machinery, and deliberately never as card text.
 - **Printed Charge lines.** A set of her cards grant Charge outright as a
   bonus on top of the funnel. They span the rarities.
-- **Her defensive power.** Her prevention ward pays for each proc with a random
+- **Her defensive power.** Her prevention ward (`prevent_exhaust_ward`, the
+  Exhaust-per-proc power — not the Block-per-pulse `kurage_ward` of §4) pays
+  for each proc with a random
   Exhaust, which routes through the funnel — so being attacked accrues Charge
   without her taking any action at all.
 
@@ -156,7 +158,8 @@ Naming these so the workshop does not spend its time relitigating them.
 
 - **Charge is never spent, and the bank has no cap.** Standing law. Not
   reopened by R163 and not reopened here.
-- **The pulse rate, the Burst meter size, and the ward magnitude** carry their
+- **The pulse rate, the Burst meter size, and the Kurage ward magnitude**
+  (`kurage_ward`, the Block-per-pulse one) carry their
   own standing flags in the Kokomi playtest protocol. They are table questions
   with their own venue; this is a kit question. They will want to be read
   together eventually, which is a reason to keep them separate until someone
@@ -174,7 +177,7 @@ Naming these so the workshop does not spend its time relitigating them.
 
 ## 5. The shape question, decomposed
 
-A "bounded per-turn read budget" is not one decision. It is at least six, and
+A "bounded per-turn read budget" is not one decision. It is seven, and
 they are close to independent — a room can answer them in any order, but it has
 to answer all of them before anything can be priced.
 
@@ -213,13 +216,12 @@ to answer all of them before anything can be priced.
   to price on top of the budget itself.
 - **Later reads are refused** — the card cannot be played. Forecloses a clean
   presentation story and creates a dead-card state mid-turn; named for
-  completeness because a room should reject it explicitly rather than never
-  consider it.
+  completeness so the room decides it on the record rather than by omission.
 
 Each of these forecloses a different thing about how the turn *feels*: the
 first keeps the turn smooth and makes the limit nearly invisible; the second
-makes the limit the most legible thing in the turn; the third makes it a slope
-nobody can read off the screen.
+makes the limit the most legible thing in the turn; the third forecloses
+reading the limit off the screen at all.
 
 ### Axis D — when the allowance refreshes
 

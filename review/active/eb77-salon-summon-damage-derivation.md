@@ -77,7 +77,7 @@ scaled = base + (readable Fanfare // 10) + salon_damage_up
 `tier0/engine/effects.py:816-830` (`_salon_amount`), and
 `klee-mod/KleeCode/Powers/SalonPowers.cs:171-174` (`Scaled`). `10` is
 `SALON_FOCUS_PER` (`tier0/constants.py:295`) / `SalonConstants.FocusPerFanfare`
-(`SalonPowers.cs:31`). `salon_damage_up` is Grand Salon's stack count
+(`SalonPowers.cs:32`). `salon_damage_up` is Grand Salon's stack count
 (`docs/furina-cards.yaml:446`, +1 per copy) and is **0 in every table below** —
 these are the unaugmented numbers.
 
@@ -100,7 +100,7 @@ overdraws HP — the upkeep calls `spend_encore`, not `spend_encore_or_hp`
 (`tier0/engine/effects.py:832-857`, `_salon_bow`; `SalonPowers.cs:200-247`,
 `Bow`). Chevalmarin's 3 Encore and both aura effects do **not** take the Focus
 term — the term is numbers-only by the rework's §2.2a discipline, and the code
-matches (`effects.py:846-852` applies `aura_all` and `encore` without passing
+matches (`effects.py:848-853` applies `aura_all` and `encore` without passing
 through `_salon_amount`).
 
 **Both engines read Fanfare AFTER the turn's decay.** In the sim, decay runs at
@@ -187,10 +187,18 @@ Fanfare source:
 | turn | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10+ |
 |---|---|---|---|---|---|---|---|---|---|
 | Fanfare after upkeep | 3 | 5 | 7 | 9 | 10 | 11 | 12 | 13 | **13** |
-| Focus term | +0 | +0 | +0 | +0 | +1 | +1 | +1 | +1 | **+1** |
+| Focus term, per member in FIFO order | +0/+0/+0 | +0/+0/+0 | +0/+0/+0 | +0/+0/+0 | +0/+0/+1 | +0/+1/+1 | +1/+1/+1 | +1/+1/+1 | **+1/+1/+1** |
 
-**The stage's self-feed converges at Fanfare 13 — Focus +1 — on turn 6, and
-never reaches +2.** The general rule is simple: a steady meter of `10k` needs
+The Focus term is read *during* the upkeep, not from the post-upkeep total, and
+each member reads it **after its own Encore spend has already printed Fanfare**
+— the order is fixed at `tier0/engine/effects.py:2696` (`spend_encore`, which
+calls `gain_fanfare`) running before `_num()` → `_salon_amount()` →
+`resources.readable(p)` at `:2699-2701`. So the three members of a full stage do
+not share a Focus term within a turn: on turn 6 they read 8, 9 and 10, and only
+the last one ticks at +1. **The whole stage first ticks at +1 on turn 8; the
+meter first crosses 10 at the end of turn 6; the fixed point of 13 arrives on
+turn 9. The self-feed never reaches +2.** (Corollary: "the Focus term this turn"
+is only a well-defined single number once the meter is at its fixed point.) The general rule is simple: a steady meter of `10k` needs
 income of `2k` per turn to hold, so holding +1 costs 2 Fanfare per turn,
 holding +2 costs 4, and holding the +3 at cap costs **6 Fanfare per turn,
 every turn**. The stage supplies 3. The other 3 must come from the other live
@@ -199,7 +207,8 @@ legs — HP lost, Encore absorbed, Spotlighted cards played
 
 So the cap-row of the §3 table (Crabaletta at 9, Chevalmarin at 5) describes a
 board state the Salon plan cannot reach on its own upkeep, and the +1 row is
-what a stage that does nothing else settles at from turn 6.
+what a stage that does nothing else settles at — wholly from turn 8, and at the
+fixed point from turn 9.
 
 ---
 
@@ -298,10 +307,15 @@ the honest comparison for an opening hand:
 |---|---|---|
 | v1 | 4.00 | 12.00 |
 | v2 at Fanfare 0 | **3.67** | **7.67** (Chevalmarin's bow scores 0 units) |
-| v2 at Focus +1 | 4.67 | 8.67 |
+| v2 at Focus +1 | 4.67 | 8.33 |
 
-**So the directive's "upward" holds from turn 6 onward and does not hold on
-turns 1–5**, and the average bow is below v1's at every Fanfare level up to the
+The bow average rises by 2/3, not by 1, because only two of the three bows take
+the Focus term at all — Chevalmarin's bow is `aura_all` + `encore`, applied
+without passing through `_salon_amount` (`effects.py:848-853`), and it already
+scores 0 units in the row above: (15 + 10 + 0)/3 = 8.33.
+
+**So the directive's "upward" holds from turn 8 onward and does not hold on
+turns 1–7**, and the average bow is below v1's at every Fanfare level up to the
 cap. The unpriced half is real — v2's bows include an all-enemy Hydro
 application and 3 Encore that v1 had no analogue for — but it is unpriced, and
 the countersign is where it gets priced.
@@ -363,7 +377,7 @@ moves. All three are decisions.
 upkeep converging at Fanfare 13 / Focus +1, and holding +3 costing 6 Fanfare per
 turn forever. The §3 cap row describes a state the Salon plan does not reach on
 its own. Accepting that means the printed "+1 per 10 Fanfare" is, for a pure
-Salon deck, "+1, from turn 6".
+Salon deck, "+1, for the whole stage from turn 8".
 
 **Q4 — Does the directive's "upward numbers adjustment" read as satisfied?**
 §5c: the full stage is 11 units at Fanfare 0 against v1's 12, crosses at the

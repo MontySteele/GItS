@@ -70,10 +70,14 @@ lands into, and each one is a cost or a constraint on both.
 
 **(a) The pool is drafted, not assigned — so a buff aimed at one plan reaches
 the others.** Furina's sheet is 82 rows. **32 of them carry the `generic` tag**,
-which means the drafter offers them whatever the plan is. Measured deck
-composition from the 2026-07-28 strength battery: **about 45% of every Furina
-deck is archetype-neutral regardless of which plan is being drafted.** This was
-learned the expensive way once already (§5.3).
+which the pilot rewards under every plan (a flat `+0.8`,
+`tier05/draft.py:1294`) — and, more to the point, **every one of the 82 is
+offerable under every plan regardless of tag**: the tag is a scoring term, not
+an offer filter, so an off-plan card is simply scored lower rather than
+withheld — which is why an assigned salon draft still ends up 13% fanfare cards
+(§6.2). Measured deck composition from the 2026-07-28 strength battery: **about
+45% of every Furina deck is archetype-neutral regardless of which plan is being
+drafted.** This was learned the expensive way once already (§5.3).
 
 **(b) A card-sheet edit carries no version signal today.** The `RT/D/P/C` stamp
 does not cover the card sheets, so a change to a card's cost, numbers, rarity, or
@@ -221,8 +225,9 @@ Three findings from that pass, each of which is a cost line for remedy 1 today:
 - Sub-lever B is sheet work plus codegen plus a C# parity leg (§3e). Furina's
   generated coverage is 81 of 82 today, so the machinery exists and the work is
   routine rather than novel.
-- Either way: the affected tests. 16 test files reference salon, 10 fanfare, 6
-  spotlight, across a 190-file suite.
+- Either way: the affected tests. 37 test files reference salon, 32 fanfare, 18
+  spotlight, across a 190-file suite (of those, 16 / 10 / 6 pin the plan name as
+  a quoted string literal).
 
 **Measurement.** One re-baseline of the standing table per landed change
 (minutes of compute; §4), plus whatever instrument the success test in §3d needs.
