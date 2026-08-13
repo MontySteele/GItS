@@ -610,3 +610,106 @@ def test_the_rejection_veto_is_scoped_to_the_turn():
     memo = policy_v1.Memo()
     memo.rejected.add((memo.turn_key(state), "BASE-SWING"))
     assert policy_v1.decide(later, memo).notes["names"]["card_name"] == "Big Swing"
+
+
+# ------------------- revisions #8-#10: the Act-2 reach pass (2026-08-13) ----
+#
+# Each of the three is a DEFECT fix -- an input the module declares it reads
+# and was not reading -- so each test states the wrong answer it replaces.
+
+def _reach_map_state(kinds, hp=62, max_hp=62, act=1, floor=3):
+    """A map screen offering `kinds` (wire words: "Elite", "Monster", ...).
+    Named apart from this file's older `_map_state` on purpose -- that one
+    takes fully-formed option dicts and predates this pass."""
+    return {"state_type": "map",
+            "run": {"act": act, "floor": floor},
+            "player": {"hp": hp, "max_hp": max_hp, "gold": 0,
+                       "character": "Klee", "deck": []},
+            "map": {"next_options": [{"index": i, "type": k, "leads_to": []}
+                                     for i, k in enumerate(kinds)]}}
+
+
+def test_the_plan_follows_the_character_on_the_wire():
+    """Revision #8. Before this, a Klee run drafted, rested and priced every
+    overlay under Furina's `salon` -- the module constant, hardcoded when the
+    bot played Furina. `resolve_plan` is the sim's own source of truth."""
+    klee = {"player": {"character": "Klee"}}
+    furina = {"player": {"character": "Furina"}}
+    kokomi = {"player": {"character": "Sangonomiya Kokomi"}}
+    assert policy_v1._plan_for(klee) == ("klee", "demolition")
+    # The Furina arm is unchanged BY CONSTRUCTION, which is what makes this
+    # fix safe to ship: her assigned plan is the string that was hardcoded.
+    assert policy_v1._plan_for(furina) == ("furina", policy_v1.ARCHETYPE)
+    assert policy_v1._plan_for(kokomi)[1] == "priest"
+
+
+def test_an_unnamed_character_falls_back_to_the_old_constant():
+    """A menu state names nobody. The fallback is what every caller used
+    unconditionally before the revision, so an unrecognised run behaves as it
+    did rather than in some third way."""
+    assert policy_v1._plan_for({}) == (policy_v1.CHARACTER,
+                                       policy_v1.ARCHETYPE)
+    assert policy_v1._plan_for({"player": {"character": "Nobody"}}) == (
+        policy_v1.CHARACTER, policy_v1.ARCHETYPE)
+
+
+def test_the_plan_is_not_frozen_by_a_state_that_names_nobody():
+    """The cache must not latch the fallback off a menu frame and keep it for
+    the whole run -- that would reintroduce the bug it fixes."""
+    memo = policy_v1.Memo()
+    assert policy_v1._plan({"player": {}}, memo) == policy_v1.ARCHETYPE
+    assert memo.plan is None
+    assert policy_v1._plan({"player": {"character": "Klee"}},
+                           memo) == "demolition"
+    assert memo.plan == "demolition"
+
+
+def test_the_elite_bar_rises_with_the_elites_this_act():
+    """Revision #9. All 48 path decisions of the 20260813-002613 soak printed
+    `elite bar 0.55`, including after two elites had been taken, because
+    `state["elites_taken"]` is a key the wire has never carried."""
+    memo = policy_v1.Memo()
+    first = policy_v1._map(_reach_map_state(["Elite", "Monster"]), memo)
+    assert "elite bar 0.55" in first.rationale
+    assert memo.elites_taken == 1
+    second = policy_v1._map(_reach_map_state(["Elite", "Monster"], hp=40), memo)
+    assert "elite bar 0.70" in second.rationale
+    # 40/62 = 0.65 is under the risen bar, so the elite is now repellent.
+    assert second.notes["elite_ok"] is False
+    assert second.label.endswith("(N)")
+
+
+def test_the_elite_count_is_act_local():
+    """`tier05.route` declares both counts act-local; the reset is not
+    optional bookkeeping, it is what the dial means."""
+    memo = policy_v1.Memo()
+    policy_v1._map(_reach_map_state(["Elite"]), memo)
+    assert memo.elites_taken == 1
+    policy_v1._map(_reach_map_state(["Monster"], act=2), memo)
+    assert memo.elites_taken == 0 and memo.act_counted == 2
+
+
+def _spent_rest(can_proceed=True):
+    return {"state_type": "rest_site",
+            "run": {"act": 1, "floor": 7},
+            "player": {"hp": 45, "max_hp": 62, "character": "Klee",
+                       "deck": []},
+            "rest_site": {"can_proceed": can_proceed, "options": []}}
+
+
+def test_a_spent_rest_site_is_a_decision_not_a_forced_default():
+    """Revision #10. Choosing Rest re-serves the screen with `options: []`;
+    9 of the 11 "forced defaults" in the 20260813-002613 soak were this, with
+    the HP row jumping +18 immediately before each one."""
+    d = policy_v1.decide(_spent_rest(), policy_v1.Memo())
+    assert d.available and d.action == {"action": "proceed"}
+    assert d.notes["screen_spent"] is True
+    assert d.revision == "v1.10"
+
+
+def test_a_spent_rest_site_that_refuses_its_exit_still_declines():
+    """EB-13's own bounce, which is why the revision is gated on
+    `can_proceed`: posting a refused `proceed` is a loop with a rationale
+    attached, and `_last_resort` is the seat for answering that screen."""
+    d = policy_v1.decide(_spent_rest(can_proceed=False), policy_v1.Memo())
+    assert not d.available
