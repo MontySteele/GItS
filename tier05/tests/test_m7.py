@@ -64,9 +64,11 @@ def test_unappliable_upgrades_never_chosen_at_rest():
 
     RULING 2026-07-25 (G-C2), which this test demanded rather than a skip.
     UNAPPLIABLE is now EMPTY: nicole_celestial_gift was its last member and
-    its delta moved from {block_per_turn: +2} -- unexpressible, because the
-    block is a constant rather than a card field -- to {buff: +2}, which the
-    grammar already binds. So the non-empty assertion is retired.
+    its delta moved off {block_per_turn: +2} -- unexpressible, because the
+    block is a constant rather than a card field -- onto an expressible one.
+    (The interim G-C2 delta was superseded on 2026-07-26; the card's live row
+    is {cost: -1}. Nothing here depends on which.) So the non-empty assertion
+    is retired.
 
     The test is NOT retired with it, for two reasons. The rest-smithing rule
     it checks is still the rule; it is merely vacuous while the set is empty,

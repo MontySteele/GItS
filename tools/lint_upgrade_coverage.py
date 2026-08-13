@@ -16,9 +16,11 @@ a defect that had already shipped.
   card can have a perfectly good sheet delta that the generator cannot
   express, in which case OnUpgrade() is an empty method with a comment in it
   and the LIVE card is unupgradable while the SIM's is fine. That is exactly
-  `nicole_celestial_gift`, the card the 2026-07-25 playtest named: it has
-  `{block_per_turn: +2}` in klee-upgrades.yaml, so layer 1 passes it, and its
-  generated OnUpgrade does nothing at all.
+  `nicole_celestial_gift`, the card the 2026-07-25 playtest named: it HAD
+  `{block_per_turn: +2}` in klee-upgrades.yaml, so layer 1 passed it, and its
+  generated OnUpgrade did nothing at all. (Motivating incident, deliberately
+  preserved in the past tense: that delta was superseded twice and the card's
+  live row is `{cost: -1}` since 2026-07-26.)
 
   LAYER 3 -- THE EMITTED C#. Layer 2 asks the manifest and believes it. The
   manifest is written by the generator, so layer 2 believes the generator's

@@ -12,14 +12,15 @@ replace). A key this module does not know is a loud error -- the sheet
 and the applier drifting apart must fail the suite, not silently ship
 un-upgraded cards.
 
-UNAPPLIABLE lists the sheet entries whose deltas target numbers the
-engine encodes as CONSTANTS rather than card fields (Catalytic
-Conversion's per-reaction energy, Durin's ping, Nicole's per-turn block).
-Those upgrades exist in the design and cannot yet be expressed per-card
-in the Tier 0 DSL. They are skipped -- visibly, and the rest policy
-refuses to spend a rest on them -- rather than approximated, because a
-wrong number wearing the right name is how sim findings stop being
-trustworthy. DSL gap, logged for the M7 report.
+UNAPPLIABLE is the naming slot for sheet entries whose deltas target
+numbers the engine encodes as CONSTANTS rather than card fields. It is
+EMPTY today and deliberately kept empty rather than deleted (see the set
+itself, below, for the history of the three cards that once sat in it and
+how each left). The rule it carries is unconditional and does not depend
+on the set having members: anything named here is skipped -- visibly, and
+the rest policy refuses to spend a rest on it -- rather than
+approximated, because a wrong number wearing the right name is how sim
+findings stop being trustworthy.
 """
 
 from __future__ import annotations
@@ -81,9 +82,14 @@ def _external_pool_for(sheet: Path) -> Path:
 # nicole_celestial_gift LEFT this set with G-C2 (2026-07-25), the same way
 # catalytic_conversion left it with R37: its delta moved from
 # {block_per_turn: +2} -- unexpressible, because CELESTIAL_GIFT_BLOCK is a
-# constant rather than a card field -- to {buff: +2}, which the `buff` grammar
-# already binds to the first top-level apply_power. The R24 no-unmeasured-
+# constant rather than a card field -- to {buff: +2}. The R24 no-unmeasured-
 # upgrades law is satisfied rather than waived.
+#   That {buff: +2} was itself SUPERSEDED on 2026-07-26 by {cost: -1}, ratified
+#   with the card's redesign (docs/klee-upgrades.yaml:111-124 records the
+#   reason). So the delta named above is history, not the live sheet row, and
+#   nothing in the tree binds `buff` for this card any more.
+# durin_witchs_flame was never a member under that id in any reachable commit;
+# it carries {power_amount: +2} and upgrades normally.
 #
 # Kept as an empty set rather than deleted, per the standing curated-set
 # discipline: the invariant "every draftable card has an applicable upgrade"
