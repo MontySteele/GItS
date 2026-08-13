@@ -87,8 +87,6 @@ Rows are base enemies/encounters grouped by act. Candidates are ordered best-fit
 
 # Flags
 
-# Flags
-
 ## 1. Redesign-pressure list — base enemies with no plausible candidate (flagged, not ruled)
 
 | Base enemy | Why the atlas came up empty |
@@ -125,8 +123,6 @@ Bodies claimed by 3+ base rows (the [USER] picks one home per body per act, or a
 Nine families proposed skins for `tier0/content/encounters/` bodies (swarmling, grinder, sleeper, tank_boss, punisher). Every proposing agent also flagged the file's `*** FROZEN 2026-07-19 — do not retune ***` header and its non-diegetic purpose. Consolidated position (cut from the table, recorded in cuts): **leave the measuring instrument unthemed**; equivalent player-facing shapes exist in the shipped pools for every one of those pairings.
 
 ---
-
-# Cuts
 
 # Cuts
 
