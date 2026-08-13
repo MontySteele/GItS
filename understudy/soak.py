@@ -325,6 +325,15 @@ class Session:
         # here; as of 2026-08-04 (late) it actually does.
         env = dict(os.environ)
         env["GITS_TELEMETRY_FEED"] = "bot"
+        # THE INTENT LABEL IS PINNED THE SAME WAY, AND THE EMPTY STRING IS
+        # LOAD-BEARING. `env` starts as a copy of this shell's environment, so
+        # assigning unconditionally is what strips an operator's inherited
+        # GITS_TELEMETRY_INTENT. It must be ASSIGNED-EMPTY rather than DELETED:
+        # the mod consults the human's persistent
+        # `gits_telemetry/intent.txt` only when the variable is ABSENT
+        # (PlayTelemetry.Intent()), so deleting it would hand a bot soak
+        # whatever archetype a person last declared for their own session.
+        # Do not "simplify" this to a conditional set.
         env["GITS_TELEMETRY_INTENT"] = self.intent or ""
         self.proc = subprocess.Popen([str(exe)], cwd=str(self.dir),
                                      env=env,
