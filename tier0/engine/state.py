@@ -328,12 +328,12 @@ class Card:
     # all existing content stay byte-identical.
     enchant_damage: int = 0       # flat rider on this attack's damage
     enchant_effects: list[dict] = field(default_factory=list)  # after own fx
-    enchant_block: int = 0        # Nimble: once per play, not per block row
+    enchant_block: int = 0        # Nimble: paid on EVERY Block gain (EB-85)
     enchant_damage_mult: float = 1.0        # Corrupted: x1.5 on this attack
     enchant_first_play_damage: int = 0      # Vigorous: first play of a combat
     enchant_first_play_effects: list[dict] = field(default_factory=list)
     #                                       Sown / Swift: first play of a combat
-    enchant_top_of_draw: bool = False       # Perfect Fit: shuffle placement
+    enchant_top_of_draw: bool = False       # Perfect Fit: RESHUFFLE only
     enchant_played_this_combat: bool = False   # the first-play gate itself
     # --- Status cards (multi-act §10.2 injection op; engine/statuses.py).
     # type == "status" cards are UNPLAYABLE (combat.card_playable) and exist
@@ -715,13 +715,6 @@ class CombatState:
     # Dexterity and Frail. Kept beside the count rather than replacing it --
     # refpowers reads the count to divide a per-gain allowance.
     block_gained_this_card: int = 0
-    # Nimble (R82 reopened): "increases Block gained from this card by X" is
-    # ONCE per card PLAY, not once per Block row and not once per _op_block
-    # entry -- a two-row card, or a Block row nested under a conditional,
-    # re-enters the op and would collect the rider again off a function-local
-    # latch. Shared by _op_block and _op_block_next_turn so a card carrying
-    # both still collects the rider exactly once.
-    enchant_block_spent_this_card: bool = False
     discards_this_card: int = 0           # CalculatedGamble's draw-back count
     last_drawn_type: str = ""             # EscapePlan's drawn-card branch
     salon_replacements_this_card: int = 0 # overflow count for current card
@@ -883,10 +876,12 @@ class CombatState:
         self.rng.shuffle(self.player.discard_pile)
         merged = self.player.discard_pile + self.player.draw_pile
         # Perfect Fit (R82 reopened): "whenever this would be shuffled into
-        # your Draw Pile, place it on the top instead." The combat-START
-        # shuffle is handled by combat.surface_innate, which rides the same
-        # flag; this is the mid-combat reshuffle, the other place a card is
-        # shuffled in. Order among top-placed cards stays shuffle-relative,
+        # your Draw Pile, place it on the top instead." THIS IS THE ONLY SITE
+        # (EB-85 divergence 5): `PerfectFit.ModifyShuffleOrder` opens with
+        # `if (!isInitialShuffle && cards.Contains(base.Card))`, so the
+        # combat-start shuffle is explicitly refused and combat.surface_innate
+        # no longer rides the flag -- hoisting there made the enchantment a
+        # free Innate. Order among top-placed cards stays shuffle-relative,
         # exactly as innate's does -- no hidden second sort.
         if any(c.enchant_top_of_draw for c in merged):
             merged = ([c for c in merged if c.enchant_top_of_draw]

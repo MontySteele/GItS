@@ -95,25 +95,17 @@ GAME_RULES = {
 # already looked at -- the point of the table is that an UNLISTED
 # disagreement fails the lint. Nothing here is fixable on the C# side; every
 # row is tier0's model of an enchantment the game implements differently.
-KNOWN_DIVERGENCES = {
-    ("nimble", "skill-only"): (
-        "tier0's `_is_block_skill` requires `type == \"skill\"`; the game's "
-        "Nimble has no CanEnchantCardType override and gates on GainsBlock "
-        "alone, so an Attack that also gains Block is Nimble-eligible in the "
-        "game and not in the sim. The base game ships four such Attacks "
-        "(IronWave, Dash, BoneShards, Fisticuffs), all declaring GainsBlock."),
-    ("nimble", "block-next-turn"): (
-        "tier0's `_grants_block` counts `block_next_turn`; the game pays that "
-        "half from BlockNextTurnPower.AfterBlockCleared with `cardPlay: null`, "
-        "so there is no cardSource and Hook.ModifyBlock never reaches the "
-        "enchantment. A card whose ONLY Block arrives that way is inert under "
-        "Nimble in the game (base game: Prolong), so the mod deliberately does "
-        "not declare GainsBlock for it."),
-    ("swift", "power-only"): (
-        "tier0's Swift takes `_is_power`; the game's Swift has no override at "
-        "all and may be placed on any card. tier0's narrowing is a modelling "
-        "choice inherited from the granting event's text, not the game's."),
-}
+#
+# THE TABLE IS EMPTY, and that is the EB-85 result rather than a table nobody
+# has filled in. The EB-84 sweep recorded three eligibility splits here --
+# Nimble Skill-only, Nimble on `block_next_turn`, Swift Power-only -- and all
+# three were tier0 being narrower than the shipped enchantment. They were
+# stamp-gated (each moves what an enchant event may target) and were fixed in
+# the RUNTEMPLATE window on 2026-08-13, so every one of the eight now agrees
+# on every mod card. An entry added here in future needs the same thing the
+# three had: the decompiled class, the card fact it reads, and why the sim
+# cannot follow it.
+KNOWN_DIVERGENCES: dict[tuple[str, str], str] = {}
 
 
 def _mod_card_ids() -> set[str]:
@@ -168,30 +160,17 @@ def cs_facts(text: str) -> dict:
     }
 
 
-def _ops(effects) -> set[str]:
-    """Every op in an effect tree, `conditional` branches included."""
-    found: set[str] = set()
-    for fx in effects or ():
-        found.add(fx.get("op"))
-        if fx.get("op") == "conditional":
-            found |= _ops(fx.get("then")) | _ops(fx.get("else"))
-    return found
-
-
 def sim_reason(name: str, card, sim_ok: bool) -> str | None:
     """Which KNOWN_DIVERGENCES key explains THIS card's split, if any.
 
-    Deliberately narrow. A reason that fits any card of the right type
+    Deliberately narrow, and currently answers None for everything, because
+    KNOWN_DIVERGENCES is empty (EB-85 closed all three). The narrowness is
+    the lesson worth keeping: a reason that fits any card of the right type
     swallows the real splits the lint exists to catch -- the first draft
     returned "block-next-turn" for every Skill and so passed while a
-    hand-broken GainsBlock sat in the tree.
+    hand-broken GainsBlock sat in the tree. Whoever adds the next row adds
+    the branch that recognises it HERE, keyed on the specific card fact.
     """
-    if name == "nimble" and not sim_ok and card.type != "skill":
-        return "skill-only"
-    if name == "nimble" and sim_ok and "block" not in _ops(card.effects):
-        return "block-next-turn"
-    if name == "swift" and not sim_ok and card.type != "power":
-        return "power-only"
     return None
 
 

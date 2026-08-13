@@ -708,14 +708,6 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
                                  source=source)
 
 
-def _take_enchant_block(state: CombatState, card: Card) -> int:
-    """The Nimble rider, at most once per card play (0 after it is spent)."""
-    if state.enchant_block_spent_this_card or not card.enchant_block:
-        return 0
-    state.enchant_block_spent_this_card = True
-    return card.enchant_block
-
-
 def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     raw = (_calc_amount(state, fx["amount_formula"], card)
            if "amount_formula" in fx else fx["amount"])
@@ -731,18 +723,24 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     times = fx.get("times", 1)
     times = (_runtime_count(state, times, card)
              if isinstance(times, str) else times)
-    # Nimble (R82 reopened): "increases Block gained from this card by X" --
-    # ONCE per play, not once per row, so a two-row block card does not
-    # collect it twice. The latch lives on the STATE, reset per card play,
-    # because _op_block re-enters for every Block row (including rows nested
-    # under a conditional) and a function-local latch only de-duped the
-    # `times` loop. Not Spotlight-scaled (Spotlight scales printed numbers;
-    # an enchantment is not printed), but Frail does bite it, which is what
-    # "Block gained" means.
-    rider = _take_enchant_block(state, card)
+    # Nimble (R82 reopened; EB-85 divergence 3 fixed the cadence). The rider
+    # is paid on EVERY Block gain, not once per card play. The game applies
+    # it inside `Hook.ModifyBlock`:
+    #
+    #     if (cardSource != null && cardSource.Enchantment != null) {
+    #         num += enchantment.EnchantBlockAdditive(num); ... }
+    #
+    # with no status gate and no latch of any kind (contrast `Swift`, which
+    # flips `Status = EnchantmentStatus.Disabled` after its first payout), and
+    # `Hook.ModifyBlock` runs once per `CreatureCmd.GainBlock` call. So a
+    # two-row Block card collects Nimble twice, and a `times` loop collects it
+    # per iteration -- each of those is its own GainBlock. tier0 paid it once
+    # per play off a state latch, which under-counted every multi-gain card.
+    # Not Spotlight-scaled (Spotlight scales printed numbers; an enchantment
+    # is not printed), but Frail does bite it, exactly as the hook order does:
+    # the enchant additive lands before the multiplicative listeners.
     for _ in range(times):
-        amount = _spotlight_scale(state, card, raw) + rider
-        rider = 0
+        amount = _spotlight_scale(state, card, raw) + card.enchant_block
         # Frail bites each printed card-block gain before the refpower funnel.
         amount = powers.modify_block_gained(state.player, amount)
         state.player.block += amount
@@ -759,14 +757,21 @@ def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
     amount = _amount(state, fx["amount"])
     if state.salon_replacements_this_card:
         amount *= C.SALON_REPLACE_DAMAGE_MULT
-    # Nimble rides here too: the published text is "Block gained from this
-    # card", and two Kokomi skills gain Block only (or half) through this op.
-    # Added AFTER the Spotlight scale, exactly as _op_block adds it -- an
-    # enchantment is not a printed number -- and off the SAME per-play latch,
-    # so a card with both ops collects the rider once in total.
+    # NIMBLE DOES NOT RIDE HERE (EB-85 divergence 4). This op is the sim's
+    # mirror of `BlockNextTurnPower`, and that power pays out with
+    #
+    #     await CreatureCmd.GainBlock(base.Owner, base.Amount,
+    #                                 ValueProp.Unpowered, null);
+    #
+    # in `AfterBlockCleared`. The trailing null is the `CardPlay`, and
+    # `GainBlock` passes `cardPlay?.Card` as the card source, so
+    # `Hook.ModifyBlock` has no `cardSource.Enchantment` to read and the
+    # enchantment is never consulted -- the Block arrives from a POWER on a
+    # later turn, not from a card play. tier0 folded the rider into the
+    # power's amount, which made `tideline_watch` (inert in game) a boosted
+    # card here. The eligibility half is in `enchantments._grants_block`.
     powers.apply_power(state, state.player, "block_next_turn",
-                       _spotlight_scale(state, card, amount)
-                       + _take_enchant_block(state, card))
+                       _spotlight_scale(state, card, amount))
 
 
 def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
@@ -2453,7 +2458,6 @@ def resolve_card(state: CombatState, card: Card) -> None:
     state.exhausted_this_card = 0
     state.block_gains_this_card = 0
     state.block_gained_this_card = 0
-    state.enchant_block_spent_this_card = False
     state.discards_this_card = 0
     state.last_drawn_type = ""
     state.salon_replacements_this_card = 0

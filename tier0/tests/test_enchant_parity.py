@@ -47,11 +47,22 @@ def test_every_shipped_enchantment_names_the_card_fact_its_game_rule_reads():
 
 
 def test_a_recorded_divergence_carries_its_reason():
+    """Vacuous today on purpose -- EB-85 emptied the table -- and it stays
+    here because the shape check is what a future row needs to satisfy."""
     for key, why in lep.KNOWN_DIVERGENCES.items():
         name, reason = key
         assert name in enchantments.CATALOG, key
         assert reason, key
         assert len(why.split()) >= 12, (key, why)
+
+
+def test_no_enchantment_diverges_from_its_shipped_rule_any_more():
+    """EB-85's own pin: the three eligibility splits the EB-84 sweep found
+    are FIXED, not excused. An excuse table that quietly refills is the one
+    way this batch un-does itself, so the emptiness is asserted rather than
+    left to the lint's exit code."""
+    assert lep.KNOWN_DIVERGENCES == {}
+    assert not lep.findings()
 
 
 def test_the_lint_bites_when_a_card_stops_declaring_that_it_gains_block(
@@ -92,17 +103,24 @@ def test_the_lint_bites_when_a_card_stops_declaring_that_it_gains_block(
     assert not lep.findings()
 
 
-def test_a_reason_narrow_enough_to_still_catch_the_real_splits():
-    """`sim_reason` decides which splits are already-known.
+def test_the_three_shapes_the_sweep_argued_about_now_all_agree():
+    """`sim_reason` decides which splits are already-known, and after EB-85
+    it has nothing to recognise: none of the three cards the sweep argued
+    over is a split any more.
 
     Its first draft answered "block-next-turn" for every Skill, which
-    swallowed exactly the finding above. Pin the narrowness: a Skill that
-    gains ordinary Block gets NO excuse.
+    swallowed exactly the finding the test above builds. That narrowness is
+    the standing requirement on whoever adds the next excuse.
     """
     index = loader._card_index()
     ordinary = index["prune_witch_hunt"]          # Skill, conditional Block
-    assert lep.sim_reason("nimble", ordinary, True) is None
+    assert enchantments.eligible(ordinary, "nimble")
     delayed = index["tideline_watch"]             # Skill, block_next_turn only
-    assert lep.sim_reason("nimble", delayed, True) == "block-next-turn"
-    attack = index["freminet_pressurized_floe"]   # Attack that gains Block
-    assert lep.sim_reason("nimble", attack, False) == "skill-only"
+    # EB-85 divergence 4: block_next_turn is not GainsBlock, in either engine.
+    assert not enchantments.eligible(delayed, "nimble")
+    # EB-85 divergence 1: a Block-granting Attack is eligible in both.
+    attack = index["freminet_pressurized_floe"]
+    assert enchantments.eligible(attack, "nimble")
+    for card in (ordinary, delayed, attack):
+        assert lep.sim_reason("nimble", card, True) is None
+        assert lep.sim_reason("nimble", card, False) is None

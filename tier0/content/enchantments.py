@@ -76,7 +76,8 @@ def _is_attack(c) -> bool:
     return c.type == "attack"
 
 
-_BLOCK_OPS = ("block", "block_next_turn")
+# `block_next_turn` is deliberately NOT here -- see _grants_block.
+_BLOCK_OPS = ("block",)
 
 
 def _grants_block(effects) -> bool:
@@ -85,6 +86,22 @@ def _grants_block(effects) -> bool:
     `conditional` is the one op that nests further effect lists (`then` /
     `else` -- see engine.effects._op_conditional), so the walk is over those
     two keys and nothing else.
+
+    `block_next_turn` DOES NOT COUNT (EB-85 divergence 4). It is the sim's
+    mirror of `BlockNextTurnPower`, whose payout is
+
+        await CreatureCmd.GainBlock(base.Owner, base.Amount,
+                                    ValueProp.Unpowered, null);
+
+    in `AfterBlockCleared`. That trailing argument is the `CardPlay`, and
+    `GainBlock` derives the card source from it (`cardPlay?.Card`), so a null
+    `CardPlay` means a null `cardSource`: `Hook.ModifyBlock` finds no
+    `cardSource.Enchantment` and Nimble is never paid on that Block. The mod's cards say the same thing from the
+    other side: `TidelineWatch` declares no `BlockVar` and no `GainsBlock`
+    override, so `CardModel.GainsBlock` is its inherited `false` and
+    `Nimble.CanEnchant` refuses the card outright. A card whose ONLY Block
+    arrives this way is not a Nimble target in game (base game: Prolong);
+    tier0 offered it one and then paid a rider the game does not pay.
     """
     for fx in effects or ():
         if fx.get("op") in _BLOCK_OPS:
@@ -95,23 +112,32 @@ def _grants_block(effects) -> bool:
     return False
 
 
-def _is_block_skill(c) -> bool:
-    """Nimble's target: a Skill that actually GAINS Block.
+def _gains_block(c) -> bool:
+    """Nimble's target: any card that actually GAINS Block.
 
-    The loose predicate was `type == "skill"`, but 83 of this repo's 134
-    skills grant no Block at all, and the event picker
-    (tier05.events._enchant_targets) chooses the drafter's best LEGAL card
-    rather than its best BLOCK card -- so Nimble routinely welded itself onto
-    a card where its one printed effect could never fire, silently. The
-    tighter predicate is the published text read literally ("Block gained
-    from this card"), and the event targeting follows it for free.
+    CARD TYPE IS NOT PART OF THE RULE (EB-85 divergence 1, fixed in this
+    window). The game's `MegaCrit.Sts2.Core.Models.Enchantments.Nimble`
+    declares no `CanEnchantCardType` override at all, and its whole gate is
+
+        public override bool CanEnchant(CardModel card)
+        {
+            if (base.CanEnchant(card)) { return card.GainsBlock; }
+            return false;
+        }
+
+    so a Block-granting ATTACK is Nimble-eligible in the game. tier0 required
+    `type == "skill"` on top of that and refused those cards; the base game
+    ships four such Attacks itself (IronWave, Dash, BoneShards, Fisticuffs)
+    and this repo's mod cards declare `GainsBlock` the same way.
+
+    The Block half of the predicate stays, and it is the game's own
+    (`card.GainsBlock`): 83 of this repo's 134 skills grant no Block at all,
+    and the event picker (tier05.events._enchant_targets) chooses the
+    drafter's best LEGAL card rather than its best BLOCK card -- so a
+    type-only predicate welds Nimble onto cards where its one printed effect
+    could never fire, silently.
     """
-    return c.type == "skill" and (_grants_block(c.effects)
-                                  or _grants_block(c.enchant_effects))
-
-
-def _is_power(c) -> bool:
-    return c.type == "power"
+    return _grants_block(c.effects) or _grants_block(c.enchant_effects)
 
 
 def _exhausts(c) -> bool:
@@ -145,10 +171,20 @@ CATALOG: dict[str, Enchantment] = {
         # The HP loss is the SHIPPED `enchant_effects` list, resolved after
         # the card's own effects -- the same pipe Inky's Weak rides. The
         # damage half needs a multiplier the flat rider could not carry.
-        # NOTE, recorded rather than averaged: mobalytics publishes "lose 3
-        # HP" for this enchantment; slaythespire.wiki.gg publishes 2, and the
-        # wiki is this repo's authority everywhere else in the event layer,
-        # so 2 it is.
+        # BOTH NUMBERS ARE THE BINARY'S, confirmed by the EB-84 sweep and
+        # re-read for EB-85 (sts2.dll v0.107.1,
+        # `Models.Enchantments.Corrupted`): `private const decimal
+        # _damageAmount = 2m` with `CreatureCmd.Damage(..., 2m, ...)` in
+        # OnPlay, and `EnchantDamageMultiplicative` returning `1.5m`. The
+        # sources had disagreed -- mobalytics publishes "lose 3 HP",
+        # slaythespire.wiki.gg publishes 2 -- and the wiki-over-mobalytics
+        # call this row made was right. The DLL is the citation now.
+        #
+        # The multiplier is gated `if (!props.IsPoweredAttack()) return 1m;`,
+        # i.e. it applies to powered Move damage only, which is why the
+        # engine applies it inside the `card.type == "attack"` branch and NOT
+        # to the self-damage row below -- that row is dealt Unblockable |
+        # Unpowered | Move in game, so it fails the same gate.
         lambda x: {"enchant_damage_mult": 1.5,
                    "enchant_effects": [{"op": "damage", "target": "self",
                                         "amount": 2}]}),
@@ -157,13 +193,21 @@ CATALOG: dict[str, Enchantment] = {
     "nimble": Enchantment(
         "nimble", "Nimble",
         "Increases Block gained from this card by X.",
-        _is_block_skill,
+        _gains_block,
         lambda x: {"enchant_block": x}),
 
     "swift": Enchantment(
         "swift", "Swift",
         "The first time you play this card, draw X cards.",
-        _is_power,
+        # EB-85 divergence 2: NO card-level restriction. The game's `Swift`
+        # overrides `HasExtraCardText`, `ShowAmount` and `OnPlay` and nothing
+        # else -- no `CanEnchant`, no `CanEnchantCardType` -- so base
+        # CanEnchant (Status / Curse / Quest / already-enchanted) is the whole
+        # gate and any card may take it. tier0 took `_is_power`, a narrowing
+        # inherited from the granting event's flavor text rather than the
+        # game. This is the widest of the five: it changes what an enchant
+        # event may target on every character.
+        _anything,
         lambda x: {"enchant_first_play_effects": [{"op": "draw",
                                                    "amount": x}]}),
 
@@ -187,6 +231,11 @@ CATALOG: dict[str, Enchantment] = {
         "Whenever this would be shuffled into your Draw Pile, place it on "
         "the top instead.",
         _anything,
+        # The printed text says "whenever"; the implementation does not. It
+        # is a MID-COMBAT reshuffle placement only -- `ModifyShuffleOrder`
+        # opens `if (!isInitialShuffle && ...)` and refuses the opening
+        # shuffle, so this is not an Innate (EB-85 divergence 5). The one
+        # reading site is state.shuffle_discard_into_draw.
         lambda x: {"enchant_top_of_draw": True}),
 }
 
