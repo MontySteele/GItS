@@ -14,7 +14,7 @@ for house characters too.
 """
 
 from tier0.content import loader
-from tier0.engine import combat, powers
+from tier0.engine import combat, powers, refpowers
 from tier0.engine.state import Card
 from tier0.tests.conftest import make_enemy, make_state
 
@@ -186,3 +186,33 @@ def test_a_clone_of_an_enchanted_card_keeps_its_enchantment():
     assert len(clones) == 1
     assert clones[0].enchant_damage == 1
     assert clones[0].enchant_effects == [WEAK_RIDER]
+
+
+def test_aggression_survives_an_already_upgraded_enchanted_card():
+    """RUNTEMPLATE 10 regression: the second `+` landed INSIDE the decoration.
+
+    `_upgraded` reaches an upgraded card by appending `upgrades.SUFFIX` and
+    letting the card index miss, which is how "already upgraded" used to be
+    detected. An enchanted upgraded id decorates as `x@nimble-2+`, so the
+    appended suffix produced `x@nimble-2++` and `enchantments.split` reached
+    `int("2+")` before the index was ever consulted. That ValueError is not
+    "no applicable upgrade", so `_upgraded` re-raised it by design and the run
+    died -- Aggression recalls from the discard pile, so every Ironclad run
+    that had enchanted an upgraded attack crashed instead of scoring, which is
+    what took both `real_*` anchors out of the standing roster table.
+
+    The card is moved unupgraded and the gap is logged, exactly as the plain
+    already-upgraded card has always been.
+    """
+    state = make_state()
+    stuck = card("duck_and_cover@nimble-2+", type="attack")
+    state.player.hand = []
+    state.player.discard_pile = [stuck]
+    state.player.powers["aggression"] = 1
+
+    refpowers.side_turn_start_early(state)
+
+    assert [c.id for c in state.player.hand] == ["duck_and_cover@nimble-2+"]
+    assert [ev["reason"] for ev in state.log
+            if ev["event"] == "UNIMPLEMENTED" and ev.get("power") == "aggression"] \
+        == ["no card-sheet entry for this id; moved unupgraded"]

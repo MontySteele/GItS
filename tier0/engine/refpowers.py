@@ -1227,7 +1227,29 @@ def _upgraded(state: CombatState, card: Card) -> Card:
     the upgrade sheet; filing it as "this card has no upgrade" would hide a
     broken row behind an ordinary-looking absence, so it propagates.
     """
-    from tier0.content import loader, upgrades
+    from tier0.content import enchantments, loader, upgrades
+    # The ALREADY-UPGRADED card is the first case the docstring names, and
+    # appending a second suffix used to be how it was detected: `x+` became
+    # `x++`, the card index missed, and the `KeyError` branch below recorded
+    # it. That detection stopped working when enchantments entered the run
+    # layer at RUNTEMPLATE 10. An enchanted upgraded id decorates as
+    # `x@nimble-2+`, so the second suffix lands INSIDE the decoration
+    # (`x@nimble-2++`) and `enchantments.split` reaches `int("2+")` before the
+    # index is ever consulted. That is a `ValueError` which is not "no
+    # applicable upgrade", so the branch below re-raises it by design and the
+    # run dies -- and Aggression recalls from the discard pile, so every
+    # Ironclad run that enchanted an upgraded attack crashed instead of
+    # scoring. Detect the case up front rather than inferring it from a lookup
+    # miss: `split` keeps the upgrade suffix on the plain id, which is what
+    # lets one check cover the decorated and undecorated shapes alike.
+    # The reason string is deliberately the `KeyError` branch's, verbatim --
+    # the docstring files "already upgraded" under exactly that reason, so
+    # reusing it leaves every previously-emitted event comparable.
+    plain, _, _ = enchantments.split(card.id)
+    if plain.endswith(upgrades.SUFFIX):
+        state.emit("UNIMPLEMENTED", power="aggression", card=card.id,
+                   reason="no card-sheet entry for this id; moved unupgraded")
+        return card
     try:
         return loader.get_card(card.id + upgrades.SUFFIX)
     except KeyError:
