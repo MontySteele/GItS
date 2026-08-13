@@ -115,7 +115,7 @@ def _skill(fx):
     return Card(id="s", name="s", cost=1, type="skill", effects=fx)
 
 
-def test_nimble_targets_only_a_skill_that_actually_gains_block():
+def test_nimble_targets_only_a_card_that_actually_gains_block():
     """The published text is 'Block gained from this card', and 83 of the
     repo's 134 skills gain none -- on those, Nimble is silently inert. The
     event picker takes the drafter's best LEGAL card, so a loose predicate
@@ -124,6 +124,30 @@ def test_nimble_targets_only_a_skill_that_actually_gains_block():
     assert not enchantments.eligible(inert, "nimble")
     plain = _skill([{"op": "block", "amount": 5}])
     assert enchantments.eligible(plain, "nimble")
+
+
+def test_nimble_is_not_skill_only_and_takes_a_block_granting_attack():
+    """EB-85 divergence 1. `Nimble.CanEnchant` is `base.CanEnchant(card) &&
+    card.GainsBlock` with NO `CanEnchantCardType` override, so card type is
+    not part of the rule and a Block-granting Attack is a legal target. Four
+    live sheet rows are that shape; naming them keeps the fix from decaying
+    back into a type check the moment somebody prints a fifth."""
+    from tier0.engine.state import Card
+    attack = Card(id="a", name="a", cost=1, type="attack",
+                  effects=[{"op": "damage", "amount": 5},
+                           {"op": "block", "amount": 5}])
+    assert enchantments.eligible(attack, "nimble")
+    power = Card(id="p", name="p", cost=1, type="power",
+                 effects=[{"op": "block", "amount": 5}])
+    assert enchantments.eligible(power, "nimble")
+    # ... and a card of ANY type that gains none is still refused.
+    dry = Card(id="d", name="d", cost=1, type="attack",
+               effects=[{"op": "damage", "amount": 9}])
+    assert not enchantments.eligible(dry, "nimble")
+    live = {c.id for c in loader._card_index().values()
+            if c.type == "attack" and enchantments.eligible(c, "nimble")}
+    assert live == {"warmup_act", "freminet_pressurized_floe",
+                    "thoma_crimson_ooyoroi", "itto_superlative_superstrength"}
 
 
 def test_nimble_sees_block_next_turn_and_block_under_a_conditional():
@@ -138,13 +162,6 @@ def test_nimble_sees_block_next_turn_and_block_under_a_conditional():
                          "then": [{"op": "draw", "amount": 1}],
                          "else": [{"op": "block", "amount": 3}]}])
     assert enchantments.eligible(else_only, "nimble")
-
-
-def test_nimble_still_refuses_a_block_granting_non_skill():
-    from tier0.engine.state import Card
-    power = Card(id="p", name="p", cost=1, type="power",
-                 effects=[{"op": "block", "amount": 5}])
-    assert not enchantments.eligible(power, "nimble")
 
 
 def test_a_card_holds_exactly_one_enchantment_and_never_swaps_it():

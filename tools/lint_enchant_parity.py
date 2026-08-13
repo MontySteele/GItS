@@ -96,12 +96,6 @@ GAME_RULES = {
 # disagreement fails the lint. Nothing here is fixable on the C# side; every
 # row is tier0's model of an enchantment the game implements differently.
 KNOWN_DIVERGENCES = {
-    ("nimble", "skill-only"): (
-        "tier0's `_is_block_skill` requires `type == \"skill\"`; the game's "
-        "Nimble has no CanEnchantCardType override and gates on GainsBlock "
-        "alone, so an Attack that also gains Block is Nimble-eligible in the "
-        "game and not in the sim. The base game ships four such Attacks "
-        "(IronWave, Dash, BoneShards, Fisticuffs), all declaring GainsBlock."),
     ("nimble", "block-next-turn"): (
         "tier0's `_grants_block` counts `block_next_turn`; the game pays that "
         "half from BlockNextTurnPower.AfterBlockCleared with `cardPlay: null`, "
@@ -186,8 +180,6 @@ def sim_reason(name: str, card, sim_ok: bool) -> str | None:
     returned "block-next-turn" for every Skill and so passed while a
     hand-broken GainsBlock sat in the tree.
     """
-    if name == "nimble" and not sim_ok and card.type != "skill":
-        return "skill-only"
     if name == "nimble" and sim_ok and "block" not in _ops(card.effects):
         return "block-next-turn"
     if name == "swift" and not sim_ok and card.type != "power":

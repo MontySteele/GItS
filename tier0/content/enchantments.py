@@ -95,19 +95,32 @@ def _grants_block(effects) -> bool:
     return False
 
 
-def _is_block_skill(c) -> bool:
-    """Nimble's target: a Skill that actually GAINS Block.
+def _gains_block(c) -> bool:
+    """Nimble's target: any card that actually GAINS Block.
 
-    The loose predicate was `type == "skill"`, but 83 of this repo's 134
-    skills grant no Block at all, and the event picker
-    (tier05.events._enchant_targets) chooses the drafter's best LEGAL card
-    rather than its best BLOCK card -- so Nimble routinely welded itself onto
-    a card where its one printed effect could never fire, silently. The
-    tighter predicate is the published text read literally ("Block gained
-    from this card"), and the event targeting follows it for free.
+    CARD TYPE IS NOT PART OF THE RULE (EB-85 divergence 1, fixed in this
+    window). The game's `MegaCrit.Sts2.Core.Models.Enchantments.Nimble`
+    declares no `CanEnchantCardType` override at all, and its whole gate is
+
+        public override bool CanEnchant(CardModel card)
+        {
+            if (base.CanEnchant(card)) { return card.GainsBlock; }
+            return false;
+        }
+
+    so a Block-granting ATTACK is Nimble-eligible in the game. tier0 required
+    `type == "skill"` on top of that and refused those cards; the base game
+    ships four such Attacks itself (IronWave, Dash, BoneShards, Fisticuffs)
+    and this repo's mod cards declare `GainsBlock` the same way.
+
+    The Block half of the predicate stays, and it is the game's own
+    (`card.GainsBlock`): 83 of this repo's 134 skills grant no Block at all,
+    and the event picker (tier05.events._enchant_targets) chooses the
+    drafter's best LEGAL card rather than its best BLOCK card -- so a
+    type-only predicate welds Nimble onto cards where its one printed effect
+    could never fire, silently.
     """
-    return c.type == "skill" and (_grants_block(c.effects)
-                                  or _grants_block(c.enchant_effects))
+    return _grants_block(c.effects) or _grants_block(c.enchant_effects)
 
 
 def _is_power(c) -> bool:
@@ -157,7 +170,7 @@ CATALOG: dict[str, Enchantment] = {
     "nimble": Enchantment(
         "nimble", "Nimble",
         "Increases Block gained from this card by X.",
-        _is_block_skill,
+        _gains_block,
         lambda x: {"enchant_block": x}),
 
     "swift": Enchantment(
