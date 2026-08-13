@@ -16,7 +16,7 @@ extraction's exclusion histogram put them:
 
 from tier0 import constants as C
 from tier0.engine import combat, effects, powers, refpowers
-from tier0.engine.state import Card
+from tier0.engine.state import SLY_AUTOPLAY, Card
 from tier0.tests.conftest import make_enemy, make_state
 
 
@@ -244,13 +244,17 @@ def test_a_block_op_with_no_block_gains_nothing_from_dexterity():
 # collects the Sly cards while discarding the batch, then CardCmd.AutoPlay
 # plays each one through the SAME CardModel.OnPlayWrapper a manual play uses
 # with ResourceInfo.EnergySpent = 0. So it is a whole card play that happens
-# to be free -- not an effect list that resolves, which is Kokomi's `sly` and
-# a different mechanic sharing the word.
+# to be free -- NOT an effect list that resolves, which is what Kokomi's
+# authored riders do.
+#
+# EB-71 (R174) put both on one field: the keyword is now the reserved
+# `SLY_AUTOPLAY` rider inside `Card.sly`. One word, one field, one trigger --
+# and, as every pin below still shows unchanged, two behaviours.
 
 def test_a_sly_card_plays_itself_when_a_card_effect_discards_it():
     state = make_state()
     state.enemies = [make_enemy(hp=60)]
-    sly = card("sly", type="attack", cost=2, sly_keyword=True,
+    sly = card("sly", type="attack", cost=2, sly=[dict(SLY_AUTOPLAY)],
                fx=[{"op": "damage", "amount": 7, "target": "enemy"}])
     state.player.hand = [sly]
     hp = state.enemies[0].hp
@@ -265,7 +269,7 @@ def test_the_sly_play_is_free_and_does_not_touch_energy():
     player cannot pay for is the entire point of the keyword."""
     state = make_state()
     state.player.energy = 1
-    sly = card("sly", cost=3, sly_keyword=True, fx=[{"op": "block",
+    sly = card("sly", cost=3, sly=[dict(SLY_AUTOPLAY)], fx=[{"op": "block",
                                                      "amount": 6}])
     state.player.hand = [sly]
     effects.resolve_card(state, card("discarder", fx=[
@@ -280,7 +284,8 @@ def test_the_sly_play_counts_as_a_card_played():
     every counter that reads one."""
     state = make_state()
     state.cards_played_this_turn = 0
-    sly = card("sly", sly_keyword=True, fx=[{"op": "block", "amount": 3}])
+    sly = card("sly", sly=[dict(SLY_AUTOPLAY)],
+               fx=[{"op": "block", "amount": 3}])
     state.player.hand = [sly]
     effects.resolve_card(state, card("discarder", fx=[
         {"op": "discard", "amount": 1, "select": "chosen"}]))
@@ -293,7 +298,7 @@ def test_a_sly_card_with_exhaust_exhausts_after_its_free_play():
     """Result-pile routing is OnPlayWrapper's, not the discard's: the card
     goes where its own keywords send it once the free play resolves."""
     state = make_state()
-    sly = card("sly", sly_keyword=True, exhaust=True,
+    sly = card("sly", sly=[dict(SLY_AUTOPLAY)], exhaust=True,
                fx=[{"op": "block", "amount": 2}])
     state.player.hand = [sly]
     effects.resolve_card(state, card("discarder", fx=[
@@ -308,8 +313,8 @@ def test_the_whole_batch_is_discarded_before_any_sly_card_plays():
     pile while the first resolves, so a pile-reading effect sees it."""
     state = make_state()
     seen = []
-    a = card("a", sly_keyword=True, fx=[{"op": "block", "amount": 1}])
-    b = card("b", sly_keyword=True, fx=[{"op": "block", "amount": 1}])
+    a = card("a", sly=[dict(SLY_AUTOPLAY)], fx=[{"op": "block", "amount": 1}])
+    b = card("b", sly=[dict(SLY_AUTOPLAY)], fx=[{"op": "block", "amount": 1}])
     state.player.hand = [a, b]
     original = effects.OPS["block"]
 
@@ -334,7 +339,8 @@ def test_the_end_of_turn_hand_flush_is_not_a_sly_trigger():
     silent turn therefore pays nothing, matching the activity-gating law."""
     state = make_state()
     state.enemies = [make_enemy(hp=60)]
-    sly = card("sly", sly_keyword=True, fx=[{"op": "block", "amount": 5}])
+    sly = card("sly", sly=[dict(SLY_AUTOPLAY)],
+               fx=[{"op": "block", "amount": 5}])
     state.player.hand = [sly]
     combat._player_turn(state, lambda s: None)       # play nothing, then flush
     assert sly in state.player.discard_pile
@@ -342,10 +348,10 @@ def test_the_end_of_turn_hand_flush_is_not_a_sly_trigger():
     assert state.cards_played_this_turn == 0
 
 
-def test_kokomis_sly_and_the_base_game_sly_are_separate_fields():
-    """One word, two mechanics, and the extractor maps the keyword onto the
-    base-game one. A card carrying only the Assist-lane list must not play
-    itself, and a card carrying only the keyword must not need a list."""
+def test_kokomis_sly_and_the_base_game_sly_stay_two_behaviours():
+    """One word, one field (EB-71), two behaviours. A card carrying only
+    authored riders must not play itself; the extractor's keyword rider is
+    the only thing that auto-plays."""
     state = make_state()
     assist = card("assist", sly=[{"op": "block", "amount": 4}],
                   fx=[{"op": "block", "amount": 99}])
@@ -366,7 +372,7 @@ def test_a_free_play_does_not_clobber_the_outer_cards_context():
     state.current_card_cost = 2
     # NOT placed in hand: resolve_free_play's contract says the trigger site
     # already removed the card from its source pile.
-    sly = card("sly", type="attack", cost=1, sly_keyword=True,
+    sly = card("sly", type="attack", cost=1, sly=[dict(SLY_AUTOPLAY)],
                fx=[{"op": "damage", "amount": 1, "target": "enemy"}])
     combat.resolve_free_play(state, sly)
     assert state.kills_this_card == 3

@@ -17,8 +17,10 @@ Every figure a soak produces is a **bot-limited floor**, in exactly the sense
   * policy_v1 is a heuristic with two declared reductions of its own (the map
     arm sees two plies, the draft arm is the sim's and R96 routed three known
     scoring gaps in it);
-  * the seeds are READ-BACK, not chosen (R95), so no soak number is comparable
-    to another build's soak number until the Custom-screen arm exists;
+  * on the DEFAULT arm the seeds are read-back, not chosen (R95), so two soaks
+    are two different sets of runs and their numbers are not each other's
+    comparators (see SEEDS below for the arm that fixes this, and for what it
+    does not fix);
   * a JSON-state agent cannot see the screen, so nothing here is evidence
     about fun, legibility, or readability, ever.
 
@@ -26,11 +28,39 @@ Winrate, floors reached, HP curves and damage tables from this harness are
 DEFECT-HUNTING INSTRUMENTS and telemetry. They are not balance evidence, they
 do not grade a character, and they may not be quoted against a floor.
 
-SEEDS (R95). Read-back: the game generates the seed, we record it from
-`GET /api/v1/compendium` after embarking, and it identifies the run for a
-defect report. The recorded seed is NEVER fed to a policy stream --
-`understudy.rng.policy_rng` refuses a label shaped like one, and the refusal is
-the enforcement.
+SEEDS -- TWO ARMS, AND THIS FILE FLIES BOTH.
+
+  read-back (R95, the DEFAULT, `--seed` absent)
+      The game generates the seed; we record it from `GET /api/v1/compendium`
+      after embarking, and it identifies the run for a defect report. Nothing
+      is chosen, so two soaks are two different sets of runs.
+
+  chosen (P1.5 item 1, R104, `--seed SEED` -- repeatable, run i takes seed i)
+      The seed goes on through the forked bridge's own endpoint,
+      `POST /api/v1/gits/seed`, at the one moment that works: character select
+      up, a character picked, the embark confirm not yet fired. No seed is
+      passed on the embark verb in EITHER arm -- upstream's `menu_select(seed=)`
+      is untouched (`vendor/STS2_MCP/gits/GitsSeed.cs` says why). The channel is
+      declared on the reversibility ledger before the first seed lands, because
+      `NGame.DebugSeedOverride` is global and sticky, and teardown clears it
+      unconditionally.
+
+      THE READ-BACK IS STILL TAKEN, and on this arm it is the VERIFICATION: a
+      run whose recorded seed disagrees with the seed it asked for files
+      `seed_not_honoured` and stops. That kind sits on the HARNESS side of the
+      line -- a game that rolled its own seed is a game behaving normally, and
+      what failed is this file's claim to have chosen one. The comparison is
+      against the CANONICAL form the endpoint reports back, not against what
+      was typed: `SeedHelper.CanonicalizeSeed` upper-cases and maps 'O'->'0',
+      'I'->'1', so comparing against the typed string would file the defect
+      against a seed the game honoured exactly.
+
+A chosen seed fixes WHICH RUN, and that is all it fixes. It does not make a
+soak number a balance number, and Guardrail-7 above is unchanged by it.
+
+ON NEITHER ARM IS THE SEED A POLICY INPUT. It is stamped on the log and, on the
+chosen arm, compared against the read-back. `understudy.rng.policy_rng` refuses
+a stream label shaped like a game seed, and that refusal is the enforcement.
 
 READINESS (R97/5a). The launcher watches for the `options` key in the menu
 state, NEVER the HTTP health endpoint. `GET /` answers about 5 s after launch;
@@ -42,6 +72,16 @@ REVERSIBILITY. Every game-dir write is recorded in a ledger with its undo, the
 ledger is written to disk BEFORE the change is made, and teardown walks it in
 reverse. Appendix A of `docs/archive/understudy-phase0-report.md` is the format this
 inherits and the checklist it is measured against.
+
+EB-1, THE SOFT-LOCK THIS FILE IS EXPECTED TO SURVIVE. Two legs, because the
+hazard has two faces. `HAZARD_EVENTS` below is a register of screens the driver
+refuses to drive at all, and `understudy.hangwatch` is the watchdog for the
+case where the game hangs before there is a screen to refuse -- process alive,
+wire dead, log growing at megabytes a second. The second files
+`unresponsive_spin` rather than `bridge_unreachable`, which matters because
+`bridge_unreachable` is a HARNESS-side kind and this failure is not the
+harness's. Neither leg fixes anything: the defect is upstream's and stays open
+as a live-play hazard.
 """
 
 from __future__ import annotations
@@ -58,7 +98,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from understudy import bridge, deckwatch, naming, policy_v1
+from understudy import bridge, deckwatch, hangwatch, naming, policy_v1
 
 REPO = Path(__file__).resolve().parent.parent
 LOG_DIR = Path(__file__).resolve().parent / "logs" / "soak"
@@ -99,6 +139,41 @@ TIME_SCALE = 3.0
 # alive" asked in the same millisecond answers the wrong question. See
 # `Session.died`.
 PROCESS_EXIT_GRACE_S = 8.0
+
+# ---------------------------------------------------------- EB-1 guard ----
+#
+# EVENTS THIS HARNESS WILL NOT DRIVE, and why the register is a register rather
+# than a special case in `_mechanical_action`.
+#
+# `PUNCH_OFF` is EB-1: entering the room hangs the game. `PunchOff` fires
+# `PunchEachOther()` from `AfterEventStarted()`, so the hazard is ENTRY, not an
+# option -- there is no answer to this screen that avoids it, and picking one
+# would be picking blind anyway (the frozen frame carried no options at all).
+#
+# THE WIRE ID IS READ, NOT GUESSED. `EventRoom.CanonicalEvent.Id.Entry` is
+# `ModelDb.GetEntry(type) == StringHelper.Slugify("PunchOff")`, and Slugify
+# splits camel case and upper-cases: `PUNCH_OFF`. The event's own loc keys
+# (`PUNCH_OFF.pages.INITIAL.options.NAB`) are the same string, which is the
+# second reading. The display TITLE is matched too, because a title is loc data
+# and a bridge that ever reported one instead of the other should still be
+# caught.
+#
+# WHAT THE GUARD CAN AND CANNOT DO. It fires only if the bridge SURVIVED the
+# room entry -- if the spin has already started there is no state to read, and
+# `hangwatch` is the leg that catches that. Avoiding the room itself is not
+# available from here: the map on the wire carries a node's `type` only
+# (`Event`), never which event, so nothing short of refusing every `?` node
+# could dodge it, and that would be a route-policy change nobody asked for.
+HAZARD_EVENTS = {
+    "PUNCH_OFF": "EB-1: entering this room spins the main thread on an "
+                 "unbounded engine-error loop (godot.log grew to 2.4 GB in "
+                 "~30 min live on 2026-08-08). Root-caused upstream; there is "
+                 "no fix on our side and no safe option to pick.",
+}
+# Display titles, lower-cased, mapping to the id whose note they carry. The
+# second reading of the same screen, kept because a screen this harness must
+# not drive is worth catching twice.
+HAZARD_EVENT_TITLES = {"punch off": "PUNCH_OFF"}
 
 # Telemetry schema version, stamped on every fight record and mirrored by the
 # C# human-feed writer (`klee-mod/KleeCode/Diagnostics/PlayTelemetry.cs`). Bump
@@ -284,10 +359,18 @@ class Session:
             raise SystemExit(f"--no-setup given but no bridge is answering: {e}")
 
     def _speed_on(self) -> None:
-        try:
-            self.speed_before = bridge.get_speed()
-        except bridge.BridgeError:
-            self.speed_before = None
+        # THE FIRST CAPTURE OF THE SESSION IS THE SESSION'S ORIGINAL, and a
+        # relaunch does not get to overwrite it. `PrefsSave.FastMode` persists
+        # to `settings.save`, so a second process reads back the value the
+        # FIRST one left there -- capturing again after a restart would write
+        # `Instant` into the ledger as if it were what the user had before the
+        # soak started. The ledger is what a person reads to put their game
+        # back; it may not launder a change into a baseline.
+        if self.speed_before is None:
+            try:
+                self.speed_before = bridge.get_speed()
+            except bridge.BridgeError:
+                self.speed_before = None
         self._speed_entry = self.ledger.record(
             f"Set FastMode=Instant and TimeScale={TIME_SCALE} via "
             f"`POST /api/v1/gits/speed` (captured: "
@@ -391,6 +474,58 @@ class Session:
         subprocess.run(["taskkill", "/F", "/IM", GAME_EXE],
                        capture_output=True, text=True)
 
+    def halt_spin(self, why: str) -> dict:
+        """Stop a spinning game NOW, and leave the ledger telling the truth.
+
+        THE KILL IS THE TEARDOWN STEP THAT CANNOT WAIT. EB-1's loop writes
+        ~1.3 MB/s to `godot.log` for as long as the process lives; the ordinary
+        path (finish the run, fall out of `soak()`, walk the ledger) would let
+        it write for the rest of the night. So the process is terminated here,
+        through the ledger, the moment the watchdog is sure -- and the entry it
+        closes is the one that was opened when the game was launched, so the
+        row reads `REVERTED` with this reason rather than sitting at `APPLIED`
+        over a process that no longer exists.
+
+        THE SPEED ROW IS FAILED, NOT REVERTED, AND THAT IS THE POINT. The wire
+        is dead, so `POST {"enabled": false}` cannot run, and `PrefsSave
+        .FastMode` persists to `settings.save` -- the setting really is left
+        changed. A ledger that quietly marked it reverted because the process
+        it belonged to is gone would be lying in the one direction that costs
+        somebody an evening wondering why their game animates strangely. The
+        captured original travels in the failure note so it can be put back by
+        hand.
+
+        `--no-setup` KILLS NOTHING. That mode promised the game directory it
+        would change nothing and it did not launch the process; terminating a
+        game somebody else started is not ours to do. It reports instead.
+        """
+        note = {"killed": False, "why": why}
+        if not self.do_setup or self.proc is None:
+            note["why"] = (f"{why} -- NOT terminated: --no-setup did not launch "
+                           f"this game and may not kill it. The log flood "
+                           f"continues until someone closes it by hand.")
+            return note
+
+        if self._speed_entry is not None:
+            self.ledger.fail(
+                self._speed_entry,
+                "the wire was dead, so the speed endpoint could not be asked "
+                "to restore; FastMode persists to settings.save. Captured "
+                f"original: {json.dumps(self.speed_before)}")
+            self._speed_entry = None
+
+        def _terminate() -> str:
+            self._kill()
+            return f"terminated by the hang watchdog: {why}"
+
+        if self._launch_entry is not None:
+            self._step(self._launch_entry, _terminate)
+            self._launch_entry = None
+        else:
+            self._kill()
+        note["killed"] = True
+        return note
+
     def restart(self) -> None:
         """Kill and relaunch, keeping the ledger honest about the extra launch.
 
@@ -408,8 +543,12 @@ class Session:
         if self._speed_entry:
             self.ledger.revert(
                 self._speed_entry,
-                "superseded by a restart; the setting does not survive the "
-                "process and is re-captured below")
+                "superseded by a restart; a new launch row and speed row open "
+                "below, and the SESSION's captured original is carried "
+                "forward rather than re-captured -- PrefsSave.FastMode "
+                "persists to settings.save, so the second process would "
+                "otherwise capture the first process's setting as the "
+                "original")
             self._speed_entry = None
         self._kill()
         self._launch()
@@ -705,10 +844,15 @@ class RunDriver:
                  character: str = DEFAULT_CHARACTER,
                  commit: str | None = None,
                  chosen_seed: str | None = None,
-                 max_fights: int | None = None):
+                 max_fights: int | None = None,
+                 hazard_guard: bool = True):
         self.session = session
         self.run_index = run_index
         self.character = character
+        # EB-1. ON by default: this is a defence against a known soft-lock,
+        # not a policy. `--allow-hazard-events` turns it off for the one job it
+        # is in the way of, which is deliberately reproducing the hang.
+        self.hazard_guard = hazard_guard
         # P1.5 item 1. `None` is the R95 read-back arm -- the game rolls, we
         # record. A string is a CHOSEN seed, and the run verifies the choice
         # took rather than trusting the endpoint's answer.
@@ -742,7 +886,8 @@ class RunDriver:
         with self.log.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(record, ensure_ascii=False, default=str) + "\n")
 
-    def file_defect(self, kind: str, detail: str, state: dict) -> dict:
+    def file_defect(self, kind: str, detail: str, state: dict,
+                    extra: dict | None = None) -> dict:
         rec = {
             "record": "defect", "kind": kind, "detail": detail,
             "seed": self.seed, "run": self.run_index,
@@ -758,6 +903,11 @@ class RunDriver:
             "state_dump": _trim_state(state),
             "recent": self._fingerprints[-NO_PROGRESS_ACTIONS:],
         }
+        # Extra keys are ADDED, never allowed to overwrite: a defect row's
+        # identity fields are the row, and a watchdog's evidence blob must not
+        # be able to rename the kind it was filed under.
+        for k, v in (extra or {}).items():
+            rec.setdefault(k, v)
         self.defects.append(rec)
         self.emit(rec)
         return rec
@@ -781,6 +931,20 @@ class RunDriver:
             raise Defect("process_died",
                          "the game process exited while the run was in "
                          "progress; godot.log holds the stack trace", state)
+        hazard = _hazard_event(state) if getattr(
+                self, "hazard_guard", True) else None
+        if hazard is not None:
+            ident, note = hazard
+            # STOPPING IS THE WHOLE DEFENCE, and it is deliberately not a
+            # choice of option. The room is already entered by the time this
+            # state exists, so what is being avoided is the SECOND hang: the
+            # save is poisoned, `continue` re-enters, and the soak's own
+            # restart path answers that with `abandon_run` from the main menu,
+            # which is EB-1's recorded recovery. Posting a verb here would be
+            # guessing at a screen whose frozen capture had no options on it.
+            raise Defect("hazard_event",
+                         f"'{ident}' is on the harness's hazard register and "
+                         f"will not be driven. {note}", state)
         if state.get("state_type") == "overlay":
             raise Defect("overlay_softlock",
                          "state_type 'overlay' is the bridge's catch-all for a "
@@ -1051,10 +1215,26 @@ class RunDriver:
             # THE GRACE PERIOD IS THE WHOLE POINT (see `Session.died`): asked
             # instantly, a game that is crashing right now still reads alive,
             # and the build defect gets filed under a harness-side kind.
-            kind = ("process_died" if self.session.died()
-                    else "bridge_unreachable")
-            detail_ = f"{e} [exit code {self.session.exit_code}]"
-            self.file_defect(kind, detail_, self._last_state or {})
+            extra: dict = {}
+            if self.session.died():
+                kind = "process_died"
+                detail_ = f"{e} [exit code {self.session.exit_code}]"
+            else:
+                # ALIVE AND SILENT IS TWO DIFFERENT FAILURES, and until EB-1
+                # they shared one name. `bridge_unreachable` is harness-side:
+                # filing a spinning game under it makes the instrument blame
+                # its own wire for a build defect it has just caught. So the
+                # process is asked, from outside, whether it is spinning.
+                verdict = self._diagnose_spin()
+                kind = (hangwatch.DEFECT_KIND if verdict.hung
+                        else "bridge_unreachable")
+                detail_ = f"{e} -- {verdict.reason}"
+                extra = {"hangwatch": verdict.evidence,
+                         "hangwatch_signals": list(verdict.signals)}
+                if verdict.hung:
+                    extra["teardown"] = self.session.halt_spin(
+                        f"{hangwatch.DEFECT_KIND} at run {self.run_index}")
+            self.file_defect(kind, detail_, self._last_state or {}, extra)
             outcome, detail = "defect", f"{kind}: {detail_}"
         except Exception as e:                               # noqa: BLE001
             # The harness itself fell over. That is a defect record like any
@@ -1082,6 +1262,22 @@ class RunDriver:
         }
         self.emit(summary)
         return summary
+
+    def _diagnose_spin(self):
+        """Ask the OS whether the alive-but-silent game is spinning (EB-1).
+
+        Wrapped rather than called inline for one reason: a watchdog that can
+        raise is a watchdog that turns a classified failure back into
+        `harness_exception`. Anything this cannot answer reads as "not a spin",
+        which routes the run to `bridge_unreachable` -- the answer the file
+        gave before this leg existed.
+        """
+        try:
+            return hangwatch.diagnose(GAME_EXE, alive=True, wire_dead=True)
+        except Exception as exc:                             # noqa: BLE001
+            return hangwatch.Verdict(
+                False, f"the spin probe itself failed ({type(exc).__name__}: "
+                       f"{exc}); falling back to `bridge_unreachable`")
 
     def _to_main_menu(self) -> dict:
         """Reach the main menu, abandoning any resumable run on the way.
@@ -1412,6 +1608,31 @@ class RunDriver:
             state = self.post(state, decision.action, decision)
 
 
+def _hazard_event(state: dict) -> tuple[str, str] | None:
+    """`(identity, why)` when this screen is a registered hazard, else `None`.
+
+    Matched on the wire ID first because an id is the thing itself, and on the
+    display title second because a title is loc data that a wording pass moves
+    -- the same read-by-id-not-by-name rule `_meters` states, with the fallback
+    kept rather than dropped: a screen this harness must not drive is worth
+    catching twice.
+    """
+    if str(state.get("state_type")) != "event":
+        return None
+    ev = state.get("event") or {}
+    if not isinstance(ev, dict):
+        return None
+    ident = str(ev.get("event_id") or "").strip().upper()
+    if ident in HAZARD_EVENTS:
+        return ident, HAZARD_EVENTS[ident]
+    title = " ".join(str(ev.get("event_name") or "").split()).lower()
+    by_title = HAZARD_EVENT_TITLES.get(title)
+    if by_title is not None:
+        return by_title, HAZARD_EVENTS.get(
+            by_title, "on the hazard register by display title")
+    return None
+
+
 def _option_names(state: dict) -> list[str]:
     out = []
     for o in state.get("options") or []:
@@ -1593,7 +1814,8 @@ def _trim_state(state: dict) -> dict:
 def soak(runs: int, character: str, do_setup: bool,
          commit: str | None = None,
          seeds: list[str] | None = None,
-         max_fights: int | None = None) -> dict:
+         max_fights: int | None = None,
+         hazard_guard: bool = True) -> dict:
     from understudy import committed as _committed
     commit = _committed.normalise(commit)          # refuses an unknown word
     stamp = time.strftime("%Y%m%d-%H%M%S")
@@ -1612,7 +1834,8 @@ def soak(runs: int, character: str, do_setup: bool,
             # named. `None` throughout is the read-back arm, unchanged.
             chosen = seeds[(i - 1) % len(seeds)] if seeds else None
             driver = RunDriver(session, i, stamp, character, commit=commit,
-                               chosen_seed=chosen, max_fights=max_fights)
+                               chosen_seed=chosen, max_fights=max_fights,
+                               hazard_guard=hazard_guard)
             s = driver.run()
             s["defect_kinds"] = [d["kind"] for d in driver.defects]
             summaries.append(s)
@@ -1668,6 +1891,7 @@ def soak(runs: int, character: str, do_setup: bool,
               "policy": policy_v1.POLICY_VERSION, "commit": commit,
               "seeds": seeds,
               "requested_runs": runs, "runs": summaries,
+              "hazard_guard": hazard_guard,
               "stopped_on": stopped,
               "reversibility": session.ledger.entries}
     index.write_text(json.dumps(result, indent=1), encoding="utf-8")
@@ -1704,6 +1928,12 @@ def _needs_restart(outcome: str, alive: bool) -> bool:
 # not because the wire is the harness's fault, but because a soak that keeps
 # arriving at a state it cannot name produces no telemetry, and two of them is
 # the signal to stop rather than to burn the night.
+#
+# `unresponsive_spin` and `hazard_event` are DELIBERATELY ABSENT. Both are the
+# soak catching EB-1, which is the soak working; a second one is a second
+# observation of a live-play hazard, not a broken instrument. `hazard_event`
+# in particular costs one run and recovers on its own -- the restart path's
+# `abandon_run` is the recorded recovery for the poisoned save.
 _HARNESS_SIDE = {"no_embark_path", "no_embark", "embark_loop", "menu_loop",
                  "unexpected_start_state", "bridge_unreachable", "no_action",
                  "seed_not_honoured", "state_type_missing"}
@@ -1732,11 +1962,18 @@ def main(argv: list[str] | None = None) -> int:
                          "rolls. Repeatable; run i takes seed i, cycling. A "
                          "run whose read-back disagrees with its choice files "
                          "a `seed_not_honoured` defect rather than continuing")
+    ap.add_argument("--allow-hazard-events", action="store_true",
+                    help="EB-1: drive the events on the hazard register "
+                         "instead of stopping the run at them. It exists for "
+                         "deliberately reproducing a known soft-lock; an "
+                         "unattended soak wants the guard on, which is the "
+                         "default")
     args = ap.parse_args(argv)
 
     result = soak(args.runs, args.character, do_setup=not args.no_setup,
                   commit=args.commit, seeds=args.seed,
-                  max_fights=args.max_fights)
+                  max_fights=args.max_fights,
+                  hazard_guard=not args.allow_hazard_events)
     if args.report:
         from understudy import report
         print()

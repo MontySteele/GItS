@@ -37,6 +37,7 @@ import yaml
 
 from tier0 import constants as C
 from tier0.content import loader
+from tier0.engine.state import sly_autoplays, sly_riders
 from tier05 import draft, rewards
 
 pytestmark = pytest.mark.skipif(
@@ -184,11 +185,12 @@ def test_no_silent_card_silently_dropped_a_printed_keyword(ref_cards):
     now arrive on a FIELD rather than merely having survived the trip.
 
     The Sly five are in the pool as of ask A4 (ruled 2026-07-27: implement
-    the base-game keyword), and they must carry `sly_keyword` -- the
-    base-game auto-play -- and never Kokomi's `sly` effect list, which would
-    read as a printed rule that does nothing."""
-    assert sum(c.sly_keyword for c in ref_cards) == 7
-    assert not any(c.sly for c in ref_cards)
+    the base-game keyword). Since EB-71 (R174) they carry it as the reserved
+    `sly_autoplay` rider on the unified `sly` field -- the base-game auto-play
+    -- and never an authored effect list, which would read as a printed rule
+    that does nothing."""
+    assert sum(sly_autoplays(c) for c in ref_cards) == 7
+    assert not any(sly_riders(c) for c in ref_cards)
     assert any(c.innate for c in ref_cards)
 
 

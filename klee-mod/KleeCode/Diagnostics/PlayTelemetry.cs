@@ -357,6 +357,77 @@ internal static class PlayTelemetry
     }
 
     /// <summary>
+    /// EB-14 — ONE SELECTOR ANSWER, WITH THE LIST IT WAS CHOSEN FROM.
+    ///
+    /// Called by <see cref="SelectionTelemetry"/>, which owns the Harmony
+    /// patches on the selection screens; this file stays patch-free (pinned by
+    /// `test_track_b_curves.py`, which will not let a Harmony patch appear on
+    /// the combat lifecycle here without arguing for itself).
+    ///
+    /// THE ROW IS THE BOT FEED'S ROW, COLUMN FOR COLUMN:
+    /// `[round, screen, index, chosen, [offered…]]` (`understudy/soak.py`
+    /// `_selector_row`). Three of those columns are decided here, and each was
+    /// a way to get it wrong:
+    ///
+    ///   * ROUND is the fight's own turn counter, not `combat.RoundNumber`.
+    ///     A selector is an overlay standing on the round that opened it, and
+    ///     the soak reads `fight.turns` for exactly the same reason.
+    ///   * INDEX is found by REFERENCE against the offered list, never by
+    ///     name. Two Strikes in a pile are two different cards, and matching
+    ///     on the printed title would point the row at whichever came first.
+    ///   * SEAT is the offered cards' `Owner`, which is the game's own idiom
+    ///     here (`CardSelectCmd` itself does `cards[0].Owner`). A row lands
+    ///     only if that player has a fight record open — the same scoping the
+    ///     bot feed uses, because a selector outside a fight belongs to no
+    ///     fight.
+    /// </summary>
+    internal static void SelectorAnswered(string screen,
+                                          IReadOnlyList<CardModel> offered,
+                                          IReadOnlyList<CardModel> chosen)
+    {
+        try
+        {
+            if (offered.Count == 0 || chosen.Count == 0) return;
+            var owner = offered[0].Owner;
+            if (owner == null || !Open.TryGetValue(owner, out var record)) return;
+
+            var offeredNames = offered.Select(CardName).ToList();
+            foreach (var card in chosen)
+            {
+                var index = -1;
+                for (var i = 0; i < offered.Count; i++)
+                {
+                    if (!ReferenceEquals(offered[i], card)) continue;
+                    index = i;
+                    break;
+                }
+
+                // `-1` already MEANS "resolved without naming an option" (a
+                // confirm, a skip) on this column. Reaching it HERE means
+                // something else: the chosen card was not reference-equal to
+                // anything in the recorded offer, i.e. the instrument's own
+                // identity assumption failed. Same value, different fact, so
+                // say so in the log rather than letting it read as a skip.
+                if (index < 0)
+                {
+                    Log.Warn($"[{KleeMod.ModId}] play telemetry selector on "
+                           + $"'{screen}': chosen card '{CardName(card)}' is "
+                           + "not in the recorded offer; row written with "
+                           + "index -1, which on this column also means "
+                           + "'no option named'.");
+                }
+
+                record.Selectors.Add(
+                    (record.Turns, screen, index, CardName(card), offeredNames));
+            }
+        }
+        catch (Exception e)
+        {
+            Warn("SelectorAnswered", e);
+        }
+    }
+
+    /// <summary>
     /// Damage, from the hook rather than from a state diff — which makes this
     /// feed's attribution STRICTLY better than the bot feed's, and the
     /// difference is labelled rather than averaged away. The wire-driven soak
@@ -774,6 +845,13 @@ internal static class PlayTelemetry
         /// not do.</summary>
         public int HpLastSeen = -1;
         public readonly List<(int Round, string Name)> CardsPlayed = new();
+        /// <summary>EB-14. One row per card taken from a selection screen,
+        /// in the bot feed's column order. `Offered` is SHARED between the
+        /// rows of one screen on purpose: it is written once and never
+        /// mutated, and copying it per row would say the two answers came
+        /// from two different offers.</summary>
+        public readonly List<(int Round, string Screen, int Index, string Chosen,
+                              IReadOnlyList<string> Offered)> Selectors = new();
         public readonly Dictionary<string, int> DamageBySource = new();
         public int DamageTaken;
 
@@ -854,6 +932,31 @@ internal static class PlayTelemetry
 
             sb.Append(']');
             sb.Append(",\"n_cards_played\":").Append(CardsPlayed.Count);
+            // EB-14. `[round, screen, index, chosen, [offered…]]`, the bot
+            // feed's row shape column for column -- the whole point of the
+            // channel is that the two feeds can be read by one reader, and
+            // `understudy/replay.py` matches on the OFFERED list, not just the
+            // answer.
+            sb.Append(",\"selectors\":[");
+            for (var i = 0; i < Selectors.Count; i++)
+            {
+                if (i > 0) sb.Append(',');
+                var row = Selectors[i];
+                sb.Append('[').Append(row.Round).Append(',');
+                Quote(sb, row.Screen);
+                sb.Append(',').Append(row.Index).Append(',');
+                Quote(sb, row.Chosen);
+                sb.Append(",[");
+                for (var j = 0; j < row.Offered.Count; j++)
+                {
+                    if (j > 0) sb.Append(',');
+                    Quote(sb, row.Offered[j]);
+                }
+
+                sb.Append("]]");
+            }
+
+            sb.Append(']');
             sb.Append(",\"damage_by_source\":{");
             var first = true;
             foreach (var pair in DamageBySource.OrderBy(p => p.Key, StringComparer.Ordinal))

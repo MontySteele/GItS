@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 from tier0.content import loader
-from tier0.engine.state import Card
+from tier0.engine.state import SLY_AUTOPLAY, Card
 from tools import build_official_sheet as build
 from tools import extract_base_game_pool as extract
 
@@ -209,11 +209,14 @@ def test_a_keyword_with_no_tier0_field_excludes_the_card():
     assert set(extract.CARD_KEYWORDS) == {"Exhaust", "Innate", "Retain", "Sly"}
     assert set(extract.CARD_KEYWORDS.values()) <= {
         f.name for f in dataclasses.fields(Card)}
-    # Sly maps onto the BASE-GAME field, never onto Kokomi's Assist lane.
-    # Pointing it at `sly` would resolve an empty authored effect list and
-    # print a keyword that did nothing -- the dropped-rule defect wearing a
-    # new costume (ask A4, ruled 2026-07-27).
-    assert extract.CARD_KEYWORDS["Sly"] == "sly_keyword"
+    # EB-71 (R174): Sly maps onto the ONE `sly` field, and emits the reserved
+    # auto-play rider rather than an authored effect list. Emitting a bare
+    # list here (or `true`, which `sly` cannot carry) would print a keyword
+    # that did nothing -- the dropped-rule defect wearing a new costume (ask
+    # A4, ruled 2026-07-27). The tool cannot import the engine, so its mirror
+    # of the rider is pinned against the engine's own constant here.
+    assert extract.CARD_KEYWORDS["Sly"] == "sly"
+    assert extract.SLY_AUTOPLAY_ROW == [SLY_AUTOPLAY]
     body = """
 class SyntheticCard
 {
@@ -232,8 +235,8 @@ class SyntheticCard
     row, _ = extract._sheet_row(card, body % "Retain", "xx_")
     assert row["retain"] is True
     row, _ = extract._sheet_row(card, body % "Sly", "xx_")
-    assert row["sly_keyword"] is True
-    assert "sly" not in row              # never Kokomi's field
+    assert row["sly"] == [SLY_AUTOPLAY]  # the rider, never an authored list
+    assert "sly_keyword" not in row      # the retired field
     with pytest.raises(extract._Untranslatable, match="CardKeyword.Ethereal"):
         extract._sheet_row(card, body % "Ethereal", "xx_")
 

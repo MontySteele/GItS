@@ -3,7 +3,7 @@
 > **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 Scope: `understudy/` — the bot playtest apparatus. Tests live at
-`tier0/tests/test_understudy_{rng,soak,policy_v1}.py` (1128 lines).
+`tier0/tests/test_understudy_{rng,soak,policy_v1,hangwatch,give_card,frames}.py`.
 
 ## 1. Purpose
 
@@ -31,10 +31,14 @@ python3 -m understudy.harness begin                       # stamp seed + speed
 python3 -m understudy.harness state [--raw]               # screen + policy_v0
 python3 -m understudy.harness act '{"action":"end_turn"}' --why "one line"
 python3 -m understudy.harness auto --max-steps 25         # walk mechanical screens
+python3 -m understudy.harness give-card UNHEARD_CONFESSION --why "EB-52(a)"
+GITS_UNDERSTUDY_CAPTURE=1 python3 -m understudy.harness frame --label salon-stage
+
 
 # P1 soak: N unattended policy_v1 runs, setup/teardown automatic
 python3 -m understudy.soak --runs 20 --report
 python3 -m understudy.soak --runs 1 --no-setup            # attach to a live game
+python3 -m understudy.soak --runs 1 --allow-hazard-events # EB-1: lift the register
 
 # Reading output
 python3 -m understudy.report [<stamp>]                    # morning report
@@ -43,8 +47,8 @@ python3 -m understudy.analyze understudy/logs/phase0-<seed>.jsonl
 python3 -m pytest tier0/tests/test_understudy_*.py -q     # game never involved
 ```
 
-Library level: `bridge.get_state/post/current_seed/set_speed`
-(`bridge.py:70,74,82,95`); `policy_v0.counterfactual(state)`
+Library level: `bridge.get_state/post/current_seed/set_speed/give_card`
+(`bridge.py`); `policy_v0.counterfactual(state)`
 (`policy_v0.py:459`); `policy_v1.decide(state, memo)` (`policy_v1.py:1022`);
 `naming.describe(state, action)` / `hand_names` (`naming.py:114,237`);
 `adapter.build_combat_state` / `deck_cards` (`adapter.py:198,292`);
@@ -154,6 +158,12 @@ Library level: `bridge.get_state/post/current_seed/set_speed`
   `preview_showing` is not a reliable landed-selection signal; a multi-select
   screen needs a *different* card each visit; selection state is per-visit and
   cleared on leaving the screen (`policy_v1.py:108-117,978-984,1031-1037`).
+  **On the wire only** — since EB-14 (2026-08-12) the mod
+  writes the same `selectors` rows from inside the game and spells the screen
+  with its concrete class name, because that side can tell the three apart
+  (`klee-mod/KleeCode/Diagnostics/SelectionTelemetry.cs`;
+  `understudy/README.md` §"Telemetry schema" carries the four declared limits
+  on the human feed's column).
 - **Two dials live in `policy_v1` and nowhere else** —
   `BLOCK_MATTERS_FRACTION`, `COMPANION_SHARE_FOR_GUEST_CAST`. Bot-policy dials,
   not balance constants; they must not migrate to `tier0/constants.py`, and are
@@ -161,6 +171,28 @@ Library level: `bridge.get_state/post/current_seed/set_speed`
 - **A stall is a small cycle, not only a frozen frame:** at most 2 distinct
   fingerprints across 12 posted actions (`soak.py:79-87,569-587`). A mechanical
   action that changes nothing is likewise not mechanical (`soak.py:926-949`).
+- **A dead wire is TWO failures, and `bridge_unreachable` is only one of them.**
+  A process that is alive and spinning (EB-1) files `unresponsive_spin` instead,
+  on a log-growth / message-pump probe (`hangwatch.py`); `bridge_unreachable` is
+  harness-side, so filing a spin under it makes the instrument blame its own
+  wire for a build defect it just caught. Neither `unresponsive_spin` nor
+  `hazard_event` is in `_HARNESS_SIDE` — both are the soak working.
+- **`soak.HAZARD_EVENTS` is a register of screens the driver refuses to drive**
+  (`PUNCH_OFF`, EB-1). The hazard is room ENTRY, so the guard cannot prevent the
+  first hang and does not try: it prevents the second, by stopping the run so
+  the restart path's `abandon_run` clears the poisoned save. The map on the wire
+  carries a node's `type` only, never which event, so avoiding the room is not
+  available at all. `--allow-hazard-events` lifts it.
+- **`frames.py` is OFF unless `GITS_UNDERSTUDY_CAPTURE=1`** (env-only, same
+  precedent as `GITS_ILSPY_TREE`), captures the game WINDOW and never the
+  desktop, writes to the gitignored `understudy/logs/frames/`, and stamps
+  `frames.GUARDRAIL` on every manifest row: a frame is MATERIAL for a person,
+  and no look / legibility / readability / fun claim may be derived from one
+  here. The soak takes no pictures.
+- **`give-card` is on the ATTENDED harness and must stay there.** The soak's
+  claim is that its runs are generated runs; the absence is pinned by
+  `tier0/tests/test_understudy_give_card.py`. Every grant carries the sentence
+  saying the run is no longer comparable to any other (`bridge.GRANT_GUARDRAIL`).
 - **Ordering traps in the driver:** the character stays in `options` after
   being picked, so pick once then `confirm` or loop forever
   (`soak.py:810-820`); a play the bridge rejected is not re-offered this turn

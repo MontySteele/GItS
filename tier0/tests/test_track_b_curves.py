@@ -178,16 +178,18 @@ CS = REPO / "klee-mod" / "KleeCode" / "Diagnostics" / "PlayTelemetry.cs"
 
 # Recorded rather than derived: each asymmetry is a decision, and a test that
 # silently tolerated a new one would be no test at all.
-BOT_ONLY = {"potions_used",          # no first-party potion hook exists yet
-            # P1.5 item 3. The soak records a selector answer because it POSTED
-            # it -- the choice passes through the harness by construction. The
-            # mod has no equivalent vantage: a person answering a card_select
-            # resolves it inside the game's own screen, and PlayTelemetry sees
-            # a card leave a pile, not an offer being taken from a list. Adding
-            # it to the human feed means hooking the selection screens, which
-            # is a piece of work and not this one. SURFACED, not smuggled: a
-            # selector cut is a BOT-FEED cut until that lands.
-            "selectors"}
+BOT_ONLY = {"potions_used"}          # no first-party potion hook exists yet
+#
+# `selectors` LEFT THIS SET on 2026-08-12 (EB-14). It was bot-only from P1.5
+# because the soak records a selector answer it POSTED itself, while the mod
+# saw a card leave a pile rather than an offer being taken from a list. The
+# mod-side hook into the selection screens now exists
+# (`KleeCode/Diagnostics/SelectionTelemetry.cs`), so a selector cut is no
+# longer a bot-feed cut. The human feed's four declared LIMITS on the channel
+# -- local seat only, in-fight only, no bundle rows, no row for an empty answer
+# -- are limits on what the column CONTAINS, not asymmetries of the key set,
+# and they live in `understudy/README.md` where a reader of the column will
+# find them.
 MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
 #                                      (the soak stamps `ts` in `emit`)
             "reactions_by_turn",     # a counter only the C# side can see: the

@@ -67,8 +67,10 @@ from __future__ import annotations
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine.state import (Card, CombatState, Enemy, Fighter, Player,
-                                remove_instance)
+from tier0.engine.state import (SLY_AUTOPLAY_OP, Card, CombatState, Enemy,
+                                Fighter, Player, grant_sly_autoplay,
+                                remove_instance, sly_autoplays_permanently,
+                                sly_granted_this_turn)
 
 # ---------------------------------------------------------------------------
 # Powers this module refuses to implement, and the cards they gate.
@@ -318,6 +320,14 @@ def after_card_exhausted(state: CombatState, card: Card,
             p.energy += card.on_exhaust_energy
             state.emit("energy", amount=card.on_exhaust_energy,
                        source="on_exhaust")
+    # damage_per_exhaust (EB-82). Sits at the same funnel as the Casket
+    # accrual and for the same reason, but outside its relic gate: the two
+    # relics are unrelated and either may be held without the other. Opens
+    # on `relic_effects` being empty, so the battery never reaches it, and
+    # no relic row carries the hook yet -- unused machinery by construction.
+    if p.relic_effects:
+        from tier0.engine import relics           # late import (relics -> here)
+        relics.on_card_exhausted(state)
     n = p.powers.get("feel_no_pain", 0)
     if n:
         gain_block(state, p, n)                  # Unpowered: no Unmovable
@@ -734,9 +744,16 @@ def after_card_played(state: CombatState, card: Card, snap: dict) -> None:
     # It marks THE CARD OBJECT, so the skill keeps Sly for the rest of the
     # fight and auto-plays every later time an effect discards it. Single
     # stack type: the power is a switch, not a counter.
+    #
+    # EB-71 (R174): the mark speaks the unified grammar -- an `sly_autoplay`
+    # rider with NO `until`, which is what "for the rest of the fight" means
+    # once the turn sweep below drops only the turn-scoped ones. A card
+    # already PERMANENTLY auto-playing is left alone and emits nothing,
+    # exactly as the boolean did -- and a Skill carrying only Hand Trick's
+    # one-turn grant is still upgraded to permanent here, as it was.
     if card.type == "skill" and p.powers.get("master_planner", 0):
-        if not card.sly_keyword:
-            card.sly_keyword = True
+        if not sly_autoplays_permanently(card):
+            grant_sly_autoplay(card)
             state.emit("master_planner", card=card.id)
 
     # EVERYTHING BELOW IS ATTACK-ONLY (Rage, Juggling). The Silent's four
@@ -888,6 +905,45 @@ def after_card_drawn(state: CombatState, card: Card,
     if n and not from_hand_draw and state.in_player_turn:
         for enemy in list(state.living_enemies):
             unpowered_damage(state, enemy, n)
+    randomise_cost_on_draw(state, card)
+
+
+def randomise_cost_on_draw(state: CombatState, card: Card) -> None:
+    """The per-INSTANCE on-draw hook (EB-83; the base game's Slither).
+
+    Slither is `AfterCardDrawn` on the ENCHANTMENT, gated on the drawn card
+    being its own and on that card having landed in hand, and it writes
+    `EnergyCost.SetThisCombat(Rng.CombatEnergyCosts.NextInt(4))`. tier0 has
+    no per-card callback registry and is not growing one, so the rider is a
+    field on the instance and this is the site that reads it -- the same
+    shape `status_draw_damage` already takes at the neighbouring line.
+
+    UNUSED MACHINERY as landed: `on_draw_randomise_cost` is None on every
+    card any sheet can produce, so no roll is taken and no randomness is
+    consumed. `tier0.content.enchantments.CATALOG` deliberately still does
+    NOT hold `slither` -- the event that would grant it (Wood Carvings) is
+    blocked on a [USER] call about two base-game colorless cards (QUEUE
+    `M23`), and an enchantment nobody grants is a name with no caller.
+
+    The hand check is the game's and it is load-bearing: a draw that
+    overflows `MAX_HAND_SIZE` never reaches here, but a card the caller
+    routes elsewhere would, and re-rolling a cost for a card that is not in
+    hand is not what the enchantment says.
+    """
+    n = card.on_draw_randomise_cost
+    if not n or n <= 0:
+        return
+    # IDENTITY, not equality. `Card` is a plain dataclass, so `in` would
+    # compare field by field and two copies of the same card in the deck are
+    # equal -- the drawn instance would be indistinguishable from its twin
+    # sitting in hand. This machinery is per-INSTANCE by construction (the
+    # cost it writes is instance state), and the neighbouring identity checks
+    # in combat.py take the same care.
+    if not any(c is card for c in state.player.hand):
+        return
+    card.cost_set_this_combat = state.rng.randrange(n)
+    state.emit("cost_randomised", card=card.id,
+               amount=card.cost_set_this_combat)
 
 
 def retain_at_flush(state: CombatState, flushing: list[Card]) -> list[Card]:
@@ -1385,12 +1441,27 @@ def reset_turn_counters(state: CombatState) -> None:
     # cost, Pinpoint's discount, HandTrick's granted Sly). Swept across every
     # pile because a freed card that was discarded and redrawn must not come
     # back still free; the combat-scoped delta is deliberately untouched.
+    #
+    # EB-71 (R174): the granted Sly is a rider in the unified `sly` list, so
+    # the sweep drops riders marked `until: turn_end` and leaves everything
+    # else -- the printed keyword, Master Planner's permanent mark, and
+    # Kokomi's authored Assist effects all survive the boundary, exactly as
+    # they did when the grant was its own boolean. The list is rebound only
+    # when something is actually dropped, so the common path allocates
+    # nothing (this loop runs over every pile every turn).
     p = state.player
     for pile in (p.hand, p.draw_pile, p.discard_pile, p.exhaust_pile):
         for held in pile:
             held.free_this_turn = False
             held.cost_delta_this_turn = 0
-            held.sly_this_turn = False
+            # The guard asks the helper rather than re-writing its predicate:
+            # what expires at the turn boundary is DEFINED in one place
+            # (state.sly_granted_this_turn), and a second copy here could drift
+            # from it silently.
+            if sly_granted_this_turn(held):
+                held.sly = [fx for fx in held.sly
+                            if not (fx.get("op") == SLY_AUTOPLAY_OP
+                                    and fx.get("until") == "turn_end")]
     state.rupture_pending = 0
 
 

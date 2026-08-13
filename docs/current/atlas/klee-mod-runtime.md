@@ -45,7 +45,7 @@ PYTHONPATH=. python3 -m pytest tier0/tests -q        # full suite
 Windows/macOS dev box only: `klee-mod/build/deploy.ps1` (build → stage →
 `validate.ps1` → copy into `mods/`), `tools/build_pck.ps1` (art/scene pack), and
 the manual Harmony gate `klee-mod/build/bitecheck/` (`dotnet build;
-./bin/Debug/harmony-bitecheck.exe`) which must print `14 patch class(es) armed.`
+./bin/Debug/harmony-bitecheck.exe`) which must print `17 patch class(es) armed.`
 
 In-game there is no CLI: `KleeMod.Initialize` is the only entry
 (`KleeMod.cs:24-29`); diagnostics land in `godot.log` — grep `SELFCHECK`,
@@ -78,6 +78,15 @@ In-game there is no CLI: `KleeMod.Initialize` is the only entry
 - **Exactly one `ModHelper.SubscribeForCombatStateHooks` call**, every character's
   hooks concatenated behind it (duplicate ids are silently rejected) —
   `KleeMod.cs:55-61`; pinned at `tier0/tests/test_roster_runtime_contracts.py:160`.
+- **Telemetry patches read and never answer.** EB-14's selection hook
+  (`Diagnostics/SelectionTelemetry.cs`) is three Prefix/Postfix pairs on the
+  selection surfaces — the six grid screens share one inherited
+  `CardsSelected()`, the choose-a-card screen is its own class, and hand
+  selection opens no screen at all. `CardSelectCmd.PushSelector`/`UseSelector`
+  is the game's automation seam and installing one would pick FOR the player,
+  so it is banned mod-wide by
+  `tier0/tests/test_eb14_selection_hook.py`. `PlayTelemetry.cs` itself stays
+  Harmony-free by design (`test_track_b_curves.py`).
 - **Once-per-play means `cardPlay.IsFirstInSeries`** — card hooks fire once per
   replay, the sim grants once per `play_card` — `Powers/ElementalApplication.cs:74-95`.
 - **Never `new()` an `AbstractModel`, never hand a CANONICAL model to a mutating

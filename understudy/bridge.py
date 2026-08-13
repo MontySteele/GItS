@@ -28,6 +28,7 @@ SINGLEPLAYER = f"{BASE}/api/v1/singleplayer"
 COMPENDIUM = f"{BASE}/api/v1/compendium"
 SPEED = f"{BASE}/api/v1/gits/speed"
 SEED = f"{BASE}/api/v1/gits/seed"
+GIVE_CARD = f"{BASE}/api/v1/gits/give_card"
 
 
 class BridgeError(RuntimeError):
@@ -136,6 +137,54 @@ def clear_seed() -> dict:
 
 def get_seed() -> dict:
     return _request(SEED)
+
+
+# ------------------------------------------------------ dev card grants ----
+#
+# EB-52. `POST /api/v1/gits/give_card` puts a CHOSEN card in the deck (or in a
+# combat pile) through the game's own acquisition path -- the same
+# `RunState.CreateCard` + `CardPileCmd.Add` pair a card reward runs. It exists
+# because EB-52(a)'s obstacle is acquisition, not instrumentation: the Fanfare
+# floor is already on the wire, and what could not be arranged in three live
+# sessions was getting one of three RARE Powers into a deck.
+#
+# THIS IS NOT A MEASUREMENT DOOR, AND THE STAMP IS THE ENFORCEMENT. A run that
+# used it is not a run the generators produced, so no number off it is
+# comparable to any other run's. The endpoint says so in a `guardrail` field on
+# every success; `GRANT_GUARDRAIL` below is the harness-side copy, and callers
+# that log a grant are expected to log it beside them. Guardrail-7 is unchanged
+# either way -- a bot still cannot see the screen.
+
+GRANT_GUARDRAIL = (
+    "dev card grant: this run's deck is not one the generators produced, so "
+    "nothing measured on it is comparable to any other run")
+
+GRANT_PILES = ("deck", "hand", "draw", "discard")
+
+
+def give_card(card_id: str, count: int = 1, upgraded: bool = False,
+              pile: str = "deck") -> dict:
+    """Grant `count` copies of `card_id`. Returns the endpoint's report.
+
+    `card_id` is the wire id (`UNHEARD_CONFESSION`), or the exact printed
+    title; there is no fuzzy match here or on the far side, because
+    `/api/v1/wiki?query=` is already the search surface and a near-miss grant
+    is a card nobody asked for sitting in a deck for the rest of a run.
+
+    The grant is QUEUED on the game's side and confirmed by the next
+    `get_state()`, the same way a card play is. A `status: "error"` answer
+    comes back as an ordinary dict, not an exception -- that is this module's
+    convention for the bridge's two error shapes.
+    """
+    if pile not in GRANT_PILES:
+        raise ValueError(f"pile must be one of {GRANT_PILES}, not {pile!r}")
+    return _request(GIVE_CARD, {"card_id": card_id, "count": int(count),
+                                "upgraded": bool(upgraded), "pile": pile})
+
+
+def give_card_info() -> dict:
+    """The route's own description, including whether a run is in progress."""
+    return _request(GIVE_CARD)
 
 
 def settle(prev_type: str | None = None, tries: int = 12, delay: float = 0.6) -> dict:

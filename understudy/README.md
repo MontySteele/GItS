@@ -19,14 +19,16 @@ This directory drives the **real game** through the vendored STS2MCP bridge
 | `committed.py` | R99/4b's archetype-committed DRAFT arm — a flagged variant, off by default. Membership comes off the design sheets, so the arm that builds a deck and the reader that grades it agree on what a Fanfare card is |
 | `naming.py` | revision #7: resolved card / target / option NAMES per action |
 | `rng.py` | the dedicated policy stream, and the refusal that keeps a game seed out of it |
-| `harness.py` | `begin` / `state` / `act` — the Phase-0 measurement loop |
+| `harness.py` | `begin` / `state` / `act` — the Phase-0 measurement loop. Also `give-card` (EB-52's dev grant door) and `frame` (window capture, off by default); both are here and not in the soak on purpose |
 | `soak.py` | **P1**: N unattended policy_v1 runs, telemetry, watchdog, reversibility. **P1.5**: chosen seeds, the encore column, the selector channel |
 | `replay.py` | **S7**: drives tier0's combat model through a recorded action sequence and diffs the two instruments' numbers. It reads the SIM. **Track B**: `--use-selectors` reconstructs the Spotlight designation from `fight.selectors` instead of letting tier0's own heuristic stand in, and `--ledger` writes the per-turn Fanfare decomposition |
 | `probe_block.py` | **Track B, probe B2**: a FIXED SCRIPT (no policy) that fixes the Spotlight answer, plays only cards whose wire text prints Block, and reads `player.block` at every decision point |
 | `trace_replay.py` | **P1.5**: reconstruct a recorded fight and compare two recordings of one seed. It reads nothing but JSONL. Named apart from `replay.py` because the two are different instruments, not two halves of one |
+| `hangwatch.py` | **EB-1**: the log-growth / message-pump watchdog. Tells a game that is alive and SPINNING from a wire that merely did not answer, so the spin stops being filed under a harness-side kind |
+| `frames.py` | **OFF by default** (`GITS_UNDERSTUDY_CAPTURE=1`): one PNG of the game WINDOW, for [USER]'s art sittings. Material, never evidence — the guardrail rides on every manifest row |
 | `report.py` | the morning report — defects, outliers, curves. No LLM |
 | `analyze.py` | the Phase-0 divergence analysis |
-| `logs/` | per-run decision JSONL; `phase0-<seed>.jsonl` (committed), `soak/` (gitignored) |
+| `logs/` | per-run decision JSONL; `phase0-<seed>.jsonl` (committed), `soak/` and `frames/` (gitignored) |
 
 ## The two rules this directory exists under
 
@@ -55,6 +57,70 @@ python -m understudy.harness act '{"action":"end_turn"}' --why "..."
 `act` recomputes the counterfactual at the current state *before* posting, so
 a log line can never pair a choice with a policy answer from a screen that has
 since moved.
+
+### `give-card` — EB-52's dev grant door (attended loop only)
+
+```
+python -m understudy.harness give-card UNHEARD_CONFESSION --why "EB-52(a)"
+python -m understudy.harness give-card "Unheard Confession" --pile hand --count 2
+```
+
+EB-52(a) owes one evidence shape — a Power played and the Fanfare floor rising
+because of it — and its obstacle is **acquisition, not instrumentation**: the
+floor has been on the wire since P1.5, and three live sessions could not get
+one of the three rare Powers into a deck (six rare draws, P(0 hits) = 36%, an
+ordinary miss). This verb removes that obstacle for a smoke.
+
+It goes through the game's own acquisition path — `RunState.CreateCard` then
+`CardPileCmd.Add`, the same two lines a card reward runs — and mints nothing.
+It refuses multiplayer, refuses a combat pile out of combat, and does no fuzzy
+matching (`/api/v1/wiki?query=` is the search surface). Full reasoning:
+`vendor/STS2_MCP/gits/GitsGiveCard.cs`.
+
+**A run that used it is not a run the generators produced.** Nothing measured
+on it is comparable to any other run — not a winrate, not a floor reached, not
+an HP curve. The endpoint stamps that sentence on every success, the verb
+writes it onto the run log beside the grant, and `--why` is logged with it,
+because a deck change nobody can account for later is worse than no smoke.
+
+**It is deliberately not in `soak.py`.** The soak's claim is that its runs are
+runs the game generated; a grant reachable from an unattended overnight loop is
+a way for that claim to quietly become false while nobody is watching.
+`tier0/tests/test_understudy_give_card.py` pins its absence there.
+
+### `frame` — window capture (OFF by default)
+
+```
+GITS_UNDERSTUDY_CAPTURE=1 python -m understudy.harness frame --label salon-stage
+```
+
+One PNG of the **game window's** rectangle, written to the gitignored
+`understudy/logs/frames/` with a manifest row naming the screen, act and floor
+it was taken on. It exists so a sitting (`S4-G17`, `AS2-D5`, `AS2-B5`,
+`AS2-E2`) can be given frames from moments the bot reaches cheaply and a person
+would have to grind for — which is how EB-52's capture packet was assembled by
+hand.
+
+**Env-only and off by default**, the same shape and reasoning as
+`GITS_ILSPY_TREE`: a leg whose output is material sitting on somebody's disk
+must never be a default and must never be a path this repo chooses for you.
+Frames are gitignored for the reason `art/g12_captures/` and
+`art/eb52_captures/` are — a frame of the running game has Tier F art in it.
+
+**The window's rectangle, never the whole desktop.** The rectangle comes from
+the game process's own `MainWindowHandle`, and three states are named refusals:
+no window, a zero-size rectangle, and a minimised window (Windows parks those
+off-screen at a -32000 origin). One honest limit: the grab is
+`CopyFromScreen` over that rectangle, so anything sitting ON TOP of the game is
+in the frame — it is the game's rectangle, not the game's pixels.
+
+**A frame is MATERIAL, not a finding.** Guardrail-7 and the no-fun rule are
+not changed by the existence of a camera: nothing this directory derives from a
+frame is a claim about look, legibility, readability or fun. That sentence is
+`frames.GUARDRAIL` and it is written onto every row of the manifest — on every
+row and not once in a header, because manifests get read in slices and
+concatenated. Like `give-card`, the verb is on the ATTENDED harness only; the
+soak takes no pictures.
 
 ## What policy_v0 will not answer
 
@@ -109,6 +175,49 @@ launched yourself and makes no game-dir changes at all.
 
 Any resumable run found on the profile is abandoned rather than negotiated
 with (R97/5b).
+
+## Surviving EB-1 (the Punch Off soft-lock)
+
+BACKLOG `EB-1` is root-caused, upstream, and not ours to fix: entering the
+Punch Off room spins the main thread on an unbounded engine-error loop. The
+process stays **alive**, the wire goes **dead**, `godot.log` grew to **2.4 GB
+in ~30 minutes**, and the run save is poisoned — `continue` re-enters and hangs
+again, so the only exit is `abandon_run` from the main menu.
+
+The soak carries two legs against it, and neither fixes anything:
+
+- **The hazard register** (`soak.HAZARD_EVENTS`). `PUNCH_OFF` is refused rather
+  than driven: the run stops with a `hazard_event` defect and no verb is posted.
+  The hazard is room ENTRY (`PunchOff` fires `PunchEachOther()` from
+  `AfterEventStarted()`), so there is no safe option to pick — and the frozen
+  frame carried no options at all. What the guard buys is the SECOND hang: the
+  soak's own restart path answers a poisoned save with `abandon_run`, which is
+  EB-1's recorded recovery. The wire id is read, not guessed
+  (`ModelDb.GetEntry` slugifies `PunchOff` to `PUNCH_OFF`, which is also the
+  prefix of the event's own loc keys); the display title is matched as a second
+  reading. `--allow-hazard-events` lifts the guard for a deliberate
+  reproduction.
+- **The spin watchdog** (`hangwatch.py`), for the case where the game hangs
+  before there is a screen to refuse. On a dead wire with a live process it
+  samples `godot.log`'s growth rate and the Windows message pump; a sustained
+  flood **or** a not-responding reading on every tick of the window files
+  `unresponsive_spin` and terminates the process through the ledger. Either
+  signal alone is enough — one machine cannot read the log, another cannot ask
+  `tasklist` — but a single not-responding sample is not, because that is also
+  what a long room load looks like.
+
+**`unresponsive_spin` exists because `bridge_unreachable` is a HARNESS-side
+kind.** Filing a spinning game under it makes the instrument blame its own wire
+for a build defect it has just caught, and two of them would halt the night on
+the wrong diagnosis. Neither new kind is harness-side: both are the soak
+working.
+
+The kill is a ledger step, not a shortcut around one. The speed row is marked
+**NOT REVERTED** with the captured original in its note, because the wire is
+dead and `PrefsSave.FastMode` persists to `settings.save` — the setting really
+is left changed, and a ledger that laundered that would cost somebody an
+evening. `--no-setup` kills nothing: it did not launch the game and may not
+terminate it, so it reports instead.
 
 ## Chosen seeds (P1.5)
 
@@ -220,14 +329,53 @@ the human feed (R100/5) — a change of MEANING rather than of key, which is why
 it is called out here as loudly as a rename would be: a reader who assumed
 `interrupted` meant "probably won" was right yesterday and is wrong today.
 
-**Addition of 2026-08-05 (P1.5), BOT FEED ONLY, no renames:** `selectors`.
-The note for this landing is §"Cross-session note" in
-`docs/archive/sprint-understudy-p15-log-2026-08-05.md`. It is a **declared
-asymmetry** (`BOT_ONLY` in `tier0/tests/test_track_b_curves.py`, beside
-`potions_used`): the soak records a selector answer because it POSTED it,
-while the mod sees a card leave a pile rather than an offer being taken from a
-list. **A selector cut is a bot-feed cut** until a mod-side hook into the
-selection screens lands.
+**Addition of 2026-08-05 (P1.5):** `selectors`. The note for this landing is
+§"Cross-session note" in
+`docs/archive/sprint-understudy-p15-log-2026-08-05.md`. It arrived **BOT FEED
+ONLY** — the soak records a selector answer because it POSTED it, while the mod
+saw a card leave a pile rather than an offer being taken from a list — and so
+stood as a declared asymmetry beside `potions_used` for a week.
+
+**`selectors` became a BOTH-FEEDS key on 2026-08-12 (EB-14)**, no rename and
+no change of meaning: the mod-side hook into the selection screens landed
+(`klee-mod/KleeCode/Diagnostics/SelectionTelemetry.cs`), so **a selector cut is
+no longer a bot-feed cut**. The row is the same five columns in the same order
+— `[round, screen, index, chosen, [offered…]]` — and `understudy/replay.py` and
+`understudy/trace_replay.py` read a mod-written row without knowing which feed
+wrote it (checked, not asserted: `tier0/tests/test_eb14_selection_hook.py`).
+
+Four things the human feed's column does **not** contain, declared here
+because a reader of the column will look here and nowhere else. None is a key
+asymmetry; all four are limits on what the column can hold:
+
+- **Local seat only.** A co-op partner's answer arrives as indices through
+  `PlayerChoiceSynchronizer` and opens no screen in this process, so a remote
+  seat's rows are *absent*, not empty. Same fence as `corpse_detonations`:
+  rows present are facts, no rows is not proof nobody chose anything.
+- **In-fight only**, which is exactly the bot feed's scope (`soak.py` records a
+  selector only while a fight record is open). A rest-site smith or a shop
+  removal is outside the channel on both feeds.
+- **No bundle rows.** `NChooseABundleSelectionScreen` offers *bundles*, and a
+  bundle carries no first-party name; filling the bot feed's `bundle_select`
+  row would mean inventing one.
+- **An empty answer records nothing**, matching the bot feed, where a skipped
+  screen produces no POST and therefore no row.
+
+The `screen` column is spelled differently by the two writers **on purpose**.
+The soak writes what the bridge called the screen (`card_select`,
+`hand_select`, `bundle_select`), falling back to the raw screen class name
+lowercased; the mod writes the concrete class name lowercased always
+(`nchooseacardselectionscreen`, `nsimplecardselectscreen`, `nplayerhand`, …).
+`card_select` is *three screens wearing one name* and the mod is the side that
+can tell them apart, so re-spelling it as `card_select` would throw away the
+only thing this vantage has that the wire's does not. The two vocabularies
+overlap on the bot feed's fallback spelling rather than colliding, and no
+consumer matches on the column — `replay.py` matches on the OFFERED list.
+
+**Owed: a live smoke.** Nothing in this repo can execute the C# writer, and no
+run has exercised the new rows in a real game yet. Verify a Furina Ethereal
+Spotlight turn produces one row per turn with both options in `offered`, and
+that a Kokomi exhaust card (the hand surface) produces one.
 
 **Additions of 2026-08-07 (EB-18), HUMAN FEED ONLY, no renames:** `run_id`,
 `run_instance`, `fight_index`, `encounter`, `detonations`,
@@ -353,7 +501,7 @@ Phase 0 could not do.
 | `reactions_by_turn` | `[[round, reactions resolved since this fight opened]]` — **human feed only**; the wire does not narrate reactions. `ReactionEffects.TotalResolved` is GLOBAL, so in co-op both seats' reactions appear in every seat's row. Measurement only: no reaction constant is read or written |
 | `block_at_turn_end` | `[[round, block]]` as the player ENDED the turn — not the turn-opening block in `hp_trajectory`, which is whatever survived the enemy |
 | `cards_played` | `[[round, card_name], ...]` |
-| `selectors` | **P1.5, BOT FEED ONLY.** `[[round, screen_type, index, chosen_name, [offered names]], ...]` — every selector screen resolved inside this fight. The OFFERED LIST is in the row for the same reason `hand` travels with a card play: "Center Stage" means one thing against `[Center Stage, Guest Cast]` and nothing at all against a list that did not contain Guest Cast. `index: -1` is a selector resolved without naming an option (a confirm, a skip). `overlay` screens are excluded — that is the shape a soft-lock takes, and a screen nobody can answer has no choice to record |
+| `selectors` | **P1.5; BOTH FEEDS since EB-14 (2026-08-12).** `[[round, screen_type, index, chosen_name, [offered names]], ...]` — every selector screen resolved inside this fight. The OFFERED LIST is in the row for the same reason `hand` travels with a card play: "Center Stage" means one thing against `[Center Stage, Guest Cast]` and nothing at all against a list that did not contain Guest Cast. `index: -1` is a selector resolved without naming an option (a confirm, a skip); on the HUMAN feed it additionally covers "the chosen card was not reference-equal to anything in the recorded offer", which the mod logs a warning for when it happens. `overlay` screens are excluded — that is the shape a soft-lock takes, and a screen nobody can answer has no choice to record. The human feed's four declared limits on this column (local seat, in-fight, no bundles, no row for an empty answer) and the deliberate spelling split in `screen_type` are in §"Telemetry schema" above |
 | `potions_used` | `[[round, potion_name], ...]` — **bot feed only**; no first-party potion hook exists for the mod side yet |
 | `damage_by_source` | `{card_or_potion_name: total}` |
 | `damage_dealt`, `damage_taken` | totals |
@@ -379,14 +527,24 @@ under-count rather than invent:**
 `kind` is one of `process_died`, `overlay_softlock`, `no_progress`,
 `action_ceiling`, `run_timeout`, `bridge_unreachable`, `no_action`,
 `menu_loop`, `embark_loop`, `no_embark`, `no_embark_path`,
-`unexpected_start_state`, `seed_not_honoured`. Plus `seed`, `act`/`floor`, `state_dump` (piles
+`unexpected_start_state`, `seed_not_honoured`, `state_type_missing`,
+`unresponsive_spin`, `hazard_event`. Plus `seed`, `act`/`floor`, `state_dump` (piles
 collapsed to counts) and `recent` — the last dozen state fingerprints, which is
 what a stall looks like from inside.
+
+An `unresponsive_spin` row carries two more keys: `hangwatch` (the probe's own
+evidence — log path, the two byte counts, the derived rate, the threshold it
+was compared against, and the per-tick responding samples) and `teardown` (what
+the watchdog did about it). The rate is derivable from the two byte counts on
+purpose: a number a reader cannot re-check is not a number this house ships.
 
 The subset in `soak._HARNESS_SIDE` means **the instrument** failed rather than
 the build. Two defects of the same harness-side shape halt the soak; that is
 the stop-and-surface rule, and it exists so a broken harness does not fill a
-night with the same row.
+night with the same row. `unresponsive_spin` and `hazard_event` are
+deliberately NOT in it — both are the soak catching EB-1, which is the soak
+working, and a second observation of a live-play hazard is not a broken
+instrument.
 
 ### `forced_default`
 

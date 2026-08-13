@@ -195,14 +195,18 @@ CATALOG: dict[str, Enchantment] = {
 # named, never approximated.
 #
 #   Slither (Wood Carvings) -- "randomises this card's cost when drawn".
-#       Needs a per-DRAW hook on the card instance; `state.draw` has no
-#       per-card callback and cost is read at play time from `card_cost`,
-#       so this is new machinery rather than a rider. Wood Carvings is
-#       blocked on two further things anyway (Peck and Toric Toughness are
-#       named base-game colorless cards the mod's pools do not contain), so
-#       it stays in the skip list rather than shipping two of three options.
+#       The ENGINE half is no longer the blocker: EB-83 built the per-draw
+#       card hook (`Card.on_draw_randomise_cost` / `cost_set_this_combat`,
+#       read in `refpowers.randomise_cost_on_draw`) as unused machinery, and
+#       a CATALOG row for Slither would now be expressible. It stays out
+#       anyway, on this module's own rule: the row exists to serve a granting
+#       event, and Wood Carvings is still blocked on the two base-game
+#       colorless cards it names (Peck and Toric Toughness), which is a
+#       [USER] call against LAW's colorless clause -- QUEUE `M23`. An
+#       enchantment nobody grants is a name with no caller.
 UNEXPRESSED = {
-    "slither": "randomises cost on DRAW -- no per-draw card hook exists",
+    "slither": ("randomises cost on DRAW -- the engine hook exists (EB-83); "
+                "no event grants it while Wood Carvings is M23-gated"),
 }
 
 

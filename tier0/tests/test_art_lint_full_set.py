@@ -276,6 +276,74 @@ def test_pending_banned_family_entries_still_hit_a_ban(monkeypatch):
         f"them from the set: {stale}")
 
 
+# --- L9's APPROVED exceptions (R151) --------------------------------------
+#
+# Not a PENDING set: these are resolved rulings, so they suppress permanently.
+# They get the same rot guard anyway, plus the guard the PENDING sets do not
+# need -- that the entry is ONE ENTRY and not a category.
+
+
+def test_approved_family_exception_suppresses_only_its_exact_title(capsys):
+    """L9 stands down for the approved title and for nothing else in its family.
+
+    Synthetic rows, so this runs on a bare clone: the family ban must still
+    fire on a sibling `Character Details` file, which is what "one entry, not
+    a category" means mechanically.
+    """
+    base = {"out": "ImageGen/images/cards/kokomi/x.png", "pick": "auto",
+            "rank": None, "register": "splash", "mode": "cover", "focus": "c",
+            "source": "png", "frame": None, "w": 500, "h": 380,
+            "source_group": None}
+    approved = dict(base, asset_id="approved_rare",
+                    title="Sangonomiya Kokomi Character Details 1.png")
+    sibling = dict(base, asset_id="sibling_card",
+                   title="Sangonomiya Kokomi Character Details 5.png")
+
+    hit = {p.split()[1].rstrip(":")
+           for p in art_lint.banned_families([approved, sibling])}
+    assert hit == {"sibling_card"}, (
+        "the exception must license exactly its own title; the rest of the "
+        f"family stays banned (fired: {sorted(hit)})")
+    assert "APPROVED EXCEPTION (L9, allowlisted)" in capsys.readouterr().out
+
+
+def test_approved_family_exceptions_are_exact_titles_not_prefixes():
+    """A prefix-shaped entry would re-open the family the L9 ban closed.
+
+    Keys are compared with `_title_key`, which only folds case and the image
+    extension -- so an entry must be a whole filename. The cheap structural
+    proof: every key is normalised, is not itself a ban prefix, and records
+    the ruling that granted it.
+    """
+    prefixes = {p.strip().lower() for p, _ in art_lint.BANNED_SOURCE_FAMILIES}
+    for key, why in art_lint.APPROVED_FAMILY_EXCEPTIONS.items():
+        assert key == art_lint._title_key(key), (
+            f"exception key '{key}' is not normalised; write it lowercase "
+            "and without the file extension")
+        assert key not in prefixes, (
+            f"exception key '{key}' IS a banned-family prefix -- that "
+            "un-bans the whole category instead of naming one entry")
+        assert why and why.strip(), (
+            f"exception '{key}' records no approval; every entry must name "
+            "the ruling that granted it")
+
+
+def test_approved_family_exceptions_still_need_their_waiver():
+    """Rot direction, same idiom as the PENDING sets but purely structural.
+
+    An approved exception exists to cancel a banned-family finding. If its
+    title no longer matches any ban prefix -- family unbanned, source renamed
+    -- the entry suppresses nothing and must be DELETED so the lint keeps
+    guarding the resolution rather than carrying a dead waiver.
+    """
+    prefixes = [p.lower() for p, _ in art_lint.BANNED_SOURCE_FAMILIES]
+    stale = sorted(k for k in art_lint.APPROVED_FAMILY_EXCEPTIONS
+                   if not any(k.startswith(p) for p in prefixes))
+    assert not stale, (
+        "these APPROVED_FAMILY_EXCEPTIONS no longer fall under any banned "
+        "family, so they waive nothing -- DELETE them: " + repr(stale))
+
+
 @needs_plan
 def test_pending_red_pen_entries_are_still_colliding(monkeypatch):
     """L1's waiver set, rot direction.

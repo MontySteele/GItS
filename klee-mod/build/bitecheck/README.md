@@ -14,10 +14,13 @@ dotnet build
 Expected on an unmodified tree:
 
 ```
-[klee] harmony: 14 patch class(es) armed.
+[klee] harmony: 17 patch class(es) armed.
 ```
 
-No warnings, no errors, and **14** is the number to compare against.
+No warnings, no errors, and **17** is the number to compare against.
+
+The three most recent are EB-14's selection-telemetry patches
+(`KleeCode/Diagnostics/SelectionTelemetry.cs`), armed here on 2026-08-12.
 
 ## Why it is not in CI
 
@@ -38,7 +41,9 @@ mechanism under test to observe the mechanism under test.
 ## Running an actual bite-check
 
 Break exactly one lookup, rebuild `KleeCode`, re-run, and read the report. Then
-revert. Three cases are worth knowing, all three run on 2026-07-27:
+revert. Three cases are worth knowing, all three run on 2026-07-27 — **the
+armed counts below are against the 14-class tree of that date** and are kept as
+the record of that run, not restated against today's 17:
 
 | Break | Expected | Observed |
 |---|---|---|

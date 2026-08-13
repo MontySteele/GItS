@@ -36,7 +36,7 @@ Windows PowerShell 5.1, run from `klee-mod\` unless noted:
 ```
 
 Manual Harmony bite-check (`build/bitecheck/README.md:7-20`; expected on an
-unmodified tree: `[klee] harmony: 14 patch class(es) armed.`), then the portable
+unmodified tree: `[klee] harmony: 17 patch class(es) armed.`), then the portable
 pins, which need no game install:
 
 ```sh

@@ -145,9 +145,20 @@ In-process: `combat.run_fight(player, enemies, pilot, seed) -> CombatState`
   `archetypes` are read by *nothing* in the engine and must stay that way — they
   exist because `from_dict` refuses unknown fields and the codegen whitelists
   them (`state.py:83-99,134-140`).
-- **Two mechanics wear the word "sly"**: Kokomi's authored `sly` effect list vs
-  base-game `sly_keyword` (auto-play on discard); both handled at the one trigger
-  site in `effects._op_discard` (`state.py:141-163`).
+- **One `sly` field, two behaviours** (EB-71, R174 — the unification of what
+  used to be `sly` vs `sly_keyword` vs `sly_this_turn`). `Card.sly` is an
+  effect list; the reserved rider `{op: sly_autoplay}` in it means the
+  base-game keyword (auto-play the discarded card for free), and everything
+  else is Kokomi's authored Assist lane. Authored riders resolve inline in the
+  discard loop, the auto-plays are batched after it, and both are handled at
+  the one trigger site in `effects._op_discard`. `sly_autoplay` is deliberately
+  **not** in `OPS` and is never dispatched — registering it would demand a
+  drafter price (`lint_op_parity`), and `draft._static_power` reads
+  `sly_riders()`, so the marker is worth exactly zero: the price the keyword
+  already carried. Hand Trick grants the rider with `until: turn_end` (swept in
+  `refpowers.reset_turn_counters`); Master Planner grants it with no expiry.
+  The C# side still speaks the old shape — the parity leg was explicitly out of
+  R174's scope. Equivalence pins: `tier0/tests/test_eb71_sly_unification.py`.
 - **Phase revives fire at every HP-dropping site**, before `state.over` is
   re-read; kill predicates observe the pre-revive `hp <= 0` but Fatal
   (`counts_for_fatal`) does not — otherwise Feed farms phase-downs and minions

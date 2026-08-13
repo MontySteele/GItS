@@ -31,7 +31,7 @@ from typing import Optional
 
 from tier0 import constants as C
 from tier0 import roster
-from tier0.engine.state import Card
+from tier0.engine.state import Card, sly_riders
 
 
 # DRAFTER_VERSION 3: values are expressed in the same rough units as one
@@ -68,7 +68,9 @@ STATIC_FANFARE_FLOOR_VALUE = 0.2  # per printed floor point (v9). A floor is
                               # readers the deck happens to hold. PROPOSED.
 STATIC_CHARGE_VALUE = 0.5     # per printed Charge point: the kit Garment
                               # is a universal reader (never-expiring bank,
-                              # +1 damage per 4 Charge while it holds), so
+                              # +1 damage per `GARMENT_CHARGE_DIVISOR` Charge
+                              # while it holds -- 2 since the v0.3 charge-curve
+                              # pass, not the 4 this comment used to say), so
                               # banked points are never dead -- but one
                               # Garment window is all this prices in
 
@@ -729,11 +731,24 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                   if fx.get("op") == "repeat_this")
     if repeats:
         total *= 1.0 + repeats * STATIC_REPEAT_SHARE
-    if card.sly:
+    # `if card.sly` first: this is the draft hot path and the overwhelming
+    # majority of cards have an empty list, so the comprehension inside
+    # `sly_riders` should not allocate for them.
+    riders = sly_riders(card) if card.sly else []
+    if riders:
         # v7: a Sly rider is the same printed grammar at half face -- it
         # fires only when a card effect discards this from hand, and the
         # drafter cannot see outlet density at offer time.
-        total += effect_power(card.sly) * STATIC_SLY_SHARE
+        #
+        # EB-71 (R174): `sly_riders` drops the base-game `sly_autoplay`
+        # marker, which the unification moved onto this same field. The
+        # marker is worth EXACTLY ZERO here, which is the price the keyword
+        # already carried (it lived on a boolean this function never read) --
+        # the unification is stamp-free and may not move a drafted number.
+        # Pricing the base-game Sly rider is a real question and a separate,
+        # [USER]-owned one: a change to the priced-op set is a
+        # DRAFTER_VERSION bump.
+        total += effect_power(riders) * STATIC_SLY_SHARE
     # An armed Bomb suppresses one enemy attack action. Do not also price that
     # protection when the same card applies Weak: the two reductions share one
     # branch at runtime and never multiply.
@@ -1694,18 +1709,74 @@ def offer_worth_engaging(offers: list[Card], deck: list[Card],
                for c in offers)
 
 
+# The hindsight advantage a re-scored rival must clear before the decision it
+# beat is called a regret. UNCALIBRATED and NOT RATIFIED (R164, 2026-08-10:
+# "pre-register the measurement; do NOT ratify +1.0"). It was a bare literal
+# inside the loop below until EB-72 gave it a name; naming it derives nothing
+# and blesses nothing -- it exists so `draft_regret_gaps` can be the
+# margin-free half and this can be the one place the threshold is spelled.
+# Its route twin is `run_metrics.ROUTE_REGRET_MARGIN`, which carries the longer
+# note on why neither number has a provenance. Pinned at its boundary by
+# test_pin_tier05_draft.py (MEDIUM-11).
+DRAFT_REGRET_MARGIN = 1.0
+
+
+def draft_regret_gaps(rng: random.Random, decisions: list[dict],
+                      final_deck: list[Card], archetype: str,
+                      sample: float = C.DRAFT_REGRET_SAMPLE) -> list[float]:
+    """The RAW hindsight gaps behind `draft_regret` (EB-72).
+
+    One entry per SAMPLED screen, in screen order: the best re-score on that
+    screen minus the re-score of the card actually picked, both in the final
+    deck's context. Zeros stay in the sample -- a screen the drafter got right
+    is a 0.0, not an absence from it -- because a percentile taken over only
+    the decisions that already cleared the margin would be a percentile of the
+    threshold as much as of the drafter.
+
+    NOT CLAMPED AT ZERO, and this is the one place a gap can go negative: a
+    SKIPPED screen scores the pick at 0.0 by convention (`draft_regret`'s
+    "skip scores 0"), so a screen where every offer re-scored negative gives a
+    negative gap. Clamping would be tidier and would report a skip as a
+    decision with nothing to regret. A screen with no offers contributes no
+    entry.
+
+    `draft_regret` is the count of these above `DRAFT_REGRET_MARGIN`. Same rng,
+    same draws, same order -- but NOT bit-identical to the pre-split loop. That
+    loop asked `any(v > picked + 1.0)`; this one asks `(max - picked) > 1.0`,
+    and in floating point those differ at the exact-1.0 boundary. The
+    re-associated form is the faithful reading of MEDIUM-11's invariant ("MORE
+    THAN a full point"), so a gap of exactly 1.0 is NOT a regret; the old form
+    counted some of them, because `picked + 1.0` can round below the rival's
+    score. It is reachable on real data and it moves the count: measured over
+    120 runs at census sample rate, 197 -> 196. Nothing gates on the count, so
+    this is a reporting difference, not a behaviour change. The boundary itself
+    is pinned by `test_regret_distribution.py`.
+
+    `sample` is overridable for the same reason the route twin's is (see
+    `C.ROUTE_REGRET_SAMPLE`'s comment): the 0.10 default exists to keep the
+    IN-RUN re-scoring cheap, and a post-hoc reader that wants the whole census
+    of screens should not have to edit a constant to get it. Overriding it
+    changes which screens are re-scored and therefore breaks the equality with
+    the run's own `regret_samples` -- callers that rely on that equality must
+    leave it alone.
+    """
+    gaps: list[float] = []
+    for d in decisions:
+        if rng.random() >= sample:
+            continue
+        rescored = {c.id: score_offer(c, final_deck, archetype)
+                    for c in d["offers"]}
+        if not rescored:
+            continue
+        picked_score = rescored.get(d["picked"], 0.0)   # skip scores 0
+        gaps.append(max(rescored.values()) - picked_score)
+    return gaps
+
+
 def draft_regret(rng: random.Random, decisions: list[dict],
                  final_deck: list[Card], archetype: str) -> int:
     """Post-run re-scoring of sampled decisions in the final-deck context.
     Returns the number of regretted decisions among the sample."""
-    regrets = 0
-    for d in decisions:
-        if rng.random() >= C.DRAFT_REGRET_SAMPLE:
-            continue
-        rescored = {c.id: score_offer(c, final_deck, archetype)
-                    for c in d["offers"]}
-        picked = d["picked"]
-        picked_score = rescored.get(picked, 0.0)     # skip scores 0
-        if any(v > picked_score + 1.0 for v in rescored.values()):
-            regrets += 1
-    return regrets
+    return sum(1 for gap in draft_regret_gaps(rng, decisions, final_deck,
+                                              archetype)
+               if gap > DRAFT_REGRET_MARGIN)
