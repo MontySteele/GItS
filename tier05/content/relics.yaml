@@ -220,9 +220,25 @@ ancient:
     # DOUBLED PER-EXHAUST ACCRUAL, and it REPLACES the base rate rather than
     # adding to it -- the funnel picks one value or the other
     # (`KokomiResourceHooks.ExhaustCharge/ExhaustBurst`), so these are RATES,
-    # not riders. Both numbers are `KokomiConstants.<x> * 2` in C#, i.e.
-    # CHARGE_PER_EXHAUST 1 -> 2 and KOKOMI_BURST_PER_EXHAUST 2 -> 4. The
-    # doubling is the upgrade's design; the base halves are tier0 constants.
+    # not riders. CHARGE_PER_EXHAUST 1 -> 2 and KOKOMI_BURST_PER_EXHAUST 2 -> 4.
+    #
+    # RATIFIED INVARIANT (R190, 2026-08-13): the doubling is PERMANENT and
+    # holds in BOTH engines. The two amounts below are literals -- YAML cannot
+    # compute -- so they are PINNED rather than derived, by
+    # tools/lint_constant_parity.py's INVARIANTS block, which asserts each is
+    # exactly 2x its tier0 base constant and fails the build otherwise. The C#
+    # side is now a literal too (`PearlOfInsightRelic`), MIRRORED against these
+    # rows by value, so the whole chain is checked: C# literal == this row ==
+    # 2x tier0 base.
+    #
+    # BEFORE R190 NOTHING CHECKED THE MIDDLE OF THAT CHAIN. C# derived its
+    # numbers by expression, this file wrote them as literals, and the parity
+    # lint filed both C# members under UNMIRRORED as underivable -- so moving a
+    # base constant moved the mod and left the sim granting the old rate, with
+    # no gate anywhere. EB-74's §3f found the hole while costing lever-2
+    # candidate B (CHARGE_PER_EXHAUST 1 -> 2), which is precisely the change
+    # that would have walked into it. Anyone moving a base rate now moves four
+    # numbers and the lint says so.
     #
     # Shape UNLIKE Klee's on purpose, and the difference is the C#'s, not a
     # modelling choice: hers is a RATE where his is a windfall. The rate that

@@ -87,6 +87,16 @@ MIRRORED: dict[str, object] = {
     # only the player-facing string was renamed, so relic ids stay put.
     "ExplosiveFrags.OpeningSparks":
         _ancient_hook("touch_of_orobas_klee", "combat_start_spark"),
+    # Kokomi's upgraded starter (Touch of Orobas -> Pearl of Insight). Both
+    # were UNMIRRORED until 2026-08-13 because the C# side was the EXPRESSION
+    # `KokomiConstants.X * 2`, which parse_number cannot read. R190 ratified
+    # the doubling as a standing invariant, the C# side became a literal on
+    # OpeningSparks's precedent, and INVARIANTS below asserts the 2x itself --
+    # which is the half a by-value mirror cannot express.
+    "PearlOfInsightRelic.ChargePerExhaust":
+        _ancient_hook("touch_of_orobas_kokomi", "charge_per_exhaust"),
+    "PearlOfInsightRelic.BurstPerExhaust":
+        _ancient_hook("touch_of_orobas_kokomi", "burst_per_exhaust"),
     # Shared elemental table (tier0/constants.py, reaction block).
     "ReactionConstants.AuraDurationTurns": C.AURA_DURATION_TURNS,
     "ReactionConstants.OverloadSplash": C.OVERLOAD_SPLASH,
@@ -216,23 +226,11 @@ UNMIRRORED: dict[str, str] = {
         "which stopped being true when combat_start_spark and "
         "touch_of_orobas_klee landed -- OpeningSparks is now MIRRORED against "
         "that row.",
-    "PearlOfInsightRelic.ChargePerExhaust":
-        "derived: KokomiConstants.ChargePerExhaust * 2, an EXPRESSION rather "
-        "than a literal, so parse_number cannot read it and MIRRORED cannot "
-        "compare it. The compiler enforces the link to the base constant, "
-        "which is itself mirrored. "
-        "NOTE: this entry used to add 'the x2 itself is the upgrade's design, "
-        "not a sim number', which stopped being true when "
-        "touch_of_orobas_kokomi landed -- the doubled value IS a sim number "
-        "now (tier05/content/relics.yaml, `charge_per_exhaust: 2`), and the "
-        "only thing still keeping this row here is the C# side not being a "
-        "literal. Make it one and this becomes MIRRORED against "
-        "_ancient_hook('touch_of_orobas_kokomi', 'charge_per_exhaust'), on "
-        "ExplosiveFrags.OpeningSparks's precedent.",
-    "PearlOfInsightRelic.BurstPerExhaust":
-        "derived: KokomiConstants.BurstPerExhaust * 2, same reasoning and the "
-        "same stale-note correction -- its sim counterpart is "
-        "touch_of_orobas_kokomi's `burst_per_exhaust: 4`.",
+    # The two PearlOfInsightRelic rates USED TO LIVE HERE, as derived
+    # expressions this lint could not read. R190 ratified the 2x relationship
+    # as a standing invariant and they moved to MIRRORED above, with INVARIANTS
+    # below carrying the half MIRRORED cannot express. The old entry's own
+    # note said this was the fix; it was taken.
 
     # --- surfaced by widening the lint past `int` (§4.7 shop sprint) ---
     "FurinaParityVectors.DecayFraction":
@@ -372,9 +370,54 @@ def collect() -> dict[str, tuple[str, Path]]:
     return found
 
 
+# --------------------------------------------------------------------------
+# INVARIANTS: ratified RELATIONSHIPS between two numbers.
+#
+# MIRRORED compares a C# number against a sim number BY VALUE. That cannot
+# express "this number is twice that one" -- and a ratio that a [USER] ruling
+# made permanent is exactly the kind of thing that decays silently, because
+# both halves keep passing their own checks while the relationship between
+# them quietly stops being true.
+#
+# Each entry is (label, left, right, reason). The check is left == right.
+# --------------------------------------------------------------------------
+def _invariants() -> list[tuple[str, float, float, str]]:
+    return [
+        (
+            "PearlOfInsight.charge_per_exhaust == 2 x CHARGE_PER_EXHAUST",
+            _ancient_hook("touch_of_orobas_kokomi", "charge_per_exhaust"),
+            2 * C.CHARGE_PER_EXHAUST,
+            "RATIFIED INVARIANT (R190, 2026-08-13): Pearl of Insight's "
+            "upgraded rates are exactly 2x their base rates in BOTH engines, "
+            "permanently. The sim's copy is a LITERAL in "
+            "tier05/content/relics.yaml, so nothing but this check ties it to "
+            "the base constant -- bump CHARGE_PER_EXHAUST alone (EB-74's "
+            "lever-2 candidate B is the live example) and the relic keeps "
+            "granting the OLD doubled rate while the tooltip and the C# "
+            "literal say otherwise. Move all of them, or move none.",
+        ),
+        (
+            "PearlOfInsight.burst_per_exhaust == 2 x KOKOMI_BURST_PER_EXHAUST",
+            _ancient_hook("touch_of_orobas_kokomi", "burst_per_exhaust"),
+            2 * C.KOKOMI_BURST_PER_EXHAUST,
+            "Same ratified invariant, other currency. Note A9's warning "
+            "applies to the base pair independently: CHARGE_PER_EXHAUST and "
+            "KOKOMI_BURST_PER_EXHAUST are one wage in two currencies and move "
+            "together or the reason moves with them. This check is about the "
+            "UPGRADE's ratio, not about that pairing.",
+        ),
+    ]
+
+
 def main() -> int:
     findings: list[str] = []
     found = collect()
+
+    for label, got, want, reason in _invariants():
+        if abs(float(got) - float(want)) > FLOAT_TOLERANCE:
+            findings.append(
+                f"INVARIANT BROKEN -- {label}: reads {got}, requires {want}. "
+                f"{reason}")
 
     if not found:
         print("FINDING: no numeric `const` found -- the lint's pattern or "
@@ -424,7 +467,8 @@ def main() -> int:
     if findings:
         return 1
     print(f"constant parity: OK ({len(MIRRORED)} mirrored, "
-          f"{len(UNMIRRORED)} declared unmirrored)")
+          f"{len(UNMIRRORED)} declared unmirrored, "
+          f"{len(_invariants())} ratified invariants held)")
     return 0
 
 
