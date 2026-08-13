@@ -67,15 +67,22 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", "Salon Member"),
+        // Numbers come from SalonConstants (SalonMemberTips.BodyFor's rule,
+        // applied here): a repricing must not leave the power telling the
+        // player a retired number, and lint_constant_parity cannot see prose.
         ("description",
             "At the start of your turn, each [gold]Salon Member[/gold] "
-          + "spends 1 Encore for its act: Crabaletta deals 6 Hydro damage, "
-          + "the Usher gains 3 Block, Chevalmarin deals 2 Hydro damage. "
+          + $"spends {SalonConstants.TickEncoreCost} Encore for its act: "
+          + $"Crabaletta deals {SalonConstants.CrabalettaTick} Hydro damage, "
+          + $"the Usher gains {SalonConstants.UsherTick} Block, Chevalmarin "
+          + $"deals {SalonConstants.ChevalmarinTick} Hydro damage. "
           + "Dry members act at three-quarters. Member numbers gain +1 per "
-          + "10 [gold]Fanfare[/gold]. Maximum 3; a full stage bows its "
-          + "OLDEST member out: Crabaletta deals 14, the Usher gains 9 "
+          + $"{SalonConstants.FocusPerFanfare} [gold]Fanfare[/gold]. Maximum "
+          + $"{SalonConstants.MemberSlots}; a full stage bows its "
+          + $"OLDEST member out: Crabaletta deals {SalonConstants.CrabalettaBow}, "
+          + $"the Usher gains {SalonConstants.UsherBow} "
           + "Block, Chevalmarin applies Hydro to ALL enemies and grants "
-          + "3 Encore."),
+          + $"{SalonConstants.ChevalmarinBowEncore} Encore."),
         // The in-combat tooltip reads the LIVE cap. A12 (2026-07-28) made the
         // cap a per-player stat (SlotsFor: base plus Casting Call, which takes
         // it to 5), and until 2026-07-29 both tooltips said a flat "Maximum 3"
@@ -83,15 +90,21 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         // power itself, that the card they bought did nothing. The plain
         // description above still prints the BASE, because it renders with no
         // instance and therefore no owner to ask.
+        // {Slots} is a DynamicVar token resolved by the localizer, not a C#
+        // interpolation -- its fragment stays a plain literal.
         ("smartDescription",
             "At the start of your turn, each [gold]Salon Member[/gold] "
-          + "spends 1 Encore for its act: Crabaletta deals 6 Hydro damage, "
-          + "the Usher gains 3 Block, Chevalmarin deals 2 Hydro damage. "
+          + $"spends {SalonConstants.TickEncoreCost} Encore for its act: "
+          + $"Crabaletta deals {SalonConstants.CrabalettaTick} Hydro damage, "
+          + $"the Usher gains {SalonConstants.UsherTick} Block, Chevalmarin "
+          + $"deals {SalonConstants.ChevalmarinTick} Hydro damage. "
           + "Dry members act at three-quarters. Member numbers gain +1 per "
-          + "10 [gold]Fanfare[/gold]. Maximum {Slots}; a full stage bows its "
-          + "OLDEST member out: Crabaletta deals 14, the Usher gains 9 "
+          + $"{SalonConstants.FocusPerFanfare} [gold]Fanfare[/gold]. Maximum "
+          + "{Slots}; a full stage bows its "
+          + $"OLDEST member out: Crabaletta deals {SalonConstants.CrabalettaBow}, "
+          + $"the Usher gains {SalonConstants.UsherBow} "
           + "Block, Chevalmarin applies Hydro to ALL enemies and grants "
-          + "3 Encore."),
+          + $"{SalonConstants.ChevalmarinBowEncore} Encore."),
     };
 
     public override PowerType Type => PowerType.Buff;
