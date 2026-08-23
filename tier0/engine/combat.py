@@ -473,7 +473,12 @@ _FREE_PLAY_CONTEXT = (
     # Coverage pass 4's three per-card reads. Same hazard as the rest: a Sly
     # auto-play that discards or gains block in the middle of an outer card
     # would otherwise leave its numbers behind for the outer card to read.
-    "block_gained_this_card", "discards_this_card", "last_drawn_type")
+    "block_gained_this_card", "discards_this_card", "last_drawn_type",
+    # EB-118's identity context. The saved value is the LIST OBJECT, which is
+    # why every writer rebinds instead of clearing in place: a free play that
+    # exhausts mid-resolution opens its own list, and the restore below hands
+    # the outer card back the one it was reading.
+    "exhaust_selection")
 
 
 def resolve_free_play(state: CombatState, card: Card,

@@ -784,6 +784,15 @@ class CombatState:
     # killed_target predicate keeps its exact meaning for Klee/Furina.
     fatal_kills_this_card: int = 0        # killed_target_fatal (Feed)
     exhausted_this_card: int = 0          # generate_from_pool amount_formula
+    # EB-118 -- the Exhaust IDENTITY context, as opposed to the COUNT beside
+    # it. One printed descriptor per card the CURRENT exhaust_from took
+    # (effects.exhaust_descriptor); the later effects of the SAME card read
+    # derived totals off it. Two facts keep it from becoming a combat-global
+    # `last_exhausted`, which is the shape this deliberately is not:
+    # resolve_card opens an empty one per card play, and a second exhaust_from
+    # REBINDS rather than appends. Never cleared in place -- combat's
+    # free-play context saves the list OBJECT (see _FREE_PLAY_CONTEXT).
+    exhaust_selection: list[dict] = field(default_factory=list)
     block_gains_this_card: int = 0        # exact multi-gain block hooks
     # The block those gains actually PRODUCED, which is a different question:
     # DodgeAndRoll pays BlockNextTurn equal to what GainBlock returned, after
