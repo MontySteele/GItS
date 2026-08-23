@@ -275,6 +275,9 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "modify_bombs": [_hook("private", "bombs", "use")],
     "chance_bomb_per_detonation": [_hook("private", "bombs", "write")],
     "gain_spark": [_hook("private", "sparks", "write")],
+    # A competing use for the bank, mirroring spend_encore: the Sparks paid
+    # here are Sparks the threshold cash-out no longer reaches (packet 4.5).
+    "spend_spark": [_hook("private", "sparks", "use")],
     # --- Furina ---
     "gain_encore": [_hook("private", "encore", "write")],
     "spend_encore": [_hook("private", "encore", "use")],
