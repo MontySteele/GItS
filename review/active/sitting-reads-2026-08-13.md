@@ -7,6 +7,14 @@
 > nothing, tunes nothing, and reads nothing into the numbers. Every call these
 > numbers feed stays [USER]'s.
 
+> **ARCHIVE NOTE (Kokomi rows only), 2026-08-23 — `C10 → C11`.** The
+> rotation law landed (`CONSTANTS_VERSION` 11): a Status or Curse is no
+> longer conscriptable or chosen-exhaustable by Kokomi and pays no
+> Charge/Burst. Every Kokomi number below is therefore pre-C11 archive —
+> quoted only with its stamp, not comparable unlabeled with any C11 read.
+> All non-Kokomi rows are untouched by C11 and remain the standing
+> baseline. Nothing below is rewritten (R101b).
+
 ## Terms used here
 
 - **The stamp.** A version label like `RT11/D14/P7/C9`. It says which version of

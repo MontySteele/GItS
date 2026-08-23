@@ -21,12 +21,12 @@
   current build is the comparison baseline from now on** — the dead v0.3 W1
   comparator is not rebuilt, and later Kokomi numbers are compared against this
   state, not against the archived world.
-- **Artifact coexistence + Kokomi rotation law — RULED 2026-08-23, staged
-  PROPOSED** on branch `artifact-muster-sweep` (the `S4-G13` staged-branch
-  precedent; `CONSTANTS_VERSION` 10→11 PROPOSED): Auras and Bombs coexist with
-  Artifact (only real debuffs consume it), and Kokomi never Exhausts — nor
-  accrues Charge/Burst from — a Status or Curse. [USER] picks whether it joins
-  the open window or waits for the payoff-reach freeze.
+- **Artifact coexistence + Kokomi rotation law — RULED and LANDED 2026-08-23**
+  (`CONSTANTS_VERSION` 11, [USER] pulled the staged branch into the open
+  window): Auras and Bombs coexist with Artifact (only real debuffs consume
+  it), and Kokomi never Exhausts — nor accrues Charge/Burst from — a Status
+  or Curse. Pre-C11 Kokomi combat numbers are archive; a later
+  `staged/eb74-lever2-b-alone` pull re-baselines on C11.
 - **Roster slot 4 — Zhongli countersigned (R108), not yet scheduled.** The deep
   dive is unblocked; the pre-slot-4 gate is the roster registry (`tier0/roster.py`).
 

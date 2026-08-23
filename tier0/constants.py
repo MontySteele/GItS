@@ -1185,11 +1185,11 @@ BANNER_FEATURED_SLOTS = 3
 # DRAFTER_VERSION correctly does NOT bump -- no offer-time price moved and the
 # payoff-reach D14 pin stands; draft.POLICY_VERSION does not move either.
 # RUNTEMPLATE moves in the SAME window on its own ground (11 -> 12, above).
-# CONSTANTS_VERSION 11 -- PROPOSED, NOT LIVE ([USER] ruling 3, 2026-08-23;
-# the `S4-G13` staged-branch precedent). This note rides branch
-# `artifact-muster-sweep` and the live number below does NOT move until
-# [USER] pulls the branch -- into the open window, or after the payoff-reach
-# freeze; that sequencing choice is [USER]'s (the QUEUE row's `EB-69` note).
+# CONSTANTS_VERSION 11 ([USER] rulings 1-3, 2026-08-23). Built PROPOSED on
+# branch `artifact-muster-sweep` per ruling 3 (the `S4-G13` staged-branch
+# precedent), then PULLED BY [USER] the same day -- the sequencing choice
+# ruling 3 reserved was made as "join the open window", so the number below
+# is live and every branch that ships from here is C11.
 # Ground: an engine BEHAVIOUR change that moves Kokomi combat numbers -- the
 # rotation law ([USER] ruling 2, 2026-08-23). A Status or a Curse is never
 # one of her cards: `_op_conscript` never transforms one, `_op_exhaust_from`
@@ -1213,8 +1213,9 @@ BANNER_FEATURED_SLOTS = 3
 # draft.POLICY_VERSION does not move either. The `EB-69` collision note
 # applies to this branch exactly as it does to
 # `staged/eb74-lever2-b-alone`: whichever lands second re-baselines on the
-# first.
-CONSTANTS_VERSION = 10
+# first -- this one landed first, so a later `eb74` pull re-baselines on
+# C11 (its branch note's 9 -> 10 is stale and rebases to 11 -> 12).
+CONSTANTS_VERSION = 11
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
