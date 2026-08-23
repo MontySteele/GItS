@@ -1024,9 +1024,35 @@ def _op_apply_aura(state: CombatState, fx: dict, card: Card) -> None:
                                   "apply_aura_op")
 
 
+def _pilot_policies():
+    """The EB-118 switch, or None while it is off.
+
+    LATE IMPORT, and the only direction this dependency may run in: the pilot
+    imports this module, so the engine may reach the pilot at CALL time and
+    never at import time. The flag is read off the module rather than bound at
+    import so a test (and the Phase-2 landing) can flip one name.
+    """
+    from tier0.pilot import policy
+    return policy if policy.PILOT_POLICIES_ENABLED else None
+
+
 def _op_place_bomb(state: CombatState, fx: dict, card: Card) -> None:
+    spec = fx.get("target", "random_enemy")
+    # EB-118 (1): the CONCENTRATION form only. `random_enemy`/`random_enemies`
+    # placements are a variance profile, not a decision, and a free play's
+    # forced random targeting is parity law (_pick_targets) -- neither is the
+    # pilot's to choose.
+    concentrating = spec == "enemy" and not state.force_random_targeting
     for _ in range(_amount(state, fx.get("amount", 1))):
-        for enemy in _pick_targets(state, fx.get("target", "random_enemy")):
+        # Re-evaluated per bomb: a multi-bomb placement sees the pile it is
+        # itself building, the same way the random roll is re-rolled per bomb.
+        pol = _pilot_policies() if concentrating else None
+        if pol is not None:
+            chosen = pol.bomb_placement_target(state, fx, card)
+            targets = [chosen] if chosen is not None else []
+        else:
+            targets = _pick_targets(state, spec)
+        for enemy in targets:
             enemy.bombs.append(Bomb(damage=fx["bomb_damage"],
                                     element=fx.get("element", "pyro"),
                                     turn_placed=state.turn))
@@ -1643,7 +1669,16 @@ def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
     for _ in range(n):
         if not pool:
             break
-        victim = _worst_card(pool) if chosen else state.rng.choice(pool)
+        if chosen:
+            # EB-118 (2): the chosen branch only. A random exhaust is not a
+            # decision, and `_op_discard`/`_op_conscript` keep the placeholder
+            # -- this policy is scoped to `exhaust_from`, where the payout is
+            # on the exhausting card.
+            pol = _pilot_policies()
+            victim = (pol.exhaust_victim(state, pool, card) if pol is not None
+                      else _worst_card(pool))
+        else:
+            victim = state.rng.choice(pool)
         pool = [c for c in pool if c is not victim]
         remove_instance(hand, victim)
         state.player.exhaust_pile.append(victim)

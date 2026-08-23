@@ -626,6 +626,81 @@ STOKE_FUEL_SATED = 0.15     # per point beyond it -- not zero: surplus still
 # changes the set, and two pilot readings across it are not one measurement.
 PILOT_COMPANION_COPY_VALUE = 1.5
 
+# --- EB-118 pilot policies (STAGED). Two decisions the engine has been making
+# with a placeholder heuristic move here, behind ONE switch that DEFAULTS OFF.
+#
+# WHY A SWITCH: both policies change what the pilot DECIDES, so every Klee and
+# Kokomi tier-0.5 number re-baselines the moment they are live. Off, the two
+# call sites (`effects._op_place_bomb` concentration form,
+# `effects._op_exhaust_from` chosen form) run the identical code they ran
+# before this file was touched -- which is what keeps the frozen calibration
+# battery and every regression pin byte-identical on this branch. Turning it on
+# is the POLICY_VERSION event, written PROPOSED in tier05/draft.py and executed
+# at landing, not here.
+#
+# The constants below are filed here rather than in constants.py for the reason
+# at the head of the STOKE_* block -- constants.py is the surface the C# parity
+# gate compares by value and the mod ships no bot -- and they JOIN the set
+# C.PILOT_WEIGHTS_VERSION labels. That stamp moves with the switch, in the same
+# landing edit: while the switch is off no weight below is ever read, so the
+# labeled set is arithmetically unchanged and the stamp must NOT move yet.
+PILOT_POLICIES_ENABLED = False
+
+# Bomb placement (concentration form: `place_bomb` with `target: enemy`). The
+# scale is DAMAGE POINTS: a point of bomb damage that will actually land is
+# worth 1, so every other term below is priced against a point of damage and
+# the weights can be read as "how many points of damage is this worth".
+BOMB_LANDED_DAMAGE_VALUE = 1.0    # per point the target can still absorb
+BOMB_LETHAL_WASTE_WEIGHT = 1.0    # per point past what it has left: bombs
+                                  # beyond lethal are simply not dealt, and
+                                  # the pile is spent on a corpse either way
+BOMB_CONCENTRATION_VALUE = 2.0    # per bomb ALREADY on a target that lives to
+                                  # detonation -- one pile detonates as one
+                                  # event, which is what the pile readers and
+                                  # Pounding Surprise's per-detonation riders
+                                  # are priced on
+BOMB_CONCENTRATION_STACK_CAP = 3  # counted stacks, at most: past three the
+                                  # marginal pile-reader gain is noise next to
+                                  # the lethal-waste risk it carries
+BOMB_SUPPRESSION_VALUE = 1.0      # per point of the enemy's next attack that
+                                  # arming an UNSUPPRESSED target costs it
+                                  # (powers.modify_damage_dealt applies the
+                                  # Weak rate). A point prevented and a point
+                                  # dealt are the same point, hence 1.0
+BOMB_READER_LETHAL_POP_VALUE = 4.0   # a detonator in hand, aimed here, and the
+                                     # pile pops LETHAL: the one case the
+                                     # damage estimator already credits early
+                                     # detonation for
+BOMB_EARLY_POP_PENALTY = 3.0      # same detonator, SUB-lethal pop: the bomb is
+                                  # cashed this turn instead of detonating on
+                                  # its own next turn, forfeiting nothing but
+                                  # buying a smaller event
+BOMB_MOVE_READER_AIM_VALUE = 1.0  # `move_bombs` gathers onto the aimed enemy,
+                                  # so a pile already there is one it does not
+                                  # have to move
+
+# Exhaust selection (chosen `exhaust_from`). Candidate score is
+#   payout(this card, candidate) - future_value(candidate)
+# and the DEFAULT payout hook is identity-blind (0.0 for every candidate), so
+# the default ranking is purely "lose the least". A grammar that pays per
+# victim identity passes its own hook; the interface exists so that arrives as
+# a parameter and not as a second heuristic.
+EXHAUST_COST_EFFICIENCY_WEIGHT = 0.5   # future value is per-energy: a card's
+                                       # worth divided by 1 + w x cost, so an
+                                       # expensive payoff is discounted for the
+                                       # turn it costs to deploy, not for being
+                                       # big. This is the term the placeholder
+                                       # had BACKWARDS -- it exhausted the
+                                       # expensive card first, by cost alone
+EXHAUST_JUNK_BONUS = 6.0          # a Status or Curse is negative future value:
+                                  # it costs a draw every shuffle. Reachable
+                                  # only for pools Kokomi's rotation law does
+                                  # not govern (post-C11 her pool has no junk
+                                  # in it), e.g. a real_ironclad True Grit+
+EXHAUST_SELF_EXHAUST_DISCOUNT = 0.5   # a card that Exhausts itself on play was
+                                      # leaving the deck anyway; only the one
+                                      # use is lost
+
 # EB-29t (POLICY 6): the promoted Test Subject reads (R128). The Strength an
 # Enrage trigger grants is PERMANENT, but the greedy pilot prices it over a
 # deliberately short horizon of future attack turns -- understating a
@@ -775,3 +850,152 @@ def _lethal_card(state: CombatState, playable: list[Card],
         if d >= remaining:
             return card
     return None
+
+
+# ---------------------------------------------------------------------------
+#  EB-118 (1): bomb placement
+# ---------------------------------------------------------------------------
+
+def _hand_has_op(state: CombatState, op: str) -> bool:
+    return any(fx.get("op") == op
+               for c in state.player.hand for fx in c.effects)
+
+
+def _pile_damage(state: CombatState, enemy) -> float:
+    """What this enemy's EXISTING pile detonates for, `bomb_damage_up`
+    included -- the same sum `effects.detonate_bombs` pays out, per bomb."""
+    up = state.player.powers.get("bomb_damage_up", 0)
+    return sum(b.damage + up for b in enemy.bombs)
+
+
+def bomb_placement_score(state: CombatState, fx: dict, enemy) -> float:
+    """Value of putting ONE bomb from `fx` on `enemy`.
+
+    Lowest HP alone is not this decision: a bomb is damage that arrives at the
+    START of the next player turn (combat._player_turn detonates last turn's
+    piles), so what it is worth depends on whether the target is still alive
+    to receive it, on the pile it joins, and on the attack it suppresses on the
+    way. Pure reader of state, no rng -- determinism is preserved.
+    """
+    p = state.player
+    per_bomb = fx["bomb_damage"] + p.powers.get("bomb_damage_up", 0)
+    pending = _pile_damage(state, enemy)
+    # Block is counted as effective HP: an enemy blocking on its own turn is
+    # still holding that Block when the pile goes off at the player turn
+    # start. Wrong only in the conservative direction (it understates waste).
+    headroom = max(0.0, enemy.hp + enemy.block - pending)
+    landed = min(per_bomb, headroom)
+    score = (landed * BOMB_LANDED_DAMAGE_VALUE
+             - (per_bomb - landed) * BOMB_LETHAL_WASTE_WEIGHT)
+
+    survives = headroom > 0
+    if survives and enemy.bombs:
+        score += (min(len(enemy.bombs), BOMB_CONCENTRATION_STACK_CAP)
+                  * BOMB_CONCENTRATION_VALUE)
+    if not enemy.bombs and not enemy.bomb_suppression_spent:
+        # The suppression latch arms on the FIRST bomb (powers reads
+        # `bool(bombs) and not spent`), so this is marginal only for an empty
+        # target -- which is precisely the term that argues against blind
+        # concentration. Priced at the Weak rate the latch actually applies.
+        intent = enemy.current_intent()
+        if intent.get("kind") == "attack":
+            swing = (enemy.ramped_amount(intent, state.turn)
+                     * enemy.ramped_times(intent))
+            score += (swing * (1.0 - C.WEAK_DEALT_MULT)
+                      * BOMB_SUPPRESSION_VALUE)
+
+    aim = effects._default_target(state)
+    if enemy.bombs and enemy is aim:
+        if _hand_has_op(state, "detonate"):
+            score += (BOMB_READER_LETHAL_POP_VALUE
+                      if pending + per_bomb >= enemy.hp + enemy.block
+                      else -BOMB_EARLY_POP_PENALTY)
+        if _hand_has_op(state, "move_bombs"):
+            score += BOMB_MOVE_READER_AIM_VALUE
+    return score
+
+
+def bomb_placement_target(state: CombatState, fx: dict,
+                          card: Optional[Card] = None):
+    """The enemy this bomb goes on, or None on an empty board.
+
+    Ties fall back to the pre-policy pick (lowest HP, then board order) so a
+    board the policy has nothing to say about resolves exactly as it did.
+    """
+    living = state.living_enemies
+    if not living:
+        return None
+    best = None
+    best_key = None
+    for i, enemy in enumerate(living):
+        key = (bomb_placement_score(state, fx, enemy), -enemy.hp, -i)
+        if best_key is None or key > best_key:
+            best, best_key = enemy, key
+    return best
+
+
+# ---------------------------------------------------------------------------
+#  EB-118 (2): exhaust selection
+# ---------------------------------------------------------------------------
+
+def identity_blind_payout(state: CombatState, card: Optional[Card],
+                          candidate: Card) -> float:
+    """Default payout hook: what the EXHAUSTING card pays for this particular
+    victim. Today no shipped grammar reads the victim's identity -- Stoke and
+    True Grit+ pay the same for any card -- so the honest default is a
+    constant, and a constant cannot change the ranking. The hook exists so
+    that when an identity-sensitive card is written its payout arrives as a
+    parameter instead of as a second heuristic inside this chooser."""
+    return 0.0
+
+
+def exhaust_future_value(state: CombatState, card: Card) -> float:
+    """What keeping this card is worth, per energy.
+
+    The four terms enter at weight 1 apiece: the chooser runs at RESOLUTION
+    time, where the pilot's archetype weight set is not reachable (the weights
+    are closed over by `make_pilot`), so it cannot ask which pilot is flying.
+    Under-weighting a character term is the safe direction -- it makes the
+    chooser conservative about exhausting machinery, not eager.
+    """
+    val = (_expected_damage(state, card)
+           + _block_value(state, card)
+           + _scaling_value(state, card)
+           + _tempo_value(state, card)
+           + _sustain_value(state, card))
+    if card.is_junk:
+        val -= EXHAUST_JUNK_BONUS
+    cost = card_cost(state, card)
+    val /= 1.0 + EXHAUST_COST_EFFICIENCY_WEIGHT * max(0, cost)
+    if card.exhaust:
+        val *= EXHAUST_SELF_EXHAUST_DISCOUNT
+    return val
+
+
+def _legacy_worst_key(card: Card) -> tuple:
+    """`effects._worst_card`'s key, mirrored so ties resolve to the pick this
+    policy replaces. Kept in sync by test_eb118_switch_off."""
+    return (card.type != "attack",
+            card.cost if isinstance(card.cost, int) else 99)
+
+
+def exhaust_victim(state: CombatState, pool: list[Card],
+                   card: Optional[Card] = None, payout=None) -> Card:
+    """Which card a CHOSEN exhaust spends, out of the already-legal `pool`.
+
+    `pool` arrives filtered by the engine (kit exemption, an explicit
+    `filter:`, and Kokomi's rotation law, which already drops junk for her);
+    this chooser never widens it. Score is the payout for this victim minus
+    what losing it costs, so with the identity-blind default the pick is the
+    least valuable card -- NOT the most expensive one, which is what the
+    placeholder read and is the inversion `test_eb118_policies` pins.
+    """
+    payout = payout or identity_blind_payout
+    best = None
+    best_key = None
+    for i, cand in enumerate(pool):
+        key = (payout(state, card, cand) - exhaust_future_value(state, cand),
+               _legacy_worst_key(cand), -i)
+        if best_key is None or key > best_key:
+            best, best_key = cand, key
+    return best
