@@ -155,6 +155,12 @@ DIRECT_ROLE = {
     "exhaust_from": "utility",
     "detonate": "utility",
     "salon_bow": "utility",
+    # EB-118 §5.5. `salon_perform` is the stage's own act brought forward, so
+    # it keeps the Salon's voice rather than reading as frontload -- what it
+    # delivers depends on WHO is leftmost, which the row cannot see.
+    # `salon_rotate` delivers nothing at all on its own face.
+    "salon_perform": "utility",
+    "salon_rotate": "utility",
 }
 
 # Powers that are NOT a token modifier. Everything whose name begins with a
@@ -207,6 +213,11 @@ CHARACTER_GENERATES = {
 CONSUMES = {
     "detonate": "bomb",
     "salon_bow": "salon_member",
+    # EB-118 §5.5: both READ the stage. `salon_perform` also spends Encore,
+    # but through the shared tick path rather than as a printed cost, so the
+    # row that prints it credits at the card level like every other consumer.
+    "salon_perform": "salon_member",
+    "salon_rotate": "salon_member",
     "spend_encore": "encore",
     "crash_fanfare": "fanfare",
 }
@@ -661,7 +672,8 @@ def scan_row(row: dict, character: str = "") -> dict:
             unconditional_body = True
         if not gated and op in ("conscript", "generate_guest_star",
                                 "summon_kurage", "place_bomb", "detonate",
-                                "salon_bow", "exhaust_from", "refresh_all_auras",
+                                "salon_bow", "salon_perform",
+                                "exhaust_from", "refresh_all_auras",
                                 "apply_aura", "copy_companion_in_hand",
                                 "copy_spotlighted_in_hand", "replay_next_companion",
                                 "copy_companions_played_this_combat"):

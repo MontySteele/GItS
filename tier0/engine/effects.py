@@ -183,6 +183,19 @@ def _runtime_count(state: CombatState, token: str,
         # powers['salon_member'] == len(salon) is maintained at the deploy
         # site. Matinée Performance's per-member hits are the one user.
         return p.powers.get("salon_member", 0)
+    if token == "leftmost_salon_act":
+        # EB-118 §5.5: what the NEXT performer's act is worth right now --
+        # the printed base plus the Focus term and Grand Salon, at the price
+        # the stage can currently pay. The reward half of the leftmost read:
+        # a card body can pay off the performer it is about to move or
+        # perform without restating the member table. 0 on an empty stage.
+        #
+        # Resolves through salon_tick_amount, the same expression
+        # salon_member_act pays out and the C# role chip renders.
+        if not p.salon:
+            return 0
+        paid = p.encore >= C.SALON_TICK_ENCORE_COST
+        return salon_tick_amount(state, p.salon[0], paid)
     if token == "X":
         # Skewer: hit count = the energy actually spent, the same number
         # `amount: X` resolves. Spelled with the same token deliberately.
@@ -1307,6 +1320,53 @@ def _op_salon_bow(state: CombatState, fx: dict, card: Card) -> None:
     p.powers["salon_member"] = len(p.salon)
 
 
+def _op_salon_rotate(state: CombatState, fx: dict, card: Card) -> None:
+    """Rotate the leftmost member to the BACK of the queue (EB-118 §5.5).
+
+    A pure reorder: the member keeps its identity, performs NO tick, drains
+    NO Encore and triggers NO bow or replacement effect. It buys exactly one
+    thing -- which performer the FIFO end offers next, to `salon_bow`, to a
+    deploy landing on a full stage, and to the `leftmost_salon_member_*`
+    reads. powers['salon_member'] is untouched by construction: the queue's
+    length cannot change here.
+
+    Inert on an empty stage, and NOT silently: unlike `salon_bow`, whose
+    no-op is legible from the empty stage itself, a rotate that found nothing
+    to rotate is invisible in the state afterwards. `conscript_whiffed` is
+    the pattern.
+    """
+    p = state.player
+    if not p.salon:
+        state.emit("salon_rotate_whiffed")
+        return
+    for _ in range(_amount(state, fx.get("amount", 1))):
+        p.salon.append(p.salon.pop(0))
+    state.emit("salon_rotate", company=list(p.salon))
+
+
+def _op_salon_perform(state: CombatState, fx: dict, card: Card) -> None:
+    """The leftmost member performs NOW (EB-118 §5.5): an extra slot passive,
+    off-turn, at the standard price.
+
+    Resolves through `salon_member_act` -- the same function the turn-start
+    upkeep calls -- so the Encore upkeep, the dry three-quarters, the
+    Focus/Grand-Salon scaling, the burst particle and the `salon_tick`
+    telemetry row are inherited rather than restated. That sharing is the
+    contract, not an implementation convenience.
+
+    The member STAYS on stage: this is a performance, not a bow, and not a
+    rotation. `amount: N` therefore performs the leftmost member N times;
+    pair it with `salon_rotate` to spread the acts across the company.
+    """
+    p = state.player
+    if not p.salon:
+        state.emit("salon_perform_whiffed")
+        return
+    for _ in range(_amount(state, fx.get("amount", 1))):
+        if not salon_member_act(state, p.salon[0]):
+            break
+
+
 def _op_generate_guest_star(state: CombatState, fx: dict, card: Card) -> None:
     """Guest Star generation (kickoff §9), four guardrails all structural:
     this-combat-only (tokens live in combat piles; decks rebuild from ids
@@ -1801,6 +1861,11 @@ PREDICATE_PREFIXES = frozenset({
     "charge_at_least_",
     "fanfare_at_least_",
     "encore_at_least_",
+    # EB-118 §5.5: WHO is next to perform. Parameterised on the member name
+    # rather than tabled per member, for the same reason the integer bars are
+    # -- but the argument is closed here, because SALON_MEMBERS is: a typo'd
+    # member is a load-time failure, not a branch that never fires.
+    "leftmost_salon_member_",
 })
 
 
@@ -1816,6 +1881,8 @@ def is_known_predicate(name: str) -> bool:
             return False
         if prefix in ("target_has_power_", "self_has_power_"):
             return True
+        if prefix == "leftmost_salon_member_":
+            return arg in C.SALON_MEMBERS
         # The integer forms must actually carry an integer. A typo'd
         # `fanfare_at_least_ten` would otherwise pass a name-only check and
         # raise from int() mid-combat -- the very failure being moved earlier.
@@ -1892,6 +1959,15 @@ def _predicate(state: CombatState, name: str) -> bool:
     # --- Furina sheet-pass predicates ---
     if name == "has_salon_members":
         return state.player.powers.get("salon_member", 0) > 0
+    if name.startswith("leftmost_salon_member_"):
+        # EB-118 §5.5: which performer is NEXT -- the head of the FIFO queue,
+        # the same end `salon_bow` pops, `salon_perform` acts on and a deploy
+        # into a full stage displaces. Reads the queue, not the mirror
+        # counter: powers['salon_member'] carries the count and cannot carry
+        # identity. False on an empty stage for every member name.
+        want = name[len("leftmost_salon_member_"):]
+        salon = state.player.salon
+        return bool(salon) and salon[0] == want
     if name == "spotlight_set":
         return state.player.spotlight is not None
     if name == "spotlight_moved_this_turn":
@@ -2449,6 +2525,8 @@ OPS = {
     "raise_fanfare_cap": _op_raise_fanfare_cap,
     "crash_fanfare": _op_crash_fanfare,
     "salon_bow": _op_salon_bow,
+    "salon_rotate": _op_salon_rotate,
+    "salon_perform": _op_salon_perform,
     "generate_guest_star": _op_generate_guest_star,
     "copy_spotlighted_in_hand": _op_copy_spotlighted_in_hand,
     "heal": _op_heal,
@@ -2733,6 +2811,66 @@ def player_turn_start_triggers(state: CombatState) -> None:
         gain_sparks(state, 1)
 
 
+def salon_tick_amount(state: CombatState, member: str, paid: bool) -> int:
+    """What this member's tick is worth RIGHT NOW: the printed base plus the
+    Focus term and Grand Salon (_salon_amount), then the dry reduction when
+    the member cannot pay. Crabaletta and Chevalmarin print damage, the Usher
+    prints Block; each member prints exactly one numeric, so one reader
+    answers for all three.
+
+    The mirror of C# SalonMemberPower.TickValue, and the reason both exist:
+    the resolution path and every reader of "what will this member do" must
+    be the same expression, not two copies that agree until one is edited.
+    """
+    spec = C.SALON_MEMBERS[member]["tick"]
+    base = spec.get("damage", 0) or spec.get("block", 0)
+    amt = _salon_amount(state, base)
+    return amt if paid else int(amt * C.SALON_DRY_DAMAGE_MULT)
+
+
+def salon_member_act(state: CombatState, member: str) -> bool:
+    """ONE member's slot passive, with the full standard bill: the Encore
+    upkeep, the dry three-quarters when it goes unpaid, the Focus/Grand-Salon
+    scaling, the burst particle, and the `salon_tick` telemetry row.
+
+    THE ONLY implementation of a member acting. `salon_tick` runs it once per
+    member at the start of the player turn; the `salon_perform` op runs it on
+    demand for the leftmost member. A second copy of this body is the defect
+    this shape exists to make impossible -- a card that performs a member
+    must not be able to drift from the upkeep that performs the same member.
+
+    Returns False when the stage cannot act at all (the player is dead, or
+    there is no living enemy left to act against) -- the caller's break
+    condition, kept here so the on-demand verb inherits it rather than
+    restating it.
+    """
+    p = state.player
+    if not p.alive or not state.living_enemies:
+        return False
+    spec = C.SALON_MEMBERS[member]["tick"]
+    paid = p.encore >= C.SALON_TICK_ENCORE_COST
+    state.emit("salon_tick", member=member, paid=paid)
+    if paid:
+        # No `card`: the upkeep bill is the STAGE's, not any one card's,
+        # and the per-member cut already exists on the `salon_tick` row
+        # that tier05.encore_telemetry reads.
+        resources.spend_encore(state, C.SALON_TICK_ENCORE_COST,
+                               "salon_upkeep")
+    if spec.get("damage", 0):
+        enemy = state.rng.choice(state.living_enemies)
+        deal_damage_to_enemy(state, enemy,
+                             salon_tick_amount(state, member, paid),
+                             element="hydro", source="salon")
+    if spec.get("block", 0):
+        amt = salon_tick_amount(state, member, paid)
+        p.block += amt
+        state.emit("block", amount=amt)
+    if p.burst_max:
+        # §1 particle economy
+        resources.gain_burst(state, C.SALON_TICK_BURST, "salon_tick")
+    return True
+
+
 def salon_tick(state: CombatState) -> None:
     """Salon v2 (rework plan §1): each active member performs its UNIQUE
     slot passive at the START of the player turn, in queue order
@@ -2754,35 +2892,8 @@ def salon_tick(state: CombatState) -> None:
         state.emit("salon_upkeep", members=len(p.salon), encore=p.encore,
                    cost=C.SALON_TICK_ENCORE_COST * len(p.salon))
     for member in list(p.salon):
-        if not p.alive or not state.living_enemies:
+        if not salon_member_act(state, member):
             break
-        spec = C.SALON_MEMBERS[member]["tick"]
-        paid = p.encore >= C.SALON_TICK_ENCORE_COST
-        state.emit("salon_tick", member=member, paid=paid)
-        if paid:
-            # No `card`: the upkeep bill is the STAGE's, not any one card's,
-            # and the per-member cut already exists on the `salon_tick` row
-            # that tier05.encore_telemetry reads.
-            resources.spend_encore(state, C.SALON_TICK_ENCORE_COST,
-                                   "salon_upkeep")
-
-        def _num(base: int) -> int:
-            amt = _salon_amount(state, base)
-            return amt if paid else int(amt * C.SALON_DRY_DAMAGE_MULT)
-
-        dmg = spec.get("damage", 0)
-        if dmg:
-            enemy = state.rng.choice(state.living_enemies)
-            deal_damage_to_enemy(state, enemy, _num(dmg), element="hydro",
-                                 source="salon")
-        blk = spec.get("block", 0)
-        if blk:
-            amt = _num(blk)
-            p.block += amt
-            state.emit("block", amount=amt)
-        if p.burst_max:
-            # §1 particle economy
-            resources.gain_burst(state, C.SALON_TICK_BURST, "salon_tick")
 
 
 def _exhaust_autoplay_sweep(state: CombatState) -> None:
