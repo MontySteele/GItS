@@ -854,6 +854,15 @@ CARD_FIELDS = {
     # the design working twice: a card that retains in the sim and does not
     # in the game is precisely the divergence this whitelist exists to stop.
     "retain",
+    # EB-118: Ethereal on the BASE card, the A9 / Track-C.1 story a third
+    # time. The keyword rail below already carried Exhaust/Innate/Retain and
+    # the game owns the whole behaviour from the keyword alone
+    # (CombatManager.EndPlayerTurnInternal exhausts every hand card whose
+    # Keywords contain Ethereal, causedByEthereal: true), so nothing is
+    # reimplemented here -- only the base-card spelling was missing, and
+    # without this entry the first card ruled Ethereal from print would BLOCK
+    # with "card field(s) ['ethereal'] not understood".
+    "ethereal",
     # Companion identity/reward metadata.
     "star", "element", "role_c", "personal_pool", "nation", "character",
     "guest_star",
@@ -2353,9 +2362,10 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "floor_drop": any(e["op"] == "crash_fanfare" for e in effects),
         # cards: tier0 bumps the add_card amount.
         "cards": any(e["op"] == "add_card" for e in effects),
-        # remove: value-checked in the loop below (only 'exhaust' lands;
-        # 'self_damage' remains structural).
-        "remove": bool(card.get("exhaust")),
+        # remove: value-checked in the loop below, which owns the whole key
+        # because WHICH field must be present depends on the VALUE
+        # ('exhaust' and 'ethereal' land; 'self_damage' remains structural).
+        "remove": False,
         # copy_cost_override: play-time IsUpgraded read in the copy emission.
         "copy_cost_override": any(e["op"] == "copy_companion_in_hand"
                                   for e in effects) or any(
@@ -2475,8 +2485,18 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                 return {}, "delta 'add: draw' on a repeating card (repeat semantics not expressible)"
         if key == "condition" and value != "unconditional":
             return {}, f"delta 'condition: {value}' (only 'unconditional' is tier0 grammar)"
-        if key == "remove" and value != "exhaust":
-            return {}, f"delta 'remove: {value}' not expressible by codegen (structural upgrade)"
+        if key == "remove":
+            # Both removable values name a base-card KEYWORD FIELD of the same
+            # name, so the presence check is the field lookup. Owned here
+            # rather than in `has` above: `has` is keyed by delta KEY and this
+            # delta's requirement is keyed by its VALUE.
+            if value not in ("exhaust", "ethereal"):
+                return {}, f"delta 'remove: {value}' not expressible by codegen (structural upgrade)"
+            if not card.get(value):
+                return {}, (
+                    f"delta 'remove: {value}' on a card that does not print "
+                    f"{value} (sheet/card mismatch)")
+            continue
         if not has[key]:
             return {}, f"delta key '{key}' has no matching effect on this card (sheet/card mismatch)"
     return dict(deltas), None
@@ -5062,6 +5082,12 @@ def build_upgrade(card: dict) -> list[str]:
         # touches only the upgraded copy; the auto-keyword text follows.
         done.add("remove")
         lines.append("RemoveKeyword(CardKeyword.Exhaust);")
+    if deltas.get("remove") == "ethereal":
+        # tier0: card.ethereal = False. The canon shape verbatim -- Apparition,
+        # EchoForm and VoidForm each print Ethereal and each remove it in
+        # OnUpgrade with this one line and nothing else.
+        done.add("remove")
+        lines.append("RemoveKeyword(CardKeyword.Ethereal);")
     if "copy_cost_override" in deltas:
         done.add("copy_cost_override")
         lines.append(
@@ -5409,6 +5435,15 @@ def emit(
     # (playtest finding 2026-07-20: the tag was invisible on cards). Gameplay
     # still reads ISkillTagCard; the keyword is what the player sees.
     keywords = []
+    # EB-118. FIRST in the array, because the canon pairing spells it that way
+    # (Apparition: `{ Ethereal, Exhaust }`) and an Ethereal card is very often
+    # also an Exhaust card. The keyword is the whole implementation: the game's
+    # own end-of-turn sweep reads Keywords and exhausts the card
+    # (causedByEthereal: true), so there is no body to emit and no hook to
+    # register. `remove: ethereal` upgrades ride the RemoveKeyword path in
+    # build_upgrade, exactly as Apparition/EchoForm/VoidForm do.
+    if card.get("ethereal"):
+        keywords.append("CardKeyword.Ethereal")
     if card.get("exhaust"):
         keywords.append("CardKeyword.Exhaust")
     # A9: base-card Innate rides the same CanonicalKeywords rail as Exhaust,

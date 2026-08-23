@@ -176,6 +176,70 @@ def test_unknown_card_level_semantics_block_loudly():
     ) == "card field(s) ['future_resource_cost'] not understood"
 
 
+def _ethereal_probe(**kw) -> dict:
+    card = {
+        "id": "eb118_codegen_probe",
+        "name": "EB118 Codegen Probe",
+        "cost": 1,
+        "type": "skill",
+        "rarity": "common",
+        "character": "klee",
+        "effects": [{"op": "block", "amount": 5}],
+    }
+    card.update(kw)
+    return card
+
+
+def test_base_ethereal_rides_the_canonical_keyword_rail(monkeypatch):
+    """EB-118. The keyword IS the implementation -- the game's own
+    end-of-turn sweep reads `Keywords` and exhausts the card -- so a card
+    ruled Ethereal from print emits a keyword and no body, and its
+    remove-on-upgrade delta emits the one line canon uses (Apparition,
+    EchoForm, VoidForm each do exactly this and nothing else).
+    """
+    monkeypatch.setattr(gen, "_upgrade_deltas",
+                        {"eb118_codegen_probe": {"remove": "ethereal"}})
+    card = _ethereal_probe(ethereal=True)
+    assert gen.blocked_reason(card, gen.KLEE_PROFILE) is None
+    source = gen.emit(card, gen.KLEE_PROFILE)
+    assert ("public override IEnumerable<CardKeyword> CanonicalKeywords =>\n"
+            "        new[] { CardKeyword.Ethereal };") in source
+    assert gen.build_upgrade(card) == ["RemoveKeyword(CardKeyword.Ethereal);"]
+    # No hook, no power, no per-card sweep: the mod reuses the game's.
+    assert "Ethereal" not in source.replace("CardKeyword.Ethereal", "")
+
+
+def test_ethereal_precedes_exhaust_in_the_keyword_array(monkeypatch):
+    # Canon spells the common pairing in this order (Apparition), and the two
+    # keywords ride the same array.
+    monkeypatch.setattr(gen, "_upgrade_deltas", {})
+    source = gen.emit(_ethereal_probe(ethereal=True, exhaust=True),
+                      gen.KLEE_PROFILE)
+    assert "new[] { CardKeyword.Ethereal, CardKeyword.Exhaust };" in source
+
+
+def test_a_card_without_the_field_never_mentions_the_keyword(monkeypatch):
+    monkeypatch.setattr(gen, "_upgrade_deltas", {})
+    assert "Ethereal" not in gen.emit(_ethereal_probe(), gen.KLEE_PROFILE)
+
+
+def test_remove_delta_must_match_a_keyword_the_card_prints(monkeypatch):
+    """`remove:` is checked against the base card by VALUE. Removing a
+    keyword the card never printed would generate an upgraded copy identical
+    to its base -- a dead campfire choice, which R24 forbids -- so it is
+    reported as a sheet/card mismatch rather than emitted."""
+    monkeypatch.setattr(gen, "_upgrade_deltas",
+                        {"eb118_codegen_probe": {"remove": "ethereal"}})
+    assert gen.upgrade_plan(_ethereal_probe())[1] == (
+        "delta 'remove: ethereal' on a card that does not print ethereal "
+        "(sheet/card mismatch)")
+    monkeypatch.setattr(gen, "_upgrade_deltas",
+                        {"eb118_codegen_probe": {"remove": "exhaust"}})
+    assert gen.upgrade_plan(_ethereal_probe(ethereal=True))[1] == (
+        "delta 'remove: exhaust' on a card that does not print exhaust "
+        "(sheet/card mismatch)")
+
+
 def test_register_never_reaches_the_generated_csharp():
     """`register` is a SHEET-SIDE voice label. Codegen tolerates it and
     ignores it: strip the field and every generated file must come out
