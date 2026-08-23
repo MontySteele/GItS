@@ -88,11 +88,14 @@ future draws.
 ### 2.1 Charge (the Bake-Kurage meter)
 
 - Accrual (proposed base rule): Whenever one of your cards is Exhausted,
-  gain 1 Charge. Universal — includes Commander-consumed conscripts, the
-  law-mandated Exhaust on every legal heal (Qiqi/Sigewinne become premium
-  Charge events — the healing law is her enabler, not her obstacle),
-  prevention-power procs, and even exhausted statuses/curses (accepted
-  quirk: she is uniquely status-resistant; knob if it distorts).
+  gain 1 Charge. Universal across routes — includes Commander-consumed
+  conscripts, the law-mandated Exhaust on every legal heal (Qiqi/Sigewinne
+  become premium Charge events — the healing law is her enabler, not her
+  obstacle), and prevention-power procs. A Status or a Curse is NOT one of
+  her cards ([USER] rotation law, 2026-08-23): Muster and chosen Exhaust
+  never select one, and a Status/Curse exhaust pays no Charge or Burst
+  particle by any route; a card that may eat those types says so with an
+  explicit filter, reserved Uncommon/Rare design space.
 - Alternative considered: tag-gated accrual ("Consumed" keyword only).
   Rejected in draft for rules-weight; revisit only if sim shows universal
   accrual makes non-priest decks accidentally elite on A2.

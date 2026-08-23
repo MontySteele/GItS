@@ -49,6 +49,11 @@
 #          one-time purchase instead of a repeatable one. A future pass that "simplifies" either law to a single
 #          condition has not simplified it; it has repealed it. Kokomi takes ZERO slots under LAW 2 (the healer
 #          heals no HP) and exactly one under LAW 5.
+#   LAW 6 (rotation law, [USER] 2026-08-23): Kokomi only Exhausts HER OWN cards. A Status or a Curse is never
+#          one of her cards: Muster and every chosen-Exhaust card never select one, and NO Charge (or Burst
+#          particle) accrues from a Status/Curse exhaust by any route. Discard is unchanged. A card that may
+#          eat those types says so on its face with an explicit filter (Dodge Roll's shape) — a dedicated
+#          Uncommon/Rare junk-eater is reserved future design space, and no card on this sheet is one.
 # Element: hydro | Cadence: CATALYST (RULED R52, ask N1): every attack applies hydro — the pool's co-op/reaction
 #   voice, and the structural third of elite A6 (application uptime comes from the cadence, not authored lines).
 # Archetypes (kickoff §3): commander (conscription engine) | priest (Charge/exhaust density) | assist (Sly/discard

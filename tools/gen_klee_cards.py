@@ -3845,6 +3845,11 @@ def build_body(
             # is her engine's throttle and the CHOICE is the gameplay -- a
             # random pick would not be a smaller version of this card, it
             # would be a different card.
+            # ROTATION LAW ([USER] 2026-08-23): the selector offers one of
+            # HER cards -- KokomiResources.OwnCard, which is NotKitCard AND
+            # not a Status/Curse. Sim twin: _op_exhaust_from drops junk from
+            # the unfiltered pool under her relic hook. A card that may eat
+            # junk says so with an explicit `filter:` (the branch below).
             n = ('DynamicVars["Exhausts"].IntValue'
                  if exhaust_upgrade(card) else str(int(eff.get("amount", 1))))
             lines.append(NEWLINE.join([
@@ -3854,7 +3859,7 @@ def build_body(
                 "                new CardSelectorPrefs(",
                 "                    CardSelectorPrefs.ExhaustSelectionPrompt, "
                 f"{n}),",
-                "                KitGrant.NotKitCard, this)).ToList();",
+                "                KokomiResources.OwnCard, this)).ToList();",
                 "            foreach (var victim in toExhaust)",
                 "            {",
                 "                await CardCmd.Exhaust(choiceContext, victim);",

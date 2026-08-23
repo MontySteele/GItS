@@ -21,6 +21,12 @@
   current build is the comparison baseline from now on** — the dead v0.3 W1
   comparator is not rebuilt, and later Kokomi numbers are compared against this
   state, not against the archived world.
+- **Artifact coexistence + Kokomi rotation law — RULED 2026-08-23, staged
+  PROPOSED** on branch `artifact-muster-sweep` (the `S4-G13` staged-branch
+  precedent; `CONSTANTS_VERSION` 10→11 PROPOSED): Auras and Bombs coexist with
+  Artifact (only real debuffs consume it), and Kokomi never Exhausts — nor
+  accrues Charge/Burst from — a Status or Curse. [USER] picks whether it joins
+  the open window or waits for the payoff-reach freeze.
 - **Roster slot 4 — Zhongli countersigned (R108), not yet scheduled.** The deep
   dive is unblocked; the pre-slot-4 gate is the roster registry (`tier0/roster.py`).
 
@@ -115,7 +121,9 @@ contract version is `roster-pck-v3`.
 
 - **tier0 combat kernel** — op interpreter, powers, statuses, reactions,
   resources; comparability-first and emit-only toward the run layer. 7-axis
-  scorecard, anchor `(ref_ironclad, starter) = 3.0`, frozen battery.
+  scorecard, anchor `(ref_ironclad, starter) = 3.0`, frozen battery. Kokomi's
+  rotation law lives at three seams off one predicate (`Card.is_junk`);
+  Artifact itself is C#-only (unmodelled in sim).
   (`docs/current/atlas/tier0-engine.md`, `tier0-harness-tests.md`)
 - **tier0.5 run sim + drafter** — run-level model, acts, runner, draft, and the
   real StS2 16-floor map/route policy. (`docs/current/atlas/tier05-sim-core.md`,

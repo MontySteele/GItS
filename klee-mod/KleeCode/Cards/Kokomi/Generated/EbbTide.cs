@@ -72,7 +72,7 @@ public sealed class EbbTide : CustomCardModel, ICharacterCard
                 choiceContext, Owner,
                 new CardSelectorPrefs(
                     CardSelectorPrefs.ExhaustSelectionPrompt, DynamicVars["Exhausts"].IntValue),
-                KitGrant.NotKitCard, this)).ToList();
+                KokomiResources.OwnCard, this)).ToList();
             foreach (var victim in toExhaust)
             {
                 await CardCmd.Exhaust(choiceContext, victim);

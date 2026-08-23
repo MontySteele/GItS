@@ -364,6 +364,16 @@ class Card:
     def is_companion(self) -> bool:
         return self.role_c is not None or "companion" in self.tags
 
+    @property
+    def is_junk(self) -> bool:
+        """A Status or a Curse -- never one of YOUR cards in the sense
+        Kokomi's rotation law uses (LAW, Kokomi identity, [USER]
+        2026-08-23). One predicate shared by the conscript pool, the
+        chosen-exhaust pool and the Charge funnel so the three cannot
+        drift apart. Lives on Card because refpowers and effects both need
+        it and neither may import the other."""
+        return self.rarity in ("status", "curse")
+
     @classmethod
     def from_dict(cls, d: dict) -> "Card":
         known = {f for f in cls.__dataclass_fields__}

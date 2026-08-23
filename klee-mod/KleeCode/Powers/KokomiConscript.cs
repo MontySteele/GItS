@@ -79,9 +79,13 @@ public static class KokomiConscript
             // carried since the kit sprint), and an already-conscripted
             // recruit is excluded too -- re-mustering the same unit is
             // rules-legal and pointless, and offering it just adds noise to
-            // the prompt.
+            // the prompt. ROTATION LAW ([USER] 2026-08-23): a Muster
+            // transforms one of HER cards -- never a Status or a Curse
+            // (KokomiResources.OwnCard; sim twin _op_conscript's
+            // `not c.is_junk`). Conscripting a Dazed was free curse removal
+            // that also paid Charge when the recruit rotated out.
             bool Eligible(CardModel card) =>
-                KitGrant.NotKitCard(card) && card is not ICompanionCard;
+                KokomiResources.OwnCard(card) && card is not ICompanionCard;
 
             if (!hand.Cards.Any(Eligible)) return;   // conscript whiffed
 

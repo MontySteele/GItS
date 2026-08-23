@@ -59,7 +59,16 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
           + $"[gold]Elemental Reaction[/gold]; a {Element} hit refreshes its duration."),
     };
 
-    public override PowerType Type => PowerType.Debuff;
+    // ARTIFACT COEXISTENCE ([USER] ruling 2026-08-23; LAW "Combat --
+    // elements & reactions"): elemental application coexists with Artifact
+    // rather than consuming it -- only an actual debuff reduces Artifact.
+    // ArtifactPower.TryModifyPowerAmountReceived negates on
+    // GetTypeForAmount(amount) == PowerType.Debuff (decompile-verified,
+    // sts2.dll v0.107.1), and for a positive-amount counter that is exactly
+    // this Type property, so Buff is the whole change. Scope ruled: Auras
+    // and Bombs coexist; Frozen and reaction-applied Vulnerable/Weak/Poison
+    // stay real debuffs (FrozenPower keeps Debuff).
+    public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 

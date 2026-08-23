@@ -71,7 +71,15 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
           + "deals 25% less damage."),
     };
 
-    public override PowerType Type => PowerType.Debuff;
+    // ARTIFACT COEXISTENCE ([USER] ruling 2026-08-23; LAW "Combat --
+    // elements & reactions"): elemental application coexists with Artifact
+    // rather than consuming it. ArtifactPower negates on
+    // GetTypeForAmount(amount) == PowerType.Debuff (decompile-verified,
+    // sts2.dll v0.107.1); Buff takes Bomb out of that gate. Rider included:
+    // Bomb's "first attack -25%" now lands through Artifact too -- ruled
+    // acceptable under "Auras and Bombs" coexist. Frozen and
+    // reaction-applied Vulnerable/Weak/Poison stay real debuffs.
+    public override PowerType Type => PowerType.Buff;
 
     /// <summary>Counter, not Duration: bombs are consumed by detonation, not by time.</summary>
     public override PowerStackType StackType => PowerStackType.Counter;

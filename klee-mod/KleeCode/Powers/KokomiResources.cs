@@ -168,6 +168,33 @@ public static class KokomiResources
     public static bool IsKokomi(Creature? creature) =>
         creature?.Player?.Character is IKokomiCharacter;
 
+    /// <summary>
+    /// ROTATION LAW ([USER] ruling 2026-08-23; LAW "Character identity —
+    /// Kokomi"). "Whenever one of YOUR cards is Exhausted" reads literally: a
+    /// Status or a Curse is never one of her cards. This one predicate is the
+    /// law's whole surface in the mod -- the Muster candidate filter, every
+    /// generated chosen-Exhaust selector, and the Charge/Burst funnel all ask
+    /// it -- so the three cannot drift apart. Sim twin: Card.is_junk
+    /// (tier0/engine/state.py), used at the same three seams.
+    ///
+    /// The retired behaviour was kickoff v1 §2.1's "statuses/curses count
+    /// too (accepted quirk)": a Dazed in hand was free curse removal that
+    /// also paid Charge when the recruit rotated out, which made her uniquely
+    /// status-resistant for nothing. A card that IS allowed to eat junk says
+    /// so on its face with an explicit filter (Dodge Roll's shape) -- that is
+    /// the design space this vacates, at Uncommon/Rare.
+    /// </summary>
+    public static bool IsJunk(CardModel card) =>
+        card.Rarity == CardRarity.Status || card.Rarity == CardRarity.Curse;
+
+    /// <summary>
+    /// The selector predicate for every Kokomi verb that picks one of HER
+    /// cards to rotate out: kit-exempt (the v1.9 invariant every discard and
+    /// exhaust pool already rides) AND not junk.
+    /// </summary>
+    public static bool OwnCard(CardModel card) =>
+        KitGrant.NotKitCard(card) && !IsJunk(card);
+
     private static ChargeResource? Find(Creature? creature)
     {
         var owner = creature?.Player;
@@ -283,6 +310,13 @@ public sealed class KokomiResourceHooks : AbstractModel
         // happens to catch here only because the helpers take Creature.
         var owner = card.Owner?.Creature;
         if (!KokomiResources.IsKokomi(owner)) return Task.CompletedTask;
+
+        // ROTATION LAW ([USER] 2026-08-23): "one of YOUR cards" is literal.
+        // A Status or a Curse pays nothing here whichever route exhausted it
+        // -- Ethereal, a played Dazed, the ward's random draw-pile pick. Both
+        // halves of the accrual (Charge AND the Burst particle) read the same
+        // way. Sim twin: refpowers.after_card_exhausted's `not card.is_junk`.
+        if (KokomiResources.IsJunk(card)) return Task.CompletedTask;
 
         // EPOCH 2 / D1 (audit sec.1.1). This granted the BASE 1/2 unconditionally
         // and never looked at the relic, while PearlOfInsightRelic declared

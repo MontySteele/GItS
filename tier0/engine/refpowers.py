@@ -285,10 +285,14 @@ def after_card_exhausted(state: CombatState, card: Card,
     # exhausts (swept per play), ethereal, the autoplay sweep, and the
     # prevention ward's procs all pass through here, so "whenever one of
     # your cards is Exhausted" is structural, not per-site discipline.
-    # Statuses/curses count too (accepted quirk, §2.1). The exhaust event
-    # is also her burst-particle economy (KOKOMI_BURST_PER_EXHAUST).
+    # "YOUR cards" is read literally since the 2026-08-23 [USER] ruling: a
+    # Status or a Curse pays NOTHING at this funnel, whichever route
+    # exhausted it (Ethereal, a Dazed, the ward's random draw-pile pick).
+    # The "statuses/curses count too, accepted quirk" line of kickoff v1
+    # §2.1 is retired with it. The exhaust event is also her burst-particle
+    # economy (KOKOMI_BURST_PER_EXHAUST) and the same reading governs both.
     # Dead branch for every player without the relic hook.
-    if "tamakushi_casket" in p.relic_hooks:
+    if "tamakushi_casket" in p.relic_hooks and not card.is_junk:
         from tier0.engine import resources    # late import (module graph)
         from tier0.engine import relics       # late import (relics -> here)
         # C5: a MUSTERED recruit's rotation is reported separately from every
