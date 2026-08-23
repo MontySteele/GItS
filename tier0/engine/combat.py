@@ -168,8 +168,30 @@ def card_playable(state: CombatState, card: Card) -> bool:
     if card.encore_cost and state.player.encore < card.encore_cost:
         return False        # "Spend N Encore:" cost line -- a gate, never
                             # an overdraw (that is the spend_encore op)
+    price = spark_cost(card)
+    if price and state.player.sparks < price:
+        return False        # EB-118 §4.5, the Spark sink's cost line: the
+                            # gate one line up, DERIVED from the op instead
+                            # of a second sheet field, so the price shown
+                            # and the price paid cannot drift apart.
     # No Fanfare playability gate: Fanfare is read, never spent (F-A4).
     return card_cost(state, card) <= state.player.energy
+
+
+def spark_cost(card: Card) -> int:
+    """What this card's printed text charges in Sparks, 0 for every shipped
+    card (EB-118 stages the op; no sheet row uses it).
+
+    TOP-LEVEL ops only. A spend inside a conditional branch is a price the
+    player cannot be shown before choosing to play the card, so it is not
+    part of the cost line -- effects.spend_sparks refuses it at resolve time
+    instead, which is the loud half of the same rule.
+    """
+    total = 0
+    for fx in card.effects:
+        if fx.get("op") == "spend_spark":
+            total += effects.spend_spark_amount(fx)
+    return total
 
 
 def card_cost(state: CombatState, card: Card) -> int:

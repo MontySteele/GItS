@@ -578,6 +578,27 @@ def _op_price(fx: dict) -> float:
         return abs(fx.get("delta", 1)) * STATIC_ENERGY_VALUE
     if op == "gain_spark":
         return _neutral_amount(fx) * STATIC_SPARK_VALUE
+    if op == "spend_spark":
+        # The same dial with the sign flipped -- spend_encore's shape, for
+        # spend_encore's reason: a printed cost must read as one.
+        #
+        # PROPOSED PRICE, PHASE 2 (EB-118 §4.5, Klee). The dial is the dead
+        # STATIC_SPARK_VALUE, so the term is 0.0 today and a sink's whole
+        # offer-screen value is its payoff ops. The design intent for the
+        # first sink cards -- recorded here to be checked against a real
+        # price when one is authored, not encoded as one -- is that a
+        # spend-2 outcome is worth roughly ONE ENERGY and lands at or below
+        # one free Attack, which is what a bank of 2 buys under True Spark
+        # Knight. One energy is STATIC_ENERGY_VALUE = 0.0 under the v3
+        # flat-proxy sweep, so intent and arithmetic agree by coincidence
+        # rather than by derivation; whichever pass revives the energy dial
+        # owes this term a real number.
+        #
+        # DRAFTER_VERSION IS NOT MOVED. No sheet row prints the op, so no
+        # offer screen changes and no tier0.5 number moves -- an op no card
+        # uses moves no number. The bump is owed at Phase-2 landing, with
+        # the first sink card that prints it.
+        return -_neutral_amount(fx) * STATIC_SPARK_VALUE
     if op == "burst_energy":
         return _neutral_amount(fx, 0) * STATIC_BURST_VALUE
 
@@ -1168,6 +1189,8 @@ STATIC_OP_PRICING: dict[str, str] = {
     "cost_mod": "ZERO: energy in another costume, priced through "
                 "STATIC_ENERGY_VALUE",
     "gain_spark": "ZERO: STATIC_SPARK_VALUE, the v3 flat-proxy sweep",
+    "spend_spark": "the same dead dial, NEGATIVE: a Spark price is a "
+                   "printed cost. PROPOSED, see the branch in _op_price",
     "burst_energy": "ZERO: STATIC_BURST_VALUE, the v3 flat-proxy sweep",
 }
 

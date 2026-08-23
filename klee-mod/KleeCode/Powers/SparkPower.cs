@@ -81,6 +81,69 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
             choiceContext, player, amount, applier: player, cardSource: cardSource);
     }
 
+    /// <summary>
+    /// Can this creature pay a Spark price of <paramref name="amount"/> right
+    /// now? (EB-118 §4.5, the Spark sink; sim mirror:
+    /// tier0/engine/combat.py <c>spark_cost</c> read by <c>card_playable</c>.)
+    ///
+    /// This is the GATE half of the cost line. A generated sink overrides
+    /// <c>CardModel.IsPlayable</c> with this call -- the extension point the
+    /// game documents for exactly this ("Grand Finale is only playable if
+    /// your draw pile is empty"), consulted by <c>CanPlay</c> before any
+    /// energy is committed -- so a short bank shows as an unplayable card
+    /// rather than as a play that quietly does nothing.
+    ///
+    /// Reads <see cref="SparksAsResolved"/> and not the raw Amount, for the
+    /// reason that accessor exists: the sim spends the threshold charge
+    /// before a card's effects resolve while our consume runs after, so a
+    /// mid-play read must subtract the pending spend or it sees a bank the
+    /// sim never shows. Out of hand (the playability read) the two agree.
+    /// </summary>
+    public static bool CanSpend(Creature owner, int amount) =>
+        amount > 0 && SparksAsResolved(owner) >= amount;
+
+    /// <summary>
+    /// Spend Sparks as a COST, the sink's payment half (sim mirror:
+    /// effects.py <c>spend_sparks</c>). ALL OR NOTHING -- returns whether the
+    /// bank paid, and mutates nothing when it did not.
+    ///
+    /// No overdraw: the shortfall-drains-HP grammar belongs to Furina's
+    /// Encore alone, and a PARTIAL spend would leave the caller believing it
+    /// was paid. The gate above is what a player sees; this refusal is the
+    /// backstop for a spend the gate cannot see (one nested in a branch),
+    /// and it is the same all-or-nothing rule on both sides.
+    ///
+    /// Dropping the bank below <see cref="CurrentThreshold"/> is a legal and
+    /// deliberate outcome: under True Spark Knight (threshold 2) a spend of 2
+    /// forfeits the free Attack. Nothing caches the bar -- <c>AppliesTo</c>
+    /// re-reads Amount for the cost hook and for the consume decision -- so
+    /// the forfeit takes effect on the very next read, as in the sim.
+    ///
+    /// applier: null, and for the same reason the threshold consume passes
+    /// null -- a spend is bookkeeping, not a power "given" by anyone, and
+    /// keeping it out of the ModifyPowerAmountGiven chain means nothing can
+    /// inflate or shrink the exact price.
+    /// </summary>
+    public static async Task<bool> Spend(
+        PlayerChoiceContext choiceContext, Creature player, int amount,
+        CardModel? cardSource)
+    {
+        if (!CanSpend(player, amount))
+        {
+            return false;
+        }
+
+        var power = player.Powers.OfType<SparkPower>().FirstOrDefault();
+        if (power == null)
+        {
+            return false;
+        }
+
+        await PowerCmd.ModifyAmount(
+            choiceContext, power, -amount, applier: null, cardSource: cardSource);
+        return true;
+    }
+
     private bool AppliesTo(CardModel card) =>
         Amount >= CurrentThreshold
         && card.Type == CardType.Attack
