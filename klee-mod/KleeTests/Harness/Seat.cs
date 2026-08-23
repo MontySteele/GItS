@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 
 namespace KleeMod.Tests.Harness;
 
@@ -97,6 +98,48 @@ internal sealed class Seat
     internal Seat WithMaxHp(int maxHp)
     {
         Set(Creature, "MaxHp", maxHp);
+        return this;
+    }
+
+    /// <summary>Put a power on THIS seat's creature at a given amount.
+    ///
+    /// The real path is PowerCmd.Apply, which needs a PlayerChoiceContext and
+    /// a live combat -- outside the headless boundary. So the power is
+    /// allocated uninitialised (a CustomPowerModel's constructor registers
+    /// with BaseLib's model tables, which is state a test has no business
+    /// mutating), its Owner and Amount are seeded, and it is pushed onto the
+    /// creature's own `_powers` list -- the list every reader under test
+    /// walks (Creature.Powers is a read-only view of it).
+    ///
+    /// What is bypassed is the APPLY pipeline: stacking rules, hooks, VFX. A
+    /// test that needs any of those has left the boundary. What is exercised
+    /// is the READ, which is what these pins are about.</summary>
+    internal Seat WithPower<T>(int amount) where T : PowerModel
+    {
+        var power = (T)RuntimeHelpers.GetUninitializedObject(typeof(T));
+        // The BACKING FIELDS, not the properties: PowerModel.Owner's setter
+        // refuses to move a power between owners and its getter asserts
+        // mutability, and Amount's setter routes through SetAmount, which
+        // raises display events into objects this harness has no scene tree
+        // for. IsMutable is set through its own setter -- the flag the
+        // game's ToMutable would have set, and the one Owner's getter reads.
+        SetField(power, "_owner", Creature);
+        SetField(power, "_amount", amount);
+        Set(power, "IsMutable", true);
+
+        var powers = (List<PowerModel>)typeof(Creature)
+            .GetField("_powers", HeadlessGame.All)!
+            .GetValue(Creature)!;
+        powers.Add(power);
+        return this;
+    }
+
+    /// <summary>Move a power's Amount after the fact -- a bank going down.
+    /// The real mover is PowerCmd.ModifyAmount, which needs a combat.</summary>
+    internal Seat SetPowerAmount<T>(int amount) where T : PowerModel
+    {
+        var power = Creature.Powers.OfType<T>().First();
+        SetField(power, "_amount", amount);
         return this;
     }
 

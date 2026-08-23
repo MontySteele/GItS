@@ -564,6 +564,46 @@ def gain_sparks(state: CombatState, n: int) -> None:
     state.emit("gain_spark", amount=n, total=state.player.sparks)
 
 
+def spend_spark_amount(fx: dict) -> int:
+    """The literal Spark price on one `spend_spark` effect.
+
+    A LITERAL positive int, not `_amount`: `combat.spark_cost` reads the same
+    number off the printed effect with no state in hand, and a price the
+    playability gate cannot read is a price that fires without being shown.
+    Raises rather than approximating -- the loader's vocabulary check reports
+    an unknown op, and this reports an unpriceable one.
+    """
+    amount = fx.get("amount")
+    if not isinstance(amount, int) or isinstance(amount, bool) or amount <= 0:
+        raise ValueError(
+            f"spend_spark amount must be a positive literal int, got "
+            f"{amount!r}")
+    return amount
+
+
+def spend_sparks(state: CombatState, n: int) -> bool:
+    """Spend n Sparks. ALL OR NOTHING; returns whether the bank paid.
+
+    Sparks have no overdraw currency -- the shortfall-drains-HP grammar is
+    Furina's Encore alone (resources.spend_encore_or_hp) -- so a short bank
+    pays NOTHING rather than draining what it holds: a partial spend leaves
+    the payer believing it was paid, which is the silent-fire this op exists
+    to make impossible. The refusal is EMITTED, never swallowed.
+
+    Below the free-Attack threshold is a legal place to land: the bank is a
+    resource with competing uses, and combat.spark_threshold reads the LIVE
+    bank at every site (card_cost and play_card both call it), so a spend
+    that drops under the bar forfeits the free Attack on the very next read.
+    """
+    p = state.player
+    if p.sparks < n:
+        state.emit("spend_spark_refused", amount=n, bank=p.sparks)
+        return False
+    p.sparks -= n
+    state.emit("spend_spark", amount=n, total=p.sparks)
+    return True
+
+
 def _add_token(state: CombatState, card: Card, zone: str) -> None:
     if zone == "hand" and len(state.player.hand) < C.MAX_HAND_SIZE:
         state.player.hand.append(card)
@@ -1163,6 +1203,20 @@ def _op_grant_sly_this_turn(state: CombatState, fx: dict, card: Card) -> None:
 
 def _op_gain_spark(state: CombatState, fx: dict, card: Card) -> None:
     gain_sparks(state, fx.get("amount", 1))
+
+
+def _op_spend_spark(state: CombatState, fx: dict, card: Card) -> None:
+    """The Spark SINK (EB-118 §4.5): sparks are a resource with a competing
+    use, and this is the competition.
+
+    The COST LINE, not an overdraw: a card printing this op at top level is
+    unplayable below its price (combat.spark_cost -> combat.card_playable),
+    the encore_cost gate's shape, so the cost is visible before the energy
+    is spent. `spend_sparks` refuses a short bank as well -- the gate cannot
+    see a spend nested in a conditional branch, and an unpayable price must
+    fail loudly wherever it is reached rather than half-paying.
+    """
+    spend_sparks(state, spend_spark_amount(fx))
 
 
 def _op_gain_encore(state: CombatState, fx: dict, card: Card) -> None:
@@ -2442,6 +2496,7 @@ OPS = {
     "buff_next_attack": _op_buff_next_attack,
     "cost_mod": _op_cost_mod,
     "gain_spark": _op_gain_spark,
+    "spend_spark": _op_spend_spark,
     "gain_encore": _op_gain_encore,
     "spend_encore": _op_spend_encore,
     "spotlight_designate": _op_spotlight_designate,

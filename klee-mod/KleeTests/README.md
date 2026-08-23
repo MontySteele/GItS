@@ -13,7 +13,7 @@ found was found by playing**. This is a partial backstop for that — see
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 38 tests, ~0.3s after build
+dotnet test                       # 52 tests, ~0.3s after build
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -82,9 +82,10 @@ either pinned structurally and labelled, or left out.
 | `DerivationPinTests.cs` | 14 | Fanfare cap against live max HP (audit **H3**, authority pin), cap clamp on gain, identity gating, the `?? 0` fallback; salon tick = printed base + Focus term, and the dry three-quarters truncation. |
 | `InterpolationPinTests.cs` | 5 | The tooltip text `lint_constant_parity` structurally cannot see: `SalonMemberPower` and both Pearl relics interpolate their constants rather than restating them (EB-86's shape; M24's "signing is a one-file edit"). |
 | `CoopSeamTests.cs` | 8 | Per-seat ownership and attribution — see below. |
+| `SparkSinkPinTests.cs` | 14 | EB-118 §4.5's Spark sink: the `CanSpend` gate a generated sink hangs `IsPlayable` on (whole price or nothing), True Spark Knight's live threshold and its floor of 1, and two structural pins on `Spend` (it refuses through the same predicate the gate uses, and moves the bank through the same `PowerCmd.ModifyAmount` the threshold consume uses). No card prints the op. |
 | `ParityAuthorityPinTests.cs` | 6 | Audit findings **M1** and **M2** pinned as the C# authority record, plus H3's cross-reference. |
 
-**38 tests, all green.**
+**52 tests, all green.**
 
 ## Co-op coverage
 

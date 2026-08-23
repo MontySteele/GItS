@@ -207,7 +207,14 @@ PROFILES = {
 # keep their stamps, +bonus each). chance_bomb_per_detonation rolls
 # Rng.CombatTargets.NextFloat() < chance (verified decompile; CombatTargets
 # is the established in-combat pick stream).
-MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_energy",
+# spend_spark (EB-118 §4.5) is the Spark SINK: the call site is
+# SparkPower.Spend -> PowerCmd.ModifyAmount, the same verified idiom the
+# threshold consume already uses, and the price is a LITERAL (no upgrade
+# delta reaches it -- a card that pays less on upgrade is a repricing, and
+# repricing is [USER]'s call, not codegen's). The cost LINE is emitted
+# separately as an IsPlayable override; see `spark_gate_member` in emit().
+MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
+                  "spend_spark", "burst_energy",
                   "gain_encore", "spend_encore", "raise_fanfare_cap",
                   "gain_fanfare_floor",
                   # Fanfare rework (2026-07-28): the Hyperbeam settle
@@ -1125,7 +1132,10 @@ def blocked_reason(
             if not isinstance(amt, int) and _x_formula_reason(card, amt):
                 return _x_formula_reason(card, amt)
         if op in {"gain_encore", "spend_encore", "raise_fanfare_cap",
-                  "gain_fanfare_floor", "crash_fanfare", "salon_bow"}:
+                  "gain_fanfare_floor", "crash_fanfare", "salon_bow",
+                  # A Spark price the generator cannot read as a
+                  # literal is a price the IsPlayable gate cannot show.
+                  "spend_spark"}:
             unknown = set(eff) - {"op", "amount"}
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
@@ -2923,6 +2933,16 @@ def _stmt_gain_spark(card: dict, eff: dict) -> str:
     return f"await SparkPower.Gain(choiceContext, Owner.Creature, {amount}, this);"
 
 
+def _stmt_spend_spark(card: dict, eff: dict) -> str:
+    # The PAYMENT half of the sink cost line; the GATE half is the IsPlayable
+    # override emit() attaches from the same effect. Literal price -- see
+    # MECHANICAL_OPS. The return value is deliberately dropped: with the gate
+    # in front of it a top-level spend cannot be short, and a card that wants
+    # to BRANCH on the payment is a different mechanic than a cost line.
+    return ("await SparkPower.Spend(choiceContext, Owner.Creature, "
+            f"{int(eff['amount'])}, this);")
+
+
 def _stmt_burst_energy(card: dict, eff: dict) -> str:
     amount = ('DynamicVars["BurstEnergy"].IntValue' if burst_upgrade(card)
               else str(int(eff["amount"])))
@@ -3278,6 +3298,9 @@ def build_body(
 
         elif op == "gain_spark":
             lines.append(_stmt_gain_spark(card, eff))
+
+        elif op == "spend_spark":
+            lines.append(_stmt_spend_spark(card, eff))
 
         elif op == "burst_energy":
             lines.append(_stmt_burst_energy(card, eff))
@@ -4378,6 +4401,17 @@ def build_description(card: dict) -> str:
                     "Gain 1 [gold]Spark[/gold]." if n == 1
                     else f"Gain {n} [gold]Sparks[/gold]."
                 )
+
+        elif op == "spend_spark":
+            # The price is printed FIRST because it is a cost line: a player
+            # reads what the card charges before what it buys. The card is
+            # unplayable below it (the IsPlayable gate), so this sentence
+            # describes a gate, never a partial spend.
+            n = int(eff["amount"])
+            parts.append(
+                "Spend 1 [gold]Spark[/gold]." if n == 1
+                else f"Spend {n} [gold]Sparks[/gold]."
+            )
 
         elif op == "burst_energy":
             if burst_upgrade(card):
@@ -5595,6 +5629,22 @@ def emit(
         "\n\n    protected override HashSet<CardTag> CanonicalTags => "
         f"new() {{ CardTag.{tag} }};"
         if tag else "")
+    # EB-118 §4.5, the Spark cost line. Sparks are a PowerModel and not a
+    # CustomResource, so BaseLib's SetCanonicalCost rail below cannot carry
+    # this price: the gate is CardModel.IsPlayable, the extension point the
+    # game documents for exactly this ("Grand Finale is only playable if your
+    # draw pile is empty") and the mirror of tier0 card_playable's
+    # `spark_cost` check. TOP-LEVEL spends only, the sim's rule -- a price
+    # inside a conditional branch cannot be shown before the play, and
+    # SparkPower.Spend refuses it there instead.
+    spark_price = sum(int(eff["amount"]) for eff in card["effects"]
+                      if eff.get("op") == "spend_spark")
+    spark_gate_member = (
+        "\n\n    // The Spark cost line (EB-118): unplayable below the price,\n"
+        "    // which is how the cost is shown rather than silently failing.\n"
+        "    protected override bool IsPlayable =>\n"
+        f"        SparkPower.CanSpend(Owner.Creature, {spark_price});"
+        if spark_price else "")
     resource_cost_setup = []
     if int(card.get("encore_cost", 0)) > 0:
         resource_cost_setup.append(
@@ -5647,7 +5697,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{card["name"].replace('"', chr(92) + chr(34))}"),
         ("description", "{desc}"),
-    }};{tags_member}
+    }};{tags_member}{spark_gate_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
