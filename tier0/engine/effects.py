@@ -1671,12 +1671,18 @@ def _best_card(cards: list[Card]) -> Card:
 
 
 def _walk_effects(effects: list[dict]):
-    """Effect list walk including conditional branches."""
+    """Effect list walk including conditional branches and modal modes."""
     for fx in effects:
         yield fx
         for branch in ("then", "else"):
             if isinstance(fx.get(branch), list):
                 yield from _walk_effects(fx[branch])
+        # A mode body is printed text the same way a branch is -- the player
+        # can always reach it -- so `_printed_power` must see it or a modal
+        # card scores as blank to every chooser that ranks on printed power.
+        for mode in fx.get("modes") or ():
+            if isinstance(mode, dict) and isinstance(mode.get("effects"), list):
+                yield from _walk_effects(mode["effects"])
 
 
 def _printed_power(card: Card) -> int:
@@ -1759,6 +1765,65 @@ def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("conditional", card=card.id, predicate=fx["if"], fired=fired)
     branch = fx["then"] if fired else fx.get("else", [])
     _resolve_effects(state, branch, card)
+
+
+# --- the modal / choose-one surface (EB-118 sec.5.4, STAGED) ---------------
+#
+# A `choose_one` effect carries `modes:`, a list of 2+ dicts, each one a
+# `label:` and an ordinary `effects:` list. It is NOT a new keyword: the
+# label is the plain card text of that mode and the bodies are the same op
+# vocabulary the rest of the sheet uses, so a modal card reads as ordinary
+# card text and no keyword tooltip is owed.
+#
+# The distinction from `conditional` is WHO decides. A conditional reads a
+# predicate off the board; a modal asks the player. That makes mode selection
+# a play-time CHOICE, which in this engine means the chooser seam beside
+# `_worst_card` / `_best_card` -- the same surface `select: chosen` exhaust,
+# chosen discard and Armaments' upgrade target already ride.
+#
+# NO SHIPPED CARD IS MODAL. The surface is registered and tested; nothing on
+# any sheet reaches it, so the frozen battery cannot move.
+
+MODES_KEY = "modes"
+MODE_FIELDS = frozenset({"label", "effects"})
+MODAL_FIELDS = frozenset({"op", MODES_KEY})
+MIN_MODES = 2
+
+
+def _chosen_mode(state: CombatState, modes: list[dict], card: Card) -> int:
+    """Which mode does the pilot take? PLACEHOLDER -- always the first.
+
+    INSTRUMENT SURFACE, same convention as `_worst_card`: every modal
+    measurement will ride this choice. Unlike those, this one is not even a
+    heuristic -- it is a fixed index, chosen so the seam exists and stays
+    deterministic while the honest answer is unbuilt.
+
+    The honest answer is PHASE-2 POLICY_VERSION work, landing with the
+    prototype card's price. Valuing a mode means valuing an effect list
+    against the live board, which is the pilot's job and moves `P`. Do not
+    grow this body into that policy: when the policy lands it REPLACES this
+    body, and that is a POLICY_VERSION bump because every tier0.5 number
+    taken with a modal card in the pool renumbers.
+
+    `tier0.pilot.policy._active_effects` calls this same function for its
+    forecast, so the pilot's read of a modal card and the mode that actually
+    resolves cannot disagree.
+    """
+    return 0
+
+
+def _op_choose_one(state: CombatState, fx: dict, card: Card) -> None:
+    modes = fx[MODES_KEY]
+    index = _chosen_mode(state, modes, card)
+    mode = modes[index]
+    # Parity + telemetry: the C# side records the same event name and the
+    # same three fields (klee-mod/KleeCode/Cards/ModalChoice.cs), so a mode
+    # taken in either engine reads the same. Generic like the `conditional`
+    # emit -- the label is the mode's printed text, so a take-rate can be
+    # read per card, per mode, or both.
+    state.emit("mode_chosen", card=card.id, index=index,
+               label=mode.get("label"))
+    _resolve_effects(state, mode.get("effects", []), card)
 
 
 # The predicate vocabulary, as data. `_predicate` below stays an if-chain --
@@ -2458,6 +2523,7 @@ OPS = {
     "exhaust_from": _op_exhaust_from,
     "scry_discard": _op_scry_discard,
     "conditional": _op_conditional,
+    "choose_one": _op_choose_one,                # EB-118 surface, unused
     "repeat_this": _op_repeat_this,
     "grow_damage": _op_grow_damage,
     "chance_bomb_per_detonation": _op_chance_bomb_per_detonation,

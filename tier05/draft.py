@@ -101,12 +101,19 @@ def _static_condition_share(name: str) -> float:
 
 
 def _nested_effects(effect_list: list[dict]):
-    """Walk every printed branch for card classification only."""
+    """Walk every printed branch and mode for card classification only."""
     for fx in effect_list:
         yield fx
         if fx.get("op") == "conditional":
             yield from _nested_effects(fx.get("then", []))
             yield from _nested_effects(fx.get("else", []))
+        elif fx.get("op") == "choose_one":
+            # EB-118: every classifier downstream of this walk (_has_tempo,
+            # _is_applier, behavioural_archetypes, ...) asks "does this card
+            # print X anywhere". A mode the player may always take prints X
+            # as much as a branch does.
+            for mode in fx.get("modes") or ():
+                yield from _nested_effects(mode.get("effects") or [])
 
 
 def _neutral_amount(fx: dict, default: float = 1.0) -> float:
@@ -429,7 +436,7 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
 # them rather than returning a second, quieter number for the same op.
 _PRICED_INLINE = frozenset({
     "damage", "chain_attack", "block", "place_bomb", "apply_power",
-    "conditional", "conscript", "gain_charge", "summon_kurage",
+    "conditional", "choose_one", "conscript", "gain_charge", "summon_kurage",
     "gain_fanfare_floor", "grow_damage", "repeat_this",
 })
 
@@ -621,6 +628,32 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                     share = _static_condition_share(name)
                     total += (else_power
                               + share * (then_power - else_power))
+            elif fx.get("op") == "choose_one":
+                # EB-118 sec.5.4 -- PROPOSED, and it moves no number, because
+                # no shipped card carries a `choose_one`. Registered here
+                # because `tools/lint_op_parity.py` requires every registered
+                # op to carry a price, and the moment to decide one is now.
+                #
+                # AGGREGATE = MAX of the modes' generic prices. A conditional
+                # blends its branches by a reachability SHARE because the
+                # board decides which one fires and the drafter cannot see
+                # the board. A modal has no such uncertainty: the PLAYER
+                # decides, at play time, with the board in front of them, and
+                # every mode is always available. So a share blend would be
+                # modelling a coin flip that does not exist.
+                #
+                # Max is also the conservative choice among the defensible
+                # ones. A modal card is worth AT LEAST its best mode -- it
+                # dominates a card printing that mode alone -- so max is a
+                # lower bound, and the surplus it declines to credit is the
+                # optionality itself (the right to decide late), which is
+                # real but is exactly what the Phase-2 pilot policy has to
+                # measure before it can be priced. Under-crediting until then
+                # keeps the drafter from paying for a mode-valuation the
+                # pilot cannot yet perform.
+                mode_powers = [effect_power(mode.get("effects") or [])
+                               for mode in fx.get("modes") or ()]
+                total += max(mode_powers, default=0.0)
             elif (fx.get("op") in ("damage", "chain_attack")
                   and fx.get("target") != "self"):
                 amt = fx.get("amount", 0)
@@ -1103,6 +1136,8 @@ STATIC_OP_PRICING: dict[str, str] = {
                    "and a flat engine credit on POWER-type cards (v4/v12)",
     "place_bomb": "bomb damage at STATIC_BOMB_DAMAGE_SHARE + a guard credit",
     "conditional": "reachable-branch share; Klee's live predicates at half",
+    "choose_one": "MAX of the modes -- the player picks, so no share blend; "
+                  "PROPOSED, no D move (no shipped card is modal)",
     "conscript": "STATIC_CONSCRIPT_VALUE per recruit (v7)",
     "gain_charge": "STATIC_CHARGE_VALUE per printed point (v7)",
     "summon_kurage": "ONE pulse, not the duration (v8)",

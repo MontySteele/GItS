@@ -1,0 +1,151 @@
+"""EB-118 sec.5.4: the modal surface across the two engines.
+
+Three questions this file answers and the modal behaviour file does not:
+what the GENERATOR emits for a modal row, what it REFUSES, and whether the
+C# mirror of the shape constants and the emit row still matches tier0's.
+
+The C# leg's own pins live in klee-mod/KleeTests/ModalChoicePinTests.cs; this
+file is the half that reads BOTH sources, because a constant mirrored in two
+languages drifts in whichever one the other's tests cannot see.
+"""
+
+import copy
+import re
+import sys
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "tools"))
+
+import gen_klee_cards as gen                                   # noqa: E402
+from tier0.engine import effects                               # noqa: E402
+
+MODAL_CS = ROOT / "klee-mod" / "KleeCode" / "Cards" / "ModalChoice.cs"
+
+
+def modal_card(*modes, **overrides):
+    """A real Furina row with its effects replaced by one `choose_one`."""
+    base = next(c for c in gen._sheet_cards(gen.FURINA_PROFILE.sheet)
+                if c["id"] == "courtroom_drama")
+    card = copy.deepcopy(base)
+    for key in ("tags", "sly", "exhaust", "innate", "retain"):
+        card.pop(key, None)
+    card.update(id="modal_probe", name="Modal Probe", cost=1, type="skill",
+                effects=[{"op": "choose_one", "modes": list(modes)}])
+    card.update(overrides)
+    return card
+
+
+ENCORE = {"label": "Gain 2 Encore",
+          "effects": [{"op": "gain_encore", "amount": 2}]}
+DRAW = {"label": "Spend 2 Encore: draw 2",
+        "effects": [{"op": "gain_encore", "amount": -2},
+                    {"op": "draw", "amount": 2}]}
+HIT = {"label": "Deal 7 damage",
+       "effects": [{"op": "damage", "amount": 7, "target": "enemy"}]}
+
+
+# --- what the generator emits ----------------------------------------------
+
+def test_a_modal_row_generates_rather_than_blocking():
+    assert gen.blocked_reason(modal_card(ENCORE, DRAW),
+                              gen.FURINA_PROFILE) is None
+
+
+def test_the_body_routes_through_the_games_own_choice_surface():
+    src = gen.emit(modal_card(ENCORE, DRAW), gen.FURINA_PROFILE)
+    assert "ModalChoice.SelectMode(choiceContext, Owner, modeOptions)" in src
+    assert "ModalChoice.CreateOption<ModalProbeModeA>(Owner)" in src
+    assert "ModalChoice.CreateOption<ModalProbeModeB>(Owner)" in src
+    assert "if (modeIndex == 0)" in src
+    # One class per mode, in the card's own file, off the shared base.
+    assert "public sealed class ModalProbeModeA : ModalOptionCard" in src
+    assert "public sealed class ModalProbeModeB : ModalOptionCard" in src
+
+
+def test_the_taken_mode_is_recorded_in_the_generated_body():
+    src = gen.emit(modal_card(ENCORE, DRAW), gen.FURINA_PROFILE)
+    assert "ModalChoice.RecordChoice(this, modeIndex," in src
+
+
+def test_the_face_is_ordinary_card_text_no_new_keyword():
+    """Rails: a modal card prints a sentence, not a keyword."""
+    desc = gen.build_description(modal_card(ENCORE, DRAW))
+    assert desc == "Choose one: Gain 2 Encore | Spend 2 Encore: draw 2."
+    assert "[gold]" not in desc
+    src = gen.emit(modal_card(ENCORE, DRAW), gen.FURINA_PROFILE)
+    assert "KleeKeywords" not in src
+
+
+def test_a_modal_card_is_aimed_by_its_modes():
+    """TargetType is declared before a mode is picked, so an enemy-facing
+    mode still has to make the card aimable."""
+    src = gen.emit(modal_card(ENCORE, HIT), gen.FURINA_PROFILE)
+    assert "TargetType.AnyEnemy" in src
+
+
+# --- what the generator refuses --------------------------------------------
+
+@pytest.mark.parametrize("modes,expected", [
+    ([ENCORE], "at least 2 modes"),
+    ([ENCORE, DRAW, ENCORE, DRAW], "at most 3"),
+    ([{"label": "", "effects": [{"op": "draw", "amount": 1}]}, DRAW],
+     "non-empty label"),
+    ([{"label": "a", "effects": []}, DRAW], "non-empty effects list"),
+    ([{"label": "a", "effect": [{"op": "draw", "amount": 1}]}, DRAW],
+     "mode field(s)"),
+    ([{"label": "a", "effects": [{"op": "summon_kurage", "amount": 1}]}, DRAW],
+     "inside a mode body"),
+    ([{"label": "a", "effects": [{"op": "draw", "amount": "all"}]}, DRAW],
+     "must be a literal int"),
+])
+def test_an_inexpressible_modal_blocks_with_a_reason(modes, expected):
+    reason = gen.blocked_reason(modal_card(*modes), gen.FURINA_PROFILE)
+    assert reason and expected in reason
+
+
+def test_modes_that_would_aim_differently_block():
+    away = {"label": "Hit them all",
+            "effects": [{"op": "damage", "amount": 3, "target": "all_enemies"}]}
+    reason = gen.blocked_reason(modal_card(HIT, away), gen.FURINA_PROFILE)
+    assert reason and "disagree on TargetType" in reason
+
+
+def test_two_modals_on_one_card_block():
+    card = modal_card(ENCORE, DRAW)
+    card["effects"] = card["effects"] + copy.deepcopy(card["effects"])
+    reason = gen.blocked_reason(card, gen.FURINA_PROFILE)
+    assert reason and "mode selection collision" in reason
+
+
+# --- the C# mirror ---------------------------------------------------------
+
+def test_the_generator_mirrors_the_engines_shape_constants():
+    assert gen.MODAL_FIELDS == set(effects.MODAL_FIELDS)
+    assert gen.MODE_FIELDS == set(effects.MODE_FIELDS)
+
+
+def test_the_cs_emit_row_mirrors_the_tier0_event():
+    """Same event name and same field names in both engines.
+
+    The tier0 side is the literal in `effects._op_choose_one`; the C# side is
+    ModalChoice.EventName / EventFields, read out of the source here so a
+    rename on either side fails rather than quietly splitting the stream.
+    """
+    src = MODAL_CS.read_text(encoding="utf-8")
+    name = re.search(r'EventName = "([a-z_]+)"', src)
+    fields = re.search(r"EventFields = \{([^}]*)\}", src)
+    assert name and fields
+    assert name.group(1) == "mode_chosen"
+    assert re.findall(r'"([a-z]+)"', fields.group(1)) == \
+        ["card", "index", "label"]
+
+
+def test_the_cs_side_reuses_the_base_game_choice_screen():
+    """The reason this surface is not an invented prompt, pinned in prose AND
+    in the call. The behavioural half is KleeTests' IL pin."""
+    src = MODAL_CS.read_text(encoding="utf-8")
+    assert "CardSelectCmd.FromChooseACardScreen(" in src
+    assert "PlayerChoiceContext" in src
