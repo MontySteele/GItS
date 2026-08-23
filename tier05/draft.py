@@ -731,6 +731,22 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                   if fx.get("op") == "repeat_this")
     if repeats:
         total *= 1.0 + repeats * STATIC_REPEAT_SHARE
+    # EB-118, the same placement one line down and the opposite sign: a
+    # keyword that decides whether the printed effects resolve at all scales
+    # the whole card. Reads `is_ethereal`, so both spellings price the same.
+    #
+    # PROPOSED at landing: a DRAFTER_VERSION bump, because a change to the
+    # priced set is one (the EB-71 note above states the rule). NOT TAKEN
+    # HERE, and the integer is deliberately not written down: no committed
+    # sheet row carries `ethereal:` today, and the only cards the tag spelling
+    # reaches are Statuses, Curses and the Spotlight token -- rarities outside
+    # RARITY_ODDS, which no reward, shop or Neow channel can offer. The term
+    # is therefore provably inert on every drafted card in the tree, and a
+    # stamp move with no number behind it would archive a world for nothing.
+    # It becomes owed the moment a DRAFTABLE row prints the field (Phase 2's
+    # big_badda_boom is that row).
+    if card.is_ethereal:
+        total *= STATIC_ETHEREAL_SHARE
     # `if card.sly` first: this is the draft hot path and the overwhelming
     # majority of cards have an empty list, so the comprehension inside
     # `sly_riders` should not allocate for them.
@@ -1076,6 +1092,28 @@ STATIC_MAX_HP_VALUE = 1.0          # gain_max_hp, per point: permanent HP
                                    # AND an immediate heal of the same size,
                                    # priced at one point of Block each.
 # -- structural -----------------------------------------------------------
+STATIC_ETHEREAL_SHARE = 0.6        # EB-118. Ethereal is a DOWNSIDE and the
+                                   # drafter must price it, or a card whose
+                                   # whole design is "strong, but it dies in
+                                   # your hand" scores as if the second half
+                                   # were not printed. A card-level LIFECYCLE
+                                   # discount, not an op price: the keyword
+                                   # touches no effect, it decides whether the
+                                   # effects ever resolve at all -- so it
+                                   # scales what the card printed rather than
+                                   # sitting as a term beside it, the same
+                                   # placement STATIC_REPEAT_SHARE takes
+                                   # below and for the mirror-image reason.
+                                   # 0.6 is a JUDGEMENT, not a sweep: an
+                                   # Ethereal card is lost outright on the
+                                   # draws where its cost cannot be paid the
+                                   # turn it arrives, and at the drafter's
+                                   # ~3-energy turn that is a large minority
+                                   # of them. It is deliberately not harsher:
+                                   # the keyword costs nothing on the draws
+                                   # where the card IS played, which is the
+                                   # majority, and the sheet buys the whole
+                                   # downside off at the campfire.
 STATIC_REPEAT_SHARE = 0.5          # repeat_this multiplies the card's OWN
                                    # printed effects. Applied at half,
                                    # because every printed use of the op
