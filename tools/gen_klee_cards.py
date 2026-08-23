@@ -234,7 +234,16 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_
                   # KokomiConscript.Run. All three have verified call sites in
                   # klee-mod/KleeCode/Powers -- the whitelist stays honest.
                   "gain_charge", "summon_kurage", "conscript",
+                  # EB-118 (staged): recall_to_draw's exhaust SOURCE only.
+                  # Rides RecallFromExhaust.Recall -- one verified call site
+                  # in klee-mod/KleeCode/Powers. The discard source (Headbutt's
+                  # shape) is NOT built and blocks by name below.
+                  "recall_to_draw",
                   "replay_next_companion", "copy_companions_played_this_combat"}
+
+# recall_to_draw (EB-118). `position` is accepted only as its default: the
+# destination is top-of-draw in both engines and there is no other placement.
+RECALL_FIELDS = {"op", "from", "position", "amount"}
 
 # --- companion batch (2026-07-21) --------------------------------------------
 def is_companion(card: dict) -> bool:
@@ -1343,6 +1352,29 @@ def blocked_reason(
             # moonlit_offering their upgrade paths for no reason.
             if eff.get("amount", 1) != 1 and eff.get("select") != "chosen":
                 return "exhaust_from amount > 1 (random re-pool loop not built)"
+        if op == "recall_to_draw":
+            # EB-118 §6.4. Constraints 3-6 are runtime pool filters and live
+            # in RecallFromExhaust.Recallable; 1 and 2 are card SHAPE and are
+            # checked here, because the generator reads the sheet directly and
+            # never passes through the tier0 loader that enforces them
+            # (loader._validate_recall_shape). A row that reaches the emitter
+            # has therefore been checked on both sides of the wall.
+            unknown = set(eff) - RECALL_FIELDS
+            if unknown:
+                return f"recall_to_draw field(s) {sorted(unknown)} not understood"
+            if eff.get("from") != "exhaust":
+                return (f"recall_to_draw from '{eff.get('from', 'discard')}' "
+                        f"(only the exhaust source is built)")
+            if eff.get("position", "top") != "top":
+                return f"recall_to_draw position '{eff.get('position')}'"
+            if not isinstance(eff.get("amount", 1), int):
+                return "recall_to_draw amount must be a literal int"
+            if card.get("rarity") not in ("uncommon", "rare"):
+                return (f"recall_to_draw on a {card.get('rarity')} card "
+                        f"(EB-118 §6.4 constraint 1: Uncommon or Rare)")
+            if not card.get("exhaust"):
+                return ("recall_to_draw on a card that does not Exhaust "
+                        "(EB-118 §6.4 constraint 2)")
         if op == "add_card":
             unknown = set(eff) - ADD_CARD_FIELDS
             if unknown:
@@ -3885,6 +3917,18 @@ def build_body(
                 "        }"
             )
 
+        elif op == "recall_to_draw":
+            # EB-118, exhaust source. The whole verb -- the eligible pool, the
+            # top-of-draw placement and the gained Exhaust -- lives in
+            # RecallFromExhaust so the six constraints have ONE C# home and
+            # cannot be re-spelled per card. The generated body is the call.
+            # Sim twin: effects._op_recall_to_draw with `from: exhaust`.
+            n = str(int(eff.get("amount", 1)))
+            lines.append(
+                "await RecallFromExhaust.Recall(\n"
+                f"            choiceContext, Owner, this, {n});"
+            )
+
         elif op == "add_card":
             zone = eff.get("zone") or eff.get("to", "discard")
             pile = "PileType.Hand" if zone == "hand" else "PileType.Discard"
@@ -4631,6 +4675,20 @@ def build_description(card: dict) -> str:
         elif op == "exhaust_from":
             parts.append("Exhaust a random Status card from your hand.")
 
+        elif op == "recall_to_draw":
+            # EB-118. The face carries BOTH halves of the bargain: where the
+            # card comes back to, and that it comes back on loan. The gained
+            # Exhaust is the whole reason the card is priced as a loan and
+            # not as a second copy, so it is printed, not left to a keyword
+            # the player has to notice on the returned card.
+            n = int(eff.get("amount", 1))
+            what = ("a card" if n == 1 else f"{n} cards")
+            parts.append(
+                f"Choose {what} from your [gold]Exhaust[/gold] pile; put "
+                f"{'it' if n == 1 else 'them'} on top of your draw pile. "
+                f"{'It gains' if n == 1 else 'They gain'} "
+                f"[gold]Exhaust[/gold].")
+
         elif op == "add_card":
             n = eff.get("amount", 1)
             zone_txt = ("your hand"
@@ -5247,6 +5305,15 @@ def emit(
          if eff.get("op") == "apply_power" and eff.get("never_reduces")), None)
     if never_reduces_eff:
         interfaces += ", INeverReducingApplier"
+    # EB-118 §6.4 constraint 3: a card that retrieves from Exhaust may never
+    # be retrieved from Exhaust. The sim reads that off the printed effect
+    # tree (effects.retrieves_from_exhaust); C# has no effect tree at runtime,
+    # so the same shape is stamped as a marker interface and the pool filter
+    # asks the type. Stamped from the SHEET, so the two answers have one
+    # source.
+    if any(eff.get("op") == "recall_to_draw"
+           for eff in iter_effects(card)):
+        interfaces += ", IExhaustRetriever"
 
     ind = "\n        "
     vars_cs = (",".join(f"{ind}    {v}" for v in vars_)).lstrip()

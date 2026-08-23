@@ -2130,24 +2130,85 @@ def _op_extra_card_screen(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("extra_card_screen", total=state.extra_card_screens)
 
 
+# EB-118: the exhaust pile as a recall_to_draw SOURCE, not a parallel op
+# family. One verb ("put a card back on top of the draw pile"), two piles it
+# may reach into; a second op would have duplicated the placement rule, the
+# kit exemption and the pilot's choice surface three ways.
+RECALL_SOURCES = ("discard", "exhaust")
+RECALL_EXHAUST_SOURCE = "exhaust"
+
+
+def retrieves_from_exhaust(card: Card) -> bool:
+    """Does this card itself retrieve from the exhaust pile? (EB-118 §6.4
+    constraint 3.)
+
+    A card-shape property, read off the printed effect tree rather than a
+    hand-set flag, so a future sheet row cannot arm the capability and forget
+    to declare it. The C# twin is the IExhaustRetriever marker interface,
+    which the generator stamps from this same shape.
+    """
+    return any(fx.get("op") == "recall_to_draw"
+               and fx.get("from") == RECALL_EXHAUST_SOURCE
+               for fx in _walk_effects(card.effects))
+
+
+def recall_exhaust_pool(state: CombatState, card: Card) -> list[Card]:
+    """The eligible targets in the exhaust pile (EB-118 §6.4, constraints
+    3 / 6). Enforced HERE rather than by card-author discipline, and shared
+    by the op and the closure sweep so the two cannot drift.
+
+    * kit cards are never fodder and never loot (the v1.9 invariant every
+      other pile pool rides);
+    * a card that itself retrieves from Exhaust is ineligible, INCLUDING
+      this one -- that exclusion is what keeps the pile from closing into a
+      cycle, and the `is not card` clause covers the route where the
+      retrieval card has already been routed to the pile;
+    * Status and Curse are ineligible (`is_junk`, the C11 rotation-law
+      predicate). Ordinary personal and Companion cards stay eligible.
+    """
+    return [c for c in state.player.exhaust_pile
+            if not c.kit_card
+            and not c.is_junk
+            and not retrieves_from_exhaust(c)
+            and c is not card]
+
+
 def _op_recall_to_draw(state: CombatState, fx: dict, card: Card) -> None:
     """Headbutt: put a chosen card from the discard pile on TOP of the draw
     pile. Index 0 IS the top -- state.draw pops index 0 and
-    combat.surface_innate prepends. No-op on an empty discard pile."""
+    combat.surface_innate prepends. No-op on an empty source pile.
+
+    `from: exhaust` (EB-118) reads the exhaust pile instead, through
+    `recall_exhaust_pool`, and the returned card GAINS Exhaust for the rest
+    of combat (constraint 5): it is on loan for one more use, then rotates
+    again and grants Charge again under normal law -- the funnel in
+    refpowers.after_card_exhausted sees a personal card and pays it, C11
+    included. Removing it from the pile temporarily weakens only pile
+    READERS; banked Charge does not fall, because Charge is never spent
+    (LAW). Destination is the draw pile in both branches -- never the hand
+    (constraint 4).
+    """
     p = state.player
     src = fx.get("from", "discard")
-    if src != "discard":
+    if src not in RECALL_SOURCES:
         raise ValueError(f"unknown recall_to_draw source {src!r}")
     pos = fx.get("position", "top")
     if pos != "top":
         raise ValueError(f"unknown recall_to_draw position {pos!r}")
+    from_exhaust = src == RECALL_EXHAUST_SOURCE
+    pile = p.exhaust_pile if from_exhaust else p.discard_pile
     for _ in range(_amount(state, fx.get("amount", 1))):
-        if not p.discard_pile:
+        pool = recall_exhaust_pool(state, card) if from_exhaust else pile
+        if not pool:
             return
-        pick = _best_card(p.discard_pile)
-        remove_instance(p.discard_pile, pick)
+        pick = _best_card(pool)
+        remove_instance(pile, pick)
+        if from_exhaust:
+            # Rest-of-combat, per INSTANCE: the sheet row is untouched and a
+            # twin of the same card elsewhere in the deck is unaffected.
+            pick.exhaust = True
         p.draw_pile.insert(0, pick)
-        state.emit("recall_to_draw", card=pick.id)
+        state.emit("recall_to_draw", card=pick.id, source=src)
 
 
 def _op_transform_in_hand(state: CombatState, fx: dict, card: Card) -> None:

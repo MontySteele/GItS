@@ -13,7 +13,7 @@ found was found by playing**. This is a partial backstop for that — see
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 38 tests, ~0.3s after build
+dotnet test                       # 48 tests, ~0.3s after build
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -83,8 +83,9 @@ either pinned structurally and labelled, or left out.
 | `InterpolationPinTests.cs` | 5 | The tooltip text `lint_constant_parity` structurally cannot see: `SalonMemberPower` and both Pearl relics interpolate their constants rather than restating them (EB-86's shape; M24's "signing is a one-file edit"). |
 | `CoopSeamTests.cs` | 8 | Per-seat ownership and attribution — see below. |
 | `ParityAuthorityPinTests.cs` | 6 | Audit findings **M1** and **M2** pinned as the C# authority record, plus H3's cross-reference. |
+| `RecallFromExhaustTests.cs` | 10 | EB-118's exhaust-pile retrieval: the pool filter RUNS (kit, junk and retriever exclusions), the move is pinned structurally (`FromCombatPile` -> `Add` at `CardPilePosition.Top` -> `AddKeyword`) because it needs a live `CombatState`. |
 
-**38 tests, all green.**
+**48 tests, all green.**
 
 ## Co-op coverage
 

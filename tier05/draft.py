@@ -551,6 +551,8 @@ def _op_price(fx: dict) -> float:
     if op == "scry_discard":
         return STATIC_SCRY_VALUE
     if op == "recall_to_draw":
+        # Source-agnostic on purpose (EB-118); the argument is at the
+        # constant, and `fx["from"]` is deliberately not read here.
         return _neutral_amount(fx) * STATIC_RECALL_VALUE
     if op == "upgrade_in_hand":
         return STATIC_UPGRADE_VALUE                        # one neutral card
@@ -1044,6 +1046,22 @@ STATIC_SCRY_VALUE = 0.5            # scry_discard: exactly one worst card
                                    # the printed look-at count.
 STATIC_RECALL_VALUE = 1.0          # recall_to_draw: a CHOSEN card from the
                                    # discard onto the top of the draw pile.
+                                   # PROPOSED (EB-118, staged): the exhaust
+                                   # SOURCE prices at this same rate and gets
+                                   # no hook of its own. The offer-time
+                                   # question is unchanged -- one chosen card
+                                   # lands on top of the draw pile -- and the
+                                   # two ways the sources differ point in
+                                   # opposite directions: the exhaust pile is
+                                   # a strictly smaller (often empty)
+                                   # reservoir, and what it returns is on
+                                   # LOAN, gaining Exhaust and leaving again
+                                   # after one use. A split rate would be a
+                                   # number nothing has measured, and
+                                   # DRAFTER_VERSION does not move for a
+                                   # staged capability no shipped card uses.
+                                   # test_eb118_recall_exhaust pins that the
+                                   # generic price applies to both sources.
 STATIC_UPGRADE_VALUE = 1.5         # upgrade_in_hand, per card upgraded --
                                    # combat-scoped here, which is why it is
                                    # under a full card's worth.
@@ -1149,7 +1167,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "exhaust_from": "STATIC_STATUS_EXHAUST_VALUE filtered, else "
                     "STATIC_EXHAUST_VALUE",
     "scry_discard": "STATIC_SCRY_VALUE; one card leaves however many are seen",
-    "recall_to_draw": "STATIC_RECALL_VALUE per chosen card recalled",
+    "recall_to_draw": "STATIC_RECALL_VALUE per chosen card recalled, "
+                      "source-agnostic (EB-118: `from: exhaust` prices the "
+                      "same, PROPOSED at the constant)",
     "upgrade_in_hand": "STATIC_UPGRADE_VALUE per card upgraded",
     "grant_sly_this_turn": "STATIC_GRANT_SLY_VALUE, one turn of the rider",
     "remember_card": "ZERO: STATIC_REMEMBER_CARD_VALUE, paid on the power",
