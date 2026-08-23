@@ -15,11 +15,13 @@ become wrong:
      live sheets classify with zero UNCLASSIFIED, and an unknown op,
      predicate, formula, count token, power, tag or card-level field
      comes back as UNCLASSIFIED rather than as nothing.
-  4. THE HONEST STOP. `game_ref/` is gitignored and absent on a fresh
-     clone, so the tool's default path is the mod-only diagnostic. The
-     canon reader is exercised against a SYNTHETIC decompiled tree in a
-     temp dir instead, and the real invocation is asserted to print the
-     incompleteness banner rather than a comparison.
+  4. THE HONEST STOP. `game_ref/` is gitignored: absent on a fresh clone
+     and in a worktree, present in the main checkout. So the tool has two
+     legitimate paths -- the mod-only diagnostic and the eight-pool
+     comparison -- and the real invocation is pinned to whichever one
+     this checkout can actually support. The canon reader is additionally
+     exercised against a SYNTHETIC decompiled tree in a temp dir, so the
+     canon half is covered either way.
 """
 from __future__ import annotations
 
@@ -31,8 +33,30 @@ import pytest
 
 from tier0.engine import effects
 from tools import card_connectivity_report as ccr
+from tools import extract_base_game_pool as _extract
 
 REPO = Path(__file__).resolve().parents[2]
+
+
+@pytest.fixture(autouse=True)
+def _no_canon_dial_leak():
+    """`extract.decompile_character` COMPLETES the tag-scoped power dial in
+    place -- by design, at the one moment the power's decompiled source is
+    readable. That mutation is a property of the extractor, not of this
+    tool; but this suite is the first thing in the tier0 process to reach
+    the canon reader, so without this the completed name leaks into every
+    later test in the session (`test_extract_base_game_pool` asserts the
+    COMMITTED dial holds only the prefix, and would fail on ordering
+    alone). Snapshot and restore, so the side effect stays inside the
+    test that provoked it."""
+    saved = (dict(_extract.SUPPORTED_POWERS), dict(_extract.UPGRADE_POWER_KEY))
+    try:
+        yield
+    finally:
+        _extract.SUPPORTED_POWERS.clear()
+        _extract.SUPPORTED_POWERS.update(saved[0])
+        _extract.UPGRADE_POWER_KEY.clear()
+        _extract.UPGRADE_POWER_KEY.update(saved[1])
 
 
 def _row(**kwargs) -> dict:
@@ -426,33 +450,44 @@ def test_canon_corpus_on_a_missing_tree_is_a_reason_not_a_crash(tmp_path):
     assert problems and "does not exist" in problems[0]
 
 
-# --- the honest stop, in THIS worktree --------------------------------------
+# --- the honest stop, or the full read, depending on this checkout ----------
+#
+# game_ref/ is gitignored: present in the main checkout, absent from a
+# worktree (OPERATIONS forbids linking it in). Both are legitimate places to
+# run the suite, so these pin the tool's behaviour in whichever one we are in
+# rather than pinning the checkout itself.
 
-def test_no_game_ref_in_this_worktree():
-    """The premise of the test below. game_ref/ is gitignored and must not
-    be linked into a worktree (OPERATIONS); if it appears here, the
-    honest-stop assertion below stops meaning anything."""
-    assert not (REPO / "game_ref").exists()
+HAS_GAME_REF = (REPO / "game_ref").exists()
 
 
-def test_real_invocation_prints_the_mod_only_diagnostic():
+def test_real_invocation_prints_the_report_this_checkout_can_support():
     proc = subprocess.run(
         [sys.executable, "tools/card_connectivity_report.py"],
         cwd=REPO, capture_output=True, text=True, encoding="utf-8")
     assert proc.returncode == 0, proc.stderr
     out = proc.stdout
-    assert "INCOMPLETE REPORT -- MOD POOLS ONLY, NO CANON BASELINE" in out
-    assert "why the canon half is missing" in out
     for pool in ("klee", "furina", "kokomi"):
         assert f"--- {pool} (" in out
-    for canon in ("ironclad", "silent", "defect", "necrobinder", "regent"):
-        assert f"--- {canon} (" not in out
+    if HAS_GAME_REF:
+        # The canon half is reachable: all eight pools, no honest-stop banner.
+        assert "INCOMPLETE REPORT -- MOD POOLS ONLY, NO CANON BASELINE" not in out
+        for canon in ("ironclad", "silent", "defect", "necrobinder", "regent"):
+            assert f"--- {canon} (" in out
+    else:
+        assert "INCOMPLETE REPORT -- MOD POOLS ONLY, NO CANON BASELINE" in out
+        assert "why the canon half is missing" in out
+        for canon in ("ironclad", "silent", "defect", "necrobinder", "regent"):
+            assert f"--- {canon} (" not in out
 
 
-def test_report_is_incomplete_and_carries_no_threshold():
+def test_report_completeness_matches_the_corpus_and_carries_no_threshold():
     report = ccr.build_report()
-    assert report["complete"] is False
-    assert report["canon_pools"] == []
+    assert report["complete"] is HAS_GAME_REF
+    if HAS_GAME_REF:
+        assert sorted(report["canon_pools"]) == [
+            "defect", "ironclad", "necrobinder", "regent", "silent"]
+    else:
+        assert report["canon_pools"] == []
     assert sorted(report["mod_pools"]) == ["furina", "klee", "kokomi"]
     # NO GATE. The registration carries no pass/fail threshold and no
     # target share, so the report must hold no verdict of any kind: every
