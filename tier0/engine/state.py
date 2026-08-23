@@ -197,6 +197,19 @@ class Card:
     # card upgrade such as Hot Hands+ can now express the base-game keyword
     # without pretending to be a Burst.
     retain: bool = False
+    # EB-118: Ethereal printed on the BASE card. Until now the keyword was
+    # reachable only through `tags: [ethereal]`, which is how the engine
+    # sheets spell it for Statuses, Curses and the Spotlight token -- a
+    # vocabulary personal sheets do not use for lifecycle keywords (they use
+    # `exhaust:`, `innate:`, `retain:`). The field is the personal-sheet
+    # spelling of the SAME keyword; `is_ethereal` below is the single
+    # predicate the engine reads, so the two doors cannot drift apart.
+    #
+    # ORTHOGONAL TO `is_junk`. Ethereal is a timing keyword and junk is a
+    # rarity class: an Ethereal PERSONAL card is still one of Kokomi's own
+    # cards and still pays her Charge funnel when it burns (LAW, Kokomi
+    # identity, [USER] 2026-08-23; pinned in test_ethereal_base_field).
+    ethereal: bool = False
     # principles v1.8: standard-banner 5-stars (Jean/Mona/Diluc) are ordinary
     # nation-pool rares that participate in the banner roll like anyone else.
     # The tag exists so that IF banner-variance data shows bad-roll bricking,
@@ -363,6 +376,17 @@ class Card:
     @property
     def is_companion(self) -> bool:
         return self.role_c is not None or "companion" in self.tags
+
+    @property
+    def is_ethereal(self) -> bool:
+        """Ethereal by either spelling -- the printed field or the tag.
+
+        ONE predicate, for the reason `is_junk` below is one: combat reads
+        the keyword at three seams (the retain split, the flush filter, the
+        ethereal sweep) and a second door that only two of them knew about
+        would burn a card in one place and discard it in another.
+        """
+        return self.ethereal or "ethereal" in self.tags
 
     @property
     def is_junk(self) -> bool:

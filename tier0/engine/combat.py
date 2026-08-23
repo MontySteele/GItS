@@ -714,16 +714,18 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Burst cards have Retain (principles v1.4): they stay in hand.
     # Ethereal cards (the Spotlight selector) vanish to exhaust instead of
     # discarding -- an unplayed selector must never circulate as loot.
+    # `Card.is_ethereal`, not the raw tag: EB-118 added the printed base-card
+    # field beside it and all three seams below must read the same door.
     retained = [c for c in p.hand if "burst" in c.tags or c.retain]
     # WellLaidPlans (BeforeFlushLate): single-turn Retain on up to N cards
     # that were about to be flushed. Computed against what WOULD flush, so it
     # can never "retain" a card that was staying anyway.
     would_flush = [c for c in p.hand
                    if "burst" not in c.tags and not c.retain
-                   and "ethereal" not in c.tags]
+                   and not c.is_ethereal]
     retained += refpowers.retain_at_flush(state, would_flush)
     ethereal = [c for c in p.hand
-                if "ethereal" in c.tags
+                if c.is_ethereal
                 and "burst" not in c.tags and not c.retain]
     # Membership must be by IDENTITY: Card is a dataclass, so two copies of
     # the same card compare EQUAL, and a value check here would drop the
@@ -739,7 +741,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     flushed = [c for c in p.hand if id(c) not in retained_ids]
     p.discard_pile.extend(c for c in p.hand
                           if "burst" not in c.tags and not c.retain
-                          and "ethereal" not in c.tags
+                          and not c.is_ethereal
                           and id(c) not in retained_ids)
     p.hand = retained
     for c in flushed:
