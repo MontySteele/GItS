@@ -220,6 +220,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # Fanfare rework (2026-07-28): the Hyperbeam settle
                   # (Track C.2) and the on-demand bow probe (Track D).
                   "crash_fanfare", "salon_bow",
+                  # EB-118 §5.5 (staged): the queue verbs. Both are a
+                  # single call into SalonMemberPower, the salon_bow
+                  # shape, so they carry no locals and no new grammar.
+                  "salon_rotate", "salon_perform",
                   "generate_guest_star",
                   "copy_spotlighted_in_hand",
                   "heal",
@@ -351,6 +355,11 @@ _EXHAUST_PILE_BAR = re.compile(r"^exhaust_pile_at_least_(\d+)$")
 # shape as Fanfare's and gets the same parametric treatment for the same
 # reason -- moving the bar must be a card edit, never a codegen edit.
 _ENCORE_BAR = re.compile(r"^encore_at_least_(\d+)$")
+# EB-118 §5.5: WHO is next to perform. Parametric like the bars above, but on
+# a CLOSED argument -- the member table, which both engines share -- so an
+# unknown name blocks the card instead of generating a branch that can never
+# fire. The display names are the faces' own: "the Usher" carries its article.
+_LEFTMOST_MEMBER = re.compile(r"^leftmost_salon_member_([a-z]+)$")
 
 
 def predicate_cs(name: str) -> str | None:
@@ -374,6 +383,15 @@ def predicate_cs(name: str) -> str | None:
     hit = _ENCORE_BAR.match(name)
     if hit:
         return f"FurinaResources.Encore(Owner.Creature) >= {hit.group(1)}"
+    hit = _LEFTMOST_MEMBER.match(name)
+    # SALON_MEMBER_CS is the one member->enum map, shared with `member:` on
+    # the deploy op: a predicate must not grow a second spelling of the same
+    # three identities. `random` is not an identity and is excluded -- "if a
+    # random member is next" is not a question about the stage.
+    member = SALON_MEMBER_CS.get(hit.group(1)) if hit else None
+    if member and member != "null":
+        return ("SalonMemberPower.LeftmostMember(Owner.Creature) == "
+                f"{member}")
     return PREDICATES_CS.get(name)
 
 
@@ -395,6 +413,13 @@ def predicate_text(name: str) -> str | None:
         # [gold] like its Fanfare/Charge siblings above -- swelling_overture
         # shipped the only un-golded resource keyword on a face (SYS-9).
         return f"If you have at least {hit.group(1)} [gold]Encore[/gold]"
+    hit = _LEFTMOST_MEMBER.match(name)
+    if hit and SALON_MEMBER_CS.get(hit.group(1), "null") != "null":
+        # "next to perform", not "leftmost": the queue's LEFT is a fact about
+        # the stage's layout, and what the player is being told is the order
+        # of play. The stage names are B5's, so the face and the tooltip that
+        # explains the member are titled the same thing.
+        return f"If {SALON_MEMBER_NAMES[hit.group(1)]} is next to perform"
     return PREDICATE_TEXT.get(name)
 
 
@@ -405,7 +430,12 @@ CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 # repeat_this is legal ONLY as a conditional's entire then-branch.
 BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               "place_bomb", "burst_energy", "energy",
-              "buff_next_attack"}
+              "buff_next_attack",
+              # EB-118 §5.5: single calls with no locals, which is the whole
+              # branch-legality criterion. The obvious future row is
+              # "if the leftmost member is X, do Y" -- see the
+              # leftmost_salon_member_ predicate below.
+              "salon_rotate", "salon_perform"}
 
 # Cards carrying a repeat-conditional re-resolve their other effects (sim
 # resolve_card: the repeat excludes only the repeat machinery). The repeated
@@ -418,7 +448,8 @@ REPEAT_SAFE_OPS = {"damage", "block", "draw", "gain_spark", "burst_energy"}
 # exactly `salon_bow`, which is a single awaited call with no locals -- the
 # only op the new grammar has a card for. Anything else blocks the upgrade
 # path loudly rather than emitting an unverified replay.
-UPGRADE_REPEAT_OPS = REPEAT_SAFE_OPS | {"salon_bow"}
+UPGRADE_REPEAT_OPS = REPEAT_SAFE_OPS | {"salon_bow", "salon_rotate",
+                                        "salon_perform"}
 
 # Field whitelists for the bomb ops (UNPARSEABLE discipline: an unknown
 # field encodes a mechanic; block loudly, never approximate).
@@ -1131,6 +1162,17 @@ def blocked_reason(
             amt = eff.get("amount")
             if not isinstance(amt, int) and _x_formula_reason(card, amt):
                 return _x_formula_reason(card, amt)
+        if op in {"salon_rotate", "salon_perform"}:
+            # EB-118 §5.5. Same field discipline as the meter ops above,
+            # with `amount` OPTIONAL: one rotation and one act are the
+            # natural units, so `{op: salon_rotate}` is the common row
+            # and the default is the sim's (1).
+            unknown = set(eff) - {"op", "amount"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            amount = eff.get("amount", 1)
+            if not isinstance(amount, int) or amount <= 0:
+                return f"{op} amount must be a positive literal int"
         if op in {"gain_encore", "spend_encore", "raise_fanfare_cap",
                   "gain_fanfare_floor", "crash_fanfare", "salon_bow",
                   # A Spark price the generator cannot read as a
@@ -3082,6 +3124,14 @@ def _emit_branch_op(
         )
     elif op == "gain_encore":
         lines.append(_stmt_gain_encore(card, eff))
+    elif op == "salon_rotate":
+        # EB-118 §5.5. Literal in a branch, like every other branch resolver:
+        # no delta grammar reaches a rotation count.
+        lines.append("SalonMemberPower.RotateLeftmost("
+                     f'Owner.Creature, {int(eff.get("amount", 1))});')
+    elif op == "salon_perform":
+        lines.append("await SalonMemberPower.PerformLeftmost("
+                     f'choiceContext, Owner.Creature, {int(eff.get("amount", 1))});')
     elif op == "energy":
         # DEFECT FIXED HERE (found by G8, 2026-07-26). An `energy` delta made
         # the CanonicalVars entry and the OnUpgrade bump, but the play emitted
@@ -3369,6 +3419,22 @@ def build_body(
             # introducing a second notion of "which member".
             lines.append(
                 "await SalonMemberPower.BowLeftmost("
+                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
+
+        elif op == "salon_rotate":
+            # EB-118 §5.5. A reorder and nothing else: no tick, no Encore, no
+            # bow. Synchronous by signature, which is what guarantees it.
+            lines.append(
+                "SalonMemberPower.RotateLeftmost("
+                f"Owner.Creature, {int(eff.get('amount', 1))});")
+
+        elif op == "salon_perform":
+            # EB-118 §5.5. Resolves through the SAME PerformMember the
+            # turn-start upkeep calls, so the Encore upkeep, the dry cut, the
+            # Focus scaling and the burst particle are inherited here rather
+            # than restated on the card.
+            lines.append(
+                "await SalonMemberPower.PerformLeftmost("
                 f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
 
         elif op == "heal":
@@ -4114,6 +4180,14 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
             body.append(
                 "await SalonMemberPower.BowLeftmost("
                 f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
+        elif op == "salon_rotate":
+            body.append(
+                "SalonMemberPower.RotateLeftmost("
+                f"Owner.Creature, {int(eff.get('amount', 1))});")
+        elif op == "salon_perform":
+            body.append(
+                "await SalonMemberPower.PerformLeftmost("
+                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
     pad = " " * indent
     return "\n".join(pad + s.replace("\n", "\n" + " " * 4) for s in body)
 
@@ -4492,6 +4566,24 @@ def build_description(card: dict) -> str:
                 "bow." if n == 1 else
                 f"The leftmost {n} members of your [gold]Salon[/gold] take "
                 "their bows.")
+
+        elif op == "salon_rotate":
+            # "Moves to the back" and not "rotates": the player is told what
+            # happens to the member, not what happens to the data structure.
+            n = int(eff.get("amount", 1))
+            parts.append(
+                "The leftmost member of your [gold]Salon[/gold] moves to the "
+                "back." if n == 1 else
+                f"The leftmost member of your [gold]Salon[/gold] moves to the "
+                f"back, {n} times.")
+
+        elif op == "salon_perform":
+            n = int(eff.get("amount", 1))
+            parts.append(
+                "The leftmost member of your [gold]Salon[/gold] performs "
+                "now." if n == 1 else
+                f"The leftmost member of your [gold]Salon[/gold] performs "
+                f"now, {n} times.")
 
         elif op == "heal":
             parts.append("Heal {Heal:diff()} HP.")

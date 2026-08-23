@@ -508,6 +508,10 @@ def _op_price(fx: dict) -> float:
         return -_neutral_amount(fx, 0) * STATIC_CRASH_FANFARE_VALUE
     if op == "salon_bow":
         return _neutral_amount(fx) * STATIC_SALON_BOW_VALUE
+    if op == "salon_perform":
+        return _neutral_amount(fx) * STATIC_SALON_PERFORM_VALUE
+    if op == "salon_rotate":
+        return STATIC_SALON_ROTATE_VALUE
     if op == "spotlight_designate":
         return STATIC_SPOTLIGHT_DESIGNATE_VALUE
 
@@ -1027,6 +1031,32 @@ STATIC_SALON_BOW_VALUE = 2.0       # salon_bow: one member's bow, on demand.
                                    # drafter cannot see stage occupancy, and
                                    # the plan bonus already pays for the
                                    # Salon shape.
+# EB-118 §5.5 (staged 2026-08-23). BOTH VALUES BELOW ARE PROPOSED, and
+# neither moves a number today: no sheet row prints either op, so every
+# drafting arm scores exactly as it did before. DRAFTER_VERSION therefore
+# does NOT move -- an unused op cannot change an offer screen, and the pin at
+# 14 (R121's payoff-reach registration) is untouched. The first card that
+# prints one of these verbs is what makes these dials load-bearing, and the
+# bump belongs to that window, not this one.
+STATIC_SALON_PERFORM_VALUE = 1.5   # salon_perform: one extra member tick, on
+                                   # demand. Priced BELOW salon_bow because
+                                   # a tick is the smaller half of a member
+                                   # (Crabaletta 6 against 14) and because
+                                   # the tick pays its Encore upkeep, which
+                                   # the bow does not -- the drafter cannot
+                                   # see whether the meter can afford it, so
+                                   # the conservative read is the priced one.
+STATIC_SALON_ROTATE_VALUE = 0.0    # salon_rotate: ZERO, and structurally so
+                                   # rather than pending a number. Rotating
+                                   # delivers nothing by itself; its whole
+                                   # value is which member the NEXT bow,
+                                   # perform or displacement finds, and stage
+                                   # occupancy is exactly what an offer
+                                   # screen cannot see (the salon_bow note
+                                   # above says the same thing about a value
+                                   # it could at least bound). Priced at zero
+                                   # deliberately, not by omission -- the
+                                   # STATIC_STRIP_BLOCK_VALUE precedent.
 STATIC_SPOTLIGHT_DESIGNATE_VALUE = 1.5  # spotlight_designate: prints
                                    # nothing and is what the whole
                                    # Spotlight kit reads. Deliberately
@@ -1187,6 +1217,10 @@ STATIC_OP_PRICING: dict[str, str] = {
     "crash_fanfare": "ZERO: STATIC_CRASH_FANFARE_VALUE until the meter-read "
                      "formula is priced; see the constant",
     "salon_bow": "STATIC_SALON_BOW_VALUE per bow taken",
+    "salon_perform": "STATIC_SALON_PERFORM_VALUE per act performed "
+                     "(PROPOSED; no sheet row prints it, so no number moves)",
+    "salon_rotate": "ZERO: STATIC_SALON_ROTATE_VALUE, a stage-occupancy "
+                    "question an offer screen cannot see",
     "spotlight_designate": "STATIC_SPOTLIGHT_DESIGNATE_VALUE, the universal "
                            "half of what the archetype term already pays",
     "generate_guest_star": "STATIC_GENERATED_CARD_VALUE per token",

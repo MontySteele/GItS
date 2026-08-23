@@ -13,7 +13,7 @@ found was found by playing**. This is a partial backstop for that — see
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 52 tests, ~0.3s after build
+dotnet test                       # 64 tests, ~0.3s after build
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -68,7 +68,7 @@ the whole run with it and reports as `Test Run Aborted`.
 | `PlayTelemetry.ToJson()` | `Intent()` → `Root()` → `Godot.ProjectSettings.GlobalizePath` → **process death** | the telemetry schema is pinned by reading the serializer's field set and its `ldstr` key literals (`Harness/Il.cs`), not by running it. |
 | `ModelDb` lookups (`GetById`, `ToMutable`) | `ModelNotFoundException` — the registry is populated only by the game's boot | card models are constructed directly; `IsMutable` is set through its own setter, which is the flag `ToMutable` would have set. A canonical `CardModel`'s Owner **getter** throws too, which is `EB-94`'s root cause met from the test side. |
 | Anything touching a Godot object | `Texture2D`, `StringName`, scene nodes — **process death** | no test may touch art, VFX, hover-tip rendering or `KleePck`. |
-| A live `CombatState` / a real card PLAY | needs a combat the harness cannot build | card `OnPlay` bodies, damage resolution, `await CardPileCmd.*`, turn sequencing and the Salon's `Deploy`/`Bow` are **not reachable**. Ordering facts about them are pinned structurally (IL call sets) and labelled as such. |
+| A live `CombatState` / a real card PLAY | needs a combat the harness cannot build | card `OnPlay` bodies, damage resolution, `await CardPileCmd.*`, turn sequencing and the Salon's `Deploy`/`Bow`/`PerformMember` are **not reachable**. Ordering facts about them are pinned structurally (IL call sets) and labelled as such. |
 | A second peer | no transport, no lockstep | multiplayer **transport** — lockstep RNG agreement, remote-seat selection round trips, desync — remains play-only. |
 
 Nothing here is faked past. Where a fact could not be reached directly it is
@@ -84,8 +84,9 @@ either pinned structurally and labelled, or left out.
 | `CoopSeamTests.cs` | 8 | Per-seat ownership and attribution — see below. |
 | `SparkSinkPinTests.cs` | 14 | EB-118 §4.5's Spark sink: the `CanSpend` gate a generated sink hangs `IsPlayable` on (whole price or nothing), True Spark Knight's live threshold and its floor of 1, and two structural pins on `Spend` (it refuses through the same predicate the gate uses, and moves the bank through the same `PowerCmd.ModifyAmount` the threshold consume uses). No card prints the op. |
 | `ParityAuthorityPinTests.cs` | 6 | Audit findings **M1** and **M2** pinned as the C# authority record, plus H3's cross-reference. |
+| `SalonVerbTests.cs` | 12 | `EB-118` §5.5's Salon verbs: the structural pin that the turn-start upkeep and perform-now resolve through the SAME `PerformMember` (the packet's no-duplicate-implementation requirement), and the behavioural pins for `RotateLeftmost` and the leftmost reads. |
 
-**52 tests, all green.**
+**64 tests, all green.**
 
 ## Co-op coverage
 
