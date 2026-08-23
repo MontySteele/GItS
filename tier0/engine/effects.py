@@ -1599,6 +1599,17 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
         _free_play(state, victim, force_exhaust=False)
 
 
+def kokomi_rotation_law(player) -> bool:
+    """Does this player's Exhaust economy run under Kokomi's rotation law?
+
+    Keyed on the Tamakushi Casket relic hook -- the SAME seam the Charge
+    funnel in refpowers.after_card_exhausted is keyed on -- so the law and
+    the accrual it governs are switched by one fact. The upgraded starter
+    (Pearl of Insight) keeps the hook, so the law survives the upgrade.
+    A real_ironclad True Grit+ has no hook and keeps its any-card pool."""
+    return "tamakushi_casket" in player.relic_hooks
+
+
 def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
     hand = state.player.hand
     # DEFECT FIX: the status branch used to rebuild the pool from `hand` and
@@ -1610,6 +1621,16 @@ def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
         pool = [c for c in pool if c.rarity == "status"]
     elif fx.get("filter") == "non_attack":
         pool = [c for c in pool if c.type != "attack"]
+    elif kokomi_rotation_law(state.player):
+        # ROTATION LAW ([USER] 2026-08-23): Kokomi rotates her OWN cards
+        # out, never a Status or a Curse. The unfiltered pool -- chosen or
+        # random -- drops junk under her law; a card that IS allowed to eat
+        # junk says so with an explicit `filter:` (Dodge Roll's shape), which
+        # is the branch above and is untouched. The old behaviour ("statuses
+        # and curses count too, accepted quirk", kickoff v1 §2.1) made her
+        # uniquely status-resistant for free; that quirk is retired, and the
+        # design space it vacates is a dedicated Uncommon/Rare card.
+        pool = [c for c in pool if not c.is_junk]
     n = fx.get("amount", 1)
     # Stoke exhausts the WHOLE hand and then generates that many cards. The
     # count is fixed BEFORE any exhausting (the dll reads exhaustCount off
@@ -2275,8 +2296,14 @@ def _op_conscript(state: CombatState, fx: dict, card: Card) -> None:
             _add_token(state, recruit, "hand")
             continue
         hand = state.player.hand
+        # ROTATION LAW ([USER] 2026-08-23): a Muster transforms one of HER
+        # cards. A Status or a Curse is not a recruit -- conscripting a
+        # Dazed used to be free curse removal that also paid Charge when the
+        # recruit rotated out. Unconditional here (the verb is hers alone;
+        # the shared exhaust_from keys the same law on the relic hook).
         candidates = [c for c in hand
-                      if not c.kit_card and not c.is_companion]
+                      if not c.kit_card and not c.is_companion
+                      and not c.is_junk]
         if not candidates:
             state.emit("conscript_whiffed")
             return

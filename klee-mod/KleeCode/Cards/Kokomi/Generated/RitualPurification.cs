@@ -64,7 +64,7 @@ public sealed class RitualPurification : CustomCardModel, ICharacterCard
                 choiceContext, Owner,
                 new CardSelectorPrefs(
                     CardSelectorPrefs.ExhaustSelectionPrompt, 1),
-                KitGrant.NotKitCard, this)).ToList();
+                KokomiResources.OwnCard, this)).ToList();
             foreach (var victim in toExhaust)
             {
                 await CardCmd.Exhaust(choiceContext, victim);

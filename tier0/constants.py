@@ -1185,7 +1185,37 @@ BANNER_FEATURED_SLOTS = 3
 # DRAFTER_VERSION correctly does NOT bump -- no offer-time price moved and the
 # payoff-reach D14 pin stands; draft.POLICY_VERSION does not move either.
 # RUNTEMPLATE moves in the SAME window on its own ground (11 -> 12, above).
-CONSTANTS_VERSION = 10
+# CONSTANTS_VERSION 11 ([USER] rulings 1-3, 2026-08-23). Built PROPOSED on
+# branch `artifact-muster-sweep` per ruling 3 (the `S4-G13` staged-branch
+# precedent), then PULLED BY [USER] the same day -- the sequencing choice
+# ruling 3 reserved was made as "join the open window", so the number below
+# is live and every branch that ships from here is C11.
+# Ground: an engine BEHAVIOUR change that moves Kokomi combat numbers -- the
+# rotation law ([USER] ruling 2, 2026-08-23). A Status or a Curse is never
+# one of her cards: `_op_conscript` never transforms one, `_op_exhaust_from`
+# drops them from the unfiltered pool under her relic hook (explicit
+# `filter:` untouched -- Dodge Roll's opt-in shape), and
+# `after_card_exhausted` pays no Charge and no Burst particle for one by any
+# route (Ethereal, a played Dazed, the ward's random draw-pile pick). One
+# predicate (`Card.is_junk`) at all three seams. Every pre-bump Kokomi
+# number that saw a Status/Curse in hand or exhaust overstated her: junk was
+# free curse removal that also paid the meter ("accepted quirk", kickoff v1
+# §2.1 -- retired). The bump criterion is CONSTANTS 5's ("comparability
+# decides, not edit size"); the direct precedent is C10's EB-95..101 shape.
+# The SAME ruling's Artifact half (Auras/Bombs coexist with Artifact) is
+# C#-only -- tier0 does not model Artifact ("unimplemented in sim:
+# Artifact 3", candidates.md:512) -- so it is recorded here for the window's
+# completeness but moves no sim number.
+# NO CARD SHEET WAS EDITED: the R179/M15 clause is checked, not invoked --
+# no card added, removed, repriced, renumbered or rarity-moved.
+# DRAFTER_VERSION correctly does NOT move: no op was added and no
+# offer-time price moved (`_static_power` never priced junk).
+# draft.POLICY_VERSION does not move either. The `EB-69` collision note
+# applies to this branch exactly as it does to
+# `staged/eb74-lever2-b-alone`: whichever lands second re-baselines on the
+# first -- this one landed first, so a later `eb74` pull re-baselines on
+# C11 (its branch note's 9 -> 10 is stale and rebases to 11 -> 12).
+CONSTANTS_VERSION = 11
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

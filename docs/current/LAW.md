@@ -50,6 +50,12 @@ combat grammar comes with us. (principles §1)
   direct HP damage, cannot shatter the freeze it just applied). In boss rooms
   only creatures carrying `MinionPower` are Frozen; every other creature takes
   the Vulnerable substitution. (principles §2.2; R44; R116 NC-7 / R117 Q13)
+- **Elemental application coexists with Artifact.** An Aura or a Bomb lands
+  beside Artifact rather than consuming a charge — only an actual debuff
+  reduces Artifact. Scope: Auras and Bombs coexist; Frozen and
+  reaction-applied Vulnerable/Weak/Poison stay real debuffs and are negated
+  as normal. Bomb's "first attack −25%" rider lands through Artifact under
+  the same rule — ruled acceptable. ([USER] 2026-08-23)
 - **Hard CC is payoff-tier only.** No reaction and no companion card produces an
   intent-skip/stun at repeatable-common economics; full stun is priced at or
   above base-game stun scarcity with per-combat diminishing returns. Companions
@@ -232,6 +238,12 @@ combat grammar comes with us. (principles §1)
   flatness (the stability band); ward prevention stays reported telemetry, never
   axis-credited. Canonical archetypes: priest / commander / assist (+ generic).
   (R51; R66)
+- **Rotation law: Kokomi only Exhausts her own cards.** A Status or a Curse is
+  never one of her cards: Muster and every chosen-Exhaust card never select
+  one, and no Charge (or Burst particle) accrues from a Status/Curse exhaust
+  by any route. Discard is unchanged. An explicit `filter:` on a card is the
+  opt-in (Dodge Roll's shape); a dedicated Uncommon/Rare that can eat those
+  types is reserved future design space. ([USER] 2026-08-23)
 - **VOICE LAW: Exhaust is rotation, never sacrifice.** Weak/Vulnerable enter her
   pool only as riders on exhaust/Sly engine pieces. Conscripted companions count
   as self-sourced kit for `SUPPORT_CARRY`; drafted Inazuma-pool cards count

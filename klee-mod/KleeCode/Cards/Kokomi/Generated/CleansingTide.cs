@@ -64,7 +64,7 @@ public sealed class CleansingTide : CustomCardModel, ICharacterCard
                 choiceContext, Owner,
                 new CardSelectorPrefs(
                     CardSelectorPrefs.ExhaustSelectionPrompt, 2),
-                KitGrant.NotKitCard, this)).ToList();
+                KokomiResources.OwnCard, this)).ToList();
             foreach (var victim in toExhaust)
             {
                 await CardCmd.Exhaust(choiceContext, victim);
