@@ -83,8 +83,9 @@ either pinned structurally and labelled, or left out.
 | `InterpolationPinTests.cs` | 5 | The tooltip text `lint_constant_parity` structurally cannot see: `SalonMemberPower` and both Pearl relics interpolate their constants rather than restating them (EB-86's shape; M24's "signing is a one-file edit"). |
 | `CoopSeamTests.cs` | 8 | Per-seat ownership and attribution — see below. |
 | `ParityAuthorityPinTests.cs` | 6 | Audit findings **M1** and **M2** pinned as the C# authority record, plus H3's cross-reference. |
+| `ExhaustSelectionTests.cs` | 15 | `EB-118`'s Exhaust identity context: the six printed descriptors, the derived reads, and above all the SCOPING — another card reads nothing, a second `Open` replaces, the seat is part of the key. Sim twin: `tier0/tests/test_exhaust_context.py`; the emitted column names are pinned across the two engines by `tier0/tests/test_exhaust_context_parity.py`. The codegen's wiring into a generated `OnPlay` is a labelled structural pin — a card PLAY is outside the boundary. |
 
-**38 tests, all green.**
+**53 tests, all green.**
 
 ## Co-op coverage
 

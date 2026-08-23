@@ -64,6 +64,7 @@ public sealed class Reinforcements : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         {
+            ExhaustSelection.Open(this);
             var toExhaust = (await CardSelectCmd.FromHand(
                 choiceContext, Owner,
                 new CardSelectorPrefs(
@@ -71,8 +72,11 @@ public sealed class Reinforcements : CustomCardModel, ICharacterCard
                 KokomiResources.OwnCard, this)).ToList();
             foreach (var victim in toExhaust)
             {
+                ExhaustSelection.Record(this, victim);
                 await CardCmd.Exhaust(choiceContext, victim);
             }
+
+            ExhaustSelection.Close(this);
         }
         await KokomiConscript.Run(choiceContext, Owner, this, 2, createMode: true, costOverride: null);
     }

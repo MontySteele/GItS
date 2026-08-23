@@ -58,6 +58,7 @@ public sealed class DodgeRoll : CustomCardModel
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         {
+            ExhaustSelection.Open(this);
             var statusCards = CardPile.Get(PileType.Hand, Owner)?
                 .Cards.Where(c => c.Rarity == CardRarity.Status).ToList();
             if (statusCards != null && statusCards.Count > 0)
@@ -65,9 +66,12 @@ public sealed class DodgeRoll : CustomCardModel
                 var victim = Owner.RunState.Rng.CombatTargets.NextItem(statusCards);
                 if (victim != null)
                 {
+                    ExhaustSelection.Record(this, victim);
                     await CardCmd.Exhaust(choiceContext, victim);
                 }
             }
+
+            ExhaustSelection.Close(this);
         }
     }
 
