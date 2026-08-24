@@ -40,7 +40,7 @@ public sealed class ClockworkToy : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Imaginary Friend"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Gain 3 [gold]Burst Energy[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Gain 3 [gold]Burst Energy[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

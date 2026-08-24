@@ -47,7 +47,7 @@ public sealed class BlastRadius : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Blast Radius"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. Discard 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -72,6 +72,13 @@ public sealed class BlastRadius : CustomCardModel, IElementalCard
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
+        {
+            var picked = (await CardSelectCmd.FromHandForDiscard(
+                choiceContext, Owner,
+                new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 1),
+                KitGrant.NotKitCard, this)).ToList();
+            await CardCmd.Discard(choiceContext, picked);
+        }
     }
 
     protected override void OnUpgrade()

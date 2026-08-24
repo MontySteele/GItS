@@ -9,7 +9,7 @@ klee	quick_fuse	common	demolition	glue	utility	utility		early,mid,late	early,lat
 klee	double_pop	common	demolition	enabler	frontload	frontload		early	early		bomb			frontload	frontload
 klee	ammo_scavenging	common	demolition	glue	frontload,velocity	frontload,velocity		early	early		bomb			frontload	frontload
 klee	big_badda_boom	common	demolition,generic	glue	frontload	frontload		mid	early						
-klee	blast_radius	common	generic	glue	frontload	frontload		early	early	aoe					
+klee	blast_radius	common	generic	glue	frontload,velocity	frontload,velocity		early	early	aoe					
 klee	chain_fuse	uncommon	demolition	enabler	frontload	frontload		early	early		bomb			frontload	frontload
 klee	careful_arrangement	uncommon	demolition	glue	frontload	frontload		mid	early		bomb			frontload	frontload
 klee	bomb_voyage	common	demolition	enabler	frontload	frontload		mid	early	aoe	bomb			frontload	frontload
@@ -74,7 +74,7 @@ klee	secret_stash	rare	demolition	glue	frontload,velocity	frontload,velocity		ea
 klee	vermillion_pact	rare	reaction	payoff	scaling	scaling		late	late						
 klee	playtime_forever	rare	demolition,spark	payoff	frontload,scaling	frontload,scaling		late	late		bomb	bomb		frontload	frontload
 klee	best_friends_forever	rare	reaction	payoff	velocity	velocity		early	late						
-klee	no_holding_back	rare	generic	payoff	frontload	frontload		early	late	aoe					
+klee	no_holding_back	rare	generic	payoff	frontload,velocity	frontload,velocity		early	late	aoe					
 furina	soloists_solicitation	basic	generic	glue	frontload	frontload		early	early						
 furina	stage_presence	basic	generic	glue	block	block		early	early						
 furina	regal_bearing	basic	generic	glue	block,utility	block,utility		early	early						

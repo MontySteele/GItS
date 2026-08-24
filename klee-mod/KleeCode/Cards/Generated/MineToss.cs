@@ -44,7 +44,7 @@ public sealed class MineToss : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mine Toss"),
-        ("description", "Place 2 [gold]Bombs[/gold] on random enemies, each dealing {Damage:diff()} damage."),
+        ("description", "Place 2 [gold]Bombs[/gold] on random enemies, each dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

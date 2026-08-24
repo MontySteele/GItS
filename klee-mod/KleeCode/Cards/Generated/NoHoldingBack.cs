@@ -37,17 +37,17 @@ public sealed class NoHoldingBack : CustomCardModel, IElementalCard
     public Element Element => Element.Pyro;
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesPyro };
+        new[] { CardKeyword.Exhaust, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false, includesConfiscatedRules: true);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("no_holding_back");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "No Holding Back"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies."),
+        ("description", "Deal {Damage:diff()} damage to ALL enemies. Add a [gold]Confiscated[/gold] to your discard pile."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -72,6 +72,10 @@ public sealed class NoHoldingBack : CustomCardModel, IElementalCard
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
+        {
+            var token = CombatState!.CreateCard<Confiscated>(Owner);
+            await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
+        }
     }
 
     protected override void OnUpgrade()

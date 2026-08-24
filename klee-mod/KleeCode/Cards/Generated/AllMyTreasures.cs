@@ -44,7 +44,7 @@ public sealed class AllMyTreasures : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "All of My Treasures!"),
-        ("description", "Place 6 [gold]Bombs[/gold] on random enemies, each dealing {Damage:diff()} damage. Gain 2 [gold]Sparks[/gold]."),
+        ("description", "Place 6 [gold]Bombs[/gold] on random enemies, each dealing {Damage:diff()} damage. Gain 2 [gold]Sparks[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -46,7 +46,7 @@ public sealed class ControlledDemolition : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Controlled Demolition"),
-        ("description", "Place X+1 [gold]Bombs[/gold] on random enemies, each dealing {Damage:diff()} damage."),
+        ("description", "Place X+1 [gold]Bombs[/gold] on random enemies, each dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
