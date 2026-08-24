@@ -86,5 +86,5 @@ Two derivations feed this table and they are not interchangeable:
 | token | fight: early | fight: mid | fight: late |
 |---|---|---|---|
 | `bake_kurage` | **— nothing —** | `block`, `frontload`, `scaling` | `block`, `frontload`, `scaling` |
-| `charge` | `frontload`, `scaling` | `frontload`, `scaling` | `frontload`, `scaling` |
+| `charge` | `frontload`, `scaling` | `block`, `frontload`, `scaling` | `block`, `frontload`, `scaling` |
 | `conscript` | `block`, `frontload`, `velocity` | `block`, `frontload`, `velocity` | `block`, `frontload`, `velocity` |

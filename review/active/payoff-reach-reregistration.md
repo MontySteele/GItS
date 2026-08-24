@@ -769,3 +769,61 @@ gitignored base-game material, REFERENCE ONLY, primary-checkout-local. **A
 worktree has no `game_ref/` and must never be given one** — which is why the
 census tool takes the path as an argument and why control C1 runs in the
 primary checkout only.
+
+### 6.8 Amendment — R190's Assist payoff-supply fence (`R197`, 2026-08-23)
+
+R190's fence is not this registration's own clause, but it is binding on this
+registration's three Kokomi arms: it is what held `kokomi/assist`'s payoff
+supply still while the sprint that may be grading that very number was unrun.
+`EB-69`'s already-adopted bodies cannot be classified honestly without moving
+that supply. The collision was **surfaced, not engineered around** — the
+`EB-118` Phase-0 contract's item 8 requires exactly that, and forbids
+disguising a payoff as glue to make a fingerprint pass — and [USER] answered by
+amending the fence.
+
+**The amended fence, as ruled:**
+
+> The already-adopted EB-69 batch may change Assist payoff supply. No further
+> Assist payoff-supply changes are permitted before the post-settle grade.
+
+**Both supply figures, on the record.**
+
+- **Pre-fill: 3.** `undertow`, `quiet_harbor`, `epiphany_of_the_deep` — the
+  three sheet rows carrying `role: payoff` **and** `assist` at the date the
+  fence was set. This is the "current 3 vs expected 0–2" the `EB-74` row
+  names, and it is kept here because it is the number the fence was set
+  around; the amendment does not retire it.
+- **Post-fill: 5.** Two `EB-69` rows classify `payoff` ∧ `assist` and join it:
+  `what_the_tokoyo_took` (a Rare attack scaling off the Assist lane's own
+  discard count) and `the_gunbai_turns` (a Rare whose whole function is cashing
+  the lane's drafted Sly riders in one turn). `what_the_tokoyo_returns` is
+  ruled `role: glue` — retrieval and repair, cashing no resource into output.
+
+**The retrieval-rubric note, stated in advance rather than discovered later.**
+`what_the_tokoyo_returns` is the borderline card and it is named as one. If the
+eventual payoff-classification rubric rules that retrieval **is** payoff, this
+figure becomes **6** by that rubric, transparently, with no re-reading of any
+card body and no re-ruling of this amendment. The two nearest live analogues in
+the same lane and rarity (`undertow`, `quiet_harbor`) both carry `role: payoff`
+on the shipped sheet, which is why the card is borderline rather than clear.
+
+**What this spoils, said out loud.** The `EB-118` Phase-0 contract's §2.4
+carried a committed directional prediction that Kokomi's Assist payoff supply
+*"does not rise before the payoff grade"*. That prediction is now **spoiled by
+an authorized content intervention** — this one. It is struck and annotated
+where it is published and is **not rewritten** (`R101b`): a published
+prediction stands as published, and a spoiled prediction is not a re-predicted
+one.
+
+**Grading consequence — none beyond what §6.5 already registered.** §6.5
+already puts the official `P5` read *after* `EB-69` lands and already states
+that the three Kokomi arms are re-read at that point and may move on either
+axis. That is unchanged. This amendment is what makes that post-settle read
+legitimate rather than contaminated: the supply moves once, by an authorized
+and recorded act, before the read — not during it.
+
+**Amendment history (§6.8).** Carried in §6.1's house form.
+
+| amendment | what changed | why |
+|---|---|---|
+| **1** — R190's Assist payoff-supply fence (`R197`, [USER] ruling of 2026-08-23) | The fence admits the already-adopted `EB-69` batch and nothing else: Assist payoff supply moves 3 → 5 with the fill, and no further Assist payoff-supply change is permitted before the post-settle grade. Both figures are recorded, with the retrieval-rubric route to 6 stated in advance. Phase-0 §2.4's Kokomi supply clause is spoiled, struck where published, never rewritten. | The fill's honest classification moves the fenced number, and Phase-0 item 8 forbids the alternative (mislabelling a payoff as glue). A fence [USER] set is a fence [USER] may move; the cost — that the frozen experiment's Assist arm is graded against the post-fill pool rather than the pre-fill one — is paid deliberately and recorded before the fill lands, not after. |

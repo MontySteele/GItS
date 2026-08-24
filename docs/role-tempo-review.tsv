@@ -164,29 +164,29 @@ kokomi	tactical_retreat	basic	generic	enabler	velocity	velocity		early	early
 kokomi	tide_reading	basic	generic	glue	block,velocity	block,velocity		early	early						
 kokomi	conscription_notice	common	commander	enabler	block,frontload,velocity	block,frontload,velocity		early	early		conscript		block,frontload,velocity	block,frontload,velocity	block,frontload,velocity
 kokomi	to_the_front	common	commander	enabler	block,frontload,velocity	block,frontload,velocity		early	early		conscript		block,frontload,velocity	block,frontload,velocity	block,frontload,velocity
-kokomi	votive_offering	common	priest	glue	block,frontload,scaling,utility	block,frontload,scaling,utility		early	early		charge		frontload,scaling	frontload,scaling	frontload,scaling
-kokomi	ritual_purification	common	priest	enabler	frontload,scaling,utility,velocity	frontload,scaling,utility,velocity		early	early		charge		frontload,scaling	frontload,scaling	frontload,scaling
+kokomi	votive_offering	common	priest	glue	block,frontload,scaling,utility	block,frontload,scaling,utility		early	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
+kokomi	ritual_purification	common	priest	enabler	block,frontload,scaling,utility,velocity	block,frontload,scaling,utility,velocity		early	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
 kokomi	waterspout	common	priest,generic	glue	frontload	frontload		early	early						
-kokomi	cleansing_tide	common	priest	glue	block,frontload,scaling,utility	block,frontload,scaling,utility		mid	early		charge		frontload,scaling	frontload,scaling	frontload,scaling
+kokomi	cleansing_tide	common	priest	glue	block,frontload,scaling,utility	block,frontload,scaling,utility		mid	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
 kokomi	undertow_shuffle	common	assist	glue	velocity	velocity		early	early						
 kokomi	moon_signal	common	assist	enabler	velocity	velocity		early	early						
 kokomi	drifting_lantern	common	assist,generic	glue	block	block		early	early						
 kokomi	surging_shoal	common	generic,priest	glue	frontload	frontload		early	early	aoe					
 kokomi	jade_bulwark	common	generic	glue	block	block		early	early						
-kokomi	pulsing_current	common	generic,priest	glue	frontload,scaling	frontload,scaling		early	early		charge		frontload,scaling	frontload,scaling	frontload,scaling
+kokomi	pulsing_current	common	generic,priest	glue	block,frontload,scaling	block,frontload,scaling		early	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
 kokomi	kurages_oath	common	priest,generic	payoff	block,frontload,scaling	block,frontload,scaling		late	early,late		bake_kurage	bake_kurage		block,frontload,scaling	block,frontload,scaling
 kokomi	before_sun_and_moon	uncommon	priest,generic	payoff	block,frontload,scaling	block,frontload,scaling		late	late		bake_kurage	bake_kurage		block,frontload,scaling	block,frontload,scaling
 kokomi	standing_orders	common	commander	enabler	block,frontload,velocity	block,frontload,velocity		early	early		conscript		block,frontload,velocity	block,frontload,velocity	block,frontload,velocity
 kokomi	signal_arrow	common	commander	glue	block,frontload,velocity	block,frontload,velocity		early	early		conscript		block,frontload,velocity	block,frontload,velocity	block,frontload,velocity
-kokomi	shoulder_to_shoulder	common	commander	payoff	frontload,scaling,utility,velocity	frontload,scaling,utility,velocity		early	early,late		charge		frontload,scaling	frontload,scaling	frontload,scaling
+kokomi	shoulder_to_shoulder	common	commander	payoff	block,frontload,scaling,utility,velocity	block,frontload,scaling,utility,velocity		early	early,late		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
 kokomi	vow_of_tides	common	priest,generic	glue	frontload	frontload		early	early	aoe					
-kokomi	pearl_diver	common	priest	enabler	frontload,scaling,utility	frontload,scaling,utility		early	early		charge		frontload,scaling	frontload,scaling	frontload,scaling
-kokomi	tideline_watch	common	priest	glue	block,frontload,scaling,utility	block,frontload,scaling,utility		early	early		charge		frontload,scaling	frontload,scaling	frontload,scaling
+kokomi	pearl_diver	common	priest	enabler	block,frontload,scaling,utility	block,frontload,scaling,utility		early	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
+kokomi	tideline_watch	common	priest	glue	block,frontload,scaling,utility	block,frontload,scaling,utility		early	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
 kokomi	whispered_word	common	assist	glue	block,velocity	block,velocity		early	early						
-kokomi	driftwood_charm	common	assist,generic	glue	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early	early		charge		frontload,scaling	frontload,scaling	frontload,scaling
+kokomi	driftwood_charm	common	assist,generic	glue	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
 kokomi	scattering_spray	common	assist,generic	glue	frontload,velocity	frontload,velocity		early	early	aoe					
-kokomi	ebb_tide	common	assist	enabler	frontload,scaling,utility,velocity	frontload,scaling,utility,velocity		early	early		charge		frontload,scaling	frontload,scaling	frontload,scaling
-kokomi	salt_line	common	assist,generic	glue	block,frontload,scaling,utility	block,frontload,scaling,utility		early	early		charge		frontload,scaling	frontload,scaling	frontload,scaling
+kokomi	ebb_tide	common	assist	enabler	block,frontload,scaling,utility,velocity	block,frontload,scaling,utility,velocity		early	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
+kokomi	salt_line	common	assist,generic	glue	block,frontload,scaling,utility	block,frontload,scaling,utility		early	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
 kokomi	slack_water	common	generic	glue	block	block		early	early						
 kokomi	tideturn	common	generic	glue	frontload,velocity	frontload,velocity		early	early						
 kokomi	steady_the_line	common	generic,assist	glue	block,velocity	block,velocity		early	early						
@@ -196,7 +196,7 @@ kokomi	field_promotion	uncommon	commander	enabler	block,frontload,velocity	block
 kokomi	reinforcements	uncommon	commander	payoff	block,frontload,scaling,utility,velocity	block,frontload,scaling,utility,velocity		mid	late		charge,conscript		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 kokomi	mercy_of_the_deep	uncommon	priest	payoff	block	block		late	late						
 kokomi	pearl_barrage	uncommon	priest	payoff	frontload,scaling	frontload,scaling		late	late			exhaust_pile			
-kokomi	communion_of_tides	uncommon	priest,assist	glue	frontload,scaling,utility,velocity	frontload,scaling,utility,velocity		early	early		charge		frontload,scaling	frontload,scaling	frontload,scaling
+kokomi	communion_of_tides	uncommon	priest,assist	glue	block,frontload,scaling,utility,velocity	block,frontload,scaling,utility,velocity		early	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
 kokomi	rearguard_action	uncommon	assist	glue	block,velocity	block,velocity		early	early						
 kokomi	shell_of_sanctuary	uncommon	generic	glue	block	block		mid	early						
 kokomi	exposing_current	uncommon	priest,generic	enabler	frontload,utility	frontload,utility		early	early						
@@ -218,4 +218,18 @@ kokomi	vigil_of_the_deep	rare	priest,generic	payoff	sustain	sustain		mid,late	la
 kokomi	grand_conscription	rare	commander	payoff	block,frontload,scaling,velocity	block,frontload,scaling,velocity		mid	late		charge,conscript		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 kokomi	depths_judgment	rare	priest	payoff	frontload,scaling	frontload,scaling		mid,late	late			exhaust_pile			
 kokomi	epiphany_of_the_deep	rare	priest,assist	payoff	velocity	velocity		mid,late	late						
-kokomi	prayer_to_the_moon	rare	priest,generic	payoff	block,frontload,scaling	block,frontload,scaling		early	late		charge		frontload,scaling	frontload,scaling	frontload,scaling
+kokomi	prayer_to_the_moon	rare	priest,generic	payoff	block,frontload,scaling	block,frontload,scaling		early	late		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
+kokomi	the_gunbai_turns	rare	assist	payoff	velocity	velocity		early	late						
+kokomi	all_hands	rare	commander	payoff	block,frontload,scaling,velocity	block,frontload,scaling,velocity		mid	late		charge,conscript		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
+kokomi	what_the_tokoyo_took	rare	assist	payoff	frontload	frontload		mid	late						
+kokomi	gyorin_formation	rare	generic,priest	payoff	block	block		mid,late	late			charge			
+kokomi	council_at_bourou	uncommon	commander,assist	enabler	block,frontload,velocity	block,frontload,velocity		early	early		conscript		block,frontload,velocity	block,frontload,velocity	block,frontload,velocity
+kokomi	wheel_the_ranks	uncommon	assist	glue	block,velocity	block,velocity		early	early						
+kokomi	open_the_stores	uncommon	assist,priest	enabler	block,frontload,scaling,utility,velocity	block,frontload,scaling,utility,velocity		early	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
+kokomi	what_the_tokoyo_returns	uncommon	assist	glue	block	block		early	early						
+kokomi	raise_the_sashimono	uncommon	assist,commander	enabler	velocity	velocity		early	early						
+kokomi	crane_wing	uncommon	commander	glue	block,velocity	block,velocity		early	early						
+kokomi	send_the_runner	common	priest,assist	glue	block,frontload,scaling,utility,velocity	block,frontload,scaling,utility,velocity		early	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
+kokomi	massed_volley	common	assist,generic	glue	frontload	frontload		early	early	aoe					
+kokomi	hold_the_narrows	common	commander	glue	block,frontload,velocity	block,frontload,velocity		early	early		conscript		block,frontload,velocity	block,frontload,velocity	block,frontload,velocity
+kokomi	tighten_the_cords	common	generic	glue	block	block		early	early						

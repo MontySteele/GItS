@@ -94,7 +94,33 @@ KNOWN: set[frozenset] = set()
 # (dodge_roll/hide_and_seek was here; RESOLVED by the R25 errata batch,
 # 2026-07-20 — dodge_roll block 8 -> 6 < hide_and_seek's 7, so the
 # superset no longer dominates. The lint now guards the fix.)
-PENDING_RULING: set[frozenset] = set()
+PENDING_RULING: set[frozenset] = {
+    # --- EB-69, the Kokomi pool fill (R198, 2026-08-23). Three pairs the fill
+    # surfaced. Filed to QUEUE `M36` as a design/taste call and listed here
+    # rather than fixed: changing a printed body is red-pen work, and the
+    # fill's fourteen bodies are exactly the ones [USER] has just ruled.
+    #
+    # 0-cost skills. raise_the_sashimono: grant a Skill Sly + draw 1.
+    # moon_signal: discard 1 (random) + draw 1 -- the Common pays a cost the
+    # Uncommon does not and gains less. NOTE THE PATTERN: this is the THIRD
+    # uncommon 0-cost to dominate moon_signal (sayu_naptime and sucrose_gust
+    # are already in CROSS_KNOWN for the same shape against the same victim),
+    # which is evidence about moon_signal's rate rather than about this card.
+    frozenset({"raise_the_sashimono", "moon_signal"}),
+    # 1-cost skills. crane_wing: block 6 + companion cost_mod -1 this turn.
+    # jade_bulwark: block 6, nothing else. The textbook "uncommon is the
+    # common plus a rider" shape this lint exists to catch, and the cleanest
+    # of the three: either the Uncommon's Block comes down off Pearl Bulwark's
+    # 6, or the pair is ruled accepted.
+    frozenset({"crane_wing", "jade_bulwark"}),
+    # 1-cost skills, CROSS-SHEET, and the same body twice:
+    # gorou_heart_of_the_clan is block 3 + metallicize 2; tighten_the_cords is
+    # block 3 + metallicize 1. Inherited from the frozen brief's A15 body, not
+    # authored at the fill. Its upgrade row ({power_amount: +1}) takes the
+    # Common to metallicize 2, so the UPGRADED faces are equal and only the
+    # printed faces differ.
+    frozenset({"gorou_heart_of_the_clan", "tighten_the_cords"}),
+}
 
 RARITY_ORDER = {"common": 0, "uncommon": 1, "rare": 2}
 

@@ -108,6 +108,20 @@ GAME_RULES = {
 KNOWN_DIVERGENCES: dict[tuple[str, str], str] = {}
 
 
+# `blocked` carries TWO different facts under one key, and until EB-69 they
+# were indistinguishable because only one of them had ever occurred. A card
+# blocked with the reason "hand-written" IS shipped -- codegen skips it because
+# a human wrote the class (Klee's eight, `let_the_people_rejoice`,
+# `ceremonial_garment`). A card blocked with any OTHER reason names an
+# unimplemented C# runtime grammar and ships NO CLASS AT ALL; EB-69 produced
+# the first five of those (`grant_sly_this_turn`, a `discards_this_turn`
+# CalculatedVar, a `1_per_2_charge` block rider, and `recall_to_draw` from
+# discard -- see BACKLOG `EB-122`). Folding both into "ids the mod ships a
+# class for" made this lint demand a .cs file that codegen deliberately did not
+# write, so the reason string is read rather than assumed.
+HAND_WRITTEN_REASON = "hand-written"
+
+
 def _mod_card_ids() -> set[str]:
     """Every sheet id the mod ships a class for (generated or hand-written)."""
     ids: set[str] = set()
@@ -116,7 +130,8 @@ def _mod_card_ids() -> set[str]:
         ids.update(data.get("generated", []))
         ids.update(data.get("companions", []))
         ids.update(data.get("guest_stars", []))
-        ids.update(data.get("blocked", {}))
+        ids.update(cid for cid, why in (data.get("blocked") or {}).items()
+                   if why == HAND_WRITTEN_REASON)
     return ids
 
 

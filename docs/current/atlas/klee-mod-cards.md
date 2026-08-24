@@ -48,7 +48,7 @@ In-process: `gen.blocked_reason(card, profile)` (`gen_klee_cards.py:961`),
 is `gen._run_profile(profile, check)` (`:5997`), planning through
 `gen.PLAN_BUILDERS`.
 Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
-3 Guest Stars; kokomi 61/62; 278 card classes, all pooled.
+3 Guest Stars; kokomi 70/76; 287 card classes, all pooled.
 
 ## 3. Key invariants
 
@@ -62,8 +62,8 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
 - **`CARD_FIELDS` is deliberately total** — an unknown card-level field blocks
   the card by name rather than being ignored (`:790-837`, `card_level_reason`
   `:840-847`). It caught `innate` and `retain` (`:791-813`); `tempo_band` had to
-  be added or every personal row would block (`:827-831`) — **220** today
-  (76 / 82 / 62), and the count is read from the sheets, not from this line.
+  be added or every personal row would block (`:827-831`) — **234** today
+  (76 / 82 / 76), and the count is read from the sheets, not from this line.
 - **`MECHANICAL_OPS` is a whitelist backed by verified C# call sites**; an op
   outside it blocks (`:200-227`, refused `:996-998`). Per-op field whitelists
   apply the same rule one level down (`:244-268`).

@@ -155,6 +155,91 @@ depths_judgment:   {formula_per: +1}     # 10 + 3 per exhausted card (the pile-r
 epiphany_of_the_deep: {cost: -1}         # 2->1 (true_spark_knight precedent: the engine power arrives on curve)
 prayer_to_the_moon: {block: +4}          # 4->8; the Charge line NEVER moves (resource-curve law)
 
+# ---- EB-69 POOL FILL (+14) — R198, [USER] 2026-08-23 ----
+# A COMPLETE upgrade row for every one of the fourteen: EB-69 may not ship without them, and nothing is held
+# out. Same laws as everywhere above. (i) RESOURCE CURVE NEVER MOVES — no gain_charge delta, no muster-count
+# delta, no threshold moves. (ii) COMMONS: one number, no cost reductions (ONE ruled [USER] exception below,
+# marked as such). (iii) UNCOMMONS: a bump OR a keyword, and both uncommon cost slots are already spent
+# (mass_mobilization, reinforcements), so NO new uncommon takes `cost: -1`. (iv) SLY BRANCHES NEVER MOVE —
+# the applier has no sly-delta key (header gap note), so five of these fourteen can upgrade only their played
+# face. (v) Every delta key below already exists in tier0/content/upgrades.py.
+# Ten of the fourteen are a single existing delta key with a named live precedent.
+
+# --- EB-69 RARES (+4) ---
+the_gunbai_turns:  {retain: true}        # honor_guard exactly: a one-shot detonation of a hand that must be
+                                         # DRAWN on the turn the hand is right, so Retain is the failure mode
+                                         # it answers. The Sly-grant count (3) and the discard count (3) are
+                                         # printed identities and do not move; cost_mod-style deepening is not
+                                         # available and would be energy anyway.
+all_hands:         {cost: -1}            # 2->1. grand_conscription: {cost: -1}, the same card one lane over.
+                                         # The muster count and the +2 Charge NEVER move (resource-curve law),
+                                         # and the cost_mod may not deepen because cost_mod is energy — which
+                                         # is honor_guard's own recorded note.
+what_the_tokoyo_took: {formula_base: +3} # 6 + 4/discard -> 9 + 4/discard. undertow's reasoning, deliberately
+                                         # reused: the slope reads an UNBOUNDED count, so moving the slope is
+                                         # a resource-curve move on a tail that already carries a WATCH line
+                                         # (see the card row). The base is the half that pays on turn 1.
+gyorin_formation:  {block: +3}           # the IMMEDIATE half, 6 now -> 9 now; the 6 next turn and the
+                                         # 1-per-2-Charge read both stay. slack_water's note — "the half you
+                                         # can rely on is the half that grows". The alternative
+                                         # ({block_next_turn: +4}, the tideline_watch precedent) is NOT taken:
+                                         # given this card's WATCH line the smaller of the two is the safer
+                                         # sale, and the pre-emptive half is the half being watched.
+
+# --- EB-69 UNCOMMONS (+6) ---
+council_at_bourou: {draw: +1}            # draw 1 -> 2. field_promotion: {draw: +1}. Muster stays 1
+                                         # (resource-curve law) and the chosen discard stays 1. Reads against
+                                         # the D5 body: [USER] took the draw down 2 -> 1 (lint-ok: 2->1 is the
+                                         # D5 BASE-BODY history, not this row's delta) and dropped the
+                                         # Exhaust, so the upgrade sells the point the base gave up.
+wheel_the_ranks:   {add: {op: block, amount: 3}}  # the played face gains 3 Block. NOT {draw: +1}: draw-3 for
+                                         # free at 0 cost reads too strong for the uncommon rate, and the
+                                         # communion_of_tides draw precedent is a 1-cost card. The Sly 4 Block
+                                         # cannot move (applier gap note).
+open_the_stores:   {retain: true}        # NOT {discard: +1}. A bigger CHOSEN discard reads as a cost the
+                                         # player pays, not a reward the upgrade sells — the ebb_tide
+                                         # "sells more engine" argument holds only where the engine half is
+                                         # the exhaust, and here the discard is the tempo half. Charge stays 4
+                                         # (resource-curve law) and the Sly exhaust stays 1 (applier gap).
+what_the_tokoyo_returns: {block: +3}     # played Block 4 -> 7. rearguard_action / quiet_harbor parity. The
+                                         # recall count deliberately does NOT move: it reads an unbounded pile
+                                         # (undertow's argument) and moving it interacts with the D3
+                                         # self-recall contract. The Sly recall cannot move (applier gap).
+raise_the_sashimono: {retain: true}      # NOT {draw: +1}. The base ALREADY replaces itself (grant Sly + draw
+                                         # 1 at cost 0), so a second draw is a second card off one free order
+                                         # rather than a sharpening — and the rationale line that claimed the
+                                         # draw made it self-replacing "on upgrade" was simply wrong about the
+                                         # base, and is corrected here rather than inherited. Retain is the
+                                         # honest sale for an on-ramp: it stops being a card you must draw ON
+                                         # the turn the Rare is in hand. The Sly-grant count stays 1.
+crane_wing:        {block: +2}           # 6->8, jade_bulwark: {block: +2}. cost_mod may not deepen — energy is
+                                         # the resource curve.
+
+# --- EB-69 COMMONS (+4) ---
+send_the_runner:   {draw: +1, add: {op: discard, amount: 1, select: chosen}}
+                                         # [USER]-RULED (D2a): draw 1 / exhaust 1 chosen -> draw 2 / discard 1
+                                         # chosen / exhaust 1 chosen. FLAGGED HONESTLY: this is TWO moves on a
+                                         # COMMON where this file's own commons idiom is one number, and the
+                                         # section heading above says so. The one live two-key common-shaped
+                                         # row is tactical_retreat {draw: +1, discard: +1} — and that card is a
+                                         # BASIC, not a common. RECORDED AS A [USER] EXCEPTION, NOT A
+                                         # PRECEDENT: a later two-key common row cites its own ruling or does
+                                         # not land. It is also the only place the assist lane gets its
+                                         # chosen-discard cycler back, which is why the second key is the one
+                                         # it is.
+massed_volley:     {damage: +2}          # 5->7 all. scattering_spray: {damage: +2} — the exact same card shape
+                                         # at the same rarity. The Sly 4 random cannot move (applier gap note).
+hold_the_narrows:  {block: +3}           # 5->8, votive_offering: {block: +3}. The Sly muster could not move
+                                         # even if the applier allowed it (resource-curve law).
+tighten_the_cords: {power_amount: +1}    # metallicize 1 -> 2; the played Block stays 3. THE SHARPER OF THE TWO
+                                         # DRAFTED OPTIONS, and [USER] took it deliberately over {block: +3}.
+                                         # It is the closest thing on this sheet to selling a faster engine —
+                                         # before_sun_and_moon's note is the standing argument for treating a
+                                         # COEFFICIENT move more carefully than a TERM move — but metallicize
+                                         # is a flat per-turn Block term, not a coefficient on an uncapped
+                                         # bank, so the two cases are not the same case. The card is bought
+                                         # for the trajectory, and the trajectory is what the upgrade sells.
+
 # ---- COMPANIONS (modest; upgraded forms stay enabler-grade — Klee sheet law) ----
 gorou_inuzaka_charge:    {damage: +3}    # 6->9, the starter arrow (v0.4: 0-cost + Exhaust, so the
                                          # upgrade buys damage, not reach)

@@ -2573,6 +2573,18 @@ def _op_recall_to_draw(state: CombatState, fx: dict, card: Card) -> None:
     from_exhaust = src == RECALL_EXHAUST_SOURCE
     pile = p.exhaust_pile if from_exhaust else p.discard_pile
     for _ in range(_amount(state, fx.get("amount", 1))):
+        # THE DISCARD BRANCH IS UNFILTERED ON PURPOSE (EB-69 / D3, R198,
+        # 2026-08-23). It is the raw pile: no `c is not card` clause, no kit
+        # filter, no junk filter -- so a card discarded by an effect can have
+        # its own Sly rider recall ITSELF. `what_the_tokoyo_returns` is the
+        # card that reads this, and [USER] ruled the behaviour DELIBERATE
+        # rather than an accident to be excluded. It is a FALLBACK, not a
+        # rule: `_best_card` prefers a real Attack in the pile. The asymmetry
+        # with the exhaust branch below -- which DOES exclude self, kit, junk
+        # and other retrievers, because EB-118 §6.4 required it -- is now
+        # intentional on both sides. Tidying the two into one filtered path
+        # breaks a shipped card; pinned by
+        # tier0/tests/test_eb69_tokoyo_returns_selfrecall.py.
         pool = recall_exhaust_pool(state, card) if from_exhaust else pile
         if not pool:
             return

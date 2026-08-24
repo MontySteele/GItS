@@ -16,6 +16,7 @@ public static class KokomiCardRoster
 
     public static IReadOnlyList<CardModel> All => _all ??= new List<CardModel>
     {
+        ModelDb.Card<AllHands>(),
         ModelDb.Card<AllStreamsFlow>(),
         ModelDb.Card<BakeKurage>(),
         ModelDb.Card<BeforeSunAndMoon>(),
@@ -23,6 +24,8 @@ public static class KokomiCardRoster
         ModelDb.Card<CommunionOfTides>(),
         ModelDb.Card<ConscriptionNotice>(),
         ModelDb.Card<CoralGuard>(),
+        ModelDb.Card<CouncilAtBourou>(),
+        ModelDb.Card<CraneWing>(),
         ModelDb.Card<DepthsJudgment>(),
         ModelDb.Card<Driftglass>(),
         ModelDb.Card<DriftingLantern>(),
@@ -32,14 +35,17 @@ public static class KokomiCardRoster
         ModelDb.Card<ExposingCurrent>(),
         ModelDb.Card<FieldPromotion>(),
         ModelDb.Card<GrandConscription>(),
+        ModelDb.Card<HoldTheNarrows>(),
         ModelDb.Card<HonorGuard>(),
         ModelDb.Card<JadeBulwark>(),
         ModelDb.Card<KuragesOath>(),
         ModelDb.Card<MassMobilization>(),
+        ModelDb.Card<MassedVolley>(),
         ModelDb.Card<MercyOfTheDeep>(),
         ModelDb.Card<MoonSignal>(),
         ModelDb.Card<MoonlitOffering>(),
         ModelDb.Card<NereidsAscension>(),
+        ModelDb.Card<OpenTheStores>(),
         ModelDb.Card<PearlBarrage>(),
         ModelDb.Card<PearlCurrent>(),
         ModelDb.Card<PearlDiver>(),
@@ -54,6 +60,7 @@ public static class KokomiCardRoster
         ModelDb.Card<SaltLine>(),
         ModelDb.Card<SangoPrayer>(),
         ModelDb.Card<ScatteringSpray>(),
+        ModelDb.Card<SendTheRunner>(),
         ModelDb.Card<ShellOfSanctuary>(),
         ModelDb.Card<ShoulderToShoulder>(),
         ModelDb.Card<SignalArrow>(),
@@ -67,6 +74,7 @@ public static class KokomiCardRoster
         ModelDb.Card<TideReading>(),
         ModelDb.Card<TidelineWatch>(),
         ModelDb.Card<Tideturn>(),
+        ModelDb.Card<TightenTheCords>(),
         ModelDb.Card<ToTheFront>(),
         ModelDb.Card<Undertow>(),
         ModelDb.Card<UndertowShuffle>(),
@@ -76,6 +84,7 @@ public static class KokomiCardRoster
         ModelDb.Card<WatchOfTheShallows>(),
         ModelDb.Card<WatersEdge>(),
         ModelDb.Card<Waterspout>(),
+        ModelDb.Card<WheelTheRanks>(),
         ModelDb.Card<WhisperedWord>(),
     };
 }

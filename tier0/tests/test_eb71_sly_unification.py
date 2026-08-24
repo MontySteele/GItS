@@ -81,9 +81,15 @@ def test_the_autoplay_rider_adds_exactly_zero_drafted_value():
 
 
 # Every committed card that carries a Sly rider, priced on the
-# PRE-UNIFICATION tree. These eight are Kokomi's Assist lane; nothing
+# PRE-UNIFICATION tree. All thirteen are Kokomi's Assist lane; nothing
 # committed carries the base-game keyword (it only ever arrives through the
 # extractor, into the gitignored reference pool).
+#
+# THIS IS A CENSUS, NOT A FREEZE. The assertion is that EB-71's unification did
+# not move any Sly card's drafted price -- so a NEW Sly card joins the table at
+# its measured price and proves the same thing about itself. The eight below
+# the line are the pre-EB-69 set and their values are UNCHANGED by the fill,
+# which is the part that would have been the regression.
 PRE_UNIFICATION_SLY_PRICES = {
     "driftglass": 10.5,
     "drifting_lantern": 6.0,
@@ -93,6 +99,12 @@ PRE_UNIFICATION_SLY_PRICES = {
     "tidal_lure": 5.0,
     "undertow": 5.0,
     "whispered_word": 2.5,
+    # --- EB-69, the Kokomi pool fill (R198, 2026-08-23): five new Sly rows ---
+    "hold_the_narrows": 5.75,
+    "massed_volley": 12.0,
+    "open_the_stores": 2.25,
+    "what_the_tokoyo_returns": 5.5,
+    "wheel_the_ranks": 2.0,
 }
 
 
