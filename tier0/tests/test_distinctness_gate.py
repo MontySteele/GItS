@@ -34,12 +34,22 @@ KNOWN_FAILING = {
     # Block skill, another cost_mod rider, another metallicize common -- which
     # is precisely how a fill closes a COUNT gap without closing a BREADTH
     # gap. Phase-0 §2.5 keeps this gate independent and binding, so it is
-    # entered here to keep the wall green while the content question goes to
+    # entered here to keep the wall green while the content question went to
     # [USER] at QUEUE `M36` with the two strict-domination pairs it shares a
-    # cause with. It is NOT a ruling that 33% is acceptable.
-    # Gate: `M36` answered -> re-measure and delete this entry, or convert it
-    # to a ruled threshold move. The two entries above are pre-existing and
-    # unrelated to that row.
+    # cause with.
+    #
+    # RULED 2026-08-24, R200 -- AND THE BREACH IS NOT RATIFIED. [USER] ruled
+    # 33% TEMPORARY, carried by this entry THROUGH Phase 3 and cleared there.
+    # One body from each pair is redesigned and the targets are named:
+    # moon_signal, crane_wing, tighten_the_cords (see
+    # tools/lint_strict_domination.PENDING_RULING for which end of each pair
+    # and why). The replacement bodies are authored in the EB-118 Phase-3
+    # batch -- a design act then, not now.
+    # Gate: BACKLOG `EB-125`. When the three redesigns land, re-measure and
+    # DELETE this entry; the staleness test below forces the deletion the
+    # moment the breach stops reproducing. There is no branch where this
+    # becomes a moved threshold -- R200 declined that. The two entries above
+    # are pre-existing debt and are not part of EB-125.
     ("kokomi", "neardup"),
 }
 

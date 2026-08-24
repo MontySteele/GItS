@@ -100,18 +100,34 @@ PENDING_RULING: set[frozenset] = {
     # rather than fixed: changing a printed body is red-pen work, and the
     # fill's fourteen bodies are exactly the ones [USER] has just ruled.
     #
+    # RULED 2026-08-24, R200. The three pairs are NOT accepted. One body from
+    # each is redesigned, [USER] named which end moves, and the exact
+    # replacement bodies are authored in the EB-118 Phase-3 batch -- a design
+    # act then, not now. CLEARING GATE FOR ALL THREE ENTRIES: BACKLOG
+    # `EB-125`. Delete each entry when its redesign lands and the pair stops
+    # dominating -- and note that nothing forces that deletion automatically:
+    # unlike CROSS_KNOWN, this set has no staleness test, so a cleared pair
+    # left here rots into cover. EB-125 owns the deletion. Do NOT move any of
+    # these to KNOWN -- that would read as accepted, and R200 declined to
+    # accept them.
+    #
     # 0-cost skills. raise_the_sashimono: grant a Skill Sly + draw 1.
     # moon_signal: discard 1 (random) + draw 1 -- the Common pays a cost the
     # Uncommon does not and gains less. NOTE THE PATTERN: this is the THIRD
     # uncommon 0-cost to dominate moon_signal (sayu_naptime and sucrose_gust
     # are already in CROSS_KNOWN for the same shape against the same victim),
     # which is evidence about moon_signal's rate rather than about this card.
+    # REDESIGN TARGET: moon_signal, NOT raise_the_sashimono. Three separate
+    # uncommons dominate it, so the recurring problem is the Common.
     frozenset({"raise_the_sashimono", "moon_signal"}),
     # 1-cost skills. crane_wing: block 6 + companion cost_mod -1 this turn.
     # jade_bulwark: block 6, nothing else. The textbook "uncommon is the
     # common plus a rider" shape this lint exists to catch, and the cleanest
-    # of the three: either the Uncommon's Block comes down off Pearl Bulwark's
-    # 6, or the pair is ruled accepted.
+    # of the three.
+    # REDESIGN TARGET: crane_wing, NOT jade_bulwark. Jade stays the clean
+    # Block-rate anchor for the pool; Crane surrenders some immediate Block in
+    # exchange for its companion-discount identity, so the pair separates on
+    # what each card is FOR rather than on a number.
     frozenset({"crane_wing", "jade_bulwark"}),
     # 1-cost skills, CROSS-SHEET, and the same body twice:
     # gorou_heart_of_the_clan is block 3 + metallicize 2; tighten_the_cords is
@@ -119,6 +135,9 @@ PENDING_RULING: set[frozenset] = {
     # authored at the fill. Its upgrade row ({power_amount: +1}) takes the
     # Common to metallicize 2, so the UPGRADED faces are equal and only the
     # printed faces differ.
+    # REDESIGN TARGET: tighten_the_cords, NOT gorou_heart_of_the_clan. It is
+    # the direct clone, and it folds into Phase 3's clone-family rewrites
+    # under EB-118 Phase-0 §6.5 rather than standing as its own errand.
     frozenset({"gorou_heart_of_the_clan", "tighten_the_cords"}),
 }
 

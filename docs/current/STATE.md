@@ -231,8 +231,12 @@ Named here for status only. Open items are in
   fourteen upgrade rows in one batch, 62 → 76. `S4-G11`'s Kokomi pile is
   discharged; that row stays open on its other three piles. What the fill
   raised rather than settled: QUEUE `M36` (a distinctness-gate breach and
-  three strict-domination pairs), BACKLOG `EB-121` (the art bill is 6 slots
-  short) and `EB-122` (five cards blocked on unimplemented C# grammar).
+  three strict-domination pairs) — **ruled 2026-08-24 (R200) and now carried
+  as BACKLOG `EB-125`:** the 33% `neardup` breach is TEMPORARY, not ratified,
+  and one body from each pair is redesigned in the `EB-118` Phase-3 batch
+  (`moon_signal`, `crane_wing`, `tighten_the_cords`) — plus BACKLOG `EB-121`
+  (the art bill is 6 slots short) and `EB-122` (five cards blocked on
+  unimplemented C# grammar).
 
 ## Watch register (dormant)
 
