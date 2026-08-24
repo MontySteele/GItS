@@ -45,7 +45,9 @@ registration packets themselves live under `review/active/` — one home, not tw
   pools (five canon via the `game_ref/` extraction surfaces, three mod) under
   one frozen classifier; honest mod-only stop when canon is absent. **Built
   (`tools/card_connectivity_report.py`) and calibration-run 2026-08-23 —
-  descriptive only, NOT the baseline; no threshold is registered** —
+  descriptive only, NOT the baseline; no threshold is registered; the archived
+  run was taken under classifier `v1`, before the same-day `v2` completion
+  grounded the last three canon detectors, so it is not a `v2` read** —
   directional predictions only
   (§2.4); an absolute gate may be proposed only after the frozen classifier
   has read all five canon pools. Baseline protocol (§2.3): primary baseline is

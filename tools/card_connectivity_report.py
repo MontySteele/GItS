@@ -52,16 +52,26 @@ What differs is where the evidence is read from:
 Every vocabulary entry carries its canon detection status, and the
 report prints it. Three values:
 
-  `grounded`      -- there is a decompiled token this repo already reads
-                     for that entry (every C# token named in this file
-                     already appears in committed repo source; no new
-                     game data enters the repo here).
+  `grounded`      -- there is a decompiled token this repo reads for that
+                     entry. Every C# token named in this file is ENGINE
+                     API SURFACE -- a command name, a model override, an
+                     enum member -- and never a card name, a number or any
+                     other game datum, so no game data enters the repo
+                     here.
   `canon_absent`  -- the mechanic is a GItS invention with no base-game
                      analogue (elemental auras and reactions). Zero is
                      the true canon value, not a detection failure.
   `ungrounded`    -- the entry is real, but this repo holds no verified
                      decompiled token for it. It reports UNCLASSIFIED on
-                     canon pools rather than a silent zero.
+                     canon pools rather than a silent zero. NO SHARED
+                     ENTRY IS UNGROUNDED TODAY: `junk_create`,
+                     `junk_remove` and `enemy_intent` were the last three
+                     and were grounded BEFORE the baseline, because packet
+                     2.3(4) freezes the classifier once and complete
+                     rather than repairing it mid-batch. The status value
+                     and its UNCLASSIFIED path stay, because the next
+                     vocabulary entry to arrive without a token must still
+                     say so.
 
 UNCLASSIFIED IS A FIRST-CLASS OUTPUT
 -------------------------------------
@@ -95,7 +105,14 @@ if str(REPO) not in sys.path:
 
 from tools import effect_walk                       # noqa: E402
 
-VOCAB_VERSION = "eb118-connectivity-v1"
+# v2 grounded the last three ungrounded shared entries (`junk_create`,
+# `junk_remove`, `enemy_intent`) and listed the two hookless `CardKeyword`s.
+# The vocabulary's ENTRIES are unchanged; what moved is how much of it the
+# canon adapter can see. Bumped rather than reused because two reports that
+# classify the same pool differently must not both say `v1` -- and no
+# baseline has been taken under either, which is the whole point of doing
+# this before the freeze (packet 2.3(4)). This is not an `RT/D/P/C` stamp.
+VOCAB_VERSION = "eb118-connectivity-v2"
 
 # `recall_to_draw`'s exhaust-pile source (tier0.engine.effects).
 RECALL_EXHAUST_SOURCE = "exhaust"
@@ -129,15 +146,15 @@ SHARED_STATES: dict[str, tuple[str, str]] = {
     "exhaust_other_random": ("Exhaust another card, game's pick", GROUNDED),
     "self_exhaust": ("the card Exhausts itself", GROUNDED),
     "ethereal": ("the card is Ethereal", GROUNDED),
-    "junk_create": ("junk/status/curse creation", UNGROUNDED),
-    "junk_remove": ("junk/status/curse removal", UNGROUNDED),
+    "junk_create": ("junk/status/curse creation", GROUNDED),
+    "junk_remove": ("junk/status/curse removal", GROUNDED),
     "hand_contents": ("hand contents or hand size", GROUNDED),
     "draw_pile": ("draw-pile contents or size", GROUNDED),
     "discard_pile": ("discard-pile contents or size", GROUNDED),
     "exhaust_pile": ("Exhaust-pile contents or size", GROUNDED),
     "block_held": ("Block held, by either side", GROUNDED),
     "enemy_count": ("how many enemies there are / how many died", GROUNDED),
-    "enemy_intent": ("what the enemy intends this turn", UNGROUNDED),
+    "enemy_intent": ("what the enemy intends this turn", GROUNDED),
     "aura_reaction": ("elemental aura / reaction state", CANON_ABSENT),
     "plays_this_turn": ("cards/Attacks/Skills/Companions played this "
                         "turn or combat", GROUNDED),
@@ -1008,6 +1025,47 @@ CANON_KEYWORD_HOOKS = {
     "Innate": _hook("shared", "card_timing", "write"),
     "Sly": _hook("private", "conscript_sly", "write"),
 }
+# The rest of `CardKeyword`, listed rather than ignored -- the same
+# classified-but-hookless idiom `TAGS_NO_HOOK` and `CARD_FIELDS_NO_HOOK` use,
+# so a keyword the enum grows later is UNCLASSIFIED instead of dropped.
+# `Unplayable` is a printed rule that moves nothing BY BEING one: the card is
+# never played, so it never reaches a state. `Eternal` refuses deck REMOVAL,
+# a run-layer fact this combat vocabulary does not name. `None` is the enum's
+# zero and says only that the card carries no keyword.
+CANON_KEYWORDS_NO_HOOK = frozenset({"None", "Unplayable", "Eternal"})
+
+# --- junk, in the game's two spellings ---------------------------------------
+#
+# The base game says "this is a Status or a Curse" in two places and this tool
+# reads both, because they answer different questions. A card MODEL declares
+# it in its own ctor (`CardRarity.Status` / `CardRarity.Curse`), which is what
+# makes a CREATED card junk -- the same route the sheet adapter takes through
+# `junk_rarity`, resolved here off the created model's own decompiled source
+# instead of off a side sheet. A card that FILTERS for junk tests the TYPE
+# instead (`c.Type == CardType.Status`), because the type is the field a pile
+# predicate can see.
+CANON_JUNK_MODEL = re.compile(r"CardRarity\.(?:Status|Curse)\b")
+CANON_JUNK_FILTER = re.compile(r"CardType\.(?:Status|Curse)\b")
+# The removal verbs, and the narrow reading of "removal" this tool takes:
+# junk LEAVES the deck for good. Exhausting it and transforming it into
+# something else both do that; discarding it does not (it comes back next
+# shuffle) and neither does drawing it. A junk filter with no removal verb is
+# a READER of junk, not a remover, which is the next entry down.
+CANON_JUNK_REMOVE = re.compile(r"CardCmd\.(?:Exhaust|Transform)\b")
+# `AfterCardGeneratedForCombat` is the game's own "a card just entered this
+# combat from nowhere" callback. Gated on a junk filter, it is exactly a READ
+# of junk creation -- the card's behaviour is conditioned on junk arriving.
+CANON_JUNK_CREATED_HOOK = re.compile(r"\bAfterCardGeneratedForCombat\b")
+
+# --- enemy intent ------------------------------------------------------------
+#
+# The intent layer is the monster's `NextMove` and the `IntentType`s hanging
+# off it; a card that asks what the enemy is about to do reaches for one of
+# those names (`klee-mod/KleeCode/Powers/CurtainCallPowers.cs` is this repo's
+# own worked example of the read). The WRITE side is `CreatureCmd.Stun`, which
+# replaces the move the enemy had telegraphed with a lost turn.
+CANON_INTENT_READ = re.compile(r"\bIntentType\.\w+|\.Intents\b|\bNextMove\b")
+CANON_INTENT_WRITE = re.compile(r"CreatureCmd\.Stun\b")
 # A canon power whose rider fires on a universal verb, recognised off the
 # POWER's own decompiled model rather than off a name table: the hook is
 # a card-play/draw/discard/exhaust callback on a model that is not a
@@ -1038,6 +1096,52 @@ class CanonReader:
         return self._cache[short_name]
 
 
+def _classify_canon_junk(record: dict, card: dict, sources: list[str],
+                         reader: CanonReader | None) -> None:
+    """The junk axis: what a card puts into the deck and what it takes out.
+
+    Creation is read off the CREATED card's own model, never off its name --
+    the sheet adapter's rule, kept word for word on this side, because a name
+    list would be both game data and a permanent maintenance debt. A model
+    this reader cannot open is UNCLASSIFIED, not "not junk".
+
+    Removal and the creation READ both need two tokens agreeing inside ONE
+    source: a junk filter and, respectively, a removal verb or the
+    card-generated callback. The conjunction is deliberately per-source and
+    not over the concatenation -- a card that Exhausts something while a
+    Power it applies happens to mention Statuses is not a junk remover, and
+    joining the two texts first would say it was.
+    """
+    for created in card.get("creates") or ():
+        model = reader.source(created) if reader else ""
+        if not model:
+            record["unclassified"].append(
+                f"{created}: created card model unreadable, junk verdict "
+                "UNCLASSIFIED (not 'not junk')")
+            continue
+        if CANON_JUNK_MODEL.search(model):
+            _apply(record, [_hook("shared", "junk_create", "write")])
+            record["external_reach"] = True
+    for source in sources:
+        if not CANON_JUNK_FILTER.search(source):
+            continue
+        if CANON_JUNK_REMOVE.search(source):
+            _apply(record, [_hook("shared", "junk_remove", "write")])
+            record["external_reach"] = True
+        if CANON_JUNK_CREATED_HOOK.search(source):
+            _apply(record, [_hook("shared", "junk_create", "read")])
+            record["external_reach"] = True
+
+
+def _classify_canon_intent(record: dict, sources: list[str]) -> None:
+    """What the enemy intends: read it, or overwrite it with a lost turn."""
+    for source in sources:
+        if CANON_INTENT_READ.search(source):
+            _apply(record, [_hook("shared", "enemy_intent", "read")])
+        if CANON_INTENT_WRITE.search(source):
+            _apply(record, [_hook("shared", "enemy_intent", "write")])
+
+
 def classify_canon_card(card: dict, src: str, pool: str,
                         reader: CanonReader | None = None) -> dict:
     """One decompiled canon card -> the SAME record shape as a sheet row."""
@@ -1054,7 +1158,7 @@ def classify_canon_card(card: dict, src: str, pool: str,
     for keyword in card.get("keywords") or ():
         hook = CANON_KEYWORD_HOOKS.get(keyword)
         if hook is None:
-            if keyword != "None":
+            if keyword not in CANON_KEYWORDS_NO_HOOK:
                 record["unclassified"].append(f"CardKeyword.{keyword}")
             continue
         _apply(record, [hook])
@@ -1089,12 +1193,14 @@ def classify_canon_card(card: dict, src: str, pool: str,
             record["random_placement"] = True
 
     # The power tag-through: a Power's own model says what verb it rides.
+    power_sources: list[str] = []
     for power in sorted(set(CANON_POWER_APPLY.findall(src))):
         power_src = reader.source(power) if reader else ""
         if not power_src:
             record["unclassified"].append(
                 f"{power}: model unreadable, rider unclassified")
             continue
+        power_sources.append(power_src)
         if CANON_UNIVERSAL_VERB.search(power_src):
             _apply(record, [_hook("shared", "universal_verb_power", "write")])
             record["external_reach"] = True
@@ -1102,6 +1208,13 @@ def classify_canon_card(card: dict, src: str, pool: str,
             if pattern.search(power_src):
                 _apply(record, [hook])
         record["automatic_value"] = True
+
+    # The two detectors that need more than one token, over the card AND the
+    # models of the powers it applies -- a Power is where half the base game's
+    # junk-watching lives, so reading only the card would report a silent zero
+    # for the card that applies it.
+    _classify_canon_junk(record, card, [src] + power_sources, reader)
+    _classify_canon_intent(record, [src] + power_sources)
 
     # The entries this repo holds no verified canon token for. Recorded per
     # card so the pool's UNCLASSIFIED count is honest rather than a zero.
