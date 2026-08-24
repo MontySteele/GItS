@@ -275,6 +275,25 @@ also pays `KOKOMI_BURST_PER_EXHAUST = 2` particles it never paid before — at
 Common, at cost 0, repeatable. **Trigger:** Burst frequency across a run reads
 above the ratified meter-20 cadence (R139) in the post-fill baseline.
 
+**`W9` `X9` — Kokomi's Charge bank, uncapped and never spent.** R188
+(2026-08-13) ruled workshop axis **G**, the null option: **no Charge read
+budget** — and that is a deferral of a nerf, not an endorsement of the current
+balance. The §3.3 double read is inside the ruling, not fenced off from it: it
+is ruled intended deckbuilder stacking. Reads per turn are now instrumented and
+the instrument is deliberately inert — `resources.note_charge_read` tallies
+every resolved read onto `CombatState.charge_reads_this_turn` tagged by source,
+and `combat` emits one `charge_reads_turn` sample per completed player turn;
+nothing in engine, pilot or drafter reads the tally back, so it is not a budget
+and cannot become one by accident. Declared blind spot: the sample rides
+`turn_close`, which a turn ending in the last kill or the player's death never
+reaches, so the truncation is toward the BUSY end. **Trigger:** `X9` returns to
+[USER] only if **a reads-per-turn reading or a live playtest shows repeatable
+reads dominant.** "Dominant" is not a number yet — §5.1 of
+`review/active/charge-reads-per-turn-registration-2026-08-13.md` is the slot
+that makes it one, and that slot is [USER]'s. (BACKLOG `EB-78`.)
+
 (Migrated from the retired watch-items docket, frozen at tag
 `pre-simplification-2026-08-06`; `W5` added 2026-08-10, `W6`–`W8` at `EB-69`
-2026-08-23.)
+2026-08-23, `W9` 2026-08-24 — `EB-78`'s owed line, written at **`W9` and not
+`W6`** because `EB-69` minted `W6`–`W8` while it was outstanding and `W6` is
+now `gyorin_formation`.)
