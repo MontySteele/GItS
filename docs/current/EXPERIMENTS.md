@@ -202,7 +202,8 @@ registration packets themselves live under `review/active/` — one home, not tw
   **§8's per-arm prediction table and the direction half of `Q4` stay blank**,
   so the packet is not cleared to launch; the countersign is withheld until the
   post-window restamp, because predictions are filled against the settled world
-  and the `RT`/`C` window is open. R189 also chose the **route** —
+  — and the `RT`/`C` window that was open at R189 has since CLOSED (2026-08-24,
+  settled at `RT12/D14/P7/C11`), so the restamp and the fill are now takeable. R189 also chose the **route** —
   measure-first, so this sweep runs before the `elemental_ecstasy` redesign
   (Option `C2`), which lands after the graded read as its own `C` bump.
   **Sequencing: its payoff-reach gate is DISCHARGED.** It was to run *after* the
