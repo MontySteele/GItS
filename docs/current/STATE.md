@@ -163,7 +163,8 @@ Named here for status only. Open items are in
 - **Axis-validity tracks** — Track A / Track E logs.
 - **Kokomi playtest** — unrun.
 - **Payoff-reach re-registration** — R121, pinned at DRAFTER_VERSION 14.
-  Predictions committed 2026-08-13 (R186); the sprint is unrun and waits on the
+  Predictions committed 2026-08-13 (R186); §6.5's `T3` amended pre-run
+  2026-08-23 (`M28` ratified, R196); the sprint is unrun and waits on the
   settle-first freeze (EXPERIMENTS).
 
 ## Watch register (dormant)

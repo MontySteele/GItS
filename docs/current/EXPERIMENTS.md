@@ -62,7 +62,13 @@ registration packets themselves live under `review/active/` — one home, not tw
   (R185), Q-A under its observational reading and Q-B under its arithmetic
   reading with direction and threshold, the two-leg instrument, the sample
   plan at the ratified cell (n=600/arm, seed 11, `hunter`, `assigned`,
-  realistic), controls C1 and C2, a 4h ceiling and tripwires T1–T4. **UNRUN,
+  realistic), controls C1 and C2, a 4h ceiling and tripwires T1–T4.
+  **§6.5 was AMENDED pre-run 2026-08-23 (`M28` ratified, R196):** `T3` no
+  longer fires on realized reach above the canonical TOP supply ceiling of 3
+  — reach and offer above the canonical figures are REPORTED at raw value plus
+  multiple, with no new band above TOP — and `T3` is now a single
+  classifier-integrity condition over reward-pool base ids. `P5(a)`/`P5(b)`,
+  the aims, the Q-A/Q-B predictions and `P12` are untouched. **UNRUN,
   and it does not run yet:** §6.6's approved P12 is **settle first** — the
   freeze begins only after the open `RT`/`C` window (`M14`'s batch: `EB-70`,
   the `EB-82` conversion, the `EB-85` batch, `EB-69`) lands and a dependency
