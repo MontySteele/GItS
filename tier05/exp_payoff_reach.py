@@ -7,7 +7,10 @@ is `tier05/exp_furina_ghostcheck.py`, whose payoff column is
 nine arms. This file is the generic one. It ADDS NO CLASSIFIER and reads no
 new field: supply comes from the sheets' own `role: payoff` + `archetypes`,
 and realized reach comes from `draft._generic_core_counts`, the function
-`core_complete` and `_core_progress` already share.
+`core_complete` and `_core_progress` already share. Both legs classify payoff
+membership through ONE shared predicate, `draft.is_on_plan_payoff` — §6.5's
+amended `T3` (`M28`, R196) fires on a disagreement between the two legs, so a
+second copy of that rule here would manufacture the fault it detects.
 
 READER AND PRINTER ONLY. Nothing here scores a draft, and the registration's
 `DRAFTER_VERSION = 14` pin is untouched — running this cannot move a pick.
@@ -142,7 +145,7 @@ def static_leg(character: str, archetype: str,
     sizes = {r: len(pool.get(r, ())) for r in DRAFTABLE}
     payoffs_at = {
         r: sum(1 for c in pool.get(r, ())
-               if c.role == "payoff" and archetype in c.archetypes)
+               if draft.is_on_plan_payoff(c, archetype))
         for r in DRAFTABLE}
     supply = sum(payoffs_at.values())
 
