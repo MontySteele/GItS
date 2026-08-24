@@ -568,7 +568,21 @@ BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
 # when a VALUE changes" rule covers this -- a weight ENTERING the labeled set
 # changes the set, and a Klee reading taken while the pilot scored
 # `copy_companion_in_hand` at zero is not comparable with one taken after.
-PILOT_WEIGHTS_VERSION = 2
+#
+# v3 = POLICY 8 (EB-118 Phase 2A, 2026-08-24): `PILOT_POLICIES_ENABLED` flips
+# to True and the eleven `BOMB_*` / `EXHAUST_*` weights of the bomb-placement
+# and exhaust-selection policies ENTER the labeled set -- the same v2 reading
+# of the rule, applied to a whole block instead of one weight. While the switch
+# was off no weight in that block was ever read, so the labeled set was
+# arithmetically unchanged and the stamp could not move first; the moment the
+# switch is on, a Klee or Kokomi reading taken before it is not comparable with
+# one taken after. Filed in `tier0/pilot/policy.py` rather than here for the
+# C#-parity reason written at that block's head -- where a weight LIVES is not
+# what decides which readings are comparable. NO VALUE MOVED at this bump: the
+# eleven are byte-identical to the hand-picked numbers they landed with, and
+# W4's sweep of them (`tier05/pilot_weight_sweep.py`) is a separate act that
+# would carry its own bump.
+PILOT_WEIGHTS_VERSION = 3
 # Sim-hygiene sprint 2026-07-29 (task 4): the inline scoring weights that had
 # been living as bare floats inside tier0/pilot/policy.py. MOVED, NOT RETUNED
 # -- every value below is byte-identical to the literal it replaced, and the

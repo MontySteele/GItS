@@ -1,8 +1,18 @@
 """EB-118 with the switch ON: the two evaluators on constructed boards.
 
-Every test here flips `policy.PILOT_POLICIES_ENABLED` for its own duration.
-Nothing in the shipped suite runs with it on -- that is the staging contract,
-and test_eb118_switch_off holds the other half of it.
+THIS IS NOW THE SHIPPED WORLD. Written during the staging window, this file's
+`policies_on` fixture was the only place in the suite where the switch was ever
+True -- that was the staging contract, and test_eb118_switch_off held the other
+half of it. **The Phase-2A flip (`POLICY_VERSION` 8, `PILOT_WEIGHTS_VERSION` 3,
+2026-08-24) turned the switch on for good**, so the fixture no longer changes
+anything.
+
+It is KEPT rather than deleted, and for a reason that outlives the flip: a test
+that asserts a decision should say which world it is asserting in, not inherit
+one from a module default that has now moved once. Its sibling file states the
+off side the same way. So the pins below -- `test_the_chooser_inverts_the_
+placeholder` above all -- read exactly as they did, and now describe what
+ships instead of what was staged.
 
 Boards are built to vary ONE thing. Where a term is not what a test is about
 it is neutralised on both sides (`bomb_suppression_spent=True` on both enemies,
@@ -23,6 +33,8 @@ PLACE_5 = {"op": "place_bomb", "amount": 1, "target": "enemy",
 
 @pytest.fixture
 def policies_on(monkeypatch):
+    """A no-op since the Phase-2A flip, and deliberately still here: it names
+    the world each test asserts in rather than inheriting the default."""
     monkeypatch.setattr(policy, "PILOT_POLICIES_ENABLED", True)
 
 

@@ -640,25 +640,41 @@ STOKE_FUEL_SATED = 0.15     # per point beyond it -- not zero: surplus still
 # changes the set, and two pilot readings across it are not one measurement.
 PILOT_COMPANION_COPY_VALUE = 1.5
 
-# --- EB-118 pilot policies (STAGED). Two decisions the engine has been making
-# with a placeholder heuristic move here, behind ONE switch that DEFAULTS OFF.
+# --- EB-118 pilot policies. LIVE since the EB-118 Phase-2A flip (2026-08-24).
+# Two decisions the engine used to make with a placeholder heuristic live here,
+# behind ONE switch -- which now DEFAULTS ON.
 #
-# WHY A SWITCH: both policies change what the pilot DECIDES, so every Klee and
-# Kokomi tier-0.5 number re-baselines the moment they are live. Off, the two
-# call sites (`effects._op_place_bomb` concentration form,
-# `effects._op_exhaust_from` chosen form) run the identical code they ran
-# before this file was touched -- which is what keeps the frozen calibration
-# battery and every regression pin byte-identical on this branch. Turning it on
-# is the POLICY_VERSION event, written PROPOSED in tier05/draft.py and executed
-# at landing, not here.
+# WHY A SWITCH, AND WHAT IT GUARDS NOW: both policies change what the pilot
+# DECIDES, so every Klee and Kokomi tier-0.5 number re-baselined at the flip.
+# The switch did NOT become decoration when it was thrown -- the pre-policy
+# code is still live behind it (`effects._op_place_bomb` concentration form
+# falls back to `_pick_targets`' lowest-HP aim, `effects._op_exhaust_from`
+# chosen form to `_worst_card`'s highest-cost non-Attack), and that fallback is
+# the only way the pre-flip world can still be run: it is what the W4 sweep's
+# byte-identity arm forces off (`tier05/pilot_weight_sweep.sandbox`,
+# `force=False`) to prove that a weight reaches the engine ONLY through this
+# gate. Pin: `tier0/tests/test_eb118_switch_off.py`, which flipped from "the
+# shipped default is off" to "the legacy path is preserved and reachable".
+#
+# THE FLIP WAS ONE EDIT AND THREE INTEGERS, and no fourth: `POLICY_VERSION`
+# 7 -> 8 (tier05/draft.py), `C.PILOT_WEIGHTS_VERSION` 2 -> 3, and this switch.
+# 2C's `MODE_CHOOSER_ENABLED` is a DIFFERENT switch with its own activation
+# window (R191) and is not touched by this one.
 #
 # The constants below are filed here rather than in constants.py for the reason
 # at the head of the STOKE_* block -- constants.py is the surface the C# parity
 # gate compares by value and the mod ships no bot -- and they JOIN the set
-# C.PILOT_WEIGHTS_VERSION labels. That stamp moves with the switch, in the same
-# landing edit: while the switch is off no weight below is ever read, so the
-# labeled set is arithmetically unchanged and the stamp must NOT move yet.
-PILOT_POLICIES_ENABLED = False
+# C.PILOT_WEIGHTS_VERSION labels. That stamp moved with the switch, in the same
+# landing edit: while the switch was off no weight below was ever read, so the
+# labeled set was arithmetically unchanged and the stamp could not move first.
+#
+# HAND-PICKED. The values below were chosen by hand and never swept when they
+# were written; W4 (`tier05/pilot_weight_sweep.py`) sweeps them inside this
+# same activation window, after this flip. Any change to one of them is its own
+# `C.PILOT_WEIGHTS_VERSION` bump with the sweep row cited -- and most of that
+# grid's outcomes are [USER]'s call, not the integration's (that module's
+# TASTE / TUNING LINE).
+PILOT_POLICIES_ENABLED = True
 
 # Bomb placement (concentration form: `place_bomb` with `target: enemy`). The
 # scale is DAMAGE POINTS: a point of bomb damage that will actually land is

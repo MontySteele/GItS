@@ -1798,14 +1798,19 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # tier0.5 number does. C.PILOT_WEIGHTS_VERSION 1 -> 2 in the same edit. The
 # payoff-reach registration's DRAFTER_VERSION = 14 pin is UNTOUCHED: the
 # drafter is not taught anything here, only the pilot.
-# POLICY_VERSION PROPOSED (EB-118, staged 2026-08-23). No integer here: the
-# bump executes when the switch is thrown, not when the code lands.
+# POLICY_VERSION 8 (EB-118 Phase 2A, 2026-08-24). THE SWITCH IS THROWN, and
+# this is the integer the PROPOSED block reserved when the pair landed inert on
+# 2026-08-23: the bump executes when the switch is thrown, not when the code
+# lands.
 #
-# Two decisions the engine has been making with a placeholder move into
+# Two decisions the engine had been making with a placeholder moved into
 # `tier0/pilot/policy.py`, both behind `policy.PILOT_POLICIES_ENABLED`, which
-# ships FALSE. Off, both call sites run their pre-EB-118 code and every number
-# on this branch -- the frozen calibration battery included -- is
-# byte-identical, which is why the stamp must not move yet.
+# shipped FALSE and now ships TRUE. While it was off, both call sites ran their
+# pre-EB-118 code and every number on the staging branch -- the frozen
+# calibration battery included -- was byte-identical, which is why the stamp
+# could not move first. That pre-policy code is still LIVE BEHIND the switch:
+# it is the comparator the W4 sweep's byte-identity arm forces off
+# (`tier05/pilot_weight_sweep.sandbox`, `force=False`), not dead code.
 #
 # (a) KLEE, bomb placement. `place_bomb` in its concentration form
 # (`target: enemy`) resolved through `_pick_targets`, i.e. lowest HP: a
@@ -1837,13 +1842,15 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # other, so no cell exists in which only one is live. Same argument v11 and
 # v12 made on the RUNTEMPLATE side.
 #
-# WHAT RE-BASELINES AT THE BUMP: every Klee tier-0.5 number (four printed rows
+# WHAT RE-BASELINED AT THE BUMP: every Klee tier-0.5 number (four printed rows
 # place in the concentration form) and every Kokomi number that touches a chosen
-# exhaust, which under the casket is her whole Charge engine. Also moving in
-# the same landing edit: `C.PILOT_WEIGHTS_VERSION`, because the EB-118 weights
-# ENTER the set it labels the moment they are first read -- the R176 reading of
-# that rule. The payoff-reach registration's `DRAFTER_VERSION = 14` pin is
-# UNTOUCHED: the drafter learns nothing here, only the pilot.
+# exhaust, which under the casket is her whole Charge engine. Moving in the
+# SAME landing edit and nothing else: `C.PILOT_WEIGHTS_VERSION` 2 -> 3, because
+# the EB-118 weights ENTER the set it labels the moment they are first read --
+# the R176 reading of that rule. `DRAFTER_VERSION` (15), `RUNTEMPLATE_VERSION`
+# (12) and `CONSTANTS_VERSION` (12) are all UNTOUCHED: the drafter learns
+# nothing here, only the pilot, and no run-layer content and no balance
+# constant moved.
 #
 # POLICY_VERSION PROPOSED (EB-118 2C, staged 2026-08-24). A SECOND proposed
 # bump, and deliberately not folded into the one above: R191 ruled that the
@@ -1876,7 +1883,13 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # expected to move NO Furina number until the weights are swept in 2C's
 # window or the pair is redesigned, and a null result here must not be read
 # as "modal cards are neutral".
-POLICY_VERSION = 7
+#
+# THE 2A FLIP IS TAKEN AND 2C'S IS NOT, WHICH IS WHY ONE INTEGER MOVED AND ONE
+# BLOCK ABOVE IS STILL PROPOSED. `POLICY_VERSION` 8 is the 2A pair's flip and
+# nothing else; `MODE_CHOOSER_ENABLED` is untouched at False and its bump is
+# still reserved, exactly as R191 separated them. A reader who finds only one
+# integer here after two staged blocks is reading it correctly.
+POLICY_VERSION = 8
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
 # place a character's archetype vocabulary is declared -- and where it is
