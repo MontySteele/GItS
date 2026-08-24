@@ -17,7 +17,7 @@ import pytest
 
 from tier0 import constants as C
 from tier0.engine.state import Card
-from tier05 import cells, draft, exp_payoff_reach as reach, model
+from tier05 import cells, draft, exp_payoff_reach as reach, model, rewards
 
 
 # --- the static leg, on a fixture pool ------------------------------------
@@ -329,3 +329,84 @@ def test_drawing_from_the_dedicated_stream_perturbs_nothing_in_the_run():
     shared = model.run_many("klee", "demolition", "demolition", drawer, 4,
                             SEED, **kw)
     assert _fingerprint(shared) != _fingerprint(quiet)
+
+
+# --- the ONE shared membership predicate (M28 / R196, §6.5's amended T3) ----
+#
+# §6.5's amended `T3` fires iff a reward-pool base id's on-plan payoff
+# membership differs between the static leg and the deck side. It can only
+# mean what it says while both sides read the SAME predicate, so the
+# amendment prescribes one shared function rather than a cross-check between
+# two copies. These pins are that prescription, made executable: they assert
+# the predicate's own rule, and they assert that neither call site classifies
+# by any other route.
+
+def _membership_cases() -> list[tuple[Card, str, bool]]:
+    """(card, archetype, is-an-on-plan-payoff) — every corner of the rule.
+
+    Both halves of `role == "payoff" and archetype in c.archetypes` are
+    exercised in isolation, so a predicate that dropped either half fails
+    here rather than silently at the two call sites.
+    """
+    return [
+        (_card("p_on", "common", "payoff", ["plan"]), "plan", True),
+        (_card("p_off", "common", "payoff", ["other"]), "plan", False),
+        (_card("p_multi", "rare", "payoff", ["plan", "other"]), "plan", True),
+        (_card("p_multi", "rare", "payoff", ["plan", "other"]), "other", True),
+        (_card("e_on", "common", "enabler", ["plan"]), "plan", False),
+        (_card("g_on", "common", "glue", ["plan"]), "plan", False),
+        (_card("p_bare", "common", "payoff", []), "plan", False),
+    ]
+
+
+def test_the_registered_membership_predicate_is_role_and_archetype():
+    for card, archetype, expected in _membership_cases():
+        assert draft.is_on_plan_payoff(card, archetype) is expected, card.id
+
+
+def test_static_leg_classifies_only_through_the_shared_predicate():
+    """The STATIC side counts exactly the cards the predicate admits.
+
+    Counted rarity by rarity, because the static leg's supply term is a sum
+    over `DRAFTABLE` and a leg that dropped a rarity would still agree on the
+    total for a single-rarity fixture.
+    """
+    pool = _fixture_pool()
+    s = reach.static_leg("fixture", "plan", pool=pool)
+    for rarity, cards in pool.items():
+        assert s["payoffs_at"][rarity] == sum(
+            1 for c in cards if draft.is_on_plan_payoff(c, "plan")), rarity
+    assert s["supply"] == sum(
+        1 for cards in pool.values() for c in cards
+        if draft.is_on_plan_payoff(c, "plan"))
+
+
+def test_deck_side_classifies_only_through_the_shared_predicate():
+    """The DECK side's payoff column is the predicate over deck INSTANCES.
+
+    Instances, not ids: two copies of one payoff read 2 here against a static
+    supply of 1, which is why §6.5 phrases `T3` over membership and never
+    over counts. The duplicate below pins that reading.
+    """
+    deck = [c for c, _, _ in _membership_cases()]
+    deck.append(_card("p_on", "common", "payoff", ["plan"]))   # a second copy
+    _, payoffs = draft._generic_core_counts(deck, "plan")
+    assert payoffs == sum(1 for c in deck
+                          if draft.is_on_plan_payoff(c, "plan"))
+    assert payoffs == 4          # p_on twice, p_multi, and nothing else
+
+
+def test_both_legs_agree_on_every_live_arm_card_by_card():
+    """No disagreement over live content — `T3`'s condition, read today.
+
+    This is a PARITY pin, not a content pin: it asserts the two legs agree,
+    never how many payoffs a sheet holds, so a sheet edit moves nothing here.
+    """
+    for character, archetype in reach.ARMS:
+        pool = rewards.character_pool(character)
+        cards = [c for cards in pool.values() for c in cards]
+        static_ids = {c.id for c in cards
+                      if draft.is_on_plan_payoff(c, archetype)}
+        deck_ids = {c.id for c in cards
+                    if draft._generic_core_counts([c], archetype)[1]}
+        assert static_ids == deck_ids, f"{character}/{archetype}"

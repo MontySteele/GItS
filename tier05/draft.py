@@ -386,16 +386,39 @@ def _core_advance_view(cards: list[Card]) -> list[Card]:
             for c in cards]
 
 
+def is_on_plan_payoff(card: Card, archetype: str) -> bool:
+    """Is this card an on-plan PAYOFF for this archetype? The one predicate.
+
+    `role == "payoff" and archetype in c.archetypes` -- the membership rule
+    `review/active/payoff-reach-reregistration.md` §6.4 registers, written
+    once and shared, so the sprint's two legs cannot classify the same card
+    differently. `_generic_core_counts` below is the DECK side (it counts
+    instances in a finished deck); `exp_payoff_reach.static_leg` is the STATIC
+    side (it counts ids in a reward pool). §6.5's amended `T3` (`M28`, R196)
+    fires on a disagreement between those two readings, so a SECOND
+    implementation of this rule is the exact fault `T3` exists to detect --
+    which is why the amendment prescribes extracting it rather than
+    cross-checking two copies.
+
+    Same idiom, same reason as `_generic_core_counts`' own docstring: one
+    place, so the call sites cannot drift apart.
+    """
+    return card.role == "payoff" and archetype in card.archetypes
+
+
 def _generic_core_counts(deck: list[Card], archetype: str) -> tuple[int, int]:
     """(on-plan enabler+payoff cards, on-plan payoff cards) for one deck.
 
     One place, so `core_complete` and `_core_progress` cannot drift apart --
-    the v10 fanfare fix had to move both limbs for the same reason.
+    the v10 fanfare fix had to move both limbs for the same reason. The payoff
+    half defers to `is_on_plan_payoff` above, which is the same place the
+    static leg reads.
     """
     on_plan = [c for c in deck
                if archetype in c.archetypes
                and c.role in ("enabler", "payoff")]
-    return len(on_plan), sum(1 for c in on_plan if c.role == "payoff")
+    return len(on_plan), sum(1 for c in on_plan
+                             if is_on_plan_payoff(c, archetype))
 
 
 def _core_progress(deck: list[Card], archetype: str) -> float:
