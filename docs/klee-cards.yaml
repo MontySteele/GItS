@@ -200,7 +200,23 @@
 - {id: bombs_away, name: "Bombs Away!", cost: 3, type: skill, rarity: uncommon, solve: [frontload], tempo_band: {fight: [late], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 5, target: random_enemies, bomb_damage: 5}]}
 - {id: explosives_workshop, name: "Explosives Workshop", cost: 1, type: power, rarity: uncommon, solve: [frontload, scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition], role: payoff,
-   effects: [{op: apply_power, power: bomb_damage_up, amount: 2, target: self}]}
+   effects: [{op: apply_power, power: bomb_damage_per_rotation, amount: 1, target: self}]}
+   # EB-118 sec.4.4 (2026-08-24): the flat install becomes a CONNECTIVE one.
+   # It was "your Bombs deal +2 damage", a number you read once and never
+   # thought about again. It is now "the first time each turn you discard or
+   # Exhaust a card, your Bombs deal +1 damage this combat" -- the same
+   # ceiling reachable in two turns, but only if the deck is doing something
+   # the card cares about. Id, rarity, role and archetypes are UNCHANGED,
+   # which is what keeps this a Phase-1 edit.
+   # THE ONCE-PER-TURN LATCH IS THE BOUND, and it is the guard LAW's Klee
+   # A1/A2 rail asks for: connective scaling may not displace her frontload,
+   # so the card cannot be turned into an engine by a discard-heavy turn.
+   # The trigger does not care WHICH card left -- ordinary discards, ordinary
+   # Exhausts and Klee's own status-exhaust route all count.
+   # It increments the SAME `bomb_damage_up` the detonation reads, so a Bomb
+   # armed three turns ago detonates at today's number. A second bomb-damage
+   # stat would have made already-placed Bombs disagree with future ones.
+   # The upgrade raises the PER-TRIGGER increment and adds no second trigger.
 - {id: cluster_charge, name: "Cluster Charge", cost: 2, type: attack, rarity: uncommon, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition], role: enabler,
    effects: [{op: damage, amount: 10, target: enemy}, {op: place_bomb, amount: 2, target: random_enemies, bomb_damage: 5}]}
 - {id: trip_wire, name: "Trip Wire", cost: 1, type: skill, rarity: uncommon, solve: [frontload, utility], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: glue, tags: [skill_tag],

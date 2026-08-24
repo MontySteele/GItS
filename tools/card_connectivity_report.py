@@ -108,6 +108,31 @@ if str(REPO) not in sys.path:
 
 from tools import effect_walk                       # noqa: E402
 
+# v3 (EB-118 sec.4.4, the Explosives Workshop door) adds ONE `POWER_HOOKS`
+# row, `bomb_damage_per_rotation`, and nothing else. No shared or private
+# ENTRY is added, removed or re-hooked; no record field, pool statistic,
+# canon detection token or grounding status moves. The full grammar argument
+# -- why the new power joins `universal_verb_power` rather than a new
+# verb-triggered class -- lives at that row, where a reader looking up the
+# power will find it.
+#
+# WHY A BUMP AT ALL, AND WHY THE FREEZE IS HONOURED RATHER THAN BROKEN.
+# Packet 2.3(4) freezes the classifier for the batch and names the ONE
+# permitted repair: revise the vocabulary and re-run BOTH SIDES under a new
+# `VOCAB_VERSION`, never repair only the post result. `POWER_HOOKS` is a
+# detection table, so adding a row to it is a vocabulary revision even
+# though the change is additive -- hence the bump, and hence the rule that
+# a `v2` number may only be compared with a `v2` number.
+#
+# THE RE-RUN IS TRIVIALLY SATISFIED AND THAT IS A PROPERTY, NOT A SHORTCUT.
+# `bomb_damage_per_rotation` does not exist in the pre-door sheets, so the
+# added row cannot fire on the baseline corpus; every other table is
+# untouched; and the only printed text that moves is the version line
+# itself, because this decision is recorded in CODE COMMENTS rather than in
+# the entry descriptions the report renders. The baseline therefore re-runs
+# under `v3` numerically identical to its `v2` reading -- checked by
+# re-running it, not assumed (`tier0/tests/test_eb118_connectivity.py`).
+#
 # v2 grounded the last three ungrounded shared entries (`junk_create`,
 # `junk_remove`, `enemy_intent`) and listed the two hookless `CardKeyword`s.
 # The vocabulary's ENTRIES are unchanged; what moved is how much of it the
@@ -115,7 +140,7 @@ from tools import effect_walk                       # noqa: E402
 # classify the same pool differently must not both say `v1` -- and no
 # baseline has been taken under either, which is the whole point of doing
 # this before the freeze (packet 2.3(4)). This is not an `RT/D/P/C` stamp.
-VOCAB_VERSION = "eb118-connectivity-v2"
+VOCAB_VERSION = "eb118-connectivity-v3"
 
 # `recall_to_draw`'s exhaust-pile source (tier0.engine.effects).
 RECALL_EXHAUST_SOURCE = "exhaust"
@@ -372,6 +397,82 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "next_attack_up": [_hook("shared", "card_identity", "write")],
     # Klee
     "bomb_damage_up": [_hook("private", "bombs", "use")],
+    # EB-118 sec.4.4 -- Explosives Workshop's install after the conversion,
+    # and the one row `VOCAB_VERSION` v3 exists for.
+    #
+    # WHY v2 REPORTED IT UNCLASSIFIED, precisely. This table is keyed by
+    # power NAME, so ANY new power is UNCLASSIFIED on arrival whatever its
+    # grammar. That name gap is the mechanical reason the gate went red. It
+    # is not the interesting question, and it is worth separating from the
+    # one that is, because the two have different answers.
+    #
+    # THE GRAMMAR QUESTION. The power is TRIGGERED by a universal verb --
+    # the first discard OR Exhaust of each turn, with no filter on the card
+    # that leaves -- and it pays into a CHARACTER-PRIVATE meter. No previous
+    # entry had that combination, so the choice was a new verb-TRIGGERED
+    # shared entry against the existing `universal_verb_power`.
+    #
+    # IT IS `universal_verb_power`, DERIVED FROM THIS VOCABULARY'S OWN
+    # CONVENTIONS RATHER THAN FROM THAT ENTRY'S ONE-LINE PROSE. Read
+    # literally, "a Power that MODIFIES a universal verb" would exclude a
+    # trigger -- but it would also exclude three of the four powers already
+    # in the class, so it is the prose that is narrow, not the class. Three
+    # independent facts in this file say so and they agree:
+    #
+    #   (1) MEMBERSHIP AS PRACTISED. `feel_no_pain` and `dark_embrace` are
+    #       bodies inside `refpowers.after_card_exhausted` -- pure triggers
+    #       on the Exhaust verb. `first_attack_draw` fires on the played-card
+    #       path gated `attacks_played_this_turn == 1`: a trigger on the play
+    #       verb WITH A ONCE-PER-TURN LATCH, which is this power's structural
+    #       twin. Only `zero_cost_attacks_up` modifies a verb's arithmetic.
+    #       The class as practised is "a rider a card installs on a universal
+    #       verb", and that is what this power is.
+    #   (2) THE CANON DETECTOR. `CANON_UNIVERSAL_VERB` -- the token set that
+    #       decides this entry on all five canon pools -- is a pure TRIGGER
+    #       vocabulary: AfterCardDiscarded, AfterCardExhausted,
+    #       AfterCardPlayed, AfterCardDrawn, the hand-draw pair. The C# twin
+    #       of this power (`ExplosivesWorkshopPower`) overrides
+    #       `AfterCardDiscarded` and `AfterCardExhausted`, so a base-game
+    #       power of exactly this shape is classified here ALREADY, under
+    #       `v2`, with no vocabulary change at all.
+    #   (3) ONE CLASSIFIER, TWO EVIDENCE ADAPTERS -- this tool's own premise.
+    #       A sheet-only trigger class would make the two adapters disagree
+    #       about the same mechanic, which is the one thing the premise
+    #       forbids.
+    #
+    # THE REJECTED ALTERNATIVE, recorded because it was close. A separate
+    # `universal_verb_trigger` entry is only honest if the three existing
+    # triggers MOVE into it. Moving them renumbers the paired baseline's
+    # shared writer:reader table, which the v3 acceptance check (relabel
+    # only) forbids outright. Adding the class for this card ALONE -- inside
+    # the batch that changed this card -- is precisely the failure the freeze
+    # exists to prevent: two identical shapes in two classes, sorted by which
+    # side of a batch they arrived on, with the newer one's label chosen by
+    # the party that wants it to read as connected.
+    #
+    # THE HOOKS, each derived and none asserted:
+    #   * `bombs use` -- the SAME hook `bomb_damage_up` carries directly
+    #     above, because that is the stat this power increments (one
+    #     bomb-damage number, so a Bomb armed before a trigger and one armed
+    #     after agree). Carrying it verbatim is what makes this card's
+    #     pre/post connectivity diff exactly the verb hooks it GAINED.
+    #   * `discard_pile read` / `exhaust_pile read` -- it watches both event
+    #     families. `feel_no_pain` and `dark_embrace` already encode "watches
+    #     Exhausts" as `exhaust_pile read`; the discard half is the same
+    #     encoding on the other pile.
+    #   * `universal_verb_power write` -- the rider itself, and the ONLY
+    #     source of this card's `external_reach`. That flag is derived
+    #     through `UNIVERSAL_VERB_POWERS` below FROM these hooks; no line
+    #     anywhere sets it for this power by hand. It comes out true for the
+    #     reason the entry names -- a companion, a colorless card, an Ancient
+    #     or a Status can be the card that leaves, because sec.4.4 puts no
+    #     filter on the victim and names Klee's status-exhaust route as a
+    #     trigger in terms.
+    "bomb_damage_per_rotation": [_hook("private", "bombs", "use"),
+                                 _hook("shared", "discard_pile", "read"),
+                                 _hook("shared", "exhaust_pile", "read"),
+                                 _hook("shared", "universal_verb_power",
+                                       "write")],
     "detonation_splash": [_hook("private", "bombs", "read"),
                           _hook("shared", "enemy_count", "read")],
     "detonation_vuln": [_hook("private", "bombs", "read")],

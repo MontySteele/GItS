@@ -37,13 +37,13 @@ public sealed class ExplosivesWorkshop : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Explosives Workshop"),
-        ("description", "Your [gold]Bombs[/gold] detonate for {PowerAmount:diff()} more damage."),
+        ("description", "The first time each turn you discard or Exhaust a card, your [gold]Bombs[/gold] deal {PowerAmount:diff()} more damage this combat."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 2m)
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -56,7 +56,7 @@ public sealed class ExplosivesWorkshop : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<BombDamageUpPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<ExplosivesWorkshopPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

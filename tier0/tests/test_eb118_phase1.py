@@ -23,6 +23,8 @@ REPO = Path(__file__).resolve().parents[2]
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
+from tier05 import draft                                          # noqa: E402
+
 
 
 def _sheet(name):
@@ -94,6 +96,111 @@ def test_both_face_prices_survive_the_upgrade():
     assert nhb_up.effects[0]["amount"] == nhb.effects[0]["amount"] + 4
     assert nhb_up.exhaust is True
     assert nhb_up.effects[-1]["card"] == "confiscated"
+
+
+# --- §4.4: Explosives Workshop becomes a connective install -----------------
+
+def _workshop_state():
+    state = make_state(enemies=[make_enemy(hp=200)])
+    _play(state, "explosives_workshop")
+    return state
+
+
+def test_the_workshop_pays_on_the_first_discard_of_the_turn_and_once():
+    """One window over two event families. A turn that discards twice pays
+    once; the second event is not a second trigger."""
+    state = _workshop_state()
+    state.player.hand.append(loader.get_card("strike"))
+    state.player.hand.append(loader.get_card("defend"))
+    assert state.player.powers.get("bomb_damage_up", 0) == 0
+
+    effects.resolve_card(state, loader.get_card("kaboom"))   # no discard
+    assert state.player.powers.get("bomb_damage_up", 0) == 0
+
+    effects.resolve_card(state, _discarder())
+    assert state.player.powers["bomb_damage_up"] == 1
+
+    effects.resolve_card(state, _discarder())
+    assert state.player.powers["bomb_damage_up"] == 1
+    assert len(_events(state, "workshop_trigger")) == 1
+
+
+def _discarder():
+    """A minimal one-op card: discard 1, chosen. Built rather than borrowed
+    so the pin does not move when a real card's body does."""
+    from tier0.engine.state import Card
+    return Card(id="probe_discard", name="Probe", cost=0, type="skill",
+                rarity="common",
+                effects=[{"op": "discard", "amount": 1, "select": "chosen"}])
+
+
+def test_an_exhaust_is_the_same_trigger_as_a_discard():
+    """"Discard OR Exhaust" is ONE window: a turn that Exhausts and then
+    discards pays once, not twice. The latch is the bound the A1/A2 rail
+    asks for -- a discard-heavy turn cannot turn the card into an engine."""
+    state = _workshop_state()
+    for _ in range(3):
+        state.player.hand.append(loader.get_card("strike"))
+
+    _play(state, "da_da_da")          # an Exhaust, no discard
+    assert state.player.powers["bomb_damage_up"] == 1
+
+    effects.resolve_card(state, _discarder())
+    assert state.player.powers["bomb_damage_up"] == 1
+    assert len(_events(state, "workshop_trigger")) == 1
+
+
+def test_a_bomb_armed_before_the_trigger_detonates_at_the_new_number():
+    """The reason the trigger pays into `bomb_damage_up` rather than a
+    second bomb-damage stat. A Bomb armed three turns ago and one armed
+    after the trigger detonate for the same amount; anything else is a trap
+    the player cannot see."""
+    enemy = make_enemy(hp=200)
+    state = make_state(enemies=[enemy])
+    _play(state, "explosives_workshop")
+    _play(state, "pop")                                  # a 5-damage Bomb
+    state.player.hand.append(loader.get_card("strike"))
+    effects.resolve_card(state, _discarder())            # the turn's trigger
+
+    effects.detonate_bombs(state, enemy)
+
+    assert [ev["damage"] for ev in _events(state, "bomb_detonation")] == [6]
+
+
+def test_the_upgrade_buys_a_bigger_step_not_a_second_trigger():
+    """§4.4: the upgrade raises the per-trigger increment and does not add
+    another trigger per turn."""
+    state = make_state(enemies=[make_enemy(hp=200)])
+    _play(state, "explosives_workshop+")
+    for _ in range(3):
+        state.player.hand.append(loader.get_card("strike"))
+
+    effects.resolve_card(state, _discarder())
+    assert state.player.powers["bomb_damage_up"] == 2
+
+    effects.resolve_card(state, _discarder())
+    assert state.player.powers["bomb_damage_up"] == 2
+
+
+def test_the_workshop_keeps_every_field_the_drafter_reads():
+    """§4.4's own claim, pinned instead of asserted in prose: the card stays
+    a Power with the same metadata, so the drafter's valuation of it cannot
+    have moved and the conversion does not need a `D` bump.
+
+    The credit is ZERO and that is not an accident of this card --
+    `STATIC_POWER_ENGINE_VALUE` is 0.0, the deliberate 'the drafter cannot
+    see an engine's payout curve at offer time' convention. Both halves are
+    asserted: if either the constant or this card's metadata moves, the
+    no-bump argument stops holding and this test says so.
+    """
+    row = _row("klee", "explosives_workshop")
+    assert (row["type"], row["rarity"], row["role"], row["cost"]) == (
+        "power", "uncommon", "payoff", 1)
+    assert row["archetypes"] == ["demolition"]
+
+    assert draft.STATIC_POWER_ENGINE_VALUE == 0.0
+    for cid in ("explosives_workshop", "explosives_workshop+"):
+        assert draft._static_power(loader.get_card(cid)) == 0.0
 
 
 # --- §4.6: the `skill_tag` contribution becomes visible ---------------------

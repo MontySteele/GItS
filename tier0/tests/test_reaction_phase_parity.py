@@ -711,6 +711,18 @@ CO_TENANCY_LEDGER = {
             "enemy BombPower detonation by allies-before-enemies iteration "
             "(R35 -- the ordering proof in the class comment), matching the "
             "sim's reset-then-detonate (combat.py:501 vs :511)",
+        ("Powers/DemolitionPowers.cs", "ExplosivesWorkshopPower"):
+            "clears its own once-per-turn latch (EB-118 sec.4.4). THE "
+            "ORDERING QUESTION, answered rather than assumed: it shares "
+            "`BombDamageUpPower` with BombPower's turn-start detonation, "
+            "which is a co-tenant of this same broadcast -- but it only "
+            "RESETS a private bool here and writes the shared stat from the "
+            "discard/exhaust hooks, which fire inside the player's turn, "
+            "strictly after every tenant of this broadcast has run. So no "
+            "co-tenant can observe a different bomb-damage number depending "
+            "on order. The sim orders it the same way and for the same "
+            "reason: `discards_this_turn` / `cards_exhausted_this_turn` are "
+            "zeroed at the player turn start and only card play moves them",
         ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
             "purges the Salon company map, clears Curtain Call per-turn "
             "windows; touches nothing its co-tenants read",

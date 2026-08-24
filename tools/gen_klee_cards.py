@@ -613,6 +613,13 @@ CHANCE_BOMB_FIELDS = {"op", "chance", "bomb_damage"}
 APPLY_POWERS = {
     "bomb_damage_up": ("BombDamageUpPower", None,
         "Your [gold]Bombs[/gold] detonate for {X} more damage."),
+    # EB-118 sec.4.4. Explosives Workshop's install. `bomb_damage_up` above is
+    # what this PAYS INTO and it stays exactly where it is, because a Bomb
+    # armed before a trigger and one armed after must detonate at the same
+    # number -- which is only true while there is one bomb-damage stat.
+    "bomb_damage_per_rotation": ("ExplosivesWorkshopPower", None,
+        "The first time each turn you discard or Exhaust a card, your "
+        "[gold]Bombs[/gold] deal {X} more damage this combat."),
     "zero_cost_attacks_up": ("ZeroCostAttacksUpPower", None,
         "Your Attacks that cost 0 deal {X} more damage."),
     "spark_per_turn": ("SparkPerTurnPower", None,

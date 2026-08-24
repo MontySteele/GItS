@@ -280,6 +280,16 @@ def after_card_exhausted(state: CombatState, card: Card,
     """
     p = state.player
     state.cards_exhausted_this_turn += 1
+    # EB-118 sec.4.4, the exhaust half of Explosives Workshop's once-per-turn
+    # latch. It sits at THIS funnel for the same reason the Casket accrual
+    # below does: every exhaust route -- played, mid-card, ethereal, the
+    # autoplay sweep, the ward -- passes through here, so "the first time each
+    # turn you discard or Exhaust a card" is structural rather than
+    # per-site discipline. One definition, four seams, no filter on the
+    # victim: unlike the Casket accrual this pays for junk too, because
+    # Klee's status-exhaust route is named in the packet as a trigger.
+    from tier0.engine import effects as _effects    # late import (cycle)
+    _effects.note_rotation_event(state)
     # Kokomi (kickoff v1 §2.1/§2.5): the Tamakushi Casket's universal
     # accrual law, at the ONE exhaust funnel — played-exhausts, mid-card
     # exhausts (swept per play), ethereal, the autoplay sweep, and the

@@ -33,16 +33,24 @@ public static class DemolitionConstants
 }
 
 /// <summary>
-/// Explosives Workshop: each stack adds to EVERY bomb detonation's damage.
+/// The bomb-damage STAT: each stack adds to EVERY bomb detonation's damage.
 /// Read at detonation in <see cref="BombPower"/>, BEFORE amplification --
 /// the sim computes `bomb.damage + bonus + bomb_damage_up` and only then
 /// hands the total to the elemental pipeline (effects.py detonate_bombs).
+///
+/// EB-118 sec.4.4 (2026-08-24) took the card off it. Explosives Workshop no
+/// longer applies this directly; <see cref="ExplosivesWorkshopPower"/> does,
+/// once per turn, when the player discards or Exhausts. So the TITLE moved
+/// with the card: this is now the derived stat and says so, and the card's
+/// name belongs to the power the card actually installs. Nothing else about
+/// it changes, and deliberately: it is still the ONE bomb-damage number, so
+/// a Bomb armed before a trigger and one armed after detonate the same.
 /// </summary>
 public sealed class BombDamageUpPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Explosives Workshop"),
+        ("title", "Bomb Damage"),
         ("description", "Your [gold]Bombs[/gold] detonate for {Amount} more damage."),
     };
 
@@ -50,6 +58,77 @@ public sealed class BombDamageUpPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
+}
+
+/// <summary>
+/// Explosives Workshop (EB-118 sec.4.4): the first time each turn the owner
+/// discards or Exhausts a card, add Amount to <see cref="BombDamageUpPower"/>
+/// for the rest of the combat.
+///
+/// ONE WINDOW OVER TWO EVENT FAMILIES. The latch is a single bool, not one
+/// per hook, because "the first time each turn you discard OR Exhaust" is one
+/// trigger: a turn that discards and then Exhausts pays once. Sim twin:
+/// `effects.note_rotation_event`, which asks whether the COMBINED
+/// discard+exhaust count for the turn is exactly 1 -- the same question, in
+/// the shape the sim's counters make natural.
+///
+/// THE RESET RIDES BeforeSideTurnStart(Player), matching the sim, where both
+/// counters are zeroed at the player's turn start. The window therefore runs
+/// from one player turn start to the next and spans the enemy turn, so an
+/// Ethereal card burning off at end of turn can be the turn's first event.
+/// That is the sim's window, deliberately copied rather than tightened to
+/// "your own side's turn" -- the tighter guard the base game's Tingsha uses
+/// would have made the two engines disagree on exactly that card.
+///
+/// NO FILTER ON THE VICTIM. Unlike the Kokomi rotation law's funnel, a
+/// Status or Curse leaving hand pays here: sec.4.4 names Klee's own
+/// status-exhaust route as a trigger. What is checked is OWNERSHIP, which
+/// the sim gets for free with one seat and co-op does not: a partner's
+/// discard is not the owner's first event.
+/// </summary>
+public sealed class ExplosivesWorkshopPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Explosives Workshop"),
+        ("description",
+            "The first time each turn you discard or Exhaust a card, your "
+          + "[gold]Bombs[/gold] deal {Amount} more damage this combat."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    private bool _paidThisTurn;
+
+    public override Task AfterCardDiscarded(
+        PlayerChoiceContext choiceContext, CardModel card) =>
+        Pay(choiceContext, card);
+
+    public override Task AfterCardExhausted(
+        PlayerChoiceContext choiceContext, CardModel card,
+        bool causedByEthereal) =>
+        Pay(choiceContext, card);
+
+    public override Task BeforeSideTurnStart(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IReadOnlyList<Creature> participants, ICombatState combatState)
+    {
+        if (side == CombatSide.Player) _paidThisTurn = false;
+        return Task.CompletedTask;
+    }
+
+    private async Task Pay(PlayerChoiceContext choiceContext, CardModel card)
+    {
+        if (Amount <= 0 || _paidThisTurn) return;
+        if (card.Owner?.Creature != Owner) return;
+
+        _paidThisTurn = true;
+        Flash();
+        await PowerCmd.Apply<BombDamageUpPower>(
+            choiceContext, Owner, Amount, applier: Owner, cardSource: null);
+    }
 }
 
 /// <summary>
