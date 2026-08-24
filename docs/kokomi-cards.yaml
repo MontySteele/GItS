@@ -700,7 +700,7 @@
    # worked arithmetic over the formula, not printed values).
    # THE POST-FILL BASELINE MUST REPORT THE UPPER TAIL, NOT A WORKED EXAMPLE: p90/p99 per-turn discard count
    # and the realized damage distribution of this card. A mean is not the instrument here; the tail is the
-   # whole question. (This obligation is carried in BACKLOG, not only here.)
+   # whole question. Carried durably as `W7` in STATE's watch register, not only here.
 - {id: gyorin_formation, name: "Gyorin Formation", cost: 2, type: skill, rarity: rare, solve: [block], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [generic, priest], role: payoff,
    effects: [{op: block, amount: 6, bonus_formula: 1_per_2_charge},
              {op: block_next_turn, amount: 6}]}
@@ -720,6 +720,7 @@
    # around, on a character whose Charge bank fills every time she rotates a card off and is NEVER SPENT (R80).
    # That is the thing to read in the post-fill baseline, and if her stability number moves a lot, this is the
    # first card to look at. Recorded so the deferral is visible when that baseline lands, not to reopen it.
+   # Carried durably as `W6` in STATE's watch register.
 
 # ---------- UNCOMMON, EB-69 (+6: 20 -> 26) ----------
 - {id: council_at_bourou, name: "Council at Bourou", cost: 1, type: skill, rarity: uncommon, solve: [block, frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [commander, assist], role: enabler,
@@ -810,7 +811,8 @@
    # line used to grant: net zero on Charge.
    # WATCH — POWER, burst-particle cadence. It ALSO now pays KOKOMI_BURST_PER_EXHAUST = 2 burst particles the
    # discard body never paid, at Common, at cost 0, repeatable. Small but real, and it is an addition to her
-   # burst cadence across a run rather than to any one turn. (Carried in BACKLOG, not only here.)
+   # burst cadence across a run rather than to any one turn. Carried durably as `W8` in STATE's watch
+   # register, not only here.
    # IT CHANGED LANES, and that consequence is ACCEPTED EXPLICITLY rather than inherited: chosen Exhaust is the
    # PRIEST verb, so the archetypes are [priest, assist] (pearl_diver's neighbourhood — Common, cost 0, chosen
    # Exhaust) and `solve` gains scaling, because it feeds Charge and the Burst meter through the funnel.
