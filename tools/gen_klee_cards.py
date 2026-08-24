@@ -250,6 +250,14 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # KokomiConscript.Run. All three have verified call sites in
                   # klee-mod/KleeCode/Powers -- the whitelist stays honest.
                   "gain_charge", "summon_kurage", "conscript",
+                  # EB-122 (EB-69's fill): the turn-scoped Sly grant. Rides
+                  # SlyGrant.Grant, whose whole shape is Hand Trick's --
+                  # CardSelectCmd.FromHand filtered to non-Sly Skills, then
+                  # the game's own CardCmd.ApplySingleTurnSly, which the game
+                  # itself clears at turn end. No mod-side timer exists,
+                  # because inventing one is what would have made this a
+                  # different mechanic wearing the same name.
+                  "grant_sly_this_turn",
                   # EB-118 (staged): recall_to_draw's exhaust SOURCE only.
                   # Rides RecallFromExhaust.Recall -- one verified call site
                   # in klee-mod/KleeCode/Powers. The discard source (Headbutt's
@@ -937,7 +945,15 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "encore",
                        # digs), so the delta is normally negative.
                        "floor_drop",
                        "cards", "remove",
-                       "copy_cost_override", "add"}
+                       "copy_cost_override", "add",
+                       # EB-122: `add`'s POSITION. The emitter appended, full
+                       # stop, so an upgrade whose new line resolves in the
+                       # MIDDLE of the ruled body was unexpressible and blocked
+                       # the whole card's upgrade path (send_the_runner+, D2a).
+                       # Names the op it precedes rather than an index, exactly
+                       # as tier0's applier does, so a later edit to the base
+                       # body cannot silently slide the insertion.
+                       "add_before"}
                       | {"generate_cost_override"}
                       # Kokomi (playtest sprint, Track B). Three deltas her
                       # sheet already rules but codegen could not express, so
@@ -1223,7 +1239,8 @@ def blocked_reason(
     for effect in card.get("effects", []):
         if ("amount_formula" in effect
                 and exhaust_pile_calc_rider(card, effect) is None
-                and exhaust_selection_calc_rider(card, effect) is None):
+                and exhaust_selection_calc_rider(card, effect) is None
+                and discards_turn_calc_rider(card, effect) is None):
             formula = effect["amount_formula"]
             return (f"amount_formula (reads {formula.get('count')}) -- needs a "
                     "CalculatedVar bound to that count, not a literal")
@@ -1547,6 +1564,21 @@ def blocked_reason(
             # moonlit_offering their upgrade paths for no reason.
             if eff.get("amount", 1) != 1 and eff.get("select") != "chosen":
                 return "exhaust_from amount > 1 (random re-pool loop not built)"
+        if op == "grant_sly_this_turn":
+            # EB-122. `card_type` is the sheet's target filter and the ONLY
+            # value with a verified C# read is `skill`: Hand Trick's filter is
+            # `card.Type == CardType.Skill`, and the sim's own default is the
+            # same word. Another type is expressible in principle and has no
+            # card, so it stays a NAMED blocker rather than a guess -- the
+            # discipline every closed map in this file states.
+            unknown = set(eff) - {"op", "card_type"}
+            if unknown:
+                return (f"grant_sly_this_turn field(s) {sorted(unknown)} "
+                        "not understood")
+            if eff.get("card_type", "skill") != "skill":
+                return (f"grant_sly_this_turn card_type "
+                        f"'{eff['card_type']}' (only 'skill' has a verified "
+                        "C# filter)")
         if op == "recall_to_draw":
             # EB-118 §6.4. Constraints 3-6 are runtime pool filters and live
             # in RecallFromExhaust.Recallable; 1 and 2 are card SHAPE and are
@@ -1557,19 +1589,27 @@ def blocked_reason(
             unknown = set(eff) - RECALL_FIELDS
             if unknown:
                 return f"recall_to_draw field(s) {sorted(unknown)} not understood"
-            if eff.get("from") != "exhaust":
-                return (f"recall_to_draw from '{eff.get('from', 'discard')}' "
-                        f"(only the exhaust source is built)")
+            src = eff.get("from", "discard")
+            if src not in ("exhaust", "discard"):
+                return f"recall_to_draw from '{src}'"
             if eff.get("position", "top") != "top":
                 return f"recall_to_draw position '{eff.get('position')}'"
             if not isinstance(eff.get("amount", 1), int):
                 return "recall_to_draw amount must be a literal int"
-            if card.get("rarity") not in ("uncommon", "rare"):
-                return (f"recall_to_draw on a {card.get('rarity')} card "
-                        f"(EB-118 §6.4 constraint 1: Uncommon or Rare)")
-            if not card.get("exhaust"):
-                return ("recall_to_draw on a card that does not Exhaust "
-                        "(EB-118 §6.4 constraint 2)")
+            # EB-122: §6.4's card-shape constraints belong to the EXHAUST
+            # source and only to it. They price a LOAN out of a pile a card
+            # would never otherwise leave; a discard-pile card was always
+            # coming back on the next reshuffle, so there is nothing to price
+            # and nothing to cycle. `what_the_tokoyo_returns` is an Uncommon
+            # that does not Exhaust, and it is legal. tier0 draws the same
+            # line at the same place (loader._validate_recall_shape).
+            if src == "exhaust":
+                if card.get("rarity") not in ("uncommon", "rare"):
+                    return (f"recall_to_draw on a {card.get('rarity')} card "
+                            f"(EB-118 §6.4 constraint 1: Uncommon or Rare)")
+                if not card.get("exhaust"):
+                    return ("recall_to_draw on a card that does not Exhaust "
+                            "(EB-118 §6.4 constraint 2)")
         if op == "add_card":
             unknown = set(eff) - ADD_CARD_FIELDS
             if unknown:
@@ -1789,6 +1829,33 @@ def exhaust_selection_calc_rider(card: dict,
         return None
     return (int(formula.get("base", 0)), int(formula.get("per", 1)),
             f"static (card, _) => ExhaustSelection.{accessor}(card)")
+
+
+def discards_turn_calc_rider(card: dict,
+                             eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: discards_this_turn}` (EB-122, for
+    EB-69's `what_the_tokoyo_took`) -- a damage number priced off what the
+    seat has thrown away this turn.
+
+    Same CalculatedDamageVar path as the exhaust-pile and exhaust-selection
+    riders beside it, and the shape is not an invention: the base game's own
+    MementoMori is `CalculationBase 9 + ExtraDamage 4 * (discards this turn)`,
+    which is the triple this returns and the card tier0 names as the source of
+    the token (`effects._formula_count`). The count only exists mid-turn, so a
+    face printing only `base` would understate the card exactly when the
+    Assist lane has done its work.
+
+    Damage only, matching the two riders beside it: a block-side reader needs
+    `block_calc_rider`'s CalculationBase plumbing and has no card yet.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict) \
+            or formula.get("count") != "discards_this_turn":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "static (card, _) => KokomiResources.DiscardsThisTurn(card)")
 
 
 def charge_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
@@ -2055,6 +2122,12 @@ def rider_tip_args(card: dict) -> tuple[str, str]:
             # Charge" is a different card from "+1 per 2 Charge".
             kokomi_args.append(f"chargePer: {int(charge.group(1))}")
             kokomi_args.append(f"chargeStep: {int(charge.group(2))}")
+            if eff.get("op") == "block":
+                # EB-122 / SYS-7, one meter over: `gyorin_formation` is the
+                # first Charge rider on a BLOCK op, and this tip is the only
+                # surface carrying the rate. Without the noun it would be the
+                # single place a player can read it and would say "damage".
+                kokomi_args.append("chargeGrantsBlock: true")
         elif "bonus_vs_aura" in eff:
             args.append(f"auraBonus: {int(eff['bonus_vs_aura'])}")
     return ", ".join(args), ", ".join(kokomi_args)
@@ -2249,7 +2322,15 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     # including Guest Star token plays -- see the sheet row for why the B2
     # printed-cost lesson does not apply to a payoff.
     companions = re.fullmatch(r"(\d+)_per_companion_played_this_turn", formula)
-    if not m and not members and not companions:
+    # EB-122 (`gyorin_formation`, EB-69's fill): Kokomi's Charge slope on a
+    # BLOCK op -- the fourth shape on this rail and the block twin of
+    # `charge_calc_rider`. It carries that rider's argument in its sharper
+    # form: the bank is uncapped and never spent, so by act 3 the rider is
+    # routinely larger than the printed base. Nothing read the formula before,
+    # so the card would have rendered and paid a flat 6 -- which is why
+    # `blocked_reason` refused to emit it rather than ship a wrong number.
+    charge = re.fullmatch(r"(\d+)_per_(\d+)_charge", formula)
+    if not m and not members and not companions and not charge:
         return None
     if salon_deploy_card(card):
         return None
@@ -2269,6 +2350,11 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     if companions:
         return int(eff["amount"]), int(companions.group(1)), (
             f"static (card, _) => {COMPANION_PLAYS_THIS_TURN_CS}")
+    if charge:
+        return int(eff["amount"]), int(charge.group(1)), (
+            "static (card, _) => "
+            f"KokomiResources.GetCharge(card.Owner.Creature) "
+            f"/ {int(charge.group(2))}")
     return int(eff["amount"]), int(m.group(1)), (
         "static (card, _) => "
         f"FurinaResources.ReadableFanfare(card.Owner.Creature) / {int(m.group(2))}")
@@ -2293,6 +2379,9 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     selection = exhaust_selection_calc_rider(card, eff)
     if selection is not None:
         return selection
+    discards = discards_turn_calc_rider(card, eff)
+    if discards is not None:
+        return discards
     charge = charge_calc_rider(card, eff)
     if charge is not None:
         base, per_n, div = charge
@@ -2677,10 +2766,13 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # the chance_bomb_per_detonation replacement.
         "bonus": any(e["op"] in BONUS_OPS and "bonus" in e for e in effects),
         "chance": any(e["op"] == "chance_bomb_per_detonation" for e in effects),
-        # Structural `add` upgrades currently support one exact, verified
-        # shape: append a draw effect. It is emitted as an IsUpgraded-gated
-        # draw at the end of OnPlay, matching upgrades.py's list append.
+        # Structural `add` upgrades are validated by VALUE below, not here:
+        # which shapes are expressible depends on the added op and on what the
+        # base card already declares, so the whole key is owned by the loop.
         "add": True,
+        # EB-122. Position modifier for `add`; its requirement is that the
+        # named op is on the card, which is keyed by VALUE and checked below.
+        "add_before": True,
         # Kokomi. Each binds to the op that owns the number, so a delta on a
         # card without that op is still reported unexpressible rather than
         # silently dropped on the floor.
@@ -2703,13 +2795,19 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # EB-118 joins the same two vars: both riders render through the
         # CalculatedDamageVar triple, so ExtraDamage/CalculationBase are where
         # a `per` / `base` delta lands whichever count it reads.
+        # EB-122 joins the discards-this-turn rider to the same two vars, for
+        # the same reason: it renders through the identical
+        # CalculationBase/ExtraDamage triple, so the deltas land in the same
+        # slots whichever count the rider reads.
         "formula_per": any(
             exhaust_pile_calc_rider(card, e) is not None
             or exhaust_selection_calc_rider(card, e) is not None
+            or discards_turn_calc_rider(card, e) is not None
             for e in effects),
         "formula_base": any(
             exhaust_pile_calc_rider(card, e) is not None
             or exhaust_selection_calc_rider(card, e) is not None
+            or discards_turn_calc_rider(card, e) is not None
             for e in effects),
     }
     # tier0 binds every POWER_UPGRADE_KEYS delta to the first TOP-LEVEL
@@ -2746,14 +2844,55 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                        for e in effects):
                     return {}, ("delta 'add: repeat_this' on a card that "
                                 "already repeats (repeatTimes collision)")
+            elif added_op == "discard":
+                # EB-122 (send_the_runner+). The CHOSEN branch only: the
+                # emitter for a random discard re-pools per pick, and an
+                # upgrade-only random throw has no card. Every number is a
+                # LITERAL -- an appended effect is not the target of any other
+                # delta key, so nothing can move it and no var is needed.
+                if not (isinstance(value, dict)
+                        and set(value) == {"op", "amount", "select"}
+                        and value.get("select") == "chosen"
+                        and isinstance(value.get("amount"), int)
+                        and value["amount"] > 0):
+                    return {}, (
+                        f"delta 'add: {value}' (an appended discard must be "
+                        "`select: chosen` with a positive literal amount)")
+                if any(e.get("op") in ("discard", "discard_for_sparks")
+                       for e in everywhere):
+                    return {}, (
+                        "delta 'add: discard' on a card that already discards "
+                        "(the appended throw and the printed one would read "
+                        "as one line)")
+            elif added_op == "block":
+                # EB-122 (wheel_the_ranks+). Literal, and deliberately WITHOUT
+                # a BlockVar: `CanonicalVars` is what BaseLib auto-detects
+                # `GainsBlock` from, and a card that only gains Block once
+                # upgraded must not claim it while unupgraded -- tier0's own
+                # Nimble predicate reads the base row, so a declared var would
+                # be an eligibility split the moment it shipped
+                # (lint_enchant_parity). The upgraded instance says so instead,
+                # through an IsUpgraded-valued override.
+                if not (isinstance(value, dict)
+                        and set(value) == {"op", "amount"}
+                        and isinstance(value.get("amount"), int)
+                        and value["amount"] > 0):
+                    return {}, (
+                        f"delta 'add: {value}' (an appended block must carry "
+                        "a positive literal amount)")
+                if any(e.get("op") == "block" for e in everywhere):
+                    return {}, (
+                        "delta 'add: block' on a card that already gains "
+                        "Block (Block var collision)")
             elif not (isinstance(value, dict)
                       and set(value) == {"op", "amount"}
                       and value.get("op") in {"draw", "gain_encore"}
                       and isinstance(value.get("amount"), int)
                       and value["amount"] > 0):
                 return {}, (
-                    f"delta 'add: {value}' (only a positive draw or "
-                    "gain_encore effect, or a repeat_this, is expressible)")
+                    f"delta 'add: {value}' (only a positive draw, "
+                    "gain_encore, block or chosen discard effect, or a "
+                    "repeat_this, is expressible)")
             if added_op == "draw" and any(
                     e.get("op") == "draw" for e in everywhere):
                 return {}, "delta 'add: draw' on a card with an existing draw (Cards var collision)"
@@ -2762,6 +2901,25 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                         x.get("op") == "repeat_this" for x in e.get("then", []))
                     for e in effects):
                 return {}, "delta 'add: draw' on a repeating card (repeat semantics not expressible)"
+        if key == "add_before":
+            # EB-122. Same three checks tier0's applier makes, in the same
+            # order and for the same reasons (content/upgrades.py): it is a
+            # modifier, so it needs an `add`; it names an OP, not an index; and
+            # the op has to be on the card, or the applier raises and the
+            # position silently would not be honoured here.
+            if "add" not in deltas or not isinstance(value, str):
+                return {}, (
+                    f"delta 'add_before: {value}' without an `add` to place "
+                    "(it is a position modifier, not an effect)")
+            if deltas["add"].get("op") == "repeat_this":
+                return {}, (
+                    "delta 'add_before' beside 'add: repeat_this' (a repeat "
+                    "re-runs the whole body; it has no position within it)")
+            if not any(e.get("op") == value for e in effects):
+                return {}, (
+                    f"delta 'add_before: {value}' names an op this card does "
+                    "not print at top level (sheet/card mismatch)")
+            continue
         if key == "condition" and value != "unconditional":
             return {}, f"delta 'condition: {value}' (only 'unconditional' is tier0 grammar)"
         if key == "remove":
@@ -2790,6 +2948,39 @@ def added_draw_upgrade(card: dict) -> int:
     added = upgrade_plan(card)[0].get("add")
     return (int(added["amount"])
             if isinstance(added, dict) and added.get("op") == "draw" else 0)
+
+
+def added_block_upgrade(card: dict) -> int:
+    """Amount of an upgrade-only Block grant added by `add`, or zero (EB-122,
+    wheel_the_ranks+). Shape validated in upgrade_plan."""
+    added = upgrade_plan(card)[0].get("add")
+    return (int(added["amount"])
+            if isinstance(added, dict) and added.get("op") == "block" else 0)
+
+
+def added_discard_upgrade(card: dict) -> int:
+    """Count of an upgrade-only CHOSEN discard added by `add`, or zero
+    (EB-122, send_the_runner+). Shape validated in upgrade_plan."""
+    added = upgrade_plan(card)[0].get("add")
+    return (int(added["amount"])
+            if isinstance(added, dict) and added.get("op") == "discard" else 0)
+
+
+def added_effect_anchor(card: dict) -> dict | None:
+    """The top-level effect an `add` must resolve BEFORE, or None to append.
+
+    EB-122. The anchor is looked up by OP, which is what makes the position
+    survive an edit to the base body: tier0's applier does the identical
+    `next(e for e in top if e["op"] == before)` and raises when it misses, and
+    `upgrade_plan` refuses the card on the same miss, so the two engines can
+    never disagree about WHERE the new line goes.
+    """
+    deltas = upgrade_plan(card)[0]
+    before = deltas.get("add_before")
+    if not before:
+        return None
+    return next((e for e in card.get("effects", [])
+                 if e.get("op") == before), None)
 
 
 def added_encore_upgrade(card: dict) -> int:
@@ -3474,8 +3665,18 @@ def build_body(
         # tier0 play_card: current_x = energy actually spent. The captured
         # X value (through Hook.ModifyXValue) is the game's same number.
         lines.append("var x = ResolveEnergyXValue();")
+    add_anchor = added_effect_anchor(card)
     for eff in card["effects"]:
         op = eff["op"]
+
+        # EB-122. A POSITIONED `add` resolves in the middle of the ruled body,
+        # so it is emitted at its anchor rather than after the loop.
+        # send_the_runner+ is ruled draw 2 -> discard 1 chosen -> exhaust 1
+        # chosen (D2a); appended, it read draw / exhaust / discard, and the
+        # player exhausted before being asked what to throw -- a different
+        # card, silently.
+        if eff is add_anchor:
+            lines.extend(_upgrade_add_lines(card, salon_deploy_present))
 
         if op == "block":
             if salon_calc_rider(card, eff) is not None:
@@ -3629,6 +3830,14 @@ def build_body(
             lines.append(
                 "await KurageSummon.Field(choiceContext, Owner.Creature, "
                 f"{kurage_turns_expr(card, eff)}, this);")
+
+        elif op == "grant_sly_this_turn":
+            # EB-122. The whole verb lives in SlyGrant so its filter and its
+            # end-of-turn expiry have ONE home and cannot be re-spelled per
+            # card; the generated body is the call. Sim twin:
+            # effects._op_grant_sly_this_turn.
+            lines.append(
+                "await SlyGrant.Grant(choiceContext, Owner, this);")
 
         elif op == "conscript":
             override = eff.get("cost_override")
@@ -4308,9 +4517,18 @@ def build_body(
             # RecallFromExhaust so the six constraints have ONE C# home and
             # cannot be re-spelled per card. The generated body is the call.
             # Sim twin: effects._op_recall_to_draw with `from: exhaust`.
+            #
+            # EB-122: the DISCARD source is the same verb reading the other
+            # pile, and it has its own home for the same reason -- the two are
+            # deliberately asymmetric (unfiltered vs §6.4-filtered, no loan
+            # keyword vs Exhaust), so one class holding both would have to
+            # branch on the source at every line.
             n = str(int(eff.get("amount", 1)))
+            home = ("RecallFromExhaust"
+                    if eff.get("from", "discard") == "exhaust"
+                    else "RecallFromDiscard")
             lines.append(
-                "await RecallFromExhaust.Recall(\n"
+                f"await {home}.Recall(\n"
                 f"            choiceContext, Owner, this, {n});"
             )
 
@@ -4437,33 +4655,11 @@ def build_body(
             lines.append(_modes_block(card, mode_bodies))
 
     # Structural upgrade append (tier0 upgrades.py: card.effects.append).
-    # It resolves after every base effect and before the repeat tail.
-    if added_draw_upgrade(card):
-        lines.append(
-            "if (IsUpgraded)\n"
-            "        {\n"
-            "            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);\n"
-            "        }"
-        )
-    if added_encore_upgrade(card):
-        if added_encore_salon(card) is not None:
-            # SYS-6: replacement-scaled through the var the face renders, so
-            # the printed number and the grant cannot drift.
-            amount = "(int)salonScaledEncore"
-        else:
-            amount = str(added_encore_upgrade(card))
-            if salon_deploy_present:
-                # Non-static deploy count: the closed-form var is
-                # unavailable, so the grant keeps the inline rule.
-                amount += (" * (salonReplacements > 0 ? "
-                           "SalonConstants.ReplacementNumericMultiplier : 1)")
-        lines.append(
-            "if (IsUpgraded)\n"
-            "        {\n"
-            "            FurinaResources.GainEncore("
-            f"Owner.Creature, {amount});\n"
-            "        }"
-        )
+    # It resolves after every base effect and before the repeat tail -- unless
+    # `add_before` gave it a position, in which case the loop above has already
+    # emitted it at that op and this is a no-op.
+    if added_effect_anchor(card) is None:
+        lines.extend(_upgrade_add_lines(card, salon_deploy_present))
 
     # Repeat tail (sim resolve_card): a repeat re-resolves the effect list
     # minus the repeat machinery, `times` more times. The replayed ops are
@@ -4491,6 +4687,76 @@ def build_body(
             + "\n            }\n        }"
         )
 
+    return lines
+
+
+def _upgrade_add_lines(card: dict, salon_deploy_present: bool) -> list[str]:
+    """The IsUpgraded-gated statements a structural `add` delta contributes.
+
+    Factored out (EB-122) because the emission now has TWO sites: appended
+    after the base effects, which is what every `add` did before, and inserted
+    at the op an `add_before` names. One list, two call sites, so the two
+    positions cannot come to mean different bodies.
+    """
+    lines: list[str] = []
+    if added_draw_upgrade(card):
+        lines.append(
+            "if (IsUpgraded)\n"
+            "        {\n"
+            "            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);\n"
+            "        }"
+        )
+    if added_encore_upgrade(card):
+        if added_encore_salon(card) is not None:
+            # SYS-6: replacement-scaled through the var the face renders, so
+            # the printed number and the grant cannot drift.
+            amount = "(int)salonScaledEncore"
+        else:
+            amount = str(added_encore_upgrade(card))
+            if salon_deploy_present:
+                # Non-static deploy count: the closed-form var is
+                # unavailable, so the grant keeps the inline rule.
+                amount += (" * (salonReplacements > 0 ? "
+                           "SalonConstants.ReplacementNumericMultiplier : 1)")
+        lines.append(
+            "if (IsUpgraded)\n"
+            "        {\n"
+            "            FurinaResources.GainEncore("
+            f"Owner.Creature, {amount});\n"
+            "        }"
+        )
+    if added_block_upgrade(card):
+        # EB-122. Inline BlockVar, NOT a CanonicalVars entry: BaseLib
+        # auto-detects `GainsBlock` from that list, and a card whose Block
+        # exists only after a smith must not claim it before one -- tier0's
+        # Nimble predicate reads the base row, so the declaration would be an
+        # eligibility split (lint_enchant_parity) rather than a var. The
+        # upgraded instance answers true through the GainsBlock override the
+        # emitter writes instead. Same literal shape a Sly branch's Block uses.
+        lines.append(
+            "if (IsUpgraded)\n"
+            "        {\n"
+            "            await CreatureCmd.GainBlock(Owner.Creature, "
+            f"new BlockVar({added_block_upgrade(card)}m, ValueProp.Move), "
+            "cardPlay);\n"
+            "        }"
+        )
+    if added_discard_upgrade(card):
+        # EB-122. Byte-for-byte the chosen-discard emitter's own screen -- one
+        # selection for the whole batch, kit-exempt pool -- so an appended
+        # throw and a printed one cannot come to mean different things. Braced
+        # for the same reason that one is: `picked` may not be redeclared.
+        lines.append(
+            "if (IsUpgraded)\n"
+            "        {\n"
+            "            var pickedUpgrade = (await CardSelectCmd.FromHandForDiscard(\n"
+            "                choiceContext, Owner,\n"
+            "                new CardSelectorPrefs("
+            f"CardSelectorPrefs.DiscardSelectionPrompt, {added_discard_upgrade(card)}),\n"
+            "                KitGrant.NotKitCard, this)).ToList();\n"
+            "            await CardCmd.Discard(choiceContext, pickedUpgrade);\n"
+            "        }"
+        )
     return lines
 
 
@@ -4637,6 +4903,45 @@ def _is_klee_row(card: dict) -> bool:
                          yaml.safe_load(SHEET.read_text(encoding="utf-8"))}
     return card.get("id") in _KLEE_ROW_IDS
 
+def _upgrade_add_text(card: dict) -> list[str]:
+    """The `{IfUpgraded:show:...|}` clauses a structural `add` contributes.
+
+    EB-122: factored out beside `_upgrade_add_lines` and for the same reason.
+    The FACE has to place the new sentence where the new effect resolves, or a
+    positioned upgrade would read in one order and play in another -- which is
+    the failure the position exists to prevent, wearing different clothes.
+    Every payload is pipe-free, the one nesting the swap-parse forbids.
+    """
+    out: list[str] = []
+    if added_draw_upgrade(card):
+        n = added_draw_upgrade(card)
+        draw = "Draw 1 card." if n == 1 else f"Draw {n} cards."
+        out.append("{IfUpgraded:show:" + draw + "|}")
+    if added_encore_upgrade(card):
+        n = added_encore_upgrade(card)
+        if added_encore_salon(card) is not None:
+            # SYS-6: the appended encore doubles on a replacement deploy, so
+            # the face renders the live var, not the unscaled literal.
+            out.append(
+                "{IfUpgraded:show:Gain {Encore:diff()} "
+                "[gold]Encore[/gold].|}")
+        else:
+            out.append(
+                "{IfUpgraded:show:Gain "
+                f"{n} [gold]Encore[/gold].|}}")
+    if added_block_upgrade(card):
+        out.append(
+            "{IfUpgraded:show:Gain "
+            f"{added_block_upgrade(card)} [gold]Block[/gold].|}}")
+    if added_discard_upgrade(card):
+        # The chosen-discard emitter's own wording ("Discard 1 card."), so an
+        # appended throw and a printed one read identically.
+        n = added_discard_upgrade(card)
+        out.append(
+            "{IfUpgraded:show:Discard "
+            f"{n} card{'' if n == 1 else 's'}.|}}")
+    return out
+
 
 def build_description(card: dict) -> str:
     """
@@ -4658,10 +4963,17 @@ def build_description(card: dict) -> str:
         parts.append(f"Spend {rendered} [gold]{label}[/gold].")
     salon_named = False          # B5: has a deploy already said "your Salon"?
     deploy_amounts, deploy_skip = merged_deploy_text(card)
+    add_anchor = added_effect_anchor(card)
     for eff_index, eff in enumerate(card["effects"]):
         if eff_index in deploy_skip:
             continue
         op = eff["op"]
+
+        # EB-122: a positioned `add` reads where it resolves. Placed BEFORE
+        # the skip check would be wrong -- a merged deploy still occupies its
+        # position -- so it sits with the sentence it precedes.
+        if eff is add_anchor:
+            parts.extend(_upgrade_add_text(card))
 
         if op == "block":
             if _is_sly_branch(card):
@@ -4808,6 +5120,13 @@ def build_description(card: dict) -> str:
                 parts.append("Scales with "
                              + EXHAUST_SELECTION_TEXT[eff["amount_formula"]
                                                       ["count"]] + ".")
+            if discards_turn_calc_rider(card, eff) is not None:
+                # EB-122. Third sentence in the same family: the number is
+                # honest (it renders through the CalculatedVar), and this says
+                # WHY it moves. It also tells the pilot the count is per TURN,
+                # which is the whole play pattern -- throw first, then swing.
+                parts.append(
+                    "Scales with the cards you discarded this turn.")
             if "bonus_formula" in eff:
                 formula = eff["bonus_formula"]
                 if formula.endswith("_per_detonation_this_combat"):
@@ -5157,6 +5476,31 @@ def build_description(card: dict) -> str:
         elif op == "exhaust_from":
             parts.append("Exhaust a random Status card from your hand.")
 
+        elif op == "grant_sly_this_turn":
+            # EB-122. A RUN of identical grants is one sentence, the B5 rule
+            # (`merged_deploy_text`) applied to a second verb: the_gunbai_turns
+            # prints the op three times, and three copies of the same line is
+            # the boilerplate that ruling deletes. The body still emits one
+            # call per effect -- each opens its own screen and each picks a
+            # DIFFERENT Skill, because the filter excludes what a previous
+            # grant already touched -- so merging is text only.
+            run_start = eff_index == 0 or (
+                card["effects"][eff_index - 1].get("op") != op
+                or card["effects"][eff_index - 1].get("card_type", "skill")
+                != eff.get("card_type", "skill"))
+            if not run_start:
+                continue
+            n = 0
+            for later in card["effects"][eff_index:]:
+                if (later.get("op") != op
+                        or later.get("card_type", "skill")
+                        != eff.get("card_type", "skill")):
+                    break
+                n += 1
+            what = "a Skill" if n == 1 else f"{n} Skills"
+            parts.append(
+                f"Give {what} in your hand [gold]Sly[/gold] this turn.")
+
         elif op == "recall_to_draw":
             # EB-118. The face carries BOTH halves of the bargain: where the
             # card comes back to, and that it comes back on loan. The gained
@@ -5165,11 +5509,20 @@ def build_description(card: dict) -> str:
             # the player has to notice on the returned card.
             n = int(eff.get("amount", 1))
             what = ("a card" if n == 1 else f"{n} cards")
-            parts.append(
-                f"Choose {what} from your [gold]Exhaust[/gold] pile; put "
-                f"{'it' if n == 1 else 'them'} on top of your draw pile. "
-                f"{'It gains' if n == 1 else 'They gain'} "
-                f"[gold]Exhaust[/gold].")
+            if eff.get("from", "discard") == "exhaust":
+                parts.append(
+                    f"Choose {what} from your [gold]Exhaust[/gold] pile; put "
+                    f"{'it' if n == 1 else 'them'} on top of your draw pile. "
+                    f"{'It gains' if n == 1 else 'They gain'} "
+                    f"[gold]Exhaust[/gold].")
+            else:
+                # EB-122, the discard source. The loan sentence is ABSENT and
+                # its absence is the pricing: nothing is granted, because a
+                # discard-pile card was coming back on the next reshuffle
+                # anyway and the card is only buying the order.
+                parts.append(
+                    f"Choose {what} from your discard pile; put "
+                    f"{'it' if n == 1 else 'them'} on top of your draw pile.")
 
         elif op == "add_card":
             n = eff.get("amount", 1)
@@ -5287,25 +5640,8 @@ def build_description(card: dict) -> str:
                     text += f" Maximum {m}."
                 parts.append(text)
 
-    if added_draw_upgrade(card):
-        n = added_draw_upgrade(card)
-        draw = "Draw 1 card." if n == 1 else f"Draw {n} cards."
-        parts.append("{IfUpgraded:show:" + draw + "|}")
-    if added_encore_upgrade(card):
-        n = added_encore_upgrade(card)
-        if added_encore_salon(card) is not None:
-            # SYS-6: the appended encore doubles on a replacement deploy, so
-            # the face renders the live var, not the unscaled literal. The
-            # payload is pipe-free, which is the only nesting the
-            # {IfUpgraded:show:...} swap-parse forbids (see the
-            # condition-swap guard above).
-            parts.append(
-                "{IfUpgraded:show:Gain {Encore:diff()} "
-                "[gold]Encore[/gold].|}")
-        else:
-            parts.append(
-                "{IfUpgraded:show:Gain "
-                f"{n} [gold]Encore[/gold].|}}")
+    if added_effect_anchor(card) is None:
+        parts.extend(_upgrade_add_text(card))
     if added_repeat_upgrade(card):
         # Same sentence the printed repeat-conditional uses ("play this card
         # again"), swapped in on upgrade. Pipe-free payload, as the swap-parse
@@ -5676,9 +6012,17 @@ def build_upgrade(card: dict) -> list[str]:
                 "IsUpgraded-gated replay of the base effects (sim "
                 "resolve_card).")
         else:
+            where = ("appended after the base effects"
+                     if "add_before" not in deltas
+                     else f"resolved before the {deltas['add_before']} row")
             lines.append(
-                "// add: gain_encore -- expressed at play time as an "
-                "IsUpgraded-gated effect appended after the base effects.")
+                f"// add: {add_op} -- expressed at play time as an "
+                f"IsUpgraded-gated effect {where}.")
+    if "add_before" in deltas:
+        # EB-122. The position is consumed by the `add` emission above (and by
+        # build_body / build_description, which place the statement and the
+        # sentence). Marked done so the SYS-1 guard sees the key expressed.
+        done.add("add_before")
     if "encore_cost" in deltas:
         done.add("encore_cost")
         lines.append(
@@ -5855,7 +6199,15 @@ def emit(
     # so the same shape is stamped as a marker interface and the pool filter
     # asks the type. Stamped from the SHEET, so the two answers have one
     # source.
+    # EB-122: the marker is about the EXHAUST source, so the stamp asks the
+    # source. The sim's twin already did -- `effects.retrieves_from_exhaust`
+    # tests `fx["from"] == RECALL_EXHAUST_SOURCE` -- and this side did not,
+    # because the discard source was blocked and no row could reach the
+    # difference. `what_the_tokoyo_returns` reads the DISCARD pile and is not
+    # part of the exhaust cycle; stamping it would have excluded it from a
+    # pool it belongs in, silently, on a claim no sheet row makes.
     if any(eff.get("op") == "recall_to_draw"
+           and eff.get("from", "discard") == "exhaust"
            for eff in iter_effects(card)):
         interfaces += ", IExhaustRetriever"
 
@@ -5962,7 +6314,23 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard
     # 2026-08-13 (`enchantments._grants_block`), so the two engines agree
     # here now and nothing is being papered over.
     gains_block_member = ""
-    if (any(eff.get("op") == "block" for eff in _effects_everywhere(card))
+    if added_block_upgrade(card) and not any(
+            eff.get("op") == "block" for eff in _effects_everywhere(card)):
+        # EB-122 (wheel_the_ranks+). Block that exists only after a smith, so
+        # the claim has to move with the smith. `=> true` would be a lie on the
+        # unupgraded card and an eligibility split against tier0, whose Nimble
+        # predicate reads the BASE row (`enchantments._grants_block`); `false`
+        # would be a lie on the upgraded one, whose Block does go through
+        # CreatureCmd.GainBlock with the cardPlay attached and would collect
+        # the rider. The property is the only place that distinction can live,
+        # and no BlockVar is declared for exactly this reason.
+        gains_block_member = (
+            "\n    /// <summary>Block arrives only from the ruled upgrade "
+            "(`add: block`), so the\n    /// claim moves with it -- see "
+            "gen_klee_cards `_upgrade_add_lines` (EB-122).</summary>\n"
+            "    public override bool GainsBlock => IsUpgraded;\n"
+        )
+    elif (any(eff.get("op") == "block" for eff in _effects_everywhere(card))
             and not any("BlockVar(" in v for v in vars_)):
         # The summary deliberately does NOT spell the declaration block's own
         # name: lint_generated_structure locates that block by the first

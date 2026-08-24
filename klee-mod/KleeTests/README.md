@@ -13,7 +13,7 @@ found was found by playing**. This is a partial backstop for that — see
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 94 tests, ~0.3s after build
+dotnet test                       # 114 tests, ~0.3s after build
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -79,17 +79,19 @@ either pinned structurally and labelled, or left out.
 | File | Tests | What it holds |
 |---|---|---|
 | `ConstantPinTests.cs` | 5 | `SalonConstants` (M24's six summon-damage values, signed 2026-08-13 by R187, plus the stage dials); `PearlOfInsightRelic` = 2× the base exhaust accrual (the EB-74 invariant), and the base values against tier0's constants. |
-| `DerivationPinTests.cs` | 14 | Fanfare cap against live max HP (audit **H3**, authority pin), cap clamp on gain, identity gating, the `?? 0` fallback; salon tick = printed base + Focus term, and the dry three-quarters truncation. |
-| `InterpolationPinTests.cs` | 5 | The tooltip text `lint_constant_parity` structurally cannot see: `SalonMemberPower` and both Pearl relics interpolate their constants rather than restating them (EB-86's shape; M24's "signing is a one-file edit"). |
+| `DerivationPinTests.cs` | 16 | Fanfare cap against live max HP (audit **H3**, authority pin), cap clamp on gain, identity gating, the `?? 0` fallback; salon tick = printed base + Focus term, and the dry three-quarters truncation. Plus `EB-122`'s `DiscardsThisTurn`: the two null routes a CalculatedVar preview actually takes, and a labelled structural pin that the per-turn and per-seat clauses are the base game's MementoMori ones. |
+| `InterpolationPinTests.cs` | 6 | The tooltip text `lint_constant_parity` structurally cannot see: `SalonMemberPower` and both Pearl relics interpolate their constants rather than restating them (EB-86's shape; M24's "signing is a one-file edit"). Plus `EB-122`'s Charge-rider NOUN — `gyorin_formation` is the first Charge rider on a Block op, and this tip is the only surface carrying the rate, so a hardcoded "damage" would be the single place a player can read it and would read it wrong (SYS-7, one meter over). |
 | `CoopSeamTests.cs` | 8 | Per-seat ownership and attribution — see below. |
 | `SparkSinkPinTests.cs` | 14 | EB-118 §4.5's Spark sink: the `CanSpend` gate a generated sink hangs `IsPlayable` on (whole price or nothing), True Spark Knight's live threshold and its floor of 1, and two structural pins on `Spend` (it refuses through the same predicate the gate uses, and moves the bank through the same `PowerCmd.ModifyAmount` the threshold consume uses). No card prints the op. |
 | `ParityAuthorityPinTests.cs` | 6 | Audit findings **M1** and **M2** pinned as the C# authority record, plus H3's cross-reference. |
 | `SalonVerbTests.cs` | 12 | `EB-118` §5.5's Salon verbs: the structural pin that the turn-start upkeep and perform-now resolve through the SAME `PerformMember` (the packet's no-duplicate-implementation requirement), and the behavioural pins for `RotateLeftmost` and the leftmost reads. |
 | `RecallFromExhaustTests.cs` | 10 | EB-118's exhaust-pile retrieval: the pool filter RUNS (kit, junk and retriever exclusions), the move is pinned structurally (`FromCombatPile` -> `Add` at `CardPilePosition.Top` -> `AddKeyword`) because it needs a live `CombatState`. |
 | `ExhaustSelectionTests.cs` | 15 | `EB-118`'s Exhaust identity context: the six printed descriptors, the derived reads, and above all the SCOPING — another card reads nothing, a second `Open` replaces, the seat is part of the key. Sim twin: `tier0/tests/test_exhaust_context.py`; the emitted column names are pinned across the two engines by `tier0/tests/test_exhaust_context_parity.py`. The codegen's wiring into a generated `OnPlay` is a labelled structural pin — a card PLAY is outside the boundary. |
+| `RecallFromDiscardTests.cs` | 9 | `EB-122`'s other half of the same verb: `recall_to_draw` reading its DEFAULT source. The file is about an ASYMMETRY that is deliberate on both sides — the discard branch filters nothing and grants nothing, because [USER] ruled the unfiltered branch (and the self-recall it allows) DELIBERATE at `EB-69`/D3, R198. Sim spec: `tier0/tests/test_eb69_tokoyo_returns_selfrecall.py`. Structural where a live `CombatState` is needed, including the two faces routing through one call. |
+| `SlyGrantTests.cs` | 8 | `EB-122`'s turn-scoped Sly grant. The pool predicate RUNS (Skills only, never a kit card, never one already Sly this turn — the clause that makes a second grant pick a different card); the grant is structural, and pins that the expiry is the GAME's `CardCmd.ApplySingleTurnSly` rather than a mod-side timer. Both carriers route through the one home. |
 | `ModalChoicePinTests.cs` | 5 | `EB-118` sec.5.4's modal surface: `ModalChoice` delegates to the base game's OWN card-level choice rather than reimplementing one (`CardSelectCmd.FromChooseACardScreen` + `PlayerChoiceContext`, co-op-synced as `PlayerChoiceType.Index`), the three-option ceiling the screen itself enforces, and the `mode_chosen` telemetry row pinned to its tier0 twin. Structural: making a choice needs a live `CombatState`. No sheet row is modal. |
 
-**94 tests, all green.**
+**114 tests, all green.**
 
 ## Co-op coverage
 
