@@ -1601,6 +1601,52 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # tier0.5 number does. C.PILOT_WEIGHTS_VERSION 1 -> 2 in the same edit. The
 # payoff-reach registration's DRAFTER_VERSION = 14 pin is UNTOUCHED: the
 # drafter is not taught anything here, only the pilot.
+# POLICY_VERSION PROPOSED (EB-118, staged 2026-08-23). No integer here: the
+# bump executes when the switch is thrown, not when the code lands.
+#
+# Two decisions the engine has been making with a placeholder move into
+# `tier0/pilot/policy.py`, both behind `policy.PILOT_POLICIES_ENABLED`, which
+# ships FALSE. Off, both call sites run their pre-EB-118 code and every number
+# on this branch -- the frozen calibration battery included -- is
+# byte-identical, which is why the stamp must not move yet.
+#
+# (a) KLEE, bomb placement. `place_bomb` in its concentration form
+# (`target: enemy`) resolved through `_pick_targets`, i.e. lowest HP: a
+# targeting heuristic standing in for a decision. `bomb_placement_target`
+# enumerates the legal enemies and prices what a bomb is actually worth on
+# each -- what the target can still absorb before the pile is past lethal
+# (bombs beyond lethal are simply not dealt), the pile it joins and lives to
+# detonate with, the Weak-rate attack that arming an unsuppressed enemy costs
+# it, and the pile readers in hand (`detonate` aimed here pays only when the
+# pop is lethal, which is the rule the damage estimator already applies).
+# Random-target placements and free plays' forced random targeting are
+# untouched: those are variance profiles and parity law, not decisions.
+#
+# (b) KOKOMI, exhaust selection. A chosen `exhaust_from` spent
+# `_worst_card` -- highest-cost non-Attack -- which looks expert exactly when
+# the expensive card happens to be the dead one and is otherwise backwards: it
+# throws away the payoff and keeps the dud. `exhaust_victim` scores each
+# candidate as the exhausting card's payout for that victim minus the victim's
+# own future value (its pilot valuation in the current state, per energy, with
+# junk negative and a self-exhausting card discounted). The payout is a HOOK
+# defaulting to identity-blind, because no shipped grammar reads the victim's
+# identity; when one is written its payout arrives as a parameter rather than
+# as a second heuristic. The pool is the engine's -- post-C11 Kokomi's rotation
+# law has already dropped junk from it -- and the chooser never widens it.
+#
+# ONE BUMP, not two: both are the same class of change (the pilot's judgement,
+# not the engine's rules), they land behind one switch, and neither is
+# quotable alone -- the switch cannot be thrown for one policy and not the
+# other, so no cell exists in which only one is live. Same argument v11 and
+# v12 made on the RUNTEMPLATE side.
+#
+# WHAT RE-BASELINES AT THE BUMP: every Klee tier-0.5 number (four printed rows
+# place in the concentration form) and every Kokomi number that touches a chosen
+# exhaust, which under the casket is her whole Charge engine. Also moving in
+# the same landing edit: `C.PILOT_WEIGHTS_VERSION`, because the EB-118 weights
+# ENTER the set it labels the moment they are first read -- the R176 reading of
+# that rule. The payoff-reach registration's `DRAFTER_VERSION = 14` pin is
+# UNTOUCHED: the drafter learns nothing here, only the pilot.
 POLICY_VERSION = 7
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
