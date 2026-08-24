@@ -250,7 +250,14 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # in klee-mod/KleeCode/Powers. The discard source (Headbutt's
                   # shape) is NOT built and blocks by name below.
                   "recall_to_draw",
-                  "replay_next_companion", "copy_companions_played_this_combat"}
+                  "replay_next_companion", "copy_companions_played_this_combat",
+                  # EB-118 sec.5.4: the modal surface. choose_one rides
+                  # KleeMod.Cards.ModalChoice, a thin wrapper over the base
+                  # game's OWN card-level choice
+                  # (CardSelectCmd.FromChooseACardScreen + PlayerChoiceContext,
+                  # co-op-synced as PlayerChoiceType.Index). Inert on every
+                  # committed sheet -- no row is modal today.
+                  "choose_one"}
 
 # recall_to_draw (EB-118). `position` is accepted only as its default: the
 # destination is top-of-draw in both engines and there is no other placement.
@@ -445,6 +452,106 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # "if the leftmost member is X, do Y" -- see the
               # leftmost_salon_member_ predicate below.
               "salon_rotate", "salon_perform"}
+
+# The exact key set each branch op may carry. Module-level because a modal's
+# mode body is emitted through the same `_emit_branch_op` resolvers as a
+# conditional branch, so it has to be validated by the same rule -- two copies
+# of this table is exactly how a mode body would drift from a branch body.
+BRANCH_FIELDS = {
+    "damage": {"op", "amount", "target"},
+    "block": {"op", "amount"},
+    "draw": {"op", "amount"},
+    "gain_spark": {"op", "amount"},
+    "gain_encore": {"op", "amount"},
+    "burst_energy": {"op", "amount"},
+    "energy": {"op", "amount"},
+    "place_bomb": {"op", "amount", "target", "bomb_damage"},
+    "buff_next_attack": {"op", "amount"},
+}
+
+# EB-118 sec.5.4, codegen leg. Mirrors tier0.engine.effects.MODAL_FIELDS /
+# MODE_FIELDS; tier0/tests/test_eb118_modal_parity.py pins the two together.
+MODAL_FIELDS = {"op", "modes"}
+MODE_FIELDS = {"label", "effects"}
+
+
+def _branch_op_reason(eff: dict, where: str) -> str | None:
+    """Why this effect cannot be emitted inside a branch or a mode body."""
+    if eff.get("op") not in BRANCH_OPS:
+        return f"op '{eff.get('op')}' inside a {where}"
+    unknown = set(eff) - BRANCH_FIELDS[eff["op"]]
+    if unknown:
+        return (f"branch {eff['op']} field(s) {sorted(unknown)} "
+                "not understood")
+    if (eff.get("op") == "damage"
+            and (eff.get("target") not in DAMAGE_TARGETS
+                 or eff.get("target") == "self")):
+        return f"branch damage target '{eff.get('target')}'"
+    if (eff.get("op") == "place_bomb"
+            and eff.get("target") not in BOMB_TARGETS):
+        return f"branch place_bomb target '{eff.get('target')}'"
+    if not isinstance(eff.get("amount", eff.get("bomb_damage")), int):
+        return f"branch {eff['op']} amount must be a literal int"
+    return None
+
+
+# The base game's choose-a-card screen refuses more than three options
+# (`CardSelectCmd.FromChooseACardScreen`: `if (cards.Count > 3) throw`, read
+# off sts2.dll v0.107.1). That is the ceiling on modes, and it belongs here
+# rather than in a comment on the sheet -- a four-mode row must BLOCK, not
+# ship and throw in front of a player.
+MAX_MODES = 3
+
+
+def _mode_target_type(mode: dict) -> str | None:
+    """The C# TargetType a mode body implies, or None for self-only."""
+    for eff in mode.get("effects", []):
+        if eff.get("op") == "damage" and eff.get("target") != "self":
+            return TARGET_CS[eff["target"]]
+        if eff.get("op") == "place_bomb":
+            return TARGET_CS[eff["target"]]
+    return None
+
+
+def _modal_reason(eff: dict) -> str | None:
+    """Why this `choose_one` cannot be emitted. EB-118 sec.5.4.
+
+    The mode bodies go through the SAME resolvers a conditional branch does,
+    so they carry the same restriction; what is extra here is the screen's
+    three-option ceiling and the target agreement below.
+    """
+    unknown = set(eff) - MODAL_FIELDS
+    if unknown:
+        return f"choose_one field(s) {sorted(unknown)} not understood"
+    modes = eff.get("modes")
+    if not isinstance(modes, list) or len(modes) < 2:
+        return "choose_one needs at least 2 modes"
+    if len(modes) > MAX_MODES:
+        return (f"choose_one with {len(modes)} modes "
+                f"(the choose-a-card screen takes at most {MAX_MODES})")
+    for mode in modes:
+        if not isinstance(mode, dict):
+            return "choose_one mode is not a mapping"
+        unknown = set(mode) - MODE_FIELDS
+        if unknown:
+            return f"mode field(s) {sorted(unknown)} not understood"
+        if not isinstance(mode.get("label"), str) or not mode["label"]:
+            return "mode needs a non-empty label"
+        if not isinstance(mode.get("effects"), list) or not mode["effects"]:
+            return "mode needs a non-empty effects list"
+        for e in mode["effects"]:
+            reason = _branch_op_reason(e, "mode body")
+            if reason:
+                return reason
+    # TargetType is a property of the CARD, declared before a mode is picked,
+    # so modes that would aim differently are inexpressible -- the player would
+    # have aimed the card before choosing what it does.
+    targets = {_mode_target_type(mode) for mode in modes}
+    targets.discard(None)
+    if len(targets) > 1:
+        return (f"choose_one modes disagree on TargetType {sorted(targets)} "
+                "(the card is aimed before the mode is chosen)")
+    return None
 
 # Cards carrying a repeat-conditional re-resolve their other effects (sim
 # resolve_card: the repeat excludes only the repeat machinery). The repeated
@@ -950,6 +1057,12 @@ def card_level_reason(
 def pascal(card_id: str) -> str:
     """kaboom -> Kaboom, sorry_jean -> SorryJean, jumpy_dumpty_mk2 -> JumpyDumptyMk2."""
     return "".join(p.capitalize() for p in re.split(r"[_\-]", card_id) if p)
+
+
+def cs_escape(text: str) -> str:
+    """A sheet string as a C# literal body. Backslash first, or the quote
+    escape this adds would be escaped a second time."""
+    return text.replace("\\", "\\\\").replace('"', '\\"')
 
 
 _sheet_cards_cache: dict[Path, list] = {}
@@ -1506,34 +1619,19 @@ def blocked_reason(
                     return (f"repeat-conditional beside op(s) {sorted(set(bad))} "
                             "(repeated body would redeclare locals)")
             else:
-                branch_fields = {
-                    "damage": {"op", "amount", "target"},
-                    "block": {"op", "amount"},
-                    "draw": {"op", "amount"},
-                    "gain_spark": {"op", "amount"},
-                    "gain_encore": {"op", "amount"},
-                    "burst_energy": {"op", "amount"},
-                    "energy": {"op", "amount"},
-                    "place_bomb": {"op", "amount", "target", "bomb_damage"},
-                    "buff_next_attack": {"op", "amount"},
-                }
                 for branch in (then, els):
                     for e in branch:
-                        if e.get("op") not in BRANCH_OPS:
-                            return f"op '{e.get('op')}' inside a conditional branch"
-                        unknown = set(e) - branch_fields[e["op"]]
-                        if unknown:
-                            return (f"branch {e['op']} field(s) {sorted(unknown)} "
-                                    "not understood")
-                        if (e.get("op") == "damage"
-                                and (e.get("target") not in DAMAGE_TARGETS
-                                     or e.get("target") == "self")):
-                            return f"branch damage target '{e.get('target')}'"
-                        if (e.get("op") == "place_bomb"
-                                and e.get("target") not in BOMB_TARGETS):
-                            return f"branch place_bomb target '{e.get('target')}'"
-                        if not isinstance(e.get("amount", e.get("bomb_damage")), int):
-                            return f"branch {e['op']} amount must be a literal int"
+                        reason = _branch_op_reason(e, "conditional branch")
+                        if reason:
+                            return reason
+        if op == "choose_one":
+            reason = _modal_reason(eff)
+            if reason:
+                return reason
+    if sum(1 for e in card.get("effects", []) if e.get("op") == "choose_one") > 1:
+        # One selection local per body (`modeIndex`), and one screen per play:
+        # two modals on one card would collide on both.
+        return "two choose_one effects on one card (mode selection collision)"
     if sum(1 for e in card.get("effects", []) if e.get("op") == "detonate") > 1:
         return "two detonate effects on one card (count variable collision)"
     if sum(1 for e in card.get("effects", [])
@@ -3276,6 +3374,31 @@ def _conditional_block(pred: str, then_lines: list[str],
     return out
 
 
+def modal_option_class(card: dict, index: int) -> str:
+    """The generated class name for one mode's face on the choice screen."""
+    return f"{pascal(card['id'])}Mode{chr(ord('A') + index)}"
+
+
+def _modes_block(card: dict, mode_bodies: list[list[str]]) -> str:
+    """The if/else-if ladder over the answered mode index.
+
+    A ladder rather than a `switch`: the branch bodies are the same statement
+    lists `_conditional_block` renders, and one renderer for both keeps a mode
+    body and a branch body from drifting apart in whitespace alone.
+    """
+    def body(stmts: list[str]) -> str:
+        return "\n".join("            " + s.replace("\n", "\n    ")
+                         for s in stmts)
+
+    out = ""
+    for i, stmts in enumerate(mode_bodies):
+        head = (f"if (modeIndex == {i})" if i == 0
+                else (f"\n        else if (modeIndex == {i})"
+                      if i < len(mode_bodies) - 1 else "\n        else"))
+        out += f"{head}\n        {{\n{body(stmts)}\n        }}"
+    return out
+
+
 def build_body(
     card: dict, profile: CharacterProfile = KLEE_PROFILE
 ) -> list[str]:
@@ -4228,6 +4351,31 @@ def build_body(
                         spotlight_capable)
                 lines.append(_conditional_block(pred, then_lines, else_lines))
 
+        elif op == "choose_one":
+            # EB-118 sec.5.4. The screen, the co-op sync and the automation
+            # seam are all the base game's (ModalChoice wraps them); what is
+            # generated is the option list, the record, and the ladder.
+            modes = eff["modes"]
+            options = ",\n            ".join(
+                f"ModalChoice.CreateOption<{modal_option_class(card, i)}>(Owner)"
+                for i in range(len(modes)))
+            lines.append(
+                "var modeOptions = new List<CardModel>\n        {\n"
+                f"            {options},\n        }};")
+            lines.append("var modeIndex = await ModalChoice.SelectMode("
+                         "choiceContext, Owner, modeOptions);")
+            labels = ", ".join(f'"{cs_escape(m["label"])}"' for m in modes)
+            lines.append("ModalChoice.RecordChoice(this, modeIndex, "
+                         f"new[] {{ {labels} }}[modeIndex]);")
+            mode_bodies: list[list[str]] = []
+            for mode in modes:
+                stmts: list[str] = []
+                for e in mode["effects"]:
+                    _emit_branch_op(card, e, stmts, ctx, True,
+                                    {"pending": False}, spotlight_capable)
+                mode_bodies.append(stmts)
+            lines.append(_modes_block(card, mode_bodies))
+
     # Structural upgrade append (tier0 upgrades.py: card.effects.append).
     # It resolves after every base effect and before the repeat tail.
     if added_draw_upgrade(card):
@@ -4983,6 +5131,16 @@ def build_description(card: dict) -> str:
                     clause = "{IfUpgraded:show:" + upgraded + "|" + clause + "}"
                 parts.append(clause)
 
+        elif op == "choose_one":
+            # RAILS ("no new named keyword"): the face is ordinary card text.
+            # "Choose one:" is a sentence, not a keyword -- no [gold], no
+            # tooltip, nothing registered in KleeKeywords. Each mode prints
+            # its own authored label, which is that mode's card text and the
+            # same string its option class shows on the screen.
+            labels = " | ".join(m["label"].rstrip(".")
+                                for m in eff["modes"])
+            parts.append(f"Choose one: {labels}.")
+
         elif op == "discard":
             n = int(eff.get("amount", 1))
             if plain_discard_upgrade(card):
@@ -5530,6 +5688,17 @@ def emit(
         if eff["op"] in ("apply_aura", "swirl"):
             target_type = TARGET_CS[eff.get("target", "enemy")]
             break
+        # EB-118: a modal's aiming verb sits inside a mode body, so a card
+        # whose only enemy-facing effect is modal would declare TargetType.Self
+        # and be unaimable. blocked_reason has already refused modes that
+        # disagree, so the first mode that names a target names the card's.
+        if eff["op"] == "choose_one":
+            modal_target = next(
+                (t for t in (_mode_target_type(m) for m in eff["modes"])
+                 if t is not None), None)
+            if modal_target is not None:
+                target_type = modal_target
+                break
 
     vars_ = build_vars(card)
     body = build_body(card, profile)
@@ -5594,6 +5763,30 @@ def emit(
     # resolved it as effects would skip the card-played events the payoffs
     # read -- the reading the tech-debt audit (§5) refused sim-side, refused
     # here for the same reason. A marker-only row emits no hook at all.
+    # EB-118 sec.5.4: one option class per mode, in the card's own file.
+    # The screen takes CARDS, so each mode needs a face; ModalOptionCard
+    # supplies everything but the two authored strings. They live beside the
+    # card because a mode's text is that card's text -- the same reasoning
+    # that keeps a Sly rider on the card that prints it.
+    modal_option_classes = ""
+    modal_eff = next((e for e in card["effects"]
+                      if e.get("op") == "choose_one"), None)
+    if modal_eff is not None:
+        for i, mode in enumerate(modal_eff["modes"]):
+            label = cs_escape(mode["label"])
+            modal_option_classes += f'''
+/// <summary>Mode {i} of {card["id"]}. A face for the choose-a-card screen;
+/// never played, never in a pile, never in a pool.</summary>
+public sealed class {modal_option_class(card, i)} : ModalOptionCard
+{{
+    public override List<(string, string)>? Localization => new()
+    {{
+        ("title", "{label}"),
+        ("description", "{label}"),
+    }};
+}}
+'''
+
     sly_cs = ""
     if sly_riders(card):
         # _sly_view, not a plain effects swap: see its docstring. Under the
@@ -5980,7 +6173,7 @@ public sealed class {cls} : {interfaces}
         {upgrade_cs}
     }}
 {sly_cs}}}
-'''
+{modal_option_classes}'''
 
 
 # --- the driver ---------------------------------------------------------------

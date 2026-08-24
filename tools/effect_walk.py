@@ -53,14 +53,21 @@ from typing import Any, Iterator
 # that never resolve.
 BRANCH_KEYS = ("then", "else")
 
+# The modal (`choose_one`) shape, EB-118: `modes:` is a list of MODE DICTS,
+# each `{label:, effects:}` -- one level deeper than a branch, which is why
+# it cannot just join BRANCH_KEYS. Every mode body is printed text the player
+# can always reach, so it is a branch for every question this walk answers.
+MODES_KEY = "modes"
+MODE_EFFECTS_KEY = "effects"
+
 
 def iter_effects(effects: Any) -> Iterator[dict]:
-    """Yield every effect in a row's effect TREE, branches included.
+    """Yield every effect in a row's effect TREE, branches and modes included.
 
     Accepts an effects list or a whole card row (dict with `effects`), so a
     caller cannot silently pass the wrong thing and get an empty walk. The
-    conditional itself is yielded BEFORE its branches -- a scanner that keys
-    on `op == "conditional"` must still see it.
+    conditional (or the modal) itself is yielded BEFORE its sub-lists -- a
+    scanner that keys on `op == "conditional"` must still see it.
     """
     if isinstance(effects, dict) and "effects" in effects:
         effects = effects.get("effects")
@@ -70,6 +77,9 @@ def iter_effects(effects: Any) -> Iterator[dict]:
         yield fx
         for key in BRANCH_KEYS:
             yield from iter_effects(fx.get(key))
+        for mode in fx.get(MODES_KEY) or ():
+            if isinstance(mode, dict):
+                yield from iter_effects(mode.get(MODE_EFFECTS_KEY))
 
 
 def branch_effects(effects: Any) -> list[dict]:

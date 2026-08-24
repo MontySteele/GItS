@@ -166,6 +166,17 @@ def _active_effects(state: CombatState, effect_list: list[dict]):
                 continue
             branch = fx["then"] if ready else fx.get("else", [])
             yield from _active_effects(state, branch)
+        elif fx["op"] == "choose_one":
+            # EB-118: the pilot forecasts the mode it will actually take by
+            # asking the ENGINE's chooser rather than keeping a second copy
+            # of the rule -- the Track C.2 lesson the fanfare clamp above
+            # records. That chooser is a marked PLACEHOLDER today
+            # (effects._chosen_mode); the honest valuation is Phase-2
+            # POLICY_VERSION work. No shipped card is modal, so nothing
+            # scored today reaches this branch.
+            modes = fx[effects.MODES_KEY]
+            index = effects._chosen_mode(state, modes, None)
+            yield from _active_effects(state, modes[index]["effects"])
         else:
             yield fx
 

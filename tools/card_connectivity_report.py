@@ -262,6 +262,12 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # The branch node itself moves nothing; its `if:` is classified through
     # PREDICATE_HOOKS and its branches are walked by `iter_effects`.
     "conditional": [],
+    # EB-118 sec.5.4. Same shape as `conditional`: the node itself moves
+    # nothing and its mode bodies are walked by `iter_effects`. The
+    # difference is WHO picks, and that is recorded through CHOICE_OPS
+    # below rather than as a hook -- a mode is a play-time selection, not a
+    # state.
+    "choose_one": [],
     # --- energy ---
     "energy": [],
     "burst_energy": [_hook("private", "burst", "write")],
@@ -329,6 +335,7 @@ CHOICE_OPS: dict[str, str] = {
     "recall_to_draw": "queue",
     "remember_card": "pile",
     "grant_sly_this_turn": "pile",
+    "choose_one": "mode",
     "spotlight_designate": "mode",
     "conscript": "mode",
     "extra_card_screen": "pile",
