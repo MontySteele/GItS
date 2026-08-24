@@ -128,11 +128,16 @@ def test_big_badda_boom_prints_the_price_and_the_upgrade_buys_it_off():
     """EB-118 Phase 2 (packet §4.3): the first DRAFTABLE Ethereal carrier.
 
     The whole slice is two facts and this test is both of them: the base card
-    prints the downside and nothing else moved, and the upgrade removes the
-    downside and nothing else moved. If a later edit restores the number bump
-    beside the keyword, or lets the base damage drift, the card stops being a
-    one-variable read of STATIC_ETHEREAL_SHARE and R193's repricing trigger is
-    reading a different card than the one it was armed on.
+    prints the downside, and the upgrade removes the downside and moves NOTHING
+    else. If a later edit restores the number bump beside the keyword, or lets
+    the body differ between the faces, the card stops being a one-variable read
+    of STATIC_ETHEREAL_SHARE and R193's repricing trigger is reading a
+    different card than the one it was armed on.
+
+    The BODY is [USER]'s 2026-08-24 ruling (option A): 16, plus 8 to a random
+    other enemy when the 16 kills. It rides BOTH faces, which is exactly what
+    keeps the upgrade a one-variable read now that the card is no longer a
+    bare number.
     """
     base = loader.get_card("big_badda_boom")
     up = loader.get_card("big_badda_boom+")
@@ -143,10 +148,12 @@ def test_big_badda_boom_prints_the_price_and_the_upgrade_buys_it_off():
     assert up.ethereal is False
     assert up.is_ethereal is False
 
-    # Nothing else moves across the upgrade -- same cost, same single 16.
+    # Nothing else moves across the upgrade -- same cost, same body.
     assert base.cost == up.cost == 2
     assert base.effects == up.effects == [
         {"op": "damage", "amount": 16, "target": "enemy"},
+        {"op": "conditional", "if": "killed_target",
+         "then": [{"op": "damage", "amount": 8, "target": "random_enemy"}]},
     ]
 
     # ORTHOGONAL TO is_junk (the state.py note, [USER] 2026-08-23): an Ethereal

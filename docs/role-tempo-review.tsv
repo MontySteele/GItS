@@ -8,7 +8,7 @@ klee	fish_flavored_bait	common	demolition	enabler	frontload	frontload		early	ear
 klee	quick_fuse	common	demolition	glue	utility	utility		early,mid,late	early,late			bomb			
 klee	double_pop	common	demolition	enabler	frontload	frontload		early	early		bomb			frontload	frontload
 klee	ammo_scavenging	common	demolition	glue	frontload,velocity	frontload,velocity		early	early		bomb			frontload	frontload
-klee	big_badda_boom	common	demolition,generic	glue	frontload	frontload		mid	early						
+klee	big_badda_boom	common	demolition,generic	glue	frontload	frontload		mid,late	early						
 klee	blast_radius	common	generic	glue	frontload,velocity	frontload,velocity		early	early	aoe					
 klee	chain_fuse	uncommon	demolition	enabler	frontload	frontload		early	early		bomb			frontload	frontload
 klee	careful_arrangement	uncommon	demolition	glue	frontload	frontload		mid	early		bomb			frontload	frontload

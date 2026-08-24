@@ -26,12 +26,44 @@
    effects: [{op: place_bomb, amount: 2, target: enemy, bomb_damage: 4}]}
 - {id: ammo_scavenging, name: "Ammo Scavenging", cost: 1, type: skill, rarity: common, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: glue, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 5}, {op: draw, amount: 1}]}
-# EB-118 PHASE 2 (packet §4.3, [USER]-approved direction 2026-08-23): the second of the
-# three direct faces to gain a readable price. The base damage does NOT move -- the
-# price is added FIRST and alone, so the later read is one variable. Ethereal is the
-# printed downside and the upgrade BUYS IT OFF (`remove: ethereal`, klee-upgrades.yaml),
-# which is why the old `{damage: +4}` delta is gone rather than kept beside it: one
-# upgrade axis per card (upgrade-conventions.md row 6).
+# EB-118 PHASE 2 (packet §4.3): the second of the three direct faces to gain a readable
+# price. BODY RULED BY [USER] 2026-08-24, option A of a reviewed slate, REPLACING the
+# 2026-08-23 direction this row shipped with. What was wrong with that one, in
+# [USER]'s terms: 16@2 plus Ethereal is a pure TAX, and an upgrade that only removes the
+# tax merely refunds it -- neither face has anything to decide, and "2 energy for 20 just
+# sounds boring". So the price stays and the card is given something to be ABOUT: a
+# rider that pays off exactly when the printed number does its job.
+# THE RIDER IS EXISTING GRAMMAR, NOT NEW MACHINERY. `{op: conditional, if: killed_target,
+# then: [...]}` ships on sparkly_explosion (this sheet) and showstopper (Furina's), in
+# both engines; the branch is an ordinary `damage` op, which is why no loader, engine or
+# codegen vocabulary moves for it. Packet §4.3's "existing grammar only" holds.
+# "A RANDOM OTHER ENEMY" IS THE CORPSE BEING DEAD, NOT A NEW TARGET SPEC. The branch
+# resolves AFTER the 16 has landed and only when it killed, so the target is already out
+# of the living-enemy population both engines draw `random_enemy` from -- tier0
+# `_pick_targets` filters `state.living_enemies`, and the C# emits
+# `.TargetingRandomOpponents(CombatState!)`, whose population is the same live accessor
+# (`HittableEnemies`) the sim iterates. That is FIRST-PARTY VERIFIED, not inferred: the
+# game's own shipped API docs say `HittableEnemies` is what "AOE and random attack
+# targeting" draws from, and that a creature "is not hittable if it's dead". The printed
+# "other" is therefore ENFORCED, not merely intended, and no `random_other_enemy` spec
+# was invented to say it.
+# NO OTHER ENEMY ALIVE: killing the last enemy leaves the splash nobody to reach. In
+# tier0 that is PROVEN and pinned -- `_pick_targets` returns an empty list and the damage
+# op resolves into nothing, no error and no self-hit. In the mod it is ASSUMED, on the
+# same assumption TWELVE ALREADY-SHIPPED CARDS make: every `random_enemy` damage op the
+# generator has ever emitted delegates to `.TargetingRandomOpponents(CombatState!)`
+# unguarded, and da_da_da / rapid_fire / jumpy_dumpty (a BASIC card) all reach the empty
+# pool the moment an early hit kills the last body. This row adds NO new exposure -- it
+# is the thirteenth caller of a path the first twelve already depend on. What is NOT
+# written down anywhere is why that path is safe: the bomb and aura emitters guard their
+# empty case because THEY call `Rng.NextItem`, which throws on an empty sequence, but the
+# damage emitter hands the job to the game's own builder and is silently trusted. That
+# asymmetry is an undocumented load-bearing assumption and is filed as an engineering
+# finding, not settled here.
+# Ethereal is the printed downside and the upgrade BUYS IT OFF (`remove: ethereal`,
+# klee-upgrades.yaml), which is why the old `{damage: +4}` delta is gone rather than kept
+# beside it: one upgrade axis per card (upgrade-conventions.md row 6). The numbers do NOT
+# move on upgrade -- 16/8 on both faces.
 # FIRST DRAFTABLE CARRIER OF THE KEYWORD. The `ethereal:` field, the remove-Ethereal
 # upgrade grammar and the C# CardKeyword.Ethereal reuse all landed INERT with the
 # Route-1 infrastructure set; this row is what arms them. Two consequences ride with
@@ -39,14 +71,24 @@
 # the drafter's PROPOSED bump comes due at integration; and R193's repricing trigger
 # arms -- 0.6 is PROVISIONAL until this card has been read (trigger note at the
 # constant in tier05/draft.py).
-# NOT MOVED, deliberately: id, rarity, role, archetypes, solve, tempo_band. Ethereal is
-# a LIFECYCLE keyword -- it decides whether the printed effect resolves at all, not what
-# problem the card solves. A 2-cost 16 that dies in an unaffordable hand still solves
-# frontload, still lands mid-fight / early-run, still glues demolition and generic.
+# TEMPO_BAND MOVED, AND NO HAND PUT IT THERE: fight [mid] -> [mid, late], written by
+# `suggest_role_tempo_tags.py --land` and re-verified by `--check`. The rule that moved
+# it is `role_tempo.fight_bands`, which bands a card `late` when any effect sits behind
+# a gate (`gated_effect`, set by the walk the moment an op is nested in a conditional).
+# A rider that pays only on a kill IS such a gate, so the classifier is right: the card
+# is worth more in the fight-phase where things are close enough to death to die. It is
+# now the band sparkly_explosion already carries for the same predicate. `solve` did NOT
+# move -- a conditional splash is more of the same frontload, not a different problem --
+# and the classifier agrees, so the review TSV lists 0 rows diverging from the authored
+# solve.
+# NOT MOVED, deliberately: id, rarity, role, archetypes, solve. Ethereal is a LIFECYCLE
+# keyword -- it decides whether the printed effect resolves at all, not what problem the
+# card solves. A 2-cost 16 that dies in an unaffordable hand still solves frontload,
+# still glues demolition and generic.
 # Role and archetype movement is Phase-3-fenced (packet §3) and R199's first guardrail
 # forbids a relabel whose only effect is to improve a count.
-- {id: big_badda_boom, name: "Big Badda Boom", cost: 2, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition, generic], role: glue, ethereal: true,
-   effects: [{op: damage, amount: 16, target: enemy}]}
+- {id: big_badda_boom, name: "Big Badda Boom", cost: 2, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [mid, late], run: [early]}, archetypes: [demolition, generic], role: glue, ethereal: true,
+   effects: [{op: damage, amount: 16, target: enemy}, {op: conditional, if: killed_target, then: [{op: damage, amount: 8, target: random_enemy}]}]}
 - {id: blast_radius, name: "Blast Radius", cost: 1, type: attack, rarity: common, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
    effects: [{op: damage, amount: 9, target: all_enemies}, {op: discard, amount: 1, select: chosen}]}
    # EB-118 sec.4.3 (2026-08-24): a READABLE SECOND PRICE, existing grammar
