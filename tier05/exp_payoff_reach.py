@@ -31,6 +31,24 @@ Two legs, exactly as §6.4 states them:
   ratified cell. Reported against the aimed band's bracket, and it is NOT part
   of the P5 pass/fail (§6.2: every possible drafter lands inside that bracket).
   It is what grades Q-A: realized reach against the blind-draft offer floor.
+  It also carries `T3`'s membership audit — see below.
+
+ABOVE THE CANONICAL SCALE, THIS READER REPORTS AND NEVER TRIPS (§6.1, amended
+at `M28` / R196). `TOP` is the observed maximum of nine canonical archetypes
+drawn from five base-game pools, not a boundary of the possible, and the
+authored sheets read above it on both axes. So a supply above the canonical
+ceiling of 3, an offer above TOP's 0.0214, and a realized reach above that
+same ceiling are each printed at their RAW VALUE plus their MULTIPLE of the
+canonical figure, to one decimal. No categorical band is created above TOP on
+either axis. `REACH_CEILING` is a reporting DIVISOR here and nothing else.
+
+`T3` IS CLASSIFIER INTEGRITY AND CONTAINS NO REACH QUANTITY (§6.5, same
+amendment). Every deck card reconstructs to a reward-pool base id under
+upgrade normalization; each such id's on-plan payoff membership is compared
+between the deck-side and the static reading, both through
+`draft.is_on_plan_payoff`; `T3` fires iff any id's membership differs. The two
+sets that do not reconstruct — anchor-shield cards and external-source on-plan
+payoffs — are excluded from the comparison and reported on their own lines.
 
 The registered run is 600/arm at seed 11, hunter, assigned, realistic — the
 canonical cell (§6.5). Control C1 is the two `real_*` anchors and runs in the
@@ -50,7 +68,7 @@ import statistics
 import sys
 
 from tier0 import constants as C
-from tier0.content import loader
+from tier0.content import loader, upgrades
 from tier05 import cells, draft, rewards
 
 # The nine arms of §6.5, in roster ship order. One per ruled aim, no more and
@@ -94,9 +112,19 @@ OFFER_INTERVALS: dict[str, tuple[float, float]] = {
 # §6.5 P5(a): supply tolerance, one card either way.
 SUPPLY_TOLERANCE = 1
 
-# §6.5 tripwires T2 / T3.
+# §6.5 tripwire T2.
 DECK_SIZE_WINDOW = (12, 30)
+
+# The canonical supply ceiling. Since `M28` (R196) this is a REPORTING DIVISOR
+# and nothing else: §6.5's amended `T3` contains no reach quantity at all, and
+# realized reach above this figure is reported at its raw value and its
+# multiple of it (§6.1), never tripped. It is deliberately still read from
+# `BANDS["TOP"]` so the divisor and the band cannot drift apart.
 REACH_CEILING = BANDS["TOP"][1]
+
+# §6.1's other canonical figure: TOP's offer. Same role — a divisor for the
+# above-scale report, never a threshold.
+OFFER_CEILING = BANDS["TOP"][0]
 
 # The rarity `RARITY_ODDS` favours most -- the 0.60 slot, the left end of the
 # 12x spread §6.3's Q-B reasoning names. Read live, never hard-coded.
@@ -177,13 +205,44 @@ def grade_offer(offer: float, band: str) -> bool:
     return lo <= offer < hi or (band == "HIGH" and offer == hi)
 
 
+def above_scale(value: float, canonical: float) -> str:
+    """§6.1's reporting rule for a figure above the canonical scale.
+
+    "An archetype whose offer exceeds TOP's 0.0214, or whose supply exceeds
+    the canonical ceiling of 3, is reported at its raw value and its multiple
+    of the canonical figure, per arm, with the multiple printed to one decimal
+    place." The raw value is printed by the caller in its own column; this
+    returns the multiple, or the empty string when the figure is inside the
+    canonical scale and there is nothing to report.
+
+    No band, no bucket, no label: a bucketed scale invented after the readings
+    exist would be a design band authored against seen data, and the ratio
+    carries the whole finding while inventing nothing.
+    """
+    if not canonical or value <= canonical:
+        return ""
+    return f"{value / canonical:.1f}x"
+
+
 def band_of(offer: float) -> str:
     """Which band an offer figure actually lands in -- reported beside the
-    aim so a miss says WHERE it went, not only that it went."""
+    aim so a miss says WHERE it went, not only that it went.
+
+    ABOVE THE CANONICAL SCALE THERE IS NO BAND (§6.1, amended at `M28`/R196).
+    The four bands are order statistics over nine canonical archetypes and
+    `TOP` is that sample's observed maximum, not a boundary of the possible;
+    inventing a fifth label for what sits above it would be a design band
+    authored against seen data. So an offer above `TOP` is labelled by its
+    MULTIPLE of `TOP` -- `2.9x TOP`, to one decimal -- which is a
+    measurement, not a category. `TOP` itself is still a band and still
+    named.
+    """
     for name, (lo, hi) in OFFER_INTERVALS.items():
         if lo <= offer < hi:
             return name
-    return "TOP+" if offer > BANDS["TOP"][0] else "TOP"
+    if offer > OFFER_CEILING:
+        return f"{offer / OFFER_CEILING:.1f}x TOP"
+    return "TOP"
 
 
 # ---------------------------------------------------------------------------
@@ -201,6 +260,97 @@ def deck_reach(deck: list, archetype: str) -> tuple[int, int]:
     return draft._generic_core_counts(deck, archetype)
 
 
+def base_id(card_id: str) -> str:
+    """The printed card an id reconstructs to -- §6.5's upgrade normalization.
+
+    `<id>+` IS the upgraded form throughout tier 0.5 (`upgrades.SUFFIX`, R20's
+    one upgrade convention), so normalization is exactly stripping it. Stated
+    as its own function because `T3` is phrased over base ids and a reader
+    must be able to see the whole of what "normalized" means.
+    """
+    return (card_id[:-len(upgrades.SUFFIX)]
+            if card_id.endswith(upgrades.SUFFIX) else card_id)
+
+
+def _is_anchor_shielded(card) -> bool:
+    """Is this a card the anchor tag shield strips `archetypes` from?
+
+    §6.5 names this set `draft._anchor_tag_shield`. There is no function by
+    that name: the shield is R121's `draft.ANCHOR_TAG_SHIELD_CHARACTER`
+    applied in `draft.behavioural_archetypes` and `draft._core_advance_view`,
+    and the predicate it applies is the one written out here. The registration
+    names the SET correctly and the symbol loosely; the set is what `T3`
+    excludes, so the set is what this reads. Read off `draft`, never
+    re-hard-coded, so a change to the shield reaches this exclusion.
+    """
+    return (card.character == draft.ANCHOR_TAG_SHIELD_CHARACTER
+            and bool(card.archetypes))
+
+
+def membership_audit(decks: list[list], character: str, archetype: str,
+                     pool: dict[str, list] | None = None) -> dict:
+    """§6.5's `T3`, as amended at `M28` (R196). NO reach quantity enters it.
+
+    For every card in every finished deck of one arm, reconstruct a
+    reward-pool base id under `base_id` above, then compare that id's on-plan
+    payoff membership as classified on the DECK side against its membership in
+    the arm's STATIC pool. `T3` fires iff any base id's membership differs.
+
+    Both sides call `draft.is_on_plan_payoff` -- the one registered predicate
+    -- so a disagreement cannot be a threshold judgement, a sampling artefact
+    or a design finding. It can only mean the two legs are counting different
+    objects under one predicate, which is the drift the shared predicate
+    exists to prevent. The deck side reads the card as the deck holds it
+    (upgraded form included) and the static side reads the printed pool row;
+    that is the whole content of "after upgrade normalization", and it is why
+    an upgrade that quietly moved `role` or `archetypes` would show up here.
+
+    Two sets of cards do NOT reconstruct and are therefore NOT `T3` inputs.
+    They are counted and returned so the printer can put them on their own
+    lines, because silently dropping them is how an integrity check learns to
+    pass:
+
+      * `anchor_shield` -- cards the R121 anchor tag shield strips
+        `archetypes` from, by design. Their deck-side membership is a
+        deliberate blindness, not a drift.
+      * `external` -- ON-PLAN PAYOFFS that entered the deck from outside the
+        reward pool: event grants, tokens, guest stars, starters. They have
+        no static row to be compared against. Non-payoff cards from outside
+        the pool are simply not inputs and are not reported: they carry no
+        membership claim for the two legs to disagree about.
+    """
+    if pool is None:
+        pool = rewards.character_pool(character)
+    static_by_id = {c.id: c for cards in pool.values() for c in cards}
+
+    disagree: dict[str, tuple[bool, bool]] = {}
+    anchor_shield: set[str] = set()
+    external: set[str] = set()
+    compared: set[str] = set()
+    for deck in decks:
+        for card in deck:
+            if _is_anchor_shielded(card):
+                anchor_shield.add(base_id(card.id))
+                continue
+            bid = base_id(card.id)
+            row = static_by_id.get(bid)
+            if row is None:
+                if draft.is_on_plan_payoff(card, archetype):
+                    external.add(bid)
+                continue
+            compared.add(bid)
+            deck_member = draft.is_on_plan_payoff(card, archetype)
+            static_member = draft.is_on_plan_payoff(row, archetype)
+            if deck_member != static_member:
+                disagree[bid] = (deck_member, static_member)
+    return {
+        "compared": sorted(compared),
+        "disagree": dict(sorted(disagree.items())),
+        "anchor_shield": sorted(anchor_shield),
+        "external": sorted(external),
+    }
+
+
 def sim_leg(cell) -> dict:
     """Realized reach for one arm at one cell. Runs the cell."""
     a = cell.arm()
@@ -216,6 +366,7 @@ def sim_leg(cell) -> dict:
         "reach_sd": statistics.pstdev(reach) if len(reach) > 1 else 0.0,
         "held_none": sum(1 for p in reach if p == 0) / len(reach),
         "max_reach": max(reach),
+        "audit": membership_audit(decks, cell.character, cell.archetype),
     }
 
 
@@ -244,19 +395,28 @@ def tripwires(cell, static: dict, sim: dict | None) -> list[str]:
             fired.append(f"T2: {arm} mean deck size {sim['decksize']:.1f} is "
                          f"outside {lo}-{hi}; the band floors would be "
                          "extrapolated, not read")
-        # The registered statistic is the ARM's realized reach -- §6.4 leg 2's
-        # per-arm figure, which is the mean at sim["reach"], the same number
-        # the printer grades and the same grain T2 reads deck size at. It is
-        # NOT the per-run maximum: max_reach is one deck, and one deck is not
-        # an arm. Reading the max here halted the sprint on ordinary data
-        # (four arms fired at 20 runs/arm with maxima 8/5/7/11 while every
-        # arm's mean sat inside the ceiling). A per-deck outlier check may be
-        # wanted, but it is a DISTINCT tripwire and goes back through the
-        # registration rather than riding under T3's wording.
-        if sim["reach"] > REACH_CEILING:
-            fired.append(f"T3: {arm} realized reach {sim['reach']:.2f} "
-                         f"exceeds the TOP supply ceiling {REACH_CEILING} — "
-                         "an instrument fault, not a finding")
+        # T3, as AMENDED at `M28` (R196). No reach quantity enters it: reach
+        # above the canonical ceiling is what the authored sheets print, so it
+        # is REPORTED with its multiple (§6.1) and never tripped. What fires
+        # here is classifier integrity — a reward-pool base id whose on-plan
+        # payoff membership differs between the deck-side and the static
+        # reading, after upgrade normalization and after the two excluded sets
+        # are taken out. That cannot be produced by ordinary data.
+        #
+        # The premise the amendment replaced, kept as a warning: the tripwire
+        # used to fire on realized reach above 3. It halted the sprint on
+        # ordinary content, first on the per-deck maximum (a defect, fixed
+        # 2026-08-13) and then on the arm mean (the premise itself, which the
+        # static leg's own supplies of 3–14 contradict).
+        for bid, (deck_member, static_member) in sim["audit"]["disagree"].items():
+            fired.append(
+                f"T3: {arm} base id {bid!r} classifies as "
+                f"{'on-plan payoff' if deck_member else 'not a payoff'} on the "
+                f"deck side and "
+                f"{'on-plan payoff' if static_member else 'not a payoff'} in "
+                "the static pool — the two legs are counting different "
+                "objects under one predicate, an instrument fault, not a "
+                "finding")
     return fired
 
 
@@ -285,30 +445,40 @@ def dedupe_fired(fired: list[str]) -> list[str]:
 
 def _print_static(rows: dict[tuple[str, str], dict]) -> None:
     print(f"\n  LEG 1 — STATIC (sheets only; no run, no stamp)")
-    print(f"  {'arm':>20} {'aim':>7} {'supply':>7} {'P5a':>5} "
-          f"{'offer':>9} {'lands':>7} {'P5b':>5} {'cf offer':>9} "
-          f"{'cf delta':>9}")
+    print(f"  {'arm':>20} {'aim':>7} {'supply':>7} {'x sup':>9} {'P5a':>5} "
+          f"{'offer':>9} {'lands':>9} {'P5b':>5} "
+          f"{'cf offer':>9} {'cf delta':>9}")
     for arm in ARMS:
         s = rows[arm]
         band = AIMS[arm]
         a_ok = "PASS" if grade_supply(s["supply"], band) else "FAIL"
         b_ok = "PASS" if grade_offer(s["offer"], band) else "FAIL"
-        print(f"  {'/'.join(arm):>20} {band:>7} {s['supply']:>7d} {a_ok:>5} "
-              f"{s['offer']:>9.4f} {band_of(s['offer']):>7} {b_ok:>5} "
+        print(f"  {'/'.join(arm):>20} {band:>7} {s['supply']:>7d} "
+              f"{above_scale(s['supply'], REACH_CEILING):>9} {a_ok:>5} "
+              f"{s['offer']:>9.4f} {band_of(s['offer']):>9} {b_ok:>5} "
               f"{s['cf_offer']:>9.4f} {s['cf_delta']:>+9.4f}")
     print("\n  P5(a) supply within the band ceiling +/- 1 card; P5(b) offer in "
           "the band's\n  half-open interval. Missing BOTH is the redesign "
           "trigger (§6.5); missing one\n  is reported, not triggered. cf = the "
           "Q-B (B-ii) counterfactual: same payoff\n  COUNT, relabelled to "
           f"{FAVOURED_RARITY}.")
+    print(f"\n  ABOVE THE CANONICAL SCALE (§6.1). Each axis is reported at its "
+          f"RAW value plus its\n  MULTIPLE of the canonical figure, to one "
+          f"decimal: `x sup` against the supply\n  ceiling of {REACH_CEILING}, "
+          f"and `lands` against TOP's offer of {OFFER_CEILING} once the\n  "
+          "figure leaves the banded range. TOP is the observed maximum of nine "
+          "canonical\n  archetypes, not a boundary of the possible, and NO "
+          "categorical band is created\n  above it on either axis — a bucket "
+          "invented after the readings exist would be a\n  design band "
+          "authored against seen data.")
 
 
 def _print_sim(rows: dict[tuple[str, str], dict],
                static: dict[tuple[str, str], dict]) -> None:
     print(f"\n  LEG 2 — SIM (realized on-plan reach; reported, not P5-graded)")
     print(f"  {'arm':>20} {'aim':>7} {'deck':>6} {'on-plan':>8} "
-          f"{'reach':>7} {'floor':>7} {'x floor':>8} {'ceil':>5} "
-          f"{'none':>6} {'win':>7}")
+          f"{'reach':>7} {'x ceil':>7} {'floor':>7} {'x floor':>8} "
+          f"{'ceil':>5} {'none':>6} {'win':>7}")
     for arm in ARMS:
         if arm not in rows:
             continue
@@ -316,14 +486,48 @@ def _print_sim(rows: dict[tuple[str, str], dict],
         floor = BANDS[band][0] * r["decksize"]
         mult = r["reach"] / floor if floor else float("inf")
         print(f"  {'/'.join(arm):>20} {band:>7} {r['decksize']:>6.1f} "
-              f"{r['on_plan']:>8.2f} {r['reach']:>7.2f} {floor:>7.3f} "
-              f"{mult:>8.1f} {BANDS[band][1]:>5d} "
+              f"{r['on_plan']:>8.2f} {r['reach']:>7.2f} "
+              f"{above_scale(r['reach'], REACH_CEILING):>7} "
+              f"{floor:>7.3f} {mult:>8.1f} {BANDS[band][1]:>5d} "
               f"{r['held_none']:>6.1%} {r['win']:>6.1%}")
     print("\n  floor = the aimed band's blind-draft offer x the observed deck "
           "size; the\n  bracket's right edge is the band's supply ceiling. "
           "Q-A's registered\n  prediction: reach > floor in all nine arms, "
           ">= 3x floor everywhere, and\n  >= 1.0 in the three HIGH arms. "
           "Grading is blind-first and lives in the\n  registration, not here.")
+    print(f"  x ceil = realized reach as a MULTIPLE of the canonical supply "
+          f"ceiling ({REACH_CEILING}),\n  §6.1's reporting rule, printed only "
+          "where reach exceeds it. Since `M28` (R196)\n  reach above that "
+          "ceiling is REPORTED and never tripped: it is what the authored\n"
+          "  sheets print, not evidence of miscounting.")
+    _print_exclusions(rows)
+
+
+def _print_exclusions(rows: dict[tuple[str, str], dict]) -> None:
+    """`T3`'s two excluded sets, on their own lines, as §6.5 requires.
+
+    They are printed whether or not `T3` fires. An integrity condition that
+    hides what it declined to look at is not one: these two lines are how a
+    reader sees the size of the hole in the comparison, and a swelling
+    `external` line is itself information even though it can never fire `T3`.
+    """
+    print("\n  T3 EXCLUSIONS — cards that do not reconstruct to a reward-pool "
+          "base id and\n  are therefore not T3 inputs (§6.5). Reported, never "
+          "tripped.")
+    for arm in ARMS:
+        if arm not in rows:
+            continue
+        a = rows[arm]["audit"]
+        print(f"  {'/'.join(arm):>20}  compared {len(a['compared']):>3} ids · "
+              f"anchor-shield {len(a['anchor_shield']):>2}"
+              f"{' ' + ', '.join(a['anchor_shield']) if a['anchor_shield'] else ''}")
+        print(f"  {'':>20}  external-source on-plan payoffs "
+              f"{len(a['external']):>2}"
+              f"{' ' + ', '.join(a['external']) if a['external'] else ''}")
+    print("  anchor-shield = R121 strips `archetypes` from these by design. "
+          "external-source =\n  on-plan payoffs that entered from outside the "
+          "reward pool (event grants, tokens,\n  guest stars, starters), which "
+          "have no static row to be compared against.")
 
 
 def main(argv: list[str] | None = None) -> int:

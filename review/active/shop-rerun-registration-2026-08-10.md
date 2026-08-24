@@ -3,8 +3,11 @@
 > **Status: DRAFT. Nothing here has been run.** No number in this document was
 > measured. The instrument was repaired and the shop world was changed on
 > 2026-08-10; this packet asks to re-run the measurement in the new world.
-> **That world is `RT11/D14/P7/C9`, `C9` including the X7/X8 rarity erratum
-> — §2 enumerates it in full, and it is the world the re-run measures.**
+> **That world is `RT12/D14/P7/C11` — §2 enumerates it in full, and it is the
+> world the re-run measures.** (Re-stamped a third time 2026-08-24 on `M14`'s
+> own instruction, after the settle-first batch emptied: `RT11/D14/P7/C9` →
+> `RT12/D14/P7/C11`. `C9`'s X7/X8 rarity erratum is still in the world; it is
+> now inside `C11` rather than at the stamp's edge.)
 > The predictions in §5 are deliberately blank — they are [USER]'s to fill in
 > before any seed is run.
 
@@ -67,7 +70,7 @@ events rather than by asserting that none occurred.
 
 ## 2. One window, one world
 
-**The registered world is `RT11/D14/P7/C9`, including the X7/X8 rarity
+**The registered world is `RT12/D14/P7/C11`, still including the X7/X8 rarity
 erratum.** In plain English, and as the standing requirement for this
 re-run: this is the world the re-run measures. Everything listed below is
 inside one window, and a run of this instrument that does not report this
@@ -169,6 +172,53 @@ What that one window contains, in full:
    at the bump — `review/active/sitting-reads-2026-08-13.md` — is the table to
    author the `§5` predictions against.
 
+8. **`RUNTEMPLATE_VERSION` 12** (the window-2 correctness batch, `EB-104`,
+   2026-08-13 — five run-layer fixes under one coordinated bump). Two of them
+   are this cell's own subject:
+   - **`EB-102` — the shop finally receives the run's Featured Banner.**
+     `RunContext.resolve_shop` omitted `banner=`, so the shop could sell a
+     5-star the banner had excluded from every reward screen. This is the
+     engineering blocker `M14` named, and it landed **before** this re-run
+     exactly as `EB-104`'s first ordering constraint required. It changes which
+     card `rng.choice` lands on, so **every §4.7 shop-channel figure taken
+     under `C9` renumbers** — including any figure quoted while this packet was
+     stamped `RT11`.
+   - **`EB-112` — event card-reward screens roll rarity through
+     `RARITY_ODDS`** like every other reward screen: 20.0% Rare per offer
+     becomes 5.0%, on three shipped options in acts 1 and 2, for every
+     character. `RARITY_ODDS` itself is unmoved; only the site that failed to
+     consult it.
+   The other three — `EB-103` (potion capacity derived from held relics on
+   read), `EB-110` (the rest-site heal floors where it rounded) and `EB-111`
+   (Book of Five Rings counts event deck-adds) — sell nothing, but they change
+   how far a run gets and therefore how many shops it visits.
+9. **`CONSTANTS_VERSION` 10, then 11.** `C10` is the tier0 engine half of the
+   same window-2 batch: seven combat-kernel fixes, one of which (`EB-96`, a
+   sleeping enemy is a side-turn participant) moves a frozen
+   calibration-battery number and two Act-1 bodies. `C11` is the
+   Artifact-coexistence + Kokomi-rotation ruling of 2026-08-23. Its Artifact
+   half is C#-only and moves **no** sim number. Its **Kokomi half is engine
+   behaviour and does move numbers**: a Status or a Curse is never one of her
+   cards, so she pays no Charge and no Burst particle for exhausting one, and
+   every pre-`C11` Kokomi combat number is archive. Kokomi (priest) is one of
+   the three profiles this cell runs.
+10. **`EB-69`, the Kokomi pool fill** (R198, 2026-08-23) — **content, carrying
+    no version integer of its own, and the largest single change to what this
+    cell measures.** Fourteen cards and fourteen upgrade rows land on Kokomi's
+    sheet, 62 → 76 rows, and her draftable reward pool goes **56 → 70 cards**
+    (common / uncommon / rare, 27/20/9 → 31/26/13). The character shelf and the
+    companion channel compete for one purse, so this changes what the shelf
+    offers at every Kokomi visit. **No pre-fill Kokomi number is a cheaper
+    sample of this one.** It is enumerated here precisely because it carries no
+    stamp: leaving it to the stamp to imply would leave it invisible.
+
+**The window is now SETTLED, and this is the third and final re-stamp.**
+`M14`'s batch is empty as of 2026-08-24: `EB-70` left it at R195 ([USER] paused
+the starter-offer retune pending the Klee-rework design sweep) and `EB-69` was
+the last item to land. Everything above is inside one settled world. What
+remains on the `M14` row is **entering the ruled §5 slate and then the
+countersign** — in that order, and neither is done here.
+
 The floor restoration, the instrument repair and the rarity erratum land
 together, in the same commit range, under one stamp (`CONSTANTS_VERSION` 9).
 The pilot change is a separate stamp component (`POLICY_VERSION`), and it
@@ -202,6 +252,16 @@ one change to the *world*), stated without softening:
   before 2026-08-11 is a different world.
 - The **Nimble repair** is not a world change for this cell at all: the three
   profiles it runs are byte-identical across it on the same seeds.
+- The **window-2 batch, `C11` and `EB-69`** (items 8–10) are world changes
+  outside the channel, on the same footing as the enchant events and `P7`:
+  identical in both arms, so none of them can create or hide an arm
+  difference, and all of them named rather than left to the stamp. `EB-102` is
+  the one exception to "outside the channel" — it is inside it, and it is a
+  **repair to the shop this cell measures**, landed before the run precisely so
+  the run does not measure the defect. The cost is the same cost item 4 and
+  item 5 carry, one size larger: this cell's absolute numbers are comparable to
+  no earlier read at all, and the within-cell arm contrast that Q1–Q4 ask is
+  unaffected because both arms sit in one world.
 
 Landing them apart would be worse, not better. It would mean either measuring
 the new world with a broken instrument, or measuring the old world with the
@@ -272,10 +332,10 @@ the channel should be re-priced or re-stocked. That is a design call and it is
   only difference between the two arms; same seeds, same characters, same
   policy, same everything else.
 - Characters: unchanged — `klee`/demolition, `furina`/salon, `kokomi`/priest.
-- World: **`RT11/D14/P7/C9`**, `C9` including the X7/X8 rarity erratum — the
-  world enumerated in §2. The report must carry the full run-cell stamp
-  (`RT/D/P/C`) or it is not citable (R68), and it must read `RT11/D14/P7/C9`
-  or it is not *this* registration's measurement.
+- World: **`RT12/D14/P7/C11`** — the world enumerated in §2, the X7/X8 rarity
+  erratum included. The report must carry the full run-cell stamp (`RT/D/P/C`)
+  or it is not citable (R68), and it must read `RT12/D14/P7/C11` or it is not
+  *this* registration's measurement.
 - Every output line the instrument printed before the repair still prints, so
   the pre-existing reads stay reproducible. The new reads are printed on lines
   labelled `NEW`.
