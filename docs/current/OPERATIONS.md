@@ -36,8 +36,8 @@ Tier-0 combat balance (Monte Carlo, 7-axis scorecard, anchor
 `ref_ironclad/starter = 3.0`):
 
 ```sh
-PYTHONPATH=. python3 -m tier0.harness.runner --character klee --deck reaction_package --pilot reaction --fights 1000
-PYTHONPATH=. python3 -m tier0.harness.runner --score --character klee --deck demolition_package
+PYTHONPATH=. python3 -m tier0.harness.runner --character klee --deck reaction_weighted --pilot reaction --fights 1000
+PYTHONPATH=. python3 -m tier0.harness.runner --score --character klee --deck demolition_weighted
 PYTHONPATH=. python3 -m tier0.harness.runner --report-character --character furina --fights 1000
 ```
 
