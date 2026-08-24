@@ -49,17 +49,24 @@
 # was invented to say it.
 # NO OTHER ENEMY ALIVE: killing the last enemy leaves the splash nobody to reach. In
 # tier0 that is PROVEN and pinned -- `_pick_targets` returns an empty list and the damage
-# op resolves into nothing, no error and no self-hit. In the mod it is ASSUMED, on the
-# same assumption TWELVE ALREADY-SHIPPED CARDS make: every `random_enemy` damage op the
-# generator has ever emitted delegates to `.TargetingRandomOpponents(CombatState!)`
-# unguarded, and da_da_da / rapid_fire / jumpy_dumpty (a BASIC card) all reach the empty
-# pool the moment an early hit kills the last body. This row adds NO new exposure -- it
-# is the thirteenth caller of a path the first twelve already depend on. What is NOT
-# written down anywhere is why that path is safe: the bomb and aura emitters guard their
-# empty case because THEY call `Rng.NextItem`, which throws on an empty sequence, but the
-# damage emitter hands the job to the game's own builder and is silently trusted. That
-# asymmetry is an undocumented load-bearing assumption and is filed as an engineering
-# finding, not settled here.
+# op resolves into nothing, no error and no self-hit. In the mod it is FIRST-PARTY
+# GUARDED, and that is DECOMPILE-VERIFIED against the shipped `sts2.dll` v0.107.1
+# (ilspycmd 8.2) rather than assumed: `AttackCommand.Execute` rebuilds `validTargets`
+# from the living creatures on every hit and then runs `if (validTargets.Count == 0 &&
+# combatState.IsLiveCombat()) break;` BEFORE it ever reaches the `Rng.NextItem` call --
+# and `CombatState.IsLiveCombat()` returns literally `true`, so nothing about that break
+# is conditional. The empty pool ends the hit loop; it does not throw, does not self-hit
+# and does not re-hit the corpse. ONE REFINEMENT, recorded so nobody rediscovers it: a
+# throw path on empty targets DOES exist, but only inside the duplicate-exclusion
+# recheck under `allowDuplicates: false` -- and no generator-emitted card passes that
+# argument, all thirteen callers taking the `true` default. This row adds NO new
+# exposure -- it is the thirteenth caller of a path the first twelve already depend on,
+# and every one of those twelve (da_da_da / rapid_fire / jumpy_dumpty, a BASIC card,
+# among them) reaches the empty pool the moment an early hit kills the last body. The
+# asymmetry that made the path LOOK undocumented is real and benign: the bomb and aura
+# emitters guard their empty case because THEY call `Rng.NextItem` themselves, which
+# throws on an empty sequence, while the damage emitter delegates to the game's own
+# builder -- which guards for them.
 # Ethereal is the printed downside and the upgrade BUYS IT OFF (`remove: ethereal`,
 # klee-upgrades.yaml), which is why the old `{damage: +4}` delta is gone rather than kept
 # beside it: one upgrade axis per card (upgrade-conventions.md row 6). The numbers do NOT

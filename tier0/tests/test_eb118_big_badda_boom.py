@@ -165,15 +165,19 @@ def test_the_last_enemy_leaves_the_splash_nowhere_to_go():
     damage op has nobody to deal to. No error, no self-hit, no re-hit of the
     corpse.
 
-    THE MOD SIDE IS ASSUMED, NOT PINNED HERE, and deliberately so: its splash
-    delegates to `.TargetingRandomOpponents`, which no headless test can reach
-    (EB-105's boundary -- there is no live CombatState). It is the same
-    unguarded call TWELVE shipped cards already make, three of which
-    (da_da_da, rapid_fire, jumpy_dumpty) hit the empty pool whenever an early
-    hit kills the last body, so this card adds no exposure the roster does not
-    already carry. The undocumented part -- why the delegated path is safe
-    when the hand-rolled `Rng.NextItem` paths all guard -- is an engineering
-    finding, not something this test can settle."""
+    THE MOD SIDE IS NOT PINNED HERE, and deliberately so: its splash delegates
+    to `.TargetingRandomOpponents`, which no headless test can reach (EB-105's
+    boundary -- there is no live CombatState). It is NOT unverified for that,
+    though. The guard is FIRST-PARTY and decompile-verified against the
+    shipped sts2.dll v0.107.1 (ilspycmd 8.2): `AttackCommand.Execute` filters
+    `validTargets` to living creatures each hit and breaks on
+    `validTargets.Count == 0 && combatState.IsLiveCombat()` BEFORE the
+    `Rng.NextItem` call, and `CombatState.IsLiveCombat()` returns literally
+    `true`. A throw on empty targets exists only under `allowDuplicates:
+    false`, the duplicate-exclusion recheck, which no generator-emitted card
+    passes -- all thirteen callers take the `true` default. So the delegated
+    path is safe for the same reason the hand-rolled `Rng.NextItem` paths
+    guard: the game's own builder does the guarding for it."""
     st = _play(12)
     only, = st.enemies
     assert not only.alive

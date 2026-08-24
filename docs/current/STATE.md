@@ -190,17 +190,25 @@ Named here for status only. Open items are in
   sixteen) with register lint `R7` retired and the LAW wording amended; the
   Block-reader cleanup; Klee's two ruled face prices; and `Burst +5` on all
   fifteen `skill_tag` faces. **Three items stopped at a [USER] door and are
-  built, tested and staged on local branches, pushed nowhere** — the
+  built, tested and staged on local branches, pushed nowhere; TWO OF THE THREE
+  WERE RULED 2026-08-24 (R203) AND ONE IS HELD.** Still at the door: the
   Bomb-placement target cut (`staged/eb118-bomb-placement-cut`: it moves
   `klee/demolition_weighted` A2_scaling 4.703 → 4.936 against a **ratified**
-  4.8 band, and a band moves only by ruling), the Explosives Workshop
-  conversion (`staged/eb118-workshop-conversion`: its new power is grammar the
-  FROZEN classifier has never seen, so extending the vocabulary mid-batch is a
-  measurement call), and `lasting_impression`'s cap rider (its ruled upgrade
-  delta binds to the op being removed, so the card needs a new ruled delta
-  first). **The Phase-1 re-baseline is OWED, not skipped**: two of the three
-  staged items move Klee combat numbers again when pulled, so taking the
-  twelve-arm table between them costs two re-baselines for one window.
+  4.8 band, and a band moves only by ruling) — [USER] is still looking at it,
+  so it keeps QUEUE `M38` and nothing it governs moves. **ADOPTED at R203:**
+  the Explosives Workshop conversion (`staged/eb118-workshop-conversion`) —
+  `VOCAB_VERSION` v3 authorized, both connectivity sides re-run under it, the
+  baseline required back numerically unchanged except for its vocabulary
+  label, and the hook classification deliberately NOT pre-committed; and
+  `lasting_impression`'s cap rider — its broken `{fanfare_cap: +2}` delta
+  replaced by `{encore: +2}` (`gain_encore` 4 → 6) as an UNBLOCKER, not a
+  richness repair. A build branch for the two carries them and **stamps at
+  landing, not at the ruling**; the engineering detail lives in BACKLOG
+  `EB-118`. **The Phase-1 re-baseline is OWED, not skipped**: the
+  Bomb-placement cut moves Klee combat numbers again the moment it is pulled,
+  so taking the twelve-arm table before it costs two re-baselines for one
+  window — and the reconstructed Phase-1-only post-read still waits on that
+  same door.
   **PHASE 2A RAN 2026-08-24 AND IS STOPPED AT A [USER] DOOR, WITH ITS SWEEP
   DONE.** The pilot-policy flip is built complete — `PILOT_POLICIES_ENABLED`
   True, `POLICY_VERSION` 8, `PILOT_WEIGHTS_VERSION` 3, one edit, three
@@ -254,7 +262,9 @@ Named here for status only. Open items are in
   than a 1a/1b split with its attribution caveat pre-registered, `klee/spark`
   7 → 6, and Big Badda Boom's `demolition` tag added to the W1 audit list.
   **The sequence is five steps and W1 is step (v):** (i) rule the three Phase-1
-  doors (QUEUE `M38`); (ii) reconstruct the Phase-1-only world from `cd5bd25`
+  doors (QUEUE `M38`) — **two of the three ruled at R203, the Bomb-placement
+  cut still open, so step (i) is NOT discharged**; (ii) reconstruct the
+  Phase-1-only world from `cd5bd25`
   plus the ruled doors and take ITS post-read — `main` now mixes phases, so
   that read cannot come from main; (iii) close Phase 2's three windows
   separately and take a Phase-2 post-read; (iv) that read is W1's pre-state;

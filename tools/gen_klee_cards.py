@@ -3335,6 +3335,17 @@ def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
         # unguarded.
         call.append(".TargetingAllOpponents(CombatState!)")
     else:  # random_enemy / random_enemies
+        # Emitted UNGUARDED on purpose, and that is a first-party fact rather
+        # than a trust: decompiled from the shipped sts2.dll v0.107.1
+        # (ilspycmd 8.2), AttackCommand.Execute refilters `validTargets` to
+        # living creatures on every hit and breaks on
+        # `validTargets.Count == 0 && combatState.IsLiveCombat()` BEFORE the
+        # Rng.NextItem call -- and CombatState.IsLiveCombat() returns literally
+        # `true`. An empty pool ends the hit loop; it does not throw, self-hit
+        # or re-hit a corpse. The one throw path on empty targets sits inside
+        # the duplicate-exclusion recheck under `allowDuplicates: false`, which
+        # this emitter never passes (the default is `true`), so no emitted card
+        # can reach it.
         call.append(".TargetingRandomOpponents(CombatState!)")
 
     call.append('.WithHitFx("vfx/vfx_attack_slash")')
