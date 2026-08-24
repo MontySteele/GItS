@@ -444,7 +444,23 @@ FORMULA_HOOKS: dict[str, list[tuple[str, str, str]]] = {
 # UNCLASSIFIED. `enemy_poison_total` is deliberately absent: enemy poison
 # is a real engine token with NO entry in this vocabulary, so it reports
 # UNCLASSIFIED, which is the honest answer and not a zero.
+_IDENTITY_OF_THE_SELECTION = [_hook("shared", "exhaust_pile", "read"),
+                               _hook("shared", "card_identity", "read")]
+
 COUNT_HOOKS: dict[str, list[tuple[str, str, str]]] = {
+    # EB-118 6.3: the selection the resolving card just made. Every one of
+    # these reads a card that is now in the exhaust pile, and all but `size`
+    # read a PRINTED identity field off it (cost, type, ownership, upgrade
+    # state) -- which is the whole point of the grammar: the card you chose
+    # tells this card what to do.
+    "exhaust_selection_size": [_hook("shared", "exhaust_pile", "read")],
+    "exhaust_selection_cost": _IDENTITY_OF_THE_SELECTION,
+    "exhaust_selection_attacks": _IDENTITY_OF_THE_SELECTION,
+    "exhaust_selection_skills": _IDENTITY_OF_THE_SELECTION,
+    "exhaust_selection_powers": _IDENTITY_OF_THE_SELECTION,
+    "exhaust_selection_upgraded": _IDENTITY_OF_THE_SELECTION,
+    "exhaust_selection_companions": _IDENTITY_OF_THE_SELECTION,
+    "exhaust_selection_personal": _IDENTITY_OF_THE_SELECTION,
     # EB-118 5.5's reward half: what the NEXT performer's act is worth right
     # now. Reads the private queue AND the Encore bank, because the value it
     # returns is the one the stage can currently pay for.
@@ -486,6 +502,13 @@ PREDICATE_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "exhausted_this_card": [_hook("shared", "exhaust_pile", "read")],
     "hp_lost_this_turn": [_hook("shared", "hp_ledger", "read")],
     "has_salon_members": [_hook("private", "salon", "read")],
+    # EB-118 6.3. The yes/no and closed-vocabulary forms of the selection
+    # read; the two integer forms live in PREDICATE_PREFIXES above.
+    "exhaust_selection_has_companion": _IDENTITY_OF_THE_SELECTION,
+    "exhaust_selection_has_personal": _IDENTITY_OF_THE_SELECTION,
+    "exhaust_selection_has_type_attack": _IDENTITY_OF_THE_SELECTION,
+    "exhaust_selection_has_type_skill": _IDENTITY_OF_THE_SELECTION,
+    "exhaust_selection_has_type_power": _IDENTITY_OF_THE_SELECTION,
     "spotlight_set": [_hook("private", "spotlight", "read")],
     "spotlight_moved_this_turn": [_hook("private", "spotlight", "read")],
     "spotlight_unmoved_this_combat": [_hook("private", "spotlight", "read")],
@@ -498,8 +521,29 @@ PREDICATE_PREFIXES: dict[str, list[tuple[str, str, str]]] = {
     "fanfare_at_least_": [_hook("private", "fanfare", "read")],
     "charge_at_least_": [_hook("private", "charge", "read")],
     "exhaust_pile_at_least_": [_hook("shared", "exhaust_pile", "read")],
-    # EB-118 5.5: "which performer is next" -- a read of the private queue.
-    "leftmost_salon_member_": [_hook("private", "salon", "read")],
+    # EB-118 6.3. The integer forms; the closed-vocabulary and yes/no forms
+    # are named entries in PREDICATE_HOOKS, because the prefix path here
+    # only accepts a digit argument.
+    "exhaust_selection_cost_at_least_": [
+        _hook("shared", "exhaust_pile", "read"),
+        _hook("shared", "card_identity", "read")],
+    "exhaust_selection_size_at_least_": [
+        _hook("shared", "exhaust_pile", "read")],
+}
+
+# Prefixes whose argument is a NAME, not an integer. Kept separate from
+# PREDICATE_PREFIXES above because that table's match requires a digit
+# argument -- deliberately, so a typo'd `fanfare_at_least_ten` reports
+# UNCLASSIFIED here rather than being waved through. These get the same
+# strictness from a closed argument list instead: the engine validates the
+# same vocabularies at load (`C.SALON_MEMBERS`, `effects.CARD_TYPES`), so a
+# name outside them cannot reach a sheet, and one that appears here anyway
+# is a drift signal worth an UNCLASSIFIED.
+NAMED_ARG_PREFIXES: dict[str, tuple[frozenset, list]] = {
+    # EB-118 5.5: WHICH performer is next -- a read of the private queue.
+    "leftmost_salon_member_": (
+        frozenset({"chevalmarin", "crabaletta", "usher"}),
+        [_hook("private", "salon", "read")]),
 }
 
 # Card-level fields the sheets carry. A field not listed here is
@@ -624,6 +668,8 @@ def _classify_amount(record: dict, value, where: str) -> None:
         record["unclassified"].append(f"{where}: amount token {value!r}")
         return
     _apply(record, hooks)
+    if value in EXTERNAL_REACH_READS:
+        record["external_reach"] = True
     record["automatic_value"] = True
 
 
@@ -759,6 +805,16 @@ def _classify_effect(record: dict, fx: dict, junk_rarity) -> None:
         record["automatic_value"] = True
 
 
+# The reads only a NON-PERSONAL card can satisfy. A card asking whether the
+# selection contained a Companion reaches outside the character's own pool
+# in exactly the sense `external_reach` names -- the same call the op side
+# already makes for `conscript`, `copy_companion_in_hand` and the rest.
+EXTERNAL_REACH_READS = frozenset({
+    "exhaust_selection_has_companion",
+    "exhaust_selection_companions",
+})
+
+
 def _classify_predicate(record: dict, name) -> None:
     if not isinstance(name, str):
         record["unclassified"].append(f"conditional.if {name!r}")
@@ -770,9 +826,16 @@ def _classify_predicate(record: dict, name) -> None:
                 hooks = pref_hooks
                 break
     if hooks is None:
+        for prefix, (allowed, pref_hooks) in NAMED_ARG_PREFIXES.items():
+            if name.startswith(prefix) and name[len(prefix):] in allowed:
+                hooks = pref_hooks
+                break
+    if hooks is None:
         record["unclassified"].append(f"unknown predicate {name!r}")
         return
     _apply(record, hooks)
+    if name in EXTERNAL_REACH_READS:
+        record["external_reach"] = True
 
 
 def classify_row(row: dict, pool: str, junk_rarity=None) -> dict:

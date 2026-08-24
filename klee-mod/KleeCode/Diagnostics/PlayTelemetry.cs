@@ -431,6 +431,36 @@ internal static class PlayTelemetry
     }
 
     /// <summary>
+    /// EB-118 — ONE RESOLVED EXHAUST SELECTION, in the sim's row shape.
+    ///
+    /// The row itself is rendered by <see cref="Powers.ExhaustSelection"/>,
+    /// which owns the column names; this file only decides WHICH FIGHT it
+    /// belongs to. That split is the point: the sim's twin row
+    /// (`tier0/engine/effects.py` `exhaust_selection_row`) is compared against
+    /// the C# column literals by a parity test, and a serializer that also
+    /// held a copy of the names would give it two places to disagree.
+    ///
+    /// A selection resolved outside a fight record — a seat with no open
+    /// fight — is DROPPED rather than filed under a fight it did not happen
+    /// in, the same scoping <see cref="SelectorAnswered"/> uses.
+    ///
+    /// Additive at this schema version (understudy/README.md): a reader that
+    /// does not know `exhaust_selections` sees a key it can ignore.
+    /// </summary>
+    internal static void ExhaustSelectionResolved(Player? seat, string row)
+    {
+        try
+        {
+            if (seat == null || !Open.TryGetValue(seat, out var record)) return;
+            record.ExhaustSelections.Add(row);
+        }
+        catch (Exception e)
+        {
+            Warn("ExhaustSelectionResolved", e);
+        }
+    }
+
+    /// <summary>
     /// Damage, from the hook rather than from a state diff — which makes this
     /// feed's attribution STRICTLY better than the bot feed's, and the
     /// difference is labelled rather than averaged away. The wire-driven soak
@@ -869,6 +899,10 @@ internal static class PlayTelemetry
         /// from two different offers.</summary>
         public readonly List<(int Round, string Screen, int Index, string Chosen,
                               IReadOnlyList<string> Offered)> Selectors = new();
+        /// <summary>EB-118. One pre-rendered JSON object per resolved
+        /// Exhaust selection, in the sim's column order. Rendered by
+        /// `Powers.ExhaustSelection.ParityRow`, which owns the names.</summary>
+        public readonly List<string> ExhaustSelections = new();
         public readonly Dictionary<string, int> DamageBySource = new();
         public int DamageTaken;
 
@@ -971,6 +1005,16 @@ internal static class PlayTelemetry
                 }
 
                 sb.Append("]]");
+            }
+
+            sb.Append(']');
+            // EB-118. Written verbatim: each entry is already a JSON object
+            // whose keys are ExhaustSelection.RowKeys.
+            sb.Append(",\"exhaust_selections\":[");
+            for (var i = 0; i < ExhaustSelections.Count; i++)
+            {
+                if (i > 0) sb.Append(',');
+                sb.Append(ExhaustSelections[i]);
             }
 
             sb.Append(']');

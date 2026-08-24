@@ -216,7 +216,15 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # SURFACED, not smuggled: any Track B cut on these is a HUMAN-FEED
             # cut until a wire route for them lands.
             "run_id", "run_instance", "fight_index", "encounter",
-            "detonations", "corpse_detonations"}
+            "detonations", "corpse_detonations",
+            # EB-118. One row per resolved Exhaust selection, in the SIM's
+            # column order -- the cross-engine comparison this exists for is
+            # against the tier0 kernel's `exhaust_selection` event, not
+            # against the soak. The soak drives the game from outside and the
+            # wire narrates a card leaving a pile, not the identity of the
+            # selection that took it, so a bot-feed twin is new wire surface
+            # and a separate piece of work. Added, never a rename.
+            "exhaust_selections"}
 
 
 def _csharp_keys() -> set[str]:

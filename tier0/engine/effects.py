@@ -114,6 +114,88 @@ def _bonus_formula(state: CombatState, formula: str,
     raise ValueError(f"unknown bonus_formula {formula!r}")
 
 
+# --- EB-118: card-resolution-scoped Exhaust identity context ---------------
+#
+# The card you chose to Exhaust tells the exhausting card what to do. What is
+# recorded is PRINTED IDENTITY ONLY -- six descriptors a CardModel carries too,
+# which is what lets the C# twin (Powers/ExhaustSelection.cs) record the same
+# row off the same facts. Nothing here reads sim-only state.
+#
+# THE SCOPING, which is the whole point and the thing a `last_exhausted`
+# global would get wrong:
+#   * resolve_card opens an EMPTY selection per card play, so the next card
+#     played reads nothing;
+#   * combat._FREE_PLAY_CONTEXT saves and restores it, so a free play landing
+#     mid-resolution cannot hand its victims to the outer card;
+#   * a SECOND exhaust_from on one card opens its own -- the list is REBOUND,
+#     never cleared in place, because the free-play save holds the object.
+#
+# Kokomi's rotation law (C11) filters her unfiltered pool before any of this
+# runs, so her context never carries junk. The mechanism is character-neutral:
+# an explicit `filter: status` card (Dodge Roll's shape) records its victims
+# here too. There is deliberately NO "Status exhausted" reward grammar -- the
+# context reports rarity, and what a card does with that is a sheet decision.
+EXHAUST_SELECTION_PREFIX = "exhaust_selection_"
+
+# The descriptor a victim leaves behind, in emission order.
+EXHAUST_SELECTION_FIELDS = ("id", "cost", "type", "rarity",
+                            "companion", "upgraded")
+
+
+def exhaust_descriptor(card: Card) -> dict:
+    """The printed identity of one exhausted card.
+
+    `cost` is the PRINTED cost and is kept raw: an X-cost card in hand has no
+    spent value, so it stays "X" here and contributes 0 to the derived total
+    rather than being silently coerced to a number a formula would pay for.
+    `upgraded` reads the id suffix, which survives an enchantment mark
+    (`x@sharp-2+`) because upgrades.apply_upgrade re-attaches the mark INSIDE
+    the suffix.
+    """
+    from tier0.content import upgrades          # late import avoids cycle
+    return {"id": card.id, "cost": card.cost, "type": card.type,
+            "rarity": card.rarity, "companion": card.is_companion,
+            "upgraded": card.id.endswith(upgrades.SUFFIX)}
+
+
+def exhaust_selection_counts(selection: list[dict]) -> dict:
+    """Derived reads over a selection. ONE definition, three consumers: the
+    `exhaust_selection_*` runtime counts, the `exhaust_selection_*` predicates
+    and the emitted parity row -- so a formula can never report a different
+    number from the row a parity test compares against C#."""
+    return {
+        "size": len(selection),
+        # Non-int costs (X) contribute nothing; see exhaust_descriptor.
+        "cost": sum(d["cost"] for d in selection
+                    if isinstance(d["cost"], int)),
+        "attacks": sum(1 for d in selection if d["type"] == "attack"),
+        "skills": sum(1 for d in selection if d["type"] == "skill"),
+        "powers": sum(1 for d in selection if d["type"] == "power"),
+        "companions": sum(1 for d in selection if d["companion"]),
+        # PERSONAL is the complement of companion, spelled out rather than
+        # inferred: a card that rewards rotating your OWN cards out asks a
+        # different question from `size - companions`, and the sheet should
+        # be able to say which one it means.
+        "personal": sum(1 for d in selection if not d["companion"]),
+        "upgraded": sum(1 for d in selection if d["upgraded"]),
+    }
+
+
+# The parity row, key for key and in order. The C# twin renders the same keys
+# (ExhaustSelection.ParityRow); test_exhaust_context_parity.py reads them out
+# of the C# source and compares, so neither side can add or rename a column
+# alone. `victims` is the id list -- the same ids CardCmd.Exhaust takes.
+EXHAUST_SELECTION_ROW_KEYS = ("card", "victims") + tuple(
+    exhaust_selection_counts([]))
+
+
+def exhaust_selection_row(state: CombatState, card: Card) -> dict:
+    row = {"card": card.id,
+           "victims": [d["id"] for d in state.exhaust_selection]}
+    row.update(exhaust_selection_counts(state.exhaust_selection))
+    return row
+
+
 def _runtime_count(state: CombatState, token: str,
                    current_card: Optional[Card] = None) -> int:
     """A live integer the base-game CalculatedX/CalculatedDamage vars read at
@@ -223,6 +305,16 @@ def _runtime_count(state: CombatState, token: str,
         return state.discards_this_card
     if token == "block_gained_this_card":
         return state.block_gained_this_card
+    # EB-118: the Exhaust identity context. `exhausted_this_card` above is the
+    # COUNT; these are the derived reads off the DESCRIPTORS of the selection
+    # the current card's exhaust_from just resolved. Registered as one prefix
+    # family rather than eight tokens so the vocabulary and the emitted parity
+    # row cannot disagree about what exists -- both enumerate the same dict.
+    if token.startswith(EXHAUST_SELECTION_PREFIX):
+        counts = exhaust_selection_counts(state.exhaust_selection)
+        key = token[len(EXHAUST_SELECTION_PREFIX):]
+        if key in counts:
+            return counts[key]
     raise ValueError(f"unknown runtime count {token!r}")
 
 
@@ -1754,6 +1846,15 @@ def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
     # player choose -- exactly the split _op_discard_for_sparks already
     # makes, and it reuses the same _worst_card instrument surface.
     chosen = fx.get("select", "random") == "chosen"
+    # EB-118: OPEN this effect's own context. Rebound, not cleared in place --
+    # combat._FREE_PLAY_CONTEXT saved the outer card's list OBJECT, and an
+    # in-place clear here would empty that too. A second exhaust_from on the
+    # same card therefore replaces the first's record, which is the ruled
+    # behaviour: two rotations on one card are two questions, not one pile.
+    # Opened BEFORE the loop, so an empty pool leaves an empty selection
+    # rather than the previous effect's.
+    selection: list[dict] = []
+    state.exhaust_selection = selection
     for _ in range(n):
         if not pool:
             break
@@ -1762,10 +1863,18 @@ def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
         remove_instance(hand, victim)
         state.player.exhaust_pile.append(victim)
         state.exhausted_this_card += 1
+        # Recorded off the instance BEFORE anything downstream can touch it,
+        # and from the PRINTED fields only, so the row is the same one the
+        # mod's selector path can build off a CardModel.
+        selection.append(exhaust_descriptor(victim))
         if chosen:
             state.emit("exhaust", card=victim.id, chosen=True)
         else:
             state.emit("exhaust", card=victim.id)
+    # The parity row, emitted once per resolved selection (including the empty
+    # one -- "nothing was there to take" is a reading, not a gap). Emit-only:
+    # nothing in the engine reads this back, the formulas read the context.
+    state.emit("exhaust_selection", **exhaust_selection_row(state, card))
 
 
 def _worst_card(cards: list[Card]) -> Card:
@@ -1903,6 +2012,10 @@ PREDICATE_NAMES = frozenset({
     "spotlight_moved_this_turn",
     "spotlight_unmoved_this_combat",
     "spotlighted_card_played_this_turn",
+    # EB-118. Ownership is a yes/no on the sheet, so it is a name, not a
+    # count prefix; the COUNTS are reachable as amounts.
+    "exhaust_selection_has_companion",
+    "exhaust_selection_has_personal",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -1920,7 +2033,18 @@ PREDICATE_PREFIXES = frozenset({
     # -- but the argument is closed here, because SALON_MEMBERS is: a typo'd
     # member is a load-time failure, not a branch that never fires.
     "leftmost_salon_member_",
+    # EB-118. `_has_type_` takes a card TYPE (a closed vocabulary, validated
+    # below); the other two take an integer like their neighbours.
+    "exhaust_selection_has_type_",
+    "exhaust_selection_cost_at_least_",
+    "exhaust_selection_size_at_least_",
 })
+
+# The card types `exhaust_selection_has_type_` may name. Closed on purpose:
+# a typo'd `..._has_type_attacks` would otherwise load fine and read False
+# forever, which is the silent-scaling failure the vocabulary check exists
+# to stop.
+CARD_TYPES = frozenset({"attack", "skill", "power"})
 
 
 def is_known_predicate(name: str) -> bool:
@@ -1937,6 +2061,8 @@ def is_known_predicate(name: str) -> bool:
             return True
         if prefix == "leftmost_salon_member_":
             return arg in C.SALON_MEMBERS
+        if prefix == "exhaust_selection_has_type_":
+            return arg in CARD_TYPES
         # The integer forms must actually carry an integer. A typo'd
         # `fanfare_at_least_ten` would otherwise pass a name-only check and
         # raise from int() mid-combat -- the very failure being moved earlier.
@@ -1993,6 +2119,25 @@ def _predicate(state: CombatState, name: str) -> bool:
         # least N cards; otherwise the card resolves as nothing.
         n = int(name.rsplit("_", 1)[1])
         return len(state.player.exhaust_pile) >= n
+    # EB-118. These read the CURRENT selection (the exhaust_from earlier in
+    # this same card), not the pile: the pile is everything ever rotated off
+    # the line, this is the one choice just made. A card with no exhaust_from
+    # before the conditional reads an empty selection and every branch here
+    # is False, which is the honest answer rather than an error -- the same
+    # reading `drew_skill_this_card` gives a card that drew nothing.
+    if name.startswith("exhaust_selection_cost_at_least_"):
+        counts = exhaust_selection_counts(state.exhaust_selection)
+        return counts["cost"] >= int(name.rsplit("_", 1)[1])
+    if name.startswith("exhaust_selection_size_at_least_"):
+        counts = exhaust_selection_counts(state.exhaust_selection)
+        return counts["size"] >= int(name.rsplit("_", 1)[1])
+    if name.startswith("exhaust_selection_has_type_"):
+        want = name[len("exhaust_selection_has_type_"):]
+        return any(d["type"] == want for d in state.exhaust_selection)
+    if name == "exhaust_selection_has_companion":
+        return any(d["companion"] for d in state.exhaust_selection)
+    if name == "exhaust_selection_has_personal":
+        return any(not d["companion"] for d in state.exhaust_selection)
     if name.startswith("charge_at_least_"):
         # Kokomi threshold read (v0.5 sheet fill). A THRESHOLD is not a
         # proportional read: it pays a flat, printed bonus once the bank
@@ -2391,6 +2536,7 @@ def _free_play(state: CombatState, card: Card,
       2. save and RESTORE the whole per-card context block resolve_card
          sets (current_card_companion, reactions_this_card,
          kills_this_card, fatal_kills_this_card, exhausted_this_card,
+         exhaust_selection,
          detonations_at_card_start, repeat_requested,
          target_had_offelement_aura, current_attack_bonus, sparks_at_play,
          current_x, current_card_cost);
@@ -2698,6 +2844,11 @@ def resolve_card(state: CombatState, card: Card) -> None:
     state.kills_this_card = 0
     state.fatal_kills_this_card = 0
     state.exhausted_this_card = 0
+    # EB-118: a fresh, EMPTY identity context per card play. Rebound rather
+    # than cleared for the reason _op_exhaust_from states. This line is the
+    # whole cross-card scoping guarantee -- the card after an exhausting card
+    # reads nothing, whatever it asks.
+    state.exhaust_selection = []
     state.block_gains_this_card = 0
     state.block_gained_this_card = 0
     state.discards_this_card = 0

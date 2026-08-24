@@ -1088,8 +1088,9 @@ def blocked_reason(
     # discipline. Teaching this needs a CalculatedVar bound to the exhaust
     # pile, which is Track C work, not a codegen shortcut.
     for effect in card.get("effects", []):
-        if "amount_formula" in effect and exhaust_pile_calc_rider(
-                card, effect) is None:
+        if ("amount_formula" in effect
+                and exhaust_pile_calc_rider(card, effect) is None
+                and exhaust_selection_calc_rider(card, effect) is None):
             formula = effect["amount_formula"]
             return (f"amount_formula (reads {formula.get('count')}) -- needs a "
                     "CalculatedVar bound to that count, not a literal")
@@ -1606,6 +1607,72 @@ def exhaust_pile_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | Non
             "KokomiResources.ExhaustPileCount(card.Owner.Creature)")
 
 
+# EB-118. The `exhaust_selection_*` counts, tier0 token -> the C# accessor
+# that answers it. Both sides derive every one of them from the same recorded
+# descriptors (tier0 effects.exhaust_selection_counts /
+# Powers/ExhaustSelection.cs), so a name here is a name there.
+#
+# Deliberately a CLOSED map, the same discipline RUNTIME_TIMES states: a count
+# token the generator does not know must stay a NAMED BLOCKER. Guessing emits
+# a card that compiles and pays its `base` forever while the face promises
+# scaling, which is this generator's worst failure.
+EXHAUST_SELECTION_COUNTS = {
+    "exhaust_selection_size": "Size",
+    "exhaust_selection_cost": "Cost",
+    "exhaust_selection_attacks": "Attacks",
+    "exhaust_selection_skills": "Skills",
+    "exhaust_selection_powers": "Powers",
+    "exhaust_selection_companions": "Companions",
+    "exhaust_selection_personal": "Personal",
+    "exhaust_selection_upgraded": "Upgraded",
+}
+
+# The clause each count renders on the face. The number itself is honest --
+# it goes through the CalculatedDamageVar like every other converted rider --
+# so this sentence only has to say WHY it moves.
+EXHAUST_SELECTION_TEXT = {
+    "exhaust_selection_size": "the number of cards you just "
+                              "[gold]Exhausted[/gold]",
+    "exhaust_selection_cost": "the total cost of the cards you just "
+                              "[gold]Exhausted[/gold]",
+    "exhaust_selection_attacks": "the Attacks you just [gold]Exhausted[/gold]",
+    "exhaust_selection_skills": "the Skills you just [gold]Exhausted[/gold]",
+    "exhaust_selection_powers": "the Powers you just [gold]Exhausted[/gold]",
+    "exhaust_selection_companions": "the [gold]Companion[/gold] cards you just "
+                                    "[gold]Exhausted[/gold]",
+    "exhaust_selection_personal": "your own cards you just "
+                                  "[gold]Exhausted[/gold]",
+    "exhaust_selection_upgraded": "the upgraded cards you just "
+                                  "[gold]Exhausted[/gold]",
+}
+
+
+def exhaust_selection_calc_rider(card: dict,
+                                 eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: exhaust_selection_*}` (EB-118) --
+    a damage number priced off the selection the SAME card just Exhausted.
+
+    Same CalculatedDamageVar path as the exhaust_pile rider beside it, and
+    for a sharper version of the same reason: this count does not exist until
+    the card resolves, so a face printing only `base` would be the only number
+    the player ever sees. The reader is scoped to the resolving card, which is
+    exactly the `card` a CalculatedVar multiplier is handed.
+
+    Damage only, matching the pile rider: a block-side reader needs the
+    CalculationBase plumbing `block_calc_rider` owns and has no card yet.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict):
+        return None
+    accessor = EXHAUST_SELECTION_COUNTS.get(formula.get("count"))
+    if accessor is None:
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            f"static (card, _) => ExhaustSelection.{accessor}(card)")
+
+
 def charge_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
     """Kokomi's Charge damage rider (`N_per_M_charge`), rendered through the
     base game's CalculatedDamageVar for exactly the reason Furina's Fanfare
@@ -2105,6 +2172,9 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     pile = exhaust_pile_calc_rider(card, eff)
     if pile is not None:
         return pile
+    selection = exhaust_selection_calc_rider(card, eff)
+    if selection is not None:
+        return selection
     charge = charge_calc_rider(card, eff)
     if charge is not None:
         base, per_n, div = charge
@@ -2512,10 +2582,17 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "times": any(e["op"] == "damage" and e.get("target") != "self"
                      and isinstance(e.get("times"), int) and e["times"] > 1
                      for e in effects),
+        # EB-118 joins the same two vars: both riders render through the
+        # CalculatedDamageVar triple, so ExtraDamage/CalculationBase are where
+        # a `per` / `base` delta lands whichever count it reads.
         "formula_per": any(
-            exhaust_pile_calc_rider(card, e) is not None for e in effects),
+            exhaust_pile_calc_rider(card, e) is not None
+            or exhaust_selection_calc_rider(card, e) is not None
+            for e in effects),
         "formula_base": any(
-            exhaust_pile_calc_rider(card, e) is not None for e in effects),
+            exhaust_pile_calc_rider(card, e) is not None
+            or exhaust_selection_calc_rider(card, e) is not None
+            for e in effects),
     }
     # tier0 binds every POWER_UPGRADE_KEYS delta to the first TOP-LEVEL
     # apply_power OR buff_next_attack (upgrades.py takes `next(fx for fx in
@@ -3993,8 +4070,14 @@ def build_body(
             # junk says so with an explicit `filter:` (the branch below).
             n = ('DynamicVars["Exhausts"].IntValue'
                  if exhaust_upgrade(card) else str(int(eff.get("amount", 1))))
+            # EB-118: the selection's identity context. Opened BEFORE the
+            # screen so a cancelled or empty selector leaves an EMPTY context
+            # rather than the previous effect's, recorded per victim, closed
+            # once -- the same three beats _op_exhaust_from makes, and the
+            # reason a second selector on one card replaces the first.
             lines.append(NEWLINE.join([
                 "{",
+                "            ExhaustSelection.Open(this);",
                 "            var toExhaust = (await CardSelectCmd.FromHand(",
                 "                choiceContext, Owner,",
                 "                new CardSelectorPrefs(",
@@ -4003,16 +4086,23 @@ def build_body(
                 "                KokomiResources.OwnCard, this)).ToList();",
                 "            foreach (var victim in toExhaust)",
                 "            {",
+                "                ExhaustSelection.Record(this, victim);",
                 "                await CardCmd.Exhaust(choiceContext, victim);",
                 "            }",
+                "",
+                "            ExhaustSelection.Close(this);",
                 "        }",
             ]))
 
         elif op == "exhaust_from":
             # tier0 _op_exhaust_from with filter status: RANDOM victim from
             # the hand's Status cards (not chosen -- the sim rolls rng).
+            # EB-118: a filtered exhaust records its victims too -- the
+            # context is the op's, not Kokomi's. Opened unconditionally so
+            # "no Status in hand" reads as an empty selection on both sides.
             lines.append(
                 "{\n"
+                "            ExhaustSelection.Open(this);\n"
                 "            var statusCards = CardPile.Get(PileType.Hand, Owner)?\n"
                 "                .Cards.Where(c => c.Rarity == CardRarity.Status).ToList();\n"
                 "            if (statusCards != null && statusCards.Count > 0)\n"
@@ -4020,9 +4110,12 @@ def build_body(
                 "                var victim = Owner.RunState.Rng.CombatTargets.NextItem(statusCards);\n"
                 "                if (victim != null)\n"
                 "                {\n"
+                "                    ExhaustSelection.Record(this, victim);\n"
                 "                    await CardCmd.Exhaust(choiceContext, victim);\n"
                 "                }\n"
                 "            }\n"
+                "\n"
+                "            ExhaustSelection.Close(this);\n"
                 "        }"
             )
 
@@ -4472,6 +4565,13 @@ def build_description(card: dict) -> str:
                 # reason, which is the exact confusion Track C exists to stop.
                 parts.append(
                     "Scales with the number of cards [gold]Exhausted[/gold].")
+            if exhaust_selection_calc_rider(card, eff) is not None:
+                # Same job as the pile sentence above, and needed more: this
+                # count does not exist until the card resolves, so without it
+                # the face is a number that appears from nowhere.
+                parts.append("Scales with "
+                             + EXHAUST_SELECTION_TEXT[eff["amount_formula"]
+                                                      ["count"]] + ".")
             if "bonus_formula" in eff:
                 formula = eff["bonus_formula"]
                 if formula.endswith("_per_detonation_this_combat"):
