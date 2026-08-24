@@ -4803,17 +4803,32 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
     return "\n".join(pad + s.replace("\n", "\n" + " " * 4) for s in body)
 
 
-def _branch_text(card: dict, branch: list[dict], in_then: bool) -> str:
+# Predicates that are true only because something the card hit is now DEAD.
+# Inside such a branch the killed body is already out of the live-enemy
+# population both engines roll `random_enemy` against (tier0 _pick_targets
+# filters living_enemies; TargetingRandomOpponents draws from HittableEnemies),
+# so a random pick CANNOT return the corpse and the face is entitled to print
+# the stronger word. DERIVED, not a card special case: it reads the branch's
+# own predicate, and it is deliberately gated to the THEN arm -- in an `else`
+# arm the predicate is false, nothing died, and "other" would be a lie.
+KILL_PREDICATES = frozenset({"killed_target", "killed_target_fatal"})
+
+
+def _branch_text(card: dict, branch: list[dict], in_then: bool,
+                 predicate: str = "") -> str:
     """Card text for a conditional branch: literal numbers unless a ruled
     delta claims the var (mirrors _emit_branch_op's amount policy)."""
     bits = []
     cb_pending = in_then and conditional_bonus_upgrade(card) > 0
+    after_kill = in_then and predicate in KILL_PREDICATES
+    rnd = (" to a random other enemy" if after_kill
+           else " to a random enemy")
     for e in branch:
         op = e["op"]
         if op == "damage":
             tgt = {"all_enemies": " to ALL enemies",
-                   "random_enemy": " to a random enemy",
-                   "random_enemies": " to a random enemy"}.get(e["target"], "")
+                   "random_enemy": rnd,
+                   "random_enemies": rnd}.get(e["target"], "")
             if cb_pending:
                 cb_pending = False
                 bits.append(f"deal {{ExtraDamage:diff()}} damage{tgt}")
@@ -5553,11 +5568,14 @@ def build_description(card: dict) -> str:
             if any(e.get("op") == "repeat_this" for e in then):
                 parts.append(f"{pred_txt}: play this card again.")
             else:
-                then_txt = _branch_text(card, then, in_then=True)
+                then_txt = _branch_text(card, then, in_then=True,
+                                        predicate=eff["if"])
                 clause = f"{pred_txt}: {then_txt}"
                 els = eff.get("else", [])
                 if els:
-                    clause += f" Otherwise: {_branch_text(card, els, in_then=False)}"
+                    clause += (" Otherwise: "
+                               + _branch_text(card, els, in_then=False,
+                                              predicate=eff["if"]))
                 if condition_upgrade(card):
                     # {IfUpgraded:show:upgraded|normal} -- the runtime form
                     # BaseLib's SimpleLoc MakeUpgradeSwap generates. Pipe is

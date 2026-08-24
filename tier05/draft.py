@@ -77,6 +77,33 @@ STATIC_CHARGE_VALUE = 0.5     # per printed Charge point: the kit Garment
 # These predicates are readable before a card is played. Mid-resolution
 # conditions such as reaction_triggered_by_this and killed_target remain out:
 # valuing their best branch unconditionally would recreate the old power bias.
+#
+# THE UNDER-CREDIT THAT FALLS OUT OF THAT IS ACCEPTED, IN WRITING, HERE
+# (EB-118 Phase 2B, the [USER] body ruling of 2026-08-24). A predicate that is
+# not in this set does not get a discounted branch -- `effect_power` never
+# recurses into it at all, so the branch is credited at ZERO. Big Badda Boom's
+# ruled rider ("if it kills, deal 8 to a random other enemy") is therefore
+# invisible to the drafter: the card prices at 4.8 base / 8.0 upgraded with the
+# rider exactly as it did without it. So does sparkly_explosion's kill branch,
+# and showstopper's, and they have priced that way since they shipped -- this
+# note names the convention rather than introducing it.
+#
+# It is accepted on R194's terms and for R194's reason (the Deep Breath modal
+# under-credit, [USER] 2026-08-23), and the test that owns the acceptance is
+# `tier05/tests/test_ethereal_draft_valuation.py`:
+#   * The error is ONE-DIRECTIONAL. Crediting a kill branch would require
+#     guessing how often the swing kills, which is a board fact the drafter has
+#     no access to; refusing to guess makes the drafter UNDERvalue the card and
+#     never overvalue it. The failure it can cause is passing on a good card,
+#     not paying for a bad one.
+#   * It does NOT move the Ethereal read. The rider is on both faces and prices
+#     at zero on both, so the base:upgraded ratio R193's trigger reads is
+#     untouched (the trigger note at STATIC_ETHEREAL_SHARE carries this).
+#   * REPRICING TRIGGER, inherited not invented: the first time a kill-gated
+#     branch has to be told apart from its own base card by a drafted price.
+#     Nothing today needs that, because the pilot reads the live predicate at
+#     play time (tier0.pilot.policy) and the drafter's blindness costs only an
+#     offer ranking.
 STATIC_STATE_CONDITIONS = frozenset({
     "has_spark",
     "target_has_nonpyro_aura",
@@ -1308,9 +1335,19 @@ STATIC_ETHEREAL_SHARE = 0.6        # EB-118. Ethereal is a DOWNSIDE and the
                                    # the FIRST DRAFTABLE CARRIER of the keyword
                                    # and it prices its WHOLE upgrade on this
                                    # share -- base Ethereal at 0.6, upgraded at
-                                   # 1.0, and nothing else on the card moves --
-                                   # so the read of that card is a read of this
-                                   # number and of nothing else.
+                                   # 1.0 -- so the read of that card is a read
+                                   # of this number and of nothing else.
+                                   # THE 2026-08-24 BODY RULING DOES NOT BREAK
+                                   # THAT. [USER] replaced the bare 16 with
+                                   # "16, and 8 to a random other enemy if it
+                                   # kills". The rider rides BOTH FACES, so the
+                                   # base-to-upgraded DELTA is still exactly
+                                   # the keyword and the read stays
+                                   # one-variable. It also prices at ZERO here
+                                   # (see the under-credit note at
+                                   # STATIC_STATE_CONDITIONS), so it moves
+                                   # neither side of the ratio: 4.8 base, 8.0
+                                   # upgraded, before and after the ruling.
                                    # WHAT IS OWED WHEN IT HAS BEEN READ: the
                                    # share is either RE-DERIVED against the read
                                    # or RE-RATIFIED deliberately. It may NOT

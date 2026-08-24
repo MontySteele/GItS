@@ -66,10 +66,44 @@ def test_the_share_is_exercised_by_a_real_draftable_carrier():
     assert priced == full * draft.STATIC_ETHEREAL_SHARE
     assert priced < full                  # the downside costs the card price
 
-    # The upgrade is the WHOLE difference: nothing else on this card moves, so
-    # the gap between the two prices is exactly the keyword. That is what makes
-    # the card a one-variable read of the share (R193's armed trigger).
+    # The upgrade is the WHOLE difference: the ruled body (16 + the kill rider)
+    # rides BOTH faces, so the gap between the two prices is exactly the
+    # keyword. That is what makes the card a one-variable read of the share
+    # (R193's armed trigger) even after the 2026-08-24 body ruling.
     assert base.cost == up.cost and base.effects == up.effects
+
+
+def test_the_ruled_kill_rider_is_credited_at_zero():
+    """THE HONEST NUMBER, AND THE UNDER-CREDIT NAMED WITH IT.
+
+    [USER]'s 2026-08-24 body ruling hung a rider on this card -- 8 more damage
+    to a random other enemy when the swing kills. The drafter cannot see it:
+    `killed_target` is deliberately absent from STATIC_STATE_CONDITIONS, so
+    `effect_power` never recurses into the branch and it contributes exactly
+    0.0. The card prices identically with the rider and without it.
+
+    This is pinned rather than fixed, on R194's terms (the note at
+    STATIC_STATE_CONDITIONS): the error is one-directional -- the drafter
+    UNDERvalues the card, never over-values it -- because crediting the branch
+    would mean guessing a kill rate off a board the drafter has never seen.
+    The test exists so the zero is a recorded decision and not an unnoticed
+    hole: if a later change starts crediting kill branches, this fails and the
+    acceptance gets revisited on purpose.
+    """
+    base = loader.get_card("big_badda_boom")
+    rider = next(fx for fx in base.effects if fx.get("op") == "conditional")
+    assert rider["if"] == "killed_target"
+    assert rider["if"] not in draft.STATIC_STATE_CONDITIONS
+
+    stripped = Card(**{**vars(base),
+                       "effects": [fx for fx in base.effects
+                                   if fx.get("op") != "conditional"]})
+    assert draft._static_power(base) == draft._static_power(stripped)
+
+    # The absolute numbers, so a silent move in the share, the placement of the
+    # multiplier or the body is caught by the price a draft is built from.
+    assert draft._static_power(base) == 4.8
+    assert draft._static_power(loader.get_card("big_badda_boom+")) == 8.0
 
 
 def test_the_carrier_set_is_exactly_what_was_ruled():

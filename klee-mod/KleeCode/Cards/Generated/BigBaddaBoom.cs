@@ -47,7 +47,7 @@ public sealed class BigBaddaBoom : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Big Badda Boom"),
-        ("description", "Deal {Damage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage. If it kills: deal 8 damage to a random other enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -66,12 +66,21 @@ public sealed class BigBaddaBoom : CustomCardModel, IElementalCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        var enemiesAtStart = CombatState!.HittableEnemies.ToList();
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
+        if (enemiesAtStart.Any(e => e.IsDead))
+        {
+            await DamageCmd.Attack(8m)
+                .FromCard(this)
+                .TargetingRandomOpponents(CombatState!)
+                .WithHitFx("vfx/vfx_attack_slash")
+                .Execute(choiceContext);
+        }
     }
 
     protected override void OnUpgrade()
