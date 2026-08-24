@@ -13,7 +13,7 @@ found was found by playing**. This is a partial backstop for that — see
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 89 tests, ~0.3s after build
+dotnet test                       # 94 tests, ~0.3s after build
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -87,8 +87,9 @@ either pinned structurally and labelled, or left out.
 | `SalonVerbTests.cs` | 12 | `EB-118` §5.5's Salon verbs: the structural pin that the turn-start upkeep and perform-now resolve through the SAME `PerformMember` (the packet's no-duplicate-implementation requirement), and the behavioural pins for `RotateLeftmost` and the leftmost reads. |
 | `RecallFromExhaustTests.cs` | 10 | EB-118's exhaust-pile retrieval: the pool filter RUNS (kit, junk and retriever exclusions), the move is pinned structurally (`FromCombatPile` -> `Add` at `CardPilePosition.Top` -> `AddKeyword`) because it needs a live `CombatState`. |
 | `ExhaustSelectionTests.cs` | 15 | `EB-118`'s Exhaust identity context: the six printed descriptors, the derived reads, and above all the SCOPING — another card reads nothing, a second `Open` replaces, the seat is part of the key. Sim twin: `tier0/tests/test_exhaust_context.py`; the emitted column names are pinned across the two engines by `tier0/tests/test_exhaust_context_parity.py`. The codegen's wiring into a generated `OnPlay` is a labelled structural pin — a card PLAY is outside the boundary. |
+| `ModalChoicePinTests.cs` | 5 | `EB-118` sec.5.4's modal surface: `ModalChoice` delegates to the base game's OWN card-level choice rather than reimplementing one (`CardSelectCmd.FromChooseACardScreen` + `PlayerChoiceContext`, co-op-synced as `PlayerChoiceType.Index`), the three-option ceiling the screen itself enforces, and the `mode_chosen` telemetry row pinned to its tier0 twin. Structural: making a choice needs a live `CombatState`. No sheet row is modal. |
 
-**89 tests, all green.**
+**94 tests, all green.**
 
 ## Co-op coverage
 
