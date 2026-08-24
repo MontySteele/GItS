@@ -50,11 +50,20 @@ registration packets themselves live under `review/active/` — one home, not tw
   grounded the last three canon detectors, so it is not a `v2` read** —
   directional predictions only
   (§2.4); an absolute gate may be proposed only after the frozen classifier
-  has read all five canon pools. Baseline protocol (§2.3): primary baseline is
-  taken immediately before the first `EB-118` sheet edit, after `EB-69` lands;
-  classifier frozen for the whole batch, vocabulary revisions re-run BOTH
-  sides. Registered blind spots at §2.6 (the `decide%` gaps, the lowest-HP
-  target heuristic, the `_worst_card` exhaust proxy).
+  has read all five canon pools. **THE PAIRED BASELINE IS TAKEN, 2026-08-24 —
+  `review/active/eb118-connectivity-baseline-2026-08-24.txt`**, at `a2e389f`
+  and as the first commit of the Phase-1 branch, so every Phase-1 sheet edit
+  is later than it in branch history, which is what §2.3(3)'s "immediately
+  before the first sheet edit" means operationally. **All eight pools read**
+  — the honest-stop path was not taken — and **UNCLASSIFIED is zero in every
+  one of them**, so no share below rests on a silently-zeroed unknown.
+  **The classifier is FROZEN from that commit** (§2.3(4)): if the vocabulary
+  is later found wrong, BOTH sides are re-run under a new `VOCAB_VERSION`,
+  never the post result alone. No threshold was derived and none may be — the
+  five-canon precondition of §2.5 is now met, but meeting it authorizes a
+  PROPOSAL to [USER], not a gate. Registered blind spots at §2.6 (the
+  `decide%` gaps, the lowest-HP target heuristic, the `_worst_card` exhaust
+  proxy).
 - **payoff-reach re-registration** — the `RARITY_ODDS` fence. **RUN AND GRADED
   2026-08-24.** Q18 countersigned (R121); predictions committed 2026-08-13
   (R186) as the registration's `## 6`, before any sprint number was read; §6.5

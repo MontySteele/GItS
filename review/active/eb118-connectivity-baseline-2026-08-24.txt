@@ -1,0 +1,415 @@
+==============================================================================
+EB-118 CONNECTIVITY BASELINE — the paired baseline, packet §2.3 step (3)
+  registration  review/active/eb118-richness-phase0-2026-08-23.md §2
+  read date     2026-08-24T19:45Z
+  commit        a2e389fe8cc4f4b20c6f105c4882e605b04b3c6c (main, D15 landing)
+  branch        eb118-phase1 — this is the branch's FIRST commit, and every
+                Phase-1 sheet edit is a LATER commit on it. The ordering is
+                the registration's, not a convenience: a baseline read after
+                a sheet moved would be a post number wearing a pre label.
+  instrument    tools/card_connectivity_report.py, vocabulary
+                eb118-connectivity-v2
+  world         RT12 / D15 / P7 / C11 — recorded for provenance only. This
+                instrument reads SHEETS. It has no run count, no seed, no
+                combat and no draft, so no RT/D/P/C field is an input to a
+                single number below, and none moved to take it.
+==============================================================================
+THE CLASSIFIER IS FROZEN FROM THIS COMMIT.
+Packet §2.3(4): the vocabulary is frozen for the whole richness batch. From
+here on, in this branch and after it, `SHARED_STATES`, `PRIVATE_STATES`, the
+record fields, the pool statistics and the detection tokens are not edited.
+If the vocabulary is later found WRONG, the repair is to revise it and re-run
+BOTH SIDES — this baseline and the post read, under one new `VOCAB_VERSION` —
+never to repair only the post result. A one-sided repair would be the
+instrument grading its own batch, and the packet forbids it in those words.
+`VOCAB_VERSION` is the freeze's own name: this file is `v2` and a `v2` number
+may only ever be compared with another `v2` number.
+
+WHAT THIS FILE IS NOT.
+It is not a grade and it is not a gate. §2.5 registers NO threshold: there is
+no 55–65% target, no pass/fail bar, and no code in the instrument compares a
+share to a constant. Every percentage below is a REPORTED QUANTITY. The
+directional predictions of §2.4 are graded against the POST read, not against
+this one, and one of them (the Kokomi Assist supply clause) is already struck
+as SPOILED by an authorized content intervention (R197) and is not re-predicted.
+
+THE READ IS COMPLETE — ALL EIGHT POOLS, ZERO UNCLASSIFIED.
+The honest-stop path (mod-only diagnostic, no canon comparison, no derived
+threshold) was NOT taken: this checkout reaches the game binary through
+`klee-mod/local.props`, so all five canon pools decompiled and read alongside
+the three mod pools. Every one of the eight pools reports UNCLASSIFIED: none —
+no op, predicate, formula, count token, power name or card-level field in any
+of the 673 cards fell outside the frozen vocabulary. That is the condition the
+packet asks for in §2.2's last line, met on the read that matters.
+
+  pool          cards  non-basic  shared hook  play-time choice  automatic only
+  klee             76         72        66.7%              5.6%           30.6%
+  furina           82         77        75.3%              1.3%           74.0%
+  kokomi           76         71        93.0%             38.0%           25.4%
+  ironclad         87         84       100.0%              6.0%           94.0%
+  silent           88         84       100.0%              9.5%           90.5%
+  defect           88         84       100.0%              3.6%           96.4%
+  necrobinder      88         84       100.0%              6.0%           94.0%
+  regent           88         84       100.0%              9.5%           90.5%
+
+Read those three columns together and nothing else, because nothing else is
+registered: the canon pools sit at 100% shared-hook share and 90–96% automatic-
+only, the mod pools at 66.7–93.0% and 25.4–74.0%. Whether the gap is a defect
+or a design difference is EXACTLY the question §2.5 refuses to answer from a
+first read, and this file does not answer it either.
+
+PROVENANCE DIGESTS (sha256) — what was classified, and by what.
+  classifier
+    342f9b44972a96809fafb4b274087b361c9a8aad10f355828999289e981a7b90
+      tools/card_connectivity_report.py
+    ef6ef2ae18de106edf33e986b5439726bcc2426133d7a26608f6c2827a118e99
+      tools/effect_walk.py           (the nested then:/else: walker §2.2 requires)
+    584f40d57ad5afa9887a3fcaff121458136c8534488c5cfba88085a5184cf549
+      tools/extract_base_game_pool.py (the canon adapter's decompile route)
+  mod inputs
+    258c67bc32dfcc63adff538dde3defbf9d400f3d295ecf398c9bad149b49f992
+      docs/klee-cards.yaml
+    98850e2fe93166f4dad4c4fceeea543502ba75a35cbebd7b8f78097d842d0cdd
+      docs/furina-cards.yaml
+    9edcb046e7441b895683ecc1545f4572f9c6c7edc0ed2a33b09732681105d8a8
+      docs/kokomi-cards.yaml        (post-EB-69: 76 rows, the paired baseline
+                                     Kokomi's numbers are only valid against)
+  canon input
+    a1f9e653f1e28e4076558fee1e60d218619cb7e057b887c6417f62c62c6d7a52
+      sts2.dll (v0.107.1, buildid 23811903) — gitignored, machine-local,
+      reached through klee-mod/local.props and decompiled to a temp tree.
+      A checkout without it prints the mod-only report and CANNOT reproduce
+      the canon half of this file.
+
+DETERMINISM, CHECKED RATHER THAN ASSUMED. The tool was run twice at this
+commit and the two reports are byte-identical (the JSON sidecar too); the only
+differing line was the `--json` echo of the output path. No seed exists to fix.
+
+REPRODUCTION
+    python tools/card_connectivity_report.py
+from the repository root, on a checkout at the commit above with a readable
+`sts2.dll`. Everything below this line is the instrument's own stdout,
+unedited, on the payoff-reach-results precedent — a provenance header, not a
+rewrite.
+==============================================================================
+
+CARD CONNECTIVITY REPORT  (vocabulary eb118-connectivity-v2)
+EB-118. Deterministic, sheets-only, no gate and no threshold.
+
+All eight pools read. Canon pools: defect, ironclad, necrobinder, regent, silent
+
+--- furina (82 cards, 77 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook        75.3%
+    a non-target play-time choice    1.3%
+    touches a contested state       45.5%
+    extra value is automatic only   74.0%
+    external reach                   6.5%
+    random damage                    0.0%
+    random placement                 6.5%
+  writer:reader by SHARED state (cards, not instances):
+    aura_reaction              3 W :   4 R
+    block_held                19 W :   0 R
+    card_identity              9 W :   1 R
+    card_timing                2 W :   0 R
+    discard_pile               1 W :   0 R
+    draw_pile                  0 W :  18 R
+    enemy_count                0 W :   9 R
+    enemy_intent               0 W :   1 R
+    hand_contents             19 W :   0 R
+    hp_ledger                  2 W :   0 R
+    plays_this_turn            1 W :   2 R
+    self_exhaust               9 W :   0 R
+    universal_verb_power       1 W :   0 R
+  writer:reader by PRIVATE state:
+    burst                      0 W :   1 R
+    encore                    20 W :   9 R
+    fanfare                   19 W :  17 R
+    salon                     13 W :  11 R
+    spotlight                  1 W :  12 R
+  distinct hooks per card: 0:2, 1:19, 2:23, 3:24, 4:11, 5:2, 6:1
+  play-time choice kinds: pile:1
+  cross-archetype edges: 3
+    fanfare|salon            via private:encore, private:fanfare, private:salon, shared:aura_reaction, shared:block_held, shared:card_timing, shared:draw_pile, shared:enemy_count, shared:hand_contents, shared:hp_ledger, shared:self_exhaust
+    fanfare|spotlight        via private:encore, private:fanfare, private:salon, private:spotlight, shared:aura_reaction, shared:block_held, shared:card_identity, shared:draw_pile, shared:enemy_count, shared:hand_contents, shared:self_exhaust
+    salon|spotlight          via private:encore, private:fanfare, private:salon, shared:aura_reaction, shared:block_held, shared:draw_pile, shared:enemy_count, shared:hand_contents, shared:self_exhaust
+  cards in two non-generic plans: 6 -- curtain_cue, dress_rehearsal, hearts_swelling, high_tide, rain_of_roses, tempo_change
+  UNCLASSIFIED: none
+
+--- klee (76 cards, 72 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook        66.7%
+    a non-target play-time choice    5.6%
+    touches a contested state       51.4%
+    extra value is automatic only   30.6%
+    external reach                  11.1%
+    random damage                   11.1%
+    random placement                20.8%
+  writer:reader by SHARED state (cards, not instances):
+    aura_reaction              0 W :   7 R
+    block_held                16 W :   0 R
+    card_identity              1 W :   6 R
+    card_timing                0 W :   2 R
+    discard_chosen             1 W :   0 R
+    discard_pile               4 W :   0 R
+    discard_random             1 W :   0 R
+    draw_pile                  0 W :   9 R
+    enemy_count                0 W :  17 R
+    exhaust_other_random       1 W :   0 R
+    exhaust_pile               1 W :   0 R
+    hand_contents             10 W :   4 R
+    hp_ledger                  1 W :   0 R
+    junk_create                1 W :   0 R
+    junk_remove                1 W :   0 R
+    plays_this_turn            1 W :   1 R
+    self_exhaust               5 W :   0 R
+    universal_verb_power       1 W :   0 R
+  writer:reader by PRIVATE state:
+    bombs                     18 W :  10 R
+    burst                      3 W :   1 R
+    sparks                    15 W :   5 R
+  distinct hooks per card: 0:6, 1:27, 2:26, 3:9, 4:7, 6:1
+  play-time choice kinds: discard:1, pile:1, x_alloc:2
+  cross-archetype edges: 3
+    demolition|reaction      via private:sparks, shared:block_held, shared:draw_pile, shared:enemy_count, shared:hand_contents, shared:self_exhaust
+    demolition|spark         via private:bombs, private:sparks, shared:block_held, shared:draw_pile, shared:enemy_count, shared:hand_contents, shared:self_exhaust
+    reaction|spark           via private:sparks, shared:block_held, shared:card_identity, shared:draw_pile, shared:enemy_count, shared:hand_contents, shared:self_exhaust
+  cards in two non-generic plans: 2 -- playtime_forever, sparkly_explosion
+  UNCLASSIFIED: none
+
+--- kokomi (76 cards, 71 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook        93.0%
+    a non-target play-time choice   38.0%
+    touches a contested state       56.3%
+    extra value is automatic only   25.4%
+    external reach                  23.9%
+    random damage                    2.8%
+    random placement                25.4%
+  writer:reader by SHARED state (cards, not instances):
+    block_held                29 W :   0 R
+    card_identity             16 W :   1 R
+    discard_chosen             4 W :   0 R
+    discard_pile              13 W :   2 R
+    discard_random             9 W :   0 R
+    draw_pile                  1 W :  21 R
+    enemy_count                0 W :   7 R
+    exhaust_other_chosen      12 W :   0 R
+    exhaust_pile              14 W :   6 R
+    hand_contents             18 W :  34 R
+    hp_ledger                  2 W :   0 R
+    self_exhaust              11 W :   0 R
+    universal_verb_power       2 W :   0 R
+  writer:reader by PRIVATE state:
+    burst                      0 W :   1 R
+    charge                    10 W :   5 R
+    conscript_sly             26 W :   0 R
+    kurage                     1 W :   2 R
+  distinct hooks per card: 0:1, 1:17, 2:12, 3:12, 4:20, 5:9, 6:4, 7:1
+  play-time choice kinds: discard:4, exhaust:12, mode:12, pile:2, queue:1
+  cross-archetype edges: 3
+    assist|commander         via private:charge, private:conscript_sly, shared:block_held, shared:card_identity, shared:discard_chosen, shared:discard_pile, shared:draw_pile, shared:exhaust_other_chosen, shared:exhaust_pile, shared:hand_contents, shared:self_exhaust
+    assist|priest            via private:charge, private:conscript_sly, shared:block_held, shared:discard_chosen, shared:discard_pile, shared:discard_random, shared:draw_pile, shared:enemy_count, shared:exhaust_other_chosen, shared:exhaust_pile, shared:hand_contents, shared:self_exhaust, shared:universal_verb_power
+    commander|priest         via private:charge, private:conscript_sly, shared:block_held, shared:discard_chosen, shared:discard_pile, shared:draw_pile, shared:exhaust_other_chosen, shared:exhaust_pile, shared:hand_contents, shared:self_exhaust
+  cards in two non-generic plans: 7 -- communion_of_tides, council_at_bourou, epiphany_of_the_deep, moonlit_offering, open_the_stores, raise_the_sashimono, send_the_runner
+  UNCLASSIFIED: none
+
+--- defect (88 cards, 84 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook       100.0%
+    a non-target play-time choice    3.6%
+    touches a contested state       41.7%
+    extra value is automatic only   96.4%
+    external reach                  20.2%
+    random damage                    0.0%
+    random placement                 2.4%
+  writer:reader by SHARED state (cards, not instances):
+    block_held                14 W :   0 R
+    card_identity              1 W :  88 R
+    card_timing                5 W :   2 R
+    discard_pile               1 W :   8 R
+    discard_random             1 W :   0 R
+    draw_pile                  0 W :  12 R
+    enemy_count                0 W :   8 R
+    ethereal                   1 W :   0 R
+    exhaust_other_chosen       1 W :   0 R
+    exhaust_other_random       1 W :   0 R
+    exhaust_pile               2 W :   1 R
+    hand_contents             20 W :   9 R
+    hp_ledger                  3 W :   0 R
+    junk_create                5 W :   3 R
+    junk_remove                2 W :   0 R
+    plays_this_turn            1 W :   0 R
+    self_exhaust              18 W :   0 R
+    universal_verb_power       5 W :   0 R
+  writer:reader by PRIVATE state:
+    orbs                      24 W :   2 R
+  distinct hooks per card: 1:15, 2:32, 3:21, 4:14, 5:6
+  play-time choice kinds: pile:1, x_alloc:2
+  cross-archetype edges: 0
+  cards in two non-generic plans: 0
+  UNCLASSIFIED: none
+
+--- ironclad (87 cards, 84 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook       100.0%
+    a non-target play-time choice    6.0%
+    touches a contested state       14.3%
+    extra value is automatic only   94.0%
+    external reach                  10.7%
+    random damage                    0.0%
+    random placement                 6.0%
+  writer:reader by SHARED state (cards, not instances):
+    block_held                17 W :   0 R
+    card_identity              4 W :  87 R
+    card_timing                4 W :   2 R
+    discard_pile               0 W :   3 R
+    draw_pile                  0 W :  12 R
+    enemy_count                0 W :  12 R
+    exhaust_other_chosen       3 W :   0 R
+    exhaust_other_random       5 W :   0 R
+    exhaust_pile               8 W :   4 R
+    hand_contents             15 W :  15 R
+    hp_ledger                 13 W :   0 R
+    plays_this_turn            5 W :   0 R
+    self_exhaust              25 W :   0 R
+    universal_verb_power       6 W :   0 R
+  writer:reader by PRIVATE state:
+    (none)
+  distinct hooks per card: 1:24, 2:18, 3:24, 4:11, 5:7, 6:3
+  play-time choice kinds: pile:3, x_alloc:2
+  cross-archetype edges: 0
+  cards in two non-generic plans: 0
+  UNCLASSIFIED: none
+
+--- necrobinder (88 cards, 84 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook       100.0%
+    a non-target play-time choice    6.0%
+    touches a contested state       15.5%
+    extra value is automatic only   94.0%
+    external reach                  21.4%
+    random damage                    0.0%
+    random placement                 2.4%
+  writer:reader by SHARED state (cards, not instances):
+    block_held                14 W :   0 R
+    card_identity              3 W :  88 R
+    card_timing               13 W :   2 R
+    discard_pile               0 W :   6 R
+    draw_pile                  0 W :  13 R
+    enemy_count                0 W :  11 R
+    ethereal                  15 W :   0 R
+    exhaust_other_random       2 W :   0 R
+    exhaust_pile               2 W :   1 R
+    hand_contents             17 W :   7 R
+    hp_ledger                  5 W :   0 R
+    self_exhaust              15 W :   0 R
+    universal_verb_power       9 W :   0 R
+  writer:reader by PRIVATE state:
+    osty                      23 W :   0 R
+  distinct hooks per card: 1:11, 2:35, 3:21, 4:16, 5:3, 6:2
+  play-time choice kinds: pile:3, x_alloc:2
+  cross-archetype edges: 0
+  cards in two non-generic plans: 0
+  UNCLASSIFIED: none
+
+--- regent (88 cards, 84 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook       100.0%
+    a non-target play-time choice    9.5%
+    touches a contested state       15.5%
+    extra value is automatic only   90.5%
+    external reach                  16.7%
+    random damage                    0.0%
+    random placement                 0.0%
+  writer:reader by SHARED state (cards, not instances):
+    block_held                14 W :   0 R
+    card_identity              6 W :  88 R
+    card_timing                8 W :   1 R
+    discard_pile               0 W :   2 R
+    draw_pile                  0 W :  13 R
+    enemy_count                0 W :  10 R
+    ethereal                   2 W :   0 R
+    exhaust_pile               1 W :   1 R
+    hand_contents             21 W :  13 R
+    hp_ledger                  2 W :   0 R
+    junk_create                2 W :   0 R
+    plays_this_turn            3 W :   0 R
+    self_exhaust               9 W :   0 R
+    universal_verb_power       6 W :   0 R
+  writer:reader by PRIVATE state:
+    stars                     23 W :   0 R
+  distinct hooks per card: 1:22, 2:34, 3:16, 4:12, 5:3, 6:1
+  play-time choice kinds: pile:7, x_alloc:1
+  cross-archetype edges: 0
+  cards in two non-generic plans: 0
+  UNCLASSIFIED: none
+
+--- silent (88 cards, 84 non-basic) ---
+  shares over NON-BASIC cards:
+    at least one shared hook       100.0%
+    a non-target play-time choice    9.5%
+    touches a contested state       22.6%
+    extra value is automatic only   90.5%
+    external reach                  26.2%
+    random damage                    0.0%
+    random placement                 3.6%
+  writer:reader by SHARED state (cards, not instances):
+    block_held                15 W :   1 R
+    card_identity              4 W :  88 R
+    card_timing               12 W :   2 R
+    discard_chosen             5 W :   0 R
+    discard_pile               9 W :   0 R
+    discard_random             3 W :   0 R
+    draw_pile                  0 W :   9 R
+    enemy_count                0 W :  15 R
+    exhaust_pile               0 W :   1 R
+    hand_contents              9 W :  14 R
+    hp_ledger                 12 W :   0 R
+    plays_this_turn            1 W :   0 R
+    self_exhaust              12 W :   0 R
+    universal_verb_power      10 W :   0 R
+  writer:reader by PRIVATE state:
+    conscript_sly             10 W :   0 R
+  distinct hooks per card: 1:23, 2:21, 3:26, 4:12, 5:5, 6:1
+  play-time choice kinds: discard:5, pile:2, x_alloc:2
+  cross-archetype edges: 0
+  cards in two non-generic plans: 0
+  UNCLASSIFIED: none
+
+vocabulary (entry -- canon detection status):
+  shared  hp_ledger              grounded      HP lost or paid (self-damage, heal, max HP)
+  shared  discard_chosen         grounded      a discard the player picks
+  shared  discard_random         grounded      a discard the game picks
+  shared  exhaust_other_chosen   grounded      Exhaust another card, player's pick
+  shared  exhaust_other_random   grounded      Exhaust another card, game's pick
+  shared  self_exhaust           grounded      the card Exhausts itself
+  shared  ethereal               grounded      the card is Ethereal
+  shared  junk_create            grounded      junk/status/curse creation
+  shared  junk_remove            grounded      junk/status/curse removal
+  shared  hand_contents          grounded      hand contents or hand size
+  shared  draw_pile              grounded      draw-pile contents or size
+  shared  discard_pile           grounded      discard-pile contents or size
+  shared  exhaust_pile           grounded      Exhaust-pile contents or size
+  shared  block_held             grounded      Block held, by either side
+  shared  enemy_count            grounded      how many enemies there are / how many died
+  shared  enemy_intent           grounded      what the enemy intends this turn
+  shared  aura_reaction          canon_absent  elemental aura / reaction state
+  shared  plays_this_turn        grounded      cards/Attacks/Skills/Companions played this turn or combat
+  shared  card_identity          grounded      card identity, type, cost or upgrade state
+  shared  card_timing            grounded      timing fields: X, Retain, Innate
+  shared  universal_verb_power   grounded      a Power that modifies a universal verb -- playing, drawing, discarding or Exhausting ANY eligible card
+  private bombs                  canon_absent  Klee's Bombs
+  private sparks                 canon_absent  Klee's Sparks
+  private encore                 canon_absent  Furina's Encore
+  private fanfare                canon_absent  Furina's Fanfare
+  private salon                  canon_absent  Furina's Salon members
+  private spotlight              canon_absent  Furina's Spotlight
+  private charge                 canon_absent  Kokomi's Charge
+  private burst                  canon_absent  Kokomi's Burst meter (the Charge family's spend door)
+  private conscript_sly          canon_absent  Conscript / Sly
+  private kurage                 canon_absent  the Bake-Kurage summon
+  private orbs                   grounded      canon: channelled Orbs
+  private stars                  grounded      canon: Forge / Stars
+  private osty                   grounded      canon: summoned bodies
+
