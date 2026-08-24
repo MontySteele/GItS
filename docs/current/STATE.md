@@ -181,6 +181,26 @@ Named here for status only. Open items are in
   supply cut on `kokomi/commander` or `kokomi/assist`, whose problem is access
   not saturation; and a ruled priority order). The guardrails and the order live
   in the BACKLOG `EB-118` row.
+  **PHASE 1 IS PART-LANDED, 2026-08-24, and the parts that did not land are
+  STAGED rather than dropped.** The paired connectivity baseline was taken
+  FIRST, before any sheet moved
+  (`review/active/eb118-connectivity-baseline-2026-08-24.txt`, all eight pools,
+  zero UNCLASSIFIED), and the classifier is frozen from that commit. Landed:
+  Furina's incidental `raise_fanfare_cap` riders (fifteen of the packet's
+  sixteen) with register lint `R7` retired and the LAW wording amended; the
+  Block-reader cleanup; Klee's two ruled face prices; and `Burst +5` on all
+  fifteen `skill_tag` faces. **Three items stopped at a [USER] door and are
+  built, tested and staged on local branches, pushed nowhere** — the
+  Bomb-placement target cut (`staged/eb118-bomb-placement-cut`: it moves
+  `klee/demolition_weighted` A2_scaling 4.703 → 4.936 against a **ratified**
+  4.8 band, and a band moves only by ruling), the Explosives Workshop
+  conversion (`staged/eb118-workshop-conversion`: its new power is grammar the
+  FROZEN classifier has never seen, so extending the vocabulary mid-batch is a
+  measurement call), and `lasting_impression`'s cap rider (its ruled upgrade
+  delta binds to the op being removed, so the card needs a new ruled delta
+  first). **The Phase-1 re-baseline is OWED, not skipped**: two of the three
+  staged items move Klee combat numbers again when pulled, so taking the
+  twelve-arm table between them costs two re-baselines for one window.
 - **Enemy remapping** — planned.
 - **Art passes** — Furina and Kokomi surfaces (Kokomi's are newest).
 - **Animation sprint 2.**
