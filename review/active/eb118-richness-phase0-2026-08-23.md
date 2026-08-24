@@ -87,8 +87,12 @@ These are part of the implementation contract, not caveats to apply later.
    richness card-body, rarity, role, archetype, id-list, drafter, or policy
    change lands before the payoff-reach experiment grades. The static tool and
    unused staged infrastructure may be built now as described in §3.
-10. **`D14` stays pinned.** `D15` is already reserved by the staged `EB-43`
-    ordering. Richness op prices do not reuse that number or merge ahead of it.
+10. **`D14` stays pinned — DISCHARGED 2026-08-24.** The pin lifted at the
+    payoff-reach grade, and `EB-43` then spent the number it was reserving:
+    `DRAFTER_VERSION` is **15** and the spotlight limb is what it means. The
+    constraint's live remnant is its arithmetic only — richness op prices are a
+    drafter behaviour change, so they take **`D16`**, the next free number, in
+    their own window and with their own re-baseline.
 11. **Existing user gates remain existing user gates.** This packet recommends
     Retain as the `encore_performance` upgrade answer but does not close `M27`;
     role/payoff reclassification waits on `M28`; and it neither pulls nor
@@ -277,8 +281,10 @@ staged branch.
 
 ### Phase 2 — infrastructure landing and honest policies
 
-After the `D14` pin lifts and the reserved `D15`/`EB-43` step executes, land
-new ops with prices and parity. Land the two pilot changes under an explicit
+Both of this phase's preconditions are **satisfied as of 2026-08-24** — the
+`D14` pin lifted at the payoff-reach grade and the reserved `D15`/`EB-43` step
+executed — so what follows is takeable, at `D16`. Land new ops with prices and
+parity. Land the two pilot changes under an explicit
 `POLICY_VERSION` bump before using run results to tune Bomb placement or Recycle
 cards. One modal prototype is priced before the pattern is copied. Land Big
 Badda Boom's Ethereal price here, with the card-level keyword and its drafter

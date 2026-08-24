@@ -2,10 +2,23 @@
 
 > **Two windows, one document.** Part 1 (§1–§5) is the `RT10 → RT11` re-baseline, published as taken. Part 2 (§6–§10) is the second re-take, owed by the window-2 correctness batch's coordinated bump later the same day. Part 1 is not rewritten and its `RT11` column is Part 2's `RT11` column — the same numbers, from the same run, quoted once.
 
-> **Lifecycle: ACTIVE.** This is the re-baseline the `RUNTEMPLATE` 10 → 11 bump
-> owes. It is descriptive only. It runs, records and reports. It recommends
-> nothing, tunes nothing, and reads nothing into the numbers. Every call these
-> numbers feed stays [USER]'s.
+> **Lifecycle: ARCHIVE as of 2026-08-24.** This was the re-baseline the
+> `RUNTEMPLATE` 10 → 11 bump owed. It is descriptive only. It runs, records and
+> reports. It recommends nothing, tunes nothing, and reads nothing into the
+> numbers. Every call these numbers feed stays [USER]'s.
+
+> **ARCHIVE NOTE (whole document), 2026-08-24 — `D14 → D15`.** `EB-43` landed
+> the spotlight-limb payoff-presence change and `DRAFTER_VERSION` moved 14 →
+> 15, so **every column in this file is a `D14` reading and is archive by stamp
+> law** (R68) — the nine non-Kokomi rows of Part 2 included, which the C11 note
+> below had left standing. The standing twelve-arm table is now
+> `review/active/sitting-reads-2026-08-24.md`, taken at `RT12/D15/P7/C11`.
+> Nothing here is rewritten (R101b); the numbers stand exactly as published and
+> are quotable only with their own stamps. **Recorded from the re-take, because
+> it bears on how this file is read:** re-run at `C11`/`D14`, all nine
+> non-Kokomi rows of Part 2 reproduced to the printed precision on every
+> column, and all three Kokomi rows moved — which is what the note below said
+> would happen.
 
 > **ARCHIVE NOTE (Kokomi rows only), 2026-08-23 — `C10 → C11`.** The
 > rotation law landed (`CONSTANTS_VERSION` 11): a Status or Curse is no

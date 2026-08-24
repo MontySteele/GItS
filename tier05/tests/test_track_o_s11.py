@@ -1,4 +1,4 @@
-"""Track O slice 11: `core_complete` at DRAFTER_VERSION 14 under adversarial
+"""Track O slice 11: `core_complete` at DRAFTER_VERSION 15 under adversarial
 deck compositions.
 
 These pin the properties of the predicate that are UNAMBIGUOUS from its own
@@ -65,8 +65,18 @@ def _battery():
         ("reaction_no_amp",
          klee + _cards("dahlia_sacramental_shower", "kaeya_frostgnaw"),
          "reaction"),
-        ("spotlight_online", furina + _cards("lynette_box_trick", "limelight"),
+        # DRAFTER_VERSION 15 (EB-43): the machinery limb now wants a
+        # machinery PAYOFF as well, so the old `spotlight_online` row --
+        # access + `limelight`, the one enabler-role machinery card -- is
+        # offline and is renamed for what it now is. A genuinely online row
+        # is added beside it so this battery still exercises the complete
+        # side of the spotlight limb, which is what
+        # `test_progress_reaches_one_exactly...` reads it for.
+        ("spotlight_online",
+         furina + _cards("lynette_box_trick", "limelight", "top_billing"),
          "spotlight"),
+        ("spotlight_machinery_no_payoff",
+         furina + _cards("lynette_box_trick", "limelight"), "spotlight"),
         ("spotlight_access_only", furina + _cards("lynette_box_trick"),
          "spotlight"),
         ("fanfare_online", furina + _cards("rapturous_applause"), "fanfare"),

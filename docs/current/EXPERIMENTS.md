@@ -61,8 +61,10 @@ registration packets themselves live under `review/active/` — one home, not tw
   amended pre-run 2026-08-23 (`M28` ratified, R196) and that amendment
   implemented as `EB-120`; §6.6's `P12` freeze taken 2026-08-24; the registered
   cell run and graded blind the same day. **All six steps of `R121`'s
-  countersigned order have now run in order, except (5) and (6), which the
-  grade unblocks and which are deliberately not taken with it.**
+  countersigned order have now run, in order and complete.** Steps (5) and (6)
+  were deliberately left out of the grading window and taken in the next one,
+  2026-08-24: `EB-43`'s staged D15 landed with its re-baseline (`D` 14 → 15),
+  and the `RA-G1`/`RA-G2`/`tto` quarantine lifted on the graded read.
   **THE OUTCOME, in one line: nine arms, nine `P5` MISSES on both axes — every
   arm ABOVE its band window, never below — Q-A SPLIT and Q-B SPLIT, no tripwire
   fired, and the redesign trigger fired roster-wide and minted `QUEUE` `M37` —
@@ -160,9 +162,15 @@ registration packets themselves live under `review/active/` — one home, not tw
   read, which is exactly the span §6.6 gave it, and no `RT`/`D`/`P`/`C` bump
   landed inside it. **`R190`'s remaining Assist payoff-supply fence is
   discharged by the same read.**
-  **WHAT IS OWED NEXT, in order, and none of it is taken here:** step (5), the
-  staged D15 (`EB-43`) landing with its re-baseline, which moves `D` 14 → 15;
-  step (6), the `RA-G1`/`RA-G2`/`tto` quarantine lift, which `R121` put "on the
+  **STEPS (5) AND (6) ARE EXECUTED, 2026-08-24, in the window after this one
+  and in R121's order.** Step (5): `EB-43`'s staged D15 landed — the spotlight
+  limb of `core_complete`/`_core_progress` now requires a machinery payoff, and
+  `D` moved 14 → 15 with its twelve-arm re-baseline in the same window and
+  nothing else beside it (`review/active/sitting-reads-2026-08-24.md`). **Every
+  number this registration published is a `D14` reading and is archive by stamp
+  law from that bump** — which changes nothing about the grade: a graded record
+  stands as published (`R101b`) and is never re-run against a later world. Step
+  (6): the `RA-G1`/`RA-G2`/`tto` quarantine lifted, which `R121` put "on the
   graded read, and nowhere earlier". **The design call the grade raised was
   `QUEUE` `M37`, and it is ANSWERED — R199, [USER] 2026-08-24:** the canonical
   bands stay a directional richness benchmark rather than a hard 1–3
@@ -202,16 +210,22 @@ registration packets themselves live under `review/active/` — one home, not tw
   **§8's per-arm prediction table and the direction half of `Q4` stay blank**,
   so the packet is not cleared to launch; the countersign is withheld until the
   post-window restamp, because predictions are filled against the settled world
-  — and the `RT`/`C` window that was open at R189 has since CLOSED (2026-08-24,
-  settled at `RT12/D14/P7/C11`), so the restamp and the fill are now takeable. R189 also chose the **route** —
+  — and the `RT`/`C` window that was open at R189 has since CLOSED (2026-08-24),
+  so the restamp and the fill are now takeable. R189 also chose the **route** —
   measure-first, so this sweep runs before the `elemental_ecstasy` redesign
   (Option `C2`), which lands after the graded read as its own `C` bump.
-  **Sequencing: its payoff-reach gate is DISCHARGED.** It was to run *after* the
-  payoff-reach sprint's graded read, per the approved settle-first plan, and
-  before the staged `EB-43`/D15 landing (its own S3). **That graded read landed
-  2026-08-24**, so the ordering constraint ahead of it is satisfied and the one
-  behind it — land before D15 moves `D` 14 → 15, or re-stamp — is now the live
-  one. The countersign is still withheld and is still [USER]'s →
+  **Sequencing: its payoff-reach gate is DISCHARGED, and `S3`'s two-way fork is
+  RESOLVED to the re-stamp arm.** It was to run *after* the payoff-reach
+  sprint's graded read, per the approved settle-first plan, and *before* the
+  staged `EB-43`/D15 landing — or, failing that, re-stamped past it (`S3`). The
+  graded read landed 2026-08-24 and **D15 landed the same day**, so the "land
+  before D15" arm is spent and the fork falls to the other one: **the packet
+  re-stamps to `RT12/D15/P7/C11` when [USER] takes it up**, and its restamp is
+  now the fourth field rather than the first three. That re-stamp is the
+  packet's own act at countersign time and is deliberately NOT applied to the
+  packet here — nothing is written into an uncountersigned registration from
+  outside it. Nothing else in `S3` moves: the sweep still runs before the `C2`
+  redesign. The countersign is still withheld and is still [USER]'s →
   `review/active/m17-sweep-reregistration-p7-2026-08-13.md`; companion redesign
   options packet `review/active/m17-elemental-ecstasy-redesign-2026-08-13.md`.
 - **Shop companion channel re-run (`S4-G10` / `C9`)** — **DRAFT, awaiting
