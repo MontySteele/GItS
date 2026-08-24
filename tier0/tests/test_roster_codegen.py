@@ -1259,3 +1259,27 @@ def test_the_shipped_eb69_chosen_discards_carry_the_selection_idiom():
         assert f"Discard {count} card{plural}." in src, class_name
         assert "random card" not in src, class_name
 
+
+def test_codegen_refuses_the_add_before_position_rather_than_dropping_it(
+        monkeypatch):
+    """`add_before` is a tier0 applier key (send_the_runner+'s ruled middle
+    insertion). The C# `add:` emitter appends its IsUpgraded-gated effect at
+    the END of OnPlay and has no way to honour a position, so the delta must
+    come back UNEXPRESSIBLE -- silently appending would ship an upgraded card
+    that resolves in a different order from the one the sim upgrades to.
+    Gate: BACKLOG EB-122."""
+    card = {
+        "id": "add_before_probe",
+        "name": "Add Before Probe",
+        "cost": 0,
+        "type": "skill",
+        "rarity": "common",
+        "effects": [{"op": "draw", "amount": 1},
+                    {"op": "exhaust_from", "amount": 1, "select": "chosen"}],
+    }
+    monkeypatch.setattr(gen, "_upgrade_deltas", {
+        "add_before_probe": {"add": {"op": "gain_encore", "amount": 1},
+                             "add_before": "exhaust_from"}})
+    assert gen.upgrade_plan(card)[1] == (
+        "delta key 'add_before: exhaust_from' not expressible by codegen "
+        "(structural upgrade)")

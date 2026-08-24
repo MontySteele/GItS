@@ -173,10 +173,14 @@ CODEGEN_DEBT: dict[str, str] = {
     # twin is wanted and adding one would be a lie about the sheet.
     "send_the_runner":
         "DEBT -- [USER]'s ruled two-key common upgrade (D2a): draw +1 plus "
-        "`add: discard 1 chosen`. The delta is authored and shipped in "
-        "docs/kokomi-upgrades.yaml; only the C# `add:` emitter cannot express "
-        "a discard. Gate: BACKLOG `EB-122` teaches the emitter `discard` -> "
-        "delete this entry.",
+        "`add: discard 1 chosen`, inserted BEFORE the printed exhaust "
+        "(`add_before: exhaust_from`) because D2a rules the order draw 2 -> "
+        "discard 1 chosen -> exhaust 1 chosen. The delta is authored and "
+        "shipped in docs/kokomi-upgrades.yaml; the C# `add:` emitter can "
+        "express neither the discard nor a POSITION -- it appends its "
+        "IsUpgraded-gated effect at the end of OnPlay. Gate: BACKLOG "
+        "`EB-122` teaches the emitter `discard` AND `add_before` -> delete "
+        "this entry.",
     "wheel_the_ranks":
         "DEBT -- ruled upgrade `add: block 3` on the played face (D6). Same "
         "single missing emitter as the entry above, one op over. Gate: "
