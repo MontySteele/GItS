@@ -13,7 +13,7 @@ import copy
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine import powers, reactions, resources
+from tier0.engine import powers, reactions, resources, statuses
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, grant_sly_autoplay,
                                 remove_instance, sly_autoplays,
@@ -707,6 +707,37 @@ def spend_sparks(state: CombatState, n: int) -> bool:
     p.sparks -= n
     state.emit("spend_spark", amount=n, total=p.sparks)
     return True
+
+
+def token_card(card_id: str) -> Card:
+    """One door from a stored card ID back to a fresh Card instance.
+
+    Powers that make cards keep an ID, not an object -- Infinite Blades
+    carries its token id as a row payload, Nightmare remembers what
+    `SetSelectedCard` would have cloned. Almost every such id is pool
+    content and comes from the loader; the exception is a STATUS, which
+    `engine.statuses` synthesizes under `status_<x>` and which is
+    deliberately in no pool and no loader index at all. Nightmare chooses
+    from HAND and an enemy-injected Dazed is in hand, so the loader lookup
+    raised `KeyError: 'status_dazed'` and killed the whole run (EB-123).
+
+    THE LOADER IS ASKED FIRST, and the status door opens only inside the
+    handler for the KeyError the loader itself raised. That ordering is the
+    point rather than a detail: every id the loader already resolved is
+    resolved by the same call with the same result, so no measured number
+    can move -- the only behaviour that can differ is behaviour that used
+    to be a crash. An id neither side knows still raises, because a typo'd
+    payload is a defect and a resolver that quietly invented a card in its
+    place would hide it.
+    """
+    from tier0.content import loader                # late import (cycle)
+    try:
+        return loader.get_card(card_id)
+    except KeyError:
+        status = statuses.status_from_card_id(card_id)
+        if status is None:
+            raise
+        return status
 
 
 def _add_token(state: CombatState, card: Card, zone: str) -> None:

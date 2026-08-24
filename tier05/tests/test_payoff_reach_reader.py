@@ -494,6 +494,79 @@ def test_base_id_normalizes_the_upgrade_suffix_and_leaves_everything_else():
     assert reach.base_id("+") == ""
 
 
+# --- EB-124: the run-applied enchantment is the OTHER decoration -----------
+
+def test_base_id_normalizes_the_enchantment_mark_too():
+    """EB-124. A deck-list id carries two independent decorations, the
+    upgrade suffix and the enchantment mark (`<id>@<name>[-<amount>][+]`,
+    `tier0.content.enchantments`). `base_id` normalized only the first, so
+    an enchanted reward-pool card reconstructed to nothing and fell into the
+    external-source set. Both come off, and the precedent is the engine's
+    own: `enchantments.split` is the function `loader._card_prototype` uses
+    to look past the mark, and the mark sits INSIDE the upgrade suffix, so
+    the order is split-then-strip and never the reverse."""
+    assert reach.base_id("da_da_da@corrupted") == "da_da_da"
+    assert reach.base_id("high_tide@vigorous-8") == "high_tide"
+    assert reach.base_id("high_tide@vigorous-8+") == "high_tide"
+    # ... and an id carrying neither decoration is untouched, which is the
+    # branch every non-enchanted deck list takes.
+    assert reach.base_id("high_tide") == "high_tide"
+
+
+def test_an_enchanted_pool_card_is_compared_not_called_external():
+    """The first of EB-124's two directions. `da_da_da@corrupted` is a
+    reward-pool card that a run event enchanted; it never left the pool, and
+    the exclusion line's own words -- 'entered the deck from outside the
+    reward pool' -- were never true of it."""
+    pool = _fixture_pool()
+    enchanted = _card("u_pay@corrupted", "uncommon", "payoff", ["plan"])
+    a = reach.membership_audit([[enchanted]], "fixture", "plan", pool=pool)
+    assert a["compared"] == ["u_pay"]
+    assert a["external"] == []
+    assert a["disagree"] == {}
+
+
+def test_a_genuinely_external_payoff_is_still_called_external():
+    """The second direction, and the one that keeps the fix honest: widening
+    the normalization must not empty the set. An event grant with no static
+    row still has nothing to be compared against."""
+    pool = _fixture_pool()
+    granted = _card("event_gift@corrupted", "rare", "payoff", ["plan"])
+    plain = _card("event_gift2", "rare", "payoff", ["plan"])
+    a = reach.membership_audit([[granted, plain]], "fixture", "plan",
+                               pool=pool)
+    assert a["external"] == ["event_gift", "event_gift2"]
+    assert a["compared"] == []
+
+
+def test_an_enchanted_upgraded_pool_card_reconstructs_through_both():
+    """Both decorations at once, in the order a run applies them: the card
+    is upgraded and then enchanted, and it must still land on its row."""
+    pool = _fixture_pool()
+    both = _card("u_pay@sharp-2+", "uncommon", "payoff", ["plan"])
+    a = reach.membership_audit([[both]], "fixture", "plan", pool=pool)
+    assert a["compared"] == ["u_pay"] and a["external"] == []
+
+
+def test_enchanting_a_live_card_moves_neither_role_nor_archetypes():
+    """Why the graded 2026-08-24 read is unaffected by this fix, pinned
+    rather than asserted in prose: `role` and `archetypes` are the whole of
+    `is_on_plan_payoff`, and an enchantment touches neither. So returning
+    the enchanted ids to the compared set adds compared ids and cannot add
+    a disagreement -- which is exactly what the sprint measured before the
+    grade (all 122 excluded ids carried an `@`, genuinely external payoffs
+    numbered zero, and `T3` fired under neither normalization)."""
+    from tier0.content import enchantments, loader
+    for name in sorted(enchantments.CATALOG):
+        plain = loader.peek_card("undertow")
+        amount = 2 if enchantments.CATALOG[name].rider(2) is not None else None
+        decorated = loader.peek_card(
+            enchantments.decorate("undertow", name, amount))
+        assert decorated.role == plain.role
+        assert decorated.archetypes == plain.archetypes
+        assert reach.base_id(decorated.id) == "undertow"
+
+
 def test_the_audit_compares_the_upgraded_form_against_the_printed_row():
     """Upgrade normalization is what makes the comparison possible at all.
 

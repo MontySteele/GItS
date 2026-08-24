@@ -858,10 +858,17 @@ def before_hand_draw(state: CombatState) -> None:
     id is not in this file: it arrives as a `payload` on the row that applied
     the power (see effects._op_apply_power), because a base-game card id is
     decompiled game data and this module is committed.
+
+    BOTH limbs below rebuild a card from a stored ID through
+    `effects.token_card` rather than through the loader directly. A Status
+    is synthesized, not indexed, so a bare `loader.get_card()` here raised
+    `KeyError: 'status_dazed'` on a remembered Dazed and took the run with
+    it (EB-123). Nightmare is the limb that could reach it -- it chooses
+    from hand, and a clog is in hand -- but the shape is identical in both,
+    so both go through the one door.
     """
     p = state.player
-    from tier0.content import loader                # late import avoids cycle
-    from tier0.engine.effects import _add_token
+    from tier0.engine.effects import _add_token, token_card
 
     n = p.powers.get("infinite_blades", 0)
     if n:
@@ -872,7 +879,7 @@ def before_hand_draw(state: CombatState) -> None:
                               "no card")
         else:
             for _ in range(n):
-                _add_token(state, loader.get_card(token), "hand")
+                _add_token(state, token_card(token), "hand")
 
     # NightmarePower, the same hook: Amount COPIES of the card chosen when it
     # was played, then PowerCmd.Remove(this) -- one payout, not a standing
@@ -888,7 +895,7 @@ def before_hand_draw(state: CombatState) -> None:
                               "choose when it resolved")
         else:
             for _ in range(n):
-                _add_token(state, loader.get_card(remembered), "hand")
+                _add_token(state, token_card(remembered), "hand")
 
 
 def after_card_drawn(state: CombatState, card: Card,
