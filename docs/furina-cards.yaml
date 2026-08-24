@@ -177,38 +177,38 @@
    # Pairs with A13 by construction: same slope, one on damage and one on
    # block, so the stage reads the same way on both halves of the turn.
 # Fanfare (7)
-- {id: suffering_for_art, name: "Suffering for Art", register: archon, cost: 0, type: skill, rarity: common, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early, mid, late], run: [early, late]}, archetypes: [fanfare], role: enabler,
-   effects: [{op: damage, amount: 1, target: self}, {op: gain_encore, amount: 3},
-             {op: block, amount: 0, bonus_formula: 1_per_4_fanfare}]}
+- {id: suffering_for_art, name: "Suffering for Art", register: archon, cost: 0, type: skill, rarity: common, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [fanfare], role: enabler,
+   effects: [{op: damage, amount: 1, target: self}, {op: gain_encore, amount: 3}]}
    # The tragedienne: pay 1 HP, gain 3 buffer. The measured one-point wound keeps the risk/reward without making an overpicked Common a run liability.
-   # COMPENSATION Track 2.2 (RULED 2026-07-28; the rate RATIFIED at the R130
-   # sitting, 2026-08-07). The brief
-   # calls this card the flagship of the conversion and it is right: it already
-   # self-damages, and under single-leg HP loss is the meter's LARGEST source
-   # (45.4% of stoker generation -- lint-ok: measured telemetry, not card numbers).
-   # So the card now closes its own loop on one
-   # face -- take the wound, print the meter, read the meter -- and it is the
-   # only card in the pool that both pays and reads.
-   # BASE 0 IS INTENTIONAL AND IT IS THE PRICE. This is a 0-cost common in an
-   # archetype that plays it every turn; a printed base would make it a free
-   # repeatable wall. What it gets is exactly the scaling line, which is worth
-   # nothing on turn 1 and real money once the deck is doing its job. The face
-   # reads "Gain 1 Block per 4 Fanfare" -- no zero is printed.
-   # The old line "Both movements generate Fanfare" was RETIRED here: it was
-   # written in the two-leg world and the gain half stopped paying at Track A.
-- {id: lasting_impression, name: "Lasting Impression", register: archon, cost: 1, type: skill, rarity: common, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early, mid, late], run: [early]}, archetypes: [fanfare], role: enabler, exhaust: true,
-   effects: [{op: raise_fanfare_cap, amount: 5}, {op: gain_encore, amount: 4},
-             {op: block, amount: 0, bonus_formula: 1_per_4_fanfare}]}
-   # BODY LANDED R135 (2026-08-08), commissioned R130 item 7 ("needs a
-   # rework", not a ratify). Candidate A of the worksheet: the Block reader.
-   # The commons tier rate (1_per_4_fanfare, ratified R130 item 6) rides the
-   # card that raises the cap, so it finally touches the meter it moves --
-   # the exact clause the Track 2.4 veto took OFF the starter, landing on a
-   # non-starter common instead. Zero new grammar: the clause is copied from
-   # the shipped commons. Cost 1 / common / exhaust unchanged (the sitting
-   # commissioned a body, not a reprice), and the upgrade delta chains on
-   # top unchanged. The paragraph below is the LOSS this body answers; it
-   # stays on the record because the answer is only legible beside it.
+   # THE FANFARE-READING BLOCK LINE IS GONE (EB-118 sec.5.3, 2026-08-24). It
+   # arrived at COMPENSATION Track 2.2 (RULED 2026-07-28, rate ratified R130)
+   # as the flagship of that conversion, and the argument for it was good: the
+   # card already self-damages, HP loss is the meter's largest single-leg
+   # source, so one face took the wound, printed the meter and read it back.
+   # What sec.5.3 found is that the POOL, not the card, was the problem --
+   # a whole family of Block readers on one rate, two of them with a printed
+   # base of ZERO. A zero base is a rider that shows the player a keyword and
+   # pays nothing at the moment they read it, and two of them were. The reader
+   # role stays with `held_breath` at Common (printed base 4) and
+   # `thunderous_ovation` at Rare (base 6, the steeper rate): a card that
+   # reads the meter now also pays something for existing.
+   # The old line "Both movements generate Fanfare" was RETIRED before that:
+   # it was written in the two-leg world and the gain half stopped paying at
+   # Track A. The register stays `archon`; R2 no longer FORCES it (nothing on
+   # this row reads Fanfare) and a register is a naming call, not a lint's.
+- {id: lasting_impression, name: "Lasting Impression", register: archon, cost: 1, type: skill, rarity: common, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [fanfare], role: enabler, exhaust: true,
+   effects: [{op: raise_fanfare_cap, amount: 5}, {op: gain_encore, amount: 4}]}
+   # BODY LANDED R135 (2026-08-08), commissioned R130 item 7 (lint-ok: sitting
+   # item ordinal, not a card number) ("needs a
+   # rework", not a ratify): Candidate A of the worksheet, the Block reader --
+   # the commons tier rate riding the card that raises the cap, so it finally
+   # touched the meter it moved. THAT LINE IS GONE (EB-118 sec.5.3,
+   # 2026-08-24), on the pool argument rather than the card one: it was one of
+   # two Block readers printing a base of ZERO, and a rider that shows a
+   # keyword and pays nothing at the moment it is read is what sec.5.3
+   # removes. Cost 1 / common / exhaust unchanged throughout. The paragraph
+   # below is the LOSS the R135 body answered; it stays on the record because
+   # the hole it describes is open again and the next body has to know it.
    # FANFARE REWORK Track B (2026-07-28, RULED): "Fanfare +5" -> "Fanfare Cap
    # +5". The full grant is now a RARE POWER payoff only (R6), and this is a
    # COMMON Exhaust skill -- so it converts to the cheap half of the pair
@@ -487,9 +487,8 @@
    # A 0-cost cantrip at an empty meter, the old three-card hand at a full one. Its UPGRADE drops the gate rather than
    # adding cards, so the upgraded card is exactly the pre-sprint one and the base version is what had to be paid for.
    # This also closes the upgrade gap F-A4 opened (its only delta had been the spend discount). PROPOSED.
-- {id: hearts_swelling, name: "Hearts Swelling", register: archon, cost: 2, type: skill, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [mid, late], run: [early, late]}, archetypes: [fanfare, salon], role: enabler, innate: true,
-   effects: [{op: gain_encore, amount: 7},
-             {op: block, amount: 3, bonus_formula: 1_per_4_fanfare}]}
+- {id: hearts_swelling, name: "Hearts Swelling", register: archon, cost: 2, type: skill, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [mid], run: [early]}, archetypes: [fanfare, salon], role: enabler, innate: true,
+   effects: [{op: gain_encore, amount: 7}, {op: block, amount: 3}]}
    # The big buffer draught. Seven points of deferred HP.
    # COMPENSATION Track 2.2 (RULED 2026-07-28; the 3 and the rate RATIFIED
    # R130 2026-08-07 — the fifth of the five bodies (lint-ok: packet bookkeeping); the packet's item-6 list
@@ -497,17 +496,21 @@
    # The pool's biggest blind battery gains a same-card reason for the buffer
    # to exist. "Seven Fanfare flux" was its old second sentence and Track A
    # deleted it: banking 7 Encore now prints exactly nothing until it leaves.
-   # THE BASE 3 IS NOT DECORATION, it is the fix for this card specifically.
-   # It is INNATE (A9, ruled one day earlier), so its guaranteed play is turn
-   # ONE, into an empty meter -- a pure scaling clause here would have been a
-   # printed reader with a near-zero fire rate on the one turn the card is
-   # promised to be in hand, which is the D4 mistake the brief warns against
-   # re-shipping. Base 3 is what it pays on that turn; the slope is what it
-   # pays on the redraw, when the deck is running.
-   # REGISTER private -> archon, and the LINT forced it, not taste: R4 held it
-   # private only while every leaf op was Encore, and R2 sends any Fanfare
-   # READ to the archon voice. Both rules changed their answer on the same
-   # edit. The name survives the move -- the swell being read is the house's.
+   # THE BASE 3 SURVIVES AND THE SLOPE DOES NOT (EB-118 sec.5.3, 2026-08-24).
+   # The base was always the fix for this card specifically: it is INNATE (A9),
+   # so its guaranteed play is turn ONE into an empty meter, and a pure
+   # scaling clause would have been a printed reader with a near-zero fire
+   # rate on the one turn the card is promised to be in hand -- the D4 mistake
+   # the brief warns against re-shipping. sec.5.3 keeps exactly that half.
+   # What it removes is the 1_per_4_fanfare slope, because the pool carried
+   # a whole family of Block readers on one rate and the reader ROLE now
+   # belongs to `held_breath` at Common and `thunderous_ovation` at Rare. This
+   # card is a buffer draught with a real printed wall, not another reader.
+   # REGISTER private -> archon was forced by the LINT when the read landed:
+   # R4 held it private only while every leaf op was Encore, and R2 sends any
+   # Fanfare READ to the archon voice. Neither rule reaches the row now -- the
+   # block op keeps R4 off it and nothing reads Fanfare -- so the register is
+   # unforced and STAYS, because a register is a naming call and not a lint's.
    # A9 (RULED 2026-07-28, playtest-2 red-pen): gains INNATE on the BASE card
    # (not on upgrade — the table lists it flat, alongside A2's flat Exhaust).
    # First base-card innate on any sheet: tier0 read it for free (Card.innate

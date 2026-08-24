@@ -87,8 +87,8 @@ furina	mademoiselle_crabaletta	common	salon	enabler	block,frontload,scaling,velo
 furina	dinner_service	common	salon	glue	block	block		early,mid,late	early,late			salon_member			
 furina	usher_the_waves	common	salon	enabler	frontload,utility	frontload,utility		early	early						
 furina	house_call	common	salon	glue	frontload,scaling	frontload,scaling		early,mid,late	early,late			salon_member			
-furina	suffering_for_art	common	fanfare	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early,mid,late	early,late		encore	fanfare	block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
-furina	lasting_impression	common	fanfare	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early,mid,late	early		encore,fanfare	fanfare	block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
+furina	suffering_for_art	common	fanfare	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early	early		encore		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
+furina	lasting_impression	common	fanfare	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early	early		encore,fanfare		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	warmup_act	common	fanfare,generic	glue	block,frontload	block,frontload		early,mid,late	early						
 furina	ebb_and_flow	common	fanfare	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early	early		encore		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	applause_line	common	fanfare,generic	glue	frontload,scaling	frontload,scaling		early,mid,late	early,late			fanfare			
@@ -115,7 +115,7 @@ furina	overflowing_hospitality	uncommon	salon	enabler	block,frontload,scaling,su
 furina	waters_embrace	uncommon	salon,generic	glue	block	block		mid,late	early,late			salon_member			
 furina	crescendo	uncommon	fanfare	payoff	frontload,scaling	frontload,scaling		early,mid,late	late			fanfare			
 furina	florid_cadenza	uncommon	fanfare	payoff	velocity	velocity		early,mid,late	late			fanfare			
-furina	hearts_swelling	uncommon	fanfare,salon	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		mid,late	early,late		encore	fanfare	block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
+furina	hearts_swelling	uncommon	fanfare,salon	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		mid	early		encore		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	pit_orchestra	uncommon	salon,generic	glue	block,frontload,scaling,velocity	block,frontload,scaling,velocity		late	early		salon_member	salon_member	block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	leading_role	uncommon	spotlight	payoff	scaling	scaling		late	late		spotlight	spotlight		scaling	scaling
 furina	supporting_cast	uncommon	spotlight	payoff	scaling	scaling		late	late		spotlight	spotlight		scaling	scaling

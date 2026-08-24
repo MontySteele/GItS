@@ -247,19 +247,26 @@ def test_breathless_played_dry_costs_true_hp_and_still_prints():
     assert st.player.fanfare == 4 * C.FANFARE_PER_HP_LOST
 
 
-def test_suffering_for_art_closes_its_own_loop_on_one_face():
-    """Track 2.2's flagship. The wound prints the meter and the third clause
-    reads it, so this is the only card in the pool that both pays Fanfare and
-    cashes it. The block is worth nothing on a cold meter, which is the price
-    of a 0-cost common that the archetype plays every turn."""
+def test_suffering_for_art_still_pays_the_meter_and_no_longer_reads_it():
+    """Track 2.2's flagship, half retired.
+
+    The wound still prints the meter -- that leg is the card's identity and
+    EB-118 sec.5.3 does not touch it. What sec.5.3 removed is the third
+    clause, the zero-base Block reader: the pool carried a whole family of
+    Block readers on one rate, two of them printing a base of zero, and a
+    zero base shows the player a keyword that pays nothing at the moment
+    they read it. So this card pays Fanfare and no longer cashes it -- on a
+    hot meter as much as a cold one, which is what the second half asserts
+    and what the old version of this test could not have distinguished.
+    """
     st = _furina_state()
     play(st, "suffering_for_art")
     assert st.player.fanfare == 1                  # the wound, and only it
-    assert st.player.block == 0                    # 1 // 4
+    assert st.player.block == 0
 
     st = _furina_state(fanfare=15)
     play(st, "suffering_for_art")
-    assert st.player.block == 4                    # (15 + 1) // 4
+    assert st.player.block == 0                    # the reader is gone
 
 
 def test_hearts_swelling_pays_on_the_turn_it_is_guaranteed_to_be_played():
