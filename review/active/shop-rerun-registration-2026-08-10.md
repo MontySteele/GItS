@@ -3,11 +3,13 @@
 > **Status: DRAFT. Nothing here has been run.** No number in this document was
 > measured. The instrument was repaired and the shop world was changed on
 > 2026-08-10; this packet asks to re-run the measurement in the new world.
-> **That world is `RT12/D14/P7/C11` — §2 enumerates it in full, and it is the
+> **That world is `RT12/D15/P7/C11` — §2 enumerates it in full, and it is the
 > world the re-run measures.** (Re-stamped a third time 2026-08-24 on `M14`'s
 > own instruction, after the settle-first batch emptied: `RT11/D14/P7/C9` →
-> `RT12/D14/P7/C11`. `C9`'s X7/X8 rarity erratum is still in the world; it is
-> now inside `C11` rather than at the stamp's edge.)
+> `RT12/D14/P7/C11`; and a **fourth** time the same day, `D14` → `D15`, when
+> `EB-43`'s staged drafter change landed as step (5) of `R121`'s countersigned
+> six-step order — see item 11 in §2. `C9`'s X7/X8 rarity erratum is still in
+> the world; it is now inside `C11` rather than at the stamp's edge.)
 > The predictions in §5 are deliberately blank — they are [USER]'s to fill in
 > before any seed is run.
 
@@ -70,7 +72,7 @@ events rather than by asserting that none occurred.
 
 ## 2. One window, one world
 
-**The registered world is `RT12/D14/P7/C11`, still including the X7/X8 rarity
+**The registered world is `RT12/D15/P7/C11`, still including the X7/X8 rarity
 erratum.** In plain English, and as the standing requirement for this
 re-run: this is the world the re-run measures. Everything listed below is
 inside one window, and a run of this instrument that does not report this
@@ -211,12 +213,51 @@ What that one window contains, in full:
     offers at every Kokomi visit. **No pre-fill Kokomi number is a cheaper
     sample of this one.** It is enumerated here precisely because it carries no
     stamp: leaving it to the stamp to imply would leave it invisible.
+11. **`DRAFTER_VERSION` 15** (`EB-43`, 2026-08-24 — step (5) of `R121`'s
+    countersigned six-step order, landed once step (4)'s blind grade released
+    the `D14` pin the branch had been staged behind since 2026-08-06). The
+    drafter's "is this deck's core finished?" test (`core_complete`) and its
+    progress meter (`_core_progress`) now ask the **spotlight** plan for a
+    machinery *payoff* as well as machinery, so `limelight` alone stops
+    counting as a finished engine.
 
-**The window is now SETTLED, and this is the third and final re-stamp.**
+    **Does this cell read anything drafter-side? Yes, and directly.** The shop
+    instrument is a tier-0.5 instrument, and the shop's buy policy **reuses the
+    draft policy's valuation verbatim** (`shop.visit_shop`, §5 of the shop
+    rules: buy a card iff the policy would draft it and gold allows). A `D`
+    move is therefore not a distant world change for this cell — it sits inside
+    the shelf decision this cell measures, as well as inside every draft screen
+    the run walks. That is why the field is named here rather than left to the
+    stamp to imply, and it is why the re-stamp was owed at all.
+
+    **What this particular `D` move reaches, stated exactly.** Both changed
+    sites sit inside `if archetype == "spotlight":`. None of the three profiles
+    this cell runs — `klee`/demolition, `furina`/salon, `kokomi`/priest — is a
+    spotlight arm, so for all three the predicate and the meter return at
+    `D15` exactly what they returned at `D14`. The twelve-arm re-baseline taken
+    at the bump agrees: eleven of the twelve arms printed identically on every
+    column, and the only arm that moved is `furina`/spotlight, which this cell
+    does not run. **This is neither item 6's proof nor item 7's disclaimer.**
+    No same-seed re-run of *this cell's own* arms was taken either side of the
+    bump, so nothing byte-identical is claimed here; what is claimed is a
+    code-path argument that is exact, corroborated by the re-baseline. Every
+    tier-0.5 number taken at `D14` is archive under R68 whichever arm it came
+    from, and a report of this cell that does not read `D15` is not this
+    registration's measurement.
+
+**The settle-first window is SETTLED, and this is the FOURTH re-stamp.**
 `M14`'s batch is empty as of 2026-08-24: `EB-70` left it at R195 ([USER] paused
 the starter-offer retune pending the Klee-rework design sweep) and `EB-69` was
-the last item to land. Everything above is inside one settled world. What
-remains on the `M14` row is **entering the ruled §5 slate and then the
+the last item to land. **The third re-stamp, taken earlier the same day, called
+itself the final one and it was not.** It moved `RT` and `C` while `EB-43`'s
+`D15` was still staged behind the payoff-reach grade; that grade landed later
+the same day and released it, so `D14` → `D15` is item 11 above and this
+re-stamp is the fourth. The finality claim is not repeated here. What R182
+guarantees is the *sequence*, not that no further field moves before [USER]
+reaches the slate — and the sequence handles this case exactly as it handled
+the last one: the world moves, the packet catches up, then the slate is
+entered, then the countersign. Everything above is inside one settled world.
+What remains on the `M14` row is **entering the ruled §5 slate and then the
 countersign** — in that order, and neither is done here.
 
 The floor restoration, the instrument repair and the rarity erratum land
@@ -262,6 +303,14 @@ one change to the *world*), stated without softening:
   item 5 carry, one size larger: this cell's absolute numbers are comparable to
   no earlier read at all, and the within-cell arm contrast that Q1–Q4 ask is
   unaffected because both arms sit in one world.
+- The **`D15` drafter change** (item 11) is a world change **inside** the
+  machinery this cell uses — the shop buys through the draft policy's own
+  valuation — but it is confined to the spotlight limb, which none of this
+  cell's three arms selects. It is therefore identical in both arms twice over:
+  once because both arms sit in one world, and once because neither arm reaches
+  the changed code at all. It is named rather than left to the stamp because
+  "the shop cannot see the drafter" would be false, and the reason it moves no
+  number here is a specific one worth writing down rather than a general one.
 
 Landing them apart would be worse, not better. It would mean either measuring
 the new world with a broken instrument, or measuring the old world with the
@@ -332,9 +381,9 @@ the channel should be re-priced or re-stocked. That is a design call and it is
   only difference between the two arms; same seeds, same characters, same
   policy, same everything else.
 - Characters: unchanged — `klee`/demolition, `furina`/salon, `kokomi`/priest.
-- World: **`RT12/D14/P7/C11`** — the world enumerated in §2, the X7/X8 rarity
+- World: **`RT12/D15/P7/C11`** — the world enumerated in §2, the X7/X8 rarity
   erratum included. The report must carry the full run-cell stamp (`RT/D/P/C`)
-  or it is not citable (R68), and it must read `RT12/D14/P7/C11` or it is not
+  or it is not citable (R68), and it must read `RT12/D15/P7/C11` or it is not
   *this* registration's measurement.
 - Every output line the instrument printed before the repair still prints, so
   the pre-existing reads stay reproducible. The new reads are printed on lines
@@ -443,6 +492,7 @@ run does not start until they are filled and this packet is countersigned.**
 
 1. [USER] fills §5 and countersigns; the filled predictions land as their own
    commit, before any seed in the registered range is run.
-2. The cell runs at the §4 n and seed, under `CONSTANTS_VERSION` 9.
+2. The cell runs at the §4 n and seed, under the §2 registered world
+   stamp as re-stamped (RT12/D15/P7/C11 at the fourth re-stamp).
 3. The report is published with its full stamp, graded against §5 blind.
 4. This packet and its EXPERIMENTS pointer leave HEAD when the grade lands.
