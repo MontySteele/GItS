@@ -1212,6 +1212,19 @@ def _pilot_policies():
     return policy if policy.PILOT_POLICIES_ENABLED else None
 
 
+def _mode_chooser():
+    """The EB-118 2C switch, or None while it is off.
+
+    A SECOND flag rather than a second reader of the first, because R191 gave
+    the mode chooser its own activation window and the 2A pair flips first:
+    sharing `PILOT_POLICIES_ENABLED` would activate mode valuation inside 2A's
+    window and leave 2C's POLICY_VERSION bump with nothing to attribute. Same
+    late-import rule and same read-off-the-module rule as above.
+    """
+    from tier0.pilot import policy
+    return policy if policy.MODE_CHOOSER_ENABLED else None
+
+
 def _op_place_bomb(state: CombatState, fx: dict, card: Card) -> None:
     spec = fx.get("target", "random_enemy")
     # EB-118 (1): the CONCENTRATION form only. `random_enemy`/`random_enemies`
@@ -2132,25 +2145,33 @@ MIN_MODES = 2
 
 
 def _chosen_mode(state: CombatState, modes: list[dict], card: Card) -> int:
-    """Which mode does the pilot take? PLACEHOLDER -- always the first.
+    """Which mode does the pilot take?
 
     INSTRUMENT SURFACE, same convention as `_worst_card`: every modal
-    measurement will ride this choice. Unlike those, this one is not even a
-    heuristic -- it is a fixed index, chosen so the seam exists and stays
-    deterministic while the honest answer is unbuilt.
+    measurement rides this choice, so a policy replaces ONE function rather
+    than N call sites.
 
-    The honest answer is PHASE-2 POLICY_VERSION work, landing with the
-    prototype card's price. Valuing a mode means valuing an effect list
-    against the live board, which is the pilot's job and moves `P`. Do not
-    grow this body into that policy: when the policy lands it REPLACES this
-    body, and that is a POLICY_VERSION bump because every tier0.5 number
-    taken with a modal card in the pool renumbers.
+    Switch OFF (the shipped default): the fixed index this seam was staged
+    with, byte for byte. Switch ON (EB-118 2C, under R191's own
+    POLICY_VERSION window): `policy.choose_mode` -- argmax of the pilot's
+    existing per-op play valuations over the live board, minus the HP an
+    overdrawing spend would cost, ties to the lowest index.
+
+    The two do not meet at a seam: index 0 is what that tie-break returns
+    when the modes score the same, so the staged fixed index is the
+    DEGENERATE CASE of the policy rather than a rule surviving beside it.
+    Turning the switch on is the POLICY_VERSION event -- every tier0.5 number
+    taken with a modal card in the pool renumbers -- which is why the flip is
+    a landing act and not an edit here.
 
     `tier0.pilot.policy._active_effects` calls this same function for its
     forecast, so the pilot's read of a modal card and the mode that actually
     resolves cannot disagree.
     """
-    return 0
+    pol = _mode_chooser()
+    if pol is None:
+        return 0
+    return pol.choose_mode(state, modes, card)
 
 
 def _op_choose_one(state: CombatState, fx: dict, card: Card) -> None:

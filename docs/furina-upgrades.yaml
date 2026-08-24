@@ -150,7 +150,16 @@ standing_ovation:      {cost: -1}            # 1->0 after the machinery-efficien
 fortissimo_guard:      {power_amount: +2}    # deploy-block 5->7 (Curtain Call B: skill->power; block delta retired with the flat body)
 courtroom_drama:       {power_amount: +1}    # cross_examination 1->2 (both counts grow together by design)
 quick_change:          {power_amount: +1}    # first-Attack draw 1->2 (Curtain Call B: skill->power)
-deep_breath:           {remove: exhaust}     # sugar_rush-exact quality upgrade
+deep_breath:           {cost: -1}            # 1->0 (shared_billing / leading_role cost line).
+                                             # EB-118 2C, R194 point 6: the modal conversion takes the
+                                             # upgrade with it. `remove: exhaust` was justified as
+                                             # sugar_rush-EXACT parity, and the card is no longer Sugar
+                                             # Rush -- it is a choose-one. A cost drop is the delta that
+                                             # stays MODE-INDEPENDENT in effect as well as in grammar: it
+                                             # improves both bodies by the same energy and changes neither
+                                             # choice. Removing Exhaust would instead change HOW OFTEN the
+                                             # choice is made, which is the one thing the prototype was
+                                             # landed to measure.
 
 # ---- RARES (quality over quantity) ----
 # let_the_people_rejoice: NO UPGRADE (kit card, v1.9; Talent Training = v2 design space)

@@ -44,7 +44,7 @@ public sealed class DeepBreath : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deep Breath"),
-        ("description", "Gain 1 Energy. Gain 2 [gold]Encore[/gold]."),
+        ("description", "Choose one: Gain 1 Energy and 2 Encore | Spend 2 Encore: draw 2."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -62,12 +62,49 @@ public sealed class DeepBreath : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PlayerCmd.GainEnergy(1, Owner);
-        FurinaResources.GainEncore(Owner.Creature, 2);
+        var modeOptions = new List<CardModel>
+        {
+            ModalChoice.CreateOption<DeepBreathModeA>(Owner),
+            ModalChoice.CreateOption<DeepBreathModeB>(Owner),
+        };
+        var modeIndex = await ModalChoice.SelectMode(choiceContext, Owner, modeOptions);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 1 Energy and 2 Encore", "Spend 2 Encore: draw 2" }[modeIndex]);
+        if (modeIndex == 0)
+        {
+            await PlayerCmd.GainEnergy(1, Owner);
+            FurinaResources.GainEncore(Owner.Creature, 2);
+        }
+        else
+        {
+            await FurinaResources.SpendEncoreOrHp(choiceContext, Owner.Creature, 2, this);
+            await CardPileCmd.Draw(choiceContext, 2m, Owner);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        RemoveKeyword(CardKeyword.Exhaust);
+        EnergyCost.UpgradeBy(-1);
     }
+}
+
+/// <summary>Mode 0 of deep_breath. A face for the choose-a-card screen;
+/// never played, never in a pile, never in a pool.</summary>
+public sealed class DeepBreathModeA : ModalOptionCard
+{
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "Gain 1 Energy and 2 Encore"),
+        ("description", "Gain 1 Energy and 2 Encore"),
+    };
+}
+
+/// <summary>Mode 1 of deep_breath. A face for the choose-a-card screen;
+/// never played, never in a pile, never in a pool.</summary>
+public sealed class DeepBreathModeB : ModalOptionCard
+{
+    public override List<(string, string)>? Localization => new()
+    {
+        ("title", "Spend 2 Encore: draw 2"),
+        ("description", "Spend 2 Encore: draw 2"),
+    };
 }

@@ -193,3 +193,65 @@ def test_the_cs_side_reuses_the_base_game_choice_screen():
     src = MODAL_CS.read_text(encoding="utf-8")
     assert "CardSelectCmd.FromChooseACardScreen(" in src
     assert "PlayerChoiceContext" in src
+
+
+# --- the shipped prototype, as generated -----------------------------------
+
+DEEP_BREATH_CS = (ROOT / "klee-mod" / "KleeCode" / "Cards" / "Furina"
+                  / "Generated" / "DeepBreath.cs")
+
+
+def _deep_breath_cs() -> str:
+    return DEEP_BREATH_CS.read_text(encoding="utf-8")
+
+
+def test_the_prototypes_committed_cs_carries_both_ruled_modes():
+    """EB-118 2C, the C# face of `deep_breath`. Read off the COMMITTED file
+    rather than a fresh emit, because what ships is the file: `--check` keeps
+    the two in step, and this says what the file has to contain."""
+    src = _deep_breath_cs()
+    assert "ModalChoice.SelectMode(choiceContext, Owner, modeOptions)" in src
+    assert "ModalChoice.CreateOption<DeepBreathModeA>(Owner)" in src
+    assert "ModalChoice.CreateOption<DeepBreathModeB>(Owner)" in src
+    assert "public sealed class DeepBreathModeA : ModalOptionCard" in src
+    assert "public sealed class DeepBreathModeB : ModalOptionCard" in src
+
+
+def test_the_prototypes_mode_1_is_the_body_it_shipped_with():
+    """R194's whole reason for this pair: the card players know survives as
+    one mode, and in C# that means the two statements the class emitted
+    before the conversion, unchanged, under `if (modeIndex == 0)`."""
+    mode_1 = _deep_breath_cs().split("if (modeIndex == 0)")[1].split("else")[0]
+    assert "await PlayerCmd.GainEnergy(1, Owner);" in mode_1
+    assert "FurinaResources.GainEncore(Owner.Creature, 2);" in mode_1
+
+
+def test_the_prototypes_mode_2_overdraws_through_the_real_primitive():
+    """EB-119's repair, on the shipped card rather than on a fixture: mode 2
+    calls `SpendEncoreOrHp` -- a thin bank pays TRUE HP -- and not the
+    no-overdraw `SpendEncore`, and not a negative `GainEncore`."""
+    src = _deep_breath_cs()
+    mode_2 = src.split("if (modeIndex == 0)")[1].split("else")[1]
+    assert ("await FurinaResources.SpendEncoreOrHp(choiceContext, "
+            "Owner.Creature, 2, this);") in mode_2
+    assert "await CardPileCmd.Draw(choiceContext, 2m, Owner);" in mode_2
+    assert "GainEncore(Owner.Creature, -2)" not in src
+
+
+def test_the_prototypes_upgrade_is_the_ruled_cost_line():
+    """R194 point 6, and contract point 5 in the same assertion: the upgrade
+    moves the CARD's cost and no mode body, and the Exhaust keyword the card
+    prints survives it."""
+    src = _deep_breath_cs()
+    assert "EnergyCost.UpgradeBy(-1);" in src
+    assert "RemoveKeyword(CardKeyword.Exhaust)" not in src
+    assert "CardKeyword.Exhaust" in src          # still printed on the base
+
+
+def test_the_prototypes_face_prints_the_choice_as_ordinary_text():
+    """Rails: "Choose one:" is a sentence, not a keyword. One face, two
+    labels, no tooltip and nothing registered."""
+    src = _deep_breath_cs()
+    assert ('("description", "Choose one: Gain 1 Energy and 2 Encore | '
+            'Spend 2 Encore: draw 2."),') in src
+    assert "KleeKeywords" not in src

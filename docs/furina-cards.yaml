@@ -592,9 +592,28 @@
    # design). The standing costume-change discipline: the first Attack each turn draws — spotlight_draw's
    # first-play-window grammar on her attack cadence, activity-gated per the header law. Was: draw 3,
    # discard 1 (Bright Idea parity — generic padding, exactly what this sweep removes). PROPOSED.
-- {id: deep_breath, name: "Deep Breath", register: private, cost: 1, type: skill, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [generic, fanfare], role: glue, exhaust: true,
-   effects: [{op: energy, amount: 1}, {op: gain_encore, amount: 2}]}
-   # Sugar Rush parity, buffer-flavored.
+- {id: deep_breath, name: "Deep Breath", register: private, cost: 1, type: skill, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early, mid, late], run: [early]}, archetypes: [generic, fanfare], role: glue, exhaust: true,
+   effects: [{op: choose_one, modes: [
+              {label: "Gain 1 Energy and 2 Encore",
+               effects: [{op: energy, amount: 1}, {op: gain_encore, amount: 2}]},
+              {label: "Spend 2 Encore: draw 2",
+               effects: [{op: spend_encore, amount: 2}, {op: draw, amount: 2}]}]}]}
+   # EB-118 Phase 2C: the MODAL PROTOTYPE. R192 chose this card; R194 ruled the pair
+   # (Option A, [USER] 2026-08-23). Mode 1 is the card as it shipped, unchanged -- the
+   # Sugar-Rush-parity buffer body players already know -- so the conversion adds a
+   # choice rather than replacing a card. Mode 2 is packet §5.4's own example shape:
+   # a DELIBERATE, PLAYER-DIRECTED ordinary-turn cash-out, which is the space her three
+   # existing spend cards and the automatic Salon upkeep do not cover.
+   # `spend_encore` is the OVERDRAW primitive, so a thin bank pays TRUE HP -- that is
+   # the price of the greed and it is deliberate (the no-overdraw shape is the
+   # `encore_cost` field, and a salon-register card could not carry a spend line at all).
+   # The frame is MODE-INDEPENDENT (the chooser contract's frame clause): Exhaust, cost,
+   # type and rarity belong to the card, and the choice selects a body, never a frame.
+   # DRAFTER PRICE IS UNCHANGED BY CONSTRUCTION and the under-credit is ACCEPTED (R194):
+   # `draw` and `energy` are both static ZERO, so MAX(modes) = mode 1 = the old body's
+   # price to the digit. See the acceptance note at the `choose_one` price row in
+   # tier05/draft.py. ONE modal card is the prototype discipline -- the pattern is not
+   # copied until the pilot and the price can distinguish the modes (packet §5.4).
 # Promoted at Curtain Call (R85) -- see each card's own comment
 - {id: torrential_turn, name: "Torrential Turn", register: salon, cost: 2, type: attack, rarity: uncommon, solve: [frontload, utility], tempo_band: {fight: [mid], run: [late]}, archetypes: [salon, generic], role: payoff,
    effects: [{op: damage, amount: 10, target: enemy, bonus_vs_aura: 3}, {op: refresh_all_auras}]}

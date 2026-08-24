@@ -704,10 +704,40 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                     total += (else_power
                               + share * (then_power - else_power))
             elif fx.get("op") == "choose_one":
-                # EB-118 sec.5.4 -- PROPOSED, and it moves no number, because
-                # no shipped card carries a `choose_one`. Registered here
-                # because `tools/lint_op_parity.py` requires every registered
-                # op to carry a price, and the moment to decide one is now.
+                # EB-118 sec.5.4. One shipped card carries a `choose_one`:
+                # `deep_breath`, the Phase-2C prototype (R192 picked the card,
+                # R194 ruled the pair).
+                #
+                # THE UNDER-CREDIT IS ACCEPTED, IN WRITING, AT THIS ROW
+                # (R194, [USER] 2026-08-23). Deep Breath's mode 1 is the body
+                # the card already shipped -- `energy 1` + `gain_encore 2` --
+                # and its mode 2 is `spend_encore 2` + `draw 2`. Both `draw`
+                # and `energy` are static ZERO here (STATIC_DRAW_VALUE /
+                # STATIC_ENERGY_VALUE, the v3 flat-proxy sweep), so mode 2
+                # prices at MINUS its own spend and `MAX(modes)` returns mode
+                # 1 by construction. Two consequences, both intended:
+                #
+                #   * The conversion moves NO drafter number. Deep Breath is
+                #     priced to the digit as it was before it became modal,
+                #     because the mode that wins the max IS the old body.
+                #   * The card's flexibility -- the whole reason it was
+                #     converted -- goes UN-CREDITED. That is a bounded,
+                #     one-directional error: the drafter undervalues the
+                #     card, never over-values it, and the failure it can
+                #     cause is passing on a good card rather than paying for
+                #     a bad one.
+                #
+                # The arbitration leg is therefore NOT exercised by the
+                # shipped sheet at all, which is why R194 also owed a
+                # SYNTHETIC pin: two nonzero-priced fixture modes, in both
+                # orders, in `tier0/tests/test_eb118_modal.py`. Without it the
+                # max would first be exercised by a Phase-3 card carrying
+                # real stakes.
+                #
+                # Repricing trigger: the first modal mode whose winning body
+                # is priced by a dial that is NOT zero. When `draw` stops
+                # being a static zero, this row is re-read against Deep
+                # Breath rather than inherited.
                 #
                 # AGGREGATE = MAX of the modes' generic prices. A conditional
                 # blends its branches by a reachability SHARE because the
@@ -722,10 +752,11 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 # dominates a card printing that mode alone -- so max is a
                 # lower bound, and the surplus it declines to credit is the
                 # optionality itself (the right to decide late), which is
-                # real but is exactly what the Phase-2 pilot policy has to
+                # real but is exactly what the pilot's mode chooser has to
                 # measure before it can be priced. Under-crediting until then
-                # keeps the drafter from paying for a mode-valuation the
-                # pilot cannot yet perform.
+                # keeps the drafter from paying for a mode-valuation whose
+                # own weights are still hand-picked
+                # (`policy.MODE_OVERDRAW_HP_VALUE`, unswept).
                 mode_powers = [effect_power(mode.get("effects") or [])
                                for mode in fx.get("modes") or ()]
                 total += max(mode_powers, default=0.0)
@@ -1292,7 +1323,8 @@ STATIC_OP_PRICING: dict[str, str] = {
     "place_bomb": "bomb damage at STATIC_BOMB_DAMAGE_SHARE + a guard credit",
     "conditional": "reachable-branch share; Klee's live predicates at half",
     "choose_one": "MAX of the modes -- the player picks, so no share blend; "
-                  "PROPOSED, no D move (no shipped card is modal)",
+                  "deep_breath's mode-2 under-credit ACCEPTED at the row "
+                  "(R194) and its price is unmoved by the conversion",
     "conscript": "STATIC_CONSCRIPT_VALUE per recruit (v7)",
     "gain_charge": "STATIC_CHARGE_VALUE per printed point (v7)",
     "summon_kurage": "ONE pulse, not the duration (v8)",
@@ -1695,6 +1727,38 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # ENTER the set it labels the moment they are first read -- the R176 reading of
 # that rule. The payoff-reach registration's `DRAFTER_VERSION = 14` pin is
 # UNTOUCHED: the drafter learns nothing here, only the pilot.
+#
+# POLICY_VERSION PROPOSED (EB-118 2C, staged 2026-08-24). A SECOND proposed
+# bump, and deliberately not folded into the one above: R191 ruled that the
+# mode-valuation chooser takes its OWN activation window, so it rides its own
+# flag (`policy.MODE_CHOOSER_ENABLED`, shipping FALSE) rather than the 2A
+# pair's. Two flags, two flips, two integers -- and the flip is what executes
+# either, not the code landing.
+#
+# WHAT MOVES: `effects._chosen_mode`, the seam a `choose_one` resolves
+# through, stops returning a fixed index and asks `policy.choose_mode` --
+# argmax of the pilot's EXISTING per-op play valuations (damage, block,
+# scaling, tempo, sustain, each at weight 1, for `exhaust_future_value`'s
+# reason) over the live board, minus the TRUE HP an overdrawing
+# `spend_encore` would cost at `policy.MODE_OVERDRAW_HP_VALUE`. Ties break to
+# the LOWEST mode index, which is what makes the staged fixed index the
+# degenerate case of the new rule instead of a branch beside it.
+#
+# WHAT RE-BASELINES AT THE BUMP: every tier-0.5 number taken with a modal card
+# in the pool. Today that is `deep_breath` and nothing else -- the prototype
+# discipline is one card until the pilot and the price can distinguish the
+# modes -- and see the acceptance note at the `choose_one` price row for why
+# the drafter's number does not move with it.
+#
+# READ THE FIRST MEASUREMENT WITH THIS IN HAND: under the hand-picked weights
+# the chooser takes Deep Breath's mode 1 on EVERY board. Mode 1 scores
+# `energy 1` + `gain_encore 2` = 1.0 + 1.6 = 2.6 with no state-dependent term
+# in it, and mode 2 scores `draw 2` = 2.0 before any overdraw penalty, so the
+# gap is at least 0.6 whatever the bank holds. That is a real reading of the
+# pilot's currency and not a broken chooser -- but it means the flip is
+# expected to move NO Furina number until the weights are swept in 2C's
+# window or the pair is redesigned, and a null result here must not be read
+# as "modal cards are neutral".
 POLICY_VERSION = 7
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
