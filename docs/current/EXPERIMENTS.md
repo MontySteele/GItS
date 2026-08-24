@@ -76,9 +76,7 @@ registration packets themselves live under `review/active/` — one home, not tw
   more, outside that batch: the Artifact-coexistence + Kokomi-rotation ruling
   landed 2026-08-23, `CONSTANTS` 10 → **11**, [USER] pulling the staged branch
   into this same open window. So the live stamp is `RT12/D14/P7/C11`, and
-  §6.6's `RT10` line records what was verified on 2026-08-12, not what ships. **The freeze still cannot begin**, because two
-  of the four batch items have not landed: `EB-70` is blocked on unmade design
-  picks at QUEUE `M29`, and `EB-69` waits on the `S4-G11` eye-read. §6 is
+  §6.6's `RT10` line records what was verified on 2026-08-12, not what ships. **The freeze still cannot begin**, but the batch shrank on 2026-08-23: `EB-70` LEFT the window at R195 ([USER] paused the starter-offer retune pending the Klee-rework design sweep R134 originally routed it to — it will not land before the freeze, and when it is eventually taken up it re-baselines in whatever world then exists), so the one item still open is `EB-69`, waiting on the `S4-G11` eye-read. §6 is
   re-stamped once, when the last of them lands, rather than after each —
   re-stamping a registration per item is how a one-variable window turns into
   four. **The dependency re-check passed at both bumps**, and it is recorded so
