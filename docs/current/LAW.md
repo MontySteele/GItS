@@ -347,6 +347,10 @@ combat grammar comes with us. (principles §1)
   substring `"strike"`, `+3` to attacks only, FROZEN. A rename that adds or
   removes such a substring on either field moves damage and is not cosmetic.
   (R179; M15 draft text ratified as written, amended on the rename clause)
+  **Role/archetype amendment (RATIFIED 2026-08-24, R202):** a change to a card's
+  `role` or `archetypes` is a material card-sheet edit because both fields are
+  mechanically read by drafting. It requires a `CONSTANTS_VERSION` bump, and
+  drafted-world numbers are not comparable across it.
 
 ## Design governance & measurement authority
 
