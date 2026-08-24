@@ -198,8 +198,13 @@ combat grammar comes with us. (principles §1)
   Live legs: HP lost / Encore spent / Encore absorbed / Spotlighted card played.
   Cards use printed `Fanfare Cap +X` (raises cap) and `Fanfare +X` (full grant,
   rare POWER payoff only); cards raise a permanent floor (`gain_fanfare_floor`),
-  not the cap. Fanfare is a global pool on Furina surviving Spotlight moves.
-  (principles v1.12 RATIFIED; furina §4; R41; R114 FLAG-3)
+  not the cap. **`Fanfare Cap +X` is an AVAILABLE EXPLICIT VERB, not a rider
+  every Power carries** — a card prints it when raising the ceiling is that
+  card's job. The incidental carriers were removed along with the register
+  lint that required one on every Power (`EB-118` §5.2, 2026-08-24; lint `R7`
+  retired, `R6` untouched — the full grant is still a rare-POWER payoff).
+  Fanfare is a global pool on Furina surviving Spotlight moves.
+  (principles v1.12 RATIFIED; furina §4; R41; R114 FLAG-3; EB-118 §5.2)
 - **Delete-test applies unmodified, no detector carve-outs:** deleting Furina's
   cards from a winning Spotlight deck must gut it; companions winning anyway is
   `SUPPORT_CARRY`. **Self-carry must not be the median-best plan** (Salon and

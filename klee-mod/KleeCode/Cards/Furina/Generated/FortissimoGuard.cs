@@ -41,14 +41,13 @@ public sealed class FortissimoGuard : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fortissimo Guard"),
-        ("description", "Whenever you deploy a [gold]Salon Member[/gold], gain {PowerAmount:diff()} Block. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
+        ("description", "Whenever you deploy a [gold]Salon Member[/gold], gain {PowerAmount:diff()} Block."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 5m),
-            new DynamicVar("FanfareCap", 5m)
+            new DynamicVar("PowerAmount", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,7 +60,6 @@ public sealed class FortissimoGuard : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<SalonDeployBlockPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
-        FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
     }
 
     protected override void OnUpgrade()

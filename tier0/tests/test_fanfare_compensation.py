@@ -32,7 +32,8 @@ REPO = loader.DOCS_DIR.parent
 
 
 # --------------------------------------------------------------------------
-# Track 1 -- every Power prints a Fanfare keyword (R7)
+# Track 1 -- RETIRED as a universal rider (EB-118 sec.5.2, 2026-08-24).
+# What survives is R6: the full grant is a rare-POWER payoff, three cards.
 # --------------------------------------------------------------------------
 
 def _sheet() -> list[dict]:
@@ -52,28 +53,47 @@ def _keywords(card: dict) -> list[str]:
     return out
 
 
-def test_every_power_prints_exactly_one_fanfare_keyword():
-    """Track 1, the ruling itself: no Power grants nothing any more.
+def test_no_power_carries_an_incidental_cap_rider():
+    """The inverse of the rule this file was written to pin.
 
-    The rework left twelve Powers granting nothing at all, which was invisible
-    in a different way than the pre-rework silent grant: the value was gone,
-    but "which Powers grant" had become a curated list nobody could read off a
-    card. The ruling reverses it, and the shape of the ruling -- ALL of them --
-    is what lets this be an assertion instead of a list.
+    Track 1 required every Power to print a Fanfare keyword, and thirteen of
+    them printed "Fanfare Cap +X" because the rule said so rather than
+    because the card was about headroom. EB-118 sec.5.2 removed them and
+    retired R7, so the assertion flips: a Power prints the cap verb only if a
+    future ruling gives one that job, and none has. The three rare payoffs
+    keep the OTHER keyword, which is the next test.
+
+    Verified to fail against the pre-removal sheet, where all seventeen
+    Powers carried a keyword and thirteen of them carried this one.
     """
     powers = [c for c in _sheet() if c.get("type") == "power"]
     assert len(powers) == 17
-    for card in powers:
-        kws = _keywords(card)
-        assert len(kws) == 1, f"{card['id']} prints {kws}"
+    carriers = [c["id"] for c in powers
+                if "raise_fanfare_cap" in _keywords(c)]
+    assert carriers == []
 
 
-def test_the_full_grant_stayed_rare_and_the_cap_took_everything_else():
-    """R6 survives Track 1 unamended, which is the point of the two keywords.
+def test_the_only_cap_carrier_left_is_the_one_its_upgrade_pins():
+    """`lasting_impression` is the sixteenth card of sec.5.2's list and the
+    one that did not land: its ruled upgrade delta is `fanfare_cap: +2`,
+    which binds to this op, so removing the op makes `apply_upgrade` raise
+    and the card needs a NEW ruled delta before it can lose the line. That is
+    [USER]'s call, so the row is pinned here rather than left to drift -- if
+    the delta is ever ruled and the op removed, this test is what says so.
+    """
+    carriers = [c["id"] for c in _sheet()
+                if "raise_fanfare_cap" in _keywords(c)]
+    assert carriers == ["lasting_impression"]
 
-    "Fanfare Cap +X" going everywhere would be a reason to worry the pair had
-    collapsed into one keyword. It has not: the full grant is still three rare
-    Powers, and every other Power prints the cheap half.
+
+def test_the_full_grant_is_still_three_rare_powers():
+    """R6 survives both Track 1 and its retirement, which is the point.
+
+    The pair of keywords was always at risk of collapsing into one: first by
+    "Fanfare Cap +X" going everywhere (Track 1), now by it going nowhere
+    (EB-118 sec.5.2). Neither touched the full grant. It is still exactly
+    three rare Powers, and it is still the only Fanfare keyword a card can
+    earn by being a payoff.
     """
     grants = {c["id"] for c in _sheet()
               if "gain_fanfare_floor" in _keywords(c)}
@@ -84,20 +104,23 @@ def test_the_full_grant_stayed_rare_and_the_cap_took_everything_else():
         assert card["type"] == "power" and card["rarity"] == "rare"
 
 
-def test_r7_fails_on_a_power_that_grants_nothing(tmp_path, capsys):
-    """RED TEST for R7. Mutation: strip the keyword off one Power.
+def test_r6_still_fails_on_a_full_grant_outside_a_rare_power(tmp_path, capsys):
+    """RED TEST for the rule that SURVIVED. Mutation: plant the full grant on
+    a common Power.
 
-    Verified to fail before it was kept -- with `raise_fanfare_cap` removed
-    from `casting_call` the lint exits 1 and names R7. Without this the ruling
-    would be a convention held by twelve hand-edited rows, which is precisely
-    the shape the rework's own short list had and the shape that lost.
+    R7's own red test retired with R7 (EB-118 sec.5.2) -- a red test for a
+    rule that no longer exists asserts nothing. R6 is the half that still
+    binds, and it never had a mutation test of its own; it does now, because
+    the pair of keywords is only meaningful while one of them is still gated.
+    Verified to fail before it was kept: with the grant planted on
+    `casting_call` the lint exits 1 and names R6.
     """
     import tools.lint_furina_registers as lint
 
     cards = _sheet()
     victim = next(c for c in cards if c["id"] == "casting_call")
-    victim["effects"] = [fx for fx in victim["effects"]
-                         if fx.get("op") != "raise_fanfare_cap"]
+    victim["effects"] = victim["effects"] + [
+        {"op": "gain_fanfare_floor", "amount": 5}]
     broken = tmp_path / "furina-cards.yaml"
     broken.write_text(yaml.safe_dump(cards), encoding="utf-8")
 
@@ -109,22 +132,25 @@ def test_r7_fails_on_a_power_that_grants_nothing(tmp_path, capsys):
     # And it must fail FOR THE RIGHT REASON. A lint that exits 1 because the
     # temp file tripped some other rule would look identical from here.
     out = capsys.readouterr().out
-    assert "R7 casting_call" in out
+    assert "R6 casting_call" in out
 
 
-def test_r2_no_longer_drags_the_cap_keyword_into_the_archon_voice():
-    """The lint half of Track 1, and the reason it had to move.
+def test_r2_still_does_not_reach_the_cap_verb():
+    """The release survives the rule that caused it.
 
     R2 sends Fanfare READS to the archon register. `raise_fanfare_cap` was in
-    that set for exactly one day, while the cap keyword sat on a short list
-    R2 itself selected. Under the ruling every Power prints it, so leaving it
-    in R2 would have forced twelve salon and private Powers to rename into a
-    voice they do not speak, to satisfy a rule that had stopped choosing
-    anything. These three rows are the proof it released.
+    that set for exactly one day, until Track 1 put the line on every Power
+    and R2 stopped selecting anything by keeping it. EB-118 sec.5.2 removed
+    the riders, so the original reason is spent -- and the release is NOT
+    reversed, because whether a dedicated headroom card speaks in the archon
+    voice is a naming call with no card to judge. These three rows are the
+    proof: they are exactly the salon and private Powers that carried the
+    line, they no longer carry it, and their registers did not move to pay
+    for its removal.
     """
     for cid in ("casting_call", "grand_salon", "quick_change"):
         card = next(c for c in _sheet() if c["id"] == cid)
-        assert "raise_fanfare_cap" in _keywords(card)
+        assert "raise_fanfare_cap" not in _keywords(card)
         assert card["register"] in ("salon", "private")
 
     res = subprocess.run(

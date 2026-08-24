@@ -45,7 +45,7 @@ public sealed class EndlessWaltz : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Endless Waltz"),
-        ("description", "Add 1 [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]. Add 1 [gold]Gentilhomme Usher[/gold]. [gold]Salon Member[/gold] numbers are {PowerAmount:diff()} higher. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
+        ("description", "Add 1 [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]. Add 1 [gold]Gentilhomme Usher[/gold]. [gold]Salon Member[/gold] numbers are {PowerAmount:diff()} higher."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -53,8 +53,7 @@ public sealed class EndlessWaltz : CustomCardModel, ICharacterCard
         {
             new CalculationBaseVar(3m),
             new CalculationExtraVar(1m),
-            new CalculatedVar("PowerAmount").WithMultiplier(static (card, _) => SalonMemberPower.ReplacementDelta(card, 2, SalonConstants.ReplacementNumericMultiplier)),
-            new DynamicVar("FanfareCap", 8m)
+            new CalculatedVar("PowerAmount").WithMultiplier(static (card, _) => SalonMemberPower.ReplacementDelta(card, 2, SalonConstants.ReplacementNumericMultiplier))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -71,7 +70,6 @@ public sealed class EndlessWaltz : CustomCardModel, ICharacterCard
         salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Crabaletta);
         salonReplacements += await SalonMemberPower.Deploy(choiceContext, Owner.Creature, 1, this, SalonMember.Usher);
         await PowerCmd.Apply<SalonDamageUpPower>(choiceContext, Owner.Creature, (int)salonScaledPowerAmount, applier: Owner.Creature, cardSource: this);
-        FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
     }
 
     protected override void OnUpgrade()

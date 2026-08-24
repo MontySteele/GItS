@@ -33,13 +33,16 @@
 #     Spelled "Fanfare Cap", never bare "Cap" -- the Salon's member cap is also a per-player stat since A12.
 #     NO card may grant TRANSIENT Fanfare directly (register lint L12, a BLOCKER on both the sheet and
 #     effects.OPS): the moment one does, "Fanfare +X" means two things on faces already printed.
-#     COMPENSATION PASS, Track 1 (2026-07-28, RULED; REVERSES the short list): EVERY POWER prints a Fanfare
-#     keyword, and only a select few print the full grant. A Power prints "Fanfare +X" if it is one of the
-#     three rare-Power payoffs (R6); every OTHER Power prints "Fanfare Cap +X" -- there is no Power on this
-#     sheet that grants nothing. Register lint R7 is that rule, so the next Power authored without a keyword
-#     is a blocker rather than a silent omission. The rework's four-carrier short list is GONE.
-#     The magnitudes restore the retired invisible rule as printed text: +5 at common/uncommon, +8 at rare.
-#     Fanfare Cap may ALSO ride a non-Power (lasting_impression, reginas_mercy); "Fanfare +X" may not.
+#     EB-118 sec.5.2 (2026-08-24) RETIRES Track 1's universal rider. "Fanfare Cap +X" is an AVAILABLE
+#     EXPLICIT VERB, not a line every Power must carry: sixteen cards carried it incidentally, the cap has
+#     not been a binding number since F-A5, and a printed line that is close to inert teaches the player to
+#     distrust printed lines. Register lint R7 -- "every Power prints exactly one Fanfare keyword" -- is
+#     GONE with them. What survives unchanged: R6, so "Fanfare +X" (gain_fanfare_floor) is still a RARE
+#     POWER payoff and still exactly three cards; and the verb itself, so a future card whose JOB is
+#     headroom prints "Fanfare Cap +X" and means it. Magnitudes if one is authored: +5 at common/uncommon,
+#     +8 at rare. The cap verb may ride a non-Power (lasting_impression); "Fanfare +X" may not.
+#     NO compensation was paid for the sixteen removals, deliberately: the value of the removal IS that a
+#     printed rider becomes trustworthy again, and paying for it in flat numbers would spend that.
 # NO passive accrual anywhere on this sheet — no per-turn Encore or Fanfare trickle exists, and none may be added (a per-turn Encore
 # power would launder passive Fanfare through the gain hook; deliberately not designed — see sheet-pass plan §5).
 # ONE exception, off-sheet by construction: the Ancient carve-out (R127, LAW card-sheet rules) — All the World's a
@@ -99,13 +102,7 @@
 # is that nothing reads them, so nothing has ever caught one.
 # Salon (7 since A12)
 - {id: casting_call, name: "Casting Call", register: salon, cost: 1, type: power, rarity: common, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [late], run: [early]}, archetypes: [salon], role: enabler,
-   effects: [{op: apply_power, power: salon_cap_up, amount: 1, target: self},
-             {op: raise_fanfare_cap, amount: 5}]}
-   # COMPENSATION Track 1 (RULED 2026-07-28; X RATIFIED at 5, R130 2026-08-07): every Power
-   # prints a Fanfare keyword. This one is a COMMON Power in the salon voice,
-   # which is precisely the case the rework's short list excluded -- and the
-   # reason the exclusion is reversed: "which Powers grant" stopped being a
-   # register question the moment the answer became "all of them".
+   effects: [{op: apply_power, power: salon_cap_up, amount: 1, target: self}]}
    # A12 (RULED 2026-07-28, playtest-2 red-pen; ex-D2). Capacitor parity: the
    # Salon's size was a constant from the day it was built, and this is the
    # card that makes it a stat. Pool 77 -> 78 (lint-ok: pool sizes).
@@ -219,6 +216,12 @@
    # short list of Exhaust skills that carry Fanfare Cap precisely because it
    # was the pool's common floor source: the mechanic still reaches the
    # power-light archetype it was built for, at a smaller number.
+   # EB-118 sec.5.2 (2026-08-24) named this card among its removals and it is
+   # the ONE that did not land: its ruled upgrade delta is
+   # `fanfare_cap: +2`, which binds to this op, so removing the op makes
+   # apply_upgrade raise and the card needs a NEW ruled delta first. That is a
+   # design act and it is [USER]'s. So this row is now the pool's only
+   # raise_fanfare_cap carrier -- which is not the sec.5.2 end state.
    # COMPENSATION Track 1 (2026-07-28) revisited this card and shipped NO
    # reprice, deliberately. Every candidate that "falls out naturally" is
    # either more blind Encore -- the exact disease this sprint's diagnosis
@@ -444,9 +447,7 @@
    # Fill the three Salon slots at once, one of each (v2). Cost 3->2 at the rework; on a full stage the oldest
    # members bow out (Defect evoke geometry). PROPOSED pending red-pen.
 - {id: grand_salon, name: "Grand Salon", register: salon, cost: 1, type: power, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [salon], role: payoff,
-   effects: [{op: apply_power, power: salon_damage_up, amount: 1, target: self},
-             {op: raise_fanfare_cap, amount: 5}]}
-   # COMPENSATION Track 1 (RULED 2026-07-28; X RATIFIED at 5, R130 2026-08-07).
+   effects: [{op: apply_power, power: salon_damage_up, amount: 1, target: self}]}
    # A10 (RULED 2026-07-28, playtest-2 red-pen): amount 3 -> 1 (2 upgraded),
    # Defect parity. Pairs with B4: the power must move ALL member numbers,
    # not just their damage, so the old +3 was both too large and too narrow.
@@ -514,26 +515,20 @@
    # and needed the keyword wired on the base path — see gen_klee_cards.
 - {id: pit_orchestra, name: "Stagehands", register: salon, cost: 1, type: power, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [late], run: [early]}, archetypes: [salon, generic], role: glue,
    effects: [{op: apply_power, power: salon_bow_block, amount: 5, target: self, note: "whenever a Salon member takes its final bow, gain N Block"},
-             {op: apply_power, power: salon_bow_encore, amount: 2, target: self, note: "...and N Encore"},
-             {op: raise_fanfare_cap, amount: 5}]}
-   # COMPENSATION Track 1 (RULED 2026-07-28; X RATIFIED at 5, R130 2026-08-07).
+             {op: apply_power, power: salon_bow_encore, amount: 2, target: self, note: "...and N Encore"}]}
    # CURTAIN CALL B (R85): skill->power + (rn) to salon-craft — the crew strikes the set behind every bow.
    # Bow-triggered (the OTHER salon verb; fortissimo_guard owns the deploy), so the two engines never twin.
    # Was: block 5 + encore 1 hybrid glue ("Pit Orchestra"), a NEARDUP core[block] member with macaron_break.
    # PROPOSED pending red-pen.
 # Spotlight (7)
-- {id: leading_role, name: "Leading Role", register: salon, cost: 1, type: power, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
-   effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self, note: "first Spotlighted card each turn costs N less"},
-             {op: raise_fanfare_cap, amount: 5}]}
-   # COMPENSATION Track 1 (RULED 2026-07-28; X RATIFIED at 5, R130 2026-08-07).
+- {id: leading_role, name: "Leading Role", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
+   effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self, note: "first Spotlighted card each turn costs N less"}]}
    # Ratified texture verbatim (kickoff §3.2). Her card granting economy — the baseline multiplier still can't.
    # CAP DROPPED (user ruling 2026-07-24): the "first Spotlighted card each turn" clause already limits this to ONE
    # proc a turn, so a second copy is linear, not compounding — the pass-1 cap rationale was written for per-turn
    # compounding powers and does not reach this one. Base StS lets you spam Power dupes; this now does too.
-- {id: supporting_cast, name: "Supporting Cast", register: salon, cost: 1, type: power, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
-   effects: [{op: apply_power, power: spotlight_draw, amount: 1, target: self, note: "first Spotlighted card each turn draws N"},
-             {op: raise_fanfare_cap, amount: 5}]}
-   # COMPENSATION Track 1 (RULED 2026-07-28; X RATIFIED at 5, R130 2026-08-07).
+- {id: supporting_cast, name: "Supporting Cast", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
+   effects: [{op: apply_power, power: spotlight_draw, amount: 1, target: self, note: "first Spotlighted card each turn draws N"}]}
    # The other ratified texture line. Cap dropped with Leading Role's, same ruling and same reasoning.
 - {id: guest_list, name: "The Guest List", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [block, frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [spotlight], role: enabler, exhaust: true,
    effects: [{op: generate_guest_star, rarity: uncommon, amount: 1}, {op: energy, amount: 1}]}
@@ -541,10 +536,8 @@
 - {id: directors_cut, name: "Director's Cut", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [velocity], tempo_band: {fight: [late], run: [early, late]}, archetypes: [spotlight], role: glue,
    effects: [{op: conditional, if: spotlight_moved_this_turn, then: [{op: energy, amount: 1}, {op: draw, amount: 2}], else: [{op: draw, amount: 1}]}]}
    # Re-aim payoff: the scene changes and the production surges.
-- {id: top_billing, name: "Top Billing", register: salon, cost: 1, type: power, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
-   effects: [{op: apply_power, power: spotlight_mult_bonus, amount: 25, target: self, note: "Spotlighted numbers +25% per copy for the rest of combat"},
-             {op: raise_fanfare_cap, amount: 5}]}
-   # COMPENSATION Track 1 (RULED 2026-07-28; X RATIFIED at 5, R130 2026-08-07).
+- {id: top_billing, name: "Top Billing", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
+   effects: [{op: apply_power, power: spotlight_mult_bonus, amount: 25, target: self, note: "Spotlighted numbers +25% per copy for the rest of combat"}]}
    # R16 re-author (replaces Constant Star): the name above the title — the archetype's core scaling engine.
    # Combat-duration mult through the SAME pipe (§2.2a numbers-only inherited). (lint-ok: pct points)
    # The old Spend 2 Encore gate was removed: an early scaling engine must be installable before it can repay setup.
@@ -555,11 +548,9 @@
 - {id: duet, name: "Duet", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [spotlight], role: payoff,
    effects: [{op: replay_next_companion, times: 1, duration: this_turn}, {op: draw, amount: 1}]}
    # Study Buddy parity: the next companion performs twice. Star-agnostic — works on any guest.
-- {id: standing_ovation, name: "Standing Ovation", register: salon, cost: 1, type: power, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
+- {id: standing_ovation, name: "Standing Ovation", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: ovation_spend_boost, amount: 10, target: self, note: "whenever you spend Encore, Spotlighted +10% per copy this turn"},
-             {op: apply_power, power: spotlight_encore_first, amount: 1, target: self, note: "gain N Encore on the first Spotlighted card each turn"},
-             {op: raise_fanfare_cap, amount: 5}]}
-   # COMPENSATION Track 1 (RULED 2026-07-28; X RATIFIED at 5, R130 2026-08-07).
+             {op: apply_power, power: spotlight_encore_first, amount: 1, target: self, note: "gain N Encore on the first Spotlighted card each turn"}]}
    # R32.1 FLIP, landed: spend-payoff + first-play trickle. Each spend EVENT grants Spotlighted +10% this turn
    # through the same §2.2a pipe; the applause keeps a per-TURN trickle coming (Supporting Cast's first-play
    # window). CAP DROPPED (user ruling 2026-07-24, uncap-all): ovation_spend_boost was the other compounding ceiling
@@ -576,34 +567,24 @@
    # PROPOSED pending red-pen. (lint-ok: pct points)
 # Generic (4)
 - {id: fortissimo_guard, name: "Fortissimo Guard", register: salon, cost: 2, type: power, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [mid, late], run: [early]}, archetypes: [salon, generic], role: glue,
-   effects: [{op: apply_power, power: salon_deploy_block, amount: 5, target: self, note: "whenever you deploy a Salon member, gain N Block"},
-             {op: raise_fanfare_cap, amount: 5}]}
-   # COMPENSATION Track 1 (RULED 2026-07-28; X RATIFIED at 5, R130 2026-08-07).
+   effects: [{op: apply_power, power: salon_deploy_block, amount: 5, target: self, note: "whenever you deploy a Salon member, gain N Block"}]}
    # CURTAIN CALL B (R85): skill->power, the §4 power-quota conversion. Activity-triggered block (the guard
    # stands when the cast walks on), never per-turn — the sheet header's accrual law. Per deploy EVENT, so
    # Full Ensemble is three cues. Was: block 11 flat (Spirited Away minus one). (lint-ok: pre-sweep body)
    # The A3 discipline now lives
    # on the trigger rate instead of one big number. PROPOSED pending red-pen.
-- {id: courtroom_drama, name: "Courtroom Drama", register: archon, cost: 1, type: power, rarity: uncommon, solve: [block, frontload, scaling, utility, velocity], tempo_band: {fight: [late], run: [early]}, archetypes: [generic], role: glue,
-   effects: [{op: apply_power, power: cross_examination, amount: 1, target: self, note: "the first reaction you trigger each turn applies N Vulnerable and N Weak to its target"},
-             {op: raise_fanfare_cap, amount: 5}]}
-   # FANFARE REWORK Track B (2026-07-28, RULED; the X RATIFIED at 5, R130 2026-08-07): prints
-   # "Fanfare Cap +5". It used to receive exactly 5 floor for FREE, as every
-   # Power did, printed nowhere. This is the visible replacement and it is a
-   # deliberate REDUCTION -- cap is headroom, not baseline. See the sprint log
-   # for the standing measurement note: the cap has not been a binding number
-   # since F-A5, so this keyword is close to inert at current constants.
-   # COMPENSATION Track 1 (2026-07-28): no longer one of four carriers -- every
-   # Power prints this now, and R7 enforces it. The X is unchanged.
+- {id: courtroom_drama, name: "Courtroom Drama", register: archon, cost: 1, type: power, rarity: uncommon, solve: [utility], tempo_band: {fight: [late], run: [early]}, archetypes: [generic], role: glue,
+   effects: [{op: apply_power, power: cross_examination, amount: 1, target: self, note: "the first reaction you trigger each turn applies N Vulnerable and N Weak to its target"}]}
+   # The printed "Fanfare Cap" rider is GONE (EB-118 sec.5.2, 2026-08-24). It
+   # was the visible replacement for the invisible floor every Power once
+   # received, and the sprint log's own standing note is why it left: the cap
+   # has not been a binding number since F-A5, so the line was close to inert
+   # on the face. No compensation was paid in the same batch, by rule.
    # CURTAIN CALL B (R85): skill->power on the RATIFIED archon register move — the trial runs all combat.
    # Reads state Furina owns (her reactions put the defendant on the stand); first-reaction gate keeps a
    # reaction storm from becoming a lockdown engine. Was: Vulnerable 2 + Weak 1 one-shot. PROPOSED.
-- {id: quick_change, name: "Quick Change", register: private, cost: 1, type: power, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [late], run: [early]}, archetypes: [generic], role: glue,
-   effects: [{op: apply_power, power: first_attack_draw, amount: 1, target: self, note: "the first Attack you play each turn draws N"},
-             {op: raise_fanfare_cap, amount: 5}]}
-   # COMPENSATION Track 1 (RULED 2026-07-28; X RATIFIED at 5, R130 2026-08-07). The PRIVATE
-   # register keeps its Power keyword: under R7 the keyword is a card-TYPE
-   # property, not a voice, which is the whole reason R2 had to release it.
+- {id: quick_change, name: "Quick Change", register: private, cost: 1, type: power, rarity: uncommon, solve: [velocity], tempo_band: {fight: [late], run: [early]}, archetypes: [generic], role: glue,
+   effects: [{op: apply_power, power: first_attack_draw, amount: 1, target: self, note: "the first Attack you play each turn draws N"}]}
    # CURTAIN CALL B (R85): the RATIFIED 5th power slot (chat 2026-07-27; florid_cadenza keeps its F-B1 threshold  (lint-ok: ruling ordinal)
    # design). The standing costume-change discipline: the first Attack each turn draws — spotlight_draw's
    # first-play-window grammar on her attack cadence, activity-gated per the header law. Was: draw 3,
@@ -665,14 +646,10 @@
    # pays for payoff-grade numbers. Plain attack since Track B (mass application deleted; the Gardener-wall
    # answer is now the payoff's, not the applier's). Left the convergence watchlist with its application.
    # PROPOSED.
-- {id: crowd_work, name: "The Gallery Stirs", register: archon, cost: 1, type: power, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [late], run: [early]}, archetypes: [fanfare], role: glue,
-   effects: [{op: apply_power, power: encore_spend_draw, amount: 1, target: self, note: "the first time you spend Encore each turn, draw N"},
-             {op: raise_fanfare_cap, amount: 5}]}
-   # FANFARE REWORK Track B (2026-07-28, RULED; X RATIFIED at 5, R130 2026-08-07): "Fanfare Cap
-   # +5", replacing the invisible 5 floor every Power used to receive. The
-   # fanfare plan's own glue card.
-   # COMPENSATION Track 1 (2026-07-28): the short list it was one of four of is
-   # REVERSED -- every Power prints a keyword now (R7). The X is unchanged.
+- {id: crowd_work, name: "The Gallery Stirs", register: archon, cost: 1, type: power, rarity: uncommon, solve: [velocity], tempo_band: {fight: [late], run: [early]}, archetypes: [fanfare], role: glue,
+   effects: [{op: apply_power, power: encore_spend_draw, amount: 1, target: self, note: "the first time you spend Encore each turn, draw N"}]}
+   # The fanfare plan's own glue card. Its printed "Fanfare Cap" rider is GONE
+   # (EB-118 sec.5.2, 2026-08-24) -- an incidental line, not this card's job.
    # CURTAIN CALL B (R85): skill->power + (rn) to the archon register — the audience leans in whenever she
    # gives of herself. The A5 spend-tempo identity becomes a standing engine on the SAME verb (spend events),
    # once per turn so the flux plan cannot loop it. The encore_cost 2 install gate is dropped: a spend-payoff
@@ -729,12 +706,7 @@
 - {id: endless_waltz, name: "Endless Waltz", register: salon, cost: 2, type: power, rarity: rare, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [salon], role: payoff,
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta},
              {op: apply_power, power: salon_member, amount: 1, target: self, member: usher},
-             {op: apply_power, power: salon_damage_up, amount: 3, target: self},
-             {op: raise_fanfare_cap, amount: 8}]}
-   # COMPENSATION Track 1 (RULED 2026-07-28; X RATIFIED at 8, the rare rate, R130 2026-08-07).
-   # A rare POWER that is NOT one of the three "Fanfare +X" payoffs: R6 keeps
-   # the full grant on those three, so this prints the cheap half at the rare
-   # magnitude. Rarity buys the bigger number, not the other keyword.
+             {op: apply_power, power: salon_damage_up, amount: 3, target: self}]}
    # Named for her passive. The waltzing pair (hammer + shield, v2) and a standing crescendo — the Salon's rare
    # engine piece. Cost 3->2 at the rework reprice. PROPOSED pending red-pen.
 - {id: grand_gala, name: "Grand Gala", register: salon, cost: 2, type: skill, rarity: rare, solve: [block, frontload, scaling, sustain, utility, velocity], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [salon], role: payoff, exhaust: true, tags: [skill_tag],
@@ -758,10 +730,8 @@
              {op: conditional, if: fanfare_at_least_15, then: [{op: damage, amount: 6, target: all_enemies}]}]}
    # F-B1: the archetype's ONE deliberate big-moment gate, and the reason thresholds were not banned outright. Keeps the
    # smooth read so it is never dead, and adds a burst above a bar that is reachable under decay. PROPOSED.
-- {id: star_of_the_show, name: "Star of the Show", register: salon, cost: 1, type: power, rarity: rare, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
-   effects: [{op: apply_power, power: spotlight_flat_damage, amount: 5, target: self, note: "Spotlighted cards' damage ops +5 printed per copy"},
-             {op: raise_fanfare_cap, amount: 8}]}
-   # COMPENSATION Track 1 (RULED 2026-07-28; X RATIFIED at 8, the rare rate, R130 2026-08-07).
+- {id: star_of_the_show, name: "Star of the Show", register: salon, cost: 1, type: power, rarity: rare, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
+   effects: [{op: apply_power, power: spotlight_flat_damage, amount: 5, target: self, note: "Spotlighted cards' damage ops +5 printed per copy"}]}
    # G-D2 (2026-07-25), PROPOSED: printed bonus per copy raised. Named "weak" by the co-op A0 playtest,
    # and consistent with spotlight's run winrate measured far below salon's in the same world (see the
    # G-E2 anchors in docs/archive/ship-what-we-know-sprint-log.md).
@@ -775,10 +745,8 @@
    # CAP DROPPED (user ruling 2026-07-24): with amount 3 and max_stacks 3 the cap EQUALLED one application, so a second
    # copy did literally nothing — a dead card of exactly the shape lint_strict_domination exists to catch. Flat +3 per
    # copy is linear and rides the same numbers-only pipe, so uncapping restores the base-StS "spam dupes if you want to".
-- {id: prima_donna, name: "Prima Donna", register: salon, cost: 2, type: power, rarity: rare, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [spotlight], role: payoff,
-   effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self}, {op: apply_power, power: spotlight_draw, amount: 1, target: self},
-             {op: raise_fanfare_cap, amount: 8}]}
-   # COMPENSATION Track 1 (RULED 2026-07-28; X RATIFIED at 8, the rare rate, R130 2026-08-07).
+- {id: prima_donna, name: "Prima Donna", register: salon, cost: 2, type: power, rarity: rare, solve: [scaling], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [spotlight], role: payoff,
+   effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self}, {op: apply_power, power: spotlight_draw, amount: 1, target: self}]}
    # Both texture lines in one rare: the production revolves around her star.
 - {id: high_tide, name: "High Tide", register: archon, cost: 1, type: attack, rarity: rare, solve: [frontload, scaling], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [salon, fanfare], role: payoff, tags: [skill_tag],
    effects: [{op: damage, amount: 15, target: enemy, bonus_formula: 1_per_2_fanfare}]}
@@ -828,13 +796,14 @@
    # The rare generator: two uncommon guests at once (still sub-Rare output — the equal-rarity clause reads the GENERATED
    # rarity, and this card's own grammar keeps it under the banner: it creates uncommons, never 5-star Rares).
 - {id: reginas_mercy, name: "The Regina's Mercy", register: archon, cost: 1, type: skill, rarity: rare, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [generic, fanfare], role: payoff, exhaust: true, tags: [focalors],
-   effects: [{op: gain_encore, amount: 12}, {op: raise_fanfare_cap, amount: 5}]}
-   # FANFARE REWORK Track B (2026-07-28, RULED): "Fanfare +5" -> "Fanfare Cap
-   # +5". A RARE, but a SKILL, and R6 puts the full grant on rare POWERS only.
-   # The Focalors pair keeps its shape: the_sea_is_my_stage is the Power and
-   # carries the real grant; this is the skill and carries the headroom.
+   effects: [{op: gain_encore, amount: 12}]}
+   # It printed the full Fanfare grant until the rework, then the cap rider,
+   # and now neither (EB-118 sec.5.2, 2026-08-24). R6 keeps the grant on rare
+   # POWERS, and this is a skill; the headroom line that replaced it was
+   # incidental. The Focalors pair is undisturbed -- the_sea_is_my_stage is
+   # the Power and carries the real grant.
    # CURTAIN CALL C (R85): Focalors slot 2 (RATIFIED), rewritten toward "her final mercy" (§7) — she gives
-   # EVERYTHING, once: twelve points of grace, and the nation permanently remembers (+5 floor). Not a heal;
+   # EVERYTHING, once: twelve points of grace. Not a heal;
    # the law stays clean. Exhaust stays: a final mercy happens once. The lasting_impression floor grammar
    # at its rare ceiling. PROPOSED.
 # Promoted at Curtain Call (R85)

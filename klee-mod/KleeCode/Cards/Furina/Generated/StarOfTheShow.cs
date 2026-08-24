@@ -41,14 +41,13 @@ public sealed class StarOfTheShow : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Star of the Show"),
-        ("description", "[gold]Spotlighted[/gold] Companion damage gains {PowerAmount:diff()}. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
+        ("description", "[gold]Spotlighted[/gold] Companion damage gains {PowerAmount:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 5m),
-            new DynamicVar("FanfareCap", 8m)
+            new DynamicVar("PowerAmount", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,7 +60,6 @@ public sealed class StarOfTheShow : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<SpotlightFlatDamagePower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
-        FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
     }
 
     protected override void OnUpgrade()
