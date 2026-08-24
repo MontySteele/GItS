@@ -201,6 +201,38 @@ Named here for status only. Open items are in
   first). **The Phase-1 re-baseline is OWED, not skipped**: two of the three
   staged items move Klee combat numbers again when pulled, so taking the
   twelve-arm table between them costs two re-baselines for one window.
+  **PHASE 2B AND 2C ARE ON `main` WITH THEIR INTEGRATION WINDOWS OPEN.** 2B is
+  `big_badda_boom`, the pool's first draftable Ethereal carrier, whose body was
+  **re-ruled to Option A the same day (R201)** — *Deal 16. If this kills its
+  target, deal 8 to a random other enemy. Ethereal; upgrade removes Ethereal* —
+  replacing, not amending, the bare-16 body PR #64 shipped. The rider is
+  existing grammar (`sparkly_explosion` / `showstopper`, both engines) and
+  prices at ZERO on both faces, so R193's provisional
+  `STATIC_ETHEREAL_SHARE = 0.6` stays armed and the ratio its trigger reads is
+  untouched. 2C is the Deep Breath modal prototype and its mode chooser. **NO
+  STAMP MOVED WITH EITHER.** The live cell is still `RT12/D15/P7/C12` — 2B's
+  owed `DRAFTER_VERSION` bump is named at the price row and deliberately
+  unwritten — and **both pilot switches are still `False`**
+  (`PILOT_POLICIES_ENABLED` for the 2A pair, `MODE_CHOOSER_ENABLED` for 2C:
+  two flags, two windows, R191). **So a number read off `main` today is NOT
+  citable as a Phase-2 number until those windows close**, and R191 requires
+  them closed SEPARATELY — 2A flip = its own window and its own `P` bump, 2B
+  stamps = `C` + `D`, 2C chooser = its own window and its own `P` bump.
+  **PHASE 3 IS RATIFIED AS A GOVERNING PLAN (R202, 2026-08-24), AND WINDOW 1
+  IS NOT OPEN.** Nine calls, carried in BACKLOG `EB-118`: three ratified card
+  bodies executing at W2 (`moon_signal`, `crane_wing`, `tighten_the_cords` —
+  BACKLOG `EB-125`), the LAW amendment that landed with the ruling
+  (`role`/`archetypes` are material card-sheet edits and take a
+  `CONSTANTS_VERSION` bump), R147 left UNAMENDED with a scope note deferred to
+  W1, a body-sheet gate over every unauthored W2/W3 family, ONE Window 1 rather
+  than a 1a/1b split with its attribution caveat pre-registered, `klee/spark`
+  7 → 6, and Big Badda Boom's `demolition` tag added to the W1 audit list.
+  **The sequence is five steps and W1 is step (v):** (i) rule the three Phase-1
+  doors (QUEUE `M38`); (ii) reconstruct the Phase-1-only world from `cd5bd25`
+  plus the ruled doors and take ITS post-read — `main` now mixes phases, so
+  that read cannot come from main; (iii) close Phase 2's three windows
+  separately and take a Phase-2 post-read; (iv) that read is W1's pre-state;
+  (v) W1, then W2, then W3, each behind its own gate.
 - **Enemy remapping** — planned.
 - **Art passes** — Furina and Kokomi surfaces (Kokomi's are newest).
 - **Animation sprint 2.**
