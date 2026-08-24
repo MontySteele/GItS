@@ -1215,7 +1215,46 @@ BANNER_FEATURED_SLOTS = 3
 # `staged/eb74-lever2-b-alone`: whichever lands second re-baselines on the
 # first -- this one landed first, so a later `eb74` pull re-baselines on
 # C11 (its branch note's 9 -> 10 is stale and rebases to 11 -> 12).
-CONSTANTS_VERSION = 11
+# CONSTANTS_VERSION 12 -- the EB-118 PHASE-1 cleanup batch (2026-08-24), and
+# the ground for this one is the clause the last two bumps recorded as checked
+# and not invoked: R179/M15, "a material card-sheet edit is a world change and
+# lands under a CONSTANTS_VERSION bump". Card sheets WERE edited here, twenty
+# rows of them, and the edits are effect-level rather than cosmetic.
+#   (a) sec.5.2 -- fifteen Furina cards lose an incidental `raise_fanfare_cap`
+#   rider. The line was measured close to inert (the cap has not been a
+#   binding number since F-A5), so what moves is small, but "small" is not the
+#   test: it is a printed effect leaving twenty percent of a pool.
+#   sec.5.2's sixteenth card, `lasting_impression`, did NOT land -- its ruled
+#   upgrade delta binds to the op -- so the pool keeps exactly one carrier.
+#   (b) sec.5.3 -- the Block-reader family. `suffering_for_art` and
+#   `lasting_impression` lose ZERO-base Fanfare readers, `hearts_swelling`
+#   keeps its printed Block 3 and loses its formula. `held_breath` (Common)
+#   and `thunderous_ovation` (Rare) are preserved as the two readers that pay
+#   something on a cold meter. Every Furina Block and Fanfare number taken
+#   before this window is archive.
+#   (c) sec.4.3 -- `blast_radius` gains a chosen discard and
+#   `no_holding_back` gains Exhaust plus one `confiscated`. Two Klee cards
+#   cost more than they did; base damage is untouched by design (sec.4.3 adds
+#   the second price first and reprices in its own window).
+#   (d) sec.4.6 -- `Burst +5` printed on fifteen `skill_tag` faces. TEXT ONLY,
+#   and recorded here for the window's completeness rather than as ground: the
+#   tag, its membership and the meter arithmetic do not move, and a card face
+#   is not a number. On its own it would not have earned a bump.
+# NO ENGINE RULE MOVED. No op was added, no power was added, no hook changed
+# -- the three Phase-1 items that would have touched the engine are STAGED and
+# not pulled (see the BACKLOG EB-118 row). This is a pure content window.
+# RT, D and P are all UNTOUCHED and each for its own reason: no run-layer
+# content moved (RT), no offer-time price and no drafter code moved so the
+# D15 spotlight-limb bump is undisturbed (D), and no pilot heuristic moved --
+# `PILOT_POLICIES_ENABLED` is still False (P).
+# THE RE-BASELINE IS OWED AND DELIBERATELY NOT TAKEN HERE. Two of the three
+# staged Phase-1 items move Klee combat numbers again the moment [USER] pulls
+# them, so re-taking the twelve-arm standing table now would buy a table that
+# a same-day pull invalidates -- the EB-69/EB-74 collision argument, applied
+# to this window. Every pre-window Furina and Klee combat number is archive
+# from this bump regardless; the archive banner goes where the numbers are
+# published and nothing is rewritten (R101b).
+CONSTANTS_VERSION = 12
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
