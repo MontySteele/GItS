@@ -98,7 +98,12 @@ def test_survival_sprint_frontload_endpoints():
     upgraded = {
         "kaboom+": 10,
         "jumpy_dumpty+": 10,
-        "big_badda_boom+": 20,
+        # big_badda_boom+ is NOT in this map any more. EB-118 Phase 2 moved its
+        # upgrade off the number and onto the keyword (`remove: ethereal`), so
+        # the upgraded face prints the SAME 16 the base does. Its own pin is
+        # test_big_badda_boom_prints_the_price_and_the_upgrade_buys_it_off
+        # below; leaving a 16 here would read as a survival-sprint endpoint
+        # rather than as the deliberate absence of one.
         "blast_radius+": 12,
         "pocket_fireworks+": 7,
         "rapid_fire+": 5,
@@ -117,6 +122,47 @@ def test_survival_sprint_frontload_endpoints():
 
     flame = loader.get_card("flame_dance")
     assert flame.effects[0]["bonus_vs_aura"] == 4  # rider deliberately stable
+
+
+def test_big_badda_boom_prints_the_price_and_the_upgrade_buys_it_off():
+    """EB-118 Phase 2 (packet §4.3): the first DRAFTABLE Ethereal carrier.
+
+    The whole slice is two facts and this test is both of them: the base card
+    prints the downside and nothing else moved, and the upgrade removes the
+    downside and nothing else moved. If a later edit restores the number bump
+    beside the keyword, or lets the base damage drift, the card stops being a
+    one-variable read of STATIC_ETHEREAL_SHARE and R193's repricing trigger is
+    reading a different card than the one it was armed on.
+    """
+    base = loader.get_card("big_badda_boom")
+    up = loader.get_card("big_badda_boom+")
+
+    assert base.ethereal is True
+    assert base.is_ethereal is True           # the field spelling, not the tag
+    assert "ethereal" not in base.tags
+    assert up.ethereal is False
+    assert up.is_ethereal is False
+
+    # Nothing else moves across the upgrade -- same cost, same single 16.
+    assert base.cost == up.cost == 2
+    assert base.effects == up.effects == [
+        {"op": "damage", "amount": 16, "target": "enemy"},
+    ]
+
+    # ORTHOGONAL TO is_junk (the state.py note, [USER] 2026-08-23): an Ethereal
+    # PERSONAL card is still one of the character's own cards. Klee has no
+    # rotation law, but the field is shared with the sheet that does, so the
+    # separation is pinned where the first carrier lives too.
+    assert base.is_junk is False
+
+    # Rarity is what makes this the trigger: a Common is offerable by every
+    # reward, shop and Neow channel, which is what spends the drafter's
+    # no-bump licence.
+    assert base.rarity == "common"
+
+    # Phase-3-fenced fields did NOT move with the price (packet §3, R199 g1).
+    assert base.role == "glue"
+    assert sorted(base.archetypes) == ["demolition", "generic"]
 
 
 def test_survival_sprint_companion_interfaces_have_live_bodies():

@@ -53,11 +53,21 @@ def test_number_bumps_follow_the_mined_grammar():
     jd = loader.get_card("jumpy_dumpty+")                # dual bump privilege
     assert jd.effects[0]["amount"] == 10                 # 8->10
     assert jd.effects[1]["bomb_damage"] == 8             # 6->8
-    assert loader.get_card("big_badda_boom+").effects[0]["amount"] == 20
+    # big_badda_boom's 16->20 left this test at EB-118 Phase 2: its upgrade is
+    # now a keyword removal (grammar row 4), not a number bump (rows 1/2), so
+    # it is pinned in test_condition_and_keyword_class_upgrades below instead.
+    assert loader.get_card("boom_goes_the_dynamite+").effects[0]["amount"] == 22
 
 
 def test_condition_and_keyword_class_upgrades():
     assert loader.get_card("sugar_rush+").exhaust is False
+    # EB-118 Phase 2: the mined "Remove Ethereal" row (n=13) gets its first
+    # carrier. `remove: ethereal` is guarded in upgrades.py where `remove:
+    # exhaust` is not -- a delta that removes a keyword the base never printed
+    # raises rather than generating an upgraded copy identical to its base --
+    # so this assertion also proves the base still prints it.
+    assert loader.get_card("big_badda_boom").ethereal is True
+    assert loader.get_card("big_badda_boom+").ethereal is False
     # Live playtest 2026-07-22: Retain lets the player bank the enabler for
     # a useful hand without forcing the HP cost into turn 1.
     hot = loader.get_card("hot_hands+")
