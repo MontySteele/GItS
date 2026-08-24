@@ -166,6 +166,22 @@ CODEGEN_DEBT: dict[str, str] = {
         "blocker; the replacement delta is the open design call at QUEUE "
         "`M27`. Gate: delta authored -> delete THIS ENTRY AND THE "
         "SHEET_EXEMPT ENTRY TOGETHER.",
+    # --- EB-69 (R198, 2026-08-23). TWO ENTRIES, ONE MISSING EMITTER. Both
+    # sheet deltas exist and are ruled; the `add:` emitter expresses only a
+    # positive draw, a `gain_encore`, or a `repeat_this`, so neither renders.
+    # These are LAYER-2 ONLY -- the sheet rows are complete, so no SHEET_EXEMPT
+    # twin is wanted and adding one would be a lie about the sheet.
+    "send_the_runner":
+        "DEBT -- [USER]'s ruled two-key common upgrade (D2a): draw +1 plus "
+        "`add: discard 1 chosen`. The delta is authored and shipped in "
+        "docs/kokomi-upgrades.yaml; only the C# `add:` emitter cannot express "
+        "a discard. Gate: BACKLOG `EB-122` teaches the emitter `discard` -> "
+        "delete this entry.",
+    "wheel_the_ranks":
+        "DEBT -- ruled upgrade `add: block 3` on the played face (D6). Same "
+        "single missing emitter as the entry above, one op over. Gate: "
+        "BACKLOG `EB-122` teaches the `add:` emitter `block` -> delete this "
+        "entry.",
 }
 
 

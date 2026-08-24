@@ -40,15 +40,23 @@
 #          riders (draw, energy, cycling, selection). Exhaust cards may carry riders — Block and other
 #          identity/defense riders are explicitly legal — but an economy rider on an exhaust card is legal
 #          ONLY as a deliberate one-time velocity piece: RARE **AND** self-Exhaust.
-#          Template: "Gain 1 (2) energy, draw 1 (2), exhaust 2. Exhaust."  (moonlit_offering is the sheet's one
+#          Template: "Gain 1 (2) energy, draw 1 (2), exhaust 2. Exhaust."  (moonlit_offering was the sheet's one
 #          instance; swift_currents was merged into it at G8 rather than promoted alongside it.)
+#          TWO INSTANCES AS OF EB-69 (R198, [USER] 2026-08-23), and the second is a DELIBERATE YES, not a
+#          discovery: `the_gunbai_turns` is Rare AND self-Exhaust and carries a chosen `discard`, which is
+#          selection, which LAW 5's monopoly list names. It is therefore LEGAL under the conjunctive shape
+#          below, and the defect was that this header claimed exactly one instance while the fill added a
+#          second. The header now says two. B4's point stands unchanged: the PAIR (Rare AND self-Exhaust)
+#          is what makes each of them a one-time purchase, and a third instance is a fresh [USER] act, not
+#          a precedent this line has granted.
 #   B4 — THE CONJUNCTIVE SHAPE, stated once for BOTH laws that use it. LAW 2 admits a heal only at Rare AND
 #          Exhaust; LAW 5 admits an economy rider only at Rare AND self-Exhaust. In both cases the PAIR is the
 #          point: either half alone is exactly the shape the law exists to prevent — a Rare that heals is a
 #          payoff, an Exhaust card that draws is an engine — and it is the conjunction that makes the effect a
 #          one-time purchase instead of a repeatable one. A future pass that "simplifies" either law to a single
 #          condition has not simplified it; it has repealed it. Kokomi takes ZERO slots under LAW 2 (the healer
-#          heals no HP) and exactly one under LAW 5.
+#          heals no HP) and exactly TWO under LAW 5 (moonlit_offering, the_gunbai_turns) -- see the LAW 5
+#          note above for why the second is a deliberate yes.
 #   LAW 6 (rotation law, [USER] 2026-08-23): Kokomi only Exhausts HER OWN cards. A Status or a Curse is never
 #          one of her cards: Muster and every chosen-Exhaust card never select one, and NO Charge (or Burst
 #          particle) accrues from a Status/Curse exhaust by any route. Discard is unchanged. A card that may
@@ -160,7 +168,7 @@
    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: block, amount: 5}]}
    # Burn a card for safety: Defend-grade Block whose rider is fuel with the Casket, pure loss without a payoff —
    # the priest lane's honest price.
-- {id: ritual_purification, name: "Ritual Purification", cost: 1, type: skill, rarity: common, solve: [frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [priest], role: enabler,
+- {id: ritual_purification, name: "Ritual Purification", cost: 1, type: skill, rarity: common, solve: [block, frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [priest], role: enabler,
    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: gain_charge, amount: 4}, {op: draw, amount: 1}]}
    # The premium Charge common (§2.1 explicit-bonus grammar): exhaust 1 -> 5 total Charge (1 funnel + 4 line),
    # replaces itself. The engine's metronome. v0.3: line 2 -> 4 — the benchmark common Forges 7 while dealing 7; (lint-ok: benchmark common's numbers)
@@ -214,7 +222,7 @@
    effects: [{op: block, amount: 6}]}
    # Graceful Retreat parity exactly (6 at common, under Klee's Hide and Seek) — the stability character does NOT
    # get a hidden block subsidy; her edge is the ward and the buffer of future draws. (lint-ok: Furina comp)
-- {id: pulsing_current, name: "Pulsing Current", cost: 1, type: attack, rarity: common, solve: [frontload, scaling], tempo_band: {fight: [early], run: [early]}, archetypes: [generic, priest], role: glue,
+- {id: pulsing_current, name: "Pulsing Current", cost: 1, type: attack, rarity: common, solve: [block, frontload, scaling], tempo_band: {fight: [early], run: [early]}, archetypes: [generic, priest], role: glue,
    effects: [{op: damage, amount: 7, target: enemy}, {op: gain_charge, amount: 1}]}
    # v0.3: her Regent-common analogue — deal 7 AND feed the meter 1. The v0.2 stance ("deliberately UNDER
    # Klee's 7") is SUPERSEDED by the charge-curve ruling direction: the scaling currency rides on ordinary
@@ -280,7 +288,7 @@
    effects: [{op: damage, amount: 5, target: enemy}, {op: conscript, amount: 1}]}
    # The shot that calls the muster: a real swing that is also an order. Under pulsing_current's 7 because the (lint-ok: sibling card's number)
    # muster is worth more than the premium point it trades away.
-- {id: shoulder_to_shoulder, name: "Shoulder to Shoulder", cost: 1, type: skill, rarity: common, solve: [frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [early, late]}, archetypes: [commander], role: payoff,
+- {id: shoulder_to_shoulder, name: "Shoulder to Shoulder", cost: 1, type: skill, rarity: common, solve: [block, frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [early, late]}, archetypes: [commander], role: payoff,
    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: copy_companion_in_hand, amount: 1}]}
    # Rotate one card off the line and the unit beside it steps up twice. The Commander's only common PAYOFF:
    # it whiffs with no companion in hand, which is exactly the archetype tax — you must have mustered first.
@@ -296,7 +304,7 @@
    # The old note priced it "ABOVE surging_shoal's 7 by one point" — that gap is now 2 (shoal is 6 per R77), (lint-ok: quoted superseded note, corrected in the same line)
    # and the pricing sentence is struck rather than re-derived: the ratified numbers are 6 and 8, and inventing
    # a fresh justification for a gap nobody ruled on would be reasoning backwards from the answer.
-- {id: pearl_diver, name: "Pearl Diver", cost: 0, type: skill, rarity: common, solve: [frontload, scaling, utility], tempo_band: {fight: [early], run: [early]}, archetypes: [priest], role: enabler,
+- {id: pearl_diver, name: "Pearl Diver", cost: 0, type: skill, rarity: common, solve: [block, frontload, scaling, utility], tempo_band: {fight: [early], run: [early]}, archetypes: [priest], role: enabler,
    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: gain_charge, amount: 2}]}
    # The free fuel line: burn one, bank 3 total (2 line + 1 funnel). ritual_purification is the 1-cost engine
    # common that also replaces itself; this is the cheap one that does not. Watatsumi's divers, on the nose.
@@ -332,7 +340,7 @@
 # These rows do not buff the lane. They CONNECT it: discard -> exhaust -> meter -> the payoff that reads the
 # pile the churn has been filling. P7 could not grade before they existed; the E1 assist column is its
 # pre-F4 baseline.
-- {id: ebb_tide, name: "Ebb Tide", cost: 0, type: skill, rarity: common, solve: [frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [assist], role: enabler,
+- {id: ebb_tide, name: "Ebb Tide", cost: 0, type: skill, rarity: common, solve: [block, frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [assist], role: enabler,
    effects: [{op: discard, amount: 1}, {op: exhaust_from, amount: 1, select: chosen}]}
    # THE CONVERTER, in its plainest form: the random discard rings whatever Sly bell is in hand, and the chosen
    # exhaust turns the churn into Charge and Burst. Two cards leave your hand for zero energy and no immediate
@@ -402,7 +410,7 @@
    effects: [{op: damage, amount_formula: {base: 5, per: 1, count: exhaust_pile}, target: enemy}]}
    # Ashen-Strike rail: 5 + 1 per exhausted card (v0.3: base 3 -> 5 — the floor must be playable before the
    # pile exists). Bounded by the fight's real burn (not the uncapped meter) — pile-limited by construction.
-- {id: communion_of_tides, name: "Communion of Tides", cost: 1, type: skill, rarity: uncommon, solve: [frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [priest, assist], role: glue,
+- {id: communion_of_tides, name: "Communion of Tides", cost: 1, type: skill, rarity: uncommon, solve: [block, frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [priest, assist], role: glue,
    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: draw, amount: 2}]}
    # Burn one, see two: the lane-bridge card (priest fuel, assist velocity).
 # Assist (2 + 1 F4 bridge)
@@ -602,3 +610,245 @@
    # The pure offering: one card, eight Charge (7 line + 1 funnel) and a moment's calm. The meter's rare (lint-ok: 7 line + 1 funnel arithmetic)
    # accelerant. v0.3: 4 -> 7 — the v0.2 audit found this RARE generating less meter than the benchmark
    # COMMON Forges; a rare accelerant must out-accelerate a common by more than politeness.
+
+# ======================= EB-69 POOL FILL (+14: 62 -> 76) — R198, [USER] 2026-08-23 =======================
+# WHY THIS BLOCK EXISTS. R58 carried the v0.5 partial fill's remaining gap forward as an explicit design pass
+#   "AFTER the early playtest results". This is that pass, and it closes the gap in ONE batch: +4 rare,
+#   +6 uncommon, +4 common, taking the sheet to 76 rows at 5 basic / 31 common / 26 uncommon / 14 rare —
+#   Klee's shape. Draftable reward pool = 70 (`ceremonial_garment` is `kit_card: true` and never draftable).
+#   The batch ships with a complete upgrade row for every one of the 14 (docs/kokomi-upgrades.yaml); EB-69 may
+#   not ship without them, and nothing is held out.
+# PROVENANCE. Bodies from the frozen 2026-07-29 brief (docs/archive/brief-kokomi-pool-fill.md, 15 proposals),
+#   minus A3 `tideborne_discipline` — the one engine ask, DROPPED with its `discard_dividend` power, leaving the
+#   brief's own declared A4+A6 fallback. Names are the S4-G11 eye-read's, [USER]-ruled 2026-08-23 over the
+#   Japanese military register. `role` / `solve` / `tempo_band` did not exist when the brief was written:
+#   `role` is ruled here, and `solve` / `tempo_band` are the CLASSIFIER'S per R91 — the drift gate requires
+#   them to EQUAL suggest_role_tempo_tags' output, so moving a band means moving the classifier rule, which is
+#   a design call and not a landing (watch_of_the_shallows' note is the standing statement of this).
+#   THE EYE-READ SHEET'S PROPOSED solve/tempo_band VALUES ARE NOT WHAT LANDED, and that is the rule working
+#   rather than failing: eleven of the fourteen differ from the v3 proposals, which were drawn by hand from
+#   each card's nearest shipped analogue before the classifier was run. `--land` wrote the derived values.
+#   SIX PRE-EXISTING ROWS ALSO MOVED for the same reason and are in this commit's diff --
+#   ritual_purification, pulsing_current, shoulder_to_shoulder, pearl_diver, ebb_tide, communion_of_tides all
+#   gained `block`, because gyorin_formation and tighten_the_cords give Charge and the exhaust funnel a
+#   block-shaped payoff they did not have, and a carrier inherits the roles its meter cashes into (charter
+#   A0.1). No hand edit was made to any of the six; the tag-through table is derived from the pool, and the
+#   pool changed.
+# THE R190 COLLISION IS NOT HIDDEN. Two of these rows classify `role: payoff` AND carry `assist`
+#   (`what_the_tokoyo_took`, `the_gunbai_turns`), which moves Assist payoff supply 3 -> 5. That fence was
+#   [USER]'s and [USER] amended it (R197) BEFORE this block landed, in the registration it protects:
+#   review/active/payoff-reach-reregistration.md §6.8. Phase-0 item 8 forbids the alternative in so many words
+#   — "do not disguise a payoff as glue to make the fingerprint pass" — so the honest tags are the tags.
+#   `what_the_tokoyo_returns` is the borderline one and is ruled `role: glue`: retrieval and repair cash no
+#   resource into output. If a later rubric rules retrieval IS payoff, the supply reads 6 by that rubric,
+#   transparently, and no body here changes.
+# EVERY NUMBER IN THIS BLOCK IS PROPOSED, as everywhere else on this sheet. The names are RULED.
+# NO VERSION INTEGER MOVES WITH THIS BLOCK. EB-69 is registered settle-first content; RT/D/P/C are untouched.
+
+# ---------- RARE, EB-69 (+4: 10 -> 14) ----------
+# The priority the brief named: the assist lane had NO rare of its own (its two were priest cards wearing an
+# assist tag), and a lane with no payoff at its top rarity has no reason to be drafted after the third pick.
+- {id: the_gunbai_turns, name: "The Gunbai Turns", cost: 1, type: skill, rarity: rare, solve: [velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [assist], role: payoff, exhaust: true,
+   effects: [{op: grant_sly_this_turn, card_type: skill},
+             {op: grant_sly_this_turn, card_type: skill},
+             {op: grant_sly_this_turn, card_type: skill},
+             {op: discard, amount: 3, select: chosen}]}
+   # THE ASSIST LANE'S FIRST RARE OF ITS OWN, and it pays off cards already drafted rather than adding an
+   # engine: three Skills in hand become Sly, then a chosen discard-3 fires all three riders at once.
+   # `grant_sly_this_turn` filters to Skills not already Sly this turn, so the three ops pick three different
+   # cards instead of stacking on one. Cost 1 + Exhaust keep it a one-shot detonation of a hand, not a loop.
+   # FIRST PRINTED USE OF `grant_sly_this_turn` — the verb was implemented, tested and priced, and unreachable
+   # because no card row used it (the surging_shoal vigil defect one level down: a verb in no card is a verb
+   # that does not exist).
+   # ROLE. `payoff`, honestly: it prints no damage and no Block, which is a tempting enabler argument, but its
+   # entire function is cashing the lane's drafted Sly riders in one turn, at Rare, exclusively for assist.
+   # That is a payoff wearing an enabler's effect list. See the R190 note in the block header.
+   # LAW 5, DELIBERATE YES ([USER], D5) (lint-ok: law number, not a value): Rare AND self-Exhaust carrying a
+   # chosen `discard` — selection, which that law's monopoly list names — is legal under the conjunctive
+   # carve-out (lint-ok: the sentence above cites the law, not a card number), and this is the sheet's SECOND
+   # instance. The header said "one" and now says two; the yes is recorded rather than inherited silently.
+   # VOICE LAW: the gunbai is the commander's iron war fan and a turn of the fan is a signal, not a fall.
+- {id: all_hands, name: "All Hands", cost: 2, type: skill, rarity: rare, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [mid], run: [late]}, archetypes: [commander], role: payoff, exhaust: true,
+   effects: [{op: conscript, amount: 2, mode: create},
+             {op: cost_mod, scope: companion_cards, delta: -1, duration: this_turn},
+             {op: gain_charge, amount: 2}]}
+   # NAME RULED BY [USER] at the v1 eye-read (was "Beat to Quarters"); the register-shift alternate
+   # "Sound the Horagai" was offered beside it at v2 and NOT taken. Ships as ruled.
+   # COMMANDER'S SINGLE-CARD PAYOFF TURN. The lane's best turn currently needs two rares in hand —
+   # grand_conscription makes the bodies and honor_guard discounts them, and nothing did both. `mode: create`
+   # is Uncommon+ only under LAW 4 and the Exhaust pays one card back, so the net is +1 on a Rare, which is
+   # what the law prices Rares for.
+- {id: what_the_tokoyo_took, name: "What the Tokoyo Took", cost: 1, type: attack, rarity: rare, solve: [frontload], tempo_band: {fight: [mid], run: [late]}, archetypes: [assist], role: payoff,
+   effects: [{op: damage, amount_formula: {base: 6, per: 4, count: discards_this_turn}, target: enemy}]}
+   # THE ASSIST LANE'S ONLY SELF-READING ATTACK. Every damage card the lane could draft either reads the
+   # EXHAUST pile (undertow, pearl_barrage, depths_judgment — priest's resource) or is flat (scattering_spray,
+   # driftglass). A lane whose whole verb is discarding had no card that asked how much it discarded.
+   # FIRST PRINTED USE of the `discards_this_turn` count.
+   # [USER]-RULED REPRICE (v2 ruling (b)): cost 2 -> 1 and 3-per -> 4-per. The brief's version was ruled too
+   # weak. Benchmarked against Strangle (1 energy, 8 + 2 per OTHER CARD PLAYED, considered unpickable — (lint-ok: the benchmark card's numbers)
+   # lint-ok: Strangle's numbers, not this row's): this card's floor is worse (6 cold vs Strangle's 8, (lint-ok: benchmark comp)
+   # lint-ok) and its ceiling much higher, and the counts are deliberately NOT
+   # equally easy to hit — Strangle counts any card played, which happens for free every turn; this counts
+   # cards discarded BY AN EFFECT, which only happens if the deck bought discard cards. So it stays a payoff
+   # rather than a staple.
+   # WATCH — POWER INCREASE, NOT A RE-RATE. Three discards is ONE CARD'S WORTH inside this very pool:
+   # the_gunbai_turns discards 3 by itself and does so AFTER marking three Skills Sly, so those riders fire and
+   # can discard more; open_the_stores adds 2; wheel_the_ranks adds 1; the upgraded send_the_runner adds 1; and
+   # the five existing assist 0-cost random-discard commons add on top (lint-ok: a card count, not a value).
+   # A chained turn reaching 6+ discards is
+   # reachable inside this pool, and at 6 discards this is 30 damage for 1 energy, 33 upgraded (lint-ok:
+   # worked arithmetic over the formula, not printed values).
+   # THE POST-FILL BASELINE MUST REPORT THE UPPER TAIL, NOT A WORKED EXAMPLE: p90/p99 per-turn discard count
+   # and the realized damage distribution of this card. A mean is not the instrument here; the tail is the
+   # whole question. (This obligation is carried in BACKLOG, not only here.)
+- {id: gyorin_formation, name: "Gyorin Formation", cost: 2, type: skill, rarity: rare, solve: [block], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [generic, priest], role: payoff,
+   effects: [{op: block, amount: 6, bonus_formula: 1_per_2_charge},
+             {op: block_next_turn, amount: 6}]}
+   # THE FLATNESS CARD, and the only one in this fill whose case is a MEASUREMENT. The 2026-07-29 stability
+   # reading found that on the instrument R51 made the home of her healer fantasy, Kokomi reads mid-pack to
+   # worst on every column — and that Klee, her declared opposite on the volatility axis, reads FLATTER than
+   # she does. Her pool's reason is visible: pre-emptive Block is printed on exactly two commons (slack_water
+   # 4/4, tideline_watch 8-next — lint-ok: sibling cards' numbers) and per-turn Block on one uncommon
+   # (pearl_current). This is the two flatness
+   # verbs at rare rate, with the Charge bank finally buying DEFENCE instead of only damage — the kickoff's
+   # stated identity ("her HP bar doesn't move; her deck does") as arithmetic rather than as flavour.
+   # ARITHMETIC, STATED EXACTLY, because the v2 eye-read got it wrong and said "twelve Block on the turn it is
+   # played": it is 6 now (+1 per 2 Charge) and 6 at the START OF YOUR NEXT TURN — 12 across two turns, not 12
+   # on one. At 8 Charge it is 10 now + 6 next (lint-ok: worked arithmetic over the Charge rider).
+   # WATCH — POSSIBLE OVER-STRONG BLOCK ENGINE, DELIBERATELY DEFERRED BY [USER] 2026-08-23. The concern is not
+   # a single-turn spike; it is a RATE — 6 pre-emptive Block every turn for as long as the card keeps coming
+   # around, on a character whose Charge bank fills every time she rotates a card off and is NEVER SPENT (R80).
+   # That is the thing to read in the post-fill baseline, and if her stability number moves a lot, this is the
+   # first card to look at. Recorded so the deferral is visible when that baseline lands, not to reopen it.
+
+# ---------- UNCOMMON, EB-69 (+6: 20 -> 26) ----------
+- {id: council_at_bourou, name: "Council at Bourou", cost: 1, type: skill, rarity: uncommon, solve: [block, frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [commander, assist], role: enabler,
+   effects: [{op: conscript, amount: 1, mode: create},
+             {op: draw, amount: 1},
+             {op: discard, amount: 1, select: chosen}]}
+   # THE LANE BRIDGE. The kickoff says assist "feeds both other lanes" and no card actually bridged them. This
+   # one does it in one direction: velocity in, a body out, and the chosen discard means the card it draws into
+   # can be thrown to a Sly rider.
+   # D5 ([USER] 2026-08-23) — LAW 5 FIX AND RATE REDUCTION, both (lint-ok: law number, not a value). As the
+   # brief printed it this card was
+   # Uncommon, self-Exhaust, and drew 2 (lint-ok: the brief's superseded body, on record): an ECONOMY rider on
+   # an exhaust card below LAW 5's Rare bar (lint-ok: law number, not a value), which the law admits only as
+   # "RARE AND self-Exhaust". The brief predates that law (lint-ok: law reference), so it was an inherited defect rather
+   # than a new proposal. [USER] took fix (1) of the three on offer — DROP THE EXHAUST — and reduced the draw
+   # 2 -> 1 with it. Uncommons may create (reinforcements precedent), so the net-0 argument the brief used to
+   # justify the Exhaust was never needed at this rarity; without the Exhaust the card is +1 net, which is
+   # exactly what LAW 4 permits above Common. The alternatives are on the record as NOT taken: dropping the
+   # draw would have killed the card's reason to exist (draw IS the bridge), and promoting it to Rare would
+   # have taken a rare slot the fill did not budget and moved the pool tuple.
+- {id: wheel_the_ranks, name: "Wheel the Ranks", cost: 0, type: skill, rarity: uncommon, solve: [block, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [assist], role: glue,
+   sly: [{op: block, amount: 4}],
+   effects: [{op: discard, amount: 1, select: chosen},
+             {op: draw, amount: 2}]}
+   # The lane's four 0-costs (moon_signal, whispered_word, ebb_tide, steady_the_line) are all COMMONS at common
+   # rate, so a big-energy assist turn had nothing to spend on. A chosen discard into draw-2 at 0 is the
+   # uncommon rate, and the Sly rider makes it pay when it is itself the card thrown.
+   # NAME: kuruma-gakari, the rotating wheel formation where tired ranks turn off the line and fresh ones turn
+   # on — the Exhaust/rotation voice rule applied to a cycler.
+- {id: open_the_stores, name: "Open the Stores", cost: 1, type: skill, rarity: uncommon, solve: [block, frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [assist, priest], role: enabler,
+   sly: [{op: exhaust_from, amount: 1, select: chosen}],
+   effects: [{op: discard, amount: 2, select: chosen},
+             {op: gain_charge, amount: 4}]}
+   # THE ASSIST -> PRIEST BRIDGE, in the other direction from council_at_bourou: it converts a discarded hand
+   # into Charge, the only currency both lanes read. Two chosen discards fire two Sly riders, and its own Sly
+   # rider feeds the exhaust funnel, so the card pays whether it is played or thrown.
+   # NAME: hyoro, an army's provisions — the depot thrown open and spent all at once for position.
+- {id: what_the_tokoyo_returns, name: "What the Tokoyo Returns", cost: 1, type: skill, rarity: uncommon, solve: [block], tempo_band: {fight: [early], run: [early]}, archetypes: [assist], role: glue,
+   sly: [{op: recall_to_draw, amount: 1}],
+   effects: [{op: recall_to_draw, amount: 1},
+             {op: block, amount: 4}]}
+   # THE LANE'S STRUCTURAL WEAKNESS, ANSWERED: it discards at volume and could not get a payoff back.
+   # FIRST PRINTED USE of `recall_to_draw`. Uncommon rather than common because recursion plus a lane built on
+   # random discards is a real engine.
+   # THROWN, IT RETURNS ITSELF — DELIBERATE, PINNED, AND SAID OUT LOUD (D3, [USER] 2026-08-23, R198). When a
+   # card effect discards this card, only the `sly` list resolves (the played effects do NOT fire), and the
+   # discard branch of `_op_recall_to_draw` reads the raw pile with no self-exclusion — so on an empty or
+   # Skill-only pile the thrown copy recalls ITSELF to the top of the draw pile. That is now the DOCUMENTED
+   # CONTRACT, not an accident: the brief's own rationale said "the Sly rider deliberately makes the THROWN
+   # copy the better one", and the engine delivers it literally. It is a FALLBACK, not a rule — `_best_card`
+   # ranks (is attack, printed power), so a decent Attack anywhere in the discard pile wins and this card
+   # prints 0 damage. The played face cannot self-recall (it is resolving, not in a pile). The exhaust branch
+   # (`recall_exhaust_pool`) DOES exclude self, kit, junk and other retrievers, because EB-118 §6.4 required
+   # it; the asymmetry is real, is now intentional on both sides, and is pinned by
+   # tier0/tests/test_eb69_tokoyo_returns_selfrecall.py.
+   # ROLE: `glue`, and it is the borderline call in this fill rather than a comfortable one — retrieval and
+   # repair cash no resource into output, but the two nearest live analogues in the same lane and rarity
+   # (undertow, quiet_harbor) both carry `role: payoff`. Ruled glue (D1/R197). If a later payoff rubric rules
+   # retrieval IS payoff, Assist payoff supply reads 6 instead of 5 by that rubric, and nothing here changes.
+- {id: raise_the_sashimono, name: "Raise the Sashimono", cost: 0, type: skill, rarity: uncommon, solve: [velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [assist, commander], role: enabler,
+   effects: [{op: grant_sly_this_turn, card_type: skill},
+             {op: draw, amount: 1}]}
+   # THE ON-RAMP, and the reason the_gunbai_turns is draftable at all: one card becomes Sly, one card is drawn,
+   # free. Without something at this rarity the "make a card Sly" verb would exist on exactly one Rare and the
+   # lane's rare payoff would have no ladder up to it.
+   # NAME: sashimono, the small back-banners a Sengoku unit was identified and directed by — one banner up, one
+   # unit marked, which is literally what the card does to one Skill.
+- {id: crane_wing, name: "Crane Wing", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [commander], role: glue,
+   effects: [{op: block, amount: 6},
+             {op: cost_mod, scope: companion_cards, delta: -1, duration: this_turn}]}
+   # Commander's only discount was a Rare (honor_guard), so the lane could not defend on the turn it mustered —
+   # it either played bodies or played Block. Block-plus-discount at uncommon is the lane's missing tempo turn.
+   # NAME: kakuyoku, the crane-wing formation — the line spreading its arms around what it is protecting.
+   # Pairs with gyorin_formation as a two-card formation family, which reads as intentional rather than
+   # repetitive at exactly two.
+
+# ---------- COMMON, EB-69 (+4: 27 -> 31) ----------
+# Each nets card delta <= 0 and is checked against LAW 4 by tools/lint_kokomi_decksize.py.
+- {id: send_the_runner, name: "Send the Runner", cost: 0, type: skill, rarity: common, solve: [block, frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [priest, assist], role: glue,
+   effects: [{op: draw, amount: 1},
+             {op: exhaust_from, amount: 1, select: chosen}]}
+   # [USER]-RULED BODY (v2 ruling (d), CONFIRMED at D2a 2026-08-23 against a reviewer's proposed reopen).
+   # The brief's body (draw 1, discard 1 chosen, gain 1 Charge) was strictly better than Silent's Prepared,
+   # which is already an excellent card — i.e. strictly-better-than-excellent at common rate. [USER] verbatim
+   # reason for holding this body over the reviewer's Prepared-parity alternative: it "becomes hand-size-
+   # neutral at common rarity".
+   # THE CHARGE DID NOT GO AWAY. CHARGE_PER_EXHAUST = 1, so the exhaust earns exactly the 1 Charge the printed
+   # line used to grant: net zero on Charge.
+   # WATCH — POWER, burst-particle cadence. It ALSO now pays KOKOMI_BURST_PER_EXHAUST = 2 burst particles the
+   # discard body never paid, at Common, at cost 0, repeatable. Small but real, and it is an addition to her
+   # burst cadence across a run rather than to any one turn. (Carried in BACKLOG, not only here.)
+   # IT CHANGED LANES, and that consequence is ACCEPTED EXPLICITLY rather than inherited: chosen Exhaust is the
+   # PRIEST verb, so the archetypes are [priest, assist] (pearl_diver's neighbourhood — Common, cost 0, chosen
+   # Exhaust) and `solve` gains scaling, because it feeds Charge and the Burst meter through the funnel.
+   # THE COST, NAMED: the assist lane therefore ends this fill with NO common-rate chosen-discard cycler. That
+   # was this card's entire declared job in the brief, and only the UPGRADED face discards. Every other assist
+   # 0-cost discards at RANDOM. [USER] took that trade knowingly.
+   # LAW 6 (rotation law) covers the exhaust: an unfiltered chosen-Exhaust never offers a Status or a Curse, by
+   # construction in the engine, so this card cannot be used to eat junk and stays out of the reserved
+   # junk-eater design space.
+   # NAME: tsukai-ban, the Sengoku messenger corps. [USER] reverted the proposed "Relieve the Post" swap on
+   # 2026-08-23, verbatim: "I do actually prefer 'Send the Runner', so yes, let's revert the name change."
+- {id: massed_volley, name: "Massed Volley", cost: 1, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [assist, generic], role: glue,
+   sly: [{op: damage, amount: 4, target: random_enemy}],
+   effects: [{op: damage, amount: 5, target: all_enemies}]}
+   # The lane's only AoE was scattering_spray (5 AoE plus a random discard). This is the same rate with the
+   # payoff moved onto the Sly rider, so it rewards being THROWN rather than charging for it — and R56's "no
+   # one starts the game with AoE; if you need it, you draft it" is respected because it is a draft-in, not a
+   # starter. Delta 0.
+   # NAME: the massed-volley doctrine the Sengoku field armies were built around. (`ashigaru` was considered
+   # and dropped: levied foot soldiers brush the forced-service reading the voice law keeps out of her pool.)
+- {id: hold_the_narrows, name: "Hold the Narrows", cost: 1, type: skill, rarity: common, solve: [block, frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [commander], role: glue,
+   sly: [{op: conscript, amount: 1}],
+   effects: [{op: block, amount: 5}]}
+   # The only card in the pool where the COMMANDER verb fires off the ASSIST verb, at the rarity where the two
+   # lanes actually meet in a deck. `conscript` in default transform mode is delta ZERO, which is precisely why
+   # LAW 4 lets it sit on a Common.
+   # NAME. Coupled swap ([USER], D4): council_at_bourou took the Bourou place-name, and "Bourou" on two cards is
+   # the adjacency problem the eye-read exists to prevent — so this card, drafted "Guard at Bourou", takes its
+   # alternate. RATIONALE CORRECTION CARRIED WITH IT: the v2 claim that "Bourou means watchtower" is WRONG and
+   # withdrawn — Bourou Village is the resistance's own village on Watatsumi, which is canon and is why the
+   # name works, but the etymology claim was false and is struck rather than re-derived.
+- {id: tighten_the_cords, name: "Tighten the Cords", cost: 1, type: skill, rarity: common, solve: [block], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
+   effects: [{op: block, amount: 3},
+             {op: apply_power, power: metallicize, amount: 1, target: self}]}
+   # The flatness texture at common rate, and the cheapest possible answer to gyorin_formation's measurement:
+   # per-turn Block is printed on exactly one other card in her pool (pearl_current, uncommon, metallicize 3).
+   # One stack for 1 is UNDER-RATE as a Block card on purpose — it is bought for the trajectory, not for the
+   # turn, which is the distinction the stability instrument exists to make visible.
+   # NAME: the Sengoku proverb katte kabuto no o wo shimeyo — "after the victory, tighten the cords of your
+   # helmet." A card bought for the trajectory could not ask for a better name. The v1 name (Slackwater Drill)
+   # echoed the shipped `slack_water` and is gone: no shared word, no shared shape.

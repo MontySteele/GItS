@@ -53,14 +53,17 @@ absent on a fresh clone.
 
 ## Content inventory
 
-Live sim inventory (`docs/current/atlas/tier0-pilot-roster.md` §2): **303 cards
+Live sim inventory (`docs/current/atlas/tier0-pilot-roster.md` §2): **317 cards
 in the loader index** (of which 3 are acquisition-only Ancient side-sheet rows,
-leaving the 300 the atlas quotes), **5 character sheets** (3 roster + 2
+leaving the 314 the atlas quotes), **5 character sheets** (3 roster + 2
 reference), **6 encounters, 15 pilot weight sets**. The battery encounters are
 frozen (`content/encounters/battery.yaml`, FROZEN 2026-07-19). Card sheets:
 `docs/klee-cards.yaml`, `docs/furina-cards.yaml`, `docs/kokomi-cards.yaml` (all
-three carry the `tempo_band:` field, **220 personal rows** total — 76 / 82 /
-62). Balance numbers (HP, decks, bands) live in
+three carry the `tempo_band:` field, **234 personal rows** total — 76 / 82 /
+76). Kokomi's sheet moved 62 → **76 (5 basic / 31 common / 26 uncommon / 14
+rare, 70 draftable)** on 2026-08-23: `EB-69`, the ruled 14-card pool fill
+(R198). Her pool is now Klee's shape, and every pre-fill Kokomi draft number is
+a pre-fill number. Balance numbers (HP, decks, bands) live in
 `tier0/content/characters/*.yaml`, the ratified artifact — not in the registry.
 
 ## Mod card coverage (generated)
@@ -76,8 +79,20 @@ exactly why STATE reads the artifact.
 - **Furina** — **81 of 82** generated, 1 blocked (`let_the_people_rejoice`,
   intentionally hand-written kit machinery)
   (`klee-mod/KleeCode/Cards/Furina/Generated/manifest.json`).
-- **Kokomi** — **61 of 62** generated, 1 blocked (`ceremonial_garment`,
-  hand-written) (`klee-mod/KleeCode/Cards/Kokomi/Generated/manifest.json`).
+- **Kokomi** — **70 of 76** generated, 6 blocked
+  (`klee-mod/KleeCode/Cards/Kokomi/Generated/manifest.json`). One is
+  `ceremonial_garment` (hand-written). The other **five arrived with `EB-69`**
+  and each names an unimplemented C# runtime grammar rather than a defect:
+  `the_gunbai_turns` and `raise_the_sashimono` (op `grant_sly_this_turn`),
+  `what_the_tokoyo_took` (an `amount_formula` over `discards_this_turn` needs a
+  CalculatedVar bound to that count), `gyorin_formation` (`bonus_formula`
+  `1_per_2_charge` on `block` has no rider and would render as the bare base),
+  and `what_the_tokoyo_returns` (a Sly `recall_to_draw` from **discard** —
+  only the exhaust source is built). Two further cards generate but ship
+  WITHOUT an upgrade under the no-partial-upgrades rule: `send_the_runner`
+  ([USER]'s ruled two-key delta) and `wheel_the_ranks`. **The sim has all
+  fourteen; the mod has nine of them and seven of their upgrades** — a declared
+  asymmetry, tracked as `EB-122`.
 
 ## Version / world stamps
 

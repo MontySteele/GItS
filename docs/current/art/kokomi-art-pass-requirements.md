@@ -12,12 +12,15 @@ the [USER] taste pass); **character-shell track DONE** — see §5a
 
 | Surface | Required portraits |
 |---|---:|
-| Kokomi personal sheet | 62 |
+| Kokomi personal sheet | 76 |
 | Companions (Inazuma) | 15 |
-| **Total card-sized outputs** | **77** |
+| **Total card-sized outputs** | **91** |
 
-*(Bill history 2026-07-26, post-merge sweep: the personal-sheet row read
-**58** and is now **62**. The Neap Tide
+*(Bill history: 2026-08-23, `EB-69` — the personal-sheet row reads **76**; the ruled 14-card pool fill
+landed (R198) and is 14 faces this table now carries and the art pass has NOT yet produced. See the slot
+arithmetic below: the plan is **6 slots SHORT**, which is the first time this document has recorded a
+deficit rather than headroom. Filed as `EB-121`. Earlier: 2026-07-26, post-merge sweep, the personal-sheet
+row read **58** and became **62**. The Neap Tide
 amendment added four faces this table did not follow — R73's
 `before_sun_and_moon` and the three F4 Sly-lane bridge rows (`ebb_tide`,
 `salt_line`, `undertow`). All four are now planned, rendered and ledgered, and
@@ -60,7 +63,7 @@ inspection disqualified two whole families the raw counts had included.
 | `tcg` | 3 | Character Card + Platinum + Golden, 420×720 each |
 | `item` | 5 | Sango Pearl Wild 797², Vision 400², Sango Pearl 256², The Deep 256², Item 256² |
 | `vfx` | **0 usable** | see below — every one is a sigil |
-| **Viable distinct sources** | **33** | against **62** personal faces (58 when this was counted; +4 in the Neap Tide amendment) |
+| **Viable distinct sources** | **33** | against **76** personal faces (58 when this was counted; +4 in the Neap Tide amendment; +14 at `EB-69`) |
 
 ### `vfx` IS A DEAD REGISTER FOR HER — the single most important finding
 
@@ -113,7 +116,7 @@ wonder why the plan ignores them.
 
 ### Consequence for the plan: the unit is SLOTS, not sources
 
-33 sources against 62 faces means crop reuse is mandatory, as hybrid §2
+33 sources against 76 faces means crop reuse is mandatory, as hybrid §2
 anticipated. But the real currency turned out to be **(source, anchor)
 slots**: a large source backs several distinct faces, a small transparent icon
 backs exactly one.
@@ -124,9 +127,13 @@ backs exactly one.
 | tcg (multi-anchor) | 3 | 12 |
 | item (single) | 5 | 5 |
 | sticker (single) | 15 | 15 |
-| **total** | **33** | **70** for 62 faces |
+| **total** | **33** | **70** for 76 faces |
 
-**Headroom, as of the 2026-07-26 gap fill: 8 slots.** The four Neap Tide faces
+**Headroom is GONE, and the sign has flipped: 70 slots against 76 faces is a 6-SLOT DEFICIT**
+(`EB-69`, 2026-08-23). The fill added 14 personal faces to a plan that had 8 slots spare, so the source
+census has to be reopened or the crop-reuse rule has to stretch further than hybrid §2 anticipated. This is
+recorded, not solved: which source backs which of the fourteen new faces is an art call, and it is filed as
+`EB-121` rather than decided here. The 2026-07-26 reading, for comparison, was **8 slots spare**: The four Neap Tide faces
 were each given a source that NO card row held at rank 1 — Bake-Kurage Summon,
 Namecard Background The Deep, Expression 2, Profile — which was the last of the
 unclaimed-*source* slack, not of the slot slack. The distinction matters for
