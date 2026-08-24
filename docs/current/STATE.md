@@ -201,6 +201,23 @@ Named here for status only. Open items are in
   first). **The Phase-1 re-baseline is OWED, not skipped**: two of the three
   staged items move Klee combat numbers again when pulled, so taking the
   twelve-arm table between them costs two re-baselines for one window.
+  **PHASE 2B AND 2C ARE ON `main` WITH THEIR INTEGRATION WINDOWS OPEN.** 2B is
+  `big_badda_boom`, the pool's first draftable Ethereal carrier, whose body was
+  **re-ruled to Option A the same day (R201)** — *Deal 16. If this kills its
+  target, deal 8 to a random other enemy. Ethereal; upgrade removes Ethereal* —
+  replacing, not amending, the bare-16 body PR #64 shipped. The rider is
+  existing grammar (`sparkly_explosion` / `showstopper`, both engines) and
+  prices at ZERO on both faces, so R193's provisional
+  `STATIC_ETHEREAL_SHARE = 0.6` stays armed and the ratio its trigger reads is
+  untouched. 2C is the Deep Breath modal prototype and its mode chooser. **NO
+  STAMP MOVED WITH EITHER.** The live cell is still `RT12/D15/P7/C12` — 2B's
+  owed `DRAFTER_VERSION` bump is named at the price row and deliberately
+  unwritten — and **both pilot switches are still `False`**
+  (`PILOT_POLICIES_ENABLED` for the 2A pair, `MODE_CHOOSER_ENABLED` for 2C:
+  two flags, two windows, R191). **So a number read off `main` today is NOT
+  citable as a Phase-2 number until those windows close**, and R191 requires
+  them closed SEPARATELY — 2A flip = its own window and its own `P` bump, 2B
+  stamps = `C` + `D`, 2C chooser = its own window and its own `P` bump.
 - **Enemy remapping** — planned.
 - **Art passes** — Furina and Kokomi surfaces (Kokomi's are newest).
 - **Animation sprint 2.**
