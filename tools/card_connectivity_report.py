@@ -22,17 +22,20 @@ QUANTITY, not a floor, and no code here compares one to a constant.
 
 THE COMPARISON CORPUS IS ALL EIGHT POOLS
 -----------------------------------------
-Five canon pools (Ironclad, Silent, Defect, Necrobinder, Regent) read out
-of the local `game_ref/` extraction surface -- the same
-`tools/extract_base_game_pool.py` route `tools/canon_role_tempo.py`
-uses -- and three mod pools (Klee, Furina, Kokomi) read out of
-`docs/*-cards.yaml`.
+Five canon pools (Ironclad, Silent, Defect, Necrobinder, Regent) extracted
+from the local game binary -- the same `tools/extract_base_game_pool.py`
+route `tools/canon_role_tempo.py` uses, which reads `sts2.dll` through
+`klee-mod/local.props` and decompiles it to a temporary tree -- and three
+mod pools (Klee, Furina, Kokomi) read out of `docs/*-cards.yaml`.
 
 **If the five canon pools are not all present, this tool prints an
 explicitly incomplete, MOD-ONLY diagnostic report.** It does not print a
 canon comparison and it does not derive a threshold from three pools. A
-fresh clone has no `game_ref/` (it is gitignored), so the honest-stop
-path is the DEFAULT path, not an error case.
+fresh clone has no `local.props` and no game, so the honest-stop path is
+the DEFAULT path, not an error case. `canon_source()` is where that
+question is asked, and it is the only place: a checkout is judged on the
+binary it can reach, never on whether a gitignored `game_ref/` directory
+happens to exist beside it.
 
 ONE CLASSIFIER, TWO EVIDENCE ADAPTERS
 --------------------------------------
@@ -1225,6 +1228,35 @@ def classify_canon_card(card: dict, src: str, pool: str,
     return record
 
 
+def canon_source() -> tuple[Path | None, str]:
+    """`(sts2.dll, "")` when the canon half is reachable, `(None, why)` when
+    it is not. THE capability question, asked in one place.
+
+    What the canon half actually depends on is the BINARY -- read through
+    `klee-mod/local.props` and decompiled to a temporary tree -- and never
+    `game_ref/`. `game_ref/` holds the *sheet* artifacts other tools emit;
+    this one extracts its five pools itself, so a checkout with local.props
+    and no `game_ref/` (every DLL-backed worktree) is a checkout that CAN
+    print the complete report. Anything asking "can this checkout support
+    the canon comparison" -- `canon_corpus` below, and the suite that pins
+    which report this checkout prints -- must ask through here, so the
+    predicate and the behaviour cannot drift apart.
+    """
+    try:
+        from tools import extract_base_game_pool as extract
+    except Exception as exc:                       # pragma: no cover - import
+        return None, f"tools.extract_base_game_pool unimportable: {exc}"
+    try:
+        return extract.game_dll(), ""
+    except SystemExit as err:
+        return None, f"no local game to read: {err.code}"
+
+
+def canon_reachable() -> bool:
+    """The boolean form of `canon_source`."""
+    return canon_source()[0] is not None
+
+
 def canon_corpus(tree: Path | None = None) -> tuple[dict, list[str]]:
     """({character: [records]}, problems). All five pools, or nothing.
 
@@ -1243,10 +1275,9 @@ def canon_corpus(tree: Path | None = None) -> tuple[dict, list[str]]:
             return {}, [f"--canon-tree {tree} does not exist"]
         context = nullcontext(tree)
     else:
-        try:
-            dll = extract.game_dll()
-        except SystemExit as err:
-            return {}, [f"no local game to read: {err.code}"]
+        dll, why = canon_source()
+        if dll is None:
+            return {}, [why]
         context = extract.decompiled_project(dll)
 
     pools: dict[str, list[dict]] = {}

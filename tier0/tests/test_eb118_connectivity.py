@@ -15,13 +15,15 @@ become wrong:
      live sheets classify with zero UNCLASSIFIED, and an unknown op,
      predicate, formula, count token, power, tag or card-level field
      comes back as UNCLASSIFIED rather than as nothing.
-  4. THE HONEST STOP. `game_ref/` is gitignored: absent on a fresh clone
-     and in a worktree, present in the main checkout. So the tool has two
+  4. THE HONEST STOP. The canon half is extracted from the local game
+     binary, which a fresh clone does not have. So the tool has two
      legitimate paths -- the mod-only diagnostic and the eight-pool
      comparison -- and the real invocation is pinned to whichever one
-     this checkout can actually support. The canon reader is additionally
-     exercised against a SYNTHETIC decompiled tree in a temp dir, so the
-     canon half is covered either way.
+     this checkout can actually support, asked through the tool's OWN
+     capability probe rather than through a filesystem check of our own
+     (see `HAS_CANON` below). The canon reader is additionally exercised
+     against a SYNTHETIC decompiled tree in a temp dir, so the canon half
+     is covered either way.
 """
 from __future__ import annotations
 
@@ -604,12 +606,21 @@ def test_canon_corpus_on_a_missing_tree_is_a_reason_not_a_crash(tmp_path):
 
 # --- the honest stop, or the full read, depending on this checkout ----------
 #
-# game_ref/ is gitignored: present in the main checkout, absent from a
-# worktree (OPERATIONS forbids linking it in). Both are legitimate places to
-# run the suite, so these pin the tool's behaviour in whichever one we are in
-# rather than pinning the checkout itself.
+# A checkout either can reach the base-game binary or cannot. Both are
+# legitimate places to run the suite, so these pin the tool's behaviour in
+# whichever one we are in rather than pinning the checkout itself.
+#
+# The predicate is the TOOL'S OWN capability probe, not a filesystem check of
+# ours. It used to be `(REPO / "game_ref").exists()`, and that is a different
+# question from the one the tool answers: the canon half decompiles `sts2.dll`
+# through `klee-mod/local.props` and never reads `game_ref/` at all. A sibling
+# worktree carries local.props but no gitignored `game_ref/` (OPERATIONS
+# forbids linking one in), so the tool printed the COMPLETE report there while
+# this module predicted the honest stop -- a false failure in every DLL-backed
+# worktree. Asking `ccr.canon_source()` is asking the same door `canon_corpus`
+# opens, so the two cannot drift apart again.
 
-HAS_GAME_REF = (REPO / "game_ref").exists()
+HAS_CANON = ccr.canon_reachable()
 
 
 def test_real_invocation_prints_the_report_this_checkout_can_support():
@@ -620,7 +631,7 @@ def test_real_invocation_prints_the_report_this_checkout_can_support():
     out = proc.stdout
     for pool in ("klee", "furina", "kokomi"):
         assert f"--- {pool} (" in out
-    if HAS_GAME_REF:
+    if HAS_CANON:
         # The canon half is reachable: all eight pools, no honest-stop banner.
         assert "INCOMPLETE REPORT -- MOD POOLS ONLY, NO CANON BASELINE" not in out
         for canon in ("ironclad", "silent", "defect", "necrobinder", "regent"):
@@ -634,8 +645,8 @@ def test_real_invocation_prints_the_report_this_checkout_can_support():
 
 def test_report_completeness_matches_the_corpus_and_carries_no_threshold():
     report = ccr.build_report()
-    assert report["complete"] is HAS_GAME_REF
-    if HAS_GAME_REF:
+    assert report["complete"] is HAS_CANON
+    if HAS_CANON:
         assert sorted(report["canon_pools"]) == [
             "defect", "ironclad", "necrobinder", "regent", "silent"]
     else:
