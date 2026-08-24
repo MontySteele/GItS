@@ -8,14 +8,29 @@ The claims, in the order the file makes them:
                     everything back -- the switch, the weights, and their
                     TYPES -- out of an exception as well as a clean exit.
   SWITCH-OFF        with the switch off, two wildly different weight vectors
-  BYTE-IDENTITY     produce byte-identical runs. That is what makes the merged
-                    pair inert, and this file holds the proof at the run level
-                    rather than at the call site (`test_eb118_switch_off`
-                    holds the call-site half).
+  BYTE-IDENTITY     produce byte-identical runs. This file holds the proof at
+                    the run level rather than at the call site
+                    (`test_eb118_switch_off` holds the call-site half).
 
 Every claim carries its POSITIVE CONTROL. "Nothing moved" is only evidence
 when the same harness can be shown moving something under the same conditions
 -- otherwise a harness that did nothing at all would pass every test here.
+
+WHAT THE PHASE-2A FLIP DID TO THIS FILE (2026-08-24, `POLICY_VERSION` 8,
+`PILOT_WEIGHTS_VERSION` 3). `policy.PILOT_POLICIES_ENABLED` shipped False when
+these tests were written, so two kinds of line here were reading the shipped
+default and calling it something else:
+
+  * `assert policy.PILOT_POLICIES_ENABLED is False` after a sandbox was never
+    a claim about the value False -- it is the RESTORATION claim, that the
+    sandbox puts back whatever it found. It is asserted against
+    `SHIPPED_SWITCH` below, captured at import before any sandbox has run,
+    which is what it always meant and survives the next flip too.
+  * the byte-identity arm's `force=False` used to leave the switch off because
+    off was where it shipped. It now leaves it ON, so those tests hold the
+    switch off explicitly. THE CLAIM IS UNCHANGED AND IS NOT RETIRED BY THE
+    FLIP: it is what proves a weight reaches the engine only through the gate,
+    and the pre-policy path is still live code behind that gate.
 
 Cells run at 6 runs. That is far too small to say anything about a winrate and
 is not asked to: every assertion below is about IDENTITY (a digest) or about
@@ -34,10 +49,28 @@ from tier05 import pilot_weight_sweep as w4
 PLACE_5 = {"op": "place_bomb", "amount": 1, "target": "enemy",
            "bomb_damage": 5}
 
+#: The switch as the tree SHIPS it, read once at import and before any sandbox
+#: has run. Every restoration assertion below compares against this rather than
+#: against a literal: the sandbox's promise is "whatever I found, I put back",
+#: and a literal turns that promise into a statement about the value of the day
+#: -- which went stale the moment Phase 2A flipped it True.
+SHIPPED_SWITCH = policy.PILOT_POLICIES_ENABLED
+
 
 @pytest.fixture(scope="module")
 def scope():
     return w4.discover_scope()
+
+
+@pytest.fixture
+def switch_off(monkeypatch):
+    """Hold the pre-policy path down for a test's own duration.
+
+    Before Phase 2A this was the shipped state and the byte-identity tests got
+    it for free from `force=False`. Naming it is what keeps those tests about
+    the gate instead of about the default.
+    """
+    monkeypatch.setattr(policy, "PILOT_POLICIES_ENABLED", False)
 
 
 @pytest.fixture
@@ -172,7 +205,10 @@ def test_an_unranged_weight_is_named_in_the_plan_and_not_swept():
 # ---------------------------------------------------------------------------
 
 def test_importing_the_harness_arms_nothing():
-    assert policy.PILOT_POLICIES_ENABLED is False
+    """Importing the harness neither flips the switch nor arms a weight: the
+    switch reads exactly as the tree ships it, and the weight is a plain
+    float rather than one of the counting subclasses."""
+    assert policy.PILOT_POLICIES_ENABLED is SHIPPED_SWITCH
     assert type(policy.BOMB_LANDED_DAMAGE_VALUE) is float
 
 
@@ -183,7 +219,7 @@ def test_the_switch_and_the_weights_come_back_after_an_exception(scope):
             assert policy.PILOT_POLICIES_ENABLED is True
             assert policy.BOMB_CONCENTRATION_VALUE == 99.0
             raise RuntimeError("mid-cell")
-    assert policy.PILOT_POLICIES_ENABLED is False
+    assert policy.PILOT_POLICIES_ENABLED is SHIPPED_SWITCH
     for name, value in before.items():
         restored = getattr(policy, name)
         assert restored == value
@@ -193,17 +229,45 @@ def test_the_switch_and_the_weights_come_back_after_an_exception(scope):
         assert type(restored) in (int, float), name
 
 
+def test_the_switch_comes_back_OFF_when_that_is_what_it_found(switch_off,
+                                                             scope):
+    """The restoration claim in the direction that can actually regress.
+
+    Until Phase 2A this was the same test as the one above, because off was
+    the shipped state. Now that the tree ships ON, a sandbox that simply left
+    the switch alone would pass that one -- so the off side is asserted on its
+    own, held down explicitly.
+    """
+    with pytest.raises(RuntimeError):
+        with w4.sandbox({"BOMB_CONCENTRATION_VALUE": 99.0}):
+            assert policy.PILOT_POLICIES_ENABLED is True
+            raise RuntimeError("mid-cell")
+    assert policy.PILOT_POLICIES_ENABLED is False
+
+
 def test_a_typod_weight_is_refused_rather_than_swept_as_nothing():
     with pytest.raises(AttributeError) as excinfo:
         with w4.sandbox({"BOMB_LANDED_DAMGE_VALUE": 1.0}):
             pass                                    # pragma: no cover
     assert "R67" in str(excinfo.value)
-    assert policy.PILOT_POLICIES_ENABLED is False
+    assert policy.PILOT_POLICIES_ENABLED is SHIPPED_SWITCH
 
 
-def test_the_sandbox_reports_whether_it_had_to_force_the_switch():
+def test_the_sandbox_reports_whether_it_had_to_force_the_switch(monkeypatch):
+    """`forced` answers "did I have to turn it on", which is a fact about the
+    switch the sandbox FOUND -- so since Phase 2A shipped it ON, the shipped
+    tree's answer is False. Both sides are asserted rather than the one that
+    happens to be shipping, which is the whole reason the field exists: a
+    caller must never have to assume what state it inherited."""
+    monkeypatch.setattr(policy, "PILOT_POLICIES_ENABLED", False)
     with w4.sandbox({}) as state:
         assert state.forced is True
+    with w4.sandbox({}, force=False) as state:
+        assert state.forced is False
+
+    monkeypatch.setattr(policy, "PILOT_POLICIES_ENABLED", True)
+    with w4.sandbox({}) as state:
+        assert state.forced is False        # already on: nothing to force
     with w4.sandbox({}, force=False) as state:
         assert state.forced is False
 
@@ -215,7 +279,9 @@ def test_the_sandbox_forces_exactly_the_switch_it_was_given(monkeypatch):
     monkeypatch.setattr(policy, "OTHER_SWITCH_PROBE", False, raising=False)
     with w4.sandbox({}, switch="OTHER_SWITCH_PROBE"):
         assert policy.OTHER_SWITCH_PROBE is True
-        assert policy.PILOT_POLICIES_ENABLED is False
+        # Untouched, whatever it happens to be: forcing the named switch must
+        # not reach the pair's.
+        assert policy.PILOT_POLICIES_ENABLED is SHIPPED_SWITCH
     assert policy.OTHER_SWITCH_PROBE is False
     with pytest.raises(AttributeError):
         with w4.sandbox({}, switch="NO_SUCH_SWITCH"):
@@ -251,12 +317,16 @@ def test_reads_are_counted_on_the_real_read_path(scope):
 
 @pytest.mark.parametrize("cell_name", ["bomb-primary", "exhaust-primary"])
 def test_switch_off_is_byte_identical_across_two_wild_vectors(
-        scope, wild, cell_name):
-    """The inertness claim, at the RUN level.
+        switch_off, scope, wild, cell_name):
+    """The gate claim, at the RUN level.
 
     With the switch off the engine never reaches a weight, so the whole grid
-    collapses to one set of runs. This is the property that lets the pair sit
-    in HEAD without re-baselining anything.
+    collapses to one set of runs. Before Phase 2A this was the inertness
+    property that let the pair sit in HEAD without re-baselining anything;
+    after the flip it is the same fact doing a different job -- proof that a
+    weight reaches the engine ONLY through the gate, which is what the
+    sandbox's `force=False` arm relies on and what makes a moving null control
+    diagnostic rather than mysterious.
     """
     cell = _cell(cell_name)
     a = w4.evaluate(cell, scope.defaults, force=False)["digest"]
@@ -265,7 +335,8 @@ def test_switch_off_is_byte_identical_across_two_wild_vectors(
 
 
 @pytest.mark.parametrize("cell_name", ["bomb-primary", "exhaust-primary"])
-def test_the_positive_control_the_previous_test_needs(scope, wild, cell_name):
+def test_the_positive_control_the_previous_test_needs(switch_off, scope, wild,
+                                                      cell_name):
     """Without this, a harness that ran nothing would pass the test above.
 
     Forcing the switch ON moves the cell, and moving the weights under it
@@ -279,7 +350,17 @@ def test_the_positive_control_the_previous_test_needs(scope, wild, cell_name):
     assert on_wild != on
 
 
-def test_the_null_control_cell_never_moves(scope, wild):
+def test_the_shipped_switch_is_the_on_side_of_that_pair(scope):
+    """Which side of the pair above the tree actually ships, asserted where
+    the harness can see it: `force=False` is the OFF comparator only while
+    someone holds the switch down, and since Phase 2A nobody does by default."""
+    assert policy.PILOT_POLICIES_ENABLED is True
+    cell = _cell("bomb-primary")
+    assert (w4.evaluate(cell, scope.defaults, force=False)["digest"]
+            == w4.evaluate(cell, scope.defaults)["digest"])
+
+
+def test_the_null_control_cell_never_moves(switch_off, scope, wild):
     """Furina carries neither op. Every point must land on one digest here,
     with the switch off OR forced on -- a moving control can only be a leak
     in this harness, and voids the sweep rather than shading a verdict."""
@@ -534,7 +615,7 @@ def test_the_bare_command_runs_nothing(capsys):
     out = capsys.readouterr().out
     assert "PLAN ONLY" in out
     assert "Nothing was run" in out
-    assert policy.PILOT_POLICIES_ENABLED is False
+    assert policy.PILOT_POLICIES_ENABLED is SHIPPED_SWITCH
 
 
 def test_execute_without_a_stage_is_refused(capsys):

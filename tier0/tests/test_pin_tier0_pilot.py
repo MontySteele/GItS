@@ -80,7 +80,16 @@ def test_self_power_scaling_value_still_decays_with_the_setup_taper():
 # v1 was the set as EB-5 found it -- nothing retuned, values byte-identical to
 # the inline literals they replaced. v2 (POLICY 7, R176) is v1 plus one NEW
 # weight, `PILOT_COMPANION_COPY_VALUE`, filed in the policy.py half: no v1
-# value moved, but the SET did, which is what the stamp labels.
+# value moved, but the SET did, which is what the stamp labels. v3 (POLICY 8,
+# EB-118 Phase 2A, 2026-08-24) is the same rule applied to a block instead of a
+# weight: `PILOT_POLICIES_ENABLED` flipped True, so the eleven `BOMB_*` /
+# `EXHAUST_*` weights are read for the first time and ENTER the set. No v2
+# value moved either.
+#
+# The constants-side half of the set is unchanged at v3 -- every new weight is
+# filed in policy.py -- so this dict is still named for the version that last
+# moved it, and `test_every_pilot_weight_in_constants_is_in_the_stamped_set`
+# still compares against it.
 PILOT_WEIGHT_SET_V2 = {
     "PILOT_REACTION_TRIGGER_VALUE": 6.0,
     "PILOT_REACTION_SEED_VALUE": 2.0,
@@ -114,7 +123,7 @@ PILOT_WEIGHT_SET_V2 = {
 }
 # The half that stays in policy.py for the C# parity reason written at its
 # head. Filed elsewhere, stamped the same.
-POLICY_FILED_WEIGHT_SET_V2 = {
+POLICY_FILED_WEIGHT_SET_V3 = {
     "STOKE_DEPLOY_OPEN": 6.0,
     "STOKE_DEPLOY_FULL": 1.5,
     "STOKE_RUNWAY_TURNS": 2.0,
@@ -122,15 +131,38 @@ POLICY_FILED_WEIGHT_SET_V2 = {
     "STOKE_FUEL_SATED": 0.15,
     # v2, POLICY 7 (R176): the companion-copy valuation in `_tempo_value`.
     "PILOT_COMPANION_COPY_VALUE": 1.5,
+    # v3, POLICY 8 (EB-118 Phase 2A): the pair's eleven weights, read for the
+    # first time at the flip. Hand-picked and pinned here at the values they
+    # landed with, so that adopting a W4 sweep point forces the same decision
+    # every other weight edit forces -- a `PILOT_WEIGHTS_VERSION` bump, or a
+    # commit that says why the reading did not move.
+    "BOMB_LANDED_DAMAGE_VALUE": 1.0,
+    "BOMB_LETHAL_WASTE_WEIGHT": 1.0,
+    "BOMB_CONCENTRATION_VALUE": 2.0,
+    "BOMB_CONCENTRATION_STACK_CAP": 3,
+    "BOMB_SUPPRESSION_VALUE": 1.0,
+    "BOMB_READER_LETHAL_POP_VALUE": 4.0,
+    "BOMB_EARLY_POP_PENALTY": 3.0,
+    "BOMB_MOVE_READER_AIM_VALUE": 1.0,
+    "EXHAUST_COST_EFFICIENCY_WEIGHT": 0.5,
+    "EXHAUST_JUNK_BONUS": 6.0,
+    "EXHAUST_SELF_EXHAUST_DISCOUNT": 0.5,
 }
 
 
-def test_the_pilot_weight_set_is_stamped_at_v2():
-    assert C.PILOT_WEIGHTS_VERSION == 2
+def test_the_pilot_weight_set_is_stamped_at_v3():
+    assert C.PILOT_WEIGHTS_VERSION == 3
     for name, value in PILOT_WEIGHT_SET_V2.items():
         assert getattr(C, name) == value, name
-    for name, value in POLICY_FILED_WEIGHT_SET_V2.items():
+    for name, value in POLICY_FILED_WEIGHT_SET_V3.items():
         assert getattr(policy, name) == value, name
+
+
+def test_the_pair_weights_are_stamped_because_the_switch_is_ON():
+    """v3's whole ground. A weight nothing reads is not in the labeled set --
+    that is why the eleven above sat unstamped through the staging window and
+    why the stamp moved in the same edit as the switch, not before it."""
+    assert policy.PILOT_POLICIES_ENABLED is True
 
 
 def test_every_pilot_weight_in_constants_is_in_the_stamped_set():
