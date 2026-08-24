@@ -60,11 +60,12 @@ Live inventory today: 300 cards, 5 character sheets (3 roster + 2 reference),
 6 encounters, 15 pilot weight sets.
 
 Recipe (recount with `loader._card_index()`, then subtract the side sheet):
-220 personal rows (`docs/klee-cards.yaml` 76, `docs/furina-cards.yaml` 82,
-`docs/kokomi-cards.yaml` 62) + 51 companion rows (17 / 19 / 15) + 29 shared and
+234 personal rows (`docs/klee-cards.yaml` 76, `docs/furina-cards.yaml` 82,
+`docs/kokomi-cards.yaml` 76) + 51 companion rows (17 / 19 / 15) + 29 shared and
 reference rows under `tier0/content/cards/` (curses 10, ironclad_package 6,
-silent 6, ironclad_starter 3, colorless_event 2, tokens 2) = 300. The loader
-index reads **303** — the extra 3 are `ancients.yaml`, acquisition-only.
+silent 6, ironclad_starter 3, colorless_event 2, tokens 2) = 314. The loader
+index reads **317** — the extra 3 are `ancients.yaml`, acquisition-only.
+Kokomi's 62 -> 76 is `EB-69` (R198, 2026-08-23), the ruled 14-card pool fill.
 
 ## 3. Key invariants
 

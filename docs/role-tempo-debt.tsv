@@ -39,8 +39,6 @@ klee	reaction	scaling|late
 klee	reaction	scaling|mid
 klee	spark	block|late
 klee	spark	block|mid
-kokomi	priest	block|late
-kokomi	priest	block|mid
 kokomi	priest	scaling|late
 kokomi	priest	velocity|late
 kokomi	priest	velocity|mid

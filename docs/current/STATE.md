@@ -53,14 +53,17 @@ absent on a fresh clone.
 
 ## Content inventory
 
-Live sim inventory (`docs/current/atlas/tier0-pilot-roster.md` §2): **303 cards
+Live sim inventory (`docs/current/atlas/tier0-pilot-roster.md` §2): **317 cards
 in the loader index** (of which 3 are acquisition-only Ancient side-sheet rows,
-leaving the 300 the atlas quotes), **5 character sheets** (3 roster + 2
+leaving the 314 the atlas quotes), **5 character sheets** (3 roster + 2
 reference), **6 encounters, 15 pilot weight sets**. The battery encounters are
 frozen (`content/encounters/battery.yaml`, FROZEN 2026-07-19). Card sheets:
 `docs/klee-cards.yaml`, `docs/furina-cards.yaml`, `docs/kokomi-cards.yaml` (all
-three carry the `tempo_band:` field, **220 personal rows** total — 76 / 82 /
-62). Balance numbers (HP, decks, bands) live in
+three carry the `tempo_band:` field, **234 personal rows** total — 76 / 82 /
+76). Kokomi's sheet moved 62 → **76 (5 basic / 31 common / 26 uncommon / 14
+rare, 70 draftable)** on 2026-08-23: `EB-69`, the ruled 14-card pool fill
+(R198). Her pool is now Klee's shape, and every pre-fill Kokomi draft number is
+a pre-fill number. Balance numbers (HP, decks, bands) live in
 `tier0/content/characters/*.yaml`, the ratified artifact — not in the registry.
 
 ## Mod card coverage (generated)
@@ -76,8 +79,20 @@ exactly why STATE reads the artifact.
 - **Furina** — **81 of 82** generated, 1 blocked (`let_the_people_rejoice`,
   intentionally hand-written kit machinery)
   (`klee-mod/KleeCode/Cards/Furina/Generated/manifest.json`).
-- **Kokomi** — **61 of 62** generated, 1 blocked (`ceremonial_garment`,
-  hand-written) (`klee-mod/KleeCode/Cards/Kokomi/Generated/manifest.json`).
+- **Kokomi** — **70 of 76** generated, 6 blocked
+  (`klee-mod/KleeCode/Cards/Kokomi/Generated/manifest.json`). One is
+  `ceremonial_garment` (hand-written). The other **five arrived with `EB-69`**
+  and each names an unimplemented C# runtime grammar rather than a defect:
+  `the_gunbai_turns` and `raise_the_sashimono` (op `grant_sly_this_turn`),
+  `what_the_tokoyo_took` (an `amount_formula` over `discards_this_turn` needs a
+  CalculatedVar bound to that count), `gyorin_formation` (`bonus_formula`
+  `1_per_2_charge` on `block` has no rider and would render as the bare base),
+  and `what_the_tokoyo_returns` (a Sly `recall_to_draw` from **discard** —
+  only the exhaust source is built). Two further cards generate but ship
+  WITHOUT an upgrade under the no-partial-upgrades rule: `send_the_runner`
+  ([USER]'s ruled two-key delta) and `wheel_the_ranks`. **The sim has all
+  fourteen; the mod has nine of them and seven of their upgrades** — a declared
+  asymmetry, tracked as `EB-122`.
 
 ## Version / world stamps
 
@@ -164,8 +179,18 @@ Named here for status only. Open items are in
 - **Kokomi playtest** — unrun.
 - **Payoff-reach re-registration** — R121, pinned at DRAFTER_VERSION 14.
   Predictions committed 2026-08-13 (R186); §6.5's `T3` amended pre-run
-  2026-08-23 (`M28` ratified, R196); the sprint is unrun and waits on the
-  settle-first freeze (EXPERIMENTS).
+  2026-08-23 (`M28` ratified, R196); R190's Assist payoff-supply fence amended
+  2026-08-23 (R197, §6.8) so the `EB-69` batch — and only that batch — could
+  move the supply 3 → 5. **The settle-first batch is EMPTY as of `EB-69`'s
+  landing**, so the world can settle; the sprint is still unrun, and the
+  `M14` re-stamp and the `P12` freeze are two separate registration acts that
+  are now unblocked and deliberately not taken with the fill (EXPERIMENTS).
+- **`EB-69` Kokomi pool fill — CLOSED 2026-08-23 (R198).** Fourteen cards and
+  fourteen upgrade rows in one batch, 62 → 76. `S4-G11`'s Kokomi pile is
+  discharged; that row stays open on its other three piles. What the fill
+  raised rather than settled: QUEUE `M36` (a distinctness-gate breach and
+  three strict-domination pairs), BACKLOG `EB-121` (the art bill is 6 slots
+  short) and `EB-122` (five cards blocked on unimplemented C# grammar).
 
 ## Watch register (dormant)
 
@@ -177,5 +202,33 @@ unblocked since `O-1` closed; a new reading runs under EXPERIMENTS law),
 `W4` X5 (fanfare floor), `W5` `lynette_box_trick` (X7, R161 — deliberately left
 alone at its current rarity; as a companion card it is close to "what if I
 high-roll a colorless option". **Trigger:** playtest shows it overperforming).
+
+**`W6` `gyorin_formation` — pre-emptive Block RATE.** [USER] was shown the card
+as possibly an over-strong Block engine and deliberately deferred it
+(2026-08-23, `EB-69`). The concern is explicitly not a single-turn spike: the
+card is 6 Block now (+1 per 2 Charge) and 6 more at the start of the next turn
+— 12 across two turns, not 12 on one — and the worry is **6 pre-emptive Block
+every turn for as long as the card keeps coming around**, on a character whose
+Charge bank fills every time she rotates a card off and is never spent (R80).
+**Trigger:** her stability number moves materially in the post-fill baseline;
+this is the first card to look at.
+
+**`W7` `what_the_tokoyo_took` — upper-tail discard count and realized damage.**
+[USER]'s reprice (cost 2 → 1, 3-per → 4-per) is a real power increase and was
+ruled as one, not as a re-rate. Three discards is one card's worth inside this
+pool and a chained turn reaching **6+** is reachable, which is 30 damage for 1
+energy (33 upgraded). **The obligation is on the INSTRUMENT, not on the card:**
+the post-fill baseline must report **p90/p99 per-turn discard count and the
+realized damage distribution of this card**, never a worked example. A mean is
+not the instrument here; the tail is the whole question.
+
+**`W8` `send_the_runner` — burst-particle cadence.** [USER]'s D2a body trades
+the printed Charge grant for a chosen Exhaust. Charge is a wash
+(`CHARGE_PER_EXHAUST = 1` replaces the dropped grant exactly), but the card now
+also pays `KOKOMI_BURST_PER_EXHAUST = 2` particles it never paid before — at
+Common, at cost 0, repeatable. **Trigger:** Burst frequency across a run reads
+above the ratified meter-20 cadence (R139) in the post-fill baseline.
+
 (Migrated from the retired watch-items docket, frozen at tag
-`pre-simplification-2026-08-06`; `W5` added 2026-08-10.)
+`pre-simplification-2026-08-06`; `W5` added 2026-08-10, `W6`–`W8` at `EB-69`
+2026-08-23.)

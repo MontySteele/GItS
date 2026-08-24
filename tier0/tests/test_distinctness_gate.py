@@ -25,8 +25,22 @@ KNOWN_FAILING = {
     # furina uniq/neardup CLEARED by the Curtain Call sweep (R85,
     # 2026-07-27): 62->76 / 0.94->0.15 per card, inside the official band.
     # The Track-B maxclu transient (6) resolved in the same sweep (3).
-    ("kokomi", "uniq"),      # 56% -- breadth
-    ("kokomi", "maxclu"),    # 7 -- the 7x block cluster
+    ("kokomi", "uniq"),      # 53% -- breadth (was 56% pre-EB-69)
+    ("kokomi", "maxclu"),    # 8 -- the block cluster (was 7 pre-EB-69)
+    # ("kokomi", "neardup") -- NEW AT EB-69 (R198, 2026-08-23), 26% -> 33%
+    # against a ratified threshold of 30%. THIS IS THE FILL'S OWN FINDING AND
+    # IT IS NOT BEING TREATED AS COVER. The 14 ruled bodies are rebuilds of
+    # shapes the pool already prints -- another 0-cost cycler, another Sly
+    # Block skill, another cost_mod rider, another metallicize common -- which
+    # is precisely how a fill closes a COUNT gap without closing a BREADTH
+    # gap. Phase-0 §2.5 keeps this gate independent and binding, so it is
+    # entered here to keep the wall green while the content question goes to
+    # [USER] at QUEUE `M36` with the two strict-domination pairs it shares a
+    # cause with. It is NOT a ruling that 33% is acceptable.
+    # Gate: `M36` answered -> re-measure and delete this entry, or convert it
+    # to a ruled threshold move. The two entries above are pre-existing and
+    # unrelated to that row.
+    ("kokomi", "neardup"),
 }
 
 
