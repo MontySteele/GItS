@@ -492,6 +492,7 @@ run does not start until they are filled and this packet is countersigned.**
 
 1. [USER] fills §5 and countersigns; the filled predictions land as their own
    commit, before any seed in the registered range is run.
-2. The cell runs at the §4 n and seed, under `CONSTANTS_VERSION` 9.
+2. The cell runs at the §4 n and seed, under the §2 registered world
+   stamp as re-stamped (RT12/D15/P7/C11 at the fourth re-stamp).
 3. The report is published with its full stamp, graded against §5 blind.
 4. This packet and its EXPERIMENTS pointer leave HEAD when the grade lands.
