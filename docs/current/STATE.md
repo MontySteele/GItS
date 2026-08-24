@@ -169,13 +169,18 @@ Named here for status only. Open items are in
   instrument and the full Route-1 infrastructure set are merged **inert**
   ([USER] pulled the staged branches 2026-08-23): no card uses any new op,
   pilot policies sit behind `PILOT_POLICIES_ENABLED = False`, every new
-  drafter price is PROPOSED, and no live version integer moved. **Its two
-  fences moved 2026-08-24 and neither is a clearance:** the payoff-reach grade
-  landed (so the Phase-1 sheet-edit gate and the Phase-2 `D14` lift are
-  released as gates), and it minted `QUEUE` `M37` — so the density question
-  the fences were protecting is now an open [USER] design row rather than an
-  unread measurement, and any sheet edit moving a payoff role, an `archetypes`
-  tag or a payoff's rarity is decided there.
+  drafter price is PROPOSED, and no live version integer moved. **All three
+  fences came down 2026-08-24.** The payoff-reach grade landed, releasing the
+  Phase-1 sheet-edit gate and the Phase-2 `D14` lift, and the density row it
+  minted (`QUEUE` `M37`) was **ruled the same day (R199)**: the canonical bands
+  are a directional benchmark rather than a hard 1–3 requirement, the sheets do
+  over-use `role: payoff`, and **Phase 3 is AUTHORIZED** to convert genuine
+  setup / access / repair / bridge cards to glue or enabler and to drop
+  unsupported `archetypes` tags — under four guardrails (no relabeling to
+  improve a count; no rarity moves to force offer probability; no mechanical
+  supply cut on `kokomi/commander` or `kokomi/assist`, whose problem is access
+  not saturation; and a ruled priority order). The guardrails and the order live
+  in the BACKLOG `EB-118` row.
 - **Enemy remapping** — planned.
 - **Art passes** — Furina and Kokomi surfaces (Kokomi's are newest).
 - **Animation sprint 2.**
@@ -197,8 +202,10 @@ Named here for status only. Open items are in
   with zero disagreements — so the misses are content, not instrument. The
   redesign trigger fired roster-wide and minted **`QUEUE` `M37`** under `M28`'s
   aggregation rule: one row, nine arms enumerated, and explicitly not a claim
-  that one mechanism produced them. `P12` and `R190`'s remaining Assist fence
-  are both discharged. **Steps (5) and (6) — the staged D15 (`EB-43`) landing
+  that one mechanism produced them — **and [USER] ruled it the same day (R199),
+  so it has left HEAD and its authorization now lives in BACKLOG `EB-118`'s
+  Phase-3 fence.** `P12` and `R190`'s remaining Assist fence are both
+  discharged. **Steps (5) and (6) — the staged D15 (`EB-43`) landing
   and the `RA-G1`/`RA-G2`/`tto` quarantine lift — are UNBLOCKED and
   deliberately NOT taken**; they are the next window's work. Of the two
   defects the run surfaced, `EB-123` is **FIXED 2026-08-24** — after the
