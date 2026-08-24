@@ -285,6 +285,15 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "raise_fanfare_cap": [_hook("private", "fanfare", "write")],
     "crash_fanfare": [_hook("private", "fanfare", "use")],
     "salon_bow": [_hook("private", "salon", "use")],
+    # EB-118 5.5. Rotate is a pure REORDER: it consumes nothing, so it is a
+    # write to the private board (which performer the FIFO end offers next)
+    # and not a competing use of it.
+    "salon_rotate": [_hook("private", "salon", "write")],
+    # Perform-now runs the standard member action, upkeep included, so it
+    # spends the stage AND the Encore that pays for it -- the same two
+    # competing uses the turn-start tick makes, taken on demand.
+    "salon_perform": [_hook("private", "salon", "use"),
+                      _hook("private", "encore", "use")],
     "spotlight_designate": [_hook("private", "spotlight", "write")],
     "copy_spotlighted_in_hand": [_hook("private", "spotlight", "read"),
                                  _hook("shared", "hand_contents", "write"),
@@ -433,6 +442,11 @@ FORMULA_HOOKS: dict[str, list[tuple[str, str, str]]] = {
 # is a real engine token with NO entry in this vocabulary, so it reports
 # UNCLASSIFIED, which is the honest answer and not a zero.
 COUNT_HOOKS: dict[str, list[tuple[str, str, str]]] = {
+    # EB-118 5.5's reward half: what the NEXT performer's act is worth right
+    # now. Reads the private queue AND the Encore bank, because the value it
+    # returns is the one the stage can currently pay for.
+    "leftmost_salon_act": [_hook("private", "salon", "read"),
+                           _hook("private", "encore", "read")],
     "exhaust_pile": [_hook("shared", "exhaust_pile", "read")],
     "exhausted_this_card": [_hook("shared", "exhaust_pile", "read")],
     "player_block": [_hook("shared", "block_held", "read")],
@@ -481,6 +495,8 @@ PREDICATE_PREFIXES: dict[str, list[tuple[str, str, str]]] = {
     "fanfare_at_least_": [_hook("private", "fanfare", "read")],
     "charge_at_least_": [_hook("private", "charge", "read")],
     "exhaust_pile_at_least_": [_hook("shared", "exhaust_pile", "read")],
+    # EB-118 5.5: "which performer is next" -- a read of the private queue.
+    "leftmost_salon_member_": [_hook("private", "salon", "read")],
 }
 
 # Card-level fields the sheets carry. A field not listed here is
