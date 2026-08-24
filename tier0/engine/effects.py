@@ -1755,6 +1755,47 @@ def _op_add_card(state: CombatState, fx: dict, card: Card) -> None:
         _add_token(state, token, zone)
 
 
+def _discard_victims(state: CombatState, n: int, chosen: bool):
+    """The victims of one `discard` op, in the order they are discarded.
+
+    BATCH-SELECTION CONTRACT (chosen only). Canon's discard screen picks the
+    WHOLE batch before any of it leaves the hand, so selection membership is
+    decided against the hand as it stood when the op began. This walk
+    therefore takes all `n` picks up front off ONE candidate list that only
+    ever shrinks -- it never re-reads `state.player.hand`.
+
+    That matters because the caller resolves each victim's authored Sly rider
+    INLINE, and Kokomi's riders draw, recall and create. Re-polling the hand
+    per pick let a card that did not exist when the player was asked become
+    the next victim (`drifting_lantern`'s `sly: draw 1` thrown to
+    `open_the_stores`' discard-2 is the live shape). Rider TIMING is
+    unchanged -- each victim still discards and fires in order; only
+    MEMBERSHIP is fixed up front. A rider that moves a not-yet-processed
+    victim out of hand is handled by the caller's `remove_instance` guard.
+
+    RANDOM keeps its per-pick re-poll, deliberately. It is the DEFAULT and
+    every card that discards without `select:` was priced against it; nothing
+    in the decompile reference was read to say canon batches the random path
+    too, so it is left exactly as it was rather than flipped on a guess.
+    """
+    if chosen:
+        candidates = [c for c in state.player.hand if not c.kit_card]
+        picks: list[Card] = []
+        for _ in range(n):
+            if not candidates:
+                break
+            victim = _worst_card(candidates)
+            picks.append(victim)
+            candidates = [c for c in candidates if c is not victim]
+        yield from picks
+        return
+    for _ in range(n):
+        pool = [c for c in state.player.hand if not c.kit_card]
+        if not pool:
+            return
+        yield state.rng.choice(pool)
+
+
 def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
     # Kit cards are exempt: the v1.9 invariant is that the Burst never
     # enters a pile. Without this, a random discard (Bright Idea) moved
@@ -1769,18 +1810,27 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
     # discard is not a second heuristic to keep honest. Random stays the
     # DEFAULT: every existing card that discards does so at random, and a
     # silent flip would re-price them.
+    #
+    # WHO is discarded is `_discard_victims`' business and its batch-selection
+    # contract is stated there; WHAT each discard does is this function's. The
+    # split is the point: selection membership must be answerable without
+    # reading the rider machinery below it.
     chosen = fx.get("select", "random") == "chosen"
     sly_batch: list[Card] = []
     # `amount: hand_size` is how "discard your hand" is spelled -- resolved
     # ONCE, here, before the first card leaves, so it cannot chase its own
-    # shrinking pool. The loop's own `if not pool: break` already handles a
+    # shrinking pool. The victim walk's own empty-pool stop already handles a
     # hand smaller than the number asked for.
-    for _ in range(_amount(state, fx.get("amount", 1))):
-        pool = [c for c in state.player.hand if not c.kit_card]
-        if not pool:
-            break
-        victim = _worst_card(pool) if chosen else state.rng.choice(pool)
-        remove_instance(state.player.hand, victim)
+    n = _amount(state, fx.get("amount", 1))
+    for victim in _discard_victims(state, n, chosen):
+        # A rider fired by an EARLIER victim in the same batch may already
+        # have moved this one out of hand (`open_the_stores`' Sly exhaust is
+        # the live shape: discard 2 chosen, and the first card's rider
+        # exhausts a card that may be the second pick). Skip it rather than
+        # resurrect it from wherever it went -- the same rule the
+        # `sly_batch` walk below applies to the discard pile.
+        if not remove_instance(state.player.hand, victim):
+            continue
         state.player.discard_pile.append(victim)
         state.discards_this_turn += 1
         state.discards_this_card += 1
@@ -1800,7 +1850,9 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
         # AUTHORED riders (Kokomi's Assist lane) resolve HERE, inline, with
         # the discarded card as context, AFTER it reaches the discard pile
         # (StS2 order). The base-game auto-play rider resolves after the
-        # loop instead — see the batch note below.
+        # loop instead — see the batch note below. Inline is the RULED
+        # timing and is unchanged; what a rider can no longer do is add to
+        # the batch it is part of (`_discard_victims`).
         riders = sly_riders(victim) if victim.sly else []
         if riders:
             state.emit("sly", card=victim.id)
