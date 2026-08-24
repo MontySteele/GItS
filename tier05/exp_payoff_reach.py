@@ -115,6 +115,24 @@ SUPPLY_TOLERANCE = 1
 # §6.5 tripwire T2.
 DECK_SIZE_WINDOW = (12, 30)
 
+# §6.5 tripwire T1 — the registration's own world-stamp string, quoted.
+#
+# RE-STAMPED AT THE `P12` FREEZE (§6.6, 2026-08-24): `RT10 / D14 / P7 / C9` ->
+# `RT12 / D14 / P7 / C11`. That is the act §6.6's approved ordering (ii)
+# reserved — settle first, re-stamp §6 to the world the batch left behind,
+# THEN freeze — and it moved no version integer: the world moved first, by
+# `RT` 10->11->12 and `C` 9->10->11, each an authorized bump fingerprinted
+# against this fence when it landed. `D14`, the registration's actual pin, is
+# inside the string unchanged and was never re-pinned.
+#
+# Left stale the tripwire fired on every arm of every run, because the string
+# named a superseded world — a stale citation, not a finding, and a tripwire
+# that fires unconditionally carries no information. A literal rather than a
+# read of `cells`: `T1`'s whole job is to catch the live world DIVERGING from
+# the registered one, and a condition that recomputed both sides from the same
+# live source could never fire.
+REGISTERED_STAMP = "RT12 / D14 / P7 / C11"
+
 # The canonical supply ceiling. Since `M28` (R196) this is a REPORTING DIVISOR
 # and nothing else: §6.5's amended `T3` contains no reach quantity at all, and
 # realized reach above this figure is reported at its raw value and its
@@ -377,9 +395,9 @@ def tripwires(cell, static: dict, sim: dict | None) -> list[str]:
     v = cell.versions
     arm = f"{static['character']}/{static['archetype']}"
     stamp = f"RT{v['RT']} / D{v['D']} / P{v['P']} / C{v['C']}"
-    if stamp != "RT10 / D14 / P7 / C9":
+    if stamp != REGISTERED_STAMP:
         fired.append(f"T1: world stamp is {stamp}, registered against "
-                     "RT10 / D14 / P7 / C9")
+                     f"{REGISTERED_STAMP}")
     if static["supply"] == 0:
         fired.append(f"T4: {arm} has "
                      "zero draftable payoff cards — this is a content "

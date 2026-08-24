@@ -581,7 +581,7 @@ it does not silently extend and it does not silently shrink `n`.
 
 | id | condition | why it is a stop rather than a footnote |
 |---|---|---|
-| **T1** | The world stamp at any arm is not `RT10 / D14 / P7 / C9` | The pin is the registration's; a moved stamp means the sprint is measuring a different world than the one it was registered against. |
+| **T1** | The world stamp at any arm is not `RT12 / D14 / P7 / C11` | The pin is the registration's; a moved stamp means the sprint is measuring a different world than the one it was registered against. **The stamp string was re-stamped at the `P12` freeze (§6.6, 2026-08-24), which is the act §6.6's ordering-(ii) reserved for exactly this. `D14` is the pin and it did not move; `RT`, `P` and `C` are the settle-first window's own movement, fingerprinted at every bump.** |
 | **T2** | Mean finished deck size in any arm falls outside **12–30 cards** | The §6.1 brackets are quoted at N=15/20/25. Outside that span the band floors are being extrapolated, not read. |
 | **T3** | **Classifier integrity — one condition.** For each arm, and for each finished deck in that arm, reconstruct every deck card to a **reward-pool base id** under explicit upgrade normalization (an upgraded card normalizes to the id of the printed card it upgrades from). Cards that do not so reconstruct are **not** `T3` inputs and are reported on their own lines: **anchor-shield cards** (those `draft._anchor_tag_shield` strips `archetypes` from, by design) and **external-source cards** (on-plan payoffs that entered the deck from outside the reward pool — event grants, tokens, guest stars, starters). For every remaining base id, compare its on-plan payoff membership as classified on the **deck** side against its membership in the arm's **static** pool. **`T3` fires iff any base id's membership differs between the two readings.** | Under the exclusions above, the two readings are classifying the *same card id* against the *same registered predicate* (`role == "payoff" and archetype in c.archetypes`). A disagreement is therefore not a threshold judgement, a sampling artefact or a design finding: it means the sprint's two legs are counting different objects under one predicate, which is precisely the drift `draft._generic_core_counts` was consolidated to prevent (§6.4). It cannot be produced by ordinary data. |
 | **T4** | The static leg finds any archetype with **zero** draftable payoff cards | A zero is a finding about the sheet (census §5.3 calls the canonical zeros blind spots), but it makes every offer-based grade for that arm degenerate. It stops the sprint and goes to [USER] as a content question. |
@@ -704,6 +704,7 @@ edit — but the change is recorded here so it is visible.
 
 | amendment | what changed | why |
 |---|---|---|
+| **2** — `T1`'s registered stamp string, re-stamped at the `P12` freeze (2026-08-24) | `RT10 / D14 / P7 / C9` → **`RT12 / D14 / P7 / C11`**, in this table and in the reader that evaluates it (`tier05/exp_payoff_reach.tripwires`). Nothing else in `T1` changed: it is still "the world stamp at any arm is not the registered one", it still stops the sprint, and it still fires on any world but the frozen one. | This is not a loosening — it is the act §6.6's approved ordering (ii) reserved. Settle first means the registration is re-stamped to the world the batch left behind and *then* frozen; until the re-stamp, `T1` fired on every arm purely because the string named a world that had already been superseded three times, which is a stale citation rather than a finding. The re-stamp moves **no version integer** — the world moved first, by its own authorized bumps, and the registration is catching up to it. |
 | **1** — `T3` premise (`M28`, [USER] ruling of 2026-08-23, `R196`) | `T3` no longer fires on realized reach above the canonical TOP supply ceiling of 3. Reach and offer above the canonical figures are reported at raw value plus multiple of the canonical figure (§6.1), with no new categorical band. `T3` becomes a single classifier-integrity condition: a reward-pool base id whose on-plan payoff membership differs between the static and the deck-side reading, after upgrade normalization and after anchor-shield and external-source cards are separated out and reported. Implemented by one shared membership predicate under a byte-neutrality condition, or removed. The aggregation rule for simultaneous redesign triggers is ratified with it. | The registered premise contradicted the authored sheets. The registration's own static leg reads supplies of 3–14 and offers of 0.0406–0.1606 under the identical registered predicate, so a reading above 3 is what the content prints, not evidence of miscounting. Distinct from the max-vs-mean implementation slip in the same tripwire, which was a defect and was fixed 2026-08-13; this amendment concerns the ceiling's premise. |
 
 **Nothing else in §6 is amended.** §6.2's `R185` aims stand as ruled; §6.2's
@@ -716,14 +717,18 @@ amendment.**
 
 ### 6.6 The pin, the contamination statement, and the freeze
 
-**Pin — VERIFIED LIVE 2026-08-12.** `DRAFTER_VERSION = 14` at
-**`tier0/constants.py:1195`**. (The registration's §3 cites line 978; the
-value is unchanged and the line has moved — §3 is inside a frozen record and
-is not edited for it.) The full world stamp at this commit is
-**`RT10 / D14 / P7 / C9`**: `RUNTEMPLATE_VERSION = 10`
-(`tier0/constants.py:708`), `CONSTANTS_VERSION = 9`
-(`tier0/constants.py:1059`), `POLICY_VERSION = 7` (`tier05/draft.py:1454`),
-read live through `tier05/cells.py`. The staged D15 change
+**Pin — RE-VERIFIED LIVE AT THE FREEZE, 2026-08-24.** `DRAFTER_VERSION = 14`
+at **`tier0/constants.py:1354`**. (The registration's §3 cites line 978 and
+this paragraph cited 1195 on 2026-08-12; the value is unchanged and the line
+has moved twice — §3 is inside a frozen record and is not edited for it, and
+a line number is not a pin.) The full world stamp at the freeze is
+**`RT12 / D14 / P7 / C11`**: `RUNTEMPLATE_VERSION = 12`
+(`tier0/constants.py:785`), `CONSTANTS_VERSION = 11`
+(`tier0/constants.py:1218`), `POLICY_VERSION = 7` (`tier05/draft.py:1673`),
+read live through `tier05/cells.py`. **`D` never moved across any of it** —
+`RT` 10 → 11 → 12 and `C` 9 → 10 → 11 are the settle-first window's own
+authorized bumps, each one fingerprinted against this fence when it landed
+(EXPERIMENTS, the four re-takes). The staged D15 change
 (`staged/d15-spotlight-payoff`, `EB-43`) stays staged: it lands at step (5),
 with its re-baseline, after this sprint runs.
 
@@ -763,6 +768,65 @@ applies here, so the two available orderings are:
 **(ii) is the conservative default and is what is PROPOSED**, on the ground
 that it is the sequence [USER] already chose for the neighbouring
 registration.
+
+**P12 — TAKEN 2026-08-24. THE WORLD IS FROZEN.**
+
+Ordering (ii) ran to its end. The settle-first batch emptied — `EB-70` LEFT
+the window at `R195` ([USER] paused the starter-offer retune pending the Klee
+rework), the `EB-82` conversion and the `EB-85` batch landed under one
+coordinated `RT` bump, the `EB-104` correctness batch under a second `RT` bump
+plus a `C` bump, the Artifact-coexistence / Kokomi-rotation ruling under a
+third `C` bump, and `EB-69` landed at `R198` as settle-first CONTENT moving no
+version integer at all. The dependency re-check then ran a **fourth** time
+against the post-`EB-69` world and is recorded in full at
+`docs/current/EXPERIMENTS.md`; it is referenced here rather than re-derived,
+because re-deriving a fingerprint at the freeze is how a fence quietly gets
+re-taken under a different rule.
+
+**The freeze record, in the form §6.6 asks for.**
+
+- **Date:** 2026-08-24.
+- **World:** `RT12 / D14 / P7 / C11`, read live through `tier05/cells.py`.
+- **The fence, item by item, at the freeze.** `RARITY_ODDS` =
+  `{common 0.60, uncommon 0.35, rare 0.05}` — **unmoved across all four
+  re-takes**. `DRAFTER_VERSION = 14` — **unmoved**, and not re-pinned.
+- **Pool fingerprints** (`rewards.character_pool`, common / uncommon / rare):
+  `klee` **29/28/14**, `furina` **23/35/18**, `kokomi` **31/26/13**,
+  `real_ironclad` **19/32/20**, `real_silent` **20/35/25**, `ref_ironclad`
+  **4/2/0**. Five of the six are byte-identical to the third re-take, id lists
+  included; `kokomi` moved 27/20/9 → 31/26/13 (56 → 70 draftable) — the
+  fourteen `EB-69` rows less `ceremonial_garment`, which carries
+  `kit_card: true`. §6.1 stated **both** Kokomi pool figures in advance and
+  said the official static read is taken after the fill, so this movement is
+  the registration's own plan executing, not a surprise. The two `real_*`
+  pools read from the gitignored `game_ref/` tree and are therefore
+  fingerprinted in the PRIMARY CHECKOUT, per §6.7.
+- **What the freeze forbids from here.** No `RT` / `D` / `P` / `C` bump lands
+  on the sprint's branch between this act and the graded read of step (4).
+  The freeze binds the SPRINT'S branch, which is where the run and the grade
+  are taken; it is not a claim on what other branches may do.
+- **What the freeze changed.** Two registration STRINGS and nothing else:
+  the world stamp in the paragraph above, and `T1`'s registered stamp string
+  in §6.5's tripwire table and in the reader that evaluates it. **No version
+  integer moved, in either direction.** A freeze that had to bump something
+  to be taken would not be a freeze.
+
+**Why `T1` had to be re-stamped before the run and not after it.** `T1` is
+evaluated against a live read of `tier05/cells.py`. Left at `RT10 / D14 / P7 /
+C9` it fires on every arm of every run, forever, for the single reason that
+the string names a world three authorized bumps ago — which is a stale
+citation, not a measurement finding, and a tripwire that fires unconditionally
+carries no information at all. Re-stamping it is the act ordering (ii)
+reserved; declining to re-stamp it would not have made the sprint more
+conservative, it would have made `T1` unable to detect the thing it exists to
+detect. **After the re-stamp `T1` is silent on the frozen world and fires on
+any other**, which is the property the tripwire was registered for.
+
+**Amendment history (§6.6).** Carried in §6.1's house form.
+
+| amendment | what changed | why |
+|---|---|---|
+| **1** — the `P12` freeze, taken 2026-08-24 | The pin paragraph's world stamp is re-stamped `RT10 / D14 / P7 / C9` → **`RT12 / D14 / P7 / C11`** and its `DRAFTER_VERSION` line citation updated 1195 → 1354; the freeze record above is added. `D14` is unchanged and is not re-pinned. | Ordering (ii) — settle first — is what `R186` approved, and it prescribes exactly this: let the batch land, re-stamp §6 if the world moved, then freeze. The world moved three times and the batch is now empty, so the re-stamp is due and the freeze is takeable. The once-only rule held: §6 is re-stamped **once**, at the end of the window, not once per item. |
 
 ### 6.7 Data held — status at this commit, verified 2026-08-12
 
