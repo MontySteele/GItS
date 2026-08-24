@@ -82,32 +82,30 @@ registration packets themselves live under `review/active/` — one home, not tw
   more, outside that batch: the Artifact-coexistence + Kokomi-rotation ruling
   landed 2026-08-23, `CONSTANTS` 10 → **11**, [USER] pulling the staged branch
   into this same open window. So the live stamp is `RT12/D14/P7/C11`, and
-  §6.6's `RT10` line records what was verified on 2026-08-12, not what ships. **THE SETTLE-FIRST BATCH IS NOW EMPTY (2026-08-23).** `EB-70` LEFT the window at R195 ([USER] paused the starter-offer retune pending the Klee-rework design sweep R134 originally routed it to — it will not land before the freeze, and when it is eventually taken up it re-baselines in whatever world then exists), and `EB-69` LANDED at R198: the ruled 14-card Kokomi fill, `S4-G11`'s eye-read discharged for that pile, the sheet at 76 rows (5/31/26/14, 70 draftable), **and no version integer moved** — it is settle-first CONTENT, so `RT`/`D`/`P`/`C` are exactly where the last bump left them at `RT12/D14/P7/C11`. **Nothing is left to settle, so the world can settle.** **TWO SEPARATE REGISTRATION ACTS ARE NOW UNBLOCKED AND NEITHER IS TAKEN HERE, because each is its own act and taking one as a side effect of a content landing is the thing this ordering exists to prevent:** (a) `M14`'s re-stamp of the shop-rerun pre-registration to the live `C11` world, and (b) §6.6's `P12` freeze itself, which begins only after the dependency re-check is run and §6 is re-stamped if the world moved — and it did move, three times, since §6.6's `RT10` line. The re-check has NOT been run against the post-`EB-69` world and is the next thing owed. One thing the fill DID change that the re-check must read: **Kokomi's Assist payoff supply moved 3 → 5**, under an amended R190 fence ([USER], R197, recorded before the fill landed — `review/active/payoff-reach-reregistration.md` §6.8), which is why §6.5 already puts the official `P5` read after this point and says the three Kokomi arms may move on either axis. §6 is
-  re-stamped once, when the last of them lands, rather than after each —
-  re-stamping a registration per item is how a one-variable window turns into
-  four. **The dependency re-check passed at both bumps**, and it is recorded so
-  it does not have to be re-derived. Across the whole `RT10 → RT11` window
-  `RARITY_ODDS`, `rewards.character_pool` for all six characters, the nine
-  archetypes' payoff supply/offer figures from `exp_payoff_reach.static_leg`,
-  and `DRAFTER_VERSION = 14` were all **byte-identical** — the fingerprint was
-  taken before the first merge and again after the bump. **The same four were
-  re-taken across `RT11/C9 → RT12/C10` and are byte-identical again**, all four
-  UNMOVED: `RARITY_ODDS` `{common 0.60, uncommon 0.35, rare 0.05}`; the six
-  pools at `klee 29/28/14`, `furina 23/35/18`, `kokomi 27/20/9`,
-  `real_ironclad 19/32/20`, `real_silent 20/35/25`, `ref_ironclad 4/2/—`, id
-  lists included; all nine `static_leg` rows identical to the digit
-  (supply 10/8/7 · 9/10/14 · 13/5/3, with offer and counterfactual unchanged);
-  `DRAFTER_VERSION = 14`. `EB-112` was the one member that could have reached
-  the fence — it changes how an **event** card screen rolls rarity — and it
-  does not: it makes that screen consult `RARITY_ODDS` instead of bypassing it,
-  and `static_leg` is arithmetic over the reward pools and the odds table, so
-  neither the constant nor any static-leg output moves. Nothing in either
-  window touched the payoff role, the sheets' archetype fields or the rarity
-  fence, which is exactly what §6.6's ordering-(i) argument predicted. **The
-  same four were re-taken a third time across `C10 → C11`** (the 2026-08-23
-  ruling, `cb8be0c`) and are byte-identical again, `DRAFTER_VERSION = 14`
-  included: that window edited no card sheet and moved no offer-time price.
-  **`D` did not move and must not be re-pinned.**
+  §6.6's `RT10` line records what was verified on 2026-08-12, not what ships. **THE SETTLE-FIRST BATCH IS EMPTY.** `EB-70` LEFT the window at R195 ([USER] paused the starter-offer retune pending the Klee-rework design sweep R134 originally routed it to — it will not land before the freeze, and when it is eventually taken up it re-baselines in whatever world then exists), and `EB-69` LANDED at R198: the ruled 14-card Kokomi fill, `S4-G11`'s eye-read discharged for that pile, the sheet at 76 rows (5/31/26/14, 70 draftable), **and no version integer moved** — it is settle-first CONTENT, so `RT`/`D`/`P`/`C` are exactly where the last bump left them at `RT12/D14/P7/C11`.
+  **`M14`'s re-stamp — the first of the two unblocked registration acts — is DONE (2026-08-24).** The shop-rerun packet is re-stamped `RT11/D14/P7/C9` → `RT12/D14/P7/C11`, its §2 window list carries the three items that cell can see (`RT12`, `C10`→`C11`, and `EB-69` itself), and what remains on `M14` is the slate entry and the countersign, both [USER] acts. **§6.6's `P12` freeze — the second act — is NOT taken here and is the next thing owed after this bullet.**
+  **THE DEPENDENCY RE-CHECK HAS NOW RUN AGAINST THE POST-`EB-69` WORLD (2026-08-24) — the FOURTH re-take of the fence, and the first that is NOT byte-identical.** All four fingerprint items were re-taken at the live `RT12/D14/P7/C11`:
+  **(1) `RARITY_ODDS` — UNMOVED**, `{common 0.60, uncommon 0.35, rare 0.05}`.
+  **(2) `DRAFTER_VERSION = 14` — UNMOVED.** `D` did not move and must not be re-pinned.
+  **(3) `rewards.character_pool` — five of six pools byte-identical, id lists included:** `klee 29/28/14`, `furina 23/35/18`, `real_ironclad 19/32/20`, `real_silent 20/35/25`, `ref_ironclad 4/2/—`. **`kokomi` MOVED, by design: 27/20/9 → 31/26/13**, 56 → 70 draftable cards — the fourteen `EB-69` rows, less `ceremonial_garment` which carries `kit_card: true`. This is the fill doing exactly what it was ruled to do; §6.1 already stated both Kokomi pool figures in advance and said the official static read is taken after the fill.
+  **(4) `exp_payoff_reach.static_leg` — the six Klee and Furina rows identical to the digit** (supply 10/8/7 · 9/10/14, offer and counterfactual unchanged), **the three Kokomi rows MOVED**: priest supply 13 → 14 (offer 0.1606 → 0.1270), commander 5 → 6 (0.0683 → 0.0578), assist 3 → 5 (0.0406 → 0.0385). The offer term falls on all three even where supply rises, because the pool denominator grew faster than the payoff numerator — arithmetic, recorded, not graded.
+  **THE MOVEMENT IS AUTHORIZED, NOT A VIOLATION.** `kokomi/assist`'s 3 → 5 is precisely the move R197 admitted when it amended R190's fence (§6.8), recorded **before** the fill landed and with both figures on the record; the other two Kokomi rows are the same fill classified honestly under the same registered predicate. §6.5 already put the official `P5` read after this point and already said the three Kokomi arms may move on either axis. **Nothing here is a `P5` grade** — these are fingerprint figures, taken as the three previous re-takes took them, and the grade is the freeze's own step. The six Klee and Furina rows are exactly as stable as §6.6's ordering-(i) argument predicted, and the fence itself — the odds table and the drafter pin — never moved across any of the four re-takes.
+  **The once-only rule held.** §6 is re-stamped once, when the last of the
+  batch lands, rather than after each item — re-stamping a registration per
+  item is how a one-variable window turns into four. The fence was
+  fingerprinted at every bump so it did not have to be re-derived later:
+  byte-identical across `RT10 → RT11`, byte-identical again across
+  `RT11/C9 → RT12/C10`, byte-identical a third time across `C10 → C11` (the
+  2026-08-23 ruling, `cb8be0c`, which edited no card sheet and moved no
+  offer-time price), and moved for the first time — in Kokomi's three rows
+  only, and by authorization — at this fourth re-take. `EB-112` was the one
+  batch member that could have reached the fence and did not: it makes an
+  event card screen consult `RARITY_ODDS` instead of bypassing it, and
+  `static_leg` is arithmetic over the reward pools and the odds table, so
+  neither the constant nor any static-leg output moves.
+  **What is owed next, in order:** §6.6's `P12` freeze — which re-stamps §6
+  (and `T1`'s registered stamp string with it) to `RT12/D14/P7/C11` and then
+  freezes — and only then steps (3)–(6). Neither is taken here.
   Owed before the run and named in §6.4/§6.5: the generic reach reader
   (`tier05/exp_payoff_reach.py`) and the `blind` control policy — **both built
   2026-08-13**. Steps (3)–(6) run in order and none reorders →

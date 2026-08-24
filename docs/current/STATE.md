@@ -181,10 +181,15 @@ Named here for status only. Open items are in
   Predictions committed 2026-08-13 (R186); §6.5's `T3` amended pre-run
   2026-08-23 (`M28` ratified, R196); R190's Assist payoff-supply fence amended
   2026-08-23 (R197, §6.8) so the `EB-69` batch — and only that batch — could
-  move the supply 3 → 5. **The settle-first batch is EMPTY as of `EB-69`'s
-  landing**, so the world can settle; the sprint is still unrun, and the
-  `M14` re-stamp and the `P12` freeze are two separate registration acts that
-  are now unblocked and deliberately not taken with the fill (EXPERIMENTS).
+  move the supply 3 → 5. **The settle-first batch is EMPTY**, and 2026-08-24
+  discharged the first of the two unblocked registration acts: `M14`'s
+  re-stamp is done and the fence's **fourth dependency re-check has run** at
+  the live `RT12/D14/P7/C11`. `RARITY_ODDS`, `DRAFTER_VERSION = 14` and five
+  of the six reward pools are byte-identical for the fourth time; Kokomi's
+  pool (56 → 70) and her three `static_leg` rows moved, by the authorization
+  R197 recorded in advance. **The second act — §6.6's `P12` freeze — is NOT
+  taken, and it is what the sprint now waits on**; the sprint is still unrun
+  (EXPERIMENTS).
 - **`EB-69` Kokomi pool fill — CLOSED 2026-08-23 (R198).** Fourteen cards and
   fourteen upgrade rows in one batch, 62 → 76. `S4-G11`'s Kokomi pile is
   discharged; that row stays open on its other three piles. What the fill
