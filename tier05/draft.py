@@ -874,16 +874,18 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
     # keyword that decides whether the printed effects resolve at all scales
     # the whole card. Reads `is_ethereal`, so both spellings price the same.
     #
-    # PROPOSED at landing: a DRAFTER_VERSION bump, because a change to the
-    # priced set is one (the EB-71 note above states the rule). NOT TAKEN
-    # HERE, and the integer is deliberately not written down: no committed
-    # sheet row carries `ethereal:` today, and the only cards the tag spelling
-    # reaches are Statuses, Curses and the Spotlight token -- rarities outside
-    # RARITY_ODDS, which no reward, shop or Neow channel can offer. The term
-    # is therefore provably inert on every drafted card in the tree, and a
-    # stamp move with no number behind it would archive a world for nothing.
-    # It becomes owed the moment a DRAFTABLE row prints the field (Phase 2's
-    # big_badda_boom is that row).
+    # THE NO-BUMP LICENCE IS SPENT (EB-118 Phase 2B). The note this replaces
+    # said the PROPOSED DRAFTER_VERSION bump was not taken because the term
+    # was provably inert -- no committed sheet row printed `ethereal:`, and
+    # the only cards the tag spelling reached were Statuses, Curses and the
+    # Spotlight token, whose rarities sit outside RARITY_ODDS. It named the
+    # row that would end that: "Phase 2's big_badda_boom". That row is now in
+    # docs/klee-cards.yaml. A Common Klee attack is offerable by every reward,
+    # shop and Neow channel, so this multiplier now moves a drafted price and
+    # the bump is OWED, not proposed. It is taken at INTEGRATION, with the
+    # slice's own re-baseline -- the integer is still not written down here,
+    # because a staged branch that hard-codes a future stamp is exactly what
+    # packet §3 forbids.
     if card.is_ethereal:
         total *= STATIC_ETHEREAL_SHARE
     # `if card.sly` first: this is the draft hot path and the overwhelming
@@ -1295,6 +1297,33 @@ STATIC_ETHEREAL_SHARE = 0.6        # EB-118. Ethereal is a DOWNSIDE and the
                                    # where the card IS played, which is the
                                    # majority, and the sheet buys the whole
                                    # downside off at the campfire.
+                                   #
+                                   # ===== R193 REPRICING TRIGGER -- ARMED =====
+                                   # 0.6 is ratified PROVISIONALLY (R193,
+                                   # Phase-2 sitting 2026-08-23), and this
+                                   # comment is the trigger, armed in the same
+                                   # commit that arms the constant. THE TRIGGER
+                                   # IS THE BIG BADDA BOOM READ. That card
+                                   # (docs/klee-cards.yaml, EB-118 Phase 2B) is
+                                   # the FIRST DRAFTABLE CARRIER of the keyword
+                                   # and it prices its WHOLE upgrade on this
+                                   # share -- base Ethereal at 0.6, upgraded at
+                                   # 1.0, and nothing else on the card moves --
+                                   # so the read of that card is a read of this
+                                   # number and of nothing else.
+                                   # WHAT IS OWED WHEN IT HAS BEEN READ: the
+                                   # share is either RE-DERIVED against the read
+                                   # or RE-RATIFIED deliberately. It may NOT
+                                   # lapse into a settled number by having
+                                   # shipped once. A provisional constant that
+                                   # nobody revisits is a ratified one nobody
+                                   # voted for.
+                                   # The durable copy of this obligation is the
+                                   # BACKLOG EB-118 row; this comment is the
+                                   # copy that sits where the number is, so a
+                                   # reader who reaches the constant cannot
+                                   # miss that it is on loan.
+                                   # ===========================================
 STATIC_REPEAT_SHARE = 0.5          # repeat_this multiplies the card's OWN
                                    # printed effects. Applied at half,
                                    # because every printed use of the op

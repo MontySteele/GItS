@@ -17,7 +17,18 @@ fish_flavored_bait: {bomb_damage: +2}
 quick_fuse:        {add: {op: draw, amount: 1}}    # 0-cost utility gains rider
 double_pop:        {bomb_damage: +2}               # 4->6 each
 ammo_scavenging:   {bomb_damage: +2}
-big_badda_boom:    {damage: +4}                    # 16->20, big-base row
+# EB-118 Phase 2 (packet §4.3): the base card now prints Ethereal, and the upgrade
+# BUYS THE DOWNSIDE OFF instead of bumping the number. `{damage: +4}` (16->20) is
+# GONE, not kept beside it -- row 6 of the mined grammar is one upgrade axis per card,
+# and a card whose base story is "strong, but it dies in your hand" upgrades by
+# ending that story. Canon shape verbatim: Apparition, EchoForm and VoidForm each
+# print Ethereal and each remove it on upgrade, changing nothing else.
+# CONVENTION DIVERGENCE, DECLARED: row 4 puts keyword upgrades in "mid/rare
+# territory" and our derived Commons rule says "exactly one number bump". This is a
+# COMMON taking a keyword upgrade. It is ruled, not drifted -- the packet names the
+# card, the phase and the shape -- and it is the same kind of exception R148 ruled
+# for shared_billing's common cost reduction rather than grandfathering it.
+big_badda_boom:    {remove: ethereal}              # base prints it; the upgrade ends it
 blast_radius:      {damage: +3}                    # 9->12 AoE
 chain_fuse:        {bonus: +2}                     # placed-this-turn bonus 3->5
 careful_arrangement: {bonus: +2}                   # 2->4 per moved bomb

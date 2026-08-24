@@ -26,7 +26,26 @@
    effects: [{op: place_bomb, amount: 2, target: enemy, bomb_damage: 4}]}
 - {id: ammo_scavenging, name: "Ammo Scavenging", cost: 1, type: skill, rarity: common, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: glue, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 5}, {op: draw, amount: 1}]}
-- {id: big_badda_boom, name: "Big Badda Boom", cost: 2, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition, generic], role: glue,
+# EB-118 PHASE 2 (packet §4.3, [USER]-approved direction 2026-08-23): the second of the
+# three direct faces to gain a readable price. The base damage does NOT move -- the
+# price is added FIRST and alone, so the later read is one variable. Ethereal is the
+# printed downside and the upgrade BUYS IT OFF (`remove: ethereal`, klee-upgrades.yaml),
+# which is why the old `{damage: +4}` delta is gone rather than kept beside it: one
+# upgrade axis per card (upgrade-conventions.md row 6).
+# FIRST DRAFTABLE CARRIER OF THE KEYWORD. The `ethereal:` field, the remove-Ethereal
+# upgrade grammar and the C# CardKeyword.Ethereal reuse all landed INERT with the
+# Route-1 infrastructure set; this row is what arms them. Two consequences ride with
+# it and neither is optional: `STATIC_ETHEREAL_SHARE` stops being provably inert, so
+# the drafter's PROPOSED bump comes due at integration; and R193's repricing trigger
+# arms -- 0.6 is PROVISIONAL until this card has been read (trigger note at the
+# constant in tier05/draft.py).
+# NOT MOVED, deliberately: id, rarity, role, archetypes, solve, tempo_band. Ethereal is
+# a LIFECYCLE keyword -- it decides whether the printed effect resolves at all, not what
+# problem the card solves. A 2-cost 16 that dies in an unaffordable hand still solves
+# frontload, still lands mid-fight / early-run, still glues demolition and generic.
+# Role and archetype movement is Phase-3-fenced (packet §3) and R199's first guardrail
+# forbids a relabel whose only effect is to improve a count.
+- {id: big_badda_boom, name: "Big Badda Boom", cost: 2, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition, generic], role: glue, ethereal: true,
    effects: [{op: damage, amount: 16, target: enemy}]}
 - {id: blast_radius, name: "Blast Radius", cost: 1, type: attack, rarity: common, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
    effects: [{op: damage, amount: 9, target: all_enemies}, {op: discard, amount: 1, select: chosen}]}

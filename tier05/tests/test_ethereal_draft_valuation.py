@@ -5,9 +5,12 @@ would score "strong, but it may vanish before you can afford it" as if the
 second clause were not printed -- the mirror of every other unpriced-term
 failure this scorer has been fixed for.
 
-The term is INERT on the committed tree and this file proves it, which is the
-whole reason no DRAFTER_VERSION move is taken here (see the PROPOSED note at
-the call site in tier05/draft.py).
+EB-118 Phase 2B: the term is NO LONGER INERT. `big_badda_boom` prints
+`ethereal:` in docs/klee-cards.yaml and is a Common, so every reward, shop and
+Neow channel can offer it. The inertness test this file used to carry named
+that row as the thing that would end it; it did, and what replaced it is the
+live-carrier pin below. The DRAFTER_VERSION bump is consequently OWED and is
+taken at integration (see the call site in tier05/draft.py).
 """
 from tier0 import constants as C
 from tier0.content import loader
@@ -42,14 +45,40 @@ def test_removing_it_on_upgrade_restores_the_full_price():
             > draft._static_power(probe(ethereal=True)))
 
 
-def test_the_term_is_inert_on_every_draftable_card_today():
-    """No committed row prints the field, and the only cards the TAG
-    spelling reaches are Statuses, Curses and the Spotlight token -- whose
-    rarities are outside RARITY_ODDS, so no reward, shop or Neow channel can
-    offer them. Nothing the drafter can be shown changes price, which is why
-    the stamp does not move. This test is what becomes owed-work the day a
-    draftable row prints `ethereal:`."""
+def test_the_share_is_exercised_by_a_real_draftable_carrier():
+    """The pin that replaces the inertness test.
+
+    A probe-only pricing test proves the arithmetic and nothing about the
+    tree. This one runs the share on the card the drafter can actually be
+    shown, through the same `_static_power` the offer scorer calls, and
+    pins the exact ratio -- so a silent change to STATIC_ETHEREAL_SHARE, to
+    the placement of the multiplier, or to the card's body is caught by the
+    number a drafted price is actually built from.
+    """
+    base = loader.get_card("big_badda_boom")
+    up = loader.get_card("big_badda_boom+")
+    assert base.rarity in C.RARITY_ODDS, "the carrier must be offerable"
+    assert base.is_ethereal and not up.is_ethereal
+
+    priced = draft._static_power(base)
+    full = draft._static_power(up)
+    assert full > 0.0                     # the test would be vacuous otherwise
+    assert priced == full * draft.STATIC_ETHEREAL_SHARE
+    assert priced < full                  # the downside costs the card price
+
+    # The upgrade is the WHOLE difference: nothing else on this card moves, so
+    # the gap between the two prices is exactly the keyword. That is what makes
+    # the card a one-variable read of the share (R193's armed trigger).
+    assert base.cost == up.cost and base.effects == up.effects
+
+
+def test_the_carrier_set_is_exactly_what_was_ruled():
+    """Ethereal is a downside the drafter now pays for, so an accidental
+    `ethereal:` on some other row would quietly discount a card nobody meant
+    to discount. Phase 2B rules ONE draftable carrier; this fails the moment
+    a second appears without a ruling to point at."""
     offerable = [c for c in loader._card_index().values()
                  if c.rarity in C.RARITY_ODDS]
     assert offerable, "no offerable cards loaded -- the test would be vacuous"
-    assert not [c.id for c in offerable if c.is_ethereal]
+    assert sorted(c.id for c in offerable
+                  if c.is_ethereal) == ["big_badda_boom"]

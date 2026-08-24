@@ -37,7 +37,7 @@ public sealed class BigBaddaBoom : CustomCardModel, IElementalCard
     public Element Element => Element.Pyro;
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesPyro };
+        new[] { CardKeyword.Ethereal, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: false);
@@ -76,6 +76,6 @@ public sealed class BigBaddaBoom : CustomCardModel, IElementalCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(4m);
+        RemoveKeyword(CardKeyword.Ethereal);
     }
 }

@@ -13,8 +13,14 @@ must NOT move:
      it burns (LAW, Kokomi identity, [USER] 2026-08-23).
   2. A card that does not print the field is untouched -- it discards.
 
-STAGED: no committed sheet row carries `ethereal:` yet, so every card here
-is synthetic on purpose.
+Every card here is synthetic ON PURPOSE, and stays synthetic now that the
+keyword has a live carrier: these are the MACHINERY's pins and must keep
+holding even if `big_badda_boom` is one day redesigned off Ethereal. The
+carrier's own pins -- shipped row, real fight, codegen, generated file -- are
+`tier0/tests/test_eb118_big_badda_boom.py`, and its drafter price is
+`tier05/tests/test_ethereal_draft_valuation.py`. (The header's earlier
+"STAGED: no committed sheet row carries `ethereal:` yet" was retired at
+EB-118 Phase 2B, when one did.)
 """
 import pytest
 
