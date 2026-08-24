@@ -185,6 +185,23 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             card.cost = max(0, card.cost + val)
         elif key == "remove" and val == "exhaust":
             card.exhaust = False
+        elif key == "remove" and val == "ethereal":
+            # EB-118: the mined "Remove Ethereal" keyword upgrade (n=13,
+            # docs/upgrade-conventions.md row 4) -- the base card carries the
+            # downside and the upgrade BUYS IT OFF, which is why it removes
+            # rather than adding a number. Canon precedent: Apparition,
+            # EchoForm and VoidForm all `RemoveKeyword(CardKeyword.Ethereal)`
+            # in OnUpgrade and change nothing else.
+            #
+            # Guarded where `remove: exhaust` above is not: the key is new, so
+            # there is no row to grandfather, and a delta that removes a
+            # keyword the card never printed is a sheet error that must fail
+            # here rather than generate an upgraded copy identical to its base.
+            # The FIELD only. The `tags: [ethereal]` spelling belongs to
+            # Statuses, Curses and tokens, whose rarities are outside
+            # RARITY_ODDS and which therefore have no upgrade path at all.
+            ok = card.ethereal
+            card.ethereal = False
         elif key == "remove" and val == "self_damage":
             card.effects = [fx for fx in top
                             if not (fx.get("op") == "damage"

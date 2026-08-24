@@ -248,6 +248,15 @@ UNMIRRORED: dict[str, str] = {
     "KleeSelfCheck.RuleCount":
         "diagnostic bookkeeping: how many self-check rules exist. It counts "
         "this file's own contents, not anything the sim models.",
+    "ExhaustSelection.XCost":
+        "a SENTINEL, not a balance number (EB-118): the cost recorded for an "
+        "X-cost victim, negative so no derived total can sum it by accident. "
+        "tier0 expresses the same fact differently -- the descriptor keeps "
+        "`cost` raw as the string 'X' and the total skips non-ints "
+        "(effects.exhaust_selection_counts) -- so there is no sim VALUE to "
+        "compare against. The BEHAVIOUR is pinned on both sides instead, by "
+        "the X-cost tests in test_exhaust_context.py and "
+        "ExhaustSelectionTests.cs.",
 
     # Presentation layer. These are pixels, seconds and sprite orientation --
     # tier0 models no geometry and no time, so there is nothing to mirror. They

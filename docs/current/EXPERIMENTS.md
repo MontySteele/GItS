@@ -39,6 +39,20 @@ registration packets themselves live under `review/active/` — one home, not tw
 - Pre-registration drafts are a [USER]-gated class; the grade goes in blind.
 
 ## Active registrations (pointers — packets live in `review/active/`)
+- **EB-118 card-connectivity instrument** — static pre-registration at
+  `review/active/eb118-richness-phase0-2026-08-23.md` §2, [USER]-approved
+  2026-08-23. Deterministic, sheets-only, moves no `RT/D/P/C` version; eight
+  pools (five canon via the `game_ref/` extraction surfaces, three mod) under
+  one frozen classifier; honest mod-only stop when canon is absent. **Built
+  (`tools/card_connectivity_report.py`) and calibration-run 2026-08-23 —
+  descriptive only, NOT the baseline; no threshold is registered** —
+  directional predictions only
+  (§2.4); an absolute gate may be proposed only after the frozen classifier
+  has read all five canon pools. Baseline protocol (§2.3): primary baseline is
+  taken immediately before the first `EB-118` sheet edit, after `EB-69` lands;
+  classifier frozen for the whole batch, vocabulary revisions re-run BOTH
+  sides. Registered blind spots at §2.6 (the `decide%` gaps, the lowest-HP
+  target heuristic, the `_worst_card` exhaust proxy).
 - **payoff-reach re-registration** — the `RARITY_ODDS` fence. Q18 countersigned
   (R121); **predictions COMMITTED 2026-08-13 (R186)** as the registration's
   `## 6`, before any sprint number was read — step (2) of the countersigned

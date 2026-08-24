@@ -68,6 +68,7 @@ public sealed class EbbTide : CustomCardModel, ICharacterCard
             await CardCmd.Discard(choiceContext, victim);
         }
         {
+            ExhaustSelection.Open(this);
             var toExhaust = (await CardSelectCmd.FromHand(
                 choiceContext, Owner,
                 new CardSelectorPrefs(
@@ -75,8 +76,11 @@ public sealed class EbbTide : CustomCardModel, ICharacterCard
                 KokomiResources.OwnCard, this)).ToList();
             foreach (var victim in toExhaust)
             {
+                ExhaustSelection.Record(this, victim);
                 await CardCmd.Exhaust(choiceContext, victim);
             }
+
+            ExhaustSelection.Close(this);
         }
     }
 

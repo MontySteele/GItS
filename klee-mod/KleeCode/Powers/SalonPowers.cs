@@ -429,47 +429,150 @@ public sealed class SalonMemberPower : PowerModel, ILocalizationProvider
         Vfx.SalonVisualsBridge.Refresh(owner);
     }
 
+    /// <summary>
+    /// ONE member's slot passive, with the full standard bill: the Encore
+    /// upkeep, the dry three-quarters when it goes unpaid, the Focus/Grand
+    /// Salon scaling (through <see cref="TickValue"/>) and the burst particle.
+    ///
+    /// THE ONLY implementation of a member acting.
+    /// <see cref="AfterPlayerTurnStart"/> runs it once per member at the start
+    /// of the player turn; <see cref="PerformLeftmost"/> runs it on demand for
+    /// the leftmost member (EB-118 §5.5). A second copy of this body is the
+    /// defect the shape exists to make impossible -- a card that performs a
+    /// member must not be able to drift from the upkeep that performs the same
+    /// member. Mirrors tier0 effects.salon_member_act.
+    /// </summary>
+    /// <returns>False when the stage cannot act at all (the owner is dead, or
+    /// there is no hittable enemy left) -- the caller's break condition, kept
+    /// here so the on-demand verb inherits it rather than restating it.
+    /// </returns>
+    public static async Task<bool> PerformMember(
+        PlayerChoiceContext choiceContext, Creature owner, SalonMember member)
+    {
+        if (owner.IsDead) return false;
+        var combat = owner.CombatState;
+        var targets = combat?.HittableEnemies.ToList();
+        if (targets == null || targets.Count == 0) return false;
+
+        var paid = FurinaResources.Encore(owner)
+                   >= SalonConstants.TickEncoreCost;
+        if (paid)
+        {
+            FurinaResources.SpendEncore(owner, SalonConstants.TickEncoreCost);
+        }
+
+        // The SAME expression D1's role chip renders -- see TickValue.
+        var amount = TickValue(owner, member, paid);
+
+        switch (member)
+        {
+            case SalonMember.Crabaletta:
+            case SalonMember.Chevalmarin:
+            {
+                var target = combat!.RunState.Rng.CombatTargets
+                    .NextItem(targets);
+                if (target == null) break;
+                await ElementalHit.Deal(
+                    choiceContext, target, Elements.Element.Hydro,
+                    amount, owner);
+                break;
+            }
+            case SalonMember.Usher:
+                await CreatureCmd.GainBlock(
+                    owner, amount, ValueProp.Unpowered, null, fast: true);
+                break;
+        }
+        FurinaResources.GainBurst(
+            owner, FurinaResourceConstants.BurstPerSalonTick);
+        return true;
+    }
+
+    /// <summary>
+    /// The leftmost member performs NOW (EB-118 §5.5): an extra slot passive,
+    /// off-turn, at the standard price. Resolves through
+    /// <see cref="PerformMember"/> -- the same method the turn-start upkeep
+    /// calls -- so the upkeep, the dry reduction, the scaling and the particle
+    /// are inherited rather than restated.
+    ///
+    /// The member STAYS on stage: this is a performance, not a bow and not a
+    /// rotation, so the company and its mirror counter are untouched.
+    /// <paramref name="amount"/> is therefore N acts by whoever is leftmost;
+    /// pair it with <see cref="RotateLeftmost"/> to spread them.
+    ///
+    /// Inert on an empty stage, matching the sim's `salon_perform`.
+    /// </summary>
+    public static async Task PerformLeftmost(
+        PlayerChoiceContext choiceContext, Creature owner, int amount)
+    {
+        if (!FurinaResources.IsFurina(owner)) return;
+        var company = CompanyFor(owner);
+        for (var i = 0; i < amount && company.Count > 0; i++)
+        {
+            if (!await PerformMember(choiceContext, owner, company[0])) break;
+        }
+    }
+
+    /// <summary>
+    /// Rotate the leftmost member to the BACK of the queue (EB-118 §5.5).
+    ///
+    /// A pure reorder: the member keeps its identity, performs NO tick, drains
+    /// NO Encore and triggers NO bow or replacement effect. It buys exactly
+    /// one thing -- which performer the FIFO end offers next, to
+    /// <see cref="BowLeftmost"/>, to a <see cref="Deploy"/> landing on a full
+    /// stage, and to <see cref="LeftmostMember"/>.
+    ///
+    /// Synchronous, and no counter apply: nothing here is awaited and the
+    /// queue's LENGTH cannot change, so the SalonMemberPower mirror is already
+    /// correct. Only the visual layer, which is slot-index-keyed, has to be
+    /// told (animation sprint 2, Funnel Contract §1).
+    /// </summary>
+    public static void RotateLeftmost(Creature owner, int amount)
+    {
+        if (!FurinaResources.IsFurina(owner)) return;
+        var company = CompanyFor(owner);
+        if (company.Count == 0) return;
+        for (var i = 0; i < amount; i++)
+        {
+            var moving = company[0];
+            company.RemoveAt(0);
+            company.Add(moving);
+        }
+        Vfx.SalonVisualsBridge.Refresh(owner);
+    }
+
+    /// <summary>Who is NEXT to perform: the head of the FIFO queue -- the same
+    /// end <see cref="BowLeftmost"/> pops, <see cref="PerformLeftmost"/> acts
+    /// on and a full-stage <see cref="Deploy"/> displaces. Null on an empty
+    /// stage. The read half of EB-118 §5.5, and the mirror of tier0's
+    /// `leftmost_salon_member_<name>` predicate; the counter power carries the
+    /// count and cannot carry identity, so this reads the company.</summary>
+    public static SalonMember? LeftmostMember(Creature owner)
+    {
+        var company = CompanyFor(owner);
+        return company.Count == 0 ? null : company[0];
+    }
+
+    /// <summary>What the NEXT performer's act is worth right now, at the price
+    /// the stage can currently pay: the reward half of the leftmost read, and
+    /// the mirror of tier0's `leftmost_salon_act` runtime count. 0 on an empty
+    /// stage. Resolves through <see cref="TickValue"/>, the same expression
+    /// <see cref="PerformMember"/> pays out.</summary>
+    public static int LeftmostActValue(Creature owner)
+    {
+        var member = LeftmostMember(owner);
+        if (member == null) return 0;
+        var paid = FurinaResources.Encore(owner)
+                   >= SalonConstants.TickEncoreCost;
+        return TickValue(owner, member.Value, paid);
+    }
+
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
         if (player.Creature != Owner) return;
         foreach (var member in CompanyFor(Owner).ToList())
         {
-            if (Owner.IsDead) break;
-            var targets = CombatState?.HittableEnemies.ToList();
-            if (targets == null || targets.Count == 0) break;
-
-            var paid = FurinaResources.Encore(Owner)
-                       >= SalonConstants.TickEncoreCost;
-            if (paid)
-            {
-                FurinaResources.SpendEncore(
-                    Owner, SalonConstants.TickEncoreCost);
-            }
-
-            // The SAME expression D1's role chip renders -- see TickValue.
-            var amount = TickValue(Owner, member, paid);
-
-            switch (member)
-            {
-                case SalonMember.Crabaletta:
-                case SalonMember.Chevalmarin:
-                {
-                    var target = CombatState!.RunState.Rng.CombatTargets
-                        .NextItem(targets);
-                    if (target == null) break;
-                    await ElementalHit.Deal(
-                        choiceContext, target, Elements.Element.Hydro,
-                        amount, Owner);
-                    break;
-                }
-                case SalonMember.Usher:
-                    await CreatureCmd.GainBlock(
-                        Owner, amount, ValueProp.Unpowered, null, fast: true);
-                    break;
-            }
-            FurinaResources.GainBurst(
-                Owner, FurinaResourceConstants.BurstPerSalonTick);
+            if (!await PerformMember(choiceContext, Owner, member)) break;
         }
     }
 

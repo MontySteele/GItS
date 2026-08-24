@@ -442,6 +442,22 @@ internal hook ORDER, so **a cut on any of them is a human-feed cut** until such
 a route lands. `corpse_detonations > 0` is a fact; `== 0` is not proof of
 absence (see `PlayTelemetry.FlushAll` for the one declared race).
 
+**Addition of 2026-08-23 (EB-118), HUMAN FEED ONLY, no renames:**
+`exhaust_selections`. One object per resolved Exhaust selection, in the
+**sim's** column order — `card`, `victims`, then `size`, `cost`, `attacks`,
+`skills`, `powers`, `companions`, `personal`, `upgraded`. The columns are
+owned by `KleeCode/Powers/ExhaustSelection.cs` (`RowKeys`) and pinned against
+`tier0.engine.effects.EXHAUST_SELECTION_ROW_KEYS` by
+`tier0/tests/test_exhaust_context_parity.py`, so this is the one telemetry
+column whose partner is the **tier0 kernel's event stream** rather than the
+soak's record. `card` and `victims` carry model ENTRY names (`PEARL_DIVER`) —
+the sim's sheet ids uppercased, so a reader case-folds rather than expecting a
+literal match. An **empty selection still writes a row**: "nothing was there to
+take" is a reading, not a gap, and a stream comparison needs the same row count
+on both sides. A declared asymmetry (`MOD_ONLY`): the wire narrates a card
+leaving a pile, not the identity of the selection that took it, so a bot-feed
+twin is new wire surface.
+
 **And two changes of MEANING in the same pass, called out as loudly as renames
 would be.** Both live inside `meters_by_turn`; neither key was renamed and
 neither changed type:

@@ -60,6 +60,7 @@ public sealed class TidelineWatch : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         {
+            ExhaustSelection.Open(this);
             var toExhaust = (await CardSelectCmd.FromHand(
                 choiceContext, Owner,
                 new CardSelectorPrefs(
@@ -67,8 +68,11 @@ public sealed class TidelineWatch : CustomCardModel, ICharacterCard
                 KokomiResources.OwnCard, this)).ToList();
             foreach (var victim in toExhaust)
             {
+                ExhaustSelection.Record(this, victim);
                 await CardCmd.Exhaust(choiceContext, victim);
             }
+
+            ExhaustSelection.Close(this);
         }
         await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, DynamicVars["BlockNextTurn"].IntValue, applier: Owner.Creature, cardSource: this);
     }

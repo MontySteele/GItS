@@ -207,12 +207,23 @@ PROFILES = {
 # keep their stamps, +bonus each). chance_bomb_per_detonation rolls
 # Rng.CombatTargets.NextFloat() < chance (verified decompile; CombatTargets
 # is the established in-combat pick stream).
-MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_energy",
+# spend_spark (EB-118 §4.5) is the Spark SINK: the call site is
+# SparkPower.Spend -> PowerCmd.ModifyAmount, the same verified idiom the
+# threshold consume already uses, and the price is a LITERAL (no upgrade
+# delta reaches it -- a card that pays less on upgrade is a repricing, and
+# repricing is [USER]'s call, not codegen's). The cost LINE is emitted
+# separately as an IsPlayable override; see `spark_gate_member` in emit().
+MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
+                  "spend_spark", "burst_energy",
                   "gain_encore", "spend_encore", "raise_fanfare_cap",
                   "gain_fanfare_floor",
                   # Fanfare rework (2026-07-28): the Hyperbeam settle
                   # (Track C.2) and the on-demand bow probe (Track D).
                   "crash_fanfare", "salon_bow",
+                  # EB-118 §5.5 (staged): the queue verbs. Both are a
+                  # single call into SalonMemberPower, the salon_bow
+                  # shape, so they carry no locals and no new grammar.
+                  "salon_rotate", "salon_perform",
                   "generate_guest_star",
                   "copy_spotlighted_in_hand",
                   "heal",
@@ -234,7 +245,23 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark", "burst_
                   # KokomiConscript.Run. All three have verified call sites in
                   # klee-mod/KleeCode/Powers -- the whitelist stays honest.
                   "gain_charge", "summon_kurage", "conscript",
-                  "replay_next_companion", "copy_companions_played_this_combat"}
+                  # EB-118 (staged): recall_to_draw's exhaust SOURCE only.
+                  # Rides RecallFromExhaust.Recall -- one verified call site
+                  # in klee-mod/KleeCode/Powers. The discard source (Headbutt's
+                  # shape) is NOT built and blocks by name below.
+                  "recall_to_draw",
+                  "replay_next_companion", "copy_companions_played_this_combat",
+                  # EB-118 sec.5.4: the modal surface. choose_one rides
+                  # KleeMod.Cards.ModalChoice, a thin wrapper over the base
+                  # game's OWN card-level choice
+                  # (CardSelectCmd.FromChooseACardScreen + PlayerChoiceContext,
+                  # co-op-synced as PlayerChoiceType.Index). Inert on every
+                  # committed sheet -- no row is modal today.
+                  "choose_one"}
+
+# recall_to_draw (EB-118). `position` is accepted only as its default: the
+# destination is top-of-draw in both engines and there is no other placement.
+RECALL_FIELDS = {"op", "from", "position", "amount"}
 
 # --- companion batch (2026-07-21) --------------------------------------------
 def is_companion(card: dict) -> bool:
@@ -344,6 +371,11 @@ _EXHAUST_PILE_BAR = re.compile(r"^exhaust_pile_at_least_(\d+)$")
 # shape as Fanfare's and gets the same parametric treatment for the same
 # reason -- moving the bar must be a card edit, never a codegen edit.
 _ENCORE_BAR = re.compile(r"^encore_at_least_(\d+)$")
+# EB-118 §5.5: WHO is next to perform. Parametric like the bars above, but on
+# a CLOSED argument -- the member table, which both engines share -- so an
+# unknown name blocks the card instead of generating a branch that can never
+# fire. The display names are the faces' own: "the Usher" carries its article.
+_LEFTMOST_MEMBER = re.compile(r"^leftmost_salon_member_([a-z]+)$")
 
 
 def predicate_cs(name: str) -> str | None:
@@ -367,6 +399,15 @@ def predicate_cs(name: str) -> str | None:
     hit = _ENCORE_BAR.match(name)
     if hit:
         return f"FurinaResources.Encore(Owner.Creature) >= {hit.group(1)}"
+    hit = _LEFTMOST_MEMBER.match(name)
+    # SALON_MEMBER_CS is the one member->enum map, shared with `member:` on
+    # the deploy op: a predicate must not grow a second spelling of the same
+    # three identities. `random` is not an identity and is excluded -- "if a
+    # random member is next" is not a question about the stage.
+    member = SALON_MEMBER_CS.get(hit.group(1)) if hit else None
+    if member and member != "null":
+        return ("SalonMemberPower.LeftmostMember(Owner.Creature) == "
+                f"{member}")
     return PREDICATES_CS.get(name)
 
 
@@ -388,6 +429,13 @@ def predicate_text(name: str) -> str | None:
         # [gold] like its Fanfare/Charge siblings above -- swelling_overture
         # shipped the only un-golded resource keyword on a face (SYS-9).
         return f"If you have at least {hit.group(1)} [gold]Encore[/gold]"
+    hit = _LEFTMOST_MEMBER.match(name)
+    if hit and SALON_MEMBER_CS.get(hit.group(1), "null") != "null":
+        # "next to perform", not "leftmost": the queue's LEFT is a fact about
+        # the stage's layout, and what the player is being told is the order
+        # of play. The stage names are B5's, so the face and the tooltip that
+        # explains the member are titled the same thing.
+        return f"If {SALON_MEMBER_NAMES[hit.group(1)]} is next to perform"
     return PREDICATE_TEXT.get(name)
 
 
@@ -398,7 +446,112 @@ CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 # repeat_this is legal ONLY as a conditional's entire then-branch.
 BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               "place_bomb", "burst_energy", "energy",
-              "buff_next_attack"}
+              "buff_next_attack",
+              # EB-118 §5.5: single calls with no locals, which is the whole
+              # branch-legality criterion. The obvious future row is
+              # "if the leftmost member is X, do Y" -- see the
+              # leftmost_salon_member_ predicate below.
+              "salon_rotate", "salon_perform"}
+
+# The exact key set each branch op may carry. Module-level because a modal's
+# mode body is emitted through the same `_emit_branch_op` resolvers as a
+# conditional branch, so it has to be validated by the same rule -- two copies
+# of this table is exactly how a mode body would drift from a branch body.
+BRANCH_FIELDS = {
+    "damage": {"op", "amount", "target"},
+    "block": {"op", "amount"},
+    "draw": {"op", "amount"},
+    "gain_spark": {"op", "amount"},
+    "gain_encore": {"op", "amount"},
+    "burst_energy": {"op", "amount"},
+    "energy": {"op", "amount"},
+    "place_bomb": {"op", "amount", "target", "bomb_damage"},
+    "buff_next_attack": {"op", "amount"},
+}
+
+# EB-118 sec.5.4, codegen leg. Mirrors tier0.engine.effects.MODAL_FIELDS /
+# MODE_FIELDS; tier0/tests/test_eb118_modal_parity.py pins the two together.
+MODAL_FIELDS = {"op", "modes"}
+MODE_FIELDS = {"label", "effects"}
+
+
+def _branch_op_reason(eff: dict, where: str) -> str | None:
+    """Why this effect cannot be emitted inside a branch or a mode body."""
+    if eff.get("op") not in BRANCH_OPS:
+        return f"op '{eff.get('op')}' inside a {where}"
+    unknown = set(eff) - BRANCH_FIELDS[eff["op"]]
+    if unknown:
+        return (f"branch {eff['op']} field(s) {sorted(unknown)} "
+                "not understood")
+    if (eff.get("op") == "damage"
+            and (eff.get("target") not in DAMAGE_TARGETS
+                 or eff.get("target") == "self")):
+        return f"branch damage target '{eff.get('target')}'"
+    if (eff.get("op") == "place_bomb"
+            and eff.get("target") not in BOMB_TARGETS):
+        return f"branch place_bomb target '{eff.get('target')}'"
+    if not isinstance(eff.get("amount", eff.get("bomb_damage")), int):
+        return f"branch {eff['op']} amount must be a literal int"
+    return None
+
+
+# The base game's choose-a-card screen refuses more than three options
+# (`CardSelectCmd.FromChooseACardScreen`: `if (cards.Count > 3) throw`, read
+# off sts2.dll v0.107.1). That is the ceiling on modes, and it belongs here
+# rather than in a comment on the sheet -- a four-mode row must BLOCK, not
+# ship and throw in front of a player.
+MAX_MODES = 3
+
+
+def _mode_target_type(mode: dict) -> str | None:
+    """The C# TargetType a mode body implies, or None for self-only."""
+    for eff in mode.get("effects", []):
+        if eff.get("op") == "damage" and eff.get("target") != "self":
+            return TARGET_CS[eff["target"]]
+        if eff.get("op") == "place_bomb":
+            return TARGET_CS[eff["target"]]
+    return None
+
+
+def _modal_reason(eff: dict) -> str | None:
+    """Why this `choose_one` cannot be emitted. EB-118 sec.5.4.
+
+    The mode bodies go through the SAME resolvers a conditional branch does,
+    so they carry the same restriction; what is extra here is the screen's
+    three-option ceiling and the target agreement below.
+    """
+    unknown = set(eff) - MODAL_FIELDS
+    if unknown:
+        return f"choose_one field(s) {sorted(unknown)} not understood"
+    modes = eff.get("modes")
+    if not isinstance(modes, list) or len(modes) < 2:
+        return "choose_one needs at least 2 modes"
+    if len(modes) > MAX_MODES:
+        return (f"choose_one with {len(modes)} modes "
+                f"(the choose-a-card screen takes at most {MAX_MODES})")
+    for mode in modes:
+        if not isinstance(mode, dict):
+            return "choose_one mode is not a mapping"
+        unknown = set(mode) - MODE_FIELDS
+        if unknown:
+            return f"mode field(s) {sorted(unknown)} not understood"
+        if not isinstance(mode.get("label"), str) or not mode["label"]:
+            return "mode needs a non-empty label"
+        if not isinstance(mode.get("effects"), list) or not mode["effects"]:
+            return "mode needs a non-empty effects list"
+        for e in mode["effects"]:
+            reason = _branch_op_reason(e, "mode body")
+            if reason:
+                return reason
+    # TargetType is a property of the CARD, declared before a mode is picked,
+    # so modes that would aim differently are inexpressible -- the player would
+    # have aimed the card before choosing what it does.
+    targets = {_mode_target_type(mode) for mode in modes}
+    targets.discard(None)
+    if len(targets) > 1:
+        return (f"choose_one modes disagree on TargetType {sorted(targets)} "
+                "(the card is aimed before the mode is chosen)")
+    return None
 
 # Cards carrying a repeat-conditional re-resolve their other effects (sim
 # resolve_card: the repeat excludes only the repeat machinery). The repeated
@@ -411,7 +564,8 @@ REPEAT_SAFE_OPS = {"damage", "block", "draw", "gain_spark", "burst_energy"}
 # exactly `salon_bow`, which is a single awaited call with no locals -- the
 # only op the new grammar has a card for. Anything else blocks the upgrade
 # path loudly rather than emitting an unverified replay.
-UPGRADE_REPEAT_OPS = REPEAT_SAFE_OPS | {"salon_bow"}
+UPGRADE_REPEAT_OPS = REPEAT_SAFE_OPS | {"salon_bow", "salon_rotate",
+                                        "salon_perform"}
 
 # Field whitelists for the bomb ops (UNPARSEABLE discipline: an unknown
 # field encodes a mechanic; block loudly, never approximate).
@@ -854,6 +1008,15 @@ CARD_FIELDS = {
     # the design working twice: a card that retains in the sim and does not
     # in the game is precisely the divergence this whitelist exists to stop.
     "retain",
+    # EB-118: Ethereal on the BASE card, the A9 / Track-C.1 story a third
+    # time. The keyword rail below already carried Exhaust/Innate/Retain and
+    # the game owns the whole behaviour from the keyword alone
+    # (CombatManager.EndPlayerTurnInternal exhausts every hand card whose
+    # Keywords contain Ethereal, causedByEthereal: true), so nothing is
+    # reimplemented here -- only the base-card spelling was missing, and
+    # without this entry the first card ruled Ethereal from print would BLOCK
+    # with "card field(s) ['ethereal'] not understood".
+    "ethereal",
     # Companion identity/reward metadata.
     "star", "element", "role_c", "personal_pool", "nation", "character",
     "guest_star",
@@ -894,6 +1057,12 @@ def card_level_reason(
 def pascal(card_id: str) -> str:
     """kaboom -> Kaboom, sorry_jean -> SorryJean, jumpy_dumpty_mk2 -> JumpyDumptyMk2."""
     return "".join(p.capitalize() for p in re.split(r"[_\-]", card_id) if p)
+
+
+def cs_escape(text: str) -> str:
+    """A sheet string as a C# literal body. Backslash first, or the quote
+    escape this adds would be escaped a second time."""
+    return text.replace("\\", "\\\\").replace('"', '\\"')
 
 
 _sheet_cards_cache: dict[Path, list] = {}
@@ -1032,8 +1201,9 @@ def blocked_reason(
     # discipline. Teaching this needs a CalculatedVar bound to the exhaust
     # pile, which is Track C work, not a codegen shortcut.
     for effect in card.get("effects", []):
-        if "amount_formula" in effect and exhaust_pile_calc_rider(
-                card, effect) is None:
+        if ("amount_formula" in effect
+                and exhaust_pile_calc_rider(card, effect) is None
+                and exhaust_selection_calc_rider(card, effect) is None):
             formula = effect["amount_formula"]
             return (f"amount_formula (reads {formula.get('count')}) -- needs a "
                     "CalculatedVar bound to that count, not a literal")
@@ -1115,8 +1285,22 @@ def blocked_reason(
             amt = eff.get("amount")
             if not isinstance(amt, int) and _x_formula_reason(card, amt):
                 return _x_formula_reason(card, amt)
+        if op in {"salon_rotate", "salon_perform"}:
+            # EB-118 §5.5. Same field discipline as the meter ops above,
+            # with `amount` OPTIONAL: one rotation and one act are the
+            # natural units, so `{op: salon_rotate}` is the common row
+            # and the default is the sim's (1).
+            unknown = set(eff) - {"op", "amount"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            amount = eff.get("amount", 1)
+            if not isinstance(amount, int) or amount <= 0:
+                return f"{op} amount must be a positive literal int"
         if op in {"gain_encore", "spend_encore", "raise_fanfare_cap",
-                  "gain_fanfare_floor", "crash_fanfare", "salon_bow"}:
+                  "gain_fanfare_floor", "crash_fanfare", "salon_bow",
+                  # A Spark price the generator cannot read as a
+                  # literal is a price the IsPlayable gate cannot show.
+                  "spend_spark"}:
             unknown = set(eff) - {"op", "amount"}
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
@@ -1343,6 +1527,29 @@ def blocked_reason(
             # moonlit_offering their upgrade paths for no reason.
             if eff.get("amount", 1) != 1 and eff.get("select") != "chosen":
                 return "exhaust_from amount > 1 (random re-pool loop not built)"
+        if op == "recall_to_draw":
+            # EB-118 §6.4. Constraints 3-6 are runtime pool filters and live
+            # in RecallFromExhaust.Recallable; 1 and 2 are card SHAPE and are
+            # checked here, because the generator reads the sheet directly and
+            # never passes through the tier0 loader that enforces them
+            # (loader._validate_recall_shape). A row that reaches the emitter
+            # has therefore been checked on both sides of the wall.
+            unknown = set(eff) - RECALL_FIELDS
+            if unknown:
+                return f"recall_to_draw field(s) {sorted(unknown)} not understood"
+            if eff.get("from") != "exhaust":
+                return (f"recall_to_draw from '{eff.get('from', 'discard')}' "
+                        f"(only the exhaust source is built)")
+            if eff.get("position", "top") != "top":
+                return f"recall_to_draw position '{eff.get('position')}'"
+            if not isinstance(eff.get("amount", 1), int):
+                return "recall_to_draw amount must be a literal int"
+            if card.get("rarity") not in ("uncommon", "rare"):
+                return (f"recall_to_draw on a {card.get('rarity')} card "
+                        f"(EB-118 §6.4 constraint 1: Uncommon or Rare)")
+            if not card.get("exhaust"):
+                return ("recall_to_draw on a card that does not Exhaust "
+                        "(EB-118 §6.4 constraint 2)")
         if op == "add_card":
             unknown = set(eff) - ADD_CARD_FIELDS
             if unknown:
@@ -1412,34 +1619,19 @@ def blocked_reason(
                     return (f"repeat-conditional beside op(s) {sorted(set(bad))} "
                             "(repeated body would redeclare locals)")
             else:
-                branch_fields = {
-                    "damage": {"op", "amount", "target"},
-                    "block": {"op", "amount"},
-                    "draw": {"op", "amount"},
-                    "gain_spark": {"op", "amount"},
-                    "gain_encore": {"op", "amount"},
-                    "burst_energy": {"op", "amount"},
-                    "energy": {"op", "amount"},
-                    "place_bomb": {"op", "amount", "target", "bomb_damage"},
-                    "buff_next_attack": {"op", "amount"},
-                }
                 for branch in (then, els):
                     for e in branch:
-                        if e.get("op") not in BRANCH_OPS:
-                            return f"op '{e.get('op')}' inside a conditional branch"
-                        unknown = set(e) - branch_fields[e["op"]]
-                        if unknown:
-                            return (f"branch {e['op']} field(s) {sorted(unknown)} "
-                                    "not understood")
-                        if (e.get("op") == "damage"
-                                and (e.get("target") not in DAMAGE_TARGETS
-                                     or e.get("target") == "self")):
-                            return f"branch damage target '{e.get('target')}'"
-                        if (e.get("op") == "place_bomb"
-                                and e.get("target") not in BOMB_TARGETS):
-                            return f"branch place_bomb target '{e.get('target')}'"
-                        if not isinstance(e.get("amount", e.get("bomb_damage")), int):
-                            return f"branch {e['op']} amount must be a literal int"
+                        reason = _branch_op_reason(e, "conditional branch")
+                        if reason:
+                            return reason
+        if op == "choose_one":
+            reason = _modal_reason(eff)
+            if reason:
+                return reason
+    if sum(1 for e in card.get("effects", []) if e.get("op") == "choose_one") > 1:
+        # One selection local per body (`modeIndex`), and one screen per play:
+        # two modals on one card would collide on both.
+        return "two choose_one effects on one card (mode selection collision)"
     if sum(1 for e in card.get("effects", []) if e.get("op") == "detonate") > 1:
         return "two detonate effects on one card (count variable collision)"
     if sum(1 for e in card.get("effects", [])
@@ -1511,6 +1703,72 @@ def exhaust_pile_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | Non
     return (int(formula.get("base", 0)), int(formula.get("per", 1)),
             "static (card, _) => "
             "KokomiResources.ExhaustPileCount(card.Owner.Creature)")
+
+
+# EB-118. The `exhaust_selection_*` counts, tier0 token -> the C# accessor
+# that answers it. Both sides derive every one of them from the same recorded
+# descriptors (tier0 effects.exhaust_selection_counts /
+# Powers/ExhaustSelection.cs), so a name here is a name there.
+#
+# Deliberately a CLOSED map, the same discipline RUNTIME_TIMES states: a count
+# token the generator does not know must stay a NAMED BLOCKER. Guessing emits
+# a card that compiles and pays its `base` forever while the face promises
+# scaling, which is this generator's worst failure.
+EXHAUST_SELECTION_COUNTS = {
+    "exhaust_selection_size": "Size",
+    "exhaust_selection_cost": "Cost",
+    "exhaust_selection_attacks": "Attacks",
+    "exhaust_selection_skills": "Skills",
+    "exhaust_selection_powers": "Powers",
+    "exhaust_selection_companions": "Companions",
+    "exhaust_selection_personal": "Personal",
+    "exhaust_selection_upgraded": "Upgraded",
+}
+
+# The clause each count renders on the face. The number itself is honest --
+# it goes through the CalculatedDamageVar like every other converted rider --
+# so this sentence only has to say WHY it moves.
+EXHAUST_SELECTION_TEXT = {
+    "exhaust_selection_size": "the number of cards you just "
+                              "[gold]Exhausted[/gold]",
+    "exhaust_selection_cost": "the total cost of the cards you just "
+                              "[gold]Exhausted[/gold]",
+    "exhaust_selection_attacks": "the Attacks you just [gold]Exhausted[/gold]",
+    "exhaust_selection_skills": "the Skills you just [gold]Exhausted[/gold]",
+    "exhaust_selection_powers": "the Powers you just [gold]Exhausted[/gold]",
+    "exhaust_selection_companions": "the [gold]Companion[/gold] cards you just "
+                                    "[gold]Exhausted[/gold]",
+    "exhaust_selection_personal": "your own cards you just "
+                                  "[gold]Exhausted[/gold]",
+    "exhaust_selection_upgraded": "the upgraded cards you just "
+                                  "[gold]Exhausted[/gold]",
+}
+
+
+def exhaust_selection_calc_rider(card: dict,
+                                 eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: exhaust_selection_*}` (EB-118) --
+    a damage number priced off the selection the SAME card just Exhausted.
+
+    Same CalculatedDamageVar path as the exhaust_pile rider beside it, and
+    for a sharper version of the same reason: this count does not exist until
+    the card resolves, so a face printing only `base` would be the only number
+    the player ever sees. The reader is scoped to the resolving card, which is
+    exactly the `card` a CalculatedVar multiplier is handed.
+
+    Damage only, matching the pile rider: a block-side reader needs the
+    CalculationBase plumbing `block_calc_rider` owns and has no card yet.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict):
+        return None
+    accessor = EXHAUST_SELECTION_COUNTS.get(formula.get("count"))
+    if accessor is None:
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            f"static (card, _) => ExhaustSelection.{accessor}(card)")
 
 
 def charge_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
@@ -2012,6 +2270,9 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     pile = exhaust_pile_calc_rider(card, eff)
     if pile is not None:
         return pile
+    selection = exhaust_selection_calc_rider(card, eff)
+    if selection is not None:
+        return selection
     charge = charge_calc_rider(card, eff)
     if charge is not None:
         base, per_n, div = charge
@@ -2353,9 +2614,10 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "floor_drop": any(e["op"] == "crash_fanfare" for e in effects),
         # cards: tier0 bumps the add_card amount.
         "cards": any(e["op"] == "add_card" for e in effects),
-        # remove: value-checked in the loop below (only 'exhaust' lands;
-        # 'self_damage' remains structural).
-        "remove": bool(card.get("exhaust")),
+        # remove: value-checked in the loop below, which owns the whole key
+        # because WHICH field must be present depends on the VALUE
+        # ('exhaust' and 'ethereal' land; 'self_damage' remains structural).
+        "remove": False,
         # copy_cost_override: play-time IsUpgraded read in the copy emission.
         "copy_cost_override": any(e["op"] == "copy_companion_in_hand"
                                   for e in effects) or any(
@@ -2418,10 +2680,17 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "times": any(e["op"] == "damage" and e.get("target") != "self"
                      and isinstance(e.get("times"), int) and e["times"] > 1
                      for e in effects),
+        # EB-118 joins the same two vars: both riders render through the
+        # CalculatedDamageVar triple, so ExtraDamage/CalculationBase are where
+        # a `per` / `base` delta lands whichever count it reads.
         "formula_per": any(
-            exhaust_pile_calc_rider(card, e) is not None for e in effects),
+            exhaust_pile_calc_rider(card, e) is not None
+            or exhaust_selection_calc_rider(card, e) is not None
+            for e in effects),
         "formula_base": any(
-            exhaust_pile_calc_rider(card, e) is not None for e in effects),
+            exhaust_pile_calc_rider(card, e) is not None
+            or exhaust_selection_calc_rider(card, e) is not None
+            for e in effects),
     }
     # tier0 binds every POWER_UPGRADE_KEYS delta to the first TOP-LEVEL
     # apply_power OR buff_next_attack (upgrades.py takes `next(fx for fx in
@@ -2475,8 +2744,18 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                 return {}, "delta 'add: draw' on a repeating card (repeat semantics not expressible)"
         if key == "condition" and value != "unconditional":
             return {}, f"delta 'condition: {value}' (only 'unconditional' is tier0 grammar)"
-        if key == "remove" and value != "exhaust":
-            return {}, f"delta 'remove: {value}' not expressible by codegen (structural upgrade)"
+        if key == "remove":
+            # Both removable values name a base-card KEYWORD FIELD of the same
+            # name, so the presence check is the field lookup. Owned here
+            # rather than in `has` above: `has` is keyed by delta KEY and this
+            # delta's requirement is keyed by its VALUE.
+            if value not in ("exhaust", "ethereal"):
+                return {}, f"delta 'remove: {value}' not expressible by codegen (structural upgrade)"
+            if not card.get(value):
+                return {}, (
+                    f"delta 'remove: {value}' on a card that does not print "
+                    f"{value} (sheet/card mismatch)")
+            continue
         if not has[key]:
             return {}, f"delta key '{key}' has no matching effect on this card (sheet/card mismatch)"
     return dict(deltas), None
@@ -2903,6 +3182,16 @@ def _stmt_gain_spark(card: dict, eff: dict) -> str:
     return f"await SparkPower.Gain(choiceContext, Owner.Creature, {amount}, this);"
 
 
+def _stmt_spend_spark(card: dict, eff: dict) -> str:
+    # The PAYMENT half of the sink cost line; the GATE half is the IsPlayable
+    # override emit() attaches from the same effect. Literal price -- see
+    # MECHANICAL_OPS. The return value is deliberately dropped: with the gate
+    # in front of it a top-level spend cannot be short, and a card that wants
+    # to BRANCH on the payment is a different mechanic than a cost line.
+    return ("await SparkPower.Spend(choiceContext, Owner.Creature, "
+            f"{int(eff['amount'])}, this);")
+
+
 def _stmt_burst_energy(card: dict, eff: dict) -> str:
     amount = ('DynamicVars["BurstEnergy"].IntValue' if burst_upgrade(card)
               else str(int(eff["amount"])))
@@ -3042,6 +3331,14 @@ def _emit_branch_op(
         )
     elif op == "gain_encore":
         lines.append(_stmt_gain_encore(card, eff))
+    elif op == "salon_rotate":
+        # EB-118 §5.5. Literal in a branch, like every other branch resolver:
+        # no delta grammar reaches a rotation count.
+        lines.append("SalonMemberPower.RotateLeftmost("
+                     f'Owner.Creature, {int(eff.get("amount", 1))});')
+    elif op == "salon_perform":
+        lines.append("await SalonMemberPower.PerformLeftmost("
+                     f'choiceContext, Owner.Creature, {int(eff.get("amount", 1))});')
     elif op == "energy":
         # DEFECT FIXED HERE (found by G8, 2026-07-26). An `energy` delta made
         # the CanonicalVars entry and the OnUpgrade bump, but the play emitted
@@ -3074,6 +3371,31 @@ def _conditional_block(pred: str, then_lines: list[str],
     out = f"if ({pred})\n        {{\n{body(then_lines)}\n        }}"
     if else_lines:
         out += f"\n        else\n        {{\n{body(else_lines)}\n        }}"
+    return out
+
+
+def modal_option_class(card: dict, index: int) -> str:
+    """The generated class name for one mode's face on the choice screen."""
+    return f"{pascal(card['id'])}Mode{chr(ord('A') + index)}"
+
+
+def _modes_block(card: dict, mode_bodies: list[list[str]]) -> str:
+    """The if/else-if ladder over the answered mode index.
+
+    A ladder rather than a `switch`: the branch bodies are the same statement
+    lists `_conditional_block` renders, and one renderer for both keeps a mode
+    body and a branch body from drifting apart in whitespace alone.
+    """
+    def body(stmts: list[str]) -> str:
+        return "\n".join("            " + s.replace("\n", "\n    ")
+                         for s in stmts)
+
+    out = ""
+    for i, stmts in enumerate(mode_bodies):
+        head = (f"if (modeIndex == {i})" if i == 0
+                else (f"\n        else if (modeIndex == {i})"
+                      if i < len(mode_bodies) - 1 else "\n        else"))
+        out += f"{head}\n        {{\n{body(stmts)}\n        }}"
     return out
 
 
@@ -3259,6 +3581,9 @@ def build_body(
         elif op == "gain_spark":
             lines.append(_stmt_gain_spark(card, eff))
 
+        elif op == "spend_spark":
+            lines.append(_stmt_spend_spark(card, eff))
+
         elif op == "burst_energy":
             lines.append(_stmt_burst_energy(card, eff))
 
@@ -3326,6 +3651,22 @@ def build_body(
             # introducing a second notion of "which member".
             lines.append(
                 "await SalonMemberPower.BowLeftmost("
+                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
+
+        elif op == "salon_rotate":
+            # EB-118 §5.5. A reorder and nothing else: no tick, no Encore, no
+            # bow. Synchronous by signature, which is what guarantees it.
+            lines.append(
+                "SalonMemberPower.RotateLeftmost("
+                f"Owner.Creature, {int(eff.get('amount', 1))});")
+
+        elif op == "salon_perform":
+            # EB-118 §5.5. Resolves through the SAME PerformMember the
+            # turn-start upkeep calls, so the Encore upkeep, the dry cut, the
+            # Focus scaling and the burst particle are inherited here rather
+            # than restated on the card.
+            lines.append(
+                "await SalonMemberPower.PerformLeftmost("
                 f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
 
         elif op == "heal":
@@ -3852,8 +4193,14 @@ def build_body(
             # junk says so with an explicit `filter:` (the branch below).
             n = ('DynamicVars["Exhausts"].IntValue'
                  if exhaust_upgrade(card) else str(int(eff.get("amount", 1))))
+            # EB-118: the selection's identity context. Opened BEFORE the
+            # screen so a cancelled or empty selector leaves an EMPTY context
+            # rather than the previous effect's, recorded per victim, closed
+            # once -- the same three beats _op_exhaust_from makes, and the
+            # reason a second selector on one card replaces the first.
             lines.append(NEWLINE.join([
                 "{",
+                "            ExhaustSelection.Open(this);",
                 "            var toExhaust = (await CardSelectCmd.FromHand(",
                 "                choiceContext, Owner,",
                 "                new CardSelectorPrefs(",
@@ -3862,16 +4209,23 @@ def build_body(
                 "                KokomiResources.OwnCard, this)).ToList();",
                 "            foreach (var victim in toExhaust)",
                 "            {",
+                "                ExhaustSelection.Record(this, victim);",
                 "                await CardCmd.Exhaust(choiceContext, victim);",
                 "            }",
+                "",
+                "            ExhaustSelection.Close(this);",
                 "        }",
             ]))
 
         elif op == "exhaust_from":
             # tier0 _op_exhaust_from with filter status: RANDOM victim from
             # the hand's Status cards (not chosen -- the sim rolls rng).
+            # EB-118: a filtered exhaust records its victims too -- the
+            # context is the op's, not Kokomi's. Opened unconditionally so
+            # "no Status in hand" reads as an empty selection on both sides.
             lines.append(
                 "{\n"
+                "            ExhaustSelection.Open(this);\n"
                 "            var statusCards = CardPile.Get(PileType.Hand, Owner)?\n"
                 "                .Cards.Where(c => c.Rarity == CardRarity.Status).ToList();\n"
                 "            if (statusCards != null && statusCards.Count > 0)\n"
@@ -3879,10 +4233,25 @@ def build_body(
                 "                var victim = Owner.RunState.Rng.CombatTargets.NextItem(statusCards);\n"
                 "                if (victim != null)\n"
                 "                {\n"
+                "                    ExhaustSelection.Record(this, victim);\n"
                 "                    await CardCmd.Exhaust(choiceContext, victim);\n"
                 "                }\n"
                 "            }\n"
+                "\n"
+                "            ExhaustSelection.Close(this);\n"
                 "        }"
+            )
+
+        elif op == "recall_to_draw":
+            # EB-118, exhaust source. The whole verb -- the eligible pool, the
+            # top-of-draw placement and the gained Exhaust -- lives in
+            # RecallFromExhaust so the six constraints have ONE C# home and
+            # cannot be re-spelled per card. The generated body is the call.
+            # Sim twin: effects._op_recall_to_draw with `from: exhaust`.
+            n = str(int(eff.get("amount", 1)))
+            lines.append(
+                "await RecallFromExhaust.Recall(\n"
+                f"            choiceContext, Owner, this, {n});"
             )
 
         elif op == "add_card":
@@ -3982,6 +4351,31 @@ def build_body(
                         spotlight_capable)
                 lines.append(_conditional_block(pred, then_lines, else_lines))
 
+        elif op == "choose_one":
+            # EB-118 sec.5.4. The screen, the co-op sync and the automation
+            # seam are all the base game's (ModalChoice wraps them); what is
+            # generated is the option list, the record, and the ladder.
+            modes = eff["modes"]
+            options = ",\n            ".join(
+                f"ModalChoice.CreateOption<{modal_option_class(card, i)}>(Owner)"
+                for i in range(len(modes)))
+            lines.append(
+                "var modeOptions = new List<CardModel>\n        {\n"
+                f"            {options},\n        }};")
+            lines.append("var modeIndex = await ModalChoice.SelectMode("
+                         "choiceContext, Owner, modeOptions);")
+            labels = ", ".join(f'"{cs_escape(m["label"])}"' for m in modes)
+            lines.append("ModalChoice.RecordChoice(this, modeIndex, "
+                         f"new[] {{ {labels} }}[modeIndex]);")
+            mode_bodies: list[list[str]] = []
+            for mode in modes:
+                stmts: list[str] = []
+                for e in mode["effects"]:
+                    _emit_branch_op(card, e, stmts, ctx, True,
+                                    {"pending": False}, spotlight_capable)
+                mode_bodies.append(stmts)
+            lines.append(_modes_block(card, mode_bodies))
+
     # Structural upgrade append (tier0 upgrades.py: card.effects.append).
     # It resolves after every base effect and before the repeat tail.
     if added_draw_upgrade(card):
@@ -4070,6 +4464,14 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
         elif op == "salon_bow":
             body.append(
                 "await SalonMemberPower.BowLeftmost("
+                f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
+        elif op == "salon_rotate":
+            body.append(
+                "SalonMemberPower.RotateLeftmost("
+                f"Owner.Creature, {int(eff.get('amount', 1))});")
+        elif op == "salon_perform":
+            body.append(
+                "await SalonMemberPower.PerformLeftmost("
                 f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
     pad = " " * indent
     return "\n".join(pad + s.replace("\n", "\n" + " " * 4) for s in body)
@@ -4311,6 +4713,13 @@ def build_description(card: dict) -> str:
                 # reason, which is the exact confusion Track C exists to stop.
                 parts.append(
                     "Scales with the number of cards [gold]Exhausted[/gold].")
+            if exhaust_selection_calc_rider(card, eff) is not None:
+                # Same job as the pile sentence above, and needed more: this
+                # count does not exist until the card resolves, so without it
+                # the face is a number that appears from nowhere.
+                parts.append("Scales with "
+                             + EXHAUST_SELECTION_TEXT[eff["amount_formula"]
+                                                      ["count"]] + ".")
             if "bonus_formula" in eff:
                 formula = eff["bonus_formula"]
                 if formula.endswith("_per_detonation_this_combat"):
@@ -4358,6 +4767,17 @@ def build_description(card: dict) -> str:
                     "Gain 1 [gold]Spark[/gold]." if n == 1
                     else f"Gain {n} [gold]Sparks[/gold]."
                 )
+
+        elif op == "spend_spark":
+            # The price is printed FIRST because it is a cost line: a player
+            # reads what the card charges before what it buys. The card is
+            # unplayable below it (the IsPlayable gate), so this sentence
+            # describes a gate, never a partial spend.
+            n = int(eff["amount"])
+            parts.append(
+                "Spend 1 [gold]Spark[/gold]." if n == 1
+                else f"Spend {n} [gold]Sparks[/gold]."
+            )
 
         elif op == "burst_energy":
             if burst_upgrade(card):
@@ -4438,6 +4858,24 @@ def build_description(card: dict) -> str:
                 "bow." if n == 1 else
                 f"The leftmost {n} members of your [gold]Salon[/gold] take "
                 "their bows.")
+
+        elif op == "salon_rotate":
+            # "Moves to the back" and not "rotates": the player is told what
+            # happens to the member, not what happens to the data structure.
+            n = int(eff.get("amount", 1))
+            parts.append(
+                "The leftmost member of your [gold]Salon[/gold] moves to the "
+                "back." if n == 1 else
+                f"The leftmost member of your [gold]Salon[/gold] moves to the "
+                f"back, {n} times.")
+
+        elif op == "salon_perform":
+            n = int(eff.get("amount", 1))
+            parts.append(
+                "The leftmost member of your [gold]Salon[/gold] performs "
+                "now." if n == 1 else
+                f"The leftmost member of your [gold]Salon[/gold] performs "
+                f"now, {n} times.")
 
         elif op == "heal":
             parts.append("Heal {Heal:diff()} HP.")
@@ -4631,6 +5069,20 @@ def build_description(card: dict) -> str:
         elif op == "exhaust_from":
             parts.append("Exhaust a random Status card from your hand.")
 
+        elif op == "recall_to_draw":
+            # EB-118. The face carries BOTH halves of the bargain: where the
+            # card comes back to, and that it comes back on loan. The gained
+            # Exhaust is the whole reason the card is priced as a loan and
+            # not as a second copy, so it is printed, not left to a keyword
+            # the player has to notice on the returned card.
+            n = int(eff.get("amount", 1))
+            what = ("a card" if n == 1 else f"{n} cards")
+            parts.append(
+                f"Choose {what} from your [gold]Exhaust[/gold] pile; put "
+                f"{'it' if n == 1 else 'them'} on top of your draw pile. "
+                f"{'It gains' if n == 1 else 'They gain'} "
+                f"[gold]Exhaust[/gold].")
+
         elif op == "add_card":
             n = eff.get("amount", 1)
             zone_txt = ("your hand"
@@ -4678,6 +5130,16 @@ def build_description(card: dict) -> str:
                             "{IfUpgraded:show:...}.")
                     clause = "{IfUpgraded:show:" + upgraded + "|" + clause + "}"
                 parts.append(clause)
+
+        elif op == "choose_one":
+            # RAILS ("no new named keyword"): the face is ordinary card text.
+            # "Choose one:" is a sentence, not a keyword -- no [gold], no
+            # tooltip, nothing registered in KleeKeywords. Each mode prints
+            # its own authored label, which is that mode's card text and the
+            # same string its option class shows on the screen.
+            labels = " | ".join(m["label"].rstrip(".")
+                                for m in eff["modes"])
+            parts.append(f"Choose one: {labels}.")
 
         elif op == "discard":
             n = int(eff.get("amount", 1))
@@ -5062,6 +5524,12 @@ def build_upgrade(card: dict) -> list[str]:
         # touches only the upgraded copy; the auto-keyword text follows.
         done.add("remove")
         lines.append("RemoveKeyword(CardKeyword.Exhaust);")
+    if deltas.get("remove") == "ethereal":
+        # tier0: card.ethereal = False. The canon shape verbatim -- Apparition,
+        # EchoForm and VoidForm each print Ethereal and each remove it in
+        # OnUpgrade with this one line and nothing else.
+        done.add("remove")
+        lines.append("RemoveKeyword(CardKeyword.Ethereal);")
     if "copy_cost_override" in deltas:
         done.add("copy_cost_override")
         lines.append(
@@ -5220,6 +5688,17 @@ def emit(
         if eff["op"] in ("apply_aura", "swirl"):
             target_type = TARGET_CS[eff.get("target", "enemy")]
             break
+        # EB-118: a modal's aiming verb sits inside a mode body, so a card
+        # whose only enemy-facing effect is modal would declare TargetType.Self
+        # and be unaimable. blocked_reason has already refused modes that
+        # disagree, so the first mode that names a target names the card's.
+        if eff["op"] == "choose_one":
+            modal_target = next(
+                (t for t in (_mode_target_type(m) for m in eff["modes"])
+                 if t is not None), None)
+            if modal_target is not None:
+                target_type = modal_target
+                break
 
     vars_ = build_vars(card)
     body = build_body(card, profile)
@@ -5247,6 +5726,15 @@ def emit(
          if eff.get("op") == "apply_power" and eff.get("never_reduces")), None)
     if never_reduces_eff:
         interfaces += ", INeverReducingApplier"
+    # EB-118 §6.4 constraint 3: a card that retrieves from Exhaust may never
+    # be retrieved from Exhaust. The sim reads that off the printed effect
+    # tree (effects.retrieves_from_exhaust); C# has no effect tree at runtime,
+    # so the same shape is stamped as a marker interface and the pool filter
+    # asks the type. Stamped from the SHEET, so the two answers have one
+    # source.
+    if any(eff.get("op") == "recall_to_draw"
+           for eff in iter_effects(card)):
+        interfaces += ", IExhaustRetriever"
 
     ind = "\n        "
     vars_cs = (",".join(f"{ind}    {v}" for v in vars_)).lstrip()
@@ -5275,6 +5763,30 @@ def emit(
     # resolved it as effects would skip the card-played events the payoffs
     # read -- the reading the tech-debt audit (§5) refused sim-side, refused
     # here for the same reason. A marker-only row emits no hook at all.
+    # EB-118 sec.5.4: one option class per mode, in the card's own file.
+    # The screen takes CARDS, so each mode needs a face; ModalOptionCard
+    # supplies everything but the two authored strings. They live beside the
+    # card because a mode's text is that card's text -- the same reasoning
+    # that keeps a Sly rider on the card that prints it.
+    modal_option_classes = ""
+    modal_eff = next((e for e in card["effects"]
+                      if e.get("op") == "choose_one"), None)
+    if modal_eff is not None:
+        for i, mode in enumerate(modal_eff["modes"]):
+            label = cs_escape(mode["label"])
+            modal_option_classes += f'''
+/// <summary>Mode {i} of {card["id"]}. A face for the choose-a-card screen;
+/// never played, never in a pile, never in a pool.</summary>
+public sealed class {modal_option_class(card, i)} : ModalOptionCard
+{{
+    public override List<(string, string)>? Localization => new()
+    {{
+        ("title", "{label}"),
+        ("description", "{label}"),
+    }};
+}}
+'''
+
     sly_cs = ""
     if sly_riders(card):
         # _sly_view, not a plain effects swap: see its docstring. Under the
@@ -5409,6 +5921,15 @@ def emit(
     # (playtest finding 2026-07-20: the tag was invisible on cards). Gameplay
     # still reads ISkillTagCard; the keyword is what the player sees.
     keywords = []
+    # EB-118. FIRST in the array, because the canon pairing spells it that way
+    # (Apparition: `{ Ethereal, Exhaust }`) and an Ethereal card is very often
+    # also an Exhaust card. The keyword is the whole implementation: the game's
+    # own end-of-turn sweep reads Keywords and exhausts the card
+    # (causedByEthereal: true), so there is no body to emit and no hook to
+    # register. `remove: ethereal` upgrades ride the RemoveKeyword path in
+    # build_upgrade, exactly as Apparition/EchoForm/VoidForm do.
+    if card.get("ethereal"):
+        keywords.append("CardKeyword.Ethereal")
     if card.get("exhaust"):
         keywords.append("CardKeyword.Exhaust")
     # A9: base-card Innate rides the same CanonicalKeywords rail as Exhaust,
@@ -5560,6 +6081,22 @@ def emit(
         "\n\n    protected override HashSet<CardTag> CanonicalTags => "
         f"new() {{ CardTag.{tag} }};"
         if tag else "")
+    # EB-118 §4.5, the Spark cost line. Sparks are a PowerModel and not a
+    # CustomResource, so BaseLib's SetCanonicalCost rail below cannot carry
+    # this price: the gate is CardModel.IsPlayable, the extension point the
+    # game documents for exactly this ("Grand Finale is only playable if your
+    # draw pile is empty") and the mirror of tier0 card_playable's
+    # `spark_cost` check. TOP-LEVEL spends only, the sim's rule -- a price
+    # inside a conditional branch cannot be shown before the play, and
+    # SparkPower.Spend refuses it there instead.
+    spark_price = sum(int(eff["amount"]) for eff in card["effects"]
+                      if eff.get("op") == "spend_spark")
+    spark_gate_member = (
+        "\n\n    // The Spark cost line (EB-118): unplayable below the price,\n"
+        "    // which is how the cost is shown rather than silently failing.\n"
+        "    protected override bool IsPlayable =>\n"
+        f"        SparkPower.CanSpend(Owner.Creature, {spark_price});"
+        if spark_price else "")
     resource_cost_setup = []
     if int(card.get("encore_cost", 0)) > 0:
         resource_cost_setup.append(
@@ -5612,7 +6149,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{card["name"].replace('"', chr(92) + chr(34))}"),
         ("description", "{desc}"),
-    }};{tags_member}
+    }};{tags_member}{spark_gate_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -5636,7 +6173,7 @@ public sealed class {cls} : {interfaces}
         {upgrade_cs}
     }}
 {sly_cs}}}
-'''
+{modal_option_classes}'''
 
 
 # --- the driver ---------------------------------------------------------------

@@ -13,7 +13,7 @@ found was found by playing**. This is a partial backstop for that — see
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 38 tests, ~0.3s after build
+dotnet test                       # 94 tests, ~0.3s after build
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -68,7 +68,7 @@ the whole run with it and reports as `Test Run Aborted`.
 | `PlayTelemetry.ToJson()` | `Intent()` → `Root()` → `Godot.ProjectSettings.GlobalizePath` → **process death** | the telemetry schema is pinned by reading the serializer's field set and its `ldstr` key literals (`Harness/Il.cs`), not by running it. |
 | `ModelDb` lookups (`GetById`, `ToMutable`) | `ModelNotFoundException` — the registry is populated only by the game's boot | card models are constructed directly; `IsMutable` is set through its own setter, which is the flag `ToMutable` would have set. A canonical `CardModel`'s Owner **getter** throws too, which is `EB-94`'s root cause met from the test side. |
 | Anything touching a Godot object | `Texture2D`, `StringName`, scene nodes — **process death** | no test may touch art, VFX, hover-tip rendering or `KleePck`. |
-| A live `CombatState` / a real card PLAY | needs a combat the harness cannot build | card `OnPlay` bodies, damage resolution, `await CardPileCmd.*`, turn sequencing and the Salon's `Deploy`/`Bow` are **not reachable**. Ordering facts about them are pinned structurally (IL call sets) and labelled as such. |
+| A live `CombatState` / a real card PLAY | needs a combat the harness cannot build | card `OnPlay` bodies, damage resolution, `await CardPileCmd.*`, turn sequencing and the Salon's `Deploy`/`Bow`/`PerformMember` are **not reachable**. Ordering facts about them are pinned structurally (IL call sets) and labelled as such. |
 | A second peer | no transport, no lockstep | multiplayer **transport** — lockstep RNG agreement, remote-seat selection round trips, desync — remains play-only. |
 
 Nothing here is faked past. Where a fact could not be reached directly it is
@@ -82,9 +82,14 @@ either pinned structurally and labelled, or left out.
 | `DerivationPinTests.cs` | 14 | Fanfare cap against live max HP (audit **H3**, authority pin), cap clamp on gain, identity gating, the `?? 0` fallback; salon tick = printed base + Focus term, and the dry three-quarters truncation. |
 | `InterpolationPinTests.cs` | 5 | The tooltip text `lint_constant_parity` structurally cannot see: `SalonMemberPower` and both Pearl relics interpolate their constants rather than restating them (EB-86's shape; M24's "signing is a one-file edit"). |
 | `CoopSeamTests.cs` | 8 | Per-seat ownership and attribution — see below. |
+| `SparkSinkPinTests.cs` | 14 | EB-118 §4.5's Spark sink: the `CanSpend` gate a generated sink hangs `IsPlayable` on (whole price or nothing), True Spark Knight's live threshold and its floor of 1, and two structural pins on `Spend` (it refuses through the same predicate the gate uses, and moves the bank through the same `PowerCmd.ModifyAmount` the threshold consume uses). No card prints the op. |
 | `ParityAuthorityPinTests.cs` | 6 | Audit findings **M1** and **M2** pinned as the C# authority record, plus H3's cross-reference. |
+| `SalonVerbTests.cs` | 12 | `EB-118` §5.5's Salon verbs: the structural pin that the turn-start upkeep and perform-now resolve through the SAME `PerformMember` (the packet's no-duplicate-implementation requirement), and the behavioural pins for `RotateLeftmost` and the leftmost reads. |
+| `RecallFromExhaustTests.cs` | 10 | EB-118's exhaust-pile retrieval: the pool filter RUNS (kit, junk and retriever exclusions), the move is pinned structurally (`FromCombatPile` -> `Add` at `CardPilePosition.Top` -> `AddKeyword`) because it needs a live `CombatState`. |
+| `ExhaustSelectionTests.cs` | 15 | `EB-118`'s Exhaust identity context: the six printed descriptors, the derived reads, and above all the SCOPING — another card reads nothing, a second `Open` replaces, the seat is part of the key. Sim twin: `tier0/tests/test_exhaust_context.py`; the emitted column names are pinned across the two engines by `tier0/tests/test_exhaust_context_parity.py`. The codegen's wiring into a generated `OnPlay` is a labelled structural pin — a card PLAY is outside the boundary. |
+| `ModalChoicePinTests.cs` | 5 | `EB-118` sec.5.4's modal surface: `ModalChoice` delegates to the base game's OWN card-level choice rather than reimplementing one (`CardSelectCmd.FromChooseACardScreen` + `PlayerChoiceContext`, co-op-synced as `PlayerChoiceType.Index`), the three-option ceiling the screen itself enforces, and the `mode_chosen` telemetry row pinned to its tier0 twin. Structural: making a choice needs a live `CombatState`. No sheet row is modal. |
 
-**38 tests, all green.**
+**94 tests, all green.**
 
 ## Co-op coverage
 

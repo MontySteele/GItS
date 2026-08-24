@@ -168,8 +168,30 @@ def card_playable(state: CombatState, card: Card) -> bool:
     if card.encore_cost and state.player.encore < card.encore_cost:
         return False        # "Spend N Encore:" cost line -- a gate, never
                             # an overdraw (that is the spend_encore op)
+    price = spark_cost(card)
+    if price and state.player.sparks < price:
+        return False        # EB-118 §4.5, the Spark sink's cost line: the
+                            # gate one line up, DERIVED from the op instead
+                            # of a second sheet field, so the price shown
+                            # and the price paid cannot drift apart.
     # No Fanfare playability gate: Fanfare is read, never spent (F-A4).
     return card_cost(state, card) <= state.player.energy
+
+
+def spark_cost(card: Card) -> int:
+    """What this card's printed text charges in Sparks, 0 for every shipped
+    card (EB-118 stages the op; no sheet row uses it).
+
+    TOP-LEVEL ops only. A spend inside a conditional branch is a price the
+    player cannot be shown before choosing to play the card, so it is not
+    part of the cost line -- effects.spend_sparks refuses it at resolve time
+    instead, which is the loud half of the same rule.
+    """
+    total = 0
+    for fx in card.effects:
+        if fx.get("op") == "spend_spark":
+            total += effects.spend_spark_amount(fx)
+    return total
 
 
 def card_cost(state: CombatState, card: Card) -> int:
@@ -473,7 +495,12 @@ _FREE_PLAY_CONTEXT = (
     # Coverage pass 4's three per-card reads. Same hazard as the rest: a Sly
     # auto-play that discards or gains block in the middle of an outer card
     # would otherwise leave its numbers behind for the outer card to read.
-    "block_gained_this_card", "discards_this_card", "last_drawn_type")
+    "block_gained_this_card", "discards_this_card", "last_drawn_type",
+    # EB-118's identity context. The saved value is the LIST OBJECT, which is
+    # why every writer rebinds instead of clearing in place: a free play that
+    # exhausts mid-resolution opens its own list, and the restore below hands
+    # the outer card back the one it was reading.
+    "exhaust_selection")
 
 
 def resolve_free_play(state: CombatState, card: Card,
@@ -714,16 +741,18 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Burst cards have Retain (principles v1.4): they stay in hand.
     # Ethereal cards (the Spotlight selector) vanish to exhaust instead of
     # discarding -- an unplayed selector must never circulate as loot.
+    # `Card.is_ethereal`, not the raw tag: EB-118 added the printed base-card
+    # field beside it and all three seams below must read the same door.
     retained = [c for c in p.hand if "burst" in c.tags or c.retain]
     # WellLaidPlans (BeforeFlushLate): single-turn Retain on up to N cards
     # that were about to be flushed. Computed against what WOULD flush, so it
     # can never "retain" a card that was staying anyway.
     would_flush = [c for c in p.hand
                    if "burst" not in c.tags and not c.retain
-                   and "ethereal" not in c.tags]
+                   and not c.is_ethereal]
     retained += refpowers.retain_at_flush(state, would_flush)
     ethereal = [c for c in p.hand
-                if "ethereal" in c.tags
+                if c.is_ethereal
                 and "burst" not in c.tags and not c.retain]
     # Membership must be by IDENTITY: Card is a dataclass, so two copies of
     # the same card compare EQUAL, and a value check here would drop the
@@ -739,7 +768,7 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     flushed = [c for c in p.hand if id(c) not in retained_ids]
     p.discard_pile.extend(c for c in p.hand
                           if "burst" not in c.tags and not c.retain
-                          and "ethereal" not in c.tags
+                          and not c.is_ethereal
                           and id(c) not in retained_ids)
     p.hand = retained
     for c in flushed:

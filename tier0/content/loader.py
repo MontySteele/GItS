@@ -254,7 +254,36 @@ def _card_index() -> dict[str, Card]:
         # `sly_riders` before the check, so an extracted keyword row still
         # loads (see state.Card.sly).
         _validate_effect_vocabulary(c.id, sly_riders(c))
+        _validate_recall_shape(c)
     return index
+
+
+def _validate_recall_shape(card: Card) -> None:
+    """EB-118 §6.4 constraints 1 and 2, AT LOAD.
+
+    A card that retrieves from the exhaust pile must be Uncommon or Rare and
+    must itself Exhaust. Both are card-SHAPE law, so they are enforced where
+    the loader already enforces shape rather than left to sheet-author
+    discipline: the runtime pool filters (constraints 3-6) cannot see rarity
+    or the printed keyword, and a Common permanent retriever is exactly the
+    version of this capability the packet refuses.
+    `tools/lint_recall_exhaust.py` is the same law swept over the sheets,
+    including rows no run happens to load.
+    """
+    from tier0.engine import effects as _effects        # late: cycle
+
+    if not _effects.retrieves_from_exhaust(card):
+        return
+    if card.rarity not in ("uncommon", "rare"):
+        raise ValueError(
+            f"card {card.id!r}: retrieval from the exhaust pile is "
+            f"Uncommon-or-Rare only (EB-118 §6.4 constraint 1); this row is "
+            f"{card.rarity!r}")
+    if not card.exhaust:
+        raise ValueError(
+            f"card {card.id!r}: a card that retrieves from the exhaust pile "
+            f"must itself Exhaust (EB-118 §6.4 constraint 2); this row has "
+            f"no `exhaust: true`")
 
 
 def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
@@ -271,8 +300,9 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
     that was valid stays valid and nothing about resolution changes -- the only
     behaviour that moves is *when* a typo is reported, which is the whole point.
 
-    Recurses through `then`/`else` branches: conditionals nest, and an
-    unreachable-today branch is exactly where a typo survives longest.
+    Recurses through `then`/`else` branches and through `choose_one`'s
+    `modes:` bodies: both nest, and an unreachable-today branch is exactly
+    where a typo survives longest.
     """
     from tier0.engine import effects as _effects        # late: cycle
 
@@ -287,9 +317,59 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
             if not _effects.is_known_predicate(name):
                 raise ValueError(
                     f"card {card_id!r}: unknown predicate {name!r}")
+        if op == "choose_one":
+            _validate_modal_shape(card_id, fx)
+            for mode in fx[_effects.MODES_KEY]:
+                _validate_effect_vocabulary(card_id, mode["effects"])
         for branch in ("then", "else"):
             if fx.get(branch):
                 _validate_effect_vocabulary(card_id, fx[branch])
+
+
+def _validate_modal_shape(card_id: str, fx: dict) -> None:
+    """The `choose_one` shape, checked AT LOAD (EB-118 sec.5.4).
+
+    A modal is the one op whose payload is a list of DICTS rather than a list
+    of effects, so it is also the one op a typo can hide in without tripping
+    the op check above: `{effect: [...]}` for `{effects: [...]}` would load
+    clean and resolve as an empty mode. Hence an exact key set at both
+    levels, the same discipline `Card.from_dict` applies to a card row.
+
+    Two modes is a floor, not a style rule. One mode is not a choice -- it is
+    a conditional with the predicate left out -- and a card that offers the
+    player a single option is a sheet defect, not a design.
+    """
+    from tier0.engine import effects as _effects        # late: cycle
+
+    unknown = set(fx) - _effects.MODAL_FIELDS
+    if unknown:
+        raise ValueError(
+            f"card {card_id!r}: unknown modal fields {sorted(unknown)}")
+    modes = fx.get(_effects.MODES_KEY)
+    if not isinstance(modes, list):
+        raise ValueError(
+            f"card {card_id!r}: choose_one needs a `modes:` list")
+    if len(modes) < _effects.MIN_MODES:
+        raise ValueError(
+            f"card {card_id!r}: choose_one needs at least "
+            f"{_effects.MIN_MODES} modes, got {len(modes)}")
+    for i, mode in enumerate(modes):
+        if not isinstance(mode, dict):
+            raise ValueError(
+                f"card {card_id!r}: mode {i} is not a mapping")
+        unknown = set(mode) - _effects.MODE_FIELDS
+        if unknown:
+            raise ValueError(
+                f"card {card_id!r}: mode {i} has unknown mode keys "
+                f"{sorted(unknown)}")
+        if not isinstance(mode.get("label"), str) or not mode["label"]:
+            raise ValueError(
+                f"card {card_id!r}: mode {i} needs a non-empty `label:` "
+                f"-- the label IS that mode's printed card text")
+        if not isinstance(mode.get("effects"), list) or not mode["effects"]:
+            raise ValueError(
+                f"card {card_id!r}: mode {i} needs a non-empty `effects:` "
+                f"list")
 
 
 def guest_star_generation_pool(rarity: str) -> list[Card]:

@@ -43,6 +43,17 @@ draft-regret gap distributions; gated by
 loops cannot see a margin and that the printer re-prices exactly the sample
 the live run recorded).
 
+`card_connectivity_report.py` (EB-118 — how much of the rest of the game each
+card touches: shared/private state reads and writes, non-target play-time
+choices, contested states, external reach, random shares, cross-archetype
+edges. Deterministic, sheets-only, **no gate and no threshold**; the
+comparison corpus is all eight pools under one frozen vocabulary, and with
+`game_ref/` absent it prints an explicitly incomplete MOD-ONLY diagnostic
+instead of a canon comparison. Gated by
+`tier0/tests/test_eb118_connectivity.py`: one fixture per vocabulary entry, a
+red fixture, the op table pinned against `effects.OPS`, and the canon reader
+exercised against a synthetic decompiled tree.)
+
 ## Advisory (CI-visible, never blocking)
 `patch_sentinel.py` — asks whether the INSTALLED sts2.dll still agrees with the
 `game_ref/` baselines (cards, character facts) and with its own relic/DLL

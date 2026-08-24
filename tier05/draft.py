@@ -101,12 +101,19 @@ def _static_condition_share(name: str) -> float:
 
 
 def _nested_effects(effect_list: list[dict]):
-    """Walk every printed branch for card classification only."""
+    """Walk every printed branch and mode for card classification only."""
     for fx in effect_list:
         yield fx
         if fx.get("op") == "conditional":
             yield from _nested_effects(fx.get("then", []))
             yield from _nested_effects(fx.get("else", []))
+        elif fx.get("op") == "choose_one":
+            # EB-118: every classifier downstream of this walk (_has_tempo,
+            # _is_applier, behavioural_archetypes, ...) asks "does this card
+            # print X anywhere". A mode the player may always take prints X
+            # as much as a branch does.
+            for mode in fx.get("modes") or ():
+                yield from _nested_effects(mode.get("effects") or [])
 
 
 def _neutral_amount(fx: dict, default: float = 1.0) -> float:
@@ -429,7 +436,7 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
 # them rather than returning a second, quieter number for the same op.
 _PRICED_INLINE = frozenset({
     "damage", "chain_attack", "block", "place_bomb", "apply_power",
-    "conditional", "conscript", "gain_charge", "summon_kurage",
+    "conditional", "choose_one", "conscript", "gain_charge", "summon_kurage",
     "gain_fanfare_floor", "grow_damage", "repeat_this",
 })
 
@@ -508,6 +515,10 @@ def _op_price(fx: dict) -> float:
         return -_neutral_amount(fx, 0) * STATIC_CRASH_FANFARE_VALUE
     if op == "salon_bow":
         return _neutral_amount(fx) * STATIC_SALON_BOW_VALUE
+    if op == "salon_perform":
+        return _neutral_amount(fx) * STATIC_SALON_PERFORM_VALUE
+    if op == "salon_rotate":
+        return STATIC_SALON_ROTATE_VALUE
     if op == "spotlight_designate":
         return STATIC_SPOTLIGHT_DESIGNATE_VALUE
 
@@ -551,6 +562,8 @@ def _op_price(fx: dict) -> float:
     if op == "scry_discard":
         return STATIC_SCRY_VALUE
     if op == "recall_to_draw":
+        # Source-agnostic on purpose (EB-118); the argument is at the
+        # constant, and `fx["from"]` is deliberately not read here.
         return _neutral_amount(fx) * STATIC_RECALL_VALUE
     if op == "upgrade_in_hand":
         return STATIC_UPGRADE_VALUE                        # one neutral card
@@ -578,6 +591,27 @@ def _op_price(fx: dict) -> float:
         return abs(fx.get("delta", 1)) * STATIC_ENERGY_VALUE
     if op == "gain_spark":
         return _neutral_amount(fx) * STATIC_SPARK_VALUE
+    if op == "spend_spark":
+        # The same dial with the sign flipped -- spend_encore's shape, for
+        # spend_encore's reason: a printed cost must read as one.
+        #
+        # PROPOSED PRICE, PHASE 2 (EB-118 §4.5, Klee). The dial is the dead
+        # STATIC_SPARK_VALUE, so the term is 0.0 today and a sink's whole
+        # offer-screen value is its payoff ops. The design intent for the
+        # first sink cards -- recorded here to be checked against a real
+        # price when one is authored, not encoded as one -- is that a
+        # spend-2 outcome is worth roughly ONE ENERGY and lands at or below
+        # one free Attack, which is what a bank of 2 buys under True Spark
+        # Knight. One energy is STATIC_ENERGY_VALUE = 0.0 under the v3
+        # flat-proxy sweep, so intent and arithmetic agree by coincidence
+        # rather than by derivation; whichever pass revives the energy dial
+        # owes this term a real number.
+        #
+        # DRAFTER_VERSION IS NOT MOVED. No sheet row prints the op, so no
+        # offer screen changes and no tier0.5 number moves -- an op no card
+        # uses moves no number. The bump is owed at Phase-2 landing, with
+        # the first sink card that prints it.
+        return -_neutral_amount(fx) * STATIC_SPARK_VALUE
     if op == "burst_energy":
         return _neutral_amount(fx, 0) * STATIC_BURST_VALUE
 
@@ -621,6 +655,32 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                     share = _static_condition_share(name)
                     total += (else_power
                               + share * (then_power - else_power))
+            elif fx.get("op") == "choose_one":
+                # EB-118 sec.5.4 -- PROPOSED, and it moves no number, because
+                # no shipped card carries a `choose_one`. Registered here
+                # because `tools/lint_op_parity.py` requires every registered
+                # op to carry a price, and the moment to decide one is now.
+                #
+                # AGGREGATE = MAX of the modes' generic prices. A conditional
+                # blends its branches by a reachability SHARE because the
+                # board decides which one fires and the drafter cannot see
+                # the board. A modal has no such uncertainty: the PLAYER
+                # decides, at play time, with the board in front of them, and
+                # every mode is always available. So a share blend would be
+                # modelling a coin flip that does not exist.
+                #
+                # Max is also the conservative choice among the defensible
+                # ones. A modal card is worth AT LEAST its best mode -- it
+                # dominates a card printing that mode alone -- so max is a
+                # lower bound, and the surplus it declines to credit is the
+                # optionality itself (the right to decide late), which is
+                # real but is exactly what the Phase-2 pilot policy has to
+                # measure before it can be priced. Under-crediting until then
+                # keeps the drafter from paying for a mode-valuation the
+                # pilot cannot yet perform.
+                mode_powers = [effect_power(mode.get("effects") or [])
+                               for mode in fx.get("modes") or ()]
+                total += max(mode_powers, default=0.0)
             elif (fx.get("op") in ("damage", "chain_attack")
                   and fx.get("target") != "self"):
                 amt = fx.get("amount", 0)
@@ -731,6 +791,22 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                   if fx.get("op") == "repeat_this")
     if repeats:
         total *= 1.0 + repeats * STATIC_REPEAT_SHARE
+    # EB-118, the same placement one line down and the opposite sign: a
+    # keyword that decides whether the printed effects resolve at all scales
+    # the whole card. Reads `is_ethereal`, so both spellings price the same.
+    #
+    # PROPOSED at landing: a DRAFTER_VERSION bump, because a change to the
+    # priced set is one (the EB-71 note above states the rule). NOT TAKEN
+    # HERE, and the integer is deliberately not written down: no committed
+    # sheet row carries `ethereal:` today, and the only cards the tag spelling
+    # reaches are Statuses, Curses and the Spotlight token -- rarities outside
+    # RARITY_ODDS, which no reward, shop or Neow channel can offer. The term
+    # is therefore provably inert on every drafted card in the tree, and a
+    # stamp move with no number behind it would archive a world for nothing.
+    # It becomes owed the moment a DRAFTABLE row prints the field (Phase 2's
+    # big_badda_boom is that row).
+    if card.is_ethereal:
+        total *= STATIC_ETHEREAL_SHARE
     # `if card.sly` first: this is the draft hot path and the overwhelming
     # majority of cards have an empty list, so the comprehension inside
     # `sly_riders` should not allocate for them.
@@ -990,6 +1066,32 @@ STATIC_SALON_BOW_VALUE = 2.0       # salon_bow: one member's bow, on demand.
                                    # drafter cannot see stage occupancy, and
                                    # the plan bonus already pays for the
                                    # Salon shape.
+# EB-118 §5.5 (staged 2026-08-23). BOTH VALUES BELOW ARE PROPOSED, and
+# neither moves a number today: no sheet row prints either op, so every
+# drafting arm scores exactly as it did before. DRAFTER_VERSION therefore
+# does NOT move -- an unused op cannot change an offer screen, and the pin at
+# 14 (R121's payoff-reach registration) is untouched. The first card that
+# prints one of these verbs is what makes these dials load-bearing, and the
+# bump belongs to that window, not this one.
+STATIC_SALON_PERFORM_VALUE = 1.5   # salon_perform: one extra member tick, on
+                                   # demand. Priced BELOW salon_bow because
+                                   # a tick is the smaller half of a member
+                                   # (Crabaletta 6 against 14) and because
+                                   # the tick pays its Encore upkeep, which
+                                   # the bow does not -- the drafter cannot
+                                   # see whether the meter can afford it, so
+                                   # the conservative read is the priced one.
+STATIC_SALON_ROTATE_VALUE = 0.0    # salon_rotate: ZERO, and structurally so
+                                   # rather than pending a number. Rotating
+                                   # delivers nothing by itself; its whole
+                                   # value is which member the NEXT bow,
+                                   # perform or displacement finds, and stage
+                                   # occupancy is exactly what an offer
+                                   # screen cannot see (the salon_bow note
+                                   # above says the same thing about a value
+                                   # it could at least bound). Priced at zero
+                                   # deliberately, not by omission -- the
+                                   # STATIC_STRIP_BLOCK_VALUE precedent.
 STATIC_SPOTLIGHT_DESIGNATE_VALUE = 1.5  # spotlight_designate: prints
                                    # nothing and is what the whole
                                    # Spotlight kit reads. Deliberately
@@ -1044,6 +1146,22 @@ STATIC_SCRY_VALUE = 0.5            # scry_discard: exactly one worst card
                                    # the printed look-at count.
 STATIC_RECALL_VALUE = 1.0          # recall_to_draw: a CHOSEN card from the
                                    # discard onto the top of the draw pile.
+                                   # PROPOSED (EB-118, staged): the exhaust
+                                   # SOURCE prices at this same rate and gets
+                                   # no hook of its own. The offer-time
+                                   # question is unchanged -- one chosen card
+                                   # lands on top of the draw pile -- and the
+                                   # two ways the sources differ point in
+                                   # opposite directions: the exhaust pile is
+                                   # a strictly smaller (often empty)
+                                   # reservoir, and what it returns is on
+                                   # LOAN, gaining Exhaust and leaving again
+                                   # after one use. A split rate would be a
+                                   # number nothing has measured, and
+                                   # DRAFTER_VERSION does not move for a
+                                   # staged capability no shipped card uses.
+                                   # test_eb118_recall_exhaust pins that the
+                                   # generic price applies to both sources.
 STATIC_UPGRADE_VALUE = 1.5         # upgrade_in_hand, per card upgraded --
                                    # combat-scoped here, which is why it is
                                    # under a full card's worth.
@@ -1076,6 +1194,28 @@ STATIC_MAX_HP_VALUE = 1.0          # gain_max_hp, per point: permanent HP
                                    # AND an immediate heal of the same size,
                                    # priced at one point of Block each.
 # -- structural -----------------------------------------------------------
+STATIC_ETHEREAL_SHARE = 0.6        # EB-118. Ethereal is a DOWNSIDE and the
+                                   # drafter must price it, or a card whose
+                                   # whole design is "strong, but it dies in
+                                   # your hand" scores as if the second half
+                                   # were not printed. A card-level LIFECYCLE
+                                   # discount, not an op price: the keyword
+                                   # touches no effect, it decides whether the
+                                   # effects ever resolve at all -- so it
+                                   # scales what the card printed rather than
+                                   # sitting as a term beside it, the same
+                                   # placement STATIC_REPEAT_SHARE takes
+                                   # below and for the mirror-image reason.
+                                   # 0.6 is a JUDGEMENT, not a sweep: an
+                                   # Ethereal card is lost outright on the
+                                   # draws where its cost cannot be paid the
+                                   # turn it arrives, and at the drafter's
+                                   # ~3-energy turn that is a large minority
+                                   # of them. It is deliberately not harsher:
+                                   # the keyword costs nothing on the draws
+                                   # where the card IS played, which is the
+                                   # majority, and the sheet buys the whole
+                                   # downside off at the campfire.
 STATIC_REPEAT_SHARE = 0.5          # repeat_this multiplies the card's OWN
                                    # printed effects. Applied at half,
                                    # because every printed use of the op
@@ -1103,6 +1243,8 @@ STATIC_OP_PRICING: dict[str, str] = {
                    "and a flat engine credit on POWER-type cards (v4/v12)",
     "place_bomb": "bomb damage at STATIC_BOMB_DAMAGE_SHARE + a guard credit",
     "conditional": "reachable-branch share; Klee's live predicates at half",
+    "choose_one": "MAX of the modes -- the player picks, so no share blend; "
+                  "PROPOSED, no D move (no shipped card is modal)",
     "conscript": "STATIC_CONSCRIPT_VALUE per recruit (v7)",
     "gain_charge": "STATIC_CHARGE_VALUE per printed point (v7)",
     "summon_kurage": "ONE pulse, not the duration (v8)",
@@ -1128,6 +1270,10 @@ STATIC_OP_PRICING: dict[str, str] = {
     "crash_fanfare": "ZERO: STATIC_CRASH_FANFARE_VALUE until the meter-read "
                      "formula is priced; see the constant",
     "salon_bow": "STATIC_SALON_BOW_VALUE per bow taken",
+    "salon_perform": "STATIC_SALON_PERFORM_VALUE per act performed "
+                     "(PROPOSED; no sheet row prints it, so no number moves)",
+    "salon_rotate": "ZERO: STATIC_SALON_ROTATE_VALUE, a stage-occupancy "
+                    "question an offer screen cannot see",
     "spotlight_designate": "STATIC_SPOTLIGHT_DESIGNATE_VALUE, the universal "
                            "half of what the archetype term already pays",
     "generate_guest_star": "STATIC_GENERATED_CARD_VALUE per token",
@@ -1149,7 +1295,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "exhaust_from": "STATIC_STATUS_EXHAUST_VALUE filtered, else "
                     "STATIC_EXHAUST_VALUE",
     "scry_discard": "STATIC_SCRY_VALUE; one card leaves however many are seen",
-    "recall_to_draw": "STATIC_RECALL_VALUE per chosen card recalled",
+    "recall_to_draw": "STATIC_RECALL_VALUE per chosen card recalled, "
+                      "source-agnostic (EB-118: `from: exhaust` prices the "
+                      "same, PROPOSED at the constant)",
     "upgrade_in_hand": "STATIC_UPGRADE_VALUE per card upgraded",
     "grant_sly_this_turn": "STATIC_GRANT_SLY_VALUE, one turn of the rider",
     "remember_card": "ZERO: STATIC_REMEMBER_CARD_VALUE, paid on the power",
@@ -1168,6 +1316,8 @@ STATIC_OP_PRICING: dict[str, str] = {
     "cost_mod": "ZERO: energy in another costume, priced through "
                 "STATIC_ENERGY_VALUE",
     "gain_spark": "ZERO: STATIC_SPARK_VALUE, the v3 flat-proxy sweep",
+    "spend_spark": "the same dead dial, NEGATIVE: a Spark price is a "
+                   "printed cost. PROPOSED, see the branch in _op_price",
     "burst_energy": "ZERO: STATIC_BURST_VALUE, the v3 flat-proxy sweep",
 }
 
@@ -1451,6 +1601,52 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # tier0.5 number does. C.PILOT_WEIGHTS_VERSION 1 -> 2 in the same edit. The
 # payoff-reach registration's DRAFTER_VERSION = 14 pin is UNTOUCHED: the
 # drafter is not taught anything here, only the pilot.
+# POLICY_VERSION PROPOSED (EB-118, staged 2026-08-23). No integer here: the
+# bump executes when the switch is thrown, not when the code lands.
+#
+# Two decisions the engine has been making with a placeholder move into
+# `tier0/pilot/policy.py`, both behind `policy.PILOT_POLICIES_ENABLED`, which
+# ships FALSE. Off, both call sites run their pre-EB-118 code and every number
+# on this branch -- the frozen calibration battery included -- is
+# byte-identical, which is why the stamp must not move yet.
+#
+# (a) KLEE, bomb placement. `place_bomb` in its concentration form
+# (`target: enemy`) resolved through `_pick_targets`, i.e. lowest HP: a
+# targeting heuristic standing in for a decision. `bomb_placement_target`
+# enumerates the legal enemies and prices what a bomb is actually worth on
+# each -- what the target can still absorb before the pile is past lethal
+# (bombs beyond lethal are simply not dealt), the pile it joins and lives to
+# detonate with, the Weak-rate attack that arming an unsuppressed enemy costs
+# it, and the pile readers in hand (`detonate` aimed here pays only when the
+# pop is lethal, which is the rule the damage estimator already applies).
+# Random-target placements and free plays' forced random targeting are
+# untouched: those are variance profiles and parity law, not decisions.
+#
+# (b) KOKOMI, exhaust selection. A chosen `exhaust_from` spent
+# `_worst_card` -- highest-cost non-Attack -- which looks expert exactly when
+# the expensive card happens to be the dead one and is otherwise backwards: it
+# throws away the payoff and keeps the dud. `exhaust_victim` scores each
+# candidate as the exhausting card's payout for that victim minus the victim's
+# own future value (its pilot valuation in the current state, per energy, with
+# junk negative and a self-exhausting card discounted). The payout is a HOOK
+# defaulting to identity-blind, because no shipped grammar reads the victim's
+# identity; when one is written its payout arrives as a parameter rather than
+# as a second heuristic. The pool is the engine's -- post-C11 Kokomi's rotation
+# law has already dropped junk from it -- and the chooser never widens it.
+#
+# ONE BUMP, not two: both are the same class of change (the pilot's judgement,
+# not the engine's rules), they land behind one switch, and neither is
+# quotable alone -- the switch cannot be thrown for one policy and not the
+# other, so no cell exists in which only one is live. Same argument v11 and
+# v12 made on the RUNTEMPLATE side.
+#
+# WHAT RE-BASELINES AT THE BUMP: every Klee tier-0.5 number (four printed rows
+# place in the concentration form) and every Kokomi number that touches a chosen
+# exhaust, which under the casket is her whole Charge engine. Also moving in
+# the same landing edit: `C.PILOT_WEIGHTS_VERSION`, because the EB-118 weights
+# ENTER the set it labels the moment they are first read -- the R176 reading of
+# that rule. The payoff-reach registration's `DRAFTER_VERSION = 14` pin is
+# UNTOUCHED: the drafter learns nothing here, only the pilot.
 POLICY_VERSION = 7
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one

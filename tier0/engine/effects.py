@@ -114,6 +114,88 @@ def _bonus_formula(state: CombatState, formula: str,
     raise ValueError(f"unknown bonus_formula {formula!r}")
 
 
+# --- EB-118: card-resolution-scoped Exhaust identity context ---------------
+#
+# The card you chose to Exhaust tells the exhausting card what to do. What is
+# recorded is PRINTED IDENTITY ONLY -- six descriptors a CardModel carries too,
+# which is what lets the C# twin (Powers/ExhaustSelection.cs) record the same
+# row off the same facts. Nothing here reads sim-only state.
+#
+# THE SCOPING, which is the whole point and the thing a `last_exhausted`
+# global would get wrong:
+#   * resolve_card opens an EMPTY selection per card play, so the next card
+#     played reads nothing;
+#   * combat._FREE_PLAY_CONTEXT saves and restores it, so a free play landing
+#     mid-resolution cannot hand its victims to the outer card;
+#   * a SECOND exhaust_from on one card opens its own -- the list is REBOUND,
+#     never cleared in place, because the free-play save holds the object.
+#
+# Kokomi's rotation law (C11) filters her unfiltered pool before any of this
+# runs, so her context never carries junk. The mechanism is character-neutral:
+# an explicit `filter: status` card (Dodge Roll's shape) records its victims
+# here too. There is deliberately NO "Status exhausted" reward grammar -- the
+# context reports rarity, and what a card does with that is a sheet decision.
+EXHAUST_SELECTION_PREFIX = "exhaust_selection_"
+
+# The descriptor a victim leaves behind, in emission order.
+EXHAUST_SELECTION_FIELDS = ("id", "cost", "type", "rarity",
+                            "companion", "upgraded")
+
+
+def exhaust_descriptor(card: Card) -> dict:
+    """The printed identity of one exhausted card.
+
+    `cost` is the PRINTED cost and is kept raw: an X-cost card in hand has no
+    spent value, so it stays "X" here and contributes 0 to the derived total
+    rather than being silently coerced to a number a formula would pay for.
+    `upgraded` reads the id suffix, which survives an enchantment mark
+    (`x@sharp-2+`) because upgrades.apply_upgrade re-attaches the mark INSIDE
+    the suffix.
+    """
+    from tier0.content import upgrades          # late import avoids cycle
+    return {"id": card.id, "cost": card.cost, "type": card.type,
+            "rarity": card.rarity, "companion": card.is_companion,
+            "upgraded": card.id.endswith(upgrades.SUFFIX)}
+
+
+def exhaust_selection_counts(selection: list[dict]) -> dict:
+    """Derived reads over a selection. ONE definition, three consumers: the
+    `exhaust_selection_*` runtime counts, the `exhaust_selection_*` predicates
+    and the emitted parity row -- so a formula can never report a different
+    number from the row a parity test compares against C#."""
+    return {
+        "size": len(selection),
+        # Non-int costs (X) contribute nothing; see exhaust_descriptor.
+        "cost": sum(d["cost"] for d in selection
+                    if isinstance(d["cost"], int)),
+        "attacks": sum(1 for d in selection if d["type"] == "attack"),
+        "skills": sum(1 for d in selection if d["type"] == "skill"),
+        "powers": sum(1 for d in selection if d["type"] == "power"),
+        "companions": sum(1 for d in selection if d["companion"]),
+        # PERSONAL is the complement of companion, spelled out rather than
+        # inferred: a card that rewards rotating your OWN cards out asks a
+        # different question from `size - companions`, and the sheet should
+        # be able to say which one it means.
+        "personal": sum(1 for d in selection if not d["companion"]),
+        "upgraded": sum(1 for d in selection if d["upgraded"]),
+    }
+
+
+# The parity row, key for key and in order. The C# twin renders the same keys
+# (ExhaustSelection.ParityRow); test_exhaust_context_parity.py reads them out
+# of the C# source and compares, so neither side can add or rename a column
+# alone. `victims` is the id list -- the same ids CardCmd.Exhaust takes.
+EXHAUST_SELECTION_ROW_KEYS = ("card", "victims") + tuple(
+    exhaust_selection_counts([]))
+
+
+def exhaust_selection_row(state: CombatState, card: Card) -> dict:
+    row = {"card": card.id,
+           "victims": [d["id"] for d in state.exhaust_selection]}
+    row.update(exhaust_selection_counts(state.exhaust_selection))
+    return row
+
+
 def _runtime_count(state: CombatState, token: str,
                    current_card: Optional[Card] = None) -> int:
     """A live integer the base-game CalculatedX/CalculatedDamage vars read at
@@ -183,6 +265,19 @@ def _runtime_count(state: CombatState, token: str,
         # powers['salon_member'] == len(salon) is maintained at the deploy
         # site. Matinée Performance's per-member hits are the one user.
         return p.powers.get("salon_member", 0)
+    if token == "leftmost_salon_act":
+        # EB-118 §5.5: what the NEXT performer's act is worth right now --
+        # the printed base plus the Focus term and Grand Salon, at the price
+        # the stage can currently pay. The reward half of the leftmost read:
+        # a card body can pay off the performer it is about to move or
+        # perform without restating the member table. 0 on an empty stage.
+        #
+        # Resolves through salon_tick_amount, the same expression
+        # salon_member_act pays out and the C# role chip renders.
+        if not p.salon:
+            return 0
+        paid = p.encore >= C.SALON_TICK_ENCORE_COST
+        return salon_tick_amount(state, p.salon[0], paid)
     if token == "X":
         # Skewer: hit count = the energy actually spent, the same number
         # `amount: X` resolves. Spelled with the same token deliberately.
@@ -210,6 +305,16 @@ def _runtime_count(state: CombatState, token: str,
         return state.discards_this_card
     if token == "block_gained_this_card":
         return state.block_gained_this_card
+    # EB-118: the Exhaust identity context. `exhausted_this_card` above is the
+    # COUNT; these are the derived reads off the DESCRIPTORS of the selection
+    # the current card's exhaust_from just resolved. Registered as one prefix
+    # family rather than eight tokens so the vocabulary and the emitted parity
+    # row cannot disagree about what exists -- both enumerate the same dict.
+    if token.startswith(EXHAUST_SELECTION_PREFIX):
+        counts = exhaust_selection_counts(state.exhaust_selection)
+        key = token[len(EXHAUST_SELECTION_PREFIX):]
+        if key in counts:
+            return counts[key]
     raise ValueError(f"unknown runtime count {token!r}")
 
 
@@ -562,6 +667,46 @@ def detonate_bombs(state: CombatState, enemy: Enemy, bonus: int = 0) -> None:
 def gain_sparks(state: CombatState, n: int) -> None:
     state.player.sparks += n
     state.emit("gain_spark", amount=n, total=state.player.sparks)
+
+
+def spend_spark_amount(fx: dict) -> int:
+    """The literal Spark price on one `spend_spark` effect.
+
+    A LITERAL positive int, not `_amount`: `combat.spark_cost` reads the same
+    number off the printed effect with no state in hand, and a price the
+    playability gate cannot read is a price that fires without being shown.
+    Raises rather than approximating -- the loader's vocabulary check reports
+    an unknown op, and this reports an unpriceable one.
+    """
+    amount = fx.get("amount")
+    if not isinstance(amount, int) or isinstance(amount, bool) or amount <= 0:
+        raise ValueError(
+            f"spend_spark amount must be a positive literal int, got "
+            f"{amount!r}")
+    return amount
+
+
+def spend_sparks(state: CombatState, n: int) -> bool:
+    """Spend n Sparks. ALL OR NOTHING; returns whether the bank paid.
+
+    Sparks have no overdraw currency -- the shortfall-drains-HP grammar is
+    Furina's Encore alone (resources.spend_encore_or_hp) -- so a short bank
+    pays NOTHING rather than draining what it holds: a partial spend leaves
+    the payer believing it was paid, which is the silent-fire this op exists
+    to make impossible. The refusal is EMITTED, never swallowed.
+
+    Below the free-Attack threshold is a legal place to land: the bank is a
+    resource with competing uses, and combat.spark_threshold reads the LIVE
+    bank at every site (card_cost and play_card both call it), so a spend
+    that drops under the bar forfeits the free Attack on the very next read.
+    """
+    p = state.player
+    if p.sparks < n:
+        state.emit("spend_spark_refused", amount=n, bank=p.sparks)
+        return False
+    p.sparks -= n
+    state.emit("spend_spark", amount=n, total=p.sparks)
+    return True
 
 
 def _add_token(state: CombatState, card: Card, zone: str) -> None:
@@ -1024,9 +1169,35 @@ def _op_apply_aura(state: CombatState, fx: dict, card: Card) -> None:
                                   "apply_aura_op")
 
 
+def _pilot_policies():
+    """The EB-118 switch, or None while it is off.
+
+    LATE IMPORT, and the only direction this dependency may run in: the pilot
+    imports this module, so the engine may reach the pilot at CALL time and
+    never at import time. The flag is read off the module rather than bound at
+    import so a test (and the Phase-2 landing) can flip one name.
+    """
+    from tier0.pilot import policy
+    return policy if policy.PILOT_POLICIES_ENABLED else None
+
+
 def _op_place_bomb(state: CombatState, fx: dict, card: Card) -> None:
+    spec = fx.get("target", "random_enemy")
+    # EB-118 (1): the CONCENTRATION form only. `random_enemy`/`random_enemies`
+    # placements are a variance profile, not a decision, and a free play's
+    # forced random targeting is parity law (_pick_targets) -- neither is the
+    # pilot's to choose.
+    concentrating = spec == "enemy" and not state.force_random_targeting
     for _ in range(_amount(state, fx.get("amount", 1))):
-        for enemy in _pick_targets(state, fx.get("target", "random_enemy")):
+        # Re-evaluated per bomb: a multi-bomb placement sees the pile it is
+        # itself building, the same way the random roll is re-rolled per bomb.
+        pol = _pilot_policies() if concentrating else None
+        if pol is not None:
+            chosen = pol.bomb_placement_target(state, fx, card)
+            targets = [chosen] if chosen is not None else []
+        else:
+            targets = _pick_targets(state, spec)
+        for enemy in targets:
             enemy.bombs.append(Bomb(damage=fx["bomb_damage"],
                                     element=fx.get("element", "pyro"),
                                     turn_placed=state.turn))
@@ -1163,6 +1334,20 @@ def _op_grant_sly_this_turn(state: CombatState, fx: dict, card: Card) -> None:
 
 def _op_gain_spark(state: CombatState, fx: dict, card: Card) -> None:
     gain_sparks(state, fx.get("amount", 1))
+
+
+def _op_spend_spark(state: CombatState, fx: dict, card: Card) -> None:
+    """The Spark SINK (EB-118 §4.5): sparks are a resource with a competing
+    use, and this is the competition.
+
+    The COST LINE, not an overdraw: a card printing this op at top level is
+    unplayable below its price (combat.spark_cost -> combat.card_playable),
+    the encore_cost gate's shape, so the cost is visible before the energy
+    is spent. `spend_sparks` refuses a short bank as well -- the gate cannot
+    see a spend nested in a conditional branch, and an unpayable price must
+    fail loudly wherever it is reached rather than half-paying.
+    """
+    spend_sparks(state, spend_spark_amount(fx))
 
 
 def _op_gain_encore(state: CombatState, fx: dict, card: Card) -> None:
@@ -1305,6 +1490,53 @@ def _op_salon_bow(state: CombatState, fx: dict, card: Card) -> None:
             break
         _salon_bow(state, p.salon.pop(0))
     p.powers["salon_member"] = len(p.salon)
+
+
+def _op_salon_rotate(state: CombatState, fx: dict, card: Card) -> None:
+    """Rotate the leftmost member to the BACK of the queue (EB-118 §5.5).
+
+    A pure reorder: the member keeps its identity, performs NO tick, drains
+    NO Encore and triggers NO bow or replacement effect. It buys exactly one
+    thing -- which performer the FIFO end offers next, to `salon_bow`, to a
+    deploy landing on a full stage, and to the `leftmost_salon_member_*`
+    reads. powers['salon_member'] is untouched by construction: the queue's
+    length cannot change here.
+
+    Inert on an empty stage, and NOT silently: unlike `salon_bow`, whose
+    no-op is legible from the empty stage itself, a rotate that found nothing
+    to rotate is invisible in the state afterwards. `conscript_whiffed` is
+    the pattern.
+    """
+    p = state.player
+    if not p.salon:
+        state.emit("salon_rotate_whiffed")
+        return
+    for _ in range(_amount(state, fx.get("amount", 1))):
+        p.salon.append(p.salon.pop(0))
+    state.emit("salon_rotate", company=list(p.salon))
+
+
+def _op_salon_perform(state: CombatState, fx: dict, card: Card) -> None:
+    """The leftmost member performs NOW (EB-118 §5.5): an extra slot passive,
+    off-turn, at the standard price.
+
+    Resolves through `salon_member_act` -- the same function the turn-start
+    upkeep calls -- so the Encore upkeep, the dry three-quarters, the
+    Focus/Grand-Salon scaling, the burst particle and the `salon_tick`
+    telemetry row are inherited rather than restated. That sharing is the
+    contract, not an implementation convenience.
+
+    The member STAYS on stage: this is a performance, not a bow, and not a
+    rotation. `amount: N` therefore performs the leftmost member N times;
+    pair it with `salon_rotate` to spread the acts across the company.
+    """
+    p = state.player
+    if not p.salon:
+        state.emit("salon_perform_whiffed")
+        return
+    for _ in range(_amount(state, fx.get("amount", 1))):
+        if not salon_member_act(state, p.salon[0]):
+            break
 
 
 def _op_generate_guest_star(state: CombatState, fx: dict, card: Card) -> None:
@@ -1640,18 +1872,44 @@ def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
     # player choose -- exactly the split _op_discard_for_sparks already
     # makes, and it reuses the same _worst_card instrument surface.
     chosen = fx.get("select", "random") == "chosen"
+    # EB-118: OPEN this effect's own context. Rebound, not cleared in place --
+    # combat._FREE_PLAY_CONTEXT saved the outer card's list OBJECT, and an
+    # in-place clear here would empty that too. A second exhaust_from on the
+    # same card therefore replaces the first's record, which is the ruled
+    # behaviour: two rotations on one card are two questions, not one pile.
+    # Opened BEFORE the loop, so an empty pool leaves an empty selection
+    # rather than the previous effect's.
+    selection: list[dict] = []
+    state.exhaust_selection = selection
     for _ in range(n):
         if not pool:
             break
-        victim = _worst_card(pool) if chosen else state.rng.choice(pool)
+        if chosen:
+            # EB-118 (2): the chosen branch only. A random exhaust is not a
+            # decision, and `_op_discard`/`_op_conscript` keep the placeholder
+            # -- this policy is scoped to `exhaust_from`, where the payout is
+            # on the exhausting card.
+            pol = _pilot_policies()
+            victim = (pol.exhaust_victim(state, pool, card) if pol is not None
+                      else _worst_card(pool))
+        else:
+            victim = state.rng.choice(pool)
         pool = [c for c in pool if c is not victim]
         remove_instance(hand, victim)
         state.player.exhaust_pile.append(victim)
         state.exhausted_this_card += 1
+        # Recorded off the instance BEFORE anything downstream can touch it,
+        # and from the PRINTED fields only, so the row is the same one the
+        # mod's selector path can build off a CardModel.
+        selection.append(exhaust_descriptor(victim))
         if chosen:
             state.emit("exhaust", card=victim.id, chosen=True)
         else:
             state.emit("exhaust", card=victim.id)
+    # The parity row, emitted once per resolved selection (including the empty
+    # one -- "nothing was there to take" is a reading, not a gap). Emit-only:
+    # nothing in the engine reads this back, the formulas read the context.
+    state.emit("exhaust_selection", **exhaust_selection_row(state, card))
 
 
 def _worst_card(cards: list[Card]) -> Card:
@@ -1671,12 +1929,18 @@ def _best_card(cards: list[Card]) -> Card:
 
 
 def _walk_effects(effects: list[dict]):
-    """Effect list walk including conditional branches."""
+    """Effect list walk including conditional branches and modal modes."""
     for fx in effects:
         yield fx
         for branch in ("then", "else"):
             if isinstance(fx.get(branch), list):
                 yield from _walk_effects(fx[branch])
+        # A mode body is printed text the same way a branch is -- the player
+        # can always reach it -- so `_printed_power` must see it or a modal
+        # card scores as blank to every chooser that ranks on printed power.
+        for mode in fx.get("modes") or ():
+            if isinstance(mode, dict) and isinstance(mode.get("effects"), list):
+                yield from _walk_effects(mode["effects"])
 
 
 def _printed_power(card: Card) -> int:
@@ -1761,6 +2025,65 @@ def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:
     _resolve_effects(state, branch, card)
 
 
+# --- the modal / choose-one surface (EB-118 sec.5.4, STAGED) ---------------
+#
+# A `choose_one` effect carries `modes:`, a list of 2+ dicts, each one a
+# `label:` and an ordinary `effects:` list. It is NOT a new keyword: the
+# label is the plain card text of that mode and the bodies are the same op
+# vocabulary the rest of the sheet uses, so a modal card reads as ordinary
+# card text and no keyword tooltip is owed.
+#
+# The distinction from `conditional` is WHO decides. A conditional reads a
+# predicate off the board; a modal asks the player. That makes mode selection
+# a play-time CHOICE, which in this engine means the chooser seam beside
+# `_worst_card` / `_best_card` -- the same surface `select: chosen` exhaust,
+# chosen discard and Armaments' upgrade target already ride.
+#
+# NO SHIPPED CARD IS MODAL. The surface is registered and tested; nothing on
+# any sheet reaches it, so the frozen battery cannot move.
+
+MODES_KEY = "modes"
+MODE_FIELDS = frozenset({"label", "effects"})
+MODAL_FIELDS = frozenset({"op", MODES_KEY})
+MIN_MODES = 2
+
+
+def _chosen_mode(state: CombatState, modes: list[dict], card: Card) -> int:
+    """Which mode does the pilot take? PLACEHOLDER -- always the first.
+
+    INSTRUMENT SURFACE, same convention as `_worst_card`: every modal
+    measurement will ride this choice. Unlike those, this one is not even a
+    heuristic -- it is a fixed index, chosen so the seam exists and stays
+    deterministic while the honest answer is unbuilt.
+
+    The honest answer is PHASE-2 POLICY_VERSION work, landing with the
+    prototype card's price. Valuing a mode means valuing an effect list
+    against the live board, which is the pilot's job and moves `P`. Do not
+    grow this body into that policy: when the policy lands it REPLACES this
+    body, and that is a POLICY_VERSION bump because every tier0.5 number
+    taken with a modal card in the pool renumbers.
+
+    `tier0.pilot.policy._active_effects` calls this same function for its
+    forecast, so the pilot's read of a modal card and the mode that actually
+    resolves cannot disagree.
+    """
+    return 0
+
+
+def _op_choose_one(state: CombatState, fx: dict, card: Card) -> None:
+    modes = fx[MODES_KEY]
+    index = _chosen_mode(state, modes, card)
+    mode = modes[index]
+    # Parity + telemetry: the C# side records the same event name and the
+    # same three fields (klee-mod/KleeCode/Cards/ModalChoice.cs), so a mode
+    # taken in either engine reads the same. Generic like the `conditional`
+    # emit -- the label is the mode's printed text, so a take-rate can be
+    # read per card, per mode, or both.
+    state.emit("mode_chosen", card=card.id, index=index,
+               label=mode.get("label"))
+    _resolve_effects(state, mode.get("effects", []), card)
+
+
 # The predicate vocabulary, as data. `_predicate` below stays an if-chain --
 # each branch carries the ruling that put it there, and that prose is worth
 # more than a dispatch table -- but a chain cannot be ENUMERATED, and the
@@ -1789,6 +2112,10 @@ PREDICATE_NAMES = frozenset({
     "spotlight_moved_this_turn",
     "spotlight_unmoved_this_combat",
     "spotlighted_card_played_this_turn",
+    # EB-118. Ownership is a yes/no on the sheet, so it is a name, not a
+    # count prefix; the COUNTS are reachable as amounts.
+    "exhaust_selection_has_companion",
+    "exhaust_selection_has_personal",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -1801,7 +2128,23 @@ PREDICATE_PREFIXES = frozenset({
     "charge_at_least_",
     "fanfare_at_least_",
     "encore_at_least_",
+    # EB-118 §5.5: WHO is next to perform. Parameterised on the member name
+    # rather than tabled per member, for the same reason the integer bars are
+    # -- but the argument is closed here, because SALON_MEMBERS is: a typo'd
+    # member is a load-time failure, not a branch that never fires.
+    "leftmost_salon_member_",
+    # EB-118. `_has_type_` takes a card TYPE (a closed vocabulary, validated
+    # below); the other two take an integer like their neighbours.
+    "exhaust_selection_has_type_",
+    "exhaust_selection_cost_at_least_",
+    "exhaust_selection_size_at_least_",
 })
+
+# The card types `exhaust_selection_has_type_` may name. Closed on purpose:
+# a typo'd `..._has_type_attacks` would otherwise load fine and read False
+# forever, which is the silent-scaling failure the vocabulary check exists
+# to stop.
+CARD_TYPES = frozenset({"attack", "skill", "power"})
 
 
 def is_known_predicate(name: str) -> bool:
@@ -1816,6 +2159,10 @@ def is_known_predicate(name: str) -> bool:
             return False
         if prefix in ("target_has_power_", "self_has_power_"):
             return True
+        if prefix == "leftmost_salon_member_":
+            return arg in C.SALON_MEMBERS
+        if prefix == "exhaust_selection_has_type_":
+            return arg in CARD_TYPES
         # The integer forms must actually carry an integer. A typo'd
         # `fanfare_at_least_ten` would otherwise pass a name-only check and
         # raise from int() mid-combat -- the very failure being moved earlier.
@@ -1872,6 +2219,25 @@ def _predicate(state: CombatState, name: str) -> bool:
         # least N cards; otherwise the card resolves as nothing.
         n = int(name.rsplit("_", 1)[1])
         return len(state.player.exhaust_pile) >= n
+    # EB-118. These read the CURRENT selection (the exhaust_from earlier in
+    # this same card), not the pile: the pile is everything ever rotated off
+    # the line, this is the one choice just made. A card with no exhaust_from
+    # before the conditional reads an empty selection and every branch here
+    # is False, which is the honest answer rather than an error -- the same
+    # reading `drew_skill_this_card` gives a card that drew nothing.
+    if name.startswith("exhaust_selection_cost_at_least_"):
+        counts = exhaust_selection_counts(state.exhaust_selection)
+        return counts["cost"] >= int(name.rsplit("_", 1)[1])
+    if name.startswith("exhaust_selection_size_at_least_"):
+        counts = exhaust_selection_counts(state.exhaust_selection)
+        return counts["size"] >= int(name.rsplit("_", 1)[1])
+    if name.startswith("exhaust_selection_has_type_"):
+        want = name[len("exhaust_selection_has_type_"):]
+        return any(d["type"] == want for d in state.exhaust_selection)
+    if name == "exhaust_selection_has_companion":
+        return any(d["companion"] for d in state.exhaust_selection)
+    if name == "exhaust_selection_has_personal":
+        return any(not d["companion"] for d in state.exhaust_selection)
     if name.startswith("charge_at_least_"):
         # Kokomi threshold read (v0.5 sheet fill). A THRESHOLD is not a
         # proportional read: it pays a flat, printed bonus once the bank
@@ -1892,6 +2258,15 @@ def _predicate(state: CombatState, name: str) -> bool:
     # --- Furina sheet-pass predicates ---
     if name == "has_salon_members":
         return state.player.powers.get("salon_member", 0) > 0
+    if name.startswith("leftmost_salon_member_"):
+        # EB-118 §5.5: which performer is NEXT -- the head of the FIFO queue,
+        # the same end `salon_bow` pops, `salon_perform` acts on and a deploy
+        # into a full stage displaces. Reads the queue, not the mirror
+        # counter: powers['salon_member'] carries the count and cannot carry
+        # identity. False on an empty stage for every member name.
+        want = name[len("leftmost_salon_member_"):]
+        salon = state.player.salon
+        return bool(salon) and salon[0] == want
     if name == "spotlight_set":
         return state.player.spotlight is not None
     if name == "spotlight_moved_this_turn":
@@ -2130,24 +2505,85 @@ def _op_extra_card_screen(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("extra_card_screen", total=state.extra_card_screens)
 
 
+# EB-118: the exhaust pile as a recall_to_draw SOURCE, not a parallel op
+# family. One verb ("put a card back on top of the draw pile"), two piles it
+# may reach into; a second op would have duplicated the placement rule, the
+# kit exemption and the pilot's choice surface three ways.
+RECALL_SOURCES = ("discard", "exhaust")
+RECALL_EXHAUST_SOURCE = "exhaust"
+
+
+def retrieves_from_exhaust(card: Card) -> bool:
+    """Does this card itself retrieve from the exhaust pile? (EB-118 §6.4
+    constraint 3.)
+
+    A card-shape property, read off the printed effect tree rather than a
+    hand-set flag, so a future sheet row cannot arm the capability and forget
+    to declare it. The C# twin is the IExhaustRetriever marker interface,
+    which the generator stamps from this same shape.
+    """
+    return any(fx.get("op") == "recall_to_draw"
+               and fx.get("from") == RECALL_EXHAUST_SOURCE
+               for fx in _walk_effects(card.effects))
+
+
+def recall_exhaust_pool(state: CombatState, card: Card) -> list[Card]:
+    """The eligible targets in the exhaust pile (EB-118 §6.4, constraints
+    3 / 6). Enforced HERE rather than by card-author discipline, and shared
+    by the op and the closure sweep so the two cannot drift.
+
+    * kit cards are never fodder and never loot (the v1.9 invariant every
+      other pile pool rides);
+    * a card that itself retrieves from Exhaust is ineligible, INCLUDING
+      this one -- that exclusion is what keeps the pile from closing into a
+      cycle, and the `is not card` clause covers the route where the
+      retrieval card has already been routed to the pile;
+    * Status and Curse are ineligible (`is_junk`, the C11 rotation-law
+      predicate). Ordinary personal and Companion cards stay eligible.
+    """
+    return [c for c in state.player.exhaust_pile
+            if not c.kit_card
+            and not c.is_junk
+            and not retrieves_from_exhaust(c)
+            and c is not card]
+
+
 def _op_recall_to_draw(state: CombatState, fx: dict, card: Card) -> None:
     """Headbutt: put a chosen card from the discard pile on TOP of the draw
     pile. Index 0 IS the top -- state.draw pops index 0 and
-    combat.surface_innate prepends. No-op on an empty discard pile."""
+    combat.surface_innate prepends. No-op on an empty source pile.
+
+    `from: exhaust` (EB-118) reads the exhaust pile instead, through
+    `recall_exhaust_pool`, and the returned card GAINS Exhaust for the rest
+    of combat (constraint 5): it is on loan for one more use, then rotates
+    again and grants Charge again under normal law -- the funnel in
+    refpowers.after_card_exhausted sees a personal card and pays it, C11
+    included. Removing it from the pile temporarily weakens only pile
+    READERS; banked Charge does not fall, because Charge is never spent
+    (LAW). Destination is the draw pile in both branches -- never the hand
+    (constraint 4).
+    """
     p = state.player
     src = fx.get("from", "discard")
-    if src != "discard":
+    if src not in RECALL_SOURCES:
         raise ValueError(f"unknown recall_to_draw source {src!r}")
     pos = fx.get("position", "top")
     if pos != "top":
         raise ValueError(f"unknown recall_to_draw position {pos!r}")
+    from_exhaust = src == RECALL_EXHAUST_SOURCE
+    pile = p.exhaust_pile if from_exhaust else p.discard_pile
     for _ in range(_amount(state, fx.get("amount", 1))):
-        if not p.discard_pile:
+        pool = recall_exhaust_pool(state, card) if from_exhaust else pile
+        if not pool:
             return
-        pick = _best_card(p.discard_pile)
-        remove_instance(p.discard_pile, pick)
+        pick = _best_card(pool)
+        remove_instance(pile, pick)
+        if from_exhaust:
+            # Rest-of-combat, per INSTANCE: the sheet row is untouched and a
+            # twin of the same card elsewhere in the deck is unaffected.
+            pick.exhaust = True
         p.draw_pile.insert(0, pick)
-        state.emit("recall_to_draw", card=pick.id)
+        state.emit("recall_to_draw", card=pick.id, source=src)
 
 
 def _op_transform_in_hand(state: CombatState, fx: dict, card: Card) -> None:
@@ -2200,6 +2636,7 @@ def _free_play(state: CombatState, card: Card,
       2. save and RESTORE the whole per-card context block resolve_card
          sets (current_card_companion, reactions_this_card,
          kills_this_card, fatal_kills_this_card, exhausted_this_card,
+         exhaust_selection,
          detonations_at_card_start, repeat_requested,
          target_had_offelement_aura, current_attack_bonus, sparks_at_play,
          current_x, current_card_cost);
@@ -2442,6 +2879,7 @@ OPS = {
     "buff_next_attack": _op_buff_next_attack,
     "cost_mod": _op_cost_mod,
     "gain_spark": _op_gain_spark,
+    "spend_spark": _op_spend_spark,
     "gain_encore": _op_gain_encore,
     "spend_encore": _op_spend_encore,
     "spotlight_designate": _op_spotlight_designate,
@@ -2449,6 +2887,8 @@ OPS = {
     "raise_fanfare_cap": _op_raise_fanfare_cap,
     "crash_fanfare": _op_crash_fanfare,
     "salon_bow": _op_salon_bow,
+    "salon_rotate": _op_salon_rotate,
+    "salon_perform": _op_salon_perform,
     "generate_guest_star": _op_generate_guest_star,
     "copy_spotlighted_in_hand": _op_copy_spotlighted_in_hand,
     "heal": _op_heal,
@@ -2458,6 +2898,7 @@ OPS = {
     "exhaust_from": _op_exhaust_from,
     "scry_discard": _op_scry_discard,
     "conditional": _op_conditional,
+    "choose_one": _op_choose_one,                # EB-118 surface, unused
     "repeat_this": _op_repeat_this,
     "grow_damage": _op_grow_damage,
     "chance_bomb_per_detonation": _op_chance_bomb_per_detonation,
@@ -2504,6 +2945,11 @@ def resolve_card(state: CombatState, card: Card) -> None:
     state.kills_this_card = 0
     state.fatal_kills_this_card = 0
     state.exhausted_this_card = 0
+    # EB-118: a fresh, EMPTY identity context per card play. Rebound rather
+    # than cleared for the reason _op_exhaust_from states. This line is the
+    # whole cross-card scoping guarantee -- the card after an exhausting card
+    # reads nothing, whatever it asks.
+    state.exhaust_selection = []
     state.block_gains_this_card = 0
     state.block_gained_this_card = 0
     state.discards_this_card = 0
@@ -2733,6 +3179,66 @@ def player_turn_start_triggers(state: CombatState) -> None:
         gain_sparks(state, 1)
 
 
+def salon_tick_amount(state: CombatState, member: str, paid: bool) -> int:
+    """What this member's tick is worth RIGHT NOW: the printed base plus the
+    Focus term and Grand Salon (_salon_amount), then the dry reduction when
+    the member cannot pay. Crabaletta and Chevalmarin print damage, the Usher
+    prints Block; each member prints exactly one numeric, so one reader
+    answers for all three.
+
+    The mirror of C# SalonMemberPower.TickValue, and the reason both exist:
+    the resolution path and every reader of "what will this member do" must
+    be the same expression, not two copies that agree until one is edited.
+    """
+    spec = C.SALON_MEMBERS[member]["tick"]
+    base = spec.get("damage", 0) or spec.get("block", 0)
+    amt = _salon_amount(state, base)
+    return amt if paid else int(amt * C.SALON_DRY_DAMAGE_MULT)
+
+
+def salon_member_act(state: CombatState, member: str) -> bool:
+    """ONE member's slot passive, with the full standard bill: the Encore
+    upkeep, the dry three-quarters when it goes unpaid, the Focus/Grand-Salon
+    scaling, the burst particle, and the `salon_tick` telemetry row.
+
+    THE ONLY implementation of a member acting. `salon_tick` runs it once per
+    member at the start of the player turn; the `salon_perform` op runs it on
+    demand for the leftmost member. A second copy of this body is the defect
+    this shape exists to make impossible -- a card that performs a member
+    must not be able to drift from the upkeep that performs the same member.
+
+    Returns False when the stage cannot act at all (the player is dead, or
+    there is no living enemy left to act against) -- the caller's break
+    condition, kept here so the on-demand verb inherits it rather than
+    restating it.
+    """
+    p = state.player
+    if not p.alive or not state.living_enemies:
+        return False
+    spec = C.SALON_MEMBERS[member]["tick"]
+    paid = p.encore >= C.SALON_TICK_ENCORE_COST
+    state.emit("salon_tick", member=member, paid=paid)
+    if paid:
+        # No `card`: the upkeep bill is the STAGE's, not any one card's,
+        # and the per-member cut already exists on the `salon_tick` row
+        # that tier05.encore_telemetry reads.
+        resources.spend_encore(state, C.SALON_TICK_ENCORE_COST,
+                               "salon_upkeep")
+    if spec.get("damage", 0):
+        enemy = state.rng.choice(state.living_enemies)
+        deal_damage_to_enemy(state, enemy,
+                             salon_tick_amount(state, member, paid),
+                             element="hydro", source="salon")
+    if spec.get("block", 0):
+        amt = salon_tick_amount(state, member, paid)
+        p.block += amt
+        state.emit("block", amount=amt)
+    if p.burst_max:
+        # §1 particle economy
+        resources.gain_burst(state, C.SALON_TICK_BURST, "salon_tick")
+    return True
+
+
 def salon_tick(state: CombatState) -> None:
     """Salon v2 (rework plan §1): each active member performs its UNIQUE
     slot passive at the START of the player turn, in queue order
@@ -2754,35 +3260,8 @@ def salon_tick(state: CombatState) -> None:
         state.emit("salon_upkeep", members=len(p.salon), encore=p.encore,
                    cost=C.SALON_TICK_ENCORE_COST * len(p.salon))
     for member in list(p.salon):
-        if not p.alive or not state.living_enemies:
+        if not salon_member_act(state, member):
             break
-        spec = C.SALON_MEMBERS[member]["tick"]
-        paid = p.encore >= C.SALON_TICK_ENCORE_COST
-        state.emit("salon_tick", member=member, paid=paid)
-        if paid:
-            # No `card`: the upkeep bill is the STAGE's, not any one card's,
-            # and the per-member cut already exists on the `salon_tick` row
-            # that tier05.encore_telemetry reads.
-            resources.spend_encore(state, C.SALON_TICK_ENCORE_COST,
-                                   "salon_upkeep")
-
-        def _num(base: int) -> int:
-            amt = _salon_amount(state, base)
-            return amt if paid else int(amt * C.SALON_DRY_DAMAGE_MULT)
-
-        dmg = spec.get("damage", 0)
-        if dmg:
-            enemy = state.rng.choice(state.living_enemies)
-            deal_damage_to_enemy(state, enemy, _num(dmg), element="hydro",
-                                 source="salon")
-        blk = spec.get("block", 0)
-        if blk:
-            amt = _num(blk)
-            p.block += amt
-            state.emit("block", amount=amt)
-        if p.burst_max:
-            # §1 particle economy
-            resources.gain_burst(state, C.SALON_TICK_BURST, "salon_tick")
 
 
 def _exhaust_autoplay_sweep(state: CombatState) -> None:
