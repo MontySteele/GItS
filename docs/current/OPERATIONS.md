@@ -55,6 +55,36 @@ without a stamp is not citable (R68). `jobs` is a wall-clock lever only — run
 *i* is a pure function of `seed + i`. Depth: `docs/current/atlas/tier0-harness-tests.md`,
 `tier05-sim-core.md`, `tier05-economy.md`, `tier05-metrics.md`.
 
+Pilot-policy weight sweep (`W4`, `EB-118`) — the pilot weights that live in
+`tier0/pilot/policy.py` rather than in `constants.py`, which is why
+`tier05.sweeps` cannot reach them:
+
+```sh
+PYTHONPATH=. python3 -m tier05.pilot_weight_sweep                       # plan only, runs NOTHING
+PYTHONPATH=. python3 -m tier05.pilot_weight_sweep --execute --stage coverage --jobs 0
+PYTHONPATH=. python3 -m tier05.pilot_weight_sweep --execute --stage screen  --jobs 0
+PYTHONPATH=. python3 -m tier05.pilot_weight_sweep --execute --stage search  --jobs 0 --axes <the LIVE axes coverage named>
+PYTHONPATH=. python3 -m tier05.pilot_weight_sweep --execute --stage confirm --jobs 0 --point-json P.json
+```
+
+Run the stages in that order: coverage says which weights are read at all, the
+screen moves one axis at a time, the search combines only the axes coverage
+kept live, and confirm re-runs one candidate on a **held-out seed**. `--execute`
+is mandatory — the bare command prints the design and exits. **`--jobs` is a
+wall-clock lever at the (point, cell) level only**: every cell is pinned to
+`jobs=1` internally, because a `run_many` worker re-imports `policy.py` and
+would run the shipped weights while the parent believed it was sweeping.
+**ONE gate per sweep** (`--gate`): `PILOT_POLICIES_ENABLED` and
+`MODE_CHOOSER_ENABLED` are separate activation windows (R191), and forcing both
+would put two of them through one measurement. A weight no measurement cell
+READ is refused rather than printed (R67/R33) — that refusal is the instrument
+working, and the answer to it is to leave the weight alone. Only a DOMINATING
+point that reproduces at confirm may be adopted, and adopting one is its own
+`PILOT_WEIGHTS_VERSION` bump; TRADE, INSEPARABLE, a SHARED weight, an adopted
+zero and any stack-cap move are [USER]'s. The design, the grid, the five cells
+and the decision rule are the module's own docstring — it documents itself,
+`understudy/soak.py`'s pattern, so the design cannot drift from the code.
+
 ## Codegen — roster cards
 
 One character-aware generator emits the C# card classes from the canonical

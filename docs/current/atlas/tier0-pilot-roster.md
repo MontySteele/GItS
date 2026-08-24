@@ -121,6 +121,26 @@ Kokomi's 62 -> 76 is `EB-69` (R198, 2026-08-23), the ruled 14-card pool fill.
   bump is written PROPOSED at `tier05/draft.py:1604-1650` and is deliberately
   **not** taken while the switch is off: no weight is ever read, so the
   labeled set is arithmetically unchanged. Pin: `test_eb118_switch_off.py`.
+  The flip itself is BUILT and STAGED on `staged/eb118-2a-policy-flip`, held at
+  a ratified-band ruling (`QUEUE` `M40`); merging that branch IS the pull.
+- **WHICH WEIGHTS A SWITCH GOVERNS IS NOW MACHINE-DISCOVERABLE, NOT A LIST
+  SOMEBODY MAINTAINS.** `tier05.pilot_weight_sweep.discover_scope()` derives
+  the whole surface from source in four steps: the GATES in
+  `tier0/engine/effects.py` (any function that late-imports the pilot module
+  and returns it behind one boolean — structural, so it finds
+  `MODE_CHOOSER_ENABLED` beside `PILOT_POLICIES_ENABLED` without being told),
+  that gate's entry points, the transitive closure those reach inside
+  `policy.py`, and every module-level numeric constant loaded anywhere in it.
+  `C.<KNOB>` reads are deliberately NOT collected — those are `tier05.sweeps`'
+  territory. The split it reports matters as much as the list: a constant the
+  closure loads that is ALSO reachable from outside it is **SHARED** and is
+  reported rather than swept, because moving it leaves the gate's window
+  (D4). `PILOT_COMPANION_COPY_VALUE` is the live example — `_tempo_value`
+  loads it inside the closure and the main scorer `_score` reaches
+  `_tempo_value` too, so moving it moves draft scoring. Consequence for
+  anyone adding a pilot policy: file the weight beside the others and the
+  sweep finds it; give it no designed range and it is reported UNRANGED and
+  left alone, which is the intended default rather than an omission.
 - **The pilot must not disagree with the engine.** Every formula it forecasts
   goes through the engine's own helper — `effects.flat_attack_bonus`,
   `effects._calc_amount`, `effects._bonus_formula`, `effects.spotlight_mult`,
