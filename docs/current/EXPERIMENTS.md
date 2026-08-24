@@ -38,6 +38,23 @@ registration packets themselves live under `review/active/` — one home, not tw
   `band = None`).
 - Pre-registration drafts are a [USER]-gated class; the grade goes in blind.
 
+### What registration law does NOT reach: engineering tuning
+- A **sweep** is not a registered experiment and is not blind-graded — there is
+  no prediction to grade, and nothing above reaches it. Three rules underneath
+  that law carry over verbatim, and a sweep that skips them is not citable.
+  **(1) Stamp law (R68):** every printed row carries its cell's `RT/D/P/C`; a
+  sweep taken across a bump is two sweeps, and an unstamped row cannot say
+  which. **(2) The dead-knob gate (R67, with R33):** a swept knob nothing READ
+  produces a flat table indistinguishable from "the knob does not matter", so
+  the point is refused rather than printed — and the gate may not be satisfied
+  by adding a read. **(3) Look-first:** rows print in GRID ORDER, never sorted
+  by outcome, and the adoption rule is fixed before any row is read, because
+  picking the grid maximum of a noisy sweep afterwards is the forking-paths
+  defect with extra steps. `tier05/sweeps.py` covers the `constants.py` knobs
+  and `tier05/pilot_weight_sweep.py` the pilot weights filed outside it; both
+  write their expected outcome down in advance, since a null that was predicted
+  is a result and a null that was not is an unfalsifiable instrument.
+
 ## Active registrations (pointers — packets live in `review/active/`)
 - **EB-118 card-connectivity instrument** — static pre-registration at
   `review/active/eb118-richness-phase0-2026-08-23.md` §2, [USER]-approved
