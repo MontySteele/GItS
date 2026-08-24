@@ -13,7 +13,7 @@ found was found by playing**. This is a partial backstop for that — see
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 64 tests, ~0.3s after build
+dotnet test                       # 74 tests, ~0.3s after build
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -85,8 +85,9 @@ either pinned structurally and labelled, or left out.
 | `SparkSinkPinTests.cs` | 14 | EB-118 §4.5's Spark sink: the `CanSpend` gate a generated sink hangs `IsPlayable` on (whole price or nothing), True Spark Knight's live threshold and its floor of 1, and two structural pins on `Spend` (it refuses through the same predicate the gate uses, and moves the bank through the same `PowerCmd.ModifyAmount` the threshold consume uses). No card prints the op. |
 | `ParityAuthorityPinTests.cs` | 6 | Audit findings **M1** and **M2** pinned as the C# authority record, plus H3's cross-reference. |
 | `SalonVerbTests.cs` | 12 | `EB-118` §5.5's Salon verbs: the structural pin that the turn-start upkeep and perform-now resolve through the SAME `PerformMember` (the packet's no-duplicate-implementation requirement), and the behavioural pins for `RotateLeftmost` and the leftmost reads. |
+| `RecallFromExhaustTests.cs` | 10 | EB-118's exhaust-pile retrieval: the pool filter RUNS (kit, junk and retriever exclusions), the move is pinned structurally (`FromCombatPile` -> `Add` at `CardPilePosition.Top` -> `AddKeyword`) because it needs a live `CombatState`. |
 
-**64 tests, all green.**
+**74 tests, all green.**
 
 ## Co-op coverage
 

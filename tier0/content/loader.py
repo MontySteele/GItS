@@ -254,7 +254,36 @@ def _card_index() -> dict[str, Card]:
         # `sly_riders` before the check, so an extracted keyword row still
         # loads (see state.Card.sly).
         _validate_effect_vocabulary(c.id, sly_riders(c))
+        _validate_recall_shape(c)
     return index
+
+
+def _validate_recall_shape(card: Card) -> None:
+    """EB-118 §6.4 constraints 1 and 2, AT LOAD.
+
+    A card that retrieves from the exhaust pile must be Uncommon or Rare and
+    must itself Exhaust. Both are card-SHAPE law, so they are enforced where
+    the loader already enforces shape rather than left to sheet-author
+    discipline: the runtime pool filters (constraints 3-6) cannot see rarity
+    or the printed keyword, and a Common permanent retriever is exactly the
+    version of this capability the packet refuses.
+    `tools/lint_recall_exhaust.py` is the same law swept over the sheets,
+    including rows no run happens to load.
+    """
+    from tier0.engine import effects as _effects        # late: cycle
+
+    if not _effects.retrieves_from_exhaust(card):
+        return
+    if card.rarity not in ("uncommon", "rare"):
+        raise ValueError(
+            f"card {card.id!r}: retrieval from the exhaust pile is "
+            f"Uncommon-or-Rare only (EB-118 §6.4 constraint 1); this row is "
+            f"{card.rarity!r}")
+    if not card.exhaust:
+        raise ValueError(
+            f"card {card.id!r}: a card that retrieves from the exhaust pile "
+            f"must itself Exhaust (EB-118 §6.4 constraint 2); this row has "
+            f"no `exhaust: true`")
 
 
 def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
