@@ -909,3 +909,262 @@ and recorded act, before the read — not during it.
 | amendment | what changed | why |
 |---|---|---|
 | **1** — R190's Assist payoff-supply fence (`R197`, [USER] ruling of 2026-08-23) | The fence admits the already-adopted `EB-69` batch and nothing else: Assist payoff supply moves 3 → 5 with the fill, and no further Assist payoff-supply change is permitted before the post-settle grade. Both figures are recorded, with the retrieval-rubric route to 6 stated in advance. Phase-0 §2.4's Kokomi supply clause is spoiled, struck where published, never rewritten. | The fill's honest classification moves the fenced number, and Phase-0 item 8 forbids the alternative (mislabelling a payoff as glue). A fence [USER] set is a fence [USER] may move; the cost — that the frozen experiment's Assist arm is graded against the post-fill pool rather than the pre-fill one — is paid deliberately and recorded before the fill lands, not after. |
+
+---
+
+## 7. The blind-first grade — step (4)
+
+**Run graded:** `review/active/payoff-reach-results-2026-08-24.txt`, the
+registered cell at the frozen world `RT12 / D14 / P7 / C11` — n = 600 per arm,
+seed 11, `hunter`, `assigned`, realistic, all registered acts, the nine arms of
+§6.5 and no others. **Predictions graded:** §6.2's `P5(a)` / `P5(b)` against
+the `R185` aims, §6.3's Q-A and Q-B, and the one struck prediction §6.8 names.
+Per `D5`, nothing above is revised against the run that grades it, and per
+§6.5 the grade is written **before** any narrative: §§7.1–7.8 are the
+prediction-by-prediction verdicts and contain no design conclusion, §8 onward
+is the design-facing readout.
+
+### 7.1 Verdict vocabulary, and how `P5` maps onto it
+
+§6.5 registers the vocabulary as **PREDICTED / SPLIT / MISS**, "in the EB-17p
+§13 shape". `P5` is two pass/fail axes per arm rather than a direction, so the
+mapping is stated rather than assumed: **PREDICTED** = the aim lands on both
+axes; **SPLIT** = it lands on one; **MISS** = it lands on neither. That is not
+a new rule — §6.5 already says "Missing one of the two is reported, not
+triggered" and that missing "**both**  ... goes to `QUEUE`", so SPLIT and MISS
+are the registration's own two cases wearing the registered names.
+
+### 7.2 `P5(a)` — SUPPLY, static. Nine slots.
+
+Pass window = the aimed band's supply ceiling ± 1 card (LOW/MEDIUM ceiling 1 →
+0–2; HIGH ceiling 2 → 1–3).
+
+| arm | aim | supply | pass window | verdict |
+|---|---|---|---|---|
+| `klee/demolition` | MEDIUM | **10** | 0–2 | FAIL |
+| `klee/reaction` | HIGH | **8** | 1–3 | FAIL |
+| `klee/spark` | LOW | **7** | 0–2 | FAIL |
+| `furina/salon` | MEDIUM | **9** | 0–2 | FAIL |
+| `furina/spotlight` | HIGH | **10** | 1–3 | FAIL |
+| `furina/fanfare` | LOW | **14** | 0–2 | FAIL |
+| `kokomi/priest` | MEDIUM | **14** | 0–2 | FAIL |
+| `kokomi/commander` | HIGH | **6** | 1–3 | FAIL |
+| `kokomi/assist` | LOW | **5** | 0–2 | FAIL |
+
+**Nine of nine FAIL.** Every arm is above its window and none below. Reported
+at §6.1's above-scale rule, the supplies run **1.7× to 4.7×** the canonical
+ceiling of 3.
+
+### 7.3 `P5(b)` — OFFER, static. Nine slots.
+
+Pass window = the band's half-open interval: LOW `[0, 0.0058)`, MEDIUM
+`[0.0058, 0.0097)`, HIGH `[0.0097, 0.0214]`.
+
+| arm | aim | offer | pass window | lands | verdict |
+|---|---|---|---|---|---|
+| `klee/demolition` | MEDIUM | **0.0625** | `[0.0058, 0.0097)` | 2.9× TOP | FAIL |
+| `klee/reaction` | HIGH | **0.0985** | `[0.0097, 0.0214]` | 4.6× TOP | FAIL |
+| `klee/spark` | LOW | **0.0600** | `[0, 0.0058)` | 2.8× TOP | FAIL |
+| `furina/salon` | MEDIUM | **0.0539** | `[0.0058, 0.0097)` | 2.5× TOP | FAIL |
+| `furina/spotlight` | HIGH | **0.0639** | `[0.0097, 0.0214]` | 3.0× TOP | FAIL |
+| `furina/fanfare` | LOW | **0.0678** | `[0, 0.0058)` | 3.2× TOP | FAIL |
+| `kokomi/priest` | MEDIUM | **0.1270** | `[0.0058, 0.0097)` | 5.9× TOP | FAIL |
+| `kokomi/commander` | HIGH | **0.0578** | `[0.0097, 0.0214]` | 2.7× TOP | FAIL |
+| `kokomi/assist` | LOW | **0.0385** | `[0, 0.0058)` | 1.8× TOP | FAIL |
+
+**Nine of nine FAIL.** Every arm is above its window, and every arm is above
+the whole banded range — the smallest offer on the board, `kokomi/assist`'s
+0.0385, is already **1.8×** TOP's 0.0214. No categorical label is created
+above TOP (§6.1); the multiples are the report.
+
+### 7.4 `P5` verdicts, per arm
+
+| arm | `P5(a)` | `P5(b)` | verdict |
+|---|---|---|---|
+| `klee/demolition` | FAIL | FAIL | **MISS** |
+| `klee/reaction` | FAIL | FAIL | **MISS** |
+| `klee/spark` | FAIL | FAIL | **MISS** |
+| `furina/salon` | FAIL | FAIL | **MISS** |
+| `furina/spotlight` | FAIL | FAIL | **MISS** |
+| `furina/fanfare` | FAIL | FAIL | **MISS** |
+| `kokomi/priest` | FAIL | FAIL | **MISS** |
+| `kokomi/commander` | FAIL | FAIL | **MISS** |
+| `kokomi/assist` | FAIL | FAIL | **MISS** |
+
+**0 PREDICTED / 0 SPLIT / 9 MISS.** This is the OFFICIAL `P5` read — the
+post-settle static read §6.5 reserved it to be, taken after `EB-69` landed.
+The nine provisional misses `R196` adopted as information are superseded by
+it, and the three Kokomi arms were re-read as §6.5 required: they moved on
+both axes with the fill (priest supply 13 → 14, commander 5 → 6, assist 3 → 5;
+all three offers fell, because the pool denominator grew faster than the payoff
+numerator) and **the verdict did not change for any of them**. The six Klee and
+Furina rows are identical to the digit across all four fingerprint re-takes.
+
+### 7.5 Q-A (reading A-ii) — can reach be bought at the drafter / odds layer?
+
+Registered prediction: **direction POSITIVE** — realized on-plan reach under
+`assigned` exceeds the aimed band's blind-draft offer floor at the observed
+deck size, in all nine arms; **threshold ≥ 3×** that floor in every arm, **and
+≥ 1.0 payoff per deck** in the three HIGH-aimed arms.
+
+| arm | aim | deck | reach | floor | × floor | ≥ 3×? | HIGH ≥ 1.0? |
+|---|---|---|---|---|---|---|---|
+| `klee/demolition` | MEDIUM | 25.0 | 2.85 | 0.145 | 19.7 | yes | — |
+| `klee/reaction` | HIGH | 21.7 | 1.84 | 0.210 | 8.8 | yes | **yes** |
+| `klee/spark` | LOW | 24.3 | 2.15 | 0.046 | 46.6 | yes | — |
+| `furina/salon` | MEDIUM | 21.2 | 1.35 | 0.123 | 10.9 | yes | — |
+| `furina/spotlight` | HIGH | 21.4 | 2.35 | 0.208 | 11.3 | yes | **yes** |
+| `furina/fanfare` | LOW | 19.3 | 1.46 | 0.037 | 39.9 | yes | — |
+| `kokomi/priest` | MEDIUM | 20.9 | 2.44 | 0.121 | 20.1 | yes | — |
+| `kokomi/commander` | HIGH | 21.9 | **0.81** | 0.213 | 3.8 | yes | **NO** |
+| `kokomi/assist` | LOW | 19.4 | 0.74 | 0.037 | 20.1 | yes | — |
+
+- **Direction — HOLDS.** Reach exceeds the floor in all nine arms.
+- **Threshold, clause 1 (≥ 3× everywhere) — HOLDS.** The smallest multiple is
+  `kokomi/commander` at 3.8×; the largest is `klee/spark` at 46.6×.
+- **Threshold, clause 2 (≥ 1.0 in the three HIGH arms) — FAILS in one of
+  three.** `klee/reaction` 1.84 and `furina/spotlight` 2.35 clear it;
+  `kokomi/commander` reads **0.81**, and 48.3% of its finished decks hold no
+  on-plan payoff at all.
+
+**Q-A verdict: SPLIT.** Two of the three registered clauses hold across all
+nine arms; the third fails in exactly one arm. Recorded and not interpreted
+here: §6.3 states what a MISS would have meant, and this is not one.
+
+### 7.6 Q-B (reading B-ii) — can reach be bought by in-rarity composition?
+
+Registered prediction: **direction POSITIVE and LARGE** — the counterfactual
+offer exceeds the actual for every archetype whose payoffs are not already at
+the favoured rarity; **threshold: the median archetype's offer at least
+DOUBLES, and at least one archetype's counterfactual offer crosses a band
+boundary upward.**
+
+| arm | payoffs common / uncommon / rare | offer | counterfactual | Δ | ratio |
+|---|---|---|---|---|---|
+| `klee/demolition` | 0 / 3 / 7 | 0.0625 | 0.1538 | +0.0913 | 2.46× |
+| `klee/reaction` | 2 / 4 / 2 | 0.0985 | 0.1371 | +0.0386 | 1.39× |
+| `klee/spark` | 1 / 2 / 4 | 0.0600 | 0.1200 | +0.0600 | 2.00× |
+| `furina/salon` | 0 / 4 / 5 | 0.0539 | 0.1687 | +0.1149 | 3.13× |
+| `furina/spotlight` | 0 / 5 / 5 | 0.0639 | 0.1818 | +0.1179 | 2.85× |
+| `furina/fanfare` | 0 / 4 / 10 | 0.0678 | 0.2270 | +0.1592 | 3.35× |
+| `kokomi/priest` | 1 / 6 / 7 | 0.1270 | 0.1909 | +0.0639 | 1.50× |
+| `kokomi/commander` | 1 / 2 / 3 | 0.0578 | 0.1000 | +0.0422 | 1.73× |
+| `kokomi/assist` | 0 / 2 / 3 | 0.0385 | 0.0833 | +0.0449 | 2.17× |
+
+- **Direction — HOLDS.** No archetype has its payoffs already at the favoured
+  rarity (six of the nine print **zero** common payoffs; the other three print
+  one or two), and the counterfactual exceeds the actual in all nine.
+- **Threshold, clause 1 (median at least doubles) — HOLDS, and the reading
+  does not matter.** By median RATIO the middle archetype is `kokomi/assist`
+  at **2.17×**; by median actual OFFER it is `klee/demolition` at **2.46×**.
+  Both readings clear 2×, so the clause is satisfied without choosing between
+  them.
+- **Threshold, clause 2 (a counterfactual crosses a band boundary upward) —
+  NOT SATISFIED, and it is unsatisfiable at these figures.** The band
+  boundaries are 0.0058, 0.0097 and 0.0214. **All nine ACTUAL offers already
+  sit above the highest of them** (1.8×–5.9× TOP, §7.3), so no boundary is
+  left above any archetype for a counterfactual to cross, and §6.1's amendment
+  forbids inventing one. The counterfactuals move from 1.8×–5.9× TOP to
+  **3.9×–10.6× TOP** — a large upward move on a scale that has run out of
+  boundaries, not a band change.
+
+**Q-B verdict: SPLIT.** Direction and the doubling clause hold; the
+band-crossing clause cannot be satisfied because its premise — that a GItS
+archetype's offer sits inside the canonical band space — is false for every
+arm. §6.3 named two branches and this run lands on the first ("If the GItS
+sheets inherited that shape, the headroom is arithmetically enormous"): the
+headroom is there and the doubling is comfortable, while the clause that
+assumed the starting point was inside the scale is the half that could not be
+graded as written.
+
+### 7.7 The struck prediction §6.8 names — SPOILED, NOT GRADED
+
+The `EB-118` Phase-0 contract's §2.4 carried a committed directional prediction
+that Kokomi's Assist payoff supply *"does not rise before the payoff grade"*.
+`R197` ruled it **spoiled by an authorized content intervention** — the
+`EB-69` fill, whose honest classification moves the fenced number — struck
+where it is published and **not rewritten** (`R101b`).
+
+**It is therefore not graded, and its outcome is not a result.** For the record
+and not as a verdict: the supply did rise, 3 → 5, by the one batch the amended
+fence admits, recorded before the fill landed with both figures on the record.
+A prediction voided before the read is not a prediction that missed.
+
+### 7.8 Grade summary
+
+| slot | verdict |
+|---|---|
+| `P5` — nine arms (`P5(a)` ∧ `P5(b)` against the `R185` aims) | **9 MISS** |
+| Q-A (A-ii) — the drafter / odds layer | **SPLIT** |
+| Q-B (B-ii) — in-rarity composition | **SPLIT** |
+| Phase-0 §2.4's Kokomi supply clause | **SPOILED — not graded** |
+
+**Tripwires `T1`–`T4`: NONE FIRED.** `T1` is silent on the frozen world (the
+`P12` re-stamp, §6.6). `T2`: every arm's mean finished deck size lands in
+19.3–25.0, inside the registered 12–30. `T3`'s amended integrity condition
+**HOLDS** — across every finished deck in every arm, no reward-pool base id
+classifies differently on the deck side than in the static pool: zero
+disagreements, with `draft.is_on_plan_payoff` the only route either leg took.
+`T4`: no arm has zero draftable payoffs; the smallest supply on the board is 5.
+
+**The controls, reported and never part of a verdict.** `C1` is
+**half-executed**: `real_ironclad/generic` reads realized reach 2.11 against 16
+payoff-role cards in the pool at the same cell, and `real_silent/generic` is
+**BLOCKED** by a pre-existing engine defect (`BACKLOG EB-123`) rather than by
+anything this sprint did. `C2` puts the empirical blind-draft floor at
+0.39–1.40 payoffs per deck against arithmetic floors of 0.037–0.278 — the
+arithmetic floor Q-A is registered against is **2.4×–19.3× LOWER** than the
+floor a blind draft actually produces in this world. That is a fact about the
+comparator, recorded here; it does not re-grade Q-A, whose threshold is
+registered against the arithmetic floor and stays graded against it (`D5`).
+
+One reporting defect in the run, recorded because it bears on how the `T3`
+lines read: the `external-source` exclusion counts ENCHANTED reward-pool cards
+and labels them as having entered from outside the pool. All 122 such ids carry
+an `@`; genuinely external on-plan payoffs numbered **zero** in every arm, and
+`T3`'s answer is unchanged under either normalization. `BACKLOG EB-124`.
+
+---
+
+## 8. Design-facing readout — the redesign trigger
+
+**Everything above is descriptive. Everything below is a routing act, not a
+design conclusion: the design question is ASKED, not answered.**
+
+### 8.1 Which arms trigger
+
+§6.5's redesign trigger: *"If an archetype misses its aimed band on **both**
+`P5(a)` and `P5(b)`, that archetype's sheet composition goes to `QUEUE` as a
+design row."* **All nine arms miss both axes** (§7.4), so **all nine trigger.**
+
+### 8.2 The aggregation rule, applied
+
+§6.5's rule, ratified at `M28`: several arms triggering at the same read are
+discharged as **one roster-wide `QUEUE` row that enumerates the triggered arms
+separately** — not one row per arm, and not by declining the trigger. Its `M`
+id is **re-derived from `QUEUE` at mint** rather than reserved.
+
+**Minted: `QUEUE` `M37`.** Derived from the live register at mint time: `M36`
+is the newest row and `M33`–`M35` are burned integers, so `M37` is the next
+free one. The row enumerates all nine arms with their own supply, offer and
+multiples, and it carries the rule's own caveat: **one row because the pattern
+is roster-wide and a reader needs it in one place — NOT an assertion that one
+mechanism produced all nine.**
+
+### 8.3 What this grade unblocks, and what it does not
+
+- **Step (5) — the staged D15 / `EB-43` landing — is UNBLOCKED.** The
+  countersigned order puts it after blind-first grading, and grading is now
+  done. It is **not executed here**: it is the next window's work, with its own
+  re-baseline, and it moves `D` 14 → 15.
+- **Step (6) — the `RA-G1` / `RA-G2` / `tto` quarantine lift — is UNBLOCKED**
+  on the same ground: `R121` put the lift "on the graded read, and nowhere
+  earlier".
+- **The `P12` freeze is DISCHARGED.** It ran from the freeze act to this graded
+  read, which is exactly the span §6.6 gave it.
+- **`R190`'s remaining Assist fence is DISCHARGED.** It forbade further Assist
+  payoff-supply movement "before the post-settle grade"; the post-settle grade
+  is this one.
+- **NOT unblocked by this grade:** the `M14` slate entry and countersign, the
+  `M17` countersign and its `C2` landing, and `S4-G13`'s lever-2 pull. Each is
+  a [USER] act on its own row, and none of them is what this grade decides.
