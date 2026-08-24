@@ -41,7 +41,7 @@ def modal_card(*modes, **overrides):
 ENCORE = {"label": "Gain 2 Encore",
           "effects": [{"op": "gain_encore", "amount": 2}]}
 DRAW = {"label": "Spend 2 Encore: draw 2",
-        "effects": [{"op": "gain_encore", "amount": -2},
+        "effects": [{"op": "spend_encore", "amount": 2},
                     {"op": "draw", "amount": 2}]}
 HIT = {"label": "Deal 7 damage",
        "effects": [{"op": "damage", "amount": 7, "target": "enemy"}]}
@@ -79,6 +79,38 @@ def test_the_face_is_ordinary_card_text_no_new_keyword():
     assert "KleeKeywords" not in src
 
 
+def test_a_mode_body_spend_emits_the_real_overdraw_call():
+    """EB-119, the C# leg of the modal-spend repair.
+
+    The contract's own second mode is `{op: spend_encore, amount: 2}`, and
+    this fixture used to substitute `{op: gain_encore, amount: -2}` because
+    the generator could not emit a spend inside a mode body. The substitution
+    is a DIVERGENCE, not a paraphrase: `FurinaResources.GainEncore` opens
+    `if (amount <= 0) return;`, so the mod would have done nothing while the
+    sim drained the meter. What must be emitted is the same call a printed
+    top-level spend makes -- `SpendEncoreOrHp`, the overdraw primitive, not
+    the no-overdraw `SpendEncore`.
+    """
+    src = gen.emit(modal_card(ENCORE, DRAW), gen.FURINA_PROFILE)
+    assert ("await FurinaResources.SpendEncoreOrHp(choiceContext, "
+            "Owner.Creature, 2, this);") in src
+    assert "GainEncore(Owner.Creature, -2)" not in src
+
+
+def test_the_mode_body_spend_is_the_top_level_spends_own_call():
+    """Structural, not textual: the statement a mode body emits for a spend
+    is the statement build_body emits for the same printed effect. One
+    pathway, so an overdraw or Fanfare rule can only be changed in one place.
+    """
+    spend = {"op": "spend_encore", "amount": 2}
+    printed = modal_card(ENCORE, DRAW)
+    printed["effects"] = [spend]
+    top = [ln.strip() for ln in gen.build_body(printed, gen.FURINA_PROFILE)
+           if "SpendEncoreOrHp" in ln]
+    assert len(top) == 1
+    assert top[0] in gen.emit(modal_card(ENCORE, DRAW), gen.FURINA_PROFILE)
+
+
 def test_a_modal_card_is_aimed_by_its_modes():
     """TargetType is declared before a mode is picked, so an enemy-facing
     mode still has to make the card aimable."""
@@ -104,6 +136,18 @@ def test_a_modal_card_is_aimed_by_its_modes():
 def test_an_inexpressible_modal_blocks_with_a_reason(modes, expected):
     reason = gen.blocked_reason(modal_card(*modes), gen.FURINA_PROFILE)
     assert reason and expected in reason
+
+
+@pytest.mark.parametrize("amount", [0, -2])
+def test_the_substitution_trick_cannot_be_generated(amount):
+    """EB-119. The generator half of the block. `gain_encore: -2` is inert in
+    C# and live in the sim, so it may not reach a mode body (or a conditional
+    branch) at all -- the sim's loader refuses it on every sheet, and this is
+    the same bar on the emit side."""
+    mode = {"label": "nope",
+            "effects": [{"op": "gain_encore", "amount": amount}]}
+    reason = gen.blocked_reason(modal_card(mode, HIT), gen.FURINA_PROFILE)
+    assert reason and "must be a positive literal int" in reason
 
 
 def test_modes_that_would_aim_differently_block():
