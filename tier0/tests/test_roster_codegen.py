@@ -1260,26 +1260,74 @@ def test_the_shipped_eb69_chosen_discards_carry_the_selection_idiom():
         assert "random card" not in src, class_name
 
 
-def test_codegen_refuses_the_add_before_position_rather_than_dropping_it(
-        monkeypatch):
-    """`add_before` is a tier0 applier key (send_the_runner+'s ruled middle
-    insertion). The C# `add:` emitter appends its IsUpgraded-gated effect at
-    the END of OnPlay and has no way to honour a position, so the delta must
-    come back UNEXPRESSIBLE -- silently appending would ship an upgraded card
-    that resolves in a different order from the one the sim upgrades to.
-    Gate: BACKLOG EB-122."""
-    card = {
+def _add_before_probe() -> dict:
+    return {
         "id": "add_before_probe",
         "name": "Add Before Probe",
         "cost": 0,
         "type": "skill",
         "rarity": "common",
+        "character": "kokomi",
+        "archetypes": ["assist"],
+        "role": "glue",
         "effects": [{"op": "draw", "amount": 1},
                     {"op": "exhaust_from", "amount": 1, "select": "chosen"}],
     }
+
+
+def test_codegen_honours_the_add_before_position(monkeypatch):
+    """`add_before` is a tier0 applier key (send_the_runner+'s ruled middle
+    insertion). This file used to pin the REFUSAL -- the emitter appended, full
+    stop, so the delta had to come back unexpressible rather than ship an
+    upgraded card that resolved in a different order from the one the sim
+    upgrades to. EB-122 built the position, so the pin becomes the positive
+    claim: the gated effect is emitted BEFORE the op the key names, in the body
+    AND on the face.
+
+    D2a's order is draw 2 -> discard 1 chosen -> exhaust 1 chosen. Appended, it
+    read draw / exhaust / discard, and the player exhausted before being asked
+    what to throw -- a different card."""
+    card = _add_before_probe()
+    monkeypatch.setattr(gen, "_upgrade_deltas", {
+        "add_before_probe": {"add": {"op": "discard", "amount": 1,
+                                     "select": "chosen"},
+                             "add_before": "exhaust_from"}})
+    assert gen.upgrade_plan(card)[1] is None
+    src = gen.emit(card, gen.KOKOMI_PROFILE)
+    gated = src.index("var pickedUpgrade")
+    exhaust = src.index("ExhaustSelection.Open(this);")
+    assert gated < exhaust, "the appended discard must resolve first"
+    # The FACE reads in the order it plays, or a positioned upgrade lies about
+    # itself in exactly the way the position exists to prevent.
+    text_add = src.index("{IfUpgraded:show:Discard 1 card.|}")
+    text_exhaust = src.index("[gold]Exhaust[/gold] 1 card from your hand.")
+    assert text_add < text_exhaust
+
+
+def test_codegen_still_refuses_an_add_before_it_cannot_place(monkeypatch):
+    """The three ways a position is not honourable, each a NAMED block rather
+    than a silent append -- the same three tier0's applier makes."""
+    card = _add_before_probe()
+
+    # (a) a position with nothing to place.
+    monkeypatch.setattr(gen, "_upgrade_deltas", {
+        "add_before_probe": {"add_before": "exhaust_from"}})
+    assert "position modifier" in gen.upgrade_plan(card)[1]
+
+    # (b) an op this card does not print, which is how an edit to the base body
+    # surfaces instead of sliding the insertion somewhere else.
     monkeypatch.setattr(gen, "_upgrade_deltas", {
         "add_before_probe": {"add": {"op": "gain_encore", "amount": 1},
-                             "add_before": "exhaust_from"}})
-    assert gen.upgrade_plan(card)[1] == (
-        "delta key 'add_before: exhaust_from' not expressible by codegen "
-        "(structural upgrade)")
+                             "add_before": "place_bomb"}})
+    assert "does not print at top level" in gen.upgrade_plan(card)[1]
+
+    # (c) a repeat, which re-runs the whole body and has no position in it.
+    # The probe's ops are all repeat-safe, so the ONLY thing that can refuse
+    # this row is the position guard -- an `exhaust_from` here would be caught
+    # a line earlier for a different (also correct) reason and prove nothing.
+    repeatable = dict(card, effects=[{"op": "draw", "amount": 1},
+                                     {"op": "block", "amount": 5}])
+    monkeypatch.setattr(gen, "_upgrade_deltas", {
+        "add_before_probe": {"add": {"op": "repeat_this", "times": 1},
+                             "add_before": "block"}})
+    assert "no position within it" in gen.upgrade_plan(repeatable)[1]

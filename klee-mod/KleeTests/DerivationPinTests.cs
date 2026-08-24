@@ -137,4 +137,41 @@ public class DerivationPinTests
         Assert.True(SalonMemberPower.StageIsFull(seat.Creature, 3));
         Assert.False(SalonMemberPower.StageIsFull(seat.Creature, 2));
     }
+
+    // ---------------------------------------------------------------
+    // EB-122: `KokomiResources.DiscardsThisTurn`, the scaling term behind
+    // `what_the_tokoyo_took`.
+    //
+    // It is a combat HISTORY read, so the count itself needs a live
+    // CombatManager and is outside the headless boundary. What IS reachable
+    // is the pair of facts that decide whether it is safe to call at all --
+    // CalculatedVar previews call multipliers with no combat behind them --
+    // plus the structural claim that the expression is the base game's own
+    // MementoMori multiplier rather than a re-derivation of it.
+    // ---------------------------------------------------------------
+
+    [Fact]
+    public void Discards_this_turn_is_zero_with_no_card_and_no_combat()
+    {
+        Assert.Equal(0, KokomiResources.DiscardsThisTurn(null));
+        // A canonical model has no CombatState, which is what a reward-screen
+        // or deck-view preview hands the multiplier.
+        Assert.Equal(0, KokomiResources.DiscardsThisTurn(
+            new global::KleeMod.Cards.Kokomi.Generated.WhatTheTokoyoTook()));
+    }
+
+    [Fact]
+    public void Discards_this_turn_counts_this_turn_and_this_seat()
+    {
+        // STRUCTURAL, and labelled as such. Two clauses carry the whole
+        // meaning and both are the sim's too rather than choices made here:
+        // the end-of-turn hand flush does not go through CardCmd.Discard and
+        // so writes no entry, and the owner filter keeps a co-op partner's
+        // discards out of this card's bonus.
+        var calls = Il.Calls(Il.Method("KokomiResources", "DiscardsThisTurn"));
+
+        Assert.Contains("CombatManager.get_History", calls);
+        Assert.Contains("CombatHistoryEntry.HappenedThisTurn", calls);
+        Assert.Contains("CardModel.get_Owner", calls);
+    }
 }

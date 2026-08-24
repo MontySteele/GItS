@@ -97,4 +97,23 @@ public class InterpolationPinTests
         Assert.Equal("Surintendante Chevalmarin",
             global::KleeMod.Cards.SalonMemberTips.DisplayName(SalonMember.Chevalmarin));
     }
+
+    [Fact]
+    public void The_charge_rider_tip_can_say_Block_as_well_as_damage()
+    {
+        // EB-122 / SYS-7, one meter over. `gyorin_formation` is the first
+        // Charge rider on a BLOCK op, and this tip is the ONLY surface that
+        // carries the RATE -- the face was cut to "Scales with Charge" on the
+        // strength of it. A hardcoded noun would make the single place a
+        // player can read the rate the place it is read wrong.
+        //
+        // Structural: the body needs a live Owner and CombatState to print
+        // its second sentence, so what is asserted is that BOTH nouns are
+        // literals in the method rather than one being baked in.
+        var strings = Harness.Il.Strings(
+            Harness.Il.Method("KokomiRiderTips", "ChargeBody"));
+
+        Assert.Contains("Block", strings);
+        Assert.Contains("damage", strings);
+    }
 }

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
+using MegaCrit.Sts2.Core.Combat.History.Entries;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -241,6 +242,51 @@ public static class KokomiResources
         var owner = creature?.Player;
         if (owner == null) return 0;
         return CardPile.Get(PileType.Exhaust, owner)?.Cards.Count ?? 0;
+    }
+
+    /// <summary>
+    /// Cards this SEAT has discarded this turn -- the scaling term behind
+    /// `what_the_tokoyo_took` (EB-122, from EB-69's fill).
+    ///
+    /// TRANSCRIBED, not re-derived. The expression is the base game's own
+    /// MementoMori multiplier verbatim (sts2.dll v0.107.1,
+    /// MegaCrit.Sts2.Core.Models.Cards.MementoMori.CanonicalVars), and the sim
+    /// names that same card as the source of its `discards_this_turn` token
+    /// (tier0/engine/effects.py `_formula_count`). Two consequences fall out
+    /// of reading the HISTORY rather than a counter, and both are the sim's
+    /// too rather than choices made here: the end-of-turn hand flush does not
+    /// go through CardCmd.Discard and so does not count, and the owner filter
+    /// makes the tally PER SEAT -- a co-op partner's discards are not this
+    /// card's bonus.
+    ///
+    /// Static and null-tolerant because CalculatedVar previews call it with no
+    /// target, and outside a combat there is no history to read.
+    /// </summary>
+    public static int DiscardsThisTurn(CardModel? card)
+    {
+        if (card == null) return 0;
+        var combatState = card.CombatState;
+        if (combatState == null) return 0;
+        var history = CombatManager.Instance?.History;
+        if (history == null) return 0;
+
+        // A loop rather than MementoMori's `.Count(lambda)`: the predicate is
+        // the whole meaning of this method, and in a closure it is invisible
+        // to the structural pin that guards it (KleeTests reads a method's own
+        // call set and cannot follow a compiler-generated display class). The
+        // two clauses are byte-for-byte the base game's; only the spelling of
+        // the iteration differs, and this one also allocates nothing on a
+        // preview, which runs on every hover.
+        var count = 0;
+        foreach (var entry in history.Entries)
+        {
+            if (entry is not CardDiscardedEntry discarded) continue;
+            if (!discarded.HappenedThisTurn(combatState)) continue;
+            if (discarded.Card.Owner != card.Owner) continue;
+            count++;
+        }
+
+        return count;
     }
 
     internal static KokomiBurstResource? FindBurst(Creature? creature)

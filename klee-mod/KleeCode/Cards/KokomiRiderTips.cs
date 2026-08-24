@@ -66,26 +66,35 @@ public static class KokomiRiderTips
         IEnumerable<IHoverTip> inherited,
         CardModel card,
         int chargePer = 0,
-        int chargeStep = 0)
+        int chargeStep = 0,
+        bool chargeGrantsBlock = false)
     {
         foreach (var tip in inherited) yield return tip;
         if (chargePer <= 0 || chargeStep <= 0) yield break;
         yield return new HoverTip(
             new LocString(Table, ChargeKey + ".title"),
-            ChargeBody(card, chargePer, chargeStep));
+            ChargeBody(card, chargePer, chargeStep, chargeGrantsBlock));
     }
 
     /// <summary>The rate, plus what it is worth right now -- the
-    /// FurinaRiderTips.FanfareBody wording, one meter over.</summary>
-    private static string ChargeBody(CardModel card, int per, int step)
+    /// FurinaRiderTips.FanfareBody wording, one meter over.
+    ///
+    /// EB-122: the NOUN is a parameter for exactly the reason SYS-7 made it
+    /// one on the Fanfare tip. `gyorin_formation` is the first Charge rider on
+    /// a BLOCK op, and this tip is the ONLY surface that carries the rate --
+    /// so a hardcoded "damage" would be the single place the player can read
+    /// the rate and would read it wrong.</summary>
+    private static string ChargeBody(
+        CardModel card, int per, int step, bool grantsBlock)
     {
-        var rate = $"+{per} damage per {step} [gold]Charge[/gold] you hold.";
+        var noun = grantsBlock ? "Block" : "damage";
+        var rate = $"+{per} {noun} per {step} [gold]Charge[/gold] you hold.";
         var owner = card.Owner?.Creature;
         if (owner == null || card.CombatState == null) return rate;
 
         var charge = KokomiResources.GetCharge(owner);
         return $"{rate} You hold {charge} Charge: +{charge / step * per} "
-             + "damage, already counted in the number above.";
+             + $"{noun}, already counted in the number above.";
     }
 
     /// <summary>

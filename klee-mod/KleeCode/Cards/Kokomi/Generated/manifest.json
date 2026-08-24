@@ -8,8 +8,8 @@
   },
   "coverage": {
     "total": 76,
-    "generated": 70,
-    "blocked": 6
+    "generated": 75,
+    "blocked": 1
   },
   "generated": [
     "all_hands",
@@ -31,6 +31,7 @@
     "exposing_current",
     "field_promotion",
     "grand_conscription",
+    "gyorin_formation",
     "hold_the_narrows",
     "honor_guard",
     "jade_bulwark",
@@ -49,6 +50,7 @@
     "press_the_advantage",
     "pulsing_current",
     "quiet_harbor",
+    "raise_the_sashimono",
     "read_the_current",
     "rearguard_action",
     "reinforcements",
@@ -65,6 +67,7 @@
     "steady_the_line",
     "surging_shoal",
     "tactical_retreat",
+    "the_gunbai_turns",
     "the_tide_remembers",
     "tidal_lure",
     "tide_reading",
@@ -80,34 +83,21 @@
     "watch_of_the_shallows",
     "waters_edge",
     "waterspout",
+    "what_the_tokoyo_returns",
+    "what_the_tokoyo_took",
     "wheel_the_ranks",
     "whispered_word"
   ],
   "blocked": {
-    "ceremonial_garment": "hand-written",
-    "gyorin_formation": "bonus_formula '1_per_2_charge' on op 'block' is expressed by no rider (it would render as the bare base)",
-    "raise_the_sashimono": "op 'grant_sly_this_turn'",
-    "the_gunbai_turns": "op 'grant_sly_this_turn'",
-    "what_the_tokoyo_returns": "sly branch: recall_to_draw from 'discard' (only the exhaust source is built)",
-    "what_the_tokoyo_took": "amount_formula (reads discards_this_turn) -- needs a CalculatedVar bound to that count, not a literal"
+    "ceremonial_garment": "hand-written"
   },
   "runtime_clusters": {
     "hand_written": [
       "ceremonial_garment"
-    ],
-    "shared_emitter_gap": [
-      "gyorin_formation",
-      "raise_the_sashimono",
-      "the_gunbai_turns",
-      "what_the_tokoyo_returns",
-      "what_the_tokoyo_took"
     ]
   },
   "upgrades": {
     "_comment": "docs/kokomi-upgrades.yaml is authoritative. A generated card listed below ships without an upgrade until its full delta is expressible; partial upgrade application is forbidden.",
-    "no_upgrade_path": {
-      "send_the_runner": "delta 'add: {'op': 'discard', 'amount': 1, 'select': 'chosen'}' (only a positive draw or gain_encore effect, or a repeat_this, is expressible)",
-      "wheel_the_ranks": "delta 'add: {'op': 'block', 'amount': 3}' (only a positive draw or gain_encore effect, or a repeat_this, is expressible)"
-    }
+    "no_upgrade_path": {}
   }
 }

@@ -386,9 +386,42 @@ def test_the_generator_refuses_the_shapes_the_loader_refuses():
     assert "constraint 1" in gen.blocked_reason(common, gen.KOKOMI_PROFILE)
     no_exhaust = dict(base, exhaust=False)
     assert "constraint 2" in gen.blocked_reason(no_exhaust, gen.KOKOMI_PROFILE)
-    from_discard = dict(base, effects=[{"op": "recall_to_draw"}])
-    assert "only the exhaust source is built" in gen.blocked_reason(
-        from_discard, gen.KOKOMI_PROFILE)
+    # A source neither engine knows is still a NAMED blocker.
+    bad_source = dict(base, effects=[{"op": "recall_to_draw",
+                                      "from": "deck", "amount": 1}])
+    assert "recall_to_draw from 'deck'" in gen.blocked_reason(
+        bad_source, gen.KOKOMI_PROFILE)
+
+
+def test_the_six_constraints_are_the_exhaust_sources_and_only_its():
+    """EB-122 restages the line this file used to hold, which read "the
+    discard source is not built". It IS built now -- `what_the_tokoyo_returns`
+    ships it -- and the claim that replaced it is the interesting one: §6.4's
+    CARD-SHAPE constraints belong to the exhaust source alone.
+
+    They price a LOAN out of a pile a card would never otherwise leave. A
+    discard-pile card was coming back on the next reshuffle regardless, so
+    there is nothing to price and no cycle to break, and Uncommon-or-Rare and
+    self-Exhaust would refuse a legal card for a reason that does not apply to
+    it. tier0 draws the same line in the same place
+    (`loader._validate_recall_shape`)."""
+    from tools import gen_klee_cards as gen
+    discard = {"id": "probe_recall_discard", "name": "Probe", "cost": 1,
+               "type": "skill", "rarity": "common", "character": "kokomi",
+               "archetypes": ["assist"], "role": "glue",
+               "effects": [{"op": "recall_to_draw", "amount": 1}]}
+    # Common, and does not Exhaust: both fatal on the exhaust source, neither
+    # relevant here.
+    assert gen.blocked_reason(discard, gen.KOKOMI_PROFILE) is None
+    src = gen.emit(discard, gen.KOKOMI_PROFILE)
+    assert "await RecallFromDiscard.Recall(" in src
+    # NOT an exhaust retriever: that marker is the exhaust pool's cycle
+    # exclusion and a discard reader is not in that cycle. The sim reads the
+    # same distinction off `from` (`effects.retrieves_from_exhaust`).
+    assert "IExhaustRetriever" not in src
+    # No loan is granted, and the face does not claim one.
+    assert "It gains [gold]Exhaust[/gold]" not in src
+    assert "from your discard pile" in src
 
 
 def test_both_engines_exclude_the_same_three_things():

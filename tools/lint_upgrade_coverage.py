@@ -166,26 +166,13 @@ CODEGEN_DEBT: dict[str, str] = {
         "blocker; the replacement delta is the open design call at QUEUE "
         "`M27`. Gate: delta authored -> delete THIS ENTRY AND THE "
         "SHEET_EXEMPT ENTRY TOGETHER.",
-    # --- EB-69 (R198, 2026-08-23). TWO ENTRIES, ONE MISSING EMITTER. Both
-    # sheet deltas exist and are ruled; the `add:` emitter expresses only a
-    # positive draw, a `gain_encore`, or a `repeat_this`, so neither renders.
-    # These are LAYER-2 ONLY -- the sheet rows are complete, so no SHEET_EXEMPT
-    # twin is wanted and adding one would be a lie about the sheet.
-    "send_the_runner":
-        "DEBT -- [USER]'s ruled two-key common upgrade (D2a): draw +1 plus "
-        "`add: discard 1 chosen`, inserted BEFORE the printed exhaust "
-        "(`add_before: exhaust_from`) because D2a rules the order draw 2 -> "
-        "discard 1 chosen -> exhaust 1 chosen. The delta is authored and "
-        "shipped in docs/kokomi-upgrades.yaml; the C# `add:` emitter can "
-        "express neither the discard nor a POSITION -- it appends its "
-        "IsUpgraded-gated effect at the end of OnPlay. Gate: BACKLOG "
-        "`EB-122` teaches the emitter `discard` AND `add_before` -> delete "
-        "this entry.",
-    "wheel_the_ranks":
-        "DEBT -- ruled upgrade `add: block 3` on the played face (D6). Same "
-        "single missing emitter as the entry above, one op over. Gate: "
-        "BACKLOG `EB-122` teaches the `add:` emitter `block` -> delete this "
-        "entry.",
+    # EB-69's two LAYER-2 entries (`send_the_runner`, `wheel_the_ranks`) are
+    # GONE as of EB-122, 2026-08-24, deleted by the gate each of them named:
+    # the `add:` emitter now expresses `block`, a chosen `discard` and a
+    # POSITION (`add_before`), so both cards emit their whole ruled delta and
+    # neither is exempt from anything. The stale-curation sweep below is what
+    # reported the entries the moment they became lies -- which is the
+    # behaviour a curated list is supposed to have.
 }
 
 
