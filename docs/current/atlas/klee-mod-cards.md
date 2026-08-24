@@ -48,7 +48,7 @@ In-process: `gen.blocked_reason(card, profile)` (`gen_klee_cards.py:961`),
 is `gen._run_profile(profile, check)` (`:5997`), planning through
 `gen.PLAN_BUILDERS`.
 Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
-3 Guest Stars; kokomi 60/61; 277 card classes, all pooled.
+3 Guest Stars; kokomi 61/62; 278 card classes, all pooled.
 
 ## 3. Key invariants
 
