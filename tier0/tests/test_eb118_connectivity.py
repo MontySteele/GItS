@@ -345,6 +345,17 @@ CANON_FIXTURES: dict[str, str] = {
     "plays_this_turn": "int n = base.CombatState.CardsPlayedThisTurnCount;",
     "card_identity": "CardCmd.Upgrade(item);",
     "card_timing": "int x = ResolveEnergyXValue();",
+    # The junk axis needs TWO tokens agreeing, so its fixtures carry both.
+    # Creation's WRITE side cannot be reached from a body at all -- it is
+    # read off the created card's own model -- and has its own test below.
+    "junk_create": "if (card.Type == CardType.Status) "
+                   "{ AfterCardGeneratedForCombat(card, creator); }",
+    "junk_remove": "foreach (CardModel c in hand.Where("
+                   "(CardModel c) => c.Type == CardType.Status)) "
+                   "{ await CardCmd.Exhaust(choiceContext, c); }",
+    "enemy_intent": "if (target.Monster.NextMove.Intents.Any("
+                    "(AbstractIntent i) => i.IntentType == IntentType.Attack))"
+                    " { }",
     "orbs": "OrbCmd.Channel<LightningOrb>(base.CombatState, 1);",
     "stars": "ForgeCmd.Forge(base.CombatState, 1);",
     "osty": "OstyCmd.Summon(base.CombatState, 1);",
@@ -380,14 +391,155 @@ def test_canon_keyword_fixtures(keyword, state):
     assert ("shared", state) in hooks_of(record)
 
 
-def test_ungrounded_entries_report_unclassified_on_canon():
-    """`junk_create`, `junk_remove` and `enemy_intent` have no verified
-    decompiled token in this repo. They must say UNCLASSIFIED, not 0."""
+def test_no_shared_entry_is_ungrounded():
+    """`junk_create`, `junk_remove` and `enemy_intent` were the last three
+    and are grounded above. The classifier freezes ONCE and complete."""
+    assert [s for s, (_w, st) in ccr.SHARED_STATES.items()
+            if st == ccr.UNGROUNDED] == []
+
+
+def test_the_ungrounded_path_still_reports_unclassified(monkeypatch):
+    """...so the mechanism has no live entry to demonstrate it, and is
+    exercised against a temporary one instead of being deleted with the
+    last real one. The next entry to arrive without a token must still
+    report UNCLASSIFIED rather than a silent zero."""
+    monkeypatch.setitem(ccr.SHARED_STATES, "fixture_state",
+                        ("an entry with no canon token", ccr.UNGROUNDED))
     record = _canon_record("DamageCmd.Attack(cardPlay.Target, 5);")
-    for state, (_why, status) in ccr.SHARED_STATES.items():
-        if status == ccr.UNGROUNDED:
-            assert any(note.startswith(state)
-                       for note in record["unclassified"]), state
+    assert any(note.startswith("fixture_state")
+               for note in record["unclassified"]), record
+
+
+# --- the junk axis and enemy intent, grounded (EB-118 W1) -------------------
+
+def test_junk_creation_is_read_off_the_created_cards_own_model(tmp_path):
+    """A name list would be game data AND a maintenance debt. The verdict
+    comes from the created model's own ctor, exactly as the sheet adapter
+    reads the created row's own `rarity:`."""
+    (tmp_path / "Junky.cs").write_text(
+        "namespace MegaCrit.Sts2.Core.Models.Cards;\n"
+        "public sealed class Junky : CardModel {\n"
+        "  public Junky() : base(-1, CardType.Status, CardRarity.Status,\n"
+        "    TargetType.None) { }\n}\n", encoding="utf-8")
+    (tmp_path / "Handy.cs").write_text(
+        "namespace MegaCrit.Sts2.Core.Models.Cards;\n"
+        "public sealed class Handy : CardModel {\n"
+        "  public Handy() : base(0, CardType.Skill, CardRarity.Token,\n"
+        "    TargetType.Self) { }\n}\n", encoding="utf-8")
+    reader = ccr.CanonReader(tmp_path)
+
+    junk = _canon_record("CardModel c = base.CombatState.CreateCard<Junky>("
+                         "base.Owner);", reader=reader)
+    assert ("shared", "junk_create") in hooks_of(junk)
+    assert junk["external_reach"] is True
+
+    # ...and a card that mints a TOKEN mints no junk. Same call, same shape:
+    # only the created model's own rarity separates them.
+    token = _canon_record("CardModel c = base.CombatState.CreateCard<Handy>("
+                          "base.Owner);", reader=reader)
+    assert ("shared", "junk_create") not in hooks_of(token)
+
+
+def test_an_unreadable_created_model_is_unclassified_not_not_junk():
+    record = _canon_record(
+        "CardModel c = base.CombatState.CreateCard<Nowhere>(base.Owner);")
+    assert any("Nowhere" in note for note in record["unclassified"]), record
+
+
+def test_junk_removal_needs_a_filter_and_a_removal_verb():
+    """Exhausting or transforming a junk-filtered set removes junk.
+    Exhausting anything else does not, and neither does a bare filter."""
+    both = _canon_record(CANON_FIXTURES["junk_remove"])
+    assert ("shared", "junk_remove") in hooks_of(both)
+    assert both["external_reach"] is True
+
+    verb_only = _canon_record("await CardCmd.Exhaust(choiceContext, card);")
+    assert ("shared", "junk_remove") not in hooks_of(verb_only)
+
+    filter_only = _canon_record(
+        "if (card.Type == CardType.Status) { base.EnergyCost"
+        ".SetUntilPlayed(0); }")
+    assert ("shared", "junk_remove") not in hooks_of(filter_only)
+
+
+def test_the_junk_conjunction_is_per_source_not_over_the_join(tmp_path):
+    """A card that Exhausts, applying a Power that merely mentions junk, is
+    not a junk remover -- and would read as one if the two texts were
+    concatenated before the filter and the verb were looked for."""
+    (tmp_path / "MentionPower.cs").write_text(
+        "namespace MegaCrit.Sts2.Core.Models.Powers;\n"
+        "public sealed class MentionPower : PowerModel {\n"
+        "  public override async Task AfterCardDrawn(CardModel card) {\n"
+        "    if (card.Type == CardType.Status) { Flash(); }\n"
+        "  }\n}\n", encoding="utf-8")
+    reader = ccr.CanonReader(tmp_path)
+    record = _canon_record(
+        "await CardCmd.Exhaust(choiceContext, card); "
+        "await PowerCmd.Apply<MentionPower>(base.Owner.Creature, 1);",
+        reader=reader)
+    assert ("shared", "junk_remove") not in hooks_of(record)
+
+
+def test_junk_creation_is_also_read_through_an_applied_power(tmp_path):
+    """Half the base game's junk-watching lives on a Power, so reading only
+    the card would report a silent zero for the card that applies it."""
+    (tmp_path / "WatchPower.cs").write_text(
+        "namespace MegaCrit.Sts2.Core.Models.Powers;\n"
+        "public sealed class WatchPower : PowerModel {\n"
+        "  public override async Task AfterCardGeneratedForCombat("
+        "CardModel card, Player? creator) {\n"
+        "    if (card.Type == CardType.Status) { Flash(); }\n"
+        "  }\n}\n", encoding="utf-8")
+    reader = ccr.CanonReader(tmp_path)
+    record = _canon_record(
+        "await PowerCmd.Apply<WatchPower>(base.Owner.Creature, 1);",
+        reader=reader)
+    assert ("shared", "junk_create") in hooks_of(record)
+    assert record["external_reach"] is True
+
+
+def test_enemy_intent_reads_and_writes_are_separate():
+    read = _canon_record(CANON_FIXTURES["enemy_intent"])
+    assert "enemy_intent" in read["shared_reads"]
+    assert "enemy_intent" not in read["shared_writes"]
+    # Stun replaces the move the enemy had telegraphed: a WRITE.
+    write = _canon_record("await CreatureCmd.Stun(cardPlay.Target);")
+    assert "enemy_intent" in write["shared_writes"]
+
+
+def test_a_plain_attack_touches_neither_junk_nor_intent():
+    record = _canon_record("DamageCmd.Attack(cardPlay.Target, 5);")
+    for state in ("junk_create", "junk_remove", "enemy_intent"):
+        assert ("shared", state) not in hooks_of(record), state
+    assert record["unclassified"] == []
+
+
+@pytest.mark.parametrize("keyword", sorted(ccr.CANON_KEYWORDS_NO_HOOK))
+def test_listed_hookless_keywords_are_classified_not_unclassified(keyword):
+    """`Unplayable` and `Eternal` are printed rules that touch no vocabulary
+    state; `None` says the card carries no keyword at all. Listed rather
+    than ignored, so a keyword the enum grows later still reports."""
+    record = _canon_record("DamageCmd.Attack(cardPlay.Target, 5);",
+                           keywords=(keyword,))
+    assert record["unclassified"] == []
+
+
+def test_an_unlisted_keyword_is_still_unclassified():
+    record = _canon_record("DamageCmd.Attack(cardPlay.Target, 5);",
+                           keywords=("Sparkly",))
+    assert any("Sparkly" in note for note in record["unclassified"])
+
+
+def test_every_grounded_shared_entry_has_a_canon_fixture():
+    """The canon half of pin 1. A `grounded` status is a claim that the
+    detector exists; a claim nobody can demonstrate is one to distrust."""
+    covered = set(CANON_FIXTURES) | {
+        "self_exhaust", "ethereal",              # test_canon_keyword_fixtures
+        "universal_verb_power",                  # the power tag-through test
+    }
+    grounded = {s for s, (_w, st) in ccr.SHARED_STATES.items()
+                if st == ccr.GROUNDED}
+    assert not grounded - covered, sorted(grounded - covered)
 
 
 def test_canon_absent_entries_have_no_canon_detector():
