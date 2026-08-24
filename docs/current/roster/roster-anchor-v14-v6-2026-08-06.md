@@ -4,6 +4,9 @@
 
 > # QUARANTINE BANNER — the core-attainment columns are quarantined pending
 > # re-registration (queue row 10.7 / Q18, [USER] 2026-08-06)
+> # **LIFTED 2026-08-24 on the graded read (R121 step (6)) — see the second
+> # addendum at the foot of this banner. Read the whole banner: it is the
+> # record of the fence, and the lift does not remove the stamp.**
 >
 > **Carried forward 2026-08-06 (Track M, wave 8) from
 > `docs/roster-anchor-v14-2026-08-05.md`'s banner, which governs this table
@@ -52,6 +55,58 @@
 > read"* — after the sprint runs under DRAFTER 14 (step 3) and is graded
 > blind-first (step 4). Nothing lifts earlier, and the lift is a paper act at
 > the queue row, not here. Ruling: `tier0/DECISIONS.md` **R121**.
+>
+> ---
+>
+> ### ADDENDUM, 2026-08-24 — THE QUARANTINE IS LIFTED (`R121` step (6))
+>
+> **Same banner, closed; not a third banner and not a rewrite.** The condition
+> the two addenda above fixed has occurred. The payoff-reach sprint ran under
+> `DRAFTER 14` at the frozen `RT12/D14/P7/C11` (step 3) and was **graded blind
+> on 2026-08-24** (step 4) — `review/active/payoff-reach-reregistration.md`
+> §7–§8, raw results at `review/active/payoff-reach-results-2026-08-24.txt`.
+> `R121` put the lift "on the graded read, and nowhere earlier", and the graded
+> read has landed. **Steps (5) and (6) were taken in the window after the
+> grade, in order: `EB-43`'s `D15` landed with its re-baseline, then this.**
+>
+> **What lifts, and it is exactly what the two addenda enumerated and nothing
+> else:** the **`core attain`** column, its printed interval (**`core 95%`**)
+> and the **`tto`** column. All three, together, on the one event named. They
+> are no longer quarantined-pending-re-registration: the fence they waited on
+> is re-established and graded, so they are readable, quotable and gradable
+> again on their own terms. Nothing is rewritten and no cell moves (R101b) —
+> the numbers stood as published throughout and stand as published now; the
+> footnote markers `†` and `‡` in the table below keep pointing here, and what
+> they point at is this addendum.
+>
+> **What does NOT change, and a reader must carry both facts at once.** The
+> lift removes the quarantine. It does **not** remove the stamp. Every number
+> in this document was measured at **`RT7/D14/P3/C6`**, and all four fields
+> have since moved — the live world is `RT12/D15/P7/C11`. So these columns are
+> quotable **as the `C6`/`D14` reading they are** and are not comparable,
+> unlabeled, with any current number (R68). The `DRAFTER 14 → 15` bump of
+> 2026-08-24 archives them along with every other `D14` reading; the standing
+> twelve-arm table is `review/active/sitting-reads-2026-08-24.md`. The two
+> facts are independent and both apply.
+>
+> **Recorded here rather than at the queue row, and why that is not a
+> departure.** The banner above says the lift is "a paper act at the queue
+> row, not here" — an instruction about where the AUTHORITY lives, written to
+> stop a document from lifting its own quarantine on its own say-so. The
+> authority is `R121`, given in advance and conditioned on an event that has
+> now occurred; the queue row that carried it (10.7) closed and left HEAD
+> under the closed-items rule. The durable record of the act is the register
+> (`STATE.md`'s payoff-reach entry, `EXPERIMENTS.md`'s registration entry);
+> this addendum is the consequence, written where the reader meets the fence.
+> **No number, interval, footnote or designation in this document is touched
+> by it.**
+>
+> **One thing the lift does NOT do, so nobody reads it as done.** These three
+> columns came from the roster-anchor document's own per-arm harness;
+> `tier05/exp_roster_anchors` has never printed them, which is why no
+> re-baseline since — 2026-08-08, 2026-08-13, 2026-08-24 — carries them.
+> Restoring them to that script is a build, not a paper act, and it is not
+> part of this lift.
 
 **Designation (R118, queue row 10.2, [USER] approved together with its
 rider):** the roster-anchor v14 n=3000 table **as re-produced under v6** is
