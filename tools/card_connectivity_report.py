@@ -97,6 +97,9 @@ from tools import effect_walk                       # noqa: E402
 
 VOCAB_VERSION = "eb118-connectivity-v1"
 
+# `recall_to_draw`'s exhaust-pile source (tier0.engine.effects).
+RECALL_EXHAUST_SOURCE = "exhaust"
+
 DOCS = REPO / "docs"
 MOD_SHEETS = {
     "klee": DOCS / "klee-cards.yaml",
@@ -634,6 +637,15 @@ def _classify_effect(record: dict, fx: dict, junk_rarity) -> None:
     if hooks is None:
         record["unclassified"].append(f"unknown op {op!r}")
         return
+    if op == "recall_to_draw" and fx.get("from") == RECALL_EXHAUST_SOURCE:
+        # EB-118 6.4: `from: exhaust` moves the SOURCE PILE. Substituted at
+        # the lookup rather than subtracted after `_apply`, because by then
+        # the discard-pile hook is indistinguishable from one another effect
+        # on the same card contributed. The returned card also gains Exhaust
+        # for the rest of combat -- a write to the pile it just left.
+        hooks = [_hook("shared", "exhaust_pile", "use"),
+                 _hook("shared", "draw_pile", "write"),
+                 _hook("shared", "self_exhaust", "write")]
     _apply(record, hooks)
 
     target = fx.get("target")
