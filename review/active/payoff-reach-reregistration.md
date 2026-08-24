@@ -284,6 +284,54 @@ In one sentence: a canonical archetype prints **1–3 draftable payoff cards**,
 **none of them common** in any of the five pools, and its offer stream shows
 one on roughly **0.6–6% of 3-card reward screens**.
 
+**The canonical scale is open at the top, and GItS reads above it.** The four
+bands are order statistics over nine canonical archetypes drawn from five
+base-game pools; **TOP is the observed maximum of that sample, not a boundary
+of the possible.** An authored GItS archetype may legitimately print more
+payoffs than any canonical archetype does, and the sheets do.
+
+**Pool size is NOT the explanation, and the census says so in its own §0.**
+Each of the five canonical pools holds **82 draftable cards**
+(`review/active/payoff-census-2026-08-08.md` §0: 20 common / 36 uncommon /
+26 rare in all five). The three GItS reward pools hold **71** (Klee 29/28/14),
+**76** (Furina 23/35/18) and — **currently** — **56** (Kokomi 27/20/9), the
+last of which rises to **70** once the already-registered `EB-69` fill lands
+(`BACKLOG`: fourteen cards onto a 62-row sheet, taking it to 76 rows at
+5/31/26/14 — 71 non-basic rows, of which the reward pool takes **70**, because
+`ceremonial_garment` carries `kit_card: true` and is never draftable). Both
+Kokomi figures are stated because the official static read is taken **after**
+that fill, per §6.6's `P12`. These are comparable magnitudes throughout — the
+GItS pools run between roughly two-thirds and nine-tenths of a canonical pool,
+and after `EB-69` all three sit within about 15% of one — and a difference of
+that size cannot produce offers at **2× to 8× canonical TOP**, still less
+supplies at up to **4.7×** the canonical ceiling.
+
+**The finding is density, and its cause is open.** Under the registered
+attribution rubric (`R178`), the GItS sheets read as assigning **payoff** status
+far more densely than canonical space. Several mechanisms could produce that,
+and the static leg does not separate them: how liberally the `role: payoff`
+field is assigned; how many `archetypes` tags a single card carries, so that one
+card counts toward several arms; where payoffs sit by rarity, which drives the
+offer term but not the supply term; and any mixture of these, differing by
+character. **Nothing here asserts which.** This is the same concern the
+`EB-118` card-connectivity instrument was registered to measure from the other
+direction — whether our sheets are more densely interconnected than the pools
+they are modelled on — and the two readings should be read beside each other
+when both exist.
+
+**Reporting above the scale.** An archetype whose offer exceeds TOP's 0.0214,
+or whose supply exceeds the canonical ceiling of 3, is reported at **its raw
+value and its multiple of the canonical figure**, per arm — for example
+*"offer 0.0625 — 2.9× canonical TOP; supply 10 — 3.3× canonical ceiling"* —
+with the multiple printed to one decimal place. **No categorical label above
+TOP is created.** A bucketed scale invented after the readings exist would be a
+design band authored against seen data, which is the exact move this amendment
+exists to prevent elsewhere in the same section; the raw value and its ratio
+carry the whole finding and invent nothing. §6.2's aims are unchanged — no
+archetype is aimed at TOP, and none is aimed above it. The same rule governs
+**realized** reach in §6.5: above the canonical ceiling it is REPORTED, never
+tripped.
+
 **Amendment history, carried because the bands are order statistics over nine
 points and two of them have already moved.**
 
@@ -535,18 +583,118 @@ it does not silently extend and it does not silently shrink `n`.
 |---|---|---|
 | **T1** | The world stamp at any arm is not `RT10 / D14 / P7 / C9` | The pin is the registration's; a moved stamp means the sprint is measuring a different world than the one it was registered against. |
 | **T2** | Mean finished deck size in any arm falls outside **12–30 cards** | The §6.1 brackets are quoted at N=15/20/25. Outside that span the band floors are being extrapolated, not read. |
-| **T3** | Any arm's realized reach exceeds the TOP supply ceiling of **3** | The reach reader would then be counting something the ratified rubric would not call a payoff, which is an instrument fault and not a finding. |
+| **T3** | **Classifier integrity — one condition.** For each arm, and for each finished deck in that arm, reconstruct every deck card to a **reward-pool base id** under explicit upgrade normalization (an upgraded card normalizes to the id of the printed card it upgrades from). Cards that do not so reconstruct are **not** `T3` inputs and are reported on their own lines: **anchor-shield cards** (those `draft._anchor_tag_shield` strips `archetypes` from, by design) and **external-source cards** (on-plan payoffs that entered the deck from outside the reward pool — event grants, tokens, guest stars, starters). For every remaining base id, compare its on-plan payoff membership as classified on the **deck** side against its membership in the arm's **static** pool. **`T3` fires iff any base id's membership differs between the two readings.** | Under the exclusions above, the two readings are classifying the *same card id* against the *same registered predicate* (`role == "payoff" and archetype in c.archetypes`). A disagreement is therefore not a threshold judgement, a sampling artefact or a design finding: it means the sprint's two legs are counting different objects under one predicate, which is precisely the drift `draft._generic_core_counts` was consolidated to prevent (§6.4). It cannot be produced by ordinary data. |
 | **T4** | The static leg finds any archetype with **zero** draftable payoff cards | A zero is a finding about the sheet (census §5.3 calls the canonical zeros blind spots), but it makes every offer-based grade for that arm degenerate. It stops the sprint and goes to [USER] as a content question. |
+
+**Notes on `T3`, part of the same amendment.**
+
+**Why there is only one condition.** An earlier draft carried a second: that no
+finished deck may hold more *distinct* on-plan payoff card ids than its arm's
+eligible supply. Under the exclusions above that is a **tautology** — every
+`T3`-eligible deck card reconstructs to a reward-pool base id, so the set of
+distinct on-plan payoff ids in a deck is a subset of the arm's eligible supply,
+and its count cannot exceed the supply **unless** the two readings disagree
+about membership, which is the condition already stated. A tautological
+tripwire is noise in a registration, so it is not carried.
+
+**Instances vs. distinct ids — why the condition is stated on ids.**
+`draft._generic_core_counts` counts card **instances**: a deck legitimately
+holding three copies of one payoff reads reach 3 against a supply of 1. Any
+integrity condition phrased over counts would therefore fire on honest
+drafting. `T3` is phrased entirely over **base ids and membership**, and no
+count enters it.
+
+**The implementation route is PRESCRIBED, not left open, and this is part of
+the amendment.** `draft._generic_core_counts` returns `tuple[int, int]` —
+counts, not ids — so `T3` cannot be implemented as a cross-check against its
+return value without writing a **second** classification of payoff membership,
+which would be the very drift `T3` is meant to detect. `T3` is therefore
+implemented by **extracting one shared payoff-membership predicate** — a single
+function answering *is this card an on-plan payoff for this archetype* — used by
+**both** `tier05/exp_payoff_reach.static_leg` and `draft._generic_core_counts`,
+backed by a **focused parity test** pinning the two call sites to that one
+predicate. This is the codebase's own idiom, stated in `_generic_core_counts`'
+own docstring: *"One place, so `core_complete` and `_core_progress` cannot drift
+apart."*
+
+**Neutrality condition, binding.** That extraction must be a
+**behavior-identical refactor, pinned byte-neutral**: the full suite green, and
+**no tier-0.5 number moves**, verified against a pre-refactor read. It
+therefore **moves no `D` and no `P` integer** and is legal pre-freeze
+instrument work under §6.6's settle-first `P12` — the same class as the generic
+reach reader and the `blind` control policy, both of which §6.4 named as owed
+builds and both of which landed 2026-08-13 without moving a stamp.
+**Fallback, ratified with the amendment:** if the shared predicate cannot be
+extracted cleanly *and* neutrally, **`T3` is REMOVED from the tripwire table
+rather than implemented as two independent classifiers.** A redundant
+implementation would manufacture the disagreements it claims to detect, and the
+sprint is better off with three tripwires than with a fourth that is its own
+failure mode. **`T1`, `T2` and `T4` stand unchanged either way.**
+
+**Realized reach above the canonical TOP ceiling is REPORTED, never tripped.**
+Per arm, the printer reports realized reach as: the mean, the standard
+deviation, the arm's own eligible supply, the fraction of decks holding none,
+and — where the mean exceeds the canonical ceiling of 3 — its multiple of that
+ceiling, per §6.1's reporting rule. This is §6.2's existing rule applied
+consistently: realized reach was already outside the pass/fail, and the
+amendment removes the one place where it could nonetheless stop the sprint.
+No categorical band is created above TOP, on either axis.
+
+**`P5` is carried unchanged, and the current read is a diagnostic, not the
+grade.** `P5(a)` and `P5(b)` grade exactly as §6.2 registered them. **The
+current pre-settle read shows nine provisional misses — every arm missing both
+axes — and the final set of triggered arms is determined by the post-settle
+official read, not by this diagnostic.** §6.6's `P12` puts that read after
+`EB-69` lands; `EB-69` adds fourteen cards to Kokomi's sheet and its payoff
+roles are unsettled, so the three Kokomi arms are re-read at that point and may
+move on either axis. The six Klee and Furina arms are expected to be stable —
+nothing in the open window touches those sheets — but they are graded at the
+same read as the others, not carried forward from here. **What the provisional
+read already supports, and what it does not:** it supports the *pattern* claim
+that the GItS sheets read above the canonical band space on both axes, broadly
+across characters, at 1.9×–7.5× canonical TOP offer and up to 4.7× the
+canonical supply ceiling; it does **not** establish which arms officially
+trigger the redesign trigger below, and it may not be quoted as though it does.
 
 **Redesign trigger — PROPOSED.** If an archetype misses its aimed band on
 **both** P5(a) and P5(b), that archetype's sheet composition goes to `QUEUE`
 as a design row. Missing one of the two is reported, not triggered — the two
 axes answer different questions and disagreeing is informative on its own.
 
+**Aggregation RULE — ratified at `M28`.** If several arms trigger at the same
+read, they are discharged as **one roster-wide `QUEUE` row that enumerates the
+triggered arms separately**, not as one row per arm, and not by declining the
+trigger. **This is an organizational disposition, not a causal conclusion:**
+one row is right because the *pattern* is roster-wide and a reader needs to see
+it in one place, and the arms are enumerated separately because each carries its
+own supply, offer and multiples and because a per-character or per-archetype
+diagnosis must remain available later. It does **not** assert that one mechanism
+produced all of them. **The row is minted only after the post-settle official
+static read**, with whatever arms then trigger, and its `M` id is **re-derived
+from `QUEUE` at mint** rather than reserved now. **No row is minted at the
+`M28` ratification.**
+
 **Grading is blind-first (step 4).** The predictions above are graded as
 PREDICTED / SPLIT / MISS against the run output before any narrative is
 written, in the EB-17p §13 shape. Per D5, nothing above is revised against the
 run that grades it.
+
+**Amendment history (§6.5).** Carried in §6.1's house form. §6.5 is marked
+PROPOSED, the sprint is UNRUN and no number has been graded against it, so
+`R101b` does not apply and pre-ratification amendment lands as an in-place
+edit — but the change is recorded here so it is visible.
+
+| amendment | what changed | why |
+|---|---|---|
+| **1** — `T3` premise (`M28`, [USER] ruling of 2026-08-23, `R196`) | `T3` no longer fires on realized reach above the canonical TOP supply ceiling of 3. Reach and offer above the canonical figures are reported at raw value plus multiple of the canonical figure (§6.1), with no new categorical band. `T3` becomes a single classifier-integrity condition: a reward-pool base id whose on-plan payoff membership differs between the static and the deck-side reading, after upgrade normalization and after anchor-shield and external-source cards are separated out and reported. Implemented by one shared membership predicate under a byte-neutrality condition, or removed. The aggregation rule for simultaneous redesign triggers is ratified with it. | The registered premise contradicted the authored sheets. The registration's own static leg reads supplies of 3–14 and offers of 0.0406–0.1606 under the identical registered predicate, so a reading above 3 is what the content prints, not evidence of miscounting. Distinct from the max-vs-mean implementation slip in the same tripwire, which was a defect and was fixed 2026-08-13; this amendment concerns the ceiling's premise. |
+
+**Nothing else in §6 is amended.** §6.2's `R185` aims stand as ruled; §6.2's
+`P5(a)` and `P5(b)` stand **exactly as registered**; §6.3's Q-A and Q-B stand as
+committed (`R186`) and are not revised against the run that will grade them
+(`D5`); §6.6's `P12` settle-first ordering, the pin, the contamination
+statement and blind-first grading are untouched. **The official `P5` grade is
+the post-settle static read, not the pre-settle diagnostic that prompted this
+amendment.**
 
 ### 6.6 The pin, the contamination statement, and the freeze
 
