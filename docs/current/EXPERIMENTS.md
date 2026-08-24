@@ -67,7 +67,8 @@ registration packets themselves live under `review/active/` — one home, not tw
   longer fires on realized reach above the canonical TOP supply ceiling of 3
   — reach and offer above the canonical figures are REPORTED at raw value plus
   multiple, with no new band above TOP — and `T3` is now a single
-  classifier-integrity condition over reward-pool base ids. `P5(a)`/`P5(b)`,
+  classifier-integrity condition over reward-pool base ids, **implemented
+  2026-08-24 (`EB-120`)**. `P5(a)`/`P5(b)`,
   the aims, the Q-A/Q-B predictions and `P12` are untouched. **UNRUN,
   and it does not run yet:** §6.6's approved P12 is **settle first** — the
   freeze begins only after the open `RT`/`C` window (`M14`'s batch: `EB-70`,
@@ -108,7 +109,13 @@ registration packets themselves live under `review/active/` — one home, not tw
   freezes — and only then steps (3)–(6). Neither is taken here.
   Owed before the run and named in §6.4/§6.5: the generic reach reader
   (`tier05/exp_payoff_reach.py`) and the `blind` control policy — **both built
-  2026-08-13**. Steps (3)–(6) run in order and none reorders →
+  2026-08-13** — and the amended `T3` plus §6.1's above-scale reporting, both
+  **built 2026-08-24 (`EB-120`)**. The `M28` fallback was not needed: `T3` is
+  implemented entirely off the one shared predicate
+  (`draft.is_on_plan_payoff`), so all four tripwires stand. Reader and printer
+  only, `D` and `P` unmoved, and the static leg's supply, offer and
+  counterfactual figures identical to the digit across the build.
+  Steps (3)–(6) run in order and none reorders →
   `review/active/payoff-reach-reregistration.md` §6.
 - **EB-17p force-first-copy paired winrate** — **RUN AND GRADED 2026-08-10.**
   Countersigned complete (`N` = 2400 pairs, Strike filler, 4h ceiling, §6.1b

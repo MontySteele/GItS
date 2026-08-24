@@ -101,42 +101,63 @@ def test_an_archetype_with_no_payoffs_reads_zero_and_trips_t4():
     assert any(f.startswith("T4") for f in fired)
 
 
-def _sim(reach_mean: float, max_reach: int, decksize: float = 20.0) -> dict:
-    """The three sim-leg keys `tripwires` reads. Nothing live."""
+def _audit(disagree: dict | None = None, anchor: list | None = None,
+           external: list | None = None) -> dict:
+    return {"compared": [], "disagree": disagree or {},
+            "anchor_shield": anchor or [], "external": external or []}
+
+
+def _sim(reach_mean: float, max_reach: int, decksize: float = 20.0,
+         audit: dict | None = None) -> dict:
+    """The sim-leg keys `tripwires` reads. Nothing live."""
     return {"decksize": decksize, "reach": reach_mean, "max_reach": max_reach,
             "n": 20, "on_plan": reach_mean, "reach_sd": 0.0,
-            "held_none": 0.0, "win": 0.0}
+            "held_none": 0.0, "win": 0.0, "audit": audit or _audit()}
 
 
-def test_t3_grades_the_arms_realized_reach_and_not_the_per_run_maximum():
-    """§6.5 T3 reads "any arm's realized reach", which is the per-ARM figure
-    §6.4 leg 2 defines and the printer grades -- the mean. A per-run maximum
-    is one deck, and one deck is not an arm: reading it halted the sprint on
-    ordinary data, because a deck holding four on-plan payoffs is ordinary
-    against sheets that print 3-14 per archetype.
+def test_realized_reach_above_the_canonical_ceiling_is_reported_never_tripped():
+    """`M28` / R196: `T3` contains NO reach quantity at all.
 
-    Pinned in both directions so a future edit cannot quietly swap the
-    statistic back.
+    The old premise fired on realized reach above the canonical supply ceiling
+    of 3. The registration's own static leg reads supplies of 3-14 under the
+    identical registered predicate, so a reading above 3 is what the authored
+    content prints, not evidence of miscounting -- and the tripwire halted the
+    sprint on ordinary data twice, first on the per-deck maximum (a defect)
+    and then on the arm mean (the premise). Both directions are pinned so
+    neither can come back under `T3`'s name.
     """
     s = reach.static_leg("fixture", "plan", pool=_fixture_pool())
-    assert reach.REACH_CEILING == 3
-
-    # A mean inside the ceiling does NOT fire, however high one deck ran.
-    inside = reach.tripwires(reach.BASE, s, _sim(2.12, 11))
-    assert not any(f.startswith("T3") for f in inside), inside
-
-    # A mean above the ceiling DOES fire, even with no outlier deck at all.
-    over = reach.tripwires(reach.BASE, s, _sim(3.5, 4))
-    t3 = [f for f in over if f.startswith("T3")]
-    assert len(t3) == 1, over
-    assert "3.50" in t3[0]              # the mean, printed as a mean
+    assert reach.REACH_CEILING == 3          # still here -- as a DIVISOR
+    for mean, mx in ((2.12, 11), (3.5, 4), (14.0, 20)):
+        fired = reach.tripwires(reach.BASE, s, _sim(mean, mx))
+        assert not any(f.startswith("T3") for f in fired), (mean, fired)
 
 
-def test_two_arms_at_the_same_number_report_as_two_fired_tripwires():
+def test_t3_fires_when_the_two_readings_disagree_and_is_silent_when_they_agree():
+    """The amended condition, on a synthetic disagreement.
+
+    A membership audit is fed directly, because the whole point of `T3` is a
+    state live content cannot produce: the two legs share one predicate, so
+    the only way to observe a disagreement is to construct one.
+    """
+    s = reach.static_leg("fixture", "plan", pool=_fixture_pool())
+
+    agree = reach.tripwires(reach.BASE, s, _sim(1.0, 2, audit=_audit()))
+    assert not any(f.startswith("T3") for f in agree), agree
+
+    differs = _audit(disagree={"u_pay": (False, True)})
+    fired = reach.tripwires(reach.BASE, s, _sim(1.0, 2, audit=differs))
+    t3 = [f for f in fired if f.startswith("T3")]
+    assert len(t3) == 1, fired
+    assert "'u_pay'" in t3[0]
+    assert "not a payoff" in t3[0] and "on-plan payoff" in t3[0]
+
+
+def test_two_arms_disagreeing_report_as_two_fired_tripwires():
     """The fired list used to be de-duplicated by exact message text. That is
     correct for T1 -- one live stamp read nine times -- and wrong for the
     per-arm tripwires, whose messages carried a number and no arm name: two
-    arms at the same reach emitted byte-identical strings and printed as one
+    arms in the same state emitted byte-identical strings and printed as one
     line, so the report under-counted the arms that fired.
 
     Asserted on the COUNT and on both arm names, which is what a reader
@@ -144,8 +165,9 @@ def test_two_arms_at_the_same_number_report_as_two_fired_tripwires():
     """
     a = reach.static_leg("alpha", "plan", pool=_fixture_pool())
     b = reach.static_leg("beta", "plan", pool=_fixture_pool())
-    fired = (reach.tripwires(reach.BASE, a, _sim(5.0, 5))
-             + reach.tripwires(reach.BASE, b, _sim(5.0, 5)))
+    differs = _audit(disagree={"u_pay": (False, True)})
+    fired = (reach.tripwires(reach.BASE, a, _sim(1.0, 2, audit=differs))
+             + reach.tripwires(reach.BASE, b, _sim(1.0, 2, audit=differs)))
     fired = reach.dedupe_fired(fired)
 
     t3 = [f for f in fired if f.startswith("T3")]
@@ -190,7 +212,38 @@ def test_band_of_reports_where_a_missed_offer_actually_landed():
     assert reach.band_of(0.0) == "LOW"
     assert reach.band_of(reach.BANDS["MEDIUM"][0]) == "MEDIUM"
     assert reach.band_of(reach.BANDS["HIGH"][0]) == "HIGH"
-    assert reach.band_of(1.0) == "TOP+"
+    assert reach.band_of(reach.BANDS["TOP"][0]) == "TOP"
+
+
+def test_no_categorical_band_is_created_above_top():
+    """§6.1 as amended: above TOP there is a MULTIPLE, never a label.
+
+    The reader used to print `TOP+` for everything above the canonical
+    maximum. That is a fifth band invented after the readings existed, which
+    is the move the amendment exists to prevent; the raw value and its ratio
+    carry the whole finding and invent nothing.
+    """
+    top = reach.BANDS["TOP"][0]
+    assert reach.band_of(top * 2.94) == "2.9x TOP"
+    assert reach.band_of(top * 10) == "10.0x TOP"
+    assert not any(reach.band_of(top * m).endswith("+") for m in (1.1, 2, 50))
+
+
+def test_above_scale_prints_the_multiple_to_one_decimal_or_nothing_at_all():
+    """§6.1's reporting rule, on both axes and at the boundary.
+
+    A figure INSIDE the canonical scale reports nothing -- an empty column,
+    not `1.0x` -- because the rule is about what sits above the scale and a
+    ratio printed everywhere would read as a grade.
+    """
+    assert reach.above_scale(10, reach.REACH_CEILING) == "3.3x"
+    assert reach.above_scale(14, reach.REACH_CEILING) == "4.7x"
+    assert reach.above_scale(0.0625, reach.OFFER_CEILING) == "2.9x"
+    assert reach.above_scale(3, reach.REACH_CEILING) == ""     # at the ceiling
+    assert reach.above_scale(1, reach.REACH_CEILING) == ""
+    assert reach.above_scale(1.0, 0) == ""                     # no divisor
+    assert reach.OFFER_CEILING == reach.BANDS["TOP"][0]
+    assert reach.REACH_CEILING == reach.BANDS["TOP"][1]
 
 
 def test_the_nine_arms_and_the_ruled_aims_agree_and_are_three_of_each():
@@ -394,6 +447,78 @@ def test_deck_side_classifies_only_through_the_shared_predicate():
     assert payoffs == sum(1 for c in deck
                           if draft.is_on_plan_payoff(c, "plan"))
     assert payoffs == 4          # p_on twice, p_multi, and nothing else
+
+
+def test_base_id_normalizes_the_upgrade_suffix_and_leaves_everything_else():
+    assert reach.base_id("undertow+") == "undertow"
+    assert reach.base_id("undertow") == "undertow"
+    assert reach.base_id("a+b") == "a+b"          # only a TRAILING suffix
+    assert reach.base_id("+") == ""
+
+
+def test_the_audit_compares_the_upgraded_form_against_the_printed_row():
+    """Upgrade normalization is what makes the comparison possible at all.
+
+    A deck holds `u_pay+`; the pool holds `u_pay`. Normalized, they are one
+    base id and the two readings agree, so nothing fires. If the upgraded form
+    ever classified differently from the row it upgrades from -- a `role` or
+    an `archetypes` field moving under an upgrade -- that is precisely the
+    drift `T3` exists to catch, and the second half asserts it is caught.
+    """
+    pool = _fixture_pool()
+    upgraded = _card("u_pay+", "uncommon", "payoff", ["plan"])
+    a = reach.membership_audit([[upgraded]], "fixture", "plan", pool=pool)
+    assert a["compared"] == ["u_pay"]
+    assert a["disagree"] == {}
+
+    drifted = _card("u_pay+", "uncommon", "glue", ["plan"])
+    b = reach.membership_audit([[drifted]], "fixture", "plan", pool=pool)
+    assert b["disagree"] == {"u_pay": (False, True)}
+
+
+def test_the_audit_is_silent_when_the_two_readings_agree():
+    pool = _fixture_pool()
+    decks = [[c for cards in pool.values() for c in cards]] * 3
+    a = reach.membership_audit(decks, "fixture", "plan", pool=pool)
+    assert a["disagree"] == {}
+    assert a["anchor_shield"] == [] and a["external"] == []
+    assert len(a["compared"]) == 17          # every card in the fixture pool
+
+
+def test_anchor_shield_cards_are_excluded_and_reported_on_their_own_line():
+    """R121's shield strips `archetypes` by design, so the deck side is
+    deliberately blind to them. A blindness the registration authorised is not
+    a drift, and counting it as one would make `T3` fire on its own design."""
+    shielded = Card(id="anchor_pay", name="anchor_pay", cost=1, type="skill",
+                    rarity="uncommon", role="payoff", archetypes=["plan"],
+                    character=draft.ANCHOR_TAG_SHIELD_CHARACTER)
+    a = reach.membership_audit([[shielded]], "fixture", "plan",
+                               pool=_fixture_pool())
+    assert a["anchor_shield"] == ["anchor_pay"]
+    assert a["disagree"] == {} and a["compared"] == []
+
+
+def test_external_source_payoffs_are_excluded_and_reported_on_their_own_line():
+    """On-plan payoffs with no static row -- event grants, tokens, guest
+    stars, starters. They have nothing to be compared against, and a
+    NON-payoff from outside carries no membership claim to disagree about, so
+    only the payoffs are reported."""
+    granted = _card("event_gift", "rare", "payoff", ["plan"])
+    filler = _card("strike", "common", "glue", [])
+    a = reach.membership_audit([[granted, filler]], "fixture", "plan",
+                               pool=_fixture_pool())
+    assert a["external"] == ["event_gift"]
+    assert a["disagree"] == {} and a["compared"] == []
+
+
+def test_the_audit_is_phrased_over_ids_so_duplicate_copies_never_fire_it():
+    """§6.5: `_generic_core_counts` counts INSTANCES, so any condition phrased
+    over counts fires on honest drafting. Three copies of one payoff against a
+    supply of one is ordinary; it must be silent."""
+    pool = _fixture_pool()
+    deck = [_card("u_pay", "uncommon", "payoff", ["plan"]) for _ in range(3)]
+    a = reach.membership_audit([deck], "fixture", "plan", pool=pool)
+    assert a["compared"] == ["u_pay"] and a["disagree"] == {}
 
 
 def test_both_legs_agree_on_every_live_arm_card_by_card():

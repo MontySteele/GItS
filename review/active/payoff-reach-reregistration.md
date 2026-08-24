@@ -631,6 +631,24 @@ implementation would manufacture the disagreements it claims to detect, and the
 sprint is better off with three tripwires than with a fourth that is its own
 failure mode. **`T1`, `T2` and `T4` stand unchanged either way.**
 
+**BUILT 2026-08-24 (`EB-120`) — the fallback was NOT needed.** The shared
+predicate is `draft.is_on_plan_payoff` (`role == "payoff" and archetype in
+c.archetypes`), extracted behavior-identically and byte-neutrally 2026-08-23,
+and `T3` is implemented entirely off it in
+`tier05/exp_payoff_reach.membership_audit`: base-id reconstruction under
+`base_id` (the `upgrades.SUFFIX` normalization), the deck-side and static-side
+membership comparison through that one predicate, and the two exclusion sets
+counted and printed on their own lines whether or not `T3` fires. `REACH_CEILING`
+left the tripwire table entirely and is now read by the PRINTER alone, as
+§6.1's divisor; no `D` and no `P` moved, and
+the static leg's supply, offer and counterfactual figures are identical to the
+digit across the build. §6.5's set of exclusion names is honoured as a SET:
+there is no `draft._anchor_tag_shield` symbol — the shield is R121's
+`draft.ANCHOR_TAG_SHIELD_CHARACTER`, applied in `behavioural_archetypes` and
+`_core_advance_view` — and the exclusion reads that, so a change to the shield
+reaches it. Recorded here rather than amended: nothing about the registered
+condition changed.
+
 **Realized reach above the canonical TOP ceiling is REPORTED, never tripped.**
 Per arm, the printer reports realized reach as: the mean, the standard
 deviation, the arm's own eligible supply, the fraction of decks holding none,
