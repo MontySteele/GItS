@@ -170,10 +170,13 @@ def _active_effects(state: CombatState, effect_list: list[dict]):
             # EB-118: the pilot forecasts the mode it will actually take by
             # asking the ENGINE's chooser rather than keeping a second copy
             # of the rule -- the Track C.2 lesson the fanfare clamp above
-            # records. That chooser is a marked PLACEHOLDER today
-            # (effects._chosen_mode); the honest valuation is Phase-2
-            # POLICY_VERSION work. No shipped card is modal, so nothing
-            # scored today reaches this branch.
+            # records. With the switch off that chooser is the staged fixed
+            # index; with it on it is `choose_mode` below, and the round trip
+            # (pilot -> engine seam -> pilot) is deliberate: one rule, asked
+            # the same way from both sides. `None` for the card is why
+            # `_mode_probe` scores a mode body on a neutral frame -- there is
+            # no host card to offer here, and a score that needed one would
+            # make this forecast disagree with the play it forecasts.
             modes = fx[effects.MODES_KEY]
             index = effects._chosen_mode(state, modes, None)
             yield from _active_effects(state, modes[index]["effects"])
@@ -712,6 +715,40 @@ EXHAUST_SELF_EXHAUST_DISCOUNT = 0.5   # a card that Exhausts itself on play was
                                       # leaving the deck anyway; only the one
                                       # use is lost
 
+# Mode valuation (EB-118 2C, R191/R194). Which body a `choose_one` resolves.
+# ADDITIVE to the block above and to nothing else: no weight that existed
+# before this edit changes, which is what lets the 2A weight sweep and this
+# slice sit in the same file without one renumbering the other.
+#
+# ITS OWN SWITCH, not `PILOT_POLICIES_ENABLED`. R191 ruled that the mode
+# chooser takes its OWN activation window, and the 2A pair flips first in the
+# ruled sequence -- so a shared flag would activate this policy inside 2A's
+# window and leave 2C with no flip of its own to attribute anything to. Two
+# flags, two windows, two POLICY_VERSION bumps; the sibling ruling that 2B and
+# 2C may not share a D window is the same argument about the same pair of
+# slices.
+#
+# The staging discipline is identical to the shared flag's: off, the seam runs
+# the fixed index it was staged with and every number on this branch is the
+# number it was (`test_eb118_switch_off`).
+#
+# BOTH WEIGHTS ARE HAND-PICKED AND UNSWEPT. The W4 sweep pattern runs inside
+# 2C's window, and a value that moves there is its own
+# `PILOT_WEIGHTS_VERSION` bump.
+MODE_CHOOSER_ENABLED = False
+MODE_OVERDRAW_HP_VALUE = 1.0   # per point of TRUE HP a `spend_encore` shortfall
+                               # drains. The chooser's scale is already "points
+                               # of damage": _block_value prices Block by the
+                               # damage it prevents and heal by the HP it
+                               # restores, both at 1. A point of HP paid and a
+                               # point of damage taken are the same point, so
+                               # this weight is 1.0 for the same reason
+                               # BOMB_SUPPRESSION_VALUE is
+MODE_TIE_EPSILON = 1e-9        # the band inside which two modes are a TIE.
+                               # Float noise must not decide a mode, because the
+                               # tie-break is the rule that keeps replays stable
+                               # and reproduces the pre-flip placeholder
+
 # EB-29t (POLICY 6): the promoted Test Subject reads (R128). The Strength an
 # Enrage trigger grants is PERMANENT, but the greedy pilot prices it over a
 # deliberately short horizon of future attack turns -- understating a
@@ -1010,3 +1047,119 @@ def exhaust_victim(state: CombatState, pool: list[Card],
         if best_key is None or key > best_key:
             best, best_key = cand, key
     return best
+
+
+# ---------------------------------------------------------------------------
+#  EB-118 2C: mode valuation -- which body a `choose_one` resolves
+# ---------------------------------------------------------------------------
+#
+# The chooser contract, ratified with the Deep Breath modes (R194, [USER]
+# 2026-08-23), in the order it was written:
+#
+#   1. score each mode body with the pilot's EXISTING per-op play valuations
+#      over current state, minus an overdraw penalty priced at the pilot's HP
+#      value when `spend_encore` would shortfall;
+#   2. argmax, with a deterministic tie-break to the LOWEST mode index;
+#   3. weights in this file, beside the other policy weights, hand-picked;
+#   4. behind the default-off switch until 2C's own POLICY_VERSION bump;
+#   5. Exhaust, cost, and every card-level field are MODE-INDEPENDENT -- the
+#      choice selects a body, never a frame.
+#
+# Point 2 is what retires `effects._chosen_mode`'s fixed index without leaving
+# a second code path behind it: a board on which every mode scores the same is
+# a TIE, the tie-break takes the lowest index, and the lowest index is 0 --
+# which is exactly what the placeholder returned. The pre-flip behaviour is
+# therefore the DEGENERATE CASE of the new rule rather than a branch that
+# survives inside it.
+
+def _mode_probe(mode: dict) -> Card:
+    """The mode body as a scoreable card, on a NEUTRAL frame.
+
+    Deliberately not a copy of the host card. Two reasons, and the second is
+    load-bearing:
+
+    * Contract point 5. The frame -- cost, type, Exhaust, tags -- belongs to
+      the CARD and is identical whichever mode is taken, so a frame-sensitive
+      score would be pricing something the choice does not select.
+    * `policy._active_effects` forecasts the mode the pilot will take and has
+      no host card to offer (it walks an effect list, not a play), while
+      `effects._op_choose_one` resolves with the real one. Scoring the body
+      ALONE makes those two calls the same arithmetic by construction, which
+      is the agreement `test_eb118_modal` pins -- rather than a property that
+      happens to hold until a mode body reads a card field.
+
+    The cost term is left out of the score entirely for the same reason: it is
+    the card's, it is shared by every mode, and a constant cannot change an
+    argmax.
+    """
+    return Card(id="_mode", name="_mode", cost=0, type="skill",
+                effects=list(mode.get("effects", [])))
+
+
+def _mode_overdraw_hp(state: CombatState, mode: dict) -> float:
+    """TRUE HP this mode body's spends would drain, given the bank NOW.
+
+    `resources.spend_encore_or_hp` drains Encore first and charges any
+    shortfall to HP, so the penalty is the shortfall and not the spend: paying
+    out of a full bank costs the buffer, which `_sustain_value` already prices
+    on the other side of the ledger, while paying out of an empty one costs
+    life the pilot cannot get back.
+
+    The bank is walked in body ORDER and a gain inside the same body refills
+    it, because that is what the engine does when the two ops sit in one mode.
+    """
+    bank = float(state.player.encore)
+    short = 0.0
+    for fx in _active_effects(state, mode.get("effects", [])):
+        if fx["op"] == "gain_encore":
+            bank += _est(state, fx.get("amount", 0))
+        elif fx["op"] == "spend_encore":
+            n = _est(state, fx.get("amount", 0))
+            paid = min(bank, n)
+            bank -= paid
+            short += n - paid
+    return short
+
+
+def mode_score(state: CombatState, mode: dict) -> float:
+    """What taking this mode is worth on the board as it stands.
+
+    The five terms enter at weight 1 apiece, for `exhaust_future_value`'s
+    reason and with its docstring's caveat: the chooser runs at RESOLUTION
+    time, where the pilot's archetype weight set is closed over by
+    `make_pilot` and cannot be asked which pilot is flying. The character
+    machinery terms (`_spotlight_value`, `_charge_value`, `_stoke_value`,
+    `_reaction_value`) are left out for the same reason `_score` gates them
+    behind a per-archetype weight -- unweighted, they would let one
+    character's machinery outvote another's on a card neither is flying.
+    """
+    probe = _mode_probe(mode)
+    return (_expected_damage(state, probe)
+            + _block_value(state, probe)
+            + _scaling_value(state, probe)
+            + _tempo_value(state, probe)
+            + _sustain_value(state, probe)
+            - _mode_overdraw_hp(state, mode) * MODE_OVERDRAW_HP_VALUE)
+
+
+def choose_mode(state: CombatState, modes: list[dict],
+                card: Optional[Card] = None) -> int:
+    """Which mode index the pilot takes. Argmax, ties to the lowest index.
+
+    `card` is accepted and unused -- see `_mode_probe`. It stays in the
+    signature because the engine's seam passes it and a later
+    identity-sensitive modal grammar would arrive through it as a parameter,
+    the way `identity_blind_payout` does for exhaust selection.
+
+    Strictly-greater-by-MODE_TIE_EPSILON is the whole tie rule: a later mode
+    has to BEAT the incumbent, so an exact tie, a float-noise tie, and an
+    empty read all resolve to the earliest mode -- index 0 in the degenerate
+    case, which is the index the placeholder returned.
+    """
+    best_index = 0
+    best = None
+    for i, mode in enumerate(modes):
+        score = mode_score(state, mode)
+        if best is None or score > best + MODE_TIE_EPSILON:
+            best_index, best = i, score
+    return best_index

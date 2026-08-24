@@ -483,9 +483,24 @@ def _walk(effects, gated=False, gates=()):
     inside a branch can be credited to the resource that unlocked them --
     without that link, `if: fanfare_at_least_20 then: damage` would credit
     Fanfare with nothing at all.
+
+    `choose_one` mode bodies are NOT gated, and the container itself is not
+    yielded -- it is a wrapper, not an effect. A conditional branch may never
+    fire, which is exactly what `gated` means here; one mode ALWAYS resolves
+    and the player picks which with the board in front of them. That is the
+    same distinction that makes the drafter price a modal as MAX of its modes
+    rather than blending them by a reachability share. Blind to modes this
+    classifier read the first shipped modal card as one unknown op and moved
+    its fight band, and the tags it derives are LANDED on the sheet -- so the
+    blindness would have been laundered into authored metadata.
     """
     for fx in effects or ():
         if not isinstance(fx, dict):
+            continue
+        if fx.get("op") == "choose_one":
+            for mode in fx.get("modes") or ():
+                yield from _walk(mode.get("effects"), gated=gated,
+                                 gates=gates)
             continue
         if fx.get("op") == "conditional":
             yield fx, gated, gates

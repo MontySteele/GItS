@@ -1,10 +1,15 @@
 """EB-118 sec.5.4: the generic choose-one / modal effect surface.
 
-STAGED. No shipped card carries a `choose_one`, and the last test in this
-file is the pin that says so -- the surface exists, is validated and is
-priced, but the battery cannot move because nothing reaches it. The first
-card to use it is the Phase-2 prototype, priced with the pilot's real
-mode-valuation policy (a POLICY_VERSION move), not here.
+ONE shipped card carries a `choose_one` -- `deep_breath`, the Phase-2C
+prototype (R192 picked the card, R194 ruled the pair) -- and the prototype
+section below is the pin that keeps it one. The pattern is not copied until
+the pilot and the price can distinguish the modes, which is the packet's own
+sequencing and not a style preference.
+
+The pilot's half of that pair lives in `test_eb118_mode_chooser` (switch on)
+and `test_eb118_switch_off` (switch off); the price's half is the MAX
+arbitration pin below, which is SYNTHETIC because the shipped card's mode 2
+prices at a static zero and cannot exercise it (R194's accepted under-credit).
 
 The sheet syntax under test:
 
@@ -14,14 +19,16 @@ The sheet syntax under test:
                                                   {op: draw, amount: 2}]}]}
 """
 
+import copy
+
 import pytest
 
-from tier0.content import loader
+from tier0.content import loader, upgrades
 from tier0.engine import effects
 from tier0.engine.state import Card
 from tier0.pilot import policy
 from tier05 import draft
-from tools import effect_walk
+from tools import effect_walk, role_tempo
 
 
 def card(**kw):
@@ -273,6 +280,23 @@ def test_the_drafter_classification_walk_sees_mode_bodies():
     assert draft._has_tempo(c)
 
 
+def test_the_role_tempo_classifier_sees_mode_bodies_and_does_not_gate_them():
+    """The tags this classifier derives are LANDED on the sheet, so a blind
+    spot here does not stay an instrument problem -- it becomes authored
+    metadata. Blind to modes it read `deep_breath` as one unknown op and
+    moved its fight band.
+
+    Mode bodies are NOT gated. A conditional branch may never fire, which is
+    what `gated` means; one mode always resolves and the player picks which,
+    the same distinction the drafter's MAX-not-share-blend rests on.
+    """
+    row = {"effects": [modal([{"op": "block", "amount": 5}],
+                             [{"op": "draw", "amount": 2}])]}
+    walked = list(role_tempo._walk(row["effects"]))
+    assert [fx["op"] for fx, _, _ in walked] == ["block", "draw"]
+    assert not any(gated for _, gated, _ in walked)
+
+
 # --- pricing ---------------------------------------------------------------
 
 def test_a_modal_prices_as_the_max_of_its_modes():
@@ -291,12 +315,83 @@ def test_the_modal_op_carries_a_price_rationale():
     assert "choose_one" in draft._PRICED_INLINE
 
 
-# --- the staging pin -------------------------------------------------------
+def test_the_max_leg_arbitrates_between_two_nonzero_priced_modes():
+    """R194's owed SYNTHETIC pin, and the reason it is owed.
 
-def test_no_shipped_card_is_modal_yet():
-    """EB-118 Phase 1 builds the SURFACE only. While this holds, no committed
-    number can have moved: the op is unreachable from every sheet."""
-    modal_cards = [c.id for c in loader._card_index().values()
-                   if any(fx.get("op") == "choose_one"
-                          for fx in effects._walk_effects(c.effects))]
-    assert modal_cards == []
+    The shipped modal card cannot exercise this leg. Deep Breath's mode 2 is
+    `spend_encore` + `draw`, `draw` is a static ZERO and the spend is
+    negative, so `MAX(modes)` returns mode 1 by construction and never
+    performs a comparison. Without this fixture the arbitration would first
+    run in front of a Phase-3 card carrying real stakes.
+
+    Two NONZERO-priced modes, asserted in BOTH orders, so the result is the
+    max and not a first-mode read: a max that silently returned `modes[0]`
+    would pass one order and fail the other.
+    """
+    lo = [{"op": "block", "amount": 4}]
+    hi = [{"op": "damage", "amount": 9, "target": "enemy"}]
+    lo_price = draft._static_power(card(cost=1, effects=lo))
+    hi_price = draft._static_power(card(cost=1, effects=hi))
+    assert lo_price > 0 and hi_price > lo_price      # both modes are priced
+
+    for order in ((lo, hi), (hi, lo)):
+        priced = draft._static_power(card(cost=1, effects=[modal(*order)]))
+        assert priced == hi_price
+    # ... and a third mode priced between them does not disturb the max.
+    mid = [{"op": "block", "amount": 6}]
+    assert draft._static_power(
+        card(cost=1, effects=[modal(lo, hi, mid)])) == hi_price
+
+
+# --- the prototype ---------------------------------------------------------
+
+def test_deep_breath_is_the_only_modal_card():
+    """EB-118 2C converts ONE card (R192). The prototype discipline is the
+    packet's own (sec.5.4): do not copy the pattern to four cards until the
+    pilot and the price can distinguish the modes. This pin is what makes
+    "one card" a fact rather than an intention."""
+    modal_cards = sorted(c.id for c in loader._card_index().values()
+                         if any(fx.get("op") == "choose_one"
+                                for fx in effects._walk_effects(c.effects)))
+    assert modal_cards == ["deep_breath"]
+
+
+def test_deep_breaths_modes_are_the_ruled_pair():
+    """R194, Option A. Mode 1 is the body the card already shipped -- that is
+    the whole reason the pair was chosen -- and mode 2 reaches the OVERDRAW
+    primitive rather than paraphrasing it as a negative gain (EB-119)."""
+    dbreath = loader._card_index()["deep_breath"]
+    fx, = dbreath.effects
+    assert fx["op"] == "choose_one"
+    assert [m["effects"] for m in fx["modes"]] == [
+        [{"op": "energy", "amount": 1}, {"op": "gain_encore", "amount": 2}],
+        [{"op": "spend_encore", "amount": 2}, {"op": "draw", "amount": 2}]]
+    assert [m["label"] for m in fx["modes"]] == [
+        "Gain 1 Energy and 2 Encore", "Spend 2 Encore: draw 2"]
+
+
+def test_the_frame_is_mode_independent():
+    """Contract point 5: the choice selects a body, never a frame. Exhaust,
+    cost, type and rarity are the CARD's and survive the conversion; the
+    upgrade is the ruled cost line (R194 point 6) and touches no mode."""
+    dbreath = loader._card_index()["deep_breath"]
+    assert (dbreath.cost, dbreath.type, dbreath.rarity, dbreath.exhaust) \
+        == (1, "skill", "uncommon", True)
+    up = upgrades.apply_upgrade(copy.deepcopy(dbreath))
+    assert (up.id, up.cost, up.exhaust) == ("deep_breath+", 0, True)
+    assert up.effects == dbreath.effects
+
+
+def test_the_conversion_moves_no_drafter_number():
+    """The accepted under-credit, as arithmetic (R194).
+
+    `draw` and `energy` are both static ZERO, so mode 2 prices at minus its
+    own spend and the max returns mode 1 -- which IS the pre-conversion body.
+    Deep Breath is therefore priced to the digit as it was before it became
+    modal, and the acceptance note at the `choose_one` price row says so in
+    prose. If a dial moves and this test fails, that row is what to re-read.
+    """
+    dbreath = loader._card_index()["deep_breath"]
+    old_body = card(cost=1, effects=[{"op": "energy", "amount": 1},
+                                     {"op": "gain_encore", "amount": 2}])
+    assert draft._static_power(dbreath) == draft._static_power(old_body)
