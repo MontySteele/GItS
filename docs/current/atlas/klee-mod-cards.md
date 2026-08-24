@@ -83,6 +83,50 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
   (Hand Trick's `until: turn_end` grant) is runtime state with no C# rail and
   BLOCKS. Guard: `tools/lint_sly_grammar.py`; pins:
   `tier0/tests/test_eb71_cs_parity.py`.
+- **`EB-118`'s new C# surfaces are merged and UNREACHED** (2026-08-23). Four
+  ops joined `MECHANICAL_OPS` with verified call sites — `spend_spark`
+  (`:217`), `salon_rotate` / `salon_perform` (`:226`), `recall_to_draw`
+  (`:252`), `choose_one` (`:260`) — and **no committed sheet row prints any of
+  them**, so `--check` output and every manifest are byte-identical to the
+  pre-branch tree. Landing sites: `recall_to_draw` rides
+  `Powers/RecallFromExhaust.cs` (`Recall`), whose `Recallable` pool filter *is*
+  §6.4 constraints 3–6 while constraints 1–2 are card SHAPE checked in
+  `blocked_reason` (`:1530-1545`) — the generator reads the sheet directly and
+  never passes through `loader._validate_recall_shape`, so a row that reaches
+  the emitter has been checked on both sides of the wall; the `IExhaustRetriever`
+  marker is stamped from the same printed shape tier0 reads. `salon_perform`
+  rides `SalonMemberPower.PerformLeftmost` (`:3339`, `:3663`), which loops
+  `PerformMember` — the one body the turn-start upkeep also runs, mirroring
+  `effects.salon_member_act`; a second copy of it is the defect the shape
+  exists to prevent. `salon_rotate` rides `RotateLeftmost`, a pure reorder.
+  Chosen `exhaust_from` now brackets its selector with
+  `ExhaustSelection.Open` / `Record` / `Close` (`:4203-4216`), the twin of
+  tier0's `CombatState.exhaust_selection`, keyed on the resolving card INSTANCE
+  and the seat (a tracker keyed on anything shared is right solo and wrong in
+  co-op).
+- **`choose_one` INVENTS NO UI** — `Cards/ModalChoice.cs` is a thin wrapper over
+  the base game's own card-level choice: `CardSelectCmd.FromChooseACardScreen`
+  (the ≤3-option screen Splash/Discovery/Quasar and the generation Potions
+  already use), sequenced by the `PlayerChoiceContext` every `OnPlay` receives
+  and co-op-synced as `PlayerChoiceType.Index`; `CardSelectCmd.Selector` keeps
+  a modal card answerable by the understudy bot rather than a wall. The
+  mode-taken record mirrors tier0's `mode_chosen` emit field for field
+  (`tier0/tests/test_eb118_modal_parity.py` reads it out of the source).
+  **Two `choose_one` effects on one card BLOCK** — one `modeIndex` local and
+  one screen per play, so they would collide on both (`:1631-1633`).
+- **Ethereal is a keyword REUSE, not a new rail.** `ethereal: true` on a base
+  row joins `CARD_FIELDS` (`:1019` — without the entry the first card ruled
+  Ethereal from print would BLOCK on an unknown field) and emits
+  `CardKeyword.Ethereal` **first** in the `CanonicalKeywords` array, beside
+  Exhaust/Innate/Retain, because the canon pairing spells it that way
+  (Apparition: `{ Ethereal, Exhaust }`) — `:5924-5933`. The keyword is the
+  whole implementation: the game's own end-of-turn sweep reads `Keywords` and
+  exhausts the card (`causedByEthereal: true`), so there is no body and no hook,
+  and the description string never hand-writes the word. The
+  `remove: ethereal` upgrade delta emits `RemoveKeyword(CardKeyword.Ethereal)`
+  in `OnUpgrade` (`:5527-5532`), the canon shape verbatim (Apparition,
+  EchoForm, VoidForm each print it and each remove it, changing nothing else).
+  Precedent already shipping in the mod: Furina's `EtherealSpotlight` token.
 - **Two handwritten sets, not interchangeable**: `HAND_WRITTEN` is Klee-only
   (guarded by `profile is KLEE_PROFILE`), `HAND_WRITTEN_ROSTER` is
   Furina/Kokomi (`:653-676`, `:941-945`).

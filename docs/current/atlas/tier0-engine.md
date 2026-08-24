@@ -172,7 +172,98 @@ In-process: `combat.run_fight(player, enemies, pilot, seed) -> CombatState`
 - **Encore absorption is credited to A4 sustain, never A3 block** — without the
   rule Furina grows a phantom third elite axis (`resources.py:6-11`).
 
-## 6. Reading order
+## 6. EB-118 surfaces — merged, and INERT
+
+Merged into `main` 2026-08-23 on the settled Route-1 precedent: the ops, the
+field and the context exist in HEAD, **no card on any sheet reaches any of
+them**, every drafter price is PROPOSED, and no live `RT/D/P/C` integer moved.
+Activation is Phase 2 (`review/active/eb118-richness-phase0-2026-08-23.md`
+§3). Each entry says what the surface *is*, because the thing a reader will
+trip over is assuming it is dead code.
+
+- **`spend_spark` — ALL OR NOTHING, and the price is visible** (`effects.py:672`
+  `spend_spark_amount`, `:689` `spend_sparks`, op at `:1339`). The amount is a
+  literal positive int and raises otherwise, because `combat.spark_cost` reads
+  the same number off the printed effect with no state in hand — a price the
+  playability gate cannot read is a price that fires without being shown. A
+  short bank pays **nothing** and emits `spend_spark_refused`: Sparks have no
+  overdraw currency (the shortfall-drains-HP grammar is Furina's Encore alone,
+  `resources.spend_encore_or_hp`), and a partial spend leaves the payer
+  believing it was paid. Dropping under the free-Attack bar is a legal landing
+  — `combat.spark_threshold` reads the LIVE bank at every site.
+- **`choose_one` / `modes` — the modal surface, and the chooser is a marked
+  PLACEHOLDER** (`effects.py:2030-2087`). A `choose_one` carries `modes:`, a
+  list of 2+ `{label, effects}` dicts; it is **not** a keyword — the label is
+  that mode's plain card text and the bodies are the ordinary op vocabulary.
+  The distinction from `conditional` is WHO decides: a conditional reads a
+  predicate off the board, a modal asks the player, which puts it at the
+  chooser seam beside `_worst_card` / `_best_card`. `_chosen_mode`
+  (`:2051`) always returns index 0 — a fixed index, not a heuristic, chosen so
+  the seam exists and stays deterministic. `pilot.policy._active_effects`
+  calls that same function for its forecast, so the pilot's read and the mode
+  that resolves cannot disagree. Replacing that body is `POLICY_VERSION` work.
+  Emits `mode_chosen(card, index, label)`, mirrored in
+  `KleeCode/Cards/ModalChoice.cs`.
+- **`recall_to_draw` gained a SOURCE, not a parallel op family**
+  (`effects.py:2512-2589`). `from: exhaust` reads the exhaust pile through
+  `recall_exhaust_pool` (`:2530`), whose filter *is* the constraint set: no kit
+  card, no `is_junk` Status/Curse, no card that itself retrieves from Exhaust
+  (`retrieves_from_exhaust`, `:2516`, read off the printed effect tree), and
+  never the resolving card's own instance — that last exclusion is what keeps
+  the pile from closing into a cycle. Destination is top-of-draw in both
+  branches, **never the hand**; the returned card gains `exhaust` per
+  INSTANCE for the rest of combat, so it rotates again and pays Charge again
+  at the ordinary funnel. Card-shape constraints (Uncommon-or-Rare,
+  self-Exhausting) live at `loader._validate_recall_shape` and
+  `gen_klee_cards.blocked_reason`; `tools/lint_recall_exhaust.py` sweeps both
+  halves plus the closure.
+- **Salon `rotate` / `perform` — two verbs over ONE member-action path**
+  (`effects.py:1495` `_op_salon_rotate`, `:1519` `_op_salon_perform`,
+  `salon_member_act` at `:3199`). Rotate is a pure reorder: identity kept, no
+  tick, no Encore drained, no bow or replacement triggered, and
+  `powers['salon_member']` untouched by construction. Perform resolves through
+  `salon_member_act` — the same function turn-start upkeep calls — so the
+  Encore upkeep, the dry three-quarters, the Focus/Grand-Salon scaling and the
+  `salon_tick` row are inherited, not restated; that sharing is the contract.
+  The member STAYS on stage, so `amount: N` performs the leftmost member N
+  times. Both whiff **loudly** on an empty stage (`salon_rotate_whiffed` /
+  `salon_perform_whiffed`), the `conscript_whiffed` pattern. Reads come from
+  the `leftmost_salon_member_*` predicate prefix (`:2135`), closed on
+  `SALON_MEMBERS` so a typo fails at load.
+- **`ethereal:` on the BASE card, and ONE predicate for both spellings**
+  (`state.py:212` the field, `:381` `is_ethereal`). Until now the keyword was
+  reachable only through `tags: [ethereal]`, which is the Status/Curse/token
+  spelling; the field is the personal-sheet spelling of the same keyword, and
+  `is_ethereal` is the single predicate combat reads at all three seams (retain
+  split, flush filter, ethereal sweep). **Orthogonal to `is_junk`** — an
+  Ethereal *personal* card is still one of Kokomi's own cards and still pays
+  her Charge funnel when it burns. The `remove: ethereal` upgrade delta
+  (`content/upgrades.py:188-204`) is guarded where `remove: exhaust` is not: a
+  delta removing a keyword the base never printed is a sheet error. The
+  drafter scales the whole card by `draft.STATIC_ETHEREAL_SHARE` (0.6) — a
+  lifecycle discount, not an op price — and no offerable row prints the field,
+  which is why `D` did not move.
+- **`CombatState.exhaust_selection` — an identity CONTEXT, not a combat-global
+  `last_exhausted`** (`state.py:808-819`; `effects.py:117-195`;
+  `_op_exhaust_from` `:1845-1912`). One printed descriptor per victim the
+  CURRENT `exhaust_from` took — `id, cost, type, rarity, companion, upgraded`,
+  printed identity only, which is what lets `Powers/ExhaustSelection.cs` record
+  the same row off the same facts. Three facts do the scoping: `resolve_card`
+  opens an empty selection per card play; `combat._FREE_PLAY_CONTEXT`
+  (`combat.py:489`) saves and restores the list OBJECT, so a free play landing
+  mid-resolution cannot hand its victims to the outer card; and a second
+  `exhaust_from` REBINDS rather than clearing in place. `exhaust_selection_counts`
+  (`:161`) is one definition with three consumers — the
+  `exhaust_selection_*` amount tokens (`:313`), the predicates, and the emitted
+  parity row (`EXHAUST_SELECTION_ROW_KEYS`, `:189`) — so a formula can never
+  report a different number from the row the parity test compares. X-costs
+  contribute 0 to the derived total rather than being coerced. Vocabulary:
+  names `exhaust_selection_has_companion` / `_has_personal` (`:2117`),
+  prefixes `exhaust_selection_has_type_` / `_cost_at_least_` / `_size_at_least_`
+  (`:2138`). Deliberately **no** "Status exhausted" reward grammar — the
+  context reports rarity and C11 keeps Kokomi's pool free of junk.
+
+## 7. Reading order
 
 1. `tier0/README.md` — what the sim is for, and what is frozen.
 2. `tier0/engine/state.py` — data model, determinism contract, card schema.
