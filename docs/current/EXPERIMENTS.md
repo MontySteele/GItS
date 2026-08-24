@@ -55,68 +55,116 @@ registration packets themselves live under `review/active/` — one home, not tw
   classifier frozen for the whole batch, vocabulary revisions re-run BOTH
   sides. Registered blind spots at §2.6 (the `decide%` gaps, the lowest-HP
   target heuristic, the `_worst_card` exhaust proxy).
-- **payoff-reach re-registration** — the `RARITY_ODDS` fence. Q18 countersigned
-  (R121); **predictions COMMITTED 2026-08-13 (R186)** as the registration's
-  `## 6`, before any sprint number was read — step (2) of the countersigned
-  execution order is executed and `Q-C` is closed. Committed: the ruled aims
-  (R185), Q-A under its observational reading and Q-B under its arithmetic
-  reading with direction and threshold, the two-leg instrument, the sample
-  plan at the ratified cell (n=600/arm, seed 11, `hunter`, `assigned`,
-  realistic), controls C1 and C2, a 4h ceiling and tripwires T1–T4.
-  **§6.5 was AMENDED pre-run 2026-08-23 (`M28` ratified, R196):** `T3` no
-  longer fires on realized reach above the canonical TOP supply ceiling of 3
-  — reach and offer above the canonical figures are REPORTED at raw value plus
-  multiple, with no new band above TOP — and `T3` is now a single
-  classifier-integrity condition over reward-pool base ids, **implemented
-  2026-08-24 (`EB-120`)**. `P5(a)`/`P5(b)`,
-  the aims, the Q-A/Q-B predictions and `P12` are untouched. **UNRUN,
-  and it does not run yet:** §6.6's approved P12 is **settle first** — the
-  freeze begins only after the open `RT`/`C` window (`M14`'s batch: `EB-70`,
-  the `EB-82` conversion, the `EB-85` batch, `EB-69`) lands and a dependency
-  re-check passes; if the world moved, §6 is re-stamped before the freeze.
-  **Window status 2026-08-13: the world moved twice and the window is still
-  open.** First the `EB-82` conversion and the `EB-85` batch landed together
-  under one coordinated bump, `RUNTEMPLATE` 10 → **11**. Then window 2 of the
-  correctness batch (`EB-104`, all twelve members) landed under a second
-  coordinated bump, `RUNTEMPLATE` 11 → **12** for its five run-layer fixes and
-  `CONSTANTS` 9 → **10** for its seven tier0 engine fixes. `C` then moved once
-  more, outside that batch: the Artifact-coexistence + Kokomi-rotation ruling
-  landed 2026-08-23, `CONSTANTS` 10 → **11**, [USER] pulling the staged branch
-  into this same open window. So the live stamp is `RT12/D14/P7/C11`, and
-  §6.6's `RT10` line records what was verified on 2026-08-12, not what ships. **THE SETTLE-FIRST BATCH IS EMPTY.** `EB-70` LEFT the window at R195 ([USER] paused the starter-offer retune pending the Klee-rework design sweep R134 originally routed it to — it will not land before the freeze, and when it is eventually taken up it re-baselines in whatever world then exists), and `EB-69` LANDED at R198: the ruled 14-card Kokomi fill, `S4-G11`'s eye-read discharged for that pile, the sheet at 76 rows (5/31/26/14, 70 draftable), **and no version integer moved** — it is settle-first CONTENT, so `RT`/`D`/`P`/`C` are exactly where the last bump left them at `RT12/D14/P7/C11`.
-  **`M14`'s re-stamp — the first of the two unblocked registration acts — is DONE (2026-08-24).** The shop-rerun packet is re-stamped `RT11/D14/P7/C9` → `RT12/D14/P7/C11`, its §2 window list carries the three items that cell can see (`RT12`, `C10`→`C11`, and `EB-69` itself), and what remains on `M14` is the slate entry and the countersign, both [USER] acts. **§6.6's `P12` freeze — the second act — is NOT taken here and is the next thing owed after this bullet.**
-  **THE DEPENDENCY RE-CHECK HAS NOW RUN AGAINST THE POST-`EB-69` WORLD (2026-08-24) — the FOURTH re-take of the fence, and the first that is NOT byte-identical.** All four fingerprint items were re-taken at the live `RT12/D14/P7/C11`:
-  **(1) `RARITY_ODDS` — UNMOVED**, `{common 0.60, uncommon 0.35, rare 0.05}`.
-  **(2) `DRAFTER_VERSION = 14` — UNMOVED.** `D` did not move and must not be re-pinned.
-  **(3) `rewards.character_pool` — five of six pools byte-identical, id lists included:** `klee 29/28/14`, `furina 23/35/18`, `real_ironclad 19/32/20`, `real_silent 20/35/25`, `ref_ironclad 4/2/—`. **`kokomi` MOVED, by design: 27/20/9 → 31/26/13**, 56 → 70 draftable cards — the fourteen `EB-69` rows, less `ceremonial_garment` which carries `kit_card: true`. This is the fill doing exactly what it was ruled to do; §6.1 already stated both Kokomi pool figures in advance and said the official static read is taken after the fill.
-  **(4) `exp_payoff_reach.static_leg` — the six Klee and Furina rows identical to the digit** (supply 10/8/7 · 9/10/14, offer and counterfactual unchanged), **the three Kokomi rows MOVED**: priest supply 13 → 14 (offer 0.1606 → 0.1270), commander 5 → 6 (0.0683 → 0.0578), assist 3 → 5 (0.0406 → 0.0385). The offer term falls on all three even where supply rises, because the pool denominator grew faster than the payoff numerator — arithmetic, recorded, not graded.
-  **THE MOVEMENT IS AUTHORIZED, NOT A VIOLATION.** `kokomi/assist`'s 3 → 5 is precisely the move R197 admitted when it amended R190's fence (§6.8), recorded **before** the fill landed and with both figures on the record; the other two Kokomi rows are the same fill classified honestly under the same registered predicate. §6.5 already put the official `P5` read after this point and already said the three Kokomi arms may move on either axis. **Nothing here is a `P5` grade** — these are fingerprint figures, taken as the three previous re-takes took them, and the grade is the freeze's own step. The six Klee and Furina rows are exactly as stable as §6.6's ordering-(i) argument predicted, and the fence itself — the odds table and the drafter pin — never moved across any of the four re-takes.
-  **The once-only rule held.** §6 is re-stamped once, when the last of the
-  batch lands, rather than after each item — re-stamping a registration per
-  item is how a one-variable window turns into four. The fence was
-  fingerprinted at every bump so it did not have to be re-derived later:
-  byte-identical across `RT10 → RT11`, byte-identical again across
-  `RT11/C9 → RT12/C10`, byte-identical a third time across `C10 → C11` (the
-  2026-08-23 ruling, `cb8be0c`, which edited no card sheet and moved no
-  offer-time price), and moved for the first time — in Kokomi's three rows
-  only, and by authorization — at this fourth re-take. `EB-112` was the one
-  batch member that could have reached the fence and did not: it makes an
-  event card screen consult `RARITY_ODDS` instead of bypassing it, and
-  `static_leg` is arithmetic over the reward pools and the odds table, so
-  neither the constant nor any static-leg output moves.
-  **What is owed next, in order:** §6.6's `P12` freeze — which re-stamps §6
-  (and `T1`'s registered stamp string with it) to `RT12/D14/P7/C11` and then
-  freezes — and only then steps (3)–(6). Neither is taken here.
-  Owed before the run and named in §6.4/§6.5: the generic reach reader
-  (`tier05/exp_payoff_reach.py`) and the `blind` control policy — **both built
-  2026-08-13** — and the amended `T3` plus §6.1's above-scale reporting, both
-  **built 2026-08-24 (`EB-120`)**. The `M28` fallback was not needed: `T3` is
-  implemented entirely off the one shared predicate
-  (`draft.is_on_plan_payoff`), so all four tripwires stand. Reader and printer
-  only, `D` and `P` unmoved, and the static leg's supply, offer and
-  counterfactual figures identical to the digit across the build.
-  Steps (3)–(6) run in order and none reorders →
-  `review/active/payoff-reach-reregistration.md` §6.
+- **payoff-reach re-registration** — the `RARITY_ODDS` fence. **RUN AND GRADED
+  2026-08-24.** Q18 countersigned (R121); predictions committed 2026-08-13
+  (R186) as the registration's `## 6`, before any sprint number was read; §6.5
+  amended pre-run 2026-08-23 (`M28` ratified, R196) and that amendment
+  implemented as `EB-120`; §6.6's `P12` freeze taken 2026-08-24; the registered
+  cell run and graded blind the same day. **All six steps of `R121`'s
+  countersigned order have now run in order, except (5) and (6), which the
+  grade unblocks and which are deliberately not taken with it.**
+  **THE OUTCOME, in one line: nine arms, nine `P5` MISSES on both axes — every
+  arm ABOVE its band window, never below — Q-A SPLIT and Q-B SPLIT, no tripwire
+  fired, and the redesign trigger fired roster-wide and minted `QUEUE` `M37`.**
+  **The three commits, in the order the registration prescribes them.**
+  **(1) the freeze**, `6e9fd92` — §6.6's `P12` taken at the live
+  `RT12/D14/P7/C11`, re-stamping §6's world string and `T1`'s registered stamp
+  string (in the tripwire table and in `tier05/exp_payoff_reach`) from the
+  superseded `RT10/D14/P7/C9`. **No version integer moved in either
+  direction**: the world moved first, by `RT` 10→11→12 and `C` 9→10→11, each an
+  authorized bump fingerprinted against this fence when it landed, and the
+  registration caught up to it. Left stale, `T1` fired on every arm of every run
+  for the single reason that its string named a superseded world — a stale
+  citation, not a finding. Re-stamped, it is silent on the frozen world and
+  fires on a divergence in any of the four fields, both directions pinned by a
+  test written against the constant rather than against the live tree.
+  **(2) the run**, `19ed641` — the registered cell value for value: n = 600 per
+  arm, seed 11, `hunter`, `assigned`, realistic, all registered acts, the nine
+  arms of §6.5 and no others, nothing overridden. **56 seconds against a 4-hour
+  stop-and-report ceiling.** Raw results at
+  `review/active/payoff-reach-results-2026-08-24.txt`, on the `EB-17p`
+  precedent — the instrument's own stdout with a provenance header, not a
+  rewrite.
+  **(3) the grade**, `56470ea` — blind-first, in §6.5's prescribed order:
+  every prediction slot graded before any narrative (registration §7), then the
+  design-facing readout (§8), then the mint.
+  **TRIPWIRES `T1`–`T4`: NONE FIRED.** `T2`'s deck sizes land 19.3–25.0 inside
+  the registered 12–30; `T4` finds no zero-payoff arm (smallest supply 5); and
+  **`T3`'s amended classifier-integrity condition HOLDS with zero
+  disagreements** — across every finished deck in every arm, no reward-pool base
+  id classified differently on the deck side than in the static pool, with
+  `draft.is_on_plan_payoff` the only route either leg took. That is what makes
+  the nine misses a fact about content rather than about the instrument.
+  **THE GRADE, slot by slot.** `P5` — the OFFICIAL post-settle static read, the
+  one §6.5 reserved for after `EB-69` — is **0 PREDICTED / 0 SPLIT / 9 MISS**,
+  both axes in every arm: supplies 5–14 (1.7×–4.7× the canonical ceiling of 3)
+  against windows of 0–2 and 1–3, offers 0.0385–0.1270 (1.8×–5.9× canonical
+  TOP) against intervals topping out at 0.0214. **The nine provisional misses
+  `R196` adopted as information are SUPERSEDED by this read, not confirmed by
+  it** — the three Kokomi arms were genuinely re-read after the fill, moved on
+  both axes, and did not change verdict. **Q-A (A-ii): SPLIT** — direction
+  holds (realized reach beats the blind-draft floor in all nine arms) and the
+  ≥ 3× clause holds everywhere (3.8×–46.6×), while the ≥ 1.0-in-HIGH clause
+  fails in one of three, `kokomi/commander` at 0.81 payoffs per finished deck
+  with 48.3% of decks holding none. **Q-B (B-ii): SPLIT** — direction holds
+  (six of nine arms print ZERO common payoffs; the counterfactual exceeds the
+  actual in all nine) and the median-doubles clause holds under **both**
+  available readings, 2.17× by median ratio and 2.46× by median offer, so the
+  reading never had to be chosen; the band-crossing clause is **unsatisfiable**
+  at these figures, because all nine actual offers already sit above the highest
+  band boundary and §6.1's amendment forbids inventing one above `TOP`. **The
+  `EB-118` Phase-0 §2.4 Kokomi supply clause: SPOILED, NOT GRADED** per
+  R197/§6.8 — the supply did rise 3 → 5 by the one batch the amended fence
+  admits, and a prediction voided before the read is not a prediction that
+  missed. It stays struck where published and is not rewritten (`R101b`).
+  **THE CONTROLS, reported and never part of a verdict.** `C1` is
+  **half-executed**: §6.5 names its arms `(real_ironclad, starter)` /
+  `(real_silent, starter)`, `starter` is a tier-0 DECK PACKAGE name that tier
+  0.5 has no archetype for, and the pair's only constructible form is
+  `real_ironclad/generic` / `real_silent/generic` — a naming reconciliation
+  recorded rather than performed silently. `real_ironclad` reads realized reach
+  2.11 at the same cell; `real_silent` is **BLOCKED** by a pre-existing engine
+  defect (`BACKLOG EB-123`), reported as blocked and NOT at a reduced `n`,
+  because dropping the one run that crashed is exactly the silent shrink the
+  sample plan forbids. `C2` ran `blind` over the same nine arms — the only
+  reading under which an empirical floor exists for each of the nine arms Q-A is
+  predicted over — and puts that floor at 0.39–1.40 per deck against arithmetic
+  floors of 0.037–0.278, i.e. **the registered comparator is 2.4×–19.3× lower
+  than the floor a blind draft actually produces.** Recorded; it does not
+  re-grade Q-A, which stays graded against the arithmetic floor (`D5`).
+  §6.5's "7,800 with controls" implies four control arms and names two; the
+  registered PARAMETER (600 per arm) was honoured exactly and the arithmetic
+  discrepancy is recorded in the results artifact rather than resolved by
+  picking two arms out of nine.
+  **`C1` RUNS IN THE PRIMARY CHECKOUT ONLY, per §6.7** — `game_ref/` is
+  gitignored and a worktree must never be given one — so the whole range was
+  taken with the frozen reader loaded by path against the primary tree's
+  content, the only configuration in which every registered arm and both
+  controls read at once. The reader's only deletion across the two trees is the
+  `T1` literal, so `static_leg`, `sim_leg` and `membership_audit` are
+  byte-identical between them.
+  **TWO DEFECTS FOUND BY THE RUN, BOTH FILED, NEITHER FIXED.** `EB-123`:
+  NightmarePower resolves its remembered card through `loader.get_card`, and a
+  Status card is synthesized under an id no loader index holds — one run of 600
+  in `real_silent` dies on it. `EB-124`: `T3`'s `external-source` exclusion
+  line counts ENCHANTED reward-pool cards and labels them as having come from
+  outside the pool — all 122 such ids carry an `@`, genuinely external on-plan
+  payoffs numbered zero in every arm, and `T3`'s answer is unchanged under
+  either normalization (verified, not assumed). Neither was fixed inside the
+  sprint: a behaviour fix moves the world and `P12` forbade that until the
+  graded read, and editing a frozen reader after seeing its output is how an
+  instrument gets tuned to its own reading.
+  **`P12` IS DISCHARGED.** The freeze ran from the freeze act to the graded
+  read, which is exactly the span §6.6 gave it, and no `RT`/`D`/`P`/`C` bump
+  landed inside it. **`R190`'s remaining Assist payoff-supply fence is
+  discharged by the same read.**
+  **WHAT IS OWED NEXT, in order, and none of it is taken here:** step (5), the
+  staged D15 (`EB-43`) landing with its re-baseline, which moves `D` 14 → 15;
+  step (6), the `RA-G1`/`RA-G2`/`tto` quarantine lift, which `R121` put "on the
+  graded read, and nowhere earlier". The design call the grade raised is
+  `QUEUE` `M37` and is [USER]'s →
+  `review/active/payoff-reach-reregistration.md` §7–§8;
+  `review/active/payoff-reach-results-2026-08-24.txt`; QUEUE `M37`.
 - **EB-17p force-first-copy paired winrate** — **RUN AND GRADED 2026-08-10.**
   Countersigned complete (`N` = 2400 pairs, Strike filler, 4h ceiling, §6.1b
   co-primary), §8 predictions committed ahead of the run (`eb67706`), graded
@@ -149,9 +197,12 @@ registration packets themselves live under `review/active/` — one home, not tw
   and the `RT`/`C` window is open. R189 also chose the **route** —
   measure-first, so this sweep runs before the `elemental_ecstasy` redesign
   (Option `C2`), which lands after the graded read as its own `C` bump.
-  **Sequencing:** it runs *after* the payoff-reach sprint's graded read, per the
-  approved settle-first plan, and before the staged `EB-43`/D15 landing (its own
-  S3) →
+  **Sequencing: its payoff-reach gate is DISCHARGED.** It was to run *after* the
+  payoff-reach sprint's graded read, per the approved settle-first plan, and
+  before the staged `EB-43`/D15 landing (its own S3). **That graded read landed
+  2026-08-24**, so the ordering constraint ahead of it is satisfied and the one
+  behind it — land before D15 moves `D` 14 → 15, or re-stamp — is now the live
+  one. The countersign is still withheld and is still [USER]'s →
   `review/active/m17-sweep-reregistration-p7-2026-08-13.md`; companion redesign
   options packet `review/active/m17-elemental-ecstasy-redesign-2026-08-13.md`.
 - **Shop companion channel re-run (`S4-G10` / `C9`)** — **DRAFT, awaiting
@@ -186,8 +237,9 @@ registration packets themselves live under `review/active/` — one home, not tw
   tagged per source so the workshop's unsettled §6 scope boundary is not
   settled by construction). Descriptive: it grades no design and cannot on its
   own fire a nerf. §5.1 is where "repeatable reads dominant" becomes a number,
-  and it is a [USER] slot. Sequenced after the payoff-reach graded read; it
-  moves no version and opens no window →
+  and it is a [USER] slot. Its payoff-reach sequencing gate is DISCHARGED (the graded read
+  landed 2026-08-24); it moves no version and opens no window, and what remains
+  between it and a run is the countersign →
   `review/active/charge-reads-per-turn-registration-2026-08-13.md`.
 - **Kokomi stability band (D5)** — no band is declared yet (the declaration
   is QUEUE `S4-G6`; until it lands, the band rides DARK, `band = None`); its
