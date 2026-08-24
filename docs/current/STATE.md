@@ -169,13 +169,18 @@ Named here for status only. Open items are in
   instrument and the full Route-1 infrastructure set are merged **inert**
   ([USER] pulled the staged branches 2026-08-23): no card uses any new op,
   pilot policies sit behind `PILOT_POLICIES_ENABLED = False`, every new
-  drafter price is PROPOSED, and no live version integer moved. **Its two
-  fences moved 2026-08-24 and neither is a clearance:** the payoff-reach grade
-  landed (so the Phase-1 sheet-edit gate and the Phase-2 `D14` lift are
-  released as gates), and it minted `QUEUE` `M37` — so the density question
-  the fences were protecting is now an open [USER] design row rather than an
-  unread measurement, and any sheet edit moving a payoff role, an `archetypes`
-  tag or a payoff's rarity is decided there.
+  drafter price is PROPOSED, and no live version integer moved. **All three
+  fences came down 2026-08-24.** The payoff-reach grade landed, releasing the
+  Phase-1 sheet-edit gate and the Phase-2 `D14` lift, and the density row it
+  minted (`QUEUE` `M37`) was **ruled the same day (R199)**: the canonical bands
+  are a directional benchmark rather than a hard 1–3 requirement, the sheets do
+  over-use `role: payoff`, and **Phase 3 is AUTHORIZED** to convert genuine
+  setup / access / repair / bridge cards to glue or enabler and to drop
+  unsupported `archetypes` tags — under four guardrails (no relabeling to
+  improve a count; no rarity moves to force offer probability; no mechanical
+  supply cut on `kokomi/commander` or `kokomi/assist`, whose problem is access
+  not saturation; and a ruled priority order). The guardrails and the order live
+  in the BACKLOG `EB-118` row.
 - **Enemy remapping** — planned.
 - **Art passes** — Furina and Kokomi surfaces (Kokomi's are newest).
 - **Animation sprint 2.**
@@ -197,8 +202,10 @@ Named here for status only. Open items are in
   with zero disagreements — so the misses are content, not instrument. The
   redesign trigger fired roster-wide and minted **`QUEUE` `M37`** under `M28`'s
   aggregation rule: one row, nine arms enumerated, and explicitly not a claim
-  that one mechanism produced them. `P12` and `R190`'s remaining Assist fence
-  are both discharged. **Steps (5) and (6) — the staged D15 (`EB-43`) landing
+  that one mechanism produced them — **and [USER] ruled it the same day (R199),
+  so it has left HEAD and its authorization now lives in BACKLOG `EB-118`'s
+  Phase-3 fence.** `P12` and `R190`'s remaining Assist fence are both
+  discharged. **Steps (5) and (6) — the staged D15 (`EB-43`) landing
   and the `RA-G1`/`RA-G2`/`tto` quarantine lift — are UNBLOCKED and
   deliberately NOT taken**; they are the next window's work. Of the two
   defects the run surfaced, `EB-123` is **FIXED 2026-08-24** — after the
@@ -224,8 +231,12 @@ Named here for status only. Open items are in
   fourteen upgrade rows in one batch, 62 → 76. `S4-G11`'s Kokomi pile is
   discharged; that row stays open on its other three piles. What the fill
   raised rather than settled: QUEUE `M36` (a distinctness-gate breach and
-  three strict-domination pairs), BACKLOG `EB-121` (the art bill is 6 slots
-  short) and `EB-122` (five cards blocked on unimplemented C# grammar).
+  three strict-domination pairs) — **ruled 2026-08-24 (R200) and now carried
+  as BACKLOG `EB-125`:** the 33% `neardup` breach is TEMPORARY, not ratified,
+  and one body from each pair is redesigned in the `EB-118` Phase-3 batch
+  (`moon_signal`, `crane_wing`, `tighten_the_cords`) — plus BACKLOG `EB-121`
+  (the art bill is 6 slots short) and `EB-122` (five cards blocked on
+  unimplemented C# grammar).
 
 ## Watch register (dormant)
 
@@ -264,6 +275,25 @@ also pays `KOKOMI_BURST_PER_EXHAUST = 2` particles it never paid before — at
 Common, at cost 0, repeatable. **Trigger:** Burst frequency across a run reads
 above the ratified meter-20 cadence (R139) in the post-fill baseline.
 
+**`W9` `X9` — Kokomi's Charge bank, uncapped and never spent.** R188
+(2026-08-13) ruled workshop axis **G**, the null option: **no Charge read
+budget** — and that is a deferral of a nerf, not an endorsement of the current
+balance. The §3.3 double read is inside the ruling, not fenced off from it: it
+is ruled intended deckbuilder stacking. Reads per turn are now instrumented and
+the instrument is deliberately inert — `resources.note_charge_read` tallies
+every resolved read onto `CombatState.charge_reads_this_turn` tagged by source,
+and `combat` emits one `charge_reads_turn` sample per completed player turn;
+nothing in engine, pilot or drafter reads the tally back, so it is not a budget
+and cannot become one by accident. Declared blind spot: the sample rides
+`turn_close`, which a turn ending in the last kill or the player's death never
+reaches, so the truncation is toward the BUSY end. **Trigger:** `X9` returns to
+[USER] only if **a reads-per-turn reading or a live playtest shows repeatable
+reads dominant.** "Dominant" is not a number yet — §5.1 of
+`review/active/charge-reads-per-turn-registration-2026-08-13.md` is the slot
+that makes it one, and that slot is [USER]'s. (BACKLOG `EB-78`.)
+
 (Migrated from the retired watch-items docket, frozen at tag
 `pre-simplification-2026-08-06`; `W5` added 2026-08-10, `W6`–`W8` at `EB-69`
-2026-08-23.)
+2026-08-23, `W9` 2026-08-24 — `EB-78`'s owed line, written at **`W9` and not
+`W6`** because `EB-69` minted `W6`–`W8` while it was outstanding and `W6` is
+now `gyorin_formation`.)

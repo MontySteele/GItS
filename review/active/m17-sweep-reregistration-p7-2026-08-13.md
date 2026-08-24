@@ -30,6 +30,12 @@
 > post-window restamp, the packet is re-stamped if the world moved, §8's
 > per-arm prediction table is filled **then**, and the countersign comes after
 > that. Signing now would date the packet to a world it will not run in.
+>
+> **§9's "Order of operations" was reconciled to that sequence on 2026-08-24.**
+> As drafted it put the countersign first and asked [USER] to fill §7 — both
+> contradicted this note and R189's ruling. The packet is DRAFT and
+> uncountersigned, so the correction is made in place; no measurement record is
+> touched and R101b is not in play.
 
 ---
 
@@ -433,15 +439,28 @@ committed table **without editing §8**. The predictions commit must exist
 before the sweep is launched, and the sweep's report is not opened by the
 author of the predictions before the grade is recorded.
 
-**Order of operations:**
-1. Countersign this packet. **OPEN — [USER], QUEUE `M17`.**
-2. Confirm the §10 engineering prerequisites still hold at the new stamp,
+**Order of operations — RECONCILED 2026-08-24 to R189's ruled sequence.** As
+first drafted, this list put the countersign at step 1 and asked [USER] to fill
+§7's `N` and cost ceiling at step 3. Both were stale: R189 (2026-08-13) filled
+§7 already, and ruled that **predictions are filled against the settled world,
+before the countersign** — which is what the header note above says and what
+§9.1 sequences. The list contradicted them; it now agrees with them. Nothing
+about the grading discipline changed, only the order this file states.
+
+1. The open `RT`/`C` window closes (§9.1 sequences it).
+2. **Re-stamp §3 if the world moved.** A world that moved and was not
+   re-stamped is an S1 event at launch, not a detail.
+3. Confirm the §10 engineering prerequisites still hold at the new stamp,
    suite green. (They are built; §10 is a re-verification, not a rebuild.)
-3. [USER] fills the §7 `N` and cost ceiling.
-4. §8's predictions are committed — **their own commit, nothing else in it.**
-5. Run the sweep at the pinned stamp. Report only; read nothing into it.
-6. Blind grade against §8; the grade is its own commit.
-7. Any design act is downstream of the grade and is [USER]'s.
+4. **[USER] fills §8** — the per-arm prediction table and the DIRECTION half of
+   the `Q4` slot — and it is committed as **its own commit, nothing else in
+   it.** (§7's `N` = 2,400 pairs and the 4-hour cost ceiling are already
+   filled, R189, and are not re-asked here; §8.1's redesign trigger is filled
+   too.)
+5. **Countersign this packet.** **OPEN — [USER], QUEUE `M17`.**
+6. Run the sweep at the pinned stamp. Report only; read nothing into it.
+7. Blind grade against §8; the grade is its own commit.
+8. Any design act is downstream of the grade and is [USER]'s.
 
 **Order of reading, at the grade** — this order and no other, because reading
 them in any other order lets one number colour the next:

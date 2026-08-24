@@ -65,7 +65,9 @@ registration packets themselves live under `review/active/` — one home, not tw
   grade unblocks and which are deliberately not taken with it.**
   **THE OUTCOME, in one line: nine arms, nine `P5` MISSES on both axes — every
   arm ABOVE its band window, never below — Q-A SPLIT and Q-B SPLIT, no tripwire
-  fired, and the redesign trigger fired roster-wide and minted `QUEUE` `M37`.**
+  fired, and the redesign trigger fired roster-wide and minted `QUEUE` `M37` —
+  **which [USER] then RULED the same day (R199), so the row has left HEAD and
+  the design call is settled, not pending.**
   **The three commits, in the order the registration prescribes them.**
   **(1) the freeze**, `6e9fd92` — §6.6's `P12` taken at the live
   `RT12/D14/P7/C11`, re-stamping §6's world string and `T1`'s registered stamp
@@ -161,10 +163,16 @@ registration packets themselves live under `review/active/` — one home, not tw
   **WHAT IS OWED NEXT, in order, and none of it is taken here:** step (5), the
   staged D15 (`EB-43`) landing with its re-baseline, which moves `D` 14 → 15;
   step (6), the `RA-G1`/`RA-G2`/`tto` quarantine lift, which `R121` put "on the
-  graded read, and nowhere earlier". The design call the grade raised is
-  `QUEUE` `M37` and is [USER]'s →
+  graded read, and nowhere earlier". **The design call the grade raised was
+  `QUEUE` `M37`, and it is ANSWERED — R199, [USER] 2026-08-24:** the canonical
+  bands stay a directional richness benchmark rather than a hard 1–3
+  requirement, the sheets do over-use `role: payoff`, and `EB-118` Phase 3 is
+  authorized to convert genuine setup / access / repair / bridge cards to glue
+  or enabler under four named guardrails. The row has left HEAD and the durable
+  text is the `EB-118` Phase-3 fence in BACKLOG. Nothing in this registration is
+  reopened by it; a graded record is not re-read against a later ruling →
   `review/active/payoff-reach-reregistration.md` §7–§8;
-  `review/active/payoff-reach-results-2026-08-24.txt`; QUEUE `M37`.
+  `review/active/payoff-reach-results-2026-08-24.txt`; BACKLOG `EB-118`.
 - **EB-17p force-first-copy paired winrate** — **RUN AND GRADED 2026-08-10.**
   Countersigned complete (`N` = 2400 pairs, Strike filler, 4h ceiling, §6.1b
   co-primary), §8 predictions committed ahead of the run (`eb67706`), graded
@@ -194,7 +202,8 @@ registration packets themselves live under `review/active/` — one home, not tw
   **§8's per-arm prediction table and the direction half of `Q4` stay blank**,
   so the packet is not cleared to launch; the countersign is withheld until the
   post-window restamp, because predictions are filled against the settled world
-  and the `RT`/`C` window is open. R189 also chose the **route** —
+  — and the `RT`/`C` window that was open at R189 has since CLOSED (2026-08-24,
+  settled at `RT12/D14/P7/C11`), so the restamp and the fill are now takeable. R189 also chose the **route** —
   measure-first, so this sweep runs before the `elemental_ecstasy` redesign
   (Option `C2`), which lands after the graded read as its own `C` bump.
   **Sequencing: its payoff-reach gate is DISCHARGED.** It was to run *after* the
