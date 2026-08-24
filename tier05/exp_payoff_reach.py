@@ -44,11 +44,13 @@ either axis. `REACH_CEILING` is a reporting DIVISOR here and nothing else.
 
 `T3` IS CLASSIFIER INTEGRITY AND CONTAINS NO REACH QUANTITY (§6.5, same
 amendment). Every deck card reconstructs to a reward-pool base id under
-upgrade normalization; each such id's on-plan payoff membership is compared
-between the deck-side and the static reading, both through
-`draft.is_on_plan_payoff`; `T3` fires iff any id's membership differs. The two
-sets that do not reconstruct — anchor-shield cards and external-source on-plan
-payoffs — are excluded from the comparison and reported on their own lines.
+`base_id`'s normalization — the upgrade suffix §6.5 names, and since `EB-124`
+the run-applied enchantment mark as well; each such id's on-plan payoff
+membership is compared between the deck-side and the static reading, both
+through `draft.is_on_plan_payoff`; `T3` fires iff any id's membership differs.
+The two sets that do not reconstruct — anchor-shield cards and external-source
+on-plan payoffs — are excluded from the comparison and reported on their own
+lines.
 
 The registered run is 600/arm at seed 11, hunter, assigned, realistic — the
 canonical cell (§6.5). Control C1 is the two `real_*` anchors and runs in the
@@ -75,7 +77,7 @@ import statistics
 import sys
 
 from tier0 import constants as C
-from tier0.content import loader, upgrades
+from tier0.content import enchantments, loader, upgrades
 from tier05 import cells, draft, rewards
 
 # The nine arms of §6.5, in roster ship order. One per ruled aim, no more and
@@ -311,15 +313,48 @@ def deck_reach(deck: list, archetype: str) -> tuple[int, int]:
 
 
 def base_id(card_id: str) -> str:
-    """The printed card an id reconstructs to -- §6.5's upgrade normalization.
+    """The printed card an id reconstructs to. Stated as its own function
+    because `T3` is phrased over base ids and a reader must be able to see
+    the whole of what "normalized" means.
 
-    `<id>+` IS the upgraded form throughout tier 0.5 (`upgrades.SUFFIX`, R20's
-    one upgrade convention), so normalization is exactly stripping it. Stated
-    as its own function because `T3` is phrased over base ids and a reader
-    must be able to see the whole of what "normalized" means.
+    A tier-0.5 deck-list id carries TWO independent decorations, and both
+    come off here:
+
+      * the upgrade suffix, `<id>+` (`upgrades.SUFFIX`, R20's one upgrade
+        convention) -- §6.5's "explicit upgrade normalization";
+      * the run-applied enchantment mark, `<id>@<name>[-<amount>]`
+        (`tier0.content.enchantments`, R82 reopened), which an EVENT attaches
+        to a card already sitting in the run deck.
+
+    THE SECOND ONE IS `EB-124`, FIXED 2026-08-24 AND FOR FUTURE RUNS ONLY.
+    Normalizing the upgrade suffix alone is what §6.5 prescribed, but an
+    enchanted REWARD-POOL card then failed to reconstruct and fell into
+    `membership_audit`'s `external` set -- which is printed under the label
+    "on-plan payoffs that entered the deck from outside the reward pool",
+    something an enchanted pool card is not. At the graded 2026-08-24 read
+    all 122 ids on those lines carried an `@` and genuinely external on-plan
+    payoffs numbered ZERO in every arm, so the line reported a hole of ~14
+    ids per arm when the hole its stated cause could explain was empty.
+    THE GRADE ITSELF DOES NOT MOVE, and that was verified before this fix
+    rather than assumed: an enchantment moves neither `role` nor
+    `archetypes`, which are the whole of `draft.is_on_plan_payoff`, so
+    returning the 122 to the compared set yields zero membership
+    disagreements and `T3` fires under neither normalization. The published
+    record stands as published (`R101b`) and nothing in the results artifact
+    or the registration is edited on the strength of this.
+
+    The order is split-then-strip, never the reverse: the mark sits INSIDE
+    the upgrade suffix by design (`x@sharp-2+`), and `enchantments.split` is
+    the engine's own door past it -- the same function
+    `loader._card_prototype` uses -- so the reader reconstructs an id exactly
+    the way the loader does instead of growing a second opinion about id
+    shape. An unregistered enchantment name still raises out of `split`: a
+    deck-list id nothing can build is a defect, and a reader that quietly
+    normalized it to something would hide it.
     """
-    return (card_id[:-len(upgrades.SUFFIX)]
-            if card_id.endswith(upgrades.SUFFIX) else card_id)
+    plain, _, _ = enchantments.split(card_id)
+    return (plain[:-len(upgrades.SUFFIX)]
+            if plain.endswith(upgrades.SUFFIX) else plain)
 
 
 def _is_anchor_shielded(card) -> bool:
