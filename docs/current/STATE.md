@@ -150,10 +150,13 @@ Named here for status only. Open items are in
 [`docs/current/BACKLOG.md`](BACKLOG.md).
 
 - **EB-118 richness pass** — Phase-0 contract in HEAD
-  (`review/active/eb118-richness-phase0-2026-08-23.md`); connectivity
-  instrument and the staged Route-1 infrastructure set are the only
-  executable-now work; every sheet edit is phase-fenced behind the
-  payoff-reach grade.
+  (`review/active/eb118-richness-phase0-2026-08-23.md`); the connectivity
+  instrument and the full Route-1 infrastructure set are merged **inert**
+  ([USER] pulled the staged branches 2026-08-23): no card uses any new op,
+  pilot policies sit behind `PILOT_POLICIES_ENABLED = False`, every new
+  drafter price is PROPOSED, and no live version integer moved. Every
+  sheet edit stays phase-fenced behind the payoff-reach grade; activation
+  (the policy flip and the `D` move) is Phase 2.
 - **Enemy remapping** — planned.
 - **Art passes** — Furina and Kokomi surfaces (Kokomi's are newest).
 - **Animation sprint 2.**

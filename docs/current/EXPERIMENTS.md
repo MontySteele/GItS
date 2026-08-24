@@ -43,8 +43,10 @@ registration packets themselves live under `review/active/` — one home, not tw
   `review/active/eb118-richness-phase0-2026-08-23.md` §2, [USER]-approved
   2026-08-23. Deterministic, sheets-only, moves no `RT/D/P/C` version; eight
   pools (five canon via the `game_ref/` extraction surfaces, three mod) under
-  one frozen classifier; honest mod-only stop when canon is absent. **Unbuilt,
-  unrun, and no threshold is registered** — directional predictions only
+  one frozen classifier; honest mod-only stop when canon is absent. **Built
+  (`tools/card_connectivity_report.py`) and calibration-run 2026-08-23 —
+  descriptive only, NOT the baseline; no threshold is registered** —
+  directional predictions only
   (§2.4); an absolute gate may be proposed only after the frozen classifier
   has read all five canon pools. Baseline protocol (§2.3): primary baseline is
   taken immediately before the first `EB-118` sheet edit, after `EB-69` lands;
