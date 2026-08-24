@@ -72,9 +72,11 @@ registration packets themselves live under `review/active/` — one home, not tw
   under one coordinated bump, `RUNTEMPLATE` 10 → **11**. Then window 2 of the
   correctness batch (`EB-104`, all twelve members) landed under a second
   coordinated bump, `RUNTEMPLATE` 11 → **12** for its five run-layer fixes and
-  `CONSTANTS` 9 → **10** for its seven tier0 engine fixes — so the live stamp
-  is `RT12/D14/P7/C10`, and §6.6's `RT10` line records what was verified on
-  2026-08-12, not what ships. **The freeze still cannot begin**, because two
+  `CONSTANTS` 9 → **10** for its seven tier0 engine fixes. `C` then moved once
+  more, outside that batch: the Artifact-coexistence + Kokomi-rotation ruling
+  landed 2026-08-23, `CONSTANTS` 10 → **11**, [USER] pulling the staged branch
+  into this same open window. So the live stamp is `RT12/D14/P7/C11`, and
+  §6.6's `RT10` line records what was verified on 2026-08-12, not what ships. **The freeze still cannot begin**, because two
   of the four batch items have not landed: `EB-70` is blocked on unmade design
   picks at QUEUE `M29`, and `EB-69` waits on the `S4-G11` eye-read. §6 is
   re-stamped once, when the last of them lands, rather than after each —
@@ -97,8 +99,11 @@ registration packets themselves live under `review/active/` — one home, not tw
   and `static_leg` is arithmetic over the reward pools and the odds table, so
   neither the constant nor any static-leg output moves. Nothing in either
   window touched the payoff role, the sheets' archetype fields or the rarity
-  fence, which is exactly what §6.6's ordering-(i) argument predicted. **`D`
-  did not move and must not be re-pinned.**
+  fence, which is exactly what §6.6's ordering-(i) argument predicted. **The
+  same four were re-taken a third time across `C10 → C11`** (the 2026-08-23
+  ruling, `cb8be0c`) and are byte-identical again, `DRAFTER_VERSION = 14`
+  included: that window edited no card sheet and moved no offer-time price.
+  **`D` did not move and must not be re-pinned.**
   Owed before the run and named in §6.4/§6.5: the generic reach reader
   (`tier05/exp_payoff_reach.py`) and the `blind` control policy — **both built
   2026-08-13**. Steps (3)–(6) run in order and none reorders →
