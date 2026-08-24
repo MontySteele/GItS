@@ -445,6 +445,15 @@ CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 # delta-var) amounts and no local declarations outside their own braces.
 # repeat_this is legal ONLY as a conditional's entire then-branch.
 BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
+              # EB-119: the OVERDRAW primitive belongs beside its own gain.
+              # The modal contract's second mode IS a spend
+              # (tier0/tests/test_eb118_modal.py), and without this entry the
+              # generator could not emit the contract's own example -- which
+              # is how `{op: gain_encore, amount: -2}` came to stand in for it
+              # in a fixture. That substitution is a no-op in C#
+              # (FurinaResources.GainEncore returns on `amount <= 0`) while
+              # the sim moves the meter, so it is now refused outright below.
+              "spend_encore",
               "place_bomb", "burst_energy", "energy",
               "buff_next_attack",
               # EB-118 §5.5: single calls with no locals, which is the whole
@@ -463,6 +472,7 @@ BRANCH_FIELDS = {
     "draw": {"op", "amount"},
     "gain_spark": {"op", "amount"},
     "gain_encore": {"op", "amount"},
+    "spend_encore": {"op", "amount"},
     "burst_energy": {"op", "amount"},
     "energy": {"op", "amount"},
     "place_bomb": {"op", "amount", "target", "bomb_damage"},
@@ -492,6 +502,11 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
         return f"branch place_bomb target '{eff.get('target')}'"
     if not isinstance(eff.get("amount", eff.get("bomb_damage")), int):
         return f"branch {eff['op']} amount must be a literal int"
+    if eff["op"] in ("gain_encore", "spend_encore") and eff["amount"] <= 0:
+        # EB-119, the same bar the top-level meter ops carry in
+        # blocked_reason. A negative GAIN is the shape a spend was smuggled
+        # in as, and it is not one: it does nothing at all in C#.
+        return f"branch {eff['op']} amount must be a positive literal int"
     return None
 
 
@@ -3331,6 +3346,15 @@ def _emit_branch_op(
         )
     elif op == "gain_encore":
         lines.append(_stmt_gain_encore(card, eff))
+    elif op == "spend_encore":
+        # EB-119. Byte-for-byte the call build_body's top-level arm makes --
+        # SpendEncoreOrHp, not SpendEncore -- so a spend inside a branch or a
+        # mode body overdraws into HP, prints Fanfare and rings the
+        # first-spend hooks exactly as a printed one does. Literal, like every
+        # other branch resolver: no delta grammar reaches a printed cost.
+        lines.append(
+            "await FurinaResources.SpendEncoreOrHp("
+            f"choiceContext, Owner.Creature, {int(eff['amount'])}, this);")
     elif op == "salon_rotate":
         # EB-118 §5.5. Literal in a branch, like every other branch resolver:
         # no delta grammar reaches a rotation count.
@@ -4523,6 +4547,12 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool) -> str:
                 f"{{IfUpgraded:show:{base + delta}|{base}}}"
                 if delta else str(base))
             bits.append(f"gain {amount} [gold]Encore[/gold]")
+        elif op == "spend_encore":
+            # EB-119. The shortfall clause is not decoration -- it is the
+            # difference between this op and the encore_cost gate, and the
+            # top-level arm in build_description prints it too.
+            bits.append(f'spend {int(e["amount"])} [gold]Encore[/gold] '
+                        "(losing HP for any shortfall)")
         elif op == "energy":
             bits.append(f"gain {int(e['amount'])} Energy")
         elif op == "place_bomb":

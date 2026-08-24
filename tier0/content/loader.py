@@ -303,6 +303,11 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
     Recurses through `then`/`else` branches and through `choose_one`'s
     `modes:` bodies: both nest, and an unreachable-today branch is exactly
     where a typo survives longest.
+
+    One AMOUNT is checked here as well, for the same when-is-it-reported
+    reason: a non-positive `gain_encore` (EB-119). It is not a vocabulary
+    error, but it is a cross-engine one, and the recursion above is already
+    the only walk that reaches every nested body on every sheet.
     """
     from tier0.engine import effects as _effects        # late: cycle
 
@@ -317,6 +322,20 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
             if not _effects.is_known_predicate(name):
                 raise ValueError(
                     f"card {card_id!r}: unknown predicate {name!r}")
+        if op == "gain_encore" and isinstance(fx.get("amount"), int) \
+                and fx["amount"] <= 0:
+            # EB-119. A negative GAIN is not a spend, and it is the exact
+            # shape a spend gets smuggled in as. It is also silently INERT in
+            # the mod -- FurinaResources.GainEncore opens `if (amount <= 0)
+            # return;` -- so a row written this way moves the sim's meter and
+            # does nothing in game. The overdraw primitive is `spend_encore`;
+            # the no-overdraw price is the `encore_cost` field. Refused here
+            # because a non-positive amount has no honest reading at all.
+            raise ValueError(
+                f"card {card_id!r}: gain_encore amount must be positive, got "
+                f"{fx['amount']} -- a negative gain is not a spend; use "
+                f"spend_encore (the overdraw primitive) or the encore_cost "
+                f"field")
         if op == "choose_one":
             _validate_modal_shape(card_id, fx)
             for mode in fx[_effects.MODES_KEY]:
