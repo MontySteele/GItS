@@ -43,6 +43,17 @@ draft-regret gap distributions; gated by
 loops cannot see a margin and that the printer re-prices exactly the sample
 the live run recorded).
 
+`lint_recall_exhaust.py` (EB-118 — the six §6.4 constraints on `recall_to_draw`
+`from: exhaust`, swept three ways: card SHAPE over every `*-cards.yaml` /
+`*-companions.yaml` row (Uncommon-or-Rare, self-Exhausting, top-of-draw only),
+ENGINE CLOSURE over the complete effect graph (the whole loader index plus a
+synthetic retriever in one exhaust pile, with `effects.recall_exhaust_pool`
+asserted to exclude every retriever, kit card and Status/Curse), and a
+structural pin on the C# leg in `lint_constant_parity`'s shape. Prints its
+denominator. Gated by `tier0/tests/test_eb118_recall_exhaust.py`; no committed
+row ships `from: exhaust` yet, so the shape leg is vacuous by construction and
+says so.)
+
 `card_connectivity_report.py` (EB-118 — how much of the rest of the game each
 card touches: shared/private state reads and writes, non-target play-time
 choices, contested states, external reach, random shares, cross-archetype

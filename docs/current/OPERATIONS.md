@@ -124,6 +124,31 @@ Local-only (not in CI): `lint_text_encoding.py`, `lint_generated_structure.py`,
 `art_lint.py`, `card_distinctness_report.py --gate`, `dump_claimed_sources.py`.
 `tools/README.md` is the authoritative map of which tool is gated by what.
 
+Suite-gated (runs under `pytest`, not in the CI `lints` job):
+`lint_recall_exhaust.py` (`EB-118`, merged **inert** 2026-08-23; gate
+`tier0/tests/test_eb118_recall_exhaust.py`).
+
+```sh
+python3 tools/lint_recall_exhaust.py       # exit 1 with findings on stdout
+```
+
+Three sweeps in one tool, all enforcing `EB-118` §6.4's six constraints on
+`recall_to_draw` with `from: exhaust`. **(a) Card shape** over every
+`docs/*-cards.yaml` and `docs/*-companions.yaml` row: a retriever must be
+Uncommon-or-Rare, must carry `exhaust: true`, and may not ask for a
+destination other than top-of-draw. **(b) Engine closure**, against the
+complete effect graph rather than one card: the whole loader index plus a
+synthetic retriever goes into one exhaust pile and `effects.recall_exhaust_pool`
+is asserted to exclude every retriever (the probe itself included), every kit
+card and every Status/Curse — the hazard is a *cycle*, and tier0's own closure
+detector sees one turn of one fight. **(c) A structural C# pin** in
+`lint_constant_parity`'s shape: `KleeCode/Powers/RecallFromExhaust.cs` must
+name all three exclusions plus `CardPilePosition.Top`/`PileType.Draw`/
+`CardKeyword.Exhaust`, and must never name `PileType.Hand`. It prints its
+denominator — a sweep that compared nothing must not read like a clean one. No
+committed sheet row ships `from: exhaust` today, so leg (a) is deliberately
+vacuous while (b) and (c) are not.
+
 Encoding rule is repo-wide and structural: **every text read/write declares
 `encoding=`** (an omitted encoding is cp1252 on Windows, UTF-8 on CI). The
 content path carries zero encoding debt.

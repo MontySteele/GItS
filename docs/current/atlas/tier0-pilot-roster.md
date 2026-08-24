@@ -92,6 +92,34 @@ index reads **303** — the extra 3 are `ancients.yaml`, acquisition-only.
 - **Character-machinery terms default to 0.0 and are skipped when zero**, so
   every older pilot is arithmetically unchanged and the frozen anchor tables
   cannot move (`policy.py:646-654`; weights in `content/pilots/archetypes.yaml`).
+- **The two `EB-118` pilot policies are merged and SWITCHED OFF**
+  (`policy.py:658` `PILOT_POLICIES_ENABLED = False`; the engine reaches them
+  through `effects._pilot_policies`, `effects.py:1172-1181`, a LATE import —
+  the pilot imports the engine, so this dependency may run at call time and
+  never at import time, and the flag is read off the module so one name can be
+  flipped). **(a) Bomb placement**, the CONCENTRATION form only
+  (`policy.bomb_placement_score` `:882`, `bomb_placement_target` `:929`; call
+  site `effects._op_place_bomb`): candidate enumeration scored in DAMAGE
+  POINTS — landed damage, lethal waste, existing pile concentration to a
+  counted cap, the enemy attack suppressed by arming it, and a detonator in
+  hand aimed here. `random_enemy` placements and a free play's forced random
+  targeting stay out of scope: a variance profile is not a decision, and
+  forced random targeting is parity law. **(b) Exhaust selection**, the chosen
+  `exhaust_from` (`policy.exhaust_victim` `:993`, `exhaust_future_value`
+  `:963`, `identity_blind_payout` `:952`): candidates scored as
+  `payout - future_value`, with the default payout hook identity-blind, so the
+  default ranking is "lose the least" and an identity-paying grammar passes
+  its own hook rather than growing a second heuristic. OFF, both call sites
+  run the identical code they ran before the branch — which is what keeps the
+  frozen battery and every regression pin byte-identical.
+- **Flipping that switch is TWO version moves in ONE edit.**
+  `tier05/draft.POLICY_VERSION` (the decisions change, so every Klee and
+  Kokomi tier-0.5 number re-baselines — the R93 rule) **and**
+  `C.PILOT_WEIGHTS_VERSION` (the `BOMB_*` / `EXHAUST_*` weights ENTER the set
+  that stamp labels, and two readings across it are not one measurement). The
+  bump is written PROPOSED at `tier05/draft.py:1604-1650` and is deliberately
+  **not** taken while the switch is off: no weight is ever read, so the
+  labeled set is arithmetically unchanged. Pin: `test_eb118_switch_off.py`.
 - **The pilot must not disagree with the engine.** Every formula it forecasts
   goes through the engine's own helper — `effects.flat_attack_bonus`,
   `effects._calc_amount`, `effects._bonus_formula`, `effects.spotlight_mult`,
@@ -183,7 +211,17 @@ index reads **303** — the extra 3 are `ancients.yaml`, acquisition-only.
 - **The `STOKE_*` constants are deliberately NOT in `constants.py`** — that file
   is the surface `tools/lint_constant_parity.py` compares to C# by value, and a
   pilot heuristic has no C# counterpart because the mod ships no bot
-  (`policy.py:554-565`).
+  (`policy.py:554-565`). The `EB-118` `BOMB_*` / `EXHAUST_*` weights
+  (`policy.py:664-713`) are filed there for the same reason, and are stamped by
+  `C.PILOT_WEIGHTS_VERSION` all the same — where a weight LIVES is not what
+  decides which readings are comparable.
+- **The exhaust-chooser placeholder is not merely coarse, it is BACKWARDS on
+  one term** — highest-cost-non-Attack exhausts the expensive card *first*, by
+  cost alone, while `EXHAUST_COST_EFFICIENCY_WEIGHT` discounts an expensive
+  payoff for the turn it costs to deploy, not for being big
+  (`policy.py:699-706`, and `_legacy_worst_key` at `:986` is the shape being
+  replaced). Until the switch flips, any tier-0.5 claim about a
+  selected-identity Exhaust card is a claim about the proxy.
 - **Two "known understatement" lists are on the record** in the pilot weights
   file so a low anchor score is not read as a finding about the pool: Demon Form
   scoring as a one-shot, Vulnerable priced flat at `amount*2`, poison priced
