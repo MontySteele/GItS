@@ -44,7 +44,7 @@ public sealed class ChainFuse : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chain Fuse"),
-        ("description", "[gold]Bombs[/gold] placed this turn deal {Bonus:diff()} more damage. Place a [gold]Bomb[/gold] on a random enemy dealing {Damage:diff()} damage."),
+        ("description", "[gold]Bombs[/gold] placed this turn deal {Bonus:diff()} more damage. Place a [gold]Bomb[/gold] on a random enemy dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -27,7 +27,7 @@ KNOWN_FAILING = {
     # The Track-B maxclu transient (6) resolved in the same sweep (3).
     ("kokomi", "uniq"),      # 53% -- breadth (was 56% pre-EB-69)
     ("kokomi", "maxclu"),    # 8 -- the block cluster (was 7 pre-EB-69)
-    # ("kokomi", "neardup") -- NEW AT EB-69 (R198, 2026-08-23), 26% -> 33%
+    # ("kokomi", "neardup") -- NEW AT EB-69 (R198, 2026-08-23), 26 -> 33 PAIRS
     # against a ratified threshold of 30%. THIS IS THE FILL'S OWN FINDING AND
     # IT IS NOT BEING TREATED AS COVER. The 14 ruled bodies are rebuilds of
     # shapes the pool already prints -- another 0-cost cycler, another Sly
@@ -39,7 +39,7 @@ KNOWN_FAILING = {
     # cause with.
     #
     # RULED 2026-08-24, R200 -- AND THE BREACH IS NOT RATIFIED. [USER] ruled
-    # 33% TEMPORARY, carried by this entry THROUGH Phase 3 and cleared there.
+    # 33 pairs (limit 30) TEMPORARY, carried by this entry THROUGH Phase 3 and cleared there.
     # One body from each pair is redesigned and the targets are named:
     # moon_signal, crane_wing, tighten_the_cords (see
     # tools/lint_strict_domination.PENDING_RULING for which end of each pair

@@ -156,13 +156,15 @@ def test_the_constellation_card_grants_a_floor_not_a_cap():
 def test_targeted_fanfare_floor_repairs():
     suffering = loader.get_card("suffering_for_art")
     thunder = loader.get_card("thunderous_ovation")
-    # COMPENSATION Track 2.2 (2026-07-28): the flagship conversion. The wound
-    # prints the meter and the third clause reads it, so this is the one card
-    # in the pool that both pays Fanfare and spends it on the same face.
+    # COMPENSATION Track 2.2 (2026-07-28) gave this card a third clause that
+    # read the meter its own wound prints. EB-118 sec.5.3 (2026-08-24) took
+    # the clause back off: it was one of two Block readers with a printed
+    # base of ZERO, and the reader role now sits with `held_breath` at Common
+    # and `thunderous_ovation` at Rare, both of which pay something on a cold
+    # meter. What survives here is the leg that was never in question.
     assert suffering.effects == [
         {"op": "damage", "amount": 1, "target": "self"},
         {"op": "gain_encore", "amount": 3},
-        {"op": "block", "amount": 0, "bonus_formula": "1_per_4_fanfare"},
     ]
     # F-B1 made it a smooth read; Curtain Call C (R85) steepened the rate
     # and moved the card to its rare payoff slot (base 7->6, 1 per 2).
@@ -171,21 +173,22 @@ def test_targeted_fanfare_floor_repairs():
     ]
 
 
-def test_lasting_impressions_ruled_body_is_exactly_three_ops():
-    """R135 (2026-08-08): the body S4-G9 item 7 commissioned, landed.
+def test_lasting_impressions_body_after_the_reader_came_off():
+    """R135 (2026-08-08) gave this row a body; EB-118 sec.5.3 took one clause
+    of it back, and the card is in an unfinished state ON PURPOSE.
 
-    The R130 sitting refused to ratify this row -- "needs a rework" -- and
-    the worksheet's candidate A was picked after measurement: the cap raise
-    and the Encore rider keep their numbers and a commons-rate Block reader
-    joins them, so the card reads the meter it raises. Pinned as an EXACT
-    list, in order, because a ruled body is the one thing on this sheet that
-    must not drift by accident: an op appended, dropped or re-rated here is
-    a second ruling, not an edit.
+    R135's candidate A added a commons-rate Block reader so the card would
+    read the meter it raises. sec.5.3 removed it -- a printed base of ZERO is
+    a keyword that pays nothing at the moment the player reads it, and two of
+    the pool's Block readers were that. sec.5.2 would ALSO have taken the cap
+    raise, and did not: the ruled upgrade delta `{fanfare_cap: +2}` binds to
+    that op, so removing it makes `apply_upgrade` raise and the card needs a
+    NEW ruled delta first. That is [USER]'s call.
 
-    The upgrade is asserted alongside it for the same reason the sheet's
-    comment says the delta "chains on top unchanged" -- `{fanfare_cap: +2}`
-    moves ONE number (5 -> 7) and must leave the reader clause and its rate
-    exactly where they are.
+    So this pin says two things at once: the body as it stands, and the fact
+    that the upgrade still has exactly one number to move (5 -> 7). If the
+    delta is ever re-ruled, this is the test that has to be rewritten with
+    it, which is the point of pinning an EXACT list in order.
     """
     card = loader.get_card("lasting_impression")
     assert card.cost == 1 and card.rarity == "common" and card.type == "skill"
@@ -193,12 +196,10 @@ def test_lasting_impressions_ruled_body_is_exactly_three_ops():
     assert card.effects == [
         {"op": "raise_fanfare_cap", "amount": 5},
         {"op": "gain_encore", "amount": 4},
-        {"op": "block", "amount": 0, "bonus_formula": "1_per_4_fanfare"},
     ]
     assert loader.get_card("lasting_impression+").effects == [
         {"op": "raise_fanfare_cap", "amount": 7},
         {"op": "gain_encore", "amount": 4},
-        {"op": "block", "amount": 0, "bonus_formula": "1_per_4_fanfare"},
     ]
 
 

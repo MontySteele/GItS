@@ -47,7 +47,7 @@ public sealed class JumpyDumpty : CustomCardModel, IElementalCard, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Dumpty"),
-        ("description", "Deal {Damage:diff()} damage to random enemies twice. Place a [gold]Bomb[/gold] on a random enemy dealing {ExtraDamage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage to random enemies twice. Place a [gold]Bomb[/gold] on a random enemy dealing {ExtraDamage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };

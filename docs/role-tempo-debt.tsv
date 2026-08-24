@@ -23,10 +23,23 @@
 # disagreeing with the sheets' own comments; read it as a re-measurement,
 # not as progress.
 #
+# SAID OUT LOUD, 2026-08-24 (EB-118 sec.5.2): 16 -> 17. The cell that
+# ARRIVES is furina/spotlight frontload|late. A growing list is what this
+# header calls a regression, so read what happened before reading it as
+# one: nobody deleted a frontload card. Five spotlight Powers covered
+# that cell by TOUCHING THE FANFARE METER -- a card that touches a meter
+# inherits the solves of that meter's payoff set -- and what they touched
+# it with was the incidental `raise_fanfare_cap` rider EB-118 sec.5.2
+# removed. The coverage was inherited from a printed line the packet
+# measured as close to inert, so this is a DISCLOSURE of a gap the pool
+# already had in play, not one the batch opened. Filling it is Phase 3's
+# business (Spotlight content). No floor moved to absorb it; none may.
+#
 # Every line is a COVERAGE GAP in a pool. No line names a card, and none
 # ever can: this lint is floors-only (charter A0.2(1)).
 character	archetype	cell
 furina	salon	frontload|late
+furina	spotlight	frontload|late
 furina	spotlight	scaling|late
 klee	demolition	block|early
 klee	demolition	block|late

@@ -41,13 +41,13 @@ public sealed class PrimaDonna : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Prima Donna"),
-        ("description", "The first [gold]Spotlighted[/gold] card each turn costs 1 less. The first [gold]Spotlighted[/gold] card each turn draws 1 card. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
+        ("description", "The first [gold]Spotlighted[/gold] card each turn costs 1 less. The first [gold]Spotlighted[/gold] card each turn draws 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("FanfareCap", 8m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,7 +61,6 @@ public sealed class PrimaDonna : CustomCardModel, ICharacterCard
     {
         await PowerCmd.Apply<SpotlightDiscountPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
         await PowerCmd.Apply<SpotlightDrawPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
     }
 
     protected override void OnUpgrade()

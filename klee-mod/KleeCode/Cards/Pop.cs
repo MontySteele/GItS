@@ -27,7 +27,12 @@ public sealed class Pop : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pop!"),
-        ("description", "Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage."),
+        // EB-118 sec.4.6: the `skill_tag` contribution is printed on every
+        // one of the fifteen faces that carries the tag. This card is
+        // hand-written, so the line is hand-carried; the generated cards
+        // get the identical text from build_description. NOT a keyword --
+        // sec.1 rail 1 -- so it stays out of CanonicalKeywords below.
+        ("description", "Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     /// <summary>

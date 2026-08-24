@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -40,23 +39,18 @@ public sealed class HeartsSwelling : CustomCardModel, ICharacterCard
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Innate };
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 4, grantsBlock: true);
-
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("hearts_swelling");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hearts Swelling"),
-        ("description", "Gain {IfUpgraded:show:9|7} [gold]Encore[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Scales with [gold]Fanfare[/gold]."),
+        ("description", "Gain {IfUpgraded:show:9|7} [gold]Encore[/gold]. Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(3m),
-            new CalculationExtraVar(1m),
-            new CalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.ReadableFanfare(card.Owner.Creature) / 4)
+            new BlockVar(3m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -69,7 +63,7 @@ public sealed class HeartsSwelling : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 9 : 7));
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
+        await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
     }
 
     protected override void OnUpgrade()

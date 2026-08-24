@@ -41,14 +41,13 @@ public sealed class QuickChange : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Quick Change"),
-        ("description", "The first Attack you play each turn draws {PowerAmount:diff()} card{PowerAmount:plural:|s}. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
+        ("description", "The first Attack you play each turn draws {PowerAmount:diff()} card{PowerAmount:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 1m),
-            new DynamicVar("FanfareCap", 5m)
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,7 +60,6 @@ public sealed class QuickChange : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<FirstAttackDrawPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
-        FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
     }
 
     protected override void OnUpgrade()

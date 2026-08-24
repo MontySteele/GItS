@@ -206,28 +206,38 @@ def test_lasting_impression_raises_the_cap_banks_encore_and_exhausts():
     assert state.player.discard_pile == []
 
 
-def test_lasting_impression_pays_block_off_the_meter_it_raises():
-    """R135 (2026-08-08), the ruled body -- candidate A, the Block reader.
+def test_lasting_impression_raises_the_cap_and_reads_nothing_back():
+    """R135's Block reader is GONE (EB-118 sec.5.3, 2026-08-24).
 
-    The point of the clause is that the card finally touches the meter it
-    moves: the cap raise is headroom, and the Block line is what reads the
-    Fanfare already banked. At 14 (the meter's working range) the commons
-    rate pays 3. Mutation: drop the `bonus_formula` from the sheet row and
-    this goes 3 == 0 while the pin above stays green.
+    R135 gave this card a clause so that it would finally touch the meter it
+    moves -- the cap raise is headroom, the Block line read the Fanfare
+    already banked. sec.5.3 removed it as one of two readers printing a base
+    of ZERO. What is left is headroom on a ceiling and an Encore rider, so
+    the assertion inverts: a full working meter now pays this card nothing.
+    The cap raise itself is still here, and still held only by the ruled
+    upgrade delta that binds to it (sec.5.2's one unlanded removal).
     """
     state = furina_state()
     state.player.fanfare = 14
+    cap_before = state.player.fanfare_cap
 
     play(state, "lasting_impression")
 
-    assert state.player.block == 14 // 4      # commons rate, 1 per 4
-    assert state.player.fanfare == 14         # a read never spends the meter
+    assert state.player.block == 0            # the reader is gone
+    assert state.player.fanfare == 14         # and nothing spent the meter
+    assert state.player.fanfare_cap == cap_before + 5
+    assert state.player.encore == 4
 
 
-def test_prima_donna_installs_both_spotlight_powers_and_raises_the_cap():
+def test_prima_donna_installs_both_spotlight_powers_and_leaves_the_cap_alone():
     """Prima Donna installs one stack each of the Spotlight discount and the
-    Spotlight draw, raises the Fanfare Cap by 8 without moving the meter, and
-    -- being a Power -- leaves combat entirely instead of hitting a pile."""
+    Spotlight draw and -- being a Power -- leaves combat entirely instead of
+    hitting a pile.
+
+    It used to raise the Fanfare Cap on the way past. EB-118 sec.5.2 removed
+    that rider from the cards that carried it incidentally, so the cap
+    assertion inverts: this card now touches neither the ceiling nor the
+    meter, and the two Spotlight installs are the whole of it."""
     state = furina_state()
     cap_before = state.player.fanfare_cap
 
@@ -235,7 +245,7 @@ def test_prima_donna_installs_both_spotlight_powers_and_raises_the_cap():
 
     assert state.player.powers["spotlight_discount"] == 1
     assert state.player.powers["spotlight_draw"] == 1
-    assert state.player.fanfare_cap == cap_before + 8
+    assert state.player.fanfare_cap == cap_before
     assert state.player.fanfare == 0
     assert state.player.discard_pile == [] and state.player.exhaust_pile == []
 

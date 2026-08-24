@@ -41,14 +41,13 @@ public sealed class CastingCall : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Casting Call"),
-        ("description", "Your [gold]Salon[/gold] has room for {PowerAmount:diff()} more [gold]Salon Member(s)[/gold]. [gold]Fanfare Cap[/gold] +{FanfareCap:diff()}."),
+        ("description", "Your [gold]Salon[/gold] has room for {PowerAmount:diff()} more [gold]Salon Member(s)[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 1m),
-            new DynamicVar("FanfareCap", 5m)
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,7 +60,6 @@ public sealed class CastingCall : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<SalonCapUpPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
-        FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
     }
 
     protected override void OnUpgrade()

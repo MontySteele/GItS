@@ -44,7 +44,7 @@ public sealed class TripWire : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Trip Wire"),
-        ("description", "Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage. Apply 1 [gold]Weak[/gold]."),
+        ("description", "Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage. Apply 1 [gold]Weak[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -44,7 +44,7 @@ public sealed class BombsAway : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bombs Away!"),
-        ("description", "Place 5 [gold]Bombs[/gold] on random enemies, each dealing {Damage:diff()} damage."),
+        ("description", "Place 5 [gold]Bombs[/gold] on random enemies, each dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

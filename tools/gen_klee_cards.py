@@ -50,6 +50,11 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 from tools.effect_walk import (SLY_AUTOPLAY_OP, iter_effects,  # noqa: E402
                                sly_autoplays, sly_riders)
+# EB-118 sec.4.6. The generator prints the `skill_tag` contribution on the
+# face, and it READS the number off tier0 rather than restating it: a printed
+# 5 that could drift from the constant is the defect this line exists to
+# remove, not one to introduce.
+from tier0.constants import BURST_PER_SKILL_TAG                 # noqa: E402
 
 SHEET = REPO / "docs" / "klee-cards.yaml"
 # Mirrors tier0/content/upgrades.py UPGRADE_SHEETS, in the same order.
@@ -4611,6 +4616,28 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool) -> str:
     return " and ".join(bits) + "."
 
 
+_KLEE_ROW_IDS: set[str] | None = None
+
+
+def _is_klee_row(card: dict) -> bool:
+    """Is this row on KLEE's sheet? EB-118 sec.4.6's scope, and only that.
+
+    THE MECHANIC IS NOT KLEE-ONLY and this gate does not pretend otherwise:
+    `combat.play_card` pays BURST_PER_SKILL_TAG to ANY character with a Burst
+    meter, so Furina's thirteen `skill_tag` rows and Kokomi's one pay the
+    same invisible 5. sec.4.6 sits under the packet's Klee section and rules
+    "every one of the FIFTEEN", so fifteen faces is what this batch prints.
+    Extending the line to the other fourteen is the same legibility argument
+    and is deliberately NOT taken here -- it is a change to two other
+    characters' faces that no ruling in this packet asked for.
+    """
+    global _KLEE_ROW_IDS
+    if _KLEE_ROW_IDS is None:
+        _KLEE_ROW_IDS = {row["id"] for row in
+                         yaml.safe_load(SHEET.read_text(encoding="utf-8"))}
+    return card.get("id") in _KLEE_ROW_IDS
+
+
 def build_description(card: dict) -> str:
     """
     Card text. Syntax is copied from base-game strings observed at runtime:
@@ -5303,6 +5330,27 @@ def build_description(card: dict) -> str:
     # description string as well would print the word twice (the A9 note on
     # the CanonicalKeywords rail is the same reasoning). `_sly_view` already
     # drops it, so a marker-only row produces no text and no line.
+    # EB-118 sec.4.6: the `skill_tag` contribution becomes VISIBLE. The tag
+    # is worth BURST_PER_SKILL_TAG burst energy on play and always has been,
+    # paid by KleeElementalHooks.AfterCardPlayed off the ISkillTagCard
+    # marker -- a real number on fifteen faces that no face printed. The tag,
+    # its membership and the meter arithmetic do NOT move here; only the
+    # reading does.
+    #
+    # NOT A KEYWORD, by sec.1 rail 1: `Burst +5` is a visible effect LINE, and
+    # Klee gets no third keyword out of this pass. So it is rendered as plain
+    # text with only the resource name highlighted -- the same treatment the
+    # `burst_energy` op's own line already gets -- and it is deliberately
+    # NOT added to CanonicalKeywords, where the game's auto-keyword pipeline
+    # would give it a tooltip and a capitalised badge and make it one.
+    #
+    # LITERAL, never a var: the number is a CONSTANT of the tag rather than a
+    # property of the card, no upgrade delta can reach it, and rendering it
+    # through {Var:diff()} would invite exactly the drift this line exists to
+    # remove.
+    if "skill_tag" in (card.get("tags") or ()) and _is_klee_row(card):
+        parts.append(f"[gold]Burst[/gold] +{BURST_PER_SKILL_TAG}.")
+
     if sly_riders(card):
         sly_text = build_description(_sly_view(card)).strip()
         if sly_text:

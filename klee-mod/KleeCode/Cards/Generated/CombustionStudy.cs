@@ -40,7 +40,7 @@ public sealed class CombustionStudy : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Combustion Study"),
-        ("description", "Gain {BurstEnergy:diff()} [gold]Burst Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Gain {BurstEnergy:diff()} [gold]Burst Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

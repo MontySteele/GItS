@@ -44,7 +44,7 @@ public sealed class DoublePop : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Double Pop"),
-        ("description", "Place 2 [gold]Bombs[/gold], each dealing {Damage:diff()} damage."),
+        ("description", "Place 2 [gold]Bombs[/gold], each dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

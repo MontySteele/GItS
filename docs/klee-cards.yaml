@@ -28,8 +28,16 @@
    effects: [{op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 5}, {op: draw, amount: 1}]}
 - {id: big_badda_boom, name: "Big Badda Boom", cost: 2, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition, generic], role: glue,
    effects: [{op: damage, amount: 16, target: enemy}]}
-- {id: blast_radius, name: "Blast Radius", cost: 1, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
-   effects: [{op: damage, amount: 9, target: all_enemies}]}
+- {id: blast_radius, name: "Blast Radius", cost: 1, type: attack, rarity: common, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
+   effects: [{op: damage, amount: 9, target: all_enemies}, {op: discard, amount: 1, select: chosen}]}
+   # EB-118 sec.4.3 (2026-08-24): a READABLE SECOND PRICE, existing grammar
+   # only. The card was a flat AoE face with nothing to decide; the chosen
+   # discard is a play-time choice with a real downstream (what leaves hand,
+   # which pile it enters, what still gets played this turn). CHOSEN, not
+   # random -- a random discard is variance, not a decision, and the packet's
+   # whole subject is decisions. Base damage is UNCHANGED for the structural
+   # pass and the ruled `{damage: +3}` upgrade rides on unchanged: sec.4.3
+   # says add the second price first and reprice later, in its own window.
 - {id: chain_fuse, name: "Chain Fuse", cost: 1, type: skill, rarity: uncommon, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: modify_bombs, scope: placed_this_turn, bonus: 3}, {op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 4}]}
 - {id: careful_arrangement, name: "Careful Arrangement", cost: 1, type: skill, rarity: uncommon, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition], role: glue,
@@ -244,5 +252,13 @@
    effects: [{op: apply_power, power: bomb_and_spark_per_turn, amount: 1, target: self}]}
 - {id: best_friends_forever, name: "Best Friends Forever", cost: 1, type: skill, rarity: rare, solve: [velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [reaction], role: payoff, exhaust: true,
    effects: [{op: copy_companions_played_this_combat, zone: hand, cost_override: 0}]}
-- {id: no_holding_back, name: "No Holding Back", cost: 1, type: attack, rarity: rare, solve: [frontload], tempo_band: {fight: [early], run: [late]}, archetypes: [generic], role: payoff,
-   effects: [{op: damage, amount: 14, target: all_enemies}]}
+- {id: no_holding_back, name: "No Holding Back", cost: 1, type: attack, rarity: rare, solve: [frontload, velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [generic], role: payoff, exhaust: true,
+   effects: [{op: damage, amount: 14, target: all_enemies}, {op: add_card, card: confiscated, zone: discard, amount: 1}]}
+   # EB-118 sec.4.3 (2026-08-24): TWO prices, both existing grammar. Exhaust
+   # is the card-level one; the junk card is the deck-level one, and it is
+   # `confiscated` -- Klee's already-shipped status-price vocabulary, the
+   # same one fish_blasting pays -- rather than an inline Burn injector the
+   # packet forbids inventing. The name survives the eye-read sec.4.3 asks
+   # for: holding nothing back is exactly when Jean confiscates something.
+   # Base damage UNCHANGED and the ruled `{damage: +4}` upgrade rides on
+   # unchanged; both prices remain after the upgrade, by the same clause.
