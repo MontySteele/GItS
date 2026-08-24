@@ -60,6 +60,13 @@ Usage:
   python -m tier05.exp_payoff_reach --leg sim  [--runs N] [--seed N]
                                               [--route NAME] [--jobs N]
                                               [--policy assigned|blind]
+  python -m tier05.exp_payoff_reach --controls    # ... and both controls
+
+`--controls` appends the two registered controls to the report: C1, the two
+canonical anchor arms at the same cell, and C2, the same nine arms under
+`blind`. They print AFTER the tripwire report and their own tripwire state is
+labelled a diagnostic, because §6.5's stop condition is defined over the nine
+roster arms and a control must never be able to look like part of it.
 """
 
 from __future__ import annotations
@@ -77,6 +84,31 @@ ARMS: tuple[tuple[str, str], ...] = (
     ("klee", "demolition"), ("klee", "reaction"), ("klee", "spark"),
     ("furina", "salon"), ("furina", "spotlight"), ("furina", "fanfare"),
     ("kokomi", "priest"), ("kokomi", "commander"), ("kokomi", "assist"),
+)
+
+# CONTROL C1 (§6.5, PROPOSED AUTHORISED) — the canonical-pool anchor arms.
+#
+# §6.5 names them `(real_ironclad, starter)` and `(real_silent, starter)`.
+# `starter` is a TIER-0 DECK PACKAGE name — it is how STATE names the scoring
+# anchor, `("ref_ironclad", "starter")` under the `generic` pilot — and tier
+# 0.5 has no such archetype: `runner.resolve_plan("real_ironclad", "starter")`
+# raises, because the extracted anchor sheets tag every card `generic` and
+# `generic` is the only plan either anchor has. So the registered pair's only
+# constructible tier-0.5 form is the one below. Recorded rather than silently
+# translated: it is a naming reconciliation between two layers, and it changes
+# neither the pool being drafted nor the cell being run.
+#
+# WHAT THIS CONTROL CAN AND CANNOT JOIN. On the SIM axis it is the join §6.5
+# claims: realized reach out of the ACTUAL Ironclad and Silent pools the
+# census measured, under the same drafter, the same cell and the same reader.
+# On the STATIC axis it is NOT like-for-like with the bands, and the reason is
+# in the census's own rubric: the bands were derived over IDENTITY archetypes
+# and rubric R3(b) EXCLUDES generic layers, while the tier-0.5 anchor sheets
+# carry `generic` and nothing else. So a static read here counts every
+# payoff-role card in the pool, not one identity archetype's payoffs, and it
+# is printed as a denominator for the reach column rather than as a band read.
+C1_ARMS: tuple[tuple[str, str], ...] = (
+    ("real_ironclad", "generic"), ("real_silent", "generic"),
 )
 
 # The aims, RULED 2026-08-12 (R185). Quoted, never re-derived here.
@@ -114,6 +146,24 @@ SUPPLY_TOLERANCE = 1
 
 # §6.5 tripwire T2.
 DECK_SIZE_WINDOW = (12, 30)
+
+# §6.5 tripwire T1 — the registration's own world-stamp string, quoted.
+#
+# RE-STAMPED AT THE `P12` FREEZE (§6.6, 2026-08-24): `RT10 / D14 / P7 / C9` ->
+# `RT12 / D14 / P7 / C11`. That is the act §6.6's approved ordering (ii)
+# reserved — settle first, re-stamp §6 to the world the batch left behind,
+# THEN freeze — and it moved no version integer: the world moved first, by
+# `RT` 10->11->12 and `C` 9->10->11, each an authorized bump fingerprinted
+# against this fence when it landed. `D14`, the registration's actual pin, is
+# inside the string unchanged and was never re-pinned.
+#
+# Left stale the tripwire fired on every arm of every run, because the string
+# named a superseded world — a stale citation, not a finding, and a tripwire
+# that fires unconditionally carries no information. A literal rather than a
+# read of `cells`: `T1`'s whole job is to catch the live world DIVERGING from
+# the registered one, and a condition that recomputed both sides from the same
+# live source could never fire.
+REGISTERED_STAMP = "RT12 / D14 / P7 / C11"
 
 # The canonical supply ceiling. Since `M28` (R196) this is a REPORTING DIVISOR
 # and nothing else: §6.5's amended `T3` contains no reach quantity at all, and
@@ -377,9 +427,9 @@ def tripwires(cell, static: dict, sim: dict | None) -> list[str]:
     v = cell.versions
     arm = f"{static['character']}/{static['archetype']}"
     stamp = f"RT{v['RT']} / D{v['D']} / P{v['P']} / C{v['C']}"
-    if stamp != "RT10 / D14 / P7 / C9":
+    if stamp != REGISTERED_STAMP:
         fired.append(f"T1: world stamp is {stamp}, registered against "
-                     "RT10 / D14 / P7 / C9")
+                     f"{REGISTERED_STAMP}")
     if static["supply"] == 0:
         fired.append(f"T4: {arm} has "
                      "zero draftable payoff cards — this is a content "
@@ -530,6 +580,77 @@ def _print_exclusions(rows: dict[tuple[str, str], dict]) -> None:
           "have no static row to be compared against.")
 
 
+def _print_c1(rows: dict[tuple[str, str], dict],
+              static: dict[tuple[str, str], dict]) -> None:
+    """CONTROL C1 — the two canonical-pool anchor arms, at the same cell.
+
+    NO BAND COLUMN AND NO P5 VERDICT, deliberately. The census excluded
+    generic layers (rubric R3(b)) and these sheets carry only `generic`, so
+    grading them against the bands would be comparing a whole-pool payoff
+    count with an identity archetype's. What the control is FOR is the reach
+    column: the same drafter, the same cell and the same reader, run over the
+    pools the bands were derived from.
+    """
+    print("\n  CONTROL C1 — canonical-pool anchors (§6.5; primary checkout "
+          "only, `game_ref/`)")
+    print(f"  {'arm':>22} {'pool':>6} {'payoffs':>8} {'offer':>9} "
+          f"{'deck':>6} {'reach':>7} {'x ceil':>7} {'none':>6} {'win':>7}")
+    for arm in C1_ARMS:
+        if arm not in rows:
+            continue
+        r, s = rows[arm], static[arm]
+        print(f"  {'/'.join(arm):>22} {sum(s['sizes'].values()):>6d} "
+              f"{s['supply']:>8d} {s['offer']:>9.4f} "
+              f"{r['decksize']:>6.1f} {r['reach']:>7.2f} "
+              f"{above_scale(r['reach'], REACH_CEILING):>7} "
+              f"{r['held_none']:>6.1%} {r['win']:>6.1%}")
+    print("  `payoffs` is every payoff-role card in the pool under the ONE "
+          "registered\n  predicate — the anchor sheets carry a single "
+          "`generic` archetype, so there is no\n  identity layer to narrow it "
+          "to, and the census's own bands excluded exactly\n  that layer. "
+          "Reported as the reach column's denominator, never as a band read.")
+
+
+def _print_c2(blind: dict[tuple[str, str], dict],
+              assigned: dict[tuple[str, str], dict]) -> None:
+    """CONTROL C2 — the blind-pick negative control (§6.5).
+
+    "A policy that takes uniformly at random from each offer screen, giving
+    the offer floor EMPIRICALLY rather than by arithmetic." So the column that
+    matters is `blind reach` beside the band's arithmetic floor: it says
+    whether the floor Q-A is graded against is the floor a blind draft
+    actually produces in this world.
+
+    REPORTED, NOT GRADED. Q-A's registered threshold is stated against the
+    ARITHMETIC floor (§6.3), and §6.5 registered C2 with declining it as a
+    live option precisely because the grade does not depend on it. Re-grading
+    Q-A against this column would be swapping the registered comparator after
+    the readings exist.
+    """
+    print("\n  CONTROL C2 — blind-pick negative control (`--policy blind`), "
+          "same arms and cell")
+    print(f"  {'arm':>20} {'aim':>7} {'deck':>6} {'blind':>7} "
+          f"{'arith floor':>11} {'blind/arith':>11} {'assigned':>9} "
+          f"{'asg/blind':>9} {'none':>6}")
+    for arm in ARMS:
+        if arm not in blind:
+            continue
+        b, band = blind[arm], AIMS[arm]
+        floor = BANDS[band][0] * b["decksize"]
+        a = assigned.get(arm)
+        print(f"  {'/'.join(arm):>20} {band:>7} {b['decksize']:>6.1f} "
+              f"{b['reach']:>7.2f} {floor:>11.3f} "
+              f"{(b['reach'] / floor if floor else float('inf')):>11.1f} "
+              f"{(a['reach'] if a else float('nan')):>9.2f} "
+              f"{(a['reach'] / b['reach'] if a and b['reach'] else float('inf')):>9.2f} "
+              f"{b['held_none']:>6.1%}")
+    print("  `arith floor` = the aimed band's blind-draft offer x the observed "
+          "deck size —\n  the comparator Q-A is REGISTERED against. `blind` is "
+          "the same quantity measured\n  instead of computed. Both are printed "
+          "because the whole point of the control is\n  the gap between them; "
+          "neither this table nor that gap re-grades Q-A.")
+
+
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     leg = "both"
@@ -541,6 +662,9 @@ def main(argv: list[str] | None = None) -> int:
         del args[i:i + 2]
     if leg not in ("static", "sim", "both"):
         raise SystemExit(f"unknown leg {leg!r} (static | sim | both)")
+    controls = "--controls" in args
+    if controls:
+        args.remove("--controls")
     policy = BASE.policy
     if "--policy" in args:
         i = args.index("--policy")
@@ -582,6 +706,73 @@ def main(argv: list[str] | None = None) -> int:
             print(f"    {f}")
     else:
         print("\n  tripwires T1–T4: none fired.")
+
+    if not controls:
+        return 0
+
+    # The two registered controls. They run AFTER the tripwire report on
+    # purpose: the tripwire table of §6.5 is defined over the nine roster
+    # arms, and a control's rows must never be able to look like part of the
+    # stop condition. Their own tripwire state is reported separately below,
+    # explicitly as a diagnostic.
+    c1_static = {arm: static_leg(*arm) for arm in C1_ARMS}
+    c1_sims: dict[tuple[str, str], dict] = {}
+    if leg in ("sim", "both"):
+        for arm in C1_ARMS:
+            pool_size = sum(c1_static[arm]["sizes"].values())
+            if not pool_size:
+                # `game_ref/` is gitignored and a worktree has none (§6.7). An
+                # empty pool here is that absence, and reporting a reach
+                # number off it would be reporting a control that did not run.
+                print(f"\n  CONTROL C1 {'/'.join(arm)}: SKIPPED — the "
+                      "canonical pool is empty in this checkout. §6.7: "
+                      "`game_ref/`\n  is gitignored, a worktree has none and "
+                      "must never be given one, so C1 runs in\n  the PRIMARY "
+                      "CHECKOUT only. This is the absence, stated, not a "
+                      "reading of zero.")
+                continue
+            try:
+                c1_sims[arm] = sim_leg(base.but(character=arm[0],
+                                                archetype=arm[1]))
+            except Exception as exc:                 # noqa: BLE001
+                # A CONTROL cannot destroy a registered read that already
+                # completed — §6.5's stop condition is the tripwire table over
+                # the nine roster arms, and this is neither. The exception is
+                # PRINTED rather than swallowed, and the arm is reported
+                # BLOCKED rather than reported at a quietly reduced `n`: the
+                # sample plan forbids silently shrinking `n`, and dropping the
+                # runs that failed would be exactly that.
+                print(f"\n  CONTROL C1 {'/'.join(arm)}: BLOCKED at the "
+                      f"registered cell — {type(exc).__name__}: {exc}")
+                print("  The arm is NOT reported at a reduced n. An engine "
+                      "defect reachable only from a\n  control's own pool is "
+                      "a defect to file, not a result to quote, and it is\n  "
+                      "neither a tripwire nor a finding about payoff reach.")
+    if c1_sims:
+        _print_c1(c1_sims, c1_static)
+
+    if leg in ("sim", "both"):
+        blind_base = base.but(policy="blind")
+        blind = {arm: sim_leg(blind_base.but(character=arm[0],
+                                             archetype=arm[1]))
+                 for arm in ARMS}
+        _print_c2(blind, sims)
+        c_fired = dedupe_fired(
+            [f"C1 {f}" for arm in c1_sims
+             for f in tripwires(base.but(character=arm[0], archetype=arm[1]),
+                                c1_static[arm], c1_sims[arm])]
+            + [f"C2 {f}" for arm in ARMS
+               for f in tripwires(blind_base.but(character=arm[0],
+                                                 archetype=arm[1]),
+                                  statics[arm], blind[arm])])
+        print("\n  CONTROL-ARM TRIPWIRE STATE — DIAGNOSTIC. §6.5's tripwire "
+              "table is defined over\n  the nine roster arms; a control "
+              "cannot stop the sprint. Printed because a\n  control that "
+              "quietly tripped its own integrity check would make its rows "
+              "worth\n  less, and hiding that is how a control becomes "
+              "decoration.")
+        for f in (c_fired or ["    (none)"]):
+            print(f"    {f}" if f.strip() != "(none)" else f)
     return 0
 
 

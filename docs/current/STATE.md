@@ -169,26 +169,39 @@ Named here for status only. Open items are in
   instrument and the full Route-1 infrastructure set are merged **inert**
   ([USER] pulled the staged branches 2026-08-23): no card uses any new op,
   pilot policies sit behind `PILOT_POLICIES_ENABLED = False`, every new
-  drafter price is PROPOSED, and no live version integer moved. Every
-  sheet edit stays phase-fenced behind the payoff-reach grade; activation
-  (the policy flip and the `D` move) is Phase 2.
+  drafter price is PROPOSED, and no live version integer moved. **Its two
+  fences moved 2026-08-24 and neither is a clearance:** the payoff-reach grade
+  landed (so the Phase-1 sheet-edit gate and the Phase-2 `D14` lift are
+  released as gates), and it minted `QUEUE` `M37` — so the density question
+  the fences were protecting is now an open [USER] design row rather than an
+  unread measurement, and any sheet edit moving a payoff role, an `archetypes`
+  tag or a payoff's rarity is decided there.
 - **Enemy remapping** — planned.
 - **Art passes** — Furina and Kokomi surfaces (Kokomi's are newest).
 - **Animation sprint 2.**
 - **Axis-validity tracks** — Track A / Track E logs.
 - **Kokomi playtest** — unrun.
-- **Payoff-reach re-registration** — R121, pinned at DRAFTER_VERSION 14.
-  Predictions committed 2026-08-13 (R186); §6.5's `T3` amended pre-run
-  2026-08-23 (`M28` ratified, R196); R190's Assist payoff-supply fence amended
-  2026-08-23 (R197, §6.8) so the `EB-69` batch — and only that batch — could
-  move the supply 3 → 5. **The settle-first batch is EMPTY**, and 2026-08-24
-  discharged the first of the two unblocked registration acts: `M14`'s
-  re-stamp is done and the fence's **fourth dependency re-check has run** at
-  the live `RT12/D14/P7/C11`. `RARITY_ODDS`, `DRAFTER_VERSION = 14` and five
-  of the six reward pools are byte-identical for the fourth time; Kokomi's
-  pool (56 → 70) and her three `static_leg` rows moved, by the authorization
-  R197 recorded in advance. **The second act — §6.6's `P12` freeze — is NOT
-  taken, and it is what the sprint now waits on**; the sprint is still unrun
+- **Payoff-reach re-registration — RUN AND GRADED 2026-08-24.** R121's
+  six-step order has run through step (4). §6.6's `P12` freeze was taken at
+  the live `RT12/D14/P7/C11` (re-stamping §6's world string and `T1`'s
+  registered stamp string from the superseded `RT10/D14/P7/C9`, **moving no
+  version integer**), the registered cell ran value for value — n = 600/arm,
+  seed 11, `hunter`, `assigned`, realistic, all acts, the nine arms and no
+  others, 56 seconds against a 4-hour ceiling — and the grade went in blind.
+  **Nine arms, nine `P5` MISSES on both axes, every one ABOVE its band window;
+  Q-A SPLIT (reach beats its floor everywhere and clears 3×, but
+  `kokomi/commander` reads 0.81 against a HIGH bar of 1.0) and Q-B SPLIT (the
+  median offer more than doubles under both readings; the band-crossing clause
+  is unsatisfiable because every actual offer already sits above the top
+  band).** No tripwire fired, and `T3`'s classifier-integrity condition held
+  with zero disagreements — so the misses are content, not instrument. The
+  redesign trigger fired roster-wide and minted **`QUEUE` `M37`** under `M28`'s
+  aggregation rule: one row, nine arms enumerated, and explicitly not a claim
+  that one mechanism produced them. `P12` and `R190`'s remaining Assist fence
+  are both discharged. **Steps (5) and (6) — the staged D15 (`EB-43`) landing
+  and the `RA-G1`/`RA-G2`/`tto` quarantine lift — are UNBLOCKED and
+  deliberately NOT taken**; they are the next window's work. Two engine /
+  instrument defects the run surfaced are filed, unfixed: `EB-123`, `EB-124`
   (EXPERIMENTS).
 - **`EB-69` Kokomi pool fill — CLOSED 2026-08-23 (R198).** Fourteen cards and
   fourteen upgrade rows in one batch, 62 → 76. `S4-G11`'s Kokomi pile is

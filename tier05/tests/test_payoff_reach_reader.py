@@ -187,6 +187,44 @@ def test_the_arm_independent_stamp_tripwire_is_still_reported_once():
     assert len([f for f in fired if f.startswith("T1")]) == 1, fired
 
 
+def _stamped(text: str) -> SimpleNamespace:
+    """A cell-shaped stub whose `versions` render to exactly `text`."""
+    rt, d, pol, con = (part.strip() for part in text.split("/"))
+    return SimpleNamespace(versions={"RT": int(rt[2:]), "D": int(d[1:]),
+                                     "P": int(pol[1:]), "C": int(con[1:])})
+
+
+def test_t1_is_silent_on_the_registered_world_and_fires_on_every_other():
+    """The `P12` freeze's own property, pinned in both directions (§6.6).
+
+    `T1` was re-stamped at the freeze because, left naming a superseded world,
+    it fired on every arm of every run — a stale citation dressed as a finding,
+    and a tripwire that fires unconditionally carries no information. The two
+    halves that make it informative again are asserted here rather than
+    inferred: SILENT on the registered stamp, and FIRING on a divergence in
+    each of the four fields — the `D` case especially, since `D14` is the
+    registration's actual pin and a silent `D` move is the failure this whole
+    fence exists to prevent.
+
+    Deliberately phrased against `REGISTERED_STAMP` and never against the live
+    tree, so this test pins the tripwire's BEHAVIOUR and does not become a
+    second, undeclared freeze on `tier0/constants.py`.
+    """
+    s = reach.static_leg("fixture", "plan", pool=_fixture_pool())
+
+    def t1(stamp: str) -> list[str]:
+        return [f for f in reach.tripwires(_stamped(stamp), s, None)
+                if f.startswith("T1")]
+
+    assert t1(reach.REGISTERED_STAMP) == []
+    for moved in ("RT13 / D14 / P7 / C11",       # run template moved
+                  "RT12 / D15 / P7 / C11",       # THE PIN moved
+                  "RT12 / D14 / P8 / C11",       # policy moved
+                  "RT12 / D14 / P7 / C12",       # constants moved
+                  "RT10 / D14 / P7 / C9"):       # the pre-freeze string
+        assert len(t1(moved)) == 1, moved
+
+
 # --- the band-hit criterion (P5) ------------------------------------------
 
 def test_supply_grade_is_the_band_ceiling_plus_or_minus_one_card():
