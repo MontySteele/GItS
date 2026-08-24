@@ -73,6 +73,15 @@ These are part of the implementation contract, not caveats to apply later.
    the grade. If an adopted `EB-69` body cannot be classified honestly without
    moving that supply, stop and surface that existing collision; do not disguise
    a payoff as glue to make the fingerprint pass.
+
+   > **Annotation, 2026-08-23 (`R197`) — the clause above did its job and is
+   > left as written.** The collision was real, it was surfaced rather than
+   > engineered around, and [USER] amended R190's fence in answer: the
+   > already-adopted `EB-69` batch may move Assist payoff supply (3 → 5), and
+   > nothing else may before the post-settle grade. Read "R190 still forbids"
+   > above as the state at signing;
+   > `review/active/payoff-reach-reregistration.md` §6.8 carries the amended
+   > fence and both figures.
 9. **The payoff-reach freeze controls sheet landing.** Other than the already
    registered settle-first work (`EB-69`, `EB-70`, and their companions), no
    richness card-body, rarity, role, archetype, id-list, drafter, or policy
@@ -184,8 +193,18 @@ These are direction-only because no all-five-canon baseline exists yet.
   spending and Salon queue control rise; repeated Fanfare-reader families
   shrink without removing the distinct marquee payoffs.
 - **Kokomi:** distinct card signatures and identity-sensitive Exhaust choices
-  rise; bridge/shared-decision density rises; Assist payoff supply does not rise
-  before the payoff grade.
+  rise; bridge/shared-decision density rises; ~~Assist payoff supply does not
+  rise before the payoff grade~~.
+
+  > **SPOILED 2026-08-23 by an authorized content intervention (`R197`) —
+  > struck, not rewritten (`R101b`).** [USER] amended R190's Assist
+  > payoff-supply fence to admit the already-adopted `EB-69` batch, and that
+  > batch takes Assist payoff supply **3 → 5**. The clause above stands exactly
+  > as published and is **not** re-predicted; a spoiled prediction is not a
+  > corrected one. The amendment, both supply figures, and the retrieval-rubric
+  > route to 6 are recorded at
+  > `review/active/payoff-reach-reregistration.md` §6.8. The other two Kokomi
+  > clauses on this line are untouched and still live.
 
 ### 2.5 No gate yet
 
