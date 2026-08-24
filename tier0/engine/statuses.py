@@ -30,6 +30,14 @@ _SPECS = {
     "toxic":  {"name": "Toxic", "draw": 2},
 }
 
+# The id namespace these cards live in. Named rather than spelled inline
+# because a second site now has to RECOGNISE one: a status is in no pool and
+# no loader index, so any path holding a card ID rather than a card object
+# needs a way to tell "the loader has never heard of this" from "this is a
+# clog the engine synthesizes" (EB-123). The two namespaces are disjoint and
+# a test pins that they stay so.
+STATUS_ID_PREFIX = "status_"
+
 
 def status_ids() -> tuple[str, ...]:
     return tuple(sorted(_SPECS))
@@ -45,7 +53,22 @@ def make_status(status_id: str) -> Card:
             f"unknown status {status_id!r}; known: {sorted(_SPECS)}"
         ) from None
     return Card(
-        id=f"status_{status_id}", name=spec["name"], cost=0, type="status",
-        rarity="basic", tags=list(spec.get("tags", [])),
+        id=f"{STATUS_ID_PREFIX}{status_id}", name=spec["name"], cost=0,
+        type="status", rarity="basic", tags=list(spec.get("tags", [])),
         status_eot_damage=spec.get("eot", 0),
         status_draw_damage=spec.get("draw", 0))
+
+
+def status_from_card_id(card_id: str) -> Card | None:
+    """`make_status` read backwards: a fresh Card for a synthesized status
+    ID, or None for anything that is not one.
+
+    None rather than an exception because the caller's question is "is this
+    id mine?", and the answer "no" is the common case, not an error.
+    """
+    if not card_id.startswith(STATUS_ID_PREFIX):
+        return None
+    status_id = card_id[len(STATUS_ID_PREFIX):]
+    if status_id not in _SPECS:
+        return None
+    return make_status(status_id)

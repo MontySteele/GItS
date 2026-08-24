@@ -200,9 +200,18 @@ Named here for status only. Open items are in
   that one mechanism produced them. `P12` and `R190`'s remaining Assist fence
   are both discharged. **Steps (5) and (6) — the staged D15 (`EB-43`) landing
   and the `RA-G1`/`RA-G2`/`tto` quarantine lift — are UNBLOCKED and
-  deliberately NOT taken**; they are the next window's work. Two engine /
-  instrument defects the run surfaced are filed, unfixed: `EB-123`, `EB-124`
-  (EXPERIMENTS).
+  deliberately NOT taken**; they are the next window's work. Of the two
+  defects the run surfaced, `EB-123` is **FIXED 2026-08-24** — after the
+  grade, outside the discharged `P12` freeze: a remembered Status now rebuilds
+  through `effects.token_card`, which asks the loader first and opens the
+  synthesized-status door only inside the handler for the `KeyError` the
+  loader raised, so a previously-crashing `real_silent` run completes and **no
+  anchor or frozen-battery number moves** (`real_ironclad/generic` at the `C1`
+  cell is byte-identical across the fix). The blocked half of `C1` is
+  unblocked as an engine matter; **no completion run was taken and none is
+  scheduled** — the published record stands as published (`R101b`) and whether
+  a completed `C1` is wanted is [USER]'s call. `EB-124` is still open
+  (BACKLOG).
 - **`EB-69` Kokomi pool fill — CLOSED 2026-08-23 (R198).** Fourteen cards and
   fourteen upgrade rows in one batch, 62 → 76. `S4-G11`'s Kokomi pile is
   discharged; that row stays open on its other three piles. What the fill
