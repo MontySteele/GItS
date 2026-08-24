@@ -804,9 +804,12 @@
              {op: exhaust_from, amount: 1, select: chosen}]}
    # [USER]-RULED BODY (v2 ruling (d), CONFIRMED at D2a 2026-08-23 against a reviewer's proposed reopen).
    # The brief's body (draw 1, discard 1 chosen, gain 1 Charge) was strictly better than Silent's Prepared,
-   # which is already an excellent card — i.e. strictly-better-than-excellent at common rate. [USER] verbatim
-   # reason for holding this body over the reviewer's Prepared-parity alternative: it "becomes hand-size-
-   # neutral at common rarity".
+   # which is already an excellent card — i.e. strictly-better-than-excellent at common rate.
+   # WHAT THE VERBATIM WAS ABOUT, recorded the right way round. [USER]'s "becomes hand-size-neutral at common
+   # rarity" is the CRITICISM OF THE REVIEWER'S Prepared-parity ALTERNATIVE — the reason that version was
+   # REJECTED — not a property of the body held here. Both faces of the held body are deliberately net −1,
+   # counting the played card: base = −1 play +1 draw −1 exhaust = −1; upgrade = −1 play +2 draw −1 discard
+   # −1 exhaust = −1. A 0-cost common that costs nothing in cards is exactly what the ruling refused.
    # THE CHARGE DID NOT GO AWAY. CHARGE_PER_EXHAUST = 1, so the exhaust earns exactly the 1 Charge the printed
    # line used to grant: net zero on Charge.
    # WATCH — POWER, burst-particle cadence. It ALSO now pays KOKOMI_BURST_PER_EXHAUST = 2 burst particles the

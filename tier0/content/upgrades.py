@@ -207,7 +207,36 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
                             if not (fx.get("op") == "damage"
                                     and fx.get("target") == "self")]
         elif key == "add":
-            card.effects.append(copy.deepcopy(val))
+            # APPEND is the default and is what every rider row wants: a
+            # `{draw: 1}` or `{gain_encore: 2}` bought by the upgrade reads
+            # last on the face and resolves last.
+            #
+            # `add_before` (below) is for the one shape append cannot spell:
+            # an upgrade whose new line resolves in the MIDDLE of the ruled
+            # body. send_the_runner+ is ruled "draw 2 -> discard 1 chosen ->
+            # exhaust 1 chosen" ([USER], D2a), and an append loaded it as
+            # draw/exhaust/discard -- the player exhausted before being asked
+            # what to throw, which is a different card.
+            #
+            # It names the OP it must precede rather than an index, so a
+            # later edit to the base body cannot silently slide the insertion
+            # somewhere else: the op is either still there (insert before it)
+            # or it is not (ok stays False and the applier raises).
+            before = delta.get("add_before")
+            if before is None:
+                card.effects.append(copy.deepcopy(val))
+            else:
+                at = next((i for i, e in enumerate(top)
+                           if e.get("op") == before), None)
+                ok = at is not None
+                if ok:
+                    card.effects.insert(at, copy.deepcopy(val))
+        elif key == "add_before":
+            # Position modifier for `add`, consumed by the branch above. It
+            # is validated and applied there, so all this branch owes is
+            # order-independence: sheet key order must not decide whether the
+            # position is honoured.
+            ok = "add" in delta and isinstance(val, str)
         elif key == "innate":
             # R37 (Catalytic Converter+): boolean, only True is a ruling.
             if val is not True:

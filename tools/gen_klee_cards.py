@@ -3851,25 +3851,56 @@ def build_body(
             )
 
         elif op == "discard":
-            # Random discard, kit-exempt pool (tier0 _op_discard: re-pool per
-            # pick, stop when empty). CombatTargets is the established rng
-            # stream for in-combat random picks (bomb targeting idiom).
             # G6: an upgradeable count reads the VAR, so the loop bound and
             # the printed face cannot disagree after an upgrade -- the same
             # preview-truth rule the Furina legibility sprint established.
             n = ('DynamicVars["Discards"].IntValue'
                  if plain_discard_upgrade(card) else int(eff.get("amount", 1)))
-            lines.append(
-                f"for (var i = 0; i < {n}; i++)\n"
-                "        {\n"
-                "            var pool = CardPile.Get(PileType.Hand, Owner)?"
-                ".Cards.Where(KitGrant.NotKitCard).ToList();\n"
-                "            if (pool == null || pool.Count == 0) break;\n"
-                "            var victim = Owner.RunState.Rng.CombatTargets.NextItem(pool);\n"
-                "            if (victim == null) break;\n"
-                "            await CardCmd.Discard(choiceContext, victim);\n"
-                "        }"
-            )
+            if eff.get("select") == "chosen":
+                # CHOSEN discard (`select: chosen`), the base-game "Discard N
+                # cards" shape. Emitted through the SAME idiom
+                # `discard_for_sparks` above uses and for the same reason: the
+                # selection screen picks the whole batch BEFORE any of it
+                # leaves the hand, so a rider that draws cannot make the drawn
+                # card selectable inside the same discard. tier0's
+                # `_op_discard` batches its chosen path identically; the two
+                # engines therefore agree on selection MEMBERSHIP as well as
+                # on count.
+                #
+                # `FromHand`'s own rule auto-selects a short hand, which is
+                # tier0's `if not candidates: break` -- neither engine asks
+                # for a choice it cannot offer.
+                #
+                # Braced so a card carrying two selections (or a chosen
+                # discard beside `discard_for_sparks`) cannot redeclare
+                # `picked` -- the same scoping the exhaust_from emission uses.
+                lines.append(
+                    "{\n"
+                    "            var picked = (await CardSelectCmd.FromHandForDiscard(\n"
+                    "                choiceContext, Owner,\n"
+                    "                new CardSelectorPrefs("
+                    f"CardSelectorPrefs.DiscardSelectionPrompt, {n}),\n"
+                    "                KitGrant.NotKitCard, this)).ToList();\n"
+                    "            await CardCmd.Discard(choiceContext, picked);\n"
+                    "        }"
+                )
+            else:
+                # Random discard, kit-exempt pool (tier0 _op_discard: re-pool
+                # per pick, stop when empty). CombatTargets is the established
+                # rng stream for in-combat random picks (bomb targeting
+                # idiom). The re-poll is DELIBERATE on this branch and is the
+                # sim's own random semantics -- only the chosen branch batches.
+                lines.append(
+                    f"for (var i = 0; i < {n}; i++)\n"
+                    "        {\n"
+                    "            var pool = CardPile.Get(PileType.Hand, Owner)?"
+                    ".Cards.Where(KitGrant.NotKitCard).ToList();\n"
+                    "            if (pool == null || pool.Count == 0) break;\n"
+                    "            var victim = Owner.RunState.Rng.CombatTargets.NextItem(pool);\n"
+                    "            if (victim == null) break;\n"
+                    "            await CardCmd.Discard(choiceContext, victim);\n"
+                    "        }"
+                )
 
         elif op == "discard_for_sparks":
             # R36: forced player-chosen discard of N (auto-selects-all on a
@@ -5173,16 +5204,30 @@ def build_description(card: dict) -> str:
 
         elif op == "discard":
             n = int(eff.get("amount", 1))
+            # PREVIEW TRUTH: "random" is a claim about who picks, and the
+            # emitter used to print it whatever `select` said -- a chosen
+            # discard read as a random one on the face while the body (now)
+            # opens a selection screen. The word tracks the branch that
+            # emits, exactly as the body does.
+            picker = "" if eff.get("select") == "chosen" else " random"
             if plain_discard_upgrade(card):
                 # Upgradeable: the face must show the NEW number, so it
                 # renders through the var like every other upgraded count.
                 parts.append(
-                    "Discard {Discards:diff()} random "
+                    "Discard {Discards:diff()}" + picker + " "
                     "card{Discards:plural:|s}.")
-            else:
+            elif picker:
                 parts.append(
                     "Discard a random card." if n == 1
                     else f"Discard {n} random cards."
+                )
+            else:
+                # No article form on the chosen branch: canon's own selection
+                # cards print the numeral ("Discard 1 card."), which is also
+                # what `discard_for_sparks` and the chosen `exhaust_from`
+                # print next door.
+                parts.append(
+                    f"Discard {n} card{'' if n == 1 else 's'}."
                 )
 
         elif op == "discard_for_sparks":

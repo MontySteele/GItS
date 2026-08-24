@@ -41,7 +41,7 @@ public sealed class WheelTheRanks : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Wheel the Ranks"),
-        ("description", "Discard a random card. Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Sly[/gold]: Gain 4 [gold]Block[/gold]."),
+        ("description", "Discard 1 card. Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Sly[/gold]: Gain 4 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -59,13 +59,12 @@ public sealed class WheelTheRanks : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        for (var i = 0; i < 1; i++)
         {
-            var pool = CardPile.Get(PileType.Hand, Owner)?.Cards.Where(KitGrant.NotKitCard).ToList();
-            if (pool == null || pool.Count == 0) break;
-            var victim = Owner.RunState.Rng.CombatTargets.NextItem(pool);
-            if (victim == null) break;
-            await CardCmd.Discard(choiceContext, victim);
+            var picked = (await CardSelectCmd.FromHandForDiscard(
+                choiceContext, Owner,
+                new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 1),
+                KitGrant.NotKitCard, this)).ToList();
+            await CardCmd.Discard(choiceContext, picked);
         }
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }

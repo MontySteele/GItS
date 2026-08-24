@@ -41,7 +41,7 @@ public sealed class OpenTheStores : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Open the Stores"),
-        ("description", "Discard 2 random cards. Gain 4 [gold]Charge[/gold]. [gold]Sly[/gold]: [gold]Exhaust[/gold] 1 card from your hand."),
+        ("description", "Discard 2 cards. Gain 4 [gold]Charge[/gold]. [gold]Sly[/gold]: [gold]Exhaust[/gold] 1 card from your hand."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -59,13 +59,12 @@ public sealed class OpenTheStores : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        for (var i = 0; i < 2; i++)
         {
-            var pool = CardPile.Get(PileType.Hand, Owner)?.Cards.Where(KitGrant.NotKitCard).ToList();
-            if (pool == null || pool.Count == 0) break;
-            var victim = Owner.RunState.Rng.CombatTargets.NextItem(pool);
-            if (victim == null) break;
-            await CardCmd.Discard(choiceContext, victim);
+            var picked = (await CardSelectCmd.FromHandForDiscard(
+                choiceContext, Owner,
+                new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 2),
+                KitGrant.NotKitCard, this)).ToList();
+            await CardCmd.Discard(choiceContext, picked);
         }
         KokomiResources.GainCharge(Owner.Creature, 4);
     }

@@ -7,6 +7,8 @@ checks the generated external data when it is available locally.
 import ast
 import inspect
 
+import pytest
+
 from tier0.content import upgrades
 from tier0.engine import effects
 from tier0.engine.state import Card
@@ -213,3 +215,69 @@ def test_bounded_history_card_deltas_apply(monkeypatch):
     assert conditional["else"][0]["amount"] == 8
     assert upgraded.effects[1]["amount"] == 9
     assert upgraded.on_exhaust_energy == 3
+
+
+def test_add_before_inserts_the_added_effect_ahead_of_the_op_it_names():
+    """`add:` appends, which is right for a rider bought by an upgrade and
+    wrong for an upgrade whose new line resolves in the MIDDLE of the body.
+
+    send_the_runner+ is the live row: ruled draw 2 -> discard 1 chosen ->
+    exhaust 1 chosen ([USER], D2a), and a bare append loaded it as draw /
+    exhaust / discard -- the player was asked what to Exhaust before being
+    asked what to throw, and each question changes the answer to the other.
+    """
+    from tier0.content import loader
+    upgraded = loader.get_card("send_the_runner" + upgrades.SUFFIX)
+    assert [(fx["op"], fx.get("select")) for fx in upgraded.effects] == [
+        ("draw", None), ("discard", "chosen"), ("exhaust_from", "chosen")]
+    # The other key on the same row still lands: draw 1 -> 2.
+    assert upgraded.effects[0]["amount"] == 2
+
+
+def test_every_other_add_row_still_appends():
+    """The audit as a test. `add_before` must not change the DEFAULT, so
+    every row that does not carry one keeps its added effect last -- the
+    silent-behaviour-change this mechanism was chosen to avoid."""
+    from tier0.content import loader
+    moved, seen = {}, 0
+    for card_id, delta in upgrades._upgrade_index().items():
+        if not isinstance(delta, dict) or "add" not in delta:
+            continue
+        if "add_before" in delta:
+            continue
+        seen += 1
+        upgraded = loader.get_card(card_id + upgrades.SUFFIX)
+        if upgraded.effects[-1].get("op") != delta["add"].get("op"):
+            moved[card_id] = [fx.get("op") for fx in upgraded.effects]
+    # Print the denominator: a sweep that compared nothing must not read
+    # like a clean one.
+    assert seen >= 8, f"only {seen} plain `add:` rows swept -- sweep broke"
+    assert not moved, f"`add:` rows that stopped appending: {moved}"
+
+
+def test_add_before_is_order_independent_and_needs_an_add(monkeypatch):
+    """The position key is consumed by the `add` branch, so sheet key order
+    must not decide whether it is honoured -- and a position with nothing to
+    position is a sheet error, not a no-op."""
+    body = [{"op": "draw", "amount": 1},
+            {"op": "exhaust_from", "amount": 1, "select": "chosen"}]
+
+    def _probe(delta):
+        monkeypatch.setattr(upgrades, "_upgrade_index",
+                            lambda: {"synthetic": delta})
+        return upgrades.apply_upgrade(Card(
+            id="synthetic", name="Synthetic", cost=0, type="skill",
+            effects=[dict(fx) for fx in body]))
+
+    # `add_before` FIRST in the dict -- the key the applier reaches first is
+    # the one that does nothing, and the result must be identical.
+    reversed_order = _probe({"add_before": "exhaust_from",
+                             "add": {"op": "block", "amount": 1}})
+    assert [fx["op"] for fx in reversed_order.effects] == [
+        "draw", "block", "exhaust_from"]
+
+    with pytest.raises(ValueError, match="add_before"):
+        _probe({"add_before": "exhaust_from"})
+    with pytest.raises(ValueError, match="add"):
+        _probe({"add": {"op": "block", "amount": 1},
+                "add_before": "no_such_op"})

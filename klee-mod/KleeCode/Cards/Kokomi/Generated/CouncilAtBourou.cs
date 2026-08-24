@@ -45,7 +45,7 @@ public sealed class CouncilAtBourou : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Council at Bourou"),
-        ("description", "[gold]Muster[/gold] 1, adding the unit to your hand. Draw {Cards:diff()} card{Cards:plural:|s}. Discard a random card."),
+        ("description", "[gold]Muster[/gold] 1, adding the unit to your hand. Draw {Cards:diff()} card{Cards:plural:|s}. Discard 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -65,13 +65,12 @@ public sealed class CouncilAtBourou : CustomCardModel, ICharacterCard
     {
         await KokomiConscript.Run(choiceContext, Owner, this, 1, createMode: true, costOverride: null);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        for (var i = 0; i < 1; i++)
         {
-            var pool = CardPile.Get(PileType.Hand, Owner)?.Cards.Where(KitGrant.NotKitCard).ToList();
-            if (pool == null || pool.Count == 0) break;
-            var victim = Owner.RunState.Rng.CombatTargets.NextItem(pool);
-            if (victim == null) break;
-            await CardCmd.Discard(choiceContext, victim);
+            var picked = (await CardSelectCmd.FromHandForDiscard(
+                choiceContext, Owner,
+                new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 1),
+                KitGrant.NotKitCard, this)).ToList();
+            await CardCmd.Discard(choiceContext, picked);
         }
     }
 

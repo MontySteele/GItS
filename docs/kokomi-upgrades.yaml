@@ -8,6 +8,10 @@
 # KNOWN GAP, flagged not fudged: no sly-delta key exists in the applier, so Sly branches never move on upgrade
 #   (drifting_lantern/tidal_lure upgrade their PLAYED faces only). Extending the dispatch is a design decision
 #   about whether upgrades should sharpen the discard game — deferred to a ruling, not smuggled in here.
+# `add_before: <op>` is the ONE position key `add:` takes. Without it `add:` appends, which is what every other
+#   add-row on every sheet wants; with it the added effect is inserted in front of the first top-level effect
+#   carrying that op. It exists because send_the_runner+ is ruled to resolve its new line in the MIDDLE of the
+#   body — see that row. It is a POSITION, never a second effect: one `add`, one place.
 
 # ---- BASICS ----
 waters_edge:       {damage: +3}          # 6->9 (R53: base stays at Strike parity; Strike+ slope)
@@ -216,9 +220,15 @@ crane_wing:        {block: +2}           # 6->8, jade_bulwark: {block: +2}. cost
                                          # the resource curve.
 
 # --- EB-69 COMMONS (+4) ---
-send_the_runner:   {draw: +1, add: {op: discard, amount: 1, select: chosen}}
+send_the_runner:   {draw: +1, add: {op: discard, amount: 1, select: chosen}, add_before: exhaust_from}
                                          # [USER]-RULED (D2a): draw 1 / exhaust 1 chosen -> draw 2 / discard 1
-                                         # chosen / exhaust 1 chosen. FLAGGED HONESTLY: this is TWO moves on a
+                                         # chosen / exhaust 1 chosen. `add_before` is what makes the loaded
+                                         # order the RULED order: a bare `add` appends, which loaded the card as
+                                         # draw / exhaust / discard — the player was asked what to Exhaust
+                                         # before being asked what to throw, and each question changes the
+                                         # answer to the other. Naming the op (not an index) means a later edit
+                                         # to the base body either still has an `exhaust_from` to sit in front
+                                         # of or fails loudly. FLAGGED HONESTLY: this is TWO moves on a
                                          # COMMON where this file's own commons idiom is one number, and the
                                          # section heading above says so. The one live two-key common-shaped
                                          # row is tactical_retreat {draw: +1, discard: +1} — and that card is a

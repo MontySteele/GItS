@@ -1188,3 +1188,98 @@ def test_salon_debut_added_encore_renders_replacement_scaled():
     body = src[src.index("OnPlay"):]
     assert body.index("salonScaledEncore = ") < body.index(
         "SalonMemberPower.Deploy")
+
+
+def _discard_probe(**eff) -> dict:
+    """A minimal Kokomi-shaped card whose only effect is one `discard`."""
+    fx = {"op": "discard", "amount": 2}
+    fx.update(eff)
+    return {
+        "id": "discard_select_probe",
+        "name": "Discard Select Probe",
+        "cost": 1,
+        "type": "skill",
+        "rarity": "common",
+        "solve": ["utility"],
+        "archetypes": ["assist"],
+        "role": "glue",
+        "effects": [fx],
+    }
+
+
+def test_a_chosen_discard_emits_the_selection_screen_not_a_random_loop(
+        monkeypatch):
+    """`select: chosen` is a claim about WHO PICKS, and the emitter used to
+    drop it on the floor: every `discard` op generated the random-victim
+    loop, so three EB-69 cards ruled as chosen discards shipped a C# body
+    that discarded at random and a face that said so.
+
+    The chosen branch rides the SAME verified idiom `discard_for_sparks`
+    uses -- one `FromHandForDiscard` selection, then one batch
+    `CardCmd.Discard` -- which is also what makes the two engines agree on
+    selection TIMING: the whole batch is picked before any of it leaves the
+    hand, matching tier0 `_op_discard`'s chosen path.
+    """
+    monkeypatch.setattr(gen, "_upgrade_deltas", {})
+    src = gen.emit(_discard_probe(select="chosen"), gen.KOKOMI_PROFILE)
+    assert "CardSelectCmd.FromHandForDiscard(" in src
+    assert "CardSelectorPrefs.DiscardSelectionPrompt, 2)" in src
+    assert "KitGrant.NotKitCard, this)).ToList();" in src
+    assert "await CardCmd.Discard(choiceContext, picked);" in src
+    # The random loop must be GONE, not merely accompanied.
+    assert "Rng.CombatTargets.NextItem" not in src
+    # ... and the face must not keep claiming a random victim.
+    assert "Discard 2 cards." in src
+    assert "random" not in src
+
+
+def test_a_default_discard_keeps_the_random_loop(monkeypatch):
+    """The other half of the pin. Random stays the DEFAULT and stays a
+    re-polling loop -- every card that discards without `select:` was priced
+    against it, and a silent flip to a selection screen would re-price them.
+    """
+    monkeypatch.setattr(gen, "_upgrade_deltas", {})
+    src = gen.emit(_discard_probe(), gen.KOKOMI_PROFILE)
+    assert "Rng.CombatTargets.NextItem(pool);" in src
+    assert "CardSelectCmd.FromHandForDiscard" not in src
+    assert "Discard 2 random cards." in src
+
+
+def test_the_shipped_eb69_chosen_discards_carry_the_selection_idiom():
+    """The three live rows, asserted against the artifact the game loads."""
+    for class_name, count in (("CouncilAtBourou", 1),
+                              ("WheelTheRanks", 1),
+                              ("OpenTheStores", 2)):
+        path = gen.KOKOMI_PROFILE.out_dir / f"{class_name}.cs"
+        src = path.read_text(encoding="utf-8")
+        assert "CardSelectCmd.FromHandForDiscard(" in src, class_name
+        assert (f"CardSelectorPrefs.DiscardSelectionPrompt, {count})"
+                in src), class_name
+        plural = "" if count == 1 else "s"
+        assert f"Discard {count} card{plural}." in src, class_name
+        assert "random card" not in src, class_name
+
+
+def test_codegen_refuses_the_add_before_position_rather_than_dropping_it(
+        monkeypatch):
+    """`add_before` is a tier0 applier key (send_the_runner+'s ruled middle
+    insertion). The C# `add:` emitter appends its IsUpgraded-gated effect at
+    the END of OnPlay and has no way to honour a position, so the delta must
+    come back UNEXPRESSIBLE -- silently appending would ship an upgraded card
+    that resolves in a different order from the one the sim upgrades to.
+    Gate: BACKLOG EB-122."""
+    card = {
+        "id": "add_before_probe",
+        "name": "Add Before Probe",
+        "cost": 0,
+        "type": "skill",
+        "rarity": "common",
+        "effects": [{"op": "draw", "amount": 1},
+                    {"op": "exhaust_from", "amount": 1, "select": "chosen"}],
+    }
+    monkeypatch.setattr(gen, "_upgrade_deltas", {
+        "add_before_probe": {"add": {"op": "gain_encore", "amount": 1},
+                             "add_before": "exhaust_from"}})
+    assert gen.upgrade_plan(card)[1] == (
+        "delta key 'add_before: exhaust_from' not expressible by codegen "
+        "(structural upgrade)")
