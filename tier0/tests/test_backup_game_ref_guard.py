@@ -19,6 +19,15 @@ are monkeypatched on every test that calls `main` or `mirror`, and the
 assertions afterwards are about the temp vault's contents. A test for a
 destructive tool that could itself be destructive would be worse than no test.
 
+HERMETIC ACROSS PLATFORMS, WHICH IS A SEPARATE CLAIM. The CI runner is Ubuntu
+(`.github/workflows/repo.yml`, job `pytest`) and `pathlib.Path` binds to the
+running platform: the vault string is one *relative* component named
+`C:\\Users\\...` on POSIX. So no assertion here may read `backup.VAULT.parts`
+— shape questions go to `backup.VAULT_WINDOWS`, which parses as Windows on
+every host — and no test may depend on the configured vault being absolute.
+The two `platform_refusal` tests below drive `sys.platform` themselves, so they
+assert the same thing on Windows and on the runner.
+
 FAST LANE. Deliberately unmarked: `battery` is the only registered marker and
 the fast lane is `-m "not battery"`, so an unmarked test runs there. This is
 filesystem work on a handful of tiny temp files and belongs in the inner loop —
@@ -27,6 +36,9 @@ tool.
 """
 
 from __future__ import annotations
+
+import sys
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 import pytest
 
@@ -164,8 +176,72 @@ def test_the_vault_is_hard_coded_outside_any_worktree():
     content out of a clean worktree, which is what took both prior backups.
     A configurable backup root is a backup root that can be pointed at a temp
     directory and quietly stop being a backup, so the constant is asserted
-    rather than merely commented."""
-    parts = [p.lower() for p in backup.VAULT.parts]
+    rather than merely commented.
+
+    Asked of `VAULT_WINDOWS`, not `VAULT`: the question is about the Windows
+    path's shape, and `Path` cannot answer it off Windows."""
+    parts = [p.lower() for p in backup.VAULT_WINDOWS.parts]
+    assert backup.VAULT_WINDOWS.is_absolute()
     assert parts[-1] == "game_ref"
     assert "onedrive" in parts
     assert "worktrees" not in parts
+
+
+# --- the vault is a Windows path, and this host may not be Windows ----------
+
+def test_the_vault_string_is_relative_under_posix_semantics():
+    """The whole reason `platform_refusal` exists, pinned as the fact it is
+    rather than as prose. Same verdict on either host — both parsers are
+    asked by name, neither is the running platform's."""
+    assert PureWindowsPath(backup.VAULT_SPEC).is_absolute()
+    posix = PurePosixPath(backup.VAULT_SPEC)
+    assert not posix.is_absolute()
+    assert len(posix.parts) == 1, "one backslash-laden component, not a tree"
+
+
+@pytest.mark.parametrize("platform", ["linux", "darwin"])
+def test_the_configured_vault_is_refused_off_windows(monkeypatch, platform):
+    monkeypatch.setattr(backup.sys, "platform", platform)
+    reason = backup.platform_refusal(backup.VAULT)
+    assert reason is not None and platform in reason
+
+
+def test_an_absolute_override_is_accepted_anywhere(monkeypatch, tmp_path):
+    """The escape hatch the suite itself rides: a vault that is absolute HERE
+    is fine on any host, which is what keeps every other test in this file
+    hermetic on the Ubuntu runner."""
+    for platform in ("linux", "darwin", "win32"):
+        monkeypatch.setattr(backup.sys, "platform", platform)
+        assert backup.platform_refusal(tmp_path / "vault") is None
+
+
+@pytest.mark.skipif(sys.platform != "win32",
+                    reason="the configured vault is only a vault on Windows")
+def test_the_configured_vault_is_accepted_on_the_windows_primary():
+    """The converse of the refusal, and it can only be asked where it holds:
+    `Path` is platform-bound, so no monkeypatching of `sys.platform` makes the
+    Windows vault absolute on the Ubuntu runner. The skip there is the
+    accurate answer, not a gap — the tool does not run there."""
+    assert backup.platform_refusal(backup.VAULT) is None
+
+
+def test_a_relative_vault_cannot_be_created_underfoot(tmp_path, monkeypatch,
+                                                      capsys):
+    """THE FAUX-DIRECTORY TEST. A healthy source passes the wipe-guard, so
+    only the platform refusal stands between a relative vault and a directory
+    of that name appearing under the working directory. Exit 2, cwd empty.
+
+    The vault here is relative on BOTH hosts rather than the configured
+    Windows string, which is what the configured string DEGRADES TO on POSIX:
+    a regression then writes into a temp cwd instead of into the real vault.
+    A test for a destructive tool cannot itself be destructive."""
+    src = _populate(tmp_path / "game_ref", 12)
+    cwd = tmp_path / "cwd"
+    cwd.mkdir()
+    monkeypatch.chdir(cwd)
+    monkeypatch.setattr(backup, "SOURCE", src)
+    monkeypatch.setattr(backup, "VAULT", Path("faux_vault") / "game_ref")
+
+    assert backup.main([]) == 2
+    assert "REFUSING TO MIRROR" in capsys.readouterr().out
+    assert list(cwd.iterdir()) == [], "the mirror created a vault underfoot"

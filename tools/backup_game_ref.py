@@ -25,6 +25,15 @@ is the canonical source. `game_ref/` is gitignored and decompile-derived, so a
 worktree has none at all; running this there hits the guard and exits 2, which
 is the correct answer rather than a bug.
 
+WINDOWS-ONLY, AND CHECKED. `pathlib.Path` binds to the running platform, so on
+POSIX the vault string parses as a single *relative* component named
+`C:\\Users\\...` -- an unguarded mirror there would not fail, it would quietly
+build a faux `C:\\...` directory under the working directory and call that a
+backup. `platform_refusal` is the second refusal for exactly that: off Windows
+the tool exits 2 unless `VAULT` has been replaced by a path that is absolute
+*here*. Questions about the vault's shape ask `VAULT_WINDOWS`, which is parsed
+as Windows on every host.
+
 What it does once the guard passes: copies files that are new or changed
 (mtime/size), deletes vault files whose source is gone, leaves the rest alone,
 and prints a table of the three counts.
@@ -37,7 +46,7 @@ from __future__ import annotations
 import argparse
 import shutil
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "game_ref"
@@ -45,7 +54,16 @@ SOURCE = ROOT / "game_ref"
 # RULED by [USER] 2026-08-24 -- "Agreed on the backup in OneDrive". Hard-coded
 # on purpose: a configurable backup root is a backup root that can be pointed
 # at a temp directory and quietly stop being a backup.
-VAULT = Path(r"C:\Users\Monty\OneDrive\GItS-vault\game_ref")
+VAULT_SPEC = r"C:\Users\Monty\OneDrive\GItS-vault\game_ref"
+
+# The same string, twice, because the two readings are not interchangeable.
+# VAULT_WINDOWS parses as Windows on every host and is what any question about
+# the vault's SHAPE must ask -- on POSIX `Path(VAULT_SPEC).parts` is one
+# backslash-laden component, so "is it under OneDrive?" answers no. VAULT is
+# the platform-bound handle the mirror actually opens, and off Windows it is
+# relative, which `platform_refusal` refuses rather than resolves.
+VAULT_WINDOWS = PureWindowsPath(VAULT_SPEC)
+VAULT = Path(VAULT_SPEC)
 
 # The guard threshold. A complete game_ref is 25 files today; validate.ps1's S7
 # reference list alone names 8. Ten is comfortably below any real tree and
@@ -78,6 +96,30 @@ def guard(source: Path) -> str | None:
     if count < MIN_SOURCE_FILES:
         return (f"source game_ref holds {count} file(s), fewer than the "
                 f"{MIN_SOURCE_FILES}-file floor: {source}")
+    return None
+
+
+def platform_refusal(vault: Path) -> str | None:
+    """The refusal reason when `vault` is not a destination this host can
+    write a backup to, or None.
+
+    Split out beside `guard` for the same reason: both are refusals a reader
+    (and the suite) must be able to see without running a mirror. The two
+    arms:
+
+      * the configured Windows vault on a non-Windows host -- it is not a
+        vault there, it is a relative path that would be created underfoot;
+      * any vault that is not absolute on this platform -- the general form of
+        the same defect, and the one the configured vault takes on POSIX.
+
+    An override IS allowed off Windows (the suite's `tmp_path`, a future
+    non-Windows vault) provided it is absolute here.
+    """
+    if vault == Path(VAULT_SPEC) and sys.platform != "win32":
+        return (f"the configured vault is a Windows path and this host is "
+                f"{sys.platform}, where it is a RELATIVE path: {vault}")
+    if not vault.is_absolute():
+        return f"vault path is not absolute on {sys.platform}: {vault}"
     return None
 
 
@@ -140,6 +182,20 @@ def main(argv: list[str]) -> int:
 
     print(f"backup_game_ref: source={SOURCE}")
     print(f"                 vault ={VAULT}")
+
+    # Destination first: on a non-Windows host the source guard's verdict is
+    # right for the wrong reason, and if a POSIX checkout ever did carry a
+    # populated game_ref/ the mirror would run and write a faux directory.
+    refusal = platform_refusal(VAULT)
+    if refusal is not None:
+        print()
+        print("  REFUSING TO MIRROR -- " + refusal)
+        print("  Mirroring here would not reach any vault: it would CREATE a")
+        print("  directory of that literal name under the working directory")
+        print("  and report success. The vault was NOT touched.")
+        print("  This tool is for the Windows primary checkout. To back up")
+        print("  elsewhere, replace VAULT with a path absolute on this host.")
+        return 2
 
     refusal = guard(SOURCE)
     if refusal is not None:
