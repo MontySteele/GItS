@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Run the repo's lint battery CONCURRENTLY and report every result.
 
-The battery is thirteen CI invocations plus four that only ever run locally,
-and until now the only way to run it was to paste seventeen lines from
+The battery is thirteen CI invocations plus five that only ever run locally,
+and until now the only way to run it was to paste eighteen lines from
 `OPERATIONS.md` / `.github/workflows/repo.yml` one at a time. Pasted serially
 they cost the sum of their runtimes; run as separate processes they cost the
 slowest one, because each is an independent short-lived Python process with no
@@ -121,6 +121,7 @@ REGISTRY: tuple[Lint, ...] = (
     _local("generated-structure", "tools/lint_generated_structure.py"),
     _local("art-lint",            "tools/art_lint.py"),
     _local("card-distinctness",   "tools/card_distinctness_report.py", "--gate"),
+    _local("game-ref-backup",     "tools/lint_game_ref_backup.py"),
 
     _suite("companion-shop-coverage",  "tools/lint_companion_shop_coverage.py"),
     _suite("effect-branch-scans",      "tools/lint_effect_branch_scans.py"),
