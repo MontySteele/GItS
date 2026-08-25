@@ -19,11 +19,29 @@ registration packets themselves live under `review/active/` — one home, not tw
 - A prediction must **name the instrument that can SEE the changed object**, and
   confirm it can. The sim is one-seat; a C#-only change never gets a sim
   prediction; `support` is never linted because no instrument sees it.
-- Change one variable per measurement window. The drafter/constants version is
+- Change one variable per measurement window **where a causal answer will
+  actually change the next decision** (R207). The drafter/constants version is
   part of the variable set — a scorer change **is** a version bump in the same
-  edit (`DRAFTER_VERSION` in `tier0/constants.py`).
+  edit (`DRAFTER_VERSION` in `tier0/constants.py`). Where nothing turns on
+  attributing a movement to one edit, several variables may share a window; the
+  stamp then labels the world, and a number taken in it is attributable to the
+  window rather than to any one edit inside it.
+- **A published standing baseline is spent where it buys something, not owed at
+  every bump (R207).** A **standing table** is published at a meaningful product
+  milestone, or when a pending decision needs one. Intermediate attribution
+  comes from **commit-hash scratch comparisons** — build a throwaway world at
+  one commit, read it, compare it against another commit, and publish neither.
+  **Its honest limit is that a scratch comparison is not citable the way a
+  stamped baseline is:** scratch worlds are never pushed, so a scratch read
+  cannot be re-read later without rebuilding the world it was taken in. Nothing
+  here relaxes stamping or citability — see *Versioning* below — and every
+  already-registered read stands as registered.
 
 ### Versioning
+- **Version stamps are mandatory exactly as before (R207 left this untouched):**
+  any change to a published-world variable bumps its stamp, and a report without
+  a stamp is not citable. What R207 relaxed is when a **standing baseline** is
+  published, not when a stamp is bumped.
 - The run-cell stamp is `RT/D/P/C`, read live via `tier05/cells.py`:
   `RUNTEMPLATE_VERSION`, `DRAFTER_VERSION`, `CONSTANTS_VERSION` in
   `tier0/constants.py`, and `POLICY_VERSION` in `tier05/draft.py`. The
