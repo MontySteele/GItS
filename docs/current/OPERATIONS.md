@@ -8,7 +8,7 @@ index of what to type, not how it works.
 
 - Python 3.12. No requirements file in-tree; the suite's actual imports are
   `pytest pyyaml pillow numpy`. CI installs exactly those. `pytest-xdist` is
-  optional, local, and not in that list — see the PROPOSED test section below
+  optional, local, and not in that list — see the parallel-suite section below
   for what it buys and why CI does not install it.
 - Most sim entry points need `PYTHONPATH=.`. Codegen and tools run as
   `.venv/bin/python tools/<x>.py` (Windows: `.venv/Scripts/python`).
@@ -32,12 +32,13 @@ NOT set it (a runner has no `game_ref/`), and that is the point: the `pytest`
 job asserts the *committed* world is sound. Tests are cwd-sensitive — run from
 the repo root.
 
-### PROPOSED — parallel suite, fast lane, concurrent lints (awaiting [USER])
+### RATIFIED [USER] 2026-08-24 — parallel suite, fast lane, concurrent lints
 
 Measured 2026-08-24 on the 16-CPU Windows box, branch `test-speed`, from
 `origin/main` `4bbc9bc`. **Nothing below changes a default**: `pytest.ini`
 registers marker names and sets no `addopts`, so a bare `python -m pytest`
-and CI's line behave exactly as before. What is proposed is the *workflow*.
+and CI's line behave exactly as before. What was proposed, and is now
+ratified, is the *workflow* — the discipline at the end of this section.
 
 One optional local dependency, deliberately NOT added to CI's install line:
 
@@ -82,7 +83,9 @@ at least 0.45 s serially. Everything else stays in the fast lane by
 construction: sheet lints, codegen checks, encoding and register gates, the
 event-pool resolution sweep, the C#-parity pins.
 
-The discipline being proposed:
+The discipline, **RATIFIED** ([USER] 2026-08-24; the verbatim is in the
+ratifying commit, per CLAUDE.md — no R-number was minted, the same
+date-attributed shape the C11 ruling took):
 
 - **inner loop** — the targeted tests for what you are editing, plus the fast
   lane. Seconds, not minutes.
@@ -234,7 +237,7 @@ Local-only (not in CI): `lint_text_encoding.py`, `lint_generated_structure.py`,
 `tools/README.md` is the authoritative map of which tool is gated by what.
 
 `tools/run_lints.py` runs the whole battery concurrently and prints one row per
-tool with its exit code — see the PROPOSED test section. It carries the
+tool with its exit code — see the parallel-suite section. It carries the
 registry those two lists describe, and fails the run if a `tools/lint_*.py`
 appears that no registry row names, so the list above cannot go stale in
 silence.
