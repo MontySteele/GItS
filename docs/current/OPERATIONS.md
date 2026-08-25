@@ -299,6 +299,15 @@ git worktree prune
   junction/symlink and deletes what it finds — this has destroyed non-regenerable
   `game_ref/` files. A worktree simply lacks art, and that is fine; `build_pck`,
   `deploy`, and art passes happen on the main checkout.
+- **`git worktree remove` deletes GITIGNORED CONTENT even when the worktree is
+  clean, and even with nothing linked.** `git status` reports clean because
+  ignored files are ignored — so a worktree holding a `game_ref_backup/` copy
+  looks empty to git and is removed whole. **On 2026-08-24 a routine purge of
+  stale worktrees took both surviving `game_ref/` backups this way**, which is
+  how one deletion became a fourth total loss. Before removing a worktree,
+  check it for ignored data you care about: `git -C ../GItS-<name> status
+  --ignored --porcelain | grep '^!!'`. Never park the only copy of anything in
+  a worktree.
 
 Rationale and incident history: `docs/current/rationale/`.
 
