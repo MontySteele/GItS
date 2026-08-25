@@ -173,33 +173,32 @@ def test_targeted_fanfare_floor_repairs():
     ]
 
 
-def test_lasting_impressions_body_after_the_reader_came_off():
-    """R135 (2026-08-08) gave this row a body; EB-118 sec.5.3 took one clause
-    of it back, and the card is in an unfinished state ON PURPOSE.
+def test_lasting_impressions_body_after_both_clauses_came_off():
+    """R135 (2026-08-08) gave this row a body; EB-118 took both of its extra
+    clauses back, and what is left is a deliberately simple card.
 
     R135's candidate A added a commons-rate Block reader so the card would
     read the meter it raises. sec.5.3 removed it -- a printed base of ZERO is
     a keyword that pays nothing at the moment the player reads it, and two of
     the pool's Block readers were that. sec.5.2 would ALSO have taken the cap
-    raise, and did not: the ruled upgrade delta `{fanfare_cap: +2}` binds to
-    that op, so removing it makes `apply_upgrade` raise and the card needs a
-    NEW ruled delta first. That is [USER]'s call.
+    raise, and for one window it could not: the ruled upgrade delta
+    `{fanfare_cap: +2}` bound to that op, so removing it made `apply_upgrade`
+    raise. [USER] ruled the replacement delta on 2026-08-24 -- `{encore: +2}`,
+    the Furina Commons convention of one number bump and no cost reduction --
+    and the removal landed with it.
 
-    So this pin says two things at once: the body as it stands, and the fact
-    that the upgrade still has exactly one number to move (5 -> 7). If the
-    delta is ever re-ruled, this is the test that has to be rewritten with
-    it, which is the point of pinning an EXACT list in order.
+    THE STATE THIS PINS IS AN ENDPOINT, NOT A WAYPOINT: a 1-cost Common
+    Exhaust Encore battery, one number on each face. It is deliberately
+    simple rather than unfinished, and if it is later judged too empty the
+    answer is a BODY redesign -- never a second design hidden in the upgrade
+    line, which is exactly what the retired `fanfare_cap` delta had become.
     """
     card = loader.get_card("lasting_impression")
     assert card.cost == 1 and card.rarity == "common" and card.type == "skill"
     assert card.exhaust is True
-    assert card.effects == [
-        {"op": "raise_fanfare_cap", "amount": 5},
-        {"op": "gain_encore", "amount": 4},
-    ]
+    assert card.effects == [{"op": "gain_encore", "amount": 4}]
     assert loader.get_card("lasting_impression+").effects == [
-        {"op": "raise_fanfare_cap", "amount": 7},
-        {"op": "gain_encore", "amount": 4},
+        {"op": "gain_encore", "amount": 6},
     ]
 
 

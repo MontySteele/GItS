@@ -38,9 +38,13 @@ name audit, by house law, and no tool pretends to cover it.
       retired R7 with them, so the cap verb is once again a chosen line
       rather than a universal one. It is NOT put back into R2, because
       whether a dedicated headroom card speaks in the archon voice is a
-      naming call and there is no such card to judge: the sheet's only
-      remaining carrier is `lasting_impression`, already archon, and it is
-      there only because its ruled upgrade delta pins it (see the sheet).
+      naming call and THERE IS NO SUCH CARD TO JUDGE. The last carrier,
+      `lasting_impression`, lost the line on 2026-08-24 when [USER] ruled the
+      replacement upgrade delta (`{encore: +2}`) that had been pinning it, so
+      the sheet now prints the cap verb NOWHERE. That card became a pure
+      Encore body in the same edit and R4 moved it archon -> private, which
+      is the mechanical half; whether the NAME reads in the offstage voice is
+      the eyes-on audit this docstring reserves.
       The full grant stays in R2 because it stayed rare and chosen.
   R3  any card that APPLIES salon_member (deploys a cast member) is
       register: salon. Reads (has_salon_members and count scalers) are not

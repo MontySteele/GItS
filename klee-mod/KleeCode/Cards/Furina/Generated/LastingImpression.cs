@@ -44,13 +44,13 @@ public sealed class LastingImpression : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lasting Impression"),
-        ("description", "[gold]Fanfare Cap[/gold] +{FanfareCap:diff()}. Gain 4 [gold]Encore[/gold]."),
+        ("description", "Gain {IfUpgraded:show:6|4} [gold]Encore[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("FanfareCap", 5m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -62,12 +62,11 @@ public sealed class LastingImpression : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        FurinaResources.RaiseFanfareCap(Owner.Creature, DynamicVars["FanfareCap"].IntValue);
-        FurinaResources.GainEncore(Owner.Creature, 4);
+        FurinaResources.GainEncore(Owner.Creature, (IsUpgraded ? 6 : 4));
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["FanfareCap"].UpgradeValueBy(2m);
+        // encore: every gain_encore site reads IsUpgraded at play time (branches included).
     }
 }

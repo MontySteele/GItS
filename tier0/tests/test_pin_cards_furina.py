@@ -183,39 +183,42 @@ def test_rain_of_roses_soaks_every_enemy_in_hydro_and_banks_five_encore():
     assert state.player.encore == 5
 
 
-def test_lasting_impression_raises_the_cap_banks_encore_and_exhausts():
-    """Lasting Impression raises the Fanfare CAP by 5 -- headroom only, the
-    meter itself does not move -- gains 4 Encore, and exhausts on play.
+def test_lasting_impression_banks_encore_and_exhausts():
+    """Lasting Impression gains 4 Encore and Exhausts on play. That is the
+    whole card (EB-118 sec.5.3, then sec.5.2, [USER] 2026-08-24).
 
-    R135 (2026-08-08) added the third clause, the ruled body: Block 0 on the
-    commons rate. At an empty meter that is ZERO Block, which is the half of
-    the card that has to be asserted rather than assumed -- a base-0 reader
-    reads as "no Block clause at all" on every empty-meter pin, so the paying
-    case lives in the test below it.
+    It used to raise the Fanfare CAP by 5 as well. sec.5.2's rider removal
+    stopped at this one row for exactly one reason -- the ruled upgrade delta
+    `{fanfare_cap: +2}` bound to the op -- and the replacement delta
+    `{encore: +2}` released it. So the card is deliberately a 1-cost Common
+    Exhaust Encore battery now, and THE ASSERTION THAT MATTERS IS THE
+    NEGATIVE ONE: the cap does not move. Headroom on a ceiling nothing
+    reaches is the thing sec.5.2 was removing.
     """
     state = furina_state()
     cap_before = state.player.fanfare_cap
 
     play(state, "lasting_impression")
 
-    assert state.player.fanfare_cap == cap_before + 5
-    assert state.player.fanfare == 0          # cap is headroom, not a grant
+    assert state.player.fanfare_cap == cap_before   # no headroom line left
+    assert state.player.fanfare == 0
     assert state.player.encore == 4
-    assert state.player.block == 0            # base 0, empty meter (R135)
+    assert state.player.block == 0            # the R135 reader is gone too
     assert [c.id for c in state.player.exhaust_pile] == ["lasting_impression"]
     assert state.player.discard_pile == []
 
 
-def test_lasting_impression_raises_the_cap_and_reads_nothing_back():
-    """R135's Block reader is GONE (EB-118 sec.5.3, 2026-08-24).
+def test_lasting_impression_reads_nothing_back_off_a_full_meter():
+    """R135's Block reader is GONE (EB-118 sec.5.3) and so is the cap raise
+    (sec.5.2). This row touches the Fanfare meter in NEITHER direction now.
 
-    R135 gave this card a clause so that it would finally touch the meter it
-    moves -- the cap raise is headroom, the Block line read the Fanfare
-    already banked. sec.5.3 removed it as one of two readers printing a base
-    of ZERO. What is left is headroom on a ceiling and an Encore rider, so
-    the assertion inverts: a full working meter now pays this card nothing.
-    The cap raise itself is still here, and still held only by the ruled
-    upgrade delta that binds to it (sec.5.2's one unlanded removal).
+    R135 gave the card a clause so that it would finally touch the meter it
+    moved -- the cap raise was headroom, the Block line read the Fanfare
+    already banked. sec.5.3 removed the reader as one of two printing a base
+    of ZERO; sec.5.2 then took the raise, once its upgrade delta was re-ruled
+    off the op. A full working meter pays this card nothing and this card
+    pays the meter nothing, which is what makes `archetypes: [fanfare]` a
+    Phase-3 W1 audit item rather than a fact this test can assert.
     """
     state = furina_state()
     state.player.fanfare = 14
@@ -225,7 +228,7 @@ def test_lasting_impression_raises_the_cap_and_reads_nothing_back():
 
     assert state.player.block == 0            # the reader is gone
     assert state.player.fanfare == 14         # and nothing spent the meter
-    assert state.player.fanfare_cap == cap_before + 5
+    assert state.player.fanfare_cap == cap_before   # and nothing raised it
     assert state.player.encore == 4
 
 

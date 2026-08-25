@@ -196,8 +196,8 @@
    # it was written in the two-leg world and the gain half stopped paying at
    # Track A. The register stays `archon`; R2 no longer FORCES it (nothing on
    # this row reads Fanfare) and a register is a naming call, not a lint's.
-- {id: lasting_impression, name: "Lasting Impression", register: archon, cost: 1, type: skill, rarity: common, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [fanfare], role: enabler, exhaust: true,
-   effects: [{op: raise_fanfare_cap, amount: 5}, {op: gain_encore, amount: 4}]}
+- {id: lasting_impression, name: "Lasting Impression", register: private, cost: 1, type: skill, rarity: common, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [fanfare], role: enabler, exhaust: true,
+   effects: [{op: gain_encore, amount: 4}]}
    # BODY LANDED R135 (2026-08-08), commissioned R130 item 7 (lint-ok: sitting
    # item ordinal, not a card number) ("needs a
    # rework", not a ratify): Candidate A of the worksheet, the Block reader --
@@ -206,31 +206,80 @@
    # 2026-08-24), on the pool argument rather than the card one: it was one of
    # two Block readers printing a base of ZERO, and a rider that shows a
    # keyword and pays nothing at the moment it is read is what sec.5.3
-   # removes. Cost 1 / common / exhaust unchanged throughout. The paragraph
-   # below is the LOSS the R135 body answered; it stays on the record because
-   # the hole it describes is open again and the next body has to know it.
-   # FANFARE REWORK Track B (2026-07-28, RULED): "Fanfare +5" -> "Fanfare Cap
-   # +5". The full grant is now a RARE POWER payoff only (R6), and this is a
-   # COMMON Exhaust skill -- so it converts to the cheap half of the pair
-   # rather than keeping a keyword its slot no longer earns. It is on the
+   # removes. Cost 1 / common / exhaust unchanged throughout.
+   # AND THE CAP LINE IS GONE TOO (EB-118 sec.5.2, [USER] 2026-08-24). This
+   # was the ONE card of sec.5.2's sixteen (lint-ok: the packet's card count,
+   # not a number on this row) that did not land with the rest,
+   # and the blocker was never the removal: it was that the ruled upgrade
+   # delta `fanfare_cap: +2` BINDS to this op, so taking the op out made
+   # `apply_upgrade` raise. The new ruled delta is `{encore: +2}` and it
+   # unblocks the removal, so the pool now holds ZERO incidental cap riders,
+   # which is sec.5.2's stated end state.
+   # WHAT THIS CARD NOW IS, said plainly so nobody reads the upgrade as a
+   # design: a 1-cost Common Exhaust Encore battery, Encore 4 base and 6
+   # upgraded. The delta is the Furina Commons convention -- ONE number bump,
+   # ZERO cost reductions -- with `surintendante_chevalmarin` {encore: +2} and
+   # `suffering_for_art` {encore: +1} as the precedents in this file. THIS IS
+   # AN UNBLOCKER, NOT A RICHNESS REPAIR. If the body is later judged too
+   # empty, that verdict opens a BODY redesign; it never buys a second design
+   # smuggled into the upgrade line.
+   # THE PRICE OF SIMPLE IS MEASURED, NOT GUESSED, AND IT IS DISCLOSED HERE.
+   # The simplification costs Furina distinctness, and the new near-duplicate
+   # pair is THIS ROW against `reginas_mercy` on the `core[#exhaust]`
+   # signature -- both are now 1-cost Exhaust skills whose whole body is one
+   # gain_encore, separated by rarity and by a number.
+   # Measured: uniq 76% -> 73%, neardup 7 -> 8 pairs (lint-ok: distinctness
+   # report figures, not card numbers).
+   # THE RATIFIED GATE STILL PASSES WITH ROOM -- uniq floor 70, maxclu
+   # unmoved and inside its ceiling, neardup far under its pair limit
+   # (lint-ok: ratified gate thresholds, not card numbers) -- so nothing here
+   # is a breach and nothing is curated. It is written down because it is the
+   # exact evidence a later "too empty" verdict would be built from, and the
+   # answer to that verdict is a BODY -- this row's or that one's -- never a
+   # bigger number on the upgrade line.
+   # `solve` DOES NOT MOVE, and that was asked rather than assumed. The guess
+   # was that it would lose `block` and `scaling` with the two clauses that
+   # looked like they earned them -- and `tools/role_tempo.py` says no: the
+   # four-role list comes off the ENCORE line, not off the Block reader or the
+   # cap raise. `suffering_for_art` (self-damage + Encore) and `ebb_and_flow`
+   # (Encore + spend) carry the identical four with no Block and no cap
+   # anywhere. `suggest_role_tempo_tags.py --check` is the gate, it caught the
+   # hand pick, and this row is the classifier's verdict.
+   # The `tag-through` column DID move -- `encore,fanfare` -> `encore` -- which
+   # is the honest half: this row no longer touches the Fanfare meter at all.
+   # `archetypes: [fanfare]` is left ALONE deliberately: a tag change is a
+   # material sheet edit under R202 and belongs to Phase 3's W1 audit, not to
+   # an unblocker.
+   # THE REGISTER MOVES, and it is the lint's call rather than a naming one:
+   # `archon` -> `private`, because R4 says a PURE Encore card (every leaf op
+   # is gain_encore/spend_encore) is `private`, and with the cap line gone
+   # this row finally is one. R2 had already released it -- nothing here
+   # reads Fanfare. THE SEMANTIC HALF IS NOT SETTLED BY A LINT and is flagged
+   # rather than assumed: whether the NAME "Lasting Impression" reads in the
+   # offstage voice is [USER]'s eyes-on name audit, by house law, and the
+   # lint's own docstring says so.
+   # The paragraph below is the LOSS the R135 body answered; it stays on the
+   # record because the hole it describes is open again and the next body has
+   # to know it.
+   # FANFARE REWORK Track B (2026-07-28, RULED): "Fanfare +5" (lint-ok:
+   # retired numbers -- this row prints neither keyword since sec.5.2) ->
+   # "Fanfare Cap +5" (lint-ok: retired numbers). The full grant is now a RARE
+   # POWER payoff only (R6), and this is a
+   # COMMON Exhaust skill -- so it converted to the cheap half of the pair
+   # rather than keeping a keyword its slot no longer earned. It was on the
    # short list of Exhaust skills that carry Fanfare Cap precisely because it
-   # was the pool's common floor source: the mechanic still reaches the
+   # was the pool's common floor source: the mechanic still reached the
    # power-light archetype it was built for, at a smaller number.
-   # EB-118 sec.5.2 (2026-08-24) named this card among its removals and it is
-   # the ONE that did not land: its ruled upgrade delta is
-   # `fanfare_cap: +2`, which binds to this op, so removing the op makes
-   # apply_upgrade raise and the card needs a NEW ruled delta first. That is a
-   # design act and it is [USER]'s. So this row is now the pool's only
-   # raise_fanfare_cap carrier -- which is not the sec.5.2 end state.
    # COMPENSATION Track 1 (2026-07-28) revisited this card and shipped NO
    # reprice, deliberately. Every candidate that "falls out naturally" is
    # either more blind Encore -- the exact disease this sprint's diagnosis
    # names -- or a reader clause, which is a redesign and out of scope by the
    # brief's own words. What this card needs is a body, and that is a ruling.
    # SAID PLAINLY: this is the single biggest individual loss in the track.
-   # The card went from +5 permanent baseline to +5 headroom on a ceiling
-   # nothing reaches, so at current constants it is close to a deletion of
-   # this card's scaling line. Recorded here rather than discovered later.
+   # The card went from +5 permanent baseline to +5 headroom (lint-ok:
+   # retired numbers; sec.5.2 has since removed the headroom line too) on a
+   # ceiling nothing reaches, so at current constants it is close to a
+   # deletion of this card's scaling line. Recorded rather than discovered.
    # Floor RATIFIED here (2026-07-26 [USER]; raised from its F-B2 value, and the upgrade delta chains on
    # top unchanged). Tested at the red-pen, and the honest reading of that cell is that it sits BELOW THE
    # RUN INSTRUMENT'S NOISE FLOOR -- both the fanfare and salon arms moved by less than the seed spread.
