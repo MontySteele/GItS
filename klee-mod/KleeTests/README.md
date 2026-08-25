@@ -15,7 +15,7 @@ thing it still cannot reach — a live `CombatState`.)
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 135 tests, ~0.5s after build
+dotnet test                       # 141 tests, ~0.5s after build
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -92,9 +92,10 @@ either pinned structurally and labelled, or left out.
 | `RecallFromDiscardTests.cs` | 11 | `EB-122`'s other half of the same verb: `recall_to_draw` reading its DEFAULT source. The file is about an ASYMMETRY that is deliberate on both sides — the discard branch filters nothing and grants nothing, because [USER] ruled the unfiltered branch (and the self-recall it allows) DELIBERATE at `EB-69`/D3, R198. Sim spec: `tier0/tests/test_eb69_tokoyo_returns_selfrecall.py`. Structural where a live `CombatState` is needed, including the two faces routing through one call. |
 | `SlyGrantTests.cs` | 9 | `EB-122`'s turn-scoped Sly grant. The pool predicate RUNS (Skills only, never a kit card, never one already Sly this turn — the clause that makes a second grant pick a different card); the grant is structural, and pins that the expiry is the GAME's `CardCmd.ApplySingleTurnSly` rather than a mod-side timer. Both carriers route through the one home. |
 | `ModalChoicePinTests.cs` | 5 | `EB-118` sec.5.4's modal surface: `ModalChoice` delegates to the base game's OWN card-level choice rather than reimplementing one (`CardSelectCmd.FromChooseACardScreen` + `PlayerChoiceContext`, co-op-synced as `PlayerChoiceType.Index`), the three-option ceiling the screen itself enforces, and the `mode_chosen` telemetry row pinned to its tier0 twin. Structural: making a choice needs a live `CombatState`. No sheet row is modal. |
+| `ConditionalUpgradePinTests.cs` | 6 | `EB-140`'s two branch-moving upgrade delta keys. `hold_the_line`'s `{conditional_block: +3}` and `take_it_from_the_top`'s `{conditional_damage: +4}` shipped at `W3` with an empty `OnUpgrade`; the top-level half is now pinned BEHAVIOURALLY through the game's own `CardModel.UpgradeInternal` (Block 5 -> 8, and the Furina card's printed Block held at 5 because the delta is a damage one), the branch half by the face it prints (`{IfUpgraded:show:9|6}` / `{IfUpgraded:show:14|10}`), and the play-time read structurally -- resolving a branch needs a live `CombatState`. Codegen twin: `tier0/tests/test_roster_codegen.py`. |
 | `BombInstancingTests.cs` | 18 | `EB-130` / R205's per-placer bomb piles. The instance type itself; the base game's OWN `PowerCmd.FindExistingInstanceForStacking` answering that two placers get two piles, one placer still gets one, and a gather does not land in another placer's pile on the destination; the SUPPRESSION ARBITER (two piles fold to one 0.75, never 0.5625 — the preview and the hit elect the same pile, and the creature-keyed latch is spent once); and `ModifyAll` reaching every pile with the solo total unmoved. Structural where a live `CombatState` is needed: the `DetonateOn`/`MoveAllTo` loops, and the DEATH-TEARDOWN finding pinned on the game's own kill and hook-broadcast machinery. |
 
-**135 tests, all green.**
+**141 tests, all green.**
 
 ## Co-op coverage
 

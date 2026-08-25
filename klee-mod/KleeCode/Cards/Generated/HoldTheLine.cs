@@ -37,7 +37,7 @@ public sealed class HoldTheLine : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hold the Line"),
-        ("description", "Spend 2 [gold]Sparks[/gold]. Gain {Block:diff()} [gold]Block[/gold]. If an enemy intends to attack: gain 6 [gold]Block[/gold]."),
+        ("description", "Spend 2 [gold]Sparks[/gold]. Gain {Block:diff()} [gold]Block[/gold]. If an enemy intends to attack: gain {IfUpgraded:show:9|6} [gold]Block[/gold]."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -65,12 +65,13 @@ public sealed class HoldTheLine : CustomCardModel
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         if (CurtainCallHooks.EnemyIntendsAttack(Owner.Creature))
         {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(6m, ValueProp.Move), cardPlay);
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 9m : 6m), ValueProp.Move), cardPlay);
         }
     }
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- delta key 'conditional_block: 3' not expressible by codegen (structural upgrade). Flagged in manifest.
+        DynamicVars.Block.UpgradeValueBy(3m);
+        // conditional_block: the branch amount swaps on an IsUpgraded read at play time; the text swaps via {IfUpgraded:show:...|...}.
     }
 }
