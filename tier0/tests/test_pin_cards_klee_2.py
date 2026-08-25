@@ -357,11 +357,14 @@ def test_sparkly_explosion_gathers_detonates_at_plus_three_then_swings():
 
     _play(state, "sparkly_explosion")
 
-    # tier0 re-resolves `target: enemy` per op to the LOWEST-HP living enemy,
-    # so all three Bombs gather on `right`: 5+3, 5+3, 6+3 = 25, then 14.
-    # (EB-136: C# holds ONE cardPlay.Target for all three ops. The engines
-    # concentrate differently and the sim number on this card is diagnostic
-    # until that repair lands.)
+    # All three ops resolve against ONE creature -- the aim bound at card-play
+    # construction, `right` at 100 HP -- so the board's Bombs gather there,
+    # pop at +3 each (5+3, 5+3, 6+3 = 25) and the 14 lands on the same body.
+    # EB-136 / R210 (`C18`) is what makes that a STATEMENT rather than a
+    # coincidence: before the binding each op re-picked the lowest-HP living
+    # enemy independently and agreed here only because nothing died mid-card.
+    # The kill case is pinned in `test_eb136_same_target_binding.py`, and the
+    # DIAGNOSTIC caveat this comment used to carry is cleared.
     assert right.hp == 100 - 25 - 14
     assert left.hp == 200
     assert left.bombs == [] and right.bombs == []
