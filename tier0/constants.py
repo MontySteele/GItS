@@ -1785,6 +1785,56 @@ BANNER_FEATURED_SLOTS = 3
 # instrument movement recorded above is a BUILD-TIME FACT in W1 §5's sense,
 # written down in the landing commit so it cannot later be discovered and read
 # as a finding, and it is NOT graded against any committed prediction.
+# ---------------------------------------------------------------------------
+# FORWARD CORRECTION, 2026-08-25, to (e)'s FIRE RATES ONLY. R101b: the lines
+# above stand as published and are NOT rewritten; this paragraph is appended
+# beneath them, and it is the number a later reader should quote.
+# WHAT WAS WRONG. (e) reports `exhaust_pile_at_least_6` firing 12.8% of
+# `kokomi/priest_weighted` attack plays and `_at_least_8` firing 7.4% (mean
+# pile 1.65, median 0, p90 6, p99 12). Those were taken through
+# `harness/runner.score_config`, which ALWAYS runs
+# `run_full_battery(*BASELINE, "generic", ...)` -- the `ref_ironclad`/`starter`
+# ANCHOR BATTERY -- into the same process before it scores the target config.
+# Ironclad attack plays carry an EMPTY exhaust pile, so every one of them
+# entered the denominator as a zero. The pooled denominator was ~2.78x the
+# Kokomi one, and the published rates are the Kokomi rates diluted by that
+# factor. Nothing else in (e) is affected: the body, the bar, the upgrade
+# delta and the drafter prices were never functions of these numbers.
+# THE CLEAN MEASUREMENT, re-taken 2026-08-25 on the SAME instrument with the
+# anchor battery removed -- `run_full_battery("kokomi", "priest_weighted",
+# "priest", 40, seed)` and nothing else, sampling `len(player.exhaust_pile)`
+# at every attack play, which is the exact expression the predicate reads.
+# TWO SEEDS: seed 11, 2,494 attack plays -> `_at_least_6` 40.2%,
+# `_at_least_8` 24.9%, mean 4.87, median 4, p90 10, p99 14. Seed 23, 2,491
+# plays -> 42.2% / 27.3%, mean 5.02, median 4, p90 10, p99 15. POOLED over
+# 4,985 plays: `_at_least_6` 41.2%, `_at_least_8` 26.1%, mean 4.95, MEDIAN 4.
+# The contaminated path reproduces the published figures on demand -- the same
+# spy through `score_config` reads 14.5% / 9.0% (mean 1.76, median 0) at seed
+# 11 and 15.1% / 9.8% (mean 1.81, median 0) at seed 23 -- so the mechanism is
+# demonstrated, not inferred.
+# WHAT SURVIVES AND WHAT DOES NOT. THE RATIO SURVIVES: bar 6 fires about 1.6x
+# as often as bar 8 clean (41.2 / 26.1), against 1.7x as published (12.8 /
+# 7.4), so the comparison that actually drove the ruling -- 6 rather than the
+# slate's first 8, chosen for the higher rate -- holds, and (e)'s "~2x" was a
+# generous rounding on BOTH readings rather than an artefact of the
+# contamination. THE ABSOLUTE LEVELS DO NOT: every one was understated by
+# roughly 3x, and the two that read as near-never are the ones that mislead --
+# "median 0" is really MEDIAN 4, and a mean of 1.65 is really 4.95. The Rare's
+# second half is therefore a REGULAR occurrence, not the
+# once-a-fight-when-you-have-really-burned moment (e) describes.
+# ONE CONSEQUENCE IS [USER]'s AND HAS BEEN HANDED OVER, NOT SETTLED HERE:
+# under R58 the bar of 6 is a one-way door, and it was set against a rate now
+# known to be ~3x higher, so whether 6 is still the right bar is a design call
+# and it is [USER]'s. Nothing in this correction moves the bar, the body or
+# any stamp. The drafter disclosure above is affected the same way and by the
+# same factor -- (e)'s 8 Block is credited at full face against what is really
+# a 41.2% fire rate, not 12.8%, so the over-credit is LESS wrong than
+# disclosed, and its bound of 4.0 is unchanged because that bound is
+# 8 Block / cost 2 and never read the rate at all.
+# `docs/kokomi-cards.yaml` carries the same two figures in the
+# `depths_judgment` row's comment; it is pointed at this paragraph rather than
+# rewritten, for the same R101b reason.
+# ---------------------------------------------------------------------------
 CONSTANTS_VERSION = 17
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
