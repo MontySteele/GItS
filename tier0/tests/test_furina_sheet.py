@@ -695,6 +695,42 @@ def test_encore_performance_is_free_and_refunds_nothing():
     assert [fx["op"] for fx in card.effects] == ["copy_spotlighted_in_hand"]
 
 
+def test_encore_performance_upgrade_buys_retain_and_nothing_else():
+    """M27 (RULED 2026-08-24): the Rare's weakness is target-dependence, not
+    copy size, so the authored replacement delta is `{retain: true}`.
+
+    It binds to no op -- it sets a card FIELD -- so the copy itself is
+    untouched on both faces and the delta cannot inherit the `cost_override`
+    semantics question that sank every candidate written against the copy.
+    The card is 0-cost on both faces, so the upgrade buys timing only.
+    """
+    base = loader.get_card("encore_performance")
+    up = loader.get_card("encore_performance+")
+    assert not base.retain and up.retain
+    assert base.effects == up.effects
+    assert base.cost == up.cost == 0
+
+
+def test_encore_performance_retain_survives_the_turn_it_has_no_target():
+    """The upgrade's whole job, as an observable: with no Spotlighted target
+    the base face is dead AND discarded at end of turn, while the upgraded
+    face is dead but still in hand for the turn a target arrives."""
+    def survives_the_flush(cid):
+        # The real turn loop, not a direct call -- test_ethereal_base_field's
+        # `hand_survives` idiom. Nothing to draw and no plays, so the only
+        # thing that can move the card is the end-of-turn flush.
+        p = loader.build_player("furina")
+        p.draw_pile, p.discard_pile = [], []
+        p.hand = [loader.get_card(cid)]
+        st = combat.run_fight(
+            p, [make_enemy(hp=1, intents=[{"kind": "block", "amount": 0}])],
+            lambda s: None, seed=0)
+        return any(c.id == cid for c in st.player.hand)
+
+    assert not survives_the_flush("encore_performance")
+    assert survives_the_flush("encore_performance+")
+
+
 def test_spotlight_machinery_refunds_setup_energy():
     # encore_performance is in this list for the same OBSERVABLE (playing it
     # leaves energy where it was) but by a different mechanism since the X3

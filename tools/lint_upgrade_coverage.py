@@ -69,51 +69,15 @@ from tools.gen_klee_cards import pascal             # noqa: E402
 # register would put one card's gate two lists away from the assertion it
 # silences.
 SHEET_EXEMPT: dict[str, str] = {
-    # CURATED EXEMPTION -- [USER] reply of 2026-08-06 to the Second Wind open
-    # one-liner (2) (`docs/archive/surplus-week-manifest-2026-08-05.md`, "Open
-    # one-liners this batch generated for [USER]"): *"curated exemption now;
-    # the replacement delta is deferred behind FLAG-2."*
-    #
-    # DEBT, not a rule. R110's S-1 erratum (X3) made Encore Performance a
-    # 0-cost card, which empties its upgrade: `copy_cost_override: 0` was the
-    # delta's only content and a 0-cost card cannot be discounted to 0. The
-    # card IS a draftable campfire pick and SHOULD gain an upgrade; it does not
-    # have one that means anything, and this entry is the register saying so
-    # out loud rather than the lint quietly passing a hollow delta.
-    #
-    # LOAD-BEARING as of 2026-08-06. It was pre-positioned when it was written;
-    # [USER]'s Y-4 reply ("YES") then deleted `copy_cost_override: 0` from
-    # `docs/furina-upgrades.yaml`, and this entry is now the only thing holding
-    # Layer 1 green for this card. Verified in both directions at landing:
-    # disable the entry and L1 reports `encore_performance` at once.
-    #
-    # REMOVAL CONDITION: a replacement upgrade delta is authored for
-    # `encore_performance` and THIS ENTRY IS DELETED with it.
-    #
-    # FLAG-2 IS NO LONGER THE BLOCKER, and this comment used to say it was.
-    # The condition was written as a conjunction -- FLAG-2 ruled AND a delta
-    # authored -- and the first conjunct fired on 2026-08-05: R114 discharged
-    # all four held flags (`d833573`; standing LAW at `LAW.md:309-313`, and
-    # `tier0/tests/test_s13_exploit_pins.py:290-298` records the two ratified
-    # fixes). The clause "FLAG-2 is HELD; nothing may be built against it" was
-    # true for the 34 minutes between this entry landing and that ruling, and
-    # survived by omission through the post-R114 sweep that removed the same
-    # restatement from two other files.
-    #
-    # The entry itself is STILL LOAD-BEARING -- no replacement delta exists, so
-    # the lint is correctly green -- but the reason it gave was false, and a
-    # maintainer reading it would correctly conclude the delta was blocked and
-    # never author one. Authoring a replacement for a Rare is a design call and
-    # it is now unblocked and open: QUEUE `M27`. The lint's stale-curation
-    # sweep structurally cannot catch this class: the entry is still needed,
-    # only its stated reason had expired.
-    "encore_performance":
-        "DEBT -- upgrade emptied by R110/S-1 (X3): `copy_cost_override: 0` is "
-        "meaningless on a card that now costs 0. Curated exemption per [USER] "
-        "2026-08-06. FLAG-2 was discharged 2026-08-05 (R114) and is NOT the "
-        "blocker; no replacement delta has been authored, which is the open "
-        "design call at QUEUE `M27`. Gate: delta authored -> delete this "
-        "entry.",
+    # EMPTY, and it got there the way a curated set is supposed to: by its
+    # entry's own removal condition firing. The one entry this ever held was
+    # `encore_performance`, carrying the debt R110/S-1 created when it made the
+    # card 0-cost and emptied `{copy_cost_override: 0}`. The condition was a
+    # conjunction -- FLAG-2 ruled AND a replacement delta authored -- and the
+    # second conjunct fired at M27 (2026-08-24): the card now prints
+    # `{retain: true}`, so Layer 1 is green on a real delta rather than on a
+    # curated silence, and the entry and its CODEGEN_DEBT twin were deleted
+    # together as both said they must be. An entry added here names its gate.
 }
 
 # Whole classes are exempted by predicate rather than by listing every id --
@@ -149,23 +113,14 @@ def _draftable(card) -> tuple[bool, str]:
 # can express. The lint's own stale-curation sweep is what noticed the entry had
 # become a lie, which is the behaviour a curated list is supposed to have.
 #
-# ONE ENTRY AGAIN as of 2026-08-06, and it is SHEET_EXEMPT's twin rather than a
-# new judgment. [USER]'s Y-4 reply deleted `copy_cost_override: 0` from
-# `docs/furina-upgrades.yaml`, which emptied `encore_performance`'s upgrade. The
-# pre-positioned exemption above was written against LAYER 1 (the sheet) only;
-# regenerating the C# then moved the same single fact into the Furina manifest's
-# `no_upgrade_path`, where LAYER 2 reads it. Two layers see one absent delta, so
-# the curated set needs the card named in both. Same debt, same gate, same
-# removal condition -- and both entries are deleted together or not at all.
+# EMPTY as of M27, 2026-08-24. `encore_performance` was the last entry and was
+# SHEET_EXEMPT's twin rather than a second judgment: one absent delta seen by
+# two layers, so the card had to be named in both, and both said they were
+# deleted together or not at all. M27 authored the replacement
+# (`{retain: true}`), the generator emits the upgrade path, and both entries
+# went. `retain` needed no new emitter grammar -- the EB-125 Moon Signal build
+# had just put `AddKeyword(CardKeyword.Retain)` through the same door.
 CODEGEN_DEBT: dict[str, str] = {
-    "encore_performance":
-        "DEBT -- twin of SHEET_EXEMPT's entry, not a second decision. The "
-        "sheet delta was deleted by [USER] 2026-08-06 (Y-4) because R110/S-1 "
-        "made the card 0-cost, so the generator correctly emits no upgrade "
-        "path. FLAG-2 was discharged 2026-08-05 (R114) and is NOT the "
-        "blocker; the replacement delta is the open design call at QUEUE "
-        "`M27`. Gate: delta authored -> delete THIS ENTRY AND THE "
-        "SHEET_EXEMPT ENTRY TOGETHER.",
     # EB-69's two LAYER-2 entries (`send_the_runner`, `wheel_the_ranks`) are
     # GONE as of EB-122, 2026-08-24, deleted by the gate each of them named:
     # the `add:` emitter now expresses `block`, a chosen `discard` and a

@@ -750,6 +750,8 @@
    effects: [{op: copy_spotlighted_in_hand, amount: 1}]}
    # THE duplication card (kickoff §9; DECISIONS 64's held-open registration). Copies a Spotlighted card in hand — kit-deepener,
    # Columbina's replay grammar on schedule. Costs nothing, so the copied Companion is playable now; still dead without a target.
+   # M27 (RULED 2026-08-24): that last clause is what the upgrade answers. `{retain: true}` in furina-upgrades.yaml lets the
+   # holder keep the card until a Spotlighted target exists, so the upgrade buys timing, not a bigger copy.
    # S13/X3 (sitting 2026-08-06, family X3): "Remove the energy rider and make it free to play instead." Was cost 1 with
    # {op: energy, amount: 1}; the refund was the term the self-copy loop compounded into an energy-POSITIVE engine. Cost 0
    # buys the same "playable now" the refund was printed for, and cannot stack above zero.
