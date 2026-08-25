@@ -143,16 +143,35 @@ public class SlyGrantTests
     }
 
     [Fact]
-    public void The_prompt_is_an_owed_stand_in_and_not_invented_copy()
+    public void The_prompt_reads_the_ruled_copy_and_not_a_stand_in()
     {
-        // The base game renders this screen from a per-card
-        // `cards/<id>.selectionScreenPrompt` row (Hand Trick), no generated
-        // card has ever carried one, and authoring the string is a
-        // player-facing TEXT call. It stands at the closest shipped string,
-        // in ONE member, exactly as RecallFromExhaust's does -- so the ruled
-        // copy lands in one place. This test is what makes that a recorded
-        // decision rather than a silent choice.
-        Assert.Equal(CardSelectorPrefs.DiscardSelectionPrompt.ToString(),
-                     SlyGrant.Prompt.ToString());
+        // EB-122's owed half, DISCHARGED 2026-08-25. The stand-in this
+        // replaces was DiscardSelectionPrompt, which named the wrong pile
+        // entirely -- this screen reads the HAND.
+        Assert.Equal(
+            "Choose a Skill in your hand. It gains [gold]Sly[/gold] this turn.",
+            SlyGrant.PromptText);
+        Assert.NotEqual(CardSelectorPrefs.DiscardSelectionPrompt.LocEntryKey,
+                        SlyGrant.Prompt.LocEntryKey);
+    }
+
+    [Fact]
+    public void The_prompt_is_wired_to_a_row_that_is_actually_injected()
+    {
+        // A LocString is a table plus a key: nothing checks at compile time
+        // that the key resolves, and an unresolved one renders as the literal
+        // key on the selection screen -- the exact defect that shipped as
+        // "card_keywords.KLEEMOD-COMPANION_RIDER.title" in 0.2-589. The row is
+        // merged in KleeMod.InjectLocStrings, which reaches Godot on the way
+        // in (README, the headless boundary), so it is pinned STRUCTURALLY:
+        // both the key and the ruled text are string literals in that method
+        // because both are consts read from this class.
+        Assert.Equal("cards", SlyGrant.Prompt.LocTable);
+        Assert.Equal(SlyGrant.PromptKey, SlyGrant.Prompt.LocEntryKey);
+        Assert.EndsWith(".selectionScreenPrompt", SlyGrant.PromptKey);
+
+        var injected = Il.Strings(Il.Method("KleeMod", "InjectLocStrings"));
+        Assert.Contains(SlyGrant.PromptKey, injected);
+        Assert.Contains(SlyGrant.PromptText, injected);
     }
 }

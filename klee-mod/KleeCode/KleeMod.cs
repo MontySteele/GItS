@@ -105,6 +105,25 @@ public static class KleeMod
                 ["JUMPY_DUMPTY.description"] = "Deal {Damage:diff()} damage twice.",
 
                 // Pop is now a CustomCardModel and declares its own loc.
+
+                // EB-122: the three SELECTION-SCREEN prompts, ruled copy
+                // 2026-08-25. Not card rows and not an exception to the split
+                // above -- `<ENTRY>.selectionScreenPrompt` in the `cards`
+                // table is the base game's own shape for this screen
+                // (HAND_TRICK's and HEADBUTT's rows are exactly these two
+                // verbs), and a LocString is a table plus a key with no
+                // raw-text constructor, so ruled copy can only reach the
+                // screen as a row. They are keyed on the VERB rather than on a
+                // card id because one screen serves every carrier that prints
+                // it -- the same "one member, one string" discipline the three
+                // Prompt properties were written with. The pck carries no copy
+                // of these, so this dictionary is their only source and a
+                // missing entry is directly player-visible as a raw key.
+                [Powers.SlyGrant.PromptKey] = Powers.SlyGrant.PromptText,
+                [Powers.RecallFromDiscard.PromptKey] =
+                    Powers.RecallFromDiscard.PromptText,
+                [Powers.RecallFromExhaust.PromptKey] =
+                    Powers.RecallFromExhaust.PromptText,
             });
 
             // Runtime copy of the custom-keyword loc. The pck carries the

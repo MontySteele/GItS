@@ -62,14 +62,41 @@ public static class RecallFromDiscard
     public const CardPilePosition Placement = CardPilePosition.Top;
 
     /// <summary>
-    /// The selection prompt. OWED, the same way <see cref="RecallFromExhaust"/>'s
-    /// is: the base game ships no "retrieve" prompt -- Headbutt renders this
-    /// screen from its own per-card <c>cards/&lt;id&gt;.selectionScreenPrompt</c>
-    /// row -- and authoring that string is a player-facing TEXT call, not an
-    /// engineering one. It stands at the prompt naming the PILE the screen is
-    /// showing. One member, so the ruled copy lands in one place.
+    /// The loc table the prompt lives in, and it is the base game's own.
+    /// Headbutt -- the row this whole class transcribes -- renders its screen
+    /// from <c>cards/HEADBUTT.selectionScreenPrompt</c>, "Choose a card to put
+    /// on top of your Draw Pile." <c>KleeMod.InjectLocStrings</c> merges the
+    /// mod's row into the same table at boot, so a code-only rebuild never
+    /// renders the raw key.
     /// </summary>
-    public static LocString Prompt => CardSelectorPrefs.DiscardSelectionPrompt;
+    private const string Table = "cards";
+
+    /// <summary>Key for <see cref="Prompt"/>, keyed on the VERB rather than on
+    /// a card id -- one screen, one ruled string, however many carriers print
+    /// it.</summary>
+    public const string PromptKey =
+        "KLEEMOD-RECALL_FROM_DISCARD.selectionScreenPrompt";
+
+    /// <summary>
+    /// RULED COPY ([USER], 2026-08-25) -- the OWED note this replaces is
+    /// DISCHARGED. Two sentences because the screen does two things the player
+    /// must be told apart: which pile it is reading, and where the pick lands.
+    /// Headbutt's own row names only the destination, which it can afford
+    /// because Headbutt shows one pile and this verb has a twin reading the
+    /// other one (<see cref="RecallFromExhaust"/>).
+    ///
+    /// NO KEYWORD IS GILDED HERE, and that is the same fact as the class
+    /// docstring's first bullet: this branch grants nothing. A [gold] tag on
+    /// this screen would promise a loan the discard branch does not charge.
+    /// Reaching the live mod at the next deploy; the rendered look is an
+    /// eyes-on item.
+    /// </summary>
+    public const string PromptText =
+        "Choose a card from your Discard Pile. Put it on top of your Draw Pile.";
+
+    /// <summary>The selection prompt. One member, so the ruled copy lands in
+    /// one place.</summary>
+    public static LocString Prompt => new LocString(Table, PromptKey);
 
     /// <summary>
     /// Move up to <paramref name="amount"/> chosen cards from the discard pile

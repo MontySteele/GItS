@@ -49,14 +49,43 @@ namespace KleeMod.Powers;
 public static class SlyGrant
 {
     /// <summary>
-    /// The selection prompt. OWED, exactly as <see cref="RecallFromExhaust"/>'s
-    /// is: Hand Trick renders this screen from its own per-card
-    /// <c>cards/&lt;id&gt;.selectionScreenPrompt</c> row, no generated card has
-    /// ever carried one, and authoring the string is a player-facing TEXT call
-    /// rather than an engineering one. It stands at the closest shipped string
-    /// meanwhile. One member, so the ruled copy lands in one place.
+    /// The loc table the prompt lives in, and it is the base game's own. Hand
+    /// Trick renders this screen from <c>cards/HAND_TRICK.selectionScreenPrompt</c>
+    /// -- "Choose a card to add [gold]Sly[/gold] to." -- so a mod row in the
+    /// same table under the same suffix is the shipped shape rather than a new
+    /// mechanism. <c>KleeMod.InjectLocStrings</c> merges it at boot, which is
+    /// what keeps a code-only rebuild from rendering the raw key.
     /// </summary>
-    public static LocString Prompt => CardSelectorPrefs.DiscardSelectionPrompt;
+    private const string Table = "cards";
+
+    /// <summary>
+    /// Key for <see cref="Prompt"/>. Keyed on the VERB, not on a card id: two
+    /// cards print this screen and the ruled copy is ONE string. The base game
+    /// keys per card because each of its prompts is written for one card.
+    /// </summary>
+    public const string PromptKey = "KLEEMOD-SLY_GRANT.selectionScreenPrompt";
+
+    /// <summary>
+    /// RULED COPY ([USER], 2026-08-25) -- the OWED note this replaces is
+    /// DISCHARGED. It names the filter the screen is actually applying
+    /// (Skills, in hand) and the duration, because <see cref="Eligible"/>
+    /// enforces both and a prompt that said only "a card" would describe a
+    /// pool the player cannot pick from.
+    ///
+    /// The gilding is not decoration and it is not invented: every base-game
+    /// prompt that grants a keyword gilds it -- HAND_TRICK's own row wraps
+    /// [gold]Sly[/gold], SCULPTING_STRIKE wraps [gold]Ethereal[/gold], SNAP
+    /// wraps [gold]Retain[/gold] -- so this screen demonstrably renders BBCode
+    /// and demonstrably gilds this exact keyword (SlayTheSpire2.pck, v0.107.1,
+    /// English rows read 2026-08-25). Reaching the live mod at the next
+    /// deploy; the rendered look is still an eyes-on item.
+    /// </summary>
+    public const string PromptText =
+        "Choose a Skill in your hand. It gains [gold]Sly[/gold] this turn.";
+
+    /// <summary>The selection prompt. One member, so the ruled copy lives in
+    /// one place for both carriers.</summary>
+    public static LocString Prompt => new LocString(Table, PromptKey);
 
     /// <summary>
     /// Eligible targets. Skills only (the game's filter and the sheet's only

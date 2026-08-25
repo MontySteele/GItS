@@ -55,7 +55,7 @@ public sealed class DepthsJudgment : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sango Isshin"),
-        ("description", "Deal {Damage:diff()} damage. If 6 or more cards are [gold]Exhausted[/gold]: gain 8 [gold]Block[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. If 8 or more cards are [gold]Exhausted[/gold]: gain 8 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -79,7 +79,7 @@ public sealed class DepthsJudgment : CustomCardModel, IElementalCard, ICharacter
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        if (KokomiResources.ExhaustPileCount(Owner.Creature) >= 6)
+        if (KokomiResources.ExhaustPileCount(Owner.Creature) >= 8)
         {
             await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(8m, ValueProp.Move), cardPlay);
         }

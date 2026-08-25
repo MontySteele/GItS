@@ -131,15 +131,54 @@ public class RecallFromDiscardTests
     }
 
     [Fact]
-    public void The_prompt_is_an_owed_stand_in_and_not_invented_copy()
+    public void The_prompt_reads_the_ruled_copy_and_not_a_stand_in()
     {
-        // The base game ships no "retrieve" prompt -- Headbutt renders this
-        // screen from its own per-card `cards/<id>.selectionScreenPrompt` row
-        // -- and authoring that string is a player-facing TEXT call. It stands
-        // at the prompt naming the PILE the screen is showing, in ONE member,
-        // the same way RecallFromExhaust's does. A recorded decision, not a
-        // silent one.
-        Assert.Equal(CardSelectorPrefs.DiscardSelectionPrompt.ToString(),
-                     RecallFromDiscard.Prompt.ToString());
+        // EB-122's owed half, DISCHARGED 2026-08-25.
+        Assert.Equal(
+            "Choose a card from your Discard Pile. Put it on top of your "
+            + "Draw Pile.",
+            RecallFromDiscard.PromptText);
+        Assert.NotEqual(CardSelectorPrefs.DiscardSelectionPrompt.LocEntryKey,
+                        RecallFromDiscard.Prompt.LocEntryKey);
+    }
+
+    [Fact]
+    public void The_two_sources_get_two_prompts_and_only_one_promises_a_loan()
+    {
+        // The asymmetry this whole file is about, said on the screen. The
+        // exhaust branch charges the returned card an Exhaust and its prompt
+        // gilds the keyword; this branch grants nothing, so a [gold] tag here
+        // would promise a price it does not charge.
+        Assert.NotEqual(RecallFromExhaust.PromptKey,
+                        RecallFromDiscard.PromptKey);
+        Assert.Contains("[gold]Exhaust[/gold]", RecallFromExhaust.PromptText);
+        Assert.DoesNotContain("[gold]", RecallFromDiscard.PromptText);
+    }
+
+    [Fact]
+    public void Both_prompts_are_wired_to_rows_that_are_actually_injected()
+    {
+        // A LocString is a table plus a key, and an unresolved key renders as
+        // the literal key on the selection screen (0.2-589 shipped exactly
+        // that). InjectLocStrings reaches Godot, so this is the structural
+        // pin: key and ruled text are both const-inlined literals there.
+        var injected = Il.Strings(Il.Method("KleeMod", "InjectLocStrings"));
+        foreach (var (key, text) in new[]
+                 {
+                     (RecallFromDiscard.PromptKey, RecallFromDiscard.PromptText),
+                     (RecallFromExhaust.PromptKey, RecallFromExhaust.PromptText),
+                 })
+        {
+            Assert.EndsWith(".selectionScreenPrompt", key);
+            Assert.Contains(key, injected);
+            Assert.Contains(text, injected);
+        }
+
+        Assert.Equal("cards", RecallFromDiscard.Prompt.LocTable);
+        Assert.Equal(RecallFromDiscard.PromptKey,
+                     RecallFromDiscard.Prompt.LocEntryKey);
+        Assert.Equal("cards", RecallFromExhaust.Prompt.LocTable);
+        Assert.Equal(RecallFromExhaust.PromptKey,
+                     RecallFromExhaust.Prompt.LocEntryKey);
     }
 }
