@@ -258,10 +258,14 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # because inventing one is what would have made this a
                   # different mechanic wearing the same name.
                   "grant_sly_this_turn",
-                  # EB-118 (staged): recall_to_draw's exhaust SOURCE only.
-                  # Rides RecallFromExhaust.Recall -- one verified call site
-                  # in klee-mod/KleeCode/Powers. The discard source (Headbutt's
-                  # shape) is NOT built and blocks by name below.
+                  # recall_to_draw, BOTH sources. The exhaust source arrived
+                  # with EB-118 and rides RecallFromExhaust.Recall; the discard
+                  # source (Headbutt's shape) arrived with EB-122 and rides
+                  # RecallFromDiscard.Recall. One verified call site each in
+                  # klee-mod/KleeCode/Powers. (This note said the discard
+                  # source was "NOT built and blocks by name below" until
+                  # EB-125 caught it: the block was lifted at EB-122 and the
+                  # comment was not, so it described a wall that had gone.)
                   "recall_to_draw",
                   "replay_next_companion", "copy_companions_played_this_combat",
                   # EB-118 sec.5.4: the modal surface. choose_one rides
