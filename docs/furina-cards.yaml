@@ -645,14 +645,26 @@
    effects: [{op: choose_one, modes: [
               {label: "Gain 1 Energy and 2 Encore",
                effects: [{op: energy, amount: 1}, {op: gain_encore, amount: 2}]},
-              {label: "Spend 2 Encore: draw 2",
-               effects: [{op: spend_encore, amount: 2}, {op: draw, amount: 2}]}]}]}
+              {label: "Spend 3 Encore: draw 3",
+               effects: [{op: spend_encore, amount: 3}, {op: draw, amount: 3}]}]}]}
    # EB-118 Phase 2C: the MODAL PROTOTYPE. R192 chose this card; R194 ruled the pair
    # (Option A, [USER] 2026-08-23). Mode 1 is the card as it shipped, unchanged -- the
    # Sugar-Rush-parity buffer body players already know -- so the conversion adds a
    # choice rather than replacing a card. Mode 2 is packet §5.4's own example shape:
    # a DELIBERATE, PLAYER-DIRECTED ordinary-turn cash-out, which is the space her three
    # existing spend cards and the automatic Salon upkeep do not cover.
+   # MODE 2 IS RE-BODIED 2->3 (R205, [USER] 2026-08-24), and mode 1 is UNCHANGED.
+   # R194's ratified 2/2 pair measured DOMINATED once the chooser could read it:
+   # mode 1 scores 2.6 with NO state-dependent term in it, and 2/2 topped out at 2.0
+   # on a bank that covers the spend, so no board existed that the chooser took mode 2
+   # on. The weight-sweep exit was REFUSED: the dominance is structural (mode 1 has no
+   # state term to lose on), and `MODE_OVERDRAW_HP_VALUE` and its sibling are SHARED
+   # policy -- bending them to rescue one card reprices every Encore generator in the
+   # pool. 3/3 buys the property the ruled pair lacked: 3.0 when the bank covers it,
+   # 2.0 at a one-point shortfall, so mode 2 wins at bank >= 3 and loses below it.
+   # The RATE is deliberate at 1 card per Encore -- the same rate 2/2 printed, so the
+   # re-body is a bigger transaction and not a better exchange, and the greed is
+   # priced by the deeper bank it needs rather than by a worse ratio.
    # `spend_encore` is the OVERDRAW primitive, so a thin bank pays TRUE HP -- that is
    # the price of the greed and it is deliberate (the no-overdraw shape is the
    # `encore_cost` field, and a salon-register card could not carry a spend line at all).

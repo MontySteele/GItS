@@ -44,7 +44,7 @@ public sealed class DeepBreath : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deep Breath"),
-        ("description", "Choose one: Gain 1 Energy and 2 Encore | Spend 2 Encore: draw 2."),
+        ("description", "Choose one: Gain 1 Energy and 2 Encore | Spend 3 Encore: draw 3."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -68,7 +68,7 @@ public sealed class DeepBreath : CustomCardModel, ICharacterCard
             ModalChoice.CreateOption<DeepBreathModeB>(Owner),
         };
         var modeIndex = await ModalChoice.SelectMode(choiceContext, Owner, modeOptions);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 1 Energy and 2 Encore", "Spend 2 Encore: draw 2" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 1 Energy and 2 Encore", "Spend 3 Encore: draw 3" }[modeIndex]);
         if (modeIndex == 0)
         {
             await PlayerCmd.GainEnergy(1, Owner);
@@ -76,8 +76,8 @@ public sealed class DeepBreath : CustomCardModel, ICharacterCard
         }
         else
         {
-            await FurinaResources.SpendEncoreOrHp(choiceContext, Owner.Creature, 2, this);
-            await CardPileCmd.Draw(choiceContext, 2m, Owner);
+            await FurinaResources.SpendEncoreOrHp(choiceContext, Owner.Creature, 3, this);
+            await CardPileCmd.Draw(choiceContext, 3m, Owner);
         }
     }
 
@@ -104,7 +104,7 @@ public sealed class DeepBreathModeB : ModalOptionCard
 {
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 2 Encore: draw 2"),
-        ("description", "Spend 2 Encore: draw 2"),
+        ("title", "Spend 3 Encore: draw 3"),
+        ("description", "Spend 3 Encore: draw 3"),
     };
 }

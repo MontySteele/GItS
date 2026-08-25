@@ -233,9 +233,9 @@ def test_the_prototypes_mode_2_overdraws_through_the_real_primitive():
     src = _deep_breath_cs()
     mode_2 = src.split("if (modeIndex == 0)")[1].split("else")[1]
     assert ("await FurinaResources.SpendEncoreOrHp(choiceContext, "
-            "Owner.Creature, 2, this);") in mode_2
-    assert "await CardPileCmd.Draw(choiceContext, 2m, Owner);" in mode_2
-    assert "GainEncore(Owner.Creature, -2)" not in src
+            "Owner.Creature, 3, this);") in mode_2
+    assert "await CardPileCmd.Draw(choiceContext, 3m, Owner);" in mode_2
+    assert "GainEncore(Owner.Creature, -3)" not in src
 
 
 def test_the_prototypes_upgrade_is_the_ruled_cost_line():
@@ -253,5 +253,5 @@ def test_the_prototypes_face_prints_the_choice_as_ordinary_text():
     labels, no tooltip and nothing registered."""
     src = _deep_breath_cs()
     assert ('("description", "Choose one: Gain 1 Energy and 2 Encore | '
-            'Spend 2 Encore: draw 2."),') in src
+            'Spend 3 Encore: draw 3."),') in src
     assert "KleeKeywords" not in src

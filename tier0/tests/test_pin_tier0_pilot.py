@@ -84,11 +84,17 @@ def test_self_power_scaling_value_still_decays_with_the_setup_taper():
 # EB-118 Phase 2A, 2026-08-24) is the same rule applied to a block instead of a
 # weight: `PILOT_POLICIES_ENABLED` flipped True, so the eleven `BOMB_*` /
 # `EXHAUST_*` weights are read for the first time and ENTER the set. No v2
-# value moved either.
+# value moved either. v4 (POLICY 9, EB-118 Phase 2C, 2026-08-24) is that rule a
+# third time, on the smallest possible block: `MODE_CHOOSER_ENABLED` flipped
+# True, so `MODE_OVERDRAW_HP_VALUE` is read for the first time and ENTERS the
+# set. No v3 value moved. `MODE_TIE_EPSILON` is listed with it for completeness
+# and is not the ground -- a float-noise guard on the tie-break is not a
+# valuation weight -- but it is pinned here anyway, because a silent edit to it
+# would change which boards count as ties.
 #
-# The constants-side half of the set is unchanged at v3 -- every new weight is
-# filed in policy.py -- so this dict is still named for the version that last
-# moved it, and `test_every_pilot_weight_in_constants_is_in_the_stamped_set`
+# The constants-side half of the set is unchanged since v2 -- every new weight
+# is filed in policy.py -- so that dict is still named for the version that
+# last moved it, and `test_every_pilot_weight_in_constants_is_in_the_stamped_set`
 # still compares against it.
 PILOT_WEIGHT_SET_V2 = {
     "PILOT_REACTION_TRIGGER_VALUE": 6.0,
@@ -123,7 +129,7 @@ PILOT_WEIGHT_SET_V2 = {
 }
 # The half that stays in policy.py for the C# parity reason written at its
 # head. Filed elsewhere, stamped the same.
-POLICY_FILED_WEIGHT_SET_V3 = {
+POLICY_FILED_WEIGHT_SET_V4 = {
     "STOKE_DEPLOY_OPEN": 6.0,
     "STOKE_DEPLOY_FULL": 1.5,
     "STOKE_RUNWAY_TURNS": 2.0,
@@ -147,22 +153,29 @@ POLICY_FILED_WEIGHT_SET_V3 = {
     "EXHAUST_COST_EFFICIENCY_WEIGHT": 0.5,
     "EXHAUST_JUNK_BONUS": 6.0,
     "EXHAUST_SELF_EXHAUST_DISCOUNT": 0.5,
+    # v4, POLICY 9 (EB-118 Phase 2C): the mode-valuation weight, read for the
+    # first time at the chooser flip. Its sibling epsilon rides along and is
+    # pinned rather than grounded -- see the note above the set.
+    "MODE_OVERDRAW_HP_VALUE": 1.0,
+    "MODE_TIE_EPSILON": 1e-9,
 }
 
 
-def test_the_pilot_weight_set_is_stamped_at_v3():
-    assert C.PILOT_WEIGHTS_VERSION == 3
+def test_the_pilot_weight_set_is_stamped_at_v4():
+    assert C.PILOT_WEIGHTS_VERSION == 4
     for name, value in PILOT_WEIGHT_SET_V2.items():
         assert getattr(C, name) == value, name
-    for name, value in POLICY_FILED_WEIGHT_SET_V3.items():
+    for name, value in POLICY_FILED_WEIGHT_SET_V4.items():
         assert getattr(policy, name) == value, name
 
 
-def test_the_pair_weights_are_stamped_because_the_switch_is_ON():
-    """v3's whole ground. A weight nothing reads is not in the labeled set --
-    that is why the eleven above sat unstamped through the staging window and
-    why the stamp moved in the same edit as the switch, not before it."""
+def test_the_policy_weights_are_stamped_because_their_switches_are_ON():
+    """v3's and v4's whole ground. A weight nothing reads is not in the
+    labeled set -- that is why each block sat unstamped through its staging
+    window and why each stamp moved in the same edit as its switch, not
+    before it. Two switches, two bumps (R191)."""
     assert policy.PILOT_POLICIES_ENABLED is True
+    assert policy.MODE_CHOOSER_ENABLED is True
 
 
 def test_every_pilot_weight_in_constants_is_in_the_stamped_set():

@@ -737,27 +737,42 @@ EXHAUST_SELF_EXHAUST_DISCOUNT = 0.5   # a card that Exhausts itself on play was
                                       # leaving the deck anyway; only the one
                                       # use is lost
 
-# Mode valuation (EB-118 2C, R191/R194). Which body a `choose_one` resolves.
+# Mode valuation (EB-118 2C, R191/R194/R205). Which body a `choose_one`
+# resolves. LIVE since the EB-118 Phase-2C flip (2026-08-24) -- the SECOND and
+# LAST of Phase 2's two activation windows.
 # ADDITIVE to the block above and to nothing else: no weight that existed
 # before this edit changes, which is what lets the 2A weight sweep and this
 # slice sit in the same file without one renumbering the other.
 #
 # ITS OWN SWITCH, not `PILOT_POLICIES_ENABLED`. R191 ruled that the mode
-# chooser takes its OWN activation window, and the 2A pair flips first in the
-# ruled sequence -- so a shared flag would activate this policy inside 2A's
-# window and leave 2C with no flip of its own to attribute anything to. Two
+# chooser takes its OWN activation window, and the 2A pair flipped first in the
+# ruled sequence -- so a shared flag would have activated this policy inside
+# 2A's window and left 2C with no flip of its own to attribute anything to. Two
 # flags, two windows, two POLICY_VERSION bumps; the sibling ruling that 2B and
 # 2C may not share a D window is the same argument about the same pair of
 # slices.
 #
-# The staging discipline is identical to the shared flag's: off, the seam runs
-# the fixed index it was staged with and every number on this branch is the
-# number it was (`test_eb118_switch_off`).
+# THE SWITCH DID NOT BECOME DECORATION WHEN IT WAS THROWN, exactly as the 2A
+# pair's did not: off, `effects._chosen_mode` returns the fixed index the seam
+# was staged with, and that path is still live behind the flag and still
+# pinned (`test_eb118_switch_off`). It is the only way the pre-flip world can
+# be run.
 #
-# BOTH WEIGHTS ARE HAND-PICKED AND UNSWEPT. The W4 sweep pattern runs inside
-# 2C's window, and a value that moves there is its own
-# `PILOT_WEIGHTS_VERSION` bump.
-MODE_CHOOSER_ENABLED = False
+# THE FLIP WAS ONE EDIT AND THREE INTEGERS: `POLICY_VERSION` 8 -> 9
+# (tier05/draft.py), `C.PILOT_WEIGHTS_VERSION` 3 -> 4, and this switch. A
+# FOURTH integer moves in the SAME landing on its OWN ground and is not part of
+# the flip -- `C.CONSTANTS_VERSION` 13 -> 14, for the mode-2 re-body, which is
+# a material card-sheet edit under R179/M15 and would have owed a bump with the
+# chooser still off.
+#
+# BOTH WEIGHTS ARE HAND-PICKED AND UNSWEPT, AND STILL ARE. The W4 sweep pattern
+# was available in this window and was NOT run over these two: the pair the
+# chooser reads was re-bodied instead (R205), on the finding that no setting of
+# these weights could rescue it -- mode 1 carries no state-dependent term, so
+# the dominance was structural, and both weights are SHARED policy whose
+# bending reprices every Encore generator in the pool. Any later change to one
+# of them is still its own `C.PILOT_WEIGHTS_VERSION` bump.
+MODE_CHOOSER_ENABLED = True
 MODE_OVERDRAW_HP_VALUE = 1.0   # per point of TRUE HP a `spend_encore` shortfall
                                # drains. The chooser's scale is already "points
                                # of damage": _block_value prices Block by the
