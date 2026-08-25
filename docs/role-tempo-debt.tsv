@@ -40,6 +40,7 @@
 character	archetype	cell
 furina	salon	frontload|late
 furina	spotlight	frontload|late
+furina	spotlight	frontload|mid
 furina	spotlight	scaling|late
 klee	demolition	block|early
 klee	demolition	block|late

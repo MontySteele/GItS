@@ -579,13 +579,13 @@
    # SHAPE A as the state's capstone: one great wave reading the meter (+1 per 2 Charge, to ALL). Every §2.2
    # rate limit ships: Rare, Exhaust (which is itself one more Charge), cost 2. At a banked 20 Charge: 20-to-all, (lint-ok: banked-Charge worked example)
    # once. The multiplicative-read risk lives HERE and only here — watchlist cell in the report.
-- {id: sango_prayer, name: "Sango Prayer", cost: 1, type: skill, rarity: rare, solve: [block, utility], tempo_band: {fight: [early], run: [late]}, archetypes: [priest, generic], role: payoff, exhaust: true,
+- {id: sango_prayer, name: "Sango Prayer", cost: 1, type: skill, rarity: rare, solve: [block, utility], tempo_band: {fight: [early], run: [late]}, archetypes: [priest, generic], role: glue, exhaust: true,
    effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies}, {op: block, amount: 5}]}
    # R52 REWORK (ask 1: the v0.1 heal-12 is GONE — no amendment taken, none planned; "make her rares pay off a (lint-ok: removed v0.1 value, on record)
    # different way"). The prayer now stills the spears: Weak 2 to ALL + a moment's calm. R51 texture verbatim —
    # a debuff earned on an Exhaust piece (Rare, one cast per fight, and its burn is itself a Charge), NOT a
    # spammable cheap AoE weaken. Same sustain fantasy, zero HP restored: the axis it feeds is the stability band.
-- {id: vigil_of_the_deep, name: "Vigil of the Deep", cost: 2, type: power, rarity: rare, solve: [sustain], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [priest, generic], role: payoff,
+- {id: vigil_of_the_deep, name: "Vigil of the Deep", cost: 2, type: power, rarity: rare, solve: [sustain], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [priest, generic], role: enabler,
    effects: [{op: apply_power, power: prevent_exhaust_ward, amount: 6, target: self, max_stacks: 6, note: "first unblocked hit each turn: prevent up to 6, Exhaust a random draw-pile card"}]}
    # THE §2.4 prevention power (user's sample made card): her HP bar doesn't move; her deck does. Every proc is
    # an Exhaust -> Charge: getting attacked fuels the finisher. Both structural guards ship (LAW 4 breaks the
@@ -605,7 +605,15 @@
    effects: [{op: apply_power, power: dark_embrace, amount: 1, target: self}]}
    # Draw-per-exhaust (the Dark Embrace rail): the burned page turns itself. In HER deck every lane rings it —
    # priced at the base game's rare rate for exactly that reason.
-- {id: prayer_to_the_moon, name: "Prayer to the Moon", cost: 1, type: skill, rarity: rare, solve: [block, frontload, scaling], tempo_band: {fight: [early], run: [late]}, archetypes: [priest, generic], role: payoff, exhaust: true,
+   # ROLE DEBT, RECORDED (Phase 3, ADOPTED 2026-08-24). This card's body is
+   # draw-per-Exhaust, which the Phase-3 rubric classifies as ACCESS, not
+   # payoff. It is held at role: payoff ONLY because it is one of five cards (lint-ok: an arm's supply count, not this row)
+   # in kokomi/assist's payoff supply and R199's third guardrail forbids
+   # cutting that arm mechanically. The hold is a guardrail consequence, not
+   # a classification. When Assist's ACCESS problem is fixed -- by carriers,
+   # not by labels -- this card is reclassified as enabler without a further
+   # ruling being needed.
+- {id: prayer_to_the_moon, name: "Prayer to the Moon", cost: 1, type: skill, rarity: rare, solve: [block, frontload, scaling], tempo_band: {fight: [early], run: [late]}, archetypes: [priest, generic], role: enabler, exhaust: true,
    effects: [{op: gain_charge, amount: 7}, {op: block, amount: 4}]}
    # The pure offering: one card, eight Charge (7 line + 1 funnel) and a moment's calm. The meter's rare (lint-ok: 7 line + 1 funnel arithmetic)
    # accelerant. v0.3: 4 -> 7 — the v0.2 audit found this RARE generating less meter than the benchmark

@@ -88,13 +88,18 @@
 # move -- a conditional splash is more of the same frontload, not a different problem --
 # and the classifier agrees, so the review TSV lists 0 rows diverging from the authored
 # solve.
-# NOT MOVED, deliberately: id, rarity, role, archetypes, solve. Ethereal is a LIFECYCLE
+# NOT MOVED at the Ethereal landing: id, rarity, role, solve. Ethereal is a LIFECYCLE
 # keyword -- it decides whether the printed effect resolves at all, not what problem the
-# card solves. A 2-cost 16 that dies in an unaffordable hand still solves frontload,
-# still glues demolition and generic.
-# Role and archetype movement is Phase-3-fenced (packet §3) and R199's first guardrail
-# forbids a relabel whose only effect is to improve a count.
-- {id: big_badda_boom, name: "Big Badda Boom", cost: 2, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [mid, late], run: [early]}, archetypes: [demolition, generic], role: glue, ethereal: true,
+# card solves. A 2-cost 16 that dies in an unaffordable hand still solves frontload.
+# `demolition` DROPPED, RULED [USER] 2026-08-24, the EB-118 Phase-3 W1 audit item R202
+# call (9) opened. The ruled ground is that the tag means Bomb-plan PARTICIPATION
+# everywhere else in this arm, and this body has none of its five verbs -- no
+# place_bomb, detonate, modify_bombs, move_bombs, and no read of the bomb board. It is
+# not a relabel to improve a count: the card is `role: glue`, so it was never in
+# klee/demolition's payoff supply and no arm's supply number moves with it. R199's
+# first guardrail is checked and not invoked. The ruled consequence is priced at
+# secret_stash's row, where it lands.
+- {id: big_badda_boom, name: "Big Badda Boom", cost: 2, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [mid, late], run: [early]}, archetypes: [generic], role: glue, ethereal: true,
    effects: [{op: damage, amount: 16, target: enemy}, {op: conditional, if: killed_target, then: [{op: damage, amount: 8, target: random_enemy}]}]}
 - {id: blast_radius, name: "Blast Radius", cost: 1, type: attack, rarity: common, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
    effects: [{op: damage, amount: 9, target: all_enemies}, {op: discard, amount: 1, select: chosen}]}
@@ -302,11 +307,11 @@
    effects: [{op: apply_power, power: detonation_splash, amount: 3, target: self, splash_procs_per_turn: 3, note: "bomb detonations: 3 dmg ALL enemies + 3 burst energy; splash capped at 3 procs/turn (armed by errata triage — demolition band ceiling knob)"}]}
 - {id: chained_reactions, name: "Chained Reactions", cost: 0, type: skill, rarity: rare, solve: [frontload, utility], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [demolition], role: payoff,
    effects: [{op: detonate, target: all_enemies}, {op: chance_bomb_per_detonation, chance: 0.5, bomb_damage: 5}]}
-- {id: explosive_frags, name: "Explosive Frags", cost: 1, type: power, rarity: rare, solve: [frontload, scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition], role: payoff,
+- {id: explosive_frags, name: "Explosive Frags", cost: 1, type: power, rarity: rare, solve: [frontload, scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition], role: glue,
    effects: [{op: apply_power, power: detonation_vuln, amount: 1, target: self}]}
 - {id: sparkly_explosion, name: "Sparkly Explosion", cost: 2, type: attack, rarity: rare, solve: [frontload, velocity], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [demolition, spark], role: payoff,
    effects: [{op: damage, amount: 18, target: enemy}, {op: conditional, if: killed_target, then: [{op: gain_spark, amount: 3}, {op: place_bomb, amount: 1, target: all_enemies, bomb_damage: 6}]}]}
-- {id: all_my_treasures, name: "All of My Treasures!", cost: 3, type: skill, rarity: rare, solve: [frontload, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition], role: payoff, exhaust: true, tags: [skill_tag],
+- {id: all_my_treasures, name: "All of My Treasures!", cost: 3, type: skill, rarity: rare, solve: [frontload, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition], role: enabler, exhaust: true, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 6, target: enemy, bomb_damage: 6}, {op: gain_spark, amount: 2}]}
 - {id: fish_blasting, name: "Fish Blasting", cost: X, type: attack, rarity: rare, solve: [frontload, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [generic], role: payoff,
    effects: [{op: damage, amount: 8, target: all_enemies, times: X}, {op: add_card, card: confiscated, zone: discard, amount: 1}]}
@@ -330,9 +335,18 @@
    # something on the turn it is played. Rework sim (tools/archive/klee_rework_sim.py, the machine-readable
    # source for these bodies): 13-43% picked, winrate-neutral within ±1%.
    # Cost 1, rare and Exhaust all stand; the upgrade still buys a third common ({cards: +1}).
+   # THE DRAW POOL SHRANK BY ONE, RULED [USER] 2026-08-24 (EB-118 Phase-3 W1 audit).
+   # `demolition_commons` is DERIVED at load, not listed: every non-kit Common whose
+   # `archetypes` carry `demolition` (loader.cards_in_pool). big_badda_boom dropped that
+   # tag in the same ruling, so this card's draw pool goes from eight members to seven (lint-ok: pool membership, not a card number)
+   # and Big Badda Boom can no longer arrive off it. That is a COMBAT outcome-distribution
+   # change, not a drafting one, and it was accepted WITH the ruling rather than
+   # discovered after it -- the audit priced it before the tag moved. Nothing on this row
+   # is edited: the add clause is still verbatim and the pool is still derived, which is
+   # the whole point -- membership follows the tags and is never hand-listed here.
 - {id: vermillion_pact, name: "Vermillion Pact", cost: 1, type: power, rarity: rare, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [reaction], role: payoff,
    effects: [{op: apply_power, power: amp_reaction_up, amount: 100, target: self, note: "PERCENT: doubles the base Vaporize/Melt amplifier. Watch the 4x amp-cap detector."}]}
-- {id: playtime_forever, name: "Playtime Forever", cost: 3, type: power, rarity: rare, solve: [frontload, scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition, spark], role: payoff,
+- {id: playtime_forever, name: "Playtime Forever", cost: 3, type: power, rarity: rare, solve: [frontload, scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition, spark], role: enabler,
    effects: [{op: apply_power, power: bomb_and_spark_per_turn, amount: 1, target: self}]}
 - {id: best_friends_forever, name: "Best Friends Forever", cost: 1, type: skill, rarity: rare, solve: [velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [reaction], role: payoff, exhaust: true,
    effects: [{op: copy_companions_played_this_combat, zone: hand, cost_override: 0}]}
