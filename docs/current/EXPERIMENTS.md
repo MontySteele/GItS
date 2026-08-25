@@ -229,11 +229,13 @@ registration packets themselves live under `review/active/` — one home, not tw
   bands stay a directional richness benchmark rather than a hard 1–3
   requirement, the sheets do over-use `role: payoff`, and `EB-118` Phase 3 is
   authorized to convert genuine setup / access / repair / bridge cards to glue
-  or enabler under four named guardrails. The row has left HEAD and the durable
-  text is the `EB-118` Phase-3 fence in BACKLOG. Nothing in this registration is
+  or enabler under four named guardrails. The row has left HEAD, and so has the
+  `EB-118` row that carried the Phase-3 fence — the pass ran to completion and
+  closed on 2026-08-25 — so the durable text of both is **R199** and **R211** in
+  their own commit messages. Nothing in this registration is
   reopened by it; a graded record is not re-read against a later ruling →
   `review/active/payoff-reach-reregistration.md` §7–§8;
-  `review/active/payoff-reach-results-2026-08-24.txt`; BACKLOG `EB-118`.
+  `review/active/payoff-reach-results-2026-08-24.txt`.
 - **EB-17p force-first-copy paired winrate** — **RUN AND GRADED 2026-08-10.**
   Countersigned complete (`N` = 2400 pairs, Strike filler, 4h ceiling, §6.1b
   co-primary), §8 predictions committed ahead of the run (`eb67706`), graded
