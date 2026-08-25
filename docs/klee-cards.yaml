@@ -324,10 +324,13 @@
    # twice over: once if the swing kills, once if Block eats it. An explicit `detonate` placed BEFORE
    # the damage line is immune to both. On an empty board the card resolves as a plain 14 -- measured
    # on the real resolver, not argued.
-   # ITS SIMULATED NUMBER IS EXPLICITLY DIAGNOSTIC until EB-136's same-target repair lands. tier0
-   # re-resolves `target: enemy` per op to the LOWEST-HP living enemy while C# holds one
-   # `cardPlay.Target` for all three, so the sim can scatter what the mod concentrates -- and an
-   # earlier op on this card routinely KILLS the aim. Any tier-0.5 number on this row understates it.
+   # THE DIAGNOSTIC CAVEAT THIS ROW CARRIED IS CLEARED, and it was cleared by a landing rather than
+   # by a re-reading: EB-136's same-target binding shipped at C18 (R210, [USER] 2026-08-25). tier0
+   # used to re-resolve `target: enemy` per op to the LOWEST-HP living enemy while C# held one
+   # `cardPlay.Target` for all three, so the sim scattered what the mod concentrates -- and an
+   # earlier op on THIS card routinely KILLS the aim, which is what made the caveat urgent. The
+   # gather, the detonation and the 14 now resolve onto one creature in both engines, and a
+   # simulated number on this row is an ordinary number again. (lint-ok: ruling ref, not values)
    # `spark` DROPPED with the `gain_spark` rider: the tag means Spark-plan participation and the body
    # no longer participates. (lint-ok: supply counts / ruling ref, not values this row prints)
    # klee/spark payoff supply 6 -> 5, the second of R202 call (8)'s two steps. (lint-ok: same)

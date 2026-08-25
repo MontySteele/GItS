@@ -1868,7 +1868,171 @@ BANNER_FEATURED_SLOTS = 3
 # decimals move, both down, by 2.8 and 1.9 points. The bar question handed
 # to [USER] above is unchanged in kind and slightly softened in degree.
 # ---------------------------------------------------------------------------
-CONSTANTS_VERSION = 17
+# CONSTANTS_VERSION 18 -- EB-136's SAME-TARGET BINDING (R210, [USER]
+# 2026-08-25 -- full parity: Q1(b), `times` same-pass, corpse powers), landed
+# 2026-08-25. NOT A SHEET WINDOW AND NOT A CARD-BODY PASS: no printed number,
+# no label, no upgrade delta and no dial value moves here. What moves is HOW
+# THE RESOLVER AIMS, and it moves under R179/M15's own logic -- a change that
+# materially alters what a card does to a board is a `C` bump whether it is
+# spelled in a sheet row or in the engine that reads one. C15/C16/C17 beneath
+# it were the EB-118 Phase-3 label, Window-2 and Window-2b card-body passes.
+# Enumerated the way those enumerate their own, so that the world a C18 number
+# was taken in is readable from the stamp.
+#   (a) THE BINDING. A card's `target: enemy` ops used to resolve
+#   INDEPENDENTLY PER OP to whoever was lowest-HP at that moment
+#   (`effects._pick_targets`); C# aims every one of them at the single
+#   `cardPlay.Target` the play was constructed with. `CardPlay.Target` is
+#   `public required Creature? Target { get; init; }` -- immutable for the life
+#   of the play -- and on an autoplay `CardCmd.AutoPlay` fills it from
+#   `HittableEnemies` BEFORE `OnPlayWrapper` is entered. So tier0 now takes the
+#   pick ONCE, at the top of `effects.resolve_card`, holds it on
+#   `CombatState.card_aim` / `card_aim_bound` for every aimed op of the card,
+#   and clears it in a `finally` so the pilot's between-play estimates keep
+#   reading live state. `combat._FREE_PLAY_CONTEXT` saves and restores the
+#   pair, because a free play is a second `CardPlay` inside the first.
+#   WHICH creature is NOT what moved and this bump does not re-open it: a
+#   manual play's target is the human's mouse pick, which no engine rule
+#   mirrors, so tier0 keeps its documented lowest-HP aim. Destination SCORING
+#   stays severed as a later design question. `force_random_targeting` (the
+#   free-play path) now rolls ONCE PER CARD rather than once per op, and only
+#   for a card that actually aims -- `CardCmd.AutoPlay` rolls
+#   `Rng.CombatTargets` only `if (card2.TargetType == TargetType.AnyEnemy)`.
+#   (b) THE SAME BINDING INSIDE ONE OP (`times`). `_op_damage` and
+#   `_op_apply_power` re-picked per hit. `AttackCommand.Execute` refilters its
+#   one-element `GetPossibleTargets()` by `IsAlive` on EVERY hit and `break`s
+#   on empty (`CombatState.IsLiveCombat()` returns literally `true`, so the
+#   break is unconditional), so hits 2..N re-check the SAME `_singleTarget` and
+#   stop when it dies. `_op_damage` now breaks on an empty target list, which
+#   is that shape literally. The power side has no break to make: see (c).
+#   `random_enemy` is UNTOUCHED and still re-rolls per pass -- BouncingFlask
+#   throws three flasks at three separately rolled bodies, and that is a
+#   different `TargetType`, not a bound aim.
+#   (c) THE DEAD-TARGET RULE, AND IT IS NOT UNIFORM. Aimed DAMAGE fizzles:
+#   `AttackCommand` breaks, with `CreatureCmd.Damage`'s `if
+#   (originalTarget2.IsDead) continue;` behind it. Aimed POWERS LAND ON THE
+#   CORPSE: `PowerCmd.Apply` guards only on `CanReceivePowers`, whose
+#   first-party doc comment says in as many words that dead creatures can still
+#   have powers applied to them, where `IsHittable` three lines above it does
+#   test `IsDead`. Every other aimed op reaches that same corpse-accepting
+#   door and is ruled with it -- `place_bomb` (`BombPower.Place` ->
+#   `PowerCmd.Apply`), `move_bombs` (`BombPower.MoveAllTo` -> `PowerCmd.Apply`
+#   on `dest`, while its SOURCES are `HittableEnemies` and so exclude the
+#   dead), `apply_aura` / `swirl` (`ElementalHit.ApplyOnly` -> `AuraCmd.Apply`
+#   -> `PowerCmd.Apply<XAuraPower>`). `detonate` lands there on its own
+#   evidence: `BombPower.DetonateOn` reads `target.Powers.OfType<BombPower>()`
+#   with no aliveness test at all, and the mod already NAMES the case
+#   (`RecordDetonation(..., onCorpse: target is { IsDead: true })`, the EB-18
+#   counter that reports and never grades). `strip_block` is deliberately left
+#   on the fizzle default: it is not one of the emitter's `AIMING_OPS`, no C#
+#   corpse behaviour is recorded for it, and a corpse's Block is 0, so the two
+#   readings are observationally identical.
+#   (d) THE DEAD-ENEMY POWER STATE, BUILT RATHER THAN ASSUMED (the audit's
+#   sec.4/C3). tier0 had never applied a power to a corpse -- every picker
+#   filtered `living_enemies` -- so standing it up meant examining the seams
+#   the audit listed rather than discovering them later. What holds, each now
+#   pinned in `tier0/tests/test_eb136_same_target_binding.py`: a corpse's
+#   powers never tick and never act, because every duration tick, intent and
+#   turn hook in the engine walks `living_enemies`; an aura banked on a corpse
+#   is closed by `reactions.close_dead_auras` at the next settle, which is
+#   EB-58's uptime rule doing its job rather than a divergence; a Bomb banked
+#   on a corpse SURVIVES, because no tier0 site and no C# site removes it for
+#   dying, which is what makes the corpse-detonation counter a real instrument.
+#   THE PHASED-BOSS SEAM IS RECONCILED AND IT IS NOT A DEATH RULE:
+#   `combat._settle_phases` rebuilds `powers` (keeping only Strength and
+#   Enrage) and clears `bombs` at a REVIVE, so a debuff or a pile banked on a
+#   body between its knockdown and the settle goes with the old bar. That is a
+#   new body, not a corpse, and it leaves C#'s corpse-Bomb semantics untouched.
+#   (e) ONE FUNNEL GUARD, and it repairs a case that PREDATES the binding.
+#   `effects.deal_damage_to_enemy` now returns 0 for a dead target, which is
+#   `CreatureCmd.Damage`'s guard at the level it actually sits at -- below
+#   `AttackCommand`. Before it, charge 2 of a Bomb pile whose charge 1 had
+#   killed the body still ran the whole reaction pipeline on the corpse, which
+#   could consume an aura and splash off it. tier0's own overkill clamp meant
+#   the DAMAGE was already 0; the reaction was not.
+#   (f) THE CONSEQUENCE THAT IS NOT A CARD, AND IT IS NAMED RATHER THAN LEFT
+#   TO BE FOUND: EB-118 (1)'s bomb-placement chooser is SUPERSEDED for
+#   `target: enemy`. `place_bomb` is one of the emitter's `AIMING_OPS` -- All
+#   of My Treasures emits six `BombPower.Place` calls on the ONE
+#   `cardPlay.Target`, Trip Wire puts its bomb and its Weak on that same body
+#   -- so a per-bomb chooser is three independently picked destinations where
+#   the mod has one, which is the divergence restated rather than the cure, and
+#   the row struck per-op aim hooks from its own scope for exactly that reason.
+#   `_op_place_bomb` no longer calls `pilot.policy.bomb_placement_target`.
+#   NOTHING IN `policy.py` IS EDITED: `bomb_placement_score`,
+#   `bomb_placement_target` and all eight of their weights stand at their
+#   shipped values, as the destination-scoring machinery the severed question
+#   will need. `P` IS UNTOUCHED ON ITS OWN GROUND -- no pilot heuristic and no
+#   weight value moved -- and the instrument movement that follows is declared
+#   at the end of this block.
+#   (g) NOTHING WAS BUILT IN THE MOD AND NOTHING NEEDED TO BE. C# already
+#   binds; it is the reference. `klee-mod/` is byte-identical across this
+#   landing and `gen_roster_cards.py --check` is unaffected -- no sheet row and
+#   no emitter vocabulary moved.
+# WHAT IS ARCHIVE. EVERY COMBAT NUMBER FOR EVERY CHARACTER, INCLUDING THE
+# ANCHOR'S. The ruled scope is 28 live cards spanning `klee`, `furina`,
+# `kokomi`, the `inazuma-companions` and `colorless_event` sheets,
+# `ref_ironclad`'s STARTER (`bash`), `ref_silent` (`neutralize_like`), and both
+# `real_*` pools (six `ic_*` rows and seven `si_*` rows); (b) reaches seven
+# more (`matinee_performance`, `ic_twin_strike`, `ic_fight_me`, `ic_dismantle`,
+# `ic_fiend_fire`, `ic_spite`, `si_skewer`). THE ANCHOR RENORMALISES TO 3.0 ON
+# EVERY AXIS BY CONSTRUCTION and that is exactly why this has to be said out
+# loud: `(ref_ironclad, starter)` under `generic` is the DIVISOR in
+# `axes.normalize`, its combat behaviour moved -- `bash`'s Vulnerable now lands
+# on the body the 8 killed instead of walking to a living bystander, which is a
+# live debuff REMOVED and a real strength loss, not a rounding difference --
+# and so every ratio taken against the old anchor is a C17-world ratio.
+# tier-0.5 numbers are archive by the same reach. Archive banners go where the
+# numbers are published; nothing is rewritten (R101b).
+# `RT`, `D` and `P` ARE UNTOUCHED, each on its own ground. No run-layer content
+# moved (`RT`). No drafter code and no dial value moved (`D`), and no drafter
+# PRICE moves either -- `draft._static_power` reads printed rows, and no
+# printed row changed; the binding is a resolution-time fact the offer scorer
+# has never modelled. No pilot heuristic and no weight value moved (`P`); both
+# EB-118 activation switches keep the values Phase 2 left them at.
+# THE INSTRUMENT MOVEMENT IS (f)'s AND IT IS DISCLOSED, NOT BALANCED AGAINST.
+# `tier05/pilot_weight_sweep.discover_scope` derives the 2A pair's sweepable
+# surface from the ENGINE's own call sites, so with `_op_place_bomb` no longer
+# asking, its entry points go from `("bomb_placement_target",
+# "exhaust_victim")` to `("exhaust_victim",)` and the eight `BOMB_*` weights
+# leave `pair_own`. THAT NARROWING IS R33 DOING ITS JOB rather than damage: a
+# sweep that kept them would report a null on every cell and could not show
+# the swept constant was READ even once, which is the exact failure R33's
+# exercise counter exists to catch. The `bomb-primary` / `bomb-secondary`
+# cells stop being carriers of a gated decision and now read like the Furina
+# null control; `CELL_SPECS` still calls them `measure` and they are carriers
+# again only if the severed destination-scoring question is answered by
+# putting a chooser back at BIND time.
+# `sparkly_explosion`'s DIAGNOSTIC CAVEAT IS CLEARED BY THIS LANDING. C17 (a)
+# declared its simulated number DIAGNOSTIC until this repair landed, on the
+# ground that tier0 could scatter what the mod concentrates and that the card
+# is the first shipped body where an earlier op routinely KILLS the aim. That
+# is now false: the gather, the detonation and the 14 resolve onto one
+# creature, pinned by this row's first acceptance test. The C17 paragraph
+# stands as published and is NOT rewritten (R101b) -- this is where the caveat
+# is lifted. The two editable copies of it are updated in place:
+# `docs/klee-cards.yaml`'s `sparkly_explosion` comment and `EB-118`'s item (d)
+# in `BACKLOG.md`.
+# ONE QUESTION IS LEFT OPEN ON PURPOSE AND IS NOT GUESSED AT. `_op_swirl`
+# re-aims a single-target Swirl at whichever living body carries an aura when
+# the bound aim carries none. That is an aim RE-TAKE, which Q1(b) forbids --
+# and it is also a documented tier0 aim choice, which the same row says binding
+# does not overturn. Five of the six `swirl target: enemy` rows carry no second
+# aimed op, so deleting the branch would read them as blank whenever the aura
+# sits off the lowest-HP body: a NEW divergence from a mod a human aims by
+# hand. Moving it into the bind instead would bind `sayu_yoohoo_windwheel`'s
+# DAMAGE to the aura'd body, which is card-shape-dependent aim policy nobody
+# ruled. So it is left standing, ONE of the 28 in-scope cards is still
+# scattering, and the state of the question is pinned by a strict xfail
+# (`test_eb136_same_target_binding.py::test_swirl_aim_retake_is_unruled`).
+# NO STANDING BASELINE IS OWED AT THIS BUMP, and that is R207 as agreed at the
+# ruling rather than a deferral: `W3`'s single public window carries the single
+# public standing read, this lands BEFORE that read so the read absorbs the
+# movement, and the disclosure owed here is a commit-hash scratch before/after
+# carried in PR text and published nowhere. NO CONNECTIVITY READ AND NO
+# REGISTERED EXPERIMENT ATTACH TO THIS WINDOW EITHER: nothing here is graded
+# against a committed prediction.
+# ---------------------------------------------------------------------------
+CONSTANTS_VERSION = 18
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
