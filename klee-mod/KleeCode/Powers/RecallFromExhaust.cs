@@ -62,13 +62,40 @@ public static class RecallFromExhaust
     public const CardKeyword Loan = CardKeyword.Exhaust;
 
     /// <summary>
-    /// The selection prompt. OWED: the base game ships no "retrieve" prompt
-    /// and a mod-side card_selection row has no card to render it yet, so
-    /// this stands at the Exhaust prompt -- true of what the pick becomes,
-    /// not of what it does. One member, so the first shipped retrieval card
-    /// changes it in one place.
+    /// The loc table the prompt lives in -- the base game's own, under its own
+    /// <c>&lt;ENTRY&gt;.selectionScreenPrompt</c> suffix.
+    /// <c>KleeMod.InjectLocStrings</c> merges the mod's row at boot.
     /// </summary>
-    public static LocString Prompt => CardSelectorPrefs.ExhaustSelectionPrompt;
+    private const string Table = "cards";
+
+    /// <summary>Key for <see cref="Prompt"/>, keyed on the VERB. No card
+    /// prints this screen yet -- the retrieval cards are still ahead -- and
+    /// the copy being ruled now is what keeps the first one from inventing
+    /// its own.</summary>
+    public const string PromptKey =
+        "KLEEMOD-RECALL_FROM_EXHAUST.selectionScreenPrompt";
+
+    /// <summary>
+    /// RULED COPY ([USER], 2026-08-25) -- the OWED note this replaces is
+    /// DISCHARGED. It says all three things the exhaust branch does that its
+    /// discard twin does not: which pile is being read, where the card lands,
+    /// and the LOAN. Constraint 5's Exhaust is the price of the retrieval and
+    /// the player is told before choosing, not after.
+    ///
+    /// [gold]Exhaust[/gold] is gilded because the base game gilds a keyword it
+    /// grants on this screen and gilds this one by name -- PURITY's row reads
+    /// "Choose up to {Cards:diff()} cards to [gold]Exhaust[/gold]."
+    /// (SlayTheSpire2.pck, v0.107.1, English rows read 2026-08-25), which also
+    /// settles that the selection screen renders BBCode at all. Reaching the
+    /// live mod at the next deploy; the rendered look is an eyes-on item.
+    /// </summary>
+    public const string PromptText =
+        "Choose a card to return from your Exhaust Pile. It goes on top of "
+        + "your Draw Pile and gains [gold]Exhaust[/gold].";
+
+    /// <summary>The selection prompt. One member, so the first shipped
+    /// retrieval card reads the ruled copy instead of writing its own.</summary>
+    public static LocString Prompt => new LocString(Table, PromptKey);
 
     /// <summary>
     /// Eligible targets (EB-118 §6.4 constraints 3 and 6). Sim twin:

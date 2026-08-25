@@ -132,8 +132,13 @@ them rather than from prose.
   the manifest's `blocked` map. The manifest's `upgrades.no_upgrade_path` list
   is **empty**, so every generated Kokomi card ships with its upgrade. The
   `EB-69` sim/mod asymmetry is **closed** — both engines hold all fourteen fill
-  cards and all fourteen upgrade deltas (`EB-122`, which stands open only on
-  two selection-screen prompt strings, a [USER] copy call).
+  cards and all fourteen upgrade deltas. The two new selection screens read
+  RULED prompt copy (2026-08-25), carried as `cards` loc rows keyed on the VERB
+  rather than on a card id — `KLEEMOD-SLY_GRANT` and
+  `KLEEMOD-RECALL_FROM_DISCARD`, beside the carrier-less
+  `KLEEMOD-RECALL_FROM_EXHAUST` — and merged by `KleeMod.InjectLocStrings`.
+  They reach the live mod at the next deploy; the rendered look is an eyes-on
+  item.
 
 ## Mod build environment (pinned)
 
