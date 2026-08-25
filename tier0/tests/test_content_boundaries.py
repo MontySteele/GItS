@@ -64,6 +64,35 @@ def test_predicate_registry_matches_the_if_chain_exactly():
         f"registry-only: {sorted(set(effects.PREDICATE_PREFIXES) - prefixes)}")
 
 
+def _runtime_count_chain_source() -> str:
+    body = EFFECTS_SRC[EFFECTS_SRC.index("def _runtime_count("):]
+    return body[:body.index("\ndef ")]
+
+
+def test_count_registry_matches_the_runtime_count_chain_exactly():
+    """EB-135. `RUNTIME_COUNT_NAMES` is the same kind of object as
+    `PREDICATE_NAMES` — data mirroring code — so it gets the same pin, in
+    both directions.
+
+    A token `_runtime_count` resolves but this set omits would make the load
+    check reject valid content. A token here that the chain ignores documents
+    a spelling nothing reads, which is the defect the registry exists to
+    catch.
+    """
+    src = _runtime_count_chain_source()
+    exact = set(re.findall(r'token == "([A-Za-z_]+)"', src))
+    assert exact == set(effects.RUNTIME_COUNT_NAMES), (
+        f"chain-only: {sorted(exact - set(effects.RUNTIME_COUNT_NAMES))}, "
+        f"registry-only: {sorted(set(effects.RUNTIME_COUNT_NAMES) - exact)}")
+    # The prefix family is registered by CONSTANT rather than by literal, so
+    # the chain is asked for the constant's NAME and the registry for its
+    # value.
+    prefixes = set(re.findall(r'token\.startswith\(([A-Z_]+)\)', src))
+    assert prefixes == {"EXHAUST_SELECTION_PREFIX"}, prefixes
+    assert set(effects.RUNTIME_COUNT_PREFIXES) == {
+        effects.EXHAUST_SELECTION_PREFIX}
+
+
 def test_every_shipped_card_passes_the_vocabulary_check():
     """The positive control: every card of real content, all valid.
 

@@ -304,6 +304,18 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
     `modes:` bodies: both nest, and an unreachable-today branch is exactly
     where a typo survives longest.
 
+    EB-135: `count:` is checked here too, and it is the one grammar this
+    function existed for that it did not cover. `op:` went through
+    `effects.OPS` and `if:` through `is_known_predicate`, and then it stopped
+    — while `_calc_amount` resolved `formula["count"]` through
+    `_runtime_count`, which raises `unknown runtime count` the first time the
+    card RESOLVES. That is verbatim the failure the paragraph above says this
+    check was written to end. The same door is reached by a string-valued
+    `amount:` and by a string-valued `times:` (both go through `_amount`,
+    whose last arm IS the count vocabulary), and by a dict `times_formula:`
+    (the same `_calc_amount`), so all four are checked against the same
+    registry rather than one of them.
+
     One AMOUNT is checked here as well, for the same when-is-it-reported
     reason: a non-positive `gain_encore` (EB-119). It is not a vocabulary
     error, but it is a cross-engine one, and the recursion above is already
@@ -322,6 +334,7 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
             if not _effects.is_known_predicate(name):
                 raise ValueError(
                     f"card {card_id!r}: unknown predicate {name!r}")
+        _validate_count_vocabulary(card_id, fx)
         if op == "gain_encore" and isinstance(fx.get("amount"), int) \
                 and fx["amount"] <= 0:
             # EB-119. A negative GAIN is not a spend, and it is the exact
@@ -343,6 +356,70 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
         for branch in ("then", "else"):
             if fx.get(branch):
                 _validate_effect_vocabulary(card_id, fx[branch])
+
+
+def _validate_count_vocabulary(card_id: str, fx: dict) -> None:
+    """Every runtime-count token on ONE effect, checked AT LOAD (EB-135).
+
+    Four spellings reach `effects._runtime_count`, and a typo in any of them
+    raised only at RESOLVE before this existed:
+
+      `amount_formula: {count: <token>}`   -> `_calc_amount`
+      `times_formula:  {count: <token>}`   -> `_calc_amount`, same door
+      `amount: "<token>"`                  -> `_amount`'s last arm
+      `times:  "<token>"`                  -> `_amount`, same arm
+
+    Split out of `_validate_effect_vocabulary` rather than inlined because it
+    is per-EFFECT and op-agnostic: any op may carry a formula, and a check
+    that lived inside one op's branch is exactly the shape of the defect
+    `EB-132` fixed one file over.
+
+    Deliberately NOT checked here: `bonus_formula`. It is a different grammar
+    (`N_per_<thing>` / `N_per_M_<resource>`), not a count token, with its own
+    raise in `_bonus_formula`; folding it in would mean a second hand-written
+    vocabulary mirroring a second chain, and this row's whole argument is
+    that a mirrored vocabulary is only safe when something pins it to its
+    chain. It is recorded as the next honest step, not silently skipped.
+    """
+    from tier0.engine import effects as _effects        # late: cycle
+
+    op = fx.get("op")
+    for key in ("amount_formula", "times_formula"):
+        formula = fx.get(key)
+        if not isinstance(formula, dict):
+            continue
+        if key == "amount_formula" and op in _effects.POWER_FORMULA_OPS:
+            # The OTHER grammar wearing this key: `{target_power: <name>}`,
+            # resolved by `_power_amount_formula`. The power name is
+            # deliberately open (any power a card reads), so what is checked
+            # is that the key is there at all -- which is exactly what that
+            # function raises on.
+            if "target_power" not in formula:
+                raise ValueError(
+                    f"card {card_id!r}: apply_power amount_formula "
+                    f"{formula!r} names no `target_power` -- "
+                    f"effects._power_amount_formula would raise the first "
+                    f"time it resolved")
+            continue
+        token = formula.get("count")
+        if not _effects.is_known_count(token):
+            raise ValueError(
+                f"card {card_id!r}: unknown runtime count {token!r} in "
+                f"{key} (op {op!r}) -- not resolvable by "
+                f"effects._runtime_count, so this card would raise the first "
+                f"time it resolved")
+    for key in ("amount", "times"):
+        val = fx.get(key)
+        if not isinstance(val, str):
+            continue
+        if key == "amount" and val == "all" and op in _effects.AMOUNT_ALL_OPS:
+            continue                    # the op reads it itself; see the set
+        if not _effects.is_known_amount(val):
+            raise ValueError(
+                f"card {card_id!r}: unknown runtime count {val!r} in "
+                f"{key} (op {op!r}) -- not resolvable by "
+                f"effects._amount, so this card would raise the first time "
+                f"it resolved")
 
 
 def _validate_modal_shape(card_id: str, fx: dict) -> None:
