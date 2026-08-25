@@ -63,6 +63,9 @@ git show <commit>:<path>
 - **One worktree per workstream, sibling directories only.** Never link a
   gitignored asset directory into a worktree (`OPERATIONS.md` has the rule and
   the reason).
+- **A multi-item decision is presented to [USER] and recorded as ONE slate
+  under ONE ruling** (R206) — don't mint transient register rows for answers
+  already in hand.
 
 Non-Claude agents: `AGENTS.md` routes them here. These norms are canonical in
 this file only — don't restate them elsewhere.

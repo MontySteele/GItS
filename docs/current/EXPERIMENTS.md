@@ -38,6 +38,15 @@ registration packets themselves live under `review/active/` — one home, not tw
   `band = None`).
 - Pre-registration drafts are a [USER]-gated class; the grade goes in blind.
 
+### Decision linkage (R206)
+- **Every registration names the DECISION each outcome would change** — slot by
+  slot, in the packet, before the run. A prediction with no decision attached to
+  its outcomes is not registered.
+- **If every plausible outcome leaves the next action unchanged, the experiment
+  is not run.** An interesting number is not a reason; the reason is the act the
+  number selects between. This reaches registrations only — a sweep is
+  engineering tuning and is governed below.
+
 ### What registration law does NOT reach: engineering tuning
 - A **sweep** is not a registered experiment and is not blind-graded — there is
   no prediction to grade, and nothing above reaches it. Three rules underneath

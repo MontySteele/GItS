@@ -359,6 +359,10 @@ git worktree prune
   check it for ignored data you care about: `git -C ../GItS-<name> status
   --ignored --porcelain | grep '^!!'`. Never park the only copy of anything in
   a worktree.
+- **A phase's content does not merge to `main` until the prior phase's required
+  read is complete (R206).** Build it, test it, push the branch — merging is the
+  act that is sequenced, not the work. A branch waiting on a read is INERT, not
+  blocked, and merging one IS the pull.
 
 Rationale and incident history: `docs/current/rationale/`.
 
