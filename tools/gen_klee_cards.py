@@ -981,12 +981,27 @@ HAND_WRITTEN_ROSTER = {"let_the_people_rejoice", "ceremonial_garment"}
 #                  form BaseLib's SimpleLoc generates for upgrade swaps)
 #   bombs       -> X-cost bomb count: X_plus_N -> X_plus_(N+val) in tier0;
 #                  codegen renders "X+{Bombs:diff()}" off a Bombs var
+#   conditional_block / conditional_damage -> EB-140. tier0 bumps EVERY
+#                  literal-int matching op the row prints, branches INCLUDED
+#                  (upgrades.py: `block` anywhere; non-self `damage`
+#                  anywhere). Codegen says the two halves in the two ways it
+#                  already has: the TOP-LEVEL half through the op's own var
+#                  (Block / Damage, or CalculationBase on a converted rider),
+#                  the BRANCH half as an (IsUpgraded ? up : base) literal
+#                  swap with {IfUpgraded:show:up|base} rendered beside it --
+#                  curtain_cue's shape for the `encore` key. Distinct from
+#                  `conditional_bonus`, which moves ONE branch number through
+#                  the ExtraDamage var; these move ALL of them.
 EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "encore",
                        "encore_cost", "fanfare_cost", "fanfare_cap",
                        "fanfare_floor", "heal",
                        "bomb_damage", "burst_energy", "cost",
                        "discard", "sparks", "innate", "retain", "bonus", "chance",
                        "conditional_bonus", "condition", "bombs",
+                       # EB-140 (W3/R211's two unemittable keys). See the
+                       # header note above: expressibility is decided per card
+                       # by _conditional_delta_targets, not by the key alone.
+                       "conditional_block", "conditional_damage",
                        "bonus_per_detonation", "bonus_slope",
                        # Fanfare rework Track C.2 (2026-07-28): the
                        # Hyperbeam's upgrade cuts its PRICE (the floor it
@@ -2851,6 +2866,11 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         e for e in effects
         if e.get("op") == "conditional"
         and not any(x.get("op") == "repeat_this" for x in e.get("then", []))]
+    # EB-140. Computed once, used twice: as the `has` booleans below and as
+    # the REASON the loop reports, so an unemittable shape says which shape it
+    # was instead of the generic sheet/card-mismatch line.
+    cond_reason = {k: _conditional_delta_reason(card, k, deltas)
+                   for k in _CONDITIONAL_DELTA_OPS if k in deltas}
     has = {
         "damage": any(e["op"] == "damage" and e["target"] != "self" for e in effects),
         "block": any(e["op"] == "block" for e in effects),
@@ -2863,6 +2883,11 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                   if x.get("op") in ("damage", "block")), {}
                  ).get("op") == "damage"
             for c in non_repeat_conditionals),
+        # EB-140: whole-card expressibility, not a single presence test --
+        # these keys bump EVERY matching op, so every one of them has to have
+        # somewhere to render.
+        "conditional_block": cond_reason.get("conditional_block") is None,
+        "conditional_damage": cond_reason.get("conditional_damage") is None,
         "condition": bool(non_repeat_conditionals),
         # bombs: tier0 rewrites X_plus_N -> X_plus_(N+val).
         "bombs": any(e["op"] == "place_bomb"
@@ -3088,6 +3113,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                     f"delta 'remove: {value}' on a card that does not print "
                     f"{value} (sheet/card mismatch)")
             continue
+        if cond_reason.get(key):
+            return {}, cond_reason[key]
         if not has[key]:
             return {}, f"delta key '{key}' has no matching effect on this card (sheet/card mismatch)"
     return dict(deltas), None
@@ -3303,6 +3330,102 @@ def conditional_bonus_upgrade(card: dict) -> int:
             "ExtraDamage var but the card also places bombs -- two claims "
             "on one var name.")
     return delta
+
+
+# --- EB-140: the two "bump every matching op" keys --------------------------
+#
+# tier0's appliers (upgrades.py `conditional_block` / `conditional_damage`)
+# take the card's `everywhere` scope -- top level AND both arms of every
+# conditional -- and bump each matching op whose amount is a LITERAL INT. The
+# predicates below are that same test, held next to each other so the two
+# engines cannot drift on which op a delta lands on. (Contrast
+# `conditional_bonus`, which moves exactly ONE branch number.)
+_CONDITIONAL_DELTA_OPS = {
+    "conditional_block": lambda e: (e.get("op") == "block"
+                                    and isinstance(e.get("amount"), int)),
+    "conditional_damage": lambda e: (e.get("op") == "damage"
+                                     and e.get("target") != "self"
+                                     and isinstance(e.get("amount"), int)),
+}
+
+
+def _conditional_delta_targets(card: dict, key: str) -> tuple[list, list]:
+    """(top-level effects, branch effects) this delta bumps on this card.
+
+    Split by WHERE they live because codegen says the two halves in two
+    different grammars: the top-level op owns a DynamicVar and upgrades
+    through it, while a branch amount is a literal and swaps on an
+    `IsUpgraded` read (curtain_cue's shape for the `encore` key).
+    """
+    match = _CONDITIONAL_DELTA_OPS[key]
+    effects = card.get("effects", [])
+    top = [e for e in effects if match(e)]
+    branch = []
+    for eff in effects:
+        if eff.get("op") != "conditional":
+            continue
+        for arm in ("then", "else"):
+            branch.extend(e for e in (eff.get(arm) or []) if match(e))
+    return top, branch
+
+
+def _conditional_delta_reason(card: dict, key: str,
+                              deltas: dict) -> str | None:
+    """None when a `conditional_block`/`conditional_damage` delta is fully
+    emittable on this card, else the reason it is not.
+
+    R24's UNAPPLIABLE discipline in its usual direction: a shape the emitter
+    cannot say in FULL is reported structural rather than half-applied, since
+    half a ruled upgrade is a silent approximation of the other half.
+    """
+    top, branch = _conditional_delta_targets(card, key)
+    what = ("literal-int `block`" if key == "conditional_block"
+            else "literal-int non-self `damage`")
+    if not top and not branch:
+        return (f"delta key '{key}: {deltas[key]}' has no {what} op on this "
+                "card (sheet/card mismatch)")
+    if len(top) > 1:
+        # One op, one var: build_vars declares a single Block/Damage var per
+        # card, so a second top-level target would have nowhere to render.
+        return (f"delta key '{key}: {deltas[key]}' bumps {len(top)} top-level "
+                f"{what} ops and the card declares one var for them "
+                "(structural upgrade)")
+    if _is_sly_branch(card):
+        # Belt and braces: _sly_view already swaps the id so no delta is
+        # found, and every Sly amount is a literal that must stay one.
+        return (f"delta key '{key}: {deltas[key]}' inside a Sly branch "
+                "(structural upgrade)")
+    if branch and "conditional_bonus" in deltas:
+        # conditional_bonus rewrites the then-branch's first damage through
+        # the ExtraDamage var; both keys claiming one branch number would
+        # emit one of the two and drop the other.
+        return (f"delta key '{key}: {deltas[key]}' shares a branch with a "
+                "`conditional_bonus` delta (two claims on one number)")
+    for eff in card.get("effects", []):
+        if eff.get("op") != "conditional":
+            continue
+        if not any(e.get("op") == "repeat_this"
+                   for e in (eff.get("then") or [])):
+            continue
+        if any(_CONDITIONAL_DELTA_OPS[key](e)
+               for arm in ("then", "else") for e in (eff.get(arm) or [])):
+            # A repeat-conditional's body is re-emitted through the repeat
+            # tail rather than through _emit_branch_op, so there is no single
+            # site an IsUpgraded swap could live on.
+            return (f"delta key '{key}: {deltas[key]}' reaches inside a "
+                    "repeat-conditional (no swap site)")
+    return None
+
+
+def conditional_block_upgrade(card: dict) -> int:
+    """Ruled `conditional_block: +N`, or 0. Expressibility is gated in
+    upgrade_plan, so a non-zero answer here is emittable everywhere."""
+    return int(upgrade_plan(card)[0].get("conditional_block", 0))
+
+
+def conditional_damage_upgrade(card: dict) -> int:
+    """Ruled `conditional_damage: +N`, or 0. Gated the same way."""
+    return int(upgrade_plan(card)[0].get("conditional_damage", 0))
 
 
 def condition_upgrade(card: dict) -> bool:
@@ -3699,6 +3822,25 @@ def _stmt_gain_encore(
         f"{amount});")
 
 
+def _branch_amount(card: dict, eff: dict, key: str) -> str:
+    """A branch damage/block amount as C#: a bare literal, or the
+    `(IsUpgraded ? up : base)` swap a conditional_* delta puts on it.
+
+    EB-140. The BRANCH half of `conditional_block` / `conditional_damage`.
+    Branch amounts are literals by construction (see this function's callers),
+    so the only way to say "this number is 3 higher when upgraded" is the
+    play-time read -- which is exactly what curtain_cue already emits for the
+    `encore` key. The TOP-LEVEL half of the same delta rides the op's own
+    DynamicVar and is bumped in OnUpgrade instead.
+    """
+    base = int(eff["amount"])
+    delta = (conditional_block_upgrade(card) if key == "conditional_block"
+             else conditional_damage_upgrade(card))
+    if not delta or not _CONDITIONAL_DELTA_OPS[key](eff):
+        return f"{base}m"
+    return f"(IsUpgraded ? {base + delta}m : {base}m)"
+
+
 def _emit_branch_op(
     card: dict, eff: dict, lines: list[str], ctx: dict,
     in_then: bool, cb_state: dict, spotlight_capable: bool
@@ -3712,12 +3854,12 @@ def _emit_branch_op(
             cb_state["pending"] = False
             amount = "DynamicVars.ExtraDamage.BaseValue"
         else:
-            amount = f'{int(eff["amount"])}m'
+            amount = _branch_amount(card, eff, "conditional_damage")
         if spotlight_capable:
             amount = f"SpotlightSystem.PrintedDamage(this, {amount})"
         _emit_damage(card, eff, lines, ctx, amount)
     elif op == "block":
-        amount = f'{int(eff["amount"])}m'
+        amount = _branch_amount(card, eff, "conditional_block")
         if spotlight_capable:
             amount = f"SpotlightSystem.PrintedBlock(this, {amount})"
         lines.append(
@@ -5031,6 +5173,19 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
 KILL_PREDICATES = frozenset({"killed_target", "killed_target_fatal"})
 
 
+def _branch_amount_text(card: dict, eff: dict, key: str) -> str:
+    """The rendered form of `_branch_amount`: a bare number, or the
+    `{IfUpgraded:show:up|base}` swap beside it. EB-140; kept next to the
+    emitter it mirrors so the face and the effect cannot print different
+    numbers."""
+    base = int(eff["amount"])
+    delta = (conditional_block_upgrade(card) if key == "conditional_block"
+             else conditional_damage_upgrade(card))
+    if not delta or not _CONDITIONAL_DELTA_OPS[key](eff):
+        return str(base)
+    return f"{{IfUpgraded:show:{base + delta}|{base}}}"
+
+
 def _branch_text(card: dict, branch: list[dict], in_then: bool,
                  predicate: str = "") -> str:
     """Card text for a conditional branch: literal numbers unless a ruled
@@ -5050,9 +5205,13 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
                 cb_pending = False
                 bits.append(f"deal {{ExtraDamage:diff()}} damage{tgt}")
             else:
-                bits.append(f'deal {int(e["amount"])} damage{tgt}')
+                bits.append(
+                    f'deal {_branch_amount_text(card, e, "conditional_damage")}'
+                    f" damage{tgt}")
         elif op == "block":
-            bits.append(f'gain {int(e["amount"])} [gold]Block[/gold]')
+            bits.append(
+                f'gain {_branch_amount_text(card, e, "conditional_block")} '
+                "[gold]Block[/gold]")
         elif op == "draw":
             if branch_draw_upgrade(card):
                 then_var, else_var = branch_draw_vars(card)
@@ -6135,6 +6294,39 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("conditional_bonus")
         lines.append(
             f'DynamicVars.ExtraDamage.UpgradeValueBy({int(deltas["conditional_bonus"])}m);')
+    for ckey in ("conditional_block", "conditional_damage"):
+        # EB-140. tier0 bumps EVERY matching op, branches included, so the
+        # delta is emitted in two places and this is only one of them: the
+        # TOP-LEVEL op moves through its own var here, while each BRANCH
+        # amount swaps on an IsUpgraded read at play time (_branch_amount).
+        # A card with only a branch target therefore lands a comment and no
+        # statement -- the same shape `encore` leaves on curtain_cue, and the
+        # shape lint_upgrade_coverage's layer 3 holds to the SHEET rather
+        # than to the manifest.
+        if ckey not in deltas:
+            continue
+        done.add(ckey)
+        top, branch = _conditional_delta_targets(card, ckey)
+        val = int(deltas[ckey])
+        for eff in top:
+            if salon_calc_rider(card, eff) is not None:
+                var = "DynamicVars.CalculationBase"
+            elif ckey == "conditional_block":
+                var = ("DynamicVars.CalculationBase"
+                       if (spotlight_block_rider(card, eff) is not None
+                           or block_calc_rider(card, eff) is not None)
+                       else "DynamicVars.Block")
+            else:
+                var = ("DynamicVars.CalculationBase"
+                       if calc_rider(card, eff) is not None
+                       else "DynamicVars.Damage")
+            lines.append(f"{var}.UpgradeValueBy({val}m);")
+        if branch:
+            how_many = ("the branch amount swaps" if len(branch) == 1
+                        else f"all {len(branch)} branch amounts swap")
+            lines.append(
+                f"// {ckey}: {how_many} on an IsUpgraded read at play time; "
+                "the text swaps via {IfUpgraded:show:...|...}.")
     if branch_draw_upgrade(card):
         # tier0 draw deltas bump ALL draw ops, branches included. Only the
         # BRANCH vars are emitted here: when the card also draws at top level

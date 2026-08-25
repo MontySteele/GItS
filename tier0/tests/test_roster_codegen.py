@@ -88,24 +88,21 @@ FURINA_DEFERRED_TO_FD: set[str] = set()
 # the invariant "every non-kit card has an upgrade path" is asserted
 # positively below, and the next gap needs somewhere to be named.
 #
-# THE NEXT GAP ARRIVED 2026-08-25, at W3 (EB-118 Phase 3, R211), and it is a
-# DIFFERENT KIND from every entry above it. Those were cards whose sheet delta
-# had died with a retired grammar -- nothing to express. This one has a
-# perfectly good ratified sheet delta that TIER0 APPLIES CORRECTLY and the
-# GENERATOR CANNOT EMIT: `take_it_from_the_top` takes `{conditional_damage: +4}`
-# (10 -> 14 on a branch), and `EXPRESSIBLE_DELTAS` holds `conditional_bonus`
-# but neither `conditional_damage` nor `conditional_block`. Klee's
-# `hold_the_line` is the same gap on the Block side; it has no set of its own
-# here and is named in `lint_upgrade_coverage.CODEGEN_DEBT` beside this one.
+# THE NEXT GAP ARRIVED 2026-08-25, at W3 (EB-118 Phase 3, R211), and CLOSED
+# the same day at EB-140. It was a DIFFERENT KIND from every entry above it:
+# those were cards whose sheet delta had died with a retired grammar -- nothing
+# to express. This one had a perfectly good ratified delta that TIER0 APPLIED
+# CORRECTLY and the GENERATOR COULD NOT EMIT -- `take_it_from_the_top`'s
+# `{conditional_damage: +4}` (10 -> 14 on a branch), with Klee's
+# `hold_the_line` the same gap on the Block side.
 #
-# IT IS NOT A DESIGN CHANGE AND MUST NOT BE ANSWERED WITH ONE. R211 ratified
-# both deltas as printed and this window may not re-rule them into keys the
-# emitter happens to have; the fix is the EMITTER, and the shape it needs
-# already ships -- `curtain_cue` emits `(IsUpgraded ? 4 : 3)` inside a branch
-# for the `encore` key and renders `{IfUpgraded:show:4|3}` beside it. GATE:
-# BACKLOG `EB-140`. When those two keys emit, both ids leave this set and
-# `CODEGEN_DEBT` in the SAME commit -- two registers, one debt, one removal.
-FURINA_UPGRADE_GAP_PENDING_FB1: set[str] = {"take_it_from_the_top"}
+# IT WAS NOT ANSWERED WITH A DESIGN CHANGE, which is the part to keep. R211's
+# deltas stand as printed; the EMITTER learned both keys, on the shape that
+# already shipped -- `curtain_cue`'s `(IsUpgraded ? 4 : 3)` inside a branch
+# with `{IfUpgraded:show:4|3}` rendered beside it. Both ids left this set and
+# `lint_upgrade_coverage.CODEGEN_DEBT` in the SAME commit as the emitter
+# change: two registers, one debt, one removal.
+FURINA_UPGRADE_GAP_PENDING_FB1: set[str] = set()
 
 
 def _generated_source(class_name: str) -> str:
@@ -355,10 +352,10 @@ def test_furina_profile_emits_every_non_kit_card():
     # (change_the_bill, take_it_from_the_top). `blocked` HELD AT 1 -- the
     # hand-written kit Burst -- and that is the number to read: the window
     # introduced the first sheet use of BOTH Salon verbs and the generator
-    # emitted them at top level with no new blocker. What it did NOT express
-    # is take_it_from_the_top's `conditional_damage` UPGRADE, which is a
-    # different ledger (manifest `upgrades.no_upgrade_path`, curated in
-    # tools/lint_upgrade_coverage.CODEGEN_DEBT) and is asserted there.
+    # emitted them at top level with no new blocker. The one thing that window
+    # did NOT express -- take_it_from_the_top's `conditional_damage` UPGRADE --
+    # lives in a different ledger (manifest `upgrades.no_upgrade_path`) and was
+    # closed by EB-140 the same day, so that ledger is empty below.
     assert manifest["coverage"] == {
         "total": 84,
         "generated": 83,
@@ -1355,3 +1352,84 @@ def test_codegen_still_refuses_an_add_before_it_cannot_place(monkeypatch):
         "add_before_probe": {"add": {"op": "repeat_this", "times": 1},
                              "add_before": "block"}})
     assert "no position within it" in gen.upgrade_plan(repeatable)[1]
+
+
+# --- EB-140: the two branch-moving upgrade keys ------------------------------
+#
+# W3 (R211) ratified `{conditional_block: +3}` on `hold_the_line` and
+# `{conditional_damage: +4}` on `take_it_from_the_top`, and the emitter could
+# say neither, so both cards shipped an empty `OnUpgrade` -- a campfire choice
+# in the sim and none in the live game. These pins are on the SHIPPED .cs
+# rather than on a re-emission, because only one of the two is what the game
+# loads (see `_generated_source`). The C# twin -- the same two cards upgraded
+# through the game's own `CardModel.UpgradeInternal` -- is
+# `klee-mod/KleeTests/ConditionalUpgradePinTests.cs`.
+
+
+def _klee_generated_source(class_name: str) -> str:
+    path = gen.KLEE_PROFILE.out_dir / f"{class_name}.cs"
+    assert path.exists(), (
+        f"{class_name} is not generated -- regenerate with "
+        "`python tools/gen_roster_cards.py`")
+    return path.read_text(encoding="utf-8")
+
+
+def test_conditional_block_moves_both_of_hold_the_lines_halves():
+    """tier0 bumps EVERY literal-int block op the row prints, so the printed 5
+    and the branch's 6 both move -- and they move through two different
+    grammars, which is the whole of what EB-140 built."""
+    source = _klee_generated_source("HoldTheLine")
+
+    # The top-level half: the op owns `DynamicVars.Block`, so the campfire
+    # bumps the var and the face re-renders itself off `{Block:diff()}`.
+    assert "DynamicVars.Block.UpgradeValueBy(3m);" in source
+    assert "Gain {Block:diff()} [gold]Block[/gold]." in source
+
+    # The branch half: a literal, so it swaps on an IsUpgraded read.
+    assert ("await CreatureCmd.GainBlock(Owner.Creature, "
+            "new BlockVar((IsUpgraded ? 9m : 6m), ValueProp.Move), "
+            "cardPlay);") in source
+    assert ("If an enemy intends to attack: gain {IfUpgraded:show:9|6} "
+            "[gold]Block[/gold].") in source
+
+    # And the shape this row existed to remove is gone.
+    assert "NO upgrade path" not in source
+
+
+def test_conditional_damage_moves_take_it_from_the_tops_branch_only():
+    """`{conditional_damage: +4}` binds to non-self damage ops, and this card's
+    only one is the branch's -- so the swing goes 10 -> 14 and the printed
+    Block 5 does not move. The Block var carries no bump at all."""
+    source = _generated_source("TakeItFromTheTop")
+
+    assert ("await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, "
+            "(IsUpgraded ? 14m : 10m)))") in source
+    assert ("If you moved the [gold]Spotlight[/gold] this turn: deal "
+            "{IfUpgraded:show:14|10} damage.") in source
+
+    assert "new BlockVar(5m, ValueProp.Move)" in source
+    assert "UpgradeValueBy" not in source
+    assert "NO upgrade path" not in source
+
+
+def test_a_conditional_delta_with_no_op_to_bump_is_still_refused(monkeypatch):
+    """The keys are expressible, not unconditional. A row that rules one with
+    nothing to land on is a sheet/card mismatch and says so."""
+    card = _ethereal_probe()
+    monkeypatch.setattr(gen, "_upgrade_deltas",
+                        {"eb118_codegen_probe": {"conditional_damage": 4}})
+    reason = gen.upgrade_plan(card)[1]
+    assert "conditional_damage" in reason and "non-self `damage`" in reason
+
+
+def test_a_second_top_level_target_keeps_a_conditional_delta_structural(
+        monkeypatch):
+    """One op, one var. Two top-level blocks would need two Block vars, so the
+    delta is reported structural rather than half-applied (R24)."""
+    card = dict(_ethereal_probe(),
+                effects=[{"op": "block", "amount": 4},
+                         {"op": "block", "amount": 3}])
+    monkeypatch.setattr(gen, "_upgrade_deltas",
+                        {"eb118_codegen_probe": {"conditional_block": 3}})
+    reason = gen.upgrade_plan(card)[1]
+    assert "2 top-level" in reason and "structural upgrade" in reason

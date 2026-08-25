@@ -1282,6 +1282,13 @@ def _cost_line(stage: str, points: int, cells: int,
 def format_plan(scope: WeightScope,
                 seconds_per_run: float | None = None) -> str:
     screen = screen_points(scope)
+    # WHAT AN UNRANGED NAME MEANS: discovered, live, and deliberately NOT
+    # swept -- this harness does not invent a range for a term whose comment it
+    # has not read. The one standing entry is `EXHAUST_FORMULA_PAYOUT_WEIGHT`
+    # (W3 / R211), and its range is DEFERRED until the pilot valuation repairs
+    # land, ruled [USER] 2026-08-25. Do not fill it in from this plan alone: a
+    # weight swept while the scorer around it is under repair measures the
+    # repair rather than the weight.
     unranged = [k for k in scope.pair_own
                 if k not in RANGES and k not in PINNED]
     lines = [

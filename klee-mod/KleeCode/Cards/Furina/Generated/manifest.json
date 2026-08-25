@@ -111,8 +111,6 @@
   },
   "upgrades": {
     "_comment": "docs/furina-upgrades.yaml is authoritative. A generated card listed below ships without an upgrade until its full delta is expressible; partial upgrade application is forbidden.",
-    "no_upgrade_path": {
-      "take_it_from_the_top": "delta key 'conditional_damage: 4' not expressible by codegen (structural upgrade)"
-    }
+    "no_upgrade_path": {}
   }
 }

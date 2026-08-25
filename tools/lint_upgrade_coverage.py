@@ -129,35 +129,21 @@ CODEGEN_DEBT: dict[str, str] = {
     # reported the entries the moment they became lies -- which is the
     # behaviour a curated list is supposed to have.
     #
-    # W3 (EB-118 Phase 3, R211, 2026-08-25) puts TWO entries back, and they are
-    # ONE debt wearing two card names. `EXPRESSIBLE_DELTAS` holds
-    # `conditional_bonus` and holds NEITHER `conditional_damage` NOR
-    # `conditional_block`, so a ratified delta that tier0 applies correctly --
-    # both keys bump every matching op the printed body carries, branches
-    # included -- emits no upgrade path at all. Both cards therefore ship a
-    # campfire choice in the sim and none in the live game, which is a REAL
-    # two-engine divergence and is named here rather than tolerated.
+    # W3 (EB-118 Phase 3, R211) put TWO entries here on 2026-08-25 and EB-140
+    # took them out the same day, by the gate they named. They were ONE debt
+    # wearing two card names -- `hold_the_line`'s `{conditional_block: +3}` and
+    # `take_it_from_the_top`'s `{conditional_damage: +4}`: ratified deltas that
+    # tier0 applied correctly and `EXPRESSIBLE_DELTAS` could not emit, so both
+    # cards shipped a campfire choice in the SIM and none in the live game.
     #
-    # WHY IT IS NOT ANSWERED BY RE-RULING THE DELTAS: R211 ratified both as
-    # printed, and picking a key because the emitter happens to have it is
-    # choosing a design to fit tooling -- the same move R199 guardrail (1)
-    # forbids on labels. `take_it_from_the_top`'s whole point is that the
-    # upgrade pays off the BAR, and `hold_the_line`'s is that it raises BOTH
-    # halves of a conditional Block.
-    #
-    # GATE: BACKLOG `EB-140` -- teach the emitter the two keys. The shape it
-    # needs ALREADY SHIPS and is worth naming so the build is not scoped from
-    # scratch: `curtain_cue` emits `(IsUpgraded ? 4 : 3)` inside a branch for
-    # the `encore` key, with `{IfUpgraded:show:4|3}` rendered beside it. When
-    # those two keys emit, both entries here and
-    # `test_roster_codegen.FURINA_UPGRADE_GAP_PENDING_FB1`'s go in the SAME
-    # commit -- deleted together or not at all.
-    "hold_the_line":
-        "W3/R211 `{conditional_block: +3}` -- EXPRESSIBLE_DELTAS has "
-        "`conditional_bonus` but not `conditional_block`. Gate: EB-140.",
-    "take_it_from_the_top":
-        "W3/R211 `{conditional_damage: +4}` -- same gap on the damage side. "
-        "Gate: EB-140.",
+    # THE FIX WAS THE EMITTER, NOT A RE-RULING, and that is the part worth
+    # keeping: the deltas stand exactly as R211 printed them. The generator now
+    # says the TOP-LEVEL half of such a delta through the op's own var and each
+    # BRANCH half as an `(IsUpgraded ? up : base)` swap with
+    # `{IfUpgraded:show:up|base}` rendered beside it -- curtain_cue's shape for
+    # the `encore` key. Both entries here and
+    # `test_roster_codegen.FURINA_UPGRADE_GAP_PENDING_FB1`'s left in the same
+    # commit as the emitter change, exactly as the gate required.
 }
 
 

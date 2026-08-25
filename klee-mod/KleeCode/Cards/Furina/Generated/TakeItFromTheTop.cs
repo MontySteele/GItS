@@ -41,7 +41,7 @@ public sealed class TakeItFromTheTop : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Take It From the Top"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you moved the [gold]Spotlight[/gold] this turn: deal 10 damage."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you moved the [gold]Spotlight[/gold] this turn: deal {IfUpgraded:show:14|10} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class TakeItFromTheTop : CustomCardModel, ICharacterCard
         if (SpotlightSystem.MovedThisTurn(Owner.Creature))
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 10m))
+            await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, (IsUpgraded ? 14m : 10m)))
                 .FromCard(this)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
@@ -73,6 +73,6 @@ public sealed class TakeItFromTheTop : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // R24: NO upgrade path -- delta key 'conditional_damage: 4' not expressible by codegen (structural upgrade). Flagged in manifest.
+        // conditional_damage: the branch amount swaps on an IsUpgraded read at play time; the text swaps via {IfUpgraded:show:...|...}.
     }
 }

@@ -2154,16 +2154,7 @@ BANNER_FEATURED_SLOTS = 3
 #   and the exhaust-pile reader family goes 5 -> 3 as both rewrites drop their
 #   pile reads, which is what completes R208's `damage@one~` five-to-two.
 #   `kokomi` near-duplicates hold at 29 against an untouched limit of 30.
-#   (d) WHAT THIS WINDOW COULD NOT BUILD TO THE SLATE, recorded here because a
-#   `C` stamp that hides a parity gap is worse than one that names it: the
-#   generator cannot emit `conditional_block` or `conditional_damage` upgrade
-#   deltas, so `hold_the_line` and `take_it_from_the_top` ship a campfire
-#   upgrade in the SIM and none in the live game. The deltas are ratified as
-#   printed and were NOT re-ruled into keys the emitter happens to have --
-#   picking a design to fit tooling is the move R199 guardrail (1) forbids on
-#   labels, applied to numbers. The gap is named in two curated registers and
-#   gated on BACKLOG `EB-140`.
-#   (e) THE STANDING READ THIS WINDOW OWES IS DIAGNOSTIC-SCOPED AND IS NOT THE
+#   (d) THE STANDING READ THIS WINDOW OWES IS DIAGNOSTIC-SCOPED AND IS NOT THE
 #   PHASE-4 MILESTONE TABLE (R211 item 7). The three reasons are (a)'s
 #   hold-versus-spend gap, (b)'s scorer blindness on both Furina rows, and
 #   (c)'s scorer blindness on Tide of Names. The milestone read follows in a
