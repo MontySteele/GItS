@@ -460,9 +460,34 @@
    # there; do not quote the three-member cell's old rows against it.
    # solve retagged utility -> frontload: it no longer applies anything.
 
-# ---------- UNCOMMON (35: was 25; +10 promoted commons -3 promoted to rare at Curtain Call R85;
-#                      +1 the D6 bow probe at the Fanfare rework) ----------
-# Salon (8 since the D6 probe)
+# ---------- UNCOMMON (37: was 25; +10 promoted commons -3 promoted to rare at Curtain Call R85;
+#                      +1 the D6 bow probe at the Fanfare rework; +2 at W3) ----------
+# Salon (9 since W3's control card)
+# W3 (EB-118 Phase-3 Window 3, R211): the FIRST sheet row in the repo that prints either Salon
+# verb. `salon_rotate` and `salon_perform` have been built and unused since Phase 2 -- the
+# rotate is a pure reorder that performs no tick, drains no Encore and triggers no bow, and the
+# perform resolves through the SAME function turn-start upkeep uses, so the Encore upkeep, the
+# dry-quarter rule, Focus and Grand-Salon scaling and the burst particle are all INHERITED
+# rather than restated. This row is what arms them.
+- {id: change_the_bill, name: "Change the Bill", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [block, utility], tempo_band: {fight: [early, mid, late], run: [early, late]}, archetypes: [salon], role: glue,
+   effects: [{op: salon_rotate}, {op: salon_perform}, {op: block, amount: 3}]}
+   # SALON CONTROL, which the plan asked for and no card provided: send the next performer to the
+   # back of the line, and the new lead performs. On a DRY stage the tick reads `paid=False` and
+   # pays the three-quarters Block; on an EMPTY stage both verbs whiff by name
+   # (`salon_rotate_whiffed`, `salon_perform_whiffed`) and the printed Block still lands -- a
+   # LEGIBLE blank, not a silent one.
+   # WHY THE BLOCK IS THERE, and it is a drafting fact rather than a design flourish: without it
+   # (cost 0, rotate + perform only) the card prices 1.5000, and its natural upgrade -- adding a
+   # draw -- moves the price by ZERO, because draw is a dead dial. A 1.5-priced Uncommon with an
+   # invisible upgrade is a card the drafter never takes. With it: 4.5000 / 7.5000. (lint-ok: drafted prices)
+   # THE ROTATE IS A DELIBERATE ZERO in the drafter (STATIC_SALON_ROTATE_VALUE); the perform is
+   # 1.5; the Block is face. Neighbours: waters_embrace 4.50, many_waters_melody 1.20,
+   # take_your_bow 2.00.
+   # HONEST FAILURE MODE, and it is why the card's simulated number is a FLOOR: the salon arm
+   # holds a member on 76.5% of plays, and THE PILOT CANNOT SEE THE STAGE WHEN IT SCORES THIS (lint-ok: measured rate)
+   # CARD -- it reads no Salon condition and has no valuation branch for performing -- so it
+   # prices the row at its Block alone and will under-play it. A null result on this row is not
+   # evidence that the card does nothing.
 - {id: take_your_bow, name: "Take Your Bow", register: salon, cost: 0, type: skill, rarity: uncommon, solve: [utility], tempo_band: {fight: [early, mid, late], run: [early, late]}, archetypes: [salon], role: enabler,
    effects: [{op: salon_bow, amount: 1}]}
    # FANFARE REWORK Track D (RULED direction 2026-07-28). Cost 0, uncommon and
@@ -573,7 +598,7 @@
    # Bow-triggered (the OTHER salon verb; fortissimo_guard owns the deploy), so the two engines never twin.
    # Was: block 5 + encore 1 hybrid glue ("Pit Orchestra"), a NEARDUP core[block] member with macaron_break.
    # PROPOSED pending red-pen.
-# Spotlight (7)
+# Spotlight (8 since W3's reward)
 - {id: leading_role, name: "Leading Role", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], tempo_band: {fight: [late], run: [early]}, archetypes: [spotlight], role: enabler,
    effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self, note: "first Spotlighted card each turn costs N less"}]}
    # Ratified texture verbatim (kickoff §3.2). Her card granting economy — the baseline multiplier still can't.
@@ -589,6 +614,42 @@
 - {id: directors_cut, name: "Director's Cut", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [velocity], tempo_band: {fight: [late], run: [early, late]}, archetypes: [spotlight], role: glue,
    effects: [{op: conditional, if: spotlight_moved_this_turn, then: [{op: energy, amount: 1}, {op: draw, amount: 2}], else: [{op: draw, amount: 1}]}]}
    # Re-aim payoff: the scene changes and the production surges.
+   # W3 (R211) NOTE, recorded because the register row expected otherwise: the Spotlight pricing
+   # rider does NOT move this row's drafted price. It stays 0.0000 at EVERY share, because BOTH
+   # its branches pay in dead dials -- energy and draw are both static zero. `curtain_cue` is the
+   # one shipped row the rider re-prices. Measured, not inferred.
+# W3 (EB-118 Phase-3 Window 3, R211): the route-(b) Spotlight reward.
+- {id: take_it_from_the_top, name: "Take It From the Top", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [block, frontload], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [spotlight], role: payoff,
+   effects: [{op: block, amount: 5},
+             {op: conditional, if: spotlight_moved_this_turn, then: [{op: damage, amount: 10, target: enemy}]}]}
+   # A GENUINE PAYOFF, not a third copy of the two rows above it: it pays in DAMAGE off a bar --
+   # a reward verb, not setup, access, repair or bridge -- and neither curtain_cue nor
+   # directors_cut does that. `furina/spotlight` payoff supply 5 -> 6 over a sub-pool 17 -> 18. (lint-ok: payoff supply counts)
+   # Spotlight is FOURTH in the ruled conversion priority order, so adding a payoff there is a
+   # DISCLOSURE item under R199, not a breach.
+   # THE BAR IS REAL RATHER THAN DECORATIVE, and the eight-fold plan lock is the evidence: the (lint-ok: plan-lock ratio)
+   # then-arm fires on 16.7% of spotlight-arm plays against 2.0% on the other two arms. And (lint-ok: measured rate)
+   # because the PLAYER controls the re-aim -- only the Ethereal Spotlight token moves it, and a
+   # duplicate designation is inert -- the human rate is far above the pilot's: the card creates
+   # a deliberate two-card sequence, move the Spotlight then cash it in, at the cost of
+   # alternating away from whichever Spotlight mode you were using.
+   # UPGRADE `{conditional_damage: +4}` IS THE DESIGN-HONEST DELTA: the swing goes 10 -> 14 and
+   # the Block stays at 5. The applier bumps every non-self damage op with a literal amount, and
+   # this card's only such op is the branch's, so nothing else moves.
+   # AND IT IS WHY THE PRICING RIDER RIDES WITH IT. Before W3, `spotlight_moved_this_turn` was
+   # not a priced state condition, so the drafter credited the branch at zero and the card priced
+   # 5.0000 on BOTH faces -- an upgrade the offer screen could not see at all. R211 took the
+   # delta and the rider together for exactly that reason.
+   # BODY CHOSEN BY MEASUREMENT, not by taste: four earlier drafts were tested against scratch
+   # copies of the real sheet and two of them CREATED a new near-duplicate pair -- a damage stem
+   # with a conditional damage arm twins `flood_of_emotion` (one of the three distinct payoff
+   # shapes the plan preserves), and the AoE variant twins `dramatic_entrance`. This body adds no
+   # family and no cluster.
+   # ONE AIMED EFFECT ONLY, so it takes no aiming exposure at all.
+   # HONEST FAILURE MODES: it is 5 Block on the great majority of pilot plays, and the pilot will
+   # never plan the re-aim, so its simulated number is a hard FLOOR and a null result is not
+   # evidence. Under The Curtain Never Falls the condition is permanently true, which makes the
+   # card unconditional for that one relic.
 - {id: top_billing, name: "Top Billing", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
    effects: [{op: apply_power, power: spotlight_mult_bonus, amount: 25, target: self, note: "Spotlighted numbers +25% per copy for the rest of combat"}]}
    # R16 re-author (replaces Constant Star): the name above the title — the archetype's core scaling engine.

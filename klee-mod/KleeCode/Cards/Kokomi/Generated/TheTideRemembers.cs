@@ -50,14 +50,16 @@ public sealed class TheTideRemembers : CustomCardModel, IElementalCard, ICharact
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "The Tide Remembers"),
-        ("description", "Deal {Damage:diff()} damage to ALL enemies. If 6 or more cards are [gold]Exhausted[/gold]: deal 5 damage to ALL enemies."),
+        ("title", "Tide of Names"),
+        ("description", "[gold]Exhaust[/gold] 1 card from your hand. Deal {CalculatedDamage:diff()} damage to ALL enemies. Scales with the total cost of the cards you just [gold]Exhausted[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move)
+            new CalculationBaseVar(5m),
+            new ExtraDamageVar(2m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => ExhaustSelection.Cost(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -69,25 +71,31 @@ public sealed class TheTideRemembers : CustomCardModel, IElementalCard, ICharact
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+        {
+            ExhaustSelection.Open(this);
+            var toExhaust = (await CardSelectCmd.FromHand(
+                choiceContext, Owner,
+                new CardSelectorPrefs(
+                    CardSelectorPrefs.ExhaustSelectionPrompt, 1),
+                KokomiResources.OwnCard, this)).ToList();
+            foreach (var victim in toExhaust)
+            {
+                ExhaustSelection.Record(this, victim);
+                await CardCmd.Exhaust(choiceContext, victim);
+            }
+
+            ExhaustSelection.Close(this);
+        }
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        if (KokomiResources.ExhaustPileCount(Owner.Creature) >= 6)
-        {
-            await DamageCmd.Attack(5m)
-                .FromCard(this)
-                .TargetingAllOpponents(CombatState!)
-                .WithHitFx("vfx/vfx_attack_slash")
-                .SpawningHitVfxOnEachCreature()
-                .Execute(choiceContext);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

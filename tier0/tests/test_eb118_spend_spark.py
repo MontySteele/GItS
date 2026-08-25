@@ -248,11 +248,30 @@ def test_a_bank_above_the_price_keeps_the_free_attack():
 
 # --- staging discipline ----------------------------------------------------
 
-def test_no_shipped_card_prints_the_op():
-    """Route-1 staging: the op surface lands with no sheet row using it, so
-    no combat and no drafted number moves and no version stamp is owed. The
-    first card to print it is Phase 2, with its price."""
-    printed = [c.id for c in loader._card_index().values()
-               if any(fx.get("op") == "spend_spark"
-                      for fx in draft._nested_effects(c.effects))]
-    assert printed == []
+def test_exactly_the_three_w3_sinks_print_the_op():
+    """The staging licence is SPENT, and this test is what records it.
+
+    It used to assert `printed == []`: Route-1 staging landed the op surface
+    with no sheet row using it, so no combat and no drafted number moved and
+    no version stamp was owed. W3 (EB-118 Phase 3, R211) is the window that
+    ends that -- `powder_charge` is the first row on any sheet to print the
+    op, and it is what made `STATIC_SPARK_SPEND_COST` load-bearing and the
+    `DRAFTER_VERSION` bump due.
+
+    Kept as an EXACT SET rather than deleted, because the useful property is
+    unchanged in kind: the op's reach is still enumerable, and a fourth row
+    printing it is a window's worth of drafted-number movement that has to be
+    said out loud rather than discovered.
+
+    Every one prints its price at TOP LEVEL, which is not decoration: a
+    `spend_spark` nested in a conditional branch is invisible to
+    `combat.spark_cost` and therefore to the playability gate, so the card's
+    payoff would fire without the bank ever being charged.
+    """
+    printed = sorted(c.id for c in loader._card_index().values()
+                     if any(fx.get("op") == "spend_spark"
+                            for fx in draft._nested_effects(c.effects)))
+    assert printed == ["hold_the_line", "powder_charge", "smoke_and_sparks"]
+
+    for cid in printed:
+        assert loader.get_card(cid).effects[0]["op"] == "spend_spark"

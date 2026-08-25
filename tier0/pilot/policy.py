@@ -1025,13 +1025,142 @@ def bomb_placement_target(state: CombatState, fx: dict,
 
 def identity_blind_payout(state: CombatState, card: Optional[Card],
                           candidate: Card) -> float:
-    """Default payout hook: what the EXHAUSTING card pays for this particular
-    victim. Today no shipped grammar reads the victim's identity -- Stoke and
-    True Grit+ pay the same for any card -- so the honest default is a
-    constant, and a constant cannot change the ranking. The hook exists so
-    that when an identity-sensitive card is written its payout arrives as a
-    parameter instead of as a second heuristic inside this chooser."""
+    """The pre-W3 payout hook, kept as the named zero.
+
+    It is what the chooser did before a shipped card read the victim's
+    identity: Stoke and True Grit+ pay the same for any card, so the honest
+    answer was a constant, and a constant cannot change the ranking. W3
+    (EB-118 Phase 3, R211) made `formula_aware_payout` the default because
+    `pearl_barrage` and `the_tide_remembers` now print a payout slope over the
+    selection. This function is still the exact behaviour of that default for
+    every card that prints no such slope, and it is what the callers that pass
+    `payout=` explicitly can still ask for by name."""
     return 0.0
+
+
+# W3 (EB-118 Phase 3, R211). The scale is DAMAGE POINTS -- the same scale
+# BOMB_LANDED_DAMAGE_VALUE and MODE_OVERDRAW_HP_VALUE already use, and the same
+# scale `exhaust_future_value` is denominated in (_block_value prices Block by
+# the damage it prevents). At 1.0 a point of payout and a point of forgone
+# future value trade one for one, which is the only setting that makes the
+# subtraction in `exhaust_victim` mean anything.
+#
+# THE RARE-ROTATION TRADE IS THE COST AND IT WAS RULED, NOT DISCOVERED:
+# measured on `kokomi/priest_weighted`, at `the_tide_remembers`'s own plays the
+# formula-aware chooser takes a Rare on 21.7% of selections against the blind
+# chooser's 13.1%, buying about +1.21 damage per play. Lowering the weight
+# softens the hazard without removing it (0.5 -> 19.0% Rares, +0.92 damage;
+# 0.34 -> 17.4%, +0.72), which says the hazard is inherent in paying by cost
+# rather than sitting in this constant. R211 ACCEPTS IT AND PAIRS IT WITH
+# RETRIEVAL -- `shell_of_sanctuary`'s W3 body ("Salvage the Line") loans a
+# rotated Rare back out of the Exhaust pile. Any later change to this value is
+# its own `C.PILOT_WEIGHTS_VERSION` bump.
+EXHAUST_FORMULA_PAYOUT_WEIGHT = 1.0
+
+
+def _printed_effects(effect_list: list[dict]):
+    """Every printed effect, branches and modal bodies included.
+
+    Deliberately NOT `_active_effects`: that one asks which branch will fire
+    right now, and this one asks what the card PRINTS. A payout the player may
+    reach at all is a payout this hook must be able to read, and the ranking it
+    feeds is a comparison between candidates for the same card -- so a branch
+    the board happens not to satisfy scales every candidate identically and
+    cannot mis-rank them.
+    """
+    for fx in effect_list:
+        yield fx
+        if fx.get("op") == "conditional":
+            yield from _printed_effects(fx.get("then") or [])
+            yield from _printed_effects(fx.get("else") or [])
+        elif fx.get("op") == "choose_one":
+            for mode in fx.get("modes") or ():
+                yield from _printed_effects(mode.get("effects") or [])
+
+
+def _selection_payout_terms(card: Optional[Card]):
+    """Every printed damage effect on `card` whose formula reads a selection.
+
+    Yields `(count_key, per, is_wide)` for each one.
+    """
+    if card is None:
+        return
+    for fx in _printed_effects(card.effects):
+        if fx.get("op") != "damage":
+            continue
+        formula = fx.get("amount_formula")
+        if not isinstance(formula, dict):
+            continue
+        count = formula.get("count", "")
+        if not isinstance(count, str):
+            continue
+        if not count.startswith(effects.EXHAUST_SELECTION_PREFIX):
+            continue
+        yield (count[len(effects.EXHAUST_SELECTION_PREFIX):],
+               formula.get("per", 1),
+               fx.get("target") == "all_enemies")
+
+
+def formula_aware_payout(state: CombatState, card: Optional[Card],
+                         candidate: Card) -> float:
+    """What the EXHAUSTING card pays, in damage points, for taking THIS victim.
+
+    DERIVED FROM WHAT THE CARD PRINTS -- never a preference for expensive
+    cards. It walks the exhausting card's printed effects for damage whose
+    formula reads an exhaust-selection count, and returns the MARGINAL
+    contribution this candidate would make to that count:
+
+        count == exhaust_selection_cost      -> per * candidate.cost
+        count == exhaust_selection_attacks   -> per * (type == "attack")
+        count == exhaust_selection_skills    -> per * (type == "skill")
+        count == exhaust_selection_powers    -> per * (type == "power")
+        count == exhaust_selection_companions-> per * is_companion
+        count == exhaust_selection_personal  -> per * (not is_companion)
+        count == exhaust_selection_upgraded  -> per * is_upgraded
+        count == exhaust_selection_size      -> per * 1   (CONSTANT: every
+                                                candidate contributes exactly
+                                                one, so it cannot rank)
+
+    R211: IF THE DAMAGE EFFECT CARRYING THE FORMULA TARGETS `all_enemies`, THE
+    PAYOUT IS MULTIPLIED BY `len(state.living_enemies)`. A wide card really
+    does buy `per` points on every body, and a hook that ignored that would
+    under-read its own printed text on exactly the boards the card is for.
+    Measured on the two ratified carriers, which is why the clause is not a
+    general re-weighting but the difference between them: `pearl_barrage` aims
+    (`per: 3`, multiplier 1) and `the_tide_remembers` is wide (`per: 2`,
+    multiplier = living enemies). On a one-enemy board -- 62% of the wide
+    card's plays -- the clause buys +0.34 damage per play; on a five-body board
+    the effective slope is 10 and it buys +5.41.
+
+    A CARD PRINTING NO SUCH FORMULA RETURNS 0.0, so this default degenerates
+    EXACTLY to `identity_blind_payout` and every other card keeps its pick.
+    That is not an argument, it is a regression test (test_eb118_policies).
+    """
+    terms = list(_selection_payout_terms(card))
+    if not terms:
+        return 0.0
+    # ONE definition of what a victim contributes, shared with the engine: the
+    # marginal is this candidate's own row in `exhaust_selection_counts`, which
+    # is the same function the runtime count, the predicates and the emitted
+    # C#-parity row all read. A formula can therefore never be paid for a
+    # quantity the engine would count differently -- including the X-cost rule
+    # (a non-int cost contributes nothing rather than being coerced).
+    marginals = effects.exhaust_selection_counts(
+        [effects.exhaust_descriptor(candidate)])
+    total = 0.0
+    for count_key, per, is_wide in terms:
+        marginal = marginals.get(count_key)
+        if not marginal:
+            # Either a count with no marginal rule, or one this candidate does
+            # not move. `size` is the interesting case and it is deliberately
+            # NOT special-cased away: every candidate contributes exactly 1, so
+            # the term is a constant across the pool and cannot rank -- which
+            # is the honest answer, and it still adds the constant so a caller
+            # comparing absolute payouts sees the card's real slope.
+            continue
+        bodies = len(state.living_enemies) if is_wide else 1
+        total += per * marginal * bodies
+    return total * EXHAUST_FORMULA_PAYOUT_WEIGHT
 
 
 def exhaust_future_value(state: CombatState, card: Card) -> float:
@@ -1071,11 +1200,17 @@ def exhaust_victim(state: CombatState, pool: list[Card],
     `pool` arrives filtered by the engine (kit exemption, an explicit
     `filter:`, and Kokomi's rotation law, which already drops junk for her);
     this chooser never widens it. Score is the payout for this victim minus
-    what losing it costs, so with the identity-blind default the pick is the
-    least valuable card -- NOT the most expensive one, which is what the
+    what losing it costs, so on a card that prints no payout slope the pick is
+    the least valuable card -- NOT the most expensive one, which is what the
     placeholder read and is the inversion `test_eb118_policies` pins.
+
+    W3 (R211): the default is `formula_aware_payout`, which returns 0.0 for
+    every card that prints no selection formula and is therefore byte-identical
+    to the old `identity_blind_payout` default on every such card. What it adds
+    is that `pearl_barrage` and `the_tide_remembers` now pull the pick toward
+    the victim their OWN printed slope pays most for.
     """
-    payout = payout or identity_blind_payout
+    payout = payout or formula_aware_payout
     best = None
     best_key = None
     for i, cand in enumerate(pool):

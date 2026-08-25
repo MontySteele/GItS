@@ -281,16 +281,27 @@ def test_the_sim_discard_branch_is_still_unfiltered():
         "the discard branch is unfiltered (EB-69 / D3, R198)"
 
 
-def test_no_committed_row_asks_the_exhaust_source():
-    """The other premise, and the one that keeps §6.4's exclusions where they
-    were written. `lint_recall_exhaust`'s card-shape leg is deliberately
-    vacuous for the same reason; if a row ever asks for it, the exhaust
-    constraints stop being hypothetical and this asks the question."""
-    offenders = [
+def test_exactly_one_committed_row_asks_the_exhaust_source():
+    """The premise that kept §6.4's exclusions hypothetical is SPENT, and this
+    test records what spending it cost -- which is nothing.
+
+    It used to assert the list was empty, and said that if a row ever asked
+    for the exhaust source the constraints would stop being hypothetical.
+    W3 (EB-118 Phase 3, R211) shipped `shell_of_sanctuary`'s rewrite
+    ("Salvage the Line"), so `lint_recall_exhaust`'s card-shape leg is no
+    longer vacuous and the shape rules it enforces are met BY CONSTRUCTION:
+    Uncommon, and it Exhausts itself. Both are checked on the codegen side
+    and again at load, so this row cannot regress into a Common or into a
+    non-Exhausting retriever without a loader error.
+    """
+    asking = sorted(
         c.id for c in loader._card_index().values()
         for fx in list(c.effects or []) + list(c.sly or [])
-        if fx.get("op") == "recall_to_draw" and fx.get("from") == "exhaust"]
-    assert offenders == [], offenders
+        if fx.get("op") == "recall_to_draw" and fx.get("from") == "exhaust")
+    assert asking == ["shell_of_sanctuary"]
+
+    row = loader.get_card("shell_of_sanctuary")
+    assert row.rarity == "uncommon" and row.exhaust is True
 
 
 # --- the two unexpressible upgrade deltas ----------------------------------

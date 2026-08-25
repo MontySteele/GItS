@@ -79,9 +79,15 @@ def test_pool_composition():
     #     blind Encore batteries. Track 1 put "Fanfare Cap +X" on twelve more
     #     Powers and Track 2 rewrote three cards in place; neither moves a
     #     count. (lint-ok: pool sizes)
-    assert len(cards) == 82
+    #   84, uncommon 37: W3 (EB-118 Phase 3, R211, 2026-08-25) added TWO
+    #     Uncommons -- change_the_bill, the Salon-control card and the first
+    #     sheet row in the repo to print either Salon verb, and
+    #     take_it_from_the_top, the route-(b) Spotlight reward. Both are new
+    #     rows rather than rewrites, so both counters move by two.
+    #     (lint-ok: pool sizes)
+    assert len(cards) == 84
     assert len(by_rarity["common"]) == 23
-    assert len(by_rarity["uncommon"]) == 35
+    assert len(by_rarity["uncommon"]) == 37
     assert len(by_rarity["rare"]) == 19
     kit = [c for c in by_rarity["rare"] if c.kit_card]
     assert [c.id for c in kit] == ["let_the_people_rejoice"]   # 18 draftable
@@ -100,9 +106,10 @@ def test_pool_composition():
                                                  # the compensation pass's two new attacks;
                                                  # 18 -> 17 at R208 W2b, standing_room_only
                                                  # retyped attack -> skill with its body
-    assert len(by_type["skill"]) == 48           # skill-heavy pole+, the cadence reason
+    assert len(by_type["skill"]) == 50           # skill-heavy pole+, the cadence reason
                                                  # (46 -> 47: held_breath; 47 -> 48: the same
-                                                 # W2b retype, arriving on this side)
+                                                 # W2b retype, arriving on this side;
+                                                 # 48 -> 50: W3's two Uncommons, both Skills)
     assert len(by_type["power"]) == 17           # official quota floor (19-21% roster-wide)
 
 

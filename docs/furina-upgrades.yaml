@@ -107,6 +107,15 @@ macaron_break:         {encore: +1, block: +1}  # A3 (2026-07-28): encore 2->3 A
 swelling_overture:     {draw: +1}            # all draw ops (draw-key law): 2->3 base, 1->2 at reserves (Curtain Call C)
 undercurrent:          {times: +2}           # A5 (2026-07-28): 3 -> 5 hits of 2 AoE; the per-hit number is fixed
 standing_room_only:    {block: +2}           # printed block 3->5 (R208 W2b re-body); the branch's 3 and the else-arm's draw are untouched
+# ---- W3 (R211) ----
+change_the_bill:       {block: +3}           # 3->6. The Salon verbs do NOT move: a rotate is a rotate and a
+                                             # perform inherits the upkeep, so there is no number in either to
+                                             # buy. The Block is the whole upgradable surface, by construction.
+take_it_from_the_top:  {conditional_damage: +4}  # the swing 10->14; the printed Block 5 is untouched. THE
+                                             # DESIGN-HONEST DELTA (R211): the card is about the bar, so the
+                                             # upgrade pays off the bar. Before W3's pricing rider this delta
+                                             # was invisible on the offer screen -- the card priced 5.0000 on
+                                             # both faces -- which is why the ruling took the two together.
 
 # ---- UNCOMMONS (bump OR keyword/condition; two cost slots + one 1->0) ----
 take_your_bow:         {add: {op: repeat_this, times: 1}}

@@ -129,7 +129,7 @@ PILOT_WEIGHT_SET_V2 = {
 }
 # The half that stays in policy.py for the C# parity reason written at its
 # head. Filed elsewhere, stamped the same.
-POLICY_FILED_WEIGHT_SET_V4 = {
+POLICY_FILED_WEIGHT_SET_V5 = {
     "STOKE_DEPLOY_OPEN": 6.0,
     "STOKE_DEPLOY_FULL": 1.5,
     "STOKE_RUNWAY_TURNS": 2.0,
@@ -158,14 +158,21 @@ POLICY_FILED_WEIGHT_SET_V4 = {
     # pinned rather than grounded -- see the note above the set.
     "MODE_OVERDRAW_HP_VALUE": 1.0,
     "MODE_TIE_EPSILON": 1e-9,
+    # v5, POLICY 10 (EB-118 Phase-3 Window 3, R211): the formula-aware exhaust
+    # payout's weight. NOT the v2/v3/v4 shape -- those were weights that
+    # already existed and were unread behind a switch, so the ENTRY was the
+    # event. This is a genuinely new weight arriving with the behaviour that
+    # reads it, and there is no switch: the chooser's default payout hook is
+    # `formula_aware_payout` outright.
+    "EXHAUST_FORMULA_PAYOUT_WEIGHT": 1.0,
 }
 
 
-def test_the_pilot_weight_set_is_stamped_at_v4():
-    assert C.PILOT_WEIGHTS_VERSION == 4
+def test_the_pilot_weight_set_is_stamped_at_v5():
+    assert C.PILOT_WEIGHTS_VERSION == 5
     for name, value in PILOT_WEIGHT_SET_V2.items():
         assert getattr(C, name) == value, name
-    for name, value in POLICY_FILED_WEIGHT_SET_V4.items():
+    for name, value in POLICY_FILED_WEIGHT_SET_V5.items():
         assert getattr(policy, name) == value, name
 
 

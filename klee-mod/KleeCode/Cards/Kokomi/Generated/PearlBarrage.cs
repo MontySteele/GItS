@@ -51,15 +51,15 @@ public sealed class PearlBarrage : CustomCardModel, IElementalCard, ICharacterCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pearl Barrage"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with the number of cards [gold]Exhausted[/gold]."),
+        ("description", "[gold]Exhaust[/gold] 1 card from your hand. Deal {CalculatedDamage:diff()} damage. Scales with the total cost of the cards you just [gold]Exhausted[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(5m),
-            new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiResources.ExhaustPileCount(card.Owner.Creature))
+            new ExtraDamageVar(3m),
+            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => ExhaustSelection.Cost(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -71,6 +71,21 @@ public sealed class PearlBarrage : CustomCardModel, IElementalCard, ICharacterCa
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        {
+            ExhaustSelection.Open(this);
+            var toExhaust = (await CardSelectCmd.FromHand(
+                choiceContext, Owner,
+                new CardSelectorPrefs(
+                    CardSelectorPrefs.ExhaustSelectionPrompt, 1),
+                KokomiResources.OwnCard, this)).ToList();
+            foreach (var victim in toExhaust)
+            {
+                ExhaustSelection.Record(this, victim);
+                await CardCmd.Exhaust(choiceContext, victim);
+            }
+
+            ExhaustSelection.Close(this);
+        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this)
@@ -81,6 +96,6 @@ public sealed class PearlBarrage : CustomCardModel, IElementalCard, ICharacterCa
 
     protected override void OnUpgrade()
     {
-        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

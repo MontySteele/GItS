@@ -50,12 +50,24 @@
 # Window 2 (2026-08-25) moved this list by NOTHING: tighten_the_cords went
 # [generic]/glue -> [priest]/payoff and the gate stayed at 18 against 18.
 #
+# SAID OUT LOUD HERE, 2026-08-25 (EB-118 Phase-3 Window 3, R211): 18 -> 17,
+# and this one IS progress rather than a change of subject. The cell that
+# LEAVES is furina/spotlight frontload|mid -- the entry the note directly
+# above disclosed at Window 1 -- and it leaves because a card was WRITTEN
+# for it. `take_it_from_the_top` is a spotlight-tagged Uncommon whose
+# derived tags are solve [block, frontload] and fight band [mid], so the
+# sub-pool goes from 17 cards of which 4 covered the cell to 18 of which 5
+# do. No floor moved and no instrument moved; the tags were derived by
+# `suggest_role_tempo_tags.py --land`, exactly as every other row's are.
+# Window 3's other five rows move this list by NOTHING: the three Klee
+# sinks derive solves against cells klee already covers, and all three
+# Kokomi rows are rewrites inside pools whose gaps are elsewhere.
+#
 # Every line is a COVERAGE GAP in a pool. No line names a card, and none
 # ever can: this lint is floors-only (charter A0.2(1)).
 character	archetype	cell
 furina	salon	frontload|late
 furina	spotlight	frontload|late
-furina	spotlight	frontload|mid
 furina	spotlight	scaling|late
 klee	demolition	block|early
 klee	demolition	block|late

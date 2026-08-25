@@ -125,6 +125,10 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<GleefulBarrage>(),
             ModelDb.Card<GrandFinale>(),
             ModelDb.Card<HideAndSeek>(),
+            // W3 Spark sinks (EB-118 Phase 3, R211): the first three cards on
+            // any sheet to print `spend_spark`. SparkPower.Spend has been in
+            // the mod since Phase 2 and no card called it until these.
+            ModelDb.Card<HoldTheLine>(),
             ModelDb.Card<HotHands>(),
             ModelDb.Card<JumpyDumpty>(),
             ModelDb.Card<JumpyDumptyMk2>(),
@@ -134,6 +138,7 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<PerfectTiming>(),
             ModelDb.Card<PlaytimeForever>(),
             ModelDb.Card<PocketFireworks>(),
+            ModelDb.Card<PowderCharge>(),          // W3 sink (see HoldTheLine)
             // Bomb-op batch.
             ModelDb.Card<QuickFuse>(),
             ModelDb.Card<RapidFire>(),
@@ -141,6 +146,7 @@ public sealed class KleeCardPool : CardPoolModel
             ModelDb.Card<RunAway>(),
             ModelDb.Card<SecretStash>(),
             ModelDb.Card<SkipAndHop>(),
+            ModelDb.Card<SmokeAndSparks>(),        // W3 sink (see HoldTheLine)
             ModelDb.Card<Snap>(),
             ModelDb.Card<SorryJean>(),
             ModelDb.Card<SparkCollection>(),

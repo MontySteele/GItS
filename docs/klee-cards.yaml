@@ -199,8 +199,8 @@
 - {id: patched_dress, name: "Patched Dress", cost: 1, type: skill, rarity: common, solve: [block], tempo_band: {fight: [early, mid, late], run: [early, late]}, archetypes: [spark, generic], role: glue,
    effects: [{op: block, amount: 6}, {op: conditional, if: has_spark, then: [{op: block, amount: 3}]}]}
 
-# ---------- UNCOMMON (25) ----------
-# Demolition (8)
+# ---------- UNCOMMON (28) ----------
+# Demolition (9 since W3's bridge sink)
 - {id: jumpy_dumpty_mk2, name: "Jumpy Dumpty Mk.II", cost: 2, type: attack, rarity: uncommon, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: damage, amount: 8, target: random_enemy, times: 2}, {op: place_bomb, amount: 1, target: all_enemies, bomb_damage: 6}]}
 - {id: remote_detonator, name: "Remote Detonator", cost: 1, type: skill, rarity: uncommon, solve: [utility], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [demolition], role: payoff,
@@ -243,7 +243,34 @@
    # one uncommon and is within noise rather than evidence of nothing happening.
 - {id: kaboom_beetle_swarm, name: "Kaboom Beetle Swarm", cost: 2, type: attack, rarity: uncommon, solve: [frontload], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [demolition], role: payoff,
    effects: [{op: damage, amount: 5, target: random_enemy, times: 3, bonus_vs_bombed: 3}]}
-# Spark (7)
+# W3 (EB-118 Phase-3 Window 3, R211): the FIRST of the three ratified Spark sinks, and the
+# bridge between the two plans -- Sparks in, a detonation out.
+- {id: powder_charge, name: "Powder Charge", cost: 1, type: skill, rarity: uncommon, solve: [utility], tempo_band: {fight: [early, mid, late], run: [early, late]}, archetypes: [demolition, spark], role: glue,
+   effects: [{op: spend_spark, amount: 2}, {op: detonate, target: enemy, bonus: 4}]}
+   # THE FIRST SHEET ROW IN THE REPO THAT PRINTS `spend_spark`. The machinery has been built
+   # in both engines since Phase 2 and used by no card: `_op_spend_spark` resolves it, a short
+   # bank pays NOTHING (never a partial spend), and `combat.spark_cost` makes the price a
+   # PLAYABILITY GATE derived from the printed effect. This row is what arms all of it, and
+   # it is what makes `STATIC_SPARK_SPEND_COST` load-bearing -- the drafter bump that op's own
+   # comment declared owed "with the first sink card that prints it" is discharged here.
+   # THE COST MUST STAY AT TOP LEVEL. A `spend_spark` inside a conditional branch is invisible
+   # to the playability gate, and the payoff would then fire unpaid. That is a structural rule
+   # about this verb, not a preference about this card.
+   # ROLE IS `glue`, NOT `payoff` (R211). The plan calls the card a BRIDGE, and a bridge is glue
+   # in the guardrails' vocabulary; so klee/demolition payoff supply holds at 7 and klee/spark (lint-ok: payoff supply counts)
+   # at 5, and R199 guardrail (1) is not reached. (lint-ok: payoff supply counts)
+   # HONEST FAILURE MODES, both measured rather than asserted. At the moment the pilot plays a
+   # card that detonates, the bank reads two or more on 42-48% of those plays -- the card is (lint-ok: measured rate)
+   # dead in hand about half the time the board is right for it. And on an empty board it burns
+   # the Sparks for nothing: the whole event log is one line, `spend_spark amount=2 total=1`.
+   # ITS SIMULATED NUMBER IS DIAGNOSTIC FOR TWO REASONS, and the second is NOT cleared by C18.
+   # (1) The pilot has no hold-versus-spend term for Sparks -- there is no `spend_spark` branch
+   # anywhere in `tier0/pilot/policy.py` -- so the sim measures a pilot that spends the bank the
+   # moment a sink is legal and never banks toward the free Attack. (2) Same-target binding
+   # (C18/R210) fixed WHICH EFFECTS SHARE A TARGET and explicitly severed WHICH TARGET IS RIGHT:
+   # tier0 still aims at the lowest-HP living enemy, and if that enemy holds no Bombs this card
+   # silently does nothing having already spent the Sparks, where a player aims at the pile.
+# Spark (9 since W3's two dedicated sinks)
 - {id: spark_knight_style, name: "Spark Knight Style", cost: 1, type: power, rarity: uncommon, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [spark], role: payoff,
    effects: [{op: apply_power, power: zero_cost_attacks_up, amount: 2, target: self}]}
 - {id: endless_fireworks, name: "Endless Fireworks", cost: 1, type: power, rarity: uncommon, solve: [frontload, scaling, velocity], tempo_band: {fight: [late], run: [early]}, archetypes: [spark], role: enabler,
@@ -270,6 +297,38 @@
    effects: [{op: block, amount: 2}, {op: gain_spark, amount: 1}, {op: draw, amount: 1}]}
 - {id: sugar_rush, name: "Sugar Rush", cost: 1, type: skill, rarity: uncommon, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [spark], role: glue, exhaust: true,
    effects: [{op: energy, amount: 1}, {op: gain_spark, amount: 1}]}
+# W3 (R211), sinks two and three. Both spend the same 2, for the same reason powder_charge does:
+# 2 is exactly one free Attack under True Spark Knight, which is the exchange the sinks are
+# authored against.
+- {id: hold_the_line, name: "Hold the Line", cost: 1, type: skill, rarity: uncommon, solve: [block], tempo_band: {fight: [early, mid, late], run: [early]}, archetypes: [spark], role: glue,
+   effects: [{op: spend_spark, amount: 2},
+             {op: block, amount: 5},
+             {op: conditional, if: enemy_intends_attack, then: [{op: block, amount: 6}]}]}
+   # WHY IT BELONGS: Sparks turn into free ATTACKS by default. This is the only thing in Klee's
+   # kit that converts them into DEFENCE instead, which is what makes the bank a genuinely
+   # contested resource rather than a delayed Attack.
+   # UPGRADE `{conditional_block: +3}` raises BOTH halves -- 5->8 and 6->9 -- and the drafter can
+   # see the top-level half, so this is the one sink whose upgrade is simultaneously design-honest
+   # and visible on the offer screen.
+   # THE BRANCH IS CREDITED AT ZERO by the drafter: `enemy_intends_attack` is not in
+   # STATIC_STATE_CONDITIONS. Measured, it fires on 72.6% of demolition-arm plays, so the card (lint-ok: measured rate)
+   # really delivers about 9.4 Block against a printed 5. Under-valuing is the safe direction and (lint-ok: measured realised value)
+   # the standing convention -- but note that on THIS card the two mis-pricings stop cancelling:
+   # the Spark cost used to be over-credited at zero too, and the new spend dial removes that half.
+   # It aims at nothing, so it takes no aiming exposure at all; its diagnostic caveat is the
+   # hold-versus-spend one alone (see powder_charge).
+- {id: smoke_and_sparks, name: "Smoke and Sparks", cost: 1, type: skill, rarity: uncommon, solve: [utility], tempo_band: {fight: [early], run: [early]}, archetypes: [spark, generic], role: glue,
+   effects: [{op: spend_spark, amount: 2},
+             {op: apply_power, power: vulnerable, amount: 3, target: enemy}]}
+   # THE EXCHANGE RATE IS PRINTED AGAINST A REAL NEIGHBOUR, which is the point of the card.
+   # `surprise_visit` is an Uncommon 1-cost Skill applying 2 Vulnerable. This applies 3 and
+   # charges 2 Sparks -- so the Sparks buy exactly ONE EXTRA STACK, and that single number is one
+   # of the three inputs the spend dial's derivation weighs.
+   # HONEST FAILURE MODES: dead below bank 2, and strictly worse than `surprise_visit` on any turn
+   # when the extra stack does not matter. That is the competing-use tension working as intended.
+   # It aims once, so it takes the milder form of powder_charge's aiming caveat -- the sim debuffs
+   # the weakest enemy where a player debuffs the dangerous one -- but it never silently does
+   # nothing, so its number is skewed rather than hollow.
 # Reaction (6)
 - {id: catalytic_conversion, name: "Catalytic Converter", cost: 1, type: power, rarity: uncommon, solve: [velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [reaction], role: payoff,
    effects: [{op: apply_power, power: reaction_bonus_spark_energy, amount: 1, target: self}]}
