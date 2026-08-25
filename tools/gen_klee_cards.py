@@ -1234,6 +1234,57 @@ RUNTIME_TIMES_TEXT = {
 }
 
 
+def _times_reason(card: dict, eff: dict) -> str | None:
+    """Why this effect's `times:` cannot be generated, or None.
+
+    EB-132. This test used to live INSIDE the `op == "damage"` arm of
+    `blocked_reason`, and that placement was the defect. tier0 honours
+    `times:` on five ops -- `_op_damage` (`tier0/engine/effects.py:799`),
+    `_op_block` (`:937`), `_op_apply_power` (`:1201`), `_op_repeat_this`
+    (`:2444`) and `_op_replay_next_companion` (`:2498`) -- and `_op_block`
+    loops the WHOLE gain exactly the way `_op_damage` loops its hits, so
+    `{op: block, amount: 2, times: exhaust_pile}` pays `amount x pile` in the
+    sim. The block emitter has no hit-count path at all: it writes ONE
+    `await CreatureCmd.GainBlock` whatever `times` says. A runtime count was
+    therefore a NAMED BLOCKER one arm over and INVISIBLE here. The test is
+    hoisted out so it covers every op that reads the field, and each op gets
+    the answer its own emitter can honestly back:
+
+      damage -- a literal hit count, a `RUNTIME_TIMES` member and an X
+                formula all render (`.WithHitCount`), so the allowlist is
+                the whole rule.
+      block  -- NOTHING but 1 renders. Building the C# loop is not this
+                row's work and inventing one here would be a behaviour
+                change nobody asked for: the grammar is honestly
+                unavailable in BOTH engines until someone writes it, and a
+                named blocker is what that looks like. A literal `times: 3`
+                is refused for the same reason a runtime count is -- the
+                emitter cannot count either.
+
+    The two remaining ops are covered by their own arms in `blocked_reason`
+    and are deliberately left there rather than restated here, so no shape
+    acquires a second, differently-worded refusal: `apply_power` refuses
+    `times` through `APPLY_POWER_FIELDS` totality, and `repeat_this` /
+    `replay_next_companion` each demand a literal int. The correspondence is
+    pinned in `tier0/tests/test_eb132_block_times_parity.py`, which reads the
+    honouring set off the engine rather than trusting this comment.
+    """
+    op = eff.get("op")
+    times = eff.get("times", 1)
+    if op == "damage":
+        if (not isinstance(times, int) and times not in RUNTIME_TIMES
+                and _x_formula_reason(card, times)):
+            return _x_formula_reason(card, times)
+        return None
+    if op == "block":
+        if times != 1:
+            return (
+                f"times {times!r} on op 'block' -- tier0 loops the whole "
+                "Block gain and the emitter has no hit-count path (it would "
+                "write one un-looped GainBlock)")
+    return None
+
+
 def _x_expr(val, bombs_var: bool = False) -> str:
     """C# expression for a tier0 amount formula ('x' is ResolveEnergyXValue,
     declared at the top of OnPlay)."""
@@ -1331,6 +1382,11 @@ def blocked_reason(
         op = eff.get("op")
         if op not in MECHANICAL_OPS:
             return f"op '{op}'"
+        # EB-132: hoisted out of the damage arm so it covers every op that
+        # honours `times:` -- see _times_reason for which op gets which answer.
+        times_reason = _times_reason(card, eff)
+        if times_reason:
+            return times_reason
         # B1 CLASS FIX (2026-07-28). A `bonus_formula` on a NON-damage op is a
         # blocker unless a rider actually expresses it.
         #
@@ -1381,10 +1437,8 @@ def blocked_reason(
                     return (
                         "bonus_vs_aura requires enemy damage and "
                         "a literal int")
-            times = eff.get("times", 1)
-            if (not isinstance(times, int) and times not in RUNTIME_TIMES
-                    and _x_formula_reason(card, times)):
-                return _x_formula_reason(card, times)
+            # `times` is checked by _times_reason at the top of this loop
+            # (EB-132) -- it is not a damage-only field.
         if op == "place_bomb":
             if eff.get("target") not in BOMB_TARGETS:
                 return f"bomb target '{eff.get('target')}'"
