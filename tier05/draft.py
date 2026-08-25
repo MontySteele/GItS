@@ -1328,12 +1328,20 @@ STATIC_ETHEREAL_SHARE = 0.6        # EB-118. Ethereal is a DOWNSIDE and the
                                    # majority, and the sheet buys the whole
                                    # downside off at the campfire.
                                    #
-                                   # ===== R193 TRIGGER -- FIRED AND READ ====
-                                   # THE READ WAS TAKEN 2026-08-24 at the
-                                   # `D16` integration bump, on the terms
-                                   # written below, and its arithmetic is
-                                   # recorded here rather than in a report
-                                   # nobody reaching this constant would open.
+                                   # ===== RATIFIED (R205, 2026-08-24) =====
+                                   # 0.6 IS A SETTLED NUMBER. It did not become
+                                   # one by default: R193 armed a trigger with
+                                   # the constant, the trigger fired, the read
+                                   # was taken, and the ruling was made on the
+                                   # read. The arithmetic is recorded here
+                                   # rather than in a report nobody reaching
+                                   # this constant would open.
+                                   # THE READ, taken 2026-08-24 at the `D16`
+                                   # integration bump: `big_badda_boom` is the
+                                   # pool's FIRST DRAFTABLE CARRIER of the
+                                   # keyword and prices its whole upgrade on
+                                   # this share, so a read of that card is a
+                                   # read of this number and of nothing else.
                                    # `draft._static_power`, both faces of
                                    # `big_badda_boom` as they ship on `main`:
                                    #
@@ -1347,8 +1355,12 @@ STATIC_ETHEREAL_SHARE = 0.6        # EB-118. Ethereal is a DOWNSIDE and the
                                    # on the upgraded one (the upgrade removes
                                    # the keyword), and the ratio the trigger
                                    # reads IS this constant to six places --
-                                   # 4.8 and 8.0 are the two figures the note
-                                   # below predicted, unchanged by R201.
+                                   # 4.8 and 8.0 are the two figures R193
+                                   # predicted, unchanged by R201's Option A
+                                   # body (its rider rides BOTH faces, so the
+                                   # base-to-upgraded delta is still exactly
+                                   # the keyword and the read stays
+                                   # one-variable).
                                    # THE ONE-VARIABLE CLAIM CHECKED RATHER
                                    # THAN ASSUMED: the Option A rider prices at
                                    # 4.8000 -> 4.8000 base and 8.0000 ->
@@ -1381,48 +1393,24 @@ STATIC_ETHEREAL_SHARE = 0.6        # EB-118. Ethereal is a DOWNSIDE and the
                                    # telemetry exists, so the frequency cannot
                                    # be read off a run. Building it is a
                                    # build, not a read.
-                                   # THEREFORE: RE-RATIFY OR MOVE IS [USER]'S,
-                                   # and it is filed as QUEUE `M41`. The
-                                   # constant is NOT moved at this bump. The
-                                   # obligation below is discharged as to its
-                                   # READ half and open as to its RULING half,
-                                   # which is why this block is amended in
-                                   # place rather than deleted.
-                                   # ===== the trigger, as written =====
-                                   # 0.6 is ratified PROVISIONALLY (R193,
-                                   # Phase-2 sitting 2026-08-23), and this
-                                   # comment is the trigger, armed in the same
-                                   # commit that arms the constant. THE TRIGGER
-                                   # IS THE BIG BADDA BOOM READ. That card
-                                   # (docs/klee-cards.yaml, EB-118 Phase 2B) is
-                                   # the FIRST DRAFTABLE CARRIER of the keyword
-                                   # and it prices its WHOLE upgrade on this
-                                   # share -- base Ethereal at 0.6, upgraded at
-                                   # 1.0 -- so the read of that card is a read
-                                   # of this number and of nothing else.
-                                   # THE 2026-08-24 BODY RULING DOES NOT BREAK
-                                   # THAT. [USER] replaced the bare 16 with
-                                   # "16, and 8 to a random other enemy if it
-                                   # kills". The rider rides BOTH FACES, so the
-                                   # base-to-upgraded DELTA is still exactly
-                                   # the keyword and the read stays
-                                   # one-variable. It also prices at ZERO here
-                                   # (see the under-credit note at
-                                   # STATIC_STATE_CONDITIONS), so it moves
-                                   # neither side of the ratio: 4.8 base, 8.0
-                                   # upgraded, before and after the ruling.
-                                   # WHAT IS OWED WHEN IT HAS BEEN READ: the
-                                   # share is either RE-DERIVED against the read
-                                   # or RE-RATIFIED deliberately. It may NOT
-                                   # lapse into a settled number by having
-                                   # shipped once. A provisional constant that
-                                   # nobody revisits is a ratified one nobody
-                                   # voted for.
-                                   # The durable copy of this obligation is the
-                                   # BACKLOG EB-118 row; this comment is the
-                                   # copy that sits where the number is, so a
-                                   # reader who reaches the constant cannot
-                                   # miss that it is on loan.
+                                   # THE RULE THE RATIFICATION ADOPTS: no
+                                   # decision unless a RE-DERIVATION DISAGREES
+                                   # with 0.6. None is derivable today -- the
+                                   # frequency is uninstrumented, per the
+                                   # paragraph above -- and the plateau says
+                                   # the third digit is not load-bearing, so
+                                   # there is nothing for a decision to be
+                                   # about. R193's obligation is discharged in
+                                   # both halves, READ and RULING, and QUEUE
+                                   # `M41` is closed.
+                                   # WHAT WOULD REOPEN IT: a re-derivation that
+                                   # DISAGREES -- which means building the
+                                   # per-card Ethereal-loss telemetry first,
+                                   # deliberately, not as a side effect of some
+                                   # other instrument. A move is still its own
+                                   # `DRAFTER_VERSION` bump with its own
+                                   # re-baseline, and every drafted number in
+                                   # the tree archives with it.
                                    # ===========================================
 STATIC_REPEAT_SHARE = 0.5          # repeat_this multiplies the card's OWN
                                    # printed effects. Applied at half,

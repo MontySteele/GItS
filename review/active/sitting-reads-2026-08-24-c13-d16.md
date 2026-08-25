@@ -298,3 +298,115 @@ The run's full stdout is reproduced in §§1–3 row for row; its stderr is the
 relic-skip `UserWarning` block every run of this script emits, plus the §5.1
 traceback. Nothing in this file is quoted from any run other than the one
 named in the cell table.
+
+---
+
+## 8. Addendum — 2026-08-24: the two floor arms, run
+
+> **This section ADDS the two rows §5.1 could not run. It rewrites nothing.**
+> Every number in §§1–3 stands exactly as published (R101b) — including the
+> two `*not run*` cells, which are a true record of what that run did. This
+> addendum is a second, later run of the same script in the same cell, and it
+> is labeled as such rather than merged into the tables above.
+
+### 8.1 Why it is runnable now
+
+`game_ref/` was restored on 2026-08-24, after §5 was written: [USER] supplied
+an other-local worktree backup (fourteen files), and the derived half was
+regenerated through `tools.extract_base_game_pool` + `tools.build_official_sheet`.
+Both pools rebuild and both verify — **ironclad 76 cards, silent 87** — and
+`real_ironclad` / `real_silent` load again.
+
+Two further derived artifacts had to be re-derived after the anchors loaded,
+each of which announced itself only as a `FileNotFoundError`:
+`game_ref/role_tempo_canon.json` (`tools.canon_role_tempo`, five canon pools)
+and the `defect` / `necrobinder` / `regent` extractor pools
+(`tools.extract_base_game_pool`). The canon regeneration doubles as an
+integrity check on the restore and it passed: the tool rewrites two COMMITTED
+docs beside its local artifact and **both came back byte-identical**. The
+primary checkout's suite is green with **zero skips** (3199 passed).
+
+BACKLOG `EB-128` NARROWS on that restore rather than closing: three
+`*_char_facts.yaml` (`defect`, `necrobinder`, `regent`) are still missing —
+the only file class the restore could not produce, and nothing reads them
+today — the durable-backup location is still [USER]'s call, and the guard
+against the destroyer is still owed.
+
+**One repair was needed before the run and it is disclosed here, not buried.**
+The recovered `silent_pool_pass2.yaml` predates `EB-71`/R174 and still printed
+`sly_keyword: true` on `si_haze`, a field the loader now refuses — so the tree
+passed `--verify` and still could not be loaded. `--verify` is a CONSISTENCY
+check (does the on-disk pool match a rebuild from its own inputs), not a
+CURRENCY check (does the vocabulary those inputs print still exist). The repair
+is the migration the retirement message itself prescribes,
+`sly_keyword: true` → `sly: [{op: sly_autoplay}]`, and `test_real_silent`'s
+pinned count of seven `sly_autoplay` cards is what says it is complete: six came
+from the extractor, `si_haze` is the seventh. **Nothing was fabricated, stubbed
+or approximated** — one row's field name was migrated, and no number, cost,
+rarity or effect moved.
+
+### 8.2 The cell
+
+Identical to §"The cell" in every field, and taken on the primary checkout at
+`main` = `4fee4a6` (PR #72, the `C13`/`D16` merge) — which is the same world the
+`after` column was taken in.
+
+| | |
+|---|---|
+| checkout | primary (`game_ref/` is primary-local and gitignored; a worktree cannot see it) |
+| HEAD | `main` at `4fee4a6` |
+| command | `PYTHONPATH=. python -m tier05.exp_roster_anchors --runs 3000 --jobs 0 --seed 20260729` |
+| cell | `cell=roster-anchors[jobs=0,runs=3000,seed=20260729] seed=20260729 runs=3000 RT12/D16/P7/C13` |
+| route / policy / loadout | `hunter` / `assigned` / realistic, relics + potions, all registered acts |
+| arms | **all twelve completed**; no arm raised |
+
+The script has no arm selection — `ARMS` is a module constant — so the full
+twelve ran. That is a free integrity check and it is reported in §8.4.
+
+### 8.3 The two floors
+
+| arm | `C11/D15` win | `C13/D16` win | `C13/D16` 95% | Δ |
+|---|---|---|---|---|
+| `real_ironclad / generic` (floor) | 5.5% | **5.5%** | [4.7, 6.3] | — |
+| `real_silent / generic` (floor) | 1.3% | **1.3%** | [0.9, 1.7] | — |
+
+| arm | `C11/D15` act-1 | `C13/D16` act-1 | `C13/D16` 95% | Δ |
+|---|---|---|---|---|
+| `real_ironclad / generic` | 67.2% | **67.2%** | [65.5, 68.8] | — |
+| `real_silent / generic` | 54.4% | **54.4%** | [52.6, 56.2] | — |
+
+Shape columns, same cell: `real_ironclad` **0.97 / 21.6 / 13.5**,
+`real_silent` **0.65 / 20.8 / 10.7** (acts / deck / fights).
+
+**They did not separate — they did not move at all.** Both floors print their
+prior `C11/D15` values on both rate columns to the printed precision, so they
+join `ref_ironclad` and the three Kokomi arms as the window's control set
+rather than as movers. That is what the C13 stamp predicts of them and it is
+reported rather than asserted: `real_ironclad` and `real_silent` are built from
+`game_ref/`, which no edit in this window touches.
+
+**The roster therefore has its floors back.** `real_ironclad / generic` 5.5%
+and `real_silent / generic` 1.3% are the numbers every roster arm is read
+against, and §5.1's recorded cost — "the roster has no floors" — is paid off at
+these two values.
+
+### 8.4 The other ten arms reproduced, exactly
+
+Because the script runs all twelve, this addendum re-took the ten rows §§1–3
+already publish. **All ten reproduce to the printed precision on all five
+columns** — winrate, act-1 and the three shape values — against the `C13/D16`
+column above them.
+
+Two things follow, and they are different claims:
+
+- **The addendum is in the same cell as the table it completes.** Two floor
+  rows appended to a table taken separately would otherwise be an assumption;
+  here it is a measurement.
+- **`game_ref/`'s PRESENCE is not a term in the ten rows either.** §5.2 showed
+  the absence was not a term, using the four unchanged arms. This run closes
+  the other direction: the same ten rows reproduce with the tree present. The
+  two readings together bracket it — the reference tree matters to
+  `real_ironclad` and `real_silent`, and to nothing else in this table.
+
+Nothing in §§1–7 is edited on the strength of this. The published run is the
+published run; this is a later run that agrees with it.
