@@ -112,6 +112,56 @@ Two facts this measurement turned up, neither fixed here:
   been run first. It is a standing red in the local-only lane, so
   `run_lints.py --lane ci` is the arm that goes green today.
 
+## game_ref backup — the OneDrive vault
+
+`game_ref/` is gitignored, decompile-derived, and half of it is thirteen
+hand-authored pass layers that no tool can regenerate. It has been destroyed
+four times. RULED [USER] 2026-08-24: *"Agreed on the backup in OneDrive"* — the
+durable copy lives at
+
+```
+C:\Users\Monty\OneDrive\GItS-vault\game_ref
+```
+
+hard-coded in `tools/backup_game_ref.py` (a configurable backup root is one
+that can be pointed somewhere temporary and quietly stop being a backup).
+
+```sh
+python -m tools.backup_game_ref             # mirror local -> vault
+python -m tools.backup_game_ref --dry-run   # what it would do
+python tools/lint_game_ref_backup.py        # staleness tripwire, never writes
+```
+
+**Run the backup after ANY restore, extraction, or hand edit of `game_ref/`** —
+after `tools.extract_base_game_pool` + `tools.build_official_sheet`, after
+restoring pass layers from anywhere, after editing a `*_char_facts.yaml` by
+hand. The tripwire is in `run_lints.py`'s **local** lane, so a normal
+`python tools/run_lints.py` says when the vault has fallen behind.
+
+**The guard is the tool's reason to exist.** `backup_game_ref` REFUSES (exit 2,
+loud, vault untouched) when local `game_ref/` is missing or holds fewer than ten
+files. Every destruction so far left the directory *present and empty* with
+`git status` clean; a plain mirror run "to be safe" in that state would
+propagate the deletion into the vault and take the last copy with it. If local
+`game_ref/` is empty, the vault is the source — copy the other way.
+
+The lint's three verdicts, mirroring validate.ps1's S7 convention: local
+`game_ref/` **absent or empty** → NOTE, exit 0 (a fresh clone, a runner and
+every worktree have none, and a lint that failed there is a lint everyone
+learns to ignore); **present but under ten files** → NOTE, exit 0 (S7 owns
+incompleteness and fails loudly on it; the vault deliberately keeps the older
+complete generation rather than being refreshed from a partial tree);
+**present with ten or more** → the vault must exist, hold every source file, and
+carry no file that local has since grown, shrunk or out-dated (2 s skew
+tolerance). Vault-only files are notes, never failures — deleting them is the
+backup script's job.
+
+**Backups never live in worktrees.** `git worktree remove` deletes gitignored
+content out of a *clean* worktree, which is how the 2026-08-24 loss took both
+prior backup copies along with the tree they were meant to protect. The vault is
+outside every checkout for exactly that reason; see also the no-link rule under
+Worktrees.
+
 ## Simulate
 
 Tier-0 combat balance (Monte Carlo, 7-axis scorecard, anchor
@@ -233,7 +283,8 @@ python3 tools/lint_roster_registry.py       tools/lint_vendor_pin.py       tools
 ```
 
 Local-only (not in CI): `lint_text_encoding.py`, `lint_generated_structure.py`,
-`art_lint.py`, `card_distinctness_report.py --gate`, `dump_claimed_sources.py`.
+`art_lint.py`, `card_distinctness_report.py --gate`,
+`lint_game_ref_backup.py`, `dump_claimed_sources.py`.
 `tools/README.md` is the authoritative map of which tool is gated by what.
 
 `tools/run_lints.py` runs the whole battery concurrently and prints one row per
