@@ -128,4 +128,15 @@ Up My Sleeve | base game / Silent (ask A5, 2026-07-27)
 Well Laid Plans | base game / Silent (ask A5, 2026-07-27)
 Wraith Form | base game / Silent (ask A5, 2026-07-27)
 #
+# RETIRED DISPLAY NAMES (the R69 pattern, applied to a card-body rewrite
+# rather than to a card/relic clash). W3 (EB-118 Phase 3, R211, 2026-08-25)
+# rewrote two Kokomi rows KEEPING THEIR IDS and renaming only the
+# player-facing string. The old strings are burned so a future row cannot
+# re-mint a name a player has already met attached to a different card. The
+# ids they used to describe are still live and still on the sheet, under new
+# names. Neither entry is annotated "<kind>-owned", so both are enforced
+# against every kind -- which is correct: nothing holds either name now.
+Shell of Sanctuary | retired display name (kokomi-cards.yaml `shell_of_sanctuary`, the 11-Block wall) -- R211 rewrote that id as "Salvage the Line"; the string may not be re-minted
+The Tide Remembers | retired display name (kokomi-cards.yaml `the_tide_remembers`, the exhaust-pile bar) -- R211 rewrote that id as "Tide of Names"; the string may not be re-minted
+#
 # Add more as they're found in playtest or cross-mod testing.

@@ -46,10 +46,14 @@ def test_pool_composition():
     # and careful_arrangement were promoted Common -> Uncommon, costs and
     # numbers unchanged. Three cards moved across the line, so the two
     # counters move by three in opposite directions and the total holds.
+    # 28 -> 31 and 76 -> 79 at W3 (EB-118 Phase 3, R211, 2026-08-25): the
+    # three ratified Spark sinks -- powder_charge, hold_the_line and
+    # smoke_and_sparks -- all new Uncommon Skills. This is a real pool GROWTH,
+    # not a promotion, so unlike R161/R162 the counters do not cancel.
     assert len(by_rarity["common"]) == 29         # 32 - 3 (R161/R162)
-    assert len(by_rarity["uncommon"]) == 28       # 25 + 3 (R161/R162)
+    assert len(by_rarity["uncommon"]) == 31       # 25 + 3 (R161/R162) + 3 (W3)
     assert len(by_rarity["rare"]) == 15
-    assert sum(len(v) for v in by_rarity.values()) == 76
+    assert sum(len(v) for v in by_rarity.values()) == 79
     kit = [c for c in by_rarity["rare"] if c.kit_card]
     assert [c.id for c in kit] == ["sparks_n_splash"]   # 14 draftable rares
 
@@ -75,12 +79,17 @@ def test_archetype_tag_counts():
     for c in _klee_pool():
         for arch in c.archetypes:
             counts[arch] = counts.get(arch, 0) + 1
-    assert counts["demolition"] == 27     # 28 - 1 (big_badda_boom, W1 audit)
-    assert counts["spark"] == 21           # 22 - 1 (sparkly_explosion, R208 W2b:
-                                           # the re-body drops gain_spark, so the
-                                           # tag goes with the participation)
+    # W3 (R211, 2026-08-25): the three Spark sinks. powder_charge is the
+    # bridge and carries BOTH plan tags; hold_the_line is [spark] alone;
+    # smoke_and_sparks is [spark, generic]. All three are `role: glue`, so no
+    # payoff count moves anywhere -- what moves is sub-pool size, and
+    # klee/spark's payoff DENSITY falls 24% -> 21% as a result. That is a
+    # disclosure rather than a breach: klee/spark is not on R199's ruled
+    # conversion priority list. (lint-ok: payoff density)
+    assert counts["demolition"] == 28     # 27 + 1 (powder_charge, W3)
+    assert counts["spark"] == 24           # 21 + 3 (all three W3 sinks)
     assert counts["reaction"] == 14
-    assert counts["generic"] == 19
+    assert counts["generic"] == 20         # 19 + 1 (smoke_and_sparks, W3)
 
 
 def test_survival_sprint_frontload_endpoints():

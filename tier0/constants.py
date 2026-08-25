@@ -600,7 +600,34 @@ BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
 # argmax that any weight decides. Naming it here is a completeness note, not a
 # second reason. A Furina reading taken with the chooser off is not comparable
 # with one taken after -- for `deep_breath` and, today, nothing else.
-PILOT_WEIGHTS_VERSION = 4
+#
+# v5 = POLICY 10 (EB-118 Phase-3 Window 3, R211, 2026-08-25):
+# `EXHAUST_FORMULA_PAYOUT_WEIGHT = 1.0` ENTERS the labeled set, filed in
+# `tier0/pilot/policy.py` for the C#-parity reason at that block's head. This
+# one is NOT the v2/v3/v4 shape -- those were weights that existed and were
+# never read while a switch was off, and the entry WAS the event. This is a
+# genuinely NEW weight arriving with the behaviour that reads it: the chosen-
+# Exhaust chooser's default payout hook stops being `identity_blind_payout`
+# and becomes `formula_aware_payout`, which pays a candidate the marginal
+# contribution it would make to the exhausting card's OWN printed selection
+# formula -- multiplied by the living-enemy count when that formula's damage
+# targets `all_enemies`. The value 1.0 is hand-picked and unswept, on
+# `BOMB_LANDED_DAMAGE_VALUE`'s and `MODE_OVERDRAW_HP_VALUE`'s reasoning: the
+# chooser's scale is already points of damage, and a point of payout and a
+# point of forgone future value trade one for one.
+# WHAT IT MAKES INCOMPARABLE is narrower than usual and worth saying, because
+# a reader will otherwise assume every Kokomi reading archives: the hook
+# returns 0.0 for any card that prints no selection formula, so it is
+# BYTE-IDENTICAL to the old default on every carrier except the two W3 rows
+# that print one (`pearl_barrage`, `the_tide_remembers`). That is asserted
+# directly over every chosen-Exhaust carrier on every sheet rather than
+# argued -- `test_eb118_policies.test_no_existing_carriers_pick_moved` -- and
+# it is what replaces a fourth scratch run that would have been provably null.
+# THE RARE-ROTATION TRADE IS THE COST AND R211 ACCEPTED IT, paired with
+# retrieval (C19 (c)'s "Salvage the Line" loans a rotated Rare back out of the
+# Exhaust pile). Any later change to the value is its own bump, and the sweep
+# grid's outcomes are [USER]'s call, not the integration's.
+PILOT_WEIGHTS_VERSION = 5
 # Sim-hygiene sprint 2026-07-29 (task 4): the inline scoring weights that had
 # been living as bare floats inside tier0/pilot/policy.py. MOVED, NOT RETUNED
 # -- every value below is byte-identical to the literal it replaced, and the
@@ -2032,7 +2059,119 @@ BANNER_FEATURED_SLOTS = 3
 # REGISTERED EXPERIMENT ATTACH TO THIS WINDOW EITHER: nothing here is graded
 # against a committed prediction.
 # ---------------------------------------------------------------------------
-CONSTANTS_VERSION = 18
+# CONSTANTS_VERSION 19 -- the EB-118 PHASE-3 WINDOW 3 CARD-BODY PASS (R211,
+# [USER] 2026-08-25 -- the W3 ratification slate), landed 2026-08-25. ONE
+# window, EIGHT sheet rows, ALL THREE characters: five NEW rows and three
+# REWRITES THAT KEEP THEIR CARD IDS. Ground is R179/M15 as written -- printed
+# effects and printed numbers move on every sheet -- with R202's role /
+# archetype amendment reached once, on the row that leaves a clone cluster.
+# Enumerated the way C13-C18 enumerate their own, so that the world a C19
+# number was taken in is readable from the stamp.
+#   (a) W3-KLEE, THREE NEW UNCOMMON SKILLS, and they are the first rows on any
+#   sheet to print `spend_spark`. `powder_charge` (spend 2, `detonate
+#   target: enemy bonus: 4`, upgrade `{bonus: +3}`), `hold_the_line` (spend 2,
+#   Block 5, `conditional if: enemy_intends_attack then: [block 6]`, upgrade
+#   `{conditional_block: +3}` raising BOTH halves), `smoke_and_sparks` (spend
+#   2, Vulnerable 3, upgrade `{vulnerable: +1}`). The ratified floor of
+#   three-or-four sinks is met AT THREE: a fourth candidate was cut at the
+#   ruling. ALL THREE ARE `role: glue`, so NO PAYOFF COUNT MOVES ANYWHERE --
+#   what moves is sub-pool size, and `klee/spark`'s payoff DENSITY falls 24%
+#   -> 21% as three glue cards join and no payoff does. That is a DISCLOSURE,
+#   not a breach: `klee/spark` is not on R199's ruled conversion priority
+#   list. It is nevertheless the second consecutive window in which that arm
+#   thins, and the sheet says so beside the rows.
+#   THE SPARK PRICE IS AT TOP LEVEL ON ALL THREE and that is structural, not
+#   stylistic: `combat.spark_cost` reads the top-level op and the playability
+#   gate refuses the play below the bank, so a `spend_spark` nested in a
+#   branch would let the payoff fire unpaid.
+#   ALL THREE SIMULATED NUMBERS ARE DIAGNOSTIC and the reason is declared here
+#   rather than discovered later: THE PILOT HAS NO HOLD-VERSUS-SPEND TERM for
+#   Sparks -- there is no `spend_spark` branch anywhere in
+#   `tier0/pilot/policy.py`, and `PILOT_SPARK_VALUE` is read only on GAIN -- so
+#   the sim measures a pilot that spends the bank the moment a sink is legal
+#   and never banks toward the free Attack. `powder_charge` carries a SECOND,
+#   separate reason that C18 above does NOT clear: R210 took full parity on
+#   which effects SHARE a target and explicitly severed which target is RIGHT,
+#   so tier0 still aims at the lowest-HP living enemy -- and if that enemy
+#   holds no Bombs this card silently does nothing having already spent the
+#   Sparks, where a player aims at the pile. `smoke_and_sparks` takes a milder
+#   form of the same (the sim debuffs the weakest where a player debuffs the
+#   dangerous one) and is skewed rather than hollow; `hold_the_line` aims at
+#   nothing and is clean on that axis.
+#   (b) W3-FURINA, TWO NEW UNCOMMON SKILLS. `change_the_bill` (`salon_rotate`
+#   + `salon_perform` + Block 3, upgrade `{block: +3}`) is the first sheet row
+#   in the repo to print EITHER Salon verb -- both have been built and unused
+#   since Phase 2 -- and its Block is load-bearing rather than decorative: at
+#   cost 0 with the two verbs alone the card prices 1.5000 and its natural
+#   upgrade (a draw) moves the price by ZERO, because draw is a dead dial.
+#   `take_it_from_the_top` (Block 5 + `conditional if:
+#   spotlight_moved_this_turn then: [damage 10 target: enemy]`, upgrade
+#   `{conditional_damage: +4}`) is the route-(b) Spotlight reward. `role:
+#   payoff` and `archetypes: [spotlight]`, so `furina/spotlight` payoff supply
+#   goes 5 -> 6 over a sub-pool 17 -> 18 -- Spotlight is FOURTH in the ruled
+#   priority order, so that is a disclosure item and not a breach. BOTH ROWS'
+#   NUMBERS ARE FLOORS AND A NULL RESULT ON THEM IS NOT EVIDENCE: the pilot's
+#   scorer reads neither the Salon state nor the Spotlight branch, so it
+#   under-plays both.
+#   (c) W3-KOKOMI, THREE REWRITES, AND THE POOL STAYS AT 76 ROWS AND AT THE
+#   SAME 76 IDS. `pearl_barrage` stops reading the exhaust PILE and reads THE
+#   CARD YOU CHOSE: `exhaust_from 1 chosen` + `damage amount_formula {base: 5,
+#   per: 3, count: exhaust_selection_cost} target: enemy`, upgrade
+#   `{formula_per: +1}` -> `{formula_base: +3}` (the retired delta had no pile
+#   slope left to bump). Its ladder is 5 / 8 / 11 over the WHOLE live range,
+#   because Kokomi's sheet has no card above cost 2.
+#   `shell_of_sanctuary` KEEPS ITS ID and becomes "Salvage the Line" -- the
+#   R69 pattern, the identifier frozen and the display string renamed, with
+#   the retired string burned in `docs/reserved-card-names.txt`. Cost 2 -> 1,
+#   `block 11` -> `draw 1` + `recall_to_draw 1 from: exhaust` + `gain_charge
+#   2` + `block 4`, `exhaust: true`, `archetypes` [generic] -> [priest,
+#   assist] (R202's amendment, the one label move in this window), `role:
+#   glue` unchanged. ITS UPGRADE SHEET IS NOT EDITED AT ALL: the live delta
+#   was already `{block: 4}`, which is exactly the ruled 4 -> 8.
+#   THE EFFECT ORDER IS THE RULED CORRECTION AND IT IS LOAD-BEARING -- traced
+#   on the real resolver, recall-then-draw puts the rescued card at draw-pile
+#   index 0 and the draw pops index 0, so the rescued card lands STRAIGHT IN
+#   HAND, defeating the rule that a retrieved card goes to the top of the draw
+#   pile and never to hand. It is ALSO the repo's FIRST Exhaust-retrieving
+#   row, so `lint_recall_exhaust`'s card-shape leg stops being vacuous; the
+#   shape rules are met by construction (Uncommon, and it Exhausts itself).
+#   `the_tide_remembers` KEEPS ITS ID and becomes "Tide of Names":
+#   `exhaust_from 1 chosen` + `damage amount_formula {base: 5, per: 2, count:
+#   exhaust_selection_cost} target: all_enemies`, upgrade `{damage: +3}` ->
+#   `{formula_base: +2}` (the retired delta has no matching effect on the new
+#   body). Tags `[priest, generic]` and `role: payoff` DO NOT MOVE, so
+#   `kokomi/priest` payoff supply holds at 12 -- an earlier draft retagged it
+#   `commander` and said in terms that it did so to keep the count down, which
+#   R199 guardrail (1) forbids outright, and R211 refused that. Its ladder is
+#   5 / 7 / 9, WIDE and SHALLOW where Pearl is AIMED and STEEP: two cards
+#   reading the same count with the same shape would be a clone.
+#   ITS NUMBER IS A FLOOR: the pilot cannot see this card's payout when it
+#   decides whether to PLAY it, so it scores the row against an EMPTY
+#   selection, base only.
+#   TWO STANDING DEBTS MOVE, and both were measured rather than hoped. The
+#   flat-Block clone cluster goes 8 -> 7 as `shell_of_sanctuary` leaves it --
+#   the first movement on that curated debt this workstream has produced --
+#   and the exhaust-pile reader family goes 5 -> 3 as both rewrites drop their
+#   pile reads, which is what completes R208's `damage@one~` five-to-two.
+#   `kokomi` near-duplicates hold at 29 against an untouched limit of 30.
+#   (d) WHAT THIS WINDOW COULD NOT BUILD TO THE SLATE, recorded here because a
+#   `C` stamp that hides a parity gap is worse than one that names it: the
+#   generator cannot emit `conditional_block` or `conditional_damage` upgrade
+#   deltas, so `hold_the_line` and `take_it_from_the_top` ship a campfire
+#   upgrade in the SIM and none in the live game. The deltas are ratified as
+#   printed and were NOT re-ruled into keys the emitter happens to have --
+#   picking a design to fit tooling is the move R199 guardrail (1) forbids on
+#   labels, applied to numbers. The gap is named in two curated registers and
+#   gated on BACKLOG `EB-140`.
+#   (e) THE STANDING READ THIS WINDOW OWES IS DIAGNOSTIC-SCOPED AND IS NOT THE
+#   PHASE-4 MILESTONE TABLE (R211 item 7). The three reasons are (a)'s
+#   hold-versus-spend gap, (b)'s scorer blindness on both Furina rows, and
+#   (c)'s scorer blindness on Tide of Names. The milestone read follows in a
+#   later window, when those caveats clear. Per-character attribution for this
+#   window is by commit-hash scratch comparison (R207) and is not citable the
+#   way a stamped table is.
+# ---------------------------------------------------------------------------
+CONSTANTS_VERSION = 19
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
@@ -2239,7 +2378,48 @@ CONSTANTS_VERSION = 18
 # 12 -> 13 above (the sheet and engine content), `RT` and `P` untouched.
 # The re-baseline this bump owes is the same table C13 owes, and it is taken
 # ONCE for both: `review/active/sitting-reads-2026-08-24-c13-d16.md`.
-DRAFTER_VERSION = 16
+# DRAFTER_VERSION 17 (EB-118 Phase-3 Window 3, R211, 2026-08-25) -- ONE NEW
+# DIAL AND ONE NEW PRICED CONDITION, and this is the first bump in the series
+# where the drafter learns a COST rather than a value.
+#   (a) `STATIC_SPARK_SPEND_COST = 2.5` (`tier05/draft.py`). The `spend_spark`
+#   branch of `_op_price` used to read the dead GAIN dial with the sign
+#   flipped and therefore priced at 0.0; it now reads its own live dial. THE
+#   BUMP IS UNCONDITIONAL AND IT WAS OWED IN WRITING: that branch carried an
+#   explicit no-bump licence saying the bump came due "at Phase-2 landing,
+#   with the first sink card that prints it", and `powder_charge` is that card
+#   (C19 (a) above). The value is DERIVED, not picked -- three routes, two of
+#   them converging on 2.50 from opposite directions (what a Spark buys, and
+#   what Klee's own sheet charges to acquire two of them) -- and taken at the
+#   TOP of the convergent range under R194's direction rule, which requires
+#   the residual error to UNDER-value the sink rather than over-value it. The
+#   derivation, its sensitivity and the two discounts deliberately declined
+#   live at the constant. **THE VALUE IS [USER]-HELD:** 1.5 is the defensible
+#   smaller number in the same method, and `hold_the_line` scoring 0.00 in a
+#   demolition draft -- below `DRAFT_SKIP_THRESHOLD` -- is the offer-screen
+#   consequence that would argue for it.
+#   (b) `spotlight_moved_this_turn` joins `STATIC_STATE_CONDITIONS` with
+#   `STATIC_SPOTLIGHT_MOVED_SHARE = 0.167`, the measured spotlight-arm rate.
+#   R211 ratified the RIDER but not the SHARE, so the value is chosen under
+#   R194 again: 0.5 (Klee's precedent for a branch the player can arrange and
+#   the drafter cannot see) and 0.167 are both defensible and 0.167 is the
+#   more conservative; anything at or above 1.0 is not defensible, because at
+#   share 1.0 `take_it_from_the_top` would price 15.00 base off a branch that
+#   fires on a sixth of plays in its own arm. **ALSO [USER]-HELD.**
+#   THE ARCHIVE SCOPE OF THIS BUMP IS UNUSUALLY SMALL AND THAT IS WORTH
+#   STATING, because the reflex is to assume a dial move archives the world.
+#   It is FOUR ROWS, three of them new. `STATIC_SPARK_SPEND_COST` re-prices
+#   the three new sinks AND NOTHING ELSE -- R211 kept `STATIC_SPARK_VALUE` at
+#   0.0, so all eleven shipped Klee Spark rows and `prune_witch_hunt` are
+#   unchanged to four decimals, verified card by card and pinned in
+#   `test_eb118_w3_bodies.py`. The rider re-prices `take_it_from_the_top` and
+#   `curtain_cue` (0.0000 -> 0.4000); `directors_cut` does NOT move at any
+#   share, because BOTH its branches pay in dead dials (energy and draw), and
+#   that corrects an expectation the `EB-118` register row carried.
+#   ONE WINDOW, and each field moves on its own ground: `C` 18 -> 19 above
+#   (the eight sheet rows), `P` 9 -> 10 below (the chooser), `RT` untouched.
+#   THE READ THIS BUMP OWES IS W3's SINGLE DIAGNOSTIC-SCOPED STANDING READ,
+#   taken once for the whole window -- see C19 (e).
+DRAFTER_VERSION = 17
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).

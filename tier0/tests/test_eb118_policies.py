@@ -217,11 +217,19 @@ def test_a_self_exhausting_card_is_cheaper_to_lose(policies_on):
     assert policy.exhaust_victim(state, [keeper, burner]) is burner
 
 
-def test_the_payout_hook_is_identity_blind_by_default(policies_on):
-    """No shipped grammar reads the victim's identity, so the default hook is
-    a constant and cannot move the ranking. The interface is the deliverable:
-    an identity-sensitive payout arrives as a parameter, and here one flips
-    the pick onto the card the blind chooser was keeping."""
+def test_the_payout_hook_is_blind_with_no_exhausting_card(policies_on):
+    """Called with NO exhausting card there is nothing printed to read, so the
+    default pays a constant and cannot move the ranking. The interface is the
+    deliverable: an identity-sensitive payout arrives as a parameter, and here
+    one flips the pick onto the card the blind chooser was keeping.
+
+    W3 (R211) moved the default from `identity_blind_payout` to
+    `formula_aware_payout` and these three assertions are UNCHANGED, because a
+    card that prints no selection formula pays nothing -- which is the whole
+    contract of the swap. The DOCSTRING is what had to be rewritten: the old
+    one said "no shipped grammar reads the victim's identity", and
+    `pearl_barrage` falsified that sentence the moment its W3 body landed.
+    """
     dud = _skill("dud", 0)
     payoff = _skill("payoff", 2, [{"op": "block", "amount": 12}])
     state = make_state([make_enemy()])
@@ -232,6 +240,131 @@ def test_the_payout_hook_is_identity_blind_by_default(policies_on):
     assert policy.exhaust_victim(
         state, pool, payout=lambda s, c, cand: 50.0 * (cand is payoff)
     ) is payoff
+
+
+# --- (2b) W3 (R211): the formula-aware payout ------------------------------
+#
+# These use the same `[dud(0), payoff(2, Block 12)]` pool the inversion pin
+# above uses, so what they assert is exactly the DIFFERENCE the exhausting
+# card makes. Nothing else on the board moves.
+
+def _aimed_carrier(per=3):
+    """`pearl_barrage`'s shape: aimed, so no multiplicity clause."""
+    return Card(id="aimed", name="aimed", cost=1, type="attack", effects=[
+        {"op": "exhaust_from", "amount": 1, "select": "chosen"},
+        {"op": "damage", "target": "enemy",
+         "amount_formula": {"base": 5, "per": per,
+                            "count": "exhaust_selection_cost"}}])
+
+
+def _wide_carrier(per=2):
+    """`the_tide_remembers`' shape: `target: all_enemies`, so the payout reads
+    the board."""
+    return Card(id="wide", name="wide", cost=2, type="attack", effects=[
+        {"op": "exhaust_from", "amount": 1, "select": "chosen"},
+        {"op": "damage", "target": "all_enemies",
+         "amount_formula": {"base": 5, "per": per,
+                            "count": "exhaust_selection_cost"}}])
+
+
+def test_the_default_is_no_longer_blind(policies_on):
+    """THE W3 pin. With `pearl_barrage`'s body as the exhausting card, the
+    printed slope pulls the pick onto the card the blind chooser was keeping.
+
+    The arithmetic is spelled out so a later weight change cannot move this
+    silently: future values are 0.0 (dud) and 2.5 (payoff), the payout at
+    `per: 3` is 0.0 and 6.0, so the scores are 0.0 and 3.5 -- the pick FLIPS
+    from `dud` to `payoff`."""
+    dud = _skill("dud", 0)
+    payoff = _skill("payoff", 2, [{"op": "block", "amount": 12}])
+    state = make_state([make_enemy()])
+    pool = [dud, payoff]
+    card = _aimed_carrier()
+
+    assert policy.exhaust_future_value(state, dud) == 0.0
+    assert policy.exhaust_future_value(state, payoff) == 2.5
+    assert policy.formula_aware_payout(state, card, dud) == 0.0
+    assert policy.formula_aware_payout(state, card, payoff) == 6.0
+
+    assert policy.exhaust_victim(state, pool) is dud            # no carrier
+    assert policy.exhaust_victim(state, pool, card=card) is payoff
+
+
+def test_a_card_printing_no_selection_formula_is_unmoved(policies_on):
+    """The other half of the contract, and the reason the change reaches only
+    two rows: a SHIPPED chosen-Exhaust carrier that prints no selection
+    formula pays nothing, so its pick is identical to the blind one."""
+    from tier0.content.loader import get_card
+
+    dud = _skill("dud", 0)
+    payoff = _skill("payoff", 2, [{"op": "block", "amount": 12}])
+    state = make_state([make_enemy()])
+    runner = get_card("send_the_runner")
+
+    assert list(policy._selection_payout_terms(runner)) == []
+    assert policy.formula_aware_payout(state, runner, payoff) == 0.0
+    assert policy.exhaust_victim(state, [dud, payoff], card=runner) is dud
+
+
+def test_a_wide_formula_reads_the_board(policies_on):
+    """NEW WITH R211: a `target: all_enemies` formula multiplies the payout by
+    the living-enemy count. A wide card really does buy `per` points on every
+    body, and a hook that ignored that would under-read its own printed text
+    on exactly the boards the card is for.
+
+    The aimed carrier is the control: same two boards, same payout."""
+    dud = _skill("dud", 0)
+    payoff = _skill("payoff", 2, [{"op": "block", "amount": 12}])
+    wide, aimed = _wide_carrier(), _aimed_carrier()
+
+    one = make_state([make_enemy()])
+    three = make_state([make_enemy(name="a"), make_enemy(name="b"),
+                        make_enemy(name="c")])
+
+    assert policy.formula_aware_payout(one, wide, dud) == 0.0
+    assert policy.formula_aware_payout(one, wide, payoff) == 4.0
+    assert policy.formula_aware_payout(three, wide, dud) == 0.0
+    assert policy.formula_aware_payout(three, wide, payoff) == 12.0
+
+    assert (policy.formula_aware_payout(one, aimed, payoff)
+            == policy.formula_aware_payout(three, aimed, payoff) == 6.0)
+
+
+def test_no_existing_carriers_pick_moved(policies_on):
+    """The invariance regression that REPLACES a whole scratch run.
+
+    A fourth scratch world with the chooser live and no selection formula on
+    any sheet would be provably bit-identical to baseline, because (i) the new
+    hook returns zero for any card printing no selection formula, (ii) only
+    the two W3 rows print one, and (iii) the chooser is deterministic given the
+    pool. This asserts (i) and (ii) directly, over every chosen-Exhaust carrier
+    on every sheet -- Sly riders included, which is the EB-134 lesson -- in
+    milliseconds and forever."""
+    from tier0.content import loader
+
+    dud = _skill("dud", 0)
+    payoff = _skill("payoff", 2, [{"op": "block", "amount": 12}])
+    state = make_state([make_enemy(name="a"), make_enemy(name="b")])
+    pool = [dud, payoff]
+    blind = policy.exhaust_victim(state, pool,
+                                  payout=policy.identity_blind_payout)
+
+    carriers, printing = [], []
+    for card in loader._card_index().values():
+        bodies = list(card.effects) + list(card.sly or [])
+        if any(fx.get("op") == "exhaust_from" and fx.get("select") == "chosen"
+               for fx in policy._printed_effects(bodies)):
+            carriers.append(card.id)
+        if list(policy._selection_payout_terms(card)):
+            printing.append(card.id)
+
+    assert carriers, "no chosen-Exhaust carrier found -- the sweep is stale"
+    assert sorted(set(printing)) == ["pearl_barrage", "the_tide_remembers"]
+
+    for cid in sorted(set(carriers) - set(printing)):
+        card = loader._card_index()[cid]
+        assert policy.formula_aware_payout(state, card, payoff) == 0.0
+        assert policy.exhaust_victim(state, pool, card=card) is blind
 
 
 def test_the_op_exhausts_through_the_policy(policies_on):

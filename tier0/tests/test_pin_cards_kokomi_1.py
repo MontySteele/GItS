@@ -58,13 +58,26 @@ def test_jade_bulwark_gains_six_block():
     assert st.player.hand == []
 
 
-def test_shell_of_sanctuary_gains_eleven_block():
-    """Shell of Sanctuary is the 2-cost big wall: 11 Block, no rider."""
+def test_salvage_the_line_costs_one_and_pays_charge_beside_its_block():
+    """`shell_of_sanctuary` was the 2-cost big wall -- 11 Block, no rider.
+    W3 (EB-118 Phase 3, R211) rewrote it as "Salvage the Line", KEEPING THE
+    ID: cost 2 -> 1, Block 11 -> 4, with a draw, an Exhaust retrieval and a
+    Charge line around it.
+
+    This pin is the SLOT, not the retrieval -- the ruled effect ORDER and the
+    empty-pile behaviour are pinned in test_eb118_w3_bodies.py, beside the
+    ruling that settled them. What belongs here is that the row now costs one
+    energy and pays a Charge, which is the arithmetic the rest of this file
+    reads."""
     st = kokomi_state()
     play(st, "shell_of_sanctuary")
-    assert st.player.block == 11
-    assert st.player.energy == 1
-    assert st.player.charge == 0
+    assert st.player.block == 4
+    assert st.player.energy == 2
+    # THREE, not the printed two: the row Exhausts itself and Kokomi's
+    # CHARGE_PER_EXHAUST funnel pays the third. That is inherited behaviour
+    # rather than anything W3 printed, and it is asserted here so the printed
+    # line and the funnel stay separable if either ever moves.
+    assert st.player.charge == 3
 
 
 # --- attack ---

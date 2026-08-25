@@ -44,6 +44,32 @@ STATIC_DEBUFF_VALUE = 2.0
 STATIC_BOMB_DAMAGE_SHARE = 0.5
 STATIC_BOMB_GUARD_VALUE = 1.5
 STATIC_KLEE_CONDITIONAL_SHARE = 0.5
+# W3 (EB-118 Phase 3, R211) -- the Spotlight pricing rider's share.
+#
+# 0.167 IS THE MEASURED RATE, not a judgement: `spotlight_moved_this_turn`
+# reads true on 16.7% of plays in `furina/spotlight_weighted` and on 2.0% of
+# plays in the salon and fanfare arms -- an eight-fold plan lock, which is what
+# makes the branch a real bar rather than decoration.
+#
+# WHY THE MEASURED RATE RATHER THAN KLEE'S 0.5 PRECEDENT, and this is the one
+# judgement in it: R211 ratified the RIDER but not the SHARE, so the value is
+# chosen under R194's direction rule -- every one-directional error in this
+# file must make the drafter PASS ON A GOOD CARD, never pay for something it
+# cannot see. Both 0.5 (the shape-matching choice: Klee's 0.5 covers exactly
+# this class, a branch the player can arrange and the drafter cannot see) and
+# 0.167 are defensible; 0.167 is the maximally conservative of the two, and
+# anything at or above 1.0 is not defensible at all -- at share 1.0
+# `take_it_from_the_top` would price 15.00 base, one of the biggest-priced
+# Uncommon Skills on Furina's sheet, on the strength of a branch that fires on
+# a sixth of plays in its own arm. [USER] holds the value; this is the second
+# of W3's two overridable numbers (the first is STATIC_SPARK_SPEND_COST).
+#
+# ITS WHOLE REACH IS TWO ROWS, measured card by card rather than inferred:
+# `take_it_from_the_top` 5.0000/5.0000 -> 6.6700/7.3400 (the base-to-upgraded
+# gap goes from 0.00 to 0.67, which is the entire point of taking the rider),
+# and `curtain_cue` 0.0000 -> 0.4000. `directors_cut` does NOT move at any
+# share, because both its branches pay in dead dials -- energy and draw.
+STATIC_SPOTLIGHT_MOVED_SHARE = 0.167
 STATIC_STRENGTH_VALUE = 2.0        # conservative two future Attack hits (v4)
 STATIC_PERSISTENT_PROC_SHARE = 1.0  # one turn of a repeatable Power (v4)
 # DRAFTER_VERSION 6: all_enemies damage counts toward the average swarm, not
@@ -110,6 +136,13 @@ STATIC_STATE_CONDITIONS = frozenset({
     "target_has_power_vulnerable",
     "card_exhausted_this_turn",
     "hp_lost_this_turn",
+    # W3 (EB-118 Phase 3, R211) -- the Spotlight pricing rider. Added WITH the
+    # first card whose whole upgrade the offer screen could not otherwise see:
+    # `take_it_from_the_top` takes `{conditional_damage: +4}` on a branch gated
+    # by this name, and while the name was unpriced the card read 5.0000 on
+    # BOTH faces. The ruling took the delta and the rider together, and the
+    # rider is what makes the delta visible.
+    "spotlight_moved_this_turn",
 })
 
 
@@ -124,6 +157,8 @@ def _static_condition(name: str) -> bool:
 def _static_condition_share(name: str) -> float:
     if name in ("has_spark", "target_has_nonpyro_aura"):
         return STATIC_KLEE_CONDITIONAL_SHARE
+    if name == "spotlight_moved_this_turn":
+        return STATIC_SPOTLIGHT_MOVED_SHARE
     return 1.0
 
 
@@ -667,26 +702,23 @@ def _op_price(fx: dict) -> float:
     if op == "gain_spark":
         return _neutral_amount(fx) * STATIC_SPARK_VALUE
     if op == "spend_spark":
-        # The same dial with the sign flipped -- spend_encore's shape, for
-        # spend_encore's reason: a printed cost must read as one.
+        # A PRINTED COST, PRICED AS ONE -- spend_encore's shape and
+        # spend_encore's reason, and since W3 (R211) it has its OWN dial
+        # rather than the gain side's with the sign flipped.
         #
-        # PROPOSED PRICE, PHASE 2 (EB-118 §4.5, Klee). The dial is the dead
-        # STATIC_SPARK_VALUE, so the term is 0.0 today and a sink's whole
-        # offer-screen value is its payoff ops. The design intent for the
-        # first sink cards -- recorded here to be checked against a real
-        # price when one is authored, not encoded as one -- is that a
-        # spend-2 outcome is worth roughly ONE ENERGY and lands at or below
-        # one free Attack, which is what a bank of 2 buys under True Spark
-        # Knight. One energy is STATIC_ENERGY_VALUE = 0.0 under the v3
-        # flat-proxy sweep, so intent and arithmetic agree by coincidence
-        # rather than by derivation; whichever pass revives the energy dial
-        # owes this term a real number.
+        # THE OWED BUMP IS DISCHARGED HERE. This branch used to carry a
+        # licence saying DRAFTER_VERSION was not moved because no sheet row
+        # printed the op, and naming what would end that: "the first sink
+        # card that prints it". `powder_charge` is that row (W3-Klee,
+        # R211), so the bump landed with it, unconditionally.
         #
-        # DRAFTER_VERSION IS NOT MOVED. No sheet row prints the op, so no
-        # offer screen changes and no tier0.5 number moves -- an op no card
-        # uses moves no number. The bump is owed at Phase-2 landing, with
-        # the first sink card that prints it.
-        return -_neutral_amount(fx) * STATIC_SPARK_VALUE
+        # THE ASYMMETRY IS DELIBERATE AND IS THE WHOLE DESIGN POSITION: the
+        # SPEND side has a real price and the GAIN side (STATIC_SPARK_VALUE)
+        # stays at 0.0. R211 kept it there, which is why NO existing row
+        # re-prices at this bump -- the archive scope is the three new sink
+        # rows and nothing else. See STATIC_SPARK_SPEND_COST for the
+        # derivation and for what waking the gain side would reach.
+        return -_neutral_amount(fx) * STATIC_SPARK_SPEND_COST
     if op == "burst_energy":
         return _neutral_amount(fx, 0) * STATIC_BURST_VALUE
 
@@ -1425,8 +1457,79 @@ STATIC_REPEAT_SHARE = 0.5          # repeat_this multiplies the card's OWN
 # -- the measured dead dials (see the header above) ------------------------
 STATIC_DRAW_VALUE = 0.0            # draw, draw_while, draw_to_hand_size
 STATIC_ENERGY_VALUE = 0.0          # energy, and cost_mod through it
-STATIC_SPARK_VALUE = 0.0           # gain_spark, discard_for_sparks
+STATIC_SPARK_VALUE = 0.0           # gain_spark, discard_for_sparks. STAYS
+                                   # DEAD, and that is a design position
+                                   # rather than an oversight: R211 kept the
+                                   # GAIN side at zero while giving the SPEND
+                                   # side a real price (STATIC_SPARK_SPEND_COST
+                                   # below). An undocumented asymmetry reads as
+                                   # a bug to the next person, so: waking this
+                                   # dial would re-price TWELVE shipped rows --
+                                   # all_my_treasures, cant_catch_me, crackle,
+                                   # da_da_da, hot_hands, skip_and_hop, snap,
+                                   # spark_collection, sparkly_treasure,
+                                   # sugar_rush, warm_glow, and prune_witch_hunt
+                                   # in docs/mondstadt-companions.yaml -- and for
+                                   # four of those (sparkly_treasure,
+                                   # spark_collection, hot_hands, sugar_rush,
+                                   # all at 0.0000 today) it would be a
+                                   # VISIBILITY FLIP rather than a re-price.
+                                   # None of that happens while this is 0.0.
 STATIC_BURST_VALUE = 0.0           # burst_energy
+# -- Klee's Spark price (W3, EB-118 Phase 3, R211) --------------------------
+# THE COST-SIDE DIAL, on STATIC_CRASH_FANFARE_VALUE's idiom: the sign lives in
+# `_op_price`'s branch, the magnitude lives here, and the reason lives beside
+# the magnitude.
+#
+# THE UNIT IS THE FILE'S OWN: "values are expressed in the same rough units as
+# one point of printed damage or Block" (the v3 header). So the question this
+# number answers is not "what is a Spark worth" in the abstract -- it is how
+# many points of printed damage-or-Block one Spark is worth AT THE MOMENT IT IS
+# SPENT. A printed `spend_spark: 2` therefore costs a card 5.00.
+#
+# DERIVED, NOT PICKED -- three routes, two of which converge from opposite
+# directions on the same number (the derivation and its full sensitivity table
+# publish in the W3 packet; the load-bearing lines are these):
+#   (1) USE-VALUE. Sparks buy free Attacks. The value of a free Attack is the
+#       ENERGY it refunds, not the Attack's printed power -- you would have
+#       played that card anyway. Klee's pool's MEDIAN price-per-energy is 5.00
+#       (median 5.00 whether or not the ten zero-priced Powers are in the
+#       sample, which is what makes it the number to use), and 2 Sparks is one
+#       free Attack under True Spark Knight (`combat.spark_threshold` drops
+#       SPARKS_FOR_FREE_ATTACK to 2). 5.00 / 2 -> 2.50.
+#   (2) ACQUISITION, AT THE MATCHED QUANTITY. `spark_collection` gives up its
+#       whole slot to buy exactly TWO Sparks, at Common cost 1 Skill, whose
+#       non-Spark slot median is 5.00. 5.00 / 2 -> 2.50. The sheet's own price
+#       for a purchase of two, applied to a spend of two, needs no bridging
+#       assumption at all. (The whole purchase ladder is a coherent bulk
+#       discount -- sparkly_treasure 4.00, spark_collection 2.50, hot_hands
+#       1.67 -- and its median is also 2.50.)
+#   (3) THE SINKS' OWN PRINTED EXCHANGE RATES pull DOWN, to 1.0-1.7, and
+#       powder_charge is written as if a Spark were worth less than nothing.
+#       That is not a defect in the derivation: a sink is SUPPOSED to be a
+#       slightly bad deal in raw output, because what it really buys is a USE
+#       for a bank that would otherwise sit there -- which the drafter cannot
+#       see, and which is exactly why the residual error must under-value.
+#
+# R194's DIRECTION RULE PICKS THE TOP OF THE CONVERGENT RANGE. Every
+# one-directional error already in this file makes the drafter PASS ON A GOOD
+# CARD, never PAY FOR A COST IT CANNOT SEE. This is the drafter's first cost
+# term of that kind, so 2.5 deliberately OVER-charges the sink by up to ~30%:
+# two discounts that would lower it are declined on direction grounds -- the
+# waste discount (12-30% of Sparks gained are never converted, giving 2.19 or
+# 1.75) and the measured-threshold discount (both weighted arms actually run at
+# threshold 3, giving 1.67).
+#
+# WHAT IT DOES, and it is disclosed rather than buried: every sink loses
+# 2 x dial on both faces. powder_charge 7.00/10.00 -> 2.00/5.00,
+# hold_the_line 5.00/8.00 -> 0.00/3.00, smoke_and_sparks 6.00/8.00 ->
+# 1.00/3.00. In a `spark` draft all three stay above DRAFT_SKIP_THRESHOLD; in a
+# `demolition` draft hold_the_line scores 0.00, BELOW it, because it is tagged
+# [spark] only and was already weak there. [USER] holds the value: 1.5 is the
+# defensible smaller number in the same method (between the threshold-3 read
+# and the sinks' own rates) if that offer-screen effect is not wanted.
+STATIC_SPARK_SPEND_COST = 2.5      # spend_spark, per Spark. NOT the gain
+                                   # dial's mirror -- see above.
 
 
 # The op-parity table (Task 2 of the same sprint). EVERY key of
@@ -1519,8 +1622,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     "cost_mod": "ZERO: energy in another costume, priced through "
                 "STATIC_ENERGY_VALUE",
     "gain_spark": "ZERO: STATIC_SPARK_VALUE, the v3 flat-proxy sweep",
-    "spend_spark": "the same dead dial, NEGATIVE: a Spark price is a "
-                   "printed cost. PROPOSED, see the branch in _op_price",
+    "spend_spark": "NEGATIVE STATIC_SPARK_SPEND_COST, its own live dial: a "
+                   "Spark price is a printed cost (W3/R211; the gain side "
+                   "stays dead on purpose)",
     "burst_energy": "ZERO: STATIC_BURST_VALUE, the v3 flat-proxy sweep",
 }
 
@@ -1940,7 +2044,47 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # exactly as R191 separated them. What is owed next is R202 step (iii)'s tail:
 # the Phase-2 post-read, taken ONCE over both activation windows rather than
 # once per switch.
-POLICY_VERSION = 9
+#
+# POLICY_VERSION 10 -- the EB-118 PHASE-3 WINDOW 3 EXHAUST-CHOOSER REPAIR
+# (R211, [USER] 2026-08-25), landed 2026-08-25. NOT A FLIP: there is no switch
+# here and none was staged. `policy.exhaust_victim`'s DEFAULT payout hook
+# changes from `identity_blind_payout` to `formula_aware_payout`, and
+# `C.PILOT_WEIGHTS_VERSION` 4 -> 5 labels the weight that arrives with it
+# (`EXHAUST_FORMULA_PAYOUT_WEIGHT = 1.0`).
+#
+# WHY A BODY ALONE DOES NOT WORK, which is the whole reason R208 deferred
+# `pearl_barrage` into this window as ONE design unit: the old default was
+# "lose the least", a constant that cannot see a printed payout slope, so a
+# card whose damage scales with the COST of what you exhausted exerted no pull
+# at all on which card the pilot picked. Measured, the shipped chooser already
+# ties the pool's dearest cost on ~79% of selections and realises ~82% of the
+# available cost -- so the defect is REAL, MODEST and FORMULA-BLIND, not
+# cheapest-seeking, and the repair is correspondingly small.
+#
+# WHAT THE HOOK READS IS WHAT THE CARD PRINTS, never a preference for
+# expensive cards: the marginal contribution the candidate would make to the
+# exhausting card's own printed `exhaust_selection_*` count, times that card's
+# own printed `per`, times the board its own printed `target` names. R211's
+# multiplicity clause is that last factor -- an `all_enemies` formula
+# multiplies by `len(state.living_enemies)`, because a wide card really does
+# buy `per` points on every body. Change the slope and the chooser changes
+# with it; delete the card and the chooser is identity-blind again.
+#
+# WHAT RE-BASELINES AT THIS BUMP IS NARROWER THAN THE STAMP SUGGESTS, and it
+# is asserted rather than argued. The hook returns 0.0 for any card printing
+# no selection formula, exactly TWO rows on any sheet print one, and the
+# chooser is deterministic given the pool -- so every OTHER chosen-Exhaust
+# carrier's pick is unchanged, over all twelve of them, Sly riders included.
+# `test_eb118_policies.test_no_existing_carriers_pick_moved` sweeps that in
+# milliseconds, and it exists BECAUSE it replaces a fourth scratch run that
+# would have been provably bit-identical to baseline.
+#
+# ONE WINDOW, and each field moves on its own ground: `C` 18 -> 19 (the eight
+# sheet rows), `D` 16 -> 17 (the spend dial and the Spotlight rider), `RT`
+# untouched. R191's one-variable-per-window order is kept by what is NOT here:
+# the pilot's Encore opportunity-cost repair is a second pilot-version change
+# with its own re-baseline and is deferred out of this window by ruling.
+POLICY_VERSION = 10
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
 # place a character's archetype vocabulary is declared -- and where it is

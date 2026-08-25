@@ -77,7 +77,16 @@ def test_the_policy_stamp_bumped():
     # resolving a fixed index and asks the pilot, and
     # `C.PILOT_WEIGHTS_VERSION` moves 3 -> 4 in the same edit for the same
     # reason). Two flags, two windows, two bumps: R191.
-    assert draft.POLICY_VERSION == 9
+    # 10 is EB-118 Phase-3 Window 3 (R211) and it is NOT a flip -- no switch
+    # was staged for it. `policy.exhaust_victim`'s DEFAULT payout hook becomes
+    # `formula_aware_payout`, so a card whose damage scales with what you
+    # exhausted finally pulls on which card the pilot picks, and
+    # `C.PILOT_WEIGHTS_VERSION` moves 4 -> 5 in the same edit for the weight
+    # that arrives with it. What re-baselines is narrower than the stamp
+    # suggests and is asserted rather than argued: the hook pays zero for any
+    # card printing no selection formula, so every other chosen-Exhaust
+    # carrier's pick is provably unchanged (test_eb118_policies).
+    assert draft.POLICY_VERSION == 10
 
 
 def test_the_starvation_alarm_keys_on_the_cohorts_own_archetypes():

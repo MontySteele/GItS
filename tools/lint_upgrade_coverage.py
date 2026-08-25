@@ -128,6 +128,36 @@ CODEGEN_DEBT: dict[str, str] = {
     # neither is exempt from anything. The stale-curation sweep below is what
     # reported the entries the moment they became lies -- which is the
     # behaviour a curated list is supposed to have.
+    #
+    # W3 (EB-118 Phase 3, R211, 2026-08-25) puts TWO entries back, and they are
+    # ONE debt wearing two card names. `EXPRESSIBLE_DELTAS` holds
+    # `conditional_bonus` and holds NEITHER `conditional_damage` NOR
+    # `conditional_block`, so a ratified delta that tier0 applies correctly --
+    # both keys bump every matching op the printed body carries, branches
+    # included -- emits no upgrade path at all. Both cards therefore ship a
+    # campfire choice in the sim and none in the live game, which is a REAL
+    # two-engine divergence and is named here rather than tolerated.
+    #
+    # WHY IT IS NOT ANSWERED BY RE-RULING THE DELTAS: R211 ratified both as
+    # printed, and picking a key because the emitter happens to have it is
+    # choosing a design to fit tooling -- the same move R199 guardrail (1)
+    # forbids on labels. `take_it_from_the_top`'s whole point is that the
+    # upgrade pays off the BAR, and `hold_the_line`'s is that it raises BOTH
+    # halves of a conditional Block.
+    #
+    # GATE: BACKLOG `EB-140` -- teach the emitter the two keys. The shape it
+    # needs ALREADY SHIPS and is worth naming so the build is not scoped from
+    # scratch: `curtain_cue` emits `(IsUpgraded ? 4 : 3)` inside a branch for
+    # the `encore` key, with `{IfUpgraded:show:4|3}` rendered beside it. When
+    # those two keys emit, both entries here and
+    # `test_roster_codegen.FURINA_UPGRADE_GAP_PENDING_FB1`'s go in the SAME
+    # commit -- deleted together or not at all.
+    "hold_the_line":
+        "W3/R211 `{conditional_block: +3}` -- EXPRESSIBLE_DELTAS has "
+        "`conditional_bonus` but not `conditional_block`. Gate: EB-140.",
+    "take_it_from_the_top":
+        "W3/R211 `{conditional_damage: +4}` -- same gap on the damage side. "
+        "Gate: EB-140.",
 }
 
 

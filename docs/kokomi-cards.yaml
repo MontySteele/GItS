@@ -425,10 +425,33 @@
    effects: [{op: apply_power, power: feel_no_pain, amount: 3, target: self}]}
    # Block-per-exhaust (the Feel No Pain rail, already engine-proven): every burn is also a guard. With the
    # ward this is the stability loop closing — getting hit exhausts, exhausting blocks.
-- {id: pearl_barrage, name: "Pearl Barrage", cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [priest], role: payoff,
-   effects: [{op: damage, amount_formula: {base: 5, per: 1, count: exhaust_pile}, target: enemy}]}
-   # Ashen-Strike rail: 5 + 1 per exhausted card (v0.3: base 3 -> 5 — the floor must be playable before the
-   # pile exists). Bounded by the fight's real burn (not the uncapped meter) — pile-limited by construction.
+- {id: pearl_barrage, name: "Pearl Barrage", cost: 1, type: attack, rarity: uncommon, solve: [block, frontload, scaling, utility], tempo_band: {fight: [early], run: [late]}, archetypes: [priest], role: payoff,
+   effects: [{op: exhaust_from, amount: 1, select: chosen},
+             {op: damage, amount_formula: {base: 5, per: 3, count: exhaust_selection_cost}, target: enemy}]}
+   # BODY RULED BY [USER] 2026-08-25 (R211), the EB-118 Phase-3 W3-Kokomi slate. It DEFERRED OUT OF W2b into
+   # this window (R208) because the body and the chooser it needs are ONE DESIGN UNIT, and this is that
+   # landing. Ashen-Strike is gone: the card no longer reads the PILE, it reads THE CARD YOU CHOSE.
+   # THE ID IS KEPT (R211 item 5, the R69 pattern) and so is the display name -- only the body moves here.
+   # WHY THE PILE READ HAD TO GO, and it is a distinctness fact rather than a taste one: this row was the
+   # fifth member of the `damage@one~` clone family and one of FIVE cards reading the exhaust-pile count.
+   # W2b took the family five -> three with this row's old body still present; this rewrite is what
+   # completes R208's five -> two, and the pile readers go five -> three in the same slate (R2 drops the
+   # other one).
+   # THE PRICE RISE IS THE DRAFTER BECOMING HONEST, NOT THE CARD BECOMING STRONGER, and both halves are
+   # true and sign together. The drafter evaluates a formula at ONE UNIT of the live count, so it read the
+   # old body as 5+1=6 against a measured mean of 9.72 -- a 38% under-valuation -- and reads this one as (lint-ok: measured mean)
+   # 5+3=8 against a measured 8.07, to within about 1%. So the offer-screen number goes UP (6.0000/7.0000 (lint-ok: measured mean)
+   # -> 8.5000/11.5000) while the REALISED damage goes DOWN by about 1.6 points. (lint-ok: measured realised value)
+   # THE LADDER IS 5 / 8 / 11 and it lands on 8 roughly three quarters of the time: Kokomi's sheet has no (lint-ok: payout ladder)
+   # card above cost 2, so {0, 1, 2} is the entire live range, and the live chooser's mean victim cost is
+   # 1.02. That bounded range is R211's reason for keeping `per: 3` rather than steepening -- base 4 / (lint-ok: measured mean)
+   # per 5 turns the ladder into 4 / 9 / 14 over a distribution 88% concentrated on two values, and makes (lint-ok: measured distribution)
+   # every chooser mistake far more expensive.
+   # EMPTY HAND IS A READING, NOT A CRASH: the selection row still emits with size 0 and cost 0 and the
+   # card deals its base 5.
+   # UPGRADE `{formula_base: +3}` (was `{formula_per: +1}`, which has no pile slope left to bump): 5 -> 8, (lint-ok: payout ladder)
+   # keeping the slope. On a BOUNDED count, bumping the base is the honest half -- the per-term ruling
+   # belongs to counts that only grow.
 - {id: communion_of_tides, name: "Communion of Tides", cost: 1, type: skill, rarity: uncommon, solve: [block, frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [priest, assist], role: glue,
    effects: [{op: exhaust_from, amount: 1, select: chosen}, {op: draw, amount: 2}]}
    # Burn one, see two: the lane-bridge card (priest fuel, assist velocity).
@@ -440,10 +463,48 @@
 #   +2 energy, discard 1 -- an economy rider on an exhaust card below R79's Rare bar, and the F1 census found a
 #   SECOND card in exactly that shape (moonlit_offering). Rather than promote two near-duplicates, the two are
 #   one card at the R79 template. See moonlit_offering.
-# Generic (1)
-- {id: shell_of_sanctuary, name: "Shell of Sanctuary", cost: 2, type: skill, rarity: uncommon, solve: [block], tempo_band: {fight: [mid], run: [early]}, archetypes: [generic], role: glue,
-   effects: [{op: block, amount: 11}]}
-   # Fortissimo Guard parity exactly: the generic big wall, no subsidy. (lint-ok: Furina comp)
+# Generic (0 since W3 -- shell_of_sanctuary's generic tag left with its body; the retrieval carrier
+#              below is [priest, assist] now, and this heading is kept as the slot's history)
+- {id: shell_of_sanctuary, name: "Salvage the Line", cost: 1, type: skill, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [priest, assist], role: glue, exhaust: true,
+   effects: [{op: draw, amount: 1},
+             {op: recall_to_draw, amount: 1, from: exhaust},
+             {op: gain_charge, amount: 2},
+             {op: block, amount: 4}]}
+   # BODY RULED BY [USER] 2026-08-25 (R211), W3-Kokomi. THE ID IS KEPT and the DISPLAY NAME CHANGES --
+   # the R69 pattern: the identifier freezes, the string renames, and the retired name is reserved at
+   # landing (docs/reserved-card-names.txt). Keeping the id saves the generated C# class name, the
+   # upgrade row, the art path and the manifest entry; the cost is that the id no longer describes the
+   # card, and R211 accepts that explicitly.
+   # THE FIRST EXHAUST-RETRIEVING ROW IN THE REPO. `lint_recall_exhaust.py` reported zero retrieving
+   # rows on every sheet until this one; the shape rules it enforces are satisfied BY CONSTRUCTION --
+   # Uncommon (a Common retriever is refused by name) and it Exhausts itself (a retriever that does not
+   # is refused by name), both checked on the codegen side and again at load.
+   # THE EFFECT ORDER IS THE RULED CORRECTION AND IT IS LOAD-BEARING. Traced on the real resolver: with
+   # recall BEFORE draw, the recall puts the card at index 0 of the draw pile and the draw pops index 0,
+   # so the rescued card goes STRAIGHT INTO HAND -- which defeats the rule that a retrieved card goes to
+   # the TOP OF THE DRAW PILE and never to hand. draw -> recall -> gain_charge is the order that reads
+   # correctly: you draw off your existing pile, and the rescued card sits on top for NEXT draw.
+   # An EMPTY Exhaust pile is a clean no-op with the draw, the Charge and the Block all still paying.
+   # WHAT THE POOL LOSES, said plainly: 11 Block at cost 2 was Kokomi's largest single defensive face. (lint-ok: retired base face)
+   # Her remaining flat Block runs rearguard_action 7, jade_bulwark 6, coral_guard 5, drifting_lantern (lint-ok: neighbour Block faces)
+   # 4+4. This prints 4, which gives a little of it back but not most of it. If she feels defensively
+   # thin after this window, that is where it came from.
+   # WHY THIS DONOR: it is the least distinctive body she owns -- a bare Block number with no rider, no
+   # condition and no archetype identity -- and it is a member of the EIGHT-CARD flat-Block clone (lint-ok: clone-cluster size)
+   # cluster, so rewriting it takes that standing curated debt to seven. Measured, not hoped. (lint-ok: clone-cluster size)
+   # WHY THE BASE BLOCK IS 4 AT ALL: without it the card prices 2.0000/7.0000, and the slot's price (lint-ok: drafted prices)
+   # barely moving (5.5000/7.5000 -> 6.0000/10.0000) is the good outcome. (lint-ok: drafted prices)
+   # ONE DISCLOSURE ABOUT INTENT: the approved plan names this row as a candidate for a RECYCLE rewrite
+   # ("the card you chose tells this card what to do"). It is used for RETRIEVAL instead, because Block
+   # scaled off a selection count needs a CalculatedVar the mod does not have -- the selection riders
+   # are damage-only -- so Recycle bodies must be damage-shaped. That is a reading of the plan, flagged
+   # rather than assumed.
+   # HONEST FAILURE MODES: the returned card gains Exhaust for the rest of combat, so a rescued engine
+   # piece is on a one-use loan; the sim's recall is the engine's own "best card" pick, not the
+   # player's; and a second copy can never fetch the first, because retrievers exclude each other --
+   # two copies are worse than one.
+   # UPGRADE: NO SHEET EDIT AT ALL. The live delta is already `{block: 4}`, which is exactly what R211
+   # wants (4 -> 8), so the row carries over untouched. (lint-ok: upgraded face)
 # R51 texture pair (2)
 - {id: exposing_current, name: "Exposing Current", cost: 1, type: attack, rarity: uncommon, solve: [frontload, utility], tempo_band: {fight: [early], run: [early]}, archetypes: [priest, generic], role: enabler, exhaust: true,
    effects: [{op: damage, amount: 8, target: enemy}, {op: apply_power, power: vulnerable, amount: 2, target: enemy}]}
@@ -573,13 +634,36 @@
    # NAME (D1, STILL OPEN): "Watch of the Shallows" is AUTHORED FLAVOR, not wiki-verified canon — built as the
    # lesser twin of Vigil of the Deep (shallows/deep, watch/vigil). Unique against the internal and reserved
    # namespaces, but S4-G11 (names read by eye before they ship) has no substitute: the eye-read is [USER]'s.
-- {id: the_tide_remembers, name: "The Tide Remembers", cost: 2, type: attack, rarity: uncommon, solve: [frontload, scaling], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [priest, generic], role: payoff,
-   effects: [{op: damage, amount: 4, target: all_enemies},
-             {op: conditional, if: exhaust_pile_at_least_6, then: [{op: damage, amount: 5, target: all_enemies}]}]}
-   # The pile threshold: the exhaust pile is the record of everything she has rotated off the line, and once it
-   # is six deep the wave arrives with all of it behind (4 to all, or 9). pearl_barrage reads the pile per-card
-   # and single-target; this reads it once, as a bar, and pays ALL enemies — the AoE face of the same idea,
-   # bounded by construction. Same base-plus-bonus encoding as read_the_current, for the same two reasons.
+- {id: the_tide_remembers, name: "Tide of Names", cost: 2, type: attack, rarity: uncommon, solve: [block, frontload, scaling, utility], tempo_band: {fight: [mid], run: [late]}, archetypes: [priest, generic], role: payoff,
+   effects: [{op: exhaust_from, amount: 1, select: chosen},
+             {op: damage, amount_formula: {base: 5, per: 2, count: exhaust_selection_cost}, target: all_enemies}]}
+   # BODY RULED BY [USER] 2026-08-25 (R211), W3-Kokomi. THE ID IS KEPT and the DISPLAY NAME CHANGES --
+   # the R69 pattern again; the retired name is reserved at landing.
+   # ITS LADDER IS DELIBERATELY DIFFERENT FROM PEARL'S. pearl_barrage is AIMED AND STEEP (5 / 8 / 11); (lint-ok: payout ladder)
+   # this is WIDE AND SHALLOW (5 / 7 / 9). Two cards reading the same count with the same shape would be (lint-ok: payout ladder)
+   # a clone; different targets, different costs and different slopes are two jobs.
+   # WHY THIS DONOR: it is the same slot -- a cost-2 wide priest payoff -- so the replacement is like for
+   # like and `kokomi/priest` payoff supply holds at 12; it carries the same tags, so the guardrail (lint-ok: payoff supply counts)
+   # arithmetic comes out at zero; and it comes out of the more crowded family. She had FIVE cards
+   # reading the exhaust-pile count against three reading Charge, and this slate takes the pile readers
+   # to three.
+   # THE TAGS ARE THE HONEST ONES (R211): [priest, generic], exactly what the row already carried. An
+   # earlier draft dropped `priest` for `commander` and said in terms that it did so because tagging it
+   # priest would take supply 12 -> 13. That is choosing a label to improve a count, which R199 (lint-ok: payoff supply counts)
+   # guardrail (1) forbids outright. Three facts settle that the body is priest: commander is the
+   # CONSCRIPTION engine (fourteen of its sixteen rows touch conscription or companions and NONE reads a (lint-ok: pool census)
+   # card's cost); pearl_barrage is the identical cost-cash-out mechanic and is tagged [priest]; and the
+   # earlier draft's own stated reason was the count and nothing else.
+   # THE DRAFTED PRICE GOES DOWN, by 19%: 9.0000/12.0000 -> 7.2500/9.2500. Realised output goes UP about (lint-ok: drafted prices)
+   # 9% with today's chooser and about 19% once W3's formula-aware chooser is live -- measured at each (lint-ok: measured deltas)
+   # card's OWN plays, not deck-wide. Both directions are real and they are not in tension: the old body
+   # was over-priced by the drafter reading a flat 4-to-all plus a bar it credits, and under-realised
+   # because a cost-2 card is played late and its own pile is bigger than the deck-wide mean.
+   # HONEST FAILURE MODE, and it makes the simulated number a FLOOR: the pilot cannot see this card's
+   # payout when it decides whether to PLAY it -- it reads no selection count at all -- so it scores the
+   # card against an EMPTY selection, base only. It will be under-played.
+   # UPGRADE `{formula_base: +2}` (was `{damage: +3}`, which has no matching effect on the new body):
+   # 5 -> 7, so the ladder becomes 7 / 9 / 11. (lint-ok: payout ladder)
 
 # ---------- RARE (7 draftable + 1 kit) ----------
 - {id: ceremonial_garment, name: "Ceremonial Garment", cost: 0, type: skill, rarity: rare, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [generic], role: payoff, tags: [burst], kit_card: true,

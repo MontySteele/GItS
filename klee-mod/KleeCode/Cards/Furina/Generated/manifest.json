@@ -7,8 +7,8 @@
     "namespace": "KleeMod.Cards.Furina.Generated"
   },
   "coverage": {
-    "total": 82,
-    "generated": 81,
+    "total": 84,
+    "generated": 83,
     "blocked": 1
   },
   "generated": [
@@ -19,6 +19,7 @@
     "blocking_notes",
     "breathless",
     "casting_call",
+    "change_the_bill",
     "command_performance",
     "commanding_gaze",
     "courtroom_drama",
@@ -79,6 +80,7 @@
     "supporting_cast",
     "surintendante_chevalmarin",
     "swelling_overture",
+    "take_it_from_the_top",
     "take_your_bow",
     "tempo_change",
     "the_final_verdict",
@@ -109,6 +111,8 @@
   },
   "upgrades": {
     "_comment": "docs/furina-upgrades.yaml is authoritative. A generated card listed below ships without an upgrade until its full delta is expressible; partial upgrade application is forbidden.",
-    "no_upgrade_path": {}
+    "no_upgrade_path": {
+      "take_it_from_the_top": "delta key 'conditional_damage: 4' not expressible by codegen (structural upgrade)"
+    }
   }
 }

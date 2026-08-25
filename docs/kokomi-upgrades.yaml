@@ -73,15 +73,25 @@ mass_mobilization: {cost: -1}            # 2->1 (uncommon cost slot 1)
 field_promotion:   {draw: +1}            # 1->2
 reinforcements:    {cost: -1}            # 2->1 (uncommon cost slot 2)
 mercy_of_the_deep: {power_amount: +1}    # feel_no_pain 3->4
-pearl_barrage:     {formula_per: +1}     # 5 + 2/exhausted card (gleeful_barrage-class scaling bump;
-                                         # the base moved 3 -> 5 at v0.3 (lint-ok: 3->5 is that base move,
-                                         # not this row's delta), the slope is what upgrades)
+pearl_barrage:     {formula_base: +3}    # 5 -> 8, keeping the `per: 3` slope (R211, W3-Kokomi). Was
+                                         # {formula_per: +1} against the retired pile body; that delta has
+                                         # no pile slope left to bump. ON A BOUNDED COUNT the base is the
+                                         # honest half: the selection cost lives in {0, 1, 2} because
+                                         # Kokomi's sheet has no card above cost 2, so steepening `per`
+                                         # would make every chooser mistake more expensive over a
+                                         # distribution 88% concentrated on two values. Bumping `per` is (lint-ok: measured distribution)
+                                         # the ruling for counts that only grow; this count does not.
 communion_of_tides: {draw: +1}           # burn 1, see 3
 rearguard_action:  {block: +3}           # 7->10, dodge_roll-parity
 # swift_currents: MERGED INTO moonlit_offering (G8). Its old delta was {energy: +1} with the Exhaust
 #   deliberately retained, because removal would have opened a net-positive energy loop. That reasoning is
 #   inherited by the merged card, whose Exhaust is now load-bearing for R79 as well as for the loop.
-shell_of_sanctuary: {block: +4}          # 11->15, spirited_away-parity
+shell_of_sanctuary: {block: +4}          # 4->8 ("Salvage the Line", R211's W3-Kokomi rewrite). THE DELTA
+                                         # DID NOT MOVE and that is not an accident: the ruled base face
+                                         # prints Block 4 with upgrade +4, which is exactly the key and the
+                                         # value this row already carried against the retired 11 (lint-ok:
+                                         # 11 is the retired base, not this row's delta). The rewrite
+                                         # therefore needs no upgrade-sheet edit at all.
 exposing_current:  {vulnerable: +1}      # 2->3 (surprise_visit-parity; the R51 rider sharpens, the Exhaust stays)
 all_streams_flow:  {damage: +3}          # 5->8 base; the 1-per-2-Charge read never moves (resource-curve law)
 tidal_lure:        {block: +2}           # played 4->6; Sly Vulnerable stays 1 (header gap note)
@@ -162,7 +172,11 @@ before_sun_and_moon: {power_amount: +1}  # kurage_amp 1->2. NOT the +2 pearl_cur
                                          # point of it buys -- and that reading is worth stating, because a
                                          # coefficient on the engine's output is the closest this sheet comes
                                          # to selling a faster engine without technically being one.
-the_tide_remembers: {damage: +3}         # the base wave, 4->7 to all (so 9->12 over the bar); pile bar stays 6
+the_tide_remembers: {formula_base: +2}   # 5 -> 7 ("Tide of Names", R211's W3-Kokomi rewrite), so the wide
+                                         # ladder becomes 7 / 9 / 11. Was {damage: +3}, which has no matching
+                                         # effect on the new body -- the retired one printed a flat wave and
+                                         # a pile bar, and neither survives the rewrite. Base rather than
+                                         # per, for pearl_barrage's reason: the selection cost is bounded.
 
 # ---- RARES (quality over quantity) ----
 nereids_ascension: {damage: +4}          # 12->16 all; the 1-per-2-Charge read never moves (resource-curve law)

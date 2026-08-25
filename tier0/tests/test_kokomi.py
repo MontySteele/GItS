@@ -845,15 +845,27 @@ def test_threshold_bars_do_not_move_on_upgrade():
     raising a gain_charge line -- it makes the engine arrive sooner. The
     upgrades for both threshold cards buy their always-live half instead,
     and this fails if a later pass sells the bar.
+
+    THE SECOND THRESHOLD CARD IS GONE, and its going is not a weakening of
+    this rule. `the_tide_remembers` used to read `exhaust_pile_at_least_6`;
+    W3 (EB-118 Phase 3, R211) rewrote it as "Tide of Names", a selection-cost
+    formula with no bar at all, so there is no threshold left on that row to
+    sell. `depths_judgment` carries the other shipped pile bar and R209 pins
+    it separately -- and under R58 a bar may rise and may never come down.
     """
-    for cid, bar in (("read_the_current", "charge_at_least_10"),
-                     ("the_tide_remembers", "exhaust_pile_at_least_6")):
+    for cid, bar in (("read_the_current", "charge_at_least_10"),):
         for card in (loader.get_card(cid), loader.get_card(cid + "+")):
             (cond,) = [fx for fx in card.effects
                        if fx.get("op") == "conditional"]
             assert cond["if"] == bar, cid
-            assert cond["then"][0]["amount"] == (
-                6 if cid == "read_the_current" else 5), cid
+            assert cond["then"][0]["amount"] == 6, cid
+
+    # And the rewritten row prints no conditional at all, which is what makes
+    # the loop above honest rather than quietly narrowed.
+    for card in (loader.get_card("the_tide_remembers"),
+                 loader.get_card("the_tide_remembers+")):
+        assert not [fx for fx in card.effects
+                    if fx.get("op") == "conditional"]
 
 
 def test_decksize_lint_counts_the_card_copying_ops():

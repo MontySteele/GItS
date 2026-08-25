@@ -87,7 +87,25 @@ FURINA_DEFERRED_TO_FD: set[str] = set()
 # Kept as an empty set rather than deleted, the same way F-B1 and F-D left it:
 # the invariant "every non-kit card has an upgrade path" is asserted
 # positively below, and the next gap needs somewhere to be named.
-FURINA_UPGRADE_GAP_PENDING_FB1: set[str] = set()
+#
+# THE NEXT GAP ARRIVED 2026-08-25, at W3 (EB-118 Phase 3, R211), and it is a
+# DIFFERENT KIND from every entry above it. Those were cards whose sheet delta
+# had died with a retired grammar -- nothing to express. This one has a
+# perfectly good ratified sheet delta that TIER0 APPLIES CORRECTLY and the
+# GENERATOR CANNOT EMIT: `take_it_from_the_top` takes `{conditional_damage: +4}`
+# (10 -> 14 on a branch), and `EXPRESSIBLE_DELTAS` holds `conditional_bonus`
+# but neither `conditional_damage` nor `conditional_block`. Klee's
+# `hold_the_line` is the same gap on the Block side; it has no set of its own
+# here and is named in `lint_upgrade_coverage.CODEGEN_DEBT` beside this one.
+#
+# IT IS NOT A DESIGN CHANGE AND MUST NOT BE ANSWERED WITH ONE. R211 ratified
+# both deltas as printed and this window may not re-rule them into keys the
+# emitter happens to have; the fix is the EMITTER, and the shape it needs
+# already ships -- `curtain_cue` emits `(IsUpgraded ? 4 : 3)` inside a branch
+# for the `encore` key and renders `{IfUpgraded:show:4|3}` beside it. GATE:
+# BACKLOG `EB-140`. When those two keys emit, both ids leave this set and
+# `CODEGEN_DEBT` in the SAME commit -- two registers, one debt, one removal.
+FURINA_UPGRADE_GAP_PENDING_FB1: set[str] = {"take_it_from_the_top"}
 
 
 def _generated_source(class_name: str) -> str:
@@ -332,9 +350,18 @@ def test_furina_profile_emits_every_non_kit_card():
     # The count is the whole point of the deferral discipline: it was 2 for two
     # sprints, visibly, and it moved when the gap closed rather than when
     # somebody remembered.
+    #
+    # W3 (EB-118 Phase 3, R211, 2026-08-25): 82 -> 84, two new Uncommons
+    # (change_the_bill, take_it_from_the_top). `blocked` HELD AT 1 -- the
+    # hand-written kit Burst -- and that is the number to read: the window
+    # introduced the first sheet use of BOTH Salon verbs and the generator
+    # emitted them at top level with no new blocker. What it did NOT express
+    # is take_it_from_the_top's `conditional_damage` UPGRADE, which is a
+    # different ledger (manifest `upgrades.no_upgrade_path`, curated in
+    # tools/lint_upgrade_coverage.CODEGEN_DEBT) and is asserted there.
     assert manifest["coverage"] == {
-        "total": 82,
-        "generated": 81,
+        "total": 84,
+        "generated": 83,
         "blocked": 1,
     }
     assert set(manifest["generated"]) == generated

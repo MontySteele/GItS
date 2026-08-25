@@ -165,14 +165,34 @@ def test_the_exhaust_branch_still_excludes_self_the_contrast_case():
         "the exhaust branch must keep excluding self; only discard is open"
 
 
-def test_no_committed_kokomi_row_asks_for_recall_from_exhaust():
-    """The two branches are only safely asymmetric while no Kokomi row uses
-    the guarded one. If one ever does, this contract needs re-reading beside
-    `lint_recall_exhaust`, not inherited."""
+def test_the_one_committed_kokomi_row_reads_the_guarded_branch_as_written():
+    """This test used to assert NO Kokomi row asked for the guarded branch,
+    and to say that if one ever did the contract needed re-reading rather than
+    inheriting. W3 (EB-118 Phase 3, R211) shipped one -- "Salvage the Line",
+    `shell_of_sanctuary`'s rewrite -- so the re-reading is DONE HERE, against
+    the real row rather than a fabricated probe.
+
+    THE ASYMMETRY HOLDS AND IT IS WHAT THE CARD WANTS. The exhaust branch
+    excludes self and every other retriever; the discard branch does not.
+    Applied to the shipped row that means A SECOND COPY CAN NEVER FETCH THE
+    FIRST -- a real design consequence, disclosed on the sheet (two copies are
+    worse than one) -- and it is exactly what §6.4 guarded for: a retriever
+    that can fetch a retriever is a loop.
+    """
     rows = [c for c in loader._card_index().values()
             if getattr(c, "character", None) == "kokomi"]
-    offenders = [
+    asking = sorted(
         c.id for c in rows
         for fx in list(c.effects or []) + list(c.sly or [])
-        if fx.get("op") == "recall_to_draw" and fx.get("from") == "exhaust"]
-    assert offenders == [], offenders
+        if fx.get("op") == "recall_to_draw" and fx.get("from") == "exhaust")
+    assert asking == ["shell_of_sanctuary"]
+
+    st = _state()
+    carrier = loader.get_card("shell_of_sanctuary")
+    second = loader.get_card("shell_of_sanctuary")
+    keeper = _filler("keeper")
+    st.player.exhaust_pile = [second, keeper]
+
+    pool = effects.recall_exhaust_pool(st, carrier)
+    assert [c.id for c in pool] == ["keeper"], \
+        "a retriever must never be able to fetch another retriever"

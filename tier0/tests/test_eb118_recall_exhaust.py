@@ -303,12 +303,25 @@ def test_the_shape_check_reaches_a_conditional_branch():
         loader._validate_recall_shape(hidden)
 
 
-def test_no_shipped_card_uses_the_capability_yet():
-    """EB-118 is staged infrastructure: the capability exists and nothing
-    ships on it. When the first card does, this test is the reminder that
-    the design call was [USER]'s to make."""
-    assert not [c.id for c in loader._card_index().values()
-                if effects.retrieves_from_exhaust(c)]
+def test_exactly_one_shipped_card_uses_the_capability():
+    """The staged capability has its first carrier, and the design call was
+    [USER]'s exactly as this test was written to require.
+
+    It used to assert the list was EMPTY -- EB-118 landed retrieval as staged
+    infrastructure and nothing shipped on it. W3 (EB-118 Phase 3, R211) rewrote
+    `shell_of_sanctuary` into "Salvage the Line", the repo's first
+    Exhaust-retrieving row, and the shape rules that governed the staging are
+    satisfied BY CONSTRUCTION rather than by exemption: Uncommon (a Common
+    retriever is refused by name) and self-Exhausting (a retriever that does
+    not Exhaust is refused by name).
+    """
+    carriers = sorted(c.id for c in loader._card_index().values()
+                      if effects.retrieves_from_exhaust(c))
+    assert carriers == ["shell_of_sanctuary"]
+
+    card = loader.get_card("shell_of_sanctuary")
+    assert card.rarity in ("uncommon", "rare")
+    assert card.exhaust is True
 
 
 # --- engine closure -------------------------------------------------------

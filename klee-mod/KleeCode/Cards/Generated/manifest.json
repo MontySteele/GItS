@@ -37,6 +37,7 @@
     "gleeful_barrage",
     "grand_finale",
     "hide_and_seek",
+    "hold_the_line",
     "hot_hands",
     "jumpy_dumpty",
     "jumpy_dumpty_mk2",
@@ -46,12 +47,14 @@
     "perfect_timing",
     "playtime_forever",
     "pocket_fireworks",
+    "powder_charge",
     "quick_fuse",
     "rapid_fire",
     "remote_detonator",
     "run_away",
     "secret_stash",
     "skip_and_hop",
+    "smoke_and_sparks",
     "snap",
     "sorry_jean",
     "spark_collection",
@@ -132,6 +135,8 @@
   },
   "upgrades": {
     "_comment": "R24 (2026-07-20): docs/klee-upgrades.yaml is the single source of truth for upgrade deltas; codegen defaults are ABOLISHED. Generated cards listed below ship with NO upgrade path (UNAPPLIABLE discipline) until their delta is ratified, made numeric, or hand-finished.",
-    "no_upgrade_path": {}
+    "no_upgrade_path": {
+      "hold_the_line": "delta key 'conditional_block: 3' not expressible by codegen (structural upgrade)"
+    }
   }
 }
