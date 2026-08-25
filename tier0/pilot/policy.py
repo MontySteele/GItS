@@ -668,9 +668,15 @@ PILOT_COMPANION_COPY_VALUE = 1.5
 # landing edit: while the switch was off no weight below was ever read, so the
 # labeled set was arithmetically unchanged and the stamp could not move first.
 #
-# HAND-PICKED. The values below were chosen by hand and never swept when they
-# were written; W4 (`tier05/pilot_weight_sweep.py`) sweeps them inside this
-# same activation window, after this flip. Any change to one of them is its own
+# HAND-PICKED, AND STILL HAND-PICKED AFTER THE SWEEP. The values below were
+# chosen by hand and never swept when they were written; W4
+# (`tier05/pilot_weight_sweep.py`) RAN inside this same activation window and
+# returned the null it predicted in advance -- 78 weight points classified,
+# every one INSEPARABLE, no DOMINATING point, so the adoption rule decided
+# without a judgement call and NOTHING WAS ADOPTED. `EXHAUST_JUNK_BONUS` was
+# refused by the R67 dead-knob gate (post-C11 Kokomi's rotation law drops junk
+# before the chooser ever sees it) and is left alone rather than fed a read,
+# per R33. Any later change to one of these is still its own
 # `C.PILOT_WEIGHTS_VERSION` bump with the sweep row cited -- and most of that
 # grid's outcomes are [USER]'s call, not the integration's (that module's
 # TASTE / TUNING LINE).

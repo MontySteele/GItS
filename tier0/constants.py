@@ -579,9 +579,11 @@ BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
 # one taken after. Filed in `tier0/pilot/policy.py` rather than here for the
 # C#-parity reason written at that block's head -- where a weight LIVES is not
 # what decides which readings are comparable. NO VALUE MOVED at this bump: the
-# eleven are byte-identical to the hand-picked numbers they landed with, and
-# W4's sweep of them (`tier05/pilot_weight_sweep.py`) is a separate act that
-# would carry its own bump.
+# eleven are byte-identical to the hand-picked numbers they landed with. W4's
+# sweep of them (`tier05/pilot_weight_sweep.py`) is a separate act carrying its
+# own bump, and it RAN inside this same window and adopted nothing -- 78 points,
+# every one INSEPARABLE, so no such bump was owed and the hand-picked vector is
+# what v3 labels.
 PILOT_WEIGHTS_VERSION = 3
 # Sim-hygiene sprint 2026-07-29 (task 4): the inline scoring weights that had
 # been living as bare floats inside tier0/pilot/policy.py. MOVED, NOT RETUNED
