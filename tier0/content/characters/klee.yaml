@@ -13,20 +13,24 @@ burst_max: 40
 # fills. The sheet's kit_card flag and this list must agree (loader checks).
 kit: [sparks_n_splash]
 relic_hooks: [spark_on_detonation]   # Pounding Surprise
-# Ruling 3.4 as restructured in round 3: A1>A2 is HARD on starter and on
-# the median across archetype decks; a warning on individual packages.
+# Frontload over scaling. Ruling 3.4, restructured in round 3, and DEMOTED by
+# R204 (2026-08-24): it stays BINDING DESIGN INTENT and is no longer
+# mechanically asserted anywhere. It used to be HARD on starter and on the
+# median across archetype decks and a warning on individual packages; it is
+# now reported on every deck of every run through `axes.identity_flags` and
+# gates nothing. LAW's Klee identity text is unchanged by the ruling.
 constraints: ["A1_frontload>A2_scaling"]
 # Round-3 heuristic restructure: identity is judged on starter + the
-# per-axis median of these decks, with per-deck A2 bands.
+# per-axis median of these decks.
 archetype_decks:
   demolition_weighted: demolition   # deck: pilot
   spark_weighted: spark
   reaction_weighted: reaction
-deck_bands:
-  A2_scaling:
-    demolition_weighted: 4.8
-    spark_weighted: 4.5
-    reaction_weighted: 3.5
+# R204: `deck_bands` DELETED with the system that read them -- A2_scaling
+# demolition_weighted 4.8, spark_weighted 4.5, reaction_weighted 3.5, the
+# three ratified per-deck ceilings the retired gate asserted. No replacement
+# band is ratified. `winrate_bands` below is a DIFFERENT system and is
+# UNAFFECTED.
 # Authored-package floors (v0.2 playtest pass). These 25-card batteries now
 # reach the 40-point kit Burst reliably and are ceiling-saturated; realistic
 # Act-1 runs own the upper-power comparison instead of pretending these are

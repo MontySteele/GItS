@@ -306,3 +306,42 @@ def invariant_flags(scores: dict[str, float], *,
         flags.append(f"ELITE_PAIRING (elite axes {elite} are not the declared "
                      f"pair {sorted(elite_pair)})")
     return flags
+
+
+def identity_flags(scores: dict[str, float],
+                   identities: list[str]) -> list[str] | None:
+    """A character's DECLARED IDENTITY comparisons, reported and never
+    asserted -- the same convention as `invariant_flags` above, and it lives
+    here for that reason.
+
+    R204 (2026-08-24) retired the live per-axis deck-band system as acceptance
+    law and DEMOTED these comparisons with it. They used to be gate semantics:
+    `CONSTRAINT VIOLATED` was hard on the starter deck and on the archetype
+    median, `warn (package deck)` everywhere else, and `tier0/tests/test_pass3`
+    asserted the median one. Nothing asserts them now. They still print, on
+    every deck of every run, because the ruling demoted them rather than
+    deleting them -- a declared identity that stops being visible stops being
+    designed against.
+
+    A comparison is the yaml's own string, `"A1_frontload>A2_scaling"`. The
+    data stays in `tier0/content/characters/*.yaml` and reaches here through
+    `loader.character_constraints`, deliberately: it is PER-CHARACTER, and
+    this module holds no per-character data (`invariant_flags` takes its
+    declared elite pair as a parameter for exactly that reason). Klee's
+    frontload-over-scaling identity remains binding DESIGN INTENT under R204
+    and LAW; what changed is that it is reported rather than mechanically
+    asserted.
+
+    `None`, not `[]`, where the character declares no identity: an empty list
+    means "checked, every declared identity holds", which is a verdict, and
+    the report prints it as one.
+    """
+    if not identities:
+        return None
+    flags = []
+    for con in identities:
+        left, right = con.split(">")
+        if not scores[left] > scores[right]:
+            flags.append(f"DECLARED_IDENTITY ({con} does not hold: "
+                         f"{scores[left]:.1f} vs {scores[right]:.1f})")
+    return flags

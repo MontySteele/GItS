@@ -208,3 +208,54 @@ def test_a_package_deck_is_out_of_scope_like_the_shape_heuristic(package):
 def test_a_character_starter_gets_a_real_reading():
     klee = score_config("klee", "starter", "generic", 40, SEED)
     assert isinstance(klee["invariant_flags"], list)
+
+
+# --- R204: the demoted declared-identity comparison ------------------------
+
+def test_a_holding_identity_reports_the_verdict_and_no_flag():
+    """`[]` is the verdict "checked, it holds" -- not silence."""
+    holds = dict({ax: 3.0 for ax in axes.AXES}, A1_frontload=4.5,
+                 A2_scaling=2.0)
+    assert axes.identity_flags(holds, ["A1_frontload>A2_scaling"]) == []
+
+
+def test_a_breaching_identity_names_the_comparison_and_both_numbers():
+    breaches = dict({ax: 3.0 for ax in axes.AXES}, A1_frontload=2.0,
+                    A2_scaling=4.5)
+    flags = axes.identity_flags(breaches, ["A1_frontload>A2_scaling"])
+    assert len(flags) == 1
+    assert flags[0].startswith("DECLARED_IDENTITY")
+    assert "A1_frontload>A2_scaling" in flags[0]
+    assert "2.0" in flags[0] and "4.5" in flags[0]
+
+
+def test_the_comparison_is_strict_so_a_tie_breaches():
+    """`>` is the yaml's own operator: equal axes do not satisfy it."""
+    tied = {ax: 3.0 for ax in axes.AXES}
+    assert len(axes.identity_flags(tied, ["A1_frontload>A2_scaling"])) == 1
+
+
+def test_no_declared_identity_is_none_not_an_empty_list():
+    """The anchor declares none, and `[]` there would claim a check that
+    never happened -- the same convention `invariant_flags` uses."""
+    assert axes.identity_flags({ax: 3.0 for ax in axes.AXES}, []) is None
+
+
+def test_the_anchors_package_declares_no_identity_so_it_reads_none(package):
+    """`ref_ironclad` declares no `constraints:`, so BOTH readings are out of
+    scope on it -- `None` and not `[]`, which would claim a check that never
+    happened."""
+    assert package["invariant_flags"] is None
+    assert package["identity_flags"] is None
+
+
+def test_a_character_package_deck_still_gets_an_identity_reading():
+    """R204 DEMOTED the comparison rather than narrowing it, and the two
+    scopes now differ on purpose. The scorecard invariants are out of scope on
+    a monoculture package (it reads extreme on both and teaches nothing). The
+    identity comparison is NOT: it reported on every deck when it was a gate
+    -- `warn (package deck)` -- so it still reports on every deck now that it
+    is only a report."""
+    klee = score_config("klee", "demolition_weighted", "demolition", 40, SEED)
+    assert klee["invariant_flags"] is None
+    assert isinstance(klee["identity_flags"], list)

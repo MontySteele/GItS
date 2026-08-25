@@ -721,9 +721,16 @@ def character_nation(character_id: str) -> str | None:
 
 
 def character_constraints(character_id: str) -> list[str]:
-    """Identity constraints like "A1_frontload>A2_scaling" — hard on
-    starter and the archetype-deck median, a warning on package decks
-    (round-3 restructure)."""
+    """Declared identity comparisons like "A1_frontload>A2_scaling".
+
+    REPORTED, NEVER ASSERTED since R204 (2026-08-24). They were the gate half
+    of the retired per-axis deck-band system -- hard on starter and on the
+    archetype-deck median, a warning on package decks (the round-3
+    restructure). The comparison still runs on every deck of every run and
+    prints conspicuously, through `axes.identity_flags`; nothing decides on
+    it. The data stays here because it is per-character and the axis module
+    holds no per-character data.
+    """
     return list(_character_index()[character_id].get("constraints", []))
 
 
@@ -732,21 +739,13 @@ def archetype_decks(character_id: str) -> dict[str, str]:
     return dict(_character_index()[character_id].get("archetype_decks", {}))
 
 
-def deck_bands(character_id: str) -> dict[str, dict[str, float]]:
-    """Per-axis, per-deck score ceilings, e.g. A2_scaling caps."""
-    return dict(_character_index()[character_id].get("deck_bands", {}))
-
-
-def stale_bands(character_id: str) -> dict[str, dict[str, str]]:
-    """Per-axis, per-deck reason strings for bands known to be wrong.
-
-    B4. A known-stale band still fires BAND EXCEEDED on every run, because a
-    band is ratified law and only a ruling moves it. Without a reason that
-    flag is indistinguishable from a live finding, and a gate that always
-    fires trains its reader to skim past it. The reason rides with the flag;
-    the band itself is untouched.
-    """
-    return dict(_character_index()[character_id].get("stale_bands", {}))
+# R204 (2026-08-24) RETIRED the live per-axis deck-band system as acceptance
+# law, roster-wide, and `deck_bands()` / `stale_bands()` went with it -- the
+# accessors, the three characters' data, the `BAND EXCEEDED` emission and
+# B4's "a band is ratified law until a ruling moves it" docstring. No
+# replacement bands are ratified. Seven-axis values are reportable
+# diagnostics only. `winrate_bands()` below is UNAFFECTED: those are the
+# ratified 1,000-fight bands, which the ruling leaves standing.
 
 
 def winrate_bands(character_id: str) -> dict[str, dict[str, tuple]]:

@@ -36,6 +36,25 @@ def _print_invariants(flags: list | None) -> None:
         print("  ✓ both declared scorecard invariants hold")
 
 
+def _print_identity(flags: list | None) -> None:
+    """The declared per-character identity comparison, printed as advice.
+
+    R204 (2026-08-24) demoted this from gate semantics -- `CONSTRAINT
+    VIOLATED` on starter and on the median, `warn (package deck)` elsewhere --
+    to a report, and retired the deck-band system it was gated beside. It
+    prints under the same `· INVARIANT` banner as EB-50's two, because that is
+    the reporting the ruling migrated it into and conspicuousness is the whole
+    reason it survives. Same `None` convention: silence where no identity is
+    declared, and the verdict line where one is declared and holds.
+    """
+    if flags is None:
+        return
+    for flag in flags:
+        print(f"  · INVARIANT {flag}")
+    if not flags:
+        print("  ✓ the declared identity comparison holds")
+
+
 def print_scorecard(character: str, deck: str, result: dict) -> None:
     print(f"\n=== Scorecard: {character}/{deck} "
           f"(REF_IRONCLAD starter = 3.0) ===")
@@ -56,6 +75,7 @@ def print_scorecard(character: str, deck: str, result: dict) -> None:
     if not result["heuristic_flags"]:
         print("  ✓ statline shape passes the balance heuristic")
     _print_invariants(result.get("invariant_flags"))
+    _print_identity(result.get("identity_flags"))
 
 
 def print_median(character: str, rep: dict) -> None:
@@ -66,13 +86,16 @@ def print_median(character: str, rep: dict) -> None:
     for flag in rep["median_flags"]:
         print(f"  ⚠ {flag}")
     if not rep["median_flags"]:
-        print("  ✓ median statline passes heuristic + identity constraints")
+        # R204: the identity half left this list for the report below, so the
+        # verdict names only what this list still checks.
+        print("  ✓ median statline passes the balance heuristic")
     for flag in rep.get("band_flags", []):
         marker = "⚠" if flag.startswith("WINRATE BAND") else "·"
         print(f"  {marker} {flag}")
     if rep.get("band_flags") == []:
         print("  ✓ all ratified winrate bands hold")
     _print_invariants(rep.get("median_invariant_flags"))
+    _print_identity(rep.get("median_identity_flags"))
 
 
 def print_reaction_share(encounter: str, r: dict) -> None:

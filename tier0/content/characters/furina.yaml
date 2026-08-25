@@ -20,7 +20,9 @@ kit: [let_the_people_rejoice]   # v1.9: Burst is kit, not loot
 # card to hand each turn.
 relic_hooks: [ethereal_spotlight]
 # Identity constraint (kickoff §2 shape): her sustain must dominate her
-# frontload — hard on starter and the archetype median, warn on packages.
+# frontload. DEMOTED by R204 (2026-08-24) -- it was hard on starter and the
+# archetype median and a warn on packages; it is now reported on every deck of
+# every run through `axes.identity_flags` and gates nothing.
 constraints: ["A4_sustain>A1_frontload"]
 archetype_decks:
   salon_weighted: salon
@@ -28,43 +30,22 @@ archetype_decks:
   fanfare_weighted: fanfare
 # NO winrate_bands yet: bands are ratified artifacts (pass-3 pattern);
 # the report's winrate proposals remain proposals (salon bands proposed,
-# spotlight/fanfare deliberately held until the R16 world lands).
-# A2 deck bands RATIFIED by R19 (2026-07-20) under the lag-not-growth
-# reading (curve exponents 0.07-0.28: the ratio instrument inflates
-# A1-dreadful engines; Klee deck-band precedent). spotlight_weighted
-# BANDED AT PASS 2 per R19's schedule, in the R16 world: measured 4.0
-# at 1000 fights + the 0.3 margin convention. Red-pen may adjust.
-# STALE SINCE THE SALON-V2 REWORK (2026-07-23, furina-salon-rework-plan.md):
-# these A2 values were measured in the v1 anonymous-tick world and the
-# rework deliberately moved Salon output. NOT silently retuned (ratified-
-# band law) -- re-measure + red-pen at the rework's ratification.
-deck_bands:
-  A2_scaling:
-    salon_weighted: 7.6
-    fanfare_weighted: 4.2
-    spotlight_weighted: 4.3
-# B4 (Serenitea Sweep II, 2026-07-27) -- INTERIM ANNOTATION, NOT A BAND MOVE.
-# Sweep-I E2 re-measured all three at `stamp RT7/D10/P3/C3, fights=1000,
-# seed=11, A6 instrument v2`: salon 9.04 vs band 7.6, fanfare 5.69 vs 4.2,
-# spotlight 4.90 vs 4.3. All three low, all three in the same direction --
-# so this is not salon-specific drift, and fanfare's miss (+1.49) is the
-# largest and had never been flagged at all.
-#
-# The numbers above are UNCHANGED and move only at the axis-validity session:
-# under D3 seven-axis numbers are reportable but not load-bearing, so E2
-# establishes that these bands are wrong, NOT what the right ones are.
-#
-# What this key fixes is the flag, not the band. All three read BAND EXCEEDED
-# on every Furina scorecard run, and a gate that always fires is on its way to
-# being ignored. Now it says why it is firing and what closes it. Delete these
-# entries when the bands are re-ratified -- an annotation outliving its reason
-# is the B6 ledger lesson, and `test_stale_band_annotations_point_at_real_bands`
-# fails if one names a band that no longer exists.
-stale_bands:
-  A2_scaling:
-    salon_weighted: "known-stale band; re-ratify at axis-validity session"
-    fanfare_weighted: "known-stale band; re-ratify at axis-validity session"
-    spotlight_weighted: "known-stale band; re-ratify at axis-validity session"
+# spotlight/fanfare deliberately held until the R16 world lands). That
+# system is UNAFFECTED by R204.
+# R204 (2026-08-24) RETIRED the live per-axis deck-band system as acceptance
+# law, roster-wide, and `deck_bands` + `stale_bands` are DELETED here with it.
+# What stood here, recorded because the deletion is the whole point: A2
+# ceilings salon_weighted 7.6, fanfare_weighted 4.2, spotlight_weighted 4.3,
+# ratified by R19 (2026-07-20) under the lag-not-growth reading; and B4's
+# (Serenitea Sweep II, 2026-07-27) three `stale_bands` annotations, which
+# existed only because a band known to be wrong still fired BAND EXCEEDED on
+# every Furina run -- Sweep-I E2 had re-measured all three low and in the same
+# direction (salon 9.04, fanfare 5.69, spotlight 4.90). B4's interim fix was
+# the flag, not the band, and it was waiting on an axis-validity session to
+# re-ratify. R204 answers that wait by retiring the system instead: NO
+# replacement bands are ratified, and seven-axis values are reportable
+# diagnostics that may identify something to investigate and may not gate a
+# merge, require re-banding, or justify moving a value.
 starting_deck:
   - soloists_solicitation
   - soloists_solicitation
