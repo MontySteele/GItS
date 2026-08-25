@@ -91,8 +91,14 @@ These are part of the implementation contract, not caveats to apply later.
     payoff-reach grade, and `EB-43` then spent the number it was reserving:
     `DRAFTER_VERSION` is **15** and the spotlight limb is what it means. The
     constraint's live remnant is its arithmetic only — richness op prices are a
-    drafter behaviour change, so they take **`D16`**, the next free number, in
-    their own window and with their own re-baseline.
+    drafter behaviour change, so they take **their own `DRAFTER_VERSION`
+    window**, with their own re-baseline. *(Hygiene, 2026-08-24: this clause
+    named the integer `D16` outright. Integers are assigned AT integration and
+    never reserved in advance — the same rule §3 states as "never hard-code the
+    future integer in a staged branch" — and the reservation would have been
+    wrong the moment R191 split Phase 2 into three windows that cannot all be
+    16. Naming the window instead. The Phase-2 integration window did in fact
+    take 16, assigned when it closed.)*
 11. **Existing user gates remain existing user gates.** This packet recommends
     Retain as the `encore_performance` upgrade answer but does not close `M27`;
     role/payoff reclassification waits on `M28`; and it neither pulls nor
@@ -283,8 +289,10 @@ staged branch.
 
 Both of this phase's preconditions are **satisfied as of 2026-08-24** — the
 `D14` pin lifted at the payoff-reach grade and the reserved `D15`/`EB-43` step
-executed — so what follows is takeable, at `D16`. Land new ops with prices and
-parity. Land the two pilot changes under an explicit
+executed — so what follows is takeable, under **a `DRAFTER_VERSION` bump of its
+own, the integer assigned when the window closes** (hygiene 2026-08-24: this
+line named `D16` in advance; see §1.10. The window closed on 2026-08-24 and the
+integer it took is 16). Land new ops with prices and parity. Land the two pilot changes under an explicit
 `POLICY_VERSION` bump before using run results to tune Bomb placement or Recycle
 cards. One modal prototype is priced before the pattern is copied. Land Big
 Badda Boom's Ethereal price here, with the card-level keyword and its drafter

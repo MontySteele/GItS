@@ -1240,9 +1240,16 @@ BANNER_FEATURED_SLOTS = 3
 #   and recorded here for the window's completeness rather than as ground: the
 #   tag, its membership and the meter arithmetic do not move, and a card face
 #   is not a number. On its own it would not have earned a bump.
-# NO ENGINE RULE MOVED. No op was added, no power was added, no hook changed
-# -- the three Phase-1 items that would have touched the engine are STAGED and
-# not pulled (see the BACKLOG EB-118 row). This is a pure content window.
+# NO ENGINE RULE MOVED IN THIS WINDOW. No op, no power and no hook is part of
+# C12: at this bump the three Phase-1 items that would have touched the engine
+# were staged and unpulled, and C12 is a pure content window.
+# THE SECOND HALF OF THAT SENTENCE HAS BEEN CORRECTED IN PLACE (2026-08-24, at
+# the C13 bump below), because it was written in the present tense about a tree
+# that has since moved: all three doors landed at PR #69 (`ddd96b7`) with
+# CONSTANTS_VERSION still reading 12, and door (b) brought an engine power and
+# a hook with it. C12's CONTENTS are unchanged and its archive claim stands;
+# what is no longer true is "staged and not pulled" as a description of `main`.
+# The landed items are enumerated and carried by C13.
 # RT, D and P are all UNTOUCHED and each for its own reason: no run-layer
 # content moved (RT), no offer-time price and no drafter code moved so the
 # D15 spotlight-limb bump is undisturbed (D), and no pilot heuristic moved --
@@ -1253,8 +1260,98 @@ BANNER_FEATURED_SLOTS = 3
 # a same-day pull invalidates -- the EB-69/EB-74 collision argument, applied
 # to this window. Every pre-window Furina and Klee combat number is archive
 # from this bump regardless; the archive banner goes where the numbers are
-# published and nothing is rewritten (R101b).
-CONSTANTS_VERSION = 12
+# published and nothing is rewritten (R101b). THE DEFERRAL IS DISCHARGED AT
+# C13 BELOW, which is what it bought: the staged items landed first, and one
+# table is taken after them instead of one before and one after.
+# CONSTANTS_VERSION 13 -- the EB-118 PHASE-2 INTEGRATION window (2026-08-24).
+# ONE declared window covering EVERY material sheet and engine edit that
+# reached `main` after C12 was stamped. It is not a fresh batch of work: all of
+# it is already merged, each door and each PR named a CONSTANTS_VERSION move as
+# OWED AT LANDING, and PRs #62, #64, #65 and #69 all landed with the integer
+# still reading 12. This bump is that debt paid, enumerated the way C12
+# enumerated its own so that the world a C13 number was taken in is readable
+# from the stamp rather than from the merge log.
+# The ground is the clause C12 rested on -- R179/M15, a material card-sheet
+# edit is a world change -- plus an ENGINE half C12 explicitly did not have,
+# which lands this bump on CONSTANTS 5's comparability criterion as well
+# (C10's EB-95..101 shape is the direct precedent for that half).
+#   (a) PHASE 2B -- `big_badda_boom`, BOTH PRs, one card. #64 (`baa8a97`) made
+#   the row the pool's FIRST DRAFTABLE CARRIER of `ethereal:`, its old
+#   `{damage: +4}` upgrade delta replaced by `{remove: ethereal}` under the
+#   one-upgrade-axis rule. #65 (`b967be6`) then REPLACED that body rather than
+#   amending it, on R201's Option A: "Deal 16. If this kills its target, deal 8
+#   to a random other enemy." The rider is EXISTING grammar
+#   (`conditional`/`killed_target`, already shipped on `sparkly_explosion` and
+#   `showstopper` in both engines), so no op, no loader vocabulary, no codegen
+#   entry and no predicate moved with it; the classifier re-derived the fight
+#   band [mid] -> [mid, late] and landed it.
+#   (b) DOOR (a) -- the Bomb-placement target cut (`1873c7e`, R204). TWELVE
+#   `place_bomb` rows leave `target: random_enemy`: eight to the concentration
+#   form (`target: enemy`), four to the distribution form, with the codegen and
+#   TargetType work the latter needs. Klee's demolition board changes shape.
+#   `klee/demolition_weighted` A2_scaling reads 4.937 and that number is
+#   DESCRIPTIVE EVIDENCE with NO re-band, because R204 retired the live
+#   per-axis deck-band system as acceptance law roster-wide.
+#   (c) DOOR (b) -- the Explosives Workshop conversion (`5a51c1b`, R203), and
+#   this is the half C12 could not have had. The flat `bomb_damage_up` install
+#   becomes `bomb_damage_per_rotation`, A NEW ENGINE POWER with a once-per-turn
+#   latch on discard-or-Exhaust: new code in `tier0/engine/effects.py` and
+#   `tier0/engine/refpowers.py`, mirrored in `DemolitionPowers.cs`. It
+#   increments the SAME bomb-damage stat the detonation reads, so a Bomb armed
+#   three turns ago detonates at today's number, and the upgrade raises the
+#   per-trigger increment (+1 -> +2) rather than adding a second trigger. The
+#   frozen connectivity classifier learned the word under an authorized
+#   `VOCAB_VERSION` v3 with both sides re-run.
+#   (d) DOOR (c) -- `lasting_impression` (`ad36c41`, R203). The sixteenth card
+#   of sec.5.2 sheds its `raise_fanfare_cap` line at last, and the broken
+#   `{fanfare_cap: +2}` delta that BOUND to that op is replaced by
+#   `{encore: +2}` (`gain_encore` 4 -> 6 on the upgraded face). An UNBLOCKER,
+#   not a richness repair. Furina's pool now carries ZERO cap riders.
+#   (e) PHASE 2C's LANDED CONTENT (`1d843ac`). `deep_breath` converts to
+#   `choose_one` with R194's ratified pair, its upgrade delta moves
+#   `remove: exhaust` -> `{cost: -1}`, a modal resolution path lands in
+#   `tier0/engine/effects.py`, and `tools/role_tempo.py` re-derived and landed
+#   the fight band early -> early/mid/late.
+#   THIS ITEM IS IN THE WINDOW ON PURPOSE, AND THE REASON IS RECORDED RATHER
+#   THAN ASSUMED. R191 names three Phase-2 windows and assigns stamps to two of
+#   them -- "2B stamps = C + D, 2C chooser = its own window and its own P
+#   bump" -- which leaves 2C's CONTENT unassigned, because R191 was written
+#   before that content was on `main`; the 2C commit itself names "the required
+#   C bump" as integration's. It is folded in here rather than held, because a
+#   stamp integer labels a WORLD and not a subset of one: `main` today resolves
+#   `deep_breath` from a modal body and upgrades it with a cost drop, and a C13
+#   note that did not say so would misdescribe every number published at C13.
+#   What is NOT here is 2C's ACTIVATION -- `MODE_CHOOSER_ENABLED` is still
+#   False, no pilot heuristic moved, and the chooser keeps its own window and
+#   its own `P` bump exactly as R191 orders.
+#   AND THE LANDING IS NOT INERT, which is the other half of the reason. With
+#   the chooser off the engine resolves mode 1, the body the card already
+#   shipped, so the base face moves no number -- but the UPGRADE delta is live
+#   either way, and an upgraded Deep Breath now costs 0 and KEEPS Exhaust where
+#   it used to cost 1 and lose it.
+#   (f) `EB-122` (`26af01d`) is recorded for completeness and is NOT ground:
+#   the five blocked Kokomi cards get their C# grammar and the codegen that
+#   emits it. No card sheet row and no tier0 module moved, so no sim number
+#   moves and on its own it would not have earned a bump.
+# EVERY PRE-WINDOW KLEE AND FURINA NUMBER IS ARCHIVE. Kokomi's sheet and her
+# engine path are untouched by (a)-(f), so her three arms are this window's own
+# control -- the re-baseline below REPORTS whether they reproduced rather than
+# asserting that they would. Archive banners go where the numbers are
+# published; nothing is rewritten (R101b).
+# `RT` and `P` are UNTOUCHED, each on its own ground: no run-layer content
+# moved (`RT`), and no pilot heuristic moved -- BOTH switches are still False
+# (`PILOT_POLICIES_ENABLED` for the 2A pair, `MODE_CHOOSER_ENABLED` for 2C) --
+# so `P` stays at 7 and both activation windows stay open (R191). `D` moves in
+# the SAME window on its own ground (15 -> 16, below): each field once,
+# together, at the end of the window, which is the shape RT11/C10 took.
+# THE RE-BASELINE IS TAKEN AT THIS BUMP:
+# `review/active/sitting-reads-2026-08-24-c13-d16.md`. It is TEN of the twelve
+# arms, and the shortfall is an instrument loss disclosed there and filed as
+# BACKLOG `EB-128`: the gitignored `game_ref/` tree was destroyed on this
+# machine a fourth time, so `real_ironclad` and `real_silent` cannot be loaded
+# at all and their two rows could not be run. `ref_ironclad` is unaffected and
+# carries the anchor-identity check.
+CONSTANTS_VERSION = 13
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
@@ -1414,7 +1511,54 @@ CONSTANTS_VERSION = 12
 # for lands WITH this bump, in the same window and no other change beside
 # it: `review/active/sitting-reads-2026-08-24.md`, the twelve-arm table at
 # `RT12/D15/P7/C11`.
-DRAFTER_VERSION = 15
+# DRAFTER_VERSION 16 (EB-118 Phase 2, 2026-08-24) -- THE INERT TERMS GO LIVE.
+# No drafter CODE moved and no dial VALUE moved in this window. What moved is
+# which rows the existing dials REACH, and two of those dials were carrying an
+# explicit no-bump licence that said, in the file, exactly when it would be
+# spent. Both are spent now.
+#   (a) `STATIC_ETHEREAL_SHARE` (`tier05/draft.py`). The licence read: the
+#   term is provably inert because no committed sheet row prints `ethereal:`
+#   and the only cards the tag spelling reaches are Statuses, Curses and the
+#   Spotlight token, whose rarities sit outside `RARITY_ODDS`. It named the
+#   row that would end that -- "Phase 2's big_badda_boom" -- and that row is
+#   now on `main`. A Common Klee Attack is offerable by every reward, shop and
+#   Neow channel, so the multiplier now moves a drafted price:
+#   `big_badda_boom` prices **8.0000 -> 4.8000** on its base face.
+#   (b) `choose_one`'s MAX arbitration -- the same shape with a weaker
+#   consequence. It was registered PROPOSED with "no shipped card is modal"
+#   as its stated reason; `deep_breath` is modal now (2C's landed content,
+#   C13 above). It moves NO number -- `draw` and `energy` are static zeros, so
+#   `MAX(modes)` returns mode 1, which IS the body the card already shipped --
+#   and it is in the window anyway, because what this stamp labels is which
+#   terms a drafted price may depend on, not whether one sheet happened to
+#   exercise them.
+# RECORDED HERE AND EXPLICITLY NOT GROUND, because a reader comparing offer
+# prices across this boundary will find FOUR Klee rows moved and needs to know
+# why only one of the four is this stamp's business. The other three are door
+# (a)'s distribution form, priced through dials that were already live:
+# `place_bomb` costs `bomb_damage * amount * STATIC_BOMB_DAMAGE_SHARE` and is
+# blind to `target`, so a row that printed several random bombs and now prints
+# ONE on all enemies prices lower by construction -- `mine_toss` 6.5000 ->
+# 4.0000, `jumpy_dumpty_mk2` 11.7500 -> 10.2500, `cluster_charge` 8.2500 ->
+# 7.0000. That is a SHEET consequence and it belongs to C13. Every other
+# changed row in both sheets prices identically across the window, checked:
+# `explosives_workshop` is 0.0000 on the old body and on the new one, and no
+# Furina row moved at all.
+# THE R193 REPRICING TRIGGER FIRED AT THIS BUMP AND WAS EXECUTED. Its terms
+# and the read's full arithmetic live at the constant in `tier05/draft.py`,
+# beside the number they are a read of. In one line: the card prices 4.8000
+# base / 8.0000 upgraded -- exactly the two figures the trigger note predicted
+# -- the ratio is 0.600000 to six places, and R201's kill rider prices at ZERO
+# on both faces, so this is the one-variable read the trigger was written to
+# get. THE SHARE IS NOT MOVED HERE. The note offers a re-derivation OR a
+# deliberate re-ratification and defines no formula for the first, and 0.6 is
+# on the record as "a JUDGEMENT, not a sweep"; the ratify-or-move call is
+# [USER]'s and is filed as QUEUE `M41`.
+# ONE WINDOW, and each field that moves in it moves on its own ground: `C`
+# 12 -> 13 above (the sheet and engine content), `RT` and `P` untouched.
+# The re-baseline this bump owes is the same table C13 owes, and it is taken
+# ONCE for both: `review/active/sitting-reads-2026-08-24-c13-d16.md`.
+DRAFTER_VERSION = 16
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).

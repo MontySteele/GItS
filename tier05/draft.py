@@ -909,10 +909,13 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
     # row that would end that: "Phase 2's big_badda_boom". That row is now in
     # docs/klee-cards.yaml. A Common Klee attack is offerable by every reward,
     # shop and Neow channel, so this multiplier now moves a drafted price and
-    # the bump is OWED, not proposed. It is taken at INTEGRATION, with the
-    # slice's own re-baseline -- the integer is still not written down here,
-    # because a staged branch that hard-codes a future stamp is exactly what
-    # packet §3 forbids.
+    # the bump was OWED, not proposed.
+    # IT IS TAKEN: `DRAFTER_VERSION` 15 -> 16 at the Phase-2 integration
+    # window, 2026-08-24, with the re-baseline in the same window
+    # (`review/active/sitting-reads-2026-08-24-c13-d16.md`). The integer was
+    # written at integration and not before, which is what packet §3 asks for;
+    # the price it moved is `big_badda_boom` 8.0000 -> 4.8000, and the R193
+    # read of that number is at the constant above.
     if card.is_ethereal:
         total *= STATIC_ETHEREAL_SHARE
     # `if card.sly` first: this is the draft hot path and the overwhelming
@@ -1325,7 +1328,67 @@ STATIC_ETHEREAL_SHARE = 0.6        # EB-118. Ethereal is a DOWNSIDE and the
                                    # majority, and the sheet buys the whole
                                    # downside off at the campfire.
                                    #
-                                   # ===== R193 REPRICING TRIGGER -- ARMED =====
+                                   # ===== R193 TRIGGER -- FIRED AND READ ====
+                                   # THE READ WAS TAKEN 2026-08-24 at the
+                                   # `D16` integration bump, on the terms
+                                   # written below, and its arithmetic is
+                                   # recorded here rather than in a report
+                                   # nobody reaching this constant would open.
+                                   # `draft._static_power`, both faces of
+                                   # `big_badda_boom` as they ship on `main`:
+                                   #
+                                   #   base face      4.8000
+                                   #   upgraded face  8.0000
+                                   #   base with the keyword cleared  8.0000
+                                   #   ratio base:upgraded  0.600000
+                                   #
+                                   # so the share's whole contribution is
+                                   # -3.2000 on the base face and exactly zero
+                                   # on the upgraded one (the upgrade removes
+                                   # the keyword), and the ratio the trigger
+                                   # reads IS this constant to six places --
+                                   # 4.8 and 8.0 are the two figures the note
+                                   # below predicted, unchanged by R201.
+                                   # THE ONE-VARIABLE CLAIM CHECKED RATHER
+                                   # THAN ASSUMED: the Option A rider prices at
+                                   # 4.8000 -> 4.8000 base and 8.0000 ->
+                                   # 8.0000 upgraded against the same rows with
+                                   # the `conditional` stripped, so it
+                                   # contributes zero to both sides and moves
+                                   # neither end of the ratio.
+                                   # WHAT THE READ SAYS ABOUT THE NUMBER, as
+                                   # far as arithmetic can say anything: the
+                                   # base face ranks 17th of the 29 Klee
+                                   # draftable Commons at 0.6, and that rank is
+                                   # a PLATEAU rather than a knife edge --
+                                   # rank 17 holds for every share in
+                                   # [0.5625, 0.6250] (below 0.5625 the price
+                                   # drops under `bomb_voyage`'s 4.5; above
+                                   # 0.6250 it clears the four-way tie at 5.0
+                                   # and the card jumps to 13th). 0.6 sits
+                                   # near the middle of that plateau, so the
+                                   # shipped value is not load-bearing to the
+                                   # third digit and a small move would change
+                                   # no offer ranking at all.
+                                   # WHAT IT DOES NOT SAY, and this is the
+                                   # limit of the mechanical half: the note's
+                                   # own rationale for 0.6 is a claim about
+                                   # the FREQUENCY of a lost draw ("lost
+                                   # outright on the draws where its cost
+                                   # cannot be paid the turn it arrives"), and
+                                   # nothing in either engine counts that
+                                   # today -- no per-card Ethereal-loss
+                                   # telemetry exists, so the frequency cannot
+                                   # be read off a run. Building it is a
+                                   # build, not a read.
+                                   # THEREFORE: RE-RATIFY OR MOVE IS [USER]'S,
+                                   # and it is filed as QUEUE `M41`. The
+                                   # constant is NOT moved at this bump. The
+                                   # obligation below is discharged as to its
+                                   # READ half and open as to its RULING half,
+                                   # which is why this block is amended in
+                                   # place rather than deleted.
+                                   # ===== the trigger, as written =====
                                    # 0.6 is ratified PROVISIONALLY (R193,
                                    # Phase-2 sitting 2026-08-23), and this
                                    # comment is the trigger, armed in the same
