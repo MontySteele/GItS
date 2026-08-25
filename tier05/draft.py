@@ -69,6 +69,13 @@ STATIC_KLEE_CONDITIONAL_SHARE = 0.5
 # gap goes from 0.00 to 0.67, which is the entire point of taking the rider),
 # and `curtain_cue` 0.0000 -> 0.4000. `directors_cut` does NOT move at any
 # share, because both its branches pay in dead dials -- energy and draw.
+#
+# RECALIBRATION IS OWED AND ITS DIRECTION IS RULED ([USER] 2026-08-25): 0.167
+# is the rate a pilot that does not PLAN Spotlight movement produces, which
+# makes it a floor on the human rate rather than an estimate of it -- the
+# player controls the re-aim, and the card creates a deliberate two-card
+# sequence. Recalibrate this share when the pilot learns to plan Spotlight
+# movement; until then it stays where the measurement put it.
 STATIC_SPOTLIGHT_MOVED_SHARE = 0.167
 STATIC_STRENGTH_VALUE = 2.0        # conservative two future Attack hits (v4)
 STATIC_PERSISTENT_PROC_SHARE = 1.0  # one turn of a repeatable Power (v4)
