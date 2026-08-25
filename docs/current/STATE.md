@@ -11,7 +11,7 @@
 
 ## Live cell
 
-**`RT12 / D16 / P9 / C15`**, read live via `tier05/cells.py`, with
+**`RT12 / D16 / P9 / C16`**, read live via `tier05/cells.py`, with
 `PILOT_WEIGHTS_VERSION` **4**. Numbers are never comparable across a stamp
 boundary unless labeled, and a report without a stamp is not citable
 (`EXPERIMENTS.md`).
@@ -21,7 +21,7 @@ boundary unless labeled, and a report without a stamp is not citable
 | `RT` `RUNTEMPLATE_VERSION` | **12** | `tier0/constants.py` | The run-layer half of the window-2 correctness batch (`EB-104`): the shop receives the run's Featured Banner, potion capacity is derived from held relics on read, the rest-site heal floors, Book of Five Rings counts event deck-adds through one door, and event card-reward screens roll rarity through `RARITY_ODDS`. |
 | `D` `DRAFTER_VERSION` | **16** | `tier0/constants.py` | `EB-118` Phase 2's two formerly-inert drafter terms are live: `STATIC_ETHEREAL_SHARE` now prices a shipped card (`big_badda_boom` 8.0000 → 4.8000 base, 8.0000 upgraded), and `choose_one`'s `MAX(modes)` arbitration is reachable but moves no number. The share is **RATIFIED at 0.6 (R205)**; the read and the rank plateau are recorded at the constant in `tier05/draft.py`. `D15` beneath it is `EB-43` — the spotlight limb of `core_complete`/`_core_progress` requires a machinery payoff. |
 | `P` `POLICY_VERSION` | **9** | `tier05/draft.py` | The `EB-118` Phase-2C mode-chooser flip: `MODE_CHOOSER_ENABLED` is `True` and `effects._chosen_mode` asks `policy.choose_mode` — argmax of the pilot's per-op valuations over the live board, minus the TRUE HP an overdrawing `spend_encore` costs, ties to the lowest index. `PILOT_WEIGHTS_VERSION` 4 labels the weight set now that `MODE_OVERDRAW_HP_VALUE` is read; no weight VALUE has moved from the hand-picked vector. Phase-2A's `PILOT_POLICIES_ENABLED = True` (Klee bomb placement, Kokomi chosen exhaust) is inside this value at `P8`. |
-| `C` `CONSTANTS_VERSION` | **15** | `tier0/constants.py` | The `EB-118` Phase-3 **Window 1 label pass** — metadata only: sixteen `role` conversions and five `archetypes` changes over nineteen cards, the three `tempo_band.run` values the classifier re-derives off `role`, and `SecretStash.cs` dropping Big Badda Boom from the derived `demolition_commons` pool (8 members → 7, a combat outcome-distribution change). **The first bump taken under R202's LAW amendment** — `role`/`archetypes` are material card-sheet edits — so **every tier-0.5 drafted number for all three characters is archive**; the combat archive is only Klee numbers that depend on what `secret_stash` produces. `C14` beneath it was `deep_breath`'s mode 2 (`spend_encore 3` + `draw 3`, R205); `C13` beneath that was the `EB-118` Phase-2 sheet-and-engine integration window — `big_badda_boom` (Ethereal carrier, R201's kill rider), the twelve `place_bomb` rows leaving `target: random_enemy`, `bomb_damage_per_rotation` as a new engine power with a once-per-turn latch, `lasting_impression`'s `{encore: +2}`, and `deep_breath`'s conversion to `choose_one` — and `C13` is the world the standing baseline below was read in. |
+| `C` `CONSTANTS_VERSION` | **16** | `tier0/constants.py` | The `EB-118` Phase-3 **Window 2 card-body pass** (R202) — three ratified Kokomi bodies and their upgrade deltas: `moon_signal` becomes a chosen discard plus `recall_to_draw` with the draw moved onto a Sly rider (upgrade `{retain: true}`), `crane_wing` printed Block 6 → 4 with `{block: +2}` unchanged, and `tighten_the_cords` Block 3 → 5 with its Metallicize gated on `exhaust_pile_at_least_3`, upgrade corrected to `{block: +2}` (R58) and labels moved `[generic]`/`glue` → `[priest]`/`payoff`, which reaches R202's LAW amendment a second time. `encore_performance`'s ruled `{retain: true}` (ex-`M27`, R205) rides the same landing on its own provenance. **Archive: every Kokomi tier-0.5 and combat number, and every Furina tier-0.5 number** — the Rare that had no upgrade path is now a rest-site smith candidate. Klee is untouched. `C15` beneath it was Window 1's label pass (sixteen `role` conversions, five `archetypes` changes, and `SecretStash.cs` dropping Big Badda Boom from `demolition_commons`); `C14` beneath that was `deep_breath`'s mode 2 (`spend_encore 3` + `draw 3`, R205); `C13` beneath that was the `EB-118` Phase-2 sheet-and-engine integration window, and `C13` is the world the standing baseline below was read in. |
 
 **Standing baseline:** `review/active/sitting-reads-2026-08-24-c13-d16.md` —
 twelve arms, taken at `RT12/D16/P7/C13`, with §8's dated addendum carrying the
@@ -30,8 +30,11 @@ two `real_*` floor rows (`real_ironclad` 5.5% win / 67.2% act-1, `real_silent`
 `P8` and `P9` activation windows closed above it, and the read they owed —
 R202 step (iii)'s single Phase-2 post-read — is TAKEN and merged
 (`review/active/eb118-connectivity-phase2-postread-2026-08-24.txt`), which
-step (iv) makes Window 1's pre-state. `C15` moves the table no further: no
-standing baseline is owed at that bump, because no pending decision names one.
+step (iv) makes Window 1's pre-state. Neither `C15` nor `C16` moves the table:
+no standing baseline is owed at either bump, because no pending decision names
+one. `C16` does move the table further OUT OF DATE — its three Kokomi bodies
+make the Kokomi arms archive in combat as well as in drafting — and the read
+that repairs that is `W3`'s single public one, not a table taken per window.
 Under **R207** a published standing table is owed at a meaningful product
 milestone or when a
 pending decision needs one; intermediate attribution is by commit-hash scratch
@@ -185,8 +188,8 @@ Slay the Spire 2 **v0.107.1**, commit `59260271` (2026-06-18), Steam buildid
 Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
 [`BACKLOG.md`](BACKLOG.md).
 
-- **`EB-118` richness pass — Phase 2 is COMPLETE; Phase 3 Window 1 is LANDED
-  and W2 is the live front.** All three Phase-2 windows are closed: the
+- **`EB-118` richness pass — Phase 2 is COMPLETE; Phase 3 Windows 1 and 2 are
+  LANDED and W3 is the live front.** All three Phase-2 windows are closed: the
   `C13`/`D16` content window with its single re-baseline, then 2A's activation
   on its own `P8`, then 2C's on `P9` with `C14` beside it. R202 step (iii)'s
   Phase-2 post-read is TAKEN and merged — ONE read over both activation
@@ -198,12 +201,17 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   against a paired connectivity re-read — **7 PRED, 0 SPLIT, 0 MISS**
   (`review/active/eb118-w1-postread-2026-08-25.txt`). Phase 3 is ratified as a
   governing plan (R202, amended at R205 and R207) and its nine calls,
-  guardrails and priority order live in BACKLOG `EB-118`. **Next: W2, staged
-  and INERT on `eb125-w2-bodies` (`e2e6da0`) — merging it IS the pull.**
-  **Window 3 lands as ONE public `C`/`D` window with one standing read**, its
-  per-character attribution taken as commit-hash scratch comparisons (R207).
-- **Register diet** — this file's half is DONE; the `BACKLOG.md` half is gated
-  on `W2` landing (BACKLOG `EB-131`).
+  guardrails and priority order live in BACKLOG `EB-118`. **Window 2 (the
+  three ratified card bodies, `EB-125`) LANDS at `C16`** and clears R200's
+  TEMPORARY `kokomi` `neardup` breach by redesign — 33 → 29 pairs against an
+  untouched limit of 30 — with all five allowlist entries deleted. No
+  connectivity read was registered for it, and none is invented. **Next: W3,
+  which lands as ONE public `C`/`D` window with one standing read**, its
+  per-character attribution taken as commit-hash scratch comparisons (R207);
+  **`W2b`** — the Exhaust-reader clone rewrites, a distinct sub-batch — is
+  still awaiting [USER]'s ruling and is NOT discharged by W2.
+- **Register diet** — this file's half is DONE; the `BACKLOG.md` half is
+  UNBLOCKED by W2's landing and not yet done (BACKLOG `EB-131`).
 - **Payoff-reach re-registration — RUN AND GRADED 2026-08-24.** R121's
   countersigned six-step order has run end to end. The grade, the controls, the
   tripwires and the two defects the run found (`EB-123`, `EB-124`, both since

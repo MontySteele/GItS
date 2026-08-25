@@ -1506,7 +1506,115 @@ BANNER_FEATURED_SLOTS = 3
 # The registered read for this window is the PAIRED CONNECTIVITY re-read the
 # pre-registration owed, taken against the Phase-2 post-read that R202 step
 # (iv) made W1's pre-state.
-CONSTANTS_VERSION = 15
+# CONSTANTS_VERSION 16 -- the EB-118 PHASE-3 WINDOW 2 CARD-BODY PASS (R202,
+# [USER] 2026-08-24: "Agreed on the per-card judgments for now." and "The
+# current phase 3 ledger is ratified."), landed 2026-08-25. ONE window, THREE
+# ratified Kokomi bodies and their upgrade deltas, plus one Furina upgrade
+# delta that rides the landing on its own provenance. W1 was metadata only;
+# this window moves PRINTED CARDS, so its ground is R179/M15 as written --
+# effect-number changes -- with R202's role/archetype amendment reached once
+# more by (c). Enumerated the way C13, C14 and C15 enumerate their own so that
+# the world a C16 number was taken in is readable from the stamp.
+#   (a) `moon_signal` (kokomi, Common, cost 0, Skill) -- the free cycle becomes
+#   a free REORDER. Effects `discard 1` (random) + `draw 1` become
+#   `discard 1 select: chosen` + `recall_to_draw 1`, and the draw moves onto a
+#   new `sly: [{op: draw, amount: 1}]` rider, so the bell rings when the card
+#   is THROWN rather than when it is played. UPGRADE `{draw: +1}` ->
+#   `{retain: true}`: `add` appends unless `add_before` is given,
+#   `recall_to_draw` inserts at draw-pile index 0 and `state.draw` pops index
+#   0, so an appended draw would take back exactly the card the recall placed.
+#   Retain sets a card FIELD and inserts nothing, so the printed order is
+#   identical between the faces. `role`, `archetypes` and `tempo_band` do not
+#   move (assist / enabler).
+#   (b) `crane_wing` (kokomi, Uncommon, cost 1, Skill) -- printed `block`
+#   6 -> 4, `cost_mod` rider untouched. The upgrade delta `{block: +2}` is
+#   UNCHANGED and the base moved, so the upgraded face reads 8 -> 6 and lands
+#   level with `jade_bulwark`'s printed Block instead of above it. No label
+#   moves (commander / glue), so R199's third guardrail is untouched.
+#   (c) `tighten_the_cords` (kokomi, Common, cost 1, Skill) -- BODY AND LABELS
+#   TOGETHER. Printed `block` 3 -> 5, and the unconditional
+#   `apply_power metallicize 1 target: self` becomes that same apply inside
+#   `{op: conditional, if: exhaust_pile_at_least_3}`. UPGRADE
+#   `{power_amount: +1}` -> `{block: +2}` per R58's always-live-half rule, so
+#   the upgraded face reads block 7 with the bar where it is printed instead of
+#   block 3 / metallicize 2. `archetypes` [generic] -> [priest] and `role`
+#   glue -> payoff under Fork A (the label follows the body): reading the
+#   Exhaust pile is priest's public state. This is the SECOND bump to reach
+#   R202's LAW amendment, and the only card in this window that does.
+#   (d) ONE CLASSIFIER RE-DERIVATION, taken as the classifier ruled it and
+#   written by `suggest_role_tempo_tags.py --land` rather than by hand.
+#   `tighten_the_cords` `tempo_band.fight` [early] -> [early, mid, late] and
+#   `.run` [early] -> [early, late], off (c)'s `role`. No other row moved and
+#   `--check` reports all three sheets matching the classifier.
+#   (e) `encore_performance` (furina, Rare, cost 0, Skill) -- ex-`QUEUE` `M27`,
+#   ruled R205, and ITS PROVENANCE IS NOT EB-118. It rides this window because
+#   this was the open build and it shares an emitter door with (a). The BODY
+#   does not move; the card gains the upgrade delta `{retain: true}` where it
+#   had NONE. That is a material sheet edit on R179/M15 ground in its own
+#   right: the delta answers target-dependence -- a 0-cost Rare that does
+#   nothing unless a Spotlighted card is in hand -- so the upgrade buys TIMING,
+#   not a bigger copy, and it sidesteps FLAG-2(ii) because `retain` binds to no
+#   op. Three curated registers emptied with it, each by its own stated gate:
+#   `lint_upgrade_coverage.SHEET_EXEMPT`, `lint_upgrade_coverage.CODEGEN_DEBT`
+#   and `test_roster_codegen.FURINA_UPGRADE_GAP_PENDING_FB1`.
+#   (f) THE C# DELTAS, all generated: `MoonSignal.cs`, `CraneWing.cs`,
+#   `TightenTheCords.cs`, `EncorePerformance.cs`, and the Furina manifest's
+#   `no_upgrade_path` emptied. `apply_power` joins the codegen's `BRANCH_OPS`
+#   for the SELF target ONLY -- the enemy arms need the target guard or declare
+#   locals and still block by name -- which is what (c) needed and the reason
+#   Kokomi is 75/76 rather than 74/76. Furina stays 81/82 and
+#   `gen_roster_cards.py --check` is clean on all three sheets.
+# WHAT IS ARCHIVE. EVERY KOKOMI tier-0.5 AND COMBAT NUMBER: three drafted-pool
+# bodies moved (two Commons and an Uncommon, so any Kokomi arm can draft them)
+# and three upgrade deltas with them. EVERY FURINA tier-0.5 NUMBER, by (e) and
+# on the run layer rather than in a fight: `model.rest_action` filters its
+# smith candidates through `upgrades.has_upgrade`, so a Rare that had no
+# upgrade path was never a candidate and now is -- the candidate SET moved even
+# though the card's own price did not. Furina combat numbers are archive only
+# for decks holding the upgraded face, which could not exist before this
+# window. KLEE IS UNTOUCHED: no Klee sheet row, no Klee upgrade, no Klee
+# generated file. Archive banners go where the numbers are published; nothing
+# is rewritten (R101b).
+# `RT`, `D` and `P` ARE UNTOUCHED, each on its own ground. No run-layer content
+# moved (`RT`). No pilot heuristic and no weight value moved (`P`); both
+# activation switches keep the values Phase 2 left them at. No drafter code and
+# no dial value moved (`D`) -- and the prices these sheet edits feed WERE
+# MEASURED rather than argued, because they move: `moon_signal` -0.5000 ->
+# 1.0000 on both faces, `crane_wing` 6.0000 -> 4.0000 and its upgraded face
+# 8.0000 -> 6.0000, `tighten_the_cords` 3.0000 -> 5.0000 and 3.0000 -> 7.0000,
+# `encore_performance` 3.0000 -> 3.0000 with an upgraded face that now exists
+# and prices 3.0000. A sheet consequence priced through LIVE dials is C-ground
+# and not D-ground -- the precedent C14 set on `deep_breath` and C15 restated
+# -- so the whole of that movement is declared here.
+# THE SUPPLY MOVEMENT IS (c)'s AND IT IS NAMED, NOT INFERRED: kokomi/priest
+# payoff supply 11 -> 12 over a sub-pool of 28 -> 29, and kokomi/generic loses
+# the row from its sub-pool (36 -> 35) with its payoff count unchanged at 10.
+# assist (5) and commander (6) do not move. The cost is the one the ruling
+# already named: priest is the most over-supplied arm on the sheet and this
+# adds a payoff to it. R199 ruled the bands DIRECTIONAL and Guardrail 1 forbids
+# relabelling a card to keep a count tidy, so the number is disclosed rather
+# than balanced against.
+# THE WINDOW'S OWN GATE, MEASURED ON THIS WORLD: the `kokomi` `neardup` count
+# reads 33 -> 29 against a limit of 30 pairs, so R200's TEMPORARY breach is
+# CLEARED BY REDESIGN and not by a moved threshold -- the limit is untouched at
+# 0.40. Beside it `uniq` 53% -> 54%, `decide%` 33% -> 36%, `hapax` 11 -> 10,
+# `rider%` 36% -> 34%, and `maxclu` unmoved at 8 (still curated debt, with
+# `uniq`). The `furina`, `klee` and `mondstadt-companions` pools are
+# byte-identical across the window. `lint_strict_domination` is CLEAN over 264
+# compared cards with all five EB-125 allowlist entries deleted, and
+# `lint_role_tempo_coverage --gate` is green at 18 findings against 18 pins on
+# both sides -- (c)'s relabel neither opened nor closed a coverage cell.
+# NO STANDING BASELINE IS OWED AT THIS BUMP (R207): a standing table is
+# published at a meaningful product milestone or when a pending decision needs
+# one, and no pending decision names one here -- `S4-G13`'s pull condition
+# reads a table when the lever is pulled, which is not this landing. NO
+# CONNECTIVITY READ IS REGISTERED FOR THIS WINDOW EITHER: W1's read was owed by
+# W1's own pre-registration §4, no W2 pre-registration exists, and R207 gives
+# W3 the single public window with the single standing read. What was taken
+# here is a BUILD-TIME FACT in W1 §5's sense, recorded in the landing commit so
+# it cannot later be discovered and read as a finding, and it is NOT graded
+# against §2.4's committed directional predictions.
+CONSTANTS_VERSION = 16
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
