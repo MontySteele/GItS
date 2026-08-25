@@ -114,6 +114,9 @@ REGISTRY: tuple[Lint, ...] = (
     _ci("role-tempo-coverage",  "tools/lint_role_tempo_coverage.py", "--gate"),
     _ci("roster-registry",      "tools/lint_roster_registry.py"),
     _ci("r-numbers",            "tools/lint_r_numbers.py"),
+    # EB-127. Beside r-numbers deliberately: same question (an id namespace
+    # with no gate), the other series.
+    _ci("register-ids",         "tools/lint_register_ids.py"),
     _ci("vendor-pin",           "tools/lint_vendor_pin.py"),
     _ci("art-coverage",         "tools/art_coverage.py"),
 

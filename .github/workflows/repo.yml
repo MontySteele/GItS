@@ -111,6 +111,16 @@ jobs:
       # frozen ones. Runs from committed state only -- no tags needed.
       - name: R-number namespace
         run: python tools/lint_r_numbers.py
+      # EB-127. The other half of the same namespace question: r-numbers
+      # guards R/D, this guards the ROW ids -- no two rows in QUEUE.md or
+      # BACKLOG.md may define the same id, and no id may define a row in both.
+      # Two collisions reached review in two weeks (EB-119/EB-120, and M38
+      # minted twice off one base) and neither was caught by anything
+      # mechanical. Citations are out of scope by design; re-use of a RETIRED
+      # id is NOT covered and cannot be from HEAD alone, because closed rows
+      # leave HEAD.
+      - name: register row-id uniqueness
+        run: python tools/lint_register_ids.py
       # Understudy 2026-08-04. vendor/ carries third-party source pinned to an
       # exact upstream commit; this asserts the tree still is what the
       # provenance note says it is, in both directions. Cheap, and the one
