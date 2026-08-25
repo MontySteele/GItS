@@ -13,9 +13,13 @@ namespace KleeMod.Tests;
 ///
 /// THE STANDING GAP. tier 0.5 models ONE seat, so no sim run can ever
 /// disagree with the mod about a two-seat board -- the repo records this in
-/// three places (BombPower.cs:399, CompanionPowers.cs:46, TurnEndSequencer.cs)
+/// three places (BombPower.cs, CompanionPowers.cs:46, TurnEndSequencer.cs)
 /// and every co-op defect found so far was found by playing. Each test below
 /// converts one class of that from play-only to testable.
+///
+/// EB-130 narrowed the BombPower one: two seats PLACING two piles is pinned in
+/// BombInstancingTests; two seats DETONATING on one enemy still needs a live
+/// CombatState and stays play-only.
 ///
 /// WHAT IS AND IS NOT COVERED. These test per-seat OWNERSHIP AND ATTRIBUTION:
 /// that two seats' resources, relic effects, identity gating and telemetry

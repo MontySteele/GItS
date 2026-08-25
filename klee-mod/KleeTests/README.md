@@ -4,16 +4,18 @@
 no Godot, no scene tree and no game launch. Registered as `EB-105`.
 
 Before this existed the repo had no C# test project at all, and the register
-said so in three places (`BombPower.cs:399`, `CompanionPowers.cs:46`,
+said so in three places (`BombPower.cs`, `CompanionPowers.cs:46`,
 `TurnEndSequencer.cs`): tier 0.5 models one seat, so **every co-op defect ever
 found was found by playing**. This is a partial backstop for that — see
-"Co-op coverage" below for exactly which part.
+"Co-op coverage" below for exactly which part. (`BombPower.cs` no longer says
+it: `EB-130` rewrote that comment, and it now names this project and the one
+thing it still cannot reach — a live `CombatState`.)
 
 ## Running it
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 117 tests, ~0.4s after build
+dotnet test                       # 135 tests, ~0.5s after build
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -90,8 +92,9 @@ either pinned structurally and labelled, or left out.
 | `RecallFromDiscardTests.cs` | 11 | `EB-122`'s other half of the same verb: `recall_to_draw` reading its DEFAULT source. The file is about an ASYMMETRY that is deliberate on both sides — the discard branch filters nothing and grants nothing, because [USER] ruled the unfiltered branch (and the self-recall it allows) DELIBERATE at `EB-69`/D3, R198. Sim spec: `tier0/tests/test_eb69_tokoyo_returns_selfrecall.py`. Structural where a live `CombatState` is needed, including the two faces routing through one call. |
 | `SlyGrantTests.cs` | 9 | `EB-122`'s turn-scoped Sly grant. The pool predicate RUNS (Skills only, never a kit card, never one already Sly this turn — the clause that makes a second grant pick a different card); the grant is structural, and pins that the expiry is the GAME's `CardCmd.ApplySingleTurnSly` rather than a mod-side timer. Both carriers route through the one home. |
 | `ModalChoicePinTests.cs` | 5 | `EB-118` sec.5.4's modal surface: `ModalChoice` delegates to the base game's OWN card-level choice rather than reimplementing one (`CardSelectCmd.FromChooseACardScreen` + `PlayerChoiceContext`, co-op-synced as `PlayerChoiceType.Index`), the three-option ceiling the screen itself enforces, and the `mode_chosen` telemetry row pinned to its tier0 twin. Structural: making a choice needs a live `CombatState`. No sheet row is modal. |
+| `BombInstancingTests.cs` | 18 | `EB-130` / R205's per-placer bomb piles. The instance type itself; the base game's OWN `PowerCmd.FindExistingInstanceForStacking` answering that two placers get two piles, one placer still gets one, and a gather does not land in another placer's pile on the destination; the SUPPRESSION ARBITER (two piles fold to one 0.75, never 0.5625 — the preview and the hit elect the same pile, and the creature-keyed latch is spent once); and `ModifyAll` reaching every pile with the solo total unmoved. Structural where a live `CombatState` is needed: the `DetonateOn`/`MoveAllTo` loops, and the DEATH-TEARDOWN finding pinned on the game's own kill and hook-broadcast machinery. |
 
-**117 tests, all green.**
+**135 tests, all green.**
 
 ## Co-op coverage
 
@@ -109,7 +112,9 @@ What this converts from play-only to testable:
 - the **salon company is keyed per Creature**, and two seats resolve to two
   distinct entries;
 - the telemetry **fight row carries `seats` and `seat_index`** (EB-18's join
-  keys), pinned as both fields and emitted key literals.
+  keys), pinned as both fields and emitted key literals;
+- **two placers own two separate bomb piles** on one enemy, and the enemy's
+  first attack is still reduced ONCE across both of them (`EB-130`).
 
 What is **still play-only** — this is a partial backstop, not a full one:
 
@@ -117,7 +122,8 @@ What is **still play-only** — this is a partial backstop, not a full one:
   selection round trips, desync and disconnect;
 - anything that needs a live `CombatState`: the off-seat burst attribution
   `TurnEndAttribution` exists for, corpse detonations, co-op ownership of a
-  card actually being played, `Deploy`/`Bow` resolution;
+  card actually being played, `Deploy`/`Bow` resolution, and **two seats
+  DETONATING on one enemy** — `EB-130` pins the placing half, not this one;
 - everything visual.
 
 ## A note on what these tests are for

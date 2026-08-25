@@ -43,6 +43,13 @@ namespace KleeMod.Powers;
 /// this split, and the NPower badge renders DisplayAmount and refreshes on
 /// DisplayAmountChanged (verified in the NPower decompile). Detonation still
 /// iterates bombs individually; every listener sees per-bomb events.
+///
+/// ONE PILE PER PLACER (R205): see <see cref="InstanceType"/>. A bombed enemy
+/// carries one BombPower INSTANCE per placing creature, so in co-op the badge
+/// count is the pile count and each pile detonates under its own name. Every
+/// "all the bombs on this enemy" verb below therefore iterates instances --
+/// <see cref="DetonateOn"/>, <see cref="ModifyAll"/>, <see cref="MoveAllTo"/>
+/// -- and never takes the first one it finds.
 /// </summary>
 public sealed class BombPower : PowerModel, ILocalizationProvider
 {
@@ -85,6 +92,37 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 
     /// <summary>
+    /// ONE BOMB BADGE PER PLACER -- [USER] ruling R205, shape (a).
+    ///
+    /// Without this the power is PowerInstanceType.None, and the base game's
+    /// stacking search (PowerCmd.FindExistingInstanceForStacking, sts2.dll
+    /// v0.107.1) resolves that case to `target.GetPower(id)`: ONE instance per
+    /// enemy no matter who placed. Both Klees' bombs merged into it, and a
+    /// power carries ONE Applier -- so the second Klee's bombs detonated under
+    /// the first Klee's name, feeding her Big One counter, her Pounding
+    /// Surprise sparks, her Blazing Delight, her Explosive Frags.
+    ///
+    /// InstancedPerApplier resolves the same search to
+    /// `GetPowerInstances(id).FirstOrDefault(p => p.Applier == applier)`, so
+    /// each placer stacks into their OWN pile and gets their own badge, their
+    /// own detonation credit and their own listeners. The reading is
+    /// mechanically honest -- two Klees really have placed two separate piles
+    /// -- and the clutter it costs is confined to the two-Klee case, which is
+    /// the only case that can produce it. Shape (b), a placer field threaded
+    /// through BombCharge, was REJECTED at the same ruling: more code, no
+    /// visible change, and the display keeps lying about how many piles exist.
+    ///
+    /// SOLO IS BIT-IDENTICAL BY CONSTRUCTION. One player is one applier is one
+    /// instance, and the per-applier search then finds exactly what the
+    /// unscoped search found. Every consequence below is a co-op consequence.
+    ///
+    /// Base-game precedent: OblivionPower and StranglePower are the two
+    /// shipped InstancedPerApplier powers.
+    /// </summary>
+    public override PowerInstanceType InstanceType =>
+        PowerInstanceType.InstancedPerApplier;
+
+    /// <summary>
     /// One live bomb: its charge and the combat round it was placed in.
     /// The round stamp mirrors tier0's Bomb.turn_placed and exists for
     /// modify_bombs scope 'placed_this_turn' (Chain Fuse). Today every live
@@ -114,6 +152,38 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     private static readonly SpireField<Creature, bool> SuppressionSpent =
         new(() => false);
 
+    /// <summary>
+    /// THE SUPPRESSION ARBITER. A forced consequence of R205, not a new rule.
+    ///
+    /// ModifyDamageMultiplicative is a PER-INSTANCE override and the engine
+    /// FOLDS it: Hook.ModifyDamageInternal walks every hook listener doing
+    /// `num *= num3`, and every power instance on the creature is a listener.
+    /// So the moment bombs instance per placer, two piles would each return
+    /// 0.75m and the enemy's first attack would land at 0.5625. Nobody chose
+    /// that. The printed rule is one enemy, one combat, one 25%.
+    ///
+    /// The per-Creature SuppressionSpent latch cannot arbitrate on its own,
+    /// because it is only WRITTEN in AfterAttack -- by then all N instances
+    /// have already armed and already multiplied. So exactly one instance is
+    /// ELECTED, and the election is a pure function of the enemy's own power
+    /// list: the FIRST BombPower on the owner that still has live charges.
+    /// Creature.Powers is the creature's _powers list in application order, so
+    /// this is deterministic, needs no extra state to keep in sync, and cannot
+    /// drift from what the badges show.
+    ///
+    /// BOTH READERS RUN IT, which is what makes the preview and the hit agree:
+    /// BeforeAttack latches it into _suppressionArmedForAttack for the whole
+    /// action, and the intent-preview branch evaluates it live.
+    ///
+    /// Solo: one instance, trivially the first with charges, so this predicate
+    /// is a no-op and the reduction is the same single 0.75 it always was.
+    /// </summary>
+    private bool IsSuppressionArbiter =>
+        ReferenceEquals(
+            this,
+            Owner.Powers.OfType<BombPower>()
+                 .FirstOrDefault(bomb => bomb._damages.Count > 0));
+
     // The enemy action in flight, latched at the attack-command boundary.
     // Compared by reference so a nested AttackCommand fired by a hook
     // mid-action (a retaliation, a detonation) can neither re-arm nor clear
@@ -141,6 +211,13 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// eligibility is read BEFORE the action resolves, so bombs detonating
     /// mid-action never strip later hits. A real Weak stack shares the same
     /// branch below, so the two reductions never multiply.
+    ///
+    /// EVERY instance latches the command, but only the elected arbiter arms.
+    /// The latch on the non-arbiters is load-bearing, not bookkeeping: it is
+    /// what keeps them in the snapshot branch below for the whole action, so a
+    /// retaliation that pops the arbiter's pile mid-action cannot promote a
+    /// second instance into the arbiter role and land a second 0.75 on a later
+    /// hit. That is the same invariant this hook already existed to hold.
     /// </summary>
     public override Task BeforeAttack(AttackCommand attack)
     {
@@ -150,7 +227,7 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         }
         _suppressionAttack = attack;
         _suppressionArmedForAttack =
-            _damages.Count > 0 && !SuppressionSpent[Owner];
+            _damages.Count > 0 && !SuppressionSpent[Owner] && IsSuppressionArbiter;
         return Task.CompletedTask;
     }
 
@@ -165,9 +242,13 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         // Inside an action the BeforeAttack snapshot rules every hit. Outside
         // one (intent preview -- same idiom as GigantificationPower's null
         // branch) the live state IS the snapshot the next action will take.
+        //
+        // IsSuppressionArbiter appears in BOTH branches on purpose: the
+        // preview must show the same one-pile-only 0.75 the hit will apply, or
+        // a two-Klee enemy's intent number would disagree with the damage.
         var suppressed = _suppressionAttack != null
             ? _suppressionArmedForAttack
-            : _damages.Count > 0 && !SuppressionSpent[Owner];
+            : _damages.Count > 0 && !SuppressionSpent[Owner] && IsSuppressionArbiter;
         if (!suppressed) return 1m;
 
         var hasRealWeak = Owner.Powers.OfType<WeakPower>()
@@ -179,6 +260,8 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, AttackCommand attack)
     {
         if (attack != _suppressionAttack) return Task.CompletedTask;
+        // Only the elected arbiter ever armed, so only the arbiter spends the
+        // creature-keyed latch -- N instances still spend it exactly once.
         if (_suppressionArmedForAttack)
         {
             SuppressionSpent[Owner] = true;
@@ -249,13 +332,26 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// re-bomb chance per detonation caused by the play (the sim diffs its
     /// detonations counter around the card; here the count is returned
     /// directly).
+    ///
+    /// EVERY PILE, not the first one found. "Detonate this enemy's bombs"
+    /// means all of them, and under InstancedPerApplier a co-op enemy carries
+    /// one pile per placer -- so Quick Fuse, Chained Reactions, Remote
+    /// Detonator and Sparkly Explosion move exactly the totals they moved when
+    /// the two placers shared one merged pile. Each pile detonates under its
+    /// OWN Applier, which is the point of the ruling.
+    ///
+    /// Snapshot before iterating: Detonate calls PowerCmd.Remove(this), so the
+    /// live power list mutates under the loop.
     /// </summary>
     public static async Task<int> DetonateOn(
         PlayerChoiceContext choiceContext, Creature target, int bonus = 0)
     {
-        var bomb = target.Powers.OfType<BombPower>().FirstOrDefault();
-        if (bomb == null) return 0;
-        return await bomb.Detonate(choiceContext, bonus);
+        var total = 0;
+        foreach (var bomb in target.Powers.OfType<BombPower>().ToList())
+        {
+            total += await bomb.Detonate(choiceContext, bonus);
+        }
+        return total;
     }
 
     /// <summary>Detonate across enemies (tier0 detonate target all_enemies);
@@ -278,6 +374,11 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// the card's own place_bomb in effect order, so the new bomb is not
     /// buffed; effect order preserves that here too). Pure mutation, no
     /// commands -- synchronous by design.
+    ///
+    /// EVERY PILE on every enemy: Chain Fuse buffs "every live bomb", and
+    /// under InstancedPerApplier the second placer's bombs are live bombs on
+    /// the same enemy. Taking the first instance would silently halve the card
+    /// on a co-op board.
     /// </summary>
     public static void ModifyAll(
         IEnumerable<Creature> enemies, int bonus, bool placedThisRoundOnly,
@@ -285,18 +386,19 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     {
         foreach (var enemy in enemies)
         {
-            var bomb = enemy.Powers.OfType<BombPower>().FirstOrDefault();
-            if (bomb == null) continue;
-            for (var i = 0; i < bomb._damages.Count; i++)
+            foreach (var bomb in enemy.Powers.OfType<BombPower>().ToList())
             {
-                var charge = bomb._damages[i];
-                if (placedThisRoundOnly && charge.RoundPlaced != currentRound)
+                for (var i = 0; i < bomb._damages.Count; i++)
                 {
-                    continue;
+                    var charge = bomb._damages[i];
+                    if (placedThisRoundOnly && charge.RoundPlaced != currentRound)
+                    {
+                        continue;
+                    }
+                    bomb._damages[i] = charge with { Damage = charge.Damage + bonus };
                 }
-                bomb._damages[i] = charge with { Damage = charge.Damage + bonus };
+                bomb.SyncDisplay();
             }
-            bomb.SyncDisplay();
         }
     }
 
@@ -305,6 +407,20 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// onto <paramref name="dest"/>, +bonus each; round stamps travel with
     /// the charges (tier0 keeps turn_placed on moved bombs). Source powers
     /// are removed once emptied.
+    ///
+    /// EVERY PILE on every source enemy, for the same reason as ModifyAll:
+    /// "gather every bomb" means every bomb, whoever placed it.
+    ///
+    /// GATHER TRANSFERS OWNERSHIP TO THE GATHERER. The re-apply below passes
+    /// the MOVER as applier, so under InstancedPerApplier the gathered charges
+    /// land in the mover's own pile on dest -- creating it if the mover had no
+    /// bombs there yet. That is the ruled default and it falls straight out of
+    /// the existing call; picking up someone else's bombs makes them yours.
+    ///
+    /// A PRE-EXISTING OTHER-PLAYER PILE ON DEST SURVIVES INTACT, badge and
+    /// all, because dest is skipped as a source. That is not an oversight
+    /// carried forward -- it is shape (a) working as ruled: the other Klee's
+    /// bombs on the destination were never gathered, so they are still hers.
     /// </summary>
     public static async Task MoveAllTo(
         PlayerChoiceContext choiceContext, Creature dest,
@@ -315,12 +431,15 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         foreach (var enemy in enemies.ToList())
         {
             if (enemy == dest) continue;
-            var source = enemy.Powers.OfType<BombPower>().FirstOrDefault();
-            if (source == null || source._damages.Count == 0) continue;
-            moved.AddRange(source._damages);
-            source._damages.Clear();
-            source.SyncDisplay();
-            await PowerCmd.Remove(source);
+            // Snapshot: PowerCmd.Remove takes the source out of this list.
+            foreach (var source in enemy.Powers.OfType<BombPower>().ToList())
+            {
+                if (source._damages.Count == 0) continue;
+                moved.AddRange(source._damages);
+                source._damages.Clear();
+                source.SyncDisplay();
+                await PowerCmd.Remove(source);
+            }
         }
         if (moved.Count == 0) return;
 
@@ -347,6 +466,31 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// "bombs detonate -> auras tick -> power hooks -> draw + energy", so this
     /// uses BeforeSideTurnStart -- which is also the only turn-start hook that
     /// carries a PlayerChoiceContext, and dealing damage requires one.
+    ///
+    /// PER INSTANCE, so on a co-op board each pile detonates in its own slot of
+    /// the broadcast, under its own placer's name. That is the ruling, and it
+    /// carries a DEATH-TEARDOWN consequence worth stating plainly because it is
+    /// the one place a pile can be lost (decompile-established, sts2.dll
+    /// v0.107.1, and forced -- this is the base game's own machinery, not a
+    /// choice made here):
+    ///
+    ///   Hook.BeforeSideTurnStart walks a listener list snapshotted when the
+    ///   broadcast opened, but re-tests CombatState.Contains(model) before
+    ///   yielding each one, and for a power that test is
+    ///   `Owner.CombatState != null`. A killing blow runs INLINE inside the
+    ///   damage command (CreatureCmd.Damage ends `await Kill(killedCreatures)`),
+    ///   and CreatureCmd.KillWithoutCheckingWinCondition detaches the corpse
+    ///   (`combatState.RemoveCreature`, unattach: true) and then strips its
+    ///   powers. So if the FIRST pile to be reached kills the enemy, the other
+    ///   placer's instances are torn down before their slot arrives and never
+    ///   detonate -- losing that placer's detonation-listener grants (Pounding
+    ///   Surprise sparks, Blazing Delight, Explosive Frags) and their Big One
+    ///   credit for those bombs.
+    ///
+    /// Solo this is unreachable by construction: one player is one instance, so
+    /// there is never a second pile to skip. The card-driven verbs are NOT
+    /// affected either -- DetonateOn snapshots the instances first and iterates
+    /// the snapshot, so Quick Fuse and friends still reach every pile.
     /// </summary>
     public override async Task BeforeSideTurnStart(
         PlayerChoiceContext choiceContext, CombatSide side,
@@ -364,6 +508,12 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// ValueProp.Unpowered and no card source, so it is not a "powered attack"
     /// and cannot re-enter here -- which, combined with clearing the list
     /// before dealing damage, is what stops a bomb from detonating itself.
+    ///
+    /// DEATH TEARDOWN DOES NOT REACH THIS HOOK. The base game does not
+    /// broadcast AfterDamageReceived at all for a blow that killed
+    /// (CreatureCmd.Damage: `if (!WasTargetKilled || !originalTarget.IsDead)`),
+    /// so no pile sees it on a killing hit -- first or second, before this
+    /// change or after it. Instancing changes nothing here.
     /// </summary>
     public override async Task AfterDamageReceived(
         PlayerChoiceContext choiceContext, Creature target, DamageResult result,
@@ -404,12 +554,21 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// blocked"). This was ONE team-wide integer. In co-op that meant a second
     /// player's detonations inflated your Big One: two Klees each throwing five
     /// bombs both read ten, and the card's damage roughly doubled for free.
-    /// The sim cannot see it -- tier 0.5 models one seat -- and there is no C#
-    /// test project, so co-op defects are play-derived by construction.
+    /// D2 scoped the TRACKER: the dictionary is keyed per player, using the
+    /// ownership idiom ExplosiveFrags.OnBombDetonated states two files over
+    /// ("own bombs only: in co-op another player's detonations are theirs").
     ///
-    /// The ownership idiom is ExplosiveFrags.OnBombDetonated two files over
-    /// ("own bombs only: in co-op another player's detonations are theirs"),
-    /// keyed on the APPLIER's player. Same key here.
+    /// THAT WAS HALF THE DEFECT, AND UNTIL R205 THIS COMMENT READ AS THOUGH IT
+    /// WERE ALL OF IT. The key is the applier's Player -- but while BombPower
+    /// merged both placers into one instance there was only ever ONE Applier
+    /// to key on, so the second Klee's bombs still counted toward the first
+    /// Klee's Big One through a dictionary that looked correctly scoped and
+    /// was. InstanceType above closes the other half: one instance per placer
+    /// is one Applier per pile, so this key finally separates what it names.
+    ///
+    /// The sim still cannot see any of it -- tier 0.5 models one seat -- and
+    /// KleeTests (EB-105) reaches per-seat ownership but not a live
+    /// CombatState, so the two-seat DETONATION itself stays play-derived.
     ///
     /// Solo behaviour is unchanged by construction: with one player the
     /// per-player count and the team-wide count are the same number.
@@ -441,6 +600,13 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     /// The Big One's bonus still reads
     /// <see cref="DetonationsThisCombat"/>, which counts corpse detonations
     /// among its total exactly as it did before this counter existed.
+    ///
+    /// R205 MOVES THE BOUNDARY THIS COUNTER IS DRAWN AROUND, in co-op only.
+    /// "The payload" used to be every bomb on the enemy in one merged list;
+    /// it is now one placer's pile. So the trailing-corpse split is taken
+    /// GROUPED BY PLACER rather than in one interleaved run, and the placer
+    /// whose pile lands the kill is the only one who can record a live-target
+    /// detonation for that enemy. Solo the two readings are the same list.
     /// </summary>
     private static readonly Dictionary<Player, int> _corpseDetonationsByPlayer = new();
 
@@ -501,11 +667,19 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         // Explosives Workshop: flat bonus per detonation, added BEFORE
         // amplification -- the sim totals `bomb.damage + bonus + bomb_damage_up`
         // and only then enters the elemental pipeline (effects.py detonate_bombs).
+        //
+        // R205, co-op: `applier` is now THIS PILE's placer rather than whoever
+        // happened to bomb the enemy first, so the Workshop bonus and every
+        // dealer-side amplification below read the right Klee's board. That is
+        // a detonation-DAMAGE move, forced by the ruling and stated here so it
+        // is not mistaken for drift.
         var damageUp =
             applier?.Powers.OfType<BombDamageUpPower>().FirstOrDefault()?.Amount ?? 0;
 
         // One VFX per detonation EVENT, not per bomb stack (sprint plan E2's
-        // spam guard) — this method is the per-event funnel.
+        // spam guard) — this method is the per-event funnel. R205 makes "event"
+        // mean "one placer's pile", so a two-Klee enemy lobs two: the spam
+        // guard still holds per pile, and two piles are two events.
         Vfx.KleeCombatVfx.SpawnBombLob(applier, target);
 
         foreach (var damage in payloads)
