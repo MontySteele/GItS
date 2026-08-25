@@ -278,6 +278,7 @@ def test_pilot_reads_klee_pure_state_conditional_block():
     assert policy._raw_block(state, dress) == 9
 
 
+@pytest.mark.battery
 @pytest.mark.parametrize("deck,pilot", DECKS)
 @pytest.mark.parametrize("enc", ["swarm", "punisher", "attrition",
                                  "burst_check", "tank_boss", "gauntlet"])
@@ -287,6 +288,7 @@ def test_klee_decks_run_clean(deck, pilot, enc):
     assert "INFINITE" not in s["flags"], s
 
 
+@pytest.mark.battery
 @pytest.mark.parametrize("deck", ["melt_stack", "barrage_engine",
                                   "loop_density", "dream_team"])
 def test_watchlist_configs_run_clean(deck):

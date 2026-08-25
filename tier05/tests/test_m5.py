@@ -515,6 +515,7 @@ def test_bomb_guard_proxy_does_not_stack_with_printed_weak():
     assert draft._static_power(sorry) == 4 + 4 * 0.5 + 1.5
 
 
+@pytest.mark.battery
 def test_draft_regret_deterministic():
     r = model.run_many("klee", "spark", "spark",
                        draft.assigned_policy, 20, SEED)
@@ -692,6 +693,7 @@ def test_survival_profile_keeps_dead_runs_in_later_fight_cohorts():
     assert died["act_median_hp_pct"] < survived["act_median_hp_pct"]
 
 
+@pytest.mark.battery
 def test_summarize_runs_fragility_shape():
     res = model.run_many("klee", "demolition", "demolition",
                          draft.assigned_policy, 40, SEED)

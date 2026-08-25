@@ -134,6 +134,7 @@ HEALTHY = lambda f: 1.0                                   # noqa: E731
 DEGRADING = lambda f: 1.0 - 0.6 * f / 15                  # noqa: E731
 
 
+@pytest.mark.battery
 def test_hunter_hits_the_player_behaviour_target():
     """THE calibration claim. Domain ground truth (research §1.3): a competent
     player fights a median ~2.5 elites per act, realistic range 1-4, because
@@ -152,6 +153,7 @@ def test_hunter_hits_the_player_behaviour_target():
         "a path-hunter should nearly always find at least one"
 
 
+@pytest.mark.battery
 def test_elite_count_responds_to_run_state():
     """The clause that makes the target meaningful. A policy that always takes
     exactly two hits the median and is still wrong -- a real player takes the
@@ -176,6 +178,7 @@ def test_elite_count_responds_to_run_state():
     assert rests_hurt > rests_healthy + 0.5
 
 
+@pytest.mark.battery
 def test_the_two_policies_are_structurally_different():
     """The A/B is only worth running if the poles actually differ. `cautious`
     deliberately brackets BELOW the realistic floor -- it is not a model of a

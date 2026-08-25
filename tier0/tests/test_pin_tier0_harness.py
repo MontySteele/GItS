@@ -10,6 +10,8 @@ something different while still looking well-formed.
 
 from __future__ import annotations
 
+import pytest
+
 from tier0.harness import axes, metrics
 from tier0.harness.runner import score_config
 from tier0.tests.conftest import make_state
@@ -77,6 +79,7 @@ def test_scripted_enemy_sleeps_count_as_enemy_actions_in_control_uptime():
 
 # --- runner: the sign of the reported matchup-texture delta ---------------
 
+@pytest.mark.battery
 def test_pressure_delta_is_punisher_winrate_minus_attrition_winrate():
     """pressure_delta is subtracted punisher-first: a POSITIVE value means
     the config does better against the burst matchup than the grind, and a

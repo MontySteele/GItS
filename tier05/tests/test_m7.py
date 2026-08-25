@@ -1,9 +1,12 @@
 """M7: rest-site smithing in the run model."""
 
+import pytest
+
 from tier0.content import loader, upgrades
 from tier05 import draft, model
 
 
+@pytest.mark.battery
 def test_runs_rest_coherently_and_stay_deterministic():
     """DRAFTER_VERSION 5 revision: both template rests directly precede an
     E/B fight, so the pre-fight lookahead heals every bruised (<90%)
@@ -41,6 +44,7 @@ def test_upgraded_ids_flow_through_metrics_unchanged():
     assert draft.archetype_shares(plain) == draft.archetype_shares(smithed)
 
 
+@pytest.mark.battery
 def test_adaptive_runs_are_label_independent_including_rests():
     """Review-workflow regression: M7 smithing consulted the assigned
     label, so adaptive runs (defined to ignore it) diverged by label at

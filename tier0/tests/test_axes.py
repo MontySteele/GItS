@@ -21,6 +21,7 @@ def package():
                         FIGHTS, SEED)
 
 
+@pytest.mark.battery
 def test_shared_anchor_battery_scores_identically(package):
     """score_character hands ONE baseline battery to every deck it scores
     instead of re-running it per deck. The anchor is a deterministic
@@ -36,15 +37,18 @@ def test_shared_anchor_battery_scores_identically(package):
     assert passed_in["pressure_delta"] == package["pressure_delta"]
 
 
+@pytest.mark.battery
 def test_baseline_scores_are_exactly_three(baseline):
     for ax, v in baseline["scores"].items():
         assert v == pytest.approx(3.0), ax
 
 
+@pytest.mark.battery
 def test_baseline_has_no_heuristic_flags(baseline):
     assert baseline["heuristic_flags"] == []
 
 
+@pytest.mark.battery
 def test_package_deck_scales_better_than_starter(package):
     # Strength ramp is the package's whole identity: A2 must move up.
     # (The raw curve exponents are both slightly negative and within
@@ -52,11 +56,13 @@ def test_package_deck_scales_better_than_starter(package):
     assert package["scores"]["A2_scaling"] > 3.0
 
 
+@pytest.mark.battery
 def test_package_deck_beats_starter_on_tank_boss(package):
     wr = metrics.summarize(package["stats"]["tank_boss"])["winrate"]
     assert wr > 0.5
 
 
+@pytest.mark.battery
 def test_gauntlet_merges_stages():
     stats = run_battery("ref_ironclad", "starter", "gauntlet", "generic",
                         20, SEED)
@@ -76,6 +82,7 @@ def test_gauntlet_merges_stages():
 
 # --- frozen battery regression (recalibrating requires editing these) ---
 
+@pytest.mark.battery
 @pytest.mark.parametrize("enc,lo,hi", [
     ("punisher", 0.40, 0.70),      # target 50-60%
     ("swarm", 0.95, 1.01),
@@ -88,6 +95,7 @@ def test_frozen_battery_starter_winrates(enc, lo, hi):
     assert lo < wr < hi, f"{enc}: {wr} outside frozen calibration band"
 
 
+@pytest.mark.battery
 def test_frozen_battery_fight_lengths():
     swarm = metrics.summarize(run_battery(
         "ref_ironclad", "starter", "swarm", "generic", 300, SEED))
@@ -100,6 +108,7 @@ def test_frozen_battery_fight_lengths():
     assert boss["avg_turns"] >= 10     # A2 needs turn-10 data
 
 
+@pytest.mark.battery
 def test_a7_self_referential_sanity(baseline):
     # Review ruling #3: REF_IRONCLAD starter reaches 70% of its own peak
     # window within the first few turns (no engine to assemble).
@@ -194,6 +203,7 @@ def test_the_declared_pair_is_a_parameter():
         swapped, elite_pair=("A1_frontload", "A3_block")) == []
 
 
+@pytest.mark.battery
 def test_the_anchor_is_not_scored_against_a_declared_identity(baseline):
     """REF_IRONCLAD starter is flat 3.0 BY CONSTRUCTION and declares no elite
     pair, so `None` (out of scope) is the honest reading — an empty list would
@@ -201,10 +211,12 @@ def test_the_anchor_is_not_scored_against_a_declared_identity(baseline):
     assert baseline["invariant_flags"] is None
 
 
+@pytest.mark.battery
 def test_a_package_deck_is_out_of_scope_like_the_shape_heuristic(package):
     assert package["invariant_flags"] is None
 
 
+@pytest.mark.battery
 def test_a_character_starter_gets_a_real_reading():
     klee = score_config("klee", "starter", "generic", 40, SEED)
     assert isinstance(klee["invariant_flags"], list)
@@ -241,6 +253,7 @@ def test_no_declared_identity_is_none_not_an_empty_list():
     assert axes.identity_flags({ax: 3.0 for ax in axes.AXES}, []) is None
 
 
+@pytest.mark.battery
 def test_the_anchors_package_declares_no_identity_so_it_reads_none(package):
     """`ref_ironclad` declares no `constraints:`, so BOTH readings are out of
     scope on it -- `None` and not `[]`, which would claim a check that never
@@ -249,6 +262,7 @@ def test_the_anchors_package_declares_no_identity_so_it_reads_none(package):
     assert package["identity_flags"] is None
 
 
+@pytest.mark.battery
 def test_a_character_package_deck_still_gets_an_identity_reading():
     """R204 DEMOTED the comparison rather than narrowing it, and the two
     scopes now differ on purpose. The scorecard invariants are out of scope on

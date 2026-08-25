@@ -108,6 +108,7 @@ def test_burst_cast_rate_with_retain():
     assert cast / full > 0.5
 
 
+@pytest.mark.battery
 def test_a4_baseline_heals_and_klee_floors():
     base = score_config("ref_ironclad", "starter", "generic", FIGHTS, SEED)
     assert base["raw"]["A4_sustain"] > 0            # Burning Blood anchor
@@ -117,6 +118,7 @@ def test_a4_baseline_heals_and_klee_floors():
     assert klee["scores"]["A4_sustain"] == 0.5      # zero-healing floor
 
 
+@pytest.mark.battery
 def test_sustain_probe_raises_a4():
     """R8: the barbara_injection instrument died with the conjunctive
     healing law (its heals converted to block/meter). The A4 probe now
@@ -133,6 +135,7 @@ def test_sustain_probe_raises_a4():
         "klee", "reaction_weighted").relic_hooks
 
 
+@pytest.mark.battery
 def test_a6_ordering_anchor():
     # Ruling 2 sanity: Ironclad-package < Klee on the AoE term.
     pkg = score_config("ref_ironclad", "archetype_package", "generic",
@@ -143,6 +146,7 @@ def test_a6_ordering_anchor():
     assert klee["scores"]["A6_utility"] > 3.0
 
 
+@pytest.mark.battery
 def test_a1_gt_a2_constraint_wired():
     """The declared identity is still WIRED -- it just no longer decides.
 

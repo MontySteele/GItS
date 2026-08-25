@@ -181,6 +181,7 @@ def test_battery_player_has_no_relic_effects():
         assert p.relic_effects == [], (character, deck)
 
 
+@pytest.mark.battery
 def test_anchor_and_baseline_still_exact():
     """Import and re-run the anchor-lock + baseline-3.0 assertions. If the
     relic engine ever perturbs the frozen battery, one of these moves and

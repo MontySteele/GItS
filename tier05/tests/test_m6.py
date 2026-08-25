@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import random
 
+import pytest
+
 from tier0 import constants as C
 from tier0.content import loader
 from tier05 import ab, draft, model
@@ -163,6 +165,7 @@ def test_relevance_is_judged_before_the_pick_lands():
     assert rel["screens"] == sum(len(r.decisions) for r in rs)
 
 
+@pytest.mark.battery
 def test_relevance_measures_the_pool_not_the_policy():
     """Same seeds, different policy: the FIRST screen is offered before any
     pick diverges, so its relevance must match regardless of policy.
@@ -203,6 +206,7 @@ def test_relevance_is_deck_sensitive_for_reaction():
     assert not draft.offer_advances_plan(offers, done, "reaction")
 
 
+@pytest.mark.battery
 def test_achievability_alarm_threshold():
     rs = model.run_many("klee", "demolition", "demolition",
                         draft.assigned_policy, runs=40, seed=6)

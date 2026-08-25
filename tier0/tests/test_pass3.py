@@ -27,6 +27,7 @@ def test_boom_rework_is_amp_nuke():
     assert boom.effects[1]["then"][0]["op"] == "repeat_this"
 
 
+@pytest.mark.battery
 def test_reaction_solo_floors():
     # Ruling: co-op-primary archetype, accepted solo floors.
     tb = metrics.summarize(run_battery("klee", "reaction_weighted",
@@ -37,6 +38,7 @@ def test_reaction_solo_floors():
     assert ga["winrate"] >= 0.75, ga
 
 
+@pytest.mark.battery
 def test_median_identity_evaluation(klee_report):
     """R204 (2026-08-24) took the ASSERTIONS out of this test and left the
     REPORTING in.
@@ -63,6 +65,7 @@ def test_median_identity_evaluation(klee_report):
         assert "DECLARED_IDENTITY" in f and "A1_frontload>A2_scaling" in f, f
 
 
+@pytest.mark.battery
 def test_the_declared_identity_is_reported_on_every_deck(klee_report):
     """R204's "demote, don't delete", executable.
 

@@ -1,5 +1,7 @@
 """Combat loop + determinism (spec M1: same seed = identical log)."""
 
+import pytest
+
 from tier0.content import loader
 from tier0.engine.combat import run_fight
 from tier0.harness import metrics
@@ -43,6 +45,7 @@ def test_starter_vs_punisher_is_competitive():
     assert 0.05 < s["winrate"] < 0.95, s
 
 
+@pytest.mark.battery
 def test_package_deck_beats_starter():
     base = metrics.summarize(run_battery("ref_ironclad", "starter",
                                          "punisher", "generic", 200, 7))
