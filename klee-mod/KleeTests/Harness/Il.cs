@@ -119,10 +119,18 @@ internal static class Il
     {
         yield return method;
 
-        var asyncAttr = method.GetCustomAttribute<AsyncStateMachineAttribute>();
-        if (asyncAttr == null) yield break;
+        // An async method compiles to a state machine, and so does an ITERATOR
+        // (`yield return`). In both cases the declared body is a stub that news
+        // up the machine and the real call sites live in the generated
+        // MoveNext. The iterator arm is what EB-130's death-teardown pin needs:
+        // it reads the game's own hook-listener iterator, whose declared body
+        // calls nothing but the state machine's constructor.
+        var machine =
+            method.GetCustomAttribute<AsyncStateMachineAttribute>()?.StateMachineType
+            ?? method.GetCustomAttribute<IteratorStateMachineAttribute>()?.StateMachineType;
+        if (machine == null) yield break;
 
-        var moveNext = asyncAttr.StateMachineType.GetMethod("MoveNext", HeadlessGame.All);
+        var moveNext = machine.GetMethod("MoveNext", HeadlessGame.All);
         if (moveNext != null) yield return moveNext;
     }
 
