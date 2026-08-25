@@ -462,17 +462,54 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     }
 
     /// <summary>
-    /// Start-of-turn detonation. Tier 0 orders the player turn as
-    /// "bombs detonate -> auras tick -> power hooks -> draw + energy", so this
-    /// uses BeforeSideTurnStart -- which is also the only turn-start hook that
-    /// carries a PlayerChoiceContext, and dealing damage requires one.
+    /// One Bomb pile as it stood BEFORE any of the turn's detonation damage:
+    /// what it will deal, who placed it, and the combat it belongs to.
     ///
-    /// PER INSTANCE, so on a co-op board each pile detonates in its own slot of
-    /// the broadcast, under its own placer's name. That is the ruling, and it
-    /// carries a DEATH-TEARDOWN consequence worth stating plainly because it is
-    /// the one place a pile can be lost (decompile-established, sts2.dll
-    /// v0.107.1, and forced -- this is the base game's own machinery, not a
-    /// choice made here):
+    /// EB-138. The whole point of taking this is that it OUTLIVES the power.
+    /// Once a pile is claimed, nothing the resolution does -- a kill, a
+    /// teardown, a hook that strips powers off a corpse -- can take the pile's
+    /// credit or its listeners away, because none of that is still stored on
+    /// the power.
+    /// </summary>
+    public readonly record struct TurnStartPile(
+        BombPower Power, IReadOnlyList<int> Payload, Creature? Applier,
+        ICombatState? Combat);
+
+    /// <summary>
+    /// Take THIS pile's charges: empty the list, refresh the badge, and hand
+    /// back what it was carrying (null if it was already empty).
+    ///
+    /// PURE -- no commands, nothing that can kill -- which is what lets the
+    /// take run across EVERY pile before the first hit lands. It is also the
+    /// recursion guard the single-pile path has always had: detonation damage
+    /// can kill, fire hooks and re-enter combat logic, so the charges must
+    /// already be spent by then. Tier 0 does the same
+    /// (`bombs, enemy.bombs = enemy.bombs, []`).
+    ///
+    /// Applier and CombatState are read HERE rather than at resolution: the
+    /// power is about to be detached and its state references may not survive
+    /// removal.
+    /// </summary>
+    private TurnStartPile? Take()
+    {
+        if (_damages.Count == 0) return null;
+
+        var taken = new TurnStartPile(
+            this, _damages.Select(charge => charge.Damage).ToList(),
+            Applier, CombatState);
+        _damages.Clear();
+        SyncDisplay();
+        return taken;
+    }
+
+    /// <summary>
+    /// EB-138 -- THE COMPENSATION, and it is one step: TAKE every pile on this
+    /// enemy BEFORE any damage begins.
+    ///
+    /// `EB-130` made a bombed enemy carry one pile per placing creature, and
+    /// that took something away that the old merged payload had. The base
+    /// game's own machinery is what takes it (decompile-established, sts2.dll
+    /// v0.107.1, and forced -- not a choice made here):
     ///
     ///   Hook.BeforeSideTurnStart walks a listener list snapshotted when the
     ///   broadcast opened, but re-tests CombatState.Contains(model) before
@@ -481,23 +518,101 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
     ///   damage command (CreatureCmd.Damage ends `await Kill(killedCreatures)`),
     ///   and CreatureCmd.KillWithoutCheckingWinCondition detaches the corpse
     ///   (`combatState.RemoveCreature`, unattach: true) and then strips its
-    ///   powers. So if the FIRST pile to be reached kills the enemy, the other
-    ///   placer's instances are torn down before their slot arrives and never
-    ///   detonate -- losing that placer's detonation-listener grants (Pounding
-    ///   Surprise sparks, Blazing Delight, Explosive Frags) and their Big One
-    ///   credit for those bombs.
+    ///   powers. So if the first pile reached killed the enemy, every later
+    ///   placer's instance was torn down before its slot arrived and never
+    ///   detonated -- losing that placer's detonation-listener grants (Pounding
+    ///   Surprise, Blazing Delight, Explosive Frags, Touch of Orobas) and their
+    ///   Big One credit.
     ///
-    /// Solo this is unreachable by construction: one player is one instance, so
-    /// there is never a second pile to skip. The card-driven verbs are NOT
-    /// affected either -- DetonateOn snapshots the instances first and iterates
-    /// the snapshot, so Quick Fuse and friends still reach every pile.
+    /// IN THE OLD MERGED-PAYLOAD WORLD THOSE BOMBS WERE CONSUMED, CREDITED AND
+    /// FED TO LISTENERS after a kill, because they were trailing entries in one
+    /// list that had already been spent. Instancing is what took that away, so
+    /// this is a co-op REGRESSION and not a new rule, and the repair restores
+    /// the old parity rather than inventing one (R211, [USER] 2026-08-25).
+    ///
+    /// HOW: take first, resolve second. Every pile is emptied while the enemy
+    /// is still alive, and resolution then runs off the returned SNAPSHOT
+    /// under each pile's ORIGINAL owner. A kill mid-resolution therefore
+    /// fizzles the later piles' DAMAGE against the corpse -- which is what
+    /// tier0 does too, where the clamp makes a hit on a dead enemy count for
+    /// nothing (`effects.detonate_bombs`) -- while their bombs are still
+    /// consumed, still credit their own placer's counters, and still fire
+    /// their own placer's listeners.
+    ///
+    /// IDEMPOTENT BY CONSTRUCTION, which is what lets any instance be the one
+    /// that runs it: the first instance reached takes ALL the piles, so every
+    /// later instance finds nothing to take and no-ops. A teardown that
+    /// removes those later instances can no longer remove anything still owed
+    /// -- there is nothing left ON them to remove.
+    ///
+    /// Solo is unchanged by construction: one player is one applier is one
+    /// pile, so take-then-resolve is the single-pile order it always was.
+    /// </summary>
+    public static IReadOnlyList<TurnStartPile> TakeTurnStartPiles(Creature enemy)
+    {
+        var taken = new List<TurnStartPile>();
+        // Snapshot the instance list too, so the loop reads one fixed set of
+        // piles in the enemy's own application order -- which is what makes
+        // the resolution below deterministic.
+        foreach (var pile in enemy.Powers.OfType<BombPower>().ToList())
+        {
+            if (pile.Take() is { } charge)
+            {
+                taken.Add(charge);
+            }
+        }
+        return taken;
+    }
+
+    /// <summary>Take every pile (above), then detach the emptied powers. The
+    /// two halves are separate because only the FIRST is allowed to matter: by
+    /// the time anything that can run a command happens, every pile's payload
+    /// is already off the power and in the returned list.</summary>
+    public static async Task<IReadOnlyList<TurnStartPile>> ClaimTurnStartPiles(
+        Creature enemy)
+    {
+        var claimed = TakeTurnStartPiles(enemy);
+        foreach (var pile in claimed)
+        {
+            await PowerCmd.Remove(pile.Power);
+        }
+        return claimed;
+    }
+
+    /// <summary>Claim every pile on this enemy, then resolve each one under its
+    /// own placer. Returns how many bombs detonated. See
+    /// <see cref="ClaimTurnStartPiles"/> for why the two halves are separate.
+    /// </summary>
+    public static async Task<int> ResolveTurnStartPiles(
+        PlayerChoiceContext choiceContext, Creature enemy)
+    {
+        var total = 0;
+        foreach (var pile in await ClaimTurnStartPiles(enemy))
+        {
+            total += await ResolvePayload(choiceContext, enemy, pile, bonus: 0);
+        }
+        return total;
+    }
+
+    /// <summary>
+    /// Start-of-turn detonation. Tier 0 orders the player turn as
+    /// "bombs detonate -> auras tick -> power hooks -> draw + energy", so this
+    /// uses BeforeSideTurnStart -- which is also the only turn-start hook that
+    /// carries a PlayerChoiceContext, and dealing damage requires one.
+    ///
+    /// THE HOOK IS STILL PER INSTANCE -- that is the game's broadcast, not ours
+    /// -- but what it does is not per instance any more: whichever pile's slot
+    /// arrives FIRST resolves the whole enemy (EB-138). The card-driven verbs
+    /// were never affected: DetonateOn snapshots the instances first and
+    /// iterates the snapshot, so Quick Fuse and friends already reached every
+    /// pile.
     /// </summary>
     public override async Task BeforeSideTurnStart(
         PlayerChoiceContext choiceContext, CombatSide side,
         IReadOnlyList<Creature> participants, ICombatState combatState)
     {
         if (side != CombatSide.Player) return;
-        await Detonate(choiceContext);
+        await ResolveTurnStartPiles(choiceContext, Owner);
     }
 
     /// <summary>
@@ -530,18 +645,6 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         await Detonate(choiceContext);
     }
 
-    /// <summary>
-    /// Detonates every bomb on this enemy; returns how many detonated.
-    /// <paramref name="bonus"/> is the card-carried detonation bonus (tier0
-    /// detonate_bombs: `dmg = bomb.damage + bonus + bomb_damage_up` -- Remote
-    /// Detonator's +2 rides here, before amplification, exactly like the
-    /// Explosives Workshop bonus).
-    ///
-    /// Clears the list BEFORE dealing any damage. Tier 0 does the same
-    /// (`bombs, enemy.bombs = enemy.bombs, []`) and it is the recursion guard:
-    /// detonation damage can kill, trigger hooks, and re-enter combat logic, so
-    /// the charges must already be spent by then.
-    /// </summary>
     /// <summary>
     /// Per-combat, PER-PLAYER detonation total (sim: state.detonations_total),
     /// read by The Big One's (grand_finale) bonus_formula. Keyed to the
@@ -649,20 +752,45 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
             (_corpseDetonationsByPlayer.TryGetValue(player, out var c) ? c : 0) + 1;
     }
 
+    /// <summary>
+    /// Detonates every bomb in THIS pile; returns how many detonated.
+    /// <paramref name="bonus"/> is the card-carried detonation bonus (tier0
+    /// detonate_bombs: `dmg = bomb.damage + bonus + bomb_damage_up` -- Remote
+    /// Detonator's +2 rides here, before amplification, exactly like the
+    /// Explosives Workshop bonus).
+    ///
+    /// Claim then resolve, which is where the recursion guard lives: the
+    /// charges are spent and the power detached BEFORE any damage, because
+    /// detonation damage can kill, fire hooks and re-enter combat logic. Tier 0
+    /// does the same (`bombs, enemy.bombs = enemy.bombs, []`). The turn-start
+    /// path splits those two halves across every pile on the enemy rather than
+    /// doing them one pile at a time -- see <see cref="ClaimTurnStartPiles"/>.
+    /// </summary>
     private async Task<int> Detonate(PlayerChoiceContext choiceContext, int bonus = 0)
     {
-        if (_damages.Count == 0) return 0;
-
-        var payloads = _damages.Select(c => c.Damage).ToList();
-        _damages.Clear();
-        SyncDisplay();
-
+        // Read before the take: PowerCmd.Remove detaches the power, and the
+        // target is who the payload is resolving against.
         var target = Owner;
-        var applier = Applier;
-        // Snapshot before Remove: the power's state references may not
-        // survive removal, and RecordDetonation below needs the combat.
-        var combatState = CombatState;
+        if (Take() is not { } pile) return 0;
         await PowerCmd.Remove(this);
+        return await ResolvePayload(choiceContext, target, pile, bonus);
+    }
+
+    /// <summary>
+    /// Resolve one CLAIMED pile against <paramref name="target"/>: per bomb,
+    /// credit its placer, deal its Pyro hit, and ring its placer's listeners.
+    ///
+    /// Static and snapshot-driven on purpose (EB-138): everything it needs
+    /// travels in the <see cref="TurnStartPile"/>, so a pile resolves the same
+    /// whether its power still exists, whether the enemy is still alive, and
+    /// whether some earlier pile already killed it.
+    /// </summary>
+    private static async Task<int> ResolvePayload(
+        PlayerChoiceContext choiceContext, Creature target, TurnStartPile pile,
+        int bonus)
+    {
+        var applier = pile.Applier;
+        var combatState = pile.Combat;
 
         // Explosives Workshop: flat bonus per detonation, added BEFORE
         // amplification -- the sim totals `bomb.damage + bonus + bomb_damage_up`
@@ -682,7 +810,7 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
         // guard still holds per pile, and two piles are two events.
         Vfx.KleeCombatVfx.SpawnBombLob(applier, target);
 
-        foreach (var damage in payloads)
+        foreach (var damage in pile.Payload)
         {
             // Sim order: detonations_total increments before the damage
             // lands (effects.py detonate_bombs).
@@ -690,7 +818,10 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
             // The corpse test is read PER BOMB and BEFORE this bomb's damage,
             // which is the only reading that says what it means: the bomb that
             // lands the kill detonated on a live enemy, and every bomb behind
-            // it in the same payload detonated on a corpse.
+            // it detonated on a corpse. EB-138 widens what "behind it" reaches
+            // without changing the test: on a co-op board the bombs behind the
+            // kill can now be a LATER PLACER'S pile, and they record against
+            // that placer rather than being lost with their power.
             RecordDetonation(combatState, applier, onCorpse: target is { IsDead: true });
 
             // R23: each detonation is a Pyro-tagged hit (tier0 detonate_bombs
@@ -706,7 +837,7 @@ public sealed class BombPower : PowerModel, ILocalizationProvider
             await NotifyDetonationListeners(choiceContext, applier, target, damage);
         }
 
-        return payloads.Count;
+        return pile.Payload.Count;
     }
 
     /// <summary>
