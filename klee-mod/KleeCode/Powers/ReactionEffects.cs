@@ -99,14 +99,16 @@ internal static class ReactionEffects
     /// Vulnerable never applied -- dropping the x1.5 from both the preview and
     /// the dealt damage. `ReactionsThisTurn` accumulated across both turns.
     ///
-    /// CO-OP SCOPING IS NOT SETTLED HERE. `_turnStartTotal` is board-scoped by
-    /// red-pen R1 and can simply be re-taken. The per-dealer map cannot:
-    /// `Clear()` would wipe a partner who is NOT taking the extra turn and
-    /// whose count is legitimately current. So only the extra-turn player's
-    /// own key is removed -- the narrow choice that touches no partner state
-    /// and is byte-identical to `Clear()` solo, where there is one player.
-    /// Whether that is the RIGHT co-op reading is a behavior call and is
-    /// [USER]'s (QUEUE); it is deliberately not decided by this line.
+    /// CO-OP SCOPING IS RATIFIED AS SHIPPED (R205, 2026-08-24). An extra turn
+    /// is a new turn FOR THE BOARD and only for the player taking it:
+    /// board-global turn facts are RE-TAKEN (`_turnStartTotal`, and
+    /// `ReactionTriggeredThisTurn` stays global across the extra turn exactly
+    /// as red-pen R1 made it -- a Reaction is a fact about the board), while
+    /// the per-dealer map clears ONLY the extra-turn player's own key. A
+    /// partner who is not taking the extra turn keeps their once-per-turn
+    /// window, because their count is legitimately current and `Clear()` would
+    /// wipe it; and the partner does NOT receive another turn. Solo this is
+    /// byte-identical to `Clear()`, where there is one player.
     /// </summary>
     public static void MarkExtraTurnStart(Creature? extraTurnCreature)
     {

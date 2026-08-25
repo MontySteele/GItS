@@ -140,6 +140,28 @@ from tools import effect_walk                       # noqa: E402
 # classify the same pool differently must not both say `v1` -- and no
 # baseline has been taken under either, which is the whole point of doing
 # this before the freeze (packet 2.3(4)). This is not an `RT/D/P/C` stamp.
+#
+# ===== v3 IS RATIFIED, AND ITS ONE KNOWN ARTIFACT IS DECLARED HERE =====
+# R205 (2026-08-24). There is no v4 now. The artifact, measured at the
+# Phase-1-only post-read: `random_enemies` sits in BOTH `RANDOM_TARGETS` and
+# `MULTI_TARGETS`, so de-randomizing a placement row (door (a), R204) deletes
+# an `enemy_count` shared read along with the randomness -- Klee `random
+# placement` fell 20.8% -> 5.6% while shared-hook share fell 66.7% -> 65.3%,
+# and two cards lost their only shared hook that way.
+#
+# THE ARTIFACT IS REAL AND IT IS CORRECTLY SIGNED. `random_enemies` and
+# `all_enemies` genuinely DO depend on the enemy population -- how much they
+# do is a fact about the board -- and a single aimed target genuinely does
+# not. So the column is not lying about those rows. What the vocabulary is
+# missing is a DIFFERENT concept, `target_selection`, not a defect in
+# `enemy_count`: nothing here models how a target is chosen, only how many
+# bodies an effect reaches.
+#
+# IF TARGET CHOICE IS EVER MODELLED it enters as a NEW vocabulary, roster-wide,
+# with BOTH sides re-run under it -- never as a patch to this comparison. A
+# reading is comparable only with readings taken under its own
+# `VOCAB_VERSION`, and the published Phase-1 post-read stands as published
+# (R101b) and is not re-run against a later vocabulary.
 VOCAB_VERSION = "eb118-connectivity-v3"
 
 # `recall_to_draw`'s exhaust-pile source (tier0.engine.effects).
@@ -704,6 +726,10 @@ REQUIRES_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "burst_energy_full": [_hook("private", "burst", "read")],
 }
 
+# `random_enemies` is deliberately in BOTH sets -- it is random AND it is
+# multi. The consequence for anyone reading the shared-hook column off a
+# de-randomized row is DECLARED at `VOCAB_VERSION` above (R205); read it there
+# before concluding this membership is a bug.
 RANDOM_TARGETS = frozenset({"random_enemy", "random_enemies"})
 MULTI_TARGETS = frozenset({"all_enemies", "random_enemies"})
 # The junk rarities a created card can carry. `add_card`/`generate_*` ask
