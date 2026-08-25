@@ -339,31 +339,157 @@ def _power_amount_formula(state: CombatState, formula: dict) -> int:
     raise ValueError(f"unknown apply_power amount_formula {formula!r}")
 
 
+# EB-136 / R210 (C18). The ops whose `target: enemy` spelling means "the one
+# creature the player picked", and which therefore read `cardPlay.Target` in
+# C#. Deliberately the SAME list the emitter carries as `AIMING_OPS`
+# (`tools/gen_klee_cards.py:1070`) plus `apply_power` on an enemy-landing
+# power, because the two answering differently is the divergence this repair
+# closes: the sheet row that makes a card declare `TargetType.AnyEnemy` in the
+# mod is the sheet row that binds the aim in the sim.
+AIMING_OPS = frozenset(("damage", "place_bomb", "detonate", "move_bombs",
+                        "apply_aura", "swirl", "apply_power"))
+
+# Ops whose aimed target may be a CORPSE. C#'s dead-target rule is op-dependent
+# and this frozenset is that asymmetry, written down once:
+#
+#   * DAMAGE FIZZLES. `AttackCommand.Execute` refilters its one-element
+#     `GetPossibleTargets()` by `IsAlive` on EVERY hit and breaks on empty
+#     (`CombatState.IsLiveCombat()` returns literally `true`), with
+#     `CreatureCmd.Damage`'s `if (originalTarget2.IsDead) continue;` behind it.
+#     No retarget, no corpse hit.
+#   * EVERYTHING ELSE HERE LANDS ON THE CORPSE, because every one of them
+#     reaches the target through `PowerCmd.Apply`, whose only guard is
+#     `CanReceivePowers` -- and `Creature`'s own first-party doc says why the
+#     guard is not `IsHittable`: "a creature is not hittable if it's dead, but
+#     dead creatures can still have powers applied to them". `apply_power` is
+#     the decompile-settled case (audit sec.3.2); `place_bomb`
+#     (`BombPower.Place` -> `PowerCmd.Apply`), `move_bombs`
+#     (`BombPower.MoveAllTo` -> `PowerCmd.Apply` on `dest`) and `apply_aura` /
+#     `swirl` (`ElementalHit.ApplyOnly` -> `AuraCmd.Apply` ->
+#     `PowerCmd.Apply<XAuraPower>`) are our own mod code reaching the same
+#     door. `detonate` is the odd one and lands here on its own evidence:
+#     `BombPower.DetonateOn` reads `target.Powers.OfType<BombPower>()` with NO
+#     aliveness test at all, and the mod already RECOGNISES the corpse case --
+#     `RecordDetonation(..., onCorpse: target is { IsDead: true })`, the EB-18
+#     counter. The charges are spent; the damage behind them is what dies at
+#     `CreatureCmd.Damage`.
+#
+# `strip_block` is absent deliberately: it is not one of the emitter's aiming
+# ops, no C# behaviour is recorded for it on a corpse, and a dead creature's
+# Block is 0 -- so the two readings are observationally identical and the
+# non-inventive one is the default.
+CORPSE_TARGETABLE_OPS = frozenset(("apply_power", "place_bomb", "detonate",
+                                   "move_bombs", "apply_aura", "swirl"))
+
+
+def _card_aims_at_enemy(card: Card) -> bool:
+    """Does this card ever aim, i.e. would the mod declare
+    `TargetType.AnyEnemy` for it?
+
+    Only consulted on the `force_random_targeting` path, where the answer
+    decides whether the bind CONSUMES AN RNG DRAW: `CardCmd.AutoPlay` rolls
+    `Rng.CombatTargets` only `if (card2.TargetType == TargetType.AnyEnemy)`, so
+    a free-played card that aims at nothing must not eat a roll. The
+    deterministic bind needs no such gate (a lowest-HP read is free), which is
+    why this walk is off the hot path entirely.
+
+    Walks the WHOLE effect tree -- conditional arms, mode bodies and the
+    enchantment riders -- where the emitter's `_aims_at_chosen_enemy` reads
+    top-level rows and mode bodies only. Over-answering costs one roll; the
+    emitter under-answering is its own bug (its `ThrowIfNull` catches it).
+    """
+    def walk(effects) -> bool:
+        for fx in effects or ():
+            if (fx.get("target") == "enemy" and fx.get("op") in AIMING_OPS):
+                return True
+            if walk(fx.get("then")) or walk(fx.get("else")):
+                return True
+            for mode in fx.get("modes") or ():
+                if walk(mode.get("effects")):
+                    return True
+        return False
+    return (walk(card.effects) or walk(card.enchant_effects)
+            or walk(card.enchant_first_play_effects))
+
+
+def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
+    """C#'s `CardPlay.Target`, rolled ONCE at card-play construction.
+
+    `CardPlay.Target` is `public required Creature? Target { get; init; }` --
+    immutable for the life of the play -- and on an autoplay `CardCmd.AutoPlay`
+    fills it from `HittableEnemies` BEFORE `OnPlayWrapper` is entered. So the
+    binding moment is here, ahead of every op: a bound aim is picked pre-AoE,
+    not lazily at the first aimed row.
+
+    WHICH creature is not what R210 moved and this function does not re-open
+    it: a manual play's target is the human's mouse pick, which no engine rule
+    mirrors, so tier0 keeps its documented lowest-HP identity choice. What
+    changed is that the pick is taken ONCE instead of per op. Destination
+    SCORING stays severed as a later design question.
+    """
+    living = state.living_enemies
+    if not living:
+        return None
+    # PARITY, not fidelity: the base game rolls a RANDOM enemy for
+    # TargetType.AnyEnemy on an autoplay, and the variance profile is the whole
+    # identity of Havoc/Cascade. Keeping tier0's lowest-HP aim for free plays
+    # would hand those cards a pilot's judgement they do not have. Set only for
+    # the duration of a free play -- and now rolled ONCE PER CARD, which is
+    # where `CardCmd.AutoPlay` rolls it, rather than once per op.
+    if state.force_random_targeting and _card_aims_at_enemy(card):
+        return state.rng.choice(living)
+    return min(living, key=lambda e: e.hp)
+
+
 def _default_target(state: CombatState) -> Optional[Enemy]:
-    """tier0's single-target aim -- the lowest-HP living enemy, the same one
-    _pick_targets('enemy') returns and resolve_card snapshots for its aura
-    predicate. Dismantle's hit-count predicate and Dominate/MoltenFist's
-    power-reading formula both need the enemy the card is about to (or just
-    did) hit. CAVEAT, inherent to the model and shared with Bash/Uppercut:
-    across ops the aim is RE-picked, so a hit that kills the aimed enemy
-    hands the rider to whoever is lowest-HP next, not to a corpse."""
+    """The enemy a card-reading predicate or formula is talking about.
+
+    INSIDE a card play this is the bound aim and nothing else -- Dismantle's
+    hit-count predicate and Dominate/MoltenFist's power-reading formula both
+    mean `cardPlay.Target`, and under R210 that is a single creature for the
+    whole play, DEAD OR ALIVE. The C17-and-earlier caveat this docstring used
+    to carry (the aim is re-picked across ops, so a hit that kills it hands the
+    rider to whoever is lowest-HP next) is exactly what EB-136 repaired.
+
+    OUTSIDE a card play -- the pilot's estimates, which run between plays --
+    there is no `CardPlay` yet, so the honest answer is the live lowest-HP
+    read: the aim the next play WOULD bind.
+    """
+    if state.card_aim_bound:
+        return state.card_aim
     living = state.living_enemies
     return min(living, key=lambda e: e.hp) if living else None
 
 
-def _pick_targets(state: CombatState, spec: str) -> list[Enemy]:
-    living = state.living_enemies
-    if not living:
-        return []
-    if spec in ("enemy", "lowest_hp_enemy"):        # pilot aims at lowest HP
-        # PARITY, not fidelity: the base game rolls a RANDOM enemy for
-        # TargetType.AnyEnemy on an autoplay, and the variance profile is
-        # the whole identity of Havoc/Cascade. Keeping tier0's lowest-HP aim
-        # for free plays would hand those cards a pilot's judgement they do
-        # not have. Set only for the duration of a free play.
+def _pick_targets(state: CombatState, spec: str,
+                  allow_dead: bool = False) -> list[Enemy]:
+    """Resolve one op's `target:` spec to the creatures it hits.
+
+    `enemy` / `lowest_hp_enemy` return the play's BOUND aim (R210) -- the same
+    creature for every aimed op of the card. `allow_dead` is the per-op half of
+    C#'s non-uniform dead-target rule (see `CORPSE_TARGETABLE_OPS`): False fizzles
+    on a corpse the way `AttackCommand` does, True lands on it the way
+    `PowerCmd.Apply` does. It reaches the bound aim ONLY -- `all_enemies` and
+    the random specs draw from `HittableEnemies`, which excludes the dead in
+    both engines.
+    """
+    if spec in ("enemy", "lowest_hp_enemy"):
+        if state.card_aim_bound:
+            aim = state.card_aim
+            if aim is None:                    # bound on an empty board
+                return []
+            return [aim] if (aim.alive or allow_dead) else []
+        # No card play in flight (a direct op call, or a probe driving the
+        # resolver by hand). The aim the next play would bind.
+        living = state.living_enemies
+        if not living:
+            return []
         if state.force_random_targeting:
             return [state.rng.choice(living)]
         return [min(living, key=lambda e: e.hp)]
+    living = state.living_enemies
+    if not living:
+        return []
     if spec == "all_enemies":
         return list(living)
     if spec in ("random_enemy", "random_enemies"):
@@ -504,6 +630,17 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
                          source: str = "card") -> float:
     """Full damage pipeline: strength/weak -> reaction amp -> vulnerable ->
     block -> hp. Returns damage actually dealt to HP (for metrics)."""
+    # THE DEAD TAKE NOTHING (EB-136 / R210, C18). `CreatureCmd.Damage` opens
+    # its per-target loop with `if (originalTarget2.IsDead) continue;`, so a
+    # corpse absorbs no damage, fires no reaction and pays no on-hit rider --
+    # and that guard sits at the FUNNEL, below `AttackCommand`, which is why it
+    # is written here rather than only at `_pick_targets`. It is what makes a
+    # corpse detonation spend its charges for nothing (`_op_detonate`) and it
+    # also fixes a case that predates the binding: bomb 2 of a pile whose bomb
+    # 1 killed used to run the reaction pipeline on the body, which could
+    # consume an aura and splash off it.
+    if not enemy.alive:
+        return 0.0
     # Solar Isotoma (Crystallize engine): attack hits vs aura'd enemies
     # grant block — checked before the hit can consume the aura.
     if (source == "attack" and enemy.aura
@@ -901,7 +1038,18 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
         target = "all_enemies"
 
     for _ in range(times):
-        for enemy in _pick_targets(state, target):
+        # R210 Q2 -- the same binding INSIDE one op. `AttackCommand.Execute`
+        # re-filters its target list by `IsAlive` on every hit and
+        # `break`s the moment it is empty, so hits 2..N of a multi-hit attack
+        # re-check the SAME `_singleTarget` and stop when it dies. tier0 used
+        # to re-pick per hit, which spread Matinee Performance's 2s across
+        # whoever was lowest-HP next. Aimed damage never lands on a corpse
+        # (`allow_dead` stays False), so the empty list IS the death and the
+        # break is C#'s literal shape.
+        targets = _pick_targets(state, target)
+        if not targets:
+            break
+        for enemy in targets:
             hit = base
             if fx.get("bonus_vs_bombed") and id(enemy) in bombed_at_cast:
                 hit += fx["bonus_vs_bombed"]
@@ -1210,7 +1358,15 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
         if widen and state.player.powers.get(widen, 0):
             target = "all_enemies"
         for _ in range(times):
-            for enemy in _pick_targets(state, target):
+            # R210 Q3: an aimed power LANDS ON THE CORPSE. `PowerCmd.Apply`
+            # guards on `CanReceivePowers`, which -- unlike `IsHittable` three
+            # lines above it in `Creature` -- deliberately does not test
+            # `IsDead`, and the first-party doc comment says so in as many
+            # words. So there is no death-break here the way there is in
+            # `_op_damage`: every stack of a `times` loop lands, on a body or
+            # on a corpse. The `enemy` spec is the only one this reaches --
+            # `random_enemy` still re-rolls per pass, which is the note above.
+            for enemy in _pick_targets(state, target, allow_dead=True):
                 powers.apply_power(state, enemy, fx["power"], amount,
                                    max_stacks=cap, never_reduces=floor)
 
@@ -1219,7 +1375,13 @@ def _op_apply_aura(state: CombatState, fx: dict, card: Card) -> None:
     times = (C.SALON_REPLACE_NUMERIC_MULT
              if state.salon_replacements_this_card else 1)
     for _ in range(times):
-        targets = _pick_targets(state, fx.get("target", "enemy"))
+        # R210 Q3: `ElementalHit.ApplyOnly` reaches `AuraCmd.Apply`, which is
+        # `PowerCmd.Apply<XAuraPower>` -- the corpse-accepting door. An aura
+        # banked on a corpse is closed by `reactions.close_dead_auras` at the
+        # next settle, which is the sim's own honest bookkeeping and not a
+        # divergence: the mod's aura power sits on the dead creature too.
+        targets = _pick_targets(state, fx.get("target", "enemy"),
+                                allow_dead=True)
         # Track H, LOG-ONLY: one row per resolution of an aura-applying VERB.
         # Distinct from `aura_applied`, which is the verb's EFFECT and is
         # silent when the op resolves into nothing (dead target, off-list
@@ -1259,20 +1421,32 @@ def _mode_chooser():
 
 def _op_place_bomb(state: CombatState, fx: dict, card: Card) -> None:
     spec = fx.get("target", "random_enemy")
-    # EB-118 (1): the CONCENTRATION form only. `random_enemy`/`random_enemies`
-    # placements are a variance profile, not a decision, and a free play's
-    # forced random targeting is parity law (_pick_targets) -- neither is the
-    # pilot's to choose.
-    concentrating = spec == "enemy" and not state.force_random_targeting
+    # EB-118 (1)'s CONCENTRATION HOOK IS SUPERSEDED BY R210 FOR `target:
+    # enemy`, and that is the ruling rather than a regression. `place_bomb` is
+    # one of the emitter's `AIMING_OPS`, so in the mod every bomb of a
+    # placement goes on `cardPlay.Target` -- All of My Treasures emits a
+    # six-iteration loop over the ONE bound creature, Trip Wire puts its bomb
+    # and its Weak on the same one. A per-bomb chooser is three independently
+    # picked destinations where the mod has one, which is the divergence this
+    # row closes restated, and the row struck per-op aim hooks from its own
+    # scope for exactly that reason. Destination SCORING is severed as a later
+    # design question; until it is asked, the bound lowest-HP aim is the
+    # documented identity choice and the hook does not get to re-take it
+    # mid-card. The hook still owns the `random_enemy` spellings, which are a
+    # variance profile rather than a decision and never read `cardPlay.Target`
+    # -- and the engine no longer has a spelling that asks the chooser, so the
+    # call site is gone rather than gated. `pilot.policy.bomb_placement_score`
+    # and `bomb_placement_target` are LEFT STANDING, unchanged: they are the
+    # destination-scoring machinery the severed question will need, and no
+    # pilot weight or heuristic moved in this repair.
     for _ in range(_amount(state, fx.get("amount", 1))):
-        # Re-evaluated per bomb: a multi-bomb placement sees the pile it is
-        # itself building, the same way the random roll is re-rolled per bomb.
-        pol = _pilot_policies() if concentrating else None
-        if pol is not None:
-            chosen = pol.bomb_placement_target(state, fx, card)
-            targets = [chosen] if chosen is not None else []
-        else:
-            targets = _pick_targets(state, spec)
+        # R210 Q3: `BombPower.Place` is `PowerCmd.Apply<BombPower>`, so a bomb
+        # lands on a corpse. It detonates for nothing (the damage dies at
+        # `CreatureCmd.Damage`), but it is THERE, and `move_bombs` can gather
+        # it. Placement stays inside the `amount` loop -- the bind is per card,
+        # so every bomb of one placement goes to the same creature, which is
+        # the six-iteration loop All of My Treasures emits.
+        targets = _pick_targets(state, spec, allow_dead=True)
         for enemy in targets:
             enemy.bombs.append(Bomb(damage=fx["bomb_damage"],
                                     element=fx.get("element", "pyro"),
@@ -1282,14 +1456,28 @@ def _op_place_bomb(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_detonate(state: CombatState, fx: dict, card: Card) -> None:
-    for enemy in _pick_targets(state, fx.get("target", "enemy")):
+    # R210 Q3, and this op's verdict rests on its OWN evidence rather than on
+    # the PowerCmd door: `BombPower.DetonateOn` reads
+    # `target.Powers.OfType<BombPower>()` with no aliveness test whatsoever,
+    # and the mod already names the case -- `RecordDetonation(..., onCorpse:
+    # target is { IsDead: true })`, the EB-18 counter that REPORTS AND NEVER
+    # GRADES. So a detonation on a corpse HAPPENS: the charges are spent, the
+    # counter ticks, and the damage behind them dies at `CreatureCmd.Damage`
+    # (`deal_damage_to_enemy`'s dead-target return, this file).
+    for enemy in _pick_targets(state, fx.get("target", "enemy"),
+                               allow_dead=True):
         if enemy.bombs:
             detonate_bombs(state, enemy, bonus=fx.get("bonus", 0))
 
 
 def _op_move_bombs(state: CombatState, fx: dict, card: Card) -> None:
     # Careful Arrangement: gather all bombs onto one enemy, +bonus each.
-    targets = _pick_targets(state, fx.get("target", "enemy"))
+    # R210 Q3: the DESTINATION may be a corpse -- `BombPower.MoveAllTo` hands
+    # `dest` to `PowerCmd.Apply`, which accepts one. The SOURCES may not: the
+    # emitted call passes `CombatState!.HittableEnemies`, and `IsHittable`
+    # opens with `if (IsDead) return false;`, so a corpse's own pile is never
+    # gathered. `living_enemies` below is exactly that list.
+    targets = _pick_targets(state, fx.get("target", "enemy"), allow_dead=True)
     if not targets:
         return
     dest = targets[0]
@@ -1326,10 +1514,34 @@ def _op_burst_energy(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_swirl(state: CombatState, fx: dict, card: Card) -> None:
-    targets = _pick_targets(state, fx.get("target", "enemy"))
+    # R210 Q3: same corpse-accepting door as apply_aura (`ElementalHit
+    # .ApplyOnly` -> `AuraCmd.Apply` -> `PowerCmd.Apply<XAuraPower>`).
+    targets = _pick_targets(state, fx.get("target", "enemy"), allow_dead=True)
     # A human will aim a single-target Swirl at an aura when one exists.
     # Tier 0 otherwise hard-aims every AnyEnemy card at lowest HP, which made
     # Anemo cards blank whenever the aura happened to sit elsewhere.
+    #
+    # THE ONE AIM RE-TAKE R210 DOES NOT SETTLE, AND IT IS LEFT STANDING
+    # DELIBERATELY -- it is the C18 landing's one reported open question, and
+    # no register id is minted for it here. The ruling's two sentences point
+    # opposite ways
+    # here and the blast-radius audit never reaches this branch: Q1(b) says
+    # every `target: enemy` op binds to the play's one lowest-HP aim, while the
+    # same row severs destination SCORING and says binding "does not overturn"
+    # tier0's documented aim choices. This branch IS a documented tier0 aim
+    # choice -- the sim's model of the mouse pick a human makes on a card whose
+    # entire payload is the aura it lands on -- and five of the six `swirl
+    # target: enemy` rows carry NO second aimed op, so for them binding and
+    # re-taking are the same creature and only the POLICY question is live.
+    # Deleting it would make the sim read those five as blank whenever the
+    # aura sits off the lowest-HP body, which is a NEW divergence from a mod
+    # the player aims by hand -- closing one gap by opening another. Moving it
+    # into `bind_card_aim` instead would bind Yoohoo Windwheel's damage to the
+    # aura'd enemy, which is card-shape-dependent aim policy nobody ruled.
+    # So: unresolved, un-implemented, and pinned as unresolved by
+    # `test_eb136_same_target_binding.py::test_swirl_aim_retake_is_unruled`.
+    # ONE CARD is left scattering by this, `sayu_yoohoo_windwheel` (`damage 4`
+    # + `swirl`), of the 28 in the ruled scope.
     if fx.get("target", "enemy") == "enemy" and targets and not targets[0].aura:
         aura_targets = [e for e in state.living_enemies if e.aura]
         if aura_targets:
@@ -3225,6 +3437,22 @@ def _resolve_effects(state: CombatState, effects: list[dict],
 
 
 def resolve_card(state: CombatState, card: Card) -> None:
+    # THE BIND, and it is the FIRST line of a play for a reason (EB-136 /
+    # R210, C18). `CardPlay.Target` is filled in when the play is CONSTRUCTED,
+    # before `OnPlayWrapper` is entered, so the aim is picked ahead of every
+    # op -- pre-AoE, pre-kill, pre-anything this card is about to do. Cleared
+    # in the `finally` so the pilot's between-play estimates read live state
+    # instead of the last card's corpse.
+    state.card_aim = bind_card_aim(state, card)
+    state.card_aim_bound = True
+    try:
+        _resolve_card_bound(state, card)
+    finally:
+        state.card_aim = None
+        state.card_aim_bound = False
+
+
+def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # Control provenance (§2.2a) — with the kickoff ask §6.7 attribution
     # (PROPOSED): a CONSCRIPTED companion is self-sourced (Kokomi paid a
     # card of her own deck for it), so its control does not count toward
@@ -3248,8 +3476,12 @@ def resolve_card(state: CombatState, card: Card) -> None:
     state.detonations_at_card_start = state.detonations_total
     state.repeat_requested = 0
     # Predicate snapshot: does the default target hold an off-element aura?
-    living = state.living_enemies
-    tgt = min(living, key=lambda e: e.hp) if living else None
+    # Reads the BOUND aim (R210) rather than re-deriving the lowest-HP pick,
+    # so Sizzle's predicate and Sizzle's two damage rows cannot disagree about
+    # which creature the card is talking about -- and under a free play's
+    # forced random targeting the predicate now follows the rolled aim instead
+    # of a lowest-HP body the card will never touch.
+    tgt = state.card_aim
     state.target_had_offelement_aura = bool(
         tgt and tgt.aura and tgt.aura != state.player.element)
     # Per-card flat attack bonus. Computed by the shared pure helper so the
