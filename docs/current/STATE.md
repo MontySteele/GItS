@@ -219,9 +219,15 @@ Named here for status only. Open items are in
   deck-band system is retired as acceptance law roster-wide and the 4.8
   ceiling it breached no longer exists (see *Systems* below). Build branches
   carry the execution and **stamp at landing, not at the ruling**; the
-  engineering detail lives in BACKLOG `EB-118`. **The Phase-1 re-baseline is
-  OWED, not skipped**, and so is the reconstructed Phase-1-only post-read —
-  both now wait on the ruled items LANDING rather than on a [USER] door.
+  engineering detail lives in BACKLOG `EB-118`. **THE RECONSTRUCTED
+  PHASE-1-ONLY POST-READ IS TAKEN AND GRADED, 2026-08-24** —
+  `review/active/eb118-connectivity-phase1-postread-2026-08-24.txt`, read on a
+  never-pushed scratch world (`cd5bd25` plus the three doors in landing order):
+  33 cards moved, zero UNCLASSIFIED in all eight pools on both sides, the
+  baseline reproducing under `VOCAB_VERSION` v3 with **one differing line in
+  319** (the label, R203's acceptance check), and the §2.4 grade **3 PRED /
+  2 SPLIT / 4 MISS / 1 NOT GRADED**. **The Phase-1 re-baseline of the
+  twelve-arm standing table is still OWED, not skipped.**
   **PHASE 2A RAN 2026-08-24, ITS SWEEP IS DONE, AND R204 TOOK ITS DOOR AWAY.**
   The pilot-policy flip is built complete — `PILOT_POLICIES_ENABLED` True,
   `POLICY_VERSION` 8, `PILOT_WEIGHTS_VERSION` 3, one edit, three integers, no
@@ -283,7 +289,8 @@ Named here for status only. Open items are in
   and `QUEUE` `M38` has left HEAD with them**; (ii) reconstruct the
   Phase-1-only world from `cd5bd25`
   plus the ruled doors and take ITS post-read — `main` now mixes phases, so
-  that read cannot come from main; (iii) close Phase 2's three windows
+  that read cannot come from main — **COMPLETE 2026-08-24**; (iii) close
+  Phase 2's three windows
   separately and take a Phase-2 post-read; (iv) that read is W1's pre-state;
   (v) W1, then W2, then W3, each behind its own gate.
 - **Enemy remapping** — planned.
