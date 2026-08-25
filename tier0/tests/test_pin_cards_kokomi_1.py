@@ -1,5 +1,6 @@
-"""Behaviour pins for fourteen Kokomi sheet cards (block/conscript/Sly/
-exhaust-funnel commons) that no other test file exercises.
+"""Behaviour pins for the Kokomi sheet cards (block/conscript/Sly/
+exhaust-funnel commons, plus the EB-125 ratified bodies) that no other test
+file exercises.
 
 Each test builds a minimal Kokomi combat, plays exactly one card, and
 asserts the observable result the engine produces today: Block gained,
@@ -161,15 +162,47 @@ def test_field_promotion_conscripts_at_cost_zero_and_draws():
 
 # --- Sly / discard lane ---
 
-def test_moon_signal_discards_then_draws_for_free():
-    """A Moment Alone costs 0: it discards a card from hand at random and
-    then draws one, so hand size is unchanged."""
+def test_moon_signal_throws_a_chosen_card_and_recalls_one_to_draw():
+    """A Moment Alone costs 0: it discards a card you PICK, then puts a card
+    from the discard pile on TOP of the draw pile (EB-125 / R202).
+
+    The hand economy is deliberately negative -- the card played and the card
+    thrown both leave, and nothing arrives in hand. `_best_card` prefers a
+    real Attack, so the seeded Water's Edge is what comes back rather than the
+    card just thrown."""
     st = kokomi_state(draw_pile=["coral_guard"])
+    st.player.discard_pile.append(loader.get_card("waters_edge"))
     play(st, "moon_signal", hand=["jade_bulwark"], energy=0)
     assert st.player.energy == 0
-    assert [c.id for c in st.player.hand] == ["coral_guard"]
+    assert st.player.hand == []
+    assert [c.id for c in st.player.draw_pile] == ["waters_edge",
+                                                   "coral_guard"]
     assert [c.id for c in st.player.discard_pile] == ["jade_bulwark",
                                                       "moon_signal"]
+
+
+def test_moon_signal_recalls_the_card_it_just_threw_on_an_empty_pile():
+    """The discard branch of `recall_to_draw` is UNFILTERED (the D3
+    self-recall contract, R198), so with nothing else in the pile the card you
+    just threw is the only candidate and returns to the top of the draw pile.
+    A known consequence of the ratified body, pinned so it stays deliberate."""
+    st = kokomi_state(draw_pile=["coral_guard"])
+    play(st, "moon_signal", hand=["jade_bulwark"], energy=0)
+    assert [c.id for c in st.player.draw_pile] == ["jade_bulwark",
+                                                   "coral_guard"]
+    assert [c.id for c in st.player.discard_pile] == ["moon_signal"]
+
+
+def test_moon_signal_upgrade_buys_retain_and_moves_no_effect():
+    """The ratified upgrade is `{retain: true}`: it sets a card FIELD and
+    inserts nothing, so the printed order is identical between the faces --
+    which is the whole reason a draw was refused (an appended draw would take
+    back exactly the card the recall placed)."""
+    base = loader.get_card("moon_signal")
+    up = loader.get_card("moon_signal+")
+    assert not base.retain and up.retain
+    assert base.effects == up.effects
+    assert [fx["op"] for fx in up.effects] == ["discard", "recall_to_draw"]
 
 
 def test_rearguard_action_discards_a_card_for_seven_block():
@@ -192,9 +225,62 @@ def test_driftwood_charm_blocks_and_draws_and_its_sly_pays_charge():
     assert st.player.charge == 0        # the Sly rider does NOT fire on play
 
     st = kokomi_state(draw_pile=["coral_guard", "coral_guard"])
+    # Seeded so Moon Signal's recall takes the Attack rather than the Charm it
+    # just threw -- the Sly rider is what this pin is about.
+    st.player.discard_pile.append(loader.get_card("waters_edge"))
     play(st, "moon_signal", hand=["driftwood_charm"], energy=0)
     assert st.player.charge == 2
     assert "driftwood_charm" in [c.id for c in st.player.discard_pile]
+
+
+# --- EB-125 ratified bodies (R202): Crane Wing and Tighten the Cords ---
+
+def test_crane_wing_gains_four_block_and_discounts_companions_this_turn():
+    """Crane Wing surrenders immediate Block to keep its discount identity
+    (EB-125 / R202): 4 Block, and Companion cards cost 1 less this turn. That
+    is two under jade_bulwark's printed Block, which is what separates the
+    pair on what each card is FOR rather than on a number."""
+    st = kokomi_state()
+    play(st, "crane_wing")
+    assert st.player.block == 4
+    assert st.player.energy == 2
+    assert loader.get_card("jade_bulwark").effects[0]["amount"] > 4
+
+
+def test_crane_wing_upgrade_reaches_jade_bulwarks_printed_block():
+    """`{block: +2}` is unchanged; the base moved, so the upgraded Crane lands
+    level with Pearl Bulwark's PRINTED face instead of above it."""
+    up = loader.get_card("crane_wing+")
+    assert up.effects[0]["amount"] == 6 == loader.get_card(
+        "jade_bulwark").effects[0]["amount"]
+    assert up.effects[1]["delta"] == -1        # cost_mod may not deepen
+
+
+def test_tighten_the_cords_pays_metallicize_only_over_the_exhaust_bar():
+    """The ratified body gates the Metallicize on the exhaust pile, which is
+    what separates it from gorou_heart_of_the_clan's unconditional stack. The
+    Block half is always live."""
+    st = kokomi_state()
+    play(st, "tighten_the_cords")
+    assert st.player.block == 5
+    assert "metallicize" not in st.player.powers
+
+    st = kokomi_state()
+    for _ in range(3):
+        st.player.exhaust_pile.append(loader.get_card("coral_guard"))
+    play(st, "tighten_the_cords")
+    assert st.player.block == 5
+    assert st.player.powers["metallicize"] == 1
+
+
+def test_tighten_the_cords_upgrade_moves_the_always_live_half():
+    """R58: on a threshold card the always-live half moves and the bar cannot
+    drift down. Here that is the Block (5 -> 7); the exhaust bar stays put."""
+    up = loader.get_card("tighten_the_cords+")
+    assert up.effects[0] == {"op": "block", "amount": 7}
+    assert up.effects[1]["if"] == "exhaust_pile_at_least_3"
+    assert up.effects[1]["then"][0]["amount"] == 1
+    assert up.archetypes == ["priest"] and up.role == "payoff"
 
 
 # --- priest exhaust lane ---

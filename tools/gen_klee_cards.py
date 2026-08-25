@@ -469,6 +469,19 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               "spend_encore",
               "place_bomb", "burst_energy", "energy",
               "buff_next_attack",
+              # EB-125: `apply_power` on YOURSELF, and only on yourself. The
+              # self arm of the top-level emitter is already a single
+              # PowerCmd.Apply with no locals -- the same shape as
+              # buff_next_attack's branch resolver above -- so it meets the
+              # branch-legality criterion as written. The ENEMY arms do not
+              # and stay blocked BY NAME in _branch_op_reason: `enemy` needs
+              # the target guard, `random_enemy` and `all_enemies` declare
+              # locals inside their own blocks, and emitting them a second,
+              # subtly different way here is exactly the drift this table
+              # exists to prevent. Sim twin: effects._op_apply_power reached
+              # through a conditional; tighten_the_cords is the first row to
+              # print it (EB-125 / R202).
+              "apply_power",
               # EB-118 §5.5: single calls with no locals, which is the whole
               # branch-legality criterion. The obvious future row is
               # "if the leftmost member is X, do Y" -- see the
@@ -490,6 +503,11 @@ BRANCH_FIELDS = {
     "energy": {"op", "amount"},
     "place_bomb": {"op", "amount", "target", "bomb_damage"},
     "buff_next_attack": {"op", "amount"},
+    # EB-125. Deliberately NARROWER than APPLY_POWER_FIELDS: `max_stacks`,
+    # `splash_procs_per_turn` and the rest all steer machinery the branch
+    # resolver does not emit, so a row carrying one blocks by name instead of
+    # silently losing it.
+    "apply_power": {"op", "power", "amount", "target"},
 }
 
 # EB-118 sec.5.4, codegen leg. Mirrors tier0.engine.effects.MODAL_FIELDS /
@@ -513,6 +531,17 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
     if (eff.get("op") == "place_bomb"
             and eff.get("target") not in BOMB_TARGETS):
         return f"branch place_bomb target '{eff.get('target')}'"
+    if eff.get("op") == "apply_power":
+        # EB-125. Self only -- see the BRANCH_OPS note. `salon_member` is a
+        # typed DEPLOY that also carries the salonReplacements counter, so it
+        # is not the plain Apply this resolver emits even though its target
+        # reads self.
+        if eff.get("power") not in APPLY_POWERS:
+            return f"branch apply_power power '{eff.get('power')}'"
+        if eff.get("power") == "salon_member":
+            return "branch apply_power power 'salon_member' (typed deploy)"
+        if eff.get("target") != "self":
+            return f"branch apply_power target '{eff.get('target')}'"
     if not isinstance(eff.get("amount", eff.get("bomb_damage")), int):
         return f"branch {eff['op']} amount must be a literal int"
     if eff["op"] in ("gain_encore", "spend_encore") and eff["amount"] <= 0:
@@ -3666,6 +3695,20 @@ def _emit_branch_op(
             f'Owner.Creature, {int(eff["amount"])}, '
             "applier: Owner.Creature, cardSource: this);"
         )
+    elif op == "apply_power":
+        # EB-125. Byte-for-byte the SELF arm of build_body's top-level
+        # apply_power, which is the only arm _branch_op_reason lets through.
+        # Literal for the same reason buff_next_attack is: power_upgrade_effect
+        # searches TOP-LEVEL effects only, so a nested apply_power is never the
+        # effect a ruled power delta binds to -- and a card whose delta finds no
+        # top-level home stops loudly there rather than rendering a wrong var
+        # here. Stack caps stay with the power's own
+        # TryModifyPowerAmountReceived, so the call site is a plain Apply.
+        lines.append(
+            f"await PowerCmd.Apply<{APPLY_POWERS[eff['power']][0]}>("
+            f'choiceContext, Owner.Creature, {int(eff["amount"])}, '
+            "applier: Owner.Creature, cardSource: this);"
+        )
 
 
 def _conditional_block(pred: str, then_lines: list[str],
@@ -4970,6 +5013,17 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
             # effect, so a branch rider never renders a var.
             bits.append(
                 f'your next Attack deals {int(e["amount"])} more damage')
+        elif op == "apply_power":
+            # EB-125. The power's own template, lowercased into the branch
+            # clause and stripped of its full stop, so "If your Exhaust pile
+            # has 3 or more cards: at the start of your turn, gain 1 Block."
+            # reads as one sentence. Literal amount, same rule as
+            # buff_next_attack above.
+            txt = (APPLY_POWERS[e["power"]][2]
+                   .replace("{X}", str(int(e["amount"])))
+                   .replace("{XS}", "" if int(e["amount"]) == 1 else "s")
+                   .replace("{TO}", "").rstrip("."))
+            bits.append(txt[0].lower() + txt[1:])
         else:
             # A branch op with no text arm renders an EMPTY clause -- which is
             # how Chevreuse first generated "If a reaction triggered: ."

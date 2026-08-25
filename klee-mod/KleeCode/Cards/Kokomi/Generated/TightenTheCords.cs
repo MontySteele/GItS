@@ -41,14 +41,13 @@ public sealed class TightenTheCords : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tighten the Cords"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. At the start of your turn, gain {PowerAmount:diff()} Block."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If 3 or more cards are [gold]Exhausted[/gold]: at the start of your turn, gain 1 Block."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(3m, ValueProp.Move),
-            new DynamicVar("PowerAmount", 1m)
+            new BlockVar(5m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,11 +60,14 @@ public sealed class TightenTheCords : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await PowerCmd.Apply<MetallicizePower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        if (KokomiResources.ExhaustPileCount(Owner.Creature) >= 3)
+        {
+            await PowerCmd.Apply<MetallicizePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        DynamicVars.Block.UpgradeValueBy(2m);
     }
 }

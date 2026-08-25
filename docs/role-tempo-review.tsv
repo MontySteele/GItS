@@ -232,4 +232,4 @@ kokomi	crane_wing	uncommon	commander	glue	block,velocity	block,velocity		early	e
 kokomi	send_the_runner	common	priest,assist	glue	block,frontload,scaling,utility,velocity	block,frontload,scaling,utility,velocity		early	early		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
 kokomi	massed_volley	common	assist,generic	glue	frontload	frontload		early	early	aoe					
 kokomi	hold_the_narrows	common	commander	glue	block,frontload,velocity	block,frontload,velocity		early	early		conscript		block,frontload,velocity	block,frontload,velocity	block,frontload,velocity
-kokomi	tighten_the_cords	common	generic	glue	block	block		early	early						
+kokomi	tighten_the_cords	common	priest	payoff	block	block		early,mid,late	early,late			exhaust_pile			

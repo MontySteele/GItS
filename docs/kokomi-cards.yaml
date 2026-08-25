@@ -190,8 +190,27 @@
    # rings the Sly bell TWICE. (First-draft draw-2/discard-1 was a strict-domination lint catch vs Communion —
    # the CCM remedy applied: each card is now a real choice, churn-vs-fuel.)
 - {id: moon_signal, name: "A Moment Alone", cost: 0, type: skill, rarity: common, solve: [velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [assist], role: enabler,
-   effects: [{op: discard, amount: 1}, {op: draw, amount: 1}]}
-   # Free cycle: pays tempo (a random discard), buys a fresh look. Sly's cheapest bell.
+   sly: [{op: draw, amount: 1}],
+   effects: [{op: discard, amount: 1, select: chosen},
+             {op: recall_to_draw, amount: 1}]}
+   # RATIFIED REDESIGN (R202, EB-125). The free cycle is now a free REORDER: throw a card you pick, then put a
+   # card from your discard pile on top of your draw pile. The draw moved onto the Sly rider, so the cheapest
+   # bell in the lane still rings — it just rings when the card is THROWN rather than when it is played.
+   # WHY IT MOVED: the old draw-1 body was dominated by several separate uncommons (raise_the_sashimono,
+   # sayu_naptime, sucrose_gust), each of which gave the same draw and paid nothing. R200 named the Common's
+   # own rate as the defect rather than the newest card that exposed it. `recall_to_draw` is a benefit key none
+   # of them carry, which is what clears every one of those pairs — verified WITH and WITHOUT the Sly rider, so
+   # the rider is identity, not the mechanism.
+   # THE HAND ECONOMY IS DELIBERATELY NEGATIVE: you lose the card you play AND the card you throw, and nothing
+   # arrives in hand. That is the property the upgrade must not flatten, and it is why the upgrade buys Retain
+   # instead of a draw (kokomi-upgrades.yaml).
+   # KNOWN CONSEQUENCE, recorded rather than discovered: the discard branch of `recall_to_draw` is UNFILTERED
+   # (the D3 self-recall contract, R198), so on an otherwise empty discard pile the card you just threw is the
+   # only candidate and comes straight back to the top of your draw pile. `_best_card` prefers a real Attack,
+   # so that line is a fallback, not the rule.
+   # Recursion-at-common was the standing objection (the fill put recall at uncommon on purpose). The answer is
+   # that this is a SWAP, not an engine: the discard pays for the recall in the same breath and the hand is down
+   # two cards to move one card's position.
 - {id: drifting_lantern, name: "Drifting Lantern", cost: 1, type: skill, rarity: common, solve: [block], tempo_band: {fight: [early], run: [early]}, archetypes: [assist, generic], role: glue,
    sly: [{op: block, amount: 4}],
    effects: [{op: block, amount: 4}]}
@@ -797,8 +816,15 @@
    # NAME: sashimono, the small back-banners a Sengoku unit was identified and directed by — one banner up, one
    # unit marked, which is literally what the card does to one Skill.
 - {id: crane_wing, name: "Crane Wing", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [commander], role: glue,
-   effects: [{op: block, amount: 6},
+   effects: [{op: block, amount: 4},
              {op: cost_mod, scope: companion_cards, delta: -1, duration: this_turn}]}
+   # RATIFIED REDESIGN (R202, EB-125): the printed Block drops so the card separates from jade_bulwark on what
+   # it is FOR rather than on a number. It was Pearl Bulwark plus a rider (lint-ok: superseded printed Block 6),
+   # the textbook shape the domination lint exists to catch. Pearl Bulwark stays the pool's clean Block-rate
+   # anchor; Crane Wing surrenders immediate Block to keep its companion-discount identity. Upgraded it lands
+   # exactly level with Pearl Bulwark's PRINTED face and two under Pearl Bulwark upgraded (lint-ok: sibling
+   # card's numbers), which is the separation R200 asked for. `role: glue` is unchanged, so R199's third
+   # guardrail (no mechanical supply cut on commander) is untouched.
    # Commander's only discount was a Rare (honor_guard), so the lane could not defend on the turn it mustered —
    # it either played bodies or played Block. Block-plus-discount at uncommon is the lane's missing tempo turn.
    # NAME: kakuyoku, the crane-wing formation — the line spreading its arms around what it is protecting.
@@ -855,13 +881,26 @@
    # alternate. RATIONALE CORRECTION CARRIED WITH IT: the v2 claim that "Bourou means watchtower" is WRONG and
    # withdrawn — Bourou Village is the resistance's own village on Watatsumi, which is canon and is why the
    # name works, but the etymology claim was false and is struck rather than re-derived.
-- {id: tighten_the_cords, name: "Tighten the Cords", cost: 1, type: skill, rarity: common, solve: [block], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
-   effects: [{op: block, amount: 3},
-             {op: apply_power, power: metallicize, amount: 1, target: self}]}
-   # The flatness texture at common rate, and the cheapest possible answer to gyorin_formation's measurement:
-   # per-turn Block is printed on exactly one other card in her pool (pearl_current, uncommon, metallicize 3).
-   # One stack for 1 is UNDER-RATE as a Block card on purpose — it is bought for the trajectory, not for the
-   # turn, which is the distinction the stability instrument exists to make visible.
+- {id: tighten_the_cords, name: "Tighten the Cords", cost: 1, type: skill, rarity: common, solve: [block], tempo_band: {fight: [early, mid, late], run: [early, late]}, archetypes: [priest], role: payoff,
+   effects: [{op: block, amount: 5},
+             {op: conditional, if: exhaust_pile_at_least_3,
+              then: [{op: apply_power, power: metallicize, amount: 1, target: self}]}]}
+   # RATIFIED REDESIGN (R202, EB-125), body and labels together. It was a DIRECT CLONE of Gorou — Forward Unto
+   # Victory: same printed Block, one less Metallicize, and its old upgrade took the Common to the uncommon's
+   # printed face exactly. The Metallicize is now GATED on the exhaust pile, so the two cards carry different
+   # benefit keys and neither set contains the other.
+   # THE LABELS FOLLOW THE BODY (Fork A, R202). Reading the exhaust pile — priest's public state — is a payoff
+   # under the Phase-3 rubric, and every other reader of that pile on this sheet is `[priest]`
+   # (mercy_of_the_deep, pearl_barrage, the_tide_remembers, depths_judgment). So `[priest] / payoff`, and
+   # `generic` is DROPPED under one-role honesty rather than kept as a hedge. The cost is named, not hidden:
+   # priest is the most over-supplied arm on the sheet and this adds a payoff to it. R199 ruled the bands
+   # directional, and Guardrail 1 forbids relabelling a card to keep a count tidy.
+   # It now READS her own engine instead of printing a larger Block number, which is what Phase-0 §6.5 asks
+   # for, and it keeps the card's stated identity — bought for the trajectory, not for the turn — while making
+   # the trajectory something you build.
+   # The threshold is legal at Common: the grammar note above fences CHARGE bars to Uncommon and above, and an
+   # exhaust-pile bar is not a Charge bar. Per-turn Block is still printed on exactly one other card in her
+   # pool (pearl_current, uncommon, metallicize 3).
    # NAME: the Sengoku proverb katte kabuto no o wo shimeyo — "after the victory, tighten the cords of your
    # helmet." A card bought for the trajectory could not ask for a better name. The v1 name (Slackwater Drill)
    # echoed the shipped `slack_water` and is gone: no shared word, no shared shape.

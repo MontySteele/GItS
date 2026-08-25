@@ -81,7 +81,7 @@ def test_the_autoplay_rider_adds_exactly_zero_drafted_value():
 
 
 # Every committed card that carries a Sly rider, priced on the
-# PRE-UNIFICATION tree. All thirteen are Kokomi's Assist lane; nothing
+# PRE-UNIFICATION tree. All fourteen are Kokomi's Assist lane; nothing
 # committed carries the base-game keyword (it only ever arrives through the
 # extractor, into the gitignored reference pool).
 #
@@ -105,6 +105,11 @@ PRE_UNIFICATION_SLY_PRICES = {
     "open_the_stores": 2.25,
     "what_the_tokoyo_returns": 5.5,
     "wheel_the_ranks": 2.0,
+    # --- EB-125, the ratified Moon Signal rebuild (R202, 2026-08-24): its
+    # draw moved onto a Sly rider, so the card joins the census at its
+    # measured price, which is exactly what a census is for. The thirteen
+    # rows above are UNCHANGED by it, and that is the assertion.
+    "moon_signal": 1.0,
 }
 
 
