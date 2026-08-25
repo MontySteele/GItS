@@ -117,7 +117,10 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
     "EB": 137,   # docs/current/ cites EB-137 (defined); EB-131/EB-133 retired
-    "M": 40,     # M40 cited by atlas/tier0-pilot-roster.md, closed under R204
+    "M": 44,     # M43/M44 minted by R206 (4ff9f90) and settled by R207 with no
+                 # surviving HEAD citation — the exact blind spot this constant
+                 # covers. A HEAD scan reads 40; the ceiling is the ISSUED
+                 # high-water, so history outranks the scan here.
 }
 
 # Every id AT OR BELOW its ceiling that legitimately defines a row. Frozen by
