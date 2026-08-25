@@ -1834,6 +1834,26 @@ BANNER_FEATURED_SLOTS = 3
 # `docs/kokomi-cards.yaml` carries the same two figures in the
 # `depths_judgment` row's comment; it is pointed at this paragraph rather than
 # rewritten, for the same R101b reason.
+# SECOND FORWARD CORRECTION, 2026-08-25, SAME DAY, to the paragraph above --
+# ITS DECIMALS ONLY. R101b again: the paragraph stands as published; this one
+# is appended beneath it and carries the better-sampled figures.
+# WHAT WAS IMPRECISE. The clean pooled rates above were taken at 40 fights
+# per encounter over two seeds. At that setting the seed-to-seed spread is
+# wide -- a six-seed sweep reads `_at_least_6` anywhere from 37.5% to 42.2% --
+# because plays inside one fight share a pile trajectory, so ~2,500 attack
+# plays carry the information of ~240 fights, not 2,500 independent
+# observations. Seeds 11 and 23 are two of the higher draws, which put the
+# pooled 41.2% / 26.1% at the top of the range rather than at its centre.
+# THE BETTER-SAMPLED MEASUREMENT: the same instrument at `da33ec6`, 200
+# fights per encounter over three seeds (11, 42, 23), 37,161 attack plays.
+# `_at_least_6` 38.4%, `_at_least_8` 24.2%, mean 4.72, MEDIAN 4, p90 10,
+# p99 14. The per-seed spread at bar 6 collapses to 38.2-38.5, which is why
+# THESE are the decimals a later reader should quote.
+# EVERYTHING ELSE ABOVE SURVIVES UNTOUCHED: the contamination diagnosis, the
+# mechanism demonstration, median 4 not 0, the ~3x understatement, and the
+# ratio (38.4 / 24.2 = 1.59 against the 1.58 above). Only the two headline
+# decimals move, both down, by 2.8 and 1.9 points. The bar question handed
+# to [USER] above is unchanged in kind and slightly softened in degree.
 # ---------------------------------------------------------------------------
 CONSTANTS_VERSION = 17
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
