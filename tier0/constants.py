@@ -1785,6 +1785,19 @@ BANNER_FEATURED_SLOTS = 3
 # instrument movement recorded above is a BUILD-TIME FACT in W1 §5's sense,
 # written down in the landing commit so it cannot later be discovered and read
 # as a finding, and it is NOT graded against any committed prediction.
+# (f) RULED LATE INTO THE WINDOW, [USER] 2026-08-25 (R209), PRE-MERGE:
+#   `depths_judgment` (Sango Isshin) moves its bar `exhaust_pile_at_least_6`
+#   -> `_at_least_8` on BOTH faces. (e) chose 6 against fire rates the two
+#   corrections below expose as contaminated and then noisy-high; clean and
+#   well-sampled, bar 6 fires 38.4% of priest attack plays (a regular
+#   feature) and bar 8 fires 24.2% (roughly one attack play in four), which
+#   is the earned-dividend shape (e)'s own rationale describes. The always-
+#   live 14 and the `{damage: +4}` upgrade are untouched; the branch payload
+#   stays 8 Block, so the drafter disclosure bound of 4.0 is unchanged (it
+#   never read the rate). Under R58 the bar may rise again and may never
+#   come down -- 6 is not recoverable. The window is still ONE window: this
+#   item rides C17 because the chain has not reached main; nothing about it
+#   re-opens (e)'s ratified body, which stands as recorded.
 # ---------------------------------------------------------------------------
 # FORWARD CORRECTION, 2026-08-25, to (e)'s FIRE RATES ONLY. R101b: the lines
 # above stand as published and are NOT rewritten; this paragraph is appended

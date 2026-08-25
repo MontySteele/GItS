@@ -38,7 +38,7 @@ DOCS = "docs/current"
 
 # Highest number issued under each prefix. Frozen namespace below these lives
 # at tag pre-simplification-2026-08-06; bump in the same commit as the ruling.
-R_CEILING = 208
+R_CEILING = 209
 D_CEILING = 15
 
 HEADING = re.compile(r"(?m)^##\s+([RD]\d+)\b")

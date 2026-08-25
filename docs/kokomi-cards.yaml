@@ -629,26 +629,23 @@
    # nobody here is fuel. This comment is the marked example the sweep was written against.
 - {id: depths_judgment, name: "Sango Isshin", cost: 2, type: attack, rarity: rare, solve: [block, frontload], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [priest], role: payoff,
    effects: [{op: damage, amount: 14, target: enemy},
-             {op: conditional, if: exhaust_pile_at_least_6, then: [{op: block, amount: 8}]}]}
+             {op: conditional, if: exhaust_pile_at_least_8, then: [{op: block, amount: 8}]}]}
    # BODY RULED BY [USER] 2026-08-25 (R208), EB-118 Phase-3 W2b. The Rare leaves the five-member (lint-ok: clone-family size)
    # `damage@one~` clone family and takes the DIVIDEND job: make the pile pay something other than damage. A
    # deep pile is the record of everything she has burned, and at Rare that record buys her a wall. `solve`
    # swaps `scaling` for `block` -- the classifier's own derivation, written by `suggest_role_tempo_tags.py
    # --land`, not by hand. `role: payoff` and `archetypes: [priest]` do not move, so kokomi/priest payoff
    # supply holds at 12. (lint-ok: supply count)
-   # THE BAR IS 6, AT ROUGHLY TWICE THE BAR-8 RATE. Measured on kokomi/priest_weighted attack plays:
-   # `exhaust_pile_at_least_6` fires 12.8% and `_at_least_8` fires 7.4% (mean pile 1.65, median 0, p90 6). (lint-ok: measured rate)
-   # THOSE TWO RATES ARE SUPERSEDED BY A DATED FORWARD CORRECTION, 2026-08-25, at the C17 block in
-   # `tier0/constants.py` -- read it before quoting them. They were taken through `score_config`, which runs
-   # the ref_ironclad anchor battery into the same counters; the clean re-measurement is materially higher and
-   # the "median 0" above is the contamination. The BAR-6-OVER-BAR-8 COMPARISON that chose this bar survives.
-   # Struck rather than rewritten, R101b. (lint-ok: measured rate)
-   # 8 was the slate's first bar; 6 was chosen deliberately as the ~2x rate so the Rare's second half is a
-   # once-a-fight-when-you-have-really-burned moment rather than a rounding error. Under R58 that 6 is a
-   # one-way door.
+   # THE BAR IS 8, RULED BY [USER] 2026-08-25 (R209). R208 ratified the bar at 6 against rates later shown
+   # contaminated (12.8% / 7.4%, taken through `score_config`'s anchor battery) -- struck rather than (lint-ok: measured rate)
+   # rewritten at the C17 block in `tier0/constants.py`, R101b, under two dated forward corrections; read
+   # them before quoting any rate here. Clean and well-sampled, bar 6 fires 38.4% of priest attack plays (lint-ok: measured rate)
+   # -- a regular feature, not a dividend -- and bar 8 fires 24.2%, roughly one attack play in four: the (lint-ok: measured rate)
+   # earned-moment shape the ratification wanted. Under R58 the bar may rise again and may never come
+   # down: 6 is gone for good. (lint-ok: measured rate)
    # THE DRAFTER PAYS FOR THIS BRANCH, unlike almost every conditional in the window: `_static_condition`
    # waves the `exhaust_pile_at_least_` prefix through, so the 8 Block is credited at full face against a
-   # 12.8% fire rate. The over-credit is bounded at 4.0 (8 Block / cost 2) and is disclosed, not tuned out. (lint-ok: measured rate)
+   # 24.2% fire rate. The over-credit is bounded at 4.0 (8 Block / cost 2) and is disclosed, not tuned out. (lint-ok: measured rate)
 - {id: epiphany_of_the_deep, name: "Song of Pearls", cost: 2, type: power, rarity: rare, solve: [velocity], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [priest, assist], role: payoff,
    effects: [{op: apply_power, power: dark_embrace, amount: 1, target: self}]}
    # Draw-per-exhaust (the Dark Embrace rail): the burned page turns itself. In HER deck every lane rings it —

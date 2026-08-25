@@ -322,21 +322,22 @@ def test_undertow_upgrade_still_buys_the_base_not_the_slope():
     assert up.sly == [{"op": "energy", "amount": 1}]
 
 
-def test_sango_isshin_buys_a_wall_only_over_a_six_deep_pile():
+def test_sango_isshin_buys_a_wall_only_over_an_eight_deep_pile():
     """R208's W2b body takes the DIVIDEND job: the Rare stops being a fourth
     slope over one count and makes the pile pay something other than damage.
-    Below the bar it is a flat 14; at six exhausted cards it also walls for
-    8. The bar sits at roughly twice the bar-8 fire rate (12.8% vs 7.4% of
-    priest attack plays)."""
+    Below the bar it is a flat 14; at eight exhausted cards it also walls for
+    8. The bar is 8 by R209 (2026-08-25): the ratified 6 fired on 38.4% of
+    clean priest attack plays -- a regular feature -- where 8 fires 24.2%,
+    the earned-moment rate the ratification described."""
     shallow = kokomi_state()
-    for _ in range(5):
+    for _ in range(7):
         shallow.player.exhaust_pile.append(loader.get_card("coral_guard"))
     play(shallow, "depths_judgment")
     assert shallow.enemies[0].hp == 286
     assert shallow.player.block == 0
 
     deep = kokomi_state()
-    for _ in range(6):
+    for _ in range(8):
         deep.player.exhaust_pile.append(loader.get_card("coral_guard"))
     play(deep, "depths_judgment")
     assert deep.enemies[0].hp == 286               # damage no longer scales
@@ -348,7 +349,7 @@ def test_sango_isshin_upgrade_moves_the_always_live_damage():
     -> 18, and under R58 the bar cannot drift down on upgrade."""
     up = loader.get_card("depths_judgment+")
     assert up.effects[0] == {"op": "damage", "amount": 18, "target": "enemy"}
-    assert up.effects[1]["if"] == "exhaust_pile_at_least_6"
+    assert up.effects[1]["if"] == "exhaust_pile_at_least_8"
     assert up.effects[1]["then"] == [{"op": "block", "amount": 8}]
     assert up.archetypes == ["priest"] and up.role == "payoff"
 
