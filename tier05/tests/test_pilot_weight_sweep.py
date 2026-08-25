@@ -99,8 +99,27 @@ def _cell(name, runs=6, seed=11):
 #  Discovery -- the scope is read off source, never declared here
 # ---------------------------------------------------------------------------
 
+#: The eight weights `bomb_placement_score` reads. In scope until `C18`, out
+#: of it since -- named here so the change is assertable in both directions
+#: rather than merely absent.
+BOMB_WEIGHTS = ("BOMB_LANDED_DAMAGE_VALUE", "BOMB_LETHAL_WASTE_WEIGHT",
+                "BOMB_CONCENTRATION_VALUE", "BOMB_CONCENTRATION_STACK_CAP",
+                "BOMB_SUPPRESSION_VALUE", "BOMB_READER_LETHAL_POP_VALUE",
+                "BOMB_EARLY_POP_PENALTY", "BOMB_MOVE_READER_AIM_VALUE")
+
+
 def test_the_entry_points_are_the_engines_own_call_sites(scope):
-    assert scope.entry_points == ("bomb_placement_target", "exhaust_victim")
+    """ONE entry point since `C18`, and the harness found that by itself.
+
+    `EB-136` / R210 bound every `target: enemy` op of a card to a single aim
+    taken at card-play construction, and `place_bomb` is one of the emitter's
+    `AIMING_OPS` -- so `_op_place_bomb` stopped asking `bomb_placement_target`
+    where the bomb goes and reads the play's bound target like every other
+    aimed row. The chooser is still in `policy.py`, unedited; the ENGINE no
+    longer calls it, which is exactly what "derived from source, never a
+    hard-coded list" exists to notice.
+    """
+    assert scope.entry_points == ("exhaust_victim",)
     assert scope.gate.switch == "PILOT_POLICIES_ENABLED"
 
 
@@ -157,14 +176,29 @@ def test_a_third_gated_chooser_is_discovered_without_editing_this_harness():
 
 
 def test_the_pair_weights_are_pair_own(scope):
-    for name in ("BOMB_LANDED_DAMAGE_VALUE", "BOMB_LETHAL_WASTE_WEIGHT",
-                 "BOMB_CONCENTRATION_VALUE", "BOMB_CONCENTRATION_STACK_CAP",
-                 "BOMB_SUPPRESSION_VALUE", "BOMB_READER_LETHAL_POP_VALUE",
-                 "BOMB_EARLY_POP_PENALTY", "BOMB_MOVE_READER_AIM_VALUE",
-                 "EXHAUST_COST_EFFICIENCY_WEIGHT", "EXHAUST_JUNK_BONUS",
+    for name in ("EXHAUST_COST_EFFICIENCY_WEIGHT", "EXHAUST_JUNK_BONUS",
                  "EXHAUST_SELF_EXHAUST_DISCOUNT"):
         assert name in scope.pair_own, name
         assert getattr(policy, name) == scope.pair_own[name]
+
+
+def test_the_bomb_weights_left_the_sweep_when_the_engine_stopped_reading_them(
+        scope):
+    """R33's dead-knob law, applied to the harness rather than to a result.
+
+    `EB-136` / R210 (`C18`) bound `place_bomb target: enemy` to the play's one
+    aim, so no engine path reaches `bomb_placement_score` any more. A sweep
+    that kept sweeping these eight would report a null on every cell and
+    would be unable to show the swept constant was READ even once -- which is
+    the exact failure R33's exercise counter exists to catch. They are out of
+    `pair_own` and out of `shared`; the constants themselves stand untouched
+    in `policy.py`, waiting on the destination-scoring question `EB-136`
+    severed.
+    """
+    for name in BOMB_WEIGHTS:
+        assert name not in scope.pair_own, name
+        assert name not in scope.shared, name
+        assert hasattr(policy, name), name
 
 
 def test_a_weight_the_main_scorer_also_reaches_is_shared_not_swept(scope):
@@ -298,12 +332,21 @@ def test_counted_weights_are_numerically_invisible():
     assert min(5, w4._arm_value("BOMB_CONCENTRATION_STACK_CAP", 3)) == 3
 
 
-def test_reads_are_counted_on_the_real_read_path(scope):
+def test_reads_are_counted_on_the_real_read_path():
     """No `policy.py` edit and no self-report: the count comes off genuine
-    arithmetic inside `bomb_placement_score` (R33's exercise-counter law)."""
+    arithmetic inside `bomb_placement_score` (R33's exercise-counter law).
+
+    Armed from an EXPLICIT mapping rather than from `scope.defaults` since
+    `C18`: the engine no longer reaches these eight (R210 bound `place_bomb`),
+    so they are out of the discovered scope. The claim this test makes is
+    about the COUNTER, not about the sweep's membership -- it has to keep
+    holding on a function the harness can still be pointed at by hand, or the
+    exercise counter has no proof it counts real arithmetic at all.
+    """
     low, high = make_enemy(hp=3, name="low"), make_enemy(hp=60, name="high")
     state = make_state([low, high])
-    with w4.sandbox(scope.defaults) as sb:
+    armed = {name: getattr(policy, name) for name in BOMB_WEIGHTS}
+    with w4.sandbox(armed) as sb:
         policy.bomb_placement_score(state, PLACE_5, high)
     assert sb.reads["BOMB_LANDED_DAMAGE_VALUE"] > 0
     assert sb.reads["BOMB_LETHAL_WASTE_WEIGHT"] > 0
@@ -336,14 +379,24 @@ def test_switch_off_is_byte_identical_across_two_wild_vectors(
 
 
 @pytest.mark.battery
-@pytest.mark.parametrize("cell_name,runs", [("bomb-primary", 6),
-                                            ("exhaust-primary", 10)])
+@pytest.mark.parametrize("cell_name,runs", [("exhaust-primary", 10)])
 def test_the_positive_control_the_previous_test_needs(switch_off, scope, wild,
                                                       cell_name, runs):
     """Without this, a harness that ran nothing would pass the test above.
 
     Forcing the switch ON moves the cell, and moving the weights under it
     moves the cell again.
+
+    THE BOMB CELL LEFT THIS CONTROL AT `C18` (`EB-136` / R210) and its
+    inertness is pinned in its own right below, which is the honest place for
+    it: the gate's Klee half no longer HAS a decision to move, because
+    `_op_place_bomb` reads the play's bound aim instead of asking
+    `bomb_placement_target`. Leaving `bomb-primary` parametrized here would
+    have turned a positive control into a standing red light for a behaviour
+    change the ruling asked for; deleting the row without replacing it would
+    have lost the fact. Both halves of the byte-identity claim above still run
+    on both cells -- on the bomb cell it now holds trivially, which is exactly
+    what the new pin says out loud.
 
     THE EXHAUST CELL NEEDS TEN RUNS, NOT SIX, SINCE R208 / W2b (2026-08-25),
     and the reason is content rather than harness. This control has no power
@@ -368,11 +421,43 @@ def test_the_positive_control_the_previous_test_needs(switch_off, scope, wild,
 def test_the_shipped_switch_is_the_on_side_of_that_pair(scope):
     """Which side of the pair above the tree actually ships, asserted where
     the harness can see it: `force=False` is the OFF comparator only while
-    someone holds the switch down, and since Phase 2A nobody does by default."""
+    someone holds the switch down, and since Phase 2A nobody does by default.
+
+    READ ON THE EXHAUST CELL SINCE `C18`. It used to read on `bomb-primary`,
+    which since `EB-136` / R210 carries no gated decision at all and would
+    therefore agree with itself whichever side shipped -- a claim about the
+    default that a cell with nothing behind the gate cannot make.
+    """
     assert policy.PILOT_POLICIES_ENABLED is True
-    cell = _cell("bomb-primary")
+    cell = _cell("exhaust-primary", runs=10)
     assert (w4.evaluate(cell, scope.defaults, force=False)["digest"]
             == w4.evaluate(cell, scope.defaults)["digest"])
+
+
+@pytest.mark.battery
+@pytest.mark.parametrize("cell_name", ["bomb-primary", "bomb-secondary"])
+def test_the_bomb_cells_carry_no_gated_decision_since_the_binding(
+        switch_off, scope, wild, cell_name):
+    """`C18` (`EB-136` / R210) emptied the 2A pair's KLEE half, and this is
+    where that is written down rather than inferred from a deleted row.
+
+    `_op_place_bomb` used to ask `bomb_placement_target` where each bomb went;
+    it now reads the play's ONE bound aim, because `place_bomb` is one of the
+    emitter's `AIMING_OPS` and the mod puts every bomb of a placement on
+    `cardPlay.Target`. So on a Klee cell the gate has nothing behind it: the
+    switch may be off, forced on, or forced on at a wild vector, and all three
+    are one digest. That is the same shape as the Furina null control below --
+    which is the point. `CELL_SPECS` still calls these rows `measure`; they
+    are only carriers again if the destination-scoring question `EB-136`
+    severed is answered by putting a chooser back at BIND time.
+    """
+    cell = _cell(cell_name)
+    digests = {
+        w4.evaluate(cell, scope.defaults, force=False)["digest"],
+        w4.evaluate(cell, scope.defaults)["digest"],
+        w4.evaluate(cell, wild)["digest"],
+    }
+    assert len(digests) == 1
 
 
 @pytest.mark.battery
@@ -432,8 +517,30 @@ def test_the_screen_moves_exactly_one_axis_per_point(scope):
 
 
 def test_the_numeraire_is_never_swept(scope):
+    """A `PINNED` axis is held at its shipped value wherever it is in scope.
+
+    Stated over `PINNED` rather than over the one name in it since `C18`: the
+    bomb numeraire left the discovered scope with the rest of its vector when
+    R210 bound `place_bomb`, and a test that named it directly would have gone
+    green-by-absence on a grid that had stopped containing it. The property is
+    also exercised on a scope that DOES hold it, below, so this arm cannot
+    pass vacuously.
+    """
     for point in w4.screen_points(scope):
-        assert point["BOMB_LANDED_DAMAGE_VALUE"] == 1.0
+        for name in w4.PINNED:
+            if name in point:
+                assert point[name] == scope.defaults[name]
+
+    pinned = {name: getattr(policy, name) for name in w4.PINNED}
+    held = w4.WeightScope(entry_points=("x",),
+                          pair_own=dict(pinned,
+                                        BOMB_LETHAL_WASTE_WEIGHT=1.0),
+                          shared={})
+    points = w4.screen_points(held)
+    assert len(points) > 1, "the control grid has to actually sweep something"
+    for point in points:
+        for name, value in pinned.items():
+            assert point[name] == value
 
 
 def test_the_bomb_vector_is_scale_invariant_which_is_why_it_is_pinned(scope):

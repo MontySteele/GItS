@@ -844,6 +844,20 @@ class CombatState:
     # using tier0's lowest-HP pilot aim -- variance IS the point of Havoc.
     free_play_depth: int = 0
     force_random_targeting: bool = False
+    # EB-136 / R210 (C18): tier0's mirror of C#'s `CardPlay.Target`. That
+    # property is `init`-only -- immutable once the play is constructed -- so
+    # every `target: enemy` op of one card resolves against ONE creature, and
+    # `CardCmd.AutoPlay` rolls the autoplay pick ONCE from `HittableEnemies`
+    # BEFORE resolution rather than lazily at the first aimed op.
+    # `effects.resolve_card` writes both fields at the top of a play and clears
+    # them in its `finally`; `combat._FREE_PLAY_CONTEXT` saves and restores them
+    # so a free play cannot leave its aim behind for the outer card.
+    # `card_aim_bound` exists because `None` is a LEGAL bound value (an empty
+    # board) and must not read as "no play in flight": the pilot calls
+    # `_default_target` between plays and has to see live state, not the last
+    # card's corpse.
+    card_aim: Optional[Enemy] = None
+    card_aim_bound: bool = False
     current_card_cost: int = 0            # this_cost_zero
     current_x: int = 0                    # X-cost cards
     sparks_at_play: int = 0               # bank BEFORE this card's own spark

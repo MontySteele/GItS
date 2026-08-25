@@ -121,17 +121,35 @@ def test_placement_ties_fall_back_to_the_pre_policy_pick(policies_on):
     assert policy.bomb_placement_target(state, PLACE_5) is b
 
 
-def test_the_op_places_through_the_policy_and_reprices_per_bomb(policies_on):
-    """End to end, and the multi-bomb case: the second bomb sees the pile the
-    first one built, so a two-bomb placement concentrates."""
+def test_the_op_no_longer_places_through_the_policy(policies_on):
+    """END TO END, AND THIS PIN IS INVERTED SINCE `C18` (`EB-136` / R210).
+
+    It used to read "the op places through the policy and reprices per bomb":
+    both bombs of a two-bomb placement went where `bomb_placement_target` said,
+    the second one seeing the pile the first had built. R210 ruled that EVERY
+    `target: enemy` op of a card resolves against ONE aim taken at card-play
+    construction, and `place_bomb` is one of the emitter's `AIMING_OPS` -- the
+    mod emits All of My Treasures as six `BombPower.Place` calls on the single
+    `cardPlay.Target`, and Trip Wire puts its bomb and its Weak on that same
+    creature. A per-bomb chooser is three independently picked destinations
+    where the mod has one, which is the divergence restated, so the engine
+    stopped consulting it for this spelling.
+
+    The board is the one the policy has the most to say about -- a 3 HP body
+    that wastes 2 of a 5-damage bomb -- so a pass here cannot be the policy
+    agreeing by accident. `bomb_placement_target` is UNCHANGED and still
+    pinned above; what moved is who asks it.
+    """
     low, high = _enemy(3, "low"), _enemy(60, "high")
     state = make_state([low, high])
-    effects._op_place_bomb(state, {"op": "place_bomb", "amount": 2,
-                                   "target": "enemy", "bomb_damage": 5},
-                           _skill("probe", 1))
+    fx = {"op": "place_bomb", "amount": 2, "target": "enemy",
+          "bomb_damage": 5}
+    assert policy.bomb_placement_target(state, fx) is high   # still says high
 
-    assert low.bombs == []
-    assert len(high.bombs) == 2
+    effects.resolve_card(state, _skill("probe", 1, [fx]))
+
+    assert len(low.bombs) == 2          # the bound aim: lowest HP at play
+    assert high.bombs == []
 
 
 def test_random_placement_is_untouched_by_the_policy(policies_on):

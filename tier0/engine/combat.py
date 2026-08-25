@@ -500,7 +500,15 @@ _FREE_PLAY_CONTEXT = (
     # why every writer rebinds instead of clearing in place: a free play that
     # exhausts mid-resolution opens its own list, and the restore below hands
     # the outer card back the one it was reading.
-    "exhaust_selection")
+    "exhaust_selection",
+    # EB-136 / R210: the play's bound `cardPlay.Target`. A free play is a
+    # SECOND `CardPlay` constructed inside the first, with its own target, and
+    # `resolve_card`'s `finally` clears the pair on the way out -- so without
+    # these two names the outer card would finish its remaining aimed ops
+    # unbound, silently reverting to the per-op lowest-HP pick this row exists
+    # to kill. Both are saved: `card_aim_bound` carries the distinction between
+    # "bound to nothing" and "no play in flight".
+    "card_aim", "card_aim_bound")
 
 
 def resolve_free_play(state: CombatState, card: Card,
