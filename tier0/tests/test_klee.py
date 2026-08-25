@@ -59,17 +59,23 @@ def test_archetype_tag_counts():
 
     NOTE: deliberately locks the ACTUAL counts rather than asserting the
     template §3.4 "15-20 tagged cards per archetype" band, which all three
-    archetypes currently sit outside (28 / 22 / 14) with no amendment in
+    archetypes currently sit outside (27 / 22 / 14) with no amendment in
     the v1->v1.10 log. Reaction's 14 is rationalized in the character doc
     ("enablers live in the companion pool") but never formally waived.
     QUEUED FOR USER at the v1 review -- amend the band or accept the
     deviation on record; until then this test only catches silent drift.
+
+    DEMOLITION 28 -> 27, [USER] 2026-08-24 (EB-118 Phase-3 W1 audit):
+    big_badda_boom dropped the tag, because the tag means Bomb-plan
+    participation and that body carries none of the arm's five bomb verbs.
+    GENERIC DOES NOT MOVE with it -- the card already carried `generic`, so
+    the drop is one tag off, not one tag traded for another.
     """
     counts = {}
     for c in _klee_pool():
         for arch in c.archetypes:
             counts[arch] = counts.get(arch, 0) + 1
-    assert counts["demolition"] == 28
+    assert counts["demolition"] == 27     # 28 - 1 (big_badda_boom, W1 audit)
     assert counts["spark"] == 22          # 21 + snap (M7 R1)
     assert counts["reaction"] == 14
     assert counts["generic"] == 19
@@ -167,9 +173,20 @@ def test_big_badda_boom_prints_the_price_and_the_upgrade_buys_it_off():
     # no-bump licence.
     assert base.rarity == "common"
 
-    # Phase-3-fenced fields did NOT move with the price (packet §3, R199 g1).
+    # `role` did NOT move with the price and has not moved since (R199 g1: a
+    # relabel whose only effect is to improve a count is forbidden, and this
+    # card is glue in every reading of it).
     assert base.role == "glue"
-    assert sorted(base.archetypes) == ["demolition", "generic"]
+
+    # `archetypes` DID move, and only at a ruling: [USER] 2026-08-24 dropped
+    # `demolition` at the EB-118 Phase-3 W1 audit, on the ground that the tag
+    # means Bomb-plan participation and this body carries none of the arm's
+    # five bomb verbs -- no place_bomb, detonate, modify_bombs, move_bombs, and
+    # no read of the bomb board. The ruled consequence rides on secret_stash:
+    # `demolition_commons` is DERIVED from this tag, so its draw pool went 8 ->
+    # 7 and this card can no longer arrive off it. Supply arithmetic is
+    # untouched, because the card is glue and was never in a payoff supply.
+    assert sorted(base.archetypes) == ["generic"]
 
 
 def test_survival_sprint_companion_interfaces_have_live_bodies():

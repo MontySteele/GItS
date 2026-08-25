@@ -530,7 +530,7 @@
    # build). Each performance plays LOUDER: Rampage growth (grow_damage, permanent this combat) on top of
    # the 1-per-2 read, so the card is literally a crescendo. Printed base 8->6 pays for the growth line.
    # Breaks the damage@one~ clone family: no other card grows. PROPOSED.
-- {id: florid_cadenza, name: "Florid Cadenza", register: archon, cost: 0, type: skill, rarity: uncommon, solve: [velocity], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [fanfare], role: payoff,
+- {id: florid_cadenza, name: "Florid Cadenza", register: archon, cost: 0, type: skill, rarity: uncommon, solve: [velocity], tempo_band: {fight: [early, mid, late], run: [early, late]}, archetypes: [fanfare], role: glue,
    effects: [{op: draw, amount: 1}, {op: conditional, if: fanfare_at_least_12, then: [{op: draw, amount: 2}]}]}
    # F-B1: kept as a THRESHOLD, deliberately — draw cannot scale smoothly at this cost without becoming a combo engine.
    # A 0-cost cantrip at an empty meter, the old three-card hand at a full one. Its UPGRADE drops the gate rather than
@@ -573,13 +573,13 @@
    # Was: block 5 + encore 1 hybrid glue ("Pit Orchestra"), a NEARDUP core[block] member with macaron_break.
    # PROPOSED pending red-pen.
 # Spotlight (7)
-- {id: leading_role, name: "Leading Role", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
+- {id: leading_role, name: "Leading Role", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], tempo_band: {fight: [late], run: [early]}, archetypes: [spotlight], role: enabler,
    effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self, note: "first Spotlighted card each turn costs N less"}]}
    # Ratified texture verbatim (kickoff §3.2). Her card granting economy — the baseline multiplier still can't.
    # CAP DROPPED (user ruling 2026-07-24): the "first Spotlighted card each turn" clause already limits this to ONE
    # proc a turn, so a second copy is linear, not compounding — the pass-1 cap rationale was written for per-turn
    # compounding powers and does not reach this one. Base StS lets you spam Power dupes; this now does too.
-- {id: supporting_cast, name: "Supporting Cast", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [spotlight], role: payoff,
+- {id: supporting_cast, name: "Supporting Cast", register: salon, cost: 1, type: power, rarity: uncommon, solve: [scaling], tempo_band: {fight: [late], run: [early]}, archetypes: [spotlight], role: enabler,
    effects: [{op: apply_power, power: spotlight_draw, amount: 1, target: self, note: "first Spotlighted card each turn draws N"}]}
    # The other ratified texture line. Cap dropped with Leading Role's, same ruling and same reasoning.
 - {id: guest_list, name: "The Guest List", register: salon, cost: 1, type: skill, rarity: uncommon, solve: [block, frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [spotlight], role: enabler, exhaust: true,
@@ -754,7 +754,7 @@
    # {op: energy, amount: 1}; the refund was the term the self-copy loop compounded into an energy-POSITIVE engine. Cost 0
    # buys the same "playable now" the refund was printed for, and cannot stack above zero.
    # WATCHLIST: duplicating an amp-booster goes on the amp-cap watchlist (iron rule bounds it; confirm in provenance logs).
-- {id: singer_of_many_waters, name: "Singer of Many Waters", register: archon, cost: 1, type: skill, rarity: rare, solve: [sustain], tempo_band: {fight: [early], run: [late]}, archetypes: [generic, salon], role: payoff, exhaust: true,
+- {id: singer_of_many_waters, name: "Singer of Many Waters", register: archon, cost: 1, type: skill, rarity: rare, solve: [sustain], tempo_band: {fight: [early], run: [late]}, archetypes: [generic], role: glue, exhaust: true,
    effects: [{op: heal, amount: 6}]}
    # TRUE HEAL: Rare AND Exhausts — the conjunctive law's poster child (Guardrail 6). The Pneuma voice, once per combat.
    # A6 (RULED 2026-07-28, playtest-2 red-pen): heal 14 -> 6; the upgraded
@@ -792,7 +792,7 @@
              {op: apply_power, power: salon_damage_up, amount: 3, target: self}]}
    # Named for her passive. The waltzing pair (hammer + shield, v2) and a standing crescendo — the Salon's rare
    # engine piece. Cost 3->2 at the rework reprice. PROPOSED pending red-pen.
-- {id: grand_gala, name: "Grand Gala", register: salon, cost: 2, type: skill, rarity: rare, solve: [block, frontload, scaling, sustain, utility, velocity], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [salon], role: payoff, exhaust: true, tags: [skill_tag],
+- {id: grand_gala, name: "Grand Gala", register: salon, cost: 2, type: skill, rarity: rare, solve: [block, frontload, scaling, sustain, utility, velocity], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [salon], role: enabler, exhaust: true, tags: [skill_tag],
    effects: [{op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta},
              {op: apply_power, power: salon_member, amount: 1, target: self, member: crabaletta},
              {op: apply_power, power: salon_member, amount: 1, target: self, member: chevalmarin},
@@ -800,7 +800,7 @@
              {op: gain_encore, amount: 4}]}
    # All My Treasures parity: four deployments — on any live stage the elders bow out (v2 evoke geometry), and its
    # replacement-doubled Encore rider funds the opening turns. Cost 3->2 at the rework reprice. PROPOSED.
-- {id: the_sea_is_my_stage, name: "The Sea Is My Stage", register: archon, cost: 1, type: power, rarity: rare, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [fanfare], role: payoff, tags: [focalors],
+- {id: the_sea_is_my_stage, name: "The Sea Is My Stage", register: archon, cost: 1, type: power, rarity: rare, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [fanfare], role: enabler, tags: [focalors],
    effects: [{op: gain_fanfare_floor, amount: 15}]}
    # CURTAIN CALL C (R85): Focalors slot 1 (RATIFIED), flavor pass only — the hydro Archon on her true
    # stage: the sea SHE is, the divinity the audience mistakes for theatre. Mechanics untouched by ruling.
@@ -828,14 +828,14 @@
    # CAP DROPPED (user ruling 2026-07-24): with amount 3 and max_stacks 3 the cap EQUALLED one application, so a second
    # copy did literally nothing — a dead card of exactly the shape lint_strict_domination exists to catch. Flat +3 per
    # copy is linear and rides the same numbers-only pipe, so uncapping restores the base-StS "spam dupes if you want to".
-- {id: prima_donna, name: "Prima Donna", register: salon, cost: 2, type: power, rarity: rare, solve: [scaling], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [spotlight], role: payoff,
+- {id: prima_donna, name: "Prima Donna", register: salon, cost: 2, type: power, rarity: rare, solve: [scaling], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [spotlight], role: enabler,
    effects: [{op: apply_power, power: spotlight_discount, amount: 1, target: self}, {op: apply_power, power: spotlight_draw, amount: 1, target: self}]}
    # Both texture lines in one rare: the production revolves around her star.
-- {id: high_tide, name: "High Tide", register: archon, cost: 1, type: attack, rarity: rare, solve: [frontload, scaling], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [salon, fanfare], role: payoff, tags: [skill_tag],
+- {id: high_tide, name: "High Tide", register: archon, cost: 1, type: attack, rarity: rare, solve: [frontload, scaling], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [fanfare], role: payoff, tags: [skill_tag],
    effects: [{op: damage, amount: 15, target: enemy, bonus_formula: 1_per_2_fanfare}]}
    # F-B1: gate -> the steepest read on the sheet, which is what makes it the archetype's payoff rather than a fat vanilla
    # hit. Printed damage comes down for the same reason as flood_of_emotion: the Spend line was paying for part of it.
-- {id: rain_of_roses, name: "Rain of Roses", register: salon, cost: 1, type: skill, rarity: rare, solve: [block, frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [salon, spotlight], role: payoff, tags: [skill_tag],
+- {id: rain_of_roses, name: "Rain of Roses", register: salon, cost: 1, type: skill, rarity: rare, solve: [block, frontload, scaling, utility, velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [generic], role: enabler, tags: [skill_tag],
    effects: [{op: apply_aura, element: hydro, target: all_enemies}, {op: gain_encore, amount: 5}]}
    # G-D1 (2026-07-25), PROPOSED: repriced one energy cheaper. Named "weak" by the co-op A0 playtest,
    # and that reading is consistent with the v2 reprice lesson -- rares were overpriced as a TIER, not
@@ -850,6 +850,8 @@
    # with guest_neuvillette_judgment (one measurement covers the full mass-application set).
    # M12(a) RULED 2026-08-10 (R147): the cell is TWO -- {rain_of_roses, guest_neuvillette_judgment}. The
    # four-name premise cited a phantom line; undercurrent and standing_room_only are not members.
+   # Phase 3 changes this card's metadata, not its mass-application body; R147 cell membership is
+   # unchanged. Any future drafted-deck instrument must register against the then-live role/drafter world.
 - {id: the_final_verdict, name: "The Final Verdict", register: archon, cost: 2, type: attack, rarity: rare, solve: [scaling], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [fanfare], role: payoff,
    effects: [{op: damage, amount: 0, bonus_formula: 1_per_1_fanfare, target: enemy},
              {op: crash_fanfare, amount: 30}]}
@@ -874,11 +876,11 @@
    # (pilot-gap P3), so one cast typically buries the floor below zero and the
    # second cast in a combat is a genuinely bad idea. That is the intended
    # shape -- a finisher, not a rotation piece.
-- {id: command_performance, name: "Command Performance", register: salon, cost: 1, type: skill, rarity: rare, solve: [block, frontload, velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [spotlight], role: payoff, exhaust: true,
+- {id: command_performance, name: "Command Performance", register: salon, cost: 1, type: skill, rarity: rare, solve: [block, frontload, velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [spotlight], role: enabler, exhaust: true,
    effects: [{op: generate_guest_star, rarity: uncommon, amount: 2}]}
    # The rare generator: two uncommon guests at once (still sub-Rare output — the equal-rarity clause reads the GENERATED
    # rarity, and this card's own grammar keeps it under the banner: it creates uncommons, never 5-star Rares).
-- {id: reginas_mercy, name: "The Regina's Mercy", register: archon, cost: 1, type: skill, rarity: rare, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [generic, fanfare], role: payoff, exhaust: true, tags: [focalors],
+- {id: reginas_mercy, name: "The Regina's Mercy", register: archon, cost: 1, type: skill, rarity: rare, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [generic, fanfare], role: enabler, exhaust: true, tags: [focalors],
    effects: [{op: gain_encore, amount: 12}]}
    # It printed the full Fanfare grant until the rework, then the cap rider,
    # and now neither (EB-118 sec.5.2, 2026-08-24). R6 keeps the grant on rare
@@ -904,7 +906,7 @@
    # RETYPE REVERTED by the pre-registered shrink clause (Track B / the uptime prediction): cell 3
    # breached the hydro-uptime bound (fanfare arm -26% rel.), so the flood stays a damaging SKILL — both
    # strikes apply. (lint-ok: telemetry) PROPOSED.
-- {id: showstopper, name: "Showstopper", register: archon, cost: 1, type: attack, rarity: rare, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [fanfare], role: payoff,
+- {id: showstopper, name: "Showstopper", register: archon, cost: 1, type: attack, rarity: rare, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [generic], role: payoff,
    effects: [{op: damage, amount: 12, target: enemy}, {op: conditional, if: killed_target, then: [{op: gain_encore, amount: 6}, {op: draw, amount: 2}]}]}
    # CURTAIN CALL C (R85): the RATIFIED 4th rare (chat 2026-07-27), differentiated from house_call (§7) by
    # vacating the conditional-double-damage shape entirely: a showstopper STOPS THE SHOW — if the hit

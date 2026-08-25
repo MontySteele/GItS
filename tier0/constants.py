@@ -1430,7 +1430,83 @@ BANNER_FEATURED_SLOTS = 3
 # post-read, which is now unblocked and owed, rather than a table taken twice
 # in one day. That is the same argument the 2A flip recorded when it took no
 # table of its own.
-CONSTANTS_VERSION = 14
+# CONSTANTS_VERSION 15 -- the EB-118 PHASE-3 WINDOW 1 LABEL PASS (R202, [USER]
+# 2026-08-24: "The current phase 3 ledger is ratified."), landed 2026-08-25.
+# ONE window, METADATA ONLY: sixteen `role` conversions and five `archetypes`
+# changes across nineteen cards on the three character sheets, plus the three
+# `tempo_band.run` values the classifier re-derives off `role` and the one
+# generated C# file the `demolition_commons` pool feeds. NO card body, cost,
+# rarity, keyword, `solve` or upgrade delta moves; no op is added; no drafter
+# code and no pilot heuristic moves.
+# THIS IS THE FIRST BUMP TAKEN UNDER R202's LAW AMENDMENT, and it is declared
+# on that ground alone: "a change to a card's `role` or `archetypes` is a
+# material card-sheet edit because both fields are mechanically read by
+# drafting. It requires a `CONSTANTS_VERSION` bump, and drafted-world numbers
+# are not comparable across it." R179/M15's own enumeration -- additions,
+# removals, cost changes, effect-number changes, rarity moves -- reaches NONE
+# of these edits, which is exactly why the amendment was ratified and why this
+# window could not have been stamped without it.
+#   (a) THE SIXTEEN ROLE CONVERSIONS. Twelve `payoff` -> `enabler` and four
+#   `payoff` -> `glue`, by pool: furina/fanfare (`florid_cadenza`,
+#   `the_sea_is_my_stage`, `reginas_mercy`), furina/spotlight (`leading_role`,
+#   `supporting_cast`, `prima_donna`, `command_performance`, `rain_of_roses`),
+#   furina/salon (`singer_of_many_waters`, `grand_gala`), kokomi/priest
+#   (`sango_prayer`, `vigil_of_the_deep`, `prayer_to_the_moon`) and
+#   klee/demolition (`explosive_frags`, `all_my_treasures`,
+#   `playtime_forever`). Nineteen payoff tags leave five arms off eighteen
+#   cards, and the measured supply is the ratified arithmetic exactly:
+#   furina/fanfare 14 -> 10, kokomi/priest 14 -> 11, klee/demolition 10 -> 7,
+#   furina/spotlight 10 -> 5, furina/salon 9 -> 5, klee/spark 7 -> 6,
+#   furina/generic 9 -> 8, kokomi/generic 13 -> 10; klee/generic 3,
+#   klee/reaction 8, kokomi/assist 5 and kokomi/commander 6 do not move.
+#   (b) THE FIVE `archetypes` CHANGES. `showstopper` [fanfare] -> [generic],
+#   `high_tide` [salon, fanfare] -> [fanfare], `rain_of_roses`
+#   [salon, spotlight] -> [generic], `singer_of_many_waters` [generic, salon]
+#   -> [generic], and `big_badda_boom` [demolition, generic] -> [generic]
+#   (the W1 audit ruling, [USER] 2026-08-24 "Agreed on all of those rulings").
+#   (c) THE ONE COMBAT CONSEQUENCE, and it is (b)'s alone. `demolition_commons`
+#   is DERIVED at load as every non-kit Common carrying the tag, so Big Badda
+#   Boom's drop takes `secret_stash`'s add-pool from EIGHT members to SEVEN and
+#   that card can no longer arrive off it. That is an outcome-distribution
+#   change inside a fight, not a drafting one, and it was accepted WITH the
+#   ruling rather than discovered after it. The klee `demolition` sub-pool
+#   reads 28 -> 27 and `generic` stays 19 (the card already carried it).
+#   (d) THREE CLASSIFIER RE-DERIVATIONS, taken as the classifier ruled them.
+#   `role_tempo.run_bands` reads `role`: an uncommon that is not a payoff also
+#   bands `early`, so `florid_cadenza` [late] -> [early, late] and
+#   `leading_role` / `supporting_cast` [late] -> [early]. No rare moved.
+#   (e) THE ONE C# DELTA, which is the proof `archetypes` reaches emission:
+#   `SecretStash.cs` drops `ModelDb.Card<BigBaddaBoom>()` from its stash list,
+#   so both engines read seven. No other generated file moves and
+#   `gen_roster_cards.py --check` is clean on all three sheets.
+# WHAT IS ARCHIVE: EVERY tier-0.5 DRAFTED NUMBER FOR ALL THREE CHARACTERS.
+# `is_on_plan_payoff` is literally `role == "payoff" and archetype in
+# card.archetypes` and the adaptive scorer reads both fields a second time, so
+# an offer scored before this window is not comparable with one scored after
+# it -- which is the amendment's own sentence, applied. The combat archive is
+# NARROW and named: Klee numbers that depend on what `secret_stash` produces,
+# per (c). Nothing else in combat moves, because no body moved. Archive
+# banners go where the numbers are published; nothing is rewritten (R101b).
+# AND THE ATTRIBUTION CAVEAT IS PART OF THE WINDOW, pre-registered before it
+# opened (`review/active/eb118-w1-preregistration-2026-08-24.md` §3): NO causal
+# role-versus-tag claim may be read out of a tier-0.5 number taken after this
+# bump, because both fields feed the same scorer. The window is ONE window by
+# ruling (R202 call (7)), not a 1a/1b split, and the honest repair if such a
+# claim ever matters is to split the window and re-run.
+# `RT`, `D` and `P` ARE UNTOUCHED, each on its own ground. No run-layer content
+# moved (`RT`). No drafter code and no dial value moved (`D`): the offer scorer
+# reads these fields, but a sheet consequence priced through live dials is
+# C-ground and not D-ground -- the precedent C14 set on `deep_breath` and D16
+# set on the repriced `place_bomb` rows. No pilot heuristic moved (`P`); both
+# activation switches keep the values Phase 2 left them at. The live cell at
+# this landing is `RT12/D16/P9/C15`.
+# NO STANDING BASELINE IS OWED AT THIS BUMP, and that is R207 rather than a
+# deferral: a standing table is published at a meaningful product milestone or
+# when a pending decision needs one, and no pending decision names one here.
+# The registered read for this window is the PAIRED CONNECTIVITY re-read the
+# pre-registration owed, taken against the Phase-2 post-read that R202 step
+# (iv) made W1's pre-state.
+CONSTANTS_VERSION = 15
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

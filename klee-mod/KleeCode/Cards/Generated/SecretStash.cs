@@ -70,7 +70,6 @@ public sealed class SecretStash : CustomCardModel
             var stashPool = new List<CardModel>
             {
                 ModelDb.Card<AmmoScavenging>(),
-                ModelDb.Card<BigBaddaBoom>(),
                 ModelDb.Card<BombVoyage>(),
                 ModelDb.Card<DoublePop>(),
                 ModelDb.Card<FishFlavoredBait>(),

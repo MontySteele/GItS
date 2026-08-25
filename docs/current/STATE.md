@@ -11,7 +11,7 @@
 
 ## Live cell
 
-**`RT12 / D16 / P9 / C14`**, read live via `tier05/cells.py`, with
+**`RT12 / D16 / P9 / C15`**, read live via `tier05/cells.py`, with
 `PILOT_WEIGHTS_VERSION` **4**. Numbers are never comparable across a stamp
 boundary unless labeled, and a report without a stamp is not citable
 (`EXPERIMENTS.md`).
@@ -21,15 +21,19 @@ boundary unless labeled, and a report without a stamp is not citable
 | `RT` `RUNTEMPLATE_VERSION` | **12** | `tier0/constants.py` | The run-layer half of the window-2 correctness batch (`EB-104`): the shop receives the run's Featured Banner, potion capacity is derived from held relics on read, the rest-site heal floors, Book of Five Rings counts event deck-adds through one door, and event card-reward screens roll rarity through `RARITY_ODDS`. |
 | `D` `DRAFTER_VERSION` | **16** | `tier0/constants.py` | `EB-118` Phase 2's two formerly-inert drafter terms are live: `STATIC_ETHEREAL_SHARE` now prices a shipped card (`big_badda_boom` 8.0000 → 4.8000 base, 8.0000 upgraded), and `choose_one`'s `MAX(modes)` arbitration is reachable but moves no number. The share is **RATIFIED at 0.6 (R205)**; the read and the rank plateau are recorded at the constant in `tier05/draft.py`. `D15` beneath it is `EB-43` — the spotlight limb of `core_complete`/`_core_progress` requires a machinery payoff. |
 | `P` `POLICY_VERSION` | **9** | `tier05/draft.py` | The `EB-118` Phase-2C mode-chooser flip: `MODE_CHOOSER_ENABLED` is `True` and `effects._chosen_mode` asks `policy.choose_mode` — argmax of the pilot's per-op valuations over the live board, minus the TRUE HP an overdrawing `spend_encore` costs, ties to the lowest index. `PILOT_WEIGHTS_VERSION` 4 labels the weight set now that `MODE_OVERDRAW_HP_VALUE` is read; no weight VALUE has moved from the hand-picked vector. Phase-2A's `PILOT_POLICIES_ENABLED = True` (Klee bomb placement, Kokomi chosen exhaust) is inside this value at `P8`. |
-| `C` `CONSTANTS_VERSION` | **14** | `tier0/constants.py` | `deep_breath`'s mode 2 is `spend_encore 3` + `draw 3` (R205); mode 1 and every frame field are unchanged. The world beneath it is `C13`, the `EB-118` Phase-2 sheet-and-engine integration window — `big_badda_boom` (Ethereal carrier, R201's kill rider), the twelve `place_bomb` rows leaving `target: random_enemy`, `bomb_damage_per_rotation` as a new engine power with a once-per-turn latch, `lasting_impression`'s `{encore: +2}`, and `deep_breath`'s conversion to `choose_one` — and it is the world the standing baseline below was read in. |
+| `C` `CONSTANTS_VERSION` | **15** | `tier0/constants.py` | The `EB-118` Phase-3 **Window 1 label pass** — metadata only: sixteen `role` conversions and five `archetypes` changes over nineteen cards, the three `tempo_band.run` values the classifier re-derives off `role`, and `SecretStash.cs` dropping Big Badda Boom from the derived `demolition_commons` pool (8 members → 7, a combat outcome-distribution change). **The first bump taken under R202's LAW amendment** — `role`/`archetypes` are material card-sheet edits — so **every tier-0.5 drafted number for all three characters is archive**; the combat archive is only Klee numbers that depend on what `secret_stash` produces. `C14` beneath it was `deep_breath`'s mode 2 (`spend_encore 3` + `draw 3`, R205); `C13` beneath that was the `EB-118` Phase-2 sheet-and-engine integration window — `big_badda_boom` (Ethereal carrier, R201's kill rider), the twelve `place_bomb` rows leaving `target: random_enemy`, `bomb_damage_per_rotation` as a new engine power with a once-per-turn latch, `lasting_impression`'s `{encore: +2}`, and `deep_breath`'s conversion to `choose_one` — and `C13` is the world the standing baseline below was read in. |
 
 **Standing baseline:** `review/active/sitting-reads-2026-08-24-c13-d16.md` —
 twelve arms, taken at `RT12/D16/P7/C13`, with §8's dated addendum carrying the
 two `real_*` floor rows (`real_ironclad` 5.5% win / 67.2% act-1, `real_silent`
 1.3% / 54.4%) after `game_ref/` was restored. It is a `P7`/`C13` reading: the
-`P8` and `P9` activation windows closed above it, and the read they owe is
-R202 step (iii)'s single Phase-2 post-read (in flight, below). Under **R207** a
-published standing table is owed at a meaningful product milestone or when a
+`P8` and `P9` activation windows closed above it, and the read they owed —
+R202 step (iii)'s single Phase-2 post-read — is TAKEN and merged
+(`review/active/eb118-connectivity-phase2-postread-2026-08-24.txt`), which
+step (iv) makes Window 1's pre-state. `C15` moves the table no further: no
+standing baseline is owed at that bump, because no pending decision names one.
+Under **R207** a published standing table is owed at a meaningful product
+milestone or when a
 pending decision needs one; intermediate attribution is by commit-hash scratch
 comparison, which is not citable the way a stamped baseline is
 (`EXPERIMENTS.md`). Version stamps themselves are unchanged: every change to a
@@ -117,19 +121,15 @@ them rather than from prose.
 - **Furina** — **81 of 82** generated, 1 blocked
   (`let_the_people_rejoice`, intentionally hand-written kit machinery)
   (`klee-mod/KleeCode/Cards/Furina/Generated/manifest.json`).
-- **Kokomi** — **70 of 76** generated, 6 blocked
-  (`klee-mod/KleeCode/Cards/Kokomi/Generated/manifest.json`).
-  `ceremonial_garment` is hand-written; the other five each name an
-  unimplemented C# runtime grammar rather than a defect: `the_gunbai_turns` and
-  `raise_the_sashimono` (op `grant_sly_this_turn`), `what_the_tokoyo_took` (an
-  `amount_formula` over `discards_this_turn` needs a CalculatedVar bound to that
-  count), `gyorin_formation` (`bonus_formula` `1_per_2_charge` on `block` has no
-  rider and would render as the bare base), and `what_the_tokoyo_returns` (a Sly
-  `recall_to_draw` from **discard**; only the exhaust source is built). Two more
-  generate but ship WITHOUT an upgrade under the no-partial-upgrades rule:
-  `send_the_runner` and `wheel_the_ranks`. Of the fourteen `EB-69` fill cards
-  the sim has all fourteen, the mod nine of them and seven of their upgrades —
-  a declared asymmetry, tracked as `EB-122`.
+- **Kokomi** — **75 of 76** generated, **1 blocked**
+  (`klee-mod/KleeCode/Cards/Kokomi/Generated/manifest.json`, whose `coverage`
+  block reads `total 76 / generated 75 / blocked 1`). The one block is
+  `ceremonial_garment`, hand-written kit machinery, and it is the only entry in
+  the manifest's `blocked` map. The manifest's `upgrades.no_upgrade_path` list
+  is **empty**, so every generated Kokomi card ships with its upgrade. The
+  `EB-69` sim/mod asymmetry is **closed** — both engines hold all fourteen fill
+  cards and all fourteen upgrade deltas (`EB-122`, which stands open only on
+  two selection-screen prompt strings, a [USER] copy call).
 
 ## Mod build environment (pinned)
 
@@ -185,16 +185,21 @@ Slay the Spire 2 **v0.107.1**, commit `59260271` (2026-06-18), Steam buildid
 Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
 [`BACKLOG.md`](BACKLOG.md).
 
-- **`EB-118` richness pass — Phase 2 is COMPLETE; Phase 3 is the live front.**
-  All three Phase-2 windows are closed: the `C13`/`D16` content window with its
-  single re-baseline, then 2A's activation on its own `P8`, then 2C's on `P9`
-  with `C14` beside it. **IN FLIGHT: R202 step (iii)'s Phase-2 post-read** —
-  ONE read over both activation windows, not one per switch — which is step
-  (iv)'s W1 pre-state and the last thing between here and Window 1. Phase 3 is
-  ratified as a governing plan (R202, amended at R205 and R207) and its nine
-  calls, guardrails and priority order live in BACKLOG `EB-118`. **Staged and
-  INERT, waiting on windows rather than on work:** `eb118-w1-labels`
-  (`184d63d`) and `eb125-w2-bodies` (`e2e6da0`) — merging one IS the pull.
+- **`EB-118` richness pass — Phase 2 is COMPLETE; Phase 3 Window 1 is LANDED
+  and W2 is the live front.** All three Phase-2 windows are closed: the
+  `C13`/`D16` content window with its single re-baseline, then 2A's activation
+  on its own `P8`, then 2C's on `P9` with `C14` beside it. R202 step (iii)'s
+  Phase-2 post-read is TAKEN and merged — ONE read over both activation
+  windows, not one per switch
+  (`review/active/eb118-connectivity-phase2-postread-2026-08-24.txt`) — and
+  step (iv) makes it Window 1's pre-state. **Window 1 (step (v)) is the label
+  pass and it LANDS at `C15`:** sixteen `role` conversions and five
+  `archetypes` changes over nineteen cards, its pre-registration graded blind
+  against a paired connectivity re-read — **7 PRED, 0 SPLIT, 0 MISS**
+  (`review/active/eb118-w1-postread-2026-08-25.txt`). Phase 3 is ratified as a
+  governing plan (R202, amended at R205 and R207) and its nine calls,
+  guardrails and priority order live in BACKLOG `EB-118`. **Next: W2, staged
+  and INERT on `eb125-w2-bodies` (`e2e6da0`) — merging it IS the pull.**
   **Window 3 lands as ONE public `C`/`D` window with one standing read**, its
   per-character attribution taken as commit-hash scratch comparisons (R207).
 - **Register diet** — this file's half is DONE; the `BACKLOG.md` half is gated
