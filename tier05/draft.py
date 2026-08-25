@@ -1798,14 +1798,19 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # tier0.5 number does. C.PILOT_WEIGHTS_VERSION 1 -> 2 in the same edit. The
 # payoff-reach registration's DRAFTER_VERSION = 14 pin is UNTOUCHED: the
 # drafter is not taught anything here, only the pilot.
-# POLICY_VERSION PROPOSED (EB-118, staged 2026-08-23). No integer here: the
-# bump executes when the switch is thrown, not when the code lands.
+# POLICY_VERSION 8 (EB-118 Phase 2A, 2026-08-24). THE SWITCH IS THROWN, and
+# this is the integer the PROPOSED block reserved when the pair landed inert on
+# 2026-08-23: the bump executes when the switch is thrown, not when the code
+# lands.
 #
-# Two decisions the engine has been making with a placeholder move into
+# Two decisions the engine had been making with a placeholder moved into
 # `tier0/pilot/policy.py`, both behind `policy.PILOT_POLICIES_ENABLED`, which
-# ships FALSE. Off, both call sites run their pre-EB-118 code and every number
-# on this branch -- the frozen calibration battery included -- is
-# byte-identical, which is why the stamp must not move yet.
+# shipped FALSE and now ships TRUE. While it was off, both call sites ran their
+# pre-EB-118 code and every number on the staging branch -- the frozen
+# calibration battery included -- was byte-identical, which is why the stamp
+# could not move first. That pre-policy code is still LIVE BEHIND the switch:
+# it is the comparator the W4 sweep's byte-identity arm forces off
+# (`tier05/pilot_weight_sweep.sandbox`, `force=False`), not dead code.
 #
 # (a) KLEE, bomb placement. `place_bomb` in its concentration form
 # (`target: enemy`) resolved through `_pick_targets`, i.e. lowest HP: a
@@ -1837,13 +1842,42 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # other, so no cell exists in which only one is live. Same argument v11 and
 # v12 made on the RUNTEMPLATE side.
 #
-# WHAT RE-BASELINES AT THE BUMP: every Klee tier-0.5 number (four printed rows
+# WHAT RE-BASELINED AT THE BUMP: every Klee tier-0.5 number (four printed rows
 # place in the concentration form) and every Kokomi number that touches a chosen
-# exhaust, which under the casket is her whole Charge engine. Also moving in
-# the same landing edit: `C.PILOT_WEIGHTS_VERSION`, because the EB-118 weights
-# ENTER the set it labels the moment they are first read -- the R176 reading of
-# that rule. The payoff-reach registration's `DRAFTER_VERSION = 14` pin is
-# UNTOUCHED: the drafter learns nothing here, only the pilot.
+# exhaust, which under the casket is her whole Charge engine. Moving in the
+# SAME landing edit and nothing else: `C.PILOT_WEIGHTS_VERSION` 2 -> 3, because
+# the EB-118 weights ENTER the set it labels the moment they are first read --
+# the R176 reading of that rule. `RUNTEMPLATE_VERSION` (12), `DRAFTER_VERSION`
+# (16) and `CONSTANTS_VERSION` (13) are all UNTOUCHED: the drafter learns
+# nothing here, only the pilot, and no run-layer content and no balance
+# constant moved. THE LIVE CELL AT THIS LANDING IS `RT12/D16/P8/C13` -- D16 and
+# C13 are Phase 2's CONTENT windows, closed earlier the same day as R202's step
+# (iii) required and NOT anything this edit moved; the block above was written
+# against the pre-close `D15`/`C12` world and is corrected here rather than
+# left to rot.
+#
+# THE GATE THAT HELD THIS FLIP WAS RETIRED, NOT SATISFIED. It was staged rather
+# than landed against ONE red test -- `test_pass3.py::test_per_deck_a2_bands`,
+# `klee/reaction_weighted` `A2_scaling` 3.4898 -> 3.5290 against a ratified
+# band of 3.5 -- and R204 (2026-08-24) retired the live per-axis deck-band
+# system as acceptance law roster-wide, deleting that test with the system it
+# read and closing `QUEUE` `M40` with NO replacement number. What the ruling
+# acted on is the probe: the band did not hold pre-flip either (3.5810 at
+# seed 7, 3.7735 at n=1000/seed 42), so the gate was passing on one lucky cell
+# by 0.0102, and the flip's own contribution is a consistent +0.035 against a
+# 0.21 seed spread. Seven-axis values are reportable diagnostics from here and
+# gate nothing. UN-GATED IS NOT UN-SEQUENCED: this landing keeps its place in
+# R191's window order, which is exactly why the 2C block below is still
+# PROPOSED and `MODE_CHOOSER_ENABLED` is still False.
+#
+# WHAT THE SWITCH DID TO THE SIM, recorded here so no later reader mistakes it
+# for the Phase-2 result: at the shipped weights NO cell separates at either
+# read -- `klee/demolition` 7.05% -> 6.70%, `klee/spark` 4.35% -> 3.75%,
+# `kokomi/priest` 1.35% -> 1.30%, `kokomi/assist` 0.40% -> 0.35% (n=2000, seed
+# 12, every interval overlapping), with `furina/salon` byte-identical across
+# the switch. A better decision rule bought no measurable winrate on these
+# cells; the citable Phase-2 read is the post-read owed AFTER 2C's window
+# closes, not these four numbers.
 #
 # POLICY_VERSION PROPOSED (EB-118 2C, staged 2026-08-24). A SECOND proposed
 # bump, and deliberately not folded into the one above: R191 ruled that the
@@ -1876,7 +1910,13 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # expected to move NO Furina number until the weights are swept in 2C's
 # window or the pair is redesigned, and a null result here must not be read
 # as "modal cards are neutral".
-POLICY_VERSION = 7
+#
+# THE 2A FLIP IS TAKEN AND 2C'S IS NOT, WHICH IS WHY ONE INTEGER MOVED AND ONE
+# BLOCK ABOVE IS STILL PROPOSED. `POLICY_VERSION` 8 is the 2A pair's flip and
+# nothing else; `MODE_CHOOSER_ENABLED` is untouched at False and its bump is
+# still reserved, exactly as R191 separated them. A reader who finds only one
+# integer here after two staged blocks is reading it correctly.
+POLICY_VERSION = 8
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
 # place a character's archetype vocabulary is declared -- and where it is
