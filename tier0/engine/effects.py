@@ -2655,6 +2655,33 @@ RECALL_SOURCES = ("discard", "exhaust")
 RECALL_EXHAUST_SOURCE = "exhaust"
 
 
+def walk_card_effects(card: Card):
+    """Every PRINTED effect on a card — the played face's tree AND the Sly
+    branch's.
+
+    EB-134. `Card.sly` is its own effect list (`state.py:262`) and
+    `_walk_effects` stops at `card.effects`, so a question answered by that
+    walk alone is answered about the played face only. For a CAPABILITY
+    question — "can this card do X at all" — that is simply wrong: a Sly
+    rider is printed text the player can always reach, exactly like a
+    conditional branch or a modal mode body, both of which `_walk_effects`
+    already descends into.
+
+    Deliberately a SECOND function rather than a change to `_walk_effects`.
+    Some callers want the played face and are right to: `_printed_power`
+    ranks what a card pays when you PLAY it, and folding a discard-only rider
+    into that scalar would mis-rank every Assist card for every chooser. The
+    rule is per-question, so the walk is per-question too — which is the same
+    discipline `tools/effect_walk.iter_effects_top` states on the sheet side.
+
+    The reserved `{op: sly_autoplay}` marker is filtered out by `sly_riders`:
+    it is a card PLAY, not an effect list, and is never dispatched as an op
+    (EB-71 / R174).
+    """
+    yield from _walk_effects(card.effects)
+    yield from _walk_effects(sly_riders(card))
+
+
 def retrieves_from_exhaust(card: Card) -> bool:
     """Does this card itself retrieve from the exhaust pile? (EB-118 §6.4
     constraint 3.)
@@ -2663,10 +2690,20 @@ def retrieves_from_exhaust(card: Card) -> bool:
     hand-set flag, so a future sheet row cannot arm the capability and forget
     to declare it. The C# twin is the IExhaustRetriever marker interface,
     which the generator stamps from this same shape.
+
+    EB-134: the walk is `walk_card_effects`, so the Sly branch counts. It
+    used to be `_walk_effects(card.effects)`, and that ONE blind spot
+    disarmed four checks at once, because everything downstream rides this
+    single predicate — `loader._validate_recall_shape` skipped constraints 1
+    and 2 (Uncommon-or-Rare, self-exhausting) at LOAD, `recall_exhaust_pool`
+    offered a sly retriever as fodder for itself and so broke the cycle
+    exclusion the pile's one-way rotation rests on, and
+    `tools/lint_recall_exhaust` swept straight past it. A capability hidden
+    in a `sly:` list is still a capability.
     """
     return any(fx.get("op") == "recall_to_draw"
                and fx.get("from") == RECALL_EXHAUST_SOURCE
-               for fx in _walk_effects(card.effects))
+               for fx in walk_card_effects(card))
 
 
 def recall_exhaust_pool(state: CombatState, card: Card) -> list[Card]:

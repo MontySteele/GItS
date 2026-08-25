@@ -48,8 +48,8 @@ REPO = Path(__file__).resolve().parent.parent
 # carry Bomb rules", "how many gain_encore sites are there" -- go through the
 # shared walk like everyone else's.
 sys.path.insert(0, str(REPO))
-from tools.effect_walk import (SLY_AUTOPLAY_OP, iter_effects,  # noqa: E402
-                               sly_autoplays, sly_riders)
+from tools.effect_walk import (SLY_AUTOPLAY_OP, iter_card_effects,  # noqa: E402
+                               iter_effects, sly_autoplays, sly_riders)
 # EB-118 sec.4.6. The generator prints the `skill_tag` contribution on the
 # face, and it READS the number off tier0 rather than restating it: a printed
 # 5 that could drift from the constant is the defect this line exists to
@@ -6462,9 +6462,15 @@ def emit(
     # difference. `what_the_tokoyo_returns` reads the DISCARD pile and is not
     # part of the exhaust cycle; stamping it would have excluded it from a
     # pool it belongs in, silently, on a claim no sheet row makes.
+    # EB-134: `iter_card_effects`, not `iter_effects`. The Sly branch is
+    # emitted into THIS class (see `_sly_view` and the `sly_body` block
+    # below), so a sly-borne exhaust retriever is a retriever the C# pool
+    # filter must be able to see by type -- and `sly:` is a card-LEVEL list
+    # that no effect-level recursion reaches. The stamp and its sim twin
+    # (`effects.retrieves_from_exhaust`) now walk the same halves of the card.
     if any(eff.get("op") == "recall_to_draw"
            and eff.get("from", "discard") == "exhaust"
-           for eff in iter_effects(card)):
+           for eff in iter_card_effects(card)):
         interfaces += ", IExhaustRetriever"
 
     ind = "\n        "

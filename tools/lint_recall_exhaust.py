@@ -67,8 +67,17 @@ def _rows(path: Path) -> list[dict]:
 
 
 def _retrieval_rows(row: dict) -> list[dict]:
-    """The row's exhaust-retrieval effect lines, branches included."""
-    return [fx for fx in effect_walk.iter_effects(row)
+    """The row's exhaust-retrieval effect lines — branches, modes AND Sly.
+
+    EB-134: this read `iter_effects`, which cannot reach `sly:` at any depth,
+    because `sly:` is a card-LEVEL list and `iter_effects` descends from
+    inside an effect. A sly-borne retriever therefore escaped constraints 1,
+    2 and 4 in this sweep exactly as it escaped them at load.
+    `iter_card_effects` is the capability-question walk, and this is a
+    capability question: the card can retrieve, and which half of it prints
+    the line changes nothing about the pile.
+    """
+    return [fx for fx in effect_walk.iter_card_effects(row)
             if fx.get("op") == "recall_to_draw"
             and fx.get("from") == effects.RECALL_EXHAUST_SOURCE]
 
