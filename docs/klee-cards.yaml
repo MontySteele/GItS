@@ -10,14 +10,14 @@
 - {id: duck_and_cover, name: "Duck and Cover", cost: 1, type: skill, rarity: basic, solve: [block], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
    effects: [{op: block, amount: 5}]}
 - {id: jumpy_dumpty, name: "Jumpy Dumpty", cost: 2, type: attack, rarity: basic, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
-   effects: [{op: damage, amount: 8, target: random_enemy, times: 2}, {op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 6}]}
+   effects: [{op: damage, amount: 8, target: random_enemy, times: 2}, {op: place_bomb, amount: 1, target: enemy, bomb_damage: 6}]}
 - {id: pop, name: "Pop!", cost: 0, type: skill, rarity: basic, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 1, target: enemy, bomb_damage: 5}]}
 
 # ---------- COMMON (32) ----------
 # Demolition (10)
 - {id: mine_toss, name: "Mine Toss", cost: 1, type: skill, rarity: common, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
-   effects: [{op: place_bomb, amount: 2, target: random_enemies, bomb_damage: 5}]}
+   effects: [{op: place_bomb, amount: 1, target: all_enemies, bomb_damage: 5}]}
 - {id: fish_flavored_bait, name: "Fish-Flavored Bait", cost: 1, type: attack, rarity: common, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: enabler,
    effects: [{op: damage, amount: 5, target: enemy}, {op: place_bomb, amount: 1, target: enemy, bomb_damage: 5}]}
 - {id: quick_fuse, name: "Quick Fuse", cost: 0, type: skill, rarity: common, solve: [utility], tempo_band: {fight: [early, mid, late], run: [early, late]}, archetypes: [demolition], role: glue,
@@ -25,7 +25,7 @@
 - {id: double_pop, name: "Double Pop", cost: 1, type: skill, rarity: common, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 2, target: enemy, bomb_damage: 4}]}
 - {id: ammo_scavenging, name: "Ammo Scavenging", cost: 1, type: skill, rarity: common, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: glue, tags: [skill_tag],
-   effects: [{op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 5}, {op: draw, amount: 1}]}
+   effects: [{op: place_bomb, amount: 1, target: enemy, bomb_damage: 5}, {op: draw, amount: 1}]}
 # EB-118 PHASE 2 (packet §4.3): the second of the three direct faces to gain a readable
 # price. BODY RULED BY [USER] 2026-08-24, option A of a reviewed slate, REPLACING the
 # 2026-08-23 direction this row shipped with. What was wrong with that one, in
@@ -107,7 +107,7 @@
    # pass and the ruled `{damage: +3}` upgrade rides on unchanged: sec.4.3
    # says add the second price first and reprice later, in its own window.
 - {id: chain_fuse, name: "Chain Fuse", cost: 1, type: skill, rarity: uncommon, solve: [frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
-   effects: [{op: modify_bombs, scope: placed_this_turn, bonus: 3}, {op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 4}]}
+   effects: [{op: modify_bombs, scope: placed_this_turn, bonus: 3}, {op: place_bomb, amount: 1, target: enemy, bomb_damage: 4}]}
 - {id: careful_arrangement, name: "Careful Arrangement", cost: 1, type: skill, rarity: uncommon, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition], role: glue,
    effects: [{op: move_bombs, target: enemy, bonus: 2}]}
    # RARITY ERRATUM X8, ruled R162 (2026-08-10), landed into C9's open window. chain_fuse and
@@ -116,7 +116,7 @@
    # bombs already being on the board, which is exactly the shape that should be drafted at the
    # uncommon band rather than showing up as filler in every common roll. lint-ok
 - {id: bomb_voyage, name: "Bomb Voyage", cost: 2, type: skill, rarity: common, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
-   effects: [{op: place_bomb, amount: 3, target: random_enemies, bomb_damage: 5}]}
+   effects: [{op: place_bomb, amount: 3, target: enemy, bomb_damage: 5}]}
 # Spark (11) — snap added v0.6 per M7 ruling R1 (margin-supply content fix)
 - {id: sparkly_treasure, name: "Sparkly Treasure", cost: 0, type: skill, rarity: common, solve: [frontload, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [spark], role: enabler,
    effects: [{op: gain_spark, amount: 1}]}  # M9 upgrade delta lives in klee-upgrades.yaml (R20: no inline upgrade fields)
@@ -176,7 +176,7 @@
 - {id: hide_and_seek, name: "Hide and Seek", cost: 1, type: skill, rarity: common, solve: [block, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
    effects: [{op: block, amount: 7}, {op: scry_discard, amount: 2}]}
 - {id: sorry_jean, name: "Sorry, Jean...", cost: 1, type: skill, rarity: common, solve: [block, frontload], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition, generic], role: glue,
-   effects: [{op: block, amount: 4}, {op: place_bomb, amount: 1, target: random_enemy, bomb_damage: 4}]}
+   effects: [{op: block, amount: 4}, {op: place_bomb, amount: 1, target: enemy, bomb_damage: 4}]}
 - {id: spooked, name: "Spooked!", cost: 1, type: skill, rarity: common, solve: [block, utility], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
    effects: [{op: block, amount: 3}, {op: apply_power, power: weak, amount: 1, target: all_enemies}]}
 # Display rename (art vibe-check ruling 2026-07-20): "Imaginary Friend", from
@@ -194,11 +194,11 @@
 # ---------- UNCOMMON (25) ----------
 # Demolition (8)
 - {id: jumpy_dumpty_mk2, name: "Jumpy Dumpty Mk.II", cost: 2, type: attack, rarity: uncommon, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
-   effects: [{op: damage, amount: 8, target: random_enemy, times: 2}, {op: place_bomb, amount: 2, target: random_enemies, bomb_damage: 6}]}
+   effects: [{op: damage, amount: 8, target: random_enemy, times: 2}, {op: place_bomb, amount: 1, target: all_enemies, bomb_damage: 6}]}
 - {id: remote_detonator, name: "Remote Detonator", cost: 1, type: skill, rarity: uncommon, solve: [utility], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [demolition], role: payoff,
    effects: [{op: detonate, target: all_enemies, bonus: 2}]}
 - {id: bombs_away, name: "Bombs Away!", cost: 3, type: skill, rarity: uncommon, solve: [frontload], tempo_band: {fight: [late], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
-   effects: [{op: place_bomb, amount: 5, target: random_enemies, bomb_damage: 5}]}
+   effects: [{op: place_bomb, amount: 5, target: enemy, bomb_damage: 5}]}
 - {id: explosives_workshop, name: "Explosives Workshop", cost: 1, type: power, rarity: uncommon, solve: [frontload, scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition], role: payoff,
    effects: [{op: apply_power, power: bomb_damage_per_rotation, amount: 1, target: self}]}
    # EB-118 sec.4.4 (2026-08-24): the flat install becomes a CONNECTIVE one.
@@ -218,11 +218,11 @@
    # stat would have made already-placed Bombs disagree with future ones.
    # The upgrade raises the PER-TRIGGER increment and adds no second trigger.
 - {id: cluster_charge, name: "Cluster Charge", cost: 2, type: attack, rarity: uncommon, solve: [frontload], tempo_band: {fight: [mid], run: [early]}, archetypes: [demolition], role: enabler,
-   effects: [{op: damage, amount: 10, target: enemy}, {op: place_bomb, amount: 2, target: random_enemies, bomb_damage: 5}]}
+   effects: [{op: damage, amount: 10, target: enemy}, {op: place_bomb, amount: 1, target: all_enemies, bomb_damage: 5}]}
 - {id: trip_wire, name: "Trip Wire", cost: 1, type: skill, rarity: uncommon, solve: [frontload, utility], tempo_band: {fight: [early], run: [early]}, archetypes: [demolition], role: glue, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 1, target: enemy, bomb_damage: 7}, {op: apply_power, power: weak, amount: 1, target: enemy}]}
 - {id: controlled_demolition, name: "Controlled Demolition", cost: X, type: skill, rarity: uncommon, solve: [frontload], tempo_band: {fight: [late], run: [early]}, archetypes: [demolition], role: enabler, tags: [skill_tag],
-   effects: [{op: place_bomb, amount: X_plus_1, target: random_enemies, bomb_damage: 7}]}
+   effects: [{op: place_bomb, amount: X_plus_1, target: enemy, bomb_damage: 7}]}
    # G-D3 RATIFIED 2026-07-26 [USER], taking the ALTERNATIVE: bomb damage raised, bomb COUNT reverted to
    # its original base. "Seems weak" (co-op A0 playtest) is the standing X-cost failure mode -- the card
    # is PRICED against its best turn and PLAYED on its median one.
@@ -305,9 +305,9 @@
 - {id: explosive_frags, name: "Explosive Frags", cost: 1, type: power, rarity: rare, solve: [frontload, scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition], role: payoff,
    effects: [{op: apply_power, power: detonation_vuln, amount: 1, target: self}]}
 - {id: sparkly_explosion, name: "Sparkly Explosion", cost: 2, type: attack, rarity: rare, solve: [frontload, velocity], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [demolition, spark], role: payoff,
-   effects: [{op: damage, amount: 18, target: enemy}, {op: conditional, if: killed_target, then: [{op: gain_spark, amount: 3}, {op: place_bomb, amount: 2, target: random_enemies, bomb_damage: 6}]}]}
+   effects: [{op: damage, amount: 18, target: enemy}, {op: conditional, if: killed_target, then: [{op: gain_spark, amount: 3}, {op: place_bomb, amount: 1, target: all_enemies, bomb_damage: 6}]}]}
 - {id: all_my_treasures, name: "All of My Treasures!", cost: 3, type: skill, rarity: rare, solve: [frontload, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition], role: payoff, exhaust: true, tags: [skill_tag],
-   effects: [{op: place_bomb, amount: 6, target: random_enemies, bomb_damage: 6}, {op: gain_spark, amount: 2}]}
+   effects: [{op: place_bomb, amount: 6, target: enemy, bomb_damage: 6}, {op: gain_spark, amount: 2}]}
 - {id: fish_blasting, name: "Fish Blasting", cost: X, type: attack, rarity: rare, solve: [frontload, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [generic], role: payoff,
    effects: [{op: damage, amount: 8, target: all_enemies, times: X}, {op: add_card, card: confiscated, zone: discard, amount: 1}]}
 - {id: true_spark_knight, name: "True Spark Knight", cost: 2, type: power, rarity: rare, solve: [frontload, scaling, velocity], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [spark], role: payoff,

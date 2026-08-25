@@ -81,10 +81,15 @@ def test_careful_arrangement_gathers_every_other_bomb_onto_one_enemy():
     assert [ev["count"] for ev in _events(state, "bombs_moved")] == [3]
 
 
-def test_jumpy_dumpty_mk2_lands_two_eights_then_arms_two_six_bombs():
+def test_jumpy_dumpty_mk2_lands_two_eights_then_arms_one_bomb_per_enemy():
     """Jumpy Dumpty Mk.II is two discrete 8-damage hits (not one 16), and
-    its two 6-damage bombs are armed after the hits land, so the card never
-    detonates its own payload."""
+    its 6-damage bomb is armed after the hits land, so the card never
+    detonates its own payload.
+
+    EB-118 §4.2 made it a DISTRIBUTION row -- one Bomb on EACH enemy, where
+    it used to roll two Bombs at random enemies. Against a single enemy
+    that is one Bomb and not two: the count is now a fact about the board.
+    """
     enemy = make_enemy(hp=60)
     state = make_state(enemies=[enemy])
 
@@ -92,7 +97,20 @@ def test_jumpy_dumpty_mk2_lands_two_eights_then_arms_two_six_bombs():
 
     assert [ev["amount"] for ev in _events(state, "damage")] == [8, 8]
     assert enemy.hp == 44
-    assert [b.damage for b in enemy.bombs] == [6, 6]
+    assert [b.damage for b in enemy.bombs] == [6]
+
+
+def test_jumpy_dumpty_mk2_arms_every_enemy_when_the_board_is_wide():
+    """The other half of the distribution shape, and the reason §4.2 calls
+    it a width profile: three enemies, three Bombs, one each. The two-enemy
+    median is what the old random roll produced; the tails moved in both
+    directions, and only a multi-enemy board can see that."""
+    enemies = [make_enemy(hp=60, name=n) for n in ("a", "b", "c")]
+    state = make_state(enemies=enemies)
+
+    _play(state, "jumpy_dumpty_mk2")
+
+    assert [[b.damage for b in e.bombs] for e in enemies] == [[6], [6], [6]]
 
 
 def test_remote_detonator_sets_off_every_board_bomb_at_plus_two_each():

@@ -12,7 +12,7 @@ klee	big_badda_boom	common	demolition,generic	glue	frontload	frontload		mid,late
 klee	blast_radius	common	generic	glue	frontload,velocity	frontload,velocity		early	early	aoe					
 klee	chain_fuse	uncommon	demolition	enabler	frontload	frontload		early	early		bomb			frontload	frontload
 klee	careful_arrangement	uncommon	demolition	glue	frontload	frontload		mid	early		bomb			frontload	frontload
-klee	bomb_voyage	common	demolition	enabler	frontload	frontload		mid	early	aoe	bomb			frontload	frontload
+klee	bomb_voyage	common	demolition	enabler	frontload	frontload		mid	early		bomb			frontload	frontload
 klee	sparkly_treasure	common	spark	enabler	frontload,velocity	frontload,velocity		early	early		spark			frontload,velocity	frontload,velocity
 klee	pocket_fireworks	common	spark	enabler	frontload	frontload		early	early						
 klee	crackle	common	spark	enabler	frontload,velocity	frontload,velocity		early	early		spark			frontload,velocity	frontload,velocity
@@ -37,11 +37,11 @@ klee	run_away	common	generic	glue	block	block		early	early
 klee	patched_dress	common	spark,generic	glue	block	block		early,mid,late	early,late			spark			
 klee	jumpy_dumpty_mk2	uncommon	demolition	enabler	frontload	frontload		mid	early	aoe	bomb			frontload	frontload
 klee	remote_detonator	uncommon	demolition	payoff	utility	utility		early,mid,late	late	aoe		bomb			
-klee	bombs_away	uncommon	demolition	enabler	frontload	frontload		late	early	aoe	bomb			frontload	frontload
+klee	bombs_away	uncommon	demolition	enabler	frontload	frontload		late	early		bomb			frontload	frontload
 klee	explosives_workshop	uncommon	demolition	payoff	frontload,scaling	frontload,scaling		late	late		bomb	bomb		frontload	frontload
 klee	cluster_charge	uncommon	demolition	enabler	frontload	frontload		mid	early	aoe	bomb			frontload	frontload
 klee	trip_wire	uncommon	demolition	glue	frontload,utility	frontload,utility		early	early		bomb			frontload	frontload
-klee	controlled_demolition	uncommon	demolition	enabler	frontload	frontload		late	early	aoe	bomb			frontload	frontload
+klee	controlled_demolition	uncommon	demolition	enabler	frontload	frontload		late	early		bomb			frontload	frontload
 klee	kaboom_beetle_swarm	uncommon	demolition	payoff	frontload	frontload		mid,late	late			bomb			
 klee	spark_knight_style	uncommon	spark	payoff	scaling	scaling		late	late						
 klee	endless_fireworks	uncommon	spark	enabler	frontload,scaling,velocity	frontload,scaling,velocity		late	early		spark	spark		frontload,velocity	frontload,velocity
@@ -65,7 +65,7 @@ klee	blazing_delight	rare	demolition	payoff	frontload,scaling	frontload,scaling	
 klee	chained_reactions	rare	demolition	payoff	frontload,utility	frontload,utility		early,mid,late	late	aoe	bomb	bomb		frontload	frontload
 klee	explosive_frags	rare	demolition	payoff	frontload,scaling	frontload,scaling		late	late		bomb	bomb		frontload	frontload
 klee	sparkly_explosion	rare	demolition,spark	payoff	frontload,velocity	frontload,velocity		mid,late	late	aoe	bomb,spark			frontload,velocity	frontload,velocity
-klee	all_my_treasures	rare	demolition	payoff	frontload,velocity	frontload,velocity		late	late	aoe	bomb,spark			frontload,velocity	frontload,velocity
+klee	all_my_treasures	rare	demolition	payoff	frontload,velocity	frontload,velocity		late	late		bomb,spark			frontload,velocity	frontload,velocity
 klee	fish_blasting	rare	generic	payoff	frontload,velocity	frontload,velocity		late	late	aoe					
 klee	true_spark_knight	rare	spark	payoff	frontload,scaling,velocity	frontload,scaling,velocity		mid,late	late		spark	spark		frontload,velocity	frontload,velocity
 klee	da_da_da	rare	spark	payoff	frontload,velocity	frontload,velocity		early	late		spark			frontload,velocity	frontload,velocity

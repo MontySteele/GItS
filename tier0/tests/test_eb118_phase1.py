@@ -24,6 +24,7 @@ if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
 
 from tier05 import draft                                          # noqa: E402
+from tools import effect_walk                                     # noqa: E402
 
 
 
@@ -46,6 +47,10 @@ def _play(state, card_id, energy=5):
 
 def _events(state, name):
     return [ev for ev in state.log if ev["event"] == name]
+
+
+def _every_effect(card):
+    return list(effect_walk.iter_effects(card.get("effects", [])))
 
 
 # --- §4.3: two direct faces gain a readable second price --------------------
@@ -270,3 +275,103 @@ def test_the_meter_arithmetic_did_not_move():
     income = [(ev["source"], ev["amount"])
               for ev in _events(state, "burst_income")]
     assert income == [("skill_tag", C.BURST_PER_SKILL_TAG)]
+
+
+# --- §4.2: the Bomb-placement target cut ------------------------------------
+#
+# The packet's acceptance line is "Klee random Bomb placement is zero and
+# explicit random damage remains". Both halves are one claim about the
+# sheet, so both are asserted here rather than left to the twelve edited
+# rows to imply.
+
+CONCENTRATION = {"jumpy_dumpty", "ammo_scavenging", "chain_fuse",
+                 "bomb_voyage", "sorry_jean", "bombs_away",
+                 "controlled_demolition", "all_my_treasures",
+                 # already concentrated before the cut
+                 "pop", "fish_flavored_bait", "double_pop", "trip_wire"}
+DISTRIBUTION = {"mine_toss", "jumpy_dumpty_mk2", "cluster_charge",
+                "sparkly_explosion"}
+
+
+def test_no_klee_card_places_a_bomb_at_a_random_target():
+    """Zero, over the WHOLE effect tree -- `sparkly_explosion` places
+    inside a kill-conditional's `then:`, so a top-level scan would have
+    read clean while a random placement shipped."""
+    offenders = [
+        card["id"] for card in _sheet("klee")
+        for eff in _every_effect(card)
+        if eff.get("op") == "place_bomb"
+        and eff.get("target") in ("random_enemy", "random_enemies")
+    ]
+    assert offenders == []
+
+
+def test_every_bomb_row_is_one_of_the_two_ruled_shapes():
+    """Concentration (`target: enemy`, amount kept) or distribution
+    (`target: all_enemies`, amount 1). The amount rule is not decoration:
+    the engine loops amount x targets, so `all_enemies` at amount 2 is two
+    Bombs on EVERY enemy -- the exact substitution §4.2 forbids."""
+    for card in _sheet("klee"):
+        for eff in _every_effect(card):
+            if eff.get("op") != "place_bomb":
+                continue
+            if eff["target"] == "enemy":
+                assert card["id"] in CONCENTRATION, card["id"]
+            elif eff["target"] == "all_enemies":
+                assert card["id"] in DISTRIBUTION, card["id"]
+                assert eff["amount"] == 1, card["id"]
+            else:
+                raise AssertionError(
+                    f"{card['id']}: bomb target {eff['target']!r}")
+
+
+def test_explicit_random_damage_survives_the_cut():
+    """§4.1 preserves the rows whose `damage` op is deliberately random.
+    Klee controls where she PREPARES explosions; she does not always control
+    where the spray lands, and the cut was aimed at the first half only.
+
+    THE LIST IS TEN, NOT THE NINE THIS PIN WAS WRITTEN WITH, and the tenth is
+    not a survivor of the cut -- it arrived after it. `big_badda_boom`'s
+    Option A body (Phase 2B, R201) added `{op: damage, target: random_enemy}`
+    inside its kill conditional, and Phase 2B landed on `main` while this cut
+    sat staged. So the set grows for a reason outside §4.1 entirely, which is
+    exactly why it is spelled out here rather than quietly re-counted: the
+    cut still removed random PLACEMENT and still left random DAMAGE alone.
+    The tenth row is BACKLOG `EB-126`'s thirteenth
+    `TargetingRandomOpponents` caller and adds no new exposure.
+    """
+    random_damage = {
+        card["id"] for card in _sheet("klee")
+        for eff in _every_effect(card)
+        if eff.get("op") == "damage"
+        and eff.get("target") in ("random_enemy", "random_enemies")
+    }
+    assert random_damage == {
+        "crackle", "da_da_da", "gleeful_barrage", "jumpy_dumpty",
+        "jumpy_dumpty_mk2", "kaboom_beetle_swarm", "pocket_fireworks",
+        "rapid_fire", "study_of_explosions",
+        "big_badda_boom"}
+
+
+def test_a_concentration_row_stacks_its_whole_payload_on_one_enemy():
+    """Bomb Voyage is three Bombs, and after the cut all three land on the
+    same chosen enemy. Under the old random roll they scattered."""
+    aimed = make_enemy(hp=20, name="aimed")
+    other = make_enemy(hp=60, name="other")
+    state = make_state(enemies=[aimed, other])
+
+    _play(state, "bomb_voyage")
+
+    assert [b.damage for b in aimed.bombs] == [5, 5, 5]
+    assert other.bombs == []
+
+
+def test_a_distribution_row_gives_every_enemy_exactly_one():
+    """Mine Toss is the pure distribution row: one Bomb each, however wide
+    the board, and never two on one enemy."""
+    enemies = [make_enemy(hp=40, name=n) for n in ("a", "b", "c", "d")]
+    state = make_state(enemies=enemies)
+
+    _play(state, "mine_toss")
+
+    assert [[b.damage for b in e.bombs] for e in enemies] == [[5]] * 4

@@ -47,7 +47,7 @@ public sealed class ClusterCharge : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Cluster Charge"),
-        ("description", "Deal {Damage:diff()} damage. Place 2 [gold]Bombs[/gold] on random enemies, each dealing {ExtraDamage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage. Place a [gold]Bomb[/gold] on EACH enemy dealing {ExtraDamage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -73,12 +73,8 @@ public sealed class ClusterCharge : CustomCardModel, IElementalCard
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        for (var i = 0; i < 2; i++)
+        foreach (var bombTarget in CombatState!.HittableEnemies.ToList())
         {
-            var candidates = CombatState!.HittableEnemies.ToList();
-            if (candidates.Count == 0) break;
-            var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);
-            if (bombTarget == null) break;
             await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars.ExtraDamage.BaseValue, Owner.Creature, this);
         }
     }

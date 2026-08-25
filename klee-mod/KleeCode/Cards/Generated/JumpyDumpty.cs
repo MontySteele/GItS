@@ -47,7 +47,7 @@ public sealed class JumpyDumpty : CustomCardModel, IElementalCard, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Dumpty"),
-        ("description", "Deal {Damage:diff()} damage to random enemies twice. Place a [gold]Bomb[/gold] on a random enemy dealing {ExtraDamage:diff()} damage. [gold]Burst[/gold] +5."),
+        ("description", "Deal {Damage:diff()} damage to random enemies twice. Place a [gold]Bomb[/gold] dealing {ExtraDamage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
@@ -63,7 +63,7 @@ public sealed class JumpyDumpty : CustomCardModel, IElementalCard, ISkillTagCard
     // GenerateAllCards. BaseLib's auto-registration would need a [Pool]
     // attribute and would register every card a second time.
     public JumpyDumpty()
-        : base(2, CardType.Attack, CardRarity.Basic, TargetType.AllEnemies, autoAdd: false)
+        : base(2, CardType.Attack, CardRarity.Basic, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
@@ -75,14 +75,8 @@ public sealed class JumpyDumpty : CustomCardModel, IElementalCard, ISkillTagCard
             .TargetingRandomOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        for (var i = 0; i < 1; i++)
-        {
-            var candidates = CombatState!.HittableEnemies.ToList();
-            if (candidates.Count == 0) break;
-            var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);
-            if (bombTarget == null) break;
-            await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars.ExtraDamage.BaseValue, Owner.Creature, this);
-        }
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.ExtraDamage.BaseValue, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()

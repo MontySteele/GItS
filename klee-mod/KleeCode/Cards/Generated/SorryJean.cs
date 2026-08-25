@@ -41,7 +41,7 @@ public sealed class SorryJean : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sorry, Jean..."),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Place a [gold]Bomb[/gold] on a random enemy dealing {Damage:diff()} damage."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -55,21 +55,15 @@ public sealed class SorryJean : CustomCardModel
     // GenerateAllCards. BaseLib's auto-registration would need a [Pool]
     // attribute and would register every card a second time.
     public SorryJean()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.AllEnemies, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        for (var i = 0; i < 1; i++)
-        {
-            var candidates = CombatState!.HittableEnemies.ToList();
-            if (candidates.Count == 0) break;
-            var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);
-            if (bombTarget == null) break;
-            await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
-        }
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()

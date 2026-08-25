@@ -860,7 +860,15 @@ POWER_UPGRADE_KEYS = {"power_amount", "amp_percent", "splash_damage", "vulnerabl
 POWER_UPGRADE_OPS = ("apply_power", "buff_next_attack")
 
 # Bomb placement targets we have a verified selection idiom for.
-BOMB_TARGETS = {"enemy", "random_enemy", "random_enemies"}
+#
+# EB-118 §4.2 added `all_enemies` -- the DISTRIBUTION form, one Bomb per
+# living enemy. It is not a synonym for the random forms and it is not
+# interchangeable with them at any `amount` but 1: tier0 loops
+# `amount x targets`, so `all_enemies` with `amount: 3` is three Bombs on
+# EVERY enemy. The four distribution rows on the sheet all carry
+# `amount: 1` for exactly that reason, and `_emit_place_bomb` mirrors the
+# nesting order rather than assuming the sheet will stay disciplined.
+BOMB_TARGETS = {"enemy", "all_enemies", "random_enemy", "random_enemies"}
 
 # Damage targets we have a confirmed builder for (see AttackCommand).
 DAMAGE_TARGETS = {"enemy", "all_enemies", "random_enemy", "random_enemies", "self"}
@@ -1022,6 +1030,27 @@ TARGET_CS = {
     "random_enemies": "TargetType.AllEnemies",
     "self": "TargetType.Self",
 }
+
+# The ops whose `target: enemy` spelling means "the player picks one", and
+# therefore reads `cardPlay.Target` at resolution. Kept beside TARGET_CS so
+# the two cannot drift: every entry here maps through TARGET_CS["enemy"].
+AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
+              "apply_aura", "swirl")
+
+
+def _aims_at_chosen_enemy(eff: dict) -> bool:
+    """Does this top-level effect need a target the PLAYER chose?
+
+    The question a card's declared TargetType has to answer. `apply_power`
+    is included only for the powers that land on an enemy -- a self-buff
+    named `target: self` aims at nothing.
+    """
+    if eff.get("target") != "enemy":
+        return False
+    if eff.get("op") in AIMING_OPS:
+        return True
+    return (eff.get("op") == "apply_power"
+            and eff.get("power") in ENEMY_APPLY_POWERS)
 
 # A card-level field can alter playability or lifecycle without appearing in
 # effects. Treating unknown fields as harmless metadata is therefore unsafe:
@@ -3368,6 +3397,22 @@ def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
     lines.append(stmt)
 
 
+def _bomb_where(target: str, singular: bool) -> str:
+    """The placement clause a Bomb line prints, for ONE target spelling.
+
+    One definition for both description sites (the merged-deploy one-liner
+    and the top-level face), because a card that says "on a random enemy"
+    on one screen and "on EACH enemy" on another has told the player two
+    different things about the same row. `enemy` prints nothing: the aimed
+    form is the default reading of "place a Bomb" on an aimable card.
+    """
+    if target == "enemy":
+        return ""
+    if target == "all_enemies":
+        return " on EACH enemy"
+    return " on a random enemy" if singular else " on random enemies"
+
+
 def _emit_place_bomb(card: dict, eff: dict, lines: list[str], ctx: dict,
                      dmg_expr: str) -> None:
     n = eff["amount"]
@@ -3386,6 +3431,28 @@ def _emit_place_bomb(card: dict, eff: dict, lines: list[str], ctx: dict,
             lines.append(
                 f"for (var i = 0; i < {n}; i++)\n        {{\n"
                 f"            {place}\n        }}"
+            )
+    elif eff["target"] == "all_enemies":
+        # EB-118 §4.2 distribution. tier0 nests `for _ in range(amount): for
+        # enemy in targets`, and re-reads the living enemies on each outer
+        # pass -- so the outer loop is the AMOUNT and the enemy sweep is
+        # inside it, not the other way round. Every shipped row is
+        # `amount: 1`; the loop is written for the general case anyway,
+        # because a later row that is not 1 must not silently mean something
+        # else in C# than it means in the sim.
+        sweep = (
+            "foreach (var bombTarget in CombatState!.HittableEnemies.ToList())"
+            "\n        {\n"
+            f"            await BombPower.Place(choiceContext, bombTarget, "
+            f"{dmg_expr}, Owner.Creature, this);\n        }}"
+        )
+        if n == 1:
+            lines.append(sweep)
+        else:
+            lines.append(
+                f"for (var i = 0; i < {n}; i++)\n        {{\n"
+                + "\n".join("    " + ln for ln in sweep.split("\n"))
+                + "\n        }"
             )
     else:
         # Each bomb rolls its own target, so N bombs can land on N
@@ -4892,11 +4959,10 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
             bits.append(f"gain {int(e['amount'])} Energy")
         elif op == "place_bomb":
             n, d = e["amount"], int(e["bomb_damage"])
+            where = _bomb_where(e["target"], n == 1)
             if n == 1:
-                where = "" if e["target"] == "enemy" else " on a random enemy"
                 bits.append(f"place a [gold]Bomb[/gold]{where} dealing {d} damage")
             else:
-                where = "" if e["target"] == "enemy" else " on random enemies"
                 bits.append(
                     f"place {n} [gold]Bombs[/gold]{where}, each dealing {d} damage")
         elif op == "buff_next_attack":
@@ -5070,9 +5136,8 @@ def build_description(card: dict) -> str:
                     n = "X+{Bombs:diff()}"
                 else:
                     n = f'X+{int(n[len("X_plus_"):])}' if n != "X" else "X"
-            where = "" if eff["target"] == "enemy" else " on random enemies"
+            where = _bomb_where(eff["target"], n == 1)
             if n == 1:
-                where = "" if eff["target"] == "enemy" else " on a random enemy"
                 parts.append(
                     f"Place a [gold]Bomb[/gold]{where} dealing {{{var}:diff()}} damage."
                 )
@@ -6164,8 +6229,20 @@ def emit(
 
     # The card's declared TargetType follows its FIRST damaging effect; a card
     # that only blocks or draws targets Self.
-    target_type = "TargetType.Self"
-    for eff in card["effects"]:
+    #
+    # EB-118 §4.2 exception, and it is a correctness one rather than a
+    # preference: an effect that AIMS (`target: enemy`) dereferences
+    # `cardPlay.Target`, which the game only fills in for `TargetType.AnyEnemy`.
+    # `jumpy_dumpty` is the shape that exposed it -- two random-enemy hits
+    # FIRST, then a Bomb the player places -- and under the plain first-match
+    # rule it would declare `AllEnemies`, take no target, and throw on its own
+    # ThrowIfNull in front of a player. So a chosen target anywhere in the top
+    # level wins over an earlier unaimed one. This is exactly the packet's
+    # sentence made mechanical: Klee controls where she prepares explosions,
+    # she does not always control where the spray lands.
+    aimed = any(_aims_at_chosen_enemy(e) for e in card["effects"])
+    target_type = TARGET_CS["enemy"] if aimed else "TargetType.Self"
+    for eff in ([] if aimed else card["effects"]):
         if eff["op"] == "damage" and eff["target"] != "self":
             target_type = TARGET_CS[eff["target"]]
             break
