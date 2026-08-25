@@ -34,6 +34,10 @@ namespace KleeMod.Cards.Kokomi.Generated;
 
 public sealed class DepthsJudgment : CustomCardModel, IElementalCard, ICharacterCard
 {
+    /// <summary>Block arrives from a conditional row, so this card declares no
+    /// BlockVar and BaseLib's auto-detect cannot see it (EB-84).</summary>
+    public override bool GainsBlock => true;
+
     /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
     public Element Element => Element.Hydro;
 
@@ -51,15 +55,13 @@ public sealed class DepthsJudgment : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sango Isshin"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with the number of cards [gold]Exhausted[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. If 6 or more cards are [gold]Exhausted[/gold]: gain 8 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(10m),
-            new ExtraDamageVar(2m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiResources.ExhaustPileCount(card.Owner.Creature))
+            new DamageVar(14m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -72,15 +74,19 @@ public sealed class DepthsJudgment : CustomCardModel, IElementalCard, ICharacter
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
+        if (KokomiResources.ExhaustPileCount(Owner.Creature) >= 6)
+        {
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(8m, ValueProp.Move), cardPlay);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
+        DynamicVars.Damage.UpgradeValueBy(4m);
     }
 }

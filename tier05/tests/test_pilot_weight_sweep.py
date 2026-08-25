@@ -336,15 +336,27 @@ def test_switch_off_is_byte_identical_across_two_wild_vectors(
 
 
 @pytest.mark.battery
-@pytest.mark.parametrize("cell_name", ["bomb-primary", "exhaust-primary"])
+@pytest.mark.parametrize("cell_name,runs", [("bomb-primary", 6),
+                                            ("exhaust-primary", 10)])
 def test_the_positive_control_the_previous_test_needs(switch_off, scope, wild,
-                                                      cell_name):
+                                                      cell_name, runs):
     """Without this, a harness that ran nothing would pass the test above.
 
     Forcing the switch ON moves the cell, and moving the weights under it
     moves the cell again.
+
+    THE EXHAUST CELL NEEDS TEN RUNS, NOT SIX, SINCE R208 / W2b (2026-08-25),
+    and the reason is content rather than harness. This control has no power
+    unless the sampled runs actually CONTAIN a chosen-exhaust decision the
+    wild vector flips. W2b re-bodied `depths_judgment` off its exhaust-pile
+    slope and revised `undertow`, which moves what a kokomi/priest deck
+    drafts and therefore how often it reaches that decision; at six runs the
+    wild vector stopped changing the digest. Six -> ten restores the control
+    and the gate claim it backstops is unchanged. This is a POWER number for
+    a control, not a threshold anything is measured against -- swept cells
+    run at `STAGE_N`, which is 40 to 2000.
     """
-    cell = _cell(cell_name)
+    cell = _cell(cell_name, runs=runs)
     off = w4.evaluate(cell, scope.defaults, force=False)["digest"]
     on = w4.evaluate(cell, scope.defaults)["digest"]
     on_wild = w4.evaluate(cell, wild)["digest"]

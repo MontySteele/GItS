@@ -146,7 +146,8 @@ read_the_current:  {damage: +3}          # the ALWAYS-LIVE half, 7->10 (so 13->1
                                          # also the honest sale: it pays on turn 1, not only after node 4.
 quiet_harbor:      {block: +3}           # played 5->8; the Sly draw stays 2 (header gap note)
 driftglass:        {damage: +3}          # played 8->11; the Sly hit stays 5 (header gap note)
-undertow:          {formula_base: +3}    # played base 4->7; the per-exhaust slope stays +1 and the Sly
+undertow:          {formula_base: +3}    # played base 5->8 (R208 W2b raised the printed base to 5); the per-exhaust
+                                         # slope stays +1, the bar-3 draw stays, and the Sly
                                          # energy stays 1. Upgrading the BASE rather than the slope on purpose:
                                          # the slope reads a pile that is uncapped and only grows (the same
                                          # shape R80 makes dangerous on Charge), so moving it is a
@@ -168,7 +169,7 @@ nereids_ascension: {damage: +4}          # 12->16 all; the 1-per-2-Charge read n
 sango_prayer:      {weak: +1}            # 2->3 all (spooked-parity; Rare + Exhaust rate limits carry the weight)
 vigil_of_the_deep: {power_amount: +2}    # ward 6->8; max_stacks rides along (single-application encoding)
 grand_conscription: {cost: -1}           # 2->1 (all_my_treasures-class rare cost slot; muster count fixed at 3)
-depths_judgment:   {formula_per: +1}     # 10 + 3 per exhausted card (the pile-reader's ceiling climbs, base fixed)
+depths_judgment:   {damage: +4}          # 14->18 (R208 W2b re-body); the bar stays 6 and the Block stays 8
 epiphany_of_the_deep: {cost: -1}         # 2->1 (true_spark_knight precedent: the engine power arrives on curve)
 prayer_to_the_moon: {block: +4}          # 4->8; the Charge line NEVER moves (resource-curve law)
 

@@ -253,17 +253,67 @@ def test_prima_donna_installs_both_spotlight_powers_and_leaves_the_cap_alone():
     assert state.player.discard_pile == [] and state.player.exhaust_pile == []
 
 
-def test_standing_room_only_hits_all_for_five_plus_one_per_four_fanfare():
-    """The House Rises hits every enemy for 5, plus 1 more per full 4 points
-    of Fanfare on the meter -- 9 Fanfare is two steps, so 7 apiece."""
+# --- R208 / W2b ratified bodies: The House Rises and Dramatic Entrance ---
+
+def test_the_house_rises_blocks_three_and_draws_under_the_encore_bar():
+    """R208's W2b body. Below `encore_at_least_5` the card is Block 3 plus a
+    card; at the bar it is Block 6 and no draw. BOTH arms are pinned, because
+    the whole point of the ruled else-arm is that it is a DIFFERENT kind of
+    help rather than a smaller amount of the same one -- a predicate that
+    silently stopped firing would otherwise be absorbed by the else."""
     cold = furina_state(enemies=[make_enemy(hp=100, name="a"),
                                  make_enemy(hp=100, name="b")])
+    cold.player.draw_pile.append(loader.get_card("regal_bearing"))
     play(cold, "standing_room_only")
-    assert [e.hp for e in cold.enemies] == [95, 95]
+    assert cold.player.encore == 0
+    assert cold.player.block == 3
+    assert drawn(cold) == 1
+    assert [e.hp for e in cold.enemies] == [100, 100]    # no damage anywhere
+
+    hot = furina_state(enemies=[make_enemy(hp=100, name="a")])
+    hot.player.draw_pile.append(loader.get_card("regal_bearing"))
+    hot.player.encore = 5
+    play(hot, "standing_room_only")
+    assert hot.player.encore == 5             # read, never spent
+    assert hot.player.block == 6
+    assert drawn(hot) == 0
+
+
+def test_the_house_rises_upgrade_moves_only_the_printed_block():
+    """`{block: +2}` runs `_bump_first` over TOP-LEVEL effects, so the printed
+    3 -> 5 and neither branch arm moves (R58's always-live-half rule)."""
+    up = loader.get_card("standing_room_only+")
+    assert up.effects[0] == {"op": "block", "amount": 5}
+    assert up.effects[1]["if"] == "encore_at_least_5"
+    assert up.effects[1]["then"] == [{"op": "block", "amount": 3}]
+    assert up.effects[1]["else"] == [{"op": "draw", "amount": 1}]
+    assert up.type == "skill" and up.role == "glue"
+
+
+def test_dramatic_entrance_clears_the_board_only_over_the_fanfare_bar():
+    """R208's W2b body, candidate A. Below 12 Fanfare it is an aimed 7; at the
+    bar the SHAPE changes and every enemy takes 7 more. The meter is read and
+    never spent."""
+    cold = furina_state(enemies=[make_enemy(hp=100, name="a"),
+                                 make_enemy(hp=100, name="b")])
+    play(cold, "dramatic_entrance")
+    assert cold.player.fanfare == 0
+    assert [e.hp for e in cold.enemies] == [93, 100]
 
     hot = furina_state(enemies=[make_enemy(hp=100, name="a"),
                                 make_enemy(hp=100, name="b")])
-    resources.gain_fanfare(hot, 9, "test")
-    play(hot, "standing_room_only")
-    assert hot.player.fanfare == 9            # read, never spent
-    assert [e.hp for e in hot.enemies] == [93, 93]
+    resources.gain_fanfare(hot, 12, "test")
+    play(hot, "dramatic_entrance")
+    assert hot.player.fanfare == 12           # read, never spent
+    assert [e.hp for e in hot.enemies] == [86, 93]
+
+
+def test_dramatic_entrance_upgrade_moves_the_aimed_half_not_the_bar():
+    """`{damage: +3}` bumps the first top-level damage line only: 7 -> 10.
+    The bar stays 12 and the AoE arm stays 7 -- under R58 a threshold may
+    never be lowered on upgrade."""
+    up = loader.get_card("dramatic_entrance+")
+    assert up.effects[0] == {"op": "damage", "amount": 10, "target": "enemy"}
+    assert up.effects[1]["if"] == "fanfare_at_least_12"
+    assert up.effects[1]["then"] == [
+        {"op": "damage", "amount": 7, "target": "all_enemies"}]

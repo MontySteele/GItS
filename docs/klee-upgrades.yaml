@@ -90,7 +90,7 @@ surprise_visit:    {vulnerable: +1}                # 2->3
 blazing_delight:   {splash_damage: +1}             # 3->4, proc cap 3 unchanged
 chained_reactions: {chance: 0.75}                  # 50% -> 75% re-bomb
 explosive_frags:   {vulnerable: +1}                # detonation vuln 1->2
-sparkly_explosion: {damage: +5}                    # 18->23
+sparkly_explosion: {damage: +5}                    # 14->19 (R208 W2b re-body; the detonation bonus 3 is untouched)
 all_my_treasures:  {cost: -1}                      # 3->2
 fish_blasting:     {damage: +2}                    # 8->10 per X
 true_spark_knight: {cost: -1}                      # 2->1

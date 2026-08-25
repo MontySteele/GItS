@@ -97,7 +97,12 @@ PRE_UNIFICATION_SLY_PRICES = {
     "quiet_harbor": 5.0,
     "salt_line": 5.25,
     "tidal_lure": 5.0,
-    "undertow": 5.0,
+    # R208 / W2b (2026-08-25): the ratified `undertow` revision moved its
+    # formula base 4 -> 5 and appended an `exhaust_pile_at_least_3` draw, so
+    # the row reads 5.0 -> 6.0. That move is through the card's PRINTED BODY
+    # -- the branch credits zero and the Sly rider is byte-identical -- which
+    # is the one way this census accepts a value moving.
+    "undertow": 6.0,
     "whispered_word": 2.5,
     # --- EB-69, the Kokomi pool fill (R198, 2026-08-23): five new Sly rows ---
     "hold_the_narrows": 5.75,

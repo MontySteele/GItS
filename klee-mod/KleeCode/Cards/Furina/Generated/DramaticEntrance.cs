@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -37,23 +36,18 @@ public sealed class DramaticEntrance : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 4);
-
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("dramatic_entrance");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dramatic Entrance"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with [gold]Fanfare[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. If you have at least 12 [gold]Fanfare[/gold]: deal 7 damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(6m),
-            new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.ReadableFanfare(card.Owner.Creature) / 4)
+            new DamageVar(7m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -66,15 +60,24 @@ public sealed class DramaticEntrance : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+        await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
+        if (FurinaResources.ReadableFanfare(Owner.Creature) >= 12)
+        {
+            await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 7m))
+                .FromCard(this)
+                .TargetingAllOpponents(CombatState!)
+                .WithHitFx("vfx/vfx_attack_slash")
+                .SpawningHitVfxOnEachCreature()
+                .Execute(choiceContext);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars.Damage.UpgradeValueBy(3m);
     }
 }

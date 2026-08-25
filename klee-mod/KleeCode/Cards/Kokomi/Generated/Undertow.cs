@@ -51,13 +51,13 @@ public sealed class Undertow : CustomCardModel, IElementalCard, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undertow"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with the number of cards [gold]Exhausted[/gold]. [gold]Sly[/gold]: Gain 1 Energy."),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with the number of cards [gold]Exhausted[/gold]. If 3 or more cards are [gold]Exhausted[/gold]: draw 1 card. [gold]Sly[/gold]: Gain 1 Energy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(4m),
+            new CalculationBaseVar(5m),
             new ExtraDamageVar(1m),
             new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiResources.ExhaustPileCount(card.Owner.Creature))
         };
@@ -77,6 +77,10 @@ public sealed class Undertow : CustomCardModel, IElementalCard, ICharacterCard
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
+        if (KokomiResources.ExhaustPileCount(Owner.Creature) >= 3)
+        {
+            await CardPileCmd.Draw(choiceContext, 1m, Owner);
+        }
     }
 
     protected override void OnUpgrade()

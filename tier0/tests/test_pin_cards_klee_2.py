@@ -10,6 +10,7 @@ spec, or its ordering has to break a test before it can ship.
 
 from tier0.content import loader
 from tier0.engine import combat
+from tier0.engine.state import Bomb
 from tier0.tests.conftest import make_enemy, make_state
 
 
@@ -334,3 +335,58 @@ def test_fish_blasting_hits_every_enemy_x_times_and_adds_a_confiscated():
     # pile afterwards, so Confiscated sits UNDER it.
     assert [c.id for c in state.player.discard_pile] == ["confiscated",
                                                          "fish_blasting"]
+
+
+# --- R208 / W2b ratified body: Sparkly Explosion ---
+
+def test_sparkly_explosion_gathers_detonates_at_plus_three_then_swings():
+    """R208's W2b body, in the ruled ORDER: move every Bomb on the board onto
+    the target, detonate that target's pile at +3 each, and only then deal 14.
+
+    The order is the whole ruling. Klee's implicit pop is guarded on the
+    target surviving AND on hp damage being nonzero, so a detonation placed
+    AFTER the swing is thrown away on a kill or against Block; an explicit
+    `detonate` placed before it is immune to both.
+    """
+    left = make_enemy(hp=200, name="left")
+    right = make_enemy(hp=100, name="right")
+    right.bombs.append(Bomb(damage=6))
+    state = make_state(enemies=[left, right])
+    left.bombs.append(Bomb(damage=5))
+    left.bombs.append(Bomb(damage=5))
+
+    _play(state, "sparkly_explosion")
+
+    # tier0 re-resolves `target: enemy` per op to the LOWEST-HP living enemy,
+    # so all three Bombs gather on `right`: 5+3, 5+3, 6+3 = 25, then 14.
+    # (EB-136: C# holds ONE cardPlay.Target for all three ops. The engines
+    # concentrate differently and the sim number on this card is diagnostic
+    # until that repair lands.)
+    assert right.hp == 100 - 25 - 14
+    assert left.hp == 200
+    assert left.bombs == [] and right.bombs == []
+
+
+def test_sparkly_explosion_is_a_plain_fourteen_on_an_empty_board():
+    """The measured floor of the ruled body: with no Bombs anywhere,
+    `move_bombs` moves nothing, `detonate` does nothing, and the card
+    resolves as a 14-damage two-cost Rare."""
+    enemy = make_enemy(hp=100)
+    state = make_state(enemies=[enemy])
+
+    _play(state, "sparkly_explosion")
+
+    assert enemy.hp == 86
+    assert enemy.bombs == []
+    assert state.player.sparks == 0        # the gain_spark rider is gone
+
+
+def test_sparkly_explosion_upgrade_moves_the_printed_damage_only():
+    """`{damage: +5}` runs `_bump_first` over top-level damage effects, so
+    14 -> 19 and neither the gather nor the detonation bonus moves."""
+    up = loader.get_card("sparkly_explosion+")
+    assert up.effects == [
+        {"op": "move_bombs", "target": "enemy"},
+        {"op": "detonate", "target": "enemy", "bonus": 3},
+        {"op": "damage", "amount": 19, "target": "enemy"}]
+    assert up.archetypes == ["demolition"]     # the spark tag stays dropped

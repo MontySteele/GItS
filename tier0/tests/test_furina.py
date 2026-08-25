@@ -662,25 +662,34 @@ def test_every_read_is_instrumented_at_the_moment_it_reads():
 
 
 def test_pilot_values_the_smooth_fanfare_reads():
-    """F-B1 turned these two commons from binary gates into smooth reads,
+    """F-B1 turned these commons from binary gates into smooth reads,
     so the pilot must now see a value that MOVES with the meter rather than
     stepping once. A pilot blind to the rider would price the archetype's
-    own payoffs at their printed number and play straight past them."""
+    own payoffs at their printed number and play straight past them.
+
+    THE DAMAGE-SIDE CARD MOVED, NOT THE PROPERTY. This test used to read
+    `dramatic_entrance` (6 + 1 per 4 Fanfare); R208's W2b re-body took that
+    card off the smooth rail entirely and onto a `fanfare_at_least_12` bar,
+    which is pinned on its own terms in `test_pin_cards_furina`. The damage
+    half is carried here by `applause_line`, which prints the IDENTICAL
+    1-per-4 rate, so the property under test is unchanged and only its
+    carrier moved.
+    """
     st = furina_state()
-    entrance = loader.get_card("dramatic_entrance")   # 6 + 1 per 4 Fanfare
+    applause = loader.get_card("applause_line")       # 3 + 1 per 4 Fanfare
     ovation = loader.get_card("thunderous_ovation")   # 6 + 1 per 2 Fanfare
     #                                       (Curtain Call C's steepened rate)
 
     st.player.fanfare = 0
-    assert policy._expected_damage(st, entrance) == 6
+    assert policy._expected_damage(st, applause) == 3
     assert policy._raw_block(st, ovation) == 6
 
-    st.player.fanfare = 4        # one entrance step, two ovation steps
-    assert policy._expected_damage(st, entrance) == 7
+    st.player.fanfare = 4        # one applause step, two ovation steps
+    assert policy._expected_damage(st, applause) == 4
     assert policy._raw_block(st, ovation) == 8
 
     st.player.fanfare = 20       # five steps -- no threshold cliff anywhere
-    assert policy._expected_damage(st, entrance) == 11
+    assert policy._expected_damage(st, applause) == 8
     assert policy._raw_block(st, ovation) == 16
 
 
@@ -688,9 +697,13 @@ def test_the_common_fanfare_readers_are_live_from_turn_one():
     """F-A4 on the two commons that used to be the archetype's gates.
 
     They are now un-gated readers: playable at 0 Fanfare, better at 5, and
-    the meter is untouched either way. (F-B1 replaces the binary threshold
-    with a smooth per-N read; that is card DESIGN and lands there, not
-    here -- this pins only that the gate and the payment are gone.)
+    the meter is untouched either way. (F-B1 replaced the binary PLAYABILITY
+    gate with a smooth per-N read on both; R208's W2b re-body then moved
+    `dramatic_entrance` onto a `fanfare_at_least_12` EFFECT bar, which is a
+    different thing and does not restore the old gate -- the card is still
+    playable at 0 Fanfare and still spends nothing. That is card DESIGN and
+    lands there, not here -- this pins only that the gate and the payment
+    are gone.)
     """
     for cid, get, low, high in (
             ("dramatic_entrance",

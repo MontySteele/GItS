@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -37,44 +36,42 @@ public sealed class StandingRoomOnly : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCard(base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 4);
-
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("standing_room_only");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The House Rises"),
-        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. Scales with [gold]Fanfare[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. If you have at least 5 [gold]Encore[/gold]: gain 3 [gold]Block[/gold]. Otherwise: draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(5m),
-            new ExtraDamageVar(1m),
-            new CalculatedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaResources.ReadableFanfare(card.Owner.Creature) / 4)
+            new BlockVar(3m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public StandingRoomOnly()
-        : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AllEnemies, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
-            .FromCard(this)
-            .TargetingAllOpponents(CombatState!)
-            .WithHitFx("vfx/vfx_attack_slash")
-            .SpawningHitVfxOnEachCreature()
-            .Execute(choiceContext);
+        await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, DynamicVars.Block.BaseValue), ValueProp.Move), cardPlay);
+        if (FurinaResources.Encore(Owner.Creature) >= 5)
+        {
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, 3m), ValueProp.Move), cardPlay);
+        }
+        else
+        {
+            await CardPileCmd.Draw(choiceContext, 1m, Owner);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(2m);
+        DynamicVars.Block.UpgradeValueBy(2m);
     }
 }

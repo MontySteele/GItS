@@ -64,7 +64,7 @@ klee	sparks_n_splash	rare	generic	payoff	frontload,scaling,velocity	frontload,sc
 klee	blazing_delight	rare	demolition	payoff	frontload,scaling	frontload,scaling		late	late		bomb	bomb		frontload	frontload
 klee	chained_reactions	rare	demolition	payoff	frontload,utility	frontload,utility		early,mid,late	late	aoe	bomb	bomb		frontload	frontload
 klee	explosive_frags	rare	demolition	glue	frontload,scaling	frontload,scaling		late	late		bomb	bomb		frontload	frontload
-klee	sparkly_explosion	rare	demolition,spark	payoff	frontload,velocity	frontload,velocity		mid,late	late	aoe	bomb,spark			frontload,velocity	frontload,velocity
+klee	sparkly_explosion	rare	demolition	payoff	frontload,utility	frontload,utility		mid,late	late		bomb	bomb		frontload	frontload
 klee	all_my_treasures	rare	demolition	enabler	frontload,velocity	frontload,velocity		late	late		bomb,spark			frontload,velocity	frontload,velocity
 klee	fish_blasting	rare	generic	payoff	frontload,velocity	frontload,velocity		late	late	aoe					
 klee	true_spark_knight	rare	spark	payoff	frontload,scaling,velocity	frontload,scaling,velocity		mid,late	late		spark	spark		frontload,velocity	frontload,velocity
@@ -129,14 +129,14 @@ furina	courtroom_drama	uncommon	generic	glue	utility	utility		late	early
 furina	quick_change	uncommon	generic	glue	velocity	velocity		late	early						
 furina	deep_breath	uncommon	generic,fanfare	glue	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early,mid,late	early		encore	encore	block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	torrential_turn	uncommon	salon,generic	payoff	frontload,utility	frontload,utility		mid	late			aura			
-furina	dramatic_entrance	uncommon	fanfare	payoff	frontload,scaling	frontload,scaling		early,mid,late	late			fanfare			
+furina	dramatic_entrance	uncommon	fanfare	payoff	frontload,scaling	frontload,scaling		early,mid,late	late	aoe		fanfare			
 furina	witness_stand	uncommon	generic	glue	utility,velocity	utility,velocity		early	early						
 furina	audience_participation	uncommon	fanfare,generic	glue	block,frontload,scaling,velocity	block,frontload,scaling,velocity		late	early,late		encore	aura	block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	tempo_change	uncommon	fanfare,salon	glue	velocity	velocity		early,mid,late	early,late			salon_member			
 furina	poised_riposte	uncommon	generic	glue	frontload,scaling	frontload,scaling		early,mid,late	early,late			encore			
 furina	curtain_up	uncommon	fanfare	enabler	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early	early		encore		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	matinee_performance	uncommon	salon,generic	payoff	frontload,scaling	frontload,scaling		early,mid,late	late			salon_member			
-furina	standing_room_only	uncommon	fanfare,generic	payoff	frontload,scaling	frontload,scaling		early,mid,late	late	aoe		fanfare			
+furina	standing_room_only	uncommon	fanfare,generic	glue	block,velocity	block,velocity		early,mid,late	early,late			encore			
 furina	crowd_work	uncommon	fanfare	glue	velocity	velocity		late	early						
 furina	let_the_people_rejoice	rare	generic	payoff	block,frontload,scaling,velocity	block,frontload,scaling,velocity		early,mid,late	late	aoe	encore	burst,fanfare	block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
 furina	encore_performance	rare	spotlight	payoff	velocity	velocity		early	late						
@@ -216,7 +216,7 @@ kokomi	nereids_ascension	rare	priest,generic	payoff	frontload,scaling	frontload,
 kokomi	sango_prayer	rare	priest,generic	glue	block,utility	block,utility		early	late	aoe					
 kokomi	vigil_of_the_deep	rare	priest,generic	enabler	sustain	sustain		mid,late	late						
 kokomi	grand_conscription	rare	commander	payoff	block,frontload,scaling,velocity	block,frontload,scaling,velocity		mid	late		charge,conscript		block,frontload,scaling,velocity	block,frontload,scaling,velocity	block,frontload,scaling,velocity
-kokomi	depths_judgment	rare	priest	payoff	frontload,scaling	frontload,scaling		mid,late	late			exhaust_pile			
+kokomi	depths_judgment	rare	priest	payoff	block,frontload	block,frontload		mid,late	late			exhaust_pile			
 kokomi	epiphany_of_the_deep	rare	priest,assist	payoff	velocity	velocity		mid,late	late						
 kokomi	prayer_to_the_moon	rare	priest,generic	enabler	block,frontload,scaling	block,frontload,scaling		early	late		charge		frontload,scaling	block,frontload,scaling	block,frontload,scaling
 kokomi	the_gunbai_turns	rare	assist	payoff	velocity	velocity		early	late						
