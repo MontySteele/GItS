@@ -35,6 +35,21 @@
 # already had in play, not one the batch opened. Filling it is Phase 3's
 # business (Spotlight content). No floor moved to absorb it; none may.
 #
+# SAID OUT LOUD HERE, 2026-08-25 (EB-118 Phase-3 Window 1): 17 -> 18. The
+# cell that ARRIVES is furina/spotlight frontload|mid, and it is the SAME
+# SHAPE as the entry above -- inherited coverage, disclosed rather than
+# opened. Rain of Roses lost its `spotlight` tag in the label pass because
+# it reads no Spotlight state of any kind; before, the spotlight sub-pool
+# held 18 cards of which 5 covered the cell (27.8% against a floor of
+# 25.0%), and after it holds 17 of which 4 do (23.5%). Nobody deleted a
+# frontload card and nothing was lost: a card that was never doing the job
+# stopped being counted as though it were. The measurement and its
+# arithmetic are published at review/active/eb118-w1-postread-2026-08-25.txt
+# (the pre-registration's build-time fact (b)); this note is the register
+# carrying it, which the header above requires and W1's landing missed.
+# Window 2 (2026-08-25) moved this list by NOTHING: tighten_the_cords went
+# [generic]/glue -> [priest]/payoff and the gate stayed at 18 against 18.
+#
 # Every line is a COVERAGE GAP in a pool. No line names a card, and none
 # ever can: this lint is floors-only (charter A0.2(1)).
 character	archetype	cell
