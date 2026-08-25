@@ -47,7 +47,7 @@ public sealed class SparklyExplosion : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sparkly Explosion"),
-        ("description", "Deal {Damage:diff()} damage. If it kills: gain 3 [gold]Sparks[/gold] and place 2 [gold]Bombs[/gold] on random enemies, each dealing 6 damage."),
+        ("description", "Deal {Damage:diff()} damage. If it kills: gain 3 [gold]Sparks[/gold] and place a [gold]Bomb[/gold] on EACH enemy dealing 6 damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -76,12 +76,8 @@ public sealed class SparklyExplosion : CustomCardModel, IElementalCard
         if (enemiesAtStart.Any(e => e.IsDead))
         {
             await SparkPower.Gain(choiceContext, Owner.Creature, 3, this);
-            for (var i = 0; i < 2; i++)
+            foreach (var bombTarget in CombatState!.HittableEnemies.ToList())
             {
-                var candidates = CombatState!.HittableEnemies.ToList();
-                if (candidates.Count == 0) break;
-                var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);
-                if (bombTarget == null) break;
                 await BombPower.Place(choiceContext, bombTarget, 6, Owner.Creature, this);
             }
         }

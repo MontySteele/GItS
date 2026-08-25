@@ -60,7 +60,9 @@ patched_dress:     {block: +3}                     # 6->9; Spark branch remains 
 jumpy_dumpty_mk2:  {damage: +2}                    # 8->10 x2
 remote_detonator:  {bonus: +2}                     # detonation bonus 2->4
 bombs_away:        {cost: -1}                      # 3->2 (uncommon cost slot)
-explosives_workshop: {power_amount: +1}            # +2->+3 per copy; duplicate Powers stack without a cap
+explosives_workshop: {power_amount: +1}            # EB-118 sec.4.4: the PER-TRIGGER increment, +1->+2.
+                                                   # It buys a bigger step, never a second trigger per turn.
+                                                   # Duplicate Powers still stack without a cap.
 cluster_charge:    {damage: +3}                    # 10->13
 trip_wire:         {bomb_damage: +3}               # 7->10
 controlled_demolition: {bomb_damage: +3}           # 7 -> 10 per bomb (RATIFIED 2026-07-26; was {bombs: +1})

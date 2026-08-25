@@ -19,7 +19,18 @@ def test_duplicate_klee_powers_stack_without_arbitrary_caps():
     card = loader.get_card("explosives_workshop")
     for _ in range(5):
         effects.resolve_card(st, card)
-    assert st.player.powers["bomb_damage_up"] == 10
+    # EB-118 sec.4.4 moved WHAT the card installs, not whether copies stack.
+    # Five copies are five stacks of the trigger, and the ruling this test
+    # verifies -- no arbitrary cap on duplicate Powers -- is asserted on the
+    # installed power. What those five stacks then PAY is one trigger's worth
+    # per turn, which is the second assertion: the same 10 as before, reached
+    # by playing the deck rather than by playing the card.
+    assert st.player.powers["bomb_damage_per_rotation"] == 5
+    assert "bomb_damage_up" not in st.player.powers
+
+    st.player.hand.append(loader.get_card("strike"))
+    effects.resolve_card(st, loader.get_card("blast_radius"))
+    assert st.player.powers["bomb_damage_up"] == 5
 
     spark_style = loader.get_card("spark_knight_style")
     for _ in range(3):

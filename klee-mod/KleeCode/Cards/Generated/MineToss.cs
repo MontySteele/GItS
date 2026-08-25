@@ -44,7 +44,7 @@ public sealed class MineToss : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mine Toss"),
-        ("description", "Place 2 [gold]Bombs[/gold] on random enemies, each dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
+        ("description", "Place a [gold]Bomb[/gold] on EACH enemy dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,12 +63,8 @@ public sealed class MineToss : CustomCardModel, ISkillTagCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        for (var i = 0; i < 2; i++)
+        foreach (var bombTarget in CombatState!.HittableEnemies.ToList())
         {
-            var candidates = CombatState!.HittableEnemies.ToList();
-            if (candidates.Count == 0) break;
-            var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);
-            if (bombTarget == null) break;
             await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
         }
     }

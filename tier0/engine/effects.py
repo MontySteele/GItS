@@ -622,6 +622,38 @@ def _detonate_bombs_on_hit(state: CombatState, enemy: Enemy, source: str) -> Non
     detonate_bombs(state, enemy)
 
 
+def note_rotation_event(state: CombatState) -> None:
+    """Explosives Workshop's once-per-turn latch (EB-118 sec.4.4).
+
+    "The first time each turn you discard OR Exhaust a card" is ONE window
+    over TWO event families, so the latch cannot live inside either family's
+    handler: it is the COMBINED count that has to be 1. Both counters are
+    zeroed together at the player's turn start, and every caller increments
+    its own counter immediately BEFORE calling here, so the sum reads 1 on
+    exactly the first event of the turn and never again -- no third piece of
+    state, and no way for the two families to each pay once.
+
+    WHAT IT PAYS INTO IS THE POINT. It increments the same `bomb_damage_up`
+    the detonation reads, rather than a second bomb-damage stat, which is
+    what makes already-placed and future Bombs agree: a Bomb armed three
+    turns ago detonates at today's number. The packet asks for exactly that.
+
+    The trigger is deliberately blind to WHICH card left -- an ordinary card
+    discarded to pay a price, a card Exhausted by its own keyword, and
+    Klee's status-exhaust route all count. The bound is the once-per-turn
+    latch, not a filter on the victim (sec.4.4; and LAW's Klee A1/A2 rail --
+    connective scaling stays bounded and never displaces her frontload).
+    """
+    n = state.player.powers.get("bomb_damage_per_rotation", 0)
+    if not n:
+        return
+    if state.discards_this_turn + state.cards_exhausted_this_turn != 1:
+        return
+    state.player.powers["bomb_damage_up"] = (
+        state.player.powers.get("bomb_damage_up", 0) + n)
+    state.emit("workshop_trigger", amount=n)
+
+
 def detonate_bombs(state: CombatState, enemy: Enemy, bonus: int = 0) -> None:
     bombs, enemy.bombs = enemy.bombs, []
     p = state.player
@@ -1877,6 +1909,7 @@ def _op_discard(state: CombatState, fx: dict, card: Card) -> None:
             continue
         state.player.discard_pile.append(victim)
         state.discards_this_turn += 1
+        note_rotation_event(state)          # EB-118 sec.4.4, seam 1 of 3
         state.discards_this_card += 1
         if chosen:
             state.emit("discard", card=victim.id, chosen=True)
@@ -2089,6 +2122,7 @@ def _op_discard_for_sparks(state: CombatState, fx: dict, card: Card) -> None:
         remove_instance(state.player.hand, victim)
         state.player.discard_pile.append(victim)
         state.discards_this_turn += 1
+        note_rotation_event(state)          # EB-118 sec.4.4, seam 2 of 3
         state.emit("discard", card=victim.id, chosen=True)
         discarded += 1
     gain = min(fx.get("sparks", discarded), discarded)
@@ -3219,6 +3253,7 @@ def player_turn_start_triggers(state: CombatState) -> None:
                     remove_instance(p.hand, victim)
                     p.discard_pile.append(victim)
                     state.discards_this_turn += 1
+                    note_rotation_event(state)   # EB-118 sec.4.4, seam 3 of 3
                     state.emit("discard", card=victim.id)
                     state.emit("selector_hand_full_discard", card=victim.id)
             # A hand of nothing but kit cards has no legal victim; the grant is

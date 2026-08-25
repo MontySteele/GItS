@@ -28,18 +28,37 @@ def _events(state, name):
 
 # --- demolition ---
 
-def test_cluster_charge_hits_for_ten_then_arms_two_five_damage_bombs():
-    """Cluster Charge deals its 10 damage FIRST and only then arms its two
+def test_cluster_charge_hits_for_ten_then_arms_a_bomb_on_each_enemy():
+    """Cluster Charge deals its 10 damage FIRST and only then arms its
     bombs, so the bombs it places survive the hit that would detonate them:
-    the enemy ends at -10 HP holding two armed 5-damage bombs."""
+    the aimed enemy ends at -10 HP holding an armed 5-damage bomb.
+
+    EB-118 §4.2 made it a DISTRIBUTION row -- one Bomb on EACH enemy, where
+    it used to roll two at random. The damage half still aims (the card
+    keeps `target: enemy` on its attack); only the placement went wide."""
     enemy = make_enemy(hp=60)
     state = make_state(enemies=[enemy])
 
     _play(state, "cluster_charge")
 
     assert enemy.hp == 50
-    assert [b.damage for b in enemy.bombs] == [5, 5]
-    assert [b.element for b in enemy.bombs] == ["pyro", "pyro"]
+    assert [b.damage for b in enemy.bombs] == [5]
+    assert [b.element for b in enemy.bombs] == ["pyro"]
+
+
+def test_cluster_charge_aims_its_damage_but_spreads_its_bombs():
+    """The two halves target differently on purpose, which one enemy
+    cannot show: the 10 damage lands on the aimed (lowest-HP) enemy alone,
+    while every living enemy gets a Bomb."""
+    aimed = make_enemy(hp=20, name="aimed")
+    other = make_enemy(hp=60, name="other")
+    state = make_state(enemies=[aimed, other])
+
+    _play(state, "cluster_charge")
+
+    assert (aimed.hp, other.hp) == (10, 60)
+    assert [b.damage for b in aimed.bombs] == [5]
+    assert [b.damage for b in other.bombs] == [5]
 
 
 def test_all_my_treasures_arms_six_bombs_and_banks_two_sparks():

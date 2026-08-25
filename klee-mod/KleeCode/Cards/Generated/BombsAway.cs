@@ -44,7 +44,7 @@ public sealed class BombsAway : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bombs Away!"),
-        ("description", "Place 5 [gold]Bombs[/gold] on random enemies, each dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
+        ("description", "Place 5 [gold]Bombs[/gold], each dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -57,19 +57,16 @@ public sealed class BombsAway : CustomCardModel, ISkillTagCard
     // GenerateAllCards. BaseLib's auto-registration would need a [Pool]
     // attribute and would register every card a second time.
     public BombsAway()
-        : base(3, CardType.Skill, CardRarity.Uncommon, TargetType.AllEnemies, autoAdd: false)
+        : base(3, CardType.Skill, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         for (var i = 0; i < 5; i++)
         {
-            var candidates = CombatState!.HittableEnemies.ToList();
-            if (candidates.Count == 0) break;
-            var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);
-            if (bombTarget == null) break;
-            await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
+            await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
         }
     }
 

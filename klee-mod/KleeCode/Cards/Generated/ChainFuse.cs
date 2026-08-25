@@ -44,7 +44,7 @@ public sealed class ChainFuse : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chain Fuse"),
-        ("description", "[gold]Bombs[/gold] placed this turn deal {Bonus:diff()} more damage. Place a [gold]Bomb[/gold] on a random enemy dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
+        ("description", "[gold]Bombs[/gold] placed this turn deal {Bonus:diff()} more damage. Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -58,21 +58,15 @@ public sealed class ChainFuse : CustomCardModel, ISkillTagCard
     // GenerateAllCards. BaseLib's auto-registration would need a [Pool]
     // attribute and would register every card a second time.
     public ChainFuse()
-        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.AllEnemies, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         BombPower.ModifyAll(CombatState!.HittableEnemies, DynamicVars["Bonus"].IntValue, placedThisRoundOnly: true, CombatState!.RoundNumber);
-        for (var i = 0; i < 1; i++)
-        {
-            var candidates = CombatState!.HittableEnemies.ToList();
-            if (candidates.Count == 0) break;
-            var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);
-            if (bombTarget == null) break;
-            await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
-        }
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()

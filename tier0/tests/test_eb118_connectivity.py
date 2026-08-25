@@ -241,6 +241,122 @@ def test_enemy_poison_total_is_unclassified_not_folded_in():
                for note in record["unclassified"])
 
 
+# --- 5. VOCAB v3: the one row the Explosives Workshop door added ------------
+#
+# EB-118 §4.4 introduced `bomb_damage_per_rotation`, which `v2` reported
+# UNCLASSIFIED. §2.3(4) permits exactly one repair — revise the vocabulary
+# and re-run BOTH sides under a new `VOCAB_VERSION` — and forbids repairing
+# only the post result. These four tests hold the two halves of that: the
+# revision is ADDITIVE and therefore cannot renumber the paired baseline,
+# and the grammar it chose is the one this vocabulary already practises
+# rather than one invented for the card that needed it.
+
+# The vocabulary as `v2` froze it (`f2d5f00`, the paired baseline commit).
+# Literal on purpose: a set read back out of the module it is meant to
+# guard would agree with anything.
+V2_SHARED_ENTRIES = {
+    "hp_ledger", "discard_chosen", "discard_random", "exhaust_other_chosen",
+    "exhaust_other_random", "self_exhaust", "ethereal", "junk_create",
+    "junk_remove", "hand_contents", "draw_pile", "discard_pile",
+    "exhaust_pile", "block_held", "enemy_count", "enemy_intent",
+    "aura_reaction", "plays_this_turn", "card_identity", "card_timing",
+    "universal_verb_power"}
+V2_PRIVATE_ENTRIES = {
+    "bombs", "sparks", "encore", "fanfare", "salon", "spotlight", "charge",
+    "burst", "conscript_sly", "kurage", "orbs", "stars", "osty"}
+V2_POWER_ROWS = {
+    "weak", "vulnerable", "frail", "strength", "dexterity", "next_attack_up",
+    "bomb_damage_up", "detonation_splash", "detonation_vuln",
+    "bomb_and_spark_per_turn", "spark_per_turn", "sparks_n_splash",
+    "spark_threshold_down", "zero_cost_attacks_up",
+    "reaction_bonus_spark_energy", "amp_reaction_up", "salon_member",
+    "salon_cap_up", "salon_damage_up", "salon_bow_block",
+    "salon_bow_encore", "salon_deploy_block", "spotlight_mult_bonus",
+    "spotlight_mult_bonus_turn", "spotlight_flat_damage",
+    "spotlight_flat_damage_turn", "spotlight_discount", "spotlight_draw",
+    "spotlight_encore_first", "ovation_spend_boost", "fanfare_delta_block",
+    "fanfare_attack_per10", "first_attack_draw", "encore_spend_draw",
+    "cross_examination", "kurage_ward", "kurage_amp", "ceremonial_garment",
+    "prevent_exhaust_ward", "feel_no_pain", "dark_embrace", "metallicize"}
+
+
+def test_v3_added_exactly_one_power_row_and_no_vocabulary_entry():
+    """The machine-checkable form of the relabel-only acceptance check.
+
+    A baseline re-run can only move if a table a baseline card reaches
+    moved. `bomb_damage_per_rotation` exists in NO pre-door sheet, so an
+    additive `POWER_HOOKS` row cannot fire on the baseline corpus -- but
+    only while it really is the sole delta. Any shared/private entry, op,
+    formula, predicate or count-token change would break that argument
+    silently, so the entry sets are pinned here rather than argued in
+    prose.
+    """
+    assert ccr.VOCAB_VERSION == "eb118-connectivity-v3"
+    assert set(ccr.SHARED_STATES) == V2_SHARED_ENTRIES
+    assert set(ccr.PRIVATE_STATES) == V2_PRIVATE_ENTRIES
+    assert set(ccr.POWER_HOOKS) - V2_POWER_ROWS == {"bomb_damage_per_rotation"}
+    assert not V2_POWER_ROWS - set(ccr.POWER_HOOKS)
+
+
+def test_the_workshop_power_is_a_universal_verb_rider():
+    """§4.4's power, classified: it rides the discard AND Exhaust verbs and
+    pays into the SAME private bomb-damage stat `bomb_damage_up` carries."""
+    record = classify(_row(effects=[
+        {"op": "apply_power", "power": "bomb_damage_per_rotation",
+         "amount": 1, "target": "self"}]))
+    assert record["unclassified"] == []
+    assert hooks_of(record) == {
+        ("shared", "discard_pile"), ("shared", "exhaust_pile"),
+        ("shared", "universal_verb_power"), ("private", "bombs")}
+    # the stat hook is `bomb_damage_up`'s own, verbatim -- one bomb-damage
+    # number, so the card's pre/post diff is exactly the verb hooks gained.
+    assert ("private", "bombs") in record["uses"]
+    assert ccr.POWER_HOOKS["bomb_damage_up"][0] in \
+        ccr.POWER_HOOKS["bomb_damage_per_rotation"]
+
+
+def test_the_workshops_external_reach_is_derived_not_asserted():
+    """`external_reach` for this power comes from `UNIVERSAL_VERB_POWERS`,
+    which is itself derived from the hook table -- no line sets it by hand.
+    Re-derive the tuple here so a hand-added membership would show up."""
+    derived = {name for name, hooks in ccr.POWER_HOOKS.items()
+               if any(h[1] == "universal_verb_power" for h in hooks)}
+    assert set(ccr.UNIVERSAL_VERB_POWERS) == derived
+    assert "bomb_damage_per_rotation" in derived
+    record = classify(_row(effects=[
+        {"op": "apply_power", "power": "bomb_damage_per_rotation",
+         "amount": 1, "target": "self"}]))
+    assert record["external_reach"] is True
+
+
+def test_the_universal_verb_class_is_the_verb_TRIGGER_class():
+    """WHY the power joined that class instead of getting its own.
+
+    The entry's one-line prose says a Power that MODIFIES a universal verb.
+    Read narrowly that would exclude a trigger -- and it would also exclude
+    three of the four powers that were already in the class before this
+    door, which is how we know it is the prose that is narrow. This test
+    pins the two repo facts the decision rests on, so a later reader cannot
+    re-narrow the class without one of them going red.
+    """
+    # (1) membership as practised: three pre-door carriers are triggers.
+    #     `first_attack_draw` is the exact structural twin -- a trigger on a
+    #     universal verb with a once-per-turn latch.
+    for trigger in ("feel_no_pain", "dark_embrace", "first_attack_draw"):
+        assert trigger in ccr.UNIVERSAL_VERB_POWERS
+    # (2) the canon detector that decides this entry on all five canon pools
+    #     is a pure TRIGGER token set -- and it matches the C# twin of the
+    #     new power, so a base-game power of this shape needed no v3.
+    for token in ("AfterCardDiscarded", "AfterCardExhausted",
+                  "AfterCardPlayed", "AfterCardDrawn"):
+        assert ccr.CANON_UNIVERSAL_VERB.search(
+            f"public override Task {token}(x) {{}}")
+    csharp = (REPO / "klee-mod" / "KleeCode" / "Powers"
+              / "DemolitionPowers.cs").read_text(encoding="utf-8")
+    workshop = csharp.split("class ExplosivesWorkshopPower", 1)[1]
+    assert ccr.CANON_UNIVERSAL_VERB.search(workshop)
+
+
 # --- the effect TREE, not the top level -------------------------------------
 
 def test_hooks_inside_a_conditional_branch_are_seen():

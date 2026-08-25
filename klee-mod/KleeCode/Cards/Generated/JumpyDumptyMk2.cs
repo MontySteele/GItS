@@ -47,7 +47,7 @@ public sealed class JumpyDumptyMk2 : CustomCardModel, IElementalCard, ISkillTagC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Dumpty Mk.II"),
-        ("description", "Deal {Damage:diff()} damage to random enemies twice. Place 2 [gold]Bombs[/gold] on random enemies, each dealing {ExtraDamage:diff()} damage. [gold]Burst[/gold] +5."),
+        ("description", "Deal {Damage:diff()} damage to random enemies twice. Place a [gold]Bomb[/gold] on EACH enemy dealing {ExtraDamage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -73,12 +73,8 @@ public sealed class JumpyDumptyMk2 : CustomCardModel, IElementalCard, ISkillTagC
             .TargetingRandomOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        for (var i = 0; i < 2; i++)
+        foreach (var bombTarget in CombatState!.HittableEnemies.ToList())
         {
-            var candidates = CombatState!.HittableEnemies.ToList();
-            if (candidates.Count == 0) break;
-            var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);
-            if (bombTarget == null) break;
             await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars.ExtraDamage.BaseValue, Owner.Creature, this);
         }
     }

@@ -73,17 +73,28 @@ def test_no_power_carries_an_incidental_cap_rider():
     assert carriers == []
 
 
-def test_the_only_cap_carrier_left_is_the_one_its_upgrade_pins():
-    """`lasting_impression` is the sixteenth card of sec.5.2's list and the
-    one that did not land: its ruled upgrade delta is `fanfare_cap: +2`,
-    which binds to this op, so removing the op makes `apply_upgrade` raise
-    and the card needs a NEW ruled delta before it can lose the line. That is
-    [USER]'s call, so the row is pinned here rather than left to drift -- if
-    the delta is ever ruled and the op removed, this test is what says so.
+def test_the_cap_verb_is_now_printed_by_no_card_at_all():
+    """sec.5.2's stated end state, reached 2026-08-24 when the sixteenth card
+    landed with the other fifteen.
+
+    `lasting_impression` was the one that did not land, and the blocker was
+    never the removal: its ruled upgrade delta `fanfare_cap: +2` BOUND to
+    this op, so taking the op out made `apply_upgrade` raise. [USER] ruled
+    the replacement delta (`{encore: +2}`) and the hold came off. The
+    assertion therefore INVERTS -- it used to name the one carrier, and now
+    it says there is none.
+
+    The verb itself is deliberately NOT retired from the engine: sec.5.2
+    removed a universal rider, not a keyword. `raise_fanfare_cap` stays a
+    live op, and `fanfare_cap` stays a live upgrade key, for the card whose
+    JOB is headroom whenever one is ruled. This test is what would notice a
+    new carrier arriving without that ruling.
     """
     carriers = [c["id"] for c in _sheet()
                 if "raise_fanfare_cap" in _keywords(c)]
-    assert carriers == ["lasting_impression"]
+    assert carriers == []
+    from tier0.engine import effects as _effects
+    assert "raise_fanfare_cap" in _effects.OPS
 
 
 def test_the_full_grant_is_still_three_rare_powers():

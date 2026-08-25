@@ -44,7 +44,7 @@ public sealed class AmmoScavenging : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ammo Scavenging"),
-        ("description", "Place a [gold]Bomb[/gold] on a random enemy dealing {Damage:diff()} damage. Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Burst[/gold] +5."),
+        ("description", "Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage. Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -58,20 +58,14 @@ public sealed class AmmoScavenging : CustomCardModel, ISkillTagCard
     // GenerateAllCards. BaseLib's auto-registration would need a [Pool]
     // attribute and would register every card a second time.
     public AmmoScavenging()
-        : base(1, CardType.Skill, CardRarity.Common, TargetType.AllEnemies, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Common, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        for (var i = 0; i < 1; i++)
-        {
-            var candidates = CombatState!.HittableEnemies.ToList();
-            if (candidates.Count == 0) break;
-            var bombTarget = Owner.RunState.Rng.CombatTargets.NextItem(candidates);
-            if (bombTarget == null) break;
-            await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
-        }
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 

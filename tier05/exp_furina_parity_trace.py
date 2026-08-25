@@ -48,15 +48,26 @@ SEED = 11                     # the sprint's registered seed
 # id and played in this order, skipping any the hand does not hold that turn.
 #
 # Chosen to exercise every branch of the ported behaviour in as few turns as
-# possible: the "Fanfare Cap +X" keyword (ceiling only), the "Fanfare +X"
-# keyword on a rare Power (floor, cap and current together), an Encore SPEND
-# (generation -- the one source that stays deterministic once the enemy is
-# forbidden to hit, see the punching bag below), a threshold reader, and at
-# least two turns of pure decay so the fade is visible in isolation.
+# possible: the "Fanfare +X" keyword on a rare Power (floor, cap and current
+# together), an Encore SPEND (generation -- the one source that stays
+# deterministic once the enemy is forbidden to hit, see the punching bag
+# below), a threshold reader, and at least two turns of pure decay so the fade
+# is visible in isolation.
+#
+# ONE LEG OF THAT LIST IS NO LONGER REACHABLE, and the script is left as it is
+# rather than repaired, because there is nothing to repair it with. The
+# ceiling-only "Fanfare Cap +X" keyword was carried here by
+# `lasting_impression`, and EB-118 sec.5.2 ([USER] 2026-08-24) took the last
+# printed carrier off the sheet -- the verb survives in `effects.OPS` and
+# `fanfare_cap` survives as an upgrade key, for a future card whose JOB is
+# headroom, but NO shipped card prints it. Substituting a different card would
+# not restore the leg; it would only hide that the leg is gone. T2 still earns
+# its place as the first decay turn and as an Encore source.
 SCRIPT: list[list[str]] = [
     ["an_invitation"],              # T1: generate. No decay this turn.
-    ["lasting_impression"],         # T2: first decay, THEN Encore +4 and
-                                    #     "Fanfare Cap +5" -- ceiling only
+    ["lasting_impression"],         # T2: first decay, THEN Encore +4. The
+                                    #     "Fanfare Cap +5" this row used to
+                                    #     add is gone (EB-118 sec.5.2)
     ["breathless"],                 # T3: decay, THEN spend 4 Encore -> the
                                     #     meter has something to fade
     ["the_sea_is_my_stage"],        # T4: a RARE POWER -- "Fanfare +15"
