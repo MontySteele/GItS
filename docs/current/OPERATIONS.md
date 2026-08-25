@@ -7,7 +7,9 @@ index of what to type, not how it works.
 ## Environment
 
 - Python 3.12. No requirements file in-tree; the suite's actual imports are
-  `pytest pyyaml pillow numpy`. CI installs exactly those.
+  `pytest pyyaml pillow numpy`. CI installs exactly those. `pytest-xdist` is
+  optional, local, and not in that list — see the PROPOSED test section below
+  for what it buys and why CI does not install it.
 - Most sim entry points need `PYTHONPATH=.`. Codegen and tools run as
   `.venv/bin/python tools/<x>.py` (Windows: `.venv/Scripts/python`).
 - `tools/` is an implicit namespace package: both `python3 tools/x.py` and
@@ -29,6 +31,83 @@ atomically, reproducing the bare-clone world CI actually starts from. CI does
 NOT set it (a runner has no `game_ref/`), and that is the point: the `pytest`
 job asserts the *committed* world is sound. Tests are cwd-sensitive — run from
 the repo root.
+
+### PROPOSED — parallel suite, fast lane, concurrent lints (awaiting [USER])
+
+Measured 2026-08-24 on the 16-CPU Windows box, branch `test-speed`, from
+`origin/main` `4bbc9bc`. **Nothing below changes a default**: `pytest.ini`
+registers marker names and sets no `addopts`, so a bare `python -m pytest`
+and CI's line behave exactly as before. What is proposed is the *workflow*.
+
+One optional local dependency, deliberately NOT added to CI's install line:
+
+```sh
+python -m pip install pytest-xdist      # 3.8.0, pulls execnet 2.1.2
+```
+
+```sh
+python -m pytest tier0/tests tier05/tests -q -n auto --dist loadscope
+python -m pytest tier0/tests tier05/tests -q -m "not battery" -n auto --dist loadscope
+python tools/run_lints.py               # concurrent lint battery, ci + local lanes
+python tools/run_lints.py --lane ci     # exactly CI's `lints` job
+python tools/run_lints.py --list        # the registry, and any lint missing from it
+```
+
+| arm | wall clock | items run |
+|---|---|---|
+| full suite, serial (today's gate) | 152–159 s | 3195 |
+| full suite, `-n auto` (16) `--dist loadscope` | 35 s | 3195 |
+| full suite, `-n 8 --dist loadscope` | 36 s | 3195 |
+| fast lane, `-m "not battery" -n auto` | 13 s | 3113 (97.4%) |
+| fast lane, `-m "not battery"` serial | 55 s | 3113 |
+| lints, serial (17 tools) | 5.3 s | — |
+| lints, concurrent (17 tools) | 1.0 s | — |
+
+Pass/skip/xfail counts are identical across every arm (3138 / 45 / 12; the
+fast lane drops 82 items and nothing else). Two back-to-back `-n auto` runs
+agreed to 0.4 s and no test flaked, so no test needed a `serial` marker and
+none was added — `battery` is the only marker registered.
+
+`--dist loadscope` is load-bearing, not a preference: it keeps a module on one
+worker, so a module-scoped battery fixture (`test_pass3.klee_report`,
+`test_silent.silent`, `test_axes.package`) is computed once instead of once
+per worker. The knee of the curve is at 8 workers; 16 buys about 1 s more,
+because past that point the run is bounded by the longest single module scope
+plus per-worker collection.
+
+`battery` marks the 52 test functions (82 collected items) whose time is spent
+in a Monte-Carlo battery (`run_battery` / `score_config` / `score_character`)
+or a run-level sim (`model.run_many`, repeated route walks) **and** that cost
+at least 0.45 s serially. Everything else stays in the fast lane by
+construction: sheet lints, codegen checks, encoding and register gates, the
+event-pool resolution sweep, the C#-parity pins.
+
+The discipline being proposed:
+
+- **inner loop** — the targeted tests for what you are editing, plus the fast
+  lane. Seconds, not minutes.
+- **before any push** — the FULL suite (`-n auto --dist loadscope`) and the
+  full lint battery. The fast lane is never the gate: the deselected 82 items
+  are the calibration bands, and a band that was not run is not a band.
+- **bare `pytest` stays bare.** No `addopts`. Anyone who types the CI line
+  gets the CI run.
+
+CI is deliberately untouched. A hosted `ubuntu-latest` runner has 2–4 vCPU, so
+the gain there is the `-n 4` shape (52 s measured here) rather than the `-n 16`
+shape — real, but roughly a third of the local saving, and it would put a
+plugin install on the critical path of the one job that asserts the fresh-clone
+world is sound. That trade is [USER]'s to make, not this branch's.
+
+Two facts this measurement turned up, neither fixed here:
+
+- `tools/lint_role_tempo_coverage.py --gate` is **green** on `4bbc9bc`
+  (17 findings, exactly the 17 pinned). Only the bare invocation, which no
+  gate uses, exits 1.
+- `tools/card_distinctness_report.py --gate` exits **2** — "NO OFFICIAL ANCHOR
+  IN THIS RUN" — on the art-bearing main checkout as well as in a worktree,
+  because its official pools want `tools/extract_base_game_pool.py` to have
+  been run first. It is a standing red in the local-only lane, so
+  `run_lints.py --lane ci` is the arm that goes green today.
 
 ## Simulate
 
@@ -153,6 +232,12 @@ python3 tools/lint_roster_registry.py       tools/lint_vendor_pin.py       tools
 Local-only (not in CI): `lint_text_encoding.py`, `lint_generated_structure.py`,
 `art_lint.py`, `card_distinctness_report.py --gate`, `dump_claimed_sources.py`.
 `tools/README.md` is the authoritative map of which tool is gated by what.
+
+`tools/run_lints.py` runs the whole battery concurrently and prints one row per
+tool with its exit code — see the PROPOSED test section. It carries the
+registry those two lists describe, and fails the run if a `tools/lint_*.py`
+appears that no registry row names, so the list above cannot go stale in
+silence.
 
 Suite-gated (runs under `pytest`, not in the CI `lints` job):
 `lint_recall_exhaust.py` (`EB-118`, merged **inert** 2026-08-23; gate

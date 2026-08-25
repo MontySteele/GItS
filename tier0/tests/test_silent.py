@@ -23,17 +23,20 @@ def ironclad_pkg():
                         FIGHTS, SEED)
 
 
+@pytest.mark.battery
 def test_silent_scales_hardest(silent, ironclad_pkg):
     assert silent["scores"]["A2_scaling"] > 4.0
     assert silent["scores"]["A2_scaling"] > ironclad_pkg["scores"]["A2_scaling"]
     assert silent["curve_exponent"] > ironclad_pkg["curve_exponent"]
 
 
+@pytest.mark.battery
 def test_silent_velocity_above_baseline(silent, ironclad_pkg):
     assert silent["scores"]["A5_velocity"] > 3.2
     assert silent["scores"]["A5_velocity"] > ironclad_pkg["scores"]["A5_velocity"]
 
 
+@pytest.mark.battery
 def test_silent_weakness_is_utility_or_setup(silent, ironclad_pkg):
     # Single-target shivs, no AoE: A6 must sit below baseline, and ruling
     # 2's ordering anchor must hold on the AoE term:
@@ -45,10 +48,12 @@ def test_silent_weakness_is_utility_or_setup(silent, ironclad_pkg):
     assert "A6_utility" in bottom_two or "A7_setup_tax" in bottom_two
 
 
+@pytest.mark.battery
 def test_silent_frontload_not_above_baseline(silent):
     assert silent["scores"]["A1_frontload"] <= 3.0
 
 
+@pytest.mark.battery
 def test_silent_comes_online_slower_than_ironclad_package(silent, ironclad_pkg):
     # Review ruling #3 expected sanity for the self-referential A7.
     assert (silent["raw"]["A7_setup_tax"]

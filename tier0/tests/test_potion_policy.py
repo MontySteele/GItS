@@ -242,6 +242,7 @@ def test_battery_player_has_no_potions():
         assert p.node_kind == "", (character, deck)
 
 
+@pytest.mark.battery
 def test_anchor_and_baseline_still_exact():
     """Import and re-run the anchor-lock + baseline-3.0 assertions. If the
     potion engine ever perturbs the frozen battery, one of these moves and THIS

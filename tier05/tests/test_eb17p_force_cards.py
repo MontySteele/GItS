@@ -213,6 +213,7 @@ def test_a_cell_forwards_its_force_cards_to_the_model(monkeypatch):
     assert seen["force_cards"] is None
 
 
+@pytest.mark.battery
 def test_the_arms_stay_paired_by_seed():
     """Run i of either arm is a pure function of `seed + i`, which is what
     makes the pairing by INDEX legitimate (§4)."""

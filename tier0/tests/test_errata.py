@@ -121,6 +121,7 @@ V02_MEDIAN = {"A1_frontload": 4.77, "A2_scaling": 3.82, "A3_block": 2.09,
               "A7_setup_tax": 2.37}
 
 
+@pytest.mark.battery
 def test_v02_median_scorecard_locked():
     rep = score_character("klee", 300, SEED)
     for ax, frozen in V02_MEDIAN.items():
@@ -129,6 +130,7 @@ def test_v02_median_scorecard_locked():
 
 # --- authored-package floors (realistic Tier 0.5 owns the ceiling) ---
 
+@pytest.mark.battery
 def test_winrate_bands_skipped_below_min_fights():
     rep = score_character("klee", 50, SEED)
     assert any("not checked" in f for f in rep["band_flags"])
@@ -143,6 +145,7 @@ def test_sheet_splash_cap_matches_engine_constant():
     assert fx["splash_procs_per_turn"] == C.DETONATION_SPLASH_PROC_CAP
 
 
+@pytest.mark.battery
 @pytest.mark.parametrize("deck,pilot,enc", [
     ("demolition_weighted", "demolition", "tank_boss"),
     ("spark_weighted", "spark", "tank_boss"),

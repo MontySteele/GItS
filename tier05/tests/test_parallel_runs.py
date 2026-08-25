@@ -27,6 +27,7 @@ def _fingerprint(results):
 RUNS = 7          # deliberately not a multiple of the job counts below
 
 
+@pytest.mark.battery
 @pytest.mark.parametrize("jobs", [2, 3, RUNS + 2])
 def test_parallel_batches_match_the_serial_batch(jobs):
     kw = dict(grant_relics=True, grant_potions=True, n_acts=1)
@@ -40,6 +41,7 @@ def test_parallel_batches_match_the_serial_batch(jobs):
     assert _fingerprint(parallel) == _fingerprint(serial)
 
 
+@pytest.mark.battery
 def test_more_jobs_than_runs_does_not_lose_or_duplicate_runs():
     # Empty chunks are dropped rather than dispatched; the seeds must still
     # come back exactly once each, in order.

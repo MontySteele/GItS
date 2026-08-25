@@ -249,6 +249,7 @@ def test_reads_are_counted_on_the_real_read_path(scope):
 #  Switch-off byte-identity, with its positive control
 # ---------------------------------------------------------------------------
 
+@pytest.mark.battery
 @pytest.mark.parametrize("cell_name", ["bomb-primary", "exhaust-primary"])
 def test_switch_off_is_byte_identical_across_two_wild_vectors(
         scope, wild, cell_name):
@@ -264,6 +265,7 @@ def test_switch_off_is_byte_identical_across_two_wild_vectors(
     assert a == b
 
 
+@pytest.mark.battery
 @pytest.mark.parametrize("cell_name", ["bomb-primary", "exhaust-primary"])
 def test_the_positive_control_the_previous_test_needs(scope, wild, cell_name):
     """Without this, a harness that ran nothing would pass the test above.
@@ -279,6 +281,7 @@ def test_the_positive_control_the_previous_test_needs(scope, wild, cell_name):
     assert on_wild != on
 
 
+@pytest.mark.battery
 def test_the_null_control_cell_never_moves(scope, wild):
     """Furina carries neither op. Every point must land on one digest here,
     with the switch off OR forced on -- a moving control can only be a leak

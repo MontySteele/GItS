@@ -19,6 +19,8 @@ from __future__ import annotations
 
 import random
 
+import pytest
+
 from tier0 import constants as C
 from tier05 import draft, maps, model, route, run_metrics
 from tier05.maps import ELITE, NORMAL, SHOP, TREASURE, ActMap, Room
@@ -290,6 +292,7 @@ def test_live_route_regret_is_deterministic():
     assert [x.hp_by_node for x in a] == [x.hp_by_node for x in b]
 
 
+@pytest.mark.battery
 def test_recording_the_walk_draws_no_rng_of_its_own():
     """The recording must be free. If it consumed a draw, or if the sampler
     reached into the run stream, every seeded number in the repo would

@@ -7,6 +7,8 @@ and it is silent rather than zero-filled when the cohort never reacted.
 
 from __future__ import annotations
 
+import pytest
+
 from tier0 import constants as C
 from tier05 import cells, reaction_telemetry
 
@@ -110,6 +112,7 @@ def test_the_block_carries_no_verdict():
     assert "report-only" in lowered
 
 
+@pytest.mark.battery
 def test_end_to_end_on_a_real_reacting_cohort():
     """The instrument survives a live cohort and the arithmetic closes on it."""
     cell = cells.Cell(name="test", character="klee", archetype="reaction",
