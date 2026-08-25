@@ -145,7 +145,29 @@ RULES_BEARING_OPS: dict[str, str] = {
 # kill-conditional `then:` places 2 Bombs at 6 while the shipped card said
 # `includesBombRules: false` -- retired when the generator and the parity gate
 # both learned to walk the tree and the C# was regenerated.
-BRANCH_ONLY_KNOWN: dict[str, tuple[tuple[str, ...], str]] = {}
+BRANCH_ONLY_KNOWN: dict[str, tuple[tuple[str, ...], str]] = {
+    "tighten_the_cords": (
+        ("apply_power",),
+        "EB-125 / R202: the ratified body gates its Metallicize on"
+        " `exhaust_pile_at_least_3`, so the card's only apply_power sits in a"
+        " `then:`. CHECKED, reader by reader. The three registered flat sites"
+        " in TOP_LEVEL_ONLY all read past it harmlessly:"
+        " `extract_base_game_pool._row_delta_key` reads DLL-translated rows"
+        " and never a house sheet; `lint_constant_parity._ancient_hook` reads"
+        " relic hooks, which have no `conditional` by grammar; and"
+        " `lint_strict_domination.effect_maps` is flat ON PURPOSE and its"
+        " flatness is the POINT here -- crediting a gated Metallicize as"
+        " unconditional value is exactly what made this card a clone of"
+        " gorou_heart_of_the_clan, and keeping the conditional opaque is what"
+        " separates them. Every reader that asks a rules question walks the"
+        " tree: `role_tempo` and `card_connectivity_report` reach the op"
+        " through `iter_effects`, and `lint_handwritten_parity.walk_effects`"
+        " recurses into `then`/`else` explicitly. The C# side carries no"
+        " card-level tooltip marker for a power in either position --"
+        " MetallicizePower supplies its own at runtime, exactly as it does"
+        " for pearl_current's unconditional apply -- and the generator's"
+        " whole-card questions go through `_effects_everywhere`."),
+}
 
 
 # ---------------------------------------------------------------------------

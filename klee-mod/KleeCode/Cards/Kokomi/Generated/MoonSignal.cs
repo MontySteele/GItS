@@ -41,13 +41,13 @@ public sealed class MoonSignal : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "A Moment Alone"),
-        ("description", "Discard a random card. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Discard 1 card. Choose a card from your discard pile; put it on top of your draw pile. [gold]Sly[/gold]: Draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CardsVar(1)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -59,19 +59,27 @@ public sealed class MoonSignal : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        for (var i = 0; i < 1; i++)
         {
-            var pool = CardPile.Get(PileType.Hand, Owner)?.Cards.Where(KitGrant.NotKitCard).ToList();
-            if (pool == null || pool.Count == 0) break;
-            var victim = Owner.RunState.Rng.CombatTargets.NextItem(pool);
-            if (victim == null) break;
-            await CardCmd.Discard(choiceContext, victim);
+            var picked = (await CardSelectCmd.FromHandForDiscard(
+                choiceContext, Owner,
+                new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 1),
+                KitGrant.NotKitCard, this)).ToList();
+            await CardCmd.Discard(choiceContext, picked);
         }
-        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        await RecallFromDiscard.Recall(
+            choiceContext, Owner, this, 1);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Cards.UpgradeValueBy(1m);
+        AddKeyword(CardKeyword.Retain);
+    }
+
+    /// <summary>Sly: resolves when THIS card is discarded.</summary>
+    public override async Task AfterCardDiscarded(
+        PlayerChoiceContext choiceContext, CardModel card)
+    {
+        if (card != this) return;
+        await CardPileCmd.Draw(choiceContext, 1, Owner);
     }
 }

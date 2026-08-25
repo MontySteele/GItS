@@ -95,50 +95,14 @@ KNOWN: set[frozenset] = set()
 # 2026-07-20 — dodge_roll block 8 -> 6 < hide_and_seek's 7, so the
 # superset no longer dominates. The lint now guards the fix.)
 PENDING_RULING: set[frozenset] = {
-    # --- EB-69, the Kokomi pool fill (R198, 2026-08-23). Three pairs the fill
-    # surfaced. Filed to QUEUE `M36` as a design/taste call and listed here
-    # rather than fixed: changing a printed body is red-pen work, and the
-    # fill's fourteen bodies are exactly the ones [USER] has just ruled.
-    #
-    # RULED 2026-08-24, R200. The three pairs are NOT accepted. One body from
-    # each is redesigned, [USER] named which end moves, and the exact
-    # replacement bodies are authored in the EB-118 Phase-3 batch -- a design
-    # act then, not now. CLEARING GATE FOR ALL THREE ENTRIES: BACKLOG
-    # `EB-125`. Delete each entry when its redesign lands and the pair stops
-    # dominating -- and note that nothing forces that deletion automatically:
-    # unlike CROSS_KNOWN, this set has no staleness test, so a cleared pair
-    # left here rots into cover. EB-125 owns the deletion. Do NOT move any of
-    # these to KNOWN -- that would read as accepted, and R200 declined to
-    # accept them.
-    #
-    # 0-cost skills. raise_the_sashimono: grant a Skill Sly + draw 1.
-    # moon_signal: discard 1 (random) + draw 1 -- the Common pays a cost the
-    # Uncommon does not and gains less. NOTE THE PATTERN: this is the THIRD
-    # uncommon 0-cost to dominate moon_signal (sayu_naptime and sucrose_gust
-    # are already in CROSS_KNOWN for the same shape against the same victim),
-    # which is evidence about moon_signal's rate rather than about this card.
-    # REDESIGN TARGET: moon_signal, NOT raise_the_sashimono. Three separate
-    # uncommons dominate it, so the recurring problem is the Common.
-    frozenset({"raise_the_sashimono", "moon_signal"}),
-    # 1-cost skills. crane_wing: block 6 + companion cost_mod -1 this turn.
-    # jade_bulwark: block 6, nothing else. The textbook "uncommon is the
-    # common plus a rider" shape this lint exists to catch, and the cleanest
-    # of the three.
-    # REDESIGN TARGET: crane_wing, NOT jade_bulwark. Jade stays the clean
-    # Block-rate anchor for the pool; Crane surrenders some immediate Block in
-    # exchange for its companion-discount identity, so the pair separates on
-    # what each card is FOR rather than on a number.
-    frozenset({"crane_wing", "jade_bulwark"}),
-    # 1-cost skills, CROSS-SHEET, and the same body twice:
-    # gorou_heart_of_the_clan is block 3 + metallicize 2; tighten_the_cords is
-    # block 3 + metallicize 1. Inherited from the frozen brief's A15 body, not
-    # authored at the fill. Its upgrade row ({power_amount: +1}) takes the
-    # Common to metallicize 2, so the UPGRADED faces are equal and only the
-    # printed faces differ.
-    # REDESIGN TARGET: tighten_the_cords, NOT gorou_heart_of_the_clan. It is
-    # the direct clone, and it folds into Phase 3's clone-family rewrites
-    # under EB-118 Phase-0 §6.5 rather than standing as its own errand.
-    frozenset({"gorou_heart_of_the_clan", "tighten_the_cords"}),
+    # EMPTY, and it is meant to be. The three EB-69 pairs that lived here
+    # (raise_the_sashimono/moon_signal, crane_wing/jade_bulwark,
+    # gorou_heart_of_the_clan/tighten_the_cords) were ruled NOT ACCEPTED at
+    # R200 and cleared at EB-125 by redesigning the end [USER] named: the
+    # ratified bodies landed 2026-08-24 (R202) and none of the three pairs
+    # dominates any more. This set has no staleness test -- unlike CROSS_KNOWN
+    # -- so an entry left here after its pair clears rots into cover for the
+    # next real finding. Anything added must name its clearing gate.
 }
 
 RARITY_ORDER = {"common": 0, "uncommon": 1, "rare": 2}
@@ -165,16 +129,13 @@ CROSS_KNOWN: set[frozenset] = {
     # lynette_box_trick: draw 2, nothing else. The Uncommon is the common plus
     # a free Exhaust trigger.
     frozenset({"communion_of_tides", "lynette_box_trick"}),
-    # 0-cost skills. sayu_naptime: block 3 + draw 1. moon_signal: discard 1 +
-    # draw 1 -- the Common pays a cost the Uncommon does not, and gains less.
-    frozenset({"sayu_naptime", "moon_signal"}),
-    # 0-cost skills, and the SAME PAIR SHAPE one row up. sucrose_gust was
-    # bumped common -> uncommon by the 2026-08-06 sitting (family X2: infinite
-    # cycling engines are gated to Uncommon+), which made it sayu_naptime's
-    # twin against moon_signal: swirl + draw 1 vs discard 1 + draw 1. The
-    # finding is inherited from the ratified rarity move, not a new design
-    # choice; it queues for red-pen beside its twin.
-    frozenset({"sucrose_gust", "moon_signal"}),
+    # sayu_naptime/moon_signal and sucrose_gust/moon_signal are GONE, cleared
+    # by the same act that cleared PENDING_RULING: R200 read the three-way
+    # pile-up on moon_signal as evidence about the Common's own rate, and
+    # EB-125's redesign (R202) gave it a `recall_to_draw` benefit key neither
+    # uncommon carries. The staleness test below would have forced these two
+    # deletions in any case; they are recorded here as the outcome, not as a
+    # waiver.
     # --- THE ELEMENT CLUSTER, four pairs of one shape. shinobu_thundergrust
     # is a 1-cost applier attack for 7; the four Commons are the same card at
     # 5-6. They differ ONLY in `element`, which this lint does not read,

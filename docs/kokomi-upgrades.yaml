@@ -43,7 +43,20 @@ ritual_purification: {draw: +1}          # 1->2; the Charge line NEVER moves (re
 waterspout:        {damage: +3}          # 10->13, still burns itself (the base moved to 10 at v0.3)
 cleansing_tide:    {block: +4}           # 10->14, still eats two cards
 undertow_shuffle:  {draw: +1}            # 3->4; discard stays 2 (the two Sly bells are the identity)
-moon_signal:       {draw: +1}            # discard 1, see 2
+moon_signal:       {retain: true}        # R202 / EB-125, with the redesigned body. NOT a draw, and the reason is
+                                         # mechanical rather than a preference: `add` APPENDS unless `add_before`
+                                         # is given, `recall_to_draw` inserts at draw-pile index 0, and
+                                         # `state.draw` pops index 0 — so an appended draw would take back exactly
+                                         # the card the recall just placed, turning a 0-cost Common into
+                                         # "return the best card from your discard pile to your hand". On an empty
+                                         # draw pile it degenerates further: the discard, the recall and the draw
+                                         # all touch the same card and the upgrade becomes a no-op that has spent
+                                         # itself. Retain sets a card FIELD and inserts nothing, so the printed
+                                         # order is byte-identical between the faces and that failure cannot occur
+                                         # by construction. It also leaves the hand economy negative, which is the
+                                         # body's whole point. PRECEDENT, same argument: raise_the_sashimono
+                                         # {retain: true} below, plus honor_guard, the_gunbai_turns and
+                                         # open_the_stores. The Sly draw cannot move on upgrade (applier gap).
 drifting_lantern:  {block: +2}           # played 4->6; the Sly branch stays 4 (header gap note)
 surging_shoal:     {damage: +2}          # R77: 6->8 all (was 7->9; lint-ok: 7->9 superseded pair). The delta
                                          # is unchanged; the base moved.
@@ -216,8 +229,10 @@ raise_the_sashimono: {retain: true}      # NOT {draw: +1}. The base ALREADY repl
                                          # base, and is corrected here rather than inherited. Retain is the
                                          # honest sale for an on-ramp: it stops being a card you must draw ON
                                          # the turn the Rare is in hand. The Sly-grant count stays 1.
-crane_wing:        {block: +2}           # 6->8, jade_bulwark: {block: +2}. cost_mod may not deepen — energy is
-                                         # the resource curve.
+crane_wing:        {block: +2}           # 4->6 (R202 / EB-125: the delta is unchanged, the base moved), still
+                                         # jade_bulwark: {block: +2}. The upgraded Crane now lands level with
+                                         # Pearl Bulwark's printed face rather than above it. cost_mod may not
+                                         # deepen — energy is the resource curve.
 
 # --- EB-69 COMMONS (+4) ---
 send_the_runner:   {draw: +1, add: {op: discard, amount: 1, select: chosen}, add_before: exhaust_from}
@@ -241,14 +256,16 @@ massed_volley:     {damage: +2}          # 5->7 all. scattering_spray: {damage: 
                                          # at the same rarity. The Sly 4 random cannot move (applier gap note).
 hold_the_narrows:  {block: +3}           # 5->8, votive_offering: {block: +3}. The Sly muster could not move
                                          # even if the applier allowed it (resource-curve law).
-tighten_the_cords: {power_amount: +1}    # metallicize 1 -> 2; the played Block stays 3. THE SHARPER OF THE TWO
-                                         # DRAFTED OPTIONS, and [USER] took it deliberately over {block: +3}.
-                                         # It is the closest thing on this sheet to selling a faster engine —
-                                         # before_sun_and_moon's note is the standing argument for treating a
-                                         # COEFFICIENT move more carefully than a TERM move — but metallicize
-                                         # is a flat per-turn Block term, not a coefficient on an uncapped
-                                         # bank, so the two cases are not the same case. The card is bought
-                                         # for the trajectory, and the trajectory is what the upgrade sells.
+tighten_the_cords: {block: +2}           # 5->7 (R202 / EB-125, with the redesigned body). CORRECTED FROM
+                                         # {power_amount: +1}: the body is now a threshold, and LAW's threshold
+                                         # rule (R58) requires the ALWAYS-LIVE half to move so the bar cannot
+                                         # drift down. Here that half is the Block; the exhaust-pile bar stays
+                                         # where it is printed. Every other threshold row on this sheet obeys the
+                                         # same rule — read_the_current {damage: +3} ("the ALWAYS-LIVE half"),
+                                         # the_tide_remembers {damage: +3} ("the base wave"), gyorin_formation
+                                         # {block: +3} ("the IMMEDIATE half"). The card is still bought for the
+                                         # trajectory; the upgrade now sells the turn it is played on, and the
+                                         # trajectory stays something the deck has to earn.
 
 # ---- COMPANIONS (modest; upgraded forms stay enabler-grade — Klee sheet law) ----
 gorou_inuzaka_charge:    {damage: +3}    # 6->9, the starter arrow (v0.4: 0-cost + Exhaust, so the

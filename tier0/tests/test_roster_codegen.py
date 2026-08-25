@@ -70,27 +70,24 @@ FURINA_DEFERRED_TO_FD: set[str] = set()
 # empty set rather than deleted, so the invariant "every card has an upgrade
 # path" is asserted positively and the next gap has somewhere to be named.
 #
-# THE NEXT GAP ARRIVED 2026-08-06, and this is the set it is named in --
-# which is what the paragraph above was written for. `encore_performance`'s
-# only delta was `copy_cost_override: 0`, and R110/S-1 (S13 family X3) made
-# the base card cost 0, so the delta could not mean anything: a 0-cost card
-# cannot be discounted to 0. [USER] authorised the deletion on 2026-08-06
-# (sixth-wave brief, Track Y item Y-4), the sheet entry went, and the
-# generator correctly emits the card with no upgrade path.
+# THE NEXT GAP ARRIVED 2026-08-06 and CLOSED 2026-08-24. `encore_performance`
+# was named here because its only delta was `copy_cost_override: 0` and
+# R110/S-1 (S13 family X3) made the base card cost 0 -- a 0-cost card cannot
+# be discounted to 0, so the delta meant nothing. [USER] deleted it (Y-4) and
+# the generator correctly emitted the card with no upgrade path.
 #
-# GATE, stated because an entry without one never leaves: when a replacement
-# upgrade delta is authored for `encore_performance`, this entry is deleted
-# together with both curated entries in `tools/lint_upgrade_coverage.py`
-# (SHEET_EXEMPT for layer 1, CODEGEN_DEBT for layer 2). Three registers, one
-# debt, one removal.
+# M27 (RULED 2026-08-24) authored the replacement -- `{retain: true}`, which
+# answers the card's real weakness (target-dependence: a 0-cost Rare that does
+# nothing unless a Spotlighted card is in hand) by buying TIMING rather than a
+# bigger copy. That fired this entry's gate exactly as it was written:
+# "deleted together with both curated entries in
+# `tools/lint_upgrade_coverage.py` (SHEET_EXEMPT for layer 1, CODEGEN_DEBT for
+# layer 2). Three registers, one debt, one removal." All three went together.
 #
-# This gate used to read "FLAG-2 is HELD; when it is ruled ...". FLAG-2 was
-# discharged on 2026-08-05 by R114 (`d833573`; standing LAW at
-# `LAW.md:309-313`), so that half of the condition has already fired and the
-# clause was false from the day after it was written. The entry stays -- the
-# delta does not exist -- but nothing is waiting on a ruling any more. Whether
-# to author one at all is the open design call at QUEUE `M27`.
-FURINA_UPGRADE_GAP_PENDING_FB1: set[str] = {"encore_performance"}
+# Kept as an empty set rather than deleted, the same way F-B1 and F-D left it:
+# the invariant "every non-kit card has an upgrade path" is asserted
+# positively below, and the next gap needs somewhere to be named.
+FURINA_UPGRADE_GAP_PENDING_FB1: set[str] = set()
 
 
 def _generated_source(class_name: str) -> str:

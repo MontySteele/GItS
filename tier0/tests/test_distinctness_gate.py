@@ -25,32 +25,11 @@ KNOWN_FAILING = {
     # furina uniq/neardup CLEARED by the Curtain Call sweep (R85,
     # 2026-07-27): 62->76 / 0.94->0.15 per card, inside the official band.
     # The Track-B maxclu transient (6) resolved in the same sweep (3).
-    ("kokomi", "uniq"),      # 53% -- breadth (was 56% pre-EB-69)
+    ("kokomi", "uniq"),      # 54% -- breadth (was 56% pre-EB-69)
     ("kokomi", "maxclu"),    # 8 -- the block cluster (was 7 pre-EB-69)
-    # ("kokomi", "neardup") -- NEW AT EB-69 (R198, 2026-08-23), 26 -> 33 PAIRS
-    # against a ratified threshold of 30%. THIS IS THE FILL'S OWN FINDING AND
-    # IT IS NOT BEING TREATED AS COVER. The 14 ruled bodies are rebuilds of
-    # shapes the pool already prints -- another 0-cost cycler, another Sly
-    # Block skill, another cost_mod rider, another metallicize common -- which
-    # is precisely how a fill closes a COUNT gap without closing a BREADTH
-    # gap. Phase-0 §2.5 keeps this gate independent and binding, so it is
-    # entered here to keep the wall green while the content question went to
-    # [USER] at QUEUE `M36` with the two strict-domination pairs it shares a
-    # cause with.
-    #
-    # RULED 2026-08-24, R200 -- AND THE BREACH IS NOT RATIFIED. [USER] ruled
-    # 33 pairs (limit 30) TEMPORARY, carried by this entry THROUGH Phase 3 and cleared there.
-    # One body from each pair is redesigned and the targets are named:
-    # moon_signal, crane_wing, tighten_the_cords (see
-    # tools/lint_strict_domination.PENDING_RULING for which end of each pair
-    # and why). The replacement bodies are authored in the EB-118 Phase-3
-    # batch -- a design act then, not now.
-    # Gate: BACKLOG `EB-125`. When the three redesigns land, re-measure and
-    # DELETE this entry; the staleness test below forces the deletion the
-    # moment the breach stops reproducing. There is no branch where this
-    # becomes a moved threshold -- R200 declined that. The two entries above
-    # are pre-existing debt and are not part of EB-125.
-    ("kokomi", "neardup"),
+    # kokomi neardup CLEARED by the EB-125 redesigns (R202, 2026-08-24): the
+    # three ratified bodies take the pool 33 -> 29 pairs, inside the limit of
+    # 30. The breach was ruled TEMPORARY, never a moved threshold (R200).
 }
 
 

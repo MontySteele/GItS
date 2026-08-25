@@ -103,9 +103,11 @@ world is sound. That trade is [USER]'s to make, not this branch's.
 
 Two facts this measurement turned up, neither fixed here:
 
-- `tools/lint_role_tempo_coverage.py --gate` is **green** on `4bbc9bc`
-  (17 findings, exactly the 17 pinned). Only the bare invocation, which no
-  gate uses, exits 1.
+- `tools/lint_role_tempo_coverage.py --gate` is **green** — 17 findings against
+  the 17 then pinned when this was measured on `4bbc9bc`, and 18 against 18
+  since the `EB-118` Window-1 label pass disclosed an inherited
+  `furina/spotlight frontload|mid` gap. Only the bare invocation, which no gate
+  uses, exits 1.
 - `tools/card_distinctness_report.py --gate` exits **2** — "NO OFFICIAL ANCHOR
   IN THIS RUN" — on the art-bearing main checkout as well as in a worktree,
   because its official pools want `tools/extract_base_game_pool.py` to have
