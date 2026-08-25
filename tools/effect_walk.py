@@ -137,6 +137,33 @@ def sly_autoplays(row: Any) -> bool:
                for fx in sly)
 
 
+def iter_card_effects(row: Any) -> Iterator[dict]:
+    """Every PRINTED effect of a card ROW — the played face's tree AND the
+    Sly branch's tree.
+
+    EB-134, the sheet-side half. `sly:` is a card-LEVEL effect list, not an
+    effect-level one, so `iter_effects` (which walks `then`/`else`/`modes`
+    from inside an effect) cannot reach it however deep it recurses. Every
+    scanner that asked a CAPABILITY question — "can this card retrieve from
+    the exhaust pile at all" — through `iter_effects` alone was therefore
+    answering it about the played face only, and a Sly rider is printed text
+    the player can always reach.
+
+    Use this for capability questions. Keep `iter_effects` for questions
+    about the PLAYED face, and `iter_effects_top` for questions about the
+    unconditional face — the choice is per-question and each spelling says
+    which question is being asked, which is this module's whole point.
+
+    The reserved `{op: sly_autoplay}` marker is filtered by `sly_riders`: it
+    is a card PLAY rather than an effect list (EB-71 / R174).
+    """
+    if not isinstance(row, dict):
+        yield from iter_effects(row)
+        return
+    yield from iter_effects(row.get("effects"))
+    yield from iter_effects(sly_riders(row))
+
+
 def printed_floor(fx: dict) -> int | None:
     """What this effect pays with every meter it reads at ZERO, or None.
 

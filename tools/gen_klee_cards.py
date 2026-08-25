@@ -48,8 +48,8 @@ REPO = Path(__file__).resolve().parent.parent
 # carry Bomb rules", "how many gain_encore sites are there" -- go through the
 # shared walk like everyone else's.
 sys.path.insert(0, str(REPO))
-from tools.effect_walk import (SLY_AUTOPLAY_OP, iter_effects,  # noqa: E402
-                               sly_autoplays, sly_riders)
+from tools.effect_walk import (SLY_AUTOPLAY_OP, iter_card_effects,  # noqa: E402
+                               iter_effects, sly_autoplays, sly_riders)
 # EB-118 sec.4.6. The generator prints the `skill_tag` contribution on the
 # face, and it READS the number off tier0 rather than restating it: a printed
 # 5 that could drift from the constant is the defect this line exists to
@@ -1234,6 +1234,57 @@ RUNTIME_TIMES_TEXT = {
 }
 
 
+def _times_reason(card: dict, eff: dict) -> str | None:
+    """Why this effect's `times:` cannot be generated, or None.
+
+    EB-132. This test used to live INSIDE the `op == "damage"` arm of
+    `blocked_reason`, and that placement was the defect. tier0 honours
+    `times:` on five ops -- `_op_damage` (`tier0/engine/effects.py:799`),
+    `_op_block` (`:937`), `_op_apply_power` (`:1201`), `_op_repeat_this`
+    (`:2444`) and `_op_replay_next_companion` (`:2498`) -- and `_op_block`
+    loops the WHOLE gain exactly the way `_op_damage` loops its hits, so
+    `{op: block, amount: 2, times: exhaust_pile}` pays `amount x pile` in the
+    sim. The block emitter has no hit-count path at all: it writes ONE
+    `await CreatureCmd.GainBlock` whatever `times` says. A runtime count was
+    therefore a NAMED BLOCKER one arm over and INVISIBLE here. The test is
+    hoisted out so it covers every op that reads the field, and each op gets
+    the answer its own emitter can honestly back:
+
+      damage -- a literal hit count, a `RUNTIME_TIMES` member and an X
+                formula all render (`.WithHitCount`), so the allowlist is
+                the whole rule.
+      block  -- NOTHING but 1 renders. Building the C# loop is not this
+                row's work and inventing one here would be a behaviour
+                change nobody asked for: the grammar is honestly
+                unavailable in BOTH engines until someone writes it, and a
+                named blocker is what that looks like. A literal `times: 3`
+                is refused for the same reason a runtime count is -- the
+                emitter cannot count either.
+
+    The two remaining ops are covered by their own arms in `blocked_reason`
+    and are deliberately left there rather than restated here, so no shape
+    acquires a second, differently-worded refusal: `apply_power` refuses
+    `times` through `APPLY_POWER_FIELDS` totality, and `repeat_this` /
+    `replay_next_companion` each demand a literal int. The correspondence is
+    pinned in `tier0/tests/test_eb132_block_times_parity.py`, which reads the
+    honouring set off the engine rather than trusting this comment.
+    """
+    op = eff.get("op")
+    times = eff.get("times", 1)
+    if op == "damage":
+        if (not isinstance(times, int) and times not in RUNTIME_TIMES
+                and _x_formula_reason(card, times)):
+            return _x_formula_reason(card, times)
+        return None
+    if op == "block":
+        if times != 1:
+            return (
+                f"times {times!r} on op 'block' -- tier0 loops the whole "
+                "Block gain and the emitter has no hit-count path (it would "
+                "write one un-looped GainBlock)")
+    return None
+
+
 def _x_expr(val, bombs_var: bool = False) -> str:
     """C# expression for a tier0 amount formula ('x' is ResolveEnergyXValue,
     declared at the top of OnPlay)."""
@@ -1331,6 +1382,11 @@ def blocked_reason(
         op = eff.get("op")
         if op not in MECHANICAL_OPS:
             return f"op '{op}'"
+        # EB-132: hoisted out of the damage arm so it covers every op that
+        # honours `times:` -- see _times_reason for which op gets which answer.
+        times_reason = _times_reason(card, eff)
+        if times_reason:
+            return times_reason
         # B1 CLASS FIX (2026-07-28). A `bonus_formula` on a NON-damage op is a
         # blocker unless a rider actually expresses it.
         #
@@ -1381,10 +1437,8 @@ def blocked_reason(
                     return (
                         "bonus_vs_aura requires enemy damage and "
                         "a literal int")
-            times = eff.get("times", 1)
-            if (not isinstance(times, int) and times not in RUNTIME_TIMES
-                    and _x_formula_reason(card, times)):
-                return _x_formula_reason(card, times)
+            # `times` is checked by _times_reason at the top of this loop
+            # (EB-132) -- it is not a damage-only field.
         if op == "place_bomb":
             if eff.get("target") not in BOMB_TARGETS:
                 return f"bomb target '{eff.get('target')}'"
@@ -1631,7 +1685,38 @@ def blocked_reason(
             # "pick the worst, remove it from the pool, repeat" without the
             # loop. Blanket-blocking both cost cleansing_tide (a Common) and
             # moonlit_offering their upgrade paths for no reason.
-            if eff.get("amount", 1) != 1 and eff.get("select") != "chosen":
+            # EB-133. The clause below licenses `amount != 1` on the chosen
+            # branch because `CardSelectCmd.FromHand` takes a COUNT -- and a
+            # count is exactly what a non-literal amount is not. It never
+            # checked that the value was an INT, so `{op: exhaust_from,
+            # select: chosen, amount: all}` walked past every refusal in this
+            # function and met `str(int(eff.get("amount", 1)))` in the chosen
+            # emitter: a ValueError stack trace, thrown by the one mechanism
+            # whose entire job is to name what cannot be expressed.
+            #
+            # The row is LEGAL tier0 grammar -- `_op_exhaust_from` reads
+            # `n = len(pool) if n == "all" else _amount(state, n)`
+            # (`tier0/engine/effects.py:1995-1999`), Stoke's whole-hand shape,
+            # and `_amount` accepts the `X` / `X_plus_N` formulas besides.
+            #
+            # IT IS REFUSED RATHER THAN EMITTED, deliberately. Emitting a
+            # pool-sized selection means committing to what
+            # `CardSelectorPrefs`' count means when it is not a literal --
+            # whether it clamps to the hand, whether a screen that can only be
+            # answered one way is shown at all -- and NO decompile is
+            # available to read that contract off. No committed row prints the
+            # shape, so an emitted body would be a guess at a call contract in
+            # code no card compiles: precisely the failure the closed maps in
+            # this file (RUNTIME_TIMES, the branch-field tables) exist to
+            # prevent. A named blocker is the honest answer until someone with
+            # the dll builds the loop.
+            amount = eff.get("amount", 1)
+            if not isinstance(amount, int):
+                return (
+                    f"exhaust_from amount {amount!r} is not a literal int "
+                    "(the C# selector takes a count; the pool-sized 'all' "
+                    "loop and the X formulas are not built)")
+            if amount != 1 and eff.get("select") != "chosen":
                 return "exhaust_from amount > 1 (random re-pool loop not built)"
         if op == "grant_sly_this_turn":
             # EB-122. `card_type` is the sheet's target filter and the ONLY
@@ -6377,9 +6462,15 @@ def emit(
     # difference. `what_the_tokoyo_returns` reads the DISCARD pile and is not
     # part of the exhaust cycle; stamping it would have excluded it from a
     # pool it belongs in, silently, on a claim no sheet row makes.
+    # EB-134: `iter_card_effects`, not `iter_effects`. The Sly branch is
+    # emitted into THIS class (see `_sly_view` and the `sly_body` block
+    # below), so a sly-borne exhaust retriever is a retriever the C# pool
+    # filter must be able to see by type -- and `sly:` is a card-LEVEL list
+    # that no effect-level recursion reaches. The stamp and its sim twin
+    # (`effects.retrieves_from_exhaust`) now walk the same halves of the card.
     if any(eff.get("op") == "recall_to_draw"
            and eff.get("from", "discard") == "exhaust"
-           for eff in iter_effects(card)):
+           for eff in iter_card_effects(card)):
         interfaces += ", IExhaustRetriever"
 
     ind = "\n        "

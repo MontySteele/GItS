@@ -2312,6 +2312,105 @@ def is_known_predicate(name: str) -> bool:
     return False
 
 
+# EB-135. The `_runtime_count` vocabulary, registered the way the predicate
+# vocabulary above is and for the identical reason. `if:` was load-checked and
+# `amount_formula.count:` was not -- the ONE grammar the check exists for that
+# it did not cover -- so a typo'd count loaded clean and raised
+# `unknown runtime count` the first time the card RESOLVED, which is verbatim
+# the failure `_validate_effect_vocabulary`'s docstring says it was written to
+# end. For a Rare that means in front of a player rather than in a test, and on
+# the co-op seat there is no sim backstop at all.
+#
+# Data mirroring code, so it is derived from `_runtime_count`'s own if-chain
+# and compared in BOTH directions by
+# `tier0/tests/test_content_boundaries.py` -- the same anti-rot pin
+# `PREDICATE_NAMES` carries. A token the chain resolves but this set omits
+# would make the validator reject valid content; a token here the chain
+# ignores documents a spelling nothing reads.
+RUNTIME_COUNT_NAMES = frozenset({
+    "exhaust_pile",
+    "player_block",
+    "attacks_in_hand",
+    "strike_cards",
+    "player_damage_events",
+    "attacks_played_this_turn",
+    "skills_in_hand",
+    "other_cards_in_hand",
+    "discards_this_turn",
+    "cards_drawn_this_combat",
+    "enemy_poison_total",
+    "salon_members",
+    "leftmost_salon_act",
+    "X",
+    "exhausted_this_card",
+    "hand_size",
+    "discards_this_card",
+    "block_gained_this_card",
+})
+
+# The one prefix family, exactly as `PREDICATE_PREFIXES` carries its own.
+# The legal keys are READ OFF `exhaust_selection_counts` rather than listed:
+# that function is already the single definition its three consumers share,
+# and a second hand-written copy here is precisely the drift this registry
+# exists to prevent.
+RUNTIME_COUNT_PREFIXES = frozenset({EXHAUST_SELECTION_PREFIX})
+
+
+def is_known_count(token: str) -> bool:
+    """Would `_runtime_count` resolve this token? Pure, state-free, load-safe.
+
+    The mirror of `is_known_predicate`, and the same contract: no
+    `CombatState`, no side effects, safe to call from the loader.
+    """
+    if not isinstance(token, str):
+        return False
+    if token in RUNTIME_COUNT_NAMES:
+        return True
+    if token.startswith(EXHAUST_SELECTION_PREFIX):
+        key = token[len(EXHAUST_SELECTION_PREFIX):]
+        return key in exhaust_selection_counts([])
+    return False
+
+
+# TWO GRAMMARS WEAR THE SAME KEY, and a load check that did not know it would
+# refuse shipped content. `amount_formula:` is the COUNT grammar
+# (`_calc_amount`, `{base, per, count}`) on damage / block / energy and on any
+# dict `times_formula`, but on `apply_power` it is the POWER-READING grammar
+# (`_power_amount_formula`, `{target_power: <name>}`) — Dominate and
+# MoltenFist are the two users, both in the reference Ironclad pool.
+POWER_FORMULA_OPS = frozenset({"apply_power"})
+
+# The one op that reads `amount: "all"` ITSELF, before `_amount` ever sees it:
+# `_op_exhaust_from` resolves it as the eligible pool size (Stoke's whole-hand
+# shape; ic_fiend_fire and ic_second_wind print it). Anywhere else "all" is a
+# typo that would reach `_amount` and raise.
+AMOUNT_ALL_OPS = frozenset({"exhaust_from"})
+
+
+def is_known_amount(val) -> bool:
+    """Would `_amount` resolve this amount? Pure, state-free, load-safe.
+
+    `_amount` accepts four spellings and the last of them is the whole count
+    vocabulary above -- `amount: hand_size` is Calculated Gamble's shape --
+    so a typo'd string amount fails at exactly the same moment and for
+    exactly the same reason a typo'd `count:` does. Same door, same guard.
+    """
+    if isinstance(val, bool):
+        return False
+    if isinstance(val, int):
+        return True
+    if not isinstance(val, str):
+        return False
+    if val == "X":
+        return True
+    if val.startswith("X_plus_"):
+        return val[len("X_plus_"):].isdigit()
+    if val.startswith("-"):
+        # Malaise's sign-flip: one number spent twice with opposite signs.
+        return bool(val[1:]) and is_known_amount(val[1:])
+    return is_known_count(val)
+
+
 def _predicate(state: CombatState, name: str) -> bool:
     if name == "this_cost_zero":
         return state.current_card_cost == 0
@@ -2655,6 +2754,33 @@ RECALL_SOURCES = ("discard", "exhaust")
 RECALL_EXHAUST_SOURCE = "exhaust"
 
 
+def walk_card_effects(card: Card):
+    """Every PRINTED effect on a card — the played face's tree AND the Sly
+    branch's.
+
+    EB-134. `Card.sly` is its own effect list (`state.py:262`) and
+    `_walk_effects` stops at `card.effects`, so a question answered by that
+    walk alone is answered about the played face only. For a CAPABILITY
+    question — "can this card do X at all" — that is simply wrong: a Sly
+    rider is printed text the player can always reach, exactly like a
+    conditional branch or a modal mode body, both of which `_walk_effects`
+    already descends into.
+
+    Deliberately a SECOND function rather than a change to `_walk_effects`.
+    Some callers want the played face and are right to: `_printed_power`
+    ranks what a card pays when you PLAY it, and folding a discard-only rider
+    into that scalar would mis-rank every Assist card for every chooser. The
+    rule is per-question, so the walk is per-question too — which is the same
+    discipline `tools/effect_walk.iter_effects_top` states on the sheet side.
+
+    The reserved `{op: sly_autoplay}` marker is filtered out by `sly_riders`:
+    it is a card PLAY, not an effect list, and is never dispatched as an op
+    (EB-71 / R174).
+    """
+    yield from _walk_effects(card.effects)
+    yield from _walk_effects(sly_riders(card))
+
+
 def retrieves_from_exhaust(card: Card) -> bool:
     """Does this card itself retrieve from the exhaust pile? (EB-118 §6.4
     constraint 3.)
@@ -2663,10 +2789,20 @@ def retrieves_from_exhaust(card: Card) -> bool:
     hand-set flag, so a future sheet row cannot arm the capability and forget
     to declare it. The C# twin is the IExhaustRetriever marker interface,
     which the generator stamps from this same shape.
+
+    EB-134: the walk is `walk_card_effects`, so the Sly branch counts. It
+    used to be `_walk_effects(card.effects)`, and that ONE blind spot
+    disarmed four checks at once, because everything downstream rides this
+    single predicate — `loader._validate_recall_shape` skipped constraints 1
+    and 2 (Uncommon-or-Rare, self-exhausting) at LOAD, `recall_exhaust_pool`
+    offered a sly retriever as fodder for itself and so broke the cycle
+    exclusion the pile's one-way rotation rests on, and
+    `tools/lint_recall_exhaust` swept straight past it. A capability hidden
+    in a `sly:` list is still a capability.
     """
     return any(fx.get("op") == "recall_to_draw"
                and fx.get("from") == RECALL_EXHAUST_SOURCE
-               for fx in _walk_effects(card.effects))
+               for fx in walk_card_effects(card))
 
 
 def recall_exhaust_pool(state: CombatState, card: Card) -> list[Card]:
