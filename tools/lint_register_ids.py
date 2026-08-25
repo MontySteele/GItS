@@ -116,9 +116,10 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 140,   # EB-140 minted at the R211 W3 build (the codegen
-                 # upgrade-delta gap); EB-138/EB-139 minted by R211;
-                 # EB-131/EB-133 retired
+    "EB": 141,   # EB-141 minted 2026-08-25 for the unstamped
+                 # exp_shop_companion_channel instrument (R68); EB-140 minted
+                 # at the R211 W3 build (the codegen upgrade-delta gap);
+                 # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
     "M": 44,     # M43/M44 minted by R206 (4ff9f90) and settled by R207 with no
                  # surviving HEAD citation — the exact blind spot this constant
                  # covers. A HEAD scan reads 40; the ceiling is the ISSUED
@@ -134,7 +135,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
         1, 12, 15, 28, 32, 33, 34, 35, 36, 38, 40, 41, 53, 65, 67, 70, 71,
         74, 76, 78, 80, 83, 84, 85, 88, 89, 90, 94, 105, 106, 107, 109, 115,
-        116, 117, 121, 128, 129, 137, 139,
+        116, 117, 121, 128, 129, 137, 139, 141,
     }),
     "M": frozenset({10, 13, 14, 16, 17, 19, 26}),
 }
