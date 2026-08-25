@@ -113,12 +113,14 @@ jobs:
         run: python tools/lint_r_numbers.py
       # EB-127. The other half of the same namespace question: r-numbers
       # guards R/D, this guards the ROW ids -- no two rows in QUEUE.md or
-      # BACKLOG.md may define the same id, and no id may define a row in both.
-      # Two collisions reached review in two weeks (EB-119/EB-120, and M38
-      # minted twice off one base) and neither was caught by anything
-      # mechanical. Citations are out of scope by design; re-use of a RETIRED
-      # id is NOT covered and cannot be from HEAD alone, because closed rows
-      # leave HEAD.
+      # BACKLOG.md may define the same id, no id may define a row in both, and
+      # no number at or below its series' frozen ceiling may be re-minted once
+      # its row has closed. Two collisions reached review in two weeks
+      # (EB-119/EB-120, and M38 minted twice off one base) and neither was
+      # caught by anything mechanical. Citations are out of scope AS
+      # DEFINITIONS by design. The retired-id half reads committed constants
+      # rather than git history, for the reason r-numbers does the same: this
+      # checkout is depth-1 with no tags.
       - name: register row-id uniqueness
         run: python tools/lint_register_ids.py
       # Understudy 2026-08-04. vendor/ carries third-party source pinned to an
