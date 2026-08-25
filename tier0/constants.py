@@ -1614,7 +1614,178 @@ BANNER_FEATURED_SLOTS = 3
 # here is a BUILD-TIME FACT in W1 §5's sense, recorded in the landing commit so
 # it cannot later be discovered and read as a finding, and it is NOT graded
 # against §2.4's committed directional predictions.
-CONSTANTS_VERSION = 16
+# CONSTANTS_VERSION 17 -- the EB-118 PHASE-3 WINDOW 2b CARD-BODY PASS (R208,
+# [USER] 2026-08-25: "Overall I agree as well; we can ratify the currely set."),
+# landed 2026-08-25. ONE window, FIVE ratified bodies across ALL THREE
+# characters -- the Exhaust-reader clone rewrites R205 ruled in as `W2b` plus
+# the two Furina bodies and the one Klee body the same slate carried. W1 was
+# metadata only and W2 moved three Kokomi cards; this window moves PRINTED
+# CARDS ON EVERY SHEET, so its ground is R179/M15 as written -- effect-number
+# changes -- with R202's role/archetype amendment reached twice more, by (a)
+# and (b). Enumerated the way C13, C14, C15 and C16 enumerate their own so
+# that the world a C17 number was taken in is readable from the stamp.
+#   (a) `sparkly_explosion` (klee, Rare, cost 2, Attack) -- the kill-gated
+#   splash becomes a DELIBERATE detonation. Effects `damage 18` +
+#   `conditional if: killed_target then: [gain_spark 3, place_bomb 1
+#   all_enemies bomb_damage 6]` become `move_bombs target: enemy` +
+#   `detonate target: enemy bonus: 3` + `damage 14 target: enemy`, in that
+#   order. UPGRADE `{damage: +5}` is UNCHANGED and the base moved, so the
+#   upgraded face reads 14 -> 19 instead of 18 -> 23. `archetypes`
+#   [demolition, spark] -> [demolition] -- R202's amendment, first of two
+#   here, and the second of R202 call (8)'s two ruled steps on `klee/spark`.
+#   `solve` [frontload, velocity] -> [frontload, utility], the classifier's
+#   own derivation. WHY THE ORDER IS THE RULING: `_detonate_bombs_on_hit` is
+#   guarded on `enemy.alive` and reached only when hp damage is nonzero, so an
+#   implicit pop is discarded twice over -- once if the swing kills, once if
+#   Block eats it. An explicit `detonate` before the damage line is immune to
+#   both. Measured on the real resolver: on an empty board the card resolves
+#   as a plain 14. BOTH VERBS ARE LIVE REGISTERED GRAMMAR -- three `detonate`
+#   rows ship (`quick_fuse`, `remote_detonator`, `chained_reactions`) and one
+#   `move_bombs` (`careful_arrangement`) -- so nothing was built in either
+#   engine for it.
+#   ITS SIMULATED NUMBER IS EXPLICITLY DIAGNOSTIC UNTIL `EB-136`'s SAME-TARGET
+#   REPAIR LANDS, and that is declared here rather than discovered later.
+#   tier0 re-resolves `target: enemy` INDEPENDENTLY PER OP to the lowest-HP
+#   living enemy (`_pick_targets`), while C# holds one `cardPlay.Target` for
+#   all three -- and this is the first shipped card where an earlier op on the
+#   card routinely KILLS the aim, so the sim can scatter what the mod
+#   concentrates. Any tier-0.5 number taken on this row systematically
+#   UNDERSTATES it, and that sentence belongs beside any published number.
+#   (b) `standing_room_only` "The House Rises" (furina, Uncommon, cost 1) --
+#   BODY AND LABELS TOGETHER. `damage 5 target: all_enemies bonus_formula
+#   1_per_4_fanfare` becomes `block 3` + `conditional if: encore_at_least_5
+#   then: [block 3] else: [draw 1]`. Type attack -> SKILL, `role` payoff ->
+#   glue (R202's amendment, second of two here), `solve` [frontload, scaling]
+#   -> [block, velocity], `tempo_band.run` [late] -> [early, late].
+#   `archetypes` [fanfare, generic] is UNCHANGED. UPGRADE `{damage: +2}` ->
+#   `{block: +2}`: `_bump_first` matches `op == "block"` at TOP LEVEL only, so
+#   the printed 3 -> 5 and both branch arms are untouched, which is R58's
+#   always-live-half rule. THE ELSE-ARM IS `draw`, NOT `gain_encore`, and that
+#   is the ruled half of the call: with Encore the card's usual face would
+#   have read as `macaron_break` (Common: Encore 2 + Block 2) plus one Block
+#   one rarity up -- the twin pattern this pass exists to kill, and one no
+#   lint can see because `effect_maps` treats a conditional as opaque and the
+#   distinctness report reads verbs rather than magnitudes. No Furina card at
+#   any rarity prints Block and draw together.
+#   (c) `dramatic_entrance` (furina, Uncommon, cost 1, Attack) -- candidate A
+#   of the slate. `damage 6 target: enemy bonus_formula 1_per_4_fanfare`
+#   becomes `damage 7 target: enemy` + `conditional if: fanfare_at_least_12
+#   then: [damage 7 target: all_enemies]`. UPGRADE `{damage: +3}` is
+#   UNCHANGED and the base moved, so the upgraded face reads 7 -> 10; under
+#   R58 the bar of 12 may never be lowered on upgrade or by erratum. NO LABEL
+#   MOVES on this card -- `role: payoff`, `archetypes: [fanfare]`, cost, type,
+#   rarity and `tempo_band` all hold, and `solve` [frontload, scaling] HOLDS
+#   TOO: the slate expected `scaling` to leave with the slope, and
+#   `role_tempo` keeps it under R91/2c as countersigned, because a
+#   `fanfare_at_least_` gate ON A DAMAGE LINE is a meter read. The card stops
+#   being "a larger Applause Line" by changing SHAPE above a bar rather than
+#   changing its number.
+#   (d) `undertow` (kokomi, Uncommon, cost 1, Attack) -- the revision is
+#   EXACTLY TWO CHANGES on a card that keeps its shape: `amount_formula.base`
+#   4 -> 5, and a NEW `conditional if: exhaust_pile_at_least_3 then: [draw 1]`
+#   appended. The slope, the `sly: [{op: energy, amount: 1}]` rider (a LAW-5
+#   statement, not a number), the `{formula_base: +3}` upgrade delta, `solve`
+#   and BOTH labels are untouched, so `kokomi/assist` payoff supply holds at
+#   5. The U-A access rewrite the slate carried was REJECTED under R199's
+#   guardrail -- no label-for-count -- and this row is what replaced it.
+#   (e) `depths_judgment` "Sango Isshin" (kokomi, Rare, cost 2, Attack) --
+#   `damage amount_formula {base: 10, per: 2, count: exhaust_pile}` becomes
+#   `damage 14 target: enemy` + `conditional if: exhaust_pile_at_least_6
+#   then: [block 8]`, the DIVIDEND job: the deep pile pays something other
+#   than damage. UPGRADE `{formula_per: +1}` -> `{damage: +4}` (14 -> 18) --
+#   the retired delta had no formula left to bump. `solve` [frontload,
+#   scaling] -> [block, frontload]; `role: payoff` and `archetypes: [priest]`
+#   do not move, so `kokomi/priest` payoff supply holds at 12. THE BAR IS 6,
+#   NOT THE SLATE'S FIRST 8, AND IT WAS CHOSEN AT ~2x THE BAR-8 RATE: measured
+#   on `kokomi/priest_weighted` attack plays, `exhaust_pile_at_least_6` fires
+#   12.8% and `_at_least_8` fires 7.4% (mean pile 1.65, median 0, p90 6, p99
+#   12). One consequence is named because a test now pins it: an Attack that
+#   gains Block from a branch is a legal `nimble` enchant target, and the
+#   generated class declares `GainsBlock => true` because BaseLib's
+#   auto-detect cannot see a conditional Block row (`EB-84`).
+#   (f) THREE CLASSIFIER RE-DERIVATIONS, taken as the classifier ruled them
+#   and written by `suggest_role_tempo_tags.py --land` rather than by hand:
+#   (a)'s `solve`, (b)'s `solve` + `tempo_band.run`, and (e)'s `solve`. The
+#   fourth candidate move -- dropping `scaling` from (c) -- the classifier
+#   REFUSED, per R91/2c, and the refusal was taken. `--check` reports all
+#   three sheets matching.
+#   (g) THE C# DELTAS, all generated: `SparklyExplosion.cs`,
+#   `StandingRoomOnly.cs`, `DramaticEntrance.cs`, `Undertow.cs`,
+#   `DepthsJudgment.cs`. No emitter vocabulary moved -- every op and every
+#   predicate in the five bodies already shipped -- and
+#   `gen_roster_cards.py --check` is clean on all three sheets. Coverage is
+#   unchanged: furina 81/82, kokomi 75/76, klee fully generated. Sparkly's
+#   emitted `OnPlay` was read against the ruled order and matches it:
+#   `BombPower.MoveAllTo(..., cardPlay.Target, ...)`, then
+#   `BombPower.DetonateOn(cardPlay.Target, 3)`, then `DamageCmd.Attack(14)
+#   .Targeting(cardPlay.Target)` -- one target, three ops, which is exactly
+#   the binding `EB-136` must give the sim.
+# WHAT IS ARCHIVE. EVERY tier-0.5 NUMBER FOR ALL THREE CHARACTERS, and this
+# window is the first since C13 where that is true of all three at once:
+# drafted-pool bodies moved on the klee, furina and kokomi sheets, so an offer
+# scored before this window is not comparable with one scored after it. EVERY
+# KLEE, FURINA AND KOKOMI COMBAT NUMBER is archive as well, because all five
+# moved bodies are draftable rows any arm of their character can hold -- there
+# is no narrow carve-out to make here, unlike C15's. Archive banners go where
+# the numbers are published; nothing is rewritten (R101b).
+# `RT`, `D` and `P` ARE UNTOUCHED, each on its own ground. No run-layer content
+# moved (`RT`). No pilot heuristic and no weight value moved (`P`); both
+# activation switches keep the values Phase 2 left them at, and the one
+# pilot-side test that moved is a POSITIVE CONTROL's run count, not a weight.
+# No drafter code and no dial value moved (`D`) -- and the prices these sheet
+# edits feed WERE MEASURED through `draft._static_power` rather than argued,
+# because they move, C-ground per the precedent C14 set on `deep_breath` and
+# C15 and C16 restated: `sparkly_explosion` 9.7500 -> 10.5000 and its upgraded
+# face 12.2500 -> 13.0000; `standing_room_only` 10.0000 -> 3.0000 and 14.0000
+# -> 5.0000 (the 10.00 it leaves was two-thirds `STATIC_AOE_MULT` on a number
+# this body no longer prints -- a correction, and a large one);
+# `dramatic_entrance` 6.0000 -> 7.0000 and 9.0000 -> 10.0000; `undertow`
+# 5.0000 -> 6.0000 and 8.0000 -> 9.0000; `depths_judgment` 6.0000 -> 11.0000
+# and 6.5000 -> 13.0000. Two of the five conditionals are credited at FULL
+# FACE rather than zero, because `_static_condition` waves the
+# `exhaust_pile_at_least_` prefix through: (d)'s draw credits nothing anyway
+# under the v3 flat proxy, but (e)'s 8 Block is paid for against a 12.8% fire
+# rate, an over-credit bounded at 4.0 and disclosed rather than tuned out.
+# THE SUPPLY MOVEMENT IS (a)'s AND (b)'s, AND IT IS NAMED, NOT INFERRED:
+# `klee/spark` payoff supply 6 -> 5 over a sub-pool of 22 -> 21, and
+# `furina/fanfare` 10 -> 9 AND `furina/generic` 8 -> 7 off ONE edit, because
+# `role` is one field and moving it removes the card from EVERY archetype's
+# payoff count -- both of The House Rises' tags, not just the one the ruling
+# discussed. Both Furina sub-pools are unchanged (30 and 34); the card kept
+# its tags. `klee/demolition` (7), `kokomi/priest` (12), `kokomi/assist` (5)
+# and every other arm do not move.
+# THE WINDOW'S OWN MEASUREMENTS, TAKEN ON THE COMPOSED WORLD (main + W1 + W2 +
+# W2b) AND NOT PROJECTED. Distinctness, pre -> post: `furina` `uniq` 73% ->
+# 76% and `maxclu` 5 -> 4 -- (c) leaves the pool's ONLY five-member clone
+# family (`damage@one~`, now four: `applause_line`, `high_tide`, `house_call`,
+# `poised_riposte`) and (b) takes `damage@all~` from three to two, with
+# `neardup` unmoved at 8. `kokomi` `uniq` 54% -> 57%, `top` 30% -> 32%,
+# `rider` 34% -> 36%, `neardup` unmoved at 29 and `maxclu` unmoved at 8: (d)
+# and (e) take `CLONES 5x damage@one~` to THREE (`all_streams_flow`,
+# `pearl_barrage`, `what_the_tokoyo_took`). `klee` `hapax` 22 -> 21 and
+# `decide` 22% -> 21%, everything else unmoved (`uniq` 62%, `maxclu` 5,
+# `neardup` 21); `mondstadt-companions` byte-identical. THE THREE LAW
+# THRESHOLDS ARE UNMOVED AND SO IS THE STANDING DEBT: `kokomi` `uniq` 57% < 70
+# and `maxclu` 8 > 5, and `klee` `uniq` 62% < 70, are all PRE-EXISTING curated
+# entries in `test_distinctness_gate`; this window opens no new breach and
+# closes none of them (the eight-member cluster is flat BLOCK, which no body
+# here touches). `lint_strict_domination` is CLEAN over 264 compared cards in
+# 6 sheets. `lint_role_tempo_coverage --gate` is green at 18 findings against
+# 18 pins on both sides -- (b)'s payoff -> glue neither opened nor closed a
+# coverage cell. `lint_furina_registers` reports 0 violations and was NOT
+# expanded: (c) keeps `_touches_fanfare` selecting `dramatic_entrance`,
+# because the predicate matcher fires on an `if:` beginning
+# `fanfare_at_least_`, so R2's fanfare-reader coverage is held by the lint and
+# not only by the sheet.
+# NO STANDING BASELINE IS OWED AT THIS BUMP (R207): a standing table is
+# published at a meaningful product milestone or when a pending decision needs
+# one, and no pending decision names one here. NO CONNECTIVITY READ IS
+# REGISTERED FOR THIS WINDOW EITHER: no W2b pre-registration exists and R207
+# gives W3 the single public window with the single standing read. The
+# instrument movement recorded above is a BUILD-TIME FACT in W1 §5's sense,
+# written down in the landing commit so it cannot later be discovered and read
+# as a finding, and it is NOT graded against any committed prediction.
+CONSTANTS_VERSION = 17
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
