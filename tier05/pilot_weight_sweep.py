@@ -636,6 +636,28 @@ def _functions(tree: ast.Module) -> dict[str, ast.FunctionDef]:
 
 def _closure(funcs: Mapping[str, ast.AST],
              entries: Sequence[str]) -> set[str]:
+    """Every function reachable from `entries`, by CALL or by REFERENCE.
+
+    A bare Name load counts, not only an `ast.Call`, and that is the same
+    REACHABILITY question `discover_scope`'s docstring already frames rather
+    than a widening for its own sake: a function handed around as a VALUE runs
+    just as surely as one invoked in place, so the weights it loads are inside
+    the gate's surface.
+
+    IT WAS FOUND BY A HOLE RATHER THAN BY DESIGN (W3 -- EB-118 Phase 3, R211,
+    2026-08-25). `policy.exhaust_victim` picks its payout hook with
+    `payout = payout or formula_aware_payout` and then calls it through the
+    local name, so a call-only walk never reached `formula_aware_payout` and
+    `EXHAUST_FORMULA_PAYOUT_WEIGHT` -- a live pilot weight that decides which
+    card a chosen Exhaust spends -- was invisible to this sweep. A weight the
+    sweep cannot see cannot be swept and cannot be cited, which is exactly the
+    dead-knob condition R67 exists to refuse.
+    BLAST RADIUS MEASURED BEFORE THE CHANGE AND AFTER, on both gates: the
+    exhaust gate's pair-own set gains that ONE name and nothing else moves.
+    It arrives UNRANGED, which is this file's designed behaviour for a weight
+    discovered later -- it is reported in the plan and not swept, because the
+    harness does not invent a range for a term whose comment it has not read.
+    """
     seen: set[str] = set()
     stack = [e for e in entries if e in funcs]
     while stack:
@@ -644,9 +666,9 @@ def _closure(funcs: Mapping[str, ast.AST],
             continue
         seen.add(name)
         for node in ast.walk(funcs[name]):
-            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
-                    and node.func.id in funcs):
-                stack.append(node.func.id)
+            if (isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load)
+                    and node.id in funcs):
+                stack.append(node.id)
     return seen
 
 

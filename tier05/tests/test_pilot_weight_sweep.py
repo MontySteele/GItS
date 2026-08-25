@@ -87,6 +87,13 @@ def wild(scope):
         "BOMB_MOVE_READER_AIM_VALUE": 2.0,
         "EXHAUST_COST_EFFICIENCY_WEIGHT": 0.0,
         "EXHAUST_SELF_EXHAUST_DISCOUNT": 1.0,
+        # W3 (R211): the formula-aware payout's weight joins the gate's
+        # surface, so a vector that ignored it would no longer be "as far
+        # from the shipped one as the ranges reach". 0.0 is the DEGENERATE
+        # case rather than an invented range end -- at zero the hook pays
+        # nothing and the chooser is identity-blind again, which is the
+        # property its own tests pin.
+        "EXHAUST_FORMULA_PAYOUT_WEIGHT": 0.0,
     })
     return point
 
@@ -379,7 +386,7 @@ def test_switch_off_is_byte_identical_across_two_wild_vectors(
 
 
 @pytest.mark.battery
-@pytest.mark.parametrize("cell_name,runs", [("exhaust-primary", 10)])
+@pytest.mark.parametrize("cell_name,runs", [("exhaust-primary", 14)])
 def test_the_positive_control_the_previous_test_needs(switch_off, scope, wild,
                                                       cell_name, runs):
     """Without this, a harness that ran nothing would pass the test above.
@@ -408,6 +415,25 @@ def test_the_positive_control_the_previous_test_needs(switch_off, scope, wild,
     and the gate claim it backstops is unchanged. This is a POWER number for
     a control, not a threshold anything is measured against -- swept cells
     run at `STAGE_N`, which is 40 to 2000.
+
+    TEN -> FOURTEEN SINCE W3 (EB-118 Phase 3, R211, 2026-08-25), for the SAME
+    reason and by the same kind of measurement. W3 re-bodied all three of the
+    Kokomi rows this cell drafts around -- `pearl_barrage` off its
+    exhaust-pile slope onto a selection-cost one, `shell_of_sanctuary` into a
+    cost-1 retriever, `the_tide_remembers` into a wide selection-cost attack
+    -- which moves what a kokomi/priest deck drafts and therefore how often
+    the sampled runs reach a chosen-exhaust decision the wild vector flips.
+    Measured on the real harness at 10/12/14/16/20/24/30 runs: the wild vector
+    does not move the digest at 10 or 12 and does move it at 14 and at every
+    count above. Ten -> fourteen restores the control; the gate claim it
+    backstops is unchanged.
+
+    THE WILD VECTOR ALSO GREW ONE ENTRY IN THE SAME WINDOW, and that is not
+    one fix wearing two hats: `EXHAUST_FORMULA_PAYOUT_WEIGHT` joined the
+    gate's DISCOVERED surface (see `_closure`), so a vector leaving it at its
+    shipped value was no longer "as far from the shipped one as the ranges
+    reach". Adding it did NOT on its own restore the control -- the run count
+    did -- and both changes are kept because both were separately wrong.
     """
     cell = _cell(cell_name, runs=runs)
     off = w4.evaluate(cell, scope.defaults, force=False)["digest"]
