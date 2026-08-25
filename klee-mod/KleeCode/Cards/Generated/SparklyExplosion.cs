@@ -47,13 +47,13 @@ public sealed class SparklyExplosion : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sparkly Explosion"),
-        ("description", "Deal {Damage:diff()} damage. If it kills: gain 3 [gold]Sparks[/gold] and place a [gold]Bomb[/gold] on EACH enemy dealing 6 damage."),
+        ("description", "Move ALL [gold]Bombs[/gold] to an enemy. Detonate an enemy's [gold]Bombs[/gold]. Detonations deal 3 more damage. Deal {Damage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(18m, ValueProp.Move)
+            new DamageVar(14m, ValueProp.Move)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -66,21 +66,14 @@ public sealed class SparklyExplosion : CustomCardModel, IElementalCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var enemiesAtStart = CombatState!.HittableEnemies.ToList();
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await BombPower.MoveAllTo(choiceContext, cardPlay.Target, CombatState!.HittableEnemies, 0, Owner.Creature, this);
+        await BombPower.DetonateOn(choiceContext, cardPlay.Target, 3);
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        if (enemiesAtStart.Any(e => e.IsDead))
-        {
-            await SparkPower.Gain(choiceContext, Owner.Creature, 3, this);
-            foreach (var bombTarget in CombatState!.HittableEnemies.ToList())
-            {
-                await BombPower.Place(choiceContext, bombTarget, 6, Owner.Creature, this);
-            }
-        }
     }
 
     protected override void OnUpgrade()

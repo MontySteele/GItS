@@ -96,10 +96,13 @@ def test_pool_composition():
     #   skill  45 (was 48): -1 that retype, -1 A4's cut, -1 A7's retype.
     #   power  17 (was 15): +1 A7 retyped unheard_confession skill -> power,
     #     +1 A12's new power card.
-    assert len(by_type["attack"]) == 18          # 16 -> 18: applause_line and breathless are
-                                                 # the compensation pass's two new attacks
-    assert len(by_type["skill"]) == 47           # skill-heavy pole+, the cadence reason
-                                                 # (46 -> 47: held_breath)
+    assert len(by_type["attack"]) == 17          # 16 -> 18: applause_line and breathless are
+                                                 # the compensation pass's two new attacks;
+                                                 # 18 -> 17 at R208 W2b, standing_room_only
+                                                 # retyped attack -> skill with its body
+    assert len(by_type["skill"]) == 48           # skill-heavy pole+, the cadence reason
+                                                 # (46 -> 47: held_breath; 47 -> 48: the same
+                                                 # W2b retype, arriving on this side)
     assert len(by_type["power"]) == 17           # official quota floor (19-21% roster-wide)
 
 

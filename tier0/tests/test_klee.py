@@ -76,7 +76,9 @@ def test_archetype_tag_counts():
         for arch in c.archetypes:
             counts[arch] = counts.get(arch, 0) + 1
     assert counts["demolition"] == 27     # 28 - 1 (big_badda_boom, W1 audit)
-    assert counts["spark"] == 22          # 21 + snap (M7 R1)
+    assert counts["spark"] == 21           # 22 - 1 (sparkly_explosion, R208 W2b:
+                                           # the re-body drops gain_spark, so the
+                                           # tag goes with the participation)
     assert counts["reaction"] == 14
     assert counts["generic"] == 19
 

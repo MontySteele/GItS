@@ -267,12 +267,22 @@ def test_meter_reading_damage_is_scaling_and_frontload_only_if_it_pays_at_zero()
     premise -- "deals nothing at an empty pile" -- had gone stale against the
     shipped sheet. R129 adopts `effect_walk.printed_floor`: `amount: 5` and
     `amount_formula: {base: 5, ...}` are the same promise to the player, so
-    the three kokomi pile-readers that print a base are both. What stays
+    the kokomi pile-readers that print a base are both. What stays
     scaling-ONLY is a line with no printed floor at all: `the_final_verdict`.
+
+    TWO ROWS MOVED AT R208 / W2b (2026-08-25), in opposite directions, and
+    both moves are the rule working rather than an exception to it.
+    `depths_judgment` LEAVES this list: its ratified body prints a flat 14 and
+    buys Block over an exhaust bar, so it reads no meter on a damage line at
+    all and the classifier lands it `block, frontload`. `dramatic_entrance`
+    JOINS it, and it is the first row here to arrive by the GATE form rather
+    than the formula form -- `damage 7`, then `damage 7 to all` behind
+    `fanfare_at_least_12`. A gate on a damage line IS a meter read, so the
+    rule makes it `scaling`, and the always-live 7 is the printed floor that
+    makes it `frontload` as well.
     """
-    both = {"furina": ["applause_line"],
-            "kokomi": ["read_the_current", "pearl_barrage", "depths_judgment",
-                       "undertow"]}
+    both = {"furina": ["applause_line", "dramatic_entrance"],
+            "kokomi": ["read_the_current", "pearl_barrage", "undertow"]}
     scaling_only = {"furina": ["the_final_verdict"]}
     for character, path in rt.SHEETS.items():
         rows = rt.load_rows(path)

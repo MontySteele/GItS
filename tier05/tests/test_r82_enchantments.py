@@ -163,8 +163,15 @@ def test_nimble_is_not_skill_only_and_takes_a_block_granting_attack():
             if c.type == "attack"
             and c.character not in roster.REFERENCE_IDS
             and enchantments.eligible(c, "nimble")}
+    # FIVE since R208 / W2b (2026-08-25): `depths_judgment` (Sango Isshin) is
+    # an Attack whose ratified body gains Block out of an
+    # `exhaust_pile_at_least_6` branch, so it is exactly the shape this test
+    # exists to keep legal. The C# side agrees by construction -- its
+    # generated class declares `GainsBlock => true` because BaseLib's
+    # auto-detect cannot see a conditional Block row (EB-84).
     assert live == {"warmup_act", "freminet_pressurized_floe",
-                    "thoma_crimson_ooyoroi", "itto_superlative_superstrength"}
+                    "thoma_crimson_ooyoroi", "itto_superlative_superstrength",
+                    "depths_judgment"}
     reference = {c.id for c in loader._card_index().values()
                  if c.type == "attack"
                  and c.character in roster.REFERENCE_IDS

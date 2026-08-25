@@ -34,8 +34,10 @@
 # sounds boring". So the price stays and the card is given something to be ABOUT: a
 # rider that pays off exactly when the printed number does its job.
 # THE RIDER IS EXISTING GRAMMAR, NOT NEW MACHINERY. `{op: conditional, if: killed_target,
-# then: [...]}` ships on sparkly_explosion (this sheet) and showstopper (Furina's), in
-# both engines; the branch is an ordinary `damage` op, which is why no loader, engine or
+# then: [...]}` ships on showstopper (Furina's) and, when this row landed, on
+# sparkly_explosion too -- W2b re-bodied that card, so this sheet's only other reader of the
+# predicate is gone and this row is now the Klee half of the precedent. Both engines read it;
+# the branch is an ordinary `damage` op, which is why no loader, engine or
 # codegen vocabulary moves for it. Packet §4.3's "existing grammar only" holds.
 # "A RANDOM OTHER ENEMY" IS THE CORPSE BEING DEAD, NOT A NEW TARGET SPEC. The branch
 # resolves AFTER the 16 has landed and only when it killed, so the target is already out
@@ -83,8 +85,9 @@
 # it is `role_tempo.fight_bands`, which bands a card `late` when any effect sits behind
 # a gate (`gated_effect`, set by the walk the moment an op is nested in a conditional).
 # A rider that pays only on a kill IS such a gate, so the classifier is right: the card
-# is worth more in the fight-phase where things are close enough to death to die. It is
-# now the band sparkly_explosion already carries for the same predicate. `solve` did NOT
+# is worth more in the fight-phase where things are close enough to death to die. It was
+# then the band sparkly_explosion carried for the same predicate; that card has since been
+# re-bodied off the predicate at W2b and keeps the band on other ground. `solve` did NOT
 # move -- a conditional splash is more of the same frontload, not a different problem --
 # and the classifier agrees, so the review TSV lists 0 rows diverging from the authored
 # solve.
@@ -309,8 +312,25 @@
    effects: [{op: detonate, target: all_enemies}, {op: chance_bomb_per_detonation, chance: 0.5, bomb_damage: 5}]}
 - {id: explosive_frags, name: "Explosive Frags", cost: 1, type: power, rarity: rare, solve: [frontload, scaling], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition], role: glue,
    effects: [{op: apply_power, power: detonation_vuln, amount: 1, target: self}]}
-- {id: sparkly_explosion, name: "Sparkly Explosion", cost: 2, type: attack, rarity: rare, solve: [frontload, velocity], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [demolition, spark], role: payoff,
-   effects: [{op: damage, amount: 18, target: enemy}, {op: conditional, if: killed_target, then: [{op: gain_spark, amount: 3}, {op: place_bomb, amount: 1, target: all_enemies, bomb_damage: 6}]}]}
+- {id: sparkly_explosion, name: "Sparkly Explosion", cost: 2, type: attack, rarity: rare, solve: [frontload, utility], tempo_band: {fight: [mid, late], run: [late]}, archetypes: [demolition], role: payoff,
+   effects: [{op: move_bombs, target: enemy}, {op: detonate, target: enemy, bonus: 3}, {op: damage, amount: 14, target: enemy}]}
+   # BODY RULED BY [USER] 2026-08-25 (R208), the EB-118 Phase-3 W2b slate. The card stops being a
+   # kill-gated splash and becomes the demolition plan's DELIBERATE detonation: gather the board's
+   # Bombs onto the target, pop them at +3 each, then swing. Both verbs are live registered grammar
+   # -- three `detonate` rows ship (quick_fuse, remote_detonator, chained_reactions) and one
+   # `move_bombs` (careful_arrangement) -- so nothing is built in either engine.
+   # WHY AN EXPLICIT DETONATION RATHER THAN KLEE'S IMPLICIT ONE. `_detonate_bombs_on_hit` is guarded
+   # on `enemy.alive` and reached only when hp damage is nonzero, so an implicit pop is thrown away
+   # twice over: once if the swing kills, once if Block eats it. An explicit `detonate` placed BEFORE
+   # the damage line is immune to both. On an empty board the card resolves as a plain 14 -- measured
+   # on the real resolver, not argued.
+   # ITS SIMULATED NUMBER IS EXPLICITLY DIAGNOSTIC until EB-136's same-target repair lands. tier0
+   # re-resolves `target: enemy` per op to the LOWEST-HP living enemy while C# holds one
+   # `cardPlay.Target` for all three, so the sim can scatter what the mod concentrates -- and an
+   # earlier op on this card routinely KILLS the aim. Any tier-0.5 number on this row understates it.
+   # `spark` DROPPED with the `gain_spark` rider: the tag means Spark-plan participation and the body
+   # no longer participates. (lint-ok: supply counts / ruling ref, not values this row prints)
+   # klee/spark payoff supply 6 -> 5, the second of R202 call (8)'s two steps. (lint-ok: same)
 - {id: all_my_treasures, name: "All of My Treasures!", cost: 3, type: skill, rarity: rare, solve: [frontload, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [demolition], role: enabler, exhaust: true, tags: [skill_tag],
    effects: [{op: place_bomb, amount: 6, target: enemy, bomb_damage: 6}, {op: gain_spark, amount: 2}]}
 - {id: fish_blasting, name: "Fish Blasting", cost: X, type: attack, rarity: rare, solve: [frontload, velocity], tempo_band: {fight: [late], run: [late]}, archetypes: [generic], role: payoff,

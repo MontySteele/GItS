@@ -283,6 +283,76 @@ def test_tighten_the_cords_upgrade_moves_the_always_live_half():
     assert up.archetypes == ["priest"] and up.role == "payoff"
 
 
+# --- R208 / W2b ratified bodies: Undertow and Sango Isshin ---
+
+def test_undertow_keeps_its_slope_and_draws_over_the_exhaust_bar():
+    """The R208 revision is EXACTLY two changes on a card that keeps its
+    shape: formula base 4 -> 5, and an `exhaust_pile_at_least_3` draw
+    appended. The slope, the Sly energy rider and the labels are untouched,
+    and the U-A access rewrite that would have replaced the slope with a bar
+    was rejected under R199's no-label-for-count guardrail."""
+    shallow = kokomi_state(draw_pile=["coral_guard"])
+    shallow.player.exhaust_pile.append(loader.get_card("coral_guard"))
+    play(shallow, "undertow")
+    assert shallow.enemies[0].hp == 300 - (5 + 1)     # base 5, pile 1
+    assert shallow.player.hand == []                  # no draw under the bar
+
+    deep = kokomi_state(draw_pile=["coral_guard"])
+    for _ in range(3):
+        deep.player.exhaust_pile.append(loader.get_card("coral_guard"))
+    play(deep, "undertow")
+    assert deep.enemies[0].hp == 300 - (5 + 3)        # base 5, pile 3
+    assert [c.id for c in deep.player.hand] == ["coral_guard"]
+
+    card = loader.get_card("undertow")
+    assert card.sly == [{"op": "energy", "amount": 1}]
+    assert card.archetypes == ["assist"] and card.role == "payoff"
+
+
+def test_undertow_upgrade_still_buys_the_base_not_the_slope():
+    """`{formula_base: +3}` is UNCHANGED by the revision; the printed base
+    moved under it, so the upgraded face reads 8 + 1 per exhausted card and
+    the bar-3 draw rides along untouched."""
+    up = loader.get_card("undertow+")
+    assert up.effects[0]["amount_formula"] == {"base": 8, "per": 1,
+                                               "count": "exhaust_pile"}
+    assert up.effects[1] == {"op": "conditional",
+                             "if": "exhaust_pile_at_least_3",
+                             "then": [{"op": "draw", "amount": 1}]}
+    assert up.sly == [{"op": "energy", "amount": 1}]
+
+
+def test_sango_isshin_buys_a_wall_only_over_a_six_deep_pile():
+    """R208's W2b body takes the DIVIDEND job: the Rare stops being a fourth
+    slope over one count and makes the pile pay something other than damage.
+    Below the bar it is a flat 14; at six exhausted cards it also walls for
+    8. The bar sits at roughly twice the bar-8 fire rate (12.8% vs 7.4% of
+    priest attack plays)."""
+    shallow = kokomi_state()
+    for _ in range(5):
+        shallow.player.exhaust_pile.append(loader.get_card("coral_guard"))
+    play(shallow, "depths_judgment")
+    assert shallow.enemies[0].hp == 286
+    assert shallow.player.block == 0
+
+    deep = kokomi_state()
+    for _ in range(6):
+        deep.player.exhaust_pile.append(loader.get_card("coral_guard"))
+    play(deep, "depths_judgment")
+    assert deep.enemies[0].hp == 286               # damage no longer scales
+    assert deep.player.block == 8
+
+
+def test_sango_isshin_upgrade_moves_the_always_live_damage():
+    """`{damage: +4}` replaces the retired `{formula_per: +1}`: the flat 14
+    -> 18, and under R58 the bar cannot drift down on upgrade."""
+    up = loader.get_card("depths_judgment+")
+    assert up.effects[0] == {"op": "damage", "amount": 18, "target": "enemy"}
+    assert up.effects[1]["if"] == "exhaust_pile_at_least_6"
+    assert up.effects[1]["then"] == [{"op": "block", "amount": 8}]
+    assert up.archetypes == ["priest"] and up.role == "payoff"
+
+
 # --- priest exhaust lane ---
 
 def test_votive_offering_exhausts_a_chosen_card_for_five_block():

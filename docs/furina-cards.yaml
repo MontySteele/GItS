@@ -323,9 +323,10 @@
    # The damage rail at common. A rehearsed beat that lands harder the louder
    # the house already is.
    # COST 0, and that is the distinctness argument as well as the design one.
-   # dramatic_entrance is the same rate on the same rail one rarity up, so the
+   # dramatic_entrance WAS the same rate on the same rail one rarity up, so the
    # common could not also be a 1-cost body without being its strictly worse
-   # twin. At 0 cost it is a different card: the thing you play ALONGSIDE the
+   # twin. (W2b re-bodied that card off the rail entirely; the 0-cost argument
+   # stands on its own and is kept.) At 0 cost it is a different card: the thing you play ALONGSIDE the
    # battery on a turn the battery already ate your energy, which is exactly
    # the act-1 shape the diagnosis asks for.
    # PLAIN ATTACK, so no hydro (the cadence law). Deliberate: a 0-cost skill
@@ -682,9 +683,26 @@
    # clock on stage (refresh_all_auras, first use in this pool: durations reset, nothing is consumed).
    # The cash rider comes down 4->3 because the refresh is real value. Salon's uptime payoff. PROPOSED.
 - {id: dramatic_entrance, name: "Dramatic Entrance", register: archon, cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [fanfare], role: payoff,
-   effects: [{op: damage, amount: 6, target: enemy, bonus_formula: 1_per_4_fanfare}]}
-   # F-B1: the binary threshold becomes a SMOOTH read. Live from turn one at any meter level, where the gate rendered as
-   # nothing at all below its bar — and a scaling number is the one shape the legibility pipeline can show on the face.
+   effects: [{op: damage, amount: 7, target: enemy},
+             {op: conditional, if: fanfare_at_least_12,
+              then: [{op: damage, amount: 7, target: all_enemies}]}]}
+   # BODY RULED BY [USER] 2026-08-25 (R208), candidate A of the EB-118 Phase-3 W2b slate. The Phase-0 complaint was
+   # that this card is "a larger Applause Line" -- the same rail with a bigger number. It now changes SHAPE above a
+   # bar instead of changing its number: a small aimed Attack below 12 Fanfare, a board clear at it. She walks on
+   # when the house is already on its feet. `role`, `archetypes`, cost, type, rarity, tempo_band AND `solve`
+   # all hold. The slate expected `scaling` to leave with the slope; `suggest_role_tempo_tags.py` KEEPS it
+   # under R91/2c as countersigned -- "a damage card that READS a meter is scaling" -- because a
+   # `fanfare_at_least_` gate on a damage line is a meter read. The classifier's derivation is taken as it
+   # ruled it, written by `--land`, per the C15 (d) precedent.
+   # THE BAR IS MEASURED, NOT PICKED. `fanfare_at_least_12` reads true on 22.4% of ATTACK plays in (lint-ok: measured rate)
+   # furina/fanfare_weighted and 8.9% of all plays in furina/salon_weighted (frozen battery, generic pilot, 200 (lint-ok: instrument settings)
+   # fights per encounter, two seeds agreeing to the printed digit) -- roughly one attack in four inside its own
+   # plan and essentially never outside it. Under R58 the 12 is a one-way door: it may never be lowered later.
+   # PILOT-READABLE BY CONSTRUCTION, which is the whole route R205 ruled for this card: `policy._active_effects`
+   # forecasts `fanfare_at_least_` through `resources.readable`, the SAME clamp the engine's predicate uses.
+   # THIS IS ALSO THE ROW THAT KEEPS REGISTER LINT R2 ALIVE. `_touches_fanfare` matches an `if:` beginning
+   # `fanfare_at_least_`, so the archon voice is held here by the lint and not only by the sheet; the register
+   # lint was NOT expanded for W2b because this body keeps its fanfare-reader coverage.
 - {id: witness_stand, name: "The Witness Stand", register: archon, cost: 1, type: skill, rarity: uncommon, solve: [utility, velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [generic], role: glue,
    effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}, {op: draw, amount: 1}]}
    # Courtroom texture: one count of Vulnerable and the next page of testimony.
@@ -722,13 +740,28 @@
    # RETYPE REVERTED by the pre-registered shrink clause (Track B / prediction 7): as a damaging SKILL every
    # member hit APPLIES hydro — the matinée seeds the stage it scales with. The draw cantrip stays retired
    # (a payoff, not glue). PROPOSED.
-- {id: standing_room_only, name: "The House Rises", register: archon, cost: 1, type: attack, rarity: uncommon, solve: [frontload, scaling], tempo_band: {fight: [early, mid, late], run: [late]}, archetypes: [fanfare, generic], role: payoff,
-   effects: [{op: damage, amount: 5, target: all_enemies, bonus_formula: 1_per_4_fanfare}]}
-   # CURTAIN CALL C (R85): the archon-register fanfare AoE payoff (§7; rn). The whole nation on its feet:
-   # 5 to ALL, +1 per 4 Fanfare — the rate tightens (was 1 per 5) and the base rises 4->5 because the U slot
-   # pays for payoff-grade numbers. Plain attack since Track B (mass application deleted; the Gardener-wall
-   # answer is now the payoff's, not the applier's). Left the convergence watchlist with its application.
-   # PROPOSED.
+- {id: standing_room_only, name: "The House Rises", register: archon, cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], tempo_band: {fight: [early, mid, late], run: [early, late]}, archetypes: [fanfare, generic], role: glue,
+   effects: [{op: block, amount: 3},
+             {op: conditional, if: encore_at_least_5,
+              then: [{op: block, amount: 3}],
+              else: [{op: draw, amount: 1}]}]}
+   # BODY RULED BY [USER] 2026-08-25 (R208), the EB-118 Phase-3 W2b slate. The card leaves the
+   # `damage@all~` clone family (three members -> two) and becomes the crowd/board STABILIZER the
+   # Phase-3 direction asked for: the house on its feet is a wall, not another swing. Type moves
+   # attack -> skill with the body, and `role` payoff -> glue -- a material label move under R202's
+   # LAW amendment, so this row reaches it in its own right.
+   # THE ELSE-ARM IS DRAW, NOT ENCORE, AND THAT IS THE POINT. With `gain_encore 2` the card's usual
+   # face would have read as `macaron_break` (Common: Encore 2 + Block 2) plus one Block, one rarity
+   # up -- the exact twin pattern this pass exists to kill, and one no lint can see because
+   # `effect_maps` treats a conditional as opaque and the distinctness report reads verbs, not
+   # magnitudes. `draw` makes the else-arm a DIFFERENT KIND of help, and no Furina card at any
+   # rarity prints Block and draw together -- all 82 rows checked. (lint-ok: pool size)
+   # BAR RATE, MEASURED: `encore_at_least_5` reads true on 18.9% of SKILL plays in (lint-ok: measured rate)
+   # furina/fanfare_weighted (15.7% of all plays) and 8.4% of all plays in salon. So roughly one in (lint-ok: measured rate)
+   # five is Block 6, four in five is Block 3 plus a card. That is the honest shape of the card.
+   # UPGRADE `{block: +2}` bumps the TOP-LEVEL block only (`_bump_first` matches `op == "block"` at
+   # depth 0), so the printed 3 -> 5 and both branch arms are untouched. R58's rule: the always-live
+   # half is the half that moves.
 - {id: crowd_work, name: "The Gallery Stirs", register: archon, cost: 1, type: power, rarity: uncommon, solve: [velocity], tempo_band: {fight: [late], run: [early]}, archetypes: [fanfare], role: glue,
    effects: [{op: apply_power, power: encore_spend_draw, amount: 1, target: self, note: "the first time you spend Encore each turn, draw N"}]}
    # The fanfare plan's own glue card. Its printed "Fanfare Cap" rider is GONE
