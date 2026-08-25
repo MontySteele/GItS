@@ -148,10 +148,9 @@ CI's `lints` job invokes the standalone lints directly (`.github/workflows/*.yml
 - **Debt lists are staleness-gated in both directions.** `test_encoding_gate.DEBT`
   is per-file COUNTS, and a fixed file must LEAVE the list — a zero entry is an
   allowance for the next offence (`tier0/tests/test_encoding_gate.py:26-67,86-95`).
-  Same shape for `stale_bands` (`tier0/tests/test_stale_band_annotations.py:29-43`)
-  and R81's curated distinctness failures. And a stale-annotated band still FIRES:
-  `BAND EXCEEDED` is ratified law until a ruling moves it, the annotation only says
-  why (`tier0/harness/runner.py:88-98`).
+  Same shape for R81's curated distinctness failures. (`stale_bands` was the third
+  member of this family and is **RETIRED with the system it annotated — R204,
+  2026-08-24**; see the axis-band bullet below.)
 - **`Image.open` is not a text read.** The encoding lint once keyed on the
   attribute name, producing 20 phantom offences that were live cover for real bare
   `open()` calls; `io.open`/`codecs.open`/`gzip.open` remain in scope
@@ -170,6 +169,26 @@ CI's `lints` job invokes the standalone lints directly (`.github/workflows/*.yml
   `axes.invariant_flags` — printed by the scorecard and the archetype-median
   report, out of scope on the anchor and on package decks, and pinned as
   non-asserting at `tier0/tests/test_axes_honesty.py:211-229` (EB-50).
+- **NO axis value gates anything any more (R204, 2026-08-24).** The live
+  per-axis deck-band system is RETIRED as acceptance law, roster-wide: the
+  `deck_bands` / `stale_bands` data on all three characters, both loader
+  accessors, the `BAND EXCEEDED` emission, and the hard deck-band and
+  median-identity tests are gone, and **no replacement bands are ratified**.
+  Seven-axis values and declared identity comparisons are **reportable
+  diagnostics only** — they may identify something to investigate, and may not
+  gate a merge, require re-banding, or justify moving a value. The per-character
+  identity comparison (`constraints:` in the character yamls) was **demoted, not
+  deleted**: it lost its `CONSTRAINT VIOLATED` / `warn (package deck)` severity
+  split and now reports through `axes.identity_flags` on the same never-asserted
+  convention as the two invariants above — on **every** deck, wider than their
+  starter/median scope, because it always had that reach as a gate. Klee's
+  frontload-over-scaling identity stays **binding design intent** in LAW; it is
+  reported rather than mechanically asserted. Pinned non-asserting at
+  `tier0/tests/test_axes_honesty.py` (`test_the_declared_identity_reports_and_does_not_assert`)
+  and against regrowth at `tier0/tests/test_pass3.py`
+  (`test_the_retired_band_system_cannot_quietly_regrow`). **`winrate_bands` is a
+  DIFFERENT system and is unaffected** — the ratified 1,000-fight bands and
+  `WINRATE_BAND_MIN_FIGHTS` stand.
 - **Two fixture hazards.** Reusing one `FightStats` object under two encounter keys
   doubles the A2 sample count and silently changes which battery you measured
   (`tier0/tests/test_axes_honesty.py:140-160`); and `score_config(..., base_stats=)`

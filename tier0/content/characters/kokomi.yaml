@@ -52,13 +52,18 @@ relic_hooks: [tamakushi_casket]
 # load-bearing frontload weakness — the inverse of Klee's law. RULED R52
 # (ask 3): the Klee law was Klee-scoped all along; there is no mod-wide
 # A1>A2 invariant. This per-identity constraint stands on its own.
+# DEMOTED by R204 (2026-08-24): reported on every deck of every run through
+# `axes.identity_flags`, asserted nowhere.
 constraints: ["A2_scaling>A1_frontload"]
 archetype_decks:
   commander_weighted: commander
   priest_weighted: priest
   assist_weighted: assist
-# NO deck_bands and NO winrate_bands: bands are ratified artifacts
-# (pass-3 pattern) and this character has had zero red-pen passes.
+# NO winrate_bands: bands are ratified artifacts (pass-3 pattern) and this
+# character has had zero red-pen passes. She never carried `deck_bands`
+# either, so R204's roster-wide retirement of that system took nothing from
+# her -- the note is kept because "she has no bands" now means something
+# different: nobody has any.
 # v0.3 charge-curve pass (ask 8: composition is a knob; PROPOSED): the
 # S3 arms — tide_reading -> surging_shoal (the act-1 AoE check demands a
 # starter answer; 7 clears Skittish) and one tactical_recall ->

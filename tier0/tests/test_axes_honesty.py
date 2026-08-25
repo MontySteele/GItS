@@ -227,3 +227,28 @@ def test_the_invariants_report_and_do_not_assert():
     assert isinstance(flags, list) and len(flags) == 2
     # Both invariants are broken here, both said so, and this test passes.
     # That is the closure, stated as an executable sentence.
+
+
+def test_the_declared_identity_reports_and_does_not_assert():
+    """R204 (2026-08-24) puts the per-character identity comparison under the
+    same closure as the two invariants above.
+
+    It used to be the one axis reading that DID decide: `CONSTRAINT VIOLATED`
+    was hard on the starter deck and on the archetype median, and
+    `test_pass3.test_median_identity_evaluation` asserted it. The ruling
+    retired the live per-axis deck-band system as acceptance law and demoted
+    this comparison with it -- seven-axis values and declared identity
+    comparisons may identify something to investigate, and may not gate a
+    merge, require re-banding, or justify moving a value.
+
+    So a reading where Klee's frontload-over-scaling identity runs BACKWARDS
+    has to leave the suite green. It stays binding design intent in LAW; what
+    it no longer is, is a gate. Making it fail a run again means deleting this
+    test, and deleting it means reading why it is here.
+    """
+    backwards = dict({ax: 3.0 for ax in axes.AXES},
+                     A1_frontload=2.0, A2_scaling=4.5)
+    flags = axes.identity_flags(backwards, ["A1_frontload>A2_scaling"])
+    assert isinstance(flags, list) and len(flags) == 1
+    # The identity is broken here, the scorecard said so, and this test passes.
+    assert "DECLARED_IDENTITY" in flags[0]

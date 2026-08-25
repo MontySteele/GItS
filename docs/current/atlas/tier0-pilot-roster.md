@@ -121,8 +121,13 @@ Kokomi's 62 -> 76 is `EB-69` (R198, 2026-08-23), the ruled 14-card pool fill.
   bump is written PROPOSED at `tier05/draft.py:1604-1650` and is deliberately
   **not** taken while the switch is off: no weight is ever read, so the
   labeled set is arithmetically unchanged. Pin: `test_eb118_switch_off.py`.
-  The flip itself is BUILT and STAGED on `staged/eb118-2a-policy-flip`, held at
-  a ratified-band ruling (`QUEUE` `M40`); merging that branch IS the pull.
+  The flip itself is BUILT and STAGED on `staged/eb118-2a-policy-flip`. It
+  WAS held at a ratified-band ruling; **R204 (2026-08-24) retired the live
+  per-axis deck-band system as acceptance law roster-wide**, so the one
+  gate it went red on no longer exists, its test is deleted with the
+  system it read, and `QUEUE` `M40` closed with no replacement number.
+  What still governs the flip is R191's window order, not a band. Merging
+  that branch IS the pull.
 - **WHICH WEIGHTS A SWITCH GOVERNS IS NOW MACHINE-DISCOVERABLE, NOT A LIST
   SOMEBODY MAINTAINS.** `tier05.pilot_weight_sweep.discover_scope()` derives
   the whole surface from source in four steps: the GATES in

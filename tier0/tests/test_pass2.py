@@ -133,15 +133,25 @@ def test_a6_ordering_anchor():
 
 
 def test_a1_gt_a2_constraint_wired():
-    # Round-3 restructure: hard on starter/median, warning on packages.
+    """The declared identity is still WIRED -- it just no longer decides.
+
+    Round 3 made it hard on starter/median and a warning on packages; R204
+    (2026-08-24) demoted every one of those severities to a report and moved
+    the comparison onto `axes.identity_flags`, beside the two scorecard
+    invariants. Wiring is what this test was always for, so it still tests
+    wiring: the declaration is read, and it reaches the scorecard on a package
+    deck. The severity vocabulary it used to assert against is gone.
+    """
     assert loader.character_constraints("klee") == [
         "A1_frontload>A2_scaling"]
     klee = score_config("klee", "demolition_weighted", "demolition",
                         FIGHTS, SEED)
-    for f in klee["heuristic_flags"]:
-        assert "CONSTRAINT VIOLATED" not in f    # packages warn, not fail
-        if "warn" in f:
-            assert "A1_frontload>A2_scaling" in f
+    assert isinstance(klee["identity_flags"], list)
+    for f in klee["identity_flags"]:
+        assert "A1_frontload>A2_scaling" in f
+    for f in klee["heuristic_flags"] + klee["identity_flags"]:
+        assert "CONSTRAINT VIOLATED" not in f
+        assert "warn (package deck)" not in f
 
 
 def test_pilot_regret_reported():

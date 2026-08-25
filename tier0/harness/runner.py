@@ -80,27 +80,21 @@ def score_config(character: str, deck: str, pilot_id: str, fights: int,
         stats = run_full_battery(character, deck, pilot_id, fights, seed)
         raw = axes.raw_axes(stats)
     scores = axes.normalize(raw, base_raw)
-    # Round-3 restructure: constraints are HARD on starter (and on the
-    # median, checked in score_character); informational on package decks.
-    constraint_flags = []
-    severity = "CONSTRAINT VIOLATED" if deck == "starter" else "warn (package deck)"
-    for con in loader.character_constraints(character):
-        left, right = con.split(">")
-        if not scores[left] > scores[right]:
-            constraint_flags.append(
-                f"{severity}: {con} "
-                f"({scores[left]:.1f} vs {scores[right]:.1f})")
-    # B4: a band annotated as known-stale still fires -- it is ratified law
-    # until a ruling moves it -- but the flag carries WHY, so a gate that
-    # fires on every run of a character is not mistaken for a live finding.
-    stale = loader.stale_bands(character)
-    for axis, per_deck in loader.deck_bands(character).items():
-        if deck in per_deck and scores[axis] > per_deck[deck]:
-            reason = stale.get(axis, {}).get(deck)
-            constraint_flags.append(
-                f"BAND EXCEEDED: {axis} {scores[axis]:.1f} > "
-                f"{per_deck[deck]} for {deck}"
-                + (f" ({reason})" if reason else ""))
+    # R204 (2026-08-24): the live per-axis deck-band system is RETIRED as
+    # acceptance law, roster-wide, and the whole gate half of it stood here.
+    # What is GONE with its data: the `BAND EXCEEDED` emission reading
+    # `loader.deck_bands` with B4's `stale_bands` reason riding along. What is
+    # DEMOTED rather than deleted: the declared identity comparison, which
+    # used to carry a `CONSTRAINT VIOLATED` (starter) / `warn (package deck)`
+    # severity split. It now reports through `axes.identity_flags` on the
+    # never-asserted convention `invariant_flags` already follows, at the same
+    # scope it always had -- every deck, every run -- because a declared
+    # identity that stops being visible stops being designed against.
+    # Seven-axis values remain reportable diagnostics: they may identify
+    # something to investigate, and may not gate a merge, require re-banding,
+    # or justify moving a value.
+    identity = axes.identity_flags(scores,
+                                   loader.character_constraints(character))
     pressure_delta = (metrics.summarize(stats["punisher"])["winrate"]
                       - metrics.summarize(stats["attrition"])["winrate"])
     return {
@@ -110,9 +104,8 @@ def score_config(character: str, deck: str, pilot_id: str, fights: int,
         # The baseline is flat 3.0 by construction. The SHAPE heuristic
         # runs on starter and the archetype-median only (round 3) —
         # monoculture packages always read extreme and taught us nothing.
-        "heuristic_flags": (constraint_flags
-                            if target_is_baseline or deck != "starter"
-                            else axes.heuristic_flags(scores) + constraint_flags),
+        "heuristic_flags": ([] if target_is_baseline or deck != "starter"
+                            else axes.heuristic_flags(scores)),
         # EB-50: the two declared invariants, on the same scope as the shape
         # heuristic above and for the same reason -- a monoculture package
         # reads extreme on both. Reported, never asserted (D3).
@@ -120,6 +113,12 @@ def score_config(character: str, deck: str, pilot_id: str, fights: int,
         # "checked, both hold", and the report prints that verdict.
         "invariant_flags": (None if target_is_baseline or deck != "starter"
                             else axes.invariant_flags(scores)),
+        # R204: the demoted identity comparison, on EVERY deck -- wider scope
+        # than the two above, deliberately. Those are declared against the
+        # starter/median reading; this one was checked on every deck when it
+        # was a gate and keeps that reach now that it is a report. None where
+        # the character declares no identity (out of scope).
+        "identity_flags": identity,
         "stats": stats,
     }
 
@@ -141,12 +140,11 @@ def score_character(character: str, fights: int, seed: int) -> dict:
         ax: statistics.median(results[d]["scores"][ax] for d in decks)
         for ax in axes.AXES}
     median_flags = axes.heuristic_flags(median_scores)
-    for con in loader.character_constraints(character):
-        left, right = con.split(">")
-        if not median_scores[left] > median_scores[right]:
-            median_flags.append(
-                f"CONSTRAINT VIOLATED on median: {con} "
-                f"({median_scores[left]:.1f} vs {median_scores[right]:.1f})")
+    # R204: the median identity comparison was the OTHER hard edge of the
+    # retired system (`CONSTRAINT VIOLATED on median`, asserted by
+    # test_pass3.test_median_identity_evaluation). Demoted to a report on the
+    # same footing as the per-deck one, and deliberately kept OUT of
+    # `median_flags` so nothing that consumes that list as a pass/fail sees it.
     # Ratified winrate bands (pass-3 closeout): matchup texture is part of
     # each archetype's identity. Process fix: only checked at >=1000
     # fights — below that, binomial noise makes band edges meaningless.
@@ -170,7 +168,10 @@ def score_character(character: str, fights: int, seed: int) -> dict:
             # against (klee-pass-4-plan §0 measures them on the archetype
             # median). Kept out of `median_flags` so nothing that consumes
             # that list as a pass/fail sees them.
-            "median_invariant_flags": axes.invariant_flags(median_scores)}
+            "median_invariant_flags": axes.invariant_flags(median_scores),
+            # R204: the demoted median identity comparison, same reasoning.
+            "median_identity_flags": axes.identity_flags(
+                median_scores, loader.character_constraints(character))}
 
 
 def main(argv: list[str] | None = None) -> int:
