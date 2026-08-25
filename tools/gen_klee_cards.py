@@ -1685,7 +1685,38 @@ def blocked_reason(
             # "pick the worst, remove it from the pool, repeat" without the
             # loop. Blanket-blocking both cost cleansing_tide (a Common) and
             # moonlit_offering their upgrade paths for no reason.
-            if eff.get("amount", 1) != 1 and eff.get("select") != "chosen":
+            # EB-133. The clause below licenses `amount != 1` on the chosen
+            # branch because `CardSelectCmd.FromHand` takes a COUNT -- and a
+            # count is exactly what a non-literal amount is not. It never
+            # checked that the value was an INT, so `{op: exhaust_from,
+            # select: chosen, amount: all}` walked past every refusal in this
+            # function and met `str(int(eff.get("amount", 1)))` in the chosen
+            # emitter: a ValueError stack trace, thrown by the one mechanism
+            # whose entire job is to name what cannot be expressed.
+            #
+            # The row is LEGAL tier0 grammar -- `_op_exhaust_from` reads
+            # `n = len(pool) if n == "all" else _amount(state, n)`
+            # (`tier0/engine/effects.py:1995-1999`), Stoke's whole-hand shape,
+            # and `_amount` accepts the `X` / `X_plus_N` formulas besides.
+            #
+            # IT IS REFUSED RATHER THAN EMITTED, deliberately. Emitting a
+            # pool-sized selection means committing to what
+            # `CardSelectorPrefs`' count means when it is not a literal --
+            # whether it clamps to the hand, whether a screen that can only be
+            # answered one way is shown at all -- and NO decompile is
+            # available to read that contract off. No committed row prints the
+            # shape, so an emitted body would be a guess at a call contract in
+            # code no card compiles: precisely the failure the closed maps in
+            # this file (RUNTIME_TIMES, the branch-field tables) exist to
+            # prevent. A named blocker is the honest answer until someone with
+            # the dll builds the loop.
+            amount = eff.get("amount", 1)
+            if not isinstance(amount, int):
+                return (
+                    f"exhaust_from amount {amount!r} is not a literal int "
+                    "(the C# selector takes a count; the pool-sized 'all' "
+                    "loop and the X formulas are not built)")
+            if amount != 1 and eff.get("select") != "chosen":
                 return "exhaust_from amount > 1 (random re-pool loop not built)"
         if op == "grant_sly_this_turn":
             # EB-122. `card_type` is the sheet's target filter and the ONLY
