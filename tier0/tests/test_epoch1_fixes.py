@@ -71,8 +71,13 @@ def test_the_policy_stamp_bumped():
     # EB-118 Phase 2A (`PILOT_POLICIES_ENABLED` flips True -- Klee's bomb
     # placement and Kokomi's chosen exhaust become decisions instead of
     # heuristics, and `C.PILOT_WEIGHTS_VERSION` moves 2 -> 3 in the same
-    # edit because the pair's eleven weights are read for the first time).
-    assert draft.POLICY_VERSION == 8
+    # edit because the pair's eleven weights are read for the first time);
+    # 9 is EB-118 Phase 2C, the SECOND and last of Phase 2's two activation
+    # windows (`MODE_CHOOSER_ENABLED` flips True -- a `choose_one` stops
+    # resolving a fixed index and asks the pilot, and
+    # `C.PILOT_WEIGHTS_VERSION` moves 3 -> 4 in the same edit for the same
+    # reason). Two flags, two windows, two bumps: R191.
+    assert draft.POLICY_VERSION == 9
 
 
 def test_the_starvation_alarm_keys_on_the_cohorts_own_archetypes():

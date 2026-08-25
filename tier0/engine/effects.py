@@ -2155,7 +2155,7 @@ def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:
     _resolve_effects(state, branch, card)
 
 
-# --- the modal / choose-one surface (EB-118 sec.5.4, STAGED) ---------------
+# --- the modal / choose-one surface (EB-118 sec.5.4, LIVE) -----------------
 #
 # A `choose_one` effect carries `modes:`, a list of 2+ dicts, each one a
 # `label:` and an ordinary `effects:` list. It is NOT a new keyword: the
@@ -2169,8 +2169,12 @@ def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:
 # `_worst_card` / `_best_card` -- the same surface `select: chosen` exhaust,
 # chosen discard and Armaments' upgrade target already ride.
 #
-# NO SHIPPED CARD IS MODAL. The surface is registered and tested; nothing on
-# any sheet reaches it, so the frozen battery cannot move.
+# ONE SHIPPED CARD IS MODAL: `deep_breath`, the Phase-2C prototype (R192 chose
+# the card, R194 ruled the pair, R205 re-bodied mode 2). That is the whole
+# reach of this surface and it is a discipline, not an accident -- the pattern
+# is not copied until the pilot and the price can distinguish the modes
+# (packet sec.5.4). The frozen calibration battery holds no modal card, so it
+# cannot move across the chooser's flip; that is checked, not assumed.
 
 MODES_KEY = "modes"
 MODE_FIELDS = frozenset({"label", "effects"})

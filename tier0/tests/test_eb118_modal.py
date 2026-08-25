@@ -1,15 +1,21 @@
 """EB-118 sec.5.4: the generic choose-one / modal effect surface.
 
 ONE shipped card carries a `choose_one` -- `deep_breath`, the Phase-2C
-prototype (R192 picked the card, R194 ruled the pair) -- and the prototype
-section below is the pin that keeps it one. The pattern is not copied until
-the pilot and the price can distinguish the modes, which is the packet's own
-sequencing and not a style preference.
+prototype (R192 picked the card, R194 ruled the pair, R205 re-bodied mode 2)
+-- and the prototype section below is the pin that keeps it one. The pattern
+is not copied until the pilot and the price can distinguish the modes, which
+is the packet's own sequencing and not a style preference. THE PILOT NOW CAN:
+the chooser is live since 2026-08-24. The PRICE still cannot, and that is the
+accepted under-credit rather than an oversight.
 
-The pilot's half of that pair lives in `test_eb118_mode_chooser` (switch on)
-and `test_eb118_switch_off` (switch off); the price's half is the MAX
-arbitration pin below, which is SYNTHETIC because the shipped card's mode 2
-prices at a static zero and cannot exercise it (R194's accepted under-credit).
+The pilot's half of that pair lives in `test_eb118_mode_chooser` (switch on,
+which is now the shipped world) and `test_eb118_switch_off` (switch forced
+off); the price's half is the MAX arbitration pin below, which is SYNTHETIC
+because the shipped card's mode 2 prices at a static zero and cannot exercise
+it (R194's accepted under-credit).
+
+This file is about the SURFACE, not about which mode wins: its fixtures reach
+a body by index and take the `fixed_index` fixture where that matters.
 
 The sheet syntax under test:
 
@@ -45,6 +51,22 @@ def modal(*bodies, labels=None):
                       for n, b in zip(names, bodies)]}
 
 
+@pytest.fixture
+def fixed_index(monkeypatch):
+    """The chooser held OFF, so mode A is the mode that resolves.
+
+    Added at the 2C activation flip (2026-08-24) on the pattern the house used
+    at 2A: a test that describes the OFF world has to name it once the shipped
+    default is ON. Every test taking this fixture is about the GRAMMAR of a
+    mode body -- an op inside a mode is the op it is outside one -- and reaches
+    its body by index for convenience, so forcing the fixed index keeps the
+    board and the claim verbatim instead of re-tuning bodies until a live
+    chooser happens to agree. WHICH mode a live chooser takes is
+    `test_eb118_mode_chooser`'s subject, not this file's.
+    """
+    monkeypatch.setattr(policy, "MODE_CHOOSER_ENABLED", False)
+
+
 # --- resolution ------------------------------------------------------------
 
 def test_the_chosen_mode_resolves_and_the_others_do_not(state):
@@ -56,7 +78,7 @@ def test_the_chosen_mode_resolves_and_the_others_do_not(state):
     assert state.player.block == 0
 
 
-def test_a_mode_body_is_an_ordinary_effect_list(state):
+def test_a_mode_body_is_an_ordinary_effect_list(state, fixed_index):
     """Multi-effect bodies resolve in order, and nest like anything else."""
     c = card(effects=[modal(
         [{"op": "block", "amount": 3},
@@ -68,7 +90,7 @@ def test_a_mode_body_is_an_ordinary_effect_list(state):
     assert state.player.block == 7
 
 
-def test_a_mode_body_spends_through_the_overdraw_primitive(state):
+def test_a_mode_body_spends_through_the_overdraw_primitive(state, fixed_index):
     """EB-119, the sim leg of the modal-spend repair.
 
     The docstring above prints `spend_encore` in mode B and means it: a mode
@@ -87,7 +109,7 @@ def test_a_mode_body_spends_through_the_overdraw_primitive(state):
             if e["event"] == "encore_spent"] == [2]
 
 
-def test_a_mode_body_spend_overdraws_into_hp(state):
+def test_a_mode_body_spend_overdraws_into_hp(state, fixed_index):
     """The half the substitution could never have modelled. A spend past the
     buffer drains TRUE HP; a negative `gain_encore` would have clamped at
     zero and charged nothing."""
@@ -357,17 +379,23 @@ def test_deep_breath_is_the_only_modal_card():
 
 
 def test_deep_breaths_modes_are_the_ruled_pair():
-    """R194, Option A. Mode 1 is the body the card already shipped -- that is
-    the whole reason the pair was chosen -- and mode 2 reaches the OVERDRAW
-    primitive rather than paraphrasing it as a negative gain (EB-119)."""
+    """R194 Option A, mode 2 RE-BODIED at R205 ([USER] 2026-08-24).
+
+    Mode 1 is the body the card already shipped -- that is the whole reason
+    the pair was chosen -- and it is UNCHANGED by the re-body. Mode 2 still
+    reaches the OVERDRAW primitive rather than paraphrasing it as a negative
+    gain (EB-119); what moved is only its two amounts, 2/2 -> 3/3, so that the
+    chooser has a board it takes each mode on (the crossover pin lives in
+    `test_eb118_mode_chooser`).
+    """
     dbreath = loader._card_index()["deep_breath"]
     fx, = dbreath.effects
     assert fx["op"] == "choose_one"
     assert [m["effects"] for m in fx["modes"]] == [
         [{"op": "energy", "amount": 1}, {"op": "gain_encore", "amount": 2}],
-        [{"op": "spend_encore", "amount": 2}, {"op": "draw", "amount": 2}]]
+        [{"op": "spend_encore", "amount": 3}, {"op": "draw", "amount": 3}]]
     assert [m["label"] for m in fx["modes"]] == [
-        "Gain 1 Energy and 2 Encore", "Spend 2 Encore: draw 2"]
+        "Gain 1 Energy and 2 Encore", "Spend 3 Encore: draw 3"]
 
 
 def test_the_frame_is_mode_independent():

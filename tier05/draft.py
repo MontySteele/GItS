@@ -733,12 +733,12 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
             elif fx.get("op") == "choose_one":
                 # EB-118 sec.5.4. One shipped card carries a `choose_one`:
                 # `deep_breath`, the Phase-2C prototype (R192 picked the card,
-                # R194 ruled the pair).
+                # R194 ruled the pair, R205 re-bodied mode 2).
                 #
                 # THE UNDER-CREDIT IS ACCEPTED, IN WRITING, AT THIS ROW
                 # (R194, [USER] 2026-08-23). Deep Breath's mode 1 is the body
                 # the card already shipped -- `energy 1` + `gain_encore 2` --
-                # and its mode 2 is `spend_encore 2` + `draw 2`. Both `draw`
+                # and its mode 2 is `spend_encore 3` + `draw 3`. Both `draw`
                 # and `energy` are static ZERO here (STATIC_DRAW_VALUE /
                 # STATIC_ENERGY_VALUE, the v3 flat-proxy sweep), so mode 2
                 # prices at MINUS its own spend and `MAX(modes)` returns mode
@@ -747,6 +747,12 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 #   * The conversion moves NO drafter number. Deep Breath is
                 #     priced to the digit as it was before it became modal,
                 #     because the mode that wins the max IS the old body.
+                #     THE R205 RE-BODY DOES NOT MOVE IT EITHER, and that was
+                #     measured rather than assumed: mode 2 goes -0.6000 ->
+                #     -0.9000 and the max still returns mode 1's 0.6000, on
+                #     both faces. A sheet edit that deepens the LOSING mode is
+                #     invisible to a MAX -- which is the same accepted
+                #     under-credit read from the other side.
                 #   * The card's flexibility -- the whole reason it was
                 #     converted -- goes UN-CREDITED. That is a bounded,
                 #     one-directional error: the drafter undervalues the
@@ -1879,12 +1885,13 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # cells; the citable Phase-2 read is the post-read owed AFTER 2C's window
 # closes, not these four numbers.
 #
-# POLICY_VERSION PROPOSED (EB-118 2C, staged 2026-08-24). A SECOND proposed
-# bump, and deliberately not folded into the one above: R191 ruled that the
+# POLICY_VERSION 9 -- the EB-118 PHASE-2C MODE-CHOOSER FLIP (2026-08-24), the
+# SECOND and LAST of Phase 2's two activation windows, and with it Phase 2 is
+# complete. Deliberately not folded into the one above: R191 ruled that the
 # mode-valuation chooser takes its OWN activation window, so it rides its own
-# flag (`policy.MODE_CHOOSER_ENABLED`, shipping FALSE) rather than the 2A
-# pair's. Two flags, two flips, two integers -- and the flip is what executes
-# either, not the code landing.
+# flag (`policy.MODE_CHOOSER_ENABLED`, now True) rather than the 2A pair's.
+# Two flags, two flips, two integers -- and the flip is what executes either,
+# not the code landing.
 #
 # WHAT MOVES: `effects._chosen_mode`, the seam a `choose_one` resolves
 # through, stops returning a fixed index and asks `policy.choose_mode` --
@@ -1901,22 +1908,39 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # modes -- and see the acceptance note at the `choose_one` price row for why
 # the drafter's number does not move with it.
 #
-# READ THE FIRST MEASUREMENT WITH THIS IN HAND: under the hand-picked weights
-# the chooser takes Deep Breath's mode 1 on EVERY board. Mode 1 scores
-# `energy 1` + `gain_encore 2` = 1.0 + 1.6 = 2.6 with no state-dependent term
-# in it, and mode 2 scores `draw 2` = 2.0 before any overdraw penalty, so the
-# gap is at least 0.6 whatever the bank holds. That is a real reading of the
-# pilot's currency and not a broken chooser -- but it means the flip is
-# expected to move NO Furina number until the weights are swept in 2C's
-# window or the pair is redesigned, and a null result here must not be read
-# as "modal cards are neutral".
+# THE PAIR THE CHOOSER READS WAS RE-BODIED FIRST, IN THE SAME LANDING (R205,
+# [USER] 2026-08-24), and the reason is the measurement this block used to
+# predict. As staged, under R194's ratified 2/2 pair, the chooser took mode 1
+# on EVERY board: mode 1 scores `energy 1` + `gain_encore 2` = 1.0 + 1.6 = 2.6
+# with NO state-dependent term in it, and 2/2 topped out at `draw 2` = 2.0 on a
+# bank that covered the spend, so the gap was at least 0.6 whatever the board
+# looked like. That was a real reading of the pilot's currency and not a broken
+# chooser -- and it meant the flip would have moved NO Furina number, which is
+# a null nobody could read as "modal cards are neutral".
+# The exit taken is the RE-BODY, not a weight sweep: mode 2 is `Spend 3 Encore:
+# draw 3` and mode 1 is unchanged. The dominance was STRUCTURAL (mode 1 has no
+# state-dependent term to lose on, so no setting of the two weights makes mode
+# 2 win a board), and `MODE_OVERDRAW_HP_VALUE` and `MODE_TIE_EPSILON` are
+# SHARED policy whose bending reprices every Encore generator in the pool.
+# MEASURED AT THIS LANDING AGAINST `policy.mode_score` ITSELF, not against the
+# arithmetic above, and IDENTICAL ON BOTH FACES (the score reads the mode BODY
+# on a neutral frame, so the `{cost: -1}` upgrade cannot move it):
+#   bank    0     1     2     3+
+#   mode 1  2.6   2.6   2.6   2.6
+#   mode 2  0.0   1.0   2.0   3.0
+#   pick    1     1     1     2
+# So the chooser now takes mode 2 at a bank of 3 or more and mode 1 below it,
+# which is the property the ruled pair lacked. The drafter's number is
+# unmoved by the re-body as well as by the conversion -- mode 2 prices at
+# -0.6000 -> -0.9000 and `MAX(modes)` returns mode 1's 0.6000 either way, on
+# both faces -- so no `DRAFTER_VERSION` move is owed here.
 #
-# THE 2A FLIP IS TAKEN AND 2C'S IS NOT, WHICH IS WHY ONE INTEGER MOVED AND ONE
-# BLOCK ABOVE IS STILL PROPOSED. `POLICY_VERSION` 8 is the 2A pair's flip and
-# nothing else; `MODE_CHOOSER_ENABLED` is untouched at False and its bump is
-# still reserved, exactly as R191 separated them. A reader who finds only one
-# integer here after two staged blocks is reading it correctly.
-POLICY_VERSION = 8
+# BOTH PHASE-2 FLIPS ARE NOW TAKEN AND PHASE 2 IS COMPLETE. `POLICY_VERSION` 8
+# was the 2A pair's flip and nothing else; 9 is this one and nothing else,
+# exactly as R191 separated them. What is owed next is R202 step (iii)'s tail:
+# the Phase-2 post-read, taken ONCE over both activation windows rather than
+# once per switch.
+POLICY_VERSION = 9
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
 # place a character's archetype vocabulary is declared -- and where it is

@@ -584,7 +584,23 @@ BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
 # own bump, and it RAN inside this same window and adopted nothing -- 78 points,
 # every one INSEPARABLE, so no such bump was owed and the hand-picked vector is
 # what v3 labels.
-PILOT_WEIGHTS_VERSION = 3
+#
+# v4 = POLICY 9 (EB-118 Phase 2C, 2026-08-24): `MODE_CHOOSER_ENABLED` flips to
+# True and `MODE_OVERDRAW_HP_VALUE` ENTERS the labeled set. The v2/v3 reading
+# of the rule again, and it is the FILE'S OWN IDIOM rather than a judgement
+# made here: the mode-valuation block's head says a value moving there is its
+# own `PILOT_WEIGHTS_VERSION` bump, and v3 already established that a weight
+# which was never READ while its switch was off cannot have moved the stamp
+# earlier -- so the entry IS the event. NO VALUE MOVED: 1.0 is byte-identical
+# to the hand-picked number it landed with, and W4's sweep was NOT run over it
+# (R205 re-bodied the card instead, on the finding that the dominance was
+# structural and these two weights are shared policy).
+# `MODE_TIE_EPSILON` rides along and is NOT the ground: 1e-9 is a float-noise
+# guard on the tie-break, not a valuation weight, and it cannot change an
+# argmax that any weight decides. Naming it here is a completeness note, not a
+# second reason. A Furina reading taken with the chooser off is not comparable
+# with one taken after -- for `deep_breath` and, today, nothing else.
+PILOT_WEIGHTS_VERSION = 4
 # Sim-hygiene sprint 2026-07-29 (task 4): the inline scoring weights that had
 # been living as bare floats inside tier0/pilot/policy.py. MOVED, NOT RETUNED
 # -- every value below is byte-identical to the literal it replaced, and the
@@ -1367,7 +1383,54 @@ BANNER_FEATURED_SLOTS = 3
 # machine a fourth time, so `real_ironclad` and `real_silent` cannot be loaded
 # at all and their two rows could not be run. `ref_ironclad` is unaffected and
 # carries the anchor-identity check.
-CONSTANTS_VERSION = 13
+# CONSTANTS_VERSION 14 -- the `deep_breath` MODE-2 RE-BODY (R205, [USER]
+# 2026-08-24), landed inside the EB-118 Phase-2C activation window. ONE window,
+# ONE card, ONE mode body, enumerated the way C13 enumerated its own so that
+# the world a C14 number was taken in is readable from the stamp.
+#   (a) `deep_breath` mode 2: `spend_encore 2` + `draw 2` becomes
+#   `spend_encore 3` + `draw 3`, label "Spend 2 Encore: draw 2" -> "Spend 3
+#   Encore: draw 3". MODE 1 IS UNCHANGED, and so is every frame field -- cost,
+#   type, rarity, register, Exhaust, tags, and the `{cost: -1}` upgrade delta.
+#   Nothing else on any sheet moved.
+# THE GROUND IS R179/M15, unamended and unstretched: this is an EFFECT-NUMBER
+# CHANGE, which that rule names in its own text, and R202's role/archetype
+# amendment is the same logic reaching a different field -- a sheet field that
+# is mechanically read is material. The bump is owed by the re-body ALONE and
+# would have been owed with the chooser still off, which is why it is declared
+# here on its own ground and not folded into the `P` flip that shares the
+# landing.
+# WHY A SEPARATE WINDOW FROM C13 rather than an amendment to it: C13 CLOSED,
+# and its re-baseline was published under it
+# (`review/active/sitting-reads-2026-08-24-c13-d16.md`). A stamp integer labels
+# a world, and a published number cannot be moved into a world it was not taken
+# in -- so a sheet edit after the close is a new window, the way C13 itself was
+# a new window over C12's landed debt rather than an edit to C12's note.
+# WHAT IS ARCHIVE: every Furina tier-0.5 and combat number that DEPENDS ON
+# WHICH MODE DEEP BREATH RESOLVES. With the chooser live that is a real set,
+# and the honest bound is that it is the whole Furina column rather than a
+# named subset -- the card is an Uncommon in the general pool, so any Furina
+# arm can draft it. Klee's and Kokomi's numbers are untouched by (a): neither
+# pool holds a modal card. Archive banners go where the numbers are published;
+# nothing is rewritten (R101b).
+# `RT` AND `D` ARE UNTOUCHED, and `D` was MEASURED rather than argued. No
+# drafter code and no dial value moved, and the price this sheet edit feeds is
+# unmoved on both faces: `deep_breath` prices 0.6000 -> 0.6000 and
+# `deep_breath+` 0.6000 -> 0.6000, because `MAX(modes)` returns mode 1 and the
+# edit deepened the LOSING mode (-0.6000 -> -0.9000). Had that max moved, the
+# move would still have been C-ground and not D-ground -- a sheet consequence
+# priced through live dials, the precedent D16 set when three `place_bomb`
+# rows repriced off door (a) -- but it did not, so there is nothing to
+# attribute. `P` moves in the SAME landing on its own ground (8 -> 9, the
+# chooser flip), with `PILOT_WEIGHTS_VERSION` 3 -> 4 beside it: each field
+# once, each on its own reason. The live cell at this landing is
+# `RT12/D16/P9/C14`.
+# THE RE-BASELINE OWED HERE IS NOT A SECOND TABLE. R202 step (iii) owes ONE
+# Phase-2 post-read taken after both activation windows close, and this landing
+# closes the second one -- so the read this bump re-baselines into is that
+# post-read, which is now unblocked and owed, rather than a table taken twice
+# in one day. That is the same argument the 2A flip recorded when it took no
+# table of its own.
+CONSTANTS_VERSION = 14
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

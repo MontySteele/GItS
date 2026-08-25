@@ -1,13 +1,17 @@
 """EB-118 2C with the mode chooser ON: which body a `choose_one` resolves.
 
-Every test here flips `policy.MODE_CHOOSER_ENABLED` for its own duration.
-Nothing in the shipped suite runs with it on -- that is the staging contract,
-and `test_eb118_switch_off` holds the other half of it.
+THIS IS NOW THE SHIPPED WORLD. `MODE_CHOOSER_ENABLED` is True since the
+Phase-2C activation window closed (2026-08-24, `POLICY_VERSION` 9,
+`PILOT_WEIGHTS_VERSION` 4), so the fixture below asserts the default rather
+than departing from it -- and it is KEPT rather than deleted, because a switch
+that has moved once may move again and a test that names its world stays
+readable when it does. `test_eb118_switch_off` holds the other half: the
+legacy fixed-index path, still live behind the flag.
 
 The flag is 2C's OWN, not the 2A pair's `PILOT_POLICIES_ENABLED`: R191 ruled
-the chooser takes its own activation window, and the 2A pair flips first in
-the ruled sequence, so a shared flag would activate this policy inside 2A's
-window. The two are independent here on purpose.
+the chooser takes its own activation window, and the 2A pair flipped first in
+the ruled sequence, so a shared flag would have activated this policy inside
+2A's window. The two are independent here on purpose.
 
 Boards are built to vary ONE thing. Where a term is not what a test is about
 it is neutralised on both sides, so a pass here is a statement about the term
@@ -212,41 +216,84 @@ def test_the_host_card_cannot_change_the_pick(chooser_on):
 
 # --- (5) the shipped prototype ---------------------------------------------
 
-def _deep_breath_modes():
-    return loader._card_index()["deep_breath"].effects[0]["modes"]
+def _deep_breath_modes(face="deep_breath"):
+    return loader.get_card(face).effects[0]["modes"]
 
 
-@pytest.mark.parametrize("bank", [0, 1, 2, 5, 20])
-def test_deep_breath_takes_mode_1_on_every_bank(chooser_on, bank):
-    """THE HONEST READING, PINNED SO IT CANNOT BE MISTAKEN FOR A NULL RESULT.
+# The crossover, as arithmetic. Mode 1 is `energy 1` + `gain_encore 2` =
+# 1.0 + 1.6 = 2.6 and carries NO state-dependent term, so it is flat at every
+# bank. Mode 2 is `draw 3` = 3.0 minus the shortfall the bank cannot cover, at
+# MODE_OVERDRAW_HP_VALUE = 1.0 a point.
+DEEP_BREATH_SCORES = {0: (2.6, 0.0), 1: (2.6, 1.0), 2: (2.6, 2.0),
+                      3: (2.6, 3.0), 4: (2.6, 3.0), 5: (2.6, 3.0),
+                      8: (2.6, 3.0), 20: (2.6, 3.0)}
 
-    Under the hand-picked weights the ruled pair is DOMINATED: mode 1 scores
-    `energy 1` + `gain_encore 2` = 1.0 + 1.6 = 2.6 with no state-dependent
-    term in it, and mode 2 tops out at `draw 2` = 2.0 with a full bank and
-    falls from there as the overdraw penalty bites. The gap is at least 0.6
-    whatever the board looks like, so the chooser takes mode 1 always.
 
-    That is a real reading of the pilot's currency, not a broken chooser --
-    and it means throwing 2C's switch is expected to move NO Furina number
-    until the weights are swept in 2C's own window (the W4 pattern, R191) or
-    the pair is redesigned. This test is here so that a null measurement is
-    read as "the pair is dominated" rather than "modal cards are neutral".
+@pytest.mark.parametrize("face", ["deep_breath", "deep_breath+"])
+@pytest.mark.parametrize("bank", sorted(DEEP_BREATH_SCORES))
+def test_deep_breath_crosses_over_at_a_bank_of_three(chooser_on, face, bank):
+    """THE CROSSOVER, PINNED ON BOTH FACES AND ACROSS THE BANK.
+
+    THIS PIN IS AN INVERSION AND SAYS SO. It replaces one that asserted the
+    chooser took mode 1 on EVERY bank, and whose prose read a null at
+    activation as "this pair is dominated". That was an honest reading of the
+    pair as R194 ratified it -- `spend 2 / draw 2` topped out at 2.0 against a
+    flat 2.6 -- and it is FALSIFIED as a description of the shipped card,
+    because R205 re-bodied mode 2 to `spend 3 / draw 3` for exactly this
+    reason. A dominated pair is not a fact about modal cards; it was a fact
+    about two numbers, and the numbers moved.
+
+    What the re-body bought is a board for each mode: 3.0 when the bank can
+    pay the spend, 2.0 at a one-point shortfall, so mode 2 wins at a bank of
+    3 or more and loses below it. The rate is unchanged at one card per
+    Encore -- this is a bigger transaction, not a better exchange.
+
+    BOTH FACES, and the reason they agree is structural rather than lucky:
+    the upgrade delta is `{cost: -1}`, `mode_score` reads the mode BODY on a
+    neutral frame (`_mode_probe`), and a frame the choice does not select
+    cannot move the argmax. A 0-cost Deep Breath that still Exhausts chooses
+    exactly as the 1-cost one does.
     """
     state = make_state([make_enemy(hp=60)])
     state.player.encore = bank
+    modes = _deep_breath_modes(face)
+    expect_1, expect_2 = DEEP_BREATH_SCORES[bank]
+    assert policy.mode_score(state, modes[0]) == pytest.approx(expect_1)
+    assert policy.mode_score(state, modes[1]) == pytest.approx(expect_2)
+    assert policy.choose_mode(state, modes) == (1 if bank >= 3 else 0)
+
+
+def test_the_crossover_is_at_the_spend_and_not_at_a_tuned_number(chooser_on):
+    """WHY 3 is the crossover: it is the mode's own printed spend, not a
+    constant anyone picked. One point short and the shortfall costs exactly
+    one point of TRUE HP, which is what drops mode 2 under mode 1."""
     modes = _deep_breath_modes()
-    assert policy.choose_mode(state, modes) == 0
-    assert policy.mode_score(state, modes[0]) \
-        >= policy.mode_score(state, modes[1]) + 0.6
+    spend = next(fx["amount"] for fx in modes[1]["effects"]
+                 if fx["op"] == "spend_encore")
+    below = make_state([make_enemy(hp=60)])
+    below.player.encore = spend - 1
+    at = make_state([make_enemy(hp=60)])
+    at.player.encore = spend
+    assert policy.mode_score(at, modes[1]) - policy.mode_score(
+        below, modes[1]) == pytest.approx(policy.MODE_OVERDRAW_HP_VALUE)
+    assert policy.choose_mode(below, modes) == 0
+    assert policy.choose_mode(at, modes) == 1
 
 
-def test_deep_breath_mode_1_resolves_as_the_pre_conversion_card(chooser_on):
-    """Which is why the conversion is quiet in both engines: the mode the
-    pilot takes IS the body the card shipped with, so the sheet edit changes
-    what the player MAY do without changing what the sim DOES."""
-    state = make_state([make_enemy(hp=60)])
-    state.player.energy = 3
-    state.player.encore = 4
-    effects.resolve_card(state, loader._card_index()["deep_breath"])
-    assert (state.player.energy, state.player.encore) == (4, 6)
-    assert state.player.hp == 80
+def test_deep_breath_resolves_the_mode_the_crossover_names(chooser_on):
+    """End to end through the seam, on both sides of the crossover. Below it
+    the card is the buffer body it always was; at or above it the pilot cashes
+    the bank and the spend is covered, so no HP is paid."""
+    thin = make_state([make_enemy(hp=60)])
+    thin.player.energy, thin.player.encore = 3, 2
+    effects.resolve_card(thin, loader.get_card("deep_breath"))
+    assert (thin.player.energy, thin.player.encore) == (4, 4)
+    assert thin.player.hp == 80
+
+    deep = make_state([make_enemy(hp=60)])
+    deep.player.energy, deep.player.encore = 3, 4
+    effects.resolve_card(deep, loader.get_card("deep_breath"))
+    assert (deep.player.energy, deep.player.encore) == (3, 1)
+    assert deep.player.hp == 80
+    assert [e["index"] for e in deep.log
+            if e["event"] == "mode_chosen"] == [1]
