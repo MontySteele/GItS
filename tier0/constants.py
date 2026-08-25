@@ -1511,7 +1511,54 @@ CONSTANTS_VERSION = 13
 # for lands WITH this bump, in the same window and no other change beside
 # it: `review/active/sitting-reads-2026-08-24.md`, the twelve-arm table at
 # `RT12/D15/P7/C11`.
-DRAFTER_VERSION = 15
+# DRAFTER_VERSION 16 (EB-118 Phase 2, 2026-08-24) -- THE INERT TERMS GO LIVE.
+# No drafter CODE moved and no dial VALUE moved in this window. What moved is
+# which rows the existing dials REACH, and two of those dials were carrying an
+# explicit no-bump licence that said, in the file, exactly when it would be
+# spent. Both are spent now.
+#   (a) `STATIC_ETHEREAL_SHARE` (`tier05/draft.py`). The licence read: the
+#   term is provably inert because no committed sheet row prints `ethereal:`
+#   and the only cards the tag spelling reaches are Statuses, Curses and the
+#   Spotlight token, whose rarities sit outside `RARITY_ODDS`. It named the
+#   row that would end that -- "Phase 2's big_badda_boom" -- and that row is
+#   now on `main`. A Common Klee Attack is offerable by every reward, shop and
+#   Neow channel, so the multiplier now moves a drafted price:
+#   `big_badda_boom` prices **8.0000 -> 4.8000** on its base face.
+#   (b) `choose_one`'s MAX arbitration -- the same shape with a weaker
+#   consequence. It was registered PROPOSED with "no shipped card is modal"
+#   as its stated reason; `deep_breath` is modal now (2C's landed content,
+#   C13 above). It moves NO number -- `draw` and `energy` are static zeros, so
+#   `MAX(modes)` returns mode 1, which IS the body the card already shipped --
+#   and it is in the window anyway, because what this stamp labels is which
+#   terms a drafted price may depend on, not whether one sheet happened to
+#   exercise them.
+# RECORDED HERE AND EXPLICITLY NOT GROUND, because a reader comparing offer
+# prices across this boundary will find FOUR Klee rows moved and needs to know
+# why only one of the four is this stamp's business. The other three are door
+# (a)'s distribution form, priced through dials that were already live:
+# `place_bomb` costs `bomb_damage * amount * STATIC_BOMB_DAMAGE_SHARE` and is
+# blind to `target`, so a row that printed several random bombs and now prints
+# ONE on all enemies prices lower by construction -- `mine_toss` 6.5000 ->
+# 4.0000, `jumpy_dumpty_mk2` 11.7500 -> 10.2500, `cluster_charge` 8.2500 ->
+# 7.0000. That is a SHEET consequence and it belongs to C13. Every other
+# changed row in both sheets prices identically across the window, checked:
+# `explosives_workshop` is 0.0000 on the old body and on the new one, and no
+# Furina row moved at all.
+# THE R193 REPRICING TRIGGER FIRED AT THIS BUMP AND WAS EXECUTED. Its terms
+# and the read's full arithmetic live at the constant in `tier05/draft.py`,
+# beside the number they are a read of. In one line: the card prices 4.8000
+# base / 8.0000 upgraded -- exactly the two figures the trigger note predicted
+# -- the ratio is 0.600000 to six places, and R201's kill rider prices at ZERO
+# on both faces, so this is the one-variable read the trigger was written to
+# get. THE SHARE IS NOT MOVED HERE. The note offers a re-derivation OR a
+# deliberate re-ratification and defines no formula for the first, and 0.6 is
+# on the record as "a JUDGEMENT, not a sweep"; the ratify-or-move call is
+# [USER]'s and is filed as QUEUE `M41`.
+# ONE WINDOW, and each field that moves in it moves on its own ground: `C`
+# 12 -> 13 above (the sheet and engine content), `RT` and `P` untouched.
+# The re-baseline this bump owes is the same table C13 owes, and it is taken
+# ONCE for both: `review/active/sitting-reads-2026-08-24-c13-d16.md`.
+DRAFTER_VERSION = 16
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).
