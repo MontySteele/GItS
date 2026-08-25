@@ -448,9 +448,18 @@ lands.
 
 The second draft in this pair is
 **`review/active/m17-sweep-reregistration-p7-2026-08-13.md`**: the same five
-arms as the frozen `EB-17p` registration, re-stamped to `RT10/D14/P7/C9`.
+arms as the frozen `EB-17p` registration, re-stamped to **`RT12/D17/P10/C19`**
+(2026-08-25; this line read `RT10/D14/P7/C9` when both drafts were written).
 `M17` (R180) permits the design act to be deferred behind the re-measure, so
 **both orderings below are faithful to the ruling.** No position is taken.
+
+**THE ORDERING QUESTION IS SETTLED AND ROUTE 1 IS THE ROUTE (R189,
+2026-08-13).** The two routes below are kept as the record of the choice, not
+as an open fork: measure-first was chosen, so the sweep runs first and this
+redesign lands after its graded read as its own `CONSTANTS_VERSION` bump.
+R205 (2026-08-24) then settled the one sub-shape §5 left open — **Block moves
+to 5**, so the landing is the predicate move alone. Route 2's re-stamp
+consequence is therefore not owed.
 
 **A constraint that binds before either ordering.** The payoff-reach
 registration's §6.6 **P12** freeze is approved on the **settle-first** plan
@@ -481,8 +490,9 @@ queue and takes its slot from the same order.
 
 **Route 2 — redesign first, then measure the new card.**
 
-- The chosen option lands under a `CONSTANTS_VERSION` bump (`C9` → `C10`), and
-  the sweep is re-stamped to `RT10/D14/P7/C10` before it runs.
+- The chosen option lands under a `CONSTANTS_VERSION` bump (as drafted, `C9` →
+  `C10`; the live integer is now 19, so the bump would be `C19` → `C20`), and
+  the sweep is re-stamped to the resulting world before it runs.
 - **Consequence:** the sweep's `elemental_ecstasy` arm is then measuring a
   **different card**. The arm set is unchanged — R180's "never a narrowed set"
   is satisfied — but the arm's *meaning* changes, and its result may not be

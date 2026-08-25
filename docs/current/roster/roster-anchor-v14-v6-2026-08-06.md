@@ -82,12 +82,13 @@
 > **What does NOT change, and a reader must carry both facts at once.** The
 > lift removes the quarantine. It does **not** remove the stamp. Every number
 > in this document was measured at **`RT7/D14/P3/C6`**, and all four fields
-> have since moved — the live world is `RT12/D15/P7/C11`. So these columns are
+> have since moved — the live world is `RT12/D17/P10/C19`. So these columns are
 > quotable **as the `C6`/`D14` reading they are** and are not comparable,
 > unlabeled, with any current number (R68). The `DRAFTER 14 → 15` bump of
 > 2026-08-24 archives them along with every other `D14` reading; the standing
-> twelve-arm table is `review/active/sitting-reads-2026-08-24.md`. The two
-> facts are independent and both apply.
+> twelve-arm table is `review/active/sitting-reads-2026-08-25-c19-d17-p10.md`,
+> which supersedes the two 2026-08-24 tables this line used to name (each
+> stands as published, R101b). The two facts are independent and both apply.
 >
 > **Recorded here rather than at the queue row, and why that is not a
 > departure.** The banner above says the lift is "a paper act at the queue
