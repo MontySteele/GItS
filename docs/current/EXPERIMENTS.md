@@ -257,7 +257,8 @@ registration packets themselves live under `review/active/` — one home, not tw
   single-card experiment — because §13.8's `borrowed_brilliance` anomaly was
   pilot refusal that `P7` (R176) resolved, and because §13's Δ figures are `P6`
   reads. The draft is the parent's instrument and arm set unchanged, re-stamped
-  to `RT10/D14/P7/C9`, with a new descriptive `Q4` on the bare-form play rate.
+  to **`RT12/D17/P10/C19`**, with a new descriptive `Q4` on the bare-form play
+  rate.
   **PARTLY FILLED 2026-08-13 (R189), and deliberately NOT countersigned:**
   `N` = 2,400 pairs/card, a 4-hour stop-and-report ceiling, §8.1's redesign
   trigger carried forward unchanged, and the `Q4` materiality threshold at 5%
@@ -274,21 +275,46 @@ registration packets themselves live under `review/active/` — one home, not tw
   sprint's graded read, per the approved settle-first plan, and *before* the
   staged `EB-43`/D15 landing — or, failing that, re-stamped past it (`S3`). The
   graded read landed 2026-08-24 and **D15 landed the same day**, so the "land
-  before D15" arm is spent and the fork falls to the other one: **the packet
-  re-stamps to `RT12/D15/P7/C11` when [USER] takes it up**, and its restamp is
-  now the fourth field rather than the first three. That re-stamp is the
-  packet's own act at countersign time and is deliberately NOT applied to the
-  packet here — nothing is written into an uncountersigned registration from
-  outside it. Nothing else in `S3` moves: the sweep still runs before the `C2`
-  redesign. The countersign is still withheld and is still [USER]'s →
+  before D15" arm is spent and the fork falls to the other one.
+  **THE RE-STAMP IS TAKEN, 2026-08-25: `RT10/D14/P7/C9` →
+  `RT12/D17/P10/C19`** — step (2) of the packet's own `§9` order, executed
+  under R189's sequence at [USER]'s 2026-08-25 direction, and NOT a
+  countersign-time act after all. The target the pointer last named
+  (`RT12/D15/P7/C11`) was overtaken before it could be applied: `EB-118`'s
+  richness pass ran to completion and `EB-136` landed inside the same span, so
+  all four fields moved rather than a fourth. **Nothing countersign-gated was
+  written:** `§8`'s per-arm table and the direction half of `Q4` are still
+  blank and still [USER]'s, the countersign line is still blank, and the `Q4`
+  estimand — the bare-form `played_when_drawn_rate` — was deliberately NOT
+  measured, because reading an estimand before its prediction exists is the
+  retro-fit `§8` prevents. `S3` is **spent** (the `D15` boundary is behind the
+  packet, not ahead of it) and `S1` now pins all four fields; `§10`'s owed
+  re-verification is done at the new stamp; and the run is staged mechanically
+  at the packet's new `§9.2`. Nothing else in `S3` moves: the sweep still runs
+  before the `C2` redesign. The countersign is still withheld and is still
+  [USER]'s, and what precedes it is `§8`'s fill →
   `review/active/m17-sweep-reregistration-p7-2026-08-13.md`; companion redesign
   options packet `review/active/m17-elemental-ecstasy-redesign-2026-08-13.md`.
-- **Shop companion channel re-run (`S4-G10` / `C9`)** — **DRAFT, awaiting
-  [USER] countersign at QUEUE `M14`, unrun.** The packet is in HEAD as of the
-  `shop-floor-2026-08-10` merge. The channel's world moved ([USER] restored slot 2's
-  Uncommon floor, `CONSTANTS_VERSION` 9) and the instrument's two defects were
-  repaired, both on 2026-08-10; the packet asks to re-measure in the new world.
-  Predictions are explicit [USER] slots and are still blank →
+- **Shop companion channel re-run (`S4-G10`, registered at `RT12/D17/P10/C19`)**
+  — **DRAFT, awaiting [USER] slate entry then countersign at QUEUE `M14`,
+  unrun.** The packet is in HEAD as of the `shop-floor-2026-08-10` merge. The
+  channel's world moved ([USER] restored slot 2's Uncommon floor,
+  `CONSTANTS_VERSION` 9) and the instrument's two defects were repaired, both
+  on 2026-08-10; the packet asks to re-measure in the new world. **Re-stamped
+  FIVE times since, most recently 2026-08-25 (`RT12/D15/P7/C11` →
+  `RT12/D17/P10/C19`), all under R182's sequence — the world moves, the packet
+  catches up, then the slate is entered, then the countersign.** The fifth is
+  the largest: thirteen bumps across three fields, and unlike the fourth it
+  **reaches all three arms this cell runs** — `D16`/`D17` move the price table
+  the shop's buy policy reads on every shelf entry, and `C19`'s new rows
+  renumber the Klee and Furina shelves. `§2` items 12–15 enumerate it and
+  `§2.1` names the table to author predictions against
+  (`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`, which supersedes
+  the two 2026-08-24 tables; each stands as published, R101b). Predictions are
+  explicit [USER] slots and are still blank; the run is staged mechanically at
+  `§7.1`, where two instrument hazards are named — it prints no `RT/D/P/C`
+  (citability rests on a provenance header) and it has **no smoke path**, so
+  any invocation reads the registered seed →
   `review/active/shop-rerun-registration-2026-08-10.md`.
 - **The regret margins (`M13`)** — **DRAFT, §7 PARTLY FILLED 2026-08-12
   (R181), awaiting [USER] countersign at QUEUE `M13`, unrun.** `ROUTE_REGRET_MARGIN` and its drafter

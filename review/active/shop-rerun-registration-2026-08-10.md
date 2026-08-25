@@ -3,13 +3,16 @@
 > **Status: DRAFT. Nothing here has been run.** No number in this document was
 > measured. The instrument was repaired and the shop world was changed on
 > 2026-08-10; this packet asks to re-run the measurement in the new world.
-> **That world is `RT12/D15/P7/C11` — §2 enumerates it in full, and it is the
+> **That world is `RT12/D17/P10/C19` — §2 enumerates it in full, and it is the
 > world the re-run measures.** (Re-stamped a third time 2026-08-24 on `M14`'s
 > own instruction, after the settle-first batch emptied: `RT11/D14/P7/C9` →
-> `RT12/D14/P7/C11`; and a **fourth** time the same day, `D14` → `D15`, when
+> `RT12/D14/P7/C11`; a **fourth** time the same day, `D14` → `D15`, when
 > `EB-43`'s staged drafter change landed as step (5) of `R121`'s countersigned
-> six-step order — see item 11 in §2. `C9`'s X7/X8 rarity erratum is still in
-> the world; it is now inside `C11` rather than at the stamp's edge.)
+> six-step order — see item 11 in §2; and a **fifth** time 2026-08-25,
+> `RT12/D15/P7/C11` → `RT12/D17/P10/C19`, when `EB-118`'s three-character
+> richness pass ran to completion and `EB-136`'s same-target binding landed
+> inside the same span — see items 12–15. `C9`'s X7/X8 rarity erratum is still
+> in the world; it is now inside `C19` rather than at the stamp's edge.)
 > The predictions in §5 are deliberately blank — they are [USER]'s to fill in
 > before any seed is run.
 
@@ -72,7 +75,7 @@ events rather than by asserting that none occurred.
 
 ## 2. One window, one world
 
-**The registered world is `RT12/D15/P7/C11`, still including the X7/X8 rarity
+**The registered world is `RT12/D17/P10/C19`, still including the X7/X8 rarity
 erratum.** In plain English, and as the standing requirement for this
 re-run: this is the world the re-run measures. Everything listed below is
 inside one window, and a run of this instrument that does not report this
@@ -170,9 +173,11 @@ What that one window contains, in full:
    **Unlike item 6, this is not named for completeness.** Item 6 was proved
    byte-identical on these three profiles either side of the repair; this one
    is not, and is not claimed to be. Every Klee and Furina number in the
-   `RT10` world is archive for this cell, and the twelve-arm re-baseline taken
-   at the bump — `review/active/sitting-reads-2026-08-13.md` — is the table to
-   author the `§5` predictions against.
+   `RT10` world is archive for this cell. The twelve-arm re-baseline taken at
+   this bump was `review/active/sitting-reads-2026-08-13.md`, **and it is no
+   longer the table to author the `§5` predictions against** — it has been
+   superseded twice since, and the current one is named at §2.1. Each
+   superseded table stands as published and is not rewritten (R101b).
 
 8. **`RUNTEMPLATE_VERSION` 12** (the window-2 correctness batch, `EB-104`,
    2026-08-13 — five run-layer fixes under one coordinated bump). Two of them
@@ -242,21 +247,231 @@ What that one window contains, in full:
     bump, so nothing byte-identical is claimed here; what is claimed is a
     code-path argument that is exact, corroborated by the re-baseline. Every
     tier-0.5 number taken at `D14` is archive under R68 whichever arm it came
-    from, and a report of this cell that does not read `D15` is not this
-    registration's measurement.
+    from. **The "must read `D15`" clause this item carried is superseded by
+    item 13: the registered `D` is now 17, and a report of this cell that does
+    not read `D17` is not this registration's measurement.** Item 11's own
+    conclusion — that the `D` move reached none of these three arms — was true
+    of `D15` and is **not** true of `D16` or `D17`, which is why item 13 says so
+    in its own words rather than inheriting this one's.
 
-**The settle-first window is SETTLED, and this is the FOURTH re-stamp.**
-`M14`'s batch is empty as of 2026-08-24: `EB-70` left it at R195 ([USER] paused
-the starter-offer retune pending the Klee-rework design sweep) and `EB-69` was
-the last item to land. **The third re-stamp, taken earlier the same day, called
-itself the final one and it was not.** It moved `RT` and `C` while `EB-43`'s
-`D15` was still staged behind the payoff-reach grade; that grade landed later
-the same day and released it, so `D14` → `D15` is item 11 above and this
-re-stamp is the fourth. The finality claim is not repeated here. What R182
+12. **`CONSTANTS_VERSION` 11 → 19 — eight bumps, and they are the `EB-118`
+    three-character richness pass plus `EB-136`.** Named one by one, with what
+    each reaches of `klee`/demolition, `furina`/salon and `kokomi`/priest,
+    because "eight bumps" left to the stamp would hide which arms moved:
+    - **`C12`** (2026-08-24, `9d7c9a2`; ground R179/M15) — the Phase-1 cleanup
+      batch: twenty sheet rows, fifteen Furina cards losing an incidental
+      `raise_fanfare_cap` rider, the Block-reader family losing zero-base
+      Fanfare readers, `blast_radius` gaining a chosen discard. **klee YES,
+      furina YES, kokomi NO.**
+    - **`C13`** (2026-08-24, `1499dcc`; R201/R203/R204/R194) — the Phase-2
+      integration window: `big_badda_boom` re-bodied, **twelve `place_bomb`
+      rows leave `target: random_enemy`**, Explosives Workshop becomes a
+      per-rotation power, `deep_breath` converts to `choose_one`. **klee YES
+      (heavily), furina YES, kokomi NO** — her sheet and engine path are
+      untouched, which the block calls her arms' own control.
+    - **`C14`** (R205, [USER] 2026-08-24) — `deep_breath`'s mode 2 alone.
+      **furina YES** (it is a Furina Uncommon any arm can draft), **klee NO,
+      kokomi NO** — neither pool holds a modal card. Its drafted price is
+      measured unmoved (0.6000 → 0.6000 on both faces), so this is a combat
+      reach, not a shelf-score one.
+    - **`C15`** (R202, [USER] 2026-08-24; landed 2026-08-25) — Window 1's
+      label pass: sixteen `role` conversions and five `archetypes` changes over
+      nineteen cards, no body or cost moving. **YES, ALL THREE, and it is the
+      widest DRAFTING reach in the range** — `is_on_plan_payoff` is literally
+      `role == "payoff" and archetype in card.archetypes`, which is inside the
+      shelf decision this cell measures. Payoff supply: klee/demolition
+      **10 → 7**, furina/salon **9 → 5**, kokomi/priest **14 → 11**.
+    - **`C16`** (R202 + R205, [USER] 2026-08-24; landed 2026-08-25) —
+      Window 2's three Kokomi bodies plus `encore_performance`'s ruled
+      `{retain: true}`. **kokomi YES** (`moon_signal` −0.5000 → 1.0000,
+      `crane_wing` 6.0000 → 4.0000, `tighten_the_cords` 3.0000 → 5.0000).
+      **furina YES on the run layer** — `model.rest_action` filters smith
+      candidates through `upgrades.has_upgrade`, so a Rare that had no upgrade
+      path was never a candidate and now is. **klee NO** — the block states
+      "KLEE IS UNTOUCHED".
+    - **`C17`** (R208, with item (f) ruled late by R209, [USER] 2026-08-25) —
+      Window 2b's five bodies across all three sheets. **YES, ALL THREE.**
+      Prices moved on every one: `sparkly_explosion` 9.7500 → 10.5000,
+      `standing_room_only` 10.0000 → 3.0000, `dramatic_entrance`
+      6.0000 → 7.0000, `undertow` 5.0000 → 6.0000, `depths_judgment`
+      6.0000 → 11.0000.
+    - **`C18`** (R210, [USER] 2026-08-25) — `EB-136`'s same-target binding.
+      **Not a sheet window: no printed number, label, delta or dial moves, so
+      `_static_power` is unchanged and the shelf SCORE does not move.** What
+      moves is how the resolver aims — `target: enemy` ops bind to one creature
+      at card-play construction instead of re-resolving per op. **YES, ALL
+      THREE, and the anchor too.** Its route into this cell is the one items
+      8's `EB-103`/`EB-110`/`EB-111` travel: combat resolution → HP and run
+      length → **how many shops a run visits and with what purse**.
+    - **`C19`** (R211, [USER] 2026-08-25, `487dc9a`) — Window 3's card-body
+      pass: eight rows, five new and three rewrites keeping their ids.
+      **YES, ALL THREE.** Klee gains three `spend_spark` sinks, Furina gains
+      `change_the_bill` and `take_it_from_the_top`, and Kokomi's `pearl_barrage`,
+      `shell_of_sanctuary` and `the_tide_remembers` are rewritten in place.
+      **Two things ride with it that this cell must carry.** (i) A named
+      two-engine gap: the generator cannot emit `conditional_block` /
+      `conditional_damage` deltas, so `hold_the_line` and
+      `take_it_from_the_top` ship a campfire upgrade **in the sim and none in
+      the live game** (BACKLOG `EB-140`). **This cell is the sim, so both
+      upgrades are live for it.** (ii) `W3`'s numbers were declared
+      **DIAGNOSTIC** at the ruling: the pilot has no hold-versus-spend term for
+      Sparks, so it spends the bank the moment a sink is legal, and its scorer
+      reads neither new Furina row's state nor Tide of Names' payout. Those
+      rows contribute **floors**, and a null on them is not evidence.
+
+13. **`DRAFTER_VERSION` 15 → 16 → 17, and this is the field that matters most
+    to this cell.** Item 11 established why: the shop's buy policy reuses the
+    draft policy's valuation verbatim, so a `D` move sits inside the shelf
+    decision this cell measures. **Item 11 then concluded that `D15` reached
+    none of these three arms because it was confined to the spotlight limb.
+    That reasoning does NOT carry forward, and the difference is the single
+    most important sentence in this re-stamp:** `D16` and `D17` are **price
+    table** moves, and a price is read on every shelf entry in every arm.
+    - **`D16`** (`EB-118` Phase 2, 2026-08-24, `6056a05`; the 0.6 share
+      ratified by R205, the ratify-or-move call filed as QUEUE `M41`). No
+      drafter code and no dial value moved — what moved is which rows the
+      existing dials reach. `STATIC_ETHEREAL_SHARE` now reaches a draftable
+      row: **`big_badda_boom` prices 8.0000 → 4.8000**. It is a Klee **Common**,
+      so it is on the shelf constantly. **klee YES, furina NO, kokomi NO.**
+    - **`D17`** (R211, [USER] 2026-08-25) — the first bump in the series where
+      the drafter learns a **cost** rather than a value.
+      `STATIC_SPARK_SPEND_COST = 2.5` gives the `spend_spark` branch of
+      `_op_price` its own live dial, and `spotlight_moved_this_turn` joins
+      `STATIC_STATE_CONDITIONS` at share 0.167. **Both values are
+      [USER]-overridable and each lives in exactly one constant.** **Exactly
+      five rows move, and no others** — `STATIC_SPARK_VALUE` stayed at 0.0, so
+      all eleven shipped Klee Spark rows are unchanged to four decimals:
+
+      | row | character | base | upgraded |
+      |---|---|---|---|
+      | `powder_charge` | klee | 7.0000 → **2.0000** | 10.0000 → **5.0000** |
+      | `hold_the_line` | klee | 5.0000 → **0.0000** | 8.0000 → **3.0000** |
+      | `smoke_and_sparks` | klee | 6.0000 → **1.0000** | 8.0000 → **3.0000** |
+      | `take_it_from_the_top` | furina | 5.0000 → **6.6700** | 5.0000 → **7.3380** |
+      | `curtain_cue` | furina | 0.0000 → **0.4002** | → **0.7002** |
+
+      (`directors_cut` does **not** move at any share — both its branches pay
+      in dead dials.) **klee YES, furina YES, kokomi NO** — no Kokomi row
+      prints either construct. **And the offer-screen consequence is named
+      rather than left implicit:** in a `demolition` draft `hold_the_line`
+      scores **0.00**, below `DRAFT_SKIP_THRESHOLD`. This dial can turn a Klee
+      shelf entry into one the buy policy will not buy at all, which is
+      precisely the decision this cell instruments.
+
+14. **`POLICY_VERSION` 7 → 8 → 9 → 10, with `PILOT_WEIGHTS_VERSION` 2 → 5
+    beside it** (one weights bump per policy bump). The pilot is what plays the
+    cards the drafter and the shop bought, so it moves run length and therefore
+    shop count.
+    - **`P8`** (`EB-118` Phase 2A, 2026-08-24, `d3bf0e0`; window order R191, the
+      gate that held it retired by R204) — `PILOT_POLICIES_ENABLED` False →
+      True. Klee bomb placement stops resolving to lowest-HP and asks
+      `bomb_placement_target`; a chosen `exhaust_from` stops spending
+      `_worst_card` and asks `exhaust_victim`. **klee YES, kokomi YES, furina
+      NO — and the furina answer is MEASURED, not argued: `furina/salon` was
+      byte-identical across the switch.**
+    - **`P9`** (`EB-118` Phase 2C, 2026-08-24, `b343008`) — `MODE_CHOOSER_ENABLED`
+      False → True; `effects._chosen_mode` asks `policy.choose_mode`. **furina
+      YES** (`deep_breath` is the only modal card in the repo), **klee NO,
+      kokomi NO.** The drafter's number does not move with it, so like `C14`
+      this is a combat reach, not a shelf-score one.
+    - **`P10`** (R211, [USER] 2026-08-25) — `policy.exhaust_victim`'s default
+      payout hook becomes `formula_aware_payout`. **kokomi YES, klee NO,
+      furina NO.** Exactly two rows on any sheet print an `exhaust_selection_*`
+      formula — `pearl_barrage` and `the_tide_remembers`, both Kokomi, both
+      draftable on-plan `priest` payoffs — and the hook returns 0.0 for every
+      card printing none. **Grade that evidence as a third kind:** it is
+      neither item 6's byte-identity proof nor item 11's pure code-path
+      argument, but a **test assertion** (`test_eb118_policies.test_no_existing_carriers_pick_moved`
+      sweeps every chosen-Exhaust carrier on every sheet), and that test exists
+      *because* it replaced a scratch run that would have been provably
+      bit-identical to baseline. No same-seed re-run of this cell's own klee or
+      furina arms was taken across it.
+
+15. **Content and derived pools that carry no version integer, on item 10's
+    precedent — and one of them is the sharpest change in this whole
+    re-stamp.**
+    - **The draftable pool grew for two of the three characters, which
+      RENUMBERS THE SHELF.** `shop_offer` rolls `rarity` through the unmoved
+      `RARITY_ODDS` and then `rng.choice` over the character's whole bucket
+      (`tier05/shop.py:88-95`, `tier05/rewards.character_pool`) — **not**
+      archetype-filtered. Klee's draftable pool goes **71 → 74** and Furina's
+      **76 → 78**, both entirely in the **Uncommon** bucket (klee 28 → 31,
+      furina 35 → 37), from `C19`'s five new rows. So **the same rng draw maps
+      to a different card from the first Uncommon roll of the run onward** for
+      klee/demolition and furina/salon: a hard renumber of the shelf itself, on
+      top of every price move above, and invisible from the stamp unless
+      written down. **Kokomi's pool is unmoved in membership AND in order** —
+      the same 76 sheet ids at the same file positions, 70 draftable at
+      31/26/13, exactly item 10's figures — so the same rng state yields her
+      the same card; what moved for her is the **price** of what appears, not
+      which card appears.
+    - **`demolition_commons` 8 → 7 members** (`C15`). The pool is derived at
+      load as every non-kit Common carrying the `demolition` tag, so
+      `big_badda_boom`'s tag drop takes `secret_stash`'s in-fight add-pool from
+      eight to seven, in both engines. **klee/demolition only**, and it is an
+      in-fight distribution change rather than a drafting one.
+    - **The smith candidate set moved for Furina** (`C16`). `model.rest_action`
+      filters smith candidates through `upgrades.has_upgrade`, so
+      `encore_performance` — a Rare with no upgrade path — was never a
+      candidate and now is. **The candidate set moved even though the card's
+      own drafted price did not.**
+
+### 2.1 The table to author the `§5` predictions against
+
+**`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`** — twelve arms at
+`RT12/D17/P10/C19`, taken on `main` = `a247f25`, all twelve in one pass with
+`game_ref/` present, so both `real_*` floors sit in the main tables
+(`real_ironclad` 5.2% win / 65.5% act-1, `real_silent` 1.2% / 54.1%). It
+supersedes `review/active/sitting-reads-2026-08-24.md`, which item 11 and the
+`M14` row used to name, and `review/active/sitting-reads-2026-08-24-c13-d16.md`
+before that; each stands as published (R101b).
+
+**It is the read at this packet's world, and that is checkable rather than
+assumed.** The only diff between `a247f25` and this packet's re-stamp point,
+`main` = `1eb5b45`, is four documentation files and one lint tool — no
+`tier0/`, `tier05/` or `content/` file, and no version integer. So no re-take
+was owed at the re-stamp and none was made.
+
+**Three properties of it a prediction-writer must know.** (i) **Its Δ column
+spans `C13` → `C19`**, five `CONSTANTS_VERSION` bumps plus `D16` → `D17` and
+`P7` → `P10`, so **no row's Δ is attributable to any one of items 12–14
+alone**, and none is attempted. (ii) **It has no control set and says so**:
+`C18` moved the anchor's own combat behaviour, so `ref_ironclad` and both
+`real_*` floors moved with the roster. (iii) **It publishes DIAGNOSTIC-SCOPED,
+not as a milestone table** — three of `W3`'s eight rows are measured by an
+instrument that cannot see what they print, so their contribution is a floor.
+The three arms this cell runs read **`klee/demolition` 5.1%** win / 82.4%
+act-1, **`furina/salon` 2.5%** / 50.5%, **`kokomi/priest` 0.9%** / **45.0%** —
+and that last act-1 figure, 39.9% → 45.0%, is the one interval separation
+anywhere in the table.
+
+**`M14`'s settle-first batch is still empty, and this is the FIFTH re-stamp.**
+The batch emptied on 2026-08-24: `EB-70` left it at R195 ([USER] paused the
+starter-offer retune pending the Klee-rework design sweep) and `EB-69` was the
+last item to land. Nothing has re-entered it. **What moved between the fourth
+re-stamp and this one is not `M14`'s batch at all** — it is `EB-118`'s
+three-character richness pass running to completion (`C12`–`C17`, `C19`, `D16`,
+`D17`, `P8`–`P10`) with `EB-136`'s `C18` inside the same span, work this cell
+does not gate and did not wait for.
+
+**The third re-stamp called itself final and it was not; the fourth said so and
+did not repeat the claim; this one does not make it either.** What R182
 guarantees is the *sequence*, not that no further field moves before [USER]
-reaches the slate — and the sequence handles this case exactly as it handled
-the last one: the world moves, the packet catches up, then the slate is
-entered, then the countersign. Everything above is inside one settled world.
+reaches the slate — and the sequence has now handled the case three times
+running, identically: the world moves, the packet catches up, then the slate is
+entered, then the countersign.
+
+**One honest note on how large this catch-up is, because it is much larger than
+the last two.** The fourth re-stamp moved one field by one integer and could
+argue, exactly, that the change reached none of this cell's three arms. This
+one moves three fields across thirteen bumps, and **it cannot make that
+argument and does not try**: items 12–15 reach all three arms, the shelf is
+renumbered for two of them (item 15), and `D16`/`D17` move prices the buy
+policy reads on every shelf entry (item 13). Everything above is nonetheless
+inside one settled world, and the within-cell arm contrast Q1–Q4 asks is
+unaffected for the reason it always was — both arms sit in that one world and
+differ only by the `companions` flag.
+
 What remains on the `M14` row is **entering the ruled §5 slate and then the
 countersign** — in that order, and neither is done here.
 
@@ -311,6 +526,29 @@ one change to the *world*), stated without softening:
   the changed code at all. It is named rather than left to the stamp because
   "the shop cannot see the drafter" would be false, and the reason it moves no
   number here is a specific one worth writing down rather than a general one.
+- The **`EB-118` richness pass and `EB-136`** (items 12–15) are world changes
+  outside the channel, on the same footing as everything above: identical in
+  both arms, so none of them can create or hide an arm difference, and all of
+  them named rather than left to the stamp. **Two of them are inside the
+  machinery this cell uses, and the previous bullet's escape hatch is not
+  available to either.** `D16` and `D17` move the drafter's PRICE TABLE, and
+  the shop buys a card iff the draft policy would draft it — so a price move is
+  read on every shelf entry in every arm, not confined to a limb no arm
+  selects. And item 15's pool growth **renumbers the shelf** for klee and
+  furina: the rarity odds are unmoved, but `rng.choice` now maps the same draw
+  to a different card out of a larger Uncommon bucket. The cost is the cost
+  items 4, 5 and 8 already carry, larger again: **this cell's absolute numbers
+  are comparable to no earlier read at all.** The within-cell arm contrast is
+  unaffected, and that is the only thing Q1–Q4 rest on.
+- **What is NOT claimed for items 12–15.** No same-seed byte-identity re-run of
+  this cell's own three arms was taken either side of any of these bumps, and
+  none is asserted — item 6's proof shape is not available here and is not
+  borrowed. What is offered instead is per-bump reach, named arm by arm, with
+  the evidence for each labelled as what it is: measured (`furina/salon`
+  byte-identical across `P8`), code-path (`P10`'s two-carrier scope, `C14`'s
+  and `P9`'s "no modal card in this pool"), or test-asserted (`P10`'s
+  carrier sweep). **Where a bump reaches an arm, it is stated plainly rather
+  than argued down.**
 
 Landing them apart would be worse, not better. It would mean either measuring
 the new world with a broken instrument, or measuring the old world with the
@@ -381,13 +619,32 @@ the channel should be re-priced or re-stocked. That is a design call and it is
   only difference between the two arms; same seeds, same characters, same
   policy, same everything else.
 - Characters: unchanged — `klee`/demolition, `furina`/salon, `kokomi`/priest.
-- World: **`RT12/D15/P7/C11`** — the world enumerated in §2, the X7/X8 rarity
+- World: **`RT12/D17/P10/C19`** — the world enumerated in §2, the X7/X8 rarity
   erratum included. The report must carry the full run-cell stamp (`RT/D/P/C`)
-  or it is not citable (R68), and it must read `RT12/D15/P7/C11` or it is not
+  or it is not citable (R68), and it must read `RT12/D17/P10/C19` or it is not
   *this* registration's measurement.
-- Every output line the instrument printed before the repair still prints, so
-  the pre-existing reads stay reproducible. The new reads are printed on lines
-  labelled `NEW`.
+- **The instrument does not print that stamp itself, and the fix is procedural,
+  not an edit to the instrument.** `tier05/exp_shop_companion_channel.py` calls
+  `model.run_many` directly rather than running through a `Cell`, so its header
+  line reads only `§4.7 companion channel -- N runs/arm, seed 20260725`. Left
+  alone, that would make the report uncitable under R68 the moment it is
+  produced — the requirement in the bullet above would be unsatisfiable
+  mechanically. **§7.1 closes it with a provenance header on the results
+  artifact**, on the `payoff-reach` precedent, and the instrument is not edited:
+  a script is not tuned inside the window of the registration that is about to
+  run it. (Recorded here rather than filed silently: the gap is a real one and
+  a future re-run of this cell would be better served by the instrument taking
+  a `Cell`.)
+- Every output line the instrument printed **before the 2026-08-10 repair**
+  still prints, so the pre-existing reads stay reproducible. The new reads are
+  printed on lines labelled `NEW`. **Two of those `NEW` lines were themselves
+  replaced on 2026-08-11 and the packet says which**, because "every line still
+  prints" would otherwise be read as covering them: the money header gained
+  `, AND DURING THE VISIT`, the counter `priced_out` was renamed
+  `unaffordable_on_arrival`, and the line `NEW priced out: none -- gold was
+  never the constraint` — the unsupported conclusion §1 indicts — was
+  **deleted** and replaced by three counted lines. Nothing above the file's own
+  `--- NEW reads (2026-08-10)` marker moved at all.
 
 **Proposed n and seed** — from the prior run's own convention, which is the
 only convention this cell has:
@@ -490,9 +747,77 @@ run does not start until they are filled and this packet is countersigned.**
 
 ## 7. What happens when it is countersigned
 
-1. [USER] fills §5 and countersigns; the filled predictions land as their own
-   commit, before any seed in the registered range is run.
+1. [USER] enters the ruled slate into §4 and §5 and countersigns — **in that
+   order**; the filled predictions land as their own commit, before any seed in
+   the registered range is run.
 2. The cell runs at the §4 n and seed, under the §2 registered world
-   stamp as re-stamped (RT12/D15/P7/C11 at the fourth re-stamp).
+   stamp as re-stamped (`RT12/D17/P10/C19` at the fifth re-stamp).
+   **The exact commands are at §7.1; nothing is left to decide at run time.**
 3. The report is published with its full stamp, graded against §5 blind.
 4. This packet and its EXPERIMENTS pointer leave HEAD when the grade lands.
+
+### 7.1 The exact run, once §4/§5 are entered and the packet is countersigned
+
+**Nothing here is a decision.** The arms, characters, seed and instrument are
+all fixed above; the one value that comes from the slate is `n`. Run from the
+repo root; `PYTHONPATH=.` is required for the sim entry points
+(`OPERATIONS.md`).
+
+**(0) Confirm the world, before anything else.** §2's stamp is a precondition,
+not a label, and the instrument cannot check it for you (§4):
+
+```
+PYTHONPATH=. python3 -c "from tier05 import cells; v=cells.CANONICAL.versions; print('RT{RT}/D{D}/P{P}/C{C}'.format(**v))"
+```
+
+This must print exactly `RT12/D17/P10/C19`. **If it prints anything else the
+world has moved again: stop, re-stamp, and do not run.**
+
+**(1) The run.** The script takes one positional argument, the runs per arm per
+character:
+
+```
+PYTHONPATH=. python3 -m tier05.exp_shop_companion_channel <RUNS> | tee review/active/shop-rerun-results-2026-08-25.txt
+```
+
+- `<RUNS>` is **§4's `n` as entered by the slate**. §4 currently reads
+  `RUNS = 500`, and the `M14` row records the ruled slate raising it to
+  **1,000 per arm per character** as part of the fill — so this is expected to
+  read `... 1000`, giving 3 characters × 2 arms × 1,000 = **6,000 runs**.
+  **Whatever §4 says after the entry governs; this line does not set it.**
+- **`SEED = 20260725` is a module constant and is not a command-line
+  argument.** It is not passed and must not be changed.
+- **There is no `--jobs` and there must not be**: the two arms differ by a
+  monkeypatch of `shop.visit_shop`, which worker processes would not inherit.
+  This runs single-process by construction.
+- **THIS INSTRUMENT HAS NO SMOKE PATH, AND THAT IS A HAZARD.** Unlike the
+  `EB-17p` sweep, there is
+  no `--smoke` flag and no excluded seed base: *every* invocation, at any `n`,
+  runs on the registered seed `20260725`. **A "does it run" check is therefore
+  a read of the registered range.** The only pre-run check that is safe is an
+  import, which executes no runs:
+  `PYTHONPATH=. python3 -c "import tier05.exp_shop_companion_channel"` —
+  verified clean at this world on 2026-08-25.
+
+**(2) Publish the raw output with a provenance header**, on the payoff-reach
+precedent — the instrument's own stdout, unedited, under a header naming the
+registration, the run date, the world, the instrument and the commit. **This is
+what makes the report citable**, because the instrument prints no `RT/D/P/C`
+of its own (§4). The header must carry, at minimum:
+
+```
+registration  review/active/shop-rerun-registration-2026-08-10.md §2, §4
+run date      <date>
+world         RT12/D17/P10/C19   (verified by step (0) at run time)
+commit        <the main SHA the run was taken at>
+instrument    tier05/exp_shop_companion_channel.py
+n / seed      <RUNS> per arm per character / 20260725
+arms          companions off vs companions on; klee/demolition,
+              furina/salon, kokomi/priest
+```
+
+**(3) Grade blind against §5**, which is not edited by the grade. The grade is
+its own commit.
+
+**The output of (1) is not opened by whoever filled §5 before (3) is
+recorded.** That is the blind in blind grading, and no command can enforce it.
