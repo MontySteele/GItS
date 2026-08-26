@@ -139,7 +139,11 @@ def _est(state: CombatState, val, default: int = 0) -> float:
 #  The two collections below are that hole made visible. Every predicate any
 #  sheet PRINTS must appear in exactly one of them, and
 #  `test_eb144_predicate_literacy.py` fails the build otherwise -- a lint, not
-#  a comment, because the failure mode is silence.
+#  a comment, because the failure mode is silence. WHICH sheets are loadable
+#  depends on the checkout: the roster always, the `real_*` reference pools
+#  only where `game_ref/` is present, so the reference half of that lint is
+#  discharged by the S7 gate in `klee-mod/build/validate.ps1` and skipped
+#  everywhere else.
 #
 #  SCORABLE: evaluated live at score time, so the correct branch is scored.
 #  BLIND:    MID-RESOLUTION by nature -- the fact the branch reads does not
@@ -186,6 +190,30 @@ BLIND_PREDICATES = frozenset({
     # the card, which the pilot deliberately does not do.
     "reaction_triggered_by_this",
     "killed_target",
+    # The three below are printed ONLY by the `real_ironclad` / `real_silent`
+    # reference pools, which live in the gitignored `game_ref/` and so are
+    # invisible to a fresh clone and to CI. They were untriaged until the S7
+    # deploy gate -- the one place the suite runs WITH `game_ref/` present --
+    # went red on them.
+    #
+    # `killed_target_fatal` (ic_feed, si_the_hunt) and `drew_skill_this_card`
+    # (si_escape_plan) are `killed_target`'s own class: a fact produced by
+    # this card's earlier ops, mid-resolution, unanswerable at score time
+    # without simulating the card.
+    "killed_target_fatal",
+    "drew_skill_this_card",
+    # `self_has_power_tracking` (si_tracking) is NOT that class -- it is a
+    # pure read of a power the player already holds, and
+    # `effects._predicate` would answer it live and correctly. It is declared
+    # blind anyway, and deliberately: these two collections are read by the
+    # lint and by nothing else (`_active_effects`'s if-chain names its
+    # predicates itself), so a name landing here moves no measured number,
+    # while making it SCORABLE would change how the `real_silent` anchor
+    # scores its hand and so force a `P` stamp bump -- and a standing
+    # re-baseline is being taken at `P11` right now. The live read is a
+    # candidate for a future `P` window; it is not a defect, so it is not
+    # backlog.
+    "self_has_power_tracking",
 })
 BLIND_PREDICATE_PREFIXES: tuple[str, ...] = ()
 
