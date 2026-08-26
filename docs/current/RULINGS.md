@@ -221,8 +221,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R209 | 2026-08-25 | Sango Isshin raises its bar to the rate the ratification described | `0f1f57f` |
 | R210 | 2026-08-25 | EB-136 takes full parity, and the row stops asking | `a9ff0dd` |
 | R211 | 2026-08-25 | the W3 slate is ratified, and two windows are named for what leaves it | `63a27f9` |
+| R212 | 2026-08-26 | the delegation ladder — seven standing authorizations | `c99f31f` |
 
-210 rows over the R1..R211 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 99 from a commit message, 0 unresolved.
+211 rows over the R1..R212 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 100 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 

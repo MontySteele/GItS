@@ -16,7 +16,8 @@ repo.
   - open engineering work → `docs/current/BACKLOG.md`
   - measurement law + active registrations → `docs/current/EXPERIMENTS.md`
   - build / test / sim / codegen / art / worktrees → `docs/current/OPERATIONS.md`
-  - a ruling by number → `docs/current/RULINGS.md` (being built)
+  - a ruling cited by number → `docs/current/RULINGS.md` (generated index:
+    id, date, one line, and the commit or ledger to retrieve its words from)
   - stamp history (what a past RT/D/P/C level covered) → `docs/current/STAMPS.md`
   - the **one** YAML sheet the task touches (`docs/*-cards.yaml`,
     `*-upgrades.yaml`, `*-companions.yaml`, …). Never bulk-load all YAML.
