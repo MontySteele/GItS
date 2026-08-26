@@ -43,12 +43,12 @@ commit; **`deploy`** — `build_pck` → `deploy` → `validate`; **`worktree`**
 add, the no-link rule, purge.
 
 Lints, all registered in `run_lints`'s `ci` lane: `register-shape`,
-`stamp-rows`, `sheet-stamp`, `experiments-active`, `hook-self-tests`. The four
+`stamp-rows`, `sheet-stamp`, `experiments-active`, `hook-self-tests`. The
 register/stamp lints ship **green** by carrying a curated `DEBT` set of the
-rows that fail today — 42 register rows, 3 stamp rows, 4 registrations — so
-the gate binds from this commit forward while the existing rows stay a work
-list. A `DEBT` entry that has since become clean FAILS, so the sets can only
-shrink; empty one and the lint becomes ordinary.
+rows that failed when the gate was born, so it binds from that commit forward
+while the old rows stay a work list. Each lint prints its own DEBT count — the
+number is not repeated here because it only shrinks: a `DEBT` entry that has
+since become clean FAILS, and an emptied set makes the lint ordinary.
 
 **What a mechanism cannot reach.** A hook sees a tool call, not an intention:
 nothing here can tell that a *sitting* skipped its blind grade, that a `QUEUE`

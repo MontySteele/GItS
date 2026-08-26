@@ -8,9 +8,11 @@ description: Take a registered experiment's run - verify the pinned world stamp,
 A sitting is not "run the sim and look". It is a countersigned packet executed
 literally. Commands run from the repo root.
 
-1. **Refuse to start unless the packet is ready** — its prediction slate filled
-   and its countersign line signed, each as its own commit, both BEFORE this
-   run. Predictions are filled against the settled world, never the result.
+1. **Refuse to start unless the packet is ready** — its prediction slate
+   committed as DRAFTED, in its own commit, BEFORE any seed runs (R212: the
+   pre-registration is the commit-before-run, not who wrote it). [USER]
+   countersigns in batch or vetoes within 5 days; a slate inside that window
+   may run. Predictions are filled against the settled world, never the result.
 
 2. **World check. The run does not start until this prints the pinned stamp.**
 
@@ -19,9 +21,11 @@ literally. Commands run from the repo root.
    ```
 
    Compare with the stamp in the packet header / §2 / §4 (e.g.
-   `RT12/D17/P10/C19`). **Mismatch is tripwire S1: STOP, do not run.**
-   Re-stamp the packet against the live world and re-register — a tripwire
-   naming a superseded world is a citation defect, not a finding.
+   `RT12/D17/P10/C19`). **Mismatch is tripwire S1: STOP, do not run.** The
+   packet is NOT re-signed (R212 abolished restamp-and-hold): re-draft only
+   the slots the move affects, disclose the stamp diff in the packet's row,
+   then run against the live world — a tripwire naming a superseded world is
+   a citation defect, not a finding.
 
 3. **Prove the tree is green first**, so a red suite cannot be blamed on the run:
    `python -m pytest tier0/tests tier05/tests -q -n auto --dist loadscope`
