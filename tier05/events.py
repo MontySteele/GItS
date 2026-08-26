@@ -332,7 +332,94 @@ def _enchant_targets(opt: dict, st: EventState) -> list[int]:
     return out
 
 
-def option_value(opt: dict, st: EventState, _depth: int = 0) -> float:
+def _adds_of(opt: dict, st: EventState) -> int:
+    """How many cards this option would put INTO THE DECK.
+
+    The forecast half of `EventState.note_add`: every site `resolve` ticks
+    the door at has a line here and no site has two. Written against the same
+    option keys the valuation below already reads, so a key that gains a
+    value term and forgets its add count is visible as a diff of one function
+    against its neighbour rather than as a silent under-credit.
+
+    It is an UPPER BOUND in exactly one place, and only for one reason: a
+    card screen adds nothing when the drafter skips every offer
+    (`DRAFT_SKIP_THRESHOLD`). Every other site is exact -- the emptiness
+    cases that make an add fail (`random_card` with no legal pool,
+    `pick_cards` with a short offer list, a `transform` with no legal victim)
+    are counted here the same way `resolve` counts them.
+    """
+    n = 0
+    if opt.get("duplicate_deck"):
+        n += len(st.deck_ids)
+    if opt.get("transform"):
+        # `_worst_cards` picks victims from the non-excluded deck, so the
+        # count of legal victims is the count of replacements that arrive.
+        legal = sum(1 for cid in st.deck_ids
+                    if loader.peek_card(cid).rarity not in _NEVER_TRANSFORMED)
+        n += min(opt["transform"], legal)
+    n += 1 if opt.get("curse") else 0
+    n += 1 if opt.get("add_card") else 0
+    n += 1 if opt.get("add_ancient") else 0
+    if opt.get("random_card"):
+        spec = opt["random_card"]
+        if _filtered_pool(st, spec):
+            n += spec.get("n", 1)
+    if opt.get("pick_cards"):
+        spec = opt["pick_cards"]
+        pool = rewards.character_pool(st.character)
+        if any(cs for cs in pool.values()):
+            n += min(spec["take"], spec["of"])
+    n += 1 if opt.get("card_reward") else 0
+    n += opt.get("card_screens", 0)
+    return n
+
+
+def _book_credit(opt: dict, st: EventState, held) -> float:
+    """HP this option is worth THROUGH Book of Five Rings (EB-129 / R205).
+
+    The relic pays 20 HP every fifth card that enters the master deck, and
+    `EB-111` made event adds count toward that -- but only on the paying
+    side. The pilot still scored the fifth card exactly like the first, so a
+    run holding the Book at 4-of-5 could walk past a free card and take the
+    other branch. This is the seeing side.
+
+    THE VALUE IS THE REALIZED HEAL, CLIPPED TO MISSING HP, and both halves
+    are the ruling's:
+
+      * realized -- the chunk arithmetic is not re-derived here. `held`
+        is asked (`book_heal_for`), so a batch that crosses no boundary is
+        worth nothing and a batch that crosses two is worth two heals.
+        `st.cards_added` is added in because the ledger is in two pieces
+        mid-visit: the run layer hands the visit's tally to
+        `note_cards_added` only when the visit ENDS, so an earlier rung of
+        an escalation ladder has already moved the pending count without
+        `held` knowing it yet.
+      * clipped -- a heal cannot restore HP that is not missing. Without the
+        clip a full-HP run would pay real costs for a heal it cannot bank.
+
+    NO NEW WEIGHT ENTERS, and none is owed: option value is already
+    HP-denominated, so the relic's own printed 20 is the price.
+
+    Its one honest approximation is the same one every term here makes: the
+    missing HP is read BEFORE this option's own HP moves, so an option that
+    also costs HP is credited slightly low and one that also heals slightly
+    high. `resolve` applies costs first and heals last, and reproducing that
+    order here would be a second copy of it.
+    """
+    if held is None:
+        return 0.0
+    adds = _adds_of(opt, st)
+    if adds <= 0:
+        return 0.0
+    pending = st.cards_added
+    raw = held.book_heal_for(pending + adds) - held.book_heal_for(pending)
+    if raw <= 0:
+        return 0.0
+    return float(min(raw, max(0, st.max_hp - st.hp)))
+
+
+def option_value(opt: dict, st: EventState, _depth: int = 0,
+                 held=None) -> float:
     """What this option is worth, in HP. Positive is good.
 
     ESCALATION IS VALUED THROUGH, not at face value. An option that only opens
@@ -344,6 +431,11 @@ def option_value(opt: dict, st: EventState, _depth: int = 0) -> float:
     the next screen actually computes, and it has no free parameter to tune.
     Tablet of Truth had the same latent bug: with lookahead it climbs one rung
     and stops, which is where the max-HP price overtakes the upgrade.
+
+    `held` is the run's relic holder, or None for a bare run and for every
+    caller that only wants the content's own value. It is read by exactly one
+    term -- `_book_credit` -- and a run without the Book scores identically
+    whether it is passed or not.
     """
     v = 0.0
     v += opt.get("hp", 0)
@@ -390,10 +482,19 @@ def option_value(opt: dict, st: EventState, _depth: int = 0) -> float:
     v += POTION_HP * opt.get("potion", 0)
     if opt.get("spend_potion"):
         v -= POTION_HP
+    # EB-129 (R205): the cards this option adds are ALSO worth whatever Book
+    # of Five Rings pays for crossing its next chunk boundary. Beside the
+    # other HP terms because it IS one -- see `_book_credit`.
+    v += _book_credit(opt, st, held)
     nxt = opt.get("escalate")
     if nxt and _depth < _LOOKAHEAD_DEPTH:
         stages = options_of(get_event(nxt))
-        v += max(option_value(o, st, _depth + 1) for o in stages)
+        # The next rung is valued against the ledger as it stands NOW: the
+        # lookahead has never applied this stage's effects before valuing the
+        # one after it (the deck, HP and gold it reads are this stage's too),
+        # and the Book credit inherits that limit rather than inventing a
+        # second, half-applied state to read.
+        v += max(option_value(o, st, _depth + 1, held=held) for o in stages)
     return v
 
 
@@ -441,13 +542,19 @@ def _fit(opt: dict, st: EventState) -> float:
     return draft.score_offer(loader.peek_card(cid), deck, st.archetype)
 
 
-def choose(rng: random.Random, event: dict, st: EventState) -> dict | None:
+def choose(rng: random.Random, event: dict, st: EventState,
+           held=None) -> dict | None:
     """Greedy on `option_value`, then on card fit, ties by declaration order.
-    None if the event left nothing legal (possible on a nearly-dead run)."""
+    None if the event left nothing legal (possible on a nearly-dead run).
+
+    `held` is forwarded to the valuation and nothing else; a bare run passes
+    None and picks exactly as it always did.
+    """
     opts = available(event, st)
     if not opts:
         return None
-    return max(opts, key=lambda o: (option_value(o, st), _fit(o, st),
+    return max(opts, key=lambda o: (option_value(o, st, held=held),
+                                    _fit(o, st),
                                     -event["options"].index(o)))
 
 
@@ -709,7 +816,7 @@ def visit(rng: random.Random, act: int, st: EventState, seen: set[str],
     while True:
         seen.add(event["id"])
         event = materialize(rng, event)
-        opt = choose(rng, event, st)
+        opt = choose(rng, event, st, held=held)
         if opt is None:
             return
         resolve(rng, event, opt, st, held=held, bag=bag, policy=policy,
