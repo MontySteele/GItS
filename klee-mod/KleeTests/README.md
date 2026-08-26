@@ -1,7 +1,17 @@
 # KleeTests — the mod's C# test suite
 
 `dotnet test` against the **real** `klee.dll` and the **real** `sts2.dll`, with
-no Godot, no scene tree and no game launch. Registered as `EB-105`.
+no Godot, no scene tree and no game launch. Built as `EB-105`, whose BACKLOG
+row closed on 2026-08-26 (R212) — **this file is the record now**: the headless
+boundary, what co-op coverage exists and what is still play-only, and the three
+audit findings pinned as the C# authority record all live below.
+
+Two things that were only ever in the row, kept here because nothing else says
+them. **The next leg**, if anyone takes one, is a live-`CombatState` harness:
+it would move `Deploy`/`Bow`, card `OnPlay` bodies and off-seat attribution
+from the play-only list into the boundary. And **tier 0.5 models ONE seat**, so
+no sim run can ever disagree with the mod about a two-seat board — that is why
+a partial C# backstop is worth having at all.
 
 Before this existed the repo had no C# test project at all, and the shipped
 source said so in nine places: tier 0.5 models one seat, so **every co-op

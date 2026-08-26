@@ -288,11 +288,25 @@ with (R97/5b).
 
 ## Surviving EB-1 (the Punch Off soft-lock)
 
-BACKLOG `EB-1` is root-caused, upstream, and not ours to fix: entering the
-Punch Off room spins the main thread on an unbounded engine-error loop. The
-process stays **alive**, the wire goes **dead**, `godot.log` grew to **2.4 GB
-in ~30 minutes**, and the run save is poisoned — `continue` re-enters and hangs
-again, so the only exit is `abandon_run` from the main menu.
+`EB-1` is root-caused, upstream, and not ours to fix — **this section is its
+durable record.** The BACKLOG row that used to carry it has left HEAD: its
+acceptance was MET on 2026-08-13 and a hazard marker is not open work, so under
+R212 the hazard lives where the people who need it already read.
+
+`MegaCrit.Sts2.Core.Models.Events.PunchOff.PunchEachOther()` instantiates a
+`PackedScene` whose GPUParticles RID comes back null, and the engine logs
+`ERROR: Parameter "particles" is null` once per particle-property setter in an
+**unbounded loop**. It is a soft-lock, not a crash, and **not seed-specific**:
+the main thread spins, nothing repaints, the process stays **alive**, the wire
+goes **dead**, `godot.log` grew to **2.4 GB in ~30 minutes**, and the run save
+is poisoned — `continue` re-enters and hangs again, so the only exit is
+`abandon_run` from the main menu. **Every live session has to know that
+recovery.**
+
+**A route policy that avoids the room is NOT available.** The map on the wire
+carries a node's `PointType` and never which event sits on it, so nothing short
+of refusing every `?` node would do it — and that would move every soak number.
+Refusing the event at entry (below) is the only guard that costs nothing.
 
 The soak carries two legs against it, and neither fixes anything:
 

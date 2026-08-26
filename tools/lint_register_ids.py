@@ -143,10 +143,10 @@ CEILINGS: dict[str, int] = {
 # That second half is the whole mechanism — see rule 6 in the docstring.
 OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
-        1, 12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 67, 70, 71,
-        74, 78, 80, 83, 84, 105, 116, 128, 137, 146,
+        12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 67, 70, 71,
+        74, 78, 80, 83, 84, 116, 128, 137, 146,
     }),
-    "M": frozenset({10, 13, 14, 16, 17, 19, 26, 45}),
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
