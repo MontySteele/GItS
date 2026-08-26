@@ -117,7 +117,10 @@ both Salon verbs read the resolver's `salon_tick_amount` — no new dial.
 **`EB-145`**: the score forecasts its own selection — Tide of Names, Pearl
 Barrage. **`EB-129`** pays the Book of Five Rings chunk at event valuation
 (R205's own-window gate set aside by [USER], null scratch). **Archive: roster
-combat + tier-0.5; anchors provably unmoved.** **The re-baseline was TAKEN at
+combat + tier-0.5. `EB-144` provably cannot move the `ref_*` anchors (they
+print no conditional — asserted by test); `EB-129`'s event valuation is
+generic, and the anchor ARMS did move by a few runs in 3000, inside interval
+(§4.2 of the read below).** **The re-baseline was TAKEN at
 `RT12/D18/P11/C20`** (`review/active/sitting-reads-2026-08-26-c20-d18-p11.md`,
 `main` = `190e598`, 2026-08-26) **and its caveat check graded all three of the
 standing read's diagnostic caveats CLEARED against code** — the hold-versus-spend
