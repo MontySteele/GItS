@@ -3,7 +3,7 @@
 > **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
 Scope: `understudy/` — the bot playtest apparatus. Tests live at
-`tier0/tests/test_understudy_{rng,soak,policy_v1,hangwatch,give_card,frames}.py`.
+`tier0/tests/test_understudy_{rng,soak,policy_v1,hangwatch,give_card,frames,scenario}.py`.
 
 ## 1. Purpose
 
@@ -40,6 +40,12 @@ python3 -m understudy.soak --runs 20 --report
 python3 -m understudy.soak --runs 1 --no-setup            # attach to a live game
 python3 -m understudy.soak --runs 1 --allow-hazard-events # EB-1: lift the register
 
+# EB-142 targeted scenario: give a card, set the board, play it, assert
+# (ATTENDED ONLY -- never in a soak)
+python3 -m understudy.scenario check                      # parse only, no game
+python3 -m understudy.scenario run understudy/scenarios/spark-gate-refusal.yaml \
+    --why "EB-142: does the Spark gate show as unplayable"
+
 # Reading output
 python3 -m understudy.report [<stamp>]                    # morning report
 python3 -m understudy.analyze understudy/logs/phase0-<seed>.jsonl
@@ -52,7 +58,10 @@ Library level: `bridge.get_state/post/current_seed/set_speed/give_card`
 (`policy_v0.py:459`); `policy_v1.decide(state, memo)` (`policy_v1.py:1022`);
 `naming.describe(state, action)` / `hand_names` (`naming.py:114,237`);
 `adapter.build_combat_state` / `deck_cards` (`adapter.py:198,292`);
-`rng.policy_rng(label)` (`rng.py:38`).
+`rng.policy_rng(label)` (`rng.py:38`); `scenario.load` /
+`scenario.Runner(scenario, why, wire=bridge)` (`scenario.py`);
+`soak.run_scripted(policy, stamp, ...)` — the setup/swap/teardown seam the
+two probes and `scenario.py` share.
 
 ## 3. Key invariants
 
@@ -193,6 +202,32 @@ Library level: `bridge.get_state/post/current_seed/set_speed/give_card`
   claim is that its runs are generated runs; the absence is pinned by
   `tier0/tests/test_understudy_give_card.py`. Every grant carries the sentence
   saying the run is no longer comparable to any other (`bridge.GRANT_GUARDRAIL`).
+- **`scenario.py` is the same door widened, under the same rule** (EB-142). It
+  grants a card AND writes a board (`/api/v1/gits/debug_state`:
+  `set_resource`, `set_energy`, `set_hp`, `set_block`, each through the game's
+  own mutator, `why` REQUIRED and logged), so a scenario run is comparable to
+  nothing. Attendedness is pinned by
+  `tier0/tests/test_understudy_scenario.py`, which walks `soak.py`'s imports
+  with the AST rather than grepping — `soak.py` NAMES `scenario.py` in the
+  comment explaining why `run_scripted` was factored out, and a substring pin
+  would read that explanation as the violation it is explaining. **It asserts
+  numbers only** — HP, Block, power stacks, resource amounts, `prompt`,
+  `can_play`, `unplayable_reason`, printed text — and a failed assert is a
+  DEFECT, never a design finding.
+- **A scenario posts its OWN actions, unlike the two probes.**
+  `soak._mechanical_action` claims `hand_select` BEFORE `policy_v1.decide` is
+  asked and answers it with card 0 + confirm. A scenario whose question is
+  WHICH card gets exhausted (`the_tide_remembers` scales off the exhausted
+  card's cost) cannot live with that, so the runner executes the whole scenario
+  inline at the first combat screen and hands combat back afterwards. Stated
+  cost: the driver's watchdog and per-action telemetry do not see those posts.
+- **Sparks cannot be set by `set_resource`, and that is a fact about the game,
+  not a gap in the door.** Sparks are a POWER
+  (`klee-mod/KleeCode/Powers/SparkPower.cs`), not one of BaseLib's registered
+  CustomResources — that registry reaches Fanfare, Encore, Charge, the two
+  Bursts and the three Spotlight meters. Both Klee scenarios climb the bank by
+  playing Sparkly Treasure (cost 0, `gain_spark 1`), which is the route
+  `gits/GitsDebugState.cs`'s header prescribes for anything it does not set.
 - **Ordering traps in the driver:** the character stays in `options` after
   being picked, so pick once then `confirm` or loop forever
   (`soak.py:810-820`); a play the bridge rejected is not re-offered this turn

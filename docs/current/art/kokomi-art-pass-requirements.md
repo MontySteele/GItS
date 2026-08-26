@@ -2,9 +2,12 @@
 
 > **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
-**Date:** 2026-07-25
-**Status:** card shortlists built and provisionally applied (77 faces, awaiting
-the [USER] taste pass); **character-shell track DONE** — see §5a
+**Date:** 2026-07-25 (census recounted and `EB-69`'s fourteen shortlisted 2026-08-26)
+**Status:** card shortlists built for every face on the sheet but
+`watch_of_the_shallows`, awaiting the [USER] taste pass; `EB-69`'s fourteen are
+shortlisted and rendered but **NOT applied** — their rank 1 is a proposal, not
+a provisional pick, and `art_coverage` bills all fourteen as MISSING until the
+picks land; **character-shell track DONE** — see §5a
 **Canonical content:** `docs/kokomi-cards.yaml`, `docs/inazuma-companions.yaml`
 **Bill owner:** `tools/art_coverage.py` — if this doc and the tool disagree, the tool is right (the lesson of the Furina bill correction).
 
@@ -16,10 +19,16 @@ the [USER] taste pass); **character-shell track DONE** — see §5a
 | Companions (Inazuma) | 15 |
 | **Total card-sized outputs** | **91** |
 
-*(Bill history: 2026-08-23, `EB-69` — the personal-sheet row reads **76**; the ruled 14-card pool fill
-landed (R198) and is 14 faces this table now carries and the art pass has NOT yet produced. See the slot
-arithmetic below: the plan is **6 slots SHORT**, which is the first time this document has recorded a
-deficit rather than headroom. Filed as `EB-121`. Earlier: 2026-07-26, post-merge sweep, the personal-sheet
+*(Bill history: 2026-08-26, `EB-121` — the census was RECOUNTED by tool
+(`tools/art_source_census.py`) and the deficit is **gone**: **34 viable
+distinct sources yielding 93 (source, anchor) slots** against 76 faces, which
+is **+17 slots of headroom**. The recount also produced the shortlists, so all
+fourteen `EB-69` faces now hold ranked plan rows and the only unfilled face on
+the sheet is `watch_of_the_shallows`, which predates the fill. Earlier:
+2026-08-23, `EB-69` — the personal-sheet row reads **76**; the ruled 14-card
+pool fill landed (R198) and is 14 faces this table carries and the art pass had
+not yet produced, read at the time as 6 slots SHORT. Earlier: 2026-07-26,
+post-merge sweep, the personal-sheet
 row read **58** and became **62**. The Neap Tide
 amendment added four faces this table did not follow — R73's
 `before_sun_and_moon` and the three F4 Sly-lane bridge rows (`ebb_tide`,
@@ -63,8 +72,19 @@ inspection disqualified two whole families the raw counts had included.
 | `sticker` | 15 | 11 Paimon's Paintings emoji (300–340², transparent, **no text**), 3 Expressions (420²), Side by Side (263×315) |
 | `tcg` | 3 | Character Card + Platinum + Golden, 420×720 each |
 | `item` | 5 | Sango Pearl Wild 797², Vision 400², Sango Pearl 256², The Deep 256², Item 256² |
-| `vfx` | **0 usable** | see below — every one is a sigil |
-| **Viable distinct sources** | **33** | against **76** personal faces (58 when this was counted; +4 in the Neap Tide amendment; +14 at `EB-69`) |
+| `vfx` | **1 usable of 9** | see below — every one but Bake-Kurage Summon is a sigil or a clip thumbnail |
+| **Viable distinct sources** | **34** | against **76** personal faces (58 when this was counted; +4 in the Neap Tide amendment; +14 at `EB-69`) |
+
+*(Recounted 2026-08-26 by `tools/art_source_census.py --character kokomi`,
+which reads the pixels in `art/raw/` and the claims in `art/plan.tsv` rather
+than anyone's memory. The 2026-07-25 hand count read **33**; the correction is
+**Bake-Kurage Summon**, which this section already named as the one piece of
+kit art that works and which the plan had already claimed at rank 1 for
+`bake_kurage`, but which the table below it never added. Everything else in the
+count survived the recount unchanged, register by register. One further source
+sat in `art/raw/` unmentioned by the plan at any rank —
+`Icon Emoji Paimon's Paintings 39 Sangonomiya Kokomi.png` — and is now
+shortlisted.)*
 
 ### `vfx` IS A DEAD REGISTER FOR HER — the single most important finding
 
@@ -117,30 +137,67 @@ wonder why the plan ignores them.
 
 ### Consequence for the plan: the unit is SLOTS, not sources
 
-33 sources against 76 faces means crop reuse is mandatory, as hybrid §2
+34 sources against 76 faces means crop reuse is mandatory, as hybrid §2
 anticipated. But the real currency turned out to be **(source, anchor)
 slots**: a large source backs several distinct faces, a small transparent icon
 backs exactly one.
 
+**The count below is COMPUTED, not estimated** — `tools/art_source_census.py`
+derives each source's valid anchor range from its own geometry (see *Anchors
+are computed, not chosen* below), spreads anchors across it at the tightest
+spacing the shipped plan uses (0.085), and caps the count per source at the
+crop-reuse budget. Per-source rows are in
+`docs/current/art/kokomi-source-census.tsv`; re-derive with
+
+```
+python tools/art_source_census.py --character kokomi --art-root <main checkout>
+```
+
 | Family | Sources | Slots |
 |---|---:|---:|
-| large splash (multi-anchor) | 10 | 38 |
-| tcg (multi-anchor) | 3 | 12 |
+| large splash (multi-anchor) | 10 | 49 |
+| tcg (multi-anchor) | 3 | 18 |
+| `Bake-Kurage Summon` (multi-anchor, filed `vfx`) | 1 | 6 |
 | item (single) | 5 | 5 |
 | sticker (single) | 15 | 15 |
-| **total** | **33** | **70** for 76 faces |
+| **total** | **34** | **93** for 76 faces |
 
-**Headroom is GONE, and the sign has flipped: 70 slots against 76 faces is a 6-SLOT DEFICIT**
-(`EB-69`, 2026-08-23). The fill added 14 personal faces to a plan that had 8 slots spare, so the source
-census has to be reopened or the crop-reuse rule has to stretch further than hybrid §2 anticipated. This is
-recorded, not solved: which source backs which of the fourteen new faces is an art call, and it is filed as
-`EB-121` rather than decided here. The 2026-07-26 reading, for comparison, was **8 slots spare**: The four Neap Tide faces
-were each given a source that NO card row held at rank 1 — Bake-Kurage Summon,
-Namecard Background The Deep, Expression 2, Profile — which was the last of the
-unclaimed-*source* slack, not of the slot slack. The distinction matters for
-whoever adds the next card: there are still spare anchors on the large splash
-and tcg families, so the next face is a re-crop of an already-used source, and
-it will need an L12 check rather than a hunt.
+**There is no deficit. 93 slots against 76 faces is +17 SLOTS OF HEADROOM**
+(recounted 2026-08-26, `EB-121`). What moved is not the inventory — it is the
+**crop-reuse budget**, and that budget is §6's first open question, which has
+never been answered. Run the same census at each candidate answer:
+
+| Crop-reuse budget | Slots | vs 76 faces |
+|---:|---:|---:|
+| 4 anchors per source | 74 | −2 |
+| 5 | 85 | +9 |
+| **6 — what the plan ALREADY SHIPS** | **93** | **+17** |
+| 7 | 100 | +24 |
+
+**The 70-slot figure reconciles exactly at a budget of 4**: 38 splash + 12 tcg
++ 5 item + 15 sticker is the census run with `--reuse-cap 4`, over the 33
+sources that count missed Bake-Kurage from. So the 2026-08-23 deficit was
+never a fact about the source pool; it was a stale budget. **And 4 is
+contradicted by shipped art** — `Sangonomiya Kokomi Card`, `Character
+Sangonomiya Kokomi Game`, `Character Card Showcase` and `Character Card` each
+carry **six** rank-1 anchors today. A budget of 4 could only be restored by
+re-cropping faces already rendered.
+
+The generated grid reproduces the shipped anchors **exactly** on six of the
+eight multi-anchor sources (Portrait, Introduction Card, Card, Game, Showcase,
+Character Card), which is what licenses using it to price the unclaimed ones.
+`Sangonomiya Kokomi Wish.png` is the one source whose four shipped anchors sit
+off-grid (`x0.33/0.40/0.47/0.53`, clustered in the low half of a range that
+runs to `0.67`); its free anchors are read off the census's `free_anchors`
+column rather than by subtraction.
+
+The 2026-07-26 reading, for comparison, was **8 slots spare**: the four Neap
+Tide faces were each given a source that NO card row held at rank 1 —
+Bake-Kurage Summon, Namecard Background The Deep, Expression 2, Profile — which
+was the last of the unclaimed-*source* slack, not of the slot slack. The
+distinction matters for whoever adds the next card: there are still spare
+anchors on the large splash and tcg families, so the next face is a re-crop of
+an already-used source, and it will need an L12 check rather than a hunt.
 
 **Anchors are computed, not chosen.** A `cover` focus is a *centre*, and the
 crop is clamped inside the image, so any anchor nearer an edge than half the
@@ -180,7 +237,7 @@ sweep is now **L12** in `art_lint`, and it immediately turned up three
 | Pair | Status |
 |---|---|
 | `catalytic_conversion` == `spark_collection` | already in `PENDING_RED_PEN` for a related L1 |
-| `crowd_work` == `standing_ovation` | shipped Furina art, allowlisted, **wants a re-pick** — blocked on a `standing_ovation` CARD contact sheet (BACKLOG `EB-76`) |
+| `crowd_work` == `standing_ovation` | shipped Furina art, allowlisted, **wants a re-pick** — no longer blocked: the pair contact sheet is produced (`art/contact_sheet_eb76_art_l12_pair.html`) and the pick is [USER]'s at the QUEUE Art-debt row |
 
 `blazing_delight` == `true_spark_knight` was the third pair when this was
 written; it was **retired 2026-07-25** and is not a live collision. Removed here
@@ -217,14 +274,32 @@ The assist lane is the happy accident of this pass: *A Moment Alone*,
 what a chibi reaction sticker is for, and the sticker pool is the one part of
 the inventory that is not scarce relative to its lane.
 
+**`EB-69`'s fourteen could not follow this table, and the reason is worth
+recording.** Five of them are assist-lane and the lane's natural register is
+`sticker`, but by the time they were shortlisted the item register was
+**exhausted** (5 of 5 claimed) and only four stickers remained free. So the
+fill leans on `tcg` (Character Card Golden, unclaimed at rank 1 until now) and
+on the unclaimed anchors of the large splash family — which is exactly where
+§2's recount said the headroom was. Register-by-lane is a preference, and the
+first thing scarcity spends.
+
 ## 5. Order of work
 
 1. Hunt the real inventory — **done**, this document.
 2. Ban what fails on sight — **done**, `art_lint.BANNED_SOURCE_FAMILIES`.
-3. Build `art/plan.tsv` shortlists — 3 ranked candidates per face, 73 faces.
+2a. **Price it.** `python tools/art_source_census.py --character kokomi` — how
+   many sources are viable, how many (source, anchor) slots they yield, and
+   which anchors are still free. Do this BEFORE shortlisting anything: the
+   free-anchor list is what a shortlist is drawn from, and a hand count of it
+   goes stale the moment the sheet grows (`EB-69` → `EB-121`).
+3. Build `art/plan.tsv` shortlists — 3 ranked candidates per face.
    Companions first (mechanical), then Kokomi by lane.
 4. `python tools/art_fetch.py` → `art/raw/` + `art/SOURCES.tsv`.
-5. `python tools/art_contact_sheet.py` → the artifact the taste pass reads.
+5. `python tools/art_process.py --assets <ids>` → `art/candidates/<id>/r*.png`,
+   then `python tools/art_contact_sheet.py --assets <ids>` → the artifact the
+   taste pass reads. From a worktree both take `--art-root <main checkout>`;
+   the art trees are gitignored and must **never** be linked in
+   (`OPERATIONS.md`, "Worktrees").
 6. **[USER] taste pass** — the picks are not mine to make. Klee's took three
    red-pen rounds (`docs/archive/klee-art-redpen-round2.md`, `round3.md`) and Furina's
    rejected 13 of batch 1.
@@ -303,8 +378,12 @@ hashes — the extraction is proven not to have moved one of her pixels.
 
 ## 6. Open questions for the taste pass
 
-1. **Crop reuse budget.** 45 cards over ~24 reusable sources is ~2 crops per
-   source. Furina's hybrid §2 capped this implicitly; is there a number you
+1. **Crop reuse budget — this is now the load-bearing question, not a tidy-up.**
+   §2's recount shows the whole surplus-or-deficit sign hangs on it: 4 anchors
+   per source is −2 slots, 6 is +17. The plan has ALREADY shipped 6 on four
+   sources without the number ever being stated, so the honest options are
+   ratify 6, or name a lower number and accept that shipped faces get
+   re-cropped. Furina's hybrid §2 capped this implicitly. Is there a number you
    want stated, or is it eyes-on per card?
 2. **Environment art as card faces.** Watatsumi Island / Shrine / Altar are
    on-theme for the priest lane but contain no character. Furina's pass

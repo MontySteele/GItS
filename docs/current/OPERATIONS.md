@@ -270,6 +270,34 @@ klee-mod\build\validate.ps1 -RunCsharpTests   # ... plus the C# suite (opt-in)
 cd klee-mod\KleeTests && dotnet test           # the C# suite on its own
 ```
 
+`deploy_bridge.ps1 -BuildOnly` lints the vendor pin, compiles the bridge into
+`klee-mod\dist\STS2_MCP`, and stops — the game directory is not touched and the
+running-game refusal is skipped, because a build holds no lock. That is the
+check a `vendor/STS2_MCP/gits/` edit wants from a worktree that has no business
+installing anything (`EB-142`).
+
+### Understudy — targeted scenarios (attended only)
+
+```
+python -m understudy.scenario check                            # parse only, no game
+python -m understudy.scenario run understudy/scenarios/spark-gate-refusal.yaml \
+    --why "EB-142: does the Spark gate show as unplayable"
+```
+
+Needs the bridge DEPLOYED (`klee-mod\build\deploy_bridge.ps1`, no `-BuildOnly`),
+`steam_appid.txt` in the game root, Steam running. Setup and teardown are the
+soak's, via `soak.run_scripted`; the scenario itself starts at the first fight.
+
+`--why` is required and is logged on every row, and every row also carries
+`bridge.GRANT_GUARDRAIL`: a scenario grants a card and writes a board through
+`/api/v1/gits/debug_state`, so **nothing measured on one is comparable to any
+soak, any run, or any other scenario**. Guardrail-7 and the no-fun rule are
+unchanged — it asserts numbers (HP, Block, power stacks, resource amounts,
+prompts, `can_play`, `unplayable_reason`, printed text) and a failed assert is a
+defect, never a design finding. It is deliberately unreachable from `soak.py`;
+`tier0/tests/test_understudy_scenario.py` pins that. Depth:
+`understudy/README.md` and `docs/current/atlas/understudy.md`.
+
 `KleeTests` (`EB-105`) runs the shipped `klee.dll` against the real game
 assemblies **headless** — no Godot, no launch. It is opt-in, not a deploy gate;
 its boundary and its co-op coverage are in `klee-mod/KleeTests/README.md`.

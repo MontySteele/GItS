@@ -1136,6 +1136,91 @@ def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
                        _spotlight_scale(state, card, amount))
 
 
+# EB-83. The power name is the op name: one string, so `powers`, the sidecar
+# and the emitted row cannot spell the same power three ways.
+BLOCK_AT_TURN_START = "block_at_turn_start"
+
+
+def block_at_turn_start_turns(fx: dict) -> int:
+    """The literal duration on one `block_at_turn_start` effect.
+
+    A LITERAL positive int, not `_amount`, on the `spend_spark_amount`
+    precedent and for a sharper version of its reason: this number is not
+    consumed once at play time, it decides how many FUTURE turns the power
+    survives, and a duration resolved against combat state at play time would
+    read as printed text that means something different every time it is
+    played. The AMOUNT may be a formula (it is snapshotted at play time, which
+    is what makes it honest); the DURATION may not.
+
+    Raises rather than approximating -- the loader's vocabulary check reports
+    an unknown op, and this reports an unplayable duration. `tier0/content/
+    loader.py::_validate_effect_vocabulary` calls it at LOAD, so a sheet row
+    that gets it wrong fails before a player ever meets the card.
+    """
+    turns = fx.get("turns")
+    if not isinstance(turns, int) or isinstance(turns, bool) or turns <= 0:
+        raise ValueError(
+            f"block_at_turn_start turns must be a positive literal int, got "
+            f"{turns!r}")
+    return turns
+
+
+def _op_block_at_turn_start(state: CombatState, fx: dict, card: Card) -> None:
+    """Gain `amount` Block at the start of each of your next `turns` turns.
+
+    THE DURATION-SCOPED REPEATING TWIN of `block_next_turn` (EB-83). That op
+    is a one-shot bank popped whole at the next turn start; this one pays the
+    same delayed Block once per turn for a printed number of turns, which is
+    the shape `powers` alone cannot hold -- an int stack is one number and this
+    power is two. The second number lives in `Player.timed_power_amounts`, the
+    sidecar `power_payloads` already established; `powers[BLOCK_AT_TURN_START]`
+    holds TURNS REMAINING, the engine's own stacks-are-turns grammar.
+
+    THE AMOUNT IS SNAPSHOTTED AT PLAY TIME and never re-read. Spotlight and the
+    salon replacement multiplier scale it here, exactly as they scale
+    `block_next_turn`, because printed Block is printed Block at the moment it
+    is printed; a later Frail, a later No Block or a lost Spotlight cannot
+    shrink a half that was already banked.
+
+    NIMBLE DOES NOT RIDE HERE, for `block_next_turn`'s reason verbatim: the
+    Block arrives from a POWER on a later turn, so there is no `cardSource`
+    for an enchantment hook to read. `enchantments._grants_block`'s allowlist
+    excludes this op by construction and says so.
+
+    NOT ROUTED THROUGH `powers.apply_power`: that function's stacking is
+    additive on the stack count, and here the stack count is a DURATION, where
+    additive means "playing it twice makes it last twice as long" -- the
+    opposite of what every other duration in this engine does (the Ceremonial
+    Garment refresh and `_op_summon_kurage` both take `max`). Written directly
+    for the same reason `_op_summon_kurage` is, and emitting its own row the
+    same way.
+    """
+    amount = _amount(state, fx["amount"])
+    if state.salon_replacements_this_card:
+        amount *= C.SALON_REPLACE_DAMAGE_MULT
+    amount = _spotlight_scale(state, card, amount)
+    turns = block_at_turn_start_turns(fx)
+    p = state.player
+    # PLACEHOLDER -- sheet-pass sweep, user pick. Stacking two of these is
+    # ADDITIVE ON AMOUNT and MAX ON TURNS: the amounts sum into one payout and
+    # the longer duration wins, so a second casting can never shorten a
+    # standing one. No ratified rule for same-name (amount, turns) effects
+    # exists to inherit -- the engine's ratified duration rules are all
+    # single-field refreshes (`_op_summon_kurage`'s `max`, the aura refresh,
+    # `apply_power(never_reduces=)`), and each of them settles only the turns
+    # half. The amount half is genuinely unruled, and additive is the choice
+    # that makes two copies of a card worth two copies. NO CARD PRINTS THIS OP,
+    # so nothing depends on the choice today; it wants [USER]'s eye whenever
+    # the first carrier is printed.
+    p.timed_power_amounts[BLOCK_AT_TURN_START] = (
+        p.timed_power_amounts.get(BLOCK_AT_TURN_START, 0) + amount)
+    p.powers[BLOCK_AT_TURN_START] = max(p.powers.get(BLOCK_AT_TURN_START, 0),
+                                        turns)
+    state.emit(BLOCK_AT_TURN_START,
+               amount=p.timed_power_amounts[BLOCK_AT_TURN_START],
+               turns=p.powers[BLOCK_AT_TURN_START])
+
+
 def _op_draw(state: CombatState, fx: dict, card: Card) -> None:
     if fx.get("amount_formula") == "per_aura":     # Elemental Ecstasy
         # Checked FIRST: the row carries no flat `amount`, and running it
@@ -3366,6 +3451,7 @@ OPS = {
     "damage": _op_damage,
     "block": _op_block,
     "block_next_turn": _op_block_next_turn,
+    BLOCK_AT_TURN_START: _op_block_at_turn_start,
     "draw": _op_draw,
     "draw_while": _op_draw_while,
     "energy": _op_energy,
@@ -3641,6 +3727,34 @@ def player_turn_start_triggers(state: CombatState) -> None:
         # will not see this gain unless it is rerouted on purpose.
         p.block += n
         state.emit("block", amount=n)
+    # EB-83 -- the DURATION-SCOPED twin of the pop above, at the same seam and
+    # deliberately adjacent to it: both are delayed Block landing after the
+    # turn-start block reset, and splitting them across the function is how one
+    # of them acquires a different set of hooks by accident.
+    #
+    # PAY, THEN TICK, THEN EXPIRE. `powers[BLOCK_AT_TURN_START]` is turns
+    # remaining, so a power applied on turn N (during the player's own turn,
+    # after this function has already run for turn N) with `turns: 2` pays at
+    # the start of N+1 and N+2 and is gone before N+3 -- exactly "the start of
+    # your next 2 turns", and it never pays on the turn it was played.
+    #
+    # THE PAYOUT IS RAW, sharing `block_next_turn`'s argument above verbatim
+    # rather than restating it: neither block funnel may touch a gain the card
+    # that banked it is no longer the source of. The two delayed-Block ops must
+    # not drift, so they get one behaviour and it is written once.
+    n = p.powers.get(BLOCK_AT_TURN_START, 0)
+    if n:
+        amount = p.timed_power_amounts.get(BLOCK_AT_TURN_START, 0)
+        if amount:
+            p.block += amount
+            state.emit("block", amount=amount)
+        if n > 1:
+            p.powers[BLOCK_AT_TURN_START] = n - 1
+        else:
+            # BOTH entries leave together. The sidecar outliving the power is
+            # a stale amount waiting for the next application to add itself to.
+            del p.powers[BLOCK_AT_TURN_START]
+            p.timed_power_amounts.pop(BLOCK_AT_TURN_START, None)
     # --- the two Ancient income powers (R127 / EB-30m) ------------------
     # PLACED ABOVE `salon_tick` DELIBERATELY, and above the whole income
     # group below it (celestial_gift / masque_red_death / spark_per_turn all

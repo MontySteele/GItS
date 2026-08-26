@@ -116,17 +116,23 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 142,   # EB-142 minted AND CLOSED for the 0.2-1028 attended-playtest
+    "EB": 146,   # EB-146 minted 2026-08-26 (scenario harness first run + set_power); EB-143/144/145 minted 2026-08-26 for the three Phase-4
+                 # pilot/scorer repairs the C19/D17/P10 standing read names as
+                 # its diagnostic caveats (Spark hold-vs-spend, scorer
+                 # predicate literacy, Tide of Names payout scoring).
+                 # EB-142 minted AND CLOSED for the 0.2-1028 attended-playtest
                  # defect (a branch-nested aiming op deriving TargetType.Self);
                  # the ceiling stays at the issued number, ceilings never come
                  # down. EB-141 minted 2026-08-25 for the unstamped
                  # exp_shop_companion_channel instrument (R68); EB-140 minted
                  # at the R211 W3 build (the codegen upgrade-delta gap);
                  # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
-    "M": 44,     # M43/M44 minted by R206 (4ff9f90) and settled by R207 with no
-                 # surviving HEAD citation — the exact blind spot this constant
-                 # covers. A HEAD scan reads 40; the ceiling is the ISSUED
-                 # high-water, so history outranks the scan here.
+    "M": 45,     # M45 minted 2026-08-26: the post-playtest richness slate, ONE
+                 # row under ONE ruling (R206), gated on the three-character
+                 # playtest. M43/M44 minted by R206 (4ff9f90) and settled by
+                 # R207 with no surviving HEAD citation — the exact blind spot
+                 # this constant covers. A HEAD scan reads 40; the ceiling is
+                 # the ISSUED high-water, so history outranks the scan here.
 }
 
 # Every id AT OR BELOW its ceiling that legitimately defines a row. Frozen by
@@ -136,10 +142,11 @@ CEILINGS: dict[str, int] = {
 # That second half is the whole mechanism — see rule 6 in the docstring.
 OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
-        1, 12, 15, 28, 32, 33, 34, 35, 36, 38, 40, 41, 53, 65, 67, 70, 71,
-        74, 76, 78, 80, 83, 84, 88, 94, 105, 116, 121, 128, 129, 137, 139, 141,
+        1, 12, 15, 28, 32, 33, 34, 35, 38, 40, 41, 53, 65, 67, 70, 71,
+        74, 78, 80, 83, 84, 105, 116, 128, 129, 137, 139, 141,
+        143, 144, 145, 146,
     }),
-    "M": frozenset({10, 13, 14, 16, 17, 19, 26}),
+    "M": frozenset({10, 13, 14, 16, 17, 19, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

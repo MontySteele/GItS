@@ -89,7 +89,7 @@ public static class KokomiRiderTips
     {
         var noun = grantsBlock ? "Block" : "damage";
         var rate = $"+{per} {noun} per {step} [gold]Charge[/gold] you hold.";
-        var owner = card.Owner?.Creature;
+        var owner = TipOwner.CreatureOf(card);
         if (owner == null || card.CombatState == null) return rate;
 
         var charge = KokomiResources.GetCharge(owner);
@@ -155,7 +155,7 @@ public static class KokomiRiderTips
     {
         foreach (var tip in inherited) yield return tip;
 
-        var owner = card.Owner?.Creature;
+        var owner = TipOwner.CreatureOf(card);
         if (owner == null || card.CombatState == null) yield break;
         if (!CeremonialGarmentPower.IsUp(owner)) yield break;
 
@@ -175,7 +175,7 @@ public static class KokomiRiderTips
     /// rather than printing a misleading zero -- the FurinaRiderTips rule.
     /// </summary>
     private static string PulseBody(CardModel card) =>
-        PulseBody(card.Owner?.Creature, inCombat: card.CombatState != null);
+        PulseBody(TipOwner.CreatureOf(card), inCombat: card.CombatState != null);
 
     /// <summary>
     /// Creature overload (EB-53/N1). The end-of-turn docket's Bake-Kurage slot

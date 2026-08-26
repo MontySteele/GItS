@@ -176,10 +176,19 @@ def test_an_irregular_id_is_covered_by_the_explicit_set():
 
 def test_the_manifest_is_not_derived_from_what_it_checks():
     """A ceiling recomputed at runtime from the live rows guards nothing: it
-    would follow a re-mint down instead of refusing it. The frozen ceilings
-    must therefore sit STRICTLY ABOVE the highest id still defining a row —
-    the gap IS the retired numbers (EB-131 and EB-133 are cited by live rows
-    and define none)."""
+    would follow a re-mint down instead of refusing it. So no ceiling may sit
+    BELOW the highest id still defining a row, and the manifest must record
+    numbers the live scan cannot see.
+
+    THE EVIDENCE OF THAT IS THE HOLES IN `OPEN_IDS`, NOT A CEILING GAP. This
+    test used to demand that at least one ceiling sit STRICTLY above its
+    series' top live row. That is a coincidence, not an invariant: it holds
+    only while some series' highest number happens to have retired, and a
+    perfectly legal mint at `ceiling + 1` in every series drives every gap to
+    zero at once (M45, 2026-08-26, with EB already flush at 145). The durable
+    statement is the one below — every series carries retired numbers at or
+    below its ceiling whose rows have left HEAD, which `max(live)` wearing a
+    different name could never produce."""
     mod = _module()
     _, where = mod.findings()
     top = {}
@@ -190,9 +199,9 @@ def test_the_manifest_is_not_derived_from_what_it_checks():
     assert set(top) == set(mod.CEILINGS), (top, sorted(mod.CEILINGS))
     for series, highest_live in top.items():
         assert mod.CEILINGS[series] >= highest_live, (series, top)
-    # And at least one series must actually show the gap, or the ceilings are
-    # just `max(live)` wearing a different name.
-    assert any(mod.CEILINGS[s] > n for s, n in top.items()), (top, mod.CEILINGS)
+    for series, ceiling in mod.CEILINGS.items():
+        retired = set(range(1, ceiling + 1)) - set(mod.OPEN_IDS.get(series, ()))
+        assert retired, (series, ceiling, sorted(mod.OPEN_IDS.get(series, ())))
 
 
 def test_the_manifest_does_not_fork_a_series_another_lint_owns():

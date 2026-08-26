@@ -280,6 +280,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "chain_attack": [_hook("shared", "enemy_count", "read")],
     "block": [_hook("shared", "block_held", "write")],
     "block_next_turn": [_hook("shared", "block_held", "write")],
+    # EB-83. The duration-scoped twin writes the SAME shared state as its
+    # one-shot sibling, N turns running: the vocabulary asks what state an op
+    # moves, not how many times it moves it, and a `turns`-scaled hook would
+    # make a longer power look like a wider one.
+    "block_at_turn_start": [_hook("shared", "block_held", "write")],
     "strip_block": [_hook("shared", "block_held", "use")],
     "heal": [_hook("shared", "hp_ledger", "write")],
     "gain_max_hp": [_hook("shared", "hp_ledger", "write")],

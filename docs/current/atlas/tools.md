@@ -54,6 +54,7 @@ python3 tools/canon_role_tempo.py [--from-json]    # needs game + ilspycmd
 python3 tools/extract_base_game_pool.py --characters Ironclad,Silent [--emit-sheet]
 python3 tools/art_fetch.py && python3 tools/art_process.py [--apply-picks art/picks.tsv]
 python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
+python3 tools/art_source_census.py --character kokomi [--reuse-cap N] [--tsv OUT]
 .venv/Scripts/python tools/cut_combat_layers.py klee [--check]
 .venv/Scripts/python tools/gen_furina_stills.py    # and gen_kokomi_stills.py
 .venv/Scripts/python tools/gen_char_icon_outlines.py [--check]
@@ -79,6 +80,22 @@ python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full
 - **art_lint scopes to EFFECTIVE picks only** — auto rows and shortlist rank 1;
   dead ranks may share sources freely (`art_lint.py:4-5`). `source_group`
   defaults to BLANK and blank means strict L1 (`:35-46`).
+- **An art pool is priced in (source, anchor) SLOTS, never in sources**
+  (`art_source_census.py`). `cover` clamps its crop inside the image, so a
+  source's slot count is `min(reuse_cap, floor(range / 0.085) + 1)` over the
+  valid centre range `[f/2, 1 - f/2]` its own geometry allows — a big splash
+  backs six faces, a transparent icon exactly one. **`reuse_cap` is a TASTE
+  call, not a geometric one**, and Kokomi's 2026-08-23 "6-slot deficit" was
+  entirely an artifact of a stale one (`EB-121`; the doc's 70 reconciles at
+  `--reuse-cap 4`, the shipped plan is at 6).
+- **A worktree reaches the main checkout's art by `--art-root`, never by a
+  link.** `art/raw/` and `art/candidates/` are gitignored Tier F and exist only
+  on the art-bearing checkout; `art_process.py` and `art_contact_sheet.py` both
+  take an absolute `--art-root` so a branch's `plan.tsv` renders against those
+  pixels without a junction `git worktree remove` could follow
+  (`OPERATIONS.md`, "Worktrees"). `art_process --assets` renders candidates
+  ONLY — nothing is placed and the manifest is untouched, so a gate review
+  cannot promote an unreviewed rank 1 into the shipping tree.
 - **No plan row may claim an out-path a generator owns (L11)**, and the curated
   `GENERATOR_OWNED` map is itself verified — named script must exist and must
   contain the filename (`art_lint.py:354-411`).

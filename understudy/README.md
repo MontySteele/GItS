@@ -20,6 +20,7 @@ This directory drives the **real game** through the vendored STS2MCP bridge
 | `naming.py` | revision #7: resolved card / target / option NAMES per action |
 | `rng.py` | the dedicated policy stream, and the refusal that keeps a game seed out of it |
 | `harness.py` | `begin` / `state` / `act` — the Phase-0 measurement loop. Also `give-card` (EB-52's dev grant door) and `frame` (window capture, off by default); both are here and not in the soak on purpose |
+| `scenario.py` | **EB-142**: targeted scenarios — "put card X in hand, set up the board, play it at enemy Y, assert Z" — driven off a YAML file under `scenarios/`. **ATTENDED ONLY**, beside `give-card` and `frame`; `soak.py` imports it nowhere and a test pins that |
 | `soak.py` | **P1**: N unattended policy_v1 runs, telemetry, watchdog, reversibility. **P1.5**: chosen seeds, the encore column, the selector channel. **EB-117**: `--character` names a select-screen OPTION ID and is verified twice — checked against the screen before the embark, then read back off `player.character` after it; the READ-BACK is what every record, index and report header carries |
 | `replay.py` | **S7**: drives tier0's combat model through a recorded action sequence and diffs the two instruments' numbers. It reads the SIM. **Track B**: `--use-selectors` reconstructs the Spotlight designation from `fight.selectors` instead of letting tier0's own heuristic stand in, and `--ledger` writes the per-turn Fanfare decomposition |
 | `probe_block.py` | **Track B, probe B2**: a FIXED SCRIPT (no policy) that fixes the Spotlight answer, plays only cards whose wire text prints Block, and reads `player.block` at every decision point |
@@ -148,6 +149,88 @@ frame is a claim about look, legibility, readability or fun. That sentence is
 row and not once in a header, because manifests get read in slices and
 concatenated. Like `give-card`, the verb is on the ATTENDED harness only; the
 soak takes no pictures.
+
+### `scenario` — EB-142's targeted-scenario harness (attended loop only)
+
+```
+python -m understudy.scenario check                            # parse only, no game
+python -m understudy.scenario run understudy/scenarios/spark-gate-refusal.yaml \
+    --why "EB-142: does the Spark gate show as unplayable"
+```
+
+The question it exists for is one sentence long: **put card X in hand
+(upgraded or not), set up the board, play it at enemy Y, and assert Z.** That
+question had no instrument. `tier0` asserts the arithmetic and
+`lint_constant_parity` asserts that a C# constant equals a sheet number;
+neither can assert that the SHIPPED card, resolved by the real game against a
+real enemy with a real Block value, paid what the sheet prints.
+
+Two doors make it possible, and both are dev-only:
+`vendor/STS2_MCP/gits/GitsGiveCard.cs` (EB-52) puts a chosen card in hand, and
+`vendor/STS2_MCP/gits/GitsDebugState.cs` (EB-142) sets the board around it —
+`set_resource`, `set_energy`, `set_hp`, `set_block`, each through the game's own
+mutator for that number, singleplayer and in-combat only, `why` required and
+logged on every write.
+
+**It asserts numbers and nothing else.** HP, Block, power stacks, resource
+amounts, prompt strings, `can_play`, `unplayable_reason`, printed card text.
+Guardrail-7 is unchanged: a failed assert is a DEFECT, never a design finding,
+and a scenario's board was set by hand so it is not comparable to any soak, any
+run, or any other scenario. The no-fun rule is unchanged: a JSON-state agent
+cannot see the screen, and nothing here or downstream of its log may claim
+anything about look, legibility, readability or feel.
+
+**`bridge.GRANT_GUARDRAIL` rides on EVERY row of the JSONL**, not once at the
+top — `frames.py`'s reason for doing the same with its manifest: logs get read
+in slices and concatenated.
+
+**It is deliberately not in `soak.py`**, for `give-card`'s reason exactly: the
+soak's claim is that its runs are runs the game generated, and every scenario
+grants a card and writes a board. `tier0/tests/test_understudy_scenario.py`
+pins the absence structurally (an AST walk over `soak.py`'s imports, so the
+comment explaining the shared helper is not read as the violation).
+
+**Reaching a fight is `soak.run_scripted`**, the setup / policy-swap / teardown
+dance `probe_block.py` and `probe_corpse.py` each carried a copy of until this
+file made it a rule. The driver does the menu, the embark, the EB-117 character
+read-back, the R95 seed read-back and the route to the first fight; the scenario
+wakes up at the first combat screen.
+
+**The scenario posts its OWN actions**, which is where it differs from the two
+probes. `soak._mechanical_action` claims `hand_select` BEFORE `policy_v1.decide`
+is ever asked and answers it by selecting card 0 and confirming — right for an
+unattended soak, fatal for a scenario whose question is *which* card gets
+exhausted. The cost is stated rather than hidden: the driver's watchdog and its
+per-action telemetry do not see the scenario's posts. This is the attended loop.
+
+**Names resolve at the moment of the POST**, never before (R93 revision #7). A
+file is written in card NAMES and `card_index: 2` is a different card one frame
+later; every `play` and `select` re-reads and re-resolves, and a name that is
+not there is a failed step with the hand printed. `card_key` folds the three
+spellings that exist in this repo — `KLEEMOD-POWDER_CHARGE`, `powder_charge`
+and `Powder Charge` — onto one key.
+
+The pack:
+
+| file | asserts |
+|---|---|
+| `eb142-take-it-from-the-top.yaml` | both arms in one turn: Block 5 and NO damage cold, then Block 5 **and** 10 after Center Stage. The order is the design — `SpotlightSystem.ResetTurn` clears `KLEEMOD_SPOTLIGHT_MOVED` at turn start |
+| `powder-charge-detonate-bonus.yaml` | a Pop! bomb (5) plus the printed `bonus: 4` moves 9, with the Spark ladder read at 1 (refused) and 2 (allowed) |
+| `tide-of-names-splash.yaml` | 5 + 2×cost = 9 to **every living enemy**, exhausting a second copy of itself for the cost-2 rung. The splash is the half no sheet lint can see |
+| `spark-gate-refusal.yaml` | `hold_the_line` reads `can_play: false` at Sparks 0 and 1 with the game's own `UnplayableReason`, and playable at 2 |
+
+**`assumptions` is part of the file format and is printed with the result.** An
+exact expected number usually depends on something the scenario did not set —
+the enemy's Block, a Vulnerable stack, which encounter rolled. A file that
+states its assumptions is a file whose failure can be read.
+
+**Sparks cannot be set, and that is a fact about the game rather than a gap in
+the door.** Sparks are a POWER (`Powers/SparkPower.cs`, a `PowerModel` with a
+badge), not one of BaseLib's registered CustomResources, so `set_resource`
+reaches Fanfare, Encore, Charge, Burst and the Spotlight meters but not that
+one. Both Klee scenarios climb the bank by playing Sparkly Treasure (cost 0,
+`gain_spark 1`), which is the route `GitsDebugState.cs`'s header prescribes for
+anything it does not set. A `set_power` op is the follow-up.
 
 ## What policy_v0 will not answer
 

@@ -16,6 +16,12 @@
   should have installed. -Remove exists because the reversibility log demands
   a one-command undo, not as an afterthought.
 
+  -BuildOnly lints the pin and compiles, and stops before the game directory is
+  touched at all. That is the check a bridge EDIT wants (EB-142): a worktree
+  that is not the art-bearing main checkout has no business installing
+  anything, and the compiler is still the only thing that verifies a gits/
+  handler against the game's real assemblies.
+
   NOTE: keep this file pure ASCII (validate.ps1 S8). Windows PowerShell 5.1
   reads .ps1 as ANSI unless there's a BOM.
 #>
@@ -24,8 +30,19 @@ param(
     [ValidateSet('Debug', 'Release')]
     [string]$Configuration = 'Release',
     # Uninstall: delete <GameDir>\mods\STS2_MCP and nothing else.
-    [switch]$Remove
+    [switch]$Remove,
+    # Compile only: lint the pin, build the dll into the staging directory, and
+    # STOP before anything is copied into the game. Added for EB-142, whose C#
+    # half had to be shown to compile from a worktree that must not touch the
+    # game directory at all. It is also the cheap check a bridge edit wants
+    # before the game is closed: the install path below refuses to run while
+    # SlayTheSpire2.exe is up, and this path does not care.
+    [switch]$BuildOnly
 )
+
+if ($Remove -and $BuildOnly) {
+    throw "-Remove and -BuildOnly are opposites; pass one."
+}
 
 $ErrorActionPreference = 'Stop'
 
@@ -49,10 +66,12 @@ if ($target -eq $kleeTarget) {
     throw "Refusing to run: this script's target collides with deploy.ps1's."
 }
 
-$running = Get-Process -Name 'SlayTheSpire2' -ErrorAction SilentlyContinue
-if ($running) {
-    $ids = $running.Id -join ', '
-    throw "Slay the Spire 2 is running (PID $ids). Close it first; it holds a lock on the mod dll."
+if (-not $BuildOnly) {
+    $running = Get-Process -Name 'SlayTheSpire2' -ErrorAction SilentlyContinue
+    if ($running) {
+        $ids = $running.Id -join ', '
+        throw "Slay the Spire 2 is running (PID $ids). Close it first; it holds a lock on the mod dll."
+    }
 }
 
 if ($Remove) {
@@ -82,6 +101,12 @@ if ($LASTEXITCODE -ne 0) { throw "Bridge build failed." }
 
 $dll = Join-Path $stage 'STS2_MCP.dll'
 if (-not (Test-Path $dll)) { throw "Expected output not found: $dll" }
+
+if ($BuildOnly) {
+    Write-Host "Built (not installed): $dll" -ForegroundColor Green
+    Write-Host "The game directory was not touched." -ForegroundColor Cyan
+    return
+}
 
 # ModManager walks mods/ recursively and JSON-parses everything it finds, so
 # the same S1 discipline deploy.ps1 uses applies: ship the dll and exactly one

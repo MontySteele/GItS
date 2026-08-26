@@ -96,6 +96,11 @@ core is suite-gated on synthetic fixtures
 ## Manual live instruments
 `gen_klee_cards.py` (the roster codegen itself), `art_fetch.py`,
 `art_process.py`, `art_hunt.py`, `art_contact_sheet.py`,
+`art_source_census.py` (`EB-121` — prices a character's source pool in
+(source, anchor) SLOTS rather than sources, off `art/raw/` geometry and
+`art/plan.tsv` claims; `--reuse-cap` is the crop-reuse budget, which is a
+[USER] taste call, so the tool reports at whatever number it is handed and
+settles nothing),
 `gen_kokomi_stills.py` (NO byte-pin twin, unlike Furina's),
 `gen_transition_wipe.py`,
 `gen_char_icon_outlines.py` (derives each character's top-panel outline halo

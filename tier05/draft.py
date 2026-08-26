@@ -598,6 +598,17 @@ def _op_price(fx: dict) -> float:
     # -- damage- and Block-shaped -----------------------------------------
     if op == "block_next_turn":
         return _neutral_amount(fx, 0) * STATIC_DELAYED_BLOCK_SHARE
+    if op == "block_at_turn_start":
+        # EB-83, the duration-scoped twin: the same delayed-Block discount,
+        # once per turn it is printed to pay. `turns` is a literal positive int
+        # by construction (`effects.block_at_turn_start_turns`, enforced at
+        # load), so this multiply cannot meet a formula. NO CARD ON ANY SHEET
+        # PRINTS THIS OP, so the branch is unreachable and `D` does not move --
+        # it exists because `tools/lint_op_parity.py` requires a pricing
+        # decision at the moment the author still knows the answer, which is
+        # the whole discipline. PROPOSED, like every value in this table.
+        return (_neutral_amount(fx, 0) * STATIC_DELAYED_BLOCK_SHARE
+                * fx.get("turns", 1))
     if op == "buff_next_attack":
         return _neutral_amount(fx, 0) * STATIC_NEXT_ATTACK_SHARE
     if op == "detonate":
@@ -1565,6 +1576,8 @@ STATIC_OP_PRICING: dict[str, str] = {
     "grow_damage": "one discounted future redraw",
     # --- damage/Block-shaped, new in v13 ---------------------------------
     "block_next_turn": "printed Block at STATIC_DELAYED_BLOCK_SHARE",
+    "block_at_turn_start": "printed Block at STATIC_DELAYED_BLOCK_SHARE, once "
+                           "per printed turn (EB-83; no sheet prints it)",
     "buff_next_attack": "flat damage at STATIC_NEXT_ATTACK_SHARE",
     "chain_attack": "its own damage line x STATIC_CHAIN_ATTACK_MULT",
     "detonate": "STATIC_DETONATE_VALUE + printed bonus, AoE-scaled",

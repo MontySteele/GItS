@@ -76,7 +76,12 @@ def _is_attack(c) -> bool:
     return c.type == "attack"
 
 
-# `block_next_turn` is deliberately NOT here -- see _grants_block.
+# `block_next_turn` is deliberately NOT here -- see _grants_block. Neither is
+# EB-83's `block_at_turn_start`, for the identical reason and by the identical
+# mechanism: this is an ALLOWLIST, so a delayed-Block op is excluded by
+# construction rather than by remembering to exclude it. Said out loud anyway,
+# because "the new op is absent" and "the new op was forgotten" look the same
+# on a line that lists one op.
 _BLOCK_OPS = ("block",)
 
 
@@ -252,14 +257,15 @@ CATALOG: dict[str, Enchantment] = {
 #       event, and Wood Carvings is not converted yet. Its colorless blocker
 #       is RULED -- R184 chose reskin, so Peck and Toric Toughness are
 #       replaced by equivalent-function companion/Teyvat content and LAW's
-#       colorless clause holds. As of 2026-08-13 (EB-83) that reskin is one
-#       option short of shippable, and not for a design reason: the Peck half
-#       is expressible (1-cost Attack, 2 damage x3), the TORIC TOUGHNESS half
-#       is not. Toric Toughness gives Block at the start of your next 2 turns,
-#       and `block_next_turn` is a one-shot bank popped whole at the next turn
-#       start -- there is no duration-scoped repeating Block power, so the
-#       second turn cannot be expressed. Two of three options is not a
-#       conversion, so no event grants Slither, so this row stays.
+#       colorless clause holds. THE ENGINE IS NO LONGER SHORT EITHER: the
+#       Peck half was always expressible (1-cost Attack, 2 damage x3), and
+#       the TORIC TOUGHNESS half -- "Block at the start of your next 2
+#       turns", which `block_next_turn`'s one-shot bank could not say -- now
+#       has `block_at_turn_start`, the duration-scoped repeating Block power
+#       (EB-83, 2026-08-26; atlas tier0-engine §7), also built as unused
+#       machinery. What remains is [USER]'s, not engineering's: the RT window
+#       for the conversion and the S4-G11-pattern name eye-read. Until it
+#       converts no event grants Slither, so this row stays.
 #       An enchantment nobody grants is a name with no caller.
 #
 #       When it does land it needs a companion row in the parity lint:

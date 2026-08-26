@@ -1152,6 +1152,49 @@ confiscated	ImageGen/images/cards/klee/confiscated.png	500	380	cover_autocrop	co
 watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	y0.16	shortlist	2	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
 watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
 watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover_autocrop	contain@0.08	shortlist	4	png	Sangonomiya Kokomi Multi Wish.png		splash	kokomi_pool
+# EB-121: shortlists for EB-69's fourteen fill faces (R198). Ranks 1-2 are UNCLAIMED (source, anchor) slots from the recounted census (docs/current/art/kokomi-source-census.tsv); rank 3 keeps the shipped convention of one deliberate kit-art option that must never be the default.
+the_gunbai_turns	ImageGen/images/cards/kokomi/the_gunbai_turns.png	500	380	cover	y0.22	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+the_gunbai_turns	ImageGen/images/cards/kokomi/the_gunbai_turns.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
+the_gunbai_turns	ImageGen/images/cards/kokomi/the_gunbai_turns.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
+all_hands	ImageGen/images/cards/kokomi/all_hands.png	500	380	cover	y0.33	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+all_hands	ImageGen/images/cards/kokomi/all_hands.png	500	380	cover	x0.31	shortlist	2	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
+all_hands	ImageGen/images/cards/kokomi/all_hands.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Kurage's Oath.png		vfx	kokomi_pool
+what_the_tokoyo_took	ImageGen/images/cards/kokomi/what_the_tokoyo_took.png	500	380	cover	y0.44	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+what_the_tokoyo_took	ImageGen/images/cards/kokomi/what_the_tokoyo_took.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Side by Side We Venture Character Kokomi.png		sticker	kokomi_pool
+what_the_tokoyo_took	ImageGen/images/cards/kokomi/what_the_tokoyo_took.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Princess of Watatsumi.png		vfx	kokomi_pool
+gyorin_formation	ImageGen/images/cards/kokomi/gyorin_formation.png	500	380	cover	y0.56	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+gyorin_formation	ImageGen/images/cards/kokomi/gyorin_formation.png	500	380	cover	x0.36	shortlist	2	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+gyorin_formation	ImageGen/images/cards/kokomi/gyorin_formation.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Ceremonial Garment Buff Icon.png		vfx	kokomi_pool
+council_at_bourou	ImageGen/images/cards/kokomi/council_at_bourou.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+council_at_bourou	ImageGen/images/cards/kokomi/council_at_bourou.png	500	380	cover	x0.41	shortlist	2	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
+council_at_bourou	ImageGen/images/cards/kokomi/council_at_bourou.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Preview.gif		vfx	kokomi_pool
+wheel_the_ranks	ImageGen/images/cards/kokomi/wheel_the_ranks.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Sangonomiya Kokomi Expression 3.png		sticker	kokomi_pool
+wheel_the_ranks	ImageGen/images/cards/kokomi/wheel_the_ranks.png	500	380	cover	y0.22	shortlist	2	png	Bake-Kurage Summon.png		vfx	kokomi_pool
+wheel_the_ranks	ImageGen/images/cards/kokomi/wheel_the_ranks.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Kurage's Oath Preview.gif		vfx	kokomi_pool
+open_the_stores	ImageGen/images/cards/kokomi/open_the_stores.png	500	380	cover	y0.78	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+open_the_stores	ImageGen/images/cards/kokomi/open_the_stores.png	500	380	cover	x0.50	shortlist	2	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
+open_the_stores	ImageGen/images/cards/kokomi/open_the_stores.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Water Preview.gif		vfx	kokomi_pool
+what_the_tokoyo_returns	ImageGen/images/cards/kokomi/what_the_tokoyo_returns.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 39 Sangonomiya Kokomi.png		sticker	kokomi_pool
+what_the_tokoyo_returns	ImageGen/images/cards/kokomi/what_the_tokoyo_returns.png	500	380	cover	y0.33	shortlist	2	png	Bake-Kurage Summon.png		vfx	kokomi_pool
+what_the_tokoyo_returns	ImageGen/images/cards/kokomi/what_the_tokoyo_returns.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Attack Preview.gif		vfx	kokomi_pool
+raise_the_sashimono	ImageGen/images/cards/kokomi/raise_the_sashimono.png	500	380	cover	y0.78	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
+raise_the_sashimono	ImageGen/images/cards/kokomi/raise_the_sashimono.png	500	380	cover	x0.55	shortlist	2	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+raise_the_sashimono	ImageGen/images/cards/kokomi/raise_the_sashimono.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
+crane_wing	ImageGen/images/cards/kokomi/crane_wing.png	500	380	cover	x0.59	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+crane_wing	ImageGen/images/cards/kokomi/crane_wing.png	500	380	cover	x0.69	shortlist	2	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
+crane_wing	ImageGen/images/cards/kokomi/crane_wing.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Kurage's Oath.png		vfx	kokomi_pool
+send_the_runner	ImageGen/images/cards/kokomi/send_the_runner.png	500	380	cover	x0.67	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
+send_the_runner	ImageGen/images/cards/kokomi/send_the_runner.png	500	380	cover	y0.12	shortlist	2	png	Sangonomiya Kokomi Multi Wish.png		splash	kokomi_pool
+send_the_runner	ImageGen/images/cards/kokomi/send_the_runner.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Princess of Watatsumi.png		vfx	kokomi_pool
+massed_volley	ImageGen/images/cards/kokomi/massed_volley.png	500	380	cover	y0.50	shortlist	1	png	Character Sangonomiya Kokomi Full Wish.png		splash	kokomi_pool
+massed_volley	ImageGen/images/cards/kokomi/massed_volley.png	500	380	cover	y0.56	shortlist	2	png	Bake-Kurage Summon.png		vfx	kokomi_pool
+massed_volley	ImageGen/images/cards/kokomi/massed_volley.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Ceremonial Garment Buff Icon.png		vfx	kokomi_pool
+hold_the_narrows	ImageGen/images/cards/kokomi/hold_the_narrows.png	500	380	cover	x0.64	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+hold_the_narrows	ImageGen/images/cards/kokomi/hold_the_narrows.png	500	380	cover	y0.27	shortlist	2	png	Sangonomiya Kokomi Multi Wish.png		splash	kokomi_pool
+hold_the_narrows	ImageGen/images/cards/kokomi/hold_the_narrows.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Preview.gif		vfx	kokomi_pool
+tighten_the_cords	ImageGen/images/cards/kokomi/tighten_the_cords.png	500	380	cover	y0.67	shortlist	1	png	Bake-Kurage Summon.png		vfx	kokomi_pool
+tighten_the_cords	ImageGen/images/cards/kokomi/tighten_the_cords.png	500	380	cover	y0.42	shortlist	2	png	Sangonomiya Kokomi Multi Wish.png		splash	kokomi_pool
+tighten_the_cords	ImageGen/images/cards/kokomi/tighten_the_cords.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Kurage's Oath Preview.gif		vfx	kokomi_pool
 warmup_act	ImageGen/images/cards/furina/warmup_act.png	500	380	cover	y0.16	shortlist	5	png	Furina Character Card Golden.png		tcg	furina_pool
 warmup_act	ImageGen/images/cards/furina/warmup_act.png	500	380	cover_autocrop	contain@0.08	shortlist	6	png	Item Furina Vision.png		item	furina_pool
 crowd_work	ImageGen/images/cards/furina/crowd_work.png	500	380	cover_autocrop	cover@0.06	shortlist	5	png	This Life, Just Like a Light Trickle of Song Still 1 Aether.png		splash	furina_pool

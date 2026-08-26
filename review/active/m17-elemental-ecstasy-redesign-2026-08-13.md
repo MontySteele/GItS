@@ -31,14 +31,17 @@
 > its own `CONSTANTS_VERSION` bump.** It does not land now, and it cannot land
 > inside the payoff-reach freeze.
 >
-> **ONE SUB-SHAPE IS NOT SETTLED AND MUST NOT BE ASSUMED.** Option C2 offers
-> the Block number optionally moved down to compensate — *"PROPOSED at
-> `block 5`"* — and R189 chose C2 without ruling on it. The packet's own §7(2)
-> asks for the numbers to be ratified or moved, and that ask is outstanding.
-> **Whoever implements C2 stops at this question rather than defaulting to
-> either value**, because holding 8 is a straight buff to the card's largest
-> number on a 2-cost uncommon that also draws, and moving to 5 is a design act
-> nobody has made. It goes back to [USER] with the post-sweep landing.
+> **THE ONE OPEN SUB-SHAPE IS SETTLED: R205 (2026-08-24) RULED BLOCK MOVES TO
+> 5.** Option C2 offered the Block number optionally moved down to compensate —
+> *"PROPOSED at `block 5`"* — and R189 chose C2 without ruling on it; R205 then
+> took that value. **The landing is therefore the predicate move alone:** any
+> aura enables the Block condition, and Block goes 8 → 5. The reason is scope,
+> not the number — holding 8 would combine the accessibility repair C2 exists
+> for with a straight buff to the card's largest number on a 2-cost uncommon
+> that also draws, and those are two changes, not one. §6 records the same
+> ruling. Nothing else in C2 moves with it, and the route is unchanged: the
+> sweep runs first and this lands after its graded read, as its own
+> `CONSTANTS_VERSION` bump.
 
 ---
 
@@ -518,8 +521,12 @@ choice is [USER]'s and is recorded on the `M17` row.
 1. **Red-pen the options.** Pick one of A / B / C / D, pick a sub-shape where
    one is offered (A's replacement upgrade line; B1 vs B2; C1 vs C2), or send
    the packet back for a fifth direction.
-2. **Ratify the numbers, or move them.** Every number in §5 is PROPOSED and
-   none is measured. Nothing lands until they are signed.
+2. **Ratify the numbers, or move them. SETTLED — nothing is outstanding
+   here.** Every number in §5 was PROPOSED and unmeasured when this list was
+   written. **R189 (2026-08-13) chose Option C2** and **R205 (2026-08-24) took
+   its one open sub-shape: Block moves to 5**, so the landing is the predicate
+   move alone and the numbers it lands with are signed. The ask is kept as the
+   record of what was asked, not as a live request.
 3. **Choose the route** in §6 — measure-first or redesign-first.
 4. **Optionally, re-read §2.1** — whether the "the pilot wants it" clause of
    R180 was load-bearing for the direction you want.

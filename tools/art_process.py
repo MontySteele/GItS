@@ -19,6 +19,11 @@ shortlist  -> art/candidates/<asset_id>/r<rank>.png at target dims,
               plus rank 1 ALSO written to the final target as the provisional
               pick (art never blocks the build; overridden by --apply-picks).
 --apply-picks art/picks.tsv  (asset_id<TAB>rank per line) promotes selections.
+--assets a,b,c   render ONLY those ids' shortlist candidates; nothing placed,
+                 manifest untouched (a gate review must not promote a rank 1).
+--art-root PATH  read art/raw/ and write art/candidates/ under PATH instead of
+                 this checkout -- how a worktree reaches the main checkout's
+                 gitignored art WITHOUT linking it in (OPERATIONS.md).
 
 Derived extras: ui/select_portrait_locked.png (desaturated+darkened).
 Updates art/manifest.csv status/tier/source columns in place.
@@ -344,7 +349,50 @@ class _ListWriter:
         self.buf.append(s)
 
 
+def _take(argv, flag):
+    """Pull `--flag VALUE` out of argv and return VALUE (or None).
+
+    Hand-rolled rather than argparse so `--apply-picks` keeps its exact
+    positional spelling; the point of both flags below is that they can be
+    added without moving the shipped invocation.
+    """
+    if flag not in argv:
+        return None
+    i = argv.index(flag)
+    if i + 1 >= len(argv):
+        sys.exit(f"{flag} needs a value")
+    value = argv[i + 1]
+    del argv[i:i + 2]
+    return value
+
+
 def main():
+    global RAW, CAND, MANIFEST
+    argv = sys.argv[1:]
+
+    # --art-root: read the pixels from ANOTHER checkout. `art/raw/` and
+    # `art/candidates/` are gitignored Tier F and exist only on the art-bearing
+    # main checkout, and OPERATIONS.md "Worktrees" forbids linking them into a
+    # worktree -- `git worktree remove` follows a junction and deletes what it
+    # finds, which has destroyed non-regenerable files. So a worktree points at
+    # the main checkout by ABSOLUTE path instead. Only the art/ tree moves;
+    # `art/plan.tsv` still comes from THIS checkout, which is the point -- the
+    # branch's plan rendered against the main checkout's pixels.
+    art_root = _take(argv, "--art-root")
+    if art_root:
+        art_root = Path(art_root).resolve()
+        RAW = art_root / "art" / "raw"
+        CAND = art_root / "art" / "candidates"
+        MANIFEST = art_root / "art" / "manifest.csv"
+
+    # --assets: render ONLY these asset ids' shortlist candidates. Nothing is
+    # PLACED and the manifest is NOT touched -- a gate review renders crops to
+    # LOOK at, and must never quietly promote an unreviewed rank 1 into the
+    # shipping tree. Same spelling and same reason as art_contact_sheet's
+    # `--assets`: a gate is not a batch.
+    only = _take(argv, "--assets")
+    only = {a.strip() for a in only.split(",") if a.strip()} if only else None
+
     rows = read_plan()
     # Taste-pass directive 3: the plan must lint clean before any pixels move.
     from art_lint import lint
@@ -353,8 +401,28 @@ def main():
         for p in problems:
             print("LINT: " + p, file=sys.stderr)
         sys.exit(1)
-    if len(sys.argv) > 2 and sys.argv[1] == "--apply-picks":
-        apply_picks(rows, sys.argv[2])
+    if len(argv) > 1 and argv[0] == "--apply-picks":
+        apply_picks(rows, argv[1])
+        return
+
+    if only is not None:
+        for missing in sorted(only - {r["asset_id"] for r in rows}):
+            print(f"NOTE: '{missing}' has no plan row -- not rendered, "
+                  f"not silently dropped")
+        done, gaps = 0, []
+        for r in rows:
+            if r["asset_id"] not in only or r["pick"] != "shortlist":
+                continue
+            if process(r, CAND / r["asset_id"] / f"r{r['rank']}.png"):
+                done += 1
+            else:
+                gaps.append(f"{r['asset_id']} r{r['rank']} ({r['title']})")
+        print(f"{done} candidate crop(s) written under {CAND}; "
+              f"nothing placed, manifest untouched")
+        for g in gaps:
+            print("  GAP: " + g)
+        for f in flags:
+            print("  FLAG: " + f)
         return
 
     done, gaps, status = 0, [], {}

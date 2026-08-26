@@ -59,18 +59,19 @@ disagree in either direction.
 
 ## What we changed
 
-**Four lines across two upstream files, plus EB-92's two guards in a third.** Everything of substance lives in
+**Five lines across two upstream files, plus EB-92's two guards in a third.** Everything of substance lives in
 `gits/`, which the pin lint excludes from the upstream hash list entirely.
 
 | File | Status | Change |
 |---|---|---|
-| `McpMod.cs` | `gits-modified` | Three `else if` arms on the `HandleRequest` route chain — `/api/v1/gits/speed` (W2), `/api/v1/gits/seed` (P1.5) and `/api/v1/gits/give_card` (EB-52) — marked in-file with `GItS LOCAL EDIT`. Nothing else in the file is touched. |
+| `McpMod.cs` | `gits-modified` | Four `else if` arms on the `HandleRequest` route chain — `/api/v1/gits/speed` (W2), `/api/v1/gits/seed` (P1.5), `/api/v1/gits/give_card` (EB-52) and `/api/v1/gits/debug_state` (EB-142) — marked in-file with `GItS LOCAL EDIT`. Nothing else in the file is touched. |
 | `McpMod.Wiki.cs` | `gits-modified` | EB-92 (2026-08-13) — two guards in the result formatter, marked in-file with `GItS LOCAL EDIT`. Every mod-card query answered `500 ... Canonical model of type <generated class> used in incorrect place`, a different class each time: the formatter walks `ModelDb.AllCards` (where mod cards live) and reads properties off the CANONICAL instance, and one throwing card took the whole search down — including the base-game rows that had formatted fine. `BuildWikiResultSafely` degrades a throwing candidate to one row carrying id/name/score/`error`, and the hover-tip read degrades to empty. Neither guard fixes the throwing card, and the degraded row names it. Upstreamable as-is: any mod's custom model can do this. |
 | `McpMod.StateBuilder.cs` | `gits-modified` | One line in `BuildPlayerState`, inside the live-combat block: `state["resources"] = GitsResourceSnapshot(combatState)`. Marked in-file with `GItS LOCAL EDIT`. P1.5 spec item 2. |
 | `gits/GitsSpeed.cs` | GItS addition | Work item W2 — the speed affordance. EB-87 (2026-08-12): the captured original `FastMode` is persisted to `GitsSpeed.original.conf` in the mod directory (next to the `STS2_MCP.conf` this file's neighbours already write — JSON content under a `.conf` name, because ModManager parses every `*.json` under `mods/` as a manifest), a later process restores from that sidecar instead of re-capturing, and a successful disable deletes it. `PrefsSave.FastMode` persists to `prefs.save` (not `settings.save` — corrected 2026-08-13 by the round-2 correctness audit, along with the mechanism: prefs are flushed only by `NGame.Quit()` or `NSettingsScreen.OnSubmenuClosed`, neither reachable from a `TerminateProcess` kill, and `NGame` demotes a persisted `Instant` to `Fast` on every non-editor boot, so no second process can read `Instant` back. The reproducible laundering is one step narrower: after a flush, a second process captures the demoted `Fast` and "restores" a `Normal` user to `Fast`. The sidecar is the right fix for that; only its stated justification was wrong). `TimeScale` is deliberately not persisted — `Engine.TimeScale` starts at its default in every process, so the live capture is already the right original. |
 | `gits/GitsSeed.cs` | GItS addition | P1.5 item 1 — the chosen-seed endpoint. Documents in-file why upstream's own `charSelect.Lobby == null` refusal does not describe the game. |
 | `gits/GitsResources.cs` | GItS addition | P1.5 item 2 — a reflection-only reader for BaseLib's custom-resource registry. No compile-time BaseLib reference; a missing BaseLib yields an empty map. |
 | `gits/GitsGiveCard.cs` | GItS addition | EB-52 — the dev-only card-injection route. Selects a card out of `ModelDb.AllCards` and hands it to the game's own acquisition path; mints nothing. **EB-91 (2026-08-13): the CARD SCOPE now follows the pile.** Deck grants are created in `player.RunState`; combat-pile grants in `player.Creature.CombatState`, which is what every in-combat generator does (`CollisionCourse`, `CardFactory.GetForCombat`). A run-scoped card handed to `AddGeneratedCardToCombat` arrived in hand and read back fine, then threw `must be added to a CombatState before playing it` out of `CardPileCmd.AddDuringManualCardPlay` and wedged the fight. The `route` field, which reported the static string `card_pile_cmd` for both branches, now names the branch that ran (`run_state_create+card_pile_add` / `combat_state_create+add_generated_to_combat`) and a `scope` field says `run`/`combat`. |
+| `gits/GitsDebugState.cs` | GItS addition | EB-142 — the dev-only board-setup route, and the second half of the targeted-scenario door `GitsGiveCard` opened. Four ops (`set_resource`, `set_energy`, `set_hp`, `set_block`), singleplayer and in-combat only, each going through the game's OWN mutator for that number: `CreatureCmd.SetCurrentHp`, `PlayerCmd.SetEnergy`, the registered `CustomResource`'s own `Amount` setter, and `Creature.LoseBlockInternal`/`GainBlockInternal` (the one hook-free write — there is no `CreatureCmd.SetBlock`, and routing a debug set through `GainBlock` would run the `ModifyBlockGained` chain over the number the caller asked for). `why` is a REQUIRED field, logged with every write. No enemy spawning and no status application — both are follow-ups, both named in the file header. `GitsResources.cs` stays a read-only serialiser; the resource WRITE lives here and reuses that file's cached registry probe. |
 
 Everything else is byte-identical to `55e0648`.
 
@@ -100,7 +101,26 @@ generators can produce, or reports state the game already holds:
   pair every in-combat generator in the game runs and which writes the
   combat-history row too.
 
+- `GitsDebugState` writes four combat numbers, and writes each one through
+  the mutator the GAME already uses for it — `CreatureCmd.SetCurrentHp`,
+  `PlayerCmd.SetEnergy`, the resource's own `Amount` setter (the property
+  BaseLib's own gain and spend paths write), and the creature's own
+  block-internal pair. It adds no mutator the game does not have, spawns no
+  enemy and applies no status.
+
 No constant, generator, reward table or pilot is touched by any of them.
+
+**`GitsDebugState` is dev-only on the same terms, and says so in the same
+field.** A combat whose board was set by hand is not a board the game's own
+play produced, so nothing measured on it is comparable to any other run; every
+successful write carries the `guardrail` field saying so, `why` is a required
+request field rather than an optional one, and the write is printed to the
+game log with its reason beside it. It refuses multiplayer for `GitsGiveCard`'s
+reason verbatim (no action-queue synchronizer, so peers diverge), refuses when
+no combat is in progress (every op writes combat state, so out of combat the
+write would be a silent no-op wearing an `ok`), and refuses `set_hp` at zero or
+below — `SetCurrentHp(0)` leaves a creature at zero without running the death
+path, which is a wedged fight wearing an `ok`, EB-91's exact shape.
 
 **`GitsGiveCard` is dev-only in a way the wire says out loud.** A run that
 used it is no longer a run the generators produced, so nothing measured on it
@@ -116,8 +136,8 @@ i.e. a silent no-op wearing an `ok`).
 1. `git clone https://github.com/Gennadiyev/STS2MCP && git checkout <new sha>`
 2. Copy the carried files over this directory (the list is
    `UPSTREAM_MANIFEST.tsv`, `status == upstream`).
-3. Re-apply the `McpMod.cs` route arms above — there are **three** of them now
-   (speed, seed, give_card), all inside one marked block. A refresh that
+3. Re-apply the `McpMod.cs` route arms above — there are **four** of them now
+   (speed, seed, give_card, debug_state), all inside one marked block. A refresh that
    re-applies two of three leaves a handler in `gits/` that nothing routes to,
    and the pin lint cannot see that: it checks hashes and markers, not whether
    a route exists. Grep the refreshed `McpMod.cs` for `gits/` and count.
@@ -134,9 +154,14 @@ on both `RunState` and `Creature.CombatState`, `CardPileCmd.Add` /
 (note `ICombatState` declares `CreateCard` itself and does not derive from
 `ICardScope`, so the combat scope is reached with `as` — a game-side merge of
 those two interfaces would silently turn the grant into the refusal branch); `GitsSeed` binds `StartRunLobby.SetSeed`,
-`NGame.DebugSeedOverride` and `SeedHelper.CanonicalizeSeed`. A game-version
-bump is the event that invalidates those, and the check is the build: it fails
-loudly, which is the good case.
+`NGame.DebugSeedOverride` and `SeedHelper.CanonicalizeSeed`; `GitsDebugState`
+binds `CreatureCmd.SetCurrentHp`, `PlayerCmd.SetEnergy`,
+`Creature.LoseBlockInternal`/`GainBlockInternal` and `Creature.Monster.Id.Entry`
+(the last of which it uses to re-synthesise the wire's `entity_id` the way
+`McpMod.StateBuilder.BuildEnemyState` does — if those two spellings ever
+diverge, a scenario's target is a creature nobody chose, and the build will not
+say so). A game-version bump is the event that invalidates those, and the check
+is the build: it fails loudly, which is the good case.
 
 Upstreaming the speed endpoint stays open; MIT does not require it and this
 sprint did not spend time on it.
