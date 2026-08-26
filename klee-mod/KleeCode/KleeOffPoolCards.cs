@@ -43,8 +43,9 @@ namespace KleeMod;
 /// means migrating all 47 companion models OUT of the three character pools
 /// (CardModel.Pool must resolve to exactly one pool, and Pool supplies the
 /// card frame and energy icon), which is a visual change to every companion
-/// plus an init-order dependency that no C# test can check. See
-/// CompanionPool.cs. The distinction matters: this is now a COST decision,
+/// plus an init-order dependency no test in `klee-mod/KleeTests` (EB-105)
+/// can check -- `ModelDb` and the game's boot order are outside its headless
+/// boundary. See CompanionPool.cs. The distinction matters: this is now a COST decision,
 /// not an impossibility, and anyone re-reading the paragraph above should not
 /// conclude otherwise.
 ///

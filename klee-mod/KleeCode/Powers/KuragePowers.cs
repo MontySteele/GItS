@@ -224,7 +224,9 @@ public sealed class KurageWardPower : PowerModel, ILocalizationProvider
 /// and rejected at G2, and it would do so without touching a number anyone
 /// would think to re-measure. tier0's
 /// test_before_sun_and_moon_raises_the_multiplier_and_stacks is the sim-side
-/// pin; this comment is the C#-side one, because there is no C# test project.
+/// pin. `klee-mod/KleeTests` (EB-105) could hold the C#-side one -- summing
+/// Amounts is pure arithmetic, well inside its headless boundary -- but no
+/// test claims it yet, so until one does this comment is the C#-side pin.
 ///
 /// It multiplies an uncapped, never-spent bank (R80), so it is the steepest
 /// term on her sheet: every other scaling card adds a term, this moves a

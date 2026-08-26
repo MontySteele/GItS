@@ -8,9 +8,11 @@ namespace KleeMod.Diagnostics;
 /// <summary>
 /// G-A5(a): the C# half of the Fanfare sim-parity check.
 ///
-/// There is no C# test project -- this DLL only executes inside the game --
-/// so "run both implementations and diff" was never available. The parity
-/// claim is assembled from two halves instead:
+/// "Run both implementations and diff" is not available and never will be:
+/// the two implementations are in two languages and two processes.
+/// `klee-mod/KleeTests` (EB-105) does now execute this DLL's arithmetic
+/// headlessly, but it cannot run the SIM, so it moves neither half of what
+/// follows. The parity claim is assembled from two halves instead:
 ///
 ///   * The Python suite
 ///     (tier0/tests/test_furina_fanfare_parity.py :: test_csharp_vectors_match_the_sim)

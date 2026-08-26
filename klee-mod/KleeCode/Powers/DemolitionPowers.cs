@@ -154,9 +154,14 @@ public sealed class DetonationSplashPower
     {
         ("title", "Blazing Delight"),
         ("description",
-            "When a [gold]Bomb[/gold] detonates: deal {Amount} damage to ALL "
-          + "enemies, ignoring Block, and gain 3 [gold]Burst Energy[/gold]. "
-          + "Up to 3 times per turn."),
+            // EB-89: the grant and the per-turn cap are interpolated.
+            // {Amount} is a DynamicVar token, so its braces are doubled
+            // to survive interpolation.
+            $"When a [gold]Bomb[/gold] detonates: deal {{Amount}} damage to "
+          + "ALL enemies, ignoring Block, and gain "
+          + $"{DemolitionConstants.SplashBurst} [gold]Burst Energy[/gold]. "
+          + $"Up to {DemolitionConstants.SplashProcCapPerTurn} times per "
+          + "turn."),
     };
 
     public override PowerType Type => PowerType.Buff;

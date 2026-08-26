@@ -58,6 +58,13 @@ jobs:
         run: python tools/lint_handwritten_parity.py
       - name: constant parity
         run: python tools/lint_constant_parity.py
+      # EB-89 (2026-08-25). The half the line above structurally cannot see:
+      # constant parity compares constants to constants and never reads the
+      # PROSE a player is shown, so a repricing could leave a tooltip quoting
+      # a retired number with every gate green. Pinned by
+      # tier0/tests/test_eb89_prose_constants.py.
+      - name: prose constants
+        run: python tools/lint_prose_constants.py
       # Sim-hygiene sprint 2026-07-29. The sibling of the line above, pointed
       # at the sim's own internal correspondence instead of the C# mirrors:
       # an engine op with no offer-time price is a card the drafter cannot
