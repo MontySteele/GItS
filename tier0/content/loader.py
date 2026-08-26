@@ -417,6 +417,17 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
                 f"{fx['amount']} -- a negative gain is not a spend; use "
                 f"spend_encore (the overdraw primitive) or the encore_cost "
                 f"field")
+        if op == _effects.BLOCK_AT_TURN_START:
+            # EB-83. The DURATION is a literal positive int and the engine
+            # raises on anything else; checked HERE for this function's whole
+            # stated reason -- at load, once, rather than the first time a card
+            # already in front of a player resolves. Same door as the
+            # gain_encore amount above: not a vocabulary error, but a
+            # printed-text error only the resolver could otherwise see.
+            try:
+                _effects.block_at_turn_start_turns(fx)
+            except ValueError as exc:
+                raise ValueError(f"card {card_id!r}: {exc}") from exc
         if op == "choose_one":
             _validate_modal_shape(card_id, fx)
             for mode in fx[_effects.MODES_KEY]:

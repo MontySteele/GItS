@@ -263,7 +263,65 @@ trip over is assuming it is dead code.
   (`:2138`). Deliberately **no** "Status exhausted" reward grammar — the
   context reports rarity and C11 keeps Kokomi's pool free of junk.
 
-## 7. Reading order
+## 7. `block_at_turn_start` — merged, and INERT (EB-83)
+
+Built FIRST AND ALONE on the `EB-82` admission rule — an engine surface is
+never invented inline inside a conversion — so it lands with **no carrier at
+all**: no card on any sheet prints it, and no live `RT/D/P/C` integer moved.
+The two replacement cards (*Tengu Flurry*, *Chinowa Ward*) and the Wood
+Carvings conversion are [USER]-gated.
+
+- **What it is.** `{op: block_at_turn_start, amount: <int|count>, turns: <int>}`
+  — "gain `amount` Block at the start of each of your next `turns` turns"
+  (`effects.py::_op_block_at_turn_start`). The **duration-scoped** twin of
+  `block_next_turn`, which is a one-shot bank popped whole at the next turn
+  start. Same seam, same raw payout, deliberately adjacent in
+  `player_turn_start_triggers` so the two cannot acquire different hooks by
+  accident: **pay, then tick, then expire**, which is why a power applied on
+  turn N with `turns: 2` pays at N+1 and N+2 and never on the turn it was
+  played.
+- **Where the second number lives, and why it is not a new object graph.**
+  `powers` is `name -> int`, so a power carrying *(amount, turns)* needs one
+  more field. It gets the sidecar the engine already uses for exactly that —
+  `Player.timed_power_amounts`, keyed by power name, the shape
+  `Player.power_payloads` established. `powers[name]` holds **turns
+  remaining** (the engine's own stacks-are-turns grammar: `kurage_summon`,
+  `colossus`, `intangible`, `double_damage`, `ceremonial_garment`) and the
+  sidecar holds the amount those turns pay, so every existing reader of
+  `powers` keeps working and only the payout consults the sidecar. Both
+  entries are deleted together at expiry. **Lifetime is exactly `powers`'
+  lifetime** — default-empty on a fresh `Player`, one built per fight by
+  tier 0.5, neither swept in `run_fight`.
+- **The amount is snapshotted at play time; the duration may not be.**
+  `amount` goes through `_amount` (so `block_gained_this_card` is
+  expressible) and is scaled by Spotlight and the salon multiplier once, at
+  play. `turns` is a **literal positive int** and raises otherwise
+  (`effects.block_at_turn_start_turns`, the `spend_spark_amount` precedent),
+  checked at LOAD by `loader._validate_effect_vocabulary`: a duration
+  resolved against combat state is printed text that means something
+  different every time it is played.
+- **Stacking is a PLACEHOLDER** — additive on amount, `max` on turns, so a
+  second casting can never shorten a standing one. No ratified rule for
+  same-name *(amount, turns)* effects exists to inherit; the engine's
+  ratified duration rules are all single-field refreshes and settle only the
+  turns half. **[USER]'s pick whenever the first carrier is printed.**
+- **Nimble does not ride it**, for `block_next_turn`'s reason verbatim (EB-85
+  divergence 4): the Block arrives from a POWER, so there is no `cardSource`
+  for the enchantment hook to read. `enchantments._BLOCK_OPS` is an allowlist,
+  so the exclusion is structural.
+- **Registered where an op has to be registered:** `effects.OPS`, the loader's
+  load-time vocabulary check, `card_connectivity_report.OP_HOOKS` (same hook
+  as its one-shot sibling — the vocabulary asks what state an op moves, not
+  how often), and `draft.STATIC_OP_PRICING` / `_op_price` (the delayed-Block
+  share, once per printed turn; PROPOSED, and unreachable).
+- **Named still-owed, for whoever prints the first carrier:** there is no
+  `block_at_turn_start` upgrade-delta key in `content/upgrades.py`, so an
+  upgraded row (Toric Toughness' published 5→7) cannot yet spell its bump.
+  Deliberately not added here — the delta keys are a shared schema with
+  `tools/gen_klee_cards.py`'s C# emitter, and a shared-schema change lands
+  atomically with every consumer (R20/R92) or not at all.
+
+## 8. Reading order
 
 1. `tier0/README.md` — what the sim is for, and what is frozen.
 2. `tier0/engine/state.py` — data model, determinism contract, card schema.

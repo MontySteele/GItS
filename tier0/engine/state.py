@@ -536,6 +536,29 @@ class Player(Fighter):
     # makes the card. Keeps decompiled card ids out of committed engine code
     # while letting a parity power create a character's own token.
     power_payloads: dict[str, str] = field(default_factory=dict)
+    # EB-83: THE STRUCTURED-POWER SIDECAR. `powers` is a `name -> int` map, so
+    # a power carrying TWO numbers -- an amount AND a duration -- has nowhere
+    # to put the second one. This is that second field, keyed by power name,
+    # exactly as `power_payloads` above is: the engine already answers "this
+    # power needs one more field than a stack count" with a sidecar map beside
+    # `powers` rather than with a parallel object graph, and a second answer to
+    # one question is how two lifetimes drift apart.
+    #
+    # The SPLIT is the engine's own stacks-are-turns grammar (`kurage_summon`,
+    # `colossus`, `intangible`, `double_damage`, `ceremonial_garment`):
+    # `powers[name]` holds TURNS REMAINING and this holds the amount those
+    # turns pay. So the tick, the expiry and every existing reader of `powers`
+    # keep working unchanged, and only the payout consults the sidecar.
+    #
+    # LIFETIME IS EXACTLY `powers`' LIFETIME -- default-empty on a freshly
+    # built Player, and tier 0.5 builds one per fight (`tier05/model.py` ->
+    # `loader.build_player_from_ids`), which is the whole of "survives nothing
+    # across combats". Neither map is swept in `run_fight`, and this one must
+    # not acquire a sweep that `powers` does not have: a carrier cleared on a
+    # pass its own power is not cleared on is a power with an amount of zero,
+    # which pays silently rather than expiring loudly. The op that writes it
+    # deletes BOTH entries at expiry, so nothing lingers even within a combat.
+    timed_power_amounts: dict[str, int] = field(default_factory=dict)
     first_hp_loss_fired: bool = False        # on_first_hp_loss_draw, per combat
     relic_conditional_applied: dict[str, int] = field(default_factory=dict)
     #                                        # conditional_power (Red Skull):
