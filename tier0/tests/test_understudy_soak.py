@@ -337,7 +337,8 @@ class _FakeBridge:
     def get_state(self):
         if self.screen == "embarked":
             return {"state_type": "map", "run": {"act": 1, "floor": 1},
-                    "player": {"hp": 60, "max_hp": 60},
+                    # EB-117: the wire names the run's character here.
+                    "player": {"hp": 60, "max_hp": 60, "character": "Furina"},
                     "map": {"next_options": [{"index": 0, "type": "Monster"}]}}
         opts = {
             "main": ["singleplayer"],
@@ -824,3 +825,171 @@ def test_a_greyed_out_rest_option_is_not_a_match():
     memo.next_node_kinds = ["?"]
     d = soak.policy_v1.decide(state, memo)
     assert not d.available, "a disabled option was chosen"
+
+
+# ---------------------------------------------------- EB-117: who embarked ---
+#
+# The row: a six-run soak launched with `--character furina` (the option id is
+# `KLEEMOD-FURINA`) matched nothing, never fired the pick, embarked on whatever
+# the character-select screen had highlighted -- Ironclad -- and produced a
+# report headed `character furina` whose every damage source was an Ironclad
+# card. It was caught only because the damage table made the mismatch visible.
+# Three guards below: the comparator, the pre-embark check, the read-back.
+#
+# The wire is not available here, so the read-back is driven with recorded
+# state dicts and the fake character-select screen the embark tests already use.
+
+
+def test_the_option_id_and_the_display_name_fold_together():
+    """The request is an OPTION id, the read-back is the wire's DISPLAY name.
+    They are different vocabularies, which is why `==` is not the test."""
+    assert soak.character_matches("KLEEMOD-FURINA", "Furina")
+    assert soak.character_matches("furina", "Furina")
+    assert soak.character_matches("KLEEMOD-KOKOMI", "Sangonomiya Kokomi")
+    assert soak.character_matches("kokomi", "Sangonomiya Kokomi")
+    assert soak.character_matches("KLEEMOD-KLEE", "Klee")
+    # Non-roster names still compare, and are never claimed as roster members.
+    assert soak.character_matches("IRONCLAD", "Ironclad")
+    assert soak.canonical_character("IRONCLAD") == "ironclad"
+
+
+def test_a_different_character_never_matches_and_neither_does_silence():
+    assert not soak.character_matches("KLEEMOD-FURINA", "Ironclad")
+    assert not soak.character_matches("kokomi", "Klee")
+    # "the wire said nothing" is a failure to verify, not a verification.
+    assert not soak.character_matches("KLEEMOD-FURINA", "")
+    assert not soak.character_matches("", "Furina")
+    assert not soak.character_matches("", "")
+
+
+def test_a_character_the_screen_does_not_offer_fails_before_the_embark(
+        monkeypatch):
+    """(a), taken as early as it can be taken. The options are on the screen,
+    so the answer is knowable before the run exists rather than six runs later
+    from a damage table. Nothing may be confirmed."""
+    fake = _FakeBridge()
+    monkeypatch.setattr(soak, "bridge", fake)
+    monkeypatch.setattr(soak, "SETTLE_S", 0)
+    d = _driver()
+    d.character = "furina"              # the EB-117 typo: the id is KLEEMOD-FURINA
+    try:
+        d._embark(fake.get_state())
+    except soak.Defect as e:
+        assert e.kind == "character_not_offered"
+        assert "furina" in e.detail
+    else:
+        raise AssertionError("an unofferable character embarked anyway")
+    confirms = [p for p in fake.posted
+                if str(p[1].get("option", "")).lower() in ("confirm", "embark")]
+    assert not confirms, "the run embarked despite the character not matching"
+    assert fake.screen != "embarked"
+
+
+def test_the_offered_character_still_embarks(monkeypatch):
+    """The guard must not cost the working path -- the same assertion the
+    embark test makes, re-made with the check in front of it."""
+    fake = _FakeBridge()
+    monkeypatch.setattr(soak, "bridge", fake)
+    monkeypatch.setattr(soak, "SETTLE_S", 0)
+    d = _driver()
+    state = d._embark(fake.get_state())
+    assert state["state_type"] == "map"
+
+
+def _embarked_as(who):
+    return {"state_type": "map", "run": {"act": 1, "floor": 1},
+            "player": {"hp": 60, "max_hp": 60, "character": who}}
+
+
+def test_the_read_back_stamps_the_character_that_actually_started():
+    """(b). `character_actual` is the only thing anything downstream stamps."""
+    d = _driver()
+    records = []
+    d.emit = records.append
+    d.character = "KLEEMOD-FURINA"
+    d._verify_character(_embarked_as("Furina"), tries=1, delay=0)
+    assert d.character_actual == "Furina"
+    assert [r["record"] for r in records] == ["character_verified"]
+    assert records[0]["character"] == "Furina"
+    assert records[0]["character_requested"] == "KLEEMOD-FURINA"
+
+
+def test_a_run_that_started_as_somebody_else_is_a_loud_defect():
+    """THE EB-117 RUN. Ironclad embarked, `furina` was requested."""
+    d = _driver()
+    d.character = "furina"
+    try:
+        d._verify_character(_embarked_as("Ironclad"), tries=1, delay=0)
+    except soak.Defect as e:
+        assert e.kind == "character_mismatch"
+        assert "Ironclad" in e.detail and "furina" in e.detail
+    else:
+        raise AssertionError("a run flying the wrong character was accepted")
+    assert d.character_actual is None
+
+
+def test_an_unreadable_character_is_a_defect_and_not_a_shrug():
+    """A run whose identity cannot be read cannot be labelled, and an
+    unlabelled soak is the whole defect this row is about."""
+    d = _driver()
+    state = {"state_type": "map", "run": {"act": 1, "floor": 1},
+             "player": {"hp": 60, "max_hp": 60}}
+    try:
+        d._verify_character(state, tries=1, delay=0)
+    except soak.Defect as e:
+        assert e.kind == "character_unverified"
+    else:
+        raise AssertionError("an unidentifiable run was waved through")
+    assert d.character_actual is None
+
+
+def test_all_three_kinds_halt_the_soak_like_a_dishonoured_seed():
+    """Same shape as `seed_not_honoured`: the instrument was told to measure
+    one thing and measured another."""
+    for kind in ("character_not_offered", "character_mismatch",
+                 "character_unverified"):
+        assert kind in soak._HARNESS_SIDE, kind
+
+
+def test_run_begin_never_carries_the_requested_string(monkeypatch):
+    """The record that used to launder the request into an identity. It stays
+    FIRST in the log (`test_track_o_s09` pins the triple), and its `character`
+    is null until the wire has answered."""
+    d = _driver()
+    records = []
+    d.emit = records.append
+    d.character = "furina"
+    d.session.exit_code = None
+
+    def _never_embarks():
+        raise soak.Defect("unexpected_start_state", "parked", {})
+
+    d._to_main_menu = _never_embarks
+    summary = d.run()
+    assert [r["record"] for r in records] == ["run_begin", "defect", "run_end"]
+    begin = records[0]
+    assert begin["character"] is None
+    assert begin["character_requested"] == "furina"
+    assert "furina" not in json.dumps(
+        {k: v for k, v in begin.items() if k != "character_requested"})
+    # And the summary the index is built from carries the same null.
+    assert summary["character"] is None
+    assert summary["character_requested"] == "furina"
+
+
+def test_the_report_header_refuses_to_print_an_unstarted_name():
+    """ACCEPTANCE: no report can carry a requested-but-unstarted name."""
+    verified = report._character_header(
+        {"character": "Sangonomiya Kokomi",
+         "character_requested": "KLEEMOD-KOKOMI"})
+    assert verified == "`Sangonomiya Kokomi`"
+
+    unverified = report._character_header(
+        {"character": None, "character_requested": "furina"})
+    assert "UNVERIFIED" in unverified
+    assert "requested `furina`" in unverified
+
+    # A pre-EB-117 index has no `character_requested` key at all and its
+    # `character` IS the request. Reading it as unverified is the truth.
+    legacy = report._character_header({"character": "furina"})
+    assert "UNVERIFIED" in legacy

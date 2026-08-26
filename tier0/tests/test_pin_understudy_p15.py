@@ -384,6 +384,11 @@ def test_a_run_that_reads_back_another_seed_files_a_defect(monkeypatch):
     d.emit = lambda record: None
     d._to_main_menu = lambda: fake.get_state()
     d._embark = lambda state: state
+    # EB-117's read-back runs between the embark and the seed read-back, and
+    # this stubbed `_embark` hands back a MENU state that names no character.
+    # The seed guard is what is under test here; the character guard has its
+    # own tests in `test_understudy_soak`.
+    d._verify_character = lambda state: state
     d._drive = lambda state: ("won", "")
 
     summary = d.run()
@@ -489,6 +494,8 @@ def test_run_one_takes_the_first_named_seed(monkeypatch, tmp_path):
             return True
 
     class _Driver:
+        character_actual = None          # EB-117: read back, never requested
+
         def __init__(self, session, i, stamp, character, commit=None,
                      chosen_seed=None, max_fights=None, hazard_guard=True):
             seen.append(chosen_seed)

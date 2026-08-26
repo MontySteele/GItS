@@ -65,6 +65,23 @@ instead of a canon comparison. Gated by
 red fixture, the op table pinned against `effects.OPS`, and the canon reader
 exercised against a synthetic decompiled tree.)
 
+## Safety guards (run by hand; each exists for one refusal)
+`purge_worktree.py` (EB-128 — removes a worktree and REFUSES, exit 2, when it
+holds gitignored data it was not told to expect. `git worktree remove` deletes
+ignored content out of a CLEAN worktree, and a 2026-08-24 purge of stale
+worktrees took both surviving `game_ref/` backups that way. Build outputs,
+caches and `local.props` are the allowlist; `game_ref/`, the decompile trees
+and the art trees deliberately are not, and `--acknowledge` is the door.
+Hermetically gated in temp repositories by
+`tier0/tests/test_purge_worktree_guard.py` — a test for a destructive tool must
+not itself be capable of the destruction.)
+
+`backup_game_ref.py` + `lint_game_ref_backup.py` (EB-128 — the OneDrive vault
+mirror and the tripwire that notices a stale one. The backup REFUSES a missing
+or under-ten-file source, because all four `game_ref/` destructions left the
+directory present and empty and a plain mirror would have propagated that into
+the one surviving copy. Gated by `tier0/tests/test_backup_game_ref_guard.py`.)
+
 ## Advisory (CI-visible, never blocking)
 `patch_sentinel.py` — asks whether the INSTALLED sts2.dll still agrees with the
 `game_ref/` baselines (cards, character facts) and with its own relic/DLL

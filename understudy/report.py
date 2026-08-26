@@ -177,6 +177,30 @@ def _median(xs: list[float]) -> float:
     return s[n // 2] if n % 2 else (s[n // 2 - 1] + s[n // 2]) / 2
 
 
+def _character_header(idx: dict) -> str:
+    """EB-117: the header names WHO EMBARKED, or says it does not know.
+
+    `character` in the index is the identity read back off the wire after the
+    embark confirm fired; `character_requested` is what the operator typed.
+    The header used to print the request, so a soak that silently flew
+    Ironclad was headed `character furina`. It never prints the request as an
+    identity again -- an unverified soak is labelled UNVERIFIED, loudly, and
+    the request appears only as the thing that was asked for.
+
+    Indexes written before this row have no `character_requested` key and
+    their `character` IS the requested string; they are read as unverified,
+    which is the truthful reading of them.
+    """
+    actual = str(idx.get("character") or "").strip()
+    requested = str(idx.get("character_requested")
+                    or ("" if "character_requested" in idx
+                        else idx.get("character") or "")).strip()
+    if actual and "character_requested" in idx:
+        return f"`{actual}`"
+    return (f"**UNVERIFIED** (requested `{requested or '?'}`; no run read a "
+            f"character back off the wire)")
+
+
 def render(stamp: str | None = None) -> str:
     stamp = stamp or latest_stamp()
     if stamp is None:
@@ -207,7 +231,7 @@ def render(stamp: str | None = None) -> str:
     a = L.append
     a(f"# Understudy soak {stamp} -- morning report")
     a("")
-    a(f"`{idx.get('policy')}` | character `{idx.get('character')}` | "
+    a(f"`{idx.get('policy')}` | character {_character_header(idx)} | "
       f"{len(runs)} of {idx.get('requested_runs')} requested runs completed")
     a("")
     a("> " + GUARDRAIL.replace("\n", " "))
