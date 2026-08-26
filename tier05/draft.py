@@ -150,6 +150,14 @@ STATIC_STATE_CONDITIONS = frozenset({
     # BOTH faces. The ruling took the delta and the rider together, and the
     # rider is what makes the delta visible.
     "spotlight_moved_this_turn",
+    # C20 (R189 C2). NOT an extension of what the drafter prices -- a
+    # PRESERVATION of it. `elemental_ecstasy`'s Block branch was already
+    # priced here under `target_has_nonpyro_aura`; C2 renamed the predicate
+    # on that one row, and leaving the new name out would have silently
+    # un-priced a branch the offer screen has always seen. No other row
+    # prints it, so no other price can move, and no dial value moves either:
+    # it takes the same Klee conditional share below.
+    "target_has_aura",
 })
 
 
@@ -162,7 +170,7 @@ def _static_condition(name: str) -> bool:
 
 
 def _static_condition_share(name: str) -> float:
-    if name in ("has_spark", "target_has_nonpyro_aura"):
+    if name in ("has_spark", "target_has_nonpyro_aura", "target_has_aura"):
         return STATIC_KLEE_CONDITIONAL_SHARE
     if name == "spotlight_moved_this_turn":
         return STATIC_SPOTLIGHT_MOVED_SHARE

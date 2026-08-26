@@ -338,8 +338,16 @@
 # sleeping Birthday-2025 art fits the effect (the nap IS the aura refresh, the
 # draws are the dreams); the old name implied reaction-rapture the card never
 # delivers. ID stays elemental_ecstasy. Future greps: try BOTH names.
+# C2 redesign (R189 direction, R205 sub-shape, landed 2026-08-26): the Block
+# branch read `target_has_nonpyro_aura`, so the card's biggest number was
+# switched off by Klee's OWN Pyro application -- she prints no off-element
+# aura (LAW, "Reactions are earned, not given"). The predicate moves to
+# `target_has_aura` and the Block moves 8 -> 5 in the same act: R205 took the
+# number DOWN so the landing is the accessibility repair alone and not also a
+# straight buff to the largest clause on a 2-cost uncommon that draws.
+# Upgrade row is untouched ({cost: -1}).
 - {id: elemental_ecstasy, name: "Sweet Dreams", cost: 2, type: skill, rarity: uncommon, solve: [block, utility, velocity], tempo_band: {fight: [mid, late], run: [early, late]}, archetypes: [reaction], role: glue,
-   effects: [{op: refresh_all_auras}, {op: draw, amount_formula: per_aura}, {op: conditional, if: target_has_nonpyro_aura, then: [{op: block, amount: 8}]}]}
+   effects: [{op: refresh_all_auras}, {op: draw, amount_formula: per_aura}, {op: conditional, if: target_has_aura, then: [{op: block, amount: 5}]}]}
 - {id: borrowed_brilliance, name: "Borrowed Brilliance", cost: 1, type: skill, rarity: uncommon, solve: [velocity], tempo_band: {fight: [early], run: [early]}, archetypes: [reaction], role: glue,
    effects: [{op: copy_companion_in_hand, amount: 1, temp: true, cost_override: 0}]}
 - {id: study_buddy, name: "Study Buddy", cost: 1, type: skill, rarity: uncommon, solve: [block, velocity], tempo_band: {fight: [early], run: [late]}, archetypes: [reaction], role: payoff,

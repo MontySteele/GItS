@@ -646,6 +646,9 @@ PREDICATE_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "this_cost_zero": [_hook("shared", "card_identity", "read")],
     "has_spark": [_hook("private", "sparks", "read")],
     "target_has_nonpyro_aura": [_hook("shared", "aura_reaction", "read")],
+    # Same shared surface, same direction: C2 (R189) widened WHICH auras
+    # count, not what the predicate touches.
+    "target_has_aura": [_hook("shared", "aura_reaction", "read")],
     "reaction_triggered_by_this": [_hook("shared", "aura_reaction", "read")],
     "reaction_triggered_this_turn": [_hook("shared", "aura_reaction", "read")],
     "killed_target": [_hook("shared", "enemy_count", "read")],

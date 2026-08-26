@@ -483,14 +483,15 @@ def _finish_play(state: CombatState, card: Card,
 # the inner card's kills, exhausts and repeat request -- a corruption that is
 # invisible in results, which is why effects._free_play refuses to resolve
 # effects inline and routes here instead. (Its contract docstring names
-# twelve; block_gains_this_card and salon_replacements_this_card are
+# fourteen; block_gains_this_card and salon_replacements_this_card are
 # resolve_card's too and are saved for the same reason.)
 _ABSENT = object()
 _FREE_PLAY_CONTEXT = (
     "current_card_companion", "reactions_this_card", "kills_this_card",
     "fatal_kills_this_card", "exhausted_this_card", "block_gains_this_card",
     "salon_replacements_this_card", "detonations_at_card_start",
-    "repeat_requested", "target_had_offelement_aura", "current_attack_bonus",
+    "repeat_requested", "target_had_offelement_aura", "target_had_aura",
+    "current_attack_bonus",
     "sparks_at_play", "current_x", "current_card_cost",
     # Coverage pass 4's three per-card reads. Same hazard as the rest: a Sly
     # auto-play that discards or gains block in the middle of an outer card
@@ -543,8 +544,9 @@ def resolve_free_play(state: CombatState, card: Card,
     now. No committed card sets either, so the roster is unmoved.
     """
     p = state.player
-    # Four of these (detonations_at_card_start, repeat_requested,
-    # target_had_offelement_aura, current_attack_bonus) are set by
+    # Five of these (detonations_at_card_start, repeat_requested,
+    # target_had_offelement_aura, target_had_aura, current_attack_bonus)
+    # are set by
     # resolve_card rather than declared on CombatState, so before the first
     # card of a fight resolves they do not exist yet -- and the exhaust
     # autoplay sweep fires at TURN END, outside any card. Restoring absence

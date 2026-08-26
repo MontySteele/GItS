@@ -190,7 +190,12 @@ def test_the_declaration_names_only_real_predicates():
 
 def test_the_two_collections_cover_todays_sheet_exactly():
     """A census, so the row's before/after list is checkable rather than
-    asserted. Seventeen names across the three sheets and the companions."""
+    asserted. Eighteen names across the three sheets and the companions.
+
+    `target_has_aura` is C20's (R189 C2, `elemental_ecstasy`) and joins as a
+    SCORABLE name; `target_has_nonpyro_aura` stays on the list because
+    `sizzle` still prints it -- the redesign moved one row, not the family.
+    """
     printed = set(_every_printed_predicate())
     assert sorted(n for n in printed if policy.predicate_is_scorable(n)) == [
         "charge_at_least_10",
@@ -206,6 +211,7 @@ def test_the_two_collections_cover_todays_sheet_exactly():
         "has_spark",
         "reaction_triggered_this_turn",
         "spotlight_moved_this_turn",
+        "target_has_aura",
         "target_has_nonpyro_aura",
         "this_cost_zero",
     ]
