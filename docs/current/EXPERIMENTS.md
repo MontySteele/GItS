@@ -296,8 +296,9 @@ registration packets themselves live under `review/active/` — one home, not tw
   `review/active/m17-sweep-reregistration-p7-2026-08-13.md`; companion redesign
   options packet `review/active/m17-elemental-ecstasy-redesign-2026-08-13.md`.
 - **Shop companion channel re-run (`S4-G10`, registered at `RT12/D17/P10/C19`)**
-  — **DRAFT, awaiting [USER] slate entry then countersign at QUEUE `M14`,
-  unrun.** The packet is in HEAD as of the `shop-floor-2026-08-10` merge. The
+  — **SLATE ENTERED AND COUNTERSIGNED 2026-08-26 ([USER]), unrun at this
+  entry; the run is firing under packet `§7.1`.** The packet is in HEAD as of
+  the `shop-floor-2026-08-10` merge. The
   channel's world moved ([USER] restored slot 2's Uncommon floor,
   `CONSTANTS_VERSION` 9) and the instrument's two defects were repaired, both
   on 2026-08-10; the packet asks to re-measure in the new world. **Re-stamped
@@ -310,8 +311,21 @@ registration packets themselves live under `review/active/` — one home, not tw
   renumber the Klee and Furina shelves. `§2` items 12–15 enumerate it and
   `§2.1` names the table to author predictions against
   (`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`, which supersedes
-  the two 2026-08-24 tables; each stands as published, R101b). Predictions are
-  explicit [USER] slots and are still blank; the run is staged mechanically at
+  the two 2026-08-24 tables; each stands as published, R101b).
+  **The six `§5` predictions and `§4`'s `n` are ENTERED, in `§7` step 1's
+  order and before any seed was run** — Q1 80–95% Uncommon DIAGNOSTIC-ONLY,
+  Q2 YES-but-uncommon with arrival-unaffordable 0–5% and a two-clause
+  price-is-not-governing test, Q3 15–30% with the original 10–35% acceptance
+  band standing beside it, Q4 YES at approximately −15 pp, P2's original band
+  standing, and a four-condition redesign trigger under which a Q1 miss alone
+  reopens nothing; `n` = 1,000 per arm per character, `SEED = 20260725`
+  retained. **The entered slate REPLACES the one R182 settled and held outside
+  the repo rather than transcribing it** — those values were never written in
+  and are not recoverable, which the packet's `§5` says in its own words. Two
+  corrections were adopted with the entry: Q2's priced-out clause restated in
+  the per-EVENT-over-per-VISIT units the instrument actually prints, and a
+  countersign line added, the packet having had none while its three siblings
+  all carry one. The run is staged mechanically at
   `§7.1`, where the instrument's standing hazards are named — it **prints the
   live `RT/D/P/C` as its first output line** (`EB-141(a)`, 2026-08-25) but
   **still does not route through a `Cell`** (`EB-141(b)`, gated on this

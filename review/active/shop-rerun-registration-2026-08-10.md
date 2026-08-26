@@ -1,7 +1,7 @@
-# Shop companion channel — re-run registration (DRAFT, awaiting countersign)
+# Shop companion channel — re-run registration (COUNTERSIGNED, unrun)
 
-> **Status: DRAFT. Nothing here has been run.** No number in this document was
-> measured. The instrument was repaired and the shop world was changed on
+> **Status: COUNTERSIGNED 2026-08-26, not yet run.** No number in this document
+> was measured. The instrument was repaired and the shop world was changed on
 > 2026-08-10; this packet asks to re-run the measurement in the new world.
 > **That world is `RT12/D17/P10/C19` — §2 enumerates it in full, and it is the
 > world the re-run measures.** (Re-stamped a third time 2026-08-24 on `M14`'s
@@ -920,7 +920,11 @@ recorded.** That is the blind in blind grading, and no command can enforce it.
 
 ## Countersign line — one word, [USER]: COUNTERSIGN / REVISE / DECLINE
 
-`________`
+`COUNTERSIGN` — [USER] 2026-08-26.
+
+**No slot is open. The packet is cleared to launch**, and §7.1 fires on §4's
+entered `n` = 1,000 with the registered seed. The world freezes from this line
+to the graded read (R182's sequence), which is also `EB-141(b)`'s gate.
 
 **Correction 2 (Claude, adopted 2026-08-26): this packet had no countersign
 line at all.** Its three sibling registrations each end with one in exactly
