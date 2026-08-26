@@ -217,13 +217,19 @@ wall-clock lever at the (point, cell) level only**: every cell is pinned to
 would run the shipped weights while the parent believed it was sweeping.
 **ONE gate per sweep** (`--gate`): `PILOT_POLICIES_ENABLED` and
 `MODE_CHOOSER_ENABLED` are separate activation windows (R191), and forcing both
-would put two of them through one measurement. A weight no measurement cell
-READ is refused rather than printed (R67/R33) — that refusal is the instrument
-working, and the answer to it is to leave the weight alone. Only a DOMINATING
-point that reproduces at confirm may be adopted, and adopting one is its own
-`PILOT_WEIGHTS_VERSION` bump; TRADE, INSEPARABLE, a SHARED weight, an adopted
-zero and any stack-cap move are [USER]'s. The design, the grid, the five cells
-and the decision rule are the module's own docstring — it documents itself,
+would put two of them through one measurement. That is R207's rule, not a
+stricter one — the separation is owed exactly where attributing the movement to
+one gate is what the next decision turns on. Where nothing turns on that
+attribution the two may share a window, and under R212 that call is Claude's
+whenever the scratch read is null (disclose the scratch hash and the null read);
+the stamp then labels the world and the number belongs to the window, not to
+either gate. A weight no measurement cell READ is refused rather than printed
+(R67/R33) — that refusal is the instrument working, and the answer to it is to
+leave the weight alone. Only a DOMINATING point that reproduces at confirm may
+be adopted, and adopting one is its own `PILOT_WEIGHTS_VERSION` bump; TRADE,
+INSEPARABLE, a SHARED weight, an adopted zero and any stack-cap move are
+[USER]'s. The design, the grid, the five cells and the decision rule are the
+module's own docstring — it documents itself,
 `understudy/soak.py`'s pattern, so the design cannot drift from the code.
 
 ## Codegen — roster cards

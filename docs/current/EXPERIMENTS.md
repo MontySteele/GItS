@@ -25,7 +25,10 @@ registration packets themselves live under `review/active/` — one home, not tw
   edit (`DRAFTER_VERSION` in `tier0/constants.py`). Where nothing turns on
   attributing a movement to one edit, several variables may share a window; the
   stamp then labels the world, and a number taken in it is attributable to the
-  window rather than to any one edit inside it.
+  window rather than to any one edit inside it. **The null-scratch call is
+  Claude's, disclosed (R212):** where the scratch read is null — no interval
+  separation on any arm — Claude shares the window without asking, and the row
+  and the PR text carry the scratch hash and that null read.
 - **A published standing baseline is spent where it buys something, not owed at
   every bump (R207).** A **standing table** is published at a meaningful product
   milestone, or when a pending decision needs one. Intermediate attribution
@@ -54,7 +57,14 @@ registration packets themselves live under `review/active/` — one home, not tw
   intent**, with its contamination stated, and **never revised against the
   playtest that grades it** (D5 — the Kokomi stability band, which lands DARK,
   `band = None`).
-- Pre-registration drafts are a [USER]-gated class; the grade goes in blind.
+- **Prediction slates are DRAFTED by Claude (R212)** from written design intent
+  and committed as their own commit, labelled DRAFTED, **before any seed run**;
+  [USER] countersigns in batch, or vetoes within five days. Pre-registration
+  holds on commit-before-run, not on authorship. The grade still goes in blind.
+- **Countersign once — restamp-and-hold is abolished (R212).** The packet's own
+  world-check refuses to run on a moved world. A moved world means re-drafting
+  the affected slots and disclosing the diff in the row; it never means
+  re-signing an already-countersigned slate.
 
 ### Decision linkage (R206)
 - **Every registration names the DECISION each outcome would change** — slot by

@@ -445,9 +445,43 @@ combat grammar comes with us. (principles §1)
 
 ## Process constraints that bind design
 
-- **[USER]-only closures:** pre-registrations, probe countersigns, band
-  ratifications, PROPOSED-number ratification, and art/lore/naming taste are
-  never resolved without [USER]. (class-p-charter §2; kokomi §0)
+- **The delegation ladder — seven standing authorizations.** Claude decides
+  these and ships them; none of them waits on [USER].
+  1. **Art picks.** Apply shortlist rank 1 and ship it. The contact sheet is
+     committed with the change, and `art_lint` L6/L9/L11/L12 still bite.
+     [USER] vetoes on the sheet, with no deadline; a veto is a one-line revert.
+  2. **Prediction slates.** Claude DRAFTS the slate from written design intent
+     and commits it as its own commit, labelled DRAFTED, BEFORE any seed run;
+     [USER] countersigns in batch, or vetoes within five days. Blind grading is
+     unchanged. Pre-registration holds on commit-before-run, not on authorship.
+  3. **Countersign once — restamp-and-hold is abolished.** The packet's own
+     world-check refuses to run on a moved world, and a moved world means
+     re-drafting the affected slots and disclosing the diff in the row. Never
+     re-sign.
+  4. **One batch per sitting** (amends R206), assembled by Claude. *"Does the
+     original band stand?"* defaults to **STANDS** unless the estimand itself
+     moved, and nothing already answered gets a transient register row.
+  5. **Window sharing** (R207) is Claude's call whenever the scratch read is
+     null — no interval separation on any arm — disclosed as the scratch hash
+     plus the null read, in the row and in the PR text.
+  6. **Hygiene inside a registered packet** never needs authorization (stale
+     sentences, filenames, rarity typos, dead paths) — except inside a
+     countersigned prediction block, where R101b holds: strike, don't rewrite.
+  7. **Derived numbers land unratified** when the number is derived rather than
+     picked, the error direction is stated and one-way, the archive scope is
+     disclosed, and the value lives in exactly one constant. Names ship
+     provisional, flagged in the loc file, and must be proved cosmetic at ship
+     time by lint (R179), or the later rename is not free. Excluded: R58
+     one-way doors, and shipped player-facing numbers.
+
+  **Form rule:** anything that still returns to [USER] is presented as a
+  **NUMBERED PICK LIST**, never a blank to fill.
+
+  **Still [USER]'s:** eyes-on judgments no test can take (the docket read,
+  in-game looks, the naming/lore audit); merging a staged balance lever; money;
+  one-way doors (R58 thresholds, major version bumps); amendments to LAW or to
+  measurement law; and a pick between genuinely different design directions.
+  (R212; amends class-p-charter §2 and kokomi §0)
 - **A WATCH ITEM is a blessing of the mechanism + a named quantity + a named
   trigger;** it does not return until the trigger fires, and then it returns with
   a reading, not an argument. (R111)
