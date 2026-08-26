@@ -87,6 +87,21 @@ FRAME_DIR = Path(__file__).resolve().parent / "logs" / "frames"
 MANIFEST = FRAME_DIR / "frames.jsonl"
 
 CAPTURE_ENV = "GITS_UNDERSTUDY_CAPTURE"
+
+# EB-142 hygiene, 2026-08-25. The auto route is `printwindow` first and
+# `copyfromscreen` only if the surface comes back BLANK -- and on this
+# Godot/Vulkan window `PrintWindow` returns a surface that is not blank and is
+# not complete either: the background and the HUD chrome render, the HAND, the
+# ENEMIES and the prompt caption do not. `Test-Blank` sees a varied bitmap,
+# says "fine", and every in-combat frame on the default route is a PARTIAL --
+# missing exactly the three things anyone captures a combat frame to look at.
+# There is no way to make the blank test catch that (the frame genuinely is
+# not blank), so the answer is an explicit override rather than a smarter
+# heuristic: name the route and take responsibility for its caveat.
+ROUTE_ENV = "GITS_UNDERSTUDY_CAPTURE_ROUTE"
+ROUTE_AUTO = "auto"
+ROUTES = (ROUTE_AUTO, "printwindow", "copyfromscreen")
+
 GAME_IMAGE = "SlayTheSpire2"          # process name, no .exe -- Get-Process
 
 GUARDRAIL = (
@@ -106,6 +121,18 @@ DISABLED_NOTE = (
 def enabled(env: dict[str, str] | None = None) -> bool:
     env = os.environ if env is None else env
     return (env.get(CAPTURE_ENV) or "").strip() in ("1", "true", "TRUE", "yes")
+
+
+def route(env: dict[str, str] | None = None) -> str:
+    """The capture route this run is pinned to, or `"auto"`.
+
+    Same family and the same reasoning as `CAPTURE_ENV`: env-only, and an
+    unrecognised value falls back to `auto` rather than failing the capture --
+    a typo should cost a caveat, never the frame.
+    """
+    env = os.environ if env is None else env
+    want = (env.get(ROUTE_ENV) or "").strip().lower()
+    return want if want in ROUTES else ROUTE_AUTO
 
 
 def frame_path(label: str, stamp: str | None = None,
@@ -152,6 +179,20 @@ public static class GitsWin {
     public static extern bool SetProcessDpiAwarenessContext(IntPtr value);
     [DllImport("user32.dll")]
     public static extern bool SetProcessDPIAware();
+    // FOREGROUNDING, for the copyfromscreen route ONLY. That route reads the
+    // SCREEN under the window's rectangle, so it photographs whatever is on
+    // top -- and something always is, because the thing driving this capture
+    // is a console. SwitchToThisWindow is the shell's own alt-tab and does
+    // not carry SetForegroundWindow's focus-stealing restrictions;
+    // HWND_TOPMOST is the belt to its braces, and is dropped again after the
+    // grab so the game does not stay pinned over everything the user owns.
+    [DllImport("user32.dll")]
+    public static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
+    [DllImport("user32.dll")]
+    public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter,
+        int X, int Y, int cx, int cy, uint uFlags);
+    [DllImport("user32.dll")]
+    public static extern bool IsZoomed(IntPtr hWnd);
 }
 "@
 try { [void][GitsWin]::SetProcessDpiAwarenessContext([IntPtr](-4)) }
@@ -197,19 +238,52 @@ function Test-Blank($bitmap) {
     return $true
 }
 
-$route = 'printwindow'
+# HWND_TOPMOST = -1, HWND_NOTOPMOST = -2; SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE
+# = 0x0013. Position and size are never touched -- only Z order.
+function Set-Foreground($hWnd) {
+    [GitsWin]::SwitchToThisWindow($hWnd, $true)
+    [void][GitsWin]::SetWindowPos($hWnd, [IntPtr](-1), 0, 0, 0, 0, 0x0013)
+    # The compositor needs a beat to actually put it there. Without this the
+    # grab races the raise and photographs the console it was told to get out
+    # from behind.
+    Start-Sleep -Milliseconds 350
+}
+function Clear-Foreground($hWnd) {
+    [void][GitsWin]::SetWindowPos($hWnd, [IntPtr](-2), 0, 0, 0, 0, 0x0013)
+}
+
 $bmp = New-Object System.Drawing.Bitmap $w, $h
 $gfx = [System.Drawing.Graphics]::FromImage($bmp)
-$hdc = $gfx.GetHdc()
-$ok = [GitsWin]::PrintWindow($hwnd, $hdc, 2)
-$gfx.ReleaseHdc($hdc)
-if ((-not $ok) -or (Test-Blank $bmp)) {
-    # Fallback: the screen under the window's rectangle. Now DPI-correct,
-    # because awareness was set above -- but still the screen and not the
-    # window, so anything sitting on top of the game lands in the frame.
-    $route = 'copyfromscreen'
-    $gfx.Clear([System.Drawing.Color]::Black)
-    $gfx.CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bmp.Size)
+
+$forced = '__ROUTE__'
+if ($forced -eq 'copyfromscreen') {
+    # PINNED by GITS_UNDERSTUDY_CAPTURE_ROUTE. No PrintWindow attempt at all,
+    # so the partial surface this route exists to avoid is never written.
+    $route = 'copyfromscreen-forced'
+    Set-Foreground $hwnd
+    try {
+        $gfx.Clear([System.Drawing.Color]::Black)
+        $gfx.CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bmp.Size)
+    } finally { Clear-Foreground $hwnd }
+} else {
+    $route = 'printwindow'
+    $hdc = $gfx.GetHdc()
+    $ok = [GitsWin]::PrintWindow($hwnd, $hdc, 2)
+    $gfx.ReleaseHdc($hdc)
+    if ($forced -ne 'printwindow' -and ((-not $ok) -or (Test-Blank $bmp))) {
+        # Fallback: the screen under the window's rectangle. Now DPI-correct,
+        # because awareness was set above -- but still the screen and not the
+        # window, so anything sitting on top of the game lands in the frame.
+        # Foregrounded for the same reason the forced route is.
+        $route = 'copyfromscreen'
+        Set-Foreground $hwnd
+        try {
+            $gfx.Clear([System.Drawing.Color]::Black)
+            $gfx.CopyFromScreen($rect.Left, $rect.Top, 0, 0, $bmp.Size)
+        } finally { Clear-Foreground $hwnd }
+    } elseif ($forced -eq 'printwindow') {
+        $route = 'printwindow-forced'
+    }
 }
 $bmp.Save('__OUT__', [System.Drawing.Imaging.ImageFormat]::Png)
 $gfx.Dispose()
@@ -218,16 +292,21 @@ Write-Output ("OK {0} {1} {2}" -f $w, $h, $route)
 """
 
 
-def build_script(image: str, out_path: Path) -> str:
-    """The script with its two holes filled. Separated so it can be read.
+def build_script(image: str, out_path: Path,
+                 forced_route: str = ROUTE_AUTO) -> str:
+    """The script with its three holes filled. Separated so it can be read.
 
-    The two substitutions are a process NAME and a path this module chose, so
-    neither is caller text arriving from a wire; `frame_path` slugs the label
-    before it can reach here.
+    The substitutions are a process NAME, a path this module chose, and a
+    route drawn from `ROUTES` -- none of them caller text arriving from a
+    wire; `frame_path` slugs the label before it can reach here, and an
+    unknown route is normalised to `auto` rather than interpolated.
     """
+    if forced_route not in ROUTES:
+        forced_route = ROUTE_AUTO
     return (_PS_SCRIPT
             .replace("__IMAGE__", image)
-            .replace("__OUT__", str(out_path).replace("'", "''")))
+            .replace("__OUT__", str(out_path).replace("'", "''"))
+            .replace("__ROUTE__", forced_route))
 
 
 def encoded_command(script: str) -> str:
@@ -284,7 +363,8 @@ def capture(label: str = "frame", note: str = "",
     out = frame_path(label, stamp=stamp, out_dir=out_dir)
     out.parent.mkdir(parents=True, exist_ok=True)
     try:
-        code, stdout, stderr = runner(build_script(image, out))
+        code, stdout, stderr = runner(
+            build_script(image, out, forced_route=route(env)))
     except Exception as exc:                                 # noqa: BLE001
         return {"status": "error", "message": f"{type(exc).__name__}: {exc}",
                 "guardrail": GUARDRAIL, "path": str(out)}
@@ -305,13 +385,17 @@ def capture(label: str = "frame", note: str = "",
     # WHICH ROUTE RAN IS PART OF THE RECORD. `copyfromscreen` frames can carry
     # an overlapping window; `printwindow` frames cannot. A reader of the
     # manifest is entitled to know which kind of frame they are looking at.
-    route = parts[3] if len(parts) > 3 else "unknown"
+    ran_route = parts[3] if len(parts) > 3 else "unknown"
 
     row = {
         "record": "frame", "ts": time.time(),
         "path": str(out), "label": label, "note": note,
         "size": size,
-        "route": route,
+        "route": ran_route,
+        # The `*-forced` suffix on `route` already says a route was PINNED;
+        # this says what it was pinned TO, so a manifest read back months
+        # later does not have to infer the env from the suffix.
+        "route_requested": route(env),
         "context": dict(context or {}),
         # ON EVERY ROW, not once at the top of the file. A manifest is read in
         # slices and concatenated with other manifests; a guardrail that lives
@@ -319,8 +403,8 @@ def capture(label: str = "frame", note: str = "",
         "guardrail": GUARDRAIL,
     }
     _append(manifest or MANIFEST, row)
-    return {"status": "ok", "message": f"captured {size} via {route}",
-            "guardrail": GUARDRAIL, "path": str(out), "route": route,
+    return {"status": "ok", "message": f"captured {size} via {ran_route}",
+            "guardrail": GUARDRAIL, "path": str(out), "route": ran_route,
             "row": row}
 
 

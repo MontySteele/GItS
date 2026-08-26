@@ -262,3 +262,98 @@ def test_the_soak_cannot_take_pictures():
     assert not hasattr(soak, "frames"), "the soak imported the capture leg"
     src = soak.Path(soak.__file__).read_text(encoding="utf-8")
     assert "frames.capture" not in src
+
+
+# ------------------------------------------------------------- the route ----
+#
+# EB-142 hygiene, 2026-08-25. The auto route's blank test cannot catch this
+# window's failure mode -- PrintWindow returns a surface that is varied and
+# INCOMPLETE (no hand, no enemies, no prompt caption) -- so the route is an
+# explicit env choice rather than a smarter heuristic.
+
+def test_the_route_is_env_only_and_defaults_to_auto():
+    assert frames.route({}) == frames.ROUTE_AUTO
+    assert frames.route({frames.ROUTE_ENV: "copyfromscreen"}) == "copyfromscreen"
+    assert frames.route({frames.ROUTE_ENV: "PrintWindow"}) == "printwindow"
+
+
+def test_an_unknown_route_costs_a_caveat_and_never_the_frame():
+    """A typo must not fail a capture, and must never be interpolated into the
+    script it would then be a hole in."""
+    assert frames.route({frames.ROUTE_ENV: "nonsense"}) == frames.ROUTE_AUTO
+    script = frames.build_script("X", frames.Path("C:/o.png"), "nonsense")
+    assert "'auto'" in script and "nonsense" not in script
+
+
+def test_the_forced_screen_route_skips_printwindow_entirely():
+    """The partial surface exists because PrintWindow RAN. Pinning the screen
+    route has to mean not asking it, not asking it and discarding the answer."""
+    script = frames.build_script("X", frames.Path("C:/o.png"), "copyfromscreen")
+    assert "$forced = 'copyfromscreen'" in script
+    assert "$route = 'copyfromscreen-forced'" in script
+
+
+def test_the_screen_route_raises_the_game_and_puts_it_back():
+    """`CopyFromScreen` photographs whatever is on top, and something always
+    is -- the console driving the capture. Both screen-route arms foreground
+    the window, and both drop the topmost flag again in a `finally`, so a
+    failed grab cannot leave the game pinned over everything the user owns."""
+    script = frames.build_script("X", frames.Path("C:/o.png"), "copyfromscreen")
+    assert "SwitchToThisWindow" in script
+    assert "Set-Foreground $hwnd" in script
+    assert "finally { Clear-Foreground $hwnd }" in script
+    # HWND_TOPMOST (-1) going up, HWND_NOTOPMOST (-2) coming back down.
+    assert "[IntPtr](-1)" in script and "[IntPtr](-2)" in script
+    # Z order only: never a move, never a resize.
+    assert "0x0013" in script
+
+
+def test_the_manifest_row_records_the_route_that_ran_and_the_one_asked_for(tmp_path):
+    runner = _Runner(0, "OK 1920 1080 copyfromscreen-forced")
+    report = frames.capture("x",
+                            env={"GITS_UNDERSTUDY_CAPTURE": "1",
+                                 frames.ROUTE_ENV: "copyfromscreen"},
+                            out_dir=tmp_path, manifest=tmp_path / "m.jsonl",
+                            runner=runner)
+    assert report["status"] == "ok"
+    assert report["row"]["route"] == "copyfromscreen-forced"
+    assert report["row"]["route_requested"] == "copyfromscreen"
+    # The guardrail rides on this row like every other one.
+    assert report["row"]["guardrail"] == frames.GUARDRAIL
+    assert "copyfromscreen" in runner.scripts[0]
+
+
+def test_the_guardrail_still_rides_a_forced_route_row(tmp_path):
+    """Every row, on every route. A route override is not a way out of it."""
+    for env_route, ran in (("copyfromscreen", "copyfromscreen-forced"),
+                           ("printwindow", "printwindow-forced")):
+        report = frames.capture("x",
+                                env={"GITS_UNDERSTUDY_CAPTURE": "1",
+                                     frames.ROUTE_ENV: env_route},
+                                out_dir=tmp_path,
+                                manifest=tmp_path / "m.jsonl",
+                                runner=_Runner(0, f"OK 1 1 {ran}"))
+        assert report["row"]["guardrail"] == frames.GUARDRAIL
+
+
+# ------------------------------------------------- the state renderer -------
+
+def test_the_renderer_names_the_character_actually_being_played():
+    """It printed "Furina" unconditionally, so every Kokomi and Klee soak
+    transcript read "Furina 56/70 HP" beside the right numbers. The wire's own
+    `player.character` is the display name and is what `policy_v1._plan_for`
+    already resolves the run's plan off."""
+    state = {"state_type": "monster", "run": {"act": 1, "floor": 3},
+             "player": {"character": "Sangonomiya Kokomi", "hp": 56,
+                        "max_hp": 70, "gold": 99, "energy": 3, "hand": []},
+             "battle": {"round": 1, "turn": "player"}}
+    out = harness.render(state)
+    assert "Sangonomiya Kokomi 56/70 HP" in out
+    assert "Furina" not in out
+
+
+def test_a_state_with_no_character_renders_a_neutral_label():
+    state = {"state_type": "map", "run": {"act": 1, "floor": 3},
+             "player": {"hp": 56, "max_hp": 70, "gold": 99}}
+    out = harness.render(state)
+    assert "Player 56/70 HP" in out

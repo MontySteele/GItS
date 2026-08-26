@@ -131,8 +131,16 @@ def render(state: dict[str, Any]) -> str:
     p = state.get("player") or {}
     lines = [f"=== {st.upper()} | act {run.get('act')} floor {run.get('floor')} ==="]
     if p:
+        # The wire's own display name (`"Klee"`, `"Sangonomiya Kokomi"`), the
+        # same field `policy_v1._plan_for` resolves the run's plan off. This
+        # line said "Furina" unconditionally, so every Kokomi and Klee soak
+        # printed "Furina 56/70 HP" beside the right numbers -- a rendering
+        # bug, but one that makes a transcript actively misleading to read
+        # back. "Player" is the fallback for a state with no character on it
+        # (a menu, a reference anchor).
+        who = str(p.get("character") or "").strip() or "Player"
         lines.append(
-            f"Furina {p.get('hp')}/{p.get('max_hp')} HP, blk {p.get('block', 0)}, "
+            f"{who} {p.get('hp')}/{p.get('max_hp')} HP, blk {p.get('block', 0)}, "
             f"{p.get('gold')}g, energy {p.get('energy', '-')} "
             f"| status: {_status_line(p.get('status'))}")
         pots = [f"[{i}] {x.get('name')}" for i, x in enumerate(p.get("potions") or [])
