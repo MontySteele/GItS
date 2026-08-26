@@ -88,7 +88,7 @@ public static class FurinaRiderTips
     {
         var noun = grantsBlock ? "Block" : "damage";
         var rate = $"+{per} {noun} per {step} Fanfare you hold.";
-        var owner = card.Owner?.Creature;
+        var owner = TipOwner.CreatureOf(card);
         if (owner == null || card.CombatState == null) return rate;
 
         var fanfare = FurinaResources.ReadableFanfare(owner);
@@ -105,7 +105,7 @@ public static class FurinaRiderTips
     {
         var noun = grantsBlock ? "Block" : "damage";
         var rate = $"+{per} {noun} per Salon member on stage.";
-        var owner = card.Owner?.Creature;
+        var owner = TipOwner.CreatureOf(card);
         if (owner == null || card.CombatState == null) return rate;
 
         var members = SalonMemberPower.Count(owner);
@@ -132,7 +132,7 @@ public static class FurinaRiderTips
     {
         var rate = $"+{per} Block per Companion card you have played this "
                  + "turn, including Guest Stars.";
-        var owner = card.Owner?.Creature;
+        var owner = TipOwner.CreatureOf(card);
         if (owner == null || card.CombatState == null) return rate;
 
         var plays = CurtainCallHooks.CompanionPlaysThisTurn(owner);
