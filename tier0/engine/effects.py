@@ -1184,15 +1184,25 @@ def _op_energy(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("energy", amount=amount)
 
 
-def _salon_amount(state: CombatState, base: int) -> int:
+def _salon_amount(state: CombatState, base: int, note: bool = True) -> int:
     """A Salon member numeric amount (Salon v2): base + the Fanfare Focus
-    term (+1 per SALON_FOCUS_PER held, read live) + Grand Salon."""
+    term (+1 per SALON_FOCUS_PER held, read live) + Grand Salon.
+
+    `note=False` returns the SAME number without filing the `fanfare_read`
+    census row (EB-144). It exists for the pilot, which forecasts what a
+    `salon_perform` WOULD pay at score time: a forecast is not a read, and a
+    scorer that filed one would inflate the C2-escrow census by however many
+    cards happened to be in hand. The alternative was a second copy of this
+    expression inside the pilot -- exactly the drift `salon_tick_amount`
+    below exists to make impossible.
+    """
     p = state.player
     if not p.fanfare_cap:
         return base + p.powers.get("salon_damage_up", 0)
     # The Salon-v2 Focus analogue is the read that matters most to this
     # sprint: it is where "a constant wearing a meter" was measured.
-    resources.note_fanfare_read(state, "salon_focus")
+    if note:
+        resources.note_fanfare_read(state, "salon_focus")
     # Clamped: a negative meter must not chip the stage. Negative member
     # ticks are the exact reading that would look like a bug rather than a
     # cost (Track C.2, PROPOSED semantics, flagged for review).
@@ -3702,7 +3712,8 @@ def player_turn_start_triggers(state: CombatState) -> None:
         gain_sparks(state, 1)
 
 
-def salon_tick_amount(state: CombatState, member: str, paid: bool) -> int:
+def salon_tick_amount(state: CombatState, member: str, paid: bool,
+                      note: bool = True) -> int:
     """What this member's tick is worth RIGHT NOW: the printed base plus the
     Focus term and Grand Salon (_salon_amount), then the dry reduction when
     the member cannot pay. Crabaletta and Chevalmarin print damage, the Usher
@@ -3712,10 +3723,12 @@ def salon_tick_amount(state: CombatState, member: str, paid: bool) -> int:
     The mirror of C# SalonMemberPower.TickValue, and the reason both exist:
     the resolution path and every reader of "what will this member do" must
     be the same expression, not two copies that agree until one is edited.
+    `note=False` is that same expression for a SCORE-time forecaster -- see
+    `_salon_amount`.
     """
     spec = C.SALON_MEMBERS[member]["tick"]
     base = spec.get("damage", 0) or spec.get("block", 0)
-    amt = _salon_amount(state, base)
+    amt = _salon_amount(state, base, note=note)
     return amt if paid else int(amt * C.SALON_DRY_DAMAGE_MULT)
 
 

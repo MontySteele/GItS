@@ -120,13 +120,94 @@ def _est(state: CombatState, val, default: int = 0) -> float:
     return default                                  # Storm of Steel)
 
 
-def _active_effects(state: CombatState, effect_list: list[dict]):
+# ---------------------------------------------------------------------------
+#  EB-144: the pilot's conditional literacy, DECLARED rather than implied.
+#
+#  `_active_effects`'s chain used to end in a bare `else: continue`, which
+#  yields NEITHER branch -- so a predicate the pilot had never been taught
+#  made it price the whole conditional at zero, silently, with no test that
+#  could notice. The `C19` audit found TEN sheet rows in that hole, not the
+#  two the standing read names: `hold_the_line` + `warmup_act`
+#  (enemy_intends_attack), `take_it_from_the_top` + `curtain_cue` +
+#  `directors_cut` (spotlight_moved_this_turn), `many_waters_melody` +
+#  `waters_embrace` + `tempo_change` (has_salon_members), `read_the_current`
+#  (charge_at_least_10) and `tail_of_flame` (this_cost_zero). Seven of the
+#  ten predate `W3` by months.
+#
+#  The two collections below are that hole made visible. Every predicate any
+#  sheet PRINTS must appear in exactly one of them, and
+#  `test_eb144_predicate_literacy.py` fails the build otherwise -- a lint, not
+#  a comment, because the failure mode is silence.
+#
+#  SCORABLE: evaluated live at score time, so the correct branch is scored.
+#  BLIND:    MID-RESOLUTION by nature -- the fact the branch reads does not
+#            exist until the card is already resolving, so there is no honest
+#            score-time answer and the historic top-level-only valuation is
+#            kept deliberately. Being listed here is the claim that this was
+#            decided, not forgotten.
+# ---------------------------------------------------------------------------
+
+# Names the pilot delegates VERBATIM to `effects._predicate`: pure reads of
+# current state, with no snapshot field and no telemetry side effect, so one
+# rule asked from both sides beats a second copy (the Track C.2 lesson that
+# the fanfare clamp below records the other half of).
+_ENGINE_LIVE_PREDICATES = frozenset({
+    "enemy_intends_attack",
+    "has_salon_members",
+    "spotlight_moved_this_turn",
+})
+_ENGINE_LIVE_PREFIXES = ("charge_at_least_",)
+
+SCORABLE_PREDICATES = frozenset({
+    "has_spark",
+    "target_has_nonpyro_aura",
+    "card_exhausted_this_turn",
+    "hp_lost_this_turn",
+    "reaction_triggered_this_turn",
+    "this_cost_zero",
+}) | _ENGINE_LIVE_PREDICATES
+SCORABLE_PREDICATE_PREFIXES = (
+    "target_has_power_",
+    "exhaust_pile_at_least_",
+    "fanfare_at_least_",
+    "encore_at_least_",
+) + _ENGINE_LIVE_PREFIXES
+
+BLIND_PREDICATES = frozenset({
+    # Both read a fact produced BY this card's own earlier ops, mid-
+    # resolution. Nothing at score time can answer them without simulating
+    # the card, which the pilot deliberately does not do.
+    "reaction_triggered_by_this",
+    "killed_target",
+})
+BLIND_PREDICATE_PREFIXES: tuple[str, ...] = ()
+
+
+def predicate_is_scorable(name: str) -> bool:
+    """Would `_active_effects` evaluate `name` and score the right branch?"""
+    return (name in SCORABLE_PREDICATES
+            or name.startswith(SCORABLE_PREDICATE_PREFIXES))
+
+
+def predicate_is_declared_blind(name: str) -> bool:
+    return (name in BLIND_PREDICATES
+            or (bool(BLIND_PREDICATE_PREFIXES)
+                and name.startswith(BLIND_PREDICATE_PREFIXES)))
+
+
+def _active_effects(state: CombatState, effect_list: list[dict],
+                    card: Optional[Card] = None):
     """Yield runtime-formula branches the pilot is explicitly able to read.
 
     Mid-resolution predicates (reaction_triggered_by_this, killed_target)
     deliberately keep their historic top-level-only valuation. Pure current-
     state Klee predicates are safe to read here, as are the pass-5/pass-6
     Ironclad predicates below.
+
+    `card` is the HOST card whose body this is, when there is one. Exactly one
+    predicate needs it (`this_cost_zero`, which is a question about the card
+    being scored and not about the state), and a mode body probed without a
+    host still scores -- it just cannot answer that one.
     """
     for fx in effect_list:
         if fx["op"] == "conditional":
@@ -162,10 +243,32 @@ def _active_effects(state: CombatState, effect_list: list[dict]):
                 # (unlike reaction_triggered_by_this, which is mid-resolution
                 # and stays excluded). Same read as the engine's predicate.
                 ready = state.reactions_this_turn > 0
+            elif name == "this_cost_zero":
+                # EB-144. The ENGINE reads `state.current_card_cost`, which at
+                # score time still holds the LAST resolved card's cost -- so
+                # delegating would be worse than not reading it at all. The
+                # pilot reads `card_cost(state, card)`, which is literally the
+                # number `combat.play_card` is about to assign to that field
+                # one line before this branch resolves. No host card (a mode
+                # body probed on a neutral frame) means no answer, and the
+                # historic zero-valuation stands for that case only.
+                if card is None:
+                    continue
+                ready = card_cost(state, card) == 0
+            elif (name in _ENGINE_LIVE_PREDICATES
+                  or name.startswith(_ENGINE_LIVE_PREFIXES)):
+                # EB-144. Pure current-state reads with no snapshot field and
+                # no telemetry side effect, so the pilot ASKS THE ENGINE
+                # rather than keeping a second copy of the rule -- the same
+                # round trip `choose_one` below makes, and the half of the
+                # Track C.2 lesson the fanfare clamp above cannot take (that
+                # one goes through `resources.readable` precisely BECAUSE the
+                # engine's predicate files a census row on the way past).
+                ready = effects._predicate(state, name)
             else:
                 continue
             branch = fx["then"] if ready else fx.get("else", [])
-            yield from _active_effects(state, branch)
+            yield from _active_effects(state, branch, card)
         elif fx["op"] == "choose_one":
             # EB-118: the pilot forecasts the mode it will actually take by
             # asking the ENGINE's chooser rather than keeping a second copy
@@ -179,13 +282,82 @@ def _active_effects(state: CombatState, effect_list: list[dict]):
             # make this forecast disagree with the play it forecasts.
             modes = fx[effects.MODES_KEY]
             index = effects._chosen_mode(state, modes, None)
-            yield from _active_effects(state, modes[index]["effects"])
+            yield from _active_effects(state, modes[index]["effects"], card)
         else:
             yield fx
 
 
+def _salon_verb_yield(state: CombatState, card: Card
+                      ) -> tuple[float, float, float]:
+    """EB-144: what this card's SALON VERBS pay right now, as
+    `(damage, block, encore_spent)`.
+
+    `salon_rotate` and `salon_perform` shipped in Phase 2 and stayed unprinted
+    until `change_the_bill` (`C19`), so the pilot had never been taught either
+    and the card scored as its Block 3 and nothing else. Neither verb gets a
+    number of its own here; both are valued by DOING WHAT THE RESOLVER DOES
+    and pricing the result through the terms that already price damage, Block
+    and Encore. Change `SALON_MEMBERS` and this moves with it.
+
+      * `salon_perform` runs `salon_member_act` on the LEFTMOST member, `N`
+        times, and that function's whole payout is one `salon_tick_amount`
+        per tick -- so this asks that same function (`note=False`: a forecast
+        must not file a `fanfare_read` census row, which is the only reason
+        the kwarg exists). Damage members pay damage, the Usher pays Block,
+        and the Encore upkeep is charged per tick that can afford it, exactly
+        as `salon_member_act` charges it, with the dry three-quarters falling
+        out of `salon_tick_amount` for the ticks that cannot.
+      * `salon_rotate` is worth ZERO ON ITS OWN and that is not a placeholder
+        -- it is the drafter's ratified reading (`STATIC_SALON_ROTATE_VALUE`,
+        EB-118 §5.5): rotating delivers nothing, its whole value is WHICH
+        member the next consumer finds. What it does get here is the thing
+        the drafter cannot see, because the drafter has no stage: inside one
+        card body the rotate moves the queue BEFORE a later `salon_perform`
+        reads it, so `offset` picks the member that will actually perform.
+        `change_the_bill` prints exactly that pair, and with a Crabaletta in
+        front of an Usher the two orderings score differently -- correctly.
+
+    Conservative by construction, disclosed rather than papered over: the
+    Chevalmarin tick's hydro application and the `SALON_TICK_BURST` particle
+    are NOT priced (no term here owns either), a stage this card would DEPLOY
+    into is not counted (the queue is read as it stands at score time), and a
+    perform that would kill the last enemy mid-loop still counts its later
+    ticks. Every one of those understates the verb.
+    """
+    p = state.player
+    # `salon_member_act`'s own refusal, and `_op_salon_perform`'s whiff: an
+    # empty stage, a dead player, or nothing left to act against pays nothing
+    # and the resolver says so out loud with `salon_perform_whiffed`.
+    if not p.salon or not p.alive or not state.living_enemies:
+        return (0.0, 0.0, 0.0)
+    offset = 0
+    dmg = blk = spent = 0.0
+    encore = p.encore
+    for fx in _active_effects(state, card.effects, card):
+        op = fx["op"]
+        if op == "salon_rotate":
+            offset += _est(state, fx.get("amount", 1), 1)
+        elif op == "salon_perform":
+            member = p.salon[offset % len(p.salon)]
+            spec = C.SALON_MEMBERS[member]["tick"]
+            for _ in range(int(_est(state, fx.get("amount", 1), 1))):
+                paid = encore >= C.SALON_TICK_ENCORE_COST
+                amt = effects.salon_tick_amount(state, member, paid,
+                                                note=False)
+                if spec.get("damage", 0):
+                    # Same pipeline head the pilot's card damage uses, and
+                    # the same one `deal_damage_to_enemy` opens with.
+                    dmg += powers.modify_damage_dealt(p, amt)
+                if spec.get("block", 0):
+                    blk += amt
+                if paid:
+                    encore -= C.SALON_TICK_ENCORE_COST
+                    spent += C.SALON_TICK_ENCORE_COST
+    return (dmg, blk, spent)
+
+
 def _expected_damage(state: CombatState, card: Card) -> float:
-    total = 0.0
+    total = _salon_verb_yield(state, card)[0]
     living = state.living_enemies
     # v0.4 W1 (priest-pilot audit): the flat per-attack bonus the engine folds
     # in at resolution — Bennett's next_attack_up, celestial_gift, the Fanfare
@@ -194,7 +366,7 @@ def _expected_damage(state: CombatState, card: Card) -> float:
     # straight through its own buff windows. Same helper the engine calls, so
     # the estimate cannot drift from what resolves; it is a pure read.
     flat = effects.flat_attack_bonus(state, card, card_cost(state, card))
-    for fx in _active_effects(state, card.effects):
+    for fx in _active_effects(state, card.effects, card):
         if fx["op"] == "damage":
             if fx.get("target") == "self":
                 # HP loss is a cost
@@ -301,8 +473,11 @@ def _estimated_exhausts(state: CombatState, card: Card) -> int:
 
 
 def _raw_block(state: CombatState, card: Card) -> float:
-    total = 0.0
-    for fx in _active_effects(state, card.effects):
+    # EB-144: the Usher's tick prints Block, so a `salon_perform` that lands
+    # on her is Block this turn and belongs in the same number the panic-block
+    # rule and _block_value read.
+    total = _salon_verb_yield(state, card)[1]
+    for fx in _active_effects(state, card.effects, card):
         if fx["op"] != "block":
             continue
         amount = (effects._calc_amount(state, fx["amount_formula"], card)
@@ -354,7 +529,7 @@ def _scaling_value(state: CombatState, card: Card) -> float:
     val = 0.0
     target = effects._default_target(state)
     applied_to_target: dict[str, int] = {}
-    for fx in _active_effects(state, card.effects):
+    for fx in _active_effects(state, card.effects, card):
         # _est, not the raw field: an X-cost debuff (Malaise: weak X) carries
         # the STRING "X" here, and raw arithmetic on it killed every run the
         # card was drafted into. "-X" falls to _est's default 0 -- a negative
@@ -465,7 +640,7 @@ def _reaction_value(state: CombatState, card: Card) -> float:
 
 def _tempo_value(state: CombatState, card: Card) -> float:
     val = 0.0
-    for fx in _active_effects(state, card.effects):
+    for fx in _active_effects(state, card.effects, card):
         if fx["op"] in ("draw", "energy"):
             formula = fx.get("amount_formula")
             if isinstance(formula, dict):
@@ -501,10 +676,18 @@ def _tempo_value(state: CombatState, card: Card) -> float:
 def _sustain_value(state: CombatState, card: Card) -> float:
     """Encore is deferred HP economy (absorbs after Block). Worth most of
     its face -- it keeps until used, unlike Block -- but discounted for
-    not stopping THIS turn's hits when drawn late."""
+    not stopping THIS turn's hits when drawn late.
+
+    EB-144: a `salon_perform` BUYS its tick with the same currency, one point
+    of upkeep per tick that can pay, so the bill is charged here at the price
+    a point is credited at two lines up. Symmetric by construction rather
+    than picked -- an on-demand tick that costs a point of Encore must not be
+    free to a scorer that pays a point of Encore 0.8.
+    """
     encore = sum(fx.get("amount", 0) for fx in card.effects
                  if fx["op"] == "gain_encore"
                  and isinstance(fx.get("amount"), int))
+    encore -= _salon_verb_yield(state, card)[2]
     return encore * C.PILOT_ENCORE_VALUE
 
 
@@ -581,7 +764,7 @@ def _charge_value(state: CombatState, card: Card) -> float:
     p = state.player
     engine_live = "tamakushi_casket" in p.relic_hooks
     val = 0.0
-    for fx in _active_effects(state, card.effects):
+    for fx in _active_effects(state, card.effects, card):
         op = fx["op"]
         if op == "gain_charge":
             val += (_est(state, fx.get("amount", 1), 1)
@@ -834,7 +1017,7 @@ def _stoke_value(state: CombatState, card: Card) -> float:
     bill = live * C.SALON_TICK_ENCORE_COST
     shortfall = max(0.0, STOKE_RUNWAY_TURNS * bill - p.encore)
     val = 0.0
-    for fx in _active_effects(state, card.effects):
+    for fx in _active_effects(state, card.effects, card):
         op = fx["op"]
         if (op == "apply_power" and fx.get("power") == "salon_member"
                 and fx.get("target", "self") == "self"):
