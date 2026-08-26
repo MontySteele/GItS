@@ -117,9 +117,10 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
     "EB": 146,   # EB-146 minted 2026-08-26 (scenario harness first run + set_power); EB-143/144/145 minted 2026-08-26 for the three Phase-4
-                 # pilot/scorer repairs the C19/D17/P10 standing read names as
-                 # its diagnostic caveats (Spark hold-vs-spend, scorer
-                 # predicate literacy, Tide of Names payout scoring).
+                 # pilot/scorer repairs the C19/D17/P10 standing read named as
+                 # its diagnostic caveats, and CLOSED the same day in the one
+                 # P11 window (with EB-129); the ceiling stays at the issued
+                 # number.
                  # EB-142 minted AND CLOSED for the 0.2-1028 attended-playtest
                  # defect (a branch-nested aiming op deriving TargetType.Self);
                  # the ceiling stays at the issued number, ceilings never come
@@ -142,9 +143,8 @@ CEILINGS: dict[str, int] = {
 # That second half is the whole mechanism — see rule 6 in the docstring.
 OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
-        1, 12, 15, 28, 32, 33, 34, 35, 38, 40, 41, 53, 65, 67, 70, 71,
-        74, 78, 80, 83, 84, 105, 116, 128, 129, 137, 139, 141,
-        143, 144, 145, 146,
+        1, 12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 67, 70, 71,
+        74, 78, 80, 83, 84, 105, 116, 128, 137, 146,
     }),
     "M": frozenset({10, 13, 14, 16, 17, 19, 26, 45}),
 }

@@ -78,7 +78,7 @@ def live_versions() -> dict[str, int]:
 
 
 def world_stamp(versions: dict[str, int] | None = None) -> str:
-    """`RT12/D17/P10/C19` -- the world half of the R68 stamp line.
+    """`RT12/D18/P11/C20` -- the world half of the R68 stamp line.
 
     Split out of `Cell.stamp` so the spelling has exactly one producer. Every
     published number in this repo is compared against others by this string;

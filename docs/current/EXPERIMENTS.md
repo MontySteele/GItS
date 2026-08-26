@@ -80,7 +80,12 @@ registration packets themselves live under `review/active/` — one home, not tw
   defect with extra steps. `tier05/sweeps.py` covers the `constants.py` knobs
   and `tier05/pilot_weight_sweep.py` the pilot weights filed outside it; both
   write their expected outcome down in advance, since a null that was predicted
-  is a result and a null that was not is an unfalsifiable instrument.
+  is a result and a null that was not is an unfalsifiable instrument. **`W4`
+  finding, `P11` (2026-08-26):** making the scorer payout-aware puts `_score`
+  through `exhaust_future_value`, so `discover_scope` reclassified all four
+  exhaust-gate weights `pair_own` → `shared` and that gate now has **no
+  sweepable surface left** — whether to sweep a shared weight anyway is
+  [USER]'s call, not an integration's.
 
 ## Active registrations (pointers — packets live in `review/active/`)
 - **EB-118 card-connectivity instrument** — static pre-registration at

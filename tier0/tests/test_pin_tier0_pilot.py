@@ -92,6 +92,11 @@ def test_self_power_scaling_value_still_decays_with_the_setup_taper():
 # valuation weight -- but it is pinned here anyway, because a silent edit to it
 # would change which boards count as ties.
 #
+# v5 (POLICY 10, R211) and v6 (POLICY 11, the scorer-literacy window) are the
+# OTHER shape: a genuinely NEW weight arriving with the behaviour that reads
+# it, with no switch in front of it -- `EXHAUST_FORMULA_PAYOUT_WEIGHT`, then
+# `SPARK_HOLD_VALUE_WEIGHT`. No earlier value moved at either.
+#
 # The constants-side half of the set is unchanged since v2 -- every new weight
 # is filed in policy.py -- so that dict is still named for the version that
 # last moved it, and `test_every_pilot_weight_in_constants_is_in_the_stamped_set`
@@ -129,7 +134,7 @@ PILOT_WEIGHT_SET_V2 = {
 }
 # The half that stays in policy.py for the C# parity reason written at its
 # head. Filed elsewhere, stamped the same.
-POLICY_FILED_WEIGHT_SET_V5 = {
+POLICY_FILED_WEIGHT_SET_V6 = {
     "STOKE_DEPLOY_OPEN": 6.0,
     "STOKE_DEPLOY_FULL": 1.5,
     "STOKE_RUNWAY_TURNS": 2.0,
@@ -165,14 +170,22 @@ POLICY_FILED_WEIGHT_SET_V5 = {
     # reads it, and there is no switch: the chooser's default payout hook is
     # `formula_aware_payout` outright.
     "EXHAUST_FORMULA_PAYOUT_WEIGHT": 1.0,
+    # v6, POLICY 11 (the scorer-literacy window): the Spark hold-versus-spend
+    # weight, and the ONLY new weight in that four-item window -- EB-144
+    # values both Salon verbs off the resolver's own `salon_tick_amount`,
+    # EB-145 prices a selection payout off the card's own printed `base`/
+    # `per`, and EB-129 pays the realized Book of Five Rings heal, so none of
+    # the three mints a dial to pin here. Same shape as v5: a new weight
+    # arriving with the behaviour that reads it, no switch in front of it.
+    "SPARK_HOLD_VALUE_WEIGHT": 1.0,
 }
 
 
-def test_the_pilot_weight_set_is_stamped_at_v5():
-    assert C.PILOT_WEIGHTS_VERSION == 5
+def test_the_pilot_weight_set_is_stamped_at_v6():
+    assert C.PILOT_WEIGHTS_VERSION == 6
     for name, value in PILOT_WEIGHT_SET_V2.items():
         assert getattr(C, name) == value, name
-    for name, value in POLICY_FILED_WEIGHT_SET_V5.items():
+    for name, value in POLICY_FILED_WEIGHT_SET_V6.items():
         assert getattr(policy, name) == value, name
 
 

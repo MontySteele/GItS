@@ -412,6 +412,36 @@ def _card_aims_at_enemy(card: Card) -> bool:
             or walk(card.enchant_first_play_effects))
 
 
+def _card_swirls_at_aim(card: Card) -> bool:
+    """Does this card carry a Swirl that lands on the play's BOUND AIM?
+
+    The gate on EB-139's aura-aware bind (R211, C20), and the reason that bind
+    is not a board-wide aim rule: a Swirl's whole payload IS the aura it lands
+    on, so an aimed Swirl is the one card shape where the mouse pick a human
+    makes is knowable from the board rather than a matter of taste. Every other
+    card keeps the documented lowest-HP aim R210 declined to re-open.
+
+    `target: all_enemies` Swirls do not gate it -- they hit the whole board and
+    have no aim to move. Walks the same whole tree `_card_aims_at_enemy` does,
+    for the same reason: a Swirl inside a conditional arm or a mode body is
+    still a Swirl this card can land.
+    """
+    def walk(effects) -> bool:
+        for fx in effects or ():
+            if (fx.get("op") == "swirl"
+                    and fx.get("target", "enemy") in ("enemy",
+                                                      "lowest_hp_enemy")):
+                return True
+            if walk(fx.get("then")) or walk(fx.get("else")):
+                return True
+            for mode in fx.get("modes") or ():
+                if walk(mode.get("effects")):
+                    return True
+        return False
+    return (walk(card.effects) or walk(card.enchant_effects)
+            or walk(card.enchant_first_play_effects))
+
+
 def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
     """C#'s `CardPlay.Target`, rolled ONCE at card-play construction.
 
@@ -421,11 +451,13 @@ def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
     binding moment is here, ahead of every op: a bound aim is picked pre-AoE,
     not lazily at the first aimed row.
 
-    WHICH creature is not what R210 moved and this function does not re-open
-    it: a manual play's target is the human's mouse pick, which no engine rule
-    mirrors, so tier0 keeps its documented lowest-HP identity choice. What
-    changed is that the pick is taken ONCE instead of per op. Destination
-    SCORING stays severed as a later design question.
+    WHICH creature is, for every card but one shape, still not re-opened: a
+    manual play's target is the human's mouse pick, which no engine rule
+    mirrors, so tier0 keeps its documented lowest-HP identity choice. R210 took
+    the pick ONCE instead of per op; R211 (EB-139, C20) added the ONE ruled
+    exception below. Destination SCORING stays severed as a later design
+    question -- nothing here scores a destination, it reads one predicate off
+    the board.
     """
     living = state.living_enemies
     if not living:
@@ -436,8 +468,27 @@ def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
     # would hand those cards a pilot's judgement they do not have. Set only for
     # the duration of a free play -- and now rolled ONCE PER CARD, which is
     # where `CardCmd.AutoPlay` rolls it, rather than once per op.
+    #
+    # THIS BRANCH IS FIRST, AND THAT ORDER IS THE RULING: forced-random autoplay
+    # stays random and receives NO corrective re-aim (R211). A free play has no
+    # human at the mouse, so modelling one there would hand Havoc/Cascade a
+    # judgement the mod never gives them -- the same argument that put the roll
+    # here in the first place.
     if state.force_random_targeting and _card_aims_at_enemy(card):
         return state.rng.choice(living)
+    # EB-139 / R211: the aura-aware bind, for MANUALLY-MODELLED play only. If
+    # ANY living enemy carries an aura when the play is constructed, the WHOLE
+    # CARD binds to the lowest-HP AURA-BEARING enemy. This replaces the aim
+    # RE-TAKE that used to live inside `_op_swirl` -- which is what C18 pinned
+    # as unruled, because a re-take put a card's damage and its Swirl on two
+    # different creatures. One bind, taken here, keeps
+    # `sayu_yoohoo_windwheel`'s `damage 4` and its Swirl on one body, and it is
+    # the body a human aims at: a Swirl on an auraless target does nothing at
+    # all.
+    if _card_swirls_at_aim(card):
+        bearers = [e for e in living if e.aura]
+        if bearers:
+            return min(bearers, key=lambda e: e.hp)
     return min(living, key=lambda e: e.hp)
 
 
@@ -1269,15 +1320,25 @@ def _op_energy(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("energy", amount=amount)
 
 
-def _salon_amount(state: CombatState, base: int) -> int:
+def _salon_amount(state: CombatState, base: int, note: bool = True) -> int:
     """A Salon member numeric amount (Salon v2): base + the Fanfare Focus
-    term (+1 per SALON_FOCUS_PER held, read live) + Grand Salon."""
+    term (+1 per SALON_FOCUS_PER held, read live) + Grand Salon.
+
+    `note=False` returns the SAME number without filing the `fanfare_read`
+    census row (EB-144). It exists for the pilot, which forecasts what a
+    `salon_perform` WOULD pay at score time: a forecast is not a read, and a
+    scorer that filed one would inflate the C2-escrow census by however many
+    cards happened to be in hand. The alternative was a second copy of this
+    expression inside the pilot -- exactly the drift `salon_tick_amount`
+    below exists to make impossible.
+    """
     p = state.player
     if not p.fanfare_cap:
         return base + p.powers.get("salon_damage_up", 0)
     # The Salon-v2 Focus analogue is the read that matters most to this
     # sprint: it is where "a constant wearing a meter" was measured.
-    resources.note_fanfare_read(state, "salon_focus")
+    if note:
+        resources.note_fanfare_read(state, "salon_focus")
     # Clamped: a negative meter must not chip the stage. Negative member
     # ticks are the exact reading that would look like a bug rather than a
     # cost (Track C.2, PROPOSED semantics, flagged for review).
@@ -1601,36 +1662,16 @@ def _op_burst_energy(state: CombatState, fx: dict, card: Card) -> None:
 def _op_swirl(state: CombatState, fx: dict, card: Card) -> None:
     # R210 Q3: same corpse-accepting door as apply_aura (`ElementalHit
     # .ApplyOnly` -> `AuraCmd.Apply` -> `PowerCmd.Apply<XAuraPower>`).
+    # AND NOTHING ELSE. There is no aim re-take here any more (EB-139 / R211,
+    # C20). This op used to re-aim a single-target Swirl at whichever living
+    # body carried an aura when the bound aim carried none -- the ONE question
+    # C18 left open, and the reason it was open is that a re-take put
+    # `sayu_yoohoo_windwheel`'s damage on one creature and its Swirl on
+    # another. R211 answered it at the BIND (see `bind_card_aim`): the whole
+    # card goes to the lowest-HP aura-bearer, so by the time this op runs the
+    # aura-aware creature IS the bound aim and asking again could only disagree
+    # with the damage that preceded it.
     targets = _pick_targets(state, fx.get("target", "enemy"), allow_dead=True)
-    # A human will aim a single-target Swirl at an aura when one exists.
-    # Tier 0 otherwise hard-aims every AnyEnemy card at lowest HP, which made
-    # Anemo cards blank whenever the aura happened to sit elsewhere.
-    #
-    # THE ONE AIM RE-TAKE R210 DOES NOT SETTLE, AND IT IS LEFT STANDING
-    # DELIBERATELY -- it is the C18 landing's one reported open question, and
-    # no register id is minted for it here. The ruling's two sentences point
-    # opposite ways
-    # here and the blast-radius audit never reaches this branch: Q1(b) says
-    # every `target: enemy` op binds to the play's one lowest-HP aim, while the
-    # same row severs destination SCORING and says binding "does not overturn"
-    # tier0's documented aim choices. This branch IS a documented tier0 aim
-    # choice -- the sim's model of the mouse pick a human makes on a card whose
-    # entire payload is the aura it lands on -- and five of the six `swirl
-    # target: enemy` rows carry NO second aimed op, so for them binding and
-    # re-taking are the same creature and only the POLICY question is live.
-    # Deleting it would make the sim read those five as blank whenever the
-    # aura sits off the lowest-HP body, which is a NEW divergence from a mod
-    # the player aims by hand -- closing one gap by opening another. Moving it
-    # into `bind_card_aim` instead would bind Yoohoo Windwheel's damage to the
-    # aura'd enemy, which is card-shape-dependent aim policy nobody ruled.
-    # So: unresolved, un-implemented, and pinned as unresolved by
-    # `test_eb136_same_target_binding.py::test_swirl_aim_retake_is_unruled`.
-    # ONE CARD is left scattering by this, `sayu_yoohoo_windwheel` (`damage 4`
-    # + `swirl`), of the 28 in the ruled scope.
-    if fx.get("target", "enemy") == "enemy" and targets and not targets[0].aura:
-        aura_targets = [e for e in state.living_enemies if e.aura]
-        if aura_targets:
-            targets = [min(aura_targets, key=lambda e: e.hp)]
     state.emit("aura_op", op="swirl", card=card.id, element="anemo",
                targets=len(targets))
     for enemy in targets:
@@ -2268,13 +2309,31 @@ def kokomi_rotation_law(player) -> bool:
     return "tamakushi_casket" in player.relic_hooks
 
 
-def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
-    hand = state.player.hand
-    # DEFECT FIX: the status branch used to rebuild the pool from `hand` and
-    # so dropped the kit-card exemption two lines above -- a status-filtered
-    # exhaust could eat the granted Burst, breaking the v1.9 invariant that
-    # the kit never enters a pile. Filter the exempt pool instead.
-    pool = [c for c in hand if not c.kit_card]   # same invariant as discard
+def exhaust_pool(state: CombatState, fx: dict,
+                 exclude: Optional[Card] = None) -> list[Card]:
+    """The already-legal candidates ONE `exhaust_from` may take.
+
+    ONE definition, TWO consumers, which is why it is a named function rather
+    than eight lines inside the op: `_op_exhaust_from` builds the real pool
+    with it at RESOLUTION time, and `policy._forecast_exhaust_selection`
+    (`EB-145`) builds the same pool at SCORE time. A pilot pricing the payout
+    of its own selection therefore cannot disagree with the pool the engine
+    will actually offer it -- the Track C.2 lesson, applied to a pool instead
+    of to a predicate.
+
+    `exclude` is the card being PLAYED. At resolution time it has already left
+    hand (`combat.play_card` removes the instance before resolving), at score
+    time it has not, so the score-time caller names it and the two callers see
+    the same list. Identity, never equality: `Card` is a value-equality
+    dataclass and two copies of one row are two candidates.
+
+    DEFECT FIX kept from the inline form: the status branch used to rebuild the
+    pool from `hand` and so dropped the kit-card exemption -- a status-filtered
+    exhaust could eat the granted Burst, breaking the v1.9 invariant that the
+    kit never enters a pile. Filter the exempt pool instead.
+    """
+    pool = [c for c in state.player.hand
+            if not c.kit_card and c is not exclude]  # same invariant as discard
     if fx.get("filter") == "status":
         pool = [c for c in pool if c.rarity == "status"]
     elif fx.get("filter") == "non_attack":
@@ -2289,6 +2348,12 @@ def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
         # uniquely status-resistant for free; that quirk is retired, and the
         # design space it vacates is a dedicated Uncommon/Rare card.
         pool = [c for c in pool if not c.is_junk]
+    return pool
+
+
+def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
+    hand = state.player.hand
+    pool = exhaust_pool(state, fx)
     n = fx.get("amount", 1)
     # Stoke exhausts the WHOLE hand and then generates that many cards. The
     # count is fixed BEFORE any exhausting (the dll reads exhaustCount off
@@ -3816,7 +3881,8 @@ def player_turn_start_triggers(state: CombatState) -> None:
         gain_sparks(state, 1)
 
 
-def salon_tick_amount(state: CombatState, member: str, paid: bool) -> int:
+def salon_tick_amount(state: CombatState, member: str, paid: bool,
+                      note: bool = True) -> int:
     """What this member's tick is worth RIGHT NOW: the printed base plus the
     Focus term and Grand Salon (_salon_amount), then the dry reduction when
     the member cannot pay. Crabaletta and Chevalmarin print damage, the Usher
@@ -3826,10 +3892,12 @@ def salon_tick_amount(state: CombatState, member: str, paid: bool) -> int:
     The mirror of C# SalonMemberPower.TickValue, and the reason both exist:
     the resolution path and every reader of "what will this member do" must
     be the same expression, not two copies that agree until one is edited.
+    `note=False` is that same expression for a SCORE-time forecaster -- see
+    `_salon_amount`.
     """
     spec = C.SALON_MEMBERS[member]["tick"]
     base = spec.get("damage", 0) or spec.get("block", 0)
-    amt = _salon_amount(state, base)
+    amt = _salon_amount(state, base, note=note)
     return amt if paid else int(amt * C.SALON_DRY_DAMAGE_MULT)
 
 

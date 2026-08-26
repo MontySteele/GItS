@@ -1284,11 +1284,17 @@ def format_plan(scope: WeightScope,
     screen = screen_points(scope)
     # WHAT AN UNRANGED NAME MEANS: discovered, live, and deliberately NOT
     # swept -- this harness does not invent a range for a term whose comment it
-    # has not read. The one standing entry is `EXHAUST_FORMULA_PAYOUT_WEIGHT`
-    # (W3 / R211), and its range is DEFERRED until the pilot valuation repairs
-    # land, ruled [USER] 2026-08-25. Do not fill it in from this plan alone: a
-    # weight swept while the scorer around it is under repair measures the
-    # repair rather than the weight.
+    # has not read. THE LIST IS EMPTY SINCE `P11`, AND SO IS `pair_own`:
+    # `EB-145` made the main scorer forecast an exhaust selection by running
+    # the same chooser, so all four of this gate's weights became `shared` and
+    # none of them is isolable any more. `EXHAUST_FORMULA_PAYOUT_WEIGHT` was
+    # the one standing unranged entry (W3 / R211), with its range DEFERRED
+    # until the pilot valuation repairs landed ([USER] 2026-08-25) precisely
+    # because "a weight swept while the scorer around it is under repair
+    # measures the repair rather than the weight" -- the repairs have landed,
+    # and the answer is that this harness can no longer separate it from its
+    # neighbours. That is a REPORTED consequence, not a licence to sweep them
+    # anyway: a weight the harness cannot isolate is a [USER] call.
     unranged = [k for k in scope.pair_own
                 if k not in RANGES and k not in PINNED]
     lines = [

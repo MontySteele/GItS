@@ -10,11 +10,13 @@ Deliberately dumb; both Klee and reference decks use the same pilot.
 
 from __future__ import annotations
 
+import contextlib
 from typing import Optional
 
 from tier0 import constants as C
 from tier0.engine import effects, powers, resources
-from tier0.engine.combat import card_cost, card_playable
+from tier0.engine.combat import (card_cost, card_playable, spark_cost,
+                                 spark_threshold)
 from tier0.engine.state import Card, CombatState
 
 
@@ -120,13 +122,94 @@ def _est(state: CombatState, val, default: int = 0) -> float:
     return default                                  # Storm of Steel)
 
 
-def _active_effects(state: CombatState, effect_list: list[dict]):
+# ---------------------------------------------------------------------------
+#  EB-144: the pilot's conditional literacy, DECLARED rather than implied.
+#
+#  `_active_effects`'s chain used to end in a bare `else: continue`, which
+#  yields NEITHER branch -- so a predicate the pilot had never been taught
+#  made it price the whole conditional at zero, silently, with no test that
+#  could notice. The `C19` audit found TEN sheet rows in that hole, not the
+#  two the standing read names: `hold_the_line` + `warmup_act`
+#  (enemy_intends_attack), `take_it_from_the_top` + `curtain_cue` +
+#  `directors_cut` (spotlight_moved_this_turn), `many_waters_melody` +
+#  `waters_embrace` + `tempo_change` (has_salon_members), `read_the_current`
+#  (charge_at_least_10) and `tail_of_flame` (this_cost_zero). Seven of the
+#  ten predate `W3` by months.
+#
+#  The two collections below are that hole made visible. Every predicate any
+#  sheet PRINTS must appear in exactly one of them, and
+#  `test_eb144_predicate_literacy.py` fails the build otherwise -- a lint, not
+#  a comment, because the failure mode is silence.
+#
+#  SCORABLE: evaluated live at score time, so the correct branch is scored.
+#  BLIND:    MID-RESOLUTION by nature -- the fact the branch reads does not
+#            exist until the card is already resolving, so there is no honest
+#            score-time answer and the historic top-level-only valuation is
+#            kept deliberately. Being listed here is the claim that this was
+#            decided, not forgotten.
+# ---------------------------------------------------------------------------
+
+# Names the pilot delegates VERBATIM to `effects._predicate`: pure reads of
+# current state, with no snapshot field and no telemetry side effect, so one
+# rule asked from both sides beats a second copy (the Track C.2 lesson that
+# the fanfare clamp below records the other half of).
+_ENGINE_LIVE_PREDICATES = frozenset({
+    "enemy_intends_attack",
+    "has_salon_members",
+    "spotlight_moved_this_turn",
+})
+_ENGINE_LIVE_PREFIXES = ("charge_at_least_",)
+
+SCORABLE_PREDICATES = frozenset({
+    "has_spark",
+    "target_has_nonpyro_aura",
+    "card_exhausted_this_turn",
+    "hp_lost_this_turn",
+    "reaction_triggered_this_turn",
+    "this_cost_zero",
+}) | _ENGINE_LIVE_PREDICATES
+SCORABLE_PREDICATE_PREFIXES = (
+    "target_has_power_",
+    "exhaust_pile_at_least_",
+    "fanfare_at_least_",
+    "encore_at_least_",
+) + _ENGINE_LIVE_PREFIXES
+
+BLIND_PREDICATES = frozenset({
+    # Both read a fact produced BY this card's own earlier ops, mid-
+    # resolution. Nothing at score time can answer them without simulating
+    # the card, which the pilot deliberately does not do.
+    "reaction_triggered_by_this",
+    "killed_target",
+})
+BLIND_PREDICATE_PREFIXES: tuple[str, ...] = ()
+
+
+def predicate_is_scorable(name: str) -> bool:
+    """Would `_active_effects` evaluate `name` and score the right branch?"""
+    return (name in SCORABLE_PREDICATES
+            or name.startswith(SCORABLE_PREDICATE_PREFIXES))
+
+
+def predicate_is_declared_blind(name: str) -> bool:
+    return (name in BLIND_PREDICATES
+            or (bool(BLIND_PREDICATE_PREFIXES)
+                and name.startswith(BLIND_PREDICATE_PREFIXES)))
+
+
+def _active_effects(state: CombatState, effect_list: list[dict],
+                    card: Optional[Card] = None):
     """Yield runtime-formula branches the pilot is explicitly able to read.
 
     Mid-resolution predicates (reaction_triggered_by_this, killed_target)
     deliberately keep their historic top-level-only valuation. Pure current-
     state Klee predicates are safe to read here, as are the pass-5/pass-6
     Ironclad predicates below.
+
+    `card` is the HOST card whose body this is, when there is one. Exactly one
+    predicate needs it (`this_cost_zero`, which is a question about the card
+    being scored and not about the state), and a mode body probed without a
+    host still scores -- it just cannot answer that one.
     """
     for fx in effect_list:
         if fx["op"] == "conditional":
@@ -162,10 +245,32 @@ def _active_effects(state: CombatState, effect_list: list[dict]):
                 # (unlike reaction_triggered_by_this, which is mid-resolution
                 # and stays excluded). Same read as the engine's predicate.
                 ready = state.reactions_this_turn > 0
+            elif name == "this_cost_zero":
+                # EB-144. The ENGINE reads `state.current_card_cost`, which at
+                # score time still holds the LAST resolved card's cost -- so
+                # delegating would be worse than not reading it at all. The
+                # pilot reads `card_cost(state, card)`, which is literally the
+                # number `combat.play_card` is about to assign to that field
+                # one line before this branch resolves. No host card (a mode
+                # body probed on a neutral frame) means no answer, and the
+                # historic zero-valuation stands for that case only.
+                if card is None:
+                    continue
+                ready = card_cost(state, card) == 0
+            elif (name in _ENGINE_LIVE_PREDICATES
+                  or name.startswith(_ENGINE_LIVE_PREFIXES)):
+                # EB-144. Pure current-state reads with no snapshot field and
+                # no telemetry side effect, so the pilot ASKS THE ENGINE
+                # rather than keeping a second copy of the rule -- the same
+                # round trip `choose_one` below makes, and the half of the
+                # Track C.2 lesson the fanfare clamp above cannot take (that
+                # one goes through `resources.readable` precisely BECAUSE the
+                # engine's predicate files a census row on the way past).
+                ready = effects._predicate(state, name)
             else:
                 continue
             branch = fx["then"] if ready else fx.get("else", [])
-            yield from _active_effects(state, branch)
+            yield from _active_effects(state, branch, card)
         elif fx["op"] == "choose_one":
             # EB-118: the pilot forecasts the mode it will actually take by
             # asking the ENGINE's chooser rather than keeping a second copy
@@ -179,14 +284,87 @@ def _active_effects(state: CombatState, effect_list: list[dict]):
             # make this forecast disagree with the play it forecasts.
             modes = fx[effects.MODES_KEY]
             index = effects._chosen_mode(state, modes, None)
-            yield from _active_effects(state, modes[index]["effects"])
+            yield from _active_effects(state, modes[index]["effects"], card)
         else:
             yield fx
 
 
+def _salon_verb_yield(state: CombatState, card: Card
+                      ) -> tuple[float, float, float]:
+    """EB-144: what this card's SALON VERBS pay right now, as
+    `(damage, block, encore_spent)`.
+
+    `salon_rotate` and `salon_perform` shipped in Phase 2 and stayed unprinted
+    until `change_the_bill` (`C19`), so the pilot had never been taught either
+    and the card scored as its Block 3 and nothing else. Neither verb gets a
+    number of its own here; both are valued by DOING WHAT THE RESOLVER DOES
+    and pricing the result through the terms that already price damage, Block
+    and Encore. Change `SALON_MEMBERS` and this moves with it.
+
+      * `salon_perform` runs `salon_member_act` on the LEFTMOST member, `N`
+        times, and that function's whole payout is one `salon_tick_amount`
+        per tick -- so this asks that same function (`note=False`: a forecast
+        must not file a `fanfare_read` census row, which is the only reason
+        the kwarg exists). Damage members pay damage, the Usher pays Block,
+        and the Encore upkeep is charged per tick that can afford it, exactly
+        as `salon_member_act` charges it, with the dry three-quarters falling
+        out of `salon_tick_amount` for the ticks that cannot.
+      * `salon_rotate` is worth ZERO ON ITS OWN and that is not a placeholder
+        -- it is the drafter's ratified reading (`STATIC_SALON_ROTATE_VALUE`,
+        EB-118 §5.5): rotating delivers nothing, its whole value is WHICH
+        member the next consumer finds. What it does get here is the thing
+        the drafter cannot see, because the drafter has no stage: inside one
+        card body the rotate moves the queue BEFORE a later `salon_perform`
+        reads it, so `offset` picks the member that will actually perform.
+        `change_the_bill` prints exactly that pair, and with a Crabaletta in
+        front of an Usher the two orderings score differently -- correctly.
+
+    Conservative by construction, disclosed rather than papered over: the
+    Chevalmarin tick's hydro application and the `SALON_TICK_BURST` particle
+    are NOT priced (no term here owns either), a stage this card would DEPLOY
+    into is not counted (the queue is read as it stands at score time), and a
+    perform that would kill the last enemy mid-loop still counts its later
+    ticks. Every one of those understates the verb.
+    """
+    p = state.player
+    # `salon_member_act`'s own refusal, and `_op_salon_perform`'s whiff: an
+    # empty stage, a dead player, or nothing left to act against pays nothing
+    # and the resolver says so out loud with `salon_perform_whiffed`.
+    if not p.salon or not p.alive or not state.living_enemies:
+        return (0.0, 0.0, 0.0)
+    offset = 0
+    dmg = blk = spent = 0.0
+    encore = p.encore
+    for fx in _active_effects(state, card.effects, card):
+        op = fx["op"]
+        if op == "salon_rotate":
+            offset += _est(state, fx.get("amount", 1), 1)
+        elif op == "salon_perform":
+            member = p.salon[offset % len(p.salon)]
+            spec = C.SALON_MEMBERS[member]["tick"]
+            for _ in range(int(_est(state, fx.get("amount", 1), 1))):
+                paid = encore >= C.SALON_TICK_ENCORE_COST
+                amt = effects.salon_tick_amount(state, member, paid,
+                                                note=False)
+                if spec.get("damage", 0):
+                    # Same pipeline head the pilot's card damage uses, and
+                    # the same one `deal_damage_to_enemy` opens with.
+                    dmg += powers.modify_damage_dealt(p, amt)
+                if spec.get("block", 0):
+                    blk += amt
+                if paid:
+                    encore -= C.SALON_TICK_ENCORE_COST
+                    spent += C.SALON_TICK_ENCORE_COST
+    return (dmg, blk, spent)
+
+
 def _expected_damage(state: CombatState, card: Card) -> float:
-    total = 0.0
+    total = _salon_verb_yield(state, card)[0]
     living = state.living_enemies
+    # EB-145: built ONLY when a printed formula asks for it, so a card that
+    # reads no selection allocates nothing and scores through the identical
+    # arithmetic it scored through before (`_formula_amount`'s first branch).
+    selection: dict = {}
     # v0.4 W1 (priest-pilot audit): the flat per-attack bonus the engine folds
     # in at resolution — Bennett's next_attack_up, celestial_gift, the Fanfare
     # term, and Kokomi's Ceremonial Garment Charge read. The pilot used to see
@@ -194,7 +372,7 @@ def _expected_damage(state: CombatState, card: Card) -> float:
     # straight through its own buff windows. Same helper the engine calls, so
     # the estimate cannot drift from what resolves; it is a pure read.
     flat = effects.flat_attack_bonus(state, card, card_cost(state, card))
-    for fx in _active_effects(state, card.effects):
+    for fx in _active_effects(state, card.effects, card):
         if fx["op"] == "damage":
             if fx.get("target") == "self":
                 # HP loss is a cost
@@ -207,7 +385,7 @@ def _expected_damage(state: CombatState, card: Card) -> float:
                 times = effects._calc_amount(state, times_formula, card)
             elif times_formula == "2_plus_sparks":
                 times = 2 + state.player.sparks
-            amount = (effects._calc_amount(state, fx["amount_formula"], card)
+            amount = (_formula_amount(state, fx, card, selection)
                       if "amount_formula" in fx
                       else _est(state, fx.get("amount", 0)))
             per_hit = powers.modify_damage_dealt(state.player,
@@ -301,11 +479,15 @@ def _estimated_exhausts(state: CombatState, card: Card) -> int:
 
 
 def _raw_block(state: CombatState, card: Card) -> float:
-    total = 0.0
-    for fx in _active_effects(state, card.effects):
+    # EB-144: the Usher's tick prints Block, so a `salon_perform` that lands
+    # on her is Block this turn and belongs in the same number the panic-block
+    # rule and _block_value read.
+    total = _salon_verb_yield(state, card)[1]
+    selection: dict = {}      # EB-145, see _expected_damage
+    for fx in _active_effects(state, card.effects, card):
         if fx["op"] != "block":
             continue
-        amount = (effects._calc_amount(state, fx["amount_formula"], card)
+        amount = (_formula_amount(state, fx, card, selection)
                   if "amount_formula" in fx else fx["amount"])
         # F-B1: Block carries the same scaling rider damage does, so the
         # pilot has to read it or it prices a Fanfare-scaled blocker at its
@@ -354,7 +536,7 @@ def _scaling_value(state: CombatState, card: Card) -> float:
     val = 0.0
     target = effects._default_target(state)
     applied_to_target: dict[str, int] = {}
-    for fx in _active_effects(state, card.effects):
+    for fx in _active_effects(state, card.effects, card):
         # _est, not the raw field: an X-cost debuff (Malaise: weak X) carries
         # the STRING "X" here, and raw arithmetic on it killed every run the
         # card was drafted into. "-X" falls to _est's default 0 -- a negative
@@ -434,9 +616,16 @@ def _reaction_value(state: CombatState, card: Card) -> float:
         target = fx.get("target", "enemy")
 
         if target == "enemy":
-            # Single-target Swirl is deliberately aura-aware in the engine:
-            # it models the player's target choice rather than blindly using
-            # tier0's generic lowest-HP aim.
+            # Single-target Swirl is deliberately aura-aware, and since
+            # EB-139 / R211 (`C20`) it is aura-aware AT THE BIND
+            # (`effects.bind_card_aim`) rather than inside `_op_swirl`: a card
+            # carrying an aimed Swirl binds its WHOLE play to the lowest-HP
+            # aura-bearer. This line is unchanged and needed no weight, because
+            # it already computed that creature -- `reactable` is the living
+            # bodies holding an off-anemo aura, and no aura is ever ANEMO
+            # (`reactions.AURA_ELEMENTS` is pyro/hydro/electro/cryo; anemo and
+            # geo are trigger-only), so it is the same set the engine now binds
+            # from. The estimate and the resolution moved TOWARD each other.
             aimed = (min(reactable, key=lambda e: e.hp)
                      if op == "swirl" and reactable
                      else effects._default_target(state))
@@ -465,7 +654,7 @@ def _reaction_value(state: CombatState, card: Card) -> float:
 
 def _tempo_value(state: CombatState, card: Card) -> float:
     val = 0.0
-    for fx in _active_effects(state, card.effects):
+    for fx in _active_effects(state, card.effects, card):
         if fx["op"] in ("draw", "energy"):
             formula = fx.get("amount_formula")
             if isinstance(formula, dict):
@@ -501,10 +690,18 @@ def _tempo_value(state: CombatState, card: Card) -> float:
 def _sustain_value(state: CombatState, card: Card) -> float:
     """Encore is deferred HP economy (absorbs after Block). Worth most of
     its face -- it keeps until used, unlike Block -- but discounted for
-    not stopping THIS turn's hits when drawn late."""
+    not stopping THIS turn's hits when drawn late.
+
+    EB-144: a `salon_perform` BUYS its tick with the same currency, one point
+    of upkeep per tick that can pay, so the bill is charged here at the price
+    a point is credited at two lines up. Symmetric by construction rather
+    than picked -- an on-demand tick that costs a point of Encore must not be
+    free to a scorer that pays a point of Encore 0.8.
+    """
     encore = sum(fx.get("amount", 0) for fx in card.effects
                  if fx["op"] == "gain_encore"
                  and isinstance(fx.get("amount"), int))
+    encore -= _salon_verb_yield(state, card)[2]
     return encore * C.PILOT_ENCORE_VALUE
 
 
@@ -581,7 +778,7 @@ def _charge_value(state: CombatState, card: Card) -> float:
     p = state.player
     engine_live = "tamakushi_casket" in p.relic_hooks
     val = 0.0
-    for fx in _active_effects(state, card.effects):
+    for fx in _active_effects(state, card.effects, card):
         op = fx["op"]
         if op == "gain_charge":
             val += (_est(state, fx.get("amount", 1), 1)
@@ -796,6 +993,157 @@ ENRAGE_TAX_TURNS = 2.0      # future attack turns a +Strength grant is priced
                             # over, discounted by PILOT_FUTURE_DAMAGE_DISCOUNT
 
 
+# ---------------------------------------------------------------------------
+#  EB-143 (P11): the Spark HOLD-versus-SPEND term
+# ---------------------------------------------------------------------------
+#
+# `spend_spark` appeared NOWHERE in this package until this window. The bank
+# was a one-way meter to the pilot -- `_tempo_value` paid
+# `C.PILOT_SPARK_VALUE` per Spark GAINED and nothing charged for a Spark
+# SPENT -- so the three `C19` sinks (`powder_charge`, `hold_the_line`,
+# `smoke_and_sparks`) bought their payoff for free at score time and the
+# standing read had to publish their contribution as a FLOOR
+# (`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`).
+#
+# THE LEDGER WAS THE DEFECT, not the eagerness. A gain worth +0.7 and a spend
+# worth 0.0 is an arbitrage the scorer could see: `sparkly_treasure` (gain 1,
+# cost 0) followed by any sink scored strictly positive with the board
+# unchanged. So the spend is charged, and it is charged in the same currency
+# the gain is paid in.
+#
+# WHAT THE TERM IS: the value of the Sparks a play would CONSUME, if they were
+# BANKED instead. Three legs, and the largest wins -- the bank has ONE best
+# use, so they are alternatives and not an addition:
+#
+#   1. THE STOCK FLOOR, `spent * C.PILOT_SPARK_VALUE`. The gain dial, mirrored.
+#      Its own comment reads "sparks -> free attacks", which is exactly what
+#      the bank is: at `C.SPARKS_FOR_FREE_ATTACK` = 3 a Spark is a third of a
+#      free Attack, and 3 x 0.7 = 2.1 is what the pilot already says that
+#      Attack is worth. Nothing new is asserted by charging it on the way out.
+#   2. THE THRESHOLD LEG. A spend that carries the bank from at-or-above
+#      `combat.spark_threshold` to below it forfeits a free Attack OUTRIGHT
+#      rather than a linear share of one, and only while an Attack that would
+#      have used it is in hand. Priced at `threshold * C.PILOT_SPARK_VALUE`,
+#      i.e. at the same dial -- the convexity the floor cannot express.
+#   3. THE READER LEG, and this is the one that makes the term a DECISION
+#      rather than a tax: the largest amount by which the drop reduces what
+#      some OTHER card in hand is worth, measured by re-reading that card at
+#      the two bank levels with the pilot's own valuations. It is DERIVED and
+#      names no card and no predicate -- `gleeful_barrage`'s `2_plus_sparks`
+#      hits and the `has_spark` riders (`eager_to_help`, `patched_dress`) are
+#      found because the scorer already reads them, so a Spark reader added to
+#      any sheet tomorrow is priced here on the day it ships.
+#
+# HAND ONLY, DELIBERATELY. A reader still in the draw pile is not counted:
+# reading the pile would give the pilot information the player does not have
+# at decision time, and the residual error UNDER-values banking, which spends
+# more readily -- the direction closer to the pre-`P11` behaviour and the safe
+# one under R194's direction rule.
+#
+# PLACEHOLDER -- sheet-pass sweep, [USER] pick: LEG 1's existence, not its
+# value. Charging the stock floor says a Spark is worth something even with no
+# reader in hand and the threshold untouched; charging 0.0 there would say the
+# bank is worth only what is currently readable off it. The floor is taken
+# because of the arbitrage above and because it is the conservative direction
+# (it UNDER-values the sink, per R194), but "does a Spark have hold value
+# outside a reachable payoff" is a design question and this is one defensible
+# answer, not the ruled one. Legs 2 and 3 stand on their own either way.
+#
+# NOT AN ARCHETYPE WEIGHT, and that is also a choice: a Spark is a Spark, the
+# free-Attack threshold is `combat`'s and not any pilot's, and the three sinks
+# are drafted by `demolition` and `generic` decks as well as `spark` ones. The
+# term is therefore pilot-independent and no row of
+# `tier0/content/pilots/archetypes.yaml` moves -- which is also what keeps the
+# archive scope to the three cards that print the op.
+#
+# STAMPING OWED AT INTEGRATION: this weight ENTERS the set
+# `C.PILOT_WEIGHTS_VERSION` labels (the EB-5 rule), and it lands inside the ONE
+# `P11` window with `EB-144` and `EB-129` (R207) -- where `POLICY_VERSION`
+# 10 -> 11 and `PILOT_WEIGHTS_VERSION` 5 -> 6 move together and this name joins
+# the pinned set in `tier0/tests/test_pin_tier0_pilot.py`. Neither integer is
+# moved here: a window with three items in it gets one bump, not three.
+SPARK_HOLD_VALUE_WEIGHT = 1.0   # the scale is DAMAGE POINTS, the same scale
+                                # `EXHAUST_FORMULA_PAYOUT_WEIGHT` and
+                                # `MODE_OVERDRAW_HP_VALUE` already use. At 1.0
+                                # a point of banked-Spark value and a point of
+                                # payoff trade one for one, which is the only
+                                # setting at which the subtraction in `_score`
+                                # means anything. At 0.0 the term vanishes and
+                                # the pilot is byte-identical to `P10` -- the
+                                # degenerate case, pinned as a test rather
+                                # than argued. THE ONE PLACE TO OVERRIDE IT.
+
+
+def _spark_bank_probe(state: CombatState, card: Card, bank: int) -> float:
+    """What `card` is worth to the pilot with the Spark bank at `bank`.
+
+    A pure read taken at a counterfactual bank: the field is set, the pilot's
+    own valuations are asked, and the field is restored unconditionally. The
+    three terms are the ones that can read the bank at all -- damage
+    (`2_plus_sparks` hit counts, `has_spark` branches), block (`has_spark`
+    riders) and tempo (`has_spark` draws) -- and every one of them is a pure
+    function of state, so a card that reads no Spark returns the SAME float at
+    both banks and contributes exactly 0.0 to the leg. No epsilon, no
+    tolerance: identical arithmetic on identical inputs.
+    """
+    p = state.player
+    saved = p.sparks
+    p.sparks = bank
+    try:
+        return (_expected_damage(state, card)
+                + _block_value(state, card)
+                + _tempo_value(state, card))
+    finally:
+        p.sparks = saved
+
+
+def _spark_reader_loss(state: CombatState, card: Card,
+                       before: int, after: int) -> float:
+    """Leg 3: the biggest single payoff in hand the drop would shrink."""
+    worst = 0.0
+    for other in state.player.hand:
+        if other is card:
+            continue        # this card's own payoff is scored on its own terms
+        loss = (_spark_bank_probe(state, other, before)
+                - _spark_bank_probe(state, other, after))
+        if loss > worst:
+            worst = loss
+    return worst
+
+
+def _spark_free_attack_loss(state: CombatState,
+                            before: int, after: int) -> float:
+    """Leg 2: a free Attack forfeited outright by crossing the threshold."""
+    threshold = spark_threshold(state)
+    if before < threshold or after >= threshold:
+        return 0.0          # nothing to forfeit, or the bar still cleared
+    if not any(c.type == "attack" and c.cost != 0 and c.cost != "X"
+               for c in state.player.hand):
+        return 0.0          # `combat.play_card` only spends the bank for an
+                            # Attack with a printed cost; nothing here to cash
+    return threshold * C.PILOT_SPARK_VALUE
+
+
+def _spark_hold_cost(state: CombatState, card: Card) -> float:
+    """What the Sparks this play consumes are worth BANKED. See the block
+    comment above for the three legs and why the largest wins.
+
+    The price is `combat.spark_cost` -- the engine's own cost line, asked the
+    same way from both sides, so the pilot can never charge itself for a
+    quantity the playability gate would not have demanded. That gate has
+    already run (`pilot()` filters on `card_playable`), so the bank covers the
+    price and the drop is the whole price.
+    """
+    price = spark_cost(card)
+    if not price:
+        return 0.0
+    before = state.player.sparks
+    after = max(0, before - price)
+    return max((before - after) * C.PILOT_SPARK_VALUE,
+               _spark_free_attack_loss(state, before, after),
+               _spark_reader_loss(state, card, before, after))
+
+
 def _stoke_value(state: CombatState, card: Card) -> float:
     """Furina's SALON machinery: deploy the stage, then keep it fuelled.
 
@@ -834,7 +1182,7 @@ def _stoke_value(state: CombatState, card: Card) -> float:
     bill = live * C.SALON_TICK_ENCORE_COST
     shortfall = max(0.0, STOKE_RUNWAY_TURNS * bill - p.encore)
     val = 0.0
-    for fx in _active_effects(state, card.effects):
+    for fx in _active_effects(state, card.effects, card):
         op = fx["op"]
         if (op == "apply_power" and fx.get("power") == "salon_member"
                 and fx.get("target", "self") == "self"):
@@ -883,6 +1231,15 @@ def _score(state: CombatState, card: Card, w: dict,
     kw = w.get("stoke", 0.0)
     if kw:
         total += kw * _stoke_value(state, card)
+    # EB-143: the Spark ledger's other half. Subtracted here rather than folded
+    # into `_tempo_value` beside the GAIN, on purpose: `_tempo_value` is also
+    # read by `exhaust_future_value` and `mode_score` at weight 1, and a sink's
+    # price is a fact about PLAYING it, not about keeping it or about which
+    # body a mode resolves. Gated on the printed price, which is 0 for every
+    # card in the repo but three -- so nothing else pays for the lookup and
+    # nothing else moves.
+    if spark_cost(card):
+        total -= SPARK_HOLD_VALUE_WEIGHT * _spark_hold_cost(state, card)
     # EB-29t: every Skill played feeds each Enraged enemy its enrage stacks
     # in PERMANENT Strength (R128 _finish_play). Priced as +n damage on each
     # of the enemy's hits over ENRAGE_TAX_TURNS future attack turns; hits
@@ -1171,12 +1528,24 @@ def exhaust_future_value(state: CombatState, card: Card) -> float:
     are closed over by `make_pilot`), so it cannot ask which pilot is flying.
     Under-weighting a character term is the safe direction -- it makes the
     chooser conservative about exhausting machinery, not eager.
+
+    EB-145 SUSPENDS ITS OWN FORECAST HERE, and that keeps this function's
+    arithmetic BYTE-IDENTICAL to `P10`'s. A candidate that itself prints a
+    selection-reading payout (`pearl_barrage`, `the_tide_remembers`) is valued
+    at its BASE, not at the payout it would reach if it were played later off
+    a pool that does not exist yet. Two reasons, and the second is the ground:
+    a candidate's own payout is conditional on a future play, which is exactly
+    the speculation this function's docstring already refuses; and pricing it
+    here would move the CHOOSER, which `P10` ratified and this window is not
+    reopening. It also terminates the recursion -- the forecast asks the
+    chooser, the chooser asks this, and one of the two has to stop.
     """
-    val = (_expected_damage(state, card)
-           + _block_value(state, card)
-           + _scaling_value(state, card)
-           + _tempo_value(state, card)
-           + _sustain_value(state, card))
+    with _forecast_suspended():
+        val = (_expected_damage(state, card)
+               + _block_value(state, card)
+               + _scaling_value(state, card)
+               + _tempo_value(state, card)
+               + _sustain_value(state, card))
     if card.is_junk:
         val -= EXHAUST_JUNK_BONUS
     cost = card_cost(state, card)
@@ -1219,6 +1588,161 @@ def exhaust_victim(state: CombatState, pool: list[Card],
         if best_key is None or key > best_key:
             best, best_key = cand, key
     return best
+
+
+# ---------------------------------------------------------------------------
+#  EB-145 (P11): payout-aware SCORING of a chosen exhaust
+# ---------------------------------------------------------------------------
+#
+# `P10` made the PICK formula-aware and left the SCORE at the base. Those are
+# two seams and the standing read says so: `Tide of Names` deals
+# `5 + 2 per exhaust_selection_cost` to ALL enemies, the selection has not
+# happened at score time, and `effects._calc_amount` reads
+# `state.exhaust_selection` -- which is EMPTY (or, worse, still holds the
+# PREVIOUS card's victims) while the pilot is deciding. So the pilot priced a
+# 2-cost wide attack at 5 per body no matter what it was about to eat.
+#
+# THE REPAIR IS TO ASK, NOT TO ESTIMATE. The scorer runs the same chooser the
+# engine will run, over the same pool `effects.exhaust_pool` will build, and
+# reads the resulting descriptors through the engine's OWN `_calc_amount`.
+# Nothing here re-implements the formula grammar, the count vocabulary or the
+# selection rules; the forecast is a temporary `state.exhaust_selection` and
+# the arithmetic on top of it is the engine's.
+#
+# NO NEW WEIGHT IS INTRODUCED AND NONE IS OWED. The payout is the card's own
+# printed `base`/`per`, the victim is the chooser's, and R211's multiplicity
+# clause is already in `_expected_damage`: an `all_enemies` damage effect is
+# summed over `state.living_enemies`, so a wide selection payout is multiplied
+# by the living bodies without a second multiply here. (`EB-129`'s ruling has
+# the same shape for the same reason -- the quantity was already denominated.)
+#
+# BOTH SHIPPED CARRIERS WERE BLIND AND BOTH ARE FIXED BY THIS ONE SEAM.
+# `the_tide_remembers` (per 2, `all_enemies`) and `pearl_barrage` (per 3,
+# aimed) print the only two selection formulas on any sheet; the fix is in
+# `_formula_amount`, which every printed `amount_formula` already flows
+# through, so neither card is named anywhere in the code.
+
+#: Re-entrancy latch. TRUE while a forecast (or a chooser valuation) is in
+#: flight, and it is the whole termination argument: the forecast asks
+#: `exhaust_victim`, which asks `exhaust_future_value`, which scores a
+#: candidate -- and a candidate that prints its own selection payout would
+#: forecast again. Module-level rather than on the state because it is a
+#: property of the CALL STACK, not of the combat; it is only ever written
+#: through `_forecast_suspended`, which restores the previous value, so no
+#: exception can leave it armed and determinism is untouched (no rng, no
+#: ordering dependence, single-threaded by `jobs=1`).
+_FORECASTING = False
+
+
+@contextlib.contextmanager
+def _forecast_suspended():
+    global _FORECASTING
+    was = _FORECASTING
+    _FORECASTING = True
+    try:
+        yield
+    finally:
+        _FORECASTING = was
+
+
+def _reads_a_selection(fx: dict) -> bool:
+    """Does this effect's printed formula count an exhaust selection?
+
+    Read off the SAME prefix the engine registers the family under
+    (`effects.EXHAUST_SELECTION_PREFIX`), never a list of token names, so a
+    ninth derived count added to `exhaust_selection_counts` is visible here on
+    the day it is added.
+    """
+    formula = fx.get("amount_formula")
+    return (isinstance(formula, dict)
+            and isinstance(formula.get("count"), str)
+            and formula["count"].startswith(effects.EXHAUST_SELECTION_PREFIX))
+
+
+def _forecast_exhaust_selection(state: CombatState,
+                                card: Card) -> Optional[list[dict]]:
+    """The descriptors this card's own chosen `exhaust_from` WOULD produce.
+
+    `None` means "no forecast is available" -- the card prints no chosen
+    exhaust, or a forecast is already in flight -- and every caller falls back
+    to the live `state.exhaust_selection`, which is the pre-`P11` reading.
+
+    THE FIRST chosen `exhaust_from` in resolution order is the one forecast,
+    because that is the selection a formula placed after it reads. A card
+    printing two of them rebinds the context on the second (the engine's ruled
+    behaviour: two rotations on one card are two questions, not one pile) and
+    is not a shape any sheet prints; if one ever does, the payout it reads is
+    the SECOND selection and this returns the first, which under-reads rather
+    than over-reads.
+
+    IT RESPECTS THE `EB-118` SWITCH, and that is not decoration. With
+    `PILOT_POLICIES_ENABLED` off the engine takes `effects._worst_card`'s pick,
+    so a forecast that asked `exhaust_victim` anyway would price a victim the
+    engine is not going to take -- and the W4 harness's whole gate claim ("a
+    weight reaches the engine ONLY through the gate") would become false at the
+    scorer. Same gate, same call shape, same fallback as
+    `effects._op_exhaust_from`.
+    """
+    if _FORECASTING:
+        return None
+    # EB-144 landed in the same window: the host card is passed so the walk
+    # that finds the `exhaust_from` reads the same branches the scoring walks
+    # read -- a chosen exhaust behind a conditional the pilot can now evaluate
+    # must be forecast on the branch that will actually resolve.
+    for fx in _active_effects(state, card.effects, card):
+        if fx.get("op") != "exhaust_from" or fx.get("select") != "chosen":
+            continue
+        pol = effects._pilot_policies()
+        pool = effects.exhaust_pool(state, fx, exclude=card)
+        n = fx.get("amount", 1)
+        n = len(pool) if n == "all" else int(_est(state, n, 1))
+        picked: list[dict] = []
+        with _forecast_suspended():
+            for _ in range(max(0, n)):
+                if not pool:
+                    break
+                victim = (exhaust_victim(state, pool, card) if pol is not None
+                          else effects._worst_card(pool))
+                pool = [c for c in pool if c is not victim]
+                picked.append(effects.exhaust_descriptor(victim))
+        return picked
+    return None
+
+
+def _formula_amount(state: CombatState, fx: dict, card: Card,
+                    cache: dict) -> int:
+    """`effects._calc_amount` for one printed formula, read against the
+    selection this card's own chosen exhaust WOULD make.
+
+    EVERY CARD PRINTING NO SELECTION FORMULA TAKES THE FIRST BRANCH and is
+    therefore byte-identical to the pre-`P11` call it replaces -- that is not
+    an argument, it is `test_eb145_payout_aware_scoring`'s regression sweep.
+
+    `cache` is the caller's per-card dict: one card can print several formulas
+    over one selection (none does today) and the chooser must be run once, not
+    once per effect.
+    """
+    formula = fx["amount_formula"]
+    if not _reads_a_selection(fx):
+        return effects._calc_amount(state, formula, card)
+    if "forecast" not in cache:
+        cache["forecast"] = _forecast_exhaust_selection(state, card)
+    forecast = cache["forecast"]
+    if forecast is None:
+        return effects._calc_amount(state, formula, card)
+    # The forecast is INSTALLED rather than interpreted: `_calc_amount` ->
+    # `_runtime_count` -> `exhaust_selection_counts` is the one definition the
+    # runtime count, the predicates and the C#-parity row all read, so a score
+    # taken this way cannot pay for a quantity the engine would count
+    # differently. Restored unconditionally -- the pilot is a PURE READER of
+    # combat state and a scorer that left a forecast behind would hand the
+    # next card a selection that never happened.
+    saved = state.exhaust_selection
+    state.exhaust_selection = forecast
+    try:
+        return effects._calc_amount(state, formula, card)
+    finally:
+        state.exhaust_selection = saved
 
 
 # ---------------------------------------------------------------------------

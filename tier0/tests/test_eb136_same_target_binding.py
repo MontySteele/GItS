@@ -45,8 +45,6 @@ passed under both engines would be pinning nothing.
 
 from __future__ import annotations
 
-import pytest
-
 from tier0.engine import effects
 from tier0.engine.combat import _settle_phases
 from tier0.engine.state import Bomb, Card
@@ -580,37 +578,31 @@ def test_a_corpses_powers_never_tick_and_never_act():
 
 
 # ---------------------------------------------------------------------------
-#  What R210 did NOT settle
+#  What R210 left open, and where R211 answered it
 # ---------------------------------------------------------------------------
 
-@pytest.mark.xfail(strict=True, reason=(
-    "UNRULED, and deliberately not guessed at (EB-136 stop rule). "
-    "`_op_swirl` re-aims a single-target Swirl at whichever living body "
-    "carries an aura when the bound aim carries none. That is an aim RE-TAKE "
-    "and Q1(b) says every `target: enemy` op binds -- but the same row severs "
-    "destination SCORING and says binding does not overturn tier0's "
-    "documented aim choices, and this branch is one of them. Five of the six "
-    "`swirl target: enemy` rows carry no second aimed op, so deleting it "
-    "would read them as blank whenever the aura sits off the lowest-HP body "
-    "-- a NEW divergence from a mod a human aims by hand. Moving it into "
-    "`bind_card_aim` instead would bind Yoohoo Windwheel's DAMAGE to the "
-    "aura'd body, which is card-shape-dependent aim policy nobody ruled. One "
-    "card is left scattering by this, of the 28 in scope."))
-def test_swirl_aim_retake_is_unruled():
-    """`sayu_yoohoo_windwheel`: `damage 4 target: enemy` + `swirl target:
-    enemy`. The mod puts both on `cardPlay.Target`. Board: the aura sits on
-    the fat body, so the swirl re-aims off the bound aim and the two ops land
-    on different creatures.
+def test_swirl_aim_question_is_answered_at_the_bind():
+    """THE FLIP. This was a strict xfail for the life of `C18` -- the one
+    question R210 declined to guess at -- and R211 (`EB-139`, `C20`) answered
+    it: for manually-modelled play, if ANY living enemy carries an aura at
+    card-play construction the WHOLE CARD binds to the lowest-HP AURA-BEARING
+    enemy. The re-take inside `_op_swirl` is gone; the aura-awareness moved to
+    `bind_card_aim`, where the card's damage cannot disagree with its Swirl.
 
-    The observable is the SWIRL SPREAD. Anemo is trigger-only and never
-    sticks, so a swirl that lands on the bound (auraless) aim does nothing and
-    the aim ends the play with no aura. Today the swirl re-aims onto the fat
-    body's Pyro, reacts, and `_react` spreads that Pyro back over every living
-    body -- so the aim comes out Pyro'd. XFAIL(strict): when the question is
-    answered, whichever way, this is where the answer gets written.
+    `sayu_yoohoo_windwheel`: `damage 4 target: enemy` + `swirl target: enemy`,
+    the one in-scope card that carries a second aimed op. Board: the aura sits
+    on the FAT body, so under the old re-take the two ops landed on different
+    creatures.
+
+    Both observables are asserted, because either alone would pass under a
+    half-adoption. The damage went to the aura-bearer, not to the lowest-HP
+    body; and the swirl reacted, so `_react` spread that Pyro back over every
+    living body -- which is why the auraless `low` ends the play Pyro'd rather
+    than clean. The wider acceptance set lives in
+    `tier0/tests/test_eb139_swirl_aura_bind.py`.
     """
-    aim, fat = _enemy(30, "aim"), _enemy(90, "fat", aura="pyro")
-    state = make_state([aim, fat])
+    low, fat = _enemy(30, "low"), _enemy(90, "fat", aura="pyro")
+    state = make_state([low, fat])
 
     effects.resolve_card(state, _card("sayu_yoohoo_windwheel", [
         {"op": "damage", "amount": 4, "target": "enemy",
@@ -618,4 +610,11 @@ def test_swirl_aim_retake_is_unruled():
         {"op": "swirl", "target": "enemy"},
     ]))
 
-    assert aim.aura is None, "the swirl stayed on the bound aim"
+    # The whole card went to the aura-bearer: the damage is on `fat`, and
+    # `low` -- lowest HP, and what C18 would have aimed at -- is untouched by
+    # it.
+    assert fat.hp == 86, "the damage did not follow the Swirl onto the aura"
+    assert low.hp == 30, "the damage stayed on the lowest-HP body"
+    # And the Swirl found an aura to spread, which is the whole point of
+    # aiming there.
+    assert low.aura == "pyro", "the Swirl found no aura and did nothing"

@@ -627,7 +627,29 @@ BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
 # retrieval (C19 (c)'s "Salvage the Line" loans a rotated Rare back out of the
 # Exhaust pile). Any later change to the value is its own bump, and the sweep
 # grid's outcomes are [USER]'s call, not the integration's.
-PILOT_WEIGHTS_VERSION = 5
+#
+# v6 = POLICY 11 (the scorer-literacy window, 2026-08-26):
+# `SPARK_HOLD_VALUE_WEIGHT = 1.0` ENTERS the labeled set, filed in
+# `tier0/pilot/policy.py` beside the other policy-side weights. Same shape as
+# v5 and not the v2/v3/v4 shape: a genuinely NEW weight arriving with the
+# behaviour that reads it, with no switch in front of it. It is the ONLY new
+# weight in a four-item window -- `EB-144` values both Salon verbs off the
+# resolver's own `salon_tick_amount` and `EB-145` prices a selection payout
+# off the card's own printed `base`/`per`, so neither mints a dial, and
+# `EB-129` pays event card-adds the realized Book of Five Rings heal. The
+# value 1.0 is hand-picked and unswept on `EXHAUST_FORMULA_PAYOUT_WEIGHT`'s
+# reasoning: the scale is points of damage on both sides of the subtraction,
+# so a point of banked-Spark value and a point of payoff trade one for one.
+# WHAT IT MAKES INCOMPARABLE: any reading of a deck holding one of the three
+# `C19` Spark sinks (`powder_charge`, `hold_the_line`, `smoke_and_sparks`) --
+# the only rows on any sheet that print `spend_spark`, so the term is gated
+# on a printed price that is 0 everywhere else and nothing else pays even the
+# lookup. At 0.0 the pilot is byte-identical to `P10`, pinned as a test
+# rather than argued. A PLACEHOLDER rides at the constant and is [USER]'s at
+# the next sheet pass: leg 1's EXISTENCE, i.e. whether a Spark has hold value
+# with no reader in hand and the free-Attack threshold untouched. Legs 2 and
+# 3 stand either way.
+PILOT_WEIGHTS_VERSION = 6
 # Sim-hygiene sprint 2026-07-29 (task 4): the inline scoring weights that had
 # been living as bare floats inside tier0/pilot/policy.py. MOVED, NOT RETUNED
 # -- every value below is byte-identical to the literal it replaced, and the
@@ -2162,7 +2184,101 @@ BANNER_FEATURED_SLOTS = 3
 #   window is by commit-hash scratch comparison (R207) and is not citable the
 #   way a stamped table is.
 # ---------------------------------------------------------------------------
-CONSTANTS_VERSION = 19
+# CONSTANTS_VERSION 20 -- EB-139's SWIRL AURA-AWARE BIND (R211, [USER]
+# 2026-08-25 -- semantics ratified there, implementation deferred to its own
+# window), landed 2026-08-26. THE ONE QUESTION C18 LEFT OPEN, CLOSED. Not a
+# sheet window and not a card-body pass: no printed number, no label, no
+# upgrade delta and no dial value moves here either. What moves is HOW THE
+# RESOLVER AIMS, which is C18's class exactly, and it takes C18's letter for
+# C18's reason -- R179/M15, a change that materially alters what a card does to
+# a board is a `C` bump whether it is spelled in a sheet row or in the engine
+# that reads one. The reviewer's "`P` window" label on the row was a
+# MIS-FILING and is corrected here: no pilot heuristic and no weight value is
+# touched.
+#   (a) THE RULED SEMANTICS, AND THE SEAM THEY LIVE AT. For MANUALLY-MODELLED
+#   play, if ANY LIVING enemy carries an aura at card-play construction, the
+#   WHOLE CARD binds to the LOWEST-HP AURA-BEARING enemy; otherwise the normal
+#   lowest-HP bind. It is built in `effects.bind_card_aim` -- the C18 seam, the
+#   first line of a play -- and NOT inside `_op_swirl`, which is the whole
+#   content of the answer: an aim taken at the bind is one creature for the
+#   whole play, where the re-take it replaces could hand a card's damage to one
+#   body and its Swirl to another.
+#   (b) WHY A SWIRL AND NOT THE BOARD. This is not a board-wide aim rule and
+#   the negative pins hold it to that (`test_eb139_swirl_aura_bind
+#   .test_a_card_with_no_swirl_ignores_the_auras_on_the_board`). A Swirl's
+#   entire payload IS the aura it lands on -- aimed at an auraless body it does
+#   nothing at all -- so an aimed Swirl is the one card shape where the mouse
+#   pick a human makes is READABLE OFF THE BOARD rather than a matter of taste.
+#   Every other card keeps the documented lowest-HP aim R210 declined to
+#   re-open, and destination SCORING stays severed: nothing here scores a
+#   destination, it reads one predicate off the board. The gate
+#   (`_card_swirls_at_aim`) walks the whole effect tree the way
+#   `_card_aims_at_enemy` does, and a `target: all_enemies` Swirl does NOT gate
+#   it -- it hits the whole board and has no aim to correct.
+#   (c) FORCED-RANDOM AUTOPLAY IS UNCHANGED AND RECEIVES NO CORRECTIVE RE-AIM.
+#   The random branch is FIRST in `bind_card_aim` and that order is the ruling:
+#   a free play has no human at the mouse, so modelling one there would hand
+#   Havoc/Cascade a judgement the mod never gives them -- the same argument
+#   that put the roll there in C18. The roll is still one draw per aiming card.
+#   (d) WHAT IS ARCHIVE, AND IT IS NARROWER THAN THE STAMP SUGGESTS. Six live
+#   rows carry an aimed Swirl, ALL of them companions -- no character sheet
+#   prints one: `sayu_yoohoo_windwheel` (Inazuma), `lynette_enigmatic_feint`
+#   and `lynette_astonishing_shift` (Fontaine), `sucrose_gust`,
+#   `sucrose_astable` and `prune_witch_hunt` (Mondstadt, the last
+#   `personal_pool: klee`). The list is DERIVED, never listed -- a seventh
+#   aimed Swirl fails `test_the_live_sheets_carry_exactly_the_enumerated
+#   _swirl_rows` and this paragraph gets corrected rather than silently
+#   outgrown. The ARMS are every arm that draws companion rewards: all nine
+#   character arms (`klee` demolition/spark/reaction, `furina`
+#   salon/spotlight/fanfare, `kokomi` priest/commander/assist). FIVE OF THE SIX
+#   ROWS MOVE NO NUMBER AT ALL, and that is demonstrated rather than hoped:
+#   each of the five puts its Swirl FIRST and carries no second aimed op
+#   (block, draw, burst energy, a Spark rider, an `all_enemies` damage row), so
+#   the creature the bind now names is byte-for-byte the creature the old
+#   re-take computed -- the same `min(bearers, key=hp)` on the same board -- and
+#   no enchantment rider can widen that, the three shipped riders being
+#   `damage target: self`, `draw` and `energy`. THE OBSERVABLE MOVEMENT IS ONE
+#   CARD: `sayu_yoohoo_windwheel`'s `damage 4`, which C18's own block named as
+#   the single row still scattering, now lands on the body its Swirl lands on.
+#   THE ANCHOR DOES NOT MOVE, AND THAT IS THE DIFFERENCE FROM C18. C18 had to
+#   declare the anchor archive because `bash` sits in `ref_ironclad`'s starter
+#   and the anchor is the DIVISOR in `axes.normalize`. Nothing here reaches it:
+#   `ref_ironclad`'s pool is starter+package (`rewards.character_pool`) and
+#   prints no Swirl, and `ref_ironclad` / `real_ironclad` / `real_silent` draw
+#   no companion REWARDS at all (`rewards.NO_COMPANION_CHARACTERS`). VERIFIED
+#   RATHER THAN ASSERTED: the `ref_ironclad/starter` scorecard was run either
+#   side of this change and is IDENTICAL -- all seven axes, all seven raws, all
+#   six battery rows, the curve exponent, the pressure delta and the regret
+#   rate. So every ratio taken against the C18 anchor is still good, and only
+#   the numerator arms above are archive. The one door left open is the SHOP
+#   companion channel, which is not gated by `NO_COMPANION_CHARACTERS`: an
+#   anchor's tier-0.5 run can BUY a companion, so `ref_ironclad/generic` at
+#   tier 0.5 is not immune BY CONSTRUCTION the way the tier-0 scorecard is. It
+#   did not fire in the scratch below, and it is written down here rather than
+#   left to be found.
+# `RT`, `D` and `P` ARE UNTOUCHED, each on its own ground. No run-layer content
+# moved (`RT`). No drafter code and no dial value moved (`D`), and no drafter
+# PRICE moves either -- `draft._static_power` reads printed rows and no printed
+# row changed; `STATIC_SWIRL_VALUE` is unmoved at 1.5, because what a Swirl is
+# WORTH did not change, only which body it lands on. No pilot heuristic and no
+# weight value moved (`P`): `policy.reaction_potential` already modelled a
+# single-target Swirl as aura-aware, so the estimate the pilot makes and the
+# resolution it gets have moved TOWARD each other rather than apart, and no
+# weight was needed to do it.
+# NO STANDING BASELINE IS OWED AT THIS BUMP (R207), on the same ground C18
+# stood on and one step further: the movement is one companion row on nine
+# arms, no pending decision is waiting on its size, and the anchor -- the thing
+# a re-baseline exists to re-fix -- provably did not move. The disclosure owed
+# here is a COMMIT-HASH SCRATCH before/after, carried in PR text and published
+# nowhere, which is not citable the way a stamped table is. A SECOND C-CLASS
+# CHANGE MAY JOIN THIS SAME WINDOW BEFORE ANY READ IS TAKEN -- the ruled
+# "Sweet Dreams" (`elemental_ecstasy`) body, R189/R205 -- and R207 is what
+# permits that: where nothing turns on attributing a movement to one edit,
+# several may share a window and the stamp labels the world. NO CONNECTIVITY
+# READ AND NO REGISTERED EXPERIMENT ATTACHES TO THIS WINDOW: nothing here is
+# graded against a committed prediction.
+# ---------------------------------------------------------------------------
+CONSTANTS_VERSION = 20
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
@@ -2410,7 +2526,55 @@ CONSTANTS_VERSION = 19
 #   (the eight sheet rows), `P` 9 -> 10 below (the chooser), `RT` untouched.
 #   THE READ THIS BUMP OWES IS W3's SINGLE DIAGNOSTIC-SCOPED STANDING READ,
 #   taken once for the whole window -- see C19 (e).
-DRAFTER_VERSION = 17
+# DRAFTER_VERSION 18 (EB-28, 2026-08-26) -- THE SALON DEPLOY STOPS PRICING AT
+# ZERO. ONE NEW DIAL, `STATIC_SALON_MEMBER_VALUE = 1.5` (`tier05/draft.py`),
+# and one new inline branch in `_static_power`. `apply_power` is priced
+# INLINE, and none of the inline branches named `power: salon_member` -- so a
+# printed company scored exactly 0.0 and Furina's members were invisible to
+# every plan except salon, where the ARCHETYPE term (not the static scorer)
+# was paying for them. That is the blindness EB-28 names, and the bump is
+# owed because a priced-op set that grows IS a DRAFTER_VERSION bump.
+#   THE VALUE IS DERIVED, NOT PICKED, and unlike D17 it is a VALUE, so the
+#   conservative end of the band is the BOTTOM rather than the top. Three
+#   routes: (1) PERFORM PARITY -- `salon_perform` already prices exactly one
+#   member tick, on demand, at 1.5, and a deploy delivers at least that; (2)
+#   TICK PLUS EVENTUAL BOW -- the perform dial's own note calls a tick "the
+#   smaller half of a member" and FIFO displacement at SALON_MEMBER_SLOTS = 3
+#   eventually pays the bow, 1.5 + 2.0 -> 3.5; (3) KURAGE PARITY -- the
+#   repo's other persistent per-turn engine credits ONE pulse at FACE value
+#   ((KURAGE_PULSE_BASE + KURAGE_PULSE_BLOCK) * STATIC_PERSISTENT_PROC_SHARE
+#   = 4.0), and a salon tick's face averaged over the three types is 4.33
+#   less the 1-Encore upkeep -> 4.03. (2) and (3) converge on 3.5-4.0 from
+#   opposite directions; (1) is the hard floor and IS WHAT IS TAKEN. The gap
+#   is declared rather than hidden: everything above one tick is stage
+#   occupancy and combat length, which an offer screen cannot see -- the same
+#   argument `STATIC_SALON_ROTATE_VALUE` makes for pricing at zero, applied
+#   to a value that can at least be bounded. **THE VALUE IS [USER]-HELD** and
+#   lives in exactly one constant; 3.5 is the defensible larger number in the
+#   same method.
+#   ARCHIVE SCOPE: NINE ROWS, ALL FURINA, ALL SALON, and nothing else on any
+#   sheet moves to four decimals (322 cards dumped before and after; the diff
+#   is these nine and no others). Base -> upgraded: `dress_rehearsal`
+#   0.0000/0.0000 -> 1.5000/1.5000; `endless_waltz` 0.0000/0.0000 ->
+#   1.5000/3.0000; `full_ensemble` 0.0000/0.0000 -> 2.2500/4.5000;
+#   `gentilhomme_usher` 4.0000/6.0000 -> 5.5000/7.5000; `grand_gala`
+#   0.6000/1.0500 -> 3.6000/4.0500; `mademoiselle_crabaletta` 0.0000/0.0000
+#   -> 1.5000/3.0000; `overflowing_hospitality` 1.4500/1.7500 ->
+#   2.2000/2.5000; `salon_debut` 0.0000/0.6000 -> 1.5000/2.1000;
+#   `surintendante_chevalmarin` 0.9000/1.5000 -> 2.4000/3.0000. FIVE of the
+#   nine priced 0.0000 on their base face before this bump and FOUR of those
+#   on both faces, which is the row's claim measured. TWO INVISIBLE UPGRADES
+#   BECOME VISIBLE: `endless_waltz`
+#   and `mademoiselle_crabaletta` each read identically on both faces before
+#   (0.0000/0.0000) and now separate, the same defect `take_it_from_the_top`
+#   was taken for at D17.
+#   `RT`, `P` and `C` are all untouched: no run-layer, policy or sheet edit
+#   rides with this. NO STANDING BASELINE IS OWED (R207) -- the movement is
+#   nine rows on one character's one register, no pending decision needs a
+#   table for it, and the `EB-28` row's own next step (the `S4-G7` remedy,
+#   rebalancing the weak Furina plans) is a [USER]-owned design pass that
+#   this fix precedes rather than answers.
+DRAFTER_VERSION = 18
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).
