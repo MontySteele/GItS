@@ -252,8 +252,8 @@ registration packets themselves live under `review/active/` — one home, not tw
   `review/active/eb17p-registration-draft-2026-08-08.md` §13, §13.8;
   `review/active/eb17p-results-2026-08-10.txt`; QUEUE `M17`.
 - **Force-first-copy paired winrate, re-registered under `P7` (`M17`)** —
-  **COUNTERSIGNED 2026-08-26 at QUEUE `M17`; run STAGED at packet `§9.2`,
-  pending launch; UNRUN.** R180 ordered
+  **COUNTERSIGNED, RUN AND BLIND-GRADED 2026-08-26: 4 PREDICTED / 1 SPLIT /
+  0 MISS, and `§8.1`'s redesign trigger fired for NO card.** R180 ordered
   the **registered five-card** sweep re-run under `P7` — never a narrowed
   single-card experiment — because §13.8's `borrowed_brilliance` anomaly was
   pilot refusal that `P7` (R176) resolved, and because §13's Δ figures are `P6`
@@ -301,10 +301,33 @@ registration packets themselves live under `review/active/` — one home, not tw
   instead, and that divergence is **disclosed in the packet beneath the table**
   rather than left for a grader to infer. The ±2 pp threshold and the 5%
   materiality threshold are both [USER]'s choices, not evidence-derived.
-  **The run is STAGED, mechanically, at the packet's `§9.2` and is pending
-  launch** — one command at `--runs 2400`, preceded by an `S1` world check that
-  must print `RT12/D17/P10/C19`. `§8` is now frozen: the blind grade is written
-  beside it and never over it →
+  **THE RUN IS TAKEN AND THE GRADE IS IN, both 2026-08-26.** `§9.2` executed
+  at the pinned `RT12/D17/P10/C19` — `S1` checked first and silent — 14,400
+  runs in **2 min 15 s** against a 4-hour ceiling that has still never bound;
+  raw output published unedited with a provenance header at
+  `review/active/m17-sweep-results-2026-08-26.txt`. The blind grade is packet
+  `§12`, written **beside** `§8` and never over it. **Per card:**
+  `friendly_visit` **PREDICTED** (+2.75 pp vs control, +4.04 pp vs filler, the
+  only row whose whole filler interval clears +2 pp); `study_buddy`
+  **PREDICTED** (+0.88 pp, a null at `N`, exactly as the row's "probably below
+  +2 pp" said; +2.17 pp vs filler); `borrowed_brilliance` **SPLIT** — the
+  vs-control half went wrong (predicted positive at +2 pp, read **−0.67 pp**),
+  the vs-filler half landed on sign (+0.62 pp), and it is the row `§8` had
+  recorded at confidence **LOW** and set from design intent rather than from
+  the parent's read, so the split is a disclosed outcome; `elemental_ecstasy`
+  **PREDICTED** (−1.12 pp vs control and +0.17 pp vs filler, both inside the
+  ±2 pp band); `kaboom` **PREDICTED** (−1.29 pp — pure deck dilution in this
+  cell costs about 1.3 points). **`Q4` PREDICTED on both halves:** the bare
+  form's `played_when_drawn_rate` is **5.99%** (2,342 of 39,083), non-zero and
+  above the 5% threshold, with no winrate gain beside it. Under `§11` that is
+  two worlds and never a difference — the `RT9/D14/P6/C8` world read 0.00% and
+  −0.17 pp vs filler; this world reads 5.99% and +0.62 pp. **`S5` is named at
+  every null** (four cells; "no move larger than the §7 MDE", 1.9 pp
+  conservative at `N` = 2,400), and `S1`/`S2`/`S4`/`S6` all held. **The trigger
+  is silent for `elemental_ecstasy` by 0.17 pp on a delta whose sign is not
+  established** — graded as registered and deliberately NOT re-read to make it
+  fire. It names a candidate, not a verdict, so it neither makes nor unmakes
+  the `C2` landing that R189 chose and R205 shaped →
   `review/active/m17-sweep-reregistration-p7-2026-08-13.md`; companion redesign
   options packet `review/active/m17-elemental-ecstasy-redesign-2026-08-13.md`.
 - **Shop companion channel re-run (`S4-G10`, registered at `RT12/D17/P10/C19`)**
