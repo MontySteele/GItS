@@ -338,7 +338,7 @@ defect, never a design finding. It is deliberately unreachable from `soak.py`;
 `tier0/tests/test_understudy_scenario.py` pins that. Depth:
 `understudy/README.md` and `docs/current/atlas/understudy.md`.
 
-`KleeTests` (`EB-105`) runs the shipped `klee.dll` against the real game
+`KleeTests` runs the shipped `klee.dll` against the real game
 assemblies **headless** — no Godot, no launch. It is opt-in, not a deploy gate;
 its boundary and its co-op coverage are in `klee-mod/KleeTests/README.md`.
 

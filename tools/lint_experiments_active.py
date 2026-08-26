@@ -111,12 +111,7 @@ def headline(body: str) -> str:
 # finished measurements still filed as active. Each leaves the list when its
 # outcome has been carried into its QUEUE row and its packet -- and the entry
 # must leave DEBT in the same commit, or rule 2 fails.
-DEBT: frozenset[str] = frozenset({
-    'payoff-reach re-registration',
-    'EB-17p force-first-copy paired winrate',
-    'Force-first-copy paired winrate, re-registered under `P7` (`M17`)',
-    'Shop companion channel re-run (`S4-G10`, registered at `RT12/D17/P10/C19`)',
-})
+DEBT: frozenset[str] = frozenset()
 
 
 def findings(text: str | None = None,

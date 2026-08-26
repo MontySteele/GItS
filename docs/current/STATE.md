@@ -190,7 +190,7 @@ Slay the Spire 2 **v0.107.1**, commit `59260271` (2026-06-18), Steam buildid
   `GitsDebugState` board-setup door, attended only) is built and unrun —
   BACKLOG `EB-146`. (`docs/current/atlas/understudy.md`)
 - **klee-mod** — the C# character mod (`KleeCode/`), the PCK build/deploy
-  pipeline, and a headless C# test project (`KleeTests/`, `EB-105`). Co-op has a
+  pipeline, and a headless C# test project (`KleeTests/`). Co-op has a
   **partial** automated backstop: per-seat ownership and attribution are
   testable; multiplayer transport and anything needing a live `CombatState` is
   play-only (`klee-mod/KleeTests/README.md`).
@@ -244,8 +244,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
 Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`), the staged lever-2 pull-or-not
 (`S4-G13`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
-countersign (`M14`); the regret-margin prediction slots (`M13`); the `M17` sweep
-countersign and its post-sweep `C2` landing; the name/lore and art eyes-on pile
+countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
 Art debt); and the Fontaine Rares close-out (`M10`).
 
