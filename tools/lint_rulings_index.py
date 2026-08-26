@@ -56,6 +56,18 @@ from understudy.report import console_safe                 # noqa: E402
 ROW = re.compile(r"(?m)^\|\s*R(\d+)\s*\|")
 
 
+def normalise(text: str) -> str:
+    """Line endings are not content.
+
+    The repo checks out with `core.autocrlf=true` on Windows, so the WORKING
+    COPY of this file is CRLF while the blob (and the generator's own write)
+    is LF. A raw byte comparison would therefore report every fresh Windows
+    checkout as stale and every Linux one as clean, which is a property of the
+    checkout and not of the index.
+    """
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def indexed_ids(text: str) -> set[int]:
     return {int(m) for m in ROW.findall(text)}
 
@@ -101,11 +113,12 @@ def main(argv: list[str]) -> int:
         print(f"rulings-index: staleness SKIPPED -- no history in this clone "
               f"(no retired ledgers, {stats['commits']} commits readable). "
               "Coverage still checked.")
-    elif fresh != committed:
+    elif normalise(fresh) != normalise(committed):
         findings.append(
             f"{rel} is stale -- `python -m tools.gen_rulings_index` produces "
-            "different bytes. Regenerate it in the commit that changed the "
-            "citations or the history.")
+            "different content (line endings excepted). Regenerate it in the "
+            "commit that changed the citations or the history; `--diff` shows "
+            "what moved.")
         if args.diff:
             print("\n".join(difflib.unified_diff(
                 committed.splitlines(), fresh.splitlines(),

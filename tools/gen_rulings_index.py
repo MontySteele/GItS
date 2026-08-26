@@ -440,10 +440,12 @@ HEADER = """# Rulings index
 
 **On-demand.** CLAUDE.md's read order does not load this file; open it when a
 ruling is cited by number and you need to know which ruling it is.
+
 **Generated -- do not hand-edit.** Regenerate with
 `python -m tools.gen_rulings_index`; `tools/lint_rulings_index.py` gates it.
-A row is a POINTER, never the ruling: the last column is the RETRIEVAL POINT
-(`git show <hash>`, or `git show <hash>:<ledger path>`) where the words live.
+
+A row is a POINTER, never the ruling and never law: the last column is the
+RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 """
 
 

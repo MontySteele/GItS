@@ -144,19 +144,38 @@ def test_the_committed_index_passes_its_own_gate():
 
 
 def test_the_committed_index_is_what_the_generator_produces():
-    mod = _module("gen_real", GEN)
-    fresh, stats = mod.render()
+    gen = _module("gen_real", GEN)
+    lint = _module("lint_real", LINT)
+    fresh, stats = gen.render()
     if not stats["history"]:
         pytest.skip("no retired ledgers in this clone -- nothing to compare")
-    assert fresh == INDEX.read_text(encoding="utf-8"), (
+    assert lint.normalise(fresh) == lint.normalise(
+        INDEX.read_text(encoding="utf-8")), (
         "docs/current/RULINGS.md is stale; "
         "run `python -m tools.gen_rulings_index`")
 
 
-def test_the_index_is_lf_only():
-    """The staleness check is a byte comparison, so a CRLF write on Windows
-    would fail the gate on every Linux run and vice versa."""
-    assert b"\r" not in INDEX.read_bytes()
+def test_the_generator_writes_lf(tmp_path):
+    """The blob is LF, so a Linux checkout and this file agree byte for byte.
+
+    The WORKING COPY is a different question: `core.autocrlf=true` hands
+    Windows a CRLF checkout of the same blob, which is why the gate compares
+    normalised text rather than bytes.
+    """
+    gen = _module("gen_lf", GEN)
+    out = tmp_path / "RULINGS.md"
+    assert gen.main(["--out", str(out)]) == 0
+    assert b"\r" not in out.read_bytes()
+
+
+def test_a_crlf_working_copy_is_not_stale(fixture_repo):
+    gen = _configured(fixture_repo)
+    _cite(fixture_repo, "See R2.\n")
+    gen.main([])
+    gen.OUT.write_bytes(
+        gen.OUT.read_text(encoding="utf-8").replace("\n", "\r\n")
+        .encode("utf-8"))
+    assert _lint_for(fixture_repo, gen).main([]) == 0
 
 
 def test_generation_is_idempotent():
