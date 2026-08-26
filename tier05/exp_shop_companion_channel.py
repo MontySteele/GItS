@@ -64,6 +64,17 @@ the gold already committed at that shop, so "never affordable here at all"
 The records are pure bookkeeping: nothing reads them and appending them draws
 no rng, so every run plays out exactly as it did before they existed.
 
+THE CELL REROUTE, 2026-08-26 (EB-141 half (b), once `M14`'s run was taken and
+graded and the world-freeze it declared was spent). Half (a) had made this
+file PRINT the live `RT/D/P/C` stamp beside a `model.run_many` it called
+itself, which was the most a registration window allowed: a `Cell` carries its
+own seed, runs, plan resolution and run entry, so rerouting inside the window
+could have moved the registered seed. It no longer can, and R68's actual
+answer is now in force -- every arm is a `Cell` derived from `BASE_CELL`, and
+the stamp is the run object's own. The reroute is argument-for-argument the
+call it replaces, and `tier05/tests/test_eb141b_shop_cell.py` pins that by
+CAPTURING the arguments rather than by re-running the registered-seed sweep.
+
 ONE VARIABLE PER CELL: the only thing that differs between the two arms is
 `companions`. Same seeds, same character, same policy, same everything else.
 The arms are not strictly paired -- switching the channel on also consumes
@@ -78,7 +89,7 @@ from __future__ import annotations
 import sys
 from collections import Counter
 
-from tier05 import cells, draft, expcli, model, stats
+from tier05 import cells, expcli, stats
 
 RUNS = 500
 CHARACTERS = [("klee", "demolition"), ("furina", "salon"), ("kokomi", "priest")]
@@ -92,6 +103,50 @@ SEED = 20260725
 wilson = stats.wilson95
 
 
+# THE BASE CELL (EB-141b, 2026-08-26). The instrument used to call
+# `model.run_many` directly and print the world beside the run; it now runs a
+# `Cell`, which is R68's actual answer -- the stamp is CARRIED BY THE OBJECT
+# THAT DOES THE RUN, so a report cannot name a world its rows did not come
+# from. Every field here is the argument the direct call was already passing,
+# written down instead of implied:
+#
+#   * REALISTIC + 3 acts -- the world every archived winrate cell was measured
+#     in (relics and potions on; a bare 1-act run wins ~0% and would make P2 a
+#     comparison of two zeroes).
+#   * `jobs=1` is LOAD-BEARING, not a default. The arms differ by a
+#     monkeypatch on `shop.visit_shop`, which worker PROCESSES do not inherit;
+#     `Cell`'s own default is 0 (one worker per CPU), so leaving it out would
+#     silently run the "on" arm with the channel off.
+#   * `policy="assigned"` resolves to the same `draft.assigned_policy` object
+#     the direct call passed, through `draft.POLICIES` -- and the plan's pilot
+#     resolves to the archetype id for all three rows, which is what the
+#     direct call hardcoded by passing `archetype` twice.
+#
+# The reroute is therefore ARGUMENT-FOR-ARGUMENT the pre-existing call and
+# the registered seed plays out unchanged; `tier05/tests/test_eb141b_shop_cell.py`
+# asserts exactly that, by capturing the arguments rather than by running the
+# sweep.
+BASE_CELL = cells.Cell(name="§4.7 companion channel",
+                       character=CHARACTERS[0][0], archetype=CHARACTERS[0][1],
+                       runs=RUNS, seed=SEED, route="hunter",
+                       policy="assigned", realistic=True, n_acts=3, jobs=1)
+
+
+def arm_cell(character: str, archetype: str, runs: int, companions: bool):
+    """The Cell for one arm, DECLARED as a delta off `BASE_CELL`.
+
+    `companions` cannot be a Cell field -- it is a monkeypatch on
+    `shop.visit_shop`, not a run parameter -- so it goes in the NAME, which is
+    where `Cell` puts every other divergence it cannot carry structurally
+    (`pilot_override`, `force_cards`). A stamp that did not say which arm it
+    came from would be an on-arm row claiming to be the control.
+    """
+    return BASE_CELL.but(
+        character=character, archetype=archetype, runs=runs,
+        name=f"§4.7 {character}/{archetype} "
+             f"companions={'on' if companions else 'off'}")
+
+
 def arm(character: str, archetype: str, runs: int, companions: bool):
     import tier05.shop as shop_mod
     original = shop_mod.visit_shop
@@ -100,37 +155,29 @@ def arm(character: str, archetype: str, runs: int, companions: bool):
         kwargs["companions"] = companions
         return original(*args, **kwargs)
 
-    # REALISTIC + 3 acts, matching the world every archived winrate cell was
-    # measured in (relics and potions on; a bare 1-act run wins ~0% and would
-    # make P2 a comparison of two zeroes). jobs stays 1: the arms differ by a
-    # monkeypatch, which worker PROCESSES would not inherit.
+    cell = arm_cell(character, archetype, runs, companions)
     shop_mod.visit_shop = patched
     try:
-        return model.run_many(character, archetype, archetype,
-                              draft.assigned_policy, runs, SEED,
-                              grant_relics=True, grant_potions=True,
-                              n_acts=3)
+        return cell.run()
     finally:
         shop_mod.visit_shop = original
 
 
 def main() -> int:
     runs = int(sys.argv[1]) if len(sys.argv) > 1 else RUNS
-    # The R68 stamp (EB-141a). This instrument reports n and seed but named no
-    # WORLD, so its own output was not citable -- and it is the registered M14
-    # measurement, so the number it is about to produce has to name the world
-    # it came from or it cannot be quoted anywhere.
-    #
-    # PRINTED, NOT ROUTED. R68's usual answer is "run it through a Cell, which
-    # prints the stamp", and that is EXACTLY what must not happen here yet: a
-    # Cell carries its own seed, runs, plan resolution and run entry, so
-    # rerouting could move seeding or behaviour, and M14's registered seed is
-    # staged to fire. `cells.world_stamp()` is the same source of truth
-    # `Cell.stamp()` formats -- one read of four live version attributes, no
-    # Cell, no rng, nothing else in this file touched. Rerouting through a
-    # Cell is the parked half of the row and waits for M14 to be run and
-    # graded.
-    print(cells.world_stamp())
+    # The R68 stamp, now ROUTED rather than printed (EB-141b). Half (a) read
+    # the four live version attributes and printed them beside a run this file
+    # made itself; the run is now a `Cell` and the line is that Cell's own
+    # `stamp()`, so the world, the seed and n come off the object that did the
+    # work. `Cell.stamp()` names no character, so heading a three-character
+    # sweep with the base cell's line claims nothing the rows do not support --
+    # each arm renames itself in `arm_cell` and the arm names are what carry
+    # the on/off divergence.
+    header = BASE_CELL if runs == BASE_CELL.runs else BASE_CELL.but(runs=runs)
+    print(header.stamp())
+    # KEPT VERBATIM. Every line this instrument printed before is printed
+    # unchanged, so the numbers already published against it -- the graded M14
+    # read of 2026-08-26 among them -- stay line-comparable.
     print(f"§4.7 companion channel -- {runs} runs/arm, seed {SEED}\n")
 
     slot1_offered = slot1_bought = 0
