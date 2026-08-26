@@ -106,8 +106,13 @@ under the `generic` pilot, normalized so every axis reads exactly `3.0`. The
 `real_*` variants depend on a local `game_ref/` tree that is gitignored and
 absent on a fresh clone; both pools verify (ironclad 76, silent 87) and both
 anchors load. Still owed there: three `*_char_facts.yaml` that no roster arm
-reads, a durable-backup location ([USER]'s call), and a guard against the
-destroyer — BACKLOG `EB-128`.
+reads — hand-authored, not tool-regenerable, and [USER]'s to supply (BACKLOG
+`EB-128`). The other three legs of that row are done: the durable-backup
+location is RULED (OneDrive, 2026-08-24) and its mirror is built
+(`tools/backup_game_ref.py`), `tools/purge_worktree.py` refuses a worktree
+purge that would take gitignored data with it, and a missing reference layer
+now fails loudly at load (`loader.require_reference_layer`) instead of by
+traceback mid-cell.
 
 ## Content inventory
 
