@@ -31,14 +31,17 @@
 > its own `CONSTANTS_VERSION` bump.** It does not land now, and it cannot land
 > inside the payoff-reach freeze.
 >
-> **ONE SUB-SHAPE IS NOT SETTLED AND MUST NOT BE ASSUMED.** Option C2 offers
-> the Block number optionally moved down to compensate — *"PROPOSED at
-> `block 5`"* — and R189 chose C2 without ruling on it. The packet's own §7(2)
-> asks for the numbers to be ratified or moved, and that ask is outstanding.
-> **Whoever implements C2 stops at this question rather than defaulting to
-> either value**, because holding 8 is a straight buff to the card's largest
-> number on a 2-cost uncommon that also draws, and moving to 5 is a design act
-> nobody has made. It goes back to [USER] with the post-sweep landing.
+> **THE ONE OPEN SUB-SHAPE IS SETTLED: R205 (2026-08-24) RULED BLOCK MOVES TO
+> 5.** Option C2 offered the Block number optionally moved down to compensate —
+> *"PROPOSED at `block 5`"* — and R189 chose C2 without ruling on it; R205 then
+> took that value. **The landing is therefore the predicate move alone:** any
+> aura enables the Block condition, and Block goes 8 → 5. The reason is scope,
+> not the number — holding 8 would combine the accessibility repair C2 exists
+> for with a straight buff to the card's largest number on a 2-cost uncommon
+> that also draws, and those are two changes, not one. §6 records the same
+> ruling. Nothing else in C2 moves with it, and the route is unchanged: the
+> sweep runs first and this lands after its graded read, as its own
+> `CONSTANTS_VERSION` bump.
 
 ---
 

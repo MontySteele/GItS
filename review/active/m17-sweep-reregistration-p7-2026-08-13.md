@@ -230,7 +230,11 @@ sheet rows and byte-identical `docs/klee-upgrades.yaml` entries between the
 `[reaction]`/`glue`, `study_buddy` `[reaction]`/`payoff`,
 `borrowed_brilliance` `[reaction]`/`glue`, `elemental_ecstasy`
 `[reaction]`/`glue`, `kaboom` `[generic]`/`glue`, basic. §5's table stands
-verbatim.
+verbatim, with one transcription correction that is **not** world movement: its
+`friendly_visit` rarity cell read `common` and now reads `uncommon`, which is
+what the sheet has printed since the **X7 rarity erratum (R161)** landed inside
+`C9`'s own window — so the cell was already wrong in the world this packet was
+drafted against, and the byte-identity claim above is unaffected.
 
 **The `reaction` plan's membership did not move either.** The set of Klee rows
 tagged `archetypes: [reaction]` is **14 ids at both commits, with an empty set
@@ -374,7 +378,7 @@ register's order, plus the filler:
 
 | id | name | rarity | cost | note |
 |---|---|---|---|---|
-| `friendly_visit` | Friendly Visit | common | 1 | Block 5 + companion cost −1 + draw 1 |
+| `friendly_visit` | Friendly Visit | uncommon | 1 | Block 5 + companion cost −1 + draw 1 |
 | `study_buddy` | Study Buddy | uncommon | 1 | Block 6 + replay-next-companion |
 | `borrowed_brilliance` | Borrowed Brilliance | uncommon | 1 | free temp copy of a companion in hand |
 | `elemental_ecstasy` | "Sweet Dreams" | uncommon | 2 | aura refresh + per-aura draw + conditional Block 8 |
