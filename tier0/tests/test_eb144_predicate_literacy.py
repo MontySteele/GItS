@@ -12,6 +12,18 @@ fail a test rather than quietly lose its branch. Every printed predicate must
 land in `policy.SCORABLE_PREDICATES` or `policy.BLIND_PREDICATES` — the
 second being a claim that a mid-resolution fact was decided against, not
 forgotten.
+
+WHAT THE LINT CAN SEE IS A PROPERTY OF THE CHECKOUT, and the census tests
+below name the layer they count because of it. A fresh clone and CI load the
+roster plus the two committed `ref_*` approximations; a checkout holding the
+gitignored `game_ref/` also loads the base-game `real_ironclad` /
+`real_silent` pools, which print three predicates the roster never does — so
+for a while the same suite answered differently in two places, green in CI
+and red on the deploy machine. The exact-list censuses below are therefore
+ROSTER censuses; the reference pools get their own curated census, and that
+one SKIPS where the pools are absent, discharged instead by
+`klee-mod/build/validate.ps1`'s S7 gate — the one place the suite runs with
+`game_ref/` present.
 """
 
 import pytest
@@ -147,10 +159,42 @@ def _printed_predicates(effect_list):
                 yield from _printed_predicates(mode.get("effects", []))
 
 
-def _every_printed_predicate():
-    """Every `if:` on every loadable card, upgraded faces included."""
+# The base-game pools behind the gitignored `game_ref/`. Derived from the
+# loader rather than retyped, so the two cannot disagree about which
+# characters are the reference layer.
+REFERENCE_POOLS = frozenset(loader.EXTERNAL_CARD_SHEETS.values())
+
+
+def _is_reference(card):
+    return card.character in REFERENCE_POOLS
+
+
+def _is_roster(card):
+    """The committed surface: the playable roster and both `ref_*` anchors —
+    everything a fresh clone and CI can load."""
+    return not _is_reference(card)
+
+
+def _reference_layer_is_loaded():
+    """Did this checkout's loader actually pull the `real_*` pools in?
+
+    Asked of the LOADER, never of the filesystem. The question the lint cares
+    about is not whether a directory exists but whether those cards are in
+    the index it walks, and only the loader answers that.
+    """
+    return any(_is_reference(card) for card in loader._card_index().values())
+
+
+def _every_printed_predicate(keep=lambda card: True):
+    """Every `if:` on every loadable card, upgraded faces included.
+
+    `keep` selects the layer being censused — `_is_roster` for the committed
+    sheets, `_is_reference` for the `game_ref/` pools, the default for both.
+    """
     found = {}
     for card_id, card in loader._card_index().items():
+        if not keep(card):
+            continue
         faces = [card]
         if upgrades.has_upgrade(card_id):
             faces.append(upgrades.apply_upgrade(loader.get_card(card_id)))
@@ -164,7 +208,12 @@ def test_every_printed_predicate_is_triaged():
     """THE LINT. A sheet row may not print a predicate the pilot has never
     been shown: either it is scorable, or it is declared blind with a reason.
     A new `if:` that is neither loses its whole branch at score time, which is
-    exactly the ten-row hole this row was filed for."""
+    exactly the ten-row hole this row was filed for.
+
+    Every loadable card, both layers: this assertion is the one thing that
+    must hold in EVERY checkout, so it is deliberately not scoped. Where
+    `game_ref/` is present it also covers the `real_*` pools, and the curated
+    census below says exactly which names that is allowed to be."""
     untriaged = {
         name: sorted(users)
         for name, users in _every_printed_predicate().items()
@@ -179,9 +228,15 @@ def test_every_printed_predicate_is_triaged():
 
 def test_the_declaration_names_only_real_predicates():
     """The other direction: a typo in either collection would silently
-    triage nothing."""
+    triage nothing.
+
+    Asked through `is_known_predicate` rather than against `PREDICATE_NAMES`
+    alone, because a declaration may name one PARAMETERISED predicate
+    (`self_has_power_tracking`) without adopting its whole family — the
+    engine's own recogniser is the one that answers for both forms, and it
+    still rejects a bare prefix or a non-integer bar."""
     for name in policy.SCORABLE_PREDICATES | policy.BLIND_PREDICATES:
-        assert name in effects.PREDICATE_NAMES, name
+        assert effects.is_known_predicate(name), name
     for prefix in (policy.SCORABLE_PREDICATE_PREFIXES
                    + policy.BLIND_PREDICATE_PREFIXES):
         assert prefix in effects.PREDICATE_PREFIXES, prefix
@@ -195,8 +250,13 @@ def test_the_two_collections_cover_todays_sheet_exactly():
     `target_has_aura` is C20's (R189 C2, `elemental_ecstasy`) and joins as a
     SCORABLE name; `target_has_nonpyro_aura` stays on the list because
     `sizzle` still prints it -- the redesign moved one row, not the family.
+
+    THE ROSTER's census, and it says so: the `real_*` pools print three more
+    names, and counting them here would make this list -- and so this test --
+    an answer about the checkout instead of about the sheet. They are
+    censused by `test_the_reference_pools_print_only_the_three_blind_names`.
     """
-    printed = set(_every_printed_predicate())
+    printed = set(_every_printed_predicate(_is_roster))
     assert sorted(n for n in printed if policy.predicate_is_scorable(n)) == [
         "charge_at_least_10",
         "encore_at_least_5",
@@ -222,12 +282,60 @@ def test_the_two_collections_cover_todays_sheet_exactly():
     ]
 
 
+def test_the_reference_pools_print_only_the_three_blind_names():
+    """The half of the lint the checkout can hide, made explicit.
+
+    `real_ironclad` / `real_silent` load only where the gitignored
+    `game_ref/` is, so this census ran nowhere until the S7 deploy gate went
+    red on three untriaged names. It is a CURATED list, not a tolerance: the
+    base-game pools are a regenerable local artifact, and a rebuild that
+    printed a fourth predicate must fail here rather than be absorbed.
+
+    Every name is declared BLIND (`policy.BLIND_PREDICATES` carries the
+    reason for each). `self_has_power_tracking` is the interesting one -- it
+    could be read live, and is deliberately not, because the collections are
+    lint-only and blind moves no measured number while scorable would move
+    the `real_silent` anchor."""
+    if not _reference_layer_is_loaded():
+        pytest.skip(
+            "no game_ref/ in this checkout, so real_ironclad / real_silent "
+            "are not in the card index and this census has nothing to "
+            "count. The gate is discharged on the deploy machine by "
+            "klee-mod/build/validate.ps1's S7 step, which runs this suite "
+            "with game_ref/ present -- that is where "
+            "test_the_reference_pools_print_only_the_three_blind_names "
+            "actually reports.")
+
+    printed = _every_printed_predicate(_is_reference)
+    assert printed, "the reference pools loaded but printed no `if:` at all"
+
+    untriaged = {
+        name: sorted(users)
+        for name, users in printed.items()
+        if not (policy.predicate_is_scorable(name)
+                or policy.predicate_is_declared_blind(name))
+    }
+    assert not untriaged, (
+        "base-game predicate(s) the pilot cannot score and has not declared "
+        "blind — add to policy.SCORABLE_PREDICATES (with a live read, which "
+        "moves an anchor's numbers and wants a P window) or to "
+        f"policy.BLIND_PREDICATES (with the reason): {untriaged}")
+
+    assert sorted(n for n in printed
+                  if policy.predicate_is_declared_blind(n)) == [
+        "drew_skill_this_card",
+        "killed_target_fatal",
+        "self_has_power_tracking",
+    ]
+
+
 def test_the_anchors_print_no_conditional_at_all():
     """The archive-scope claim, asserted rather than argued: this row moves
     the ROSTER's combat numbers and cannot move `ref_ironclad`'s or
     `ref_silent`'s, because neither anchor pool prints an `if:` for the pilot
-    to have been blind to. (`real_*` needs `game_ref/` and is out of reach of
-    a test that must pass on a fresh clone.)"""
+    to have been blind to. (`real_*` needs `game_ref/`, so the claim about
+    THAT layer is the test above, which skips where the pools are absent and
+    is discharged by validate.ps1's S7 gate instead.)"""
     owners = {cid for users in _every_printed_predicate().values()
               for cid in users}
     for pool in ("ref_ironclad", "ref_silent"):

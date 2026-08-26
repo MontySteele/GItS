@@ -25,18 +25,18 @@ archived, is in [`STAMPS.md`](STAMPS.md) — not here.
 | `P` `POLICY_VERSION` | **11** | `tier05/draft.py` | The scorer-literacy window (R207): the pilot gains a Spark hold-versus-spend term, five state predicates and payout-aware selection scoring, repairing the standing read's three diagnostic caveats in code — they clear at the re-baseline, not here. History → [`STAMPS.md`](STAMPS.md). |
 | `C` `CONSTANTS_VERSION` | **20** | `tier0/constants.py` | `EB-139`'s Swirl aura-aware bind (R211) — an aimed Swirl binds whole to the lowest-HP aura-bearer; one companion's damage moves, the anchor does not — plus the ruled Sweet Dreams body (R189/R205, joined 2026-08-26): new any-aura predicate `target_has_aura`, Block 8 → 5. History → [`STAMPS.md`](STAMPS.md). |
 
-**Standing baseline:** `review/active/sitting-reads-2026-08-25-c19-d17-p10.md`
-— twelve arms at `RT12/D17/P10/C19` (`main` = `a247f25`), all twelve in ONE
+**Standing baseline:** `review/active/sitting-reads-2026-08-26-c20-d18-p11.md`
+— twelve arms at `RT12/D18/P11/C20` (`main` = `190e598`), all twelve in ONE
 pass with `game_ref/` present, so both floors sit in the main tables
-(`real_ironclad` **5.2%** win / **65.5%** act-1, `real_silent` **1.2%** /
-**54.1%**). It publishes **DIAGNOSTIC-SCOPED and NOT as the Phase-4 milestone
-table** (R211 item 7), and it **has NO control set and says so**. The one
-interval separation anywhere in it is `kokomi / priest` act-1, 39.9% →
-**45.0%**. It supersedes `review/active/sitting-reads-2026-08-24-c13-d16.md`,
-which stands as published (R101b). **The three caveats' repairs LANDED as the
-one `P11` window** (`EB-143`/`EB-144`/`EB-145`, `EB-129` riding). **What is owed
-next is the ONE re-baseline at `RT12/D18/P11/C20` — the caveats clear there
-— and the Phase-4 milestone read follows it. Neither has been taken.**
+(`real_ironclad` **5.2%** win / **65.5%** act-1, `real_silent` **1.1%** /
+**54.0%**). **There is NO interval separation on any arm** — zero, on either
+rate column — and it **has NO control set and says so**: all twelve arms moved,
+anchors included. Its §0 checks the predecessor's three scorer caveats against
+code and grades all three **CLEARED**, so under R211 item 7 it publishes **BOTH
+as the standing re-baseline AND as the Phase-4 milestone table — the milestone
+read is TAKEN** (label Claude's under R212, reasoning in §0.4). It supersedes
+`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`, which stands as
+published with its DIAGNOSTIC-SCOPED header intact (R101b).
 
 Pinned, and NOT part of the run-cell stamp:
 
@@ -211,24 +211,24 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   three-character richness pass ran to completion (Phase 2's three windows, then
   Phase-3 `Win1`/`Win2`/`Win2b` at `C15`/`C16`/`C17`, then `Win3` as ONE public
   window at `C19`/`D17`/`P10`), and `Win3`'s single DIAGNOSTIC-SCOPED standing
-  read is the baseline named above. **What outlived the pass is two content
-  families ruled OUT of `Win3` with named destinations (R211), and the
-  body-sheet gate (R202 call (5)) travels with each: no implementation in either
-  window until [USER] rules it an exact sheet.** **(i) the Klee BOMB-BOARD
-  READERS → `Win10`**, a post-`Win3` Klee window. **(ii) `F3` / the Furina
-  ENCORE-SPENDER family → `Win11`**, which opens only AFTER the pilot's Encore
-  opportunity-cost repair — spenders cannot be priced against a resource the
-  pilot values wrongly — and that repair is a second `POLICY_VERSION` change
+  read is superseded by the baseline named above. **What outlived the pass is
+  two content families ruled OUT of `Win3` with named destinations (R211), and
+  the body-sheet gate (R202 call (5)) travels with each: no implementation in
+  either window until [USER] rules it an exact sheet.** **(i) the Klee
+  BOMB-BOARD READERS → `Win10`**, a post-`Win3` Klee window. **(ii) `F3` / the
+  Furina ENCORE-SPENDER family → `Win11`**, which opens only AFTER the pilot's
+  Encore opportunity-cost repair — spenders cannot be priced against a resource
+  the pilot values wrongly — and that repair is a second `POLICY_VERSION` change
   carrying its own re-baseline, because attribution is exactly what it buys
   (R207: one variable per window where attribution matters; several may share a
   window otherwise). **NAMING, as of 2026-08-26: the CONTENT windows are
   `Win1`/`Win2`/`Win2b`/`Win3`/`Win10`/`Win11`**, spelled `W1`–`W3`/`W10`/`W11`
   in older packets — `W1`–`W9` are the watch register below, and `W4` is
   separately the pilot-weight sweep (EXPERIMENTS `W4`, run per `OPERATIONS.md`).
-  **Nothing is scheduled on either window**, and the Phase-4 milestone read is
-  not owed until the standing baseline's three diagnostic caveats clear; their
-  repairs LANDED as the one `P11` window, so the caveats clear at the
-  re-baseline that follows, which has not been taken.
+  **Nothing is scheduled on either window.** The **Phase-4 milestone read is
+  TAKEN**: the three diagnostic caveats' repairs landed as the one `P11` window
+  (`EB-143`/`EB-144`/`EB-145`, `EB-129` riding), all three graded CLEARED
+  against code, and the `RT12/D18/P11/C20` re-baseline above carries both labels.
 - **Payoff-reach re-registration — RUN AND GRADED 2026-08-24.** R121's
   countersigned six-step order has run end to end. The grade, the controls, the
   tripwires and the two defects the run found (`EB-123`, `EB-124`, both since
