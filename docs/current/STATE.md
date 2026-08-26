@@ -240,9 +240,6 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   pre-existing collision that is deliberately not extended. **Nothing is
   scheduled on either window**, and the Phase-4 milestone read is not owed until
   the standing baseline's three diagnostic caveats clear.
-- **Register diet** — this file's half is DONE; the `BACKLOG.md` half is
-  UNBLOCKED by W2's landing, still not done, and SCHEDULED next after the W2b
-  merge (BACKLOG `EB-131`).
 - **Payoff-reach re-registration — RUN AND GRADED 2026-08-24.** R121's
   countersigned six-step order has run end to end. The grade, the controls, the
   tripwires and the two defects the run found (`EB-123`, `EB-124`, both since
