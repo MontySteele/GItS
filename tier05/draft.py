@@ -2202,7 +2202,58 @@ ARCHETYPES = ("demolition", "spark", "reaction")
 # untouched. R191's one-variable-per-window order is kept by what is NOT here:
 # the pilot's Encore opportunity-cost repair is a second pilot-version change
 # with its own re-baseline and is deferred out of this window by ruling.
-POLICY_VERSION = 10
+#
+# POLICY_VERSION 11 -- THE SCORER-LITERACY WINDOW (2026-08-26). ONE window
+# under R207's shared-window clause, carrying FOUR items, because nothing
+# turns on attributing a movement to one of them: all four are repairs to
+# what the pilot can SEE, none of them changes a printed number, a label, an
+# upgrade delta or a drafter dial, and the decision that follows the window
+# (the Phase-4 milestone read) needs the whole set landed rather than any one
+# of them isolated.
+#
+#   * EB-143 -- the Spark HOLD-versus-SPEND term, and the ONE new weight in
+#     the window: `policy.SPARK_HOLD_VALUE_WEIGHT = 1.0`, which takes
+#     `C.PILOT_WEIGHTS_VERSION` 5 -> 6. `spend_spark` appeared nowhere in
+#     `tier0/pilot/` before this, so the bank was a one-way meter -- a Spark
+#     GAINED paid `C.PILOT_SPARK_VALUE` and a Spark SPENT cost nothing, an
+#     arbitrage the scorer could see. Three legs, largest wins: the stock
+#     floor, the free-Attack threshold, and the biggest payoff in hand the
+#     drop would shrink. At 0.0 the term vanishes and the pilot is
+#     byte-identical to `P10`, which is pinned as a test.
+#   * EB-144 -- predicate and Salon-verb literacy, NO new weight.
+#     `_active_effects` ended in a bare `else: continue` that yielded NEITHER
+#     branch, so an untaught predicate priced a whole conditional at zero in
+#     silence. FIVE predicates over TEN sheet rows, seven of them predating
+#     `W3`. `reaction_triggered_by_this` and `killed_target` stay BLIND on
+#     purpose -- they are mid-resolution and have no honest score-time answer
+#     -- and `policy.BLIND_PREDICATES` is that decision made visible. Both
+#     Salon verbs are valued by asking the resolver's own
+#     `salon_tick_amount`, so no dial is minted for them.
+#   * EB-145 -- payout-aware SCORING of a chosen exhaust, NO new weight.
+#     `P10` made the PICK formula-aware and left the SCORE at the base; the
+#     scorer now runs the same chooser over `effects.exhaust_pool` and reads
+#     the result through the engine's own `_calc_amount`. Tide of Names and
+#     Pearl Barrage are the only two rows that print a selection formula, and
+#     neither is named in the code. `exhaust_future_value` SUSPENDS the
+#     forecast, which both terminates the recursion and keeps `P10`'s ratified
+#     chooser arithmetic byte-identical.
+#   * EB-129 -- Book of Five Rings chunk credit at event valuation, no new
+#     weight. R205 filed it for its own window; [USER] set that gate aside
+#     2026-08-26 on the strength of a null commit-hash scratch, applying
+#     R207's shared-window clause.
+#
+# ARCHIVE SCOPE: roster combat and tier-0.5 numbers only. Both anchors are
+# provably unmoved -- `ref_ironclad` and `ref_silent` print none of the five
+# predicates, neither Salon verb, no `spend_spark` and no selection formula
+# (asserted directly in `test_eb144_predicate_literacy`), and EB-129's bare
+# arms take no events by construction.
+#
+# WHAT IS OWED NEXT: ONE re-baseline at this cell, and it has NOT been taken
+# here. The standing read's three diagnostic caveats
+# (`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`) clear AT THAT
+# RE-BASELINE, not at this bump -- landing the repair is not reading it. The
+# Phase-4 milestone read follows the re-baseline (R207, R211 item 7).
+POLICY_VERSION = 11
 
 # F1 (Serenitea Sweep): DERIVED from tier0/roster.py, which is now the one
 # place a character's archetype vocabulary is declared -- and where it is

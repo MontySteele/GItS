@@ -86,7 +86,19 @@ def test_the_policy_stamp_bumped():
     # suggests and is asserted rather than argued: the hook pays zero for any
     # card printing no selection formula, so every other chosen-Exhaust
     # carrier's pick is provably unchanged (test_eb118_policies).
-    assert draft.POLICY_VERSION == 10
+    # 11 is the SCORER-LITERACY window (2026-08-26) -- ONE window under R207
+    # carrying four items, none of which is a flip and none of which moves a
+    # printed number or a drafter dial: EB-143 (the Spark hold-versus-spend
+    # term, and the ONE new weight, so `C.PILOT_WEIGHTS_VERSION` moves 5 -> 6
+    # in the same edit), EB-144 (five predicates over ten sheet rows read live
+    # at score time, plus both Salon verbs valued off the resolver's own
+    # `salon_tick_amount`), EB-145 (the score forecasts its own chosen-exhaust
+    # selection, so Tide of Names and Pearl Barrage stop being priced at their
+    # base) and EB-129 (Book of Five Rings chunk credit at event valuation).
+    # Archive scope is roster combat + tier-0.5 only: both anchors are
+    # provably unmoved (test_eb144_predicate_literacy). ONE re-baseline is
+    # owed at this cell and has NOT been taken at the bump.
+    assert draft.POLICY_VERSION == 11
 
 
 def test_the_starvation_alarm_keys_on_the_cohorts_own_archetypes():

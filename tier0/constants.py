@@ -627,7 +627,29 @@ BLOCK_PANIC_THRESHOLD = 0.40  # prioritize block when incoming >= 40% of HP
 # retrieval (C19 (c)'s "Salvage the Line" loans a rotated Rare back out of the
 # Exhaust pile). Any later change to the value is its own bump, and the sweep
 # grid's outcomes are [USER]'s call, not the integration's.
-PILOT_WEIGHTS_VERSION = 5
+#
+# v6 = POLICY 11 (the scorer-literacy window, 2026-08-26):
+# `SPARK_HOLD_VALUE_WEIGHT = 1.0` ENTERS the labeled set, filed in
+# `tier0/pilot/policy.py` beside the other policy-side weights. Same shape as
+# v5 and not the v2/v3/v4 shape: a genuinely NEW weight arriving with the
+# behaviour that reads it, with no switch in front of it. It is the ONLY new
+# weight in a four-item window -- `EB-144` values both Salon verbs off the
+# resolver's own `salon_tick_amount` and `EB-145` prices a selection payout
+# off the card's own printed `base`/`per`, so neither mints a dial, and
+# `EB-129` pays event card-adds the realized Book of Five Rings heal. The
+# value 1.0 is hand-picked and unswept on `EXHAUST_FORMULA_PAYOUT_WEIGHT`'s
+# reasoning: the scale is points of damage on both sides of the subtraction,
+# so a point of banked-Spark value and a point of payoff trade one for one.
+# WHAT IT MAKES INCOMPARABLE: any reading of a deck holding one of the three
+# `C19` Spark sinks (`powder_charge`, `hold_the_line`, `smoke_and_sparks`) --
+# the only rows on any sheet that print `spend_spark`, so the term is gated
+# on a printed price that is 0 everywhere else and nothing else pays even the
+# lookup. At 0.0 the pilot is byte-identical to `P10`, pinned as a test
+# rather than argued. A PLACEHOLDER rides at the constant and is [USER]'s at
+# the next sheet pass: leg 1's EXISTENCE, i.e. whether a Spark has hold value
+# with no reader in hand and the free-Attack threshold untouched. Legs 2 and
+# 3 stand either way.
+PILOT_WEIGHTS_VERSION = 6
 # Sim-hygiene sprint 2026-07-29 (task 4): the inline scoring weights that had
 # been living as bare floats inside tier0/pilot/policy.py. MOVED, NOT RETUNED
 # -- every value below is byte-identical to the literal it replaced, and the
