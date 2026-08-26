@@ -114,6 +114,25 @@ BOMB_WEIGHTS = ("BOMB_LANDED_DAMAGE_VALUE", "BOMB_LETHAL_WASTE_WEIGHT",
                 "BOMB_SUPPRESSION_VALUE", "BOMB_READER_LETHAL_POP_VALUE",
                 "BOMB_EARLY_POP_PENALTY", "BOMB_MOVE_READER_AIM_VALUE")
 
+#: The four weights `exhaust_victim` reads. Pair-own until `P11`, SHARED since
+#: -- `EB-145` made the main scorer forecast a selection by running the same
+#: chooser, so `_score` reaches them too. Named here so the change is
+#: assertable in both directions rather than merely absent, exactly as
+#: `BOMB_WEIGHTS` is.
+EXHAUST_WEIGHTS = ("EXHAUST_COST_EFFICIENCY_WEIGHT", "EXHAUST_JUNK_BONUS",
+                   "EXHAUST_SELF_EXHAUST_DISCOUNT",
+                   "EXHAUST_FORMULA_PAYOUT_WEIGHT")
+
+#: The same four, armed BY HAND at their shipped values. Since `P11` the
+#: discovered scope holds no sweepable axis for this gate, so the two
+#: end-to-end loops below take their baseline from here -- the pattern
+#: `test_reads_are_counted_on_the_real_read_path` has used for the bomb vector
+#: since `C18`. The claim those loops make is about the GATE MACHINERY (a dead
+#: axis is refused, a live one survives), and that claim has to keep holding on
+#: a vector the harness can still be pointed at, or it is untestable the moment
+#: a repair reclassifies a weight.
+EXHAUST_DEFAULTS = {name: getattr(policy, name) for name in EXHAUST_WEIGHTS}
+
 
 def test_the_entry_points_are_the_engines_own_call_sites(scope):
     """ONE entry point since `C18`, and the harness found that by itself.
@@ -182,11 +201,36 @@ def test_a_third_gated_chooser_is_discovered_without_editing_this_harness():
     assert w4.entry_points_from_source(synthetic) == ("mode_choice",)
 
 
-def test_the_pair_weights_are_pair_own(scope):
-    for name in ("EXHAUST_COST_EFFICIENCY_WEIGHT", "EXHAUST_JUNK_BONUS",
-                 "EXHAUST_SELF_EXHAUST_DISCOUNT"):
-        assert name in scope.pair_own, name
-        assert getattr(policy, name) == scope.pair_own[name]
+def test_the_exhaust_weights_became_shared_when_the_scorer_learned_to_read_them(
+        scope):
+    """`EB-145` / `P11`, and the harness found it the way it found `C18`.
+
+    Until this window the chooser's weights were the gate's OWN: nothing but
+    `exhaust_victim` reached them, so moving one moved exactly one decision and
+    the sweep could attribute a result to it. `EB-145` made the SCORER
+    payout-aware -- `policy._expected_damage` now forecasts the selection its
+    own card would make by running the same chooser -- so `_score` reaches
+    `exhaust_future_value` and every weight underneath it. Moving one of these
+    now moves the pick AND the price of `pearl_barrage` / `the_tide_remembers`
+    at draft and at play, which is a second variable in the same point (D4),
+    and `shared` is exactly the classification that says so.
+
+    THE EXHAUST GATE THEREFORE HAS NO SWEEPABLE SURFACE LEFT -- `pair_own` is
+    empty, and the two end-to-end loops below are pointed at the weights BY
+    HAND for the same reason the read-counter test has been since `C18`. That
+    is a REPORTED consequence of the repair, not a licence to sweep them
+    anyway: a weight the harness cannot isolate is one whose range is a
+    [USER] call, which is where W3 already deferred
+    `EXHAUST_FORMULA_PAYOUT_WEIGHT`'s.
+
+    The constants themselves stand untouched in `policy.py`, exactly as the
+    bomb eight do.
+    """
+    for name in EXHAUST_WEIGHTS:
+        assert name in scope.shared, name
+        assert name not in scope.pair_own, name
+        assert getattr(policy, name) == scope.shared[name]
+    assert scope.pair_own == {}
 
 
 def test_the_bomb_weights_left_the_sweep_when_the_engine_stopped_reading_them(
@@ -211,10 +255,19 @@ def test_the_bomb_weights_left_the_sweep_when_the_engine_stopped_reading_them(
 def test_a_weight_the_main_scorer_also_reaches_is_shared_not_swept(scope):
     """`exhaust_future_value` reaches `PILOT_COMPANION_COPY_VALUE` through
     `_tempo_value` -- and so does `_score`. Moving it would move draft scoring
-    as well as the chooser, which is a second variable in 2A's window (D4)."""
+    as well as the chooser, which is a second variable in 2A's window (D4).
+
+    The screen is now the BASELINE POINT ALONE, because `P11` put every
+    remaining axis of this gate in the same position (see
+    `test_the_exhaust_weights_became_shared_when_the_scorer_learned_to_read_them`).
+    Asserted as a whole list rather than by indexing point 1: "no shared weight
+    is swept" and "there is nothing left to sweep" are the same statement here,
+    and indexing a point that does not exist would report the second as an
+    IndexError instead of as a finding.
+    """
     assert "PILOT_COMPANION_COPY_VALUE" in scope.shared
     assert "PILOT_COMPANION_COPY_VALUE" not in scope.pair_own
-    assert "PILOT_COMPANION_COPY_VALUE" not in w4.screen_points(scope)[1]
+    assert w4.screen_points(scope) == [scope.defaults]
 
 
 def test_furinas_stoker_weights_are_out_of_scope_entirely(scope):
@@ -652,24 +705,33 @@ def test_the_gate_fires_end_to_end_on_the_first_offending_point(
     Refusal lands on the point that earned it, not after the grid --
     `sweeps.sweep`'s rule, for its reason: there is nothing to learn from
     finishing a dead-axis sweep.
+
+    ARMED FROM `EXHAUST_DEFAULTS` RATHER THAN FROM `scope.defaults` SINCE
+    `P11`: `EB-145` moved every one of this gate's weights to `shared`, so the
+    discovered baseline is empty and a grid built off it moves no axis at all
+    -- which would make this loop pass by never asking the question. The claim
+    is about the gate MACHINERY, so it is made on a vector the harness is
+    pointed at by hand.
     """
     monkeypatch.setitem(w4.STAGE_N, "coverage", (4, 11))
     cells = ["exhaust-primary", "exhaust-secondary"]
-    junk = {**scope.defaults, "EXHAUST_JUNK_BONUS": 12.0}
-    junk2 = {**scope.defaults, "EXHAUST_JUNK_BONUS": 0.0}
+    base = dict(EXHAUST_DEFAULTS)
+    junk = {**base, "EXHAUST_JUNK_BONUS": 12.0}
+    junk2 = {**base, "EXHAUST_JUNK_BONUS": 0.0}
     with pytest.raises(w4.DeadWeightError) as excinfo:
-        w4.run_stage("coverage", [scope.defaults, junk, junk2], cells,
-                     jobs=1, baseline=scope.defaults)
+        w4.run_stage("coverage", [base, junk, junk2], cells,
+                     jobs=1, baseline=base)
     assert "EXHAUST_JUNK_BONUS" in str(excinfo.value)
     assert len(excinfo.value.rows) == 2 * len(cells), "point three must not run"
 
 
-def test_a_live_axis_survives_the_same_end_to_end_loop(scope, monkeypatch):
-    """Positive control for the test above."""
+def test_a_live_axis_survives_the_same_end_to_end_loop(monkeypatch):
+    """Positive control for the test above. Same by-hand vector, same reason."""
     monkeypatch.setitem(w4.STAGE_N, "coverage", (4, 11))
-    moved = {**scope.defaults, "EXHAUST_COST_EFFICIENCY_WEIGHT": 1.0}
-    rows = w4.run_stage("coverage", [scope.defaults, moved],
-                        ["exhaust-primary"], jobs=1, baseline=scope.defaults)
+    base = dict(EXHAUST_DEFAULTS)
+    moved = {**base, "EXHAUST_COST_EFFICIENCY_WEIGHT": 1.0}
+    rows = w4.run_stage("coverage", [base, moved],
+                        ["exhaust-primary"], jobs=1, baseline=base)
     assert len(rows) == 2
     assert all(r["reads"]["EXHAUST_COST_EFFICIENCY_WEIGHT"] > 0 for r in rows)
 
