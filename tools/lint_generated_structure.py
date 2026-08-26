@@ -23,7 +23,7 @@ be generator-independent on purpose: it parses the .cs the generator produced
 rather than calling back into the generator that produced it. A bug that makes
 the emitter drop something cannot also make this lint stop looking for it.
 
-Three laws:
+Four laws:
 
   L1  DANGLING VAR   -- every DynamicVar the file REFERENCES (in the body via
                         `DynamicVars.X` / `DynamicVars["X"]`, or in the
@@ -44,6 +44,25 @@ Three laws:
                         list + lint) applied to codegen: when a human catch
                         finds a new silent-drop shape, it gets a row here so
                         the machine catches the next one.
+
+  L4  SELF-AIM      -- a card whose declared TargetType is `Self` must not
+                        dereference `cardPlay.Target` anywhere in its body.
+                        The game only fills `cardPlay.Target` in for a card
+                        that asks the player to aim, so a Self card that
+                        reads it throws `ArgumentNullException` mid-`OnPlay`
+                        -- and `OnPlay` is async, so `TaskHelper.
+                        LogTaskExceptions` swallows the throw and the player
+                        sees the effects BEFORE the aiming op land and
+                        nothing after it. That is EB-142: the generator
+                        derived TargetType from a card's TOP-LEVEL ops only,
+                        so `take_it_from_the_top` (Block 5, then 10 damage
+                        behind a `spotlight_moved_this_turn` branch) shipped
+                        `TargetType.Self` with `ThrowIfNull(cardPlay.Target)`
+                        in the branch: Block landed every time, the damage
+                        never landed once, on both faces, with only a
+                        godot.log line to say so. Read off the emitted .cs
+                        like L1/L2, so the fix to the derivation cannot also
+                        switch the gate off.
 
 L3 is deliberately NOT a whitelist of every sheet field. Field coverage is
 already total and already enforced -- `card_level_reason` and the per-op field
@@ -308,6 +327,45 @@ def structural_problems(source: str, where: str) -> list[str]:
     return problems
 
 
+# The declared TargetType in the emitted constructor's `: base(...)` call, and
+# the two emitted shapes that REQUIRE the target the player picked -- the null
+# guard the generator writes in front of an aiming op, and the `.Targeting()`
+# that spends it. Read off the emitted .cs rather than off the sheet, for
+# L1/L2's reason: a generator bug must not be able to silence the gate that
+# would catch it.
+#
+# `DynamicVars.CalculatedBlock.Calculate(cardPlay.Target)` is deliberately NOT
+# here, and the distinction is the whole precision of this law: that call takes
+# a NULLABLE target and reads it only when the formula names one, so five
+# shipped self-Block cards (Dinner Service, Held Breath, Blocking Notes,
+# Thunderous Ovation, Gyorin Formation) pass a null through it on every play
+# and are correct. L4 is about a target that MUST be non-null, not about the
+# identifier appearing.
+_CTOR_TARGET = re.compile(r":\s*base\([^)]*?TargetType\.(\w+)")
+_TARGET_REQUIRED = re.compile(
+    r"ArgumentNullException\.ThrowIfNull\(cardPlay\.Target"
+    r"|\.Targeting\(cardPlay\.Target"
+)
+
+
+def aim_problems(source: str, where: str) -> list[str]:
+    """L4 for a single generated file."""
+    ctor = _CTOR_TARGET.search(source)
+    if ctor is None or ctor.group(1) != "Self":
+        return []
+    if not _TARGET_REQUIRED.search(source):
+        return []
+    return [
+        f"{where}: L4 SELF-AIM -- the card declares TargetType.Self but its "
+        f"body requires cardPlay.Target, which the game only fills in "
+        f"for a card the player aims. At play time this throws "
+        f"ArgumentNullException inside the async OnPlay, the throw is "
+        f"swallowed by TaskHelper.LogTaskExceptions, and every effect after "
+        f"the aiming op silently does nothing. Derive TargetType from the "
+        f"WHOLE effect tree, branches included (EB-142)."
+    ]
+
+
 def coverage_problems(card: dict, source: str, where: str) -> list[str]:
     """L3 for a single generated file."""
     problems = []
@@ -362,6 +420,7 @@ def problems(profile: CharacterProfile) -> list[str]:
             continue
         found += structural_problems(source, where)
         found += coverage_problems(card, source, where)
+        found += aim_problems(source, where)
     return found
 
 
@@ -380,7 +439,7 @@ def main() -> int:
         print(f"\nFAIL: {len(found)} structural problem(s) in generated cards")
         return 1
     total = sum(len(generated_sources(p)) for p in PROFILES)
-    print(f"CLEAN: {total} generated cards pass L1/L2/L3")
+    print(f"CLEAN: {total} generated cards pass L1/L2/L3/L4")
     return 0
 
 

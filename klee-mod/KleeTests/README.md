@@ -15,7 +15,7 @@ thing it still cannot reach — a live `CombatState`.)
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 151 tests, ~0.5s after build
+dotnet test                       # 153 tests, ~0.5s after build
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -94,9 +94,10 @@ either pinned structurally and labelled, or left out.
 | `ModalChoicePinTests.cs` | 5 | `EB-118` sec.5.4's modal surface: `ModalChoice` delegates to the base game's OWN card-level choice rather than reimplementing one (`CardSelectCmd.FromChooseACardScreen` + `PlayerChoiceContext`, co-op-synced as `PlayerChoiceType.Index`), the three-option ceiling the screen itself enforces, and the `mode_chosen` telemetry row pinned to its tier0 twin. Structural: making a choice needs a live `CombatState`. No sheet row is modal. |
 | `BombDeathTeardownTests.cs` | 10 | `EB-138` / R211's compensation for the death teardown `BombInstancingTests` pins on the base game. The turn-start TAKE is pure, so it is all real: one instance's work reaches every pile, each keeps its own placer and payload, every pile is spent before anything that can kill runs, and a second slot finds nothing. Then the game's own kill steps are reproduced (dead + `RemoveAllPowersAfterDeath`) and the later placer's snapshot is shown to survive them, still crediting its own Big One counter and still ringing its own listeners. The MUTATION CHECK is `The_turn_start_hook_resolves_every_pile_not_only_its_own`: put `await Detonate(choiceContext)` back in the hook and it fails. Structural where a live `CombatState` is needed — the detach, the damage, and the fizzle itself. |
 | `ConditionalUpgradePinTests.cs` | 6 | `EB-140`'s two branch-moving upgrade delta keys. `hold_the_line`'s `{conditional_block: +3}` and `take_it_from_the_top`'s `{conditional_damage: +4}` shipped at `W3` with an empty `OnUpgrade`; the top-level half is now pinned BEHAVIOURALLY through the game's own `CardModel.UpgradeInternal` (Block 5 -> 8, and the Furina card's printed Block held at 5 because the delta is a damage one), the branch half by the face it prints (`{IfUpgraded:show:9|6}` / `{IfUpgraded:show:14|10}`), and the play-time read structurally -- resolving a branch needs a live `CombatState`. Codegen twin: `tier0/tests/test_roster_codegen.py`. |
+| `CardTargetTypePinTests.cs` | 2 | `EB-142`, the 0.2-1028 attended-playtest defect, pinned on the one value that was wrong. `take_it_from_the_top` shipped `TargetType.Self` because the generator derived TargetType from a card's TOP-LEVEL ops only and its 10 damage sits behind a `spotlight_moved_this_turn` conditional -- so the branch's own `ThrowIfNull(cardPlay.Target)` threw on every play with the Spotlight moved, was swallowed by `TaskHelper.LogTaskExceptions`, and the card silently paid Block and nothing else. Real, not structural: the constructor runs headlessly. Class-wide gate beside it: `tools/lint_generated_structure` law L4. |
 | `BombInstancingTests.cs` | 18 | `EB-130` / R205's per-placer bomb piles. The instance type itself; the base game's OWN `PowerCmd.FindExistingInstanceForStacking` answering that two placers get two piles, one placer still gets one, and a gather does not land in another placer's pile on the destination; the SUPPRESSION ARBITER (two piles fold to one 0.75, never 0.5625 — the preview and the hit elect the same pile, and the creature-keyed latch is spent once); and `ModifyAll` reaching every pile with the solo total unmoved. Structural where a live `CombatState` is needed: the `DetonateOn`/`MoveAllTo` loops, and the DEATH-TEARDOWN finding pinned on the game's own kill and hook-broadcast machinery. |
 
-**151 tests, all green.**
+**153 tests, all green.**
 
 ## Co-op coverage
 

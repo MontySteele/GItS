@@ -1087,11 +1087,15 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
 
 
 def _aims_at_chosen_enemy(eff: dict) -> bool:
-    """Does this top-level effect need a target the PLAYER chose?
+    """Does this effect need a target the PLAYER chose?
 
     The question a card's declared TargetType has to answer. `apply_power`
     is included only for the powers that land on an enemy -- a self-buff
     named `target: self` aims at nothing.
+
+    Asked of the WHOLE played face, branches included (EB-142): an aiming op
+    dereferences `cardPlay.Target` wherever it sits, and a branch is printed
+    text the player can reach.
     """
     if eff.get("target") != "enemy":
         return False
@@ -6575,7 +6579,18 @@ def emit(
     # level wins over an earlier unaimed one. This is exactly the packet's
     # sentence made mechanical: Klee controls where she prepares explosions,
     # she does not always control where the spray lands.
-    aimed = any(_aims_at_chosen_enemy(e) for e in card["effects"])
+    # EB-142, and it is the same correctness exception one level deeper: the
+    # scan above used to read the TOP LEVEL only, so a card whose ONLY aiming
+    # op sits inside a `conditional` branch declared `TargetType.Self`, took no
+    # target, and threw its own ThrowIfNull mid-OnPlay -- swallowed by
+    # TaskHelper.LogTaskExceptions, so the branch silently did nothing in front
+    # of a player. `take_it_from_the_top` is the shape that exposed it (Block 5
+    # at the top level, `spotlight_moved_this_turn` -> 10 damage in the branch):
+    # Block landed, the damage never did, on both faces. A card AIMS if any op
+    # ANYWHERE in its played face aims -- the player picks the target on play,
+    # exactly as tier0's single aim policy binds one creature for the whole
+    # card play (C18). `lint_generated_structure` now fails the shape outright.
+    aimed = any(_aims_at_chosen_enemy(e) for e in _effects_everywhere(card))
     target_type = TARGET_CS["enemy"] if aimed else "TargetType.Self"
     for eff in ([] if aimed else card["effects"]):
         if eff["op"] == "damage" and eff["target"] != "self":

@@ -53,7 +53,7 @@ public sealed class TakeItFromTheTop : CustomCardModel, ICharacterCard
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public TakeItFromTheTop()
-        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
