@@ -1,0 +1,81 @@
+# EB-142 scenario: take_it_from_the_top's selector-payoff branch, both arms.
+#
+# THE QUESTION. `docs/furina-cards.yaml:622` prints Block 5 and, on the branch
+# `spotlight_moved_this_turn`, 10 damage. The C# is
+# `Cards/Furina/Generated/TakeItFromTheTop.cs`, whose branch is
+# `SpotlightSystem.MovedThisTurn(Owner.Creature)`. tier0 asserts the arithmetic
+# and `lint_constant_parity` asserts the constants; neither can assert that the
+# SHIPPED card, resolved by the real game against a real enemy, pays the 10.
+#
+# BOTH ARMS, IN ONE TURN, IN THIS ORDER, AND THE ORDER IS THE DESIGN. The
+# negative arm has to run BEFORE the Spotlight moves, because
+# `SpotlightSystem.ResetTurn` clears `KLEEMOD_SPOTLIGHT_MOVED` at turn start and
+# nothing else clears it. So: play the card cold (Block only), then move the
+# Spotlight, then play a second copy (Block AND the 10).
+#
+# WHY "Center Stage" AND NOT "Guest Cast". `SpotlightSystem.Designate` early-outs
+# when the chosen mode is the one already in force, and an early-out does NOT
+# set MOVED -- so the arm has to name a mode that is not the standing one. At
+# the top of a fight no mode is in force, so either would designate; Center
+# Stage is named because it is the option that is ALWAYS offered
+# (`SpotlightCards.cs` adds Guest Cast only when the player owns a Companion
+# card, and a fresh Furina start may own none).
+#
+# WHY THE BLOCK IS 5 ON BOTH ARMS AND NOT SCALED. The card's Block goes through
+# `SpotlightSystem.PrintedBlock`, which multiplies by `OutwardMultiplier` --
+# and that returns 1 unless the card is an `ICompanionCard` under Guest Cast.
+# `TakeItFromTheTop` is Furina's own card, so the multiplier is 1 under every
+# mode. If this assertion ever fails at a scaled number, the leak
+# `OutwardMultiplier`'s comment describes ("the multiplier would leak onto
+# Furina's own cards") is what it caught.
+
+name: eb142-take-it-from-the-top
+character: KLEEMOD-FURINA
+turns: 8
+
+notes: |
+  Two plays of Take It From the Top in one turn: cold, then after the Spotlight
+  has moved. The delta the branch is worth is the difference between them.
+
+assumptions:
+  - "The player has no Strength and the enemy no Vulnerable: the branch's 10 is
+     asserted as a raw HP+Block delta, and either power would move it."
+  - "The card is granted UNUPGRADED. Upgraded it is 14 (conditional_damage +4,
+     docs/furina-upgrades.yaml), and the Block stays 5 on both faces."
+  - "The enemy has at least 10 HP+Block, so the hit is not capped by the
+     creature it lands on. Enemy Block is set to 0 first, so the HP+Block
+     bracket and the plain HP delta agree."
+  - "No Companion card is owned, so the Ethereal Spotlight offers Center Stage
+     alone; the select step names it either way."
+
+steps:
+  # ---- negative arm: nothing has moved the Spotlight this turn -------------
+  - give: {card: KLEEMOD-TAKE_IT_FROM_THE_TOP, pile: hand, upgraded: false}
+  - set_energy: {amount: 3}
+  - set_block: {who: player, amount: 0}
+  - set_block: {who: first, amount: 0}
+  - expect:
+      description_contains: {card: "Take It From the Top", text: "Block"}
+  - play: {card: "Take It From the Top", target: first}
+  - expect:
+      player_block: {amount: 5}
+      enemy_hp_block_delta: {who: first, amount: 0}
+
+  # ---- move the Spotlight -------------------------------------------------
+  - play: {card: "Ethereal Spotlight"}
+  - expect:
+      prompt_contains: "Choose"
+  - select: {cards: ["Center Stage"]}
+  - confirm: {}
+  - expect:
+      resource: {name: KLEEMOD_SPOTLIGHT_MOVED, amount: 1}
+
+  # ---- positive arm: the branch is live -----------------------------------
+  - give: {card: KLEEMOD-TAKE_IT_FROM_THE_TOP, pile: hand, upgraded: false}
+  - set_energy: {amount: 3}
+  - set_block: {who: player, amount: 0}
+  - set_block: {who: first, amount: 0}
+  - play: {card: "Take It From the Top", target: first}
+  - expect:
+      enemy_hp_block_delta: {who: first, amount: -10}
+      player_block: {amount: 5}

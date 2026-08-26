@@ -283,22 +283,16 @@ def main(argv: list[str] | None = None) -> int:
     out = args.out or str(soak.LOG_DIR / f"probe-e-{args.arm}-{stamp}.jsonl")
     soak.LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-    session = soak.Session(stamp, do_setup=not args.no_setup, intent="")
-    real = soak.policy_v1
     summary: dict[str, Any] = {}
     with open(out, "w", encoding="utf-8") as fh:
         scripted = ScriptedPolicy(args.arm, readings, fh, args.turns)
-        soak.policy_v1 = scripted        # the ONLY seam; restored in `finally`
-        try:
-            session.setup()
-            driver = soak.RunDriver(session, 1, stamp,
-                                    character=CHARACTER,
+        # `soak.run_scripted` is the setup / policy-swap / teardown dance this
+        # file and `probe_block.py` each carried a copy of (EB-142). The seam
+        # and its `finally` restore are unchanged; only their address is.
+        summary = soak.run_scripted(scripted, stamp, character=CHARACTER,
                                     max_fights=args.max_fights,
-                                    chosen_seed=args.seed)
-            summary = driver.run()
-        finally:
-            soak.policy_v1 = real
-            session.teardown()
+                                    chosen_seed=args.seed,
+                                    do_setup=not args.no_setup)
 
     print(json.dumps({"arm": args.arm, "stamp": stamp,
                       "turns_scripted": args.turns,
