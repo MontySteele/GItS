@@ -15,6 +15,48 @@ index of what to type, not how it works.
 - `tools/` is an implicit namespace package: both `python3 tools/x.py` and
   `from tools import x` work.
 
+## Mechanisms — what is enforced, and by what
+
+**Correction D (2026-08-26).** Claude treats `CLAUDE.md` and this file as
+CONTEXT, not as enforced configuration — the official guidance is explicit:
+*to block an action regardless of what Claude decides, use a PreToolUse hook*.
+A rule that lives only in prose is advice a long session can lose. Every rule
+in the table below used to be a paragraph in this file and is now a hook, a
+skill or a lint, and **the prose it replaced is DELETED rather than kept
+beside it**: two statements of one rule is one too many, and the copy that is
+not executable is the one that rots.
+
+`.claude/settings.json` wires the hooks. Each is a small portable Python
+script that reads the hook payload on stdin and exits 0 (allow) or 2 (block,
+with a one-line reason shown to Claude), so it behaves the same from Git Bash
+and from PowerShell.
+
+| event | matcher | script | what it refuses / does |
+|---|---|---|---|
+| PreToolUse | `Bash` | `tools/hooks/deny_dangerous_git.py` | `git add -A` / `.` / `--all`; `git worktree remove`; `git push` at `main` or forced; `--no-verify` on `commit` or `push` |
+| PreToolUse | `Bash` | `tools/hooks/push_gate.py` | a real `git push` runs the fast lane + `run_lints --lane ci` first (~21 s measured) and is BLOCKED on red or on timeout |
+| PostToolUse | `Edit\|Write\|NotebookEdit` | `tools/hooks/game_ref_backup_reminder.py` | an edit under `game_ref/` prints the vault-backup reminder; `GITS_HOOK_RUN_BACKUP=1` runs the mirror instead |
+
+Skills (`.claude/skills/<name>/SKILL.md`) carry the procedures this file used
+to narrate: **`sitting`** — a registered experiment's run, world-check to
+commit; **`deploy`** — `build_pck` → `deploy` → `validate`; **`worktree`** —
+add, the no-link rule, purge.
+
+Lints, all registered in `run_lints`'s `ci` lane: `register-shape`,
+`stamp-rows`, `sheet-stamp`, `experiments-active`, `hook-self-tests`. The four
+register/stamp lints ship **green** by carrying a curated `DEBT` set of the
+rows that fail today — 42 register rows, 3 stamp rows, 4 registrations — so
+the gate binds from this commit forward while the existing rows stay a work
+list. A `DEBT` entry that has since become clean FAILS, so the sets can only
+shrink; empty one and the lint becomes ordinary.
+
+**What a mechanism cannot reach.** A hook sees a tool call, not an intention:
+nothing here can tell that a *sitting* skipped its blind grade, that a `QUEUE`
+row was answered by Claude rather than by [USER], or that a design call was
+settled without being asked. Those stay norms in `CLAUDE.md`, and the lints
+above gate only their SHAPE — that a row has an ask and a gate, never that the
+ask was honoured.
+
 ## Test — the gate wall
 
 `tier0/tests` + `tier05/tests` is not a unit suite; it is the repo's gate wall
@@ -91,7 +133,11 @@ date-attributed shape the C11 ruling took):
   lane. Seconds, not minutes.
 - **before any push** — the FULL suite (`-n auto --dist loadscope`) and the
   full lint battery. The fast lane is never the gate: the deselected 82 items
-  are the calibration bands, and a band that was not run is not a band.
+  are the calibration bands, and a band that was not run is not a band. Since
+  Correction D a push that ran NOTHING is refused outright by
+  `tools/hooks/push_gate.py`, which runs the fast lane and the `ci` lint lane
+  in ~21 s — **a floor under this rule, not a substitute for it.** The hook
+  cannot afford the bands; you can.
 - **bare `pytest` stays bare.** No `addopts`. Anyone who types the CI line
   gets the CI run.
 
@@ -137,32 +183,26 @@ python tools/lint_game_ref_backup.py        # staleness tripwire, never writes
 **Run the backup after ANY restore, extraction, or hand edit of `game_ref/`** —
 after `tools.extract_base_game_pool` + `tools.build_official_sheet`, after
 restoring pass layers from anywhere, after editing a `*_char_facts.yaml` by
-hand. The tripwire is in `run_lints.py`'s **local** lane, so a normal
-`python tools/run_lints.py` says when the vault has fallen behind.
+hand. Two mechanisms carry this now: `tools/hooks/game_ref_backup_reminder.py`
+fires on any Edit/Write under `game_ref/` (git cannot — the tree is ignored,
+so `git status` is clean by construction), and the staleness tripwire is in
+`run_lints.py`'s **local** lane, so a normal `python tools/run_lints.py` says
+when the vault has fallen behind.
 
 **The guard is the tool's reason to exist.** `backup_game_ref` REFUSES (exit 2,
 loud, vault untouched) when local `game_ref/` is missing or holds fewer than ten
-files. Every destruction so far left the directory *present and empty* with
-`git status` clean; a plain mirror run "to be safe" in that state would
-propagate the deletion into the vault and take the last copy with it. If local
-`game_ref/` is empty, the vault is the source — copy the other way.
+files — every destruction so far left the directory *present and empty* with
+`git status` clean, and a mirror run "to be safe" in that state would take the
+last copy with it. **If local `game_ref/` is empty, the vault is the source —
+copy the other way.**
 
-The lint's three verdicts, mirroring validate.ps1's S7 convention: local
-`game_ref/` **absent or empty** → NOTE, exit 0 (a fresh clone, a runner and
-every worktree have none, and a lint that failed there is a lint everyone
-learns to ignore); **present but under ten files** → NOTE, exit 0 (S7 owns
-incompleteness and fails loudly on it; the vault deliberately keeps the older
-complete generation rather than being refreshed from a partial tree);
-**present with ten or more** → the vault must exist, hold every source file, and
-carry no file that local has since grown, shrunk or out-dated (2 s skew
-tolerance). Vault-only files are notes, never failures — deleting them is the
-backup script's job.
+The lint's three verdicts — absent/empty, under ten files, ten or more — and
+why each is a NOTE or a failure are in `lint_game_ref_backup.py`'s own
+docstring, where they cannot drift from the code that implements them.
 
-**Backups never live in worktrees.** `git worktree remove` deletes gitignored
-content out of a *clean* worktree, which is how the 2026-08-24 loss took both
-prior backup copies along with the tree they were meant to protect. The vault is
-outside every checkout for exactly that reason; see also the no-link rule and
-`tools/purge_worktree.py` under Worktrees.
+**Backups never live in worktrees.** The vault is outside every checkout
+because a worktree teardown deletes gitignored content; the `worktree` skill
+and the deny hook carry the rest of that rule.
 
 **A missing layer fails at the door, not mid-cell.** Asking for a `real_*` arm
 without `game_ref/` raises `loader.MissingReferenceLayer` out of
@@ -192,7 +232,10 @@ PYTHONPATH=. python3 -m tier05.runner --character klee --ab --runs 500
 
 **Every published number is world-stamped, and worlds are not comparable.**
 Run experiments through a `Cell` so the report carries its stamp; a report
-without a stamp is not citable (R68). `jobs` is a wall-clock lever only — run
+without a stamp is not citable (R68). **Running a REGISTERED cell is the
+`sitting` skill**, not a command line assembled here: world-check → the
+packet's exact command → provenance header → blind grade → registers → gate.
+`jobs` is a wall-clock lever only — run
 *i* is a pure function of `seed + i`. Depth: `docs/current/atlas/tier0-harness-tests.md`,
 `tier05-sim-core.md`, `tier05-economy.md`, `tier05-metrics.md`.
 
@@ -262,19 +305,10 @@ python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
 
 ## Build & deploy (Windows, art-bearing main checkout only)
 
-```
-tools\build_pck.ps1            # one character-aware resource pack + klee.pck.contract.txt
-klee-mod\build\deploy.ps1      # stages the pack; rejects a missing/stale/mismatched contract
-klee-mod\build\validate.ps1    # the S-gate deploy validation
-klee-mod\build\validate.ps1 -RunCsharpTests   # ... plus the C# suite (opt-in)
-cd klee-mod\KleeTests && dotnet test           # the C# suite on its own
-```
-
-`deploy_bridge.ps1 -BuildOnly` lints the vendor pin, compiles the bridge into
-`klee-mod\dist\STS2_MCP`, and stops — the game directory is not touched and the
-running-game refusal is skipped, because a build holds no lock. That is the
-check a `vendor/STS2_MCP/gits/` edit wants from a worktree that has no business
-installing anything (`EB-142`).
+**The sequence is the `deploy` skill** — pre-deploy checks, `build_pck.ps1`,
+`deploy.ps1` (which runs `validate.ps1` itself before copying), and the opt-in
+C# suite. From a worktree the one legal command is
+`klee-mod\build\deploy_bridge.ps1 -BuildOnly` (`EB-142`).
 
 ### Understudy — targeted scenarios (attended only)
 
@@ -302,10 +336,8 @@ defect, never a design finding. It is deliberately unreachable from `soak.py`;
 assemblies **headless** — no Godot, no launch. It is opt-in, not a deploy gate;
 its boundary and its co-op coverage are in `klee-mod/KleeTests/README.md`.
 
-After any roster-resource change, run `build_pck.ps1` **before** `deploy.ps1` —
-an old Klee-only PCK cannot pass validation. Machine paths come from
-`klee-mod/local.props` / `Directory.Build.props`. Depth:
-`docs/current/atlas/klee-mod-build-pck.md`, `klee-mod-runtime.md`.
+Machine paths come from `klee-mod/local.props` / `Directory.Build.props`.
+Depth: `docs/current/atlas/klee-mod-build-pck.md`, `klee-mod-runtime.md`.
 
 ## Lints
 
@@ -319,6 +351,13 @@ python3 tools/suggest_role_tempo_tags.py --check    tools/lint_role_tempo_covera
 python3 tools/lint_roster_registry.py       tools/lint_upgrade_suffix_appends.py
 python3 tools/lint_vendor_pin.py            tools/art_coverage.py
 ```
+
+Correction D added five more to `run_lints`'s `ci` lane that `repo.yml` does
+not yet name (`lint_register_shape.py`, `lint_stamp_rows.py`,
+`lint_sheet_stamp.py`, `lint_experiments_active.py`,
+`tools/hooks/selftest_all.py`) — see Mechanisms. `lint_sheet_stamp.py
+--update` is the one that re-pins `SHEET_DIGEST` after a sheet edit, and it
+belongs in the same commit as the edit.
 
 Local-only (not in CI): `lint_text_encoding.py`, `lint_generated_structure.py`,
 `art_lint.py`, `card_distinctness_report.py --gate`,
@@ -339,22 +378,10 @@ Suite-gated (runs under `pytest`, not in the CI `lints` job):
 python3 tools/lint_recall_exhaust.py       # exit 1 with findings on stdout
 ```
 
-Three sweeps in one tool, all enforcing `EB-118` §6.4's six constraints on
-`recall_to_draw` with `from: exhaust`. **(a) Card shape** over every
-`docs/*-cards.yaml` and `docs/*-companions.yaml` row: a retriever must be
-Uncommon-or-Rare, must carry `exhaust: true`, and may not ask for a
-destination other than top-of-draw. **(b) Engine closure**, against the
-complete effect graph rather than one card: the whole loader index plus a
-synthetic retriever goes into one exhaust pile and `effects.recall_exhaust_pool`
-is asserted to exclude every retriever (the probe itself included), every kit
-card and every Status/Curse — the hazard is a *cycle*, and tier0's own closure
-detector sees one turn of one fight. **(c) A structural C# pin** in
-`lint_constant_parity`'s shape: `KleeCode/Powers/RecallFromExhaust.cs` must
-name all three exclusions plus `CardPilePosition.Top`/`PileType.Draw`/
-`CardKeyword.Exhaust`, and must never name `PileType.Hand`. It prints its
-denominator — a sweep that compared nothing must not read like a clean one. No
-committed sheet row ships `from: exhaust` today, so leg (a) is deliberately
-vacuous while (b) and (c) are not.
+Three sweeps in one tool — card shape, engine closure, a structural C# pin —
+all enforcing `EB-118` §6.4's six constraints on `recall_to_draw` with
+`from: exhaust`. Each leg, and why leg (a) is deliberately vacuous until a
+committed sheet row ships `from: exhaust`, is in the tool's own docstring.
 
 Encoding rule is repo-wide and structural: **every text read/write declares
 `encoding=`** (an omitted encoding is cp1252 on Windows, UTF-8 on CI). The
@@ -370,44 +397,12 @@ point that prints content declares the console too:
 
 ## Worktrees — one working directory per workstream
 
+**The procedure is the `worktree` skill** — sibling-directory add, the
+never-link-a-gitignored-asset-tree rule, `python -m tools.purge_worktree`
+instead of `git worktree remove` (which the deny hook refuses), and prune.
 Sessions never share a working directory; collisions happen *before* commit,
-where CI cannot look.
-
-```sh
-git worktree add ../GItS-<workstream> -b <sprint-or-topic>-<short-slug>
-python -m tools.purge_worktree ../GItS-<name>   # when the workstream lands
-git worktree prune
-```
-
-- **Sibling directories only**, one branch per worktree, lowercase-hyphen branch
-  names (no slashes).
-- **Stage explicitly; never `git add -A`.** Read the `--stat` before you push —
-  one unexpected filename is the whole signal.
-- **NEVER link a gitignored asset directory** (`game_ref/`, `ImageGen/images/`,
-  `art/raw/`, `art/candidates/`) into a worktree. `git worktree remove` follows a
-  junction/symlink and deletes what it finds — this has destroyed non-regenerable
-  `game_ref/` files. A worktree simply lacks art, and that is fine; `build_pck`,
-  `deploy`, and art passes happen on the main checkout.
-- **`git worktree remove` deletes GITIGNORED CONTENT even when the worktree is
-  clean, and even with nothing linked.** `git status` reports clean because
-  ignored files are ignored — so a worktree holding a `game_ref_backup/` copy
-  looks empty to git and is removed whole. **On 2026-08-24 a routine purge of
-  stale worktrees took both surviving `game_ref/` backups this way**, which is
-  how one deletion became a fourth total loss. **Remove a worktree with
-  `python -m tools.purge_worktree ../GItS-<name>`, not with `git worktree
-  remove`.** It runs that check for you and REFUSES (exit 2, and it names what
-  it found) when the worktree holds gitignored data it was not told to expect;
-  build outputs, caches and `local.props` are on its allowlist, `game_ref/`
-  and the art trees deliberately are not, and `--acknowledge` is the door you
-  type after reading the list. By hand the check is `git -C ../GItS-<name>
-  status --ignored --porcelain | grep '^!!'`. Never park the only copy of
-  anything in a worktree.
-- **A phase's content does not merge to `main` until the prior phase's required
-  read is complete (R206).** Build it, test it, push the branch — merging is the
-  act that is sequenced, not the work. A branch waiting on a read is INERT, not
-  blocked, and merging one IS the pull.
-
-Rationale and incident history: `docs/current/rationale/`.
+where CI cannot look. Rationale and incident history:
+`docs/current/rationale/`.
 
 ## CI (`.github/workflows/repo.yml`)
 
