@@ -2162,7 +2162,101 @@ BANNER_FEATURED_SLOTS = 3
 #   window is by commit-hash scratch comparison (R207) and is not citable the
 #   way a stamped table is.
 # ---------------------------------------------------------------------------
-CONSTANTS_VERSION = 19
+# CONSTANTS_VERSION 20 -- EB-139's SWIRL AURA-AWARE BIND (R211, [USER]
+# 2026-08-25 -- semantics ratified there, implementation deferred to its own
+# window), landed 2026-08-26. THE ONE QUESTION C18 LEFT OPEN, CLOSED. Not a
+# sheet window and not a card-body pass: no printed number, no label, no
+# upgrade delta and no dial value moves here either. What moves is HOW THE
+# RESOLVER AIMS, which is C18's class exactly, and it takes C18's letter for
+# C18's reason -- R179/M15, a change that materially alters what a card does to
+# a board is a `C` bump whether it is spelled in a sheet row or in the engine
+# that reads one. The reviewer's "`P` window" label on the row was a
+# MIS-FILING and is corrected here: no pilot heuristic and no weight value is
+# touched.
+#   (a) THE RULED SEMANTICS, AND THE SEAM THEY LIVE AT. For MANUALLY-MODELLED
+#   play, if ANY LIVING enemy carries an aura at card-play construction, the
+#   WHOLE CARD binds to the LOWEST-HP AURA-BEARING enemy; otherwise the normal
+#   lowest-HP bind. It is built in `effects.bind_card_aim` -- the C18 seam, the
+#   first line of a play -- and NOT inside `_op_swirl`, which is the whole
+#   content of the answer: an aim taken at the bind is one creature for the
+#   whole play, where the re-take it replaces could hand a card's damage to one
+#   body and its Swirl to another.
+#   (b) WHY A SWIRL AND NOT THE BOARD. This is not a board-wide aim rule and
+#   the negative pins hold it to that (`test_eb139_swirl_aura_bind
+#   .test_a_card_with_no_swirl_ignores_the_auras_on_the_board`). A Swirl's
+#   entire payload IS the aura it lands on -- aimed at an auraless body it does
+#   nothing at all -- so an aimed Swirl is the one card shape where the mouse
+#   pick a human makes is READABLE OFF THE BOARD rather than a matter of taste.
+#   Every other card keeps the documented lowest-HP aim R210 declined to
+#   re-open, and destination SCORING stays severed: nothing here scores a
+#   destination, it reads one predicate off the board. The gate
+#   (`_card_swirls_at_aim`) walks the whole effect tree the way
+#   `_card_aims_at_enemy` does, and a `target: all_enemies` Swirl does NOT gate
+#   it -- it hits the whole board and has no aim to correct.
+#   (c) FORCED-RANDOM AUTOPLAY IS UNCHANGED AND RECEIVES NO CORRECTIVE RE-AIM.
+#   The random branch is FIRST in `bind_card_aim` and that order is the ruling:
+#   a free play has no human at the mouse, so modelling one there would hand
+#   Havoc/Cascade a judgement the mod never gives them -- the same argument
+#   that put the roll there in C18. The roll is still one draw per aiming card.
+#   (d) WHAT IS ARCHIVE, AND IT IS NARROWER THAN THE STAMP SUGGESTS. Six live
+#   rows carry an aimed Swirl, ALL of them companions -- no character sheet
+#   prints one: `sayu_yoohoo_windwheel` (Inazuma), `lynette_enigmatic_feint`
+#   and `lynette_astonishing_shift` (Fontaine), `sucrose_gust`,
+#   `sucrose_astable` and `prune_witch_hunt` (Mondstadt, the last
+#   `personal_pool: klee`). The list is DERIVED, never listed -- a seventh
+#   aimed Swirl fails `test_the_live_sheets_carry_exactly_the_enumerated
+#   _swirl_rows` and this paragraph gets corrected rather than silently
+#   outgrown. The ARMS are every arm that draws companion rewards: all nine
+#   character arms (`klee` demolition/spark/reaction, `furina`
+#   salon/spotlight/fanfare, `kokomi` priest/commander/assist). FIVE OF THE SIX
+#   ROWS MOVE NO NUMBER AT ALL, and that is demonstrated rather than hoped:
+#   each of the five puts its Swirl FIRST and carries no second aimed op
+#   (block, draw, burst energy, a Spark rider, an `all_enemies` damage row), so
+#   the creature the bind now names is byte-for-byte the creature the old
+#   re-take computed -- the same `min(bearers, key=hp)` on the same board -- and
+#   no enchantment rider can widen that, the three shipped riders being
+#   `damage target: self`, `draw` and `energy`. THE OBSERVABLE MOVEMENT IS ONE
+#   CARD: `sayu_yoohoo_windwheel`'s `damage 4`, which C18's own block named as
+#   the single row still scattering, now lands on the body its Swirl lands on.
+#   THE ANCHOR DOES NOT MOVE, AND THAT IS THE DIFFERENCE FROM C18. C18 had to
+#   declare the anchor archive because `bash` sits in `ref_ironclad`'s starter
+#   and the anchor is the DIVISOR in `axes.normalize`. Nothing here reaches it:
+#   `ref_ironclad`'s pool is starter+package (`rewards.character_pool`) and
+#   prints no Swirl, and `ref_ironclad` / `real_ironclad` / `real_silent` draw
+#   no companion REWARDS at all (`rewards.NO_COMPANION_CHARACTERS`). VERIFIED
+#   RATHER THAN ASSERTED: the `ref_ironclad/starter` scorecard was run either
+#   side of this change and is IDENTICAL -- all seven axes, all seven raws, all
+#   six battery rows, the curve exponent, the pressure delta and the regret
+#   rate. So every ratio taken against the C18 anchor is still good, and only
+#   the numerator arms above are archive. The one door left open is the SHOP
+#   companion channel, which is not gated by `NO_COMPANION_CHARACTERS`: an
+#   anchor's tier-0.5 run can BUY a companion, so `ref_ironclad/generic` at
+#   tier 0.5 is not immune BY CONSTRUCTION the way the tier-0 scorecard is. It
+#   did not fire in the scratch below, and it is written down here rather than
+#   left to be found.
+# `RT`, `D` and `P` ARE UNTOUCHED, each on its own ground. No run-layer content
+# moved (`RT`). No drafter code and no dial value moved (`D`), and no drafter
+# PRICE moves either -- `draft._static_power` reads printed rows and no printed
+# row changed; `STATIC_SWIRL_VALUE` is unmoved at 1.5, because what a Swirl is
+# WORTH did not change, only which body it lands on. No pilot heuristic and no
+# weight value moved (`P`): `policy.reaction_potential` already modelled a
+# single-target Swirl as aura-aware, so the estimate the pilot makes and the
+# resolution it gets have moved TOWARD each other rather than apart, and no
+# weight was needed to do it.
+# NO STANDING BASELINE IS OWED AT THIS BUMP (R207), on the same ground C18
+# stood on and one step further: the movement is one companion row on nine
+# arms, no pending decision is waiting on its size, and the anchor -- the thing
+# a re-baseline exists to re-fix -- provably did not move. The disclosure owed
+# here is a COMMIT-HASH SCRATCH before/after, carried in PR text and published
+# nowhere, which is not citable the way a stamped table is. A SECOND C-CLASS
+# CHANGE MAY JOIN THIS SAME WINDOW BEFORE ANY READ IS TAKEN -- the ruled
+# "Sweet Dreams" (`elemental_ecstasy`) body, R189/R205 -- and R207 is what
+# permits that: where nothing turns on attributing a movement to one edit,
+# several may share a window and the stamp labels the world. NO CONNECTIVITY
+# READ AND NO REGISTERED EXPERIMENT ATTACHES TO THIS WINDOW: nothing here is
+# graded against a committed prediction.
+# ---------------------------------------------------------------------------
+CONSTANTS_VERSION = 20
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

@@ -412,6 +412,36 @@ def _card_aims_at_enemy(card: Card) -> bool:
             or walk(card.enchant_first_play_effects))
 
 
+def _card_swirls_at_aim(card: Card) -> bool:
+    """Does this card carry a Swirl that lands on the play's BOUND AIM?
+
+    The gate on EB-139's aura-aware bind (R211, C20), and the reason that bind
+    is not a board-wide aim rule: a Swirl's whole payload IS the aura it lands
+    on, so an aimed Swirl is the one card shape where the mouse pick a human
+    makes is knowable from the board rather than a matter of taste. Every other
+    card keeps the documented lowest-HP aim R210 declined to re-open.
+
+    `target: all_enemies` Swirls do not gate it -- they hit the whole board and
+    have no aim to move. Walks the same whole tree `_card_aims_at_enemy` does,
+    for the same reason: a Swirl inside a conditional arm or a mode body is
+    still a Swirl this card can land.
+    """
+    def walk(effects) -> bool:
+        for fx in effects or ():
+            if (fx.get("op") == "swirl"
+                    and fx.get("target", "enemy") in ("enemy",
+                                                      "lowest_hp_enemy")):
+                return True
+            if walk(fx.get("then")) or walk(fx.get("else")):
+                return True
+            for mode in fx.get("modes") or ():
+                if walk(mode.get("effects")):
+                    return True
+        return False
+    return (walk(card.effects) or walk(card.enchant_effects)
+            or walk(card.enchant_first_play_effects))
+
+
 def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
     """C#'s `CardPlay.Target`, rolled ONCE at card-play construction.
 
@@ -421,11 +451,13 @@ def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
     binding moment is here, ahead of every op: a bound aim is picked pre-AoE,
     not lazily at the first aimed row.
 
-    WHICH creature is not what R210 moved and this function does not re-open
-    it: a manual play's target is the human's mouse pick, which no engine rule
-    mirrors, so tier0 keeps its documented lowest-HP identity choice. What
-    changed is that the pick is taken ONCE instead of per op. Destination
-    SCORING stays severed as a later design question.
+    WHICH creature is, for every card but one shape, still not re-opened: a
+    manual play's target is the human's mouse pick, which no engine rule
+    mirrors, so tier0 keeps its documented lowest-HP identity choice. R210 took
+    the pick ONCE instead of per op; R211 (EB-139, C20) added the ONE ruled
+    exception below. Destination SCORING stays severed as a later design
+    question -- nothing here scores a destination, it reads one predicate off
+    the board.
     """
     living = state.living_enemies
     if not living:
@@ -436,8 +468,27 @@ def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
     # would hand those cards a pilot's judgement they do not have. Set only for
     # the duration of a free play -- and now rolled ONCE PER CARD, which is
     # where `CardCmd.AutoPlay` rolls it, rather than once per op.
+    #
+    # THIS BRANCH IS FIRST, AND THAT ORDER IS THE RULING: forced-random autoplay
+    # stays random and receives NO corrective re-aim (R211). A free play has no
+    # human at the mouse, so modelling one there would hand Havoc/Cascade a
+    # judgement the mod never gives them -- the same argument that put the roll
+    # here in the first place.
     if state.force_random_targeting and _card_aims_at_enemy(card):
         return state.rng.choice(living)
+    # EB-139 / R211: the aura-aware bind, for MANUALLY-MODELLED play only. If
+    # ANY living enemy carries an aura when the play is constructed, the WHOLE
+    # CARD binds to the lowest-HP AURA-BEARING enemy. This replaces the aim
+    # RE-TAKE that used to live inside `_op_swirl` -- which is what C18 pinned
+    # as unruled, because a re-take put a card's damage and its Swirl on two
+    # different creatures. One bind, taken here, keeps
+    # `sayu_yoohoo_windwheel`'s `damage 4` and its Swirl on one body, and it is
+    # the body a human aims at: a Swirl on an auraless target does nothing at
+    # all.
+    if _card_swirls_at_aim(card):
+        bearers = [e for e in living if e.aura]
+        if bearers:
+            return min(bearers, key=lambda e: e.hp)
     return min(living, key=lambda e: e.hp)
 
 
@@ -1516,36 +1567,16 @@ def _op_burst_energy(state: CombatState, fx: dict, card: Card) -> None:
 def _op_swirl(state: CombatState, fx: dict, card: Card) -> None:
     # R210 Q3: same corpse-accepting door as apply_aura (`ElementalHit
     # .ApplyOnly` -> `AuraCmd.Apply` -> `PowerCmd.Apply<XAuraPower>`).
+    # AND NOTHING ELSE. There is no aim re-take here any more (EB-139 / R211,
+    # C20). This op used to re-aim a single-target Swirl at whichever living
+    # body carried an aura when the bound aim carried none -- the ONE question
+    # C18 left open, and the reason it was open is that a re-take put
+    # `sayu_yoohoo_windwheel`'s damage on one creature and its Swirl on
+    # another. R211 answered it at the BIND (see `bind_card_aim`): the whole
+    # card goes to the lowest-HP aura-bearer, so by the time this op runs the
+    # aura-aware creature IS the bound aim and asking again could only disagree
+    # with the damage that preceded it.
     targets = _pick_targets(state, fx.get("target", "enemy"), allow_dead=True)
-    # A human will aim a single-target Swirl at an aura when one exists.
-    # Tier 0 otherwise hard-aims every AnyEnemy card at lowest HP, which made
-    # Anemo cards blank whenever the aura happened to sit elsewhere.
-    #
-    # THE ONE AIM RE-TAKE R210 DOES NOT SETTLE, AND IT IS LEFT STANDING
-    # DELIBERATELY -- it is the C18 landing's one reported open question, and
-    # no register id is minted for it here. The ruling's two sentences point
-    # opposite ways
-    # here and the blast-radius audit never reaches this branch: Q1(b) says
-    # every `target: enemy` op binds to the play's one lowest-HP aim, while the
-    # same row severs destination SCORING and says binding "does not overturn"
-    # tier0's documented aim choices. This branch IS a documented tier0 aim
-    # choice -- the sim's model of the mouse pick a human makes on a card whose
-    # entire payload is the aura it lands on -- and five of the six `swirl
-    # target: enemy` rows carry NO second aimed op, so for them binding and
-    # re-taking are the same creature and only the POLICY question is live.
-    # Deleting it would make the sim read those five as blank whenever the
-    # aura sits off the lowest-HP body, which is a NEW divergence from a mod
-    # the player aims by hand -- closing one gap by opening another. Moving it
-    # into `bind_card_aim` instead would bind Yoohoo Windwheel's damage to the
-    # aura'd enemy, which is card-shape-dependent aim policy nobody ruled.
-    # So: unresolved, un-implemented, and pinned as unresolved by
-    # `test_eb136_same_target_binding.py::test_swirl_aim_retake_is_unruled`.
-    # ONE CARD is left scattering by this, `sayu_yoohoo_windwheel` (`damage 4`
-    # + `swirl`), of the 28 in the ruled scope.
-    if fx.get("target", "enemy") == "enemy" and targets and not targets[0].aura:
-        aura_targets = [e for e in state.living_enemies if e.aura]
-        if aura_targets:
-            targets = [min(aura_targets, key=lambda e: e.hp)]
     state.emit("aura_op", op="swirl", card=card.id, element="anemo",
                targets=len(targets))
     for enemy in targets:

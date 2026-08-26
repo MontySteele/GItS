@@ -434,9 +434,16 @@ def _reaction_value(state: CombatState, card: Card) -> float:
         target = fx.get("target", "enemy")
 
         if target == "enemy":
-            # Single-target Swirl is deliberately aura-aware in the engine:
-            # it models the player's target choice rather than blindly using
-            # tier0's generic lowest-HP aim.
+            # Single-target Swirl is deliberately aura-aware, and since
+            # EB-139 / R211 (`C20`) it is aura-aware AT THE BIND
+            # (`effects.bind_card_aim`) rather than inside `_op_swirl`: a card
+            # carrying an aimed Swirl binds its WHOLE play to the lowest-HP
+            # aura-bearer. This line is unchanged and needed no weight, because
+            # it already computed that creature -- `reactable` is the living
+            # bodies holding an off-anemo aura, and no aura is ever ANEMO
+            # (`reactions.AURA_ELEMENTS` is pyro/hydro/electro/cryo; anemo and
+            # geo are trigger-only), so it is the same set the engine now binds
+            # from. The estimate and the resolution moved TOWARD each other.
             aimed = (min(reactable, key=lambda e: e.hp)
                      if op == "swirl" and reactable
                      else effects._default_target(state))
