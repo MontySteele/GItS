@@ -78,7 +78,7 @@ from __future__ import annotations
 import sys
 from collections import Counter
 
-from tier05 import draft, model, stats
+from tier05 import draft, expcli, model, stats
 
 RUNS = 500
 CHARACTERS = [("klee", "demolition"), ("furina", "salon"), ("kokomi", "priest")]
@@ -337,4 +337,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

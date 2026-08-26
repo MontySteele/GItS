@@ -35,7 +35,7 @@ from __future__ import annotations
 import collections
 import sys
 
-from tier05 import cells, draft
+from tier05 import cells, draft, expcli
 
 # R68: this experiment WAS the ratified cell -- 600 runs, seed 11, hunter,
 # furina/salon, realistic loadout -- expressed as local literals that
@@ -121,4 +121,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

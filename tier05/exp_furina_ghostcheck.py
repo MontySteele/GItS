@@ -37,7 +37,7 @@ import statistics
 import sys
 
 from tier0.content import loader
-from tier05 import cells, draft, fanfare_telemetry
+from tier05 import cells, draft, expcli, fanfare_telemetry
 
 # R68: derived from the ratified cell rather than hand-rolled. The runs
 # count is a DECLARED delta -- the ghost check runs 200/arm across three
@@ -129,4 +129,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

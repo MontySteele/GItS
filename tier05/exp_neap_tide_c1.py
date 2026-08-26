@@ -35,7 +35,7 @@ from __future__ import annotations
 import sys
 import time
 
-from tier05 import cells, kurage_telemetry
+from tier05 import cells, expcli, kurage_telemetry
 
 PLANS = ("priest", "commander", "assist", "generic")
 
@@ -149,4 +149,5 @@ readers, and test_pulse_multiplier_claims checks the arithmetic still holds.
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

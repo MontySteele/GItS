@@ -34,7 +34,7 @@ from __future__ import annotations
 
 import sys
 
-from tier05 import cells, fanfare_telemetry, rework_sim
+from tier05 import cells, expcli, fanfare_telemetry, rework_sim
 
 # Every arm varies from the ratified cell. The PLAN differs between rows, so
 # unlike the pilot-gap battery these rows are not each other's controls --
@@ -224,4 +224,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

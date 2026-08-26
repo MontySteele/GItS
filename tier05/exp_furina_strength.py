@@ -36,6 +36,7 @@ import yaml
 
 from tier0 import constants as C
 from tier05 import draft, encore_telemetry, fanfare_telemetry, model, sweeps
+from tier05 import expcli
 
 SEED = 20260728
 RUNS = 150
@@ -689,4 +690,5 @@ def main(argv: list[str]) -> None:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     main(sys.argv)

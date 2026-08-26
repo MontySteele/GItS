@@ -36,7 +36,7 @@ import sys
 import time
 
 from tier0.content import loader
-from tier05 import cells, draft, elite_blitz, rewards
+from tier05 import cells, draft, elite_blitz, expcli, rewards
 
 # Every plan, not just assist. `salt_line` is [assist, generic], so the pool
 # change reaches more than the lane it was written for, and "did it cost the
@@ -157,4 +157,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

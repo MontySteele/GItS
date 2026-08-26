@@ -36,7 +36,7 @@ from __future__ import annotations
 
 import sys
 
-from tier05 import cells, stats
+from tier05 import cells, expcli, stats
 
 # R68: seed, runs, route and loadout come from the ratified cell rather than
 # from local literals. They used to be `SEED = 11` / `RUNS = 600` here, which
@@ -110,4 +110,5 @@ def _ci(rate: float, n: int) -> str:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())
