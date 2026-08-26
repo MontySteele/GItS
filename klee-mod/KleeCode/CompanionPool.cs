@@ -35,8 +35,10 @@ namespace KleeMod;
 ///    touches the shared loader surface all three character workstreams sit
 ///    on, and it depends on our pool being constructed before the first
 ///    <c>ModelDb.AllCardPools</c> read (that property caches; AllSharedCardPools
-///    does not). There is no C# test project, so none of that is verifiable
-///    except by launching the game.
+///    does not). `klee-mod/KleeTests` (EB-105) cannot answer any of it --
+///    `ModelDb` lookups and anything touching a Godot object are outside its
+///    headless boundary, and the frame is a Godot object -- so none of it is
+///    verifiable except by launching the game.
 ///
 /// Nothing in this sprint NEEDS the pool object: <c>MerchantCardEntry</c> takes
 /// a plain <c>IEnumerable&lt;CardModel&gt;</c>, so the shop reads this class

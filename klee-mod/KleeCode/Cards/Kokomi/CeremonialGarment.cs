@@ -46,7 +46,9 @@ namespace KleeMod.Cards.Kokomi;
 /// damage the moment the yaml changed, so E2/E2b measured a Burst that enters
 /// a state, while the mod shipped a Burst that enters a state AND nukes the
 /// board. Nothing failed: `lint_constant_parity` compares constants, not
-/// effect lists, and there is no C# test project.
+/// effect lists, and the C# suite that exists now (`klee-mod/KleeTests`,
+/// EB-105) cannot read an effect list either -- playing a card needs a live
+/// `CombatState`, which is outside its headless boundary.
 /// THE GENERAL RULE, since three hand-written cards exist across the roster:
 /// a hand-written card is OUTSIDE the sheet-to-C# pipeline, so a sheet ruling
 /// that touches one is a two-file edit. Grep the hand-written set on every

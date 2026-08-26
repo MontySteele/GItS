@@ -46,8 +46,11 @@ public static class CompanionConstants
 /// tier 0.5 models a single seat so no sim run could ever have disagreed.
 ///
 /// This is the shape of the whole bug class: a "this combat" tracker is
-/// correct in solo and wrong in co-op, and solo is the only configuration the
-/// instruments can see. See the G-B2 census in
+/// correct in solo and wrong in co-op, and the sim sees only solo. Since
+/// EB-105 the mod has a PARTIAL second instrument: `klee-mod/KleeTests`
+/// allocates two seats headlessly and `CoopSeamTests` covers per-seat
+/// ownership -- but not a card being played, so this tracker's own defect
+/// would still have to be found by playing. See the G-B2 census in
 /// docs/archive/ship-what-we-know-sprint-log.md for the other consumers.
 ///
 /// Uniqueness is PER OWNER, not global: if both players play Oz, both should

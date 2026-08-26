@@ -9,8 +9,9 @@ namespace KleeMod.Diagnostics;
 /// Errata Batch 2: the C# half of the NON-CARD parity checks (R116).
 ///
 /// Built exactly like <see cref="FurinaParityVectors"/> and for the same
-/// reason -- there is no C# test project, so the parity claim is assembled
-/// from two halves:
+/// reason -- no process runs both implementations, and `klee-mod/KleeTests`
+/// (EB-105) cannot run the sim -- so the parity claim is assembled from two
+/// halves:
 ///
 ///   * The Python suite
 ///     (tier0/tests/test_noncard_parity_vectors.py :: test_csharp_vectors_match_the_sim)
