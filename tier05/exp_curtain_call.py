@@ -25,7 +25,7 @@ import statistics
 import sys
 
 from tier0.content import loader
-from tier05 import aura_telemetry, cells, draft
+from tier05 import aura_telemetry, cells, draft, expcli
 
 BASE = cells.CANONICAL.but(name="curtain-call-riders")
 ARMS = ("salon", "spotlight", "fanfare")
@@ -75,4 +75,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

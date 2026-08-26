@@ -37,7 +37,7 @@ from tier0.content import loader
 from tier0.engine.combat import run_fight
 from tier0.harness import metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import sweeps
+from tier05 import expcli, sweeps
 from tier05.rewards import _nation_weighted_choice, _roll_rarity, companion_pool
 
 SEED = 20260720
@@ -222,6 +222,7 @@ def block_c() -> None:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     block_a()
     block_b()
     block_c()

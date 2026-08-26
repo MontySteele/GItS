@@ -65,7 +65,7 @@ from tier0 import roster
 from tier0.content import loader
 from tier0.harness import metrics
 from tier0.harness.runner import run_battery
-from tier05 import cells, reaction_telemetry
+from tier05 import cells, expcli, reaction_telemetry
 
 # Its own stream, its own constant. Not derived from any run seed: a bootstrap
 # that shares a stream with the sim is a bootstrap that can move a fight.
@@ -380,4 +380,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     sys.exit(main())

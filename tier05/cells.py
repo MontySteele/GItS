@@ -58,6 +58,37 @@ def _resolve_plan(character: str, archetype: str) -> tuple[str, str]:
     return runner.resolve_plan(character, archetype)
 
 
+def live_versions() -> dict[str, int]:
+    """The LIVE world stamps: `RT` / `D` / `P` / `C`, read at call time.
+
+    THE one place the four numbers are gathered. `Cell.versions` is this
+    function, and `Cell.stamp` formats it through `world_stamp` below, so a
+    report that needs the world but must NOT be routed through a Cell can ask
+    here and be reading the same source of truth rather than a fifth copy of
+    the same four attribute reads (EB-141a). Not stored, ever: a stamp that
+    was captured at import time is a stamp that can claim a world it is not
+    in, which is the mislabelling R68 exists to prevent.
+    """
+    return {
+        "RT": C.RUNTEMPLATE_VERSION,
+        "D": C.DRAFTER_VERSION,
+        "P": draft.POLICY_VERSION,
+        "C": C.CONSTANTS_VERSION,
+    }
+
+
+def world_stamp(versions: dict[str, int] | None = None) -> str:
+    """`RT12/D17/P10/C19` -- the world half of the R68 stamp line.
+
+    Split out of `Cell.stamp` so the spelling has exactly one producer. Every
+    published number in this repo is compared against others by this string;
+    two producers of it is two ways for the same world to be written down
+    differently, which is worse than no stamp at all because it looks fine.
+    """
+    v = live_versions() if versions is None else versions
+    return f"RT{v['RT']}/D{v['D']}/P{v['P']}/C{v['C']}"
+
+
 @dataclass(frozen=True)
 class Cell:
     """One reproducible measurement configuration.
@@ -132,12 +163,7 @@ class Cell:
     @property
     def versions(self) -> dict[str, int]:
         """The LIVE world stamps, read at call time and never stored."""
-        return {
-            "RT": C.RUNTEMPLATE_VERSION,
-            "D": C.DRAFTER_VERSION,
-            "P": draft.POLICY_VERSION,
-            "C": C.CONSTANTS_VERSION,
-        }
+        return live_versions()
 
     def stamp(self) -> str:
         """The mandatory report line (R68).
@@ -162,7 +188,7 @@ class Cell:
         forced = ("" if not self.force_cards
                   else f" forced={'+'.join(self.force_cards)}")
         return (f"cell={self.name} seed={self.seed} runs={self.runs}{pilot}"
-                f"{forced} RT{v['RT']}/D{v['D']}/P{v['P']}/C{v['C']}")
+                f"{forced} {world_stamp(v)}")
 
     def describe(self, subject: str | None = None,
                  varying: tuple[str, ...] = ()) -> str:

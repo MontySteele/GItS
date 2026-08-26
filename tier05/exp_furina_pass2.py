@@ -38,7 +38,7 @@ from tier0.content import loader
 from tier0.engine.combat import run_fight
 from tier0.harness import axes, metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import sweeps
+from tier05 import expcli, sweeps
 
 SEED = 20260720
 FIGHTS = 1000
@@ -250,6 +250,7 @@ def e4() -> None:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     which = sys.argv[1] if len(sys.argv) > 1 else "all"
     chosen = None
     if which in ("e1", "all"):

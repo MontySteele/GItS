@@ -40,7 +40,7 @@ from __future__ import annotations
 import sys
 
 from tier0.content import loader
-from tier05 import cells, run_metrics
+from tier05 import cells, expcli, run_metrics
 
 BASE = cells.CANONICAL.but(name="kokomi-stability")
 
@@ -144,4 +144,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

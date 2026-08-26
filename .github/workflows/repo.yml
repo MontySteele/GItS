@@ -130,6 +130,13 @@ jobs:
       # checkout is depth-1 with no tags.
       - name: register row-id uniqueness
         run: python tools/lint_register_ids.py
+      # EB-109. An enchanted id (`x@sharp-2`) became reachable at RUNTEMPLATE
+      # 10, and the upgrade suffix rides INSIDE the decoration, so every
+      # `<id> + upgrades.SUFFIX` site silently changed meaning without being
+      # edited. This holds the reachability answer beside each site and fails
+      # on a new site nobody has answered for.
+      - name: upgrade-suffix append sites
+        run: python tools/lint_upgrade_suffix_appends.py
       # Understudy 2026-08-04. vendor/ carries third-party source pinned to an
       # exact upstream commit; this asserts the tree still is what the
       # provenance note says it is, in both directions. Cheap, and the one

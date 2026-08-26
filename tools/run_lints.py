@@ -121,6 +121,11 @@ REGISTRY: tuple[Lint, ...] = (
     # EB-127. Beside r-numbers deliberately: same question (an id namespace
     # with no gate), the other series.
     _ci("register-ids",         "tools/lint_register_ids.py"),
+    # EB-109. Structural, over committed source, so it runs where the other
+    # invisible-seam gates run: an enchanted id became reachable at
+    # RUNTEMPLATE 10 and turned correct `+ SUFFIX` sites wrong without anyone
+    # editing them.
+    _ci("upgrade-suffix-appends", "tools/lint_upgrade_suffix_appends.py"),
     _ci("vendor-pin",           "tools/lint_vendor_pin.py"),
     _ci("art-coverage",         "tools/art_coverage.py"),
 

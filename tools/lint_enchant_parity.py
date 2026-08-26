@@ -108,6 +108,64 @@ GAME_RULES = {
 KNOWN_DIVERGENCES: dict[tuple[str, str], str] = {}
 
 
+# ELIGIBILITY is not the only correspondence that can drift. An enchantment
+# that pays out through a damage hook also carries a PRECONDITION on the hit
+# it is willing to modify, and that precondition is a second, independent
+# thing each engine states in its own vocabulary. Corrupted is the one shipped
+# enchantment that has one (EB-85's sixth finding, deliberately left outside
+# the EB-84 eligibility batch):
+#
+#     MegaCrit.Sts2.Core.Models.Enchantments.Corrupted
+#         public override decimal EnchantDamageMultiplicative(DamageProps props)
+#         {
+#             if (!props.IsPoweredAttack()) return 1m;
+#             ...
+#
+# and tier0 says the same thing by placing its multiplier inside
+# `engine/effects._op_damage`'s `card.type == "attack"` branch. The two agree
+# TODAY and nothing pinned it, which is exactly the shape that rots: either
+# side can move alone and the sim silently starts paying Corrupted on a hit
+# the game refuses, or stops paying one it allows.
+#
+# THE TABLE IS THE PIN, and `tier0/tests/test_eb85_corrupted_precondition.py`
+# is what bites on it. Same bargain as GAME_RULES above: the C# half is a
+# transcription carrying its decompiled citation, because decompiling
+# `sts2.dll` needs the game installed and ilspycmd
+# (`tools/extract_base_game_pool.py`) and this repo's gates run where neither
+# exists. What the pin buys is that the transcription and tier0's branch
+# cannot move INDEPENDENTLY -- the test hard-codes the guard line it expects
+# to read here, so re-transcribing after a re-decompile goes red until
+# somebody re-derives the sim side too, and an AST read of `effects.py` goes
+# red if the multiplier leaves the branch or a second unguarded reader of the
+# rider appears.
+#
+#   cs_class / cs_hook -- the decompiled class and the hook the guard opens
+#   cs_guard           -- that opening early-return, verbatim
+#   cs_predicate       -- the DamageProps predicate the guard reads
+#   sim_branch         -- the `effects.py` `if` test that must enclose the
+#                         sim's rider read
+#   sim_field          -- the `state.Card` rider field that branch guards
+GAME_DAMAGE_PRECONDITIONS: dict[str, dict[str, str]] = {
+    "corrupted": {
+        "cs_class": "MegaCrit.Sts2.Core.Models.Enchantments.Corrupted",
+        "cs_hook": "EnchantDamageMultiplicative",
+        "cs_guard": "if (!props.IsPoweredAttack()) return 1m;",
+        "cs_predicate": "IsPoweredAttack",
+        "sim_branch": 'card.type == "attack"',
+        "sim_field": "enchant_damage_mult",
+        "why": (
+            "IsPoweredAttack() is the game's 'this is a powered Move hit off "
+            "an Attack card' test. tier0 has no DamageProps, and its nearest "
+            "total statement of the same fact is the card-type branch that "
+            "already gates every other attack-only damage rider. Corrupted's "
+            "own 2 HP self-damage row is dealt Unblockable | Unpowered | Move "
+            "in game and so fails the C# guard; in tier0 it fails the branch "
+            "too, because a `target: self` damage op returns out of "
+            "`_op_damage` before the branch is reached."),
+    },
+}
+
+
 # `blocked` carries TWO different facts under one key, and until EB-69 they
 # were indistinguishable because only one of them had ever occurred. A card
 # blocked with the reason "hand-written" IS shipped -- codegen skips it because

@@ -28,7 +28,7 @@ import statistics
 import sys
 
 from tier0.content import loader
-from tier05 import draft, fanfare_telemetry, model, sweeps
+from tier05 import draft, expcli, fanfare_telemetry, model, sweeps
 
 SEED = 11            # the sprint's registered seed (plan §5)
 RUNS = 200
@@ -237,4 +237,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

@@ -28,7 +28,7 @@ from tier0.content import loader, upgrades
 from tier0.engine.combat import run_fight
 from tier0.harness import axes, metrics
 from tier0.pilot.policy import make_pilot
-from tier05 import draft, fanfare_telemetry, model
+from tier05 import draft, expcli, fanfare_telemetry, model
 
 SEED = 20260724
 RUNS = 200
@@ -218,4 +218,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

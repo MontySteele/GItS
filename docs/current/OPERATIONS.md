@@ -288,7 +288,8 @@ python3 tools/lint_handwritten_parity.py   tools/lint_constant_parity.py   tools
 python3 tools/gen_roster_cards.py --check
 python3 tools/lint_pool_membership.py       tools/lint_ancient_coverage.py
 python3 tools/suggest_role_tempo_tags.py --check    tools/lint_role_tempo_coverage.py --gate
-python3 tools/lint_roster_registry.py       tools/lint_vendor_pin.py       tools/art_coverage.py
+python3 tools/lint_roster_registry.py       tools/lint_upgrade_suffix_appends.py
+python3 tools/lint_vendor_pin.py            tools/art_coverage.py
 ```
 
 Local-only (not in CI): `lint_text_encoding.py`, `lint_generated_structure.py`,
