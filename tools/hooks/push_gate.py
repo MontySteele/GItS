@@ -227,13 +227,38 @@ TARGET_CASES = [
 ]
 
 
+# A bare `git push` is routed by the branch of the tree it would push FROM:
+# on a topic branch it gates, on `main` the deny hook owns it and this gate
+# steps aside. That answer must not depend on WHICH checkout the self-test
+# happens to run in -- it did, and the case below read as a gate failure on
+# every checkout sitting on `main` (the primary after a merge, CI's post-
+# merge run). The branch is pinned per pass instead.
+AT_MAIN_CASES = [
+    (bash_payload("git push"), 0, "a bare push AT MAIN is the deny hook's"),
+    (bash_payload("cd ../GItS-gov && git push"), 0,
+     "a bare push after a cd, target on main, is the deny hook's"),
+    (bash_payload("git push origin topic"), 2, "an explicit topic push gates even from main"),
+]
+
+
+def _routing_pass(cases, branch: str, failures: list[str]) -> None:
+    import deny_dangerous_git as deny
+    original = deny._current_branch
+    deny._current_branch = lambda repo=None: branch
+    try:
+        for raw, expected, label in cases:
+            got = decide(read_payload(raw), execute=False)
+            if got != expected:
+                failures.append(f"self-test FAIL [{label} @ {branch}]: expected "
+                                f"exit {expected}, got {got} -- payload {raw}")
+    finally:
+        deny._current_branch = original
+
+
 def self_test() -> int:
     failures: list[str] = []
-    for raw, expected, label in CASES:
-        got = decide(read_payload(raw), execute=False)
-        if got != expected:
-            failures.append(f"self-test FAIL [{label}]: expected exit "
-                            f"{expected}, got {got} -- payload {raw}")
+    _routing_pass(CASES, "topic", failures)
+    _routing_pass(AT_MAIN_CASES, "main", failures)
 
     for command, want, label in TARGET_CASES:
         got = push_target(command, HOME).as_posix()
@@ -252,7 +277,7 @@ def self_test() -> int:
 
     for line in failures:
         print(line)
-    print(f"self-test: {len(CASES) + len(TARGET_CASES) + 2} case(s), "
+    print(f"self-test: {len(CASES) + len(AT_MAIN_CASES) + len(TARGET_CASES) + 2} case(s), "
           f"{len(failures)} failure(s)")
     return 1 if failures else 0
 
