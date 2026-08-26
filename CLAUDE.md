@@ -16,6 +16,9 @@ repo.
   - open engineering work → `docs/current/BACKLOG.md`
   - measurement law + active registrations → `docs/current/EXPERIMENTS.md`
   - build / test / sim / codegen / art / worktrees → `docs/current/OPERATIONS.md`
+  - a ruling cited by number → `docs/current/RULINGS.md` (generated index:
+    id, date, one line, and the commit or ledger to retrieve its words from)
+  - stamp history (what a past RT/D/P/C level covered) → `docs/current/STAMPS.md`
   - the **one** YAML sheet the task touches (`docs/*-cards.yaml`,
     `*-upgrades.yaml`, `*-companions.yaml`, …). Never bulk-load all YAML.
 - **Reference — open only when the task reaches it, never preload:**
@@ -48,7 +51,21 @@ git show <commit>:<path>
 - **Hygiene fixes** (typos, dead references, obvious defects) are normal
   commits — no per-item authorization needed.
 - **Design, behavior, taste, or money** calls go to [USER] via `QUEUE.md`.
-  Don't settle them yourself.
+  Don't settle them yourself, except where the ladder below authorizes it.
+- **The delegation ladder (R212) — Claude decides and ships, no ask:** art
+  picks (apply shortlist rank 1, commit the contact sheet; `art_lint` still
+  bites, [USER] vetoes on the sheet); prediction slates (DRAFTED from written
+  intent, committed before any run, batch-countersigned — signed once, since a
+  moved world means re-draft and disclose, never re-sign); band re-affirmation
+  (defaults STANDS); window sharing when the scratch read is null (disclose
+  hash + read); hygiene inside registered packets (R101b still binds inside a
+  countersigned prediction block); derived-not-picked numbers (one-way error
+  direction, archive scope, one constant) and provisional names proved
+  cosmetic by lint (R179). **Still [USER]'s:** eyes-on taste, merging a staged
+  balance lever, money, one-way doors, LAW / measurement-law amendments, and a
+  pick between genuinely different design directions.
+- **Anything that still returns to [USER] is a NUMBERED PICK LIST, never a
+  blank to fill.**
 - **Experiments** keep pre-registration and blind grading — see
   `EXPERIMENTS.md`. No looking at results before the grade is in.
 - **Audit findings triage three ways:** confirmed defect → `BACKLOG.md`;
@@ -63,9 +80,9 @@ git show <commit>:<path>
 - **One worktree per workstream, sibling directories only.** Never link a
   gitignored asset directory into a worktree (`OPERATIONS.md` has the rule and
   the reason).
-- **A multi-item decision is presented to [USER] and recorded as ONE slate
-  under ONE ruling** (R206) — don't mint transient register rows for answers
-  already in hand.
+- **One batch per sitting** (R206, amended by R212): the sitting's decisions
+  are assembled by Claude and recorded as ONE slate under ONE ruling — don't
+  mint transient register rows for answers already in hand.
 
 Non-Claude agents: `AGENTS.md` routes them here. These norms are canonical in
 this file only — don't restate them elsewhere.

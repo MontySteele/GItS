@@ -218,10 +218,13 @@ def test_survival_sprint_companion_interfaces_have_live_bodies():
         "op": "draw", "amount": 1,
     }
 
+    # C2 (R189 direction, R205 sub-shape): ANY aura, Block 5. The old body
+    # read `target_has_nonpyro_aura` at Block 8, which Klee's own Pyro could
+    # not turn on. The upgrade row is deliberately unmoved.
     dreams = loader.get_card("elemental_ecstasy")
     mitigation = dreams.effects[-1]
-    assert mitigation["if"] == "target_has_nonpyro_aura"
-    assert mitigation["then"] == [{"op": "block", "amount": 8}]
+    assert mitigation["if"] == "target_has_aura"
+    assert mitigation["then"] == [{"op": "block", "amount": 5}]
     assert loader.get_card("elemental_ecstasy+").cost == 1
 
 
@@ -299,7 +302,12 @@ def test_pilot_reads_klee_pure_state_conditional_block():
 
     assert policy._raw_block(state, dreams) == 0
     state.enemies[0].aura = "hydro"
-    assert policy._raw_block(state, dreams) == 8
+    assert policy._raw_block(state, dreams) == 5
+    # C2's whole point (R189): Klee's OWN Pyro turns the branch on now. Under
+    # `target_has_nonpyro_aura` this read 0 -- the defect the redesign exists
+    # to repair, pinned from the side that used to fail.
+    state.enemies[0].aura = "pyro"
+    assert policy._raw_block(state, dreams) == 5
 
     assert policy._raw_block(state, dress) == 6
     state.player.sparks = 1

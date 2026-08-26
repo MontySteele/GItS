@@ -1,8 +1,9 @@
 # STATE
 
 > **What currently ships** — roster, systems, versions, and active workstreams.
-> Snapshot only: how a stamp reached its current value lives in the commit
-> messages that carry it, not here. Open decisions live in
+> Snapshot only: how a stamp reached its current value lives in
+> [`docs/current/STAMPS.md`](STAMPS.md) and in the commit that bumped it, not
+> here. Open decisions live in
 > [`docs/current/QUEUE.md`](QUEUE.md); engineering tasks in
 > [`docs/current/BACKLOG.md`](BACKLOG.md); normative rules in
 > [`docs/current/LAW.md`](LAW.md); measurement law and active registrations in
@@ -14,49 +15,28 @@
 **`RT12 / D18 / P11 / C20`**, read live via `tier05/cells.py`, with
 `PILOT_WEIGHTS_VERSION` **6**. Numbers are never comparable across a stamp
 boundary unless labeled, and a report without a stamp is not citable
-(`EXPERIMENTS.md`).
+(`EXPERIMENTS.md`). What each level below the live value covered, and what it
+archived, is in [`STAMPS.md`](STAMPS.md) — not here.
 
 | stamp | value | source | what this value covers |
 |---|---|---|---|
-| `RT` `RUNTEMPLATE_VERSION` | **12** | `tier0/constants.py` | The run-layer half of the window-2 correctness batch (`EB-104`): the shop receives the run's Featured Banner, potion capacity is derived from held relics on read, the rest-site heal floors, Book of Five Rings counts event deck-adds through one door, and event card-reward screens roll rarity through `RARITY_ODDS`. |
-| `D` `DRAFTER_VERSION` | **18** | `tier0/constants.py` | **`EB-28`: the Salon deploy stops pricing at zero** — cross-plan the members were invisible. ONE new dial, `STATIC_SALON_MEMBER_VALUE = 1.5` per member, at the conservative bottom of a derived 1.5–4.0 band; **[USER]-overridable, one constant**. **NINE rows, all Furina salon, nothing else moves:** `salon_debut`, `gentilhomme_usher`, `surintendante_chevalmarin`, `mademoiselle_crabaletta`, `full_ensemble`, `dress_rehearsal`, `overflowing_hospitality`, `endless_waltz`, `grand_gala`, each by `members × 1.5 ÷ cost` on both faces. `D17` beneath it was `W3`'s spark-spend cost and Spotlight rider. |
-| `P` `POLICY_VERSION` | **11** | `tier05/draft.py` | **The scorer-literacy window** (R207): FOUR items, nothing printed moves. **`EB-143`**: the Spark hold-versus-spend term — the ONE new weight, `SPARK_HOLD_VALUE_WEIGHT = 1.0`, inert at 0.0. **`EB-144`** reads five predicates over ten rows at score time (seven predate `W3`); `reaction_triggered_by_this` and `killed_target` stay blind by design; both Salon verbs read the resolver's `salon_tick_amount` — no new dial. **`EB-145`**: the score forecasts its own selection — Tide of Names, Pearl Barrage. **`EB-129`** pays the Book of Five Rings chunk at event valuation (R205's own-window gate set aside by [USER], null scratch). **Archive: roster combat + tier-0.5; anchors provably unmoved.** **The standing read's three diagnostic caveats clear AT THE RE-BASELINE — owed next, NOT taken here.** `P10` beneath it was `W3`'s exhaust-chooser repair (R211): `policy.exhaust_victim`'s default payout hook became `formula_aware_payout`, which pays a candidate off the exhausting card's OWN printed selection formula, with `PILOT_WEIGHTS_VERSION` **5** labeling `EXHAUST_FORMULA_PAYOUT_WEIGHT = 1.0`. `P9` beneath that was the Phase-2C mode-chooser flip (`MODE_CHOOSER_ENABLED` True, `effects._chosen_mode` asking `policy.choose_mode`); Phase-2A's `PILOT_POLICIES_ENABLED = True` is inside that value at `P8`. |
-| `C` `CONSTANTS_VERSION` | **20** | `tier0/constants.py` | **`EB-139`'s Swirl aura-aware bind** (R211; built 2026-08-26). An engine AIM change of `C18`'s class — no printed number, label, upgrade delta or dial moves. When a card carrying an aimed Swirl is played and any living enemy holds an aura, the whole card binds to the lowest-HP aura-bearer; with no aura, the normal lowest-HP bind. Forced-random autoplay is untouched. Six companion rows carry an aimed Swirl and five already swirled at that body, so the only number that moves is `sayu_yoohoo_windwheel`'s damage, on the nine character arms. **The anchor does NOT move** — verified identical — unlike `C18`. No standing baseline owed (R207); a second `C`-class change (the ruled Sweet Dreams body, R189/R205) may join this window. `C19` beneath it was the **`EB-118` Phase-3 Window 3 card-body pass** (R211, [USER] 2026-08-25 — the `W3` ratification slate): ONE window, **EIGHT sheet rows, all three characters**: five NEW rows and three **REWRITES THAT KEEP THEIR CARD IDS**. **Klee** gains the three ratified Spark sinks, the first rows on any sheet to print `spend_spark` — `powder_charge` (spend 2, `detonate bonus: 4`, upgrade `{bonus: +3}`), `hold_the_line` (spend 2, Block 5, `enemy_intends_attack` → Block 6, upgrade `{conditional_block: +3}` raising both halves) and `smoke_and_sparks` (spend 2, Vulnerable 3, upgrade `{vulnerable: +1}`). The 3–4 sink floor is met AT THREE. **All three are `role: glue`, so no payoff count moves anywhere**; what moves is sub-pool size, and `klee/spark`'s payoff DENSITY falls 24% → 21% — a disclosure, not a breach (that arm is not on R199's priority list), and the second consecutive window in which it thins. The Spark price is at TOP LEVEL on all three, which is structural: a `spend_spark` in a branch is invisible to the playability gate and the payoff would fire unpaid. **Furina** gains `change_the_bill` (`salon_rotate` + `salon_perform` + Block 3, upgrade `{block: +3}`) — the first sheet row in the repo to print EITHER Salon verb, both built and unused since Phase 2 — and `take_it_from_the_top` (Block 5 + `spotlight_moved_this_turn` → 10 damage, upgrade `{conditional_damage: +4}`), which takes `furina/spotlight` payoff supply 5 → 6 over a sub-pool 17 → 18: **fourth in the ruled priority order, so a disclosure item**. **Kokomi's pool stays at 76 rows AND at the same 76 ids**: `pearl_barrage` stops reading the exhaust PILE and reads the CARD YOU CHOSE (`exhaust_from 1 chosen` + `5 + 3 per exhaust_selection_cost`, delta `{formula_per: +1}` → `{formula_base: +3}`, ladder 5/8/11 over the whole live range because her sheet has no card above cost 2); `shell_of_sanctuary` keeps its id and becomes **"Salvage the Line"** (cost 2 → 1, `block 11` → draw → **recall from exhaust** → Charge 2 → Block 4, `exhaust: true`, `[generic]` → `[priest, assist]`, upgrade sheet UNTOUCHED because `{block: 4}` was already the ruled 4 → 8); `the_tide_remembers` keeps its id and becomes **"Tide of Names"** (`exhaust_from 1 chosen` + `5 + 2 per cost` to ALL, delta `{damage: +3}` → `{formula_base: +2}`, tags and role unmoved so `kokomi/priest` holds at 12). **The effect order on Salvage the Line is the ruled correction and it is load-bearing** — recall-then-draw puts the rescued card at draw-pile index 0 and the draw pops index 0, so it would land straight in hand, defeating the rule that a retrieved card goes to the TOP of the draw pile and never to hand. It is also the repo's FIRST Exhaust-retrieving row, so `lint_recall_exhaust`'s card-shape leg stops being vacuous. **Two standing debts move, measured:** the flat-Block clone cluster 8 → 7, and the exhaust-pile reader family 5 → 3 (which completes R208's `damage@one~` five-to-two). `kokomi` near-duplicates hold at 29 against an untouched limit of 30; distinct signatures `kokomi` 57% → 59%, `klee` 62% → 63%, `furina` 76% → 76%. **The standing read this window owed is TAKEN and PUBLISHED** (`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`), **DIAGNOSTIC-SCOPED and NOT the Phase-4 milestone table** (R211 item 7): the pilot has no hold-versus-spend term for Sparks, and its scorer reads neither Furina row's state nor Tide of Names' payout, so those numbers are floors and a null result on them is not evidence. `C18` beneath it was **`EB-136`'s same-target binding** (R210, [USER] 2026-08-25 — full parity). Not a sheet window and not a card-body pass: no printed number, label, upgrade delta or dial value moves. What moves is how the resolver AIMS. A card's `target: enemy` ops used to re-resolve INDEPENDENTLY PER OP to the lowest-HP living enemy; they now bind to ONE creature picked at card-play construction and held for the whole play, which is C#'s `init`-only `cardPlay.Target`. `times` binds in the same pass (hits after the aim dies fizzle, no re-pick); `force_random_targeting` rolls once per card and only for a card that aims; and the dead-target rule is reproduced op by op AND IS NOT UNIFORM — aimed damage FIZZLES (`AttackCommand` breaks), aimed powers LAND ON THE CORPSE (`PowerCmd.Apply` guards only `CanReceivePowers`), and `place_bomb`, `move_bombs`, `detonate`, `apply_aura` and `swirl` land there too, each on the decompiled evidence recorded in the blast-radius audit. **Archive: every combat AND tier-0.5 number for every character, INCLUDING THE ANCHOR'S** — the ruled scope is 28 live cards plus 7 more for `times`, and it reaches `ref_ironclad`'s starter `bash`, `ref_silent` and both `real_*` pools. The anchor renormalises to 3.0 on every axis by construction, which is exactly why its moved combat behaviour is declared: it is the DIVISOR in `axes.normalize`, and `bash`'s Vulnerable now lands on the body its 8 killed instead of walking to a living bystander — a live debuff removed, not a rounding difference. Named consequences: `sparkly_explosion`'s `C17` DIAGNOSTIC caveat is **CLEARED**; `EB-118` (1)'s bomb-placement chooser is superseded for `target: enemy` (nothing in `policy.py` edited, and the `W4` sweep's source-derived scope narrows behind it); and ONE question is left open on purpose — `_op_swirl`'s aura re-aim, which Q1(b) and the row's destination-scoring severance answer differently, pinned as unruled by a strict xfail. **No standing baseline is owed (R207 as agreed at the ruling): `W3`'s single public read absorbs the movement and this landed before it; the disclosure is a commit-hash scratch in PR text.** `C17` beneath it was the `EB-118` Phase-3 **Window 2b card-body pass** (R208) — five ratified bodies across all three sheets, the first window since `C13` to archive all three characters at once: `sparkly_explosion` becomes `move_bombs` + `detonate bonus: 3` + `damage 14` in that order (upgrade `{damage: +5}` unchanged, so 14 → 19; `spark` tag dropped); `standing_room_only` becomes Block 3 plus an `encore_at_least_5` branch paying Block 3 else a draw, retyped attack → skill with `role` payoff → glue and upgrade `{block: +2}`; `dramatic_entrance` becomes Deal 7 plus a `fanfare_at_least_12` 7-to-ALL branch, no label moving; `undertow` takes exactly two changes (formula base 4 → 5, an appended `exhaust_pile_at_least_3` draw) and keeps everything else; `depths_judgment` becomes Deal 14 plus a Block 8 branch, upgrade `{formula_per: +1}` → `{damage: +4}`, and its bar reads **`exhaust_pile_at_least_8`** — item (f) of that window, ruled late into it by R209 ([USER] 2026-08-25, pre-merge), which moved the bar 6 → 8 on both faces against clean fire rates of 38.4% and 24.2%; under R58 the bar may rise again and may never come down. `C16` beneath that was Window 2's three ratified Kokomi bodies (`moon_signal`, `crane_wing`, `tighten_the_cords`) plus `encore_performance`'s ruled `{retain: true}`; `C15` beneath that was Window 1's label pass (sixteen `role` conversions, five `archetypes` changes, and `SecretStash.cs` dropping Big Badda Boom from `demolition_commons`); `C14` beneath that was `deep_breath`'s mode 2 (`spend_encore 3` + `draw 3`, R205); `C13` beneath that was the `EB-118` Phase-2 sheet-and-engine integration window, and `C13` is the world the standing baseline below was read in. |
+| `RT` `RUNTEMPLATE_VERSION` | **12** | `tier0/constants.py` | The run-layer half of the window-2 correctness batch (`EB-104`): banner-aware shop, relic-derived potion capacity, floored rest heal, one-door Book of Five Rings counting, and event card rewards rolling `RARITY_ODDS`. History → [`STAMPS.md`](STAMPS.md). |
+| `D` `DRAFTER_VERSION` | **18** | `tier0/constants.py` | `EB-28`: the drafter prices Furina's Salon deploy through ONE new [USER]-overridable dial, `STATIC_SALON_MEMBER_VALUE = 1.5` — nine salon rows re-price on both faces, nothing else moves. History → [`STAMPS.md`](STAMPS.md). |
+| `P` `POLICY_VERSION` | **11** | `tier05/draft.py` | The scorer-literacy window (R207): the pilot gains a Spark hold-versus-spend term, five state predicates and payout-aware selection scoring, repairing the standing read's three diagnostic caveats in code — they clear at the re-baseline, not here. History → [`STAMPS.md`](STAMPS.md). |
+| `C` `CONSTANTS_VERSION` | **20** | `tier0/constants.py` | `EB-139`'s Swirl aura-aware bind (R211) — an aimed Swirl binds whole to the lowest-HP aura-bearer; one companion's damage moves, the anchor does not — plus the ruled Sweet Dreams body (R189/R205, joined 2026-08-26): new any-aura predicate `target_has_aura`, Block 8 → 5. History → [`STAMPS.md`](STAMPS.md). |
 
 **Standing baseline:** `review/active/sitting-reads-2026-08-25-c19-d17-p10.md`
-— twelve arms, taken at `RT12/D17/P10/C19` on `main` = `a247f25`, all twelve in
-ONE pass with `game_ref/` present, so both `real_*` floors sit in the main
-tables rather than in an addendum (`real_ironclad` **5.2%** win / **65.5%**
-act-1, `real_silent` **1.2%** / **54.1%**). It is `W3`'s single public read and
-it **publishes DIAGNOSTIC-SCOPED rather than as the Phase-4 milestone table**
-(R211 item 7): when it was taken the pilot had no hold-versus-spend term for
-Sparks, and its scorer read neither new Furina row's state nor Tide of Names'
-payout, so those rows contribute FLOORS and a null on them is not evidence.
-**All three repairs are LANDED at `P11`, and the caveats clear at the
-re-baseline that has yet to be taken — not at the bump.** **Its Δ column spans
-`C13` → `C19`** — five `CONSTANTS_VERSION` bumps, `D16` → `D17`, and `P7` →
-`P10` — because none of `C15`, `C16`, `C17` or `C18` was owed a standing
-baseline and none was given one; this read absorbs their movement as R207's
-sequencing intended. **No row's Δ is attributable to `W3` alone.**
-Per-character attribution inside `W3` is by commit-hash scratch comparison
-(R207), taken at build time, and is not citable the way a stamped table is.
-**The table has NO control set and says so**: `C18` moved the anchor's own
-combat behaviour, so `ref_ironclad` and both `real_*` floors moved with the
-roster and none of the three is a control across this span. The one interval
-separation anywhere in it is `kokomi / priest` act-1, 39.9% → **45.0%**. It
-supersedes `review/active/sitting-reads-2026-08-24-c13-d16.md`, which stands as
-published (R101b).
-Under **R207** a published standing table is owed at a meaningful product
-milestone or when a
-pending decision needs one; intermediate attribution is by commit-hash scratch
-comparison, which is not citable the way a stamped baseline is
-(`EXPERIMENTS.md`). Version stamps themselves are unchanged: every change to a
-published-world variable still bumps its stamp. **The three diagnostic
-caveats' repairs LANDED as the one `P11` window** (`EB-143` the Spark
-hold-versus-spend term, `EB-144` scorer predicate / Salon-verb literacy,
-`EB-145` payout-aware scoring, with `EB-129` riding). **What is owed next is
-the ONE re-baseline at `RT12/D18/P11/C20`: the caveats clear there, and the
-Phase-4 milestone read follows it. Neither has been taken.**
+— twelve arms at `RT12/D17/P10/C19` (`main` = `a247f25`), all twelve in ONE
+pass with `game_ref/` present, so both floors sit in the main tables
+(`real_ironclad` **5.2%** win / **65.5%** act-1, `real_silent` **1.2%** /
+**54.1%**). It publishes **DIAGNOSTIC-SCOPED and NOT as the Phase-4 milestone
+table** (R211 item 7), and it **has NO control set and says so**. The one
+interval separation anywhere in it is `kokomi / priest` act-1, 39.9% →
+**45.0%**. It supersedes `review/active/sitting-reads-2026-08-24-c13-d16.md`,
+which stands as published (R101b). **The three caveats' repairs LANDED as the
+one `P11` window** (`EB-143`/`EB-144`/`EB-145`, `EB-129` riding). **What is owed
+next is the ONE re-baseline at `RT12/D18/P11/C20` — the caveats clear there
+— and the Phase-4 milestone read follows it. Neither has been taken.**
 
 Pinned, and NOT part of the run-cell stamp:
 
@@ -123,17 +103,16 @@ traceback mid-cell.
 
 Live sim inventory (`docs/current/atlas/tier0-pilot-roster.md` §2): **322 cards
 in the loader index** (3 are acquisition-only Ancient side-sheet rows, leaving
-the 319 the atlas quotes; 317 → 322 at `W3`, which added five personal rows and
+the 319 the atlas quotes; 317 → 322 at `Win3`, which added five personal rows and
 rewrote three in place), **5 character sheets** (3 roster + 2 reference),
 **6 encounters, 15 pilot weight sets**. The battery encounters are frozen
 (`content/encounters/battery.yaml`, FROZEN 2026-07-19). Card sheets
 `docs/klee-cards.yaml`, `docs/furina-cards.yaml` and `docs/kokomi-cards.yaml`
 all carry the `tempo_band:` field and hold **239 personal rows** (79 / 84 / 76);
 Kokomi's 76 are **5 basic / 31 common / 26 uncommon / 14 rare, 70 draftable**,
-and `W3` held them there on purpose — all three of her Window-3 items are
-rewrites of existing rows under their existing ids, so neither her count nor
-her id list moved. Klee's 79 are 76 + the three `W3` Spark sinks; Furina's 84
-are 82 + the two `W3` Salon/Spotlight rows.
+and `Win3` held both her count and her id list there — all three of her `Win3`
+items are rewrites under existing ids. Klee's 79 are 76 + the three `Win3` Spark
+sinks; Furina's 84 are 82 + the two `Win3` Salon/Spotlight rows.
 Balance numbers (HP, decks, bands) live in `tier0/content/characters/*.yaml`,
 the ratified artifact — not in the registry. Furina's pool carries **zero**
 `raise_fanfare_cap` riders: register lint `R7` retired with them, and LAW now
@@ -150,9 +129,8 @@ them rather than from prose.
 - **Furina** — **83 of 84** generated, 1 blocked
   (`let_the_people_rejoice`, intentionally hand-written kit machinery)
   (`klee-mod/KleeCode/Cards/Furina/Generated/manifest.json`). `blocked` HELD AT
-  1 across `W3`, which is the number to read there: that window introduced the
-  first sheet use of BOTH Salon verbs and the generator emitted them with no
-  new blocker.
+  1 across `Win3`, which introduced the first sheet use of BOTH Salon verbs and
+  emitted them with no new blocker.
 - **Every generated card on every profile ships its upgrade.** All three
   manifests' `upgrades.no_upgrade_path` lists are **empty**, and the two
   curated codegen-debt registers
@@ -163,19 +141,17 @@ them rather than from prose.
   through the op's own var and each branch half swaps on an `IsUpgraded` read
   with `{IfUpgraded:show:up|base}` rendered beside it.
 - **Kokomi** — **75 of 76** generated, **1 blocked**
-  (`klee-mod/KleeCode/Cards/Kokomi/Generated/manifest.json`, whose `coverage`
-  block reads `total 76 / generated 75 / blocked 1`). The one block is
-  `ceremonial_garment`, hand-written kit machinery, and it is the only entry in
-  the manifest's `blocked` map. The manifest's `upgrades.no_upgrade_path` list
-  is **empty**, so every generated Kokomi card ships with its upgrade. The
-  `EB-69` sim/mod asymmetry is **closed** — both engines hold all fourteen fill
-  cards and all fourteen upgrade deltas. The two new selection screens read
-  RULED prompt copy (2026-08-25), carried as `cards` loc rows keyed on the VERB
-  rather than on a card id — `KLEEMOD-SLY_GRANT` and
-  `KLEEMOD-RECALL_FROM_DISCARD`, beside the carrier-less
-  `KLEEMOD-RECALL_FROM_EXHAUST` — and merged by `KleeMod.InjectLocStrings`.
-  They reach the live mod at the next deploy; the rendered look is an eyes-on
-  item.
+  (`klee-mod/KleeCode/Cards/Kokomi/Generated/manifest.json`, `coverage` reads
+  `total 76 / generated 75 / blocked 1`). The one block is `ceremonial_garment`,
+  hand-written kit machinery, and the only entry in the manifest's `blocked`
+  map. `upgrades.no_upgrade_path` is **empty**. The `EB-69` sim/mod asymmetry is
+  **closed** — both engines hold all fourteen fill cards and all fourteen
+  upgrade deltas. The two new selection screens read RULED prompt copy
+  (2026-08-25), carried as `cards` loc rows keyed on the VERB rather than a card
+  id — `KLEEMOD-SLY_GRANT` and `KLEEMOD-RECALL_FROM_DISCARD`, beside the
+  carrier-less `KLEEMOD-RECALL_FROM_EXHAUST` — merged by
+  `KleeMod.InjectLocStrings`. They reach the live mod at the next deploy; the
+  rendered look is an eyes-on item.
 
 ## Mod build environment (pinned)
 
@@ -192,13 +168,10 @@ Slay the Spire 2 **v0.107.1**, commit `59260271` (2026-06-18), Steam buildid
   resources; comparability-first and emit-only toward the run layer. 7-axis
   scorecard, anchor `(ref_ironclad, starter) = 3.0`, frozen battery.
   **NO axis value gates anything (R204):** the live per-axis deck-band system is
-  retired as acceptance law roster-wide — all three characters' `deck_bands` /
-  `stale_bands` data, both loader accessors, the `BAND EXCEEDED` emission, and
-  the hard deck-band and median-identity tests — with **no replacement bands
-  ratified**. Seven-axis values and declared identity comparisons are
-  **reportable diagnostics only**: they may identify something to investigate,
-  and may not gate a merge, require re-banding, or justify moving a value. The
-  per-character identity comparison was demoted, not deleted — it reports
+  retired as acceptance law roster-wide, with **no replacement bands ratified**.
+  Seven-axis values and declared identity comparisons are **reportable
+  diagnostics only** — they may not gate a merge, require re-banding, or justify
+  moving a value. The identity comparison was demoted, not deleted; it reports
   through `axes.identity_flags` on every deck of every run. Klee's
   frontload-over-scaling identity remains **binding design intent** (LAW).
   **Ratified 1,000-fight `winrate_bands` are UNAFFECTED.** Kokomi's rotation law
@@ -217,7 +190,7 @@ Slay the Spire 2 **v0.107.1**, commit `59260271` (2026-06-18), Steam buildid
   `GitsDebugState` board-setup door, attended only) is built and unrun —
   BACKLOG `EB-146`. (`docs/current/atlas/understudy.md`)
 - **klee-mod** — the C# character mod (`KleeCode/`), the PCK build/deploy
-  pipeline, and a headless C# test project (`KleeTests/`, `EB-105`). Co-op has a
+  pipeline, and a headless C# test project (`KleeTests/`). Co-op has a
   **partial** automated backstop: per-seat ownership and attribution are
   testable; multiplayer transport and anything needing a live `CombatState` is
   play-only (`klee-mod/KleeTests/README.md`).
@@ -234,27 +207,27 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
 [`BACKLOG.md`](BACKLOG.md).
 
 - **Richness-pass deferred families — TWO NAMED WINDOWS, NEITHER OPEN.** The
-  three-character richness pass ran to completion: Phase 2's three windows, then
-  Phase-3 Windows 1, 2 and 2b at `C15`/`C16`/`C17`, then Window 3 as ONE public
-  window at `C19`/`D17`/`P10` with `PILOT_WEIGHTS_VERSION` 5 beside it, and
-  `W3`'s single DIAGNOSTIC-SCOPED standing read is published — it is the
-  standing baseline named above. **What outlived the pass is two content
-  families ruled OUT of `W3` with named destinations (R211), and the body-sheet
-  gate (R202 call (5)) travels with each of them: no implementation in either
+  three-character richness pass ran to completion (Phase 2's three windows, then
+  Phase-3 `Win1`/`Win2`/`Win2b` at `C15`/`C16`/`C17`, then `Win3` as ONE public
+  window at `C19`/`D17`/`P10`), and `Win3`'s single DIAGNOSTIC-SCOPED standing
+  read is the baseline named above. **What outlived the pass is two content
+  families ruled OUT of `Win3` with named destinations (R211), and the
+  body-sheet gate (R202 call (5)) travels with each: no implementation in either
   window until [USER] rules it an exact sheet.** **(i) the Klee BOMB-BOARD
-  READERS → `W10`**, a post-`W3` Klee window. **(ii) `F3` / the Furina
-  ENCORE-SPENDER family → `W11`**, which opens only AFTER the pilot's Encore
+  READERS → `Win10`**, a post-`Win3` Klee window. **(ii) `F3` / the Furina
+  ENCORE-SPENDER family → `Win11`**, which opens only AFTER the pilot's Encore
   opportunity-cost repair — spenders cannot be priced against a resource the
-  pilot values wrongly, and that repair is a second `POLICY_VERSION` change
-  carrying its own re-baseline (R191, one variable per window). `W10` and `W11`
-  are WINDOW names, not register ids: `W1`–`W9` are the watch register below,
-  and `W4` is SEPARATELY the pilot-policy weight sweep (`OPERATIONS.md`) — a
-  pre-existing collision that is deliberately not extended. **Nothing is
-  scheduled on either window**, and the Phase-4 milestone read is not owed until
-  the standing baseline's three diagnostic caveats clear. **Their repairs are
-  LANDED as the one `P11` window** (`EB-143`/`EB-144`/`EB-145`, `EB-129`
-  riding); the caveats clear at the re-baseline that follows, which is the next
-  step and has not been taken.
+  pilot values wrongly — and that repair is a second `POLICY_VERSION` change
+  carrying its own re-baseline, because attribution is exactly what it buys
+  (R207: one variable per window where attribution matters; several may share a
+  window otherwise). **NAMING, as of 2026-08-26: the CONTENT windows are
+  `Win1`/`Win2`/`Win2b`/`Win3`/`Win10`/`Win11`**, spelled `W1`–`W3`/`W10`/`W11`
+  in older packets — `W1`–`W9` are the watch register below, and `W4` is
+  separately the pilot-weight sweep (EXPERIMENTS `W4`, run per `OPERATIONS.md`).
+  **Nothing is scheduled on either window**, and the Phase-4 milestone read is
+  not owed until the standing baseline's three diagnostic caveats clear; their
+  repairs LANDED as the one `P11` window, so the caveats clear at the
+  re-baseline that follows, which has not been taken.
 - **Payoff-reach re-registration — RUN AND GRADED 2026-08-24.** R121's
   countersigned six-step order has run end to end. The grade, the controls, the
   tripwires and the two defects the run found (`EB-123`, `EB-124`, both since
@@ -271,8 +244,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
 Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`), the staged lever-2 pull-or-not
 (`S4-G13`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
-countersign (`M14`); the regret-margin prediction slots (`M13`); the `M17` sweep
-countersign and its post-sweep `C2` landing; the name/lore and art eyes-on pile
+countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
 Art debt); and the Fontaine Rares close-out (`M10`).
 
@@ -309,15 +281,14 @@ returns to [USER] only when its trigger fires.
   workshop axis **G**, the null option: **no Charge read budget** — a deferral
   of a nerf, not an endorsement, with the §3.3 double read ruled intended
   deckbuilder stacking. Reads per turn are instrumented and the instrument is
-  deliberately inert: `resources.note_charge_read` tallies every resolved read
-  onto `CombatState.charge_reads_this_turn` tagged by source and `combat` emits
-  one `charge_reads_turn` sample per completed player turn; nothing in engine,
-  pilot or drafter reads the tally back, so it is not a budget and cannot become
-  one by accident. Declared blind spot: the sample rides `turn_close`, which a
-  turn ending in the last kill or the player's death never reaches, so the
-  truncation is toward the BUSY end. **Trigger:** a reads-per-turn reading or a
-  live playtest shows repeatable reads dominant — "dominant" is not a number
-  yet, and §5.1 of
+  deliberately inert (`resources.note_charge_read` →
+  `CombatState.charge_reads_this_turn`, one `charge_reads_turn` sample per
+  completed player turn; nothing reads the tally back, so it is not a budget and
+  cannot become one by accident). Declared blind spot: the sample rides
+  `turn_close`, which a turn ending in the last kill or the player's death never
+  reaches, so the truncation is toward the BUSY end. **Trigger:** a reads-per-turn
+  reading or a live playtest shows repeatable reads dominant — "dominant" is not
+  a number yet, and §5.1 of
   `review/active/charge-reads-per-turn-registration-2026-08-13.md` is the slot
   that makes it one, and that slot is [USER]'s (BACKLOG `EB-78`).
 

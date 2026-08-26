@@ -849,12 +849,16 @@ def reaction_share(all_stats: list[FightStats]) -> dict:
 # payoff ops" the 2026-07-26 audit called unused. Named here so the harvest
 # and the tests read the same list, and so adding a payoff predicate to the
 # DSL without adding it here is a visible omission rather than a silent one.
-# `target_has_nonpyro_aura` is an AURA payoff rather than a reaction payoff
-# (it reads the board state a reaction would consume), and is listed for that
-# reason -- the split is kept in the reporting, not merged away.
+# `target_has_nonpyro_aura` and its any-aura sibling `target_has_aura` are
+# AURA payoffs rather than reaction payoffs (they read the board state a
+# reaction would consume), and are listed for that reason -- the split is kept
+# in the reporting, not merged away. Both names appear because C2 (R189) moved
+# ONE row from the first to the second: a harvest that knew only the old name
+# would have reported `elemental_ecstasy`'s fire rate as zero from the day it
+# was repaired.
 REACTION_PAYOFF_PREDICATES = ("reaction_triggered_by_this",
                               "reaction_triggered_this_turn")
-AURA_PAYOFF_PREDICATES = ("target_has_nonpyro_aura",)
+AURA_PAYOFF_PREDICATES = ("target_has_nonpyro_aura", "target_has_aura")
 
 
 def aura_profile(all_stats: list[FightStats]) -> dict:

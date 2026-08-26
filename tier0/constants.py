@@ -2279,6 +2279,18 @@ BANNER_FEATURED_SLOTS = 3
 # graded against a committed prediction.
 # ---------------------------------------------------------------------------
 CONSTANTS_VERSION = 20
+
+# Correction D (2026-08-26). The content sheets carry no version integer of
+# their own, and a sheet edit moves every measured arm: a pool that grows by
+# three Uncommons renumbers the shelf, because `rng.choice` maps the same
+# draw to a different card. This is one digest over `docs/*-cards.yaml` +
+# `docs/*-companions.yaml`, gated by `tools/lint_sheet_stamp.py`, so a sheet
+# edit that bumped no stamp FAILS instead of being noticed five re-stamps
+# later. It is a fingerprint, not a version -- it says only that the sheets
+# moved, and the bump the move earns is still a judgement. Re-pin with
+# `python tools/lint_sheet_stamp.py --update`, in the SAME commit as the
+# sheet edit.
+SHEET_DIGEST = "a9eb3f1baecde24b12d59cec28cf8f578de5d113923bf5f786668423e038df70"
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

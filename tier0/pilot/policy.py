@@ -163,6 +163,11 @@ _ENGINE_LIVE_PREFIXES = ("charge_at_least_",)
 SCORABLE_PREDICATES = frozenset({
     "has_spark",
     "target_has_nonpyro_aura",
+    # R189 C2's any-aura sibling, read live below on the same pattern as the
+    # off-element one -- so `elemental_ecstasy`'s Block keeps being scored at
+    # score time instead of dropping into EB-144's silent-zero hole the
+    # moment its predicate was renamed.
+    "target_has_aura",
     "card_exhausted_this_turn",
     "hp_lost_this_turn",
     "reaction_triggered_this_turn",
@@ -220,6 +225,12 @@ def _active_effects(state: CombatState, effect_list: list[dict],
                 target = effects._default_target(state)
                 ready = bool(target and target.aura
                              and target.aura != state.player.element)
+            elif name == "target_has_aura":
+                # The forecast of the engine's card-start snapshot: at score
+                # time no aim is bound yet, so the default aim is the honest
+                # answer -- exactly what the off-element branch above does.
+                target = effects._default_target(state)
+                ready = bool(target and target.aura)
             elif name.startswith("target_has_power_"):
                 target = effects._default_target(state)
                 power = name[len("target_has_power_"):]

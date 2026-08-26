@@ -54,7 +54,14 @@ from understudy.report import console_safe          # noqa: E402
 ROOT = Path(__file__).resolve().parent.parent
 
 # Lanes:
-#   ci      -- invoked by the `lints` job in .github/workflows/repo.yml
+#   ci      -- the PRE-PUSH gate. The `lints` job in
+#              .github/workflows/repo.yml invokes the original sixteen
+#              directly; the Correction-D rows added 2026-08-26 (the four
+#              register/stamp shape lints and the hook self-tests) are gated
+#              HERE and by `tools/hooks/push_gate.py`, which runs exactly
+#              `--lane ci`. Putting them in repo.yml is [USER]'s edit, not this
+#              branch's -- so this lane is a SUPERSET of that job today, and
+#              the divergence is written down rather than assumed away.
 #   local   -- OPERATIONS.md "Local-only (not in CI)"; a runner has no art and
 #              no game, so these answer questions CI structurally cannot ask
 #   suite   -- already exercised by pytest (tools/README.md "Suite-gated");
@@ -121,6 +128,13 @@ REGISTRY: tuple[Lint, ...] = (
     # EB-127. Beside r-numbers deliberately: same question (an id namespace
     # with no gate), the other series.
     _ci("register-ids",         "tools/lint_register_ids.py"),
+    # Governance correction C, 2026-08-26. Third of the R-namespace trio:
+    # r-numbers says a citation is IN RANGE, this says the citation can be
+    # RESOLVED -- every cited id has a row in docs/current/RULINGS.md. CI lane
+    # because the half that bites there reads two files and no history; the
+    # staleness half needs the retired ledgers, so on the depth-1 checkout it
+    # skips itself and says so on stdout rather than failing blind.
+    _ci("rulings-index",        "tools/lint_rulings_index.py"),
     # EB-109. Structural, over committed source, so it runs where the other
     # invisible-seam gates run: an enchanted id became reachable at
     # RUNTEMPLATE 10 and turned correct `+ SUFFIX` sites wrong without anyone
@@ -128,6 +142,22 @@ REGISTRY: tuple[Lint, ...] = (
     _ci("upgrade-suffix-appends", "tools/lint_upgrade_suffix_appends.py"),
     _ci("vendor-pin",           "tools/lint_vendor_pin.py"),
     _ci("art-coverage",         "tools/art_coverage.py"),
+
+    # --- Correction D (2026-08-26): the governance rules that were prose ---
+    # Each ships GREEN by carrying a curated DEBT set of the rows failing
+    # today, the structurally-invisible-defects pattern: the gate binds from
+    # this commit forward while the existing rows are a work list. A DEBT
+    # entry that has since become clean FAILS, so the sets can only shrink.
+    _ci("register-shape",       "tools/lint_register_shape.py"),
+    _ci("stamp-rows",           "tools/lint_stamp_rows.py"),
+    _ci("sheet-stamp",          "tools/lint_sheet_stamp.py"),
+    _ci("experiments-active",   "tools/lint_experiments_active.py"),
+    # The hooks under tools/hooks/ are the only code here that no test imports
+    # and no lint reads -- they run out of process, on stdin JSON. A refusal
+    # that quietly stopped refusing looks exactly like a session that never
+    # tried the forbidden thing, so their self-tests are gated like anything
+    # else, in the lane push_gate.py itself runs.
+    _ci("hook-self-tests",      "tools/hooks/selftest_all.py"),
 
     _local("text-encoding",       "tools/lint_text_encoding.py"),
     _local("generated-structure", "tools/lint_generated_structure.py"),

@@ -130,6 +130,16 @@ jobs:
       # checkout is depth-1 with no tags.
       - name: register row-id uniqueness
         run: python tools/lint_register_ids.py
+      # Governance correction C, 2026-08-26. The third R-namespace question:
+      # r-numbers says a citation is IN RANGE, this says it can be RESOLVED --
+      # every R-number cited under docs/current/ has a row in
+      # docs/current/RULINGS.md, the on-demand index. That half reads two files
+      # and no history, so it runs here. The staleness half (is the index what
+      # the generator produces?) needs the retired ledgers, which this depth-1
+      # no-tags checkout does not have -- it skips itself and says so, rather
+      # than diffing against an all-unresolved regeneration.
+      - name: rulings index
+        run: python tools/lint_rulings_index.py
       # EB-109. An enchanted id (`x@sharp-2`) became reachable at RUNTEMPLATE
       # 10, and the upgrade suffix rides INSIDE the decoration, so every
       # `<id> + upgrades.SUFFIX` site silently changed meaning without being
@@ -150,6 +160,25 @@ jobs:
       # on a tree with no art is the vacuum this sprint spent Track A on.
       - name: art coverage (runs; asserts nothing about art)
         run: python tools/art_coverage.py
+      # Governance correction D, 2026-08-26. Four register/stamp gates plus the
+      # hook self-tests, all reading committed files only. register-shape and
+      # experiments-active carry a curated DEBT set of the rows that failed
+      # when the gate was born; a DEBT entry that has since become clean FAILS,
+      # so the sets only shrink. sheet-stamp asserts the six content sheets
+      # digest to SHEET_DIGEST in tier0/constants.py (a sheet edit that bumped
+      # no stamp fails here). hook-self-tests runs the allow/deny cases of the
+      # PreToolUse/PostToolUse hooks in tools/hooks/ -- a deny hook that has
+      # never refused anything is indistinguishable from one that cannot.
+      - name: register row shape
+        run: python tools/lint_register_shape.py
+      - name: STATE live-cell stamp rows
+        run: python tools/lint_stamp_rows.py
+      - name: sheet digest pinned beside CONSTANTS_VERSION
+        run: python tools/lint_sheet_stamp.py
+      - name: EXPERIMENTS active registrations
+        run: python tools/lint_experiments_active.py
+      - name: hook self-tests
+        run: python tools/hooks/selftest_all.py
 
   # (c) Patch sentinel -- ADVISORY, NEVER BLOCKING (S12, 2026-08-05).
   #

@@ -2603,6 +2603,7 @@ PREDICATE_NAMES = frozenset({
     "this_cost_zero",
     "has_spark",
     "target_has_nonpyro_aura",
+    "target_has_aura",
     "reaction_triggered_by_this",
     "reaction_triggered_this_turn",
     "killed_target",
@@ -2782,6 +2783,19 @@ def _predicate(state: CombatState, name: str) -> bool:
         # Snapshotted at card start — the card's own first hit may consume
         # the aura via reaction, which is exactly what the bonus rewards.
         return state.target_had_offelement_aura
+    if name == "target_has_aura":
+        # The any-aura sibling (R189's Option C2 for `elemental_ecstasy`).
+        # ANY element counts, INCLUDING the player's own: LAW says no
+        # character card applies an off-element aura, so a Pyro character
+        # gated on `target_has_nonpyro_aura` can never turn her own branch
+        # on, which is the whole defect C2 repairs.
+        #
+        # Snapshotted at card start for the SAME reason its off-element
+        # sibling is, not because today's only user needs it: the one card
+        # printing this consumes no aura before the branch, but an attack
+        # that printed it would, and the two names must not disagree about
+        # when they are read.
+        return state.target_had_aura
     if name == "reaction_triggered_by_this":
         return state.reactions_this_card > 0
     if name == "reaction_triggered_this_turn":
@@ -3290,7 +3304,8 @@ def _free_play(state: CombatState, card: Card,
          kills_this_card, fatal_kills_this_card, exhausted_this_card,
          exhaust_selection,
          detonations_at_card_start, repeat_requested,
-         target_had_offelement_aura, current_attack_bonus, sparks_at_play,
+         target_had_offelement_aura, target_had_aura,
+         current_attack_bonus, sparks_at_play,
          current_x, current_card_cost);
       3. current_card_cost = 0 for the free play (this_cost_zero and
          zero_cost_attacks_up both read it), then restore;
@@ -3635,6 +3650,9 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     tgt = state.card_aim
     state.target_had_offelement_aura = bool(
         tgt and tgt.aura and tgt.aura != state.player.element)
+    # Its any-aura sibling (R189 C2), taken off the SAME bound aim in the
+    # same breath so the two predicates can never describe different bodies.
+    state.target_had_aura = bool(tgt and tgt.aura)
     # Per-card flat attack bonus. Computed by the shared pure helper so the
     # pilot's estimate cannot drift from what actually resolves (v0.4 W1);
     # the two side effects the helper must NOT have live here instead:
