@@ -491,13 +491,16 @@ def test_drafter_v3_values_klee_visible_utility():
 
     dreams = loader.get_card("elemental_ecstasy")
     assert draft._has_block(dreams)
-    # Conditional 8 Block is available at the draft-time 50% share: 4 / cost
-    # 2 = 2.0. DRAFTER_VERSION 13 adds the other half of what the card prints
-    # -- `refresh_all_auras`, worth STATIC_AURA_REFRESH_VALUE and previously
-    # invisible -- so the same card now reads (4 + 1) / 2. The v3 claim this
-    # test makes is untouched: direct mitigation is visible and the engine
-    # terms stay neutral. Only the count of PRICED verbs on the card moved.
-    assert draft._static_power(dreams) == 2.5
+    # Conditional Block is available at the draft-time 50% share, plus
+    # `refresh_all_auras` at STATIC_AURA_REFRESH_VALUE (DRAFTER_VERSION 13
+    # added that second half; before it the refresh was invisible). C20's C2
+    # redesign (R189/R205) moved the printed Block 8 -> 5, so the same
+    # arithmetic now reads (2.5 + 1) / cost 2 = 1.75 where it read (4 + 1) / 2
+    # = 2.5. THE DRAFTER DID NOT MOVE: the share is the same dial and the
+    # renamed predicate is priced in the same class its predecessor was. The
+    # v3 claim this test makes is untouched -- direct mitigation is visible
+    # and the engine terms stay neutral.
+    assert draft._static_power(dreams) == 1.75
     assert draft._static_power(loader.get_card("patched_dress")) == 7.5
     assert draft._static_power(loader.get_card("bennett_fantastic_voyage")) == 6
     assert draft._static_power(loader.get_card("durin_witchs_flame")) == 6

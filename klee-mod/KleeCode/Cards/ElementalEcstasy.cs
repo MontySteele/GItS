@@ -16,10 +16,16 @@ namespace KleeMod.Cards;
 
 /// <summary>
 /// Sheet: uncommon skill, cost 2, refresh all elemental auras, draw 1 card
-/// per aura, and gain 8 Block if the default-aim target has a non-Pyro aura.
+/// per aura, and gain 5 Block if the default-aim target has ANY aura.
 /// Hand-written (R23). Port of tier0 _op_refresh_all_auras + _op_draw's
 /// per_aura formula (count first, refresh each, draw the count) plus the
-/// `target_has_nonpyro_aura` conditional block branch.
+/// `target_has_aura` conditional block branch.
+///
+/// C2 redesign (R189 direction, R205 sub-shape, 2026-08-26): the branch used
+/// to read `target_has_nonpyro_aura`, which Klee's own Pyro application can
+/// never satisfy, so the card's biggest number was unreachable by the
+/// character printing it. Any aura now enables it and the Block moves 8 -> 5,
+/// so the landing is the accessibility repair alone.
 ///
 /// Skills carry no element (sheet header), so playing this never applies or
 /// consumes anything -- it only resets durations, which is why it reads the
@@ -36,12 +42,12 @@ public sealed class ElementalEcstasy : CustomCardModel
         ("title", "Sweet Dreams"),
         ("description",
             "Refresh all elemental auras. Draw 1 card for each aura. "
-          + "If the lowest-HP enemy has a non-[gold]Pyro[/gold] aura, "
+          + "If the lowest-HP enemy has an aura, "
           + "gain {Block} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar> { new BlockVar(8m, ValueProp.Move) };
+        new List<DynamicVar> { new BlockVar(5m, ValueProp.Move) };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself (see Kaboom).
     public ElementalEcstasy()
@@ -51,13 +57,14 @@ public sealed class ElementalEcstasy : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        // tier0 snapshots target_has_nonpyro_aura against its default aim:
-        // the lowest-HP living enemy, even for this self-targeted utility.
+        // tier0 snapshots target_has_aura against its default aim: the
+        // lowest-HP living enemy, even for this self-targeted utility. The
+        // element is deliberately NOT inspected -- C2 (R189) is exactly the
+        // removal of that test, so Klee's own Pyro counts.
         var defaultTarget = CombatState!.HittableEnemies
             .OrderBy(e => e.CurrentHp).FirstOrDefault();
         var shouldBlock = defaultTarget != null
-            && AuraCmd.Find(defaultTarget) is { } targetAura
-            && targetAura.Element != Element.Pyro;
+            && AuraCmd.Find(defaultTarget) != null;
 
         // HittableEnemies is the verified live-enemy accessor the generated
         // random-target cards use; the sim iterates living_enemies.
