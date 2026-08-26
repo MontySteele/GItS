@@ -713,3 +713,78 @@ def test_a_spent_rest_site_that_refuses_its_exit_still_declines():
     attached, and `_last_resort` is the seat for answering that screen."""
     d = policy_v1.decide(_spent_rest(can_proceed=False), policy_v1.Memo())
     assert not d.available
+
+
+# ---------------------------------- #11: a delegated screen has a HISTORY ---
+#
+# EB-106, recorded. Soak `20260813-010707` run 2, seed `JN7ZSSZAE3`, package
+# `0.2-738`, act 2 floor 20: the Amalgamator event's "Combine Strikes" opens a
+# `card_select` whose prompt reads "Choose 2 cards to Remove.", the arm posted
+# `select_card index 0` TWELVE times ("Toggling card selection: Kaboom!"),
+# `can_confirm` never turned true, and the run ended `no_progress`. The state
+# below is that screen as the defect row recorded it -- three identical
+# Kaboom! copies at 0/1/2 and a Jumpy Dumpty at 3.
+
+
+def _amalgamator(can_confirm=False):
+    """The recorded EB-106 screen. Two cards are wanted; four are offered."""
+    kaboom = {"id": "KLEEMOD-KABOOM", "name": "Kaboom!", "type": "Attack",
+              "cost": "1", "rarity": "Basic", "is_upgraded": False,
+              "description": "Deal 7 damage. Applies Pyro."}
+    jumpy = {"id": "KLEEMOD-JUMPY_DUMPTY", "name": "Jumpy Dumpty",
+             "type": "Attack", "cost": "2", "rarity": "Basic",
+             "is_upgraded": False,
+             "description": "Deal 8 damage to random enemies twice."}
+    cards = [dict(kaboom, index=0), dict(kaboom, index=1),
+             dict(kaboom, index=2), dict(jumpy, index=3)]
+    return {"state_type": "card_select", "run": {"act": 2, "floor": 20},
+            "player": {"hp": 67, "max_hp": 68, "block": 0, "hand": [],
+                       "draw_pile": [], "discard_pile": [], "exhaust_pile": []},
+            "card_select": {"screen_type": "select",
+                            "prompt": "Choose 2 cards to Remove.",
+                            "can_cancel": False, "can_confirm": can_confirm,
+                            "preview_showing": False, "cards": cards}}
+
+
+def test_a_delegated_remove_screen_picks_a_different_card_each_visit():
+    """The EB-106 cycle, made red. The arm that hands an upgrade/remove screen
+    to policy_v0 recorded its toggle into the Memo and never read it back, so
+    a screen with a quota above one was answered with the same index forever.
+    policy_v0 is frozen, so the fix withholds the toggled cards from the offer
+    it is asked about."""
+    state = _amalgamator()
+    memo = policy_v1.Memo()
+    picks = []
+    for _ in range(3):
+        d = policy_v1.decide(state, memo)
+        assert d.available, "a screen that cannot be cancelled needs an answer"
+        assert d.action["action"] == "select_card"
+        picks.append(d.action["index"])
+    assert len(set(picks)) == 3, f"the same index was re-toggled: {picks}"
+    assert all(0 <= i < 4 for i in picks), \
+        f"an index was posted that is not on the screen: {picks}"
+
+
+def test_the_delegated_pick_is_reindexed_to_the_screens_own_numbering():
+    """The withheld offer is a SHORTER list, so the index policy_v0 answers
+    with counts positions in it. Posting that number unmapped would toggle the
+    wrong card -- and the label carries the index too, so it is rewritten."""
+    state = _amalgamator()
+    memo = policy_v1.Memo()
+    first = policy_v1.decide(state, memo)
+    second = policy_v1.decide(state, memo)
+    assert second.action["index"] != first.action["index"]
+    assert second.label.endswith(f"[{second.action['index']}]"), second.label
+    assert second.notes.get("already_toggled") == [first.action["index"]]
+
+
+def test_the_delegated_screen_confirms_once_the_quota_is_met():
+    """Two toggles land, the wire turns `can_confirm` true, and the outstanding
+    verb is the confirm -- which is what the recorded run never reached."""
+    memo = policy_v1.Memo()
+    policy_v1.decide(_amalgamator(), memo)
+    policy_v1.decide(_amalgamator(), memo)
+    d = policy_v1.decide(_amalgamator(can_confirm=True), memo)
+    assert d.action == {"action": "confirm_selection"}
+    assert d.notes["basis"] == "grid_confirm"
+    assert len(d.notes["selected_indices"]) == 2

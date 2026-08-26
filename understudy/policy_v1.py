@@ -26,15 +26,18 @@ WHERE EACH REVISION LIVES
   #6 in-combat choice overlay      `_choice_overlay`
   #7 resolved card NAMES           `understudy/naming.py`, attached by `decide`
 
-REVISIONS #8-#10 (2026-08-13, the Act-2 reach pass). Three DEFECT fixes, not
-new preferences: each one restores an input this module already declares it
-reads and was not reading. Named here because R93's convention is that a
-revision has a number, a justification from observed decisions, and a log.
+REVISIONS #8-#11 (2026-08-13 onward, the Act-2 reach pass and its follow-up).
+Four DEFECT fixes, not new preferences: each one restores an input this module
+already declares it reads and was not reading. Named here because R93's
+convention is that a revision has a number, a justification from observed
+decisions, and a log.
 
   #8 the plan follows the character   `_plan_for`, `_card_reward`, `_rest`,
                                       `_score_offers`
   #9 elites/rests counted per act     `_map` (+ `Memo.elites_taken`)
   #10 a spent rest site is a decision `_rest`
+  #11 a delegated select screen has   `_card_select_screen`,
+      a HISTORY                       `_reindex_to_screen`
 
   #8, from the 20260813-002613 soak, three runs of KLEE: every draft
   rationale read `score_offer under the SALON plan`, and `Combustion Study`,
@@ -66,6 +69,20 @@ revision has a number, a justification from observed decisions, and a log.
   the rest was taken and the screen is SPENT (the HP jumps +18 right before
   each one). A counter whose entries are 82% bookkeeping cannot do the job
   that counter exists for.
+
+  #11, from the 20260813-010707 soak, run 2 (EB-106): the run ends
+  `no_progress` on an Act-2 `card_select` at floor 20 -- the Amalgamator
+  event's "Choose 2 cards to Remove." -- with the SAME index posted twelve
+  times ("Toggling card selection: Kaboom!") and `can_confirm` never turning
+  true. The multi-select lesson was already learned twice and written into
+  `_choice_overlay` and `_committed_screen`, both of which skip an index the
+  Memo says was toggled this visit; the third path -- the one that delegates
+  an upgrade/remove screen to policy_v0 -- recorded the toggle into the Memo
+  and then never read it back. `Memo.selected_screens` was working, and the
+  cycle is the `card_select` arm re-toggling, not the event re-serving: the
+  visit was never left, so nothing was cleared. Fixed by WITHHOLDING the
+  toggled cards from the offer policy_v0 is asked about, which is the only
+  shape available -- that module is frozen.
 
 DETERMINISM
 
@@ -1105,12 +1122,30 @@ def _card_select_screen(state: dict[str, Any], memo: Memo) -> Decision:
         # 'remove'. Handing it the kind we read off the prompt is a
         # TRANSLATION, not a policy change: the decision it then makes is
         # still `rest_action`'s smith/thin order, unmodified.
+        #
+        # REVISION #11 (EB-106). The cards already toggled on this visit are
+        # WITHHELD from that arm rather than filtered out of its answer.
+        # policy_v0 is a pure function of one wire state and is frozen, so it
+        # cannot know a screen has a history; asked the same screen twice it
+        # returns the same index twice, `select_card` TOGGLES, and a screen
+        # with a quota above one ("Choose 2 cards to Remove.", the Amalgamator
+        # event) never reaches `can_confirm`. The offer is the only input that
+        # moves, so the delegation stays a delegation: `rest_action` is asked
+        # "which of the cards still on the table", and its smith/thin order
+        # over that list is unmodified. Indices are mapped back to the
+        # SCREEN's own numbering before the action is posted.
+        entries = [e for e in (blob.get("cards") or []) if isinstance(e, dict)]
+        offered = [i for i in range(len(entries)) if i not in taken]
         translated = dict(state)
-        translated["card_select"] = {**blob, "screen_type": kind}
-        d = _from_v0(policy_v0._card_select(translated))
+        translated["card_select"] = {**blob, "screen_type": kind,
+                                     "cards": [entries[i] for i in offered]}
+        d = _reindex_to_screen(_from_v0(policy_v0._card_select(translated)),
+                               offered)
         d.notes = {**d.notes, "screen_kind_from": "prompt"
                    if str(blob.get("screen_type") or "").lower() != kind
                    else "screen_type"}
+        if taken:
+            d.notes = {**d.notes, "already_toggled": sorted(taken)}
         if d.available:
             return _remember_selection(d, memo, key)
         # THE SIM'S LADDER CAN REFUSE A SCREEN WE ARE ALREADY COMMITTED TO.
@@ -1129,6 +1164,34 @@ def _card_select_screen(state: dict[str, Any], memo: Memo) -> Decision:
             _committed_screen(state, blob, kind, d.rationale, taken),
             memo, key)
     return _remember_selection(_choice_overlay(state, taken), memo, key)
+
+
+def _reindex_to_screen(d: Decision, offered: list[int]) -> Decision:
+    """Map a `select_card` index over a WITHHELD offer back to the screen's.
+
+    Revision #11's second half. The arm above hands policy_v0 a shortened card
+    list, so the index that comes back counts positions in that list; the wire
+    counts positions on the screen. The label carries the index too and is
+    rewritten with it, because a log line that names a card and an index which
+    disagree is worse than one that names neither.
+    """
+    if not d.available or not d.action:
+        return d
+    if d.action.get("action") != "select_card":
+        return d
+    off = int(d.action.get("index", -1))
+    if not (0 <= off < len(offered)):
+        return _unavailable(
+            d.category,
+            f"the sim chose offer {off}, which is not one of the "
+            f"{len(offered)} options still untoggled on this screen")
+    real = offered[off]
+    d.action = {**d.action, "index": real}
+    if d.label.endswith(f"[{off}]"):
+        d.label = d.label[: -len(f"[{off}]")] + f"[{real}]"
+    if real != off:
+        d.notes = {**d.notes, "offer_index": off, "screen_index": real}
+    return d
 
 
 def _remember_selection(d: Decision, memo: Memo, key: tuple) -> Decision:
