@@ -121,6 +121,13 @@ REGISTRY: tuple[Lint, ...] = (
     # EB-127. Beside r-numbers deliberately: same question (an id namespace
     # with no gate), the other series.
     _ci("register-ids",         "tools/lint_register_ids.py"),
+    # Governance correction C, 2026-08-26. Third of the R-namespace trio:
+    # r-numbers says a citation is IN RANGE, this says the citation can be
+    # RESOLVED -- every cited id has a row in docs/current/RULINGS.md. CI lane
+    # because the half that bites there reads two files and no history; the
+    # staleness half needs the retired ledgers, so on the depth-1 checkout it
+    # skips itself and says so on stdout rather than failing blind.
+    _ci("rulings-index",        "tools/lint_rulings_index.py"),
     # EB-109. Structural, over committed source, so it runs where the other
     # invisible-seam gates run: an enchanted id became reachable at
     # RUNTEMPLATE 10 and turned correct `+ SUFFIX` sites wrong without anyone
