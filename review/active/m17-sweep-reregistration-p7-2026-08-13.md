@@ -10,10 +10,11 @@
 > packet. Their §13 grade stands as published. Where this packet quotes them it
 > quotes them; it never edits them.
 >
-> **Prediction slots (§8) are BLANK and are [USER]'s.** Per EXPERIMENTS law and
-> the R121 precedent, predictions are authored design-side and land as their own
-> commit **before** any seed in the registered range is run. Nothing in this
-> file may be run until they exist.
+> **Prediction slots (§8) are FILLED, 2026-08-26, and they are [USER]'s.** Per
+> EXPERIMENTS law and the R121 precedent, predictions are authored design-side
+> and land as their own commit **before** any seed in the registered range is
+> run — which is how they landed: the fill is its own commit, taken before any
+> registered seed had been run, and **§8 is not edited again.**
 >
 > **PARTLY FILLED 2026-08-13 by R189, and STILL NOT COUNTERSIGNED.** Four slots
 > are settled and written in below: §7's `N` (**2,400 pairs per card**), §7's
@@ -52,8 +53,10 @@
 >
 > **WHAT THE RE-STAMP DID NOT DO, deliberately.** It filled nothing, graded
 > nothing and measured nothing. §8's per-arm table and the direction half of the
-> `Q4` slot are still blank and still [USER]'s; the countersign line is still
-> blank. **The `borrowed_brilliance` bare-form play rate was NOT re-measured**,
+> `Q4` slot were left blank for [USER] at the re-stamp and were filled
+> afterwards, on 2026-08-26, in their own commit and against the settled world —
+> which is the order R189 ruled.
+> **The `borrowed_brilliance` bare-form play rate was NOT re-measured**,
 > and that is a rule and not an omission: it is the `Q4` read, [USER]'s
 > direction for `Q4` is not written down yet, and taking the number first is
 > exactly the blind-grading breach EXPERIMENTS forbids. The `P7`-era ~6.1%
@@ -537,24 +540,41 @@ grade drawn from fewer than the registered `N` quotes its own realised MDE.
 
 ---
 
-## 8. Predictions — **BLANK. [USER]'s, before any number is read**
+## 8. Predictions — **FILLED 2026-08-26. [USER]'s, before any number is read**
 
 Per EXPERIMENTS (*"pre-registered from design intent … never revised against
 the playtest that grades it"*) and the R121 precedent that predictions are
 authored design-side and appended **as their own commit before any measurement
-runs**. **Drafting them here would be the retro-fit that authority forbids, so
-the cells below are empty.**
+runs**. **The commit that carries this section is that commit**: it lands
+before any seed in §4's registered range has been run, it contains nothing but
+the fill, and §8 is not edited again — the grade is written beside it, never
+over it.
 
 For **each** arm, [USER] states a direction and a threshold for **both**
 co-primaries — an ungraded co-primary is just a number nobody committed to.
 
 | card | §6.1 sign of Δ vs control | threshold (pp) that counts as a real move | §6.1b sign of Δ vs filler | confidence |
 |---|---|---|---|---|
-| `friendly_visit` | **[USER]** | **[USER]** | **[USER]** | **[USER]** |
-| `study_buddy` | **[USER]** | **[USER]** | **[USER]** | **[USER]** |
-| `borrowed_brilliance` | **[USER]** | **[USER]** | **[USER]** | **[USER]** |
-| `elemental_ecstasy` ("Sweet Dreams") | **[USER]** | **[USER]** | **[USER]** | **[USER]** |
-| `kaboom` (filler, negative control) | **[USER]** | **[USER]** | — (it is the baseline) | **[USER]** |
+| `friendly_visit` | **positive** | **+2 pp — expected to be met or exceeded** | **positive, ≥ +2 pp** | **high** |
+| `study_buddy` | **positive** | **+2 pp — probably below it against control** | **positive, probably ≥ +2 pp** | **medium** |
+| `borrowed_brilliance` | **positive** | **+2 pp** | **positive** | **LOW** |
+| `elemental_ecstasy` ("Sweet Dreams") | **near-null; slightly negative if anything** | **±2 pp — predicted INSIDE the band** | **null — inside ±2 pp** | **medium-high** |
+| `kaboom` (filler, negative control) | **slightly negative (dilution)** | **±2 pp — predicted INSIDE the band** | — (it is the baseline) | **high** |
+
+**Disclosure for the grader, recorded with the fill.** These directions were
+authored 2026-08-26 with the parent's `P6` read in view — archive under this
+packet's own rule (§11), never a comparator. The `friendly_visit`,
+`study_buddy`, `elemental_ecstasy` and `kaboom` rows track that read. The
+`borrowed_brilliance` row does **not**: it is set from DESIGN INTENT — the
+parent's own *"positive, likely ≥ +2"* — rather than from the `P6` zero-plays
+read, because `Q4`'s premise is that the `P6` pilot refused the card and the
+repaired pilot this sweep runs under does not. A near-null prediction beside a
+">5% played" prediction would only cohere if the card failed WHEN PLAYED —
+which §8.1's trigger (b) tests independently.
+
+**The ±2 pp threshold is [USER]'s choice**, carried forward from the parent the
+same way §8.1's trigger was — not computed from §7's MDE and not derived from
+any read.
 
 **Q4 slot — `borrowed_brilliance` bare-form play rate. THRESHOLD FILLED
 2026-08-13 (R189): 5%.** `played_when_drawn_rate` on the un-upgraded form is
@@ -570,9 +590,19 @@ implied it. That the ruled threshold sits just under the one figure anyone has
 seen is a fact about the threshold, and is written down here rather than
 noticed at grading time.
 
-**The DIRECTION half of this slot is still [USER]'s and is still blank**, along
-with the whole per-arm table above. It is filled at the post-window countersign
-with the rest of §8.
+**DIRECTION — FILLED 2026-08-26, with the rest of §8.** The bare form's
+`played_when_drawn_rate` is predicted **NON-ZERO and ABOVE the 5% materiality
+threshold**: the pilot repair R180 ordered this re-run for has removed the
+categorical refusal §13.8 recorded at `P6` (zero plays in 40,396 draws), and
+the `P10` pilot the sweep runs under carries it. **No large winrate gain is
+predicted from that alone** — the card is situational even when it is played —
+so a play rate above 5% sitting beside a small §6.1 delta is the PREDICTED
+shape here, not a contradiction to be reconciled at the grade.
+
+**What that prediction rests on, stated so the grade cannot mis-attribute it.**
+The reaching change is `P7`'s valuation fix (R176), carried unchanged into
+`P10`. §3.1 records that `P9`'s and `P10`'s own limbs provably do **not** reach
+this cell, so a nonzero read here is not evidence about either of them.
 
 **A note for whoever transcribes [USER]'s words.** In the parent, [USER] wrote
 directions against the control plus one statement about the filler, and the
@@ -580,6 +610,11 @@ filler column followed by arithmetic rather than by a second judgement — which
 was recorded so a grader could see it was not an independent prediction scored
 as a separate success. **If [USER] works the same way this time, record it the
 same way.**
+
+**Recorded, 2026-08-26: not the same way.** The filler column above is stated
+per row and carries its own qualifiers (`study_buddy`'s "probably", the two
+inside-band nulls), so it is a second judgement rather than arithmetic off the
+control column, and both co-primaries are graded as independent predictions.
 
 ### 8.1 The redesign trigger — **FILLED 2026-08-13 (R189): CARRIED FORWARD UNCHANGED**
 
@@ -646,7 +681,8 @@ about the grading discipline changed, only the order this file states.
    the `Q4` slot — and it is committed as **its own commit, nothing else in
    it.** (§7's `N` = 2,400 pairs and the 4-hour cost ceiling are already
    filled, R189, and are not re-asked here; §8.1's redesign trigger is filled
-   too.) **OPEN — [USER].**
+   too.) **DONE 2026-08-26** — its own commit, nothing else in it, taken before
+   any seed in §4's registered range had been run.
 5. **Countersign this packet.** **OPEN — [USER], QUEUE `M17`.**
 6. Run the sweep at the pinned stamp. Report only; read nothing into it.
    **The exact command is at §9.2**; nothing is left to decide at run time.
