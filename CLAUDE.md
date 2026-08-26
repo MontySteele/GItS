@@ -17,6 +17,7 @@ repo.
   - measurement law + active registrations → `docs/current/EXPERIMENTS.md`
   - build / test / sim / codegen / art / worktrees → `docs/current/OPERATIONS.md`
   - a ruling by number → `docs/current/RULINGS.md` (being built)
+  - stamp history (what a past RT/D/P/C level covered) → `docs/current/STAMPS.md`
   - the **one** YAML sheet the task touches (`docs/*-cards.yaml`,
     `*-upgrades.yaml`, `*-companions.yaml`, …). Never bulk-load all YAML.
 - **Reference — open only when the task reaches it, never preload:**
