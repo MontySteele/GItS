@@ -83,8 +83,10 @@ public sealed class CenterStageOption : CustomCardModel
     {
         ("title", "Center Stage"),
         ("description",
-            "Spotlight Furina. Her cards generate 2 Fanfare when played, "
-          + "but receive no numeric boost."),
+            // EB-89: the rate is interpolated, not printed.
+            $"Spotlight Furina. Her cards generate "
+          + $"{SpotlightSystem.FanfarePerCenterStagePlay} Fanfare when "
+          + "played, but receive no numeric boost."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
