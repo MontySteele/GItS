@@ -51,7 +51,10 @@ comparison, which is not citable the way a stamped baseline is
 (`EXPERIMENTS.md`). Version stamps themselves are unchanged: every change to a
 published-world variable still bumps its stamp. **The Phase-4 milestone read
 follows when the three diagnostic caveats above clear; it is not owed at any
-bump landed so far.**
+bump landed so far.** Those caveats are filed as BACKLOG `EB-143` (the Spark
+hold-versus-spend term), `EB-144` (scorer predicate / Salon-verb literacy) and
+`EB-145` (Tide of Names payout-aware scoring) — all three gated behind `M14`
+and `M17` firing, then landing as ONE `P11` window with ONE re-baseline.
 
 Pinned, and NOT part of the run-cell stamp:
 
@@ -244,7 +247,9 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   and `W4` is SEPARATELY the pilot-policy weight sweep (`OPERATIONS.md`) — a
   pre-existing collision that is deliberately not extended. **Nothing is
   scheduled on either window**, and the Phase-4 milestone read is not owed until
-  the standing baseline's three diagnostic caveats clear.
+  the standing baseline's three diagnostic caveats clear — BACKLOG `EB-143`,
+  `EB-144` and `EB-145`, which land together as one `P11` window once `M14` and
+  `M17` have fired.
 - **Payoff-reach re-registration — RUN AND GRADED 2026-08-24.** R121's
   countersigned six-step order has run end to end. The grade, the controls, the
   tripwires and the two defects the run found (`EB-123`, `EB-124`, both since
