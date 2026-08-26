@@ -41,6 +41,13 @@ each with what a useful answer looks like.
 Fill in the answers section as you go. Everything else here is context to read
 first.
 
+The exploratory session that runs ahead of this one does **not** open her cold:
+her twelve-card starter reaches an Exhaust exactly once, so a cold opening
+grades a character the player never met. The scripted opening it uses instead —
+priest-weighted early picks plus one granted Exhaust payoff, a grant that makes
+that run non-comparable and is therefore not this protocol's run — is written
+up at `review/active/richness-playtest-brief-2026-08-26.md`.
+
 ---
 
 ## Read this before treating anything as a bug
