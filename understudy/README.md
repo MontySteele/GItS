@@ -123,9 +123,23 @@ Frames are gitignored for the reason `art/g12_captures/` and
 **The window's rectangle, never the whole desktop.** The rectangle comes from
 the game process's own `MainWindowHandle`, and three states are named refusals:
 no window, a zero-size rectangle, and a minimised window (Windows parks those
-off-screen at a -32000 origin). One honest limit: the grab is
-`CopyFromScreen` over that rectangle, so anything sitting ON TOP of the game is
-in the frame — it is the game's rectangle, not the game's pixels.
+off-screen at a -32000 origin).
+
+**Two routes, and on this build you have to name the one you want.** The
+default asks the window for its own pixels (`PrintWindow`) and falls back to
+reading the screen under its rectangle only if that comes back blank. On this
+Godot/Vulkan window `PrintWindow` comes back neither blank nor complete — the
+background and HUD chrome render, the **hand, the enemies and the prompt
+caption do not** — so the blank test passes and every in-combat frame on the
+default route is a partial. Set
+**`GITS_UNDERSTUDY_CAPTURE_ROUTE=copyfromscreen`** (same family as
+`GITS_UNDERSTUDY_CAPTURE`, env-only, an unknown value falls back to `auto`) to
+pin the screen route, which does render all of it. Its honest limit is the old
+one — it is the game's rectangle, not the game's pixels, so anything sitting ON
+TOP of the game lands in the frame — which is why that route now raises the
+game to the foreground for the grab and drops it back afterwards. Every
+manifest row records the route that RAN (`copyfromscreen-forced` when pinned)
+beside `route_requested`, and carries the guardrail either way.
 
 **A frame is MATERIAL, not a finding.** Guardrail-7 and the no-fun rule are
 not changed by the existence of a camera: nothing this directory derives from a

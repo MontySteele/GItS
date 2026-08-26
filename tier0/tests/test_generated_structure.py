@@ -27,6 +27,7 @@ import yaml
 
 from tools.lint_generated_structure import (
     MECHANICS,
+    aim_problems,
     PROFILES,
     coverage_problems,
     generated_sources,
@@ -137,3 +138,86 @@ def test_the_gate_fires_on_the_thunderous_ovation_bug():
     assert not coverage_problems(card, source, "ThunderousOvation.cs")
     found = coverage_problems(card, broken, "ThunderousOvation.cs")
     assert any("L3 MISSING MECHANIC" in line and "bonus_formula" in line for line in found), found
+
+
+# --------------------------------------------------------------------------
+# EB-142, the third real defect, reconstructed the same way.
+# --------------------------------------------------------------------------
+
+def test_take_it_from_the_top_aims_at_a_chosen_enemy():
+    """The shipped card, pinned on the value that was wrong in 0.2-1028.
+
+    An attended playtest of 0.2-1028 played this card twice with the
+    Spotlight already moved: Block +5 landed both times, enemy HP never
+    moved, and godot.log carried
+    `PlayCardAction ... completed with exception: System.ArgumentNullException
+    ... (Parameter 'cardPlay.Target')`. The constructor declared
+    `TargetType.Self` because the generator derived TargetType from TOP-LEVEL
+    ops only and this card's damage lives inside a `conditional`.
+    """
+    source = (CARDS / "Furina" / "Generated" / "TakeItFromTheTop.cs").read_text(
+        encoding="utf-8"
+    )
+    assert "TargetType.AnyEnemy" in source
+    assert "TargetType.Self" not in source
+    # The branch it exists for is still there.
+    assert "SpotlightSystem.MovedThisTurn(Owner.Creature)" in source
+    assert ".Targeting(cardPlay.Target)" in source
+
+
+def test_the_gate_fires_on_the_take_it_from_the_top_defect():
+    """L4: put the wrong TargetType back and the lint has to say so."""
+    path = CARDS / "Furina" / "Generated" / "TakeItFromTheTop.cs"
+    source = path.read_text(encoding="utf-8")
+    broken = source.replace("TargetType.AnyEnemy", "TargetType.Self")
+    assert broken != source, (
+        "TakeItFromTheTop no longer declares AnyEnemy in the shape this test "
+        "reconstructs the bug from; the reconstruction is stale"
+    )
+
+    assert not aim_problems(source, "TakeItFromTheTop.cs")
+    found = aim_problems(broken, "TakeItFromTheTop.cs")
+    assert any("L4 SELF-AIM" in line for line in found), found
+
+
+def test_l4_does_not_fire_on_a_nullable_target_read():
+    """The precision half: `Calculate(cardPlay.Target)` takes a NULL fine.
+
+    Five shipped self-Block cards pass a possibly-null target into the
+    calculated-block var on every play and are correct. An L4 that keyed on
+    the identifier rather than on the two REQUIRING shapes would red-flag all
+    five and would have been switched off within the week.
+    """
+    source = (CARDS / "Furina" / "Generated" / "DinnerService.cs").read_text(
+        encoding="utf-8"
+    )
+    assert "TargetType.Self" in source
+    assert "Calculate(cardPlay.Target)" in source
+    assert not aim_problems(source, "DinnerService.cs")
+
+
+def test_target_type_derivation_reads_the_whole_effect_tree():
+    """The generator-side half, at the derivation rather than at the output.
+
+    A card whose ONLY aiming op sits in a branch must still declare an aimed
+    TargetType. Asserted against a synthetic row so it keeps proving the rule
+    after the sheet moves.
+    """
+    from tools.gen_klee_cards import _aims_at_chosen_enemy, _effects_everywhere
+
+    row = {
+        "id": "synthetic_branch_aimer",
+        "effects": [
+            {"op": "block", "amount": 5, "target": "self"},
+            {
+                "op": "conditional",
+                "if": "spotlight_moved_this_turn",
+                "then": [{"op": "damage", "amount": 10, "target": "enemy"}],
+            },
+        ],
+    }
+    assert not any(_aims_at_chosen_enemy(e) for e in row["effects"]), (
+        "the top-level read is what was wrong; if it now reports True the "
+        "reconstruction is stale"
+    )
+    assert any(_aims_at_chosen_enemy(e) for e in _effects_everywhere(row))

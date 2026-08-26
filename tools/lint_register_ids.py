@@ -116,7 +116,10 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 141,   # EB-141 minted 2026-08-25 for the unstamped
+    "EB": 142,   # EB-142 minted AND CLOSED for the 0.2-1028 attended-playtest
+                 # defect (a branch-nested aiming op deriving TargetType.Self);
+                 # the ceiling stays at the issued number, ceilings never come
+                 # down. EB-141 minted 2026-08-25 for the unstamped
                  # exp_shop_companion_channel instrument (R68); EB-140 minted
                  # at the R211 W3 build (the codegen upgrade-delta gap);
                  # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
