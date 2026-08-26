@@ -28,6 +28,8 @@ Usage (every script):
 from __future__ import annotations
 
 import json
+import os
+import re
 import shlex
 import sys
 from pathlib import Path
@@ -122,19 +124,34 @@ def simple_commands(command: str) -> list[list[str]]:
     return out
 
 
-def git_subcommand(tokens: list[str]) -> tuple[str, list[str]]:
-    """`(subcommand, its arguments)` for a git invocation, else `("", [])`.
+def _git_start(tokens: list[str]) -> int | None:
+    """The index just past the `git` executable, or `None` if this is not git.
 
-    Handles the leading global options (`git -C ../GItS-foo worktree remove`)
-    and env-prefixed invocations (`GIT_PAGER=cat git push`), both of which a
-    naive `tokens[0] == "git"` test reads as "not git at all".
+    Skips `VAR=value` prefixes (`GIT_PAGER=cat git push`) and accepts a git
+    named by path, both of which a naive `tokens[0] == "git"` test reads as
+    "not git at all".
     """
     index = 0
     while index < len(tokens) and "=" in tokens[index] and not tokens[index].startswith("-"):
-        index += 1                      # VAR=value prefixes
+        index += 1
     if index >= len(tokens) or Path(tokens[index]).name.lower() not in ("git", "git.exe"):
+        return None
+    return index + 1
+
+
+def git_subcommand(tokens: list[str]) -> tuple[str, list[str]]:
+    """`(subcommand, its arguments)` for a git invocation, else `("", [])`.
+
+    The leading global options are skipped, `-C ../GItS-foo` included -- this
+    function answers *what* git is being asked to do. **Where** it is being
+    asked to do it is `git_c_dirs`, a separate question and for a while a
+    missing one: the push gate ran in the session's checkout while the push
+    itself carried `-C` to a sibling worktree.
+    """
+    start = _git_start(tokens)
+    if start is None:
         return "", []
-    index += 1
+    index = start
     while index < len(tokens):
         token = tokens[index]
         if token in GIT_OPTS_WITH_ARG:
@@ -145,6 +162,130 @@ def git_subcommand(tokens: list[str]) -> tuple[str, list[str]]:
             continue
         return token, tokens[index + 1:]
     return "", []
+
+
+def git_c_dirs(tokens: list[str]) -> list[str]:
+    """Every `-C <dir>` on a git invocation, in order.
+
+    Repeated `-C` COMPOSES -- `git -C a -C b` resolves `b` relative to `a`,
+    exactly as git itself does -- so this returns the list and the caller
+    folds it, rather than returning a single "the" directory that would be
+    wrong for the second one.
+    """
+    start = _git_start(tokens)
+    if start is None:
+        return []
+    dirs: list[str] = []
+    index = start
+    while index < len(tokens):
+        token = tokens[index]
+        if token == "-C" and index + 1 < len(tokens):
+            dirs.append(tokens[index + 1])
+            index += 2
+            continue
+        if token in GIT_OPTS_WITH_ARG:
+            index += 2
+            continue
+        if token.startswith("-"):
+            index += 1
+            continue
+        break                            # the subcommand: global options end
+    return dirs
+
+
+# `cd` and every spelling of it this project's two shells offer. PowerShell's
+# `Set-Location` and its `sl` alias are here because BOTH PreToolUse hooks now
+# match `Bash|PowerShell`: a rule that only understood Git Bash would be a
+# rule with a second shell as its bypass.
+CD_ALIASES = {"cd", "chdir", "pushd", "set-location", "sl"}
+
+# A Git-Bash drive path (`/c/Users/...`) is not a path any Windows API
+# understands, and it is the spelling that appears in practice.
+POSIX_DRIVE = re.compile(r"^/([A-Za-z])(/.*)?$")
+
+
+def native_path(raw: str) -> Path:
+    """A path token as the running platform spells it."""
+    text = str(raw).strip().strip('"').strip("'")
+    match = POSIX_DRIVE.match(text.replace("\\", "/"))
+    if match:
+        return Path(f"{match.group(1).upper()}:{match.group(2) or '/'}")
+    return Path(text)
+
+
+def _joined(base: Path, raw: str) -> Path:
+    """`raw` resolved against `base`, purely -- no filesystem, no symlinks.
+
+    `normpath` rather than `resolve`: the answer must be the same whether or
+    not the directory exists, because the caller's next move is to say so
+    when it does not.
+    """
+    target = native_path(raw)
+    if not target.is_absolute():
+        target = base / target
+    return Path(os.path.normpath(target))
+
+
+def cd_target(tokens: list[str]) -> str | None:
+    """The directory a `cd`-shaped simple command moves to, else `None`.
+
+    `None` also covers the two spellings whose destination cannot be read off
+    the command line -- bare `cd` (a home directory) and `cd -` (wherever you
+    were before). Those are UNKNOWN rather than "here", and the caller falls
+    through to the next resolution source, which is then validated like any
+    other.
+    """
+    if not tokens or tokens[0].lower() not in CD_ALIASES:
+        return None
+    # PowerShell spells the argument `-Path ../x`; both shells put flags
+    # first, so dropping every leading `-token` leaves the destination. `cd -`
+    # drops to nothing by the same rule, which is the answer it should give.
+    args = [t for t in tokens[1:] if not t.startswith("-")]
+    return args[0] if args else None
+
+
+def payload_cwd(payload: dict) -> Path:
+    """The directory Claude was in, per the hook payload's own `cwd` field.
+
+    Documented as *"Current working directory when the hook is invoked"*, and
+    it follows Claude: entering a worktree or running `cd` moves it, while
+    `CLAUDE_PROJECT_DIR` stays at the session root. So it is the right default
+    and the wrong answer on its own -- an in-line `cd` inside the very command
+    being judged has not run yet when the hook fires.
+    """
+    raw = payload.get("cwd")
+    return native_path(str(raw)) if raw else Path(os.getcwd())
+
+
+def push_target(command: str, cwd: str | Path) -> Path:
+    """The directory a `git push` in `command` would actually run in.
+
+    THE DEFECT THIS FIXES. Every push in this project is made from a SIBLING
+    WORKTREE while the session's directory stays the main checkout --
+    `cd ../GItS-gov && git push -u origin gov-2026-08-26`, or
+    `git -C ../GItS-gov push`. A gate that ran in the session's checkout
+    tested a different branch, usually one behind, and reported GREEN for a
+    tree it had never looked at. That is worse than no gate.
+
+    Resolution order, highest first:
+      (a) `-C` on the push invocation itself, folded left to right;
+      (b) the most recent `cd` BEFORE the push in the same command line --
+          `cd ../a && cd ../b && git push` lands in `b`, because each `cd` is
+          resolved against the one before it, and a `cd` AFTER the push is
+          never reached because this returns at the push;
+      (c) `cwd`, the payload's own field.
+    """
+    running = native_path(str(cwd))
+    for tokens in simple_commands(command):
+        sub, _ = git_subcommand(tokens)
+        if sub == "push":
+            for directory in git_c_dirs(tokens):
+                running = _joined(running, directory)
+            return running
+        moved = cd_target(tokens)
+        if moved:
+            running = _joined(running, moved)
+    return running
 
 
 def deny(reason: str) -> int:
@@ -178,9 +319,18 @@ def run_self_test(cases: list[tuple[str, int, str]],
     return 1 if failures else 0
 
 
-def bash_payload(command: str) -> str:
-    """A synthetic `Bash` hook payload, for the self-tests."""
-    return json.dumps({"tool_name": "Bash", "tool_input": {"command": command}})
+def bash_payload(command: str, tool: str = "Bash",
+                 cwd: str | None = None) -> str:
+    """A synthetic shell-tool hook payload, for the self-tests.
+
+    `tool` defaults to `Bash` and is set to `PowerShell` by the cases that
+    prove the second shell is not a bypass: both carry the command at
+    `tool_input.command`, which is why one parser serves both.
+    """
+    body: dict = {"tool_name": tool, "tool_input": {"command": command}}
+    if cwd is not None:
+        body["cwd"] = cwd
+    return json.dumps(body)
 
 
 def edit_payload(path: str, tool: str = "Edit") -> str:

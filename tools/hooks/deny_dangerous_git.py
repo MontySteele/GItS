@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PreToolUse/Bash: refuse the four git invocations OPERATIONS.md forbids in prose.
+"""PreToolUse/Bash|PowerShell: refuse the four git invocations OPERATIONS.md forbids in prose.
 
 Correction D. Each rule below was, until this file existed, a sentence in a
 document -- and a sentence is context, not configuration. These four were
@@ -25,6 +25,15 @@ chosen because each one has already cost this repo something:
      off the hook layer this correction is building. A gate with a documented
      bypass is a suggestion.
 
+TWO REVIEW DEFECTS, FIXED 2026-08-26. **The matcher was `Bash` alone**, and
+this session also has a PowerShell tool that carries its command line at the
+same `tool_input.command` -- so every rule below had a second shell as its
+bypass. It is now `Bash|PowerShell`, and `Set-Location` / `sl` / `pushd` read
+as `cd`. **And the bare-push branch check ran in the wrong tree**: it asked
+the hook script's own checkout what branch was out, while the push itself is
+routinely made from a sibling worktree (`cd ../GItS-gov && git push`). It now
+asks the tree the push actually targets, resolved by `_hooklib.push_target`.
+
 Everything else is allowed and must stay allowed: `git add docs/current`,
 `git push origin my-branch`, `git worktree add`, `git worktree prune`,
 `git commit -m`. The self-test carries those as cases precisely so a later
@@ -42,8 +51,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _hooklib import (ALLOW, REPO, bash_command, bash_payload, deny,  # noqa: E402
-                      git_subcommand, read_payload, run_self_test,
-                      simple_commands)
+                      git_subcommand, payload_cwd, push_target, read_payload,
+                      run_self_test, simple_commands)
 
 ADD_EVERYTHING = {"-A", "--all", "--no-ignore-removal", ".", "./", ":/", ":"}
 FORCE_FLAGS = {"-f", "--force", "--force-with-lease", "--force-if-includes"}
@@ -79,24 +88,31 @@ def _refspec_targets_protected(args: list[str]) -> str:
     return ""
 
 
-def _current_branch() -> str:
+def _current_branch(repo: Path | None = None) -> str:
     """The checked-out branch, for a BARE `git push` with no refspec.
 
-    Failures are silent and read as "not main": a hook that cannot answer the
-    question must not answer it with a refusal.
+    `repo` is the tree the push actually targets, which is not this script's
+    own checkout whenever the push is made from a sibling worktree -- asking
+    the wrong tree returns the wrong branch and the rule silently stops
+    applying. Failures are silent and read as "not main": a hook that cannot
+    answer the question must not answer it with a refusal.
     """
     try:
         proc = subprocess.run(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"],
-            cwd=REPO, capture_output=True, text=True, timeout=10,
+            cwd=str(repo or REPO), capture_output=True, text=True, timeout=10,
             encoding="utf-8", errors="replace")
     except (OSError, subprocess.SubprocessError):
         return ""
     return proc.stdout.strip() if proc.returncode == 0 else ""
 
 
-def verdict(tokens: list[str]) -> str:
-    """The refusal one simple command earns, or `""` if it is fine."""
+def verdict(tokens: list[str], repo: Path | None = None) -> str:
+    """The refusal one simple command earns, or `""` if it is fine.
+
+    `repo` is the tree a bare `git push` would push FROM; everything else here
+    is answered from the command line alone.
+    """
     sub, args = git_subcommand(tokens)
     if not sub:
         return ""
@@ -131,7 +147,8 @@ def verdict(tokens: list[str]) -> str:
                     "Fix what is red instead of muting it.")
         branch = _refspec_targets_protected(args)
         if not branch and not any(not a.startswith("-") for a in args[1:]):
-            branch = _current_branch() if _current_branch() in PROTECTED else ""
+            live = _current_branch(repo)
+            branch = live if live in PROTECTED else ""
         if branch:
             return (f"DENIED by tools/hooks/deny_dangerous_git.py: this push "
                     f"targets `{branch}`. Branches go up; the PR merge to "
@@ -147,8 +164,10 @@ def verdict(tokens: list[str]) -> str:
 
 
 def decide(payload: dict) -> int:
-    for tokens in simple_commands(bash_command(payload)):
-        reason = verdict(tokens)
+    command = bash_command(payload)
+    repo = push_target(command, payload_cwd(payload))
+    for tokens in simple_commands(command):
+        reason = verdict(tokens, repo)
         if reason:
             return deny(reason)
     return ALLOW
@@ -173,6 +192,16 @@ CASES = [
     (bash_payload("git push --no-verify origin topic"), 2, "push --no-verify"),
     (bash_payload("git commit --no-verify -m 'x'"), 2, "commit --no-verify"),
     (bash_payload("git commit -n -m 'x'"), 2, "commit -n"),
+    # --- the second shell is not a bypass (review defect 2) ---------------
+    (bash_payload("git add -A", tool="PowerShell"), 2, "PowerShell add -A"),
+    (bash_payload("git push --force origin topic", tool="PowerShell"), 2,
+     "PowerShell force push"),
+    (bash_payload("Set-Location ../GItS-gov; git push origin main",
+                  tool="PowerShell"), 2, "PowerShell Set-Location then main"),
+    (bash_payload("git worktree remove ../GItS-foo", tool="PowerShell"), 2,
+     "PowerShell worktree remove"),
+    (bash_payload("Set-Location ../GItS-gov; git push origin topic",
+                  tool="PowerShell"), 0, "PowerShell branch push is allowed"),
     # --- and the workflow that must NOT be blocked ------------------------
     (bash_payload("git add docs/current/OPERATIONS.md tools/hooks"), 0, "explicit add"),
     (bash_payload("git add -p tier0/constants.py"), 0, "add -p"),
