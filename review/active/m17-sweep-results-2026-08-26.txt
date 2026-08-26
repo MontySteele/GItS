@@ -1,0 +1,187 @@
+==============================================================================
+M17 — FORCE-FIRST-COPY PAIRED WINRATE, re-registered under `P7`
+RAW RESULTS, step (6) of §9's order — the run of the countersigned packet
+  registration  review/active/m17-sweep-reregistration-p7-2026-08-13.md
+  run date      2026-08-26
+  world         RT12 / D17 / P10 / C19 — the pinned stamp of §3, confirmed by
+                §9.2 step (0) immediately before launch. S1 silent.
+  instrument    tier05/exp_eb17p_forced_copy.py, reused as-is (§10.4); no arm,
+                column or default edited for this packet
+  commit        f4615be
+  branch        sitting-m17-2026-08-26
+  countersign   COUNTERSIGN — [USER] 2026-08-26 (§8 filled 2026-08-26, its own
+                commit, before any seed in §4's registered range was run)
+==============================================================================
+NOTHING IN THIS FILE IS A GRADE. Step (7) is the blind grade and it happens in
+the registration, against §8's committed table, without editing §8. This file
+is what the instrument printed, unedited.
+
+THE REGISTERED CELL, AS RUN (§3 and §7, value by value):
+  N         2400 pairs per card  §7, filled by R189 — fixed at countersign
+  seed      11                   cells.CANONICAL.seed; pairing is by index
+  route     hunter               cells.CANONICAL.route
+  policy    assigned             the plan-committed drafter
+  loadout   realistic            relics + potions
+  acts      all registered acts  n_acts = None
+  arms      the six of §5        1 control + 4 register cards + kaboom filler
+  flags     --runs 2400 --jobs 0 no --seed, no --route, and NOT --smoke
+
+ON THE CELL LABEL: the header below stamps itself `cell=eb17p[...]` rather than
+§3's `m17p7`. That is §10.1's recorded naming reconciliation, not a different
+cell — every field that is not the label is identical, and the script may not be
+edited for this packet (§10.4).
+==============================================================================
+
+==============================================================================
+EB-17p -- force-first-copy PAIRED winrate
+  cell=eb17p[jobs=0,runs=2400] seed=11 runs=2400 RT12/D17/P10/C19
+  klee/reaction, forced first copy vs control, route hunter, policy assigned, relics + potions, all registered acts
+==============================================================================
+  ARMS: 1 control + 5 treated (friendly_visit, study_buddy, borrowed_brilliance, elemental_ecstasy, kaboom), same seeds, 2400 runs each
+  ESTIMAND: intent-to-treat. A forced copy may be upgraded or removed by the run;
+            a control run may draft the card by itself. Both stay in their arms.
+  FILLER ARM: kaboom, Klee's own basic Attack -- the deck-dilution baseline.
+  The bootstrap runs on its own stream (seed 17000000), never a run seed.
+  running control (2400 runs) ...
+    9s
+  running forced(friendly_visit) (2400 runs) ...
+    11s
+  running forced(study_buddy) (2400 runs) ...
+    10s
+  running forced(borrowed_brilliance) (2400 runs) ...
+    10s
+  running forced(elemental_ecstasy) (2400 runs) ...
+    10s
+  running forced(kaboom) (2400 runs) ...
+    11s
+------------------------------------------------------------------------------
+CARD friendly_visit
+  compliance  forced copy family held at end 98.83%, upgraded 36.17%, removed at rest 0.00%, smithed at rest 26.00%
+              mean family copies in the treated final deck 1.19
+  contamination  control arm acquired the family on its own in 17.00% of runs
+  -- 6.1 primary: forced vs control (paired by seed) --
+  vs control             delta +2.75pp  [+1.50pp, +3.96pp]  McNemar b=147 c=81 p=0.0000
+                         arms 8.12% vs 5.38%  concordant both=48 neither=2124  n=2400
+  -- 6.1b co-primary: forced vs filler (paired by seed) --
+  vs filler              delta +4.04pp  [+2.92pp, +5.17pp]  McNemar b=147 c=50 p=0.0000
+                         arms 8.12% vs 4.08%  concordant both=48 neither=2155  n=2400
+  -- 6.2 secondary run-level (paired) --
+    act1         delta +0.0612 [+0.0471, +0.0754]   (0.911 vs 0.850)
+    acts         delta +0.1921 [+0.1600, +0.2242]   (1.364 vs 1.172)
+    decksize     delta +0.9613 [+0.8321, +1.0825]   (22.606 vs 21.645)
+    fights       delta +1.7229 [+1.4883, +1.9604]   (17.139 vs 15.416)
+  -- 6.4 secondary subgroup: control never acquired the family --
+  clean pairs            delta +3.21pp  [+1.86pp, +4.57pp]  McNemar b=125 c=61 p=0.0000
+                         arms 7.83% vs 4.62%  concordant both=31 neither=1775  n=1992
+  -- 6.5 card flow, forced arm, this family only --
+  card flow   [forced(friendly_visit)] 1091954 draws, 656722 plays, 629645 played-when-drawn, 446704 dead-in-hand (41133 combats)
+    friendly_visit               draws 50013  plays 25738  pwd 25483 (51%)  dead 23821 (48%)  first-copy 19064/31492 (61%)  win 94% played vs 98% dead
+    friendly_visit+              draws 13037  plays  7865  pwd  7730 (59%)  dead  5068 (39%)  first-copy 5873/8296 (71%)  win 92% played vs 93% dead
+    POOLED friendly_visit + friendly_visit+   draws 63050  plays 33603  played-when-drawn 52.68%  dead-in-hand 45.82%
+  -- 6.1 unpaired Wilson intervals (continuity ONLY, not the test) --
+    treated 8.12% [7.10%, 9.29%]   control 5.38% [4.54%, 6.35%]
+------------------------------------------------------------------------------
+CARD study_buddy
+  compliance  forced copy family held at end 91.58%, upgraded 66.25%, removed at rest 0.00%, smithed at rest 70.12%
+              mean family copies in the treated final deck 1.14
+  contamination  control arm acquired the family on its own in 22.38% of runs
+  -- 6.1 primary: forced vs control (paired by seed) --
+  vs control             delta +0.88pp  [-0.25pp, +2.00pp]  McNemar b=107 c=86 p=0.1498
+                         arms 6.25% vs 5.38%  concordant both=43 neither=2164  n=2400
+  -- 6.1b co-primary: forced vs filler (paired by seed) --
+  vs filler              delta +2.17pp  [+1.17pp, +3.21pp]  McNemar b=106 c=54 p=0.0000
+                         arms 6.25% vs 4.08%  concordant both=44 neither=2196  n=2400
+  -- 6.2 secondary run-level (paired) --
+    act1         delta +0.0183 [+0.0037, +0.0338]   (0.868 vs 0.850)
+    acts         delta +0.0592 [+0.0246, +0.0912]   (1.231 vs 1.172)
+    decksize     delta +0.4788 [+0.3558, +0.6021]   (22.123 vs 21.645)
+    fights       delta +0.5996 [+0.3475, +0.8471]   (16.015 vs 15.416)
+  -- 6.4 secondary subgroup: control never acquired the family --
+  clean pairs            delta +0.43pp  [-0.86pp, +1.72pp]  McNemar b=79 c=71 p=0.5678
+                         arms 6.01% vs 5.58%  concordant both=33 neither=1680  n=1863
+  -- 6.5 card flow, forced arm, this family only --
+  card flow   [forced(study_buddy)] 1015701 draws, 593647 plays, 569848 played-when-drawn, 431830 dead-in-hand (38437 combats)
+    study_buddy                  draws 30467  plays 13391  pwd 13282 (44%)  dead 16811 (55%)  first-copy 9775/18824 (52%)  win 95% played vs 98% dead
+    study_buddy+                 draws 30802  plays 19212  pwd 18934 (61%)  dead 11316 (37%)  first-copy 13240/18430 (72%)  win 92% played vs 97% dead
+    POOLED study_buddy + study_buddy+   draws 61269  plays 32603  played-when-drawn 52.58%  dead-in-hand 45.91%
+  -- 6.1 unpaired Wilson intervals (continuity ONLY, not the test) --
+    treated 6.25% [5.35%, 7.29%]   control 5.38% [4.54%, 6.35%]
+------------------------------------------------------------------------------
+CARD borrowed_brilliance
+  compliance  forced copy family held at end 98.58%, upgraded 27.75%, removed at rest 0.00%, smithed at rest 19.88%
+              mean family copies in the treated final deck 1.01
+  contamination  control arm acquired the family on its own in 3.54% of runs
+  -- 6.1 primary: forced vs control (paired by seed) --
+  vs control             delta -0.67pp  [-1.75pp, +0.46pp]  McNemar b=77 c=93 p=0.2499
+                         arms 4.71% vs 5.38%  concordant both=36 neither=2194  n=2400
+  -- 6.1b co-primary: forced vs filler (paired by seed) --
+  vs filler              delta +0.62pp  [-0.25pp, +1.50pp]  McNemar b=64 c=49 p=0.1876
+                         arms 4.71% vs 4.08%  concordant both=49 neither=2238  n=2400
+  -- 6.2 secondary run-level (paired) --
+    act1         delta -0.0379 [-0.0533, -0.0229]   (0.812 vs 0.850)
+    acts         delta -0.0929 [-0.1267, -0.0629]   (1.079 vs 1.172)
+    decksize     delta -0.0817 [-0.2138, +0.0446]   (21.563 vs 21.645)
+    fights       delta -0.9142 [-1.1617, -0.6750]   (14.502 vs 15.416)
+  -- 6.4 secondary subgroup: control never acquired the family --
+  clean pairs            delta -0.56pp  [-1.64pp, +0.52pp]  McNemar b=76 c=89 p=0.3502
+                         arms 4.75% vs 5.31%  concordant both=34 neither=2116  n=2315
+  -- 6.5 card flow, forced arm, this family only --
+  card flow   [forced(borrowed_brilliance)] 873679 draws, 509729 plays, 487967 played-when-drawn, 374297 dead-in-hand (34804 combats)
+    borrowed_brilliance          draws 39083  plays  2356  pwd  2342 (6%)  dead 36197 (93%)  first-copy 2209/26849 (8%)  win 94% played vs 95% dead
+    borrowed_brilliance+         draws  8466  plays  2590  pwd  2578 (30%)  dead  5776 (68%)  first-copy 2252/5534 (41%)  win 91% played vs 90% dead
+    POOLED borrowed_brilliance + borrowed_brilliance+   draws 47549  plays 4946  played-when-drawn 10.35%  dead-in-hand 88.27%
+  -- 6.1 unpaired Wilson intervals (continuity ONLY, not the test) --
+    treated 4.71% [3.93%, 5.63%]   control 5.38% [4.54%, 6.35%]
+------------------------------------------------------------------------------
+CARD elemental_ecstasy
+  compliance  forced copy family held at end 96.62%, upgraded 28.00%, removed at rest 0.00%, smithed at rest 20.25%
+              mean family copies in the treated final deck 1.10
+  contamination  control arm acquired the family on its own in 12.88% of runs
+  -- 6.1 primary: forced vs control (paired by seed) --
+  vs control             delta -1.12pp  [-2.21pp, -0.08pp]  McNemar b=69 c=96 p=0.0426
+                         arms 4.25% vs 5.38%  concordant both=33 neither=2202  n=2400
+  -- 6.1b co-primary: forced vs filler (paired by seed) --
+  vs filler              delta +0.17pp  [-0.71pp, +1.04pp]  McNemar b=60 c=56 p=0.7807
+                         arms 4.25% vs 4.08%  concordant both=42 neither=2242  n=2400
+  -- 6.2 secondary run-level (paired) --
+    act1         delta -0.0471 [-0.0621, -0.0312]   (0.803 vs 0.850)
+    acts         delta -0.0996 [-0.1308, -0.0704]   (1.073 vs 1.172)
+    decksize     delta -0.1292 [-0.2542, -0.0042]   (21.515 vs 21.645)
+    fights       delta -0.9783 [-1.2079, -0.7475]   (14.438 vs 15.416)
+  -- 6.4 secondary subgroup: control never acquired the family --
+  clean pairs            delta -1.10pp  [-2.20pp, +0.00pp]  McNemar b=59 c=82 p=0.0635
+                         arms 4.11% vs 5.21%  concordant both=27 neither=1923  n=2091
+  -- 6.5 card flow, forced arm, this family only --
+  card flow   [forced(elemental_ecstasy)] 877657 draws, 507148 plays, 487967 played-when-drawn, 378208 dead-in-hand (34650 combats)
+    elemental_ecstasy            draws 40735  plays  3726  pwd  3699 (9%)  dead 36079 (89%)  first-copy 3330/26761 (12%)  win 91% played vs 95% dead
+    elemental_ecstasy+           draws  8721  plays  2402  pwd  2376 (27%)  dead  6225 (71%)  first-copy 2089/5653 (37%)  win 89% played vs 91% dead
+    POOLED elemental_ecstasy + elemental_ecstasy+   draws 49456  plays 6128  played-when-drawn 12.28%  dead-in-hand 85.54%
+  -- 6.1 unpaired Wilson intervals (continuity ONLY, not the test) --
+    treated 4.25% [3.51%, 5.13%]   control 5.38% [4.54%, 6.35%]
+------------------------------------------------------------------------------
+CARD kaboom
+  compliance  forced copy family held at end 100.00%, upgraded 27.75%, removed at rest 1.71%, smithed at rest 0.00%
+              mean family copies in the treated final deck 3.88
+  contamination  control arm acquired the family on its own in 99.92% of runs
+  -- 6.1 primary: forced vs control (paired by seed) --
+  vs control             delta -1.29pp  [-2.33pp, -0.25pp]  McNemar b=65 c=96 p=0.0178
+                         arms 4.08% vs 5.38%  concordant both=33 neither=2206  n=2400
+  -- 6.1b co-primary: this arm IS the filler --
+  -- 6.2 secondary run-level (paired) --
+    act1         delta -0.0425 [-0.0579, -0.0279]   (0.807 vs 0.850)
+    acts         delta -0.1004 [-0.1304, -0.0700]   (1.072 vs 1.172)
+    decksize     delta -0.1212 [-0.2446, +0.0059]   (21.523 vs 21.645)
+    fights       delta -0.9479 [-1.1817, -0.7071]   (14.468 vs 15.416)
+  -- 6.4 secondary subgroup: control never acquired the family --
+  clean pairs            delta +0.00pp  [+0.00pp, +0.00pp]  McNemar b=0 c=0 p=1.0000
+                         arms 50.00% vs 50.00%  concordant both=1 neither=1  n=2
+  -- 6.5 card flow, forced arm, this family only --
+  card flow   [forced(kaboom)] 851156 draws, 499824 plays, 481422 played-when-drawn, 358211 dead-in-hand (34723 combats)
+    kaboom                       draws 171347  plays 104240  pwd 103131 (60%)  dead 66819 (39%)  first-copy 28221/34491 (82%)  win 94% played vs 93% dead
+    kaboom+                      draws 11101  plays  8510  pwd  8387 (76%)  dead  2576 (23%)  first-copy 4922/5632 (87%)  win 90% played vs 88% dead
+    POOLED kaboom + kaboom+   draws 182448  plays 112750  played-when-drawn 61.12%  dead-in-hand 38.04%
+  -- 6.1 unpaired Wilson intervals (continuity ONLY, not the test) --
+    treated 4.08% [3.36%, 4.95%]   control 5.38% [4.54%, 6.35%]
+==============================================================================
+Numbers only. No threshold is applied here and no card is graded here: the
+grade is a blind comparison against the registration's committed section 8 table.
