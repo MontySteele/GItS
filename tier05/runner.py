@@ -72,6 +72,16 @@ def resolve_plan(character: str, archetype: str | None) -> tuple[str, str]:
         raise ValueError(
             f"character {character!r} has no archetype {plan!r}; choose one "
             f"of {', '.join(pilots)}")
+    # BACKLOG EB-128 (4). THE LOUD CHECK, and this is the door to put it
+    # behind: R68 made this function the single source of truth for
+    # character -> plan, so every tier-0.5 arm -- the CLI, `cells`, every
+    # experiment module -- asks it before it asks for a card. A `real_*` arm
+    # whose gitignored `game_ref/` layer has been destroyed used to be
+    # discovered by traceback mid-cell, or not at all (a silent skip-count
+    # jump). It now fails here, before a single run, with the restore point in
+    # the message. A no-op for every other character, which is why it can sit
+    # on this path unconditionally.
+    loader.require_reference_layer(character)
     return plan, pilots[plan]
 
 
