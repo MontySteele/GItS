@@ -117,16 +117,16 @@ import yaml
 from understudy import adapter, bridge, naming
 
 SCENARIO_DIR = Path(__file__).resolve().parent / "scenarios"
-LOG_DIR = Path(__file__).resolve().parent / "logs"
+# Gitignored, like `logs/soak/` and for the same reason: a reading taken on a
+# hand-set board is disqualified by construction, and a disqualified reading
+# committed to the repo is one a later reader can mistake for evidence.
+LOG_DIR = Path(__file__).resolve().parent / "logs" / "scenario"
 
 # The screens a scenario acts on itself. Combat is where it starts; the two
 # selection screens are where a card's own effect can take it mid-step.
 COMBAT_SCREENS = ("monster", "elite", "boss")
 SELECT_SCREENS = ("hand_select", "card_select")
 
-# Every verb a step may name. Kept as data so the parser can refuse an unknown
-# key with the list, rather than skipping it -- a mistyped step that is silently
-# ignored is a scenario that passes without running.
 # Cards a scenario may name that are on NO sheet, each with the reason it is
 # reachable in a fight. `tier0/tests/test_understudy_scenario.py` checks every
 # other name against `docs/*-cards.yaml`, and without this list that lint would
@@ -146,6 +146,9 @@ TOKEN_CARDS = {
         "Companion card (GuestCastOption)",
 }
 
+# Every verb a step may name. Kept as data so the parser can refuse an unknown
+# key with the list, rather than skipping it -- a mistyped step that is silently
+# ignored is a scenario that passes without running.
 ACTION_STEPS = ("play", "select", "confirm", "end_turn")
 SETUP_STEPS = ("give", "set_resource", "set_energy", "set_hp", "set_block")
 OTHER_STEPS = ("expect", "read", "mark")
