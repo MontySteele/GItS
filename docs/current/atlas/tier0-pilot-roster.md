@@ -146,6 +146,13 @@ Kokomi's 62 -> 76 is `EB-69` (R198, 2026-08-23), the ruled 14-card pool fill.
   anyone adding a pilot policy: file the weight beside the others and the
   sweep finds it; give it no designed range and it is reported UNRANGED and
   left alone, which is the intended default rather than an omission.
+- **`P11` added TWO scorer terms and ONE registry.** `_spark_hold_cost` charges
+  what a `spend_spark` play would be worth BANKED (stock floor, free-Attack
+  threshold, or the biggest reader in hand it shrinks — largest wins) at
+  `policy.SPARK_HOLD_VALUE_WEIGHT`; `_formula_amount` runs the real chooser over
+  `effects.exhaust_pool` so a card scores the payout it will reach; and
+  `policy.SCORABLE_PREDICATES` / `BLIND_PREDICATES` declare every sheet
+  predicate either scorable or deliberately blind, lint-enforced.
 - **The pilot must not disagree with the engine.** Every formula it forecasts
   goes through the engine's own helper — `effects.flat_attack_bonus`,
   `effects._calc_amount`, `effects._bonus_formula`, `effects.spotlight_mult`,
