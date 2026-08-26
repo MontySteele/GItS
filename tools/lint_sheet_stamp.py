@@ -92,13 +92,18 @@ def pinned(text: str | None = None) -> str | None:
         # round-trip: this file is 2,500 lines that are not this tool's, and a
         # lint that silently rewrote all of them would be a worse defect than
         # the one it gates.
-        text = CONSTANTS.read_text(encoding="utf-8", newline="")
+        # `open(newline="")` rather than `read_text(newline="")`: the
+        # latter only exists from Python 3.13, and CI runs 3.12 -- it raised
+        # TypeError there and the gate went red on every push to main.
+        with CONSTANTS.open(encoding="utf-8", newline="") as handle:
+            text = handle.read()
     match = PIN.search(text)
     return match.group(1) if match else None
 
 
 def repin(new: str) -> bool:
-    text = CONSTANTS.read_text(encoding="utf-8", newline="")
+    with CONSTANTS.open(encoding="utf-8", newline="") as handle:
+        text = handle.read()
     if not PIN.search(text):
         return False
     text = PIN.sub(f'SHEET_DIGEST = "{new}"', text, count=1)
