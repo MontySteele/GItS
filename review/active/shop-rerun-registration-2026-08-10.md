@@ -13,8 +13,10 @@
 > richness pass ran to completion and `EB-136`'s same-target binding landed
 > inside the same span — see items 12–15. `C9`'s X7/X8 rarity erratum is still
 > in the world; it is now inside `C19` rather than at the stamp's edge.)
-> The predictions in §5 are deliberately blank — they are [USER]'s to fill in
-> before any seed is run.
+> **The §4 `n` and the six §5 predictions are ENTERED, [USER] 2026-08-26**, in
+> §7 step 1's order and before any seed was run. §5 records that the entered
+> slate REPLACES the one R182 held outside the repo rather than transcribing
+> it, and it carries two corrections raised at review and adopted with it.
 
 **Plain English is a standing requirement for this packet.** Terms are glossed
 where they first appear.
@@ -623,18 +625,25 @@ the channel should be re-priced or re-stocked. That is a design call and it is
   erratum included. The report must carry the full run-cell stamp (`RT/D/P/C`)
   or it is not citable (R68), and it must read `RT12/D17/P10/C19` or it is not
   *this* registration's measurement.
-- **The instrument does not print that stamp itself, and the fix is procedural,
-  not an edit to the instrument.** `tier05/exp_shop_companion_channel.py` calls
-  `model.run_many` directly rather than running through a `Cell`, so its header
-  line reads only `§4.7 companion channel -- N runs/arm, seed 20260725`. Left
-  alone, that would make the report uncitable under R68 the moment it is
-  produced — the requirement in the bullet above would be unsatisfiable
-  mechanically. **§7.1 closes it with a provenance header on the results
-  artifact**, on the `payoff-reach` precedent, and the instrument is not edited:
-  a script is not tuned inside the window of the registration that is about to
-  run it. (Recorded here rather than filed silently: the gap is a real one and
-  a future re-run of this cell would be better served by the instrument taking
-  a `Cell`.)
+- **The instrument PRINTS that stamp but does not ROUTE through a `Cell`, and
+  the remaining fix is procedural, not an edit to the instrument.** As of
+  `EB-141(a)` (`26b4b2c`, 2026-08-25) the instrument's first output line is
+  `print(cells.world_stamp())` (`tier05/exp_shop_companion_channel.py:133`),
+  above the byte-unchanged `§4.7 companion channel -- N runs/arm, seed
+  20260725` header — so the run's own stdout names the world it came from, and
+  step (0)'s check gains a witness inside the artifact. `cells.world_stamp()`
+  is the same single producer `Cell.stamp()` formats, so that header cannot
+  spell the world differently than a `Cell` would. **What is still missing is
+  the ROUTING:** `arm()` calls `model.run_many` directly rather than running a
+  `Cell` (`:109-112`). That is `EB-141(b)`, and it is **gated on this
+  registration's grade** — a `Cell` carries its own seed, runs, plan
+  resolution and run entry, so rerouting could move seeding or behaviour while
+  the registered seed is staged to fire. **§7.1's provenance header therefore
+  STAYS.** The printed stamp does not retire it: what makes the report citable
+  is binding that stdout to a registration, a commit and an `n`, and no line
+  the instrument prints does that. The instrument is not edited inside this
+  window — a script is not tuned inside the window of the registration that is
+  about to run it.
 - Every output line the instrument printed **before the 2026-08-10 repair**
   still prints, so the pre-existing reads stay reproducible. The new reads are
   printed on lines labelled `NEW`. **Two of those `NEW` lines were themselves
@@ -646,42 +655,98 @@ the channel should be re-priced or re-stocked. That is a design call and it is
   **deleted** and replaced by three counted lines. Nothing above the file's own
   `--- NEW reads (2026-08-10)` marker moved at all.
 
-**Proposed n and seed** — from the prior run's own convention, which is the
-only convention this cell has:
+**`n` and seed — ENTERED, [USER] 2026-08-26.** These replace the packet's own
+proposal, which was `RUNS = 500` per arm per character from the prior run's
+convention — the only convention this cell had.
 
-- `RUNS = 500` per arm per character (3 characters × 2 arms = 3000 runs).
-- `SEED = 20260725`, unchanged.
+- **`RUNS` = 1,000 per arm per character** (3 characters × 2 arms × 1,000 =
+  **6,000 runs**). R182 already specified this figure on 2026-08-12 and the
+  `M14` row has carried it since; the entry is where it finally lands in the
+  packet.
+- **`SEED = 20260725`, RETAINED.** It is a module constant, not a command-line
+  argument, and §7.1 does not pass it.
 
 Keeping the seed does not make the old and new numbers comparable — the world
 moved, and switching the channel on consumes randomness, so runs diverge
 rather than pairing. It is kept because changing it would buy nothing and
-would remove the one thing still held fixed. **If [USER] wants tighter
-intervals on the slot-2 mix (Q1), raising `RUNS` is the lever; slot-2
-purchases are a small fraction of runs, so that count is the binding sample,
-not the run count.** Both numbers are [USER]'s to confirm or change before the
-run.
+would remove the one thing still held fixed. **The packet named raising `RUNS`
+as the lever for tighter intervals on the slot-2 mix (Q1) — slot-2 purchases
+are a small fraction of runs, so that count is the binding sample, not the run
+count — and the doubling above is exactly that lever, taken.** Neither number
+is open any longer.
 
-## 5. Predictions — [USER] SLOTS, to be filled before any seed is run
+## 5. Predictions — SLATE ENTERED BY [USER], 2026-08-26
 
 Measurement law: predictions are written from design intent, before the
-numbers exist, and are never revised against the run that grades them. The
-slots below are left empty on purpose. **Filling them is a [USER] act and the
-run does not start until they are filled and this packet is countersigned.**
+numbers exist, and are never revised against the run that grades them. All six
+slots below are now filled, and the run had not been taken when they landed.
+That is the whole of the blind, and no command enforces it (§7.1 step 3).
 
-> **[USER] SLOT — Q1, slot-2 purchase mix.** Expected share of slot-2
-> purchases that are Uncommon (rather than Rare), as a band:
-> `____ % – ____ %`. Acceptance target or diagnostic-only? `____`
+**This slate REPLACES the one R182 settled on 2026-08-12; it is not a
+transcription of it.** R182's six values plus its trigger were decided and
+held **outside the repo**, were never written into this packet, and **are not
+recoverable from it** — so nothing below is claimed to reproduce them, and no
+reader should treat this as R182's slate restored. It is authored fresh and
+stands on its own terms. The one figure that genuinely does carry over from
+R182 is §4's `n`, which the `M14` row has held in writing since 2026-08-12.
+The slate was proposed at review, corrected in two places by Claude (both
+marked below), and adopted by [USER] on 2026-08-26.
+
+**Grading vocabulary**, fixed here before the read: each slot grades
+**PREDICTED** (the result is inside the entered band or matches the entered
+direction), **MISS** (it is not), or **SPLIT** (a slot with more than one
+clause, where some clauses hold and others do not). A slot's grade never
+depends on another slot's.
+
+**One instrument note the grader needs, and it is not a prediction.** The
+script prints three legacy verdict lines of its own — `P1 ... IN BAND
+(10-35%)`, `P2 ... IN BAND (positive, <= +2.00pp)` and `P3 ... IN BAND
+(>= 60%, DIAGNOSTIC)` — whose bands are **hardcoded from the original July
+cell, not from this slate**. Two of them happen to coincide with what is
+entered below (P1 with Q3's retained acceptance band, P2 with the carried-
+forward winrate band). **The third does not: Q1's entered band is 80–95%, and
+the instrument's `>= 60%` verdict says nothing about it.** Grade the printed
+*percentages* against this section; never the instrument's own IN BAND / OUT
+OF BAND word.
+
+> **Q1 — slot-2 purchase mix. ENTERED.** Expected share of slot-2 purchases
+> that are Uncommon rather than Rare: **80% – 95%**.
+> **DIAGNOSTIC-ONLY — not an acceptance target.** A result outside the band
+> records a fact about the shelf and the purse and nothing more; the redesign
+> trigger below says in its own words that a Q1 miss alone reopens nothing.
 >
 > *Context for the call, not a prediction:* the old P3 band was "≥ 60%
 > Uncommon", graded as a diagnostic under R14 discipline. Under the restored
 > floor the offer table is 87.5% Uncommon / 12.5% Rare, and Rares cost twice
-> as much, so both the shelf and the purse point the same way. Whether the
-> old band is still the right one is the call.
+> as much, so both the shelf and the purse point the same way.
 
-> **[USER] SLOT — Q2, the money question.** Prediction: is gold ever the
-> binding constraint on a companion purchase? `YES / NO`, and the band for
-> the share of offers that are unaffordable on arrival: `____ % – ____ %`.
-> What result would count as "price is not governing this channel"? `____`
+> **Q2 — the money question. ENTERED.** Is gold ever the binding constraint on
+> a companion purchase? **YES, but uncommon.** Band for the share of companion
+> offers that are unaffordable **on arrival**: **0% – 5%**.
+>
+> **"Price is not governing this channel" — BOTH clauses must hold:**
+> **(1)** the arrival-unaffordable share of companion offers is **≤ 5%**, and
+> **(2)** companion-slot `pick_priced_out` events **÷ shop visits ≤ 5%**.
+>
+> **Correction 1 (Claude, adopted 2026-08-26): clause (2) is stated in the
+> units the instrument actually prints, and the mismatch is declared rather
+> than glossed.** The instrument emits a **raw per-EVENT count**, not a
+> per-visit share. `pick_priced_out` is a `Counter` keyed by `(where, rarity)`,
+> where `where` is `"slot 1"` / `"slot 2"` for the companion channel and
+> `"character shelf"` otherwise
+> (`tier05/exp_shop_companion_channel.py:226-234`); the count and that
+> distinguishing detail print on the `NEW preferred picks priced out
+> mid-visit:` line (`:322-331`). The denominator comes from the gold line,
+> `NEW gold on arrival: ... (N visits)` (`:297-303`), whose `N` is the number
+> of distinct ON-arm shop visits that offered a companion — the same total the
+> crowd-out block splits into `companion bought` + `none bought`. **So clause
+> (2) reads: the two `slot N` keys of that detail, with the `character shelf`
+> key EXCLUDED, over `N` — a per-EVENT numerator over a per-VISIT
+> denominator.** That differs from a true per-visit share only where a single
+> visit produces two such events, in which case this ratio reads slightly
+> **high**. That is the conservative direction for a clause whose job is to
+> clear the channel of suspicion, and no per-visit denominator for these
+> events is printed, so it is this ratio or nothing.
 >
 > *Note on the slot, not a prediction:* the YES/NO stays exactly as written,
 > and the instrument now supports it. Before 2026-08-11 it did not — a `NO`
@@ -689,27 +754,52 @@ run does not start until they are filled and this packet is countersigned.**
 > card that goes out of reach mid-visit, so the honest answer would have been
 > "unmeasured" no matter what the run printed. The priced-out log closes that
 > gap: `YES` is now falsifiable against three counts (the three parts of Q2
-> in §3), and the run reports all three. The band above still refers to the
-> arrival share specifically; if you want bands on the other two counts as
-> well, write them in here.
+> in §3), and the run reports all three. The 0–5% band above refers to the
+> arrival share specifically; the other two counts carry no band and are
+> reported.
 
-> **[USER] SLOT — Q3, true P1 buy rate.** Expected slot-1 buy rate, as a
-> share of the visits that offered slot 1: `____ % – ____ %`. Does the
-> original 10–35% band stand as the acceptance band in the new world, or is
-> it replaced? `____`
+> **Q3 — true P1 buy rate. ENTERED.** Expected slot-1 buy rate, as a share of
+> the visits that offered slot 1: **15% – 30%**. **The original 10–35% band
+> STANDS as the acceptance band** in the new world; it is not replaced.
+> The two are graded separately, because they do different jobs: a result
+> inside 15–30% is PREDICTED; a result outside 15–30% but still inside 10–35%
+> is a MISS on the prediction that does **not** breach acceptance; a result
+> outside 10–35% is a MISS **and** fires the redesign trigger below.
 
-> **[USER] SLOT — Q4, crowding out.** Expected direction: does buying a
-> companion reduce the relic buy rate in the same visit? `YES / NO /
-> NO PREDICTION (descriptive)`. If yes, by how much: `____ pp`.
+> **Q4 — crowding out. ENTERED.** Direction: **YES** — buying a companion
+> reduces the relic buy rate in the same visit. Magnitude: **approximately
+> −15 pp**, relic-buy rate in visits with a companion purchase against visits
+> without.
+>
+> *How "approximately" is read, fixed here before the run (Claude's reading of
+> the entered slate, recorded rather than left to grading time):* **PREDICTED**
+> if the drop lands in **−10 pp to −20 pp**; **SPLIT** if the direction holds
+> (any drop at all) but the magnitude falls outside that range; **MISS** if the
+> relic buy rate is equal or higher in companion-purchase visits, i.e. the
+> direction is wrong.
 
-> **[USER] SLOT — P2 (winrate delta), carried forward.** The original band
-> was "positive and no more than +2.0 percentage points". Does it stand under
-> the restored floor? `STANDS / REPLACED BY ____`. The floor removes the
-> cheap tier, so the channel is now strictly more expensive per card, which
-> pushes the delta in an unobvious direction: fewer purchases, better ones.
+> **P2 (winrate delta), carried forward. ENTERED — the original band STANDS:
+> positive and no more than +2.0 percentage points.** Not replaced. The floor
+> removes the cheap tier, so the channel is now strictly more expensive per
+> card, which pushes the delta in an unobvious direction: fewer purchases,
+> better ones. Graded on the instrument's mean delta across the three
+> characters, which is the figure its own `P2` line prints.
 
-> **[USER] SLOT — redesign trigger.** What result, if any, reopens the shop
-> design rather than merely being recorded? `____`
+> **Redesign trigger — ENTERED.** Reopen the shop design — as a design call
+> for [USER] at `QUEUE`, never an engineering fix taken here — if **ANY ONE**
+> of these fires:
+> 1. the slot-1 buy rate falls **outside 10–35%** (Q3's acceptance band);
+> 2. companion-slot `pick_priced_out` events ÷ shop visits is **> 10%** — the
+>    ratio defined in Q2's Correction 1, at double the 5% clearance threshold;
+> 3. the relic-buy rate falls by **≥ 20 pp** in companion-purchase visits
+>    against visits without — Q4's direction at a magnitude that is crowding
+>    rather than trading; or
+> 4. the mean winrate delta lands **below 0 or above +2 pp** — P2's band
+>    breached in either direction.
+>
+> **A Q1 miss ALONE does not reopen anything.** Q1 is diagnostic-only, and
+> that is written here as well as at the slot so the trigger cannot be read as
+> sweeping it back in.
 
 ## 6. Contamination and known limits
 
@@ -780,11 +870,10 @@ character:
 PYTHONPATH=. python3 -m tier05.exp_shop_companion_channel <RUNS> | tee review/active/shop-rerun-results-2026-08-25.txt
 ```
 
-- `<RUNS>` is **§4's `n` as entered by the slate**. §4 currently reads
-  `RUNS = 500`, and the `M14` row records the ruled slate raising it to
-  **1,000 per arm per character** as part of the fill — so this is expected to
-  read `... 1000`, giving 3 characters × 2 arms × 1,000 = **6,000 runs**.
-  **Whatever §4 says after the entry governs; this line does not set it.**
+- `<RUNS>` is **§4's `n` as entered by the slate**, and the slate is now
+  entered: §4 reads **1,000 per arm per character**, so the command reads
+  `... 1000`, giving 3 characters × 2 arms × 1,000 = **6,000 runs**. §4
+  governs; this line does not set it.
 - **`SEED = 20260725` is a module constant and is not a command-line
   argument.** It is not passed and must not be changed.
 - **There is no `--jobs` and there must not be**: the two arms differ by a
@@ -801,9 +890,14 @@ PYTHONPATH=. python3 -m tier05.exp_shop_companion_channel <RUNS> | tee review/ac
 
 **(2) Publish the raw output with a provenance header**, on the payoff-reach
 precedent — the instrument's own stdout, unedited, under a header naming the
-registration, the run date, the world, the instrument and the commit. **This is
-what makes the report citable**, because the instrument prints no `RT/D/P/C`
-of its own (§4). The header must carry, at minimum:
+registration, the run date, the world, the instrument and the commit. **The
+instrument DOES print the live `RT/D/P/C` as its first output line** since
+`EB-141(a)` (2026-08-25), so the stdout is self-stamping and step (0)'s check
+has a witness inside the artifact — **but it still does not route through a
+`Cell`** (`EB-141(b)`, gated on this grade), and the printed line does not
+retire the header. **The provenance header is what makes the report citable**,
+because it is what binds that stdout to this registration, to a commit and to
+an `n` (§4). The header must carry, at minimum:
 
 ```
 registration  review/active/shop-rerun-registration-2026-08-10.md §2, §4
@@ -821,3 +915,24 @@ its own commit.
 
 **The output of (1) is not opened by whoever filled §5 before (3) is
 recorded.** That is the blind in blind grading, and no command can enforce it.
+
+---
+
+## Countersign line — one word, [USER]: COUNTERSIGN / REVISE / DECLINE
+
+`________`
+
+**Correction 2 (Claude, adopted 2026-08-26): this packet had no countersign
+line at all.** Its three sibling registrations each end with one in exactly
+this shape (`review/active/m17-sweep-reregistration-p7-2026-08-13.md`,
+`review/active/eb17p-registration-draft-2026-08-08.md`,
+`review/active/charge-reads-per-turn-registration-2026-08-13.md`), and both §7
+step 1 and the `M14` row require a countersign before any seed is run — but
+there was nowhere in the document to record one. The line is added so the act
+has a home, and so that "countersigned" is a fact a reader can check here
+rather than infer from a register row.
+
+**Slate ENTERED 2026-08-26**, in §7 step 1's order and as its own commit ahead
+of any run: §4's `n` = 1,000 per arm per character with `SEED = 20260725`
+retained, and all six §5 slots. **It REPLACES R182's slate rather than
+transcribing it** — see §5's opening.

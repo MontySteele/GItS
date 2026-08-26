@@ -312,9 +312,12 @@ registration packets themselves live under `review/active/` — one home, not tw
   (`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`, which supersedes
   the two 2026-08-24 tables; each stands as published, R101b). Predictions are
   explicit [USER] slots and are still blank; the run is staged mechanically at
-  `§7.1`, where two instrument hazards are named — it prints no `RT/D/P/C`
-  (citability rests on a provenance header) and it has **no smoke path**, so
-  any invocation reads the registered seed →
+  `§7.1`, where the instrument's standing hazards are named — it **prints the
+  live `RT/D/P/C` as its first output line** (`EB-141(a)`, 2026-08-25) but
+  **still does not route through a `Cell`** (`EB-141(b)`, gated on this
+  registration's grade), so citability rests on `§7.1`'s provenance header
+  binding that stdout to a registration, a commit and an `n`; and it has **no
+  smoke path**, so any invocation reads the registered seed →
   `review/active/shop-rerun-registration-2026-08-10.md`.
 - **The regret margins (`M13`)** — **DRAFT, §7 PARTLY FILLED 2026-08-12
   (R181), awaiting [USER] countersign at QUEUE `M13`, unrun.** `ROUTE_REGRET_MARGIN` and its drafter
