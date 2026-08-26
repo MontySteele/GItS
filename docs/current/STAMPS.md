@@ -117,8 +117,16 @@ both Salon verbs read the resolver's `salon_tick_amount` — no new dial.
 **`EB-145`**: the score forecasts its own selection — Tide of Names, Pearl
 Barrage. **`EB-129`** pays the Book of Five Rings chunk at event valuation
 (R205's own-window gate set aside by [USER], null scratch). **Archive: roster
-combat + tier-0.5; anchors provably unmoved.** **The standing read's three
-diagnostic caveats clear AT THE RE-BASELINE — owed next, NOT taken here.**
+combat + tier-0.5; anchors provably unmoved.** **The re-baseline was TAKEN at
+`RT12/D18/P11/C20`** (`review/active/sitting-reads-2026-08-26-c20-d18-p11.md`,
+`main` = `190e598`, 2026-08-26) **and its caveat check graded all three of the
+standing read's diagnostic caveats CLEARED against code** — the hold-versus-spend
+term is subtracted inside `_score`, both blind predicates and both Salon verbs
+are read at score time, and `_formula_amount` runs in the score seam and not
+only the chooser — **so that table publishes as the standing re-baseline AND as
+the Phase-4 milestone table (R211 item 7), with zero interval separations; its
+§4.2 records that the anchor arms' own tier-0.5 counts and `deck` means did move
+by a few runs, inside interval on every rate column.**
 
 ### `P10` — `Win3`'s exhaust-chooser repair (R211)
 
