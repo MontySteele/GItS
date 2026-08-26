@@ -1,6 +1,8 @@
-# M17 — force-first-copy paired winrate, **re-registered under `P7`**: DRAFT
+# M17 — force-first-copy paired winrate, **re-registered under `P7`**: COUNTERSIGNED
 
-> **Lifecycle: DRAFT, awaiting [USER]'s countersign at QUEUE `M17`. UNRUN.**
+> **Lifecycle: COUNTERSIGNED 2026-08-26 at QUEUE `M17`, CLEARED TO LAUNCH,
+> UNRUN.** The run is §9.2 and is staged pending launch; nothing in the
+> registered seed range has been executed.
 > This is the second of the two drafts `M17` says do not exist yet. It is a
 > **new registration standing beside** the frozen `EB-17p` packet — not a
 > re-grade of it, not an amendment to it.
@@ -16,7 +18,8 @@
 > run — which is how they landed: the fill is its own commit, taken before any
 > registered seed had been run, and **§8 is not edited again.**
 >
-> **PARTLY FILLED 2026-08-13 by R189, and STILL NOT COUNTERSIGNED.** Four slots
+> **PARTLY FILLED 2026-08-13 by R189** — the rest of the fill and the
+> countersign came later, on 2026-08-26, in the order R189 ruled. Four slots
 > are settled and written in below: §7's `N` (**2,400 pairs per card**), §7's
 > cost ceiling (**4 hours, stop-and-report**), §8.1's redesign trigger
 > (**carried forward unchanged**), and the §8 `Q4` materiality threshold
@@ -24,13 +27,15 @@
 > first, and the `elemental_ecstasy` redesign lands after the graded read as its
 > own `C` bump.
 >
-> **The countersign is deliberately WITHHELD, and that is not an oversight.**
-> R189 ruled that this packet is not signed at `C9`: the `RT`/`C` window is
-> still open, the world will move at its close, and predictions are filled
-> against the SETTLED world. The filled slots above are carried into the
-> post-window restamp, the packet is re-stamped if the world moved, §8's
-> per-arm prediction table is filled **then**, and the countersign comes after
-> that. Signing now would date the packet to a world it will not run in.
+> **The countersign was deliberately WITHHELD at `C9`, and that was not an
+> oversight.** R189 ruled that this packet is not signed there: the `RT`/`C`
+> window was still open, the world would move at its close, and predictions are
+> filled against the SETTLED world. The filled slots above were carried into
+> the post-window restamp, the packet was re-stamped because the world had
+> moved, §8's per-arm prediction table was filled **then**, and the countersign
+> came after that. Signing at `C9` would have dated the packet to a world it
+> was never going to run in. **All three steps are now taken** — restamp
+> 2026-08-25, fill 2026-08-26, countersign 2026-08-26 — each in its own commit.
 >
 > **§9's "Order of operations" was reconciled to that sequence on 2026-08-24.**
 > As drafted it put the countersign first and asked [USER] to fill §7 — both
@@ -70,7 +75,9 @@
 > carried forward unchanged here. The world has nonetheless moved `P7` → `P10`
 > since the fill, and nobody has seen a bare-form figure in this world at all.
 > Whether to leave 5% standing or re-rule it is [USER]'s and is available at the
-> countersign; this packet does not touch it either way.
+> countersign; this packet does not touch it either way. **Resolved at the
+> 2026-08-26 countersign: 5% stands, unmoved and still [USER]'s choice rather
+> than an evidence-derived figure.**
 
 ---
 
@@ -111,8 +118,9 @@ the results are graded blind against them afterwards.
 under the approved settle-first plan, and this sweep runs after it, in a world
 that has not moved in between. **That sequencing is now SPENT, not pending** —
 the payoff-reach sprint ran and was graded blind on 2026-08-24, and everything
-§9.1 ordered ahead of this sweep has landed. What is left in front of the run
-is §8's fill and the countersign, both [USER]'s.
+§9.1 ordered ahead of this sweep has landed. **Both of [USER]'s remaining acts
+are taken too** — §8's fill (2026-08-26) and the countersign (2026-08-26) — so
+nothing is left in front of the run but the run itself, at §9.2.
 
 ---
 
@@ -683,15 +691,19 @@ about the grading discipline changed, only the order this file states.
    filled, R189, and are not re-asked here; §8.1's redesign trigger is filled
    too.) **DONE 2026-08-26** — its own commit, nothing else in it, taken before
    any seed in §4's registered range had been run.
-5. **Countersign this packet.** **OPEN — [USER], QUEUE `M17`.**
+5. **Countersign this packet.** **DONE 2026-08-26 — [USER], QUEUE `M17`.** The
+   countersign line at the foot of this file reads
+   `COUNTERSIGN — [USER] 2026-08-26`, and it is its own commit.
 6. Run the sweep at the pinned stamp. Report only; read nothing into it.
    **The exact command is at §9.2**; nothing is left to decide at run time.
+   **STAGED, pending launch.**
 7. Blind grade against §8; the grade is its own commit.
 8. Any design act is downstream of the grade and is [USER]'s.
 
-**Steps 1–3 are marked DONE in place rather than removed, because they are the
-record of what the re-stamp discharged.** Everything ahead of the run is now
-steps 4 and 5, and both are [USER]'s.
+**Steps 1–5 are marked DONE in place rather than removed, because they are the
+record of what the re-stamp, the fill and the countersign discharged.**
+Everything ahead of the packet is now steps 6, 7 and 8 — the run, the blind
+grade, and whatever design act the grade selects.
 
 **Order of reading, at the grade** — this order and no other, because reading
 them in any other order lets one number colour the next:
@@ -814,7 +826,7 @@ Step 5's "this sweep must be graded before `D15` lands, or S3 fires" is the
 clause that went the other way: `D15` landed first, so that arm is spent and
 S3 is spent with it (§9, S3).
 
-### 9.2 The exact run, once §8 is filled and the packet is countersigned
+### 9.2 The exact run — §8 IS filled and the packet IS countersigned; this is STAGED
 
 **Nothing here is a decision.** Every value below is already registered: the
 cell is §3's, `N` is §7's, the arms are §5's, and the script is §10.4's,
@@ -967,30 +979,43 @@ a frozen instrument.)
 
 ## Countersign line — one word, [USER]: COUNTERSIGN / REVISE / DECLINE
 
-`________`
+`COUNTERSIGN — [USER] 2026-08-26`
 
 **Slots FILLED 2026-08-13 by R189:** §7 `N` = 2,400 pairs/card, §7 cost ceiling
 = 4 hours stop-and-report, §8.1's trigger carried forward unchanged, and §8's
 `Q4` materiality threshold = 5%.
 
-**Slots STILL OPEN:** §8's per-arm prediction table (direction, threshold,
-filler sign and confidence for all five arms) and the direction half of the
-`Q4` slot.
+**Slots FILLED 2026-08-26, in their own commit ahead of this line:** §8's
+per-arm prediction table (direction, threshold, filler sign and confidence for
+all five arms) and the direction half of the `Q4` slot.
+
+**NO SLOT IS OPEN. The packet is COUNTERSIGNED and CLEARED TO LAUNCH**, and
+what is left is §9.2's run — steps 6, 7 and 8 of §9's order, all mechanical.
 
 **The countersign was WITHHELD by R189 until after the post-window restamp** —
 the world moves at the close of the open `RT`/`C` window and predictions are
-filled against the settled world. **THE RESTAMP IS DONE (2026-08-25,
-`RT12/D17/P10/C19`), so the condition R189 withheld the countersign on is
-satisfied and the countersign is next.** What stands between this packet and
-its run is now exactly two [USER] acts, in this order: **fill §8** (the per-arm
-prediction table and the direction half of the `Q4` slot), then **countersign
-above**. §9.2 is the run, and it is mechanical. **Until both are done the
-packet is NOT cleared to launch and no seed in the registered range may be
-run.**
+filled against the settled world. **The restamp was done 2026-08-25
+(`RT12/D17/P10/C19`), §8 was filled 2026-08-26 against that settled world, and
+the countersign follows both**, in the order R189 ruled and in three separate
+commits.
+
+**What the countersign does NOT license.** It does not license a re-read of
+§8 — the table above is frozen and the grade is written beside it, never over
+it (R101b's discipline, applied to this packet's own predictions). It does not
+license the `C2` `elemental_ecstasy` redesign, which lands **after** the graded
+read as its own `CONSTANTS_VERSION` bump (R189's measure-first route, R205's
+Block 5). And it does not license a change to `N`: §7's 2,400 is fixed at
+countersign and may not be extended after a read.
+
+**S1 is still live and is still checked, not assumed.** §9.2 step (0) runs
+first and must print `RT12/D17/P10/C19`. A countersigned packet run into a
+moved world is an S1 event, not a detail.
 
 — drafted 2026-08-13 on branch `overnight-burn-2026-08-12`, per QUEUE `M17` /
 R180. **Re-stamped 2026-08-25 at `main` = `1eb5b45`** under R189's own
-sequence — execution, not a new ruling. Zero design authority exercised: every
-threshold, direction and taste call is [USER]'s, §8 is untouched and still
-blank, and the `Q4` estimand was deliberately not measured. The frozen
-`EB-17p` registration and results file were read and not edited (R101b).
+sequence — execution, not a new ruling. **§8 filled and this line countersigned
+2026-08-26**, both [USER]'s and both taken before any seed in §4's registered
+range was run. Zero design authority was exercised by the drafter at any of the
+three steps: every threshold, direction and taste call is [USER]'s, and the
+`Q4` estimand was deliberately not measured before its prediction existed. The
+frozen `EB-17p` registration and results file were read and not edited (R101b).

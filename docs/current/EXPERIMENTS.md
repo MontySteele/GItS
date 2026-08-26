@@ -252,22 +252,22 @@ registration packets themselves live under `review/active/` — one home, not tw
   `review/active/eb17p-registration-draft-2026-08-08.md` §13, §13.8;
   `review/active/eb17p-results-2026-08-10.txt`; QUEUE `M17`.
 - **Force-first-copy paired winrate, re-registered under `P7` (`M17`)** —
-  **DRAFT, awaiting [USER] countersign at QUEUE `M17`, unrun.** R180 ordered
+  **COUNTERSIGNED 2026-08-26 at QUEUE `M17`; run STAGED at packet `§9.2`,
+  pending launch; UNRUN.** R180 ordered
   the **registered five-card** sweep re-run under `P7` — never a narrowed
   single-card experiment — because §13.8's `borrowed_brilliance` anomaly was
   pilot refusal that `P7` (R176) resolved, and because §13's Δ figures are `P6`
   reads. The draft is the parent's instrument and arm set unchanged, re-stamped
   to **`RT12/D17/P10/C19`**, with a new descriptive `Q4` on the bare-form play
   rate.
-  **PARTLY FILLED 2026-08-13 (R189), and deliberately NOT countersigned:**
+  **PARTLY FILLED 2026-08-13 (R189):**
   `N` = 2,400 pairs/card, a 4-hour stop-and-report ceiling, §8.1's redesign
   trigger carried forward unchanged, and the `Q4` materiality threshold at 5%
   — the last recorded as [USER]'s chosen threshold, **not** evidence-derived.
-  **§8's per-arm prediction table and the direction half of `Q4` stay blank**,
-  so the packet is not cleared to launch; the countersign is withheld until the
-  post-window restamp, because predictions are filled against the settled world
-  — and the `RT`/`C` window that was open at R189 has since CLOSED (2026-08-24),
-  so the restamp and the fill are now takeable. R189 also chose the **route** —
+  The countersign was withheld there until the post-window restamp, because
+  predictions are filled against the settled world; the `RT`/`C` window closed
+  2026-08-24 and the restamp followed on 2026-08-25. R189 also chose the
+  **route** —
   measure-first, so this sweep runs before the `elemental_ecstasy` redesign
   (Option `C2`), which lands after the graded read as its own `C` bump.
   **Sequencing: its payoff-reach gate is DISCHARGED, and `S3`'s two-way fork is
@@ -283,16 +283,28 @@ registration packets themselves live under `review/active/` — one home, not tw
   (`RT12/D15/P7/C11`) was overtaken before it could be applied: `EB-118`'s
   richness pass ran to completion and `EB-136` landed inside the same span, so
   all four fields moved rather than a fourth. **Nothing countersign-gated was
-  written:** `§8`'s per-arm table and the direction half of `Q4` are still
-  blank and still [USER]'s, the countersign line is still blank, and the `Q4`
-  estimand — the bare-form `played_when_drawn_rate` — was deliberately NOT
-  measured, because reading an estimand before its prediction exists is the
-  retro-fit `§8` prevents. `S3` is **spent** (the `D15` boundary is behind the
+  written at the restamp:** `§8` was left blank and the `Q4` estimand — the
+  bare-form `played_when_drawn_rate` — was deliberately NOT measured, because
+  reading an estimand before its prediction exists is the retro-fit `§8`
+  prevents. `S3` is **spent** (the `D15` boundary is behind the
   packet, not ahead of it) and `S1` now pins all four fields; `§10`'s owed
-  re-verification is done at the new stamp; and the run is staged mechanically
-  at the packet's new `§9.2`. Nothing else in `S3` moves: the sweep still runs
-  before the `C2` redesign. The countersign is still withheld and is still
-  [USER]'s, and what precedes it is `§8`'s fill →
+  re-verification is done at the new stamp. Nothing else in `S3` moves: the
+  sweep still runs before the `C2` redesign.
+  **`§8` IS FILLED AND THE PACKET IS COUNTERSIGNED, 2026-08-26**, in that order
+  and in two separate commits — the per-arm prediction table for both
+  co-primaries plus the DIRECTION half of the `Q4` slot, then
+  `COUNTERSIGN — [USER] 2026-08-26` on the packet's own line. The `Q4`
+  direction: the bare form's `played_when_drawn_rate` is predicted **NON-ZERO
+  and ABOVE the 5% threshold**, with no large winrate gain predicted from that
+  alone. Four of the five arm rows track the parent's `P6` read (archive, never
+  a comparator); the `borrowed_brilliance` row is set from DESIGN INTENT
+  instead, and that divergence is **disclosed in the packet beneath the table**
+  rather than left for a grader to infer. The ±2 pp threshold and the 5%
+  materiality threshold are both [USER]'s choices, not evidence-derived.
+  **The run is STAGED, mechanically, at the packet's `§9.2` and is pending
+  launch** — one command at `--runs 2400`, preceded by an `S1` world check that
+  must print `RT12/D17/P10/C19`. `§8` is now frozen: the blind grade is written
+  beside it and never over it →
   `review/active/m17-sweep-reregistration-p7-2026-08-13.md`; companion redesign
   options packet `review/active/m17-elemental-ecstasy-redesign-2026-08-13.md`.
 - **Shop companion channel re-run (`S4-G10`, registered at `RT12/D17/P10/C19`)**
