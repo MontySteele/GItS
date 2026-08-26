@@ -117,9 +117,14 @@ public static class SalonMemberTips
     /// read LIVE off the owner (A12 made it a stat), and the bow-order line
     /// is the D1 ruling: with summon order guaranteed, position IS the
     /// signal, so the keyword teaches it instead of a marker on the stage.
+    ///
+    /// EB-94: the owner goes through <see cref="TipOwner"/>. Reading
+    /// `card.Owner` directly threw on a canonical model -- which is what the
+    /// compendium hands this property -- and took the card's whole tip set
+    /// with it.
     /// </summary>
     private static string SalonRulesBody(CardModel card) =>
-        SalonRulesBody(card.Owner?.Creature);
+        SalonRulesBody(TipOwner.CreatureOf(card));
 
     /// <summary>Creature overload: the stage hover (D1 §4) has no card to
     /// ask, and the copy must not fork.</summary>
