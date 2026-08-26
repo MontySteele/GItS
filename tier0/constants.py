@@ -2410,7 +2410,55 @@ CONSTANTS_VERSION = 19
 #   (the eight sheet rows), `P` 9 -> 10 below (the chooser), `RT` untouched.
 #   THE READ THIS BUMP OWES IS W3's SINGLE DIAGNOSTIC-SCOPED STANDING READ,
 #   taken once for the whole window -- see C19 (e).
-DRAFTER_VERSION = 17
+# DRAFTER_VERSION 18 (EB-28, 2026-08-26) -- THE SALON DEPLOY STOPS PRICING AT
+# ZERO. ONE NEW DIAL, `STATIC_SALON_MEMBER_VALUE = 1.5` (`tier05/draft.py`),
+# and one new inline branch in `_static_power`. `apply_power` is priced
+# INLINE, and none of the inline branches named `power: salon_member` -- so a
+# printed company scored exactly 0.0 and Furina's members were invisible to
+# every plan except salon, where the ARCHETYPE term (not the static scorer)
+# was paying for them. That is the blindness EB-28 names, and the bump is
+# owed because a priced-op set that grows IS a DRAFTER_VERSION bump.
+#   THE VALUE IS DERIVED, NOT PICKED, and unlike D17 it is a VALUE, so the
+#   conservative end of the band is the BOTTOM rather than the top. Three
+#   routes: (1) PERFORM PARITY -- `salon_perform` already prices exactly one
+#   member tick, on demand, at 1.5, and a deploy delivers at least that; (2)
+#   TICK PLUS EVENTUAL BOW -- the perform dial's own note calls a tick "the
+#   smaller half of a member" and FIFO displacement at SALON_MEMBER_SLOTS = 3
+#   eventually pays the bow, 1.5 + 2.0 -> 3.5; (3) KURAGE PARITY -- the
+#   repo's other persistent per-turn engine credits ONE pulse at FACE value
+#   ((KURAGE_PULSE_BASE + KURAGE_PULSE_BLOCK) * STATIC_PERSISTENT_PROC_SHARE
+#   = 4.0), and a salon tick's face averaged over the three types is 4.33
+#   less the 1-Encore upkeep -> 4.03. (2) and (3) converge on 3.5-4.0 from
+#   opposite directions; (1) is the hard floor and IS WHAT IS TAKEN. The gap
+#   is declared rather than hidden: everything above one tick is stage
+#   occupancy and combat length, which an offer screen cannot see -- the same
+#   argument `STATIC_SALON_ROTATE_VALUE` makes for pricing at zero, applied
+#   to a value that can at least be bounded. **THE VALUE IS [USER]-HELD** and
+#   lives in exactly one constant; 3.5 is the defensible larger number in the
+#   same method.
+#   ARCHIVE SCOPE: NINE ROWS, ALL FURINA, ALL SALON, and nothing else on any
+#   sheet moves to four decimals (322 cards dumped before and after; the diff
+#   is these nine and no others). Base -> upgraded: `dress_rehearsal`
+#   0.0000/0.0000 -> 1.5000/1.5000; `endless_waltz` 0.0000/0.0000 ->
+#   1.5000/3.0000; `full_ensemble` 0.0000/0.0000 -> 2.2500/4.5000;
+#   `gentilhomme_usher` 4.0000/6.0000 -> 5.5000/7.5000; `grand_gala`
+#   0.6000/1.0500 -> 3.6000/4.0500; `mademoiselle_crabaletta` 0.0000/0.0000
+#   -> 1.5000/3.0000; `overflowing_hospitality` 1.4500/1.7500 ->
+#   2.2000/2.5000; `salon_debut` 0.0000/0.6000 -> 1.5000/2.1000;
+#   `surintendante_chevalmarin` 0.9000/1.5000 -> 2.4000/3.0000. FIVE of the
+#   nine priced 0.0000 on their base face before this bump and FOUR of those
+#   on both faces, which is the row's claim measured. TWO INVISIBLE UPGRADES
+#   BECOME VISIBLE: `endless_waltz`
+#   and `mademoiselle_crabaletta` each read identically on both faces before
+#   (0.0000/0.0000) and now separate, the same defect `take_it_from_the_top`
+#   was taken for at D17.
+#   `RT`, `P` and `C` are all untouched: no run-layer, policy or sheet edit
+#   rides with this. NO STANDING BASELINE IS OWED (R207) -- the movement is
+#   nine rows on one character's one register, no pending decision needs a
+#   table for it, and the `EB-28` row's own next step (the `S4-G7` remedy,
+#   rebalancing the weak Furina plans) is a [USER]-owned design pass that
+#   this fix precedes rather than answers.
+DRAFTER_VERSION = 18
 DRAFT_BLOCK_DENSITY_MIN = 0.18    # defense quota: draft block below this
 DRAFT_DECK_SOFT_CAP = 22          # deck-size penalty beyond this
 # Retuned 1.0 -> 0.5 by a 6-point sweep at 1000 runs/cell (M7 report).
