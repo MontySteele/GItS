@@ -1,7 +1,7 @@
 # DERIVED FILE -- regenerate with tools/dump_claimed_sources.py.
 # Diff every art candidate against the CLAIMED block before proposing it.
 # See the tool's docstring for what each block means.
-# CLAIMED: 271 effective card picks
+# CLAIMED: 285 effective card picks
 2024 7 5 amusement park art.png	universal_revelry
 4th Anniversary Wallpaper 1.png	thunderous_ovation
 A Commemorative Photo Aether 1.png	audience_participation
@@ -15,6 +15,7 @@ Archon Quest When All Return to the Waters.png	usher_the_waves
 Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png	crowd_work
 Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png	standing_ovation
 Bake-Kurage Summon.png	before_sun_and_moon
+Bake-Kurage Summon.png	tighten_the_cords
 Barbara Character Card.png	barbara_shining_idol
 Bennett Character Card.png	bennett_fantastic_voyage
 Calamitous Tread Graphic 3.png	torrential_turn
@@ -40,6 +41,7 @@ Character Nicole Game.png	nicole_celestial_gift
 Character Raiden Shogun Full Wish.png	raiden_musou_no_hitotachi
 Character Sangonomiya Kokomi Full Wish.png	ceremonial_garment
 Character Sangonomiya Kokomi Full Wish.png	depths_judgment
+Character Sangonomiya Kokomi Full Wish.png	massed_volley
 Character Sangonomiya Kokomi Game.png	nereids_ascension
 Character Sangonomiya Kokomi Game.png	pearl_barrage
 Character Sangonomiya Kokomi Game.png	pearl_current
@@ -114,6 +116,7 @@ Icon Emoji Paimon's Paintings 25 Sangonomiya Kokomi 2.png	tidal_lure
 Icon Emoji Paimon's Paintings 28 Furina 1.png	dramatic_entrance
 Icon Emoji Paimon's Paintings 28 Furina 2.png	warmup_act
 Icon Emoji Paimon's Paintings 29 Furina 1.png	tempo_change
+Icon Emoji Paimon's Paintings 39 Sangonomiya Kokomi.png	what_the_tokoyo_returns
 Icon Emoji Paimon's Paintings 46 Klee 1.png	run_away
 Item Ball Invitation Letter.png	an_invitation
 Item Dodoco's Beach Nap.png	fish_blasting
@@ -210,10 +213,17 @@ Sangonomiya Kokomi Card.png	scattering_spray
 Sangonomiya Kokomi Card.png	slack_water
 Sangonomiya Kokomi Card.png	steady_the_line
 Sangonomiya Kokomi Card.png	surging_shoal
+Sangonomiya Kokomi Character Card Golden.png	all_hands
+Sangonomiya Kokomi Character Card Golden.png	council_at_bourou
+Sangonomiya Kokomi Character Card Golden.png	gyorin_formation
+Sangonomiya Kokomi Character Card Golden.png	open_the_stores
+Sangonomiya Kokomi Character Card Golden.png	the_gunbai_turns
+Sangonomiya Kokomi Character Card Golden.png	what_the_tokoyo_took
 Sangonomiya Kokomi Character Card Platinum.png	grand_conscription
 Sangonomiya Kokomi Character Card Platinum.png	honor_guard
 Sangonomiya Kokomi Character Card Platinum.png	mass_mobilization
 Sangonomiya Kokomi Character Card Platinum.png	press_the_advantage
+Sangonomiya Kokomi Character Card Platinum.png	raise_the_sashimono
 Sangonomiya Kokomi Character Card Platinum.png	reinforcements
 Sangonomiya Kokomi Character Card Showcase.png	all_streams_flow
 Sangonomiya Kokomi Character Card Showcase.png	communion_of_tides
@@ -228,6 +238,7 @@ Sangonomiya Kokomi Character Card.png	signal_arrow
 Sangonomiya Kokomi Character Card.png	standing_orders
 Sangonomiya Kokomi Character Card.png	to_the_front
 Sangonomiya Kokomi Expression 2.png	salt_line
+Sangonomiya Kokomi Expression 3.png	wheel_the_ranks
 Sangonomiya Kokomi Introduction Card.jpg	tideturn
 Sangonomiya Kokomi Introduction Card.jpg	vow_of_tides
 Sangonomiya Kokomi Introduction Card.jpg	waterspout
@@ -237,11 +248,14 @@ Sangonomiya Kokomi Portrait.png	coral_guard
 Sangonomiya Kokomi Portrait.png	tactical_retreat
 Sangonomiya Kokomi Portrait.png	tide_reading
 Sangonomiya Kokomi Portrait.png	waters_edge
+Sangonomiya Kokomi Profile.png	hold_the_narrows
 Sangonomiya Kokomi Profile.png	undertow
 Sangonomiya Kokomi Vision.png	pearl_diver
+Sangonomiya Kokomi Wish.png	crane_wing
 Sangonomiya Kokomi Wish.png	epiphany_of_the_deep
 Sangonomiya Kokomi Wish.png	prayer_to_the_moon
 Sangonomiya Kokomi Wish.png	sango_prayer
+Sangonomiya Kokomi Wish.png	send_the_runner
 Sangonomiya Kokomi Wish.png	vigil_of_the_deep
 Savoring the Breeze Furina.png	breathless
 Sayu Character Card.png	sayu_yoohoo_windwheel
@@ -274,7 +288,7 @@ VIPAD Furina.png	showstopper
 Version 4.2 Wallpaper 2.png	waters_embrace
 Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 #
-# FREE: 186 fetched titles no card claims
+# FREE: 184 fetched titles no card claims
 # 4th Anniversary Wallpaper 3.jpg
 # A Commemorative Photo Aether 2.png
 # A Commemorative Photo Lumine 1.png
@@ -409,9 +423,7 @@ Version Luna VIII HoYoPlay Splashscreen.png	crescendo
 # Raiden Shogun Character Card Platinum.png
 # Rainbow Macarons Event Card.png
 # Ride the Waves to a Rendezvous in Fontaine Opera Epiclese Concept Art 1.png
-# Sangonomiya Kokomi Character Card Golden.png
 # Sangonomiya Kokomi Expression 1.png
-# Sangonomiya Kokomi Expression 3.png
 # Sangonomiya Kokomi Multi Wish.png
 # Savoring the Breeze Wallpaper Furina.png
 # Sayu Character Card Platinum.png
