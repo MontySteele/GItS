@@ -13,6 +13,7 @@ explicitly forbids. Batches come from that section.
     python tools/art_contact_sheet.py --batch identity   # basics + generic + rares
     python tools/art_contact_sheet.py --list             # batch sizes, review nothing
     python tools/art_contact_sheet.py --assets a,b,c --out art/contact_sheet_g12.html
+    python tools/art_contact_sheet.py --assets a,b --art-root ../GItS   # from a worktree
 
 `--assets` cuts ACROSS the batches, and exists because a gate is not a batch.
 R86's G1 asks for five specific rows whose archetypes scatter them over three
@@ -148,7 +149,7 @@ def batch_of(asset_id, out_path, meta):
     return "unsorted"
 
 
-def render(assets, title, subtitle, meta=None):
+def render(assets, title, subtitle, meta=None, art_root=ROOT):
     # The heading carries the display name next to the asset_id, because
     # `crowd_work` / `standing_ovation` / `tempo_change` do not tell a reviewer
     # which card is on screen and the pick is made on the card, not the slug.
@@ -162,7 +163,7 @@ def render(assets, title, subtitle, meta=None):
         for r in sorted(cands, key=lambda x: x["rank"]):
             img = f"candidates/{aid}/r{r['rank']}.png"
             label = r["title"] + (f" @{r['frame']}%" if r["frame"] is not None else "")
-            if not (ROOT / "art" / img).exists():
+            if not (art_root / "art" / img).exists():
                 cells.append(f'<div class="cand missing">r{r["rank"]}: missing<br>'
                              f'<small>{html.escape(label)}</small></div>')
                 continue
@@ -222,7 +223,14 @@ def main():
                          "(for gate reviews). Implies --batch all.")
     ap.add_argument("--title", default=None,
                     help="override the sheet's heading (use with --assets)")
+    ap.add_argument("--art-root", type=Path, default=ROOT,
+                    help="checkout whose art/ holds the rendered candidates "
+                         "and receives the sheet. art/candidates/ is "
+                         "gitignored Tier F and lives only on the main "
+                         "checkout, which a worktree reaches by ABSOLUTE path "
+                         "and never by a link (OPERATIONS.md 'Worktrees').")
     args = ap.parse_args()
+    art_root = args.art_root.resolve()
 
     want = None
     if args.assets:
@@ -266,10 +274,11 @@ def main():
 
     heading = args.title or BATCH_TITLES[args.batch]
     title = f"Teyvat Spire art picks — {heading}"
-    out = args.out or ROOT / "art" / (
+    out = args.out or art_root / "art" / (
         "contact_sheet.html" if args.batch == "all"
         else f"contact_sheet_{args.batch}.html")
-    out.write_text(render(assets, title, heading, meta), encoding="utf-8")
+    out.write_text(render(assets, title, heading, meta, art_root),
+                   encoding="utf-8")
     print(f"wrote {out} ({len(assets)} shortlist assets, batch '{args.batch}')")
     return 0
 
