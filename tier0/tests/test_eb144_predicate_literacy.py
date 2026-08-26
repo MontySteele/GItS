@@ -216,6 +216,21 @@ def test_the_two_collections_cover_todays_sheet_exactly():
     ]
 
 
+def test_the_anchors_print_no_conditional_at_all():
+    """The archive-scope claim, asserted rather than argued: this row moves
+    the ROSTER's combat numbers and cannot move `ref_ironclad`'s or
+    `ref_silent`'s, because neither anchor pool prints an `if:` for the pilot
+    to have been blind to. (`real_*` needs `game_ref/` and is out of reach of
+    a test that must pass on a fresh clone.)"""
+    owners = {cid for users in _every_printed_predicate().values()
+              for cid in users}
+    for pool in ("ref_ironclad", "ref_silent"):
+        anchor = {c.id for c in loader._card_index().values()
+                  if c.character == pool}
+        assert anchor, pool
+        assert not (anchor & owners), (pool, sorted(anchor & owners))
+
+
 # --- (4) the Salon verbs ---------------------------------------------------
 
 def test_change_the_bill_is_no_longer_just_block_three():
