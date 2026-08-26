@@ -33,7 +33,7 @@ and from PowerShell.
 
 | event | matcher | script | what it refuses / does |
 |---|---|---|---|
-| PreToolUse | `Bash` \| `PowerShell` | `tools/hooks/deny_dangerous_git.py` | `git add -A` / `.` / `--all`; `git worktree remove`; `git push` at `main` or forced; `--no-verify` on `commit` or `push` |
+| PreToolUse | `Bash\|PowerShell` | `tools/hooks/deny_dangerous_git.py` | `git add -A` / `.` / `--all`; `git worktree remove`; `git push` at `main` or forced; `--no-verify` on `commit` or `push` |
 | PreToolUse | `Bash\|PowerShell` | `tools/hooks/push_gate.py` | a real `git push` runs the fast lane + `run_lints --lane ci` first (~21 s measured) **in the tree the push targets** — resolved from `git -C`, then the last in-line `cd`, then the payload's `cwd`, and NAMED in the note — and is BLOCKED on red, on timeout, or when that tree holds no `tools/run_lints.py` / `tier0/tests` |
 | PostToolUse | `Edit\|Write\|NotebookEdit` | `tools/hooks/game_ref_backup_reminder.py` | an edit under `game_ref/` prints the vault-backup reminder; `GITS_HOOK_RUN_BACKUP=1` runs the mirror instead |
 
