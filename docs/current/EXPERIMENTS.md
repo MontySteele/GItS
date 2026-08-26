@@ -296,8 +296,37 @@ registration packets themselves live under `review/active/` — one home, not tw
   `review/active/m17-sweep-reregistration-p7-2026-08-13.md`; companion redesign
   options packet `review/active/m17-elemental-ecstasy-redesign-2026-08-13.md`.
 - **Shop companion channel re-run (`S4-G10`, registered at `RT12/D17/P10/C19`)**
-  — **DRAFT, awaiting [USER] slate entry then countersign at QUEUE `M14`,
-  unrun.** The packet is in HEAD as of the `shop-floor-2026-08-10` merge. The
+  — **RUN AND GRADED 2026-08-26.** Slate entered and packet countersigned
+  the same day, in that order and as separate commits ahead of any seed; the
+  run then fired under packet `§7.1` and was graded blind against `§5`.
+  **THE OUTCOME, in one line: 2 PREDICTED / 1 SPLIT / 2 MISS over 6,000 runs
+  at `RT12/D17/P10/C19`, and the redesign trigger FIRED on exactly one of its
+  four conditions — P2's winrate band, at a mean Δ of −0.07 pp.**
+  **Q1 PREDICTED** (92.7% Uncommon of 1,130 slot-2 purchases against an
+  entered 80–95%). **Q2 SPLIT**: the `YES` direction holds and is measured
+  rather than asserted — 531 preferred picks priced out mid-visit, **298 of
+  them affordable at the door**, which is precisely the case the pre-2026-08-11
+  arrival check structurally could not see — while the entered 0–5% arrival
+  band misses at **28.6%**, and **"price is not governing this channel" fails
+  on BOTH of its clauses** (28.6% > 5%; companion-slot priced-out events ÷
+  shop visits = 531/5,709 = 9.3% > 5%). **Q3 PREDICTED and its retained 10–35%
+  acceptance band holds** (20.7%, 1,183/5,709 visits). **Q4 MISS on
+  direction** — the relic buy rate is HIGHER in companion-purchase visits,
+  16.0% against 14.3%, where −15 pp was entered. **P2 MISS**, mean Δ
+  −0.07 pp (klee +0.80, furina −0.90, kokomi −0.10). Trigger conditions 1–3
+  did not fire; condition 2 came within 0.7 pp and that is recorded rather
+  than rounded away. **Condition 4 was honoured as the bright line it was
+  entered as:** −0.07 pp is a hair below zero and the per-character deltas
+  disagree in sign, but every such observation was available before the run,
+  none was written into the trigger, and adopting one afterwards is choosing
+  the boundary to fit the result. **The packet and this pointer STAY IN HEAD**
+  — a registration leaves HEAD when it is graded *and closed*, and the design
+  call the firing raises is open at QUEUE `M14` and rests on this evidence
+  (packet `§8.4`). **`EB-141(b)`'s gate is now OPEN**; the trigger firing does
+  not re-gate it. Raw read with its provenance header:
+  `review/active/shop-rerun-results-2026-08-26.txt`; the grade is packet
+  `§8`, and `§5` is not edited by it (R101b). The packet has been in HEAD since
+  the `shop-floor-2026-08-10` merge. The
   channel's world moved ([USER] restored slot 2's Uncommon floor,
   `CONSTANTS_VERSION` 9) and the instrument's two defects were repaired, both
   on 2026-08-10; the packet asks to re-measure in the new world. **Re-stamped
@@ -310,11 +339,27 @@ registration packets themselves live under `review/active/` — one home, not tw
   renumber the Klee and Furina shelves. `§2` items 12–15 enumerate it and
   `§2.1` names the table to author predictions against
   (`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`, which supersedes
-  the two 2026-08-24 tables; each stands as published, R101b). Predictions are
-  explicit [USER] slots and are still blank; the run is staged mechanically at
-  `§7.1`, where two instrument hazards are named — it prints no `RT/D/P/C`
-  (citability rests on a provenance header) and it has **no smoke path**, so
-  any invocation reads the registered seed →
+  the two 2026-08-24 tables; each stands as published, R101b).
+  **The six `§5` predictions and `§4`'s `n` are ENTERED, in `§7` step 1's
+  order and before any seed was run** — Q1 80–95% Uncommon DIAGNOSTIC-ONLY,
+  Q2 YES-but-uncommon with arrival-unaffordable 0–5% and a two-clause
+  price-is-not-governing test, Q3 15–30% with the original 10–35% acceptance
+  band standing beside it, Q4 YES at approximately −15 pp, P2's original band
+  standing, and a four-condition redesign trigger under which a Q1 miss alone
+  reopens nothing; `n` = 1,000 per arm per character, `SEED = 20260725`
+  retained. **The entered slate REPLACES the one R182 settled and held outside
+  the repo rather than transcribing it** — those values were never written in
+  and are not recoverable, which the packet's `§5` says in its own words. Two
+  corrections were adopted with the entry: Q2's priced-out clause restated in
+  the per-EVENT-over-per-VISIT units the instrument actually prints, and a
+  countersign line added, the packet having had none while its three siblings
+  all carry one. The run is staged mechanically at
+  `§7.1`, where the instrument's standing hazards are named — it **prints the
+  live `RT/D/P/C` as its first output line** (`EB-141(a)`, 2026-08-25) but
+  **still does not route through a `Cell`** (`EB-141(b)`, gated on this
+  registration's grade), so citability rests on `§7.1`'s provenance header
+  binding that stdout to a registration, a commit and an `n`; and it has **no
+  smoke path**, so any invocation reads the registered seed →
   `review/active/shop-rerun-registration-2026-08-10.md`.
 - **The regret margins (`M13`)** — **DRAFT, §7 PARTLY FILLED 2026-08-12
   (R181), awaiting [USER] countersign at QUEUE `M13`, unrun.** `ROUTE_REGRET_MARGIN` and its drafter
