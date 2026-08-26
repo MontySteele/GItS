@@ -32,7 +32,7 @@ import os
 import re
 import shlex
 import sys
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 
 REPO = Path(__file__).resolve().parents[2]
 
@@ -221,9 +221,21 @@ def _joined(base: Path, raw: str) -> Path:
     when it does not.
     """
     target = native_path(raw)
-    if not target.is_absolute():
+    if not _absolute(target):
         target = base / target
     return Path(os.path.normpath(target))
+
+
+def _absolute(path: Path) -> bool:
+    """Absolute on THIS platform, or spelled with a Windows drive.
+
+    `native_path` turns `/c/Users/...` into `C:/Users/...` on purpose; on a
+    POSIX host (the CI runner) `Path.is_absolute()` does not recognise that
+    spelling and `_joined` would glue it under the base -- which is exactly
+    what the self-test caught. The conversion's whole meaning is "this is an
+    absolute drive path", so it is absolute everywhere.
+    """
+    return path.is_absolute() or PureWindowsPath(str(path)).is_absolute()
 
 
 def cd_target(tokens: list[str]) -> str | None:
