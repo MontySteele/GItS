@@ -2183,13 +2183,31 @@ def kokomi_rotation_law(player) -> bool:
     return "tamakushi_casket" in player.relic_hooks
 
 
-def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
-    hand = state.player.hand
-    # DEFECT FIX: the status branch used to rebuild the pool from `hand` and
-    # so dropped the kit-card exemption two lines above -- a status-filtered
-    # exhaust could eat the granted Burst, breaking the v1.9 invariant that
-    # the kit never enters a pile. Filter the exempt pool instead.
-    pool = [c for c in hand if not c.kit_card]   # same invariant as discard
+def exhaust_pool(state: CombatState, fx: dict,
+                 exclude: Optional[Card] = None) -> list[Card]:
+    """The already-legal candidates ONE `exhaust_from` may take.
+
+    ONE definition, TWO consumers, which is why it is a named function rather
+    than eight lines inside the op: `_op_exhaust_from` builds the real pool
+    with it at RESOLUTION time, and `policy._forecast_exhaust_selection`
+    (`EB-145`) builds the same pool at SCORE time. A pilot pricing the payout
+    of its own selection therefore cannot disagree with the pool the engine
+    will actually offer it -- the Track C.2 lesson, applied to a pool instead
+    of to a predicate.
+
+    `exclude` is the card being PLAYED. At resolution time it has already left
+    hand (`combat.play_card` removes the instance before resolving), at score
+    time it has not, so the score-time caller names it and the two callers see
+    the same list. Identity, never equality: `Card` is a value-equality
+    dataclass and two copies of one row are two candidates.
+
+    DEFECT FIX kept from the inline form: the status branch used to rebuild the
+    pool from `hand` and so dropped the kit-card exemption -- a status-filtered
+    exhaust could eat the granted Burst, breaking the v1.9 invariant that the
+    kit never enters a pile. Filter the exempt pool instead.
+    """
+    pool = [c for c in state.player.hand
+            if not c.kit_card and c is not exclude]  # same invariant as discard
     if fx.get("filter") == "status":
         pool = [c for c in pool if c.rarity == "status"]
     elif fx.get("filter") == "non_attack":
@@ -2204,6 +2222,12 @@ def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
         # uniquely status-resistant for free; that quirk is retired, and the
         # design space it vacates is a dedicated Uncommon/Rare card.
         pool = [c for c in pool if not c.is_junk]
+    return pool
+
+
+def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
+    hand = state.player.hand
+    pool = exhaust_pool(state, fx)
     n = fx.get("amount", 1)
     # Stoke exhausts the WHOLE hand and then generates that many cards. The
     # count is fixed BEFORE any exhausting (the dll reads exhaustCount off
