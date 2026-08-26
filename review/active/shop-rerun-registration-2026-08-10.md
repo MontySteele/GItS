@@ -1,7 +1,11 @@
-# Shop companion channel — re-run registration (COUNTERSIGNED, unrun)
+# Shop companion channel — re-run registration (RUN AND GRADED 2026-08-26)
 
-> **Status: COUNTERSIGNED 2026-08-26, not yet run.** No number in this document
-> was measured. The instrument was repaired and the shop world was changed on
+> **Status: RUN AND GRADED 2026-08-26. The grade is §8, and the redesign
+> trigger FIRED** — on P2's winrate band and on nothing else, so the row this
+> packet serves, `QUEUE` `M14`, stays OPEN as a design call and the packet
+> stays in HEAD with it (§8.4). **Every measured number lives in §8 and in
+> `review/active/shop-rerun-results-2026-08-26.txt`; nothing above §8 was
+> measured**, and §5 is not edited by the grade (R101b). The instrument was repaired and the shop world was changed on
 > 2026-08-10; this packet asks to re-run the measurement in the new world.
 > **That world is `RT12/D17/P10/C19` — §2 enumerates it in full, and it is the
 > world the re-run measures.** (Re-stamped a third time 2026-08-24 on `M14`'s
@@ -916,15 +920,166 @@ its own commit.
 **The output of (1) is not opened by whoever filled §5 before (3) is
 recorded.** That is the blind in blind grading, and no command can enforce it.
 
+## 8. The grade — taken blind, 2026-08-26
+
+Blind-first, in §5's order: every prediction slot is graded before any
+narrative. **§5 is not edited by this grade** (§7.1 step 3), and it was
+committed in full before this run existed.
+
+**The read:** `review/active/shop-rerun-results-2026-08-26.txt` — the
+instrument's own stdout under the §7.1 provenance header. 6,000 runs
+(1,000 per arm per character), seed `20260725`, world `RT12/D17/P10/C19`,
+commit `603de9f`, 183 seconds, exit 0. Step (0)'s world check and the
+instrument's own first stdout line (`EB-141(a)`) both printed the registered
+stamp and agree.
+
+**THE OUTCOME, IN ONE LINE: 2 PREDICTED / 1 SPLIT / 2 MISS, and the redesign
+trigger FIRES on exactly one of its four conditions — P2's winrate band, at a
+mean Δ of −0.07 pp.**
+
+### 8.1 Slot by slot
+
+**Q1 — slot-2 purchase mix. PREDICTED.** Entered 80–95% Uncommon,
+DIAGNOSTIC-ONLY. Read: **92.7% Uncommon of 1,130 slot-2 purchases** — inside
+the band. The offered mix was 5,003 Uncommon / 706 Rare (87.6% / 12.4%), so
+purchases run about five points Uncommon-*er* than the shelf itself: the purse
+and the floor pointing the same way, which is what the slot's context
+expected.
+
+**Q2 — the money question. SPLIT.** Two clauses, and they part.
+
+- **Direction: HOLDS.** `YES` — gold is sometimes the binding constraint, and
+  it is now measured rather than asserted. **531 preferred picks were priced
+  out mid-visit, and 298 of those were affordable at the door** and stopped
+  being affordable because the same visit had already bought something else.
+  That is exactly the case the arrival check structurally cannot see — the
+  unsupported "gold was never the constraint" line §1 indicts — and it is not
+  rare.
+- **Band: MISSES, and not narrowly.** Entered 0–5% of companion offers
+  unaffordable on arrival. Read: **3,260 of 11,418 = 28.6%**, about six times
+  the top of the band. (The denominator checks out: 4,078 + 4,080 affordable
+  of 5,709 + 5,709 offered.)
+- **"Price is not governing this channel": NOT SATISFIED — both clauses
+  fail.** (1) arrival-unaffordable **28.6% > 5%**. (2) companion-slot
+  `pick_priced_out` events ÷ shop visits = **531 / 5,709 = 9.3% > 5%**.
+  Correction 1's units were the ones the run actually printed, and one detail
+  is worth recording: the priced-out detail line carried only `slot 1` and
+  `slot 2` keys and **no `character shelf` key at all**, so the exclusion
+  Correction 1 prescribes removed nothing here and the numerator is the whole
+  531. Its declared per-EVENT-over-per-VISIT skew is therefore the only gap
+  between this ratio and a true per-visit share.
+- **The third count, reported without a band as §5 said it would be:**
+  **15,376 shelf entries stranded at loop exit, 15,085 of them on the gold
+  guard** — the purse falling below the cheapest thing left. That exit
+  recorded nothing at all before 2026-08-11.
+
+**Q3 — true P1 buy rate. PREDICTED, and acceptance HOLDS.** Entered 15–30%,
+with the original 10–35% band standing as acceptance. Read: **20.7%
+(1,183 / 5,709 visits)** — inside the prediction and comfortably inside
+acceptance. This is the first honest read of the number; the old figure was
+inflated by the attribution defect §1 describes.
+
+**Q4 — crowding out. MISS — the direction is wrong.** Entered `YES`,
+approximately −15 pp. Read: the relic buy rate is **16.0% in visits where a
+companion was bought (332 / 2,071)** against **14.3% in visits where none was
+(521 / 3,638)** — **+1.7 pp, i.e. UP, not down.** Under §5's recorded reading
+of "approximately", a wrong direction is a MISS outright rather than a SPLIT,
+and this is a wrong direction.
+
+**P2 — winrate delta. MISS, and it is the one that fires the trigger.**
+Entered: the original band STANDS — positive and no more than +2.0 pp. Read:
+**mean Δ = −0.07 pp**, below zero and so outside the band at its lower edge.
+Per character: `klee/demolition` **+0.80 pp** (off 4.0% / on 4.8%),
+`furina/salon` **−0.90 pp** (3.5% / 2.6%), `kokomi/priest` **−0.10 pp**
+(0.9% / 0.8%).
+
+### 8.2 The redesign trigger
+
+**IT FIRES — on condition 4, and on that one alone.**
+
+| # | condition as entered | read | fires? |
+|---|---|---|---|
+| 1 | slot-1 buy rate outside 10–35% | 20.7% | no |
+| 2 | companion-slot priced-out events ÷ shop visits > 10% | 9.3% | no |
+| 3 | relic-buy rate down ≥ 20 pp in companion visits | +1.7 pp (UP) | no |
+| 4 | mean winrate Δ below 0 or above +2 pp | −0.07 pp | **YES** |
+
+Condition 2 came within 0.7 pp of firing and did not. Recorded, because "did
+not fire" and "was nowhere near firing" are different facts and only one of
+them is true here.
+
+**Condition 4 is a bright line and it is honoured as one.** −0.07 pp is a hair
+below zero; the three per-character deltas do not agree in sign; and the
+on-arm 95% intervals are wide enough to hold both signs. **Every one of those
+observations was available before the run, and none of them was written into
+the trigger.** Adopting any of them now, after seeing the number, would be
+choosing the boundary to fit the result — the forking-paths defect with extra
+steps. The entered condition says *below 0*, and the read is below 0.
+
+**What the firing means, and what it does not.** It reopens the **shop design**
+as a [USER] call at `QUEUE` `M14`. Nothing here is an engineering fix and none
+is taken; §3 fixed that before the run — whether any of these numbers is good
+or bad, and whether the channel should be re-priced or re-stocked, is a design
+call downstream of the grade. **A Q1 miss alone would have reopened nothing,
+and Q1 did not miss in any case.**
+
+### 8.3 Reported, and never part of a verdict
+
+- **The two crowd-out reads disagree in sign, and both are printed.** At RUN
+  TOTALS the on-arm buys **40.8% fewer relics** (990 against 1,672) and ends
+  with **6.7% less gold**. At VISIT RESOLUTION the relic rate is 1.7 pp
+  **higher** inside companion-purchase visits. They answer different
+  questions, which is precisely why §3 asked the second one: the run-total
+  figure conditions on nothing, while the visit-level figure conditions on a
+  visit in which a companion was affordable at all — a visit arriving with a
+  fatter purse than average. **That is an observation about what the two
+  numbers can mean, not a finding.** Nothing in this cell measures the
+  selection directly, and Q4 is graded on the visit-level figure it named.
+- **Gold on arrival: mean 153.5, median 129, min 0, max 999**, over 5,709
+  visits. The cheapest companion under the restored floor is 75 gold, and half
+  of all visits arrive holding under 130.
+- **`removals` is 0 in both arms.** The card-remove door was not opened in any
+  of the 6,000 runs, so the run-total crowd-out block's first row compares two
+  zeroes and says nothing. Unchanged from the original cell.
+- **Total gold spent on companions: 188,250.**
+- **The instrument's own three verdict words** — `P1 IN BAND`, `P2 OUT OF
+  BAND`, `P3 IN BAND (>= 60%, DIAGNOSTIC)` — carry the **July cell's**
+  hardcoded bands. Two of them coincide with what was entered; **P3's does
+  not**, Q1's entered band being 80–95%. This grade reads printed percentages
+  throughout and never the instrument's verdict word, exactly as §5 required.
+
+### 8.4 What this grade does to the packet, the row and `EB-141`
+
+- **`QUEUE` `M14` STAYS OPEN.** It converts from a slate-entry row into the
+  design call the trigger raises, with the firing condition named on it.
+- **§7 step 4 is NOT executed in this pass, and the reason is stated rather
+  than left to inference.** That step takes this packet out of HEAD when the
+  grade lands; `EXPERIMENTS` says a registration leaves HEAD when it is
+  **graded and closed**. This one is graded and is **not** closed — the design
+  call it feeds is open and rests on it, and removing the evidence while the
+  decision is pending would strand the row's own pointer. The packet leaves
+  HEAD with the row, not before it.
+- **`EB-141(b)` IS UNBLOCKED.** Its gate read, verbatim, *"`M14`'s run being
+  taken and graded"*. That has now happened, and the freeze this packet
+  declared from the countersign to the graded read is spent. The instrument
+  may be rerouted through a `Cell` and the §7.1 bridge retired. **The trigger
+  firing does not re-gate it:** what reopens is the shop's design, not the
+  instrument's plumbing, and no further run is registered against this
+  packet's world.
+- **A graded record stands as published (R101b).** §5 is not edited by this
+  grade, and neither §5 nor this section is re-read against any later ruling.
+
+
 ---
 
 ## Countersign line — one word, [USER]: COUNTERSIGN / REVISE / DECLINE
 
 `COUNTERSIGN` — [USER] 2026-08-26.
 
-**No slot is open. The packet is cleared to launch**, and §7.1 fires on §4's
-entered `n` = 1,000 with the registered seed. The world freezes from this line
-to the graded read (R182's sequence), which is also `EB-141(b)`'s gate.
+**No slot was open and the packet was cleared to launch**, and §7.1 fired on
+§4's entered `n` = 1,000 with the registered seed. The world froze from this
+line to the graded read (R182's sequence) — **that freeze is now SPENT**, the
+read having landed 2026-08-26 at §8, and with it `EB-141(b)`'s gate is open.
 
 **Correction 2 (Claude, adopted 2026-08-26): this packet had no countersign
 line at all.** Its three sibling registrations each end with one in exactly

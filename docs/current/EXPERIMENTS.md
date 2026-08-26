@@ -296,8 +296,36 @@ registration packets themselves live under `review/active/` — one home, not tw
   `review/active/m17-sweep-reregistration-p7-2026-08-13.md`; companion redesign
   options packet `review/active/m17-elemental-ecstasy-redesign-2026-08-13.md`.
 - **Shop companion channel re-run (`S4-G10`, registered at `RT12/D17/P10/C19`)**
-  — **SLATE ENTERED AND COUNTERSIGNED 2026-08-26 ([USER]), unrun at this
-  entry; the run is firing under packet `§7.1`.** The packet is in HEAD as of
+  — **RUN AND GRADED 2026-08-26.** Slate entered and packet countersigned
+  the same day, in that order and as separate commits ahead of any seed; the
+  run then fired under packet `§7.1` and was graded blind against `§5`.
+  **THE OUTCOME, in one line: 2 PREDICTED / 1 SPLIT / 2 MISS over 6,000 runs
+  at `RT12/D17/P10/C19`, and the redesign trigger FIRED on exactly one of its
+  four conditions — P2's winrate band, at a mean Δ of −0.07 pp.**
+  **Q1 PREDICTED** (92.7% Uncommon of 1,130 slot-2 purchases against an
+  entered 80–95%). **Q2 SPLIT**: the `YES` direction holds and is measured
+  rather than asserted — 531 preferred picks priced out mid-visit, **298 of
+  them affordable at the door**, which is precisely the case the pre-2026-08-11
+  arrival check structurally could not see — while the entered 0–5% arrival
+  band misses at **28.6%**, and **"price is not governing this channel" fails
+  on BOTH of its clauses** (28.6% > 5%; companion-slot priced-out events ÷
+  shop visits = 531/5,709 = 9.3% > 5%). **Q3 PREDICTED and its retained 10–35%
+  acceptance band holds** (20.7%, 1,183/5,709 visits). **Q4 MISS on
+  direction** — the relic buy rate is HIGHER in companion-purchase visits,
+  16.0% against 14.3%, where −15 pp was entered. **P2 MISS**, mean Δ
+  −0.07 pp (klee +0.80, furina −0.90, kokomi −0.10). Trigger conditions 1–3
+  did not fire; condition 2 came within 0.7 pp and that is recorded rather
+  than rounded away. **Condition 4 was honoured as the bright line it was
+  entered as:** −0.07 pp is a hair below zero and the per-character deltas
+  disagree in sign, but every such observation was available before the run,
+  none was written into the trigger, and adopting one afterwards is choosing
+  the boundary to fit the result. **The packet and this pointer STAY IN HEAD**
+  — a registration leaves HEAD when it is graded *and closed*, and the design
+  call the firing raises is open at QUEUE `M14` and rests on this evidence
+  (packet `§8.4`). **`EB-141(b)`'s gate is now OPEN**; the trigger firing does
+  not re-gate it. Raw read with its provenance header:
+  `review/active/shop-rerun-results-2026-08-26.txt`; the grade is packet
+  `§8`, and `§5` is not edited by it (R101b). The packet has been in HEAD since
   the `shop-floor-2026-08-10` merge. The
   channel's world moved ([USER] restored slot 2's Uncommon floor,
   `CONSTANTS_VERSION` 9) and the instrument's two defects were repaired, both
