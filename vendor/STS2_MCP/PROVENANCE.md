@@ -71,7 +71,7 @@ disagree in either direction.
 | `gits/GitsSeed.cs` | GItS addition | P1.5 item 1 — the chosen-seed endpoint. Documents in-file why upstream's own `charSelect.Lobby == null` refusal does not describe the game. |
 | `gits/GitsResources.cs` | GItS addition | P1.5 item 2 — a reflection-only reader for BaseLib's custom-resource registry. No compile-time BaseLib reference; a missing BaseLib yields an empty map. |
 | `gits/GitsGiveCard.cs` | GItS addition | EB-52 — the dev-only card-injection route. Selects a card out of `ModelDb.AllCards` and hands it to the game's own acquisition path; mints nothing. **EB-91 (2026-08-13): the CARD SCOPE now follows the pile.** Deck grants are created in `player.RunState`; combat-pile grants in `player.Creature.CombatState`, which is what every in-combat generator does (`CollisionCourse`, `CardFactory.GetForCombat`). A run-scoped card handed to `AddGeneratedCardToCombat` arrived in hand and read back fine, then threw `must be added to a CombatState before playing it` out of `CardPileCmd.AddDuringManualCardPlay` and wedged the fight. The `route` field, which reported the static string `card_pile_cmd` for both branches, now names the branch that ran (`run_state_create+card_pile_add` / `combat_state_create+add_generated_to_combat`) and a `scope` field says `run`/`combat`. |
-| `gits/GitsDebugState.cs` | GItS addition | EB-142 — the dev-only board-setup route, and the second half of the targeted-scenario door `GitsGiveCard` opened. Four ops (`set_resource`, `set_energy`, `set_hp`, `set_block`), singleplayer and in-combat only, each going through the game's OWN mutator for that number: `CreatureCmd.SetCurrentHp`, `PlayerCmd.SetEnergy`, the registered `CustomResource`'s own `Amount` setter, and `Creature.LoseBlockInternal`/`GainBlockInternal` (the one hook-free write — there is no `CreatureCmd.SetBlock`, and routing a debug set through `GainBlock` would run the `ModifyBlockGained` chain over the number the caller asked for). `why` is a REQUIRED field, logged with every write. No enemy spawning and no status application — both are follow-ups, both named in the file header. `GitsResources.cs` stays a read-only serialiser; the resource WRITE lives here and reuses that file's cached registry probe. |
+| `gits/GitsDebugState.cs` | GItS addition | EB-142 — the dev-only board-setup route, and the second half of the targeted-scenario door `GitsGiveCard` opened. **Five ops** (`set_resource`, `set_energy`, `set_hp`, `set_block`, and `set_power` since EB-146), singleplayer and in-combat only, each going through the game's OWN mutator for that number: `CreatureCmd.SetCurrentHp`, `PlayerCmd.SetEnergy`, the registered `CustomResource`'s own `Amount` setter, `Creature.LoseBlockInternal`/`GainBlockInternal` (the one hook-free write — there is no `CreatureCmd.SetBlock`, and routing a debug set through `GainBlock` would run the `ModifyBlockGained` chain over the number the caller asked for), and `PowerCmd.Apply`/`ModifyAmount`/`Remove`. `why` is a REQUIRED field, logged with every write. **EB-142's header refused power application** — `PowerCmd.Apply` wants a `PlayerChoiceContext` and an applier, and inventing an applier is minting rather than selecting. **EB-146 answered both without inventing anything:** the context is the game's own `ThrowingPlayerChoiceContext` (what `PowerCmd.Decrement` passes, for the case where no player choice can open below), and the applier is **null** — `SparkPower.Spend`'s own precedent, which keeps a bookkeeping write out of the `ModifyPowerAmountGiven` chain so nothing can inflate or shrink the exact number. The cost is stated in-file: a power that reads its `Applier` sees null, and an `InstancedPerApplier` power gets a pile owned by nobody, which is why more than one instance of the named power on the creature is a REFUSAL rather than a guess. Enemy spawning is the one follow-up left, and the file header still names it. `GitsResources.cs` stays a read-only serialiser; the resource WRITE lives here and reuses that file's cached registry probe. |
 
 Everything else is byte-identical to `55e0648`.
 
@@ -101,12 +101,17 @@ generators can produce, or reports state the game already holds:
   pair every in-combat generator in the game runs and which writes the
   combat-history row too.
 
-- `GitsDebugState` writes four combat numbers, and writes each one through
+- `GitsDebugState` writes five combat numbers, and writes each one through
   the mutator the GAME already uses for it — `CreatureCmd.SetCurrentHp`,
   `PlayerCmd.SetEnergy`, the resource's own `Amount` setter (the property
-  BaseLib's own gain and spend paths write), and the creature's own
-  block-internal pair. It adds no mutator the game does not have, spawns no
-  enemy and applies no status.
+  BaseLib's own gain and spend paths write), the creature's own
+  block-internal pair, and `PowerCmd.Apply` / `PowerCmd.ModifyAmount` /
+  `PowerCmd.Remove`, which are the three commands every card in the game
+  applies, stacks and clears a power with. It adds no mutator the game does
+  not have and spawns no enemy. It DOES now apply a power (EB-146) — out of
+  `ModelDb.AllPowers`, which is the same registry `McpMod.Wiki.cs` and
+  `KleeSelfCheck` already enumerate, so the power selected is one the game
+  already holds and nothing is constructed here either.
 
 No constant, generator, reward table or pilot is touched by any of them.
 
@@ -120,7 +125,16 @@ reason verbatim (no action-queue synchronizer, so peers diverge), refuses when
 no combat is in progress (every op writes combat state, so out of combat the
 write would be a silent no-op wearing an `ok`), and refuses `set_hp` at zero or
 below — `SetCurrentHp(0)` leaves a creature at zero without running the death
-path, which is a wedged fight wearing an `ok`, EB-91's exact shape.
+path, which is a wedged fight wearing an `ok`, EB-91's exact shape. `set_power`
+adds five refusals of the same kind and for the same reason — an unknown power
+id (no fuzzy match, the resource arm's rule one badge over), a printed TITLE two
+registered powers share, a creature whose `CanReceivePowers` is false (PowerCmd
+would return early, which is the silent no-op again), a negative amount on a
+power that does not allow negatives (the game removes such a power at 0 or
+below, so the write would land as a REMOVAL wearing the number that was asked
+for), and a creature carrying more than one instance of the named power (an
+`InstancedPerApplier` power keeps one pile per applier and a debug set cannot
+choose which pile).
 
 **`GitsGiveCard` is dev-only in a way the wire says out loud.** A run that
 used it is no longer a run the generators produced, so nothing measured on it
@@ -156,7 +170,13 @@ on both `RunState` and `Creature.CombatState`, `CardPileCmd.Add` /
 those two interfaces would silently turn the grant into the refusal branch); `GitsSeed` binds `StartRunLobby.SetSeed`,
 `NGame.DebugSeedOverride` and `SeedHelper.CanonicalizeSeed`; `GitsDebugState`
 binds `CreatureCmd.SetCurrentHp`, `PlayerCmd.SetEnergy`,
-`Creature.LoseBlockInternal`/`GainBlockInternal` and `Creature.Monster.Id.Entry`
+`Creature.LoseBlockInternal`/`GainBlockInternal`, and — since EB-146 —
+`ModelDb.AllPowers`, `AbstractModel.Id.Entry`, `PowerModel.Title`,
+`PowerModel.AllowNegative`, `PowerModel.ToMutable`, `Creature.CanReceivePowers`,
+`Creature.GetPowerInstances`, `PowerCmd.Apply` (the NON-generic overload, which
+is the only one reachable when the type is resolved at runtime),
+`PowerCmd.ModifyAmount`, `PowerCmd.Remove` and
+`ThrowingPlayerChoiceContext`; and `Creature.Monster.Id.Entry`
 (the last of which it uses to re-synthesise the wire's `entity_id` the way
 `McpMod.StateBuilder.BuildEnemyState` does — if those two spellings ever
 diverge, a scenario's target is a creature nobody chose, and the build will not

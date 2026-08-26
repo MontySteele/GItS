@@ -1,0 +1,98 @@
+# EB-146 scenario: `set_power` reaches Sparks, which `set_resource` cannot.
+#
+# THE QUESTION. Every other scenario in this pack that needs a Spark bank
+# CLIMBS it by playing Sparkly Treasure, and the two Klee files say why in as
+# many words: Sparks are a POWER (`Powers/SparkPower.cs`, a `PowerModel` with a
+# badge), not one of BaseLib's registered CustomResources, so `set_resource`
+# reaches Fanfare, Encore, Charge, the two Bursts and the three Spotlight
+# meters and does not reach that one. `set_power` is the op that closes the
+# gap, and this file is the assertion that it does -- the same gate
+# `spark-gate-refusal.yaml` walks up by playing cards, walked here by writing
+# the bank directly and then clearing it.
+#
+# IT ASSERTS THE WRITE, NOT THE GATE. `spark-gate-refusal.yaml` already owns
+# the claim that `hold_the_line` reads unplayable below its price; that file
+# earns its Sparks by play and is the honest instrument for the RULE. What is
+# new here is the DOOR: that a power the game applies through
+# `PowerCmd.Apply` can be applied by the bridge to a creature that does not
+# carry it yet (0 -> 2), and cleared through `PowerCmd.Remove` (2 -> 0), and
+# that the gate answers the written bank exactly as it answers a played one.
+# The playability reads are how the write is observed, not a second reading of
+# the rule.
+#
+# THE ID IS THE WIRE'S OWN. `ModelDb` slugifies a power's class name into its
+# entry (`SparkPower` -> `SPARK_POWER`), the bridge prints that on every status
+# row (`McpMod.StateBuilder.BuildPowersState`), and the endpoint resolves the
+# id first and the printed Title second. `understudy/logs/p2/` carries live
+# rows with `"id": "SPARK_POWER", "name": "Spark"` beside each other, which is
+# where the spelling in this file comes from rather than from a guess.
+
+name: set-power-sparks
+character: KLEEMOD-KLEE
+turns: 8
+
+notes: |
+  Hold the Line in hand with no Spark badge at all, then Sparks written to 2
+  and the gate opening, then Sparks written back to 0 and the gate closing.
+  Both writes go through `set_power`; no Spark in this file is earned by play.
+
+assumptions:
+  - "`SPARK_POWER` is `SparkPower`'s ModelId entry (`ModelDb.GetEntry` =
+     `StringHelper.Slugify(type.Name)`), and it is the string the wire prints
+     on a status row. If a rename ever moves it, the first `set_power` step
+     fails with the endpoint's own refusal, which lists what the creature
+     carries and points at the registry."
+  - "The wire's status `amount` is `PowerModel.DisplayAmount`, and `set_power`
+     writes `Amount`. SparkPower does not override DisplayAmount, so the two
+     are the same number here. They are NOT the same number for every power --
+     `BombPower.Amount` is a bomb count and its badge shows total pending
+     damage -- so this assumption is a fact about Spark, not about the op."
+  - "`BlockedByCardLogic` is the UnplayableReason an `IsPlayable` override
+     produces (`Cards/Generated/HoldTheLine.cs` overrides it with
+     `SparkPower.CanSpend(Owner.Creature, 2)`). This is
+     `spark-gate-refusal.yaml`'s assumption verbatim; a failure here prints the
+     reason the game actually gave, which settles it."
+  - "Energy is set to 5 first, so no refusal in this file can be
+     EnergyCostTooHigh wearing the answer the scenario is looking for."
+  - "The card is granted UNUPGRADED; the upgrade moves the Block (5->8, 6->9),
+     never the price, so the gate is the same on both faces."
+  - "Klee starts the fight with NO Spark badge -- the power is absent, not
+     present at 0. The first expect reads that absence, and it is what makes
+     the 0 -> 2 write an APPLY rather than a stack change. If a relic or a
+     starting card ever puts a Spark on the board first, that expect fails at
+     the state it actually found."
+  - "`set_power` passes `applier: null`, so nothing in this file exercises a
+     power that reads its applier, and the ModifyPowerAmountGiven hook chain is
+     not run over either write. The receive chain IS run, which is why the
+     endpoint reports the amount REQUESTED and says `queued`: the scenario
+     confirms the landed number by reading the next state, and the expects
+     below are that read."
+  - "Setting a Counter power to 0 is a REMOVAL and the badge goes away
+     (`PowerCmd.Remove`, which is what the op runs at 0 rather than a
+     ModifyAmount that a hook could shrink). The last block reads the removal
+     with `no_power`; if the game keeps a 0-stack badge instead, that is the
+     expect that says so."
+
+steps:
+  - give: {card: KLEEMOD-HOLD_THE_LINE, pile: hand, upgraded: false}
+  - set_energy: {amount: 5}
+
+  # ---- cold: no Spark badge at all, and the gate is shut ------------------
+  - expect:
+      no_power: {who: player, name: "Spark"}
+      can_play: {card: "Hold the Line", value: false}
+      unplayable_reason: {card: "Hold the Line", value: "BlockedByCardLogic"}
+
+  # ---- 0 -> 2, applied to a creature that carries no Spark power yet ------
+  - set_power: {who: player, name: SPARK_POWER, amount: 2}
+  - expect:
+      power: {who: player, name: "Spark", stacks: 2}
+      can_play: {card: "Hold the Line", value: true}
+      unplayable_reason: {card: "Hold the Line", value: null}
+
+  # ---- 2 -> 0, and the gate shuts again on the written bank ---------------
+  - set_power: {who: player, name: SPARK_POWER, amount: 0}
+  - expect:
+      no_power: {who: player, name: "Spark"}
+      can_play: {card: "Hold the Line", value: false}
+      unplayable_reason: {card: "Hold the Line", value: "BlockedByCardLogic"}

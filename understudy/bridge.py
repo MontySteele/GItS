@@ -201,6 +201,24 @@ def give_card_info() -> dict:
 # block-internal pair. Singleplayer and in-combat only, and it refuses
 # multiplayer for the identical reason `give_card` does.
 #
+# EB-146 ADDS `set_power`, THE FIFTH OP, AND IT IS THE ONE THAT REACHES SPARKS.
+# Sparks are a `PowerModel` and not a registered CustomResource, so
+# `set_resource` cannot move them and both Klee scenarios had to climb the bank
+# by playing Sparkly Treasure. `set_power` resolves a power out of
+# `ModelDb.AllPowers` by the id the WIRE prints on a status row (`SPARK_POWER`)
+# or by its printed Title, and applies / stacks / clears it through
+# `PowerCmd.Apply` / `ModifyAmount` / `Remove` -- the three commands every card
+# in the game uses, with `applier: null` so nothing lands in the
+# ModifyPowerAmountGiven chain (`SparkPower.Spend`'s own reasoning). It refuses
+# an unknown power id, an ambiguous TITLE, a creature that cannot receive
+# powers, a negative amount on a power that does not allow negatives, and a
+# power the creature carries more than one instance of.
+#
+# THE NUMBER IT WRITES IS THE STACK COUNT; THE WIRE PRINTS `DisplayAmount`.
+# Those are equal for most powers and deliberately unequal for at least one:
+# `BombPower.Amount` is the bomb COUNT and its badge shows total pending
+# damage. A scenario asserting `expect: {power: ...}` is reading the badge.
+#
 # IT IS THE SAME KIND OF DOOR AS `give_card` AND IS DISQUALIFYING IN THE SAME
 # WAY. A combat whose board was set by hand is not a board the game's own play
 # produced, so nothing measured on it is comparable to any other run. The
@@ -216,18 +234,19 @@ def give_card_info() -> dict:
 # `harness give-card --why` follows, made structural. A board change nobody can
 # account for six months later is worse than no scenario.
 #
-# TWO OPS ANSWER `queued`. `set_hp` and `set_energy` go through async commands
-# that run visuals, so the endpoint queues them and the response says
-# `queued: true`; the value is confirmed by the next `get_state()`. `set_block`
-# and `set_resource` are synchronous and report the real before/after pair.
-# Callers that assert on a queued write must settle first -- see
-# `understudy/scenario.py`, which does.
+# THREE OPS ANSWER `queued`. `set_hp`, `set_energy` and `set_power` go through
+# async commands that run visuals, so the endpoint queues them and the response
+# says `queued: true`; the value is confirmed by the next `get_state()`.
+# `set_block` and `set_resource` are synchronous and report the real
+# before/after pair. Callers that assert on a queued write must settle first --
+# see `understudy/scenario.py`, which does. A `set_power` asking for the amount
+# already standing writes nothing and answers `queued: false`.
 
-DEBUG_OPS = ("set_resource", "set_energy", "set_hp", "set_block")
+DEBUG_OPS = ("set_resource", "set_energy", "set_hp", "set_block", "set_power")
 
 
 def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
-                resource: str = "") -> dict:
+                resource: str = "", power: str = "") -> dict:
     """Set one combat number. Returns the endpoint's report.
 
     A `status: "error"` answer comes back as an ordinary dict, not an
@@ -245,7 +264,7 @@ def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
                          "logged with its reason")
     return _request(DEBUG_STATE, {"op": op, "amount": int(amount),
                                   "who": who, "resource": resource,
-                                  "why": str(why)})
+                                  "power": power, "why": str(why)})
 
 
 def debug_state_info() -> dict:
@@ -267,6 +286,23 @@ def set_hp(who: str, amount: int, why: str) -> dict:
 
 def set_block(who: str, amount: int, why: str) -> dict:
     return debug_state("set_block", why, amount=amount, who=who)
+
+
+def set_power(who: str, name: str, amount: int, why: str) -> dict:
+    """Set one power's STACK COUNT on one creature. `amount=0` removes it.
+
+    `name` is the wire's own power id (`SPARK_POWER`, the string a status row
+    carries) or the printed Title (`Spark`); the endpoint matches the id first
+    and the title second, and refuses a title two powers share.
+
+    THE COUNT IS ALL IT SETS. A power that carries a payload beside its stack
+    count is not set by setting the count: `BombPower.Amount` is the bomb
+    count and the per-bomb damages live in a list only `BombPower.Place`
+    grows, so a `set_power BOMB_POWER 2` is two bombs that display nothing and
+    detonate for nothing. Plain counters and durations only (Spark,
+    Vulnerable, Weak, Strength); for anything else, play the card.
+    """
+    return debug_state("set_power", why, amount=amount, who=who, power=name)
 
 
 def settle(prev_type: str | None = None, tries: int = 12, delay: float = 0.6) -> dict:

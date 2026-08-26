@@ -204,9 +204,9 @@ two probes and `scenario.py` share.
   saying the run is no longer comparable to any other (`bridge.GRANT_GUARDRAIL`).
 - **`scenario.py` is the same door widened, under the same rule** (EB-142). It
   grants a card AND writes a board (`/api/v1/gits/debug_state`:
-  `set_resource`, `set_energy`, `set_hp`, `set_block`, each through the game's
-  own mutator, `why` REQUIRED and logged), so a scenario run is comparable to
-  nothing. Attendedness is pinned by
+  `set_resource`, `set_energy`, `set_hp`, `set_block` and `set_power` (EB-146),
+  each through the game's own mutator, `why` REQUIRED and logged), so a
+  scenario run is comparable to nothing. Attendedness is pinned by
   `tier0/tests/test_understudy_scenario.py`, which walks `soak.py`'s imports
   with the AST rather than grepping — `soak.py` NAMES `scenario.py` in the
   comment explaining why `run_scripted` was factored out, and a substring pin
@@ -221,13 +221,43 @@ two probes and `scenario.py` share.
   card's cost) cannot live with that, so the runner executes the whole scenario
   inline at the first combat screen and hands combat back afterwards. Stated
   cost: the driver's watchdog and per-action telemetry do not see those posts.
-- **Sparks cannot be set by `set_resource`, and that is a fact about the game,
-  not a gap in the door.** Sparks are a POWER
-  (`klee-mod/KleeCode/Powers/SparkPower.cs`), not one of BaseLib's registered
-  CustomResources — that registry reaches Fanfare, Encore, Charge, the two
-  Bursts and the three Spotlight meters. Both Klee scenarios climb the bank by
-  playing Sparkly Treasure (cost 0, `gain_spark 1`), which is the route
-  `gits/GitsDebugState.cs`'s header prescribes for anything it does not set.
+- **Sparks are a POWER and not a resource, which is why there are two write
+  ops.** `SparkPower` (`klee-mod/KleeCode/Powers/SparkPower.cs`) is not one of
+  BaseLib's registered CustomResources — that registry reaches Fanfare, Encore,
+  Charge, the two Bursts and the three Spotlight meters and stops there. EB-146
+  added **`set_power`**, which resolves out of `ModelDb.AllPowers` by the wire's
+  own `power.Id.Entry` (`SPARK_POWER`) or the printed Title and writes through
+  `PowerCmd.Apply` / `ModifyAmount` / `Remove` with **`applier: null`**
+  (`SparkPower.Spend`'s precedent: a bookkeeping write stays out of the
+  `ModifyPowerAmountGiven` chain). The receive chain still runs, so Artifact
+  still eats a debuff, and the response reports the amount REQUESTED with
+  `queued: true` — the landed number is read off the next state.
+  `set-power-sparks.yaml` exercises it; the two Klee scenarios that earn their
+  Sparks by playing Sparkly Treasure were deliberately NOT converted, because a
+  scenario whose subject is the RULE is more honest earning the bank.
+- **`set_power` writes `Amount`; the wire prints `DisplayAmount`.** Equal for
+  most powers, deliberately unequal for `BombPower` (`Amount` = bomb count,
+  badge = total pending detonation damage, ruled 2026-07-20). An
+  `expect: {power: ...}` reads the badge — which is why
+  `powder-charge-detonate-bonus.yaml` asserts a Pop! bomb at **5**, and why its
+  first live run's failure was the FILE and not the game.
+- **The count is ALL `set_power` writes.** A power carrying a payload beside
+  its stack count is not set by setting the count: `BombPower`'s per-bomb
+  damages live in a private list only `BombPower.Place` grows, so
+  `set_power BOMB_POWER 2` is two bombs that display nothing and detonate for
+  nothing. Plain counters and durations only (Spark, Vulnerable, Weak,
+  Strength); for a payload power, play the card that places it. The op cannot
+  detect the difference and does not pretend to — nothing in `PowerModel`
+  declares "I keep state the stack count does not describe".
+- **A board write resolves its creature selector; it did not always.**
+  `set_hp` / `set_block` / `set_power` take the `play` target's vocabulary (an
+  entity id, a display name, `first` / `lowest_hp` / `highest_hp`) and
+  `scenario.py` resolves it against the latest GET before posting, because the
+  bridge knows only entity ids and `"player"`. The first live run posted the
+  literal string and got `No living creature named 'first'` (EB-146). The step
+  record carries the selector AND the resolved id. `set_resource` /
+  `set_energy` take no `who` at all and the parser refuses one: the bridge
+  writes both to the player's combat state and ignores the field.
 - **Ordering traps in the driver:** the character stays in `options` after
   being picked, so pick once then `confirm` or loop forever
   (`soak.py:810-820`); a play the bridge rejected is not re-offered this turn
