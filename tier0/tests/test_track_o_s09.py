@@ -145,6 +145,8 @@ def test_a_defect_run_forces_a_session_restart(tmp_path, monkeypatch):
             return True
 
     class _Driver:
+        character_actual = None          # EB-117: read back, never requested
+
         def __init__(self, session, run_index, stamp, character, commit=None,
                      chosen_seed=None, max_fights=None, hazard_guard=True):
             self.run_index = run_index
