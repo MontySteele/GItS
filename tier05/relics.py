@@ -447,22 +447,55 @@ class HeldRelics:
 
     # --- card-add tracking (Book of Five Rings) ---------------------------
 
-    def note_cards_added(self, n: int, hp: int, max_hp: int) -> int:
-        """Record `n` cards added to the deck; return hp after any Book of Five
-        Rings heal(s) that the new cumulative total unlocked."""
-        if n <= 0:
-            return hp
-        self.cards_added_total += n
+    def _book_pending(self, n: int) -> tuple[int, int]:
+        """`(raw heal HP, chunk counter)` that `n` FURTHER deck-adds unlock.
+
+        THE CHUNK ARITHMETIC LIVES HERE AND NOWHERE ELSE. `note_cards_added`
+        pays it; `book_heal_for` quotes it without paying. EB-129 wanted the
+        event pilot to SEE a pending chunk, and the one thing it must not do
+        is re-derive `cards_added_total // per` at a second site -- two
+        copies of the boundary rule is how a forecast and a payout start
+        disagreeing without either of them looking wrong.
+
+        Pure: reads state, writes none.
+        """
+        heal_total = 0
+        chunks_at = self._book_chunks_healed
         for fx in self._run("book_of_five_rings"):
             per = int(fx.get("per", 5))
             heal = int(fx.get("heal", 0))
             if per <= 0:
                 continue
-            chunks = self.cards_added_total // per
+            chunks = (self.cards_added_total + n) // per
             new = chunks - self._book_chunks_healed
             if new > 0:
-                self._book_chunks_healed = chunks
-                hp = min(max_hp, hp + heal * new)
+                chunks_at = max(chunks_at, chunks)
+                heal_total += heal * new
+        return heal_total, chunks_at
+
+    def book_heal_for(self, n: int) -> int:
+        """HP the Book WOULD pay if `n` more cards entered the deck right now,
+        before any clip to missing HP. 0 without the relic, and 0 for a batch
+        that crosses no chunk boundary.
+
+        Read-only, and the read is the point (EB-129, R205): the event option
+        valuation asks this instead of counting chunks itself, so the pilot's
+        credit and the run layer's payout cannot drift apart.
+        """
+        if n <= 0:
+            return 0
+        return self._book_pending(n)[0]
+
+    def note_cards_added(self, n: int, hp: int, max_hp: int) -> int:
+        """Record `n` cards added to the deck; return hp after any Book of Five
+        Rings heal(s) that the new cumulative total unlocked."""
+        if n <= 0:
+            return hp
+        heal, chunks = self._book_pending(n)
+        self.cards_added_total += n
+        self._book_chunks_healed = chunks
+        if heal:
+            hp = min(max_hp, hp + heal)
         return hp
 
     # --- post-fight (won) -------------------------------------------------
