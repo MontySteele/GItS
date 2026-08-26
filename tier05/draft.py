@@ -901,6 +901,28 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 # an entire permanent engine up front.
                 total += _neutral_amount(fx) * STATIC_PERSISTENT_PROC_SHARE
             elif (fx.get("op") == "apply_power"
+                  and fx.get("target", "self") == "self"
+                  and fx.get("power") == "salon_member"):
+                # EB-28 / v18: the salon DEPLOY. `apply_power` is priced
+                # inline and no inline branch named this power, so a printed
+                # company priced at 0.0 and the members were invisible to
+                # every plan but salon -- where the archetype term, not this
+                # function, was paying for them.
+                #
+                # MUST SIT ABOVE the generic self-power branch below: Endless
+                # Waltz is `type: power`, so that branch would otherwise
+                # swallow the whole card at STATIC_POWER_ENGINE_VALUE (0.0)
+                # and the deploy would stay invisible on the one row where
+                # the drafter most needs to see it.
+                #
+                # MEMBER-AGNOSTIC by construction. The printed `member:` key
+                # names a type (or `random`), and the three types are worth
+                # different amounts, but which one is worth MORE depends on
+                # what is already on stage -- occupancy an offer screen
+                # cannot read. One flat dial, one number, at the floor of the
+                # band; the derivation is at the constant.
+                total += _neutral_amount(fx) * STATIC_SALON_MEMBER_VALUE
+            elif (fx.get("op") == "apply_power"
                   and fx.get("target") != "self"
                   and fx.get("power") in ("weak", "vulnerable")):
                 total += _neutral_amount(fx) * STATIC_DEBUFF_VALUE
@@ -1227,6 +1249,82 @@ STATIC_CRASH_FANFARE_VALUE = 0.0   # crash_fanfare. The Final Verdict's
                                    # Held at 0.0 until the formula reader
                                    # lands, and this line is the reason it
                                    # must land before this dial moves.
+STATIC_SALON_MEMBER_VALUE = 1.5    # per member DEPLOYED by a printed
+                                   # `apply_power power: salon_member`
+                                   # (EB-28, DRAFTER_VERSION 18). Until this
+                                   # dial existed a deploy priced at exactly
+                                   # ZERO: `apply_power` is priced inline and
+                                   # no inline branch named the power, so
+                                   # CROSS-PLAN -- a Furina drafting anything
+                                   # but salon -- the whole company was
+                                   # invisible. The archetype term paid for
+                                   # these rows inside the salon plan and
+                                   # nothing paid for them outside it.
+                                   #
+                                   # DERIVED, NOT PICKED. Three routes; the
+                                   # band is 1.5 to 4.0 and this is its
+                                   # CONSERVATIVE end, which for a VALUE
+                                   # (unlike D17's cost) is the BOTTOM.
+                                   #   (1) PERFORM PARITY, the in-family
+                                   #   floor. `salon_perform` prices exactly
+                                   #   one member tick, on demand, at 1.5. A
+                                   #   deploy delivers AT LEAST that -- the
+                                   #   member ticks at the start of the next
+                                   #   player turn. -> 1.5.
+                                   #   (2) TICK PLUS EVENTUAL BOW, the
+                                   #   in-family full-member read. The
+                                   #   perform dial's own note calls a tick
+                                   #   "the smaller half of a member", and
+                                   #   FIFO displacement at
+                                   #   SALON_MEMBER_SLOTS = 3 means a member
+                                   #   that stands long enough is bowed out
+                                   #   at STATIC_SALON_BOW_VALUE. 1.5 + 2.0
+                                   #   -> 3.5.
+                                   #   (3) KURAGE PARITY, the cross-family
+                                   #   ceiling. The repo's other persistent
+                                   #   per-turn engine credits ONE pulse at
+                                   #   FACE value -- (KURAGE_PULSE_BASE +
+                                   #   KURAGE_PULSE_BLOCK) *
+                                   #   STATIC_PERSISTENT_PROC_SHARE = 4.0. A
+                                   #   salon tick's face, averaged over the
+                                   #   three types a deploy can land
+                                   #   (crabaletta 6 damage, usher 3 Block,
+                                   #   chevalmarin 2 damage + one hydro aura
+                                   #   at STATIC_AURA_VALUE), is 4.33, less
+                                   #   the tick's 1-Encore upkeep at
+                                   #   STATIC_ENCORE_VALUE -> 4.03.
+                                   # (2) and (3) converge on 3.5-4.0 from
+                                   # opposite directions and (1) is the hard
+                                   # floor. THE FLOOR IS TAKEN, and the gap
+                                   # is named rather than hidden: everything
+                                   # above one tick -- the repeat ticks, the
+                                   # eventual bow, the Fanfare Focus scaling
+                                   # -- is stage occupancy and combat length,
+                                   # which is exactly what an offer screen
+                                   # cannot see. That is
+                                   # STATIC_SALON_ROTATE_VALUE's own argument
+                                   # applied to a value it CAN at least
+                                   # bound. The residual error under-credits
+                                   # the member and never over-credits it, so
+                                   # the failure it can cause is passing on a
+                                   # good card rather than paying for a bad
+                                   # one (R194's direction rule).
+                                   #
+                                   # NOT CAPPED AT SALON_MEMBER_SLOTS. A
+                                   # fourth deploy bows the oldest member out
+                                   # rather than fizzling, so it still pays;
+                                   # capping would mean reading stage
+                                   # occupancy, which is the thing this
+                                   # family of dials refuses to do.
+                                   #
+                                   # [USER]-OVERRIDABLE, and this is the one
+                                   # constant to move: 3.5 (route 2) is the
+                                   # defensible larger number in the same
+                                   # method, and the argument for it is that
+                                   # a member is strictly better than one
+                                   # on-demand perform. Moving it re-prices
+                                   # the NINE rows archived at D18 and
+                                   # nothing else.
 STATIC_SALON_BOW_VALUE = 2.0       # salon_bow: one member's bow, on demand.
                                    # Priced at one conservative bow rather
                                    # than at the stage it implies -- the
