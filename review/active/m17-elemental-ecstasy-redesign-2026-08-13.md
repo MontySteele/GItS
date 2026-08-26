@@ -521,8 +521,12 @@ choice is [USER]'s and is recorded on the `M17` row.
 1. **Red-pen the options.** Pick one of A / B / C / D, pick a sub-shape where
    one is offered (A's replacement upgrade line; B1 vs B2; C1 vs C2), or send
    the packet back for a fifth direction.
-2. **Ratify the numbers, or move them.** Every number in §5 is PROPOSED and
-   none is measured. Nothing lands until they are signed.
+2. **Ratify the numbers, or move them. SETTLED — nothing is outstanding
+   here.** Every number in §5 was PROPOSED and unmeasured when this list was
+   written. **R189 (2026-08-13) chose Option C2** and **R205 (2026-08-24) took
+   its one open sub-shape: Block moves to 5**, so the landing is the predicate
+   move alone and the numbers it lands with are signed. The ask is kept as the
+   record of what was asked, not as a live request.
 3. **Choose the route** in §6 — measure-first or redesign-first.
 4. **Optionally, re-read §2.1** — whether the "the pilot wants it" clause of
    R180 was load-bearing for the direction you want.

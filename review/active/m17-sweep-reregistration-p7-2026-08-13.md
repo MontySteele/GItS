@@ -848,7 +848,7 @@ has fired: stop, do not run the sweep, and re-register.**
 **(1) The sweep — the registered range, once.**
 
 ```
-PYTHONPATH=. python3 -m tier05.exp_eb17p_forced_copy --runs 2400 --jobs 0 | tee review/active/m17-sweep-results-2026-08-25.txt
+PYTHONPATH=. python3 -m tier05.exp_eb17p_forced_copy --runs 2400 --jobs 0 | tee review/active/m17-sweep-results-2026-08-26.txt
 ```
 
 - `--runs 2400` is §7's registered `N`, 2,400 pairs per card. **It is fixed at
