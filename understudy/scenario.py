@@ -91,9 +91,25 @@ YAML, under `understudy/scenarios/`. `steps` is a list of single-key mappings;
     assumptions: ["..."]          # every number that depends on the board
     steps:
       - give:   {card: KLEEMOD-TAKE_IT_FROM_THE_TOP, pile: hand}
-      - set_block: {who: JAW_WORM_0, amount: 0}
-      - play:   {card: "Take It From the Top", target: JAW_WORM_0}
-      - expect: {enemy_hp_block_delta: {who: JAW_WORM_0, amount: -10}}
+      - set_block: {who: first, amount: 0}
+      - set_power: {who: player, name: SPARK_POWER, amount: 2}
+      - play:   {card: "Take It From the Top", target: first}
+      - expect: {enemy_hp_block_delta: {who: first, amount: -10}}
+
+ONE SELECTOR VOCABULARY, AND EVERY VERB THAT ADDRESSES A CREATURE READS IT.
+`who` and `target` accept an entity id (`JAW_WORM_0`), a display name, or one
+of `ENEMY_SYMBOLS` (`first`, `lowest_hp`, `highest_hp`) -- and the board-setup
+verbs resolve it against the latest GET before posting, exactly as `play` does,
+because the bridge only knows entity ids. That was NOT true on the first live
+run (EB-146): `set_block: {who: first}` posted the literal string `first` and
+the bridge answered *No living creature named 'first'*. Every step record now
+carries both the selector as written and the id it resolved to, so a log read
+back later can tell which creature was actually written.
+
+`set_resource` and `set_energy` take NO `who`. The bridge writes both to the
+player's own combat state and ignores the field, so naming a creature there
+would set the player's number under an enemy's name; the parser refuses it
+rather than letting it read as an enemy write that silently was not one.
 
 `ASSUMPTIONS` IS PART OF THE FORMAT AND IS PRINTED WITH THE RESULT. An exact
 expected number usually depends on something the scenario did not set -- the
@@ -150,9 +166,17 @@ TOKEN_CARDS = {
 # key with the list, rather than skipping it -- a mistyped step that is silently
 # ignored is a scenario that passes without running.
 ACTION_STEPS = ("play", "select", "confirm", "end_turn")
-SETUP_STEPS = ("give", "set_resource", "set_energy", "set_hp", "set_block")
+SETUP_STEPS = ("give", "set_resource", "set_energy", "set_hp", "set_block",
+               "set_power")
 OTHER_STEPS = ("expect", "read", "mark")
 STEP_VERBS = ACTION_STEPS + SETUP_STEPS + OTHER_STEPS
+
+# The setup verbs that address a CREATURE, and so take the `play` target's
+# selector vocabulary; and the two that address the player and take no `who` at
+# all. Kept as data beside the verb list because both facts are enforced -- the
+# first by resolution before the POST, the second by a parse-time refusal.
+CREATURE_SETUP_STEPS = ("set_hp", "set_block", "set_power")
+PLAYER_ONLY_SETUP_STEPS = ("set_resource", "set_energy")
 
 
 class ScenarioError(RuntimeError):
@@ -276,10 +300,13 @@ def _validate(i: int, verb: str, body: dict[str, Any]) -> None:
 
     if verb in ("give", "play"):
         need("card")
-    elif verb == "set_resource":
+    elif verb in ("set_resource", "set_power"):
+        # `name` is the resource id for one and the power id (or printed title)
+        # for the other; one key, because to a scenario author both read as
+        # "the thing being set" and a second spelling buys nothing.
         need("name")
         if "amount" not in body:
-            raise ScenarioError(f"step {i} ('set_resource'): needs 'amount'")
+            raise ScenarioError(f"step {i} ('{verb}'): needs 'amount'")
     elif verb in ("set_energy", "set_hp", "set_block"):
         if "amount" not in body:
             raise ScenarioError(f"step {i} ('{verb}'): needs 'amount'")
@@ -300,6 +327,16 @@ def _validate(i: int, verb: str, body: dict[str, Any]) -> None:
             raise ScenarioError(
                 f"step {i} ('give'): pile must be one of "
                 f"{bridge.GRANT_PILES}, not {pile!r}")
+    if verb in PLAYER_ONLY_SETUP_STEPS and body.get("who"):
+        # Refused rather than ignored. The bridge writes both of these to the
+        # player's own combat state whatever `who` says, so a file that named an
+        # enemy would read as an enemy write and be a player write -- the
+        # silent-wrong-target shape `find_enemy` exists to prevent one verb over.
+        raise ScenarioError(
+            f"step {i} ('{verb}'): takes no 'who' -- the bridge writes it to "
+            f"the PLAYER's combat state and ignores the field, so naming "
+            f"{body['who']!r} here would set the player's number under that "
+            f"creature's name")
 
 
 def load(path: str | Path) -> Scenario:
@@ -794,9 +831,49 @@ class Runner:
                                self.state, self.state)
         self._settle()
 
-    def _debug(self, op: str, label: str, **kw: Any) -> None:
+    def _resolve_who(self, label: str, who: str) -> str:
+        """One creature selector, as the concrete entity id the bridge knows.
+
+        The bridge addresses creatures by `"player"` and by the entity ids its
+        last GET reported, and by nothing else; a scenario file is written in
+        the same vocabulary a `play` target uses, which includes the symbols
+        (`first`, `lowest_hp`, `highest_hp`) and a display name. Resolving here
+        rather than in the file is what makes a scenario portable across seeds
+        -- see `ENEMY_SYMBOLS` for why writing `JAW_WORM_0` into a file is a
+        scenario that fails on every seed but one, for a reason that is not its
+        subject.
+
+        Resolved against a FRESH read, for `_do_play`'s reason: the board one
+        frame ago is a different board, and `lowest_hp` in particular names a
+        different creature after every hit.
+        """
+        raw = str(who or "player").strip()
+        if raw.casefold() == "player":
+            return "player"
+        self.read()
+        enemy = find_enemy(self.state, raw)
+        if enemy is None:
+            raise ExpectFailed(
+                label, f"no creature {raw!r}; the fight has "
+                       f"{[adapter.enemy_id(e) for e in adapter.enemy_blobs(self.state)]}"
+                       f" (and 'player')",
+                self.state, self.state)
+        return adapter.enemy_id(enemy)
+
+    def _debug(self, op: str, label: str, selector: str | None = None,
+               **kw: Any) -> None:
         report = self.wire.debug_state(op, self.why, **kw)
-        self.emit({"step": label, "request": dict(kw, op=op), "result": report})
+        row: dict[str, Any] = {"step": label, "request": dict(kw, op=op),
+                               "result": report}
+        if selector is not None:
+            # BOTH, on every board write that names a creature: the selector is
+            # what the file said and the id is what the bridge was told, and a
+            # log read back six months later has to be able to tell which
+            # creature moved without re-deriving the symbol against a board it
+            # no longer has.
+            row["selector"] = selector
+            row["resolved_who"] = kw.get("who")
+        self.emit(row)
         if str(report.get("status")) != "ok":
             raise ExpectFailed(label, str(report.get("message")
                                           or report.get("error")),
@@ -817,12 +894,22 @@ class Runner:
         self._debug("set_energy", "set_energy", amount=int(body["amount"]))
 
     def _do_set_hp(self, body):
-        self._debug("set_hp", "set_hp", amount=int(body["amount"]),
-                    who=str(body.get("who") or "player"))
+        selector = str(body.get("who") or "player")
+        self._debug("set_hp", "set_hp", selector=selector,
+                    amount=int(body["amount"]),
+                    who=self._resolve_who("set_hp", selector))
 
     def _do_set_block(self, body):
-        self._debug("set_block", "set_block", amount=int(body["amount"]),
-                    who=str(body.get("who") or "player"))
+        selector = str(body.get("who") or "player")
+        self._debug("set_block", "set_block", selector=selector,
+                    amount=int(body["amount"]),
+                    who=self._resolve_who("set_block", selector))
+
+    def _do_set_power(self, body):
+        selector = str(body.get("who") or "player")
+        self._debug("set_power", "set_power", selector=selector,
+                    amount=int(body["amount"]), power=str(body["name"]),
+                    who=self._resolve_who("set_power", selector))
 
     # action verbs ---------------------------------------------------------
     def _do_play(self, body: dict[str, Any]) -> None:

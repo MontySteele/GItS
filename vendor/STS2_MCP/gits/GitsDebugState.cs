@@ -34,18 +34,67 @@
 //   set_resource  -> the registered CustomResource's own `Amount` setter,
 //                    which is the property BaseLib's own gain/spend paths
 //                    write (`SparkPower.Spend` ends in `power.Amount -= n`).
+//   set_power     -> PowerCmd.Apply / PowerCmd.ModifyAmount / PowerCmd.Remove
+//                    (EB-146) -- the three commands every card in the game
+//                    applies, stacks and clears a power with. Which one runs
+//                    is arithmetic, not a choice: nothing there -> Apply, a
+//                    stack that has to move -> ModifyAmount by the difference,
+//                    zero -> Remove.
 //
-// WHAT IS DELIBERATELY *NOT* HERE, and both are follow-ups rather than
-// oversights:
+// EB-146: WHY set_power EXISTS AND WHAT ANSWERED THE OBJECTION THAT HELD IT.
+// This file's first draft refused power application, and the refusal read:
+// "`PowerCmd.Apply` needs a PlayerChoiceContext and an applier, and 'who
+// applied this Vulnerable' is load-bearing for half the powers in the game. A
+// route that made one up would be minting state rather than selecting it."
+// Both halves have an answer now, and neither is a shortcut:
+//
+//   * THE CONTEXT. `ThrowingPlayerChoiceContext` is the game's OWN answer for
+//     "quite certain no player choice occurs deeper in this callstack" -- it is
+//     what `PowerCmd.Decrement` passes, and its class comment names tests and
+//     out-of-combat events as the same case. If a choice ever does open under a
+//     debug write, the throw lands in the log, which is louder and more useful
+//     than a board silently different from the one that was asked for.
+//   * THE APPLIER IS null, AND THAT IS A CHOICE WITH A STATED COST, not a
+//     default. It is `SparkPower.Spend`'s precedent verbatim: "a spend is
+//     bookkeeping, not a power given by anyone, and keeping it out of the
+//     ModifyPowerAmountGiven hook chain means nothing can inflate or shrink the
+//     exact price." A debug set is bookkeeping in exactly that sense, and
+//     inventing an applier is the minting the old refusal was right about. What
+//     it COSTS: a power whose behaviour reads `Applier` sees null, and an
+//     `InstancedPerApplier` power (Bomb, Oblivion, Strangle) gets a pile owned
+//     by nobody. The `ModifyPowerAmountReceived` chain still runs, so Artifact
+//     still eats a debuff the way it would in play -- deliberately, because a
+//     setup verb that punched through the target's own defences would be
+//     writing a board the game cannot produce. The response reports the amount
+//     REQUESTED and says `queued`; the caller confirms the landed number by
+//     reading the next state, which is where a chain that ate the write shows.
+//
+// THE AMOUNT set_power WRITES IS THE STACK COUNT, AND THAT IS ALL IT WRITES.
+// Two consequences, and both are limits of the op rather than defects:
+//
+//   * THE WIRE PRINTS `DisplayAmount`, NOT `Amount`.
+//     `McpMod.StateBuilder.BuildPowersState` serialises `power.DisplayAmount`,
+//     a virtual most powers leave equal to `Amount` and some deliberately do
+//     not: `KleeMod.Powers.BombPower` counts bombs in `Amount` and shows TOTAL
+//     PENDING DETONATION DAMAGE in `DisplayAmount`. A caller asserting on the
+//     wire is asserting on `DisplayAmount`; this op writes `Amount`.
+//   * A POWER THAT CARRIES A PAYLOAD BESIDE ITS COUNT IS NOT SET BY SETTING
+//     THE COUNT. `BombPower` is the worked example one repo over: its per-bomb
+//     damages live in a private list that only `BombPower.Place` grows, so
+//     `set_power BOMB_POWER 2` would raise the count to two, leave that list
+//     empty, and produce two bombs that display nothing and detonate for
+//     nothing. Use this op on plain counters and durations -- Spark,
+//     Vulnerable, Weak, Strength -- and for anything carrying a payload, PLAY
+//     the card that places it, which is the route this header has prescribed
+//     for everything it does not set since EB-142. The op cannot detect the
+//     difference and does not pretend to: nothing in `PowerModel` declares
+//     "I keep state the stack count does not describe".
+//
+// WHAT IS DELIBERATELY *NOT* HERE, and it is a follow-up rather than an
+// oversight:
 //   * enemy spawning -- the encounter is generated content and choosing one
 //     is `GitsSeed`'s job (pick the run), not this file's. A scenario that
 //     needs two enemies routes to a fight that has two.
-//   * status / power application -- `PowerCmd.Apply` needs a
-//     PlayerChoiceContext and an applier, and "who applied this Vulnerable"
-//     is load-bearing for half the powers in the game. A route that made one
-//     up would be minting state rather than selecting it. Until that is
-//     designed, a scenario applies a status by PLAYING the card that applies
-//     it, which is also the more honest test.
 //
 // REFLECTION FOR THE RESOURCE HALF ONLY, and for the reason
 // `gits/GitsResources.cs` states: BaseLib's `CustomResourcePatches` registry is
@@ -88,6 +137,27 @@
 //                             zero without running the death path, which is a
 //                             wedged fight wearing an `ok` (EB-91's shape).
 //                             Killing something is a play's job.
+//   * unknown power         -- refused with the powers that creature is
+//                             carrying listed and the full registry one GET
+//                             away. Same no-fuzzy-match rule as the resource
+//                             arm, for the same reason one badge over.
+//   * ambiguous power TITLE -- refused with the ids that share it. Ids are
+//                             unique; a title is loc data, and two mods may
+//                             print the same word.
+//   * cannot receive powers -- refused. `PowerCmd.Apply` returns early when
+//                             `Creature.CanReceivePowers` is false, which is a
+//                             silent no-op wearing an `ok`.
+//   * a negative amount on a power that does not allow negatives -- refused.
+//                             The game removes such a power at 0 or below, so
+//                             the write would land as a REMOVAL wearing the
+//                             number that was asked for. `amount: 0` is how a
+//                             caller asks for the removal on purpose.
+//   * more than one instance of that power on the creature -- refused. An
+//                             `InstancedPerApplier` power keeps one pile per
+//                             applier (R205 put Klee's bombs on that footing);
+//                             a debug set cannot choose which pile, and moving
+//                             the first one found is moving a number nobody
+//                             named.
 //
 //   GET  /api/v1/gits/debug_state
 //        -> { status, message, guardrail, run_in_progress, combat_in_progress,
@@ -98,24 +168,32 @@
 //        { "op": "set_energy", "amount": 3, "why": "..." }
 //        { "op": "set_hp",    "who": "player"|"JAW_WORM_0", "amount": 30, ... }
 //        { "op": "set_block", "who": "player"|"JAW_WORM_0", "amount": 0,  ... }
+//        { "op": "set_power", "who": "player", "power": "SPARK_POWER",
+//          "amount": 2, "why": "EB-146 set-power-sparks scenario" }
 //        -> { status, message, guardrail, op, who, before, after, why }
+//           (`set_power` carries one extra key, `power`, naming the id it
+//            resolved -- so a caller that spelled a TITLE can see which
+//            registered power it actually wrote.)
 //
 // `why` IS REQUIRED AND IS LOGGED. A board change nobody can account for later
 // is worse than no scenario: the same rule `harness give-card --why` follows,
 // and the same reason. It is echoed on the response so the harness row and the
 // game log carry one string.
 //
-// TWO OPS ANSWER WITH AN `after`, TWO ANSWER `queued`, AND THE RESPONSE SAYS
+// TWO OPS ANSWER WITH AN `after`, THREE ANSWER `queued`, AND THE RESPONSE SAYS
 // WHICH. `set_resource` and `set_block` are synchronous writes -- a property
 // set and two internal calls -- so the response carries the before/after pair
-// the write actually produced. `set_hp` and `set_energy` go through async
-// COMMANDS that run health-bar and energy visuals, and awaiting one from inside
-// the main-thread frame drain is the deadlock GitsGiveCard's header describes;
-// those are queued through the game's own no-await helper and answer
-// `queued: true` with the value requested, which the caller confirms by reading
-// the next state -- the same contract `play_card` and `give_card` already have.
-// `queued` is a FIELD and not a convention: a caller that treats the two the
-// same way is a caller whose next assertion races the visual.
+// the write actually produced. `set_hp`, `set_energy` and `set_power` go through
+// async COMMANDS that run health-bar, energy and power-badge visuals, and
+// awaiting one from inside the main-thread frame drain is the deadlock
+// GitsGiveCard's header describes; those are queued through the game's own
+// no-await helper and answer `queued: true` with the value requested, which the
+// caller confirms by reading the next state -- the same contract `play_card`
+// and `give_card` already have. `queued` is a FIELD and not a convention: a
+// caller that treats the two the same way is a caller whose next assertion
+// races the visual. A `set_power` that asks for the amount already standing
+// writes nothing and answers `queued: false`, because `queued` is a promise
+// that something is coming and in that case nothing is.
 //
 // PIN NOTE. This adds one `else if` arm to `McpMod.HandleRequest` -- the
 // fourth, after speed (W2), seed (P1.5) and give_card (EB-52) -- marked in-file
@@ -137,7 +215,9 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Runs;
 
 namespace STS2_MCP;
@@ -155,7 +235,7 @@ public static partial class McpMod
         + "check, never for a number.";
 
     private static readonly string[] GitsDebugStateOps =
-        { "set_resource", "set_energy", "set_hp", "set_block" };
+        { "set_resource", "set_energy", "set_hp", "set_block", "set_power" };
 
     // ------------------------------------------------------- resources ----
 
@@ -212,6 +292,126 @@ public static partial class McpMod
             GD.PrintErr($"[STS2 MCP][GItS] debug_state resource write failed: {ex.Message}");
         }
         return (false, 0, 0);
+    }
+
+    // ---------------------------------------------------------- powers ----
+
+    /// <summary>
+    /// The registered <see cref="PowerModel"/> `name` names, resolved the way
+    /// <see cref="GitsDebugResolve"/> resolves a creature: by the WIRE's own id
+    /// first (`power.Id.Entry`, which is what
+    /// `McpMod.StateBuilder.BuildPowersState` writes onto every status row) and
+    /// by the printed Title second, for that method's reason -- an id is the
+    /// thing itself, a title is loc data a wording pass moves.
+    ///
+    /// `ambiguous` comes back non-empty when a TITLE matched more than one
+    /// registered power, which is the one case a title lookup cannot settle:
+    /// ids are unique by construction and titles are not.
+    ///
+    /// This walks `ModelDb.AllPowers`, the same registry `KleeSelfCheck` sweeps
+    /// for loc coverage -- so a mod power is reachable here on exactly the terms
+    /// a base-game power is, and nothing is minted.
+    /// </summary>
+    private static PowerModel? GitsDebugFindPower(
+        string name, out List<string> ambiguous)
+    {
+        ambiguous = new List<string>();
+        var key = (name ?? "").Trim();
+        if (key.Length == 0) return null;
+
+        List<PowerModel> all;
+        try
+        {
+            all = ModelDb.AllPowers.ToList();
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr("[STS2 MCP][GItS] debug_state power registry read "
+                        + $"failed: {ex.Message}");
+            return null;
+        }
+
+        foreach (var power in all)
+        {
+            if (string.Equals(power.Id.Entry, key,
+                              StringComparison.OrdinalIgnoreCase))
+                return power;
+        }
+
+        var byTitle = all
+            .Where(p => string.Equals(SafeGetText(() => p.Title), key,
+                                      StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        if (byTitle.Count == 1) return byTitle[0];
+        if (byTitle.Count > 1)
+            ambiguous = byTitle.Select(p => p.Id.Entry)
+                               .OrderBy(e => e, StringComparer.Ordinal)
+                               .ToList();
+        return null;
+    }
+
+    private static string GitsDebugUnknownPower(
+        string name, Creature creature, List<string> ambiguous)
+    {
+        if (ambiguous.Count > 0)
+            return $"'{name}' is the printed title of {ambiguous.Count} "
+                   + "registered powers: " + string.Join(", ", ambiguous)
+                   + ". Name one by its id -- a title is loc data and a wording "
+                   + "pass moves it.";
+
+        var carried = creature.Powers.Select(p => p.Id.Entry)
+                              .OrderBy(e => e, StringComparer.Ordinal).ToList();
+        return $"No registered power '{name}'. No fuzzy match here, for the "
+               + "reason the resource arm gives: a near-miss write moves the "
+               + "wrong badge and the log says the right one moved. "
+               + (carried.Count == 0
+                   ? "That creature carries no powers at all right now. "
+                   : "That creature carries: " + string.Join(", ", carried) + ". ")
+               + "GET this route for every registered power id.";
+    }
+
+    /// <summary>
+    /// The write itself, through the game's own power commands and nothing else.
+    /// Queued rather than awaited -- see the header; every one of these three
+    /// commands runs badge visuals.
+    ///
+    /// `applier: null` on both mutating calls, and the header states what that
+    /// buys and what it costs. `ThrowingPlayerChoiceContext` is the game's own
+    /// "no choice can open below here" context, the one `PowerCmd.Decrement`
+    /// passes.
+    /// </summary>
+    private static async Task GitsDebugWritePower(
+        PowerModel prototype, PowerModel? current, Creature creature, int amount)
+    {
+        var choice = new ThrowingPlayerChoiceContext();
+
+        if (amount == 0)
+        {
+            // REMOVAL IS ITS OWN COMMAND, not `ModifyAmount(-before)`.
+            // ModifyAmount runs the receive-hook chain over the OFFSET, so a
+            // hook that shrank it would leave the power standing at a nonzero
+            // amount -- a "set to 0" that did not clear, which is the silent
+            // no-op wearing an `ok` this route refuses everywhere else.
+            if (current != null) await PowerCmd.Remove(current);
+            return;
+        }
+
+        if (current == null)
+        {
+            // `ToMutable()` is what `PowerCmd.Apply<T>` itself does with the
+            // canonical model before applying it; the canonical instance is not
+            // allowed on a creature and `AssertMutable` would throw.
+            await PowerCmd.Apply(choice, prototype.ToMutable(), creature, amount,
+                                 applier: null, cardSource: null);
+            return;
+        }
+
+        // Re-read the standing amount HERE rather than reusing the one the
+        // request saw: this runs off the queue, one or more frames later, and
+        // the offset has to be computed against the bank the command is about
+        // to modify.
+        await PowerCmd.ModifyAmount(choice, current, amount - current.Amount,
+                                    applier: null, cardSource: null);
     }
 
     // ------------------------------------------------------- creatures ----
@@ -279,7 +479,8 @@ public static partial class McpMod
     // ------------------------------------------------------------ apply ---
 
     private static Dictionary<string, object?> GitsDebugStateApply(
-        string op, string who, string resourceId, int amount, string why)
+        string op, string who, string resourceId, string powerId, int amount,
+        string why)
     {
         if (!RunManager.Instance.IsInProgress)
             return Error("No run in progress; there is no player to write to.");
@@ -307,6 +508,9 @@ public static partial class McpMod
         object? after;
         bool queued = false;
         string target = "player";
+        // Non-null for `set_power` only, and added to the response only there:
+        // adding a key is free, repurposing `who` to mean two things is not.
+        string? powerEntry = null;
 
         switch (op)
         {
@@ -386,6 +590,59 @@ public static partial class McpMod
                 break;
             }
 
+            case "set_power":
+            {
+                var creature = GitsDebugResolve(who, player, combat, out target);
+                if (creature == null)
+                    return Error(GitsDebugUnknownCreature(who, combat));
+                if (string.IsNullOrWhiteSpace(powerId))
+                    return Error("set_power needs a 'power' id, e.g. "
+                                 + "SPARK_POWER. GET this route for the list.");
+
+                var prototype = GitsDebugFindPower(powerId, out var ambiguous);
+                if (prototype == null)
+                    return Error(
+                        GitsDebugUnknownPower(powerId, creature, ambiguous));
+
+                if (!creature.CanReceivePowers)
+                    return Error(
+                        $"{target} cannot receive powers right now "
+                        + "(Creature.CanReceivePowers is false), so PowerCmd "
+                        + "would return early and the write would be a silent "
+                        + "no-op wearing an ok.");
+
+                var instances =
+                    creature.GetPowerInstances(prototype.Id).ToList();
+                if (instances.Count > 1)
+                    return Error(
+                        $"{target} carries {instances.Count} separate instances "
+                        + $"of '{prototype.Id.Entry}' -- an InstancedPerApplier "
+                        + "power keeps one pile per applier. A debug set cannot "
+                        + "choose which pile, and moving the first one found is "
+                        + "moving a number nobody named.");
+
+                if (amount < 0 && !prototype.AllowNegative)
+                    return Error(
+                        $"set_power refuses a negative amount for "
+                        + $"'{prototype.Id.Entry}': the power does not allow "
+                        + "negatives, so the game removes it at 0 or below and "
+                        + "the write would land as a REMOVAL wearing the number "
+                        + "you asked for. Ask for 0 to remove it on purpose.");
+
+                var current = instances.Count == 1 ? instances[0] : null;
+                powerEntry = prototype.Id.Entry;
+                var standing = current?.Amount ?? 0;
+                before = standing;
+                after = amount;
+                if (standing != amount)
+                {
+                    queued = true;
+                    TaskHelper.RunSafely(GitsDebugWritePower(
+                        prototype, current, creature, amount));
+                }
+                break;
+            }
+
             default:
                 return Error($"Unknown op '{op}'. One of: "
                              + string.Join(", ", GitsDebugStateOps) + ".");
@@ -394,14 +651,15 @@ public static partial class McpMod
         // EVERY WRITE IS LOGGED WITH ITS REASON, the same shape give_card logs
         // a grant. A board change with no stated reason is a change nobody can
         // account for when the log is read back.
-        GD.Print($"[STS2 MCP][GItS] debug_state: {op} {target} "
+        var label = powerEntry == null ? target : $"{target} {powerEntry}";
+        GD.Print($"[STS2 MCP][GItS] debug_state: {op} {label} "
                  + $"{before} -> {after}{(queued ? " (queued)" : "")} "
                  + $"| why: {why}");
 
-        return new Dictionary<string, object?>
+        var report = new Dictionary<string, object?>
         {
             ["status"] = "ok",
-            ["message"] = $"{op} {target}: {before} -> {after}"
+            ["message"] = $"{op} {label}: {before} -> {after}"
                           + (queued ? "; queued, read the next state to confirm"
                                     : ""),
             ["guardrail"] = GitsDebugStateGuardrail,
@@ -412,6 +670,8 @@ public static partial class McpMod
             ["queued"] = queued,
             ["why"] = why
         };
+        if (powerEntry != null) report["power"] = powerEntry;
+        return report;
     }
 
     private static string GitsDebugUnknownCreature(string who, CombatState combat)
@@ -429,6 +689,22 @@ public static partial class McpMod
 
         var resources = new List<string>();
         var creatures = new List<string> { "player" };
+        // The whole registry, not just what is on the board: `set_power` can
+        // APPLY a power that is not there yet (Sparks at 0 carry no badge), so a
+        // list of what a creature currently holds would be a list that does not
+        // answer the question a caller is asking. It is long, and this is a GET
+        // nothing in the state loop makes.
+        var powers = new List<string>();
+        try
+        {
+            powers = ModelDb.AllPowers.Select(p => p.Id.Entry)
+                            .OrderBy(e => e, StringComparer.Ordinal).ToList();
+        }
+        catch (Exception ex)
+        {
+            GD.PrintErr("[STS2 MCP][GItS] debug_state power list failed: "
+                        + ex.Message);
+        }
         try
         {
             if (inRun && inCombat)
@@ -451,15 +727,16 @@ public static partial class McpMod
         return new Dictionary<string, object?>
         {
             ["status"] = "ok",
-            ["message"] = "POST { op, amount, why, who?, resource? } to set up "
-                          + "a board through the game's own mutators. Ops: "
-                          + string.Join(", ", GitsDebugStateOps) + ".",
+            ["message"] = "POST { op, amount, why, who?, resource?, power? } "
+                          + "to set up a board through the game's own mutators. "
+                          + "Ops: " + string.Join(", ", GitsDebugStateOps) + ".",
             ["guardrail"] = GitsDebugStateGuardrail,
             ["run_in_progress"] = inRun,
             ["combat_in_progress"] = inCombat,
             ["ops"] = GitsDebugStateOps.ToList(),
             ["resources"] = resources,
-            ["creatures"] = creatures
+            ["creatures"] = creatures,
+            ["powers"] = powers
         };
     }
 
@@ -533,10 +810,12 @@ public static partial class McpMod
 
             string who = GitsDebugStr(parsed, "who") ?? "player";
             string resource = GitsDebugStr(parsed, "resource") ?? "";
+            string power = GitsDebugStr(parsed, "power") ?? "";
 
             var applyTask = RunOnMainThread(
                 () => GitsDebugStateApply(op!.Trim(), who.Trim(),
-                                          resource.Trim(), amount, why!.Trim()));
+                                          resource.Trim(), power.Trim(),
+                                          amount, why!.Trim()));
             SendJson(response, applyTask.GetAwaiter().GetResult());
         }
         catch (Exception ex)

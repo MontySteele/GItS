@@ -63,9 +63,10 @@ class FakeWire:
                             "upgraded": upgraded, "pile": pile})
         return dict(self.grant)
 
-    def debug_state(self, op, why, amount=0, who="player", resource=""):
+    def debug_state(self, op, why, amount=0, who="player", resource="",
+                    power=""):
         self.debugs.append({"op": op, "why": why, "amount": amount,
-                            "who": who, "resource": resource})
+                            "who": who, "resource": resource, "power": power})
         return dict(self.debug)
 
 
@@ -146,6 +147,50 @@ def test_a_pile_the_grant_route_does_not_have_is_refused_at_parse_time():
         scenario.parse({"name": "t", "character": "c",
                         "steps": [{"give": {"card": "X", "pile": "exhaust"}},
                                   {"expect": {"player_block": 0}}]})
+
+
+def test_set_power_needs_both_a_name_and_an_amount():
+    for body in ({"amount": 2}, {"name": "SPARK_POWER"}):
+        with pytest.raises(scenario.ScenarioError):
+            scenario.parse({"name": "t", "character": "c",
+                            "steps": [{"set_power": body},
+                                      {"expect": {"player_block": 0}}]})
+
+
+def test_set_power_amount_zero_is_a_removal_and_not_a_missing_field():
+    """`amount: 0` is how a file asks for the power to be REMOVED (the bridge
+    runs `PowerCmd.Remove` there), so the parser tests for the KEY and never
+    for truthiness."""
+    s = scenario.parse({"name": "t", "character": "c",
+                        "steps": [{"set_power": {"name": "SPARK_POWER",
+                                                 "amount": 0}},
+                                  {"expect": {"player_block": 0}}]})
+    assert s.steps[0][1]["amount"] == 0
+
+
+def test_the_player_only_board_writes_refuse_a_who():
+    """The bridge writes `set_energy` and `set_resource` to the PLAYER's combat
+    state and ignores `who`. A file that named an enemy there would read as an
+    enemy write and be a player write, so it is refused at parse time rather
+    than posted and silently mis-attributed."""
+    for verb in scenario.PLAYER_ONLY_SETUP_STEPS:
+        body = {"amount": 1, "who": "first"}
+        if verb == "set_resource":
+            body["name"] = "KLEEMOD_ENCORE"
+        with pytest.raises(scenario.ScenarioError) as e:
+            scenario.parse({"name": "t", "character": "c",
+                            "steps": [{verb: body},
+                                      {"expect": {"player_block": 0}}]})
+        assert "takes no 'who'" in str(e.value)
+
+
+def test_the_setup_verbs_and_the_bridge_ops_are_one_list():
+    """One door, two spellings, and they have to stay in step: a verb the file
+    format accepts that the bridge has no op for is a scenario that parses and
+    then fails at the machine, which is the one place nothing here can test."""
+    verbs = {v for v in scenario.SETUP_STEPS if v.startswith("set_")}
+    assert verbs == set(bridge.DEBUG_OPS)
+    assert set(scenario.CREATURE_SETUP_STEPS)         | set(scenario.PLAYER_ONLY_SETUP_STEPS) == verbs
 
 
 @pytest.mark.parametrize("raw,want", [
@@ -340,7 +385,7 @@ def test_the_stated_reason_travels_onto_every_board_write():
     _, _, wire, _ = run_scenario(
         [{"set_energy": 3}, {"expect": {"player_block": 0}}], [combat()])
     assert wire.debugs == [{"op": "set_energy", "why": "a test", "amount": 3,
-                            "who": "player", "resource": ""}]
+                            "who": "player", "resource": "", "power": ""}]
 
 
 def test_a_play_resolves_the_card_at_the_state_it_is_about_to_post_into():
@@ -433,6 +478,64 @@ def test_a_failed_expect_records_both_readings_for_the_printed_diff():
     assert f["after"]["player"]["block"] == 0
 
 
+def test_a_board_write_resolves_its_creature_selector_before_posting():
+    """DEFECT A, from the first live run (EB-146). `set_block: {who: first}`
+    posted the literal string `first` and the bridge answered *No living
+    creature named 'first'. Use "player", or one of the entity ids the last GET
+    reported: ...*. `play` had resolved its target through `find_enemy` since
+    day one; the board writes handed the raw string over. The living-only
+    filter is pinned here too -- the dead slime is not `first`."""
+    st = combat(enemies=[enemy("TWIG_SLIME_S_0", hp=0),
+                         enemy("TWIG_SLIME_M_0", hp=12),
+                         enemy("LEAF_SLIME_S_0", hp=9)])
+    ok, _, wire, _ = run_scenario(
+        [{"set_block": {"who": "first", "amount": 0}},
+         {"expect": {"player_block": 0}}], [st])
+    assert ok
+    assert wire.debugs[0]["who"] == "TWIG_SLIME_M_0"
+
+
+def test_a_board_write_logs_both_the_selector_and_the_id_it_resolved_to():
+    """A log read back later has to say WHICH creature moved without
+    re-deriving a symbol against a board it no longer has."""
+    st = combat(enemies=[enemy("JAW_WORM_0", hp=40)])
+    _, _, _, buf = run_scenario(
+        [{"set_hp": {"who": "lowest_hp", "amount": 5}},
+         {"expect": {"player_block": 0}}], [st])
+    rows = [json.loads(x) for x in buf.getvalue().splitlines()]
+    row = next(r for r in rows if r.get("step") == "set_hp")
+    assert row["selector"] == "lowest_hp"
+    assert row["resolved_who"] == "JAW_WORM_0"
+
+
+def test_a_board_write_selector_that_names_nothing_fails_before_it_posts():
+    ok, r, wire, _ = run_scenario(
+        [{"set_block": {"who": "SLIME_9", "amount": 0}},
+         {"expect": {"player_block": 0}}],
+        [combat(enemies=[enemy("JAW_WORM_0")])])
+    assert not ok
+    assert wire.debugs == []
+    assert "JAW_WORM_0" in r.failures[0]["detail"]
+
+
+def test_the_player_selector_is_passed_through_as_itself():
+    _, _, wire, _ = run_scenario(
+        [{"set_block": {"who": "player", "amount": 0}},
+         {"expect": {"player_block": 0}}], [combat()])
+    assert wire.debugs[0]["who"] == "player"
+
+
+def test_a_set_power_step_posts_the_power_id_beside_the_resolved_creature():
+    st = combat(enemies=[enemy("JAW_WORM_0")])
+    _, _, wire, _ = run_scenario(
+        [{"set_power": {"who": "first", "name": "VULNERABLE_POWER",
+                        "amount": 2}},
+         {"expect": {"player_block": 0}}], [st])
+    assert wire.debugs[0] == {"op": "set_power", "why": "a test", "amount": 2,
+                              "who": "JAW_WORM_0", "resource": "",
+                              "power": "VULNERABLE_POWER"}
+
+
 def test_a_queued_write_is_settled_before_the_next_assertion_reads_it():
     """`set_hp` and `set_energy` answer `queued: true` -- they go through async
     commands that run visuals. Trusting the answer instead of settling is how
@@ -503,6 +606,15 @@ def test_every_scenario_in_the_pack_parses():
     assert files, "the pack is empty"
     for p in files:
         scenario.load(p)          # raises on anything malformed
+
+
+def test_the_pack_exercises_the_set_power_door():
+    """EB-146's acceptance shape: the op does not ship without a file that
+    runs it, for the reason `test_every_scenario_in_the_pack_parses` exists --
+    an instrument nothing points at is not an instrument."""
+    verbs = {v for p in scenario.all_scenarios()
+             for v, _ in scenario.load(p).steps}
+    assert "set_power" in verbs
 
 
 def test_every_card_a_scenario_names_exists_on_a_sheet_or_is_a_declared_token():

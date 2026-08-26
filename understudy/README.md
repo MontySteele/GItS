@@ -167,10 +167,23 @@ real enemy with a real Block value, paid what the sheet prints.
 
 Two doors make it possible, and both are dev-only:
 `vendor/STS2_MCP/gits/GitsGiveCard.cs` (EB-52) puts a chosen card in hand, and
-`vendor/STS2_MCP/gits/GitsDebugState.cs` (EB-142) sets the board around it —
-`set_resource`, `set_energy`, `set_hp`, `set_block`, each through the game's own
-mutator for that number, singleplayer and in-combat only, `why` required and
-logged on every write.
+`vendor/STS2_MCP/gits/GitsDebugState.cs` (EB-142, widened by EB-146) sets the
+board around it — `set_resource`, `set_energy`, `set_hp`, `set_block` and
+`set_power`, each through the game's own mutator for that number, singleplayer
+and in-combat only, `why` required and logged on every write.
+
+**Every verb that names a creature reads one selector vocabulary**, and the
+board writes resolve it before they post. `who` (on `set_hp`, `set_block`,
+`set_power`) and `target` (on `play`) both take an entity id, a display name, or
+one of `first` / `lowest_hp` / `highest_hp` — and `scenario.py` resolves that
+against the latest GET, because the bridge addresses creatures by entity id and
+by `"player"` and by nothing else. That was NOT true on the first live run: the
+board writes handed the raw string over and `set_block: {who: first}` came back
+*No living creature named 'first'* (EB-146). Every step record now carries both
+the selector as written and the id it resolved to. `set_resource` and
+`set_energy` take no `who` at all — the bridge writes both to the player's own
+combat state and ignores the field, so the parser refuses one rather than let a
+player write wear an enemy's name.
 
 **It asserts numbers and nothing else.** HP, Block, power stacks, resource
 amounts, prompt strings, `can_play`, `unplayable_reason`, printed card text.
@@ -217,20 +230,49 @@ The pack:
 | `eb142-take-it-from-the-top.yaml` | both arms in one turn: Block 5 and NO damage cold, then Block 5 **and** 10 after Center Stage. The order is the design — `SpotlightSystem.ResetTurn` clears `KLEEMOD_SPOTLIGHT_MOVED` at turn start |
 | `powder-charge-detonate-bonus.yaml` | a Pop! bomb (5) plus the printed `bonus: 4` moves 9, with the Spark ladder read at 1 (refused) and 2 (allowed) |
 | `tide-of-names-splash.yaml` | 5 + 2×cost = 9 to **every living enemy**, exhausting a second copy of itself for the cost-2 rung. The splash is the half no sheet lint can see |
-| `spark-gate-refusal.yaml` | `hold_the_line` reads `can_play: false` at Sparks 0 and 1 with the game's own `UnplayableReason`, and playable at 2 |
+| `spark-gate-refusal.yaml` | `hold_the_line` reads `can_play: false` at Sparks 0 and 1 with the game's own `UnplayableReason`, and playable at 2. The bank is EARNED by play here, which is what makes this the instrument for the rule |
+| `set-power-sparks.yaml` | **EB-146**: the `set_power` door itself — Sparks written 0 -> 2 onto a creature carrying no Spark badge at all (an apply), then 2 -> 0 (a removal), with the gate answering the written bank exactly as it answers a played one |
 
 **`assumptions` is part of the file format and is printed with the result.** An
 exact expected number usually depends on something the scenario did not set —
 the enemy's Block, a Vulnerable stack, which encounter rolled. A file that
 states its assumptions is a file whose failure can be read.
 
-**Sparks cannot be set, and that is a fact about the game rather than a gap in
-the door.** Sparks are a POWER (`Powers/SparkPower.cs`, a `PowerModel` with a
-badge), not one of BaseLib's registered CustomResources, so `set_resource`
-reaches Fanfare, Encore, Charge, Burst and the Spotlight meters but not that
-one. Both Klee scenarios climb the bank by playing Sparkly Treasure (cost 0,
-`gain_spark 1`), which is the route `GitsDebugState.cs`'s header prescribes for
-anything it does not set. A `set_power` op is the follow-up.
+**Sparks are a POWER, not a resource, and that is why there are two ops.**
+Sparks live in `Powers/SparkPower.cs` — a `PowerModel` with a badge — and not in
+BaseLib's registered CustomResource table, so `set_resource` reaches Fanfare,
+Encore, Charge, Burst and the Spotlight meters and cannot reach that one. EB-146
+added **`set_power`**, which resolves a power out of `ModelDb.AllPowers` by the
+id the wire prints on a status row (`SPARK_POWER`) or by its printed Title, and
+applies / stacks / clears it through `PowerCmd.Apply` / `ModifyAmount` /
+`Remove` — with `applier: null`, which is `SparkPower.Spend`'s own precedent: a
+bookkeeping write stays out of the `ModifyPowerAmountGiven` chain so nothing can
+inflate or shrink the exact number. The receive chain still runs, so Artifact
+still eats a debuff the way it would in play, and the response reports the
+amount REQUESTED with `queued: true` — the landed number is read off the next
+state. `set-power-sparks.yaml` is the file that exercises it.
+
+**The two Klee scenarios that EARN their Sparks keep earning them.**
+`spark-gate-refusal.yaml` and `powder-charge-detonate-bonus.yaml` climb the bank
+by playing Sparkly Treasure (cost 0, `gain_spark 1`), and neither was converted:
+a scenario whose subject is the RULE is more honest when the bank got there the
+way a player's would.
+
+**`set_power` writes the STACK COUNT; the wire prints `DisplayAmount`.** They
+are the same number for most powers and deliberately different for at least one:
+`BombPower.Amount` is the bomb COUNT and its badge is total pending detonation
+damage (ruled 2026-07-20). An `expect: {power: ...}` is reading the badge, which
+is why `powder-charge-detonate-bonus.yaml` asserts a Pop! bomb at **5** and not
+at 1 — the first live run of that file asserted 1, read 5, and the file was the
+thing that was wrong.
+
+**And the count is ALL `set_power` writes**, which is a limit worth knowing
+before it costs a session. A power carrying a payload beside its stack count is
+not set by setting the count: `BombPower`'s per-bomb damages live in a list only
+`BombPower.Place` grows, so `set_power BOMB_POWER 2` is two bombs that display
+nothing and detonate for nothing. Use it on plain counters and durations — Spark,
+Vulnerable, Weak, Strength — and for anything that carries a payload, play the
+card that places it, which is what this pack does for bombs.
 
 ## What policy_v0 will not answer
 

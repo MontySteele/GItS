@@ -31,9 +31,18 @@ notes: |
   5 (the bomb) + 4 (the bonus) = 9, asserted as an HP+Block delta.
 
 assumptions:
+  - "THE BOMB BADGE READS DAMAGE, NOT BOMB COUNT, which is why the first expect
+     asserts 5 and not 1. The wire serialises `PowerModel.DisplayAmount`
+     (`McpMod.StateBuilder.BuildPowersState`), and `BombPower` splits the two on
+     purpose: `Amount` is the bomb count the stack system syncs, `DisplayAmount`
+     is TOTAL PENDING DETONATION DAMAGE (`Powers/BombPower.cs:277-279`, ruled
+     2026-07-20 -- an enemy-side status number reads as incoming damage, and a
+     count display makes per-bomb buffs invisible). The first live run of this
+     file asserted 1 and the game reported 5: the file was wrong, not the game."
   - "Exactly ONE bomb is on the target when Powder Charge resolves. DetonateOn
      walks every BombPower on the creature, so a second bomb would add its own
-     damage and its own +4."
+     damage and its own +4 -- and, the badge being a damage total, a second bomb
+     would move the first expect off 5 as well."
   - "The player has no Strength and the enemy no Vulnerable; the 9 is asserted
      raw. The enemy's Block is set to 0 first, so the HP+Block bracket and the
      plain HP delta agree."
@@ -54,7 +63,7 @@ steps:
   # ---- the bomb -----------------------------------------------------------
   - play: {card: "Pop!", target: first}
   - expect:
-      power: {who: first, name: "Bomb", stacks: 1}
+      power: {who: first, name: "Bomb", stacks: 5}
 
   # ---- the bank, climbed one Spark at a time -------------------------------
   - play: {card: "Sparkly Treasure"}

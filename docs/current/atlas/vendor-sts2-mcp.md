@@ -14,8 +14,8 @@ A pinned, vendored snapshot of [STS2MCP](https://github.com/Gennadiyev/STS2MCP)
 actions over an unauthenticated HTTP API on `localhost:15526`. This directory is
 the **contract** `understudy/` codes against: read `state_type`, POST the verb
 that `state_type` advertises. It is explicitly **not** ours to improve — it is
-upstream's source held byte-identical to its pin, with four marked local edit
-lines across two upstream files and four files of our own under `gits/`
+upstream's source held byte-identical to its pin, with marked local edit lines
+across three upstream files and five files of our own under `gits/`
 (`PROVENANCE.md`, "What we changed"). It is also **not a
 simulator**: nothing here models the game, so anything the wire does not expose is
 structurally invisible rather than approximated.
@@ -44,9 +44,9 @@ curl -s -X POST http://localhost:15526/api/v1/gits/speed -d '{"enabled":true,"ti
 
 Route table (the whole surface): `/`, `/api/v1/singleplayer`,
 `/api/v1/multiplayer`, `/api/v1/profiles`, `/api/v1/profile`,
-`/api/v1/compendium`, `/api/v1/wiki`, and the three GItS forks
-`/api/v1/gits/speed`, `/api/v1/gits/seed`, `/api/v1/gits/give_card`
-(`McpMod.HandleRequest`). Anything else is 404.
+`/api/v1/compendium`, `/api/v1/wiki`, and the four GItS forks
+`/api/v1/gits/speed`, `/api/v1/gits/seed`, `/api/v1/gits/give_card`,
+`/api/v1/gits/debug_state` (`McpMod.HandleRequest`). Anything else is 404.
 
 ## 3. Key invariants
 
@@ -82,8 +82,10 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
   (`tools/lint_vendor_pin.py:15-34`, `:146-229`; `vendor/README.md:29-54`).
 - **Every GItS fork SELECTS state the game's own generators can produce; none
   of them mints any.** `GitsSeed` chooses which run the generators make;
-  `GitsResources` only serialises; `GitsGiveCard` (EB-52) resolves a card out of
-  `ModelDb.AllCards` and hands it to `RunState.CreateCard` +
+  `GitsResources` only serialises; `GitsDebugState` (EB-142/EB-146) writes five
+  combat numbers, each through the mutator the game already uses for it and
+  none of them a mutator the game lacks; `GitsGiveCard` (EB-52) resolves a card
+  out of `ModelDb.AllCards` and hands it to `RunState.CreateCard` +
   `CardPileCmd.Add` — the two lines `CardReward.OnSelected` itself runs — or to
   `AddGeneratedCardToCombat` for a combat pile, so the combat-history row is
   written too. `give_card` is DEV-ONLY: it stamps a `guardrail` field on every
@@ -197,7 +199,7 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
    the 409 guard, and the marked local edit.
 4. `vendor/STS2_MCP/gits/` — the GItS-authored code; each file's header is its
    contract (`GitsSpeed.cs:1-46`, `GitsSeed.cs:1-93`, `GitsResources.cs:1-46`,
-   `GitsGiveCard.cs:1-88`).
+   `GitsGiveCard.cs:1-88`, `GitsDebugState.cs:1-160`).
 5. `vendor/README.md` + `tools/lint_vendor_pin.py:1-35` — the vendoring rules and
    their executable half.
 6. `vendor/STS2_MCP/docs/raw-full.md` — object-by-object schema, when a field's
