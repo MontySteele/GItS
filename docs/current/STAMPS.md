@@ -199,6 +199,7 @@ character arms. **The anchor does NOT move** — verified identical — unlike
 `C18`. No standing baseline owed (R207); a second `C`-class change (the ruled
 Sweet Dreams body, R189/R205) may join this window.
 
+**Joined the same window 2026-08-26 (R207): the ruled Sweet Dreams (`elemental_ecstasy`) body** — R189 direction, R205 sub-shape. The Block branch moves from `target_has_nonpyro_aura` to a NEW any-aura predicate `target_has_aura` and the Block moves 8 → 5, so Klee's own Pyro turns on the card's biggest clause for the first time. One sheet row; drafter price 2.5000 → 1.7500 base and 5.0000 → 3.5000 upgraded; upgrade row untouched; `D` and `P` unmoved because the predicate's drafter/pilot entries preserve the pricing and scoring the row already had. Hand-written card (R23), so codegen is byte-identical; `ElementalEcstasy.cs` hand-edited. Disclosure: a 200-run commit-hash scratch on `klee/reaction` read flat (5.5% either side). M17's blind grade preceded it (4 PREDICTED / 1 SPLIT / 0 MISS; the card's own trigger silent by 0.17 pp — a candidate, not a verdict). Landed as `a49bf20`.
 ### `C19` — the `EB-118` Phase-3 `Win3` card-body pass
 
 R211, [USER] 2026-08-25 — the `Win3` ratification slate. ONE window, **EIGHT
