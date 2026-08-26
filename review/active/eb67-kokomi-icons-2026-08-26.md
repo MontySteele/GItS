@@ -192,11 +192,22 @@ Both files are already rendered and waiting.
 
 Nothing below can be done from a worktree, and none of it has been done.
 
-1. **Merge the branch**, then re-make the pictures:
-   `python tools/art_process.py --apply-picks art/picks.tsv` (with the eight
-   asset ids listed at rank 1, or just re-run the sheet's export). This creates
-   `ImageGen/images/kokomi/powers/` and `ImageGen/images/kokomi/relics/` on the
-   machine that builds.
+1. **Merge the branch**, then re-make the pictures. All twenty-four candidate
+   crops are already rendered and sitting in `art/candidates/` on the main
+   checkout, so this only has to promote the eight rank 1s:
+
+   ```sh
+   printf '%s\t1\n' relic_pearl_of_wisdom power_kokomi_pearl \
+     power_kokomi_bake_kurage power_kokomi_kurages_oath \
+     power_kokomi_before_sun_and_moon power_kokomi_ceremonial_garment \
+     power_kokomi_vigil_of_the_deep power_kokomi_princess_of_watatsumi \
+     > art/picks.tsv
+   python tools/art_process.py --apply-picks art/picks.tsv
+   ```
+
+   (If you vetoed anything on the sheet, use the `picks.tsv` the sheet's
+   **Export** button gave you instead of the one above.) This is what creates
+   `ImageGen/images/kokomi/powers/` and `ImageGen/images/kokomi/relics/`.
 2. **`tools/build_pck.ps1`.** It will stop printing `SKIPPED: kokomi\powers` and
    `SKIPPED: kokomi\relics` and start packing them. That line changing is the
    proof the fix landed.
