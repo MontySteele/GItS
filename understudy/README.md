@@ -231,7 +231,7 @@ The pack:
 | `powder-charge-detonate-bonus.yaml` | a Pop! bomb (5) plus the printed `bonus: 4` moves 9, with the Spark ladder read at 1 (refused) and 2 (allowed) |
 | `tide-of-names-splash.yaml` | 5 + 2×cost = 9 to **every living enemy**, exhausting a second copy of itself for the cost-2 rung. The splash is the half no sheet lint can see |
 | `spark-gate-refusal.yaml` | `hold_the_line` reads `can_play: false` at Sparks 0 and 1 with the game's own `UnplayableReason`, and playable at 2. The bank is EARNED by play here, which is what makes this the instrument for the rule |
-| `set-power-sparks.yaml` | **EB-146**: the `set_power` door itself — Sparks written 0 —> 2 onto a creature carrying no Spark badge at all (an apply), then 2 —> 0 (a removal), with the gate answering the written bank exactly as it answers a played one |
+| `set-power-sparks.yaml` | **EB-146**: the `set_power` door itself — Sparks written 0 -> 2 onto a creature carrying no Spark badge at all (an apply), then 2 -> 0 (a removal), with the gate answering the written bank exactly as it answers a played one |
 
 **`assumptions` is part of the file format and is printed with the result.** An
 exact expected number usually depends on something the scenario did not set —
