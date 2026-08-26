@@ -15,6 +15,7 @@ Every script, mapped to what actually runs it. "validate" = invoked by
 | `lint_ancient_coverage.py` | S6d |
 | `lint_constant_parity.py` | S6e + pytest (`test_sheet_lints.py`) — the dual-wired model the others should follow |
 | `build_pck.ps1` | S6c reads its contract output |
+| `lint_upgrade_suffix_appends.py` | not a validate.ps1 rule (nothing about it is shipped code) but gated twice: CI, and `test_eb109_suffix_appends.py`. Every `<id> + upgrades.SUFFIX` site declares whether its left operand can be a DECK id -- which may carry an enchantment mark, `x@sharp-2` -- and how it survives one. The seam is structurally invisible: an enchanted id was unreachable until RUNTEMPLATE 10, so correct sites became wrong without being edited (EB-109) |
 | `lint_vendor_pin.py` | not a validate.ps1 rule (the bridge is a harness, not shipped) but gated three ways: CI, `test_vendor_pin.py`, and `klee-mod/build/deploy_bridge.ps1` refuses to install a drifted snapshot |
 
 ## Suite-gated (pytest only — no deploy gate)
