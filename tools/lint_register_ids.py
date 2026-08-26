@@ -140,8 +140,8 @@ CEILINGS: dict[str, int] = {
 # That second half is the whole mechanism — see rule 6 in the docstring.
 OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
-        1, 12, 15, 28, 32, 33, 34, 35, 38, 40, 41, 53, 65, 67, 70, 71,
-        74, 78, 80, 83, 84, 105, 116, 128, 129, 137, 139, 141,
+        1, 12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 67, 70, 71,
+        74, 78, 80, 83, 84, 105, 116, 128, 129, 137, 139,
         143, 144, 145, 146,
     }),
     "M": frozenset({10, 13, 14, 16, 17, 19, 26}),
