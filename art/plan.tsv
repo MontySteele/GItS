@@ -1203,3 +1203,57 @@ tempo_change	ImageGen/images/cards/furina/tempo_change.png	500	380	cover_autocro
 tempo_change	ImageGen/images/cards/furina/tempo_change.png	500	380	cover_autocrop	contain@0.08	shortlist	5	png	Item Special Clock.png		item	furina_pool
 audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	6	png	This Life, Just Like a Light Trickle of Song Still 2 Aether.png		splash	furina_pool
 audience_participation	ImageGen/images/cards/furina/audience_participation.png	500	380	cover_autocrop	cover@0.06	shortlist	7	png	The Opera of Noirceur and Blancheur Ticket.png		item	furina_pool
+#
+# EB-67 -- Kokomi's relic and power icons (R212(1): Claude ranks and
+# applies rank 1, [USER] vetoes on the contact sheet).
+#
+# The pck's kokomi/ block carried model/, ui/ and summon/ and NOTHING else,
+# so KleePck.Path returned null for every kokomi/relics/ and kokomi/powers/
+# path and the game drew the NOPE placeholder. Captured live 2026-08-08 on
+# `Pearl of Wisdom` in the relic strip and on the `Bake-Kurage` badge.
+# build_pck.ps1 has ALWAYS copied both directories (its furina/kokomi loop
+# over ui, powers, relics, model) -- it printed SKIPPED because the SOURCE
+# directories did not exist. These rows are what creates them, which is why
+# the fix is a plan change and not a build change.
+#
+# 256x256 RGBA: the size every shipped Klee and Furina power and relic icon
+# already uses, verified against ImageGen/images/{powers,relics} and
+# ImageGen/images/furina/{powers,relics}.
+#
+# register `icon` throughout, and that is legal here: L3 bans `icon` from
+# CARD portraits, and L1/L7/L8/L9 all scope to /cards/ out-paths, so an icon
+# row may wear a source a card row already claims (art_lint's own
+# "register-CROSSING reuse is legal by construction"). Every rank 1 below is
+# nevertheless a DISTINCT picture from every other rank 1 in this block --
+# KleePowerIcons' standing note is that a shared sigil reads as intentional,
+# which is the exact failure the Spotlight sweep was cleaning up.
+#
+# The two pearls are deliberately split: `Item Sango Pearl.png` is the clean
+# 256x256 orb at native size and goes to the RELIC, which draws larger and
+# permanently in the relic strip and is the surface that was captured broken;
+# the Burst gauge's cap icon takes the other pearl render. Tie broken on
+# consumer size, not on taste.
+relic_pearl_of_wisdom	ImageGen/images/kokomi/relics/pearl_of_wisdom.png	256	256	contain	center	shortlist	1	png	Item Sango Pearl.png		icon
+relic_pearl_of_wisdom	ImageGen/images/kokomi/relics/pearl_of_wisdom.png	256	256	cover	center	shortlist	2	png	Item Sango Pearl Wild.png		icon
+relic_pearl_of_wisdom	ImageGen/images/kokomi/relics/pearl_of_wisdom.png	256	256	cover	center	shortlist	3	png	Sangonomiya Kokomi Vision.png		icon
+power_kokomi_pearl	ImageGen/images/kokomi/powers/pearl.png	256	256	cover	center@1.6	shortlist	1	png	Item Sango Pearl Wild.png		icon
+power_kokomi_pearl	ImageGen/images/kokomi/powers/pearl.png	256	256	cover	center	shortlist	2	png	Sangonomiya Kokomi Vision.png		icon
+power_kokomi_pearl	ImageGen/images/kokomi/powers/pearl.png	256	256	contain	center	shortlist	3	png	Item Sango Pearl.png		icon
+power_kokomi_bake_kurage	ImageGen/images/kokomi/powers/bake_kurage.png	256	256	cover	y0.42	shortlist	1	png	Bake-Kurage Summon.png		icon
+power_kokomi_bake_kurage	ImageGen/images/kokomi/powers/bake_kurage.png	256	256	contain	center	shortlist	2	png	Talent Kurage's Oath.png		icon
+power_kokomi_bake_kurage	ImageGen/images/kokomi/powers/bake_kurage.png	256	256	cover	center	shortlist	3	gif	Kurage's Oath Preview.gif	50	icon
+power_kokomi_kurages_oath	ImageGen/images/kokomi/powers/kurages_oath.png	256	256	contain	center	shortlist	1	png	Talent Kurage's Oath.png		icon
+power_kokomi_kurages_oath	ImageGen/images/kokomi/powers/kurages_oath.png	256	256	cover	center	shortlist	2	gif	Kurage's Oath Preview.gif	70	icon
+power_kokomi_kurages_oath	ImageGen/images/kokomi/powers/kurages_oath.png	256	256	cover	y0.72	shortlist	3	png	Bake-Kurage Summon.png		icon
+power_kokomi_before_sun_and_moon	ImageGen/images/kokomi/powers/before_sun_and_moon.png	256	256	cover	y0.66@2.2	shortlist	1	png	Sangonomiya Kokomi Vision.png		icon
+power_kokomi_before_sun_and_moon	ImageGen/images/kokomi/powers/before_sun_and_moon.png	256	256	contain	center	shortlist	2	png	Talent Nereid's Ascension.png		icon
+power_kokomi_before_sun_and_moon	ImageGen/images/kokomi/powers/before_sun_and_moon.png	256	256	contain	center	shortlist	3	png	Icon Emoji Paimon's Paintings 13 Sangonomiya Kokomi 2.png		sticker
+power_kokomi_ceremonial_garment	ImageGen/images/kokomi/powers/ceremonial_garment.png	256	256	contain	center	shortlist	1	png	Ceremonial Garment Buff Icon.png		icon
+power_kokomi_ceremonial_garment	ImageGen/images/kokomi/powers/ceremonial_garment.png	256	256	cover	center	shortlist	2	gif	Nereid's Ascension Ceremonial Garment Water Preview.gif	50	icon
+power_kokomi_ceremonial_garment	ImageGen/images/kokomi/powers/ceremonial_garment.png	256	256	cover	center	shortlist	3	gif	Nereid's Ascension Ceremonial Garment Attack Preview.gif	50	icon
+power_kokomi_vigil_of_the_deep	ImageGen/images/kokomi/powers/vigil_of_the_deep.png	256	256	cover	center	shortlist	1	png	Namecard Background Sangonomiya Kokomi The Deep.png		icon
+power_kokomi_vigil_of_the_deep	ImageGen/images/kokomi/powers/vigil_of_the_deep.png	256	256	cover	center	shortlist	2	png	Item Sangonomiya Kokomi The Deep.png		icon
+power_kokomi_vigil_of_the_deep	ImageGen/images/kokomi/powers/vigil_of_the_deep.png	256	256	cover	center	shortlist	3	gif	Nereid's Ascension Ceremonial Garment Water Preview.gif	70	icon
+power_kokomi_princess_of_watatsumi	ImageGen/images/kokomi/powers/princess_of_watatsumi.png	256	256	contain	center	shortlist	1	png	Talent Princess of Watatsumi.png		icon
+power_kokomi_princess_of_watatsumi	ImageGen/images/kokomi/powers/princess_of_watatsumi.png	256	256	contain	center	shortlist	2	png	Sangonomiya Kokomi Item.png		icon
+power_kokomi_princess_of_watatsumi	ImageGen/images/kokomi/powers/princess_of_watatsumi.png	256	256	contain	center	shortlist	3	png	Side by Side We Venture Character Kokomi.png		icon
