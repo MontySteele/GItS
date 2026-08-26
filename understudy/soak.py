@@ -2072,6 +2072,58 @@ def _trim_state(state: dict) -> dict:
     return out
 
 
+# --------------------------------------------- one run, someone else's -----
+#
+# THE FIXED-SCRIPT SEAM, FACTORED (EB-142). `probe_block.py` and
+# `probe_corpse.py` each carried a byte-for-byte copy of the same eleven lines:
+# build a Session, swap this module's `policy_v1` name for a scripted object,
+# run ONE RunDriver, restore the name in a `finally`, tear down. A third caller
+# (`scenario.py`) made the duplication a rule rather than a coincidence, so it
+# lives here once, where the two objects it drives already live.
+#
+# WHAT IT IS NOT. It is not a policy, a second driver, or a way into the soak:
+# the soak's own entry point below does not call it, and nothing here grants a
+# card or writes a board. It is the SETUP-AND-TEARDOWN half a fixed script
+# needs in order to reach an in-combat state at all -- the embark, the character
+# verification, the seed read-back and the route to the first fight are
+# `RunDriver`'s, unchanged, and the caller's object only decides what to do once
+# a screen is in front of it.
+#
+# THE SWAP IS THE ONLY SEAM, AND IT IS RESTORED IN A `finally`. Leaving this
+# module's `policy_v1` name pointing at somebody's script would make the NEXT
+# run in the same process fly a policy nobody chose, and the log would not say
+# so -- `run_begin` records `policy_v1.POLICY_VERSION`, which is why every
+# script here PREFIXES that string rather than replacing it.
+
+
+def run_scripted(policy: Any, stamp: str,
+                 character: str = DEFAULT_CHARACTER,
+                 max_fights: int | None = 1,
+                 chosen_seed: str | None = None,
+                 do_setup: bool = True,
+                 intent: str = "") -> dict:
+    """Drive ONE run with `policy` standing in for `policy_v1`.
+
+    `policy` must offer what `RunDriver` reaches through the module for:
+    `decide(state, memo, commit=None)`, `Memo`, `POLICY_VERSION`, and the two
+    dial names the run record stamps. Delegating those to `policy_v1` rather
+    than reimplementing them is the probes' pattern, and the reason a script
+    overrides WHAT is chosen and never the bookkeeping around it.
+    """
+    global policy_v1
+    session = Session(stamp, do_setup=do_setup, intent=intent)
+    real = policy_v1
+    policy_v1 = policy
+    try:
+        session.setup()
+        driver = RunDriver(session, 1, stamp, character=character,
+                           max_fights=max_fights, chosen_seed=chosen_seed)
+        return driver.run()
+    finally:
+        policy_v1 = real
+        session.teardown()
+
+
 # ----------------------------------------------------------------- main ----
 
 def soak(runs: int, character: str, do_setup: bool,

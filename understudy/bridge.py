@@ -29,6 +29,7 @@ COMPENDIUM = f"{BASE}/api/v1/compendium"
 SPEED = f"{BASE}/api/v1/gits/speed"
 SEED = f"{BASE}/api/v1/gits/seed"
 GIVE_CARD = f"{BASE}/api/v1/gits/give_card"
+DEBUG_STATE = f"{BASE}/api/v1/gits/debug_state"
 
 
 class BridgeError(RuntimeError):
@@ -190,6 +191,82 @@ def give_card(card_id: str, count: int = 1, upgraded: bool = False,
 def give_card_info() -> dict:
     """The route's own description, including whether a run is in progress."""
     return _request(GIVE_CARD)
+
+
+# ------------------------------------------------------ board setup -------
+#
+# EB-142. `POST /api/v1/gits/debug_state` sets one combat number through the
+# game's own mutator for it: `CreatureCmd.SetCurrentHp`, `PlayerCmd.SetEnergy`,
+# a registered CustomResource's own `Amount` setter, or the creature's own
+# block-internal pair. Singleplayer and in-combat only, and it refuses
+# multiplayer for the identical reason `give_card` does.
+#
+# IT IS THE SAME KIND OF DOOR AS `give_card` AND IS DISQUALIFYING IN THE SAME
+# WAY. A combat whose board was set by hand is not a board the game's own play
+# produced, so nothing measured on it is comparable to any other run. The
+# endpoint stamps its OWN `guardrail` field on every success (the wording is
+# about the board, not the deck); the harness-side sentence a scenario log
+# carries on every row is `GRANT_GUARDRAIL` above, unchanged and shared with
+# the grant door, because one caveat a reader reads beats two near-identical
+# ones a reader learns to skip. Guardrail-7 is unchanged either way: a bot
+# cannot see the screen.
+#
+# WHY `why` IS A REQUIRED ARGUMENT HERE AND NOT AN OPTIONAL ONE. The endpoint
+# refuses a write without it (HTTP 400), which is the same rule
+# `harness give-card --why` follows, made structural. A board change nobody can
+# account for six months later is worse than no scenario.
+#
+# TWO OPS ANSWER `queued`. `set_hp` and `set_energy` go through async commands
+# that run visuals, so the endpoint queues them and the response says
+# `queued: true`; the value is confirmed by the next `get_state()`. `set_block`
+# and `set_resource` are synchronous and report the real before/after pair.
+# Callers that assert on a queued write must settle first -- see
+# `understudy/scenario.py`, which does.
+
+DEBUG_OPS = ("set_resource", "set_energy", "set_hp", "set_block")
+
+
+def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
+                resource: str = "") -> dict:
+    """Set one combat number. Returns the endpoint's report.
+
+    A `status: "error"` answer comes back as an ordinary dict, not an
+    exception -- this module's standing convention for the bridge's two error
+    shapes, and the debug door does not get to be the exception.
+    """
+    if op not in DEBUG_OPS:
+        raise ValueError(f"op must be one of {DEBUG_OPS}, not {op!r}")
+    if not str(why).strip():
+        # Refused client-side because the answer is knowable client-side, the
+        # same reason an unknown pile is refused in `give_card`. A round trip
+        # to learn that the reason field was empty is a round trip that only
+        # happens when a live game is up.
+        raise ValueError("debug_state needs a --why: every board write is "
+                         "logged with its reason")
+    return _request(DEBUG_STATE, {"op": op, "amount": int(amount),
+                                  "who": who, "resource": resource,
+                                  "why": str(why)})
+
+
+def debug_state_info() -> dict:
+    """The route's own description: ops, registered resources, living ids."""
+    return _request(DEBUG_STATE)
+
+
+def set_resource(name: str, amount: int, why: str) -> dict:
+    return debug_state("set_resource", why, amount=amount, resource=name)
+
+
+def set_energy(amount: int, why: str) -> dict:
+    return debug_state("set_energy", why, amount=amount)
+
+
+def set_hp(who: str, amount: int, why: str) -> dict:
+    return debug_state("set_hp", why, amount=amount, who=who)
+
+
+def set_block(who: str, amount: int, why: str) -> dict:
+    return debug_state("set_block", why, amount=amount, who=who)
 
 
 def settle(prev_type: str | None = None, tries: int = 12, delay: float = 0.6) -> dict:
