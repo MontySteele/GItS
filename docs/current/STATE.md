@@ -211,7 +211,9 @@ Slay the Spire 2 **v0.107.1**, commit `59260271` (2026-06-18), Steam buildid
   real StS2 16-floor map/route policy. (`docs/current/atlas/tier05-sim-core.md`,
   `tier05-economy.md`, `tier05-metrics.md`)
 - **understudy** — the bot playtest bridge driving the real game (Guardrail-7,
-  no-fun rule). (`docs/current/atlas/understudy.md`)
+  no-fun rule). A targeted-scenario harness (`understudy/scenario.py` + the
+  `GitsDebugState` board-setup door, attended only) is built and unrun —
+  BACKLOG `EB-146`. (`docs/current/atlas/understudy.md`)
 - **klee-mod** — the C# character mod (`KleeCode/`), the PCK build/deploy
   pipeline, and a headless C# test project (`KleeTests/`, `EB-105`). Co-op has a
   **partial** automated backstop: per-seat ownership and attribution are

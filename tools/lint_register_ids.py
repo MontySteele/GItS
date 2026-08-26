@@ -116,7 +116,7 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 145,   # EB-143/144/145 minted 2026-08-26 for the three Phase-4
+    "EB": 146,   # EB-146 minted 2026-08-26 (scenario harness first run + set_power); EB-143/144/145 minted 2026-08-26 for the three Phase-4
                  # pilot/scorer repairs the C19/D17/P10 standing read names as
                  # its diagnostic caveats (Spark hold-vs-spend, scorer
                  # predicate literacy, Tide of Names payout scoring).
@@ -142,7 +142,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
         1, 12, 15, 28, 32, 33, 34, 35, 38, 40, 41, 53, 65, 67, 70, 71,
         74, 78, 80, 83, 84, 105, 116, 128, 129, 137, 139, 141,
-        143, 144, 145,
+        143, 144, 145, 146,
     }),
     "M": frozenset({10, 13, 14, 16, 17, 19, 26}),
 }
