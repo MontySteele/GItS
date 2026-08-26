@@ -177,13 +177,7 @@ DEBT: frozenset[tuple[str, str]] = frozenset({
     (BACKLOG, 'EB-116'),   # 1292 chars > 600
     (BACKLOG, 'EB-12'),   # 795 chars > 600
     (BACKLOG, 'EB-128'),   # 5901 chars > 600
-    (BACKLOG, 'EB-129'),   # 1486 chars > 600
     (BACKLOG, 'EB-137'),   # 3117 chars > 600
-    (BACKLOG, 'EB-139'),   # 2151 chars > 600
-    (BACKLOG, 'EB-141'),   # missing Scope; 4840 chars > 600
-    (BACKLOG, 'EB-143'),   # 1184 chars > 600
-    (BACKLOG, 'EB-144'),   # 1214 chars > 600
-    (BACKLOG, 'EB-145'),   # 1195 chars > 600
     (BACKLOG, 'EB-146'),   # 1785 chars > 600
     (BACKLOG, 'EB-15'),   # 1099 chars > 600
     (BACKLOG, 'EB-33/34/35'),   # 938 chars > 600

@@ -82,11 +82,12 @@ def stamp_rows(text: str) -> list[tuple[str, str]]:
 
 
 # --- THE CURATED DEBT SET --------------------------------------------------
-# Frozen 2026-08-26 against `gov-d-mechanisms`: `D` 2,389 / `P` 1,895 / `C`
-# 7,477 characters. `RT` is NOT here -- it passes at 379 -- and that asymmetry
-# is the point: the three entries below are a rewrite waiting to happen, not a
-# statement that stamp rows are allowed to be long.
-DEBT: frozenset[str] = frozenset({"D", "P", "C"})
+# Frozen 2026-08-26 against `gov-d-mechanisms` at `D` 2,389 / `P` 1,895 / `C`
+# 7,477 characters; PAID the same day when Correction B's STATE diet landed on
+# `gov-2026-08-26` (RT 318 / D 282 / P 338 / C 368; history -> STAMPS.md). The
+# set is empty and only ever shrinks: a row that grows past 400 again FAILS,
+# it does not get a new entry here.
+DEBT: frozenset[str] = frozenset()
 
 
 def findings(text: str | None = None,
