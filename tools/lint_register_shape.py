@@ -172,42 +172,9 @@ def scan(sources: dict[str, str] | None = None) -> dict[tuple[str, str], list[st
 # emptied entries, never to absorb a fresh failure -- that is what rules 7
 # and 8 below are for.
 DEBT: frozenset[tuple[str, str]] = frozenset({
-    (BACKLOG, 'EB-1'),   # 3227 chars > 600
-    (BACKLOG, 'EB-105'),   # 3695 chars > 600
-    (BACKLOG, 'EB-116'),   # 1292 chars > 600
-    (BACKLOG, 'EB-12'),   # 795 chars > 600
-    (BACKLOG, 'EB-128'),   # 5901 chars > 600
-    (BACKLOG, 'EB-137'),   # 3117 chars > 600
-    (BACKLOG, 'EB-146'),   # 1785 chars > 600
-    (BACKLOG, 'EB-15'),   # 1099 chars > 600
-    (BACKLOG, 'EB-33/34/35'),   # 938 chars > 600
-    (BACKLOG, 'EB-40'),   # 1626 chars > 600
-    (BACKLOG, 'EB-41'),   # 1788 chars > 600
-    (BACKLOG, 'EB-53'),   # 2431 chars > 600
-    (BACKLOG, 'EB-65'),   # 1419 chars > 600
-    (BACKLOG, 'EB-67'),   # 913 chars > 600
-    (BACKLOG, 'EB-70'),   # 793 chars > 600
-    (BACKLOG, 'EB-71'),   # 697 chars > 600
-    (BACKLOG, 'EB-74'),   # 2067 chars > 600
-    (BACKLOG, 'EB-78'),   # 2320 chars > 600
-    (BACKLOG, 'EB-83'),   # 2632 chars > 600
-    (BACKLOG, 'EB-84'),   # 1874 chars > 600
-    (BACKLOG, 'SKIP-10.9'),   # 1724 chars > 600
-    (QUEUE, 'Art debt'),   # 5904 chars > 500
-    (QUEUE, 'M13'),   # no pick list or eyes-on marker; 1623 chars > 500
-    (QUEUE, 'M14'),   # 12716 chars > 500
-    (QUEUE, 'M16'),   # no ask verb; no pick list or eyes-on marker; 508 chars > 500
-    (QUEUE, 'M17'),   # 10246 chars > 500
-    (QUEUE, 'M19'),   # no pick list or eyes-on marker; 1615 chars > 500
-    (QUEUE, 'M26'),   # no ask verb; 1775 chars > 500
-    (QUEUE, 'M45'),   # 4279 chars > 500
-    (QUEUE, 'S4-G11'),   # no pick list or eyes-on marker; no gate in Status; 2322 chars > 500
-    (QUEUE, 'S4-G12 / CC-G1 / CC-G2'),   # no ask verb; 614 chars > 500
-    (QUEUE, 'S4-G13'),   # no pick list or eyes-on marker; 6020 chars > 500
-    (QUEUE, 'S4-G14'),   # no ask verb; no pick list or eyes-on marker; 1127 chars > 500
-    (QUEUE, 'S4-G17'),   # no pick list or eyes-on marker
-    (QUEUE, 'S4-G6'),   # no pick list or eyes-on marker; 862 chars > 500
-    (QUEUE, 'S8 + S10 galleries'),   # no ask verb; no pick list or eyes-on marker; 690 chars > 500
+    (BACKLOG, 'SKIP-10.9'),   # 1127 chars > 600 -- the enumeration of un-modelled
+                              # mechanics IS the row; every name cut is a backlog
+                              # item deleted. Pinned 2026-08-26 after Correction E.
 })
 
 
