@@ -130,6 +130,16 @@ jobs:
       # checkout is depth-1 with no tags.
       - name: register row-id uniqueness
         run: python tools/lint_register_ids.py
+      # Governance correction C, 2026-08-26. The third R-namespace question:
+      # r-numbers says a citation is IN RANGE, this says it can be RESOLVED --
+      # every R-number cited under docs/current/ has a row in
+      # docs/current/RULINGS.md, the on-demand index. That half reads two files
+      # and no history, so it runs here. The staleness half (is the index what
+      # the generator produces?) needs the retired ledgers, which this depth-1
+      # no-tags checkout does not have -- it skips itself and says so, rather
+      # than diffing against an all-unresolved regeneration.
+      - name: rulings index
+        run: python tools/lint_rulings_index.py
       # EB-109. An enchanted id (`x@sharp-2`) became reachable at RUNTEMPLATE
       # 10, and the upgrade suffix rides INSIDE the decoration, so every
       # `<id> + upgrades.SUFFIX` site silently changed meaning without being
