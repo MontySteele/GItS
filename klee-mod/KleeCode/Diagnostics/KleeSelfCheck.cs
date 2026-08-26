@@ -73,11 +73,12 @@ internal static class KleeSelfCheck
             CheckPowerIcons();
 
             // R19 (G-A5a). Furina's Fanfare arithmetic against vectors derived
-            // from the sim. This is the only place the C# port can be executed
-            // against the design of record at all -- there is no C# test
-            // project, so a boot-time check is the whole of the automated
-            // half. The Python suite guarantees the vectors themselves are the
-            // sim's; this guarantees our code answers them correctly.
+            // from the sim. This is where the C# port is executed against the
+            // design of record IN THE GAME; `klee-mod/KleeTests` (EB-105) now
+            // runs mod arithmetic headlessly too, but only a boot check runs it
+            // in the configuration a player is actually in. The Python suite
+            // guarantees the vectors themselves are the sim's; this guarantees
+            // our code answers them correctly.
             foreach (var finding in FurinaParityVectors.Check())
             {
                 Fail("R19", finding);

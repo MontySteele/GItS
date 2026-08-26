@@ -78,7 +78,7 @@ import sys
 
 from tier0 import constants as C
 from tier0.content import enchantments, loader, upgrades
-from tier05 import cells, draft, rewards
+from tier05 import cells, draft, expcli, rewards
 
 # The nine arms of §6.5, in roster ship order. One per ruled aim, no more and
 # no fewer.
@@ -812,4 +812,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

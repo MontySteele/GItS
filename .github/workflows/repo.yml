@@ -58,6 +58,13 @@ jobs:
         run: python tools/lint_handwritten_parity.py
       - name: constant parity
         run: python tools/lint_constant_parity.py
+      # EB-89 (2026-08-25). The half the line above structurally cannot see:
+      # constant parity compares constants to constants and never reads the
+      # PROSE a player is shown, so a repricing could leave a tooltip quoting
+      # a retired number with every gate green. Pinned by
+      # tier0/tests/test_eb89_prose_constants.py.
+      - name: prose constants
+        run: python tools/lint_prose_constants.py
       # Sim-hygiene sprint 2026-07-29. The sibling of the line above, pointed
       # at the sim's own internal correspondence instead of the C# mirrors:
       # an engine op with no offer-time price is a card the drafter cannot
@@ -123,6 +130,13 @@ jobs:
       # checkout is depth-1 with no tags.
       - name: register row-id uniqueness
         run: python tools/lint_register_ids.py
+      # EB-109. An enchanted id (`x@sharp-2`) became reachable at RUNTEMPLATE
+      # 10, and the upgrade suffix rides INSIDE the decoration, so every
+      # `<id> + upgrades.SUFFIX` site silently changed meaning without being
+      # edited. This holds the reachability answer beside each site and fails
+      # on a new site nobody has answered for.
+      - name: upgrade-suffix append sites
+        run: python tools/lint_upgrade_suffix_appends.py
       # Understudy 2026-08-04. vendor/ carries third-party source pinned to an
       # exact upstream commit; this asserts the tree still is what the
       # provenance note says it is, in both directions. Cheap, and the one

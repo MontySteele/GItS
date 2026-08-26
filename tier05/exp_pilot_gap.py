@@ -51,7 +51,7 @@ import statistics
 import sys
 
 from tier0 import constants as C
-from tier05 import cells, encore_telemetry, fanfare_telemetry
+from tier05 import cells, encore_telemetry, expcli, fanfare_telemetry
 
 # The ratified cell, on Furina's salon plan, which is what every arm below
 # varies from. Only the PILOT differs between arms -- same seed, same route,
@@ -331,4 +331,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

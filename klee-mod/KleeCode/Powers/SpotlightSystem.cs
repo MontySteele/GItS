@@ -428,8 +428,10 @@ public sealed class CenterStagePower : PowerModel, ILocalizationProvider
     {
         ("title", "Center Stage"),
         ("description",
+            // EB-89: the rate is interpolated, not printed.
             "Furina is Spotlighted. Playing her cards generates "
-          + "2 Fanfare; their printed numbers are unchanged."),
+          + $"{SpotlightSystem.FanfarePerCenterStagePlay} Fanfare; their "
+          + "printed numbers are unchanged."),
     };
 
     public override PowerType Type => PowerType.Buff;

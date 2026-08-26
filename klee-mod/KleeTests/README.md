@@ -3,13 +3,17 @@
 `dotnet test` against the **real** `klee.dll` and the **real** `sts2.dll`, with
 no Godot, no scene tree and no game launch. Registered as `EB-105`.
 
-Before this existed the repo had no C# test project at all, and the register
-said so in three places (`BombPower.cs`, `CompanionPowers.cs:46`,
-`TurnEndSequencer.cs`): tier 0.5 models one seat, so **every co-op defect ever
-found was found by playing**. This is a partial backstop for that — see
-"Co-op coverage" below for exactly which part. (`BombPower.cs` no longer says
-it: `EB-130` rewrote that comment, and it now names this project and the one
-thing it still cannot reach — a live `CombatState`.)
+Before this existed the repo had no C# test project at all, and the shipped
+source said so in nine places: tier 0.5 models one seat, so **every co-op
+defect ever found was found by playing**. This is a partial backstop for that
+— see "Co-op coverage" below for exactly which part. None of those nine
+comments says it any more: `EB-130` rewrote `BombPower.cs` and `EB-105`'s
+comment leg swept the other eight (`CeremonialGarment.cs`, `CompanionPool.cs`,
+`CompanionPowers.cs`, `FurinaParityVectors.cs`, `KleeSelfCheck.cs`,
+`KleeOffPoolCards.cs`, `NonCardParityVectors.cs`, `KuragePowers.cs`). Each now
+names this project AND the boundary that still applies to it, because "there
+is a C# suite" and "this particular fact is reachable" are different claims
+and only the second one is worth anything to a reader.
 
 ## Running it
 

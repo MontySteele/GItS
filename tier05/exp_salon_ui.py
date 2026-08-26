@@ -29,6 +29,7 @@ import sys
 
 from tier0 import constants as C
 from tier05 import conditional_telemetry, draft, encore_telemetry, model
+from tier05 import expcli
 
 SEED = 20260728
 RUNS = 200
@@ -129,4 +130,5 @@ def main(argv: list[str]) -> None:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     main(sys.argv)

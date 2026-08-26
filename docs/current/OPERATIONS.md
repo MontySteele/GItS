@@ -161,8 +161,15 @@ backup script's job.
 **Backups never live in worktrees.** `git worktree remove` deletes gitignored
 content out of a *clean* worktree, which is how the 2026-08-24 loss took both
 prior backup copies along with the tree they were meant to protect. The vault is
-outside every checkout for exactly that reason; see also the no-link rule under
-Worktrees.
+outside every checkout for exactly that reason; see also the no-link rule and
+`tools/purge_worktree.py` under Worktrees.
+
+**A missing layer fails at the door, not mid-cell.** Asking for a `real_*` arm
+without `game_ref/` raises `loader.MissingReferenceLayer` out of
+`tier05.runner.resolve_plan` before any run starts, and the message names this
+tool as the restore point. **Never stub, fabricate or approximate the layer to
+make an anchor load** — a stubbed `real_ironclad` produces numbers that look
+like floors and are not.
 
 ## Simulate
 
@@ -281,7 +288,8 @@ python3 tools/lint_handwritten_parity.py   tools/lint_constant_parity.py   tools
 python3 tools/gen_roster_cards.py --check
 python3 tools/lint_pool_membership.py       tools/lint_ancient_coverage.py
 python3 tools/suggest_role_tempo_tags.py --check    tools/lint_role_tempo_coverage.py --gate
-python3 tools/lint_roster_registry.py       tools/lint_vendor_pin.py       tools/art_coverage.py
+python3 tools/lint_roster_registry.py       tools/lint_upgrade_suffix_appends.py
+python3 tools/lint_vendor_pin.py            tools/art_coverage.py
 ```
 
 Local-only (not in CI): `lint_text_encoding.py`, `lint_generated_structure.py`,
@@ -339,7 +347,7 @@ where CI cannot look.
 
 ```sh
 git worktree add ../GItS-<workstream> -b <sprint-or-topic>-<short-slug>
-git worktree remove ../GItS-<name>     # when the workstream lands
+python -m tools.purge_worktree ../GItS-<name>   # when the workstream lands
 git worktree prune
 ```
 
@@ -357,10 +365,15 @@ git worktree prune
   ignored files are ignored — so a worktree holding a `game_ref_backup/` copy
   looks empty to git and is removed whole. **On 2026-08-24 a routine purge of
   stale worktrees took both surviving `game_ref/` backups this way**, which is
-  how one deletion became a fourth total loss. Before removing a worktree,
-  check it for ignored data you care about: `git -C ../GItS-<name> status
-  --ignored --porcelain | grep '^!!'`. Never park the only copy of anything in
-  a worktree.
+  how one deletion became a fourth total loss. **Remove a worktree with
+  `python -m tools.purge_worktree ../GItS-<name>`, not with `git worktree
+  remove`.** It runs that check for you and REFUSES (exit 2, and it names what
+  it found) when the worktree holds gitignored data it was not told to expect;
+  build outputs, caches and `local.props` are on its allowlist, `game_ref/`
+  and the art trees deliberately are not, and `--acknowledge` is the door you
+  type after reading the list. By hand the check is `git -C ../GItS-<name>
+  status --ignored --porcelain | grep '^!!'`. Never park the only copy of
+  anything in a worktree.
 - **A phase's content does not merge to `main` until the prior phase's required
   read is complete (R206).** Build it, test it, push the branch — merging is the
   act that is sequenced, not the work. A branch waiting on a read is INERT, not

@@ -40,7 +40,7 @@ import sys
 import time
 
 from tier0.content import loader
-from tier05 import cells, kurage_telemetry
+from tier05 import cells, expcli, kurage_telemetry
 
 PLANS = ("priest", "commander", "assist", "generic")
 
@@ -131,4 +131,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

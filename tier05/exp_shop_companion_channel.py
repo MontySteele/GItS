@@ -78,7 +78,7 @@ from __future__ import annotations
 import sys
 from collections import Counter
 
-from tier05 import draft, model, stats
+from tier05 import cells, draft, expcli, model, stats
 
 RUNS = 500
 CHARACTERS = [("klee", "demolition"), ("furina", "salon"), ("kokomi", "priest")]
@@ -116,6 +116,21 @@ def arm(character: str, archetype: str, runs: int, companions: bool):
 
 def main() -> int:
     runs = int(sys.argv[1]) if len(sys.argv) > 1 else RUNS
+    # The R68 stamp (EB-141a). This instrument reports n and seed but named no
+    # WORLD, so its own output was not citable -- and it is the registered M14
+    # measurement, so the number it is about to produce has to name the world
+    # it came from or it cannot be quoted anywhere.
+    #
+    # PRINTED, NOT ROUTED. R68's usual answer is "run it through a Cell, which
+    # prints the stamp", and that is EXACTLY what must not happen here yet: a
+    # Cell carries its own seed, runs, plan resolution and run entry, so
+    # rerouting could move seeding or behaviour, and M14's registered seed is
+    # staged to fire. `cells.world_stamp()` is the same source of truth
+    # `Cell.stamp()` formats -- one read of four live version attributes, no
+    # Cell, no rng, nothing else in this file touched. Rerouting through a
+    # Cell is the parked half of the row and waits for M14 to be run and
+    # graded.
+    print(cells.world_stamp())
     print(f"§4.7 companion channel -- {runs} runs/arm, seed {SEED}\n")
 
     slot1_offered = slot1_bought = 0
@@ -337,4 +352,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

@@ -1142,8 +1142,14 @@ public sealed class FurinaBurstMeterPower : PowerModel, ILocalizationProvider
     {
         ("title", "Burst Energy"),
         ("description",
-            "Skill cards and Reactions grant 5; Salon attacks grant 2; "
-          + "deliberately spent Encore grants 1 per point. At 70, "
+            // EB-89: every rate here is interpolated from the constant
+            // the resolution actually reads.
+            $"Skill cards and Reactions grant "
+          + $"{FurinaResourceConstants.BurstPerSkillTag}; Salon attacks "
+          + $"grant {FurinaResourceConstants.BurstPerSalonTick}; "
+          + "deliberately spent Encore grants "
+          + $"{FurinaResourceConstants.BurstPerEncoreSpent} per point. At "
+          + $"{FurinaResourceConstants.BurstMax}, "
           + "Let the People Rejoice is added to your hand."),
     };
 

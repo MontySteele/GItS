@@ -58,6 +58,17 @@ SEEDS -- TWO ARMS, AND THIS FILE FLIES BOTH.
 A chosen seed fixes WHICH RUN, and that is all it fixes. It does not make a
 soak number a balance number, and Guardrail-7 above is unchanged by it.
 
+CHARACTER -- THE SAME DISCIPLINE, AND FOR THE SAME REASON (EB-117).
+`--character` names a character-select OPTION ID (`KLEEMOD-FURINA`), not a
+roster id, and a string that matched nothing used to be silent: the pick never
+fired, the game embarked on whatever the screen had highlighted, and the report
+was headed with the REQUESTED name. So the request is checked against the
+select screen BEFORE the embark (`character_not_offered`), the character the
+run actually started with is read back off `player.character` AFTER it
+(`character_mismatch`, `character_unverified`), and the READ-BACK is what every
+record, index and report header carries. All three kinds are harness-side and
+halt the soak on a second occurrence, exactly like `seed_not_honoured`.
+
 ON NEITHER ARM IS THE SEED A POLICY INPUT. It is stamped on the log and, on the
 chosen arm, compared against the read-back. `understudy.rng.policy_rng` refuses
 a stream label shaped like a game seed, and that refusal is the enforcement.
@@ -115,6 +126,76 @@ SPEED_SIDECAR = Path("mods") / "STS2_MCP" / "GitsSpeed.original.conf"
 STEAM_APPID = "2868840"
 GAME_EXE = "SlayTheSpire2.exe"
 DEFAULT_CHARACTER = "KLEEMOD-FURINA"
+
+# ------------------------------------------------- who actually embarked ----
+#
+# EB-117. `--character` used to be matched case-insensitively against the
+# character-select options and a string that matched NOTHING was not an error:
+# the pick simply never fired, the driver walked on, the game embarked on
+# whatever the screen had highlighted (Ironclad), and the report header printed
+# the REQUESTED name. A six-run soak launched with `--character furina` (the id
+# is `KLEEMOD-FURINA`) produced a report headed `character furina` whose every
+# damage source was an Ironclad card. The operator error is cheap; the silent
+# mislabel is the defect.
+#
+# Two things fix it, and both live below: the select screen is CHECKED before
+# the embark, and the character the run actually started with is READ BACK off
+# the wire afterwards. The read-back is what gets stamped -- never the request.
+#
+# The two strings are not the same vocabulary, which is why a comparator is
+# needed rather than `==`. The request is a character-select OPTION id
+# (`KLEEMOD-FURINA`); the read-back is the wire's own DISPLAY name
+# (`player.character`: "Furina", "Klee", "Sangonomiya Kokomi"), the same field
+# `harness.render` and `policy_v1._plan_for` read. `tier0.roster` is the
+# registry that joins them, asked rather than copied -- a second table here is
+# a second thing to forget when slot 4 lands.
+
+_CHARACTER_PREFIX = "kleemod-"
+
+
+def canonical_character(name: str) -> str:
+    """Fold an option id or a display name onto one comparable key.
+
+    Roster members fold onto their registry id (`kokomi`); anything the
+    registry does not know -- the base-game characters, a future mod -- folds
+    onto its own normalised text, so `IRONCLAD` and `Ironclad` still compare
+    equal and nothing is silently claimed to be a roster member.
+    """
+    key = str(name or "").strip().casefold()
+    if key.startswith(_CHARACTER_PREFIX):
+        key = key[len(_CHARACTER_PREFIX):]
+    key = " ".join(key.replace("-", " ").replace("_", " ").split())
+    if not key:
+        return ""
+    from tier0 import roster
+    for ch in roster.ROSTER:
+        if key in (ch.id.casefold(), ch.display.casefold()):
+            return ch.id.casefold()
+    return key
+
+
+def character_matches(requested: str, actual: str) -> bool:
+    """Did the run start as the character that was asked for?
+
+    An empty side is never a match: "the wire told us nothing" is a failure to
+    verify, not a verification, and it is reported as its own defect kind.
+    """
+    a, b = canonical_character(requested), canonical_character(actual)
+    return bool(a) and a == b
+
+
+def _selectable_characters(options: list[str]) -> list[str]:
+    """The character rows on a character-select screen.
+
+    The confirm/embark button and the back link share `options` with the
+    characters; a screen offering only those is one that has not finished
+    settling, and the pre-embark check declines to judge it rather than
+    filing a defect against a frame.
+    """
+    return [o for o in options
+            if o.strip().casefold() not in {"confirm", "embark", "back",
+                                            "cancel", "ok"}]
+
 
 # --------------------------------------------------------------- dials ----
 # Harness timings. None of these is a balance number; all are watchdog bounds.
@@ -906,6 +987,11 @@ class RunDriver:
     # __init__ -- and so the OFF state is the default everywhere.
     sampler: Any = None
 
+    # EB-117, and a class attribute for the same reason: UNVERIFIED is the
+    # default on every construction path, so nothing can read a character name
+    # off a driver that never embarked.
+    character_actual: str | None = None
+
     def __init__(self, session: Session, run_index: int, stamp: str,
                  character: str = DEFAULT_CHARACTER,
                  commit: str | None = None,
@@ -916,6 +1002,12 @@ class RunDriver:
         self.session = session
         self.run_index = run_index
         self.character = character
+        # EB-117. The character the run ACTUALLY started with, read off the
+        # wire after the embark confirm fires. `None` until then, and `None`
+        # is what every downstream stamp carries for a run that never got
+        # there -- an unverified run has no character name, rather than
+        # borrowing the requested one.
+        self.character_actual: str | None = None
         # EB-1. ON by default: this is a defence against a known soft-lock,
         # not a policy. `--allow-hazard-events` turns it off for the one job it
         # is in the way of, which is deliberately reproducing the hang.
@@ -1248,7 +1340,16 @@ class RunDriver:
 
     # -- the run ----------------------------------------------------------
     def run(self) -> dict:
-        self.emit({"record": "run_begin", "character": self.character,
+        # EB-117: `character` here is the READ-BACK identity and it is null at
+        # this point on purpose -- nothing has embarked yet, so there is no
+        # character to name. The request is recorded beside it under its own
+        # key, and `character_verified` (emitted the moment the wire answers)
+        # fills the real one in. This record stays FIRST in the log because
+        # the run_begin / defect / run_end triple is what `report.py` reads
+        # and `test_track_o_s09` pins that order for a run that never
+        # embarked; that is exactly the run whose character is unknowable.
+        self.emit({"record": "run_begin", "character": None,
+                   "character_requested": self.character,
                    "policy": policy_v1.POLICY_VERSION,
                    # The arm, recorded per run for the same reason the dials
                    # are: a log has to stay self-describing when the flag moves.
@@ -1262,6 +1363,11 @@ class RunDriver:
         try:
             state = self._to_main_menu()
             state = self._embark(state)
+            # EB-117: BEFORE the seed read-back, for the same reason the seed
+            # read-back exists at all. A soak flying the wrong character is
+            # unrecoverable after the fact -- the numbers are somebody else's
+            # and nothing in the log says so.
+            state = self._verify_character(state)
             self.seed = bridge.current_seed()
             self.emit({"record": "seed_read_back", "seed": self.seed,
                        "chosen": self.chosen_seed,
@@ -1323,6 +1429,10 @@ class RunDriver:
 
         summary = {
             "record": "run_end", "outcome": outcome, "detail": detail,
+            # EB-117: the READ-BACK identity, `None` for a run that never got
+            # far enough to be asked. Never the requested string.
+            "character": self.character_actual,
+            "character_requested": self.character,
             "seed": self.seed, "run": self.run_index,
             "actions": self.actions,
             "wall_s": round(time.time() - self.started, 1),
@@ -1436,6 +1546,24 @@ class RunDriver:
                 # The confirm button only appears in `options` while it is
                 # enabled (`_option_names` drops disabled entries), so it is
                 # absent until a character is chosen and cannot fire early.
+                #
+                # EB-117: CHECK THE SCREEN BEFORE TOUCHING IT. A `--character`
+                # that matches no option used to fall straight through to the
+                # confirm below and embark on whatever was highlighted. The
+                # options are right here, so the answer is knowable before the
+                # run exists rather than six runs later from a damage table.
+                # Guarded on there being characters to check: a screen showing
+                # only the confirm/back chrome is one still settling, and the
+                # bounded retry below is the answer to that, not a defect.
+                offered = _selectable_characters(opts)
+                if offered and self.character.lower() not in [o.lower()
+                                                              for o in opts]:
+                    raise Defect(
+                        "character_not_offered",
+                        f"character select offers no {self.character!r}; "
+                        f"the options are {offered}. Embarking anyway would "
+                        f"soak whatever the screen has highlighted and label "
+                        f"it {self.character!r}", state)
                 if picks == 0 and self.character.lower() in [o.lower()
                                                              for o in opts]:
                     picks += 1
@@ -1604,6 +1732,59 @@ class RunDriver:
             time.sleep(delay)
             state = bridge.get_state()
         return state
+
+    def _verify_character(self, state: dict[str, Any],
+                          tries: int = 60,
+                          delay: float = 0.5) -> dict[str, Any]:
+        """EB-117: read back WHO embarked, and refuse to soak anybody else.
+
+        The wire names the run's character on `player.character` -- the
+        display name, the field `harness.render` prints and
+        `policy_v1._plan_for` resolves the plan off. It is not there the
+        instant the confirm returns (the run is generated over several frames,
+        which is the same reason `_await_leaving_menu` exists), so this polls
+        for it on the same bound rather than trusting the first read.
+
+        Three outcomes, and two of them are defects:
+
+          match      -- `character_actual` is stamped and the run proceeds
+          mismatch   -- `character_mismatch`, harness-side. This is the EB-117
+                        run: `--character furina` never matched the option
+                        `KLEEMOD-FURINA`, the pick never fired, and the game
+                        embarked on whatever was highlighted
+          unreadable -- `character_unverified`. NOT waved through: a run whose
+                        identity cannot be read cannot be labelled, and an
+                        unlabelled soak is the defect this row is about
+        """
+        for attempt in range(tries):
+            who = str(((state.get("player") or {}).get("character")
+                       or "")).strip()
+            if who:
+                if not character_matches(self.character, who):
+                    raise Defect(
+                        "character_mismatch",
+                        f"asked to embark as {self.character!r}, the run "
+                        f"reads back {who!r}; every number this run produces "
+                        f"belongs to {who!r} and none of it is quotable "
+                        f"against {self.character!r}", state)
+                self.character_actual = who
+                self.emit({"record": "character_verified",
+                           "character": who,
+                           "character_requested": self.character,
+                           "run": self.run_index})
+                return state
+            # The last pass READS ONLY. Re-fetching after the final check
+            # would make the bound `tries` reads plus one wire call whose
+            # answer nothing looks at.
+            if attempt < tries - 1:
+                time.sleep(delay)
+                state = bridge.get_state()
+        raise Defect(
+            "character_unverified",
+            f"the run started but the wire never named a character "
+            f"(`player.character` empty after {tries} reads); "
+            f"{self.character!r} was requested and cannot be confirmed",
+            state)
 
     def _drive(self, state: dict) -> tuple[str, str]:
         while True:
@@ -1908,6 +2089,12 @@ def soak(runs: int, character: str, do_setup: bool,
     index = LOG_DIR / f"soak-{stamp}-index.json"
     shapes: dict[str, int] = {}
     stopped = None
+    # EB-117. The character the runs ACTUALLY flew, read off the wire by the
+    # first run that got far enough to be asked. Stays `None` for a soak that
+    # never embarked, and `None` is what the index and the report header then
+    # carry -- the requested string is recorded separately and never promoted
+    # to the name of the thing that was measured.
+    verified: str | None = None
     try:
         session.setup()
         for i in range(1, runs + 1):
@@ -1921,13 +2108,15 @@ def soak(runs: int, character: str, do_setup: bool,
                                hazard_guard=hazard_guard,
                                **({"p2_capture": True} if p2_capture else {}))
             s = driver.run()
+            verified = verified or driver.character_actual
             s["defect_kinds"] = [d["kind"] for d in driver.defects]
             summaries.append(s)
             print(f"    {s['outcome']}  seed={s['seed']}  "
                   f"actions={s['actions']}  fights={s['fights']}  "
                   f"defects={s['defects']}", flush=True)
             index.write_text(json.dumps(
-                {"stamp": stamp, "character": character,
+                {"stamp": stamp, "character": verified,
+                 "character_requested": character,
                  "policy": policy_v1.POLICY_VERSION, "commit": commit,
                  "seeds": seeds,
                  "requested_runs": runs, "runs": summaries}, indent=1),
@@ -1971,7 +2160,8 @@ def soak(runs: int, character: str, do_setup: bool,
     finally:
         session.teardown()
 
-    result = {"stamp": stamp, "character": character,
+    result = {"stamp": stamp, "character": verified,
+              "character_requested": character,
               "policy": policy_v1.POLICY_VERSION, "commit": commit,
               "seeds": seeds,
               "requested_runs": runs, "runs": summaries,
@@ -2018,15 +2208,26 @@ def _needs_restart(outcome: str, alive: bool) -> bool:
 # observation of a live-play hazard, not a broken instrument. `hazard_event`
 # in particular costs one run and recovers on its own -- the restart path's
 # `abandon_run` is the recorded recovery for the poisoned save.
+# EB-117's three kinds join `seed_not_honoured` here, which is the same shape
+# exactly: the instrument was told to measure one thing and measured another,
+# so a second occurrence halts the soak instead of filling the night with runs
+# nobody can quote.
 _HARNESS_SIDE = {"no_embark_path", "no_embark", "embark_loop", "menu_loop",
                  "unexpected_start_state", "bridge_unreachable", "no_action",
-                 "seed_not_honoured", "state_type_missing"}
+                 "seed_not_honoured", "state_type_missing",
+                 "character_not_offered", "character_mismatch",
+                 "character_unverified"}
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--runs", type=int, default=1)
-    ap.add_argument("--character", default=DEFAULT_CHARACTER)
+    ap.add_argument("--character", default=DEFAULT_CHARACTER,
+                    help="the character-select OPTION ID, not a roster id "
+                         "(KLEEMOD-FURINA, KLEEMOD-KLEE, KLEEMOD-KOKOMI). "
+                         "EB-117: a name the select screen does not offer "
+                         "fails before the embark, and the character the run "
+                         "actually starts with is read back and stamped")
     ap.add_argument("--no-setup", action="store_true",
                     help="attach to an already-running game; make no game-dir "
                          "changes and revert none")

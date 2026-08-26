@@ -39,6 +39,7 @@ from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat
 from tier0.engine.state import CombatState, Enemy, Player
+from tier05 import expcli
 
 SEED = 11                     # the sprint's registered seed
 
@@ -204,4 +205,5 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

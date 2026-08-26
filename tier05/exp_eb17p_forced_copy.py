@@ -56,7 +56,7 @@ import time
 
 from tier0.content import upgrades
 from tier0.harness import metrics, report
-from tier05 import cells, stats
+from tier05 import cells, expcli, stats
 
 # --- the registered configuration (§3, §4, §5) -----------------------------
 
@@ -445,4 +445,5 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":       # pragma: no cover
+    expcli.help_if_asked(__doc__)
     sys.exit(main(sys.argv[1:]))

@@ -58,7 +58,7 @@ import sys
 import time
 
 from tier0 import constants as C
-from tier05 import cells, kurage_telemetry
+from tier05 import cells, expcli, kurage_telemetry
 
 # Her four registered plans. All of them, not just the Kurage lane: the pulse
 # is fed by the exhaust funnel, which every Kokomi deck runs, so "which plans
@@ -159,4 +159,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

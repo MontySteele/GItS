@@ -33,7 +33,7 @@ from __future__ import annotations
 import sys
 import time
 
-from tier05 import burst_telemetry, cells, kurage_telemetry
+from tier05 import burst_telemetry, cells, expcli, kurage_telemetry
 
 PLANS = ("priest", "commander", "assist", "generic")
 
@@ -123,4 +123,5 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
+    expcli.help_if_asked(__doc__)
     raise SystemExit(main())

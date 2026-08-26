@@ -65,6 +65,74 @@ EXTERNAL_CARD_LAYERS = {
     ),
 }
 
+
+class MissingReferenceLayer(RuntimeError):
+    """A `real_*` arm was asked for and its `game_ref/` layer is not here.
+
+    BACKLOG `EB-128` (4). Until this existed, a lost `game_ref/` announced
+    itself in one of two structurally-invisible ways: an experiment naming a
+    `real_*` arm discovered the loss by traceback halfway through a cell (an
+    empty pool, then a failure downstream that names neither the tree nor the
+    fix), and the test suite's only tell was a SILENT SKIP-COUNT JUMP. Both
+    are the shape this repo keeps calling out -- a narrower run reporting
+    itself in the same shape as a full one.
+
+    The class is separate from `ValueError` so a caller that wants to say
+    "this arm is unavailable, here is the table without it" can catch exactly
+    this and nothing else.
+    """
+
+
+# The character -> merged sheet each `real_*` arm loads out of `game_ref/`.
+# Derived from EXTERNAL_CARD_SHEETS rather than retyped: the two must not be
+# able to disagree about which sheet backs which arm.
+REFERENCE_LAYER_SHEETS = {char: sheet
+                          for sheet, char in EXTERNAL_CARD_SHEETS.items()}
+
+
+def require_reference_layer(character: str) -> None:
+    """Fail LOUDLY and EARLY if this character's `game_ref/` layer is gone.
+
+    A no-op for every character that does not read `game_ref/` -- the roster,
+    both `ref_*` anchors, anything unknown -- so it is safe to call from the
+    one door every tier-0.5 arm goes through (`tier05.runner.resolve_plan`,
+    R68), which is where it is called from.
+
+    **STANDING RULE, and it is the row's: DO NOT fabricate, stub or
+    approximate a missing layer to make an anchor load.** A stubbed
+    `real_ironclad` produces numbers that look like floors and are not, which
+    is worse than the absence. This function's only job is to turn the absence
+    into a sentence naming the restore point.
+    """
+    sheet = REFERENCE_LAYER_SHEETS.get(character)
+    if sheet is None:
+        return
+    missing = [name for name in (sheet, *EXTERNAL_CARD_LAYERS.get(sheet, ()))
+               if not (GAME_REF_DIR / name).exists()]
+    if not missing:
+        return
+    where = ("the directory does not exist" if not GAME_REF_DIR.exists()
+             else "the directory exists but is missing")
+    raise MissingReferenceLayer(
+        f"{character!r} needs the local `game_ref/` reference layer and "
+        f"{where}: {', '.join(missing)} (looked in {GAME_REF_DIR}).\n"
+        f"  `game_ref/` is gitignored decompile-derived material, so it is "
+        f"absent on a fresh clone and in EVERY worktree by construction, and "
+        f"git history cannot restore it.\n"
+        f"  RESTORE POINT: the OneDrive vault, via "
+        f"`python -m tools.backup_game_ref` (its docstring names the vault "
+        f"path and the wipe guard); `tools/lint_game_ref_backup.py` says "
+        f"whether that mirror is current. A rebuild from the game instead "
+        f"runs tools/extract_base_game_pool.py then "
+        f"tools/build_official_sheet.py -- and note that `--verify` is a "
+        f"CONSISTENCY check, not a currency one, so a restore from a backup "
+        f"older than the last field retirement can verify and still not "
+        f"load.\n"
+        f"  DO NOT stub, fabricate or approximate this layer to make the arm "
+        f"run. A stubbed anchor produces numbers that look like floors and "
+        f"are not (BACKLOG EB-128).")
+
+
 # The two hand-approximated reference characters own the cards/ sheets.
 # Same sheet-name convention as DOCS_CARD_SHEETS: ownership is a property
 # of the pool a card ships in, not a field repeated on every row.

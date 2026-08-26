@@ -303,10 +303,24 @@ BLOCK_NEXT_TURN_FIELDS = {"op", "amount"}
 # archetype/rarity data lives only there), and every resolved member must
 # itself be a generated class -- both enforced in blocked_reason.
 ADD_CARD_CLASSES = {"confiscated": "Confiscated"}
+# add_card's own field totality. EB-90: `sly` used to sit at the head of this
+# set under CARD_FIELDS' comment about it, copied whole from there. `sly` is a
+# CARD-level key -- the discard branch of a card -- and no sheet has ever put
+# it on an add_card EFFECT, so it excused nothing and only made the set read
+# as though a rider spelling existed. Dropped; CARD_FIELDS still owns it.
+#
+# Two spellings of the same two fields are live and both are kept: Klee's
+# sheet writes `card` / `zone`, tier0's silent sheet writes `card_id` / `to`,
+# and the reader below accepts either (`eff.get("zone") or eff.get("to", ...)`,
+# `eff.get("card_id") or eff.get("card")`).
 ADD_CARD_FIELDS = {
-    # Kokomi/Silent Sly: extra effects that fire when the card is DISCARDED.
-    "sly","op", "card", "card_id", "pool", "zone", "to", "amount",
-                   "cost_override"}
+    "op",
+    "card", "card_id",       # the token, by id -- one or the other
+    "pool",                  # ... or a sheet pool, resolved at generation
+    "zone", "to",            # hand | discard -- one or the other
+    "amount",
+    "cost_override",
+}
 GUEST_STAR_FIELDS = {"op", "rarity", "amount", "to", "cost_override"}
 ENERGY_FIELDS = {"op", "amount"}
 SCRY_FIELDS = {"op", "amount"}

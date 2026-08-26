@@ -15,6 +15,7 @@ import dataclasses
 import pytest
 
 from tier0 import constants as C
+from tier0.content import loader
 from tier05 import cells, draft, run_metrics, runner
 
 
@@ -97,8 +98,20 @@ def test_a_cell_cannot_name_a_plan_its_character_does_not_have():
 def test_the_pilot_comes_from_resolve_plan():
     for character, plans in runner.CHARACTER_PLANS.items():
         for archetype, expected_pilot in plans.items():
-            c = cells.Cell(name="t", character=character,
-                           archetype=archetype)
+            try:
+                c = cells.Cell(name="t", character=character,
+                               archetype=archetype)
+            except loader.MissingReferenceLayer:
+                # BACKLOG EB-128 (4). The `real_*` arms read the gitignored
+                # `game_ref/` tree, which is absent on a fresh clone and in
+                # every worktree by construction. Constructing one there now
+                # REFUSES at the door instead of building a cell that would
+                # die by traceback mid-run -- so this is the pass, not a hole
+                # in the sweep, and it is asserted rather than skipped past.
+                assert character in loader.REFERENCE_LAYER_SHEETS
+                assert not (loader.GAME_REF_DIR /
+                            loader.REFERENCE_LAYER_SHEETS[character]).exists()
+                continue
             assert c.pilot == expected_pilot
 
 

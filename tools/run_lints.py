@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Run the repo's lint battery CONCURRENTLY and report every result.
 
-The battery is thirteen CI invocations plus five that only ever run locally,
-and until now the only way to run it was to paste eighteen lines from
+The battery is fifteen CI invocations plus five that only ever run locally,
+and until now the only way to run it was to paste twenty lines from
 `OPERATIONS.md` / `.github/workflows/repo.yml` one at a time. Pasted serially
 they cost the sum of their runtimes; run as separate processes they cost the
 slowest one, because each is an independent short-lived Python process with no
@@ -105,6 +105,10 @@ def _library(name: str, script: str, note: str) -> Lint:
 REGISTRY: tuple[Lint, ...] = (
     _ci("handwritten-parity",   "tools/lint_handwritten_parity.py"),
     _ci("constant-parity",      "tools/lint_constant_parity.py"),
+    # EB-89. Beside constant-parity in the CI file for the same reason it is
+    # beside it here: the same hazard class, the half that reads PROSE
+    # instead of constants.
+    _ci("prose-constants",      "tools/lint_prose_constants.py"),
     _ci("op-parity",            "tools/lint_op_parity.py"),
     _ci("sly-grammar",          "tools/lint_sly_grammar.py"),
     _ci("codegen-staleness",    "tools/gen_roster_cards.py", "--check"),
@@ -117,6 +121,11 @@ REGISTRY: tuple[Lint, ...] = (
     # EB-127. Beside r-numbers deliberately: same question (an id namespace
     # with no gate), the other series.
     _ci("register-ids",         "tools/lint_register_ids.py"),
+    # EB-109. Structural, over committed source, so it runs where the other
+    # invisible-seam gates run: an enchanted id became reachable at
+    # RUNTEMPLATE 10 and turned correct `+ SUFFIX` sites wrong without anyone
+    # editing them.
+    _ci("upgrade-suffix-appends", "tools/lint_upgrade_suffix_appends.py"),
     _ci("vendor-pin",           "tools/lint_vendor_pin.py"),
     _ci("art-coverage",         "tools/art_coverage.py"),
 
