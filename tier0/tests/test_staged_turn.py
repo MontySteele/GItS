@@ -28,7 +28,9 @@ from pathlib import Path
 
 import pytest
 
-from understudy import qa_packet, staged_turn
+from understudy import qa_packet
+from understudy import scenario as scenario_module
+from understudy import staged_turn
 
 REPO = Path(__file__).resolve().parents[2]
 TURNS = REPO / "understudy" / "turns"
@@ -36,6 +38,23 @@ EXAMPLE = TURNS / "kokomi-first-turn-example.yaml"
 
 
 # ------------------------------------------------------------- fixtures ----
+
+class FakeWire:
+    """A bridge that answers from a scripted list of states, last one
+    repeating. `Runner` takes its wire as an argument precisely so this can
+    exist -- see `test_understudy_scenario`, which does the same."""
+
+    def __init__(self, states):
+        self.states = list(states)
+        self.posts: list[dict] = []
+
+    def get_state(self):
+        return self.states[0] if len(self.states) == 1 else self.states.pop(0)
+
+    def post(self, **action):
+        self.posts.append(action)
+        return {"status": "ok", "message": "ok"}
+
 
 def wire_state():
     """A live-shaped state whose every field is FULL of design vocabulary.
@@ -566,3 +585,116 @@ def test_a_fixture_form_names_only_printed_titles():
         blob = staged_turn.load_form(FIXTURES / name)
         for play in blob["chosen_line"]:
             assert play["card"] in titles, f"{name}: {play['card']!r}"
+
+
+# ------------------------------------------------- the seed and the board --
+
+def test_stage_records_the_seed_the_game_actually_used(tmp_path, monkeypatch):
+    """The encounter is generated from the run seed, so a packet without one
+    cannot be replayed -- which is what the first live `execute` proved by
+    rolling its own and drawing a different monster."""
+    turn = staged_turn.load(EXAMPLE)
+    monkeypatch.setattr(staged_turn, "QA_DIR", tmp_path)
+    report = staged_turn.export_packet(turn, wire_state(), run_seed="HKB8EJD5G4")
+    blob = json.loads((tmp_path / turn.id / "packet.json").read_text(
+        encoding="utf-8"))
+    observed = json.loads((tmp_path / turn.id / "observed.json").read_text(
+        encoding="utf-8"))
+    assert report["run_seed"] == "HKB8EJD5G4"
+    assert blob["run_seed"] == "HKB8EJD5G4"
+    assert observed["run_seed"] == "HKB8EJD5G4"
+
+
+def test_the_seed_is_not_on_the_page_the_grader_reads(tmp_path, monkeypatch):
+    """`packet_sha256` and `run_seed` are envelope keys on the JSON, added
+    after the scrub. Neither is rendered into `packet.md`, which is the page a
+    grader is handed -- and which is what the hash is taken over, so recording
+    a seed cannot move it."""
+    turn = staged_turn.load(EXAMPLE)
+    monkeypatch.setattr(staged_turn, "QA_DIR", tmp_path)
+    with_seed = staged_turn.export_packet(turn, wire_state(),
+                                          run_seed="HKB8EJD5G4")
+    md = (tmp_path / turn.id / "packet.md").read_text(encoding="utf-8")
+    assert "HKB8EJD5G4" not in md
+    without = staged_turn.export_packet(turn, wire_state(), run_seed=None)
+    assert with_seed["sha256"] == without["sha256"]
+
+
+def test_the_board_matches_the_packet_it_came_from():
+    packet = qa_packet.build(wire_state(), "t")
+    assert staged_turn.board_differences(packet, wire_state()) == []
+
+
+def test_a_different_encounter_is_a_board_mismatch():
+    """The failure the first live `execute` hit, as an assertion: the fresh
+    game generated a Sludge Spinner where the packet showed a Jaw Worm."""
+    packet = qa_packet.build(wire_state(), "t")
+    live = wire_state()
+    live["battle"]["enemies"][0]["name"] = "Sludge Spinner"
+    live["battle"]["enemies"][0]["entity_id"] = "SLUDGE_SPINNER_0"
+    diffs = staged_turn.board_differences(packet, live)
+    assert len(diffs) == 1
+    assert "enemies" in diffs[0] and "Sludge Spinner" in diffs[0]
+
+
+def test_a_different_hand_is_a_board_mismatch_and_counts_copies():
+    """A multiset, not a set: three Coral Guards and one Coral Guard are
+    different hands, and a set comparison would call them equal."""
+    packet = qa_packet.build(wire_state(), "t")
+    live = wire_state()
+    live["player"]["hand"].append(dict(live["player"]["hand"][1]))
+    diffs = staged_turn.board_differences(packet, live)
+    assert len(diffs) == 1 and diffs[0].startswith("hand:")
+
+
+def test_execute_checks_the_board_before_the_first_play():
+    """Ordering is the guard. A check that ran after the first play would fire
+    only once the wrong board had already been played onto."""
+    turn = staged_turn.load(EXAMPLE)
+    steps = staged_turn.execute_steps(
+        turn, form(chosen_line=[{"card": "Bake-Kurage"}]))
+    verbs = [v for v, _ in steps]
+    assert "board_check" in verbs
+    assert verbs.index("board_check") < verbs.index("mark") < verbs.index("play")
+
+
+def test_the_board_check_refuses_by_name_and_lists_the_differences():
+    """Through the real runner, on a fake wire: the step raises, the row names
+    `board_mismatch`, and the failure carries both sides."""
+    import io
+
+    packet = qa_packet.build(wire_state(), "t")
+    live = wire_state()
+    live["battle"]["enemies"][0]["name"] = "Sludge Spinner"
+    replay = scenario_module.Scenario(
+        name="t", character="KLEEMOD-KOKOMI",
+        steps=[("board_check", {}), ("mark", {})])
+    runner = staged_turn.ExecuteRunner(replay, "a test", wire=FakeWire([live]),
+                                       out=io.StringIO(),
+                                       sleep=lambda _s: None, packet=packet)
+    assert runner.run() is False
+    assert runner.failures[0]["check"] == "board_mismatch"
+    assert "Sludge Spinner" in runner.failures[0]["detail"]
+    row = next(r for r in runner.rows if r.get("step") == "board_check")
+    assert row["ok"] is False and row["rule"] == "board_mismatch"
+
+
+def test_the_board_check_passes_and_the_run_continues():
+    import io
+
+    packet = qa_packet.build(wire_state(), "t")
+    replay = scenario_module.Scenario(
+        name="t", character="KLEEMOD-KOKOMI",
+        steps=[("board_check", {}), ("mark", {})])
+    runner = staged_turn.ExecuteRunner(replay, "a test",
+                                       wire=FakeWire([wire_state()]),
+                                       out=io.StringIO(),
+                                       sleep=lambda _s: None, packet=packet)
+    assert runner.run() is True
+    row = next(r for r in runner.rows if r.get("step") == "board_check")
+    assert row["ok"] is True and row["differences"] == []
+
+
+def test_board_mismatch_is_a_named_falsifier():
+    assert "board_mismatch" in staged_turn.FALSIFIERS
+    assert "different turn" in staged_turn.FALSIFIERS["board_mismatch"]

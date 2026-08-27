@@ -188,6 +188,9 @@ FALSIFIERS: dict[str, str] = {
     "intent_insensitive":
         "question four is no: a different enemy intent would not have "
         "changed the line, so the intent is not part of the decision",
+    "board_mismatch":
+        "the live board is not the board the packet showed, so replaying the "
+        "graded line would be playing a different turn",
     "line_dominates":
         "the decision-closeness falsifier reads one line as overwhelmingly "
         "dominating the next best",
@@ -413,9 +416,21 @@ class StagingPolicy:
 
 
 def stage_board(turn: StagedTurn, why: str, *, hold: bool,
-                out_path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
+                out_path: Path, seed: str | None = None
+                ) -> tuple[dict[str, Any], dict[str, Any]]:
     """Boot, embark, reach the first fight, set the board. Returns
-    `(live wire state, the run summary)`."""
+    `(live wire state, the run summary)`.
+
+    `seed` PINS THE RUN, and the run summary reports back the seed the game
+    actually used either way -- `None` is R95's read-back arm (the game rolls,
+    we record) and a string is P1.5's chosen arm, which `RunDriver` verifies
+    and files as a `seed_not_honoured` defect if the game ignored it. The
+    ENCOUNTER IS GENERATED FROM THAT SEED, which is why the recorded value is
+    the difference between a packet that can be replayed and one that cannot:
+    the first live `execute` of this tool rolled its own seed, drew a Sludge
+    Spinner where the packet showed a Shrinker Beetle, and refused at the
+    first targeted play.
+    """
     from understudy import soak
 
     stamp = time.strftime("%Y%m%d-%H%M%S")
@@ -435,10 +450,13 @@ def stage_board(turn: StagedTurn, why: str, *, hold: bool,
         # ledger is empty and the staged board is still on the screen when
         # this returns.
         summary = soak.run_scripted(policy, stamp, character=turn.character,
-                                    max_fights=1, chosen_seed=turn.seed,
+                                    max_fights=1,
+                                    chosen_seed=seed or turn.seed,
                                     do_setup=not hold)
         runner.emit({"step": "staged_turn_end", "staged": policy.staged_state
-                     is not None, "steps_ok": policy.ok, "run": summary})
+                     is not None, "steps_ok": policy.ok,
+                     "seed_requested": seed or turn.seed,
+                     "seed_used": summary.get("seed"), "run": summary})
     if policy.staged_state is None:
         raise TurnError(
             f"no combat screen was ever reached, so nothing was staged "
@@ -451,7 +469,8 @@ def stage_board(turn: StagedTurn, why: str, *, hold: bool,
     return policy.staged_state, summary
 
 
-def export_packet(turn: StagedTurn, state: dict[str, Any]) -> dict[str, Any]:
+def export_packet(turn: StagedTurn, state: dict[str, Any], *,
+                  run_seed: str | None = None) -> dict[str, Any]:
     """Write `packet.md`, `packet.json` and `observed.json`. Returns a report.
 
     THREE FILES, AND THE THIRD IS NOT PART OF THE PACKET. `packet.md` and
@@ -487,13 +506,22 @@ def export_packet(turn: StagedTurn, state: dict[str, Any]) -> dict[str, Any]:
                              disclosures=disclosures)
     md = qa_packet.render(packet)
     digest = qa_packet.sha256(md)
+    # THE ENVELOPE, ADDED AFTER THE SCRUB AND NEVER RENDERED INTO packet.md.
+    # `packet.md` is the page a grader reads and these two keys are not on
+    # it: the hash is what a form is answered AGAINST, and the seed is what
+    # `execute` embarks with so the encounter regenerates identically. Both
+    # are facts about the RUN rather than about the board, so a grader that
+    # was handed the json instead of the page learns nothing about the game
+    # from either -- but neither belongs on the page.
     packet["packet_sha256"] = digest
+    packet["run_seed"] = run_seed
     (d / "packet.md").write_text(md, encoding="utf-8")
     (d / "packet.json").write_text(qa_packet.dumps(packet), encoding="utf-8")
     (d / "observed.json").write_text(
         json.dumps({"turn_id": turn.id,
                     "guardrail": qa_packet.PACKET_GUARDRAIL,
                     "pilot": turn.board.pilot,
+                    "run_seed": run_seed,
                     "not_a_packet": ("the RAW wire state, ids included. Tool "
                                      "side only -- never hand this to a "
                                      "grader"),
@@ -504,6 +532,7 @@ def export_packet(turn: StagedTurn, state: dict[str, Any]) -> dict[str, Any]:
     return {"dir": d, "packet_md": d / "packet.md",
             "packet_json": d / "packet.json",
             "observed_json": d / "observed.json", "sha256": digest,
+            "run_seed": run_seed,
             "cards": len(live), "hand": live,
             "declared_cards": len(turn.board.hand),
             "enemies": len(packet["board"]["enemies"])}
@@ -1043,6 +1072,9 @@ def execute_steps(turn: StagedTurn, form: dict[str, Any]
     needs. Same for a target: `find_enemy` takes the enemy's display name.
     """
     steps = list(turn.staging)
+    # BEFORE THE MARK AND BEFORE EVERY PLAY. A line replayed onto a board the
+    # packet never showed is not a replay of anything.
+    steps.append(("board_check", {}))
     steps.append(("mark", {}))
     for play in form.get("chosen_line") or []:
         body: dict[str, Any] = {"card": str(play["card"])}
@@ -1051,6 +1083,73 @@ def execute_steps(turn: StagedTurn, form: dict[str, Any]
         steps.append(("play", body))
     steps.append(("read", {"label": "after the graded line"}))
     return steps
+
+
+def board_differences(packet: dict[str, Any],
+                      state: dict[str, Any]) -> list[str]:
+    """How the LIVE board differs from the one the packet showed.
+
+    Compared in the grader's own vocabulary and in no other: the enemies'
+    PRINTED names and the hand's PRINTED titles as a MULTISET. Not ids, not
+    HP, not intents. The question this answers is "is this the same turn the
+    form was answered about", and the two things that make it a different turn
+    are a different encounter and a different hand -- both of which the first
+    live `execute` produced at once, because it rolled its own seed.
+
+    A multiset and not a set: three Coral Guards and one Coral Guard are
+    different hands, and a set comparison would call them equal.
+    """
+    from understudy import adapter
+
+    want_enemies = sorted(qa_packet._text(e.get("name"))
+                          for e in (packet.get("board") or {}).get("enemies") or [])
+    got_enemies = sorted(qa_packet._text(e.get("name"))
+                         for e in adapter.enemy_blobs(state))
+    want_hand = sorted(qa_packet._text(c.get("title"))
+                       for c in (packet.get("board") or {}).get("hand") or [])
+    got_hand = sorted(qa_packet._text(c.get("name"))
+                      for c in scenario._hand(state))
+    out: list[str] = []
+    if want_enemies != got_enemies:
+        out.append(f"enemies: packet showed {want_enemies}, the fight has "
+                   f"{got_enemies}")
+    if want_hand != got_hand:
+        out.append(f"hand: packet showed {want_hand}, the board has "
+                   f"{got_hand}")
+    return out
+
+
+class ExecuteRunner(scenario.Runner):
+    """`scenario.Runner` with one extra verb: `board_check`.
+
+    THE GUARD RUNS BEFORE THE FIRST PLAY AND REFUSES BY NAME. `_do_play`'s own
+    "no enemy 'Shrinker Beetle'" is a fine second line of defence and it is
+    kept, but it fires per play and reads as one bad target rather than as the
+    whole board being somebody else's -- which is what it actually was the
+    first time this ran live. A guard that names `board_mismatch` and lists
+    both differences is a failure a person can act on.
+
+    A subclass rather than a verb added to `scenario.py`: `Runner._step`
+    dispatches on `_do_<verb>`, so the verb exists exactly where its meaning
+    does, and the scenario pack's parser still refuses it as unknown.
+    """
+
+    def __init__(self, *args: Any, packet: dict[str, Any] | None = None,
+                 **kw: Any):
+        super().__init__(*args, **kw)
+        self.packet = packet or {}
+
+    def _do_board_check(self, body: dict[str, Any]) -> None:
+        self.read()
+        diffs = board_differences(self.packet, self.state)
+        self.emit({"step": "board_check", "rule": "board_mismatch",
+                   "ok": not diffs, "differences": diffs,
+                   "packet_sha256": self.packet.get("packet_sha256"),
+                   "run_seed": self.packet.get("run_seed")})
+        if diffs:
+            raise scenario.ExpectFailed(
+                "board_mismatch", FALSIFIERS["board_mismatch"] + " -- "
+                + "; ".join(diffs), self.state, self.state)
 
 
 def _outcome(before: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
@@ -1152,12 +1251,19 @@ def cmd_stage(args) -> int:
     for a in turn.assumptions:
         print(f"  ASSUMES: {a}")
     print(f"GUARDRAIL: {bridge.GRANT_GUARDRAIL}")
-    state, summary = stage_board(turn, args.why, hold=args.hold, out_path=log)
-    report = export_packet(turn, state)
+    state, summary = stage_board(turn, args.why, hold=args.hold, out_path=log,
+                                 seed=args.seed or None)
+    # THE SEED THE GAME ACTUALLY USED, read back off the run rather than taken
+    # from the request -- R95's rule, and the whole reason the packet can be
+    # replayed at all. `--seed` re-stages a recorded board; with no `--seed`
+    # the game rolls and this is where the roll is captured.
+    report = export_packet(turn, state, run_seed=summary.get("seed"))
     print(f"\nlog:    {log}")
     print(f"packet: {report['packet_md']}")
     print(f"json:   {report['packet_json']}")
     print(f"sha256: {report['sha256']}")
+    print(f"seed:   {report['run_seed']}"
+          + ("  (as requested)" if args.seed else "  (game-generated)"))
     print(f"        {report['cards']} card(s) in hand, "
           f"{report['enemies']} enem(ies)")
     if args.hold:
@@ -1210,6 +1316,33 @@ def cmd_execute(args) -> int:
               file=sys.stderr)
         return 2
     turn = load(path)
+    d = turn_dir(turn.id)
+    packet_json = d / "packet.json"
+    if not packet_json.is_file():
+        print(f"no packet at {packet_json}; stage the turn first",
+              file=sys.stderr)
+        return 2
+    packet = json.loads(packet_json.read_text(encoding="utf-8"))
+
+    # TWO REFUSALS BEFORE THE GAME IS EVEN LAUNCHED, and both are cheaper to
+    # take here than to discover at the first play.
+    given = str(form.get("packet_sha256") or "")
+    if given and given != str(packet.get("packet_sha256") or ""):
+        print(f"packet_mismatch: {FALSIFIERS['packet_mismatch']}\n"
+              f"  form:   {given}\n"
+              f"  packet: {packet.get('packet_sha256')}", file=sys.stderr)
+        return 2
+    seed = args.seed or packet.get("run_seed") or turn.seed
+    if not seed:
+        # THE ENCOUNTER IS GENERATED, so a replay with no seed is a replay
+        # onto whatever the game felt like making. The first live `execute`
+        # of this tool did exactly that and drew a different monster.
+        print("no recorded run seed for this packet, so the encounter cannot "
+              "be regenerated and a replay would be a replay of nothing. "
+              "Re-stage the turn (a `stage` records the seed it ran on), or "
+              "pass --seed.", file=sys.stderr)
+        return 2
+
     stamp = time.strftime("%Y%m%d-%H%M%S")
     log = scenario.LOG_DIR / f"executed-{turn.id}-{stamp}.jsonl"
     log.parent.mkdir(parents=True, exist_ok=True)
@@ -1217,16 +1350,18 @@ def cmd_execute(args) -> int:
     replay = scenario.Scenario(name=f"{turn.id}/executed",
                                character=turn.character,
                                steps=execute_steps(turn, form),
-                               path=turn.path, seed=turn.seed,
+                               path=turn.path, seed=seed,
                                assumptions=turn.assumptions)
+    print(f"turn: {turn.id}   grader: {grader_id(form)}   seed: {seed}")
     with log.open("w", encoding="utf-8") as fh:
-        runner = scenario.Runner(replay, args.why, out=fh)
+        runner = ExecuteRunner(replay, args.why, out=fh, packet=packet)
         runner.emit({"step": "execute_begin", "turn": turn.id,
-                     "grader": grader_id(form),
+                     "grader": grader_id(form), "seed_requested": seed,
+                     "packet_sha256": packet.get("packet_sha256"),
                      "chosen_line": form.get("chosen_line")})
         policy = scenario.ScenarioPolicy(runner, turns=1)
         summary = soak.run_scripted(policy, stamp, character=turn.character,
-                                    max_fights=1, chosen_seed=turn.seed,
+                                    max_fights=1, chosen_seed=seed,
                                     do_setup=not args.no_setup)
         # THE BRACKET IS THE WHOLE LINE, not the last play. `Runner.before`
         # is reset by every action step, so reading it here would report the
@@ -1238,8 +1373,44 @@ def cmd_execute(args) -> int:
                            else scenario.digest(runner.before),
                            scenario.digest(runner.state))
         runner.emit({"step": "execute_end", "ok": policy.ok,
+                     "seed_used": summary.get("seed"),
                      "outcome": outcome, "run": summary})
-    print(f"log: {log}")
+
+    checks = [r for r in runner.rows if r.get("step") == "board_check"]
+    board_check = checks[-1] if checks else {
+        "ok": False, "differences": ["the board check was never reached"]}
+    record = {
+        "turn_id": turn.id,
+        "grader": grader_id(form),
+        "packet_sha256": packet.get("packet_sha256"),
+        "seed_requested": seed,
+        "seed_used": summary.get("seed"),
+        "seed_honoured": summary.get("seed") == seed,
+        "board_check": board_check,
+        "chosen_line": list(form.get("chosen_line") or []),
+        "played": [r.get("step") for r in runner.rows
+                   if str(r.get("step", "")).startswith("play ")],
+        "ok": bool(policy.ok),
+        "failures": runner.failures,
+        "outcome": outcome,
+        "reading": ("diagnostic only, under Guardrail-7: a hand-set board "
+                    "played once. A number here is evidence of a DEFECT or "
+                    "of nothing at all -- never a comparison, never a "
+                    "balance reading, and never a claim about the turn"),
+        "guardrail": qa_packet.PACKET_GUARDRAIL,
+        "log": str(log),
+        "executed_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+    }
+    out_path = d / f"execute-{grader_id(form)}.json"
+    out_path.write_text(json.dumps(record, indent=1, default=str) + "\n",
+                        encoding="utf-8")
+    print(f"log:    {log}")
+    print(f"record: {out_path}")
+    print(f"seed:   requested {seed}, ran {summary.get('seed')}")
+    print("board:  " + ("MATCHES the packet" if board_check["ok"]
+                        else "MISMATCH -- refused"))
+    for diff in board_check["differences"]:
+        print(f"        {diff}")
     print(json.dumps(outcome, indent=1))
     return 0 if policy.ok else 1
 
@@ -1274,6 +1445,11 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("file")
     s.add_argument("--why", default="",
                    help="one line, logged on every row. REQUIRED")
+    s.add_argument("--seed", default="",
+                   help="re-stage a RECORDED board. The encounter is "
+                        "generated from the run seed, so this is what makes "
+                        "a packet reproducible; with no --seed the game rolls "
+                        "and the roll is recorded into packet.json")
     s.add_argument("--hold", action="store_true",
                    help="leave the game at the staged board for a human to "
                         "play cold. Attaches to a game that is already up, "
@@ -1290,6 +1466,9 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("turn_id")
     e.add_argument("form")
     e.add_argument("--why", default="")
+    e.add_argument("--seed", default="",
+                   help="override the seed recorded in packet.json. Normally "
+                        "unnecessary and normally wrong")
     e.add_argument("--no-setup", action="store_true")
     e.set_defaults(func=cmd_execute)
 
