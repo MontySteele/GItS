@@ -225,8 +225,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R213 | 2026-08-26 | (2026-08-26): design course-correction -- freeze, quarantined prototype surface, Companion audit, Kokomi-first slices, four rules reopened, one falsifier | `1050f67` |
 | R214 | 2026-08-27 | (2026-08-27): morning slate -- EB block released, dead sheets re-materialised, version string amended to MAJOR.AUTO(+dirty) | `d8c91bd` |
 | R215 | 2026-08-27 | (2026-08-27): afternoon slate -- rulings lineage tagged, prototype numbers unquotable, Pearl Barrage is not a defect, Charge label deferred into E1 | `9936894` |
+| R216 | 2026-08-27 | (2026-08-27): the funnel is live -- EB-149 closed, the Kokomi slice's pool and arms ruled from the Companion audit, Muster's Charge subsidy deferred into E1 | `ed44e46` |
 
-214 rows over the R1..R215 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 103 from a commit message, 0 unresolved.
+215 rows over the R1..R216 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 104 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 

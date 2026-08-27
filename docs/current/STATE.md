@@ -269,9 +269,24 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   slice as its first prototype arm, and `EB-152`'s **Burst half shipped**
   (14 silent faces, `tools/lint_burst_legibility.py` on the ci lane) with
   its Charge half deferred into E1's Charge reopening, there being no
-  Charge keyword in the mod to print. **The next open step is `EB-149`**,
-  the blind QA-agent funnel, now ungated. The dispatch-3 confirmed
-  defects stand beside them, `EB-153`–`EB-163`.
+  Charge keyword in the mod to print. **Step 2 of the funnel is now
+  SHIPPED too (R216, 2026-08-27): `EB-149` is CLOSED.** `understudy`
+  stages a turn on the live game, writes a design-blind packet, grades a
+  fresh agent's four-question form, and replays the graded line; the
+  worked example is `review/qa/kokomi-first-turn-example/` — a fresh Opus
+  grader (`opus-5-fresh`) returned SURVIVES blind on `0.2.1209`, the
+  no-second-line fixture was REFUSED, and `execute` replayed the line on
+  the pinned seed `HKB8EJD5G4`. Two engineering findings from that run
+  are filed as `EB-164` (a face that double-states its scaling) and
+  `EB-165` (no dev door for an exact hand). **The next open step is the
+  Kokomi slice**, whose pool and arms R216 fixed: Inazuma as it ships
+  plus a priced-defence prototype subset; arm 1 is Pearl Barrage's
+  chosen-card cost against a whole-turn exhaust count (R215 C), arms 2–3
+  are `shinobu_sanctifying_ring`, `thoma_crimson_ooyoroi` and
+  `itto_superlative_superstrength` in two priced shapes — mutually
+  exclusive Block, and Block priced in the cost line. All of it on the
+  quarantined surface; no shipped sheet row moves. The dispatch-3
+  confirmed defects stand beside them, `EB-153`–`EB-163`.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
   (Kokomi's are newest). **Animation sprint 2.** **Axis-validity tracks** —
   Track A / Track E logs.

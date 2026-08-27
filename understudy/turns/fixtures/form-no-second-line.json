@@ -1,0 +1,19 @@
+{
+  "_note": "FIXTURE, not a grading. The refusing direction: everything is filled in except a second line, which is exactly the shape R213's readiness test refuses.",
+  "turn_id": "kokomi-first-turn-example",
+  "packet_sha256": "6a377aa65d15f26ddbd88f451539577c3fdedbaf7b9c3b1fad86d4324239bd8e",
+  "grader": {
+    "id": "fixture-refused",
+    "kind": "fixture",
+    "model": "none -- hand-written to exercise the tool",
+    "designed_these_cards": false
+  },
+  "chosen_line": [
+    {"card": "All Streams Flow to the Sea", "target": "Shrinker Beetle"}
+  ],
+  "q1_what_did_you_play": "All Streams Flow to the Sea into the Beetle.",
+  "q2_other_line_considered": "None.",
+  "q3_what_it_gave_up": "Nothing worth naming.",
+  "q4_different_intent": "Yes, a big attack would have made me block.",
+  "q4_changed": true
+}

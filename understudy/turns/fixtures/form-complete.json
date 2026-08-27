@@ -1,0 +1,21 @@
+{
+  "_note": "FIXTURE, not a grading. Written by hand to exercise `grade` in the accepting direction; no LLM answered it and no agent's judgement is recorded here. The tests read this file and its refused twin.",
+  "turn_id": "kokomi-first-turn-example",
+  "packet_sha256": "6a377aa65d15f26ddbd88f451539577c3fdedbaf7b9c3b1fad86d4324239bd8e",
+  "grader": {
+    "id": "fixture",
+    "kind": "fixture",
+    "model": "none -- hand-written to exercise the tool",
+    "designed_these_cards": false
+  },
+  "chosen_line": [
+    {"card": "Bake-Kurage"},
+    {"card": "All Streams Flow to the Sea", "target": "Shrinker Beetle"},
+    {"card": "Gorou — Inuzaka All-Round Defense", "target": "Shrinker Beetle"}
+  ],
+  "q1_what_did_you_play": "Bake-Kurage first to put the body down and take the Charge, then All Streams Flow to the Sea into the Beetle, then the free Gorou attack on top of it.",
+  "q2_other_line_considered": "Pearl Barrage instead of All Streams Flow, exhausting a spare Coral Guard for the cost bonus -- and a defensive turn of two Coral Guards behind the Bake-Kurage.",
+  "q3_what_it_gave_up": "All of the Block. Three Coral Guards sat in hand and I took none of them, so a debuff plus a follow-up hit lands on a bare 62.",
+  "q4_different_intent": "Yes. Against a large attack telegraph I would have led with a Coral Guard and kept the free Gorou attack for the chip, and I would not have spent the Charge on a turn I was going to be hit on.",
+  "q4_changed": true
+}

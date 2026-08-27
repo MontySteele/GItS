@@ -274,6 +274,111 @@ nothing and detonate for nothing. Use it on plain counters and durations — Spa
 Vulnerable, Weak, Strength — and for anything that carries a payload, play the
 card that places it, which is what this pack does for bombs.
 
+### `staged_turn` — EB-149's blind QA funnel (attended only)
+
+```
+python -m understudy.staged_turn check     understudy/turns/<t>.yaml   # no game
+python -m understudy.staged_turn closeness understudy/turns/<t>.yaml [--observed]
+python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --why "..." [--seed S]
+python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --hold --why "..."
+python -m understudy.staged_turn grade     <turn-id> <form.json>
+python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."
+python -m understudy.staged_turn ledger
+```
+
+R213 accepted a four-step funnel and this is step two. The `scenario` harness
+one section up answers *does this card do what its face says*; this one answers
+a question that has no arithmetic in it at all: **is there more than one line
+worth playing on this board, and would the enemy's telegraph change which?** A
+turn where the answer is no never reaches [USER].
+
+**A STAGED TURN IS A BOARD, NOT A LINE.** `understudy/turns/*.yaml` carries two
+halves. `staging` is scenario SETUP verbs — `give`, `set_hp`, `set_block`,
+`set_energy`, `set_resource`, `set_power` — and the parser REFUSES `play`,
+`end_turn` and `expect`, because a file that played its own turn would be
+answering the question. `board` is the tier0 mirror the falsifier reads. The two
+must name the same hand: `scenario.card_key` compares them at parse time, so a
+card added to one and forgotten in the other is a parse error rather than a
+falsifier reading taken on a board nobody staged.
+
+**THE PACKET IS BLIND BY CONSTRUCTION, NOT BY PROMISE.** `qa_packet.py` imports
+nothing from `tier0` — not the sheet loaders, not the engine, not the pilot —
+and `tier0/tests/test_staged_turn.py` walks its imports to say so. It copies
+field by field off an allowlist: printed card title, printed description, cost,
+playability and the game's own refusal string; HP, Block, energy and any meter
+holding something; enemy display name, HP, Block and telegraphed intent; power
+titles and hover text. Then it scrubs its own output and RAISES on a hit —
+register ids, ruling numbers, `role:`, `archetypes`, `tempo_band`, `solve:`,
+the `KLEEMOD-` prefix, and any snake_case token, which is what an internal card
+id looks like. A packet that leaks is not written.
+
+**CARD TEXT COMES OFF THE LIVE WIRE, and each card says so.** The bridge's own
+`description` is the face a player is looking at, dynamic vars already
+resolved. The fallback is the generated C# `Localization` block, whose
+`{CalculatedDamage:diff()}` is a template rather than a face — a card that
+falls back is marked `generated-cs (unresolved dynamic vars)` on its own line.
+
+**THE LIVE BOARD IS NOT THE DECLARED BOARD, and the first live run proved it.**
+The game deals its own opening hand on top of the granted one, so a turn that
+grants five cards stages with ten; the encounter is generated, so the enemy and
+its telegraph are whatever rolled. `stage` therefore writes THREE files:
+`packet.md` and `packet.json` (blind, scrubbed, for the grader) and
+`observed.json` (the raw wire state, ids and all, tool-side only).
+`closeness --observed` reads the third and scores the board the grader actually
+saw, through `adapter.build_combat_state`; without the flag it reads the
+declared mirror, which is the reading available with no game running.
+
+**THE FOUR QUESTIONS ARE THE FALSIFIER.** `qa_form.md` is the template and
+`qa_grader_prompt.md` is the exact text an orchestrator hands a fresh agent —
+no repo, no tools, one JSON object back, and *you are not being asked whether
+this is fun* in as many words. `grade` refuses a turn and names the rule:
+`no_second_line`, `intent_insensitive`, `empty_line`, `incomplete_form`,
+`grader_is_designer`, `packet_mismatch`, `line_dominates`. **SURVIVES means NOT
+YET FALSIFIED.** There is no verdict in this tool that is praise.
+
+**`closeness` IS THE ONE NUMBER (R213 F).** It walks the board depth-first,
+playing as it goes so an ordering that sets something up before spending it
+scores differently from the reverse, scores each play with the pilot's own
+`_score`, collapses the orderings onto SETS of cards, and reports
+`gap = (best - runner_up) / best`. `DOMINANCE_GAP = 0.5` is the point where the
+best line is worth twice the runner-up; above it the turn is refused. It is
+DERIVED rather than picked and its error direction is one-way — too high a
+threshold only ever means the funnel does less work. It refuses rather than
+guesses: a card the sim cannot represent, a board with one line, a line space
+past the playout bound, all come back `NOT READ`. Under R215 B it is the one
+falsifier reading that stays quotable, because it reads the TURN.
+
+**THE RUN SEED IS WHAT MAKES A PACKET REPLAYABLE.** The encounter is
+GENERATED, so `execute` cannot replay a graded line onto the packet's board
+unless it embarks on the same seed. The first live `execute` did not, drew a
+Sludge Spinner where the packet showed a Shrinker Beetle, and refused at the
+first targeted play. `stage` now records the seed the game ACTUALLY used —
+read back off the run, R95's rule — into `packet.json` and `observed.json`, as
+envelope keys added after the scrub and never rendered into `packet.md`; the
+hash is taken over the page, so recording a seed cannot move it. `stage --seed`
+re-stages a recorded board, and doing so on `HKB8EJD5G4` reproduced the
+committed packet BYTE-IDENTICALLY — same encounter, same dealt hand, same
+sha256. `execute` embarks with the recorded seed by default and refuses up
+front if there is none.
+
+**AND IT CHECKS THE BOARD ANYWAY.** Before the `mark` and before every play,
+`board_check` compares the live board with the packet in the grader's own
+vocabulary — the enemies' printed names and the hand's printed titles as a
+MULTISET, never ids, HP or intents — and refuses `board_mismatch` listing both
+sides. The per-play "no enemy 'Shrinker Beetle'" is kept as the second line of
+defence: it fires per play and reads as one bad target, where the guard names
+the whole board as somebody else's, which is what it actually was.
+
+**GUARDS.** The grader never designed the cards it reads (declared in the form,
+refused if true; procedurally, a fresh agent with the packet inline). [USER]
+plays the same staged board cold under `grader.id: user`, and `ledger` fills in
+per-question agreement: a grader whose question two disagrees with [USER]'s on
+3 of its last 5 shared turns loses `survives_alone`, so its SURVIVES needs
+[USER]'s form beside it.
+
+**Attended only, structurally.** Like `scenario` and `give-card`, `soak.py`
+cannot reach it, and the test walks the soak's imports to pin that.
+
 ## What policy_v0 will not answer
 
 Three decision classes return no counterfactual and are excluded from the M2
