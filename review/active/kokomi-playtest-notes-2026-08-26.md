@@ -22,6 +22,7 @@
 - "Kokomi's Charge mechanic is ridiculously powerful (often hitting for 100+) but otherwise suffers from low numbers... her best turn is usually 'spam companion cards to block until you can hit with the Charge'"
 - "Inazuma companion cards are mostly 'block or do a little damage', nothing terribly interesting, so the Muster usually is just 'hope you get some block'"
 - "Cards in the mod generally have a LOT of words compared to cards in the base game. I feel like this could all use some sort of grammar standardization / cleanup pass"
+- (Klee run) "Klee's cards mostly strike me as boring flavors of 'attack and/or bomb' - compared to Ironclad, who has a similar intended attack-focused playstyle, she seems much less interesting. This run hasn't shown me many companion cards."
 
 **Routing (Claude, no verdicts):** these are [USER]'s post-playtest design calls and belong in QUEUE §1 (Kokomi band / playtest / levers) and §5 (post-playtest design calls, `M45`), assembled as ONE slate for the next sitting (R206). Two engineering checks ride alongside, both harness-provable and NOT design: (1) whether a 100+ Charge hit is the sheet's arithmetic or an uncapped/unconsumed accrual (a `CHARGE_PER_EXHAUST`-class read; note `S4-G13`'s staged lever would RAISE accrual 1→2, so the observation bears on that pick); (2) the card-text word count per card vs the base game, as a measured table before any grammar pass is scoped.
 
