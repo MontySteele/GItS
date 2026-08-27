@@ -15,6 +15,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = ROOT / "tools" / "visual_qa" / "fixtures"
 
+# Spelled out so the probe scene below reads as lines rather than
+# as one escape-laden literal.
+NL = chr(10)
+
 
 def run(*args: str) -> subprocess.CompletedProcess:
     return subprocess.run(
@@ -47,10 +51,40 @@ def test_a_clean_log_exits_zero():
     assert proc.returncode == 0, proc.stdout + proc.stderr
 
 
-def test_strict_promotes_warnings():
-    """The live scenes carry cosmetic load_steps warnings and no errors."""
-    assert run("scene-deps").returncode == 0
-    assert run("--strict", "scene-deps").returncode == 1
+def test_the_live_scenes_are_clean_even_under_strict():
+    """Until 2026-08-27 two Furina scenes carried cosmetic SD-LOADSTEPS
+    warnings, and this test pinned `--strict` on their presence -- so fixing
+    the headers turned a green suite red. The live tree is now warning-free
+    on this gate, and `--strict`'s own behaviour is pinned on a fixture
+    below instead of on whatever debt the tree happens to hold."""
+    clean = run("scene-deps")
+    strict = run("--strict", "scene-deps")
+    assert clean.returncode == 0, clean.stdout + clean.stderr
+    assert strict.returncode == 0, strict.stdout + strict.stderr
+    assert "SD-LOADSTEPS" not in strict.stdout
+
+
+def test_strict_promotes_warnings(tmp_path):
+    """A warning is exit 0 normally and exit 1 under `--strict`. The probe is
+    a scene with one sub-resource and a deliberately wrong load_steps -- the
+    cheapest SD-LOADSTEPS there is, and no error alongside it."""
+    src = tmp_path / "pck-src" / "probe"
+    src.mkdir(parents=True)
+    (src / "probe.tscn").write_text(
+        "[gd_scene load_steps=9 format=3]" + NL
+        + NL
+        + '[sub_resource type="Gradient" id="Gradient_probe"]' + NL
+        + "offsets = PackedFloat32Array(0, 1)" + NL
+        + NL
+        + '[node name="Probe" type="Node2D"]' + NL,
+        encoding="utf-8")
+
+    args = ("scene-deps", "--pck-src", str(src.parent), "--no-csharp")
+    lax = run(*args)
+    strict = run("--strict", *args)
+    assert lax.returncode == 0, lax.stdout + lax.stderr
+    assert strict.returncode == 1, strict.stdout + strict.stderr
+    assert "SD-LOADSTEPS" in strict.stdout
 
 
 def test_verbose_shows_what_the_gate_did_not_check():

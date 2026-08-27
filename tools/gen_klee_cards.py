@@ -526,7 +526,19 @@ BRANCH_FIELDS = {
     # resolver does not emit, so a row carrying one blocks by name instead of
     # silently losing it.
     "apply_power": {"op", "power", "amount", "target"},
+    # EB-137. Both salon verbs have been in BRANCH_OPS since EB-118 sec.5.5
+    # with no row here, so `_branch_op_reason` raised KeyError on the first
+    # salon verb reaching a branch instead of blocking a bad field BY NAME.
+    # Same key set the top-level validator enforces above -- `amount` is
+    # OPTIONAL and defaults to 1, because one rotation and one act are the
+    # natural units -- so the two validators cannot disagree.
+    "salon_rotate": {"op", "amount"},
+    "salon_perform": {"op", "amount"},
 }
+
+# EB-137. The two branch ops whose `amount` is optional; see the note in
+# `_branch_op_reason`.
+SALON_BRANCH_VERBS = ("salon_rotate", "salon_perform")
 
 # EB-118 sec.5.4, codegen leg. Mirrors tier0.engine.effects.MODAL_FIELDS /
 # MODE_FIELDS; tier0/tests/test_eb118_modal_parity.py pins the two together.
@@ -560,6 +572,17 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
             return "branch apply_power power 'salon_member' (typed deploy)"
         if eff.get("target") != "self":
             return f"branch apply_power target '{eff.get('target')}'"
+    if eff["op"] in SALON_BRANCH_VERBS:
+        # EB-137. These two are the only branch ops whose `amount` is
+        # OPTIONAL: the top-level validator defaults it to 1 and both branch
+        # resolvers read `eff.get("amount", 1)`, so `{op: salon_rotate}` is
+        # the common row. The generic check below reads a MISSING amount as a
+        # non-int, which would block the common row, so they answer here --
+        # to the same bar the top-level validator uses.
+        amount = eff.get("amount", 1)
+        if not isinstance(amount, int) or amount <= 0:
+            return f"branch {eff['op']} amount must be a positive literal int"
+        return None
     if not isinstance(eff.get("amount", eff.get("bomb_damage")), int):
         return f"branch {eff['op']} amount must be a literal int"
     if eff["op"] in ("gain_encore", "spend_encore") and eff["amount"] <= 0:
@@ -5290,6 +5313,23 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
                    .replace("{XS}", "" if int(e["amount"]) == 1 else "s")
                    .replace("{TO}", "").rstrip("."))
             bits.append(txt[0].lower() + txt[1:])
+        elif op == "salon_rotate":
+            # EB-137, copy PROVISIONAL under R212(7). Same sentence the
+            # top-level arm in build_description prints, lowercased and
+            # without its full stop so it joins the branch clause -- "moves
+            # to the back" and not "rotates", because the player is told
+            # what happens to the member, not to the data structure.
+            n = int(e.get("amount", 1))
+            tail = "" if n == 1 else f", {n} times"
+            bits.append("the leftmost member of your [gold]Salon[/gold] "
+                        f"moves to the back{tail}")
+        elif op == "salon_perform":
+            # EB-137, copy PROVISIONAL under R212(7). Mirrors the top-level
+            # arm the same way salon_rotate does above.
+            n = int(e.get("amount", 1))
+            tail = "" if n == 1 else f", {n} times"
+            bits.append("the leftmost member of your [gold]Salon[/gold] "
+                        f"performs now{tail}")
         else:
             # A branch op with no text arm renders an EMPTY clause -- which is
             # how Chevreuse first generated "If a reaction triggered: ."
