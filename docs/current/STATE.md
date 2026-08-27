@@ -225,7 +225,8 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   `Win1`/`Win2`/`Win2b`/`Win3`/`Win10`/`Win11`**, spelled `W1`–`W3`/`W10`/`W11`
   in older packets — `W1`–`W9` are the watch register below, and `W4` is
   separately the pilot-weight sweep (EXPERIMENTS `W4`, run per `OPERATIONS.md`).
-  **Nothing is scheduled on either window.** The **Phase-4 milestone read is
+  **Both windows are FROZEN by R213 (2026-08-26) until the design
+  course-correction below reports.** The **Phase-4 milestone read is
   TAKEN**: the three diagnostic caveats' repairs landed as the one `P11` window
   (`EB-143`/`EB-144`/`EB-145`, `EB-129` riding), all three graded CLEARED
   against code, and the `RT12/D18/P11/C20` re-baseline above carries both labels.
@@ -234,8 +235,19 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   tripwires and the two defects the run found (`EB-123`, `EB-124`, both since
   fixed) are in `EXPERIMENTS.md`; the design call it raised (`M37`) is ruled
   (R199), which is also the Phase-3 authorization and its four guardrails.
-- **Kokomi playtest** — unrun
+- **Kokomi playtest** — EXPLORATORY run played 2026-08-26 on `0.2-1159`
+  (raw notes `review/active/kokomi-playtest-notes-2026-08-26.md`);
+  the confirmatory protocol run is unrun
   (`docs/current/playtest/kokomi-playtest-protocol.md`).
+- **Design course-correction (R213, 2026-08-26)** — the playtest found
+  terminal convergence with subsidized defence as the proximal failure.
+  Ruled: freeze (W10/W11/lever/tuning/new windows), a QUARANTINED
+  prototype surface, the Companion audit (purchased vs subsidized
+  defence first), Kokomi → Klee → Furina slices in sequence, four rules
+  reopened (Charge uncapped/unspent; Sparks = free Attack; unpriced
+  Companion Block; Salon as Furina's spine), one falsifier (decision
+  closeness), and a QA-agent funnel so [USER] plays surviving turns,
+  not runs. Words: the R213 commit.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
   (Kokomi's are newest). **Animation sprint 2.** **Axis-validity tracks** —
   Track A / Track E logs.
@@ -243,8 +255,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
 ## Open [USER] pile (pointers)
 
 Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
-stability-band declaration (`S4-G6`), the staged lever-2 pull-or-not
-(`S4-G13`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
+stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
 countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
 Art debt); and the Fontaine Rares close-out (`M10`).
