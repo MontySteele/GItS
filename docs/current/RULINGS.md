@@ -223,8 +223,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R211 | 2026-08-25 | the W3 slate is ratified, and two windows are named for what leaves it | `63a27f9` |
 | R212 | 2026-08-26 | the delegation ladder — seven standing authorizations | `c99f31f` |
 | R213 | 2026-08-26 | (2026-08-26): design course-correction -- freeze, quarantined prototype surface, Companion audit, Kokomi-first slices, four rules reopened, one falsifier | `1050f67` |
+| R214 | 2026-08-27 | (2026-08-27): morning slate -- EB block released, dead sheets re-materialised, version string amended to MAJOR.AUTO(+dirty) | `d8c91bd` |
 
-212 rows over the R1..R213 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 101 from a commit message, 0 unresolved.
+213 rows over the R1..R214 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 102 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
