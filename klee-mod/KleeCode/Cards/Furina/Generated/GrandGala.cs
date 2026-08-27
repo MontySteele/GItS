@@ -48,7 +48,7 @@ public sealed class GrandGala : CustomCardModel, ICharacterCard, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Gala"),
-        ("description", "Add 2 [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]. Add 1 [gold]Surintendante Chevalmarin[/gold]. Add 1 [gold]Gentilhomme Usher[/gold]. Gain {Encore:diff()} [gold]Encore[/gold]."),
+        ("description", "Add 2 [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]. Add 1 [gold]Surintendante Chevalmarin[/gold]. Add 1 [gold]Gentilhomme Usher[/gold]. Gain {Encore:diff()} [gold]Encore[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

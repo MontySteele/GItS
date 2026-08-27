@@ -116,6 +116,13 @@ REGISTRY: tuple[Lint, ...] = (
     # beside it here: the same hazard class, the half that reads PROSE
     # instead of constants.
     _ci("prose-constants",      "tools/lint_prose_constants.py"),
+    # EB-152, and the third row of the same family: constant-parity joins a C#
+    # number to a sheet number, prose-constants joins a written number to the
+    # constant, and this joins a number the ENGINE PAYS to what the card's face
+    # says about it. The playtest that found it ("Klee's cards that give Burst
+    # energy are labelled, but Kokomi's are not") is the argument for a gate
+    # rather than a test: only a player could see the gap.
+    _ci("burst-legibility",     "tools/lint_burst_legibility.py"),
     _ci("op-parity",            "tools/lint_op_parity.py"),
     _ci("sly-grammar",          "tools/lint_sly_grammar.py"),
     _ci("codegen-staleness",    "tools/gen_roster_cards.py", "--check"),

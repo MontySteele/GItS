@@ -51,7 +51,7 @@ public sealed class MatineePerformance : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Matinée Performance"),
-        ("description", "Deal {Damage:diff()} damage. Deal 2 damage once per [gold]Salon Member[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. Deal 2 damage once per [gold]Salon Member[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

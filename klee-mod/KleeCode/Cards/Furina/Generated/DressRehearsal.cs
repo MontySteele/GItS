@@ -48,7 +48,7 @@ public sealed class DressRehearsal : CustomCardModel, ICharacterCard, ISkillTagC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dress Rehearsal"),
-        ("description", "Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]. Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Draw {DrawCards:diff()} card{DrawCards:plural:|s}."),
+        ("description", "Spend {IfUpgraded:show:1|2} [gold]Encore[/gold]. Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Draw {DrawCards:diff()} card{DrawCards:plural:|s}. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

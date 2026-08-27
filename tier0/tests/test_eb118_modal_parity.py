@@ -255,3 +255,69 @@ def test_the_prototypes_face_prints_the_choice_as_ordinary_text():
     assert ('("description", "Choose one: Gain 1 Energy and 2 Encore | '
             'Spend 3 Encore: draw 3."),') in src
     assert "KleeKeywords" not in src
+
+
+# --- EB-150: the mode faces are POOL MEMBERS -------------------------------
+#
+# [USER], 2026-08-26: "Deep Breath's 'choose one' mechanic doesn't work -
+# softlocks the game". The cause is not in any mode body. `CardModel.Pool`
+# (decompile, MegaCrit.Sts2.Core.Models/CardModel.cs:297) does NOT return null
+# for a card that belongs to no pool -- it falls through to
+# `ModelDb.CardPool<MockCardPool>()`, whose `GenerateAllCards` calls
+# `NeverEverCallThisOutsideOfTests_ClearOwner()` and throws
+# `InvalidOperationException: You monster!`. The throw lands inside
+# `NChooseACardSelectionScreen._Ready()` at the first `NCard.Create(card)`,
+# which is before `_skipButton`/`_peekButton` are fetched, so the overlay's
+# `AfterOverlayShown()` NREs on a null button, the awaited
+# `TaskCompletionSource` never completes, and the turn is gone.
+#
+# THIS IS THE HALF THE LIVE SCENARIO CANNOT RUN ON EVERY COMMIT.
+# `understudy/scenarios/deep-breath-modal-choice.yaml` is the live proof and
+# it needs the game; this is the structural pin that a mode face emitted
+# tomorrow is carried the same way, on a lane that runs in CI.
+
+KLEE_CODE = ROOT / "klee-mod" / "KleeCode"
+
+OPTION_CLASS_RE = re.compile(
+    r"public sealed class (\w+)\s*:\s*ModalOptionCard")
+
+
+def _modal_option_classes_in_tree() -> dict[str, Path]:
+    """Every `: ModalOptionCard` class in the shipped C#, by class name."""
+    found: dict[str, Path] = {}
+    for path in KLEE_CODE.rglob("*.cs"):
+        for name in OPTION_CLASS_RE.findall(path.read_text(encoding="utf-8")):
+            found[name] = path
+    return found
+
+
+def test_the_tree_has_the_prototypes_two_faces_and_this_test_can_see_them():
+    """A guard on the guard: a scan that found nothing would pass the
+    membership test below while asserting nothing at all."""
+    assert set(_modal_option_classes_in_tree()) >= {"DeepBreathModeA",
+                                                    "DeepBreathModeB"}
+
+
+def test_every_mode_face_is_carried_by_a_generated_modal_options_roster():
+    rosters = "".join(p.read_text(encoding="utf-8")
+                      for p in KLEE_CODE.rglob("*ModalOptions.cs"))
+    missing = [name for name in _modal_option_classes_in_tree()
+               if f"ModelDb.Card<{name}>()" not in rosters]
+    assert not missing, (
+        f"mode faces in no ModalOptions roster: {sorted(missing)}. A card in "
+        "no pool takes CardModel.Pool through MockCardPool, which throws "
+        "inside the choose-a-card screen's _Ready and soft-locks the turn "
+        "(EB-150).")
+
+
+def test_every_modal_options_roster_is_carried_by_a_card_pool():
+    """A roster nothing reads is a list, not a membership. The off-pool list
+    is what puts the faces into `CardPoolModel.AllCardIds`, which is the only
+    thing `CardModel.Pool` looks at."""
+    pools = "".join(p.read_text(encoding="utf-8")
+                    for p in KLEE_CODE.rglob("*CardPool.cs"))
+    rosters = sorted(p.stem for p in KLEE_CODE.rglob("*ModalOptions.cs"))
+    assert rosters, "no ModalOptions roster is generated at all"
+    orphans = [cls for cls in rosters if f"{cls}.All" not in pools]
+    assert not orphans, (
+        f"ModalOptions rosters no card pool carries: {orphans} (EB-150)")

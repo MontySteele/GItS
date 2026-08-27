@@ -48,7 +48,7 @@ public sealed class RainOfRoses : CustomCardModel, ICharacterCard, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rain of Roses"),
-        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Gain {IfUpgraded:show:7|5} [gold]Encore[/gold]."),
+        ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Gain {IfUpgraded:show:7|5} [gold]Encore[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

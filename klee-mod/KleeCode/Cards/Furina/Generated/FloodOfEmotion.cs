@@ -51,7 +51,7 @@ public sealed class FloodOfEmotion : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Flood of Emotion"),
-        ("description", "Deal {Damage:diff()} damage. If you have at least 20 [gold]Fanfare[/gold]: deal 14 damage."),
+        ("description", "Deal {Damage:diff()} damage. If you have at least 20 [gold]Fanfare[/gold]: deal 14 damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

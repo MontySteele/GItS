@@ -48,7 +48,7 @@ public sealed class OverflowingHospitality : CustomCardModel, ICharacterCard, IS
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Overflowing Hospitality"),
-        ("description", "Add 1 [gold]Surintendante Chevalmarin[/gold] to your [gold]Salon[/gold]. Apply [gold]Hydro[/gold] to a random enemy. Gain {Encore:diff()} [gold]Encore[/gold]."),
+        ("description", "Add 1 [gold]Surintendante Chevalmarin[/gold] to your [gold]Salon[/gold]. Apply [gold]Hydro[/gold] to a random enemy. Gain {Encore:diff()} [gold]Encore[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

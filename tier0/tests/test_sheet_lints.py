@@ -760,3 +760,60 @@ def test_the_op_parity_lint_still_catches_a_newly_registered_op():
     assert any("chorus_of_the_unpriced" in line and "UNPRICED OP" in line
                for line in bad), bad
     assert lint.findings() == [], "and green again once the op is gone"
+
+
+# --- EB-152: the Burst reading -------------------------------------------
+#
+# [USER], 2026-08-26: "Klee's cards that give Burst energy are labelled, but
+# Kokomi's are not." The number is paid by one system (the `skill_tag` tag,
+# through the ISkillTagCard marker) and printed by another (the description
+# builder), and nothing linked them -- so thirteen of Furina's faces and one
+# of Kokomi's collected 5 Burst Energy that nothing on the card mentioned.
+
+def test_every_skill_tag_card_prints_the_burst_it_pays():
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_burst_legibility.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+    # A verdict with a denominator, and a denominator that is not zero: the
+    # dead-gate rule this file already applies to the domination sweep.
+    assert "skill_tag card(s) print the reading" in res.stdout, res.stdout
+    assert "OK: 0 skill_tag" not in res.stdout, res.stdout
+
+
+def test_the_burst_legibility_lint_still_catches_a_silent_grant():
+    """The red half, on SYNTHETIC data.
+
+    Both of the lint's inputs are injectable for exactly this: a probe row
+    written into a live sheet, or a probe class written into live C#, is the
+    pattern that once orphaned a file on a hard kill and produced a phantom CI
+    failure. Nothing here touches the tree.
+    """
+    import importlib
+    from pathlib import Path
+
+    lint = importlib.import_module("tools.lint_burst_legibility")
+    sheet = Path("docs/nowhere-cards.yaml")
+
+    assert lint.findings() == [], "the lint must be green before it is red"
+
+    # A tagged row whose face says nothing -- [USER]'s report, in miniature.
+    silent = lint.findings(tagged={"tidal_hymn": sheet},
+                           shipped={"TidalHymn": "Gain 5 [gold]Block[/gold]."})
+    assert len(silent) == 1, silent
+    assert "SILENT BURST" in silent[0] and "tidal_hymn" in silent[0]
+
+    # The same row, printing the reading, is clean.
+    assert lint.findings(
+        tagged={"tidal_hymn": sheet},
+        shipped={"TidalHymn": f"Gain 5 [gold]Block[/gold]. {lint.READING}"}
+    ) == []
+
+    # And the other sign: a face promising Burst that no hook will pay.
+    phantom = lint.findings(
+        tagged={}, shipped={"TidalHymn": f"Gain 5 [gold]Block[/gold]. "
+                                         f"{lint.READING}"})
+    assert len(phantom) == 1, phantom
+    assert "PHANTOM BURST" in phantom[0]
+
+    assert lint.findings() == [], "and green again on the real tree"
