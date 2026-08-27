@@ -21,6 +21,10 @@ now empty and the tests below hold it there.
 """
 from tools import lint_text_encoding as lint
 
+# Spelled out so the probe sources below can be written as concatenated
+# lines without an escape sequence inside a comment-bearing expression.
+NL = chr(10)
+
 # Undeclared text read/write calls per file. Counts, not line numbers, so
 # ordinary edits above an offence do not churn this list -- but a NEW offence
 # in an already-listed file still trips the gate, because it pushes the count
@@ -111,6 +115,37 @@ def test_image_open_is_not_a_text_read(tmp_path):
         encoding="utf-8")
     lines = [ln for ln, _ in lint.offences(probe)]
     assert lines == [5, 6, 7], lint.offences(probe)
+
+
+def test_binary_mode_is_seen_in_both_call_shapes(tmp_path):
+    """Fixed 2026-08-27. The mode's position depends on the call shape:
+    `open(p, "rb")` and `io.open(p, "rb")` put it at positional index 1, but
+    `some_path.open("rb")` puts it at index 0 -- the path is the receiver, not
+    an argument. `_is_binary_open` indexed at 1 unconditionally, so every
+    bound-method binary read was counted as an undeclared TEXT read: an
+    unpayable finding (binary I/O has no encoding), which callers were
+    working around by rewriting to the builtin form.
+
+    The mode is now found by SHAPE rather than position, and the second half
+    of this probe is what keeps that from over-exempting: a filename literal
+    at index 0 is not a mode, even when it contains a 'b'.
+    """
+    probe = tmp_path / "probe.py"
+    probe.write_text(
+        "from pathlib import Path" + NL
+        + "import io" + NL
+        + "def f(p):" + NL
+        + "    a = open(p, 'rb').read()" + NL       # exempt: builtin form
+        + "    b = io.open(p, 'rb').read()" + NL    # exempt: io form
+        + "    c = p.open('rb').read()" + NL        # exempt: bound method
+        + "    d = p.open(mode='rb').read()" + NL   # exempt: keyword
+        + "    e = p.open('r').read()" + NL         # NOT exempt: text mode
+        + "    g = p.open().read()" + NL             # NOT exempt: no mode
+        + "    h = open('blob.bin').read()" + NL    # NOT exempt: a FILENAME
+        + "    return a, b, c, d, e, g, h" + NL,
+        encoding="utf-8")
+    lines = [ln for ln, _ in lint.offences(probe)]
+    assert lines == [8, 9, 10], lint.offences(probe)
 
 
 def test_the_exemption_did_not_swallow_the_real_offences_in_those_files():

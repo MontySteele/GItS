@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Texture2D" path="res://furina/model/layers/furina_combat_coat_back.png" id="1_coat"]
 [ext_resource type="Texture2D" path="res://furina/model/layers/furina_combat_sword.png" id="2_sword"]

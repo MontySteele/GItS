@@ -216,11 +216,17 @@ skipped).
 
 Notable NOT-shipped boons (need ops on the §10.9 backlog or UI choices):
 Prismatic Gem / Blessed Antler / Philosopher's Stone (+1 energy **per turn**
-riders), Alchemical Coffer & Delicate Frond (potion-fill), Sai (per-turn
-block), Meat Cleaver (rest-site remove-for-maxhp), Seal of Gold
-(gold→energy), Pumpkin Candle (5-combat counter), Empty Cage (removal —
+riders), Alchemical Coffer & Delicate Frond (potion-fill), Sai (Tanx;
+per-turn block), Meat Cleaver (Tanx; rest-site remove-for-maxhp), Seal of
+Gold (gold→energy), Pumpkin Candle (5-combat counter), Empty Cage (removal —
 no pickup_remove hook yet), plus all transform / card-content / enchant /
-map-rewrite boons (New Leaf, Toy Box, Astrolabe-STS2, Snecko Eye, …).
+map-rewrite boons (New Leaf, Toy Box, Astrolabe-STS2, Snecko Eye, …), of
+which Claws (transform up to 6 cards into Maul) and the conditional
+Tri-Boomerang (enchant 3 Attacks with Instinct) are Tanx's.
+Attribution for the four Tanx boons above:
+`slaythespire.wiki.gg/wiki/Slay_the_Spire_2:Tanx` (ten-item boon list,
+cross-checked against TheGamer's Ancients guide) — see
+`docs/current/dossiers/content/ancients-gallery.md:541`.
 
 Wiki sources: STS2 Bosses / Monsters / Elites / Acts / Map Locations pages and
 the Hive / Glory / Underdocks enemy data modules on slaythespire.wiki.gg;
