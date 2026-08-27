@@ -2,7 +2,7 @@
  "turn_id": "kokomi-slice1-t03",
  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
  "pilot": "generic",
- "run_seed": "0A4RLXEB65",
+ "run_seed": "NMQLUYZDLV",
  "not_a_packet": "the RAW wire state, ids included. Tool side only -- never hand this to a grader",
  "digest": {
   "state_type": "monster",
@@ -30,6 +30,22 @@
   },
   "hand": [
    {
+    "name": "Water's Edge",
+    "id": "KLEEMOD-WATERS_EDGE",
+    "cost": "1",
+    "can_play": true,
+    "unplayable_reason": null,
+    "is_upgraded": false
+   },
+   {
+    "name": "Nereid's Ascension",
+    "id": "KLEEMOD-NEREIDS_ASCENSION",
+    "cost": "2",
+    "can_play": true,
+    "unplayable_reason": null,
+    "is_upgraded": false
+   },
+   {
     "name": "Coral Guard",
     "id": "KLEEMOD-CORAL_GUARD",
     "cost": "1",
@@ -38,22 +54,6 @@
     "is_upgraded": false
    },
    {
-    "name": "Water's Edge",
-    "id": "KLEEMOD-WATERS_EDGE",
-    "cost": "1",
-    "can_play": true,
-    "unplayable_reason": null,
-    "is_upgraded": false
-   },
-   {
-    "name": "Water's Edge",
-    "id": "KLEEMOD-WATERS_EDGE",
-    "cost": "1",
-    "can_play": true,
-    "unplayable_reason": null,
-    "is_upgraded": false
-   },
-   {
     "name": "Coral Guard",
     "id": "KLEEMOD-CORAL_GUARD",
     "cost": "1",
@@ -62,8 +62,8 @@
     "is_upgraded": false
    },
    {
-    "name": "Water's Edge",
-    "id": "KLEEMOD-WATERS_EDGE",
+    "name": "Bake-Kurage",
+    "id": "KLEEMOD-BAKE_KURAGE",
     "cost": "1",
     "can_play": true,
     "unplayable_reason": null,
@@ -104,9 +104,23 @@
   ],
   "enemies": [
    {
-    "id": "SEAPUNK_0",
-    "name": "Seapunk",
-    "hp": 22,
+    "id": "TWIG_SLIME_S_0",
+    "name": "Twig Slime (S)",
+    "hp": 10,
+    "block": 0,
+    "status": {}
+   },
+   {
+    "id": "LEAF_SLIME_M_0",
+    "name": "Leaf Slime (M)",
+    "hp": 32,
+    "block": 0,
+    "status": {}
+   },
+   {
+    "id": "LEAF_SLIME_S_0",
+    "name": "Leaf Slime (S)",
+    "hp": 15,
     "block": 0,
     "status": {}
    }
@@ -121,19 +135,53 @@
    "is_play_phase": true,
    "enemies": [
     {
-     "entity_id": "SEAPUNK_0",
+     "entity_id": "TWIG_SLIME_S_0",
      "combat_id": 1,
-     "name": "Seapunk",
-     "hp": 22,
-     "max_hp": 44,
+     "name": "Twig Slime (S)",
+     "hp": 10,
+     "max_hp": 10,
      "block": 0,
      "status": [],
      "intents": [
       {
        "type": "Attack",
-       "label": "11",
+       "label": "4",
        "title": "Aggressive",
-       "description": "This enemy intends to Attack for 11 damage."
+       "description": "This enemy intends to Attack for 4 damage."
+      }
+     ]
+    },
+    {
+     "entity_id": "LEAF_SLIME_M_0",
+     "combat_id": 2,
+     "name": "Leaf Slime (M)",
+     "hp": 32,
+     "max_hp": 32,
+     "block": 0,
+     "status": [],
+     "intents": [
+      {
+       "type": "StatusCard",
+       "label": "2",
+       "title": "Strategic",
+       "description": "This enemy intends to give you 2 Status cards."
+      }
+     ]
+    },
+    {
+     "entity_id": "LEAF_SLIME_S_0",
+     "combat_id": 3,
+     "name": "Leaf Slime (S)",
+     "hp": 15,
+     "max_hp": 15,
+     "block": 0,
+     "status": [],
+     "intents": [
+      {
+       "type": "StatusCard",
+       "label": "1",
+       "title": "Strategic",
+       "description": "This enemy intends to give you 1 Status card."
       }
      ]
     }
@@ -167,6 +215,54 @@
    },
    "hand": [
     {
+     "id": "KLEEMOD-WATERS_EDGE",
+     "name": "Water's Edge",
+     "type": "Attack",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 6 damage. Applies Hydro.",
+     "rarity": "Basic",
+     "is_upgraded": false,
+     "keywords": [
+      {
+       "name": "Applies Hydro",
+       "description": "If the target has no aura, this applies Hydro for 2 turns. A different aura is consumed to trigger a Reaction instead."
+      }
+     ],
+     "index": 0,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "unplayable_reason": null
+    },
+    {
+     "id": "KLEEMOD-NEREIDS_ASCENSION",
+     "name": "Nereid's Ascension",
+     "type": "Attack",
+     "cost": "2",
+     "star_cost": null,
+     "description": "Deal 16 damage to ALL enemies. Scales with Charge. Exhaust. Applies Hydro.",
+     "rarity": "Rare",
+     "is_upgraded": false,
+     "keywords": [
+      {
+       "name": "Charge scaling",
+       "description": "+1 damage per 2 Charge you hold. You hold 8 Charge: +4 damage, already counted in the number above."
+      },
+      {
+       "name": "Exhaust",
+       "description": "Removed until the end of combat."
+      },
+      {
+       "name": "Applies Hydro",
+       "description": "If the target has no aura, this applies Hydro for 2 turns. A different aura is consumed to trigger a Reaction instead."
+      }
+     ],
+     "index": 1,
+     "target_type": "AllEnemies",
+     "can_play": true,
+     "unplayable_reason": null
+    },
+    {
      "id": "KLEEMOD-CORAL_GUARD",
      "name": "Coral Guard",
      "type": "Skill",
@@ -181,48 +277,8 @@
        "description": "Until next turn, prevents damage."
       }
      ],
-     "index": 0,
-     "target_type": "Self",
-     "can_play": true,
-     "unplayable_reason": null
-    },
-    {
-     "id": "KLEEMOD-WATERS_EDGE",
-     "name": "Water's Edge",
-     "type": "Attack",
-     "cost": "1",
-     "star_cost": null,
-     "description": "Deal 6 damage. Applies Hydro.",
-     "rarity": "Basic",
-     "is_upgraded": false,
-     "keywords": [
-      {
-       "name": "Applies Hydro",
-       "description": "If the target has no aura, this applies Hydro for 2 turns. A different aura is consumed to trigger a Reaction instead."
-      }
-     ],
-     "index": 1,
-     "target_type": "AnyEnemy",
-     "can_play": true,
-     "unplayable_reason": null
-    },
-    {
-     "id": "KLEEMOD-WATERS_EDGE",
-     "name": "Water's Edge",
-     "type": "Attack",
-     "cost": "1",
-     "star_cost": null,
-     "description": "Deal 6 damage. Applies Hydro.",
-     "rarity": "Basic",
-     "is_upgraded": false,
-     "keywords": [
-      {
-       "name": "Applies Hydro",
-       "description": "If the target has no aura, this applies Hydro for 2 turns. A different aura is consumed to trigger a Reaction instead."
-      }
-     ],
      "index": 2,
-     "target_type": "AnyEnemy",
+     "target_type": "Self",
      "can_play": true,
      "unplayable_reason": null
     },
@@ -247,22 +303,26 @@
      "unplayable_reason": null
     },
     {
-     "id": "KLEEMOD-WATERS_EDGE",
-     "name": "Water's Edge",
-     "type": "Attack",
+     "id": "KLEEMOD-BAKE_KURAGE",
+     "name": "Bake-Kurage",
+     "type": "Skill",
      "cost": "1",
      "star_cost": null,
-     "description": "Deal 6 damage. Applies Hydro.",
+     "description": "Summon Bake-Kurage for 1 turn. Gain 1 Charge. Burst +5. Elemental Skill.",
      "rarity": "Basic",
      "is_upgraded": false,
      "keywords": [
       {
-       "name": "Applies Hydro",
-       "description": "If the target has no aura, this applies Hydro for 2 turns. A different aura is consumed to trigger a Reaction instead."
+       "name": "Bake-Kurage pulse",
+       "description": "The pulse deals 4 damage plus 3 per Charge you hold, at the END of your turn. You hold 8 Charge: the next pulse hits for 28. Charge banked before the pulse counts, so the number can still move."
+      },
+      {
+       "name": "Elemental Skill",
+       "description": "Playing this card grants 5 Burst Energy."
       }
      ],
      "index": 4,
-     "target_type": "AnyEnemy",
+     "target_type": "Self",
      "can_play": true,
      "unplayable_reason": null
     },
@@ -355,16 +415,10 @@
      "unplayable_reason": null
     }
    ],
-   "draw_pile_count": 7,
+   "draw_pile_count": 8,
    "discard_pile_count": 0,
    "exhaust_pile_count": 0,
    "draw_pile": [
-    {
-     "name": "Bake-Kurage",
-     "cost": "1",
-     "star_cost": null,
-     "description": "Summon Bake-Kurage for 1 turn. Gain 1 Charge. Burst +5. Elemental Skill."
-    },
     {
      "name": "Coral Guard",
      "cost": "1",
@@ -382,6 +436,18 @@
      "cost": "0",
      "star_cost": null,
      "description": "Draw 1 card. Discard 1 random card."
+    },
+    {
+     "name": "Water's Edge",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 6 damage. Applies Hydro."
+    },
+    {
+     "name": "Water's Edge",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 6 damage. Applies Hydro."
     },
     {
      "name": "Water's Edge",
@@ -415,10 +481,10 @@
      "keywords": []
     },
     {
-     "id": "FISHING_ROD",
-     "name": "Fishing Rod",
-     "description": "Every 3 normal combats, Upgrade a random card in your Deck.",
-     "counter": 0,
+     "id": "ARCANE_SCROLL",
+     "name": "Arcane Scroll",
+     "description": "Upon pickup, obtain a random Rare Card to add to your Deck.",
+     "counter": null,
      "keywords": []
     }
    ],

@@ -14,6 +14,24 @@
   },
   "hand": [
    {
+    "title": "Water's Edge",
+    "text": "Deal 6 damage. Applies Hydro.",
+    "text_source": "bridge",
+    "cost": "1",
+    "upgraded": false,
+    "playable": true,
+    "unplayable_reason": ""
+   },
+   {
+    "title": "Nereid's Ascension",
+    "text": "Deal 16 damage to ALL enemies. Scales with Charge. Exhaust. Applies Hydro.",
+    "text_source": "bridge",
+    "cost": "2",
+    "upgraded": false,
+    "playable": true,
+    "unplayable_reason": ""
+   },
+   {
     "title": "Coral Guard",
     "text": "Gain 5 Block.",
     "text_source": "bridge",
@@ -23,24 +41,6 @@
     "unplayable_reason": ""
    },
    {
-    "title": "Water's Edge",
-    "text": "Deal 6 damage. Applies Hydro.",
-    "text_source": "bridge",
-    "cost": "1",
-    "upgraded": false,
-    "playable": true,
-    "unplayable_reason": ""
-   },
-   {
-    "title": "Water's Edge",
-    "text": "Deal 6 damage. Applies Hydro.",
-    "text_source": "bridge",
-    "cost": "1",
-    "upgraded": false,
-    "playable": true,
-    "unplayable_reason": ""
-   },
-   {
     "title": "Coral Guard",
     "text": "Gain 5 Block.",
     "text_source": "bridge",
@@ -50,8 +50,8 @@
     "unplayable_reason": ""
    },
    {
-    "title": "Water's Edge",
-    "text": "Deal 6 damage. Applies Hydro.",
+    "title": "Bake-Kurage",
+    "text": "Summon Bake-Kurage for 1 turn. Gain 1 Charge. Burst +5. Elemental Skill.",
     "text_source": "bridge",
     "cost": "1",
     "upgraded": false,
@@ -97,14 +97,38 @@
   ],
   "enemies": [
    {
-    "name": "Seapunk",
-    "hp": 22,
-    "max_hp": 44,
+    "name": "Twig Slime (S)",
+    "hp": 10,
+    "max_hp": 10,
     "block": 0,
     "intent": {
-     "label": "11",
-     "text": "This enemy intends to Attack for 11 damage.",
+     "label": "4",
+     "text": "This enemy intends to Attack for 4 damage.",
      "kind": "Aggressive"
+    },
+    "powers": []
+   },
+   {
+    "name": "Leaf Slime (M)",
+    "hp": 32,
+    "max_hp": 32,
+    "block": 0,
+    "intent": {
+     "label": "2",
+     "text": "This enemy intends to give you 2 Status cards.",
+     "kind": "Strategic"
+    },
+    "powers": []
+   },
+   {
+    "name": "Leaf Slime (S)",
+    "hp": 15,
+    "max_hp": 15,
+    "block": 0,
+    "intent": {
+     "label": "1",
+     "text": "This enemy intends to give you 1 Status card.",
+     "kind": "Strategic"
     },
     "powers": []
    }
@@ -120,6 +144,6 @@
   "The player has no Strength and the enemies carry no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.",
   "The board carries TWO living enemies rather than one."
  ],
- "packet_sha256": "222dacff10c1a241c01b3a8e05d0faaedd16a506d50209c3f1e9bd0be34f3321",
- "run_seed": "0A4RLXEB65"
+ "packet_sha256": "4624ba2fdae3bd02f21c7657c461d3ddbb3d8b7fe4b45d24a7955cb357ab24ee",
+ "run_seed": "NMQLUYZDLV"
 }

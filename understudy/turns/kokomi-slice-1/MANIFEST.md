@@ -21,9 +21,9 @@ This table is the map.
 |---|---|---|---|---|---|---|---|---|
 | `pearl-barrage-shipped.yaml` | `kokomi-slice1-t01` | 1 — counting basis | `pearl_barrage` (shipped) | A | `HUMWKRKNCE` | `0.2.1209` (2026-08-27) | `cccf9ecf62daff984cb3e44b99c3b38b4153ecba4473fb5421923d2f35dcedba` | SURVIVES, gap 0.0256 over 27 lines; observed gap 0.0175 over 351 lines |
 | `pearl-barrage-turn.yaml` | `kokomi-slice1-t02` | 1 — counting basis | `proto_pearl_barrage_turn` | A | `HUMWKRKNCE` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.1136 over 27 lines |
-| `shinobu-sanctifying-ring-shipped.yaml` | `kokomi-slice1-t03` | 2/3 — baseline | `shinobu_sanctifying_ring` (shipped) | B | `0A4RLXEB65` | `0.2.1209` (2026-08-27) | `222dacff10c1a241c01b3a8e05d0faaedd16a506d50209c3f1e9bd0be34f3321` | SURVIVES, gap 0.0372 over 11 lines; observed gap 0.0000 over 101 lines |
-| `shinobu-sanctifying-ring-either.yaml` | `kokomi-slice1-t04` | 2 — mutually exclusive | `proto_shinobu_sanctifying_ring_either` | B | `0A4RLXEB65` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 11 lines |
-| `shinobu-sanctifying-ring-priced.yaml` | `kokomi-slice1-t05` | 3 — priced in cost | `proto_shinobu_sanctifying_ring_priced` | B | `0A4RLXEB65` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 8 lines |
+| `shinobu-sanctifying-ring-shipped.yaml` | `kokomi-slice1-t03` | 2/3 — baseline | `shinobu_sanctifying_ring` (shipped) | B | `NMQLUYZDLV` | `0.2.1209` (2026-08-27) | `4624ba2fdae3bd02f21c7657c461d3ddbb3d8b7fe4b45d24a7955cb357ab24ee` | SURVIVES, gap 0.0372 over 11 lines; observed gap 0.1912 over 79 lines |
+| `shinobu-sanctifying-ring-either.yaml` | `kokomi-slice1-t04` | 2 — mutually exclusive | `proto_shinobu_sanctifying_ring_either` | B | `NMQLUYZDLV` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 11 lines |
+| `shinobu-sanctifying-ring-priced.yaml` | `kokomi-slice1-t05` | 3 — priced in cost | `proto_shinobu_sanctifying_ring_priced` | B | `NMQLUYZDLV` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 8 lines |
 | `thoma-crimson-ooyoroi-shipped.yaml` | `kokomi-slice1-t06` | 2/3 — baseline | `thoma_crimson_ooyoroi` (shipped) | C | `XVE3PVZEPT` | `0.2.1209` (2026-08-27) | `0cbfa1ef52c3e8dbcf9c27d0955fc0a1292e96512e8305a121ba52f89410c8b6` | SURVIVES, gap 0.0717 over 11 lines; observed gap 0.0208 over 195 lines |
 | `thoma-crimson-ooyoroi-either.yaml` | `kokomi-slice1-t07` | 2 — mutually exclusive | `proto_thoma_crimson_ooyoroi_either` | C | `XVE3PVZEPT` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.1932 over 11 lines |
 | `thoma-crimson-ooyoroi-priced.yaml` | `kokomi-slice1-t08` | 3 — priced in cost | `proto_thoma_crimson_ooyoroi_priced` | C | `XVE3PVZEPT` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 8 lines |
@@ -44,23 +44,27 @@ the falsifier does not refuse the turn. It is not a claim that the turn is
 good, interesting, or better than its twin, and it is not comparable between
 two rows of the table — R213 F allows the reading only as a refusal.
 
-## Why every seed is unpinned
+## Where the seeds come from
 
-The encounter is generated from the run seed, so a seed can only be
-**discovered** by staging. Staging needs the live game, and the live game
-needs the `STS2_MCP` bridge deployed into the game directory — which is not
-installed on this machine right now (`<game>\mods\` holds `klee`,
-`STS2AutoSlayMod` and `quick_fingers`, and no bridge), and which a worktree
-may not install (`OPERATIONS.md`: from a worktree the one legal command is
-`deploy_bridge.ps1 -BuildOnly`). So no turn in this slice has been staged and
-no seed exists yet.
+The encounter is generated from the run seed, so a seed is **discovered** by
+staging and never chosen. Staging needs the live game with the `STS2_MCP`
+bridge in the game directory; a worktree may not install it (`OPERATIONS.md`:
+from a worktree the one legal command is `deploy_bridge.ps1 -BuildOnly`), so
+staging happens from the art-bearing main checkout, attended.
 
-**The seed rule for whoever stages first:** within a group (A, B, C, D) the
-first half staged rolls a seed, `stage` records it into that turn's
-`packet.json` as `run_seed`, and **every other half of the group must be
-staged with `--seed <that value>`**. Two halves on two seeds are two different
-fights, and the pair has then measured the encounter instead of the card. Fill
-the seed, staged and packet-sha columns above as each one lands.
+**The four shipped halves are staged on the release build `0.2.1209`, and
+their seeds are in the table above.** The seven prototype halves are not:
+their cards are not compiled into a release build, so each stages on a dev
+build (`klee-mod\build\deploy_proto.ps1`) and must be run with
+`--seed <its group's seed>` — the value its row already carries, marked
+`(reuse)`.
+
+**The seed rule:** within a group (A, B, C, D) the first half staged rolls a
+seed, `stage` records it into that turn's `packet.json` as `run_seed`, and
+**every other half of the group must be staged with `--seed <that value>`**.
+Two halves on two seeds are two different fights, and the pair has then
+measured the encounter instead of the card. Fill the seed, staged and
+packet-sha columns above as each one lands.
 
 **And the intent check is not optional here.** The declared boards all say the
 enemy telegraphs an ATTACK, because defence is worth nothing against anything
@@ -69,6 +73,13 @@ telegraphs a debuff or a buff instead — which is what happened to the worked
 example, `kokomi-first-turn-example`, whose Shrinker Beetle telegraphed a
 debuff — **re-roll and stage on another seed** rather than recording the
 divergence. For this slice the intent is the question, not an incidental.
+
+**Group B needs two bodies as well as an attack**, because its declared board
+carries two and the staging grammar has no verb that adds an enemy — the live
+enemy count is whatever the seed generated, and a one-body fight cannot
+exercise a board that declares two. Group B's recorded seed took seven rolls
+to reach a multi-body first fight; the one it stands on has three living
+enemies, one of them telegraphing an attack.
 
 ## Group boards
 

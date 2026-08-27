@@ -13,34 +13,34 @@ You are looking at one turn of a card battle, exactly as the game prints it. Eve
 
 ## Your hand
 
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### Nereid's Ascension
+
+- Cost: 2
+- Deal 16 damage to ALL enemies. Scales with Charge. Exhaust. Applies Hydro.
+- (card text read from: bridge)
+
 ### Coral Guard
 
 - Cost: 1
 - Gain 5 Block.
 - (card text read from: bridge)
 
-### Water's Edge
-
-- Cost: 1
-- Deal 6 damage. Applies Hydro.
-- (card text read from: bridge)
-
-### Water's Edge
-
-- Cost: 1
-- Deal 6 damage. Applies Hydro.
-- (card text read from: bridge)
-
 ### Coral Guard
 
 - Cost: 1
 - Gain 5 Block.
 - (card text read from: bridge)
 
-### Water's Edge
+### Bake-Kurage
 
 - Cost: 1
-- Deal 6 damage. Applies Hydro.
+- Summon Bake-Kurage for 1 turn. Gain 1 Charge. Burst +5. Elemental Skill.
 - (card text read from: bridge)
 
 ### Shinobu — Sanctifying Ring
@@ -69,10 +69,20 @@ You are looking at one turn of a card battle, exactly as the game prints it. Eve
 
 ## The other side
 
-### Seapunk
+### Twig Slime (S)
 
-- HP 22/44
-- Intent: Aggressive, 11, This enemy intends to Attack for 11 damage.
+- HP 10/10
+- Intent: Aggressive, 4, This enemy intends to Attack for 4 damage.
+
+### Leaf Slime (M)
+
+- HP 32/32
+- Intent: Strategic, 2, This enemy intends to give you 2 Status cards.
+
+### Leaf Slime (S)
+
+- HP 15/15
+- Intent: Strategic, 1, This enemy intends to give you 1 Status card.
 
 ## Disclosures
 
