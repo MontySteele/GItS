@@ -1,0 +1,121 @@
+# KOKOMI SLICE 1 (R216). One half of a MATCHED PAIR.
+#
+# HOW TO READ A PAIR. The files of a pair declare the SAME board -- same HP,
+# same Block, same energy, same Charge, same enemies, same alternatives in
+# hand -- and differ in EXACTLY ONE CARD: the one under test. That is the
+# whole design. If the boards differed anywhere else, a change in how the turn
+# plays could be attributed to the difference instead of to the card, and the
+# slice would have measured its own staging.
+#
+# THE SEED IS PART OF THE PAIR. The encounter is GENERATED, so the first half
+# staged is the one that DISCOVERS a seed; every other half of that pair must
+# then be staged with `--seed <that run_seed>` or the halves are two different
+# fights. MANIFEST.md carries the seed once it exists.
+#
+# THE TURN ID IS DELIBERATELY OPAQUE. It is printed into the design-blind
+# packet the grader reads, so "priced" or "either" inside an id would tell the
+# grader which arm it was holding -- the one thing a blind grade cannot
+# survive. The FILENAME names the arm, because only the tooling and the
+# packet-writer read filenames. MANIFEST.md is the map between them.
+#
+# NOTHING HERE IS A CLAIM THAT ANY ARM IS BETTER. The funnel refuses turns and
+# never rates them (R213's first guard), and the designer of these rows may
+# not grade them.
+#
+# ARM 1: PEARL BARRAGE'S COUNTING BASIS (R215 C).
+#
+# WHY THIS BOARD. Two energy against two 1-cost cards and two FREE cards, and
+# both free cards are rotations: Gorou's opener Exhausts ITSELF, and Send the
+# Runner Exhausts one card you pick. So the turn can put up to three cards in
+# the pile without spending energy on any of them.
+#
+# That is what separates the two shapes, and nothing else on this board does.
+# The SHIPPED card reads the cost of the ONE card you chose to Exhaust, so its
+# question is "which of my cards am I willing to burn" -- and here the only
+# answers worth anything are the Block or the finisher. The WHOLE-TURN shape
+# reads the count, so its question is "how many rotations can I fit", and it
+# does not care which card went.
+#
+# TWO energy, not three, because three buys everything on this board and a
+# turn where every card is playable has no second line to be close to. At two
+# the last energy goes to the Block OR to the Charge reader, which is the
+# attack/defend tension the slice exists to look at.
+
+id: kokomi-slice1-t02
+character: KLEEMOD-KOKOMI
+
+prototype: true
+
+notes: |
+  48/70 HP, no Block, 2 energy, a Charge bank of 8, and one enemy
+  at 34 HP telegraphing a heavy single hit.
+
+assumptions:
+  - "THE GAME DEALS ITS OWN OPENING HAND ON TOP OF THIS ONE (EB-165).
+     The staged hand is the declared one PLUS whatever the seat drew,
+     and there is no dev door that empties a hand yet. The packet is a
+     picture of the live hand; `closeness --observed` scores the live
+     hand; the declared board below is the smaller reading available
+     with no game running."
+  - "The encounter is GENERATED. This file can write the enemies' HP and
+     Block and cannot write their INTENT. The declared board says a
+     telegraphed ATTACK because that is the intent under which defence
+     is worth anything, and what defence costs is the whole slice. If
+     the live telegraph is not an attack the staging is REDONE on
+     another seed: here the intent is not an incidental, it is the
+     question."
+  - "Every card is granted unupgraded. An upgrade moves numbers on both
+     halves of a pair and not necessarily by the same amount, so an
+     upgraded grant is a different experiment."
+  - "Charge is written to 8 through the registered resource, so
+     Kokomi's Charge reader is a LIVE choice rather than a small
+     attack. The finisher has to be on the table, or spending the
+     energy on defence is not giving anything up."
+  - "The player has no Strength and the enemies carry no aura, Vulnerable
+     or Weak. A reaction on top of a hit would move every number the
+     falsifier scores."
+  - "The card under test here is the WHOLE-TURN prototype. Its twin is
+     pearl-barrage-shipped.yaml, and the two boards are identical."
+  - "This half cannot be staged until a dev build is deployed
+     (klee-mod/build/deploy_proto.ps1). Until then it is
+     `closeness`-only, which needs no game."
+
+staging:
+  - give: {card: KLEEMOD-PROTO_PEARL_BARRAGE_TURN, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-GOROU_INUZAKA_CHARGE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SEND_THE_RUNNER, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-CORAL_GUARD, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-ALL_STREAMS_FLOW, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 48}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 2}
+  - set_resource: {name: KLEEMOD_CHARGE, amount: 8}
+  - set_hp: {who: first, amount: 34}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+# The tier0 mirror. Read ONLY by `closeness`; never by the packet,
+# which reads the live game. The parser refuses this file if the hand
+# here and the hand staged above are not the same multiset of cards.
+board:
+  character: kokomi
+  pilot: generic
+  hp: 48
+  max_hp: 70
+  block: 0
+  energy: 2
+  turn: 3
+  resources:
+    charge: 8
+  hand:
+    - proto_pearl_barrage_turn
+    - gorou_inuzaka_charge
+    - send_the_runner
+    - coral_guard
+    - all_streams_flow
+  enemies:
+    - name: "Act-1 attacker"
+      hp: 34
+      max_hp: 46
+      block: 0
+      intent: {kind: attack, amount: 14}
