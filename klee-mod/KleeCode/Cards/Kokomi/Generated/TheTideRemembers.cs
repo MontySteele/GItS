@@ -51,7 +51,7 @@ public sealed class TheTideRemembers : CustomCardModel, IElementalCard, ICharact
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tide of Names"),
-        ("description", "[gold]Exhaust[/gold] 1 card from your hand. Deal {CalculatedDamage:diff()} damage to ALL enemies. Scales with the total cost of the cards you just [gold]Exhausted[/gold]."),
+        ("description", "[gold]Exhaust[/gold] 1 card from your hand. Deal {CalculatedDamage:diff()} damage to ALL enemies, plus {ExtraDamage:diff()} per cost of the card you just [gold]Exhausted[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

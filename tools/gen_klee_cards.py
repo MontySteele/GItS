@@ -1995,22 +1995,29 @@ EXHAUST_SELECTION_COUNTS = {
     "exhaust_selection_upgraded": "Upgraded",
 }
 
-# The clause each count renders on the face. The number itself is honest --
-# it goes through the CalculatedDamageVar like every other converted rider --
-# so this sentence only has to say WHY it moves.
+# The UNIT each count prices. Rendered on the face as the tail of a
+# "plus {ExtraDamage:diff()} per <unit>" clause.
+#
+# These used to be the object of a bare "Scales with ..." sentence, and that
+# sentence was the whole defect: {CalculatedDamage} previews base + per * 0,
+# because the selection does not exist until the card resolves, so Pearl
+# Barrage read "Deal 5 damage. Scales with the total cost of the cards you
+# just Exhausted." forever. The per-unit rate is a LIVE var (ExtraDamage, 3
+# on that card) that nothing ever printed. A face that asserts scaling
+# without naming the rate cannot be priced by the player, so the rate is
+# printed and the assertion drops.
 EXHAUST_SELECTION_TEXT = {
-    "exhaust_selection_size": "the number of cards you just "
+    "exhaust_selection_size": "card you just [gold]Exhausted[/gold]",
+    "exhaust_selection_cost": "cost of the card you just "
                               "[gold]Exhausted[/gold]",
-    "exhaust_selection_cost": "the total cost of the cards you just "
-                              "[gold]Exhausted[/gold]",
-    "exhaust_selection_attacks": "the Attacks you just [gold]Exhausted[/gold]",
-    "exhaust_selection_skills": "the Skills you just [gold]Exhausted[/gold]",
-    "exhaust_selection_powers": "the Powers you just [gold]Exhausted[/gold]",
-    "exhaust_selection_companions": "the [gold]Companion[/gold] cards you just "
+    "exhaust_selection_attacks": "Attack you just [gold]Exhausted[/gold]",
+    "exhaust_selection_skills": "Skill you just [gold]Exhausted[/gold]",
+    "exhaust_selection_powers": "Power you just [gold]Exhausted[/gold]",
+    "exhaust_selection_companions": "[gold]Companion[/gold] card you just "
                                     "[gold]Exhausted[/gold]",
-    "exhaust_selection_personal": "your own cards you just "
+    "exhaust_selection_personal": "card of your own you just "
                                   "[gold]Exhausted[/gold]",
-    "exhaust_selection_upgraded": "the upgraded cards you just "
+    "exhaust_selection_upgraded": "upgraded card you just "
                                   "[gold]Exhausted[/gold]",
 }
 
@@ -5582,12 +5589,18 @@ def build_description(card: dict) -> str:
                 parts.append(
                     "Scales with the number of cards [gold]Exhausted[/gold].")
             if exhaust_selection_calc_rider(card, eff) is not None:
-                # Same job as the pile sentence above, and needed more: this
-                # count does not exist until the card resolves, so without it
-                # the face is a number that appears from nowhere.
-                parts.append("Scales with "
-                             + EXHAUST_SELECTION_TEXT[eff["amount_formula"]
-                                                      ["count"]] + ".")
+                # NOT the pile sentence's job, though it looks like it. The
+                # pile count exists before the card resolves, so
+                # {CalculatedDamage} previews a moved number and a "why"
+                # sentence is enough. This count is zero until the card
+                # resolves, so the preview is ALWAYS the bare base and the
+                # per-unit rate never appears anywhere on the card. Print the
+                # rate off its own live var instead of asserting it exists.
+                # :diff() because `formula_per` is an upgradeable delta -- the
+                # upgraded rate must show green like every other var.
+                unit = EXHAUST_SELECTION_TEXT[eff["amount_formula"]["count"]]
+                parts[-1] = (parts[-1].removesuffix(".")
+                             + ", plus {ExtraDamage:diff()} per " + unit + ".")
             if discards_turn_calc_rider(card, eff) is not None:
                 # EB-122. Third sentence in the same family: the number is
                 # honest (it renders through the CalculatedVar), and this says

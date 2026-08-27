@@ -161,9 +161,12 @@ Slay the Spire 2 **v0.107.1**, commit `59260271` (2026-06-18), Steam buildid
 `roster-pck-v3`; the shipped mod package is `klee` **v0.2**
 (`klee-mod/Klee/manifest.json`, `min_game_version` 0.107.1). Pins frozen at tag
 `pre-simplification-2026-08-06`. The version string deploy stamps is
-**`MAJOR.AUTO`** (R214): the deployed build is still `0.2-1159`, the last one
-emitted under the old MAJOR-AUTO shape, and the next deploy emits `0.2.<commit
-count>` — valid semver, so the game parses it instead of leaving it `null`.
+**`MAJOR.AUTO`** (R214). The deployed build is **`0.2.1209`** (2026-08-27
+13:16, from `main` `f291fb4`) — the FIRST build emitted under that shape, so
+the game parses the version instead of leaving it `null`. `validate.ps1` OK;
+pack 9,586,076 bytes, 132 resources. It carries `EB-150`'s Deep Breath fix and
+`EB-152`'s fourteen Burst faces. The exhaust-selection face fix (R215) is NOT
+in it — it ships with the next deploy.
 
 ## Systems
 
@@ -250,12 +253,25 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   reopened (Charge uncapped/unspent; Sparks = free Attack; unpriced
   Companion Block; Salon as Furina's spine), one falsifier (decision
   closeness), and a QA-agent funnel so [USER] plays surviving turns,
-  not runs. Words: the R213 commit. **Its authorized engineering is
-  minted:** the quarantined prototype surface is `EB-147`, the Companion
-  audit `EB-148`, the blind QA-agent funnel `EB-149`, and the three
-  playtest defects `EB-150` (Deep Breath soft-lock), `EB-151` (Pearl
-  Barrage's base 5) and `EB-152` (unlabelled Burst/Charge gain). The
-  dispatch-3 confirmed defects mint beside them, `EB-153`–`EB-163`.
+  not runs. Words: the R213 commit. **Its authorized engineering is now
+  four-fifths landed (R215, 2026-08-27):** the **quarantined prototype
+  surface is SHIPPED** (`EB-147`) and the quarantine is proven from
+  OUTSIDE — the default `0.2.1209` build refuses a prototype grant
+  outright (`No card with id or exact title
+  'KLEEMOD-PROTO_KOKOMI_TIDECALL'`); the **Companion audit is DONE**
+  (`EB-148`), packet
+  `review/active/eb148-companion-audit-2026-08-27.md` (+ `.tsv`, 51 rows,
+  hidden-name test run); and the three playtest defects are resolved —
+  `EB-150` (Deep Breath soft-lock) **fixed and live-green on
+  `0.2.1209`**, `EB-151` (Pearl Barrage's base 5) **NOT A DEFECT**, the
+  card doing what R211 ruled and both cost ladders passing live on the
+  old build too, with [USER]'s design observation routed to the Kokomi
+  slice as its first prototype arm, and `EB-152`'s **Burst half shipped**
+  (14 silent faces, `tools/lint_burst_legibility.py` on the ci lane) with
+  its Charge half deferred into E1's Charge reopening, there being no
+  Charge keyword in the mod to print. **The next open step is `EB-149`**,
+  the blind QA-agent funnel, now ungated. The dispatch-3 confirmed
+  defects stand beside them, `EB-153`–`EB-163`.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
   (Kokomi's are newest). **Animation sprint 2.** **Axis-validity tracks** —
   Track A / Track E logs.
