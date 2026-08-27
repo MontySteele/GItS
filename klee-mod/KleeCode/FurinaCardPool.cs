@@ -64,6 +64,17 @@ public static class FurinaOffPoolCards
             ModelDb.Card<CenterStageOption>(),
             ModelDb.Card<GuestCastOption>(),
         };
+        // EB-150: the GENERATED mode faces, on the same footing as the two
+        // hand-written selector options above. A choose-one option card that
+        // is in no pool does not read as null on CardModel.Pool -- the getter
+        // falls through to MockCardPool, whose GenerateAllCards throws
+        // "You monster!" inside NChooseACardSelectionScreen._Ready(), leaving
+        // the overlay's buttons unfetched; the NullReferenceException the
+        // 2026-08-26 playtest logged in AfterOverlayShown() is that, and the
+        // awaited selection never returns. The roster is emitted by
+        // tools/gen_klee_cards.py, so a new modal card joins this list
+        // without anyone having to remember to add it.
+        cards.AddRange(FurinaModalOptions.All);
         return cards;
     }
 }

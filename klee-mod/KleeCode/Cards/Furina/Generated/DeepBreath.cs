@@ -88,7 +88,10 @@ public sealed class DeepBreath : CustomCardModel, ICharacterCard
 }
 
 /// <summary>Mode 0 of deep_breath. A face for the choose-a-card screen;
-/// never played, never in a pile, never in a pool.</summary>
+/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
+/// the generated ModalOptions roster the character's off-pool list carries.
+/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
+/// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class DeepBreathModeA : ModalOptionCard
 {
     public override List<(string, string)>? Localization => new()
@@ -99,7 +102,10 @@ public sealed class DeepBreathModeA : ModalOptionCard
 }
 
 /// <summary>Mode 1 of deep_breath. A face for the choose-a-card screen;
-/// never played, never in a pile, never in a pool.</summary>
+/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
+/// the generated ModalOptions roster the character's off-pool list carries.
+/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
+/// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class DeepBreathModeB : ModalOptionCard
 {
     public override List<(string, string)>? Localization => new()

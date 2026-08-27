@@ -52,10 +52,25 @@ MEMBERSHIP_FILES = [
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Kokomi" / "Generated"
     / "KokomiCardRoster.cs",
 ]
+# EB-150: the generated choose-one mode-face rosters, globbed rather than
+# listed. They are per-character and the generator mints one the moment a sheet
+# grows its first modal row, so a hand-maintained line here would be a line
+# somebody has to remember on exactly the day they forgot the pool.
+MEMBERSHIP_FILES += sorted(CARD_ROOT.rglob("*ModalOptions.cs"))
 
 # `public sealed class Foo : CustomCardModel` / `: CustomCardModel, IElementalCard`
+#
+# ModalOptionCard IS A CustomCardModel, and EB-150 is why the alternation is
+# here. The generated mode faces of a choose-one card derive from the shared
+# `ModalOptionCard` base rather than naming `CustomCardModel` directly, so the
+# original pattern could not see them: Deep Breath's two faces shipped in no
+# pool at all, took `CardModel.Pool` through MockCardPool inside
+# `NChooseACardSelectionScreen._Ready()`, and soft-locked the turn on the
+# 2026-08-26 playtest. This lint's docstring had described that exact failure
+# since 2026-07-21; only its regex had not kept up.
 CLASS_RE = re.compile(
-    r"^\s*public\s+sealed\s+class\s+(\w+)\s*:\s*CustomCardModel\b", re.M
+    r"^\s*public\s+sealed\s+class\s+(\w+)\s*:\s*"
+    r"(?:CustomCardModel|ModalOptionCard)\b", re.M
 )
 # `ModelDb.Card<Foo>()`, or the namespace-qualified `ModelDb.Card<A.B.Foo>()`.
 # The qualified form is legal C# and reads identically to the compiler; a
