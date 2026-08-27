@@ -156,7 +156,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
 # way a retired `EB-53` would be: it is simply not in here.
 OPEN_IRREGULAR: frozenset[str] = frozenset({
     "CC-G1", "CC-G2",
-    "S4-G6", "S4-G11", "S4-G12", "S4-G13", "S4-G14", "S4-G17",
+    "S4-G6", "S4-G11", "S4-G12", "S4-G14", "S4-G17",
     "SKIP-10.9",
 })
 
