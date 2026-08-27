@@ -26,7 +26,7 @@ Windows PowerShell 5.1, run from `klee-mod\` unless noted:
 
 ```powershell
 .\build\deploy.ps1                          # build + stage + validate + deploy to <GameDir>\mods\klee
-.\build\deploy.ps1 -Package                 # also zip dist\klee-v<MAJOR-AUTO>.zip (handoff)
+.\build\deploy.ps1 -Package                 # also zip dist\klee-v<MAJOR.AUTO>.zip (handoff)
 .\build\deploy.ps1 -AllowIncompleteGameRef  # tolerate a stale game_ref/ (S7 escape hatch)
 .\build\validate.ps1 -StageDir <stage> -SourceDir .\KleeCode -GameDir <game>
 .\build\validate.ps1 ... -StaticOnly        # every rule except S7's pytest run (~5s inner loop)
@@ -57,7 +57,7 @@ In-process (dot-source `build/version.ps1`): `Get-PackageVersion`,
   Stage a clean package and copy exactly that (`deploy.ps1:1-15`), enforced as
   rule S1 (`validate.ps1:55-60`) and re-enforced for the bridge
   (`deploy_bridge.ps1:86-101`).
-- **Version is `MAJOR-AUTO`.** MAJOR lives in `Klee/manifest.json` and no tool
+- **Version is `MAJOR.AUTO` (R214).** MAJOR lives in `Klee/manifest.json` and no tool
   writes it; AUTO is `git rev-list --count HEAD`, `+dirty` when the tree is
   dirty (`version.ps1:52-106`). The stamp is applied to the **staged** manifest
   only (`deploy.ps1:78-89`), and S3 fails when staged ≠ computed
@@ -98,7 +98,7 @@ In-process (dot-source `build/version.ps1`): `Get-PackageVersion`,
 
 ## 4. Rulings that shaped it
 
-- **R70** (`tier0/DECISIONS.md:2209-2266`) — manifest version becomes MAJOR-AUTO;
+- **R70** (`tier0/DECISIONS.md:2209-2266`) — manifest version becomes MAJOR.AUTO (separator amended by R214);
   deploy refuses to overwrite an existing handoff zip, `+dirty` is loud but not
   fatal, and S3 stops being decorative. All of `version.ps1` implements it.
 - **R13** (`klee-mod/DECISIONS.md:1905-1926`) — every power must resolve to an
@@ -167,7 +167,7 @@ In-process (dot-source `build/version.ps1`): `Get-PackageVersion`,
 ## 6. Reading order
 
 1. `klee-mod/build/deploy.ps1` — the whole shipping path in 238 lines.
-2. `klee-mod/build/version.ps1` — R70's MAJOR-AUTO policy and `Test-VersionPolicy`.
+2. `klee-mod/build/version.ps1` — R70's MAJOR.AUTO policy (R214) and `Test-VersionPolicy`.
 3. `klee-mod/build/validate.ps1` — S1-S12; every rule's header names the bug it caught.
 4. `tools/build_pck.ps1` — copy blocks, heredoc scenes, import/export, derived contract.
 5. `klee-mod/pck-src/README.md` — the four rules for git-tracked scene sources.

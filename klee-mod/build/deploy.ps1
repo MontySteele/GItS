@@ -32,7 +32,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# R70 manifest version policy (MAJOR-AUTO). Shared with validate.ps1 so the
+# R70 manifest version policy (MAJOR.AUTO, shape amended by R214). Shared with validate.ps1 so the
 # deploy-time stamp and the gate that checks it cannot compute it differently.
 . (Join-Path $PSScriptRoot 'version.ps1')
 
@@ -75,7 +75,7 @@ New-Item -ItemType Directory -Force -Path $stage | Out-Null
 Copy-Item (Join-Path $packageDir 'manifest.json') -Destination $stage
 Copy-Item $dll -Destination $stage
 
-# R70: stamp MAJOR-AUTO into the STAGED manifest. MAJOR is the deliberate half
+# R70: stamp MAJOR.AUTO into the STAGED manifest. MAJOR is the deliberate half
 # and stays exactly as committed; AUTO is the commit count, generated here.
 # The source manifest is never written to -- it is a ratified artifact.
 $version = Get-PackageVersion `
@@ -212,7 +212,7 @@ if ($Package) {
     # anyone has to remember -- AUTO advances with every commit. What the
     # recipient needs is the identity, and whether it is trustworthy.
     Write-Host ("  Co-op peers must all run THIS build: version " + $manifest.version + ".") -ForegroundColor Yellow
-    Write-Host "  Versions compare: the higher AUTO (the part after '-') is the newer build." -ForegroundColor Yellow
+    Write-Host "  Versions compare: the higher AUTO (the patch component) is the newer build." -ForegroundColor Yellow
     if ($version.IsDirty) {
         Write-Host "  *** +dirty: built from uncommitted changes. NOT for handoff. ***" -ForegroundColor Red
     }

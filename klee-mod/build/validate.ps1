@@ -45,7 +45,7 @@ function Fail($rule, $detail) { $findings.Add("[$rule] $detail") | Out-Null }
 $swTotal = [Diagnostics.Stopwatch]::StartNew()
 $suiteSeconds = 0.0
 
-# R70 manifest version policy (MAJOR-AUTO), shared with deploy.ps1 so the
+# R70 manifest version policy (MAJOR.AUTO, shape amended by R214), shared with deploy.ps1 so the
 # stamp and the gate that checks it cannot compute it differently. Also
 # supplies Read-JsonFile (BOM-tolerant) and ConvertTo-ComparableVersion.
 . (Join-Path $PSScriptRoot 'version.ps1')

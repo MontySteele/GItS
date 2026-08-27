@@ -387,9 +387,14 @@ combat grammar comes with us. (principles §1)
   leave the other to a follow-up. (R20; R92)
 - **Version stamps and game version are read live at call time** from the
   canonical source (`constants.py`, `release_info.json`), never stored or read
-  from a comment/exe. **manifest.json version is MAJOR-AUTO:** MAJOR bumped only
-  by [USER] at release; deploy refuses to overwrite a versioned zip; dirty builds
-  append `+dirty`. (R68; R70)
+  from a comment/exe. **manifest.json version is MAJOR.AUTO:** MAJOR (`0.2`,
+  exactly two dotted integers) bumped only by [USER] at release, AUTO is the
+  commit count emitted as the PATCH component (`0.2.1159`); deploy refuses to
+  overwrite a versioned zip; dirty builds append `+dirty` as semver build
+  metadata (`0.2.1159+dirty`), which the game's comparator ignores. The string
+  must parse as a semantic version: the game's parser throws on a `-` before
+  patch, leaves an unparseable version `null`, and then refuses any dependent
+  mod declaring a `min_version` on us. (R68; R70; R214)
 - **State-reading damage/spark riders snapshot state at cast;** because "when
   state is read" is invisible to the sim, the timing is pinned by a C#-side
   source-text check. Rules read the resource, never the badge (display may lag

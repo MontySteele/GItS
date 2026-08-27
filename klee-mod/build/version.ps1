@@ -1,9 +1,19 @@
 <#
-  Manifest version policy (R70, 2026-07-26). Dot-sourced by deploy.ps1 and
-  validate.ps1 so the two cannot compute the version differently -- which is
-  the whole point of a gate that compares one against the other.
+  Manifest version policy (R70, 2026-07-26; shape AMENDED by R214,
+  2026-08-27). Dot-sourced by deploy.ps1 and validate.ps1 so the two cannot
+  compute the version differently -- which is the whole point of a gate that
+  compares one against the other.
 
-  THE VERSION IS TWO PARTS: MAJOR-AUTO.
+  THE VERSION IS TWO PARTS: MAJOR.AUTO.
+
+  R214 AMENDED THE SEPARATOR, and only the separator. The old shape was
+  MAJOR-AUTO ("0.2-1159"), which is not a valid semantic version: the game's
+  own parser walks the string and throws the moment it reaches a '-' while
+  still in Minor (SemanticVersion.cs:102-107). Our parsed version was left
+  null, so ModManager refuses any future mod declaring a min_version on us
+  (ModManager.cs:810-812), and every player's log carried the warning. AUTO
+  is now the PATCH component -- "0.2.1159" -- which parses, sorts
+  monotonically, and keeps MAJOR two-part and deliberate.
 
   MAJOR ("0.2") lives in Klee\manifest.json and is bumped DELIBERATELY, by the
   user, as part of a release sprint's close-out. It is a ratified artifact like
@@ -19,7 +29,9 @@
                  deterministic-lockstep desyncs, and the one a timestamp or a
                  random build id cannot give.
 
-  A dirty working tree appends "+dirty". A +dirty build is never handed to a
+  A dirty working tree appends "+dirty" -- now as semver BUILD METADATA
+  ("0.2.1159+dirty"), which parses and which the game's comparator ignores,
+  rather than as part of a prerelease. A +dirty build is never handed to a
   co-op partner: the commit count no longer identifies its contents, so two
   zips can share a name and differ.
 
@@ -52,7 +64,7 @@ function Read-JsonFile {
 function Get-ManifestMajor {
     <#
       The deliberate half, read from the SOURCE manifest (not the staged
-      copy, which already carries MAJOR-AUTO and would compound).
+      copy, which already carries MAJOR.AUTO and would compound).
     #>
     param([string]$SourceManifest)
     if (-not (Test-Path $SourceManifest)) {
@@ -62,8 +74,12 @@ function Get-ManifestMajor {
     if ([string]::IsNullOrWhiteSpace($major)) {
         throw "manifest.json has no version; MAJOR is a ratified artifact and must be set by hand."
     }
-    if ($major -match '-') {
-        throw "manifest.json version '$major' already contains an AUTO part. MAJOR is the deliberate half only (e.g. '0.2'); AUTO is generated at deploy time."
+    # R214: MAJOR is exactly two dotted integers. Before the amendment the
+    # AUTO part was separated by '-', so a leaked AUTO was caught by looking
+    # for a dash; now that AUTO is a third dotted component, a shape check is
+    # the only thing that can still tell "0.2" from "0.2.1159" or "0.2-1159".
+    if ($major -notmatch '^\d+\.\d+$') {
+        throw "manifest.json version '$major' is not a bare MAJOR. MAJOR is the deliberate half only, exactly two dotted integers (e.g. '0.2'); AUTO is generated at deploy time and appended as the patch component."
     }
     return $major
 }
@@ -107,13 +123,13 @@ function Get-AutoVersion {
 
 function Get-PackageVersion {
     <#
-      The full MAJOR-AUTO string, plus the parts that produced it.
+      The full MAJOR.AUTO string, plus the parts that produced it.
     #>
     param([string]$SourceManifest, [string]$RepoRoot)
     $major = Get-ManifestMajor -SourceManifest $SourceManifest
     $auto = Get-AutoVersion -RepoRoot $RepoRoot
     return @{
-        Version    = "$major-$($auto.Auto)"
+        Version    = "$major.$($auto.Auto)"
         Major      = $major
         Auto       = $auto.Auto
         IsDirty    = $auto.IsDirty
@@ -168,7 +184,7 @@ function Test-VersionPolicy {
         Manifest    the STAGED manifest (PSCustomObject)
         Installed   hashtable of dependency id -> parsed manifest object
         GameVersion the game's version string, or $null if unreadable
-        Expected    the MAJOR-AUTO string this checkout computes
+        Expected    the MAJOR.AUTO string this checkout computes
     #>
     param(
         [Parameter(Mandatory = $true)]$Manifest,
@@ -215,7 +231,16 @@ function Test-VersionPolicy {
         }
     }
 
-    # R70. The staged version must be the MAJOR-AUTO this checkout computes.
+    # R214. The staged version must be a valid semantic version. The game
+    # parses it and keeps the parsed object; a version it cannot parse is
+    # left null, and a null version refuses every dependent mod that declares
+    # a min_version on us (ModManager.cs:810-812). This is the assertion the
+    # old MAJOR-AUTO shape would have failed on every build.
+    if ($Manifest.version -notmatch '^\d+\.\d+\.\d+(\+[0-9A-Za-z.-]+)?$') {
+        $out.Add("staged manifest version '$($Manifest.version)' is not a valid semantic version (R214: MAJOR.AUTO, with +dirty as build metadata). The game's parser leaves an unparseable version null and then refuses any dependent mod declaring a min_version on us.")
+    }
+
+    # R70. The staged version must be the MAJOR.AUTO this checkout computes.
     # Without this the manifest silently fossilizes: it sat at 0.2.0 for 134
     # commits, through Kokomi's shell and three sprints, while deploy
     # overwrote each previous zip of that same name.

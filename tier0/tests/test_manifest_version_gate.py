@@ -17,6 +17,14 @@ The defects being pinned, both from the 2026-07-26 audit:
        all shipped as "0.2.0", and deploy silently overwrote the previous
        zip of that same name. In deterministic-lockstep co-op that is
        exactly the failure the version field exists to prevent.
+  R214 (2026-08-27) amended the SHAPE these tests pin: MAJOR-AUTO
+  ("0.2-1159") is not a valid semantic version -- the game's parser throws on
+  the '-' while still in Minor, leaves our parsed version null, and then
+  refuses any dependent mod declaring a min_version on us. The emitted shape
+  is now MAJOR.AUTO ("0.2.1159"), with +dirty as build metadata. The old
+  shape is pinned as REFUSED below: a lock is not trusted until it is seen to
+  fail.
+
   3.5  min_version 3.3.6 and min_game_version 0.107.1 were compared to
        nothing at all. S3 checked that BaseLib was PRESENT and stopped, so a
        too-old BaseLib passed the deploy gate and failed at boot instead.
@@ -27,6 +35,7 @@ Windows-only by nature: the thing under test is a PowerShell deploy gate.
 from __future__ import annotations
 
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -75,7 +84,7 @@ foreach ($f in $out) {{ Write-Output "FINDING: $f" }}
 
 def _manifest(**overrides) -> dict:
     m = json.loads(SOURCE_MANIFEST.read_text(encoding="utf-8"))
-    m["version"] = "0.2-138"
+    m["version"] = "0.2.138"
     m.update(overrides)
     return m
 
@@ -88,7 +97,7 @@ BASELIB_OK = {"BaseLib": {"id": "BaseLib", "version": "v3.3.8"}}
 def test_a_stale_manifest_version_is_refused():
     """The presenting symptom: 134 commits stuck at 0.2.0."""
     findings = _policy(_manifest(version="0.2.0"), BASELIB_OK,
-                       "v0.107.1", "0.2-138")
+                       "v0.107.1", "0.2.138")
     assert any("staged manifest version is '0.2.0'" in f for f in findings), \
         findings
 
@@ -96,14 +105,14 @@ def test_a_stale_manifest_version_is_refused():
 def test_a_correctly_stamped_version_passes():
     """Positive control. A gate that refused every version would satisfy the
     test above while being worthless."""
-    findings = _policy(_manifest(), BASELIB_OK, "v0.107.1", "0.2-138")
+    findings = _policy(_manifest(), BASELIB_OK, "v0.107.1", "0.2.138")
     assert findings == [], findings
 
 
 def test_a_dirty_stamp_still_has_to_match():
-    findings = _policy(_manifest(version="0.2-138"), BASELIB_OK,
-                       "v0.107.1", "0.2-138+dirty")
-    assert any("computes '0.2-138+dirty'" in f for f in findings), findings
+    findings = _policy(_manifest(version="0.2.138"), BASELIB_OK,
+                       "v0.107.1", "0.2.138+dirty")
+    assert any("computes '0.2.138+dirty'" in f for f in findings), findings
 
 
 # --- the dependency pin (audit 3.5) ----------------------------------------
@@ -112,20 +121,20 @@ def test_an_unsatisfied_min_version_is_refused():
     """Before R70 this passed: BaseLib was present, so S3 stopped looking."""
     findings = _policy(
         _manifest(dependencies=[{"id": "BaseLib", "min_version": "999.0.0"}]),
-        BASELIB_OK, "v0.107.1", "0.2-138")
+        BASELIB_OK, "v0.107.1", "0.2.138")
     assert any("requires >= 999.0.0" in f for f in findings), findings
 
 
 def test_a_satisfied_min_version_passes():
     findings = _policy(
         _manifest(dependencies=[{"id": "BaseLib", "min_version": "3.3.6"}]),
-        BASELIB_OK, "v0.107.1", "0.2-138")
+        BASELIB_OK, "v0.107.1", "0.2.138")
     assert findings == [], findings
 
 
 def test_a_missing_dependency_is_still_refused():
     """The check R70 extended, not replaced."""
-    findings = _policy(_manifest(), {}, "v0.107.1", "0.2-138")
+    findings = _policy(_manifest(), {}, "v0.107.1", "0.2.138")
     assert any("is not installed" in f for f in findings), findings
 
 
@@ -133,7 +142,7 @@ def test_an_unparseable_installed_version_is_not_treated_as_satisfied():
     findings = _policy(
         _manifest(dependencies=[{"id": "BaseLib", "min_version": "3.3.6"}]),
         {"BaseLib": {"id": "BaseLib", "version": "who knows"}},
-        "v0.107.1", "0.2-138")
+        "v0.107.1", "0.2.138")
     assert any("unparseable version" in f for f in findings), findings
 
 
@@ -141,14 +150,14 @@ def test_an_unparseable_installed_version_is_not_treated_as_satisfied():
 
 def test_an_unsatisfied_min_game_version_is_refused():
     findings = _policy(_manifest(min_game_version="999.0.0"), BASELIB_OK,
-                       "v0.107.1", "0.2-138")
+                       "v0.107.1", "0.2.138")
     assert any("requires >= 999.0.0" in f for f in findings), findings
 
 
 def test_an_unknown_game_version_warns_and_does_not_claim_verification():
     """A build machine may legitimately lack release_info.json. "Not
     verified" must never read as "verified" -- that was the old behaviour."""
-    findings = _policy(_manifest(), BASELIB_OK, None, "0.2-138")
+    findings = _policy(_manifest(), BASELIB_OK, None, "0.2.138")
     assert len(findings) == 1, findings
     assert findings[0].startswith("WARN:"), findings
     assert "NOT verified" in findings[0]
@@ -167,40 +176,67 @@ def test_the_real_pins_are_satisfied_on_this_machine():
     game = res.stdout.strip()
     if not game:
         pytest.skip("game not installed on this machine")
-    findings = _policy(_manifest(), BASELIB_OK, game, "0.2-138")
+    findings = _policy(_manifest(), BASELIB_OK, game, "0.2.138")
     assert findings == [], findings
 
 
 # --- the computed version --------------------------------------------------
 
-def test_the_computed_version_is_major_dash_auto():
+def test_the_computed_version_is_major_dot_auto():
+    """R214: AUTO is the PATCH component, so the whole string is semver."""
     res = _ps(f". '{VERSION_PS1}'; "
               f"(Get-PackageVersion -SourceManifest '{SOURCE_MANIFEST}' "
               f"-RepoRoot (Get-RepoRoot)).Version")
     assert res.returncode == 0, res.stdout + res.stderr
     version = res.stdout.strip()
     major = json.loads(SOURCE_MANIFEST.read_text(encoding="utf-8"))["version"]
-    assert version.startswith(f"{major}-"), version
+    assert version.startswith(f"{major}."), version
     auto = version[len(major) + 1:]
     assert auto.replace("+dirty", "").isdigit(), (
         f"AUTO must be a commit count (optionally +dirty), got {auto!r}")
+    assert re.fullmatch(r"\d+\.\d+\.\d+(\+dirty)?", version), (
+        f"the emitted version must parse as semver, got {version!r}")
 
 
 def test_the_source_manifest_holds_only_the_major():
     """MAJOR is a ratified artifact bumped by hand. If AUTO ever leaks into
-    the committed manifest, the next deploy stamps MAJOR-AUTO-AUTO."""
+    the committed manifest, the next deploy stamps MAJOR.AUTO.AUTO."""
     major = json.loads(SOURCE_MANIFEST.read_text(encoding="utf-8"))["version"]
-    assert "-" not in major, (
-        f"committed manifest version {major!r} contains an AUTO part")
+    assert re.fullmatch(r"\d+\.\d+", major), (
+        f"committed manifest version {major!r} is not a bare MAJOR "
+        f"(exactly two dotted integers)")
 
 
-def test_a_manifest_carrying_an_auto_part_is_refused_as_a_source():
+@pytest.mark.parametrize("bad", ["0.2-1", "0.2.1", "0.2.1+dirty", "0"])
+def test_a_manifest_carrying_an_auto_part_is_refused_as_a_source(bad):
+    """R214 widened this: with AUTO now a dotted component, looking for a
+    dash no longer sees a leaked AUTO. The check is a shape check, and the
+    OLD dashed shape must still be refused."""
     res = _ps(f". '{VERSION_PS1}'; "
               "$p = Join-Path $env:TEMP 'r70_bad_manifest.json'; "
-              "'{\"version\":\"0.2-1\"}' | Set-Content $p -Encoding utf8; "
+              f"'{{\"version\":\"{bad}\"}}' | Set-Content $p -Encoding utf8; "
               "try { Get-ManifestMajor -SourceManifest $p; 'NO THROW' } "
               "catch { 'threw' }")
     assert res.stdout.strip() == "threw", res.stdout + res.stderr
+
+
+# --- R214: the semver shape, seen to fail ----------------------------------
+
+def test_the_old_dashed_shape_is_refused():
+    """The defect R214 fixes, pinned as a refusal. `0.2-1159` shipped for
+    months; the game's parser threw on it every boot and left our version
+    null. A gate that has never refused this string is not a gate."""
+    findings = _policy(_manifest(version="0.2-1159"), BASELIB_OK,
+                       "v0.107.1", "0.2-1159")
+    assert any("not a valid semantic version" in f for f in findings), findings
+
+
+def test_the_new_shape_and_its_dirty_form_both_pass_the_semver_check():
+    """Positive control for the refusal above."""
+    for good in ("0.2.1159", "0.2.1159+dirty"):
+        findings = _policy(_manifest(version=good), BASELIB_OK,
+                           "v0.107.1", good)
+        assert findings == [], (good, findings)
 
 
 def test_version_comparison_is_numeric_not_lexical():
