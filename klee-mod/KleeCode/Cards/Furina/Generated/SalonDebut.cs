@@ -48,7 +48,7 @@ public sealed class SalonDebut : CustomCardModel, ICharacterCard, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Salon Début"),
-        ("description", "Add 1 [gold]random Salon Member[/gold] to your [gold]Salon[/gold]. {IfUpgraded:show:Gain {Encore:diff()} [gold]Encore[/gold].|}"),
+        ("description", "Add 1 [gold]random Salon Member[/gold] to your [gold]Salon[/gold]. {IfUpgraded:show:Gain {Encore:diff()} [gold]Encore[/gold].|} [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

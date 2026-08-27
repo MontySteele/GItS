@@ -160,6 +160,17 @@ TOKEN_CARDS = {
     "Guest Cast":
         "the other option on that screen, offered only when the player owns a "
         "Companion card (GuestCastOption)",
+    # EB-150. A choose-one card's modes are faces on that same screen, and the
+    # generator prints the sheet's `label` into both the option class's title
+    # and its description -- so a mode is named here exactly as
+    # docs/furina-cards.yaml:707 spells it, and a label edit on the sheet is an
+    # edit here too. That coupling is deliberate: these are the only names in
+    # this table that can go stale from a SHEET edit rather than a code one.
+    "Gain 1 Energy and 2 Encore":
+        "mode 0 of deep_breath on the choose-a-card screen "
+        "(Cards/Furina/Generated/DeepBreath.cs, DeepBreathModeA)",
+    "Spend 3 Encore: draw 3":
+        "mode 1 of the same card (DeepBreathModeB)",
 }
 
 # Every verb a step may name. Kept as data so the parser can refuse an unknown

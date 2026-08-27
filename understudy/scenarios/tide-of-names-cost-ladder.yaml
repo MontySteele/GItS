@@ -1,0 +1,61 @@
+# EB-151 scenario: the SIBLING's rung, on one enemy.
+#
+# THE QUESTION, AND WHY THIS IS NOT `tide-of-names-splash.yaml`. That file
+# already owns Tide of Names' cost-2 rung and its splash, and it needs a fight
+# with two live enemies to say anything. The question EB-151 asks is narrower
+# and has to be answerable in ANY fight: does the multiplier read the victim's
+# cost at all? `docs/kokomi-cards.yaml:637-639` prints
+# `{base: 5, per: 2, count: exhaust_selection_cost}` to `all_enemies`, so a
+# cost-1 victim is 5 + 2*1 = 7 and a cost-0 victim is 5. This file exhausts a
+# cost-1 card and reads ONE enemy, which is the smallest reading that can tell
+# a live multiplier from a dead one.
+#
+# WHY THE SIBLING GETS ITS OWN RUNG AT ALL. Pearl Barrage and Tide of Names
+# are the mod's ONLY two cards whose damage multiplier reads a value written
+# during their own OnPlay -- every other `WithMultiplier` in KleeCode reads
+# state that existed before the card resolved (Spotlight, Salon, Fanfare,
+# Charge, discards-this-turn). If the reading is broken it is broken for both,
+# and if it is sound then [USER]'s "just 5 damage all the time" is about what
+# the fodder COSTS, not about the code. Either answer wants both cards read.
+#
+# CORAL GUARD IS THE VICTIM for the reason it is in the Pearl Barrage file: a
+# cost-1 Basic whose whole body is Block, not a kit card (so it passes
+# `KokomiResources.OwnCard`), inert in hand, and it moves no number this file
+# reads.
+
+name: tide-of-names-cost-ladder
+character: KLEEMOD-KOKOMI
+turns: 8
+
+notes: |
+  Play Tide of Names, exhaust a cost-1 card, and read 5 + 2*1 = 7 off the
+  first enemy. One enemy is enough: this asks whether the multiplier reads,
+  not where the damage goes.
+
+assumptions:
+  - "The card is granted UNUPGRADED. Upgraded, CalculationBase is 7 (+2,
+     TheTideRemembers.cs:99) and the rung becomes 9."
+  - "The victim is granted unupgraded. `ExhaustSelection.Describe` reads the
+     PRINTED cost (`EnergyCost.Canonical`), so an upgrade that repriced Coral
+     Guard would change the rung being asserted."
+  - "The player has no Strength and the enemy no Vulnerable; 7 is asserted raw
+     as an HP+Block delta with the enemy's Block written to 0 first."
+  - "No enemy carries a non-Hydro aura -- the card applies Hydro and a
+     reaction would move the number."
+  - "The first enemy survives a 7. If it dies the delta is capped by the
+     creature and the step fails on that rather than on the multiplier."
+
+steps:
+  - give: {card: KLEEMOD-THE_TIDE_REMEMBERS, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-CORAL_GUARD, pile: hand, upgraded: false}
+  - set_energy: {amount: 3}
+  - set_block: {who: first, amount: 0}
+
+  - play: {card: "Tide of Names"}
+  - expect:
+      state_type: "hand_select"
+      prompt_contains: "Exhaust"
+  - select: {cards: ["Coral Guard"]}
+  - confirm: {}
+  - expect:
+      enemy_hp_block_delta: {who: first, amount: -7}

@@ -48,7 +48,7 @@ public sealed class GentilhommeUsher : CustomCardModel, ICharacterCard, ISkillTa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gentilhomme Usher"),
-        ("description", "Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Add 1 [gold]Gentilhomme Usher[/gold] to your [gold]Salon[/gold]. Gain {CalculatedBlock:diff()} [gold]Block[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -48,7 +48,7 @@ public sealed class MademoiselleCrabaletta : CustomCardModel, ICharacterCard, IS
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mademoiselle Crabaletta"),
-        ("description", "Add {PowerAmount:diff()} [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]."),
+        ("description", "Add {PowerAmount:diff()} [gold]Mademoiselle Crabaletta[/gold] to your [gold]Salon[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

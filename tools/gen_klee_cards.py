@@ -3999,6 +3999,31 @@ def modal_option_class(card: dict, index: int) -> str:
     return f"{pascal(card['id'])}Mode{chr(ord('A') + index)}"
 
 
+def modal_effect(card: dict) -> dict | None:
+    """The card's `choose_one` effect, or None. One per card by construction."""
+    return next((eff for eff in card.get("effects", [])
+                 if eff.get("op") == "choose_one"), None)
+
+
+def _modal_option_names(cards: list[dict], emitted_ids) -> list[str]:
+    """Every mode-face class name emitted for this sheet, sorted.
+
+    Blocked rows are skipped: their option classes are not emitted either, and
+    a roster naming a class that does not exist is a build break rather than a
+    membership fix.
+    """
+    names: list[str] = []
+    for card in cards:
+        if card["id"] not in emitted_ids:
+            continue
+        eff = modal_effect(card)
+        if eff is None:
+            continue
+        names.extend(modal_option_class(card, i)
+                     for i, _ in enumerate(eff["modes"]))
+    return sorted(names)
+
+
 def _modes_block(card: dict, mode_bodies: list[list[str]]) -> str:
     """The if/else-if ladder over the answered mode index.
 
@@ -5341,26 +5366,11 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
     return " and ".join(bits) + "."
 
 
-_KLEE_ROW_IDS: set[str] | None = None
+# EB-152 deleted `_is_klee_row` rather than leaving it unreferenced: it existed
+# for exactly one caller, the Burst reading in `build_description`, and a
+# sheet-scoping predicate lying around is an invitation to scope the next
+# reading the same way. The reason it is gone is in that caller's comment.
 
-
-def _is_klee_row(card: dict) -> bool:
-    """Is this row on KLEE's sheet? EB-118 sec.4.6's scope, and only that.
-
-    THE MECHANIC IS NOT KLEE-ONLY and this gate does not pretend otherwise:
-    `combat.play_card` pays BURST_PER_SKILL_TAG to ANY character with a Burst
-    meter, so Furina's thirteen `skill_tag` rows and Kokomi's one pay the
-    same invisible 5. sec.4.6 sits under the packet's Klee section and rules
-    "every one of the FIFTEEN", so fifteen faces is what this batch prints.
-    Extending the line to the other fourteen is the same legibility argument
-    and is deliberately NOT taken here -- it is a change to two other
-    characters' faces that no ruling in this packet asked for.
-    """
-    global _KLEE_ROW_IDS
-    if _KLEE_ROW_IDS is None:
-        _KLEE_ROW_IDS = {row["id"] for row in
-                         yaml.safe_load(SHEET.read_text(encoding="utf-8"))}
-    return card.get("id") in _KLEE_ROW_IDS
 
 def _upgrade_add_text(card: dict) -> list[str]:
     """The `{IfUpgraded:show:...|}` clauses a structural `add` contributes.
@@ -6145,7 +6155,25 @@ def build_description(card: dict) -> str:
     # property of the card, no upgrade delta can reach it, and rendering it
     # through {Var:diff()} would invite exactly the drift this line exists to
     # remove.
-    if "skill_tag" in (card.get("tags") or ()) and _is_klee_row(card):
+    #
+    # EB-152: THE GATE THAT SAID "KLEE'S SHEET ONLY" IS GONE. [USER],
+    # 2026-08-26: "Klee's cards that give Burst energy are labelled, but
+    # Kokomi's are not." That was true and it was this line: `_is_klee_row`
+    # scoped the reading to Klee's fifteen while `combat.play_card` (and
+    # `KleeElementalHooks.AfterCardPlayed`) paid the same 5 to every character
+    # carrying a Burst meter -- Furina's thirteen `skill_tag` faces and
+    # Kokomi's one. The old docstring said so in as many words and deferred
+    # the extension for want of a ruling; EB-152 is that ruling. Nothing about
+    # the tag, its membership or the meter arithmetic moves here -- exactly as
+    # in EB-118 sec.4.6, only the READING does, so R213's numeric freeze is
+    # untouched.
+    #
+    # NO SHEET FILTER REPLACES IT, and that is a deliberate choice over a
+    # `burst_max` lookup. `skill_tag` appears on the three character sheets and
+    # on none of the three companion sheets, so "carries the tag" and "is paid
+    # the 5" are the same set today; a second predicate here would be a
+    # second place for that set to be described wrongly.
+    if "skill_tag" in (card.get("tags") or ()):
         parts.append(f"[gold]Burst[/gold] +{BURST_PER_SKILL_TAG}.")
 
     if sly_riders(card):
@@ -6767,14 +6795,16 @@ def emit(
     # card because a mode's text is that card's text -- the same reasoning
     # that keeps a Sly rider on the card that prints it.
     modal_option_classes = ""
-    modal_eff = next((e for e in card["effects"]
-                      if e.get("op") == "choose_one"), None)
+    modal_eff = modal_effect(card)
     if modal_eff is not None:
         for i, mode in enumerate(modal_eff["modes"]):
             label = cs_escape(mode["label"])
             modal_option_classes += f'''
 /// <summary>Mode {i} of {card["id"]}. A face for the choose-a-card screen;
-/// never played, never in a pile, never in a pool.</summary>
+/// never played, never in a pile, never a reward -- but a POOL MEMBER, via
+/// the generated ModalOptions roster the character's off-pool list carries.
+/// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
+/// throws inside the screen's _Ready and soft-locks the turn.</summary>
 public sealed class {modal_option_class(card, i)} : ModalOptionCard
 {{
     public override List<(string, string)>? Localization => new()
@@ -7257,17 +7287,24 @@ def _roster_class(
     source_sheet: Path,
     note: str,
     cls: str,
-    card_ids,
+    card_ids=(),
+    class_names=(),
     summary: str = "",
 ) -> str:
     """A generated `public static class <cls>` holding one ModelDb card list.
 
-    The three rosters (companions, a character's personal pool, Guest Stars)
-    are the same file with a different second header line, class name and
-    membership, so the shape lives here once.
+    The four rosters (companions, a character's personal pool, Guest Stars,
+    and the modal option faces) are the same file with a different second
+    header line, class name and membership, so the shape lives here once.
+
+    `card_ids` names sheet ROWS and is pascal-cased on the way in.
+    `class_names` names C# CLASSES that have no sheet row of their own -- the
+    per-mode option faces, whose names come from `modal_option_class`. A
+    caller passes one or the other.
     """
+    names = [pascal(card_id) for card_id in card_ids] + list(class_names)
     entries = NEWLINE_JOIN.join(
-        f"        ModelDb.Card<{pascal(card_id)}>()," for card_id in sorted(card_ids))
+        f"        ModelDb.Card<{name}>()," for name in sorted(names))
     sheet_rel = source_sheet.relative_to(REPO).as_posix()
     return f'''// <auto-generated>
 //     Generated by {profile.generator_script} from {sheet_rel}.
@@ -7572,6 +7609,30 @@ def _plan_roster(
         cls=f"{cs_name}CardRoster",
         card_ids=main_generated_ids,
     )
+
+    # EB-150: THE MODE FACES ARE POOL MEMBERS, and the soft-lock is what says
+    # so. `CardModel.Pool` does not return null for a card in no pool -- it
+    # falls through to `ModelDb.CardPool<MockCardPool>()`, whose
+    # `GenerateAllCards` calls `NeverEverCallThisOutsideOfTests_ClearOwner()`
+    # and throws "You monster!". The throw lands in
+    # `NChooseACardSelectionScreen._Ready()` at the first `NCard.Create`,
+    # before `_peekButton` is fetched, so the overlay's `AfterOverlayShown`
+    # NREs, the awaited selection never completes, and the turn is gone
+    # (playtest 2026-08-26; godot.log). CenterStageOption/GuestCastOption were
+    # already carried for exactly this reason (FurinaCardPool.cs) and the
+    # generated faces were not -- so the generator now emits them as a roster
+    # the character's off-pool list can carry, instead of leaving each new
+    # modal card to remember.
+    modal_option_names = _modal_option_names(cards, main_generated_ids)
+    if modal_option_names:
+        generated[f"{profile.character_id}_modal_options"] = _roster_class(
+            profile=profile,
+            source_sheet=profile.sheet,
+            note=(f"Every choose-one mode face; {cs_name}OffPoolCards carries "
+                  "them so CardModel.Pool resolves on the choice screen."),
+            cls=f"{cs_name}ModalOptions",
+            class_names=modal_option_names,
+        )
 
     # Guest Stars are temporary Companion cards generated only by Furina's
     # personal-pool cards. They are emitted beside her (not into the shared

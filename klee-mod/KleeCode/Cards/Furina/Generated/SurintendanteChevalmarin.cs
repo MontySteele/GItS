@@ -48,7 +48,7 @@ public sealed class SurintendanteChevalmarin : CustomCardModel, ICharacterCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Surintendante Chevalmarin"),
-        ("description", "Add 1 [gold]Surintendante Chevalmarin[/gold] to your [gold]Salon[/gold]. Gain {Encore:diff()} [gold]Encore[/gold]."),
+        ("description", "Add 1 [gold]Surintendante Chevalmarin[/gold] to your [gold]Salon[/gold]. Gain {Encore:diff()} [gold]Encore[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
