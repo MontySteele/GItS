@@ -119,7 +119,7 @@ stated intent. "Scope call" means nothing is broken and the question is what
 | **Case** | `AuraPower` routes its icon to `klee/powers/aura_<element>.png`, one file per element. If those six files were one silhouette in six colours, element identity would be colour-only. |
 | **Reproduction** | Reproducible tonight, offline: open `ImageGen/images/powers/aura_{pyro,hydro,cryo,electro,anemo,geo}.png`. Done — all six are distinct Genshin element sigils (flame, wave, six-point snowflake, etc.), not recolours of one shape. |
 | **Status** | **WORKS.** The two nearest-hue pairs (hydro/cryo both cyan; anemo/geo) are the ones that most need shape separation and have the most of it — a wave curl versus a six-point star. |
-| **Evidence** | `klee-mod/KleeCode/Powers/KleePowerIcons.cs:136-137` (the per-element path expression); assets at `ImageGen/images/powers/aura_*.png`, packed copies at `klee-mod/dist/pck-work/klee/powers/aura_*.png`. |
+| **Evidence** | `klee-mod/KleeCode/Powers/KleePowerIcons.cs:142-143` (the per-element path expression); assets at `ImageGen/images/powers/aura_*.png`, packed copies at `klee-mod/dist/pck-work/klee/powers/aura_*.png`. |
 | **Automation candidate** | Marginal. A perceptual-hash "no two element icons are near-identical" check could hang off `tools/art_lint.py` (it already opens PNGs with PIL and already runs an identical-crop hash, L12, `art_lint.py:310-320`). Low value while the six are hand-picked sigils. |
 | **Defect or scope call** | Neither — a working case. |
 

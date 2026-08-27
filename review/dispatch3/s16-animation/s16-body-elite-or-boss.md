@@ -806,8 +806,9 @@ the hitbox is the fixed `%Bounds` rect.
 
 They are still the right thing to point at — a script pinning a Spine bone to a
 world position is a capability our layered rig has no answer for — but the claim
-should carry to `s16-05-matrix.md` as **presentation** anchoring, not gameplay
-anchoring.
+should carry to the joined matrix (`s16-joined-capability-matrix.md`, which the
+schema §4 table calls `s16-05-matrix.md`) as **presentation** anchoring, not
+gameplay anchoring.
 
 ### M.3 — §5.4 undersells the body: the strongest reason to pick it is not in the rationale
 
