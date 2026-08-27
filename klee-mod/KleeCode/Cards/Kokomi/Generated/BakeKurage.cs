@@ -48,7 +48,7 @@ public sealed class BakeKurage : CustomCardModel, ICharacterCard, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bake-Kurage"),
-        ("description", "Summon [gold]Bake-Kurage[/gold] for {KurageTurns:diff()} turn{KurageTurns:plural:|s}. Gain 1 [gold]Charge[/gold]."),
+        ("description", "Summon [gold]Bake-Kurage[/gold] for {KurageTurns:diff()} turn{KurageTurns:plural:|s}. Gain 1 [gold]Charge[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

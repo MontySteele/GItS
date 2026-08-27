@@ -5366,26 +5366,11 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
     return " and ".join(bits) + "."
 
 
-_KLEE_ROW_IDS: set[str] | None = None
+# EB-152 deleted `_is_klee_row` rather than leaving it unreferenced: it existed
+# for exactly one caller, the Burst reading in `build_description`, and a
+# sheet-scoping predicate lying around is an invitation to scope the next
+# reading the same way. The reason it is gone is in that caller's comment.
 
-
-def _is_klee_row(card: dict) -> bool:
-    """Is this row on KLEE's sheet? EB-118 sec.4.6's scope, and only that.
-
-    THE MECHANIC IS NOT KLEE-ONLY and this gate does not pretend otherwise:
-    `combat.play_card` pays BURST_PER_SKILL_TAG to ANY character with a Burst
-    meter, so Furina's thirteen `skill_tag` rows and Kokomi's one pay the
-    same invisible 5. sec.4.6 sits under the packet's Klee section and rules
-    "every one of the FIFTEEN", so fifteen faces is what this batch prints.
-    Extending the line to the other fourteen is the same legibility argument
-    and is deliberately NOT taken here -- it is a change to two other
-    characters' faces that no ruling in this packet asked for.
-    """
-    global _KLEE_ROW_IDS
-    if _KLEE_ROW_IDS is None:
-        _KLEE_ROW_IDS = {row["id"] for row in
-                         yaml.safe_load(SHEET.read_text(encoding="utf-8"))}
-    return card.get("id") in _KLEE_ROW_IDS
 
 def _upgrade_add_text(card: dict) -> list[str]:
     """The `{IfUpgraded:show:...|}` clauses a structural `add` contributes.
@@ -6170,7 +6155,25 @@ def build_description(card: dict) -> str:
     # property of the card, no upgrade delta can reach it, and rendering it
     # through {Var:diff()} would invite exactly the drift this line exists to
     # remove.
-    if "skill_tag" in (card.get("tags") or ()) and _is_klee_row(card):
+    #
+    # EB-152: THE GATE THAT SAID "KLEE'S SHEET ONLY" IS GONE. [USER],
+    # 2026-08-26: "Klee's cards that give Burst energy are labelled, but
+    # Kokomi's are not." That was true and it was this line: `_is_klee_row`
+    # scoped the reading to Klee's fifteen while `combat.play_card` (and
+    # `KleeElementalHooks.AfterCardPlayed`) paid the same 5 to every character
+    # carrying a Burst meter -- Furina's thirteen `skill_tag` faces and
+    # Kokomi's one. The old docstring said so in as many words and deferred
+    # the extension for want of a ruling; EB-152 is that ruling. Nothing about
+    # the tag, its membership or the meter arithmetic moves here -- exactly as
+    # in EB-118 sec.4.6, only the READING does, so R213's numeric freeze is
+    # untouched.
+    #
+    # NO SHEET FILTER REPLACES IT, and that is a deliberate choice over a
+    # `burst_max` lookup. `skill_tag` appears on the three character sheets and
+    # on none of the three companion sheets, so "carries the tag" and "is paid
+    # the 5" are the same set today; a second predicate here would be a
+    # second place for that set to be described wrongly.
+    if "skill_tag" in (card.get("tags") or ()):
         parts.append(f"[gold]Burst[/gold] +{BURST_PER_SKILL_TAG}.")
 
     if sly_riders(card):
