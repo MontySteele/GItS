@@ -5,7 +5,7 @@ Commissioned by R213 item C. This is facts and sorting only. Nothing here change
 a number, an effect, a sheet or a register, and nothing here recommends a design.
 The questions at the end are pick lists.
 
-Machine-readable twin: `review/active/eb148-companion-audit-2026-08-27.csv`.
+Machine-readable twin: `review/active/eb148-companion-audit-2026-08-27.tsv`.
 
 ---
 
