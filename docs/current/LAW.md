@@ -371,6 +371,12 @@ combat grammar comes with us. (principles §1)
   dated comment and disclosure. Authored Tier-0 25-card batteries are
   ceiling-saturated and keep only their matchup floors; Tier 0.5 owns the
   upper-power comparison. (R62; R47)
+- **No number measured on a prototype row is quotable** — not in a packet, not
+  in a register, not in a commit message. The quarantined prototype surface
+  exists to be played, not to be measured against the shipped world: its rows
+  reach no pool, no digest, no balance report and no stamp, so a figure taken
+  off one has no comparable. The single exception is the decision-closeness
+  falsifier (R213 F), which reads the TURN rather than the row. (R213 B; R215)
 - Measurement *method* (stamp law, one-variable windows, versioning,
   pre-registration + blind grading, instrument visibility) is in `EXPERIMENTS.md`.
 

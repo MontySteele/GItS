@@ -339,12 +339,21 @@ def commits() -> list[Commit]:
     the same commit would generate two different files and the staleness gate
     would fire on a difference nobody made.
 
-    HEAD alone is too little: the six earliest ruling commits (`R8`, the
-    conjunctive healing law LAW.md still cites, among them) are reachable only
-    from the `wip-safety-net` tag, because that history was never merged
-    forward. Tags are the repo's own retrieval mechanism (CLAUDE.md's
-    history-retrieval section) and a full clone fetches all of them, so
-    `HEAD --tags` is both stable across clones and complete.
+    HEAD alone is too little: the earliest ruling commits (`R1`-`R8`, the
+    conjunctive healing law LAW.md still cites among them) are reachable from
+    no branch, because those 62 commits were never merged forward. Tags are
+    the repo's own retrieval mechanism (CLAUDE.md's history-retrieval section)
+    and a full clone fetches all of them, so `HEAD --tags` is both stable
+    across clones and complete.
+
+    TWO tags carry that lineage, and only one of them is on `origin`.
+    `rulings-r1-r8` (annotated, at `2a75d97`) is TEXT-ONLY and is PUSHED
+    (R215) -- it is the resolution route a fresh clone gets, via
+    `git fetch origin tag rulings-r1-r8`. `wip-safety-net` points into the
+    same history and stays LOCAL deliberately: a Tier-F PNG sits at its tip,
+    so pushing it would put an unratified art asset on `origin` to resolve
+    prose. Either tag resolves R1-R8; neither is required to be present for
+    the rest of the index.
     """
     code, out = run("log", "HEAD", "--tags", "--date=short",
                     f"--format={LOG_FORMAT}")
