@@ -29,6 +29,35 @@ DOCS_CARD_SHEETS = ("klee-cards.yaml", "furina-cards.yaml",
                     "mondstadt-companions.yaml", "fontaine-companions.yaml",
                     "inazuma-companions.yaml")
 
+# The QUARANTINED prototype surface (R213 B, BACKLOG EB-147). DELIBERATELY
+# NOT in DOCS_CARD_SHEETS and deliberately not named `*-cards.yaml`.
+#
+# Both halves of that sentence are load-bearing:
+#
+#   * Out of DOCS_CARD_SHEETS means out of `_card_index`, which is the ONE
+#     index every pool, run template, reward roll, digest and balance report
+#     reads. A prototype row is therefore absent from ordinary runs BY
+#     CONSTRUCTION rather than by a filter somebody has to remember -- there
+#     is no filter, because the rows never enter.
+#   * Out of the `docs/*-cards.yaml` NAME keeps it out of
+#     `tools/lint_sheet_stamp.py` (whose digest is the sheet half of the stamp
+#     law) and `tools/card_distinctness_report.py`, both of which glob that
+#     pattern. Each of those two ALSO names this file explicitly, so a future
+#     rename cannot quietly re-admit the surface to a stamp.
+#
+# The rows are still SCHEMA-CHECKED: `prototype_cards()` runs them through
+# `Card.from_dict` and the same three validators `_card_index` runs.
+# "Not measured" is the quarantine; "not checked" was never on offer.
+PROTOTYPE_SHEET = DOCS_DIR / "prototype-surface.yaml"
+
+# Every prototype id starts here. A prototype is usually a variant of
+# something that already ships, so its id -- and the C# class name derived
+# from it -- would collide with the real card often enough that "we will
+# notice" is not a plan, and a duplicated ModelId is a registry defect rather
+# than a sheet typo. The prefix also makes the R213 deletion rule greppable:
+# `git grep proto_ docs/` answers "did the last slice leave the surface?".
+PROTOTYPE_ID_PREFIX = "proto_"
+
 # The real base-game pool (tools/extract_base_game_pool.py ->
 # tools/build_ironclad_sheet.py). game_ref/ is gitignored (.gitignore:28):
 # decompiled material is REFERENCE ONLY, so this is a regenerable LOCAL
@@ -314,16 +343,89 @@ def _card_index() -> dict[str, Card]:
         dupes = {c.id for c in cards if c.id in seen or seen.add(c.id)}
         raise ValueError(f"duplicate card ids: {sorted(dupes)}")
     for c in cards:
-        _validate_effect_vocabulary(c.id, c.effects)
-        # EB-71 (R174): a Sly rider is printed effects too, and was the one
-        # effect list nothing validated -- a typo in it loaded clean and
-        # raised the first time a card effect discarded the row. The
-        # base-game auto-play marker is not an op and is filtered out by
-        # `sly_riders` before the check, so an extracted keyword row still
-        # loads (see state.Card.sly).
-        _validate_effect_vocabulary(c.id, sly_riders(c))
-        _validate_recall_shape(c)
+        _validate_card_shape(c)
     return index
+
+
+def _validate_card_shape(c: Card) -> None:
+    """The three post-construction checks every loaded card passes.
+
+    Factored out when the prototype surface landed (EB-147): a quarantined
+    row is checked by exactly the code the shipped rows are checked by, or
+    "still checked for schema validity" (R213 B) is a claim about a second
+    implementation that will drift.
+    """
+    _validate_effect_vocabulary(c.id, c.effects)
+    # EB-71 (R174): a Sly rider is printed effects too, and was the one
+    # effect list nothing validated -- a typo in it loaded clean and
+    # raised the first time a card effect discarded the row. The
+    # base-game auto-play marker is not an op and is filtered out by
+    # `sly_riders` before the check, so an extracted keyword row still
+    # loads (see state.Card.sly).
+    _validate_effect_vocabulary(c.id, sly_riders(c))
+    _validate_recall_shape(c)
+
+
+def prototype_cards(sheet: Path | None = None) -> list[Card]:
+    """The quarantined prototype rows (R213 B), schema-checked and NOT pooled.
+
+    This is the ONLY reader of `PROTOTYPE_SHEET` in tier0, and nothing in the
+    engine, the pilot, the run templates or tier05 calls it. `get_card`,
+    `all_cards`, `character_pool` and every reward roll go through
+    `_card_index`, which this function does not touch and does not populate:
+    that is the quarantine, and it is structural rather than a filter.
+
+    What it DOES do is prove the row is legal:
+
+      * `Card.from_dict` is total on both sides (unknown field -> ValueError,
+        retired field -> a named ValueError), so the sheet schema is enforced;
+      * `_validate_card_shape` runs the same effect-vocabulary and recall-shape
+        checks the shipped index runs;
+      * ids must carry `PROTOTYPE_ID_PREFIX` and must not collide with a
+        shipped card id, because a duplicate id is a duplicate ModelId in the
+        mod and an ambiguous `give_card` on the wire;
+      * `character:` is REQUIRED and must name a real roster character. One
+        surface carries every character's prototypes (R213 B: "rows carry
+        which character they belong to"), and the codegen picks the owner's
+        element cadence and art loader off this field -- a row without it has
+        no cadence, which is a wrong card rather than a missing one.
+
+    `sheet` is for the tests: they point it at a temporary fixture so the
+    SHIPPED surface can stay empty, which is the R213 deletion rule's steady
+    state. Production callers pass nothing.
+    """
+    path = sheet or PROTOTYPE_SHEET
+    if not path.exists():
+        return []
+    raw = yaml.safe_load(path.read_text(encoding="utf-8")) or []
+    shipped = _card_index()
+    known_characters = {"klee", "furina", "kokomi"}
+    seen: set[str] = set()
+    cards: list[Card] = []
+    for d in raw:
+        card_id = d.get("id")
+        if not isinstance(card_id, str) or not card_id.startswith(
+                PROTOTYPE_ID_PREFIX):
+            raise ValueError(
+                f"{path.name}: prototype id {card_id!r} must start "
+                f"{PROTOTYPE_ID_PREFIX!r} -- see PROTOTYPE_ID_PREFIX")
+        if card_id in shipped:
+            raise ValueError(
+                f"{path.name}: prototype id {card_id!r} collides with a "
+                "shipped card; two cards cannot share one ModelId")
+        if card_id in seen:
+            raise ValueError(f"{path.name}: duplicate prototype id {card_id!r}")
+        seen.add(card_id)
+        character = d.get("character")
+        if character not in known_characters:
+            raise ValueError(
+                f"{path.name}: prototype {card_id!r} must declare "
+                f"`character:` as one of {sorted(known_characters)}, "
+                f"got {character!r}")
+        card = Card.from_dict(dict(d))
+        _validate_card_shape(card)
+        cards.append(card)
+    return cards
 
 
 def _validate_recall_shape(card: Card) -> None:

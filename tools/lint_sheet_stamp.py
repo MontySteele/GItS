@@ -56,6 +56,18 @@ REPO = Path(__file__).resolve().parent.parent
 CONSTANTS = REPO / "tier0" / "constants.py"
 PATTERNS = ("docs/*-cards.yaml", "docs/*-companions.yaml")
 
+# QUARANTINED, and therefore NOT stamped (R213 B, BACKLOG EB-147): the
+# prototype surface is design scratch that no measured number was ever taken
+# on. Bumping SHEET_DIGEST because a prototype row was staged or deleted would
+# say a world moved when nothing measurable did -- and it would say it several
+# times a week, which is how a stamp stops meaning anything.
+#
+# The file's NAME (`prototype-surface.yaml`) already misses both patterns
+# above. This set is the belt to that braces: naming it explicitly means a
+# future rename to `prototype-cards.yaml` cannot quietly re-admit the surface
+# to the stamp law without someone deleting this line first.
+EXCLUDED = frozenset({"docs/prototype-surface.yaml"})
+
 # The one line this tool may rewrite. Anchored at the start of a line so a
 # mention inside a docstring or a comment cannot be mistaken for the constant.
 PIN = re.compile(r'^SHEET_DIGEST = "([0-9a-f]{0,64})"', re.MULTILINE)
@@ -65,6 +77,8 @@ def sheets() -> list[Path]:
     found: list[Path] = []
     for pattern in PATTERNS:
         found.extend(REPO.glob(pattern))
+    found = [p for p in found
+             if p.relative_to(REPO).as_posix() not in EXCLUDED]
     return sorted(found, key=lambda p: p.relative_to(REPO).as_posix())
 
 

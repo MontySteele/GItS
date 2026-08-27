@@ -206,6 +206,15 @@ class Scenario:
     turns: int = 12
     notes: str = ""
     assumptions: list[str] = field(default_factory=list)
+    # EB-147 (R213 B). This file names cards on the QUARANTINED prototype
+    # surface, which is EMPTY in the committed tree by design -- accepted and
+    # rejected slices leave it, so the healthy state has no rows. The pack's
+    # card-name lint therefore cannot resolve those names against a sheet, and
+    # this flag is how it is TOLD so, rather than the lint being loosened for
+    # every file. The lint still checks what is checkable with no surface:
+    # every granted id on a prototype scenario carries the prototype prefix,
+    # so a typo naming a shipped card is still caught.
+    prototype: bool = False
 
     def cards_named(self) -> list[str]:
         """Every card this file names, for the lint that checks they exist.
@@ -289,6 +298,7 @@ def parse(blob: dict[str, Any], path: Path | None = None) -> Scenario:
         turns=int(blob.get("turns", 12)),
         notes=str(blob.get("notes") or ""),
         assumptions=[str(a) for a in (blob.get("assumptions") or [])],
+        prototype=bool(blob.get("prototype", False)),
     )
 
 

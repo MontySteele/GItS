@@ -239,3 +239,37 @@ Live inventory: klee 68 generated + 48 companions + 8 blocked; furina 81/82 +
    path, and the kit invariant that already burned us.
 6. `docs/roster-codegen.md` — the prose contract (read its correction block
    first), before touching a profile or the sheet schema.
+
+## 7. The prototype surface — a fourth emitter that is not a fourth character
+
+`EB-147` (R213 B) added `docs/prototype-surface.yaml` and
+`tools/gen_prototype_cards.py`, emitting into
+`klee-mod/KleeCode/Cards/Prototype/Generated/`. Four facts a reader of §1–§6
+would otherwise get wrong:
+
+- **It is NOT a `CharacterProfile` in `PROFILES`.** `--character all` means
+  `PROFILES.values()`, so registering it there would put prototypes in the
+  DEFAULT run by definition — which is the one thing R213 B forbids. It is a
+  separate script with its own out dir, manifest and namespace, and
+  `lint_roster_registry` (which reads `def _plan_<id>(`) still sees exactly
+  three characters. `PLAN_BUILDERS` is untouched.
+- **The emitter is the SAME emitter.** `gen_prototype_cards` owns no templates:
+  it calls `blocked_reason` and `emit` with the OWNING character's profile,
+  `dataclasses.replace`d on the four location fields only. `character_id`,
+  `native_element`, `cadence`, `art_loader` and `emit_character_identity` stay
+  the owner's, so a Kokomi prototype keeps the catalyst cadence and its
+  `CharacterId`. (Side effect worth knowing: `profile is KLEE_PROFILE` is
+  FALSE for a replaced Klee profile, so the `HAND_WRITTEN` short-circuit and
+  the Klee header shape do not apply to prototype rows. Neither should.)
+- **A blocked prototype row is a `SystemExit`, not a manifest entry** — the
+  opposite of the character profiles. A sheet may legitimately run ahead of
+  the runtime; this surface exists to be played at the real game this week.
+- **`PrototypeRoster.cs` is committed even when the surface is EMPTY**, because
+  `KleeMod.PrototypeCards` names it under `#if PROTOTYPE_CARDS` and a dev build
+  of an empty surface must still compile. It is in
+  `lint_pool_membership.MEMBERSHIP_FILES`: the quarantine covers measurement,
+  never runtime legality, and a poolless prototype would throw "You monster!"
+  the first time a staged turn drew it.
+
+Commands and the deletion rule: `docs/current/OPERATIONS.md`, "Prototype
+surface". Packet: `review/active/eb147-prototype-surface-2026-08-27.md`.
