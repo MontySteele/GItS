@@ -15,6 +15,7 @@
 | A2 | "'All Hands' just adds 2 companion cards to my hand, rather than transforming 2 cards into companion cards." | Sheet row (`docs/kokomi-cards.yaml:808-811`): `{op: conscript, amount: 2, mode: create}`; generator emits `createMode: true`; printed text "Muster 2, adding the units to your hand." The default Muster (no `mode:`) is the other behaviour. | **As ruled, not a defect.** If [USER] wants All Hands to transform instead, that is a design pick → QUEUE (numbered, with the two Muster modes named). |
 | A3 | "Vigil of the Deep adds 3 block after you take damage, rather than preventing 3 damage" — then: "On second look, Vigil of the Deep worked as expected another time. I might have misread the numbers the first time." | Not investigated (retracted). | **Withdrawn by [USER].** Keep an eye out; if it recurs, capture the exact numbers. |
 | A4 | "Klee's cards that give Burst energy are labelled, but Kokomi's are not." | Not yet read. Klee's Burst-gain cards carry a printed keyword/rider; Kokomi's Charge/Burst gain appears to print none. | **Legibility defect** (printed-keyword class, cf. the Fanfare keyword work). Read `CanonicalKeywords` on Kokomi's gain_charge / burst rows; fix at the generator. |
+| A5 | "Deep Breath's 'choose one' mechanic doesn't work - softlocks the game" (with a screenshot). | `godot.log` (same evening, `[ERROR] System.NullReferenceException`): the throw is in the BASE GAME's `NChooseACardSelectionScreen.AfterOverlayShown()`, reached via `NOverlayStack.Push` <- `NChooseACardSelectionScreen.ShowScreen(cards, canSkip)` <- `CardSelectCmd.FromChooseACardScreen` <- `KleeMod.Cards.ModalChoice.SelectMode` <- `Cards/Furina/Generated/DeepBreath.cs:70` (`OnPlay`). So our mode-choice helper hands the choose-a-card screen option cards that the screen's after-shown step cannot dereference; the awaited selection never returns and the turn hangs. | **Confirmed defect** (soft-lock). Minted as `EB-150`: reproduce through the scenario harness, fix in `ModalChoice`, keep the scenario as the regression proof. Not during the playtest. |
 
 ## B. Design observations ([USER], verbatim — NOT interpreted here)
 
@@ -28,4 +29,4 @@
 
 ## C. Not in this file
 
-No Answers-block entries (that block belongs to the confirmatory run). No band. No lever pulled. No ids minted: the next `EB` block is reserved by the dispatch-3 charter; [USER] assigns.
+No Answers-block entries (that block belongs to the confirmatory run). No band. No lever pulled. Ids were minted the next morning (R214 released the block): A1 -> `EB-151`, A4 -> `EB-152`, A5 -> `EB-150`; A2 as ruled, A3 withdrawn.

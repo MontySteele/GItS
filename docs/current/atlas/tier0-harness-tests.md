@@ -116,7 +116,7 @@ CI's `lints` job invokes the standalone lints directly (`.github/workflows/*.yml
   whose swept knob records zero reads, so constants must be read as module
   attributes — `from tier0.constants import X` slips the hook
   (`tier0/DECISIONS.md:2065-2120`).
-- **R70** — manifest version is MAJOR-AUTO with overwrite refusal; gate in
+- **R70/R214** — manifest version is MAJOR.AUTO with overwrite refusal; gate in
   `version.ps1::Test-VersionPolicy`, pinned by
   `tier0/tests/test_manifest_version_gate.py` (`tier0/DECISIONS.md:2209-2265`).
 - **R81** — distinctness gate ratified (uniq >= 70, maxclu <= 5, neardup <= 0.40)

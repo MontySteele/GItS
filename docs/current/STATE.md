@@ -160,7 +160,10 @@ Slay the Spire 2 **v0.107.1**, commit `59260271` (2026-06-18), Steam buildid
 .NET SDK 9.0.316, ilspycmd 8.2.0.7535. The PCK contract version is
 `roster-pck-v3`; the shipped mod package is `klee` **v0.2**
 (`klee-mod/Klee/manifest.json`, `min_game_version` 0.107.1). Pins frozen at tag
-`pre-simplification-2026-08-06`.
+`pre-simplification-2026-08-06`. The version string deploy stamps is
+**`MAJOR.AUTO`** (R214): the deployed build is still `0.2-1159`, the last one
+emitted under the old MAJOR-AUTO shape, and the next deploy emits `0.2.<commit
+count>` — valid semver, so the game parses it instead of leaving it `null`.
 
 ## Systems
 
@@ -247,7 +250,12 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   reopened (Charge uncapped/unspent; Sparks = free Attack; unpriced
   Companion Block; Salon as Furina's spine), one falsifier (decision
   closeness), and a QA-agent funnel so [USER] plays surviving turns,
-  not runs. Words: the R213 commit.
+  not runs. Words: the R213 commit. **Its authorized engineering is
+  minted:** the quarantined prototype surface is `EB-147`, the Companion
+  audit `EB-148`, the blind QA-agent funnel `EB-149`, and the three
+  playtest defects `EB-150` (Deep Breath soft-lock), `EB-151` (Pearl
+  Barrage's base 5) and `EB-152` (unlabelled Burst/Charge gain). The
+  dispatch-3 confirmed defects mint beside them, `EB-153`–`EB-163`.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
   (Kokomi's are newest). **Animation sprint 2.** **Axis-validity tracks** —
   Track A / Track E logs.

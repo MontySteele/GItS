@@ -116,7 +116,16 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 146,   # EB-146 minted 2026-08-26 (scenario harness first run + set_power); EB-143/144/145 minted 2026-08-26 for the three Phase-4
+    "EB": 163,   # EB-147..163 minted at the morning sitting 2026-08-27. The
+                 # block the dispatch-3 charter had reserved was RELEASED by
+                 # [USER] — "is this just procedural (what id to use)? If so
+                 # then whichever is fine." — so R213's authorized engineering
+                 # (the quarantined prototype surface, the Companion audit, the
+                 # blind QA-agent funnel, the three playtest defects) and the
+                 # dispatch-3 confirmed defects mint CONSECUTIVELY from 147.
+                 # No M id was minted with them: nothing there registers a
+                 # measurement, so the M ceiling deliberately does not move.
+                 # EB-146 minted 2026-08-26 (scenario harness first run + set_power); EB-143/144/145 minted 2026-08-26 for the three Phase-4
                  # pilot/scorer repairs the C19/D17/P10 standing read named as
                  # its diagnostic caveats, and CLOSED the same day in the one
                  # P11 window (with EB-129); the ceiling stays at the issued
@@ -145,6 +154,8 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
         12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
         74, 78, 80, 83, 84, 116, 128,
+        147, 148, 149, 150, 151, 152, 153, 154, 155,
+        156, 157, 158, 159, 160, 161, 162, 163,
     }),
     "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
 }
