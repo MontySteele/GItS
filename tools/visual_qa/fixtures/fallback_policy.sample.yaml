@@ -1,0 +1,37 @@
+# SAMPLE fallback policy -- matches tools/visual_qa/fixtures/build_dirty.log.
+#
+# NOT a live policy and not a proposal for one. Which of the real build's
+# cross-character fallbacks are intended is an art-plan call, and this lane has
+# no authority to make it (surplus-dispatch-3 charter section 3.1). What this
+# file is for is proving the gate's shape: a declared fallback passes, an
+# undeclared one fails, and a declared-but-absent one fails too.
+#
+# Shape:
+#   allowed_fallbacks: into / resource / from / reason
+#       `resource` is namespace-relative and separator-insensitive:
+#       "ui\transition_wipe.png" and "ui/transition_wipe.png" are one key.
+#   allowed_skips: what / reason
+#       `what` is the copy-block label build_pck.ps1 prints, normalised the
+#       same way ("kokomi\summon" -> "kokomi/summon").
+
+allowed_fallbacks:
+  - into: Furina
+    resource: ui/transition_wipe.png
+    from: Klee
+    reason: >-
+      Sample row. In a real policy this would name the art ticket that owns
+      Furina's own wipe and the date it is expected.
+  - into: Furina
+    resource: model/combat_model.png
+    from: Klee
+    reason: Sample row.
+  - into: Kokomi
+    resource: ui/select_bg.png
+    from: Klee
+    reason: Sample row.
+
+allowed_skips:
+  - what: kokomi/summon
+    reason: Sample row -- the Bake-Kurage cut has not been run on this machine.
+  - what: furina/salon
+    reason: Sample row -- salon member sprites are Tier F and absent on a clean clone.

@@ -1,0 +1,26 @@
+SKIPPED: kokomi\summon -- no source at C:\repo\ImageGen\images\kokomi\summon
+SKIPPED: furina\salon -- no source at C:\repo\ImageGen\images\furina\salon
+Furina fallback: ui\transition_wipe.png <- Klee
+Furina fallback: model\combat_model.png <- Klee
+Kokomi fallback: ui\select_bg.png <- Klee
+Overlaid pck-src scene sources.
+Stamped build id 20260826-201455+deadbee
+Importing assets (MegaDot headless)...
+Godot Engine v4.5.1.stable.mono.megadot - https://godotengine.org
+Import: begin: Importing file: res://klee/ui/char_icon.png
+WARNING: Editor's own float precision differs from the project setting.
+     at: _print_warning (editor/editor_node.cpp:1204)
+ERROR: Error importing 'res://furina/ui/select_bg.png'.
+     at: _reimport_file (editor/editor_file_system.cpp:2244)
+Exporting pack...
+Godot Engine v4.5.1.stable.mono.megadot - https://godotengine.org
+savepack: begin: Storing File: res://furina/model/combat.tscn
+Unrecognized dependency: res://furina/model/layers/furina_combat_hat.png
+ERROR: Failed to save pack file.
+     at: save_pack (core/io/pck_packer.cpp:311)
+Built C:\repo\klee-mod\assets\klee.pck (8320112 bytes; contract roster-pck-v3, 124 resources)
+
+2 copy block(s) SKIPPED -- those resources are NOT in the pck:
+  kokomi\summon (no source at C:\repo\ImageGen\images\kokomi\summon)
+  furina\salon (no source at C:\repo\ImageGen\images\furina\salon)
+validate.ps1 S6c will fail for any of these that C# references.
