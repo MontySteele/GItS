@@ -1,0 +1,94 @@
+# EB-149's worked example: one staged Kokomi turn, built from SHIPPED cards.
+#
+# WHY THESE FIVE CARDS. The turn has to have more than one plausible line or
+# it fails its own falsifier before a grader ever sees it, so the hand is
+# three energy against five one-cost cards that want different things:
+#
+#   * Coral Guard is the flat Block -- the safe half of the turn.
+#   * Bake-Kurage is the setup: it puts a body on the field and feeds the
+#     meter, and pays back later rather than now.
+#   * Gorou's War Banner is the Companion, Block AND a buff on the next
+#     attack, so it is only worth its energy if an attack follows it.
+#   * All Streams Flow is the meter reader -- it is worth more the more the
+#     meter holds, which makes "spend now or bank" a real question.
+#   * Pearl Barrage costs a CARD as well as the energy: it exhausts one out
+#     of hand and scales off that card's printed cost, so playing it means
+#     choosing which of the other four to throw away.
+#
+# Three energy buys three of the five, and the fourth and fifth are what the
+# grader's second answer is about. NOTHING HERE IS A CLAIM THAT THE TURN IS
+# GOOD -- the funnel refuses turns and never rates them, and if this one has
+# no second line the closeness falsifier is supposed to say so.
+#
+# NO PROTOTYPE ROWS. Every card is a shipped Kokomi or Inazuma-companion row;
+# the quarantined surface ships empty and staging a prototype is a later
+# slice's job, not this example's.
+
+id: kokomi-first-turn-example
+character: KLEEMOD-KOKOMI
+
+notes: |
+  The board a grader is handed: 62/70 HP, no Block, 3 energy, a Charge bank of
+  8, and one Act-1 enemy written down to 32 HP with its Block cleared.
+
+assumptions:
+  - "THE GAME DEALS ITS OWN OPENING HAND ON TOP OF THIS ONE, and the first live
+     run of this file is what proved it: five granted cards arrive beside the
+     five Kokomi drew, so the staged hand is TEN. There is no dev door that
+     empties a hand, so the divergence is recorded rather than fixed. The
+     packet is a picture of the live ten; `closeness --observed` scores the
+     live ten; the declared board below is the five-card reading available
+     with no game running, and it is the smaller question."
+  - "The encounter is GENERATED. This file writes the first living enemy's HP
+     and Block, and it cannot write its INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below declares a
+     single-hit attack as the falsifier's input. If the live intent differs,
+     the closeness reading is a reading of the DECLARED board and the packet is
+     a picture of the LIVE one; they are two records, not one."
+  - "Every card is granted unupgraded. Upgrades move Pearl Barrage's base and
+     Coral Guard's Block, so an upgraded grant is a different board."
+  - "Charge is written to 8 through the registered resource. All Streams Flow
+     reads it at one point per two Charge, so the bank is what makes that card
+     a live choice rather than a small attack."
+  - "The player has no Strength and the enemy no Vulnerable or aura. A
+     reaction on top of a hit would change every number the falsifier scores."
+
+staging:
+  - give: {card: KLEEMOD-PEARL_BARRAGE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-CORAL_GUARD, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-BAKE_KURAGE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-ALL_STREAMS_FLOW, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-GOROU_WAR_BANNER, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 62}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 3}
+  - set_resource: {name: KLEEMOD_CHARGE, amount: 8}
+  - set_hp: {who: first, amount: 32}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+# The tier0 mirror. Read ONLY by `closeness`; never by the packet, which reads
+# the live game. The parser refuses this file if the hand here and the hand
+# staged above are not the same multiset of cards.
+board:
+  character: kokomi
+  pilot: generic
+  hp: 62
+  max_hp: 70
+  block: 0
+  energy: 3
+  turn: 2
+  resources:
+    charge: 8
+  hand:
+    - pearl_barrage
+    - coral_guard
+    - bake_kurage
+    - all_streams_flow
+    - gorou_war_banner
+  enemies:
+    - name: "Act-1 attacker"
+      hp: 32
+      max_hp: 44
+      block: 0
+      intent: {kind: attack, amount: 11}

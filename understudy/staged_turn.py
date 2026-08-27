@@ -1,0 +1,1309 @@
+"""EB-149 (R213 process step 2): the BLIND QA funnel for one staged turn.
+
+    python -m understudy.staged_turn check     understudy/turns/<t>.yaml
+    python -m understudy.staged_turn closeness understudy/turns/<t>.yaml
+    python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --why "..."
+    python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --hold --why "..."
+    python -m understudy.staged_turn grade     <turn-id> <form.json>
+    python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."
+    python -m understudy.staged_turn ledger
+
+WHAT THIS IS, IN ONE PARAGRAPH
+------------------------------
+R213 accepted a four-step funnel and this file is step two. A STAGED TURN is a
+board set up by hand in the real game from a YAML file. A BLIND GRADER -- an
+LLM agent with no repo access, or [USER] playing the same board cold -- sees
+only the printed truth of that board and answers four questions: what did you
+play, what other line did you seriously consider, what did your chosen line
+give up, would a different enemy intent have changed it. THE FORM IS A
+FALSIFIER AND NOT A SCORE. A turn whose second question has no answer, or whose
+fourth is "no", is REFUSED and never reaches [USER]. Nothing in this file rates
+a turn, ranks a turn, or says a turn is good; there is no verdict here but
+REFUSED and SURVIVES, and SURVIVES means only "not yet falsified".
+
+THE ONE NUMBER, AND THE ONE PLACE IT IS QUOTABLE (R213 F, R215 B)
+-----------------------------------------------------------------
+`closeness` reads the staged board into a tier0 `CombatState`, enumerates the
+plausible lines, scores each with the PILOT'S OWN `_score` surface, and reports
+the gap between the best two. It exists to refuse a turn where one line
+overwhelmingly dominates. It is not evidence that a decision is fun, it is not
+a balance reading, and it may not be compared across turns.
+
+R215 B put the exception in LAW in as many words: no number measured on a
+prototype row is quotable, EXCEPT the decision-closeness falsifier, because
+the falsifier reads the TURN and not the row. Every verdict this file writes
+carries that sentence, so a number lifted out of one arrives with its licence.
+
+WHY THE PACKET IS A SEPARATE MODULE
+-----------------------------------
+`qa_packet.py` builds the blind packet and imports nothing from `tier0` -- not
+the sheet loaders, not the engine, not the pilot. THIS file imports all three,
+because the falsifier needs them. Keeping them apart is what makes "the agent
+sees no design context" a structural fact rather than a promise: the code that
+writes the packet cannot open a sheet, and an AST walk in
+`tier0/tests/test_staged_turn.py` says so.
+
+ATTENDED ONLY, LIKE EVERY OTHER STAGED THING
+---------------------------------------------
+This module grants cards and writes a board, so it sits on `scenario.py`'s side
+of the line and `soak.py` does not import it -- pinned structurally, the same
+way `test_understudy_scenario` pins the scenario harness's absence. It reaches
+a fight through `soak.run_scripted`, the same setup / policy-swap / teardown
+dance every attended instrument uses; nothing about the embark is reimplemented
+here.
+
+THE FILE FORMAT
+---------------
+YAML, under `understudy/turns/`. Two halves that describe the same board, and
+the parser refuses a file where they disagree:
+
+    id: kokomi-first-turn-example
+    character: KLEEMOD-KOKOMI
+    assumptions: ["..."]
+    staging:                       # scenario SETUP verbs, run against the game
+      - give: {card: KLEEMOD-PEARL_BARRAGE, pile: hand}
+      - set_energy: 3
+    board:                         # the tier0 mirror, read ONLY by `closeness`
+      character: kokomi
+      pilot: generic
+      hp: 62
+      hand: [pearl_barrage, coral_guard]
+      enemies:
+        - {name: "Jaw Worm", hp: 32, intent: {kind: attack, amount: 11}}
+
+`staging` may not contain `play`, `end_turn` or `expect`: a staged turn is a
+BOARD, and the line is the grader's answer, not the file's. The two halves are
+checked against each other by `scenario.card_key`, so a card added to the hand
+in one half and forgotten in the other is a parse error and not a falsifier
+reading taken on a board nobody staged.
+"""
+
+from __future__ import annotations
+
+import argparse
+import copy
+import json
+import re
+import sys
+import time
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+from understudy import bridge, qa_packet, scenario
+
+REPO = Path(__file__).resolve().parents[1]
+TURN_DIR = Path(__file__).resolve().parent / "turns"
+# COMMITTED, unlike `understudy/logs/`. A packet is the artifact the funnel
+# exists to produce and a verdict is the record of a refusal; both are prose
+# about one hand-set board and neither is a measurement, so they belong in the
+# tree where a later reader can find the turn a verdict refused.
+QA_DIR = REPO / "review" / "qa"
+LEDGER = QA_DIR / "ledger.tsv"
+
+# ---------------------------------------------------------------------------
+# THE ONE PROVISIONAL CONSTANT (R212 derived-not-picked; disclosed in every
+# packet, pinned by `test_dominance_gap_is_the_pilots_own_doubling`).
+#
+# `closeness` reports gap = (best - runner_up) / best, in the pilot's own
+# scoring currency. DOMINANCE_GAP is the gap above which the turn is refused
+# as "one line overwhelmingly dominates".
+#
+# DERIVED, not chosen. 0.5 is exactly the point where best > 2 x runner_up:
+# the winning line is worth more than two of the next-best line put together.
+# That boundary is the pilot's own, not one invented here -- `make_pilot`
+# already treats its score as a value scale with a hard floor at zero
+# (`if best_score <= 0: return None`), so "twice the runner-up" is a statement
+# in the units the surface already defines rather than a number laid on top
+# of it.
+#
+# THE ERROR DIRECTION IS ONE-WAY, which is the R212 condition. A 2x gap in the
+# pilot's own currency is enormous; a threshold this high can only ever
+# UNDER-refuse, letting a merely-lopsided turn through to the next filter --
+# which is the four-question form, and then [USER]. It cannot refuse a turn
+# that was genuinely close. A constant whose only failure mode is "the funnel
+# does less work" is a constant that cannot corrupt a verdict.
+#
+# ALTERNATIVES CONSIDERED AND RECORDED RATHER THAN ASKED (R212):
+#   * an ABSOLUTE gap in score points (e.g. "6, one basic card's worth of
+#     output"). Rejected: the score scale is not stable across characters or
+#     board sizes -- `_score` sums weighted damage, block, scaling and tempo,
+#     so six points means something different on a two-enemy board than on a
+#     one-enemy board, and a falsifier whose threshold drifts with the board
+#     is a falsifier that refuses different things on different turns.
+#   * the pilot's `cost` weight, 0.1 per energy in `pilots/generic.yaml`.
+#     Rejected: that is the surface's TIE-BREAK resolution -- the smallest
+#     difference it can express -- and the smallest expressible difference is
+#     the opposite of a dominance threshold.
+DOMINANCE_GAP = 0.5
+
+# A compute bound, not a design number: `closeness` refuses rather than
+# truncates when a hand's line space is bigger than this. Truncating would
+# make the reported gap depend on which lines happened to be enumerated
+# first, and a falsifier whose answer depends on iteration order is not one.
+MAX_LINES = 20_000
+
+# The weighting R213's second guard asks for, made concrete and simple.
+# A grader whose answer to QUESTION TWO disagrees with [USER]'s on at least
+# WEIGHT_DISAGREE of the last WEIGHT_WINDOW turns they both played loses its
+# power to mark a turn SURVIVES ALONE: the verdict still says SURVIVES, and
+# `survives_alone` goes false, so the turn needs [USER]'s own form before it
+# counts as having passed step two. Question two is the one weighted because
+# it is the one R213 names as the slice's readiness test.
+WEIGHT_WINDOW = 5
+WEIGHT_DISAGREE = 3
+
+# The grader identity R213 reserves for [USER]'s own cold play. One spelling,
+# so a ledger row cannot be a comparison against somebody else's form.
+USER_GRADER = "user"
+
+# The four questions, in the form's own field names. Verbatim from R213's
+# "Play form" paragraph; `qa_form.md` prints the same four and
+# `test_the_form_questions_are_r213s_verbatim` pins that the two agree.
+QUESTIONS: dict[str, str] = {
+    "q1_what_did_you_play": "What did you play?",
+    "q2_other_line_considered": "What other line did you seriously consider?",
+    "q3_what_it_gave_up": "What did your chosen line give up?",
+    "q4_different_intent": "Would a different enemy intent have changed it?",
+}
+
+# Every way this funnel refuses a turn, as data, so a verdict can name the
+# rule that refused it and a reader never has to grep for the sentence.
+FALSIFIERS: dict[str, str] = {
+    "packet_mismatch":
+        "the form was answered against a different packet than the one on "
+        "disk for this turn",
+    "grader_is_designer":
+        "the grader declared it designed these cards; R213's first guard is "
+        "that the QA agent is never the designer of the cards it reads",
+    "incomplete_form":
+        "one of the four answers is missing, so the form cannot be read",
+    "empty_line":
+        "the form names no cards played, so there is no turn to read",
+    "no_second_line":
+        "question two has no answer: no other line was seriously considered, "
+        "which is R213's readiness test and the slice fails it",
+    "intent_insensitive":
+        "question four is no: a different enemy intent would not have "
+        "changed the line, so the intent is not part of the decision",
+    "line_dominates":
+        "the decision-closeness falsifier reads one line as overwhelmingly "
+        "dominating the next best",
+}
+
+# What "no answer" looks like when a grader writes prose instead of leaving a
+# field empty. Deliberately narrow: a long answer that happens to open with
+# "no" is a real answer, and only a short flat refusal is read as one.
+_NEGATIVE_WORDS = {"no", "none", "nothing", "nope", "n/a", "na", "-", "--"}
+_NEGATIVE_PHRASES = {
+    "no other line", "none seriously", "there was none", "nothing else",
+    "no second line", "not really", "no it would not", "no it wouldn't",
+    "there is no other line", "i did not consider another line",
+}
+
+
+class TurnError(RuntimeError):
+    """A turn file that cannot be used: a bad key, two halves that disagree."""
+
+
+class FormError(RuntimeError):
+    """A form file that is not a form: missing fields, wrong shape."""
+
+
+# ------------------------------------------------------------------ parse ---
+
+@dataclass
+class Board:
+    """The tier0 mirror of the staged board. Read by `closeness` and nothing
+    else -- never by the packet, which reads the LIVE game and only the live
+    game."""
+    character: str
+    hand: list[str]
+    enemies: list[dict[str, Any]]
+    pilot: str = "generic"
+    hp: int = 70
+    max_hp: int = 70
+    block: int = 0
+    energy: int = 3
+    turn: int = 1
+    resources: dict[str, int] = field(default_factory=dict)
+
+
+@dataclass
+class StagedTurn:
+    id: str
+    character: str
+    staging: list[tuple[str, Any]]
+    board: Board
+    path: Path | None = None
+    seed: str | None = None
+    notes: str = ""
+    assumptions: list[str] = field(default_factory=list)
+
+    def as_scenario(self) -> scenario.Scenario:
+        """The staging half as a `scenario.Scenario`, so the existing runner
+        executes it. Built directly rather than through `scenario.parse`,
+        which requires an `expect` -- a staged turn asserts nothing, by
+        design: it sets a board and stops."""
+        return scenario.Scenario(
+            name=self.id, character=self.character,
+            steps=list(self.staging) + [("read", {"label": "staged board"})],
+            path=self.path, seed=self.seed,
+            assumptions=list(self.assumptions))
+
+
+_ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+
+# The staging half may only SET things up. `play`, `end_turn` and `expect` are
+# the three verbs that would make the file answer its own question.
+STAGING_VERBS = scenario.SETUP_STEPS + ("read", "mark")
+
+
+def parse(blob: dict[str, Any], path: Path | None = None) -> StagedTurn:
+    if not isinstance(blob, dict):
+        raise TurnError("a turn file is a mapping at the top level")
+    for required in ("id", "character", "staging", "board"):
+        if not blob.get(required):
+            raise TurnError(f"missing '{required}'")
+    turn_id = str(blob["id"])
+    if not _ID_RE.match(turn_id):
+        # The id names a directory under `review/qa/` and is printed into the
+        # blind packet, so it is constrained at both ends: a path-safe slug,
+        # and one the packet's own leak scrub will accept.
+        raise TurnError(
+            f"id {turn_id!r} must be a lowercase hyphenated slug -- it names "
+            f"a directory under review/qa/ and is printed in the blind packet")
+
+    raw_steps = blob["staging"]
+    if not isinstance(raw_steps, list):
+        raise TurnError("'staging' must be a list")
+    steps: list[tuple[str, Any]] = []
+    for i, entry in enumerate(raw_steps):
+        if not isinstance(entry, dict) or len(entry) != 1:
+            raise TurnError(
+                f"staging step {i}: each step is a single-key mapping; "
+                f"got {entry!r}")
+        verb, raw = next(iter(entry.items()))
+        if verb not in STAGING_VERBS:
+            raise TurnError(
+                f"staging step {i}: '{verb}' is not a staging verb. A staged "
+                f"turn sets a BOARD; the line is the grader's answer, not the "
+                f"file's. One of: " + ", ".join(STAGING_VERBS))
+        body = scenario._as_body(verb, raw)
+        scenario._validate(i, verb, body)
+        steps.append((verb, body))
+
+    board = _parse_board(blob["board"])
+    turn = StagedTurn(
+        id=turn_id, character=str(blob["character"]), staging=steps,
+        board=board, path=path, seed=blob.get("seed") or None,
+        notes=str(blob.get("notes") or ""),
+        assumptions=[str(a) for a in (blob.get("assumptions") or [])])
+    _check_halves_agree(turn)
+    return turn
+
+
+def _parse_board(raw: Any) -> Board:
+    if not isinstance(raw, dict):
+        raise TurnError("'board' must be a mapping")
+    for required in ("character", "hand", "enemies"):
+        if not raw.get(required):
+            raise TurnError(f"board: missing '{required}'")
+    enemies = []
+    for i, e in enumerate(raw["enemies"]):
+        if not isinstance(e, dict) or not e.get("name"):
+            raise TurnError(f"board enemy {i}: needs a mapping with a 'name'")
+        enemies.append(dict(e))
+    return Board(
+        character=str(raw["character"]),
+        hand=[str(c) for c in raw["hand"]],
+        enemies=enemies,
+        pilot=str(raw.get("pilot") or "generic"),
+        hp=int(raw.get("hp", 70)),
+        max_hp=int(raw.get("max_hp", raw.get("hp", 70))),
+        block=int(raw.get("block", 0)),
+        energy=int(raw.get("energy", 3)),
+        turn=int(raw.get("turn", 1)),
+        resources={str(k): int(v) for k, v in (raw.get("resources") or {}).items()},
+    )
+
+
+def _check_halves_agree(turn: StagedTurn) -> None:
+    """The staged hand and the mirrored hand are the same multiset of cards.
+
+    Checked through `scenario.card_key`, which folds the three spellings this
+    repo uses. Without this, `closeness` would answer about a board nobody
+    staged and the packet would show a board nobody scored -- and the two
+    would look like one reading.
+    """
+    staged = sorted(scenario.card_key(str(b.get("card")))
+                    for v, b in turn.staging
+                    if v == "give" and str(b.get("pile") or "hand") == "hand"
+                    for _ in range(int(b.get("count", 1))))
+    mirrored = sorted(scenario.card_key(c) for c in turn.board.hand)
+    if staged != mirrored:
+        raise TurnError(
+            f"the staged hand and board.hand disagree: staged {staged}, "
+            f"board {mirrored}. They describe the same board, so a card in "
+            f"one and not the other is a falsifier reading taken on a board "
+            f"nobody staged")
+
+
+def load(path: str | Path) -> StagedTurn:
+    p = Path(path)
+    return parse(yaml.safe_load(p.read_text(encoding="utf-8")), path=p)
+
+
+def all_turns(directory: Path | None = None) -> list[Path]:
+    d = directory or TURN_DIR
+    return sorted(d.glob("*.yaml")) if d.is_dir() else []
+
+
+def turn_dir(turn_id: str) -> Path:
+    return QA_DIR / turn_id
+
+
+# --------------------------------------------------------------- staging ---
+
+class _StagingComplete(RuntimeError):
+    """The board is set. Raised to stop the driver where the turn begins.
+
+    `RunDriver.run` files any escaping exception as a `harness_exception`
+    defect and returns its summary, which is exactly the behaviour wanted
+    here: the run STOPS at the staged board instead of handing it to
+    `policy_v1`, which would play the turn the grader is supposed to play.
+    The summary's outcome is checked for this class's name rather than for
+    success, and `cmd_stage` says so in its output.
+    """
+
+
+class StagingPolicy:
+    """`policy_v1` everywhere but the first combat screen, where it stops.
+
+    `scenario.ScenarioPolicy` hands combat BACK to `policy_v1` so the fight
+    can end. This one must not: the whole point is a board frozen at the
+    moment the turn begins, either for a packet export or for a person to sit
+    down in front of.
+    """
+
+    def __init__(self, runner: scenario.Runner):
+        from understudy import policy_v1
+        self._policy = policy_v1
+        self.POLICY_VERSION = "staged_turn/" + policy_v1.POLICY_VERSION
+        self.BLOCK_MATTERS_FRACTION = policy_v1.BLOCK_MATTERS_FRACTION
+        self.COMPANION_SHARE_FOR_GUEST_CAST = \
+            policy_v1.COMPANION_SHARE_FOR_GUEST_CAST
+        self.Memo = policy_v1.Memo
+        self.runner = runner
+        self.staged_state: dict[str, Any] | None = None
+        self.ok: bool | None = None
+
+    def decide(self, state: dict[str, Any], memo: Any,
+               commit: str | None = None):
+        st = str(state.get("state_type") or "")
+        if self.staged_state is None and st in scenario.COMBAT_SCREENS:
+            self.ok = self.runner.run()
+            self.staged_state = self.runner.state or state
+            raise _StagingComplete(
+                "the board is staged; the driver stops here so the turn is "
+                "not played by a bot")
+        return self._policy.decide(state, memo, commit=commit)
+
+
+def stage_board(turn: StagedTurn, why: str, *, hold: bool,
+                out_path: Path) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Boot, embark, reach the first fight, set the board. Returns
+    `(live wire state, the run summary)`."""
+    from understudy import soak
+
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with out_path.open("w", encoding="utf-8") as fh:
+        runner = scenario.Runner(turn.as_scenario(), why, out=fh)
+        runner.emit({"step": "staged_turn_begin", "turn": turn.id,
+                     "character": turn.character, "hold": hold,
+                     "file": str(turn.path),
+                     "assumptions": turn.assumptions})
+        policy = StagingPolicy(runner)
+        # `--hold` attaches to a game somebody else launched, and that is not
+        # a convenience: `run_scripted`'s `finally` tears the session down,
+        # and a teardown that owns the launch KILLS THE GAME -- which is the
+        # one thing a hold must not do. With `do_setup=False` the session
+        # makes no game-dir changes and owns no process, so the reversibility
+        # ledger is empty and the staged board is still on the screen when
+        # this returns.
+        summary = soak.run_scripted(policy, stamp, character=turn.character,
+                                    max_fights=1, chosen_seed=turn.seed,
+                                    do_setup=not hold)
+        runner.emit({"step": "staged_turn_end", "staged": policy.staged_state
+                     is not None, "steps_ok": policy.ok, "run": summary})
+    if policy.staged_state is None:
+        raise TurnError(
+            f"no combat screen was ever reached, so nothing was staged "
+            f"(run outcome: {summary.get('outcome')} "
+            f"{summary.get('detail')})")
+    if not policy.ok:
+        raise TurnError(
+            f"a staging step failed; the board is not the one the file "
+            f"describes. See {out_path}")
+    return policy.staged_state, summary
+
+
+def export_packet(turn: StagedTurn, state: dict[str, Any]) -> dict[str, Any]:
+    """Write `packet.md`, `packet.json` and `observed.json`. Returns a report.
+
+    THREE FILES, AND THE THIRD IS NOT PART OF THE PACKET. `packet.md` and
+    `packet.json` are what a grader is handed and they are scrubbed;
+    `observed.json` is the tool's own record of the live board -- the RAW wire
+    state, entity ids and wire card ids included -- and it is never given to a
+    grader.
+
+    THE RAW STATE IS KEPT BECAUSE THE LIVE BOARD IS NOT THE DECLARED ONE, and
+    the first live run of this tool is what proved it: the game deals its own
+    opening hand, so a turn that grants five cards is staged with TEN in hand,
+    and the encounter is generated, so the enemy and its telegraph are
+    whatever rolled. `closeness --observed` reads this file and scores the
+    board the grader actually saw. The declared `board:` half stays useful --
+    it is the reading available with no game -- but where the two disagree the
+    observed one is the turn.
+    """
+    d = turn_dir(turn.id)
+    d.mkdir(parents=True, exist_ok=True)
+    # THE DISCLOSURES ARE SCRUBBED LIKE EVERYTHING ELSE, which is why none of
+    # them names a ruling: the packet's own leak rules refuse an `R213` as
+    # readily in a disclosure as in a card face, and they are right to -- a
+    # grader who can see a ruling number can look up what the ruling wanted.
+    # The constant is disclosed because a falsifier the grader cannot see the
+    # threshold of is a filter, not a disclosure; the citation for it lives in
+    # the verdict and in this module's docstring, where no grader reads.
+    disclosures = [
+        f"A decision-closeness falsifier reads this turn with a dominance "
+        f"threshold of {DOMINANCE_GAP}.",
+        "You are not being asked whether this turn is fun.",
+    ] + list(turn.assumptions)
+    packet = qa_packet.build(state, turn.id, repo=REPO,
+                             disclosures=disclosures)
+    md = qa_packet.render(packet)
+    digest = qa_packet.sha256(md)
+    packet["packet_sha256"] = digest
+    (d / "packet.md").write_text(md, encoding="utf-8")
+    (d / "packet.json").write_text(qa_packet.dumps(packet), encoding="utf-8")
+    (d / "observed.json").write_text(
+        json.dumps({"turn_id": turn.id,
+                    "guardrail": qa_packet.PACKET_GUARDRAIL,
+                    "pilot": turn.board.pilot,
+                    "not_a_packet": ("the RAW wire state, ids included. Tool "
+                                     "side only -- never hand this to a "
+                                     "grader"),
+                    "digest": scenario.digest(state),
+                    "state": state}, indent=1, default=str) + "\n",
+        encoding="utf-8")
+    live = [c["title"] for c in packet["board"]["hand"]]
+    return {"dir": d, "packet_md": d / "packet.md",
+            "packet_json": d / "packet.json",
+            "observed_json": d / "observed.json", "sha256": digest,
+            "cards": len(live), "hand": live,
+            "declared_cards": len(turn.board.hand),
+            "enemies": len(packet["board"]["enemies"])}
+
+
+# ----------------------------------------------------------------- form ----
+
+def _norm(text: Any) -> str:
+    return " ".join(str(text or "").strip().lower().split()).strip(" .!?,;:")
+
+
+def is_negative(text: Any) -> bool:
+    """"No", "none", "nothing else" -- an answer that is the absence of one.
+
+    Narrow on purpose. A long answer that opens with "no" is an answer ("no
+    line beat it, but I weighed X against Y"), and reading it as a refusal
+    would falsify a turn that passed. Only a flat short negative counts.
+    """
+    n = _norm(text)
+    if not n:
+        return True
+    if n in _NEGATIVE_WORDS or n in _NEGATIVE_PHRASES:
+        return True
+    words = n.split()
+    return words[0] in _NEGATIVE_WORDS and len(words) <= 3
+
+
+def load_form(path: str | Path) -> dict[str, Any]:
+    blob = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(blob, dict):
+        raise FormError("a form is a JSON object")
+    for key in ("grader", "chosen_line", *QUESTIONS):
+        if key not in blob:
+            raise FormError(f"the form has no {key!r}")
+    grader = blob["grader"]
+    if not isinstance(grader, dict) or not grader.get("id"):
+        raise FormError("'grader' needs at least an 'id' -- the packet has to "
+                        "record who answered it and on what")
+    line = blob["chosen_line"]
+    if not isinstance(line, list):
+        raise FormError("'chosen_line' is an ordered list of plays")
+    for i, play in enumerate(line):
+        if not isinstance(play, dict) or not play.get("card"):
+            raise FormError(f"chosen_line[{i}] needs a 'card' -- the PRINTED "
+                            f"title, which is the only spelling the grader was "
+                            f"shown")
+    return blob
+
+
+def grader_id(form: dict[str, Any]) -> str:
+    return str((form.get("grader") or {}).get("id") or "unknown")
+
+
+# ------------------------------------------------------------- the grade ---
+
+def apply_falsifiers(turn_id: str, form: dict[str, Any], *,
+                     packet_sha: str | None,
+                     closeness: dict[str, Any] | None) -> list[str]:
+    """Every rule that refuses this form, in the order they are checked."""
+    refused: list[str] = []
+    given = str(form.get("packet_sha256") or "")
+    if packet_sha and given and given != packet_sha:
+        refused.append("packet_mismatch")
+    if bool((form.get("grader") or {}).get("designed_these_cards")):
+        refused.append("grader_is_designer")
+    if any(not _norm(form.get(q)) for q in QUESTIONS):
+        refused.append("incomplete_form")
+    if not form.get("chosen_line"):
+        refused.append("empty_line")
+    if is_negative(form.get("q2_other_line_considered")):
+        refused.append("no_second_line")
+    # BOTH HALVES, and the boolean is not the authority on its own: a form
+    # that ticks `q4_changed: true` and then writes "no" has answered no.
+    if (form.get("q4_changed") is False
+            or is_negative(form.get("q4_different_intent"))):
+        refused.append("intent_insensitive")
+    if closeness and closeness.get("verdict") == "REFUSED":
+        refused.append("line_dominates")
+    return refused
+
+
+def grade(turn_id: str, form: dict[str, Any], *,
+          root: Path | None = None) -> dict[str, Any]:
+    d = (root or QA_DIR) / turn_id
+    packet_md = d / "packet.md"
+    packet_sha = (qa_packet.sha256(packet_md.read_text(encoding="utf-8"))
+                  if packet_md.is_file() else None)
+    closeness_path = d / "closeness.json"
+    closeness = (json.loads(closeness_path.read_text(encoding="utf-8"))
+                 if closeness_path.is_file() else None)
+
+    refused = apply_falsifiers(turn_id, form, packet_sha=packet_sha,
+                               closeness=closeness)
+    gid = grader_id(form)
+    down, why_down = is_down_weighted(gid, root=root)
+    verdict = {
+        "turn_id": turn_id,
+        "verdict": "REFUSED" if refused else "SURVIVES",
+        "refused_by": refused,
+        "reasons": [f"{rule}: {FALSIFIERS[rule]}" for rule in refused],
+        "grader": dict(form.get("grader") or {}),
+        "packet_sha256": packet_sha,
+        "chosen_line": list(form.get("chosen_line") or []),
+        "answers": {q: str(form.get(q) or "") for q in QUESTIONS},
+        # SURVIVES means NOT YET FALSIFIED and nothing else. It is written out
+        # in the record because a one-word verdict read six months later is
+        # exactly the kind of thing that gets promoted into "the tool liked
+        # it".
+        "survives_means": ("not yet falsified -- this funnel refuses turns "
+                           "and never rates them"),
+        "survives_alone": not refused and not down,
+        "why_not_alone": why_down if (down and not refused) else "",
+        "closeness": closeness,
+        "closeness_quotability": (
+            "the decision-closeness gap is a falsifier reading of the TURN "
+            "and is quotable under R215 B's exception; it is never evidence "
+            "that a decision is fun"),
+        "guardrail": qa_packet.PACKET_GUARDRAIL,
+        "graded_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+    }
+    return verdict
+
+
+# ------------------------------------------------------------- closeness ---
+
+def build_combat_state(board: Board):
+    """The staged board as a tier0 `CombatState`.
+
+    Returns `(state, unrepresentable)`. `unrepresentable` is the list of hand
+    cards the sim has no row for; the caller REFUSES the falsifier for that
+    turn rather than guessing, because a line scored with a card missing from
+    it is a line nobody could play.
+    """
+    import random
+
+    from tier0.content import loader
+    from tier0.engine.state import CombatState, Enemy, Player
+
+    hand = []
+    unrepresentable: list[str] = []
+    for name in board.hand:
+        try:
+            hand.append(loader.peek_card(name))
+        except (KeyError, ValueError):
+            unrepresentable.append(name)
+    if unrepresentable:
+        return None, unrepresentable
+
+    player = Player(hp=board.hp, max_hp=board.max_hp, block=board.block,
+                    energy=board.energy, hand=hand,
+                    character_id=board.character)
+    for key, amount in board.resources.items():
+        if not hasattr(player, key):
+            raise TurnError(
+                f"board.resources names {key!r}, which is not a field on the "
+                f"sim's Player -- a resource the sim cannot hold is a board "
+                f"the falsifier cannot read")
+        setattr(player, key, int(amount))
+
+    enemies = []
+    for e in board.enemies:
+        intent = dict(e.get("intent") or {"kind": "block", "amount": 0})
+        hp = int(e.get("hp", 1))
+        enemies.append(Enemy(hp=hp, max_hp=int(e.get("max_hp", hp)),
+                             block=int(e.get("block", 0)),
+                             name=str(e["name"]), intents=[intent],
+                             aura=e.get("aura")))
+    state = CombatState(player=player, enemies=enemies,
+                        # Never consumed: every scoring path below is pure,
+                        # and a line that drew from the stream would make the
+                        # gap depend on enumeration order.
+                        rng=random.Random(0), turn=board.turn)
+    return state, []
+
+
+class _TooManyLines(RuntimeError):
+    """The bounded walk hit its ceiling. Refuses; never truncates."""
+
+
+def _enumerate_lines(state, weights, max_lines: int
+                     ) -> tuple[dict[frozenset[int], float], int, int]:
+    """Every line the board can actually play, scored in the pilot's currency.
+
+    A DEPTH-FIRST WALK THAT PLAYS AS IT GOES, rather than an enumeration of
+    subsets filtered afterwards, and the difference is what makes this usable
+    on a live board. The game deals its own opening hand, so a staged hand is
+    ten cards, not five -- and ten cards is 9.8 million orderings if you
+    enumerate first and check playability second. Walking prunes at the first
+    card the energy cannot buy, which takes the same board to a few hundred
+    playouts.
+
+    Each card is scored by `pilot.policy._score` against the state AS IT IS
+    WHEN THAT CARD IS PLAYED, and then actually resolved through
+    `combat.play_card`, so an ordering that sets something up before spending
+    it scores differently from the reverse. That is why the playout is real
+    rather than a sum of static reads.
+
+    Returns `(best score per SET of cards, playouts walked, plays refused)`.
+    The collapse onto sets is the other half: "what other line did you
+    seriously consider" is a question about WHICH CARDS, and a top-two made of
+    two orderings of the same three cards would report a gap of nearly zero
+    and refuse nothing, ever.
+    """
+    from tier0.engine import combat
+    from tier0.pilot import policy
+
+    n = len(state.player.hand)
+    best: dict[frozenset[int], float] = {}
+    walked = 0
+    refused = 0
+
+    def walk(s, slots, chosen: frozenset[int], total: float) -> None:
+        nonlocal walked, refused
+        for i in range(n):
+            if i in chosen:
+                continue
+            card = slots[i]
+            # `Card` is a value-equality dataclass and `play_card` removes the
+            # instance from hand, so the SLOT LIST -- taken before the first
+            # play and copied alongside the state -- is what keeps index `i`
+            # meaning the same card for the whole line. A lookup by id or by
+            # equality would find the first EQUAL card instead.
+            if card not in s.player.hand or not combat.card_playable(s, card):
+                continue
+            if walked >= max_lines:
+                raise _TooManyLines(walked)
+            s2, slots2 = copy.deepcopy((s, slots))
+            try:
+                score = total + policy._score(s2, slots2[i], weights)
+                combat.play_card(s2, slots2[i])
+            except Exception:                                # noqa: BLE001
+                # A line the sim cannot resolve is not a line the grader could
+                # have chosen, so it leaves the walk rather than scoring zero.
+                refused += 1
+                continue
+            walked += 1
+            key = chosen | {i}
+            if score > best.get(key, float("-inf")):
+                best[key] = score
+            walk(s2, slots2, key, score)
+
+    walk(state, list(state.player.hand), frozenset(), 0.0)
+    return best, walked, refused
+
+
+# The registered resources the sim holds as named Player fields. `adapter`
+# does not map them (nothing in the bot loop reads them off the wire), and a
+# Charge reader scored against a bank of zero is a card scored as a different
+# card -- which on this repo's one shipped meter reader is the whole
+# difference between a live choice and a small attack. Explicit table rather
+# than a `setattr(k.lower())` guess: an unmapped resource is REPORTED, so a
+# meter the falsifier silently could not see never passes for one it read.
+#
+# THE THREE BURST METERS ALL LAND ON ONE FIELD, and by `max` rather than by
+# assignment: the wire registers `KLEEMOD_BURST`, `KLEEMOD_FURINA_BURST` and
+# `KLEEMOD_KOKOMI_BURST` separately while the sim holds one
+# `Player.burst_energy`, and on any real board exactly one of them is
+# non-zero. `max` makes the order the dict is walked in irrelevant, which
+# assignment would not.
+#
+# KNOWN GAP, stated rather than hidden: `burst_max` is NOT on the wire, so a
+# card gated on `requires: burst_energy_full` reads as playable on an observed
+# board whatever the meter holds. Nothing in this funnel's way uses that gate
+# today; the day one does, this is where it breaks.
+WIRE_RESOURCES = {"KLEEMOD_CHARGE": "charge", "KLEEMOD_ENCORE": "encore",
+                  "KLEEMOD_FANFARE": "fanfare",
+                  "KLEEMOD_BURST": "burst_energy",
+                  "KLEEMOD_FURINA_BURST": "burst_energy",
+                  "KLEEMOD_KOKOMI_BURST": "burst_energy"}
+
+
+def observed_state(blob: dict[str, Any]):
+    """The LIVE board from an `observed.json`, as a tier0 `CombatState`.
+
+    Reuses `understudy.adapter.build_combat_state`, which is the repo's
+    existing wire-to-sim constructor and already carries the two decisions
+    that matter here: a hand card resolves to its SHEET row where the wire id
+    names one (and is flagged approximate where it does not), and enemy powers
+    are dropped because the intent label the wire prints has already folded
+    them in.
+
+    Returns `(state, unrepresentable, notes)`.
+    """
+    from understudy import adapter
+
+    raw = blob.get("state") or {}
+    if not raw:
+        raise TurnError(
+            "observed.json holds no raw state -- it was written by a build of "
+            "this tool that only kept the digest. Re-stage the turn")
+    cs, notes = adapter.build_combat_state(raw)
+    wire = (raw.get("player") or {}).get("resources") or {}
+    unmapped = []
+    for key, amount in wire.items():
+        field_name = WIRE_RESOURCES.get(str(key))
+        if field_name is None:
+            unmapped.append(str(key))
+            continue
+        setattr(cs.player, field_name,
+                max(int(amount or 0), int(getattr(cs.player, field_name, 0))))
+    notes = dict(notes, unmapped_resources=sorted(unmapped))
+    return cs, list(notes.get("approximate_cards") or []), notes
+
+
+def closeness(board: Board, *, max_lines: int = MAX_LINES) -> dict[str, Any]:
+    """The R213 F falsifier on the DECLARED board. Refuses; never rates."""
+    state, unrepresentable = build_combat_state(board)
+    return _closeness(state, board.pilot, unrepresentable,
+                      max_lines=max_lines, source="declared board")
+
+
+def closeness_observed(blob: dict[str, Any], *, pilot: str = "",
+                       max_lines: int = MAX_LINES) -> dict[str, Any]:
+    """The same falsifier on the board the grader actually saw."""
+    state, unrepresentable, notes = observed_state(blob)
+    result = _closeness(state, pilot or str(blob.get("pilot") or "generic"),
+                        unrepresentable, max_lines=max_lines,
+                        source="observed board (live wire state)")
+    return dict(result, observed_notes=notes)
+
+
+def _closeness(state, pilot: str, unrepresentable: list[str], *,
+               max_lines: int, source: str) -> dict[str, Any]:
+    from tier0.content import loader
+
+    base = {
+        "source": source,
+        "falsifier": "decision-closeness (R213 F)",
+        "dominance_gap": DOMINANCE_GAP,
+        "quotability": (
+            "a falsifier reading of the TURN, quotable under R215 B's "
+            "exception to the prototype clause; never a claim that a "
+            "decision is fun and never comparable across turns"),
+        "guardrail": qa_packet.PACKET_GUARDRAIL,
+    }
+    if unrepresentable:
+        return dict(base, applicable=False, verdict="NOT READ",
+                    reason=f"not representable in the sim: "
+                           f"{', '.join(unrepresentable)}",
+                    unrepresentable=unrepresentable)
+
+    weights = loader.pilot_weights(pilot)
+    try:
+        best_by_set, walked, unplayable = _enumerate_lines(state, weights,
+                                                           max_lines)
+    except _TooManyLines:
+        return dict(base, applicable=False, verdict="NOT READ",
+                    reason=f"the board's line space passed the {max_lines} "
+                           f"playout bound; the falsifier refuses rather "
+                           f"than truncating, because a gap that depends on "
+                           f"which lines were walked first is not a reading")
+
+    ranked = sorted(((score, sorted(key)) for key, score in best_by_set.items()),
+                    key=lambda t: (-t[0], t[1]))
+    named = [{"cards": [state.player.hand[i].name for i in cards],
+              "score": round(score, 4)} for score, cards in ranked[:5]]
+    if len(ranked) < 2:
+        return dict(base, applicable=False, verdict="NOT READ",
+                    reason=f"only {len(ranked)} playable line(s) on this "
+                           f"board; there is no second line to be close to",
+                    lines=named)
+    top1, top2 = ranked[0][0], ranked[1][0]
+    if top1 <= 0:
+        return dict(base, applicable=False, verdict="NOT READ",
+                    reason="the pilot's surface values no line above zero "
+                           "here, so a ratio against it says nothing",
+                    lines=named)
+    gap = (top1 - top2) / top1
+    dominated = gap > DOMINANCE_GAP
+    return dict(base, applicable=True,
+                verdict="REFUSED" if dominated else "SURVIVES",
+                gap=round(gap, 4), top1=round(top1, 4), top2=round(top2, 4),
+                lines_considered=len(best_by_set),
+                playouts=walked, plays_refused=unplayable,
+                pilot=pilot, lines=named,
+                reason=(FALSIFIERS["line_dominates"] if dominated else
+                        "no line dominates by more than the derived gap"))
+
+
+# ---------------------------------------------------------------- ledger ---
+
+LEDGER_COLUMNS = ("turn_id", "grader", "verdict", "refused_by",
+                  "q1", "q2", "q3", "q4",
+                  "agree_q1", "agree_q2", "agree_q4", "survives_alone")
+
+
+def _cell(text: Any, width: int = 90) -> str:
+    """One ledger cell: no tabs, no newlines, bounded."""
+    s = " ".join(str(text or "").split())
+    return (s[:width - 1] + "…") if len(s) > width else s
+
+
+def _line_titles(form: dict[str, Any]) -> list[str]:
+    return [_norm(p.get("card")) for p in (form.get("chosen_line") or [])]
+
+
+def q2_agrees(a: dict[str, Any], b: dict[str, Any],
+              titles: list[str]) -> bool | None:
+    """Do two graders' second answers name a card in common?
+
+    `titles` is the printed titles from the packet, which is the only
+    vocabulary either answer could be written in. Deliberately shallow: this
+    is not a semantic comparison and does not pretend to be one -- it asks
+    whether the two people were weighing the same alternative, which is the
+    thing R213's guard is about. `None` when neither answer names a card at
+    all, so an unreadable pair does not count as a disagreement.
+    """
+    na, nb = _norm(a.get("q2_other_line_considered")), \
+        _norm(b.get("q2_other_line_considered"))
+    sa = {t for t in titles if t and t in na}
+    sb = {t for t in titles if t and t in nb}
+    if not sa and not sb:
+        return None
+    return bool(sa & sb)
+
+
+def ledger_rows(root: Path | None = None) -> list[dict[str, str]]:
+    path = (root or QA_DIR) / "ledger.tsv"
+    if not path.is_file():
+        return []
+    rows = []
+    for i, raw in enumerate(path.read_text(encoding="utf-8").splitlines()):
+        if not raw.strip() or raw.startswith("#"):
+            continue
+        cells = raw.split("\t")
+        if i == 0 and cells and cells[0] == "turn_id":
+            continue
+        rows.append(dict(zip(LEDGER_COLUMNS, cells + [""] * len(LEDGER_COLUMNS))))
+    return rows
+
+
+def is_down_weighted(gid: str, root: Path | None = None) -> tuple[bool, str]:
+    """R213's second guard, made concrete.
+
+    A grader that is not [USER] and whose QUESTION TWO disagreed with [USER]'s
+    on at least WEIGHT_DISAGREE of the last WEIGHT_WINDOW turns they both
+    answered loses the power to mark a turn SURVIVES ALONE. Turns where the
+    comparison could not be made (no [USER] form, or neither answer named a
+    card) are not counted either way -- an absent comparison is not a
+    disagreement.
+    """
+    if gid == USER_GRADER:
+        return False, ""
+    shared = [r for r in ledger_rows(root)
+              if r["grader"] == gid and r["agree_q2"] in ("yes", "no")]
+    window = shared[-WEIGHT_WINDOW:]
+    disagreements = sum(1 for r in window if r["agree_q2"] == "no")
+    if disagreements >= WEIGHT_DISAGREE:
+        return True, (
+            f"grader {gid!r} is down-weighted: its answer to question two "
+            f"disagreed with [USER]'s on {disagreements} of the last "
+            f"{len(window)} turns they both played, so its SURVIVES needs "
+            f"[USER]'s own cold-play form beside it "
+            f"(threshold: {WEIGHT_DISAGREE} of {WEIGHT_WINDOW})")
+    return False, ""
+
+
+def _packet_titles(turn_id: str, root: Path | None = None) -> list[str]:
+    p = (root or QA_DIR) / turn_id / "packet.json"
+    if not p.is_file():
+        return []
+    blob = json.loads(p.read_text(encoding="utf-8"))
+    return [_norm(c.get("title"))
+            for c in ((blob.get("board") or {}).get("hand") or [])]
+
+
+def build_ledger(root: Path | None = None) -> str:
+    """One row per (turn, grader), with the agreement columns filled in.
+
+    Rebuilt from the verdicts on disk rather than appended to, so a re-graded
+    turn cannot leave a stale row behind arguing with its own replacement.
+    """
+    base = root or QA_DIR
+    by_turn: dict[str, dict[str, dict[str, Any]]] = {}
+    # `verdict-<grader>.json` and NOT `verdict.json`: the latter is the
+    # brief's fixed path for "the verdict on this turn" and is rewritten by
+    # every grade, so globbing it too would enter the most recent grader
+    # twice.
+    for verdict_path in sorted(base.glob("*/verdict-*.json")):
+        blob = json.loads(verdict_path.read_text(encoding="utf-8"))
+        tid = str(blob.get("turn_id") or verdict_path.parent.name)
+        gid = str((blob.get("grader") or {}).get("id") or "unknown")
+        by_turn.setdefault(tid, {})[gid] = blob
+
+    out = ["\t".join(LEDGER_COLUMNS)]
+    for tid in sorted(by_turn):
+        graders = by_turn[tid]
+        titles = _packet_titles(tid, root)
+        user = graders.get(USER_GRADER)
+        for gid in sorted(graders):
+            v = graders[gid]
+            answers = v.get("answers") or {}
+            agree = {"agree_q1": "-", "agree_q2": "-", "agree_q4": "-"}
+            if user is not None and gid != USER_GRADER:
+                ua = user.get("answers") or {}
+                agree["agree_q1"] = _yn(
+                    _line_titles(v) == _line_titles(user))
+                a2 = q2_agrees({"q2_other_line_considered":
+                                answers.get("q2_other_line_considered")},
+                               {"q2_other_line_considered":
+                                ua.get("q2_other_line_considered")}, titles)
+                agree["agree_q2"] = "-" if a2 is None else _yn(a2)
+                agree["agree_q4"] = _yn(
+                    is_negative(answers.get("q4_different_intent"))
+                    == is_negative(ua.get("q4_different_intent")))
+            out.append("\t".join([
+                tid, gid, str(v.get("verdict") or ""),
+                ",".join(v.get("refused_by") or []) or "-",
+                _cell(answers.get("q1_what_did_you_play")),
+                _cell(answers.get("q2_other_line_considered")),
+                _cell(answers.get("q3_what_it_gave_up")),
+                _cell(answers.get("q4_different_intent")),
+                agree["agree_q1"], agree["agree_q2"], agree["agree_q4"],
+                _yn(bool(v.get("survives_alone"))),
+            ]))
+    out.append(f"# {qa_packet.PACKET_GUARDRAIL}")
+    out.append(f"# down-weighting: a grader whose q2 disagrees with "
+               f"[USER] on {WEIGHT_DISAGREE} of its last {WEIGHT_WINDOW} "
+               f"shared turns cannot mark a turn SURVIVES alone")
+    return "\n".join(out) + "\n"
+
+
+def _yn(value: bool) -> str:
+    return "yes" if value else "no"
+
+
+# --------------------------------------------------------------- execute ---
+
+def execute_steps(turn: StagedTurn, form: dict[str, Any]
+                  ) -> list[tuple[str, Any]]:
+    """The staging steps, a mark, then the grader's line as `play` steps.
+
+    THE TRANSLATION FROM TITLE TO ID HAPPENS HERE AND NOWHERE THE GRADER CAN
+    SEE. `scenario.find_card` matches a printed title against the hand the
+    wire just returned and hands the POST a card INDEX -- so the agent's
+    answer stays a list of faces and the bridge still gets the identity it
+    needs. Same for a target: `find_enemy` takes the enemy's display name.
+    """
+    steps = list(turn.staging)
+    steps.append(("mark", {}))
+    for play in form.get("chosen_line") or []:
+        body: dict[str, Any] = {"card": str(play["card"])}
+        if play.get("target"):
+            body["target"] = str(play["target"])
+        steps.append(("play", body))
+    steps.append(("read", {"label": "after the graded line"}))
+    return steps
+
+
+def _outcome(before: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
+    """HP/Block/resource deltas across the graded line. DIAGNOSTIC ONLY."""
+    def creature(d, key):
+        return {"hp": (d.get(key) or {}).get("hp"),
+                "block": (d.get(key) or {}).get("block")}
+
+    enemies_before = {e["id"]: e for e in before.get("enemies") or []}
+    enemies_after = {e["id"]: e for e in after.get("enemies") or []}
+    return {
+        "player": {"before": creature(before, "player"),
+                   "after": creature(after, "player"),
+                   "resources_before": (before.get("player") or {}).get("resources"),
+                   "resources_after": (after.get("player") or {}).get("resources")},
+        "enemies": [{"id": eid,
+                     "name": enemies_before[eid].get("name"),
+                     "hp_before": enemies_before[eid].get("hp"),
+                     "hp_after": (enemies_after.get(eid) or {}).get("hp"),
+                     "block_before": enemies_before[eid].get("block"),
+                     "block_after": (enemies_after.get(eid) or {}).get("block")}
+                    for eid in enemies_before],
+        # GUARDRAIL-7, on the row and not in a header. These numbers exist to
+        # catch a DEFECT -- a card that did not do what its face says when a
+        # person's line played it. They are not a comparison, not a balance
+        # reading, and not evidence about the turn.
+        "reading": ("diagnostic only: a hand-set board, played once. A number "
+                    "here is evidence of a DEFECT or of nothing at all"),
+        "guardrail": qa_packet.PACKET_GUARDRAIL,
+    }
+
+
+# ------------------------------------------------------------------ main ---
+
+def cmd_check(args) -> int:
+    paths = [Path(args.file)] if args.file else all_turns()
+    if not paths:
+        print("no turn files found", file=sys.stderr)
+        return 1
+    bad = 0
+    for p in paths:
+        try:
+            t = load(p)
+            print(f"OK   {p.name}: id={t.id} {len(t.staging)} staging step(s), "
+                  f"{len(t.board.hand)} card(s) in hand, "
+                  f"{len(t.board.enemies)} enem(ies), "
+                  f"{len(t.assumptions)} assumption(s)")
+        except (TurnError, scenario.ScenarioError, yaml.YAMLError) as e:
+            bad += 1
+            print(f"BAD  {p.name}: {e}", file=sys.stderr)
+    return 1 if bad else 0
+
+
+def cmd_closeness(args) -> int:
+    turn = load(args.file)
+    observed = turn_dir(turn.id) / "observed.json"
+    if args.observed and not observed.is_file():
+        print(f"no observed board at {observed}; stage the turn first",
+              file=sys.stderr)
+        return 2
+    if args.observed:
+        result = closeness_observed(
+            json.loads(observed.read_text(encoding="utf-8")),
+            pilot=turn.board.pilot)
+    else:
+        result = closeness(turn.board)
+    d = turn_dir(turn.id)
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "closeness.json").write_text(
+        json.dumps(result, indent=1) + "\n", encoding="utf-8")
+    print(f"turn: {turn.id}   pilot: {turn.board.pilot}   "
+          f"source: {result['source']}")
+    print(f"GUARDRAIL: {qa_packet.PACKET_GUARDRAIL}")
+    if not result["applicable"]:
+        print(f"NOT READ: {result['reason']}")
+        return 0
+    print(f"gap {result['gap']:.4f}  (top1 {result['top1']:.3f}, "
+          f"top2 {result['top2']:.3f}) over {result['lines_considered']} "
+          f"line(s); DOMINANCE_GAP {DOMINANCE_GAP}")
+    for line in result["lines"]:
+        print(f"  {line['score']:8.3f}  {' + '.join(line['cards'])}")
+    print(f"{result['verdict']}: {result['reason']}")
+    for note in (result.get("observed_notes") or {}).get(
+            "unmapped_resources") or []:
+        print(f"  UNMAPPED RESOURCE (read as zero): {note}")
+    print(f"closeness: {d / 'closeness.json'}")
+    return 0
+
+
+def cmd_stage(args) -> int:
+    if not str(args.why).strip():
+        print("stage needs a --why: it grants cards and writes a board",
+              file=sys.stderr)
+        return 2
+    turn = load(args.file)
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    log = scenario.LOG_DIR / f"staged-{turn.id}-{stamp}.jsonl"
+    print(f"turn: {turn.id}  ({turn.character})")
+    for a in turn.assumptions:
+        print(f"  ASSUMES: {a}")
+    print(f"GUARDRAIL: {bridge.GRANT_GUARDRAIL}")
+    state, summary = stage_board(turn, args.why, hold=args.hold, out_path=log)
+    report = export_packet(turn, state)
+    print(f"\nlog:    {log}")
+    print(f"packet: {report['packet_md']}")
+    print(f"json:   {report['packet_json']}")
+    print(f"sha256: {report['sha256']}")
+    print(f"        {report['cards']} card(s) in hand, "
+          f"{report['enemies']} enem(ies)")
+    if args.hold:
+        print("\nHOLDING: the game is still at the staged board.\n"
+              "  Play the turn cold, then write your answers into a form "
+              "(understudy/qa_form.md is the template) with\n"
+              f"  grader.id = {USER_GRADER!r} and packet_sha256 = the hash "
+              "above, and grade it with:\n"
+              f"    python -m understudy.staged_turn grade {turn.id} "
+              f"<your-form.json>")
+    return 0
+
+
+def cmd_grade(args) -> int:
+    form = load_form(args.form)
+    verdict = grade(args.turn_id, form)
+    d = turn_dir(args.turn_id)
+    d.mkdir(parents=True, exist_ok=True)
+    blob = json.dumps(verdict, indent=1) + "\n"
+    name = f"verdict-{grader_id(form)}.json"
+    (d / name).write_text(blob, encoding="utf-8")
+    # The fixed path too: one turn has one verdict a reader can find without
+    # knowing who graded it, and it is the most recent grade. The per-grader
+    # copy beside it is what the ledger reads, so a second grader does not
+    # erase the first.
+    (d / "verdict.json").write_text(blob, encoding="utf-8")
+    print(f"{verdict['verdict']}  {args.turn_id}  "
+          f"(grader {grader_id(form)})")
+    for reason in verdict["reasons"]:
+        print(f"  REFUSED BY {reason}")
+    if verdict["verdict"] == "SURVIVES":
+        print(f"  {verdict['survives_means']}")
+        if not verdict["survives_alone"]:
+            print(f"  NOT ALONE: {verdict['why_not_alone']}")
+    print(f"verdict: {d / name}")
+    return 0
+
+
+def cmd_execute(args) -> int:
+    if not str(args.why).strip():
+        print("execute needs a --why: it grants cards and writes a board",
+              file=sys.stderr)
+        return 2
+    from understudy import soak
+
+    form = load_form(args.form)
+    path = next((p for p in all_turns() if load(p).id == args.turn_id), None)
+    if path is None:
+        print(f"no turn file with id {args.turn_id!r} under {TURN_DIR}",
+              file=sys.stderr)
+        return 2
+    turn = load(path)
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    log = scenario.LOG_DIR / f"executed-{turn.id}-{stamp}.jsonl"
+    log.parent.mkdir(parents=True, exist_ok=True)
+
+    replay = scenario.Scenario(name=f"{turn.id}/executed",
+                               character=turn.character,
+                               steps=execute_steps(turn, form),
+                               path=turn.path, seed=turn.seed,
+                               assumptions=turn.assumptions)
+    with log.open("w", encoding="utf-8") as fh:
+        runner = scenario.Runner(replay, args.why, out=fh)
+        runner.emit({"step": "execute_begin", "turn": turn.id,
+                     "grader": grader_id(form),
+                     "chosen_line": form.get("chosen_line")})
+        policy = scenario.ScenarioPolicy(runner, turns=1)
+        summary = soak.run_scripted(policy, stamp, character=turn.character,
+                                    max_fights=1, chosen_seed=turn.seed,
+                                    do_setup=not args.no_setup)
+        # THE BRACKET IS THE WHOLE LINE, not the last play. `Runner.before`
+        # is reset by every action step, so reading it here would report the
+        # final card's own delta and call it the turn's. The `mark` step
+        # emitted the board as it stood when the line began; that row is the
+        # left-hand side.
+        marks = [r for r in runner.rows if r.get("step") == "mark"]
+        outcome = _outcome(marks[-1]["at"] if marks
+                           else scenario.digest(runner.before),
+                           scenario.digest(runner.state))
+        runner.emit({"step": "execute_end", "ok": policy.ok,
+                     "outcome": outcome, "run": summary})
+    print(f"log: {log}")
+    print(json.dumps(outcome, indent=1))
+    return 0 if policy.ok else 1
+
+
+def cmd_ledger(args) -> int:
+    QA_DIR.mkdir(parents=True, exist_ok=True)
+    text = build_ledger()
+    LEDGER.write_text(text, encoding="utf-8")
+    print(text, end="")
+    print(f"\nledger: {LEDGER}")
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    c = sub.add_parser("check", help="parse only; no game involved")
+    c.add_argument("file", nargs="?", default="")
+    c.set_defaults(func=cmd_check)
+
+    cl = sub.add_parser("closeness", help="the R213 F falsifier; no game")
+    cl.add_argument("file")
+    cl.add_argument("--observed", action="store_true",
+                    help="read the board the grader actually saw, from the "
+                         "observed.json a previous `stage` wrote, instead of "
+                         "the file's declared mirror. The live board is the "
+                         "one with the game's own opening hand in it")
+    cl.set_defaults(func=cmd_closeness)
+
+    s = sub.add_parser("stage", help="set the board and export a blind packet")
+    s.add_argument("file")
+    s.add_argument("--why", default="",
+                   help="one line, logged on every row. REQUIRED")
+    s.add_argument("--hold", action="store_true",
+                   help="leave the game at the staged board for a human to "
+                        "play cold. Attaches to a game that is already up, "
+                        "because a session that owns the launch kills it at "
+                        "teardown")
+    s.set_defaults(func=cmd_stage)
+
+    g = sub.add_parser("grade", help="apply the falsifier rules to one form")
+    g.add_argument("turn_id")
+    g.add_argument("form")
+    g.set_defaults(func=cmd_grade)
+
+    e = sub.add_parser("execute", help="replay a graded line live")
+    e.add_argument("turn_id")
+    e.add_argument("form")
+    e.add_argument("--why", default="")
+    e.add_argument("--no-setup", action="store_true")
+    e.set_defaults(func=cmd_execute)
+
+    ld = sub.add_parser("ledger", help="rebuild review/qa/ledger.tsv")
+    ld.set_defaults(func=cmd_ledger)
+
+    args = ap.parse_args(argv)
+    try:
+        return args.func(args)
+    except (TurnError, FormError, scenario.ScenarioError,
+            qa_packet.PacketLeak, yaml.YAMLError) as exc:
+        print(f"staged turn error: {exc}", file=sys.stderr)
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())
