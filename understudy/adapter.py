@@ -51,6 +51,7 @@ WHAT IS NOT CARRIED AT ALL
 
 from __future__ import annotations
 
+import copy
 import random
 import re
 from typing import Any
@@ -89,12 +90,30 @@ def sheet_id(bridge_id: str) -> str:
     return core.lower()
 
 
-def resolve_card(entry: dict[str, Any]) -> tuple[Card, bool]:
-    """A wire card as the sim would see it. Returns (card, approximate)."""
+def resolve_card(entry: dict[str, Any],
+                 prototype_index: dict[str, Card] | None = None
+                 ) -> tuple[Card, bool]:
+    """A wire card as the sim would see it. Returns (card, approximate).
+
+    `prototype_index` is the DEV ROUTE (R213 B), passed only when the caller
+    declared it. A quarantined row is absent from `loader._card_index()` by
+    construction, so without it a live prototype card falls through to the
+    text approximation below and the falsifier refuses the reading as
+    approximate -- the wrong answer to give about a card the sim holds an
+    EXACT row for. The index is built by the caller, once, rather than by
+    re-reading the surface per card.
+    """
     bid = str(entry.get("id") or "")
     if bid.startswith(MOD_PREFIX):
+        sid = sheet_id(bid)
+        if prototype_index:
+            hit = prototype_index.get(sid)
+            if hit is not None:
+                # Fresh per hand slot: two slots naming one row must not be
+                # the same object, or a line that plays one consumes both.
+                return copy.deepcopy(hit), False
         try:
-            return loader.peek_card(sheet_id(bid)), False
+            return loader.peek_card(sid), False
         except (KeyError, ValueError):
             pass
     return _text_card(entry), True
@@ -195,16 +214,23 @@ def _enemy_aura(entry: dict[str, Any]) -> str | None:
     return None
 
 
-def build_combat_state(state: dict[str, Any]) -> tuple[CombatState, dict[str, Any]]:
-    """Reconstruct a tier0 CombatState. Returns (state, provenance notes)."""
+def build_combat_state(state: dict[str, Any], *, prototype: bool = False
+                       ) -> tuple[CombatState, dict[str, Any]]:
+    """Reconstruct a tier0 CombatState. Returns (state, provenance notes).
+
+    `prototype` opens the quarantined surface to the resolver for THIS call
+    only (R213 B); see `resolve_card`.
+    """
     p = state.get("player") or {}
+    proto_index = ({c.id: c for c in loader.prototype_cards()}
+                   if prototype else None)
     powers, unmapped = _statuses(p.get("status"))
 
     hand_entries = list(p.get("hand") or [])
     hand: list[Card] = []
     approx: list[str] = []
     for e in hand_entries:
-        card, is_approx = resolve_card(e)
+        card, is_approx = resolve_card(e, proto_index)
         hand.append(card)
         if is_approx:
             approx.append(card.name)

@@ -399,6 +399,84 @@ def test_the_closeness_reading_carries_its_licence():
     assert r["guardrail"] == qa_packet.PACKET_GUARDRAIL
 
 
+# --- the prototype dev route (R213 B) --------------------------------------
+#
+# A quarantined row is absent from `loader._card_index()` BY CONSTRUCTION, so
+# the falsifier reaches one only down a route the turn file DECLARES. These
+# four tests are that route in both directions: it opens on the flag, it is
+# shut without it, and a shut door says which thing went wrong.
+
+def _proto_id() -> str:
+    """One prototype id off the SHIPPED surface, or skip.
+
+    Read from the surface rather than fixtured, because R213 B's deletion
+    rule makes the surface empty between slices and a fixture row here would
+    be the second permanent pool the ruling forbids, one row deep.
+    """
+    from tier0.content import loader
+    rows = loader.prototype_cards()
+    if not rows:
+        pytest.skip("the prototype surface is empty (the healthy state)")
+    return rows[0].id
+
+
+def test_a_prototype_id_is_refused_when_the_turn_does_not_declare_one():
+    """REFUSED BY NAME, not answered NOT READ. Falling through to
+    `unrepresentable` would report "the sim cannot model this card" when what
+    actually happened is that the file forgot to say what it was, and two
+    very different facts must not share one output."""
+    with pytest.raises(staged_turn.TurnError) as exc:
+        staged_turn.closeness(board(["strike", _proto_id()]))
+    assert _proto_id() in str(exc.value)
+    assert "prototype: true" in str(exc.value)
+
+
+def test_a_declared_prototype_turn_resolves_the_row():
+    """The door opens, and the card is the sheet's own row rather than an
+    approximation -- so the line the falsifier scores is a line somebody
+    could play."""
+    r = staged_turn.closeness(board(["strike", _proto_id()], energy=3),
+                              prototype=True)
+    assert r["source"] == "declared board (prototype route)"
+    assert not r.get("unrepresentable")
+    assert r["lines_considered"] > 1
+
+
+def test_the_declared_route_does_not_widen_the_ordinary_one():
+    """The flag opens the prototype surface and NOTHING else: a typo is still
+    a typo. Without this the fix would trade a refused prototype for an
+    unrefusable misspelling."""
+    r = staged_turn.closeness(board(["strike", "not_a_real_card"]),
+                              prototype=True)
+    assert r["verdict"] == "NOT READ"
+    assert "not_a_real_card" in r["unrepresentable"]
+
+
+def test_the_turn_files_prototype_flag_mirrors_the_scenarios():
+    """Same spelling, same default, and it reaches `as_scenario` -- one word
+    for one idea across the two halves of the harness."""
+    import yaml
+
+    example = yaml.safe_load(EXAMPLE.read_text(encoding="utf-8"))
+    assert staged_turn.parse(example).prototype is False
+    turn = staged_turn.parse(dict(example, prototype=True))
+    assert turn.prototype is True
+    assert turn.as_scenario().prototype is True
+
+
+def test_check_finds_turns_in_a_slice_subdirectory(tmp_path):
+    """A slice is a set of MATCHED PAIRS that only mean anything together, so
+    they live in one subdirectory; `check` has to see them there or half the
+    parse gate silently stops applying. `fixtures/` stays excluded -- it holds
+    grader forms, not turns."""
+    (tmp_path / "slice").mkdir()
+    (tmp_path / "slice" / "a.yaml").write_text("{}", encoding="utf-8")
+    (tmp_path / "fixtures").mkdir()
+    (tmp_path / "fixtures" / "form.yaml").write_text("{}", encoding="utf-8")
+    found = [p.name for p in staged_turn.all_turns(tmp_path)]
+    assert found == ["a.yaml"]
+
+
 def test_the_example_turn_has_more_than_one_line():
     """The worked example, read by the falsifier it ships with."""
     r = staged_turn.closeness(staged_turn.load(EXAMPLE).board)
