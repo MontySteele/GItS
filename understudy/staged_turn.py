@@ -244,6 +244,17 @@ class StagedTurn:
     seed: str | None = None
     notes: str = ""
     assumptions: list[str] = field(default_factory=list)
+    # MIRRORS `scenario.Scenario.prototype` (EB-147), and is the same
+    # declaration for the same reason one file over: this turn names cards on
+    # the QUARANTINED prototype surface (R213 B), which is deliberately
+    # outside `loader._card_index()`, so the tooling has to be TOLD rather
+    # than have its resolvers loosened for every turn. It is an explicit
+    # DEV-ROUTE DECLARATION: with it, `closeness` also resolves ids through
+    # `loader.prototype_cards()`; without it, a `proto_` id is refused by
+    # name rather than quietly read as unrepresentable. The reading it
+    # produces is still a falsifier of the TURN, which is R215 B's one
+    # exception to the prototype no-quote clause.
+    prototype: bool = False
 
     def as_scenario(self) -> scenario.Scenario:
         """The staging half as a `scenario.Scenario`, so the existing runner
@@ -254,7 +265,18 @@ class StagedTurn:
             name=self.id, character=self.character,
             steps=list(self.staging) + [("read", {"label": "staged board"})],
             path=self.path, seed=self.seed,
-            assumptions=list(self.assumptions))
+            assumptions=list(self.assumptions),
+            # Forwarded so the scenario the runner sees agrees with the turn
+            # about what it is. NOTE the one asymmetry, recorded rather than
+            # hidden: `test_a_prototype_scenario_grants_only_prototype_ids`
+            # requires a prototype SCENARIO to grant nothing else, and a
+            # matched-pair turn deliberately grants a prototype card BESIDE
+            # the shipped alternatives that make the decision live. That lint
+            # sweeps `scenario.all_scenarios()` -- the files under
+            # understudy/scenarios/ -- and never sees a turn-derived
+            # Scenario, so the two rules do not meet; if they are ever made
+            # to, the turn is the one that is right.
+            prototype=self.prototype)
 
 
 _ID_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
@@ -303,9 +325,30 @@ def parse(blob: dict[str, Any], path: Path | None = None) -> StagedTurn:
         id=turn_id, character=str(blob["character"]), staging=steps,
         board=board, path=path, seed=blob.get("seed") or None,
         notes=str(blob.get("notes") or ""),
-        assumptions=[str(a) for a in (blob.get("assumptions") or [])])
+        assumptions=[str(a) for a in (blob.get("assumptions") or [])],
+        prototype=bool(blob.get("prototype", False)))
     _check_halves_agree(turn)
+    _check_assumptions_blind(turn)
     return turn
+
+
+def _check_assumptions_blind(turn: StagedTurn) -> None:
+    """The assumptions are folded into the packet's disclosures VERBATIM, so
+    they are scrubbed by the same rules as a card face -- and the scrub runs
+    at export, AFTER the game has been booted, embarked and boarded. Refusing
+    here, at parse, is what makes `check` the gate it says it is: the first
+    slice cited a register id in an assumption, `check` passed all eleven
+    files, and the first `stage` burned a real launch to learn what a parse
+    could have said.
+    """
+    bad = qa_packet.leaks(list(turn.assumptions))
+    if bad:
+        rule, hit, ctx = bad[0]
+        raise TurnError(
+            f"assumption leaks design vocabulary ({rule}: {hit!r} in "
+            f"{ctx[:80]!r}): assumptions are printed in the blind packet, "
+            f"so they follow the packet's own scrub -- state the fact, not "
+            f"the citation")
 
 
 def _parse_board(raw: Any) -> Board:
@@ -360,8 +403,19 @@ def load(path: str | Path) -> StagedTurn:
 
 
 def all_turns(directory: Path | None = None) -> list[Path]:
+    """Every turn file, RECURSIVELY.
+
+    Recursive because a slice is a set of MATCHED PAIRS that only mean
+    anything together, so they live in one subdirectory
+    (`understudy/turns/kokomi-slice-1/`) rather than scattered through a flat
+    list beside the worked example. `fixtures/` is excluded by name: it holds
+    grader FORMS, not turns, and `check` would report every one of them BAD.
+    """
     d = directory or TURN_DIR
-    return sorted(d.glob("*.yaml")) if d.is_dir() else []
+    if not d.is_dir():
+        return []
+    return sorted(path for path in d.rglob("*.yaml")
+                  if "fixtures" not in path.relative_to(d).parts)
 
 
 def turn_dir(turn_id: str) -> Path:
@@ -658,22 +712,58 @@ def grade(turn_id: str, form: dict[str, Any], *,
 
 # ------------------------------------------------------------- closeness ---
 
-def build_combat_state(board: Board):
+def build_combat_state(board: Board, *, prototype: bool = False):
     """The staged board as a tier0 `CombatState`.
 
     Returns `(state, unrepresentable)`. `unrepresentable` is the list of hand
     cards the sim has no row for; the caller REFUSES the falsifier for that
     turn rather than guessing, because a line scored with a card missing from
     it is a line nobody could play.
+
+    `prototype` is the turn's own DEV-ROUTE DECLARATION (R213 B). Prototype
+    ids are absent from `loader._card_index()` BY CONSTRUCTION -- that
+    absence is the quarantine, and it is structural rather than a filter --
+    so with the flag set they are resolved through the surface's own reader,
+    `loader.prototype_cards()`, and only then. The flag is required rather
+    than inferred from the prefix: an explicit declaration is what makes a
+    prototype turn distinguishable from a turn that has a typo in it, and
+    "the id started with proto_" is not a decision anybody made.
     """
     import random
 
     from tier0.content import loader
     from tier0.engine.state import CombatState, Enemy, Player
 
+    proto_index: dict[str, Any] = {}
+    if prototype:
+        proto_index = {c.id: c for c in loader.prototype_cards()}
+    else:
+        # Refused BY NAME, and loudly. Without the flag a `proto_` id would
+        # fall through to `unrepresentable` and the falsifier would answer
+        # NOT READ -- a verdict that reads as "the sim cannot model this
+        # card" when what actually happened is that the file forgot to say
+        # what it was. Two very different facts must not share one output.
+        stray = [n for n in board.hand
+                 if str(n).startswith(loader.PROTOTYPE_ID_PREFIX)]
+        if stray:
+            raise TurnError(
+                f"board.hand names prototype row(s) {stray} but the turn does "
+                f"not declare `prototype: true`. A quarantined row is outside "
+                f"the sim's card index on purpose (R213 B); the falsifier "
+                f"reaches it only down the declared dev route.")
+
     hand = []
     unrepresentable: list[str] = []
     for name in board.hand:
+        card = proto_index.get(name)
+        if card is not None:
+            # A COPY, because `peek_card` hands back the shared prototype and
+            # every caller here is expected not to mutate it -- but
+            # `prototype_cards()` builds fresh objects per call, so two hand
+            # slots naming one row would otherwise be the SAME object and a
+            # line that played one would consume the other.
+            hand.append(copy.deepcopy(card))
+            continue
         try:
             hand.append(loader.peek_card(name))
         except (KeyError, ValueError):
@@ -804,7 +894,7 @@ WIRE_RESOURCES = {"KLEEMOD_CHARGE": "charge", "KLEEMOD_ENCORE": "encore",
                   "KLEEMOD_KOKOMI_BURST": "burst_energy"}
 
 
-def observed_state(blob: dict[str, Any]):
+def observed_state(blob: dict[str, Any], *, prototype: bool = False):
     """The LIVE board from an `observed.json`, as a tier0 `CombatState`.
 
     Reuses `understudy.adapter.build_combat_state`, which is the repo's
@@ -823,7 +913,7 @@ def observed_state(blob: dict[str, Any]):
         raise TurnError(
             "observed.json holds no raw state -- it was written by a build of "
             "this tool that only kept the digest. Re-stage the turn")
-    cs, notes = adapter.build_combat_state(raw)
+    cs, notes = adapter.build_combat_state(raw, prototype=prototype)
     wire = (raw.get("player") or {}).get("resources") or {}
     unmapped = []
     for key, amount in wire.items():
@@ -837,17 +927,27 @@ def observed_state(blob: dict[str, Any]):
     return cs, list(notes.get("approximate_cards") or []), notes
 
 
-def closeness(board: Board, *, max_lines: int = MAX_LINES) -> dict[str, Any]:
+def closeness(board: Board, *, max_lines: int = MAX_LINES,
+              prototype: bool = False) -> dict[str, Any]:
     """The R213 F falsifier on the DECLARED board. Refuses; never rates."""
-    state, unrepresentable = build_combat_state(board)
+    state, unrepresentable = build_combat_state(board, prototype=prototype)
     return _closeness(state, board.pilot, unrepresentable,
-                      max_lines=max_lines, source="declared board")
+                      max_lines=max_lines,
+                      source=("declared board (prototype route)" if prototype
+                              else "declared board"))
 
 
 def closeness_observed(blob: dict[str, Any], *, pilot: str = "",
-                       max_lines: int = MAX_LINES) -> dict[str, Any]:
-    """The same falsifier on the board the grader actually saw."""
-    state, unrepresentable, notes = observed_state(blob)
+                       max_lines: int = MAX_LINES,
+                       prototype: bool = False) -> dict[str, Any]:
+    """The same falsifier on the board the grader actually saw.
+
+    `prototype` reaches the wire resolver for the same reason it reaches the
+    declared one: without it a live prototype card degrades to the adapter's
+    text approximation and the reading is refused as approximate, which is
+    the wrong answer to give about a card the sim has an exact row for.
+    """
+    state, unrepresentable, notes = observed_state(blob, prototype=prototype)
     result = _closeness(state, pilot or str(blob.get("pilot") or "generic"),
                         unrepresentable, max_lines=max_lines,
                         source="observed board (live wire state)")
@@ -1213,9 +1313,9 @@ def cmd_closeness(args) -> int:
     if args.observed:
         result = closeness_observed(
             json.loads(observed.read_text(encoding="utf-8")),
-            pilot=turn.board.pilot)
+            pilot=turn.board.pilot, prototype=turn.prototype)
     else:
-        result = closeness(turn.board)
+        result = closeness(turn.board, prototype=turn.prototype)
     d = turn_dir(turn.id)
     d.mkdir(parents=True, exist_ok=True)
     (d / "closeness.json").write_text(

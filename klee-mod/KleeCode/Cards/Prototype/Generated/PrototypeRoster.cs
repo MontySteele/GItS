@@ -26,9 +26,22 @@ public static class PrototypeRoster
         },
         ["klee"] = new List<CardModel>
         {
+            ModelDb.Card<ProtoIttoSuperlativeSuperstrengthEither>(),
+            ModelDb.Card<ProtoIttoSuperlativeSuperstrengthPriced>(),
+            ModelDb.Card<ProtoShinobuSanctifyingRingEither>(),
+            ModelDb.Card<ProtoShinobuSanctifyingRingPriced>(),
+            ModelDb.Card<ProtoThomaCrimsonOoyoroiEither>(),
+            ModelDb.Card<ProtoThomaCrimsonOoyoroiPriced>(),
+            ModelDb.Card<ProtoIttoSuperlativeSuperstrengthEitherModeA>(),
+            ModelDb.Card<ProtoIttoSuperlativeSuperstrengthEitherModeB>(),
+            ModelDb.Card<ProtoShinobuSanctifyingRingEitherModeA>(),
+            ModelDb.Card<ProtoShinobuSanctifyingRingEitherModeB>(),
+            ModelDb.Card<ProtoThomaCrimsonOoyoroiEitherModeA>(),
+            ModelDb.Card<ProtoThomaCrimsonOoyoroiEitherModeB>(),
         },
         ["kokomi"] = new List<CardModel>
         {
+            ModelDb.Card<ProtoPearlBarrageTurn>(),
         },
     };
 

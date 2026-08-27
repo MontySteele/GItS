@@ -22,6 +22,7 @@ against.
 
 from __future__ import annotations
 
+import copy
 import json
 from dataclasses import replace
 from pathlib import Path
@@ -70,12 +71,58 @@ def test_fixture_row_validates_under_the_card_schema(tmp_path):
     assert cards[0].character == "kokomi"
 
 
-def test_shipped_surface_is_empty_and_loads(tmp_path):
-    """The committed surface is EMPTY -- the R213 deletion rule's steady state."""
+def test_the_shipped_surface_loads_whatever_is_on_it():
+    """The committed surface parses, and every row on it passes the gate.
+
+    THIS TEST USED TO ASSERT THE SURFACE WAS EMPTY. Empty is still the healthy
+    STEADY state -- R213 B's deletion rule makes it so, and the test below is
+    what keeps it from becoming a second permanent pool -- but a slice IN
+    FLIGHT legitimately has rows on it, and the first one (the Kokomi slice,
+    R216) is what found that the old assertion could not tell a slice from a
+    leak. So the empty check moves to the test that can tell them apart, and
+    this one keeps the half that is true either way: whatever is here loads,
+    through the shipped validators.
+    """
     assert loader.PROTOTYPE_SHEET.exists()
-    assert yaml.safe_load(
-        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) in ([], None)
-    assert loader.prototype_cards() == []
+    rows = yaml.safe_load(
+        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
+    cards = loader.prototype_cards()
+    assert len(cards) == len(rows)
+    for card in cards:
+        assert card.id.startswith(loader.PROTOTYPE_ID_PREFIX)
+
+
+def test_the_surface_is_non_empty_only_while_a_slice_is_open():
+    """R213 B's DELETION RULE, as a gate rather than a paragraph.
+
+        "Once a slice is ACCEPTED or REJECTED, its rows LEAVE this surface."
+
+    A row that has outlived its slice is the failure the rule names -- "a row
+    that has sat here across two slices is a defect in the process" -- and it
+    is invisible to every other check, because such a row is perfectly valid.
+    What makes it visible is that a LIVE slice always has a packet open under
+    `review/active/` explaining what its rows are asking; an abandoned row has
+    nothing pointing at it. So the surface may carry rows exactly while some
+    active packet names it, and the day the slice's packet is filed away the
+    rows have to go with it or this test says so.
+
+    Deliberately generic -- it names no slice. Hard-coding "the Kokomi slice"
+    here would make the guard expire quietly the moment that slice closed.
+    """
+    rows = yaml.safe_load(
+        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
+    if not rows:
+        return                      # the healthy steady state
+    active = REPO / "review" / "active"
+    citing = sorted(p.name for p in active.glob("*.md")
+                    if "prototype-surface.yaml" in p.read_text(
+                        encoding="utf-8", errors="replace"))
+    assert citing, (
+        f"the prototype surface carries {len(rows)} row(s) but no packet "
+        f"under review/active/ names docs/prototype-surface.yaml. Under "
+        f"R213 B a slice's rows leave the surface when the slice is accepted "
+        f"or rejected -- either the packet was filed away without deleting "
+        f"its rows, or these rows never had one.")
 
 
 @pytest.mark.parametrize("mutate, expect", [
@@ -322,3 +369,137 @@ def test_the_scenario_grants_the_fixture_row_by_id():
     # can resolve at all.
     from tools.gen_klee_cards import pascal
     assert pascal(FIXTURE["id"]) == "ProtoKokomiTidecall"
+
+
+# --- (f) the grammar THIS SLICE added, and its red cases --------------------
+#
+# The Kokomi slice (R216) needed two things the surface did not have: a
+# per-turn exhaust count for arm 1, and a modal COMPANION for arm 2. Both are
+# quarantined-use-only -- no shipped row carries either -- so these are the
+# only tests that exercise them, and each is paired with the failure it is
+# supposed to make impossible.
+
+def test_the_per_turn_exhaust_count_includes_the_card_own_victim():
+    """Arm 1's whole point, and the reason it needed a NEW counter.
+
+    `cards_exhausted_this_turn` is the AfterCardExhausted hook counter and is
+    DEFERRED while a card resolves -- `exhaust_card` returns early at
+    card_play_depth > 0 and `_op_exhaust_from` never reaches it at all -- so a
+    card that Exhausts and then reads would not see the card it had just
+    Exhausted. The prototype reads `exhausts_this_turn`, counted at the pile
+    append, and this is the difference stated as an assertion.
+    """
+    import random
+
+    from tier0.engine import combat
+    from tier0.engine.state import CombatState, Enemy, Player
+
+    # Through the surface's own reader, because `peek_card` CANNOT see a
+    # prototype row -- that inability is the quarantine, and the test would be
+    # worthless if it could.
+    rows = {c.id: c for c in loader.prototype_cards()}
+    card = rows.get("proto_pearl_barrage_turn")
+    if card is None:
+        pytest.skip("arm 1's row has left the surface (the deletion rule)")
+    victim = loader.peek_card("coral_guard")
+    player = Player(hp=50, max_hp=70, energy=3,
+                    hand=[copy.deepcopy(card), copy.deepcopy(victim)],
+                    character_id="kokomi")
+    state = CombatState(player=player,
+                        enemies=[Enemy(hp=200, max_hp=200, name="dummy",
+                                       intents=[{"kind": "block",
+                                                 "amount": 0}])],
+                        rng=random.Random(0), turn=1)
+    assert state.exhausts_this_turn == 0
+    combat.play_card(state, player.hand[0])
+    # One card was Exhausted -- the one this card chose -- and the count saw it.
+    assert state.exhausts_this_turn == 1
+    # base 5 + per 3 * 1 = 8. The number is not the question (R215 C); that
+    # the count reached ONE by the time damage resolved is.
+    assert state.enemies[0].hp == 200 - 8
+
+
+def test_the_per_turn_exhaust_count_is_a_turn_window():
+    """"This turn", not "this fight" -- which is the whole difference from
+    `exhaust_pile`, the count the shipped sheet already had."""
+    import random
+
+    from tier0.engine import refpowers
+    from tier0.engine.state import CombatState, Enemy, Player
+
+    state = CombatState(player=Player(hp=50, max_hp=70, character_id="kokomi"),
+                        enemies=[Enemy(hp=10, max_hp=10, name="dummy",
+                                       intents=[{"kind": "block",
+                                                 "amount": 0}])],
+                        rng=random.Random(0), turn=1)
+    refpowers.exhaust_card(state, loader.peek_card("coral_guard"))
+    assert state.exhausts_this_turn == 1
+    assert len(state.player.exhaust_pile) == 1
+    refpowers.reset_turn_counters(state)
+    # The window closed; the PILE did not.
+    assert state.exhausts_this_turn == 0
+    assert len(state.player.exhaust_pile) == 1
+
+
+def test_a_misspelled_runtime_count_is_refused_at_load(tmp_path):
+    """The red case for the new token. `_validate_effect_vocabulary` runs on
+    prototype rows exactly as it runs on shipped ones (R213 B: "STILL checked
+    for schema validity"), so a typo'd count is a load error and not a card
+    that compiles and quietly pays its base forever."""
+    row = dict(FIXTURE, effects=[{
+        "op": "damage", "target": "enemy",
+        "amount_formula": {"base": 5, "per": 3,
+                           "count": "exhausts_this_turnn"}}])
+    with pytest.raises(ValueError) as excinfo:
+        loader.prototype_cards(_sheet(tmp_path, [row]))
+    assert "exhausts_this_turnn" in str(excinfo.value)
+
+
+def test_a_modal_companion_keeps_its_element(monkeypatch, tmp_path):
+    """Arm 2's silent-failure case, and it is silent in the worst way: the
+    card compiles, plays, and simply stops applying the element it exists to
+    apply. A companion's element rides the CARD-level IElementalCard, so
+    "is this card elemental" is a question about the whole card and has to
+    walk the mode bodies too."""
+    row = {
+        "id": "proto_fixture_modal_companion",
+        "name": "Fixture Companion (Prototype)",
+        "character": "klee", "nation": "inazuma", "star": 4,
+        "rarity": "common", "role_c": "applier", "element": "electro",
+        "cost": 2, "type": "skill",
+        "effects": [{"op": "choose_one", "modes": [
+            {"label": "Deal 3 damage",
+             "effects": [{"op": "damage", "amount": 3, "target": "enemy",
+                          "applies_element": True}]},
+            {"label": "Gain 4 Block",
+             "effects": [{"op": "block", "amount": 4}]}]}],
+    }
+    # It loads under the shipped schema...
+    assert loader.prototype_cards(_sheet(tmp_path, [row]))[0].element == "electro"
+    # ...and it emits ELEMENTAL, which is the half that used to be lost.
+    _genproto, plan, _out = _proto_plan(monkeypatch, tmp_path, [row])
+    source = plan.generated["proto_fixture_modal_companion"]
+    assert "IElementalCard" in source
+    assert "Element.Electro" in source
+
+
+def test_every_prototype_mode_face_is_carried_by_the_prototype_roster():
+    """EB-150 again, on this surface. A mode face in no pool takes
+    CardModel.Pool through MockCardPool inside the choice screen's _Ready and
+    soft-locks the turn -- and a staged prototype turn is precisely a turn
+    that draws and previews the card."""
+    generated = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+                 / "Generated")
+    roster = (generated / "PrototypeRoster.cs").read_text(encoding="utf-8")
+    manifest = json.loads(
+        (generated / "manifest.json").read_text(encoding="utf-8"))
+    faces = [name for names in manifest.get("mode_faces", {}).values()
+             for name in names]
+    for name in faces:
+        assert f"ModelDb.Card<{name}>()" in roster, name
+    # And the manifest is not lying about what exists: every face it names is
+    # a class in the emitted tree.
+    emitted = "".join(p.read_text(encoding="utf-8")
+                      for p in generated.glob("*.cs"))
+    for name in faces:
+        assert f"class {name} " in emitted, name

@@ -45,3 +45,107 @@
 # There is deliberately no `[]` below for a staged row to trip over: an empty
 # YAML document loads as null, and every reader of this file spells that
 # `or []`. Append list rows directly under this header.
+
+# =============================================================================
+# KOKOMI SLICE 1 (R216) -- seven rows, three arms. Every one is a QUESTION put
+# to the engine, not a card: they are deleted when the slice is accepted or
+# rejected (the deletion rule above), and under R215 B no number measured on
+# any of them is quotable anywhere.
+#
+# THE HYPOTHESIS THEY TEST, in R213 C/E3's words: subsidised Block dissolves
+# the attack/defend decision. A card that hands you defence for free alongside
+# the play you wanted to make anyway leaves no second line, because there was
+# never a trade. Each pair below sets the shipped shape against a shape where
+# the Block costs SOMETHING -- an outcome, or an energy.
+#
+# NAMES. Every display name here is provisional and mine (R179). They are
+# deliberately ordinary card names rather than "(Priced)" or "(Variant)": the
+# QA grader reads printed titles on a design-blind packet, and a title that
+# names the experiment is a title that tells the grader what to answer. The
+# alternatives considered, and why they lost, are in
+# review/active/kokomi-slice-1-2026-08-27.md.
+#
+# `character:` ON A COMPANION ROW IS `klee`, AND THAT IS NOT A TYPO. It names
+# the CODEGEN PROFILE and the off-pool list, and every shipped Companion of
+# every nation is emitted through Klee's profile and pooled in
+# KleeOffPoolCards -- that is where CompanionRoster.All is carried, and it is
+# what gives a Companion its frame and its energy colour today. So a prototype
+# Companion declared `klee` resolves through exactly the path its shipped twin
+# resolves through, with no new machinery at all. `nation:` carries the pool
+# identity the sim reads (the shipped sheets get it from their FILENAME, which
+# this file does not have). The alternative -- a `character: companion` value
+# with a nation field, taught to the loader and the generator -- is recorded
+# in the packet and was rejected as machinery bought for one slice.
+#
+# OFF THE MUSTER POOL BY CONSTRUCTION, not by a filter: Muster and the reward
+# slot both read `CompanionRoster.All`, which is generated from the three
+# `*-companions.yaml` sheets and cannot see this file. The only door in is a
+# grant by id against a dev build.
+# =============================================================================
+
+# ---------- ARM 1: Pearl Barrage's counting basis (R215 C) -------------------
+# Shipped twin: `pearl_barrage` (docs/kokomi-cards.yaml). That card reads the
+# cost of THE ONE CARD you chose to Exhaust. This one reads how many cards have
+# been Exhausted THIS TURN -- the reading [USER] expected it to have. It still
+# Exhausts one chosen card itself, and that card is in its own count, so the
+# floor of the two shapes is the same number on a turn with one rotation in it.
+# Base 5 and per 3 are the shipped numbers, UNMOVED: the counting basis is the
+# question, and moving a number too would make the answer unattributable.
+- {id: proto_pearl_barrage_turn, name: "Tidal Barrage", character: kokomi,
+   cost: 1, type: attack, rarity: uncommon,
+   effects: [{op: exhaust_from, amount: 1, select: chosen},
+             {op: damage, amount_formula: {base: 5, per: 3, count: exhausts_this_turn}, target: enemy}]}
+
+# ---------- ARM 2: mutually exclusive Block (R216 C, option 1) ---------------
+# Prune's shape: the card does the engine half OR the Block half, never both.
+# Defence is paid for in OUTCOME. Same amounts, same cost, same element as the
+# shipped twin -- only the conjunction moves.
+
+# Shipped twin: `shinobu_sanctifying_ring` (3 damage to all + Electro, 4 Block,
+# cost 2). The Electro rides the card-level interface, so the flag sits on the
+# attack mode and the Block mode applies nothing.
+- {id: proto_shinobu_sanctifying_ring_either, name: "Shinobu - Warding Ring", character: klee,
+   nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro, cost: 2, type: skill,
+   effects: [{op: choose_one, modes: [
+              {label: "Deal 3 damage to ALL enemies",
+               effects: [{op: damage, amount: 3, target: all_enemies, applies_element: true}]},
+              {label: "Gain 4 Block",
+               effects: [{op: block, amount: 4}]}]}]}
+
+# Shipped twin: `thoma_crimson_ooyoroi` (8 damage + Pyro, 3 Block, cost 2).
+- {id: proto_thoma_crimson_ooyoroi_either, name: "Thoma - Blazing Ooyoroi", character: klee,
+   nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: pyro, cost: 2, type: attack,
+   effects: [{op: choose_one, modes: [
+              {label: "Deal 8 damage",
+               effects: [{op: damage, amount: 8, target: enemy, applies_element: true}]},
+              {label: "Gain 3 Block",
+               effects: [{op: block, amount: 3}]}]}]}
+
+# Shipped twin: `itto_superlative_superstrength` (14 damage, 6 Block, cost 2).
+# No element on either mode: the shipped row applies none (`applies_element:
+# false`), and adding one would make this a different card as well as a
+# differently-priced one.
+- {id: proto_itto_superlative_superstrength_either, name: "Itto - Oni Rush", character: klee,
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo, cost: 2, type: attack,
+   effects: [{op: choose_one, modes: [
+              {label: "Deal 14 damage",
+               effects: [{op: damage, amount: 14, target: enemy}]},
+              {label: "Gain 6 Block",
+               effects: [{op: block, amount: 6}]}]}]}
+
+# ---------- ARM 3: the Block priced in the cost line (R216 C, option 4) ------
+# The shipped effects EXACTLY, to the digit, and one more energy. Defence is
+# paid for in TEMPO. This is the other cheapest answer to E3 and it points the
+# opposite way from arm 2: you keep the whole card, and it competes for the
+# turn instead of riding along in it.
+- {id: proto_shinobu_sanctifying_ring_priced, name: "Shinobu - Sanctifying Circle", character: klee,
+   nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro, cost: 3, type: skill,
+   effects: [{op: damage, amount: 3, target: all_enemies, applies_element: true}, {op: block, amount: 4}]}
+
+- {id: proto_thoma_crimson_ooyoroi_priced, name: "Thoma - Crimson Guard", character: klee,
+   nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: pyro, cost: 3, type: attack,
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true}, {op: block, amount: 3}]}
+
+- {id: proto_itto_superlative_superstrength_priced, name: "Itto - Superlative Guard", character: klee,
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo, cost: 3, type: attack,
+   effects: [{op: damage, amount: 14, target: enemy, applies_element: false}, {op: block, amount: 6}]}

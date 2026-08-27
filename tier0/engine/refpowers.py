@@ -262,6 +262,10 @@ def exhaust_card(state: CombatState, card: Card,
     future op that routes through this function instead of appending directly.
     """
     state.player.exhaust_pile.append(card)
+    # Counted AT THE APPEND, deliberately above the depth guard below: this is
+    # the "reached the pile this turn" counter, not the hook counter. See
+    # CombatState.exhausts_this_turn for why the two are separate.
+    state.exhausts_this_turn += 1
     state.emit("exhaust", card=card.id)
     if state.card_play_depth:
         return
@@ -1494,6 +1498,7 @@ def reset_turn_counters(state: CombatState) -> None:
     state.skills_played_this_turn = 0             # Pinpoint
     state.block_gain_card_plays_this_turn = 0     # Unmovable's allowance
     state.cards_exhausted_this_turn = 0           # EvilEye / ForgottenRitual
+    state.exhausts_this_turn = 0                  # `exhausts_this_turn` count
     state.hp_lost_this_turn = 0                   # Spite
     state.discards_this_turn = 0                  # MementoMori
     state.tag_plays_this_turn = {}                # PhantomBlades

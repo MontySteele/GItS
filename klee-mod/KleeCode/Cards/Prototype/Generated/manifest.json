@@ -5,6 +5,36 @@
     "compile_flag": "PrototypeCards=true (defines PROTOTYPE_CARDS)",
     "reachable_by": "understudy give_card / scenario `give:` step"
   },
-  "generated": [],
-  "owners": {}
+  "generated": [
+    "proto_itto_superlative_superstrength_either",
+    "proto_itto_superlative_superstrength_priced",
+    "proto_pearl_barrage_turn",
+    "proto_shinobu_sanctifying_ring_either",
+    "proto_shinobu_sanctifying_ring_priced",
+    "proto_thoma_crimson_ooyoroi_either",
+    "proto_thoma_crimson_ooyoroi_priced"
+  ],
+  "owners": {
+    "proto_itto_superlative_superstrength_either": "klee",
+    "proto_itto_superlative_superstrength_priced": "klee",
+    "proto_pearl_barrage_turn": "kokomi",
+    "proto_shinobu_sanctifying_ring_either": "klee",
+    "proto_shinobu_sanctifying_ring_priced": "klee",
+    "proto_thoma_crimson_ooyoroi_either": "klee",
+    "proto_thoma_crimson_ooyoroi_priced": "klee"
+  },
+  "mode_faces": {
+    "proto_itto_superlative_superstrength_either": [
+      "ProtoIttoSuperlativeSuperstrengthEitherModeA",
+      "ProtoIttoSuperlativeSuperstrengthEitherModeB"
+    ],
+    "proto_shinobu_sanctifying_ring_either": [
+      "ProtoShinobuSanctifyingRingEitherModeA",
+      "ProtoShinobuSanctifyingRingEitherModeB"
+    ],
+    "proto_thoma_crimson_ooyoroi_either": [
+      "ProtoThomaCrimsonOoyoroiEitherModeA",
+      "ProtoThomaCrimsonOoyoroiEitherModeB"
+    ]
+  }
 }

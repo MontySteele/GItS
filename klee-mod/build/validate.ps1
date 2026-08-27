@@ -32,7 +32,16 @@ param(
     # and the Workshop BaseLib the way the bite-check does, and whether a C#
     # suite may BLOCK a deploy is a [USER] call that has not been made. See
     # klee-mod/KleeTests/README.md, "Not a deploy gate yet".
-    [switch]$RunCsharpTests
+    [switch]$RunCsharpTests,
+    # The DEV-BUILD version gate, and nothing else. Set ONLY by
+    # klee-mod/build/deploy_proto.ps1, which stamps its package with the
+    # +proto build metadata (R214's channel; see version.ps1). Without this
+    # switch S3 refuses a +proto package BY NAME, which is what keeps the
+    # mark from ever riding a release. It changes NO OTHER RULE: the dev
+    # deploy runs this whole gate, every S-rule, exactly as the release path
+    # does -- a prototype build that skipped gates would prove nothing about
+    # the cards it was built to try.
+    [switch]$PrototypeBuild
 )
 
 $ErrorActionPreference = 'Stop'
@@ -158,12 +167,14 @@ if (-not (Test-Path $manifestPath)) {
     # wrong.
     $expected = Get-PackageVersion `
         -SourceManifest (Join-Path (Split-Path -Parent $PSScriptRoot) 'Klee\manifest.json') `
-        -RepoRoot (Get-RepoRoot)
+        -RepoRoot (Get-RepoRoot) `
+        -Prototype:$PrototypeBuild
     foreach ($finding in (Test-VersionPolicy `
                 -Manifest $m `
                 -Installed $installed `
                 -GameVersion (Get-InstalledGameVersion $GameDir) `
-                -Expected $expected.Version)) {
+                -Expected $expected.Version `
+                -AllowPrototypeMetadata:$PrototypeBuild)) {
         if ($finding -like 'WARN:*') {
             Write-Host "  [S3] $($finding.Substring(5).Trim())" -ForegroundColor Yellow
         } else {

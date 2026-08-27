@@ -254,6 +254,14 @@ def _runtime_count(state: CombatState, token: str,
         return len(p.hand)
     if token == "discards_this_turn":
         return state.discards_this_turn
+    if token == "exhausts_this_turn":
+        # QUARANTINED USE ONLY (R213 B): no shipped row reads this token. It
+        # is the counting basis R215 C routed to the Kokomi slice -- "how many
+        # cards had been exhausted that whole turn" -- against `exhaust_pile`
+        # (the whole fight) and `exhaust_selection_cost` (the one chosen card).
+        # Counted at the pile append, so a card that Exhausts and then reads
+        # sees its own victim; see CombatState.exhausts_this_turn.
+        return state.exhausts_this_turn
     if token == "cards_drawn_this_combat":
         return state.cards_drawn_this_combat
     if token == "enemy_poison_total":
@@ -2388,6 +2396,11 @@ def _op_exhaust_from(state: CombatState, fx: dict, card: Card) -> None:
         pool = [c for c in pool if c is not victim]
         remove_instance(hand, victim)
         state.player.exhaust_pile.append(victim)
+        # The second of the two append sites CombatState.exhausts_this_turn
+        # is maintained at. This one is the reason the field exists: the
+        # victim lands here MID-PLAY, and the same card's later effects can
+        # read the count that includes it.
+        state.exhausts_this_turn += 1
         state.exhausted_this_card += 1
         # Recorded off the instance BEFORE anything downstream can touch it,
         # and from the PRINTED fields only, so the row is the same one the
@@ -2700,6 +2713,7 @@ RUNTIME_COUNT_NAMES = frozenset({
     "skills_in_hand",
     "other_cards_in_hand",
     "discards_this_turn",
+    "exhausts_this_turn",
     "cards_drawn_this_combat",
     "enemy_poison_total",
     "salon_members",

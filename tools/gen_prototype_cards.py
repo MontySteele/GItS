@@ -118,6 +118,16 @@ def plan() -> gen.ProfilePlan:
     rows = _rows()
     generated: dict[str, str] = {}
     owners: dict[str, str] = {}
+    # EB-150's lesson, carried onto this surface: a choose-one card's MODE
+    # FACES are pool members too. `CardModel.Pool` falls through to
+    # MockCardPool and throws "You monster!" inside
+    # `NChooseACardSelectionScreen._Ready()`, which soft-locks the turn -- and
+    # a staged prototype turn is precisely a turn that draws and previews the
+    # card. The character plans carry these in a separate `<Char>ModalOptions`
+    # roster; here they go into `PrototypeRoster` itself, because a second
+    # generated file for the same membership buys nothing on a surface whose
+    # healthy state is empty.
+    mode_faces: dict[str, list[str]] = {}
 
     for card in rows:
         card_id = card["id"]
@@ -142,11 +152,12 @@ def plan() -> gen.ProfilePlan:
                 "the existing grammar, or take the runtime work first.")
         generated[card_id] = gen.emit(card, profile)
         owners[card_id] = character
+        mode_faces[card_id] = gen._modal_option_names([card], {card_id})
 
     # Emitted ALWAYS, empty surface included: `KleeMod.PrototypeCards` names
     # this class under `#if PROTOTYPE_CARDS`, so a dev build of an empty
     # surface must still compile. An empty surface is the healthy state.
-    generated["prototype_roster"] = _roster_source(owners)
+    generated["prototype_roster"] = _roster_source(owners, mode_faces)
 
     manifest = {
         "_comment": (
@@ -162,6 +173,11 @@ def plan() -> gen.ProfilePlan:
         },
         "generated": sorted(generated.keys() - {"prototype_roster"}),
         "owners": dict(sorted(owners.items())),
+        # Named rather than merely emitted, so "did this row's mode faces
+        # reach a pool?" is answerable from the manifest -- EB-150 shipped
+        # because nothing wrote that question down anywhere.
+        "mode_faces": {cid: names
+                       for cid, names in sorted(mode_faces.items()) if names},
     }
 
     count = len(owners)
@@ -175,20 +191,32 @@ def plan() -> gen.ProfilePlan:
     )
 
 
-def _roster_source(owners: dict[str, str]) -> str:
+def _roster_source(owners: dict[str, str],
+                   mode_faces: dict[str, list[str]] | None = None) -> str:
     """`PrototypeRoster.For(characterId)` -- membership, split by owner.
 
     Split by owner because `CardModel.Pool` supplies the card FRAME and the
     energy icon: a Kokomi prototype resolved through `KleeCardPool` would draw
     with Klee's frame, which is a lie about what is being tested. Each
     character's off-pool builder asks for its own rows.
+
+    A choose-one row's MODE FACES ride here beside it, under the SAME owner,
+    for two reasons that agree. The membership one is EB-150: a mode face in
+    no pool takes `CardModel.Pool` through MockCardPool inside the choice
+    screen's `_Ready()` and soft-locks the turn. The frame one is the same
+    argument as the split itself -- the faces are drawn on the choose-a-card
+    screen, so they must wear the frame of the card that opened it.
     """
+    mode_faces = mode_faces or {}
     lines: list[str] = []
     for character in sorted(gen.PROFILES):
         ids = sorted(cid for cid, owner in owners.items() if owner == character)
+        classes = [gen.pascal(cid) for cid in ids]
+        for cid in ids:
+            classes.extend(mode_faces.get(cid, []))
         entries = "".join(
-            f"{gen.NEWLINE}            ModelDb.Card<{gen.pascal(cid)}>(),"
-            for cid in ids)
+            f"{gen.NEWLINE}            ModelDb.Card<{cls}>(),"
+            for cls in classes)
         lines.append(
             f'        ["{character}"] = new List<CardModel>'
             f"{gen.NEWLINE}        {{{entries}{gen.NEWLINE}        }},")

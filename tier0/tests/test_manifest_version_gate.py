@@ -62,8 +62,14 @@ def _ps(script: str) -> subprocess.CompletedProcess:
 
 
 def _policy(manifest: dict, installed: dict, game_version: str | None,
-            expected: str) -> list[str]:
-    """Run Test-VersionPolicy with synthetic inputs; return its findings."""
+            expected: str, prototype: bool = False) -> list[str]:
+    """Run Test-VersionPolicy with synthetic inputs; return its findings.
+
+    `prototype` is the dev-deploy switch (deploy_proto.ps1). It defaults
+    FALSE because that is the RELEASE path, which is what every other test in
+    this file is about.
+    """
+    allow = "$true" if prototype else "$false"
     script = f"""
 . '{VERSION_PS1}'
 $m = '{json.dumps(manifest)}' | ConvertFrom-Json
@@ -73,7 +79,8 @@ $installed = @{{}}
     for k, v in installed.items())}
 $game = {('$null' if game_version is None else chr(39) + game_version + chr(39))}
 $out = Test-VersionPolicy -Manifest $m -Installed $installed `
-    -GameVersion $game -Expected '{expected}'
+    -GameVersion $game -Expected '{expected}' `
+    -AllowPrototypeMetadata:{allow}
 foreach ($f in $out) {{ Write-Output "FINDING: $f" }}
 """
     res = _ps(script)
@@ -317,3 +324,130 @@ def test_the_build_scripts_are_pure_ascii():
             assert not bad, (
                 f"{script.name}:{n} has non-ASCII "
                 f"{[hex(ord(c)) for c in bad]}: {line!r}")
+
+
+# --- the +proto build metadata (the DEV deploy path) ------------------------
+#
+# R214 ruled MAJOR.AUTO with `+dirty` as semver build metadata. `+proto` is a
+# SECOND token on that same channel, added so a package built with the
+# quarantined prototype surface compiled in (R213 B) is identifiable on sight
+# -- deploy_proto.ps1 writes to the same mods\klee directory the release path
+# writes to, so without a mark on the version string there is nothing anywhere
+# that says which build is installed. The extension is flagged for the next
+# ruling; these tests are what it means today.
+
+def test_a_prototype_stamp_is_refused_from_the_release_path():
+    """The whole point of the switch: the release gate never accepts the mark.
+
+    Refused BY NAME rather than falling out of the Expected comparison, so
+    the finding says what happened instead of "0.2.138+proto is not 0.2.138".
+    """
+    findings = _policy(_manifest(version="0.2.138+proto"), BASELIB_OK,
+                       "v0.107.1", "0.2.138")
+    assert any("+proto" in f and "deploy_proto.ps1" in f for f in findings), \
+        findings
+
+
+def test_a_prototype_stamp_is_accepted_when_the_dev_script_asks():
+    findings = _policy(_manifest(version="0.2.138+proto"), BASELIB_OK,
+                       "v0.107.1", "0.2.138+proto", prototype=True)
+    assert findings == []
+
+
+def test_a_dirty_prototype_stamp_is_accepted_when_the_dev_script_asks():
+    findings = _policy(_manifest(version="0.2.138+proto.dirty"), BASELIB_OK,
+                       "v0.107.1", "0.2.138+proto.dirty", prototype=True)
+    assert findings == []
+
+
+def test_the_dev_path_refuses_an_unmarked_package():
+    r"""The other direction. A dev deploy whose stamp lost its mark would put
+    an indistinguishable prototype build in mods\klee, which is the exact
+    ambiguity the token exists to remove."""
+    findings = _policy(_manifest(version="0.2.138"), BASELIB_OK,
+                       "v0.107.1", "0.2.138", prototype=True)
+    assert any("no +proto mark" in f for f in findings), findings
+
+
+def test_a_prototype_stamp_is_still_a_parseable_semantic_version():
+    """R214's reason for the shape: the game keeps the PARSED version, and a
+    null version refuses every dependent mod declaring a min_version on us.
+    Build metadata is ignored by the parser, so the mark costs nothing."""
+    for version in ("0.2.138+proto", "0.2.138+proto.dirty"):
+        findings = _policy(_manifest(version=version), BASELIB_OK,
+                           "v0.107.1", version, prototype=True)
+        assert not any("not a valid semantic version" in f for f in findings)
+
+
+def test_get_package_version_composes_the_four_shapes():
+    """The non-prototype string must be BYTE-IDENTICAL to what shipped before
+    the switch existed -- that is why it is composed from Count/IsDirty and
+    the plain path still returns Auto untouched."""
+    script = f"""
+. '{VERSION_PS1}'
+$src = '{SOURCE_MANIFEST}'
+$root = '{REPO}'
+$plain = Get-PackageVersion -SourceManifest $src -RepoRoot $root
+$proto = Get-PackageVersion -SourceManifest $src -RepoRoot $root -Prototype
+Write-Output "PLAIN: $($plain.Version)"
+Write-Output "PROTO: $($proto.Version)"
+Write-Output "ISPROTO: $($proto.IsPrototype)"
+Write-Output "PLAINISPROTO: $($plain.IsPrototype)"
+"""
+    res = _ps(script)
+    assert res.returncode == 0, res.stdout + res.stderr
+    out = dict(ln.split(": ", 1) for ln in res.stdout.splitlines() if ": " in ln)
+    plain, proto = out["PLAIN"], out["PROTO"]
+    assert re.fullmatch(r"\d+\.\d+\.\d+(\+dirty)?", plain), plain
+    assert re.fullmatch(r"\d+\.\d+\.\d+\+proto(\.dirty)?", proto), proto
+    # Same MAJOR and same AUTO count; only the metadata differs.
+    assert proto.split("+")[0] == plain.split("+")[0]
+    # And dirtiness agrees between them, whichever way this tree happens to be.
+    assert plain.endswith("+dirty") == proto.endswith(".dirty")
+    assert out["ISPROTO"] == "True" and out["PLAINISPROTO"] == "False"
+
+
+def test_only_the_dev_script_sets_the_prototype_compile_flag():
+    """The quarantine's release-path leg (R213 B), stated over the whole
+    build directory rather than over two named files.
+
+    `tier0/tests/test_prototype_surface.py` pins that deploy.ps1 and
+    validate.ps1 never mention the property. This says the complement: EXACTLY
+    ONE script in the directory does, and it is the dev one. A third script
+    growing the flag would be a second release path nobody audited.
+    """
+    setters = sorted(p.name for p in BUILD.glob("*.ps1")
+                     if "PrototypeCards" in p.read_text(encoding="utf-8"))
+    assert setters == ["deploy_proto.ps1"], setters
+
+
+def test_the_dev_deploy_runs_the_whole_gate():
+    """A prototype build that skipped gates would prove nothing about the
+    cards it exists to try, so the dev path is the release path plus a flag
+    -- never minus a rule."""
+    src = (BUILD / "deploy_proto.ps1").read_text(encoding="utf-8")
+    assert "validate.ps1" in src
+    assert "-StaticOnly" not in src
+    assert "-p:PrototypeCards=true" in src
+    assert "version.ps1" in src, "deploy_proto.ps1 does not source version.ps1"
+    assert "rev-list" not in src, (
+        "deploy_proto.ps1 computes the AUTO version itself instead of asking "
+        "version.ps1")
+    # It stamps through the shared switch rather than string-editing a version.
+    assert "-Prototype" in src
+    # No handoff zip: co-op is lockstep and a peer on a release build has no
+    # prototype classes at all.
+    assert "Compress-Archive" not in src
+    # The restore route is named on the script, because there is no undo to
+    # offer -- deploy.ps1 simply overwrites it.
+    assert "deploy.ps1" in src
+
+
+def test_the_dev_deploy_checks_the_prototype_codegen_first():
+    """The one staleness gate validate.ps1 cannot supply: its S6a runs the
+    ROSTER codegen check, which cannot see the quarantined surface."""
+    src = (BUILD / "deploy_proto.ps1").read_text(encoding="utf-8")
+    assert "gen_prototype_cards.py" in src
+    assert "--check" in src
+    assert src.index("gen_prototype_cards.py") < src.index("dotnet build"), \
+        "the staleness check must run before anything is built"

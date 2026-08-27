@@ -1,0 +1,68 @@
+{
+ "source": "observed board (live wire state)",
+ "falsifier": "decision-closeness (R213 F)",
+ "dominance_gap": 0.5,
+ "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "applicable": true,
+ "verdict": "SURVIVES",
+ "gap": 0.1912,
+ "top1": 70.1,
+ "top2": 56.7,
+ "lines_considered": 79,
+ "playouts": 289,
+ "plays_refused": 0,
+ "pilot": "generic",
+ "lines": [
+  {
+   "cards": [
+    "Nereid's Ascension",
+    "Bake-Kurage"
+   ],
+   "score": 70.1
+  },
+  {
+   "cards": [
+    "Nereid's Ascension",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 56.7
+  },
+  {
+   "cards": [
+    "Water's Edge",
+    "Nereid's Ascension"
+   ],
+   "score": 53.7
+  },
+  {
+   "cards": [
+    "Nereid's Ascension",
+    "Water's Edge"
+   ],
+   "score": 53.7
+  },
+  {
+   "cards": [
+    "Nereid's Ascension",
+    "Coral Guard"
+   ],
+   "score": 52.5
+  }
+ ],
+ "reason": "no line dominates by more than the derived gap",
+ "observed_notes": {
+  "approximate_cards": [],
+  "unmapped_statuses": [],
+  "enemy_count": 3,
+  "auras_seen": [],
+  "unmapped_resources": [
+   "KLEEMOD_FANFARE_CAP_BONUS",
+   "KLEEMOD_FANFARE_FLOOR",
+   "KLEEMOD_SPOTLIGHT_MODE",
+   "KLEEMOD_SPOTLIGHT_MOVED",
+   "KLEEMOD_SPOTLIGHT_PLAYS",
+   "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+  ]
+ }
+}

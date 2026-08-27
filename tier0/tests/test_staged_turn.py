@@ -142,6 +142,23 @@ def test_the_id_must_be_a_slug():
     assert "slug" in str(e.value)
 
 
+def test_an_assumption_that_cites_a_register_id_is_refused_at_parse():
+    """Assumptions are folded into the packet's disclosures verbatim, and the
+    packet scrub runs at EXPORT -- after the game has booted, embarked and
+    boarded. The first slice cited `EB-165` in every file's assumptions,
+    `check` passed all eleven, and the first `stage` burned a real launch to
+    learn what a parse could have said. So the parse says it."""
+    with pytest.raises(staged_turn.TurnError) as e:
+        staged_turn.parse({"id": "t", "character": "c",
+                           "staging": [{"give": {"card": "strike"}}],
+                           "board": {"character": "k", "hand": ["strike"],
+                                     "enemies": [{"name": "d", "hp": 1}]},
+                           "assumptions": ["The game deals its own hand on "
+                                           "top of this one (EB-165)."]})
+    assert "register-id" in str(e.value)
+    assert "EB-165" in str(e.value)
+
+
 def test_the_two_halves_must_describe_the_same_hand():
     """The staged hand and the mirrored hand are one board written twice.
     Left unchecked, `closeness` would read a board nobody staged."""
@@ -397,6 +414,84 @@ def test_the_closeness_reading_carries_its_licence():
     assert "quotable" in r["quotability"]
     assert "never a claim that a decision is fun" in r["quotability"]
     assert r["guardrail"] == qa_packet.PACKET_GUARDRAIL
+
+
+# --- the prototype dev route (R213 B) --------------------------------------
+#
+# A quarantined row is absent from `loader._card_index()` BY CONSTRUCTION, so
+# the falsifier reaches one only down a route the turn file DECLARES. These
+# four tests are that route in both directions: it opens on the flag, it is
+# shut without it, and a shut door says which thing went wrong.
+
+def _proto_id() -> str:
+    """One prototype id off the SHIPPED surface, or skip.
+
+    Read from the surface rather than fixtured, because R213 B's deletion
+    rule makes the surface empty between slices and a fixture row here would
+    be the second permanent pool the ruling forbids, one row deep.
+    """
+    from tier0.content import loader
+    rows = loader.prototype_cards()
+    if not rows:
+        pytest.skip("the prototype surface is empty (the healthy state)")
+    return rows[0].id
+
+
+def test_a_prototype_id_is_refused_when_the_turn_does_not_declare_one():
+    """REFUSED BY NAME, not answered NOT READ. Falling through to
+    `unrepresentable` would report "the sim cannot model this card" when what
+    actually happened is that the file forgot to say what it was, and two
+    very different facts must not share one output."""
+    with pytest.raises(staged_turn.TurnError) as exc:
+        staged_turn.closeness(board(["strike", _proto_id()]))
+    assert _proto_id() in str(exc.value)
+    assert "prototype: true" in str(exc.value)
+
+
+def test_a_declared_prototype_turn_resolves_the_row():
+    """The door opens, and the card is the sheet's own row rather than an
+    approximation -- so the line the falsifier scores is a line somebody
+    could play."""
+    r = staged_turn.closeness(board(["strike", _proto_id()], energy=3),
+                              prototype=True)
+    assert r["source"] == "declared board (prototype route)"
+    assert not r.get("unrepresentable")
+    assert r["lines_considered"] > 1
+
+
+def test_the_declared_route_does_not_widen_the_ordinary_one():
+    """The flag opens the prototype surface and NOTHING else: a typo is still
+    a typo. Without this the fix would trade a refused prototype for an
+    unrefusable misspelling."""
+    r = staged_turn.closeness(board(["strike", "not_a_real_card"]),
+                              prototype=True)
+    assert r["verdict"] == "NOT READ"
+    assert "not_a_real_card" in r["unrepresentable"]
+
+
+def test_the_turn_files_prototype_flag_mirrors_the_scenarios():
+    """Same spelling, same default, and it reaches `as_scenario` -- one word
+    for one idea across the two halves of the harness."""
+    import yaml
+
+    example = yaml.safe_load(EXAMPLE.read_text(encoding="utf-8"))
+    assert staged_turn.parse(example).prototype is False
+    turn = staged_turn.parse(dict(example, prototype=True))
+    assert turn.prototype is True
+    assert turn.as_scenario().prototype is True
+
+
+def test_check_finds_turns_in_a_slice_subdirectory(tmp_path):
+    """A slice is a set of MATCHED PAIRS that only mean anything together, so
+    they live in one subdirectory; `check` has to see them there or half the
+    parse gate silently stops applying. `fixtures/` stays excluded -- it holds
+    grader forms, not turns."""
+    (tmp_path / "slice").mkdir()
+    (tmp_path / "slice" / "a.yaml").write_text("{}", encoding="utf-8")
+    (tmp_path / "fixtures").mkdir()
+    (tmp_path / "fixtures" / "form.yaml").write_text("{}", encoding="utf-8")
+    found = [p.name for p in staged_turn.all_turns(tmp_path)]
+    assert found == ["a.yaml"]
 
 
 def test_the_example_turn_has_more_than_one_line():

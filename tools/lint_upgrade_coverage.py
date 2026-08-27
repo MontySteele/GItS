@@ -337,6 +337,20 @@ def main() -> int:
     bodies_read = 0
     for path in sorted(
             (REPO / "klee-mod" / "KleeCode" / "Cards").rglob("Generated/*.cs")):
+        # THE QUARANTINED PROTOTYPE SURFACE IS OUT OF SCOPE (R213 B), and it
+        # is out for layer 1's reason rather than by exemption: this lint is
+        # the CAMPFIRE law -- "every card a player can draft can be upgraded"
+        # -- and a prototype row is never drafted. It is off-pool by
+        # construction, absent from GetUnlockedCards, and reachable only by a
+        # grant against a dev build, so there is no campfire at which its
+        # upgrade could be missing. Its sheet is also deliberately outside
+        # `loader.DOCS_CARD_SHEETS`, so without this every prototype class
+        # would map to "no id on any docs sheet" and the lint would report the
+        # working quarantine as a row of findings. The gate a prototype row
+        # DOES answer to is `tools/gen_prototype_cards.py`, which refuses an
+        # inexpressible row by name rather than listing it.
+        if "Prototype" in path.parts:
+            continue
         text = path.read_text(encoding="utf-8")
         body = _onupgrade_body(text)
         card = by_class.get(path.stem)
