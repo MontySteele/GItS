@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Lane D spike assembly. DELIBERATELY NOT referenced by KleeCode.csproj,
+       by klee-mod/build/deploy.ps1, or by tools/build_pck.ps1: nothing about
+       this spike may reach a deployed build until [USER] rules on the subject
+       enemy. It sits under klee-mod/ only so klee-mod/Directory.Build.props
+       resolves GameDataDir and BaseLibDll from local.props: no Steam path
+       appears in this file (spec 0.3). -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <AssemblyName>laned-enemy-seam</AssemblyName>
+    <RootNamespace>LaneD.EnemySeam</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <!-- Private=false throughout: the game loads all four from its own folders
+       and a mod must never ship a second copy. -->
+  <ItemGroup>
+    <Reference Include="sts2">
+      <HintPath>$(GameDataDir)\sts2.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>$(GameDataDir)\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="GodotSharp">
+      <HintPath>$(GameDataDir)\GodotSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="BaseLib">
+      <HintPath>$(BaseLibDll)</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+</Project>
