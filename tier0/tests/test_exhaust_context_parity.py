@@ -113,7 +113,13 @@ def test_the_generated_reader_renders_base_and_per_through_the_triple():
                       gen.KOKOMI_PROFILE)
     assert "CalculationBaseVar(3)" in source or "CalculationBase" in source
     assert "ExtraDamage" in source
-    assert "Scales with the total cost of the cards you just" in source
+    # And the PER term is printed, not merely asserted: {CalculatedDamage}
+    # previews base + per * 0 here (the selection does not exist until the
+    # card resolves), so a bare "Scales with ..." sentence left the rate --
+    # the only number that makes the card readable -- off the face entirely.
+    assert ("plus {ExtraDamage:diff()} per cost of the card you just "
+            "[gold]Exhausted[/gold].") in source
+    assert "Scales with" not in source
 
 
 def test_an_unknown_count_stays_a_named_blocker():

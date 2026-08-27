@@ -51,7 +51,7 @@ public sealed class PearlBarrage : CustomCardModel, IElementalCard, ICharacterCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pearl Barrage"),
-        ("description", "[gold]Exhaust[/gold] 1 card from your hand. Deal {CalculatedDamage:diff()} damage. Scales with the total cost of the cards you just [gold]Exhausted[/gold]."),
+        ("description", "[gold]Exhaust[/gold] 1 card from your hand. Deal {CalculatedDamage:diff()} damage, plus {ExtraDamage:diff()} per cost of the card you just [gold]Exhausted[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
