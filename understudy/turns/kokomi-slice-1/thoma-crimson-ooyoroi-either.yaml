@@ -52,37 +52,40 @@ notes: |
   48/70 HP, no Block, 3 energy, a Charge bank of 8, and one enemy at
   40 HP telegraphing a heavy single hit.
 
+# STAGING RULE, for the operator and not for the grader: the telegraph is
+# generated with the encounter, and defence is worth nothing against an intent
+# that is not an attack. If the live telegraph is not an attack, re-roll the
+# seed and stage again rather than recording the divergence.
+#
+# The list below is folded VERBATIM into the design-blind packet, so it carries
+# mechanical facts about the staging ONLY -- never why the board was built,
+# never which card is being looked at. The rationale lives in the header above,
+# where no grader reads.
 assumptions:
-  - "THE GAME DEALS ITS OWN OPENING HAND ON TOP OF THIS ONE (EB-165).
+  - "THE GAME DEALS ITS OWN OPENING HAND ON TOP OF THIS ONE.
      The staged hand is the declared one PLUS whatever the seat drew,
      and there is no dev door that empties a hand yet. The packet is a
      picture of the live hand; `closeness --observed` scores the live
      hand; the declared board below is the smaller reading available
      with no game running."
   - "The encounter is GENERATED. This file can write the enemies' HP and
-     Block and cannot write their INTENT. The declared board says a
-     telegraphed ATTACK because that is the intent under which defence
-     is worth anything, and what defence costs is the whole slice. If
-     the live telegraph is not an attack the staging is REDONE on
-     another seed: here the intent is not an incidental, it is the
-     question."
-  - "Every card is granted unupgraded. An upgrade moves numbers on both
-     halves of a pair and not necessarily by the same amount, so an
-     upgraded grant is a different experiment."
-  - "Charge is written to 8 through the registered resource, so
-     Kokomi's Charge reader is a LIVE choice rather than a small
-     attack. The finisher has to be on the table, or spending the
-     energy on defence is not giving anything up."
+     Block and cannot write their INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below
+     declares a telegraphed ATTACK as the falsifier's input. If the live
+     intent differs, the closeness reading is a reading of the DECLARED
+     board and the packet is a picture of the LIVE one; they are two
+     records, not one."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "Charge is written to 8 through the registered resource. All Streams
+     Flow to the Sea reads it at one point per two Charge."
   - "The player has no Strength and the enemies carry no aura, Vulnerable
      or Weak. A reaction on top of a hit would move every number the
      falsifier scores."
-  - "The card under test here is the EITHER shape. Its
-     twins are thoma-crimson-ooyoroi-shipped.yaml and thoma-crimson-ooyoroi-priced.yaml,
-     and all three boards are identical."
-  - "This half cannot be staged until a dev build is deployed
-     (klee-mod/build/deploy_proto.ps1). Until then it is
-     `closeness`-only, which needs no game."
 
+# This file cannot be staged until a dev build carrying the prototype rows is
+# deployed (klee-mod/build/deploy_proto.ps1). Until then it is closeness-only,
+# which needs no game.
 staging:
   - give: {card: KLEEMOD-PROTO_THOMA_CRIMSON_OOYOROI_EITHER, pile: hand, upgraded: false}
   - give: {card: KLEEMOD-CORAL_GUARD, pile: hand, upgraded: false}

@@ -328,7 +328,27 @@ def parse(blob: dict[str, Any], path: Path | None = None) -> StagedTurn:
         assumptions=[str(a) for a in (blob.get("assumptions") or [])],
         prototype=bool(blob.get("prototype", False)))
     _check_halves_agree(turn)
+    _check_assumptions_blind(turn)
     return turn
+
+
+def _check_assumptions_blind(turn: StagedTurn) -> None:
+    """The assumptions are folded into the packet's disclosures VERBATIM, so
+    they are scrubbed by the same rules as a card face -- and the scrub runs
+    at export, AFTER the game has been booted, embarked and boarded. Refusing
+    here, at parse, is what makes `check` the gate it says it is: the first
+    slice cited a register id in an assumption, `check` passed all eleven
+    files, and the first `stage` burned a real launch to learn what a parse
+    could have said.
+    """
+    bad = qa_packet.leaks(list(turn.assumptions))
+    if bad:
+        rule, hit, ctx = bad[0]
+        raise TurnError(
+            f"assumption leaks design vocabulary ({rule}: {hit!r} in "
+            f"{ctx[:80]!r}): assumptions are printed in the blind packet, "
+            f"so they follow the packet's own scrub -- state the fact, not "
+            f"the citation")
 
 
 def _parse_board(raw: Any) -> Board:

@@ -142,6 +142,23 @@ def test_the_id_must_be_a_slug():
     assert "slug" in str(e.value)
 
 
+def test_an_assumption_that_cites_a_register_id_is_refused_at_parse():
+    """Assumptions are folded into the packet's disclosures verbatim, and the
+    packet scrub runs at EXPORT -- after the game has booted, embarked and
+    boarded. The first slice cited `EB-165` in every file's assumptions,
+    `check` passed all eleven, and the first `stage` burned a real launch to
+    learn what a parse could have said. So the parse says it."""
+    with pytest.raises(staged_turn.TurnError) as e:
+        staged_turn.parse({"id": "t", "character": "c",
+                           "staging": [{"give": {"card": "strike"}}],
+                           "board": {"character": "k", "hand": ["strike"],
+                                     "enemies": [{"name": "d", "hp": 1}]},
+                           "assumptions": ["The game deals its own hand on "
+                                           "top of this one (EB-165)."]})
+    assert "register-id" in str(e.value)
+    assert "EB-165" in str(e.value)
+
+
 def test_the_two_halves_must_describe_the_same_hand():
     """The staged hand and the mirrored hand are one board written twice.
     Left unchecked, `closeness` would read a board nobody staged."""
