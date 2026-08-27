@@ -88,12 +88,11 @@ def parse(text: str) -> Contract:
 
 def sha256_of(path: Path) -> str:
     digest = hashlib.sha256()
-    # Builtin-`open` form rather than `path.open("rb")` deliberately:
-    # tools/lint_text_encoding.py reads the mode from positional arg 1, so the
-    # bound-method form is invisible to it and gets counted as an undeclared
-    # TEXT read. See the lane handoff -- the lint blind spot is reported, not
-    # worked around by editing a file this lane does not own.
-    with open(path, "rb") as handle:
+    # The bound-method form, which this used to avoid: until 2026-08-27
+    # tools/lint_text_encoding.py read the mode from positional arg 1 only, so
+    # `path.open("rb")` was invisible to it and counted as an undeclared TEXT
+    # read. That is fixed, and this call is the live exercise of the fix.
+    with path.open("rb") as handle:
         for block in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest().upper()

@@ -56,17 +56,48 @@ def _has_encoding(call: ast.Call) -> bool:
     return any(kw.arg == "encoding" for kw in call.keywords)
 
 
+# Every character legal in a mode string (`open`'s own documented set).
+# Used to tell a mode literal from a filename literal -- see `_mode_literal`.
+_MODE_CHARS = frozenset("rwxab+tU")
+
+
+def _mode_literal(node: ast.expr | None) -> str | None:
+    """The mode string this node is, or None if it is not one.
+
+    A mode is a short literal built only from mode characters, which is what
+    separates `open(p, "rb")`'s second argument from `open("blob.bin")`'s
+    first. A file literally named `rb` would fool this; nothing else in the
+    grammar does, and that file would be opened in text mode anyway.
+    """
+    if not isinstance(node, ast.Constant) or not isinstance(node.value, str):
+        return None
+    val = node.value
+    if val and len(val) <= 4 and set(val) <= _MODE_CHARS:
+        return val
+    return None
+
+
 def _is_binary_open(call: ast.Call) -> bool:
-    """True when the mode argument requests binary I/O."""
-    mode = None
+    """True when the mode argument requests binary I/O.
+
+    The mode's POSITION depends on the call shape, which is why this scans
+    rather than indexing: `open(p, "rb")` and `io.open(p, "rb")` put it at
+    index 1, but the bound-method form `some_path.open("rb")` puts it at
+    index 0, because the path is the receiver and not an argument. Indexing
+    at 1 unconditionally -- as this did until 2026-08-27 -- makes every
+    `Path.open("rb")` in the repo read as an undeclared TEXT read, which is a
+    finding that cannot be acted on (there is no encoding for binary I/O) and
+    which callers were working around by rewriting to the builtin form.
+    """
     for kw in call.keywords:
         if kw.arg == "mode":
-            mode = kw.value
-    if mode is None and len(call.args) >= 2:
-        mode = call.args[1]
+            return "b" in (_mode_literal(kw.value) or "")
+    for arg in call.args[:2]:
+        mode = _mode_literal(arg)
+        if mode is not None:
+            return "b" in mode
     # open(f) with no mode is text mode -- not exempt.
-    return isinstance(mode, ast.Constant) and isinstance(mode.value, str) \
-        and "b" in mode.value
+    return False
 
 
 def _binary_receiver(fn: ast.Attribute) -> bool:
