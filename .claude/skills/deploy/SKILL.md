@@ -26,8 +26,13 @@ PowerShell, from the repo root of the **art-bearing main checkout**.
    `.venv\Scripts\python tools\gen_roster_cards.py --check`
 
 4. **Gate the tree before shipping it:**
-   `python -m pytest tier0/tests tier05/tests -q -n auto --dist loadscope`
-   then `python tools/run_lints.py`.
+   `.venv\Scripts\python -m pytest tier0/tests tier05/tests -q -n auto --dist
+   loadscope` then `.venv\Scripts\python tools\run_lints.py --lane ci`. The
+   `ci` lane is the real gate — it is exactly what `tools/hooks/push_gate.py`
+   runs. A bare `run_lints.py` also runs the `local` lane, whose
+   `card-distinctness --gate` exits 1 on `main` by construction (three curated
+   known-failing breaches, carried in
+   `tier0/tests/test_distinctness_gate.py`), so it can never read as a pass.
 
 5. **Build the pack, ALWAYS before deploying.** After any roster-resource
    change an old Klee-only PCK cannot pass validation, and `deploy.ps1` rejects
