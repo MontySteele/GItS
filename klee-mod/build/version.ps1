@@ -116,6 +116,7 @@ function Get-AutoVersion {
     $auto = if ($isDirty) { "$count+dirty" } else { $count }
     return @{
         Auto       = $auto
+        Count      = $count
         IsDirty    = $isDirty
         DirtyFiles = $dirtyFiles
     }
@@ -124,16 +125,48 @@ function Get-AutoVersion {
 function Get-PackageVersion {
     <#
       The full MAJOR.AUTO string, plus the parts that produced it.
+
+      -Prototype STAMPS A DEV BUILD, on the SAME semver build-metadata
+      channel R214 already uses for +dirty. The game's parser ignores
+      everything after the '+', so a marked package is still a parseable
+      version and still refuses no dependent mod. What the mark buys is that
+      a dev package is IDENTIFIABLE ON SIGHT in the version string the game
+      shows -- which matters precisely because deploy_proto.ps1 writes to the
+      same mods\klee directory the release path writes to, so without it
+      "which build is installed right now" is a question with no answer
+      anywhere on screen.
+
+        plain           0.2.1209
+        dirty           0.2.1209+dirty          (R214, byte-unchanged)
+        prototype       0.2.1209+proto
+        both            0.2.1209+proto.dirty
+
+      proto before dirty because the token that says WHAT WAS BUILT is more
+      load-bearing than the one that says the tree moved. Composed from
+      Count/IsDirty rather than from Auto so the non-prototype string stays
+      exactly what it was before this switch existed.
+
+      THIS EXTENDS R214'S USE OF BUILD METADATA AND IS FLAGGED FOR THE NEXT
+      RULING: R214 ruled MAJOR.AUTO with +dirty, and +proto is a second token
+      on that channel serving a build shape R214 did not contemplate.
     #>
-    param([string]$SourceManifest, [string]$RepoRoot)
+    param([string]$SourceManifest, [string]$RepoRoot, [switch]$Prototype)
     $major = Get-ManifestMajor -SourceManifest $SourceManifest
     $auto = Get-AutoVersion -RepoRoot $RepoRoot
+    if ($Prototype) {
+        $meta = @('proto')
+        if ($auto.IsDirty) { $meta += 'dirty' }
+        $autoText = "$($auto.Count)+$($meta -join '.')"
+    } else {
+        $autoText = $auto.Auto
+    }
     return @{
-        Version    = "$major.$($auto.Auto)"
-        Major      = $major
-        Auto       = $auto.Auto
-        IsDirty    = $auto.IsDirty
-        DirtyFiles = $auto.DirtyFiles
+        Version     = "$major.$autoText"
+        Major       = $major
+        Auto        = $autoText
+        IsPrototype = [bool]$Prototype
+        IsDirty     = $auto.IsDirty
+        DirtyFiles  = $auto.DirtyFiles
     }
 }
 
@@ -185,12 +218,21 @@ function Test-VersionPolicy {
         Installed   hashtable of dependency id -> parsed manifest object
         GameVersion the game's version string, or $null if unreadable
         Expected    the MAJOR.AUTO string this checkout computes
+
+      AllowPrototypeMetadata is the DEV-BUILD gate and it is off by default,
+      which is the whole point: the +proto token is legal in exactly one
+      place, the package deploy_proto.ps1 stamped, and this switch is the
+      only way to say so. The release path never passes it, so a +proto
+      package reaching validate.ps1 without it is refused BY NAME rather than
+      by the Expected-mismatch rule below -- a named refusal says what
+      happened, and "0.2.1209+proto is not 0.2.1209" does not.
     #>
     param(
         [Parameter(Mandatory = $true)]$Manifest,
         [Parameter(Mandatory = $true)][hashtable]$Installed,
         [AllowNull()][string]$GameVersion,
-        [Parameter(Mandatory = $true)][string]$Expected
+        [Parameter(Mandatory = $true)][string]$Expected,
+        [switch]$AllowPrototypeMetadata
     )
     $out = New-Object System.Collections.Generic.List[string]
 
@@ -238,6 +280,18 @@ function Test-VersionPolicy {
     # old MAJOR-AUTO shape would have failed on every build.
     if ($Manifest.version -notmatch '^\d+\.\d+\.\d+(\+[0-9A-Za-z.-]+)?$') {
         $out.Add("staged manifest version '$($Manifest.version)' is not a valid semantic version (R214: MAJOR.AUTO, with +dirty as build metadata). The game's parser leaves an unparseable version null and then refuses any dependent mod declaring a min_version on us.")
+    }
+
+    # The +proto token is legal ONLY from the dev deploy path. R213 B's
+    # quarantine is a claim about what a RELEASE package contains, and a
+    # release package carrying a dev mark either was built by the dev script
+    # (so the quarantine claim is false) or was hand-edited (so the stamp is
+    # not evidence of anything). Both are the same finding.
+    if (-not $AllowPrototypeMetadata -and $Manifest.version -match '\+proto') {
+        $out.Add("staged manifest version '$($Manifest.version)' carries the +proto build metadata, which only klee-mod/build/deploy_proto.ps1 may stamp. The release path must not ship a package built with the quarantined prototype surface compiled in (R213 B).")
+    }
+    if ($AllowPrototypeMetadata -and $Manifest.version -notmatch '\+proto') {
+        $out.Add("the prototype validate was asked for but the staged manifest version '$($Manifest.version)' carries no +proto mark, so nothing on the package says it is a dev build.")
     }
 
     # R70. The staged version must be the MAJOR.AUTO this checkout computes.

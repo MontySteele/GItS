@@ -43,6 +43,12 @@ SCRIPTS = [
     ROOT / "tools" / "build_pck.ps1",
     ROOT / "klee-mod" / "build" / "deploy.ps1",
     ROOT / "klee-mod" / "build" / "version.ps1",
+    # The DEV deploy (R213 B's quarantined prototype surface). In scope for
+    # the same reason as the two above it, and unlike them it DOES shell out:
+    # it runs `tools/gen_prototype_cards.py --check` before building anything,
+    # because validate.ps1's S6a staleness gate reads the ROSTER codegen and
+    # cannot see that surface.
+    ROOT / "klee-mod" / "build" / "deploy_proto.ps1",
 ]
 
 # The helpers. A call site inside one of these bodies is the implementation,

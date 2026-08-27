@@ -304,6 +304,19 @@ generator run does not touch it.
 dotnet build klee-mod/KleeCode -p:PrototypeCards=true       # the DEV build
 ```
 
+**Deploying a dev build** — `klee-mod\build\deploy_proto.ps1`, from the
+art-bearing main checkout, game closed. It is `deploy.ps1` plus three things:
+`gen_prototype_cards.py --check` first, `-p:PrototypeCards=true` on the build,
+and a package stamped `MAJOR.AUTO+proto` (`+proto.dirty` when dirty) so a dev
+build is identifiable on sight. It runs the SAME `validate.ps1`, whole;
+`-PrototypeBuild` relaxes exactly one rule — S3 accepts the `+proto` mark,
+which every other path refuses by name. Prototype rows are off-pool, so
+ordinary play is unchanged. **To restore the release build run
+`klee-mod\build\deploy.ps1`**: it overwrites the same `mods\klee`, and the
+absence of `+proto` in the in-game version is the confirmation. Do that before
+any measured run, handoff or co-op session. No `-Package` switch, deliberately
+— a dev build is never handed to a peer.
+
 **Staging a row** — edit the sheet, regen, dev-build, then grant it by id from
 a scenario (`give: {card: KLEEMOD-PROTO_..., pile: hand}`); template and
 preconditions in `understudy/scenarios/eb147-prototype-grant.yaml`. A row the
