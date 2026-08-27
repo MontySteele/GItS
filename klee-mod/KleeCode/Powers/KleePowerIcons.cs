@@ -109,6 +109,29 @@ internal static class KleePowerIcons
         FanfareDeltaBlockPower => KleePck.Path(
             "furina/powers/unheard_confession.png"),
 
+        // KOKOMI (EB-67). This block did not exist at all: every one of her six
+        // powers fell to `_ => null` and drew the base-game placeholder, which
+        // is the `Bake-Kurage` badge the 2026-08-08 live session captured. The
+        // gap was BOTH halves at once -- no case here AND no file, because the
+        // pck's kokomi\ block carried model\, ui\ and summon\ and nothing else.
+        // Named individually rather than grouped for the reason recorded above:
+        // the three Kurage powers are three different effects and one shared
+        // jellyfish would read as intentional.
+        //
+        // Bake-Kurage has a SECOND, unrelated sprite at kokomi/summon/
+        // bake_kurage.png -- that one is the CREATURE on the field (the
+        // end-of-turn attribution docket), this one is the status badge. Both
+        // ship; they are different sizes and different jobs.
+        KurageSummonPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        KurageWardPower => KleePck.Path("kokomi/powers/kurages_oath.png"),
+        KurageAmpPower => KleePck.Path("kokomi/powers/before_sun_and_moon.png"),
+        CeremonialGarmentPower => KleePck.Path(
+            "kokomi/powers/ceremonial_garment.png"),
+        PreventExhaustWardPower => KleePck.Path(
+            "kokomi/powers/vigil_of_the_deep.png"),
+        ChargePerTurnPower => KleePck.Path(
+            "kokomi/powers/princess_of_watatsumi.png"),
+
         // NO SpotlightPower base case, deliberately. A future subclass added
         // without an icon should fall to `_ => null` and show the base-game
         // placeholder -- which reads as "no art yet" -- rather than inherit a
