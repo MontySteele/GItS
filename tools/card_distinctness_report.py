@@ -183,8 +183,19 @@ import yaml
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SHEETS = sorted(glob.glob(os.path.join(REPO, "docs", "*-cards.yaml"))) + \
-         [os.path.join(REPO, "docs", "mondstadt-companions.yaml")]
+# QUARANTINED (R213 B, BACKLOG EB-147): the prototype surface is not a pool,
+# so it has no distinctness. Feeding it in would be worse than useless -- the
+# instrument's numbers are all RATIOS over a pool, and a handful of scratch
+# rows would move hapax, uniq% and neardup for a "pool" no player can draw
+# from and that is deleted the moment its slice is graded. The file name
+# already misses the glob; the filter states the exclusion so a rename cannot
+# silently start measuring scratch.
+EXCLUDED_SHEETS = frozenset({"prototype-surface.yaml"})
+
+SHEETS = [path for path in
+          sorted(glob.glob(os.path.join(REPO, "docs", "*-cards.yaml")))
+          + [os.path.join(REPO, "docs", "mondstadt-companions.yaml")]
+          if os.path.basename(path) not in EXCLUDED_SHEETS]
 
 
 def _game_ref_pools() -> list[str]:

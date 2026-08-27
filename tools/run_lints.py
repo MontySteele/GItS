@@ -126,6 +126,13 @@ REGISTRY: tuple[Lint, ...] = (
     _ci("op-parity",            "tools/lint_op_parity.py"),
     _ci("sly-grammar",          "tools/lint_sly_grammar.py"),
     _ci("codegen-staleness",    "tools/gen_roster_cards.py", "--check"),
+    # EB-147 (R213 B). The prototype surface is quarantined from every
+    # MEASUREMENT tool and from the release build -- it is NOT quarantined
+    # from correctness. Its emitted C# is committed, so it can go stale
+    # exactly like the roster's, and a stale prototype roster is what sends a
+    # slice to the funnel carrying a card that is not the card the sheet
+    # says. Cheap on an empty surface, and it needs no game_ref.
+    _ci("prototype-codegen",    "tools/gen_prototype_cards.py", "--check"),
     _ci("pool-membership",      "tools/lint_pool_membership.py"),
     _ci("ancient-coverage",     "tools/lint_ancient_coverage.py"),
     _ci("role-tempo-artifacts", "tools/suggest_role_tempo_tags.py", "--check"),

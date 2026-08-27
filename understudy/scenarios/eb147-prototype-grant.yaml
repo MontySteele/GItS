@@ -1,0 +1,112 @@
+# EB-147 (R213 B): the quarantine's ONE door, proven open.
+#
+# THE QUESTION, AND IT IS DELIBERATELY THE SMALLEST ONE.
+# Not "is this prototype good" -- Guardrail-7 and R213's own funnel own that,
+# and a scenario can never answer it. This file asks whether the surface WORKS:
+# can a card that exists on no character's sheet, in no reward pool, in no
+# release build and in no version stamp still be put in a hand by id and
+# played, at the real game, with the numbers the prototype row prints?
+#
+# If the answer is no, the whole EB-147 shape is wrong and every slice built on
+# it is built on nothing. That is why this is the first thing run.
+#
+# THIS RUN IS DEFERRED. Another lane owns the game (2026-08-27). The file is
+# committed unrun, and it names its own preconditions below rather than
+# assuming the reader will remember them.
+#
+# PRECONDITIONS -- ALL THREE, OR THE FIRST STEP FAILS WITH THE ENDPOINT'S OWN
+# REFUSAL ("no card matched"), WHICH IS THE CORRECT FAILURE AND NOT A DEFECT:
+#
+#   1. The fixture row is STAGED on docs/prototype-surface.yaml. Verbatim:
+#
+#          - id: proto_kokomi_tidecall
+#            name: Tidecall (Prototype)
+#            character: kokomi
+#            cost: 1
+#            type: skill
+#            rarity: common
+#            effects:
+#              - {op: block, amount: 5}
+#              - {op: draw, amount: 1}
+#
+#      (It is the same row `tier0/tests/test_prototype_surface.py` uses. It is
+#      NOT committed to the surface: R213 B's deletion rule makes an empty
+#      surface the healthy state, and a fixture nobody deletes is the second
+#      permanent pool the ruling forbids.)
+#
+#   2. `PYTHONPATH=. python tools/gen_prototype_cards.py` has been run, so
+#      Cards/Prototype/Generated/ holds ProtoKokomiTidecall.cs and a
+#      PrototypeRoster that lists it under "kokomi".
+#
+#   3. The staged build is a DEV build:
+#      `dotnet build klee-mod/KleeCode -p:PrototypeCards=true`.
+#      A default build does not compile the class, so ModelDb has no entry and
+#      `give` is refused. THAT REFUSAL IS ALSO EVIDENCE -- run this file once
+#      against a default build and the quarantine is demonstrated from the
+#      outside, which is a cheaper proof than reading the csproj.
+#
+# THE ID SPELLING IS THE WIRE'S, NOT A GUESS. `ModelDb` slugifies a model's
+# entry and BaseLib prefixes the mod id, which is why every other scenario in
+# this pack writes `KLEEMOD-HOLD_THE_LINE`. A prototype is spelled the same
+# way, off its sheet id: proto_kokomi_tidecall -> KLEEMOD-PROTO_KOKOMI_TIDECALL.
+#
+# WHAT A PASS PROVES, EXACTLY: the grant door reaches a quarantined row; the
+# emitted C# resolves CardModel.Pool (an off-pool card that did NOT would have
+# thrown "You monster!" at the draw, before any expect ran, and the run would
+# end no_progress rather than fail an assertion); and the printed numbers match
+# the row. It proves nothing about fun, and nothing about balance.
+
+name: eb147-prototype-grant
+character: KLEEMOD-KOKOMI
+turns: 6
+
+# The cards this file names live on the QUARANTINED prototype surface, which is
+# EMPTY in the committed tree by design (R213 B's deletion rule). The pack's
+# card-name lint therefore cannot resolve them, and this flag is how it is told
+# so -- rather than the lint being loosened for every file. What the lint still
+# checks on a prototype scenario is the part that IS checkable with no surface:
+# every granted id carries the `PROTO_` prefix, so a typo that named a shipped
+# card would still be caught.
+prototype: true
+
+notes: |
+  A prototype row granted to hand by id in a dev build, then played, with the
+  Block it prints landing on the player and the draw arriving. Every number
+  here is the fixture row's own; none of them is a balance claim.
+
+assumptions:
+  - "`KLEEMOD-PROTO_KOKOMI_TIDECALL` is the fixture row's ModelDb entry. If
+     the row was not staged, or the build was not a dev build, the first step
+     fails with the give endpoint's own 'no card matched' -- which is the
+     quarantine working, not a defect in this file."
+  - "Kokomi starts the fight with 0 Block. The first expect reads that, so a
+     relic or starter that opens with Block would fail there rather than
+     silently inflating the read after the play."
+  - "Energy is written to 3 first, so no refusal in this file can be
+     EnergyCostTooHigh wearing the answer the scenario is looking for."
+  - "The card is granted UNUPGRADED. The prototype surface carries no
+     `*-upgrades.yaml` deltas at all -- an upgrade is a ruled number and a
+     prototype has none -- so the upgraded face does not exist to test."
+  - "Block from a Skill is not modified by anything in Kokomi's opening state,
+     so 5 printed is 5 landed. If a future prototype slice adds a Block
+     multiplier this assumption is the line that has to change."
+  - "The row's `draw 1` is deliberately NOT asserted: the card drawn is
+     whatever the deck's top was, so asserting its identity would be asserting
+     the shuffle, and asserting a hand COUNT after a play that also removes the
+     played card reads the same whether the draw fired or not. Block is the
+     honest read here; a slice that needs the draw proven writes a scenario
+     that sets the draw pile first."
+
+steps:
+  # ---- the door: a card in no pool and no release build, put in hand -------
+  - give: {card: KLEEMOD-PROTO_KOKOMI_TIDECALL, pile: hand, upgraded: false}
+  - set_energy: {amount: 3}
+  - expect:
+      player_block: {amount: 0}
+      can_play: {card: "Tidecall (Prototype)", value: true}
+      unplayable_reason: {card: "Tidecall (Prototype)", value: null}
+
+  # ---- and it resolves as the row prints ----------------------------------
+  - play: {card: "Tidecall (Prototype)"}
+  - expect:
+      player_block: {amount: 5}

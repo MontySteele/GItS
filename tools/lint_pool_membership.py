@@ -51,6 +51,17 @@ MEMBERSHIP_FILES = [
     REPO / "klee-mod" / "KleeCode" / "KokomiCardPool.cs",
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Kokomi" / "Generated"
     / "KokomiCardRoster.cs",
+    # QUARANTINED prototype surface (R213 B, EB-147). Listed here because the
+    # quarantine does NOT extend to runtime legality: a prototype card is
+    # drawn and previewed by the real game during a staged turn, so it must
+    # resolve CardModel.Pool exactly like a shipped card or it takes down the
+    # task that owned the draw. KleeMod.PrototypeCards hands this roster to
+    # each character's OFF-POOL list -- in the pool, out of GetUnlockedCards
+    # -- which is the same split the kit cards and the companions use. The
+    # file is committed even when the surface is empty (an empty roster
+    # class), so this path never goes missing.
+    REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
+    / "PrototypeRoster.cs",
 ]
 # EB-150: the generated choose-one mode-face rosters, globbed rather than
 # listed. They are per-character and the generator mints one the moment a sheet
