@@ -22,6 +22,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+from tier0.content import loader
 from understudy import bridge, scenario
 
 REPO = Path(__file__).resolve().parents[2]
@@ -624,13 +625,50 @@ def test_every_card_a_scenario_names_exists_on_a_sheet_or_is_a_declared_token():
     a list, not a switched-off check."""
     sheet = _sheet_names()
     tokens = {scenario.card_key(k) for k in scenario.TOKEN_CARDS}
+    # EB-147: prototype rows are resolvable while a slice is STAGED and absent
+    # the rest of the time, which is the quarantine working rather than a gap.
+    # A `prototype: true` file is checked against the surface as it stands.
+    proto: set[str] = set()
+    for card in loader.prototype_cards():
+        proto.add(scenario.card_key(card.id))
+        if card.name:
+            proto.add(scenario.card_key(card.name))
     unknown: list[str] = []
     for p in scenario.all_scenarios():
-        for name in scenario.load(p).cards_named():
-            if scenario.card_key(name) not in sheet | tokens:
+        s = scenario.load(p)
+        if s.prototype:
+            continue           # covered by the prototype lint below instead
+        for name in s.cards_named():
+            if scenario.card_key(name) not in sheet | tokens | proto:
                 unknown.append(f"{p.name}: {name}")
     assert not unknown, "cards named by a scenario that exist nowhere: " + \
         ", ".join(unknown)
+
+
+def test_a_prototype_scenario_grants_only_prototype_ids():
+    """EB-147 (R213 B): the half of the name lint that survives an empty surface.
+
+    A `prototype: true` file names cards that exist only while their slice is
+    staged, so "does this name resolve" is unanswerable in the committed tree.
+    What IS answerable, and what actually protects the deferred live run, is
+    that every id it GRANTS carries the prototype prefix: a typo that reached
+    for a shipped card would be granting a real card under a prototype's name,
+    which is the one confusion this whole surface exists to prevent.
+    """
+    prefix = loader.PROTOTYPE_ID_PREFIX.upper()
+    checked = 0
+    for p in scenario.all_scenarios():
+        s = scenario.load(p)
+        if not s.prototype:
+            continue
+        grants = [str(body["card"]) for verb, body in s.steps
+                  if verb == "give" and body.get("card")]
+        assert grants, f"{p.name}: a prototype scenario that grants nothing"
+        for card in grants:
+            assert card.upper().startswith(f"KLEEMOD-{prefix}"), \
+                f"{p.name}: {card} is not a prototype id"
+        checked += 1
+    assert checked, "no prototype scenario in the pack"
 
 
 def test_the_pack_covers_all_three_of_the_roster_and_states_its_assumptions():

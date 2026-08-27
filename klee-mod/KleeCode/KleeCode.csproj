@@ -12,6 +12,28 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
 
+  <!-- QUARANTINED PROTOTYPE SURFACE (R213 B, BACKLOG EB-147).
+
+       `dotnet build -p:PrototypeCards=true` compiles Cards/Prototype/** and
+       defines PROTOTYPE_CARDS, which is what makes KleeMod.PrototypeCards
+       hand the generated rows to each character's OFF-POOL list. WITHOUT the
+       property the directory is not compiled at all, so a release build
+       contains no prototype class and there is no id for anything to grant.
+
+       Compile Remove (rather than a gitignore) because the generated files
+       must stay COMMITTED and diffable: the staleness gate
+       tools/gen_prototype_cards.py (with the check flag) reads them, and a
+       surface that vanished from the tree would take its own audit trail
+       with it.
+
+       build/deploy.ps1 and build/validate.ps1 deliberately never set this. -->
+  <PropertyGroup Condition="'$(PrototypeCards)' == 'true'">
+    <DefineConstants>$(DefineConstants);PROTOTYPE_CARDS</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(PrototypeCards)' != 'true'">
+    <Compile Remove="Cards/Prototype/**/*.cs" />
+  </ItemGroup>
+
   <!-- Reference the game assembly + Harmony directly. Private=false: the game
        loads these from its own data folder, we must not ship copies. -->
   <ItemGroup>

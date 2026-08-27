@@ -1,0 +1,47 @@
+# PROTOTYPE SURFACE -- QUARANTINED. R213 B (1050f67), BACKLOG EB-147.
+#
+# WHAT THIS SHEET IS. One staging surface for cards that are being TRIED, for
+# every character at once. A row here is not a card in the game: it is a
+# question, put in front of the real engine so the funnel (R213 process) can
+# ask whether the turn it produces has a second plausible line. Each row names
+# the character it belongs to with `character:`; there is no per-character
+# prototype sheet and there will not be one.
+#
+# THE DELETION RULE, WHICH IS THE POINT OF THE FILE.
+#
+#     Once a slice is ACCEPTED or REJECTED, its rows LEAVE this surface.
+#
+# Accepted rows are re-authored onto the owning character's real sheet, with
+# their numbers ruled, their stamps bumped and their art commissioned, and the
+# prototype rows are DELETED in the same commit. Rejected rows are deleted
+# outright; the reasoning goes in the slice's packet under review/, never here
+# as a commented-out row. This surface is NEVER a second permanent pool -- an
+# empty file is the healthy steady state, and a row that has sat here across
+# two slices is a defect in the process, not a backlog item.
+#
+# WHAT A ROW IS AND IS NOT.
+#   IS      -- schema-valid (tier0/content/loader.py's own validators run on
+#              it), codegen-expressible (tools/gen_prototype_cards.py must
+#              emit it or the row is refused by name), runtime-legal (the
+#              emitted class is pool-resolvable, so it does not throw
+#              "You monster!" the moment it is drawn).
+#   IS NOT  -- in any reward pool, in the release build, in the pck, in a
+#              roster digest, in a balance report, in card_distinctness_report,
+#              or in any version stamp. None of those tools can see this file.
+#
+# HOW A ROW IS REACHED. Only by id, through the grant tooling:
+# `understudy/scenarios/*.yaml` step `give: {card: KLEEMOD-<ID>, ...}` against
+# a DEV build (`dotnet build -p:PrototypeCards=true`). The default build does
+# not compile these classes at all, so a shipped mod cannot reach them by any
+# route, including a hand-typed id.
+#
+# ID CONVENTION (enforced, not a habit): every id starts `proto_`. That is what
+# keeps a prototype's C# class name and its ModelId out of collision with a
+# shipped card, and it is what makes "did this slice leave the surface?"
+# answerable with a grep.
+#
+# STAGING ONE: docs/current/OPERATIONS.md, "Prototype surface (EB-147)".
+#
+# There is deliberately no `[]` below for a staged row to trip over: an empty
+# YAML document loads as null, and every reader of this file spells that
+# `or []`. Append list rows directly under this header.

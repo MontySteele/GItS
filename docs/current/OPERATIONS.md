@@ -291,6 +291,43 @@ The generator rejects unknown card-level fields as well as unknown effects
 Partial upgrades are forbidden — a card gets its complete ruled upgrade or lists
 under `upgrades.no_upgrade_path`. Depth: `docs/current/atlas/klee-mod-cards.md`.
 
+## Prototype surface (`EB-147`) — quarantined, dev-only
+
+`docs/prototype-surface.yaml` is ONE staging sheet for cards being TRIED, for
+every character at once (each row names its owner with `character:`, and every
+id starts `proto_`). A separate dev-only generator builds it; the default
+generator run does not touch it.
+
+```sh
+.venv/Scripts/python tools/gen_prototype_cards.py           # emit the dev-only C#
+.venv/Scripts/python tools/gen_prototype_cards.py --check   # staleness gate (CI lane)
+dotnet build klee-mod/KleeCode -p:PrototypeCards=true       # the DEV build
+```
+
+**Staging a row** — edit the sheet, regen, dev-build, then grant it by id from
+a scenario (`give: {card: KLEEMOD-PROTO_..., pile: hand}`); template and
+preconditions in `understudy/scenarios/eb147-prototype-grant.yaml`. A row the
+emitter cannot express STOPS the run by name: a prototype that cannot be
+printed cannot be tried.
+
+**THE DELETION RULE (R213 B).** *Once a slice is accepted or rejected, its rows
+LEAVE the surface.* Accepted rows are re-authored onto the owning character's
+real sheet — ruled numbers, stamp bump, art — and deleted here in the same
+commit; rejected rows are deleted outright, with the reasoning in the slice's
+packet under `review/`, never as a commented-out row. **This is never a second
+permanent pool**, and an empty file is the healthy state.
+
+What the quarantine is: without `-p:PrototypeCards=true` the classes are not
+compiled at all, so no release build, no pck and no ordinary run can reach one;
+under the flag they go into each character's OFF-POOL list (in the pool so
+`CardModel.Pool` resolves, out of `GetUnlockedCards` so no reward roll or
+transform can produce one). The rows never enter tier0's card index, so no run
+template, digest or balance report sees them, and the sheet is excluded by name
+from `lint_sheet_stamp` and `card_distinctness_report` — **staging a row bumps
+no stamp**. Still checked: the tier0 schema validators, the codegen,
+`lint_generated_structure` and `lint_pool_membership`.
+Depth: `docs/current/atlas/klee-mod-cards.md` §7.
+
 ## Art pipeline
 
 Tier F art never ships and never enters the repo; only the ledgers

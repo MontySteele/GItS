@@ -80,6 +80,13 @@ public static class KleeOffPoolCards
             // Token status: created at play time by Fish Blasting.
             ModelDb.Card<Confiscated>(),
         };
+        // QUARANTINED prototype rows (R213 B, EB-147). Empty in every
+        // build that did not set PrototypeCards=true -- the classes are not
+        // compiled. Off-pool for the reason everything else here is: Pool
+        // must resolve or the card throws "You monster!" on draw, and
+        // GetUnlockedCards must not see it or a reward roll could offer a
+        // card nobody ruled. See KleeMod.PrototypeCards.
+        cards.AddRange(PrototypeCards.For("klee"));
         return cards;
     }
 
