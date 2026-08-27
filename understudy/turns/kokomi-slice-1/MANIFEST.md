@@ -19,17 +19,17 @@ This table is the map.
 
 | file | turn id | arm | card under test | pair | seed | staged | packet sha | closeness (declared board) |
 |---|---|---|---|---|---|---|---|---|
-| `pearl-barrage-shipped.yaml` | `kokomi-slice1-t01` | 1 — counting basis | `pearl_barrage` (shipped) | A | unpinned | **pending** | — | SURVIVES, gap 0.0256 over 27 lines |
-| `pearl-barrage-turn.yaml` | `kokomi-slice1-t02` | 1 — counting basis | `proto_pearl_barrage_turn` | A | unpinned | **pending** (dev build) | — | SURVIVES, gap 0.1136 over 27 lines |
-| `shinobu-sanctifying-ring-shipped.yaml` | `kokomi-slice1-t03` | 2/3 — baseline | `shinobu_sanctifying_ring` (shipped) | B | unpinned | **pending** | — | SURVIVES, gap 0.0372 over 11 lines |
-| `shinobu-sanctifying-ring-either.yaml` | `kokomi-slice1-t04` | 2 — mutually exclusive | `proto_shinobu_sanctifying_ring_either` | B | unpinned | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 11 lines |
-| `shinobu-sanctifying-ring-priced.yaml` | `kokomi-slice1-t05` | 3 — priced in cost | `proto_shinobu_sanctifying_ring_priced` | B | unpinned | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 8 lines |
-| `thoma-crimson-ooyoroi-shipped.yaml` | `kokomi-slice1-t06` | 2/3 — baseline | `thoma_crimson_ooyoroi` (shipped) | C | unpinned | **pending** | — | SURVIVES, gap 0.0717 over 11 lines |
-| `thoma-crimson-ooyoroi-either.yaml` | `kokomi-slice1-t07` | 2 — mutually exclusive | `proto_thoma_crimson_ooyoroi_either` | C | unpinned | **pending** (dev build) | — | SURVIVES, gap 0.1932 over 11 lines |
-| `thoma-crimson-ooyoroi-priced.yaml` | `kokomi-slice1-t08` | 3 — priced in cost | `proto_thoma_crimson_ooyoroi_priced` | C | unpinned | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 8 lines |
-| `itto-superlative-superstrength-shipped.yaml` | `kokomi-slice1-t09` | 2/3 — baseline | `itto_superlative_superstrength` (shipped) | D | unpinned | **pending** | — | SURVIVES, gap 0.1003 over 11 lines |
-| `itto-superlative-superstrength-either.yaml` | `kokomi-slice1-t10` | 2 — mutually exclusive | `proto_itto_superlative_superstrength_either` | D | unpinned | **pending** (dev build) | — | SURVIVES, gap 0.0881 over 11 lines |
-| `itto-superlative-superstrength-priced.yaml` | `kokomi-slice1-t11` | 3 — priced in cost | `proto_itto_superlative_superstrength_priced` | D | unpinned | **pending** (dev build) | — | SURVIVES, gap 0.0096 over 8 lines |
+| `pearl-barrage-shipped.yaml` | `kokomi-slice1-t01` | 1 — counting basis | `pearl_barrage` (shipped) | A | `HUMWKRKNCE` | `0.2.1209` (2026-08-27) | `cccf9ecf62daff984cb3e44b99c3b38b4153ecba4473fb5421923d2f35dcedba` | SURVIVES, gap 0.0256 over 27 lines; observed gap 0.0175 over 351 lines |
+| `pearl-barrage-turn.yaml` | `kokomi-slice1-t02` | 1 — counting basis | `proto_pearl_barrage_turn` | A | `HUMWKRKNCE` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.1136 over 27 lines |
+| `shinobu-sanctifying-ring-shipped.yaml` | `kokomi-slice1-t03` | 2/3 — baseline | `shinobu_sanctifying_ring` (shipped) | B | `0A4RLXEB65` | `0.2.1209` (2026-08-27) | `222dacff10c1a241c01b3a8e05d0faaedd16a506d50209c3f1e9bd0be34f3321` | SURVIVES, gap 0.0372 over 11 lines; observed gap 0.0000 over 101 lines |
+| `shinobu-sanctifying-ring-either.yaml` | `kokomi-slice1-t04` | 2 — mutually exclusive | `proto_shinobu_sanctifying_ring_either` | B | `0A4RLXEB65` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 11 lines |
+| `shinobu-sanctifying-ring-priced.yaml` | `kokomi-slice1-t05` | 3 — priced in cost | `proto_shinobu_sanctifying_ring_priced` | B | `0A4RLXEB65` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 8 lines |
+| `thoma-crimson-ooyoroi-shipped.yaml` | `kokomi-slice1-t06` | 2/3 — baseline | `thoma_crimson_ooyoroi` (shipped) | C | `XVE3PVZEPT` | `0.2.1209` (2026-08-27) | `0cbfa1ef52c3e8dbcf9c27d0955fc0a1292e96512e8305a121ba52f89410c8b6` | SURVIVES, gap 0.0717 over 11 lines; observed gap 0.0208 over 195 lines |
+| `thoma-crimson-ooyoroi-either.yaml` | `kokomi-slice1-t07` | 2 — mutually exclusive | `proto_thoma_crimson_ooyoroi_either` | C | `XVE3PVZEPT` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.1932 over 11 lines |
+| `thoma-crimson-ooyoroi-priced.yaml` | `kokomi-slice1-t08` | 3 — priced in cost | `proto_thoma_crimson_ooyoroi_priced` | C | `XVE3PVZEPT` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 8 lines |
+| `itto-superlative-superstrength-shipped.yaml` | `kokomi-slice1-t09` | 2/3 — baseline | `itto_superlative_superstrength` (shipped) | D | `X1BQR3FU4G` | `0.2.1209` (2026-08-27) | `4c005feb2645624c0e438cb271fcbceeef0082f28830a2b62c4637e25ef2a747` | SURVIVES, gap 0.1003 over 11 lines; observed gap 0.1217 over 143 lines |
+| `itto-superlative-superstrength-either.yaml` | `kokomi-slice1-t10` | 2 — mutually exclusive | `proto_itto_superlative_superstrength_either` | D | `X1BQR3FU4G` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.0881 over 11 lines |
+| `itto-superlative-superstrength-priced.yaml` | `kokomi-slice1-t11` | 3 — priced in cost | `proto_itto_superlative_superstrength_priced` | D | `X1BQR3FU4G` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.0096 over 8 lines |
 
 `DOMINANCE_GAP` is 0.5. Every reading above is a reading of the **declared**
 board — the five-card mirror available with no game running — and is written
