@@ -20,16 +20,16 @@ This table is the map.
 | file | turn id | arm | card under test | pair | seed | staged | packet sha | closeness (declared board) |
 |---|---|---|---|---|---|---|---|---|
 | `pearl-barrage-shipped.yaml` | `kokomi-slice1-t01` | 1 — counting basis | `pearl_barrage` (shipped) | A | `HUMWKRKNCE` | `0.2.1209` (2026-08-27) | `cccf9ecf62daff984cb3e44b99c3b38b4153ecba4473fb5421923d2f35dcedba` | SURVIVES, gap 0.0256 over 27 lines; observed gap 0.0175 over 351 lines |
-| `pearl-barrage-turn.yaml` | `kokomi-slice1-t02` | 1 — counting basis | `proto_pearl_barrage_turn` | A | `HUMWKRKNCE` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.1136 over 27 lines |
+| `pearl-barrage-turn.yaml` | `kokomi-slice1-t02` | 1 — counting basis | `proto_pearl_barrage_turn` | A | `HUMWKRKNCE` | `0.2.1232+proto` (2026-08-27) | `ed277ead70ffdc9ea97625fcae8f2e0039aef3c14e68ab16bf976180e37f7b2b` | SURVIVES, gap 0.1136 over 27 lines; observed gap 0.0746 over 351 lines |
 | `shinobu-sanctifying-ring-shipped.yaml` | `kokomi-slice1-t03` | 2/3 — baseline | `shinobu_sanctifying_ring` (shipped) | B | `NMQLUYZDLV` | `0.2.1209` (2026-08-27) | `4624ba2fdae3bd02f21c7657c461d3ddbb3d8b7fe4b45d24a7955cb357ab24ee` | SURVIVES, gap 0.0372 over 11 lines; observed gap 0.1912 over 79 lines |
-| `shinobu-sanctifying-ring-either.yaml` | `kokomi-slice1-t04` | 2 — mutually exclusive | `proto_shinobu_sanctifying_ring_either` | B | `NMQLUYZDLV` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 11 lines |
-| `shinobu-sanctifying-ring-priced.yaml` | `kokomi-slice1-t05` | 3 — priced in cost | `proto_shinobu_sanctifying_ring_priced` | B | `NMQLUYZDLV` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 8 lines |
+| `shinobu-sanctifying-ring-either.yaml` | `kokomi-slice1-t04` | 2 — mutually exclusive | `proto_shinobu_sanctifying_ring_either` | B | `NMQLUYZDLV` | `0.2.1232+proto` (2026-08-27) | `9d005a29e7b34b9edb34188d80401159ecb70a83a6b4c93f7b25af0bfde88d1d` | SURVIVES, gap 0.2850 over 11 lines; observed gap 0.1912 over 79 lines |
+| `shinobu-sanctifying-ring-priced.yaml` | `kokomi-slice1-t05` | 3 — priced in cost | `proto_shinobu_sanctifying_ring_priced` | B | `NMQLUYZDLV` | `0.2.1232+proto` (2026-08-27) | `73d5f28a55cd815e4fad8a4b7c9cbecea8e6d5ffeda4fb440fd29092d4da0606` | SURVIVES, gap 0.2850 over 8 lines; observed gap 0.1912 over 72 lines |
 | `thoma-crimson-ooyoroi-shipped.yaml` | `kokomi-slice1-t06` | 2/3 — baseline | `thoma_crimson_ooyoroi` (shipped) | C | `XVE3PVZEPT` | `0.2.1209` (2026-08-27) | `0cbfa1ef52c3e8dbcf9c27d0955fc0a1292e96512e8305a121ba52f89410c8b6` | SURVIVES, gap 0.0717 over 11 lines; observed gap 0.0208 over 195 lines |
-| `thoma-crimson-ooyoroi-either.yaml` | `kokomi-slice1-t07` | 2 — mutually exclusive | `proto_thoma_crimson_ooyoroi_either` | C | `XVE3PVZEPT` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.1932 over 11 lines |
-| `thoma-crimson-ooyoroi-priced.yaml` | `kokomi-slice1-t08` | 3 — priced in cost | `proto_thoma_crimson_ooyoroi_priced` | C | `XVE3PVZEPT` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.2850 over 8 lines |
+| `thoma-crimson-ooyoroi-either.yaml` | `kokomi-slice1-t07` | 2 — mutually exclusive | `proto_thoma_crimson_ooyoroi_either` | C | `XVE3PVZEPT` | `0.2.1232+proto` (2026-08-27) | `b4bf19f7350d7bfbb78dbe90b2d0f13b07284ef785f14e6b670239b529c5090b` | SURVIVES, gap 0.1932 over 11 lines; observed gap 0.0000 over 195 lines |
+| `thoma-crimson-ooyoroi-priced.yaml` | `kokomi-slice1-t08` | 3 — priced in cost | `proto_thoma_crimson_ooyoroi_priced` | C | `XVE3PVZEPT` | `0.2.1232+proto` (2026-08-27) | `189a4fc532c06f460341873a36193e358956546c1ae630b03cd95cf1bc0dcb05` | SURVIVES, gap 0.2850 over 8 lines; observed gap 0.0000 over 171 lines |
 | `itto-superlative-superstrength-shipped.yaml` | `kokomi-slice1-t09` | 2/3 — baseline | `itto_superlative_superstrength` (shipped) | D | `X1BQR3FU4G` | `0.2.1209` (2026-08-27) | `4c005feb2645624c0e438cb271fcbceeef0082f28830a2b62c4637e25ef2a747` | SURVIVES, gap 0.1003 over 11 lines; observed gap 0.1217 over 143 lines |
-| `itto-superlative-superstrength-either.yaml` | `kokomi-slice1-t10` | 2 — mutually exclusive | `proto_itto_superlative_superstrength_either` | D | `X1BQR3FU4G` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.0881 over 11 lines |
-| `itto-superlative-superstrength-priced.yaml` | `kokomi-slice1-t11` | 3 — priced in cost | `proto_itto_superlative_superstrength_priced` | D | `X1BQR3FU4G` (reuse) | **pending** (dev build) | — | SURVIVES, gap 0.0096 over 8 lines |
+| `itto-superlative-superstrength-either.yaml` | `kokomi-slice1-t10` | 2 — mutually exclusive | `proto_itto_superlative_superstrength_either` | D | `X1BQR3FU4G` | `0.2.1232+proto` (2026-08-27) | `d0275ae60480a88eae05db48d9ef7a3827252965556531b29a757854a09e4707` | SURVIVES, gap 0.0881 over 11 lines; observed gap 0.0000 over 143 lines |
+| `itto-superlative-superstrength-priced.yaml` | `kokomi-slice1-t11` | 3 — priced in cost | `proto_itto_superlative_superstrength_priced` | D | `X1BQR3FU4G` | `0.2.1232+proto` (2026-08-27) | `b91ea08f0a5b934e23e40412d86251d4bddb8ec1d4f642c2487e7b0e852d2ae1` | SURVIVES, gap 0.0096 over 8 lines; observed gap 0.0000 over 129 lines |
 
 `DOMINANCE_GAP` is 0.5. Every reading above is a reading of the **declared**
 board — the five-card mirror available with no game running — and is written
@@ -52,12 +52,13 @@ bridge in the game directory; a worktree may not install it (`OPERATIONS.md`:
 from a worktree the one legal command is `deploy_bridge.ps1 -BuildOnly`), so
 staging happens from the art-bearing main checkout, attended.
 
-**The four shipped halves are staged on the release build `0.2.1209`, and
-their seeds are in the table above.** The seven prototype halves are not:
-their cards are not compiled into a release build, so each stages on a dev
-build (`klee-mod\build\deploy_proto.ps1`) and must be run with
-`--seed <its group's seed>` — the value its row already carries, marked
-`(reuse)`.
+**The four shipped halves are staged on the release build `0.2.1209`; the
+seven prototype halves are staged on the dev build `0.2.1232+proto`, whose
+extra rows a release build does not compile at all. Every seed is in the table
+above.** Each prototype half was staged with `--seed <its group's seed>`, so
+both halves of a group stand on one encounter; the game honoured every pinned
+seed, and each prototype packet's enemies match its group's shipped packet
+name for name, body for body, telegraph for telegraph.
 
 **The seed rule:** within a group (A, B, C, D) the first half staged rolls a
 seed, `stage` records it into that turn's `packet.json` as `run_seed`, and
