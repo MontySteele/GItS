@@ -890,14 +890,6 @@ if (-not (Test-Path $venvPython)) {
 # PROMISE that the miss is known and degrades safely, not a way to silence the
 # rule. Checked in both directions below.
 $pckDeferred = @{
-    'kokomi/relics/pearl_of_wisdom.png' =
-        'Kokomi art pass scoped her cards + the eight non-card surfaces; the ' +
-        'relic icon was deliberately left for a manual crop with eyes on it ' +
-        '(docs/kokomi-art-pass-requirements.md). Degrades via ?? base.PackedIconPath.'
-    'kokomi/powers/pearl.png' =
-        'Burst gauge cap icon, same pass, same scope decision. GaugeBridge ' +
-        'routes it through KleePck.Path, so a miss renders no cap icon.'
-
     # Curtain Call consolidation ("Take a Bow", 2026-07-27). Six new
     # activity-triggered Powers shipped their MECHANICS; the sprint was
     # explicitly mechanical and carried no art budget, and its art track was
