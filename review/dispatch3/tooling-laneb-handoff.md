@@ -125,6 +125,11 @@ work**. `PREFLIGHT.md` recorded `main` `223a4ff`; part-way through, PR #108
 state. Both states are reported in §4 because the difference is itself the
 lane's best demonstration.
 
+It moved a **third** time before this branch was pushed (`c09b6b6` → `98fb3a0`,
+still clean). No run was re-taken against `98fb3a0`, so the numbers below are
+stamped `c09b6b6` and should be re-taken before anyone quotes them. Re-taking
+them is one command (§2) and needs no state.
+
 ```
 git -C C:\Users\Monty\Documents\GitHub\GItS rev-parse --short HEAD   ->  c09b6b6
 git -C C:\Users\Monty\Documents\GitHub\GItS status --short           ->  (clean)
