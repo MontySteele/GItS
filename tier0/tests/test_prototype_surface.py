@@ -70,12 +70,58 @@ def test_fixture_row_validates_under_the_card_schema(tmp_path):
     assert cards[0].character == "kokomi"
 
 
-def test_shipped_surface_is_empty_and_loads(tmp_path):
-    """The committed surface is EMPTY -- the R213 deletion rule's steady state."""
+def test_the_shipped_surface_loads_whatever_is_on_it():
+    """The committed surface parses, and every row on it passes the gate.
+
+    THIS TEST USED TO ASSERT THE SURFACE WAS EMPTY. Empty is still the healthy
+    STEADY state -- R213 B's deletion rule makes it so, and the test below is
+    what keeps it from becoming a second permanent pool -- but a slice IN
+    FLIGHT legitimately has rows on it, and the first one (the Kokomi slice,
+    R216) is what found that the old assertion could not tell a slice from a
+    leak. So the empty check moves to the test that can tell them apart, and
+    this one keeps the half that is true either way: whatever is here loads,
+    through the shipped validators.
+    """
     assert loader.PROTOTYPE_SHEET.exists()
-    assert yaml.safe_load(
-        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) in ([], None)
-    assert loader.prototype_cards() == []
+    rows = yaml.safe_load(
+        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
+    cards = loader.prototype_cards()
+    assert len(cards) == len(rows)
+    for card in cards:
+        assert card.id.startswith(loader.PROTOTYPE_ID_PREFIX)
+
+
+def test_the_surface_is_non_empty_only_while_a_slice_is_open():
+    """R213 B's DELETION RULE, as a gate rather than a paragraph.
+
+        "Once a slice is ACCEPTED or REJECTED, its rows LEAVE this surface."
+
+    A row that has outlived its slice is the failure the rule names -- "a row
+    that has sat here across two slices is a defect in the process" -- and it
+    is invisible to every other check, because such a row is perfectly valid.
+    What makes it visible is that a LIVE slice always has a packet open under
+    `review/active/` explaining what its rows are asking; an abandoned row has
+    nothing pointing at it. So the surface may carry rows exactly while some
+    active packet names it, and the day the slice's packet is filed away the
+    rows have to go with it or this test says so.
+
+    Deliberately generic -- it names no slice. Hard-coding "the Kokomi slice"
+    here would make the guard expire quietly the moment that slice closed.
+    """
+    rows = yaml.safe_load(
+        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
+    if not rows:
+        return                      # the healthy steady state
+    active = REPO / "review" / "active"
+    citing = sorted(p.name for p in active.glob("*.md")
+                    if "prototype-surface.yaml" in p.read_text(
+                        encoding="utf-8", errors="replace"))
+    assert citing, (
+        f"the prototype surface carries {len(rows)} row(s) but no packet "
+        f"under review/active/ names docs/prototype-surface.yaml. Under "
+        f"R213 B a slice's rows leave the surface when the slice is accepted "
+        f"or rejected -- either the packet was filed away without deleting "
+        f"its rows, or these rows never had one.")
 
 
 @pytest.mark.parametrize("mutate, expect", [

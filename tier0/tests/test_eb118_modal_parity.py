@@ -299,8 +299,18 @@ def test_the_tree_has_the_prototypes_two_faces_and_this_test_can_see_them():
 
 
 def test_every_mode_face_is_carried_by_a_generated_modal_options_roster():
-    rosters = "".join(p.read_text(encoding="utf-8")
-                      for p in KLEE_CODE.rglob("*ModalOptions.cs"))
+    # `PrototypeRoster.cs` joins the glob because it is a mode-face carrier
+    # too. The quarantined surface (R213 B) has no per-character
+    # `<Char>ModalOptions` file -- its whole membership is one generated
+    # class, a second file for the same list buying nothing on a surface whose
+    # healthy state is empty -- so a modal PROTOTYPE row's faces are emitted
+    # into `PrototypeRoster` beside the card that opens the screen. Without
+    # this the faces would be genuinely pooled and this test would still call
+    # them missing, which is the wrong direction for a soft-lock guard to be
+    # wrong in. `tools/lint_pool_membership.py` already reads both files.
+    carriers = sorted(KLEE_CODE.rglob("*ModalOptions.cs")) + sorted(
+        KLEE_CODE.rglob("PrototypeRoster.cs"))
+    rosters = "".join(p.read_text(encoding="utf-8") for p in carriers)
     missing = [name for name in _modal_option_classes_in_tree()
                if f"ModelDb.Card<{name}>()" not in rosters]
     assert not missing, (

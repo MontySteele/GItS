@@ -850,6 +850,25 @@ class CombatState:
     last_drawn_type: str = ""             # EscapePlan's drawn-card branch
     salon_replacements_this_card: int = 0 # overflow count for current card
     cards_exhausted_this_turn: int = 0     # EvilEye / ForgottenRitual
+    # CARDS THAT REACHED THE EXHAUST PILE THIS PLAYER TURN, counted AT THE
+    # APPEND rather than at the AfterCardExhausted hook -- which is what makes
+    # it a different number from `cards_exhausted_this_turn` above, and why it
+    # is a second field rather than a reuse of that one.
+    #
+    # The hook counter is DEFERRED while a card is resolving: `exhaust_card`
+    # returns early at `card_play_depth > 0` and the batch is swept by
+    # `after_card_played` AFTER the card's own effects have run. And
+    # `_op_exhaust_from` appends directly, so it never reaches that counter
+    # mid-play by any route at all. A card that Exhausts something and then
+    # reads the count -- Pearl Barrage's whole-turn prototype shape, R215 C --
+    # would therefore not see the card it had just Exhausted.
+    #
+    # This one is incremented at both `player.exhaust_pile.append` sites, so
+    # it answers "how many cards have gone to the pile this turn, INCLUDING
+    # the one the resolving card just sent there". Nothing shipped reads it:
+    # it exists for the quarantined `exhausts_this_turn` runtime count
+    # (R213 B), and it is purely additive, so no shipped card's number moves.
+    exhausts_this_turn: int = 0
     # Kokomi §2.4: the prevention ward's per-round latch ("first unblocked
     # hit per turn"); reset at player turn start with the other windows.
     prevention_used_this_turn: bool = False

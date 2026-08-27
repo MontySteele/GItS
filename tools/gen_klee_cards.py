@@ -281,6 +281,30 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
 RECALL_FIELDS = {"op", "from", "position", "amount"}
 
 # --- companion batch (2026-07-21) --------------------------------------------
+def companion_damage_effects(card: dict) -> list[dict]:
+    """Every OFFENSIVE damage effect on a companion card, mode bodies included.
+
+    A companion's element rides the card-level IElementalCard interface rather
+    than the effect, so "is this card elemental" and "does it mix" are
+    questions about the whole card. Before the modal shape reached this sheet
+    both were asked of `card["effects"]` alone, which reads a `choose_one` row
+    as having no damage at all -- so a modal companion whose attack half
+    applies its element would have emitted NON-elemental and lost the reaction
+    it exists for, silently and with everything else correct.
+    """
+    out = []
+    for eff in card.get("effects", []):
+        if eff.get("op") == "damage" and eff.get("target") != "self":
+            out.append(eff)
+        elif eff.get("op") == "choose_one":
+            for mode in eff.get("modes") or []:
+                for inner in mode.get("effects") or []:
+                    if (inner.get("op") == "damage"
+                            and inner.get("target") != "self"):
+                        out.append(inner)
+    return out
+
+
 def is_companion(card: dict) -> bool:
     """Companion sheet rows carry `star` (4/5); Klee's sheet never does."""
     return "star" in card
@@ -511,7 +535,14 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
 # conditional branch, so it has to be validated by the same rule -- two copies
 # of this table is exactly how a mode body would drift from a branch body.
 BRANCH_FIELDS = {
-    "damage": {"op", "amount", "target"},
+    # `applies_element` is READ BY THE CARD, NOT BY THE BRANCH, which is why
+    # it is legal here without any branch resolver learning a new word. A
+    # companion's element is carried by the card-level IElementalCard
+    # interface (see `emit`), so the flag on a mode body does exactly one
+    # thing: it tells the emitter this card is elemental. The alternative --
+    # leaving it out -- silently drops the element from a modal companion,
+    # which is a different card rather than a blocked one.
+    "damage": {"op", "amount", "target", "applies_element"},
     "block": {"op", "amount"},
     "draw": {"op", "amount"},
     "gain_spark": {"op", "amount"},
@@ -1387,8 +1418,7 @@ def blocked_reason(
         # so mixed elemental/non-elemental damage on one card cannot be
         # expressed (tier0 reads applies_element per effect).
         applies = {bool(e.get("applies_element"))
-                   for e in card.get("effects", [])
-                   if e.get("op") == "damage" and e.get("target") != "self"}
+                   for e in companion_damage_effects(card)}
         if len(applies) > 1:
             return "mixed applies_element damage on one companion card"
 
@@ -1416,7 +1446,8 @@ def blocked_reason(
         if ("amount_formula" in effect
                 and exhaust_pile_calc_rider(card, effect) is None
                 and exhaust_selection_calc_rider(card, effect) is None
-                and discards_turn_calc_rider(card, effect) is None):
+                and discards_turn_calc_rider(card, effect) is None
+                and exhausts_turn_calc_rider(card, effect) is None):
             formula = effect["amount_formula"]
             return (f"amount_formula (reads {formula.get('count')}) -- needs a "
                     "CalculatedVar bound to that count, not a literal")
@@ -2075,6 +2106,38 @@ def discards_turn_calc_rider(card: dict,
             "static (card, _) => KokomiResources.DiscardsThisTurn(card)")
 
 
+def exhausts_turn_calc_rider(card: dict,
+                             eff: dict) -> tuple[int, int, str] | None:
+    """`amount_formula: {base, per, count: exhausts_this_turn}` -- a damage
+    number priced off every card the seat has Exhausted THIS TURN.
+
+    QUARANTINED USE ONLY as this lands (R213 B): no shipped sheet row carries
+    this count. It exists because R215 C routed [USER]'s reading of Pearl
+    Barrage -- *"I thought it was tracking how many cards had been exhausted
+    that whole turn"* -- to the Kokomi slice as its first prototype arm, and
+    an arm you cannot build is an arm you have to argue about instead of play.
+
+    THE THIRD COUNTING BASIS, and the whole point is that it is neither of the
+    other two. `exhaust_pile` reads the WHOLE FIGHT and so never resets;
+    `exhaust_selection_cost` reads THE ONE CARD the resolving card chose. This
+    reads the TURN, so it rewards stacking rotations inside one turn and
+    forgets them at the next turn start.
+
+    Same CalculatedDamageVar triple as the three riders above it, and the same
+    damage-only restriction: a block-side reader needs `block_calc_rider`'s
+    CalculationBase plumbing and has no card yet.
+    """
+    if eff.get("op") != "damage" or eff.get("target") == "self":
+        return None
+    formula = eff.get("amount_formula")
+    if not isinstance(formula, dict) \
+            or formula.get("count") != "exhausts_this_turn":
+        return None
+    return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+            "static (card, _) => "
+            "KokomiResources.ExhaustsThisTurn(card.Owner)")
+
+
 def charge_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
     """Kokomi's Charge damage rider (`N_per_M_charge`), rendered through the
     base game's CalculatedDamageVar for exactly the reason Furina's Fanfare
@@ -2599,6 +2662,9 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     discards = discards_turn_calc_rider(card, eff)
     if discards is not None:
         return discards
+    exhausts_turn = exhausts_turn_calc_rider(card, eff)
+    if exhausts_turn is not None:
+        return exhausts_turn
     charge = charge_calc_rider(card, eff)
     if charge is not None:
         base, per_n, div = charge
@@ -3026,15 +3092,20 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # the same reason: it renders through the identical
         # CalculationBase/ExtraDamage triple, so the deltas land in the same
         # slots whichever count the rider reads.
+        # The `exhausts_this_turn` rider joins on the identical argument: same
+        # CalculationBase/ExtraDamage triple, so the same two slots take the
+        # deltas whichever count the rider reads.
         "formula_per": any(
             exhaust_pile_calc_rider(card, e) is not None
             or exhaust_selection_calc_rider(card, e) is not None
             or discards_turn_calc_rider(card, e) is not None
+            or exhausts_turn_calc_rider(card, e) is not None
             for e in effects),
         "formula_base": any(
             exhaust_pile_calc_rider(card, e) is not None
             or exhaust_selection_calc_rider(card, e) is not None
             or discards_turn_calc_rider(card, e) is not None
+            or exhausts_turn_calc_rider(card, e) is not None
             for e in effects),
     }
     # tier0 binds every POWER_UPGRADE_KEYS delta to the first TOP-LEVEL
@@ -5608,6 +5679,19 @@ def build_description(card: dict) -> str:
                 # which is the whole play pattern -- throw first, then swing.
                 parts.append(
                     "Scales with the cards you discarded this turn.")
+            if exhausts_turn_calc_rider(card, eff) is not None:
+                # The EXHAUST-SELECTION shape, not the pile shape, and the
+                # difference is deliberate. Like the selection count, this one
+                # is moved by the resolving card itself -- the victim it
+                # Exhausts is in the tally -- so a preview is always short by
+                # at least one unit and a bare "Scales with ..." sentence
+                # would leave the RATE printed nowhere (R215 C's face defect,
+                # one count over). Printing the live per-unit var instead of
+                # asserting that scaling exists is the fix that landed there.
+                # :diff() because `formula_per` is an upgradeable delta.
+                parts[-1] = (parts[-1].removesuffix(".")
+                             + ", plus {ExtraDamage:diff()} per card "
+                               "[gold]Exhausted[/gold] this turn.")
             if "bonus_formula" in eff:
                 formula = eff["bonus_formula"]
                 if formula.endswith("_per_detonation_this_combat"):
@@ -6614,8 +6698,8 @@ def emit(
     # companion card mixing elemental and non-elemental damage would be
     # inexpressible (blocked_reason guards it).
     if is_companion(card):
-        elemental = any(e.get("op") == "damage" and e.get("applies_element")
-                        for e in card.get("effects", []))
+        elemental = any(e.get("applies_element")
+                        for e in companion_damage_effects(card))
         element_cs = ELEMENT_CS[card["element"]]
     else:
         elemental = profile.damage_applies_element(card)

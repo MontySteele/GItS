@@ -289,6 +289,70 @@ public static class KokomiResources
         return count;
     }
 
+    /// <summary>
+    /// QUARANTINED SUPPORT (R213 B). Cards this SEAT has Exhausted since its
+    /// own turn started -- the third counting basis, and the one [USER]
+    /// expected Pearl Barrage to have (R215 C: "I thought it was tracking how
+    /// many cards had been exhausted that whole turn").
+    ///
+    /// NOTHING SHIPPED READS THIS. It serves the `exhausts_this_turn`
+    /// amount_formula count, which lives only on the quarantined prototype
+    /// surface. The tally is maintained even in a release build -- one integer
+    /// per seat, which no shipped card can see -- because a counter that only
+    /// exists under a compile flag is a counter whose maintenance is never
+    /// exercised.
+    ///
+    /// A COUNTER RATHER THAN A HISTORY READ, which is the opposite choice from
+    /// DiscardsThisTurn above, and the reason is evidence rather than taste:
+    /// that method transcribes MementoMori's own CanonicalVars out of the
+    /// decompile, and there is no decompiled first-party card scaling off a
+    /// per-turn EXHAUST count to transcribe. Naming a history entry type that
+    /// has not been read off sts2.dll would be exactly the guess the
+    /// generator's UNPARSEABLE discipline exists to refuse. The after-exhaust
+    /// hook below is already the universal exhaust funnel this file owns -- it
+    /// is where the Charge and Burst accrual is paid -- so the count is taken
+    /// there. (The hook's own name is deliberately not spelled in this
+    /// comment: tier0/tests/test_starter_relic_upgrades.py anchors on its
+    /// FIRST occurrence in the file to read the funnel's summary, and a
+    /// mention up here would move the anchor onto prose.)
+    ///
+    /// NO JUNK FILTER, deliberately, and it is the one place the rotation law
+    /// does not reach: this counts CARDS THAT LEFT, not income earned. The sim
+    /// twin (`CombatState.exhausts_this_turn`) is incremented at the pile
+    /// append with no filter either, and the two must agree or the falsifier
+    /// reads a different card from the one the seat plays.
+    ///
+    /// Per SEAT, keyed on the Player, because co-op runs two of them and a
+    /// partner's rotation is not this card's bonus -- the same rule
+    /// DiscardsThisTurn gets from its owner filter.
+    /// </summary>
+    public static int ExhaustsThisTurn(Player? owner)
+    {
+        if (owner == null) return 0;
+        return ExhaustsByPlayer.TryGetValue(owner, out var count) ? count : 0;
+    }
+
+    private static readonly Dictionary<Player, int> ExhaustsByPlayer = new();
+
+    /// <summary>One card reached the exhaust pile. Called from the funnel.</summary>
+    internal static void NoteExhaustThisTurn(Player? owner)
+    {
+        if (owner == null) return;
+        ExhaustsByPlayer[owner] =
+            (ExhaustsByPlayer.TryGetValue(owner, out var n) ? n : 0) + 1;
+    }
+
+    /// <summary>
+    /// The window closes and reopens at PLAYER TURN START, which is where the
+    /// sim closes it too (`refpowers.reset_turn_counters`). Clearing the whole
+    /// map rather than one seat's entry also drops Players from finished
+    /// combats, so the dictionary cannot grow across a run.
+    /// </summary>
+    internal static void ResetExhaustsThisTurn()
+    {
+        ExhaustsByPlayer.Clear();
+    }
+
     internal static KokomiBurstResource? FindBurst(Creature? creature)
     {
         var owner = creature?.Player;
@@ -354,6 +418,13 @@ public sealed class KokomiResourceHooks : AbstractModel
         // CardModel.Owner is the Player; PowerModel.Owner is the Creature.
         // The two differ, and mixing them is a silent type error the compiler
         // happens to catch here only because the helpers take Creature.
+        // ABOVE BOTH GUARDS BELOW, and that is the whole difference between
+        // this tally and the accrual under it: the quarantined
+        // `exhausts_this_turn` count counts CARDS THAT LEFT, so it takes no
+        // view on who owns them or whether they were junk. Sim twin:
+        // `CombatState.exhausts_this_turn`, incremented at the pile append.
+        KokomiResources.NoteExhaustThisTurn(card.Owner);
+
         var owner = card.Owner?.Creature;
         if (!KokomiResources.IsKokomi(owner)) return Task.CompletedTask;
 
@@ -444,6 +515,12 @@ public sealed class KokomiResourceHooks : AbstractModel
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)
     {
+        // The quarantined per-turn exhaust window closes and reopens here,
+        // which is where the sim closes it (refpowers.reset_turn_counters).
+        // Ethereal cards burn at BeforeSideTurnEnd and so belong to the turn
+        // that just ended -- resetting at the next turn's start, rather than
+        // at the old turn's end, is what keeps them there.
+        KokomiResources.ResetExhaustsThisTurn();
         await KokomiKitGrant.GrantIfCharged(choiceContext, player);
     }
 
