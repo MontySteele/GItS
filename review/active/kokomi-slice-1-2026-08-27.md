@@ -266,3 +266,34 @@ I did not mint or close anything. My reading of what should be:
 - **See a prototype card render.** Prototype rows have no art by design — art
   is commissioned when a slice is *accepted* and its rows move to a real
   sheet — so they will draw with no portrait. That is correct, not a defect.
+
+## Results (2026-08-27, after the merge)
+
+All eleven turns were staged live and graded blind. Every packet went to a
+fresh grader (`opus-5-fresh`, a new agent per packet, the page inline, no
+tools) and every one of the eleven **survives** the falsifier: each form
+names a second line it seriously weighed, and each says a different intent
+would have moved it. The forms and verdicts sit beside each packet under
+`review/qa/kokomi-slice1-t01..t11/`; the ledger is `review/qa/ledger.tsv`.
+
+| group | shipped half | prototype halves | seed | builds |
+|---|---|---|---|---|
+| A — Pearl Barrage counting basis | t01 SURVIVES | t02 SURVIVES | `HUMWKRKNCE` | 0.2.1209 / 0.2.1232+proto |
+| B — Shinobu | t03 SURVIVES | t04 (either) SURVIVES · t05 (priced) SURVIVES | `NMQLUYZDLV` | same |
+| C — Thoma | t06 SURVIVES | t07 (either) SURVIVES · t08 (priced) SURVIVES | `XVE3PVZEPT` | same |
+| D — Itto | t09 SURVIVES | t10 (either) SURVIVES · t11 (priced) SURVIVES | `X1BQR3FU4G` | same |
+
+Two things the record shows without rating anything. First, the observed
+closeness reading is exactly 0.0000 on t07, t08, t10 and t11 — the pilot
+scores its top two lines identically on those boards — while their shipped
+twins read 0.0208 and 0.1217; a tie is a survival, not a refusal, but it is
+a different shape of survival from the rest of the table. Second, group B's
+live fight is three bodies with one attacking, not the two attackers the
+declared board mirrors; every half of group B was staged on that same fight,
+so the pair is matched, but the declared and observed boards are two
+records there.
+
+What is still owed is the user's own cold play of the surviving turns
+(grader id `user`), which is what the ledger's down-weighting compares the
+fresh grader against. The dev build stays deployed until that has happened;
+`klee-mod\build\deploy.ps1` restores the release build.

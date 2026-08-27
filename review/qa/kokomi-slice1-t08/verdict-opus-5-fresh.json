@@ -1,0 +1,126 @@
+{
+ "turn_id": "kokomi-slice1-t08",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "opus-5-fresh",
+  "kind": "llm",
+  "model": "claude-opus-5",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "189a4fc532c06f460341873a36193e358956546c1ae630b03cd95cf1bc0dcb05",
+ "chosen_line": [
+  {
+   "card": "Gorou \u2014 Inuzaka All-Round Defense",
+   "target": "Seapunk"
+  },
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Seapunk"
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Seapunk"
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Seapunk"
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "All damage, everything at the Seapunk. Gorou first because it costs 0 and exhausts, so there is no reason to hold it: 6 damage free. Then All Streams Flow to the Sea for 1, which reads Charge 8 at one point per two Charge, so 9 + 4 = 13. Then both Water's Edge for 1 each, 6 and 6. That is 6 + 13 + 6 + 6 = 31, spending all 3 energy. Seapunk goes from 40 to 9. I take the telegraphed 11 and drop to 37/70, which is a comfortable pool against a single attacker with no other threats on the board. The reasoning is that this is a lone enemy with 40 HP and an 11-per-turn clock: I can afford roughly six more of those hits, so the only thing that matters is how many turns it takes to kill it. Pushing to 9 remaining means almost any reasonable next hand finishes it, and every point of Block I bought instead would have been a point of damage that didn't shorten the fight.",
+  "q2_other_line_considered": "Yes \u2014 the Thoma line. Thoma - Crimson Guard costs exactly my 3 energy for 8 damage and 3 Block, and I compared it against the three 1-cost plays it displaces (All Streams for 13 plus a Water's Edge for 6, or two Water's Edge for 12). Thoma is strictly worse on damage at that price by a wide margin, and 3 Block against an 11-damage hit is not a meaningful mitigation, so I discarded it. I also weighed a mixed turn: Gorou, All Streams, and then one Coral Guard instead of the last Water's Edge \u2014 5 Block to eat almost half the incoming hit, at the cost of 6 damage. I turned it down because trading 6 damage for 5 HP is roughly break-even in raw numbers and strictly worse in tempo, since damage compounds toward ending the fight while Block expires. Tactical Retreat I considered only briefly: it is free, but it draws 1 and discards 1 at random, and I already had more playable damage than energy, so it could only have thrown away a card I wanted and could not have found me a fifth energy point.",
+  "q3_what_it_gave_up": "All defense. I end the turn on 0 Block and eat the full 11, going to 37/70. Both Coral Guard and Thoma's 3 Block are unspent, though they stay in the deck. I also gave up the free look from Tactical Retreat \u2014 with the hand already over-full relative to my energy, playing it risked discarding a Water's Edge or All Streams for a card I could not afford anyway, so the information had negative expected value this turn. And I burned Gorou permanently: it exhausts, so that 6 damage is gone from the deck for the rest of the fight, spent here rather than saved for a turn where 6 might be exactly lethal.",
+  "q4_different_intent": "Yes. The 11 is small relative to my 48 HP, which is what makes ignoring it correct. If the Seapunk had telegraphed something in the mid-20s or higher, or if the intent had been a multi-hit that Block could blunt repeatedly, I would have swapped the last Water's Edge for a Coral Guard and quite possibly both Coral Guards, dropping to Gorou plus All Streams for 19 and taking 10 Block. A defensive buff or block-gain intent on the enemy would have pushed me the other way \u2014 even harder into damage now, before the wall goes up, and Thoma's Pyro would have become worth a look next to the Hydro I am stacking. A non-attack intent, or a very small one, changes nothing: this line is already the maximum-damage line at 3 energy."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.0,
+  "top1": 27.3,
+  "top2": 27.3,
+  "lines_considered": 171,
+  "playouts": 3759,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Coral Guard",
+     "Tactical Retreat",
+     "Water's Edge",
+     "Gorou \u2014 Inuzaka All-Round Defense",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 27.3
+   },
+   {
+    "cards": [
+     "Coral Guard",
+     "Tactical Retreat",
+     "Gorou \u2014 Inuzaka All-Round Defense",
+     "Water's Edge",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 27.3
+   },
+   {
+    "cards": [
+     "Coral Guard",
+     "Tactical Retreat",
+     "Gorou \u2014 Inuzaka All-Round Defense",
+     "Coral Guard",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 27.3
+   },
+   {
+    "cards": [
+     "Coral Guard",
+     "Tactical Retreat",
+     "Gorou \u2014 Inuzaka All-Round Defense",
+     "Water's Edge",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 27.3
+   },
+   {
+    "cards": [
+     "Tactical Retreat",
+     "Water's Edge",
+     "Gorou \u2014 Inuzaka All-Round Defense",
+     "Water's Edge",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 27.3
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "unmapped_statuses": [],
+   "enemy_count": 1,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-27T18:06:00"
+}
