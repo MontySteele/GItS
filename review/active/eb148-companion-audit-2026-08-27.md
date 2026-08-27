@@ -345,42 +345,28 @@ the play does not.
 
 Numbered picks. Each option is concrete. No recommendation is made, and R213's
 freeze on numeric tuning is assumed to hold — several options below are only
-legal on the quarantined prototype surface (`EB-147`).
+legal on the quarantined prototype surface (shipped; `EB-147` closed at R215).
+**Q1, Q2 and Q4 are ANSWERED** — R216 records the picks and each carries the
+pick in place of its list. Q3 and Q5 are still open.
 
-### Q1 — The five unpriced subsidized cards
+### Q1 — The five unpriced subsidized cards — ANSWERED
 
 `lynette_enigmatic_feint`, `freminet_pressurized_floe`, `shinobu_sanctifying_ring`,
 `thoma_crimson_ooyoroi`, `itto_superlative_superstrength` all give their engine
-effect and their Block together, for one cost, always. E3 says defence must cost
-tempo, identity position, resource, or another outcome. Which price should the
-Kokomi slice test?
+effect and their Block together, for one cost, always.
 
-1. **Mutually exclusive** — Prune's existing shape: you get the Block only when
-   the engine half did not fire (the attack missed / the enemy had no aura /
-   the Shatter did not happen).
-2. **Conditional on restraint** — the Block only lands if you played no Attack
-   this turn (or: only on the turn you played no other Companion).
-3. **Split the card in two** — the attack half and the Block half become separate
-   cards, so the choice is between two cards in hand rather than free inside one.
-4. **Price it in the cost line instead** — leave the effects alone and let the
-   Energy or the rarity carry the price.
-5. **Drop the Block entirely** from these five and let the pool's dedicated
-   defensive cards (cluster C, cluster J) be the only source.
-6. **Test more than one** — pick two of the above as competing prototype arms.
+**Pick: (6) — test more than one**, with the two arms being (1) mutually
+exclusive (Prune's shape) and (4) the Block priced in the cost line. They run
+as competing prototype arms on the quarantined surface; the shipped sheet is
+untouched. (R216 C.)
 
-### Q2 — Muster's Charge subsidy (finding 8)
+### Q2 — Muster's Charge subsidy (finding 8) — ANSWERED
 
-A Mustered Companion costs 1 less, Exhausts, and pays 1 Charge when played. So
-blocking with a Mustered Companion also advances Kokomi's finisher. Should it?
+A Mustered Companion costs 1 less, Exhausts, and pays 1 Charge when played, so
+blocking with a Mustered Companion also advances Kokomi's finisher.
 
-1. **Leave it.** Charge on exhaust is universal; Companions are not special.
-2. **Charge only from cards that did something other than Block** — a pure
-   defensive play rotates out without paying Charge.
-3. **Charge from the Muster itself, not from the recruit's exhaust** — you are
-   paid for calling the unit up, not for spending it.
-4. **Spend Charge to Muster** — the call-up costs meter rather than making it.
-5. **Defer** — fold this into E1's reopened "Charge is uncapped and never spent"
-   question rather than settling it here.
+**Pick: (5) — defer**, folded into R213 E1's reopened "Charge is uncapped and
+never spent" question rather than settled here. (R216 D.)
 
 ### Q3 — The two standing Block engines (finding 9)
 
@@ -396,18 +382,12 @@ blocking with a Mustered Companion also advances Kokomi's finisher. Should it?
 4. **Send both to the prototype surface** and let the Kokomi slice decide with a
    real staged turn.
 
-### Q4 — Which pool the Kokomi slice runs against (findings 5, 6)
+### Q4 — Which pool the Kokomi slice runs against (findings 5, 6) — ANSWERED
 
 Inazuma is 60% Block, and 7 of its 9 Skills give Block.
 
-1. **Test against Inazuma exactly as it ships** — the honest baseline for what
-   [USER] played.
-2. **Test against Inazuma plus a small prototype subset** with priced defence, so
-   the two sit side by side in one Muster pool.
-3. **Test against a prototype-only Inazuma pool** so nothing unpriced is in the
-   bag at all.
-4. **Test against Inazuma with the Block-bearing Skills temporarily excluded**, to
-   see what the Muster verb feels like when it cannot hand you a wall.
+**Pick: (2) — Inazuma as it ships, plus a priced-defence prototype subset**, so
+the two sit side by side in one Muster pool. (R216 B.)
 
 ### Q5 — The near-duplicate templates (§4, findings 13, 14)
 
