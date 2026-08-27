@@ -279,7 +279,7 @@ card that places it, which is what this pack does for bombs.
 ```
 python -m understudy.staged_turn check     understudy/turns/<t>.yaml   # no game
 python -m understudy.staged_turn closeness understudy/turns/<t>.yaml [--observed]
-python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --why "..."
+python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --why "..." [--seed S]
 python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --hold --why "..."
 python -m understudy.staged_turn grade     <turn-id> <form.json>
 python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."
@@ -347,6 +347,27 @@ threshold only ever means the funnel does less work. It refuses rather than
 guesses: a card the sim cannot represent, a board with one line, a line space
 past the playout bound, all come back `NOT READ`. Under R215 B it is the one
 falsifier reading that stays quotable, because it reads the TURN.
+
+**THE RUN SEED IS WHAT MAKES A PACKET REPLAYABLE.** The encounter is
+GENERATED, so `execute` cannot replay a graded line onto the packet's board
+unless it embarks on the same seed. The first live `execute` did not, drew a
+Sludge Spinner where the packet showed a Shrinker Beetle, and refused at the
+first targeted play. `stage` now records the seed the game ACTUALLY used —
+read back off the run, R95's rule — into `packet.json` and `observed.json`, as
+envelope keys added after the scrub and never rendered into `packet.md`; the
+hash is taken over the page, so recording a seed cannot move it. `stage --seed`
+re-stages a recorded board, and doing so on `HKB8EJD5G4` reproduced the
+committed packet BYTE-IDENTICALLY — same encounter, same dealt hand, same
+sha256. `execute` embarks with the recorded seed by default and refuses up
+front if there is none.
+
+**AND IT CHECKS THE BOARD ANYWAY.** Before the `mark` and before every play,
+`board_check` compares the live board with the packet in the grader's own
+vocabulary — the enemies' printed names and the hand's printed titles as a
+MULTISET, never ids, HP or intents — and refuses `board_mismatch` listing both
+sides. The per-play "no enemy 'Shrinker Beetle'" is kept as the second line of
+defence: it fires per play and reads as one bad target, where the guard names
+the whole board as somebody else's, which is what it actually was.
 
 **GUARDS.** The grader never designed the cards it reads (declared in the form,
 refused if true; procedurally, a fresh agent with the packet inline). [USER]

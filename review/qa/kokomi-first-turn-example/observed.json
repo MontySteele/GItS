@@ -2,6 +2,7 @@
  "turn_id": "kokomi-first-turn-example",
  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
  "pilot": "generic",
+ "run_seed": "HKB8EJD5G4",
  "not_a_packet": "the RAW wire state, ids included. Tool side only -- never hand this to a grader",
  "digest": {
   "state_type": "monster",

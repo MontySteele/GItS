@@ -128,5 +128,6 @@
   "Charge is written to 8 through the registered resource. All Streams Flow reads it at one point per two Charge, so the bank is what makes that card a live choice rather than a small attack.",
   "The player has no Strength and the enemy no Vulnerable or aura. A reaction on top of a hit would change every number the falsifier scores."
  ],
- "packet_sha256": "6a377aa65d15f26ddbd88f451539577c3fdedbaf7b9c3b1fad86d4324239bd8e"
+ "packet_sha256": "6a377aa65d15f26ddbd88f451539577c3fdedbaf7b9c3b1fad86d4324239bd8e",
+ "run_seed": "HKB8EJD5G4"
 }

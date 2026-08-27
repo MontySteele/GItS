@@ -380,7 +380,7 @@ defect, never a design finding. It is deliberately unreachable from `soak.py`;
 ```
 python -m understudy.staged_turn check     understudy/turns/<t>.yaml   # no game
 python -m understudy.staged_turn closeness understudy/turns/<t>.yaml [--observed]
-python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --why "..."
+python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --why "..." [--seed S]
 python -m understudy.staged_turn grade     <turn-id> <form.json>
 python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."
 python -m understudy.staged_turn ledger
@@ -394,8 +394,12 @@ the agent that designed the cards. **grade** applies the falsifiers to its
 answers: no second line, a fourth answer of *no*, an empty line, a designer
 grading itself, a form answered against another packet, or a dominating line —
 each refuses the turn BY NAME into `verdict.json`. **execute** replays a graded
-line live; those numbers are defect diagnostics under Guardrail-7 and nothing
-else. **[USER] plays the same board cold** through `stage --hold` (attaches to a
+line live and writes `execute-<grader>.json`; those numbers are defect
+diagnostics under Guardrail-7 and nothing else. **The encounter is generated
+from the run seed**, so `stage` records the seed the game used into
+`packet.json` (not into the blind `packet.md`) and `execute` embarks with it —
+proven byte-identical on a re-stage. `execute` then compares the live enemies
+and hand against the packet and refuses `board_mismatch` before any play. **[USER] plays the same board cold** through `stage --hold` (attaches to a
 running game and leaves the board on screen) with `grader.id: user`, and
 **ledger** rebuilds `review/qa/ledger.tsv`, where a grader that keeps
 disagreeing with [USER] on question two loses its solo SURVIVES.
