@@ -375,6 +375,36 @@ defect, never a design finding. It is deliberately unreachable from `soak.py`;
 `tier0/tests/test_understudy_scenario.py` pins that. Depth:
 `understudy/README.md` and `docs/current/atlas/understudy.md`.
 
+### Understudy — staged turns and the blind QA funnel (`EB-149`, R213 step 2)
+
+```
+python -m understudy.staged_turn check     understudy/turns/<t>.yaml   # no game
+python -m understudy.staged_turn closeness understudy/turns/<t>.yaml [--observed]
+python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --why "..."
+python -m understudy.staged_turn grade     <turn-id> <form.json>
+python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."
+python -m understudy.staged_turn ledger
+```
+
+The protocol, in order. **stage** sets the board through the scenario harness
+and writes `review/qa/<turn-id>/packet.md` — printed card faces, HP, Block,
+energy, live meters, enemy intents, and nothing else. **Hand that packet and
+`understudy/qa_grader_prompt.md` to a FRESH agent** with no repo access, never
+the agent that designed the cards. **grade** applies the falsifiers to its
+answers: no second line, a fourth answer of *no*, an empty line, a designer
+grading itself, a form answered against another packet, or a dominating line —
+each refuses the turn BY NAME into `verdict.json`. **execute** replays a graded
+line live; those numbers are defect diagnostics under Guardrail-7 and nothing
+else. **[USER] plays the same board cold** through `stage --hold` (attaches to a
+running game and leaves the board on screen) with `grader.id: user`, and
+**ledger** rebuilds `review/qa/ledger.tsv`, where a grader that keeps
+disagreeing with [USER] on question two loses its solo SURVIVES.
+
+`closeness` is the one number (R213 F): the gap between the top two lines on
+the pilot's own score surface, quotable under R215 B's exception because it
+reads the TURN. SURVIVES means **not yet falsified** — nothing here rates a
+turn. Depth: `understudy/README.md`.
+
 `KleeTests` runs the shipped `klee.dll` against the real game
 assemblies **headless** — no Godot, no launch. It is opt-in, not a deploy gate;
 its boundary and its co-op coverage are in `klee-mod/KleeTests/README.md`.
