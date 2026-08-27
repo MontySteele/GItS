@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Texture2D" path="res://klee/ui/char_icon.png" id="1_icon"]
+[ext_resource type="Script" path="res://klee/scripts/thing.gd" id="2_script"]
+[ext_resource type="Texture2D" path="user://elsewhere.png" id="3_bad"]
+
+[sub_resource type="GradientTexture1D" id="Grad_unused"]
+width = 8
+
+[node name="Root" type="Node2D"]
+
+[node name="Icon" type="Sprite2D" parent="."]
+texture = ExtResource("1_icon")
+
+[node name="Ghost" type="Sprite2D" parent="."]
+texture = ExtResource("9_missing")

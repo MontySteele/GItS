@@ -1,0 +1,14 @@
+Overlaid pck-src scene sources.
+Stamped build id 20260826-193602+223a4ff
+Importing assets (MegaDot headless)...
+Godot Engine v4.5.1.stable.mono.megadot - https://godotengine.org
+Editing project: C:\repo\klee-mod\dist\pck-work
+Import: begin: Importing file: res://klee/ui/char_icon.png
+Import: begin: Importing file: res://furina/ui/char_icon.png
+Import: begin: Importing file: res://shared/gauge.tscn
+Exporting pack...
+Godot Engine v4.5.1.stable.mono.megadot - https://godotengine.org
+savepack: begin: Storing File: res://klee/ui/char_icon.png
+savepack: begin: Storing File: res://furina/ui/char_icon.png
+savepack: end
+Built C:\repo\klee-mod\assets\klee.pck (8320112 bytes; contract roster-pck-v3, 126 resources)
