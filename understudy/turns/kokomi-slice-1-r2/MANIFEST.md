@@ -48,24 +48,38 @@ is the map.
 
 | file | turn id | arm | card under test | group | seed | staged | packet sha | closeness (declared board) |
 |---|---|---|---|---|---|---|---|---|
-| `pearl-barrage-shipped.yaml` | `kokomi-slice1-r2-t01` | 1 — counting basis | `pearl_barrage` (shipped) | A | `HUMWKRKNCE` | pending | pending | SURVIVES, gap 0.0256 over 27 lines |
-| `pearl-barrage-turn.yaml` | `kokomi-slice1-r2-t02` | 1 — counting basis | `proto_pearl_barrage_turn` | A | `HUMWKRKNCE` | pending | pending | SURVIVES, gap 0.1136 over 27 lines |
-| `shinobu-sanctifying-ring-shipped.yaml` | `kokomi-slice1-r2-t03` | 2/3 — baseline | `shinobu_sanctifying_ring` (shipped) | B | `NMQLUYZDLV` | pending | pending | SURVIVES, gap 0.1224 over 6 lines |
-| `shinobu-sanctifying-ring-either.yaml` | `kokomi-slice1-r2-t04` | 2 — mutually exclusive | `proto_shinobu_sanctifying_ring_either` | B | `NMQLUYZDLV` | pending | pending | SURVIVES, gap 0.1638 over 6 lines |
-| `shinobu-sanctifying-ring-priced.yaml` | `kokomi-slice1-r2-t05` | 3 — priced in cost | `proto_shinobu_sanctifying_ring_priced` | B | `NMQLUYZDLV` | pending | pending | SURVIVES, gap 0.0452 over 4 lines |
-| `thoma-crimson-ooyoroi-shipped.yaml` | `kokomi-slice1-r2-t06` | 2/3 — baseline | `thoma_crimson_ooyoroi` (shipped) | C | `XVE3PVZEPT` | pending | pending | SURVIVES, gap 0.0717 over 11 lines |
-| `thoma-crimson-ooyoroi-either.yaml` | `kokomi-slice1-r2-t07` | 2 — mutually exclusive | `proto_thoma_crimson_ooyoroi_either` | C | `XVE3PVZEPT` | pending | pending | SURVIVES, gap 0.1932 over 11 lines |
-| `thoma-crimson-ooyoroi-priced.yaml` | `kokomi-slice1-r2-t08` | 3 — priced in cost | `proto_thoma_crimson_ooyoroi_priced` | C | `XVE3PVZEPT` | pending | pending | SURVIVES, gap 0.2850 over 8 lines |
-| `itto-superlative-superstrength-shipped.yaml` | `kokomi-slice1-r2-t09` | 2/3 — baseline | `itto_superlative_superstrength` (shipped) | D | `X1BQR3FU4G` | pending | pending | SURVIVES, gap 0.1003 over 11 lines |
-| `itto-superlative-superstrength-either.yaml` | `kokomi-slice1-r2-t10` | 2 — mutually exclusive | `proto_itto_superlative_superstrength_either` | D | `X1BQR3FU4G` | pending | pending | SURVIVES, gap 0.0881 over 11 lines |
-| `itto-superlative-superstrength-priced.yaml` | `kokomi-slice1-r2-t11` | 3 — priced in cost | `proto_itto_superlative_superstrength_priced` | D | `X1BQR3FU4G` | pending | pending | SURVIVES, gap 0.0096 over 8 lines |
+| `pearl-barrage-shipped.yaml` | `kokomi-slice1-r2-t01` | 1 — counting basis | `pearl_barrage` (shipped) | A | `HUMWKRKNCE` | `0.2.1248+proto` (2026-08-28) | `8177100724862e2ead263683e89414b32e7eaa45ec0267f1260b320d31d90b51` | SURVIVES, gap 0.0256 over 27 lines; observed gap 0.0256 over 27 lines |
+| `pearl-barrage-turn.yaml` | `kokomi-slice1-r2-t02` | 1 — counting basis | `proto_pearl_barrage_turn` | A | `HUMWKRKNCE` | `0.2.1248+proto` (2026-08-28) | `cc315eb12b32e562fc2e38ef8e588f1cb7eb2c52e353da9377fdff4f080ecdc0` | SURVIVES, gap 0.1136 over 27 lines; observed gap 0.1136 over 27 lines |
+| `shinobu-sanctifying-ring-shipped.yaml` | `kokomi-slice1-r2-t03` | 2/3 — baseline | `shinobu_sanctifying_ring` (shipped) | B | `NMQLUYZDLV` | `0.2.1248+proto` (2026-08-28) | `65909dacab6b365c8240517c541c7cac9388967f099ea212117c8e3dea52822b` | SURVIVES, gap 0.1224 over 6 lines; observed gap 0.1224 over 6 lines |
+| `shinobu-sanctifying-ring-either.yaml` | `kokomi-slice1-r2-t04` | 2 — mutually exclusive | `proto_shinobu_sanctifying_ring_either` | B | `NMQLUYZDLV` | `0.2.1248+proto` (2026-08-28) | `48ab4f50b2e25b47528b54cdf80e8824a9d13f44b59ea86fc887a383faa9b564` | SURVIVES, gap 0.1638 over 6 lines; observed gap 0.1638 over 6 lines |
+| `shinobu-sanctifying-ring-priced.yaml` | `kokomi-slice1-r2-t05` | 3 — priced in cost | `proto_shinobu_sanctifying_ring_priced` | B | `NMQLUYZDLV` | `0.2.1248+proto` (2026-08-28) | `d1c4571cc92a71596c14302852d001009901909e236efc9f6ce9bfcf89d12939` | SURVIVES, gap 0.0452 over 4 lines; observed gap 0.0452 over 4 lines |
+| `thoma-crimson-ooyoroi-shipped.yaml` | `kokomi-slice1-r2-t06` | 2/3 — baseline | `thoma_crimson_ooyoroi` (shipped) | C | `XVE3PVZEPT` | `0.2.1248+proto` (2026-08-28) | `063982445db33e6f012a05a2a17de0ee1056a82aa1a0a332a8abccee1413b3cf` | SURVIVES, gap 0.0717 over 11 lines; observed gap 0.0717 over 11 lines |
+| `thoma-crimson-ooyoroi-either.yaml` | `kokomi-slice1-r2-t07` | 2 — mutually exclusive | `proto_thoma_crimson_ooyoroi_either` | C | `XVE3PVZEPT` | `0.2.1248+proto` (2026-08-28) | `09766ea5d2d1bf2b1a4e4cacfa31fb9ad3358525cd93438b56c48a894833646d` | SURVIVES, gap 0.1932 over 11 lines; observed gap 0.1932 over 11 lines |
+| `thoma-crimson-ooyoroi-priced.yaml` | `kokomi-slice1-r2-t08` | 3 — priced in cost | `proto_thoma_crimson_ooyoroi_priced` | C | `XVE3PVZEPT` | `0.2.1248+proto` (2026-08-28) | `4e6edce831e230b21ffa4d4a0a5a0362b005fa467c10bb0154a0259d6b82d645` | SURVIVES, gap 0.2850 over 8 lines; observed gap 0.2850 over 8 lines |
+| `itto-superlative-superstrength-shipped.yaml` | `kokomi-slice1-r2-t09` | 2/3 — baseline | `itto_superlative_superstrength` (shipped) | D | `X1BQR3FU4G` | `0.2.1248+proto` (2026-08-28) | `f8a71aac32bb00b46066ce212a4c8e690b71ed3232c925fd0d9414908219e6d9` | SURVIVES, gap 0.1003 over 11 lines; observed gap 0.1003 over 11 lines |
+| `itto-superlative-superstrength-either.yaml` | `kokomi-slice1-r2-t10` | 2 — mutually exclusive | `proto_itto_superlative_superstrength_either` | D | `X1BQR3FU4G` | `0.2.1248+proto` (2026-08-28) | `fff51fbc3096422baf4b56d1d2a586dc9a7b84580b16ff1a4595d695a396ba04` | SURVIVES, gap 0.0881 over 11 lines; observed gap 0.0881 over 11 lines |
+| `itto-superlative-superstrength-priced.yaml` | `kokomi-slice1-r2-t11` | 3 — priced in cost | `proto_itto_superlative_superstrength_priced` | D | `X1BQR3FU4G` | `0.2.1248+proto` (2026-08-28) | `5df4cdbf73427af62b5f8f4d038989c50673dc8854772ad6f14a52a707b43b56` | SURVIVES, gap 0.0096 over 8 lines; observed gap 0.0096 over 8 lines |
 
-`DOMINANCE_GAP` is 0.5. Every reading above is a reading of the **declared**
-board — the mirror available with no game running — and is written by
-`staged_turn closeness` into `review/qa/<turn id>/closeness.json`. Once a turn
-is staged, re-read it with `closeness --observed`, which scores the board the
-grader actually saw; with `exact_hand: true` the two hands are now the same
-hand, so the remaining difference between the readings is the live intent.
+`DOMINANCE_GAP` is 0.5. The first reading in each cell is of the **declared**
+board — the mirror available with no game running; the second is
+`closeness --observed`, which scores the board the grader actually saw. Both
+are written into `review/qa/<turn id>/closeness.json`.
+
+**The two readings are identical on all eleven turns, to four decimal places
+and line for line.** That is the exact-hand door's whole effect, stated as a
+number: in round 1 the observed board carried the game's dealt hand and the two
+readings disagreed on every turn (`0.0256` against `0.0175` on the first one,
+and four observed ties of `0.0000` where the declared boards read between
+`0.0881` and `0.2850`). Here the live hand IS the declared hand, the live
+intents are the declared intents, and there is nothing left for the two records
+to disagree about.
+
+**All eleven were staged on ONE build**, `0.2.1248+proto`, including the four
+shipped halves. Round 1 put the shipped halves on a release build and the
+prototype halves on a dev build, which is one more difference between the halves
+of a pair than a matched pair should have. The dev build's extra rows are
+off-pool and unreachable except by the grant that names them, so a shipped half
+staged on it is the same board it would have been on the release build.
 
 **What "SURVIVES" means here, exactly:** no single line on the declared board
 is worth more than twice the runner-up in the pilot's own scoring currency, so
