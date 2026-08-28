@@ -123,6 +123,11 @@ REGISTRY: tuple[Lint, ...] = (
     # energy are labelled, but Kokomi's are not") is the argument for a gate
     # rather than a test: only a player could see the gap.
     _ci("burst-legibility",     "tools/lint_burst_legibility.py"),
+    # EB-164, the fourth row of that family and the one a BLIND READER found.
+    # Burst-legibility guards a number that is paid and never printed; this
+    # guards a number that is printed and then claimed AGAIN, so the reader
+    # adds it twice. Round 2 of the Kokomi slice lost seven verdicts to it.
+    _ci("face-scaling",         "tools/lint_face_scaling.py"),
     _ci("op-parity",            "tools/lint_op_parity.py"),
     _ci("sly-grammar",          "tools/lint_sly_grammar.py"),
     _ci("codegen-staleness",    "tools/gen_roster_cards.py", "--check"),

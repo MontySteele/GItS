@@ -51,7 +51,7 @@ public sealed class WhatTheTokoyoTook : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "What the Tokoyo Took"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with the cards you discarded this turn."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, already including the cards you discarded this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

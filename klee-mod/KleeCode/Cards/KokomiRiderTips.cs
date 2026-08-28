@@ -51,8 +51,9 @@ public static class KokomiRiderTips
     /// where no face can print them. `all_streams_flow` / `nereids_ascension`
     /// are the opposite: their rider renders INSIDE the card's own number
     /// (CalculatedDamageVar), so the face shows a live, correct total -- and
-    /// the face text was cut to "Scales with [gold]Charge[/gold]" on the
-    /// strength of that. What no surface carried was the RATE. A player could
+    /// the face text was cut to a bare marker naming Charge on the strength
+    /// of that (a trailing ", already including [gold]Charge[/gold]" clause
+    /// since EB-164). What no surface carried was the RATE. A player could
     /// watch the number move and never learn it moves by 1 per 2 Charge, so
     /// they could not price a Charge before spending one, which is the only
     /// decision the meter asks them to make.

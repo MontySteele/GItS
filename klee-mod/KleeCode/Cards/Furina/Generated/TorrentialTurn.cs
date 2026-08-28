@@ -45,7 +45,7 @@ public sealed class TorrentialTurn : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Torrential Turn"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Bonus damage vs. an elemental aura. Refresh ALL elemental auras."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, already including {ExtraDamage:diff()} if the target has an elemental aura. Refresh ALL elemental auras."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

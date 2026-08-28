@@ -165,8 +165,9 @@ Slay the Spire 2 **v0.107.1**, commit `59260271` (2026-06-18), Steam buildid
 13:16, from `main` `f291fb4`) — the FIRST build emitted under that shape, so
 the game parses the version instead of leaving it `null`. `validate.ps1` OK;
 pack 9,586,076 bytes, 132 resources. It carries `EB-150`'s Deep Breath fix and
-`EB-152`'s fourteen Burst faces. The exhaust-selection face fix (R215) is NOT
-in it — it ships with the next deploy.
+`EB-152`'s fourteen Burst faces. Two face fixes are NOT in it and ship with the
+next deploy: the exhaust-selection rate (R215 C) and `EB-164`'s eighteen
+re-worded scaling faces.
 
 ## Systems
 
@@ -323,11 +324,20 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   **ADVANCES two arms** — Tidal Barrage's counting basis and Shinobu's
   priced shape — and RETURNS five; every one of the seven prototype cards
   was played or named as the serious alternative, against two ignored
-  outright in round 1. **The round's own finding is `EB-164`:** four
+  outright in round 1. **The round's own finding was `EB-164`, now CLOSED:** four
   graders and the reviewer read *All Streams Flow* as 13 where it deals 9,
   which manufactured the lethal lines all seven refusals rest on;
-  `staged_turn execute` settled it live at 22 HP → 1. That row now BLOCKS
-  the next graded round. Packet:
+  `staged_turn execute` settled it live at 22 HP → 1. The fix is ONE rule at
+  the generator, in `gen_klee_cards.py`'s docstring — **a face states a
+  scaling exactly once**: where the printed number already carries the rider
+  the source is named in that number's own sentence (", already including
+  [gold]Charge[/gold]") and no separate sentence asserts it; where the count
+  does not exist until the card resolves the per-unit rate is printed beside
+  the number (R215 C, unchanged). Seventeen generated faces and one
+  hand-written one were re-worded, **no sheet number moved**, all three
+  manifests' coverage counts are unchanged, and
+  `tools/lint_face_scaling.py` on the ci lane refuses a face that states a
+  scaling twice — or claims a fold on a number with nothing folded in. Packet:
   `review/active/kokomi-slice-1-2026-08-27.md` §Round 2. Seat testimony
   lives in `review/qa/<turn>/form-*.json` and gitignored
   `understudy/logs/seat/`, and never enters an Understudy report, a

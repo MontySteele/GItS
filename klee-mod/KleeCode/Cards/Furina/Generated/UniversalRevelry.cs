@@ -45,7 +45,7 @@ public sealed class UniversalRevelry : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Universal Revelry"),
-        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. Scales with [gold]Fanfare[/gold]. If you have at least 15 [gold]Fanfare[/gold]: deal 6 damage to ALL enemies."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies, already including [gold]Fanfare[/gold]. If you have at least 15 [gold]Fanfare[/gold]: deal 6 damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

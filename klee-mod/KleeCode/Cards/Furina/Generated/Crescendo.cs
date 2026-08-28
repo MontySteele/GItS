@@ -45,7 +45,7 @@ public sealed class Crescendo : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crescendo"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with [gold]Fanfare[/gold]. Permanently increase this card's damage by 2 this combat."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, already including [gold]Fanfare[/gold]. Permanently increase this card's damage by 2 this combat."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

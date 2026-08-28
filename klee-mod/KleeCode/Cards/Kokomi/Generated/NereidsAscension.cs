@@ -51,7 +51,7 @@ public sealed class NereidsAscension : CustomCardModel, IElementalCard, ICharact
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Nereid's Ascension"),
-        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies. Scales with [gold]Charge[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage to ALL enemies, already including [gold]Charge[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

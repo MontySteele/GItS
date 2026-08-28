@@ -51,7 +51,7 @@ public sealed class HighTide : CustomCardModel, IElementalCard, ICharacterCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "High Tide"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with [gold]Fanfare[/gold]. [gold]Burst[/gold] +5."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, already including [gold]Fanfare[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

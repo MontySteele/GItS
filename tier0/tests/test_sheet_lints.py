@@ -817,3 +817,79 @@ def test_the_burst_legibility_lint_still_catches_a_silent_grant():
     assert "PHANTOM BURST" in phantom[0]
 
     assert lint.findings() == [], "and green again on the real tree"
+
+
+# --- EB-164: a face states its scaling once -------------------------------
+#
+# Kokomi slice 1 round 2, 2026-08-28. Seventeen faces printed a number that
+# already carried its rider and then asserted the scaling again beneath it, so
+# four of eleven blind graders and the pair reviewer read *All Streams Flow to
+# the Sea* as 13 where the game deals 9. The phantom four manufactured a lethal
+# line and seven refusals, three of them on shipped control halves;
+# `staged_turn execute` settled it live at 22 HP -> 1.
+
+def test_no_card_face_states_its_scaling_twice():
+    res = subprocess.run(
+        [sys.executable, str(REPO / "tools" / "lint_face_scaling.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+    # A verdict with a denominator, and a denominator that is not zero: a lint
+    # that reads no faces would pass on an empty tree.
+    assert "face(s) state a fold once" in res.stdout, res.stdout
+    assert "OK: 0 face(s)" not in res.stdout, res.stdout
+
+
+def test_the_face_scaling_lint_still_catches_a_double_stated_rider():
+    """The red half, on SYNTHETIC data -- no probe class in the live tree."""
+    import importlib
+
+    lint = importlib.import_module("tools.lint_face_scaling")
+
+    assert lint.findings() == [], "the lint must be green before it is red"
+
+    # EB-164 in miniature: the shipped All Streams Flow face, as it read.
+    doubled = lint.findings(shipped={
+        "AllStreamsFlow": "Deal {CalculatedDamage:diff()} damage. "
+                          "Scales with [gold]Charge[/gold]."})
+    assert len(doubled) == 1, doubled
+    assert "DOUBLE-STATED SCALING" in doubled[0]
+    assert "AllStreamsFlow" in doubled[0]
+
+    # The same face under the rule is clean.
+    assert lint.findings(shipped={
+        "AllStreamsFlow": "Deal {CalculatedDamage:diff()} damage, already "
+                          "including [gold]Charge[/gold]."}) == []
+
+    # The rehomed aura sentence is the same defect in its other shipped words.
+    aura = lint.findings(shipped={
+        "TorrentialTurn": "Deal {CalculatedDamage:diff()} damage. Bonus "
+                          "damage vs. an elemental aura."})
+    assert len(aura) == 1 and "DOUBLE-STATED SCALING" in aura[0], aura
+
+    # Other sign: a fold claimed on a number with nothing folded into it.
+    phantom = lint.findings(shipped={
+        "AllStreamsFlow": "Deal 9 damage, already including "
+                          "[gold]Charge[/gold]."})
+    assert len(phantom) == 1 and "PHANTOM FOLD" in phantom[0], phantom
+
+    # And the clause itself, said twice.
+    twice = lint.findings(shipped={
+        "AllStreamsFlow": "Deal {CalculatedDamage:diff()} damage, already "
+                          "including [gold]Charge[/gold], already including "
+                          "[gold]Charge[/gold]."})
+    assert any("SCALING STATED TWICE" in line for line in twice), twice
+
+    assert lint.findings() == [], "and green again on the real tree"
+
+
+def test_the_face_scaling_lint_reads_a_concatenated_hand_written_face():
+    """`let_the_people_rejoice` carries EB-164's defect across a C# string
+    concatenation, which a one-literal scrape would have read straight past --
+    the hand-written faces are exactly where a generator fix cannot reach."""
+    import importlib
+
+    lint = importlib.import_module("tools.lint_face_scaling")
+    shipped = lint.shipped_descriptions()
+    face = shipped["LetThePeopleRejoice"]
+    assert "{CalculatedDamage" in face and "Gain 6 [gold]Encore[/gold]" in face
+    assert lint.FOLD in face and "Scales with" not in face

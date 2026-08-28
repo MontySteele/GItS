@@ -818,15 +818,24 @@ def test_a_converted_rider_always_declares_itself_on_the_face():
     path always emitted this; the block path did not, so B1's fix traded a
     silent drop for a silent number. Thunderous Ovation is the regression
     case: it is the card B1 was reported against.
+
+    EB-164 changed WHERE the marker sits, not whether it exists: it is a
+    clause on the number's own sentence now, because as a following sentence
+    it read as a further addition on top of a number that already made it.
     """
     by_id = {card["id"]: card for card in _furina_cards()}
     thunder = gen.emit(by_id["thunderous_ovation"], gen.FURINA_PROFILE)
     dinner = gen.emit(by_id["dinner_service"], gen.FURINA_PROFILE)
     house = gen.emit(by_id["house_call"], gen.FURINA_PROFILE)
 
-    assert "Scales with [gold]Fanfare[/gold]." in thunder
-    assert "Scales with [gold]Salon[/gold]." in dinner
-    assert "Scales with [gold]Salon[/gold]." in house
+    assert ("Gain {CalculatedBlock:diff()} [gold]Block[/gold], already "
+            "including [gold]Fanfare[/gold]." in thunder)
+    assert ("Gain {CalculatedBlock:diff()} [gold]Block[/gold], already "
+            "including [gold]Salon[/gold]." in dinner)
+    assert ("Deal {CalculatedDamage:diff()} damage, already including "
+            "[gold]Salon[/gold]." in house)
+    for src in (thunder, dinner, house):
+        assert "Scales with" not in src
     # Not "Member": rpartition on the formula would name it that, and nothing
     # in the game or on the sheet calls the stage that.
     assert "[gold]Member[/gold]" not in dinner + house
@@ -959,7 +968,11 @@ def test_handwritten_furina_burst_matches_the_sheet_contract():
     # keeps only the marker. Hand-written card, wired by hand -- pin both ends
     # so it cannot drift from the generated cards' treatment.
     assert f"fanfarePer: {n}, fanfareStep: {div}" in source
-    assert "Scales with [gold]Fanfare[/gold]." in source
+    # EB-164: the marker is a clause on the number's sentence, and the
+    # hand-written face carries it across a string concatenation.
+    assert "damage to ALL enemies, already " in source
+    assert "including [gold]Fanfare[/gold]." in source
+    assert "Scales with" not in source
     assert f"plus {n} damage per" not in source
 
 
@@ -974,7 +987,9 @@ def test_converted_riders_move_their_arithmetic_to_the_hover_tip():
     # fixture now reads the generated files -- the tips are a DISPLAY claim,
     # and a display claim should be made against what is displayed.
     crescendo = _generated_source("Crescendo")
-    assert "Scales with [gold]Fanfare[/gold]." in crescendo
+    assert ("Deal {CalculatedDamage:diff()} damage, already including "
+            "[gold]Fanfare[/gold]." in crescendo)      # EB-164
+    assert "Scales with" not in crescendo
     assert "+1 damage per 2" not in crescendo
     assert (
         "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, "
@@ -982,7 +997,13 @@ def test_converted_riders_move_their_arithmetic_to_the_hover_tip():
     )
 
     torrential = _generated_source("TorrentialTurn")
-    assert "Bonus damage vs. an elemental aura." in torrential
+    # EB-164: the aura multiplier reads the AIMED target, so the previewed
+    # number already carries the bonus whenever that target has an aura. Said
+    # as its own sentence it promised an addition the number had made.
+    assert ("Deal {CalculatedDamage:diff()} damage, already including "
+            "{ExtraDamage:diff()} if the target has an elemental aura."
+            in torrential)
+    assert "Bonus damage vs." not in torrential
     assert "+3 damage if the enemy" not in torrential
     assert "FurinaRiderTips.ForCard(base.ExtraHoverTips, this, auraBonus: 3)" in torrential
 

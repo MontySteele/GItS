@@ -45,7 +45,7 @@ public sealed class TheFinalVerdict : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Final Verdict"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with [gold]Fanfare[/gold]. Your [gold]Fanfare[/gold] falls to its baseline, and that baseline falls by {FloorDrop:diff()}."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, already including [gold]Fanfare[/gold]. Your [gold]Fanfare[/gold] falls to its baseline, and that baseline falls by {FloorDrop:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
