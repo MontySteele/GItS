@@ -226,8 +226,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R214 | 2026-08-27 | (2026-08-27): morning slate -- EB block released, dead sheets re-materialised, version string amended to MAJOR.AUTO(+dirty) | `d8c91bd` |
 | R215 | 2026-08-27 | (2026-08-27): afternoon slate -- rulings lineage tagged, prototype numbers unquotable, Pearl Barrage is not a defect, Charge label deferred into E1 | `9936894` |
 | R216 | 2026-08-27 | (2026-08-27): the funnel is live -- EB-149 closed, the Kokomi slice's pool and arms ruled from the Companion audit, Muster's Charge subsidy deferred into E1 | `ed44e46` |
+| R217 | 2026-08-28 | (2026-08-28): the seat decides -- independent-model authority, GPT's D1-D9 as the design charter, +proto ratified, the automation minted in order | `00ba07a` |
 
-215 rows over the R1..R216 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 104 from a commit message, 0 unresolved.
+216 rows over the R1..R217 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 105 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
