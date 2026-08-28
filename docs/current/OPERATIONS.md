@@ -417,6 +417,43 @@ running game and leaves the board on screen) with `grader.id: user`, and
 **ledger** rebuilds `review/qa/ledger.tsv`, where a grader that keeps
 disagreeing with [USER] on question two loses its solo SURVIVES.
 
+### Understudy — the independent seat (Codex CLI)
+
+A second vendor's model in the grader's chair, so R213's first guard holds
+structurally rather than procedurally: `codex exec` cannot have seen this
+repo's design conversation. One-time, and [USER]'s to do — the sign-in is
+interactive and there is no API key:
+
+```
+npm install -g @openai/codex
+codex login                                   # ChatGPT plan sign-in
+```
+
+Then:
+
+```
+python -m understudy.seat check                          # path, version, login
+python -m understudy.seat grade <turn-id> [--model M] [--grader-id ID]
+python -m understudy.seat grade <turn-id> --dry-run      # prompt + argv only
+python -m understudy.seat review <prompt-file> [--out F] # NOT blind
+```
+
+**grade** builds the prompt from `understudy/qa_grader_prompt.md`, runs one
+fresh sandboxed config-less Codex turn from an empty scratch directory
+OUTSIDE the repo, and hands the reply to `staged_turn grade`. Blindness is
+proven from the TRANSCRIPT — the `--json` stream, codex's session rollout and
+stderr, allowlisted at every layer, unknown types refusing — because the
+read-only sandbox stops writing, not reading, and the stdout stream does not
+show tool-call attempts. A refused seat never reaches `grade`. The wrapper
+fills exactly three fields (`grader.id/kind/model`) and the raw reply is kept
+beside the filled form. **review** is the other role: not blind, read-only at
+the repo root, for a second opinion on a diff.
+
+Sessions land in `understudy/logs/seat/`, which is **gitignored** — the
+prompt inlines the packet and the rollout carries a third party's system
+prompt and raw output. The committed artifact is the form and the verdict
+under `review/qa/<turn-id>/`.
+
 `closeness` is the one number (R213 F): the gap between the top two lines on
 the pilot's own score surface, quotable under R215 B's exception because it
 reads the TURN. SURVIVES means **not yet falsified** — nothing here rates a
