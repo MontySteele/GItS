@@ -178,7 +178,7 @@ TOKEN_CARDS = {
 # ignored is a scenario that passes without running.
 ACTION_STEPS = ("play", "select", "confirm", "end_turn")
 SETUP_STEPS = ("give", "set_resource", "set_energy", "set_hp", "set_block",
-               "set_power")
+               "set_power", "clear_hand")
 OTHER_STEPS = ("expect", "read", "mark")
 STEP_VERBS = ACTION_STEPS + SETUP_STEPS + OTHER_STEPS
 
@@ -187,7 +187,20 @@ STEP_VERBS = ACTION_STEPS + SETUP_STEPS + OTHER_STEPS
 # all. Kept as data beside the verb list because both facts are enforced -- the
 # first by resolution before the POST, the second by a parse-time refusal.
 CREATURE_SETUP_STEPS = ("set_hp", "set_block", "set_power")
-PLAYER_ONLY_SETUP_STEPS = ("set_resource", "set_energy")
+PLAYER_ONLY_SETUP_STEPS = ("set_resource", "set_energy", "clear_hand")
+
+# The setup verbs that take no `amount` either. `clear_hand` is the only one --
+# it is the one verb here that moves CARDS rather than a number, and a file
+# that wrote an amount on it would be asking for something the endpoint has no
+# way to honour.
+AMOUNTLESS_SETUP_STEPS = ("clear_hand",)
+
+# How many settles `clear_hand` will wait for an emptying hand. A hand holds at
+# most `CardPile.MaxCardsInHand` = 10, each moving on its own queued command,
+# and the runner's settle is 0.7 s -- so this is a ceiling with room in it
+# rather than a tuned number, and it is a REFUSAL bound: reaching it fails the
+# step by name.
+CLEAR_HAND_SETTLES = 12
 
 
 class ScenarioError(RuntimeError):
@@ -358,6 +371,14 @@ def _validate(i: int, verb: str, body: dict[str, Any]) -> None:
             f"the PLAYER's combat state and ignores the field, so naming "
             f"{body['who']!r} here would set the player's number under that "
             f"creature's name")
+    if verb in AMOUNTLESS_SETUP_STEPS and "amount" in body:
+        # Checked AFTER the `who` rule, so a file that wrote both is told
+        # about the target first -- naming the wrong creature is the worse of
+        # the two mistakes and the one `find_enemy` exists to catch.
+        raise ScenarioError(
+            f"step {i} ('{verb}'): takes no 'amount' -- it moves the whole "
+            f"hand and the endpoint has no partial form, so a number here "
+            f"would read as a count and change nothing")
 
 
 def load(path: str | Path) -> Scenario:
@@ -925,6 +946,36 @@ class Runner:
         self._debug("set_block", "set_block", selector=selector,
                     amount=int(body["amount"]),
                     who=self._resolve_who("set_block", selector))
+
+    def _do_clear_hand(self, body):
+        """EB-165. Empty the hand to the bottom of the draw pile.
+
+        No `who` and no `amount`: the endpoint empties the LOCAL PLAYER's hand
+        and there is no partial form. `_debug` settles on the queued answer,
+        which matters more here than anywhere else in this class -- the very
+        next step is normally a grant, and a grant that raced the clear would
+        be granted into a hand that is about to be emptied.
+        """
+        self._debug("clear_hand", "clear_hand")
+        # AND THEN WAIT FOR IT, which the other five ops do not need to do.
+        # The clear queues ONE pile move per card and each runs its own pile
+        # visuals, so a ten-card hand empties over rather more frames than the
+        # single settle `_debug` takes -- and the next step is a grant, which
+        # would land in a hand still being emptied. Bounded, and the emptiness
+        # is asserted rather than assumed: a hand that never empties is a
+        # failure here, where it names the clear, instead of a wrong hand in a
+        # design-blind packet nobody can see is wrong.
+        for _ in range(CLEAR_HAND_SETTLES):
+            if not _hand(self.state):
+                break
+            self._settle()
+        left = [c.get("name") for c in _hand(self.state)]
+        self.emit({"step": "clear_hand_settled", "left_in_hand": left})
+        if left:
+            raise ExpectFailed(
+                "clear_hand",
+                f"the hand did not empty; still holding {left}",
+                self.state, self.state)
 
     def _do_set_power(self, body):
         selector = str(body.get("who") or "player")

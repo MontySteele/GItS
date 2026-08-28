@@ -168,9 +168,10 @@ real enemy with a real Block value, paid what the sheet prints.
 Two doors make it possible, and both are dev-only:
 `vendor/STS2_MCP/gits/GitsGiveCard.cs` (EB-52) puts a chosen card in hand, and
 `vendor/STS2_MCP/gits/GitsDebugState.cs` (EB-142, widened by EB-146) sets the
-board around it — `set_resource`, `set_energy`, `set_hp`, `set_block` and
-`set_power`, each through the game's own mutator for that number, singleplayer
-and in-combat only, `why` required and logged on every write.
+board around it — `set_resource`, `set_energy`, `set_hp`, `set_block`,
+`set_power` and `clear_hand` (EB-165), each through the game's own mutator for
+that number, singleplayer and in-combat only, `why` required and logged on
+every write.
 
 **Every verb that names a creature reads one selector vocabulary**, and the
 board writes resolve it before they post. `who` (on `set_hp`, `set_block`,
@@ -300,6 +301,22 @@ answering the question. `board` is the tier0 mirror the falsifier reads. The two
 must name the same hand: `scenario.card_key` compares them at parse time, so a
 card added to one and forgotten in the other is a parse error rather than a
 falsifier reading taken on a board nobody staged.
+
+**`exact_hand: true` MAKES THE STAGED HAND THE DECLARED HAND** (EB-165). The
+game deals its own opening hand on top of the granted one, so without the flag
+a five-card turn stages with ten and the blind grader reads a board nobody
+designed — reproducible on its pinned seed, and not exact. With it, `stage`
+runs `clear_hand` BEFORE the first grant. The tool owns that position: a turn
+file may not write the verb itself, because a clear after a grant would empty
+the declared hand instead of the dealt one. The cards go to the **bottom of the
+draw pile** through `CardPileCmd.Add`, the pile move that sits underneath both
+`CardCmd.Discard` and `CardCmd.Exhaust`, so no on-discard and no on-exhaust
+trigger fires and no combat-history row is written; `Hook.AfterCardChangedPiles`
+still runs, because every pile move in the game runs it and there is no route
+out of hand beneath it. Draw rather than discard because a discard pile is
+*read* by cards. Then `export_packet` REFUSES to write a packet whose live hand
+is not the declared multiset — the acceptance is a refusal, since a wrong
+board in a design-blind packet is invisible to the person reading it.
 
 **THE PACKET IS BLIND BY CONSTRUCTION, NOT BY PROMISE.** `qa_packet.py` imports
 nothing from `tier0` — not the sheet loaders, not the engine, not the pilot —

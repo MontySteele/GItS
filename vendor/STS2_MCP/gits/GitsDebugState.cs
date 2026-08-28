@@ -34,6 +34,10 @@
 //   set_resource  -> the registered CustomResource's own `Amount` setter,
 //                    which is the property BaseLib's own gain/spend paths
 //                    write (`SparkPower.Spend` ends in `power.Amount -= n`).
+//   clear_hand    -> CardPileCmd.Add(card, PileType.Draw,
+//                                    CardPilePosition.Bottom)   (EB-165)
+//                    THE BOTTOM OF THE DRAW PILE, AND THE CHOICE IS THE WHOLE
+//                    POINT OF THE OP -- see the EB-165 block below.
 //   set_power     -> PowerCmd.Apply / PowerCmd.ModifyAmount / PowerCmd.Remove
 //                    (EB-146) -- the three commands every card in the game
 //                    applies, stacks and clears a power with. Which one runs
@@ -89,6 +93,49 @@
 //     for everything it does not set since EB-142. The op cannot detect the
 //     difference and does not pretend to: nothing in `PowerModel` declares
 //     "I keep state the stack count does not describe".
+//
+// EB-165: WHY clear_hand EXISTS, AND WHY IT MOVES CARDS TO THE DRAW PILE.
+// A staged turn declares a hand and grants it card by card through
+// `give_card`. The game deals its OWN opening hand first, so a turn that
+// declares five cards is staged with ten in hand and the blind grader reads a
+// board nobody designed -- reproducible on its pinned seed, and not EXACT.
+// This op empties the hand before the grants go in, and the turn file asks for
+// it with `exact_hand: true`.
+//
+// THE DESTINATION IS THE BOTTOM OF THE DRAW PILE, and it is chosen for what it
+// does NOT fire. Read the game's own two routes out of hand:
+//
+//   * `CardCmd.Discard` is `CardPileCmd.Add(card, discardPile)` PLUS
+//     `CombatManager.Instance.History.CardDiscarded` PLUS
+//     `Hook.AfterCardDiscarded` -- and it collects `IsSlyThisTurn` cards on
+//     the way. Every one of those is a trigger a card can read, and this
+//     repo ships cards that read exactly that ("what the tokoyo took" counts
+//     the turn's discards).
+//   * `CardCmd.Exhaust` is the same shape one pile over, and Kokomi's whole
+//     rotation law is written on the exhaust count.
+//
+// `CardPileCmd.Add` is the pile move UNDERNEATH both of them: it removes the
+// card from its current pile, puts it in the new one, and runs the pile
+// visuals. It fires no discard hook, no exhaust hook and writes no combat
+// history row. What it DOES still fire, stated rather than hidden, is
+// `Hook.AfterCardChangedPiles` -- the hook every pile move in the game runs,
+// including both routes above, and there is no route out of hand beneath it.
+// A setup verb that punched through that would be writing a board the game
+// cannot produce, which is the same line `set_power` draws at Artifact.
+//
+// DRAW rather than DISCARD, given that both are reachable this way: a discard
+// pile is READ by cards ("recall from discard"), and a turn staged with the
+// dealt hand sitting in the discard pile is a turn whose declared board is
+// not the board a recall would see. The draw pile is read by nothing on a
+// staged first turn, and the cards go to the BOTTOM so a draw effect played
+// during the turn pulls what the seed would have dealt next rather than the
+// hand that was just taken away.
+//
+// IT MOVES CARDS AND NEVER DESTROYS THEM. `CardPile.Clear` exists and is not
+// used: it drops the cards out of the pile without moving them anywhere, and
+// a card in no pile at all is the wedged-fight shape `set_hp <= 0` is refused
+// for. An empty hand is refused too -- as `queued: false`, not an error,
+// because "the hand is already empty" is the state the caller asked for.
 //
 // WHAT IS DELIBERATELY *NOT* HERE, and it is a follow-up rather than an
 // oversight:
@@ -170,6 +217,9 @@
 //        { "op": "set_block", "who": "player"|"JAW_WORM_0", "amount": 0,  ... }
 //        { "op": "set_power", "who": "player", "power": "SPARK_POWER",
 //          "amount": 2, "why": "EB-146 set-power-sparks scenario" }
+//        { "op": "clear_hand", "why": "EB-165 exact hand" }
+//          (no `who`, no `amount`: it empties the LOCAL PLAYER's hand, and
+//           `before` is the card count it moved)
 //        -> { status, message, guardrail, op, who, before, after, why }
 //           (`set_power` carries one extra key, `power`, naming the id it
 //            resolved -- so a caller that spelled a TITLE can see which
@@ -180,10 +230,11 @@
 // and the same reason. It is echoed on the response so the harness row and the
 // game log carry one string.
 //
-// TWO OPS ANSWER WITH AN `after`, THREE ANSWER `queued`, AND THE RESPONSE SAYS
+// TWO OPS ANSWER WITH AN `after`, FOUR ANSWER `queued`, AND THE RESPONSE SAYS
 // WHICH. `set_resource` and `set_block` are synchronous writes -- a property
 // set and two internal calls -- so the response carries the before/after pair
-// the write actually produced. `set_hp`, `set_energy` and `set_power` go through
+// the write actually produced. `set_hp`, `set_energy`, `set_power` and
+// `clear_hand` go through
 // async COMMANDS that run health-bar, energy and power-badge visuals, and
 // awaiting one from inside the main-thread frame drain is the deadlock
 // GitsGiveCard's header describes; those are queued through the game's own
@@ -213,6 +264,7 @@ using Godot;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Context;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -235,7 +287,8 @@ public static partial class McpMod
         + "check, never for a number.";
 
     private static readonly string[] GitsDebugStateOps =
-        { "set_resource", "set_energy", "set_hp", "set_block", "set_power" };
+        { "set_resource", "set_energy", "set_hp", "set_block", "set_power",
+          "clear_hand" };
 
     // ------------------------------------------------------- resources ----
 
@@ -412,6 +465,48 @@ public static partial class McpMod
         // to modify.
         await PowerCmd.ModifyAmount(choice, current, amount - current.Amount,
                                     applier: null, cardSource: null);
+    }
+
+    // ------------------------------------------------------------ hand ----
+
+    /// <summary>
+    /// Move every card `cards` names to the BOTTOM of its owner's draw pile,
+    /// one at a time, through the game's own pile-move command (EB-165).
+    ///
+    /// `CardPileCmd.Add` and not `CardCmd.Discard`: the discard route is this
+    /// same call PLUS `History.CardDiscarded` PLUS `Hook.AfterCardDiscarded`
+    /// plus the Sly collection, and a setup verb that fired a card's
+    /// on-discard trigger would be staging a board the file did not ask for.
+    /// The header states what is still fired (`Hook.AfterCardChangedPiles`)
+    /// and why there is no route beneath it.
+    ///
+    /// One await per card rather than the `IEnumerable` overload, for the
+    /// reason `GitsGiveCardGrant` loops: the batch overload asserts every card
+    /// shares one owner and one destination, and a per-card await lets a
+    /// single refused move be visible in the log instead of taking the batch
+    /// with it.
+    /// </summary>
+    private static async Task GitsDebugClearHand(IReadOnlyList<CardModel> cards)
+    {
+        foreach (var card in cards)
+        {
+            try
+            {
+                await CardPileCmd.Add(card, PileType.Draw,
+                                      CardPilePosition.Bottom);
+            }
+            catch (Exception ex)
+            {
+                // One card that will not move must not strand the rest in
+                // hand: a half-cleared hand with no note in the log is the
+                // silent-wrong-board shape this whole file refuses. The
+                // caller confirms the emptied hand by reading the next state,
+                // and `stage` refuses the turn when it is not empty.
+                GD.PrintErr("[STS2 MCP][GItS] clear_hand could not move "
+                            + $"{SafeGetText(() => card.Id.Entry)}: "
+                            + ex.Message);
+            }
+        }
     }
 
     // ------------------------------------------------------- creatures ----
@@ -640,6 +735,31 @@ public static partial class McpMod
                     TaskHelper.RunSafely(GitsDebugWritePower(
                         prototype, current, creature, amount));
                 }
+                break;
+            }
+
+            case "clear_hand":
+            {
+                // The LOCAL PLAYER's hand and no other creature's, so this op
+                // takes no `who` at all -- the same shape `set_energy` and
+                // `set_resource` have, and `understudy/scenario.py` refuses a
+                // `who` on it at parse time for the same reason.
+                var pile = CardPile.Get(PileType.Hand, player);
+                if (pile == null)
+                    return Error("No hand pile for the local player; there is "
+                                 + "nothing to clear.");
+                var cards = pile.Cards.ToList();
+                target = "hand";
+                before = cards.Count;
+                after = 0;
+                if (cards.Count > 0)
+                {
+                    queued = true;
+                    TaskHelper.RunSafely(GitsDebugClearHand(cards));
+                }
+                // An already-empty hand answers `queued: false` and NOT an
+                // error: it is the state the caller asked for, and `queued` is
+                // a promise that something is coming.
                 break;
             }
 

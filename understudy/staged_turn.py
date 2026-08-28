@@ -59,6 +59,7 @@ the parser refuses a file where they disagree:
 
     id: kokomi-first-turn-example
     character: KLEEMOD-KOKOMI
+    exact_hand: true               # EB-165: empty the dealt hand first
     assumptions: ["..."]
     staging:                       # scenario SETUP verbs, run against the game
       - give: {card: KLEEMOD-PEARL_BARRAGE, pile: hand}
@@ -70,6 +71,14 @@ the parser refuses a file where they disagree:
       hand: [pearl_barrage, coral_guard]
       enemies:
         - {name: "Jaw Worm", hp: 32, intent: {kind: attack, amount: 11}}
+
+`exact_hand: true` (EB-165) is how a turn asks for the hand it declared and no
+other. The game deals its own opening hand on top of the granted one, so
+without it a five-card turn stages with ten; with it, `stage` runs the bridge's
+`clear_hand` op BEFORE the first grant -- the cards go to the bottom of the
+draw pile through the pile move that sits underneath discard and exhaust, so no
+trigger fires -- and `export_packet` REFUSES to write a packet whose live hand
+is not the declared multiset.
 
 `staging` may not contain `play`, `end_turn` or `expect`: a staged turn is a
 BOARD, and the line is the grader's answer, not the file's. The two halves are
@@ -255,15 +264,31 @@ class StagedTurn:
     # produces is still a falsifier of the TURN, which is R215 B's one
     # exception to the prototype no-quote clause.
     prototype: bool = False
+    # EB-165. THE GAME DEALS ITS OWN OPENING HAND ON TOP OF THE GRANTED ONE, so
+    # a turn that declares five cards is staged with ten and the blind grader
+    # reads a board nobody designed. With `exact_hand: true` the staging opens
+    # with the bridge's `clear_hand` op -- BEFORE the first grant, because a
+    # clear after them would take the declared cards too -- and `export_packet`
+    # REFUSES to write a packet whose live hand is not the declared multiset.
+    # Default False, so every turn written before this door existed still
+    # stages exactly as it did.
+    exact_hand: bool = False
 
     def as_scenario(self) -> scenario.Scenario:
         """The staging half as a `scenario.Scenario`, so the existing runner
         executes it. Built directly rather than through `scenario.parse`,
         which requires an `expect` -- a staged turn asserts nothing, by
         design: it sets a board and stops."""
+        # THE CLEAR GOES FIRST AND THE TOOL PUTS IT THERE. A turn file may not
+        # write the verb itself (`parse` refuses it), because the whole
+        # correctness of the door is its POSITION: after any grant it would
+        # empty the declared hand into the draw pile and the packet would show
+        # nothing at all.
+        opening = [("clear_hand", {})] if self.exact_hand else []
         return scenario.Scenario(
             name=self.id, character=self.character,
-            steps=list(self.staging) + [("read", {"label": "staged board"})],
+            steps=opening + list(self.staging)
+            + [("read", {"label": "staged board"})],
             path=self.path, seed=self.seed,
             assumptions=list(self.assumptions),
             # Forwarded so the scenario the runner sees agrees with the turn
@@ -311,6 +336,15 @@ def parse(blob: dict[str, Any], path: Path | None = None) -> StagedTurn:
                 f"staging step {i}: each step is a single-key mapping; "
                 f"got {entry!r}")
         verb, raw = next(iter(entry.items()))
+        if verb == "clear_hand":
+            # EB-165. The verb is real and the scenario pack may write it; a
+            # TURN may not, because here its position is load-bearing and the
+            # tool owns it. Declare `exact_hand: true` and it is prepended.
+            raise TurnError(
+                f"staging step {i}: a turn does not write 'clear_hand' -- its "
+                f"POSITION is the whole door, and after a grant it would empty "
+                f"the declared hand. Declare `exact_hand: true` at the top "
+                f"level and the clear is run before the first grant")
         if verb not in STAGING_VERBS:
             raise TurnError(
                 f"staging step {i}: '{verb}' is not a staging verb. A staged "
@@ -326,7 +360,8 @@ def parse(blob: dict[str, Any], path: Path | None = None) -> StagedTurn:
         board=board, path=path, seed=blob.get("seed") or None,
         notes=str(blob.get("notes") or ""),
         assumptions=[str(a) for a in (blob.get("assumptions") or [])],
-        prototype=bool(blob.get("prototype", False)))
+        prototype=bool(blob.get("prototype", False)),
+        exact_hand=bool(blob.get("exact_hand", False)))
     _check_halves_agree(turn)
     _check_assumptions_blind(turn)
     return turn
@@ -523,6 +558,46 @@ def stage_board(turn: StagedTurn, why: str, *, hold: bool,
     return policy.staged_state, summary
 
 
+def declared_hand_keys(turn: StagedTurn) -> list[str]:
+    """The declared hand as sorted `scenario.card_key`s, one per copy.
+
+    Read off the GIVE steps rather than off `board.hand`, because the give
+    steps are what the game was actually told; `_check_halves_agree` has
+    already pinned the two equal, so the choice is about which record is the
+    instruction and not about which is right.
+    """
+    return sorted(scenario.card_key(str(b.get("card")))
+                  for v, b in turn.staging
+                  if v == "give" and str(b.get("pile") or "hand") == "hand"
+                  for _ in range(int(b.get("count", 1))))
+
+
+def exact_hand_difference(turn: StagedTurn, state: dict[str, Any]) -> str:
+    """`""` when the live hand IS the declared hand, else what differs.
+
+    EB-165's acceptance, checked at the one place it can be checked: after the
+    clear and after the grants, against the board the packet is about to be
+    written from. A multiset, in `card_key`'s folded vocabulary, so the wire's
+    `KLEEMOD-CORAL_GUARD` and the file's `coral_guard` compare equal and two
+    Coral Guards do not compare equal to one.
+    """
+    want = declared_hand_keys(turn)
+    got = sorted(scenario.card_key(str(c.get("id") or c.get("name") or ""))
+                 for c in scenario._hand(state))
+    if want == got:
+        return ""
+    from collections import Counter
+    extra = sorted((Counter(got) - Counter(want)).elements())
+    missing = sorted((Counter(want) - Counter(got)).elements())
+    parts = []
+    if extra:
+        parts.append(f"the board holds {extra} that the file did not declare")
+    if missing:
+        parts.append(f"the file declared {missing} that the board does not "
+                     f"hold")
+    return "; ".join(parts)
+
+
 def export_packet(turn: StagedTurn, state: dict[str, Any], *,
                   run_seed: str | None = None) -> dict[str, Any]:
     """Write `packet.md`, `packet.json` and `observed.json`. Returns a report.
@@ -542,6 +617,18 @@ def export_packet(turn: StagedTurn, state: dict[str, Any], *,
     it is the reading available with no game -- but where the two disagree the
     observed one is the turn.
     """
+    if turn.exact_hand:
+        # EB-165'S ACCEPTANCE, AND IT REFUSES RATHER THAN WARNS. A turn that
+        # asked for an exact hand and got something else is a turn whose blind
+        # packet would show a board the file did not describe -- the exact
+        # failure the door exists to end -- and writing it anyway would put
+        # that board in front of a grader who has no way to know.
+        diff = exact_hand_difference(turn, state)
+        if diff:
+            raise TurnError(
+                f"exact_hand: the live hand is not the declared hand -- "
+                f"{diff}. The clear or a grant did not land; the packet is "
+                f"NOT written")
     d = turn_dir(turn.id)
     d.mkdir(parents=True, exist_ok=True)
     # THE DISCLOSURES ARE SCRUBBED LIKE EVERYTHING ELSE, which is why none of
@@ -586,7 +673,7 @@ def export_packet(turn: StagedTurn, state: dict[str, Any], *,
     return {"dir": d, "packet_md": d / "packet.md",
             "packet_json": d / "packet.json",
             "observed_json": d / "observed.json", "sha256": digest,
-            "run_seed": run_seed,
+            "run_seed": run_seed, "exact_hand": turn.exact_hand,
             "cards": len(live), "hand": live,
             "declared_cards": len(turn.board.hand),
             "enemies": len(packet["board"]["enemies"])}
@@ -1296,7 +1383,8 @@ def cmd_check(args) -> int:
             print(f"OK   {p.name}: id={t.id} {len(t.staging)} staging step(s), "
                   f"{len(t.board.hand)} card(s) in hand, "
                   f"{len(t.board.enemies)} enem(ies), "
-                  f"{len(t.assumptions)} assumption(s)")
+                  f"{len(t.assumptions)} assumption(s)"
+                  + (", exact_hand" if t.exact_hand else ""))
         except (TurnError, scenario.ScenarioError, yaml.YAMLError) as e:
             bad += 1
             print(f"BAD  {p.name}: {e}", file=sys.stderr)

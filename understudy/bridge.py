@@ -242,7 +242,19 @@ def give_card_info() -> dict:
 # see `understudy/scenario.py`, which does. A `set_power` asking for the amount
 # already standing writes nothing and answers `queued: false`.
 
-DEBUG_OPS = ("set_resource", "set_energy", "set_hp", "set_block", "set_power")
+# EB-165 ADDS `clear_hand`, THE SIXTH OP, AND IT IS THE ONLY ONE THAT MOVES A
+# CARD RATHER THAN A NUMBER. The game deals its own opening hand, so a staged
+# turn that grants five cards is staged with ten in hand -- reproducible on its
+# pinned seed and not EXACT, which is what a design-blind packet needs it to
+# be. `clear_hand` empties the hand BEFORE the grants go in, through
+# `CardPileCmd.Add(card, PileType.Draw, CardPilePosition.Bottom)`: the pile
+# move that sits UNDERNEATH `CardCmd.Discard` and `CardCmd.Exhaust`, so no
+# on-discard or on-exhaust trigger fires and no combat-history row is written.
+# `Hook.AfterCardChangedPiles` still fires, because every pile move in the game
+# runs it and there is no route out of hand beneath it. It takes no `who` and
+# no `amount`; `before` is the number of cards it moved.
+DEBUG_OPS = ("set_resource", "set_energy", "set_hp", "set_block", "set_power",
+             "clear_hand")
 
 
 def debug_state(op: str, why: str, amount: int = 0, who: str = "player",
@@ -303,6 +315,17 @@ def set_power(who: str, name: str, amount: int, why: str) -> dict:
     Vulnerable, Weak, Strength); for anything else, play the card.
     """
     return debug_state("set_power", why, amount=amount, who=who, power=name)
+
+
+def clear_hand(why: str) -> dict:
+    """Empty the local player's hand to the BOTTOM of the draw pile (EB-165).
+
+    Nothing is destroyed and nothing is discarded: the cards are moved through
+    the game's own pile-move command, which fires no on-discard and no
+    on-exhaust trigger. An already-empty hand answers `queued: false` rather
+    than an error -- it is the state the caller asked for.
+    """
+    return debug_state("clear_hand", why)
 
 
 def settle(prev_type: str | None = None, tries: int = 12, delay: float = 0.6) -> dict:
