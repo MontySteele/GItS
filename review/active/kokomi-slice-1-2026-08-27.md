@@ -300,7 +300,7 @@ Nothing is owed from [USER] here: R217 A (2026-08-28) struck the cold
 calibration play, so the `user` grader row stays empty by rule and the
 ledger's down-weighting is dormant. The dev build `0.2.1232+proto` is still
 the installed package — harmless for ordinary play, prototype rows being
-off-pool — and `klee-moduild\deploy.ps1` restores the release build
+off-pool — and `klee-mod\build\deploy.ps1` restores the release build
 whenever one is wanted.
 
 ## The seat's grades and the pair read (2026-08-28)
