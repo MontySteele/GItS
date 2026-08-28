@@ -287,6 +287,29 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   exclusive Block, and Block priced in the cost line. All of it on the
   quarantined surface; no shipped sheet row moves. The dispatch-3
   confirmed defects stand beside them, `EB-153`–`EB-163`.
+  **R217 (2026-08-28) amends the authority and adds the charter.** The
+  independent seat's four-question form now RETURNS a prototype or
+  ADVANCES it with no [USER] involvement, and **[USER] plays no forms and
+  no calibration turns during iteration** — the pre-slice calibration
+  sample is struck; `EB-149`'s `user`-grader down-weighting pin stays in
+  code but is DORMANT. Two seats materially disagreeing ESCALATES. A
+  seat's SURVIVES is never ship approval. GPT's **D1–D9 are LAW** as the
+  design charter, provisional through the Klee slice, with **no numeric
+  design bands** and decision closeness (R213 F) still the only numeric
+  falsifier. The seat is [USER]'s ChatGPT/Codex subscription driven
+  through Codex CLI headless mode (`EB-166`, branch `codex-seat`), and
+  independence is by model FAMILY, not by fresh context. `deploy_proto.ps1`'s
+  **`+proto` / `+proto.dirty` version mark is RATIFIED** (LAW, beside R214),
+  refusal symmetric. Automation minted in order: `EB-166` the seat,
+  `EB-167` a design-blind any-screen render, `EB-168` an orchestrated
+  Act-1 tester; A4 and A6 wait and are NOT minted; A1-extended (enemy
+  composition/intent setters) and A5 (vision input) are DEFERRED.
+  Routing: **Kokomi slice 2 = R213 E1's Charge arms, before Klee** — slice 1
+  tests priced Companion Block at the turn and does not exhaust Kokomi.
+  Slice 1 stays under R213/R216, not retroactively graded. Seat testimony
+  lives in `review/qa/<turn>/form-*.json` and gitignored
+  `understudy/logs/seat/`, and never enters an Understudy report, a
+  win-rate table or a measurement register.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
   (Kokomi's are newest). **Animation sprint 2.** **Axis-validity tracks** —
   Track A / Track E logs.

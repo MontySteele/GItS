@@ -1,0 +1,37 @@
+{
+ "turn_id": "kokomi-slice1-t01",
+ "packet_sha256": "cccf9ecf62daff984cb3e44b99c3b38b4153ecba4473fb5421923d2f35dcedba",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Shinobu \u2014 Grass Ring of Sanctification",
+   "target": null
+  },
+  {
+   "card": "Gorou \u2014 Inuzaka All-Round Defense",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Gorou \u2014 Inuzaka All-Round Defense",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Coral Guard",
+   "target": null
+  },
+  {
+   "card": "Coral Guard",
+   "target": null
+  }
+ ],
+ "q1_what_did_you_play": "I gained 4 Block with Shinobu \u2014 Grass Ring of Sanctification, dealt 12 total damage to Nibbit with both copies of Gorou \u2014 Inuzaka All-Round Defense, then played two Coral Guards for 10 more Block.",
+ "q2_other_line_considered": "I seriously considered using both energy on Water's Edge and All Streams Flow to the Sea, alongside both zero-cost Gorou attacks and the Ring, to prioritize damage while accepting part of the incoming attack.",
+ "q3_what_it_gave_up": "It gave up the substantially higher damage and Hydro application of the offensive line in exchange for reaching 14 Block and fully covering the telegraphed 12 damage.",
+ "q4_different_intent": "Yes. With no incoming attack, or a sufficiently smaller attack, I would have spent the two energy on damage instead of two Coral Guards.",
+ "q4_changed": true
+}

@@ -210,7 +210,7 @@ quarantine's own guard forbids the other shape: a test asserts that
 `deploy.ps1` and `validate.ps1` never so much as mention the compile flag, and
 a switch would have to name it. That test is untouched and still green.
 
-### The thing for the next ruling
+### The thing for the next ruling — RATIFIED by R217 D (2026-08-28)
 
 R214 ruled the version shape `MAJOR.AUTO`, with `+dirty` as semantic-version
 build metadata. **This extends that use.** A dev package is stamped
@@ -229,7 +229,9 @@ The gate is symmetric: a `+proto` package reaching the release path is refused
 by name, and the dev path refuses a package that *lost* its mark.
 
 **This is flagged, not assumed.** It is R214's channel being used for a build
-shape R214 did not contemplate, and it belongs in the next slate.
+shape R214 did not contemplate, and it belongs in the next slate. **R217 D
+ratified it**, and the mark and its symmetric refusal are now in LAW beside
+R214.
 
 ---
 
@@ -244,7 +246,8 @@ I did not mint or close anything. My reading of what should be:
   then stage the four shipped halves and record their seeds. Acceptance: four
   packets under `review/qa/` with `run_seed` recorded and an attack telegraph.
 - **One item for the next slate, not a register row:** the R214 metadata
-  extension in §6.
+  extension in §6 — **RATIFIED by R217 D (2026-08-28)** and written into LAW's
+  version-string clause.
 - **`EB-164` is touched but not addressed.** Tidal Barrage's face prints a
   live per-unit rate beside a calculated number, which is the wording R215 C
   settled on for the exhaust-selection count — the same wording EB-164 says

@@ -75,6 +75,15 @@ is no.
   for the same grader.
 * `grader.id` **`user`** is reserved for [USER]'s own cold play and is the
   form every other grader is compared against.
+* **There is a built seat for this: `python -m understudy.seat grade
+  <turn-id>`** runs OpenAI's Codex CLI as the fresh agent and does all of the
+  above. It proves blindness from the TRANSCRIPT rather than from the
+  sandbox — the `--json` event stream, codex's session rollout and stderr,
+  each an allowlist where an unknown type refuses — because a read-only
+  sandbox stops writing, not reading. A refused seat never reaches `grade`.
+  It fills exactly three fields the model cannot know about itself
+  (`grader.id`, `grader.kind`, `grader.model`) and touches nothing else; the
+  unedited reply is kept beside the filled form as `form-raw.json`.
 * Save the reply verbatim to a `.json` file and run
   `python -m understudy.staged_turn grade <turn-id> <form.json>`. Do not edit
   the answers on the way — a form tidied by the orchestrator is a form the
