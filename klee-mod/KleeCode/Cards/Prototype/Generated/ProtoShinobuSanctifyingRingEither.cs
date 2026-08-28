@@ -63,7 +63,7 @@ public sealed class ProtoShinobuSanctifyingRingEither : CustomCardModel, IElemen
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shinobu - Warding Ring"),
-        ("description", "Choose one: Deal 3 damage to ALL enemies | Gain 4 Block."),
+        ("description", "Choose one: Deal 3 damage to ALL enemies, applying its element | Gain 4 Block, applying no element."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -87,7 +87,7 @@ public sealed class ProtoShinobuSanctifyingRingEither : CustomCardModel, IElemen
             ModalChoice.CreateOption<ProtoShinobuSanctifyingRingEitherModeB>(Owner),
         };
         var modeIndex = await ModalChoice.SelectMode(choiceContext, Owner, modeOptions);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 3 damage to ALL enemies", "Gain 4 Block" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 3 damage to ALL enemies, applying its element", "Gain 4 Block, applying no element" }[modeIndex]);
         if (modeIndex == 0)
         {
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 3m))
@@ -118,8 +118,8 @@ public sealed class ProtoShinobuSanctifyingRingEitherModeA : ModalOptionCard
 {
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Deal 3 damage to ALL enemies"),
-        ("description", "Deal 3 damage to ALL enemies"),
+        ("title", "Deal 3 damage to ALL enemies, applying its element"),
+        ("description", "Deal 3 damage to ALL enemies, applying its element"),
     };
 }
 
@@ -132,7 +132,7 @@ public sealed class ProtoShinobuSanctifyingRingEitherModeB : ModalOptionCard
 {
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Gain 4 Block"),
-        ("description", "Gain 4 Block"),
+        ("title", "Gain 4 Block, applying no element"),
+        ("description", "Gain 4 Block, applying no element"),
     };
 }

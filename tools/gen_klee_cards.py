@@ -2138,6 +2138,25 @@ def exhausts_turn_calc_rider(card: dict,
             "KokomiResources.ExhaustsThisTurn(card.Owner)")
 
 
+def _exhausts_before(card: dict, eff: dict) -> bool:
+    """Does this card Exhaust a card of its own BEFORE `eff` resolves?
+
+    Structural, and identity-based rather than by value: two effects on one
+    sheet row can be equal dicts, and the question is about a POSITION in the
+    emitted `OnPlay` body, which runs the effects in sheet order.
+
+    Only `exhaust_from` counts. A card-level `exhaust: true` is the card
+    exhausting ITSELF after the play resolves, which is a different fact and
+    lands after the damage has already been computed.
+    """
+    for other in card.get("effects") or []:
+        if other is eff:
+            return False
+        if other.get("op") == "exhaust_from":
+            return True
+    return False
+
+
 def charge_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
     """Kokomi's Charge damage rider (`N_per_M_charge`), rendered through the
     base game's CalculatedDamageVar for exactly the reason Furina's Fanfare
@@ -5689,9 +5708,28 @@ def build_description(card: dict) -> str:
                 # one count over). Printing the live per-unit var instead of
                 # asserting that scaling exists is the fix that landed there.
                 # :diff() because `formula_per` is an upgradeable delta.
-                parts[-1] = (parts[-1].removesuffix(".")
-                             + ", plus {ExtraDamage:diff()} per card "
-                               "[gold]Exhausted[/gold] this turn.")
+                #
+                # AND IT SAYS WHETHER THE CARD'S OWN VICTIM COUNTS, because a
+                # careful reader cannot tell from "cards Exhausted this turn"
+                # and both readings are arithmetically live. The runtime
+                # answer is YES where the card Exhausts something before it
+                # deals its damage: `KokomiResources.NoteExhaustThisTurn` is
+                # paid at the universal after-exhaust funnel, the emitted
+                # `OnPlay` runs the effects in sheet order, and
+                # `CalculatedDamage`'s multiplier is read when the attack
+                # executes -- so the victim is already in the tally. The
+                # clause is written from that structure rather than asserted:
+                # a card whose exhaust does NOT precede the damage prints
+                # nothing extra, because for it the answer is no.
+                if _exhausts_before(card, eff):
+                    parts[-1] = (parts[-1].removesuffix(".")
+                                 + ", plus {ExtraDamage:diff()} per card "
+                                   "[gold]Exhausted[/gold] this turn, "
+                                   "including the one above.")
+                else:
+                    parts[-1] = (parts[-1].removesuffix(".")
+                                 + ", plus {ExtraDamage:diff()} per card "
+                                   "[gold]Exhausted[/gold] this turn.")
             if "bonus_formula" in eff:
                 formula = eff["bonus_formula"]
                 if formula.endswith("_per_detonation_this_combat"):

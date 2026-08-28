@@ -104,27 +104,54 @@
 # Shipped twin: `shinobu_sanctifying_ring` (3 damage to all + Electro, 4 Block,
 # cost 2). The Electro rides the card-level interface, so the flag sits on the
 # attack mode and the Block mode applies nothing.
+#
+# THE MODE LABELS NAME THE ELEMENT'S SCOPE, and that is a text fix taken from
+# the round-1 pair read, which found "Choose one: ... | Gain 4 Block" printed
+# beside an "Applies Electro" keyword badge with nothing saying WHICH mode the
+# badge belongs to. The runtime answer is the damage mode only: the emitted
+# body sends the attack half through `DamageCmd.Attack(...).FromCard(this)`,
+# which is what applies an `IElementalCard`'s element, and sends the Block half
+# through `CreatureCmd.GainBlock`, which applies nothing. The label prints
+# that, and no number moves.
+#
+# THE LABEL SAYS "its element" RATHER THAN "Electro", and that is a lint
+# constraint rather than a preference: `lint_prose_constants` reads a display
+# string carrying an element name AND a bare numeral as a hand-typed reaction
+# constant, and "Electro ... 4 Block" collides with `ElectroChargedDot`. The
+# element is named by the card's own keyword badge, which is the thing the
+# scope clause exists to explain, so the face says WHICH MODE and lets the
+# badge say WHICH ELEMENT. Both `either` rows are worded the same way so the
+# two arms differ only in the card under test.
 - {id: proto_shinobu_sanctifying_ring_either, name: "Shinobu - Warding Ring", character: klee,
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro, cost: 2, type: skill,
    effects: [{op: choose_one, modes: [
-              {label: "Deal 3 damage to ALL enemies",
+              {label: "Deal 3 damage to ALL enemies, applying its element",
                effects: [{op: damage, amount: 3, target: all_enemies, applies_element: true}]},
-              {label: "Gain 4 Block",
+              {label: "Gain 4 Block, applying no element",
                effects: [{op: block, amount: 4}]}]}]}
 
 # Shipped twin: `thoma_crimson_ooyoroi` (8 damage + Pyro, 3 Block, cost 2).
+# Same scope fix as the row above, same reason, same runtime reading: the
+# Pyro is the damage mode's and the Block mode applies nothing.
 - {id: proto_thoma_crimson_ooyoroi_either, name: "Thoma - Blazing Ooyoroi", character: klee,
    nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: pyro, cost: 2, type: attack,
    effects: [{op: choose_one, modes: [
-              {label: "Deal 8 damage",
+              {label: "Deal 8 damage, applying its element",
                effects: [{op: damage, amount: 8, target: enemy, applies_element: true}]},
-              {label: "Gain 3 Block",
+              {label: "Gain 3 Block, applying no element",
                effects: [{op: block, amount: 3}]}]}]}
 
 # Shipped twin: `itto_superlative_superstrength` (14 damage, 6 Block, cost 2).
 # No element on either mode: the shipped row applies none (`applies_element:
 # false`), and adding one would make this a different card as well as a
 # differently-priced one.
+#
+# NO SCOPE CLAUSE ON THIS ROW'S LABELS, unlike the two above, and the absence
+# is the honest print rather than an omission: the emitted class declares no
+# `IElementalCard` and carries no `Applies ...` keyword at all, so there is no
+# badge beside the face for a scope clause to explain. Printing "applying no
+# element" on both modes would be answering a question the card does not
+# raise.
 - {id: proto_itto_superlative_superstrength_either, name: "Itto - Oni Rush", character: klee,
    nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo, cost: 2, type: attack,
    effects: [{op: choose_one, modes: [
