@@ -116,7 +116,13 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 165,   # EB-164/165 minted by R216 (2026-08-27): the two engineering
+    "EB": 168,   # EB-166/167/168 minted by R217 (2026-08-28): the automation
+                 # the design course-correction authorized, in order -- the
+                 # independent-model seat (Codex CLI on [USER]'s subscription),
+                 # the design-blind any-screen render over the existing
+                 # bridge, and the orchestrated Act-1 tester. A4 and A6 are
+                 # deliberately NOT minted; A1-extended and A5 are DEFERRED.
+                 # EB-164/165 minted by R216 (2026-08-27): the two engineering
                  # findings the first end-to-end blind-QA run turned up -- a
                  # generated face that double-states a scaling its printed
                  # number already includes, and the missing bridge dev door
@@ -161,6 +167,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163, 164, 165,
+        166, 167, 168,
     }),
     "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
 }
