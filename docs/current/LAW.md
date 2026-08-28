@@ -380,6 +380,71 @@ combat grammar comes with us. (principles §1)
 - Measurement *method* (stamp law, one-variable windows, versioning,
   pre-registration + blind grading, instrument visibility) is in `EXPERIMENTS.md`.
 
+### Design charter (R217)
+
+Nine rules that bind card and pool design. They are qualitative by
+construction: each is a question a reader answers about a card, a package or a
+pool, not a number a report computes.
+
+1. **D1 — Character brief before pool construction.** No pool is built before
+   its character has a short [USER]-owned brief: the player promise; two or
+   three core verbs; one or two recurring tensions; the three archetype loops;
+   the bridges among them; the intended weakness; what the starting relic and
+   starter deck teach; and the failure modes to avoid, named. A tension
+   sentence *summarises* the character — it does not mandate that every card
+   serve one mechanic. Zhongli's brief is the entry gate of his deep dive.
+2. **D2 — Player-controlled leverage.** Every persistent resource and every
+   automatic engine must feed a decision the player can steer: timing,
+   targeting, placement, acquisition, conversion, or forgoing. "Watch it rise
+   until the number is large" is not a decision. The control must be reachable
+   early and reliably — starter kit, starting relic, base system, or the
+   ordinary pool — not only through a rare.
+3. **D3 — Benefits carry binding prices.** Defence and engine advancement may
+   share a card, but not both at full rate without a binding cost: energy or
+   tempo, a below-rate half, mutually exclusive outcomes, target or timing
+   awkwardness, a card or resource spent, identity position, a future draw or
+   deck cost, or the loss of another action. The counterfactual test: remove
+   the defence — is what remains still a full-rate play the player already
+   wanted? If yes, the defence was a subsidy.
+4. **D4 — Visible and live effects.** At the decision point the player can
+   perceive and forecast the consequences that matter, through the card, a
+   keyword, a persistent UI element or a character rule — not necessarily
+   verbatim on every face. Text that cannot bind in the shipped world,
+   invisible feeds and misleading calculated displays are defects. A rare
+   intentional edge case is not removed for being rare.
+5. **D5 — Simple surfaces, deep interactions.** Richness comes from
+   interactions — between cards, enemies, energy, draw order, piles, targets
+   and future turns — not from clauses on faces. Commons establish the verbs
+   and stay concise. Any added line of text must alter a decision.
+6. **D6 — Every card has a place.** Each card has one primary decision home:
+   acquisition and build; combat (sequencing, targeting, holding, conversion,
+   timing); teaching or utility, deliberately plain; or bridge. Plain cards are
+   legal and necessary, and a pool of them is not a defect to be edited away.
+7. **D7 — Mesh without preassembly.** Each pool carries linear signposts AND
+   modular tools. No preassembled deck; no archetype written in a private
+   language only its own cards speak; bridges exist so combinations arrive
+   unexpectedly. Shared-verb and hook counts describe a pool — they are never
+   acceptance bands.
+8. **D8 — Distinct play patterns.** Archetypes differ in how turns and drafts
+   unfold, not in the label on a bigger number. Damage may stay terminal; the
+   route, cadence, constraint, targeting, transformation, control or economy
+   must differ. One non-scalar payoff does not rescue an otherwise automatic
+   loop.
+9. **D9 — Shared layer and starting tutorial.** Companion packages connect to
+   both character verbs and universal verbs; not every Companion card needs a
+   hook, but every package needs a distinctive identity. The starting relic and
+   starter deck introduce the central verbs and one recurring tension from
+   fight one, with visible triggers and no invisible feed.
+
+**Provisional through the Klee slice**, then reviewed. **Nothing here is a
+numeric band and nothing here gates:** hook share, bridge %, payoff-role %,
+scalar-payoff %, random-target %, Powers-per-universal-verb count, plain-card
+%, word count and "turns with a named alternative" rate are descriptive only.
+No subjective front-matter fields enter card YAML, and there is no waiver
+mechanism. Decision closeness (R213 F) remains the only numeric design
+falsifier, and it falsifies one way. (R217 — drafted by GPT, sharpened by
+Claude, ratified by [USER].)
+
 ## Engineering invariants
 
 - **Every C# numeric balance constant is classified — mirrored or explicitly
@@ -397,10 +462,16 @@ combat grammar comes with us. (principles §1)
   exactly two dotted integers) bumped only by [USER] at release, AUTO is the
   commit count emitted as the PATCH component (`0.2.1159`); deploy refuses to
   overwrite a versioned zip; dirty builds append `+dirty` as semver build
-  metadata (`0.2.1159+dirty`), which the game's comparator ignores. The string
-  must parse as a semantic version: the game's parser throws on a `-` before
-  patch, leaves an unparseable version `null`, and then refuses any dependent
-  mod declaring a `min_version` on us. (R68; R70; R214)
+  metadata (`0.2.1159+dirty`), which the game's comparator ignores. A **dev
+  package built off the quarantined prototype surface is marked on the same
+  build-metadata channel**: `0.2.NNNN+proto`, or `0.2.NNNN+proto.dirty` when
+  the tree is dirty, so "which build is installed" has an answer on screen when
+  both paths write the same `mods\klee` directory. **The gate is symmetric:**
+  the release path refuses a `+proto` package by name, and the dev path refuses
+  a package that lost its mark. The string must parse as a semantic version:
+  the game's parser throws on a `-` before patch, leaves an unparseable version
+  `null`, and then refuses any dependent mod declaring a `min_version` on us.
+  (R68; R70; R214; R217 D)
 - **State-reading damage/spark riders snapshot state at cast;** because "when
   state is read" is invisible to the sim, the timing is pinned by a C#-side
   source-text check. Rules read the resource, never the badge (display may lag
