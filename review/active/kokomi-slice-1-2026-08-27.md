@@ -269,3 +269,89 @@ I did not mint or close anything. My reading of what should be:
 - **See a prototype card render.** Prototype rows have no art by design — art
   is commissioned when a slice is *accepted* and its rows move to a real
   sheet — so they will draw with no portrait. That is correct, not a defect.
+
+## Results (2026-08-27, after the merge)
+
+All eleven turns were staged live and graded blind. Every packet went to a
+fresh grader (`opus-5-fresh`, a new agent per packet, the page inline, no
+tools) and every one of the eleven **survives** the falsifier: each form
+names a second line it seriously weighed, and each says a different intent
+would have moved it. The forms and verdicts sit beside each packet under
+`review/qa/kokomi-slice1-t01..t11/`; the ledger is `review/qa/ledger.tsv`.
+
+| group | shipped half | prototype halves | seed | builds |
+|---|---|---|---|---|
+| A — Pearl Barrage counting basis | t01 SURVIVES | t02 SURVIVES | `HUMWKRKNCE` | 0.2.1209 / 0.2.1232+proto |
+| B — Shinobu | t03 SURVIVES | t04 (either) SURVIVES · t05 (priced) SURVIVES | `NMQLUYZDLV` | same |
+| C — Thoma | t06 SURVIVES | t07 (either) SURVIVES · t08 (priced) SURVIVES | `XVE3PVZEPT` | same |
+| D — Itto | t09 SURVIVES | t10 (either) SURVIVES · t11 (priced) SURVIVES | `X1BQR3FU4G` | same |
+
+Two things the record shows without rating anything. First, the observed
+closeness reading is exactly 0.0000 on t07, t08, t10 and t11 — the pilot
+scores its top two lines identically on those boards — while their shipped
+twins read 0.0208 and 0.1217; a tie is a survival, not a refusal, but it is
+a different shape of survival from the rest of the table. Second, group B's
+live fight is three bodies with one attacking, not the two attackers the
+declared board mirrors; every half of group B was staged on that same fight,
+so the pair is matched, but the declared and observed boards are two
+records there.
+
+Nothing is owed from [USER] here: R217 A (2026-08-28) struck the cold
+calibration play, so the `user` grader row stays empty by rule and the
+ledger's down-weighting is dormant. The dev build `0.2.1232+proto` is still
+the installed package — harmless for ordinary play, prototype rows being
+off-pool — and `klee-mod\build\deploy.ps1` restores the release build
+whenever one is wanted.
+
+## The seat's grades and the pair read (2026-08-28)
+
+R217 C made the independent seat a different model FAMILY from the author,
+so every one of the eleven turns was graded a second time by
+`codex-gpt-5.6-sol-fresh` (OpenAI, through `understudy/seat.py`), each form
+blind, transcript-guarded, and beside the Opus form in
+`review/qa/kokomi-slice1-*/`. The ledger holds both graders for all eleven.
+
+| turn | half | Opus | GPT |
+|---|---|---|---|
+| t01 | A shipped | SURVIVES | SURVIVES |
+| t02 | A prototype (Tidal Barrage) | SURVIVES | **REFUSED — `intent_insensitive`** |
+| t03 / t04 / t05 | B shipped / either / priced | SURVIVES ×3 | SURVIVES ×3 |
+| t06 / t07 / t08 | C shipped / either / priced | SURVIVES ×3 | SURVIVES ×3 |
+| t09 / t10 / t11 | D shipped / either / priced | SURVIVES ×3 | SURVIVES ×3 |
+
+**The one disagreement, t02.** Both graders took the same lethal line
+(Gorou ×2, Send the Runner, Tidal Barrage, All Streams Flow into Nibbit).
+GPT's fourth answer: *"No. This line deals enough damage to defeat Nibbit
+before its intent resolves, so a different telegraphed action would not
+have changed my play."* Opus's: *"Yes. The intent barely mattered for the
+kill itself, but it decides the fallback. If Nibbit's HP had been high
+enough that lethal was off the table…"* — a yes that changes the board to
+get there. The refusal is recorded as the seat's verdict; the reviewer
+below reads the disagreement the same way.
+
+**The pair read.** The seat's reviewer role (same model, read-only,
+everything inline) was handed all eleven packets and all twenty-two forms
+and asked, per arm: was the card under test played or seriously weighed;
+did the priced form change the KIND of choice; did the cost bind; any text
+a grader tripped on; then RETURN / ADVANCE / ESCALATE. Its reply is
+`review/qa/kokomi-slice-1-pair-review-codex-gpt-5.6-sol.md`, unedited. The
+outcome is **RETURN on all seven arms**, and the reason is the same on
+six of them: *the boards, not the cards*. Two Coral Guards, two free Gorou
+attacks and an 8-Charge finisher already supplied the whole race-versus-
+turtle choice, so the card under test was bypassed (B either/priced: neither
+grader played or weighed Shinobu; C priced: dismissed *"by direct
+arithmetic"*) or reproduced a choice the board already had (D either: *"a
+real, felt cost"* but *"not a new kind of choice"*). Group A's board had
+guaranteed lethal, which made both the alternative and the intent
+non-binding. Two text findings ride along: Tidal Barrage does not say
+whether the card it exhausts counts toward its own total, and the *either*
+faces (*"Choose one: … | Gain 4 Block. Applies Electro"*) leave it unclear
+whether the element applies after either mode.
+
+**What RETURN means next, in the seat's own prescriptions:** re-stage the
+same eleven cards on boards where the card under test is the pivot — remove
+the redundant standalone Block (the Coral Guards), take Group A's enemy HP
+off lethal, and set thresholds the priced package can cross (damage that
+kills or Block that fully answers the telegraph) — on the same group seeds,
+then grade again. No number on a shipped row moves; no shipped form is
+graded; nothing here is a claim about fun.

@@ -1,0 +1,15 @@
+{
+  "turn_id": "kokomi-slice1-t09",
+  "packet_sha256": "4c005feb2645624c0e438cb271fcbceeef0082f28830a2b62c4637e25ef2a747",
+  "grader": {"id": "opus-5-fresh", "kind": "llm", "model": "claude-opus-5", "designed_these_cards": false},
+  "chosen_line": [
+    {"card": "Gorou — Inuzaka All-Round Defense", "target": "Sludge Spinner"},
+    {"card": "All Streams Flow to the Sea", "target": "Sludge Spinner"},
+    {"card": "Itto — Superlative Superstrength", "target": "Sludge Spinner"}
+  ],
+  "q1_what_did_you_play": "Maximum damage that still happens to carry block. Gorou is free, so it goes first for 6. All Streams Flow to the Sea costs 1 and reads Charge 8 at one point per two Charge, so 9 + 4 = 13. Itto costs the remaining 2 for 14 damage and 6 Block. That is 33 damage into a 38 HP Sludge Spinner, leaving it at 5, and the 6 Block from Itto eats most of the telegraphed 8 so I take 2. Next turn kills it with almost anything, including the free-ish leftovers. Both Coral Guards, the three Water's Edges and Bake-Kurage stayed in hand; there was no fourth energy for them, and Hydro application does nothing for me here because nothing on my side reacts to it on this board.",
+  "q2_other_line_considered": "Two. First, the full-mitigation line: Gorou (0) for 6, Itto (2) for 14 and 6 Block, Coral Guard (1) for 5 Block — 20 damage and 11 Block, taking zero. I rejected it because at 48/70 against a single 8-damage attacker, 2 damage is a cheap price for 13 extra damage, and the enemy has no telegraphed escalation to hoard block against. Second, opening with Bake-Kurage to bank the summon and the +1 Charge. I checked whether the Charge bump helped All Streams — 8 goes to 9, and at one point per two Charge that still floors to 4 bonus damage, so the summon would have cost me a full energy for zero damage this turn. Dropped it.",
+  "q3_what_it_gave_up": "It gave up taking zero damage this turn — 2 HP — and it gave up the Bake-Kurage summon and the Charge it would have banked, which matters if Charge feeds anything later that I cannot see from this page. It also spent All Streams while Charge was 8 rather than holding it to grow; and it burned the exhaust card, so Gorou is gone for the rest of the fight.",
+  "q4_different_intent": "Yes. Against a much larger telegraphed hit — roughly 16 or more — I would swap Itto's damage-plus-block for the same Itto plus a Coral Guard and drop All Streams, or play both Coral Guards, because a hit that big is the one worth paying tempo to blunt. A defensive or buffing intent would push the other way: with nothing incoming I would drop Itto's block relevance entirely and just take the same three cards, so that intent changes nothing. The specific number 8 is what makes this easy — Itto's 6 Block alone covers three quarters of it, so the block-heavy line is buying 2 HP for 13 damage.",
+  "q4_changed": true
+}

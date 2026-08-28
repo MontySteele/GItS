@@ -1,54 +1,78 @@
 {
- "source": "declared board (prototype route)",
+ "source": "observed board (live wire state)",
  "falsifier": "decision-closeness (R213 F)",
  "dominance_gap": 0.5,
  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
  "applicable": true,
  "verdict": "SURVIVES",
- "gap": 0.0096,
- "top1": 20.9,
- "top2": 20.7,
- "lines_considered": 8,
- "playouts": 16,
+ "gap": 0.0,
+ "top1": 43.1,
+ "top2": 43.1,
+ "lines_considered": 129,
+ "playouts": 1243,
  "plays_refused": 0,
  "pilot": "generic",
  "lines": [
   {
    "cards": [
-    "Itto - Superlative Guard"
-   ],
-   "score": 20.9
-  },
-  {
-   "cards": [
-    "Coral Guard",
     "Water's Edge",
+    "Gorou \u2014 Inuzaka All-Round Defense",
+    "Bake-Kurage",
     "All Streams Flow to the Sea"
    ],
-   "score": 20.7
-  },
-  {
-   "cards": [
-    "Coral Guard",
-    "All Streams Flow to the Sea"
-   ],
-   "score": 14.8
+   "score": 43.1
   },
   {
    "cards": [
     "Water's Edge",
+    "Gorou \u2014 Inuzaka All-Round Defense",
+    "Bake-Kurage",
     "All Streams Flow to the Sea"
    ],
-   "score": 14.8
+   "score": 43.1
   },
   {
    "cards": [
     "Coral Guard",
-    "Water's Edge"
+    "Gorou \u2014 Inuzaka All-Round Defense",
+    "Bake-Kurage",
+    "All Streams Flow to the Sea"
    ],
-   "score": 11.8
+   "score": 43.1
+  },
+  {
+   "cards": [
+    "Gorou \u2014 Inuzaka All-Round Defense",
+    "Bake-Kurage",
+    "Coral Guard",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 43.1
+  },
+  {
+   "cards": [
+    "Gorou \u2014 Inuzaka All-Round Defense",
+    "Bake-Kurage",
+    "Water's Edge",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 43.1
   }
  ],
- "reason": "no line dominates by more than the derived gap"
+ "reason": "no line dominates by more than the derived gap",
+ "observed_notes": {
+  "approximate_cards": [],
+  "unmapped_statuses": [],
+  "enemy_count": 1,
+  "auras_seen": [],
+  "unmapped_resources": [
+   "KLEEMOD_FANFARE_CAP_BONUS",
+   "KLEEMOD_FANFARE_FLOOR",
+   "KLEEMOD_SPOTLIGHT_MODE",
+   "KLEEMOD_SPOTLIGHT_MOVED",
+   "KLEEMOD_SPOTLIGHT_PLAYS",
+   "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+  ]
+ }
 }

@@ -1,0 +1,41 @@
+{
+ "turn_id": "kokomi-slice1-t02",
+ "packet_sha256": "ed277ead70ffdc9ea97625fcae8f2e0039aef3c14e68ab16bf976180e37f7b2b",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Shinobu \u2014 Grass Ring of Sanctification",
+   "target": null
+  },
+  {
+   "card": "Gorou \u2014 Inuzaka All-Round Defense",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Gorou \u2014 Inuzaka All-Round Defense",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Send the Runner",
+   "target": null
+  },
+  {
+   "card": "Tidal Barrage",
+   "target": "Nibbit"
+  },
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Nibbit"
+  }
+ ],
+ "q1_what_did_you_play": "I gained 4 Block with Shinobu \u2014 Grass Ring of Sanctification, played both copies of Gorou \u2014 Inuzaka All-Round Defense into Nibbit, then played Send the Runner and exhausted a Coral Guard. I played Tidal Barrage into Nibbit, exhausting another Coral Guard, and finished with All Streams Flow to the Sea into Nibbit.",
+ "q2_other_line_considered": "I seriously considered using the two free Gorou attacks and spending both energy on Coral Guard copies, alongside Shinobu, to block the full 12 while preserving more of the hand, but that would leave Nibbit alive.",
+ "q3_what_it_gave_up": "It gave up the defensive value of two Coral Guards, the option to retain those cards, and any alternative use of the unknown card drawn by Send the Runner in exchange for fueling Tidal Barrage and securing lethal damage.",
+ "q4_different_intent": "No. This line deals enough damage to defeat Nibbit before its intent resolves, so a different telegraphed action would not have changed my play.",
+ "q4_changed": false
+}
