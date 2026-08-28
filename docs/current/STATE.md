@@ -307,7 +307,28 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   composition/intent setters) and A5 (vision input) are DEFERRED.
   Routing: **Kokomi slice 2 = R213 E1's Charge arms, before Klee** — slice 1
   tests priced Companion Block at the turn and does not exhaust Kokomi.
-  Slice 1 stays under R213/R216, not retroactively graded. Seat testimony
+  Slice 1 stays under R213/R216, not retroactively graded.
+  **Slice 1 has now run TWICE.** Round 1 (2026-08-27, `0.2.1232+proto`):
+  eleven turns, two graders each, GPT refused `t02`, and the seat's pair
+  read RETURNED all seven arms — *the boards, not the cards*. Round 2
+  (2026-08-28, `0.2.1248+proto`, branch `kokomi-slice-1-round-2`) re-staged
+  the same eleven cards on rebuilt boards with **no printed number moved**:
+  `EB-165` CLOSED and its `exact_hand` door makes the staged hand the
+  declared hand (declared and observed closeness now agree to four decimals
+  on all eleven, where round 1 disagreed on every turn), the redundant
+  standalone Block is gone, and thresholds are written on both halves.
+  Verdicts: **4 SURVIVES / 7 REFUSED**, every refusal `intent_insensitive`
+  and **three of them shipped controls**. The pair read
+  (`review/qa/kokomi-slice-1-r2-pair-review-codex-gpt-5.6-sol.md`)
+  **ADVANCES two arms** — Tidal Barrage's counting basis and Shinobu's
+  priced shape — and RETURNS five; every one of the seven prototype cards
+  was played or named as the serious alternative, against two ignored
+  outright in round 1. **The round's own finding is `EB-164`:** four
+  graders and the reviewer read *All Streams Flow* as 13 where it deals 9,
+  which manufactured the lethal lines all seven refusals rest on;
+  `staged_turn execute` settled it live at 22 HP → 1. That row now BLOCKS
+  the next graded round. Packet:
+  `review/active/kokomi-slice-1-2026-08-27.md` §Round 2. Seat testimony
   lives in `review/qa/<turn>/form-*.json` and gitignored
   `understudy/logs/seat/`, and never enters an Understudy report, a
   win-rate table or a measurement register.

@@ -1258,7 +1258,12 @@ def execute_steps(turn: StagedTurn, form: dict[str, Any]
     answer stays a list of faces and the bridge still gets the identity it
     needs. Same for a target: `find_enemy` takes the enemy's display name.
     """
-    steps = list(turn.staging)
+    # THE SAME OPENING `stage` USES, and for the same reason: a turn that asked
+    # for an exact hand and is replayed without the clear is replayed onto the
+    # dealt hand, which is a different board. The guard below would catch it --
+    # and did, the first time this ran on an exact-hand turn -- but catching it
+    # is not the same as replaying the turn.
+    steps = ([("clear_hand", {})] if turn.exact_hand else []) + list(turn.staging)
     # BEFORE THE MARK AND BEFORE EVERY PLAY. A line replayed onto a board the
     # packet never showed is not a replay of anything.
     steps.append(("board_check", {}))
@@ -1564,9 +1569,24 @@ def cmd_execute(args) -> int:
                      "seed_used": summary.get("seed"),
                      "outcome": outcome, "run": summary})
 
-    checks = [r for r in runner.rows if r.get("step") == "board_check"]
-    board_check = checks[-1] if checks else {
-        "ok": False, "differences": ["the board check was never reached"]}
+    # `"ok" in r` AND NOT `step == "board_check"` ALONE. When the check fails,
+    # `Runner.run` emits a SECOND row under the same step name -- its generic
+    # `expect_failed` record, which carries no `ok` key -- and taking the last
+    # row by step name picked that one and raised a KeyError while reporting
+    # the very failure it was reporting. The failure row is still the source of
+    # the difference, so it is read for its detail rather than dropped.
+    checks = [r for r in runner.rows
+              if r.get("step") == "board_check" and "ok" in r]
+    failures = [r for r in runner.rows
+                if r.get("step") == "board_check" and r.get("expect_failed")]
+    if checks:
+        board_check = checks[-1]
+    elif failures:
+        board_check = {"ok": False, "rule": failures[-1]["expect_failed"],
+                       "differences": [failures[-1].get("detail", "")]}
+    else:
+        board_check = {"ok": False,
+                       "differences": ["the board check was never reached"]}
     record = {
         "turn_id": turn.id,
         "grader": grader_id(form),

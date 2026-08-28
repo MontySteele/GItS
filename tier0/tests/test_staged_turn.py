@@ -221,6 +221,18 @@ def test_a_turn_may_not_write_clear_hand_itself():
     assert "exact_hand" in str(e.value)
 
 
+def test_execute_replays_an_exact_hand_turn_through_the_same_clear():
+    """The replay opens with the same clear the stage did. Without it the
+    graded line is replayed onto the DEALT hand, which is a different board --
+    the guard catches that, and catching it is not replaying the turn."""
+    turn = _exact_turn()
+    steps = staged_turn.execute_steps(turn, form())
+    assert steps[0][0] == "clear_hand"
+    assert steps[1][0] == "give"
+    plain = staged_turn.execute_steps(_exact_turn(exact_hand=False), form())
+    assert "clear_hand" not in [v for v, _ in plain]
+
+
 def test_the_exact_hand_check_folds_the_three_spellings():
     turn = _exact_turn()
     state = {"player": {"hand": [{"id": "KLEEMOD-PEARL_BARRAGE",

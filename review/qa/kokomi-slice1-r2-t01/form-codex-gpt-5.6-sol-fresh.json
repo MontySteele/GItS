@@ -1,0 +1,29 @@
+{
+ "turn_id": "kokomi-slice1-r2-t01",
+ "packet_sha256": "8177100724862e2ead263683e89414b32e7eaa45ec0267f1260b320d31d90b51",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Gorou \u2014 Inuzaka All-Round Defense",
+   "target": "Nibbit"
+  },
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Coral Guard",
+   "target": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Gorou \u2014 Inuzaka All-Round Defense and All Streams Flow to the Sea on Nibbit, then Coral Guard.",
+ "q2_other_line_considered": "I seriously considered replacing Coral Guard with Pearl Barrage, Exhausting Coral Guard, for more damage.",
+ "q3_what_it_gave_up": "It gave up the extra damage from Pearl Barrage in exchange for 5 Block against the telegraphed 12-damage attack.",
+ "q4_different_intent": "Yes. If Nibbit had not intended to attack, I would have favored Pearl Barrage over Coral Guard.",
+ "q4_changed": true
+}
