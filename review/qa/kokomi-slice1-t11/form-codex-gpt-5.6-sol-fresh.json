@@ -1,0 +1,33 @@
+{
+ "turn_id": "kokomi-slice1-t11",
+ "packet_sha256": "b91ea08f0a5b934e23e40412d86251d4bddb8ec1d4f642c2487e7b0e852d2ae1",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Gorou \u2014 Inuzaka All-Round Defense",
+   "target": "Sludge Spinner"
+  },
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Sludge Spinner"
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Sludge Spinner"
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Sludge Spinner"
+  }
+ ],
+ "q1_what_did_you_play": "I played Gorou \u2014 Inuzaka All-Round Defense, All Streams Flow to the Sea, and two copies of Water's Edge, all targeting Sludge Spinner, for 31 total damage.",
+ "q2_other_line_considered": "I seriously considered replacing one Water's Edge with Coral Guard, dealing 25 damage while gaining 5 Block and reducing the incoming damage from 8 to 3.",
+ "q3_what_it_gave_up": "It gave up 5 Block and therefore 5 HP in exchange for 6 additional damage, leaving Sludge Spinner at 7 HP.",
+ "q4_different_intent": "Yes. A substantially larger attack intent would have made me replace a Water's Edge with Coral Guard, and a non-attacking intent would have made the all-damage line even clearer.",
+ "q4_changed": true
+}

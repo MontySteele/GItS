@@ -120,3 +120,10 @@ The seven prototype halves need a dev build first
 (`klee-mod\build\deploy_proto.ps1`); the four shipped halves stage on the
 release build as it stands. `OPERATIONS.md` carries both paths, and restoring
 the release build afterwards.
+
+**Grades (2026-08-28):** every turn carries two blind forms — `opus-5-fresh`
+(D5) and `codex-gpt-5.6-sol-fresh` (the R217 C seat) — in
+`review/qa/kokomi-slice1-*/`; `review/qa/ledger.tsv` is rebuilt from the
+per-grader verdicts. GPT refused `t02` (`intent_insensitive`); the seat's
+pair read returned all seven prototype arms — the boards, not the cards —
+in `review/qa/kokomi-slice-1-pair-review-codex-gpt-5.6-sol.md`.

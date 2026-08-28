@@ -296,7 +296,62 @@ declared board mirrors; every half of group B was staged on that same fight,
 so the pair is matched, but the declared and observed boards are two
 records there.
 
-What is still owed is the user's own cold play of the surviving turns
-(grader id `user`), which is what the ledger's down-weighting compares the
-fresh grader against. The dev build stays deployed until that has happened;
-`klee-mod\build\deploy.ps1` restores the release build.
+Nothing is owed from [USER] here: R217 A (2026-08-28) struck the cold
+calibration play, so the `user` grader row stays empty by rule and the
+ledger's down-weighting is dormant. The dev build `0.2.1232+proto` is still
+the installed package — harmless for ordinary play, prototype rows being
+off-pool — and `klee-moduild\deploy.ps1` restores the release build
+whenever one is wanted.
+
+## The seat's grades and the pair read (2026-08-28)
+
+R217 C made the independent seat a different model FAMILY from the author,
+so every one of the eleven turns was graded a second time by
+`codex-gpt-5.6-sol-fresh` (OpenAI, through `understudy/seat.py`), each form
+blind, transcript-guarded, and beside the Opus form in
+`review/qa/kokomi-slice1-*/`. The ledger holds both graders for all eleven.
+
+| turn | half | Opus | GPT |
+|---|---|---|---|
+| t01 | A shipped | SURVIVES | SURVIVES |
+| t02 | A prototype (Tidal Barrage) | SURVIVES | **REFUSED — `intent_insensitive`** |
+| t03 / t04 / t05 | B shipped / either / priced | SURVIVES ×3 | SURVIVES ×3 |
+| t06 / t07 / t08 | C shipped / either / priced | SURVIVES ×3 | SURVIVES ×3 |
+| t09 / t10 / t11 | D shipped / either / priced | SURVIVES ×3 | SURVIVES ×3 |
+
+**The one disagreement, t02.** Both graders took the same lethal line
+(Gorou ×2, Send the Runner, Tidal Barrage, All Streams Flow into Nibbit).
+GPT's fourth answer: *"No. This line deals enough damage to defeat Nibbit
+before its intent resolves, so a different telegraphed action would not
+have changed my play."* Opus's: *"Yes. The intent barely mattered for the
+kill itself, but it decides the fallback. If Nibbit's HP had been high
+enough that lethal was off the table…"* — a yes that changes the board to
+get there. The refusal is recorded as the seat's verdict; the reviewer
+below reads the disagreement the same way.
+
+**The pair read.** The seat's reviewer role (same model, read-only,
+everything inline) was handed all eleven packets and all twenty-two forms
+and asked, per arm: was the card under test played or seriously weighed;
+did the priced form change the KIND of choice; did the cost bind; any text
+a grader tripped on; then RETURN / ADVANCE / ESCALATE. Its reply is
+`review/qa/kokomi-slice-1-pair-review-codex-gpt-5.6-sol.md`, unedited. The
+outcome is **RETURN on all seven arms**, and the reason is the same on
+six of them: *the boards, not the cards*. Two Coral Guards, two free Gorou
+attacks and an 8-Charge finisher already supplied the whole race-versus-
+turtle choice, so the card under test was bypassed (B either/priced: neither
+grader played or weighed Shinobu; C priced: dismissed *"by direct
+arithmetic"*) or reproduced a choice the board already had (D either: *"a
+real, felt cost"* but *"not a new kind of choice"*). Group A's board had
+guaranteed lethal, which made both the alternative and the intent
+non-binding. Two text findings ride along: Tidal Barrage does not say
+whether the card it exhausts counts toward its own total, and the *either*
+faces (*"Choose one: … | Gain 4 Block. Applies Electro"*) leave it unclear
+whether the element applies after either mode.
+
+**What RETURN means next, in the seat's own prescriptions:** re-stage the
+same eleven cards on boards where the card under test is the pivot — remove
+the redundant standalone Block (the Coral Guards), take Group A's enemy HP
+off lethal, and set thresholds the priced package can cross (damage that
+kills or Block that fully answers the telegraph) — on the same group seeds,
+then grade again. No number on a shipped row moves; no shipped form is
+graded; nothing here is a claim about fun.
