@@ -1,0 +1,62 @@
+{
+ "source": "declared board",
+ "falsifier": "decision-closeness (R213 F)",
+ "dominance_gap": 0.5,
+ "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "applicable": true,
+ "verdict": "SURVIVES",
+ "gap": 0.0256,
+ "top1": 23.4,
+ "top2": 22.8,
+ "lines_considered": 27,
+ "playouts": 81,
+ "plays_refused": 0,
+ "pilot": "generic",
+ "lines": [
+  {
+   "cards": [
+    "Pearl Barrage",
+    "Gorou \u2014 Inuzaka All-Round Defense",
+    "Send the Runner",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 23.4
+  },
+  {
+   "cards": [
+    "Pearl Barrage",
+    "Gorou \u2014 Inuzaka All-Round Defense",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 22.8
+  },
+  {
+   "cards": [
+    "Gorou \u2014 Inuzaka All-Round Defense",
+    "Send the Runner",
+    "Coral Guard",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 21.4
+  },
+  {
+   "cards": [
+    "Gorou \u2014 Inuzaka All-Round Defense",
+    "Coral Guard",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 20.8
+  },
+  {
+   "cards": [
+    "Pearl Barrage",
+    "Gorou \u2014 Inuzaka All-Round Defense",
+    "Send the Runner",
+    "Coral Guard"
+   ],
+   "score": 20.4
+  }
+ ],
+ "reason": "no line dominates by more than the derived gap"
+}
