@@ -1,0 +1,13 @@
+# Independent-seat sessions (`understudy/seat.py`, R217 G). One directory per
+# `codex exec` run: the prompt handed over (which INLINES the whole packet),
+# the `--json` event stream, the copied session rollout (which carries Codex's
+# own system prompt and the model's raw reasoning), stderr, the raw reply and
+# `seat.json`.
+#
+# Same rule and the same reason as scenario/ and soak/ next door: a seat's
+# FINDING travels as the verdict and the form under `review/qa/<turn-id>/`,
+# which ARE committed. The transcript is what you read to trust that verdict,
+# not the verdict itself -- and it is a third party's system prompt and a
+# third party's model output, neither of which is this repo's to redistribute.
+*
+!.gitignore

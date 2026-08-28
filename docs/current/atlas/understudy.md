@@ -50,6 +50,13 @@ python3 -m understudy.scenario run understudy/scenarios/spark-gate-refusal.yaml 
 python3 -m understudy.report [<stamp>]                    # morning report
 python3 -m understudy.analyze understudy/logs/phase0-<seed>.jsonl
 
+# EB-149 independent seat: OpenAI's Codex CLI as a design-BLIND grader
+# (no game involved; needs a one-time `codex login`)
+python3 -m understudy.seat check                          # path, version, login
+python3 -m understudy.seat grade <turn-id> [--model M] [--grader-id ID]
+python3 -m understudy.seat grade <turn-id> --dry-run      # prompt + argv only
+python3 -m understudy.seat review <prompt-file> [--out F] # NOT blind
+
 python3 -m pytest tier0/tests/test_understudy_*.py -q     # game never involved
 ```
 
@@ -61,7 +68,9 @@ Library level: `bridge.get_state/post/current_seed/set_speed/give_card`
 `rng.policy_rng(label)` (`rng.py:38`); `scenario.load` /
 `scenario.Runner(scenario, why, wire=bridge)` (`scenario.py`);
 `soak.run_scripted(policy, stamp, ...)` — the setup/swap/teardown seam the
-two probes and `scenario.py` share.
+two probes and `scenario.py` share; `seat.guard(events, rollout, stderr)` /
+`seat.fill_identity(raw, grader_id, model)` / `seat.build_prompt(packet_md,
+sha)` (`seat.py`).
 
 ## 3. Key invariants
 
@@ -98,6 +107,23 @@ two probes and `scenario.py` share.
   "Telemetry schema"; `soak.py:511-517`). Adding keys is free; **renaming or
   repurposing one is a shared-schema change** once Track B reads it
   (`soak.py:367-371`; `naming.py:31-33`).
+- **A blind seat's blindness is PROVEN FROM THE TRANSCRIPT, never assumed
+  from the sandbox** (`seat.py`). `--sandbox read-only` stops writing, not
+  reading, and the `--json` stdout stream does not show tool-call attempts at
+  all — measured, 0.150.1: a run in which the model attempted three shell
+  commands emitted only `agent_message`. So `seat.guard` reads three sources
+  — the stdout stream, codex's session rollout (which is why `--ephemeral` is
+  NOT passed to `grade`), and stderr — as an ALLOWLIST at every layer, where
+  an unknown event, item or rollout payload type REFUSES. A missing rollout
+  refuses too: no evidence is not good evidence. The scratch `-C` root is an
+  empty temp dir OUTSIDE the repo, because codex reads `AGENTS.md` from its
+  working root.
+- **The seat's identity fill has an exact limit:** `grader.id`,
+  `grader.kind` and `grader.model` only — the three facts about the SEAT that
+  a model cannot know. `turn_id`, `packet_sha256`, `designed_these_cards`,
+  `chosen_line` and all four answers are byte-for-byte the model's,
+  `form-raw.json` is kept beside the filled copy, and
+  `test_understudy_seat` proves the wrapper cannot move a fourth field.
 - **Encoding is declared on every text read/write** here, even though the
   repo's gate scans only `tier0`/`tier05`/`tools`
   (`tools/lint_text_encoding.py:43`). **Determinism:** every arm sorts, none
