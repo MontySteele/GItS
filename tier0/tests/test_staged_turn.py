@@ -181,6 +181,117 @@ def test_a_card_dealt_to_another_pile_is_not_part_of_the_hand():
     assert turn.board.hand == ["strike"]
 
 
+# ------------------------------------------------------------ exact hand ---
+
+def _exact_turn(**over):
+    blob = {
+        "id": "t", "character": "KLEEMOD-KOKOMI", "exact_hand": True,
+        "staging": [{"give": {"card": "KLEEMOD-PEARL_BARRAGE", "pile": "hand"}},
+                    {"give": {"card": "KLEEMOD-CORAL_GUARD", "pile": "hand"}}],
+        "board": {"character": "kokomi",
+                  "hand": ["pearl_barrage", "coral_guard"],
+                  "enemies": [{"name": "d", "hp": 10,
+                               "intent": {"kind": "attack", "amount": 5}}]},
+    }
+    blob.update(over)
+    return staged_turn.parse(blob)
+
+
+def test_exact_hand_prepends_the_clear_before_the_first_grant():
+    """EB-165. The POSITION is the whole door: after a grant the clear would
+    empty the declared hand into the draw pile."""
+    steps = _exact_turn().as_scenario().steps
+    assert steps[0][0] == "clear_hand"
+    assert [v for v, _ in steps].count("clear_hand") == 1
+    assert steps[1][0] == "give"
+
+
+def test_a_turn_without_the_flag_stages_exactly_as_it_did():
+    steps = _exact_turn(exact_hand=False).as_scenario().steps
+    assert "clear_hand" not in [v for v, _ in steps]
+
+
+def test_a_turn_may_not_write_clear_hand_itself():
+    with pytest.raises(staged_turn.TurnError) as e:
+        _exact_turn(staging=[{"clear_hand": None},
+                             {"give": {"card": "KLEEMOD-PEARL_BARRAGE",
+                                       "pile": "hand"}}],
+                    board={"character": "kokomi", "hand": ["pearl_barrage"],
+                           "enemies": [{"name": "d", "hp": 10}]})
+    assert "exact_hand" in str(e.value)
+
+
+def test_execute_replays_an_exact_hand_turn_through_the_same_clear():
+    """The replay opens with the same clear the stage did. Without it the
+    graded line is replayed onto the DEALT hand, which is a different board --
+    the guard catches that, and catching it is not replaying the turn."""
+    turn = _exact_turn()
+    steps = staged_turn.execute_steps(turn, form())
+    assert steps[0][0] == "clear_hand"
+    assert steps[1][0] == "give"
+    plain = staged_turn.execute_steps(_exact_turn(exact_hand=False), form())
+    assert "clear_hand" not in [v for v, _ in plain]
+
+
+def test_the_exact_hand_check_folds_the_three_spellings():
+    turn = _exact_turn()
+    state = {"player": {"hand": [{"id": "KLEEMOD-PEARL_BARRAGE",
+                                 "name": "Pearl Barrage"},
+                                {"id": "KLEEMOD-CORAL_GUARD",
+                                 "name": "Coral Guard"}]}}
+    assert staged_turn.exact_hand_difference(turn, state) == ""
+
+
+def test_the_exact_hand_check_counts_copies():
+    turn = _exact_turn()
+    state = {"player": {"hand": [{"id": "KLEEMOD-PEARL_BARRAGE"},
+                                 {"id": "KLEEMOD-CORAL_GUARD"},
+                                 {"id": "KLEEMOD-CORAL_GUARD"}]}}
+    diff = staged_turn.exact_hand_difference(turn, state)
+    assert "coral guard" in diff and "did not declare" in diff
+
+
+def test_an_exact_hand_turn_refuses_to_write_a_packet_of_another_board(
+        tmp_path, monkeypatch):
+    """The acceptance, as a refusal: a turn that asked for an exact hand and
+    got the dealt one writes NO packet, because a blind grader has no way to
+    see that the board is not the one the file describes."""
+    monkeypatch.setattr(staged_turn, "QA_DIR", tmp_path)
+    turn = _exact_turn()
+    state = {"state_type": "monster",
+             "battle": {"round": 1, "turn": "player", "enemies": []},
+             "player": {"hp": 70, "max_hp": 70, "block": 0, "energy": 3,
+                        "hand": [{"id": "KLEEMOD-PEARL_BARRAGE",
+                                  "name": "Pearl Barrage"},
+                                 {"id": "KLEEMOD-CORAL_GUARD",
+                                  "name": "Coral Guard"},
+                                 {"id": "KLEEMOD-NEREIDS_ASCENSION",
+                                  "name": "Nereid's Ascension"}]}}
+    with pytest.raises(staged_turn.TurnError) as e:
+        staged_turn.export_packet(turn, state)
+    assert "exact_hand" in str(e.value)
+    assert not (tmp_path / "t" / "packet.md").exists()
+
+
+def test_an_exact_hand_turn_writes_the_packet_when_the_hand_matches(
+        tmp_path, monkeypatch):
+    monkeypatch.setattr(staged_turn, "QA_DIR", tmp_path)
+    turn = _exact_turn()
+    state = {"state_type": "monster",
+             "battle": {"round": 1, "turn": "player", "enemies": []},
+             "player": {"hp": 70, "max_hp": 70, "block": 0, "energy": 3,
+                        "hand": [{"id": "KLEEMOD-PEARL_BARRAGE",
+                                  "name": "Pearl Barrage",
+                                  "description": "Deal 5 damage."},
+                                 {"id": "KLEEMOD-CORAL_GUARD",
+                                  "name": "Coral Guard",
+                                  "description": "Gain 5 Block."}]}}
+    report = staged_turn.export_packet(turn, state)
+    assert report["exact_hand"] is True
+    assert report["hand"] == ["Pearl Barrage", "Coral Guard"]
+    assert report["cards"] == report["declared_cards"] == 2
+
+
 # ---------------------------------------------------------------- packet ---
 
 def test_the_packet_builder_cannot_reach_a_sheet():

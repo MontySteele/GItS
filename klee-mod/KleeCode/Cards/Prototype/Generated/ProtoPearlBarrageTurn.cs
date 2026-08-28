@@ -51,7 +51,7 @@ public sealed class ProtoPearlBarrageTurn : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Barrage"),
-        ("description", "[gold]Exhaust[/gold] 1 card from your hand. Deal {CalculatedDamage:diff()} damage, plus {ExtraDamage:diff()} per card [gold]Exhausted[/gold] this turn."),
+        ("description", "[gold]Exhaust[/gold] 1 card from your hand. Deal {CalculatedDamage:diff()} damage, plus {ExtraDamage:diff()} per card [gold]Exhausted[/gold] this turn, including the one above."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

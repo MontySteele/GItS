@@ -230,8 +230,9 @@ sha)` (`seat.py`).
   saying the run is no longer comparable to any other (`bridge.GRANT_GUARDRAIL`).
 - **`scenario.py` is the same door widened, under the same rule** (EB-142). It
   grants a card AND writes a board (`/api/v1/gits/debug_state`:
-  `set_resource`, `set_energy`, `set_hp`, `set_block` and `set_power` (EB-146),
-  each through the game's own mutator, `why` REQUIRED and logged), so a
+  `set_resource`, `set_energy`, `set_hp`, `set_block`, `set_power` (EB-146)
+  and `clear_hand` (EB-165), each through the game's own mutator, `why`
+  REQUIRED and logged), so a
   scenario run is comparable to nothing. Attendedness is pinned by
   `tier0/tests/test_understudy_scenario.py`, which walks `soak.py`'s imports
   with the AST rather than grepping — `soak.py` NAMES `scenario.py` in the
@@ -275,6 +276,21 @@ sha)` (`seat.py`).
   Strength); for a payload power, play the card that places it. The op cannot
   detect the difference and does not pretend to — nothing in `PowerModel`
   declares "I keep state the stack count does not describe".
+- **`clear_hand` empties a hand without discarding it** (EB-165). The game
+  deals its own opening hand over the granted one, so a turn declaring
+  `exact_hand: true` opens its staging with this op and `export_packet`
+  refuses a packet whose live hand is not the declared multiset. The cards go
+  to the BOTTOM of the draw pile through `CardPileCmd.Add` — the pile move
+  underneath `CardCmd.Discard` and `CardCmd.Exhaust`, so no on-discard or
+  on-exhaust trigger fires and no history row is written. What still fires is
+  `Hook.AfterCardChangedPiles`, which every pile move in the game runs; there
+  is no route out of hand beneath it, and a setup verb that punched through
+  would be writing a board the game cannot produce. Draw rather than discard
+  because a discard pile is read by cards; bottom rather than top so a draw
+  played during the turn pulls what the seed would have dealt next. It takes
+  no `who` and no `amount`, and `scenario.py` waits for the hand to actually
+  empty rather than trusting the queued answer — the next step is normally a
+  grant.
 - **A board write resolves its creature selector; it did not always.**
   `set_hp` / `set_block` / `set_power` take the `play` target's vocabulary (an
   entity id, a display name, `first` / `lowest_hp` / `highest_hp`) and

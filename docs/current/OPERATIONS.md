@@ -399,7 +399,12 @@ python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."
 python -m understudy.staged_turn ledger
 ```
 
-The protocol, in order. **stage** sets the board through the scenario harness
+The protocol, in order. A turn declaring `exact_hand: true` (`EB-165`) opens
+its staging with the bridge's `clear_hand` op, so the packet shows the declared
+hand and nothing the game dealt on top of it; the cards go to the bottom of the
+draw pile through the pile move underneath discard and exhaust, and `stage`
+refuses to write a packet whose live hand is not the declared multiset.
+**stage** sets the board through the scenario harness
 and writes `review/qa/<turn-id>/packet.md` — printed card faces, HP, Block,
 energy, live meters, enemy intents, and nothing else. **Hand that packet and
 `understudy/qa_grader_prompt.md` to a FRESH agent** with no repo access, never

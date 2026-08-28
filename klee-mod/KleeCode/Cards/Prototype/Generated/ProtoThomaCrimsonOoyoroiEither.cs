@@ -63,7 +63,7 @@ public sealed class ProtoThomaCrimsonOoyoroiEither : CustomCardModel, IElemental
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thoma - Blazing Ooyoroi"),
-        ("description", "Choose one: Deal 8 damage | Gain 3 Block."),
+        ("description", "Choose one: Deal 8 damage, applying its element | Gain 3 Block, applying no element."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -87,7 +87,7 @@ public sealed class ProtoThomaCrimsonOoyoroiEither : CustomCardModel, IElemental
             ModalChoice.CreateOption<ProtoThomaCrimsonOoyoroiEitherModeB>(Owner),
         };
         var modeIndex = await ModalChoice.SelectMode(choiceContext, Owner, modeOptions);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 8 damage", "Gain 3 Block" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Deal 8 damage, applying its element", "Gain 3 Block, applying no element" }[modeIndex]);
         if (modeIndex == 0)
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
@@ -118,8 +118,8 @@ public sealed class ProtoThomaCrimsonOoyoroiEitherModeA : ModalOptionCard
 {
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Deal 8 damage"),
-        ("description", "Deal 8 damage"),
+        ("title", "Deal 8 damage, applying its element"),
+        ("description", "Deal 8 damage, applying its element"),
     };
 }
 
@@ -132,7 +132,7 @@ public sealed class ProtoThomaCrimsonOoyoroiEitherModeB : ModalOptionCard
 {
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Gain 3 Block"),
-        ("description", "Gain 3 Block"),
+        ("title", "Gain 3 Block, applying no element"),
+        ("description", "Gain 3 Block, applying no element"),
     };
 }

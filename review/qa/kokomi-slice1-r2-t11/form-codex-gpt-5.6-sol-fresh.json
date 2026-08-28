@@ -1,0 +1,29 @@
+{
+ "turn_id": "kokomi-slice1-r2-t11",
+ "packet_sha256": "5df4cdbf73427af62b5f8f4d038989c50673dc8854772ad6f14a52a707b43b56",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Sludge Spinner"
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Sludge Spinner"
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Sludge Spinner"
+  }
+ ],
+ "q1_what_did_you_play": "I played All Streams Flow to the Sea, then both copies of Water's Edge, all targeting Sludge Spinner. With 8 Charge, that deals 13 + 6 + 6 damage, enough to defeat its 24 HP.",
+ "q2_other_line_considered": "I seriously considered Itto - Superlative Guard for 14 damage and 6 Block, which would leave Sludge Spinner alive at 10 HP and reduce the incoming 8 damage to 2.",
+ "q3_what_it_gave_up": "It gave up the 6 Block from Itto - Superlative Guard, but ending the fight made that protection unnecessary against the declared attack.",
+ "q4_different_intent": "No. The three one-energy attacks provide lethal damage, so a different telegraphed intent would not have changed my line.",
+ "q4_changed": false
+}

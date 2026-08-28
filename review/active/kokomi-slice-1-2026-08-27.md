@@ -355,3 +355,116 @@ off lethal, and set thresholds the priced package can cross (damage that
 kills or Block that fully answers the telegraph) — on the same group seeds,
 then grade again. No number on a shipped row moves; no shipped form is
 graded; nothing here is a claim about fun.
+
+## Round 2 (2026-08-28)
+
+The seat returned all seven arms on *the boards, not the cards*, so round 2
+re-staged the same eleven cards on rebuilt boards. **No printed number moved.**
+The files are `understudy/turns/kokomi-slice-1-r2/`, the manifest there carries
+the per-group arithmetic, and each file's header quotes the prescription it
+executes.
+
+**What changed, and it is three things.** (1) The hand is now exactly the
+declared hand — `EB-165` built the dev door and closed, and `exact_hand: true`
+empties the game's dealt hand to the bottom of the draw pile before the grants.
+Round 1's packets carried ten cards where the files declared four or five, and
+the pair read named those extra cards as the thing that supplied the whole
+choice. (2) The redundant standalone Block is gone: groups B, C and D carry
+none, so each card's Block half is the only Block on its board; group A keeps
+exactly one and its file says why. (3) Thresholds are written on both halves —
+enemy HP against the turn's own ceiling, player HP so the telegraph takes at
+least a quarter of what is left.
+
+All eleven staged live on the pinned round-1 group seeds, on one build
+(`0.2.1248+proto`), and every seed was honoured. **The exact-hand door shows up
+as a number:** the declared and observed closeness readings are now identical
+on all eleven turns, to four decimal places and line for line, where in round 1
+they disagreed on every turn.
+
+### The verdicts
+
+One grader this round, the R217 C independent seat (`codex-gpt-5.6-sol-fresh`,
+blind, transcript-guarded, one fresh agent per packet).
+
+| turn | half | verdict |
+|---|---|---|
+| t01 | A shipped | SURVIVES |
+| t02 | A prototype (Tidal Barrage) | SURVIVES |
+| t03 | B shipped | **REFUSED — `intent_insensitive`** |
+| t04 | B either | **REFUSED — `intent_insensitive`** |
+| t05 | B priced | SURVIVES |
+| t06 | C shipped | **REFUSED — `intent_insensitive`** |
+| t07 | C either | SURVIVES |
+| t08 | C priced | **REFUSED — `intent_insensitive`** |
+| t09 | D shipped | **REFUSED — `intent_insensitive`** |
+| t10 | D either | **REFUSED — `intent_insensitive`** |
+| t11 | D priced | **REFUSED — `intent_insensitive`** |
+
+Seven refusals, all the same rule, and all with the same shape of reason in the
+grader's own words: *"this line clears all three enemies this turn"* (t03),
+*"the chosen line defeats Seapunk immediately"* (t06), *"this line kills the
+only enemy"* (t09). **Three of the seven are shipped controls**, which is the
+fact that matters: intent-insensitivity cannot be blamed on a prototype when
+the shipped half on the same board answers "no" too.
+
+### The refusals were bought with a face defect, and the game settled it
+
+Every one of those lethal lines counts *All Streams Flow to the Sea* at **13**
+damage. The card deals **9**: the sheet row is base 5 plus one per two Charge,
+and the printed face already folds the scaler in, so a reader who adds the
+Charge bonus to the printed number adds it twice. That is `EB-164` — a face
+that states its scaling twice — and this round is the first time it has been
+seen to corrupt a blind grade rather than merely confuse one.
+
+Settled by the game and not by argument: `staged_turn execute` replayed the
+group C grader's own three-attack line on its own seed and board, board check
+MATCHES, **Seapunk 22 HP → 1 HP**. The line dealt 21, not 25. There was no
+lethal line on group C, and by the same arithmetic none on group D.
+
+### The pair read
+
+The seat's reviewer role was handed all eleven packets and all eleven forms and
+verdicts and asked, per arm: was the card under test played or seriously
+weighed; did the prototype form change the KIND of choice against its shipped
+half; did the cost bind; any text a grader tripped on; then RETURN / ADVANCE /
+ESCALATE. Its reply is
+`review/qa/kokomi-slice-1-r2-pair-review-codex-gpt-5.6-sol.md`, unedited, with
+one correction noted in the header rather than in the text: **the reviewer made
+the same 13-for-9 reading the graders did**, and every "unconditional lethal"
+in its reply rests on it.
+
+| group | arm | outcome | the reviewer's one-line reason |
+|---|---|---|---|
+| A | counting basis | **ADVANCE** | *"Played and changed the turn from sacrifice-cost selection to Exhaust sequencing, with 5 Block genuinely surrendered."* |
+| B | either | RETURN | *"Played, but area damage enabled a full clear, so giving up 4 Block cost nothing."* |
+| B | priced | **ADVANCE** | *"The extra energy forced an all-in line and concretely cost the kill on the remaining enemy."* |
+| C | either | RETURN | *"The apparent trade rests on treating a 13-damage card as 9; actual chosen damage was lethal."* |
+| C | priced | RETURN | *"The tempo restriction was visible, but an unconditional lethal alternative made the card one-sided."* |
+| D | either | RETURN | *"Damage mode produced lethal, so surrendering the 6-Block outcome had no felt consequence."* |
+| D | priced | RETURN | *"The extra energy excluded follow-ups, but the competing cheap-card line simply ended combat."* |
+
+Two arms ADVANCE where round 1 advanced none. On the boards it did read
+correctly, the reviewer's readings of card exposure are unambiguous: **every
+one of the seven prototype cards was either played or named as the serious
+alternative**, where round 1 recorded *"Neither grader played or seriously
+weighed the card"* on two of them.
+
+### What the outcome means next
+
+**Two arms advance and five return, and the five returns share one cause with
+each other and with the round's seven refusals.** The reviewer's own summary of
+the refusals is that they *"primarily diagnose the boards and, secondarily, the
+funnel's fourth question — not the cards"*, and it reads the fourth question as
+*"an intent-sensitivity gate, not a general exposure or cost-binding
+measure"* — a refusal invalidates a turn's advancement evidence and does not
+mean the card went unseen.
+
+What a round 3 would have to settle first is not a board at all: **`EB-164`
+now has to be fixed before another round is graded.** Four of eleven graders
+and the reviewer read one shipped face 44% high, and on three of the four
+groups that misreading manufactured a lethal line that the game does not
+have — so the boards were returned for a property they did not possess. Its
+`BACKLOG` row carries that evidence now.
+
+Nothing here rates a card, and nothing here is a ship approval: a seat's
+SURVIVES and a seat's ADVANCE are both "not yet falsified" (R217 G).

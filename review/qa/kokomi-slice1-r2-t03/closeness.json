@@ -1,0 +1,66 @@
+{
+ "source": "observed board (live wire state)",
+ "falsifier": "decision-closeness (R213 F)",
+ "dominance_gap": 0.5,
+ "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "applicable": true,
+ "verdict": "SURVIVES",
+ "gap": 0.1224,
+ "top1": 24.5,
+ "top2": 21.5,
+ "lines_considered": 6,
+ "playouts": 9,
+ "plays_refused": 0,
+ "pilot": "generic",
+ "lines": [
+  {
+   "cards": [
+    "Shinobu \u2014 Sanctifying Ring",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 24.5
+  },
+  {
+   "cards": [
+    "Shinobu \u2014 Sanctifying Ring",
+    "Water's Edge"
+   ],
+   "score": 21.5
+  },
+  {
+   "cards": [
+    "Shinobu \u2014 Sanctifying Ring"
+   ],
+   "score": 15.6
+  },
+  {
+   "cards": [
+    "Water's Edge",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 14.8
+  },
+  {
+   "cards": [
+    "All Streams Flow to the Sea"
+   ],
+   "score": 8.9
+  }
+ ],
+ "reason": "no line dominates by more than the derived gap",
+ "observed_notes": {
+  "approximate_cards": [],
+  "unmapped_statuses": [],
+  "enemy_count": 3,
+  "auras_seen": [],
+  "unmapped_resources": [
+   "KLEEMOD_FANFARE_CAP_BONUS",
+   "KLEEMOD_FANFARE_FLOOR",
+   "KLEEMOD_SPOTLIGHT_MODE",
+   "KLEEMOD_SPOTLIGHT_MOVED",
+   "KLEEMOD_SPOTLIGHT_PLAYS",
+   "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+  ]
+ }
+}

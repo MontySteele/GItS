@@ -189,9 +189,15 @@ def test_the_setup_verbs_and_the_bridge_ops_are_one_list():
     """One door, two spellings, and they have to stay in step: a verb the file
     format accepts that the bridge has no op for is a scenario that parses and
     then fails at the machine, which is the one place nothing here can test."""
-    verbs = {v for v in scenario.SETUP_STEPS if v.startswith("set_")}
+    # `give` is the one setup verb with its own endpoint (EB-52); everything
+    # else in the list is a debug_state op. Stated as a subtraction rather than
+    # a `set_` prefix test since EB-165, whose op moves cards and is named for
+    # what it does.
+    verbs = set(scenario.SETUP_STEPS) - {"give"}
     assert verbs == set(bridge.DEBUG_OPS)
     assert set(scenario.CREATURE_SETUP_STEPS)         | set(scenario.PLAYER_ONLY_SETUP_STEPS) == verbs
+    # Every verb takes an amount except the ones that say they do not.
+    assert set(scenario.AMOUNTLESS_SETUP_STEPS) <= verbs
 
 
 @pytest.mark.parametrize("raw,want", [
@@ -524,6 +530,36 @@ def test_the_player_selector_is_passed_through_as_itself():
         [{"set_block": {"who": "player", "amount": 0}},
          {"expect": {"player_block": 0}}], [combat()])
     assert wire.debugs[0]["who"] == "player"
+
+
+def test_clear_hand_posts_the_op_with_no_who_and_no_amount():
+    """EB-165. The op empties the LOCAL PLAYER's hand and there is no partial
+    form, so the POST carries neither a creature nor a count."""
+    _, _, wire, _ = run_scenario(
+        [{"clear_hand": None}, {"expect": {"player_block": 0}}],
+        [combat(hand=[card()]), combat()])
+    assert wire.debugs == [{"op": "clear_hand", "why": "a test", "amount": 0,
+                            "who": "player", "resource": "", "power": ""}]
+
+
+def test_clear_hand_refuses_an_amount():
+    with pytest.raises(scenario.ScenarioError) as e:
+        scenario.parse({"name": "t", "character": "c",
+                        "steps": [{"clear_hand": {"amount": 3}},
+                                  {"expect": {"player_block": 0}}]})
+    assert "takes no 'amount'" in str(e.value)
+
+
+def test_clear_hand_fails_the_step_when_the_hand_does_not_empty():
+    """The bound is a REFUSAL and not a timeout that shrugs: a hand still
+    holding cards after the clear is a board the next grant lands on top of,
+    and a wrong board in a design-blind packet is invisible to the grader."""
+    ok, r, _, _ = run_scenario(
+        [{"clear_hand": None}, {"expect": {"player_block": 0}}],
+        [combat(hand=[card()])])
+    assert not ok
+    assert r.failures[0]["check"] == "clear_hand"
+    assert "did not empty" in r.failures[0]["detail"]
 
 
 def test_a_set_power_step_posts_the_power_id_beside_the_resolved_creature():

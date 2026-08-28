@@ -1,0 +1,112 @@
+{
+ "turn_id": "kokomi-slice1-r2-t06",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "intent_insensitive"
+ ],
+ "reasons": [
+  "intent_insensitive: question four is no: a different enemy intent would not have changed the line, so the intent is not part of the decision"
+ ],
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "063982445db33e6f012a05a2a17de0ee1056a82aa1a0a332a8abccee1413b3cf",
+ "chosen_line": [
+  {
+   "card": "Water's Edge",
+   "target": "Seapunk"
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Seapunk"
+  },
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Seapunk"
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played both copies of Water's Edge, then All Streams Flow to the Sea, all targeting Seapunk. With 8 Charge, the last card deals 13 damage, for 25 total and lethal.",
+  "q2_other_line_considered": "I seriously considered Thoma \u2014 Crimson Ooyoroi followed by All Streams Flow to the Sea, which would gain 3 Block but deal only 21 damage and leave Seapunk at 1 HP.",
+  "q3_what_it_gave_up": "It gave up the 3 Block and Pyro application from Thoma \u2014 Crimson Ooyoroi in exchange for securing lethal this turn.",
+  "q4_different_intent": "No. Because the chosen line defeats Seapunk immediately with the printed board state, a different intent would not have changed it."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.0717,
+  "top1": 22.3,
+  "top2": 20.7,
+  "lines_considered": 11,
+  "playouts": 22,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Thoma \u2014 Crimson Ooyoroi",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 22.3
+   },
+   {
+    "cards": [
+     "Water's Edge",
+     "Water's Edge",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 20.7
+   },
+   {
+    "cards": [
+     "Thoma \u2014 Crimson Ooyoroi",
+     "Water's Edge"
+    ],
+    "score": 19.3
+   },
+   {
+    "cards": [
+     "Thoma \u2014 Crimson Ooyoroi",
+     "Water's Edge"
+    ],
+    "score": 19.3
+   },
+   {
+    "cards": [
+     "Water's Edge",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 14.8
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "unmapped_statuses": [],
+   "enemy_count": 1,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-28T18:16:38"
+}

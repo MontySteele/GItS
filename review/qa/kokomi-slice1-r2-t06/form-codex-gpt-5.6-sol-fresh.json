@@ -1,0 +1,29 @@
+{
+ "turn_id": "kokomi-slice1-r2-t06",
+ "packet_sha256": "063982445db33e6f012a05a2a17de0ee1056a82aa1a0a332a8abccee1413b3cf",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Water's Edge",
+   "target": "Seapunk"
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Seapunk"
+  },
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Seapunk"
+  }
+ ],
+ "q1_what_did_you_play": "I played both copies of Water's Edge, then All Streams Flow to the Sea, all targeting Seapunk. With 8 Charge, the last card deals 13 damage, for 25 total and lethal.",
+ "q2_other_line_considered": "I seriously considered Thoma \u2014 Crimson Ooyoroi followed by All Streams Flow to the Sea, which would gain 3 Block but deal only 21 damage and leave Seapunk at 1 HP.",
+ "q3_what_it_gave_up": "It gave up the 3 Block and Pyro application from Thoma \u2014 Crimson Ooyoroi in exchange for securing lethal this turn.",
+ "q4_different_intent": "No. Because the chosen line defeats Seapunk immediately with the printed board state, a different intent would not have changed it.",
+ "q4_changed": false
+}
