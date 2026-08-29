@@ -773,6 +773,16 @@ the Rare reading (option 1) is. That question lives in the Klee Sparks work
 
 ## §7 — Register changes OWED (not made on this branch)
 
+> **LANDED AS `M60`, `EB-199` AND `EB-200` BY R220** (2026-08-29). Every id
+> this section reserved had collided by the time the slate opened: `M52` was
+> already Furina's countersign row and `M54`–`M58` were minted by the blind run
+> and the tester seat, so the four picks are `M60`; `EB-198` was minted by the
+> blind run for the memory-strip diagnosis, so the shared retirement is
+> `EB-199` and its C# arm is `EB-200`. `M51`'s re-pointing was overtaken too —
+> the row is COUNTERSIGNED (R220 F) and `LAW.md:481` moved `spark` to the
+> unbounded meters with it, which discharges the K1 dependency this packet
+> flags at §6. Pointer only — the text below stands as written.
+
 Nothing below is edited by this branch. All of it lands in one slate under one
 ruling.
 

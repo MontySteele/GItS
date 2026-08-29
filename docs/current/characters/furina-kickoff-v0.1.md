@@ -126,8 +126,13 @@ predates the v1.6 amendment).
   Regent-star house style — governed by opportunity cost, made safe by
   per-combat reset). Her "healing" effects grant Encore; it absorbs damage
   before HP; potent cards carry "Spend N Encore:" cost lines; **Salon
-  overdraw drains true HP when Encore is empty** — greed is legal and
-  priced. **True healing is Rare-tier AND Exhausts** (Pneuma/Singer
+  overdraw is priced in EFFECT, not in HP** — with Encore empty a member's
+  tick still fires, at three-quarters numerics
+  (`SALON_DRY_DAMAGE_MULT = 0.75`, `tier0/constants.py:377-378`), and never
+  costs true HP; auras still apply. Greed is legal and priced. (The true-HP
+  sentence this bullet used to carry is true of ENCORE ABSORPTION overdraw
+  and was never true of the Salon's — corrected 2026-08-29 under the hygiene
+  norm, off the reframe packet §2.7c.) **True healing is Rare-tier AND Exhausts** (Pneuma/Singer
   identity; tightened from v1.5's disjunctive form by user ruling — see
   m7-rulings R8).
 - **Fanfare: capped at %maxHP** — the cap is a high safety rail, not a
@@ -154,7 +159,8 @@ predates the v1.6 amendment).
 ## 5. Salon Members
 
 Off-field Hydro application engine (her repeatable aura source under
-Skill-grade cadence) with HP-drain overdraw per §4.
+Skill-grade cadence) with dry-tick overdraw per §4 (three-quarters numerics,
+never true HP).
 
 **Engineering directive — check-if-solved FIRST:** audit Necrobinder/Osty
 and BaseLib summon machinery before building anything. Salon ships on

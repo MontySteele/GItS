@@ -1473,6 +1473,12 @@ three; this packet decides Furina only and its LAW text is scoped to say so.
 
 ## 10. Register changes this packet OWES
 
+> **LANDED AS `M59` BY R220** (2026-08-29). The `M54` item 2 reserved was
+> minted in the meantime by the KURAGEMEM001 blind run, so the sixteen picks
+> carry `M59`; `M52` is re-pointed as item 1 asks, and item 6's sequencing is
+> superseded by R220 B's order (Kokomi → Klee → Furina for the folds, shared
+> retirement last). Pointer only — the text below stands as written.
+
 Not made here. This branch is docs-only and does not touch `QUEUE.md`,
 `BACKLOG.md`, `RULINGS.md`, `STATE.md` or `tools/lint_register_ids.py` — the
 R219 slate branch owns those and is unmerged. What is owed when they next open:

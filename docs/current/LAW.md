@@ -477,8 +477,11 @@ Claude, ratified by [USER].)
   source-text check. Rules read the resource, never the badge (display may lag
   only within one card play). (R72; R39)
 - **Every meter carries a bounded/unbounded property whose cap is read from
-  `constants.py`** (bounded: salon_member 3, spark 3, fanfare; unbounded: encore,
-  charge, burst, exhaust_pile). (R91 2b)
+  `constants.py`** (bounded: salon_member 3, fanfare; unbounded: encore,
+  charge, burst, exhaust_pile, spark). (R91 2b; `spark` moved to unbounded by
+  R220 F — R219 C's re-author prices Sparks as an alternative card cost with
+  **no cap**, the governor being generator scarcity, so the bounded-at-3 entry
+  was a dead reference the moment `M51` was countersigned)
 - **A structurally-invisible defect gets a machine-readable allowlist/manifest +
   a lint or boot check** (house pattern; the allowlist checks itself for rot):
   empty starting relics, pool rarity coverage, Ancient coverage, required-node
