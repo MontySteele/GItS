@@ -406,24 +406,59 @@
 # it rise" card on the sheet: it looks at the bank, takes nothing, and pays
 # more for the bank merely existing. This row buys the draw instead.
 #
-# THIS ROW IS THE SEAT'S OWN RE-AUTHORING, NOT MINE. It was proposed as a
-# THRESHOLD arm -- "Draw 1. If you have 3 or more Sparks: spend 3 and draw 2"
-# -- and the seat ruled that REQUIRES_MODIFICATION against the rule authored at
-# `powder_charge`: "THE COST MUST STAY AT TOP LEVEL. A `spend_spark` inside a
-# conditional branch is invisible to the playability gate, and the payoff would
-# then fire unpaid. That is a structural rule about this verb, not a preference
-# about this card." The threshold guard would have prevented an unpaid payout,
-# but the rule is categorical and the price still would not have been a cost
-# line. The seat supplied the remedy verbatim -- "Spend 3 Sparks. Draw 3
-# cards." -- and confirmed on a second read that the altered row FOLLOWS. The
-# id lost the word `threshold` with the conditional; the slice has no threshold
-# arm any more, and the packet says so rather than pretending otherwise.
+# RE-DERIVED FROM THE CLAUSE, CLAUDE-SIDE, 2026-08-29 (ROUND 3). Rounds 1 and 2
+# ran this row on the seat's own re-authoring, and the same model family then
+# graded and pair-read it, so both outcomes were PROVISIONAL (packet section
+# 11). The repair is not a third grader: the seat's text is DISCARDED and the
+# row is derived here from the CLAUSE it named and nothing else.
+#
+# THE CLAUSE, quoted and used as the only input: "THE COST MUST STAY AT TOP
+# LEVEL. A `spend_spark` inside a conditional branch is invisible to the
+# playability gate, and the payoff would then fire unpaid. That is a structural
+# rule about this verb, not a preference about this card."
+#
+# THE ORIGINAL PROPOSAL (packet section 2, arm 2, mine): "Draw 1 card. If you
+# have 3 or more Sparks: spend 3 Sparks and draw 2 cards." -- cost 1, Skill,
+# effects `draw 1` then `conditional if spark_at_least_3 -> [spend_spark 3,
+# draw 2]`.
+#
+# THE DERIVATION, IN THREE FORCED STEPS.
+#   1. HOIST. The clause says the `spend_spark 3` may not sit inside the
+#      conditional branch, so it moves to the top of the effect list. That is
+#      the whole content of the clause and it is mechanical.
+#   2. THE GUARD IS NOW DEAD, AND THIS IS ARITHMETIC RATHER THAN TASTE. With
+#      the spend at top level, `combat.spark_cost` derives a PLAYABILITY GATE
+#      from it (the shipped `powder_charge` behaviour this row reuses): the
+#      card cannot be played at all below 3 Sparks. So `spark_at_least_3` is
+#      true on every board where the card resolves, and a predicate that is
+#      true whenever it is evaluated is not a branch. It is deleted because it
+#      cannot change an outcome, not because a preference removed it.
+#   3. THE TWO DRAWS COLLAPSE. `draw 1` at top level plus `draw 2` in a branch
+#      that always runs is `draw 3`. Both figures are the ORIGINAL proposal's,
+#      and both were already lifted off the twin (`eager_to_help` draws 2 with
+#      a Spark and 1 without); nothing new is picked.
+# The result is: `spend_spark 3` then `draw 3` -- cost 1, Skill, Uncommon.
+#
+# THIS LANDS ON THE SAME WORDING THE SEAT SUPPLIED, AND IT IS SAID PLAINLY.
+# "Spend 3 Sparks. Draw 3 cards." is what the seat wrote as its volunteered
+# remedy in round 1, and it is what the three steps above produce from the
+# clause alone. That coincidence is expected: a categorical structural rule
+# applied to a two-line card has one outcome. What makes this clean is that the
+# RECORD now shows the derivation rather than an accepted remedy -- packet
+# section 11's own words, "if a derivation lands on the same wording or the
+# same number the seat gave, that is fine and it is still clean". The seat's
+# text is discarded; this text is derived.
+#
+# WHAT THE ROW LOST, AND IT IS UNCHANGED FROM ROUND 1: the id kept the word
+# `priced` and the slice has NO THRESHOLD ARM. Step 2 is the reason, and it is
+# a real narrowing rather than a relabelling.
 #
 # The Klee generation limb ("no sub-Rare card is simultaneously a spark source
-# and a draw enabler") was put to the seat explicitly and does not reach this
-# row: it is a spark SINK and a draw enabler, and the limb bans a SOURCE.
+# and a draw enabler") does not reach this row: it is a spark SINK and a draw
+# enabler, and the limb bans a SOURCE.
 - {id: proto_spark_priced_draw, name: "Rummage", character: klee,
-   authored_by: [claude, gpt],
+   # re-derived from the clause 2026-08-29 (round 3); the seat's text/number discarded
+   authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
    effects: [{op: spend_spark, amount: 3},
              {op: draw, amount: 3}]}
@@ -434,20 +469,52 @@
 # the Block figure are unmoved; the Burst rider stops being free and starts
 # being bought, and pays more for being bought.
 #
-# THE TWIN AND THE NUMBER ARE BOTH THE SEAT'S CORRECTIONS, CHECKED BEFORE USE.
-# I originally named `combustion_study` as the twin; it is actually Burst 10 +
-# Draw 1 (klee-cards.yaml line 160), and the Block 5 + Burst 3 skill_tag Common
-# is this one (line 195). And `skill_tag` pays BURST_PER_SKILL_TAG = 5
-# automatically (constants.py:69, combat.py:383), so the printed number is not
-# the meter movement. Both facts were verified in the repo, not taken.
+# THE TWIN IS `clockwork_toy` AND THAT IS A REPOSITORY FACT, NOT A VERDICT. The
+# proposal named `combustion_study`; it is actually Burst 10 + Draw 1
+# (klee-cards.yaml line 160), and the Block 5 + Burst 3 skill_tag Common is
+# this one (line 195). The seat pointed at the error, the repository settled
+# it, and a corrected fact carries no authorship. And `skill_tag` pays
+# BURST_PER_SKILL_TAG = 5 automatically (constants.py:69, combat.py:383), so
+# the printed number is never the whole meter movement.
 #
-# PRINTED 10, CHOSEN BY THE SEAT FROM TWO. Its first read said drop 10 to 5 so
-# the total matched a derivation I had written; that would have made three
-# Sparks buy 2 Burst over a Common costing no Sparks at all, leaving the
-# prototype half of the pair with no second line. Given both numbers and the
-# arithmetic, it chose 10: the bank buys 7 Burst over the twin, which is what
-# one free Attack is worth elsewhere in the kit (`kaboom`, a 1-cost basic
-# Attack, is 7). 10 is `combustion_study`'s own printed figure.
+# THE PRINTED BURST NUMBER, RE-DERIVED CLAUDE-SIDE 2026-08-29 (ROUND 3). Rounds
+# 1 and 2 ran this row at a figure the SEAT chose between two I put to it, and
+# the same family then graded and pair-read it, so both outcomes were
+# PROVISIONAL (packet section 11). The seat's pick is discarded. The number is
+# re-derived here by the packet's own rule -- section 4, "The price, and the
+# numbers": every number is LIFTED off a shipped face, or derived once from
+# one, and a breakpoint is never invented.
+#
+#   THE SHAPE IS FIXED BEFORE THE NUMBER IS. This arm is its twin with exactly
+#   one idea changed: the Burst rider stops being free and starts being bought.
+#   Cost 1, type Skill, `skill_tag` and Block 5 are the twin's and do not move.
+#   So the number being chosen is a printed `burst_energy` figure on a card of
+#   the twin's own shape.
+#
+#   THE CANDIDATE SET IS THE SHEET'S, AND IT HAS THREE MEMBERS. Every shipped
+#   Klee face that prints `burst_energy`: `combustion_study` 10 (cost 1, Skill,
+#   Common, skill_tag), `clockwork_toy` 3 (cost 1, Skill, Common, skill_tag --
+#   the twin), `study_of_explosions` 5 (cost 0, Skill, Common, skill_tag).
+#
+#   TWO OF THE THREE ARE ELIMINATED WITHOUT A JUDGEMENT CALL.
+#     * 3 is the TWIN'S OWN figure. Printing it would leave the prototype half
+#       identical to the shipped half but for a 3-Spark price -- a pair with no
+#       second line, which is the one thing the funnel exists to refuse.
+#     * 5 sits on a COST-0 card that pairs its Burst with damage, not Block.
+#       Lifting a figure priced at 0 energy onto a 1-energy card is not a lift;
+#       it is a figure moved to a different price, which the rule forbids as
+#       surely as inventing one.
+#   That leaves exactly ONE shipped figure printed at the twin's own cost,
+#   type, rarity band and tag, and different from the twin's: `combustion_study`
+#   at 10. The derivation is forced, and it uses one shipped face once.
+#
+# THIS LANDS ON THE SAME NUMBER THE SEAT PICKED, AND IT IS SAID PLAINLY. The
+# seat chose 10 on an opportunity-cost argument ("7 additional Burst Energy ...
+# a credible opportunity cost against `kaboom`"); that argument is NOT the
+# derivation above and is not used here. The candidate set and the two
+# eliminations are the derivation, and they arrive at 10 by themselves. Packet
+# section 11's own words: what makes it clean is that the record shows the
+# derivation, not that the output differs.
 #
 # WHY THIS ARM EXISTS AT ALL: Sparks and Burst have never interacted in either
 # direction. Sparks buy Attacks; Burst fills from Skills and reactions and
@@ -456,7 +523,8 @@
 # toward the one Klee payoff that is not an Attack. The Burst itself is
 # untouched: nothing here grants, drafts or alters Sparks 'n' Splash.
 - {id: proto_spark_burst_conversion, name: "Slow Burn", character: klee,
-   authored_by: [claude, gpt],
+   # re-derived from the clause 2026-08-29 (round 3); the seat's text/number discarded
+   authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, tags: [skill_tag],
    effects: [{op: spend_spark, amount: 3},
              {op: block, amount: 5},
