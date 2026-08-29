@@ -125,7 +125,8 @@ And, ruling the roster-wide consequence:
 — the shared Burst meter is retired as a concept, each character's signature
 resource becomes her gauge, and each former Burst becomes a drain or overdrive
 of that resource. That change is packeted separately on branch
-`burst-retirement`; **Furina's fold below is the first of its three.**
+`burst-retirement`; **Furina's fold below is the last of its three** (R220 B
+sequences the folds Kokomi → Klee → Furina, with the shared retirement last).
 
 So, for Furina: no Burst card printed at a threshold, no overdrive loan, no
 temporary Fanfare bonus and no entitlements. A full meter is a maximally scaled Salon,
@@ -560,9 +561,10 @@ docs-only for `review/active/`.
 > Burst changes") and is **packeted separately** on branch `burst-retirement`
 > (`review/active/burst-retirement-2026-08-29.md`): each character's signature
 > resource becomes her gauge, and each former Burst becomes a drain or
-> overdrive of that resource. **Furina's fold here is the first of the three**
-> — it is not a carve-out from a standing rule but the leading case of a
-> ruled roster-wide change. **This packet still decides Furina only**; Klee's
+> overdrive of that resource. **Furina's fold here is the last of the three**
+> — R220 B sequences the folds Kokomi → Klee → Furina, with the shared
+> retirement landing last of all. It is not a carve-out from a standing rule
+> but the closing case of a ruled roster-wide change. **This packet still decides Furina only**; Klee's
 > and Kokomi's bodies belong to that packet and nothing here fixes them.
 >
 > **What this RETIRES from the E4 packet.** E4's fold of Fanfare into the
@@ -675,7 +677,8 @@ permits. Prospective text, added as a scoped sentence rather than a rewrite:
 
 **One line on scope, because it will be asked.** The roster-wide retirement of
 the shared Burst meter is RULED ([USER], 2026-08-29) and is packeted separately
-on `burst-retirement`; **Furina's fold is the first of the three.** The
+on `burst-retirement`; **Furina's fold is the last of the three** (R220 B's
+order: Kokomi → Klee → Furina, shared retirement last). The
 amendment above is written Furina-scoped anyway, so that this packet can be
 signed on its own schedule and the roster-wide text replaces it cleanly rather
 than the two having to be unpicked from each other.
@@ -1430,8 +1433,8 @@ R213's quarantine. **Amendment 2 is the real one**: `LAW.md:266` requires
 every character to ship a kit-Burst and `LAW.md:176-178` says the Burst is kit
 and not loot, so moving Furina's drain onto a drafted Rare amends LAW rather
 than merely implementing a design. The roster-wide retirement is RULED and
-packeted separately on `burst-retirement`, and Furina's fold is the first of
-the three; this amendment is drafted Furina-scoped anyway so that C2 can be
+packeted separately on `burst-retirement`, and Furina's fold is the last of
+the three (R220 B); this amendment is drafted Furina-scoped anyway so that C2 can be
 signed on its own schedule and the roster-wide text replaces it cleanly.
 Amendment 1 rewrites the Fanfare generation legs. Amendment 3 is hygiene and
 can be signed independently.
@@ -1466,8 +1469,8 @@ record and unanswered; it should be the next Furina question. Named in §3 as
 deliberately unresolved so that silence is not mistaken for a decision.
 
 **Klee's and Kokomi's Bursts.** The roster-wide retirement is RULED and lives
-in its own packet on `burst-retirement`. Furina's fold here is the first of the
-three; this packet decides Furina only and its LAW text is scoped to say so.
+in its own packet on `burst-retirement`. Furina's fold here is the last of the
+three under R220 B's order; this packet decides Furina only and its LAW text is scoped to say so.
 
 ---
 
@@ -1509,7 +1512,7 @@ R219 slate branch owns those and is unmerged. What is owed when they next open:
    register rows, its own ruling id and the LAW text that supersedes §3.1's
    Furina-scoped amendment 2. What is owed *here* is only the cross-reference:
    whatever STATE bullet describes the Furina slice should name Furina's fold
-   as the first of that ruling's three characters.
+   as the last of that ruling's three characters (R220 B).
 7. **Two hygiene fixes, both normal commits under the hygiene norm**, owed on
    whichever branches next touch those files: the kickoff's Salon
    dry-overdraw sentence (§2.7c), and `docs/furina-cards.yaml:13`'s header

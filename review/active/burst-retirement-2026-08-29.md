@@ -375,21 +375,23 @@ double-currency the Kurage packet flagged at its line 645.
 
 *Current fragment:*
 
-> (bounded: salon_member 3, spark 3, fanfare; unbounded: encore, charge, burst,
-> exhaust_pile)
+> (bounded: salon_member 3, fanfare; unbounded: encore, charge, burst,
+> exhaust_pile, spark)
 
 *PROSPECTIVE replacement fragment:*
 
-> (bounded: salon_member 3, spark 3, fanfare; unbounded: encore, charge,
-> exhaust_pile)
+> (bounded: salon_member 3, fanfare; unbounded: encore, charge, exhaust_pile,
+> spark)
 
-*Caveat, and it is a real one:* `spark` is listed as **bounded at 3**. A
-spend-all Sparks card only makes sense against an unbounded or a much larger
-bank, and the Klee Sparks packet's smoke measured a *net accumulating* bank
-(§4.2). Whether Sparks are bounded is already live inside the Klee Sparks work
-(M51) and this packet does not settle it — but the retirement **depends** on the
-answer, so §4.2's pick is written to be legible either way and §6 flags the
-dependency.
+*The caveat this block used to carry is now settled:* `spark` was listed as
+**bounded at 3**, and a spend-all Sparks card only makes sense against an
+unbounded or a much larger bank — the Klee Sparks packet's smoke measured a
+*net accumulating* bank (§4.2). R220 F countersigned `M51` and moved `spark`
+to the **unbounded** list on `docs/current/LAW.md:481` as hygiene (R219 C
+prices Sparks as an alternative card cost with no cap, the governor being
+generator scarcity). So the quoted fragments above already carry the amended
+list, the retirement's dependency is discharged, and §4.2's pick reads against
+unbounded Sparks.
 
 **LAW:508 — the indicator.** The display rule stands; only the noun changes.
 
@@ -492,8 +494,9 @@ Finale, Uncommon, Spend 3, Exhaust, 18 damage** (`:263`).
   *cheaper to reach* than the current three-turn Power — and it fixes the sink
   problem in the wrong direction: one card absorbs the whole surplus, every other
   spender stops competing, and the arm's in/out ratio becomes one card's ratio.
-- **At Rare.** It is the archetype's finale: Rare draw frequency, the kit name
-  kept, and room left for the `Spend 2`/`Spend 3` band to do the per-turn sink
+- **At Rare.** It is the archetype's finale: Rare *acquisition* frequency —
+  rarity governs how often the card is offered, not how often it is drawn once
+  it is in the deck — with the kit name kept, and room left for the `Spend 2`/`Spend 3` band to do the per-turn sink
   work the smoke says is missing. The ratio still needs repair, but by *many
   small sinks* the packet is already building rather than by one card.
 
@@ -761,13 +764,14 @@ Three things, and only three.
 3. **PICK KO1** — the Kokomi fold shape, four options, (a) recommended. **Plus
    PICK KO2**, the Tamakushi Casket link re-homed from Kurage PICK 3.
 
-**One dependency to flag before answering K1:** `docs/current/LAW.md:481` lists
-`spark` as **bounded at 3**. If that holds, a spend-all Sparks card has a
-three-point ceiling and the Uncommon reading (K1 option 2) is the correct one; if
-Sparks become unbounded — which the measured +22 net bank
-(`klee-sparks-2026-08-29.md:863`) suggests they effectively already are in play —
-the Rare reading (option 1) is. That question lives in the Klee Sparks work
-(M51), not here, and K1 should be answered with it in view.
+**The dependency this section flagged is settled.** `docs/current/LAW.md:481`
+listed `spark` as **bounded at 3**; R220 F countersigned `M51` and moved it to
+the **unbounded** list. A spend-all Sparks card therefore has no three-point
+ceiling, which is the reading that argues for K1 option 1 (Rare) rather than
+option 2 (Uncommon) — option 2's own "if the bounded-Sparks reading is the one
+that holds" condition is now false, and it survives only on the
+"ship what the base game ships" argument. The measured +22 net bank
+(`klee-sparks-2026-08-29.md:863`) points the same way.
 
 ---
 
