@@ -666,6 +666,19 @@ each returns to [USER] with the picks.
    the exclusion to the jellyfish is what §7's finding actually asks for.
 10. **Study Buddy's replay is one play, not two.** The memory hook sits ahead
     of `_finish_play`'s replay loop, so a replayed Companion is remembered once.
+11. **On the STARTER DECK the engine never fires, and that is a finding about
+    `T`, not a defect.** Across five whole fights the jellyfish is fielded and
+    pulses every turn, the memory fills (1–2 Companions), and the bank tops out
+    at **2** — so a threshold of 5 is never reached and the queue is still full
+    at fight end. The cause is arithmetic and it is exactly PICK A1: her
+    starter deck contains no card that Exhausts one of her own non-Companion
+    cards, so under "Exhausts only" a starter Kokomi has almost no fuel at all,
+    and the two Charge she does bank come from `bake_kurage`'s printed
+    `gain_charge`. This is the first thing a sim arm must move, and it moves in
+    one of three directions, all [USER]'s: lower `T`, take A2
+    (`play_or_exhaust`), or accept that the engine is a *drafted* engine that
+    the opening deck deliberately cannot run. **No number here is quotable** —
+    it is reported as the shape of a hole, not as a measurement.
 
 ### What the pilot sees, stated so nobody mistakes this arm for a measurement
 
