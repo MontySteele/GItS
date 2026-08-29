@@ -86,7 +86,7 @@ Klee is the compatibility baseline character. Companion pools ship per nation:
 
 Starting HP sits against the base cast — Ironclad 80, Defect 75, Regent 75,
 Silent 70, Necrobinder 66 (`game_ref/*_char_facts.yaml`). Furina 60 → **78**
-and Kokomi 70 → **80** by sitting slate 2026-08-29: both are canonically
+and Kokomi 70 → **80** by **R219 F** (2026-08-29): both are canonically
 HP-scalers, so pools under the cast's average read wrong; Klee stays low by
 design. Every measured table that quotes a Furina or Kokomi row predates the
 change and is stale under R68 until a re-baseline —
@@ -184,18 +184,20 @@ deploy label from R218 on rides the pin above; live numbers were never
 comparable across a game build anyway (R95), and the sim references no game
 assembly and is unaffected.
 
-The deployed build is **`0.2.1357`** (2026-08-29, from
-`klee-slice-1-round-3` `605b76f`), a clean release package with no `+proto` and
-no `+dirty` mark — deployed as the teardown of the Klee slice 1 ROUND 3 funnel
-run and of `EB-188`'s live acceptance, both of which ran on `0.2.1353+proto`
-(built clean by `deploy_proto.ps1` with the game closed, and rebuilt once from a
-committed tree so the package that wrote the packets carried no `+dirty` mark).
-The bridge is uninstalled, no game process is up, and the embark's reversibility
-ledger walked back its seed, speed, process and bridge steps. It carries the
-same C# as `0.2.1269`, whose port and face fixes are described below; nothing on
-a shipped sheet moved between them, and the only C# the round added is compiled
-out of a release build by construction (the quarantined prototype rows).
-`validate.ps1` OK; pack 9,586,076 bytes.
+The installed build is **`0.2.1416+proto`** (2026-08-29), a dev package
+carrying BOTH prototype arms — Kokomi's Kurage-memory base kit and Klee's
+Spark alternative-cost rows — behind the `-p:PrototypeCards=true` compile
+switch. **It does not boot:** a regression in that package stops the mod
+loading, so the sealed Kokomi blind run it was built for HAS NOT STARTED. The
+fix is in flight on branch `kokomi-blind-run`, which mints the defect row; that
+row is not carried here because it does not exist on this branch yet. **The
+last runnable install is the release package `0.2.1357`** (2026-08-29, from
+`klee-slice-1-round-3` `605b76f`) — no `+proto`, no `+dirty`, deployed as the
+teardown of the Klee slice 1 ROUND 3 funnel run and of `EB-188`'s live
+acceptance, both of which ran on `0.2.1353+proto`. It carries the same C# as
+`0.2.1269`; nothing on a shipped sheet moved between them, and the only C# those
+rounds added is compiled out of a release build by construction (the quarantined
+prototype rows). `validate.ps1` OK; pack 9,586,076 bytes.
 It carries `EB-171`'s port and the two face fixes `0.2.1209` was missing: the
 exhaust-selection rate (R215 C) and `EB-164`'s eighteen re-worded scaling
 faces. **Re-verified live on 0.111.0** (`EB-171`): the mod loads, all nine
@@ -350,7 +352,8 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     cost 0 at a bank of 3 is the intended mechanic (whichever is played
     first takes the discount; the rest snap back), so those ten lines
     were readers failing to chain the keyword's second sentence. The row
-    is gone as a false positive; the keyword's plural sits inside `M48`.
+    is gone as a false positive, and `M48` is ANSWERED with it (R219 A/B):
+    the rule is retired by the Sparks re-author rather than amended.
     Pair read: two ADVANCE (Second Helping, Rummage), one RETURN (Slow
     Burn — its board and presentation). Minted there: `EB-187` (a staged
     board's Burst assumption double-counted the Skill tag and corrupted a
@@ -391,15 +394,65 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     ACCEPTED LIVE — `EB-188` **CLOSED** on sealed session
     `20260829-181718` (`0.2.1353+proto`, seed `71D8JS1VSKRN`, 120
     actions, six fights, the record naming `arms_granted`), where Second
-    Helping was granted, drawn and played. Kokomi's Charge accrual rule is now an open [USER] pick (`M50`),
-    with the pilot's Charge term at `M49` and Klee's two held calls at
-    `M47`/`M48`; slice 2's round-2 boards are **drafted and HELD** on
-    `M50` (branch `kokomi-slice-2-round-2`, unstaged).
+    Helping was granted, drawn and played. `M48` is ANSWERED (R219 A/B). What is open for [USER]
+    is `M47` (Bag of Tricks), `M49` (the pilot's Charge term, now
+    superseded and needing closing), `M50` (re-pointed at the
+    Kurage-memory redesign's four unruled rows), `M51` (the Sparks
+    re-author's countersign), `M52` (Furina E4 C1–C3) and `M53` (whether
+    a local model may hold a grading chair). Slice 2's round-2 boards
+    stay **drafted and HELD** on `M50` (branch `kokomi-slice-2-round-2`,
+    unstaged), and the redesign is what they now wait on.
+  - **Klee Sparks — RE-AUTHORED, both engines, behind a flag**
+    (`review/active/klee-sparks-2026-08-29.md`; evidence
+    `docs/current/research/regent-stars-economy.md`). R219 B/C: the
+    threshold rule retires and Sparks become an ALTERNATIVE CARD COST,
+    with **no cap** — the governor is generator scarcity, matched to
+    Regent's pattern, not a ceiling. Built: seven prototype rows plus an
+    eighth, `proto_true_spark_knight`, the strict Rare Power that prices
+    every Attack at 3 Sparks; sim behind `SPARK_ALT_COST_ENABLED`, C#
+    behind `-p:PrototypeCards=true` (so a release build contains no type
+    from the arm), and the price moved out of the rules box onto a **cost
+    badge** that reads the same number the gate charges. The packet's §9
+    doctrine-seat read is CLEAN. Nothing shipped moved; the countersign
+    and the eleven as-built calls are `M51`.
+  - **Kokomi Kurage memory — BASE KIT** (`review/active/kokomi-kurage-memory-2026-08-29.md`
+    §11–§13). R219 D: the Bake-Kurage is **always on**, part of the base
+    kit rather than a summoned card, and one Muster card joins the base
+    deck to teach the pattern. The memory queue prices each remembered
+    card at 3× its cost, fuelled at 1 Charge per Exhaust, blocked when the
+    front is unaffordable, uncapped. **Kurage's Oath is RULED and BUILT**
+    at *3 Block per memory played, 5 upgraded* — [USER]'s placeholder, no
+    measurement attached and none quotable. Sim, C# and the blind-run
+    prediction slate are all merged; the run itself waits on the boot
+    regression above. Four rows the redesign leaves unruled are `M50`.
+  - **Furina E4 — PACKET CLOSED, COUNTERSIGN OPEN**
+    (`review/active/furina-e4-2026-08-29.md`, revisions 2–4). The doctrine
+    seat's implementation RETURN was accepted in full and its r2 approval
+    recorded; revision 3 paid the fresh-Claude independent read of the
+    GPT-authored rows and revision 4 closed all five of its findings in
+    place, so what [USER] signs is corrected text. No code, no constant,
+    no sheet row and no LAW line has moved. `M52` carries C1 (the §3
+    ruling text and its seven retirements), C2 (the prospective LAW text,
+    §3.1/§3.2, as prospective) and C3 (the §7.1 P7 triage plan), plus the
+    co-op consequence to be signed with C1. Under R213's sequence the
+    Furina slice is now gated on **C1–C3 and nothing else** — Klee round
+    3 reported, both arms ADVANCE.
+  - **Build and grading rhythm (facts, not rulings).** CI takes a
+    **docs-only fast path** (`tools/ci_changed_paths.py`) and runs pytest
+    under xdist with a pip cache — the pytest job is ~3.5 min, from ~5.
+    The scarce budget is the Codex seat's: GPT-played runs are paced per
+    five-hour window, so a sitting plans around them rather than assuming
+    them. A **local-model grader** (Qwen 3.8 27B over llama.cpp) is a
+    sanity backstop on already-CLOSED assignments only, and it is
+    MERGED: `understudy/authorship.py` recognises a `local` family
+    (`FAMILIES`) without making it authorable (`AUTHORABLE_FAMILIES`
+    unchanged). That split is a read of the "no third family" rule, not
+    a ratified one — the row that ratifies or reverses it is `M53`.
   - **Next.** Klee slice 1 has no open engineering: all three arms read
     ADVANCE on clean independent reads and Second Helping has its
     whole-fight run. Owed next are the whole-fight runs for Rummage and
-    Slow Burn, slice 2's two §9 picks (`M49`/`M50`), slice 1's `EB-184`,
-    and Klee §6's two held [USER] calls (`M47`/`M48`).
+    Slow Burn, the boot fix that unblocks the sealed Kokomi run, slice 1's
+    `EB-184`, and the six open [USER] rows `M47`/`M49`–`M53`.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
@@ -412,9 +465,11 @@ Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
 countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
-Art debt); the Fontaine Rares close-out (`M10`); and the four prototype-slice
-calls (`M47` Bag of Tricks, `M48` the automatic free-Attack rule, `M49` the
-pilot's Charge term, `M50` the Charge accrual rule).
+Art debt); the Fontaine Rares close-out (`M10`); and the six prototype-slice
+and redesign calls (`M47` Bag of Tricks; `M49` the pilot's Charge term, now
+superseded; `M50` the Kurage-memory redesign's four unruled rows; `M51` the
+Klee Sparks re-author's countersign; `M52` Furina E4's C1–C3; `M53` whether a
+local model may hold a grading chair). `M48` was answered by R219.
 
 ## Watch register (dormant)
 
