@@ -319,10 +319,35 @@ retire with the meter; it re-points at the signature resources.
 > **Burst-meter (`burst_energy`) generation stays character-kit-scoped** and must
 > never be cheaply repeatable from companions.
 
-*PROSPECTIVE replacement:*
+*PROSPECTIVE replacement — TWO OPTIONS, and `M52`/this packet's countersign
+picks one.* External review relayed by [USER] (their own GPT chat, no seat
+authority) flagged that option (1) as written outlaws Furina's central loop,
+and offered option (2) as the repair.
+
+**(1) The packet's clause, as drafted.**
 
 > **A character's signature-resource generation (Sparks, Fanfare, Charge) stays
 > character-kit-scoped** and must never be cheaply repeatable from companions.
+
+**(2) The relayed rewrite, verbatim.**
+
+> **Companion cards may not directly grant signature resources. A
+> character-owned engine may respond to a Companion play and generate its
+> resource where explicitly declared by that character's kit.**
+
+**What each reading does to Furina.** Her reframe makes every Companion play
+— hers or an ally's — trigger a Salon member's performance, and a performance
+mints Fanfare (`furina-reframe-2026-08-29.md` §4.1, §4.3, §4.8), once per
+Companion card and **unbounded per turn** under `F4` pick 1. Under **(1)** that
+is Fanfare generation that is cheap, repeatable, and sourced from companion
+plays: read literally, the clause forbids the loop `R220 A` just ruled, and the
+countersign would land a law and its violation on the same day. Under **(2)**
+the loop is legal — no Companion card *grants* Fanfare; Furina's own kit hook
+responds to the play and mints it, and her sheet declares the hook — while the
+danger the clause exists for (a colorless Companion printing a character's
+meter off its own face) stays forbidden. Klee's Durin feed keeps retiring under
+either reading (`§4.2` `K2`), since `WITCHS_FLAME_BURST` pays off the
+companion's own body.
 
 This is the clause with the widest silent reach: it is the reason the companion
 pool is safe today, and re-pointing it is not optional bookkeeping.
@@ -517,6 +542,33 @@ rarity across that gap copies the wrong half of the card.
    "we ship what the game ships," and if Sparks stay bounded at 3
    (`docs/current/LAW.md:481`) the ceiling is small and the Uncommon price is
    correct. Choose this if the bounded-Sparks reading is the one that holds.
+   **Note:** R220 F moved `spark` to the unbounded list, so that condition no
+   longer holds and this option now rests on the precedent argument alone.
+3. **Rare, once per combat — Exhaust on the body.** The finale keeps the kit
+   name and the spend-ALL verb, but it fires once: `Exhaust` (or an equivalent
+   once-per-combat gate) means the whole bank is cashed one time and every
+   `Spend 2`/`Spend 3` card still has a job on every other turn. It is the
+   direct answer to the repeatability objection below, and it has a shipped
+   precedent in the arm's own proto row (Firework Finale, Uncommon, Spend 3,
+   Exhaust, `klee-sparks-2026-08-29.md:263`).
+4. **Rare, repeatable, but the spend is capped or diminishing** — the card
+   stays a recurring sink and the *bank it can cash* is bounded: spend up to N
+   Sparks (N a printed number), or spend all with damage-per-Spark falling
+   after the first few. Keeps a repeatable outlet for a +1.32/turn income
+   without letting one card absorb an arbitrarily large surplus at a flat rate.
+
+**The objection these two answer, stated so it is on the record.** External
+review relayed by [USER] (their own GPT chat, no seat authority) reads the
+Rare-with-a-stronger-body lean as not yet solving the economy problem:
+**rarity changes how often the card is acquired, not how often it is played
+once acquired**, so a repeatable spend-all Attack in the deck still invalidates
+every small Spark spender on every turn it is drawn — which recreates the
+"everything terminates in attack spam" failure the Klee design review named.
+Its position: if the card stays a Rare finale, cap or gate the spend
+(options 3 or 4); if it stays the near-exact Stardust analogue with no gate,
+price it at Uncommon (option 2). "Rare and stronger" alone does not change the
+per-turn economy. That is a design call and it is [USER]'s; the four options
+above are the whole space.
 
 #### The five Klee-side feeds — re-author to Sparks, or retire, per card
 
@@ -754,15 +806,63 @@ combined re-baseline.
 
 ## §6 — What returns to [USER]
 
-Three things, and only three.
+Three things, and one conditional sub-pick under the third.
 
 1. **The concept countersign and the LAW text** — §3.1's architecture paragraph
    and the eight replacement blocks in §3.2. This is a LAW amendment, which the
-   delegation ladder keeps with [USER] regardless of anything else here.
-2. **PICK K1** — Sparks 'n' Splash at Rare with a stronger body (recommended) or
-   Uncommon matching Stardust. **Plus PICK K2**, the five feed dispositions.
+   delegation ladder keeps with [USER] regardless of anything else here. **One
+   of those blocks now offers two options rather than one:** LAW:145's
+   replacement, where option (2) is the relayed rewrite that keeps Furina's
+   Companion-triggered Fanfare loop legal (§3.2).
+2. **PICK K1** — Sparks 'n' Splash at Rare with a stronger body (recommended),
+   Uncommon matching Stardust, Rare-but-once-per-combat, or Rare with a capped
+   spend — four options at §4.2. **Plus PICK K2**, the five feed dispositions.
 3. **PICK KO1** — the Kokomi fold shape, four options, (a) recommended. **Plus
    PICK KO2**, the Tamakushi Casket link re-homed from Kurage PICK 3.
+
+#### PICK KO1a — the exact payment rule, if `KO1` resolves to (a)
+
+§4.3 option (a) reads "Spend N Charge, get N/k turns of Garment (floor 1)" and
+stops there. External review relayed by [USER] (their own GPT chat, no seat
+authority) is right that this is not yet a rule: it does not say **how N is
+chosen**, what the **minimum** is, or how the **remaining** Charge is shown.
+The last of those is load-bearing rather than cosmetic — `GARMENT_CHARGE_DIVISOR
+= 2` (`tier0/constants.py:442`) makes her attack cards read the Charge she has
+*left* while the state is up (+1 damage per 2 Charge), so every point spent on
+duration is a point off potency. That duration-versus-potency trade is the
+best thing in option (a) and it only exists if the player can see both numbers
+at the moment of the choice. Three drafted rule texts, whole; pick one.
+
+1. **Fixed N, printed on the card.** *"Spend 4 Charge. Gain Ceremonial Garment
+   (2 turns)."* N and the duration are both printed constants; a second,
+   higher-rarity carrier prints a bigger pair. **Minimum:** the card is
+   unplayable below N, greyed like any unaffordable cost — the same block the
+   Kurage memory already prints by name (§11.3). **Display:** no new surface;
+   the existing Charge readout plus the card's printed cost is the whole
+   forecast. Least agency, least to explain, zero new UI, and it is the only
+   option where a co-op seat needs no prompt.
+2. **X-cost style, spend all.** *"Spend all Charge. Gain Ceremonial Garment for
+   X/2 turns (minimum 1)."* N is never chosen — it is whatever the bank holds
+   — exactly as `X Stars` works on Stardust. **Minimum:** duration floors at 1
+   turn, so the card is never a dead play, and a floor of 2 Charge to cast
+   stops a 0-Charge cast from being free. **Display:** the state's remaining
+   turns and a Charge readout of **0**, which is the honest reading — and it
+   is also the flaw: it deletes the potency half of the trade, because
+   `GARMENT_CHARGE_DIVISOR` has nothing to read under the state it just paid
+   for.
+3. **Choose-N prompt, banded.** *"Spend 2, 4 or 6 Charge. Gain Ceremonial
+   Garment for 1, 2 or 3 turns."* The player picks a band at cast from a modal.
+   **Minimum:** 2 Charge, one turn. **Display:** the modal shows, per band, the
+   duration bought **and the Charge that would remain**, with the resulting
+   attack bonus (`remaining // 2`) beside it — which is the only one of the
+   three where the trade is stated to the player rather than left to be
+   discovered. Cost: a modal on every cast, a click count, and a co-op latency
+   question of the same shape `F3` option 3 carries in the Furina reframe.
+
+`KO1a` is asked only if `KO1` resolves to (a); options (b), (c) and (d) each
+carry their own payment shape and do not need it.
+
+---
 
 **The dependency this section flagged is settled.** `docs/current/LAW.md:481`
 listed `spark` as **bounded at 3**; R220 F countersigned `M51` and moved it to

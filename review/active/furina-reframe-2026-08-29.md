@@ -1286,11 +1286,46 @@ gain by declining.
 *Decision it changes:* falsification returns F12 — the drain card is
 dominant, and either its payoff or the meter's standing value is mispriced.
 
+**Slot 6 — is the Encore-spending Evoke family worth its price? — DRAFT,
+unrun, added after the slate was drafted.** Prompted by external review
+relayed by [USER] (their own GPT chat, no seat authority). Slot 2 matches an
+Evoke against *triggering twice more*; nothing matches it against the **other**
+way to Evoke. Under §4.2 a deploy onto a full stage Evokes the front member to
+make room, and the ruled text prices that at nothing: the deploy Evokes the old
+front, lands a replacement, and performs the replacement, all for the card's
+energy. A dedicated Evoke card pays a printed `encore_cost` under `F7` pick 1,
+expends the front, and puts nothing back — the stage comes out one member
+lighter. If that asymmetry is as large as it reads, the family [USER]'s brief
+calls central ("Encore … spent down to direct the Stage via Evoke-style
+plays") is strictly inferior to a deploy card on every full stage.
+
+*The matched comparison:* one staged board, full stage, both a full-stage
+deploy card and a dedicated Evoke card in hand, built so the two lines are
+within one card of each other on the turn.
+
+*Predicted — DRAFT, derived from the ruled text, not blank:* a **majority of
+blind graders take the deploy line**, and **no form names an advantage the
+dedicated Evoke has** that the deploy does not (beyond aiming a specific
+member, which `F5` pick 1 also denies it). This is a directional prediction
+only; it is not countersignable until `F1`–`F16` are answered, like the five
+slots above.
+
+*Falsified if:* graders split on the pair, **or** any form names holding the
+board size, the Encore spend, or the Evoke's alternative effect as the reason
+the dedicated Evoke is the better line.
+
+*Decision it changes:* confirmation returns `F7` and §4.2's full-stage rule
+together — either the deploy's free Evoke has to carry a cost (Encore, or a
+reduced performance), or the dedicated Evoke family needs something the deploy
+cannot give it. Falsification retires the objection.
+
 **Required boards, from §2.7b.** At least one staged board carries **exactly
 one Salon member**, because that is the board on which rotation is a no-op and
 any positional pricing is zero — and it is the board a starter deck actually
 has. And at least one carries a **full stage with a deploy in hand**, because
-the deploy-Evokes rule is new law and has never been played.
+the deploy-Evokes rule is new law and has never been played — and slot 6 asks
+that same board to carry a **dedicated Evoke card in hand beside the deploy**,
+so the two Evoke routes are read against each other on one turn.
 
 **Who grades:** the Codex seat, blind, per `EB-149`, two graders per turn,
 every graded line replayed per `EB-170`.
@@ -1459,6 +1494,26 @@ can be signed independently.
 | **F14** | 4.7 | What does each occupied slot show — member, live trigger number, front marker, and does the Evoke number join them? |
 | **F15** | 4.7 | Does the Fanfare meter preview next turn's value after decay? |
 | **F16** | 5 | Does the starter teach Evoke with a card, by overcrowding, or both? |
+
+**Evidence added after drafting — external review, [USER]-relayed** (from
+[USER]'s own GPT chat; no seat authority, and it changes no recommendation
+here). Three rows drew a specific objection, recorded so the pick is made
+against it:
+
+- **`F1` — argues for option (2), the four-member roster.** §4.5's Focus term
+  adds +1 to **every member numeric**, and nothing in §4.2 or `F8` exempts an
+  energy payout or Chevalmarin's Encore refund, so a Rare energy member arrives
+  Focus-scaled and, under `F4` pick 1 (triggers unbounded per turn), on an
+  unbounded number of Companion plays; add the energy member only after it is
+  settled that Energy and resource refunds are never Focus-scaled.
+- **`F13` — argues for option (2), trigger line in full and Evoke as a
+  keyword.** The recommendation's own text concedes the face is "carrying three
+  rules" and calls it "the sharpest D5 tension in the packet"; moving the Evoke
+  line to the member's board tooltip is the cheaper half to hide.
+- **`F14` — argues for option (2), the slot also showing the Evoke result.**
+  Taken with `F13` (2) this puts each effect in exactly one place, and it puts
+  the Evoke number on the persistent board — which is where a player standing
+  over a generic Evoke card has to forecast it from.
 
 ### 9.3 What this packet does NOT ask, and why
 
