@@ -110,6 +110,7 @@ carried while it was active is in the commit message that retired it.
 | payoff-reach re-registration (the `RARITY_ODDS` fence) | 2026-08-24 | `RT12/D14/P7/C11` | `P5`: 0 PREDICTED / 0 SPLIT / **9 MISS**, every arm ABOVE its window on both axes. Q-A SPLIT, Q-B SPLIT. Tripwires `T1`–`T4` all silent. The design call it raised was `M37`, ruled the same day (R199) | packet `review/active/payoff-reach-reregistration.md` §7–§8; raw `review/active/payoff-reach-results-2026-08-24.txt` |
 | force-first-copy re-registered under `P7` (`M17`) | 2026-08-26 | `RT12/D17/P10/C19` | 4 PREDICTED / 1 SPLIT / 0 MISS; `Q4` PREDICTED on both halves (bare-form play rate 5.99%). §8.1's redesign trigger silent for **every** card — for `elemental_ecstasy` by 0.17 pp, on a delta whose sign is not established at that `N`. `C2` landed at Block 5, `a49bf20` | packet `review/active/m17-sweep-reregistration-p7-2026-08-13.md` §12; raw `review/active/m17-sweep-results-2026-08-26.txt` |
 | shop companion channel re-run (`S4-G10`) | 2026-08-26 | `RT12/D17/P10/C19` | 2 PREDICTED / 1 SPLIT / 2 MISS over 6,000 runs. The redesign trigger FIRED on condition 4 alone, mean winrate Δ −0.07 pp; conditions 1–3 did not. The design call it raised is open at QUEUE `M14` | packet `review/active/shop-rerun-registration-2026-08-10.md` §8; raw `review/active/shop-rerun-results-2026-08-26.txt` |
+| `KLEESPARK-R1` the Sparks arm on a live board | 2026-08-29 | dev build `0.2.1481+proto`, world `main` @ `d974303` | 2 PREDICTED (`P3`, `P6`) / 2 SPLIT (`P2`, `P4`) / 2 MISS (`P1`, `P5`). `P1`'s registered decision FIRED and PICK 4 is reopened; `P5`'s FIRED and the pilot's Spark probe needs playability before any further sim reading. `P2` and `P4` each have one half the instrument could not reach — no badge on a packet, and no dry-sink board without the generator — so PICK 8 and PICK 1 both stay open. Pair read: 6 ADVANCE / 2 RETURN / 0 ESCALATE, arm ADVANCE, and a RETURN on the LOCAL tester seat's first live use | packet `review/active/klee-sparks-2026-08-29.md` §11; raw `review/active/klee-sparks-r1-sim-2026-08-29.txt`, forms and replays under `review/qa/klee-sparks-r1-t0*/`, pair read `review/qa/klee-sparks-r1-pair-review-codex-gpt-5.6-sol.md` |
 
 ## Active registrations (pointers — packets live in `review/active/`)
 
@@ -151,62 +152,6 @@ carried while it was active is in the commit message that retired it.
   (`band = None`). The declaration is QUEUE `S4-G6`; its grading playtest is
   `docs/current/playtest/kokomi-playtest-protocol.md` (unrun, Answers block
   blank).
-- **`KLEESPARK-R1` — the Sparks arm on a live board** — **REGISTERED, unrun**,
-  no board staged and no form read at the time this entry is committed.
-  **Instrument:** the staged-turn blind QA funnel (`understudy/`, R213 step 2)
-  on the `+proto` DEV build built by `klee-mod\build\deploy_proto.ps1` — eight
-  boards under `understudy/turns/klee-sparks-r1/`, each `exact_hand: true`,
-  staged with `understudy.staged_turn stage`, graded by `staged_turn grade`'s
-  mechanical falsifiers and replayed with `execute`. It moves no `RT/D/P/C`
-  stamp; a prototype row's numbers are unquotable anywhere under R215 B and
-  every replay figure is a defect diagnostic under Guardrail-7.
-  **Tester seat:** the LOCAL Qwen seat (`python -m understudy.local_tester`),
-  its first live use, ruled available for the staged single-turn tester seat
-  only on [USER]'s 2026-08-29 instruction and the Codex seat's ADVANCE, both
-  recorded at `OPERATIONS.md` §"Local tester seat" with the four conditions
-  that ADVANCE attached. **No R-number is cited for it here**: the ruling that
-  will carry it is unissued (`R_CEILING` is 219) and citing an unissued number
-  is what `tools/lint_r_numbers.py` exists to refuse. **Spot-check:** the Codex seat
-  ALSO reads turn 1 and every 4th after it — `--seat-spot-check 4`, which is
-  the shipped default and NOT a picked rate; `M58` is open on what the rate
-  should be, and this round discloses that it used the default rather than
-  answering that pick. Any turn `understudy/resource_order.py` flags routes to
-  the seat as well, regardless of the rate. A fresh-Opus form on every packet
-  is a SAME-FAMILY read (§7 of the packet: these rows are `authored_by:
-  [claude]`) and is recorded as such, never as the deciding read.
-  **Cell:** eight graded turns on the Sparks arm's eight
-  `docs/prototype-surface.yaml` rows with `character: klee` —
-  `proto_pop_spark`, `proto_kaboom_sink`, `proto_spark_strike`,
-  `proto_spark_sweep`, `proto_spark_double_tap`, `proto_spark_blast`,
-  `proto_spark_finisher`, `proto_true_spark_knight` — behind
-  `C.SPARK_ALT_COST_ENABLED` in tier 0 and `-p:PrototypeCards=true` in C#.
-  **Predictions:** `review/active/klee-sparks-2026-08-29.md` §10.9, slots
-  P1–P6, DRAFTED and committed before any run and COUNTERSIGNED by [USER] as
-  `M51` (2026-08-29) under R212(2). They are not restated here; §10.9 is the
-  registered text and the grade is written against it.
-  **The two sim slots (P5/P6)** are the drafted-deck arm and their one
-  registered command is
-  `PYTHONIOENCODING=utf-8 python -m tier05.exp_klee_sparks_r1` — a committed
-  A/B over one seed block: flag ON with the tight set drafted onto the
-  substituted starter, against flag OFF with the five shipped rows PICK 4
-  converts (`sparkly_treasure`, `spark_collection`, `pocket_fireworks`,
-  `sugar_rush`, `cant_catch_me`) and the shipped `true_spark_knight` on the
-  shipped starter, `punisher`, `demolition` pilot weights. It reports Spark
-  spend rate per player turn and the longest run of consecutive turns whose
-  bank sat at or above the cheapest Spark price with no spend. **Registered
-  blind spot on it:** `loader._pool_substitutions` returns `{}` for Klee, so
-  the tier 0.5 drafter cannot be offered a prototype Spark row at all; the
-  "drafted" deck is therefore ASSEMBLED by id and is not a drafter output, and
-  §10.5's four named pilot blind spots all push it toward spending.
-  **World:** `main` @ `d974303`.
-  **DISCLOSURE, before any reading.** (1) The roster-wide Burst retirement is
-  RULED at `review/active/burst-retirement-2026-08-29.md` — whose own ruling
-  number is still unissued, so none is cited — and is NOT BUILT: Klee's Burst meter is still live in the build this round stages on,
-  so any Burst a grader sees on a packet is the shipped meter and not a thing
-  this round is testing. (2) The Spark badge captured at
-  `review/qa/eb194-gates/frame-*gatec-*.png` has NOT had [USER]'s eyes-on, and
-  P2 is a prediction ABOUT that badge; a grader reading a face this round is
-  reading an unapproved badge. → `review/active/klee-sparks-2026-08-29.md`.
 
 New registrations add a pointer here and land their packet under
 `review/active/`. When one is graded, it moves to the **Graded** table above —
