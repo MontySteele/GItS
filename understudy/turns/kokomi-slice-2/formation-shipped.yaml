@@ -9,7 +9,7 @@
 # THE SEED IS PART OF THE PAIR. The encounter is GENERATED, so the first half
 # staged DISCOVERS a seed; every other half of that pair must then be staged
 # with `--seed <that run_seed>` or the halves are two different fights.
-# MANIFEST.md carries the seed once one exists. Nothing here is staged.
+# MANIFEST.md carries the seed, and it is pinned in this file as well.
 #
 # THE TURN ID IS DELIBERATELY OPAQUE. It is printed into the design-blind
 # packet the grader reads, so a word like "spend" or "threshold" inside an id
@@ -60,11 +60,15 @@
 id: kokomi-slice2-t07
 character: KLEEMOD-KOKOMI
 
+# The pair's seed, discovered by staging the shipped half and then
+# pinned onto BOTH halves, so a re-stage reproduces the same fight.
+seed: QWVYM3T6J6RF
+
 exact_hand: true
 
 notes: |
   48/70 HP, no Block, 3 energy, a Charge bank of 8, and one
-  enemy at 46 HP telegraphing an attack.
+  enemy at 37 HP telegraphing an attack.
 
 # STAGING RULE, for the operator and not for the grader: the telegraph is
 # generated with the encounter, and defence is worth nothing against an intent
@@ -103,7 +107,7 @@ staging:
   - set_block: {who: player, amount: 0}
   - set_energy: {amount: 3}
   - set_resource: {name: KLEEMOD_CHARGE, amount: 8}
-  - set_hp: {who: first, amount: 46}
+  - set_hp: {who: first, amount: 37}
   - set_block: {who: first, amount: 0}
   - read: "the staged board"
 
@@ -126,8 +130,8 @@ board:
     - waters_edge
     - all_streams_flow
   enemies:
-    - name: "Act-1 attacker"
-      hp: 46
-      max_hp: 60
+    - name: "Sludge Spinner"
+      hp: 37
+      max_hp: 37
       block: 0
-      intent: {kind: attack, amount: 16}
+      intent: {kind: attack, amount: 8}

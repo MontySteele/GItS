@@ -1,0 +1,329 @@
+{
+ "turn_id": "kokomi-slice2-t06",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "pilot": "generic",
+ "run_seed": "4E4D9AV2RPPU",
+ "not_a_packet": "the RAW wire state, ids included. Tool side only -- never hand this to a grader",
+ "digest": {
+  "state_type": "monster",
+  "round": 1,
+  "turn": "player",
+  "player": {
+   "hp": 48,
+   "block": 0,
+   "energy": 2,
+   "status": {},
+   "resources": {
+    "KLEEMOD_BURST": 0,
+    "KLEEMOD_CHARGE": 8,
+    "KLEEMOD_ENCORE": 0,
+    "KLEEMOD_FANFARE": 0,
+    "KLEEMOD_FANFARE_CAP_BONUS": 0,
+    "KLEEMOD_FANFARE_FLOOR": 0,
+    "KLEEMOD_FURINA_BURST": 0,
+    "KLEEMOD_KOKOMI_BURST": 0,
+    "KLEEMOD_SPOTLIGHT_MODE": 0,
+    "KLEEMOD_SPOTLIGHT_MOVED": 0,
+    "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+   }
+  },
+  "hand": [
+   {
+    "name": "Twin Tides",
+    "id": "KLEEMOD-PROTO_CHARGE_MODE_GUARD",
+    "cost": "1",
+    "can_play": true,
+    "unplayable_reason": null,
+    "is_upgraded": false
+   },
+   {
+    "name": "Water's Edge",
+    "id": "KLEEMOD-WATERS_EDGE",
+    "cost": "1",
+    "can_play": true,
+    "unplayable_reason": null,
+    "is_upgraded": false
+   },
+   {
+    "name": "All Streams Flow to the Sea",
+    "id": "KLEEMOD-ALL_STREAMS_FLOW",
+    "cost": "1",
+    "can_play": true,
+    "unplayable_reason": null,
+    "is_upgraded": false
+   },
+   {
+    "name": "Gyorin Formation",
+    "id": "KLEEMOD-GYORIN_FORMATION",
+    "cost": "2",
+    "can_play": true,
+    "unplayable_reason": null,
+    "is_upgraded": false
+   }
+  ],
+  "enemies": [
+   {
+    "id": "NIBBIT_0",
+    "name": "Nibbit",
+    "hp": 34,
+    "block": 0,
+    "status": {}
+   }
+  ],
+  "prompt": null
+ },
+ "state": {
+  "state_type": "monster",
+  "battle": {
+   "round": 1,
+   "turn": "player",
+   "is_play_phase": true,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "combat_id": 1,
+     "name": "Nibbit",
+     "hp": 34,
+     "max_hp": 42,
+     "block": 0,
+     "status": [],
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive",
+       "description": "This enemy intends to Attack for 12 damage."
+      }
+     ]
+    }
+   ]
+  },
+  "run": {
+   "act": 1,
+   "floor": 2,
+   "ascension": 3
+  },
+  "player": {
+   "character": "Kokomi",
+   "hp": 48,
+   "max_hp": 70,
+   "block": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "resources": {
+    "KLEEMOD_BURST": 0,
+    "KLEEMOD_CHARGE": 8,
+    "KLEEMOD_ENCORE": 0,
+    "KLEEMOD_FANFARE": 0,
+    "KLEEMOD_FANFARE_CAP_BONUS": 0,
+    "KLEEMOD_FANFARE_FLOOR": 0,
+    "KLEEMOD_FURINA_BURST": 0,
+    "KLEEMOD_KOKOMI_BURST": 0,
+    "KLEEMOD_SPOTLIGHT_MODE": 0,
+    "KLEEMOD_SPOTLIGHT_MOVED": 0,
+    "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_CHARGE_MODE_GUARD",
+     "name": "Twin Tides",
+     "type": "Skill",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Choose one: Gain 5 Block | Spend 6 Charge: gain 12 Block.",
+     "rarity": "Uncommon",
+     "is_upgraded": false,
+     "keywords": [
+      {
+       "name": "Charge",
+       "description": "Charge: a bank that grows by 1 whenever one of your cards Exhausts. It has no maximum. Cards that read it are stronger the more you hold; a card printing a Charge price spends it, and cannot be played below that price. You hold 8 Charge."
+      },
+      {
+       "name": "Block",
+       "description": "Until next turn, prevents damage."
+      }
+     ],
+     "index": 0,
+     "target_type": "Self",
+     "can_play": true,
+     "unplayable_reason": null
+    },
+    {
+     "id": "KLEEMOD-WATERS_EDGE",
+     "name": "Water's Edge",
+     "type": "Attack",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 6 damage. Applies Hydro.",
+     "rarity": "Basic",
+     "is_upgraded": false,
+     "keywords": [
+      {
+       "name": "Applies Hydro",
+       "description": "If the target has no aura, this applies Hydro for 2 turns. A different aura is consumed to trigger a Reaction instead."
+      }
+     ],
+     "index": 1,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "unplayable_reason": null
+    },
+    {
+     "id": "KLEEMOD-ALL_STREAMS_FLOW",
+     "name": "All Streams Flow to the Sea",
+     "type": "Attack",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 9 damage, already including Charge. Applies Hydro.",
+     "rarity": "Uncommon",
+     "is_upgraded": false,
+     "keywords": [
+      {
+       "name": "Charge scaling",
+       "description": "+1 damage per 2 Charge you hold. You hold 8 Charge: +4 damage, already counted in the number above."
+      },
+      {
+       "name": "Applies Hydro",
+       "description": "If the target has no aura, this applies Hydro for 2 turns. A different aura is consumed to trigger a Reaction instead."
+      }
+     ],
+     "index": 2,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "unplayable_reason": null
+    },
+    {
+     "id": "KLEEMOD-GYORIN_FORMATION",
+     "name": "Gyorin Formation",
+     "type": "Skill",
+     "cost": "2",
+     "star_cost": null,
+     "description": "Gain 10 Block, already including Charge. At the start of your next turn, gain 6 Block.",
+     "rarity": "Rare",
+     "is_upgraded": false,
+     "keywords": [
+      {
+       "name": "Charge scaling",
+       "description": "+1 Block per 2 Charge you hold. You hold 8 Charge: +4 Block, already counted in the number above."
+      },
+      {
+       "name": "Block",
+       "description": "Until next turn, prevents damage."
+      }
+     ],
+     "index": 3,
+     "target_type": "Self",
+     "can_play": true,
+     "unplayable_reason": null
+    }
+   ],
+   "draw_pile_count": 13,
+   "discard_pile_count": 0,
+   "exhaust_pile_count": 0,
+   "draw_pile": [
+    {
+     "name": "Bake-Kurage",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Summon Bake-Kurage for 1 turn. Gain 1 Charge. Burst +5. Elemental Skill."
+    },
+    {
+     "name": "Coral Guard",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Gain 5 Block."
+    },
+    {
+     "name": "Coral Guard",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Gain 5 Block."
+    },
+    {
+     "name": "Coral Guard",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Gain 5 Block."
+    },
+    {
+     "name": "Coral Guard",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Gain 5 Block."
+    },
+    {
+     "name": "Tactical Retreat",
+     "cost": "0",
+     "star_cost": null,
+     "description": "Draw 1 card. Discard 1 random card."
+    },
+    {
+     "name": "Water's Edge",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 6 damage. Applies Hydro."
+    },
+    {
+     "name": "Water's Edge",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 6 damage. Applies Hydro."
+    },
+    {
+     "name": "Water's Edge",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 6 damage. Applies Hydro."
+    },
+    {
+     "name": "Water's Edge",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 6 damage. Applies Hydro."
+    },
+    {
+     "name": "Gorou \u2014 Inuzaka All-Round Defense",
+     "cost": "0",
+     "star_cost": null,
+     "description": "Deal 6 damage. Exhaust."
+    },
+    {
+     "name": "Shinobu \u2014 Grass Ring of Sanctification",
+     "cost": "0",
+     "star_cost": null,
+     "description": "Gain 4 Block."
+    },
+    {
+     "name": "Purity",
+     "cost": "0",
+     "star_cost": null,
+     "description": "Retain. Exhaust up to 3 cards in your Hand. Exhaust."
+    }
+   ],
+   "discard_pile": [],
+   "exhaust_pile": [],
+   "gold": 99,
+   "status": [],
+   "relics": [
+    {
+     "id": "KLEEMOD-PEARL_OF_WISDOM_RELIC",
+     "name": "Pearl of Wisdom",
+     "description": "Whenever a card is Exhausted, gain 1 Charge and 2 Burst Energy. Card rewards after a fight offer a fourth Companion choice.",
+     "counter": null,
+     "keywords": []
+    },
+    {
+     "id": "LEAD_PAPERWEIGHT",
+     "name": "Lead Paperweight",
+     "description": "Upon pickup, choose 1 of 2 Colorless cards to add to your Deck.",
+     "counter": null,
+     "keywords": []
+    }
+   ],
+   "potions": [],
+   "max_potion_slots": 3
+  }
+ }
+}

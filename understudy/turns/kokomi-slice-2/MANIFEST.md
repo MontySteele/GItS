@@ -5,11 +5,9 @@ opaque on purpose: they are printed into the design-blind packet a grader
 reads, so nothing in one may say which arm it belongs to. This file is the map,
 and it is not shown to a grader.
 
-**Nothing here is staged.** Every seed is unpinned and every row reads
-`staged: pending`. The prototype halves need a dev build carrying the
-quarantined rows (`klee-mod\build\deploy_proto.ps1`); the shipped halves could
-be staged on a release build, but the live game belongs to another session and
-this branch was built in a worktree.
+**All eight are staged** (2026-08-29, build `0.2.1293+proto`). Each pair's
+seed was discovered by staging the shipped half, then pinned onto BOTH halves
+of the pair — in `seed:` inside each file and in the table below.
 
 **The seed rule.** Within a pair, the first half staged rolls a seed and
 `stage` records it; every other half of that pair must then be staged with
@@ -19,16 +17,48 @@ telegraphs anything but an attack, re-roll — the intent is the question here.
 
 ## The map
 
-| turn | file | arm | card under test | staged |
+| turn | file | arm | card under test | seed | staged |
+|---|---|---|---|---|---|
+| `kokomi-slice2-t01` | `spend-shipped.yaml` | 1 — spend | `all_streams_flow` (shipped) | `JMKCFWFSN8N0` | staged |
+| `kokomi-slice2-t02` | `spend-prototype.yaml` | 1 — spend | `proto_charge_spend_strike` | `JMKCFWFSN8N0` | staged |
+| `kokomi-slice2-t03` | `threshold-shipped.yaml` | 2 — threshold | `read_the_current` (shipped) | `EXET6AYQYN9N` | staged |
+| `kokomi-slice2-t04` | `threshold-prototype.yaml` | 2 — threshold | `proto_charge_threshold_strike` | `EXET6AYQYN9N` | staged |
+| `kokomi-slice2-t05` | `mode-shipped.yaml` | 3 — mode | `coral_guard` (shipped) | `4E4D9AV2RPPU` | staged |
+| `kokomi-slice2-t06` | `mode-prototype.yaml` | 3 — mode | `proto_charge_mode_guard` | `4E4D9AV2RPPU` | staged |
+| `kokomi-slice2-t07` | `formation-shipped.yaml` | 4 — formation | `mass_mobilization` (shipped) | `QWVYM3T6J6RF` | staged |
+| `kokomi-slice2-t08` | `formation-prototype.yaml` | 4 — formation | `proto_charge_muster_price` | `QWVYM3T6J6RF` | staged |
+
+## The seed rolls, and the bodies they actually drew
+
+The encounter is generated and no verb writes an intent, so the only lever is
+the seed. Every roll is recorded here, and the body each pair settled on is the
+one written into that pair's tier0 mirror — the files now declare the LIVE
+body, not the design's placeholder, so the declared and observed closeness
+readings are readings of the same board.
+
+| pair | rolls | settled on | the body, live | why the earlier rolls were rejected |
 |---|---|---|---|---|
-| `kokomi-slice2-t01` | `spend-shipped.yaml` | 1 — spend | `all_streams_flow` (shipped) | pending |
-| `kokomi-slice2-t02` | `spend-prototype.yaml` | 1 — spend | `proto_charge_spend_strike` | pending |
-| `kokomi-slice2-t03` | `threshold-shipped.yaml` | 2 — threshold | `read_the_current` (shipped) | pending |
-| `kokomi-slice2-t04` | `threshold-prototype.yaml` | 2 — threshold | `proto_charge_threshold_strike` | pending |
-| `kokomi-slice2-t05` | `mode-shipped.yaml` | 3 — mode | `coral_guard` (shipped) | pending |
-| `kokomi-slice2-t06` | `mode-prototype.yaml` | 3 — mode | `proto_charge_mode_guard` | pending |
-| `kokomi-slice2-t07` | `formation-shipped.yaml` | 4 — formation | `mass_mobilization` (shipped) | pending |
-| `kokomi-slice2-t08` | `formation-prototype.yaml` | 4 — formation | `proto_charge_muster_price` | pending |
+| 1 — spend | 4 | `JMKCFWFSN8N0` | Sludge Spinner 34/38, attacks for 8 | two Toadpoles with the front one buffing; two Corpse Slugs; a Shrinker Beetle debuffing |
+| 2 — threshold | 3 | `EXET6AYQYN9N` | Nibbit 40/42, attacks for 12 | a Fuzzy Wurm Crawler attacking for only 4; a three-slime group |
+| 3 — mode | 12 | `4E4D9AV2RPPU` | Nibbit 34/42, attacks for 12 | five Fuzzy Wurm Crawlers and three Shrinker Beetles, at 4 damage or a debuff; three multi-body rolls |
+| 4 — formation | 10 | `QWVYM3T6J6RF` | Sludge Spinner 37/37, attacks for 8 | see the note below |
+
+**Pair 3 needed twelve rolls and that is the point of them.** Its whole
+question is 5 Block against 12 Block for a bank of 6, and a body telegraphing 4
+answers both modes with room to spare — the choice would have been dead on the
+board rather than dead in the card. Twelve rolls found one single body
+telegraphing 12, which the cheap mode does not cover and the priced mode
+exactly does.
+
+**Pair 4 settled at 37 HP rather than the 46 the design asked for, and the
+reason is recorded rather than buried.** `set_hp` clamps at a creature's
+maximum, and in ten rolls the ONLY single Act-1 body whose maximum reaches 46
+was the Fuzzy Wurm Crawler, which telegraphed 4 damage on every appearance. The
+choice was a 46 HP body against which defence is worth nothing, or a 37 HP body
+telegraphing 8. Both of the board's stated properties survive at 37 — one enemy,
+an attack telegraphed, and no lethal line, since the largest total this board
+can produce is 15 against 37 — while at 4 damage the defensive half of the
+question would not have been asked at all. The file now declares 37.
 
 ## The boards, and the arithmetic that says no line is lethal
 
@@ -48,8 +78,8 @@ number below is the printed number. All Streams Flow to the Sea reads
 | 2 (`t04`) | 2 | 12 | 40 | All Streams Flow first at 12 Charge (**11**) then Fathom the Tide (7+6=**13**) = **24**; the other order pays 13 then 8 = 21 | 16 |
 | 3 (`t05`) | 2 | 8 | 34 | Water's Edge (**6**) + All Streams Flow (**9**) = **15** | 19 |
 | 3 (`t06`) | 2 | 8 | 34 | Water's Edge (**6**) + All Streams Flow (**9**) = **15** — Twin Tides deals none | 19 |
-| 4 (`t07`) | 3 | 8 | 46 | three 1-cost plays: Water's Edge (**6**) + All Streams Flow at 8 Charge (**9**) = **15**; or the order plus one recruit, and the largest single Inazuma Companion hit is **14** | 31 |
-| 4 (`t08`) | 3 | 8 | 46 | same three 1-cost plays = **15**; or the order (bank 8 → 2) plus one recruit at **14** | 31 |
+| 4 (`t07`) | 3 | 8 | 37 | three 1-cost plays: Water's Edge (**6**) + All Streams Flow at 8 Charge (**9**) = **15**; or the order plus one recruit, and the largest single Inazuma Companion hit is **14** | 22 |
+| 4 (`t08`) | 3 | 8 | 37 | same three 1-cost plays = **15**; or the order (bank 8 → 2) plus one recruit at **14** | 22 |
 
 Two things the table does not hide. In pair 2 the ORDER of the two plays
 changes the prototype half's total and not the shipped half's — that is the
@@ -71,10 +101,14 @@ wherever it is not the card under test, because a Charge payoff nothing
 competes with is not a decision. A second flat-Block card would make "defend"
 the answer by arithmetic rather than by choice.
 
-## Closeness (declared boards, `staged_turn closeness`, 2026-08-29)
+## Closeness (`staged_turn closeness`, 2026-08-29)
 
-Run on all eight. **All eight SURVIVE** against `DOMINANCE_GAP` 0.5. Per-turn
-JSON in `review/qa/<turn id>/closeness.json`.
+Run on all eight twice: once on the declared boards before staging, and again
+with `--observed` on the boards the graders actually saw. **All eight SURVIVE
+both ways, and every number below is identical between the two readings** —
+which is the check the re-declaration above was for. `review/qa/<turn
+id>/closeness.json` holds the OBSERVED reading, because that is the board a
+grader was shown.
 
 | turn | gap | top1 / top2 | lines |
 |---|---|---|---|

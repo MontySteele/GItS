@@ -9,7 +9,7 @@
 # THE SEED IS PART OF THE PAIR. The encounter is GENERATED, so the first half
 # staged DISCOVERS a seed; every other half of that pair must then be staged
 # with `--seed <that run_seed>` or the halves are two different fights.
-# MANIFEST.md carries the seed once one exists. Nothing here is staged.
+# MANIFEST.md carries the seed, and it is pinned in this file as well.
 #
 # THE TURN ID IS DELIBERATELY OPAQUE. It is printed into the design-blind
 # packet the grader reads, so a word like "spend" or "threshold" inside an id
@@ -58,6 +58,10 @@
 
 id: kokomi-slice2-t03
 character: KLEEMOD-KOKOMI
+
+# The pair's seed, discovered by staging the shipped half and then
+# pinned onto BOTH halves, so a re-stage reproduces the same fight.
+seed: EXET6AYQYN9N
 
 exact_hand: true
 
@@ -124,8 +128,8 @@ board:
     - waters_edge
     - all_streams_flow
   enemies:
-    - name: "Act-1 attacker"
+    - name: "Nibbit"
       hp: 40
-      max_hp: 52
+      max_hp: 42
       block: 0
-      intent: {kind: attack, amount: 14}
+      intent: {kind: attack, amount: 12}
