@@ -2819,3 +2819,94 @@ replacing `Snapshot`'s call to `Affordability` fails
 `LocalContext.GetMe` for `state.Players[0]` fails
 `The_memory_card_resolves_the_local_seat_and_only_the_local_seat`; renaming the
 page's run-out sentence fails the page lock.
+
+### 14.10 Live acceptance
+
+Run 2026-08-29 from the art-bearing main checkout on branch
+`kurage-memory-card`, game closed for both deploys. Two builds, because the
+first live frame found a defect and the fix is in this section:
+
+- **`0.2.1506+proto`** is what is installed and what every capture below except
+  the first is taken on. It carries the `Portrait` fix described under "what
+  the frame found". Its predecessor `0.2.1495+proto` is the branch as `M61`
+  left it. Both stamped `+proto.dirty` — the working tree carried another
+  workstream's untracked scratch under `review/qa/local-sanity-2026-08-29*/`,
+  which is not this branch's to commit, so a clean stamp was not reachable and
+  the dirty mark is honest rather than incidental.
+- Game **v0.111.0**, the pinned build. `validate.ps1` OK on both deploys, whole
+  gate, nothing skipped.
+
+**The boards.** A live Kokomi run in each case (`understudy.embark`), first
+fight of act 1, seeds `AEKL4GL2CCNF` and `8BRS1D2FEWTG` — read back off the
+wire, and named here for provenance only. Nothing on them is a measurement:
+the queue was filled by granting `Call to Arms` through the dev door and the
+bank was moved with `set_resource`, so `bridge.GRANT_GUARDRAIL` applies to
+every frame in this section. No existing `understudy/turns/` file stages a
+memory queue, and none was written: this is a display acceptance, not a graded
+turn.
+
+**What rendered.** Captures in `review/qa/eb198-live/`.
+
+| State | Board | Result |
+|---|---|---|
+| Empty queue | round 1, Charge 0, nothing enrolled | **RENDERS.** The count alone at the left edge, cream, no ring and no thumbnail — the state the blind tester could not tell from a block. `state-a-empty-queue.png` |
+| Blocked front | Water's Edge queued at 3 Charge, bank 0 | **RENDERS.** Red ring, the card's own portrait, the price badge `3`, the count `0` in red. `state-b-blocked-red.png` |
+| Payable front | three entries (3 / free / 3), bank 7 | **RENDERS.** Blue ring, portrait, badge, the count `7` in blue. `state-c-affordable-blue.png` |
+| The click | left-click on the element | **WORKS.** The game's pile viewer opens on our `CardPile`, the queue front first in the order the page prints, each card at full size with its real face, dimmed combat behind it and the base game's own back button. One benign `CardPileScreen has no info text.` in the log, exactly as `PileType.None` was expected to produce. `state-d-pile-view.png` |
+| The pile projection | bank 7 covering the queue, then bank 3 running out at #3 | **DOES NOT RENDER.** No affordability ring appears on any entry in either case — the cards show only their own frame colours, and the two frames are indistinguishable. `state-d-pile-view.png`, `state-e-pile-view-runs-out.png` |
+
+**The anchor clears.** Left edge, vertically centred, no collision with the
+relic row above or the energy orb and draw pile below at 3842x2160. The
+thumbnail reads at 104px and the ring is legible at a glance. Whether the
+anchor still clears a DEEP relic column is untested — this run held two relics.
+
+**What the frame found, and what was fixed.** §14.5 read `CardModel.Portrait`
+off the decompile and concluded it "works for base-game cards in the queue as
+well as ours". That is exactly backwards for OUR cards and the first live
+frame drew an empty ring: a mod card has no `PortraitPath` to load, because its
+art is a runtime `ImageTexture` handed to BaseLib's portrait patch as
+`CustomCardModel.CustomPortrait` (`RosterArt.CardPortrait`, `KleeArt.cs`) and
+never reaches the base property at all. `KurageMemoryCard.Portrait` now prefers
+the override and falls back to the base property, which keeps the half of §14.5
+that was right — a base-game card in the queue still draws its own face with no
+per-roster art table. Rebuilt, redeployed and re-captured; every capture in the
+table above except the empty state is on the fixed build.
+
+**What did not work, and is NOT mine to fix.** The pile view's affordability
+rings never paint. `KurageMemoryPileRing.Paint` is armed off a Harmony postfix
+on the private `NCard.UpdateStarCostVisuals`; the mod loads with no Harmony
+error, our pile demonstrably opens, and no exception is raised — the ring
+simply never appears, on a bank that covers the whole queue or one that runs
+out at #3. Two candidates and the frame cannot separate them: that hook does
+not run for an `NCard` the pile grid builds, or the ring Panel is drawn beneath
+the card's own art. This is §14.9's own open question — "the pile ring covering
+an `NCard`'s rect under its own `Scale`" — answered NO, and picking the
+replacement hook needs the decompile rather than a guess, so it is filed rather
+than patched. **The consequence for the design is the whole point of the pile
+view**: the HUD's half (does the next one fire) is live and correct, and the
+pile's half (how far do I get) is not shipped. §14.3's division of labour is
+therefore half-built.
+
+**A diagnostic caveat, not a defect.** `set_resource` writes the bank straight
+past `KokomiResources`, so it does not run `RefreshStrip` and the element keeps
+its previous reading until something else refreshes it. Every Charge change
+through real play does go through that funnel, and was seen to repaint the
+element live (an Exhaust took the count from 0 to 1 and a Muster redrew the
+ring). Read the dev door's staleness as the door's, not the element's.
+
+**The page.** `understudy.blindplay observe` carries the run-out sentence on a
+blocked front — "Charge runs out at #1 (**Water's Edge**): that one and
+everything behind it are held until the bank catches up" — and its covering
+twin, "Your Charge covers every memory queued, if you spend none of it
+elsewhere", on a bank that reaches the end.
+
+**`godot.log`.** No exception, no error and no warning from `KurageMemoryCard`,
+`KurageMemory` or `NCardPileScreen` across either session. The only line either
+class produced is the expected `[INFO] CardPileScreen has no info text.`, once
+per pile open. The `[WARN] [klee] No card art at …` block and the
+`pck resource missing` block both predate this branch and name unrelated rows.
+
+**Still owed, and it is [USER]'s eyes-on.** Whether the badge reads against a
+light portrait (it is cream on white here, and low-contrast on Water's Edge);
+whether 104px is the right size; whether the left edge is the right home. Those
+are taste, not correctness, and §14.1's five quotes are the only spec they have.
