@@ -4,8 +4,15 @@
 TWO CHECKS, AND THEY ARE THE SAME RULE READ FROM BOTH ENDS.
 
   (1) **The field.** Every row on `docs/prototype-surface.yaml` records
-      `authored_by:` -- a non-empty list of model FAMILIES from the closed set
-      `{claude, gpt}`. `tools/gen_prototype_cards.py` already refuses a row
+      `authored_by:` -- a non-empty list of model FAMILIES from the closed
+      AUTHORING set `{claude, gpt}` (`authorship.AUTHORABLE_FAMILIES`). Note
+      the qualifier: `authorship.FAMILIES` also carries `local`, the family of
+      a model served on this machine, and the two sets are deliberately
+      different. `local` may be RECOGNISED, so a reading can be attributed and
+      a refusal can name the chair it came from; it may not AUTHOR a row, and
+      this check is what makes that true rather than merely intended -- a row
+      naming it is a finding, exactly as `mistral` is.
+      `tools/gen_prototype_cards.py` already refuses a row
       that fails this, so on a healthy tree check (1) never fires alone; it is
       here because the generator's refusal is a BUILD failure on the dev path
       and this is the lane that runs on every push.
@@ -190,6 +197,12 @@ def _self_test() -> int:
     assert authorship.field_findings({"id": "proto_x",
                                       "authored_by": ["mistral"]}), \
         "an unknown family must fail"
+    # The local GRADER family is recognised by `model_family` and is still not
+    # authorable. If this ever passes, the authoring roles have been widened
+    # by accident rather than by a ruling.
+    assert authorship.field_findings(
+        {"id": "proto_x", "authored_by": [authorship.LOCAL_FAMILY]}), \
+        "the local family must not be able to author a row"
     assert not authorship.field_findings({"id": "proto_x",
                                           "authored_by": ["claude"]})
 
