@@ -137,8 +137,9 @@ REGISTRY: tuple[Lint, ...] = (
     # unexplained. Run B6 said it out loud ("granting Charge and Burst was not
     # explained in its displayed rules text"), and a missing hover tip renders
     # as nothing at all -- no seam, no exception -- so nothing but a join can
-    # see it.
-    _ci("charge-keyword",       "tools/lint_charge_keyword.py"),
+    # see it. One row per meter inside that file -- Charge and Burst, and the
+    # next meter is a row there rather than a seventh lint here.
+    _ci("keyword-meters",       "tools/lint_keyword_meters.py"),
     _ci("op-parity",            "tools/lint_op_parity.py"),
     _ci("sly-grammar",          "tools/lint_sly_grammar.py"),
     _ci("codegen-staleness",    "tools/gen_roster_cards.py", "--check"),

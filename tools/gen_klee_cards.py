@@ -325,7 +325,7 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
 RECALL_FIELDS = {"op", "from", "position", "amount"}
 
 # The Charge KEYWORD's attach rule, in ONE place (used by `emit` below and
-# imported by `tools/lint_charge_keyword.py`, which derives nothing of its own).
+# imported by `tools/lint_keyword_meters.py`, which derives nothing of its own).
 #
 # THE RULE IS THE PRINTED WORD, NOT THE OP, and the choice is forced. The
 # op-based rule the slice shipped (`spend_charge`) is not TOTAL, and a closed

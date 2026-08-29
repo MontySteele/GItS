@@ -70,7 +70,7 @@ public sealed class PrincessOfWatatsumi : CustomCardModel, ICharacterCard
 
     // The Charge keyword, on the same rule codegen applies to her generated
     // faces: this face PRINTS the word, so it carries the definition. Written
-    // out here because the card is hand-written; `tools/lint_charge_keyword.py`
+    // out here because the card is hand-written; `tools/lint_keyword_meters.py`
     // holds the two surfaces to one rule.
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         KokomiRiderTips.ForCharge(base.ExtraHoverTips, this);
