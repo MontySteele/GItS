@@ -174,6 +174,11 @@ def card_playable(state: CombatState, card: Card) -> bool:
                             # gate one line up, DERIVED from the op instead
                             # of a second sheet field, so the price shown
                             # and the price paid cannot drift apart.
+    price = charge_cost(card)
+    if price and state.player.charge < price:
+        return False        # QUARANTINED (R213 E1), the Charge sink's cost
+                            # line -- the Spark gate above, one meter over,
+                            # and DERIVED from the op for the same reason.
     # No Fanfare playability gate: Fanfare is read, never spent (F-A4).
     return card_cost(state, card) <= state.player.energy
 
@@ -191,6 +196,26 @@ def spark_cost(card: Card) -> int:
     for fx in card.effects:
         if fx.get("op") == "spend_spark":
             total += effects.spend_spark_amount(fx)
+    return total
+
+
+def charge_cost(card: Card) -> int:
+    """What this card's printed text charges in Charge, 0 for every shipped
+    card. QUARANTINED (R213 E1): `spend_charge` lives on the prototype
+    surface alone, and R80 -- Charge is read, never spent -- is what the
+    slice reopened rather than what it repealed.
+
+    TOP-LEVEL ops only, `spark_cost`'s rule verbatim. A spend inside a
+    `choose_one` mode is a price the player cannot be shown before choosing
+    to play the card, so it is not part of the cost line -- and the game's
+    choose-a-card screen has no per-mode playability to put it on either.
+    `effects._op_spend_charge` stops the card there instead, which is the
+    loud half of the same rule.
+    """
+    total = 0
+    for fx in card.effects:
+        if fx.get("op") == "spend_charge":
+            total += effects.spend_charge_amount(fx)
     return total
 
 

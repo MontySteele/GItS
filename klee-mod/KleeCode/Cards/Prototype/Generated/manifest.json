@@ -6,6 +6,10 @@
     "reachable_by": "understudy give_card / scenario `give:` step"
   },
   "generated": [
+    "proto_charge_mode_guard",
+    "proto_charge_muster_price",
+    "proto_charge_spend_strike",
+    "proto_charge_threshold_strike",
     "proto_itto_superlative_superstrength_either",
     "proto_itto_superlative_superstrength_priced",
     "proto_pearl_barrage_turn",
@@ -15,6 +19,10 @@
     "proto_thoma_crimson_ooyoroi_priced"
   ],
   "owners": {
+    "proto_charge_mode_guard": "kokomi",
+    "proto_charge_muster_price": "kokomi",
+    "proto_charge_spend_strike": "kokomi",
+    "proto_charge_threshold_strike": "kokomi",
     "proto_itto_superlative_superstrength_either": "klee",
     "proto_itto_superlative_superstrength_priced": "klee",
     "proto_pearl_barrage_turn": "kokomi",
@@ -24,6 +32,10 @@
     "proto_thoma_crimson_ooyoroi_priced": "klee"
   },
   "mode_faces": {
+    "proto_charge_mode_guard": [
+      "ProtoChargeModeGuardModeA",
+      "ProtoChargeModeGuardModeB"
+    ],
     "proto_itto_superlative_superstrength_either": [
       "ProtoIttoSuperlativeSuperstrengthEitherModeA",
       "ProtoIttoSuperlativeSuperstrengthEitherModeB"

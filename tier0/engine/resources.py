@@ -466,6 +466,40 @@ def gain_charge(state: CombatState, n: int, source: str) -> None:
     state.emit("gain_charge", amount=n, source=source, total=p.charge)
 
 
+def spend_charge(state: CombatState, n: int, source: str,
+                 card: str | None = None) -> bool:
+    """QUARANTINED SUPPORT (R213 E1). Spend n Charge; returns whether the
+    bank paid. ALL OR NOTHING.
+
+    NOTHING SHIPPED CALLS THIS. `gain_charge` above still carries the
+    standing law -- Charge is read, never expended (R80) -- and every shipped
+    number on Kokomi's sheet was measured against a bank that only grows.
+    R213 E1 reopened that rule, and this function is what a PROTOTYPE row on
+    the quarantined surface (`docs/prototype-surface.yaml`) needs in order to
+    put the reopened question to the real engine. It is deleted with the
+    slice's rows if the slice is rejected.
+
+    NO OVERDRAW, and that is Kokomi's law rather than a taste call: the
+    shortfall-drains-HP grammar is Furina's Encore alone
+    (`spend_encore_or_hp`), and LAW's "no self-damage anywhere in her kit or
+    personal pool" forbids the shape here outright. So the bank either pays
+    the whole price or pays nothing -- the `effects.spend_sparks` bargain,
+    for the same reason it was made there: a partial spend leaves the payer
+    believing it was paid.
+
+    The refusal is EMITTED, never swallowed, and the caller
+    (`effects._op_spend_charge`) stops the rest of the card on it."""
+    p = state.player
+    if p.charge < n:
+        state.emit("spend_charge_refused", amount=n, bank=p.charge,
+                   source=source, card=card)
+        return False
+    p.charge -= n
+    state.emit("charge_spent", amount=n, source=source, card=card,
+               total=p.charge)
+    return True
+
+
 def gain_burst(state: CombatState, n: int, source: str) -> None:
     """Burst energy, with the SOURCE recorded (C5, Neap Tide v2.1).
 

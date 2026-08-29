@@ -43,6 +43,11 @@ public static class KokomiRiderTips
     public const string MusterKey = "KLEEMOD-MUSTER";
     public const string ChargeKey = "KLEEMOD-CHARGE_RIDER";
 
+    /// <summary>QUARANTINED (R213 E1). The CHARGE KEYWORD -- the meter's own
+    /// rules text, which is a different surface from ChargeKey above (that
+    /// one titles a per-card RATE tip on a reader).</summary>
+    public const string ChargeWordKey = "KLEEMOD-CHARGE";
+
     /// <summary>
     /// L4b: the printed Charge rider's RATE.
     ///
@@ -96,6 +101,54 @@ public static class KokomiRiderTips
         var charge = KokomiResources.GetCharge(owner);
         return $"{rate} You hold {charge} Charge: +{charge / step * per} "
              + $"{noun}, already counted in the number above.";
+    }
+
+    /// <summary>
+    /// QUARANTINED (R213 E1): the [gold]Charge[/gold] KEYWORD.
+    ///
+    /// THE GAP THIS CLOSES was named twice before it had a witness. R215 D
+    /// found that her Charge-gaining faces print the word and nothing on
+    /// screen says what it is, and deferred the label into E1 because
+    /// labelling a resource whose rules are open would have been settling
+    /// them. The blind seat then said it from the other side, unprompted, on
+    /// run B6: "Burst Energy accumulated ... although I never saw how to
+    /// spend it". A meter with no rules text is a meter a player can only
+    /// learn by watching it.
+    ///
+    /// It arrives HERE first, on the prototype surface, because it is the
+    /// spending rows that make the word answerable: until a card printed a
+    /// Charge PRICE there was no sentence to write about what holding one is
+    /// worth. Attached from the `spend_charge` op by codegen, so a spender
+    /// cannot ship printing a word nothing explains. The shipped gain faces
+    /// have the same gap and are not touched here -- that is wording-only
+    /// hygiene across thirty generated files and belongs in its own commit.
+    ///
+    /// The accrual rate is stated FROM THE CONSTANT, the Muster tip's
+    /// bargain: a retune must not be able to leave the definition quoting a
+    /// retired number. In combat the tip also says what the bank holds right
+    /// now, because the whole decision the keyword describes is whether to
+    /// keep it.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForCharge(
+        IEnumerable<IHoverTip> inherited, CardModel card)
+    {
+        foreach (var tip in inherited) yield return tip;
+        yield return new HoverTip(
+            new LocString(Table, ChargeWordKey + ".title"), ChargeWordBody(card));
+    }
+
+    private static string ChargeWordBody(CardModel card)
+    {
+        var per = KokomiConstants.ChargePerExhaust;
+        var rule =
+            $"[gold]Charge[/gold]: a bank that grows by {per} whenever one of "
+          + "your cards [gold]Exhausts[/gold]. It has no maximum. Cards that "
+          + "read it are stronger the more you hold; a card printing a "
+          + "[gold]Charge[/gold] price spends it, and cannot be played below "
+          + "that price.";
+        var owner = TipOwner.CreatureOf(card);
+        if (owner == null || card.CombatState == null) return rule;
+        return $"{rule} You hold {KokomiResources.GetCharge(owner)} Charge.";
     }
 
     /// <summary>

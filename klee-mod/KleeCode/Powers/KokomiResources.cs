@@ -146,11 +146,19 @@ public sealed class ChargeResource : BasicCustomResource
     public override bool ApplySharedModification => false;
 
     /// <summary>
-    /// Charge is never spent. Returning true without decrementing is the
-    /// contract, not a stub: if this ever starts subtracting, every scaling
-    /// number in her sheet was measured against a bank that only grows and is
-    /// silently wrong. See tier0/engine/resources.py -- there is no
-    /// spend_charge, by design.
+    /// NO SHIPPED CARD SPENDS CHARGE, and this override is still the "never
+    /// spent" contract for every route the GAME can take on its own: a
+    /// canonical resource cost, a cost modifier, anything that reaches a
+    /// CustomResource generically. It returns true without decrementing, so
+    /// none of them can quietly drain a bank every scaling number on her
+    /// sheet was measured against (R80).
+    ///
+    /// The reopened question (R213 E1) does NOT come through here. A
+    /// prototype row prints an explicit `spend_charge` op, and that op
+    /// resolves through <see cref="KokomiResources.SpendCharge"/> -- one
+    /// named door, greppable, quarantined, and deleted with the slice's rows
+    /// if the slice is rejected. Sim twin: tier0/engine/resources.py
+    /// `spend_charge`, which likewise nothing shipped calls.
     /// </summary>
     public override Task<bool> Spend<T>(
         ICombatState combatState, AbstractModel? spender, int amount, bool optional)
@@ -226,6 +234,57 @@ public static class KokomiResources
         // pulse number moves on every gain. Same funnel and the same reason as
         // the gauge above -- a display may not go stale behind a mutation.
         Vfx.TurnEndPreviewBridge.Refresh(creature);
+    }
+
+    /// <summary>
+    /// QUARANTINED SUPPORT (R213 E1). Whether the bank could pay this price.
+    ///
+    /// The Charge cost LINE: a generated card printing a top-level
+    /// `spend_charge` overrides IsPlayable with this call, which is how the
+    /// price is shown before the energy is committed rather than failing
+    /// silently. Sim twin: tier0/engine/combat.py `charge_cost` reached
+    /// through `card_playable`.
+    /// </summary>
+    public static bool CanSpendCharge(Creature? creature, int amount) =>
+        amount > 0 && GetCharge(creature) >= amount;
+
+    /// <summary>
+    /// QUARANTINED SUPPORT (R213 E1). Spend Charge as a COST. ALL OR
+    /// NOTHING -- returns whether the bank paid, and mutates nothing when it
+    /// did not. Sim twin: tier0/engine/resources.py `spend_charge`.
+    ///
+    /// NO OVERDRAW, and that is her LAW rather than a taste call: the
+    /// shortfall-drains-HP grammar is Furina's Encore alone, and "no
+    /// self-damage anywhere in her kit or personal pool" forbids the shape
+    /// here outright. A partial spend would also leave the caller believing
+    /// it was paid, which is the failure SparkPower.Spend was given the same
+    /// rule to avoid.
+    ///
+    /// THE RETURN VALUE IS LOAD-BEARING and the generator checks it. The
+    /// IsPlayable gate covers a top-level price, but a price inside a
+    /// `choose_one` mode has no gate to sit on -- the choose-a-card screen
+    /// offers every mode whatever the bank holds -- so the emitted statement
+    /// is `if (!await SpendCharge(...)) return;` and the play is abandoned
+    /// where the price failed.
+    ///
+    /// The direct ModifyAmount, rather than the resource's own Spend: that
+    /// override is deliberately inert (see ChargeResource), so routing
+    /// through it would return true and move nothing.
+    /// </summary>
+    public static Task<bool> SpendCharge(
+        PlayerChoiceContext choiceContext, Creature? creature, int amount,
+        CardModel? cardSource)
+    {
+        if (!CanSpendCharge(creature, amount)) return Task.FromResult(false);
+        var resource = Find(creature);
+        if (resource == null) return Task.FromResult(false);
+        resource.ModifyAmount(-amount);
+        Vfx.GaugeBridge.Refresh(creature!);
+        // The pulse reads the bank, so a spend moves the end-of-turn preview
+        // for exactly the reason a gain does. Same funnel, same rule: a
+        // display may not go stale behind a mutation.
+        Vfx.TurnEndPreviewBridge.Refresh(creature);
+        return Task.FromResult(true);
     }
 
     /// <summary>

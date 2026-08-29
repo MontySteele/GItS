@@ -3362,6 +3362,58 @@ def _op_gain_charge(state: CombatState, fx: dict, card: Card) -> None:
                           source=card.id)
 
 
+class ChargeUnpaid(Exception):
+    """A `spend_charge` price the bank could not meet. QUARANTINED (R213 E1).
+
+    Raised so the REST OF THE CARD does not resolve, which is the only
+    reading that mirrors the mod: `_stmt_spend_charge` emits
+    `if (!await KokomiResources.SpendCharge(...)) return;`, and a C# `return`
+    out of `OnPlay` abandons the play where it stands. Caught in
+    `_resolve_card_bound` and nowhere else.
+
+    A TOP-LEVEL price never reaches this: `combat.charge_cost` derives the
+    cost line off the printed op and `combat.card_playable` refuses the card
+    below it, exactly as the Spark sink does. What CAN reach it is a price
+    inside a `choose_one` mode, because the game's choose-a-card screen has
+    no per-mode playability -- a mode is selectable whatever the bank holds.
+    That gap is real and it is named in the slice-2 packet; this exception is
+    what keeps it from paying a mode's payoff for free."""
+
+
+def spend_charge_amount(fx: dict) -> int:
+    """The literal Charge price on one `spend_charge` effect.
+
+    A LITERAL positive int, on `spend_spark_amount`'s argument verbatim:
+    `combat.charge_cost` reads the same number off the printed effect with no
+    state in hand, and a price the playability gate cannot read is a price
+    that fires without being shown."""
+    amount = fx.get("amount")
+    if not isinstance(amount, int) or isinstance(amount, bool) or amount <= 0:
+        raise ValueError(
+            f"spend_charge amount must be a positive literal int, got "
+            f"{amount!r}")
+    return amount
+
+
+def _op_spend_charge(state: CombatState, fx: dict, card: Card) -> None:
+    """QUARANTINED (R213 E1): the Charge SINK.
+
+    Charge is READ and never expended under R80, and this op is the reopened
+    question in code -- it exists for the prototype surface and for nothing
+    else. No shipped row prints it, and the loader is free to refuse one:
+    the lint that guards that is the grep the surface's own header describes
+    (`proto_` ids only).
+
+    THE COST LINE, not an overdraw. A card printing this at top level is
+    unplayable below its price (`combat.charge_cost` ->
+    `combat.card_playable`), so the price is visible before the energy is
+    spent; a price nested in a mode body cannot be gated that way and stops
+    the card instead (see `ChargeUnpaid`)."""
+    if not resources.spend_charge(state, spend_charge_amount(fx),
+                                  source="spend_charge_op", card=card.id):
+        raise ChargeUnpaid(card.id)
+
+
 def _op_summon_kurage(state: CombatState, fx: dict, card: Card) -> None:
     """Bake-Kurage as a persistent summon (v0.4 plan §1).
 
@@ -3589,6 +3641,8 @@ OPS = {
     "copy_companions_played_this_combat": _op_copy_companions_played,
     # --- Kokomi (kickoff v1 §7) ---
     "gain_charge": _op_gain_charge,
+    # QUARANTINED (R213 E1) -- prototype surface only; see _op_spend_charge.
+    "spend_charge": _op_spend_charge,
     "conscript": _op_conscript,
     "summon_kurage": _op_summon_kurage,          # v0.4 O4 salvage
     # --- base-game parity ops (the real Ironclad pool) ---
@@ -3696,7 +3750,14 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
                 KNOB_READS.get("GARMENT_ATTACK_BLOCK", 0) + 1)
     state.current_attack_bonus = bonus
 
-    _resolve_effects(state, card.effects, card)
+    try:
+        _resolve_effects(state, card.effects, card)
+    except ChargeUnpaid:
+        # QUARANTINED (R213 E1). The card stops where the price failed, the
+        # mod's `return` out of OnPlay. Everything already paid stays paid --
+        # the energy, the card leaving hand -- because that is what the mod
+        # does too; only the effects after the unpayable price are skipped.
+        return
     if state.repeat_requested:                          # Perfect Timing
         times, state.repeat_requested = state.repeat_requested, 0
         for _ in range(times):
