@@ -118,8 +118,17 @@ And, settling the LAW question this packet raised against it:
 > feels basically redundant, and I want to make Kokomi's more useful as part
 > of the current rework as well."
 
-So: no Burst card printed at a threshold, no overdrive loan, no temporary
-Fanfare bonus and no entitlements. A full meter is a maximally scaled Salon,
+And, ruling the roster-wide consequence:
+
+> "Yeah, agreed on the Burst changes"
+
+— the shared Burst meter is retired as a concept, each character's signature
+resource becomes her gauge, and each former Burst becomes a drain or overdrive
+of that resource. That change is packeted separately on branch
+`burst-retirement`; **Furina's fold below is the first of its three.**
+
+So, for Furina: no Burst card printed at a threshold, no overdrive loan, no
+temporary Fanfare bonus and no entitlements. A full meter is a maximally scaled Salon,
 and that fill state **is** the reward. "Drain it all for a giant effect"
 becomes an optional **Rare payoff card**, drafted, not base kit.
 
@@ -546,13 +555,15 @@ docs-only for `review/active/`.
 > would have been fed by a teammate's reaction; here Furina has no Burst meter
 > for a reaction to feed, so the roster-wide clause stands as ratified.
 >
-> **Scope, stated so it is not over-read.** [USER] has said the roster-wide
-> Burst-meter concept is itself under review ("It was a day 1 idea that
-> frankly feels like it adds complexity without payoff… Klee's Burst feels
-> basically redundant, and I want to make Kokomi's more useful as part of the
-> current rework as well"). **This packet decides Furina only.** Klee's and
-> Kokomi's Bursts are a separate ruling and nothing here presumes their
-> outcome.
+> **Scope, stated so it is not over-read.** The roster-wide retirement of the
+> shared Burst meter is **RULED** ([USER], 2026-08-29: "Yeah, agreed on the
+> Burst changes") and is **packeted separately** on branch `burst-retirement`
+> (`review/active/burst-retirement-2026-08-29.md`): each character's signature
+> resource becomes her gauge, and each former Burst becomes a drain or
+> overdrive of that resource. **Furina's fold here is the first of the three**
+> — it is not a carve-out from a standing rule but the leading case of a
+> ruled roster-wide change. **This packet still decides Furina only**; Klee's
+> and Kokomi's bodies belong to that packet and nothing here fixes them.
 >
 > **What this RETIRES from the E4 packet.** E4's fold of Fanfare into the
 > Burst meter and everything downstream of it: the retirement of
@@ -662,11 +673,12 @@ permits. Prospective text, added as a scoped sentence rather than a rewrite:
 > "talent-relic + kit-Burst" requirement for her alone; every other character
 > ships a kit-Burst unchanged.
 
-**One line on scope, because it will be asked.** The roster-wide Burst concept
-is itself now under [USER]'s review in a separate ruling. This packet does not
-decide Klee's Burst or Kokomi's, and this amendment is deliberately written
-Furina-scoped so that a later roster-wide decision replaces it rather than
-having to unpick it.
+**One line on scope, because it will be asked.** The roster-wide retirement of
+the shared Burst meter is RULED ([USER], 2026-08-29) and is packeted separately
+on `burst-retirement`; **Furina's fold is the first of the three.** The
+amendment above is written Furina-scoped anyway, so that this packet can be
+signed on its own schedule and the roster-wide text replaces it cleanly rather
+than the two having to be unpicked from each other.
 
 **Amendment 3 — the Salon overdraw sentence.** Not a design change: LAW's
 Encore bullet says "overdraw drains true HP", which is true of Encore
@@ -1417,9 +1429,10 @@ re-points `M52` from E4's C1–C3 onto this packet and supersedes E4's §3, §4,
 R213's quarantine. **Amendment 2 is the real one**: `LAW.md:266` requires
 every character to ship a kit-Burst and `LAW.md:176-178` says the Burst is kit
 and not loot, so moving Furina's drain onto a drafted Rare amends LAW rather
-than merely implementing a design. It is drafted Furina-scoped on purpose,
-because [USER] has the roster-wide Burst concept under separate review and a
-later ruling should be able to replace this sentence rather than unpick it.
+than merely implementing a design. The roster-wide retirement is RULED and
+packeted separately on `burst-retirement`, and Furina's fold is the first of
+the three; this amendment is drafted Furina-scoped anyway so that C2 can be
+signed on its own schedule and the roster-wide text replaces it cleanly.
 Amendment 1 rewrites the Fanfare generation legs. Amendment 3 is hygiene and
 can be signed independently.
 
@@ -1452,8 +1465,9 @@ subsystem. The evidence that its mode choice has collapsed to a rule is on the
 record and unanswered; it should be the next Furina question. Named in §3 as
 deliberately unresolved so that silence is not mistaken for a decision.
 
-**Klee's and Kokomi's Bursts.** [USER] has the roster-wide Burst concept under
-review. This packet decides Furina only and its LAW text is scoped to say so.
+**Klee's and Kokomi's Bursts.** The roster-wide retirement is RULED and lives
+in its own packet on `burst-retirement`. Furina's fold here is the first of the
+three; this packet decides Furina only and its LAW text is scoped to say so.
 
 ---
 
@@ -1483,11 +1497,13 @@ R219 slate branch owns those and is unmerged. What is owed when they next open:
 5. **STATE's "Furina E4 — PACKET CLOSED, COUNTERSIGN OPEN" bullet** needs
    rewriting to point at this packet and to record that the Furina slice is now
    gated on `M52` (re-pointed) and `M54`.
-6. **A pointer to the separate roster-wide Burst review.** [USER]'s
-   2026-08-29 words on the Burst meter ("a day 1 idea that frankly feels like
-   it adds complexity without payoff") open a question larger than Furina.
-   That belongs in `QUEUE.md` as its own row when the registers open — this
-   packet does not mint it and does not presume its outcome.
+6. **A pointer to the roster-wide Burst retirement**, which is RULED and
+   packeted on `burst-retirement`
+   (`review/active/burst-retirement-2026-08-29.md`). That packet owns its own
+   register rows, its own ruling id and the LAW text that supersedes §3.1's
+   Furina-scoped amendment 2. What is owed *here* is only the cross-reference:
+   whatever STATE bullet describes the Furina slice should name Furina's fold
+   as the first of that ruling's three characters.
 7. **Two hygiene fixes, both normal commits under the hygiene norm**, owed on
    whichever branches next touch those files: the kickoff's Salon
    dry-overdraw sentence (§2.7c), and `docs/furina-cards.yaml:13`'s header
