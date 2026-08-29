@@ -1,0 +1,35 @@
+{
+ "turn_id": "kokomi-slice2-t08",
+ "packet_sha256": "6c50551206f375928e8ecb31d91feee9ab2e87b60ea31d1059637fbe81756514",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Sludge Spinner",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Sludge Spinner",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Coral Guard",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played All Streams Flow to the Sea on Sludge Spinner, then Water's Edge on Sludge Spinner, then Coral Guard. This used all 3 energy, dealt 15 damage, applied Hydro with each damage card, and gained 5 Block.",
+ "q2_other_line_considered": "I seriously considered playing Watatsumi Levy with Coral Guard or with one damage card because it could spend 6 Charge and Muster 2, but I rejected it because Muster transforms two cards already in hand into random Inazuma Companion cards, replacing known value with unknown cards.",
+ "q3_what_it_gave_up": "The chosen line gave up playing Watatsumi Levy, so it did not spend 6 Charge and did not generate any random Inazuma Companion cards. It also used all available energy, though no effect of unspent energy is stated.",
+ "q4_different_intent": "No. Based only on the printed information, the three 1-cost cards provide the best known damage and the only block, and a different telegraphed intent would not make the random transformation from Watatsumi Levy a reliable alternative.",
+ "q4_changed": false
+}

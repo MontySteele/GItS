@@ -1,0 +1,29 @@
+{
+ "turn_id": "klee-slice1-r3-t06",
+ "packet_sha256": "6d8c281cc10c1a081f800e13f331a9dec0a3641081a44a32fd2e19ab40098b8f",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Rapid Fire first, using the 3 Spark bank to make it cost 0, then played Kaboom! for its printed cost of 1. This deals 16 damage from Rapid Fire and 7 damage from Kaboom!, for 23 total damage to Nibbit, leaving it at 20 HP. I did not play Slow Burn or Duck and Cover.",
+ "q2_other_line_considered": "I seriously considered Rapid Fire followed by Duck and Cover, or Duck and Cover followed by Rapid Fire, for 16 damage and 5 Block. I also considered Slow Burn followed by Duck and Cover for 10 Block and no damage, but that gave up too much immediate damage against a 43 HP enemy that I could not kill this turn.",
+ "q3_what_it_gave_up": "The chosen line gave up all Block. Nibbit\u2019s telegraphed 12 damage will reduce my HP from 42 to 30. It also gave up the Burst-related value from Slow Burn and the extra survivability from Duck and Cover. In exchange, it maximized immediate damage by using the Spark discount on the higher-printed-cost attack and then spending the remaining energy on the other attack.",
+ "q4_different_intent": "Yes. If Nibbit\u2019s intent had been a much larger attack, especially one that could threaten my remaining 42 HP more seriously, I would have shifted toward a Block line such as Slow Burn plus Duck and Cover, or Rapid Fire plus Duck and Cover. If the intent had been Defend or a non-damaging Skill, the damage-maximizing line would have remained at least as attractive.",
+ "q4_changed": true
+}

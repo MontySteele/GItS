@@ -1,0 +1,105 @@
+{
+ "turn_id": "kokomi-slice2-t06",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "a04b0d6e34d293c24a9801c32c0d60a91375665380817558d763a69660350bb3",
+ "chosen_line": [
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Twin Tides",
+   "target": null,
+   "exhaust": null,
+   "choose": "Spend 6 Charge: gain 12 Block."
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played All Streams Flow to the Sea on Nibbit first for 9 damage, then played Twin Tides and chose Spend 6 Charge: gain 12 Block. This uses both energy, leaves Charge at 2, deals 9 damage, and blocks the telegraphed 12 damage attack.",
+  "q2_other_line_considered": "I seriously considered Gyorin Formation alone because it gives 10 Block now and 6 Block at the start of next turn, but it uses both energy and deals no damage. I also briefly checked Twin Tides' Gain 5 Block option to preserve Charge, but it is worse this turn because it leaves the 12 damage attack partially unblocked.",
+  "q3_what_it_gave_up": "The chosen line gave up Gyorin Formation's 6 Block at the start of next turn, gave up 6 Charge by spending it on Twin Tides, and gave up the chance to play Water's Edge for extra damage because both energy was used on All Streams Flow to the Sea and Twin Tides.",
+  "q4_different_intent": "Yes. If Nibbit had telegraphed Defend or a much smaller attack, I would have prioritized damage and played All Streams Flow to the Sea plus Water's Edge for 15 total damage instead of taking 12 Block. If it had telegraphed a larger attack, I would still likely have taken block, though Gyorin Formation might have become more attractive if next-turn block mattered more."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.1293,
+  "top1": 23.2,
+  "top2": 20.2,
+  "lines_considered": 7,
+  "playouts": 10,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Twin Tides",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 23.2
+   },
+   {
+    "cards": [
+     "Twin Tides",
+     "Water's Edge"
+    ],
+    "score": 20.2
+   },
+   {
+    "cards": [
+     "Water's Edge",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 14.8
+   },
+   {
+    "cards": [
+     "Twin Tides"
+    ],
+    "score": 14.3
+   },
+   {
+    "cards": [
+     "Gyorin Formation"
+    ],
+    "score": 11.8
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "unmapped_statuses": [],
+   "enemy_count": 1,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T17:22:48"
+}

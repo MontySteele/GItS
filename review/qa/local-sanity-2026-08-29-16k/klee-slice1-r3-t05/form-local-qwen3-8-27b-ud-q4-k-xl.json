@@ -1,0 +1,35 @@
+{
+ "turn_id": "klee-slice1-r3-t05",
+ "packet_sha256": "a5c6815252056b2da19e5001a72fbd0203de139d766487941f8fb0a47eb9fe87",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Imaginary Friend",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Rapid Fire first at its shown 0 cost, consuming the 3 Spark bank; with one enemy, its random hits land on Nibbit. Then I played Kaboom! at Nibbit for 1 energy, and finally Imaginary Friend for 1 energy. This deals 23 damage, leaving Nibbit at 20 HP, gives 5 Block, and gains the printed Burst effects.",
+ "q2_other_line_considered": "I seriously considered Rapid Fire first, then Duck and Cover, then Imaginary Friend, for 16 damage and 10 Block. It traded 7 damage for 5 extra Block, but against the telegraphed 12 attack I valued the extra damage more.",
+ "q3_what_it_gave_up": "It gave up the extra 5 Block from Duck and Cover, so it ends with 5 Block instead of 10. It also left Duck and Cover unplayed and did not use the Spark on Kaboom! first, but the no-block damage line was inferior because it had no Block.",
+ "q4_different_intent": "Yes, in principle: if the intent had been a much larger attack, roughly 47 or more, the 10 Block line or a purely defensive line would have been preferable because the chosen line would die while the 10 Block line could survive. For the actual telegraphed 12 attack, it did not change the play.",
+ "q4_changed": true
+}
