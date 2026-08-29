@@ -40,7 +40,7 @@ public sealed class JumpyDumptyMk2 : CustomCardModel, IElementalCard, ISkillTagC
         new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: true);
+        KleeCardTooltips.ForBurst(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesBombRules: true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("jumpy_dumpty_mk2");
 

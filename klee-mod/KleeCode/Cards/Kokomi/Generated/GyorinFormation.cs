@@ -38,7 +38,7 @@ public sealed class GyorinFormation : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForChargeRider(base.ExtraHoverTips, this, chargePer: 1, chargeStep: 2, chargeGrantsBlock: true);
+        KokomiRiderTips.ForCharge(KokomiRiderTips.ForChargeRider(base.ExtraHoverTips, this, chargePer: 1, chargeStep: 2, chargeGrantsBlock: true), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("gyorin_formation");
 

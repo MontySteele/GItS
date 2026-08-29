@@ -8,7 +8,18 @@ entry point used by CI and future character additions.
 
 from __future__ import annotations
 
-from gen_klee_cards import main
+import sys
+from pathlib import Path
+
+# Both invocations have to work. `python tools/gen_roster_cards.py` puts
+# `tools/` on sys.path itself, so the bare import below resolves; `python -m
+# tools.gen_roster_cards` puts the REPO ROOT there instead and the same import
+# raised ModuleNotFoundError -- so the two ways of asking "is codegen stale?"
+# did not answer the same question. Prepending this file's own directory makes
+# the bare import correct under both.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from gen_klee_cards import main   # noqa: E402
 
 
 if __name__ == "__main__":

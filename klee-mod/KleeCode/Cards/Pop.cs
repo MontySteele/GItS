@@ -48,9 +48,14 @@ public sealed class Pop : CustomCardModel, ISkillTagCard
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { KleeKeywords.ElementalSkill };
 
+    // The Burst keyword, on the same rule codegen applies to the generated
+    // faces: this face PRINTS the word ("Burst +5"), so it carries the
+    // definition. Written out here because the card is hand-written;
+    // `tools/lint_keyword_meters.py` holds the two surfaces to one rule.
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(
-            base.ExtraHoverTips, this, includesBombRules: true);
+        KleeCardTooltips.ForBurst(
+            KleeCardTooltips.ForCard(
+                base.ExtraHoverTips, this, includesBombRules: true), this);
 
     // autoAdd: false -- KleeCardPool owns membership. See Kaboom.
     public Pop()

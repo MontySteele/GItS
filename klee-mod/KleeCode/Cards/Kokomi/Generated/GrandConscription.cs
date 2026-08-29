@@ -41,7 +41,7 @@ public sealed class GrandConscription : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForMuster(base.ExtraHoverTips, this);
+        KokomiRiderTips.ForCharge(KokomiRiderTips.ForMuster(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("grand_conscription");
 
