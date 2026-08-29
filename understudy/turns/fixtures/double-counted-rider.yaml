@@ -1,0 +1,59 @@
+# EB-187's RED FIXTURE: an assumptions block the preflight must refuse.
+#
+# This is the sentence Klee slice 1 shipped on both halves of pair 3, kept here
+# verbatim so the refusal is pinned against the words that actually corrupted a
+# grade rather than against a paraphrase of them. The board stages Clockwork
+# Toy, whose row carries `skill_tag`, and the description builder prints
+# `Burst +5` onto the face of every row that carries it -- so a grader told the
+# tag adds 5 "over and above anything the card's own text grants" counts it
+# twice. One did: it predicted a meter of 20 -> 40 where the board produced
+# 20 -> 35, and the pair read named the arithmetic in RETURNing the arm.
+#
+# It lives under `fixtures/` so `all_turns()` never returns it -- a board that
+# must NOT be stageable would otherwise fail `check`'s own sweep, which is the
+# suite it belongs to.
+#
+# Nothing here is a turn anybody plays. No verdict, packet or reading was ever
+# taken on it.
+
+id: double-counted-rider-fixture
+character: KLEEMOD-KLEE
+
+notes: |
+  Two cards, one of them Skill-tagged, and an assumptions line that promises
+  the tag's 5 on top of what the face prints. The only question this board is
+  asked is whether the funnel refuses it before launching a game.
+
+assumptions:
+  - "The Burst meter is written to 20 of 40 through the registered
+     resource. A Skill-tagged card adds 5 to it on play, over and above
+     anything the card's own text grants."
+
+staging:
+  - give: {card: KLEEMOD-CLOCKWORK_TOY, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-KABOOM, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 42}
+  - set_energy: {amount: 2}
+  - set_resource: {name: KLEEMOD_BURST, amount: 20}
+  - set_hp: {who: first, amount: 43}
+  - read: "the staged board"
+
+board:
+  character: klee
+  pilot: generic
+  hp: 42
+  max_hp: 62
+  block: 0
+  energy: 2
+  turn: 1
+  resources:
+    burst_energy: 20
+  hand:
+    - clockwork_toy
+    - kaboom
+  enemies:
+    - name: "Act-1 attacker"
+      hp: 43
+      max_hp: 43
+      block: 0
+      intent: {kind: attack, amount: 12}

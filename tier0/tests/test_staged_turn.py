@@ -1360,3 +1360,54 @@ def test_a_status_the_sim_has_no_field_for_is_refused_not_guessed():
         mp.setattr(adapter, "STATUS_FIELDS", {"spark": "no_such_field"})
         with pytest.raises(AttributeError):
             adapter.build_combat_state(state)
+
+
+# ---------------------- EB-187, an assumption the face already contradicts ---
+
+RIDER_FIXTURE = TURNS / "fixtures" / "double-counted-rider.yaml"
+
+
+def test_an_assumption_claiming_a_printed_rider_is_refused():
+    """EB-187's red fixture, carrying the sentence that corrupted a grade. The
+    refusal names the claim, the card and the tag, because "this board is
+    unsafe" sends a reader to grep and the sentence sends them to the line."""
+    turn = staged_turn.load(RIDER_FIXTURE)
+    found = staged_turn.assumption_rider_conflicts(turn)
+    assert len(found) == 1, found
+    assert "clockwork_toy" in found[0] and "skill_tag" in found[0]
+    assert "Burst +5" in found[0]
+    with pytest.raises(staged_turn.TurnError) as exc:
+        staged_turn.assumption_preflight(turn)
+    assert "already prints" in str(exc.value)
+
+
+def test_the_reworded_assumption_passes_on_the_same_board():
+    """The other direction, and it is the whole point of the rule's shape: a
+    line saying the printed rider IS the tag is exactly what the check wants.
+    Anything else would be a check that refuses every board mentioning Burst."""
+    turn = staged_turn.load(RIDER_FIXTURE)
+    turn.assumptions[0] = (
+        "The Burst meter is written to 20 of 40 through the registered "
+        "resource. Where a card's face prints a Burst rider, that printed "
+        "rider IS the whole of what playing the card adds to the meter on "
+        "top of the card's own text -- nothing further is added behind it.")
+    assert staged_turn.assumption_rider_conflicts(turn) == []
+    staged_turn.assumption_preflight(turn)
+
+
+def test_the_rider_check_needs_the_tag_on_the_board():
+    """An untagged hand cannot double-count a rider nothing prints, so the same
+    sentence passes there -- the check reads the staged rows, not the prose."""
+    turn = staged_turn.load(RIDER_FIXTURE)
+    turn.staging[:] = [s for s in turn.staging
+                       if "CLOCKWORK_TOY" not in str(s)]
+    turn.board.hand[:] = ["kaboom"]
+    assert staged_turn.assumption_rider_conflicts(turn) == []
+
+
+def test_every_shipped_turn_passes_the_rider_check():
+    """The sweep, which is what `check` runs. Klee slice 1's pair 3 was the
+    only board carrying the claim and both halves are reworded."""
+    bad = {p.name: staged_turn.assumption_rider_conflicts(staged_turn.load(p))
+           for p in staged_turn.all_turns()}
+    assert not {k: v for k, v in bad.items() if v}

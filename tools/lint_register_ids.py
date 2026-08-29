@@ -128,7 +128,9 @@ CEILINGS: dict[str, int] = {
                  # all six slice 1 boards. RETIRED.
                  # EB-187: the Burst assumption line double-counts the
                  # Skill tag against the rider the face already prints,
-                 # and it corrupted a grade. OPEN.
+                 # and it corrupted a grade. CLOSED 2026-08-29 -- both
+                 # halves reworded and `staged_turn check` now refuses an
+                 # assumption claiming a gain the face prints. RETIRED.
                  # EB-184 minted 2026-08-29 by Kokomi slice 1 round 4: a
                  # `choose_one` card typed as an Attack demands a target
                  # even on a mode that attacks nothing, so a blind
@@ -267,7 +269,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        180, 181, 182, 183, 184, 186, 187,
+        180, 181, 182, 183, 184, 186,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

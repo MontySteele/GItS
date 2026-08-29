@@ -115,8 +115,9 @@ assumptions:
      or Weak. Every Klee attack applies Pyro, and a reaction on top of a
      hit would move every number the falsifier scores."
   - "The Burst meter is written to 20 of 40 through the registered
-     resource. A Skill-tagged card adds 5 to it on play, over and above
-     anything the card's own text grants."
+     resource. Where a card's face prints a Burst rider, that printed
+     rider IS the whole of what playing the card adds to the meter on top
+     of the card's own text -- nothing further is added behind it."
 
 # This file needs a dev build carrying the prototype rows
 # (klee-mod/build/deploy_proto.ps1). It was staged live on 0.2.1314+proto.
