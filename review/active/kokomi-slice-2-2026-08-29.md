@@ -626,3 +626,191 @@ and the pick is which order.
 
 **PICK 4 — the pilot's Charge term**, unchanged from §6 and still yours: it is a
 `POLICY_VERSION` change with a re-baseline attached, and both are frozen.
+
+---
+
+## §10. Round 2 — the two boards, re-set
+
+**2026-08-29, branch `kokomi-slice-2-round-2`, cut from `main` at `a51b0ea`.**
+This section is written by a session that owns neither the live game nor the
+main checkout, so **nothing here is staged, seeded, built or launched**. It
+records the two RETURNed boards re-set as declared boards, and it settles
+nothing: §9's picks are untouched, no register row is minted or closed, and no
+printed card number moved (R213 freeze). PICK 1 option 1 is what this executes.
+**`EB-183` is deliberately not built** — PICK 3's own first option says arm 4's
+board must be proved able to separate a Muster arm before anything is built
+against it, and that proof does not exist yet.
+
+The four files are `understudy/turns/kokomi-slice-2-r2/`, mapped by
+`MANIFEST.md` there. Turn ids `kokomi-slice2-r2-t01` … `t04`: `t01`/`t02` are
+arm 1's shipped and prototype halves, `t03`/`t04` are arm 4's.
+
+**No seed is pinned, and that is not an omission.** A re-set board is a new
+board and its encounter is a fresh roll, so round 1's four seeds belong to
+round 1's four boards; slice 1's round 4 also found that a seed only reproduces
+within one game build. Every file reads `staged: pending` with no `seed:` key.
+
+### Arm 1 — the spend
+
+> *"Only the numbers changed: both halves presented the same damage-versus-Block
+> allocation, with the prototype simply offering more damage while consuming
+> Charge."* The repair: *"include another current-turn Charge use or reader so
+> spending six Charge creates an observable sacrifice rather than merely a
+> future hypothetical."*
+
+**What changed: one energy, from two to three.** The board already carried the
+other Charge use the reviewer asked for — **Gyorin Formation**, a shipped Rare,
+2 energy, Block that reads the bank at `6 + charge // 2` and never spends it.
+At two energy taking it was the whole turn, so the card under test and the
+reader could not be played together and the price of a spend was always a
+next-turn question. At three they share the turn, and the price lands where a
+grader can see it.
+
+Both halves: player **30/70**, no Block, **3 energy**, bank **8**, one enemy at
+**24 HP** telegraphing an attack of **12**. Hand on both: Coral Guard (1, 5
+Block), Water's Edge (1, 6), Gyorin Formation (2), and the card under test —
+All Streams Flow to the Sea on `t01`, Sounding Line on `t02`. Every card beside
+the arm is shipped; a second prototype would confound the attribution.
+
+| line, bank 8 | `t01` shipped | `t02` prototype |
+|---|---|---|
+| reader-Block, then the card | 10 Block, 9 damage | 10 Block, 12 damage |
+| the card, then reader-Block | 10 Block, 9 damage | **7 Block**, 12 damage |
+| bank at end of turn | **8** | **2** |
+
+On the shipped half the two orders are identical, because neither card touches
+the bank. On the prototype half they are **three Block apart** — the spend has
+already emptied what the reader-Block reads. That is a sacrifice inside the
+turn rather than a hypothetical about the next one, and it is the same
+structure the reviewer credited on the arm that ADVANCED (*"sequencing between
+a Charge reader and spender"*, at *"a concrete three-damage sequencing
+penalty"*), asked here of a flat spender.
+
+**Two other numbers moved as consequences.** The enemy sits at 24 against a
+prototype-half ceiling of 18 (Sounding Line 12 + Water's Edge 6), so no line is
+lethal on either half; the shipped ceiling is 15. And the player sits at 30/70
+against a telegraph of 12 — 18 left with no Block, 25 at 7 Block, 28 at 10 — so
+three Block is three hit points rather than the rounding error it was at 48/70.
+
+### Arm 4 — the formation
+
+> *"Both shipped and prototype halves chose the identical three cheap cards;
+> replacing Charge gain with a Charge payment did not alter the realized
+> decision."* The repair: *"give Muster an observable near-term payoff and a
+> credible window to choose it, so Levy's Charge payment competes with known
+> value rather than unspecified randomness under incoming damage."*
+
+**Three changes, one per clause of that sentence.**
+
+1. **The three-cheap-cards line is gone.** Round 1's hand was the order plus
+   three 1-costs, which at three energy was a complete turn (15 damage, 5
+   Block) that never touched the card. One 1-cost is replaced by a **0-cost
+   shipped Inazuma Companion** — Shinobu — Grass Ring of Sanctification, 4
+   Block — so the alternatives cost two energy instead of three and the order
+   has a window to be chosen in. This is slice 1 round 4's repair for the same
+   failure, on a different hand.
+2. **The payoff is near-term and the cost is printed.** A Muster transforms
+   cards already in hand and never takes one that is already a Companion, so
+   this hand holds **exactly two** cards it can take: All Streams Flow to the
+   Sea and Coral Guard. Muster 2 takes both, so what the order costs is a known
+   number — **9 damage** (the reader at a bank of 8) and **5 Block** — instead
+   of the "unspecified randomness" the reviewer named. A Mustered recruit costs
+   one less, so the recruits are affordable on the turn that makes them; the
+   payoff no longer sits a turn away. Three energy stays the budget, and it is
+   also the guard that keeps the pool's 3-cost recruit unaffordable behind a
+   2-cost order.
+3. **A Companion is in hand, printed and immediate.** It is not a Muster
+   victim, costs nothing to play, and shows on the face of the board what a
+   recruit is worth, so the order is weighed against known value on both sides
+   of the trade.
+
+**The window is the telegraph.** The incoming hit is **8**; Coral Guard (5, one
+energy) and the Companion in hand (4, no energy) cover **nine** between them, so
+the whole attack can be answered for one of three energy and the other two stay
+free for the order. A set-up turn is affordable, which is what makes declining
+it a choice. Player **40/70**, one enemy at **26 HP**.
+
+**What the halves differ by, at a bank of 8.** The shipped order takes both
+takeable cards and pays a Charge on top: bank 8 → **9**, and the reader it
+consumed is gone. The prototype order takes the same two victims and costs six:
+bank 8 → **2** — the outlet and the fuel leave together. Either half can
+instead cash the reader FIRST for 9 and then give the order, which leaves
+Muster one victim, one recruit and one whiff; that trade is identical on both
+halves and the bank at the end of it is not.
+
+**What this board still cannot write** is which recruits the game rolls. That
+is the game's pick, and it stays random. What it can now write — and does — is
+the cost side and the timing, which is what the prescription asked for.
+
+**Round 1's `set_hp` finding is honoured rather than repeated.** Arm 4 asked for
+46 HP last round and settled at 37, because `set_hp` clamps at a creature's
+maximum and no single Act-1 body reaching 46 telegraphed anything worth
+defending against. Both boards here are designed **below** the maxima the run
+actually rolled — 24 and 26 against Nibbit's 42 and Sludge Spinner's 38 — so
+the staging can reach them without a hunt.
+
+### The arithmetic, and no lethal line
+
+Card values: Water's Edge 6, Coral Guard 5 Block, All Streams Flow to the Sea
+`5 + charge // 2` = 9 at a bank of 8, Gyorin Formation `6 + charge // 2` Block
+now plus 6 next turn, Sounding Line 12 for a spend of 6, the Companion in hand 4
+Block. No Strength, no aura on either enemy, so every number is the printed one.
+
+| turn | energy | Charge | enemy HP | largest damage the board can produce | headroom |
+|---|---|---|---|---|---|
+| `t01` | 3 | 8 | 24 | All Streams Flow (9) + Water's Edge (6) = **15** | 9 |
+| `t02` | 3 | 8 | 24 | Sounding Line (12) + Water's Edge (6) = **18** | 6 |
+| `t03` | 3 | 8 | 26 | reader first (9), then the order, then a 0-cost recruit — the pool's largest 0-cost hit is 7 → **16** | 10 |
+| `t04` | 3 | 8 | 26 | the same line; the spend adds no damage → **16** | 10 |
+
+On arm 4 the recruits' identity is the roll, so that column is the pool's
+ceiling and not a number the file can write: the largest single recruit hit is
+14 at a cost of 1 after Muster's discount, and even substituting it for the 7
+the board totals 23 against 26. The 3-cost recruit lands at 2 after the
+discount and is unaffordable behind a 2-cost order at three energy.
+
+### Closeness
+
+`staged_turn closeness` on all four **declared** boards (there is no observed
+reading, because nothing is staged). `DOMINANCE_GAP` is 0.5. **All four
+SURVIVE.**
+
+| turn | gap | top1 / top2 | lines |
+|---|---|---|---|
+| `t01` | 0.0000 | 20.700 / 20.700 | 11 |
+| `t02` | 0.0000 | 23.700 / 23.700 | 11 |
+| `t03` | 0.1957 | 18.400 / 14.800 | 13 |
+| `t04` | 0.1957 | 18.400 / 14.800 | 13 |
+
+Receipts: `review/qa/kokomi-slice2-r2-t0*/closeness.json`. Read this as a
+refusal that did not fire and nothing else (R213 F); it is not a rating and the
+rows are not comparable to each other. §4's two disclosures carry forward
+unchanged — the pilot still does not price Charge as a cost, with the error
+running one way (an over-valued spender is a spender more likely to *dominate*,
+which is what the falsifier refuses), and arm 4's two halves still read
+identically to the pilot, which values a Muster order by what it puts in hand
+rather than by what the recruits do when played. The one thing that did move
+there: **the order now appears in the pilot's ranked lines at all**, where in
+round 1 neither half's top lines contained the card under test. The blind
+graders and the pair read remain the only reading that arm has.
+
+### What is waiting
+
+All of it needs the live game and the art-bearing main checkout, which this
+branch may not touch:
+
+1. A dev build carrying the prototype rows (`deploy_proto.ps1`).
+2. Staging both pairs — shipped half first to discover the seed, prototype half
+   with `--seed <that value>`. **Re-roll on any telegraph that is not a
+   single-body attack**; pin the seed into each file and into
+   `understudy/turns/kokomi-slice-2-r2/MANIFEST.md`, and re-declare the live
+   body if it differs from the design so the declared and observed readings
+   read one board.
+3. `closeness --observed` on all four, beside the declared reading above.
+4. Blind grading — a fresh grader per packet on the four-question form, and the
+   R217 C independent seat on all four.
+5. Replay of every graded line (`staged_turn execute`, EB-170).
+6. The pair read, shipped half against prototype half, arm by arm.
+
+Seat testimony is iteration feedback, never validation, never balance evidence,
+never approval (R217 G).
