@@ -71,7 +71,7 @@ public sealed class Sizzle : CustomCardModel, IElementalCard
             AuraCmd.Find(cardPlay.Target) is { } aura && aura.Element != Element.Pyro;
 
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
@@ -79,7 +79,7 @@ public sealed class Sizzle : CustomCardModel, IElementalCard
         if (hadOffElementAura && cardPlay.Target.IsAlive)
         {
             await DamageCmd.Attack(DynamicVars.ExtraDamage.BaseValue)
-                .FromCard(this)
+                .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
                 .Execute(choiceContext);

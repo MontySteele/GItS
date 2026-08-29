@@ -68,7 +68,7 @@ public sealed class DaDaDa : CustomCardModel, IElementalCard
     {
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .WithHitCount(3)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .TargetingRandomOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);

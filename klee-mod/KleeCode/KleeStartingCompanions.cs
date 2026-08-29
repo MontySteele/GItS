@@ -48,8 +48,12 @@ internal static class KleeStartingCompanionsPatch
 
     private static void ResolveKlee(Player player, string seed, int slot)
     {
-        var playerSeed = unchecked(
-            (uint)(StringHelper.GetDeterministicHashCode(seed) + slot));
+        // v0.111.0 (`EB-171`): `GetDeterministicHashCode` returns ulong and
+        // `Rng` takes ulong, so the uint truncation is gone. This mirrors the
+        // game's own Player.cs shape verbatim -- hash + (ulong)slot -- rather
+        // than inventing a mixin of our own.
+        var playerSeed =
+            StringHelper.GetDeterministicHashCode(seed) + (ulong)slot;
         var rng = new Rng(playerSeed, "klee_starting_companions");
 
         CardModel attack = rng.NextBool()
@@ -71,8 +75,9 @@ internal static class KleeStartingCompanionsPatch
 
     private static void ResolveFurina(Player player, string seed, int slot)
     {
-        var playerSeed = unchecked(
-            (uint)(StringHelper.GetDeterministicHashCode(seed) + slot));
+        // v0.111.0 (`EB-171`): ulong seeds, see ResolveKlee above.
+        var playerSeed =
+            StringHelper.GetDeterministicHashCode(seed) + (ulong)slot;
         var rng = new Rng(playerSeed, "furina_starting_companions");
 
         CardModel attack = rng.NextBool()
@@ -114,8 +119,9 @@ internal static class KleeStartingCompanionsPatch
     /// </summary>
     private static void ResolveKokomi(Player player, string seed, int slot)
     {
-        var playerSeed = unchecked(
-            (uint)(StringHelper.GetDeterministicHashCode(seed) + slot));
+        // v0.111.0 (`EB-171`): ulong seeds, see ResolveKlee above.
+        var playerSeed =
+            StringHelper.GetDeterministicHashCode(seed) + (ulong)slot;
         var rng = new Rng(playerSeed, "kokomi_starting_companions");
 
         CardModel support = rng.NextBool()

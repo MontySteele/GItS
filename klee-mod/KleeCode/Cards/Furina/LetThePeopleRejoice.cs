@@ -78,7 +78,7 @@ public sealed class LetThePeopleRejoice
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
@@ -100,8 +100,18 @@ public sealed class LetThePeopleRejoice
     /// Burst to the deck. Klee's kit card never showed this because a played
     /// Power already leaves combat (PileType.None); Furina's card type is the
     /// only reason the divergence was reachable.
+    ///
+    /// PORTED at v0.111.0 (`EB-171`): the game replaced
+    /// `GetResultPileTypeForCardPlay` with `GetResultLocationForCardPlay`,
+    /// which returns a `CardLocation` of player / pile / position instead of a
+    /// bare pile. The behaviour is unchanged -- `CardModel.Play` still
+    /// switches on `resultLocation.pileType` and routes `PileType.None` to
+    /// `CardPileCmd.RemoveFromCombat`, and `Owner` / `CardPilePosition.Bottom`
+    /// are what the base implementation itself passes on its own
+    /// dupe-or-Power branch.
     /// </summary>
-    protected override PileType GetResultPileTypeForCardPlay() => PileType.None;
+    protected override CardLocation GetResultLocationForCardPlay() =>
+        new CardLocation(Owner, PileType.None, CardPilePosition.Bottom);
 
     protected override void OnUpgrade()
     {

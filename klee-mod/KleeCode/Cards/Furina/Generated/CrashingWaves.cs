@@ -62,7 +62,7 @@ public sealed class CrashingWaves : CustomCardModel, ICharacterCard
         foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
         {
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue + (AuraCmd.Find(auraTarget) != null ? 5 : 0)))
-                .FromCard(this)
+                .FromCard(this, cardPlay)
                 .Targeting(auraTarget)
                 .WithHitFx("vfx/vfx_attack_slash")
                 .Execute(choiceContext);

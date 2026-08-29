@@ -87,7 +87,7 @@ public sealed class TheTideRemembers : CustomCardModel, IElementalCard, ICharact
             ExhaustSelection.Close(this);
         }
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()

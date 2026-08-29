@@ -69,7 +69,7 @@ public sealed class GrandFinale : CustomCardModel, IElementalCard
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue + DynamicVars["BonusPer"].IntValue * BombPower.DetonationsThisCombat(CombatState!, Owner))
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);

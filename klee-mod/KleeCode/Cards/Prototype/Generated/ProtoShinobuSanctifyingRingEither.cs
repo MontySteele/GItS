@@ -91,7 +91,7 @@ public sealed class ProtoShinobuSanctifyingRingEither : CustomCardModel, IElemen
         if (modeIndex == 0)
         {
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 3m))
-                .FromCard(this)
+                .FromCard(this, cardPlay)
                 .TargetingAllOpponents(CombatState!)
                 .WithHitFx("vfx/vfx_attack_slash")
                 .SpawningHitVfxOnEachCreature()

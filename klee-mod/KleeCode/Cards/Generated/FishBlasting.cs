@@ -73,7 +73,7 @@ public sealed class FishBlasting : CustomCardModel, IElementalCard
         {
             await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
                 .WithHitCount(x)
-                .FromCard(this)
+                .FromCard(this, cardPlay)
                 .TargetingAllOpponents(CombatState!)
                 .WithHitFx("vfx/vfx_attack_slash")
                 .SpawningHitVfxOnEachCreature()

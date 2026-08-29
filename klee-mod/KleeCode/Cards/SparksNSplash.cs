@@ -86,8 +86,18 @@ public sealed class SparksNSplash : CustomCardModel
     /// the invariant survives a future type change, and so both kit cards
     /// declare it in the same place. Furina's Attack-shaped Burst is where
     /// the default actually diverged.
+    ///
+    /// PORTED at v0.111.0 (`EB-171`): the game replaced
+    /// `GetResultPileTypeForCardPlay` with `GetResultLocationForCardPlay`,
+    /// which returns a `CardLocation` of player / pile / position instead of a
+    /// bare pile. The behaviour is unchanged -- `CardModel.Play` still
+    /// switches on `resultLocation.pileType` and routes `PileType.None` to
+    /// `CardPileCmd.RemoveFromCombat`, and `Owner` / `CardPilePosition.Bottom`
+    /// are what the base implementation itself passes on its own
+    /// dupe-or-Power branch.
     /// </summary>
-    protected override PileType GetResultPileTypeForCardPlay() => PileType.None;
+    protected override CardLocation GetResultLocationForCardPlay() =>
+        new CardLocation(Owner, PileType.None, CardPilePosition.Bottom);
 
     protected override void OnUpgrade()
     {

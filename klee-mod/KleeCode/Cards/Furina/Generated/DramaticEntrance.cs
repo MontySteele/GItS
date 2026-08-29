@@ -61,14 +61,14 @@ public sealed class DramaticEntrance : CustomCardModel, ICharacterCard
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
         if (FurinaResources.ReadableFanfare(Owner.Creature) >= 12)
         {
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 7m))
-                .FromCard(this)
+                .FromCard(this, cardPlay)
                 .TargetingAllOpponents(CombatState!)
                 .WithHitFx("vfx/vfx_attack_slash")
                 .SpawningHitVfxOnEachCreature()

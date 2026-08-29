@@ -60,7 +60,7 @@ public sealed class FlameDance : CustomCardModel, IElementalCard
     }
 
     public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
+        Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource, CardPlay? cardPlay)
     {
         if (cardSource != this || target == null) return 0m;
         return AuraCmd.Find(target) != null ? DynamicVars.ExtraDamage.BaseValue : 0m;
@@ -69,7 +69,7 @@ public sealed class FlameDance : CustomCardModel, IElementalCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()

@@ -147,8 +147,18 @@ public sealed class CeremonialGarment
     /// Furina's Attack-shaped Burst recirculate into the draw pile and
     /// permanently add a Burst to the deck on every cast. Klee's never showed
     /// it because a played Power already leaves combat.
+    ///
+    /// PORTED at v0.111.0 (`EB-171`): the game replaced
+    /// `GetResultPileTypeForCardPlay` with `GetResultLocationForCardPlay`,
+    /// which returns a `CardLocation` of player / pile / position instead of a
+    /// bare pile. The behaviour is unchanged -- `CardModel.Play` still
+    /// switches on `resultLocation.pileType` and routes `PileType.None` to
+    /// `CardPileCmd.RemoveFromCombat`, and `Owner` / `CardPilePosition.Bottom`
+    /// are what the base implementation itself passes on its own
+    /// dupe-or-Power branch.
     /// </summary>
-    protected override PileType GetResultPileTypeForCardPlay() => PileType.None;
+    protected override CardLocation GetResultLocationForCardPlay() =>
+        new CardLocation(Owner, PileType.None, CardPilePosition.Bottom);
 
     protected override void OnUpgrade()
     {

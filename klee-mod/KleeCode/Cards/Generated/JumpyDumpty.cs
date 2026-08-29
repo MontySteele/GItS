@@ -71,7 +71,7 @@ public sealed class JumpyDumpty : CustomCardModel, IElementalCard, ISkillTagCard
     {
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .WithHitCount(2)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .TargetingRandomOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);

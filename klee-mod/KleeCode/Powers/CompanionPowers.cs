@@ -351,7 +351,7 @@ public sealed class WitchsFlamePower : PowerModel, ILocalizationProvider
             var dealt = SimDamagePipeline.DealerMods(Owner, Amount);
             await CreatureCmd.Damage(
                 choiceContext, target, (int)SimDamagePipeline.TargetMods(target, dealt),
-                ValueProp.Unpowered, dealer: null, cardSource: null);
+                ValueProp.Unpowered, dealer: null, cardSource: null, cardPlay: null);
             await KleeBurstResource.Gain(
                 choiceContext, Owner, CompanionConstants.WitchsFlameBurst,
                 cardSource: null);
@@ -465,7 +465,7 @@ public sealed class AttackUpThisTurnPower : PowerModel, ILocalizationProvider
 
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (dealer != Owner || target == Owner) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
@@ -504,7 +504,7 @@ public sealed class NextAttackUpPower : PowerModel, ILocalizationProvider
 
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (dealer != Owner || target == Owner) return 0m;
         if (!props.IsPoweredAttack()) return 0m;

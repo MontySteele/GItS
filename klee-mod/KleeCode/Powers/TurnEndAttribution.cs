@@ -161,12 +161,12 @@ public static class TurnEndAttribution
               + $"turn, and it is paid FIRST — before anything else here can "
               + $"grant Block. You hold {(int)creature.Block}: it will take "
               + $"{Math.Min((int)creature.Block, CompanionConstants.MasqueBondBlock)}.",
-            Resolve = static async (creature, _) =>
+            Resolve = static async (creature, choiceContext) =>
             {
                 foreach (var masque in creature.Powers
                              .OfType<MasqueRedDeathPower>().ToList())
                 {
-                    await masque.PayBondOfLife();
+                    await masque.PayBondOfLife(choiceContext);
                 }
             },
         },

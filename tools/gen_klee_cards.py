@@ -3791,7 +3791,7 @@ def _emit_damage(card: dict, eff: dict, lines: list[str], ctx: dict,
         call.append('.WithHitCount(DynamicVars["Times"].IntValue)')
     elif times > 1:
         call.append(f".WithHitCount({times})")
-    call.append(".FromCard(this)")
+    call.append(".FromCard(this, cardPlay)")
 
     if target == "enemy":
         _target_guard(lines, ctx)
@@ -4308,7 +4308,8 @@ def build_body(
             lines.append(
                 "await CreatureCmd.Damage(choiceContext, Owner.Creature, "
                 "DynamicVars.HpLoss.BaseValue, "
-                "ValueProp.Unblockable | ValueProp.Unpowered, this);"
+                "ValueProp.Unblockable | ValueProp.Unpowered, this, "
+                "cardPlay);"
             )
 
         elif op == "place_bomb":
@@ -4374,7 +4375,7 @@ def build_body(
                     "CombatState!.HittableEnemies.ToList())\n"
                     "        {\n"
                     f"            await DamageCmd.Attack({amount_expr})\n"
-                    "                .FromCard(this)\n"
+                    "                .FromCard(this, cardPlay)\n"
                     "                .Targeting(auraTarget)\n"
                     '                .WithHitFx("vfx/vfx_attack_slash")\n'
                     "                .Execute(choiceContext);\n"

@@ -43,7 +43,7 @@ public sealed class FrozenPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 
     public override decimal ModifyDamageMultiplicative(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
+        Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource, CardPlay? cardPlay)
     {
         // Outgoing: the frozen creature's own next action is weakened.
         if (dealer == base.Owner && target != base.Owner)
@@ -102,7 +102,7 @@ public sealed class FrozenPower : PowerModel, ILocalizationProvider
         await CreatureCmd.Damage(
             choiceContext, target, shatter,
             ValueProp.Unblockable | ValueProp.Unpowered,
-            dealer: null, cardSource: null);
+            dealer: null, cardSource: null, cardPlay: null);
     }
 
     /// <summary>

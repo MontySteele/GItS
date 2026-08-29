@@ -648,14 +648,14 @@ public static class FurinaResources
     /// </summary>
     public static async Task SpendEncoreOrHp(
         PlayerChoiceContext choiceContext, Creature creature, int amount,
-        CardModel cardSource)
+        CardModel cardSource, CardPlay? cardPlay = null)
     {
         var spent = SpendEncore(creature, amount);
         var shortfall = amount - spent;
         if (shortfall <= 0) return;
         await CreatureCmd.Damage(
             choiceContext, creature, shortfall,
-            ValueProp.Unblockable | ValueProp.Unpowered, cardSource);
+            ValueProp.Unblockable | ValueProp.Unpowered, cardSource, cardPlay);
     }
 
     /// <summary>
@@ -1272,7 +1272,7 @@ public sealed class FanfareAttackPer10Power : PowerModel, ILocalizationProvider
 
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (dealer != Owner || target == Owner) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
