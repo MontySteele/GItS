@@ -1,0 +1,41 @@
+{
+ "turn_id": "klee-sparks-r1-t01",
+ "packet_sha256": "b005604787b2a3cad3892695748e30752b679225a92c338d2be03b8b092a5f7e",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Powder Pop",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Jumpy Dumpty",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Ka-pow!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Powder Pop first to gain 1 Spark, then Jumpy Dumpty, then Kaboom! at Nibbit, then Ka-pow! at Nibbit. This used all 3 energy and prioritized direct damage while also placing two Bombs.",
+ "q2_other_line_considered": "I seriously considered Powder Pop, Kaboom!, Duck and Cover, and Ka-pow! because it would still use the Spark and add 5 Block, but it gave up Jumpy Dumpty's 16 direct damage and its 6-damage Bomb for only 5 Block.",
+ "q3_what_it_gave_up": "The chosen line gave up Duck and Cover's 5 Block and any defensive value, leaving the player to take the telegraphed 12 damage. It also relied on Ka-pow! becoming playable after Powder Pop's Spark gain, and it placed two Bombs whose damage timing is not fully specified by the page.",
+ "q4_different_intent": "No. The telegraphed 12 Attack is far below 62 HP, and the only defensive card available gives only 5 Block, so a non-lethal intent would not make the defensive line worth giving up Jumpy Dumpty and the extra Bomb.",
+ "q4_changed": false
+}

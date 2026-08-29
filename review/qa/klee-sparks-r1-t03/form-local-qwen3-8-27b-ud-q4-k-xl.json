@@ -1,0 +1,41 @@
+{
+ "turn_id": "klee-sparks-r1-t03",
+ "packet_sha256": "fcc7b1796f93f60c73c3bbac0c3c6cb18ed4d2fb9580be6a92ec62a9d6cca770",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Bang Bang!",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Bang Bang! on Seapunk, then Kaboom! on Seapunk, then Kaboom! on Seapunk, then Duck and Cover. This used all 3 Energy and all 2 Sparks, dealt 24 total damage to Seapunk, and gained 5 Block before the telegraphed 11-damage attack.",
+ "q2_other_line_considered": "I seriously considered Fwoosh! + Kaboom! + Kaboom! + Duck and Cover. That line would deal 22 damage, gain 5 Block, use all 3 Energy, and leave 1 Spark unspent. It was close because it preserves a Spark at the cost of only 2 damage this turn.",
+ "q3_what_it_gave_up": "The chosen line gave up the 1 Spark that the Fwoosh! line would have saved. It also used Bang Bang! instead of Fwoosh!, trading a single 8-damage hit for two 5-damage hits, which is better immediately against the single enemy but empties the Spark bank.",
+ "q4_different_intent": "No. A different enemy intent would not have changed the line under the information given. If the attack were larger, the 5 Block from Duck and Cover would be even more valuable. If the intent were smaller or non-attack, Duck and Cover is still the only remaining energy card and does not reduce the maximum damage available this turn.",
+ "q4_changed": false
+}
