@@ -359,7 +359,13 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   ESCALATE: Thoma's either shape needs a more discriminating board, and
   Shinobu's priced shape needs one where the multi-enemy removal does not
   carry the Block for free. Packet:
-  `review/active/kokomi-slice-1-2026-08-27.md` §§Round 2, Round 3. Seat
+  `review/active/kokomi-slice-1-2026-08-27.md` §§Round 2, Round 3.
+  **`EB-169` CLOSED:** a curated register of cards with an OPEN
+  printed/runtime defect (`understudy/face_defects.py`, shipping EMPTY
+  because `EB-164` is closed) refuses `open_face_defect` at `check` and
+  `stage` before a launch and again at `seat grade`, with
+  `tools/lint_face_defects.py` on the ci lane failing an entry whose
+  backlog row has left HEAD. Seat
   testimony lives in `review/qa/<turn>/form-*.json` and gitignored
   `understudy/logs/seat/`, and never enters an Understudy report, a
   win-rate table or a measurement register.

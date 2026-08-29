@@ -904,3 +904,137 @@ def test_the_board_check_passes_and_the_run_continues():
 def test_board_mismatch_is_a_named_falsifier():
     assert "board_mismatch" in staged_turn.FALSIFIERS
     assert "different turn" in staged_turn.FALSIFIERS["board_mismatch"]
+
+
+# ------------------------------------------- EB-169: the funnel preflight ---
+#
+# The register ships EMPTY, so every test that needs a bite passes its own
+# one-entry FIXTURE register. That is not a weaker test than a live entry --
+# it is the only honest one: an entry in the shipped register would be a claim
+# that a card is currently misprinted, and none is.
+
+RED_FIXTURE = TURNS / "fixtures" / "open-face-defect.yaml"
+
+# What round 2 of the Kokomi slice was actually in, reconstructed: EB-164 open
+# against the one face staged on all eleven boards.
+FIXTURE_REGISTER = {
+    "all_streams_flow": {
+        "eb": "EB-164",
+        "titles": ("All Streams Flow to the Sea",),
+        "defect": "the printed damage already folds Charge in and a second "
+                  "sentence claims the fold again, so a reader adds it twice",
+    },
+}
+
+
+def test_the_shipped_register_is_empty_and_the_file_says_so():
+    """EB-164 is closed, so there is nothing to refuse. An empty register is
+    the correct state and the module states it in as many words -- a reader
+    who finds `{}` should not have to guess whether it was ever filled."""
+    from understudy import face_defects
+
+    assert face_defects.OPEN_FACE_DEFECTS == {}
+    doc = face_defects.__doc__ or ""
+    assert "EMPTY" in doc and "EB-164" in doc
+
+
+def test_a_staged_board_holding_a_registered_card_is_refused_by_name():
+    """The red fixture. The refusal names the CARD and the EB id, because
+    "this packet is unsafe" sends a reader to grep and "All Streams Flow to
+    the Sea -- EB-164" sends them to the row."""
+    turn = staged_turn.load(RED_FIXTURE)
+    with pytest.raises(staged_turn.TurnError) as exc:
+        staged_turn.face_defect_preflight(turn, FIXTURE_REGISTER)
+    text = str(exc.value)
+    assert "open_face_defect" in text
+    assert "EB-164" in text
+    assert "All Streams Flow to the Sea" in text
+
+
+def test_the_preflight_passes_a_board_with_no_registered_card():
+    """The other direction, so the refusal is not "everything is refused".
+    The worked example holds no registered card under this register."""
+    register = {"pearl_barrage": dict(FIXTURE_REGISTER["all_streams_flow"],
+                                      titles=("Pearl Barrage",),
+                                      eb="EB-999")}
+    turn = staged_turn.load(RED_FIXTURE)
+    staged_turn.face_defect_preflight(turn, register)
+
+
+def test_the_preflight_matches_ids_titles_and_the_mod_spelling():
+    """`card_key` folds the three spellings, and it must, because the two
+    halves of a turn file and the packet each use a different one: the staging
+    grants `KLEEMOD-ALL_STREAMS_FLOW`, the mirror says `all_streams_flow`, and
+    a packet prints `All Streams Flow to the Sea`."""
+    from understudy import face_defects
+
+    for spelling in ("KLEEMOD-ALL_STREAMS_FLOW", "all_streams_flow",
+                     "All Streams Flow to the Sea"):
+        hits = face_defects.hits([spelling], FIXTURE_REGISTER)
+        assert len(hits) == 1, spelling
+        assert hits[0]["eb"] == "EB-164"
+    assert face_defects.hits(["Coral Guard"], FIXTURE_REGISTER) == []
+
+
+def test_check_refuses_the_red_fixture_at_the_command(monkeypatch, capsys):
+    """Through the CLI, because that is where it has to bite: `check` is the
+    gate that runs with no game, and a refusal that only exists as a function
+    is one a sitting can walk past."""
+    from understudy import face_defects
+
+    monkeypatch.setattr(face_defects, "OPEN_FACE_DEFECTS", FIXTURE_REGISTER)
+    rc = staged_turn.main(["check", str(RED_FIXTURE)])
+    assert rc == 1
+    assert "open_face_defect" in capsys.readouterr().err
+
+
+def test_check_passes_the_red_fixture_under_the_shipped_register():
+    """The same file, the same command, the empty register: OK. Proof the red
+    is the REGISTER's doing and not a malformed turn file."""
+    assert staged_turn.main(["check", str(RED_FIXTURE)]) == 0
+
+
+def test_the_preflight_reads_the_staging_half_as_well_as_the_mirror():
+    """A `give` into the draw pile is in no hand and can still be drawn into
+    the grader's turn, so both halves are swept."""
+    turn = staged_turn.load(RED_FIXTURE)
+    names = staged_turn.staged_card_names(turn)
+    assert "KLEEMOD-ALL_STREAMS_FLOW" in names   # the staging half
+    assert "all_streams_flow" in names           # the mirror
+
+
+def test_open_face_defect_is_a_named_falsifier():
+    from understudy import face_defects
+
+    assert face_defects.RULE in staged_turn.FALSIFIERS
+    assert "OPEN defect" in staged_turn.FALSIFIERS[face_defects.RULE]
+
+
+def test_execute_is_deliberately_not_preflighted():
+    """A replay is how a misread already in the record gets settled against
+    the board. Refusing it would take away the one tool that answers the
+    question the register exists to raise, so `cmd_execute` does not call the
+    preflight -- pinned, so the omission reads as a decision."""
+    import inspect
+
+    src = inspect.getsource(staged_turn.cmd_execute)
+    assert "face_defect_preflight" not in src
+    for name in ("cmd_check", "cmd_stage"):
+        assert "face_defect_preflight" in inspect.getsource(
+            getattr(staged_turn, name)), name
+
+
+def test_every_register_entry_cites_an_open_backlog_row():
+    """The closing discipline, as a test as well as a lint: an entry whose row
+    has left HEAD is stale, and stale means over-refusing in silence."""
+    import sys
+
+    sys.path.insert(0, str(REPO / "tools"))
+    import lint_face_defects
+
+    assert lint_face_defects.findings() == []
+    # And the lint bites: a fixture register citing a row that is not open.
+    rows = lint_face_defects.open_rows()
+    assert "EB-164" not in rows, "EB-164 is closed; its row must have left HEAD"
+    bad = lint_face_defects.findings(FIXTURE_REGISTER, rows)
+    assert bad and "EB-164" in bad[0]

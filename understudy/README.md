@@ -318,6 +318,23 @@ out of hand beneath it. Draw rather than discard because a discard pile is
 is not the declared multiset — the acceptance is a refusal, since a wrong
 board in a design-blind packet is invisible to the person reading it.
 
+**NO GRADED PACKET MAY CARRY A CARD WITH AN OPEN FACE DEFECT** (EB-169).
+`understudy/face_defects.py` is a curated register of card ids whose printed or
+runtime meaning is currently WRONG, each entry naming the printed title(s), the
+`BACKLOG.md` row that owns the defect, and one line on what a reader gets
+wrong. `check` and `stage` consult it and refuse `open_face_defect` — naming
+the card and the id — **before any game is launched**; `seat grade` re-checks
+the packet's own printed hand, because a packet on disk outlives the command
+that wrote it. `execute` deliberately does NOT check: a replay is how a misread
+already in the record gets settled against the board. The register ships
+**EMPTY**, which is the correct state — `EB-164`, the defect it was built for,
+is closed — and `tools/lint_face_defects.py` on the ci lane fails an entry
+whose row has left HEAD, so it can only be emptied, never quietly outlived.
+The argument for it is round 2 of the Kokomi slice: `all_streams_flow` was
+staged on all eleven boards while `EB-164` sat open against that face, four
+graders and the reviewer read 13 where the card deals 9, and seven refusals
+were manufactured out of a defect the repo had already written down.
+
 **THE PACKET IS BLIND BY CONSTRUCTION, NOT BY PROMISE.** `qa_packet.py` imports
 nothing from `tier0` — not the sheet loaders, not the engine, not the pilot —
 and `tier0/tests/test_staged_turn.py` walks its imports to say so. It copies

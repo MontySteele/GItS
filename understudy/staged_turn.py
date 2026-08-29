@@ -101,7 +101,7 @@ from typing import Any
 
 import yaml
 
-from understudy import bridge, qa_packet, scenario
+from understudy import bridge, face_defects, qa_packet, scenario
 
 REPO = Path(__file__).resolve().parents[1]
 TURN_DIR = Path(__file__).resolve().parent / "turns"
@@ -203,6 +203,11 @@ FALSIFIERS: dict[str, str] = {
     "line_dominates":
         "the decision-closeness falsifier reads one line as overwhelmingly "
         "dominating the next best",
+    # EB-169. The one rule here that refuses a BOARD rather than a FORM, and
+    # the only one that fires before a game is launched. It is in this table
+    # anyway, because the table's promise is that every refusal this funnel
+    # can make is data a reader can find without grepping for a sentence.
+    face_defects.RULE: face_defects.WHY,
 }
 
 # What "no answer" looks like when a grader writes prose instead of leaving a
@@ -570,6 +575,38 @@ def declared_hand_keys(turn: StagedTurn) -> list[str]:
                   for v, b in turn.staging
                   if v == "give" and str(b.get("pile") or "hand") == "hand"
                   for _ in range(int(b.get("count", 1))))
+
+
+def staged_card_names(turn: StagedTurn) -> list[str]:
+    """Every card the turn names, in both halves: the granted ids and the
+    mirrored hand. Both, deliberately -- `_check_halves_agree` has pinned them
+    equal for the HAND, but a `give` into `draw` or `discard` is in neither
+    hand and can still be drawn into the grader's turn."""
+    names = [str(b.get("card")) for v, b in turn.staging
+             if v == "give" and b.get("card")]
+    return names + list(turn.board.hand)
+
+
+def face_defect_preflight(turn: StagedTurn,
+                          register: dict[str, Any] | None = None) -> None:
+    """EB-169. Refuse a turn that stages a card with an OPEN face defect.
+
+    RAISES BEFORE THE GAME IS LAUNCHED, which is the whole point. Round 2 of
+    the Kokomi slice staged `all_streams_flow` on eleven boards while `EB-164`
+    sat open against that face, graded them, replayed them and pair-read them,
+    and only then learned that the arithmetic every refusal rested on was the
+    repo's own defect. The cost of learning it late is eleven launches and
+    seven manufactured refusals; the cost of learning it here is a parse.
+
+    Called by `check` and by `stage`, and NOT by `execute`: a replay is how a
+    misread already in the record gets settled against the board, so refusing
+    it would take away the one tool that answers the question. `grade` has its
+    own copy of this check on the packet's printed hand (see `seat.py`), which
+    is the belt to this one's braces.
+    """
+    found = face_defects.hits(staged_card_names(turn), register)
+    if found:
+        raise TurnError(face_defects.refusal(found))
 
 
 def exact_hand_difference(turn: StagedTurn, state: dict[str, Any]) -> str:
@@ -1385,6 +1422,7 @@ def cmd_check(args) -> int:
     for p in paths:
         try:
             t = load(p)
+            face_defect_preflight(t)
             print(f"OK   {p.name}: id={t.id} {len(t.staging)} staging step(s), "
                   f"{len(t.board.hand)} card(s) in hand, "
                   f"{len(t.board.enemies)} enem(ies), "
@@ -1438,6 +1476,8 @@ def cmd_stage(args) -> int:
               file=sys.stderr)
         return 2
     turn = load(args.file)
+    # EB-169, and BEFORE the launch: `stage_board` boots the game.
+    face_defect_preflight(turn)
     stamp = time.strftime("%Y%m%d-%H%M%S")
     log = scenario.LOG_DIR / f"staged-{turn.id}-{stamp}.jsonl"
     print(f"turn: {turn.id}  ({turn.character})")
