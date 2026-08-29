@@ -37,7 +37,14 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
 
     protected override CharacterModel? UnlocksAfterRunAs => null;
 
-    public override int StartingHp => 60;
+    /// <summary>tier0 characters/furina.yaml `hp: 78`. RATIFIED at 60 by
+    /// R17 (2026-07-20); raised to 78 by sitting slate 2026-08-29 --
+    /// "Furina and Kokomi are canonically HP-scalers ... Furina should
+    /// probably be medium-high and Kokomi be high, relative to the base
+    /// cast." Base cast: Ironclad 80 / Defect 75 / Regent 75 / Silent 70 /
+    /// Necrobinder 66; median 75, so medium-high sits above 75 and below
+    /// Kokomi's 80.</summary>
+    public override int StartingHp => 78;
 
     public override int StartingGold => 99;
 

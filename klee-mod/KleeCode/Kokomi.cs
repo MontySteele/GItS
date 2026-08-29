@@ -53,11 +53,14 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
 
     protected override CharacterModel? UnlocksAfterRunAs => null;
 
-    /// <summary>tier0 characters/kokomi.yaml `hp: 70` -- RULED R52 ask 8.
-    /// Higher than Klee's and Furina's because the stability fantasy wants
-    /// headroom, and because her deck is a second resource bar she is
-    /// already paying out of.</summary>
-    public override int StartingHp => 70;
+    /// <summary>tier0 characters/kokomi.yaml `hp: 80`. RULED R52 ask 8 at
+    /// 70 -- higher than Klee's and Furina's because the stability fantasy
+    /// wants headroom, and because her deck is a second resource bar she is
+    /// already paying out of. Raised to 80 by sitting slate 2026-08-29 --
+    /// "Furina and Kokomi are canonically HP-scalers ... Kokomi be high,
+    /// relative to the base cast." High = the base cast's top, Ironclad's
+    /// 80 (Defect 75 / Regent 75 / Silent 70 / Necrobinder 66).</summary>
+    public override int StartingHp => 80;
 
     public override int StartingGold => 99;
 

@@ -45,6 +45,15 @@ Columbina inherits proven parts.
 | A6 Utility | **4.2** | Hydro aura uptime (Klee's dream co-op partner), party buffs, debuff texture. |
 | A7 Setup tax | ~2.0 | Second declared weakness. Punisher fights should genuinely hurt. |
 
+**Starting HP: 78** (`tier0/content/characters/furina.yaml`,
+`klee-mod/KleeCode/Furina.cs`). R17 ratified 60 on 2026-07-20; sitting slate
+2026-08-29 raised it — Furina is canonically an HP-scaler, so a pool below the
+base cast's average read wrong. Against Ironclad 80 / Defect 75 / Regent 75 /
+Silent 70 / Necrobinder 66 (median 75), "medium-high" is above the median and
+below Kokomi's 80. The number is derived from the ruling, not picked; the
+alternatives 75 and 80 are recorded in
+`review/active/roster-hp-scalers-2026-08-29.md` for [USER] to re-pick.
+
 **Harness note (Tier 0, binding):** Encore absorption credits **A4**
 (chip-reduction), never A3. Without this accounting rule she grows a
 phantom third elite axis and the declaration is unfalsifiable.
