@@ -1584,3 +1584,309 @@ by hand. Eight further mutations were run against the ward tests and all
 eight were caught. **The §12.5 smoke was not re-run and does not move**: no
 card in the starter deck grants `kurage_ward`, so the Oath cannot appear in
 a starter fight by any route.
+
+## 13. The DRAFT prediction slate for the sealed blind run
+
+**DRAFTED, UNRUN, UNCOUNTERSIGNED.** Drafted by Claude from written design
+intent — §11.1 and §12.1 are [USER]'s words and are the spec, §11.3 is the rule
+as built, §12.4 pick 4 is [USER]'s ruling on the Oath — and committed as its own
+commit, labelled DRAFTED, **before any seed run**, per R212(2) and
+`EXPERIMENTS.md`'s pre-registration rule. It is offered for batch countersign.
+The grade goes in blind. Nothing below may be revised against the run that
+grades it (D5, R101b): a moved world means re-drafting the affected slots and
+disclosing the diff, never re-signing.
+
+The arm has no card row and never had one (`docs/prototype-surface.yaml`, the
+declared-not-rowed block), so nothing here bumps a stamp, moves a sheet or
+touches a drafted number.
+
+### 13.1 The decisive question
+
+**Can a blind reader, from the page alone — the strip, the hand, the bank —
+plan a Muster or an Exhaust toward a Memory play they can afford, see when the
+front is blocked and what would unblock it, and treat spending versus holding
+Charge as a decision rather than an odometer?**
+
+That is a D2 question (*every persistent resource and every automatic engine
+must feed a decision the player can steer: timing, targeting, placement,
+acquisition, conversion, or forgoing*) welded to a D4 one (*at the decision
+point the player can perceive and forecast the consequences that matter*). The
+queue is an automatic engine. If the player only watches it, D2 fails and the
+mechanic is v2's threshold with more arithmetic.
+
+**The falsifier, stated so it can bite:** the run is a MISS on the decisive
+question if the tester's own transcript, over a whole fight, never once names
+the front memory *before* it fires and never once attributes a play of theirs
+(a Muster, a deliberate Exhaust, a held Charge) to the queue — that is, if
+every mention of the jellyfish is a report of something that already happened.
+A tester who reads the strip accurately but never acts on it falsifies D2 while
+leaving D4 standing, and the slate is built to tell those two apart: P1, P2, P4
+and P6 are D4 slots, P3 and P5 are D2 slots.
+
+**What the instrument can see.** Whole-fight blind play only. A staged turn
+cannot see this arm at all: a per-turn clock, a queue that must be filled before
+it can fire, and a block that is a consequence of an earlier turn's banking are
+all cross-turn objects. The sim cannot see it either — §11.9 and §12.5 say why:
+the pilot does not value the memory, does not know a fire is a turn away and
+does not steer Muster targets, so the flagged sim arm exercises the RULE and
+never the DECISION. **No sim prediction is registered here and no number from
+either smoke is quotable** (R213 B / R215 B).
+
+### 13.2 The six slots
+
+Each slot names the prediction, the threshold that grades it, what falsifies
+it, the one-way error direction where there is one, and the decision the
+outcome changes (R206). "Graded turn" means a player turn in the sealed
+transcript on which the tester wrote anything at all; the denominators are
+fixed here, before the run, and are not renegotiated afterwards.
+
+| # | slot | prediction, with its threshold | falsifier / one-way error direction | the decision each outcome changes |
+|---|---|---|---|---|
+| **P1** | **The front entry and its price, off the page, without a rules box.** Can the tester name the card at the head of the memory and what it will cost, from the strip alone? | **YES on at least 4 of the first 5 graded turns with a non-empty queue.** The strip prints `Charge {bank} / {price} — {name} {state}` and then one numbered line per entry with its own price and its aim; a 0-cost memory prints `free`. Naming is cheap when the line is drawn. | **Falsified** by a stated price that disagrees with `queue[0].price`, or by "I cannot tell what is queued", on 2 or more of those 5. **One-way:** err toward printing MORE — a price shown on both the reading and the queue line is redundancy, a price shown on neither is D4. | Below threshold, the strip is re-drawn before anything else in the arm is judged, and the pair read is suspended: a rule read off an illegible strip grades the strip. |
+| **P2** | **Fires next turn, or blocked.** Asked to say what the jellyfish will do at the start of her next turn, does the tester get it right? | **CORRECT on at least 5 of 6 graded turns where the queue is non-empty**, counting a turn as correct when the tester's stated expectation matches the `blocked` / `fires_next` pair the bridge carried for that turn. | **Falsified** by 2 or more wrong calls, and *especially* by a wrong call in the FIRES direction — predicting a fire that did not happen. **One-way:** a tester who wrongly expects a block is pessimistic and loses nothing; a tester who wrongly expects a fire has been promised something the engine did not owe, which is D4's "misleading calculated display". | A miss in the FIRES direction sends the reading string back (the state word, and whether "fires next turn" should carry the card's aim). A miss only in the BLOCKED direction is a smaller finding and goes to the strip's wording, not to the rule. |
+| **P3** | **Planning INTO the memory.** Does the tester plan a Muster or a deliberate Exhaust *and state the Memory consequence* — "this puts X in the queue at price Y", "I burn this to bank the Charge for the front" — rather than playing the card for its printed body alone? | **At least 3 of 10 graded turns** carry such a plan, and **at least one of them is a Muster** (Rule 1: the sacrifice enters, not the recruit — the half of the rule nothing on the card's face says). | **Falsified at 0**: a run where the tester never once plays toward the queue is the conveyor reading, and D2 fails on the arm as built. **One-way:** none — this slot is symmetric and is the arm's central bet. | 0 of 10 reopens the teaching surface, not the rule: the starter Muster's dose (§12.3 slot 11, and the three Musters not chosen), and whether Rule 1 needs a printed line anywhere. 3 or more says the base kit teaches the pattern and the next question is dose, which is [USER]'s. |
+| **P4** | **The block, and what unblocks it.** On a turn where the front is unaffordable, does the tester (a) say the memory is BLOCKED, distinctly from empty, and (b) name a play that would unblock it — Exhaust something for Charge, Muster, or hold and bank? | **YES on the FIRST blocked turn of the run**, both halves. One occurrence, not a rate: the block is a state the strip prints by name (`(blocked)` on the front line, and the state word in the reading), so the first one either lands or the display does not work. | **Falsified** by "not enough Charge yet, I will wait" with no named source of Charge — that is the odometer reading of a block, and it is the exact failure D2 names. Also falsified by conflating blocked with empty. **One-way:** err toward the block being LOUDER; an over-marked block costs a line of text, an unmarked one costs the whole legibility defence. | Half (a) failing sends the empty-vs-blocked distinction back to the strip. Half (b) failing is the more serious of the two: it says the Charge sources are not discoverable from the page, and the acceleration keyword ("Stir", §11.3, provisional under R179) stops being optional. |
+| **P5** | **The Oath reads per-Memory-play, not per turn.** With `proto_kurages_oath_memory` in the deck, does the tester expect Block on a turn the memory FIRES and expect NOTHING on a turn it is empty or blocked? | **The tester states the no-pay case at least once** — an empty or blocked turn on which they do not expect the Oath's 3 Block — across the whole run. | **Falsified** by an expectation of Block on an empty or blocked turn, at any point. That is the pulse reading surviving in the player's head, and it is the defect the whole pool substitution exists to prevent. **One-way:** err toward the face being explicit; the card may over-state the condition, it may never under-state it. | A falsified P5 with the CORRECT face deployed says the wording is wrong and §12.6 item 14's string goes back. A falsified P5 with the SHIPPED pulse string deployed (see 13.5's eyes-on) grades nothing and the slot is void — the run did not carry the card the slot is about. |
+| **P6** | **The automatic play's aim.** Over the whole fight, does the tester predict the target of an automatic Memory play correctly at least once — the same body the card originally hit while that body lives, and a random eligible body otherwise? | **At least ONE correct advance call**, and it must be an advance call: the aim named before the fire, not recognised after it. The strip prints the aim on every queue line, `random` where the memory stored none. | **Falsified** by no advance call at all across the run (the rule is invisible), or by a stated expectation of a *fresh* bind — "it will hit whatever I would hit now" — on a memory whose stored target is still alive. **One-way:** none. | No advance call anywhere sends the aim to the strip's front line rather than the queue lines. A wrong-direction call (fresh bind expected) says `KURAGE_MEMORY_TARGET_FALLBACK`'s alternative, `most_hp`, is worth its own arm — more forecastable, less what [USER] asked for — and that is a design pick for [USER], not an integration's. |
+
+**Slot dependencies, declared in advance.** P2 and P4 are only gradable on turns
+the queue is non-empty, and P5 only if the Oath is drawn and played. If a run
+produces no blocked turn at all, **P4 is UNREACHED, not PASSED** — and an
+unreached P4 is itself a finding about the base kit's dose, since §12.5's shape
+says four of five starter fights hit at least one block. The same holds for P5
+if the card is never drawn: unreached, never inferred.
+
+### 13.3 Contamination
+
+**Two starter smokes have already been read by the drafter**: §11.8 (v3, five
+fights, starter deck, seeds 1–5) and §12.5 (v4 base kit, five fights, new
+starter deck, seeds 1–5). Both are disclosed here in full because reading them
+is what makes this paragraph owed.
+
+**No slot's PREDICTION is set by either smoke, and neither could set one.** Both
+are pilot runs, and §11.9 is the reason: the pilot does not value the memory, so
+neither smoke contains a single instance of the thing every slot above grades —
+a reader looking at a strip and saying what will happen. A smoke that cannot
+produce the observable cannot foretell it.
+
+**What the smokes DO inform, named exactly, and why it is not contamination.**
+Three thresholds take their DENOMINATORS from §12.5's shape, and nothing else:
+
+- **P3's "10 graded turns" and "at least 3".** §12.5 found two to six memory
+  plays per fight and roughly two to five Rule-1 entries, so ten graded turns is
+  a window in which the opportunity to plan into the queue exists several times
+  over. The smoke sets the *window*, not the *rate*: it says the tester will be
+  offered the chance, and says nothing about whether a human reader takes it.
+- **P4's "the FIRST blocked turn", and its declared-unreached case.** §12.5
+  found four of five fights hitting at least one blocked turn (one hit eight).
+  That is why P4 is written as a single occurrence rather than a rate, and why
+  its unreached branch is declared rather than left to be argued afterwards.
+- **P2's "6 graded turns with a non-empty queue".** §12.5's queue empties at one
+  card per turn and refills from both rules, so a six-turn window is reachable.
+
+Those are reachability facts about the RULE — does the event occur at all —
+taken from a source that cannot see the DECISION being graded. Deriving a
+denominator from them is the opposite of the harm pre-registration guards
+against: it stops a slot being written that the run could not reach, and it is
+written down here, before the run, rather than discovered afterwards. **No
+number from either smoke is quotable** (R213 B / R215 B), none is repeated as a
+prediction, and no smoke number appears in any threshold above — the
+denominators are round numbers chosen to sit inside the smoke's shape, not
+copied off it.
+
+**One further disclosure.** The drafter also read §12.4 pick 4's full build
+narrative, including the pool substitution and the fact that the generated
+prototype face currently carries the shipped pulse wording. That is what P5's
+void branch is for: the slot names its own invalidation condition rather than
+being quietly graded against the wrong card.
+
+### 13.4 Graders, and where independence actually holds
+
+Independence is by MODEL FAMILY, author against grader (R217 C, EB-190). The
+roles are fixed at two — Claude authors, GPT grades and reviews — and this arm
+is the awkward case, so it is written out rather than asserted.
+
+**The two halves have different authorship, and the surface already records it.**
+
+- **The card row** `proto_kurages_oath_memory` carries `authored_by: [claude]`.
+  Numbers and rule [USER]'s, implementation and wording Claude's, no seat
+  contribution. So **the Codex seat (GPT) is a clean independent grader on P5**,
+  and `seat.py`'s refusal permits it because the row does not list the seat's
+  family. The C# specifics — the strip's strings, the bridge fields, the face
+  override — are likewise Claude-authored, so the GPT seat is independent on
+  every display slot: **P1, P2, P4, P6**.
+- **The RULE arm** carries `authored_by: [claude, gpt]` in its declaration
+  block: [USER] specified it and made four rulings, Claude implemented it and
+  made it total, and [USER]'s advisor (GPT) wrote the rule statement that was
+  forwarded as the design. **Both families are inside the rule.** The arm has no
+  row, so `seat.py` has nothing to key on and will refuse nobody — the
+  separation here is doctrinal, not mechanical, and it has to be stated.
+
+**Therefore, and this is the whole protocol:**
+
+1. **The tester is the Codex seat (GPT).** The author's own model family is
+   refused as tester (R217 C) and the design is Claude's, so a Claude-family
+   model may not play this run.
+2. **The GPT seat grades P1, P2, P4, P5 and P6** — the display and row slots its
+   family did not write.
+3. **A fresh Claude reads P3** — the rule-level slot, where the GPT family
+   supplied the rule statement — against the sealed transcript, **with its
+   family marked in the record** and with the honest limit written beside it:
+   Claude implemented that rule, so this read is independent of the *statement*
+   and not of the *implementation*.
+4. **Both reads are recorded, each labelled with its family**, and neither is
+   presented as clean. **"Fresh Opus grades it" is not the general rule and must
+   never be written down as one** — it is this arm's least-bad allocation given
+   that no third family exists and none is being added.
+5. Seat testimony is iteration feedback, never validation, never balance
+   evidence, never approval (R217 G).
+
+### 13.5 The run recipe
+
+For the agent who runs this once the game is free. **Everything below runs from
+the art-bearing main checkout, with the game closed at the start; none of it
+runs from a worktree.** This packet's own branch touches no build.
+
+**1 — the `+proto` dev deploy.** The arm is quarantined behind the mod's
+prototype compile switch, and the rule's C# seams sit inside `#if
+PROTOTYPE_CARDS`, so an ordinary build does not contain the rule at all.
+
+```
+.venv/Scripts/python tools/gen_prototype_cards.py --check
+klee-mod\build\deploy_proto.ps1
+```
+
+`deploy_proto.ps1` is `deploy.ps1` plus the staleness gate,
+`-p:PrototypeCards=true`, and a package stamped `MAJOR.AUTO+proto`
+(`+proto.dirty` when dirty). It runs the same `validate.ps1` whole;
+`-PrototypeBuild` relaxes exactly one rule, S3's acceptance of the `+proto`
+mark. **The `+proto` mark in the in-game version is the confirmation that the
+rule is present** — `embark --arm` refuses a build without it. **Restore the
+release build with `klee-mod\build\deploy.ps1` before any measured run, handoff
+or co-op session**; the absence of `+proto` is that confirmation.
+
+**2 — the arm id.** The Kurage's memory is **declared, not rowed**: it authors
+no card, so it has no `proto_` id and cannot be named to `--arm`. It is carried
+by the `+proto` build itself. The one row this chain adds is the Oath:
+
+```
+--arm proto_kurages_oath_memory
+```
+
+`--arm` grants that row into the STARTING DECK (`give_card` `pile: "deck"`), so
+the tester meets the card the pools quarantine. It is what makes P5 reachable
+rather than left to a reward roll; without it the pool substitution would still
+make the Oath draftable under the flag, but on a roll nobody can pin.
+
+**3 — the embark.**
+
+```
+python -m understudy.seat check
+python -m understudy.embark --character kokomi --arm proto_kurages_oath_memory --seed <pinned>
+python -m understudy.blindplay observe
+python -m understudy.blindplay session --max-actions 60 --max-wall-s 5400
+python -m understudy.embark --teardown
+```
+
+**4 — the seeds, pinned here, before the run.** Three, in this order, one run
+each, taken in order and not re-rolled:
+
+| order | seed | what it is for |
+|---|---|---|
+| 1 | `KURAGEMEM001` | the graded run — P1 through P6 |
+| 2 | `KURAGEMEM002` | the second run, taken only if run 1 terminates before P4 is reachable (no blocked turn) or before the Oath is drawn |
+| 3 | `KURAGEMEM003` | reserve, same condition |
+
+The read-back still decides what is recorded (R95): `embark` reads the run seed
+BACK off the wire and that is what the sealed record carries. **If the game
+refuses a chosen seed**, the operator embarks without `--seed`, records the
+rolled seed and **discloses the deviation in the record before any observation
+is read** — a rolled seed disclosed up front is honest; a rolled seed
+discovered afterwards is not.
+
+**5 — what "sealed" means.** Nobody reads the record before the grade is in.
+The session lands in `understudy/logs/blindplay/` (gitignored — the prompts
+inline the screens and the rollout carries a third party's system prompt); the
+committed artifact is `review/qa/blindplay/<session>/record.md`, and it is
+written and committed **before any grader opens it**. The identity block carries
+model, codex version, the deployed mod build and the game build each read OFF
+DISK and labelled with the file it came from (`mods\klee\manifest.json` and
+`release_info.json` — never the bridge's health payload, which reports the
+vendored bridge's version and not ours), the run seed read back off the wire,
+the prompt sha256, the action count and the termination reason, with the
+tester's records verbatim under the R217 G label.
+
+**Three things the record must carry that are specific to this arm** (§6's list,
+restated because the slate depends on them):
+
+- **the arm was actually reached, named** — the `--arm` grant report, and the
+  Oath appearing in the tester's hand or deck;
+- **the flag state the build carried.** Note that **T no longer exists**: v3
+  retired `KURAGE_THRESHOLD` and each memory carries its own price at 3× its
+  cost, so what the record pins in T's place is `KURAGE_MEMORY` on (the `+proto`
+  mark), `KURAGE_ALWAYS_ON` on, `KURAGE_MEMORY_COST_PER_ENERGY = 3` and
+  `KURAGE_MEMORY_PULSE_BLOCK = 5`;
+- **at least one turn where the tester stated IN ADVANCE what the jellyfish was
+  about to play.** If no transcript contains that sentence, the legibility claim
+  is unevidenced however the fights went — which is P2 and P6 restated as a
+  record requirement.
+
+**6 — the pair read.**
+
+```
+python -m understudy.seat review <prompt-file> --out review/qa/<name>.md
+```
+
+Not blind, read-only at the repo root: the sealed record and this §13 go to the
+seat as the prompt, slot by slot, with the prompt kept beside the reply and its
+sha256 recorded, the way the slice-1 pair read was. The seat answers the slots
+its family may grade (13.4); the fresh-Claude read of P3 is taken separately and
+filed beside it with its family marked. **A replay that contradicts a form is
+the finding, not a correction** — nothing is re-graded and no answer is edited.
+
+**7 — the two eyes-on items owed at that deploy.** Both are [USER]'s, both are
+looked at once the dev build is up and before the tester is let in:
+
+- **The prototype Oath's face.** `gen_klee_cards` renders a Power's description
+  per POWER ID, so `kurage_ward` prints one string — *"Each Bake-Kurage pulse
+  also grants {X} Block."* — shared with the shipped Oath, and moving it would
+  move a shipped release face and make it false with the flag off. §12.6 item 14
+  owes the mirror its own power or its own description channel. **What must be
+  seen on the deployed card:** *"Whenever the Bake-Kurage plays a card from its
+  memory, gain 3 Block."* If the deployed card still prints the pulse string,
+  **P5 is VOID** (13.2) and the run grades the other five slots. This is also
+  the BaseLib string-order trap in its usual clothes: a description override is
+  not trusted until it has been seen to FAIL — confirm the shipped `kurages_oath`
+  still prints the pulse string on a release build in the same sitting, or the
+  override has proved nothing.
+- **The strip's look.** The gauge draws `Reading()` — `Charge {bank} /
+  {price} — {name} fires next turn|blocked`, or `Charge {bank} — memory empty`
+  on an empty queue — and then `StripText()`'s numbered lines, one per entry:
+  `{n}. {name} — {price} Charge|free — {aim}`, with `  (blocked)` on the front
+  when the bank cannot pay it. Every slot above assumes those lines are on
+  screen and legible at the size they are drawn. Eyes-on is whether the block
+  mark reads as a STATE rather than as punctuation, and whether `memory empty`
+  and a blocked front are distinguishable at a glance — P4 grades the tester on
+  exactly that distinction, so a strip that fails it here fails the slot before
+  the run starts.
+
+### 13.6 What this run cannot answer
+
+Written down so nobody overclaims off it.
+
+- **Balance.** Nothing here is a balance measurement and no number from the run
+  is quotable (R213 B / R215 B, R217 G). The Oath's 3 and 5 are [USER]'s
+  placeholder in his own word — *"see if it needs adjusting later"* — and this
+  run does not adjust them, cannot support adjusting them, and is not evidence
+  either way about whether 3× cost is the right price.
+- **The cadence of Memory plays across a RUN.** This is whole-fight play, at
+  most an Act-1 run on a starter deck. How often the memory fires over sixteen
+  floors, how the queue behaves once a deck has drafted Exhaust and Ethereal
+  cards into it, and whether Memory/Order spam becomes the only thing she does
+  are all questions about accumulated decks, and none of them is in scope.
+- **The drafted-pool tension.** §11.8 said it and §12.5 did not repeal it: the
+  base kit prints the bank, the afford and the block, but the *interesting* half
+  — banking toward a card you cannot yet afford out of a deck you chose — lives
+  in the draft. A run granted one prototype row into a twelve-card starter tests
+  the teaching surface, not the built deck, and cannot say whether one Muster is
+  the right dose.
