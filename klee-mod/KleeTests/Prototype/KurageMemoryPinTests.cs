@@ -318,6 +318,39 @@ public class KurageMemoryPinTests
     }
 
     [Fact]
+    public void The_ward_is_paid_by_the_fire_and_not_by_the_pulse()
+    {
+        // sec.12.6 ITEM 13 / sec.12.4 pick 4, RULED. The Oath keys to a MEMORY
+        // PLAY, so a blocked or empty memory pays nothing -- both of those
+        // return long before the payment line -- and the pulse no longer grants
+        // it. With the flag off the ward still rides the shipped pulse, which
+        // is code this file does not exist alongside.
+        var fire = Il.Calls(Il.Method("KurageMemory", "Fire"));
+        var pulse = Il.Calls(Il.Method("KurageMemory", "Pulse"));
+
+        Assert.Contains("KurageWardPower.WardAmount", fire);
+        Assert.DoesNotContain("KurageWardPower.WardAmount", pulse);
+    }
+
+    [Fact]
+    public void The_prototype_oath_gets_its_own_face_text()
+    {
+        // sec.12.6 ITEM 14. gen_klee_cards renders a Power's description per
+        // POWER ID, so the generated prototype face carries the SHIPPED Oath's
+        // pulse wording and is wrong. The mirror overrides that one key and
+        // nothing else; the shipped face must not move.
+        var strings = Il.Strings(Il.Method("KleeMod", "InjectLocStrings"));
+
+        Assert.Contains(strings, s =>
+            s.Contains("plays a card from its memory")
+            && s.Contains("Block"));
+        // The override is keyed off the LIVE model's entry (R4's rule), never
+        // a hardcoded id.
+        Assert.DoesNotContain(strings, s =>
+            s.Contains("PROTO_KURAGES_OATH_MEMORY"));
+    }
+
+    [Fact]
     public void The_starter_swap_happens_at_exactly_one_seam()
     {
         // sec.12.6 ITEM 5: one seam, so the mod and the sim cannot disagree

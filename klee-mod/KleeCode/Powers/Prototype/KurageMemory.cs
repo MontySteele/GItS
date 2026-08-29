@@ -681,6 +681,42 @@ public static class KurageMemory
         copy.ExhaustOnNextPlay = false;
         CardCmd.RemoveKeyword(copy, CardKeyword.Exhaust);
 
+        // KURAGE'S OATH, RE-KEYED TO THE MEMORY PLAY (sec.12.6 ITEM 13).
+        // [USER], 2026-08-29: "Let's rewrite it to '3 block per memory played,
+        // upgrade to 5' as a placeholder and see if it needs adjusting later."
+        //
+        // THE TRIGGER IS HERE AND ONLY HERE, which is what makes the rule one
+        // sentence: every memory play passes through this method -- the
+        // automatic turn-start fire and the acceleration keyword's manual one
+        // alike -- so "per memory played" needs no second site and cannot
+        // drift between the two doors. A BLOCKED or EMPTY memory returned long
+        // before this line and pays nothing, which is the point of keying to a
+        // play rather than to the pulse.
+        //
+        // THE AMOUNT IS THE CARD'S, never a constant: whatever stacks of
+        // KurageWardPower are standing is what is paid, so the placeholder
+        // numbers live on the card face (the quarantined row
+        // `proto_kurages_oath_memory`, 3 Block, 5 upgraded) and no code-side
+        // override exists that could disagree with them. PLACEHOLDER in
+        // [USER]'s own word; no measurement is attached and none may be.
+        //
+        // PAID BEFORE THE COPY RESOLVES, deliberately and as in the sim: the
+        // Block belongs to the fire, not to whatever the remembered card turns
+        // out to do, so a replayed attack that provokes a retaliation is
+        // defended by the ward its own fire paid.
+        //
+        // WITH THE FLAG OFF the ward still rides the pulse -- that code is
+        // untouched in KurageSummonPower.FirePulse and this file does not
+        // exist in a release build.
+        var ward = KurageWardPower.WardAmount(creature);
+        if (ward > 0)
+        {
+            // NC-11 (R116): power-sourced block is RAW -- Unpowered, not Move,
+            // so neither Frail nor Dexterity sees it. Same line the pulse took
+            // when it owned this payment.
+            await CreatureCmd.GainBlock(creature, ward, ValueProp.Unpowered, null);
+        }
+
         var aim = Aim(combat, entry);
         var previous = Autoplaying;
         Autoplaying = true;
@@ -786,7 +822,15 @@ public static class KurageMemory
         }
 
         // Skill, and every other type.
-        var block = KurageMemoryLaw.PulseBlock + KurageWardPower.WardAmount(owner);
+        //
+        // KURAGE'S OATH IS NOT HERE ANY MORE (sec.12.4 pick 4, RULED; sec.12.6
+        // ITEM 13). The ward is keyed to a MEMORY PLAY and is paid in
+        // <see cref="Fire"/>. Under the base kit the pulse fires at every turn
+        // end, which would have turned "per Bake-Kurage play" into "per turn"
+        // for free; a memory play is a thing she has to earn and can be blocked
+        // out of, so the ward keys to that instead. What is left here is the
+        // Skill branch's own 5, which is the pulse's and not the Oath's.
+        var block = KurageMemoryLaw.PulseBlock;
         if (block > 0)
         {
             // NC-11 (R116): power-sourced block is RAW -- unpowered, not Move,
@@ -894,7 +938,10 @@ public static class KurageMemory
             "attack" => KokomiConstants.KuragePulseBase,
             "power" => KurageMemoryLaw.PowerPulse == "charge"
                 ? KokomiConstants.ChargePerExhaust : 0,
-            _ => KurageMemoryLaw.PulseBlock + KurageWardPower.WardAmount(owner),
+            // The ward is NOT here: it rides a memory play now, not the
+            // pulse (sec.12.6 item 13), so a forecast that added it would
+            // promise Block on a turn the memory is blocked.
+            _ => KurageMemoryLaw.PulseBlock,
         };
 
     // ---------------------------------------------------------- the strip --
