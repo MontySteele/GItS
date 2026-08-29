@@ -208,8 +208,15 @@ public static class KurageMemory
     /// Per-fight reset. The sim gets this free (CombatState is rebuilt); the
     /// mod's hook models are singletons, so the clear is explicit.
     /// </summary>
-    public static void ResetForCombat()
+    /// <summary>The combat this rule is running in, stashed at subscribe time.
+    /// <c>AbstractModel.BeforeCombatStart</c> takes no arguments and the base
+    /// kit's install needs the seat list, so the one place the mod is handed a
+    /// CombatState is the one place that can supply it.</summary>
+    private static CombatState? _combat;
+
+    public static void ResetForCombat(CombatState? combat = null)
     {
+        _combat = combat;
         Queues.Clear();
         EnrolledCards.Clear();
         MemoryCopies.Clear();
@@ -309,6 +316,25 @@ public static class KurageMemory
     /// applier opens none. If one ever did, the throw lands in the log, which
     /// is louder and more useful than a board silently missing a jellyfish.
     /// </summary>
+    /// <summary>
+    /// Install for every Kokomi seat in this combat. Called from
+    /// <c>KokomiResourceHooks.BeforeCombatStart</c>, which the game fires
+    /// AFTER every creature is in and immediately BEFORE <c>StartTurn</c> --
+    /// i.e. exactly sec.12.6 item 1's "before the first turn opens".
+    ///
+    /// EVERY SEAT, not the local one: co-op is two players and a second Kokomi
+    /// is entitled to her own jellyfish. Idempotent per creature, so the belt
+    /// call at turn start costs one predicate.
+    /// </summary>
+    public static async Task InstallAll()
+    {
+        if (_combat == null) return;
+        foreach (var player in _combat.Players)
+        {
+            await Install(player.Creature);
+        }
+    }
+
     public static async Task Install(Creature? creature)
     {
         if (!BaseKitLive(creature)) return;

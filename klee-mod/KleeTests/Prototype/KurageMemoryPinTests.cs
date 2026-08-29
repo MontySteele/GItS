@@ -292,6 +292,32 @@ public class KurageMemoryPinTests
     }
 
     [Fact]
+    public void The_install_runs_before_the_first_turn_opens()
+    {
+        // sec.12.6 ITEM 1. `BeforeCombatStart` and NOT
+        // `AfterCreatureAddedToCombat`: the game raises the latter from
+        // CreatureCmd.AddToCombat, i.e. for creatures SPAWNED into a live
+        // combat, and the seats never pass through it. CombatManager raises
+        // BeforeCombatStart after every creature is in and immediately before
+        // StartTurn. This pin is what stops that repair being undone.
+        var hook = typeof(KokomiResourceHooks).GetMethod(
+            "BeforeCombatStart", HeadlessGame.All);
+
+        Assert.NotNull(hook);
+        Assert.Contains("KurageMemory.InstallAll", Il.Calls(hook));
+    }
+
+    [Fact]
+    public void The_install_covers_every_seat_not_only_the_local_one()
+    {
+        // Co-op is two players and a second Kokomi is entitled to her own
+        // jellyfish. The walk is over the combat's own seat list.
+        var calls = Il.Calls(Il.Method("KurageMemory", "InstallAll"));
+
+        Assert.Contains("KurageMemory.Install", calls);
+    }
+
+    [Fact]
     public void The_starter_swap_happens_at_exactly_one_seam()
     {
         // sec.12.6 ITEM 5: one seam, so the mod and the sim cannot disagree

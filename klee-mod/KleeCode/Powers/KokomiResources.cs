@@ -473,7 +473,7 @@ public sealed class KokomiResourceHooks : AbstractModel
         // FIGHT, which the sim gets free because CombatState is rebuilt by
         // run_fight; this hook model is a singleton and has to be told. This
         // is the one place the mod is handed a fresh combat.
-        KurageMemory.ResetForCombat();
+        KurageMemory.ResetForCombat(combatState);
 #endif
         yield return _instance;
     }
@@ -481,15 +481,21 @@ public sealed class KokomiResourceHooks : AbstractModel
 #if PROTOTYPE_CARDS
     /// <summary>
     /// QUARANTINED, v4 BASE KIT (sec.12.6 item 1). The jellyfish is installed
-    /// HERE -- when her creature enters the combat, before the first turn
-    /// opens -- rather than by a card, because under the base kit nothing
-    /// summons it. Mirror of the sim's `combat.run_fight`, which does the same
-    /// beside the per-combat Charge reset. Kokomi only, and idempotent, so a
-    /// second creature-entered event costs one predicate.
+    /// HERE rather than by a card, because under the base kit nothing summons
+    /// it. Mirror of the sim's `combat.run_fight`, which installs beside the
+    /// per-combat Charge reset for the same reason: the two have one lifetime.
+    ///
+    /// THIS HOOK AND NOT `AfterCreatureAddedToCombat`, which was the first
+    /// choice and is wrong: the game raises that one from
+    /// `CreatureCmd.AddToCombat`, i.e. for creatures SPAWNED into a live
+    /// combat, while the seats are seeded by the combat's own setup loop and
+    /// never pass through it. `CombatManager` raises THIS hook after every
+    /// creature is in and immediately before `StartTurn`, which is exactly
+    /// "before the first turn opens".
     /// </summary>
-    public override async Task AfterCreatureAddedToCombat(Creature creature)
+    public override async Task BeforeCombatStart()
     {
-        await KurageMemory.Install(creature);
+        await KurageMemory.InstallAll();
     }
 #endif
 
