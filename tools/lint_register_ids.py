@@ -285,7 +285,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 182, 183, 184, 186,
-        188, 189, 190,
+        188, 189,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
