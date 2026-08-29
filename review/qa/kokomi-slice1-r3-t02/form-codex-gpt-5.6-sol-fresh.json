@@ -1,0 +1,29 @@
+{
+ "turn_id": "kokomi-slice1-r3-t02",
+ "packet_sha256": "9741934c8dad3bcdaceee758bdd98a95bf910248a8de060264f9c31e55806822",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Gorou \u2014 Inuzaka All-Round Defense",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Tidal Barrage",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Coral Guard",
+   "target": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Gorou \u2014 Inuzaka All-Round Defense on Nibbit, then Tidal Barrage on Nibbit while Exhausting Send the Runner, then Coral Guard.",
+ "q2_other_line_considered": "I seriously considered replacing Coral Guard with All Streams Flow to the Sea for 9 more damage.",
+ "q3_what_it_gave_up": "It gave up 9 damage in exchange for 5 Block against the telegraphed 12-damage attack.",
+ "q4_different_intent": "Yes. If Nibbit had not telegraphed damage, I would have replaced Coral Guard with All Streams Flow to the Sea.",
+ "q4_changed": true
+}

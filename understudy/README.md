@@ -387,11 +387,17 @@ defence: it fires per play and reads as one bad target, where the guard names
 the whole board as somebody else's, which is what it actually was.
 
 **GUARDS.** The grader never designed the cards it reads (declared in the form,
-refused if true; procedurally, a fresh agent with the packet inline). [USER]
-plays the same staged board cold under `grader.id: user`, and `ledger` fills in
-per-question agreement: a grader whose question two disagrees with [USER]'s on
-3 of its last 5 shared turns loses `survives_alone`, so its SURVIVES needs
-[USER]'s form beside it.
+refused if true; procedurally, a fresh agent with the packet inline).
+
+**R217 A changed who grades.** [USER] plays no forms and no calibration turns
+during iteration; an independent seat's form RETURNS or ADVANCES a prototype on
+its own, and two seats materially disagreeing ESCALATES. `ledger` still fills
+in per-question agreement and still computes `survives_alone` — a grader whose
+question two disagrees with [USER]'s on 3 of its last 5 shared turns loses it —
+but with no `user` rows arriving by rule, that down-weighting is **DORMANT**:
+the pin stays in code and nothing exercises it. `stage --hold` under
+`grader.id: user` remains available for putting a staged board cold in front of
+a person, and is not owed by the protocol.
 
 **Attended only, structurally.** Like `scenario` and `give-card`, `soak.py`
 cannot reach it, and the test walks the soak's imports to pin that.

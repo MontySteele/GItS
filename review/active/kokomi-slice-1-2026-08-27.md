@@ -405,21 +405,32 @@ grader's own words: *"this line clears all three enemies this turn"* (t03),
 *"the chosen line defeats Seapunk immediately"* (t06), *"this line kills the
 only enemy"* (t09). **Three of the seven are shipped controls**, which is the
 fact that matters: intent-insensitivity cannot be blamed on a prototype when
-the shipped half on the same board answers "no" too.
+the shipped half on the same board answers "no" too. Two of those three
+(`t06`, `t09`) refused on the misread the next section describes; `t03`
+refused on a lethal line that was really there.
 
-### The refusals were bought with a face defect, and the game settled it
+### Five of the seven refusals were bought with a face defect, and the game settled it
 
-Every one of those lethal lines counts *All Streams Flow to the Sea* at **13**
-damage. The card deals **9**: the sheet row is base 5 plus one per two Charge,
-and the printed face already folds the scaler in, so a reader who adds the
-Charge bonus to the printed number adds it twice. That is `EB-164` — a face
-that states its scaling twice — and this round is the first time it has been
-seen to corrupt a blind grade rather than merely confuse one.
+**Five of them** — `t06`, `t08`, `t09`, `t10`, `t11`, which is all of groups C
+and D — count *All Streams Flow to the Sea* at **13** damage. The card deals
+**9**: the sheet row is base 5 plus one per two Charge, and the printed face
+already folds the scaler in, so a reader who adds the Charge bonus to the
+printed number adds it twice. That is `EB-164` — a face that states its scaling
+twice — and this round is the first time it has been seen to corrupt a blind
+grade rather than merely confuse one.
 
 Settled by the game and not by argument: `staged_turn execute` replayed the
 group C grader's own three-attack line on its own seed and board, board check
 MATCHES, **Seapunk 22 HP → 1 HP**. The line dealt 21, not 25. There was no
 lethal line on group C, and by the same arithmetic none on group D.
+
+**Group B's two refusals (`t03`, `t04`) are SOUND, and this section does not
+cover them.** That board's attacker sat at 10 HP with no Block, and two 1-cost
+attacks are Water's Edge 6 + All Streams **9** = 15 for two of the three
+energy — a real lethal line at the card's TRUE value, not a phantom one. So
+`t03` is a shipped control that refused on correct arithmetic, and **two**
+shipped controls, `t06` and `t09`, refused on the misread. Round 3 removes B's
+lethal line by giving that attacker 6 Block.
 
 ### The pair read
 
@@ -468,3 +479,153 @@ have — so the boards were returned for a property they did not possess. Its
 
 Nothing here rates a card, and nothing here is a ship approval: a seat's
 SURVIVES and a seat's ADVANCE are both "not yet falsified" (R217 G).
+
+## Round 3 (2026-08-28)
+
+Round 2's own finding blocked it: `EB-164`, a face that printed a number with
+its scaler already folded in and then asserted the scaling again beneath it.
+Round 3 is the same eleven cards, on round 2's boards, against faces that state
+a scaling once — plus one new protocol step that would have caught the defect
+at grade time. Files: `understudy/turns/kokomi-slice-1-r3/`, manifest there.
+Build `0.2.1252+proto`. **No printed card number moved.**
+
+### What changed, and only this
+
+**The faces.** One rule for the whole roster, in `gen_klee_cards.py`'s
+docstring: where the printed number already carries the rider, the source is
+named in that number's own sentence and nothing else asserts it; where the
+count does not exist until the card resolves, the per-unit rate is printed
+beside the number (R215 C, untouched). Eighteen faces re-worded, seventeen
+generated and one hand-written. The card at the centre of round 2's misread now
+reads, verbatim from the live packet:
+
+> All Streams Flow to the Sea — *Deal 9 damage, already including Charge.
+> Applies Hydro.*
+
+**Two boards, both to remove a lethal line, both checked with the CORRECT card
+values.** The manifest states the arithmetic per group rather than asserting
+it.
+
+* **Group B's attacker gets 6 Block.** At 10 HP with none it died to Water's
+  Edge 6 + All Streams 9 = 15 for two of three energy — a real lethal line at
+  the true value, which is why round 2's two group-B refusals were sound. Six
+  Block is an effective 16 against a ceiling of 15, so the best line leaves it
+  on 1. Block and not HP because `set_hp` clamps at a creature's maximum and
+  this body generates at 10/10.
+* **Group D is on a new seed.** Round 2 could not land its defensive threshold:
+  the attacker telegraphed 8 against a 6-Block half, and no verb writes an
+  intent. Fourteen rolls, all recorded in the manifest, looking for one body
+  telegraphing at most 6; `21RD94VY60` (Fuzzy Wurm Crawler, attacks for 4) is
+  the first that qualifies, and all three group-D halves stage on it. **No roll
+  in fourteen produced a 5 or a 6** — the one-body Act-1 telegraphs that
+  appeared were 4, 8, 11 and 12 — so the Block half now fully answers the hit
+  with 2 of its 6 spare rather than three quarters of it.
+
+Groups A and C are round 2's boards on round 2's seeds, unchanged.
+
+### The new protocol step: REPLAY
+
+After grading and before the pair read, every graded line is replayed on the
+live game on its own pinned seed and board, and the grader's stated damage or
+kill expectation is set against what the board actually did. A form whose
+refusal or survival rests on an arithmetic claim the game contradicts is
+flagged `misread` in the table below — **recorded, never re-graded**. This is
+the check that would have caught `EB-164` in round 2 at grade time instead of
+at pair-read time.
+
+### Verdicts, and the replay beside each
+
+Grader: the R217 C independent seat, blind and transcript-guarded, one fresh
+agent per packet, `codex-gpt-5.6-sol-fresh`. **7 SURVIVES / 4 REFUSED**, where
+round 2 was 4 / 7.
+
+| turn | half | verdict | replay: the board's answer to the form's arithmetic |
+|---|---|---|---|
+| t01 | A shipped | SURVIVES | **confirms** — Nibbit 38 → 23, the 15 damage q1 claims; Block 0 → 5 |
+| t02 | A proto (counting) | SURVIVES | **incomplete** — the Exhaust prompt is a modal the replayer cannot answer; only the free attack resolved (38 → 32). Untested, not contradicted |
+| t03 | B shipped | **REFUSED — `intent_insensitive`** | **confirms** — both Leaf Slimes died; the attacker went 10 HP behind 6 Block → 4 HP, 0 Block; Block 0 → 4. It lived and its telegraph landed |
+| t04 | B proto (either) | SURVIVES | **incomplete** — the mode choice is a modal; the line stopped after one card |
+| t05 | B proto (priced) | **REFUSED — `intent_insensitive`** | **confirms**, including the part a reader would doubt — the attacker took ZERO HP damage (10 → 10), its Block 6 → 3; player Block 0 → 4 |
+| t06 | C shipped | SURVIVES | **confirms** — Seapunk 22 → 1, exactly the 21 q1 claims |
+| t07 | C proto (either) | **REFUSED — `intent_insensitive`** | **confirms** — Seapunk 22 → 1. The form's claim that no line here can defeat it this turn is TRUE |
+| t08 | C proto (priced) | SURVIVES | **confirms** — Seapunk 22 → 1 |
+| t09 | D shipped | **REFUSED — `intent_insensitive`** | **confirms** — Fuzzy Wurm Crawler 24 → 1 (23 damage) AND Block 0 → 6, in one line |
+| t10 | D proto (either) | SURVIVES | **incomplete** — same modal limitation as t04 |
+| t11 | D proto (priced) | SURVIVES | **confirms** — 24 → 3 (21 damage), Block 0 → 0 |
+
+**No turn was flagged `misread`.** Eight of eleven replays completed and every
+one of the eight confirmed the grader's arithmetic to the hit point. The three
+that did not complete — `t02`, `t04`, `t10` — failed for one shared mechanical
+reason: each line passes through a modal card-selection or mode-choice prompt
+that `staged_turn execute` cannot answer. That is a real gap in the tool, filed
+as `EB-170`, and it is not a disagreement about a number.
+
+The four refusals in the grader's own words:
+
+* `t03` — *"Given only this hand and board, the same line efficiently removes
+  both 3-HP enemies, uses the strongest remaining hit on Twig Slime (S), and
+  adds Block, so a different telegraphed intent would not have changed it."*
+* `t05` — *"With both Leaf Slimes at 3 HP, the all-enemy hit removes both for
+  one play, and its Block is useful against the shown attack without costing
+  those removals."*
+* `t07` — *"From the printed information, the three one-cost attacks still
+  produce the highest known damage for the available energy, and no listed line
+  can defeat Seapunk this turn."*
+* `t09` — *"With only the printed effects available, this line gives the
+  highest damage while also gaining Block, so a different telegraphed intent
+  would not have changed my play."*
+
+Two of the four are shipped controls (`t03`, `t09`), and `t09`'s reason is the
+slice's own hypothesis stated by a blind reader: the shipped card gives the
+most damage **and** the Block in one play, so the telegraph cannot matter.
+
+### The pair read
+
+Same shape as round 2 — all eleven packets, forms and verdicts inline — with
+the replay post-state added beside each form and the three incompletes named.
+Reply, unedited:
+`review/qa/kokomi-slice-1-r3-pair-review-codex-gpt-5.6-sol.md`; prompt kept at
+`review/qa/kokomi-slice-1-r3-review-prompt.txt`, sha256
+`c2466b75e85f5ad34e4dde00d40246dfed43d781223999cdcd21c6f3a189dc87`. **No
+correction is attached this round**, where round 2's read needed one.
+
+| turn | arm | outcome | the reviewer's one-line reason |
+|---|---|---|---|
+| t02 | A counting basis | **ADVANCE** | *"Played; whole-turn counting moved the scaling attack into the defended line, while Coral Guard explicitly cost nine damage."* |
+| t04 | B either | **ADVANCE** | *"Played in damage mode; unlike shipped, killing both Leaf Slimes required giving up four Block and taking the attack."* |
+| t05 | B priced | RETURN | *"Played, but the bundled AOE removal plus Block remained intent-insensitive; the extra cost removed only a follow-up."* |
+| t07 | C either | RETURN | *"Seriously weighed, but Block mode sacrificed twelve damage for three Block and never became competitive on this board."* |
+| t08 | C priced | **ADVANCE** | *"Seriously weighed; pricing Block into the cost line created an explicit 13-damage defensive price."* |
+| t10 | D either | **ADVANCE** | *"Played in damage mode; the prototype forced a clean choice between 14 damage and six Block."* |
+| t11 | D priced | **ADVANCE** | *"Seriously weighed; paying for six Block cost seven damage and the entire three-energy turn."* |
+
+**Five ADVANCE, two RETURN, no ESCALATE** — against round 2's two ADVANCE and
+five RETURN, and round 1's seven RETURN. The reviewer's own summary: *"mutually
+exclusive modes work on the Shinobu and Itto boards but need a better Thoma
+test. Cost-line pricing works for Thoma and Itto, while Shinobu's multi-enemy
+removal remains strong enough to carry the Block without an intent-dependent
+decision."* Its opening line is the reason the round is readable at all:
+*"None warrants ESCALATE: every completed replay confirms the form, and the
+three incomplete replays are mechanically untested rather than contradictory."*
+
+### What the outcome means next
+
+Both of R213 E's shapes for pricing Companion defence now have a majority of
+their arms advancing on boards a blind reader and an independent reviewer both
+read correctly. The two RETURNs are specific and each names its own repair in
+the reviewer's words: Thoma's **either** shape needs *"a stronger or more
+discriminating board"* — its Block mode lost by twelve damage rather than
+losing a decision — and Shinobu's **priced** shape needs a board where the
+multi-enemy removal does not carry the Block for free, since *"paying for Block
+did not compete with the card's decisive two-enemy removal."*
+
+The refusals still cluster on the same property, and round 3 sharpens what it
+is. Two of the four are shipped halves whose single best line delivers maximum
+damage AND the Block together; that is not a board defect and it is not a
+grading artifact — it is the subsidy the slice exists to price, showing up as a
+turn where the telegraph cannot matter.
+
+Nothing here rates a card, and nothing here is a ship approval: a seat's
+SURVIVES and a seat's ADVANCE are both "not yet falsified" (R217 G). What a
+round 4 would carry, if one runs, is the two named board repairs and `EB-170`,
+so that a modal line can be replayed rather than left untested.

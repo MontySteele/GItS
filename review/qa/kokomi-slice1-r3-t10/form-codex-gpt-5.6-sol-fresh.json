@@ -1,0 +1,25 @@
+{
+ "turn_id": "kokomi-slice1-r3-t10",
+ "packet_sha256": "7367f43dbeacc0e73b35e1b41b822fbfcf9cfc389904ddc05a375118f9b66a4f",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Itto - Oni Rush",
+   "target": "Fuzzy Wurm Crawler"
+  },
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Fuzzy Wurm Crawler"
+  }
+ ],
+ "q1_what_did_you_play": "I played Itto - Oni Rush for 14 damage, then All Streams Flow to the Sea for 9 damage, both targeting Fuzzy Wurm Crawler. This leaves it at 1 HP.",
+ "q2_other_line_considered": "I seriously considered using Itto - Oni Rush for 6 Block and playing All Streams Flow to the Sea, preventing the telegraphed 4 damage but dealing only 9 damage.",
+ "q3_what_it_gave_up": "It gave up preventing the incoming 4 damage in exchange for dealing 14 more damage and leaving the enemy at 1 HP.",
+ "q4_different_intent": "Yes. A substantially larger attack would have made the 6 Block option more attractive, while a non-attacking intent would strengthen the case for maximizing damage.",
+ "q4_changed": true
+}

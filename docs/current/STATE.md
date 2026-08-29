@@ -302,9 +302,9 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   through Codex CLI headless mode (`EB-166`, branch `codex-seat`), and
   independence is by model FAMILY, not by fresh context. `deploy_proto.ps1`'s
   **`+proto` / `+proto.dirty` version mark is RATIFIED** (LAW, beside R214),
-  refusal symmetric. Automation minted in order: `EB-166` the seat,
-  `EB-167` a design-blind any-screen render, `EB-168` an orchestrated
-  Act-1 tester; A4 and A6 wait and are NOT minted; A1-extended (enemy
+  refusal symmetric. Automation minted in order: `EB-166` the seat — **CLOSED 2026-08-28**, built, blind-grading eleven
+  turns twice and driving both pair reads — `EB-167` a design-blind
+  any-screen render, `EB-168` an orchestrated Act-1 tester; A4 and A6 wait and are NOT minted; A1-extended (enemy
   composition/intent setters) and A5 (vision input) are DEFERRED.
   Routing: **Kokomi slice 2 = R213 E1's Charge arms, before Klee** — slice 1
   tests priced Companion Block at the turn and does not exhaust Kokomi.
@@ -337,9 +337,30 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   hand-written one were re-worded, **no sheet number moved**, all three
   manifests' coverage counts are unchanged, and
   `tools/lint_face_scaling.py` on the ci lane refuses a face that states a
-  scaling twice — or claims a fold on a number with nothing folded in. Packet:
-  `review/active/kokomi-slice-1-2026-08-27.md` §Round 2. Seat testimony
-  lives in `review/qa/<turn>/form-*.json` and gitignored
+  scaling twice — or claims a fold on a number with nothing folded in. **Round 3 (2026-08-28, `0.2.1252+proto`, branch
+  `kokomi-slice-1-round-3`)** re-staged the same eleven on **honest faces**
+  (`EB-164` fixed at the generator, eighteen faces re-worded, no printed
+  number moved) with **two board repairs, both removing a REAL lethal line
+  checked at true card values**: group B's attacker gains 6 Block (`set_hp`
+  clamps at a creature's maximum, so Block is the only verb that reaches
+  past 10/10), and group D is re-rolled onto `21RD94VY60` — fourteen rolls
+  recorded, one body telegraphing 4, and **no roll produced a 5 or a 6**, so
+  the 6-Block half now fully answers the hit instead of three quarters of it.
+  Verdicts **7 SURVIVES / 4 REFUSED** (`t03`, `t05`, `t07`, `t09`; two are
+  shipped controls), where round 2 was 4 / 7. **A REPLAY step is now part of
+  the protocol:** every graded line is re-played live and the grader's
+  arithmetic set against the board, a contradiction being recorded as
+  `misread` and never re-graded. **No turn was flagged `misread`** — eight of
+  eleven replays completed and all eight confirmed the form to the hit point;
+  the other three could not complete because `execute` cannot answer a modal
+  prompt (`EB-170`). The pair read
+  (`review/qa/kokomi-slice-1-r3-pair-review-codex-gpt-5.6-sol.md`, no
+  correction attached) **ADVANCES five arms and RETURNS two**, with no
+  ESCALATE: Thoma's either shape needs a more discriminating board, and
+  Shinobu's priced shape needs one where the multi-enemy removal does not
+  carry the Block for free. Packet:
+  `review/active/kokomi-slice-1-2026-08-27.md` §§Round 2, Round 3. Seat
+  testimony lives in `review/qa/<turn>/form-*.json` and gitignored
   `understudy/logs/seat/`, and never enters an Understudy report, a
   win-rate table or a measurement register.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces

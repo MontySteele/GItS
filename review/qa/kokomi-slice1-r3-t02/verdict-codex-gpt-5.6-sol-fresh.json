@@ -1,0 +1,115 @@
+{
+ "turn_id": "kokomi-slice1-r3-t02",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "9741934c8dad3bcdaceee758bdd98a95bf910248a8de060264f9c31e55806822",
+ "chosen_line": [
+  {
+   "card": "Gorou \u2014 Inuzaka All-Round Defense",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Tidal Barrage",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Coral Guard",
+   "target": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Gorou \u2014 Inuzaka All-Round Defense on Nibbit, then Tidal Barrage on Nibbit while Exhausting Send the Runner, then Coral Guard.",
+  "q2_other_line_considered": "I seriously considered replacing Coral Guard with All Streams Flow to the Sea for 9 more damage.",
+  "q3_what_it_gave_up": "It gave up 9 damage in exchange for 5 Block against the telegraphed 12-damage attack.",
+  "q4_different_intent": "Yes. If Nibbit had not telegraphed damage, I would have replaced Coral Guard with All Streams Flow to the Sea."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.1136,
+  "top1": 26.4,
+  "top2": 23.4,
+  "lines_considered": 27,
+  "playouts": 71,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Tidal Barrage",
+     "Gorou \u2014 Inuzaka All-Round Defense",
+     "Send the Runner",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 26.4
+   },
+   {
+    "cards": [
+     "Tidal Barrage",
+     "Gorou \u2014 Inuzaka All-Round Defense",
+     "Send the Runner",
+     "Coral Guard"
+    ],
+    "score": 23.4
+   },
+   {
+    "cards": [
+     "Tidal Barrage",
+     "Gorou \u2014 Inuzaka All-Round Defense",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 22.8
+   },
+   {
+    "cards": [
+     "Gorou \u2014 Inuzaka All-Round Defense",
+     "Send the Runner",
+     "Coral Guard",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 21.4
+   },
+   {
+    "cards": [
+     "Gorou \u2014 Inuzaka All-Round Defense",
+     "Coral Guard",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 20.8
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "unmapped_statuses": [],
+   "enemy_count": 1,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-28T19:32:08"
+}
