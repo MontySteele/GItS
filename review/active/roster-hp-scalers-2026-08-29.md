@@ -214,22 +214,29 @@ anyone clicks the button:
 
 ## 9. Verification run on this branch
 
+All green, final state of the branch:
+
 - `python tools/lint_constant_parity.py` →
   `constant parity: OK (75 mirrored, 18 declared unmirrored, 2 ratified invariants held)`
+- `python -m tools.run_lints --lane ci` → `OK: 28 lint(s) passed`
 - `python -m pytest tier0/tests -q` →
-  `2 failed, 3637 passed, 46 skipped, 12 xfailed, 3 warnings in 236.73s (0:03:56)`
-- `python -m pytest tier05/tests -q` → `794 passed, 9 warnings in 38.75s`
-- `python -m tools.run_lints --lane ci` →
-  `FAILED: prototype-codegen, prototype-authorship` (26 of 28 green)
+  `3639 passed, 46 skipped, 12 xfailed, 3 warnings in 239.41s (0:03:59)`
+- `python -m pytest tier05/tests -q` → `794 passed, 9 warnings in 37.61s`
 - `dotnet build klee-mod/KleeCode/KleeCode.csproj -p:UsePinnedAssemblies=true`
   → `12 Warning(s)` / `0 Error(s)`
 
-**The two red lints and the two red tests are the same pre-existing defect and
-are not caused by this branch.** They were confirmed red on `origin/main`
-(`48a2273`) with this branch's changes stashed: `proto_kurages_oath_memory` in
-the prototype surface carries no `authored_by:` field, which EB-190 requires,
-and the prototype codegen check fails alongside it. Fixing it means asserting
-which model families wrote that row — an authorship record, not a typo — so it
-is left alone here and belongs on the Kurage workstream that minted the row.
-It does mean the push gate is red on this branch through no fault of the HP
-change.
+**One pre-existing red had to be cleared to push, in its own commit.** On the
+first run, `prototype-authorship` and `prototype-codegen` were red and
+`tier0/tests/test_prototype_authorship.py` failed twice — all of it the same
+defect, and all of it confirmed red on `origin/main` (`48a2273`) with this
+branch's changes stashed. `proto_kurages_oath_memory` had shipped without the
+`authored_by:` field EB-190 requires; the row's comment block justified the
+omission by saying the surface has no such field and `Card.from_dict` refuses
+one, which is false — seventeen rows above it carry the field and load. The
+follow-up commit adds `authored_by: [claude]` (the value the same comment
+block's own words give: numbers and rule [USER], implementation and wording
+Claude, nothing designed by the doctrine seat, nothing graded) and corrects the
+comment. No card behaviour, face, number or generated file moves, and the
+codegen check reports the surface already up to date. It is hygiene, disclosed
+here because it rode in on this branch and belongs to the Kurage workstream,
+not to the HP change.
