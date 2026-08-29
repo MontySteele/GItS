@@ -162,8 +162,11 @@ carried while it was active is in the commit message that retired it.
   every replay figure is a defect diagnostic under Guardrail-7.
   **Tester seat:** the LOCAL Qwen seat (`python -m understudy.local_tester`),
   its first live use, ruled available for the staged single-turn tester seat
-  only by R220 E on the Codex seat's ADVANCE (the generated `RULINGS.md` index
-  still runs to R219 and has not been regenerated past it). **Spot-check:** the Codex seat
+  only on [USER]'s 2026-08-29 instruction and the Codex seat's ADVANCE, both
+  recorded at `OPERATIONS.md` §"Local tester seat" with the four conditions
+  that ADVANCE attached. **No R-number is cited for it here**: the ruling that
+  will carry it is unissued (`R_CEILING` is 219) and citing an unissued number
+  is what `tools/lint_r_numbers.py` exists to refuse. **Spot-check:** the Codex seat
   ALSO reads turn 1 and every 4th after it — `--seat-spot-check 4`, which is
   the shipped default and NOT a picked rate; `M58` is open on what the rate
   should be, and this round discloses that it used the default rather than
@@ -197,8 +200,8 @@ carried while it was active is in the commit message that retired it.
   §10.5's four named pilot blind spots all push it toward spending.
   **World:** `main` @ `d974303`.
   **DISCLOSURE, before any reading.** (1) The roster-wide Burst retirement is
-  RULED — R220 B, `review/active/burst-retirement-2026-08-29.md` — and is NOT
-  BUILT: Klee's Burst meter is still live in the build this round stages on,
+  RULED at `review/active/burst-retirement-2026-08-29.md` — whose own ruling
+  number is still unissued, so none is cited — and is NOT BUILT: Klee's Burst meter is still live in the build this round stages on,
   so any Burst a grader sees on a packet is the shipped meter and not a thing
   this round is testing. (2) The Spark badge captured at
   `review/qa/eb194-gates/frame-*gatec-*.png` has NOT had [USER]'s eyes-on, and
