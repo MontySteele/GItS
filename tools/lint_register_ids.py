@@ -309,7 +309,11 @@ CEILINGS: dict[str, int] = {
                  # exp_shop_companion_channel instrument (R68); EB-140 minted
                  # at the R211 W3 build (the codegen upgrade-delta gap);
                  # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
-    "M": 61,     # M61 minted 2026-08-29 by [USER]'s memory-gauge direction:
+    "M": 62,     # M62 minted 2026-08-29 by R221 A: the criterion that
+                 # retires the fresh-Opus control form from every packet of
+                 # a blind-QA round to the spot-check rate. The threshold is
+                 # a number, so it is [USER]'s.
+                 # M61 minted 2026-08-29 by [USER]'s memory-gauge direction:
                  # the strip is "insufficiently ambitious", so the display
                  # becomes an element carrying the bank, the next spend, a
                  # state colour and an openable queue. WHICH of the three
@@ -404,8 +408,12 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # slate rows R220 mints.
     # M61 joins 2026-08-29 with the memory-gauge direction: the build option
     # and the mock's three eyes-on calls.
+    # M62 minted 2026-08-29 by R221 A: the criterion that retires the
+    # fresh-Opus control form to the spot-check rate. KLEESPARK-R1 read
+    # 4/8, so the control stays on under every option; the row fixes the
+    # number that would take it off.
     "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 52,
-                    54, 55, 56, 57, 59, 60, 61}),
+                    54, 55, 56, 57, 59, 60, 61, 62}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

@@ -66,6 +66,84 @@ registration packets themselves live under `review/active/` — one home, not tw
   the affected slots and disclosing the diff in the row; it never means
   re-signing an already-countersigned slate.
 
+### The blind-QA funnel — the seat control, and stopping early (R221)
+
+Two rules that reach the staged-turn funnel only (`understudy/staged_turn.py`,
+`understudy/local_tester.py`), and neither one reaches a sim measurement. Both
+were written because a round of that funnel is expensive in the two scarcest
+things the house has — game time and model time — and neither is spent well by
+a phase order that leaves the game idle while a model reads.
+
+**R221 A — the fresh-Opus control form is a CALIBRATION ARM and it has an
+end.** Every packet in this funnel is read twice: once by the local tester seat
+(`understudy/local_tester.py`) and once by a fresh Opus grader with no repo
+access and the packet inline. The second read exists to answer ONE question —
+does the local seat read a board the way a frontier reader reads it? — and that
+is a calibration question, not a standing chair. **The control retires to the
+spot-check rate** — the same `turn 1 and every Nth after it` cadence
+`--seat-spot-check` already runs the Codex seat at (R220 G, `N = 4`) — **on the
+criterion QUEUE `M62` fixes, and on no other ground.** Until that criterion is
+met the control rides every packet of every round. Three clauses go with it:
+
+- **It never retires mid-round.** The round that meets the criterion is graded
+  whole with the control still on. Retirement takes effect from the NEXT
+  round's plan, which is committed before any board of that round is staged.
+- **Agreement is counted per TURN, on the verdict** — the local seat's verdict
+  and the control's verdict on the same packet, SURVIVES against SURVIVES or
+  REFUSED against REFUSED. It is not a prose comparison and does not pretend to
+  be one.
+- **It is reversible on the same rule.** A later round whose agreement falls
+  back below the criterion puts the control back on from the following round.
+  A retired control is a rate, not a deletion.
+
+The first calibration round is **`KLEESPARK-R1`** (2026-08-29): verdict
+agreement **4 of 8**, with five `intent_insensitive` refusals from the local
+seat, one `misread`, and two replay lines the bridge refused for a null target.
+The Codex pair read returned the tester seat itself. **The control therefore
+STANDS**, and `M62` is where the number that would retire it is ruled.
+
+**R221 B — sequential stopping: a round may stop early, and what it stops is
+which boards are RUN.** The rule is part of the registration and is fixed
+before any board is staged; it may not be chosen, loosened or tightened once a
+grade is in.
+
+- **A round stages its boards in a PRE-REGISTERED ORDER.** The order is the
+  smallest set of boards whose predictions cover every registered slot at least
+  twice, first — ties broken by closeness score, the closer decision first —
+  and the remaining boards after it, by the same rule. `--first N` says how
+  many of that order the round runs before it stops to look; the default is
+  **4**, raised automatically where the twice-over cover needs more.
+- **After the first set is graded and replayed, each slot is read once.** A
+  slot is **DECIDED** when it carries **two or more grades that all agree** —
+  all PREDICTED, or all MISSED. **Any SPLIT, or fewer than two grades, leaves
+  it UNDECIDED.** A refusal is a grade like any other; an unrun board
+  contributes none.
+- **The remaining boards run only if they carry an UNDECIDED slot.** Every
+  other board is recorded **UNRUN** — in `review/qa/ledger.tsv` and in the
+  packet's results section — **with its seed still pinned**, so a later round
+  runs exactly that board rather than a re-rolled one.
+- **Stopping never changes a grade.** It changes only which boards are run.
+  Nothing already graded is re-read, re-scored or withdrawn, and a slot that
+  reads DECIDED off two agreeing grades is not thereby better evidence than two
+  agreeing grades — it is exactly two agreeing grades, which is what the
+  packet reports.
+
+**Checked against the standing law, and it holds.** *Blind grading* is
+untouched: the stopping rule reads VERDICTS, which are `staged_turn grade`'s
+mechanical output, and it never reads a form before that form is graded — the
+reader is blind at read time either way. *R101b* is untouched: nothing already
+published is re-read or rewritten, and an UNRUN board is a board with no record
+rather than a struck one. *Pre-registration* is satisfied because the order,
+the `N`, and the decided rule are all committed with the round's plan
+(`local_tester round --plan-only`) before the first stage, which is the same
+commit-before-run discipline a prediction slate carries. *Guardrail-7* is
+unaffected: a stopped round produces fewer diagnostic replays, and a replay was
+never a comparison or a balance reading to begin with. The one honest cost is
+**power**, and it is named rather than hidden: a slot decided on two agreeing
+grades has two, and a round that ran every board would have had more. That is
+the trade [USER] authorised — *"makes sense, only run the rest if needed"* —
+and the ledger prints the UNRUN rows so the trade is visible in the record.
+
 ### Decision linkage (R206)
 - **Every registration names the DECISION each outcome would change** — slot by
   slot, in the packet, before the run. A prediction with no decision attached to
