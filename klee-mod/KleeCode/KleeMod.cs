@@ -267,6 +267,15 @@ public static class KleeMod
                     // per-card RATE tip on a card that READS the meter.
                     [Cards.KokomiRiderTips.ChargeWordKey + ".title"] =
                         "Charge",
+                    // The Charge keyword's twin, one meter over and three
+                    // characters wide: the Burst KEYWORD's title. The body is
+                    // built live in KleeCardTooltips because the meter's size
+                    // is per character and the tip says what the owner holds.
+                    // The retired BurstMeterPower badge used to be the only
+                    // surface that ever defined the word; nothing replaced it
+                    // until now.
+                    [Cards.KleeCardTooltips.BurstKey + ".title"] =
+                        "Burst Energy",
                 };
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))

@@ -41,7 +41,7 @@ public sealed class FullEnsemble : CustomCardModel, ICharacterCard, ISkillTagCar
         new[] { KleeKeywords.ElementalSkill };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Usher, SalonMember.Chevalmarin, SalonMember.Crabaletta });
+        KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Usher, SalonMember.Chevalmarin, SalonMember.Crabaletta }), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("full_ensemble");
 

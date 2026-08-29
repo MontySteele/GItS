@@ -41,7 +41,7 @@ public sealed class SalonDebut : CustomCardModel, ICharacterCard, ISkillTagCard
         new[] { KleeKeywords.ElementalSkill };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        SalonMemberTips.ForCard(base.ExtraHoverTips, this, randomMember: true);
+        KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(base.ExtraHoverTips, this, randomMember: true), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("salon_debut");
 

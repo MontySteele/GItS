@@ -44,7 +44,7 @@ public sealed class ReadTheCurrent : CustomCardModel, IElementalCard, ICharacter
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
+        KokomiRiderTips.ForCharge(KokomiRiderTips.ForGarmentAttack(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("read_the_current");
 

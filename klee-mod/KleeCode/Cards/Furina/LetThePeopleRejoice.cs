@@ -47,9 +47,17 @@ public sealed class LetThePeopleRejoice
     // Track L-C: the rider's arithmetic lives in the hover tip now that the
     // printed number carries it. Same treatment the generator gives its own
     // fanfare riders; hand-written card, so it is wired by hand.
+    //
+    // The Burst keyword rides the same wire, on the rule codegen applies to
+    // the generated faces: this face PRINTS the word ("Costs your full Burst
+    // Energy meter"), so it carries the definition. It is also the face that
+    // most needs it -- her whole meter is spent here.
+    // `tools/lint_keyword_meters.py` holds the two surfaces to one rule.
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCard(
-            base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 4);
+        KleeCardTooltips.ForBurst(
+            FurinaRiderTips.ForCard(
+                base.ExtraHoverTips, this, fanfarePer: 1, fanfareStep: 4),
+            this);
 
     // Fanfare rider rendered through CalculatedDamageVar (Legibility sprint,
     // 2026-07-24) so the face/hover and the resolved hit share one value path:
