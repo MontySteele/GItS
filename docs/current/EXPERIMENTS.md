@@ -82,8 +82,9 @@ does the local seat read a board the way a frontier reader reads it? — and tha
 is a calibration question, not a standing chair. **The control retires to the
 spot-check rate** — the same `turn 1 and every Nth after it` cadence
 `--seat-spot-check` already runs the Codex seat at (R220 G, `N = 4`) — **on the
-criterion QUEUE `M62` fixes, and on no other ground.** Until that criterion is
-met the control rides every packet of every round. Three clauses go with it:
+criterion R222 B fixes (ex-QUEUE `M62`), and on no other ground.** Until that
+criterion is met the control rides every packet of every round. Three clauses go
+with it:
 
 - **It never retires mid-round.** The round that meets the criterion is graded
   whole with the control still on. Retirement takes effect from the NEXT
@@ -100,7 +101,33 @@ The first calibration round is **`KLEESPARK-R1`** (2026-08-29): verdict
 agreement **4 of 8**, with five `intent_insensitive` refusals from the local
 seat, one `misread`, and two replay lines the bridge refused for a null target.
 The Codex pair read returned the tester seat itself. **The control therefore
-STANDS**, and `M62` is where the number that would retire it is ruled.
+STANDS.**
+
+**R222 B — the roles invert for the local seat, and `M62` is answered.** Under
+R221 A the fresh-Opus form was the CONTROL and the local seat was the tester.
+`KLEESPARK-R1` returned the seat, so from R222 the two swap for the local seat
+and for it only: **the fresh-Opus form DECIDES — its verdict is the graded
+one — and the local seat reads in SHADOW.** A shadow form is **RECORDED and
+NEVER GRADED**: it is filed with the round's records, it does not enter a
+tally, it decides nothing, and **it is never replayed** unless a pick says so
+in so many words. Nothing else about R221 A moves — the control does not retire
+mid-round, agreement is still counted per TURN on the VERDICT, and the rule is
+still reversible — and **the shadow forms are what that per-turn agreement is
+now counted on**: the seat's shadow verdict against the deciding fresh-Opus
+verdict, packet by packet.
+
+The seat comes back as a DECIDING tester when **both** halves of `M62`'s answer
+are met, and not on either alone: the criterion **≥ 6/8 verdict agreement over
+one round**, AND a **requalification battery covering target selection, printed
+costs, and intent sensitivity** — because fixing `target: null` alone does not
+address the semantic failures the round found. The mechanical half of the fault
+is BACKLOG `EB-203`. `M62` and `M63` leave the QUEUE on this ruling.
+
+**R222 C — the funnel REFUSES a bad form and never repairs one** (`M63`'s
+default, taken). A form that fails the pre-seal check is refused whole; no
+field of it is rewritten, not even a mechanical one, and nothing is re-read on
+a repaired copy. Editing a grader's answer is editing the measurement, and the
+funnel does not do it.
 
 **R221 B — sequential stopping: a round may stop early, and what it stops is
 which boards are RUN.** The rule is part of the registration and is fixed
@@ -188,7 +215,7 @@ carried while it was active is in the commit message that retired it.
 | payoff-reach re-registration (the `RARITY_ODDS` fence) | 2026-08-24 | `RT12/D14/P7/C11` | `P5`: 0 PREDICTED / 0 SPLIT / **9 MISS**, every arm ABOVE its window on both axes. Q-A SPLIT, Q-B SPLIT. Tripwires `T1`–`T4` all silent. The design call it raised was `M37`, ruled the same day (R199) | packet `review/active/payoff-reach-reregistration.md` §7–§8; raw `review/active/payoff-reach-results-2026-08-24.txt` |
 | force-first-copy re-registered under `P7` (`M17`) | 2026-08-26 | `RT12/D17/P10/C19` | 4 PREDICTED / 1 SPLIT / 0 MISS; `Q4` PREDICTED on both halves (bare-form play rate 5.99%). §8.1's redesign trigger silent for **every** card — for `elemental_ecstasy` by 0.17 pp, on a delta whose sign is not established at that `N`. `C2` landed at Block 5, `a49bf20` | packet `review/active/m17-sweep-reregistration-p7-2026-08-13.md` §12; raw `review/active/m17-sweep-results-2026-08-26.txt` |
 | shop companion channel re-run (`S4-G10`) | 2026-08-26 | `RT12/D17/P10/C19` | 2 PREDICTED / 1 SPLIT / 2 MISS over 6,000 runs. The redesign trigger FIRED on condition 4 alone, mean winrate Δ −0.07 pp; conditions 1–3 did not. The design call it raised is open at QUEUE `M14` | packet `review/active/shop-rerun-registration-2026-08-10.md` §8; raw `review/active/shop-rerun-results-2026-08-26.txt` |
-| `KLEESPARK-R1` the Sparks arm on a live board | 2026-08-29 | dev build `0.2.1481+proto`, world `main` @ `d974303` | 2 PREDICTED (`P3`, `P6`) / 2 SPLIT (`P2`, `P4`) / 2 MISS (`P1`, `P5`). `P1`'s registered decision FIRED and PICK 4 is reopened; `P5`'s FIRED and the pilot's Spark probe needs playability before any further sim reading. `P2` and `P4` each have one half the instrument could not reach — no badge on a packet, and no dry-sink board without the generator — so PICK 8 and PICK 1 both stay open. Pair read: 6 ADVANCE / 2 RETURN / 0 ESCALATE, arm ADVANCE, and a RETURN on the LOCAL tester seat's first live use | packet `review/active/klee-sparks-2026-08-29.md` §11; raw `review/active/klee-sparks-r1-sim-2026-08-29.txt`, forms and replays under `review/qa/klee-sparks-r1-t0*/`, pair read `review/qa/klee-sparks-r1-pair-review-codex-gpt-5.6-sol.md` |
+| `KLEESPARK-R1` the Sparks arm on a live board | 2026-08-29 | dev build `0.2.1481+proto`, world `main` @ `d974303` | 2 PREDICTED (`P3`, `P6`) / 2 SPLIT (`P2`, `P4`) / 2 MISS (`P1`, `P5`). `P1`'s registered decision FIRED and PICK 4 is reopened; `P5`'s FIRED and the pilot's Spark probe needs playability before any further sim reading. `P2` and `P4` each have one half the instrument could not reach — no badge on a packet, and no dry-sink board without the generator — so PICK 8 and PICK 1 both stay open. Pair read: 6 ADVANCE / 2 RETURN / 0 ESCALATE, arm ADVANCE, and a RETURN on the LOCAL tester seat's first live use. **ERRATUM 2026-08-29 (relayed review, packet §11.5): both MISSES carry an instrument correction and NEITHER grade is re-graded (R101b).** `P1`'s threshold of 4 was unreachable — only three of the eight boards could pose the question (`t07`'s bank of 4 pays both its sinks), so the MISS cannot establish that the tight set is thin, and whether its decision-fire stands is CONTESTED and on the pick list; the instrument defect is `EB-202`. `P5`'s per-turn spend rate is confounded by fight length (294 vs 243 turns) and by income (the arm converts four generators out of the deck, so gains fall 276 → 235 by construction); normalized, ON spent 90.6% of generated against OFF's 88.0%, and `P5`'s registered decision fires unchanged. **ANSWERED by R222 (2026-08-29), packet §11.7:** `P1`'s MISS stands as an audit record and is an instrument defect (`EB-202`), NOT a trigger — PICK 4 is not reopened and the set is left intact for whole-fight play. **The arm's next registration precondition:** whole-fight Codex play on the Sparks arm runs FIRST, and only then may a minimal repaired staged round be registered — dry sinks with no generator in hand, and a genuinely multi-enemy AoE board. **`P5`'s rerun metrics-to-be, registered now:** `spent / available Sparks` and `affordable sinks skipped` per turn, replacing the confounded raw per-turn spend rate; the rerun waits on pilot playability and carries no repricing from the 40-versus-25 figure | packet `review/active/klee-sparks-2026-08-29.md` §11; raw `review/active/klee-sparks-r1-sim-2026-08-29.txt`, forms and replays under `review/qa/klee-sparks-r1-t0*/`, pair read `review/qa/klee-sparks-r1-pair-review-codex-gpt-5.6-sol.md` |
 
 ## Active registrations (pointers — packets live in `review/active/`)
 
