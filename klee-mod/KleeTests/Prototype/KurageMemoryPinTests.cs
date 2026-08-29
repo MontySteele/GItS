@@ -212,8 +212,8 @@ public class KurageMemoryPinTests
         foreach (var key in new[]
                  {
                      "bank", "front_price", "blocked", "fires_next", "empty",
-                     "summon", "pulse_kind", "pulse_amount", "pulse_unit",
-                     "reading", "queue",
+                     "summon", "base_kit", "pulse_kind", "pulse_amount",
+                     "pulse_unit", "reading", "queue",
                  })
         {
             Assert.True(snapshot.ContainsKey(key),
@@ -257,5 +257,49 @@ public class KurageMemoryPinTests
         var calls = Il.Calls(Il.Method("KurageMemory", "Fire"));
 
         Assert.Contains("KurageMemory.SummonIsFielded", calls);
+    }
+
+    // --- v4 BASE KIT: STRUCTURAL, for the same boundary reason -----------
+
+    [Fact]
+    public void The_install_is_not_a_summon_and_is_idempotent()
+    {
+        // sec.12.6 ITEM 4: nothing summoned the jellyfish and no card paid for
+        // it, so a listener counting summons must not see one. The install goes
+        // to the game's own PowerCmd.Apply and deliberately NOT through the
+        // mod's summon wrapper, which carries that meaning.
+        var calls = Il.Calls(Il.Method("KurageMemory", "Install"));
+
+        Assert.Contains("PowerCmd.Apply", calls);
+        Assert.DoesNotContain("KurageSummon.Field", calls);
+        // Idempotent: it asks the ONE predicate first, so a second call and a
+        // belt call at turn start both cost a read and nothing else.
+        Assert.Contains("KurageMemory.SummonIsFielded", calls);
+        // ITEM 2: nothing here starts or spends a countdown.
+        Assert.DoesNotContain("PowerCmd.TickDownDuration", calls);
+    }
+
+    [Fact]
+    public void The_pulse_never_ticks_a_duration_down()
+    {
+        // sec.12.6 ITEMS 2 and 3: the jellyfish never expires, so the turn-end
+        // pulse must not spend a turn of anything. The shipped pulse does tick;
+        // the memory branch returns before reaching it, and this is the pin
+        // that says the memory pulse itself carries no countdown either.
+        var calls = Il.Calls(Il.Method("KurageMemory", "Pulse"));
+
+        Assert.DoesNotContain("PowerCmd.TickDownDuration", calls);
+    }
+
+    [Fact]
+    public void The_starter_swap_happens_at_exactly_one_seam()
+    {
+        // sec.12.6 ITEM 5: one seam, so the mod and the sim cannot disagree
+        // about what she opens with. If a second site ever swaps a starter
+        // card, this pin does not catch it -- but the authored deck reaching
+        // the seam at all is what makes there be only one.
+        var calls = Il.Calls(Il.Method("Kokomi", "get_StartingDeck"));
+
+        Assert.Contains("KurageMemory.StarterSlotEleven", calls);
     }
 }

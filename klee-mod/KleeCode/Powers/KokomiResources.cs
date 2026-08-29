@@ -478,6 +478,21 @@ public sealed class KokomiResourceHooks : AbstractModel
         yield return _instance;
     }
 
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// QUARANTINED, v4 BASE KIT (sec.12.6 item 1). The jellyfish is installed
+    /// HERE -- when her creature enters the combat, before the first turn
+    /// opens -- rather than by a card, because under the base kit nothing
+    /// summons it. Mirror of the sim's `combat.run_fight`, which does the same
+    /// beside the per-combat Charge reset. Kokomi only, and idempotent, so a
+    /// second creature-entered event costs one predicate.
+    /// </summary>
+    public override async Task AfterCreatureAddedToCombat(Creature creature)
+    {
+        await KurageMemory.Install(creature);
+    }
+#endif
+
     public override Task AfterCardExhausted(
         PlayerChoiceContext choiceContext, CardModel card, bool causedByEthereal)
     {
@@ -640,6 +655,12 @@ public sealed class KokomiResourceHooks : AbstractModel
         KurageMemory.OpenTurn(player);
         if (KokomiResources.IsKokomi(player.Creature))
         {
+            // v4 BASE KIT, the BELT to AfterCreatureAddedToCombat's braces
+            // (sec.12.6 item 1). Idempotent by construction, and here so that a
+            // combat whose setup order ever changes still opens with the
+            // jellyfish rather than silently without one -- the failure mode
+            // otherwise is a fight that quietly never pulses and never fires.
+            await KurageMemory.Install(player.Creature);
             await KurageMemory.Fire(choiceContext, player);
         }
 #endif

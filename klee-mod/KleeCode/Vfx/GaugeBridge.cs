@@ -246,11 +246,13 @@ public static class GaugeBridge
         // returns null for it, which puts the strip back to a bare counter --
         // "no bar" was never a taste call, it was the absence of a ceiling.
         //
-        // ALWAYS VISIBLE IN A KOKOMI COMBAT, not only while a jellyfish is
-        // fielded: the queue FILLS with no summon on the field, so a strip that
-        // appeared with the summon would hide the bank the player is building.
-        // ([USER] 2026-08-29 makes the Bake-Kurage base kit and always on,
-        // which makes this the only reading that survives that change too.)
+        // ALWAYS VISIBLE IN A KOKOMI COMBAT, and under v4 there is no other
+        // reading available (sec.12.6 ITEM 11): the Bake-Kurage is base kit and
+        // is installed at combat start, so there IS no "no jellyfish" state and
+        // the strip must never render one. It was already right for the v3
+        // reason -- the queue FILLS with no summon on the field, so a strip
+        // that appeared with the summon would hide the bank the player is
+        // building -- and nothing in it reads the summon at all.
         //
         // NO NEW ART. It draws in shared/gauge.tscn, the same script-less scene
         // every other gauge instantiates, with the queue rendered as LINES in

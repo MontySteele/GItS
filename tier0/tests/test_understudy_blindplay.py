@@ -1349,7 +1349,7 @@ def memory_combat_state(memory: dict | None) -> dict:
 
 BLOCKED_MEMORY = {
     "bank": 5, "front_price": 9, "blocked": True, "fires_next": False,
-    "empty": False, "summon": True,
+    "empty": False, "summon": True, "base_kit": True,
     "pulse_kind": "skill", "pulse_amount": 5, "pulse_unit": "block",
     "reading": "Charge 5 / 9 — Raiden Shogun blocked",
     "queue": [
@@ -1372,6 +1372,7 @@ def test_a_board_carrying_the_memory_parses_every_field():
     assert memory["fires_next"] is False
     assert memory["empty"] is False
     assert memory["summon"] is True
+    assert memory["base_kit"] is True
     assert memory["pulse_kind"] == "skill"
     assert memory["pulse_amount"] == 5
     assert memory["pulse_unit"] == "block"
@@ -1427,3 +1428,21 @@ def test_the_power_pulse_reads_in_charge():
     page = blindplay.render(blindplay.observation(
         memory_combat_state(powered)))
     assert "the jellyfish will give you 1 Charge" in page
+
+
+def test_the_page_names_the_jellyfish_as_a_fight_start_fact():
+    """sec.12.6 item 12. Under the base kit the Bake-Kurage is installed at
+    combat start, so a blind run must be able to SEE it before turn 1 rather
+    than inferring it from the first pulse."""
+    page = blindplay.render(blindplay.observation(
+        memory_combat_state(BLOCKED_MEMORY)))
+    assert "on the field for the whole fight" in page
+
+
+def test_a_summoned_jellyfish_is_not_announced_as_base_kit():
+    """With the base kit off the v3 arm is still reachable, and the page must
+    not tell a tester the jellyfish is permanent when it is not."""
+    summoned = dict(BLOCKED_MEMORY, base_kit=False)
+    page = blindplay.render(blindplay.observation(
+        memory_combat_state(summoned)))
+    assert "on the field for the whole fight" not in page

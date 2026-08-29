@@ -149,8 +149,25 @@ public static class KurageSummon
         // the whole fight: summoned once, never expiring, so the stacks stop
         // being a countdown and one is all it ever needs. KURAGE_DURATION is
         // not read here, which makes the Bake-Kurage upgrade's `+1 turn` INERT
-        // under the flag -- named in sec.11 and true on both engines. Nothing
-        // new is built around expiry, per [USER]'s 2026-08-29 always-on ruling.
+        // under the flag (sec.12.6 ITEM 8) -- named in sec.11 and true on both
+        // engines.
+        //
+        // v4 BASE KIT: with the jellyfish installed at combat start, this
+        // clamp is also what makes the two remaining callers NO-OPS rather
+        // than needing edits of their own, which is the least-invasive default
+        // and the one the sim took:
+        //
+        //   ITEM 7 -- the Bake-Kurage card's summon leg sets a bit that is
+        //   already set. The card keeps its second leg (`gain 1 Charge`), so
+        //   under the base kit it is a 1-cost Skill that banks 1. It has left
+        //   the starter deck and Basics are not draftable, so with the flag on
+        //   the row is unreachable in a run. sec.12.4 PICK 1 puts that to
+        //   [USER] with its alternatives; nothing is retired here.
+        //
+        //   ITEM 9 -- the Tamakushi Casket link (CeremonialGarment's refresh)
+        //   is a max(1, 1), i.e. NOTHING. Her canon E-into-Q loop is silent
+        //   under the base kit. Left exactly as written on both engines, and
+        //   sec.12.4 PICK 3 is where it goes back to [USER].
         if (KurageMemory.IsLive(owner)) turns = 1;
 #endif
         var existing = owner.Powers

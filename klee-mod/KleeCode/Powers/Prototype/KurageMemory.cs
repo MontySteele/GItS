@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KleeMod.Cards;
+using KleeMod.Cards.Kokomi.Generated;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -120,6 +121,26 @@ public static class KurageMemory
         /// and nothing else.
         /// </summary>
         public static readonly bool KeywordNeedsSummon = true;
+
+        /// <summary>
+        /// v4 BASE KIT ([USER], 2026-08-29): "I think that we will want to
+        /// make Bake-Kurage part of the base kit (always on) rather than a
+        /// separate card. So yes, we could add one Muster card to the base
+        /// deck to teach the pattern." Mirrors <c>C.KURAGE_ALWAYS_ON</c>, and
+        /// is READ ONLY UNDER the memory quarantine, exactly as in the sim.
+        ///
+        /// True: the jellyfish is installed at the start of every one of her
+        /// combats and holds the whole fight -- no duration, no expiry, no
+        /// summon needed -- and her starter deck trades Bake-Kurage for one
+        /// Muster ("To the Front!"), so RULE 1 is printed in fight 1 instead
+        /// of drafted. False leaves the v3 arm reachable whole, which is why
+        /// this is a separate switch and not an edit to the v3 code.
+        ///
+        /// A `bool` rather than an `int`, so `lint_constant_parity` does not
+        /// scan it: it selects a shape, it is not a balance number. Its sim
+        /// twin is named above and the two must move together.
+        /// </summary>
+        public static readonly bool AlwaysOn = true;
     }
 
     // -------------------------------------------------------------- state --
@@ -215,6 +236,87 @@ public static class KurageMemory
     /// </summary>
     public static bool SummonIsFielded(Creature? creature) =>
         creature?.Powers.OfType<KurageSummonPower>().Any() ?? false;
+
+    /// <summary>
+    /// sec.12.6 ITEMS 5 AND 6 -- THE STARTER SWAP, AND IT IS ONE SEAM.
+    ///
+    /// Slot 11 of her authored starting deck. With the base kit on it is
+    /// "To the Front!"; otherwise it is Bake-Kurage, byte for byte what ships.
+    ///
+    /// [USER], 2026-08-29: "we could add one Muster card to the base deck to
+    /// teach the pattern." A card that summons what is always on the field is
+    /// a card that does nothing, so Bake-Kurage leaves; one Muster takes the
+    /// slot, so RULE 1 -- the card you sacrifice to a Muster enters the
+    /// memory, priced at three times its cost -- is something she meets in
+    /// fight 1 rather than something she has to draft into. ONE CARD FOR ONE
+    /// CARD: the deck is still twelve, which is what keeps this a substitution
+    /// and not a starter rework.
+    ///
+    /// "To the Front!" and not one of the other three Musters: it is 0 energy
+    /// with one Muster and nothing else printed, so what the player learns is
+    /// the RULE and not a rider, and at 0 cost it can be played on any turn of
+    /// any hand. sec.12.3 lists the three that lost and why.
+    ///
+    /// ITEM 6 -- THE PRINTED SHEET DOES NOT MOVE. `docs/kokomi-cards.yaml`
+    /// still says Bake-Kurage and the generated card row is untouched; only
+    /// this list moves, and only under the flag. Sim twin, and the same
+    /// argument for the same reason: `loader._starter_ids`.
+    ///
+    /// ITEM 5's OTHER HALF -- the support-Companion roll still composes. That
+    /// roll (`KleeStartingCompanionsPatch.ResolveKokomi`) replaces Sayu in
+    /// slot 10 and never looks at slot 11, so the two are independent by
+    /// construction rather than by ordering luck.
+    /// </summary>
+    public static CardModel StarterSlotEleven() =>
+        KurageMemoryLaw.AlwaysOn
+            ? ModelDb.Card<ToTheFront>()
+            : ModelDb.Card<BakeKurage>();
+
+    /// <summary>Is the BASE KIT live for this creature? The memory rule, plus
+    /// v4's always-on switch, plus her identity.</summary>
+    public static bool BaseKitLive(Creature? creature) =>
+        KurageMemoryLaw.AlwaysOn && IsLive(creature);
+
+    /// <summary>
+    /// sec.12.6 ITEM 1 -- INSTALL THE JELLYFISH AT COMBAT START, not on a card.
+    ///
+    /// Mirror of the sim's `combat.run_fight`, which puts `kurage_summon` on
+    /// the player beside the per-combat Charge reset because the two now have
+    /// the same lifetime: one fight. It must be on the field before the first
+    /// turn opens and it is never removed.
+    ///
+    /// ITEM 4 -- ITS OWN SIGNAL, NOT A SUMMON. This deliberately does NOT call
+    /// <see cref="KurageSummon.Field"/>: nothing summoned it, no card paid for
+    /// it, and a listener counting summons (the play telemetry, a future
+    /// on-summon rider) must not see one. `PowerCmd.Apply` is the game's own
+    /// application path and is what the field call would have reached anyway;
+    /// what is skipped is the mod's summon WRAPPER and the meaning it carries.
+    /// The sim's twin emits `kurage_base_kit`, not `summon_kurage`.
+    ///
+    /// ITEM 2 -- NEVER EXPIRES. Nothing here starts a countdown, and the
+    /// memory branch of <see cref="KurageSummonPower.FirePulse"/> never
+    /// reaches `TickDownDuration`. The amount is 1 because stacks ARE turns in
+    /// the shipped grammar and one is all a thing that never ticks needs.
+    ///
+    /// IDEMPOTENT, and that is load-bearing: it is called from the
+    /// creature-entered-combat hook AND, as a belt, at her turn start, so a
+    /// combat whose setup order ever changes still opens with the jellyfish
+    /// rather than silently without it.
+    ///
+    /// The context: `ThrowingPlayerChoiceContext` is the game's own "quite
+    /// certain no player choice occurs deeper in this callstack" context --
+    /// what `PowerCmd.Decrement` passes -- and applying a power with no
+    /// applier opens none. If one ever did, the throw lands in the log, which
+    /// is louder and more useful than a board silently missing a jellyfish.
+    /// </summary>
+    public static async Task Install(Creature? creature)
+    {
+        if (!BaseKitLive(creature)) return;
+        if (SummonIsFielded(creature)) return;          // already installed
+        await PowerCmd.Apply<KurageSummonPower>(
+            new ThrowingPlayerChoiceContext(), creature!, 1,
+            applier: creature, cardSource: null, silent: true);
+    }
 
     /// <summary>Is this card instance a memory copy? Read by the exhaust
     /// funnel's belt clause, which must not mint Charge for a card that was
@@ -689,6 +791,7 @@ public static class KurageMemory
     ///   fires_next    -- the front will fire at her next turn start
     ///   empty         -- the queue holds nothing
     ///   summon        -- a jellyfish is on the field
+///   base_kit      -- it was installed at fight start, not summoned
     ///   pulse_kind    -- "attack" / "skill" / "power" / "none"
     ///   pulse_amount  -- what the pulse will move
     ///   pulse_unit    -- "damage" / "block" / "charge" / "hydro" / "none"
@@ -715,6 +818,11 @@ public static class KurageMemory
         snapshot["fires_next"] = front != null && !blocked;
         snapshot["empty"] = front == null;
         snapshot["summon"] = SummonIsFielded(creature);
+        // sec.12.6 ITEM 12: the install as a FIGHT-START FACT, so a blind
+        // run can see the jellyfish before turn 1 rather than inferring it
+        // from the first pulse. `summon` says it is on the field; this says
+        // nobody had to summon it.
+        snapshot["base_kit"] = KurageMemoryLaw.AlwaysOn;
         snapshot["pulse_kind"] = PulseKind(player);
         snapshot["pulse_amount"] = PulseAmount(player, creature);
         snapshot["pulse_unit"] = PulseUnit(player);

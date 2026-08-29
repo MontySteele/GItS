@@ -617,6 +617,9 @@ def kurage_memory(player: dict[str, Any]) -> dict[str, Any] | None:
       bank / front_price / blocked / fires_next / empty / summon -- the meter,
         and the target it now has. `front_price` is null on an empty queue,
         which is the honest reading of "no ceiling" rather than a zero.
+      base_kit -- the jellyfish was INSTALLED at fight start rather than
+        summoned by a card, so it is on the field before turn 1 and there is
+        no state in which it is absent.
       pulse_kind / pulse_amount / pulse_unit -- what the jellyfish will do at
         the end of THIS turn, so a seat can forecast its own turn end.
         `pulse_unit` can read `charge`, because the Power branch pays in Charge
@@ -654,6 +657,11 @@ def kurage_memory(player: dict[str, Any]) -> dict[str, Any] | None:
         "fires_next": bool(raw.get("fires_next")),
         "empty": bool(raw.get("empty")),
         "summon": bool(raw.get("summon")),
+        # The install as a FIGHT-START FACT, so a blind run can see the
+        # jellyfish before turn 1 rather than inferring it from the first
+        # pulse. `summon` says it is on the field; this says nobody summoned
+        # it -- it is base kit, and there is no state where it is absent.
+        "base_kit": bool(raw.get("base_kit")),
         "pulse_kind": _text(raw.get("pulse_kind")) or "none",
         "pulse_amount": _int(raw.get("pulse_amount")),
         "pulse_unit": _text(raw.get("pulse_unit")) or "none",
@@ -990,7 +998,11 @@ def render(obs: dict[str, Any]) -> str:
             # are the facts the screen shows, in the order it shows them.
             # Absent entirely on a build without the rule.
             m = c["memory"]
-            out += ["", "## The Bake-Kurage's memory", "", f"- {m['reading']}"]
+            out += ["", "## The Bake-Kurage's memory", ""]
+            if m["base_kit"]:
+                out.append("- The Bake-Kurage is on the field for the whole "
+                           "fight. Nothing summons it and nothing removes it.")
+            out.append(f"- {m['reading']}")
             if m["queue"]:
                 for i, e in enumerate(m["queue"], 1):
                     price = "free" if not e["price"] else f"{e['price']} Charge"
