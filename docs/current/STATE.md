@@ -176,11 +176,13 @@ deploy label from R218 on rides the pin above; live numbers were never
 comparable across a game build anyway (R95), and the sim references no game
 assembly and is unaffected.
 
-The deployed build is **`0.2.1318`** (2026-08-29, from `klee-slice-1-funnel`
-`614620a`), a clean release package with no `+proto` and no `+dirty` mark —
-deployed as the teardown of the Klee slice 1 funnel run, which had
-`0.2.1314+proto` installed while it ran. The bridge is uninstalled and no
-game process is up. It carries the same C# as
+The deployed build is **`0.2.1328`** (2026-08-29, from `klee-slice-1-funnel`
+`34d567f`), a clean release package with no `+proto` and no `+dirty` mark —
+deployed as the teardown of the Klee slice 1 ROUND 2 funnel run, which had
+`0.2.1323+proto` installed while it ran (that dev build was left installed by
+the session that staged round 2's boards, and was reused rather than rebuilt so
+the replays ran on the package that wrote the packets). The bridge is
+uninstalled and no game process is up. It carries the same C# as
 `0.2.1269`, whose port and face fixes are described below; nothing on a
 shipped sheet moved between them. `validate.ps1` OK; pack 9,586,076 bytes.
 It carries `EB-171`'s port and the two face fixes `0.2.1209` was missing: the
