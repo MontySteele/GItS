@@ -2188,3 +2188,103 @@ Written down so nobody overclaims off it.
   in the draft. A run granted one prototype row into a twelve-card starter tests
   the teaching surface, not the built deck, and cannot say whether one Muster is
   the right dose.
+
+### 13.8 THE SEALED RUN — GRADED 2026-08-29
+
+Run and graded on the branch `kokomi-blind-run`, from the art-bearing main
+checkout, on the disclosed build (13.0). No grade below was read by anybody
+before it was written, and none has been edited since.
+
+#### What was spent
+
+| | |
+|---|---|
+| seeds spent | **`KURAGEMEM001` only** |
+| seeds still UNSPENT | `KURAGEMEM002`, `KURAGEMEM003` |
+| build | `0.2.1456+proto`, off `mods\klee\manifest.json` |
+| game | v0.111.0, off `release_info.json` |
+| run seed, read back off the wire (R95) | `KURAGEMEM001` — the chosen seed was accepted, no deviation to disclose |
+| arm granted | `KLEEMOD-PROTO_KURAGES_OATH_MEMORY` into the starting deck |
+| actions | 60, stopped on `max_actions`; five fights and the run record written |
+| sealed record | `review/qa/blindplay/kuragemem001/record.md`, committed before any grader opened it |
+| leak audit | 66 observations, **1 hit**, and it is the blind prompt's own sentence *"no card list, no score, no recommendation"* matching the `pilot-vocabulary-score` rule. Not a leak; recorded rather than filtered |
+| Codex calls | **67** — 60 observations + 6 record prompts inside the one session thread, plus 1 pair read. No rate limit was hit |
+
+**Why 002 and 003 were not run, on the slate's own rule.** §13.5 pins them as
+conditional: run 2 is taken *"only if run 1 terminates before P4 is reachable
+(no blocked turn) or before the Oath is drawn"*. Neither condition holds — the
+observation pages carry a blocked front on eleven turns and the Oath on
+thirty-six — so the reserve seeds stay unspent. That is the registration being
+obeyed, not a budget decision, and it happens also to spend no Codex.
+
+#### The grades, slot by slot
+
+Graders as §13.4 fixes them: the Codex seat (GPT family) on P1, P2, P4, P5, P6;
+`opus-5-fresh` (Claude family, with the stated limit recorded beside it) on P3.
+Verbatim reads at `review/qa/kokomi-kurage-blind-001-pair-review-codex-gpt-5.6-sol.md`
+and `review/qa/kokomi-kurage-blind-001-p3-read-opus-5-fresh.md`; the prompts
+they were handed are committed beside them.
+
+| slot | grader | verdict | pair read | the count against the slot's own threshold |
+|---|---|---|---|---|
+| **P1** | seat (GPT) | **SPLIT** | RETURN | Front entries were named (`turn-006`, "the jellyfish is already set to replay Gorou next turn") but the paired card-AND-price read the threshold asks for is not in the record on 4 of the first 5 non-empty-queue turns; the falsifier's two wrong prices are not established either |
+| **P2** | seat (GPT) | **SPLIT** | RETURN | Advance fire calls exist on `turn-006`, `turn-009`, `turn-019`; neither 5 correct nor 2 wrong can be counted, because the record does not carry the `blocked` / `fires_next` pair to count them against. No FIRES-direction miss is established |
+| **P3** | `opus-5-fresh` (Claude) | **SPLIT** | RETURN | **0 of 10** qualifying turns, and **0 of six Musters** state a Memory consequence — every Muster target was chosen *because the card was dead*, the exact inverse of Rule 1, and the run record concludes that Exhaust builds Charge. The falsifier as written ("never once plays toward the queue") does not fire: `turn-005` and `turn-010` play a free card explicitly to give the jellyfish something to remember |
+| **P4** | seat (GPT) | **MISS** | RETURN | Half (a) landed on the first evidenced block — the tester read `Coral Guard blocked` as a block and said nothing behind it fires. Half (b) failed: no play was named that would supply the Charge to unblock it |
+| **P5** | seat (GPT) | **SPLIT** | RETURN | Gradable, not VOID — Gate A's face held and the Oath was drawn and played (`turn-006`). The required no-pay statement never occurs; a contrary expectation is not conclusively established either |
+| **P6** | seat (GPT) | **SPLIT** | RETURN | Advance target calls exist (`turn-019`, `turn-025`, `turn-034`), so the "no advance call at all" falsifier does not fire and no fresh-bind expectation is stated; but no call can be verified correct, because the record does not carry what the automatic play actually hit |
+
+**The pair read: 0 ADVANCE / 6 RETURN / 0 ESCALATE.** The seat's closing
+paragraph: *"the run shows that the reader sometimes planned around an
+anticipated replay, block, and target, but it does not demonstrate reliable
+planning with the queue at the committed thresholds. The evidence is incomplete
+rather than internally irreconcilable, so nothing warrants ESCALATE."*
+
+**The decisive question (13.1) is not carried.** Its falsifier — that every
+mention of the jellyfish is a report of something that already happened — does
+NOT fire: the tester names the front before it fires and twice plays toward the
+queue on purpose. But P3 at 0 of 10 says D2's steering is not there on the base
+kit as built, and P4's half (b) says the Charge sources are not discoverable
+from the page. D4 stands better than D2, which is the split the slate was built
+to tell apart, and it read the way the slate said it would read if D2 failed.
+
+#### An instrument finding this run made, recorded and NOT acted on
+
+Two of the six thresholds name an objective side the committed record cannot
+carry. P2 counts a call *"against the `blocked` / `fires_next` pair the bridge
+carried for that turn"* and P6 asks whether an advance aim call was *correct* —
+both need the wire or the replay beside the tester's sentence, and
+`record.md` carries the tester's words only. The seat said so itself on both
+slots, and both are SPLIT partly for that reason.
+
+**Nothing was re-graded and nothing was added to the record to fix it.** A
+replay that contradicts a form is the finding, not a correction (§13.5 item 6,
+R101b). The gap is written down here and returned as a numbered pick below.
+
+One thing WAS fixed, before the run and disclosed here rather than after it:
+the blind prompt requires a per-turn sentence and the reply schema enforces one,
+but nothing carried it out of the gitignored turn pages into the committed
+record — so the record could not evidence §13.5's own requirement that some turn
+state IN ADVANCE what the jellyfish was about to play. `blindplay notes` now
+carries that channel, with `_splice` stopping the leak audit truncating it;
+five locks in `tier0/tests/test_blindplay_turn_notes.py`. Hygiene on the
+instrument, committed before the seed was embarked, changing no prediction, no
+threshold and no denominator.
+
+#### Two observations from the record, neither diagnosed here
+
+Both are the tester's words, both concern the strip, and neither is a defect I
+should rule from a play record:
+
+1. Fight 1: *"after Gorou it showed 'Charge 1 / 0,' then later said the memory
+   was empty despite Charge remaining."*
+2. Fight 2: *"The memory's 'Coral Guard blocked' entry also said nothing behind
+   it fires, yet Sayu remained listed behind it, so I could not tell exactly
+   what would replay."* — and the P3 read notes that this line is Rule 1 having
+   worked, read by the tester as a display bug.
+
+#### State left on disk
+
+`mods\klee` carries `0.2.1456+proto`, installed and validated. All five embark
+ledger rows REVERTED, no game process, `steam_appid.txt` and the bridge removed.
+`KURAGEMEM002` and `KURAGEMEM003` unspent.

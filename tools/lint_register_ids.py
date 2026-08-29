@@ -116,7 +116,9 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 197,   # EB-196/197 minted 2026-08-29 by the Gate B diagnosis. 196:
+    # EB-198 minted 2026-08-29 by the KURAGEMEM001 blind run: the tester read
+    # the memory strip as inconsistent twice, undiagnosed on purpose.
+    "EB": 198,   # EB-196/197 minted 2026-08-29 by the Gate B diagnosis. 196:
                  # the C# memory could never hold an entry -- the per-fight
                  # clear sat in the subscription delegate, which the combat
                  # re-invokes on EVERY hook broadcast, so both entry rules
@@ -299,7 +301,12 @@ CEILINGS: dict[str, int] = {
                  # exp_shop_companion_channel instrument (R68); EB-140 minted
                  # at the R211 W3 build (the codegen upgrade-delta gap);
                  # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
-    "M": 53,     # M53 minted 2026-08-29 by the same slate: whether a local
+    "M": 57,     # M54-M57 minted 2026-08-29 by the KURAGEMEM001 blind run:
+                 # Rule 1 is not taught (P3 0 of 10), P4's half (b) failed so
+                 # the acceleration keyword stops being optional, the sealed
+                 # record cannot carry P2/P6's objective side, and the
+                 # prototype description channel is a generator contract.
+                 # M53 minted 2026-08-29 by the same slate: whether a local
                  # model may hold a grading chair, i.e. whether the "no third
                  # family" paragraph is about authorship only. The branch that
                  # assumed it is unmerged and stays unmerged until the row is
@@ -344,11 +351,15 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 182, 183, 184,
-        189, 191, 192, 193, 194, 195, 196, 197,
+        189, 191, 192, 193, 194, 195, 196, 197, 198,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 51, 52, 53}),
+    # M54-M57 minted 2026-08-29 by the KURAGEMEM001 blind run: Rule 1 is not
+    # taught, P4's half (b) failed, the record cannot carry P2/P6's objective
+    # side, and the prototype description channel is a generator contract.
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 51, 52, 53,
+                    54, 55, 56, 57}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
