@@ -176,15 +176,18 @@ deploy label from R218 on rides the pin above; live numbers were never
 comparable across a game build anyway (R95), and the sim references no game
 assembly and is unaffected.
 
-The deployed build is **`0.2.1328`** (2026-08-29, from `klee-slice-1-funnel`
-`34d567f`), a clean release package with no `+proto` and no `+dirty` mark —
-deployed as the teardown of the Klee slice 1 ROUND 2 funnel run, which had
-`0.2.1323+proto` installed while it ran (that dev build was left installed by
-the session that staged round 2's boards, and was reused rather than rebuilt so
-the replays ran on the package that wrote the packets). The bridge is
-uninstalled and no game process is up. It carries the same C# as
-`0.2.1269`, whose port and face fixes are described below; nothing on a
-shipped sheet moved between them. `validate.ps1` OK; pack 9,586,076 bytes.
+The deployed build is **`0.2.1357`** (2026-08-29, from
+`klee-slice-1-round-3` `605b76f`), a clean release package with no `+proto` and
+no `+dirty` mark — deployed as the teardown of the Klee slice 1 ROUND 3 funnel
+run and of `EB-188`'s live acceptance, both of which ran on `0.2.1353+proto`
+(built clean by `deploy_proto.ps1` with the game closed, and rebuilt once from a
+committed tree so the package that wrote the packets carried no `+dirty` mark).
+The bridge is uninstalled, no game process is up, and the embark's reversibility
+ledger walked back its seed, speed, process and bridge steps. It carries the
+same C# as `0.2.1269`, whose port and face fixes are described below; nothing on
+a shipped sheet moved between them, and the only C# the round added is compiled
+out of a release build by construction (the quarantined prototype rows).
+`validate.ps1` OK; pack 9,586,076 bytes.
 It carries `EB-171`'s port and the two face fixes `0.2.1209` was missing: the
 exhaust-selection rate (R215 C) and `EB-164`'s eighteen re-worded scaling
 faces. **Re-verified live on 0.111.0** (`EB-171`): the mod loads, all nine
