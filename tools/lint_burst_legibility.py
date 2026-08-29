@@ -50,6 +50,17 @@ SHEETS = (
     REPO / "docs" / "mondstadt-companions.yaml",
     REPO / "docs" / "fontaine-companions.yaml",
     REPO / "docs" / "inazuma-companions.yaml",
+    # The quarantined prototype surface (R213 B). It belongs here for the same
+    # reason the shipped sheets do: `gen_prototype_cards` emits through the
+    # owning character's profile, so a prototype row carrying `skill_tag` gets
+    # the ISkillTagCard interface and the printed reading exactly as a shipped
+    # row does. Leaving the surface out did not make the lint quiet -- it made
+    # it WRONG IN THE ACCUSING DIRECTION, reporting a correctly tagged
+    # prototype row as a PHANTOM BURST because it could not see the tag that
+    # put the reading on the face. Reading the surface is not a quarantine
+    # breach: this lint checks that a face says what its own row does, which is
+    # exactly the class of check R213 B keeps ON for prototype rows.
+    REPO / "docs" / "prototype-surface.yaml",
 )
 
 # The reading, exactly as `build_description` appends it. Built from the shared
