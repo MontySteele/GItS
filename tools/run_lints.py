@@ -132,6 +132,13 @@ REGISTRY: tuple[Lint, ...] = (
     # four above ask whether a face is honest, this asks whether a face the
     # repo has ALREADY recorded as dishonest can still reach a blind grader.
     _ci("face-defects",         "tools/lint_face_defects.py"),
+    # The sixth row of the same family, and the quietest failure of the lot:
+    # the others guard a number that is wrong, this guards a WORD that is
+    # unexplained. Run B6 said it out loud ("granting Charge and Burst was not
+    # explained in its displayed rules text"), and a missing hover tip renders
+    # as nothing at all -- no seam, no exception -- so nothing but a join can
+    # see it.
+    _ci("charge-keyword",       "tools/lint_charge_keyword.py"),
     _ci("op-parity",            "tools/lint_op_parity.py"),
     _ci("sly-grammar",          "tools/lint_sly_grammar.py"),
     _ci("codegen-staleness",    "tools/gen_roster_cards.py", "--check"),
