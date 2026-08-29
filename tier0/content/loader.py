@@ -814,11 +814,51 @@ def _starting_relic_effects(spec: dict) -> list[dict]:
     return copy.deepcopy(list(spec.get("starting_relic_effects", [])))
 
 
+def _starter_ids(spec: dict) -> list[str]:
+    """The printed starting deck, with the ONE quarantined substitution the
+    Kurage base kit makes (C.KURAGE_MEMORY + C.KURAGE_ALWAYS_ON).
+
+    THE SEAM IS HERE, in code, and the sheets do not move. Both readers of a
+    printed starter go through this function -- `build_player` (the tier 0
+    battery) and `starting_deck` (the tier 0.5 run) -- so the battery and the
+    run cannot disagree about what she opens with, which is the same argument
+    `_starting_relic_effects` above makes for her relic.
+
+    WHAT THE SWAP IS, and why ([USER], 2026-08-29): "I think that we will want
+    to make Bake-Kurage part of the base kit (always on) rather than a
+    separate card. So yes, we could add one Muster card to the base deck to
+    teach the pattern." Bake-Kurage leaves -- a card that summons what is
+    always on the field is a card that does nothing -- and one Muster card
+    takes the slot, so that RULE 1 (the card sacrificed to a Muster enters the
+    memory at three times its cost) is printed in fight 1 instead of drafted.
+    The deck size is unchanged at twelve, which is what keeps this a
+    substitution rather than a starter rework.
+
+    With the flag off this returns `list(spec["starting_deck"])` and nothing
+    else, which is the acceptance condition on the flag.
+    """
+    ids = list(spec["starting_deck"])
+    if not (C.KURAGE_MEMORY and C.KURAGE_ALWAYS_ON):
+        return ids
+    if spec.get("id") != "kokomi":
+        return ids
+    drop, add = C.KURAGE_MEMORY_STARTER_DROP, C.KURAGE_MEMORY_STARTER_ADD
+    if drop not in ids:
+        # Loud rather than silent: if the printed starter ever stops carrying
+        # Bake-Kurage, this swap has become a no-op that nobody would notice
+        # until a smoke ran and the Muster was missing.
+        raise ValueError(
+            f"kurage base kit: {drop!r} is not in the printed starter, so "
+            f"the {add!r} substitution has nothing to replace")
+    ids[ids.index(drop)] = add
+    return ids
+
+
 def build_player(character_id: str, deck: str = "starter") -> Player:
     """deck: 'starter' or the name of a package list in the character yaml
     (e.g. 'archetype_package') appended to the starter deck."""
     spec = _character_index()[character_id]
-    card_ids = list(spec["starting_deck"])
+    card_ids = _starter_ids(spec)
     hooks = list(spec.get("relic_hooks", []))
     if deck != "starter":
         card_ids += spec["packages"][deck]
@@ -892,7 +932,7 @@ def starting_deck(character_id: str, rng=None) -> list[str]:
     rewards, or any previously calibrated run randomness.
     """
     spec = _character_index()[character_id]
-    deck = list(spec["starting_deck"])
+    deck = _starter_ids(spec)
     if rng is None:
         return deck
     for slot in spec.get("randomized_starter", {}).values():
