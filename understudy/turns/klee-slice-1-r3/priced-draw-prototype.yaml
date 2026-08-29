@@ -101,8 +101,8 @@ id: klee-slice1-r3-t04
 character: KLEEMOD-KLEE
 
 # The pair's seed, discovered by staging the SHIPPED half and then pinned onto
-# both, so a re-stage reproduces the same fight.
-seed: PENDING
+# BOTH halves, so a re-stage reproduces the same fight.
+seed: 8D3369V27Z55
 
 exact_hand: true
 
@@ -110,7 +110,7 @@ prototype: true
 
 notes: |
   42/62 HP, no Block, 4 energy, a Spark bank of 3, and
-  one enemy telegraphing an attack.
+  one enemy at 46 HP telegraphing an attack.
 
 # STAGING RULE, for the operator and not for the grader: the telegraph is
 # generated with the encounter, and defence is worth nothing against an intent
@@ -157,7 +157,7 @@ staging:
   - set_block: {who: player, amount: 0}
   - set_energy: {amount: 4}
   - set_power: {who: player, name: SPARK_POWER, amount: 3}
-  - set_hp: {who: first, amount: 48}
+  - set_hp: {who: first, amount: 46}
   - set_block: {who: first, amount: 0}
   - read: "the staged board"
 
@@ -180,8 +180,8 @@ board:
     - rapid_fire
     - duck_and_cover
   enemies:
-    - name: "PENDING"
-      hp: 48
-      max_hp: 48
+    - name: "Seapunk"
+      hp: 46
+      max_hp: 46
       block: 0
-      intent: {kind: attack, amount: 12}
+      intent: {kind: attack, amount: 11}
