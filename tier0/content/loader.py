@@ -436,6 +436,18 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
     return cards
 
 
+@lru_cache(maxsize=1)
+def _prototype_index() -> dict[str, Card]:
+    """`{id: Card}` for the surface, memoized like `_card_index` is.
+
+    A SECOND index, deliberately, and never merged into the first: merging is
+    exactly what would put a prototype into `all_cards`, `character_pool` and
+    every reward roll. `_card_prototype` consults this one only behind
+    `C.SPARK_ALT_COST_ENABLED` and only for a `proto_`-prefixed id.
+    """
+    return {c.id: c for c in prototype_cards()}
+
+
 def _validate_recall_shape(card: Card) -> None:
     """EB-118 §6.4 constraints 1 and 2, AT LOAD.
 
@@ -732,6 +744,23 @@ def _card_prototype(card_id: str) -> Card:
     if plain.endswith(upgrades.SUFFIX):
         base = copy.deepcopy(_card_index()[plain[:-len(upgrades.SUFFIX)]])
         card = upgrades.apply_upgrade(base)
+    elif (C.SPARK_ALT_COST_ENABLED
+            and plain.startswith(PROTOTYPE_ID_PREFIX)):
+        # THE ONE DOOR THE SPARK ARM OPENS INTO THE QUARANTINE, and it is
+        # exactly as wide as it has to be. `_starter_ids` substitutes two
+        # PROTO ids into Klee's starting deck (PICK 1, options 1+5), and a
+        # starting deck is a list of id STRINGS that both `build_player` and
+        # `build_player_from_ids` resolve through here -- so without this
+        # branch the substitution is a KeyError rather than a card.
+        #
+        # THREE GUARDS, ALL NECESSARY, none of them a filter somebody has to
+        # remember: the flag must be ON (with it off this branch does not
+        # exist and every shipped path is byte-identical), the id must carry
+        # `proto_`, and the row must be on the surface. `_card_index` is
+        # still not populated with prototypes, so pools, rewards, drafts and
+        # digests remain structurally unable to see them -- the quarantine
+        # that matters is membership, and membership does not move here.
+        card = _prototype_index()[plain]
     else:
         card = _card_index()[plain]
     if ench is None:
@@ -822,11 +851,63 @@ def _starting_relic_effects(spec: dict) -> list[dict]:
     return copy.deepcopy(list(spec.get("starting_relic_effects", [])))
 
 
+def _starter_ids(spec: dict) -> list[str]:
+    """The printed starting deck, with the TWO quarantined substitutions the
+    Spark alternative-cost arm makes (`C.SPARK_ALT_COST_ENABLED`).
+
+    THE SEAM IS HERE, IN CODE, AND NO PRINTED SHEET MOVES. Both readers of a
+    printed starter go through this function -- `build_player` (the tier 0
+    battery) and `starting_deck` (the tier 0.5 run) -- so the battery and the
+    run cannot disagree about what she opens with. That is the same argument
+    `_starting_relic_effects` above makes for her relic, and the same seam the
+    Kurage base kit opened for Kokomi.
+
+    WHAT THE SWAP IS, and why. PICK 1 of the Sparks packet, options 1 and 5
+    together (the seat: "Options 1 and 5 together follow"). Regent's ten-card
+    starter ships exactly one Spark generator (`Venerate`) and exactly one
+    Spark sink (`FallingStar`, 0 energy / 2 stars), and [USER] asked to
+    "match their generation pattern". Klee's ten ship neither. So:
+
+      * `pop` -> `proto_pop_spark`    -- the Basic that MAKES. Same Bomb, plus
+                                         one Spark. Divine Right's job (a
+                                         non-dead turn one) done by a card the
+                                         player chooses to play, which is
+                                         D2's answer and the seat's reason for
+                                         preferring option 1 to option 2.
+      * `kaboom` -> `proto_kaboom_sink` -- the Basic that SPENDS. Same 7
+                                         damage, 0 energy, Spend 1 Spark.
+                                         `FallingStar`'s exact role.
+
+    ONE COPY OF EACH, AND THE PACKET DOES NOT SAY WHICH. Klee's starter holds
+    FOUR `kaboom`; the packet says only "`kaboom` becomes 0 energy / Spend 1
+    Spark". Substituting one copy is what makes her opening ten match
+    Regent's shape (one source, one sink); substituting all four would make
+    four of ten opening cards unplayable on an empty bank, which is a
+    different card game and not the one the packet priced. One copy is taken,
+    it is the smaller change, and it goes back to [USER] as a real pick.
+
+    THE DECK SIZE IS UNCHANGED at ten, which is what keeps this a
+    substitution rather than a starter rework. With the flag off this returns
+    `list(spec["starting_deck"])` and nothing else -- the acceptance condition
+    on the flag.
+    """
+    ids = list(spec["starting_deck"])
+    if not C.SPARK_ALT_COST_ENABLED or spec.get("id") != "klee":
+        return ids
+    for drop, add in C.SPARK_ALT_STARTER_SUBS:
+        if drop not in ids:
+            raise ValueError(
+                f"klee: Spark starter substitution cannot replace missing "
+                f"card {drop!r}")
+        ids[ids.index(drop)] = add          # ONE copy: `.index` is the first
+    return ids
+
+
 def build_player(character_id: str, deck: str = "starter") -> Player:
     """deck: 'starter' or the name of a package list in the character yaml
     (e.g. 'archetype_package') appended to the starter deck."""
     spec = _character_index()[character_id]
-    card_ids = list(spec["starting_deck"])
+    card_ids = _starter_ids(spec)
     hooks = list(spec.get("relic_hooks", []))
     if deck != "starter":
         card_ids += spec["packages"][deck]
@@ -900,7 +981,7 @@ def starting_deck(character_id: str, rng=None) -> list[str]:
     rewards, or any previously calibrated run randomness.
     """
     spec = _character_index()[character_id]
-    deck = list(spec["starting_deck"])
+    deck = _starter_ids(spec)          # the ONE seam; see `_starter_ids`
     if rng is None:
         return deck
     for slot in spec.get("randomized_starter", {}).values():
