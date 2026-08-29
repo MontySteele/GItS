@@ -2086,6 +2086,45 @@ def build_version(wire: Any = None) -> tuple[str, str]:
                 else f"no deployed package at {manifest}")
 
 
+def granted_arms(seed: str, log_dir: Path | None = None) -> tuple[str, str]:
+    """`(arms granted into this run's deck, where it was read)`. EB-188.
+
+    A blind whole-fight run cannot DRAW a prototype row -- the surface is
+    quarantined out of every pool -- so `understudy/embark.py --arm` grants it
+    into the starting deck before the tester sees a screen. A record that did
+    not name the grant would describe a deck the generators never produced as
+    though they had, which is the claim `bridge.GRANT_GUARDRAIL` exists to
+    refuse.
+
+    MATCHED BY SEED, and that is the whole of the honesty here. The sidecar is
+    written by whichever process opened the run, and this may be a different
+    process on a different day; the seed is the run's identity (R95), so a
+    sidecar whose seed is not this run's is a record of a DIFFERENT run and
+    its arms are not reported. Read off disk like the two version reads above,
+    and for the same reason -- this module may never import the operator side.
+
+    Answers `("(none)", ...)` when nothing matches, which is a positive
+    statement rather than a gap: the run met only what the pools offered.
+    """
+    d = log_dir or (Path(__file__).resolve().parent / "logs")
+    none = ("(none)", "no `--arm` grant recorded against this run's seed")
+    if not seed or not d.is_dir():
+        return none
+    for path in sorted(d.glob("embark-*.json"), reverse=True):
+        try:
+            blob = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):                         # noqa: PERF203
+            continue
+        if not isinstance(blob, dict) or _text(blob.get("run_seed")) != seed:
+            continue
+        granted = blob.get("arms_granted") or []
+        if not granted:
+            return none
+        named = ", ".join(_text(g.get("card_id")) for g in granted)
+        return named, f"the embark sidecar `{path.name}`, matched by run seed"
+    return none
+
+
 def game_version(wire: Any = None) -> tuple[str, str]:
     """`(game build, where it was read)`. Never guessed.
 
@@ -2202,6 +2241,7 @@ def record_markdown(summary: dict[str, Any], identity: dict[str, Any]) -> str:
     for key in ("model_requested", "model_observed", "codex_version",
                 "build_version", "build_version_source",
                 "game_version", "game_version_source", "run_seed",
+                "arms_granted", "arms_granted_source",
                 "prompt_sha256", "actions", "termination"):
         if key in identity:
             out.append(f"- **{key}**: {identity[key] or '(not read)'}")
@@ -2304,10 +2344,12 @@ def cmd_session(args) -> int:
         summary = session.run()
     finally:
         thread.close()
+    arms, arms_source = granted_arms(seed)
     identity = {**thread.identity(), "build_version": version,
                 "build_version_source": source,
                 "game_version": game, "game_version_source": game_source,
                 "run_seed": seed,
+                "arms_granted": arms, "arms_granted_source": arms_source,
                 "prompt_sha256": summary["prompt_sha256"],
                 "actions": summary["actions"],
                 "termination": summary["termination"]}
