@@ -1,0 +1,16 @@
+{
+  "turn_id": "klee-slice1-t05",
+  "packet_sha256": "ec27e57b2e26c6b2f3d7ef7a81e68fbf5afb10dcdcef9b3eee8b9b83dd84cb55",
+  "grader": {"id": "opus-5-fresh", "kind": "llm", "model": "claude-opus-5", "designed_these_cards": false},
+  "chosen_line": [
+    {"card": "Rapid Fire", "target": "Nibbit"},
+    {"card": "Kaboom!", "target": "Nibbit"},
+    {"card": "Imaginary Friend"},
+    {"card": "Duck and Cover"}
+  ],
+  "q1_what_did_you_play": "The entire hand. Rapid Fire first (4 damage four times, all of it into Nibbit since it is the only enemy) for 16, then Kaboom! for 7 — 23 total, taking Nibbit from 43 to 20. Both attacks are printed at 0 cost, so my whole 2 Energy went to the two Skills: Imaginary Friend for 5 Block, 3 Burst Energy and Burst +5 (plus the +5 a Skill-tagged card adds, taking the meter from 20 toward 30), and Duck and Cover for 5 more Block. That leaves me at 10 Block against a telegraphed 12, so I eat 2 and end at 40/62.",
+  "q2_other_line_considered": "Barely anything, and I want to be honest about how little there was. The only branch I actually weighed was whether to spend the second Energy on Duck and Cover or hold it — but Energy does not carry, and there is no other card to hold it for, so holding is a strict loss. I also thought for a moment about attack ordering, since the Spark bank is consumed by the first Attack played; it makes no difference here because both Attacks are already 0 cost, so the Sparks are spent for nothing either way. Everything is affordable, so 'which subset' has one answer: all of it.",
+  "q3_what_it_gave_up": "The 3 Sparks, which got burned to make a card free that was already free — that is the real cost of the turn, and I could not avoid it while attacking at all. Beyond that, nothing: no card was left in hand, no Energy unspent. If there is a hidden price it is that I took 2 damage rather than finding 2 more Block, and I had no card that could have supplied it.",
+  "q4_different_intent": "Yes. Against a non-attacking telegraph — a buff, a block-gain, a summon — the 10 Block is dead weight, and I would still play Imaginary Friend (the Burst gain and Burst Energy are unconditional value) but skip Duck and Cover entirely rather than spend a card on Block nobody is going to hit. Against a much bigger attack, say 25 or more, the line stays exactly as played but starts looking like a losing race, and I would want the answer to be more Block, which this hand cannot give. Against a multi-enemy board, Rapid Fire's random targeting would stop being 16 guaranteed damage into one body and I would want Kaboom! aimed at whichever enemy I was actually trying to kill.",
+  "q4_changed": true
+}

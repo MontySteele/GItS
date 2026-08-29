@@ -1,0 +1,17 @@
+{
+  "turn_id": "klee-slice1-t04",
+  "packet_sha256": "d38aae78f7992f140bfa3bc2ca76565189750288107389f7fb623548a9aee06d",
+  "grader": {"id": "opus-5-fresh", "kind": "llm",
+             "model": "claude-opus-5", "designed_these_cards": false},
+  "chosen_line": [
+    {"card": "Rummage"},
+    {"card": "Rapid Fire", "target": "Nibbit"},
+    {"card": "Kaboom!", "target": "Nibbit"},
+    {"card": "Duck and Cover"}
+  ],
+  "q1_what_did_you_play": "All four cards, in that order. Rummage goes first and that is the whole point of the turn: both my attacks are already printed at 0 cost, so the Spark bank buys me nothing on them — the first Attack I play would eat all 3 Sparks for zero discount. Rummage is the only card on the page that converts the bank into something, 3 Sparks for 3 cards, so it must be played before either attack touches the bank. That costs 1 of my 2 energy. Then Rapid Fire and Kaboom! at Nibbit are free: 4 damage four times plus 7, 23 total into a single target, taking Nibbit from 40 to 17, with Pyro applied. My last energy goes to Duck and Cover for 5 Block, which turns the telegraphed 12 into 7 and leaves me at 35/62. Energy spends out exactly, 1 and 1, and nothing in hand is left unplayed. Whatever Rummage draws I play only if it is free, since I have no energy left after this.",
+  "q2_other_line_considered": "Yes — skipping Rummage. That line plays Rapid Fire and Kaboom! (still free, still 23) and Duck and Cover, banking the 3 Sparks into next turn on the theory that a future Attack might actually be printed at a cost worth discounting, and leaving 1 energy unspent. I rejected it because it wastes a whole energy this turn for a discount on a card I cannot see, and because the Sparks do not survive cleanly anyway: the very next Attack I play, this turn or next, consumes all 3 whether or not it needed the discount, and both attacks in this hand would have done exactly that. Cashing the bank for 3 cards is a certain return against a speculative one. I also briefly checked whether playing an attack before Rummage could ever be right — it cannot, it just deletes the bank Rummage wants to spend.",
+  "q3_what_it_gave_up": "The Spark bank itself — after Rummage I have 0 Sparks, so if the drawn cards include an expensive Attack I have no discount for it, and no energy left to pay for it either. It also gives up any pretense of a bigger swing: 23 damage does not come close to 40, so I am committing to at least one more turn against a 12-damage attacker while spending my energy on draw and a 5-Block partial mitigation rather than on more damage. And 5 Block against a 12 is not a wall; I still take 7 and the Block is gone next turn.",
+  "q4_different_intent": "Yes. Duck and Cover is only in the line because 12 damage is coming. If Nibbit were telegraphing a buff, a block, or a small chip attack of 5 or less, I would drop Duck and Cover and hold my second energy for whatever Rummage turns up — a costed card off three fresh draws is worth more than 5 Block against nothing. In the other direction, if the intent were large enough to threaten a lethal or near-lethal window, I would consider skipping Rummage instead and playing Duck and Cover with the energy I could spare, since drawing cards does not help if the damage lands first. At 42 HP against a 12, neither pressure applies, so the greedy-but-safe version wins.",
+  "q4_changed": true
+}
