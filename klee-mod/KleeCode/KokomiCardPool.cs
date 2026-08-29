@@ -45,8 +45,24 @@ public sealed class KokomiCardPool : CardPoolModel
     protected override IEnumerable<CardModel> FilterThroughEpochs(
         UnlockState unlockState, IEnumerable<CardModel> cards)
     {
-        return base.FilterThroughEpochs(unlockState, cards)
+        var offered = base.FilterThroughEpochs(unlockState, cards)
             .Where(card => !KokomiOffPoolCards.Ids.Contains(card.Id));
+#if PROTOTYPE_CARDS
+        // QUARANTINED (sec.12.6 ITEM 15). THE ONE OFFER SEAM: this method feeds
+        // GetUnlockedCards, which is the SOLE path into reward rolls, the shop
+        // and card transforms (see KleeMod.PrototypeCards, layer 2), so a
+        // substitution made here reaches every surface that can offer her a
+        // card and no list of surfaces has to be kept in step.
+        //
+        // Under the memory rule the shipped Kurage's Oath would pay 5 Block per
+        // MEMORY PLAY off a face that says "per Bake-Kurage pulse" -- a card
+        // paying a different rule from the one it prints, which is the D4
+        // defect. So the prototype row takes its place at the same rarity, cost
+        // and type, and therefore at the same weight. Reasoning in full on
+        // KurageMemory.SwapOfferedOath.
+        offered = Powers.KurageMemory.SwapOfferedOath(offered);
+#endif
+        return offered;
     }
 
     // RosterAncientCards.Kokomi: VISIBLE in the pool (Dusty Tome draws from

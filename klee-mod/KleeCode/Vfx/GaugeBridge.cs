@@ -111,6 +111,25 @@ public static class GaugeBridge
 
         /// <summary>(previous, current) -> threshold-crossing flash.</summary>
         public required Func<int, int, bool> ShouldFlash { get; init; }
+
+        /// <summary>
+        /// A span only known at draw time, overriding <see cref="VisualSpan"/>
+        /// when it returns non-null. Null (the default) leaves every existing
+        /// gauge on the static span it was built with. The Kurage's memory
+        /// strip is the one tenant: under it the Charge bar's target is the
+        /// FRONT MEMORY'S OWN PRICE, which moves as the queue moves, and there
+        /// is no global threshold to draw against any more.
+        /// </summary>
+        public Func<Creature, int?>? DynamicSpan { get; init; }
+
+        /// <summary>
+        /// The label's whole text, overriding the "{value}" / "{value}/{max}"
+        /// default. Null (the default) leaves every existing gauge alone. The
+        /// memory strip uses it because a strip has to draw a LIST -- a price
+        /// per card and the body each will hit -- and one number cannot say
+        /// that.
+        /// </summary>
+        public Func<Creature, string>? LabelText { get; init; }
     }
 
     private static readonly GaugeSpec[] Specs =
@@ -193,6 +212,7 @@ public static class GaugeBridge
         // scaling cards read and none of them can show it on their face: the
         // Kurage pulse and the Garment rider are both computed at resolve
         // time from a bank the card never prints.
+#if !PROTOTYPE_CARDS
         new()
         {
             Key = "kokomi_charge",
@@ -208,6 +228,65 @@ public static class GaugeBridge
             ReadValue = KokomiResources.GetCharge,
             ShouldFlash = static (_, _) => false,
         },
+#else
+        // THE KURAGE'S MEMORY STRIP (QUARANTINED, Powers/Prototype/KurageMemory.cs).
+        //
+        // [USER]'s requirement, verbatim: "We need to add a UI element that
+        // shows the bank of cards queue'd for Kokomi and move the Charge meter
+        // there." So the Charge row above is REPLACED rather than joined -- the
+        // meter MOVED, it did not multiply -- and under the flag this is the
+        // only Kokomi second-row display there is.
+        //
+        // AND IT NOW HAS A BAR. The spec above says of the shipped gauge that
+        // it is "THE ONE GAUGE WITH NO BAR ... a bar would invent a target".
+        // Under v3 there IS a target and it is the FRONT MEMORY'S OWN PRICE, so
+        // the bar becomes the honest render rather than the invented one, and
+        // it is redrawn against a new price every time the queue moves
+        // (DynamicSpan). An empty memory still has no target, and DynamicSpan
+        // returns null for it, which puts the strip back to a bare counter --
+        // "no bar" was never a taste call, it was the absence of a ceiling.
+        //
+        // ALWAYS VISIBLE IN A KOKOMI COMBAT, and under v4 there is no other
+        // reading available (sec.12.6 ITEM 11): the Bake-Kurage is base kit and
+        // is installed at combat start, so there IS no "no jellyfish" state and
+        // the strip must never render one. It was already right for the v3
+        // reason -- the queue FILLS with no summon on the field, so a strip
+        // that appeared with the summon would hide the bank the player is
+        // building -- and nothing in it reads the summon at all.
+        //
+        // NO NEW ART. It draws in shared/gauge.tscn, the same script-less scene
+        // every other gauge instantiates, with the queue rendered as LINES in
+        // the existing %ValueLabel -- text and existing frames only. Miniature
+        // card faces (sec.3's design) want a scene this pck does not carry; the
+        // three facts D4 requires before ending a turn (the bank, the front's
+        // price, the blocked state) are all on the first line, and the queue's
+        // own prices and targets are on the lines under it.
+        new()
+        {
+            Key = "kokomi_memory",
+            Skin = new GaugeSkin
+            {
+                FillColor = new Color(0.44f, 0.78f, 0.84f),
+                TrackColor = new Color(0.05f, 0.16f, 0.21f, 0.85f),
+            },
+            AnchorOffset = SecondRowAnchor,
+            VisualSpan = null,
+            LabelMax = null,
+            AppliesTo = KokomiResources.IsKokomi,
+            ReadValue = KokomiResources.GetCharge,
+            DynamicSpan = static creature =>
+            {
+                var queue = Powers.KurageMemory.Queue(creature.Player);
+                // A 0-cost front is FREE and has no bar to fill: a span of 0
+                // would divide by nothing and a span of 1 would draw a lie.
+                return queue.Count > 0 && queue[0].Price > 0
+                    ? queue[0].Price : (int?)null;
+            },
+            LabelText = static creature =>
+                Powers.KurageMemory.StripText(creature.Player),
+            ShouldFlash = static (_, _) => false,
+        },
+#endif
         // NOTE: Encore has NO spec here. It was evicted from the overhead slot
         // by the C4 verdict (that slot is Burst, cross-character) and re-homes
         // as the ribbon under the Salon stage — see SalonVisualsBridge (D3).
@@ -362,13 +441,17 @@ public static class GaugeBridge
         Node2D display, GaugeSpec spec, Creature creature, bool allowFlash)
     {
         int value = spec.ReadValue(creature);
+        // A span the spec only knows at draw time wins over the static one; a
+        // spec without one (every gauge but the memory strip) is unchanged.
+        int? visualSpan = spec.DynamicSpan is { } dynamic
+            ? dynamic(creature) : spec.VisualSpan;
 
         // A null span is a counter, not a meter: hide the track and the fill
         // rather than drawing a bar with no honest ceiling (see VisualSpan).
         if (display.GetNodeOrNull<ColorRect>("%BarFill") is { } fill)
         {
-            fill.Visible = spec.VisualSpan is not null;
-            if (spec.VisualSpan is { } span)
+            fill.Visible = visualSpan is not null;
+            if (visualSpan is { } span)
             {
                 float pct = Mathf.Clamp(value / (float)span, 0f, 1f);
                 fill.Size = new Vector2(BarFullWidth * pct, fill.Size.Y);
@@ -377,12 +460,14 @@ public static class GaugeBridge
 
         if (display.GetNodeOrNull<ColorRect>("%BarBack") is { } track)
         {
-            track.Visible = spec.VisualSpan is not null;
+            track.Visible = visualSpan is not null;
         }
 
         if (display.GetNodeOrNull<Label>("%ValueLabel") is { } label)
         {
-            label.Text = spec.LabelMax is { } max ? $"{value}/{max}" : $"{value}";
+            label.Text = spec.LabelText is { } text
+                ? text(creature)
+                : spec.LabelMax is { } max ? $"{value}/{max}" : $"{value}";
         }
 
         int previous = display.HasMeta(PreviousValueMeta)

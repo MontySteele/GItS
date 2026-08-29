@@ -762,7 +762,14 @@ def _card_prototype(card_id: str) -> Card:
         # that matters is membership, and membership does not move here.
         card = _prototype_index()[plain]
     else:
-        card = _card_index()[plain]
+        index = _card_index()
+        # The substituted-prototype table is consulted ONLY on a miss, and
+        # only on the plain (un-upgraded) branch: a prototype has no upgrade
+        # row, so `<proto id>+` correctly falls through to `apply_upgrade`'s
+        # "no applicable upgrade". See `_substituted_card_index` for why the
+        # table exists and why it does not weaken the R213 quarantine.
+        card = (index[plain] if plain in index
+                else _substituted_card_index()[plain])
     if ench is None:
         return card
     # R82 reopened: the enchantment is the OUTER decoration, applied to the
@@ -929,6 +936,89 @@ def _starter_ids(spec: dict) -> list[str]:
     return ids
 
 
+def _pool_substitutions(spec: dict) -> dict[str, str]:
+    """{shipped id: prototype id} for the character's OFFERABLE pool, under
+    the same quarantine flag `_starter_ids` above reads.
+
+    THE SEAM IS HERE, in code, and the sheets do not move -- the same argument
+    `_starter_ids` makes for the printed starter, made once more for the other
+    half of what a run can be handed. `rewards.character_pool` is the single
+    source of truth for "which ids can be offered to this character" (fight
+    rewards, the shop, every event card screen and the tier 0.5 drafter all
+    read it), so it is the one caller, and gating it there gates them all.
+
+    WHAT THE SWAP IS, and why ([USER], 2026-08-29): "Why does the power print 5
+    instead of 3, exactly?" Under `C.KURAGE_MEMORY` Kurage's Oath's ward is
+    paid on a MEMORY PLAY (`effects.kurage_fire`) and the amount is read off
+    the stacks the card applied. The staged row prints [USER]'s ruled 3; the
+    SHIPPED `kurages_oath` prints 5 (7 upgraded) under a face that says "per
+    Bake-Kurage play", and it is frozen. So with the flag on and no
+    substitution, a flagged run that DRAFTED the shipped Oath paid 5 per
+    memory play under text that cannot bind -- which is D4, a defect, not a
+    balance question. The offer side is what this branch owns: under the flag
+    the shipped id leaves the pool and the prototype takes its slot at the
+    SAME rarity, so the only Oath a flagged run can be offered is the 3.
+
+    With the flag off this returns `{}` and nothing else, which is the
+    acceptance condition on the flag: no substitution, no second index, and
+    `_card_prototype` never leaves `_card_index`.
+    """
+    if not C.KURAGE_MEMORY:
+        return {}
+    if spec.get("id") != "kokomi":
+        return {}
+    return {C.KURAGE_MEMORY_POOL_DROP: C.KURAGE_MEMORY_POOL_ADD}
+
+
+def pool_substitutions(character_id: str) -> dict[str, str]:
+    """`_pool_substitutions` by character id -- the tier 0.5 door, the way
+    `starting_deck` is the door onto `_starter_ids`."""
+    spec = _character_index().get(character_id)
+    return _pool_substitutions(spec) if spec else {}
+
+
+@lru_cache(maxsize=1)
+def _substituted_card_index() -> dict[str, Card]:
+    """Prototype rows that a LIVE substitution has put within a run's reach.
+
+    THE R213 QUARANTINE IS UNCHANGED AND THIS IS WHY. `_card_index` still
+    carries no prototype row, so `all_cards`, the roster digest, the balance
+    reports, `card_distinctness_report`, the codegen and every version stamp
+    still cannot see one -- that is the structural quarantine and it is not
+    weakened here. This is a SECOND table, read by `_card_prototype` alone,
+    holding ONLY the rows some `_pool_substitutions` names. It is empty on
+    every flag-off tree, which is every shipped tree.
+
+    It exists because a substitution that could not be resolved by id would be
+    a hack: every offer surface picks a card out of the pool and then re-reads
+    it through `loader.get_card(pick.id)`, and the run layer stores decks as
+    id strings and re-derives them on every reward screen. An offered card
+    whose id does not resolve is a run that dies on the next screen.
+
+    There is no upgraded form. `docs/prototype-surface.yaml` carries no
+    upgrade rows by convention (upgrades are keyed by shipped id in
+    `docs/<character>-upgrades.yaml`), so `has_upgrade` is False for these ids
+    and the campfire and event upgrade sites skip them, which is the honest
+    behaviour while the upgraded 5 is still owed to a sheet.
+    """
+    targets = {proto
+               for spec in _character_index().values()
+               for proto in _pool_substitutions(spec).values()}
+    if not targets:
+        return {}
+    index = {c.id: c for c in prototype_cards() if c.id in targets}
+    missing = sorted(targets - set(index))
+    if missing:
+        # The R213 deletion rule takes rows OFF this surface when a slice is
+        # accepted or rejected. A substitution left pointing at a deleted row
+        # must say so here, not as a KeyError on someone's reward screen.
+        raise ValueError(
+            f"pool substitution names {missing}, which is not on "
+            f"{PROTOTYPE_SHEET.name}; a substituted row cannot have left the "
+            "surface while the flag still points at it")
+    return index
+
+
 def build_player(character_id: str, deck: str = "starter") -> Player:
     """deck: 'starter' or the name of a package list in the character yaml
     (e.g. 'archetype_package') appended to the starter deck."""
@@ -1079,7 +1169,7 @@ def reset_caches() -> None:
     loader looks, must call this rather than picking caches by hand.
     """
     for cache in (_card_index, _card_prototype, _character_index,
-                  _encounter_index, _pilot_index):
+                  _substituted_card_index, _encounter_index, _pilot_index):
         cache.cache_clear()
 
 
