@@ -29,7 +29,8 @@ and only the second one is worth anything to a reader.
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 162 tests, ~0.7s after build
+dotnet test                       # 163 tests, ~0.7s after build
+dotnet test -p:PrototypeCards=true # 190: the 163 plus Prototype/
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```
@@ -99,7 +100,7 @@ either pinned structurally and labelled, or left out.
 | `DerivationPinTests.cs` | 16 | Fanfare cap against live max HP (audit **H3**, authority pin), cap clamp on gain, identity gating, the `?? 0` fallback; salon tick = printed base + Focus term, and the dry three-quarters truncation. Plus `EB-122`'s `DiscardsThisTurn`: the two null routes a CalculatedVar preview actually takes, and a labelled structural pin that the per-turn and per-seat clauses are the base game's MementoMori ones. |
 | `InterpolationPinTests.cs` | 6 | The tooltip text `lint_constant_parity` structurally cannot see: `SalonMemberPower` and both Pearl relics interpolate their constants rather than restating them (EB-86's shape; M24's "signing is a one-file edit"). Plus `EB-122`'s Charge-rider NOUN — `gyorin_formation` is the first Charge rider on a Block op, and this tip is the only surface carrying the rate, so a hardcoded "damage" would be the single place a player can read it and would read it wrong (SYS-7, one meter over). |
 | `CoopSeamTests.cs` | 8 | Per-seat ownership and attribution — see below. |
-| `SparkSinkPinTests.cs` | 14 | EB-118 §4.5's Spark sink: the `CanSpend` gate a generated sink hangs `IsPlayable` on (whole price or nothing), True Spark Knight's live threshold and its floor of 1, and two structural pins on `Spend` (it refuses through the same predicate the gate uses, and moves the bank through the same `PowerCmd.ModifyAmount` the threshold consume uses). No card prints the op. |
+| `SparkSinkPinTests.cs` | 15 | EB-118 §4.5's Spark sink: the `CanSpend` gate a generated sink hangs `IsPlayable` on (whole price or nothing), True Spark Knight's live threshold and its floor of 1, and two structural pins on `Spend` (it refuses through the same predicate the gate uses, and moves the bank through the same `PowerCmd.ModifyAmount` the threshold consume uses). No card prints the op. Plus the Sparks arm's flag read BOTH ways round -- this file is the only one that can say a RELEASE build still runs the base rule, because the file that says it is retired is not compiled without the switch. |
 | `ParityAuthorityPinTests.cs` | 6 | Audit findings **M1** and **M2** pinned as the C# authority record, plus H3's cross-reference. |
 | `SalonVerbTests.cs` | 12 | `EB-118` §5.5's Salon verbs: the structural pin that the turn-start upkeep and perform-now resolve through the SAME `PerformMember` (the packet's no-duplicate-implementation requirement), and the behavioural pins for `RotateLeftmost` and the leftmost reads. |
 | `RecallFromExhaustTests.cs` | 10 | EB-118's exhaust-pile retrieval: the pool filter RUNS (kit, junk and retriever exclusions), the move is pinned structurally (`FromCombatPile` -> `Add` at `CardPilePosition.Top` -> `AddKeyword`) because it needs a live `CombatState`. |
@@ -113,7 +114,19 @@ either pinned structurally and labelled, or left out.
 | `CanonicalHoverTipTests.cs` | 9 | `EB-94`: the hover tips a CANONICAL card could not be asked for. `CardModel.Owner`'s getter asserts mutability, so every tip body that read it threw on the models the compendium hands out (`NCardLibraryGrid._Ready` -> `ModelDb.AllCards` -> `NCard.Create` -> `NCardHolder.CreateHoverTips`) and took the card's WHOLE tip set with it. Real, not structural: the models, the throw and the bodies all run headlessly. The three wire-measured cards (Endless Waltz, Dress Rehearsal, Dinner Service) are pinned by name, the owned-card case is the mutation guard, and one class-wide IL gate bans `CardModel.get_Owner` from the tip classes. |
 | `BombInstancingTests.cs` | 18 | `EB-130` / R205's per-placer bomb piles. The instance type itself; the base game's OWN `PowerCmd.FindExistingInstanceForStacking` answering that two placers get two piles, one placer still gets one, and a gather does not land in another placer's pile on the destination; the SUPPRESSION ARBITER (two piles fold to one 0.75, never 0.5625 — the preview and the hit elect the same pile, and the creature-keyed latch is spent once); and `ModifyAll` reaching every pile with the solo total unmoved. Structural where a live `CombatState` is needed: the `DetonateOn`/`MoveAllTo` loops, and the DEATH-TEARDOWN finding pinned on the game's own kill and hook-broadcast machinery. |
 
-**162 tests, all green.**
+**163 tests, all green.**
+
+## The prototype suite (`Prototype/`, opt-in with the rest)
+
+`Prototype/` is `Compile Remove`d unless `-p:PrototypeCards=true`, the same
+switch that compiles the rules it pins (`KleeCode.csproj`). Without the property
+those types do not exist, so a pin against them could not compile either.
+
+| File | Tests | What it holds |
+|---|---|---|
+| `SparkAlternativeCostPinTests.cs` | 27 | The Klee Sparks alternative cost (`review/active/klee-sparks-2026-08-29.md` §10; sim twin `tier0/tests/test_spark_alt_cost.py`). REAL, not structural, for almost all of it: the base rule's zeroing hook declining at any bank, the derived price of every proto row read off the emitted class, the strict Rare Power's gate at 2 vs 3 Sparks, its 0-Energy conversion, the X-cost exemption, Skills untouched, already-priced Attacks unaffected (sub-pick (a)), the co-op ownership clause, and a canonical card's price readable with its affordability false (`EB-94`'s throw from the other side). Structural where a live `CombatState` is needed: the payment routing through `SparkPower.Spend`, the badge reading `SparkCost.PriceOf`, and the starter seam's copy counts. |
+
+**With the flag: 190 tests, all green.**
 
 ## Co-op coverage
 

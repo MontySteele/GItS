@@ -61,9 +61,9 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     /// OFF arm needs the shipped rule byte for byte.
     /// </summary>
 #if PROTOTYPE_CARDS
-    internal const bool BaseRuleActive = false;
+    public const bool BaseRuleActive = false;
 #else
-    internal const bool BaseRuleActive = true;
+    public const bool BaseRuleActive = true;
 #endif
 
     /// <summary>Mirrors tier0 constants.py SPARKS_FOR_FREE_ATTACK = 3.</summary>
