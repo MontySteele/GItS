@@ -1,0 +1,116 @@
+{
+ "turn_id": "klee-slice1-r2-t04",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "023de64f8585da4271118c43d8eb93056d21279b5eb366261519c7a87d39b6f9",
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "Rapid Fire on Nibbit first, consuming the 3 Sparks, then Kaboom! on Nibbit, then Duck and Cover. This deals 23 damage and gains 5 Block.",
+  "q2_other_line_considered": "Rapid Fire, Kaboom!, then Rummage instead of Duck and Cover, keeping the same damage and drawing 3 cards but taking the full telegraphed attack.",
+  "q3_what_it_gave_up": "It gave up Rummage's draw of 3 cards in exchange for 5 Block against the incoming 12 damage.",
+  "q4_different_intent": "Yes. If Nibbit were not attacking, I would replace Duck and Cover with Rummage."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.2049,
+  "top1": 28.8,
+  "top2": 22.9,
+  "lines_considered": 10,
+  "playouts": 16,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Kaboom!",
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 28.8
+   },
+   {
+    "cards": [
+     "Kaboom!",
+     "Rapid Fire"
+    ],
+    "score": 22.9
+   },
+   {
+    "cards": [
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 21.9
+   },
+   {
+    "cards": [
+     "Rapid Fire"
+    ],
+    "score": 16.0
+   },
+   {
+    "cards": [
+     "Kaboom!",
+     "Duck and Cover"
+    ],
+    "score": 12.9
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "player_fields": {
+    "sparks": 3
+   },
+   "unmapped_statuses": [],
+   "enemy_count": 1,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T11:31:13"
+}

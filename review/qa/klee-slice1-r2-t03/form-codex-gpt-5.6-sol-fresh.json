@@ -1,0 +1,35 @@
+{
+ "turn_id": "klee-slice1-r2-t03",
+ "packet_sha256": "af45bd5a1907dd4148ec2c17454c5b1f5cce66c312df6d4e40458bb7f92d6b3e",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Rapid Fire on Nibbit for 0, consuming the 3 Sparks; then Kaboom! on Nibbit for its printed cost of 1; then Duck and Cover for 1. This deals 23 damage and gains 5 Block.",
+ "q2_other_line_considered": "I seriously considered replacing Duck and Cover with Eager to Help, keeping the same 23 damage while drawing two cards.",
+ "q3_what_it_gave_up": "It gave up drawing two cards in exchange for 5 Block against the telegraphed 12-damage attack.",
+ "q4_different_intent": "Yes. If Nibbit had telegraphed no attack, I would have replaced Duck and Cover with Eager to Help.",
+ "q4_changed": true
+}

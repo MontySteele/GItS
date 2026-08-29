@@ -116,7 +116,22 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 184,   # EB-184 minted 2026-08-29 by Kokomi slice 1 round 4: a
+    "EB": 187,   # EB-185/186/187 minted 2026-08-29 by the Klee slice 1
+                 # funnel run. EB-186: at a Spark bank of 3 the game
+                 # prints EVERY Attack in hand at cost 0 while the rule
+                 # frees exactly one, so ten of twelve blind-graded lines
+                 # were refused live. OPEN.
+                 # EB-185: the observed closeness board maps no Spark, so
+                 # every observed reading of a Klee turn scores a bank of
+                 # zero. CLOSED 2026-08-29 -- the Spark status now crosses
+                 # onto `Player.sparks` and declared and observed agree on
+                 # all six slice 1 boards. RETIRED.
+                 # EB-187: the Burst assumption line double-counts the
+                 # Skill tag against the rider the face already prints,
+                 # and it corrupted a grade. CLOSED 2026-08-29 -- both
+                 # halves reworded and `staged_turn check` now refuses an
+                 # assumption claiming a gain the face prints. RETIRED.
+                 # EB-184 minted 2026-08-29 by Kokomi slice 1 round 4: a
                  # `choose_one` card typed as an Attack demands a target
                  # even on a mode that attacks nothing, so a blind
                  # grader's Block-mode line cannot be replayed. OPEN.
@@ -254,7 +269,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        180, 181, 182, 183, 184,
+        180, 181, 182, 183, 184, 186,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

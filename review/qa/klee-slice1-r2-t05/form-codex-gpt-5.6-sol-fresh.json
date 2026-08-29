@@ -1,0 +1,35 @@
+{
+ "turn_id": "klee-slice1-r2-t05",
+ "packet_sha256": "64446ff9b961caa9d4f7dee4bb95a4f1a27483276b19c2eb810c8786cecf6667",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Imaginary Friend",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "Rapid Fire on Nibbit for 0, consuming the 3 Sparks; Kaboom! on Nibbit for its printed cost of 1; then Imaginary Friend for 1.",
+ "q2_other_line_considered": "I seriously considered playing Kaboom! first for 0, then Rapid Fire for 2. It dealt the same total damage but left no energy for Imaginary Friend.",
+ "q3_what_it_gave_up": "It spent all 2 Energy and left Duck and Cover unplayed. It also committed the Spark discount to Rapid Fire rather than Kaboom!.",
+ "q4_different_intent": "No. On the information given, the same line deals 23 damage, gains 5 Block, and gains the printed Burst benefits while fitting exactly within the available Energy, so a different telegraphed intent would not change it.",
+ "q4_changed": false
+}

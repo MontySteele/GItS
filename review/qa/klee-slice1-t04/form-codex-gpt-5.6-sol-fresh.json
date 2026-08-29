@@ -1,0 +1,41 @@
+{
+ "turn_id": "klee-slice1-t04",
+ "packet_sha256": "d38aae78f7992f140bfa3bc2ca76565189750288107389f7fb623548a9aee06d",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Rummage",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Rapid Fire",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "Rummage first, then Rapid Fire and Kaboom! on Nibbit, then Duck and Cover.",
+ "q2_other_line_considered": "I seriously considered attacking before Rummage, then playing Duck and Cover; that would consume the Sparks and forgo the unknown draw while retaining 1 Energy.",
+ "q3_what_it_gave_up": "It spent all 3 Sparks and both Energy, leaving no Energy to use on any nonzero-cost cards drawn by Rummage.",
+ "q4_different_intent": "No. With the printed hand, I would still take the draw, play both free attacks, and gain the Block because all four cards fit within the available resources.",
+ "q4_changed": false
+}

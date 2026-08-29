@@ -1,0 +1,41 @@
+{
+ "turn_id": "klee-slice1-r2-t01",
+ "packet_sha256": "c8f2d43a9fe3e4205e57b6881ef341b0a64ea340e2983d9503f216c9ffaeef5a",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Flame on the Wick",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "Rapid Fire first, consuming the 3 Sparks, then Flame on the Wick and Kaboom! on Seapunk, followed by Duck and Cover.",
+ "q2_other_line_considered": "I considered playing Kaboom! first with the Spark discount, then Rapid Fire for 2 energy and Flame on the Wick, but that would leave no energy for Duck and Cover while dealing the same total damage.",
+ "q3_what_it_gave_up": "It gave up all 3 Sparks, all 2 energy, and every card in hand; it did not give up damage or available Block compared with the other line considered.",
+ "q4_different_intent": "No. Given only the printed information, no different intent would improve on playing all three attacks while still gaining the available 5 Block.",
+ "q4_changed": false
+}

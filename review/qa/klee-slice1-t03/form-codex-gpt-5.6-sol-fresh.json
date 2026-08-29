@@ -1,0 +1,41 @@
+{
+ "turn_id": "klee-slice1-t03",
+ "packet_sha256": "cd67aac7a88d6d3272f1a3cc97665e8eb6b2f5d72156dc5018c184cc162a02ad",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Eager to Help",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Rapid Fire",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Eager to Help first while I still had Spark, then Rapid Fire, Kaboom! targeting Nibbit, and Duck and Cover.",
+ "q2_other_line_considered": "I seriously considered leaving the second energy unspent after Eager to Help so it could be used on one of the drawn cards, but their identities are not given, so I chose the guaranteed 5 Block.",
+ "q3_what_it_gave_up": "It gave up the flexibility to spend the second energy on a card drawn by Eager to Help.",
+ "q4_different_intent": "Yes. If Nibbit had not telegraphed damage, I would have omitted Duck and Cover and retained the second energy for the cards drawn by Eager to Help.",
+ "q4_changed": true
+}

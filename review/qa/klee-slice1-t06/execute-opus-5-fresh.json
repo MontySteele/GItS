@@ -1,0 +1,219 @@
+{
+ "turn_id": "klee-slice1-t06",
+ "grader": "opus-5-fresh",
+ "packet_sha256": "aabf77cd7fbaf09264ae09d0a141c1a1d3dfe057acdea9473d0ba8fa2fc54078",
+ "seed_requested": "PQUR2MZ6Z1KF",
+ "seed_used": "PQUR2MZ6Z1KF",
+ "seed_honoured": true,
+ "board_check": {
+  "step": "board_check",
+  "rule": "board_mismatch",
+  "ok": true,
+  "differences": [],
+  "packet_sha256": "aabf77cd7fbaf09264ae09d0a141c1a1d3dfe057acdea9473d0ba8fa2fc54078",
+  "run_seed": "PQUR2MZ6Z1KF",
+  "ts": 1787997331.3740642,
+  "i": 15,
+  "scenario": "klee-slice1-t06/executed",
+  "why": "Klee slice 1 round 1: replay the graded line live on its pinned seed",
+  "guardrail": "dev card grant: this run's deck is not one the generators produced, so nothing measured on it is comparable to any other run"
+ },
+ "chosen_line": [
+  {
+   "card": "Slow Burn"
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Rapid Fire",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Duck and Cover"
+  }
+ ],
+ "played": [
+  "play Slow Burn",
+  "play Kaboom!",
+  "play Rapid Fire"
+ ],
+ "modals": [],
+ "operator_answers": [],
+ "operator_answers_used": [],
+ "ok": false,
+ "failures": [
+  {
+   "step": "play",
+   "check": "play Rapid Fire",
+   "detail": "the bridge refused it: Card 'Rapid Fire' cannot be played: EnergyCostTooHigh",
+   "before": {
+    "state_type": "monster",
+    "round": 1,
+    "turn": "player",
+    "player": {
+     "hp": 42,
+     "block": 5,
+     "energy": 0,
+     "status": {},
+     "resources": {
+      "KLEEMOD_BURST": 35,
+      "KLEEMOD_CHARGE": 0,
+      "KLEEMOD_ENCORE": 0,
+      "KLEEMOD_FANFARE": 0,
+      "KLEEMOD_FANFARE_CAP_BONUS": 0,
+      "KLEEMOD_FANFARE_FLOOR": 0,
+      "KLEEMOD_FURINA_BURST": 0,
+      "KLEEMOD_KOKOMI_BURST": 0,
+      "KLEEMOD_SPOTLIGHT_MODE": 0,
+      "KLEEMOD_SPOTLIGHT_MOVED": 0,
+      "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+      "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+     }
+    },
+    "hand": [
+     {
+      "name": "Rapid Fire",
+      "id": "KLEEMOD-RAPID_FIRE",
+      "cost": "2",
+      "can_play": false,
+      "unplayable_reason": "EnergyCostTooHigh",
+      "is_upgraded": false
+     },
+     {
+      "name": "Duck and Cover",
+      "id": "KLEEMOD-DUCK_AND_COVER",
+      "cost": "1",
+      "can_play": false,
+      "unplayable_reason": "EnergyCostTooHigh",
+      "is_upgraded": false
+     }
+    ],
+    "enemies": [
+     {
+      "id": "NIBBIT_0",
+      "name": "Nibbit",
+      "hp": 36,
+      "block": 0,
+      "status": {
+       "pyro aura": 2
+      }
+     }
+    ],
+    "prompt": null
+   },
+   "after": {
+    "state_type": "monster",
+    "round": 1,
+    "turn": "player",
+    "player": {
+     "hp": 42,
+     "block": 5,
+     "energy": 0,
+     "status": {},
+     "resources": {
+      "KLEEMOD_BURST": 35,
+      "KLEEMOD_CHARGE": 0,
+      "KLEEMOD_ENCORE": 0,
+      "KLEEMOD_FANFARE": 0,
+      "KLEEMOD_FANFARE_CAP_BONUS": 0,
+      "KLEEMOD_FANFARE_FLOOR": 0,
+      "KLEEMOD_FURINA_BURST": 0,
+      "KLEEMOD_KOKOMI_BURST": 0,
+      "KLEEMOD_SPOTLIGHT_MODE": 0,
+      "KLEEMOD_SPOTLIGHT_MOVED": 0,
+      "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+      "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+     }
+    },
+    "hand": [
+     {
+      "name": "Rapid Fire",
+      "id": "KLEEMOD-RAPID_FIRE",
+      "cost": "2",
+      "can_play": false,
+      "unplayable_reason": "EnergyCostTooHigh",
+      "is_upgraded": false
+     },
+     {
+      "name": "Duck and Cover",
+      "id": "KLEEMOD-DUCK_AND_COVER",
+      "cost": "1",
+      "can_play": false,
+      "unplayable_reason": "EnergyCostTooHigh",
+      "is_upgraded": false
+     }
+    ],
+    "enemies": [
+     {
+      "id": "NIBBIT_0",
+      "name": "Nibbit",
+      "hp": 36,
+      "block": 0,
+      "status": {
+       "pyro aura": 2
+      }
+     }
+    ],
+    "prompt": null
+   }
+  }
+ ],
+ "outcome": {
+  "player": {
+   "before": {
+    "hp": 42,
+    "block": 0
+   },
+   "after": {
+    "hp": 42,
+    "block": 5
+   },
+   "resources_before": {
+    "KLEEMOD_BURST": 20,
+    "KLEEMOD_CHARGE": 0,
+    "KLEEMOD_ENCORE": 0,
+    "KLEEMOD_FANFARE": 0,
+    "KLEEMOD_FANFARE_CAP_BONUS": 0,
+    "KLEEMOD_FANFARE_FLOOR": 0,
+    "KLEEMOD_FURINA_BURST": 0,
+    "KLEEMOD_KOKOMI_BURST": 0,
+    "KLEEMOD_SPOTLIGHT_MODE": 0,
+    "KLEEMOD_SPOTLIGHT_MOVED": 0,
+    "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+   },
+   "resources_after": {
+    "KLEEMOD_BURST": 35,
+    "KLEEMOD_CHARGE": 0,
+    "KLEEMOD_ENCORE": 0,
+    "KLEEMOD_FANFARE": 0,
+    "KLEEMOD_FANFARE_CAP_BONUS": 0,
+    "KLEEMOD_FANFARE_FLOOR": 0,
+    "KLEEMOD_FURINA_BURST": 0,
+    "KLEEMOD_KOKOMI_BURST": 0,
+    "KLEEMOD_SPOTLIGHT_MODE": 0,
+    "KLEEMOD_SPOTLIGHT_MOVED": 0,
+    "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+   }
+  },
+  "enemies": [
+   {
+    "id": "NIBBIT_0",
+    "name": "Nibbit",
+    "hp_before": 43,
+    "hp_after": 36,
+    "block_before": 0,
+    "block_after": 0
+   }
+  ],
+  "reading": "diagnostic only: a hand-set board, played once. A number here is evidence of a DEFECT or of nothing at all",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun"
+ },
+ "reading": "diagnostic only, under Guardrail-7: a hand-set board played once. A number here is evidence of a DEFECT or of nothing at all -- never a comparison, never a balance reading, and never a claim about the turn",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "log": "C:\\Users\\Monty\\Documents\\GitHub\\GItS\\understudy\\logs\\scenario\\executed-klee-slice1-t06-20260829-055452.jsonl",
+ "executed_at": "2026-08-29T05:55:38"
+}

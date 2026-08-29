@@ -1,0 +1,98 @@
+{
+ "turn_id": "klee-slice1-t02",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "opus-5-fresh",
+  "kind": "llm",
+  "model": "claude-opus-5",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "8126982fff02af36073f38dd8c00b5fd3c6e4fc69d12c558ddaa7ede41ba3e35",
+ "chosen_line": [
+  {
+   "card": "Second Helping",
+   "target": "Seapunk"
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Seapunk"
+  },
+  {
+   "card": "Rapid Fire",
+   "target": "Seapunk"
+  },
+  {
+   "card": "Duck and Cover"
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I emptied the hand. All three attacks are printed at cost 0, so energy never gated them; the only scarce resource was the 3-Spark bank, and Second Helping is the card that explicitly spends it, so it led. Second Helping for 6 twice is 12, Kaboom! is 7, and Rapid Fire with only one enemy on the board puts all four of its 4-damage hits into Seapunk for 16 \u2014 35 total, leaving Seapunk at 10 of 45. That used none of my 2 energy, so I spent 1 on Duck and Cover for 5 Block, which turns the telegraphed 11 into 6 to the face and leaves me at 36/62 going into next turn. The second energy had nothing to buy.",
+  "q2_other_line_considered": "The ordering was the real decision. I considered opening with Rapid Fire or Kaboom! and saving Second Helping for last, which is the instinct when a multi-hit card wants to be first. I rejected it because the Spark rule says playing an Attack at 3 Sparks consumes all 3, so any attack ahead of Second Helping risks draining the bank Second Helping is written to spend, and I have no way from this page to know whether it still deals its 12 with an empty bank. Leading with it removes that question entirely and costs nothing, since the damage total is order-independent otherwise. I also weighed holding Duck and Cover to bank the energy, and dropped that immediately \u2014 energy does not carry and 5 Block against a live 11 is strictly better than nothing.",
+  "q3_what_it_gave_up": "It gave up the Spark bank: 3 Sparks are gone and I start next turn at 0, so whatever the next hand wants from Sparks it will have to rebuild. It also gave up 1 unspent energy, which is not a real cost. Seapunk survives at 10, so nothing about this line set up a kill I passed on \u2014 there was no reachable lethal at 35 damage into 45 HP.",
+  "q4_different_intent": "Yes, on the last card only. The three attacks go out regardless \u2014 they are free, there is one target, and the enemy has no Block to play around. But Duck and Cover is bought entirely by the telegraphed 11. If Seapunk were telegraphing a buff, a debuff, or anything non-damaging, I would hold Duck and Cover in hand rather than burn 5 Block into a turn that never hits me. A much larger telegraphed attack would not change it either \u2014 5 Block is still the only mitigation on the page, so I would still play it."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "declared board (prototype route)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.1076,
+  "top1": 28.8,
+  "top2": 25.7,
+  "lines_considered": 12,
+  "playouts": 20,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Kaboom!",
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 28.8
+   },
+   {
+    "cards": [
+     "Second Helping",
+     "Rapid Fire"
+    ],
+    "score": 25.7
+   },
+   {
+    "cards": [
+     "Kaboom!",
+     "Rapid Fire"
+    ],
+    "score": 22.9
+   },
+   {
+    "cards": [
+     "Second Helping",
+     "Kaboom!",
+     "Duck and Cover"
+    ],
+    "score": 22.7
+   },
+   {
+    "cards": [
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 21.9
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T05:44:02"
+}

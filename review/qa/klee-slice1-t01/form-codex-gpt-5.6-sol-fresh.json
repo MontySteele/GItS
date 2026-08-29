@@ -1,0 +1,41 @@
+{
+ "turn_id": "klee-slice1-t01",
+ "packet_sha256": "5bf71e2d9fe5884d61caf0202dfaca76c5886e9d6d373bad76f1e01cc789bcd8",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Flame on the Wick",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Rapid Fire, Kaboom!, and Flame on the Wick targeting Seapunk, then Duck and Cover. This deals 29 damage and gains 5 Block.",
+ "q2_other_line_considered": "I seriously considered omitting Duck and Cover, but spending 1 energy to reduce the telegraphed 11 damage by 5 had no stated competing use.",
+ "q3_what_it_gave_up": "It consumed all 3 Sparks on the first Attack and left 1 energy unused; no other available benefit was given up.",
+ "q4_different_intent": "No. With no stated downside to playing every Attack and enough energy to play Duck and Cover as well, a different telegraphed intent would not change this line.",
+ "q4_changed": false
+}

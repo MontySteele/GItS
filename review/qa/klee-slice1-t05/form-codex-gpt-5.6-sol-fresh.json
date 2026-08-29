@@ -1,0 +1,41 @@
+{
+ "turn_id": "klee-slice1-t05",
+ "packet_sha256": "ec27e57b2e26c6b2f3d7ef7a81e68fbf5afb10dcdcef9b3eee8b9b83dd84cb55",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Imaginary Friend",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Rapid Fire",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Imaginary Friend, then Duck and Cover, then Kaboom! targeting Nibbit, then Rapid Fire targeting Nibbit.",
+ "q2_other_line_considered": "I seriously considered omitting Duck and Cover, accepting 7 damage after Imaginary Friend's Block and preserving 1 Energy.",
+ "q3_what_it_gave_up": "It gave up all 2 Energy and consumed the 3 Sparks on the first Attack, rather than preserving those resources.",
+ "q4_different_intent": "Yes. If Nibbit had not telegraphed damage, I would have omitted Duck and Cover because its printed effect only provides Block.",
+ "q4_changed": true
+}

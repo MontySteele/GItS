@@ -1233,3 +1233,181 @@ def test_the_form_keys_are_optional_and_nullable(tmp_path):
 def test_modal_unanswered_is_a_named_falsifier():
     assert "modal_unanswered" in staged_turn.FALSIFIERS
     assert "guessed" in staged_turn.FALSIFIERS["modal_unanswered"]
+
+
+# ------------------------------------------------------- EB-186, the page ---
+
+def banked_state(bank: int = 3):
+    """A Klee board at a Spark bank, drawn the way the LIVE game draws it.
+
+    Two Attacks whose faces print 1 and 2 are both rendered at 0 and both
+    `can_play: true`, because the Spark hook the game consults for display is
+    the same hook it consults for payment. This is not a hypothetical: it is
+    `review/qa/klee-slice1-t01/observed.json`, which is the board twelve blind
+    readers were handed in round 1 of the Klee slice.
+    """
+    return {
+        "state_type": "monster",
+        "battle": {"round": 1, "enemies": [
+            {"name": "Seapunk", "hp": 45, "max_hp": 45, "block": 0,
+             "intents": [{"type": "Attack", "label": "11",
+                          "description": "Attack for 11 damage."}]}]},
+        "player": {
+            "hp": 42, "max_hp": 62, "block": 0, "energy": 2,
+            "resources": {},
+            "status": ([{"id": "SPARK_POWER", "name": "Spark", "amount": bank,
+                         "type": "Buff",
+                         "description": "At 3 Sparks, your Attacks cost 0. "
+                                        "Playing one consumes 3 Sparks."}]
+                       if bank else []),
+            "hand": [
+                {"id": "KLEEMOD-KABOOM", "name": "Kaboom!", "type": "Attack",
+                 "cost": "0" if bank >= 3 else "1", "can_play": True,
+                 "is_upgraded": False,
+                 "description": "Deal 7 damage. Applies Pyro."},
+                {"id": "KLEEMOD-RAPID_FIRE", "name": "Rapid Fire",
+                 "type": "Attack", "cost": "0" if bank >= 3 else "2",
+                 "can_play": True, "is_upgraded": False,
+                 "description": "Deal 4 damage to random enemies four times."},
+                {"id": "KLEEMOD-DUCK_AND_COVER", "name": "Duck and Cover",
+                 "type": "Skill", "cost": "1", "can_play": True,
+                 "is_upgraded": False, "description": "Gain 5 Block."},
+            ]},
+    }
+
+
+def test_the_printed_cost_index_reads_the_shipped_face():
+    """The face in `klee-mod` is where the number comes from, and it agrees
+    with the sheet the generator emitted it from -- EVERY id, not a sample.
+    `qa_packet` may not import a sheet loader; this test may, which is
+    exactly why the cross-check lives here."""
+    from tier0.content import loader
+    index = qa_packet.printed_cost_index(REPO)
+    assert index["Kaboom!"] == 1 and index["Rapid Fire"] == 2
+    assert index["Flame on the Wick"] == 0
+    disagree = [(c.name, index[c.name], c.cost)
+                for c in loader._card_index().values()
+                if c.name in index and isinstance(c.cost, int)
+                and index[c.name] != c.cost]
+    assert not disagree, f"the face and the sheet disagree: {disagree}"
+    assert len(index) > 200, f"only {len(index)} faces carried a cost"
+
+
+def test_a_banked_board_prints_the_rule_and_names_every_discount():
+    """EB-186's acceptance. At a bank of three the page states Spark's OWN
+    words once, and beside each Attack shown below its printed cost says what
+    that card prints. Round 1's readers had neither."""
+    page = qa_packet.render(
+        qa_packet.build(banked_state(3), "t", repo=REPO))
+    assert "At 3 Sparks, your Attacks cost 0. Playing one consumes 3 " \
+           "Sparks." in page
+    assert "covers 1 of the 2" in page
+    assert "The cost printed on this card is 1; it is showing 0 here." in page
+    assert "The cost printed on this card is 2; it is showing 0 here." in page
+    # And the card that is NOT discounted carries no note.
+    assert page.count("The cost printed on this card") == 2
+
+
+def test_an_unbanked_board_prints_nothing_extra():
+    """The other direction, and it is the one that keeps the note honest: with
+    no bank nothing is discounted, so the page gains not one word."""
+    page = qa_packet.render(
+        qa_packet.build(banked_state(0), "t", repo=REPO))
+    assert "The cost printed on this card" not in page
+    assert "Spark, and the costs below" not in page
+
+
+def test_the_spark_note_quotes_and_never_invents():
+    """The rule sentence is the power's own hover text and the arithmetic is
+    division on two numbers the page already shows. A power whose text says
+    nothing about consuming loses the count and keeps the quote."""
+    powers = [{"name": "Spark", "stacks": 6,
+               "text": "At 3 Sparks, your Attacks cost 0. Playing one "
+                       "consumes 3 Sparks."}]
+    hand = [{"cost": "0", "printed_cost": 1}, {"cost": "0", "printed_cost": 2},
+            {"cost": "1", "printed_cost": 1}]
+    note = qa_packet.spark_note(powers, hand)
+    assert "covers 2 of the 2" in note and "Your bank is 6." in note
+    silent = qa_packet.spark_note(
+        [{"name": "Spark", "stacks": 6, "text": "Sparks do something."}], hand)
+    assert "covers" not in silent and "Sparks do something." in silent
+    assert qa_packet.spark_note([], hand) == ""
+
+
+# --------------------------------------- EB-185, the Spark bank observed ---
+
+def test_the_observed_board_carries_the_spark_bank():
+    """EB-185's acceptance. Sparks ride the wire as a POWER and the sim keeps
+    them on `Player.sparks`; before the crossing existed, every observed
+    reading of a Klee board scored a bank of zero and reported `spark` as an
+    unmapped status."""
+    state, unrep, notes = staged_turn.observed_state(
+        {"state": banked_state(3)})
+    assert state.player.sparks == 3
+    assert "spark" not in notes["unmapped_statuses"]
+    assert notes["player_fields"] == {"sparks": 3}
+    empty, _, notes0 = staged_turn.observed_state({"state": banked_state(0)})
+    assert empty.player.sparks == 0 and notes0["player_fields"] == {}
+
+
+def test_a_status_the_sim_has_no_field_for_is_refused_not_guessed():
+    """The refusal half: a mapping onto a field the Player does not carry
+    would write the bank where nothing reads it and report success."""
+    from understudy import adapter
+    state = banked_state(3)
+    state["player"]["status"][0]["name"] = "Spark"
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(adapter, "STATUS_FIELDS", {"spark": "no_such_field"})
+        with pytest.raises(AttributeError):
+            adapter.build_combat_state(state)
+
+
+# ---------------------- EB-187, an assumption the face already contradicts ---
+
+RIDER_FIXTURE = TURNS / "fixtures" / "double-counted-rider.yaml"
+
+
+def test_an_assumption_claiming_a_printed_rider_is_refused():
+    """EB-187's red fixture, carrying the sentence that corrupted a grade. The
+    refusal names the claim, the card and the tag, because "this board is
+    unsafe" sends a reader to grep and the sentence sends them to the line."""
+    turn = staged_turn.load(RIDER_FIXTURE)
+    found = staged_turn.assumption_rider_conflicts(turn)
+    assert len(found) == 1, found
+    assert "clockwork_toy" in found[0] and "skill_tag" in found[0]
+    assert "Burst +5" in found[0]
+    with pytest.raises(staged_turn.TurnError) as exc:
+        staged_turn.assumption_preflight(turn)
+    assert "already prints" in str(exc.value)
+
+
+def test_the_reworded_assumption_passes_on_the_same_board():
+    """The other direction, and it is the whole point of the rule's shape: a
+    line saying the printed rider IS the tag is exactly what the check wants.
+    Anything else would be a check that refuses every board mentioning Burst."""
+    turn = staged_turn.load(RIDER_FIXTURE)
+    turn.assumptions[0] = (
+        "The Burst meter is written to 20 of 40 through the registered "
+        "resource. Where a card's face prints a Burst rider, that printed "
+        "rider IS the whole of what playing the card adds to the meter on "
+        "top of the card's own text -- nothing further is added behind it.")
+    assert staged_turn.assumption_rider_conflicts(turn) == []
+    staged_turn.assumption_preflight(turn)
+
+
+def test_the_rider_check_needs_the_tag_on_the_board():
+    """An untagged hand cannot double-count a rider nothing prints, so the same
+    sentence passes there -- the check reads the staged rows, not the prose."""
+    turn = staged_turn.load(RIDER_FIXTURE)
+    turn.staging[:] = [s for s in turn.staging
+                       if "CLOCKWORK_TOY" not in str(s)]
+    turn.board.hand[:] = ["kaboom"]
+    assert staged_turn.assumption_rider_conflicts(turn) == []
+
+
+def test_every_shipped_turn_passes_the_rider_check():
+    """The sweep, which is what `check` runs. Klee slice 1's pair 3 was the
+    only board carrying the claim and both halves are reworded."""
+    bad = {p.name: staged_turn.assumption_rider_conflicts(staged_turn.load(p))
+           for p in staged_turn.all_turns()}
+    assert not {k: v for k, v in bad.items() if v}

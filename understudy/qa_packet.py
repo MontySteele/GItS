@@ -60,6 +60,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -95,6 +96,44 @@ FORBIDDEN: tuple[tuple[str, re.Pattern[str]], ...] = (
 # fallback path; see the module docstring.
 _GENERATED_GLOB = "KleeCode/Cards/*/Generated/*.cs"
 _LOC_RE = re.compile(r'\(\s*"(title|description)"\s*,\s*"((?:[^"\\]|\\.)*)"\s*\)')
+
+# EB-186. THE COST PRINTED ON THE CARD, WHICH THE GAME STOPS SHOWING.
+#
+# Klee's Spark power rides `Hook.ModifyEnergyCostInCombat`, and the game
+# consults that hook for BOTH display and payment -- so at a full bank every
+# Attack the player holds is drawn at 0 (the draw pile too), while the rule
+# frees exactly one of them. Round 1 of the Klee slice put twelve blind
+# readers in front of that page: every one of them read "all my Attacks are
+# free", and TEN of the twelve lines they wrote were refused live with
+# `EnergyCostTooHigh`. A page whose costs are unpayable is not a picture of
+# the turn.
+#
+# So the page carries the card's PRINTED cost beside the rendered one wherever
+# the two differ. That number is read from the SHIPPED FACE in `klee-mod`
+# -- the same C# this module already reads for the fallback card text, and
+# the same `cost=` the generator wrote there out of the sheet -- and NOT from
+# a tier0 loader, because this module may not reach a sheet (see the module
+# docstring and `test_the_packet_builder_cannot_reach_a_sheet`). Two comment
+# shapes carry it, the generated header's `Sheet entry: id=... cost=2` and the
+# hand-written cards' `Sheet: cost 1, damage 7`, so one regex reads both and
+# the pin in `tier0/tests` cross-checks every id it finds against the sheet
+# the generator emitted from.
+#
+# DISCLOSED, BECAUSE IT IS A DEPARTURE. A player at the machine cannot see
+# `1` on a discounted Kaboom!; the page shows it anyway, because the
+# alternative -- proven twice over in round 1 -- is a page that reads as an
+# offer the board will refuse.
+_CARD_SOURCE_GLOB = "KleeCode/Cards/**/*.cs"
+_SHEET_COST_RE = re.compile(r"[Ss]heet[^\n]*?\bcost[=:]?\s*(\d+)")
+
+# The one power whose cost hook this note exists for, matched on the PRINTED
+# name the wire carries (`Spark`), never on a power id.
+_SPARK_TITLE = "spark"
+# `... Playing one consumes 3 Sparks.` -- read off the power's OWN printed
+# hover text, so the arithmetic below is the arithmetic a player can do from
+# the words in front of them. No constant is imported for it: a threshold this
+# module hard-coded would be a number the page asserts rather than reads.
+_CONSUMES_RE = re.compile(r"consume(?:s)?\s+(\d+)", re.I)
 
 
 class PacketLeak(RuntimeError):
@@ -195,6 +234,88 @@ def localization_index(repo: Path) -> dict[str, str]:
     return index
 
 
+@lru_cache(maxsize=4)
+def _printed_cost_index_cached(repo: Path) -> tuple[tuple[str, int], ...]:
+    index: dict[str, int] = {}
+    root = repo / "klee-mod"
+    if not root.is_dir():
+        return ()
+    for path in sorted(root.glob(_CARD_SOURCE_GLOB)):
+        try:
+            src = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        cost = _SHEET_COST_RE.search(src)
+        if cost is None:
+            continue
+        # The FIRST title in the file. A modal card's file holds several
+        # classes and only the outer one carries the sheet comment, so the
+        # first title is the one that comment is about.
+        for m in _LOC_RE.finditer(src):
+            if m.group(1) == "title":
+                index.setdefault(m.group(2), int(cost.group(1)))
+                break
+    return tuple(sorted(index.items()))
+
+
+def printed_cost_index(repo: Path | None = None) -> dict[str, int]:
+    """`{printed title: the cost printed on the shipped face}` (EB-186).
+
+    A card the index has no row for gets NO note -- an absent number is
+    silence, never a guess.
+    """
+    root = repo if repo is not None else Path(__file__).resolve().parents[1]
+    return dict(_printed_cost_index_cached(root))
+
+
+def _discounted(card: dict[str, Any]) -> bool:
+    """Is this card being SHOWN cheaper than the cost printed on it?"""
+    shown, printed = _text(card.get("cost")), card.get("printed_cost")
+    return (isinstance(printed, int) and shown.isdigit()
+            and int(shown) < printed)
+
+
+def cost_note(card: dict[str, Any]) -> str:
+    """The one sentence a discounted card carries. `""` when it is not one."""
+    if not _discounted(card):
+        return ""
+    return (f"The cost printed on this card is {card['printed_cost']}; it is "
+            f"showing {_text(card['cost'])} here.")
+
+
+def spark_note(powers: list[dict[str, Any]],
+               hand: list[dict[str, Any]]) -> str:
+    """The once-per-page Spark line (EB-186). `""` when nothing is discounted.
+
+    Every clause is either the power's own printed text, quoted, or division
+    performed on two numbers that text and the page both show. Nothing here
+    knows what a Spark is for.
+    """
+    spark = next((p for p in powers
+                  if _text(p.get("name")).lower() == _SPARK_TITLE), None)
+    if spark is None or _int(spark.get("stacks")) <= 0:
+        return ""
+    discounted = [c for c in hand if _discounted(c)]
+    if not discounted:
+        return ""
+    bank = _int(spark.get("stacks"))
+    rule = _text(spark.get("text"))
+    n = len(discounted)
+    out = [f'Spark, and the costs below. Spark\'s own text reads: "{rule}"',
+           f"Your bank is {bank}.",
+           f"{n} card{'s' if n != 1 else ''} in your hand "
+           f"{'are' if n != 1 else 'is'} shown at a cost LOWER than the cost "
+           f"printed on the card; each of them says so on its own line."]
+    m = _CONSUMES_RE.search(rule)
+    each = int(m.group(1)) if m else 0
+    if each > 0:
+        covered = bank // each
+        out.append(f"Playing one of them at the shown cost consumes {each}, "
+                   f"so a bank of {bank} covers {covered} of the "
+                   f"{n}; anything after that costs what its card prints.")
+    return " ".join(out)
+
+
 # ------------------------------------------------------------- the packet ---
 
 def _int(value: Any, default: int = 0) -> int:
@@ -259,7 +380,9 @@ def _intent(blob: Any) -> dict[str, str]:
             "kind": _text(blob.get("title") or blob.get("type"))}
 
 
-def _hand(state: dict[str, Any], loc: dict[str, str]) -> list[dict[str, Any]]:
+def _hand(state: dict[str, Any], loc: dict[str, str],
+          costs: dict[str, int] | None = None) -> list[dict[str, Any]]:
+    costs = costs or {}
     cards = []
     for entry in (state.get("player") or {}).get("hand") or []:
         if not isinstance(entry, dict):
@@ -276,6 +399,8 @@ def _hand(state: dict[str, Any], loc: dict[str, str]) -> list[dict[str, Any]]:
             "text": desc,
             "text_source": source,
             "cost": _text(entry.get("cost")),
+            # EB-186. `None` where the shipped face gives no number.
+            "printed_cost": costs.get(title),
             "upgraded": bool(entry.get("is_upgraded")),
             "playable": entry.get("can_play") is not False,
             # The game's own printed refusal, not ours.
@@ -311,6 +436,7 @@ def build(state: dict[str, Any], turn_id: str, *, repo: Path | None = None,
     is refused here rather than teaching the agent a register id.
     """
     loc = localization_index(repo) if repo is not None else {}
+    costs = printed_cost_index(repo)
     p = state.get("player") or {}
     resources = p.get("resources")
     packet = {
@@ -334,11 +460,13 @@ def build(state: dict[str, Any], turn_id: str, *, repo: Path | None = None,
                               if isinstance(resources, dict) else {}),
                 "powers": _powers(p),
             },
-            "hand": _hand(state, loc),
+            "hand": _hand(state, loc, costs),
             "enemies": _enemies(state),
         },
         "disclosures": list(disclosures or []),
     }
+    packet["board"]["spark_note"] = spark_note(packet["board"]["you"]["powers"],
+                                               packet["board"]["hand"])
     assert_blind(packet)
     return packet
 
@@ -350,6 +478,9 @@ def _render_card(c: dict[str, Any]) -> list[str]:
     if c["upgraded"]:
         head += " (upgraded)"
     lines = [head, "", f"- Cost: {c['cost'] or '-'}", f"- {c['text'] or '(no printed text)'}"]
+    note = cost_note(c)
+    if note:
+        lines.insert(3, f"- {note}")
     if not c["playable"]:
         lines.append(f"- Cannot be played right now: "
                      f"{c['unplayable_reason'] or 'the game gives no reason'}")
@@ -377,6 +508,8 @@ def render(packet: dict[str, Any]) -> str:
         out.append(f"- {pw['name']} {pw['stacks']}"
                    + (f" — {pw['text']}" if pw["text"] else ""))
     out += ["", "## Your hand", ""]
+    if b.get("spark_note"):
+        out += [b["spark_note"], ""]
     for c in b["hand"]:
         out += _render_card(c)
     out += ["## The other side", ""]

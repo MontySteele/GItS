@@ -673,6 +673,96 @@ def face_defect_preflight(turn: StagedTurn,
         raise TurnError(face_defects.refusal(found))
 
 
+# EB-187. AN ASSUMPTION MAY NOT CLAIM A GAIN THE FACE ALREADY PRINTS.
+#
+# Klee slice 1 `t06` is the case that filed it. The board's assumptions told
+# the grader that "a Skill-tagged card adds 5 to [the Burst meter] on play,
+# over and above anything the card's own text grants" -- while the face the
+# grader was reading printed `Gain 10 Burst Energy. Burst +5`, where the
+# `Burst +5` IS that tag, written onto the face by the description builder for
+# every row carrying it (`tools/lint_burst_legibility.py` is the join that
+# keeps the two in step). A grader who believes both counts the tag twice, and
+# one did: it predicted 20 -> 40 where the board produced 20 -> 35, and the
+# pair read named the arithmetic in RETURNing the arm.
+#
+# THE CHECK IS STRUCTURAL RATHER THAN TEXTUAL, because the face text is not
+# available with no game running. The tag is: a staged row either carries
+# `skill_tag` or it does not, and the lint above pins that a row carrying it
+# prints the rider. So a claim of the shape "adds <N> ... over and above the
+# card's own text" is refused when a staged card carries a tag whose rider is
+# printed and worth exactly <N>.
+#
+# NARROW ON PURPOSE. It refuses a sentence that says the gain is ADDITIONAL to
+# what the face says; a sentence that says the rider IS what the face prints,
+# which is what those two files now say, is exactly what it wants and passes.
+PRINTED_RIDERS: dict[str, tuple[str, str]] = {
+    # tag -> (the tier0 constant that sizes it, what the face prints)
+    "skill_tag": ("BURST_PER_SKILL_TAG", "Burst +{n}"),
+}
+
+_RIDER_CLAIM_RE = re.compile(
+    r"\b(?:adds?|grants?|gives?)\s+(\d+)\b[^.]*?"
+    r"\b(?:over and above|on top of|in addition to|as well as|besides)\b",
+    re.I | re.S)
+
+
+def _staged_tags(turn: StagedTurn) -> dict[str, list[str]]:
+    """`{tag: [card ids carrying it]}` over everything the turn stages."""
+    from tier0.content import loader
+
+    index: dict[str, list[str]] = {}
+    proto = ({c.id: c for c in loader.prototype_cards()}
+             if turn.prototype else {})
+    for raw in staged_card_names(turn):
+        # `card_key` folds the three spellings onto a SPACED key, which is
+        # what the face-defect register is written in; a sheet id is the same
+        # key with underscores, so the fold is reused and re-spelled rather
+        # than re-implemented.
+        key = scenario.card_key(str(raw)).replace(" ", "_")
+        card = proto.get(key)
+        if card is None:
+            try:
+                card = loader.peek_card(key)
+            except (KeyError, ValueError):
+                continue
+        for tag in card.tags or ():
+            index.setdefault(str(tag), []).append(key)
+    return index
+
+
+def assumption_rider_conflicts(turn: StagedTurn) -> list[str]:
+    """Every assumptions line claiming a gain the staged faces already print."""
+    from tier0 import constants as C
+
+    tags = _staged_tags(turn)
+    found: list[str] = []
+    for line in turn.assumptions:
+        for m in _RIDER_CLAIM_RE.finditer(" ".join(str(line).split())):
+            claimed = int(m.group(1))
+            for tag, (const_name, printed) in PRINTED_RIDERS.items():
+                amount = int(getattr(C, const_name))
+                if claimed != amount or tag not in tags:
+                    continue
+                found.append(
+                    f"an assumption says {m.group(0)!r}, but "
+                    f"{', '.join(sorted(set(tags[tag])))} carr"
+                    f"{'y' if len(set(tags[tag])) > 1 else 'ies'} `{tag}` and "
+                    f"the face already prints "
+                    f"'{printed.format(n=amount)}' -- a grader who believes "
+                    f"both counts it twice")
+    return found
+
+
+def assumption_preflight(turn: StagedTurn) -> None:
+    """EB-187. Refuse a turn whose assumptions double-count a printed rider."""
+    found = assumption_rider_conflicts(turn)
+    if found:
+        raise TurnError(
+            "the assumptions block claims a gain the card's own face already "
+            "prints; say the printed rider IS the tag, or drop the sentence: "
+            + "; ".join(found))
+
+
 def exact_hand_difference(turn: StagedTurn, state: dict[str, Any]) -> str:
     """`""` when the live hand IS the declared hand, else what differs.
 
@@ -1652,6 +1742,7 @@ def cmd_check(args) -> int:
         try:
             t = load(p)
             face_defect_preflight(t)
+            assumption_preflight(t)
             print(f"OK   {p.name}: id={t.id} {len(t.staging)} staging step(s), "
                   f"{len(t.board.hand)} card(s) in hand, "
                   f"{len(t.board.enemies)} enem(ies), "
@@ -1707,6 +1798,7 @@ def cmd_stage(args) -> int:
     turn = load(args.file)
     # EB-169, and BEFORE the launch: `stage_board` boots the game.
     face_defect_preflight(turn)
+    assumption_preflight(turn)
     stamp = time.strftime("%Y%m%d-%H%M%S")
     log = scenario.LOG_DIR / f"staged-{turn.id}-{stamp}.jsonl"
     print(f"turn: {turn.id}  ({turn.character})")
