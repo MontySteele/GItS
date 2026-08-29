@@ -1,0 +1,115 @@
+{
+ "turn_id": "klee-slice1-r2-t02",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "intent_insensitive"
+ ],
+ "reasons": [
+  "intent_insensitive: question four is no: a different enemy intent would not have changed the line, so the intent is not part of the decision"
+ ],
+ "grader": {
+  "id": "opus-5-fresh",
+  "kind": "llm",
+  "model": "claude-opus-5",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "68181c7632d9f0ee78ed0a539b22fa1002ca159d45bd731331ba3bb5ed88d82c",
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": "Seapunk"
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Seapunk"
+  },
+  {
+   "card": "Duck and Cover"
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "Rapid Fire first, spending the 3-Spark bank to play it at 0 for four hits of 4 into Seapunk (16 damage, and Pyro). That empties the bank, so Kaboom! reverts to its printed cost of 1; I paid that for 7 more damage, putting Seapunk from 45 to 22. With my last energy I played Duck and Cover for 5 Block, so the telegraphed 11 lands as 6 and I end at 36/62. Second Helping stayed in hand: it demands 3 Sparks to fire and the bank was gone, so after Rapid Fire it was not a legal play regardless of its 0 cost.",
+  "q2_other_line_considered": "Yes \u2014 leading Second Helping with the bank instead. It is the card that explicitly eats 3 Sparks, so spending them there for 6 twice felt like the 'intended' use. I dropped it because the bank is a discount and the discount is worth the most on the most expensive card: sinking it into Second Helping buys 12 damage and leaves 2 energy that can only buy Kaboom! (7) plus nothing, or Kaboom! and no Block. Sinking it into Rapid Fire buys 16 damage and still leaves enough energy for Kaboom! and the Block. Same three-card turn, 23 damage instead of 19, and Second Helping was the card that ended up stranded either way. I also checked whether to skip Duck and Cover for more offence, but with the bank spent there was no fourth attack I could afford, so the energy had no other home.",
+  "q3_what_it_gave_up": "It gives up Second Helping entirely \u2014 the card is bricked for the turn once the Sparks are gone, so I lose its 12 damage and its Pyro application, and I lose whatever value holding Sparks into next turn would have had, since the bank is at 0 going forward. It also caps me at 5 Block, which is not enough to fully eat the 11; I chose to take 6 rather than find more mitigation, because there was none to find. And Rapid Fire's damage is split into four 4s, so against anything with per-hit mitigation this is the worse 16 \u2014 here, with one enemy carrying no Block and no aura, the split costs nothing.",
+  "q4_different_intent": "No. The line is forced by the arithmetic of the discount, not by what Seapunk is doing. A bigger attack, a smaller one, a block-up, or a pure buff all leave the same fact: the Spark bank pays for exactly one card, it pays the most on Rapid Fire, and the leftover energy has no competing use \u2014 Second Helping is dead once the bank empties, so the last point of energy goes to Duck and Cover whether or not the Block matters. Only a change to the board itself would move me: enemy Block, a second target, or a Weak/Vulnerable aura would re-price the four-small-hits versus one-big-hit choice and could push the bank back onto Second Helping or Kaboom!."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.1076,
+  "top1": 28.8,
+  "top2": 25.7,
+  "lines_considered": 12,
+  "playouts": 20,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Kaboom!",
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 28.8
+   },
+   {
+    "cards": [
+     "Second Helping",
+     "Rapid Fire"
+    ],
+    "score": 25.7
+   },
+   {
+    "cards": [
+     "Kaboom!",
+     "Rapid Fire"
+    ],
+    "score": 22.9
+   },
+   {
+    "cards": [
+     "Second Helping",
+     "Kaboom!",
+     "Duck and Cover"
+    ],
+    "score": 22.7
+   },
+   {
+    "cards": [
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 21.9
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "player_fields": {
+    "sparks": 3
+   },
+   "unmapped_statuses": [],
+   "enemy_count": 1,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T11:29:22"
+}

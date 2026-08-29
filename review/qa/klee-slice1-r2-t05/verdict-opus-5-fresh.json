@@ -1,0 +1,112 @@
+{
+ "turn_id": "klee-slice1-r2-t05",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "opus-5-fresh",
+  "kind": "llm",
+  "model": "claude-opus-5",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "64446ff9b961caa9d4f7dee4bb95a4f1a27483276b19c2eb810c8786cecf6667",
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Imaginary Friend"
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I spent the Spark bank on the biggest attack first: Rapid Fire, which prints 2 but shows 0, for 4 damage four times into the only enemy \u2014 16 damage, and Nibbit is the sole target so all four hits land on it. That consumed the 3 Sparks, so Kaboom! reverted to its printed cost of 1; I paid it for 7 more damage, putting Nibbit at 20 of 43. My last energy went to Imaginary Friend for 5 Block, 3 Burst Energy and Burst +5, taking the meter from 20 toward the top. Nibbit's 12 lands into 5 Block, so I take 7 and end at 35/62. Total energy spent: 0 + 1 + 1 = 2, exactly what I had.",
+  "q2_other_line_considered": "Rapid Fire, then Duck and Cover, then Imaginary Friend \u2014 10 Block against the telegraphed 12, taking only 2 damage instead of 7. I weighed it and dropped it: 5 extra HP is cheap at 42/62 with no second attacker on the board, and Kaboom!'s 7 damage is worth more against a 43 HP enemy I want dead a turn sooner. I also briefly checked the ordering question \u2014 making Kaboom! the free card instead of Rapid Fire \u2014 and rejected it immediately, since the discount is worth 2 energy on Rapid Fire and only 1 on Kaboom!, and spending it on the 16-damage card rather than the 7-damage one is not close.",
+  "q3_what_it_gave_up": "5 HP, and Duck and Cover stays unplayed in hand for whatever the discard rule does with it. I also gave up nothing on the Burst side by choosing Imaginary Friend over Duck and Cover \u2014 that swap was free \u2014 so the whole cost of the line is the 5 HP I chose not to block, traded for 7 damage now.",
+  "q4_different_intent": "Yes. If Nibbit had telegraphed something big enough that 5 Block left me in real trouble \u2014 say an attack in the mid-20s or higher, or a multi-hit that ate the block cheaply \u2014 I would have cut Kaboom! for Duck and Cover and stacked 10 Block, conceding the 7 damage. A defensive or buffing intent with no incoming damage would have pushed me the other way, but there was nothing else damaging I could afford, so the same three cards would have been played with the block simply wasted. The 12 sits in the middle: survivable bare, so the block is a convenience and the damage is the point."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.0062,
+  "top1": 28.98,
+  "top2": 28.8,
+  "lines_considered": 14,
+  "playouts": 34,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Imaginary Friend",
+     "Kaboom!",
+     "Rapid Fire"
+    ],
+    "score": 28.98
+   },
+   {
+    "cards": [
+     "Kaboom!",
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 28.8
+   },
+   {
+    "cards": [
+     "Imaginary Friend",
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 27.98
+   },
+   {
+    "cards": [
+     "Kaboom!",
+     "Rapid Fire"
+    ],
+    "score": 22.9
+   },
+   {
+    "cards": [
+     "Imaginary Friend",
+     "Rapid Fire"
+    ],
+    "score": 22.08
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "player_fields": {
+    "sparks": 3
+   },
+   "unmapped_statuses": [],
+   "enemy_count": 1,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T11:29:22"
+}

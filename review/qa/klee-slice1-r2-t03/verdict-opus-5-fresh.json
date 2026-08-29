@@ -1,0 +1,112 @@
+{
+ "turn_id": "klee-slice1-r2-t03",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "opus-5-fresh",
+  "kind": "llm",
+  "model": "claude-opus-5",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "af45bd5a1907dd4148ec2c17454c5b1f5cce66c312df6d4e40458bb7f92d6b3e",
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Duck and Cover"
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "Rapid Fire first, spending the whole 3-Spark bank on the most expensive attack in hand so the 2-cost is the one that gets discounted to 0. With one enemy on the board all four random 4-damage hits land on Nibbit, so that is 16 damage and Pyro for free. That left both energy intact. Kaboom! then costs its printed 1 (the Spark is gone) for 7 more, taking Nibbit from 40 to 17. The last energy went into Duck and Cover for 5 Block, which turns the telegraphed 12 into 7 and leaves me at 35/62.",
+  "q2_other_line_considered": "Yes. The real alternative was leading Eager to Help while the bank still read 3, so it draws 2 instead of 1, then Rapid Fire free and Kaboom! for the last energy. Same 23 damage, plus two extra cards. I rejected it because after that sequence I am at 0 energy, so the two cards are only useful if they happen to cost 0, and I would eat the full 12 instead of 7. I also weighed spending the Spark on Kaboom! instead of Rapid Fire, but that discounts a 1-cost rather than a 2-cost and costs me a whole card's worth of play this turn.",
+  "q3_what_it_gave_up": "Card draw and whatever it would have set up for next turn \u2014 Eager to Help stays stranded in hand, and with the Spark bank empty it will only draw 1 whenever I do play it, so the 2-card version of that card is gone for now. It also gives up nothing on damage, since 23 was the ceiling either way; what it buys with the last energy is 5 HP of mitigation rather than information.",
+  "q4_different_intent": "Yes. Duck and Cover is only there because of the 12-damage attack. If Nibbit had telegraphed a buff, a debuff, or anything non-damaging, the last energy would have gone to Eager to Help instead \u2014 and in that case I would have played Eager to Help first, before Rapid Fire, so the Spark bank was still at 3 and it drew 2 rather than 1. A much larger incoming number would not have changed the line either; 5 Block is still the best use of the final energy, it just matters less."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.1667,
+  "top1": 28.8,
+  "top2": 24.0,
+  "lines_considered": 14,
+  "playouts": 34,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Kaboom!",
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 28.8
+   },
+   {
+    "cards": [
+     "Eager to Help",
+     "Kaboom!",
+     "Rapid Fire"
+    ],
+    "score": 24.0
+   },
+   {
+    "cards": [
+     "Eager to Help",
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 23.0
+   },
+   {
+    "cards": [
+     "Kaboom!",
+     "Rapid Fire"
+    ],
+    "score": 22.9
+   },
+   {
+    "cards": [
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 21.9
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "player_fields": {
+    "sparks": 3
+   },
+   "unmapped_statuses": [],
+   "enemy_count": 1,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T11:29:22"
+}
