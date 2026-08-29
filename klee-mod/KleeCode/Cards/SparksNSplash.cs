@@ -6,6 +6,7 @@ using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 
@@ -49,6 +50,14 @@ public sealed class SparksNSplash : CustomCardModel
           + "For {PowerAmount} turns: at the end of your turn, deal 5 damage "
           + "to a random enemy 4 times, applying [gold]Pyro[/gold]."),
     };
+
+    // The Burst keyword, on the same rule codegen applies to the generated
+    // faces: this face PRINTS the word, so it carries the definition -- and
+    // this is the face that most needs it, the one the meter exists to reach.
+    // Written out here because the card is hand-written;
+    // `tools/lint_keyword_meters.py` holds the two surfaces to one rule.
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForBurst(base.ExtraHoverTips, this);
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -83,12 +83,14 @@ public sealed class CeremonialGarment
           + $"grant {KokomiConstants.GarmentAttackBlock} Block."),
     };
 
-    // The Charge keyword, on the same rule codegen applies to her generated
-    // faces: this face PRINTS the word, so it carries the definition. Written
-    // out here because the card is hand-written; `tools/lint_charge_keyword.py`
-    // holds the two surfaces to one rule.
+    // The Charge and Burst keywords, on the same rules codegen applies to her
+    // generated faces: this face PRINTS both words, so it carries both
+    // definitions. Written out here because the card is hand-written;
+    // `tools/lint_keyword_meters.py` holds the two surfaces to one rule per
+    // meter.
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForCharge(base.ExtraHoverTips, this);
+        KleeCardTooltips.ForBurst(
+            KokomiRiderTips.ForCharge(base.ExtraHoverTips, this), this);
 
     /// <summary>Retain: an unplayed Burst stays in hand (sim: the turn-end
     /// filter retains burst-tagged cards). AppliesHydro left with the splash

@@ -41,7 +41,7 @@ public sealed class OverflowingHospitality : CustomCardModel, ICharacterCard, IS
         new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        SalonMemberTips.ForCard(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, members: new[] { SalonMember.Chevalmarin });
+        KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, members: new[] { SalonMember.Chevalmarin }), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("overflowing_hospitality");
 

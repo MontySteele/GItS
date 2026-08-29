@@ -355,6 +355,32 @@ def prints_charge_word(description: str) -> bool:
     return bool(CHARGE_WORD.search(description))
 
 
+# The Burst KEYWORD's attach rule, the same shape one meter over (used by
+# `emit` below and imported by `tools/lint_keyword_meters.py`).
+#
+# THE RULE IS THE PRINTED WORD HERE TOO, and here an op set is even further
+# from total than it was for Charge. A face prints the word from four
+# unrelated places: the `burst_energy` op ("Gain N Burst Energy"); the
+# `skill_tag` TAG, which renders "Burst +5" and is not an op at all; the
+# hand-written kit faces ("Costs your full Burst Energy meter"); and the prose
+# of a power or relic rider that grants the energy from a hook (Blazing
+# Delight, Catalytic Conversion, Durin's Witch's Flame). Reading the built
+# description catches all four, and it is the surface the PLAYER reads --
+# which is the surface the gap was reported against, run B6 watching the meter
+# climb and never learning how to spend it.
+#
+# Word boundary, so "Bursting" is not the meter. The only compound on any
+# sheet today is Chevreuse's card TITLE ("Ring of Bursting Grenades"), which
+# no description names, but a face quoting it later must not inherit a meter
+# it does not touch.
+BURST_WORD = re.compile(r"\bBurst\b")
+
+
+def prints_burst_word(description: str) -> bool:
+    """Does this built card description name the Burst Energy meter?"""
+    return bool(BURST_WORD.search(description))
+
+
 # --- companion batch (2026-07-21) --------------------------------------------
 def companion_damage_effects(card: dict) -> list[dict]:
     """Every OFFENSIVE damage effect on a companion card, mode bodies included.
@@ -7389,6 +7415,18 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard
             tips_expr = (
                 "KokomiRiderTips.ForCharge("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+    # The Burst keyword, on the same rule and OUTSIDE the Kokomi block --
+    # Burst is the roster's meter, not one character's, so the attach point is
+    # the roster-wide tooltip class. Charge's twin and the older gap: the word
+    # has been on thirty-eight faces across three characters since the first
+    # spike, and the only surface that ever defined it was a status badge
+    # retired in July. See `prints_burst_word` for why the rule is the printed
+    # word, and KleeCardTooltips.ForBurst for which parts of the rule are
+    # shared and which are read live off the owner.
+    if prints_burst_word(desc):
+        tips_expr = (
+            "KleeCardTooltips.ForBurst("
+            f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     if tips_expr:
         tooltip_member = (
             "\n    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"

@@ -41,7 +41,7 @@ public sealed class RainOfRoses : CustomCardModel, ICharacterCard, ISkillTagCard
         new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
+        KleeCardTooltips.ForBurst(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("rain_of_roses");
 

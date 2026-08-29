@@ -44,7 +44,7 @@ public sealed class HighTide : CustomCardModel, IElementalCard, ICharacterCard, 
         new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        FurinaRiderTips.ForCard(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, fanfarePer: 1, fanfareStep: 2);
+        KleeCardTooltips.ForBurst(FurinaRiderTips.ForCard(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, fanfarePer: 1, fanfareStep: 2), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("high_tide");
 

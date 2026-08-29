@@ -41,7 +41,7 @@ public sealed class GentilhommeUsher : CustomCardModel, ICharacterCard, ISkillTa
         new[] { KleeKeywords.ElementalSkill };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Usher });
+        KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Usher }), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("gentilhomme_usher");
 

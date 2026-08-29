@@ -41,7 +41,7 @@ public sealed class GrandGala : CustomCardModel, ICharacterCard, ISkillTagCard
         new[] { CardKeyword.Exhaust, KleeKeywords.ElementalSkill };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Crabaletta, SalonMember.Chevalmarin, SalonMember.Usher });
+        KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Crabaletta, SalonMember.Chevalmarin, SalonMember.Usher }), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("grand_gala");
 
