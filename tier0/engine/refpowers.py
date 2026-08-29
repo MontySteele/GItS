@@ -324,6 +324,21 @@ def after_card_exhausted(state: CombatState, card: Card,
         # upgrade gets exactly the pre-Orobas numbers back.
         charge, burst = relics.exhaust_accrual(
             p, C.CHARGE_PER_EXHAUST, C.KOKOMI_BURST_PER_EXHAUST)
+        # QUARANTINED (C.KURAGE_MEMORY), PICK A. THE FUEL NARROWS BY ONE
+        # CLAUSE and by nothing else: a COMPANION card pays no Charge, by any
+        # route -- Mustered, drafted or granted. That is R216 D's Muster
+        # subsidy being removed at the mechanism (the relic's printed text is
+        # the other half, and it is [USER]'s to move), and it is what breaks
+        # "block with Companions until the jellyfish is lethal": defence stops
+        # feeding the finisher.
+        #
+        # THE BURST WAGE IS UNTOUCHED, deliberately. CHARGE_PER_EXHAUST and
+        # KOKOMI_BURST_PER_EXHAUST are documented as one wage in two
+        # currencies, so narrowing both would be a second, unproposed change
+        # riding on this one; the proposal narrows the Charge funnel and says
+        # nothing about Burst, so neither does this.
+        if C.KURAGE_MEMORY and card.is_companion:
+            charge = 0
         resources.gain_charge(state, charge, kind)
         if p.burst_max:
             resources.gain_burst(state, burst, kind)
