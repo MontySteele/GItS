@@ -32,7 +32,7 @@ import pytest
 from tier0 import constants as C
 from tier0.content import loader
 from tier0.engine import combat, effects
-from tier0.engine.state import CombatState
+from tier0.engine.state import CombatState, KurageMemory
 from tier0.pilot.policy import make_pilot
 from tier0.tests.conftest import make_enemy
 
@@ -288,10 +288,10 @@ def test_c3_the_casket_refresh_pays_nothing(base_kit):
     assert st.player.powers["kurage_summon"] == 1
 
 
-def test_c4_the_oaths_ward_now_pays_every_turn_not_every_play(base_kit):
-    """Pick 4. The Oath's face says 'per Bake-Kurage play'. Under the base
-    kit the pulse is per TURN, so the ward is too. Code unchanged; the FACE
-    is what moved."""
+def test_c4_the_oaths_ward_is_ruled_and_no_longer_rides_the_pulse(base_kit):
+    """Pick 4 is RULED ([USER], 2026-08-29) and the default this test used to
+    pin is gone: the pulse no longer carries the ward at all, however many
+    stacks are standing. The ward's own section below has the rest."""
     st = kokomi_state()
     st.player.powers["kurage_summon"] = 1
     st.player.powers["kurage_ward"] = 5
@@ -301,7 +301,7 @@ def test_c4_the_oaths_ward_now_pays_every_turn_not_every_play(base_kit):
         st.player.block = 0
         effects.player_turn_end_triggers(st)
         paid.append(st.player.block)
-    assert paid == [C.KURAGE_MEMORY_PULSE_BLOCK + 5] * 3
+    assert paid == [C.KURAGE_MEMORY_PULSE_BLOCK] * 3
 
 
 def test_c5_the_fires_summon_gate_can_no_longer_fail_in_a_real_fight(
@@ -312,6 +312,140 @@ def test_c5_the_fires_summon_gate_can_no_longer_fail_in_a_real_fight(
     assert st.player.powers.get("kurage_summon", 0) == 0   # a bare state
     st = fight()
     assert st.player.powers.get("kurage_summon", 0) == 1   # a real fight
+
+
+# --------------------------------------------------------------------------
+# KURAGE'S OATH, RE-KEYED TO THE MEMORY PLAY (sec.12.4 pick 4, RULED).
+#
+# [USER], 2026-08-29: "Let's rewrite it to '3 block per memory played,
+# upgrade to 5' as a placeholder and see if it needs adjusting later."
+#
+# The numbers are a PLACEHOLDER in [USER]'s own word and nothing here is a
+# balance claim; the tests below are about WHEN the ward pays and about the
+# face carrying the ruled figures, never about whether they are right.
+# --------------------------------------------------------------------------
+
+def armed(entries, charge=0, ward=0):
+    """A state with the base kit installed, a memory queue, and optionally
+    the Oath standing."""
+    st = kokomi_state()
+    st.player.powers["kurage_summon"] = 1
+    st.player.charge = charge
+    if ward:
+        st.player.powers["kurage_ward"] = ward
+    st.kurage_queue.extend(entries)
+    return st
+
+
+def memory_entry(price=0, card_id="gorou_inuzaka_charge"):
+    return KurageMemory(card_id=card_id, cost=price // 3, price=price)
+
+
+def test_the_ward_pays_on_the_automatic_memory_play(base_kit):
+    st = armed([memory_entry()], ward=3)
+    st.player.block = 0
+    assert effects.kurage_fire(st) is True
+    assert st.player.block == 3
+    paid = [e for e in st.log if e["event"] == "kurage_ward_paid"]
+    assert len(paid) == 1 and paid[0]["amount"] == 3
+    assert paid[0]["manual"] is False
+
+
+def test_the_ward_pays_on_a_stir_play_too(base_kit):
+    """The acceleration keyword fires the front outside the automatic
+    rhythm, and a memory play is a memory play."""
+    st = armed([memory_entry()], ward=3)
+    st.player.block = 0
+    effects.OPS["play_front_memory"](st, {"op": "play_front_memory"},
+                                     loader.get_card("waters_edge"))
+    assert st.player.block == 3
+    paid = [e for e in st.log if e["event"] == "kurage_ward_paid"]
+    assert len(paid) == 1 and paid[0]["manual"] is True
+
+
+def test_the_ward_does_not_pay_on_the_pulse_under_the_flag(base_kit):
+    """THE HALF THAT MOVED. Under the base kit the pulse fires every turn
+    end; if the ward still rode it, the Oath would pay per turn for free."""
+    st = kokomi_state()
+    st.player.powers["kurage_summon"] = 1
+    st.player.powers["kurage_ward"] = 3
+    st.kurage_last_card_type = "skill"
+    st.player.block = 0
+    effects.player_turn_end_triggers(st)
+    assert st.player.block == C.KURAGE_MEMORY_PULSE_BLOCK
+    assert not [e for e in st.log if e["event"] == "kurage_ward_paid"]
+
+
+def test_a_blocked_memory_pays_no_ward(base_kit):
+    """The ward is per memory PLAYED. A front she cannot afford is not a
+    play, so it pays nothing -- which is the whole reason the trigger moved
+    off a pulse that cannot be blocked out of."""
+    st = armed([memory_entry(price=9)], charge=1, ward=3)
+    st.player.block = 0
+    assert effects.kurage_fire(st) is False
+    assert st.player.block == 0
+    assert not [e for e in st.log if e["event"] == "kurage_ward_paid"]
+
+
+def test_an_empty_memory_pays_no_ward(base_kit):
+    st = armed([], ward=3)
+    st.player.block = 0
+    assert effects.kurage_fire(st) is False
+    assert st.player.block == 0
+
+
+def test_the_ward_is_paid_once_per_play_not_once_per_turn(base_kit):
+    """Two fires in one turn (the automatic one plus a Stir) pay twice."""
+    st = armed([memory_entry(), memory_entry()], ward=3)
+    st.player.block = 0
+    assert effects.kurage_fire(st) is True
+    effects.OPS["play_front_memory"](st, {"op": "play_front_memory"},
+                                     loader.get_card("waters_edge"))
+    assert st.player.block == 6
+    assert len([e for e in st.log if e["event"] == "kurage_ward_paid"]) == 2
+
+
+def test_the_amount_is_the_cards_and_never_a_constant(base_kit):
+    """3 base, 5 upgraded -- and both come off whatever stacks the card
+    applied, so there is no code-side override that could disagree with the
+    printed face."""
+    for stacks in (3, 5):
+        st = armed([memory_entry()], ward=stacks)
+        st.player.block = 0
+        assert effects.kurage_fire(st) is True
+        assert st.player.block == stacks
+
+
+def test_the_surface_row_prints_the_ruled_placeholder(base_kit):
+    """The FACE half of the ruling: the staged row carries [USER]'s 3, on
+    the quarantined surface, with the shipped row untouched."""
+    rows = {c.id: c for c in loader.prototype_cards()}
+    row = rows["proto_kurages_oath_memory"]
+    assert row.name == "Kurage's Oath"
+    assert (row.cost, row.type, row.rarity) == (1, "power", "common")
+    assert row.effects == [{"op": "apply_power", "power": "kurage_ward",
+                            "amount": 3, "target": "self"}]
+
+
+def test_the_shipped_oath_row_did_not_move():
+    """No flag, no fixture: the printed sheet is untouched by all of this."""
+    shipped = loader.get_card("kurages_oath")
+    assert shipped.effects == [{"op": "apply_power", "power": "kurage_ward",
+                                "amount": 5, "target": "self"}]
+    assert loader.get_card("kurages_oath+").effects[0]["amount"] == 7
+
+
+def test_flag_off_the_ward_still_rides_the_pulse():
+    """THE HARD REQUIREMENT. With the flag off the shipped Oath is exactly
+    what it has always been: its ward is paid by the jellyfish's pulse, on
+    top of KURAGE_PULSE_BLOCK, and no memory play exists to pay it."""
+    st = kokomi_state()
+    st.player.powers["kurage_summon"] = 1
+    st.player.powers["kurage_ward"] = 5
+    st.player.block = 0
+    effects.player_turn_end_triggers(st)
+    assert st.player.block == C.KURAGE_PULSE_BLOCK + 5
+    assert not [e for e in st.log if e["event"] == "kurage_ward_paid"]
 
 
 # --------------------------------------------------------------------------
