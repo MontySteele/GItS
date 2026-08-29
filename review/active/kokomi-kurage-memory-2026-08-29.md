@@ -576,11 +576,151 @@ is the piece most likely to be wrong.
 
 ## 7. The doctrine seat's read
 
-*Pending — the seat runs on this document as committed, under the clause-only
-protocol (`docs/current/OPERATIONS.md`, "Doctrine seat protocol"). Its reply
-lands verbatim at
-`review/qa/kokomi-kurage-memory-doctrine-review-codex-gpt-5.6-sol.md` and is
-quoted here, with the list of clauses it says must move.*
+The repo-visible seat — Codex CLI `0.150.1`, `gpt-5.6-sol`, independent by model
+family (R217 C) — read this document as committed at `531918d`, under the
+clause-only protocol. Reply verbatim:
+`review/qa/kokomi-kurage-memory-doctrine-review-codex-gpt-5.6-sol.md`; prompt
+kept beside it, sha256
+`f634d108a796e0bbd8c2c58e3491eb636104cfa39ad3a96aed5e547c4d8dc3f4`.
+
+**It volunteered no remedy.** Nothing in its reply is marked DISCARDED, and its
+family therefore stays eligible to grade this row later (`EB-190`). It named
+clauses and nothing else, which is what the protocol asks for.
+
+### The verdicts
+
+| element | addresses the noted issues? | doctrine |
+|---|---|---|
+| E1 the queue | **PARTLY** | **FOLLOWS** — D2 |
+| E2 the fuel | **YES** on defence-feeds-the-finisher, **PARTLY** overall | **REQUIRES_MODIFICATION** — rotation/accrual law + relic |
+| E3 the threshold | **PARTLY** | **REQUIRES_MODIFICATION** — R80 + the LAW Charge bullet |
+| E4 the pulse | **PARTLY** | **REQUIRES_MODIFICATION** — kickoff identity/finisher + printed rows |
+| E5 the UI | **PARTLY** | **FOLLOWS** — D4 |
+| **overall** | **PARTLY** | **REQUIRES_MODIFICATION** |
+
+On the queue: *"It directly gives Companions a second identity beyond 'boring
+bodies' and makes their play order consequential. It indirectly adds a decision
+around Charge, but does not by itself separate defence from advancement or let
+the player decide when Charge converts."* Doctrine **FOLLOWS**, on D2:
+*"Choosing which Companion enters the visible queue and when is player-steered
+acquisition and ordering, provided the queued face and downstream target are
+forecastable under D4."*
+
+On the fuel: **YES** on the second noted issue, in its words — *"Companion
+defence no longer also supplies Charge"* — and PARTLY overall because *"Charge
+generation still culminates automatically."*
+
+On the threshold: *"Spending makes Charge cyclical instead of a number watched
+forever, and replaying queued Companions gives them consequential afterlife. The
+conversion itself remains compulsory, so the player still waits for the clock
+once queue order has been established."*
+
+On the pulse: *"It breaks the direct defence-to-ever-larger-finisher loop and
+makes sequencing card types matter. It does not itself improve Companions, and
+its automatic payoff can still become 'play the desired type last, then watch'
+if the branches do not create materially different choices."*
+
+On the UI: **FOLLOWS**, D4 — *"The ordered faces, marked threshold, firing
+indication, pulse indication, and forecast target are the appropriate doctrinal
+surface, contingent on unresolved targeting and pulse semantics being
+displayed."*
+
+Overall (A): *"The proposal substantially addresses boring Companions and removes
+Companion defence as Charge fuel. It replaces passive permanent scaling with an
+ordered tempo clock, but does not fully resolve 'waiting rather than deciding'
+because firing, payment, and card selection remain automatic."*
+
+### The clauses it says must move — the full list, and the correction it makes to §4
+
+Its (B), verbatim in the reply, is the most useful thing it produced, and it
+**corrects this document**. §8's original closing sentence said R80 and the
+relic were *"the two amendments this design needs"*; the seat's (D) names that
+as the proposal's one internal inconsistency with doctrine:
+
+> "The proposal is internally inconsistent with doctrine when it claims, 'R80 and
+> the relic text are the two amendments this design needs.' The pasted law also
+> binds universal Companion accrual, Charge-reading finishers, the Commander
+> consumption link, the kickoff decision loop, summon duration/refresh, and
+> several printed reader and pulse rules."
+
+It is right, and §8 is corrected below rather than defended. The complete set it
+names:
+
+1. the LAW Charge bullet, *"Charge is never spent"*;
+2. R80 in the sheet header, *"CHARGE IS NEVER SPENT"*;
+3. the LAW rotation/accrual definition, *"insofar as Companions currently count
+   as her own cards"*;
+4. kickoff §1's decision loop, *"Every card kept is engine; every card burned is
+   Charge"*;
+5. kickoff §2.1's universal accrual and its *"never expended"* property;
+6. kickoff §2.2's Charge-reading finisher requirement;
+7. kickoff §2.3's *"feeds Charge on consumption"* (the Commander link);
+8. kickoff §2.4's *"Each proc is an Exhaust event → Charge"*, where the
+   ownership exclusion applies;
+9. kickoff §2.5 and the shipped starter relic text;
+10. the printed rules for `bake_kurage`, `before_sun_and_moon`, `kurages_oath`,
+    `ceremonial_garment`, `nereids_ascension`, `all_streams_flow`,
+    `read_the_current`, `gyorin_formation`;
+11. **Tamakushi Casket's refresh link** — the Burst's canon *"REFRESHES a
+    fielded Bake-Kurage"*.
+
+Items 1, 2, 9 and 10 are already in §4. **Items 3–8 and 11 are new**, and six of
+them are the *kickoff charter* rather than LAW — the seat is saying that a
+character's charter document is itself a clause set that a redesign has to amend
+in the open, not quietly outgrow. `kurages_oath` in item 10 is a row §4's table
+missed: it is priced against the shipped pulse frequency, so a persistent
+jellyfish moves it whether or not its text changes. I have not amended anything;
+this list is what [USER] is being handed alongside the picks.
+
+### The D2/D4 question on automatic firing
+
+Asked directly — the jellyfish fires automatically, the player cannot choose
+when, cannot decline, cannot pick the card; does a visible queue rescue that?
+Its (C), verbatim:
+
+> "A visible ordered queue can satisfy D2 even though execution is automatic,
+> because D2 does not require control at execution; it requires that the
+> automatic engine 'feed a decision the player can steer,' and play order
+> supplies timing/acquisition steering. D4 is also measured 'At the decision
+> point,' which here is the earlier Companion play. **This passes only if that
+> point exposes the remembered face, firing conditions, target, recursion rule,
+> and relevant pulse consequence. Visibility alone does not rescue an outcome
+> whose consequential semantics remain unresolved.**"
+
+That is a conditional pass, and the condition is a list of five things the strip
+must show. Four of the five are already §3's job. The fifth — the **recursion
+rule** — is a genuine hole it found and this document does not answer:
+
+> "An automatically replayed Companion may itself satisfy 'When Kokomi plays a
+> Companion card,' append another copy, and prevent the queue from shrinking.
+> The proposal does not specify whether remembered plays can remember
+> themselves."
+
+It repeats the point against §2's own claim that the queue is self-bounding:
+*"the proposal contains no exclusion supporting that claim."* Correct on both
+counts. §2's "uncapped is fine because every fire removes one" is **only true if
+a jellyfish-played Companion does not re-enter the memory**, and this document
+never said so. That is a rule the design owes, not a number, and it is recorded
+here as owed rather than settled by me inside the seat's own finding.
+
+Two further risks it names, recorded without remedy: the ownership vocabulary
+(*"the LAW presently treats conscripted Companions as self-sourced kit for
+`SUPPORT_CARRY`, while the proposal excludes them for Charge"* — one word,
+"own", carrying two different meanings in two laws, which it reads as a D4
+invisible-feed exposure); and the pulse/replay ordering (*"the proposal does not
+define whether the jellyfish's turn-start replay becomes 'the last card Kokomi
+played,' potentially determining or overwriting the pulse before the player
+acts"* — a PICK B interaction §5 did not see).
+
+### What I take from it, and what I have not done
+
+I have changed nothing in §2–§6 in response. The seat's read is doctrine
+evidence, not an instruction, and every hole it found is either a [USER] pick or
+a rule this proposal owes before an engine arm is written. What it establishes:
+the design is **legal in shape** (D2 and D4 both pass on the two elements that
+carry the new player-facing surface) and **illegal until amended** on a clause
+list three times longer than §4's — which is exactly the answer the exercise was
+run to get, before anybody built anything.
 
 ---
 
@@ -592,7 +732,58 @@ verbatim, and this file's §7 and §9. `git revert` of the range, or simply not
 merging the branch, restores the tree exactly — **no shipped row, constant,
 sheet, engine file or LAW line is touched by any of them.**
 
-Nothing here changes until [USER] amends LAW. R80 and the relic text are the two
-amendments this design needs, and both are [USER]'s alone: the delegation ladder
-puts LAW amendments, one-way doors and picks between genuinely different design
-directions on his side of the line, and this is all three.
+Nothing here changes until [USER] amends LAW. **The amendment list is §7's
+eleven items, not the two this section originally claimed** — the seat's (D)
+caught that and it is corrected rather than argued with. All of them are
+[USER]'s alone: the delegation ladder puts LAW amendments, one-way doors and
+picks between genuinely different design directions on his side of the line, and
+this is all three.
+
+---
+
+## 9. Register moves I think are due
+
+**I have minted and closed nothing, and I have edited no register.** This is a
+list for the sitting, not an action. Next free ids for reference: `EB-191`,
+`M51`, `R219`.
+
+**Amend in place:**
+
+- **`M50`** — its text points at `review/active/kokomi-slice-2-2026-08-29.md` §9
+  PICK 2 and offers five options. Those five are withdrawn: the ask should point
+  at **this** proposal, and the pick it puts is no longer "choose an accrual
+  rule" but "take the Kurage-memory redesign, with picks A–E, or don't." It
+  stays HELD and it stays [USER]'s.
+- **`M49`** — supersede rather than answer. The pilot term it queues prices a
+  bank the player spends at a moment of their choosing; under this design they
+  never do (§4). If the proposal is taken, M49 closes and a new row asks for a
+  *tempo* term instead.
+
+**Mark superseded:**
+
+- `review/active/kokomi-slice-2-2026-08-29.md` **§9 PICK 2** — superseded by
+  this document, in [USER]'s own direction of 2026-08-29.
+- The four slice-2 prototype rows on `docs/prototype-surface.yaml`, and the
+  round-2 boards on `kokomi-slice-2-round-2`, retire under the surface's
+  deletion rule **if** the proposal is taken (§4). Not before.
+
+**Mint, if the proposal is taken** — three engineering rows, one per §6 piece,
+because they gate on each other in that order:
+
+- the **engine flag** `KURAGE_MEMORY` in both engines, default off, acceptance =
+  the suite unflagged shows zero diffs and the flagged arm plays a whole fight;
+- the **UI strip** — the queue faces, the Charge bar with T marked, the
+  last-card-type indicator; the widest estimate in §6 and the piece with no
+  precedent in the mod;
+- the **bridge fields** — queue, threshold/maximum, pulse type and amount.
+  This one should **ride `EB-181`** rather than open a second row: it is the
+  same pin move and the same class of gap (a meter with no maximum), and
+  `EB-181`'s acceptance clause already covers half of it.
+
+**And one row the seat's read earns on its own**, whether or not the proposal is
+taken as a whole: the **recursion rule** — whether a card the jellyfish plays
+re-enters the memory — is an unanswered semantic the design owes, and §2's
+self-bounding claim depends on it (§7).
+
+A ruling id (`R219`) is due if [USER] takes the design, because the LAW
+amendments in §7's list are a slate, not eleven separate calls.
