@@ -78,6 +78,23 @@ STATUS_MAP = {
     "salon": "salon",
 }
 
+# EB-185. THE STATUSES THE SIM HOLDS AS A NAMED PLAYER FIELD, NOT AS A POWER.
+#
+# Sparks ride the wire as a POWER (`SPARK_POWER`, printed `Spark`, a Buff with
+# a counter) because that is how the live game holds them, while tier0 keeps
+# them on `Player.sparks` -- a field, apart from the powers dict, because the
+# threshold rule reads it directly. Neither table above could carry the
+# crossing: `STATUS_MAP` lands in `powers` and `WIRE_RESOURCES` reads the
+# `resources` blob, which has no Spark row in it at all.
+#
+# The cost of the gap was the whole of a round: every observed reading of a
+# Klee board in slice 1 scored a bank of ZERO, so three of the six boards
+# collapsed to four playable lines and `closeness --observed` was reading a
+# turn nobody was handed. Explicit table for `WIRE_RESOURCES`' reason -- an
+# unmapped status is still REPORTED, so a meter the falsifier could not see
+# never passes for one it read.
+STATUS_FIELDS = {"spark": "sparks"}
+
 _DMG_RE = re.compile(r"[Dd]eal\s+(\d+)\s+damage")
 _INTENT_RE = re.compile(r"^(\d+)(?:\s*[x\u00d7]\s*(\d+))?$")
 _INTENT_DESC_RE = re.compile(r"[Aa]ttack for (\d+)")
@@ -143,8 +160,11 @@ def _text_card(entry: dict[str, Any]) -> Card:
     )
 
 
-def _statuses(blob: Any) -> tuple[dict[str, int], list[str]]:
+def _statuses(blob: Any) -> tuple[dict[str, int], dict[str, int], list[str]]:
+    """`(powers, player fields, unmapped)` -- see `STATUS_FIELDS` for why the
+    middle one exists and is not folded into the first."""
     powers: dict[str, int] = {}
+    fields: dict[str, int] = {}
     unmapped: list[str] = []
     for st in blob or []:
         if not isinstance(st, dict):
@@ -158,11 +178,14 @@ def _statuses(blob: Any) -> tuple[dict[str, int], list[str]]:
         except (TypeError, ValueError):
             amount = 1
         key = STATUS_MAP.get(raw)
+        field = STATUS_FIELDS.get(raw)
         if key:
             powers[key] = amount
+        elif field:
+            fields[field] = amount
         else:
             unmapped.append(raw)
-    return powers, unmapped
+    return powers, fields, unmapped
 
 
 def _intent(blob: Any) -> list[dict]:
@@ -224,7 +247,7 @@ def build_combat_state(state: dict[str, Any], *, prototype: bool = False
     p = state.get("player") or {}
     proto_index = ({c.id: c for c in loader.prototype_cards()}
                    if prototype else None)
-    powers, unmapped = _statuses(p.get("status"))
+    powers, fields, unmapped = _statuses(p.get("status"))
 
     hand_entries = list(p.get("hand") or [])
     hand: list[Card] = []
@@ -251,7 +274,7 @@ def build_combat_state(state: dict[str, Any], *, prototype: bool = False
 
     enemies: list[Enemy] = []
     for e in enemy_blobs(state):
-        epowers, _ = _statuses(e.get("status"))
+        epowers, _, _ = _statuses(e.get("status"))
         # DOUBLE-COUNTING GUARD. The intent label the wire prints is the
         # FINAL number the player will take -- the game has already folded in
         # the attacker's Strength and any Weak on it. tier0's
@@ -280,6 +303,17 @@ def build_combat_state(state: dict[str, Any], *, prototype: bool = False
             is_boss=str(state.get("state_type")) == "boss",
         ))
 
+    # EB-185. The named-field statuses, written after construction and REFUSED
+    # rather than guessed when the sim has no such field -- a `setattr` onto a
+    # Player that does not carry the attribute would put the bank somewhere
+    # nothing reads and report success.
+    for field_name, amount in fields.items():
+        if not hasattr(player, field_name):
+            raise AttributeError(
+                f"the wire carries a status mapped to Player.{field_name}, "
+                f"which the sim's Player does not have")
+        setattr(player, field_name, int(amount))
+
     cs = CombatState(
         player=player,
         enemies=enemies,
@@ -288,6 +322,7 @@ def build_combat_state(state: dict[str, Any], *, prototype: bool = False
     )
     notes = {
         "approximate_cards": approx,
+        "player_fields": dict(sorted(fields.items())),
         "unmapped_statuses": sorted(set(unmapped)),
         "enemy_count": len(enemies),
         "auras_seen": sorted({e.aura for e in enemies if e.aura}),

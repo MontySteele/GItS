@@ -123,7 +123,9 @@ CEILINGS: dict[str, int] = {
                  # were refused live. OPEN.
                  # EB-185: the observed closeness board maps no Spark, so
                  # every observed reading of a Klee turn scores a bank of
-                 # zero. OPEN.
+                 # zero. CLOSED 2026-08-29 -- the Spark status now crosses
+                 # onto `Player.sparks` and declared and observed agree on
+                 # all six slice 1 boards. RETIRED.
                  # EB-187: the Burst assumption line double-counts the
                  # Skill tag against the rider the face already prints,
                  # and it corrupted a grade. OPEN.
@@ -265,7 +267,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        180, 181, 182, 183, 184, 185, 186, 187,
+        180, 181, 182, 183, 184, 186, 187,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

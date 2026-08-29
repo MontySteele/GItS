@@ -137,11 +137,36 @@ SURVIVE**, against a dominance threshold of 0.5.
 | `t05` | **0.0062** | 28.980 / 28.800 | 0.1785 | 15.800 / 12.980 |
 | `t06` | **0.2049** | 28.800 / 22.900 | 0.1899 | 15.800 / 12.800 |
 
+**AND THE OBSERVED HALF OF THAT TABLE IS NOW SUPERSEDED, WITHOUT BEING
+ERASED.** `EB-185` was fixed on 2026-08-29 and the observed reading was taken
+again on the same six `observed.json` files, unchanged. It is written to
+`closeness-observed-eb185.json` in each turn's directory and NOT over
+`closeness-observed.json`, which is round 1's receipt and stays exactly as
+round 1 published it.
+
+| turn | observed BEFORE (round 1) | observed AFTER (`EB-185` fixed) | declared |
+|---|---|---|---|
+| `t01` | 0.1376 — 21.800 / 18.800, 9 lines | **0.1695** — 34.800 / 28.900, 15 lines | 0.1695 — 34.800 / 28.900, 15 lines |
+| `t02` | 0.1899 — 15.800 / 12.800, 4 lines | **0.1076** — 28.800 / 25.700, 12 lines | 0.1076 — 28.800 / 25.700, 12 lines |
+| `t03` | 0.1899 — 15.800 / 12.800, 7 lines | **0.1667** — 28.800 / 24.000, 14 lines | 0.1667 — 28.800 / 24.000, 14 lines |
+| `t04` | 0.1899 — 15.800 / 12.800, 4 lines | **0.2049** — 28.800 / 22.900, 10 lines | 0.2049 — 28.800 / 22.900, 10 lines |
+| `t05` | 0.1785 — 15.800 / 12.980, 7 lines | **0.0062** — 28.980 / 28.800, 14 lines | 0.0062 — 28.980 / 28.800, 14 lines |
+| `t06` | 0.1899 — 15.800 / 12.800, 4 lines | **0.2049** — 28.800 / 22.900, 10 lines | 0.2049 — 28.800 / 22.900, 10 lines |
+
+**The observed reading and the declared reading are now byte-identical on all
+six boards**, gap, top line, runner-up and line count alike, and
+`unmapped_statuses` is empty everywhere. That agreement is the acceptance
+`EB-185` was filed with, and it is worth being precise about what it does and
+does not prove: it says the two mirrors of these boards are the same board, and
+it says nothing whatever about whether any turn is a good one. All six still
+SURVIVE, which under R213 F is a refusal that did not fire and never a rating.
+
 `closeness.json` holds the **declared** reading and `closeness-observed.json`
 the observed one, and that is the opposite of Kokomi slice 2's choice. The
 reason is a defect the run found, stated here rather than buried.
 
-**THE OBSERVED READING CANNOT SEE THE SPARK BANK AT ALL (`EB-185`).** Every one
+**THE OBSERVED READING COULD NOT SEE THE SPARK BANK AT ALL DURING ROUND 1
+(`EB-185`, since fixed — the table above has the numbers both ways).** Every one
 of the six observed readings reports `unmapped_statuses: ["spark"]`. Klee holds
 Sparks as a POWER on the wire (`SPARK_POWER`), the observed mapper's
 `WIRE_RESOURCES` table covers registered RESOURCES only (Charge, Encore,
