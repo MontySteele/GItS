@@ -169,6 +169,15 @@ pack 9,586,076 bytes, 132 resources. It carries `EB-150`'s Deep Breath fix and
 next deploy: the exhaust-selection rate (R215 C) and `EB-164`'s eighteen
 re-worded scaling faces.
 
+**THE PIN NO LONGER DESCRIBES THE MACHINE (2026-08-28 21:08).** Steam moved
+this install to **v0.111.0** on the **`public-beta`** branch (buildid
+`24724944`, BaseLib **3.4.5.0**), and against those assemblies neither the
+vendored bridge nor `KleeCode` compiles — 4 lobby errors and 15 `CS0115`
+errors on the damage hooks. Everything that LAUNCHES the game is stopped until
+[USER] answers QUEUE `M46`; the port is BACKLOG `EB-171`. The pins above are
+still what the repo builds and labels against, and are deliberately NOT moved
+here on Claude's own authority.
+
 ## Systems
 
 - **tier0 combat kernel** — op interpreter, powers, statuses, reactions,
@@ -304,7 +313,11 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   **`+proto` / `+proto.dirty` version mark is RATIFIED** (LAW, beside R214),
   refusal symmetric. Automation minted in order: `EB-166` the seat — **CLOSED 2026-08-28**, built, blind-grading eleven
   turns twice and driving both pair reads — `EB-167` a design-blind
-  any-screen render, `EB-168` an orchestrated Act-1 tester; A4 and A6 wait and are NOT minted; A1-extended (enemy
+  any-screen render, `EB-168` an orchestrated Act-1 tester — **both BUILT and
+  both BLOCKED short of acceptance on 2026-08-28**, not by their own code but
+  by the game update recorded above (`M46` / `EB-171`); the one live session
+  they got walked five screens blind before the machine's build moved under
+  them. A4 and A6 wait and are NOT minted; A1-extended (enemy
   composition/intent setters) and A5 (vision input) are DEFERRED.
   Routing: **Kokomi slice 2 = R213 E1's Charge arms, before Klee** — slice 1
   tests priced Companion Block at the turn and does not exhaust Kokomi.

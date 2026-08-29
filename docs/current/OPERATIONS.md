@@ -521,12 +521,27 @@ this, not on the branch that built it. `session` attaches to a run already in
 progress and stops on a menu rather than driving one, so embark first:
 
 ```
-klee-mod\build\deploy_bridge.ps1                 # deployed, NOT -BuildOnly
-# launch the game from its exe; pick the character; embark
 python -m understudy.seat check                  # signed in?
+python -m understudy.embark --character kokomi   # bridge, launch, embark
 python -m understudy.blindplay observe           # eyeball one live screen
-python -m understudy.blindplay session --max-actions 40
+python -m understudy.blindplay session --max-actions 40 --max-wall-s 5400
+python -m understudy.embark --teardown           # put it all back
 ```
+
+**embark** is the operator's side of that line and deliberately not importable
+from `blindplay`: it owns `soak.Session`'s deploy / launch / readiness /
+embark / speed path, reads the run seed BACK off the wire (R95), and then
+stops with the game up and nothing torn down. `--hold` attaches to a game
+somebody else launched and changes nothing. `--teardown` rebuilds the session
+from the reversibility ledger ON DISK — a different process from the embark —
+and walks soak's own undo steps, newest launching embark first or `--stamp`
+by name. The sidecar it leaves in `understudy/logs/` is gitignored operator
+scratch; the seed it read is what the sealed record carries.
+
+**As of 2026-08-28 none of this runs on this machine.** The game updated to
+v0.111.0 on the `public-beta` branch and neither the bridge nor the roster mod
+compiles against it — QUEUE `M46` for the pin call, BACKLOG `EB-171` for the
+port.
 
 Acceptance is a model completing one fight and then one Act-1 run, every action
 in the transcript, and no internal id, policy hint or design tag in any
