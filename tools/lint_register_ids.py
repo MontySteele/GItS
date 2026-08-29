@@ -116,7 +116,15 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 187,   # EB-185/186/187 minted 2026-08-29 by the Klee slice 1
+    "EB": 190,   # EB-188/189/190 minted 2026-08-29 by the process-review
+                 # pass. EB-188: prototype rows are quarantined out of every
+                 # pool, so the whole-fight gate after ADVANCE cannot draw one
+                 # and cannot run. EB-189: the QA pilot's ~59k lines under
+                 # `review/qa/` want compacting once the slices close.
+                 # EB-190: author/grader separation enforced by recorded
+                 # authorship on the prototype surface, because there is no
+                 # third model family to add. All three OPEN.
+                 # EB-185/186/187 minted 2026-08-29 by the Klee slice 1
                  # funnel run. EB-186: at a Spark bank of 3 the game
                  # prints EVERY Attack in hand at cost 0 while the rule
                  # frees exactly one, so ten of twelve blind-graded lines
@@ -245,7 +253,14 @@ CEILINGS: dict[str, int] = {
                  # exp_shop_companion_channel instrument (R68); EB-140 minted
                  # at the R211 W3 build (the codegen upgrade-delta gap);
                  # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
-    "M": 46,     # M46 minted 2026-08-28 beside EB-171: the pinned build
+    "M": 50,     # M47..M50 minted 2026-08-29 by the process-review pass: the
+                 # four decisions the two prototype-slice packets carry that
+                 # are genuinely [USER]'s, moved out of the packets and into
+                 # the register the read order points at. M47 Bag of Tricks
+                 # (the held Klee arm), M48 the automatic free-Attack rule
+                 # against D2, M49 the pilot's frozen Charge term, M50 the
+                 # Charge accrual rule itself.
+                 # M46 minted 2026-08-28 beside EB-171: the pinned build
                  # environment stopped describing the machine mid-sitting, and
                  # which way that is repaired -- back to the `public` branch,
                  # forward to 0.111.0, or a kept copy of the old tree -- is a
@@ -270,10 +285,11 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 182, 183, 184, 186,
+        188, 189,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 48, 49, 50}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

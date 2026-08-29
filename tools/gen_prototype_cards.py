@@ -68,6 +68,7 @@ sys.path.insert(0, str(REPO))
 
 import tools.gen_klee_cards as gen                            # noqa: E402
 from tier0.content.loader import PROTOTYPE_ID_PREFIX          # noqa: E402
+from understudy import authorship                             # noqa: E402
 
 SHEET = REPO / "docs" / "prototype-surface.yaml"
 OUT_DIR = REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
@@ -129,7 +130,18 @@ def plan() -> gen.ProfilePlan:
     # healthy state is empty.
     mode_faces: dict[str, list[str]] = {}
 
-    for card in rows:
+    for row in rows:
+        # EB-190. `authored_by` is checked HERE and then STRIPPED: the field
+        # records which model families wrote the row, which is a fact about
+        # the row and not about the card, and `--check` staleness is the proof
+        # that it cannot move generated output -- the emitter never sees it.
+        # A row without it cannot be generated at all, because the seat's
+        # refusal has nothing to read and the separation would be back to
+        # being a procedure somebody remembers.
+        bad = authorship.field_findings(row)
+        if bad:
+            raise SystemExit("gen_prototype_cards: " + "; ".join(bad))
+        card = authorship.strip_field(row)
         card_id = card["id"]
         if not card_id.startswith(PROTOTYPE_ID_PREFIX):
             raise SystemExit(

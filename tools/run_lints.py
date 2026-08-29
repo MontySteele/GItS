@@ -150,6 +150,14 @@ REGISTRY: tuple[Lint, ...] = (
     # slice to the funnel carrying a card that is not the card the sheet
     # says. Cheap on an empty surface, and it needs no game_ref.
     _ci("prototype-codegen",    "tools/gen_prototype_cards.py", "--check"),
+    # EB-190, beside the codegen gate for the reason burst-legibility sits
+    # beside constant-parity: same file, the other hazard. The codegen gate
+    # asks whether the surface still says what the C# says; this asks whether
+    # the surface records WHO WROTE each row, and whether any committed grade
+    # under review/qa/ was produced by a family that contributed to the row it
+    # graded. Carries a curated debt set -- the four Klee slice 1 records this
+    # row was opened for -- so it is green today and bites on the next one.
+    _ci("prototype-authorship", "tools/lint_prototype_authorship.py"),
     _ci("pool-membership",      "tools/lint_pool_membership.py"),
     _ci("ancient-coverage",     "tools/lint_ancient_coverage.py"),
     _ci("role-tempo-artifacts", "tools/suggest_role_tempo_tags.py", "--check"),

@@ -41,6 +41,8 @@ FIXTURE = {
     "id": "proto_kokomi_tidecall",
     "name": "Tidecall (Prototype)",
     "character": "kokomi",
+    # EB-190: required on every row, and stripped before the emitter sees it.
+    "authored_by": ["claude"],
     "cost": 1,
     "type": "skill",
     "rarity": "common",
@@ -464,6 +466,7 @@ def test_a_modal_companion_keeps_its_element(monkeypatch, tmp_path):
     row = {
         "id": "proto_fixture_modal_companion",
         "name": "Fixture Companion (Prototype)",
+        "authored_by": ["claude"],
         "character": "klee", "nation": "inazuma", "star": 4,
         "rarity": "common", "role_c": "applier", "element": "electro",
         "cost": 2, "type": "skill",

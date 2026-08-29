@@ -90,7 +90,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
-from understudy import bridge, qa_packet, report, seat
+from understudy import authorship, bridge, qa_packet, report, seat
 
 REPO = Path(__file__).resolve().parents[1]
 LOG_ROOT = Path(__file__).resolve().parent / "logs" / "blindplay"
@@ -1559,38 +1559,35 @@ class Transcript:
 
 # Independence is by model FAMILY (R217 C). The slice's author is Claude, so a
 # Claude seat is refused however fresh its context is -- "a fresh context on
-# the same model does not satisfy it" is the ruling's own wording. The check
-# lives here rather than in `seat.py` because `seat.py`'s blind grader is one
-# turn against a staged board, where the author never had a chance to be the
-# grader; a driver that a person points at a model name needs the refusal in
-# code.
-AUTHOR_FAMILY = "claude"
-MODEL_FAMILIES = {
-    "claude": ("claude", "anthropic", "opus", "sonnet", "haiku", "fable"),
-    "gpt": ("gpt", "openai", "o1", "o3", "codex"),
-}
+# the same model does not satisfy it" is the ruling's own wording. A driver
+# that a person points at a model name needs that refusal in code.
+#
+# EB-190 MOVED THE RULE, IT DID NOT COPY IT. `understudy/authorship.py` now
+# owns the family table and the check, because `seat.py` needs the SAME
+# refusal asked the other way round -- not "who is running" but "what does the
+# row record about who wrote it" -- and two doors answering one question is
+# how a governance rule ends up enforced in one place and remembered in the
+# other. `authorship` imports nothing but yaml and reads exactly two keys off
+# the prototype surface (`id`, `authored_by`), so the no-sheet pin on this
+# module is unchanged. The names below stay bound here: this is where every
+# caller and every test already reaches for them.
+AUTHOR_FAMILY = authorship.AUTHOR_FAMILY
+MODEL_FAMILIES = authorship.MODEL_FAMILIES
+model_family = authorship.model_family
 
 
-def model_family(model: str) -> str:
-    low = str(model or "").casefold()
-    for family, markers in MODEL_FAMILIES.items():
-        if any(m in low for m in markers):
-            return family
-    return ""
+def check_independent(model: str, author: str = AUTHOR_FAMILY, *,
+                      rows: Any = ()) -> None:
+    """Refuse the author's own model family as tester. R217 C, EB-190.
 
-
-def check_independent(model: str, author: str = AUTHOR_FAMILY) -> None:
-    """Refuse the author's own model family as tester. R217 C."""
-    family = model_family(model)
-    if not family:
-        raise BlindPlayError(
-            f"cannot tell which model family {model!r} belongs to, and an "
-            f"independence rule that cannot name the family is not a check")
-    if family == author:
-        raise BlindPlayError(
-            f"{model!r} is in the {family!r} family, which authored this "
-            f"slice. Independence is by model FAMILY, not by fresh context "
-            f"(R217 C): the tester must be the Codex seat.")
+    Thin: the rule is `authorship.check_independent`. This wrapper exists only
+    to keep the failure spelled `BlindPlayError`, which is what the driver's
+    own error handling and this module's tests catch.
+    """
+    try:
+        authorship.check_independent(model, author, rows=rows)
+    except authorship.IndependenceError as exc:
+        raise BlindPlayError(str(exc)) from None
 
 
 def command_schema() -> dict[str, Any]:
@@ -2089,6 +2086,45 @@ def build_version(wire: Any = None) -> tuple[str, str]:
                 else f"no deployed package at {manifest}")
 
 
+def granted_arms(seed: str, log_dir: Path | None = None) -> tuple[str, str]:
+    """`(arms granted into this run's deck, where it was read)`. EB-188.
+
+    A blind whole-fight run cannot DRAW a prototype row -- the surface is
+    quarantined out of every pool -- so `understudy/embark.py --arm` grants it
+    into the starting deck before the tester sees a screen. A record that did
+    not name the grant would describe a deck the generators never produced as
+    though they had, which is the claim `bridge.GRANT_GUARDRAIL` exists to
+    refuse.
+
+    MATCHED BY SEED, and that is the whole of the honesty here. The sidecar is
+    written by whichever process opened the run, and this may be a different
+    process on a different day; the seed is the run's identity (R95), so a
+    sidecar whose seed is not this run's is a record of a DIFFERENT run and
+    its arms are not reported. Read off disk like the two version reads above,
+    and for the same reason -- this module may never import the operator side.
+
+    Answers `("(none)", ...)` when nothing matches, which is a positive
+    statement rather than a gap: the run met only what the pools offered.
+    """
+    d = log_dir or (Path(__file__).resolve().parent / "logs")
+    none = ("(none)", "no `--arm` grant recorded against this run's seed")
+    if not seed or not d.is_dir():
+        return none
+    for path in sorted(d.glob("embark-*.json"), reverse=True):
+        try:
+            blob = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):                         # noqa: PERF203
+            continue
+        if not isinstance(blob, dict) or _text(blob.get("run_seed")) != seed:
+            continue
+        granted = blob.get("arms_granted") or []
+        if not granted:
+            return none
+        named = ", ".join(_text(g.get("card_id")) for g in granted)
+        return named, f"the embark sidecar `{path.name}`, matched by run seed"
+    return none
+
+
 def game_version(wire: Any = None) -> tuple[str, str]:
     """`(game build, where it was read)`. Never guessed.
 
@@ -2205,6 +2241,7 @@ def record_markdown(summary: dict[str, Any], identity: dict[str, Any]) -> str:
     for key in ("model_requested", "model_observed", "codex_version",
                 "build_version", "build_version_source",
                 "game_version", "game_version_source", "run_seed",
+                "arms_granted", "arms_granted_source",
                 "prompt_sha256", "actions", "termination"):
         if key in identity:
             out.append(f"- **{key}**: {identity[key] or '(not read)'}")
@@ -2307,10 +2344,12 @@ def cmd_session(args) -> int:
         summary = session.run()
     finally:
         thread.close()
+    arms, arms_source = granted_arms(seed)
     identity = {**thread.identity(), "build_version": version,
                 "build_version_source": source,
                 "game_version": game, "game_version_source": game_source,
                 "run_seed": seed,
+                "arms_granted": arms, "arms_granted_source": arms_source,
                 "prompt_sha256": summary["prompt_sha256"],
                 "actions": summary["actions"],
                 "termination": summary["termination"]}
