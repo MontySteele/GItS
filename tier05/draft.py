@@ -663,6 +663,19 @@ def _op_price(fx: dict) -> float:
         # sheet, THAT is the change that moves the drafter and archives the
         # numbers -- see the slice-2 packet.
         return -_neutral_amount(fx, 0) * STATIC_CHARGE_VALUE
+    if op == "play_front_memory":
+        # ZERO, and a DELIBERATE zero (the Kurage's memory v3, QUARANTINED
+        # behind C.KURAGE_MEMORY). The op plays a card the memory already
+        # holds, so its whole value is the value of THAT card -- which the
+        # drafter priced when it priced the card, and would double-count if
+        # it priced it again here. There is also nothing to price against: no
+        # sheet row prints this op, no pool or digest can see it, and with the
+        # flag off it cannot even fire. `spend_charge`'s argument for not
+        # bumping DRAFTER_VERSION applies unchanged: every drafted number in
+        # the world is byte-identical with and without this branch. If an
+        # acceleration keyword is ever authored onto a real sheet, THAT is the
+        # change that moves the drafter and archives the old world.
+        return 0.0
     if op == "raise_fanfare_cap":
         return _neutral_amount(fx, 0) * STATIC_FANFARE_CAP_VALUE
     if op == "crash_fanfare":
@@ -1699,6 +1712,10 @@ STATIC_OP_PRICING: dict[str, str] = {
                     "prototype surface only -- no shipped row prints it and "
                     "no drafted number moves)",
     "summon_kurage": "ONE pulse, not the duration (v8)",
+    "play_front_memory": "ZERO: the memory's own card carries the value and "
+                         "was priced once already (Kurage memory v3, "
+                         "prototype surface only -- no shipped row prints it "
+                         "and no drafted number moves)",
     "gain_fanfare_floor": "STATIC_FANFARE_FLOOR_VALUE per point (v9)",
     "grow_damage": "one discounted future redraw",
     # --- damage/Block-shaped, new in v13 ---------------------------------
