@@ -1426,8 +1426,16 @@ class Session:
             self.transcript.write(kind="result", action=action,
                                   summary=feedback)
 
+        # ASKED EVEN ON A TRUNCATED RUN -- a session that hit its action budget
+        # still has an account worth keeping -- but never at the cost of the
+        # record already gathered: a seat that has just refused cannot answer,
+        # and losing the fight records to that would be losing the session.
         if self.actions and not self.run_record:
-            self.run_record = self._ask_record(RUN_QUESTIONS)
+            try:
+                self.run_record = self._ask_record(RUN_QUESTIONS)
+            except BlindPlayError as exc:
+                self.transcript.write(kind="seat_error", detail=str(exc),
+                                      at="run_record")
         return self.summary()
 
     def summary(self) -> dict[str, Any]:
