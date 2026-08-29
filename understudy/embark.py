@@ -207,7 +207,8 @@ def grant_arms(arms: list[str]) -> list[dict[str, Any]]:
 
 def embark(character: str, *, hold: bool = False,
            chosen_seed: str | None = None,
-           arms: list[str] | None = None) -> dict[str, Any]:
+           arms: list[str] | None = None,
+           instance: Any = None) -> dict[str, Any]:
     """Launch (or attach), embark, read the seed back, and LEAVE IT RUNNING.
 
     Returns the sidecar dict. Raises rather than tearing down on failure: a
@@ -223,13 +224,19 @@ def embark(character: str, *, hold: bool = False,
 
     stamp = time.strftime("%Y%m%d-%H%M%S")
     soak.LOG_DIR.mkdir(parents=True, exist_ok=True)
-    session = soak.Session(stamp, do_setup=not hold, intent="")
+    session = soak.Session(stamp, do_setup=not hold, intent="",
+                           instance=instance)
     sidecar = {
         "stamp": stamp,
         "ledger": str(session.ledger.path),
         "character_requested": who,
         "hold": hold,
         "arms_requested": wanted,
+        # WHICH GAME THIS RUN IS ON. A sidecar with no lane on it is a run
+        # nobody can attribute once two of them can be open at once; the
+        # label, the port and the user tree are all three facts a reader needs
+        # to find the log that belongs to it.
+        **session.instance.as_row(),
         "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
     _write_sidecar(stamp, sidecar)

@@ -198,7 +198,10 @@ public static class GitsWin {
 try { [void][GitsWin]::SetProcessDpiAwarenessContext([IntPtr](-4)) }
 catch { try { [void][GitsWin]::SetProcessDPIAware() } catch { } }
 
-$proc = Get-Process -Name '__IMAGE__' -ErrorAction SilentlyContinue |
+# __PIDSEL__ is either an id filter or the image-name lookup. With two game
+# processes up, a name lookup takes whichever the OS lists first, so a
+# two-lane capture MUST select by pid or it photographs the other lane.
+$proc = __PIDSEL__ |
         Where-Object { $_.MainWindowHandle -ne 0 } |
         Select-Object -First 1
 if (-not $proc) {
@@ -293,17 +296,23 @@ Write-Output ("OK {0} {1} {2}" -f $w, $h, $route)
 
 
 def build_script(image: str, out_path: Path,
-                 forced_route: str = ROUTE_AUTO) -> str:
-    """The script with its three holes filled. Separated so it can be read.
+                 forced_route: str = ROUTE_AUTO,
+                 pid: int | None = None) -> str:
+    """The script with its four holes filled. Separated so it can be read.
 
-    The substitutions are a process NAME, a path this module chose, and a
-    route drawn from `ROUTES` -- none of them caller text arriving from a
-    wire; `frame_path` slugs the label before it can reach here, and an
-    unknown route is normalised to `auto` rather than interpolated.
+    The substitutions are a process NAME, an integer pid, a path this module
+    chose, and a route drawn from `ROUTES` -- none of them caller text
+    arriving from a wire; `frame_path` slugs the label before it can reach
+    here, an unknown route is normalised to `auto` rather than interpolated,
+    and the pid goes through `int()` before it is spelled into the selector.
     """
     if forced_route not in ROUTES:
         forced_route = ROUTE_AUTO
+    pidsel = (f"Get-Process -Id {int(pid)} -ErrorAction SilentlyContinue"
+              if pid is not None else
+              f"Get-Process -Name '{image}' -ErrorAction SilentlyContinue")
     return (_PS_SCRIPT
+            .replace("__PIDSEL__", pidsel)
             .replace("__IMAGE__", image)
             .replace("__OUT__", str(out_path).replace("'", "''"))
             .replace("__ROUTE__", forced_route))
@@ -348,7 +357,9 @@ def capture(label: str = "frame", note: str = "",
             manifest: Path | None = None,
             env: dict[str, str] | None = None,
             runner=_run_powershell,
-            stamp: str | None = None) -> dict:
+            stamp: str | None = None,
+            pid: int | None = None,
+            instance: str = "") -> dict:
     """Take one frame of the game window. Returns a report; never raises.
 
     `context` is whatever the caller knows about the moment -- screen, act,
@@ -364,7 +375,7 @@ def capture(label: str = "frame", note: str = "",
     out.parent.mkdir(parents=True, exist_ok=True)
     try:
         code, stdout, stderr = runner(
-            build_script(image, out, forced_route=route(env)))
+            build_script(image, out, forced_route=route(env), pid=pid))
     except Exception as exc:                                 # noqa: BLE001
         return {"status": "error", "message": f"{type(exc).__name__}: {exc}",
                 "guardrail": GUARDRAIL, "path": str(out)}
@@ -372,8 +383,9 @@ def capture(label: str = "frame", note: str = "",
     token = (stdout.splitlines() or [""])[0].strip()
     if code != 0 or not token.startswith("OK"):
         reason = {
-            "NO_WINDOW": f"no visible window for process '{image}'; the game "
-                         f"must be running",
+            "NO_WINDOW": (f"no visible window for pid {pid}" if pid is not None
+                          else f"no visible window for process '{image}'; the "
+                               f"game must be running"),
             "EMPTY_RECT": "the window reported a zero-size rectangle",
             "MINIMISED": "the game window is minimised (parked off-screen at "
                          "a -32000 origin); restore it and capture again",
@@ -396,6 +408,11 @@ def capture(label: str = "frame", note: str = "",
         # this says what it was pinned TO, so a manifest read back months
         # later does not have to infer the env from the suffix.
         "route_requested": route(env),
+        # WHICH GAME THIS IS A PICTURE OF. With two lanes up, a frame with no
+        # lane on it is a frame nobody can attribute afterwards; `pid` is the
+        # fact and `instance` is the label a reader can match to a record row.
+        "pid": pid,
+        "instance": instance or "lane0",
         "context": dict(context or {}),
         # ON EVERY ROW, not once at the top of the file. A manifest is read in
         # slices and concatenated with other manifests; a guardrail that lives

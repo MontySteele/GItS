@@ -19,6 +19,7 @@ both cost a session's time to learn the hard way:
 from __future__ import annotations
 
 import json
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -36,7 +37,65 @@ class BridgeError(RuntimeError):
     pass
 
 
+# ------------------------------------------------------ which game this is --
+#
+# TWO LANES, TWO BRIDGES, AND A THREAD-LOCAL RATHER THAN A `Bridge` OBJECT.
+#
+# The choice was between threading an object through every caller and keeping
+# the free functions with a current-instance beside them. The free functions
+# won on size and on blast radius: fourteen module-level functions and six
+# module-level URL constants are called from `soak`, `staged_turn`,
+# `scenario`, `harness`, `embark`, `blindplay` and `local_tester`, and three
+# test modules assert on `bridge.SEED` / `bridge.GIVE_CARD` by identity. A
+# `Bridge` object is a rewrite of all of that; a current-instance is this
+# block plus one line in `_request`, and every existing caller and every
+# existing test keeps working unchanged.
+#
+# IT IS THREAD-LOCAL AND NOT A PLAIN GLOBAL, because the two-lane round runs
+# its lanes in THREADS in one process. A plain global would give the two lanes
+# one port -- the exact bug this build exists to remove, moved from the mod
+# side to ours. A thread that never sets one reads the process default, so
+# nothing that is not lane-aware changes behaviour.
+#
+# The URL constants above stay spelled with lane 0's base. `_request` rebases
+# every URL onto the CURRENT base at call time, so a constant is a path
+# carrier and never a promise about which game answers it.
+
+_local = threading.local()
+
+
+def current_base() -> str:
+    """The base URL this thread's calls go to."""
+    return getattr(_local, "base", BASE)
+
+
+def current_label() -> str:
+    """This thread's lane label, for record rows. `lane0` unless set."""
+    return getattr(_local, "label", "lane0")
+
+
+def use(instance) -> None:
+    """Point THIS THREAD's calls at `instance` (an `instances.Instance`)."""
+    _local.base = instance.base
+    _local.label = instance.label
+
+
+def use_default() -> None:
+    """Undo `use` for this thread."""
+    for attr in ("base", "label"):
+        if hasattr(_local, attr):
+            delattr(_local, attr)
+
+
+def _rebase(url: str) -> str:
+    base = current_base()
+    if base == BASE or not url.startswith(BASE):
+        return url
+    return base + url[len(BASE):]
+
+
 def _request(url: str, payload: dict | None = None, timeout: float = 20.0) -> dict:
+    url = _rebase(url)
     data = None
     headers = {}
     if payload is not None:

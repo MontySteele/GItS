@@ -109,7 +109,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from understudy import bridge, deckwatch, hangwatch, naming, policy_v1
+from understudy import (bridge, deckwatch, hangwatch, instances, naming,
+                        policy_v1)
 
 REPO = Path(__file__).resolve().parent.parent
 LOG_DIR = Path(__file__).resolve().parent / "logs" / "soak"
@@ -335,14 +336,36 @@ def game_dir() -> Path:
 class Session:
     """Setup, teardown, and the reversibility ledger between them."""
 
+    # CLASS ATTRIBUTES so every construction path has them, including the
+    # test doubles built with `Session.__new__` that never run `__init__`.
+    # The OFF state is the default: no instance means lane 0's defaults, and
+    # a session that launched nothing has no pid.
+    instance: Any = None
+    install_bridge: bool = True
+    proc: Any = None
+
     def __init__(self, stamp: str, do_setup: bool = True,
-                 intent: str | None = None):
+                 intent: str | None = None,
+                 instance: "instances.Instance | None" = None,
+                 install_bridge: bool = True):
         self.stamp = stamp
         self.do_setup = do_setup
         # Passed to the launched game so the mod's own hook labels its
         # records with the same declaration the bot feed is stamping.
         self.intent = intent
-        self.dir = game_dir()
+        # WHICH GAME THIS SESSION IS. `None` means lane 0 -- the machine's own
+        # APPDATA and port 15526 -- so every caller written before lanes
+        # existed gets exactly the process it used to get.
+        self.instance = instance if instance is not None else instances.lane(
+            "lane0", game_dir=game_dir())
+        # TWO LANES SHARE ONE INSTALL, SO ONLY ONE OF THEM MAY DEPLOY.
+        # `deploy_bridge.ps1` deletes and rewrites `mods\STS2_MCP` and refuses
+        # outright while a game is running -- so lane 1, which launches while
+        # lane 0's game is already up, must not run it. It is also lane 1's
+        # teardown that must NOT remove the shared directory out from under
+        # lane 0. One flag says both.
+        self.install_bridge = install_bridge
+        self.dir = self.instance.game_dir
         self.ledger = Reversibility(LOG_DIR / f"reversibility-{stamp}.json")
         self.proc: subprocess.Popen | None = None
         self._appid_entry: dict | None = None
@@ -353,10 +376,26 @@ class Session:
         self.speed_before: dict | None = None
 
     # -- setup ------------------------------------------------------------
+    def wire(self) -> None:
+        """Bind the CALLING THREAD's bridge calls to this session's game.
+
+        Called at the top of every method that touches the wire, because a
+        two-lane round calls those methods from two threads and `bridge`'s
+        current-instance is thread-local.
+        """
+        if self.instance is not None:
+            bridge.use(self.instance)
+
     def setup(self) -> None:
+        self.wire()
         if not self.do_setup:
             self._require_bridge()
             return
+        # A LANE WITH ITS OWN user:// TREE INHERITS ONE FILE AND NO MORE. The
+        # mod profile lives in `settings.save`; without it the lane boots
+        # vanilla and the whole round would read a game with no klee mod in it.
+        for path in instances.seed_profile(self.instance):
+            print(f"lane {self.instance.label}: seeded {path}")
         self._steam_appid()
         self._deploy_bridge()
         self._launch()
@@ -377,6 +416,12 @@ class Session:
         p.write_text(STEAM_APPID, encoding="ascii")
 
     def _deploy_bridge(self) -> None:
+        if not self.install_bridge:
+            # Nothing recorded, so nothing is reverted: this lane did not
+            # install the bridge and may not remove it.
+            print(f"lane {self.instance.label}: bridge deploy skipped "
+                  f"(another lane owns the shared mods directory)")
+            return
         self._bridge_entry = self.ledger.record(
             "Deployed `mods\\STS2_MCP\\` from vendor pin 55e0648",
             "`.\\build\\deploy_bridge.ps1 -Remove`")
@@ -404,7 +449,12 @@ class Session:
         # play into the HUMAN feed, which is the one feed whose whole value is
         # that a person produced it. The README already claimed this happened
         # here; as of 2026-08-04 (late) it actually does.
-        env = dict(os.environ)
+        # THE LANE'S OWN ENVIRONMENT IS THE BASE. `Instance.env` assigns
+        # `APPDATA` (a separate user:// tree: saves, settings, shader cache,
+        # mod_configs, logs) and `STS2_MCP_PORT` (which listener this process
+        # binds). On lane 0 the APPDATA half is a no-op by construction, so the
+        # single-instance path launches exactly the process it always did.
+        env = self.instance.env()
         env["GITS_TELEMETRY_FEED"] = "bot"
         # THE INTENT LABEL IS PINNED THE SAME WAY, AND THE EMPTY STRING IS
         # LOAD-BEARING. `env` starts as a copy of this shell's environment, so
@@ -428,6 +478,7 @@ class Session:
         the difference between "the process is up" and "the game is ready", and
         it is the single cheapest bug in this file to have written correctly.
         """
+        self.wire()
         deadline = time.time() + timeout
         last = "(no response)"
         while time.time() < deadline:
@@ -450,6 +501,7 @@ class Session:
                          f"last read: {last}")
 
     def _require_bridge(self) -> None:
+        self.wire()
         try:
             bridge.get_state()
         except bridge.BridgeError as e:
@@ -469,6 +521,7 @@ class Session:
         # so the endpoint would answer correctly on its own. This stays as the
         # belt to that brace: it costs one field and it is what keeps the
         # ledger honest if a sidecar is ever lost with the mod directory.
+        self.wire()
         if self.speed_before is None:
             try:
                 self.speed_before = bridge.get_speed()
@@ -518,6 +571,7 @@ class Session:
         # was ever chosen, which is why it is not conditional on having chosen
         # one; the one moment a ledger matters is the moment nobody remembers
         # what was set.
+        self.wire()
         self._step(self._seed_entry, self._release_seed)
         self._step(self._speed_entry, self._restore_speed)
         self._step(self._launch_entry, self._stop_game)
@@ -598,6 +652,20 @@ class Session:
         return "file removed"
 
     def _kill(self) -> None:
+        """Terminate THIS SESSION's process, by pid, and nothing else.
+
+        THE `taskkill /IM` BELT IS GONE, AND ITS REMOVAL IS PART OF THE
+        TWO-LANE BUILD. It killed every `SlayTheSpire2.exe` on the machine by
+        image NAME; with two lanes running that is one lane tearing down the
+        other's game mid-board -- a silent corruption of somebody else's round
+        rather than a crash anyone would notice.
+
+        What the belt was FOR is still real: a game left over from an earlier
+        crashed soak holds the mod dll and makes the next `deploy_bridge` run
+        fail. That is now the deploy script's own refusal, which lists the
+        pids, and closing a process this session did not start is the
+        operator's call rather than ours.
+        """
         if self.proc is not None and self.proc.poll() is None:
             self.proc.terminate()
             for _ in range(20):
@@ -606,11 +674,16 @@ class Session:
                 time.sleep(0.5)
             if self.proc.poll() is None:
                 self.proc.kill()
-        # Belt and braces: a game launched by an earlier crashed soak holds the
-        # dll lock and would make the NEXT deploy_bridge run fail with a
-        # message about a running game.
-        subprocess.run(["taskkill", "/F", "/IM", GAME_EXE],
-                       capture_output=True, text=True)
+            # By PID, and with /T for the tree: `Popen.kill` does not promise
+            # a child process goes with it.
+            subprocess.run(["taskkill", "/F", "/T", "/PID",
+                            str(self.proc.pid)],
+                           capture_output=True, text=True)
+
+    @property
+    def pid(self) -> int | None:
+        """This session's game pid, or None when it launched nothing."""
+        return self.proc.pid if self.proc is not None else None
 
     def halt_spin(self, why: str) -> dict:
         """Stop a spinning game NOW, and leave the ledger telling the truth.
@@ -1458,7 +1531,14 @@ class RunDriver:
         gave before this leg existed.
         """
         try:
-            return hangwatch.diagnose(GAME_EXE, alive=True, wire_dead=True)
+            # PER-LANE: this session's own log and this session's own pid.
+            # Both fall back to the machine-wide reads a single-lane soak
+            # always used, so a session with no instance still diagnoses.
+            inst = getattr(self.session, "instance", None)
+            return hangwatch.diagnose(
+                GAME_EXE, alive=True, wire_dead=True,
+                log_path=(inst.log_path() if inst is not None else None),
+                pid=getattr(self.session, "pid", None))
         except Exception as exc:                             # noqa: BLE001
             return hangwatch.Verdict(
                 False, f"the spin probe itself failed ({type(exc).__name__}: "

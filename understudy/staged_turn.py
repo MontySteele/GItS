@@ -119,6 +119,7 @@ import copy
 import json
 import re
 import sys
+import threading
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -1339,10 +1340,14 @@ def _closeness(state, pilot: str, unrepresentable: list[str], *,
 # reader that indexes by name keeps working. `seed` is the pin a later round
 # needs to run an UNRUN board rather than a re-rolled one, and `run_state` is
 # RUN for a graded row and UNRUN for a board sequential stopping did not run.
+# The two-instance build added `instance`, at the END for the same reason
+# `seed` and `run_state` were added there: `ledger_rows` pads a short row, so
+# every ledger written before this parses unchanged and a row with no lane on
+# it reads as the empty string rather than shifting every column after it.
 LEDGER_COLUMNS = ("turn_id", "grader", "verdict", "refused_by",
                   "q1", "q2", "q3", "q4",
                   "agree_q1", "agree_q2", "agree_q4", "survives_alone",
-                  "seed", "run_state")
+                  "seed", "run_state", "instance")
 
 
 def _cell(text: Any, width: int = 90) -> str:
@@ -1452,6 +1457,7 @@ def mark_unrun(turn_id: str, *, seed: str, slots: Sequence[str],
     path = home / "unrun.json"
     path.write_text(json.dumps({
         "turn_id": turn_id,
+        "instance": bridge.current_label(),
         "run_state": "UNRUN",
         "seed": seed or "-",
         "slots": list(slots),
@@ -1471,6 +1477,34 @@ def unrun_boards(root: Path | None = None) -> list[dict[str, Any]]:
         blob.setdefault("turn_id", q.parent.name)
         out.append(blob)
     return out
+
+
+def _row_instance(tid: str, gid: str, root: Path | None) -> str:
+    """Which lane replayed this (turn, grader), off the execute record.
+
+    The verdict does not carry it -- grading is mechanical and touches no
+    game -- so the lane is read from the replay that DID touch one. `-` where
+    a turn was never replayed, and for every row written before lanes existed.
+    """
+    home = (root or QA_DIR) / tid
+    for name in (f"execute-{gid}.json", "execute.json"):
+        path = home / name
+        if not path.is_file():
+            continue
+        try:
+            blob = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        return str(blob.get("instance") or "-")
+    return "-"
+
+
+#: R221 + the two-instance build. Two lanes write per-turn artifacts into
+#: their OWN `review/qa/<turn-id>/` directories, so those never collide -- but
+#: `ledger.tsv` is ONE file for the whole round, rebuilt from disk rather than
+#: appended to. This lock is what keeps a rebuild from two lanes at once from
+#: interleaving a read of the directory with somebody else's write of the file.
+LEDGER_LOCK = threading.Lock()
 
 
 def build_ledger(root: Path | None = None) -> str:
@@ -1522,6 +1556,7 @@ def build_ledger(root: Path | None = None) -> str:
                 agree["agree_q1"], agree["agree_q2"], agree["agree_q4"],
                 _yn(bool(v.get("survives_alone"))),
                 _packet_seed(tid, root), "RUN",
+                _row_instance(tid, gid, root),
             ]))
     # R221 B. The boards the stopping rule did not run, with their seeds
     # still pinned. They sit in the SAME table as the graded rows
@@ -1536,6 +1571,7 @@ def build_ledger(root: Path | None = None) -> str:
             _cell(blob.get("why")) or "-",
             "-", "-", "-", "-", "-", "-", "-", "-",
             str(blob.get("seed") or "-"), "UNRUN",
+            str(blob.get("instance") or "-"),
         ]))
     out.append(f"# {qa_packet.PACKET_GUARDRAIL}")
     out.append(f"# down-weighting: a grader whose q2 disagrees with "
@@ -2061,6 +2097,10 @@ def cmd_execute(args) -> int:
     record = {
         "turn_id": turn.id,
         "grader": grader_id(form),
+        # WHICH GAME REPLAYED IT. Two lanes replay two boards at once; a
+        # record that does not say which process ran cannot be matched to a
+        # log, a frame or a crash.
+        "instance": bridge.current_label(),
         "packet_sha256": packet.get("packet_sha256"),
         "seed_requested": seed,
         "seed_used": summary.get("seed"),
@@ -2125,7 +2165,8 @@ def cmd_packet_section(args) -> int:
 def cmd_ledger(args) -> int:
     QA_DIR.mkdir(parents=True, exist_ok=True)
     text = build_ledger()
-    LEDGER.write_text(text, encoding="utf-8")
+    with LEDGER_LOCK:
+        LEDGER.write_text(text, encoding="utf-8")
     print(text, end="")
     print(f"\nledger: {LEDGER}")
     return 0
