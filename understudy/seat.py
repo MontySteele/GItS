@@ -269,7 +269,73 @@ REFUSAL_REASONS = {
                         "against its printed or runtime meaning, so a blind "
                         "seat would be asked to reason from a face the repo "
                         "already knows is wrong",
+    # EB-190. The one refusal that is about WHO WROTE THE ROW rather than
+    # about the seat's transcript or the packet's faces. R217 C fixes the
+    # roles at two families and OPERATIONS' doctrine-seat block says why: a
+    # seat that grades a row its own family authored has graded its own work,
+    # and the outcome is not evidence. Klee slice 1 is the case.
+    "seat_authored_row": "the turn under this seat carries a prototype row "
+                         "whose `authored_by` names the seat's OWN model "
+                         "family, so its answer would be a grade of its own "
+                         "work rather than an independent reading",
 }
+
+# ------------------------------------------------- the review seat's brief --
+#
+# EB-190, third limb. The doctrine / pair-review seat's OUTPUT SHAPE is
+# protocol (OPERATIONS "Doctrine seat protocol"), and until now it lived only
+# in whichever prompt file the operator happened to write that round. A
+# protocol re-typed per round is a protocol that drifts, and the drift already
+# cost a round: the seat supplied Rummage's replacement text verbatim, it was
+# used, and both of that arm's grades are provisional because of it.
+#
+# So the text ships here and is PREPENDED to every review prompt. It does not
+# replace the caller's brief; it is the frame the brief goes in.
+REVIEW_PROTOCOL = """\
+THE PROTOCOL FOR THIS SEAT. It overrides anything below that conflicts with
+it.
+
+You are reading a proposal against a written charter or brief. Your output is,
+PER ARM:
+
+  * FOLLOWS, or REQUIRES_MODIFICATION; and
+  * the CLAUSE you ruled against, named.
+
+That is the whole output. You may NOT supply card text, a number, a mode, a
+rewritten row, or any other remedy. A remedy you volunteer is DISCARDED
+unread, and the reasoning that produced it is discarded with it -- so a
+verdict that leans on your remedy is a verdict that gets thrown away. Where a
+number has to be chosen it is derived by lifting a value off a shipped card,
+and your only part in that is confirming that the derived row FOLLOWS.
+
+WHY. Independence here is by MODEL FAMILY, author against grader (R217 C).
+A seat that writes part of a row and then reads it has read its own work, and
+the reading is not evidence. Naming the clause keeps you on the reading side
+of that line; naming the fix moves you across it.
+"""
+
+# The phrases that make a brief an ASK FOR A REMEDY. Deliberately a short,
+# literal list rather than anything clever: this guards an operator writing
+# the round's prompt in a hurry, not an adversary, and a matcher subtle enough
+# to refuse a legitimate brief would just be reworded around -- which is the
+# failure it exists to prevent. Every entry is documented by being readable.
+REMEDY_ASKS: tuple[str, ...] = (
+    "rewrite", "re-write", "re-author", "reauthor", "re-draft", "redraft",
+    "propose a fix", "propose an alternative", "propose a number",
+    "propose new", "suggest a fix", "suggest an alternative",
+    "suggest a number", "suggest new", "recommend a number",
+    "what number", "which number", "pick a number", "choose a number",
+    "write the text", "write new text", "new card text",
+    "how would you fix", "how should it be worded",
+)
+# ...and the allowlist. An occurrence is EXEMPT when one of these appears in
+# the NEGATION_WINDOW characters before it, because that is a brief FORBIDDING
+# the remedy -- the protocol above being restated, not broken.
+REMEDY_NEGATIONS: tuple[str, ...] = (
+    "do not ", "do not, ", "don't ", "never ", "may not ", "must not ",
+    "cannot ", "not asked to ", "without ", "no ", "not ",
+)
+NEGATION_WINDOW = 28
 
 
 class SeatError(RuntimeError):
@@ -527,6 +593,31 @@ def build_prompt(packet_md: str, packet_sha: str, *,
     """
     body = template_body(template)
     return body.replace("<SHA>", packet_sha).replace("<PACKET>", packet_md)
+
+
+def remedy_findings(text: str) -> list[str]:
+    """Every phrase in a review brief that asks this seat for a REMEDY.
+
+    Case-folded substring search with the negation allowlist applied. Returns
+    the offending phrases, in the order the list declares them, so a refusal
+    can print exactly what to delete.
+    """
+    low = str(text or "").casefold()
+    found: list[str] = []
+    for phrase in REMEDY_ASKS:
+        start = 0
+        while (i := low.find(phrase, start)) != -1:
+            before = low[max(0, i - NEGATION_WINDOW):i]
+            if not any(neg in before for neg in REMEDY_NEGATIONS):
+                found.append(phrase)
+                break
+            start = i + len(phrase)
+    return found
+
+
+def build_review_prompt(body: str) -> str:
+    """The protocol, then the caller's brief. Never the brief alone."""
+    return REVIEW_PROTOCOL + "\n" + str(body or "")
 
 
 def sha256(text: str) -> str:
@@ -815,7 +906,21 @@ def cmd_grade(args) -> int:
     # miniature. The import is LOCAL, exactly like `staged_turn`'s below --
     # the blind seat's module-level import graph stays as narrow as
     # `test_the_seat_cannot_reach_a_sheet` found it.
-    from understudy import face_defects
+    from understudy import authorship, face_defects
+
+    # EB-190, and BEFORE the face check for the same reason that one comes
+    # before codex is located: this refusal is about whether the seat may read
+    # this turn AT ALL, which is a prior question to whether the turn is
+    # readable. Resolution is turn id -> the turn's yaml -> the prototype rows
+    # it grants and mirrors; the PACKET cannot be the route, because it is
+    # design-blind and prints titles rather than row ids. A turn holding only
+    # shipped cards resolves to no rows and passes.
+    proto_rows = authorship.rows_in_turn(turn_id)
+    seat["prototype_rows"] = proto_rows
+    hits = authorship.conflicts(model, proto_rows)
+    if hits:
+        seat["authorship_conflicts"] = hits
+        return _refuse(seat, session, "seat_authored_row", hits)
 
     hand_titles = [str(c.get("title") or c.get("name") or "")
                    for c in ((envelope.get("board") or {}).get("hand") or [])]
@@ -954,7 +1059,35 @@ def cmd_review(args) -> int:
     if not prompt_path.is_file():
         print(f"no prompt file at {prompt_path}", file=sys.stderr)
         return 2
-    prompt = prompt_path.read_text(encoding="utf-8")
+    body = prompt_path.read_text(encoding="utf-8")
+
+    # EB-190. Two refusals, both BEFORE codex is located, both about the seat
+    # being asked to do the author's job.
+    from understudy import authorship
+
+    asks = remedy_findings(body)
+    if asks:
+        print(f"SEAT REFUSED  review_asks_for_a_remedy: this brief asks the "
+              f"seat for a fix rather than for a verdict", file=sys.stderr)
+        print(f"  {prompt_path}", file=sys.stderr)
+        print(f"  offending phrase(s): {', '.join(asks)}", file=sys.stderr)
+        print("  The seat answers FOLLOWS / REQUIRES_MODIFICATION and NAMES "
+              "THE CLAUSE. A remedy it volunteers is discarded (R217 C; "
+              "OPERATIONS 'Doctrine seat protocol').", file=sys.stderr)
+        return 1
+
+    # The rows this brief covers, resolved the same way `grade` resolves them
+    # -- by the turn ids the brief names, plus any row named outright.
+    model_for_family = args.model or DEFAULT_MODEL
+    rows = authorship.rows_named_in(body)
+    hits = authorship.conflicts(model_for_family, rows)
+    if hits:
+        print(f"SEAT REFUSED  seat_authored_row: "
+              f"{REFUSAL_REASONS['seat_authored_row']}", file=sys.stderr)
+        print(f"  {'; '.join(hits)}", file=sys.stderr)
+        return 1
+
+    prompt = build_review_prompt(body)
     stamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime())
     out = Path(args.out) if args.out else LOG_ROOT / f"review-{stamp}.md"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -972,6 +1105,8 @@ def cmd_review(args) -> int:
         print("DRY RUN -- nothing was executed")
         print(" ".join(argv))
         print(f"would land: {out}")
+        print(f"protocol:   prepended ({len(REVIEW_PROTOCOL)} chars); rows "
+              f"covered: {', '.join(rows) or '(none)'}")
         return 0
 
     # NOT BLIND and not a grader: this seat reads the repo on purpose, so

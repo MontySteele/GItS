@@ -90,7 +90,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Callable
 
-from understudy import bridge, qa_packet, report, seat
+from understudy import authorship, bridge, qa_packet, report, seat
 
 REPO = Path(__file__).resolve().parents[1]
 LOG_ROOT = Path(__file__).resolve().parent / "logs" / "blindplay"
@@ -1559,38 +1559,35 @@ class Transcript:
 
 # Independence is by model FAMILY (R217 C). The slice's author is Claude, so a
 # Claude seat is refused however fresh its context is -- "a fresh context on
-# the same model does not satisfy it" is the ruling's own wording. The check
-# lives here rather than in `seat.py` because `seat.py`'s blind grader is one
-# turn against a staged board, where the author never had a chance to be the
-# grader; a driver that a person points at a model name needs the refusal in
-# code.
-AUTHOR_FAMILY = "claude"
-MODEL_FAMILIES = {
-    "claude": ("claude", "anthropic", "opus", "sonnet", "haiku", "fable"),
-    "gpt": ("gpt", "openai", "o1", "o3", "codex"),
-}
+# the same model does not satisfy it" is the ruling's own wording. A driver
+# that a person points at a model name needs that refusal in code.
+#
+# EB-190 MOVED THE RULE, IT DID NOT COPY IT. `understudy/authorship.py` now
+# owns the family table and the check, because `seat.py` needs the SAME
+# refusal asked the other way round -- not "who is running" but "what does the
+# row record about who wrote it" -- and two doors answering one question is
+# how a governance rule ends up enforced in one place and remembered in the
+# other. `authorship` imports nothing but yaml and reads exactly two keys off
+# the prototype surface (`id`, `authored_by`), so the no-sheet pin on this
+# module is unchanged. The names below stay bound here: this is where every
+# caller and every test already reaches for them.
+AUTHOR_FAMILY = authorship.AUTHOR_FAMILY
+MODEL_FAMILIES = authorship.MODEL_FAMILIES
+model_family = authorship.model_family
 
 
-def model_family(model: str) -> str:
-    low = str(model or "").casefold()
-    for family, markers in MODEL_FAMILIES.items():
-        if any(m in low for m in markers):
-            return family
-    return ""
+def check_independent(model: str, author: str = AUTHOR_FAMILY, *,
+                      rows: Any = ()) -> None:
+    """Refuse the author's own model family as tester. R217 C, EB-190.
 
-
-def check_independent(model: str, author: str = AUTHOR_FAMILY) -> None:
-    """Refuse the author's own model family as tester. R217 C."""
-    family = model_family(model)
-    if not family:
-        raise BlindPlayError(
-            f"cannot tell which model family {model!r} belongs to, and an "
-            f"independence rule that cannot name the family is not a check")
-    if family == author:
-        raise BlindPlayError(
-            f"{model!r} is in the {family!r} family, which authored this "
-            f"slice. Independence is by model FAMILY, not by fresh context "
-            f"(R217 C): the tester must be the Codex seat.")
+    Thin: the rule is `authorship.check_independent`. This wrapper exists only
+    to keep the failure spelled `BlindPlayError`, which is what the driver's
+    own error handling and this module's tests catch.
+    """
+    try:
+        authorship.check_independent(model, author, rows=rows)
+    except authorship.IndependenceError as exc:
+        raise BlindPlayError(str(exc)) from None
 
 
 def command_schema() -> dict[str, Any]:
