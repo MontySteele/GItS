@@ -27,7 +27,7 @@ from pathlib import Path
 
 import pytest
 
-from understudy import blindplay, qa_packet, soak
+from understudy import blindplay, embark, qa_packet, soak
 
 REPO = Path(__file__).resolve().parents[2]
 RECORDED_COMBAT = (REPO / "review" / "qa" / "kokomi-slice1-r3-t01"
@@ -181,7 +181,7 @@ def test_blindplay_cannot_reach_a_sheet_or_a_policy():
     sheet loader transitively, so they are refused by the same walk."""
     named = _imported(Path(blindplay.__file__))
     banned = {"harness", "policy_v0", "policy_v1", "soak", "scenario",
-              "adapter", "naming", "staged_turn", "replay"}
+              "adapter", "naming", "staged_turn", "replay", "embark"}
     assert not [m for m in named
                 if m.split(".")[0] in ("tier0", "tier05")], named
     assert not [m for m in named if m.rsplit(".", 1)[-1] in banned], named
@@ -193,6 +193,39 @@ def test_soak_never_imports_blindplay():
     a third party's model."""
     named = _imported(Path(soak.__file__))
     assert not [m for m in named if "blindplay" in m], named
+
+
+def test_blindplay_never_imports_the_operator_side_embark():
+    """`embark.py` exists BECAUSE `blindplay` may not launch a game: it imports
+    `soak`, and through it `policy_v1` and every tier0 sheet loader. An import
+    of it from the blind module would carry the whole banned tree in behind one
+    innocuous name, so it is pinned in both directions -- named in `banned`
+    above, and checked here from the other end."""
+    assert embark.soak is soak, "embark is the side that owns the launch"
+    assert not [m for m in _imported(Path(blindplay.__file__))
+                if "embark" in m], "blindplay reached the operator side"
+
+
+def test_embark_expands_a_roster_id_to_a_select_screen_option():
+    """EB-117's cheap half: `--character kokomi` must not reach `soak._embark`,
+    which compares against the screen's own option strings and would embark on
+    whatever was highlighted."""
+    assert embark.option_id("kokomi") == "KLEEMOD-KOKOMI"
+    assert embark.option_id("KLEEMOD-KOKOMI") == "KLEEMOD-KOKOMI"
+    with pytest.raises(embark.EmbarkError):
+        embark.option_id("")
+
+
+def test_every_soak_ledger_row_has_an_embark_teardown_slot():
+    """`--teardown` runs in a DIFFERENT PROCESS from the embark, so it rebinds
+    `Session`'s undo entries by the ledger text on disk. A row soak learns to
+    write that this map does not know would be left APPLIED forever, which is a
+    teardown that silently keeps a mod in somebody's game directory."""
+    slots = [attr for attr, _ in embark._LEDGER_SLOTS]
+    for attr in ("_seed_entry", "_speed_entry", "_launch_entry",
+                 "_bridge_entry", "_appid_entry"):
+        assert attr in slots, attr
+    assert len(slots) == len(set(slots))
 
 
 def test_the_hazard_register_covers_soak_s():
