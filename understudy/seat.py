@@ -314,6 +314,62 @@ the reading is not evidence. Naming the clause keeps you on the reading side
 of that line; naming the fix moves you across it.
 """
 
+# THE SEAT HAS TWO REVIEW JOBS AND THEY HAVE DIFFERENT OUTPUT SHAPES.
+# `REVIEW_PROTOCOL` above is the DOCTRINE GATE: it reads a proposal against a
+# charter BEFORE anything is built, and its whole output is a verdict and a
+# clause. The other job is the PAIR READ, which runs AFTER a round -- shipped
+# half against prototype half, with the forms, the verdicts and the live
+# replays inline -- and its output is the round's five questions and
+# RETURN / ADVANCE / ESCALATE.
+#
+# Klee ROUND 3 is where the single protocol bit. `EB-190` shipped one text and
+# prepended it to every `seat review`, and its two strongest lines -- "It
+# overrides anything below that conflicts with it" and "That is the whole
+# output" -- do exactly what they say: the round-3 pair read came back as two
+# lines, "PAIR A: FOLLOWS", "PAIR B: FOLLOWS", with no reading and no
+# ADVANCE/RETURN, because the seat obeyed the protocol over the brief. Round 3
+# was the first pair read since that door landed, so it was the first run that
+# could find it.
+#
+# The half that is NOT negotiable is the same in both roles and is repeated
+# verbatim below: the seat may not supply text, a number, a mode or a
+# rewritten row, and a volunteered remedy is discarded. Only the OUTPUT SHAPE
+# is role-specific, and the default is unchanged, so a caller that names no
+# role still gets the doctrine gate exactly as before.
+PAIR_REVIEW_PROTOCOL = """\
+THE PROTOCOL FOR THIS SEAT. It overrides anything below that conflicts with
+it, EXCEPT the numbered questions the brief asks you -- those are the output
+shape and you answer them.
+
+You are reading a COMPLETED blind-QA round: for each arm, a shipped half and a
+prototype half of the same board, the graders' verbatim forms, the falsifier's
+verdict on each form, and what the live game did when each graded line was
+replayed. Your output is, PER ARM: the brief's numbered questions answered in
+order, and a judgment of RETURN, ADVANCE or ESCALATE.
+
+You may NOT supply card text, a number, a mode, a rewritten row, or any other
+remedy. A remedy you volunteer is DISCARDED unread, and the reasoning that
+produced it is discarded with it -- so a judgment that leans on your remedy is
+a judgment that gets thrown away. You may say that an arm's BOARD did not ask
+its question and RETURN it for that; you may not design the replacement board.
+Where a number has to be chosen it is derived by lifting a value off a shipped
+card, and that is not your job.
+
+ADVANCE means the arm is worth asking again with whole-fight play. It is NOT
+ship approval, not a balance reading and not validation, and nothing you write
+here is any of those.
+
+WHY. Independence here is by MODEL FAMILY, author against grader (R217 C).
+A seat that writes part of a row and then reads it has read its own work, and
+the reading is not evidence. Reading the evidence keeps you on the reading
+side of that line; naming the fix moves you across it.
+"""
+
+REVIEW_ROLES: dict[str, str] = {
+    "doctrine": REVIEW_PROTOCOL,
+    "pair": PAIR_REVIEW_PROTOCOL,
+}
+
 # The phrases that make a brief an ASK FOR A REMEDY. Deliberately a short,
 # literal list rather than anything clever: this guards an operator writing
 # the round's prompt in a hurry, not an adversary, and a matcher subtle enough
@@ -635,9 +691,19 @@ def remedy_findings(text: str) -> list[str]:
     return found
 
 
-def build_review_prompt(body: str) -> str:
-    """The protocol, then the caller's brief. Never the brief alone."""
-    return REVIEW_PROTOCOL + "\n" + str(body or "")
+def build_review_prompt(body: str, role: str = "doctrine") -> str:
+    """The protocol for this ROLE, then the caller's brief. Never the brief
+    alone, and never a role the caller invented: an unknown role raises rather
+    than falling back, because a silent fallback is how a pair read gets the
+    doctrine gate's output shape without anyone noticing."""
+    try:
+        protocol = REVIEW_ROLES[role]
+    except KeyError:
+        raise SeatError(
+            f"unknown review role {role!r}; the seat has two review jobs and "
+            f"they have different output shapes: "
+            f"{', '.join(sorted(REVIEW_ROLES))}") from None
+    return protocol + "\n" + str(body or "")
 
 
 def sha256(text: str) -> str:
@@ -1107,7 +1173,8 @@ def cmd_review(args) -> int:
         print(f"  {'; '.join(hits)}", file=sys.stderr)
         return 1
 
-    prompt = build_review_prompt(body)
+    role = getattr(args, "role", "doctrine") or "doctrine"
+    prompt = build_review_prompt(body, role)
     stamp = time.strftime("%Y%m%d-%H%M%S", time.gmtime())
     out = Path(args.out) if args.out else LOG_ROOT / f"review-{stamp}.md"
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -1125,8 +1192,8 @@ def cmd_review(args) -> int:
         print("DRY RUN -- nothing was executed")
         print(" ".join(argv))
         print(f"would land: {out}")
-        print(f"protocol:   prepended ({len(REVIEW_PROTOCOL)} chars); rows "
-              f"covered: {', '.join(rows) or '(none)'}")
+        print(f"protocol:   {role} ({len(REVIEW_ROLES[role])} chars) "
+              f"prepended; rows covered: {', '.join(rows) or '(none)'}")
         return 0
 
     # NOT BLIND and not a grader: this seat reads the repo on purpose, so
@@ -1170,6 +1237,14 @@ def main(argv: list[str] | None = None) -> int:
 
     r = sub.add_parser("review", help="run the REPO-VISIBLE seat (not blind)")
     r.add_argument("prompt_file")
+    r.add_argument("--role", default="doctrine", choices=sorted(REVIEW_ROLES),
+                   help="which of the seat's two review jobs this is. "
+                        "`doctrine` (the default, and unchanged) reads a "
+                        "proposal against a charter and answers FOLLOWS / "
+                        "REQUIRES_MODIFICATION plus the clause. `pair` reads "
+                        "a COMPLETED round -- forms, verdicts and replays -- "
+                        "and answers the brief's questions plus RETURN / "
+                        "ADVANCE / ESCALATE. Both forbid a remedy")
     r.add_argument("--model", default="")
     r.add_argument("--out", default="")
     r.add_argument("--dry-run", action="store_true")

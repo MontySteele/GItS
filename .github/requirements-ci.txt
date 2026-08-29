@@ -1,0 +1,20 @@
+# The packages the three jobs in repo.yml install. No requirements file lived
+# in-tree before 2026-08-29; this one exists so `setup-python`'s pip cache has
+# a dependency path to key on, and it is deliberately the ONLY reason it
+# exists -- it is not a project manifest and nothing outside CI reads it.
+#
+# Pinned loosely on purpose, carrying forward the workflow's own note: a
+# resolver surprise here should look like a resolver surprise, not like a repo
+# failure. Tighten a line only when a real break makes the pin the fix.
+#
+# One shared file for all three jobs, so all three share one cache key. The
+# `lints` job does not import pytest and `patch-sentinel` needs no pillow or
+# numpy; installing a little extra costs seconds on a cold cache and nothing
+# on a warm one, and it buys a single cache that every job restores.
+pytest
+# Added 2026-08-29 ([USER]). CI now runs the same `-n auto --dist loadscope`
+# arm the local push gate runs; see repo.yml's `pytest` job.
+pytest-xdist
+pyyaml
+pillow
+numpy

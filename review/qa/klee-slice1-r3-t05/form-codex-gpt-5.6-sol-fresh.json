@@ -1,0 +1,35 @@
+{
+ "turn_id": "klee-slice1-r3-t05",
+ "packet_sha256": "a5c6815252056b2da19e5001a72fbd0203de139d766487941f8fb0a47eb9fe87",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Imaginary Friend",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "Rapid Fire on Nibbit first, consuming the 3 Sparks, then Kaboom! on Nibbit for 1 Energy, then Imaginary Friend for 1 Energy.",
+ "q2_other_line_considered": "Rapid Fire, Imaginary Friend, and Duck and Cover, trading Kaboom!'s 7 damage for 5 additional Block.",
+ "q3_what_it_gave_up": "It gave up the additional 5 Block from Duck and Cover, so only 5 of the incoming 12 damage is blocked.",
+ "q4_different_intent": "Yes. A substantially larger attack intent would have moved me to Rapid Fire, Imaginary Friend, and Duck and Cover for 10 Block.",
+ "q4_changed": true
+}

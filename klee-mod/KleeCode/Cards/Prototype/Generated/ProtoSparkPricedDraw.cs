@@ -31,7 +31,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoSparkPricedDraw : CustomCardModel
+public sealed class ProtoSparkPricedDraw : CustomCardModel, ISparkPricedCard
 {
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_spark_priced_draw");
 
@@ -43,8 +43,17 @@ public sealed class ProtoSparkPricedDraw : CustomCardModel
 
     // The Spark cost line (EB-118): unplayable below the price,
     // which is how the cost is shown rather than silently failing.
+    // The printed price is declared ONCE here, on ISparkPricedCard,
+    // and the gate reads it back through SparkCost.PriceOf -- the
+    // same sum the Spark cost BADGE renders (PICK 8 option 2), so
+    // the price shown and the price charged cannot drift. A card
+    // that already prints a price is unaffected by the strict Rare
+    // Power, which is why PriceOf returns this number unchanged
+    // here (tier0 twin: combat.spark_price, sub-pick (a)).
+    public int PrintedSparkPrice => 3;
+
     protected override bool IsPlayable =>
-        SparkPower.CanSpend(Owner.Creature, 3);
+        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this));
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

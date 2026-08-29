@@ -1,0 +1,92 @@
+{
+ "turn_id": "klee-slice1-r3-t06",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "opus-5-fresh",
+  "kind": "llm",
+  "model": "claude-opus-5",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "6d8c281cc10c1a081f800e13f331a9dec0a3641081a44a32fd2e19ab40098b8f",
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Duck and Cover"
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "Rapid Fire first, then Kaboom!, then Duck and Cover. The Spark bank is 3 and only covers one discounted Attack, so I spent it on the card whose printed cost is highest: Rapid Fire prints 2 and shows 0, Kaboom! prints 1 and shows 0. Playing Rapid Fire first for free banks the bigger discount and leaves both energy. Nibbit is the only enemy, so all four of Rapid Fire's random 4-damage hits land on it for 16. Kaboom! then costs its printed 1 for 7 more, total 23 damage into a 43 HP enemy, and the last energy buys Duck and Cover for 5 Block, so the telegraphed 12 lands as 7 and I end at 35 HP with Nibbit at 20.",
+  "q2_other_line_considered": "Two. First, the mirrored order \u2014 Kaboom! at 0 and Rapid Fire at its printed 2 \u2014 same 23 damage but it eats both energy, leaves nothing for Duck and Cover, and I take the full 12. Strictly worse, so it was ruled out on sight. The one I actually weighed was the Slow Burn line: Slow Burn for 1 and Duck and Cover for 1, for 10 Block, 10 Burst Energy and Burst +5 off a meter sitting at 20 of 40. That takes the incoming 12 down to 2 and buys real meter progress. I rejected it because Slow Burn spends the 3 Sparks itself, so it burns the same resource that is currently worth a free Rapid Fire, and it deals zero damage into a 43 HP enemy I cannot kill this turn either way.",
+  "q3_what_it_gave_up": "The Burst meter and the fuller guard. I skipped Slow Burn entirely, so I gave up 10 Burst Energy and the Burst +5, and I left the meter where it was; Slow Burn also stays in hand competing for a future turn's Spark bank rather than being cashed now. I took 7 to the face instead of 2 by settling for 5 Block instead of 10, and I spent the whole Spark bank on damage, so my Attacks are back to printed cost next turn with nothing banked.",
+  "q4_different_intent": "Yes, though it takes a lot. Against this 12 the race maths is clear and 23 damage is worth 7 HP. If Nibbit had telegraphed something large enough that the extra 5 Block mattered for survival \u2014 roughly high thirties against my 42, or anything that would put me in lethal range \u2014 I would switch to Slow Burn plus Duck and Cover for 10 Block and bank the Burst instead. A defensive or block-gaining telegraph would also move me: chipping 23 into a wall that is about to gain armour is worth less than the meter, so I would take the Slow Burn line there too. A weaker attack, or a second enemy on the board, would not have changed anything \u2014 a second body only makes Rapid Fire's random split less certain, not less worth playing first."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "declared board (prototype route)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.2049,
+  "top1": 28.8,
+  "top2": 22.9,
+  "lines_considered": 10,
+  "playouts": 16,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Kaboom!",
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 28.8
+   },
+   {
+    "cards": [
+     "Kaboom!",
+     "Rapid Fire"
+    ],
+    "score": 22.9
+   },
+   {
+    "cards": [
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "score": 21.9
+   },
+   {
+    "cards": [
+     "Rapid Fire"
+    ],
+    "score": 16.0
+   },
+   {
+    "cards": [
+     "Kaboom!",
+     "Duck and Cover"
+    ],
+    "score": 12.9
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T13:47:51"
+}

@@ -42,6 +42,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoSparkSweep>(),
             ModelDb.Card<ProtoThomaCrimsonOoyoroiEither>(),
             ModelDb.Card<ProtoThomaCrimsonOoyoroiPriced>(),
+            ModelDb.Card<ProtoTrueSparkKnight>(),
             ModelDb.Card<ProtoIttoSuperlativeSuperstrengthEitherModeA>(),
             ModelDb.Card<ProtoIttoSuperlativeSuperstrengthEitherModeB>(),
             ModelDb.Card<ProtoShinobuSanctifyingRingEitherModeA>(),

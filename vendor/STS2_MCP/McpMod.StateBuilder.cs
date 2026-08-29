@@ -1322,6 +1322,21 @@ public static partial class McpMod
         state["target_type"] = card.TargetType.ToString();
         state["can_play"] = unplayableReason == UnplayableReason.None;
         state["unplayable_reason"] = unplayableReason != UnplayableReason.None ? unplayableReason.ToString() : null;
+
+        // GItS LOCAL EDIT (the Klee Sparks arm). `cost` above is the ENERGY
+        // cost, which is 0 for every Spark-priced card, and `can_play` collapses
+        // every reason a card is unplayable into one boolean -- so without these
+        // two an observed board shows a hand of free cards and cannot tell a
+        // short bank from a missing target. Emitted only when the card actually
+        // charges Sparks, so an ABSENT pair means "charges none" and the board
+        // stays the size it was. Implementation and its reflection contract:
+        // gits/GitsSparkPrice.cs; read by understudy/adapter.py.
+        if (GitsSparkPrice(card) is { } sparkPrice)
+        {
+            state["spark_price"] = sparkPrice;
+            state["spark_affordable"] = GitsSparkAffordable(card);
+        }
+
         return state;
     }
 

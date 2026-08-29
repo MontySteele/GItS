@@ -11,6 +11,28 @@
 # clone it actually starts from. A GitHub runner IS that fresh clone -- no art,
 # no game_ref/, no .venv -- which is the environment Track A had to reconstruct
 # by hand, and which caught two defects in this sprint's own work.
+#
+# SPEED PASS 2026-08-29 ([USER]: "Github takes about 5 minutes to run those
+# checks even if the PR is just altering markdown files. Is there a way to
+# speed that up?"). Three changes, no new jobs and no renamed ones -- the
+# three job names are load-bearing, they may be required checks in branch
+# protection, and a renamed job blocks every pull request:
+#   (1) `pytest` runs `-n auto --dist loadscope`, the exact arm
+#       tools/hooks/push_gate.py runs locally. That comment used to say xdist
+#       was "deliberately not in CI's install line"; [USER] overturned it.
+#   (2) a docs-only pull request runs only the tests that READ markdown,
+#       named one by one in the `pytest` job below, and says loudly which
+#       suite it skipped. The classifier is tools/ci_changed_paths.py and it
+#       FAILS SAFE: an empty or unavailable diff is `false`, the full run.
+#   (3) `setup-python` caches pip against .github/requirements-ci.txt.
+#
+# NOT DONE, on purpose, and appended to the NOT-doing list at the top: no
+# `paths-ignore` at the trigger level. A trigger-level filter makes the job
+# report NOTHING rather than report success, and a required check that never
+# reports blocks the pull request forever -- which is why the docs-only
+# decision lives INSIDE a job that always runs and always reports. A
+# `concurrency:` block (cancel superseded runs on the same branch) is a
+# separate, optional change and is [USER]'s to ask for.
 
 name: repo
 
@@ -27,19 +49,98 @@ jobs:
   pytest:
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 so the changed-path step below has both endpoints of
+      # the diff. The suite itself still needs no history.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      # No requirements file in-tree; these are the suite's actual imports.
-      # Pinned loosely on purpose -- a resolver surprise here should look like
-      # a resolver surprise, not like a repo failure.
-      - run: pip install pytest pyyaml pillow numpy
+          cache: 'pip'
+          cache-dependency-path: .github/requirements-ci.txt
+      # The install line moved to .github/requirements-ci.txt so the cache
+      # above has a key. That file carries the loose-pin note it inherited:
+      # a resolver surprise should look like a resolver surprise, not like a
+      # repo failure.
+      - run: pip install -r .github/requirements-ci.txt
+
+      # Is this change nothing but markdown? tools/ci_changed_paths.py owns
+      # the rule and its --self-test owns the cases. Every branch here that
+      # cannot answer honestly prints an empty list and lets the tool's
+      # empty-input case decide -- which is `false`, the full run.
+      - id: scope
+        name: changed paths -- docs-only?
+        run: |
+          set -u
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base='${{ github.event.pull_request.base.sha }}'
+            if ! git rev-parse -q --verify "$base^{commit}" >/dev/null 2>&1; then
+              base='origin/${{ github.event.pull_request.base.ref }}'
+            fi
+            changed=$(git diff --name-only "$base"...HEAD 2>/dev/null || true)
+          else
+            before='${{ github.event.before }}'
+            case "$before" in
+              ''|0000000000000000000000000000000000000000) changed='' ;;
+              *) changed=$(git diff --name-only "$before" HEAD 2>/dev/null || true) ;;
+            esac
+          fi
+          echo "--- changed paths ---"
+          printf '%s\n' "$changed"
+          echo "---------------------"
+          printf '%s\n' "$changed" \
+            | python tools/ci_changed_paths.py | tee -a "$GITHUB_OUTPUT"
+
       # NOTE the absence of GITS_REFERENCE_MODE: a runner has no game_ref/, so
       # the loader takes the committed-only path on its own. That is the point
       # -- this job asserts the COMMITTED world is sound. The auto-mode suite
       # is the deploy machine's job and stays there (validate.ps1 S7).
-      - run: python -m pytest tier0/tests tier05/tests -q
+      #
+      # `-n auto --dist loadscope` is the exact arm tools/hooks/push_gate.py
+      # runs, minus its `-m "not battery"` deselection: CI keeps the bands.
+      # loadscope is load-bearing, not a preference -- it keeps a module on
+      # one worker so a module-scoped battery fixture is computed once rather
+      # than once per worker. Measured on the 16-CPU dev box 2026-08-29 at
+      # 917e07f: 4451 passed / 46 skipped / 12 xfailed either way, 59.2 s
+      # parallel against 281.4 s serial. No test needed isolating, and no
+      # `serial` marker was added.
+      - name: full suite (parallel)
+        if: steps.scope.outputs.docs_only != 'true'
+        run: python -m pytest tier0/tests tier05/tests -q -n auto --dist loadscope
+
+      # The docs-only arm. These nine modules are not a guess: they are every
+      # module in tier0/tests + tier05/tests observed opening a committed .md
+      # file that tools/ci_changed_paths.py classifies as a doc, audited over
+      # a full run on 2026-08-29, plus test_r_numbers_lint (which enumerates
+      # the docs/current page set without opening it). What each one reads:
+      #   test_rulings_index            every .md under docs/current/
+      #   test_register_ids_lint        docs/current/QUEUE.md, BACKLOG.md
+      #   test_r_numbers_lint           the docs/current page set it scans
+      #   test_reaction_phase_parity    docs/current/BACKLOG.md (row open?)
+      #   test_staged_turn              docs/current/BACKLOG.md
+      #   test_pulse_multiplier_claims  docs/current/playtest/*.md
+      #   test_prototype_surface        review/active/*.md
+      #   test_prototype_authorship     review/qa/*/packet.md
+      #   test_understudy_seat          review/qa/kokomi-first-turn-example/packet.md
+      # Add a module here the moment a test starts reading one of those trees.
+      # The `lints` job below still runs IN FULL on a docs-only change -- the
+      # register, stamp and namespace gates are lints, and they are the other
+      # half of what a markdown edit can break.
+      - name: docs-only -- the markdown-reading tests only
+        if: steps.scope.outputs.docs_only == 'true'
+        run: |
+          echo "::notice title=docs-only fast path::Every changed path is markdown under docs/current, review/, or the repo root. SKIPPING the full tier0+tier05 suite; running only the markdown-reading tests, plus the FULL lints job. The push gate ran the whole fast lane locally before this push."
+          python -m pytest -q \
+            tier0/tests/test_rulings_index.py \
+            tier0/tests/test_register_ids_lint.py \
+            tier0/tests/test_r_numbers_lint.py \
+            tier0/tests/test_reaction_phase_parity.py \
+            tier0/tests/test_staged_turn.py \
+            tier0/tests/test_pulse_multiplier_claims.py \
+            tier0/tests/test_prototype_surface.py \
+            tier0/tests/test_prototype_authorship.py \
+            tier0/tests/test_understudy_seat.py
 
   # (b) The softlock-preventing lints, invoked DIRECTLY.
   #
@@ -53,7 +154,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install pyyaml pillow numpy
+          cache: 'pip'
+          cache-dependency-path: .github/requirements-ci.txt
+      # Same file as the other two jobs, so all three share one cache key.
+      - run: pip install -r .github/requirements-ci.txt
+      # This job runs UNCONDITIONALLY, docs-only change or not. Several of the
+      # lints below read the markdown registers -- r-numbers, register row-id
+      # uniqueness, rulings index, register row shape, STATE stamp rows,
+      # EXPERIMENTS active registrations -- so it is exactly the half of the
+      # gate a markdown-only pull request most needs.
       - name: hand-written parity
         run: python tools/lint_handwritten_parity.py
       - name: constant parity
@@ -198,13 +307,47 @@ jobs:
   patch-sentinel:
     runs-on: ubuntu-latest
     continue-on-error: true
+  #
+  # Skips its two STEPS on a docs-only change (2026-08-29): the sentinel reads
+  # game assemblies and C# fixtures, and no markdown edit can move either. The
+  # JOB still runs and still reports, because a job that reports nothing is
+  # the failure mode `paths-ignore` would have caused.
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install pytest pyyaml
+          cache: 'pip'
+          cache-dependency-path: .github/requirements-ci.txt
+      - run: pip install -r .github/requirements-ci.txt
+      # The same classifier the `pytest` job runs, duplicated rather than
+      # passed between jobs on purpose: a `needs:` edge would serialise this
+      # job behind `pytest` and cost far more wall clock than the few seconds
+      # the duplication saves. It fails safe the same way.
+      - id: scope
+        name: changed paths -- docs-only?
+        run: |
+          set -u
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base='${{ github.event.pull_request.base.sha }}'
+            if ! git rev-parse -q --verify "$base^{commit}" >/dev/null 2>&1; then
+              base='origin/${{ github.event.pull_request.base.ref }}'
+            fi
+            changed=$(git diff --name-only "$base"...HEAD 2>/dev/null || true)
+          else
+            before='${{ github.event.before }}'
+            case "$before" in
+              ''|0000000000000000000000000000000000000000) changed='' ;;
+              *) changed=$(git diff --name-only "$before" HEAD 2>/dev/null || true) ;;
+            esac
+          fi
+          printf '%s\n' "$changed" \
+            | python tools/ci_changed_paths.py | tee -a "$GITHUB_OUTPUT"
       - name: sentinel diff core (synthetic fixtures only)
+        if: steps.scope.outputs.docs_only != 'true'
         run: python -m pytest tier0/tests/test_patch_sentinel.py -q
       - name: sentinel runs (asserts nothing -- no game on a runner)
+        if: steps.scope.outputs.docs_only != 'true'
         run: python tools/patch_sentinel.py || true

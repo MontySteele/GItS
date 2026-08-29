@@ -128,7 +128,11 @@ CEILINGS: dict[str, int] = {
                  # no Star amounts at all. OPEN.
                  # EB-188/189/190 minted 2026-08-29 by the process-review
                  # pass (EB-188: the prototype-arm door for whole-fight
-                 # blind play, BUILT, live acceptance owed; EB-189: the QA
+                 # blind play -- BUILT, and CLOSED 2026-08-29 on its live
+                 # acceptance: sealed session 20260829-181718 on
+                 # 0.2.1353+proto, seed 71D8JS1VSKRN, 120 actions, the
+                 # record naming arms_granted, and the granted arm drawn
+                 # and played in fights 4 and 6. RETIRED; EB-189: the QA
                  # pilot's ~59k lines under `review/qa/` want compacting;
                  # EB-190: recorded authorship on the prototype surface,
                  # CLOSED the same day). EB-191 minted by the Klee slice 1
@@ -137,10 +141,16 @@ CEILINGS: dict[str, int] = {
                  # retry always works. OPEN. (It was minted as EB-188 in
                  # parallel and renumbered at integration.)
                  # EB-185/186/187 minted 2026-08-29 by the Klee slice 1
-                 # funnel run. EB-186: at a Spark bank of 3 the game
-                 # prints EVERY Attack in hand at cost 0 while the rule
-                 # frees exactly one, so ten of twelve blind-graded lines
-                 # were refused live. OPEN.
+                 # funnel run. EB-186 was NOT A DEFECT and its row is gone:
+                 # [USER] ruled 2026-08-29 that every Attack rendering
+                 # cost 0 at a bank of 3 is the intended mechanic -- at the
+                 # moment the hand is read every Attack IS free, whichever
+                 # is played first takes the discount, and the rest snap
+                 # back to printed cost. Round 1's ten refused lines were
+                 # readers failing to chain the keyword's second sentence,
+                 # not a display or D4 fault. A false positive goes
+                 # nowhere permanent (CLAUDE.md audit triage), so the id is
+                 # retired here and stays un-re-mintable.
                  # EB-185: the observed closeness board maps no Spark, so
                  # every observed reading of a Klee turn scores a bank of
                  # zero. CLOSED 2026-08-29 -- the Spark status now crosses
@@ -296,8 +306,8 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        180, 181, 182, 183, 184, 186,
-        188, 189, 191, 192, 193,
+        180, 181, 182, 183, 184,
+        189, 191, 192, 193,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

@@ -159,6 +159,13 @@ MIRRORED: dict[str, object] = {
     "KitBurstConstants.VolleyHits": C.SPARKS_N_SPLASH_HITS,
     "KitBurstConstants.VolleyHitDamage": C.SPARKS_N_SPLASH_HIT_DMG,
     "SparkPower.Threshold": C.SPARKS_FOR_FREE_ATTACK,
+    # The Sparks alternative-cost arm (review/active/klee-sparks-2026-08-29.md
+    # sec.5). MIRRORED and not UNMIRRORED even though the class is
+    # quarantined: the tier0 counterpart exists and is the SAME number, and
+    # this pairing is the only thing that would catch one side being repriced
+    # without the other. The row above is the threshold this one retires;
+    # both stay, because the flag runs the two economies as two arms.
+    "SparkAttackCostPower.Price": C.SPARK_ATTACK_POWER_PRICE,
     "DemolitionConstants.SplashBurst": C.DETONATION_SPLASH_BURST,
     "DemolitionConstants.SplashProcCapPerTurn": C.DETONATION_SPLASH_PROC_CAP,
     "DemolitionConstants.PlaytimeBombDamage": C.PLAYTIME_BOMB_DAMAGE,
