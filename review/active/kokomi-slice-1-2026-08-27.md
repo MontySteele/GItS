@@ -640,3 +640,150 @@ round 4 would carry, if one runs, is the two named board repairs — `EB-170` is
 done, so a modal line replays rather than being left untested, and `EB-169`'s
 preflight now refuses a board carrying a card with an open face defect before
 the round is staged at all.
+
+## Round 4 (2026-08-29)
+
+Round 3 RETURNED two arms and named a repair for each. Round 4 is those two
+repairs and nothing else: **the two returned arms and their shipped controls, on
+repaired boards, with no printed card number moved by one character.** The other
+two groups are not touched and the five arms that ADVANCED are not re-run. Files:
+`understudy/turns/kokomi-slice-1-r4/`, manifest there. Build `0.2.1293+proto`.
+
+### What changed, and only this
+
+**Group C — one card leaves the hand.** Round 3's group C held four cards against
+three energy: the card under test plus TWO Water's Edge plus All Streams Flow.
+The three 1-cost attacks alone came to 21 damage, so the turn had a complete line
+that never touched the card, and the Block mode was not losing to the card's own
+other mode — it was losing to the rest of the hand. That is what *"sacrificed
+twelve damage"* was measuring. One Water's Edge is removed; every line worth
+playing now goes through the card, and the two modes sit **8 damage apart**
+rather than twelve. Two consequences follow: the enemy goes to 24 HP, above the
+17 the board can now produce, so no line is lethal; and the player goes to 14/70,
+so the three Block is a real share of what is left rather than a rounding error.
+
+**Group B — one number moves.** Round 3's group B carried two bodies at 3 HP,
+which is the all-enemy hit's own number, so the card removed both whatever else
+was true and its Block rode in free. A grader answering "a different telegraph
+would not have changed it" was reading the board correctly. **The two
+non-attacking bodies go from 3 HP to 6.** Three damage now removes nothing, so
+the card must be bought for its Block; the removal is still available, just not
+from this card — Water's Edge kills one small body and All Streams Flow kills the
+other, for two energy, and choosing between that and the card is a choice about
+the incoming attack.
+
+### The thing this round found out the hard way: a seed is only reproducible within one game build
+
+Round 3 ran on game **v0.107.1**. `R218` ported the mod and moved the pin to
+**v0.111.0**, and the encounter generator moved with the game. Re-staging round
+3's two seeds on the new build produced two DIFFERENT fights:
+
+* Group C's `XVE3PVZEPT` gave Seapunk 22/44 attacking for 11 in round 3, and here
+  gives **Nibbit 24/45 attacking for 12**. One body, an attack telegraphed, and
+  the HP the file writes lands — the board is still the board this round
+  designed, so group C keeps the seed and its mirror is re-declared to the body
+  that appeared.
+* Group B's `NMQLUYZDLV` gave three slimes in round 3 and here gives **one
+  Shrinker Beetle telegraphing a debuff**. No second body, no third, no attack.
+  Group B was re-rolled: **sixteen rolls**, the first fifteen one or two bodies,
+  and roll sixteen `R7W86HG7WHUD` the first three-body fight — Twig Slime (S)
+  9/9 attacking for 4, Leaf Slime (M) handing out two Status cards, Leaf Slime
+  (S) attacking for 3.
+
+One number moved because of that roll, and the manifest states it rather than
+burying it: round 3's attacker sat at 10 HP behind 6 Block, an effective 16
+against a single-target ceiling of 15. This seed's attacker generates at 9/9 and
+`set_hp` clamps at a creature's maximum, so **nine behind eight** is the
+arithmetic that reaches the same property — effective 17 against the same ceiling
+of 15. The property is identical; only the numbers reaching it moved.
+
+`R95` already says live numbers are not comparable across a game build. This adds
+the ENCOUNTER to that list, which is worth writing down because a pinned seed
+looks like it survived a port and does not.
+
+### Closeness
+
+All four SURVIVE, declared and observed, and the two readings are identical:
+`t01` gap 0.1345, `t02` 0.1138, `t03` 0.1224, `t04` 0.0452, against
+`DOMINANCE_GAP` 0.5. A refusal that did not fire, and never a rating (R213 F).
+
+### Verdicts, and the replay beside each
+
+**TWO graders on every turn this round**, where round 3 had one: a fresh Claude
+per packet (`opus-5-fresh`, one agent, one turn, never reused) and the R217 C
+independent seat (`codex-gpt-5.6-sol-fresh`). **Eight forms, 8 SURVIVES, 0
+REFUSED** — against round 3's 7/4 and round 2's 4/7 on eleven.
+
+| turn | half | grader | verdict | replay: the board's answer |
+|---|---|---|---|---|
+| `t01` | C shipped | Claude | SURVIVES | **flagged** — form claims 17, board dealt **21** (Nibbit 24 → 3); Block 0 → 3 |
+| `t01` | C shipped | seat | SURVIVES | **flagged** — same 21, same reason |
+| `t02` | C proto (either) | Claude | SURVIVES | **flagged** — took the DAMAGE mode; form claims 17, board dealt 21 (24 → 3). The mode choice itself replayed exactly as written |
+| `t02` | C proto (either) | seat | SURVIVES | **INCOMPLETE** — took the BLOCK mode and the game refused the play. See below |
+| `t03` | B shipped | Claude | SURVIVES | **confirms** — both Leaf Slimes dead, Twig Slime untouched at 9 behind 8 Block |
+| `t03` | B shipped | seat | SURVIVES | **confirms** — identical |
+| `t04` | B proto (priced) | Claude | SURVIVES | **confirms** — both Leaf Slimes dead, Twig Slime untouched; the card unplayed at 3 energy |
+| `t04` | B proto (priced) | seat | SURVIVES | **confirms** — identical |
+
+**The three flags are one fact and it does not move the comparison.** On group C
+the board dealt 21 where every form said 17. The extra four is an **elemental
+reaction** between the Pyro the companion applies and the Hydro that follows it.
+One grader guessed at exactly that and declined to count it — *"if the Pyro it
+applies interacts with the Hydro that follows, the order costs me nothing and
+might gain something — I am not counting on that, the 17 is all printed
+numbers."* The reaction fires on the shipped half and the prototype half alike,
+so the pair still differs in one card. It is recorded because a form's arithmetic
+and the board's answer disagreed, which is what the flag is for.
+
+**The one incomplete replay is a DEFECT, and it is the round's sharpest find.**
+The seat took the Block half of the modal — which gains Block and has no target —
+and wrote no target, correctly, from the printed face. The game refused the play:
+*"Card requires a target. Provide 'target' with an entity_id."* The card is typed
+as an **Attack**, so the game demands a target even on the mode that attacks
+nothing. The grader's line is mechanically untested rather than contradicted, and
+the defect is `EB-184`.
+
+### The pair read
+
+Same shape as round 3, with both graders' forms and the replay post-state inline.
+Reply unedited: `review/qa/kokomi-slice-1-r4-pair-review-codex-gpt-5.6-sol.md`;
+prompt at `review/qa/kokomi-slice-1-r4-review-prompt.txt`, sha256
+`21633739efddb73e1bf79ed381f25f8dbc9cb480683a4a0d405f9895e17375ae`. The reviewer
+was told what round 3 had asked for, and asked a fifth question this round: **did
+the repair work?**
+
+| turn | arm | outcome | the reviewer's one-line reason |
+|---|---|---|---|
+| `t02` | C either | RETURN | *"Return the arm for an implementation repair, not a board redesign: the game incorrectly demands a target for the targetless Block mode, so the grader's defensive line could not be mechanically replayed."* |
+| `t04` | B priced | **ADVANCE** | *"The repaired board isolated the intended pricing question and showed a concrete change from bundled defence-plus-follow-up to an all-in defensive turn."* |
+
+**Both repairs are reported to have worked**, which is the answer round 4 was run
+to get:
+
+* Group C — *"Yes. Removing the routing attack and lowering HP made both modes
+  credible enough to split the graders, directly correcting round 3's
+  noncompetitive Block mode."* The two graders did split: one took the damage
+  mode, the other took Block.
+* Group B — *"Yes. Raising the bodies to 6 HP removed the AOE's decisive-removal
+  role: it killed nothing, so considering the prototype meant considering whether
+  4 Block justified abandoning the board clear."*
+
+The reviewer's closing, verbatim: *"Round 4 supports both intended decision
+shapes: exclusivity created a genuinely contested mode choice, and added price
+converted defence into a distinct turn-level commitment. Nothing warrants
+ESCALATE: Pair 1's divergent choices demonstrate closeness rather than an
+irreconcilable contradiction, while its failed replay is a specific mechanical
+defect that must be fixed before advancement."*
+
+### What the outcome means next
+
+**The slice's tally across four rounds is now six ADVANCE and one open RETURN**,
+and the one RETURN is not a design finding at all — it is `EB-184`, an
+implementation defect with a named fix, and the reviewer said so in as many
+words. Group C's arm was returned for the defect, not for the board; the board it
+was returned for in round 3 is reported repaired.
+
+Nothing here rates a card, and nothing here is ship approval: a seat's SURVIVES
+and a seat's ADVANCE are both "not yet falsified" (R217 G). What a round 5 would
+carry, if one runs, is one turn: `EB-184` fixed, and group C's `either` arm
+re-staged on the same board so the Block-mode line finally replays.
