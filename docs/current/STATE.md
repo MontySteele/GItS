@@ -265,167 +265,46 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   (raw notes `review/active/kokomi-playtest-notes-2026-08-26.md`);
   the confirmatory protocol run is unrun
   (`docs/current/playtest/kokomi-playtest-protocol.md`).
-- **Design course-correction (R213, 2026-08-26)** — the playtest found
-  terminal convergence with subsidized defence as the proximal failure.
-  Ruled: freeze (W10/W11/lever/tuning/new windows), a QUARANTINED
-  prototype surface, the Companion audit (purchased vs subsidized
-  defence first), Kokomi → Klee → Furina slices in sequence, four rules
-  reopened (Charge uncapped/unspent; Sparks = free Attack; unpriced
-  Companion Block; Salon as Furina's spine), one falsifier (decision
-  closeness), and a QA-agent funnel so [USER] plays surviving turns,
-  not runs. Words: the R213 commit. **Its authorized engineering is now
-  four-fifths landed (R215, 2026-08-27):** the **quarantined prototype
-  surface is SHIPPED** (`EB-147`) and the quarantine is proven from
-  OUTSIDE — the default `0.2.1209` build refuses a prototype grant
-  outright (`No card with id or exact title
-  'KLEEMOD-PROTO_KOKOMI_TIDECALL'`); the **Companion audit is DONE**
-  (`EB-148`), packet
-  `review/active/eb148-companion-audit-2026-08-27.md` (+ `.tsv`, 51 rows,
-  hidden-name test run); and the three playtest defects are resolved —
-  `EB-150` (Deep Breath soft-lock) **fixed and live-green on
-  `0.2.1209`**, `EB-151` (Pearl Barrage's base 5) **NOT A DEFECT**, the
-  card doing what R211 ruled and both cost ladders passing live on the
-  old build too, with [USER]'s design observation routed to the Kokomi
-  slice as its first prototype arm, and `EB-152`'s **Burst half shipped**
-  (14 silent faces, `tools/lint_burst_legibility.py` on the ci lane) with
-  its Charge half deferred into E1's Charge reopening, there being no
-  Charge keyword in the mod to print. **Step 2 of the funnel is now
-  SHIPPED too (R216, 2026-08-27): `EB-149` is CLOSED.** `understudy`
-  stages a turn on the live game, writes a design-blind packet, grades a
-  fresh agent's four-question form, and replays the graded line; the
-  worked example is `review/qa/kokomi-first-turn-example/` — a fresh Opus
-  grader (`opus-5-fresh`) returned SURVIVES blind on `0.2.1209`, the
-  no-second-line fixture was REFUSED, and `execute` replayed the line on
-  the pinned seed `HKB8EJD5G4`. Two engineering findings from that run
-  are filed as `EB-164` (a face that double-states its scaling) and
-  `EB-165` (no dev door for an exact hand). **The next open step is the
-  Kokomi slice**, whose pool and arms R216 fixed: Inazuma as it ships
-  plus a priced-defence prototype subset; arm 1 is Pearl Barrage's
-  chosen-card cost against a whole-turn exhaust count (R215 C), arms 2–3
-  are `shinobu_sanctifying_ring`, `thoma_crimson_ooyoroi` and
-  `itto_superlative_superstrength` in two priced shapes — mutually
-  exclusive Block, and Block priced in the cost line. All of it on the
-  quarantined surface; no shipped sheet row moves. The dispatch-3
-  confirmed defects stand beside them, `EB-153`–`EB-163`.
-  **R217 (2026-08-28) amends the authority and adds the charter.** The
-  independent seat's four-question form now RETURNS a prototype or
-  ADVANCES it with no [USER] involvement, and **[USER] plays no forms and
-  no calibration turns during iteration** — the pre-slice calibration
-  sample is struck; `EB-149`'s `user`-grader down-weighting pin stays in
-  code but is DORMANT. Two seats materially disagreeing ESCALATES. A
-  seat's SURVIVES is never ship approval. GPT's **D1–D9 are LAW** as the
-  design charter, provisional through the Klee slice, with **no numeric
-  design bands** and decision closeness (R213 F) still the only numeric
-  falsifier. The seat is [USER]'s ChatGPT/Codex subscription driven
-  through Codex CLI headless mode (`EB-166`, branch `codex-seat`), and
-  independence is by model FAMILY, not by fresh context. `deploy_proto.ps1`'s
-  **`+proto` / `+proto.dirty` version mark is RATIFIED** (LAW, beside R214),
-  refusal symmetric. Automation minted in order: `EB-166` the seat — **CLOSED 2026-08-28**, built, blind-grading eleven
-  turns twice and driving both pair reads — `EB-167` a design-blind
-  any-screen render and `EB-168` an orchestrated Act-1 tester, both BUILT.
-  **`EB-168` is CLOSED (2026-08-29):** five sealed sessions exist on the
-  re-pinned build, and its negative test refused live — a Claude-family model
-  id is rejected with exit 2 before the tool touches the wire. **`EB-167` is CLOSED too (2026-08-29),** on the row's own
-  acceptance: three tool defects the live runs found are fixed (`EB-173`,
-  `EB-176`), and the last session was a whole run — 37 actions over six
-  screen types with ZERO refusals, no stall and no leak in any of its 40
-  observations — ending only because the character died on Act 1. That
-  the tester never reached the Act-1 boss is the tester's play, not the
-  tool's code, and the row never asked for the boss. Of the two live findings
-  that run filed, **`EB-175` is CLOSED (2026-08-29)** — the bridge's
-  `end_turn` is asynchronous, so a read 55 ms after it answers `ok` carries
-  the round unchanged, the hand already discarded to zero and `is_play_phase`
-  FALSE; the render showed that hand-over frame as a playable turn and the
-  seat's second `end turn` spent the real one, which is where the 1 → 3 → 5
-  rounds came from. `blindplay.transient` now names the frame a transition
-  beside the two it already knew and every live read rides it out — the
-  driver's and the CLI's `observe` / `act` — and nothing posts a second
-  `end_turn` on a tester's behalf. **`EB-174` is CLOSED too (2026-08-29)** —
-  a sealed record could not name its build because the bridge's health
-  payload carries the VENDORED bridge's version (`v0.4.0`) and never ours, so
-  every identity block read `(not read)`. Both builds are now read OFF DISK
-  and each is labelled with the file it came from: the deployed
-  `mods\klee\manifest.json` `version` (producer `deploy.ps1`) and the game's
-  own `release_info.json` `version`. A SIXTH sealed session, **run B6**
-  (`review/qa/blindplay/runB6-20260829-2/record.md`, seed `ZZRK9QHXEFCS`,
-  0.2.1269 on v0.111.0), is the first record that names both builds: 85
-  actions over eight floors, two fights won and a third open against the
-  Act-1 elite, one leak-audit hit in 91 observations and it is the same
-  standing `score` in the tool's own guardrail sentence. It ended on the
-  refusal limit, which is `EB-177`, filed and open — two un-upgraded
-  *Water's Edge*, one of them enchanted Sharp, are BOTH unplayable,
-  because the bare title is ambiguous and the qualifier `EB-173` added
-  only separates an upgrade. A4 and A6 wait and are NOT minted; A1-extended (enemy
-  composition/intent setters) and A5 (vision input) are DEFERRED.
-  Routing: **Kokomi slice 2 = R213 E1's Charge arms, before Klee** — slice 1
-  tests priced Companion Block at the turn and does not exhaust Kokomi.
-  Slice 1 stays under R213/R216, not retroactively graded.
-  **Slice 1 has now run TWICE.** Round 1 (2026-08-27, `0.2.1232+proto`):
-  eleven turns, two graders each, GPT refused `t02`, and the seat's pair
-  read RETURNED all seven arms — *the boards, not the cards*. Round 2
-  (2026-08-28, `0.2.1248+proto`, branch `kokomi-slice-1-round-2`) re-staged
-  the same eleven cards on rebuilt boards with **no printed number moved**:
-  `EB-165` CLOSED and its `exact_hand` door makes the staged hand the
-  declared hand (declared and observed closeness now agree to four decimals
-  on all eleven, where round 1 disagreed on every turn), the redundant
-  standalone Block is gone, and thresholds are written on both halves.
-  Verdicts: **4 SURVIVES / 7 REFUSED**, every refusal `intent_insensitive`
-  and **three of them shipped controls**. The pair read
-  (`review/qa/kokomi-slice-1-r2-pair-review-codex-gpt-5.6-sol.md`)
-  **ADVANCES two arms** — Tidal Barrage's counting basis and Shinobu's
-  priced shape — and RETURNS five; every one of the seven prototype cards
-  was played or named as the serious alternative, against two ignored
-  outright in round 1. **The round's own finding was `EB-164`, now CLOSED:** four
-  graders and the reviewer read *All Streams Flow* as 13 where it deals 9,
-  which manufactured the lethal lines all seven refusals rest on;
-  `staged_turn execute` settled it live at 22 HP → 1. The fix is ONE rule at
-  the generator, in `gen_klee_cards.py`'s docstring — **a face states a
-  scaling exactly once**: where the printed number already carries the rider
-  the source is named in that number's own sentence (", already including
-  [gold]Charge[/gold]") and no separate sentence asserts it; where the count
-  does not exist until the card resolves the per-unit rate is printed beside
-  the number (R215 C, unchanged). Seventeen generated faces and one
-  hand-written one were re-worded, **no sheet number moved**, all three
-  manifests' coverage counts are unchanged, and
-  `tools/lint_face_scaling.py` on the ci lane refuses a face that states a
-  scaling twice — or claims a fold on a number with nothing folded in. **Round 3 (2026-08-28, `0.2.1252+proto`, branch
-  `kokomi-slice-1-round-3`)** re-staged the same eleven on **honest faces**
-  (`EB-164` fixed at the generator, eighteen faces re-worded, no printed
-  number moved) with **two board repairs, both removing a REAL lethal line
-  checked at true card values**: group B's attacker gains 6 Block (`set_hp`
-  clamps at a creature's maximum, so Block is the only verb that reaches
-  past 10/10), and group D is re-rolled onto `21RD94VY60` — fourteen rolls
-  recorded, one body telegraphing 4, and **no roll produced a 5 or a 6**, so
-  the 6-Block half now fully answers the hit instead of three quarters of it.
-  Verdicts **7 SURVIVES / 4 REFUSED** (`t03`, `t05`, `t07`, `t09`; two are
-  shipped controls), where round 2 was 4 / 7. **A REPLAY step is now part of
-  the protocol:** every graded line is re-played live and the grader's
-  arithmetic set against the board, a contradiction being recorded as
-  `misread` and never re-graded. **No turn was flagged `misread`**, and all
-  eleven replays now confirm the form to the hit point: eight completed on the
-  day, and the other three — held up because `execute` could not answer a modal
-  prompt — replayed on 2026-08-28 once **`EB-170` CLOSED**. A play in
-  `chosen_line` may state `exhaust` / `choose` in the printed vocabulary, an
-  unanswered prompt STOPS the replay as `modal_unanswered` rather than being
-  guessed at, and `--answer "<prompt>=<choice>"` carries an operator's answer
-  for a form written before the keys, logged as such: `t02` 38 → 21 with Block
-  0 → 5, `t04` both Leaf Slimes dead and Twig Slime (S) 10/6 → 4/0, `t10`
-  24 → 1. The pair read
-  (`review/qa/kokomi-slice-1-r3-pair-review-codex-gpt-5.6-sol.md`, no
-  correction attached) **ADVANCES five arms and RETURNS two**, with no
-  ESCALATE: Thoma's either shape needs a more discriminating board, and
-  Shinobu's priced shape needs one where the multi-enemy removal does not
-  carry the Block for free. Packet:
-  `review/active/kokomi-slice-1-2026-08-27.md` §§Round 2, Round 3.
-  **`EB-169` CLOSED:** a curated register of cards with an OPEN
-  printed/runtime defect (`understudy/face_defects.py`, shipping EMPTY
-  because `EB-164` is closed) refuses `open_face_defect` at `check` and
-  `stage` before a launch and again at `seat grade`, with
-  `tools/lint_face_defects.py` on the ci lane failing an entry whose
-  backlog row has left HEAD. Seat
-  testimony lives in `review/qa/<turn>/form-*.json` and gitignored
-  `understudy/logs/seat/`, and never enters an Understudy report, a
-  win-rate table or a measurement register.
+- **Design course-correction — R213 (2026-08-26), authority amended R217
+  (2026-08-28), pin moved R218 (2026-08-28).** Status only: the words are
+  the three commits; the running narrative is the slice packet.
+  - **Standing law.** Freeze on W10/W11, staged levers, tuning and new
+    windows. Quarantined prototype surface (`EB-147`), proven from OUTSIDE
+    on every release build since `0.2.1209`. GPT's **D1–D9 are LAW** as the
+    design charter, provisional through the Klee slice, **no numeric design
+    bands**, decision closeness (R213 F) the only numeric falsifier. Kokomi →
+    Klee → Furina, sequentially; E1–E4 reopened. **The independent seat**
+    ([USER]'s ChatGPT/Codex subscription through `understudy/seat.py`;
+    independence by model FAMILY) RETURNS a prototype or ADVANCES it with
+    no [USER] form; two seats disagreeing ESCALATES; SURVIVES is never ship
+    approval. [USER] owns briefs, direction picks, money, final signoff.
+  - **Instruments live.** Staged turns, blind packets, the four-question
+    form and closeness (`EB-149`); exact hand (`EB-165`); replay of every
+    graded line, modals answered from the form or refused (`EB-170`);
+    open-face-defect preflight (`EB-169`, register empty); a face states
+    its scaling once (`EB-164`, `tools/lint_face_scaling.py`); blind play of
+    any screen with a one-thread seat driver (`EB-167`/`EB-168`, six sealed
+    sessions under `review/qa/blindplay/`, records name both builds);
+    pinned managed assemblies in the vault (`EB-172`).
+  - **Kokomi slice 1** (`review/active/kokomi-slice-1-2026-08-27.md`,
+    §§Round 1–3): three rounds on the quarantined surface, **no shipped
+    number moved**. Round 3 (honest faces, `0.2.1252+proto`): 7 SURVIVES /
+    4 REFUSED, all eleven replays confirm the forms, pair read **ADVANCES
+    five** (Tidal Barrage, Warding Ring, Crimson Guard, Oni Rush,
+    Superlative Guard) and **RETURNS two** (Sanctifying Circle, Blazing
+    Ooyoroi — their boards, per the review). Advance means whole-fight play
+    next, not ship.
+  - **Blind-play testimony** (R217 G — iteration feedback, never
+    validation): runs B5 and B6 name, unprompted, the tension as immediate
+    Block versus Charge investment, Bake-Kurage as the win condition, and
+    the repetitive state as "Water's Edge versus Coral Guard"; B6 reports
+    Burst accumulating with no visible spend and Gorou's Charge/Burst grant
+    unprinted — the Charge-keyword gap R215 D deferred into E1, now with a
+    blind witness. Open tool rows from the runs: `EB-177`, `EB-178`,
+    `EB-179`.
+  - **Next.** Kokomi slice 2 = R213 E1's Charge arms, before Klee. A4/A6
+    unminted until their prerequisites are real; A1-extended and A5
+    DEFERRED. Slice 1 stays under R213/R216.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
   (Kokomi's are newest). **Animation sprint 2.** **Axis-validity tracks** —
   Track A / Track E logs.
