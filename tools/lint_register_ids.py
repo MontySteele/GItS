@@ -116,10 +116,16 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 188,   # EB-188 minted 2026-08-29 by the Klee slice 1 round-2
-                 # funnel run: a staged-turn replay's run seed reads back
-                 # None on 7 of 12 launches (`seed_not_honoured`), and an
-                 # identical retry always works. OPEN.
+    "EB": 191,   # EB-188/189/190 minted 2026-08-29 by the process-review
+                 # pass (EB-188: the prototype-arm door for whole-fight
+                 # blind play, BUILT, live acceptance owed; EB-189: the QA
+                 # pilot's ~59k lines under `review/qa/` want compacting;
+                 # EB-190: recorded authorship on the prototype surface,
+                 # CLOSED the same day). EB-191 minted by the Klee slice 1
+                 # round-2 funnel run: a replay's run seed reads back None
+                 # on 7 of 12 launches (`seed_not_honoured`); an identical
+                 # retry always works. OPEN. (It was minted as EB-188 in
+                 # parallel and renumbered at integration.)
                  # EB-185/186/187 minted 2026-08-29 by the Klee slice 1
                  # funnel run. EB-186: at a Spark bank of 3 the game
                  # prints EVERY Attack in hand at cost 0 while the rule
@@ -249,7 +255,14 @@ CEILINGS: dict[str, int] = {
                  # exp_shop_companion_channel instrument (R68); EB-140 minted
                  # at the R211 W3 build (the codegen upgrade-delta gap);
                  # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
-    "M": 46,     # M46 minted 2026-08-28 beside EB-171: the pinned build
+    "M": 50,     # M47..M50 minted 2026-08-29 by the process-review pass: the
+                 # four decisions the two prototype-slice packets carry that
+                 # are genuinely [USER]'s, moved out of the packets and into
+                 # the register the read order points at. M47 Bag of Tricks
+                 # (the held Klee arm), M48 the automatic free-Attack rule
+                 # against D2, M49 the pilot's frozen Charge term, M50 the
+                 # Charge accrual rule itself.
+                 # M46 minted 2026-08-28 beside EB-171: the pinned build
                  # environment stopped describing the machine mid-sitting, and
                  # which way that is repaired -- back to the `public` branch,
                  # forward to 0.111.0, or a kept copy of the old tree -- is a
@@ -273,11 +286,12 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        180, 181, 182, 183, 184, 186, 188,
+        180, 181, 182, 183, 184, 186,
+        188, 189, 191,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 48, 49, 50}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

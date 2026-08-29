@@ -343,10 +343,24 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     priced honestly, the draw destination costs 16 damage and 5 Block and
     no grader took it). A fourth arm, Bag of Tricks, stays held for
     [USER] at §6.1, and §6.2's question about the automatic rule now has
-    two rounds of live witness. Also minted: `EB-188` (a replay's run
+    two rounds of live witness. Also minted: `EB-191` (a replay's run
     seed reads back `None` on 7 of 12 launches; a retry always works).
-  - **Next.** Slice 2's §9 picks, slice 1's `EB-184`, Klee's `EB-186`
-    before any re-run of its arms, and §6's two held [USER] calls.
+  - **Process status (2026-08-29 review pass).** Two Klee arms are
+    **PROVISIONAL** on an independence breach — the doctrine seat authored
+    Rummage's text and chose Slow Burn's number and the same family then
+    graded them. **No third family** (`[USER]`, 2026-08-29); role
+    separation is enforced by recorded authorship instead (`EB-190`), and
+    both arms wait on a **Klee round 3** re-authored from the clause.
+    Whole-fight blind play is the **automatic** gate after ADVANCE; the
+    door is BUILT (`EB-188`, `embark --arm`) and its live acceptance —
+    one sealed run on a dev build — is owed. Kokomi's Charge accrual rule is now an open [USER] pick (`M50`),
+    with the pilot's Charge term at `M49` and Klee's two held calls at
+    `M47`/`M48`; slice 2's round-2 boards are **drafted and HELD** on
+    `M50` (branch `kokomi-slice-2-round-2`, unstaged).
+  - **Next.** Klee round 3 (Rummage and Slow Burn re-authored from the
+    clause, `authored_by: [claude]`) and `EB-188`'s live run with Second
+    Helping granted; slice 2's two §9 picks (`M49`/`M50`), slice 1's
+    `EB-184`, and Klee §6's two held [USER] calls (`M47`/`M48`).
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
@@ -359,7 +373,9 @@ Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
 countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
-Art debt); and the Fontaine Rares close-out (`M10`).
+Art debt); the Fontaine Rares close-out (`M10`); and the four prototype-slice
+calls (`M47` Bag of Tricks, `M48` the automatic free-Attack rule, `M49` the
+pilot's Charge term, `M50` the Charge accrual rule).
 
 ## Watch register (dormant)
 

@@ -561,6 +561,35 @@ the pilot's own score surface, quotable under R215 B's exception because it
 reads the TURN. SURVIVES means **not yet falsified** — nothing here rates a
 turn. Depth: `understudy/README.md`.
 
+### Doctrine seat protocol
+
+The seat's other job — reading a slice proposal against the character charter
+before anything is built — answers **FOLLOWS** or **REQUIRES_MODIFICATION** per
+arm and **names the clause** it ruled against. That is the whole output. It may
+not supply card text, a number, a mode or a rewritten row: a remedy it
+volunteers is **discarded**, and Claude re-derives from the named clause. Where
+a number has to be chosen, Claude derives it by the shipped-face rule (lift the
+value off a shipped card, never invent a breakpoint) and the seat only confirms
+that the derived row FOLLOWS.
+
+The reason is R217 C: independence is by MODEL FAMILY, author against grader. A
+seat that writes a row and then grades it has graded its own work, and the
+outcome is not evidence. **Klee slice 1 is the case** — the seat authored
+Rummage's text and chose Slow Burn's number, then the same family graded and
+pair-read both, and those two arms' outcomes are provisional
+(`review/active/klee-slice-1-2026-08-29.md` §11). There is no third family and
+none is being added; the roles are fixed at two — **Claude authors, GPT grades
+and reviews** — so the separation has to be enforced structurally.
+
+**How it is enforced (`EB-190`).** Every prototype row on
+`docs/prototype-surface.yaml` records `authored_by:` as a list of model
+FAMILIES (`claude`, `gpt`). Anything a seat contributed beyond a clause name —
+text, a number, a mode — adds its family to that list. `seat grade` and
+`seat review` REFUSE a turn or a pair whose row lists the seat's own family.
+`check_independent` is the door this rides on: it already refuses the Claude
+family from the blind seat, and this generalises it from who is running to what
+the row records about who wrote it.
+
 ### Blind play (`EB-167` / `EB-168`)
 
 The same blindness widened from one staged turn to a whole run, and a seat
@@ -630,6 +659,20 @@ labelled with the file it came from, `mods\klee\manifest.json` and
 vendored bridge's own version and never ours — run seed read back off the
 wire, prompt sha256, action count, termination reason) and the model's
 records verbatim under the R217 G label. The author's own model family is refused as tester (R217 C).
+
+**After ADVANCE.** A prototype arm the pair read ADVANCES goes to **whole-fight
+blind play on a dev build**, automatically. It is the next gate, not a pick, and
+nobody is asked for a form to start it. It has not run for any arm yet, and the
+reason is structural: prototype rows are quarantined out of every pool, so a
+blind run cannot draw one. Until `EB-188` lands the door — a `+proto` pool
+inclusion, or the dev door granting a named arm into the starting deck — the
+gate is **blocked, not skipped**, and an arm that reads ADVANCE waits there
+rather than moving on without it.
+
+**One round, one branch.** A funnel round runs on its own branch cut from the
+pushed tip. Never continue a round on a branch already handed over for merge:
+Klee slice 1's round-2 grades landed ahead of the `STATE.md` line that described
+round 1, because round 2 was written on the merged branch and went in with it.
 
 `KleeTests` runs the shipped `klee.dll` against the real game
 assemblies **headless** — no Godot, no launch. It is opt-in, not a deploy gate;
