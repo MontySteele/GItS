@@ -326,6 +326,8 @@ CEILINGS: dict[str, int] = {
                  # seat's ADVANCE requires "periodic review by this seat" and
                  # names no rate, so the rate is [USER]'s. The mechanism ships
                  # on the default and takes any N.
+                 # M58 ANSWERED 2026-08-29 by R220 G: N = 4, the shipped
+                 # default -- it LEFT OPEN_IDS in that commit.
                  # M54-M57 minted 2026-08-29 by the KURAGEMEM001 blind run:
                  # Rule 1 is not taught (P3 0 of 10), P4's half (b) failed so
                  # the acceleration keyword stops being optional, the sealed
@@ -391,7 +393,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # model a TESTER seat and no grading chair. M59/M60 join with the two
     # slate rows R220 mints.
     "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 52,
-                    54, 55, 56, 57, 58, 59, 60}),
+                    54, 55, 56, 57, 59, 60}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

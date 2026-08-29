@@ -408,8 +408,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     superseded and needing closing), `M50` (re-pointed at the
     Kurage-memory redesign's four unruled rows, pick 3 now answered on
     `M60`), `M52` (the Furina reframe's two countersigns), `M54`–`M57`
-    (the blind run's four), `M58` (the tester seat's spot-check rate),
-    `M59` (the reframe's sixteen picks) and `M60` (the Burst
+    (the blind run's four), `M59` (the reframe's sixteen picks) and `M60` (the Burst
     retirement's four). Slice 2's round-2 boards
     stay **drafted and HELD** on `M50` (branch `kokomi-slice-2-round-2`,
     unstaged), and the redesign is what they now wait on.
@@ -478,8 +477,8 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     non-authorable, periodic seat review, and review of any line that
     spends a resource before a resource-reading play);
     `understudy/local_tester.py` is the mechanism and OPERATIONS' **Local
-    tester seat** section is the amended rule. One pick is left open there:
-    the periodic-review rate, `M58`.
+    tester seat** section is the amended rule. The periodic-review rate is
+    settled at N = 4 (`M58`, answered by R220 G).
   - **Next.** Klee slice 1 has no open engineering: all three arms read
     ADVANCE on clean independent reads and Second Helping has its
     whole-fight run. Owed next are the whole-fight runs for Rummage and
@@ -502,9 +501,8 @@ Art debt); the Fontaine Rares close-out (`M10`); and the eleven
 prototype-slice, redesign and slate calls (`M47` Bag of Tricks; `M49` the
 pilot's Charge term, now superseded; `M50` the Kurage-memory redesign's four
 unruled rows, pick 3 answered on `M60`; `M52` the Furina reframe's two
-countersigns; `M54`–`M57` the blind run's four; `M58` the local tester seat's
-spot-check rate; `M59` the reframe's sixteen design picks; `M60` the Burst
-retirement's four picks). `M48` was answered by R219; `M51` was answered by
+countersigns; `M54`–`M57` the blind run's four; `M59` the reframe's sixteen design picks; `M60` the Burst
+retirement's four picks). `M48` was answered by R219; `M58` by R220 G (N = 4); `M51` was answered by
 R220 F and `M53` by R220 E.
 
 ## Watch register (dormant)
