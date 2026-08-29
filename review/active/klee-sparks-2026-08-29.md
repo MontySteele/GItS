@@ -569,3 +569,50 @@ family's work.
    §2.1 shows it is half a different mechanic. That is a measurement-law
    question about `docs/role-tempo-baseline.md` and
    `tools/canon_role_tempo.py:126`, and it is yours. → depends on nothing.
+
+---
+
+## 9. The independent seat's doctrine read
+
+Run 2026-08-29 under the doctrine seat protocol (`OPERATIONS.md`), model
+`gpt-5.6-sol`, on this packet at `412b929`. Verbatim output and provenance:
+`review/qa/klee-sparks-doctrine-review-codex-gpt-5.6-sol.md`; prompts:
+`review/qa/klee-sparks-doctrine-review-prompt.txt` and
+`…-r2-prompt.txt`. The seat was told the DIRECTION is [USER]-ruled and closed,
+and that its own family co-authored it (§7), so it gated the cards and the
+picks only and issued no verdict on the base-rule row.
+
+Every quotation below is the seat's own, unedited. A blank clause cell means
+the seat cited none for that row.
+
+| pick | seat's option (verbatim) | doctrine | clause cited (verbatim) | vs my reading |
+|---|---|---|---|---|
+| 1 | *"1, Relic keeps its body, and a Basic card carries the buffer; 5, Convert one Basic Attack into the starter's spark sink; best: 1."* — and *"Options 1 and 5 together follow."* | FOLLOWS | D2: *"The control must be reachable early and reliably — starter kit, starting relic, base system, or the ordinary pool — not only through a rare."* | agrees |
+| 2 | *"1, Match Regent exactly."* | FOLLOWS | D2: *"Every persistent resource and every automatic engine must feed a decision the player can steer."* | agrees |
+| 3 | *"2, Tinder Toss; 3, Bang Bang!; 4, Dodoco Blast; 5, Firework Finale; best: 2. Option 1 ruled out — R69 / R29d."* | REQUIRES_MODIFICATION | R69 / R29d: *"Display names live in the unique-names namespace, reserved names annotated with the owning kind."* | **DISAGREES** — §4.2 offered all five candidates; the seat rules candidate 1 out |
+| 4 | *"1, The tight set."* | FOLLOWS | D7: *"Each pool carries linear signposts AND modular tools."* | agrees |
+| 5 | *"1, STRICT conversion."* — sub-pick *"(a), already-priced Attacks are unaffected; (b) ruled out — D2."* | FOLLOWS | D2: *"Every persistent resource and every automatic engine must feed a decision the player can steer: timing, targeting, placement, acquisition, conversion, or forgoing."* D4: *"At the decision point the player can perceive and forecast the consequences that matter."* | agrees |
+| 6 | *"1, `SPARK_ALT_COST_ENABLED = False`."* | FOLLOWS | D4: *"Text that cannot bind in the shipped world, invisible feeds and misleading calculated displays are defects."* | agrees |
+| 7 | *"3, derive it from the new sink prices once §4's numbers are ruled."* | FOLLOWS | D4: *"At the decision point the player can perceive and forecast the consequences that matter."* | agrees |
+| 8 | *"2, Keep `SparkPower` and build a Klee Spark badge."* | FOLLOWS | D4: *"At the decision point the player can perceive and forecast the consequences that matter, through the card, a keyword, a persistent UI element or a character rule."* | agrees |
+
+And the three gate questions:
+
+| gate | seat's verdict | clause cited (verbatim) |
+|---|---|---|
+| G1 — do the five Spark-cost Attacks fix the sink problem within doctrine? | REQUIRES_MODIFICATION | R69 / R29d: *"Display names live in the unique-names namespace, reserved names annotated with the owning kind."* |
+| G2 — does the STRICT Rare Power fix it within doctrine, given that no either/or cost UI exists? | FOLLOWS | D2: *"Every persistent resource and every automatic engine must feed a decision the player can steer."* D4: *"At the decision point the player can perceive and forecast the consequences that matter."* |
+| G3 — is a Spark bank whose only sinks are printed card prices steerable under D2 and visible under D4? | FOLLOWS | D2: *"Every persistent resource and every automatic engine must feed a decision the player can steer."* D4: *"At the decision point the player can perceive and forecast the consequences that matter, through the card, a keyword, a persistent UI element or a character rule."* |
+
+**The one disagreement, and it is a real catch.** §4.2 candidate 1 proposed the
+name **Sizzle**, and `Sizzle` is already a shipped Klee Common Attack
+(`docs/klee-cards.yaml:158`, upgrade at `docs/klee-upgrades.yaml:46`; the
+character design doc's §4 names it too). §4.2 said the five names go through
+the reserved-names lint before anything is authored; the seat did the lint's
+job first and unaided. The name is [USER]'s to settle when PICK 3 is answered —
+I have not chosen a replacement here, because the seat may not supply one and
+neither may I in the same breath as recording its verdict.
+
+**No clause moved that the packet had not already put in front of the seat**,
+and the seat named none beyond D2, D4, D7 and the card-sheet naming rule. It
+volunteered no remedy in either round.
