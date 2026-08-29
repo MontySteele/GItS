@@ -488,6 +488,20 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `understudy/local_tester.py` is the mechanism and OPERATIONS' **Local
     tester seat** section is the amended rule. The periodic-review rate is
     settled at N = 4 (`M58`, answered by R220 G).
+  - **Funnel throughput — R221, BUILT, unproven live.** A blind-QA round
+    measured ~70 min for 8 turns, with roughly a third of it the game idling
+    while models read. `local_tester round` now RUNS a round rather than
+    reading it: stage / read / grade / replay pipelined behind one game lock
+    with a look-ahead of one board, ONE `soak.Session` for the whole round
+    (the process is still restarted between boards — the wire has no in-run
+    exit, so `abandon_run` from a fresh launch is the only way back to a
+    menu), `--first N` sequential stopping with UNRUN rows carrying pinned
+    seeds, and `staged_turn packet-section <slug>` writing the results block
+    from the records with the prose read left as a marked empty slot.
+    **The first pipelined round is its proof and has not run.** The
+    fresh-Opus control's retirement threshold is `M62`: `KLEESPARK-R1`
+    measured Qwen-vs-Opus verdict agreement at **4 of 8**, so the control
+    STANDS under every option on that row.
   - **Next.** Klee slice 1 has no open engineering: all three arms read
     ADVANCE on clean independent reads and Second Helping has its
     whole-fight run. Owed next are the whole-fight runs for Rummage and

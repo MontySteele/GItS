@@ -749,11 +749,56 @@ python -m understudy.local_tester round <t01> <t02> … [--seat-spot-check N]
 
 `read` reads one turn and hands the form to `staged_turn grade`; `--position`
 is the turn's one-based place in the round, which is what the spot-check rate
-counts. `round` reads a whole round in order and ends by printing the turns
-that still owe the Codex seat, with the `understudy.seat grade` command for
-each. `--plan-only` prints the schedule and sends nothing — commit the
-schedule before the readings, for the same reason a prediction slate is
-committed before a run.
+counts. `round` RUNS a whole round — stage, read, grade, replay, board by
+board — and ends by printing the turns that still owe the Codex seat, with the
+`understudy.seat grade` command for each. `--plan-only` prints the
+pre-registered order and the preflight result and sends nothing; commit that
+schedule before the round, for the same reason a prediction slate is committed
+before a run.
+
+**The round pipelines its phases and launches one game (R221).**
+
+```
+python -m understudy.local_tester round <t01> <t02> … --plan-only
+python -m understudy.local_tester round <t01> <t02> … [--first N] [--why ...]
+python -m understudy.local_tester round <t01> … --serial      # the old order
+python -m understudy.local_tester round <t01> … --attach      # someone else's game
+python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md>]
+```
+
+- **Two lanes, one game.** Game-bound steps (`stage`, `execute`) are
+  serialized under one lock; the model-bound read runs beside the game's next
+  stage, with a look-ahead of exactly one board. `--serial` restores the old
+  strictly-phased order so a live comparison is possible.
+- **`--first N`** is R221 B's sequential stopping, default **4**. The order is
+  the smallest set covering every registered slot twice (ties to the closer
+  closeness reading), and `--first` is raised automatically where the cover
+  needs more. After the first set, a slot with two or more agreeing grades is
+  DECIDED; the rest of the boards run only if they carry an UNDECIDED slot,
+  and the others land in the ledger as **UNRUN with their seeds pinned**.
+  `--first 0` runs every board. **A board declares its slots with a `slots:`
+  list in its turn file**; a board that declares none carries one slot — its
+  own id — so a round of undeclared boards never stops early, which is the
+  safe default rather than a silent one.
+- **One launch, and the part that is not buyable.** The round opens ONE
+  `soak.Session`: the appid, the bridge deploy, the speed capture and the
+  reversibility ledger are paid once rather than once per `stage` and once per
+  `execute`. **The process is still restarted between boards**, because
+  `soak.RunDriver._to_main_menu` starts from a menu, a staged board leaves the
+  game mid-combat, and the wire has no in-run exit (`abandon_run` is a
+  main-menu option). Each relaunch is recorded with its reason; a crashed game
+  relaunches once and a second failure stops the round. Seed pinning is
+  unaffected — the seed is fired at `_embark` on the attach path too, and read
+  back off the wire (R95). `--attach` hands the whole lifetime to whoever is
+  holding the game (`embark --hold`).
+- **Both preflights run over every planned board before the launch**, so
+  `EB-169` and `EB-187` refuse a round at a parse rather than after it has
+  started spending game time.
+- **`staged_turn packet-section <slug>`** writes the round's results block
+  from `review/qa/<slug>-t*/` and `review/qa/ledger.tsv`: per-turn rows, the
+  per-slot tally, what the round spent (Codex reads counted separately), the
+  UNRUN boards, and the ledger's own banners quoted. `--write <packet.md>`
+  appends it. **The prose read is a marked empty slot and is never generated.**
 
 **The four conditions.**
 
