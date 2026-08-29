@@ -1,0 +1,29 @@
+{
+ "turn_id": "kokomi-slice2-t01",
+ "packet_sha256": "19d55c8a51b6b973d988c699d689cc16d27ef74ccdde1f1d643b73bcbce39cf6",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Sludge Spinner",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Coral Guard",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played All Streams Flow to the Sea on Sludge Spinner, then Coral Guard, dealing 9 damage and gaining 5 Block against the incoming 8 damage.",
+ "q2_other_line_considered": "I seriously considered playing All Streams Flow to the Sea followed by Water's Edge for 15 total damage, accepting the full 8-damage attack.",
+ "q3_what_it_gave_up": "It gave up 6 immediate damage compared with the two-attack line and still allowed 3 damage through.",
+ "q4_different_intent": "Yes. If the enemy had not intended to attack, I would have played All Streams Flow to the Sea and Water's Edge for maximum immediate damage.",
+ "q4_changed": true
+}

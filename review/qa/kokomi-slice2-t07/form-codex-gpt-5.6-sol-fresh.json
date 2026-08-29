@@ -1,0 +1,35 @@
+{
+ "turn_id": "kokomi-slice2-t07",
+ "packet_sha256": "775fbf6d8d2903cd2844100210b32aa7c0650db9af5c7b5d3952d4eb83931785",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Coral Guard",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Sludge Spinner",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Sludge Spinner",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Coral Guard, then Water's Edge and All Streams Flow to the Sea at Sludge Spinner, gaining 5 Block and dealing 15 damage for all 3 Energy.",
+ "q2_other_line_considered": "I seriously considered Rally the Isles followed by Coral Guard, preserving the same 5 Block while gaining 1 Charge and triggering Muster 2, but the resulting cards are unspecified and random while that line deals no immediate damage.",
+ "q3_what_it_gave_up": "It gave up Rally the Isles' Muster 2 and 1 Charge in exchange for 15 known damage.",
+ "q4_different_intent": "Yes. If Sludge Spinner had not intended to attack, I would have been more willing to replace Coral Guard and the two-attack line with Rally the Isles plus one attack, since the known value of the Block would be lower.",
+ "q4_changed": true
+}

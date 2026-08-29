@@ -1,0 +1,29 @@
+{
+ "turn_id": "kokomi-slice2-t06",
+ "packet_sha256": "a04b0d6e34d293c24a9801c32c0d60a91375665380817558d763a69660350bb3",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Twin Tides",
+   "target": null,
+   "exhaust": null,
+   "choose": "Spend 6 Charge: gain 12 Block."
+  }
+ ],
+ "q1_what_did_you_play": "I played All Streams Flow to the Sea on Nibbit for 9 damage, then Twin Tides, spending 6 Charge to gain 12 Block and cover the incoming attack.",
+ "q2_other_line_considered": "I seriously considered Water's Edge followed by All Streams Flow to the Sea for 15 total damage, accepting the full 12 damage.",
+ "q3_what_it_gave_up": "It gave up 6 immediate damage compared with the two-attack line and spent 6 Charge in exchange for preventing the telegraphed 12 damage.",
+ "q4_different_intent": "Yes. With no attack or a substantially smaller attack telegraphed, I would have favored Water's Edge plus All Streams Flow to the Sea for more damage.",
+ "q4_changed": true
+}

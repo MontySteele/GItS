@@ -737,3 +737,33 @@ def test_the_declared_tokens_are_real_classes_in_the_mod():
            / "SpotlightCards.cs").read_text(encoding="utf-8")
     for cls in ("EtherealSpotlight", "CenterStageOption", "GuestCastOption"):
         assert f"class {cls}" in src
+
+
+def test_card_key_folds_the_games_rich_text_tags():
+    """A "Choose one" modal names its options WITH the game's markup left in,
+    while the packet a grader reads is scrubbed of markup before the face is
+    printed. So a replay answering the modal in the printed vocabulary -- the
+    only vocabulary a blind grader has -- could not match its own option, and
+    every priced modal line stopped `modal_unanswered`.
+
+    Found live on Kokomi slice 2 `t06`, on BOTH graders, 2026-08-29: the screen
+    offered `Spend 6 [gold]Charge[/gold]: gain 12 Block` and both forms said
+    `Spend 6 Charge: gain 12 Block.`, which is what the card prints.
+
+    The tags fold; the words between them do not, because they are part of the
+    name.
+    """
+    from understudy.scenario import card_key
+
+    screen = "Spend 6 [gold]Charge[/gold]: gain 12 Block"
+    printed = "Spend 6 Charge: gain 12 Block."
+    assert card_key(screen) == card_key(printed)
+    assert card_key(screen) == "spend 6 charge: gain 12 block"
+
+    # The word inside the tag is kept, so two options that differ only in the
+    # tagged word stay different.
+    assert card_key("Spend 6 [gold]Charge[/gold]") != card_key("Spend 6 Burst")
+
+    # Every other spelling this function already folded still folds.
+    assert (card_key("KLEEMOD-CORAL_GUARD") == card_key("coral_guard")
+            == card_key("Coral Guard") == "coral guard")
