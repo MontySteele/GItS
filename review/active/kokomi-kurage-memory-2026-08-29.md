@@ -1870,7 +1870,188 @@ looked at once the dev build is up and before the tester is let in:
   exactly that distinction, so a strip that fails it here fails the slot before
   the run starts.
 
-### 13.6 What this run cannot answer
+### 13.6 Pre-tester gates — RUN 2026-08-29, BOTH BLOCKED
+
+The two eyes-on gates of 13.5 item 7 were attempted on the `+proto` dev build
+before letting any tester in. **Neither gate could be read, because the `+proto`
+build cannot start a run at all.** The sealed blind run is NOT runnable on the
+build as it stands. Nothing below is a grade of the design; it is a report that
+the instrument is broken.
+
+**Pin, re-verified before the deploy** — all four facts match `STATE.md`:
+`release_info.json` `v0.111.0` / commit `41cef1ea` / `main_assembly_hash`
+`222455745`; `appmanifest_2868840.acf` `buildid 24724944`, `BetaKey
+public-beta`; Workshop `3737335127` `BaseLib.json` `v3.4.5`. No game process
+was running at the start.
+
+**The deploy, which succeeded.** `gen_prototype_cards --check` reported the
+surface up to date; `klee-mod\build\deploy_proto.ps1` stamped and installed
+**`0.2.1416+proto`**, `validate: OK` on the full gate (418.7 s, S7 suite
+400.4 s). The build that was replaced was the release build `0.2.1357`. So the
+package is well-formed and the failure below is a runtime one that no lint,
+no IL test and no validate rule sees.
+
+#### The blocker: the `+proto` build throws before a run can open
+
+`python -m understudy.embark --character kokomi --arm proto_kurages_oath_memory`
+(seedless — a gate check, not the sealed run) ended:
+
+```
+embark error: no_embark_path: menu_screen 'popup' offers none of the embark
+options; saw ['report_bug']
+```
+
+The popup is an error popup. `godot.log` carries the cause three times, and the
+first occurrence is the one that matters:
+
+```
+[ERROR] [klee] Failed to inject loc strings:
+System.TypeInitializationException: The type initializer for
+'KleeMod.Cards.Prototype.Generated.PrototypeRoster' threw an exception.
+ ---> System.Collections.Generic.KeyNotFoundException: The given key
+ 'CARD.KLEEMOD-PROTO_ITTO_SUPERLATIVE_SUPERSTRENGTH_EITHER' was not present
+ in the dictionary.
+   at MegaCrit.Sts2.Core.Models.ModelDb.Get[T]()
+   at MegaCrit.Sts2.Core.Models.ModelDb.Card[T]()
+   at KleeMod.Cards.Prototype.Generated.PrototypeRoster..cctor()
+   at KleeMod.PrototypeCards.For(String characterId)
+   at KleeMod.KleeMod.InjectLocStrings()
+```
+
+then, from the same poisoned type, `[ERROR] [klee] SELFCHECK aborted: …` and
+finally, on Embark:
+
+```
+[ERROR] Exception starting singleplayer run :
+System.TypeInitializationException … PrototypeRoster …
+   at KleeMod.KokomiOffPoolCards.BuildAll()
+   at KleeMod.KokomiCardPool.GenerateAllCards()
+   at MegaCrit.Sts2.Core.Nodes.NGame.StartRun(RunState runState)
+```
+
+**The ordering, with file:line.** Three facts compose into the failure and no
+one of them is wrong on its own.
+
+1. `klee-mod/KleeCode/KleeMod.cs:352-356` — `LocManager_Initialize_Patch` is a
+   Harmony **postfix on `LocManager.Initialize`**, so `InjectLocStrings` runs
+   during localisation bring-up, early in boot.
+2. `klee-mod/KleeCode/KleeMod.cs:316-329` — §12.6 item 14's block, added by
+   commit `0b357b6` ("Kurage's Oath keys to the memory play, and the prototype
+   face says so"), calls `PrototypeCards.For("kokomi")` inside that postfix in
+   order to read the key back off the live model (R4). That call is the FIRST
+   touch of `PrototypeRoster` in the process.
+3. `klee-mod/KleeCode/Cards/Prototype/Generated/PrototypeRoster.cs:22-62` — the
+   roster is an **eager `static readonly` dictionary** that resolves
+   `ModelDb.Card<T>()` for every prototype row of every character. The mod's
+   card models are `autoAdd: false`
+   (`ProtoIttoSuperlativeSuperstrengthEither.cs:67-70`, and every generated row)
+   and are constructed lazily at pool-build time — the run-start stack above is
+   where that happens. At `LocManager.Initialize` time **no mod card is in
+   `ModelDb` yet**, so the first entry in the dictionary's `"klee"` list throws.
+
+The Kokomi rows are not implicated: `"furina"` is empty and `"klee"` is
+enumerated before `"kokomi"`, so the first Itto row is simply the first thing
+resolved. Any prototype row would have thrown in its place.
+
+**Why it takes the whole build down rather than one card.** A static
+constructor that throws poisons its type for the life of the process — the CLR
+caches the `TypeInitializationException` and rethrows it on every later access.
+So one premature touch during loc injection permanently disables
+`PrototypeRoster`, which is why the self-check aborts and why
+`KokomiCardPool.GenerateAllCards()` — a legitimate, correctly-ordered caller —
+also throws. **No run of any character can be started on a `+proto` build.**
+
+**Why nothing caught it.** §12.7 records that the §12.5 smoke was not re-run for
+pick 4's build, and the prototype pin tests
+(`klee-mod/KleeTests/Prototype/KurageMemoryPinTests.cs:342-346`) assert on the
+IL **strings** inside `InjectLocStrings`, not on when it runs. `validate.ps1`
+passed whole. This defect is only visible by booting the dev build, which is
+`OPERATIONS.md`'s port-checklist item 6 ("re-verify live, do not infer") applied
+to a flag rather than to a game update.
+
+**The proposed fix, NOT applied.** Do not hardcode the key — the block's own
+comment gives R4's reason and it is right. Move the call site instead: lift the
+`#if PROTOTYPE_CARDS` block out of `InjectLocStrings`
+(`KleeMod.cs:316-329`) and run it from `KokomiOffPoolCards.BuildAll()`, which
+already calls `PrototypeCards.For("kokomi")` at a point where the models exist,
+merging into `LocManager.Instance.GetTable("cards")` there. That keeps the
+read-back-off-the-live-model property and removes the premature touch.
+A second, independent hardening worth taking with it: make
+`PrototypeRoster.ByCharacter` **lazy and per-character** in
+`tools/gen_prototype_cards.py` so a premature touch can never poison every
+character's rows at once. Both are engineering, not design, but they are on
+this packet's own critical path, so they are written here rather than acted on
+by the deploying agent.
+
+#### Gate A — the prototype Oath's face: **BLOCKED, and FAIL on the static read**
+
+Not observable in game: the loc injection that would have written the override
+is the exact call that threw, and no run opens. What can be stated from the
+build's own sources, which is weaker than eyes-on and is labelled as such:
+
+- **The shipped `kurages_oath` control still prints the pulse string.**
+  `klee-mod/KleeCode/Cards/Kokomi/Generated/KuragesOath.cs:41-45`:
+  `("description", "Each [gold]Bake-Kurage[/gold] pulse also grants
+  {PowerAmount:diff()} Block.")`. The generator emits this identically in the
+  release and the `+proto` build, so the control side of the trap is intact.
+- **The prototype row's generated face is the pulse string too.**
+  `klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKuragesOathMemory.cs:41-45`:
+  `("description", "Each [gold]Bake-Kurage[/gold] pulse also grants 3 Block.")`.
+  This is a per-class `Localization` override that BaseLib takes off the model
+  itself — a channel §12.6 item 14 and the sheet's own comment
+  (`docs/prototype-surface.yaml:581-588`) both assumed did not exist for a
+  prototype row, because both reasoned about `gen_klee_cards`'s power-id-keyed
+  renderer rather than about `gen_prototype_cards.py`. `gen_prototype_cards.py`
+  has no per-row `description:` field today, so taking that channel is a
+  generator change, not a sheet edit.
+- **Therefore the override is unproven in both directions.** It has not been
+  seen to succeed and it has not been seen to FAIL, which is the Klee-protocol
+  rule ("a lock isn't trusted till seen to FAIL") restated. On the evidence
+  available, **the deployed prototype card would print the shipped pulse
+  wording**, which is 13.2's VOID condition for P5. That verdict is recorded as
+  provisional: it is a read of the generated source, not of a rendered card, and
+  the loc merge that was meant to beat it never got to run.
+
+**What must be seen before the sealed run**, unchanged from 13.5 item 7:
+*"Whenever the Bake-Kurage plays a card from its memory, gain 3 Block."*
+
+#### Gate B — the strip: **BLOCKED, nothing observed**
+
+No fight was reached, so none of the three states was captured. Not observed,
+not inferred, not stated: `Charge N — memory empty`, a front that fires next
+turn, and a blocked front are all unread, and so are the base-kit wire facts
+(`base_kit: true`, `summon` present at fight start, starter carries
+`to_the_front` and not `bake_kurage`). The whole gate is owed at the next
+deploy.
+
+#### VRAM, the metric [USER] asked for
+
+`nvidia-smi --query-gpu=memory.used,memory.total`, on the 32607 MiB card:
+
+| when | used | delta over idle |
+|---|---|---|
+| idle, game closed, before launch | 3098 MiB | — |
+| game up, at the character-select / error popup | 3933 MiB | **835 MiB** |
+| game up, second sample, same screen | 3934 MiB | 836 MiB |
+| idle, game closed, after teardown | 2959 MiB | — |
+
+**The two in-fight samples [USER] asked for were not taken and are not
+estimated here** — no fight was reachable. 835 MiB is a floor on the game's
+footprint, not the figure a co-tenant should budget against: it is a menu with
+run assets partly preloaded and no combat scene, no VFX and no card art on
+screen. The honest headroom statement for a local 27B model sharing this card
+is that ~28.6 GiB was free with the game at a menu, and that the in-fight number
+is still unmeasured and will be larger.
+
+#### State left on disk
+
+`mods\klee` carries **`0.2.1416+proto`** — installed, validated, and **unable to
+start a run**. The bridge (`mods\STS2_MCP`) and `steam_appid.txt` were removed
+by `embark --teardown`, which reverted all four ledger rows; no game process is
+running. The pinned seeds `KURAGEMEM001/002/003` were not used and remain
+unspent. Nothing under `review/qa/blindplay/` was read or written.
+
+### 13.7 What this run cannot answer
 
 Written down so nobody overclaims off it.
 
