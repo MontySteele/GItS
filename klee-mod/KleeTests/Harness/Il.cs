@@ -82,6 +82,58 @@ internal static class Il
         return found;
     }
 
+    /// <summary>
+    /// The same scan as <see cref="Calls"/>, but ORDERED and with duplicates
+    /// kept, and naming a generic method's type argument.
+    ///
+    /// `Calls` returns a set of `Type.Method`, which answers "does this method
+    /// call X" and cannot answer "how many times, and with what". Klee's
+    /// starting deck is ten `ModelDb.Card&lt;T&gt;()` calls and the fact worth
+    /// pinning about it is a COUNT -- ONE Ka-boom! of four becomes the Spark
+    /// sink, not all four -- so this exists beside the set rather than
+    /// replacing it.
+    ///
+    /// THE FALSE-POSITIVE CAVEAT IS SHARPER HERE and is why this is separate:
+    /// `Calls`' assertions are all "does call X", where a stray byte that
+    /// happens to resolve cannot make a real regression pass. A COUNT can be
+    /// moved by one, so an assertion on this should be a count of a call the
+    /// method demonstrably makes, never a count of zero standing in for
+    /// "never".
+    /// </summary>
+    internal static IReadOnlyList<string> CallSequence(MethodBase method)
+    {
+        var found = new List<string>();
+        foreach (var body in Bodies(method))
+        {
+            var il = body.GetMethodBody()?.GetILAsByteArray();
+            if (il == null) continue;
+
+            for (var i = 0; i < il.Length - 4; i++)
+            {
+                if (il[i] != 0x28 && il[i] != 0x6F && il[i] != 0x73) continue;
+                if (i + 5 > il.Length) continue;
+                var token = BitConverter.ToInt32(il, i + 1);
+                try
+                {
+                    var target = body.Module.ResolveMethod(
+                        token, body.DeclaringType?.GetGenericArguments(), null);
+                    if (target == null) continue;
+                    var args = target.IsGenericMethod
+                        ? "<" + string.Join(",", target.GetGenericArguments()
+                                                       .Select(a => a.Name)) + ">"
+                        : string.Empty;
+                    found.Add($"{target.DeclaringType?.Name}.{target.Name}{args}");
+                }
+                catch
+                {
+                    // Not a method token. Expected while byte-scanning.
+                }
+            }
+        }
+
+        return found;
+    }
+
     /// <summary>Every string literal (`ldstr`) in the body.
     ///
     /// Used to pin a hand-rolled serializer's KEY NAMES without running it:

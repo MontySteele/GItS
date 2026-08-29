@@ -59,6 +59,7 @@ from typing import Any
 from tier0.engine.state import Card, CombatState, Enemy, Player
 
 from tier0.content import loader
+from tier0.engine import combat
 
 MOD_PREFIX = "KLEEMOD-"
 
@@ -76,6 +77,13 @@ STATUS_MAP = {
     "encore": "encore",
     "fanfare": "fanfare",
     "salon": "salon",
+    # The strict Rare Power's own stack (the Klee Sparks arm, PICK 5). Named by
+    # its TITLE, because that is what the bridge puts on the wire, and mapped to
+    # the sim's power key so `combat.spark_price` sees the same rule the live
+    # board is running. Without the row it would land in `unmapped_statuses` --
+    # reported, never guessed -- and every Attack in hand would price at 0 on the
+    # observed board while the game charged 3.
+    "true_spark_knight": "spark_attack_cost",
 }
 
 # EB-185. THE STATUSES THE SIM HOLDS AS A NAMED PLAYER FIELD, NOT AS A POWER.
@@ -252,11 +260,23 @@ def build_combat_state(state: dict[str, Any], *, prototype: bool = False
     hand_entries = list(p.get("hand") or [])
     hand: list[Card] = []
     approx: list[str] = []
+    # THE SPARK PRICE, AS THE LIVE GAME REPORTED IT (the Klee Sparks arm).
+    # `cost` on the wire is the ENERGY cost and is 0 for every Spark-priced
+    # card, so without these two keys an observed board shows a hand of free
+    # cards; and `can_play` folds every refusal into one boolean, so it cannot
+    # tell a short bank from a missing target. Kept in wire order, paired with
+    # the resolved card, so the cross-check below can name the card that
+    # disagrees.
+    wire_prices: list[tuple[str, int, bool]] = []
     for e in hand_entries:
         card, is_approx = resolve_card(e, proto_index)
         hand.append(card)
         if is_approx:
             approx.append(card.name)
+        if e.get("spark_price") is not None:
+            wire_prices.append((card.id,
+                                int(e["spark_price"]),
+                                bool(e.get("spark_affordable", True))))
 
     player = Player(
         hp=int(p.get("hp", 0)),
@@ -320,12 +340,35 @@ def build_combat_state(state: dict[str, Any], *, prototype: bool = False
         rng=random.Random(0),      # never consumed: scoring is pure
         turn=int((state.get("battle") or {}).get("round", 1) or 1),
     )
+    # THE CROSS-CHECK, and it is the whole reason the wire keys are worth
+    # carrying. `SparkCost.PriceOf` (the number the badge draws and the gate
+    # charges) and `combat.spark_price` (the number the sim charges) are two
+    # implementations of one rule in two languages; a divergence between them is
+    # a defect in one of them, and it is invisible unless something asks. A
+    # disagreement is REPORTED, never repaired here -- the same posture
+    # `unmapped_statuses` takes, and for the same reason: a reading the
+    # falsifier could not verify must not pass for one it did.
+    disagreements: list[str] = []
+    for card_id, wire_price, _ in wire_prices:
+        for card in cs.player.hand:
+            if card.id != card_id:
+                continue
+            sim_price = combat.spark_price(cs, card)
+            if sim_price != wire_price:
+                disagreements.append(
+                    f"{card_id}: wire {wire_price}, sim {sim_price}")
+            break
+
     notes = {
         "approximate_cards": approx,
         "player_fields": dict(sorted(fields.items())),
         "unmapped_statuses": sorted(set(unmapped)),
         "enemy_count": len(enemies),
         "auras_seen": sorted({e.aura for e in enemies if e.aura}),
+        "spark_prices": {cid: price for cid, price, _ in wire_prices},
+        "spark_unaffordable": sorted(
+            cid for cid, _, ok in wire_prices if not ok),
+        "spark_price_disagreements": sorted(set(disagreements)),
     }
     return cs, notes
 

@@ -845,6 +845,25 @@ APPLY_POWERS = {
         "to that enemy."),
     "spark_threshold_down": ("SparkThresholdDownPower", None,
         "You need {X} fewer [gold]Spark[/gold] for your Attacks to cost 0."),
+    # THE STRICT RARE POWER (PICK 5 wording (1), sub-pick (a); the independent
+    # seat FOLLOWS on both -- review/active/klee-sparks-2026-08-29.md sec.9).
+    # QUARANTINED: `SparkAttackCostPower` lives in `Powers/Prototype/` and is
+    # compiled only under `-p:PrototypeCards=true`, so the only row that may
+    # name this power is a `proto_` row on the prototype surface, which is
+    # compiled only under the same switch. The row above is the body this one
+    # REPLACES -- `spark_threshold_down` modifies a threshold that does not
+    # exist once the base rule is retired -- and it stays for the same reason
+    # tier0 keeps `spark_threshold`: an OFF arm needs the shipped rule byte for
+    # byte.
+    #
+    # NO {X} IN THE TEMPLATE, deliberately. The price is a CONSTANT of the rule
+    # (`SparkAttackCostPower.Price` = 3, tier0 `C.SPARK_ATTACK_POWER_PRICE`) and
+    # NOT the power's stack amount: the row applies 1 stack and charges 3, so
+    # rendering the amount here would print "cost 1 Spark" on a card that
+    # charges three. The face text is sec.5's proposal unchanged.
+    "spark_attack_cost": ("SparkAttackCostPower", None,
+        "Your Attacks that do not already cost [gold]Spark[/gold] cost 3 "
+        "[gold]Spark[/gold] instead of their Energy cost."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
@@ -7085,6 +7104,19 @@ def emit(
            for eff in iter_card_effects(card)):
         interfaces += ", IExhaustRetriever"
 
+    # PICK 8 option 2 -- THE COST BADGE'S ONE NUMBER
+    # (review/active/klee-sparks-2026-08-29.md sec.6.4). A card whose row prints
+    # a TOP-LEVEL `spend_spark` declares that price on the interface, and the
+    # IsPlayable gate below reads it back through `SparkCost.PriceOf` instead of
+    # carrying its own literal. Until this landed the price existed ONLY inside
+    # the gate's expression, so the card FACE had nothing to render a badge
+    # from -- and a badge reading a second copy of the number is exactly the
+    # display-versus-gate drift the badge exists to repair. tier0's twin
+    # argument is on `combat.spark_cost`: "the price shown and the price paid
+    # cannot drift apart".
+    if any(eff.get("op") == "spend_spark" for eff in card["effects"]):
+        interfaces += ", ISparkPricedCard"
+
     ind = "\n        "
     vars_cs = (",".join(f"{ind}    {v}" for v in vars_)).lstrip()
     vars_block = f"            {vars_cs}\n" if vars_cs else ""
@@ -7497,8 +7529,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard
     spark_gate_member = (
         "\n\n    // The Spark cost line (EB-118): unplayable below the price,\n"
         "    // which is how the cost is shown rather than silently failing.\n"
+        "    // The printed price is declared ONCE here, on ISparkPricedCard,\n"
+        "    // and the gate reads it back through SparkCost.PriceOf -- the\n"
+        "    // same sum the Spark cost BADGE renders (PICK 8 option 2), so\n"
+        "    // the price shown and the price charged cannot drift. A card\n"
+        "    // that already prints a price is unaffected by the strict Rare\n"
+        "    // Power, which is why PriceOf returns this number unchanged\n"
+        "    // here (tier0 twin: combat.spark_price, sub-pick (a)).\n"
+        f"    public int PrintedSparkPrice => {spark_price};\n\n"
         "    protected override bool IsPlayable =>\n"
-        f"        SparkPower.CanSpend(Owner.Creature, {spark_price});"
+        "        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this));"
         if spark_price else "")
     # R213 E1, QUARANTINED: the same cost line one meter over, and the mirror
     # of tier0 combat.charge_cost. TOP-LEVEL spends only, for the sim's

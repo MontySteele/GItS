@@ -841,3 +841,25 @@
    cost: 0, type: attack, rarity: uncommon, solve: [frontload], archetypes: [spark], role: payoff, exhaust: true,
    effects: [{op: spend_spark, amount: 3},
              {op: damage, amount: 18, target: enemy}]}
+
+# THE EIGHTH ROW, and it is the RULE the other seven are priced against
+# (sec.5, PICK 5 wording (1) STRICT, sub-pick (a); the independent seat FOLLOWS
+# on both). It replaces the shipped `true_spark_knight`'s body, which dies with
+# the base rule -- a modifier to a threshold that does not exist. Same id shape,
+# same rarity, same cost; only the rule moved.
+#
+# THE GENERATOR REFUSED THIS ROW ON THE SIM BRANCH BY NAME -- "apply_power power
+# 'spark_attack_cost' (no PowerModel in the registry)" -- and the refusal was
+# left standing rather than worked around, because a row emitting a reference to
+# a class that does not exist is a prototype that cannot be staged. The class
+# now exists (`klee-mod/KleeCode/Powers/Prototype/SparkAttackCostPower.cs`,
+# compiled only under -p:PrototypeCards=true) and the row goes on.
+#
+# `amount: 1` is ONE STACK, not the price. The price is a constant of the rule
+# (3, tier0 C.SPARK_ATTACK_POWER_PRICE); the registry template prints it as a
+# literal for exactly that reason.
+- {id: proto_true_spark_knight, name: "Spark Knight's Oath", character: klee,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare, solve: [scaling], archetypes: [spark], role: payoff,
+   effects: [{op: apply_power, power: spark_attack_cost, amount: 1, target: self,
+              note: "Attacks that do not already cost Sparks cost 3 Sparks and 0 Energy"}]}

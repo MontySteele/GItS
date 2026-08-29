@@ -27,7 +27,8 @@
     "proto_spark_strike",
     "proto_spark_sweep",
     "proto_thoma_crimson_ooyoroi_either",
-    "proto_thoma_crimson_ooyoroi_priced"
+    "proto_thoma_crimson_ooyoroi_priced",
+    "proto_true_spark_knight"
   ],
   "owners": {
     "proto_charge_mode_guard": "kokomi",
@@ -51,7 +52,8 @@
     "proto_spark_strike": "klee",
     "proto_spark_sweep": "klee",
     "proto_thoma_crimson_ooyoroi_either": "klee",
-    "proto_thoma_crimson_ooyoroi_priced": "klee"
+    "proto_thoma_crimson_ooyoroi_priced": "klee",
+    "proto_true_spark_knight": "klee"
   },
   "mode_faces": {
     "proto_charge_mode_guard": [
