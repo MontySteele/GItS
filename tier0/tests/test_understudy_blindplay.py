@@ -744,3 +744,171 @@ def test_the_build_version_is_read_or_left_empty_never_invented():
     assert blindplay.build_version(Silent())[0] == ""
     version, why = blindplay.build_version(Broken())
     assert version == "" and "did not answer" in why
+
+
+# --- EB-173: the deadlock a live session died on --------------------------
+
+def test_the_games_own_plus_is_not_folded_away():
+    """FOUND LIVE, 2026-08-29, run B of the EB-167 acceptance. `_fold` stripped
+    punctuation, and the `+` the GAME appends to an upgraded title is not
+    punctuation -- it is the only thing distinguishing the two cards. Folded
+    away, `Coral Guard` and `Coral Guard+` shared one key, so with both in hand
+    EVERY naming of EITHER was refused as ambiguous and neither could be
+    played. The session burned its refusal budget on round 5 and stopped."""
+    state = combat_state()
+    hand = state["player"]["hand"]
+    base = json.loads(json.dumps(hand[3]))
+    assert base["name"] == "Coral Guard"
+    up = json.loads(json.dumps(base))
+    up["name"] = "Coral Guard+"
+    up["is_upgraded"] = True
+    up["description"] = "Gain 8 Block."
+    hand.append(up)
+
+    plain = blindplay.act(state, 'play "Coral Guard"')
+    assert plain["ok"] and plain["post"]["card_index"] == 3
+    plus = blindplay.act(state, 'play "Coral Guard+"')
+    assert plus["ok"] and plus["post"]["card_index"] == len(hand) - 1
+
+
+def test_echoing_the_screen_back_verbatim_resolves():
+    """The render prints `**Coral Guard+** (upgraded)`, and a tester who types
+    that back must be understood. Before the fix it answered `nothing here is
+    called 'Coral Guard+ (upgraded)'` -- the escape hatch the refusal itself
+    advertised was documented in the grammar and implemented nowhere."""
+    state = combat_state()
+    hand = state["player"]["hand"]
+    up = json.loads(json.dumps(hand[3]))
+    up["name"] = "Coral Guard+"
+    up["is_upgraded"] = True
+    hand.append(up)
+    res = blindplay.act(state, 'play "Coral Guard+ (upgraded)"')
+    assert res["ok"] and res["post"]["card_index"] == len(hand) - 1
+
+
+def test_the_qualifier_reaches_both_sides_of_an_ambiguous_pair():
+    """The card-reward screen prints NO `+` -- two rows both read `Coral
+    Guard`, one upgraded -- so the ambiguity refusal is still right there. What
+    changed is that it is now escapable in BOTH directions: a disambiguator
+    that could only ever name one of the two would leave the other
+    unselectable, which is the same defect wearing a different hat."""
+    amb = blindplay.act(card_reward_state(), 'choose "Coral Guard"')
+    assert not amb["ok"] and "more than one" in amb["refusal"]
+
+    up = blindplay.act(card_reward_state(), 'choose "Coral Guard (upgraded)"')
+    assert up["ok"] and up["post"]["card_index"] == 1
+    base = blindplay.act(card_reward_state(),
+                         'choose "Coral Guard (not upgraded)"')
+    assert base["ok"] and base["post"]["card_index"] == 0
+
+
+def test_the_refusal_advertises_only_what_is_implemented():
+    """The whole shape of EB-173: advice a tester cannot act on is worse than
+    no advice, because it costs a turn of the refusal budget to discover."""
+    amb = blindplay.act(card_reward_state(), 'choose "Coral Guard"')
+    assert "(upgraded)" in amb["refusal"] and "(not upgraded)" in amb["refusal"]
+    for phrase in ("Coral Guard (upgraded)", "Coral Guard (not upgraded)"):
+        assert blindplay.act(card_reward_state(), f'choose "{phrase}"')["ok"]
+
+
+def test_a_qualifier_that_matches_nothing_says_so_rather_than_guessing():
+    state = combat_state()
+    res = blindplay.act(state, 'play "Coral Guard (upgraded)"')
+    assert not res["ok"] and "is upgraded" in res["refusal"]
+
+
+def bundle_select_state() -> dict:
+    """SYNTHETIC, and shaped on the LIVE wire read 2026-08-29: a bundle has an
+    `index` and a list of `cards`, and NO name of its own."""
+    return {"state_type": "bundle_select",
+            "bundle_select": {"screen_type": "bundle",
+                              "prompt": "Choose a bundle.",
+                              "bundles": [
+                {"index": 0, "card_count": 2, "cards": [
+                    {"name": "Call to Arms", "cost": "1", "type": "Skill",
+                     "description": "Muster 1. Draw 1 card."},
+                    {"name": "Massed Volley", "cost": "1", "type": "Attack",
+                     "description": "Deal 5 damage to ALL enemies."}]},
+                {"index": 1, "card_count": 2, "cards": [
+                    {"name": "Crane Wing", "cost": "1", "type": "Skill",
+                     "description": "Gain 4 Block."},
+                    {"name": "Massed Volley", "cost": "1", "type": "Attack",
+                     "description": "Deal 5 damage to ALL enemies."}]}]}}
+
+
+def test_a_bundle_is_named_by_what_is_in_it():
+    """EB-173, second half. A bundle has no name, and asking the wire for one
+    rendered `- **(unnamed)**` twice on a screen whose only verb was
+    `choose "<bundle>"`. Nothing on it could be named; a live session sat there
+    answering `confirm` until its action budget ran out. The cards inside DO
+    have printed titles, so the bundle is named by its contents -- which is
+    also how a player at the screen would say it out loud."""
+    page = blindplay.render(blindplay.observation(bundle_select_state()))
+    assert "(unnamed)" not in page
+    assert "A bundle of: Call to Arms, Massed Volley" in page
+    assert "Gain 4 Block." in page          # the faces, not just the titles
+    assert "any card title in the bundle you want" in page
+
+
+def test_choosing_a_bundle_by_a_card_only_it_holds():
+    res = blindplay.act(bundle_select_state(), 'choose "Call to Arms"')
+    assert res["ok"] and res["post"] == {"action": "select_bundle", "index": 0}
+    res = blindplay.act(bundle_select_state(), 'choose "Crane Wing"')
+    assert res["ok"] and res["post"] == {"action": "select_bundle", "index": 1}
+
+
+def test_a_card_in_both_bundles_is_refused_rather_than_guessed():
+    """Which bundle was meant is exactly the question being asked."""
+    res = blindplay.act(bundle_select_state(), 'choose "Massed Volley"')
+    assert not res["ok"] and "more than one bundle" in res["refusal"]
+
+
+def test_a_card_in_no_bundle_is_told_what_is_on_the_screen():
+    res = blindplay.act(bundle_select_state(), 'choose "Pearl Barrage"')
+    assert not res["ok"]
+    assert "Call to Arms" in res["refusal"] and "Crane Wing" in res["refusal"]
+
+
+def test_the_session_stops_on_a_screen_it_cannot_get_off(tmp_path):
+    """EB-173, third half, and the reason the other two cost a whole run. The
+    action, wall and refusal budgets all stop a session that is going WRONG.
+    None of them sees a session going NOWHERE: a command the resolver ACCEPTS
+    and the wire answers with an error resets the refusal counter and spends an
+    action, so the loop can sit on one screen until the action budget is gone.
+    Live, that was 150+ identical `confirm`s at one bundle screen."""
+    replies = [{"command": "confirm", "thinking": ""} for _ in range(40)]
+    replies.append({"record": "nothing happened"})
+    s, summary, wire, _ = _session(
+        tmp_path, replies, states=[bundle_select_state()],
+        max_actions=200, max_stalls=4)
+    assert summary["termination"] == "stalled"
+    assert summary["actions"] < 10
+
+
+def test_a_hand_select_screen_does_not_kill_the_session():
+    """EB-176, found live: a `hand_select` state renders as `card_select`, and
+    only the WIRE's name was exempt from the snake_case rule -- so the tool's
+    own name for the screen, written into the tool's own observation, tripped
+    the blindness assertion and stopped a session on a screen that had leaked
+    nothing. Both names are screen vocabulary; neither names a card, a role or
+    a ruling."""
+    state = {"state_type": "hand_select",
+             "hand_select": {"prompt": "Choose a card to discard.",
+                             "cards": [{"name": "Coral Guard", "cost": "1",
+                                        "type": "Skill",
+                                        "description": "Gain 5 Block."}]}}
+    obs = blindplay.observation(state)          # must not raise
+    assert obs["state_type"] == "hand_select" and obs["screen"] == "card_select"
+    assert "Coral Guard" in blindplay.render(obs)
+
+
+def test_the_exemption_is_still_only_the_screen_names():
+    """The other half: widening the allowance must not have widened it to
+    anything a card, a sheet or a ruling could put on the page."""
+    state = {"state_type": "hand_select",
+             "hand_select": {"prompt": "Choose a card to discard.",
+                             "cards": [{"name": "Coral Guard", "cost": "1",
+                                        "type": "Skill",
+                                        "description": "role: bridge"}]}}
+    with pytest.raises(qa_packet.PacketLeak):
+        blindplay.observation(state)

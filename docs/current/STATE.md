@@ -322,11 +322,18 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   **`+proto` / `+proto.dirty` version mark is RATIFIED** (LAW, beside R214),
   refusal symmetric. Automation minted in order: `EB-166` the seat — **CLOSED 2026-08-28**, built, blind-grading eleven
   turns twice and driving both pair reads — `EB-167` a design-blind
-  any-screen render, `EB-168` an orchestrated Act-1 tester — **both BUILT and
-  both BLOCKED short of acceptance on 2026-08-28**, not by their own code but
-  by the game update recorded above (`M46` / `EB-171`); the one live session
-  they got walked five screens blind before the machine's build moved under
-  them. A4 and A6 wait and are NOT minted; A1-extended (enemy
+  any-screen render and `EB-168` an orchestrated Act-1 tester, both BUILT.
+  **`EB-168` is CLOSED (2026-08-29):** five sealed sessions exist on the
+  re-pinned build, and its negative test refused live — a Claude-family model
+  id is rejected with exit 2 before the tool touches the wire. **`EB-167`
+  stays OPEN by one thing only.** Three tool defects the live runs found are
+  fixed (`EB-173`, `EB-176`), and the last session ran 37 actions over six
+  screen types with ZERO refusals and no leak in any of its 40 observations,
+  stopping only because the character died on Act 1; what the row still owes
+  is a run that survives to the Act-1 boss, which is the tester's play and not
+  the tool's code. Two live findings are filed and open, `EB-174` (a sealed
+  record cannot name its build) and `EB-175` (`end turn` has to be said
+  twice). A4 and A6 wait and are NOT minted; A1-extended (enemy
   composition/intent setters) and A5 (vision input) are DEFERRED.
   Routing: **Kokomi slice 2 = R213 E1's Charge arms, before Klee** — slice 1
   tests priced Companion Block at the turn and does not exhaust Kokomi.
