@@ -48,7 +48,9 @@ no commentary:
   "packet_sha256": "<SHA>",
   "grader": {"id": "<your agent id>", "kind": "llm",
              "model": "<your model name>", "designed_these_cards": false},
-  "chosen_line": [{"card": "<printed card title>", "target": "<enemy name, or omit>"}],
+  "chosen_line": [{"card": "<printed card title>", "target": "<enemy name, or omit>",
+                   "exhaust": "<printed title of the card you Exhausted, or omit>",
+                   "choose": "<printed text of the option you took, or omit>"}],
   "q1_what_did_you_play": "<prose>",
   "q2_other_line_considered": "<prose, or 'none'>",
   "q3_what_it_gave_up": "<prose>",
@@ -60,6 +62,11 @@ no commentary:
 Name cards by the exact printed titles on the page. `chosen_line` is ordered:
 first play first. Set `q4_changed` to `false` if your answer to question four
 is no.
+
+If a card you played asks you to **Exhaust a card**, say which one on that
+play as `"exhaust": "<the printed title>"`. If a card says **Choose one**, say
+which half you took as `"choose": "<the printed text of that option>"`. Leave
+both out for a card that asks neither.
 
 <PACKET>
 

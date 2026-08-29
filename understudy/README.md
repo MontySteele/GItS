@@ -283,7 +283,7 @@ python -m understudy.staged_turn closeness understudy/turns/<t>.yaml [--observed
 python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --why "..." [--seed S]
 python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --hold --why "..."
 python -m understudy.staged_turn grade     <turn-id> <form.json>
-python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."
+python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..." \n    [--answer "<prompt>=<printed choice>"]
 python -m understudy.staged_turn ledger
 ```
 
@@ -317,6 +317,25 @@ out of hand beneath it. Draw rather than discard because a discard pile is
 *read* by cards. Then `export_packet` REFUSES to write a packet whose live hand
 is not the declared multiset — the acceptance is a refusal, since a wrong
 board in a design-blind packet is invisible to the person reading it.
+
+**A LINE THAT PASSES THROUGH A MODAL PROMPT REPLAYS FROM THE FORM'S OWN
+WORDS** (EB-170). A card can stop the turn and ask which card gets Exhausted
+(`hand_select`) or which half of a *Choose one* face resolves (`card_select`);
+round 3 of the Kokomi slice met three of those and the replayer walked into the
+next play, reporting `no enemy 'Twig Slime (S)'; the fight has []` — a true
+sentence about a card-selection screen and a useless one. A play in
+`chosen_line` may now carry `exhaust: "<printed title>"` and
+`choose: "<printed option text>"`, both optional, both nullable, both in the
+only vocabulary a blind grader has, and `execute` answers the prompt from them.
+When a prompt appears and nobody said, it stops with `modal_unanswered`, naming
+the prompt and listing what was offered — **never a heuristic pick**, because
+the first offer, the biggest number and the cheapest card are all plausible
+guesses and all three produce a post-state indistinguishable from a real
+replay. `--answer "<prompt>=<printed choice>"` is the OPERATOR's answer, for a
+form written before those keys existed whose q1 prose names the choice
+unambiguously; it is logged as `source: "operator"` on the row and in the
+record, it is consumed at most once, and it never overrides an answer the form
+itself carries.
 
 **NO GRADED PACKET MAY CARRY A CARD WITH AN OPEN FACE DEFECT** (EB-169).
 `understudy/face_defects.py` is a curated register of card ids whose printed or

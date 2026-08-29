@@ -1038,3 +1038,198 @@ def test_every_register_entry_cites_an_open_backlog_row():
     assert "EB-164" not in rows, "EB-164 is closed; its row must have left HEAD"
     bad = lint_face_defects.findings(FIXTURE_REGISTER, rows)
     assert bad and "EB-164" in bad[0]
+
+
+# ------------------------------- EB-170: replaying through a modal prompt ---
+#
+# Round 3 met three of these and the replayer walked into the next play,
+# reporting `no enemy 'Twig Slime (S)'; the fight has []` -- a true sentence
+# about a card-selection screen and a useless one. These pin the three
+# outcomes: answered from the form, answered by the operator, and stopped by
+# name.
+
+def select_state(screen, prompt, offered, **over):
+    """A live-shaped state sitting on a selection screen. The wire's own
+    shape: `state_type` names the screen and the screen's blob is a sibling
+    key, which is why `_select_blob` reads the type rather than guessing."""
+    st = wire_state()
+    st["state_type"] = screen
+    st[screen] = {"prompt": prompt,
+                  "cards": [{"id": "KLEEMOD-" + t.upper().replace(" ", "_"),
+                             "name": t} for t in offered]}
+    st.update(over)
+    return st
+
+
+def modal_runner(states, form_body, answers=None):
+    import io
+
+    replay = scenario_module.Scenario(
+        name="t", character="KLEEMOD-KOKOMI",
+        steps=[("answer_modal", form_body)])
+    return staged_turn.ExecuteRunner(
+        replay, "a test", wire=FakeWire(states), out=io.StringIO(),
+        sleep=lambda _s: None, packet=qa_packet.build(wire_state(), "t"),
+        answers=answers or [])
+
+
+def test_execute_steps_puts_a_modal_answer_after_every_play():
+    """Unconditionally, and not only after the plays whose form entry carries
+    a key: a modal is a property of the card and the board, not of what the
+    grader remembered to write down."""
+    steps = staged_turn.execute_steps(
+        staged_turn.load(EXAMPLE),
+        form(chosen_line=[{"card": "Bake-Kurage"},
+                          {"card": "Pearl Barrage", "target": "Jaw Worm",
+                           "exhaust": "Coral Guard"}]))
+    verbs = [v for v, _ in steps]
+    assert verbs.count("play") == 2 and verbs.count("answer_modal") == 2
+    for i, v in enumerate(verbs):
+        if v == "play":
+            assert verbs[i + 1] == "answer_modal"
+    bodies = [b for v, b in steps if v == "answer_modal"]
+    assert bodies[0] == {"card": "Bake-Kurage"}
+    assert bodies[1] == {"card": "Pearl Barrage", "exhaust": "Coral Guard"}
+
+
+def test_a_hand_selection_is_answered_from_the_forms_exhaust_key():
+    """Kokomi's "which card gets Exhausted", which is a `hand_select` -- the
+    hand enters select mode and no screen is built, so the confirm is
+    `combat_confirm_selection` and not `confirm_selection`."""
+    up = select_state("hand_select", "Choose a card to Exhaust.",
+                      ["Coral Guard", "Send the Runner"])
+    runner = modal_runner([up] * 5 + [wire_state(), wire_state()],
+                          {"card": "Tidal Barrage",
+                           "exhaust": "Send the Runner"})
+    assert runner.run() is True
+    assert [p["action"] for p in runner.wire.posts] == [
+        "combat_select_card", "combat_confirm_selection"]
+    assert runner.wire.posts[0]["card_index"] == 1
+    row = next(r for r in runner.rows if r.get("step") == "answer_modal")
+    assert row["answered"] is True and row["source"] == "form"
+    assert row["choice"] == "Send the Runner"
+
+
+def test_a_mode_choice_is_answered_from_the_forms_choose_key():
+    """The either-faces: a `card_select` whose offers are the card's own modes,
+    printed as whole sentences. Its verbs are the other pair."""
+    up = select_state("card_select", "Choose a card.",
+                      ["Deal 14 damage", "Gain 6 Block"])
+    runner = modal_runner([up] * 5 + [wire_state(), wire_state()],
+                          {"card": "Itto - Oni Rush",
+                           "choose": "Gain 6 Block"})
+    assert runner.run() is True
+    assert [p["action"] for p in runner.wire.posts] == [
+        "select_card", "confirm_selection"]
+    assert runner.wire.posts[0]["index"] == 1
+
+
+def test_a_prompt_nobody_answered_stops_by_name_and_quotes_it():
+    """`modal_unanswered`, naming the prompt and listing the offers. NEVER a
+    heuristic pick: the first offer, the biggest number and the cheapest card
+    are all plausible guesses, and all three produce a post-state
+    indistinguishable from a real replay."""
+    up = select_state("card_select", "Choose a card.",
+                      ["Deal 14 damage", "Gain 6 Block"])
+    runner = modal_runner([up, up], {"card": "Itto - Oni Rush"})
+    assert runner.run() is False
+    fail = runner.failures[0]
+    assert fail["check"] == "modal_unanswered"
+    assert "Choose a card." in fail["detail"]
+    assert "Deal 14 damage" in fail["detail"]
+    assert runner.wire.posts == [], "it must not post a guess"
+    assert runner.modals[0]["answered"] is False
+
+
+def test_an_answer_that_is_not_on_the_screen_is_refused():
+    """A choice the screen does not offer is not an answer, and posting a
+    near-miss index would be the guess this rule exists to forbid."""
+    up = select_state("card_select", "Choose a card.",
+                      ["Deal 14 damage", "Gain 6 Block"])
+    runner = modal_runner([up, up], {"card": "Itto - Oni Rush",
+                                     "choose": "Gain 4 Block"})
+    assert runner.run() is False
+    assert runner.failures[0]["check"] == "modal_unanswered"
+    assert "not on the screen" in runner.failures[0]["detail"]
+    assert runner.wire.posts == []
+
+
+def test_no_screen_up_is_a_no_op_row_and_not_a_failure():
+    """The common case: most plays raise nothing, and the step costs one GET."""
+    runner = modal_runner([wire_state()], {"card": "Coral Guard"})
+    assert runner.run() is True
+    row = next(r for r in runner.rows if r.get("step") == "answer_modal")
+    assert row["answered"] is False and row["screen"] == ""
+    assert "rule" not in row and runner.wire.posts == []
+
+
+def test_the_operator_answer_fills_a_form_that_predates_the_keys():
+    """The three round-3 replays are forms written before `exhaust` and
+    `choose` existed. The operator reads the grader's own q1 prose, states the
+    answer, and the row says `operator` -- never `form`."""
+    up = select_state("card_select", "Choose a card.",
+                      ["Deal 14 damage", "Gain 6 Block"])
+    runner = modal_runner([up] * 5 + [wire_state(), wire_state()],
+                          {"card": "Itto - Oni Rush"},
+                          answers=[("Choose a card.", "Deal 14 damage")])
+    assert runner.run() is True
+    row = next(r for r in runner.rows if r.get("step") == "answer_modal")
+    assert row["source"] == "operator" and row["choice"] == "Deal 14 damage"
+    assert runner.answers_used == [
+        {"index": 0, "prompt": "Choose a card.", "screen": "card_select",
+         "choice": "Deal 14 damage"}]
+
+
+def test_the_operator_answer_never_overrides_the_forms_own():
+    """The form is the grader's answer and the operator's is a stand-in for a
+    missing one. If both are present the grader wins, and the row says so."""
+    up = select_state("card_select", "Choose a card.",
+                      ["Deal 14 damage", "Gain 6 Block"])
+    runner = modal_runner([up] * 5 + [wire_state(), wire_state()],
+                          {"card": "Itto - Oni Rush",
+                           "choose": "Gain 6 Block"},
+                          answers=[("Choose a card.", "Deal 14 damage")])
+    assert runner.run() is True
+    row = next(r for r in runner.rows if r.get("step") == "answer_modal")
+    assert row["source"] == "form" and row["choice"] == "Gain 6 Block"
+    assert runner.answers_used == []
+
+
+def test_the_operator_answer_may_name_the_screen_when_there_is_no_prompt():
+    """A screen can arrive with no prompt text at all, and an operator still
+    has to be able to name it."""
+    up = select_state("hand_select", "", ["Coral Guard", "Send the Runner"])
+    runner = modal_runner([up] * 5 + [wire_state(), wire_state()],
+                          {"card": "Tidal Barrage"},
+                          answers=[("hand_select", "Coral Guard")])
+    assert runner.run() is True
+    assert runner.modals[0]["source"] == "operator"
+
+
+def test_parse_answers_refuses_a_malformed_override():
+    assert staged_turn.parse_answers(["Choose a card.=Deal 14 damage"]) == [
+        ("Choose a card.", "Deal 14 damage")]
+    assert staged_turn.parse_answers(None) == []
+    for bad in ("no equals sign", "=Deal 14 damage", "Choose a card.="):
+        with pytest.raises(staged_turn.FormError):
+            staged_turn.parse_answers([bad])
+
+
+def test_the_form_keys_are_optional_and_nullable(tmp_path):
+    """Every form written before EB-170 still loads, and a null reads as
+    "this play raised no such prompt"."""
+    path = tmp_path / "f.json"
+    for line in ([{"card": "Pearl Barrage"}],
+                 [{"card": "Pearl Barrage", "exhaust": None, "choose": None}],
+                 [{"card": "Pearl Barrage", "exhaust": "Coral Guard"}]):
+        path.write_text(json.dumps(form(chosen_line=line)), encoding="utf-8")
+        assert staged_turn.load_form(path)["chosen_line"] == line
+    path.write_text(json.dumps(form(chosen_line=[{"card": "X", "exhaust": 7}])),
+                    encoding="utf-8")
+    with pytest.raises(staged_turn.FormError):
+        staged_turn.load_form(path)
+
+
+def test_modal_unanswered_is_a_named_falsifier():
+    assert "modal_unanswered" in staged_turn.FALSIFIERS
+    assert "guessed" in staged_turn.FALSIFIERS["modal_unanswered"]

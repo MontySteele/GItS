@@ -539,12 +539,21 @@ def form_schema() -> dict[str, Any]:
     in `required`, and `staged_turn.load_form` only ever requires `card`. A
     null target reads as "this card needed none", which is what an omitted
     one meant.
+
+    `exhaust` and `choose` (EB-170) are listed the same way and for the same
+    reason: nullable, required by the strict schema, and meaning "this play
+    raised no such prompt" when null. They are the only fields on the form
+    that are about the game's MACHINERY rather than the grader's reasoning,
+    and they are still stated in the printed vocabulary -- a card's title, an
+    option's own text -- because that is all a blind grader has.
     """
     play = {
         "type": "object",
         "properties": {"card": {"type": "string"},
-                       "target": {"type": ["string", "null"]}},
-        "required": ["card", "target"],
+                       "target": {"type": ["string", "null"]},
+                       "exhaust": {"type": ["string", "null"]},
+                       "choose": {"type": ["string", "null"]}},
+        "required": ["card", "target", "exhaust", "choose"],
         "additionalProperties": False,
     }
     grader = {

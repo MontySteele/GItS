@@ -470,7 +470,10 @@ def test_the_form_schema_names_every_field_the_form_needs():
     # wants every property listed in `required`, and a null target reads as
     # "this card needed none", which is what an omitted one meant.
     assert play["properties"]["target"]["type"] == ["string", "null"]
-    assert play["required"] == ["card", "target"]
+    # EB-170's two optional-and-nullable keys join it on the same rule.
+    assert play["properties"]["exhaust"]["type"] == ["string", "null"]
+    assert play["properties"]["choose"]["type"] == ["string", "null"]
+    assert play["required"] == ["card", "target", "exhaust", "choose"]
 
 
 # --------------------------------------------------------- the dry run -----
