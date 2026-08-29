@@ -346,7 +346,16 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   every identity block read `(not read)`. Both builds are now read OFF DISK
   and each is labelled with the file it came from: the deployed
   `mods\klee\manifest.json` `version` (producer `deploy.ps1`) and the game's
-  own `release_info.json` `version`. A4 and A6 wait and are NOT minted; A1-extended (enemy
+  own `release_info.json` `version`. A SIXTH sealed session, **run B6**
+  (`review/qa/blindplay/runB6-20260829-2/record.md`, seed `ZZRK9QHXEFCS`,
+  0.2.1269 on v0.111.0), is the first record that names both builds: 85
+  actions over eight floors, two fights won and a third open against the
+  Act-1 elite, one leak-audit hit in 91 observations and it is the same
+  standing `score` in the tool's own guardrail sentence. It ended on the
+  refusal limit, which is `EB-177`, filed and open — two un-upgraded
+  *Water's Edge*, one of them enchanted Sharp, are BOTH unplayable,
+  because the bare title is ambiguous and the qualifier `EB-173` added
+  only separates an upgrade. A4 and A6 wait and are NOT minted; A1-extended (enemy
   composition/intent setters) and A5 (vision input) are DEFERRED.
   Routing: **Kokomi slice 2 = R213 E1's Charge arms, before Klee** — slice 1
   tests priced Companion Block at the turn and does not exhaust Kokomi.

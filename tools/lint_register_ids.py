@@ -116,7 +116,14 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 176,   # EB-176 minted AND CLOSED 2026-08-29 by the same acceptance:
+    "EB": 177,   # EB-177 minted 2026-08-29 by run B6: two cards with the
+                 # same printed title that differ by anything but upgrade
+                 # state are BOTH unplayable -- a Sharp-enchanted copy of
+                 # `Water's Edge` beside a plain one, where the bare title
+                 # is ambiguous and neither `(upgraded)` nor
+                 # `(not upgraded)` separates them. The session died on the
+                 # refusal limit and the tester named it unprompted. OPEN.
+                 # EB-176 minted AND CLOSED 2026-08-29 by the same acceptance:
                  # a live `hand_select` renders as `card_select`, only the
                  # WIRE's screen name was exempt from the snake_case rule, and
                  # the tool's own name for the screen -- in the tool's own
@@ -218,6 +225,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
+        177,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
