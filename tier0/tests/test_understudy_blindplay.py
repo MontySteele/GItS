@@ -1270,3 +1270,55 @@ def test_the_exemption_is_still_only_the_screen_names():
                                         "description": "role: bridge"}]}}
     with pytest.raises(qa_packet.PacketLeak):
         blindplay.observation(state)
+
+
+# ---------------------------------------- EB-186, the whole-run play page ---
+
+def banked_combat_state(bank: int = 3) -> dict:
+    """A Klee combat screen at a Spark bank, as the live game draws it: two
+    Attacks printing 1 and 2, both rendered 0, both playable. Round 1 of the
+    Klee slice proved the board refuses the second of them."""
+    return {
+        "state_type": "monster",
+        "battle": {"round": 1, "enemies": [
+            {"name": "Seapunk", "hp": 45, "max_hp": 45, "block": 0,
+             "intents": [{"type": "Attack", "label": "11",
+                          "description": "Attack for 11 damage."}]}]},
+        "player": {
+            "hp": 42, "max_hp": 62, "block": 0, "energy": 2, "max_energy": 3,
+            "resources": {}, "draw_pile_count": 10,
+            "discard_pile_count": 0, "exhaust_pile_count": 0,
+            "status": ([{"name": "Spark", "amount": bank, "type": "Buff",
+                         "description": "At 3 Sparks, your Attacks cost 0. "
+                                        "Playing one consumes 3 Sparks."}]
+                       if bank else []),
+            "hand": [
+                {"id": "KLEEMOD-KABOOM", "name": "Kaboom!", "type": "Attack",
+                 "cost": "0" if bank >= 3 else "1", "can_play": True,
+                 "description": "Deal 7 damage. Applies Pyro."},
+                {"id": "KLEEMOD-RAPID_FIRE", "name": "Rapid Fire",
+                 "type": "Attack", "cost": "0" if bank >= 3 else "2",
+                 "can_play": True,
+                 "description": "Deal 4 damage to random enemies four times."},
+                {"id": "KLEEMOD-DUCK_AND_COVER", "name": "Duck and Cover",
+                 "type": "Skill", "cost": "1", "can_play": True,
+                 "description": "Gain 5 Block."},
+            ]},
+    }
+
+
+def test_the_play_page_states_the_spark_rule_and_the_printed_costs():
+    """`EB-186` on the whole-run page. The tester playing a live run reads the
+    same screen a staged grader does, so it carries the same two facts."""
+    page = blindplay.render(blindplay.observation(banked_combat_state(3)))
+    assert "At 3 Sparks, your Attacks cost 0. Playing one consumes 3 " \
+           "Sparks." in page
+    assert "covers 1 of the 2" in page
+    assert page.count("The cost printed on this card") == 2
+    assert "The cost printed on this card is 2; it is showing 0 here." in page
+
+
+def test_the_play_page_says_nothing_extra_with_no_bank():
+    page = blindplay.render(blindplay.observation(banked_combat_state(0)))
+    assert "The cost printed on this card" not in page
+    assert "Spark, and the costs below" not in page

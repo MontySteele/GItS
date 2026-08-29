@@ -442,6 +442,14 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
         "title": _text(entry.get("name")),
         "text": _text(entry.get("description")),
         "cost": _text(entry.get("cost")),
+        # `EB-186`, and the same number for the same reason as on the staged
+        # page: at a full Spark bank the game draws EVERY Attack at 0 while
+        # the rule frees one, so a page that prints only what the game draws
+        # is a page offering plays the board will refuse. Read from the
+        # shipped face in `klee-mod`; `None` where that face gives no number,
+        # and an absent number prints nothing.
+        "printed_cost": qa_packet.printed_cost_index().get(
+            _text(entry.get("name"))),
         "kind": _text(entry.get("type")),
         "upgraded": bool(entry.get("is_upgraded") or entry.get("upgraded")),
         "keywords": kws,
@@ -529,7 +537,7 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     p = _player(state)
     resources = p.get("resources")
     battle = _blob(state, "battle")
-    return {
+    combat = {
         "you": {
             "hp": _int(p.get("hp")), "max_hp": _int(p.get("max_hp")),
             "block": _int(p.get("block")), "energy": _int(p.get("energy")),
@@ -562,6 +570,13 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
               "intent": _intent(e.get("intents") or e.get("intent")),
               "powers": _powers(e)} for e in _enemies(state)], "name"),
     }
+    # `EB-186`: the once-per-screen Spark line, built from the printed powers
+    # and the printed hand this screen already carries. Empty -- and so
+    # printed nowhere -- on every screen where no card is being shown cheaper
+    # than the cost on its face.
+    combat["spark_note"] = qa_packet.spark_note(combat["you"]["powers"],
+                                                combat["hand"])
+    return combat
 
 
 def _map_nodes(state: dict[str, Any]) -> list[Any]:
@@ -784,6 +799,9 @@ def _render_card(c: dict[str, Any], bullet: str = "-") -> list[str]:
     if bits:
         head += f" — {', '.join(bits)}"
     out = [head, f"    {c['text'] or '(no printed text)'}"]
+    note = qa_packet.cost_note(c)
+    if note:
+        out.append(f"    {note}")
     for k in c["keywords"]:
         out.append(f"    *{k['name']}* — {k['text']}" if k["text"]
                    else f"    *{k['name']}*")
@@ -890,6 +908,8 @@ def render(obs: dict[str, Any]) -> str:
                 out.append(f"- **{p['title']}** — {p['text']}" if p["text"]
                            else f"- **{p['title']}**")
         out += ["", "## Your hand", ""]
+        if c.get("spark_note"):
+            out += [c["spark_note"], ""]
         for card in c["hand"]:
             out += _render_card(card)
         if not c["hand"]:
