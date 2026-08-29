@@ -335,6 +335,15 @@ and offered option (2) as the repair.
 > character-owned engine may respond to a Companion play and generate its
 > resource where explicitly declared by that character's kit.**
 
+*Checked 2026-08-29, not rewritten (it is GPT's text offered as an option):
+both sentences are complete clauses, and Furina's Companion-play → member
+performs → Fanfare loop is legal under them — the Companion grants nothing, her
+own kit hook responds and mints, and her sheet declares the hook. **One word
+would want tightening on countersign:** "directly" is undefined, and it is
+carrying the whole prohibition; and the rewrite drops the original's
+"cheaply repeatable", so the rate guard survives only in whatever the kit
+declaration itself bounds.*
+
 **What each reading does to Furina.** Her reframe makes every Companion play
 — hers or an ally's — trigger a Salon member's performance, and a performance
 mints Fanfare (`furina-reframe-2026-08-29.md` §4.1, §4.3, §4.8), once per

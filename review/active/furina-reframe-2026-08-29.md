@@ -634,7 +634,7 @@ docs-only for `review/active/`.
 ### 3.1 LAW text this needs — PROSPECTIVE, under R213 quarantine
 
 Nothing here is applied. It is drafted so [USER] can see what he would be
-signing, and it is `C2`. Three items, and only the second is a real amendment.
+signing, and it is `C2`. Four items, and only the second is a real amendment.
 
 **Amendment 1 — the Fanfare generation legs** (`LAW.md:195-207`). The current
 bullet names the four live legs as "HP lost / Encore spent / Encore absorbed /
@@ -672,8 +672,17 @@ permits. Prospective text, added as a scoped sentence rather than a rewrite:
 > full meter is its own payoff, and the "drain the meter for a giant effect"
 > card is a drafted Rare rather than kit. Her centered-overhead indicator
 > renders Fanfare. This is scoped to Furina and amends the template's
-> "talent-relic + kit-Burst" requirement for her alone; every other character
-> ships a kit-Burst unchanged.
+> "talent-relic + kit-Burst" requirement for her alone. **This is transition
+> text and nothing more:** the roster-wide retirement of the kit-Burst
+> (`review/active/burst-retirement-2026-08-29.md` §3.2, R220 B) supersedes this
+> scoped amendment, and under R220 B's order Furina's fold lands last — so by
+> the time this sentence would activate, the other characters' folds have
+> already landed and no character still ships a kit-Burst.
+
+*(Hygiene, 2026-08-29: the sentence previously ended "every other character
+ships a kit-Burst unchanged", which R220 B's sequence makes false at the moment
+this text would activate. Rewritten in place under the hygiene norm; the
+amendment's substance is unchanged.)*
 
 **One line on scope, because it will be asked.** The roster-wide retirement of
 the shared Burst meter is RULED ([USER], 2026-08-29) and is packeted separately
@@ -689,6 +698,35 @@ absorption and false of the Salon (§2.7c). The prospective fix is to scope the
 clause to Encore explicitly and leave the Salon's dry rule to the constant.
 **Hygiene, and it could be a normal commit**; it is listed under `C2` only
 because it sits in a bullet [USER] is being asked to read anyway.
+
+**Amendment 4 — what Fanfare is allowed to scale. PROSPECTIVE, DRAFT,
+UNCOUNTERSIGNED.** Drafted 2026-08-29 in response to external review relayed
+by [USER] (their own GPT chat, no seat authority), which observed that "+1 to
+every member numeric" (`SALON_FOCUS_PER`, §4.5) has no exemption written
+anywhere and so already reaches Chevalmarin's Encore refund today — before any
+energy member is added. The packet recorded that objection at `F1` and did not
+settle it; this is the settlement offered for countersign. Prospective sentence,
+added to the Fanfare bullet alongside amendment 1:
+
+> **The Focus term scales performance numerics only.** Fanfare scales only
+> those values a member's row explicitly designates as performance numerics —
+> its damage and its Block. It never scales Energy, Encore, Charge, Fanfare
+> itself, card generation, or the number of aura or status stacks a member
+> applies.
+
+**Why this wording rather than the relayed one.** The relayed draft read
+"Fanfare scales only each member's explicitly designated performance values. It
+never scales Energy, Encore, Charge, card generation, or aura counts." The
+substance is kept; three things are tightened against the packet's own terms.
+"Performance **numerics**" is the term §4.5 and `F8` already use
+(`SALON_FOCUS_PER` = "+1 to every member numeric", `:252`), so the invariant
+and the constant's own gloss say the same word. The permitted set is named
+positively (damage and Block) rather than left to the designation, so a new
+member row cannot quietly designate an Encore refund as a "performance value".
+And **Fanfare itself** is added to the exclusions, which the relayed list
+omits: §4.1's mint is already positive feedback, and a Focus term that scaled a
+member's Fanfare mint would compound it. §4.5 carries the per-member
+consequences.
 
 ---
 
@@ -935,6 +973,34 @@ Both halves ship. `SALON_FOCUS_PER = 10` adds +1 to every member numeric per
 10 held Fanfare, read live at `effects.py:1365`. `FANFARE_DECAY_FRACTION =
 0.20` decays the held meter proportionally. Neither needs building; both need
 setting against each other, which is the actual work.
+
+**What "every member numeric" is allowed to mean — the scaling invariant.
+PROSPECTIVE, DRAFT, UNCOUNTERSIGNED** (§3.1 amendment 4; drafted 2026-08-29
+against external review relayed by [USER], no seat authority). As written,
+`SALON_FOCUS_PER` scales *every* number a member produces, and neither §4.2 nor
+`F8` exempts anything — so it already reaches Chevalmarin's Encore refund
+today, and it would reach an energy member's payout the moment `F1` seats one.
+The proposed invariant:
+
+> **The Focus term scales performance numerics only.** Fanfare scales only
+> those values a member's row explicitly designates as performance numerics —
+> its damage and its Block. It never scales Energy, Encore, Charge, Fanfare
+> itself, card generation, or the number of aura or status stacks a member
+> applies.
+
+**What it excludes, member by member, against the §4.2 roster:**
+
+| member | scaled by Focus | **excluded** |
+|---|---|---|
+| Crabaletta | trigger damage; Evoke's single hit | — (nothing on this row is off-limits) |
+| Usher | trigger Block; Evoke's large Block | — |
+| Chevalmarin | trigger's small damage | the **Hydro application** on the trigger (a stack count, not a numeric); on the Evoke, the **all-enemy Hydro application** and the **Encore refund** — this is the one live row the invariant changes today |
+| scaling member (`F1`, prospective) | any damage or Block it prints itself | its **buff to another member's performance** — a modifier is not a performance numeric, and Focus scaling the modifier would apply Focus twice to the same hit |
+| Rare energy member (`F1` opt. 1, prospective) | any damage or Block it prints | its **energy payout**, entirely — which is the objection's specific point, and it is what makes `F1` option (1) survivable rather than an unbounded faucet |
+
+Card bodies are out of scope: this binds the Focus term applied to *member*
+performances, not what a drafted card does with the meter (§4.6's drain reads
+the held value directly and is unaffected).
 
 **The arithmetic, and the ceiling problem.** The Fanfare cap is
 `FANFARE_CAP_FRACTION × maxHP` = 0.5 × 78 = **39**, so the Focus term reaches
@@ -1505,7 +1571,13 @@ against it:
   energy payout or Chevalmarin's Encore refund, so a Rare energy member arrives
   Focus-scaled and, under `F4` pick 1 (triggers unbounded per turn), on an
   unbounded number of Companion plays; add the energy member only after it is
-  settled that Energy and resource refunds are never Focus-scaled.
+  settled that Energy and resource refunds are never Focus-scaled. **Settled in
+  draft since:** §3.1 amendment 4 and §4.5 now carry a prospective scaling
+  invariant ("the Focus term scales performance numerics only … never Energy,
+  Encore, Charge, Fanfare itself, card generation, or aura/status stacks"),
+  which excludes the energy payout and Chevalmarin's Encore refund. It is
+  PROSPECTIVE and uncountersigned, so it does not by itself move the `F1`
+  recommendation — but if it is signed, option (1)'s objection is answered.
 - **`F13` — argues for option (2), trigger line in full and Evoke as a
   keyword.** The recommendation's own text concedes the face is "carrying three
   rules" and calls it "the sharpest D5 tension in the packet"; moving the Evoke
