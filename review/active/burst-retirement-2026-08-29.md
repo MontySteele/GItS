@@ -680,10 +680,12 @@ worth isolating, and re-baselining twice would burn the compute twice for one
 answer. **One combined twelve-arm re-baseline discharges both**, taken after the
 last fold lands.
 
-> *Unverified in the brief:* the identifier **EB-195** does not exist. The
-> highest EB row on `main` is **EB-193** (`docs/current/BACKLOG.md:104`), and the
-> HP re-baseline is owed by the `roster-hp-scalers` packet §7, not by an EB row.
-> §7 books minting the row.
+> *Register note:* **EB-194 through EB-197 are already minted on the unmerged
+> `kokomi-blind-run` branch** — EB-194 the `+proto` boot regression, **EB-195 the
+> twelve-arm re-baseline owed after the HP change**, EB-196/197 the Kurage memory
+> and buff-text defects. `main` still shows EB-193 as the ceiling only because
+> that branch has not merged. §7 therefore numbers this packet's rows from
+> EB-198 and merges the pilot bump into the existing EB-195.
 
 ### 5.3 C# (`klee-mod/KleeCode/`)
 
@@ -791,17 +793,17 @@ transient rows.
   Casket refresh link) is answered by **KO2** and should point here rather than
   be answered twice.
 
-**BACKLOG — EB rows.** Next free id is **EB-194**
-(`docs/current/BACKLOG.md` runs to EB-193).
-- **EB-194** — the shared retirement itself: engine fields, ops, the `requires`
+**BACKLOG — EB rows.** Next free id is **EB-198** (EB-194–197 are minted on
+`kokomi-blind-run`, unmerged; `main` runs to EB-193 until it lands).
+- **EB-198** — the shared retirement itself: engine fields, ops, the `requires`
   gate, the kit-grant machinery, the eight constants, the three sheets'
   `burst_max`, and the ~30 test files. Gate: all three folds landed. Acceptance:
   `grep -i burst_energy tier0/` returns nothing outside retired-display comments.
-- **EB-195** — the `POLICY_VERSION` bump for `PILOT_BURST_DIVISOR`'s removal,
-  **explicitly merged** with the `roster-hp-scalers` §7 twelve-arm re-baseline
-  into one run. *(This is the id the brief already used; minting it here makes
-  the brief's reference true.)*
-- **EB-196** — the C# arm: the three pools' off-pool carve-outs, the keyword loc
+- **EB-195** (exists, on `kokomi-blind-run`) — gains the `POLICY_VERSION` bump
+  for `PILOT_BURST_DIVISOR`'s removal, **explicitly merged** with its twelve-arm
+  re-baseline into one run. Not minted here; its row text is amended when the
+  ruling lands.
+- **EB-199** — the C# arm: the three pools' off-pool carve-outs, the keyword loc
   id and its consumer sweep, the retired-display registry entries, and the
   `GaugeBridge` re-point including Kokomi's Charge graduating to the overhead
   anchor.
