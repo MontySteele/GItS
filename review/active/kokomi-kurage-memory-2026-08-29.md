@@ -1600,6 +1600,51 @@ The arm has no card row and never had one (`docs/prototype-surface.yaml`, the
 declared-not-rowed block), so nothing here bumps a stamp, moves a sheet or
 touches a drafted number.
 
+### 13.0 DISCLOSURE — the world moved between the draft and the run (R212)
+
+Written before the first sealed seed was embarked, and committed before it.
+
+The slate was drafted against an earlier `+proto` build. Three defects were
+found and fixed after the draft and before the run, and the build the sealed
+run executes on is **`0.2.1456+proto`**, not the build the slate was written
+against:
+
+1. **`EB-194`** — the loc merge called `PrototypeCards.For` from a Harmony
+   postfix on `LocManager.Initialize`, which forced the eager `PrototypeRoster`
+   initializer against an empty `ModelDb` and poisoned the type for the
+   process, so no run of any character could start. Fixed by moving the merge to
+   `KokomiOffPoolCards.InjectPrototypeLoc` and making the generated roster lazy.
+2. **`EB-196`** — `KurageMemory.ResetForCombat` was called from
+   `KokomiResourceHooks.Subscribe`, which a combat re-invokes on every hook
+   broadcast, so the memory was cleared between every pair of hooks and an entry
+   filed by one hook was gone before the next could read it. Fixed by moving the
+   per-fight clear to `BeforeCombatStart`, plus a `SafeTitle`-style guard on the
+   `ephemeral` read in `Enrol`.
+3. **`EB-197`** — the Bake-Kurage's buff printed *"Lasts {Amount} more turn"*,
+   a countdown nothing under the flag ticks. Under `PROTOTYPE_CARDS` it now
+   prints the lifetime it has. The release face is byte-identical.
+
+**P1 through P6 STAND AS WRITTEN, and are not re-drafted.** Each slot describes
+the arm's DESIGNED behaviour — the strip's front entry and its price (P1), the
+`blocked` / `fires_next` pair (P2), Rule 1's sacrifice-enters (P3), the blocked
+state read as a state (P4), the Oath's per-Memory-play condition (P5), and the
+stored-target aim (P6). None of the three fixes changes a stated mechanism:
+`EB-194` was a boot-order regression that let no run start at all, `EB-196`
+restored a queue that could never hold anything to the rule §11.3 already
+states, and `EB-197` corrected a face no slot grades. The fixes made the
+predicted behaviour **observable**; they did not alter what was predicted. Under
+R212 that is a disclosure, not a re-signature: nothing below is re-signed, no
+threshold, denominator or falsifier is touched, and the slate remains the one
+committed DRAFTED before any seed run.
+
+One consequence worth naming so it is not read as a revision: §13.6's first Gate
+B run could not reach the BLOCKED or FIRES-NEXT states, so P4 was recorded there
+as UNGRADEABLE. On `0.2.1456+proto` all three strip states were observed (Gate B
+re-run, fresh seed `YU4EBKU3XHEG`, which is **not** one of the sealed seeds —
+`KURAGEMEM001/002/003` were UNSPENT at the moment this block was written). P4's
+prediction, threshold and unreached branch are exactly as drafted; only its
+reachability changed.
+
 ### 13.1 The decisive question
 
 **Can a blind reader, from the page alone — the strip, the hand, the bank —
