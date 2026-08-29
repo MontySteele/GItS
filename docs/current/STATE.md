@@ -441,6 +441,15 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     measurement attached and none quotable. Sim, C# and the blind-run
     prediction slate are all merged; the run itself waits on the boot
     regression above. Four rows the redesign leaves unruled are `M50`.
+    **The memory's DISPLAY is being rebuilt**: the strip the blind run
+    tested was diagnosed true on both misread frames and found
+    insufficient rather than defective, so [USER]'s direction turns it
+    into one card at the screen's left edge — the next memory, ringed
+    blue if the bank pays it and red if not, the Charge count under it,
+    and a click opening the whole queue with the same colours running up
+    it. No meter bar at all. §14 has the three build options and the
+    running-affordability projection the queue view needs; `EB-198` is
+    re-scoped onto it, gated on `M61`.
   - **Furina REFRAME — PACKET CLOSED, COUNTERSIGN OPEN**
     (`review/active/furina-reframe-2026-08-29.md`). R220 A, from [USER]'s
     brief and his four answers: the Salon is an **orb board** in the Defect
