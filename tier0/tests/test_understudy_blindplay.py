@@ -658,6 +658,102 @@ def test_a_transition_is_ridden_out_and_never_reported_as_a_screen(tmp_path):
     assert summary["termination"] != "tool_blocked"
 
 
+def _mid_turn_frame(state: dict) -> dict:
+    """The frame `EB-175` was diagnosed on, copied field for field.
+
+    Recorded live on 2026-08-29, 55 ms after `end_turn` answered
+    `ok Ending turn`: still `state_type: monster`, still `turn: player`, the
+    ROUND UNCHANGED, the hand already discarded to zero, energy still full,
+    and `is_play_phase` FALSE. Two of these arrive before the real next round.
+    """
+    frame = json.loads(json.dumps(state))
+    frame["battle"]["is_play_phase"] = False
+    frame["player"]["hand"] = []
+    frame["player"]["discard_pile_count"] = \
+        int(frame["player"].get("discard_pile_count", 0) or 0) + 5
+    return frame
+
+
+class _EndTurnWire:
+    """A wire whose `end_turn` is ASYNCHRONOUS, as the bridge's really is.
+
+    `ExecuteEndTurn` calls `PlayerCmd.EndTurn` and answers at once; the next
+    two reads are the turn still being handed over. Every POST records the
+    round of the frame the TESTER WAS LOOKING AT, which is the whole
+    assertion: one `end turn` from the tester must spend exactly one round.
+
+    A turn ends only when it is ended from a play-phase frame -- ending from
+    the hand-over frame is what the game itself refuses ("Not in play phase")
+    and what the seat spent its real turns on.
+    """
+
+    def __init__(self, rounds: list[dict], tail: dict):
+        self.rounds, self.tail = list(rounds), tail
+        self.i = 0
+        self.pending: list[dict] = []
+        self.posts: list[dict] = []
+        self.posted_rounds: list[int | None] = []
+        self.handed: dict = {}
+
+    def _current(self) -> dict:
+        return (self.rounds[self.i] if self.i < len(self.rounds)
+                else self.tail)
+
+    def get_state(self) -> dict:
+        self.handed = self.pending.pop(0) if self.pending else self._current()
+        return self.handed
+
+    def post(self, action: str, **params) -> dict:
+        seen = self.handed or self._current()
+        battle = seen.get("battle") or {}
+        self.posts.append({"action": action, **params})
+        self.posted_rounds.append(battle.get("round"))
+        if action == "end_turn" and battle.get("is_play_phase"):
+            self.pending = [_mid_turn_frame(seen), _mid_turn_frame(seen)]
+            self.i += 1
+        return {"status": "ok", "message": "Ending turn"}
+
+    def health(self) -> dict:
+        return {"mod_version": "0.0-scripted"}
+
+
+def test_the_frame_between_two_turns_is_named_a_transition():
+    """`EB-175`, the predicate. A combat screen with `is_play_phase` false is
+    a moment, not a screen; a build that does not carry the key at all is not
+    read as one."""
+    live = combat_state()
+    assert blindplay.transient(live) == ""
+    assert blindplay.transient(_mid_turn_frame(live))
+    no_key = json.loads(json.dumps(live))
+    no_key["battle"].pop("is_play_phase")
+    assert blindplay.transient(no_key) == ""
+
+
+def test_one_end_turn_from_the_tester_spends_exactly_one_round(tmp_path):
+    """`EB-175`. Four times in one blind session the seat said `end turn`, was
+    answered `ok Ending turn`, and was then shown a combat screen with an
+    empty hand and full energy -- the frame above -- so it said `end turn`
+    again and spent a REAL turn on it. The rounds it recorded went 1 -> 3 -> 5.
+
+    Three `end turn`s, three rounds, and no round entered twice."""
+    rounds = []
+    for n, hp in ((1, 57), (2, 40), (3, 20)):
+        frame = json.loads(json.dumps(combat_state()))
+        frame["battle"]["round"] = n
+        frame["battle"]["enemies"][0]["hp"] = hp
+        rounds.append(frame)
+    wire = _EndTurnWire(rounds, game_over_state())
+    thread = blindplay.ScriptedThread(
+        [{"command": "end turn", "thinking": "."} for _ in range(3)]
+        + [{"record": "fight"}, {"record": "run"}])
+    s = blindplay.Session(thread, wire=wire, session_id="t",
+                          budget=blindplay.Budget(max_actions=3),
+                          log_root=tmp_path, settle_delay_s=0.0)
+    s.run()
+    assert [p["action"] for p in wire.posts] == ["end_turn"] * 3
+    assert wire.posted_rounds == [1, 2, 3]
+
+
 def test_a_wire_that_stays_unnamed_is_still_tool_blocked(tmp_path):
     wire = blindplay.ScriptedWire([{"state_type": "unknown"}])
     s = blindplay.Session(blindplay.ScriptedThread([]), wire=wire,
@@ -715,8 +811,12 @@ def test_the_sealed_record_carries_the_identity_and_the_words_verbatim(tmp_path)
     s, summary, _wire, thread = _session(tmp_path, replies,
                                          states=[combat_state()],
                                          max_actions=1)
-    identity = {**thread.identity(), "build_version": "0.2.1252+proto",
-                "build_version_source": "the bridge's health `mod_version`",
+    identity = {**thread.identity(), "build_version": "0.2.1269",
+                "build_version_source":
+                    "the deployed `mods\\klee\\manifest.json` `version`",
+                "game_version": "v0.111.0",
+                "game_version_source":
+                    "the game's own `release_info.json` `version`",
                 "run_seed": "HUMWKRKNCE",
                 "prompt_sha256": summary["prompt_sha256"],
                 "actions": summary["actions"],
@@ -724,26 +824,46 @@ def test_the_sealed_record_carries_the_identity_and_the_words_verbatim(tmp_path)
     path = blindplay.seal(summary, identity, log_dir=s.dir,
                           record_root=tmp_path / "committed")
     text = path.read_text(encoding="utf-8")
-    assert "0.2.1252+proto" in text and "HUMWKRKNCE" in text
+    assert "0.2.1269" in text and "v0.111.0" in text and "HUMWKRKNCE" in text
     assert summary["prompt_sha256"] in text
     assert "R217 G" in text and "not approval" in text
     assert "words" in text
 
 
-def test_the_build_version_is_read_or_left_empty_never_invented():
-    class Silent:
-        def health(self):
-            return {}
+def test_both_versions_are_read_off_disk_or_left_empty_never_invented(
+        tmp_path, monkeypatch):
+    """`EB-174`. A sealed record has to name the MOD build and the GAME build,
+    each labelled with where it was read -- and name neither rather than
+    invent one. The bridge's health payload is not consulted at all: it
+    carries the VENDORED bridge's own version and never ours, which is how
+    every record's identity block came to read `(not read)`."""
+    game = tmp_path / "Slay the Spire 2"
+    (game / "mods" / "klee").mkdir(parents=True)
+    props = tmp_path / "local.props"
+    props.write_text(f"<Project><PropertyGroup><GameDir>{game}</GameDir>"
+                     f"</PropertyGroup></Project>", encoding="utf-8")
+    monkeypatch.setattr(blindplay, "LOCAL_PROPS", props)
 
-    class Broken:
-        def health(self):
-            raise RuntimeError("no bridge")
+    # Nothing deployed and no release file: two empties, two reasons.
+    assert blindplay.build_version()[0] == ""
+    assert "no deployed package" in blindplay.build_version()[1]
+    assert blindplay.game_version()[0] == ""
+    assert "release_info.json" in blindplay.game_version()[1]
 
-    assert blindplay.build_version(blindplay.ScriptedWire([]))[0] == \
-        "0.0-scripted"
-    assert blindplay.build_version(Silent())[0] == ""
-    version, why = blindplay.build_version(Broken())
-    assert version == "" and "did not answer" in why
+    # `deploy.ps1` writes the manifest with a BOM; both reads survive one.
+    (game / "mods" / "klee" / "manifest.json").write_text(
+        '﻿{"id": "klee", "version": "0.2.1269"}', encoding="utf-8")
+    (game / "release_info.json").write_text(
+        '{"version": "v0.111.0", "commit": "41cef1ea"}', encoding="utf-8")
+    assert blindplay.build_version() == (
+        "0.2.1269", "the deployed `mods\\klee\\manifest.json` `version`")
+    assert blindplay.game_version() == (
+        "v0.111.0", "the game's own `release_info.json` `version`")
+
+    # No local.props at all is a reason, not a traceback and not a guess.
+    monkeypatch.setattr(blindplay, "LOCAL_PROPS", tmp_path / "absent.props")
+    assert blindplay.build_version()[0] == ""
+    assert blindplay.game_version()[0] == ""
 
 
 # --- EB-173: the deadlock a live session died on --------------------------

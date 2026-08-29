@@ -617,9 +617,12 @@ observation. Sessions land in `understudy/logs/blindplay/`, **gitignored** —
 the prompts inline the screens and the rollout carries a third party's system
 prompt. The committed artifact is
 `review/qa/blindplay/<session>/record.md`: the identity block (model, codex
-version, build version string, run seed read back off the wire, prompt sha256,
-action count, termination reason) and the model's records verbatim under the
-R217 G label. The author's own model family is refused as tester (R217 C).
+version, the deployed mod build and the game build — each read OFF DISK and
+labelled with the file it came from, `mods\klee\manifest.json` and
+`release_info.json`, never the bridge's health payload, which carries the
+vendored bridge's own version and never ours — run seed read back off the
+wire, prompt sha256, action count, termination reason) and the model's
+records verbatim under the R217 G label. The author's own model family is refused as tester (R217 C).
 
 `KleeTests` runs the shipped `klee.dll` against the real game
 assemblies **headless** — no Godot, no launch. It is opt-in, not a deploy gate;

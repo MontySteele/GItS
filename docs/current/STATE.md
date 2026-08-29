@@ -331,9 +331,31 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   screen types with ZERO refusals, no stall and no leak in any of its 40
   observations — ending only because the character died on Act 1. That
   the tester never reached the Act-1 boss is the tester's play, not the
-  tool's code, and the row never asked for the boss. Two live findings are filed and open, `EB-174` (a sealed
-  record cannot name its build) and `EB-175` (`end turn` has to be said
-  twice). A4 and A6 wait and are NOT minted; A1-extended (enemy
+  tool's code, and the row never asked for the boss. Of the two live findings
+  that run filed, **`EB-175` is CLOSED (2026-08-29)** — the bridge's
+  `end_turn` is asynchronous, so a read 55 ms after it answers `ok` carries
+  the round unchanged, the hand already discarded to zero and `is_play_phase`
+  FALSE; the render showed that hand-over frame as a playable turn and the
+  seat's second `end turn` spent the real one, which is where the 1 → 3 → 5
+  rounds came from. `blindplay.transient` now names the frame a transition
+  beside the two it already knew and every live read rides it out — the
+  driver's and the CLI's `observe` / `act` — and nothing posts a second
+  `end_turn` on a tester's behalf. **`EB-174` is CLOSED too (2026-08-29)** —
+  a sealed record could not name its build because the bridge's health
+  payload carries the VENDORED bridge's version (`v0.4.0`) and never ours, so
+  every identity block read `(not read)`. Both builds are now read OFF DISK
+  and each is labelled with the file it came from: the deployed
+  `mods\klee\manifest.json` `version` (producer `deploy.ps1`) and the game's
+  own `release_info.json` `version`. A SIXTH sealed session, **run B6**
+  (`review/qa/blindplay/runB6-20260829-2/record.md`, seed `ZZRK9QHXEFCS`,
+  0.2.1269 on v0.111.0), is the first record that names both builds: 85
+  actions over eight floors, two fights won and a third open against the
+  Act-1 elite, one leak-audit hit in 91 observations and it is the same
+  standing `score` in the tool's own guardrail sentence. It ended on the
+  refusal limit, which is `EB-177`, filed and open — two un-upgraded
+  *Water's Edge*, one of them enchanted Sharp, are BOTH unplayable,
+  because the bare title is ambiguous and the qualifier `EB-173` added
+  only separates an upgrade. A4 and A6 wait and are NOT minted; A1-extended (enemy
   composition/intent setters) and A5 (vision input) are DEFERRED.
   Routing: **Kokomi slice 2 = R213 E1's Charge arms, before Klee** — slice 1
   tests priced Companion Block at the turn and does not exhaust Kokomi.

@@ -226,6 +226,16 @@ that run the whole loop without the game or codex (`blindplay.py`).
   `BLOCK_MATTERS_FRACTION`, `COMPANION_SHARE_FOR_GUEST_CAST`. Bot-policy dials,
   not balance constants; they must not migrate to `tier0/constants.py`, and are
   logged per run (`policy_v1.py:70-90`; `soak.py:701-707`).
+- **`end_turn` IS ASYNCHRONOUS, and the frame it leaves behind looks playable**
+  (`EB-175`). `ExecuteEndTurn` calls `PlayerCmd.EndTurn` and answers
+  `ok Ending turn` at once; a GET 55 ms later still reads `state_type:
+  monster`, `turn: player` and the round UNCHANGED, with the hand already
+  discarded to zero and energy still full. The one field that tells the truth
+  is `battle.is_play_phase`, which is **false** on that frame and true again
+  a quarter-second later on the real next round. `blindplay.transient` counts
+  it as a transition beside `unknown` and a missing `state_type`, and
+  `blindplay.settle` rides all three out on every LIVE read (the driver's and
+  the CLI's) and on no saved one. Neither ends a turn on anybody's behalf.
 - **A stall is a small cycle, not only a frozen frame:** at most 2 distinct
   fingerprints across 12 posted actions (`soak.py:79-87,569-587`). A mechanical
   action that changes nothing is likewise not mechanical (`soak.py:926-949`).

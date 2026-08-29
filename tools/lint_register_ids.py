@@ -116,22 +116,35 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 176,   # EB-176 minted AND CLOSED 2026-08-29 by the same acceptance:
+    "EB": 177,   # EB-177 minted 2026-08-29 by run B6: two cards with the
+                 # same printed title that differ by anything but upgrade
+                 # state are BOTH unplayable -- a Sharp-enchanted copy of
+                 # `Water's Edge` beside a plain one, where the bare title
+                 # is ambiguous and neither `(upgraded)` nor
+                 # `(not upgraded)` separates them. The session died on the
+                 # refusal limit and the tester named it unprompted. OPEN.
+                 # EB-176 minted AND CLOSED 2026-08-29 by the same acceptance:
                  # a live `hand_select` renders as `card_select`, only the
                  # WIRE's screen name was exempt from the snake_case rule, and
                  # the tool's own name for the screen -- in the tool's own
                  # observation -- tripped the blindness assertion and stopped
                  # a session that had leaked nothing. Fixed in the same
                  # commit, so the row never existed.
-                 # EB-175 minted 2026-08-29 by the same acceptance: `end turn`
-                 # has to be said twice, four times in one session, and the
-                 # two screens genuinely differ -- an intermediate state the
-                 # render presents as a playable turn. OPEN.
-                 # EB-174 minted 2026-08-29: the sealed blind-play record
-                 # cannot name the build it was taken on -- the bridge's
-                 # health payload carries no version and `build_version`
-                 # correctly refuses to invent one, so every record's identity
-                 # block reads `(not read)`. OPEN.
+                 # EB-175 minted 2026-08-29 by the same acceptance and CLOSED
+                 # 2026-08-29: `end turn` had to be said twice, four times in
+                 # one session. The wire read either side of the post settled
+                 # it -- the bridge's `end_turn` is asynchronous, and a GET
+                 # 55 ms later reads the round unchanged, the hand discarded
+                 # to zero and `is_play_phase` FALSE. `blindplay.transient`
+                 # now names that frame a transition and rides it out.
+                 # EB-174 minted 2026-08-29 and CLOSED 2026-08-29: the sealed
+                 # blind-play record could not name the build it was taken on
+                 # -- the bridge's health payload carries the VENDORED
+                 # bridge's version and never ours, and `build_version`
+                 # correctly refused to invent one. Both builds are now read
+                 # OFF DISK and labelled: the deployed
+                 # `mods\klee\manifest.json` and the game's own
+                 # `release_info.json`.
                  # EB-173 minted AND CLOSED 2026-08-29 by the EB-167 live
                  # acceptance: `_fold` erased the `+` the game prints on an
                  # upgraded title, so a hand holding a base and an upgraded
@@ -212,7 +225,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        174, 175,
+        177,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

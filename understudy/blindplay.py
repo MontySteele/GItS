@@ -237,6 +237,59 @@ def _screen(state: dict[str, Any]) -> str:
     return str(state.get("state_type") or "unknown")
 
 
+def transient(state: dict[str, Any]) -> str:
+    """Why this state is a MOMENT rather than a screen, or `""`.
+
+    Three shapes, all of them the wire caught mid-stride:
+
+      NO `state_type` KEY, and `state_type: "unknown"` -- the frame between
+        leaving one room and entering the next. `soak._settle_transient`
+        learned both on this wire; the reasoning is in `Session._settle`.
+
+      A COMBAT SCREEN WITH `battle.is_play_phase` FALSE (`EB-175`) -- the
+        turn has been handed back to the game and not yet handed on to the
+        player. `end_turn` is asynchronous: `ExecuteEndTurn` calls
+        `PlayerCmd.EndTurn` and answers `ok Ending turn` at once, and a GET
+        55 ms later reads the round UNCHANGED, the hand already discarded to
+        zero, energy still full, and `is_play_phase` false. Rendered as a
+        screen that is exactly what a blind tester saw four times in one
+        session: a playable turn with an empty hand. Its second `end turn`
+        then landed on the REAL next turn a quarter-second later and spent
+        it, which is why the rounds it recorded went 1 -> 3 -> 5. Nothing
+        here posts a second `end_turn` on the tester's behalf; the read
+        waits for the turn the game is already handing over.
+
+    `is_play_phase` is checked for an explicit `False` and never for
+    falsiness: a build whose battle block does not carry the key must not
+    have every combat screen read as a transition.
+    """
+    if state.get("state_type") is None:
+        return "the wire answered with no `state_type` key"
+    if str(state.get("state_type")) == "unknown":
+        return "the wire could not name this screen"
+    if (str(state.get("state_type")) in COMBAT_SCREENS
+            and _blob(state, "battle").get("is_play_phase") is False):
+        return "the game has not handed the turn back to the player yet"
+    return ""
+
+
+def settle(state: dict[str, Any], wire: Any = bridge,
+           tries: int = SETTLE_TRIES,
+           delay: float = SETTLE_DELAY_S) -> dict[str, Any]:
+    """Poll while the state is a transition; hand back whatever is there.
+
+    Bounded on purpose, and the bound does not raise: a wire that really is
+    stuck is reported as blocked by the caller, which is a better record than
+    a read that never returns.
+    """
+    for _ in range(tries):
+        if not transient(state):
+            return state
+        time.sleep(delay)
+        state = wire.get_state()
+    return state
+
+
 def _player(state: dict[str, Any]) -> dict[str, Any]:
     p = state.get("player")
     return p if isinstance(p, dict) else {}
@@ -1583,14 +1636,13 @@ class Session:
         wire that really is stuck is still reported as blocked rather than
         waited on forever. A missing `state_type` key is the same moment one
         frame earlier and settles the same way.
+
+        `EB-175` added the third shape -- a combat screen the game has not
+        handed back yet -- to `transient()`, which is where all three now
+        live so the CLI's own live reads ride out the same moments.
         """
-        for _ in range(self.settle_tries):
-            st = state.get("state_type")
-            if st is not None and str(st) != "unknown":
-                return state
-            time.sleep(self.settle_delay_s)
-            state = self.wire.get_state()
-        return state
+        return settle(state, self.wire, self.settle_tries,
+                      self.settle_delay_s)
 
     def _ask_record(self, questions: str) -> str:
         reply = self.thread.send(f"{questions}\n\n{RECORD_DISCLAIMER}\n",
@@ -1749,23 +1801,87 @@ def _result_line(result: Any) -> str:
 
 # ----------------------------------------------------------- sealed record --
 
-def build_version(wire: Any) -> tuple[str, str]:
-    """`(version string, where it was read)`. Never guessed.
+# `klee-mod/local.props` is the machine's one statement of where the game is,
+# and this is a DELIBERATE SECOND COPY of the four lines `soak.game_dir()`
+# reads it with -- for the same reason `HAZARD_EVENTS` is copied above:
+# importing `soak` here would pull `policy_v1` and every tier0 sheet loader
+# into the design-blind module. Nothing below reads anything but a version
+# string, and a missing file is answered with a reason, never a guess.
+LOCAL_PROPS = Path(__file__).resolve().parents[1] / "klee-mod" / "local.props"
 
-    Read off the wire's health payload where the bridge reports one, and left
-    EMPTY otherwise with the reason recorded -- a record that invented a build
-    number would be worse than one that says it could not read it.
-    """
+
+def _game_dir() -> Path | None:
     try:
-        blob = wire.health()
-    except Exception as exc:                                 # noqa: BLE001
-        return "", f"the bridge did not answer: {type(exc).__name__}"
-    if not isinstance(blob, dict):
-        return "", "the health endpoint answered with something unreadable"
-    for key in ("mod_version", "version", "build", "game_version"):
-        if _text(blob.get(key)):
-            return _text(blob.get(key)), f"the bridge's health `{key}`"
-    return "", "the bridge's health payload carries no version"
+        text = LOCAL_PROPS.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    m = re.search(r"<GameDir>([^<]+)</GameDir>", text)
+    return Path(m.group(1).strip()) if m and m.group(1).strip() else None
+
+
+def _json_field(path: Path, key: str) -> str:
+    try:
+        # `deploy.ps1` writes the manifest through PowerShell, which stamps a
+        # UTF-8 BOM; `utf-8-sig` reads it either way.
+        blob = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError):
+        return ""
+    return _text(blob.get(key)) if isinstance(blob, dict) else ""
+
+
+def build_version(wire: Any = None) -> tuple[str, str]:
+    """`(mod build, where it was read)` for the DEPLOYED package. Never guessed.
+
+    `EB-174`. This used to read the bridge's health payload, which carries the
+    VENDORED bridge's own version (`v0.4.0`) and has never carried ours -- so
+    every sealed record's identity block read `(not read)`, on a document
+    whose whole purpose is provenance. The honest source is the package that
+    is actually installed: `<GameDir>\\mods\\klee\\manifest.json`, whose
+    producer is `klee-mod\\build\\deploy.ps1` and whose `version` is the
+    string the deploy stamped (`MAJOR.AUTO`, R214, with `+proto` beside it
+    where `deploy_proto.ps1` built it).
+
+    Read off DISK rather than off the wire on purpose: the file is what a
+    person would open to answer "which build was this", and a record that
+    names a build nobody can find on the machine is not provenance. `wire` is
+    accepted and ignored so the call site does not have to know that.
+    """
+    game = _game_dir()
+    if game is None:
+        return "", (f"no GameDir in {LOCAL_PROPS.name}, so the deployed "
+                    f"package cannot be found")
+    manifest = game / "mods" / "klee" / "manifest.json"
+    version = _json_field(manifest, "version")
+    if version:
+        return version, "the deployed `mods\\klee\\manifest.json` `version`"
+    return "", (f"no `version` in {manifest}" if manifest.is_file()
+                else f"no deployed package at {manifest}")
+
+
+def game_version(wire: Any = None) -> tuple[str, str]:
+    """`(game build, where it was read)`. Never guessed.
+
+    The other half of `EB-174`: a record has to name the GAME too, because a
+    live number was never comparable across a game build (R95) and the pin
+    moved under this tool once already (R218, v0.107.1 -> v0.111.0 mid-sitting).
+
+    `release_info.json` in the install root is the game's own statement of its
+    version, and it is the first of the four facts `OPERATIONS.md` names for
+    confirming a pin. Cheaper and steadier than the two alternatives: reading
+    `release=v...` out of `godot.log` means scanning a file that reaches
+    gigabytes on a bad run, and Steam's `appmanifest` buildid names a build
+    without naming a version.
+    """
+    game = _game_dir()
+    if game is None:
+        return "", (f"no GameDir in {LOCAL_PROPS.name}, so the install root "
+                    f"cannot be found")
+    info = game / "release_info.json"
+    version = _json_field(info, "version")
+    if version:
+        return version, "the game's own `release_info.json` `version`"
+    return "", (f"no `version` in {info}" if info.is_file()
+                else f"no `release_info.json` at {info}")
 
 
 # --------------------------------------------------------- the leak audit --
@@ -1856,7 +1972,8 @@ def record_markdown(summary: dict[str, Any], identity: dict[str, Any]) -> str:
            "report, a win-rate table or a measurement register.**", "",
            "## Identity", ""]
     for key in ("model_requested", "model_observed", "codex_version",
-                "build_version", "build_version_source", "run_seed",
+                "build_version", "build_version_source",
+                "game_version", "game_version_source", "run_seed",
                 "prompt_sha256", "actions", "termination"):
         if key in identity:
             out.append(f"- **{key}**: {identity[key] or '(not read)'}")
@@ -1897,9 +2014,13 @@ def _load_state(args) -> dict[str, Any]:
     already writes around one (`review/qa/<turn>/observed.json` keeps it under
     `state`), so the recorded material is usable as a fixture without being
     unwrapped by hand first.
+
+    A LIVE read settles first and a saved one never does (`EB-175`): the
+    operator driving `observe` / `act` by hand reads the wire on exactly the
+    frames the driver does, and a fixture is a frame somebody chose.
     """
     if not args.raw_file:
-        return bridge.get_state()
+        return settle(bridge.get_state())
     blob = json.loads(Path(args.raw_file).read_text(encoding="utf-8"))
     inner = blob.get("state") if isinstance(blob, dict) else None
     if isinstance(inner, dict) and inner.get("state_type"):
@@ -1941,7 +2062,8 @@ def cmd_session(args) -> int:
     except BlindPlayError as exc:
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 2
-    version, source = build_version(bridge)
+    version, source = build_version()
+    game, game_source = game_version()
     seed = bridge.current_seed() or ""
     thread = CodexThread(log_dir, model=args.model)
     budget = Budget(max_actions=args.max_actions,
@@ -1955,7 +2077,9 @@ def cmd_session(args) -> int:
     finally:
         thread.close()
     identity = {**thread.identity(), "build_version": version,
-                "build_version_source": source, "run_seed": seed,
+                "build_version_source": source,
+                "game_version": game, "game_version_source": game_source,
+                "run_seed": seed,
                 "prompt_sha256": summary["prompt_sha256"],
                 "actions": summary["actions"],
                 "termination": summary["termination"]}
