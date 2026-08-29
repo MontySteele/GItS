@@ -36,9 +36,66 @@ def _base_card_id(card_id: str) -> str:
 
 
 def spark_threshold(state: CombatState) -> int:
+    """RETIRED-UNDER-FLAG (R213 E2, PICK 6). The base rule's bar.
+
+    UNREAD whenever `C.SPARK_ALT_COST_ENABLED` is true: with the flag on
+    there is no threshold to be at, nothing is zeroed and nothing is
+    consumed, so every caller of this function is guarded by the flag. It
+    stays in the file so the OFF arm is still expressible -- that is what a
+    two-arm flag is for -- and no new code path calls it.
+    """
     # True Spark Knight: free attack at 2 sparks instead of 3.
     return max(1, C.SPARKS_FOR_FREE_ATTACK
                - state.player.powers.get("spark_threshold_down", 0))
+
+
+def spark_power_price(state: CombatState, card: Card) -> int:
+    """The Spark price the STRICT Rare Power contributes to `card`, or 0.
+
+    PICK 5, wording (1), sub-pick (a). "Your Attacks that do not already cost
+    [Spark] cost 3 [Spark] instead of their Energy cost." Three clauses, and
+    each one is a line here:
+
+      * ATTACKS ONLY -- Skills and Powers keep their Energy cost untouched.
+        Energy becomes very nearly pure Skill currency, which is the payoff
+        loop the Power is a bet on.
+      * "THAT DO NOT ALREADY COST [Spark]" -- sub-pick (a). A card printing
+        its own `spend_spark` keeps its printed price; the Power neither
+        raises it nor adds to it. (b) would have re-priced Fwoosh! from 1 to
+        3, punishing the cards the archetype drafts.
+      * X-COST ATTACKS ARE EXEMPT, AND THE PACKET DOES NOT SAY SO. §5 is
+        silent on X and this is the reading taken, stated rather than
+        buried: an X card's cost IS the energy it spends
+        (`card_cost`'s first branch, `state.current_x`), so converting it to
+        a flat 3 Sparks would resolve it at X = 0 and deal nothing --
+        exactly the reasoning R34 gave for the base rule's own X exemption,
+        reached again from the other side. It goes back to [USER] in the
+        packet's §10.
+
+    The price is NOT on the card, so `spark_cost` -- which reads printed
+    top-level ops and nothing else -- cannot see it and is not asked to. This
+    is the second, state-aware half, and `spark_price` below is the sum the
+    gate and the payment both consult.
+    """
+    if not C.SPARK_ALT_COST_ENABLED:
+        return 0
+    if card.type != "attack" or card.cost == "X":
+        return 0
+    if not state.player.powers.get("spark_attack_cost", 0):
+        return 0
+    if spark_cost(card):
+        return 0                # already Spark-priced: unaffected, (a)
+    return C.SPARK_ATTACK_POWER_PRICE
+
+
+def spark_price(state: CombatState, card: Card) -> int:
+    """What this card charges in Sparks RIGHT NOW: printed plus power.
+
+    One function so the playability gate, the payment and the pilot's hold
+    term can never disagree about the number -- the same argument
+    `spark_cost` makes for the printed half, one layer up.
+    """
+    return spark_cost(card) + spark_power_price(state, card)
 
 
 def grant_charged_kit(state: CombatState) -> None:
@@ -168,7 +225,10 @@ def card_playable(state: CombatState, card: Card) -> bool:
     if card.encore_cost and state.player.encore < card.encore_cost:
         return False        # "Spend N Encore:" cost line -- a gate, never
                             # an overdraw (that is the spend_encore op)
-    price = spark_cost(card)
+    # `spark_price`, not `spark_cost`: the printed price PLUS whatever the
+    # strict Rare Power contributes (0 with the flag off, so this line is
+    # byte-identical there). "Unplayable below 3 Sparks" is this gate.
+    price = spark_price(state, card)
     if price and state.player.sparks < price:
         return False        # EB-118 §4.5, the Spark sink's cost line: the
                             # gate one line up, DERIVED from the op instead
@@ -276,7 +336,21 @@ def card_cost(state: CombatState, card: Card) -> int:
     if (effects.is_spotlighted(state, card)
             and state.spotlighted_paid_cards_this_turn == 0):
         cost = max(0, cost - p.powers.get("spotlight_discount", 0))
-    if (card.type == "attack"
+    # THE STRICT RARE POWER'S ENERGY HALF (PICK 5): "...instead of their
+    # Energy cost". A converted Attack costs 0 Energy; the Sparks are taken in
+    # `play_card`. Checked BEFORE the retired zeroing branch below so the two
+    # rules can never both fire -- they cannot anyway, the flag makes them
+    # mutually exclusive, and the order says so at the site.
+    if spark_power_price(state, card):
+        return 0
+    # RETIRED-UNDER-FLAG: THE ZEROING. "At 3 Sparks, your Attacks cost 0" --
+    # the base rule's first half, and the half R213 E2 named as feeding none
+    # of D2's six steerable verbs: the bank has one destination and the engine
+    # picks it. With `SPARK_ALT_COST_ENABLED` on, an Attack costs what it
+    # prints (or what the Power above charges), and a full bank discounts
+    # nothing.
+    if (not C.SPARK_ALT_COST_ENABLED
+            and card.type == "attack"
             and state.player.sparks >= spark_threshold(state)):
         return 0
     # Base-game parity (FreeAttack / Corruption): checked AFTER the spark
@@ -303,11 +377,29 @@ def play_card(state: CombatState, card: Card) -> None:
     # attacks spend, and the two has_spark cards are skills, so this card is
     # the whole blast radius.
     state.sparks_at_play = p.sparks
-    if (card.type == "attack" and cost == 0
+    # RETIRED-UNDER-FLAG: THE AUTOMATIC CONSUME. "Playing one consumes 3" --
+    # the base rule's second half. Under `SPARK_ALT_COST_ENABLED` nothing
+    # spends implicitly: every Spark that leaves the bank leaves it because a
+    # printed price or the strict Power charged it, both of which are visible
+    # before the card is played. R34's X exemption above goes with it (there
+    # is no spend to be exempt from); the branch is left inert rather than
+    # deleted so the OFF arm still runs the shipped rule byte for byte.
+    if (not C.SPARK_ALT_COST_ENABLED
+            and card.type == "attack" and cost == 0
             and p.sparks >= spark_threshold(state)
             and card.cost != 0 and card.cost != "X"):
         p.sparks -= spark_threshold(state)
         state.emit("sparks_spent")
+    # THE STRICT RARE POWER'S PAYMENT (PICK 5), and it is the only new debit
+    # in this function. The printed half of a Spark price is paid by the card's
+    # own top-level `spend_spark` op when its effects resolve; the Power's half
+    # is not on the card, so it is taken here, at the cost line, beside the
+    # energy. `card_playable` has already refused a short bank, so this cannot
+    # half-pay -- and `spend_sparks` is all-or-nothing anyway and emits its
+    # refusal if it ever does.
+    owed = spark_power_price(state, card)
+    if owed:
+        effects.spend_sparks(state, owed)
     if card.cost == "X":
         state.current_x = cost                # X = energy actually spent
     state.current_card_cost = cost
