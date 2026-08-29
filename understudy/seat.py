@@ -320,7 +320,14 @@ of that line; naming the fix moves you across it.
 # to refuse a legitimate brief would just be reworded around -- which is the
 # failure it exists to prevent. Every entry is documented by being readable.
 REMEDY_ASKS: tuple[str, ...] = (
-    "rewrite", "re-write", "re-author", "reauthor", "re-draft", "redraft",
+    # Ask-SHAPED forms only. The bare verbs ("rewrite", "re-author") also
+    # occur DESCRIPTIVELY in material a brief inlines -- a proposal's reader
+    # table says "Re-author." of a row, a sheet comment says "this rewrite
+    # is what completes R208" -- and the first shipped brief that inlined a
+    # proposal was refused for exactly that (kokomi-kurage-memory, 2026-08-29).
+    "rewrite the", "rewrite it", "rewrite this", "re-write the",
+    "re-author the", "re-author it", "re-author this", "reauthor the",
+    "re-draft the", "redraft the",
     "propose a fix", "propose an alternative", "propose a number",
     "propose new", "suggest a fix", "suggest an alternative",
     "suggest a number", "suggest new", "recommend a number",
@@ -602,7 +609,20 @@ def remedy_findings(text: str) -> list[str]:
     the offending phrases, in the order the list declares them, so a refusal
     can print exactly what to delete.
     """
-    low = str(text or "").casefold()
+    # Only the brief's own prose is searched: markdown table rows, comment
+    # lines and fenced code are inlined MATERIAL (a sheet, a proposal's
+    # tables), not an ask, and are skipped line by line.
+    kept: list[str] = []
+    fenced = False
+    for line in str(text or "").splitlines():
+        stripped = line.strip()
+        if stripped.startswith("```"):
+            fenced = not fenced
+            continue
+        if fenced or stripped.startswith("|") or stripped.startswith("#"):
+            continue
+        kept.append(line)
+    low = chr(10).join(kept).casefold()
     found: list[str] = []
     for phrase in REMEDY_ASKS:
         start = 0

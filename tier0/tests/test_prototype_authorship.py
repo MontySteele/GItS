@@ -216,6 +216,19 @@ def test_a_brief_that_forbids_a_remedy_passes(brief):
     assert not seat.remedy_findings(brief), brief
 
 
+@pytest.mark.parametrize("brief", [
+    "Further copies need a second job, which is a re-authoring question, not a number.",
+    "| `all_streams_flow` | +1 per 2 Charge | **Re-author.** It was authored as the reader |",
+    "   # W2b took the family five -> three; this rewrite is what completes R208.",
+    "```" + chr(10) + "rewrite the row" + chr(10) + "```" + chr(10) + "Name the clause.",
+])
+def test_descriptive_uses_in_inlined_material_pass(brief):
+    """A brief that INLINES a proposal or a sheet carries the words as
+    description (a table verdict, a comment, prose about a question), not as
+    an ask. The kokomi-kurage-memory brief was refused for these."""
+    assert not seat.remedy_findings(brief), brief
+
+
 def test_the_shipped_review_prompts_pass():
     """The four briefs already committed under review/qa/ must not be refused
     by a guard added after them -- a gate that red-lights the existing corpus
