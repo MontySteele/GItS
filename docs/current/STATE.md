@@ -320,21 +320,29 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `EB-182` (no per-option playability on the choose-a-card screen,
     proven off the decompile), `EB-183` (R216 D's per-companion half,
     owed and unbuilt).
-  - **Klee slice 1** (`review/active/klee-slice-1-2026-08-29.md`, §11):
-    R213 E2's three Spark-spending arms, RUN 2026-08-29 on
-    `0.2.1314+proto`. Six turns in three matched pairs, seeds pinned
+  - **Klee slice 1** (`review/active/klee-slice-1-2026-08-29.md`, §11–§12):
+    R213 E2's three Spark-spending arms. **Round 1** RUN 2026-08-29 on
+    `0.2.1314+proto`: six turns in three matched pairs, seeds pinned
     after 11 rolls; closeness SURVIVES on all six both ways, though the
-    OBSERVED reading is blind to the Spark bank (`EB-185`), so the
+    OBSERVED reading was blind to the Spark bank (`EB-185`), so the
     DECLARED reading is the one committed. Twelve forms on two graders
     (7 SURVIVES / 5 REFUSED). **Ten of twelve replays were refused live**
     — at a bank of 3 the game prints every Attack at cost 0 while the
-    rule frees one (`EB-186`, shipped surface, D4). Pair read: **two
-    ADVANCE** (Second Helping, Rummage) and **one RETURN** (Slow Burn —
-    its board and presentation, per the review). A fourth arm, Bag of
-    Tricks, stays held for [USER] at §6.1, and §6.2's question about the
-    automatic rule now has a live witness. Also minted: `EB-187` (a
-    staged board's Burst assumption double-counts the Skill tag and
-    corrupted a grade).
+    rule frees one (`EB-186`, shipped surface, D4). Pair read: two
+    ADVANCE (Second Helping, Rummage), one RETURN (Slow Burn — its board
+    and presentation). Minted there: `EB-187` (a staged board's Burst
+    assumption double-counted the Skill tag and corrupted a grade).
+    **Round 2** RUN 2026-08-29 on `0.2.1323+proto`, same seeds, same
+    boards, same cards, new turn ids: `EB-185` and `EB-187` CLOSED and
+    `EB-186`'s page half fixed, so the packet now prints Spark's rule and
+    each card's printed cost. Twelve fresh forms (7 SURVIVES / 5 REFUSED)
+    and **all twelve replays played to completion**. Pair read: **two
+    ADVANCE** (Second Helping, Slow Burn) and **one RETURN** (Rummage —
+    priced honestly, the draw destination costs 16 damage and 5 Block and
+    no grader took it). A fourth arm, Bag of Tricks, stays held for
+    [USER] at §6.1, and §6.2's question about the automatic rule now has
+    two rounds of live witness. Also minted: `EB-188` (a replay's run
+    seed reads back `None` on 7 of 12 launches; a retry always works).
   - **Next.** Slice 2's §9 picks, slice 1's `EB-184`, Klee's `EB-186`
     before any re-run of its arms, and §6's two held [USER] calls.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5

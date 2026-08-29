@@ -116,7 +116,11 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 187,   # EB-185/186/187 minted 2026-08-29 by the Klee slice 1
+    "EB": 188,   # EB-188 minted 2026-08-29 by the Klee slice 1 round-2
+                 # funnel run: a staged-turn replay's run seed reads back
+                 # None on 7 of 12 launches (`seed_not_honoured`), and an
+                 # identical retry always works. OPEN.
+                 # EB-185/186/187 minted 2026-08-29 by the Klee slice 1
                  # funnel run. EB-186: at a Spark bank of 3 the game
                  # prints EVERY Attack in hand at cost 0 while the rule
                  # frees exactly one, so ten of twelve blind-graded lines
@@ -269,7 +273,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        180, 181, 182, 183, 184, 186,
+        180, 181, 182, 183, 184, 186, 188,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
