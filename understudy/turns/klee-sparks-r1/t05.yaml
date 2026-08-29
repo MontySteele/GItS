@@ -1,0 +1,85 @@
+# KLEESPARK-R1, TURN 5. THE RARE POWER, ON A BANK THAT IS SHORT.
+#
+# See t01's header for what the round is and what the mirror cannot see.
+#
+# WHAT THIS BOARD IS. The Power's other half. Same card, same 2-energy cost,
+# and a bank of 1 -- one third of a single conversion. The hand also holds the
+# Basic sink (Ka-pow!, priced at 1), which the bank CAN pay, so the board is
+# not simply "nothing is affordable": one thing is, and it is not the Power's.
+#
+# THIS IS THE SECOND AND LAST BOARD CARRYING THE POWER. t04 is the paying
+# half. Nothing else differs between them except the bank and one card of
+# filler, so a difference in how the two turns read is attributable to the
+# bank rather than to the staging.
+#
+# WHAT THE PACKET DOES NOT TELL THE READER, and this is the point of the pair:
+# neither file says which half it is. The bank is on the page and the price is
+# on the face, and whether a reader can tell a payoff from a brick from those
+# two facts alone is the question.
+#
+# NO LINE HERE IS LETHAL. The largest immediate total is Ka-pow! (0 energy,
+# 7, paying the whole bank) plus Kaboom! (1 energy, 7) plus Kaboom! (1
+# energy, 7) = 21.
+
+id: klee-sparks-r1-t05
+character: KLEEMOD-KLEE
+
+exact_hand: true
+
+prototype: true
+
+notes: |
+  42/62 HP, no Block, 3 energy, a Spark bank of 1, and one enemy
+  telegraphing an attack.
+
+assumptions:
+  - "The hand is EXACTLY the list below and nothing else. The hand the
+     game dealt is emptied before these cards are given, and a packet
+     whose live hand is not this list is refused rather than written."
+  - "The Spark bank is written to 1 through SPARK_POWER, which is how the
+     live game holds Sparks."
+  - "The encounter is GENERATED. This file can write the enemy's HP and
+     Block and cannot write its INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below
+     declares a telegraphed ATTACK as the falsifier's input."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "The player has no Strength and the enemy carries no aura, Vulnerable
+     or Weak. Every Klee attack applies Pyro, and a reaction on top of a
+     hit would move every number the falsifier scores."
+
+staging:
+  - give: {card: KLEEMOD-PROTO_TRUE_SPARK_KNIGHT, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_KABOOM_SINK, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-KABOOM, pile: hand, upgraded: false, count: 2}
+  - give: {card: KLEEMOD-DUCK_AND_COVER, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 42}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 3}
+  - set_power: {who: player, name: SPARK_POWER, amount: 1}
+  - set_hp: {who: first, amount: 46}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+board:
+  character: klee
+  pilot: demolition
+  hp: 42
+  max_hp: 62
+  block: 0
+  energy: 3
+  turn: 5
+  resources:
+    sparks: 1
+  hand:
+    - proto_true_spark_knight
+    - proto_kaboom_sink
+    - kaboom
+    - kaboom
+    - duck_and_cover
+  enemies:
+    - name: "Act 1 enemy"
+      hp: 46
+      max_hp: 46
+      block: 0
+      intent: {kind: attack, amount: 11}

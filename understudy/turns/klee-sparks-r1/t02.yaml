@@ -1,0 +1,82 @@
+# KLEESPARK-R1, TURN 2. A BANK OF ONE, AND TWO THINGS PRICED AT ONE.
+#
+# See t01's header for what the round is and what the mirror cannot see.
+#
+# WHAT THIS BOARD IS. A mid-Act-1 hand from a deck that has drafted ONE cheap
+# Spark sink on top of the substituted starter: the Basic sink (Ka-pow!) and
+# the Common sink (Fwoosh!) are both in hand, both priced at 1, and the bank
+# holds exactly 1. The bank is not set to make a point; 1 is what a single
+# Powder Pop or a single detonation leaves, which is the most ordinary bank
+# this deck has.
+#
+# THE COMPETITION IS ARITHMETIC, NOT DESIGN. Two cards priced at 1 against a
+# bank of 1 means the bank buys one of them. That the round's slate happens to
+# ask about such positions (P1) does not make this a board built to answer it:
+# the alternative was to put the bank somewhere it buys neither, and the
+# rarities put two 1-priced cards in an ordinary hand.
+#
+# NO LINE HERE IS LETHAL. The largest immediate total is Fwoosh! (8, paying
+# the whole bank) plus Kaboom! (7) plus Kaboom! (7) at 2 of 3 energy = 22.
+
+id: klee-sparks-r1-t02
+character: KLEEMOD-KLEE
+
+exact_hand: true
+
+prototype: true
+
+notes: |
+  42/62 HP, no Block, 3 energy, a Spark bank of 1, and one enemy
+  telegraphing an attack.
+
+assumptions:
+  - "The hand is EXACTLY the list below and nothing else. The hand the
+     game dealt is emptied before these cards are given, and a packet
+     whose live hand is not this list is refused rather than written."
+  - "The Spark bank is written to 1 through SPARK_POWER, which is how the
+     live game holds Sparks."
+  - "The encounter is GENERATED. This file can write the enemy's HP and
+     Block and cannot write its INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below
+     declares a telegraphed ATTACK as the falsifier's input."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "The player has no Strength and the enemy carries no aura, Vulnerable
+     or Weak. Every Klee attack applies Pyro, and a reaction on top of a
+     hit would move every number the falsifier scores."
+
+staging:
+  - give: {card: KLEEMOD-PROTO_KABOOM_SINK, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_SPARK_STRIKE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-KABOOM, pile: hand, upgraded: false, count: 2}
+  - give: {card: KLEEMOD-DUCK_AND_COVER, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 42}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 3}
+  - set_power: {who: player, name: SPARK_POWER, amount: 1}
+  - set_hp: {who: first, amount: 46}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+board:
+  character: klee
+  pilot: demolition
+  hp: 42
+  max_hp: 62
+  block: 0
+  energy: 3
+  turn: 3
+  resources:
+    sparks: 1
+  hand:
+    - proto_kaboom_sink
+    - proto_spark_strike
+    - kaboom
+    - kaboom
+    - duck_and_cover
+  enemies:
+    - name: "Act 1 enemy"
+      hp: 46
+      max_hp: 46
+      block: 0
+      intent: {kind: attack, amount: 11}

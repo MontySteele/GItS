@@ -1,0 +1,87 @@
+# KLEESPARK-R1, TURN 7. A DEEP BANK, AND THE EXPENSIVE SINK.
+#
+# See t01's header for what the round is and what the mirror cannot see.
+#
+# WHAT THIS BOARD IS. The bank has been allowed to climb to 4 -- the top of
+# the range this round staged -- and the hand holds the most expensive sink on
+# the surface (Firework Finale, priced at 3, Exhaust) beside the cheapest
+# (Fwoosh!, priced at 1) and a generator (Powder Pop). 4 pays BOTH sinks, so
+# this is deliberately NOT a competing-uses board: a round of eight that only
+# ever showed banks too thin to buy twice would be a round about thin banks.
+#
+# THE GENERATOR IS IN HAND ON PURPOSE, because a deep bank is where holding
+# has to be argued for rather than assumed. Powder Pop makes the bank 5 for 0
+# energy and the reader can spend it or bank it further.
+#
+# NO LINE HERE IS LETHAL. The largest immediate total is Firework Finale (18,
+# paying 3) plus Fwoosh! (8, paying 1) plus Duck and Cover, at 1 of 3 energy
+# spent -- 26 -- with a Bomb at 5 landing later. The enemy's HP is set above
+# the sum.
+#
+# THE MIRROR DISAGREES WITH THE LIVE BUILD HERE, the same one way t04's header
+# sets out: at a bank of 4 the flag-off mirror still lets the shipped base
+# rule zero an Attack and eat 3 Sparks. The mirror is therefore richer than
+# the live board, and a richer mirror can only make the closeness falsifier
+# stricter.
+
+id: klee-sparks-r1-t07
+character: KLEEMOD-KLEE
+
+exact_hand: true
+
+prototype: true
+
+notes: |
+  42/62 HP, no Block, 3 energy, a Spark bank of 4, and one enemy
+  telegraphing an attack.
+
+assumptions:
+  - "The hand is EXACTLY the list below and nothing else. The hand the
+     game dealt is emptied before these cards are given, and a packet
+     whose live hand is not this list is refused rather than written."
+  - "The Spark bank is written to 4 through SPARK_POWER, which is how the
+     live game holds Sparks."
+  - "The encounter is GENERATED. This file can write the enemy's HP and
+     Block and cannot write its INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below
+     declares a telegraphed ATTACK as the falsifier's input."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "The player has no Strength and the enemy carries no aura, Vulnerable
+     or Weak. Every Klee attack applies Pyro, and a reaction on top of a
+     hit would move every number the falsifier scores."
+
+staging:
+  - give: {card: KLEEMOD-PROTO_SPARK_FINISHER, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_SPARK_STRIKE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_POP_SPARK, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-DUCK_AND_COVER, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 42}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 3}
+  - set_power: {who: player, name: SPARK_POWER, amount: 4}
+  - set_hp: {who: first, amount: 52}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+board:
+  character: klee
+  pilot: demolition
+  hp: 42
+  max_hp: 62
+  block: 0
+  energy: 3
+  turn: 6
+  resources:
+    sparks: 4
+  hand:
+    - proto_spark_finisher
+    - proto_spark_strike
+    - proto_pop_spark
+    - duck_and_cover
+  enemies:
+    - name: "Act 1 enemy"
+      hp: 52
+      max_hp: 52
+      block: 0
+      intent: {kind: attack, amount: 11}
