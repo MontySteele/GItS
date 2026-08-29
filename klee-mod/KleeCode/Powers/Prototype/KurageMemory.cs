@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using KleeMod.Cards;
 using KleeMod.Cards.Kokomi.Generated;
+using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
@@ -278,6 +279,45 @@ public static class KurageMemory
         KurageMemoryLaw.AlwaysOn
             ? ModelDb.Card<ToTheFront>()
             : ModelDb.Card<BakeKurage>();
+
+    /// <summary>
+    /// sec.12.6 ITEM 15 -- THE OFFERED OATH IS THE PROTOTYPE ONE, and this is
+    /// the same one-seam pattern the starter swap takes.
+    ///
+    /// WHY IT IS NOT COSMETIC. Under the memory rule the ward is paid per
+    /// MEMORY PLAY (item 13), and the amount paid is whatever stacks are
+    /// standing -- i.e. whatever card applied them. So a flagged run that
+    /// drafted the SHIPPED Oath would get 5 Block per memory play off a face
+    /// that says "Each Bake-Kurage pulse also grants 5 Block". That is a card
+    /// paying a different rule from the one it prints, which is the D4 defect
+    /// exactly, and no amount of correct engine behaviour repairs it.
+    ///
+    /// So under the flag the shipped row leaves the OFFER surface and the
+    /// prototype row takes its place: same rarity (Common), same cost, same
+    /// type, therefore the same weight in every roll -- a substitution, not an
+    /// addition, exactly like slot 11 of the starter.
+    ///
+    /// ONE SEAM, because <c>FilterThroughEpochs</c> feeds
+    /// <c>GetUnlockedCards</c>, which <c>PrototypeCards</c>' layer 2 documents
+    /// as the SOLE path into reward rolls (<c>CardCreationOptions</c>), the
+    /// shop and card transforms (<c>CardFactory</c>). Nothing else generates
+    /// from a pool, so "every offer surface" is a property of the code rather
+    /// than a list this method has to keep in step.
+    ///
+    /// The shipped Oath stays IN the pool for <c>CardModel.Pool</c> legality
+    /// -- a poolless card throws "You monster!" the moment it is drawn, and a
+    /// player who already holds one must still be able to draw it -- it is
+    /// only unofferable. That is the same in/out split the kit Burst uses.
+    ///
+    /// With the flag off this method does not exist and the pool is byte-for-
+    /// byte what ships.
+    /// </summary>
+    public static IEnumerable<CardModel> SwapOfferedOath(
+        IEnumerable<CardModel> offered) =>
+        offered
+            .Where(card => card is not KuragesOath)
+            .Concat(PrototypeCards.For("kokomi")
+                        .Where(card => card is ProtoKuragesOathMemory));
 
     /// <summary>Is the BASE KIT live for this creature? The memory rule, plus
     /// v4's always-on switch, plus her identity.</summary>

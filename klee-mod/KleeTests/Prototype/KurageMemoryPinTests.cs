@@ -351,6 +351,31 @@ public class KurageMemoryPinTests
     }
 
     [Fact]
+    public void The_shipped_oath_is_swapped_off_every_offer_surface()
+    {
+        // sec.12.6 ITEM 15. FilterThroughEpochs feeds GetUnlockedCards, which
+        // is the sole path into reward rolls, the shop and transforms, so a
+        // substitution there covers every offer surface by construction. The
+        // shipped Oath stays IN the pool (Pool must resolve or a held copy
+        // throws on draw) and is only unofferable.
+        var calls = Il.Calls(Il.Method("KokomiCardPool", "FilterThroughEpochs"));
+
+        Assert.Contains("KurageMemory.SwapOfferedOath", calls);
+    }
+
+    [Fact]
+    public void The_swap_removes_the_shipped_row_and_adds_the_prototype_one()
+    {
+        // A SUBSTITUTION, not an addition: same rarity, same cost, same type,
+        // therefore the same weight in every roll. A pure add would make the
+        // Oath twice as likely and a pure remove would take a Common out of
+        // her pool.
+        var calls = Il.Calls(Il.Method("KurageMemory", "SwapOfferedOath"));
+
+        Assert.Contains("PrototypeCards.For", calls);
+    }
+
+    [Fact]
     public void The_starter_swap_happens_at_exactly_one_seam()
     {
         // sec.12.6 ITEM 5: one seam, so the mod and the sim cannot disagree
