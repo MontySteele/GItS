@@ -1,0 +1,68 @@
+{
+ "source": "observed board (live wire state)",
+ "falsifier": "decision-closeness (R213 F)",
+ "dominance_gap": 0.5,
+ "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "applicable": true,
+ "verdict": "SURVIVES",
+ "gap": 0.1899,
+ "top1": 15.8,
+ "top2": 12.8,
+ "lines_considered": 7,
+ "playouts": 10,
+ "plays_refused": 0,
+ "pilot": "generic",
+ "lines": [
+  {
+   "cards": [
+    "Rapid Fire"
+   ],
+   "score": 15.8
+  },
+  {
+   "cards": [
+    "Kaboom!",
+    "Duck and Cover"
+   ],
+   "score": 12.8
+  },
+  {
+   "cards": [
+    "Eager to Help",
+    "Kaboom!"
+   ],
+   "score": 7.4
+  },
+  {
+   "cards": [
+    "Kaboom!"
+   ],
+   "score": 6.9
+  },
+  {
+   "cards": [
+    "Eager to Help",
+    "Duck and Cover"
+   ],
+   "score": 6.4
+  }
+ ],
+ "reason": "no line dominates by more than the derived gap",
+ "observed_notes": {
+  "approximate_cards": [],
+  "unmapped_statuses": [
+   "spark"
+  ],
+  "enemy_count": 1,
+  "auras_seen": [],
+  "unmapped_resources": [
+   "KLEEMOD_FANFARE_CAP_BONUS",
+   "KLEEMOD_FANFARE_FLOOR",
+   "KLEEMOD_SPOTLIGHT_MODE",
+   "KLEEMOD_SPOTLIGHT_MOVED",
+   "KLEEMOD_SPOTLIGHT_PLAYS",
+   "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+  ]
+ }
+}

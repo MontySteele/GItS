@@ -9,11 +9,11 @@ grader.
 of Tricks" is held for [USER] on the independent seat's doctrine verdict, so it
 has no rows and no boards. See the packet's "Held for [USER]".
 
-**Nothing here is staged.** Every seed is unpinned and every row reads
-`staged: pending`. The prototype halves need a dev build carrying the
-quarantined rows (`klee-mod\build\deploy_proto.ps1`); the shipped halves could
-be staged on a release build, but the live game and the art-bearing checkout
-belong to another session and this branch was built in a worktree.
+**All six are staged.** They were staged live on **`0.2.1314+proto`** (built
+by `deploy_proto.ps1` on the art-bearing main checkout, game closed,
+`validate.ps1` OK) against game v0.111.0 / buildid 24724944 / `public-beta` /
+BaseLib 3.4.5.0 -- the pin, re-read off disk before any live work and unmoved.
+Each pair's seed is pinned into both of its files and into the table below.
 
 **The seed rule.** Within a pair, the first half staged rolls a seed and
 `stage` records it; the other half must then be staged with `--seed <that
@@ -23,14 +23,57 @@ anything but an attack, re-roll — the intent is the question here.
 
 ## The map
 
-| turn | file | arm | card under test | staged |
+| turn | file | arm | card under test | seed |
 |---|---|---|---|---|
-| `klee-slice1-t01` | `priced-attack-shipped.yaml` | 1 — the priced Attack | `flame_on_the_wick` (shipped) | pending |
-| `klee-slice1-t02` | `priced-attack-prototype.yaml` | 1 — the priced Attack | `proto_spark_priced_strike` | pending |
-| `klee-slice1-t03` | `priced-draw-shipped.yaml` | 2 — the priced draw | `eager_to_help` (shipped) | pending |
-| `klee-slice1-t04` | `priced-draw-prototype.yaml` | 2 — the priced draw | `proto_spark_priced_draw` | pending |
-| `klee-slice1-t05` | `burst-conversion-shipped.yaml` | 3 — the Burst conversion | `clockwork_toy` (shipped) | pending |
-| `klee-slice1-t06` | `burst-conversion-prototype.yaml` | 3 — the Burst conversion | `proto_spark_burst_conversion` | pending |
+| `klee-slice1-t01` | `priced-attack-shipped.yaml` | 1 — the priced Attack | `flame_on_the_wick` (shipped) | `N6PCA0C9GCFG` |
+| `klee-slice1-t02` | `priced-attack-prototype.yaml` | 1 — the priced Attack | `proto_spark_priced_strike` | `N6PCA0C9GCFG` |
+| `klee-slice1-t03` | `priced-draw-shipped.yaml` | 2 — the priced draw | `eager_to_help` (shipped) | `LUMNB3D9GFKD` |
+| `klee-slice1-t04` | `priced-draw-prototype.yaml` | 2 — the priced draw | `proto_spark_priced_draw` | `LUMNB3D9GFKD` |
+| `klee-slice1-t05` | `burst-conversion-shipped.yaml` | 3 — the Burst conversion | `clockwork_toy` (shipped) | `PQUR2MZ6Z1KF` |
+| `klee-slice1-t06` | `burst-conversion-prototype.yaml` | 3 — the Burst conversion | `proto_spark_burst_conversion` | `PQUR2MZ6Z1KF` |
+
+## The staging, and the eleven rolls it took
+
+Each pair's seed was discovered by staging the SHIPPED half, then pinned onto
+both halves -- in each file's own `seed:` key and in the table above. Eleven
+rolls in total. The packet asks for ONE enemy telegraphing an ATTACK, and most
+Act-1 first fights are two or three bodies, a debuff, or an attack too small for
+the defensive half of the board to mean anything.
+
+| pair | rolls | seed | the body it settled on |
+|---|---|---|---|
+| 1 -- the priced Attack | 4 | `N6PCA0C9GCFG` | Seapunk 45/45, attacks for 11 |
+| 2 -- the priced draw | 4 | `LUMNB3D9GFKD` | Nibbit 40/43, attacks for 12 |
+| 3 -- the Burst conversion | 3 | `PQUR2MZ6Z1KF` | Nibbit 43/43, attacks for 12 |
+
+**Every board settled BELOW its designed telegraph, and the operator kept
+rolling rather than take the first attack it saw.** The design asked for 14, 16
+and 18; the rolls delivered 11, 12 and 12. The first roll of pair 1 was a Sludge
+Spinner telegraphing **8**, and it was rejected for the same reason Kokomi slice
+2 rejected a 4: Duck and Cover is the deliberate defensive competitor on every
+one of these boards, and against a small hit it is not a competitor at all. Of
+the eleven rolls, four were bodies telegraphing 4, one was a pure debuff, and
+two were multi-body encounters -- the three kept are the three largest
+single-body attacks the eleven produced.
+
+**Two boards lost HP to the clamp, and it is `set_hp`'s documented behaviour
+rather than a surprise.** `set_hp` clamps at a creature's maximum. Pair 1 asked
+for 48 and Seapunk's maximum is 45; pair 3 asked for 44 and this Nibbit's
+maximum is 43. Pair 2 asked for 40 and got exactly 40. Each file now declares
+the LIVE body rather than the design's placeholder, and the staging step was
+moved to the achieved figure so a re-stage is exact rather than silently
+clamped.
+
+**Every stated property of every board still holds at the live figures:** one
+enemy, an attack telegraphed, a Spark bank of exactly 3, 2 energy, 42/62 HP, no
+Block, the declared four-card hand, and **no lethal line** -- the largest total
+each board can produce is 29 against 45, 28 against 45, 23 against 40 twice and
+23 against 43 twice.
+
+**The observed board was checked against the declared one on all six before any
+grade**, and the only divergences are the two clamped HP figures and the three
+telegraph amounts recorded above. Spark 3, energy 2, Block 0, HP 42/62 and the
+exact four-card hand read back live on every one of the six.
 
 ## The boards
 
@@ -81,44 +124,66 @@ two plays changes the total, and on `t01` it does not. That is the whole of arm
 
 ## The closeness reading
 
-`staged_turn closeness` was run on all six declared boards.
-**All six SURVIVE**, against a dominance threshold of 0.5:
+`staged_turn closeness` was run on all six boards **twice** -- once on the
+DECLARED board and once on the live `--observed` board. **All twelve readings
+SURVIVE**, against a dominance threshold of 0.5.
 
-| turn | gap | top line | runner-up | lines |
+| turn | declared gap | declared top / runner-up | observed gap | observed top / runner-up |
 |---|---|---|---|---|
-| `t01` | **0.1695** | 34.800 | 28.900 | 15 |
-| `t02` | **0.1076** | 28.800 | 25.700 | 12 |
-| `t03` | **0.1667** | 28.800 | 24.000 | 14 |
-| `t04` | **0.2049** | 28.800 | 22.900 | 10 |
-| `t05` | **0.0062** | 28.980 | 28.800 | 14 |
-| `t06` | **0.2049** | 28.800 | 22.900 | 10 |
+| `t01` | **0.1695** | 34.800 / 28.900 | 0.1376 | 21.800 / 18.800 |
+| `t02` | **0.1076** | 28.800 / 25.700 | 0.1899 | 15.800 / 12.800 |
+| `t03` | **0.1667** | 28.800 / 24.000 | 0.1899 | 15.800 / 12.800 |
+| `t04` | **0.2049** | 28.800 / 22.900 | 0.1899 | 15.800 / 12.800 |
+| `t05` | **0.0062** | 28.980 / 28.800 | 0.1785 | 15.800 / 12.980 |
+| `t06` | **0.2049** | 28.800 / 22.900 | 0.1899 | 15.800 / 12.800 |
 
-Per-turn detail is in `review/qa/<turn id>/closeness.json`. Under R215 B this
-reading is the one number from a prototype board that may be quoted, because it
-reads a *turn* and not a row. It is not a claim that any turn is good; it only
-says the falsifier refuses none of them.
+`closeness.json` holds the **declared** reading and `closeness-observed.json`
+the observed one, and that is the opposite of Kokomi slice 2's choice. The
+reason is a defect the run found, stated here rather than buried.
 
-**What the reading cannot see, disclosed rather than buried.** On `t04` and
-`t06` the card under test appears in **none** of the top lines, and in both
-cases the reason is a hole in the pilot rather than a fact about the card:
+**THE OBSERVED READING CANNOT SEE THE SPARK BANK AT ALL (`EB-185`).** Every one
+of the six observed readings reports `unmapped_statuses: ["spark"]`. Klee holds
+Sparks as a POWER on the wire (`SPARK_POWER`), the observed mapper's
+`WIRE_RESOURCES` table covers registered RESOURCES only (Charge, Encore,
+Fanfare, the three Burst meters), and `understudy/adapter.py`'s `STATUS_MAP` has
+no `spark` row -- while the sim holds the bank in a separate `Player.sparks`
+field that neither table reaches. So **every observed reading of a Klee board
+scores a bank of ZERO**, and on this slice the bank is the entire question. It
+shows in the numbers: on `t02`, `t04` and `t06` the line count collapses from
+12/10/10 to **4**, because at a bank of zero the prototype cannot pay its own
+price and drops out of every line; and on `t01` the top line falls from 34.8 to
+21.8 because Rapid Fire is not free.
 
-1. **`t04` — the tier0 mirror has no draw pile.** `Board` carries hp, block,
-   energy, turn, resources, hand and enemies, and nothing else, so both halves
-   of pair 2 draw from an empty pile and every draw is worth zero. Rummage
-   therefore scores as a card that spends 1 energy and 3 Sparks to do nothing.
-   The error runs **one way** — the arm is *under*-valued, so it is less likely
-   to dominate, and dominance is the only thing the falsifier refuses. The live
-   board has a real deck, so the blind packet is unaffected; it is the mirror
-   alone that is blind.
-2. **`t06` — the pilot does not price Burst Energy.** It has no
-   hold-versus-spend term for Sparks either (`powder_charge`'s row says so on
-   the shipped sheet), and nothing anywhere in `tier0/pilot/policy.py` values a
-   meter that pays out in a future turn. So Slow Burn scores as Duck and
-   Cover's 5 Block, one energy, *plus* the loss of a free Rapid Fire — strictly
-   worse, correctly, for a pilot that cannot see what it bought. Same one-way
-   error direction.
+The declared reading is therefore the faithful one HERE, and it is the one
+committed. The observed reading is kept beside it as the receipt for `EB-185`
+rather than as a reading of these boards. Both SURVIVE, so the falsifier refuses
+nothing either way, and under R213 F a SURVIVE is a refusal that did not fire
+and never a rating.
 
-Both are `POLICY_VERSION` changes carrying their own re-baseline, which is
-frozen and is not this slice's to make. **The blind seat is the only reading
-pairs 2 and 3 have**, and if a human grader cannot separate those halves
-either, that is itself the arm's answer.
+**Two further things the DECLARED reading cannot do, unchanged from the design
+and disclosed rather than buried.**
+
+1. **On `t04` the mirror has no draw pile.** The tier0 `Board` carries hp,
+   block, energy, turn, resources, hand and enemies and nothing else, so both
+   halves of pair 2 draw from an empty pile and every draw is worth zero.
+   Rummage scores as a card that spends 1 energy and 3 Sparks to do nothing, and
+   it appears in none of the top lines. The LIVE board has a real deck, so the
+   blind packet is unaffected; the mirror alone is blind.
+2. **On `t06` the pilot does not price Burst Energy.** Nothing in
+   `tier0/pilot/policy.py` values a meter that pays out in a future turn, and it
+   has no Spark hold-versus-spend term either. Slow Burn scores as Duck and
+   Cover's 5 Block minus a free Rapid Fire -- strictly worse, correctly, for a
+   pilot that cannot see what it bought.
+
+Both errors run **one way**: the arm is *under*-valued, so less likely to
+dominate, and dominance is the only thing the falsifier refuses. A SURVIVE here
+is the conservative direction. Both fixes are `POLICY_VERSION` changes carrying
+their own re-baseline, which is frozen and not this slice's to make. **The blind
+graders are the only reading pairs 2 and 3 have.**
+
+**One number the declared reading did NOT move.** Every declared gap, top line
+and runner-up above is byte-identical to the pre-run reading taken on the design
+placeholder boards, even though two enemies lost HP to the clamp and all three
+telegraphs came in below the design. That is not luck: no line on any board is
+lethal and no telegraph crosses a threshold Duck and Cover's 5 Block could meet,
+so the pilot's ordering over the lines is untouched by the difference.

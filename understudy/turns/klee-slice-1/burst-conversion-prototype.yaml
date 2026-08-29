@@ -9,7 +9,7 @@
 # THE SEED IS PART OF THE PAIR. The encounter is GENERATED, so the first half
 # staged DISCOVERS a seed; every other half of that pair must then be staged
 # with `--seed <that run_seed>` or the halves are two different fights.
-# MANIFEST.md carries the seed once one exists. Nothing here is staged.
+# MANIFEST.md carries the seed, and it is pinned in this file as well.
 #
 # THE TURN ID IS DELIBERATELY OPAQUE. It is printed into the design-blind
 # packet the grader reads, so a word like "priced" or "burst" inside an id
@@ -74,13 +74,17 @@
 id: klee-slice1-t06
 character: KLEEMOD-KLEE
 
+# The pair's seed, discovered by staging the shipped half and then
+# pinned onto BOTH halves, so a re-stage reproduces the same fight.
+seed: PQUR2MZ6Z1KF
+
 exact_hand: true
 
 prototype: true
 
 notes: |
   42/62 HP, no Block, 2 energy, a Spark bank of 3, a Burst meter at 20 of 40, and
-  one enemy at 44 HP telegraphing an attack.
+  one enemy at 43 HP telegraphing an attack.
 
 # STAGING RULE, for the operator and not for the grader: the telegraph is
 # generated with the encounter, and defence is worth nothing against an intent
@@ -114,9 +118,8 @@ assumptions:
      resource. A Skill-tagged card adds 5 to it on play, over and above
      anything the card's own text grants."
 
-# This file cannot be staged until a dev build carrying the prototype rows is
-# deployed (klee-mod/build/deploy_proto.ps1). Until then it is closeness-only,
-# which needs no game.
+# This file needs a dev build carrying the prototype rows
+# (klee-mod/build/deploy_proto.ps1). It was staged live on 0.2.1314+proto.
 
 staging:
   - give: {card: KLEEMOD-PROTO_SPARK_BURST_CONVERSION, pile: hand, upgraded: false}
@@ -128,7 +131,7 @@ staging:
   - set_energy: {amount: 2}
   - set_power: {who: player, name: SPARK_POWER, amount: 3}
   - set_resource: {name: KLEEMOD_BURST, amount: 20}
-  - set_hp: {who: first, amount: 44}
+  - set_hp: {who: first, amount: 43}
   - set_block: {who: first, amount: 0}
   - read: "the staged board"
 
@@ -153,8 +156,8 @@ board:
     - rapid_fire
     - duck_and_cover
   enemies:
-    - name: "Act-1 attacker"
-      hp: 44
-      max_hp: 58
+    - name: "Nibbit"
+      hp: 43
+      max_hp: 43
       block: 0
-      intent: {kind: attack, amount: 18}
+      intent: {kind: attack, amount: 12}

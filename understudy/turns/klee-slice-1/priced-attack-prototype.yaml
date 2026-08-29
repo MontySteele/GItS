@@ -9,7 +9,7 @@
 # THE SEED IS PART OF THE PAIR. The encounter is GENERATED, so the first half
 # staged DISCOVERS a seed; every other half of that pair must then be staged
 # with `--seed <that run_seed>` or the halves are two different fights.
-# MANIFEST.md carries the seed once one exists. Nothing here is staged.
+# MANIFEST.md carries the seed, and it is pinned in this file as well.
 #
 # THE TURN ID IS DELIBERATELY OPAQUE. It is printed into the design-blind
 # packet the grader reads, so a word like "priced" or "burst" inside an id
@@ -71,13 +71,17 @@
 id: klee-slice1-t02
 character: KLEEMOD-KLEE
 
+# The pair's seed, discovered by staging the shipped half and then
+# pinned onto BOTH halves, so a re-stage reproduces the same fight.
+seed: N6PCA0C9GCFG
+
 exact_hand: true
 
 prototype: true
 
 notes: |
   42/62 HP, no Block, 2 energy, a Spark bank of 3, and
-  one enemy at 48 HP telegraphing an attack.
+  one enemy at 45 HP telegraphing an attack.
 
 # STAGING RULE, for the operator and not for the grader: the telegraph is
 # generated with the encounter, and defence is worth nothing against an intent
@@ -108,9 +112,8 @@ assumptions:
      or Weak. Every Klee attack applies Pyro, and a reaction on top of a
      hit would move every number the falsifier scores."
 
-# This file cannot be staged until a dev build carrying the prototype rows is
-# deployed (klee-mod/build/deploy_proto.ps1). Until then it is closeness-only,
-# which needs no game.
+# This file needs a dev build carrying the prototype rows
+# (klee-mod/build/deploy_proto.ps1). It was staged live on 0.2.1314+proto.
 
 staging:
   - give: {card: KLEEMOD-PROTO_SPARK_PRICED_STRIKE, pile: hand, upgraded: false}
@@ -121,7 +124,7 @@ staging:
   - set_block: {who: player, amount: 0}
   - set_energy: {amount: 2}
   - set_power: {who: player, name: SPARK_POWER, amount: 3}
-  - set_hp: {who: first, amount: 48}
+  - set_hp: {who: first, amount: 45}
   - set_block: {who: first, amount: 0}
   - read: "the staged board"
 
@@ -144,8 +147,8 @@ board:
     - rapid_fire
     - duck_and_cover
   enemies:
-    - name: "Act-1 attacker"
-      hp: 48
-      max_hp: 60
+    - name: "Seapunk"
+      hp: 45
+      max_hp: 45
       block: 0
-      intent: {kind: attack, amount: 14}
+      intent: {kind: attack, amount: 11}

@@ -9,7 +9,7 @@
 # THE SEED IS PART OF THE PAIR. The encounter is GENERATED, so the first half
 # staged DISCOVERS a seed; every other half of that pair must then be staged
 # with `--seed <that run_seed>` or the halves are two different fights.
-# MANIFEST.md carries the seed once one exists. Nothing here is staged.
+# MANIFEST.md carries the seed, and it is pinned in this file as well.
 #
 # THE TURN ID IS DELIBERATELY OPAQUE. It is printed into the design-blind
 # packet the grader reads, so a word like "priced" or "burst" inside an id
@@ -75,6 +75,10 @@
 id: klee-slice1-t04
 character: KLEEMOD-KLEE
 
+# The pair's seed, discovered by staging the shipped half and then
+# pinned onto BOTH halves, so a re-stage reproduces the same fight.
+seed: LUMNB3D9GFKD
+
 exact_hand: true
 
 prototype: true
@@ -112,9 +116,8 @@ assumptions:
      or Weak. Every Klee attack applies Pyro, and a reaction on top of a
      hit would move every number the falsifier scores."
 
-# This file cannot be staged until a dev build carrying the prototype rows is
-# deployed (klee-mod/build/deploy_proto.ps1). Until then it is closeness-only,
-# which needs no game.
+# This file needs a dev build carrying the prototype rows
+# (klee-mod/build/deploy_proto.ps1). It was staged live on 0.2.1314+proto.
 
 staging:
   - give: {card: KLEEMOD-PROTO_SPARK_PRICED_DRAW, pile: hand, upgraded: false}
@@ -148,8 +151,8 @@ board:
     - rapid_fire
     - duck_and_cover
   enemies:
-    - name: "Act-1 attacker"
+    - name: "Nibbit"
       hp: 40
-      max_hp: 55
+      max_hp: 43
       block: 0
-      intent: {kind: attack, amount: 16}
+      intent: {kind: attack, amount: 12}
