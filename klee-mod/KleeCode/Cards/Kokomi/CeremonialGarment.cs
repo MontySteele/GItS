@@ -9,6 +9,7 @@ using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -81,6 +82,15 @@ public sealed class CeremonialGarment
           + $"{KokomiConstants.GarmentChargeDivisor} [gold]Charge[/gold] and "
           + $"grant {KokomiConstants.GarmentAttackBlock} Block."),
     };
+
+    // The Charge and Burst keywords, on the same rules codegen applies to her
+    // generated faces: this face PRINTS both words, so it carries both
+    // definitions. Written out here because the card is hand-written;
+    // `tools/lint_keyword_meters.py` holds the two surfaces to one rule per
+    // meter.
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForBurst(
+            KokomiRiderTips.ForCharge(base.ExtraHoverTips, this), this);
 
     /// <summary>Retain: an unplayed Burst stays in hand (sim: the turn-end
     /// filter retains burst-tagged cards). AppliesHydro left with the splash

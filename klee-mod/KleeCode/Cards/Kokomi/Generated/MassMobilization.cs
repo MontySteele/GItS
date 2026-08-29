@@ -38,7 +38,7 @@ public sealed class MassMobilization : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForMuster(base.ExtraHoverTips, this);
+        KokomiRiderTips.ForCharge(KokomiRiderTips.ForMuster(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("mass_mobilization");
 

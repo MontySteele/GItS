@@ -41,7 +41,7 @@ public sealed class DressRehearsal : CustomCardModel, ICharacterCard, ISkillTagC
         new[] { KleeKeywords.ElementalSkill };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Usher });
+        KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Usher }), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("dress_rehearsal");
 

@@ -37,7 +37,7 @@ public sealed class DoublePop : CustomCardModel, ISkillTagCard
         new[] { KleeKeywords.ElementalSkill };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.None, includesBombRules: true);
+        KleeCardTooltips.ForBurst(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.None, includesBombRules: true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("double_pop");
 

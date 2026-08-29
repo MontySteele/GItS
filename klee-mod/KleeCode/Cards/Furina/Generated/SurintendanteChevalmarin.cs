@@ -41,7 +41,7 @@ public sealed class SurintendanteChevalmarin : CustomCardModel, ICharacterCard, 
         new[] { KleeKeywords.ElementalSkill };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Chevalmarin });
+        KleeCardTooltips.ForBurst(SalonMemberTips.ForCard(base.ExtraHoverTips, this, members: new[] { SalonMember.Chevalmarin }), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("surintendante_chevalmarin");
 

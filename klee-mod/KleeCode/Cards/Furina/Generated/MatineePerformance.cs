@@ -44,7 +44,7 @@ public sealed class MatineePerformance : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.ElementalSkill, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false);
+        KleeCardTooltips.ForBurst(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("matinee_performance");
 
