@@ -290,7 +290,20 @@ CEILINGS: dict[str, int] = {
                  # exp_shop_companion_channel instrument (R68); EB-140 minted
                  # at the R211 W3 build (the codegen upgrade-delta gap);
                  # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
-    "M": 50,     # M47..M50 minted 2026-08-29 by the process-review pass: the
+    "M": 53,     # M53 minted 2026-08-29 by the same slate: whether a local
+                 # model may hold a grading chair, i.e. whether the "no third
+                 # family" paragraph is about authorship only. The branch that
+                 # assumed it is unmerged and stays unmerged until the row is
+                 # answered.
+                 # M51/M52 minted 2026-08-29 by the sitting slate (R219): the
+                 # Klee Sparks re-author's countersign -- its DRAFT prediction
+                 # slate and its eleven as-built calls -- and Furina E4's
+                 # C1/C2/C3, the ruling text, the prospective LAW text and the
+                 # P7 triage plan, which no seat and no ladder clause can sign.
+                 # M48 LEFT OPEN_IDS in the same commit, answered by R219 B:
+                 # the automatic free-Attack rule is retired by the re-author
+                 # rather than amended, and EB-186 was never a defect.
+                 # M47..M50 minted 2026-08-29 by the process-review pass: the
                  # four decisions the two prototype-slice packets carry that
                  # are genuinely [USER]'s, moved out of the packets and into
                  # the register the read order points at. M47 Bag of Tricks
@@ -326,7 +339,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 48, 49, 50}),
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 51, 52, 53}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
