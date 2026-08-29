@@ -1,0 +1,1469 @@
+You are the DOCTRINE SEAT for a card game modification. You did not write the
+proposal below, you are not being asked whether it is good, fun or balanced,
+and you are NOT being asked to design anything.
+
+THE PROTOCOL YOU ARE UNDER, verbatim from the repository's OPERATIONS.md:
+
+    The seat's other job -- reading a slice proposal against the character
+    charter before anything is built -- answers FOLLOWS or
+    REQUIRES_MODIFICATION per arm and NAMES THE CLAUSE it ruled against. That
+    is the whole output. It may not supply card text, a number, a mode or a
+    rewritten row: a remedy it volunteers is DISCARDED, and Claude re-derives
+    from the named clause.
+
+So: name clauses, not remedies. If you find yourself writing a number, a card
+face, or "you should instead...", stop and name the clause that forced it. Any
+remedy you volunteer anyway will be recorded and marked DISCARDED, and it will
+disqualify your model family from grading the row later, so it costs the
+process something real.
+
+WHY YOU: independence is by MODEL FAMILY, author against grader. The card
+proposals and the pick lists below were authored by Claude. You are the other
+family.
+
+THE ONE THING YOU MAY NOT GRADE, AND WHY. The DIRECTION has already been ruled
+by the human owner and is CLOSED. It is not on the table and you are not asked
+to re-litigate it. The direction is: retire the automatic free-Attack base rule
+("At 3 Sparks, your Attacks cost 0; playing one consumes 3"); Sparks become a
+card cost instead; no cap on the bank; match the base game's Regent character's
+generation pattern; and the character is re-stocked with Spark-cost Attacks
+plus a Rare Power that converts Attacks to a 3-Spark cost. Your own model
+family CO-AUTHORED that direction with the human owner, so on the base-rule row
+itself (the proposal's sections 1 and 6.1) you would be reading your own work,
+and the independent read on that row belongs to Claude, not to you. Do NOT
+issue a verdict on the direction. Gate the CARDS and the PICKS only.
+
+THE SANDBOX. You are read-only and previous runs of this seat found the command
+policy on this machine rejects every file read. DO NOT TRY TO READ THE
+REPOSITORY. Everything you need is pasted below verbatim and nothing has been
+summarised for you: the whole proposal packet, the whole companion research
+document it cites, the character design doc, LAW's "Character identity -- Klee"
+section, LAW's D1-D9 design charter (D2 and D4 in particular), and LAW's
+card-sheet rules.
+
+============================================================================
+WHAT YOU ARE ASKED
+============================================================================
+
+The packet carries EIGHT NUMBERED PICK LISTS. They are numbered PICK 1 through
+PICK 8 in the packet's own text. For EACH of the eight, answer these three,
+numbered, in this order:
+
+  1. OPTION. Of the options on that pick list, say which one FOLLOWS Klee's design
+     doctrine and LAW's D2 and D4? Give the option's number and its short name
+     as the packet prints it. If more than one option follows, say which
+     options follow and which single one follows best. If none follows, say
+     NONE.
+  2. DOCTRINE. For that pick list, say FOLLOWS or REQUIRES_MODIFICATION, and
+     for every option you rule against, NAME THE CLAUSE -- by its identifier
+     (D1..D9, a LAW bullet, a ruling id such as R34 / R39 / R109, a card-sheet
+     rule, a line of the character design doc) and by QUOTING the sentence you
+     ruled against. Where an option would need a written clause to be amended
+     before it could be built, say which clause and quote it. That list of
+     clauses is the single most useful thing you produce.
+  3. RISK. Anything about that pick you see that the packet has not.
+
+Then answer these THREE GATE QUESTIONS, which are the reason this review is
+being run before anything is built:
+
+  G1. THE SPARK-COST ATTACKS. The packet's section 4.2 proposes five Attacks
+      priced in Sparks rather than Energy (all 0 energy, spending 1 to 3
+      Sparks). The noted problem they exist to fix is that the character banks
+      a resource with, in her whole 79-card pool, only three things to spend it
+      on -- zero at Common, zero at Rare -- so the bank is an unsteerable
+      number that rises. Do these five, as a set, FIX that problem WITHIN
+      doctrine? Answer FOLLOWS or REQUIRES_MODIFICATION and name the clause.
+      Rule on the set and on any individual card you rule against; the damage
+      numbers are explicitly provisional shape and are not what you are being
+      asked about.
+  G2. THE RARE POWER, STRICT. The packet's section 5 takes wording (1), STRICT
+      conversion: the Power converts every Attack that does not already carry a
+      Spark price to cost 3 Sparks instead of its Energy cost. It takes STRICT
+      over a "may pay" wording on the researched finding that NO either/or cost
+      user interface exists in the shipped game -- the only stand-in mechanism
+      in the assembly is automatic, is a shortfall rule, and has no
+      implementing class at all. Given that finding, does STRICT conversion fix
+      the noted problem within doctrine? Answer FOLLOWS or
+      REQUIRES_MODIFICATION and name the clause. Rule also on the sub-pick
+      (a) versus (b) inside section 5.
+  G3. THE D2/D4 QUESTION, asked directly. D2 says every persistent resource
+      must feed a decision the player can steer, and that "the control must be
+      reachable early and reliably -- starter kit, starting relic, base system,
+      or the ordinary pool -- not only through a rare." D4 says the player must
+      be able to perceive and forecast the consequences at the decision point.
+      Under the proposed economy, is a Spark bank whose only sinks are printed
+      card prices STEERABLE within D2's meaning, and is a printed Spark price
+      VISIBLE within D4's meaning? Name the clause either way. Say plainly
+      whether any clause not already named in your answers above must also move
+      before this economy is legal.
+
+Keep each answer to a short paragraph. Quote the clause text you rule on. Do
+not restate the packet back to me.
+
+
+############################################################################
+## THE PROPOSAL PACKET (review/active/klee-sparks-2026-08-29.md)
+############################################################################
+
+# Klee's Sparks as a real cost — the research, and what I need you to pick
+
+**2026-08-29 · branch `klee-sparks-research` · research packet, nothing built,
+nothing staged, no ids minted.**
+
+Companion document: `docs/current/research/regent-stars-economy.md`, which is
+the evidence. Every number below points back into it or into a repo file by
+line.
+
+---
+
+## 1. Your words, and what they settle
+
+Verbatim, from the sitting:
+
+> The old base rule ("At 3 Sparks, your Attacks cost 0. Playing one consumes
+> 3") is being retired as the universal base mechanic; Sparks become an
+> ALTERNATIVE card cost (some Klee cards cost Sparks instead of Energy); Bomb
+> detonation stays the main source.
+
+> "No need for a cap. Getting insane spark generation is fine. Spending a ton
+> of sparks is fine. Figuring out how to do both in a deck that also needs to
+> do other things should be difficult. Regent doesn't cap its stars, it just
+> makes star generation a bit stingy unless you deliberately lean into it."
+
+> (a) "Regent has some star generation in their base kit - I believe it's a
+> starter card. Let's aim to match their generation pattern. So this would be
+> a research project."
+
+> (c) "Leaning towards reauthoring. I think that we can make some Attacks that
+> cost Sparks, matching the lore flavor, with a Rare power that basically
+> converts all attacks into 3-spark-cost attacks, which would be a deliberate
+> payoff for the archetype."
+
+**What that settles, so nobody re-opens it below:**
+
+1. The threshold rule goes. It is not a card question and cannot be
+   quarantined on the prototype card surface — that is exactly the point the
+   independent seat made in `review/active/klee-slice-1-2026-08-29.md` §6.2,
+   which is still held for you and which this direction *answers* rather than
+   sidesteps.
+2. Sparks are a **price on cards**, not a passive discount on a card type.
+3. **No cap.** Confirmed as correct-by-canon: the game's own
+   `PlayerCombatState.GainStars` clamps only at zero and has no ceiling, while
+   `GainEnergy` four lines above it clamps at 999,999,999. Regent's stars are
+   genuinely uncapped.
+4. Pounding Surprise (+1 Spark per Bomb detonation) stays the main source.
+5. There is a Rare Power that turns the whole Attack suite into Spark
+   spenders.
+
+**What it does not settle, and what §3–§6 are pick lists about:** how much
+generation, at which rarities, where the starter-deck generator lives, what
+the new Attacks cost, which existing cards get converted to make room, which
+of two possible wordings the Rare Power uses, and how a Spark price is drawn
+on a card face.
+
+**One thing you asked me not to do, and I did not:** EB-186 (all Attacks
+showing cost 0 at 3 Sparks) is not cited anywhere here as a defect. It was the
+mechanic working.
+
+---
+
+## 2. Klee today against Regent, side by side
+
+### 2.1 What Regent actually has
+
+I decompiled the pinned game build (v0.111.0, `main_assembly_hash`
+`222455745`, matching `STATE.md`'s pin) rather than trusting our extracts, and
+found two things worth reading before the numbers.
+
+**First: `ForgeStars` is our word, not the game's.** It appears nowhere in the
+assembly. It is a regex we wrote in `tools/canon_role_tempo.py:126` that
+matches three different things at once, and it fuses **Stars** (the spendable
+resource) with **Forge** (a growing 0-cost attack card, closer to Ironclad's
+Strength than to a bank). Ten of the nineteen cards in our `regent_forge`
+"package" — the anchor `klee/spark` is measured against,
+`docs/role-tempo-baseline.md:270` — never touch a Star. **The anchor's
+percentages are computed over a population that is about half a different
+mechanic.** I have not changed the anchor; that is a measurement-law call. I
+have written it down.
+
+**Second: a Star cost is an ADDITIONAL cost, not an alternative one.** From
+`PlayerCombatState.HasEnoughResourcesFor`, a card has an energy price *and* a
+star price and both are checked independently. Regent gets the *feel* of an
+alternative cost by printing **energy 0** on most star cards — 13 of 23,
+including the Basic `FallingStar` — not by any either/or machinery. This
+matters for us: your "cost Sparks instead of Energy" is expressed as **cost
+0 energy, spend N Sparks**, which is what both our engines already do.
+
+### 2.2 The counts
+
+| | Regent (91-card pool) | Klee (79-card pool) |
+|---|---|---|
+| generators | **11** (12.1%) | **16** (20.3%) |
+| spenders | **23** (25.3%) | **3** (3.8%) |
+| generators : spenders | **1 : 2.1** | **5.3 : 1** |
+
+By rarity — the shape matters more than the totals:
+
+| rarity | Regent gen | Regent spend | Klee gen | Klee spend |
+|---|---|---|---|---|
+| Basic / starter | 1 (`Venerate`, 2★) | 1 (`FallingStar`, 2★) | **0** | **0** |
+| Common | 4 | 4 | **6** | **0** |
+| Uncommon | 4 | 10 | 5 | 3 |
+| Rare | 2 | 6 | 5 | **0** |
+| Ancient | 0 | 2 | — | — |
+
+Klee's sixteen: six Commons (`sparkly_treasure` 1, `spark_collection` 2,
+`skip_and_hop` 1, `warm_glow` 1, `snap` 1, plus `crackle`'s priced discard),
+five Uncommons (`cant_catch_me` 1, `sugar_rush` 1, `hot_hands` 3,
+`endless_fireworks` = 1/turn power, `catalytic_conversion`), five Rares
+(`all_my_treasures` 2, `da_da_da` 1, `playtime_forever`, `sparks_n_splash`,
+`true_spark_knight`). Her three spenders are all Uncommon Skills that print
+`Spend 2` — `powder_charge`, `hold_the_line`, `smoke_and_sparks`.
+
+### 2.3 Where Klee is more generous than Regent, and by how much
+
+- **On the ratio: about eleven times.** Regent's pool holds 2.1 sinks per
+  source; Klee's holds 0.19. Multiply that out and Klee's supply of things to
+  spend on, relative to things that make Sparks, is **11× thinner**.
+- **At Common: infinitely.** Regent's Common band is 4 generators and 4
+  spenders — perfectly balanced, and it is the band a player actually drafts
+  from most. Klee's is 6 and **zero**.
+- **At Rare: five to nothing.** Regent's Rares are 2 generators against 6
+  spenders. Klee's Rares are 5 generators against 0.
+- **In the starter deck the direction reverses.** Regent's ten cards ship one
+  generator (`Venerate`, 2★) *and* one spender (`FallingStar`, 0 energy /
+  2★ — his Basic Attack **is** a star sink). Klee's ten (`kaboom` ×4,
+  `duck_and_cover` ×4, `jumpy_dumpty`, `pop`) contain **neither**. Her only
+  base-kit income is the relic.
+
+### 2.4 The one number that says what "stingy" means
+
+Regent, from starter deck plus relic only, at 3 energy a turn and a 10-card
+deck that cycles every two turns:
+
+- income **+1.0 Spark-equivalent per turn** (Venerate is 2★ seen once per two
+  turns), plus a flat **3★ at the start of every fight** from Divine Right;
+- expenditure **−1.0 per turn** (FallingStar is 2★, seen once per two turns);
+- **net zero, with a 3-point opening buffer.**
+
+Over a four-turn fight: **7★ made, 4★ spent.** The cheapest sink in his whole
+pool is 1★; the median printed sink is **3★**. So a Regent who drafts nothing
+can play his cheapest sink every turn and his median sink every third turn —
+and to do more than that he has to lean in.
+
+Klee's base kit, on the same arithmetic: `pop` places one bomb and
+`jumpy_dumpty` places one, so a cycle detonates about two bombs, which is
+**+1.0 Spark per turn** from Pounding Surprise — *the same income rate as
+Regent*. What she does not have is the **3-point opening buffer** and she does
+not have **a single thing to spend it on**. (Treat the +1/turn as an upper
+bound: bombs fire on a delay and `jumpy_dumpty` costs 2 energy, so some turns
+it does not get played.)
+
+**That is the whole diagnosis in one line: her income already matches Regent's
+almost exactly. Her sink supply does not exist.**
+
+---
+
+## 3. The generation pattern to match — PICK 1
+
+Because §2.4 says income is already right, "matching the generation pattern"
+is mostly about **not adding more generation** while adding sinks, and about
+deciding whether the relic keeps doing Divine Right's job.
+
+### 3.1 Does Pounding Surprise already equal Divine Right?
+
+**Not quite, and the difference is the interesting one.**
+
+| | Divine Right | Pounding Surprise |
+|---|---|---|
+| when | start of every combat, once | on every Bomb detonation |
+| amount | flat **3** | **+1 each**, unbounded |
+| steerable? | no — it just happens | **yes** — you chose the bombs |
+| turn-one value | 3 Stars in hand | usually **0**; bombs have not gone off yet |
+
+Divine Right's job is to make **turn one non-dead**. Pounding Surprise's job
+is to make **the demolition plan feed the spark plan**. They are different
+jobs, and Klee currently has only the second. Under an economy where Attacks
+cost Sparks, a turn-one hand of Spark-priced Attacks with a bank of 0 is a
+brick.
+
+**PICK 1 — the starter-kit generator.**
+
+1. **Relic keeps its body, and a Basic card carries the buffer.** Add a Spark
+   rider to one starter card — the natural home is `pop` (0 energy, places a
+   bomb), which becomes "place a Bomb, gain 1 Spark". Mirrors Regent exactly:
+   a Basic that makes, a Basic that spends. *This is my recommendation* — my
+   reading is that it puts the control on a card the player chooses to play,
+   which is the D2 answer, and it is the smallest change that removes the
+   turn-one brick.
+2. **Relic gains Divine Right's clause outright**: "At the start of each
+   combat, gain 2 Sparks. Whenever a Bomb detonates, gain 1 Spark." Simplest
+   to reason about, but it is unsteerable income and the seat's D2 objection
+   in §6.2 was precisely about unsteerable Spark machinery.
+3. **Relic changes to a flat per-combat grant only** (drop the per-detonation
+   clause). Cleanest match to Regent, but it severs demolition from spark,
+   which is Klee's whole bridge — I would not.
+4. **Neither; the opening Attack is priced at 1 Spark and the first
+   detonation pays for it.** Accepts a dead turn one by design. Honest, and
+   possibly the most interesting; also the most likely to feel bad.
+5. **Convert one Basic Attack into the starter's spark sink** — `kaboom`
+   becomes 0 energy / Spend 1 Spark. This is `FallingStar`'s exact role. Can
+   be combined with (1) and probably should be.
+
+**PICK 2 — how many free generators survive, by rarity.** Regent's shape is
+`Basic 1 / Common 4 / Uncommon 4 / Rare 2`. Klee's is `0 / 6 / 5 / 5`.
+
+1. **Match Regent exactly** — `Basic 1 / Common 4 / Uncommon 4 / Rare 2`.
+   Requires converting or de-riding 2 Commons, 1 Uncommon, 3 Rares.
+   *Recommended*, with the caveat in §4.3 about how deep the Rare cut goes.
+2. **Match at Common and Basic only**, leave Uncommon and Rare alone. Half the
+   work, and Common is the band that decides the early game.
+3. **Keep all sixteen generators and only add sinks.** Pool grows by 5–8
+   cards. Simplest, but the ratio lands around 1:0.5 — still twice as
+   generous as Regent, and your "should be difficult" does not bite.
+4. **Go past Regent** — cut to `Basic 1 / Common 3 / Uncommon 3 / Rare 1`,
+   because Klee's relic supplies income Regent's does not. Defensible, and
+   riskier.
+
+---
+
+## 4. Attacks that cost Sparks — PICK 3
+
+### 4.1 It is already expressible, in both engines, today
+
+Nothing needs to be built for the cards themselves.
+
+**tier0:** a row prints `cost: 0` and a **top-level** `{op: spend_spark,
+amount: N}`. `tier0/engine/combat.py:186` `spark_cost()` derives the price
+from the op — deliberately, so "the price shown and the price paid cannot
+drift apart" — and `card_playable` at line 171 gates on it:
+
+```python
+price = spark_cost(card)
+if price and state.player.sparks < price:
+    return False
+```
+
+The payment is `tier0/engine/effects.py:928 spend_sparks`, all-or-nothing,
+never a partial spend.
+
+**C#:** `klee-mod/KleeCode/Powers/SparkPower.cs` already ships both halves —
+`SparkPower.CanSpend(owner, amount)` is wired into a generated
+`CardModel.IsPlayable` override (the gate), and `SparkPower.Spend(...)` is the
+payment. `tools/gen_klee_cards.py:3985 _stmt_spend_spark` emits it. Three
+Uncommon Skills use this rail in the shipped game right now.
+
+**So the only thing standing between us and Spark-priced Attacks is that no
+Attack has ever printed the op.**
+
+### 4.2 Five candidates, priced against §2.4's income
+
+Income target is ~1 Spark/turn plus a small opening buffer, so: **1 Spark =
+one turn of income, 2 = a cycle, 3 = Regent's median sink.** All are 0 energy.
+
+| # | name | rarity | price | body | the Regent row it mirrors |
+|---|---|---|---|---|---|
+| 1 | **Sizzle** | Common | Spend 1 | 8 damage | `GuidingStar` (1★, 12 dmg) |
+| 2 | **Tinder Toss** | Common | Spend 1 | 4 damage to ALL enemies | `CloakOfStars` (1★, the cheap utility) |
+| 3 | **Bang Bang!** | Common | Spend 2 | 5 damage to a random enemy, twice | `FallingStar` (2★, the Basic sink) |
+| 4 | **Dodoco Blast** | Uncommon | Spend 2 | 7 damage to ALL enemies | `GammaBlast` (3★ AoE) |
+| 5 | **Firework Finale** | Uncommon | Spend 3, Exhaust | 18 damage, single target | `Devastate` (4★ big hit) |
+
+On the names: `Sizzle`, `Bang Bang!` and `Tinder Toss` sit in the
+onomatopoeia family the sheet already speaks — `Snap!`, `Crackle`,
+`Da-da-da!`, `Pop`. `Dodoco Blast` reuses a word the mod already uses in code
+(`KleeCombatVfx.SpawnDodocoPop` is literally the Spark-spend effect).
+`Firework Finale` sits beside `Pocket Fireworks` and `Endless Fireworks`.
+**All five are provisional and go through the reserved-names lint (LAW, R69 /
+R29d) before anything is authored.**
+
+The damage numbers above are *shape*, not ruled values. They are set so a
+Spark-priced Attack beats its energy-priced neighbour by roughly the energy it
+did not spend — that pricing derivation is a separate, one-constant job and I
+have not done it here.
+
+### 4.3 What gets converted, so the pool does not grow — PICK 4
+
+Klee's pool is 79. One-for-one conversions keep it there and move the ratio at
+the same time.
+
+1. **The tight set (5 conversions, pool stays 79).** *Recommended.*
+   - `sparkly_treasure` (Common, 0E, gain 1) → **Sizzle**
+   - `spark_collection` (Common, 1E, gain 2) → **Bang Bang!**
+   - `pocket_fireworks` (Common, 1E attack, no Spark rider) → **Tinder Toss**
+   - `sugar_rush` (Uncommon, 1E, +1 energy + gain 1) → **Dodoco Blast**
+   - `cant_catch_me` (Uncommon, 1E, block 2 + gain 1 + draw 1) → **Firework
+     Finale**
+
+   Result: generators `Basic 0→1 (PICK 1) / Common 6→4 / Uncommon 5→3 / Rare
+   5`; spenders `Common 0→3 / Uncommon 3→5`. Overall **11 : 8, or 1 : 0.73**.
+   Still more generous than Regent's 1 : 2.1, but it is a fifth of the
+   distance from where we are, and the Common band lands at 4 : 3 against
+   Regent's 4 : 4.
+
+   Why those five: the three Commons chosen are the ones whose whole body is
+   "make a Spark" (`sparkly_treasure`, `spark_collection`) or that is already
+   a low-texture enabler (`pocket_fireworks`); the two Uncommons are the ones
+   whose Spark gain is a small rider on other value, so the archetype loses
+   least. `snap`, `warm_glow`, `skip_and_hop` and `crackle` survive, which
+   keeps one Common Attack that generates (`snap` = Regent's `SolarStrike`
+   role) and two block-plus-Spark glue cards.
+
+2. **The tight set plus a Rare cut.** Add `da_da_da` (Rare, gain 1) →
+   converted to a Rare Spark spender, taking Rares to 4 generators. Gets the
+   overall ratio to about 1 : 0.9.
+3. **Convert nothing; add the five as new cards.** Pool goes to 84. Ratio
+   lands at 1 : 0.5. Least disruptive to existing balance reads, weakest on
+   your "should be difficult".
+4. **Convert only the three Commons.** Pool stays 79, the Common band gets its
+   sinks, Uncommon and Rare are left for a later pass.
+
+---
+
+## 5. The Rare Power — PICK 5
+
+Your shape: *"a Rare power that basically converts all attacks into
+3-spark-cost attacks."* There are two ways to write that sentence and they are
+very different cards.
+
+### Wording (1) — STRICT conversion
+
+> **True Spark Knight** — Rare, Power, 2 Energy.
+> *"Your Attacks cost 3 [Spark] instead of their Energy cost."*
+
+**In play:** every Attack in the deck now reads `0 energy / 3 Sparks`. With
+base income around 1 Spark a turn you get roughly one Attack every three turns
+unless you have drafted generation — which is the payoff loop working: the
+Power is a bet that you *have* the engine. It bricks hard when you do not.
+Energy becomes almost pure Skill currency. It is legible: every Attack's cost
+corner shows the same number.
+
+**In code:** the price is not on the card, so `spark_cost()` — which reads
+top-level ops off the row — cannot see it. Both engines need a **new
+power-contributed Spark price** that the playability gate consults. In tier0
+that is a few lines in `combat.spark_cost` and `card_playable`. In C# it is a
+new hook of the same shape the base game already has for Stars
+(`AbstractModel.TryModifyStarCost`, fanned out by
+`Hook.ModifyStarCost`) — we would be writing our own copy of an extension
+point the game ships and, notably, **nothing in the base game overrides**.
+
+**One sub-pick if you take (1):** what happens to Attacks that *already* print
+a Spark price (§4.2)? (a) they are unaffected — the Power only converts
+energy-priced Attacks; (b) all Attacks become exactly 3, which *raises* the
+price of `Sizzle` from 1 to 3. I would take **(a)**: (b) makes the payoff
+punish the very cards the archetype drafts.
+
+### Wording (2) — MAY-PAY
+
+> *"You may pay 3 [Spark] instead of an Attack's Energy cost."*
+
+**Does STS2 have an either/or cost UI Regent uses? No.** I looked, and the
+answer is unusually clean. There is exactly one mechanism in the whole
+assembly that lets one currency stand in for another —
+`Hook.ShouldPayExcessEnergyCostWithStars` — and it is:
+
+- **automatic**, with no prompt and no choice;
+- a **shortfall** rule, firing only when energy is already insufficient;
+- fixed at **2 Stars per missing energy**;
+- and **not enabled by anything that ships**. Its card, `Reserves`, exists as
+  a localisation string — *"If you don't have enough ⚡ for a card, 2★ are used
+  per ⚡ instead"* — with **no implementing class anywhere in v0.111.0**. Same
+  for `VISIONS_OF_GRANDEUR` and `PITY`. Cut or unreleased content.
+
+So the nearest expressible form of MAY-PAY is **automatic: pays Sparks when
+affordable, else Energy**. And that reintroduces exactly the problem the
+independent seat raised in slice 1 §6.2 — *"the automatic rule itself remains
+facially in tension with D2… it chooses the first eligible Attack and forces
+both timing and expenditure."* We would be retiring one automatic engine and
+installing another.
+
+A genuine prompt is possible but has no precedent: the game's choose-a-card
+screen has no per-mode playability (our own
+`tier0/engine/combat.py:200 charge_cost` docstring already records this
+problem for modal cards), so a play-time "pay which?" dialogue is new UI in a
+live game, on a Rare.
+
+### My recommendation
+
+**Take wording (1), STRICT.** My reading: it is the only one of the two where
+the player's decision happens at a moment the player controls — drafting and
+playing the Power, then choosing *which* Attack the bank buys when the bank is
+short — which is D2 satisfied by acquisition and conversion rather than by a
+prompt. On D4 it is strictly better too: a fixed printed price in the cost
+corner is the pattern the base game uses for every one of its 23 star cards,
+and none of them explain the price in rules text because the badge carries it.
+MAY-PAY, in the only form the engine can express, is an automatic engine
+wearing the word "may".
+
+**Re-authored text.** The current `true_spark_knight` row (Rare, 2 energy,
+`spark_threshold_down 1`, "free attack at 2 sparks instead of 3") dies with
+the base rule — it is a modifier to a threshold that will not exist. Proposed
+replacement, same id, same rarity, same cost:
+
+> **True Spark Knight** — Rare · Power · 2 Energy
+> *"Your Attacks that do not already cost [Spark] cost 3 [Spark] instead of
+> their Energy cost."*
+
+---
+
+## 6. Engine notes — what actually has to move
+
+### 6.1 Retiring the base rule
+
+**tier0 — four places, all in the Spark rule and nowhere else.**
+
+| file : line | what it is | what happens |
+|---|---|---|
+| `tier0/constants.py:68` | `SPARKS_FOR_FREE_ATTACK = 3` | deleted (or kept only for the archived world) |
+| `tier0/engine/combat.py:38–41` | `spark_threshold()` | deleted |
+| `tier0/engine/combat.py:279–281` | in `card_cost`: `if card.type == "attack" and sparks >= threshold: return 0` | deleted — this is the zeroing |
+| `tier0/engine/combat.py:305–310` | in `play_card`: `state.sparks_at_play = p.sparks` and the `p.sparks -= spark_threshold(state)` consume | consume deleted; `sparks_at_play` decision below |
+
+**What survives untouched, and is the new economy's spine:**
+`combat.py:171–175` (the playability gate), `combat.py:186–200`
+(`spark_cost`), `effects.py:911–947` (`spend_spark_amount`, `spend_sparks`),
+`effects.py:1772–1783` (`_op_spend_spark`).
+
+**Three rulings become dead letters and should be retired with the rule, not
+left standing:** R34 (X-cost Attacks exempt from the spark spend — there is no
+spend to be exempt from), R39 (readers see the pre-spend bank — nothing spends
+implicitly any more, so `state.sparks_at_play` and
+`SparkPower.SparksAsResolved` both lose their reason to exist), and the
+`gleeful_barrage` compensation note at `docs/klee-cards.yaml:281–287`, whose
+whole subject was the threshold fighting itself.
+
+**C# — `klee-mod/KleeCode/Powers/SparkPower.cs`.** Delete `Threshold`,
+`CurrentThreshold`, `AppliesTo`, `TryModifyEnergyCostInCombat`,
+`BeforeCardPlayed`, `AfterCardPlayed`, `SparksAsResolved`, the
+`_pendingSpendPlay` / `_pendingSpendAmount` pair, and the localisation
+description string *"At 3 Sparks, your Attacks cost 0. Playing one consumes 3
+Sparks."* **Keep** `Gain`, `CanSpend`, `Spend`, `SparksAtPlay` — those are the
+alternative-cost machinery and they already work. `SparkThresholdDownPower`
+goes with `true_spark_knight`'s old body.
+
+### 6.2 The flag, and what the repo's convention actually is
+
+There are **two** quarantine mechanisms here and they are not
+interchangeable — which is the whole reason §6.2 of the slice-1 packet is held
+for you.
+
+- **Cards** are quarantined by living on `docs/prototype-surface.yaml` with
+  `proto_`-prefixed ids, compiled only under `dotnet build
+  -p:PrototypeCards=true` and reachable only by explicit grant. That covers
+  §4's five Attacks and §5's Power body cleanly.
+- **A rule change cannot be.** The threshold rule is in
+  `tier0/engine/combat.py` and `SparkPower.cs`, not on a card sheet. The
+  repo's convention for a behaviour switch is a `*_ENABLED` boolean declared
+  next to the code it gates — the two live examples are
+  `PILOT_POLICIES_ENABLED` (`tier0/pilot/policy.py:938`) and
+  `MODE_CHOOSER_ENABLED` (`tier0/pilot/policy.py:1030`). So the name that
+  matches the house is **`SPARK_ALT_COST_ENABLED`**, not `SPARK_ECONOMY`, and
+  its home is `tier0/constants.py` beside `SPARKS_FOR_FREE_ATTACK` (line 68),
+  because that is the constant it retires.
+
+**PICK 6 — how the rule change is gated.**
+
+1. `SPARK_ALT_COST_ENABLED = False`, both rules living
+   side by side behind it, with the mod compiling the new `SparkPower` only
+   under `-p:PrototypeCards=true`. *Recommended* — it lets one arm be measured
+   against the other, which nothing else here can give you.
+2. Flip the rule outright and re-baseline. Faster, and every existing Klee
+   number becomes incomparable in one step (`RT/D/P/C` all move).
+3. Prototype cards only, rule untouched — the slice-1 shape. **This is the one
+   that cannot answer the question**, and the seat already said so.
+
+### 6.3 The pilot
+
+The comment at `docs/klee-cards.yaml:267` — *"the pilot has no
+hold-versus-spend term for Sparks"* — **is stale.** `STATE.md` records
+`POLICY_VERSION 11` as R207, "the pilot gains a Spark hold-versus-spend term".
+That comment should be corrected as hygiene whenever that row is next touched.
+
+**Is the gap smaller under a pure spend economy? Yes, structurally.** The
+hold-versus-spend problem exists *because* holding at 3 has a payoff (a free
+Attack) that competes with spending. Retire the threshold and holding has no
+payoff at all — a Spark is worth exactly what you buy with it — so the pilot's
+question collapses from "hold or spend?" to "can I afford this sink, and is it
+the best card in hand?", which is the question it already answers for energy.
+
+**But one drafter dial becomes wrong and it is yours.**
+`tier05/draft.py:1602` sets `STATIC_SPARK_VALUE = 0.0` — a `gain_spark` is
+priced at **zero**. That was defensible when Sparks only fed a discount. Under
+a spend economy every generator is underpriced by exactly that constant, which
+will show up as the drafter refusing to build the archetype. `draft.py:1670`
+records that the value is held by you. **PICK 7:** (1) leave it at 0.0 and
+read the consequence, (2) move it in the same batch as the rule, (3) derive it
+from the new sink prices once §4's numbers are ruled — *my reading is (3)*,
+because a value derived from prices that do not exist yet is a guess.
+
+### 6.4 Display — PICK 8
+
+The current Spark cost is a **text line** in the card body. The base game
+never does that: its 23 star cards say **nothing** about their price in rules
+text and carry it entirely on a dedicated cost badge beside the energy orb
+(`Nodes.Cards/NCard.cs:1044 UpdateStarCostVisuals`, a `_starIcon` /
+`_starLabel` pair with its own red-when-unaffordable colouring, plus a
+persistent on-screen counter that Regent forces always-visible).
+
+1. **Reuse the game's own star badge by storing Sparks in
+   `PlayerCombatState.Stars`.** `CardModel.CanonicalStarCost` is `public
+   virtual` and a modded card can override it;
+   `UnplayableReason.StarCostTooHigh`, the red cost colouring, the persistent
+   counter (`Klee.ShouldAlwaysShowStarCounter => true`), the spend/gain hooks
+   and the history entries all then come **free**, exactly as they work for
+   Regent. Cheapest by a distance and it is the shipped UI.
+   **The risk, stated plainly:** Sparks would *be* Stars. The power-bar icon
+   goes away, every reader (`has_spark`, `gleeful_barrage`) re-points at
+   `PlayerCombatState.Stars`, and in co-op a Star Potion or a Regent star
+   relic would top up Klee's Sparks. That cross-character coupling is a design
+   call, not an engineering one.
+2. **Keep `SparkPower` and build a Klee Spark badge** on the card face,
+   mirroring `NCard`'s star badge. No coupling, real UI work, and it is the
+   thing `EB-186` proved the player reads first.
+3. **Keep the text line.** Cheapest, and it is the option the base game
+   deliberately does not take — a price in the rules box is a price you read
+   after deciding.
+
+*My reading is (2)* — the badge is the right display and the Stars coupling in
+(1) is a door I would not walk through on a display question. But (1) is worth
+a serious look precisely because it is free, and if you want it, it is a
+one-way door and should be picked as one.
+
+---
+
+## 7. Independence and protocol
+
+Roles here follow "models don't grade their own work", by model family
+(R217 / the `authored_by` field on `docs/prototype-surface.yaml`, EB-190).
+The **Spark-cost Attacks (§4) and the Rare Power (§5) are authored by
+Claude**, so the independent grader on those rows is **the Codex seat (GPT)**;
+a fresh-Opus grade on those same rows is same-family and is recorded as such,
+not as the deciding read. GPT also **gates doctrine on the slate before
+anything is built**, under the doctrine seat protocol in `OPERATIONS.md` — a
+gate decides what may be built and decides nothing about whether it is good.
+The one row GPT does **not** read independently is the **base-rule retirement
+and the alternative-cost economy itself (§1, §6)**, because GPT co-authored
+that direction with you; there the independent read is **Claude's**, marked by
+family. Every row carries `authored_by` before `tools/gen_prototype_cards.py`
+will emit it, and `understudy/seat.py` refuses a seat that would grade its own
+family's work.
+
+---
+
+## 8. Ordered next steps
+
+1. **Answer PICK 5 (strict vs may-pay) and PICK 6 (how the rule is gated).**
+   Everything else is downstream: the Attack prices in §4 only make sense once
+   the Power's shape is fixed, and nothing can be measured until the rule
+   change has somewhere to live. → depends on nothing.
+2. **Answer PICK 1 and PICK 2** — the starter-kit generator and the surviving
+   generator counts. → sets the income the §4 prices are priced against.
+3. **Answer PICK 3 and PICK 4** — the five Attacks and which cards convert.
+   → depends on 2.
+4. **GPT doctrine gate on the resulting slate** (cards only; the rule row is
+   Claude-read per §7). → depends on 1–3.
+5. **Claude authors the rows** onto `docs/prototype-surface.yaml` as `proto_*`
+   with `authored_by: [claude]`, behind `SPARK_ALT_COST_ENABLED` if PICK 6
+   takes (1). → depends on 4.
+6. **Answer PICK 8** (display) before the dev build, because option (1) changes
+   where the bank lives and would invalidate anything built on `SparkPower`.
+   → depends on nothing, but blocks 7.
+7. **Dev build, stage, blind grade with the Codex seat as the independent
+   read**, replay every graded line. → depends on 5, 6.
+8. **Answer PICK 7** (`STATIC_SPARK_VALUE`) once §4's prices are ruled, then
+   re-baseline. → depends on 3 and 7.
+9. **Separately, and not blocking any of the above: the `regent_forge` anchor.**
+   §2.1 shows it is half a different mechanic. That is a measurement-law
+   question about `docs/role-tempo-baseline.md` and
+   `tools/canon_role_tempo.py:126`, and it is yours. → depends on nothing.
+
+
+
+############################################################################
+## THE EVIDENCE IT CITES (docs/current/research/regent-stars-economy.md)
+############################################################################
+
+# Regent's Stars — what the decompile actually says
+
+> **Research note, not a ruling.** Everything below is read off the shipped
+> assembly and the shipped localisation blob for the pinned build. Where the
+> decompile does not answer a question, the gap is stated as a gap.
+
+## 0. Provenance, and one correction to our own records
+
+**Source A — the assembly.** `ilspycmd -p -o <scratch> "…\Slay the Spire 2\
+data_sts2_windows_x86_64\sts2.dll"`, ilspycmd `8.2.0.7535` (the pinned
+version, `STATE.md` "Mod build environment"). Game **v0.111.0**, commit
+`41cef1ea`, `main_assembly_hash` `222455745` — `release_info.json` in the game
+directory, matching the pin exactly. 3538 `.cs` files, decompiled into the
+session scratchpad; **nothing from that decompile is committed** and paths
+below are given as `<namespace>/<File>.cs` relative to the decompile root.
+
+**Source B — the card text.** The localisation payload is a plain JSON blob
+embedded in `SlayTheSpire2.pck` (`LocManager.cs:128` `LocalizationAssetDir =>
+"res://localization"`). Sixteen language blocks; English quoted throughout.
+
+**The correction.** `tools/canon_role_tempo.py:126` mints a marker called
+`ForgeStars`:
+
+```python
+(re.compile(r"ForgeCmd\.|GainStars|\bStars\b"), "ForgeStars"),
+```
+
+**`ForgeStars` is our word, not the game's.** No type, method, field or
+localisation key named `ForgeStars` exists anywhere in the assembly (grep over
+all 3538 files: zero hits). The marker is a regex alternation that fuses **two
+unrelated Regent mechanics** into one 19-card "package":
+
+- **Stars** — a numeric resource on `PlayerCombatState`, spent as a card cost.
+- **Forge** — `ForgeCmd.Forge` (`MegaCrit.Sts2.Core.Commands/ForgeCmd.cs`),
+  which has nothing to do with Stars. Its own doc comment: *"Applies Forge to
+  the player. Adds Sovereign Blade to their hand if they haven't forged this
+  combat, and adds the amount of damage to it."* Forge is a growing 0-cost
+  attack card, closer to Ironclad's Strength than to a spendable bank.
+
+Of the 19 members of `regent_forge`, ten are Forge-only cards that never touch
+a Star. That matters for `klee/spark`, which is anchored to `regent_forge`
+(`docs/role-tempo-baseline.md:270`): **the anchor's cell percentages are
+computed over a population that is roughly half a different mechanic.** This
+note does not change the anchor — that is a measurement-law call — it records
+that the number is not what its name says.
+
+Everything from §1 down is about **Stars only**, re-derived from the assembly.
+
+**A second, smaller correction.** `game_ref/regent.json`'s `vars` field never
+carries a Star amount (Venerate shows `"vars": {}`). That is an extractor
+artifact, not a fact about the game: `tools/extract_base_game_pool.py:106`
+reads `new (\w+)Var\(\s*(-?[\d.]+)m` — a **decimal** literal — and `StarsVar`
+takes an `int` (`Localization.DynamicVars/StarsVar.cs`: `public StarsVar(int
+stars)`). So every Star amount in this document was read from the C# source,
+never from our JSON extract. The same regex gap also hid `Genesis` from the
+`\bStars\b` marker, because its var is spelled `"StarsPerTurn"` and the word
+boundary fails.
+
+---
+
+## 1. Generation in the base kit
+
+### 1.1 The starting deck
+
+`Models.Characters/Regent.cs` — `StartingHp => 75`, `StartingGold => 99`,
+`MaxEnergy` not overridden so it is the `CharacterModel.cs:97` default of
+**3**, and:
+
+```csharp
+public override IEnumerable<CardModel> StartingDeck => new CardModel[10]
+{
+    StrikeRegent ×4, DefendRegent ×4, FallingStar, Venerate
+};
+public override IReadOnlyList<RelicModel> StartingRelics => { DivineRight };
+public override bool ShouldAlwaysShowStarCounter => true;
+```
+
+| card | energy | ★ cost | type | what it does |
+|---|---|---|---|---|
+| `StrikeRegent` ×4 | 1 | — | Attack | `DamageVar(6m)` |
+| `DefendRegent` ×4 | 1 | — | Skill | `BlockVar(5m)` |
+| `FallingStar` | **0** | **2** | Attack, Basic | 8 damage, 1 Weak, 1 Vulnerable |
+| `Venerate` | 1 | — | Skill, Basic | **gain 2 Stars** |
+
+**Venerate is confirmed as the Basic generator**, and its amount is 2, not 1
+(`Models.Cards/Venerate.cs`):
+
+```csharp
+protected override IEnumerable<DynamicVar> CanonicalVars => new StarsVar(2);
+public Venerate() : base(1, CardType.Skill, CardRarity.Basic, TargetType.Self) { }
+protected override async Task OnPlay(...)
+{
+    await CreatureCmd.TriggerAnim(...);
+    await PlayerCmd.GainStars(base.DynamicVars.Stars.BaseValue, base.Owner);
+}
+protected override void OnUpgrade() { base.DynamicVars.Stars.UpgradeValueBy(1m); }
+```
+
+Text: `"VENERATE.description": "Gain {Stars:starIcons()}."` — upgrade takes it
+to 3.
+
+The starter deck therefore ships **one generator and one spender**, and the
+spender is the Basic Attack. `FallingStar` costs **0 energy and 2 Stars**
+(`Models.Cards/FallingStar.cs:16` `public override int CanonicalStarCost =>
+2;`). That is the whole idea in the opening hand: the character's cheapest
+real attack is bought with Stars rather than energy.
+
+### 1.2 The starting relic — Divine Right
+
+`Models.Relics/DivineRight.cs`, complete:
+
+```csharp
+public sealed class DivineRight : RelicModel
+{
+    public override RelicRarity Rarity => RelicRarity.Starter;
+    protected override IEnumerable<DynamicVar> CanonicalVars => new StarsVar(3);
+
+    public override async Task AfterRoomEntered(AbstractRoom room)
+    {
+        if (room is CombatRoom)
+        {
+            await PlayerCmd.GainStars(base.DynamicVars.Stars.BaseValue, base.Owner);
+        }
+    }
+}
+```
+
+**Answering the question directly: it is per COMBAT, not per room and not
+run-persistent.** The hook is `AfterRoomEntered`, but the body gates on `room
+is CombatRoom`, so a shop, a rest, a treasure or an event grants nothing. And
+because Stars live on the per-combat state (§4), the 3 it grants is
+functionally *"start every fight at 3 Stars"* — which is exactly how the card
+text words it:
+
+```
+"DIVINE_RIGHT.description": "At the start of each combat, gain {Stars:starIcons()}."
+```
+
+Our own `game_ref/regent_char_facts.yaml` records the relic as unmodelled and
+says the counter is "exercised on room entry"; the combat gate is the part
+that note does not carry.
+
+### 1.3 Anything else in the base kit
+
+Nothing. The other seven Regent relics (`Models.RelicPools/RegentRelicPool.cs`)
+are not starters and only two touch Stars at all:
+
+- `LunarPastry` (**Rare**) — `StarsVar(1)`, `AfterSideTurnEnd` → +1 Star per
+  turn. This is the only relic that generates Stars on a schedule.
+- `GalacticDust` — counts Stars **spent** (`_starsSpent`, `ShowCounter`), a
+  payoff rather than a source.
+- `MiniRegent` (Rare) — `AfterStarsSpent` → +1 Strength, once per turn. Payoff.
+- `FencingManual`, `OrangeDough`, `Regalite`, `VitruvianMinion` — Forge, card
+  generation, block, minion damage. No Stars.
+
+There is one Common potion: `Models.Potions/StarPotion.cs`, `StarsVar(3)`,
+`"STAR_POTION.description": "Gain {Stars:starIcons()}."`
+
+---
+
+## 2. Full generator census
+
+Population: the 91 cards enumerated by `Models.CardPools/RegentCardPool.cs`
+(`ModelDb.Card<…>()` calls, de-duplicated). Rarity mix of that pool: **Basic
+4, Common 20, Uncommon 38, Rare 27, Ancient 2**.
+
+A card counts as a generator if its source contains `PlayerCmd.GainStars`,
+applies `StarNextTurnPower`, or applies `GenesisPower`.
+
+| card | rarity | energy | type | Stars | upgrade | conditions |
+|---|---|---|---|---|---|---|
+| `Venerate` | Basic | 1 | Skill | **2** | Stars +1 | none |
+| `GatherLight` | Common | 1 | Skill | **1** | Block +3 (Stars unchanged) | none — also 8 Block |
+| `Glow` | Common | 1 | Skill | **1** | Stars +1 | none — also draw 1, draw 1 next turn |
+| `HiddenCache` | Common | 1 | Skill | **1 now + 3 next turn** | next-turn +1 | none |
+| `SolarStrike` | Common | 1 | Attack | **1** | Damage +1 **and Stars +1** | none — 9 damage |
+| `Convergence` | Uncommon | 1 | Skill | **1 next turn** | Stars +1 | none — also 1 energy next turn, Retain hand |
+| `KnockoutBlow` | Uncommon | 3 | Attack | **5** | Damage +8 (Stars unchanged) | **only if the attack kills** |
+| `RoyalGamble` | Uncommon | 0 | Skill | **9** | gains Retain | **costs 5 Stars to play**; Exhaust |
+| `ShiningStrike` | Uncommon | 1 | Attack | **2** | Damage +3 | none — 8 damage, returns to top of draw |
+| `BigBang` | Rare | 0 | Skill | **1** | gains Innate | Exhaust; also draw 1, +1 energy, Forge 5 |
+| `Genesis` | Rare | 2 | Power | **2 per turn** | +1 per turn | permanent for the combat |
+
+Eleven generators. The two next-turn ones ride
+`Models.Powers/StarNextTurnPower.cs`, which fires on `AfterEnergyReset` and
+then removes itself; `GenesisPower` fires on the same hook and does not.
+
+**Count by rarity, and the ratio to spenders** (spender = has a Star cost,
+§3):
+
+| rarity | pool | generators | spenders | generators : spenders |
+|---|---|---|---|---|
+| Basic | 4 | 1 (`Venerate`) | 1 (`FallingStar`) | 1 : 1 |
+| Common | 20 | 4 | 4 | 1 : 1 |
+| Uncommon | 38 | 4 | 10 | 1 : 2.5 |
+| Rare | 27 | 2 | 6 | 1 : 3 |
+| Ancient | 2 | 0 | 2 | 0 : 2 |
+| **total** | **91** | **11 (12.1%)** | **23 (25.3%)** | **1 : 2.1** |
+
+`RoyalGamble` is in both columns (pay 5, gain 9). The shape is the stinginess
+[USER] described from memory, and it is sharper than "a bit stingy": **the
+pool is twice as full of things to spend Stars on as things that make them,
+and the imbalance grows with rarity.** At Basic and Common the economy is
+exactly break-even one-for-one; every rarity above that sells you sinks.
+
+---
+
+## 3. Spending
+
+### 3.1 `ForgeStars` is not a spend verb — the spend is a second cost field
+
+There is no "ForgeStars" effect. A Star price is a **card property**, declared
+next to the energy cost and paid at the same moment:
+
+`Models/CardModel.cs:410`
+```csharp
+public virtual int CanonicalStarCost => -1;      // -1 = "no star cost"
+public int BaseStarCost { … }                     // mutable copy
+public bool HasStarCostX { … }                    // X-cost in Stars
+public TemporaryCardCost? TemporaryStarCost => _temporaryStarCosts.LastOrDefault();
+public event Action? StarCostChanged;
+```
+
+### 3.2 Alternative, additional, or effect-time? — **ADDITIONAL**
+
+Unambiguous, from `Entities.Players/PlayerCombatState.cs:197`:
+
+```csharp
+public bool HasEnoughResourcesFor(CardModel card, out UnplayableReason reason)
+{
+    int num  = Math.Max(0, card.EnergyCost.GetWithModifiers(CostModifiers.All));
+    int num2 = Math.Max(0, card.GetStarCostWithModifiers());
+    if (num > Energy && card.CombatState != null
+        && Hook.ShouldPayExcessEnergyCostWithStars(card.CombatState, _player))
+    {
+        num2 += (num - Energy) * 2;
+        num = Energy;
+    }
+    reason = UnplayableReason.None;
+    if (num  > Energy) reason |= UnplayableReason.EnergyCostTooHigh;
+    if (num2 > Stars ) reason |= UnplayableReason.StarCostTooHigh;
+    return reason == UnplayableReason.None;
+}
+```
+
+Both are checked, and both must pass. A card with `cost 1, ★3` needs 1 energy
+**and** 3 Stars. Regent's designers get the *feel* of an alternative cost by
+printing **energy 0** on most Star cards — 13 of the 23 spenders cost 0
+energy, including the Basic `FallingStar` — but the engine has one shape:
+**energy cost and Star cost are two independent additive prices.**
+
+The payment mirror is `Models/CardModel.cs:1806` `SpendResources()`, which
+returns `(energySpent, starsSpent)`, calls `SpendEnergy` then `SpendStars`,
+and fires `Hook.AfterStarsSpent`. Both prices are paid **before** the card's
+effects resolve, at the top of the card play.
+
+### 3.3 How playability is gated
+
+Not a per-card `IsPlayable` override — it is a first-class unplayable reason.
+`Entities.Cards/UnplayableReason.cs:29` `StarCostTooHigh = 0x20`, produced by
+`HasEnoughResourcesFor` above and consumed by `CardModel.CanPlay`. The card
+sits in hand, greyed, exactly like an unaffordable energy cost.
+
+There is also a **cost-modifier hook**, so a Star price can be changed by
+anything on the board: `Models/AbstractModel.cs:2078`
+
+```csharp
+public virtual bool TryModifyStarCost(CardModel card, decimal originalCost,
+                                      out decimal modifiedCost)
+```
+
+fanned out by `Hooks/Hook.cs:2168 ModifyStarCost` and read for display by
+`Helpers.Models/CardCostHelper.cs:118 TryModifyStarCostWithHooks`. **No
+shipped model overrides it**; the only implementor in the assembly is
+`Models.Powers.Mocks/MockModifyStarCostPower`. The extension point exists and
+is unused.
+
+### 3.4 The one either/or mechanism, and it is not shipped
+
+`Hook.ShouldPayExcessEnergyCostWithStars` (default `false`,
+`AbstractModel.cs:2336`) converts a **shortfall** in energy into Stars at
+**2 Stars per missing energy**, automatically, with no prompt. Its card text
+survives in the loc blob:
+
+```
+"RESERVES.description": "If you don't have enough {energyPrefix:energyIcons(1)}
+ for a card, 2{singleStarIcon} are used per {energyPrefix:energyIcons(1)} instead."
+```
+
+**But `Reserves` does not exist in v0.111.0.** No class, no `ModelDb`
+registration, no pool membership — a grep for the string `Reserves` across the
+whole decompile hits exactly one unrelated file
+(`GameActions.Multiplayer/PlayerChoiceSynchronizer.cs`). The same is true of
+`VISIONS_OF_GRANDEUR` ("If you have N★, draw N cards") and `PITY` ("Gain ★ for
+every N HP healed"): loc rows with no implementation. They are cut or
+unreleased content.
+
+So the answer to *"does STS2 have an either/or cost UI?"* is: **no.** It has
+one automatic fallback conversion at a fixed 2:1 rate, which nothing in the
+shipped game turns on, and which asks the player nothing.
+
+### 3.5 Every spender
+
+23 cards. `★` is `CanonicalStarCost`.
+
+| card | rarity | energy | ★ | type | effect |
+|---|---|---|---|---|---|
+| `FallingStar` | Basic | 0 | 2 | Attack | 8 damage, 1 Weak, 1 Vulnerable |
+| `AstralPulse` | Common | 0 | 3 | Attack | damage to ALL enemies, twice |
+| `CloakOfStars` | Common | 0 | 1 | Skill | 7 Block |
+| `CrescentSpear` | Common | 1 | 1 | Attack | 8 + 2 damage per Star-costed card you own |
+| `GuidingStar` | Common | 1 | 1 | Attack | 12 damage, draw 1 next turn |
+| `Alignment` | Uncommon | 0 | 2 | Skill | gain energy |
+| `Constellation` | Uncommon | 0 | 2 | Skill | **co-op only** — ally draws 1, +1 energy, 9 Block |
+| `Devastate` | Uncommon | 1 | 4 | Attack | large single-target damage |
+| `GammaBlast` | Uncommon | 0 | 3 | Attack | damage + Weak + Vulnerable |
+| `ParticleWall` | Uncommon | 0 | 2 | Skill | Block, returns to hand |
+| `Quasar` | Uncommon | 0 | 2 | Skill | choose 1 of 3 Colorless into hand |
+| `Reflect` | Uncommon | 1 | 3 | Skill | Block; blocked damage reflected this turn |
+| `Resonance` | Uncommon | 1 | 2 | Skill | +Strength; all enemies −1 Strength |
+| `RoyalGamble` | Uncommon | 0 | 5 | Skill | **gain 9 Stars**; Exhaust |
+| `Stardust` | Uncommon | 0 | **X** | Attack | 5 damage to a random enemy, X times |
+| `Comet` | Rare | 0 | 5 | Attack | big damage + Weak + Vulnerable |
+| `DecisionsDecisions` | Rare | 0 | 6 | Skill | draw; play a Skill from hand N times |
+| `DyingStar` | Rare | 1 | 3 | Attack | 9 to ALL; all enemies lose Strength this turn |
+| `NeutronAegis` | Rare | 1 | 5 | Power | Plating |
+| `SevenStars` | Rare | 2 | 7 | Attack | 7 damage to ALL enemies, N times |
+| `TheSmith` | Rare | 1 | 4 | Skill | Forge 10 |
+| `MeteorShower` | Ancient | 0 | 2 | Attack | AoE damage + Weak + Vulnerable to all |
+| `TheSealedThrone` | Ancient | 1 | 3 | Power | gain ★ whenever you play a card |
+
+**Cheapest sinks are 1★** (`CloakOfStars`, `CrescentSpear`, `GuidingStar`);
+the Basic sink is 2★; the median printed price across all 23 is **3★**.
+
+`Stardust` is the X case (`HasStarCostX => true`), resolved by
+`CardModel.ResolveStarXValue()` — it spends the whole bank and hits that many
+times.
+
+### 3.6 Cards that read Stars without spending them
+
+- **`Radiate`** (Uncommon, 0 energy, no Star cost) — the `StarsModifiedEntry`
+  reader named in the brief. Its `CalculatedHits` var sums every positive
+  `StarsModifiedEntry` this turn by this creature:
+  ```csharp
+  new CalculatedVar("CalculatedHits").WithMultiplier((card, _) =>
+      CombatManager.Instance.History.Entries.OfType<StarsModifiedEntry>()
+        .Where(e => e.HappenedThisTurn(card.CombatState) && e.Amount > 0
+                    && e.Actor == card.Owner.Creature)
+        .Sum(e => e.Amount));
+  ```
+  Text: *"Deal N damage to ALL enemies for each ★ gained this turn. (Hits N
+  times)"* — it pays **nothing** and scales on **income**, not on bank size.
+- **`CrescentSpear`** — scales on how many Star-costed cards are in your
+  combat deck (`c.CanonicalStarCost >= 0 || c.HasStarCostX`), a *deckbuilding*
+  read rather than a resource read.
+- **`ChildOfTheStarsPower`** — `AfterStarsSpent` → Block per Star spent.
+- **`BlackHolePower`** — damage all enemies on **spend or gain**, with an
+  explicit note that it uses `AfterCardPlayed` rather than `AfterStarsSpent`
+  because *"stars are spent at the beginning of the card play"*.
+- **`GalacticDust`**, **`MiniRegent`** — relic payoffs on `AfterStarsSpent`.
+
+---
+
+## 4. Persistence and cap
+
+**Stars do not persist across combats.** The counter is a field on
+`PlayerCombatState` (`Entities.Players/PlayerCombatState.cs:109`), and
+`Entities.Players/Player.cs:800` throws the whole object away between fights:
+
+```csharp
+/// Resets the player's combat state to an empty state.
+public void ResetCombatState() { PlayerCombatState = new PlayerCombatState(this); }
+```
+
+`_stars` has no initialiser, so a fresh combat starts at **0**; Divine Right
+then puts it at 3. There is no run-level Star field, no save field, nothing in
+`Player`'s serialisable state. **This makes Divine Right's grant per-fight
+income, not a run bank**, and the card text agrees.
+
+**There is no cap.** `GainStars` clamps only at the bottom:
+
+```csharp
+public void GainStars(decimal amount)
+{
+    if (amount < 0m) throw new ArgumentException("Must not be negative.", "amount");
+    Stars = (int)Math.Max((decimal)Stars + amount, 0m);
+}
+public void LoseStars(decimal amount) { … Stars = (int)Math.Max(Stars - amount, 0m); }
+```
+
+Contrast `GainEnergy`, four lines up, which clamps to `999999999`. Stars have
+**no ceiling and no overflow rule at all** — [USER]'s "Regent doesn't cap its
+stars" is exactly right, and the game does not even carry a nominal maximum.
+The setter emits a `StarsModifiedEntry` on every change
+(`Combat.History.Entries/StarsModifiedEntry.cs`), which is what `Radiate`
+reads.
+
+---
+
+## 5. Display
+
+Three separate surfaces, and the important one is that **the price is never in
+the rules text**.
+
+### 5.1 A dedicated cost badge on the card face
+
+`Nodes.Cards/NCard.cs:1044` — a `_starIcon` / `_starLabel` pair beside the
+energy orb, with its own colour rules:
+
+```csharp
+private void UpdateStarCostVisuals(PileType pileType)
+{
+    …
+    if (Model.HasStarCostX) { _starLabel.SetTextAutoSize("X"); _starIcon.Visible = true; }
+    else {
+        _starLabel.SetTextAutoSize(Model.GetStarCostWithModifiers().ToString());
+        _starIcon.Visible = Model.GetStarCostWithModifiers() >= 0;
+    }
+    UpdateStarCostColor(pileType);
+    …
+}
+```
+
+The badge is what `-1` means: a card with no Star cost simply hides the icon,
+and `NCard.cs:929` even shifts the enchantment tab up 45px when there is no
+star badge to make room for. Colour comes from
+`Helpers.Models/CardCostHelper.cs:52 GetStarCostColor`, which turns the number
+red on `UnplayableReason.StarCostTooHigh` and recolours it when a hook or a
+`TemporaryStarCost` has moved it — the same affordance energy costs get.
+`StsColors.cs:81` `defaultStarCostOutline = #175561DC`.
+
+### 5.2 The persistent counter
+
+`Nodes.Combat/NStarCounter.cs`, subscribed to `PlayerCombatState.StarsChanged`.
+Its visibility rule (line 303):
+
+```csharp
+base.Visible = base.Visible || _player.Character.ShouldAlwaysShowStarCounter || stars > 0;
+```
+
+`CharacterModel.ShouldAlwaysShowStarCounter` defaults to `false` and **Regent
+overrides it to `true`** — so the bank is on screen from turn one of every
+fight whether or not it holds anything.
+
+### 5.3 Text, and what text never says
+
+Gains are printed with a formatter that renders **N repeated star sprites**
+rather than a numeral —
+`Localization.Formatters/StarIconsFormatter.cs`, name `starIcons`, emitting
+`[img]res://images/packed/sprite_fonts/star_icon.png[/img]` once per point.
+`{singleStarIcon}` is the same glyph used as a noun.
+
+```
+"VENERATE.description":       "Gain {Stars:starIcons()}."
+"GATHER_LIGHT.description":   "Gain {Block:diff()} [gold]Block[/gold].\nGain {Stars:starIcons()}."
+"SOLAR_STRIKE.description":   "Deal {Damage:diff()} damage.\nGain {Stars:starIcons()}."
+"HIDDEN_CACHE.description":   "Gain {Stars:starIcons()}.\nNext turn, gain {StarNextTurnPower:starIcons()}."
+"KNOCKOUT_BLOW.description":  "Deal {Damage:diff()} damage.\nIf this kills an enemy, gain {Stars:starIcons()}."
+"GENESIS.description":        "At the start of your turn, gain {StarsPerTurn:starIcons()}."
+"ROYAL_GAMBLE.description":   "Gain {Stars:diff()} {singleStarIcon}."
+"CONVERGENCE.description":    "Next turn,\ngain {Energy:energyIcons()} and {Stars:starIcons()}.\n[gold]Retain[/gold] your [gold]Hand[/gold] this turn."
+"DIVINE_RIGHT.description":   "At the start of each combat, gain {Stars:starIcons()}."
+"STAR_POTION.description":    "Gain {Stars:starIcons()}."
+"CHILD_OF_THE_STARS.description": "Whenever you spend {singleStarIcon}, gain {BlockForStars:diff()} [gold]Block[/gold] for each {singleStarIcon} spent."
+"CRESCENT_SPEAR.description": "Deal {CalculatedDamage:diff()} damage.\nDeals {ExtraDamage:diff()} additional damage for ALL your cards that have a {singleStarIcon} cost."
+"RADIATE.description":        "Deal {Damage:diff()} damage to ALL enemies for each {Stars:starIcons()} gained this turn.{InCombat:\n(Hits {CalculatedHits:diff()} {CalculatedHits:plural:time|times})|}"
+```
+
+Now the spenders:
+
+```
+"FALLING_STAR.description":  "Deal {Damage:diff()} damage.\nApply {WeakPower:diff()} [gold]Weak[/gold].\nApply {VulnerablePower:diff()} [gold]Vulnerable[/gold]."
+"CLOAK_OF_STARS.description":"Gain {Block:diff()} [gold]Block[/gold]."
+"SEVEN_STARS.description":   "Deal {Damage:diff()} damage to ALL enemies {Repeat:diff()} {Repeat:plural:time|times}."
+"THE_SMITH.description":     "[gold]Forge[/gold] {Forge:diff()}."
+"STARDUST.description":      "Deal X times {Damage:diff()} damage to a random enemy."
+```
+
+**Not one spender's text mentions its Star price.** `FallingStar` reads as a
+plain 0-cost attack; the 2★ is only on the badge. `SevenStars` says nothing
+about the 7★ that gave it its name. The badge is the sole carrier of the
+price, exactly as the energy orb is for energy — and `Stardust`'s "X" is
+resolved by the badge too. That is a deliberate and quite strict UI
+convention: **a resource cost lives in the cost corner, never in the rules
+box; rules text only ever talks about gains and payoffs.**
+
+---
+
+## 6. Stinginess, quantified
+
+The setup, all from §1: **3 energy per turn; 10-card deck; Divine Right = 3★
+at the start of every fight; Venerate = 2★, one copy; FallingStar = 2★, one
+copy.**
+
+A 10-card deck with a 5-card draw cycles **every two turns**, so each single
+copy is seen once per two turns. That gives, per turn averaged:
+
+| flow | per turn | per 2-turn cycle |
+|---|---|---|
+| income from Venerate | **+1.0★** | +2★ |
+| the only sink you own (FallingStar) | **−1.0★** | −2★ |
+| net | **0** | **0** |
+
+**The base kit is exactly break-even, with a 3★ opening buffer.** Over a
+typical four-turn fight: 3 (relic) + 2 + 2 = **7★ generated**, and the deck's
+own spender wants 2★ twice = **4★ spent**, leaving 3★ on the table at the
+kill. Over a five-turn fight it is 9★ in and 6★ out.
+
+Two more ways to say the same number, both useful as targets:
+
+- **Per fight, the base kit makes 7★** (3 relic + 2 Venerate plays over four
+  turns), of which the relic is **43%**. The relic is the largest single
+  source in the starter kit and it is a flat, unsteerable, per-fight grant.
+- **Income is 1★/turn from cards, plus a one-time 3.** The cheapest sink in
+  the whole pool is **1★** and the average printed price is **3★**. So a
+  base-kit Regent can afford *one* median-priced sink every three turns, or
+  the pool's cheapest sink every turn — and cannot afford `SevenStars` (7★)
+  before turn four without drafting generation.
+
+**That ratio is what "matching the generation pattern" means:** income and
+expenditure balanced at 1:1 in the starter kit, a fixed 3-point buffer from
+the relic so turn one is never dead, a cheapest sink priced at one turn of
+income, and a *median* sink priced at three turns of income — so leaning into
+the plan means drafting generation, and not leaning into it still leaves your
+Basic star-Attack playable every cycle.
+
+Per **run-room**, the relic pays 3★ at each of the 16 floors' combat rooms
+only — roughly 10–11 fights on the pinned map (`MAP_FLOORS = 16`, room odds
+`N 0.53 / E 0.08 / B`), so ~30–33★ of relic income across a run — but the
+number is not cumulative in any sense that matters: it resets to 0 every
+fight, so the only meaningful unit is **per fight**.
+
+---
+
+## 7. What the decompile does not answer
+
+- **The intended draft rate.** Nothing in the assembly says how many
+  generators a Regent player is *expected* to pick up; the 1:2.1 pool ratio is
+  a supply fact, not a play fact.
+- **Whether `Reserves` was cut or is unreleased.** Its loc row exists, its
+  hook exists and defaults off, its class does not. We can say it does not
+  ship in v0.111.0. We cannot say why.
+- **`GalacticDust`'s full body** was read only as far as its counter fields
+  for this note; its trigger threshold is `DynamicVars.Stars.IntValue` but the
+  reward it grants was not transcribed. Not needed for any question here.
+- **Any balance intent behind the numbers.** No comments in the shipped
+  assembly discuss Star tuning.
+
+
+
+############################################################################
+## THE CHARACTER DESIGN DOC (docs/current/characters/klee-character-design.md)
+############################################################################
+
+# Klee — Character Design Doc (v0.1)
+
+> **Lifecycle: LIVING** — expected to change; read it to work on the project.
+
+**Files:** `klee-cards.yaml` (76-card pool), `mondstadt-companions.yaml` (17 companion cards). Governed by `teyvat-spire-design-principles.md`; tested per `tier0-simulator-spec.md`.
+
+## 1. Identity
+The Spark Knight. Pyro, **catalyst-grade cadence** (every attack applies Pyro — maximum reaction fuel, so base numbers run low). Delayed explosives, random targeting, gleeful fragility. She enables any reaction instantly and can trigger none alone.
+
+## 2. Declared statline (Ironclad = 3.0; declare BEFORE tuning, sim validates)
+| Axis | Target | Rationale |
+|---|---|---|
+| A1 Frontload | **4.5** | Bombs + spray; her signature strength |
+| A2 Scaling | ≤4.0, and always < A1 | REVISED after pass 1: engine decks intrinsically show mild positive curve; 'draft-gated ceiling' was empirically inverted (solo powers out-scaled companion configs). Scaling powers now stack-capped; her curve must never top her frontload |
+| A3 Block | **2.0** | Reluctant, conditional defense |
+| A4 Sustain | **~0.5 by construction** | REVISED after pass 1: A4 redefined as healing/recovery only (kill-speed already credits A1/A3; three metric variants all showed fight-level HP metrics can't express 'fragile-but-fast'). Klee heals ~nothing → floor score. Fragility signal = pressure-winrate delta, printed alongside. Barbara-injection is the canonical A4 probe |
+| A5 Velocity | 3.5 | Sparks = free plays; modest draw |
+| A6 Utility | **4.0** | Excellent AoE / poor precision (random targeting is the tax) |
+| A7 Setup tax | 3.5 | Online turn 1–2; folds to sustained pressure (see A3/A4) |
+Companion appetite: **Standard**. Balance check: 4–5 on exactly two primary axes (A1, A6) ✓, ≤2 on at least one (A3, A4) ✓.
+
+## 3. Core mechanics (numbers = sim starting points)
+- **HP 62, energy 3, draw 5.** Starting deck: 4× Kaboom!, 4× Duck and Cover, 1× Jumpy Dumpty, 1× Pop!
+- **Bombs:** charge on an enemy. Detonates at start of Klee's next turn for its damage + Pyro; detonates **early** if the enemy is hit by an Attack card. Multiple bombs stack independently. Detonations fire relic/power hooks.
+- **Sparks:** at **3 Sparks**, next Attack costs 0 (consumes 3). Starting relic **Pounding Surprise** (talent-relic): +1 Spark per Bomb detonation.
+- **Burst Energy:** meter 40. +5 per Skill-tagged card (`tags: [skill_tag]`), +5 per reaction triggered. **Sparks 'n' Splash** requires full meter, empties it.
+- Loop: place turns → detonation turns → Sparks smooth the energy curve → any off-element companion ignites the reaction layer.
+
+## 4. Archetypes (tag matrix validated by `validate.py` output)
+1. **Demolition** (28 cards, enabler-rich) — default plan. Setup/payoff rhythm; payoffs: Blazing Delight, Chained Reactions, The Big One.
+2. **Spark Spray** (21 cards, even role mix) — velocity plan; zero-cost volume, Gleeful Barrage as the scaler. Structural Shiv-analogue. Matchup texture (pass-3, ratified): act-fight specialist; **boss FLOOR 45% only — upper bands retired R47 (previously a 45–65% band), floors-only since the Burst-meter-40 world** (annotated 2026-08-06, R107; S4 finding F10). `tier0/content/characters/klee.yaml` reads `spark_weighted: [0.45, null]`; Tier 0.5 owns the upper-power comparison, so a >65% boss cell is not a violation and the code no longer flags it.
+3. **Reaction** (14 personal cards, **payoff-heavy by design; co-op-primary, boss-weak by ruling** — see pass-2 round-3 rulings: solo tank_boss floor ~35% is her accepted hard matchup; the archetype's home is co-op and act fights) — DELIBERATE ASYMMETRY: this archetype's *enablers live in the companion pool* (Dahlia/Fischl/Kaeya appliers, Sucrose/Prune triggers, Durin amp). Her personal cards only reward auras (Sizzle, Perfect Timing, Flame Dance) or accelerate Burst. Aura-starvation detector (Tier 0 §8) is this archetype's health metric; target <15% zero-reaction fights in a Reaction-weighted deck.
+Bridges: Sorry Jean (block↔demolition), Sparkly Explosion (demolition↔spark), Friendly Visit / Study Buddy / Best Friends Forever (anything↔companions).
+
+## 5. Relics & potions (v0.1 sketch — design after sim pass 1)
+- Starting: **Pounding Surprise** (above). Character relics (~8): bomb-count+, spark-threshold, burst-energy-carryover (Favonius-flavored), companion-slot upgrade, detonation lifesteal (patches A4 at relic rarity, not card rarity — deliberate), etc.
+- Potions: Bottled Fireworks (place 3 bombs), Spark Cider (gain 3 Sparks), Warm Milk (heal; Jean insists).
+
+## 6. DSL extensions required (Tier 0 M4 scope — beyond spec §4.2 v1 ops)
+`detonate`, `move_bombs`, `modify_bombs`, `burst_energy`, `swirl`, `refresh_all_auras`, `buff_next_attack`, `cost_mod`, `conditional` (predicates: this_cost_zero, has_spark, target_has_nonpyro_aura, reaction_triggered_by_this, killed_target), `repeat_this`, formula amounts (`times_formula`, `bonus_formula`, `X_plus_1`), companion ops (`copy_companion_in_hand`, `replay_next_companion`, `copy_companions_played_this_combat`), and powers: bomb_damage_up, zero_cost_attacks_up, spark_per_turn, detonation_splash, detonation_vuln, spark_threshold_down, amp_reaction_up, bomb_and_spark_per_turn, sparks_n_splash, plus companion powers (oz_summon, solar_isotoma, witchs_flame, celestial_gift). Implement lazily — a stubbed op that logs UNIMPLEMENTED is fine for pass 1; prioritize whatever the Demolition/Spark decks need first.
+
+## 7. Sim test plan (order matters)
+1. Starter-deck Klee vs battery → confirm A1/A3/A4 shape vs REF_IRONCLAD before any archetype packages.
+2. Demolition-weighted, Spark-weighted, Reaction-weighted (12 companions injected at realistic draft rates) → axis scorecards + degeneracy detectors.
+3. Watchlist: Vermillion Pact+ + Melt reaches ×3.94 against the 4× amp detector; Gleeful Barrage + spark engines for runaway; Playtime Forever + Blazing Delight loop density.
+4. Dream-team config (Prune + Durin + Nicole + Albedo forced into deck) — should be strong, NOT dominant vs a focused Demolition deck. If it dominates, nerf the Rares' numbers, not the structure.
+
+## 8. Asset punch list (for eventual art pass)
+75 card portraits (500×380), ~24 power icons, ~10 relic icons, 16 companion portraits, char select art, energy icon, map marker, combat visual (layered-PNG Godot scene, Hexaghost-style — no Spine needed for v1), ~4 SFX. All original/commissioned per principles §9.
+
+## 9. Pass-1 changelog (card sheet v0.2)
+Seven number shaves (Workshop/Spark-Knight-Style/Grand-Finale scaling −1 each; four spark block riders −1 block each). Bursts gain Retain per principles v1.4. Rationale + empirical elasticity in code-review round 2 notes. Pass-1 also shipped stack caps on the scaling powers; the 2026-07-22 playtest rebalance (`b5bb92e`) removed them, and [USER] reaffirmed uncapped 2026-08-06 (`X8-cap`, ruled and retired with `ebcf98e`) — duplicate Klee powers stack without caps, pinned in `test_pass2.py`.
+
+
+
+############################################################################
+## LAW.md -- Character identity: Klee (lines 161-180)
+############################################################################
+
+## Character identity — Klee
+
+- **Pyro, catalyst-grade:** every attack applies Pyro, base numbers run low;
+  enables any reaction, triggers none alone. (klee §1)
+- **Declared statline is load-bearing:** elite A1 (frontload) and A6
+  (utility/AoE); weak A3 (block) and A4 (sustain ~0.5). **Her scaling never tops
+  her frontload — A2 < A1 and A2 ≤ 4.0** (Klee-scoped, not mod-wide), scaling
+  powers stack-capped. (klee §2, §9; R52 ask 3)
+- **Bombs detonate at the start of Klee's turn,** early on any Attack-card hit;
+  multiple bombs stack independently, each keeping its own damage. (klee §3)
+- **Repeatable spark generation satisfies one of two limbs:** it sits at
+  Uncommon+, or no sub-Rare card is simultaneously a spark source and a draw
+  enabler — infinite sparks unreachable at Common (an unboundedness test, not a
+  ban on Common spark-minting). X-cost attacks are exempt from spark-spend.
+  (R109 X7 + [USER] annotation; R34)
+- **The Burst (Sparks 'n' Splash) is kit, not loot:** never draftable, granted to
+  hand on meter fill, casting empties the whole meter (overflow lost at cast),
+  re-granted on refill, carries Retain. (principles §2.4, v1.9)
+- **Detonation lifesteal patches A4 at relic rarity, not card rarity.** (klee §5)
+
+
+
+############################################################################
+## LAW.md -- Design charter D1-D9 (R217) (lines 383-447)
+############################################################################
+
+### Design charter (R217)
+
+Nine rules that bind card and pool design. They are qualitative by
+construction: each is a question a reader answers about a card, a package or a
+pool, not a number a report computes.
+
+1. **D1 — Character brief before pool construction.** No pool is built before
+   its character has a short [USER]-owned brief: the player promise; two or
+   three core verbs; one or two recurring tensions; the three archetype loops;
+   the bridges among them; the intended weakness; what the starting relic and
+   starter deck teach; and the failure modes to avoid, named. A tension
+   sentence *summarises* the character — it does not mandate that every card
+   serve one mechanic. Zhongli's brief is the entry gate of his deep dive.
+2. **D2 — Player-controlled leverage.** Every persistent resource and every
+   automatic engine must feed a decision the player can steer: timing,
+   targeting, placement, acquisition, conversion, or forgoing. "Watch it rise
+   until the number is large" is not a decision. The control must be reachable
+   early and reliably — starter kit, starting relic, base system, or the
+   ordinary pool — not only through a rare.
+3. **D3 — Benefits carry binding prices.** Defence and engine advancement may
+   share a card, but not both at full rate without a binding cost: energy or
+   tempo, a below-rate half, mutually exclusive outcomes, target or timing
+   awkwardness, a card or resource spent, identity position, a future draw or
+   deck cost, or the loss of another action. The counterfactual test: remove
+   the defence — is what remains still a full-rate play the player already
+   wanted? If yes, the defence was a subsidy.
+4. **D4 — Visible and live effects.** At the decision point the player can
+   perceive and forecast the consequences that matter, through the card, a
+   keyword, a persistent UI element or a character rule — not necessarily
+   verbatim on every face. Text that cannot bind in the shipped world,
+   invisible feeds and misleading calculated displays are defects. A rare
+   intentional edge case is not removed for being rare.
+5. **D5 — Simple surfaces, deep interactions.** Richness comes from
+   interactions — between cards, enemies, energy, draw order, piles, targets
+   and future turns — not from clauses on faces. Commons establish the verbs
+   and stay concise. Any added line of text must alter a decision.
+6. **D6 — Every card has a place.** Each card has one primary decision home:
+   acquisition and build; combat (sequencing, targeting, holding, conversion,
+   timing); teaching or utility, deliberately plain; or bridge. Plain cards are
+   legal and necessary, and a pool of them is not a defect to be edited away.
+7. **D7 — Mesh without preassembly.** Each pool carries linear signposts AND
+   modular tools. No preassembled deck; no archetype written in a private
+   language only its own cards speak; bridges exist so combinations arrive
+   unexpectedly. Shared-verb and hook counts describe a pool — they are never
+   acceptance bands.
+8. **D8 — Distinct play patterns.** Archetypes differ in how turns and drafts
+   unfold, not in the label on a bigger number. Damage may stay terminal; the
+   route, cadence, constraint, targeting, transformation, control or economy
+   must differ. One non-scalar payoff does not rescue an otherwise automatic
+   loop.
+9. **D9 — Shared layer and starting tutorial.** Companion packages connect to
+   both character verbs and universal verbs; not every Companion card needs a
+   hook, but every package needs a distinctive identity. The starting relic and
+   starter deck introduce the central verbs and one recurring tension from
+   fight one, with visible triggers and no invisible feed.
+
+**Provisional through the Klee slice**, then reviewed. **Nothing here is a
+numeric band and nothing here gates:** hook share, bridge %, payoff-role %,
+scalar-payoff %, random-target %, Powers-per-universal-verb count, plain-card
+%, word count and "turns with a named alternative" rate are descriptive only.
+No subjective front-matter fields enter card YAML, and there is no waiver
+mechanism. Decision closeness (R213 F) remains the only numeric design
+falsifier, and it falsifies one way. (R217 — drafted by GPT, sharpened by
+Claude, ratified by [USER].)
+
+
+
+############################################################################
+## LAW.md -- Content authoring: card-sheet rules (lines 281-354)
+############################################################################
+
+## Content authoring — card-sheet rules
+
+- **True in-combat healing is Rare-tier AND Exhausts (conjunctive R8 law);**
+  below Rare, sustain routes through Block or buffer pools; no 4-star companion
+  true-heals (potions and relic-scale trickles exempt). A rider otherwise banned
+  is legal only conjunctively — dropping one half is not a "simplification."
+  (principles Guardrail 6; R8; R79/B4)
+- **No card starts the game with AoE;** AoE must be drafted, never in any
+  starter. (R56)
+- **Ancient carve-out (R127, 2026-08-07):** an Ancient-rarity card — Dusty
+  Tome's single acquisition door, one visible Ancient per roster character —
+  may grant per-turn accrual that its owner's resource laws otherwise ban
+  (Kokomi's no-passive-accrual Charge; Furina's no-per-turn-Encore trickle).
+  A bounded, opt-in, once-per-run power spike is the rarity's design: the one
+  door out of the character's central bargain. Scoped to Ancient rarity
+  exactly — no other rarity, no relic, and no event may inherit the
+  exception. (EB-30q)
+- **Strict-domination is scoped to adjacent rarities:** a card must not be a
+  strictly-better superset of another at similar weight; two-step gaps are
+  informational. Self-damage/discard/spend_encore count as costs; prefer base-StS
+  "twist" shapes over pure supersets. (R26/R77)
+- **Threshold predicates pay a flat printed bonus once, not proportional reads;**
+  charge/meter bars are Uncommon+; thresholds encode base-plus-bonus so the
+  always-live half moves on upgrade and the bar cannot drift down (lowering a
+  threshold is forbidden). (R58, invoking R1)
+- **A meter-reading damage card is tagged `scaling`, and also `frontload` only if
+  it deals damage at meter zero.** `sustain` = healing/prevention of your own HP
+  only; zero sustain is a legal identity and `sustain` is never linted. (R91 2c,
+  2d)
+- **≤2 new keywords per character beyond the shared element system;**
+  support-protagonists may carry one extra via logged amendment with compensating
+  cuts. Muster's definition attaches from the card's OP. (principles Guardrail 5;
+  furina §6; R78)
+- **Every card carries a per-character `register` field** (shared schema column,
+  per-character vocabulary; Focalors register caps at two Rares). **The register
+  guides art selection only** — nothing under `tier0/engine` or `tier05` may read
+  it, codegen ignores it, and moving a card between registers must never move win
+  rate. (R85; R86)
+- **Upgraded starters get a distinct name, not a "+" suffix;** display names live
+  in the unique-names namespace, reserved names annotated with the owning kind. A
+  full-sheet reserved-names lint runs before any C-milestone; the naming/lore
+  audit is [USER]-only and eyes-on. (R69; R29d)
+- **Distinctness gate (red test):** uniq ≥ 70, maxclu ≤ 5, neardup ≤ 0.40/card;
+  `top%`/`vocab` carry no permanent gate; a partial-pool anchor can only loosen a
+  threshold, never certify it. (R81)
+- **Enchantment support is a minimal per-card rider;** the run-wide enchantment
+  subsystem stays outside the parity world. Encore Performance is 0-cost with no
+  energy-positive loop; copies inherit printed bounds; kit cards are not legal
+  copy targets. `replay_next_companion` / cost-delta accumulators are
+  writing-turn-scoped. (R82; R110 X3/X11; R114 FLAG-1/2; R118 Q9)
+- **Ancient-tier pool gaps are fixed with real content, never option removal;**
+  each character needs one Ancient card, gated by a deploy lint that fails on an
+  empty ledger. (klee-mod Ancient ruling)
+- **A material card-sheet edit is a world change and lands under a
+  `CONSTANTS_VERSION` bump.** *"A card-sheet edit that materially changes the
+  drafted or combat world — card additions or removals, cost changes,
+  effect-number changes, rarity moves — is a world change. It lands under a
+  `CONSTANTS_VERSION` bump like any other balance constant, and numbers are not
+  comparable across it."* The sheets sit outside the `RT/D/P/C` stamp, so
+  without this rule two worlds differing in whether a card exists at all are
+  indistinguishable to a reader of the stamp. **Rename amendment:** a
+  *cosmetic* rename is exempt from the bump **only when neither the card id nor
+  the display name is read mechanically** — and the burden is on the renamer to
+  establish that, because at least one relic reads both. `card_name_damage_bonus`
+  matches a **substring** against the card id **OR** the display name
+  (`tier0/engine/relics.py:385-398`); its one carrier is `strike_dummy`,
+  substring `"strike"`, `+3` to attacks only, FROZEN. A rename that adds or
+  removes such a substring on either field moves damage and is not cosmetic.
+  (R179; M15 draft text ratified as written, amended on the rename clause)
+  **Role/archetype amendment (RATIFIED 2026-08-24, R202):** a change to a card's
+  `role` or `archetypes` is a material card-sheet edit because both fields are
+  mechanically read by drafting. It requires a `CONSTANTS_VERSION` bump, and
+  drafted-world numbers are not comparable across it.
+
