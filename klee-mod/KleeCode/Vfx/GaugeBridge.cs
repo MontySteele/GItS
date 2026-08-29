@@ -228,65 +228,24 @@ public static class GaugeBridge
             ReadValue = KokomiResources.GetCharge,
             ShouldFlash = static (_, _) => false,
         },
-#else
-        // THE KURAGE'S MEMORY STRIP (QUARANTINED, Powers/Prototype/KurageMemory.cs).
-        //
-        // [USER]'s requirement, verbatim: "We need to add a UI element that
-        // shows the bank of cards queue'd for Kokomi and move the Charge meter
-        // there." So the Charge row above is REPLACED rather than joined -- the
-        // meter MOVED, it did not multiply -- and under the flag this is the
-        // only Kokomi second-row display there is.
-        //
-        // AND IT NOW HAS A BAR. The spec above says of the shipped gauge that
-        // it is "THE ONE GAUGE WITH NO BAR ... a bar would invent a target".
-        // Under v3 there IS a target and it is the FRONT MEMORY'S OWN PRICE, so
-        // the bar becomes the honest render rather than the invented one, and
-        // it is redrawn against a new price every time the queue moves
-        // (DynamicSpan). An empty memory still has no target, and DynamicSpan
-        // returns null for it, which puts the strip back to a bare counter --
-        // "no bar" was never a taste call, it was the absence of a ceiling.
-        //
-        // ALWAYS VISIBLE IN A KOKOMI COMBAT, and under v4 there is no other
-        // reading available (sec.12.6 ITEM 11): the Bake-Kurage is base kit and
-        // is installed at combat start, so there IS no "no jellyfish" state and
-        // the strip must never render one. It was already right for the v3
-        // reason -- the queue FILLS with no summon on the field, so a strip
-        // that appeared with the summon would hide the bank the player is
-        // building -- and nothing in it reads the summon at all.
-        //
-        // NO NEW ART. It draws in shared/gauge.tscn, the same script-less scene
-        // every other gauge instantiates, with the queue rendered as LINES in
-        // the existing %ValueLabel -- text and existing frames only. Miniature
-        // card faces (sec.3's design) want a scene this pck does not carry; the
-        // three facts D4 requires before ending a turn (the bank, the front's
-        // price, the blocked state) are all on the first line, and the queue's
-        // own prices and targets are on the lines under it.
-        new()
-        {
-            Key = "kokomi_memory",
-            Skin = new GaugeSkin
-            {
-                FillColor = new Color(0.44f, 0.78f, 0.84f),
-                TrackColor = new Color(0.05f, 0.16f, 0.21f, 0.85f),
-            },
-            AnchorOffset = SecondRowAnchor,
-            VisualSpan = null,
-            LabelMax = null,
-            AppliesTo = KokomiResources.IsKokomi,
-            ReadValue = KokomiResources.GetCharge,
-            DynamicSpan = static creature =>
-            {
-                var queue = Powers.KurageMemory.Queue(creature.Player);
-                // A 0-cost front is FREE and has no bar to fill: a span of 0
-                // would divide by nothing and a span of 1 would draw a lie.
-                return queue.Count > 0 && queue[0].Price > 0
-                    ? queue[0].Price : (int?)null;
-            },
-            LabelText = static creature =>
-                Powers.KurageMemory.StripText(creature.Player),
-            ShouldFlash = static (_, _) => false,
-        },
 #endif
+        // NO KOKOMI SECOND-ROW GAUGE UNDER THE FLAG, and that is the direction
+        // rather than an omission. `kokomi_memory` used to live here: the
+        // Charge meter plus the whole queue, drawn as LINES into the shared
+        // gauge scene's one %ValueLabel because the strip was built under a
+        // "NO NEW ART" constraint. It was correct and unreadable, which is the
+        // finding `EB-198` closed on (review/active/kokomi-kurage-memory-
+        // 2026-08-29.md sec.14.2: two frames, both true, both misread).
+        //
+        // [USER] retired it: "let's do one better and actually remove the bar
+        // ... and take back the real estate of the gauge bar." The Charge count
+        // and the front memory now draw at the LEFT EDGE OF THE SCREEN as
+        // `KurageMemoryCard` (sec.14.3, `M61` = option 3), and the queue is
+        // behind a click in the game's own pile viewer. So this row is gone
+        // rather than moved, and the second-row anchor above Kokomi is free.
+        //
+        // The shipping build is untouched: `kokomi_charge` above still holds
+        // that row without the flag.
         // NOTE: Encore has NO spec here. It was evicted from the overhead slot
         // by the C4 verdict (that slot is Burst, cross-character) and re-homes
         // as the ribbon under the Salon stage — see SalonVisualsBridge (D3).
@@ -376,6 +335,17 @@ public static class GaugeBridge
 
             RefreshDisplay(display, spec, creature, allowFlash: true);
         }
+
+#if PROTOTYPE_CARDS
+        // THE KURAGE MEMORY CARD RIDES THIS FUNNEL, deliberately: it replaced
+        // the `kokomi_memory` gauge and must redraw on exactly what that gauge
+        // redrew on. `KurageMemory.RefreshStrip` already calls Refresh on every
+        // Charge mutation and every queue move, so the new element needs no
+        // trigger of its own and no polling. It is a HUD Control rather than a
+        // creature-tracked Node2D, which is why it is a call here rather than
+        // one more GaugeSpec.
+        KurageMemoryCard.Refresh(creature);
+#endif
     }
 
     public static void DiscardDisplays(Player player)
@@ -511,5 +481,13 @@ internal static class NCombatUi_Activate_GaugeSetup
             // state.Players is already the all-seats enumeration.
             TurnEndPreviewBridge.Setup(combatRoom, player);
         }
+
+#if PROTOTYPE_CARDS
+        // ONE element for ONE seat, so it is built OUTSIDE the per-player loop
+        // and resolves the seat itself with `LocalContext.GetMe(state)` --
+        // exactly as `NCombatUi.Activate` does. [USER]: "Local only is fine
+        // (partner doesn't need to see the queue)."
+        KurageMemoryCard.Setup(state);
+#endif
     }
 }

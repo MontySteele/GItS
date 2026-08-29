@@ -1,0 +1,88 @@
+[
+  {
+    "bank": 4,
+    "prices": [
+      3,
+      0,
+      3,
+      0
+    ],
+    "states": [
+      "payable",
+      "payable",
+      "runs_out",
+      "held"
+    ],
+    "run_out_index": 2
+  },
+  {
+    "bank": 0,
+    "prices": [
+      3,
+      0
+    ],
+    "states": [
+      "runs_out",
+      "held"
+    ],
+    "run_out_index": 0
+  },
+  {
+    "bank": 1,
+    "prices": [
+      0,
+      3
+    ],
+    "states": [
+      "payable",
+      "runs_out"
+    ],
+    "run_out_index": 1
+  },
+  {
+    "bank": 0,
+    "prices": [],
+    "states": [],
+    "run_out_index": -1
+  },
+  {
+    "bank": 6,
+    "prices": [
+      3,
+      3
+    ],
+    "states": [
+      "payable",
+      "payable"
+    ],
+    "run_out_index": -1
+  },
+  {
+    "bank": 5,
+    "prices": [
+      3,
+      3
+    ],
+    "states": [
+      "payable",
+      "runs_out"
+    ],
+    "run_out_index": 1
+  },
+  {
+    "bank": 30,
+    "prices": [
+      3,
+      6,
+      9,
+      3
+    ],
+    "states": [
+      "payable",
+      "payable",
+      "payable",
+      "payable"
+    ],
+    "run_out_index": -1
+  }
+]

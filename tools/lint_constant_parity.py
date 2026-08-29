@@ -285,6 +285,27 @@ UNMIRRORED: dict[str, str] = {
         "presentation: pixel threshold below which a creature is not re-aimed.",
     "GaugeBridge.BarFullWidth":
         "presentation: meter bar width in pixels.",
+    # The Kurage memory card (sec.14). Every number below is SCREEN GEOMETRY or
+    # a font size for a HUD element the sim has no notion of: tier0 has no
+    # display at all, so there is nothing to compare by value. The affordability
+    # rule the element draws IS mirrored, and it carries no constant -- it is a
+    # running subtraction over prices the queue already holds.
+    "KurageMemoryCard.EdgeMargin":
+        "presentation: distance from the left edge of the screen, in pixels.",
+    "KurageMemoryCard.ThumbWidth":
+        "presentation: card-thumbnail width in pixels.",
+    "KurageMemoryCard.ThumbHeight":
+        "presentation: thumbnail height, derived from the width by NCard's own "
+        "300x422 aspect so the portrait is not stretched.",
+    "KurageMemoryCard.RingWidth":
+        "presentation: affordability ring thickness on the HUD thumbnail.",
+    "KurageMemoryCard.CountFontSize":
+        "presentation: the Charge count's font size.",
+    "KurageMemoryCard.BadgeFontSize":
+        "presentation: the price badge's font size.",
+    "KurageMemoryPileRing.RingWidth":
+        "presentation: ring thickness on a full-size card in the pile viewer, "
+        "thicker than the HUD's because the card is.",
     "KleeCombatVfx.LobApexLift":
         "presentation: bomb-toss arc height in pixels.",
     "KleeCombatVfx.LobDuration":

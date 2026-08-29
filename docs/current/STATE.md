@@ -447,8 +447,9 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     blue if the bank pays it and red if not, the Charge count under it,
     and a click opening the whole queue with the same colours running up
     it. No meter bar at all. §14 has the three build options and the
-    running-affordability projection the queue view needs; `EB-198` is
-    re-scoped onto it, gated on `M61`.
+    running-affordability projection the queue view needs. `M61` is
+    ANSWERED — option 3, and the element draws for the local seat only —
+    and `EB-198` is BUILT on `kurage-memory-card`, awaiting the live check.
   - **Furina REFRAME — PACKET CLOSED, COUNTERSIGN OPEN**
     (`review/active/furina-reframe-2026-08-29.md`). R220 A, from [USER]'s
     brief and his four answers: the Salon is an **orb board** in the Defect

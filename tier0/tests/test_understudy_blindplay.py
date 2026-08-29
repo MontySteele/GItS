@@ -1352,13 +1352,18 @@ BLOCKED_MEMORY = {
     "empty": False, "summon": True, "base_kit": True,
     "pulse_kind": "skill", "pulse_amount": 5, "pulse_unit": "block",
     "reading": "Charge 5 / 9 — Raiden Shogun blocked",
+    # sec.14.4's running subtraction. The bank is 5 and the front costs 9, so
+    # the queue runs out at entry 0 -- and Gorou, free though he is, is HELD
+    # behind it, because a front the bank cannot pay holds everything and pays
+    # nothing.
+    "run_out_index": 0,
     "queue": [
         {"name": "Raiden Shogun", "cost": 3, "price": 9, "target": "Slime",
-         "blocked": True, "affordable": False, "ephemeral": False,
-         "rule": "exhaust"},
+         "blocked": True, "affordable": False, "state": "runs_out",
+         "ephemeral": False, "rule": "exhaust"},
         {"name": "Gorou", "cost": 0, "price": 0, "target": None,
-         "blocked": False, "affordable": True, "ephemeral": True,
-         "rule": "muster"},
+         "blocked": False, "affordable": True, "state": "held",
+         "ephemeral": True, "rule": "muster"},
     ],
 }
 
@@ -1384,6 +1389,13 @@ def test_a_board_carrying_the_memory_parses_every_field():
     # rather than leaving a null for a reader to interpret.
     assert memory["queue"][1]["target"] == "random"
     assert memory["queue"][1]["price"] == 0
+    # The affordability run rides beside the reading, so the page and the tests
+    # see the same projection the pile view paints.
+    assert memory["run_out_index"] == 0
+    # ...but the wire's per-row STATE does not reach the board: "runs_out" is an
+    # internal snake-case id and `assert_blind` refuses one. The index says the
+    # same thing as a number and the page renders it as a sentence.
+    assert "state" not in memory["queue"][0]
 
 
 def test_a_board_without_the_key_has_no_memory_at_all():
@@ -1395,16 +1407,48 @@ def test_a_board_without_the_key_has_no_memory_at_all():
 
 
 def test_the_page_shows_the_bank_the_price_the_block_and_the_pulse():
-    """D4: everything that will fire next turn is readable this turn."""
+    """D4: everything that will fire next turn is readable this turn.
+
+    THE PAGE MIRRORS THE ELEMENT (sec.14). The strip's one running line is gone
+    and each fact stands on its own: the Charge count, then the front card with
+    its price and whether it fires, then the queue behind a heading, then the
+    run-out. `EB-198` is the reason -- the tester read "Charge 1 / 0" as a
+    fraction over a zero denominator, and both frames were true as drawn.
+    """
     page = blindplay.render(blindplay.observation(
         memory_combat_state(BLOCKED_MEMORY)))
-    assert "Charge 5 / 9 — Raiden Shogun blocked" in page
-    assert "BLOCKED: nothing behind it fires" in page
+    assert "- Charge: 5" in page
+    assert ("- Next to fire: **Raiden Shogun** — costs 9 Charge — you cannot "
+            "pay it, so NOTHING in the memory fires next turn." in page)
     assert "aims at Slime" in page
     assert "aims at random" in page
     # A 0-cost memory reads as free, because it is.
     assert "**Gorou** — free" in page
+    # The run-out is CALLED OUT rather than left to be counted off the list,
+    # and it names what is held behind it.
+    assert "Charge runs out at #1 (**Raiden Shogun**)" in page
+    assert "everything behind it are held" in page
     assert "the jellyfish will give you 5 Block" in page
+    # The strip's grammars are gone with the strip.
+    assert "Charge 5 / 9" not in page
+
+
+def test_the_page_says_a_payable_front_fires_and_names_no_run_out():
+    """The other side of the same element: a bank that covers the whole queue
+    draws blue throughout, and the page must not invent a shortfall."""
+    payable = dict(BLOCKED_MEMORY, bank=12, front_price=9, blocked=False,
+                   fires_next=True, run_out_index=-1,
+                   reading="Charge 12 / 9 — Raiden Shogun fires next turn",
+                   queue=[dict(BLOCKED_MEMORY["queue"][0], blocked=False,
+                               affordable=True, state="payable"),
+                          dict(BLOCKED_MEMORY["queue"][1], state="payable")])
+    page = blindplay.render(blindplay.observation(
+        memory_combat_state(payable)))
+    assert "- Charge: 12" in page
+    assert ("- Next to fire: **Raiden Shogun** — costs 9 Charge — it fires at "
+            "the start of your next turn." in page)
+    assert "Your Charge covers every memory queued" in page
+    assert "runs out at" not in page
 
 
 def test_an_empty_memory_says_so_and_is_not_a_block():
@@ -1415,8 +1459,12 @@ def test_an_empty_memory_says_so_and_is_not_a_block():
     obs = blindplay.observation(memory_combat_state(empty))
     assert obs["combat"]["memory"]["front_price"] is None
     page = blindplay.render(obs)
-    assert "(the memory is empty)" in page
-    assert "BLOCKED" not in page
+    # The empty state is the count ALONE on the element, and the page says the
+    # same thing in words: no card, no price, no ring.
+    assert "The memory is empty. Nothing is queued and nothing fires" in page
+    assert "- Charge: 5" in page
+    assert "Next to fire" not in page
+    assert "runs out at" not in page
     assert "you have played no card this turn" in page
 
 
