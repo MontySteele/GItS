@@ -468,8 +468,36 @@ public sealed class KokomiResourceHooks : AbstractModel
     {
         _instance ??= ModelDb.GetById<KokomiResourceHooks>(
             ModelDb.GetId<KokomiResourceHooks>());
+#if PROTOTYPE_CARDS
+        // QUARANTINED (Powers/Prototype/KurageMemory.cs). The memory is PER
+        // FIGHT, which the sim gets free because CombatState is rebuilt by
+        // run_fight; this hook model is a singleton and has to be told. This
+        // is the one place the mod is handed a fresh combat.
+        KurageMemory.ResetForCombat(combatState);
+#endif
         yield return _instance;
     }
+
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// QUARANTINED, v4 BASE KIT (sec.12.6 item 1). The jellyfish is installed
+    /// HERE rather than by a card, because under the base kit nothing summons
+    /// it. Mirror of the sim's `combat.run_fight`, which installs beside the
+    /// per-combat Charge reset for the same reason: the two have one lifetime.
+    ///
+    /// THIS HOOK AND NOT `AfterCreatureAddedToCombat`, which was the first
+    /// choice and is wrong: the game raises that one from
+    /// `CreatureCmd.AddToCombat`, i.e. for creatures SPAWNED into a live
+    /// combat, while the seats are seeded by the combat's own setup loop and
+    /// never pass through it. `CombatManager` raises THIS hook after every
+    /// creature is in and immediately before `StartTurn`, which is exactly
+    /// "before the first turn opens".
+    /// </summary>
+    public override async Task BeforeCombatStart()
+    {
+        await KurageMemory.InstallAll();
+    }
+#endif
 
     public override Task AfterCardExhausted(
         PlayerChoiceContext choiceContext, CardModel card, bool causedByEthereal)
@@ -482,6 +510,19 @@ public sealed class KokomiResourceHooks : AbstractModel
         // `exhausts_this_turn` count counts CARDS THAT LEFT, so it takes no
         // view on who owns them or whether they were junk. Sim twin:
         // `CombatState.exhausts_this_turn`, incremented at the pile append.
+#if PROTOTYPE_CARDS
+        // QUARANTINED (Powers/Prototype/KurageMemory.cs). ABOVE EVEN THAT
+        // TALLY: a memory copy's removal "is not an Exhaust EVENT at all", so
+        // NOTHING hanging off this funnel pays out for a card that was never
+        // burned -- not Charge, not Burst, not the per-turn count, not a
+        // relic's damage_per_exhaust. In practice the copy never reaches here
+        // (KurageMemory.Fire clears its Exhaust keyword before the play and
+        // lifts it out of its pile after); this is the belt to that braces.
+        if (KurageMemory.IsCopy(card))
+        {
+            return Task.CompletedTask;
+        }
+#endif
         KokomiResources.NoteExhaustThisTurn(card.Owner);
 
         var owner = card.Owner?.Creature;
@@ -506,8 +547,19 @@ public sealed class KokomiResourceHooks : AbstractModel
         // The relic is the source of truth for its own numbers, so they are
         // READ off it rather than restated here -- restating them is how the
         // description and the funnel came to disagree in the first place.
+        // QUARANTINED FUEL NOTE (v3, sec.11.6 PICK A): the fuel is THIS funnel,
+        // unnarrowed -- her own cards AND original Companions, at 1 per
+        // Exhaust. v3 retires v2's Companion carve-out, so there is nothing to
+        // add here: the shipped line already is v3's rule.
         KokomiResources.GainCharge(owner, ExhaustCharge(owner));
         KokomiResources.GainBurst(owner, ExhaustBurst(owner));
+#if PROTOTYPE_CARDS
+        // RULE 2 -- ENTRY ON EXHAUST. OUTSIDE the relic gate above,
+        // deliberately: the memory belongs to the jellyfish, not to the
+        // Tamakushi Casket, and a Kokomi who has lost the relic should still
+        // remember what she burned even while she cannot afford to replay it.
+        KurageMemory.NoteExhaust(card);
+#endif
         return Task.CompletedTask;
     }
 
@@ -548,6 +600,16 @@ public sealed class KokomiResourceHooks : AbstractModel
     /// </summary>
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
+#if PROTOTYPE_CARDS
+        // QUARANTINED: the memory's per-card TARGET RECORD, written at the
+        // bind. This is the earliest site carrying a resolved Target and it is
+        // strictly before the result-pile move that exhausts, which is what
+        // makes "a card that enters the memory after a play carries the body it
+        // hit" true. Sim twin: the record in effects.resolve_card. Outside the
+        // IsFirstInSeries guard on purpose -- a replay in a series aims at the
+        // same body, and the last write is the one that counts.
+        KurageMemory.NoteBind(cardPlay);
+#endif
         if (!cardPlay.IsFirstInSeries) return Task.CompletedTask;
         KokomiBurstResource.DrainOnPlay(cardPlay.Card);
         var owner = cardPlay.Card.Owner?.Creature;
@@ -568,6 +630,11 @@ public sealed class KokomiResourceHooks : AbstractModel
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+#if PROTOTYPE_CARDS
+        // QUARANTINED: THE PULSE KEY. Sim twin: effects.note_kurage_play, at
+        // the one site both a manual play and an auto-play pass through.
+        KurageMemory.NotePlay(cardPlay);
+#endif
         await KokomiKitGrant.GrantIfCharged(choiceContext, cardPlay.Card.Owner);
     }
 
@@ -580,6 +647,29 @@ public sealed class KokomiResourceHooks : AbstractModel
         // that just ended -- resetting at the next turn's start, rather than
         // at the old turn's end, is what keeps them there.
         KokomiResources.ResetExhaustsThisTurn();
+#if PROTOTYPE_CARDS
+        // QUARANTINED: THE FIRE, at the start of her turn -- [USER], sec.11.1,
+        // "At the start of Kokomi's turn, if she can afford the front Memory,
+        // spend its Charge cost and play it." OpenTurn first: it clears the
+        // once-per-turn latch and the pulse key, the way combat._player_turn
+        // clears kurage_fired_this_turn and kurage_last_card_type.
+        //
+        // KURAGE_FIRE_TIMING's "turn_end" alternative is implemented in the sim
+        // so the arm can be swept; the mod mirrors the DEFAULT only, and a
+        // sweep of that constant is a C# edit rather than a flag flip. Named
+        // here rather than left to be discovered.
+        KurageMemory.OpenTurn(player);
+        if (KokomiResources.IsKokomi(player.Creature))
+        {
+            // v4 BASE KIT, the BELT to AfterCreatureAddedToCombat's braces
+            // (sec.12.6 item 1). Idempotent by construction, and here so that a
+            // combat whose setup order ever changes still opens with the
+            // jellyfish rather than silently without one -- the failure mode
+            // otherwise is a fight that quietly never pulses and never fires.
+            await KurageMemory.Install(player.Creature);
+            await KurageMemory.Fire(choiceContext, player);
+        }
+#endif
         await KokomiKitGrant.GrantIfCharged(choiceContext, player);
     }
 

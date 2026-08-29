@@ -463,6 +463,56 @@
              {op: burst_energy, amount: 10}]}
 
 # =============================================================================
+# KOKOMI -- THE KURAGE'S MEMORY v3 (a RULE arm, not a card row)
+#
+# DECLARED HERE AND CARRYING NO ROW, DELIBERATELY. Every row in this file is a
+# CARD: `tools/gen_prototype_cards.py` requires an `id` starting `proto_`, a
+# `character` in the codegen profiles, and an effects list it can emit as a
+# C# class, and `tier0/content/loader.prototype_cards()` schema-checks it as a
+# card. The Kurage's memory is ENGINE BEHAVIOUR -- two entry rules, a price, a
+# turn-start fire, a pulse and a strip -- and it authors no card at all. A row
+# for it would either be a card nobody designed or a new row KIND, taught to
+# the loader, the generator, four lints and the surface tests. That is
+# machinery bought for one arm, which is the same trade this file's header
+# already refused for `character: companion`.
+#
+# So it is declared, not rowed, and the declaration is the audit trail:
+#
+#   arm:          the Kurage's memory, v3
+#   character:    kokomi
+#   spec:         review/active/kokomi-kurage-memory-2026-08-29.md sec.11
+#                 (sec.11.1 is [USER]'s words and IS the spec)
+#   sim:          tier0 behind C.KURAGE_MEMORY, default off
+#   mod:          klee-mod/KleeCode/Powers/Prototype/KurageMemory.cs, compiled
+#                 only under `dotnet build -p:PrototypeCards=true` -- the SAME
+#                 switch that quarantines the card rows above, so a release
+#                 build contains no type from it and every seam that calls it
+#                 sits inside `#if PROTOTYPE_CARDS`
+#   authored_by:  [claude, gpt] -- the field's closed set is
+#                 {claude, gpt} (EB-190), so it records the MODEL FAMILIES and
+#                 not the people: Claude implemented the rule and made it
+#                 total, and [USER]'s advisor (GPT) wrote the rule statement
+#                 [USER] forwarded as the design, which is text and therefore
+#                 adds its family. [USER] SPECIFIED THE RULE and made four
+#                 rulings on it; that is not a model family and has no cell in
+#                 the field, so it is recorded here instead.
+#                 THE FIELD ITSELF IS ON ROWS, and this arm has none -- it
+#                 authors no card at all (see above) -- so `seat.py`'s refusal
+#                 has nothing to key on for the RULE. What it does key on is
+#                 the one row this chain does add,
+#                 `proto_kurages_oath_memory`, which carries `[claude]`:
+#                 [USER] ruled its numbers and its rule, Claude wrote it, and
+#                 no seat contributed text, a number or a mode to it.
+#   prints:       nothing. `play_front_memory` (provisional keyword "Stir",
+#                 R179) has its op in the sim and its door in the mod so
+#                 codegen can emit a card that prints it; no card does.
+#   revert:       the flag. Delete Powers/Prototype/KurageMemory.cs and its
+#                 `#if PROTOTYPE_CARDS` seams; the sim half is C.KURAGE_MEMORY.
+#
+# THE DELETION RULE AT THE TOP OF THIS FILE APPLIES TO THIS BLOCK TOO: when
+# the arm is accepted or rejected, this block leaves with it.
+# =============================================================================
+
 # KOKOMI KURAGE BASE KIT (sec.12 of
 # review/active/kokomi-kurage-memory-2026-08-29.md) -- ONE row, one arm.
 #
@@ -485,20 +535,29 @@
 # surface would be quotable if it had. "See if it needs adjusting later" is
 # the disposition, not a band.
 #
-# AUTHORSHIP is the row's own `authored_by: [claude]` field -- the surface DOES
-# carry one (EB-190; seventeen rows above hold it and load), and this block
-# previously said it did not. NUMBERS AND RULE: [USER]. IMPLEMENTATION AND
-# WORDING: Claude. Nothing on this row was designed by the doctrine seat, and
-# nothing here has been graded, so `gpt` is not on the list.
+# AUTHORSHIP. NUMBERS AND RULE: [USER]. IMPLEMENTATION AND WORDING: Claude.
+# Nothing on this row was designed by the doctrine seat, and nothing here has
+# been graded. `authored_by:` is a list of MODEL FAMILIES (EB-190, head of
+# file) and [USER] is not one of them, so the field on the row below reads
+# `[claude]` -- the family that wrote it -- and this paragraph is where his
+# ownership of the numbers is recorded.
 #
 # THE SHIPPED ROW IS UNTOUCHED. `kurages_oath` in docs/kokomi-cards.yaml still
 # prints ward 5 (7 upgraded) and still says "per Bake-Kurage play"; it is a
-# shipped number under an R213 freeze and it is not this branch's to move. The
-# consequence, stated so it is not discovered: with the flag on, a deck that
-# drafts the SHIPPED Oath gets 5 per memory play, because the ward's amount is
-# read off whatever card applied it. That is the surface working as designed --
-# a staged face beside its shipped twin -- and it is what makes accepting this
-# arm a one-row re-authoring rather than an engine change.
+# shipped number under an R213 freeze and it is not this branch's to move, and
+# leaving it alone is what makes accepting this arm a one-row re-authoring
+# rather than an engine change.
+#
+# THE SHIPPED TWIN IS NOT OFFERABLE UNDER THE FLAG, and that is a fix, not a
+# second staging rule. [USER] asked of the staged face: "Why does the power
+# print 5 instead of 3, exactly?" The answer was that the ward's amount is read
+# off whatever card applied it, so a flagged run that DRAFTED the shipped Oath
+# paid 5 per memory play under a face that says per pulse -- text that cannot
+# bind, which is D4. The sheets cannot move, so the OFFER side does: under
+# `C.KURAGE_MEMORY` this row substitutes for `kurages_oath` in Kokomi's
+# offerable pool at the same rarity (`loader._pool_substitutions`, read by
+# `rewards.character_pool`, which is every offer surface's one source). Flag
+# off, the shipped Oath is the only Oath and this row is unreachable as ever.
 #
 # NO UPGRADE ROW, AND THAT IS THE SURFACE'S CONVENTION, NOT AN OMISSION. This
 # file has never carried an upgrade: no row above declares one, the schema has
@@ -529,6 +588,6 @@
 # for the prototype: it is on sec.12.6's checklist as item 14.
 # =============================================================================
 - {id: proto_kurages_oath_memory, name: "Kurage's Oath", character: kokomi,
-   authored_by: [claude],
    cost: 1, type: power, rarity: common,
+   authored_by: [claude],
    effects: [{op: apply_power, power: kurage_ward, amount: 3, target: self}]}

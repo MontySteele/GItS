@@ -106,7 +106,17 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
         ModelDb.Card<CoralGuard>(),
         ModelDb.Card<GorouInuzakaCharge>(),
         ModelDb.Card<SayuDarumaGift>(),
+#if PROTOTYPE_CARDS
+        // QUARANTINED, v4 BASE KIT (sec.12.6 items 5 and 6). THE ONE STARTER
+        // SEAM: with the flag on this slot is "To the Front!" and with it off
+        // it is Bake-Kurage, byte for byte. The sheet does not move -- only
+        // this list does, and only under the flag. The reasoning, the three
+        // Musters that lost and the sim twin (`loader._starter_ids`) are on
+        // KurageMemory.StarterSlotEleven.
+        Powers.KurageMemory.StarterSlotEleven(),
+#else
         ModelDb.Card<BakeKurage>(),
+#endif
         ModelDb.Card<TacticalRetreat>(),
     };
 

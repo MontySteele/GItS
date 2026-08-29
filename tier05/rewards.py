@@ -53,6 +53,16 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
             pool.setdefault(c.rarity, []).append(c)
         return pool
     index = loader._card_index()
+    # The QUARANTINED offerable-pool swap, and the only one there is
+    # (`loader._pool_substitutions`, behind `C.KURAGE_MEMORY`): {} on every
+    # flag-off tree, so the loop below is byte-for-byte what it has always
+    # been. This function is the single source of truth for "which ids can be
+    # offered to this character" -- `roll_card_offers`, `roll_rewards`,
+    # `shop.shop_offer`, every `events` card screen and the tier 0.5 drafter
+    # read it and nothing else -- so gating it HERE gates every offer surface
+    # at once, which is the point of putting the seam at the source instead of
+    # at the five mouths.
+    subs = loader.pool_substitutions(character_id)
     pool = {}
     for c in index.values():
         # kit_card (v1.9): Bursts are kit, not loot -- never offered. This
@@ -77,6 +87,21 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
         # pool. If that damages the baseline, so be it."
         if c.character != character_id:
             continue
+        if c.id in subs:
+            # SAME RARITY SLOT, SAME WEIGHT: the prototype is filed under the
+            # SHIPPED row's rarity, and a prototype that declares a different
+            # one is refused rather than quietly promoted or demoted. A
+            # substitution is a face swap; moving a card between tiers would
+            # move the odds it is offered at, which is a balance change
+            # smuggled in as a quarantine.
+            proto = loader.peek_card(subs[c.id])
+            if proto.rarity != c.rarity:
+                raise ValueError(
+                    f"pool substitution {c.id!r} -> {proto.id!r}: the "
+                    f"prototype is {proto.rarity!r} but the shipped row is "
+                    f"{c.rarity!r}; a substitution must not move a card "
+                    "between rarity tiers")
+            c = proto
         pool.setdefault(c.rarity, []).append(c)
     return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
 
