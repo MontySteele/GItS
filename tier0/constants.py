@@ -388,7 +388,16 @@ GARMENT_CHARGE_DIVISOR = 2    # while the state is active, attack cards
 # act-1 clear by making the BURST a metronome, which the ratio instrument
 # correctly reads as frontload. O4 moves the periodic output to the summon,
 # where canon keeps it, and lets the Burst go back to being a window. ---
-KURAGE_DURATION = 1           # turns the jellyfish holds the field. Stacks
+KURAGE_DURATION = 1           # RETIRED UNDER THE KURAGE_MEMORY FLAG (v4 base
+                              # kit): with KURAGE_ALWAYS_ON the jellyfish is
+                              # installed at combat start and never expires,
+                              # so nothing reads this while the flag is on --
+                              # not the install, and not the Casket refresh,
+                              # which maxes a 1 against a 1. The value below
+                              # is the SHIPPED one and stays exact, because
+                              # with the flag off this constant is still the
+                              # whole of the summon.
+                              # turns the jellyfish holds the field. Stacks
                               # = turns remaining (the oz_summon grammar);
                               # re-summoning REFRESHES, never adds — a
                               # second jellyfish is not a bigger jellyfish.
@@ -554,6 +563,42 @@ KURAGE_MEMORY = False         # the master quarantine flag. False = today's
                               # jellyfish is persistent, remembers what she
                               # burns, and spends Charge to replay it for 0
                               # energy.
+KURAGE_ALWAYS_ON = True       # v4 BASE KIT ([USER], 2026-08-29): "I think
+                              # that we will want to make Bake-Kurage part of
+                              # the base kit (always on) rather than a
+                              # separate card." READ ONLY WHEN KURAGE_MEMORY
+                              # IS ON. True = the jellyfish is installed at
+                              # the start of every one of Kokomi's combats and
+                              # holds for the whole fight: no duration, no
+                              # expiry, no summon needed, and the pulse fires
+                              # at every turn end. False leaves the v3 arm
+                              # reachable, where the jellyfish still had to be
+                              # summoned by the card and then never expired.
+                              # A separate constant so a revert to the v3
+                              # shape is a flip and not a re-authoring, the
+                              # same way KURAGE_THRESHOLD is for v2.
+KURAGE_MEMORY_STARTER_DROP = "bake_kurage"
+KURAGE_MEMORY_STARTER_ADD = "to_the_front"
+                              # The base-kit starter swap, and the ONLY sheet
+                              # fact the flag moves. READ ONLY WHEN
+                              # KURAGE_MEMORY IS ON, at `loader._starter_ids`,
+                              # so `docs/kokomi-cards.yaml` and
+                              # `tier0/content/characters/kokomi.yaml` are
+                              # UNTOUCHED and the shipped starter is still the
+                              # printed one. Bake-Kurage leaves because it
+                              # summons what is already there; ONE Muster card
+                              # enters in its place so RULE 1 (a Muster
+                              # remembers the card it ate, priced at 3x its
+                              # cost) is PRINTED in fight 1 rather than
+                              # drafted. The count is unchanged at twelve.
+                              # "To the Front!" is the plain Muster -- 0-cost
+                              # Skill, conscript 1, no rider -- and 0-cost
+                              # means it is playable on any turn, so fight 1
+                              # always shows the pattern. Rarity Common,
+                              # which is Furina's `an_invitation` precedent (a
+                              # Common already sits in a printed starter), so
+                              # no Basic twin is owed. sec.12 lists the three
+                              # alternatives that were not built.
 KURAGE_MEMORY_COST_PER_ENERGY = 3
                               # [USER], v3: "cards cost Charge equal to 3x
                               # their Cost". The whole price rule. A 0-cost
@@ -599,6 +644,15 @@ KURAGE_QUEUE_CAP = 0          # 0 = UNCAPPED. [USER], v3: "I don't think we
                               # ONE FIRE PER TURN clause and by the bank, not
                               # by a length.
 KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON = True
+                              # RETIRED UNDER THE FLAG by v4's base kit: with
+                              # KURAGE_ALWAYS_ON the jellyfish is on the field
+                              # for every turn of every fight, so "is there a
+                              # summon" is always yes and both settings of
+                              # this constant read the same. It is kept, and
+                              # kept True, so that turning KURAGE_ALWAYS_ON
+                              # back off restores the v3 arm whole. The
+                              # paragraph below is v3's and still describes
+                              # what it does THERE.
                               # NOT A [USER] PICK -- a hole the build had to
                               # fill. The acceleration keyword's op
                               # (`play_front_memory`, provisional keyword name
@@ -649,6 +703,12 @@ KURAGE_TARGET_RULE = "follow_her_last_attack"
 # NOT READ under the flag: KURAGE_DURATION and KURAGE_PULSE_PER_CHARGE (the
 # summon is persistent and the pulse carries no Charge term), and
 # KURAGE_THRESHOLD, which v3's per-card price replaces outright.
+# v4 adds two more to that list, both RETIRED-UNDER-FLAG rather than deleted:
+# KURAGE_DURATION is now unread on BOTH of the jellyfish's doors (the base-kit
+# install reads nothing, and the Casket refresh maxes a 1 against a 1), and
+# KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON is unread in effect because the summon
+# check it gates can no longer fail. Both keep their shipped values so that a
+# flip of KURAGE_ALWAYS_ON restores the v3 arm without a re-authoring.
 KURAGE_THRESHOLD = 5          # RETIRED BY v3, kept only so a revert to the v2
                               # arm is a flag flip rather than a re-authoring.
                               # Nothing reads it.

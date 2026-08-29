@@ -1490,6 +1490,12 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
         # the Garment while the Kurage is fielded refreshes the jellyfish's
         # duration. The E-into-Q loop, verbatim. Guarded on the summon
         # already being out -- the Burst does not conjure one from nothing.
+        #
+        # QUARANTINED CONSEQUENCE (C.KURAGE_MEMORY + C.KURAGE_ALWAYS_ON): a
+        # refresh of a jellyfish that never expires is a `max(1, 1)`, i.e.
+        # NOTHING. Left exactly as written -- the least-invasive default, and
+        # the guard above is still the honest one -- but the canon E-into-Q
+        # link pays nothing under the base kit. sec.12 pick 3.
         if (fx["power"] == "ceremonial_garment"
                 and state.player.powers.get("kurage_summon", 0)):
             # max(), not a hard set (audit 2026-07-26 s1.4; fixed in EPOCH 1).
@@ -3438,6 +3444,23 @@ def _op_summon_kurage(state: CombatState, fx: dict, card: Card) -> None:
     at fire time, so a summon made at Charge 0 still grows all fight.
     """
     p = state.player
+    if C.KURAGE_MEMORY and C.KURAGE_ALWAYS_ON and p.character_id == "kokomi":
+        # QUARANTINED, v4 BASE KIT. The jellyfish was already on the field
+        # when the fight started (`combat.run_fight`), so this op has nothing
+        # left to do: it sets a bit that is already set. That IDEMPOTENT
+        # NO-OP is the deliberate least-invasive default -- the row keeps its
+        # second leg (`gain_charge 1`) and nothing about the jellyfish moves.
+        #
+        # SAID PLAINLY, because it is a design consequence and not a code
+        # detail: under the base kit `bake_kurage` is a 1-cost Skill that
+        # gains 1 Charge, and it has LEFT the starter deck (loader
+        # `_starter_ids`). Basics are not draftable, so with the flag on the
+        # row is unreachable in a run. sec.12 puts that to [USER] as pick 1,
+        # with its alternatives (retire the row / re-key it to fire an
+        # immediate extra pulse / give it a new job).
+        p.powers["kurage_summon"] = 1
+        state.emit("summon_kurage", turns=1, persistent=True, base_kit=True)
+        return
     if C.KURAGE_MEMORY and p.character_id == "kokomi":
         # QUARANTINED. Under the memory rule the jellyfish is PERSISTENT for
         # the fight: summoned once, never expiring, so `kurage_summon` stops
@@ -3736,6 +3759,14 @@ def kurage_fire(state: CombatState, manual: bool = False) -> bool:
         # No jellyfish on the field, no memory to fire from. The queue still
         # FILLS without one: the memory is of what she burned, and the summon
         # is what acts on it.
+        #
+        # UNDER C.KURAGE_ALWAYS_ON this branch cannot be taken in a real
+        # fight -- the jellyfish is installed at combat start -- and it is
+        # kept, unchanged, because it is still the whole of the rule with
+        # KURAGE_ALWAYS_ON off, and because a unit test may build a state
+        # without one. That is also why KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON is
+        # RETIRED-under-flag rather than deleted: both of its settings read
+        # the same while the jellyfish cannot be absent.
         return False
     if not state.kurage_queue:
         # KURAGE_EMPTY_QUEUE "hold": nothing fires and NOTHING IS PAID. The
@@ -3850,6 +3881,14 @@ def kurage_memory_pulse(state: CombatState) -> None:
                 reactions.apply_aura(state, target, "hydro",
                                      source="kurage_pulse")
     else:                                    # skill (and every other type)
+        # KURAGE'S OATH, UNDER THE BASE KIT. `kurage_ward` is unchanged here
+        # and that is the least-invasive default, but its printed reading has
+        # moved: the Oath was "5 Block per Bake-Kurage play" because the
+        # jellyfish pulsed once per summon at KURAGE_DURATION 1. With
+        # KURAGE_ALWAYS_ON the pulse fires at EVERY turn end, so the Oath now
+        # pays "5 Block per turn, for the rest of the fight" -- and only on
+        # the Skill branch. Nothing in code is wrong; the card's FACE is.
+        # sec.12 pick 4.
         blk = C.KURAGE_MEMORY_PULSE_BLOCK + p.powers.get("kurage_ward", 0)
         state.emit("kurage_pulse", amount=blk, kind=kind, landed=True,
                    memory=True)

@@ -1277,3 +1277,227 @@ card yaml, LAW line or register moved, so **no drafted number moved and
 `DRAFTER_VERSION` did not**. The new op is priced at a deliberate ZERO in
 `tier05.draft.STATIC_OP_PRICING` with its reason, and carries its row in the
 connectivity table, because both tables are total by construction.
+
+## 12. Version 4 (2026-08-29) — the base kit
+
+**§11 stands.** This section adds one thing to it: the jellyfish is always
+there, and the starter deck carries a Muster. Everything is still behind
+`C.KURAGE_MEMORY` and still default off, so nothing here has shipped.
+
+### 12.1 [USER]'s words — this is the spec
+
+> "I think that we will want to make Bake-Kurage part of the base kit (always
+> on) rather than a separate card. So yes, we could add one Muster card to the
+> base deck to teach the pattern."
+
+That answers the question §11.8 asked. The v3 smoke found the memory rule
+*working* at the starter floor and *thin*: the only card in the opening deck
+that could ever enter the memory was Gorou, he is free to replay, and so the
+bank was never spent and the queue was never blocked. The interesting half of
+the design — bank toward a card you cannot yet afford, and be blocked when you
+over-bank — was drafted, not printed.
+
+### 12.2 What was built
+
+**The jellyfish is on the field from the first moment of every fight and stays
+for the whole fight.** No duration, no expiry, nothing to summon. It is
+installed at true combat start, next to the Charge meter, because the two now
+have the same lifetime — one fight. Its pulse therefore fires at every turn
+end from turn 1 onward, with no card played.
+
+**Bake-Kurage leaves the starter deck and one Muster card takes its seat.** A
+card that summons what is always on the field is a card that does nothing, so
+it goes; the Muster comes in so that **Rule 1** — *the card you sacrifice to a
+Muster enters the jellyfish's memory, priced at three times its cost* — is
+something she meets in fight 1 instead of something she has to draft into.
+The deck is still twelve cards.
+
+**The card chosen is "To the Front!"** — 0 energy, a Skill, one Muster and
+nothing else printed on it. Two reasons: it is the plainest Muster on the
+sheet, so what the player learns is the *rule* and not a rider; and at 0 cost
+it can be played on any turn of any hand, so fight 1 always shows the pattern
+rather than showing it whenever the energy happens to be spare.
+
+**Nothing on any sheet moved.** The swap lives in code (`loader._starter_ids`),
+which both the tier-0 battery and the tier-0.5 run read, so the printed
+starter in `kokomi.yaml` still says Bake-Kurage and turning the flag off gives
+today's deck back exactly. **No convention was bent:** "To the Front!" is a
+Common, and Furina's printed starter already carries a Common
+(`an_invitation`), so no Basic twin was needed and none was written. Her
+starter-reserved Companion trio (Gorou plus the Sayu-or-Shinobu roll) is
+untouched and still rolls normally.
+
+`KURAGE_ALWAYS_ON = True` is the new constant. `KURAGE_DURATION` and
+`KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON` are now unread while the flag is on, and
+are marked RETIRED-under-flag in their comments — kept at their shipped values
+so that turning the base kit off restores the v3 arm whole.
+
+### 12.3 The starter deck as it now stands (flag on)
+
+Twelve cards, the same twelve slots:
+
+| # | card | what it is |
+|---|---|---|
+| 1–4 | Water's Edge ×4 | her Strike |
+| 5–8 | Coral Guard ×4 | her Defend |
+| 9 | Gorou, Inuzaka All-Round Defense | Companion, 0 cost, Exhausts |
+| 10 | Sayu **or** Kuki Shinobu (run-start roll) | Companion, support slot |
+| 11 | **To the Front!** | **NEW** — 0 cost, Muster one card |
+| 12 | Tactical Retreat | draw 1, discard 1 |
+
+The one change is slot 11: **Bake-Kurage out, To the Front! in.**
+
+The three Muster cards that were NOT chosen, listed so the pick is a pick:
+**Call to Arms** (1 energy, Muster + draw 1 — replaces itself, but costs a
+turn's energy in fight 1), **Standing Orders** (1 energy, Muster + 4 Block —
+teaches the Muster while also being a Defend, which muddies what the player
+learns), **Signal Arrow** (1 energy Attack, 5 damage + Muster — the same
+muddying, plus it makes the Muster a rider on an attack).
+
+### 12.4 The picks — numbered, and all five are [USER]'s
+
+Five rows still print or ride "summon the Bake-Kurage" and now mean something
+different. Each one was built the **least invasive** way — nothing was
+re-authored, nothing was deleted — and each is a real decision that belongs to
+[USER]. The alternatives are listed, not built.
+
+**PICK 1 — Bake-Kurage, the card itself.**
+*Built:* the summon does nothing (the jellyfish is already there), so the card
+is a 1-cost Skill that gains 1 Charge. It has left the starter deck, and
+Basics are not draftable, so **with the flag on the row cannot be reached in a
+run at all.**
+
+1. **Leave it** (what is built): the row survives on paper, unreachable.
+2. **Retire the row.** Honest — the card's job is gone. Costs her a Basic and
+   a name.
+3. **Re-key it to "the jellyfish acts now"**: playing it fires an immediate
+   extra pulse. Keeps the card and the fantasy, but it is a new card in an old
+   row's clothes and needs authoring.
+4. **Give it a new job on the memory** — e.g. make it the acceleration card
+   ("play the front Memory now"), the keyword §11.3 built the hook for and
+   authored no card for.
+
+**PICK 2 — the Bake-Kurage upgrade (`kurage_turns: +1`).**
+*Built:* inert, as it already was under v3 — an upgraded copy is identical to
+a base one.
+
+1. **Leave it inert** (built).
+2. **Retire the delta** with the row, under pick 1.
+3. **Give the upgrade a memory-side job** instead of a duration one.
+
+**PICK 3 — the Tamakushi Casket link (casting her Burst refreshes the
+jellyfish).**
+*Built:* unchanged in code, and it now pays nothing — refreshing something
+that never expires is nothing. This is her canon E-into-Q loop, and under the
+base kit it is silent.
+
+1. **Leave it silent** (built).
+2. **Re-key the refresh to an immediate extra pulse**, so the Burst still
+   visibly wakes the jellyfish.
+3. **Retire the link** and say so on the relic's face.
+
+**PICK 4 — Kurage's Oath (the `kurage_ward` Block).**
+*Built:* unchanged in code. But its printed reading has moved: it was "5 Block
+per Bake-Kurage play" because the jellyfish pulsed once per summon; it is now
+**5 Block every turn, for the rest of the fight**, on the Skill branch of the
+pulse. Nothing in the engine is wrong — the *face* is.
+
+1. **Leave the number, rewrite the face** (built; the face rewrite is owed on
+   both engines).
+2. **Re-price it.** This is the card that already carries a [USER] "maybe too
+   strong" history (R130 took it 12 → 5), and per-turn is a much larger
+   promise than per-play. A re-price needs a measurement this arm cannot give.
+3. **Key the ward to something rarer than every turn** so its old reading
+   survives.
+
+**PICK 5 — `KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON`.**
+*Built:* retired-under-flag. It asked "does the acceleration keyword work with
+no jellyfish?", and under the base kit there is never no jellyfish, so both
+answers read the same.
+
+1. **Leave it retired-under-flag** (built).
+2. **Delete the constant** and the branch with it, accepting that the v3 arm
+   is then no longer one flip away.
+
+*(Nereid's Ascension is named as a "refresh" row in the brief; on the sheet it
+carries no summon leg at all — its only Kurage-adjacent term is a Charge read,
+which §11.7 already books. Nothing is owed there.)*
+
+### 12.5 The smoke, and it is a SHAPE
+
+Five whole fights, the new starter deck, commander weights, seeds 1–5, flag
+on. **No number below is quotable and none is claimed** (R213 B / R215 B): the
+pilot still does not value the memory, so this exercises the rule and never
+the decision.
+
+- **Rule 1 fires in fight 1, in all five.** The Muster ate one of her own
+  cards and that card entered the memory at three times its cost — as early as
+  turn 1 in three of the five, and by turn 8 in the other two. This is the
+  thing the base kit exists to do, and it does it.
+- **The block now happens.** Four of the five fights hit at least one blocked
+  turn — a front priced at 3 against a bank of 0 to 2 — and one fight was
+  blocked on eight separate turns. Under v3 the starter deck could not be
+  blocked at all.
+- **The bank is now spent.** Peak bank across the five was three to four
+  Charge, and every fight spent at least once (one spent twice). Under v3 the
+  bank was never spent, because the only memory the deck could produce was
+  free.
+- **Memory plays per fight: two to six**, against v3's flat one. The queue
+  fills from both rules now — roughly two to five Muster entries and three to
+  six Exhaust entries per fight — and empties at one card per turn.
+- **The prices the deck produces are 0 and 3.** Gorou and the Companions it
+  Musters up are free or cheap; a sacrificed Water's Edge or Coral Guard is a
+  3. One entry priced at 6 appeared once across the five.
+
+**What this says, as a shape:** the base kit does exactly what §11.8 said the
+starter was missing — the bank, the afford and the block are all printed now.
+Whether *one* Muster is the right dose, and whether the block should bite this
+often in fight 1, are design reads and they are [USER]'s.
+
+### 12.6 What the C# mirror must change — a checklist
+
+For the parallel arm on `kokomi-kurage-memory-cs`. Every item is behind the
+same quarantine flag.
+
+1. **Install the jellyfish at combat start**, not on a card. Mirror of
+   `combat.run_fight`: at true fight start, for Kokomi only, put the
+   Bake-Kurage on the field with no duration. It must be there before the
+   first turn opens and must not be removable.
+2. **Never expire it.** Remove every decrement / countdown path under the
+   flag; the turn-end pulse must not spend a turn of anything.
+3. **Fire the pulse at every turn end** from turn 1, with nothing played and
+   nothing summoned.
+4. **Emit its own signal, not a summon.** The install is not a summon, and a
+   listener counting summons must not see one that no card paid for.
+5. **Swap the starter deck in code, not on the sheet.** Bake-Kurage out, "To
+   the Front!" (`to_the_front`) in — one card for one card, twelve cards
+   total, at whatever the C# equivalent of a single starter-list seam is, and
+   it must be the *only* such seam so the mod and the sim cannot disagree. The
+   support-Companion roll must still compose with it.
+6. **Leave the printed sheet alone.** The generated card row for Bake-Kurage
+   stays; the mod's starter list is what moves, under the flag.
+7. **Make the summon op idempotent under the flag** (it sets a bit that is
+   already set) and keep the card's second leg, `gain 1 Charge`.
+8. **Neutralise the duration upgrade** (`kurage_turns +1`) under the flag.
+9. **Neutralise the Tamakushi Casket / Garment refresh** under the flag — it
+   must not extend, re-arm, or re-summon anything.
+10. **Do not touch Kurage's Oath's number**, but treat its face as owed: the
+    ward is now paid per turn, not per play, and the C# face still says
+    otherwise. The face fix waits on pick 4.
+11. **The strip** (§11.5) gains one reading: there is no "no jellyfish" state
+    any more, so the strip is always live for Kokomi and must never render an
+    absent-summon state.
+12. **The bridge** must expose the install as a fight-start fact, so a blind
+    run can see the jellyfish before turn 1 rather than inferring it from the
+    first pulse.
+
+### 12.7 Green
+
+`python -m tools.run_lints --lane ci` — **OK: 27 lint(s) passed**. Full tier 0
+suite **3556 passed, 46 skipped, 12 xfailed**; full tier 0.5 suite **794
+passed** — both with the flag off, which is the acceptance condition on the
+flag. `gen_roster_cards --check` reports **all three profiles up to
+date** -- no sheet moved, because the starter swap is code and every YAML
+file is byte-identical. Twelve
+mutations were run against the new test file and all twelve were caught. No
+LAW line, register row, sheet row or drafted number moved, so no stamp moved.
