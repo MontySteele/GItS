@@ -32,15 +32,16 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(PrototypeCards)' != 'true'">
     <Compile Remove="Cards/Prototype/**/*.cs" />
-    <!-- The same quarantine, for a RULE rather than a card. The Klee Sparks
-         alternative cost (review/active/klee-sparks-2026-08-29.md sec.10) is
-         engine and UI behaviour, not a sheet row, so it has no generated class
-         to sit in Cards/Prototype, but it is quarantined on exactly the same
-         terms and by exactly the same switch, which is what makes
-         SPARK_ALT_COST_ENABLED's C# twin ONE flag. Every seam that calls into
-         these from a SHIPPED file is itself inside #if PROTOTYPE_CARDS, so a
-         release build neither compiles the rule nor references it, and the
-         targeted revert is the flag. -->
+    <!-- The same quarantine, for a RULE rather than a card. Two arms use it and
+         they are independent: the Kurage's memory
+         (review/active/kokomi-kurage-memory-2026-08-29.md sec.11) and the Klee
+         Sparks alternative cost (review/active/klee-sparks-2026-08-29.md
+         sec.10). Both are engine (and, for Sparks, UI) behaviour rather than a
+         sheet row, so neither has a generated class to sit in Cards/Prototype,
+         and both are quarantined on exactly the same terms and by exactly the
+         same switch. Every seam that calls into them from a SHIPPED file is
+         itself inside #if PROTOTYPE_CARDS, so a release build neither compiles
+         a rule nor references one, and the targeted revert is the flag. -->
     <Compile Remove="Powers/Prototype/**/*.cs" />
     <Compile Remove="Vfx/Prototype/**/*.cs" />
   </ItemGroup>

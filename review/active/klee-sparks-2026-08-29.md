@@ -1060,15 +1060,21 @@ the difference is a numbered pick in §10.11.
 Build succeeded.  0 Error(s)   (dotnet build klee-mod/KleeCode/KleeCode.csproj -p:UsePinnedAssemblies=true)
 Build succeeded.  0 Error(s)   (… the same, plus -p:PrototypeCards=true)
 Passed!  - Failed:     0, Passed:   163, Skipped:     0, Total:   163   (dotnet test)
-Passed!  - Failed:     0, Passed:   190, Skipped:     0, Total:   190   (dotnet test -p:PrototypeCards=true)
+Passed!  - Failed:     0, Passed:   211, Skipped:     0, Total:   211   (dotnet test -p:PrototypeCards=true)
 OK: 28 lint(s) passed                                    (python -m tools.run_lints --lane ci)
-3632 passed, 46 skipped, 12 xfailed, 3 warnings in 275.30s (0:04:35)   (pytest tier0/tests -q)
-lint_prototype_authorship: OK (22 surface row(s), 4 carried debt entr(ies))
+3702 passed, 46 skipped, 12 xfailed, 3 warnings in 309.19s (0:05:09)   (pytest tier0/tests -q)
+lint_prototype_authorship: OK (23 surface row(s), 4 carried debt entr(ies))
 gen_prototype_cards: prototype surface up to date
 gen_klee_cards: up to date
 gen_roster_cards: furina up to date
 gen_roster_cards: kokomi up to date
 ```
+
+All of the above is taken AFTER merging `origin/klee-sparks-sim` at its
+resolved head, so it is the arm standing on `main` with Kokomi's Kurage-memory
+arm beside it -- 211 with the flag is this slice's 27 plus that arm's 21 plus
+the shipped 163, and the two quarantines share one switch without either
+noticing the other.
 
 **Where the bite-check ran, stated because it is a real limit.** The pinned
 assembly vault (`UsePinnedAssemblies`) has no `Sentry.Godot`, which the test

@@ -219,6 +219,15 @@ MIRRORED: dict[str, object] = {
     "KokomiConstants.GarmentChargeDivisor": C.GARMENT_CHARGE_DIVISOR,
     "KokomiConstants.ConscriptCostDelta": C.CONSCRIPT_COST_DELTA,
     "KokomiConstants.BurstMax": _char("kokomi", "burst_max"),
+    # The Kurage's memory (QUARANTINED, R213 B / EB-147 -- the C# rule lives
+    # under klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out of a
+    # release build). Quarantined is not exempt: a prototype arm measured on a
+    # number the sim never chose is exactly the failure this lint exists for,
+    # and these three are the only numeric constants the rule has. Spec:
+    # review/active/kokomi-kurage-memory-2026-08-29.md sec.11.4.
+    "KurageMemoryLaw.CostPerEnergy": C.KURAGE_MEMORY_COST_PER_ENERGY,
+    "KurageMemoryLaw.PulseBlock": C.KURAGE_MEMORY_PULSE_BLOCK,
+    "KurageMemoryLaw.QueueCap": C.KURAGE_QUEUE_CAP,
 }
 
 # --------------------------------------------------------------------------

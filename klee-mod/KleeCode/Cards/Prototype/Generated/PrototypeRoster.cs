@@ -56,6 +56,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoChargeMusterPrice>(),
             ModelDb.Card<ProtoChargeSpendStrike>(),
             ModelDb.Card<ProtoChargeThresholdStrike>(),
+            ModelDb.Card<ProtoKuragesOathMemory>(),
             ModelDb.Card<ProtoPearlBarrageTurn>(),
             ModelDb.Card<ProtoChargeModeGuardModeA>(),
             ModelDb.Card<ProtoChargeModeGuardModeB>(),

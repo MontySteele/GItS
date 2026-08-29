@@ -1152,6 +1152,20 @@ public static partial class McpMod
             // Implementation and its reflection contract: gits/GitsResources.cs.
             state["resources"] = GitsResourceSnapshot(combatState);
 
+            // GItS LOCAL EDIT (EB-181, the Kokomi half). A resource snapshot is
+            // an id and an amount, which is the whole of EB-181's second half
+            // ("a meter has no maximum"): under the Kurage's memory rule Charge
+            // HAS a target -- the front memory's own price -- and the queue
+            // behind it is a list of cards no wire key carries. A seat that
+            // cannot read the queue cannot play the character. Emitted only
+            // when this build HAS the rule, so an absent key means "no memory
+            // rule here" and an empty map means "this player is not Kokomi".
+            // Implementation and its reflection contract: gits/GitsKurageMemory.cs.
+            if (GitsKurageMemorySnapshot(player) is { } kurageMemory)
+            {
+                state["kurage_memory"] = kurageMemory;
+            }
+
             // Stars (The Regent's resource, conditionally shown)
             if (player.Character.ShouldAlwaysShowStarCounter || combatState.Stars > 0)
             {

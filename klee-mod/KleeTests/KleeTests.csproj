@@ -25,14 +25,14 @@
 
   <!-- THE QUARANTINE, on the test side. `Prototype/` holds pins for rules that
        exist only under `-p:PrototypeCards=true` (KleeCode.csproj); without the
-       property those types are not compiled, so a pin against them would not
-       compile either. Same switch, same condition, so `dotnet test` and
+       property the rule's types are not compiled, so a pin against them would
+       not compile either. Same switch, same condition, so `dotnet test` and
        `dotnet test -p:PrototypeCards=true` both build.
 
-       PROTOTYPE_CARDS is defined here as well as removed-from, because one
-       fact has to be asserted BOTH ways round: that the base Spark rule is
-       retired under the flag and still runs without it. A pin that could only
-       be compiled on one side of the switch could not say the second half. -->
+       PROTOTYPE_CARDS is defined here as well as removed-from, because one fact
+       has to be asserted BOTH ways round: that the base Spark rule is retired
+       under the flag and still runs without it. A pin that could only be
+       compiled on one side of the switch could not say the second half. -->
   <PropertyGroup Condition="'$(PrototypeCards)' == 'true'">
     <DefineConstants>$(DefineConstants);PROTOTYPE_CARDS</DefineConstants>
   </PropertyGroup>

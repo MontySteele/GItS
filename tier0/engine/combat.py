@@ -1318,6 +1318,24 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     player.fanfare_cap = player.fanfare_cap_base
     player.fanfare_floor = 0
     player.charge = 0            # Kokomi: the meter is per-combat (§2.1)
+    # QUARANTINED (C.KURAGE_MEMORY + C.KURAGE_ALWAYS_ON): THE BASE KIT.
+    # [USER], 2026-08-29 -- "make Bake-Kurage part of the base kit (always on)
+    # rather than a separate card". The jellyfish is installed HERE, at true
+    # fight start, beside the other per-combat resources, and it never
+    # expires: `kurage_summon` stops being a countdown, or even a summon, and
+    # becomes a fact about Kokomi. It sits on the same line as the meter it
+    # spends because the two now have the same lifetime -- one fight.
+    #
+    # The pulse gate in `player_turn_end_triggers` reads this power, so
+    # installing it here is also what makes the pulse fire at EVERY turn end
+    # from turn 1, with no card played and nothing summoned.
+    #
+    # Its OWN event, not `summon_kurage`: nothing summoned it, and a reader
+    # counting summons must not see one that no card paid for.
+    if C.KURAGE_MEMORY and C.KURAGE_ALWAYS_ON \
+            and player.character_id == "kokomi":
+        player.powers["kurage_summon"] = 1
+        state.emit("kurage_base_kit", persistent=True)
     player.spotlight = None
     state.rng.shuffle(player.draw_pile)
     surface_innate(player.draw_pile)
