@@ -388,9 +388,6 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 182, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
-        # 201 minted 2026-08-29 by EB-198's live acceptance: the pile view's
-        # affordability rings never paint.
-        201,
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,
