@@ -1,0 +1,29 @@
+{
+ "turn_id": "kokomi-slice1-r4-t04",
+ "packet_sha256": "aadfeb2b8f725695cd7041a32f1701741c924ee562a53934d6deb88e9b6d0aa2",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Water's Edge",
+   "target": "Leaf Slime (M)",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Leaf Slime (S)",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Water's Edge on Leaf Slime (M), killing it, then All Streams Flow to the Sea on Leaf Slime (S), killing it.",
+ "q2_other_line_considered": "I seriously considered Shinobu - Sanctifying Circle for 4 Block and damage to all three enemies, but it would leave both Leaf Slimes alive.",
+ "q3_what_it_gave_up": "It gave up 4 Block, Electro application, and damage to Twig Slime (S), while leaving 1 Energy unused.",
+ "q4_different_intent": "Yes. A sufficiently larger attack telegraphed by Twig Slime (S), especially if the Leaf Slimes were not threatening damage or Status cards, could have made Shinobu - Sanctifying Circle preferable for its Block.",
+ "q4_changed": true
+}

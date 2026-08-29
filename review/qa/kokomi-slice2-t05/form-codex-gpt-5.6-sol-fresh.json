@@ -1,0 +1,23 @@
+{
+ "turn_id": "kokomi-slice2-t05",
+ "packet_sha256": "203733a180bd71ae56c10daad6f4d0abc628fa3349c3575f08430c3b26fc61a1",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Gyorin Formation",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Gyorin Formation, gaining 10 Block now and 6 Block at the start of my next turn.",
+ "q2_other_line_considered": "I seriously considered playing Coral Guard followed by All Streams Flow to the Sea, gaining 5 Block and dealing 9 damage to Nibbit.",
+ "q3_what_it_gave_up": "It gave up dealing damage and applying Hydro this turn in exchange for reducing the telegraphed 12 damage to 2 and gaining 6 Block next turn.",
+ "q4_different_intent": "Yes. If Nibbit had not telegraphed damage, I would have played Water's Edge and All Streams Flow to the Sea on Nibbit for 15 total damage and Hydro application.",
+ "q4_changed": true
+}

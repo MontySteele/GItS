@@ -1,0 +1,15 @@
+{
+  "turn_id": "kokomi-slice1-r4-t02",
+  "packet_sha256": "aada05750bcc1672260093b54ad84a89b414dcbc3513b6d8e5155c241222f2d1",
+  "grader": {"id": "opus-5-fresh", "kind": "llm",
+             "model": "claude-opus-5", "designed_these_cards": false},
+  "chosen_line": [
+    {"card": "Thoma - Blazing Ooyoroi", "target": "Nibbit", "choose": "Deal 8 damage, applying its element"},
+    {"card": "All Streams Flow to the Sea", "target": "Nibbit"}
+  ],
+  "q1_what_did_you_play": "Thoma - Blazing Ooyoroi on its damage half into Nibbit for 8, then All Streams Flow to the Sea into Nibbit for 9. That is 17 damage for my whole 3 energy and takes Nibbit from 24 to 7. Water's Edge stays unplayed because after Thoma's 2 energy I only have 1 left and All Streams hits for 9 where Water's Edge hits for 6. I put Thoma first partly for the Pyro application landing before a Hydro hit, on the chance the game scores something off that ordering; if it does not, the order costs me nothing. I cannot kill this turn - 24 HP is above my 17 ceiling - so the question was purely how much of the gap I close before eating the 12.",
+  "q2_other_line_considered": "Two of them. First, Water's Edge plus All Streams for 15, holding Thoma - strictly worse than 17 for the same three energy spent, so it died fast. The second was real: Thoma on the Block half plus All Streams, which is 3 Block and 9 damage. That leaves me at 5 HP instead of 2, with Nibbit at 15 instead of 7. I rejected it because 3 Block against a 12 is not a save, it is a two-HP rebate, and it costs 8 damage off the enemy. At 14 HP against a 12-per-turn attacker I am dead in two turns either way unless I close the fight, so the only survival plan that works is winning the race, and 7 remaining is a killable number next turn where 15 is not.",
+  "q3_what_it_gave_up": "All of my defence and most of my margin. I end the turn at 2 HP with zero Block, so any chip damage, any intent larger than telegraphed, or any failure to draw 7 damage next turn ends the run. I also gave up Water's Edge's 6 damage and its Hydro application this turn - it sits in hand unplayable for want of energy - and I gave up the option of banking Thoma for a turn where 3 Block would actually blank an intent.",
+  "q4_different_intent": "Yes. A small telegraph - anything at 3 or less - flips me to Thoma's Block half, because there 3 Block blanks the hit entirely and buying a whole turn is worth more than 8 damage into a 24 HP enemy. A defensive or buff intent would push me the same way for the same reason. But nothing at the top end moves me: at 12, or 20, or lethal, 3 Block is noise and max damage is the only line, so the whole range from roughly 4 upward plays identically to what I did.",
+  "q4_changed": true
+}

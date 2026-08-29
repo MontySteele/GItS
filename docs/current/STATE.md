@@ -176,10 +176,12 @@ deploy label from R218 on rides the pin above; live numbers were never
 comparable across a game build anyway (R95), and the sim references no game
 assembly and is unaffected.
 
-The deployed build is **`0.2.1269`** (2026-08-29, from `eb171-port-0-111`
-`a332ad3`), the first package built against this pin and the first release
-package since `0.2.1209` — it replaces the `0.2.1252+proto` dev package that
-was left installed. `validate.ps1` OK; pack 9,586,076 bytes, 132 resources.
+The deployed build is **`0.2.1299`** (2026-08-29, from `kokomi-slice-2-funnel`
+`42577c7`), a clean release package with no `+proto` and no `+dirty` mark —
+deployed as the teardown of the slice-2 / slice-1-round-4 funnel run, which
+had `0.2.1293+proto` installed while it ran. It carries the same C# as
+`0.2.1269`, whose port and face fixes are described below; nothing on a
+shipped sheet moved between them. `validate.ps1` OK; pack 9,586,076 bytes.
 It carries `EB-171`'s port and the two face fixes `0.2.1209` was missing: the
 exhaust-selection rate (R215 C) and `EB-164`'s eighteen re-worded scaling
 faces. **Re-verified live on 0.111.0** (`EB-171`): the mod loads, all nine
@@ -290,13 +292,15 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     card name say what the feed does not carry — `EB-179`);
     pinned managed assemblies in the vault (`EB-172`).
   - **Kokomi slice 1** (`review/active/kokomi-slice-1-2026-08-27.md`,
-    §§Round 1–3): three rounds on the quarantined surface, **no shipped
-    number moved**. Round 3 (honest faces, `0.2.1252+proto`): 7 SURVIVES /
-    4 REFUSED, all eleven replays confirm the forms, pair read **ADVANCES
-    five** (Tidal Barrage, Warding Ring, Crimson Guard, Oni Rush,
-    Superlative Guard) and **RETURNS two** (Sanctifying Circle, Blazing
-    Ooyoroi — their boards, per the review). Advance means whole-fight play
-    next, not ship.
+    §§Round 1–4): four rounds on the quarantined surface, **no shipped
+    number moved**. Round 4 (`0.2.1293+proto`) re-boarded the two arms
+    round 3 returned and ran them on TWO graders: 8 forms, 8 SURVIVES,
+    7 of 8 replays clean. The reviewer reports **both board repairs
+    worked**; Sanctifying Circle **ADVANCES**, Blazing Ooyoroi RETURNS on
+    an implementation defect rather than its board (`EB-184`: a modal
+    typed Attack demands a target on its targetless Block mode, so that
+    line cannot replay). Slice tally: six ADVANCE, one open RETURN.
+    Advance means whole-fight play next, not ship.
   - **Blind-play testimony** (R217 G — iteration feedback, never
     validation): runs B5 and B6 name, unprompted, the tension as immediate
     Block versus Charge investment, Bake-Kurage as the win condition, and
@@ -304,8 +308,19 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     Burst accumulating with no visible spend and Gorou's Charge/Burst grant
     unprinted — the Charge-keyword gap R215 D deferred into E1, now with a
     blind witness. The bridge gap the runs uncovered: `EB-181`.
-  - **Next.** Kokomi slice 2 = R213 E1's Charge arms, before Klee. A4/A6
-    unminted until their prerequisites are real; A1-extended and A5
+  - **Kokomi slice 2** (`review/active/kokomi-slice-2-2026-08-29.md`, §8):
+    R213 E1's four Charge arms, RUN 2026-08-29 on `0.2.1293+proto`. Eight
+    turns in four matched pairs, seeds pinned after 29 rolls; closeness
+    SURVIVES on all eight, declared and observed. Sixteen forms on two
+    graders (15 SURVIVES / 1 REFUSED), sixteen replays, one flagged
+    `misread`. Pair read: **two ADVANCE** (Fathom the Tide, Twin Tides)
+    and **two RETURN** (Sounding Line, Watatsumi Levy — their boards, per
+    the review). Four numbered picks wait in §9. Defects minted:
+    `EB-182` (no per-option playability on the choose-a-card screen,
+    proven off the decompile), `EB-183` (R216 D's per-companion half,
+    owed and unbuilt).
+  - **Next.** Slice 2's §9 picks and slice 1's `EB-184`, then Klee.
+    A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
   (Kokomi's are newest). **Animation sprint 2.** **Axis-validity tracks** —

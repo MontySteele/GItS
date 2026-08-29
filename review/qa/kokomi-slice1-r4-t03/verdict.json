@@ -1,0 +1,101 @@
+{
+ "turn_id": "kokomi-slice1-r4-t03",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "opus-5-fresh",
+  "kind": "llm",
+  "model": "claude-opus-5",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "96a5ed3e56b9bd6aefd974eaa0a0ee31ca08c864e1e12ed55b6c485f2872cf73",
+ "chosen_line": [
+  {
+   "card": "Water's Edge",
+   "target": "Leaf Slime (M)"
+  },
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Leaf Slime (S)"
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "Water's Edge into Leaf Slime (M) for exactly its 6 remaining HP, then All Streams Flow to the Sea into Leaf Slime (S) for 9, also lethal on its 6. Two cards, two energy, two enemies dead. One energy is left over and there is nothing I want to spend it on, since Sanctifying Ring costs 2. That removes the 3-damage attack and the 2 status cards from the board entirely, and leaves only Twig Slime, which hits me for 4. I go to 12 of 70 with a clean deck and a single enemy sitting behind 8 Block.",
+  "q2_other_line_considered": "Yes: Sanctifying Ring plus All Streams Flow to the Sea, for the full 3 energy. Ring gives 4 Block and chips 3 off everything, which shaves Twig Slime's Block from 8 to 5 and puts both Leaf Slimes into one-shot range; All Streams then kills Leaf Slime (M) so I still dodge the status cards. That line takes 7 incoming against 4 Block, so 3 damage, ending at 13 HP instead of 12. I weighed the extra point of HP and the 3 Block scraped off Twig against leaving Leaf Slime (S) alive at 3 HP. Leaving it alive costs me at least 3 more damage next turn, or a card to finish it, which is more than the 1 HP the Ring line saved. The 3 chip on Twig's Block is worth something later but Block on a slime is likely to be re-applied or irrelevant compared to a whole extra body swinging. So the double-kill won.",
+  "q3_what_it_gave_up": "It gave up all defense: I take the full 4 from Twig Slime with 0 Block, and I finish at 12 HP out of 70, which is a thin cushion. It gave up the 3 chip damage on Twig Slime and the erosion of its 8 Block, so Twig is untouched and I still have to punch through 8 Block before doing a point of real damage to it. It gave up the Electro application from Sanctifying Ring and whatever reaction that could have set up on a later Hydro hit. It also gave up 1 unspent energy, and it overkilled by 3 with All Streams into a 6 HP target, damage I could have aimed at Twig if Twig had not been hiding behind more Block than any single card of mine can break.",
+  "q4_different_intent": "Yes. The line is driven by the fact that the total incoming is only 7 and I survive it comfortably even naked. If the two attackers had telegraphed enough to threaten my 16 HP, roughly 13 or more between them, Sanctifying Ring's 4 Block plus its 3 to all becomes the mandatory play and I would take Ring plus All Streams, accepting a surviving Leaf Slime. Also, the status-card intent on Leaf Slime (M) is part of why I aimed a kill there rather than at Twig; if Leaf Slime (M) had been telegraphing nothing, or something harmless, I would have been more willing to let it live and think harder about Ring for the Block and the Twig chip. Conversely, if Twig Slime had shown a big attack rather than a 4, I would want its Block eroded now, which again argues for Ring."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.1224,
+  "top1": 24.5,
+  "top2": 21.5,
+  "lines_considered": 6,
+  "playouts": 9,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Shinobu \u2014 Sanctifying Ring",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 24.5
+   },
+   {
+    "cards": [
+     "Shinobu \u2014 Sanctifying Ring",
+     "Water's Edge"
+    ],
+    "score": 21.5
+   },
+   {
+    "cards": [
+     "Shinobu \u2014 Sanctifying Ring"
+    ],
+    "score": 15.6
+   },
+   {
+    "cards": [
+     "Water's Edge",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 14.8
+   },
+   {
+    "cards": [
+     "All Streams Flow to the Sea"
+    ],
+    "score": 8.9
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "unmapped_statuses": [],
+   "enemy_count": 3,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T04:42:30"
+}

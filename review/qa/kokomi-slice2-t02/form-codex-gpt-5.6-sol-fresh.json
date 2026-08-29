@@ -1,0 +1,29 @@
+{
+ "turn_id": "kokomi-slice2-t02",
+ "packet_sha256": "948b08c6f1aa2bcf9a328eccf0f6bf542ef6c2a8acc8c6286ae5276db4f94942",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Sounding Line",
+   "target": "Sludge Spinner",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Coral Guard",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Sounding Line on Sludge Spinner, then Coral Guard. This dealt 12 damage and gained 5 Block against the incoming 8 damage.",
+ "q2_other_line_considered": "I seriously considered playing Gyorin Formation alone to block all 8 incoming damage and gain 6 Block next turn.",
+ "q3_what_it_gave_up": "The chosen line gave up 3 HP, 6 Charge, and Gyorin Formation's 6 next-turn Block in exchange for dealing 12 damage now.",
+ "q4_different_intent": "Yes. If the enemy had not intended to attack, I would have played Sounding Line followed by Water's Edge for 18 damage instead of spending energy on Block.",
+ "q4_changed": true
+}

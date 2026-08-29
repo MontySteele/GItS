@@ -1,0 +1,95 @@
+{
+ "turn_id": "kokomi-slice1-r4-t04",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "board": {
+  "you": {
+   "hp": 16,
+   "max_hp": 70,
+   "block": 0,
+   "energy": 3,
+   "resources": {
+    "Charge": 8
+   },
+   "powers": []
+  },
+  "hand": [
+   {
+    "title": "Shinobu - Sanctifying Circle",
+    "text": "Deal 3 damage to ALL enemies. Gain 4 Block. Applies Electro.",
+    "text_source": "bridge",
+    "cost": "3",
+    "upgraded": false,
+    "playable": true,
+    "unplayable_reason": ""
+   },
+   {
+    "title": "Water's Edge",
+    "text": "Deal 6 damage. Applies Hydro.",
+    "text_source": "bridge",
+    "cost": "1",
+    "upgraded": false,
+    "playable": true,
+    "unplayable_reason": ""
+   },
+   {
+    "title": "All Streams Flow to the Sea",
+    "text": "Deal 9 damage, already including Charge. Applies Hydro.",
+    "text_source": "bridge",
+    "cost": "1",
+    "upgraded": false,
+    "playable": true,
+    "unplayable_reason": ""
+   }
+  ],
+  "enemies": [
+   {
+    "name": "Twig Slime (S)",
+    "hp": 9,
+    "max_hp": 9,
+    "block": 8,
+    "intent": {
+     "label": "4",
+     "text": "This enemy intends to Attack for 4 damage.",
+     "kind": "Aggressive"
+    },
+    "powers": []
+   },
+   {
+    "name": "Leaf Slime (M)",
+    "hp": 6,
+    "max_hp": 32,
+    "block": 0,
+    "intent": {
+     "label": "2",
+     "text": "This enemy intends to give you 2 Status cards.",
+     "kind": "Strategic"
+    },
+    "powers": []
+   },
+   {
+    "name": "Leaf Slime (S)",
+    "hp": 6,
+    "max_hp": 15,
+    "block": 0,
+    "intent": {
+     "label": "3",
+     "text": "This enemy intends to Attack for 3 damage.",
+     "kind": "Aggressive"
+    },
+    "powers": []
+   }
+  ]
+ },
+ "disclosures": [
+  "A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.",
+  "You are not being asked whether this turn is fun.",
+  "THE HAND BELOW IS THE WHOLE HAND. The cards the game dealt at the start of this fight were moved to the bottom of the draw pile before these were granted, so what is printed here is what was set up and nothing else.",
+  "The encounter is GENERATED. This file can write the enemies' HP and Block and cannot write their INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.",
+  "Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.",
+  "Charge is written to 8 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.",
+  "The player has no Strength and the enemies carry no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.",
+  "The board carries THREE living enemies rather than one."
+ ],
+ "packet_sha256": "aadfeb2b8f725695cd7041a32f1701741c924ee562a53934d6deb88e9b6d0aa2",
+ "run_seed": "R7W86HG7WHUD"
+}

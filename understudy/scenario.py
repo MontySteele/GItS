@@ -122,6 +122,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import time
 from dataclasses import dataclass, field
@@ -414,18 +415,36 @@ def _select_blob(state: dict[str, Any]) -> tuple[str, dict[str, Any]]:
     return "", {}
 
 
+# The game's rich-text markup, as it appears in a modal option's own name:
+# `[gold]`, `[/gold]`, `[b]`, and any other single bracketed tag. Folded out
+# by `card_key` -- see its docstring for the defect that made this necessary.
+_RICH_TEXT_TAG = re.compile(r"\[/?[a-z0-9_]+(?:=[^\]]*)?\]")
+
+
 def card_key(text: str) -> str:
     """One comparable key for a card named by id, loc key, or printed title.
 
     `KLEEMOD-TAKE_IT_FROM_THE_TOP`, `take_it_from_the_top` and
     `Take It From the Top` are the three spellings that appear across the
     sheets, the wire and a scenario file, and a scenario author should not have
-    to know which one this frame is using. Case, the BaseLib prefix and the
-    difference between `-`, `_` and a space all fold away; nothing else does.
+    to know which one this frame is using. Case, the BaseLib prefix, the game's
+    own RICH-TEXT TAGS and the difference between `-`, `_` and a space all fold
+    away; nothing else does.
+
+    WHY THE TAGS FOLD, and it is a defect this function was on the wrong side
+    of. A "Choose one" modal names its options with the game's markup left in
+    (`Spend 6 [gold]Charge[/gold]: gain 12 Block`), while the packet a grader
+    reads is SCRUBBED of markup by `qa_packet` before the face is printed. So a
+    replay answering the modal in the printed vocabulary -- which is the only
+    vocabulary a blind grader has -- could not match its own option, and every
+    priced modal line stopped `modal_unanswered`. Found live on Kokomi slice 2
+    `t06`, on both graders, 2026-08-29. Only the TAGS are removed; the words
+    between them are part of the name and stay.
     """
     key = str(text or "").strip().casefold()
     if key.startswith("kleemod-"):
         key = key[len("kleemod-"):]
+    key = _RICH_TEXT_TAG.sub("", key)
     for ch in ("-", "_", "'", "!", ",", "."):
         key = key.replace(ch, " ")
     return " ".join(key.split())

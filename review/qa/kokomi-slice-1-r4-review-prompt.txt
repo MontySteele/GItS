@@ -1,0 +1,419 @@
+You are reviewing round 4 of a blind-QA process on a card game's PROTOTYPE
+cards. You did not design them and you are not being asked whether they are
+good, fun, or balanced. You are being asked ONE question per arm, from evidence.
+
+THE SHAPE OF THE EVIDENCE. Four staged turns in TWO MATCHED PAIRS. Within a pair
+the two turns are the SAME board -- same HP, Block, energy, resource bank, the
+same enemies on the same generated seed, the same other cards in hand -- and
+differ in EXACTLY ONE CARD. One half holds a SHIPPED card; the other holds a
+PROTOTYPE being tried in its place. The turn ids are opaque on purpose and you
+are told below which half is which.
+
+Each turn was played by TWO independent blind graders. Neither had repo access,
+history, or any prior turn; each saw only the page reproduced below and answered
+four questions. Their answers are VERBATIM and unedited. The falsifier's verdict
+on each form is given; the only refusal rule in play is `intent_insensitive` --
+the grader answered that a different telegraphed intent would not have changed
+their line.
+
+THE REPLAY. Every graded line was then replayed on the LIVE game, on that turn's
+own pinned seed and staged board, and the board's actual answer is printed
+beside each form. Where the board contradicts a form's stated arithmetic it is
+flagged -- recorded, never re-graded.
+
+WHY THIS ROUND EXISTS, AND IT MATTERS TO YOUR JUDGMENT. Round 3 of this process
+RETURNED both of the arms below, and named its own repair each time. You are
+reading the repaired boards. The cards have NOT changed by one character; only
+the boards have. So the question is not only whether the arm works, but whether
+the repair did what it was asked to do.
+
+* Pair 1 (the "either" shape). Round 3's verdict: "Seriously weighed, but Block
+  mode sacrificed twelve damage for three Block and never became competitive on
+  this board." What it asked for: "a stronger or more discriminating board."
+  THE REPAIR: one of the two identical filler attacks was removed from the hand,
+  so the turn can no longer route around the card, and the player's HP was
+  lowered so the three Block is a larger share of what is left.
+* Pair 2 (the "priced" shape -- the same effects as its shipped twin at one more
+  energy). Round 3's verdict: "Played, but the bundled AOE removal plus Block
+  remained intent-insensitive; the extra cost removed only a follow-up," and it
+  asked for a board where "paying for Block did not compete with the card's
+  decisive two-enemy removal." THE REPAIR: the two small bodies were raised from
+  3 HP to 6, so the card's 3-damage all-enemy hit no longer removes anything and
+  the card must be bought for its Block rather than for a board clear.
+
+WHAT THE SLICE IS ASKING OVERALL. The shipped companion cards BUNDLE damage and
+Block into one play for one cost, so defence is subsidised and the enemy's
+telegraph often cannot change the turn. Each prototype makes the player PAY for
+that defence -- one by making the two halves mutually exclusive, the other by
+raising the cost. The question is whether paying changes the KIND of decision.
+
+FOR EACH OF THE TWO ARMS, answer these five, numbered, in this order:
+
+1. **Card involvement.** Was the prototype played, seriously weighed, or
+   ignored? Quote the grader.
+2. **Change in kind of choice.** Compare the prototype half against its shipped
+   half. Did the KIND of decision change, or only its numbers?
+3. **Did the cost bind?** Did paying for the defence cost something concrete on
+   this turn? Name it.
+4. **Did the repair work?** Answer against round 3's prescription quoted above:
+   did the new board ask the question the old one could not?
+5. **Judgment: RETURN, ADVANCE, or ESCALATE.** ADVANCE means the arm is worth
+   asking again with whole-fight play -- NOT that it should ship. RETURN means
+   the arm or its board still needs rework; say which and what. ESCALATE means
+   the two graders contradict each other in a way you cannot resolve.
+
+Keep each answer to a sentence or two. Then a short closing paragraph: what the
+round supports, and whether anything warrants ESCALATE.
+
+
+
+##########################################################################
+## Pair 1 - the mutually-exclusive (either) shape
+##########################################################################
+
+
+==========================================================================
+### SHIPPED HALF: turn `kokomi-slice1-r4-t01`
+==========================================================================
+
+--- THE PAGE THE GRADERS SAW ---
+
+# Staged turn `kokomi-slice1-r4-t01`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 14/70
+- Block 0
+- Energy 3
+- Charge: 8
+
+## Your hand
+
+### Thoma — Crimson Ooyoroi
+
+- Cost: 2
+- Deal 8 damage. Gain 3 Block. Applies Pyro.
+- (card text read from: bridge)
+
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### All Streams Flow to the Sea
+
+- Cost: 1
+- Deal 9 damage, already including Charge. Applies Hydro.
+- (card text read from: bridge)
+
+## The other side
+
+### Nibbit
+
+- HP 24/45
+- Intent: Aggressive, 12, This enemy intends to Attack for 12 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- THE HAND BELOW IS THE WHOLE HAND. The cards the game dealt at the start of this fight were moved to the bottom of the draw pile before these were granted, so what is printed here is what was set up and nothing else.
+- The encounter is GENERATED. This file can write the enemies' HP and Block and cannot write their INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- Charge is written to 8 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.
+- The player has no Strength and the enemies carry no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.
+
+
+--- GRADER `opus-5-fresh` ---
+VERDICT: SURVIVES
+chosen line: [{"card": "Thoma \u2014 Crimson Ooyoroi", "target": "Nibbit"}, {"card": "All Streams Flow to the Sea", "target": "Nibbit"}]
+Q1 what did you play: Thoma — Crimson Ooyoroi into Nibbit first, then All Streams Flow to the Sea into Nibbit. That is all 3 energy (2 + 1) and it is the most damage the hand can produce: 8 + 9 = 17, taking Nibbit from 24 to 7, while Thoma's 3 Block still comes along for free. Nibbit's 12 leaves me at 5 HP instead of 2. Nothing in the hand reaches 24, so killing it this turn was never on the table; the goal was to leave it in one-hit range for next turn while surviving the telegraphed 12. I led with Thoma because it is the 2-cost and I wanted it down before I could be short on energy, and because if the Pyro it applies interacts with the Hydro that follows, the order costs me nothing and might gain something — I am not counting on that, the 17 is all printed numbers.
+Q2 other line considered: Water's Edge plus All Streams Flow to the Sea — 15 damage for only 2 energy, banking one. I dropped it because energy does not carry and the hand does not survive the turn, so the 'saved' point is worth nothing and it is simply 2 less damage and 3 less Block than what I played. I also weighed Thoma plus Water's Edge (14 damage, same 3 Block), but that is the chosen line with 3 damage shaved off, so it is dominated outright. Honestly, once I noticed Thoma's Block is attached to the biggest attack, the turn stopped being close: my line beats both alternatives on every axis at once.
+Q3 what it gave up: Water's Edge sits unplayed — 6 damage and a Hydro application left on the table, since 2+1+1 exceeds 3 energy. That is the whole cost; I gave up no Block and no tempo, because the line that keeps Water's Edge would have to cut All Streams and lose more damage than it gains. I also gave up any chance of ending the turn above 5 HP, but no configuration of this hand does better than 3 Block against a 12.
+Q4 would a different intent have changed it: Yes. Against a bigger telegraph the Block stops being incidental and starts being the whole point. If Nibbit had shown 15 or 16, Thoma becomes mandatory for its 3 Block and I would still take the same two cards — but if the hand had offered more Block, I would have taken it over damage. More concretely: if the intent were an attack in the 15–17 band, the 3 Block is the margin between living and dying and I would refuse any line that skips Thoma, including the 15-damage double-Hydro line I considered. If the intent were a Defend or a buff — no attack at all — the Block is dead weight, and I would want the cheapest maximum damage instead: Water's Edge plus All Streams for 15 at 2 energy is still 2 short of 17, so I would probably still play the same two cards, but the reasoning changes from 'survive and set up' to pure damage. So the intent does not always move my hands, but it moves what I am buying.
+q4_changed: True
+LIVE REPLAY: player HP 14 -> 14, Block 0 -> 3; Nibbit 24 -> 3 HP (Block 0 -> 0). (The replay stops before the enemies act, so player HP is unchanged by design.)
+REPLAY CHECK: FLAGGED. The form claims 8 + 9 = 17 damage. The board dealt 21 (Nibbit 24 -> 3). The extra 4 is an ELEMENTAL REACTION between the Pyro this card applies and the Hydro that follows it -- which this grader explicitly guessed at and declined to count. The same reaction appears on the shipped half and the prototype half alike, so it does not move the comparison.
+
+--- GRADER `codex-gpt-5.6-sol-fresh` ---
+VERDICT: SURVIVES
+chosen line: [{"card": "Thoma \u2014 Crimson Ooyoroi", "target": "Nibbit", "exhaust": null, "choose": null}, {"card": "All Streams Flow to the Sea", "target": "Nibbit", "exhaust": null, "choose": null}]
+Q1 what did you play: I played Thoma — Crimson Ooyoroi on Nibbit, then All Streams Flow to the Sea on Nibbit, dealing 17 damage and gaining 3 Block.
+Q2 other line considered: I seriously considered Water's Edge followed by All Streams Flow to the Sea, which would deal 15 damage but gain no Block.
+Q3 what it gave up: It gave up playing Water's Edge and therefore left Nibbit alive at 7 HP rather than spending that card's Hydro application; within the printed information, it gave up nothing in immediate damage or protection compared with the alternative.
+Q4 would a different intent have changed it: Yes. If Nibbit had not telegraphed damage, the 3 Block from Thoma — Crimson Ooyoroi could have been irrelevant, though I would still favor this line on the printed damage totals; an intent requiring a different immediate priority could have changed the choice.
+q4_changed: True
+LIVE REPLAY: player HP 14 -> 14, Block 0 -> 3; Nibbit 24 -> 3 HP (Block 0 -> 0). (The replay stops before the enemies act, so player HP is unchanged by design.)
+REPLAY CHECK: FLAGGED. The form claims 17 damage. The board dealt 21 (Nibbit 24 -> 3), for the same elemental reaction described above. Present on both halves, so it does not move the comparison.
+
+
+==========================================================================
+### PROTOTYPE HALF: turn `kokomi-slice1-r4-t02`
+==========================================================================
+
+--- THE PAGE THE GRADERS SAW ---
+
+# Staged turn `kokomi-slice1-r4-t02`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 14/70
+- Block 0
+- Energy 3
+- Charge: 8
+
+## Your hand
+
+### Thoma - Blazing Ooyoroi
+
+- Cost: 2
+- Choose one: Deal 8 damage, applying its element | Gain 3 Block, applying no element. Applies Pyro.
+- (card text read from: bridge)
+
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### All Streams Flow to the Sea
+
+- Cost: 1
+- Deal 9 damage, already including Charge. Applies Hydro.
+- (card text read from: bridge)
+
+## The other side
+
+### Nibbit
+
+- HP 24/45
+- Intent: Aggressive, 12, This enemy intends to Attack for 12 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- THE HAND BELOW IS THE WHOLE HAND. The cards the game dealt at the start of this fight were moved to the bottom of the draw pile before these were granted, so what is printed here is what was set up and nothing else.
+- The encounter is GENERATED. This file can write the enemies' HP and Block and cannot write their INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- Charge is written to 8 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.
+- The player has no Strength and the enemies carry no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.
+
+
+--- GRADER `opus-5-fresh` ---
+VERDICT: SURVIVES
+chosen line: [{"card": "Thoma - Blazing Ooyoroi", "target": "Nibbit", "choose": "Deal 8 damage, applying its element"}, {"card": "All Streams Flow to the Sea", "target": "Nibbit"}]
+Q1 what did you play: Thoma - Blazing Ooyoroi on its damage half into Nibbit for 8, then All Streams Flow to the Sea into Nibbit for 9. That is 17 damage for my whole 3 energy and takes Nibbit from 24 to 7. Water's Edge stays unplayed because after Thoma's 2 energy I only have 1 left and All Streams hits for 9 where Water's Edge hits for 6. I put Thoma first partly for the Pyro application landing before a Hydro hit, on the chance the game scores something off that ordering; if it does not, the order costs me nothing. I cannot kill this turn - 24 HP is above my 17 ceiling - so the question was purely how much of the gap I close before eating the 12.
+Q2 other line considered: Two of them. First, Water's Edge plus All Streams for 15, holding Thoma - strictly worse than 17 for the same three energy spent, so it died fast. The second was real: Thoma on the Block half plus All Streams, which is 3 Block and 9 damage. That leaves me at 5 HP instead of 2, with Nibbit at 15 instead of 7. I rejected it because 3 Block against a 12 is not a save, it is a two-HP rebate, and it costs 8 damage off the enemy. At 14 HP against a 12-per-turn attacker I am dead in two turns either way unless I close the fight, so the only survival plan that works is winning the race, and 7 remaining is a killable number next turn where 15 is not.
+Q3 what it gave up: All of my defence and most of my margin. I end the turn at 2 HP with zero Block, so any chip damage, any intent larger than telegraphed, or any failure to draw 7 damage next turn ends the run. I also gave up Water's Edge's 6 damage and its Hydro application this turn - it sits in hand unplayable for want of energy - and I gave up the option of banking Thoma for a turn where 3 Block would actually blank an intent.
+Q4 would a different intent have changed it: Yes. A small telegraph - anything at 3 or less - flips me to Thoma's Block half, because there 3 Block blanks the hit entirely and buying a whole turn is worth more than 8 damage into a 24 HP enemy. A defensive or buff intent would push me the same way for the same reason. But nothing at the top end moves me: at 12, or 20, or lethal, 3 Block is noise and max damage is the only line, so the whole range from roughly 4 upward plays identically to what I did.
+q4_changed: True
+LIVE REPLAY: player HP 14 -> 14, Block 0 -> 0; Nibbit 24 -> 3 HP (Block 0 -> 0). (The replay stops before the enemies act, so player HP is unchanged by design.)
+REPLAY CHECK: FLAGGED. The form claims 8 + 9 = 17. The board dealt 21 (Nibbit 24 -> 3) -- the same Pyro/Hydro reaction, present on the shipped half too. The mode choice itself replayed exactly as the form stated.
+
+--- GRADER `codex-gpt-5.6-sol-fresh` ---
+VERDICT: SURVIVES
+chosen line: [{"card": "All Streams Flow to the Sea", "target": "Nibbit", "exhaust": null, "choose": null}, {"card": "Thoma - Blazing Ooyoroi", "target": null, "exhaust": null, "choose": "Gain 3 Block, applying no element."}]
+Q1 what did you play: I played All Streams Flow to the Sea on Nibbit, then Thoma - Blazing Ooyoroi and chose Gain 3 Block, applying no element.
+Q2 other line considered: I seriously considered playing All Streams Flow to the Sea and choosing the 8-damage option on Thoma - Blazing Ooyoroi, dealing 17 total damage while taking the full attack.
+Q3 what it gave up: It gave up 8 damage to reduce the telegraphed 12 damage by 3 Block, leaving Nibbit at 15 HP instead of 7 HP.
+Q4 would a different intent have changed it: Yes. If Nibbit had not telegraphed damage, I would have chosen Thoma - Blazing Ooyoroi's 8-damage option instead of 3 Block.
+q4_changed: True
+LIVE REPLAY: player HP 14 -> 14, Block 0 -> 0; Nibbit 24 -> 15 HP (Block 0 -> 0). (The replay stops before the enemies act, so player HP is unchanged by design.)
+REPLAY CHECK: INCOMPLETE, and the reason is a DEFECT rather than a disagreement. This grader took the BLOCK half, which gains Block and has no target, and wrote no target -- correctly, from the printed face. The game REFUSED the play: 'Card requires a target. Provide target with an entity_id.' The card is typed as an Attack, so the game demands a target even on the mode that attacks nothing. The first play (All Streams Flow to the Sea, 9 damage, Nibbit 24 -> 15) landed; the card under test never resolved. This form is mechanically untested, not contradicted.
+
+
+##########################################################################
+## Pair 2 - the priced-in-cost shape
+##########################################################################
+
+
+==========================================================================
+### SHIPPED HALF: turn `kokomi-slice1-r4-t03`
+==========================================================================
+
+--- THE PAGE THE GRADERS SAW ---
+
+# Staged turn `kokomi-slice1-r4-t03`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 16/70
+- Block 0
+- Energy 3
+- Charge: 8
+
+## Your hand
+
+### Shinobu — Sanctifying Ring
+
+- Cost: 2
+- Deal 3 damage to ALL enemies. Gain 4 Block. Applies Electro.
+- (card text read from: bridge)
+
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### All Streams Flow to the Sea
+
+- Cost: 1
+- Deal 9 damage, already including Charge. Applies Hydro.
+- (card text read from: bridge)
+
+## The other side
+
+### Twig Slime (S)
+
+- HP 9/9, Block 8
+- Intent: Aggressive, 4, This enemy intends to Attack for 4 damage.
+
+### Leaf Slime (M)
+
+- HP 6/32
+- Intent: Strategic, 2, This enemy intends to give you 2 Status cards.
+
+### Leaf Slime (S)
+
+- HP 6/15
+- Intent: Aggressive, 3, This enemy intends to Attack for 3 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- THE HAND BELOW IS THE WHOLE HAND. The cards the game dealt at the start of this fight were moved to the bottom of the draw pile before these were granted, so what is printed here is what was set up and nothing else.
+- The encounter is GENERATED. This file can write the enemies' HP and Block and cannot write their INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- Charge is written to 8 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.
+- The player has no Strength and the enemies carry no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.
+- The board carries THREE living enemies rather than one.
+
+
+--- GRADER `opus-5-fresh` ---
+VERDICT: SURVIVES
+chosen line: [{"card": "Water's Edge", "target": "Leaf Slime (M)"}, {"card": "All Streams Flow to the Sea", "target": "Leaf Slime (S)"}]
+Q1 what did you play: Water's Edge into Leaf Slime (M) for exactly its 6 remaining HP, then All Streams Flow to the Sea into Leaf Slime (S) for 9, also lethal on its 6. Two cards, two energy, two enemies dead. One energy is left over and there is nothing I want to spend it on, since Sanctifying Ring costs 2. That removes the 3-damage attack and the 2 status cards from the board entirely, and leaves only Twig Slime, which hits me for 4. I go to 12 of 70 with a clean deck and a single enemy sitting behind 8 Block.
+Q2 other line considered: Yes: Sanctifying Ring plus All Streams Flow to the Sea, for the full 3 energy. Ring gives 4 Block and chips 3 off everything, which shaves Twig Slime's Block from 8 to 5 and puts both Leaf Slimes into one-shot range; All Streams then kills Leaf Slime (M) so I still dodge the status cards. That line takes 7 incoming against 4 Block, so 3 damage, ending at 13 HP instead of 12. I weighed the extra point of HP and the 3 Block scraped off Twig against leaving Leaf Slime (S) alive at 3 HP. Leaving it alive costs me at least 3 more damage next turn, or a card to finish it, which is more than the 1 HP the Ring line saved. The 3 chip on Twig's Block is worth something later but Block on a slime is likely to be re-applied or irrelevant compared to a whole extra body swinging. So the double-kill won.
+Q3 what it gave up: It gave up all defense: I take the full 4 from Twig Slime with 0 Block, and I finish at 12 HP out of 70, which is a thin cushion. It gave up the 3 chip damage on Twig Slime and the erosion of its 8 Block, so Twig is untouched and I still have to punch through 8 Block before doing a point of real damage to it. It gave up the Electro application from Sanctifying Ring and whatever reaction that could have set up on a later Hydro hit. It also gave up 1 unspent energy, and it overkilled by 3 with All Streams into a 6 HP target, damage I could have aimed at Twig if Twig had not been hiding behind more Block than any single card of mine can break.
+Q4 would a different intent have changed it: Yes. The line is driven by the fact that the total incoming is only 7 and I survive it comfortably even naked. If the two attackers had telegraphed enough to threaten my 16 HP, roughly 13 or more between them, Sanctifying Ring's 4 Block plus its 3 to all becomes the mandatory play and I would take Ring plus All Streams, accepting a surviving Leaf Slime. Also, the status-card intent on Leaf Slime (M) is part of why I aimed a kill there rather than at Twig; if Leaf Slime (M) had been telegraphing nothing, or something harmless, I would have been more willing to let it live and think harder about Ring for the Block and the Twig chip. Conversely, if Twig Slime had shown a big attack rather than a 4, I would want its Block eroded now, which again argues for Ring.
+q4_changed: True
+LIVE REPLAY: player HP 16 -> 16, Block 0 -> 0; Twig Slime (S) 9 -> 9 HP (Block 8 -> 8); Leaf Slime (M) 6 -> DEAD HP (Block 0 -> None); Leaf Slime (S) 6 -> DEAD HP (Block 0 -> None). (The replay stops before the enemies act, so player HP is unchanged by design.)
+REPLAY CHECK: confirms the form's stated arithmetic.
+
+--- GRADER `codex-gpt-5.6-sol-fresh` ---
+VERDICT: SURVIVES
+chosen line: [{"card": "Water's Edge", "target": "Leaf Slime (M)", "exhaust": null, "choose": null}, {"card": "All Streams Flow to the Sea", "target": "Leaf Slime (S)", "exhaust": null, "choose": null}]
+Q1 what did you play: Water's Edge on Leaf Slime (M), then All Streams Flow to the Sea on Leaf Slime (S), killing both.
+Q2 other line considered: Shinobu — Sanctifying Ring followed by All Streams Flow to the Sea on one of the Leaf Slimes, for 4 Block while still killing one Leaf Slime.
+Q3 what it gave up: It gave up the 4 Block and area damage from Shinobu — Sanctifying Ring, and left 1 Energy unused.
+Q4 would a different intent have changed it: Yes. If the Leaf Slimes had nonthreatening intents while unavoidable incoming attack damage made Block more valuable, I would have favored Shinobu — Sanctifying Ring plus one attack.
+q4_changed: True
+LIVE REPLAY: player HP 16 -> 16, Block 0 -> 0; Twig Slime (S) 9 -> 9 HP (Block 8 -> 8); Leaf Slime (M) 6 -> DEAD HP (Block 0 -> None); Leaf Slime (S) 6 -> DEAD HP (Block 0 -> None). (The replay stops before the enemies act, so player HP is unchanged by design.)
+REPLAY CHECK: confirms the form's stated arithmetic.
+
+
+==========================================================================
+### PROTOTYPE HALF: turn `kokomi-slice1-r4-t04`
+==========================================================================
+
+--- THE PAGE THE GRADERS SAW ---
+
+# Staged turn `kokomi-slice1-r4-t04`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 16/70
+- Block 0
+- Energy 3
+- Charge: 8
+
+## Your hand
+
+### Shinobu - Sanctifying Circle
+
+- Cost: 3
+- Deal 3 damage to ALL enemies. Gain 4 Block. Applies Electro.
+- (card text read from: bridge)
+
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### All Streams Flow to the Sea
+
+- Cost: 1
+- Deal 9 damage, already including Charge. Applies Hydro.
+- (card text read from: bridge)
+
+## The other side
+
+### Twig Slime (S)
+
+- HP 9/9, Block 8
+- Intent: Aggressive, 4, This enemy intends to Attack for 4 damage.
+
+### Leaf Slime (M)
+
+- HP 6/32
+- Intent: Strategic, 2, This enemy intends to give you 2 Status cards.
+
+### Leaf Slime (S)
+
+- HP 6/15
+- Intent: Aggressive, 3, This enemy intends to Attack for 3 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- THE HAND BELOW IS THE WHOLE HAND. The cards the game dealt at the start of this fight were moved to the bottom of the draw pile before these were granted, so what is printed here is what was set up and nothing else.
+- The encounter is GENERATED. This file can write the enemies' HP and Block and cannot write their INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- Charge is written to 8 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.
+- The player has no Strength and the enemies carry no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.
+- The board carries THREE living enemies rather than one.
+
+
+--- GRADER `opus-5-fresh` ---
+VERDICT: SURVIVES
+chosen line: [{"card": "Water's Edge", "target": "Leaf Slime (M)"}, {"card": "All Streams Flow to the Sea", "target": "Leaf Slime (S)"}]
+Q1 what did you play: Water's Edge into Leaf Slime (M) for exactly 6, killing it, then All Streams Flow to the Sea into Leaf Slime (S) for 9, killing it. Two cards, two energy, two corpses. Both Leaf Slimes sit at 6 HP with no Block, so each of my single-target attacks is exactly enough or more; the Twig Slime's 8 Block makes it the wrong place to spend anything, since All Streams would push only 1 damage through it. Killing the Medium Leaf cancels the 2 Status cards it was about to hand me, and killing the Small Leaf cancels 3 of the 7 incoming damage. I eat the Twig's 4 and end at 12 HP with the board down to one blocked-up 9 HP enemy. The third energy goes unspent because nothing in hand costs 1 anymore and Sanctifying Circle costs 3.
+Q2 other line considered: Shinobu - Sanctifying Circle alone, for the 4 Block and the 3-to-all. I checked it and dropped it fast: 3 damage to all kills nothing, it is fully absorbed by the Twig's 8 Block, and it leaves both Leaf Slimes alive to hand me 2 Status cards and hit me for 3. Trading 4 Block against 3 damage prevented plus two Status cards denied plus two enemies removed from the fight is not close. I also looked at pointing All Streams at the Twig Slime to start chewing its Block, and rejected it — 9 into 8 Block is 1 damage and lets both Leaf Slimes live.
+Q3 what it gave up: The 4 Block, so I take the Twig's full 4 and drop to 12 of 70, which is thin. It also gives up all progress against the Twig Slime: its 8 Block is untouched, it is still at 9 HP, and I spent nothing softening it, so next turn starts with that Block possibly refreshed. And it wastes 3 damage of overkill on the Small Leaf plus one unspent energy, since Sanctifying Circle could not be afforded alongside anything.
+Q4 would a different intent have changed it: Yes, though it would take a lot. With the telegraph as printed, total incoming is 7 and killing two enemies beats blocking 4. If the Twig Slime had telegraphed a genuinely dangerous hit — something in the low teens against my 16 HP — and the Leaf Slimes were doing nothing threatening, Sanctifying Circle becomes the play purely for the Block and the chip damage, accepting the Status cards. Short of that, no intent on the two 6 HP slimes changes anything: they die either way, and removing them is worth more than 4 Block.
+q4_changed: True
+LIVE REPLAY: player HP 16 -> 16, Block 0 -> 0; Twig Slime (S) 9 -> 9 HP (Block 8 -> 8); Leaf Slime (M) 6 -> DEAD HP (Block 0 -> None); Leaf Slime (S) 6 -> DEAD HP (Block 0 -> None). (The replay stops before the enemies act, so player HP is unchanged by design.)
+REPLAY CHECK: confirms the form's stated arithmetic.
+
+--- GRADER `codex-gpt-5.6-sol-fresh` ---
+VERDICT: SURVIVES
+chosen line: [{"card": "Water's Edge", "target": "Leaf Slime (M)", "exhaust": null, "choose": null}, {"card": "All Streams Flow to the Sea", "target": "Leaf Slime (S)", "exhaust": null, "choose": null}]
+Q1 what did you play: I played Water's Edge on Leaf Slime (M), killing it, then All Streams Flow to the Sea on Leaf Slime (S), killing it.
+Q2 other line considered: I seriously considered Shinobu - Sanctifying Circle for 4 Block and damage to all three enemies, but it would leave both Leaf Slimes alive.
+Q3 what it gave up: It gave up 4 Block, Electro application, and damage to Twig Slime (S), while leaving 1 Energy unused.
+Q4 would a different intent have changed it: Yes. A sufficiently larger attack telegraphed by Twig Slime (S), especially if the Leaf Slimes were not threatening damage or Status cards, could have made Shinobu - Sanctifying Circle preferable for its Block.
+q4_changed: True
+LIVE REPLAY: player HP 16 -> 16, Block 0 -> 0; Twig Slime (S) 9 -> 9 HP (Block 8 -> 8); Leaf Slime (M) 6 -> DEAD HP (Block 0 -> None); Leaf Slime (S) 6 -> DEAD HP (Block 0 -> None). (The replay stops before the enemies act, so player HP is unchanged by design.)
+REPLAY CHECK: confirms the form's stated arithmetic.
