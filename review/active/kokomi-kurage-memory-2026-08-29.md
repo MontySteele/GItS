@@ -2033,6 +2033,96 @@ ledger rows REVERTED; no game process is running. Seeds unspent. Nothing under
 `review/qa/blindplay/` was read or written.
 
 
+#### Gate B — DIAGNOSED and RE-RUN 2026-08-29: **PASS, all three states**
+
+The record above stands as published (R101b). What it observed was real; what
+it could not say is the cause, and the cause was neither entry rule and neither
+reader.
+
+**`EB-196` — the memory was cleared between every pair of hooks.**
+`KurageMemory.ResetForCombat` was called from `KokomiResourceHooks.Subscribe`,
+on the reading that the subscription delegate is handed a fresh combat once per
+fight. It is not. `CombatState.IterateHookListeners` is an iterator over
+`ModHelper.IterateAllCombatStateSubscribers(combatState)`, which re-invokes
+every mod's delegate, and a combat enumerates its hook listeners on EVERY hook
+broadcast — so the clear ran between every pair of hooks and an entry filed by
+one hook was gone before the next could read it. That is verdict **(a)** in the
+strict sense that the arm shipped with a memory that could never HOLD anything,
+and it is why both rules looked broken at once: they share nothing except the
+queue that was being wiped. The same line clears `PlayedAnything`, which is the
+strip's second wrong sentence — "you have played no card this turn" after cards
+were played. One cause, both symptoms.
+
+The fix: the per-fight clear moved to `BeforeCombatStart` (the hook the game
+raises once per combat, already proven to fire because it is where the base
+kit's jellyfish is installed), `Subscribe` keeps only the stash it exists for,
+and `ResetForCombat` gained an identity guard. Also in `Enrol`:
+`CardModel.Keywords` walks `Pile -> CombatState` and throws for a card that is
+not in a pile, which a card reaching the exhaust funnel can be — the `ephemeral`
+read is now `SafeTitle`'s try/catch idiom, because an enrolment must not be lost
+to a read that only decorates the strip.
+
+**`EB-197` — the buff printed a countdown it does not have.** Nothing under the
+flag ticks the Bake-Kurage down (§12.6 items 1, 2 and 8), but its face kept the
+shipped "Lasts {Amount} more turn". Under `PROTOTYPE_CARDS` it now prints the
+lifetime it has. The release face is byte-identical.
+
+**Locks, all seen to FAIL against the pre-fix build first**, in
+`klee-mod/KleeTests/Prototype/`: `KurageMemoryLifecycleTests` — the two entry
+rules PLAYED rather than declared unreachable (a `Seat` carries a real
+`Creature`, which is all `Enrol` reads); the bite,
+`The_memory_survives_the_subscriber_list_being_re_enumerated`, which files one
+Muster and one Exhaust — the two the live gate played and lost — and re-hands
+the same combat; `The_pulse_key_survives_the_same_re_enumeration`; and two
+structural pins on where the clear lives, plus one that reads the
+re-enumeration off `sts2.dll` rather than trusting a comment. Pre-fix output,
+verbatim: `Assert.DoesNotContain() Failure: Item found in set … Found:
+"KurageMemory.ResetForCombat"`, `Assert.Contains() Failure: Item not found in
+set … Not found: "KurageMemory.ClearForNewCombat"`, and both entry-rule tests
+`System.NullReferenceException … CardModel.get_Keywords`. `KurageBuffFaceTests`
+failed pre-fix on `Found: "Lasts"` and `Not found: "whole fight"`.
+
+**THE RE-RUN**, from the art-bearing main checkout on the same pin, installed
+stamp **`0.2.1456+proto`, `validate: OK`** on the full gate. A fresh Kokomi run
+(seed `YU4EBKU3XHEG`, seedless of the sealed slate — the pinned
+`KURAGEMEM001/002/003` are still UNSPENT), first fight, base kit only, no
+prototype arm granted. Captures in `review/qa/eb196-gateb/`.
+
+| state | file | the strip, verbatim |
+|---|---|---|
+| EMPTY | `gateB-state0-turn1-empty.md` | `Charge 0 — memory empty` |
+| BLOCKED | `gateB-state2-blocked.md` | `Charge 0 / 3 — Coral Guard blocked` + `1. Coral Guard — 3 Charge — aims at random — BLOCKED: nothing behind it fires` |
+| a QUEUE | `gateB-state3-two-entries.md` | the blocked front with a `free` memory behind it |
+| FIRES NEXT | `gateB-state4-fires-next.md` | `Charge 4 / 3 — Coral Guard fires next turn` |
+| FIRED | `gateB-state5-after-fire.md` | front gone, bank 4 -> 1, Block 5 on the board |
+
+**So P4 is now GRADEABLE**: a blocked front does not read like an empty memory
+— the empty state says `memory empty` and lists nothing, the blocked state
+prints the bank against the front's own price, names the card and says
+`BLOCKED: nothing behind it fires`. Whether that is legible ENOUGH is the
+tester's answer to give, and it is not given here.
+
+Everything else the gate proves in passing, none of it a measurement: **Rule 1**
+filed the SACRIFICE (`Coral Guard`, price 3) and not the recruit; **Rule 2**
+filed the recruit when it burned, so one Muster produced two memories, as ruled;
+a 0-cost memory printed `free`; the ONE-PER-TURN latch held (the free memory
+behind the front did not also fire); the BLOCK held the bank across a whole turn
+rather than spending it on something cheaper; and the TARGET rule showed both
+faces on one screen — `aims at Sludge Spinner` for a memory that was played at a
+body, `aims at random` for one that never was. The wire agrees field for field
+(`gateB-wire-after-fire.json`, `rule: "muster"` / `rule: "exhaust"` per row).
+
+One observation, not a defect and not fixed: a Muster recruit enrols with
+`ephemeral: true`, i.e. the rule does not see the Exhaust the Muster grants it
+at the moment it files. `ephemeral` is RECORDED AND BEHAVIOUR-FREE by
+construction (§11.3), so nothing today reads it; whoever attaches behaviour to
+it under §11.6 item 1 has to fix this first, and [USER]'s ruling on that field
+is where it belongs.
+
+**State left on disk.** `mods\klee` carries **`0.2.1456+proto`** — installed,
+validated, and proven to start and play a run. All four `embark` ledger rows
+REVERTED, no game process, seeds unspent.
+
 ### 13.7 What this run cannot answer
 
 Written down so nobody overclaims off it.
