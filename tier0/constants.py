@@ -65,7 +65,67 @@ CONTROL_UPTIME_CARRY = 0.40   # §2.2a detector: won fights with more than
                               # (propose-and-tune value from the errata)
 
 # --- Klee resources (spec §4.2; klee-character-design.md §3) ---
+# RETIRED-UNDER-FLAG. `SPARKS_FOR_FREE_ATTACK` is the base rule's whole number
+# and it is UNREAD whenever `SPARK_ALT_COST_ENABLED` is true: with the flag on
+# there is no threshold, no zeroing and no automatic consume, so the constant
+# describes a rule that is not running. It is not deleted, because the flag's
+# entire purpose (PICK 6, option 1) is to let the two economies stand side by
+# side and be measured against each other; deleting it would make the OFF arm
+# unexpressible. `combat.spark_threshold` carries the same marking.
 SPARKS_FOR_FREE_ATTACK = 3    # at 3 Sparks, next Attack costs 0
+# =============================================================================
+# SPARKS AS AN ALTERNATIVE COST -- R213 E2 PROTOTYPE ARM, QUARANTINED.
+#
+# [USER], 2026-08-29: "The old base rule ('At 3 Sparks, your Attacks cost 0.
+# Playing one consumes 3') is being retired as the universal base mechanic;
+# Sparks become an ALTERNATIVE card cost (some Klee cards cost Sparks instead
+# of Energy); Bomb detonation stays the main source."
+#
+# THE NAME AND THE HOME are the repo's own convention, not a new one: a
+# behaviour switch is a `*_ENABLED` boolean declared beside the code it gates
+# (`PILOT_POLICIES_ENABLED`, `MODE_CHOOSER_ENABLED` in tier0/pilot/policy.py),
+# and this one lives beside the constant it retires.
+#
+# WHAT THE FLAG BUYS, and it is the reason PICK 6 took option 1 rather than
+# flipping the rule outright: with it OFF every Klee number ever measured
+# stays comparable, and the two economies can be run as two arms of one
+# question. FLAG OFF IS BYTE-IDENTICAL TO TODAY -- an acceptance condition
+# pinned by tier0/tests/test_spark_alt_cost.py, not an intention.
+#
+# WHAT MOVES WHEN IT IS ON, exhaustively (every site names this constant):
+#   * combat.card_cost      -- the Attack-zeroing branch does not run.
+#   * combat.play_card      -- the automatic consume does not run.
+#   * combat.spark_price    -- the strict Rare Power contributes a price.
+#   * loader._starter_ids   -- two starter substitutions (PICK 1, opts 1+5).
+#   * pilot/policy.py       -- a Spark stops being "a third of a free Attack"
+#                              and becomes a share of the cheapest affordable
+#                              sink.
+#   * tier05/draft.py       -- the Spark dials are re-derived (PICK 7).
+# Nothing else in either engine reads it.
+SPARK_ALT_COST_ENABLED = False
+
+# THE STRICT RARE POWER (PICK 5, wording (1), sub-pick (a)). While
+# `spark_attack_cost` is on the player, an Attack that does NOT already print
+# a Spark price costs 0 Energy and this many Sparks instead, and is unplayable
+# below them. An Attack that already prints one is UNAFFECTED -- sub-pick (a),
+# because (b) would raise the price of the very cards the archetype drafts.
+#
+# 3 IS LIFTED, NOT PICKED: it is [USER]'s own phrase ("converts all attacks
+# into 3-spark-cost attacks") and it is the retired threshold's own number, so
+# the Power charges exactly what the base rule used to hand out for free.
+SPARK_ATTACK_POWER_PRICE = 3
+
+# THE STARTER SUBSTITUTIONS (PICK 1, options 1 and 5 together -- the seat:
+# "Options 1 and 5 together follow"). Both are proto rows on
+# docs/prototype-surface.yaml and both enter through the ONE seam at
+# `loader._starter_ids`; NO PRINTED SHEET MOVES. Regent's ten-card starter
+# ships exactly one generator (Venerate) and exactly one sink (FallingStar),
+# so exactly ONE COPY of each is substituted here -- see the seam for the
+# decision that leaves for [USER].
+SPARK_ALT_STARTER_SUBS: tuple[tuple[str, str], ...] = (
+    ("pop", "proto_pop_spark"),          # opt 1: the Basic that MAKES
+    ("kaboom", "proto_kaboom_sink"),     # opt 5: the Basic that SPENDS
+)
 BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played
 BURST_PER_REACTION = 5        # burst energy per reaction triggered
 
