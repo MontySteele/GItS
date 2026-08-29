@@ -325,13 +325,13 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   any-screen render and `EB-168` an orchestrated Act-1 tester, both BUILT.
   **`EB-168` is CLOSED (2026-08-29):** five sealed sessions exist on the
   re-pinned build, and its negative test refused live — a Claude-family model
-  id is rejected with exit 2 before the tool touches the wire. **`EB-167`
-  stays OPEN by one thing only.** Three tool defects the live runs found are
-  fixed (`EB-173`, `EB-176`), and the last session ran 37 actions over six
-  screen types with ZERO refusals and no leak in any of its 40 observations,
-  stopping only because the character died on Act 1; what the row still owes
-  is a run that survives to the Act-1 boss, which is the tester's play and not
-  the tool's code. Two live findings are filed and open, `EB-174` (a sealed
+  id is rejected with exit 2 before the tool touches the wire. **`EB-167` is CLOSED too (2026-08-29),** on the row's own
+  acceptance: three tool defects the live runs found are fixed (`EB-173`,
+  `EB-176`), and the last session was a whole run — 37 actions over six
+  screen types with ZERO refusals, no stall and no leak in any of its 40
+  observations — ending only because the character died on Act 1. That
+  the tester never reached the Act-1 boss is the tester's play, not the
+  tool's code, and the row never asked for the boss. Two live findings are filed and open, `EB-174` (a sealed
   record cannot name its build) and `EB-175` (`end turn` has to be said
   twice). A4 and A6 wait and are NOT minted; A1-extended (enemy
   composition/intent setters) and A5 (vision input) are DEFERRED.
