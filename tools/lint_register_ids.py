@@ -116,7 +116,12 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 171,   # EB-171 minted 2026-08-28 by the EB-167/168 live acceptance,
+    "EB": 172,   # EB-172 minted 2026-08-28 by R218 C: a gitignored backup of
+                 # the four PINNED managed assemblies in the OneDrive vault
+                 # beside game_ref, plus a local.props switch that builds
+                 # against it. A Steam update may stop a live run; it must not
+                 # be able to stop the build.
+                 # EB-171 minted 2026-08-28 by the EB-167/168 live acceptance,
                  # which could not run: the machine's game moved to v0.111.0
                  # on the `public-beta` branch and neither the vendored bridge
                  # nor the roster mod compiles against it any more. The PORT is
@@ -184,9 +189,11 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        167, 168, 171,
+        167, 168, 171, 172,
     }),
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 46}),
+    # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
+    # ceiling stays at 46, because ceilings never come down.
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

@@ -104,7 +104,7 @@ BASELIB_OK = {"BaseLib": {"id": "BaseLib", "version": "v3.3.8"}}
 def test_a_stale_manifest_version_is_refused():
     """The presenting symptom: 134 commits stuck at 0.2.0."""
     findings = _policy(_manifest(version="0.2.0"), BASELIB_OK,
-                       "v0.107.1", "0.2.138")
+                       "v0.111.0", "0.2.138")
     assert any("staged manifest version is '0.2.0'" in f for f in findings), \
         findings
 
@@ -112,13 +112,13 @@ def test_a_stale_manifest_version_is_refused():
 def test_a_correctly_stamped_version_passes():
     """Positive control. A gate that refused every version would satisfy the
     test above while being worthless."""
-    findings = _policy(_manifest(), BASELIB_OK, "v0.107.1", "0.2.138")
+    findings = _policy(_manifest(), BASELIB_OK, "v0.111.0", "0.2.138")
     assert findings == [], findings
 
 
 def test_a_dirty_stamp_still_has_to_match():
     findings = _policy(_manifest(version="0.2.138"), BASELIB_OK,
-                       "v0.107.1", "0.2.138+dirty")
+                       "v0.111.0", "0.2.138+dirty")
     assert any("computes '0.2.138+dirty'" in f for f in findings), findings
 
 
@@ -128,20 +128,20 @@ def test_an_unsatisfied_min_version_is_refused():
     """Before R70 this passed: BaseLib was present, so S3 stopped looking."""
     findings = _policy(
         _manifest(dependencies=[{"id": "BaseLib", "min_version": "999.0.0"}]),
-        BASELIB_OK, "v0.107.1", "0.2.138")
+        BASELIB_OK, "v0.111.0", "0.2.138")
     assert any("requires >= 999.0.0" in f for f in findings), findings
 
 
 def test_a_satisfied_min_version_passes():
     findings = _policy(
         _manifest(dependencies=[{"id": "BaseLib", "min_version": "3.3.6"}]),
-        BASELIB_OK, "v0.107.1", "0.2.138")
+        BASELIB_OK, "v0.111.0", "0.2.138")
     assert findings == [], findings
 
 
 def test_a_missing_dependency_is_still_refused():
     """The check R70 extended, not replaced."""
-    findings = _policy(_manifest(), {}, "v0.107.1", "0.2.138")
+    findings = _policy(_manifest(), {}, "v0.111.0", "0.2.138")
     assert any("is not installed" in f for f in findings), findings
 
 
@@ -149,7 +149,7 @@ def test_an_unparseable_installed_version_is_not_treated_as_satisfied():
     findings = _policy(
         _manifest(dependencies=[{"id": "BaseLib", "min_version": "3.3.6"}]),
         {"BaseLib": {"id": "BaseLib", "version": "who knows"}},
-        "v0.107.1", "0.2.138")
+        "v0.111.0", "0.2.138")
     assert any("unparseable version" in f for f in findings), findings
 
 
@@ -157,7 +157,7 @@ def test_an_unparseable_installed_version_is_not_treated_as_satisfied():
 
 def test_an_unsatisfied_min_game_version_is_refused():
     findings = _policy(_manifest(min_game_version="999.0.0"), BASELIB_OK,
-                       "v0.107.1", "0.2.138")
+                       "v0.111.0", "0.2.138")
     assert any("requires >= 999.0.0" in f for f in findings), findings
 
 
@@ -234,7 +234,7 @@ def test_the_old_dashed_shape_is_refused():
     months; the game's parser threw on it every boot and left our version
     null. A gate that has never refused this string is not a gate."""
     findings = _policy(_manifest(version="0.2-1159"), BASELIB_OK,
-                       "v0.107.1", "0.2-1159")
+                       "v0.111.0", "0.2-1159")
     assert any("not a valid semantic version" in f for f in findings), findings
 
 
@@ -242,7 +242,7 @@ def test_the_new_shape_and_its_dirty_form_both_pass_the_semver_check():
     """Positive control for the refusal above."""
     for good in ("0.2.1159", "0.2.1159+dirty"):
         findings = _policy(_manifest(version=good), BASELIB_OK,
-                           "v0.107.1", good)
+                           "v0.111.0", good)
         assert findings == [], (good, findings)
 
 
@@ -343,20 +343,20 @@ def test_a_prototype_stamp_is_refused_from_the_release_path():
     the finding says what happened instead of "0.2.138+proto is not 0.2.138".
     """
     findings = _policy(_manifest(version="0.2.138+proto"), BASELIB_OK,
-                       "v0.107.1", "0.2.138")
+                       "v0.111.0", "0.2.138")
     assert any("+proto" in f and "deploy_proto.ps1" in f for f in findings), \
         findings
 
 
 def test_a_prototype_stamp_is_accepted_when_the_dev_script_asks():
     findings = _policy(_manifest(version="0.2.138+proto"), BASELIB_OK,
-                       "v0.107.1", "0.2.138+proto", prototype=True)
+                       "v0.111.0", "0.2.138+proto", prototype=True)
     assert findings == []
 
 
 def test_a_dirty_prototype_stamp_is_accepted_when_the_dev_script_asks():
     findings = _policy(_manifest(version="0.2.138+proto.dirty"), BASELIB_OK,
-                       "v0.107.1", "0.2.138+proto.dirty", prototype=True)
+                       "v0.111.0", "0.2.138+proto.dirty", prototype=True)
     assert findings == []
 
 
@@ -365,7 +365,7 @@ def test_the_dev_path_refuses_an_unmarked_package():
     an indistinguishable prototype build in mods\klee, which is the exact
     ambiguity the token exists to remove."""
     findings = _policy(_manifest(version="0.2.138"), BASELIB_OK,
-                       "v0.107.1", "0.2.138", prototype=True)
+                       "v0.111.0", "0.2.138", prototype=True)
     assert any("no +proto mark" in f for f in findings), findings
 
 
@@ -375,7 +375,7 @@ def test_a_prototype_stamp_is_still_a_parseable_semantic_version():
     Build metadata is ignored by the parser, so the mark costs nothing."""
     for version in ("0.2.138+proto", "0.2.138+proto.dirty"):
         findings = _policy(_manifest(version=version), BASELIB_OK,
-                           "v0.107.1", version, prototype=True)
+                           "v0.111.0", version, prototype=True)
         assert not any("not a valid semantic version" in f for f in findings)
 
 

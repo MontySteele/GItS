@@ -155,28 +155,35 @@ them rather than from prose.
 
 ## Mod build environment (pinned)
 
-Slay the Spire 2 **v0.107.1**, commit `59260271` (2026-06-18), Steam buildid
-`23811903`, appid `2868840`, branch `public`. MegaDot v4.5.1, BaseLib 3.3.7.0,
-.NET SDK 9.0.316, ilspycmd 8.2.0.7535. The PCK contract version is
-`roster-pck-v3`; the shipped mod package is `klee` **v0.2**
-(`klee-mod/Klee/manifest.json`, `min_game_version` 0.107.1). Pins frozen at tag
-`pre-simplification-2026-08-06`. The version string deploy stamps is
-**`MAJOR.AUTO`** (R214). The deployed build is **`0.2.1209`** (2026-08-27
-13:16, from `main` `f291fb4`) — the FIRST build emitted under that shape, so
-the game parses the version instead of leaving it `null`. `validate.ps1` OK;
-pack 9,586,076 bytes, 132 resources. It carries `EB-150`'s Deep Breath fix and
-`EB-152`'s fourteen Burst faces. Two face fixes are NOT in it and ship with the
-next deploy: the exhaust-selection rate (R215 C) and `EB-164`'s eighteen
-re-worded scaling faces.
+Slay the Spire 2 **v0.111.0**, commit `41cef1ea` (2026-08-13), Steam buildid
+`24724944`, appid `2868840`, branch **`public-beta`**, `main_assembly_hash`
+`222455745`. MegaDot v4.5.1 (`v4.5.1.m.14.mono.custom_build`, the editor
+`tools/build_pck.ps1` drives — a local download, not a Steam artifact, so the
+game update did not move it), BaseLib **3.4.5.0** (Workshop item
+`3737335127`), .NET SDK 9.0.316, ilspycmd 8.2.0.7535. The PCK contract version
+is `roster-pck-v3`; the shipped mod package is `klee` **v0.2**
+(`klee-mod/Klee/manifest.json`, `min_game_version` **0.111.0** — the hooks the
+port binds do not exist on 0.107.1, so the old floor was a claim the game's own
+gate would have acted on). The version string deploy stamps is **`MAJOR.AUTO`**
+(R214), with the `+proto` dev mark beside it (R217 D).
 
-**THE PIN NO LONGER DESCRIBES THE MACHINE (2026-08-28 21:08).** Steam moved
-this install to **v0.111.0** on the **`public-beta`** branch (buildid
-`24724944`, BaseLib **3.4.5.0**), and against those assemblies neither the
-vendored bridge nor `KleeCode` compiles — 4 lobby errors and 15 `CS0115`
-errors on the damage hooks. Everything that LAUNCHES the game is stopped until
-[USER] answers QUEUE `M46`; the port is BACKLOG `EB-171`. The pins above are
-still what the repo builds and labels against, and are deliberately NOT moved
-here on Claude's own authority.
+**Pin history.** The previous pin was v0.107.1, commit `59260271`
+(2026-06-18), buildid `23811903`, branch `public`, BaseLib 3.3.7.0, frozen at
+tag `pre-simplification-2026-08-06`; it moved here under **R218**
+(2026-08-28), which took `M46` option (2) — port and re-pin — after Steam
+switched this install to `public-beta` mid-sitting. Every measurement and
+deploy label from R218 on rides the pin above; live numbers were never
+comparable across a game build anyway (R95), and the sim references no game
+assembly and is unaffected.
+
+**No package is installed against this pin yet.** The last release build was
+`0.2.1209` (2026-08-27, from `main` `f291fb4`, `validate.ps1` OK, pack
+9,586,076 bytes / 132 resources), and what currently sits in the game's
+`mods\klee` is the dev package `0.2.1252+proto` — both built for 0.107.1 and
+neither able to load on 0.111.0. `EB-171` is the port and the re-deploy; until
+it lands nothing launches. Two face fixes are still owed a live build with it:
+the exhaust-selection rate (R215 C) and `EB-164`'s eighteen re-worded scaling
+faces.
 
 ## Systems
 
