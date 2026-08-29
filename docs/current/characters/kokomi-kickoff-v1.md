@@ -234,9 +234,14 @@ green.
    both-with-capstone.
 7. SUPPORT_CARRY attribution — Kokomi-conscripted companions count as
    self-sourced; drafted Inazuma pool cards count normally.
-8. Statline constants — proposed: hp 70 (highest of the three; lore: her HP
-   pool, and stability wants headroom), energy 3, starter deck composition
-   incl. reserved companion slots. All numbers knobs.
+8. Statline constants — **hp 80** (highest of the three; lore: her HP pool,
+   and stability wants headroom). Proposed at 70 and ruled there by R52;
+   raised to 80 by sitting slate 2026-08-29 — she is canonically an
+   HP-scaler and [USER] ruled her "high ... relative to the base cast", so
+   she takes the cast's top, Ironclad's 80 (Defect 75 / Regent 75 / Silent
+   70 / Necrobinder 66). Also energy 3, starter deck composition incl.
+   reserved companion slots. All numbers knobs; alternatives 82 and 78 are
+   recorded in `review/active/roster-hp-scalers-2026-08-29.md`.
 9. Raiden disposition (§4).
 10. Naming/lore audit — card-name candidates herein are placeholders; audit
     is irreplaceable and [USER]-only. Reserved-names lint runs on the full

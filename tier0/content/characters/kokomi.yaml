@@ -14,9 +14,19 @@
 # Exactly-two-elite-axes heuristic: A2 + A6, RULED 2026-07-24 (R51).
 id: kokomi
 name: "Sangonomiya Kokomi"
-hp: 70                   # RULED R52 (ask 8): pinned starting point —
-                         # her lore HP pool; stability wants headroom.
-                         # Still a knob for sim-driven tuning.
+hp: 80                   # RULED R52 (ask 8) at 70: pinned starting point —
+                         # her lore HP pool; stability wants headroom. Still a
+                         # knob for sim-driven tuning. RAISED to 80 by sitting
+                         # slate 2026-08-29: "we forgot that Furina and Kokomi
+                         # are canonically HP-scalers, so it's weird to give
+                         # them lower HP pools than the average of the
+                         # canonical characters. Klee being low makes total
+                         # sense, but Furina should probably be medium-high
+                         # and Kokomi be high, relative to the base cast."
+                         # Derived, not picked: base cast is Ironclad 80 /
+                         # Defect 75 / Regent 75 / Silent 70 / Necrobinder 66
+                         # (game_ref/*_char_facts.yaml). "High" = the cast's
+                         # top, which is Ironclad's 80.
 nation: inazuma          # §4.1 reward weighting: Inazuma is her half
 element: hydro
 cadence: catalyst        # RULED R52 (N1): she is a catalyst — every

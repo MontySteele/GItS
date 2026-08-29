@@ -140,7 +140,7 @@ def test_a_cohort_that_only_ever_died_reports_no_flatness_not_perfect_flatness()
 # --- comparability ------------------------------------------------------
 
 def test_everything_is_a_fraction_of_max_hp():
-    """So Kokomi (70), Klee (62) and REF_IRONCLAD (80) read against each other
+    """So Kokomi (80), Klee (62) and REF_IRONCLAD (80) read against each other
     without rescaling -- the survival_profile rule."""
     small = run_metrics.trajectory_profile([_Run([_Fight(50, [25])])], 50)
     large = run_metrics.trajectory_profile([_Run([_Fight(100, [50])])], 100)

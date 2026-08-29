@@ -74,15 +74,23 @@ Pinned, and NOT part of the run-cell stamp:
 
 Ship order is stable and meaningful (`tier0/roster.py`); reports print it.
 
-| id | display | nation | element / cadence | default plan | archetypes |
-|---|---|---|---|---|---|
-| `klee` | Klee | Mondstadt | Pyro, catalyst-grade (all attacks apply) | demolition | demolition, spark, reaction |
-| `furina` | Furina | Fontaine | Hydro, Skill-grade | salon | salon, spotlight, fanfare |
-| `kokomi` | Sangonomiya Kokomi | Inazuma | Hydro, catalyst cadence | priest | priest, commander, assist |
+| id | display | HP | nation | element / cadence | default plan | archetypes |
+|---|---|---|---|---|---|---|
+| `klee` | Klee | 62 | Mondstadt | Pyro, catalyst-grade (all attacks apply) | demolition | demolition, spark, reaction |
+| `furina` | Furina | 78 | Fontaine | Hydro, Skill-grade | salon | salon, spotlight, fanfare |
+| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro, catalyst cadence | priest | priest, commander, assist |
 
 Klee is the compatibility baseline character. Companion pools ship per nation:
 `docs/mondstadt-companions.yaml`, `docs/fontaine-companions.yaml`,
 `docs/inazuma-companions.yaml`.
+
+Starting HP sits against the base cast — Ironclad 80, Defect 75, Regent 75,
+Silent 70, Necrobinder 66 (`game_ref/*_char_facts.yaml`). Furina 60 → **78**
+and Kokomi 70 → **80** by sitting slate 2026-08-29: both are canonically
+HP-scalers, so pools under the cast's average read wrong; Klee stays low by
+design. Every measured table that quotes a Furina or Kokomi row predates the
+change and is stale under R68 until a re-baseline —
+`review/active/roster-hp-scalers-2026-08-29.md` lists which.
 
 **Reference anchors** (measurement anchors, NOT roster members — no art, no
 pool, no C# class): `ref_ironclad`, `real_ironclad`, `ref_silent`, `real_silent`
