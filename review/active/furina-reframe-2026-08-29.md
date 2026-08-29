@@ -125,7 +125,8 @@ And, ruling the roster-wide consequence:
 — the shared Burst meter is retired as a concept, each character's signature
 resource becomes her gauge, and each former Burst becomes a drain or overdrive
 of that resource. That change is packeted separately on branch
-`burst-retirement`; **Furina's fold below is the first of its three.**
+`burst-retirement`; **Furina's fold below is the last of its three** (R220 B
+sequences the folds Kokomi → Klee → Furina, with the shared retirement last).
 
 So, for Furina: no Burst card printed at a threshold, no overdrive loan, no
 temporary Fanfare bonus and no entitlements. A full meter is a maximally scaled Salon,
@@ -560,9 +561,10 @@ docs-only for `review/active/`.
 > Burst changes") and is **packeted separately** on branch `burst-retirement`
 > (`review/active/burst-retirement-2026-08-29.md`): each character's signature
 > resource becomes her gauge, and each former Burst becomes a drain or
-> overdrive of that resource. **Furina's fold here is the first of the three**
-> — it is not a carve-out from a standing rule but the leading case of a
-> ruled roster-wide change. **This packet still decides Furina only**; Klee's
+> overdrive of that resource. **Furina's fold here is the last of the three**
+> — R220 B sequences the folds Kokomi → Klee → Furina, with the shared
+> retirement landing last of all. It is not a carve-out from a standing rule
+> but the closing case of a ruled roster-wide change. **This packet still decides Furina only**; Klee's
 > and Kokomi's bodies belong to that packet and nothing here fixes them.
 >
 > **What this RETIRES from the E4 packet.** E4's fold of Fanfare into the
@@ -675,7 +677,8 @@ permits. Prospective text, added as a scoped sentence rather than a rewrite:
 
 **One line on scope, because it will be asked.** The roster-wide retirement of
 the shared Burst meter is RULED ([USER], 2026-08-29) and is packeted separately
-on `burst-retirement`; **Furina's fold is the first of the three.** The
+on `burst-retirement`; **Furina's fold is the last of the three** (R220 B's
+order: Kokomi → Klee → Furina, shared retirement last). The
 amendment above is written Furina-scoped anyway, so that this packet can be
 signed on its own schedule and the roster-wide text replaces it cleanly rather
 than the two having to be unpicked from each other.
@@ -1283,11 +1286,46 @@ gain by declining.
 *Decision it changes:* falsification returns F12 — the drain card is
 dominant, and either its payoff or the meter's standing value is mispriced.
 
+**Slot 6 — is the Encore-spending Evoke family worth its price? — DRAFT,
+unrun, added after the slate was drafted.** Prompted by external review
+relayed by [USER] (their own GPT chat, no seat authority). Slot 2 matches an
+Evoke against *triggering twice more*; nothing matches it against the **other**
+way to Evoke. Under §4.2 a deploy onto a full stage Evokes the front member to
+make room, and the ruled text prices that at nothing: the deploy Evokes the old
+front, lands a replacement, and performs the replacement, all for the card's
+energy. A dedicated Evoke card pays a printed `encore_cost` under `F7` pick 1,
+expends the front, and puts nothing back — the stage comes out one member
+lighter. If that asymmetry is as large as it reads, the family [USER]'s brief
+calls central ("Encore … spent down to direct the Stage via Evoke-style
+plays") is strictly inferior to a deploy card on every full stage.
+
+*The matched comparison:* one staged board, full stage, both a full-stage
+deploy card and a dedicated Evoke card in hand, built so the two lines are
+within one card of each other on the turn.
+
+*Predicted — DRAFT, derived from the ruled text, not blank:* a **majority of
+blind graders take the deploy line**, and **no form names an advantage the
+dedicated Evoke has** that the deploy does not (beyond aiming a specific
+member, which `F5` pick 1 also denies it). This is a directional prediction
+only; it is not countersignable until `F1`–`F16` are answered, like the five
+slots above.
+
+*Falsified if:* graders split on the pair, **or** any form names holding the
+board size, the Encore spend, or the Evoke's alternative effect as the reason
+the dedicated Evoke is the better line.
+
+*Decision it changes:* confirmation returns `F7` and §4.2's full-stage rule
+together — either the deploy's free Evoke has to carry a cost (Encore, or a
+reduced performance), or the dedicated Evoke family needs something the deploy
+cannot give it. Falsification retires the objection.
+
 **Required boards, from §2.7b.** At least one staged board carries **exactly
 one Salon member**, because that is the board on which rotation is a no-op and
 any positional pricing is zero — and it is the board a starter deck actually
 has. And at least one carries a **full stage with a deploy in hand**, because
-the deploy-Evokes rule is new law and has never been played.
+the deploy-Evokes rule is new law and has never been played — and slot 6 asks
+that same board to carry a **dedicated Evoke card in hand beside the deploy**,
+so the two Evoke routes are read against each other on one turn.
 
 **Who grades:** the Codex seat, blind, per `EB-149`, two graders per turn,
 every graded line replayed per `EB-170`.
@@ -1430,8 +1468,8 @@ R213's quarantine. **Amendment 2 is the real one**: `LAW.md:266` requires
 every character to ship a kit-Burst and `LAW.md:176-178` says the Burst is kit
 and not loot, so moving Furina's drain onto a drafted Rare amends LAW rather
 than merely implementing a design. The roster-wide retirement is RULED and
-packeted separately on `burst-retirement`, and Furina's fold is the first of
-the three; this amendment is drafted Furina-scoped anyway so that C2 can be
+packeted separately on `burst-retirement`, and Furina's fold is the last of
+the three (R220 B); this amendment is drafted Furina-scoped anyway so that C2 can be
 signed on its own schedule and the roster-wide text replaces it cleanly.
 Amendment 1 rewrites the Fanfare generation legs. Amendment 3 is hygiene and
 can be signed independently.
@@ -1457,6 +1495,26 @@ can be signed independently.
 | **F15** | 4.7 | Does the Fanfare meter preview next turn's value after decay? |
 | **F16** | 5 | Does the starter teach Evoke with a card, by overcrowding, or both? |
 
+**Evidence added after drafting — external review, [USER]-relayed** (from
+[USER]'s own GPT chat; no seat authority, and it changes no recommendation
+here). Three rows drew a specific objection, recorded so the pick is made
+against it:
+
+- **`F1` — argues for option (2), the four-member roster.** §4.5's Focus term
+  adds +1 to **every member numeric**, and nothing in §4.2 or `F8` exempts an
+  energy payout or Chevalmarin's Encore refund, so a Rare energy member arrives
+  Focus-scaled and, under `F4` pick 1 (triggers unbounded per turn), on an
+  unbounded number of Companion plays; add the energy member only after it is
+  settled that Energy and resource refunds are never Focus-scaled.
+- **`F13` — argues for option (2), trigger line in full and Evoke as a
+  keyword.** The recommendation's own text concedes the face is "carrying three
+  rules" and calls it "the sharpest D5 tension in the packet"; moving the Evoke
+  line to the member's board tooltip is the cheaper half to hide.
+- **`F14` — argues for option (2), the slot also showing the Evoke result.**
+  Taken with `F13` (2) this puts each effect in exactly one place, and it puts
+  the Evoke number on the persistent board — which is where a player standing
+  over a generic Evoke card has to forecast it from.
+
 ### 9.3 What this packet does NOT ask, and why
 
 **Spotlight.** The brief does not mention it, and folding it in would mean
@@ -1466,8 +1524,8 @@ record and unanswered; it should be the next Furina question. Named in §3 as
 deliberately unresolved so that silence is not mistaken for a decision.
 
 **Klee's and Kokomi's Bursts.** The roster-wide retirement is RULED and lives
-in its own packet on `burst-retirement`. Furina's fold here is the first of the
-three; this packet decides Furina only and its LAW text is scoped to say so.
+in its own packet on `burst-retirement`. Furina's fold here is the last of the
+three under R220 B's order; this packet decides Furina only and its LAW text is scoped to say so.
 
 ---
 
@@ -1509,7 +1567,7 @@ R219 slate branch owns those and is unmerged. What is owed when they next open:
    register rows, its own ruling id and the LAW text that supersedes §3.1's
    Furina-scoped amendment 2. What is owed *here* is only the cross-reference:
    whatever STATE bullet describes the Furina slice should name Furina's fold
-   as the first of that ruling's three characters.
+   as the last of that ruling's three characters (R220 B).
 7. **Two hygiene fixes, both normal commits under the hygiene norm**, owed on
    whichever branches next touch those files: the kickoff's Salon
    dry-overdraw sentence (§2.7c), and `docs/furina-cards.yaml:13`'s header
