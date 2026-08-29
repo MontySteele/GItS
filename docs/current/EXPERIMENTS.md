@@ -226,6 +226,26 @@ carried while it was active is in the commit message that retired it.
   gate is discharged. Under R212(2) the §5 slate is drafted and committed
   DRAFTED by Claude, then countersigned in batch →
   `review/active/charge-reads-per-turn-registration-2026-08-13.md`.
+- **`KLEESPARK-W1` the Sparks arm across a WHOLE FIGHT** — **DRAFTED and
+  committed before the run**, slate at
+  `review/active/klee-sparks-2026-08-29.md` §12.3, per R212(2), offered for
+  batch countersign. **Unit:** ONE COMPLETE FIGHT — the first Monster room of a
+  live Act-1 Klee run — and not the larger floor-1-to-Act-1 run, because that
+  unit was measured at **120 Codex calls** on sealed session `20260829-181718`
+  and tonight's standing budget caps this piece at 30. **Instrument:**
+  `understudy.blindplay session`, Codex seat as the pilot (R217 G testimony,
+  never validation; Guardrail-7 rides on every number), with six of §10.2's
+  priced rows granted into the starting deck by `understudy.embark --arm`.
+  **Cell:** the installed dev build, named in the sealed record's identity
+  block off `mods\klee\manifest.json`. **Slots:** `W1` a named Spark trade-off
+  on ≥ 3 combat turns; `W2` spent/generated Sparks ≥ 0.5; `W3` ≥ 1 affordable
+  sink deliberately skipped; `W4` ≥ 70% of plays are Attacks. Each falsifier is
+  computed from the run's own transcript and per-turn notes, never from a
+  judgement. **Declared contaminants (§12.1):** the shipped automatic Spark
+  rule is still live beside the granted priced rows, and the pre-fight screens
+  are operator-driven so the seat's budget is spent inside the fight.
+  **Status:** registered before the bridge was deployed; the read lands as
+  §12.5 and the row moves to the Graded table with it.
 - **Kokomi stability band (D5)** — no band is declared, so it rides DARK
   (`band = None`). The declaration is QUEUE `S4-G6`; its grading playtest is
   `docs/current/playtest/kokomi-playtest-protocol.md` (unrun, Answers block

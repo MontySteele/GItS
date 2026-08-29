@@ -1576,3 +1576,86 @@ pipeline can consume.
    (b) a round 2 of staged turns on the two RETURNED rows (`t02`'s Fwoosh! and
    `t06`'s AoE pair) on repaired boards first; (c) both, in that order;
    (d) hold the arm until picks 1 and 3 are settled.*
+
+## 12. WHOLE-FIGHT BLIND PLAY (`KLEESPARK-W1`) — registration, drafted before the run
+
+**7(c) is [USER]'s ruling of §11.7 pick 7: both, whole-fight first.** This
+section is the first half of that — the registration, the unit, the slate and
+the falsifiers — written and committed BEFORE the bridge was deployed and
+before any Codex call was spent. Under R212(2) the slate is Claude's to draft
+from written design intent and commit DRAFTED; it is offered for batch
+countersign. §12.5 onward is the read, appended after the run.
+
+### 12.1 The unit, and why it is one fight and not a run
+
+**The unit is ONE COMPLETE FIGHT** — the first Monster room of a live Act-1
+Klee run, played end to end by the Codex seat through `understudy.blindplay
+session`, with the Sparks arm granted into the starting deck by
+`understudy.embark --arm`.
+
+The house's larger blind-play unit is the floor-1-to-Act-1 run, and it was
+measured: sealed session `20260829-181718` spent **120 Codex calls** on 120
+actions across six fights, one `codex exec resume` per screen, plus one call
+per fight record and one for the run record — **~20 calls per fight all in,
+and 128 for the run**. The standing budget rule for tonight caps this piece at
+**30 Codex calls**. A run unit is four times over that cap; one fight is inside
+it. So the unit is one fight, the cap is set in the driver rather than trusted
+to the fight's length (`--max-actions 24`, `--max-refusals 2`), and the worst
+case is 24 command calls + 2 refusals + 1 fight record + 1 run record = **28**.
+
+**Two operator facts that ride with the unit, disclosed rather than tidied:**
+
+1. **The screens before the first Monster room are driven by the operator**,
+   with `blindplay act`, at zero Codex cost, so the seat's budget is spent
+   inside the fight rather than on a map fork. Every such action is listed in
+   §12.4. The seat sees its first page at the combat screen.
+2. **The shipped automatic Spark rule is still live in the build.** The
+   re-author retires it only on acceptance (§6.1), so the fight is played on a
+   build where the granted priced rows sit BESIDE the shipped threshold
+   discount. That is a contaminant and it runs one way: it makes Sparks *more*
+   valuable to hold than the re-authored economy alone would, so a thin
+   spend-versus-hold reading here is a floor, not a ceiling.
+
+### 12.2 What is granted, and what is not
+
+Six rows of §10.2's tight set, one copy each, into the starting deck — the
+whole price ladder so a hand can hold competing prices:
+
+| row | printed name | Spark price | shape |
+|---|---|---|---|
+| `proto_pop_spark` | Powder Pop | — (generates 1) | the income |
+| `proto_kaboom_sink` | Ka-pow! | 1 | the Basic sink |
+| `proto_spark_strike` | Fwoosh! | 1 | the Common sink |
+| `proto_spark_sweep` | Tinder Toss | 1 | the AoE at the cheap end |
+| `proto_spark_double_tap` | Bang Bang! | 2 | the middle rung |
+| `proto_spark_finisher` | Firework Finale | 3 | the top rung, Exhaust |
+
+**`proto_true_spark_knight` is NOT granted.** The strict Rare Power would
+change the price of every Attack in the deck at once, which is a second
+variable in a window whose one variable is the priced-sink economy (D4). §11.7
+pick 3 is where it goes, and it stays there.
+
+**Guardrail-7 and R217 G both ride on everything below.** Nothing here is a
+win-rate, a comparison with any other build, or a claim about whether the arm
+is fun or good. Bot numbers are floors. A blind-play record is iteration
+feedback and is never validation, balance evidence or approval.
+
+### 12.3 The slate — four predictions, mechanical falsifiers
+
+Every falsifier is computed from artefacts the run writes by itself: the
+gitignored `turn-*/reply.json` per-turn `thinking` sentences, the rendered
+observations (`turn-*/prompt.md`), and `transcript.jsonl`'s command rows. No
+grade reads a judgement.
+
+| # | slot | prediction | falsifier, mechanically | the decision the outcome changes |
+|---|---|---|---|---|
+| `W1` | Does the Spark price get *named* as a trade-off across a fight, rather than only on a staged board? | **YES, on at least 3 combat turns** of the fight. | Count the fight's combat turns whose `thinking` string names a Spark-priced row AND either a second Spark-priced row or an explicit hold/save of the bank. **≥ 3 = PREDICTED, 1–2 = SPLIT, 0 = MISS.** | Below 3, §11.7 pick 1 is confirmed by a second instrument and the minimal repaired staged round of 7(c) must carry a two-affordable-sinks board and a dry-sink board rather than more rows. |
+| `W2` | The spend rate `P5` asked for, read on a real fight instead of a hand-assembled sim deck. | **Sparks spent ≥ 50% of Sparks generated** over the fight. | Sum the positive and the negative deltas of the printed Spark bank across the fight's observations; `spent / generated`. **≥ 0.5 = PREDICTED, 0.25–0.5 = SPLIT, < 0.25 = MISS.** | Below 0.25 the bank is a pool the player sits on and the ladder is priced above the income — pick 1 option (c), re-price, rather than re-count. Above 0.5 with `W3` at zero, the bank is a pass-through and the price is doing no holding work. |
+| `W3` | Is an affordable sink ever *deliberately skipped*? | **YES, on at least 1 turn.** | Count turns ended with `end turn` while the hand held a Spark-priced row whose Spark price ≤ the printed bank. **≥ 1 = PREDICTED, 0 = MISS.** (No SPLIT: the slot is a yes/no.) | Zero says the price creates no hold decision at all in live play, which reopens §4.2's table downward before any further staged round is worth staging. |
+| `W4` | GPT's attack-spam concern, as a count rather than an impression — six of eight proto rows are Attacks. | **≥ 70% of the fight's successful `play` commands name an Attack.** | Successful `play` commands in `transcript.jsonl`, typed against the granted rows and Klee's shipped starter. **≥ 70% = PREDICTED, 50–70% = SPLIT, < 50% = MISS.** | A PREDICTED `W4` beside a MISS or SPLIT `W1` is the concern confirmed: the repaired staged round must build its boards around non-Attack competition (the generator, the Burst conversion) rather than adding Attack rows. A `W4` MISS retires the concern for this build. |
+
+**Contamination stated.** §11's eight staged boards have been read, and §10.6's
+starter smoke has been read. Neither sets a number above: `W1`–`W3` are
+whole-fight questions a single staged turn structurally cannot answer (§11.6
+item 1), and `W4` is a count of live plays, which no staged board produces.
+The 40-versus-25 sim diagnostic of §11.6 is not quoted and sets nothing.
