@@ -1322,3 +1322,108 @@ def test_the_play_page_says_nothing_extra_with_no_bank():
     page = blindplay.render(blindplay.observation(banked_combat_state(0)))
     assert "The cost printed on this card" not in page
     assert "Spark, and the costs below" not in page
+
+
+# ------------------------------------------- the Kurage's memory (EB-181) ---
+#
+# The bridge field the memory rule needs, on the observed board. The rule
+# itself is quarantined in the mod (`Powers/Prototype/KurageMemory.cs`), so
+# these fixtures are SYNTHETIC and prove the READER, never the wire -- the same
+# posture every non-combat screen above takes. What they pin is the contract in
+# `vendor/STS2_MCP/gits/GitsKurageMemory.cs`: which fields exist, that an
+# absent key is absent rather than empty, and that the block, the empty queue
+# and the pulse each reach the page a tester reads.
+
+
+def memory_combat_state(memory: dict | None) -> dict:
+    """A Kokomi combat with (or without) `player.kurage_memory` on the wire."""
+    state = combat_state()
+    player = dict(state["player"])
+    player.pop("kurage_memory", None)
+    if memory is not None:
+        player["kurage_memory"] = memory
+    state = dict(state)
+    state["player"] = player
+    return state
+
+
+BLOCKED_MEMORY = {
+    "bank": 5, "front_price": 9, "blocked": True, "fires_next": False,
+    "empty": False, "summon": True,
+    "pulse_kind": "skill", "pulse_amount": 5, "pulse_unit": "block",
+    "reading": "Charge 5 / 9 — Raiden Shogun blocked",
+    "queue": [
+        {"name": "Raiden Shogun", "cost": 3, "price": 9, "target": "Slime",
+         "blocked": True, "affordable": False, "ephemeral": False,
+         "rule": "exhaust"},
+        {"name": "Gorou", "cost": 0, "price": 0, "target": None,
+         "blocked": False, "affordable": True, "ephemeral": True,
+         "rule": "muster"},
+    ],
+}
+
+
+def test_a_board_carrying_the_memory_parses_every_field():
+    obs = blindplay.observation(memory_combat_state(BLOCKED_MEMORY))
+    memory = obs["combat"]["memory"]
+    assert memory["bank"] == 5
+    assert memory["front_price"] == 9
+    assert memory["blocked"] is True
+    assert memory["fires_next"] is False
+    assert memory["empty"] is False
+    assert memory["summon"] is True
+    assert memory["pulse_kind"] == "skill"
+    assert memory["pulse_amount"] == 5
+    assert memory["pulse_unit"] == "block"
+    assert [row["name"] for row in memory["queue"]] == ["Raiden Shogun",
+                                                        "Gorou"]
+    assert memory["queue"][0]["blocked"] is True
+    assert memory["queue"][0]["target"] == "Slime"
+    # A memory that stored NO target aims randomly, and the board says the word
+    # rather than leaving a null for a reader to interpret.
+    assert memory["queue"][1]["target"] == "random"
+    assert memory["queue"][1]["price"] == 0
+
+
+def test_a_board_without_the_key_has_no_memory_at_all():
+    """A release build has no memory rule compiled in, and the observed board
+    must not describe it as an EMPTY one. Absence is the fact."""
+    obs = blindplay.observation(memory_combat_state(None))
+    assert "memory" not in obs["combat"]
+    assert "memory" not in blindplay.render(obs)
+
+
+def test_the_page_shows_the_bank_the_price_the_block_and_the_pulse():
+    """D4: everything that will fire next turn is readable this turn."""
+    page = blindplay.render(blindplay.observation(
+        memory_combat_state(BLOCKED_MEMORY)))
+    assert "Charge 5 / 9 — Raiden Shogun blocked" in page
+    assert "BLOCKED: nothing behind it fires" in page
+    assert "aims at Slime" in page
+    assert "aims at random" in page
+    # A 0-cost memory reads as free, because it is.
+    assert "**Gorou** — free" in page
+    assert "the jellyfish will give you 5 Block" in page
+
+
+def test_an_empty_memory_says_so_and_is_not_a_block():
+    empty = dict(BLOCKED_MEMORY, front_price=None, blocked=False,
+                 fires_next=False, empty=True, queue=[],
+                 pulse_kind="none", pulse_amount=0, pulse_unit="none",
+                 reading="Charge 5 — memory empty")
+    obs = blindplay.observation(memory_combat_state(empty))
+    assert obs["combat"]["memory"]["front_price"] is None
+    page = blindplay.render(obs)
+    assert "(the memory is empty)" in page
+    assert "BLOCKED" not in page
+    assert "you have played no card this turn" in page
+
+
+def test_the_power_pulse_reads_in_charge():
+    """The Power branch pays in Charge, so the page has to be able to say a
+    unit that is neither damage nor Block."""
+    powered = dict(BLOCKED_MEMORY, pulse_kind="power", pulse_amount=1,
+                   pulse_unit="charge")
+    page = blindplay.render(blindplay.observation(
+        memory_combat_state(powered)))
+    assert "the jellyfish will give you 1 Charge" in page
