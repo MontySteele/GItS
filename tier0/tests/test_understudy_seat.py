@@ -470,7 +470,10 @@ def test_the_form_schema_names_every_field_the_form_needs():
     # wants every property listed in `required`, and a null target reads as
     # "this card needed none", which is what an omitted one meant.
     assert play["properties"]["target"]["type"] == ["string", "null"]
-    assert play["required"] == ["card", "target"]
+    # EB-170's two optional-and-nullable keys join it on the same rule.
+    assert play["properties"]["exhaust"]["type"] == ["string", "null"]
+    assert play["properties"]["choose"]["type"] == ["string", "null"]
+    assert play["required"] == ["card", "target", "exhaust", "choose"]
 
 
 # --------------------------------------------------------- the dry run -----
@@ -591,3 +594,67 @@ def test_the_refusal_reasons_are_all_explained():
                    "turn_mismatch",
                    "packet_mismatch"):
         assert seat.REFUSAL_REASONS[reason].strip()
+
+
+# ------------------------------- EB-169: the preflight, belt and braces ----
+#
+# `staged_turn check`/`stage` refuse a BOARD holding a card with an open
+# face/runtime defect. A packet on disk outlives the command that wrote it, so
+# the seat checks the packet's own printed hand before it spends a third
+# party's quota reading a face the repo knows is wrong.
+
+FIXTURE_REGISTER = {
+    "all_streams_flow": {
+        "eb": "EB-164",
+        "titles": ("All Streams Flow to the Sea",),
+        "defect": "the printed damage already folds Charge in and a second "
+                  "sentence claims the fold again, so a reader adds it twice",
+    },
+}
+
+
+def test_the_seat_refuses_a_packet_holding_a_registered_face(tmp_path,
+                                                             monkeypatch,
+                                                             capsys):
+    """The worked example's hand really does hold `All Streams Flow to the
+    Sea`, so this refusal runs against a REAL packet on disk under a fixture
+    register -- which is exactly the situation round 2 of the Kokomi slice
+    graded eleven times without noticing."""
+    from understudy import face_defects
+
+    monkeypatch.setattr(face_defects, "OPEN_FACE_DEFECTS", FIXTURE_REGISTER)
+    rc = seat.main(["grade", "kokomi-first-turn-example", "--dry-run",
+                    "--log-root", str(tmp_path)])
+    assert rc == 1
+    err = capsys.readouterr().err
+    assert "open_face_defect" in err and "EB-164" in err
+    blob = json.loads(
+        next(tmp_path.rglob("seat.json")).read_text(encoding="utf-8"))
+    assert blob["refused"] == "open_face_defect"
+    assert blob["open_face_defects"][0]["eb"] == "EB-164"
+
+
+def test_the_refusal_lands_before_anything_is_executed(tmp_path, monkeypatch):
+    """It refuses even the DRY RUN, which is the ordering claim: the check is
+    ahead of `codex_path`, the scratch dance and the argv, so no part of the
+    seat is set up for a packet that will not be graded."""
+    from understudy import face_defects
+
+    monkeypatch.setattr(face_defects, "OPEN_FACE_DEFECTS", FIXTURE_REGISTER)
+    assert seat.main(["grade", "kokomi-first-turn-example", "--dry-run",
+                      "--log-root", str(tmp_path)]) == 1
+    blob = json.loads(
+        next(tmp_path.rglob("seat.json")).read_text(encoding="utf-8"))
+    assert "dry_run" not in blob and "codex_version" in blob
+
+
+def test_the_shipped_register_lets_the_example_through(tmp_path):
+    """The same packet, the same command, the EMPTY shipped register: the dry
+    run proceeds. Proof the red above is the register's doing."""
+    assert seat.main(["grade", "kokomi-first-turn-example", "--dry-run",
+                      "--log-root", str(tmp_path)]) == 0
+
+
+def test_open_face_defect_is_a_named_seat_refusal():
+    assert "open_face_defect" in seat.REFUSAL_REASONS
+    assert "OPEN defect" in seat.REFUSAL_REASONS["open_face_defect"]

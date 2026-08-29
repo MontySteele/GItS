@@ -6,6 +6,8 @@
     python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --hold --why "..."
     python -m understudy.staged_turn grade     <turn-id> <form.json>
     python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."
+    python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..." \
+        --answer "<prompt>=<printed choice>"
     python -m understudy.staged_turn ledger
 
 WHAT THIS IS, IN ONE PARAGRAPH
@@ -80,6 +82,29 @@ draw pile through the pile move that sits underneath discard and exhaust, so no
 trigger fires -- and `export_packet` REFUSES to write a packet whose live hand
 is not the declared multiset.
 
+REPLAYING A LINE THROUGH A MODAL PROMPT (EB-170)
+------------------------------------------------
+A card can stop the turn and ask a question: WHICH card gets Exhausted
+(`hand_select`), or WHICH half of a "Choose one" face resolves (`card_select`).
+Round 3 of the Kokomi slice met three of those and the replayer walked into the
+next play, which reported `no enemy 'Twig Slime (S)'; the fight has []` -- a
+true sentence about a card-selection screen and a useless one. So a play's
+entry in `chosen_line` may carry two optional keys, both in the grader's own
+printed vocabulary:
+
+    {"card": "Tidal Barrage", "target": "Nibbit", "exhaust": "Send the Runner"}
+    {"card": "Itto - Oni Rush", "choose": "Deal 14 damage"}
+
+`execute` answers the prompt from them. When a prompt appears and NOBODY said
+what to pick, it STOPS with `modal_unanswered`, naming the prompt and listing
+what was on the table -- never a heuristic pick, because the first offer, the
+biggest number and the cheapest card are all plausible guesses and all three
+produce a post-state indistinguishable from a real replay. `--answer
+"<prompt>=<printed choice>"` is the OPERATOR's answer for a form written before
+these keys existed, read off the grader's own q1 prose; it is logged as
+`source: "operator"` on the row and in the record, and it never overrides an
+answer the form itself carries.
+
 `staging` may not contain `play`, `end_turn` or `expect`: a staged turn is a
 BOARD, and the line is the grader's answer, not the file's. The two halves are
 checked against each other by `scenario.card_key`, so a card added to the hand
@@ -101,7 +126,7 @@ from typing import Any
 
 import yaml
 
-from understudy import bridge, qa_packet, scenario
+from understudy import bridge, face_defects, qa_packet, scenario
 
 REPO = Path(__file__).resolve().parents[1]
 TURN_DIR = Path(__file__).resolve().parent / "turns"
@@ -203,7 +228,51 @@ FALSIFIERS: dict[str, str] = {
     "line_dominates":
         "the decision-closeness falsifier reads one line as overwhelmingly "
         "dominating the next best",
+    # EB-170. A replay refusal, not a grading one: the line passes through a
+    # modal prompt and neither the form nor the operator said what to pick.
+    # `execute` STOPS here rather than guessing, because a heuristic pick is a
+    # replay of a line nobody played -- and a replay of the wrong line looks
+    # exactly like a replay of the right one in the post-state.
+    "modal_unanswered":
+        "the line reached a modal prompt the form did not answer, and a "
+        "replayer that guessed would be replaying a line nobody played",
+    # EB-169. The one rule here that refuses a BOARD rather than a FORM, and
+    # the only one that fires before a game is launched. It is in this table
+    # anyway, because the table's promise is that every refusal this funnel
+    # can make is data a reader can find without grepping for a sentence.
+    face_defects.RULE: face_defects.WHY,
 }
+
+# EB-170. THE TWO MODAL PROMPTS A LINE CAN PASS THROUGH, and the form key that
+# answers each. The atlas's warning that "`card_select` is three screens
+# wearing one name" is why the mapping is on the SCREEN TYPE the wire reports
+# and not on anything guessed from what is on the screen:
+#
+#   `hand_select`  -- the hand itself enters select mode; no screen is built
+#                     (`NPlayerHand.SelectCards`). This is Kokomi's "which card
+#                     gets Exhausted", so the form key is `exhaust` and its
+#                     value is a card's PRINTED TITLE.
+#   `card_select`  -- a built screen offering faces that are not hand cards
+#                     (`NChooseACardSelectionScreen`). This is a choose-one
+#                     card's MODES, so the form key is `choose` and its value
+#                     is the option's own PRINTED TEXT, which for the slice's
+#                     either-faces is a whole sentence ("Deal 14 damage").
+#
+# Both keys are optional and nullable on every play: a line that passes through
+# no prompt says nothing, and a form written before these keys existed loads
+# and replays exactly as it did.
+MODAL_KEY_FOR_SCREEN: dict[str, str] = {
+    "hand_select": "exhaust",
+    "card_select": "choose",
+}
+MODAL_KEYS: tuple[str, ...] = tuple(MODAL_KEY_FOR_SCREEN.values())
+
+# A bound, not a design number: how many prompts one play may raise before the
+# replayer calls it a loop. Three is well past anything the roster prints (a
+# mode choice followed by that mode's own selection is two) and a replayer that
+# span forever on a screen it kept failing to close would hang an attended
+# session with the game up.
+MAX_MODALS_PER_PLAY = 3
 
 # What "no answer" looks like when a grader writes prose instead of leaving a
 # field empty. Deliberately narrow: a long answer that happens to open with
@@ -572,6 +641,38 @@ def declared_hand_keys(turn: StagedTurn) -> list[str]:
                   for _ in range(int(b.get("count", 1))))
 
 
+def staged_card_names(turn: StagedTurn) -> list[str]:
+    """Every card the turn names, in both halves: the granted ids and the
+    mirrored hand. Both, deliberately -- `_check_halves_agree` has pinned them
+    equal for the HAND, but a `give` into `draw` or `discard` is in neither
+    hand and can still be drawn into the grader's turn."""
+    names = [str(b.get("card")) for v, b in turn.staging
+             if v == "give" and b.get("card")]
+    return names + list(turn.board.hand)
+
+
+def face_defect_preflight(turn: StagedTurn,
+                          register: dict[str, Any] | None = None) -> None:
+    """EB-169. Refuse a turn that stages a card with an OPEN face defect.
+
+    RAISES BEFORE THE GAME IS LAUNCHED, which is the whole point. Round 2 of
+    the Kokomi slice staged `all_streams_flow` on eleven boards while `EB-164`
+    sat open against that face, graded them, replayed them and pair-read them,
+    and only then learned that the arithmetic every refusal rested on was the
+    repo's own defect. The cost of learning it late is eleven launches and
+    seven manufactured refusals; the cost of learning it here is a parse.
+
+    Called by `check` and by `stage`, and NOT by `execute`: a replay is how a
+    misread already in the record gets settled against the board, so refusing
+    it would take away the one tool that answers the question. `grade` has its
+    own copy of this check on the packet's printed hand (see `seat.py`), which
+    is the belt to this one's braces.
+    """
+    found = face_defects.hits(staged_card_names(turn), register)
+    if found:
+        raise TurnError(face_defects.refusal(found))
+
+
 def exact_hand_difference(turn: StagedTurn, state: dict[str, Any]) -> str:
     """`""` when the live hand IS the declared hand, else what differs.
 
@@ -720,6 +821,17 @@ def load_form(path: str | Path) -> dict[str, Any]:
             raise FormError(f"chosen_line[{i}] needs a 'card' -- the PRINTED "
                             f"title, which is the only spelling the grader was "
                             f"shown")
+        # EB-170. OPTIONAL and NULLABLE, so every form written before these
+        # keys existed still loads unchanged. Both are stated in the PRINTED
+        # vocabulary the grader was shown -- a card's title for the Exhaust
+        # choice, an option's own text for a mode choice -- because that is
+        # the only spelling a blind grader has.
+        for key in MODAL_KEYS:
+            if play.get(key) is not None and not isinstance(play[key], str):
+                raise FormError(
+                    f"chosen_line[{i}].{key} is the PRINTED text of the "
+                    f"choice, as a string (or absent). Got "
+                    f"{type(play[key]).__name__}")
     return blob
 
 
@@ -1273,8 +1385,50 @@ def execute_steps(turn: StagedTurn, form: dict[str, Any]
         if play.get("target"):
             body["target"] = str(play["target"])
         steps.append(("play", body))
+        # EB-170. ONE AFTER EVERY PLAY, unconditionally, and not only after
+        # the plays whose form entry carries a key. A modal is a property of
+        # the card and the board, not of what the grader remembered to write
+        # down: the step is a no-op when no screen is up, and the whole point
+        # of the row is that a prompt nobody declared is REPORTED rather than
+        # walked into by the next play. Round 3 walked into three of them and
+        # read `no enemy 'Twig Slime (S)'; the fight has []` -- a true
+        # sentence about a card-selection screen, and a useless one.
+        answers = {k: str(play[k]) for k in MODAL_KEYS
+                   if play.get(k) is not None}
+        steps.append(("answer_modal", {"card": str(play["card"]), **answers}))
     steps.append(("read", {"label": "after the graded line"}))
     return steps
+
+
+def parse_answers(raw: list[str] | None) -> list[tuple[str, str]]:
+    """`--answer "<prompt>=<printed choice>"`, as ordered (match, choice).
+
+    THE OPERATOR'S ANSWER, AND IT IS LABELLED AS ONE. It exists for exactly
+    one situation: a form written BEFORE the `exhaust` / `choose` keys existed,
+    whose q1 prose names the choice unambiguously, being replayed so the record
+    stops saying "untested". The operator reads the prose, states the answer on
+    the command line, and every row it fills is logged with
+    `source: "operator"` and the prose it came from is the reader's to check.
+    It is never a default, never a heuristic, and it never overrides the form:
+    a form that says `exhaust` is the grader's own answer and wins.
+
+    The left-hand side matches the live PROMPT TEXT (case-insensitive
+    substring) or the screen's own wire name, because a screen can arrive with
+    no prompt at all and an operator still has to be able to name it.
+    """
+    out: list[tuple[str, str]] = []
+    for entry in raw or []:
+        if "=" not in str(entry):
+            raise FormError(
+                f"--answer takes '<prompt>=<printed choice>'; got {entry!r}. "
+                f"The left side matches the prompt the game shows (or the "
+                f"screen name, hand_select / card_select) and the right side "
+                f"is the PRINTED text of the choice")
+        match, choice = str(entry).split("=", 1)
+        if not match.strip() or not choice.strip():
+            raise FormError(f"--answer {entry!r}: both halves are required")
+        out.append((match.strip(), choice.strip()))
+    return out
 
 
 def board_differences(packet: dict[str, Any],
@@ -1327,9 +1481,15 @@ class ExecuteRunner(scenario.Runner):
     """
 
     def __init__(self, *args: Any, packet: dict[str, Any] | None = None,
+                 answers: list[tuple[str, str]] | None = None,
                  **kw: Any):
         super().__init__(*args, **kw)
         self.packet = packet or {}
+        # EB-170. The operator's answers, in order, each consumed at most once
+        # so a single `--answer` cannot silently drive two different prompts.
+        self.answers = list(answers or [])
+        self.answers_used: list[dict[str, Any]] = []
+        self.modals: list[dict[str, Any]] = []
 
     def _do_board_check(self, body: dict[str, Any]) -> None:
         self.read()
@@ -1342,6 +1502,112 @@ class ExecuteRunner(scenario.Runner):
             raise scenario.ExpectFailed(
                 "board_mismatch", FALSIFIERS["board_mismatch"] + " -- "
                 + "; ".join(diffs), self.state, self.state)
+
+    # ---------------------------------------------------- EB-170: modals ---
+
+    def _operator_answer(self, screen: str, prompt: str
+                         ) -> tuple[str, int] | None:
+        """The first UNUSED `--answer` whose left side matches this prompt.
+
+        Matched against the prompt text first and the screen's wire name
+        second, so `--answer "Choose a card.=Deal 14 damage"` and
+        `--answer "card_select=Deal 14 damage"` both work and an operator
+        facing a screen that arrives with no prompt still has a handle.
+        """
+        used = {u["index"] for u in self.answers_used}
+        want = (prompt or "").casefold()
+        for i, (match, choice) in enumerate(self.answers):
+            if i in used:
+                continue
+            m = match.casefold()
+            if (want and m in want) or m == screen.casefold():
+                return choice, i
+        return None
+
+    def _do_answer_modal(self, body: dict[str, Any]) -> None:
+        """Close whatever prompt the play just raised, from the form's own
+        words -- or STOP, naming the prompt.
+
+        THE THREE OUTCOMES, and each is a row:
+          * no screen is up -- `answered: false`, and the step is a no-op. This
+            is the common case and it costs one GET.
+          * a screen is up and somebody said what to pick -- the pick is posted
+            through `scenario`'s own `select` / `confirm`, so the two screens'
+            two different verb pairs are resolved in exactly one place.
+          * a screen is up and nobody said -- `modal_unanswered`, naming the
+            PROMPT and listing the offered text. Never a heuristic pick: the
+            first offer, the biggest number and the cheapest card are all
+            plausible guesses and all three would produce a post-state
+            indistinguishable from a real replay.
+        """
+        # EACH KEY ANSWERS AT MOST ONE PROMPT PER PLAY. Without this, a screen
+        # that failed to close would be answered with the same word forever --
+        # the replayer would look like it was working while playing the same
+        # pick over and over.
+        used_keys: set[str] = set()
+        for _ in range(MAX_MODALS_PER_PLAY):
+            self.read()
+            screen, blob = scenario._select_blob(self.state)
+            if not screen:
+                self.emit({"step": "answer_modal", "card": body.get("card"),
+                           "answered": False, "screen": "",
+                           "why": "no selection screen is up"})
+                return
+            prompt = str(blob.get("prompt") or "")
+            offered = [c for c in (blob.get("cards") or [])
+                       if isinstance(c, dict)] or scenario._hand(self.state)
+            titles = [str(c.get("name") or c.get("id") or "") for c in offered]
+            key = MODAL_KEY_FOR_SCREEN.get(screen, "")
+            choice = (str(body.get(key) or "")
+                      if key and key not in used_keys else "")
+            source = "form"
+            operator = None
+            if not choice:
+                operator = self._operator_answer(screen, prompt)
+                if operator is not None:
+                    choice, source = operator[0], "operator"
+            if not choice:
+                detail = (f"{FALSIFIERS['modal_unanswered']} -- screen "
+                          f"{screen!r}, prompt {prompt!r}, offering {titles}. "
+                          f"State it on the play as "
+                          f"{key or 'exhaust/choose'!r}, in the printed "
+                          f"vocabulary, or pass "
+                          f"--answer \"{prompt or screen}=<printed choice>\"")
+                self.emit({"step": "answer_modal", "card": body.get("card"),
+                           "answered": False, "screen": screen,
+                           "prompt": prompt, "offered": titles,
+                           "rule": "modal_unanswered"})
+                self.modals.append({"card": body.get("card"), "screen": screen,
+                                    "prompt": prompt, "offered": titles,
+                                    "answered": False, "source": "",
+                                    "choice": ""})
+                raise scenario.ExpectFailed("modal_unanswered", detail,
+                                            self.state, self.state)
+            if scenario.find_card(offered, choice) is None:
+                raise scenario.ExpectFailed(
+                    "modal_unanswered",
+                    f"{choice!r} is not on the screen. Prompt {prompt!r} "
+                    f"offers {titles}; an answer that is not on the table is "
+                    f"not an answer", self.state, self.state)
+            self.emit({"step": "answer_modal", "card": body.get("card"),
+                       "answered": True, "screen": screen, "prompt": prompt,
+                       "offered": titles, "choice": choice, "source": source})
+            self.modals.append({"card": body.get("card"), "screen": screen,
+                                "prompt": prompt, "offered": titles,
+                                "answered": True, "source": source,
+                                "choice": choice})
+            if operator is not None:
+                self.answers_used.append(
+                    {"index": operator[1], "prompt": prompt,
+                     "screen": screen, "choice": choice})
+            used_keys.add(key)
+            self._do_select({"cards": [choice]})
+            self._do_confirm({})
+        raise scenario.ExpectFailed(
+            "modal_unanswered",
+            f"one play raised more than {MAX_MODALS_PER_PLAY} prompts; the "
+            f"replayer is not closing them and stops rather than spinning",
+            self.state, self.state)
 
 
 def _outcome(before: dict[str, Any], after: dict[str, Any]) -> dict[str, Any]:
@@ -1385,6 +1651,7 @@ def cmd_check(args) -> int:
     for p in paths:
         try:
             t = load(p)
+            face_defect_preflight(t)
             print(f"OK   {p.name}: id={t.id} {len(t.staging)} staging step(s), "
                   f"{len(t.board.hand)} card(s) in hand, "
                   f"{len(t.board.enemies)} enem(ies), "
@@ -1438,6 +1705,8 @@ def cmd_stage(args) -> int:
               file=sys.stderr)
         return 2
     turn = load(args.file)
+    # EB-169, and BEFORE the launch: `stage_board` boots the game.
+    face_defect_preflight(turn)
     stamp = time.strftime("%Y%m%d-%H%M%S")
     log = scenario.LOG_DIR / f"staged-{turn.id}-{stamp}.jsonl"
     print(f"turn: {turn.id}  ({turn.character})")
@@ -1503,6 +1772,7 @@ def cmd_execute(args) -> int:
     from understudy import soak
 
     form = load_form(args.form)
+    answers = parse_answers(getattr(args, "answer", None))
     path = next((p for p in all_turns() if load(p).id == args.turn_id), None)
     if path is None:
         print(f"no turn file with id {args.turn_id!r} under {TURN_DIR}",
@@ -1546,12 +1816,20 @@ def cmd_execute(args) -> int:
                                path=turn.path, seed=seed,
                                assumptions=turn.assumptions)
     print(f"turn: {turn.id}   grader: {grader_id(form)}   seed: {seed}")
+    for match, choice in answers:
+        print(f"  OPERATOR ANSWER: {match!r} -> {choice!r}")
     with log.open("w", encoding="utf-8") as fh:
-        runner = ExecuteRunner(replay, args.why, out=fh, packet=packet)
+        runner = ExecuteRunner(replay, args.why, out=fh, packet=packet,
+                               answers=answers)
         runner.emit({"step": "execute_begin", "turn": turn.id,
                      "grader": grader_id(form), "seed_requested": seed,
                      "packet_sha256": packet.get("packet_sha256"),
-                     "chosen_line": form.get("chosen_line")})
+                     "chosen_line": form.get("chosen_line"),
+                     # EB-170. ON THE FIRST ROW OF THE LOG, so a reader who
+                     # opens the replay learns before anything else that an
+                     # answer came from the operator and not from the form.
+                     "operator_answers": [{"match": m, "choice": c}
+                                          for m, c in answers]})
         policy = scenario.ScenarioPolicy(runner, turns=1)
         summary = soak.run_scripted(policy, stamp, character=turn.character,
                                     max_fights=1, chosen_seed=seed,
@@ -1598,6 +1876,12 @@ def cmd_execute(args) -> int:
         "chosen_line": list(form.get("chosen_line") or []),
         "played": [r.get("step") for r in runner.rows
                    if str(r.get("step", "")).startswith("play ")],
+        # EB-170. Every prompt the line met, whether it was answered, and by
+        # WHOM -- `form` for the grader's own words, `operator` for an answer
+        # read off the grader's q1 prose and stated on the command line.
+        "modals": list(runner.modals),
+        "operator_answers": [{"match": m, "choice": c} for m, c in answers],
+        "operator_answers_used": list(runner.answers_used),
         "ok": bool(policy.ok),
         "failures": runner.failures,
         "outcome": outcome,
@@ -1619,6 +1903,10 @@ def cmd_execute(args) -> int:
                         else "MISMATCH -- refused"))
     for diff in board_check["differences"]:
         print(f"        {diff}")
+    for m in runner.modals:
+        print(f"modal:  {m['screen']} {m['prompt']!r} -> "
+              + (f"{m['choice']!r} ({m['source']})" if m["answered"]
+                 else "UNANSWERED"))
     print(json.dumps(outcome, indent=1))
     return 0 if policy.ok else 1
 
@@ -1677,6 +1965,16 @@ def main(argv: list[str] | None = None) -> int:
     e.add_argument("--seed", default="",
                    help="override the seed recorded in packet.json. Normally "
                         "unnecessary and normally wrong")
+    e.add_argument("--answer", action="append", default=[],
+                   metavar="PROMPT=CHOICE",
+                   help="EB-170. THE OPERATOR'S OWN ANSWER to a modal prompt "
+                        "the form did not carry, for replaying a form written "
+                        "before the `exhaust` / `choose` keys existed. The "
+                        "left side matches the prompt text (or the screen "
+                        "name); the right side is the PRINTED choice. Logged "
+                        "as `source: operator` on the row and in the record, "
+                        "never silently, and never over a form's own answer. "
+                        "Repeatable; each is consumed at most once")
     e.add_argument("--no-setup", action="store_true")
     e.set_defaults(func=cmd_execute)
 

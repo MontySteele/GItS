@@ -128,6 +128,10 @@ REGISTRY: tuple[Lint, ...] = (
     # guards a number that is printed and then claimed AGAIN, so the reader
     # adds it twice. Round 2 of the Kokomi slice lost seven verdicts to it.
     _ci("face-scaling",         "tools/lint_face_scaling.py"),
+    # EB-169, and the fifth row of that family read from the other end: the
+    # four above ask whether a face is honest, this asks whether a face the
+    # repo has ALREADY recorded as dishonest can still reach a blind grader.
+    _ci("face-defects",         "tools/lint_face_defects.py"),
     _ci("op-parity",            "tools/lint_op_parity.py"),
     _ci("sly-grammar",          "tools/lint_sly_grammar.py"),
     _ci("codegen-staleness",    "tools/gen_roster_cards.py", "--check"),

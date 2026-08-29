@@ -395,7 +395,7 @@ python -m understudy.staged_turn check     understudy/turns/<t>.yaml   # no game
 python -m understudy.staged_turn closeness understudy/turns/<t>.yaml [--observed]
 python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --why "..." [--seed S]
 python -m understudy.staged_turn grade     <turn-id> <form.json>
-python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."
+python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."     [--answer "<prompt>=<printed choice>"]
 python -m understudy.staged_turn ledger
 ```
 
@@ -419,6 +419,23 @@ from the run seed**, so `stage` records the seed the game used into
 proven byte-identical on a re-stage. `execute` then compares the live enemies
 and hand against the packet and refuses `board_mismatch` before any play.
 **ledger** rebuilds `review/qa/ledger.tsv`.
+
+**A preflight runs before any launch** (`EB-169`). `understudy/face_defects.py`
+registers card ids with an OPEN printed/runtime defect, each naming its
+`BACKLOG.md` row; `check` and `stage` refuse `open_face_defect` naming the card
+and the id, and `seat grade` re-checks the packet's printed hand. It ships
+EMPTY — `EB-164` is closed — and `tools/lint_face_defects.py` on the ci lane
+fails an entry whose row has left HEAD, so it can only be emptied.
+
+**A line through a modal prompt replays from the form's own words**
+(`EB-170`). A play in `chosen_line` may carry `exhaust: "<printed title>"` (the
+Exhaust choice, a `hand_select`) and `choose: "<printed option text>"` (a
+*Choose one* mode, a `card_select`); `execute` answers the prompt from them and
+otherwise STOPS with `modal_unanswered`, naming the prompt and the offers —
+never a heuristic pick. `--answer "<prompt>=<printed choice>"` is the
+OPERATOR's answer for a form written before those keys existed whose q1 prose
+names the choice unambiguously; it is logged as `source: "operator"`, consumed
+at most once, and never overrides an answer the form carries.
 
 **Who grades, since R217 A.** [USER] plays **no** forms and no calibration
 turns during iteration: the independent seat's form RETURNS a prototype or

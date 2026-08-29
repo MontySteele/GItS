@@ -350,16 +350,28 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   shipped controls), where round 2 was 4 / 7. **A REPLAY step is now part of
   the protocol:** every graded line is re-played live and the grader's
   arithmetic set against the board, a contradiction being recorded as
-  `misread` and never re-graded. **No turn was flagged `misread`** — eight of
-  eleven replays completed and all eight confirmed the form to the hit point;
-  the other three could not complete because `execute` cannot answer a modal
-  prompt (`EB-170`). The pair read
+  `misread` and never re-graded. **No turn was flagged `misread`**, and all
+  eleven replays now confirm the form to the hit point: eight completed on the
+  day, and the other three — held up because `execute` could not answer a modal
+  prompt — replayed on 2026-08-28 once **`EB-170` CLOSED**. A play in
+  `chosen_line` may state `exhaust` / `choose` in the printed vocabulary, an
+  unanswered prompt STOPS the replay as `modal_unanswered` rather than being
+  guessed at, and `--answer "<prompt>=<choice>"` carries an operator's answer
+  for a form written before the keys, logged as such: `t02` 38 → 21 with Block
+  0 → 5, `t04` both Leaf Slimes dead and Twig Slime (S) 10/6 → 4/0, `t10`
+  24 → 1. The pair read
   (`review/qa/kokomi-slice-1-r3-pair-review-codex-gpt-5.6-sol.md`, no
   correction attached) **ADVANCES five arms and RETURNS two**, with no
   ESCALATE: Thoma's either shape needs a more discriminating board, and
   Shinobu's priced shape needs one where the multi-enemy removal does not
   carry the Block for free. Packet:
-  `review/active/kokomi-slice-1-2026-08-27.md` §§Round 2, Round 3. Seat
+  `review/active/kokomi-slice-1-2026-08-27.md` §§Round 2, Round 3.
+  **`EB-169` CLOSED:** a curated register of cards with an OPEN
+  printed/runtime defect (`understudy/face_defects.py`, shipping EMPTY
+  because `EB-164` is closed) refuses `open_face_defect` at `check` and
+  `stage` before a launch and again at `seat grade`, with
+  `tools/lint_face_defects.py` on the ci lane failing an entry whose
+  backlog row has left HEAD. Seat
   testimony lives in `review/qa/<turn>/form-*.json` and gitignored
   `understudy/logs/seat/`, and never enters an Understudy report, a
   win-rate table or a measurement register.

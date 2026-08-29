@@ -251,6 +251,14 @@ REFUSAL_REASONS = {
     "turn_mismatch": "the form's turn_id is not the turn that was staged",
     "packet_mismatch": "the form's packet_sha256 is not the packet that was "
                        "handed over",
+    # EB-169. The BRACES to `staged_turn`'s belt: the preflight already
+    # refuses at `check` and at `stage`, but a packet on disk outlives the
+    # command that wrote it, and this is the last place a defective face can
+    # be stopped before a third party's quota is spent reading it.
+    "open_face_defect": "the packet's hand holds a card with an OPEN defect "
+                        "against its printed or runtime meaning, so a blind "
+                        "seat would be asked to reason from a face the repo "
+                        "already knows is wrong",
 }
 
 
@@ -531,12 +539,21 @@ def form_schema() -> dict[str, Any]:
     in `required`, and `staged_turn.load_form` only ever requires `card`. A
     null target reads as "this card needed none", which is what an omitted
     one meant.
+
+    `exhaust` and `choose` (EB-170) are listed the same way and for the same
+    reason: nullable, required by the strict schema, and meaning "this play
+    raised no such prompt" when null. They are the only fields on the form
+    that are about the game's MACHINERY rather than the grader's reasoning,
+    and they are still stated in the printed vocabulary -- a card's title, an
+    option's own text -- because that is all a blind grader has.
     """
     play = {
         "type": "object",
         "properties": {"card": {"type": "string"},
-                       "target": {"type": ["string", "null"]}},
-        "required": ["card", "target"],
+                       "target": {"type": ["string", "null"]},
+                       "exhaust": {"type": ["string", "null"]},
+                       "choose": {"type": ["string", "null"]}},
+        "required": ["card", "target", "exhaust", "choose"],
         "additionalProperties": False,
     }
     grader = {
@@ -781,6 +798,22 @@ def cmd_grade(args) -> int:
         "guardrail": ("staged board: a blind seat's answer is a falsifier "
                       "input and never a claim about whether a turn is fun"),
     }
+
+    # EB-169, and before codex is even located: a packet whose printed hand
+    # holds a card with an OPEN face/runtime defect is not gradeable, and
+    # spending a third party's quota to learn that is the round-2 mistake in
+    # miniature. The import is LOCAL, exactly like `staged_turn`'s below --
+    # the blind seat's module-level import graph stays as narrow as
+    # `test_the_seat_cannot_reach_a_sheet` found it.
+    from understudy import face_defects
+
+    hand_titles = [str(c.get("title") or c.get("name") or "")
+                   for c in ((envelope.get("board") or {}).get("hand") or [])]
+    defects = face_defects.hits(hand_titles)
+    if defects:
+        seat["open_face_defects"] = defects
+        return _refuse(seat, session, "open_face_defect",
+                       [f"{h['matched']} -- {h['eb']}" for h in defects])
 
     if args.dry_run:
         seat["dry_run"] = True
