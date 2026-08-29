@@ -517,6 +517,77 @@ def test_a_numbered_screen_still_reads_as_blind():
                            allow={state["state_type"]})
 
 
+def _with_powers(state: dict) -> dict:
+    """RECORDED SHAPES. Both status rows are the wire's own, field for field,
+    read live on 2026-08-29 through the debug door: `id`, `name`, `amount`,
+    `type`, `description`, `keywords`, and no duration or expiry anywhere.
+
+    `Vulnerable` states its duration inside the printed text; `Thorns` states
+    none, which is the power run B6 watched come and go unexplained."""
+    out = json.loads(json.dumps(state))
+    out["player"]["status"] = [
+        {"id": "VULNERABLE_POWER", "name": "Vulnerable", "amount": 3,
+         "type": "Debuff", "keywords": [],
+         "description": "Receive 50% more damage from Attacks for 3 turns."}]
+    out["battle"]["enemies"][0]["status"] = [
+        {"id": "THORNS_POWER", "name": "Thorns", "amount": 3, "type": "Buff",
+         "keywords": [],
+         "description": "When hit by an attack, deal 3 damage back."}]
+    return out
+
+
+def test_a_power_prints_the_buff_or_debuff_the_wire_carries():
+    """`EB-179`, gap one. `type` was on the wire all along and the page was
+    dropping it."""
+    page = blindplay.observe(_with_powers(combat_state()))
+    assert "Vulnerable 3 (debuff) — Receive 50% more damage" in page
+    assert "Thorns 3 (buff) — When hit by an attack" in page
+
+
+def test_the_page_says_out_loud_that_a_power_carries_no_expiry():
+    """...and gap one's other half: there IS no duration field on the wire, so
+    the page states that rather than printing nothing and letting a power
+    vanish unexplained. Only where a power is actually on the board."""
+    assert blindplay.POWER_NOTE in blindplay.observe(_with_powers(combat_state()))
+    bare = json.loads(json.dumps(combat_state()))
+    bare["player"]["status"] = []
+    for e in bare["battle"]["enemies"]:
+        e["status"] = []
+    assert blindplay.POWER_NOTE not in blindplay.observe(bare)
+
+
+def test_a_meter_says_the_wire_carries_no_maximum_and_no_spend_rule():
+    """`EB-179`, gap two. The resource snapshot reflects an `Id` and an
+    `Amount` and nothing else, so `burst_max` is not a field this page is
+    failing to read -- it does not exist."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["resources"] = {"KLEEMOD_KOKOMI_BURST": 12}
+    page = blindplay.observe(state)
+    assert f"Kokomi Burst: 12 — {blindplay.METER_NOTE}" in page
+    assert "no maximum" in page and "how it is spent" in page
+
+
+def test_a_hand_printing_one_name_twice_says_an_enchant_would_not_show():
+    """`EB-179`, gap three. The card builder emits no enchantment field, and
+    the one place that bites a reader is a hand holding two cards they can see
+    are different and the page cannot tell apart."""
+    state = combat_state()
+    assert blindplay.HAND_REPEAT_NOTE not in blindplay.observe(state)
+    state["player"]["hand"].append(
+        json.loads(json.dumps(state["player"]["hand"][3])))
+    assert blindplay.HAND_REPEAT_NOTE in blindplay.observe(state)
+
+
+def test_the_three_honest_lines_still_read_as_blind():
+    state = _with_powers(combat_state())
+    state["player"]["resources"] = {"KLEEMOD_KOKOMI_BURST": 12}
+    state["player"]["hand"].append(
+        json.loads(json.dumps(state["player"]["hand"][3])))
+    obs = blindplay.observation(state)
+    qa_packet.assert_blind(obs, allow={state["state_type"]})
+    qa_packet.assert_blind(blindplay.render(obs), allow={state["state_type"]})
+
+
 def test_the_screen_decides_the_verb_not_the_command():
     """One `choose`, six wire actions. Each is the verb that screen advertises
     in `vendor/STS2_MCP/docs/raw-simplified.md`."""

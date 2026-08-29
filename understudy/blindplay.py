@@ -497,7 +497,26 @@ def _number_faces(faces: list[dict[str, Any]], field: str
 
 
 def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
-    return qa_packet._powers(blob)
+    """`qa_packet._powers` plus the `type` the wire has always carried.
+
+    `EB-179`. A status row on the wire is exactly `id`, `name`, `amount`,
+    `type`, `description`, `keywords` -- no duration and no expiry anywhere.
+    `type` is the one of those the page was dropping, and it is the game's
+    own word for whether a thing on the board is helping or hurting, so it
+    goes back on the line. The filter below MIRRORS `qa_packet._powers`'s
+    skip rule (a row with no printed name is not a power the page shows), so
+    the two lists stay index-aligned; they are one function's worth of logic
+    living either side of a module boundary, and a change to one is a change
+    to both.
+    """
+    out = qa_packet._powers(blob)
+    kinds = [_text(row.get("type"))
+             for row in (blob.get("status") or [])
+             if isinstance(row, dict)
+             and (_text(row.get("title")) or _label(row.get("name")))]
+    for power, kind in zip(out, kinds):
+        power["kind"] = kind
+    return out
 
 
 def _intent(blob: Any) -> dict[str, str]:
@@ -528,6 +547,10 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         },
         "round": _int(battle.get("round")),
         "hand": _number_faces([_card_face(c) for c in _hand(state)], "title"),
+        # `EB-179`: whether the hand holds two cards printing one name, which
+        # is the ONE place the missing enchantment field bites a reader.
+        "hand_repeats": len({_fold(_text(c.get("name")))
+                             for c in _hand(state)}) < len(_hand(state)),
         "piles": {"draw": _int(p.get("draw_pile_count")),
                   "discard": _int(p.get("discard_pile_count")),
                   "exhaust": _int(p.get("exhaust_pile_count"))},
@@ -770,6 +793,56 @@ def _render_card(c: dict[str, Any], bullet: str = "-") -> list[str]:
     return out
 
 
+# `EB-179`. THREE LEGIBILITY GAPS RUN B6 REPORTED, AND WHAT THE WIRE ACTUALLY
+# CARRIES FOR EACH. Read off the live bridge on 2026-08-29 and confirmed
+# against the vendored builder, so these lines state a fact about the feed and
+# not a guess:
+#
+#   POWERS -- a status row is `id`, `name`, `amount` (the game's own
+#     `DisplayAmount`), `type`, `description` (the game's own resolved
+#     `SmartDescription`) and `keywords`. There is NO duration or expiry
+#     field. Where the game states a duration it is inside the printed text
+#     (`Vulnerable 3`: "...for 3 turns"); where it does not, nothing else
+#     says it either (`Thorns 3`: "When hit by an attack, deal 3 damage
+#     back."), which is the Toadpole's Thorns that came and went unexplained.
+#     So: print the `type` the page was dropping, and say the rest out loud.
+#
+#   METERS -- the resource snapshot reflects each registered resource's `Id`
+#     and `Amount` and nothing else. There is no maximum and no spend rule on
+#     the wire, so a meter cannot print one.
+#
+#   ENCHANTMENTS -- the card builder emits `id`, `name`, `type`, `cost`,
+#     `star_cost`, `description`, `rarity`, `is_upgraded` and `keywords`. No
+#     enchantment field exists, and run B6's live evidence says an enchant
+#     reaches none of the fields that do. Filed as a bridge gap rather than
+#     patched here. The note is printed only where it bites -- a hand holding
+#     two cards that print one name, where the reader can SEE two faces and
+#     the page cannot tell them apart.
+#
+# Each line says what is missing and whose it is to carry. None of them
+# invents a number, and none names a register id -- the page is scrubbed.
+POWER_NOTE = ("*A power's number is what the game's data feed reports for it. "
+              "The feed carries no duration and no expiry, so unless a "
+              "power's own text says when it ends, this page cannot say "
+              "either.*")
+METER_NOTE = ("the game's data feed carries this meter's amount only: no "
+              "maximum, and no rule for how it is spent")
+HAND_REPEAT_NOTE = ("*Two cards here print the same name. The game's data "
+                    "feed does not report a card's enchantment, so if one of "
+                    "them is enchanted, this page cannot show which.*")
+
+
+def _render_power(power: dict[str, Any], indent: str) -> str:
+    """One power: printed name, the amount, buff or debuff, the printed text."""
+    line = f"{indent}{power['name']} {power['stacks']}"
+    kind = str(power.get("kind") or "").strip().lower()
+    if kind:
+        line += f" ({kind})"
+    if power["text"]:
+        line += f" — {power['text']}"
+    return line
+
+
 def _render_options(items: list[dict[str, Any]], bullet: str = "-") -> list[str]:
     out = []
     for o in items:
@@ -805,10 +878,9 @@ def render(obs: dict[str, Any]) -> str:
                 f"- Block {you['block']}",
                 f"- Energy {you['energy']}/{you['max_energy']}"]
         for name, amount in sorted(you["meters"].items()):
-            out.append(f"- {name}: {amount}")
+            out.append(f"- {name}: {amount} — {METER_NOTE}")
         for pw in you["powers"]:
-            out.append(f"- {pw['name']} {pw['stacks']}"
-                       + (f" — {pw['text']}" if pw["text"] else ""))
+            out.append(_render_power(pw, "- "))
         out.append(f"- Piles: {c['piles']['draw']} in the draw pile, "
                    f"{c['piles']['discard']} discarded, "
                    f"{c['piles']['exhaust']} exhausted")
@@ -822,6 +894,8 @@ def render(obs: dict[str, Any]) -> str:
             out += _render_card(card)
         if not c["hand"]:
             out.append("- (your hand is empty)")
+        if c.get("hand_repeats"):
+            out += ["", HAND_REPEAT_NOTE]
         out += ["", "## The other side", ""]
         for e in c["enemies"]:
             line = f"- **{e['name']}** — HP {e['hp']}/{e['max_hp']}"
@@ -833,8 +907,9 @@ def render(obs: dict[str, Any]) -> str:
                                               e["intent"]["text"]) if x)
             out.append(f"    Intent: {telegraph or '(no intent shown)'}")
             for pw in e["powers"]:
-                out.append(f"    {pw['name']} {pw['stacks']}"
-                           + (f" — {pw['text']}" if pw["text"] else ""))
+                out.append(_render_power(pw, "    "))
+        if you["powers"] or any(e["powers"] for e in c["enemies"]):
+            out += ["", POWER_NOTE]
     elif obs["screen"] == "map":
         out += ["# The map", "",
                 "Where you can go next:", ""] + _render_options(obs["nodes"])
