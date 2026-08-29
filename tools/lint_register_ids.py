@@ -116,7 +116,12 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 170,   # EB-169/170 minted 2026-08-28 by the Kokomi slice-1 round-3
+    "EB": 171,   # EB-171 minted 2026-08-28 by the EB-167/168 live acceptance,
+                 # which could not run: the machine's game moved to v0.111.0
+                 # on the `public-beta` branch and neither the vendored bridge
+                 # nor the roster mod compiles against it any more. The PORT is
+                 # engineering; whether to port at all is M46.
+                 # EB-169/170 minted 2026-08-28 by the Kokomi slice-1 round-3
                  # sitting, both under R213/R216 authority and neither a
                  # design call: a funnel preflight that refuses a packet
                  # holding a card with an OPEN face/runtime defect (round 2
@@ -155,7 +160,12 @@ CEILINGS: dict[str, int] = {
                  # exp_shop_companion_channel instrument (R68); EB-140 minted
                  # at the R211 W3 build (the codegen upgrade-delta gap);
                  # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
-    "M": 45,     # M45 minted 2026-08-26: the post-playtest richness slate, ONE
+    "M": 46,     # M46 minted 2026-08-28 beside EB-171: the pinned build
+                 # environment stopped describing the machine mid-sitting, and
+                 # which way that is repaired -- back to the `public` branch,
+                 # forward to 0.111.0, or a kept copy of the old tree -- is a
+                 # one-way-ish call with every measurement label riding on it.
+                 # M45 minted 2026-08-26: the post-playtest richness slate, ONE
                  # row under ONE ruling (R206), gated on the three-character
                  # playtest. M43/M44 minted by R206 (4ff9f90) and settled by
                  # R207 with no surviving HEAD citation — the exact blind spot
@@ -174,9 +184,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        167, 168, 169, 170,
+        167, 168, 171,
     }),
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 46}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

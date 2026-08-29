@@ -2,3 +2,9 @@
 # state for the CURRENT run, not evidence about one. The decision log
 # (phase0-<seed>.jsonl) is the instrument and IS committed.
 _*
+
+# Embark sidecars (`understudy/embark.py`): a pointer to a gitignored soak
+# ledger plus absolute machine paths, written once per launch. Operator
+# scratch for `--teardown`, not evidence -- the run seed it reads back is
+# carried into the sealed record instead.
+embark-*.json

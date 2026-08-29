@@ -57,6 +57,12 @@ python3 -m understudy.seat grade <turn-id> [--model M] [--grader-id ID]
 python3 -m understudy.seat grade <turn-id> --dry-run      # prompt + argv only
 python3 -m understudy.seat review <prompt-file> [--out F] # NOT blind
 
+# EB-167/EB-168 blind play: ANY screen design-blind, and a seat that plays it
+# (`observe`/`act` need no codex; `--raw-file` needs no game either)
+python3 -m understudy.blindplay observe [--raw-file <state.json>]
+python3 -m understudy.blindplay act 'play "Coral Guard"' [--dry-run]
+python3 -m understudy.blindplay session [--model M] --max-actions 40
+
 python3 -m pytest tier0/tests/test_understudy_*.py -q     # game never involved
 ```
 
@@ -70,7 +76,10 @@ Library level: `bridge.get_state/post/current_seed/set_speed/give_card`
 `soak.run_scripted(policy, stamp, ...)` — the setup/swap/teardown seam the
 two probes and `scenario.py` share; `seat.guard(events, rollout, stderr)` /
 `seat.fill_identity(raw, grader_id, model)` / `seat.build_prompt(packet_md,
-sha)` (`seat.py`).
+sha)` (`seat.py`); `blindplay.observe(state)` / `blindplay.act(state,
+command)` / `blindplay.Session(thread, wire=…).run()`, with
+`blindplay.ScriptedWire` and `blindplay.ScriptedThread` as the shipped doubles
+that run the whole loop without the game or codex (`blindplay.py`).
 
 ## 3. Key invariants
 
@@ -118,6 +127,20 @@ sha)` (`seat.py`).
   refuses too: no evidence is not good evidence. The scratch `-C` root is an
   empty temp dir OUTSIDE the repo, because codex reads `AGENTS.md` from its
   working root.
+- **Every blind-play observation is SCRUBBED, and the allowlist is what makes
+  that possible** (`blindplay.py`). Each screen is copied field by field —
+  printed faces, printed intents, meters that hold something, pile counts — and
+  the finished structure AND the rendered page both go through
+  `qa_packet.assert_blind`. A leak raises and the page is never shown. The one
+  exemption is the wire's own screen NAME, passed one token at a time through
+  `qa_packet.leaks(..., allow=…)` so a refusal can say what it refused; no
+  other rule is ever exempt. Ids exist only long enough to build the POST.
+- **An unknown screen is `TOOL-BLOCKED`, never a heuristic** (`blindplay.py`).
+  An unrecognised `state_type`, an `overlay`, the crystal-sphere minigame and a
+  registered EB-1 hazard event all render as `TOOL-BLOCKED: <state_type>` and
+  stop the driver. There is no first-button fallback in the file:
+  `soak._mechanical_action` has one because a soak must keep moving
+  (`soak.py:1928`), and a blind tester must not.
 - **The seat's identity fill has an exact limit:** `grader.id`,
   `grader.kind` and `grader.model` only — the three facts about the SEAT that
   a model cannot know. `turn_id`, `packet_sha256`, `designed_these_cards`,

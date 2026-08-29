@@ -542,23 +542,32 @@ round 2 was 4 / 7.
 | turn | half | verdict | replay: the board's answer to the form's arithmetic |
 |---|---|---|---|
 | t01 | A shipped | SURVIVES | **confirms** — Nibbit 38 → 23, the 15 damage q1 claims; Block 0 → 5 |
-| t02 | A proto (counting) | SURVIVES | **incomplete** — the Exhaust prompt is a modal the replayer cannot answer; only the free attack resolved (38 → 32). Untested, not contradicted |
+| t02 | A proto (counting) | SURVIVES | **confirms** — Nibbit 38 → 21, the 6 + 11 the form's line adds up to with two cards Exhausted this turn; Block 0 → 5. Replayed through the Exhaust prompt on `EB-170`'s answer |
 | t03 | B shipped | **REFUSED — `intent_insensitive`** | **confirms** — both Leaf Slimes died; the attacker went 10 HP behind 6 Block → 4 HP, 0 Block; Block 0 → 4. It lived and its telegraph landed |
-| t04 | B proto (either) | SURVIVES | **incomplete** — the mode choice is a modal; the line stopped after one card |
+| t04 | B proto (either) | SURVIVES | **confirms** — both Leaf Slimes died and Twig Slime (S) went 10 HP behind 6 Block → 4 HP, 0 Block, exactly the "4 HP after Block" q1 claims. Replayed through the mode choice on `EB-170`'s answer |
 | t05 | B proto (priced) | **REFUSED — `intent_insensitive`** | **confirms**, including the part a reader would doubt — the attacker took ZERO HP damage (10 → 10), its Block 6 → 3; player Block 0 → 4 |
 | t06 | C shipped | SURVIVES | **confirms** — Seapunk 22 → 1, exactly the 21 q1 claims |
 | t07 | C proto (either) | **REFUSED — `intent_insensitive`** | **confirms** — Seapunk 22 → 1. The form's claim that no line here can defeat it this turn is TRUE |
 | t08 | C proto (priced) | SURVIVES | **confirms** — Seapunk 22 → 1 |
 | t09 | D shipped | **REFUSED — `intent_insensitive`** | **confirms** — Fuzzy Wurm Crawler 24 → 1 (23 damage) AND Block 0 → 6, in one line |
-| t10 | D proto (either) | SURVIVES | **incomplete** — same modal limitation as t04 |
+| t10 | D proto (either) | SURVIVES | **confirms** — Fuzzy Wurm Crawler 24 → 1, the 14 + 9 q1 claims; Block 0 → 0, the damage mode taken. Replayed through the mode choice on `EB-170`'s answer |
 | t11 | D proto (priced) | SURVIVES | **confirms** — 24 → 3 (21 damage), Block 0 → 0 |
 
-**No turn was flagged `misread`.** Eight of eleven replays completed and every
-one of the eight confirmed the grader's arithmetic to the hit point. The three
-that did not complete — `t02`, `t04`, `t10` — failed for one shared mechanical
-reason: each line passes through a modal card-selection or mode-choice prompt
-that `staged_turn execute` cannot answer. That is a real gap in the tool, filed
-as `EB-170`, and it is not a disagreement about a number.
+**No turn was flagged `misread`, and all eleven replays are now complete.**
+Eight completed on the day and every one confirmed the grader's arithmetic to
+the hit point. The other three — `t02`, `t04`, `t10` — stopped for one shared
+mechanical reason: each line passes through a modal card-selection or
+mode-choice prompt `staged_turn execute` could not answer. That was a real gap
+in the tool rather than a disagreement about a number, and it is now closed
+(`EB-170`): a play in `chosen_line` may state `exhaust` / `choose` in the
+printed vocabulary, an unanswered prompt STOPS the replay by name rather than
+being guessed at, and the three forms above — written before those keys existed
+— were replayed on 2026-08-28 with the choice each grader's own q1 prose names,
+supplied as an operator `--answer` and logged as `source: "operator"` in every
+record. **All three confirm the form**, so the round's replay column now reads
+eleven of eleven and none of them a contradiction. The pair read below was
+written when three cells said *incomplete*; its reasoning is unchanged by three
+confirmations, and it is left as published (R101b).
 
 The four refusals in the grader's own words:
 
@@ -627,5 +636,7 @@ turn where the telegraph cannot matter.
 
 Nothing here rates a card, and nothing here is a ship approval: a seat's
 SURVIVES and a seat's ADVANCE are both "not yet falsified" (R217 G). What a
-round 4 would carry, if one runs, is the two named board repairs and `EB-170`,
-so that a modal line can be replayed rather than left untested.
+round 4 would carry, if one runs, is the two named board repairs — `EB-170` is
+done, so a modal line replays rather than being left untested, and `EB-169`'s
+preflight now refuses a board carrying a card with an open face defect before
+the round is staged at all.

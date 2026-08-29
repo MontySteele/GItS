@@ -29,7 +29,8 @@ reads it.
   },
   "chosen_line": [
     {"card": "Bake-Kurage"},
-    {"card": "Pearl Barrage", "target": "Jaw Worm"}
+    {"card": "Pearl Barrage", "target": "Jaw Worm", "exhaust": "Coral Guard"},
+    {"card": "Itto - Oni Rush", "choose": "Deal 14 damage"}
   ],
   "q1_what_did_you_play": "...",
   "q2_other_line_considered": "...",
@@ -50,12 +51,22 @@ reads it.
 | `grader.model` | the model that answered, so a verdict names who made it |
 | `grader.designed_these_cards` | R213's first guard, declared rather than assumed. `true` REFUSES the form |
 | `chosen_line` | the line played, in order, as **printed card titles** — the only spelling the grader was shown. `target` is an enemy's printed name, and is omitted for a card that needs none |
+| `exhaust` | optional, per play: if the card asked which card to **Exhaust**, the printed title of the one chosen |
+| `choose` | optional, per play: if the card asked to **choose one**, the printed text of the option taken, exactly as the card prints it (`"Deal 14 damage"`) |
 | `q1`–`q4` | the four answers, in prose |
 | `q4_changed` | the fourth answer as a boolean, so a refusal cannot hinge on parsing prose. `false` REFUSES the form; so does a `q4` that reads as a flat "no" |
+
+A line is **replayed on the live game** after it is graded, so a choice the
+form does not state is a choice the replayer cannot make: it stops at the
+prompt and records `modal_unanswered` rather than guessing. That is the whole
+reason for the two optional keys.
 
 ## What a refusal means
 
 `grade` writes `review/qa/<turn-id>/verdict.json` and names the rule that
 refused the turn. `SURVIVES` means **not yet falsified** — it is not a pass, a
-score, or an opinion. A turn that survives goes to [USER] as a five-minute
-puzzle; that is the next step, and the only one that reads anything into it.
+score, or an opinion. A turn that survives has its line **replayed live** on
+the staged board — the grader's arithmetic set against what the game actually
+did — and then goes to the seat's pair read, which RETURNS an arm or ADVANCES
+it. **[USER] plays no forms and no turns during iteration** (R217 A); a
+SURVIVES is never ship approval.

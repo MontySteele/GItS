@@ -169,6 +169,15 @@ pack 9,586,076 bytes, 132 resources. It carries `EB-150`'s Deep Breath fix and
 next deploy: the exhaust-selection rate (R215 C) and `EB-164`'s eighteen
 re-worded scaling faces.
 
+**THE PIN NO LONGER DESCRIBES THE MACHINE (2026-08-28 21:08).** Steam moved
+this install to **v0.111.0** on the **`public-beta`** branch (buildid
+`24724944`, BaseLib **3.4.5.0**), and against those assemblies neither the
+vendored bridge nor `KleeCode` compiles — 4 lobby errors and 15 `CS0115`
+errors on the damage hooks. Everything that LAUNCHES the game is stopped until
+[USER] answers QUEUE `M46`; the port is BACKLOG `EB-171`. The pins above are
+still what the repo builds and labels against, and are deliberately NOT moved
+here on Claude's own authority.
+
 ## Systems
 
 - **tier0 combat kernel** — op interpreter, powers, statuses, reactions,
@@ -304,7 +313,11 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   **`+proto` / `+proto.dirty` version mark is RATIFIED** (LAW, beside R214),
   refusal symmetric. Automation minted in order: `EB-166` the seat — **CLOSED 2026-08-28**, built, blind-grading eleven
   turns twice and driving both pair reads — `EB-167` a design-blind
-  any-screen render, `EB-168` an orchestrated Act-1 tester; A4 and A6 wait and are NOT minted; A1-extended (enemy
+  any-screen render, `EB-168` an orchestrated Act-1 tester — **both BUILT and
+  both BLOCKED short of acceptance on 2026-08-28**, not by their own code but
+  by the game update recorded above (`M46` / `EB-171`); the one live session
+  they got walked five screens blind before the machine's build moved under
+  them. A4 and A6 wait and are NOT minted; A1-extended (enemy
   composition/intent setters) and A5 (vision input) are DEFERRED.
   Routing: **Kokomi slice 2 = R213 E1's Charge arms, before Klee** — slice 1
   tests priced Companion Block at the turn and does not exhaust Kokomi.
@@ -350,16 +363,28 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   shipped controls), where round 2 was 4 / 7. **A REPLAY step is now part of
   the protocol:** every graded line is re-played live and the grader's
   arithmetic set against the board, a contradiction being recorded as
-  `misread` and never re-graded. **No turn was flagged `misread`** — eight of
-  eleven replays completed and all eight confirmed the form to the hit point;
-  the other three could not complete because `execute` cannot answer a modal
-  prompt (`EB-170`). The pair read
+  `misread` and never re-graded. **No turn was flagged `misread`**, and all
+  eleven replays now confirm the form to the hit point: eight completed on the
+  day, and the other three — held up because `execute` could not answer a modal
+  prompt — replayed on 2026-08-28 once **`EB-170` CLOSED**. A play in
+  `chosen_line` may state `exhaust` / `choose` in the printed vocabulary, an
+  unanswered prompt STOPS the replay as `modal_unanswered` rather than being
+  guessed at, and `--answer "<prompt>=<choice>"` carries an operator's answer
+  for a form written before the keys, logged as such: `t02` 38 → 21 with Block
+  0 → 5, `t04` both Leaf Slimes dead and Twig Slime (S) 10/6 → 4/0, `t10`
+  24 → 1. The pair read
   (`review/qa/kokomi-slice-1-r3-pair-review-codex-gpt-5.6-sol.md`, no
   correction attached) **ADVANCES five arms and RETURNS two**, with no
   ESCALATE: Thoma's either shape needs a more discriminating board, and
   Shinobu's priced shape needs one where the multi-enemy removal does not
   carry the Block for free. Packet:
-  `review/active/kokomi-slice-1-2026-08-27.md` §§Round 2, Round 3. Seat
+  `review/active/kokomi-slice-1-2026-08-27.md` §§Round 2, Round 3.
+  **`EB-169` CLOSED:** a curated register of cards with an OPEN
+  printed/runtime defect (`understudy/face_defects.py`, shipping EMPTY
+  because `EB-164` is closed) refuses `open_face_defect` at `check` and
+  `stage` before a launch and again at `seat grade`, with
+  `tools/lint_face_defects.py` on the ci lane failing an entry whose
+  backlog row has left HEAD. Seat
   testimony lives in `review/qa/<turn>/form-*.json` and gitignored
   `understudy/logs/seat/`, and never enters an Understudy report, a
   win-rate table or a measurement register.

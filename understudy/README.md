@@ -283,7 +283,7 @@ python -m understudy.staged_turn closeness understudy/turns/<t>.yaml [--observed
 python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --why "..." [--seed S]
 python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --hold --why "..."
 python -m understudy.staged_turn grade     <turn-id> <form.json>
-python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."
+python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..." \n    [--answer "<prompt>=<printed choice>"]
 python -m understudy.staged_turn ledger
 ```
 
@@ -317,6 +317,42 @@ out of hand beneath it. Draw rather than discard because a discard pile is
 *read* by cards. Then `export_packet` REFUSES to write a packet whose live hand
 is not the declared multiset — the acceptance is a refusal, since a wrong
 board in a design-blind packet is invisible to the person reading it.
+
+**A LINE THAT PASSES THROUGH A MODAL PROMPT REPLAYS FROM THE FORM'S OWN
+WORDS** (EB-170). A card can stop the turn and ask which card gets Exhausted
+(`hand_select`) or which half of a *Choose one* face resolves (`card_select`);
+round 3 of the Kokomi slice met three of those and the replayer walked into the
+next play, reporting `no enemy 'Twig Slime (S)'; the fight has []` — a true
+sentence about a card-selection screen and a useless one. A play in
+`chosen_line` may now carry `exhaust: "<printed title>"` and
+`choose: "<printed option text>"`, both optional, both nullable, both in the
+only vocabulary a blind grader has, and `execute` answers the prompt from them.
+When a prompt appears and nobody said, it stops with `modal_unanswered`, naming
+the prompt and listing what was offered — **never a heuristic pick**, because
+the first offer, the biggest number and the cheapest card are all plausible
+guesses and all three produce a post-state indistinguishable from a real
+replay. `--answer "<prompt>=<printed choice>"` is the OPERATOR's answer, for a
+form written before those keys existed whose q1 prose names the choice
+unambiguously; it is logged as `source: "operator"` on the row and in the
+record, it is consumed at most once, and it never overrides an answer the form
+itself carries.
+
+**NO GRADED PACKET MAY CARRY A CARD WITH AN OPEN FACE DEFECT** (EB-169).
+`understudy/face_defects.py` is a curated register of card ids whose printed or
+runtime meaning is currently WRONG, each entry naming the printed title(s), the
+`BACKLOG.md` row that owns the defect, and one line on what a reader gets
+wrong. `check` and `stage` consult it and refuse `open_face_defect` — naming
+the card and the id — **before any game is launched**; `seat grade` re-checks
+the packet's own printed hand, because a packet on disk outlives the command
+that wrote it. `execute` deliberately does NOT check: a replay is how a misread
+already in the record gets settled against the board. The register ships
+**EMPTY**, which is the correct state — `EB-164`, the defect it was built for,
+is closed — and `tools/lint_face_defects.py` on the ci lane fails an entry
+whose row has left HEAD, so it can only be emptied, never quietly outlived.
+The argument for it is round 2 of the Kokomi slice: `all_streams_flow` was
+staged on all eleven boards while `EB-164` sat open against that face, four
+graders and the reviewer read 13 where the card deals 9, and seven refusals
+were manufactured out of a defect the repo had already written down.
 
 **THE PACKET IS BLIND BY CONSTRUCTION, NOT BY PROMISE.** `qa_packet.py` imports
 nothing from `tier0` — not the sheet loaders, not the engine, not the pilot —

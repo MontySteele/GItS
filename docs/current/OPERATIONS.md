@@ -395,7 +395,7 @@ python -m understudy.staged_turn check     understudy/turns/<t>.yaml   # no game
 python -m understudy.staged_turn closeness understudy/turns/<t>.yaml [--observed]
 python -m understudy.staged_turn stage     understudy/turns/<t>.yaml --why "..." [--seed S]
 python -m understudy.staged_turn grade     <turn-id> <form.json>
-python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."
+python -m understudy.staged_turn execute   <turn-id> <form.json> --why "..."     [--answer "<prompt>=<printed choice>"]
 python -m understudy.staged_turn ledger
 ```
 
@@ -419,6 +419,23 @@ from the run seed**, so `stage` records the seed the game used into
 proven byte-identical on a re-stage. `execute` then compares the live enemies
 and hand against the packet and refuses `board_mismatch` before any play.
 **ledger** rebuilds `review/qa/ledger.tsv`.
+
+**A preflight runs before any launch** (`EB-169`). `understudy/face_defects.py`
+registers card ids with an OPEN printed/runtime defect, each naming its
+`BACKLOG.md` row; `check` and `stage` refuse `open_face_defect` naming the card
+and the id, and `seat grade` re-checks the packet's printed hand. It ships
+EMPTY — `EB-164` is closed — and `tools/lint_face_defects.py` on the ci lane
+fails an entry whose row has left HEAD, so it can only be emptied.
+
+**A line through a modal prompt replays from the form's own words**
+(`EB-170`). A play in `chosen_line` may carry `exhaust: "<printed title>"` (the
+Exhaust choice, a `hand_select`) and `choose: "<printed option text>"` (a
+*Choose one* mode, a `card_select`); `execute` answers the prompt from them and
+otherwise STOPS with `modal_unanswered`, naming the prompt and the offers —
+never a heuristic pick. `--answer "<prompt>=<printed choice>"` is the
+OPERATOR's answer for a form written before those keys existed whose q1 prose
+names the choice unambiguously; it is logged as `source: "operator"`, consumed
+at most once, and never overrides an answer the form carries.
 
 **Who grades, since R217 A.** [USER] plays **no** forms and no calibration
 turns during iteration: the independent seat's form RETURNS a prototype or
@@ -471,6 +488,70 @@ under `review/qa/<turn-id>/`.
 the pilot's own score surface, quotable under R215 B's exception because it
 reads the TURN. SURVIVES means **not yet falsified** — nothing here rates a
 turn. Depth: `understudy/README.md`.
+
+### Blind play (`EB-167` / `EB-168`)
+
+The same blindness widened from one staged turn to a whole run, and a seat
+that plays it rather than grading it.
+
+```
+python -m understudy.blindplay observe [--raw-file <state.json>]
+python -m understudy.blindplay act "<command>" [--raw-file <f>] [--dry-run]
+python -m understudy.blindplay session [--model M] [--max-actions N]
+```
+
+**observe** renders whichever screen is up — combat, map, rewards, shop, rest,
+event, the selection overlays — as printed faces and nothing else, through
+`qa_packet`'s scrubber; an unknown or hazardous screen renders as
+`TOOL-BLOCKED: <state_type>` and is never driven. `--raw-file` renders a saved
+state (a `review/qa/<turn>/observed.json` envelope works), which is how the
+tests and a desk check run with no game. **act** resolves one player-language
+command — `play "<title>" [on "<enemy>"]`, `end turn`, `choose "<name>"`,
+`skip`, `go "<node>"`, `buy "<item>"`, `rest`, `upgrade`, `remove`,
+`use potion "<title>"`, `confirm`, `proceed` — against the current state by
+printed names only, and posts it; with `--raw-file` or `--dry-run` it resolves
+and posts nothing. **session** is the driver: one `codex exec` thread for the
+whole run, one command per screen, the fight and run records at the ends, and
+budgets on actions, wall time and consecutive refusals. All of it is built on
+`naming` / `staged_turn.execute`'s title resolution and **never on
+`harness state`**, which prints `policy_v0`'s recommendation beside the screen.
+
+**Live acceptance, from the art-bearing main checkout** — the row closes on
+this, not on the branch that built it. `session` attaches to a run already in
+progress and stops on a menu rather than driving one, so embark first:
+
+```
+python -m understudy.seat check                  # signed in?
+python -m understudy.embark --character kokomi   # bridge, launch, embark
+python -m understudy.blindplay observe           # eyeball one live screen
+python -m understudy.blindplay session --max-actions 40 --max-wall-s 5400
+python -m understudy.embark --teardown           # put it all back
+```
+
+**embark** is the operator's side of that line and deliberately not importable
+from `blindplay`: it owns `soak.Session`'s deploy / launch / readiness /
+embark / speed path, reads the run seed BACK off the wire (R95), and then
+stops with the game up and nothing torn down. `--hold` attaches to a game
+somebody else launched and changes nothing. `--teardown` rebuilds the session
+from the reversibility ledger ON DISK — a different process from the embark —
+and walks soak's own undo steps, newest launching embark first or `--stamp`
+by name. The sidecar it leaves in `understudy/logs/` is gitignored operator
+scratch; the seed it read is what the sealed record carries.
+
+**As of 2026-08-28 none of this runs on this machine.** The game updated to
+v0.111.0 on the `public-beta` branch and neither the bridge nor the roster mod
+compiles against it — QUEUE `M46` for the pin call, BACKLOG `EB-171` for the
+port.
+
+Acceptance is a model completing one fight and then one Act-1 run, every action
+in the transcript, and no internal id, policy hint or design tag in any
+observation. Sessions land in `understudy/logs/blindplay/`, **gitignored** —
+the prompts inline the screens and the rollout carries a third party's system
+prompt. The committed artifact is
+`review/qa/blindplay/<session>/record.md`: the identity block (model, codex
+version, build version string, run seed read back off the wire, prompt sha256,
+action count, termination reason) and the model's records verbatim under the
+R217 G label. The author's own model family is refused as tester (R217 C).
 
 `KleeTests` runs the shipped `klee.dll` against the real game
 assemblies **headless** — no Godot, no launch. It is opt-in, not a deploy gate;
