@@ -1,0 +1,107 @@
+{
+ "turn_id": "kokomi-slice2-t04",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "481befdafac9c185357ec5a05ab6e3bea388a54e824defc4b61bb5bdf8300cba",
+ "chosen_line": [
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Fathom the Tide",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played All Streams Flow to the Sea on Nibbit first, then Fathom the Tide on Nibbit. All Streams is played before Fathom because the disclosure says it reads Charge at one point per two Charge, so it deals 11 at Charge 12. Fathom then spends 6 Charge for 13 damage. Total is 24 damage and two Hydro applications, leaving Charge 6.",
+  "q2_other_line_considered": "I seriously considered the reversed order, Fathom the Tide first and then All Streams Flow to the Sea, because it uses the same two cards. I also looked at Coral Guard plus All Streams Flow to the Sea for 5 Block, but rejected it because the 12 attack is not lethal and the chosen line maximizes damage and Hydro applications.",
+  "q3_what_it_gave_up": "It gave up the 5 Block from Coral Guard and the option to keep Charge at 12 by not playing Fathom. It also forgoes the lower-damage, safer guard line and accepts taking the full 12 damage, ending the turn at 36 HP instead of 41 HP with a guard line.",
+  "q4_different_intent": "Yes. If Nibbit had telegraphed a lethal attack in the range that 5 Block could bring below my 48 HP, I would have included Coral Guard, likely with Fathom the Tide. The shown 12 attack is not lethal, so it does not change the chosen line."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.2101,
+  "top1": 23.8,
+  "top2": 18.8,
+  "lines_considered": 10,
+  "playouts": 16,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Fathom the Tide",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 23.8
+   },
+   {
+    "cards": [
+     "Fathom the Tide",
+     "Coral Guard"
+    ],
+    "score": 18.8
+   },
+   {
+    "cards": [
+     "Fathom the Tide",
+     "Water's Edge"
+    ],
+    "score": 18.8
+   },
+   {
+    "cards": [
+     "Coral Guard",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 16.8
+   },
+   {
+    "cards": [
+     "Water's Edge",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 16.8
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "unmapped_statuses": [],
+   "enemy_count": 1,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T17:01:41"
+}
