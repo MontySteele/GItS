@@ -1,0 +1,61 @@
+{
+ "source": "declared board (prototype route)",
+ "falsifier": "decision-closeness (R213 F)",
+ "dominance_gap": 0.5,
+ "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "applicable": true,
+ "verdict": "SURVIVES",
+ "gap": 0.1249,
+ "top1": 26.42,
+ "top2": 23.12,
+ "lines_considered": 15,
+ "playouts": 53,
+ "plays_refused": 0,
+ "pilot": "demolition",
+ "lines": [
+  {
+   "cards": [
+    "Powder Pop",
+    "Ka-pow!",
+    "Kaboom!",
+    "Duck and Cover"
+   ],
+   "score": 26.42
+  },
+  {
+   "cards": [
+    "Powder Pop",
+    "Tinder Toss",
+    "Kaboom!",
+    "Duck and Cover"
+   ],
+   "score": 23.12
+  },
+  {
+   "cards": [
+    "Powder Pop",
+    "Ka-pow!",
+    "Kaboom!"
+   ],
+   "score": 20.52
+  },
+  {
+   "cards": [
+    "Powder Pop",
+    "Kaboom!",
+    "Duck and Cover"
+   ],
+   "score": 19.42
+  },
+  {
+   "cards": [
+    "Powder Pop",
+    "Ka-pow!",
+    "Duck and Cover"
+   ],
+   "score": 18.82
+  }
+ ],
+ "reason": "no line dominates by more than the derived gap"
+}
