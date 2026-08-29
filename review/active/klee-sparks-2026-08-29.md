@@ -616,3 +616,409 @@ neither may I in the same breath as recording its verdict.
 **No clause moved that the packet had not already put in front of the seat**,
 and the seat named none beyond D2, D4, D7 and the card-sheet naming rule. It
 volunteered no remedy in either round.
+
+---
+
+## 10. What was built — the tier 0 arm
+
+**2026-08-29 · branch `klee-sparks-sim`, stacked on `klee-sparks-research`.**
+Python sim only. No C# was written, nothing was deployed, and the game was not
+launched. Every number in this section is SHAPE, and under R215 B nothing
+measured on a prototype row is quotable anywhere.
+
+### 10.1 The flag, and what moves behind it
+
+`SPARK_ALT_COST_ENABLED = False` in `tier0/constants.py`, beside
+`SPARKS_FOR_FREE_ATTACK` — the constant it retires — and named on the repo's
+own `*_ENABLED` convention (`PILOT_POLICIES_ENABLED`, `MODE_CHOOSER_ENABLED`).
+PICK 6, option 1.
+
+Six sites read it and no seventh does:
+
+| site | with the flag ON |
+|---|---|
+| `combat.card_cost` | the Attack-zeroing branch does not run |
+| `combat.play_card` | the automatic consume does not run |
+| `combat.spark_power_price` | the strict Rare Power contributes a price |
+| `loader._starter_ids` | two starter substitutions |
+| `pilot/policy.py` | a Spark stops being "a third of a free Attack" |
+| `tier05/draft.py` | the Spark dials are re-derived |
+
+`SPARKS_FOR_FREE_ATTACK` and `combat.spark_threshold` are both marked
+RETIRED-UNDER-FLAG in comments and are unread with the flag on. Neither is
+deleted: option 1 exists so the two economies can be run as two arms, and an
+OFF arm needs the shipped rule byte for byte. R34's X-cost exemption goes inert
+with the branch it guarded — with nothing spending implicitly there is no spend
+to be exempt from.
+
+**Flag off is byte-identical, and it is measured rather than asserted.** A
+sha256 of the entire event log of a fixed-seed Klee starter fight was taken on
+this branch's parent (`a8b8552`), before a byte of the arm existed:
+`20b877d3411ccdc5306f6b8c0664c8d0f0dd7f9b30421d73af411aa8c3dbe9fa`. It is
+equal on the finished branch, and it is pinned in
+`tier0/tests/test_spark_alt_cost.py`.
+
+### 10.2 The rows, as written
+
+Seven rows are on `docs/prototype-surface.yaml`. Verbatim:
+
+```yaml
+- {id: proto_pop_spark, name: "Powder Pop", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: basic, solve: [frontload], archetypes: [demolition], role: enabler, tags: [skill_tag],
+   effects: [{op: place_bomb, amount: 1, target: enemy, bomb_damage: 5},
+             {op: gain_spark, amount: 1}]}
+
+- {id: proto_kaboom_sink, name: "Ka-pow!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: basic, solve: [frontload], archetypes: [generic], role: glue,
+   effects: [{op: spend_spark, amount: 1},
+             {op: damage, amount: 7, target: enemy}]}
+
+- {id: proto_spark_strike, name: "Fwoosh!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: payoff,
+   effects: [{op: spend_spark, amount: 1},
+             {op: damage, amount: 8, target: enemy}]}
+
+- {id: proto_spark_sweep, name: "Tinder Toss", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: payoff,
+   effects: [{op: spend_spark, amount: 1},
+             {op: damage, amount: 4, target: all_enemies}]}
+
+- {id: proto_spark_double_tap, name: "Bang Bang!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: payoff,
+   effects: [{op: spend_spark, amount: 2},
+             {op: damage, amount: 5, target: random_enemy, times: 2}]}
+
+- {id: proto_spark_blast, name: "Dodoco Blast", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: uncommon, solve: [frontload], archetypes: [spark], role: payoff,
+   effects: [{op: spend_spark, amount: 2},
+             {op: damage, amount: 7, target: all_enemies}]}
+
+- {id: proto_spark_finisher, name: "Firework Finale", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: uncommon, solve: [frontload], archetypes: [spark], role: payoff, exhaust: true,
+   effects: [{op: spend_spark, amount: 3},
+             {op: damage, amount: 18, target: enemy}]}
+```
+
+Every damage figure is §4.2's table verbatim. The two Basics carry their
+shipped twins' bodies unmoved (`kaboom` 7 damage, `pop` one Bomb at 5), so the
+starter substitution is a PRICE change and nothing else. The one-for-one pool
+replacements PICK 4 names are recorded in the surface's header comment and
+executed nowhere — this surface cannot reach a pool, and re-authoring the
+printed sheet is what ACCEPTANCE means under the deletion rule.
+
+**The renamed candidate.** §4.2 candidate 1 was `Sizzle`; the seat ruled it out
+by name under R69 / R29d because `Sizzle` is a shipped Klee Common Attack
+(`docs/klee-cards.yaml:158`). Only the name moved — rarity, price, cost and body
+are the packet's unchanged. The replacement is **`Fwoosh!`**: provisional and
+mine under R179, in the onomatopoeia family the sheet already speaks (`Snap!`,
+`Crackle`, `Pop!`, `Da-da-da!`), zero hits against `docs/reserved-card-names.txt`
+and against every display name on every sheet, and `lint_unique_names` is green
+on it. **The name is yours to settle; the lint is the floor, not the ruling.**
+`Powder Pop`, `Ka-pow!` and `Spark Knight's Oath` are working titles for the
+same reason — a proto row may not reuse its twin's printed name.
+
+**The eighth row is not on the surface, and this is the first thing that goes
+back to you.** PICK 5's re-authored Rare Power is written and its sim half is
+built and tested, but `tools/gen_prototype_cards.py` refuses the row by name:
+
+> `proto_true_spark_knight is NOT EXPRESSIBLE: apply_power power
+> 'spark_attack_cost' (no PowerModel in the registry). A prototype row must be
+> emittable today — rewrite it inside the existing grammar, or take the runtime
+> work first.`
+
+That refusal is correct and was left standing rather than worked around: the C#
+`PowerModel` is owed work this branch did not do, and a row emitting a
+reference to a class that does not exist is a prototype that cannot be staged.
+The row as it would be written:
+
+```yaml
+- {id: proto_true_spark_knight, name: "Spark Knight's Oath", character: klee,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare, solve: [scaling], archetypes: [spark], role: payoff,
+   effects: [{op: apply_power, power: spark_attack_cost, amount: 1, target: self,
+              note: "Attacks that do not already cost Sparks cost 3 Sparks and 0 Energy"}]}
+```
+
+Its face text is §5's proposal unchanged: *"Your Attacks that do not already
+cost [Spark] cost 3 [Spark] instead of their Energy cost."*
+
+### 10.3 The engine
+
+`combat.spark_power_price(state, card)` is the state-aware half of a Spark
+price — Attacks only, Attacks that do not already print a price only, and
+`C.SPARK_ATTACK_POWER_PRICE = 3` (lifted, not picked: your own phrase, and the
+retired threshold's own number). `combat.spark_price` sums it with the printed
+half so the playability gate, the payment in `play_card` and the pilot's hold
+term cannot disagree about the number. `card_playable` gates on it; `play_card`
+pays it beside the energy.
+
+The starter substitutions go through ONE seam, `loader._starter_ids` — the
+Kurage base kit's seam replicated for Klee, and for the same reason: both
+readers of a printed starter (`build_player`, `starting_deck`) go through it, so
+the tier 0 battery and the tier 0.5 run cannot disagree about what she opens
+with. **No printed sheet moved.** `_card_prototype` gained one flag-gated
+branch so a `proto_` id in a starting deck resolves at all; membership does not
+move, so pools, rewards, drafts and digests still cannot see the surface.
+
+### 10.4 PICK 7 — the derived number, and its arithmetic
+
+The seat ruled option 3: *"derive it from the new sink prices once §4's numbers
+are ruled."* They are ruled, so it is derived.
+
+**Neither [USER]-held shipped dial moved.** `STATIC_SPARK_VALUE` stays 0.0 and
+`STATIC_SPARK_SPEND_COST` stays 2.5. Both were derived against a rule that does
+not run under the flag — 2.5's own route (1) reads *"2 Sparks is one free
+Attack under True Spark Knight"*, a sentence with no referent once the threshold
+is retired — so the arm gets ONE number of its own, `SPARK_ALT_VALUE`, read
+through two accessors, and the shipped world keeps both of its own.
+
+One number for both sides, because under an alternative cost a Spark is worth
+what it buys and is bought for what it is worth; printing two would assert an
+asymmetry the new rule does not have.
+
+The unit is the file's own — points of printed damage or Block. For each of the
+five sinks: what does the price buy OVER a 0-energy neighbour of the same
+rarity? All five are 0 energy, so the energy line cancels and the whole delta is
+the Sparks. Baselines are shipped rows, not invented: Common 0-energy Attack
+3.5 (`crackle` 3, `study_of_explosions` 4); Uncommon 0-energy Attack 6.0
+(`flame_on_the_wick`). AoE counts `STATIC_AOE_MULT` = 2.0 bodies, this file's
+own convention.
+
+| card | body | over baseline | per Spark |
+|---|---|---|---|
+| Fwoosh! | 8 | 8 − 3.5 = 4.5 over 1 | **4.50** |
+| Tinder Toss | 4 × 2.0 = 8 | 8 − 3.5 = 4.5 over 1 | **4.50** |
+| Bang Bang! | 5 × 2 = 10 | 10 − 3.5 = 6.5 over 2 | **3.25** |
+| Dodoco Blast | 7 × 2.0 = 14 | 14 − 6.0 = 8.0 over 2 | **4.00** |
+| Firework Finale | 18 | 18 − 6.0 = 12.0 over 3 | **4.00** |
+
+**Median = 4.00.** Median rather than mean for the reason the 2.5 derivation
+gave: an outlier row (Bang Bang!'s deliberately poor rate, which is what the
+sheet charges for a two-Spark purchase) then fails to move the dial. Firework
+Finale's Exhaust is NOT discounted — discounting it would lower the number, and
+lower is the unsafe direction on the spend side.
+
+**The error direction is one-way on both sides**, which is what makes this
+derived-not-picked under R212 rather than a design pick: on the GAIN side 4.00
+is the first non-zero price a `gain_spark` has ever carried, so the drafter can
+finally see a generator at all (0.0 made twelve shipped rows invisible); on the
+SPEND side 4.00 is 1.6× the shipped 2.5, so a sink is charged MORE, never less
+— the direction that cannot make the drafter pay for a cost it cannot see.
+Archive scope is the flag: with it off nothing reads this number.
+
+### 10.5 The pilot
+
+Leg 1 of the hold-versus-spend term quoted the rule it has to outlive — *"at
+`SPARKS_FOR_FREE_ATTACK` = 3 a Spark is a third of a free Attack"*. Under the
+flag it becomes **a share of the cheapest affordable sink in hand**: walk the
+hand for cards whose Spark price the bank can already meet, take the CHEAPEST
+such price, and price one Spark at that card's payoff divided by its price. With
+no affordable sink in hand a Spark is worth **exactly zero** — §6.3's sentence
+in code. Cheapest rather than best-rate because the cheapest affordable sink is
+the use the bank is guaranteed to be able to make, and because under-valuing
+spends more readily, which is R194's safe direction. Leg 2 (a free Attack
+forfeited by dropping under the bar) returns 0.0 under the flag: no bar, nothing
+to forfeit. Leg 3 (the reader leg) is untouched. The price the term charges is
+now `spark_price`, so the strict Power's three Sparks are charged too.
+
+**What the pilot still cannot see**, named at the function rather than left to
+be found. Each of these makes it spend more readily than a player would — the
+one-way direction — but they are real:
+
+1. **Sinks in the draw pile.** Hand-only is inherited and deliberate, so a bank
+   held for the Firework Finale two cards down reads as a bank held for nothing.
+2. **Sparks already in flight.** Bombs on the board will pay the relic when they
+   detonate; the pilot prices the bank it HAS, never the bank it is about to
+   have, so it cannot plan a two-turn purchase.
+3. **The floor of its own Power, and this is the largest.** Under the strict
+   Rare Power, spending to 2 Sparks makes EVERY unpriced Attack in hand
+   unplayable. Leg 3 does not catch it: `_spark_bank_probe` asks what a card is
+   WORTH at a bank, not whether it is PLAYABLE at one, and an Attack's expected
+   damage is the same float either way. **A pilot holding the Power will spend
+   itself out of its own Attack suite.** Fixing it means teaching the probe
+   playability, which is a `POLICY_VERSION` bump and was not taken here.
+4. **Multi-turn value.** One Spark banked across two turns and one Spark spent
+   now score identically; nothing in the term is a discount rate.
+
+### 10.6 The smoke — shape only, against Regent's numbers
+
+Five Klee **starter-deck** fights, seeds 1–5, flag ON, `punisher` encounter,
+demolition pilot weights. Not a balance read (R215 B); counts only.
+
+| seed | turns | gained | spent | auto-consumes | refused | sink in hand | sink playable | sink played | longest idle bank | win |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 5 | 6 | 2 | 0 | 0 | 2 | 2 | 2 | 2 | yes |
+| 2 | 5 | 7 | 2 | 0 | 0 | 4 | 4 | 2 | 1 | yes |
+| 3 | 5 | 7 | 2 | 0 | 0 | 4 | 2 | 2 | 2 | yes |
+| 4 | 5 | 6 | 2 | 0 | 0 | 4 | 2 | 2 | 2 | yes |
+| 5 | 5 | 7 | 3 | 0 | 0 | 7 | 5 | 3 | 1 | yes |
+
+Totals over 25 player turns: **33 Sparks gained (1.32/turn), 11 spent
+(0.44/turn), net +22.** Zero automatic consumes and zero refused spends, which
+is the retirement and the gate both working. The starter sink was in hand at 21
+decisions and playable at 15 of them — **71%**.
+
+**Against the Regent numbers in `regent-stars-economy.md` §2.4:**
+
+| | Regent (starter + relic) | Klee, this arm |
+|---|---|---|
+| income | +1.0 / turn | **+1.32 / turn** |
+| expenditure | −1.0 / turn | **−0.44 / turn** |
+| net | **zero**, with a 3-point opening buffer | **+0.88 / turn**, no buffer |
+| over a fight | 7 made, 4 spent | ~6.6 made, ~2.2 spent |
+
+**Income now matches Regent's and slightly exceeds it; expenditure is under half
+his.** She still banks. Two readings, and they are not exclusive: the starter
+sink is priced at 1 where Regent's `FallingStar` is priced at 2 (a full cycle's
+income, not a turn's), and there is one sink in ten cards against income that
+scales with how many bombs go off rather than with the cycle. The bank sat at or
+above the cheapest price with no spend for **two consecutive turns in three of
+five fights** — never longer, which is the honest shape of a starter with one
+cheap sink in it: it is not idle for long, but it is idle.
+
+**Do not read a balance claim off any of this.** The pilot's blind spots in
+§10.5 all push toward spending, the encounter is one battery fight, and five
+seeds is five seeds.
+
+### 10.7 Tests
+
+`tier0/tests/test_spark_alt_cost.py`, 39 tests in six sections: flag off
+byte-identical (the log digest, the starter, both shipped dials,
+`spark_price == spark_cost` for every card, and the shipped rule still running);
+the base rule retired; the printed price (each proto Attack gates one short of
+its price and pays exactly it); the strict Power (unplayable at 2, playable at
+3, pays 3 Sparks and 0 Energy; already-priced Attacks, Skills and X-cost Attacks
+unaffected); the starter; and the pilot.
+
+**Fifteen mutations were run against the finished file and all fifteen are
+caught.** Three of them SURVIVED when first written and the tests were fixed
+rather than the mutations dropped, which is the part worth recording:
+
+| mutation | first result | what was missing |
+|---|---|---|
+| remove the consume guard | SURVIVED | no test made an Attack cost 0 under the flag, so the old branch's own guard was never satisfied. The Power's turn now asserts the event log too. |
+| keep `PILOT_SPARK_VALUE` in leg 1 | SURVIVED | the unit function was tested directly and `_spark_hold_cost` was not. |
+| take the best-rate sink, not the cheapest | SURVIVED | the fixture's two sinks happened to agree. The pair now disagrees by construction — cheaper price, worse rate. |
+
+The other twelve: remove the zeroing guard; do not pay the Power's price; gate
+on the printed price only; sub-pick (b) instead of (a); X-cost Attacks not
+exempt; the Power applied to Skills; the starter substitution replacing all four
+copies; the starter seam ignoring the flag; leg 2 not retired; the hold term
+back on `spark_cost`; `SPARK_ALT_VALUE` moved off the median; and the shipped
+gain dial waked in the shipped world.
+
+### 10.8 The green lines, verbatim
+
+```
+OK: 28 lint(s) passed                                    (python -m tools.run_lints --lane ci)
+3626 passed, 46 skipped, 12 xfailed, 3 warnings in 218.32s (0:03:38)   (pytest tier0/tests -q)
+794 passed, 9 warnings in 36.56s                         (pytest tier05/tests -q)
+gen_klee_cards: up to date
+gen_roster_cards: furina up to date
+gen_roster_cards: kokomi up to date                      (tools/gen_roster_cards.py --check)
+lint_prototype_authorship: OK (21 surface row(s), 4 carried debt entr(ies))
+lint_prototype_authorship: self-test OK
+gen_prototype_cards: prototype surface up to date
+```
+
+### 10.9 The DRAFT prediction slate
+
+**DRAFTED, unrun, uncountersigned.** Drafted from written design intent (§1's
+ruling, §4–§5's proposals) and committed before any seed run, per R212(2) and
+`EXPERIMENTS.md`'s pre-registration rule. It is offered for batch countersign.
+
+**The decisive question, and it is a D2/D4 question rather than a winrate one:
+does a Spark-priced Attack create a spend-versus-hold decision the reader can
+see on the page?** The base rule failed D2 because the bank had one destination
+and the engine chose it. A price only fixes that if the player is ever in a
+position where two uses compete and the face shows both prices.
+
+**Instrument.** The blind-play funnel (`understudy/`), Codex seat as the
+independent read on the card rows (§7); a fresh-Opus read on the same rows is
+same-family and is recorded as such. The rule row itself is Claude-read by §7.
+The sim cannot see the decisive question at all — it is a face-and-turn
+question — so no sim prediction is registered for it; the sim slots below are
+separate and are what the sim CAN see.
+
+| # | slot | prediction (directional) | the decision each outcome changes |
+|---|---|---|---|
+| P1 | Does a graded turn contain a visible spend-vs-hold choice — two Spark uses competing, both affordable, in one hand? | **YES on at least 4 of 8 graded turns.** Two Common sinks at price 1 plus a 2 and a 3 means an ordinary hand holds more than one affordable use most turns. | Below 4 the tight set is too thin at the cheap end and PICK 4 reopens at option 2 (add the Rare cut) or option 3 (add rather than convert). |
+| P2 | Can the grader state the price off the FACE, without the rules box? | **NO with the text line; the badge is required.** This is PICK 8 option 2 restated as a prediction: the base game carries every one of its 23 star prices on a badge and none in rules text. | A NO here makes the Klee Spark badge blocking for the dev build rather than a nicety. A surprise YES retires PICK 8 as a question. |
+| P3 | Does the strict Rare Power read as a payoff or as a brick, on a turn where the bank is short? | **BRICK on an unbuilt deck, PAYOFF on a built one, and the grader can tell which from the hand.** That is the bet the card is; it fails if the grader cannot tell. | If the grader cannot tell them apart, the Power's face is under-informative and §5's wording is reopened — not its strictness. |
+| P4 | Does the starter's opening hand ever contain the sink with an empty bank? | **YES, and it reads as a dead card rather than a plan.** One `Ka-pow!` in ten with income that arrives on detonation means turn one can hold it dry. | A YES that reads DEAD moves PICK 1 toward option 4's honest dead-turn or toward pricing the opening buffer higher. A YES that reads as a plan closes PICK 1. |
+| P5 | (sim) Does the pilot's spend rate rise when the flag is on and the tight set is drafted? | **YES**, because a Spark now has a computable use and the drafter's gain dial is non-zero for the first time. | A NO says the pilot's blind spots (§10.5) dominate and the probe needs playability before any sim number about this economy is worth reading. |
+| P6 | (sim) Does the bank sit idle above the cheapest price for 3+ consecutive turns in a drafted deck? | **NO** — the starter smoke tops out at 2 and drafting adds sinks faster than income. | A YES says the sink supply is still too thin at the prices set and §4.2's table is re-priced downward. |
+
+**Contamination stated:** §10.6's starter smoke has already been read, on the
+STARTER deck only, with no drafted cards and no Rare Power. P5 and P6 are about
+DRAFTED decks and are not answered by it; P1–P4 are face-and-turn questions the
+sim cannot see. The smoke's numbers are not used to set any prediction above.
+
+### 10.10 The C# delta checklist
+
+None of this was written. It is what the dev build needs before a blind grade.
+
+1. **`SparkPower.cs` — delete the base rule's half.** `Threshold`,
+   `CurrentThreshold`, `AppliesTo`, `TryModifyEnergyCostInCombat`,
+   `BeforeCardPlayed`, `AfterCardPlayed`, `SparksAsResolved`, the
+   `_pendingSpendPlay` / `_pendingSpendAmount` pair, and the localisation string
+   *"At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks."* **Keep**
+   `Gain`, `CanSpend`, `Spend`, `SparksAtPlay` — those are the alternative-cost
+   machinery and they already work. Gate the deletion the way tier 0 gates it,
+   or compile the new body only under `-p:PrototypeCards=true`.
+2. **`SparkThresholdDownPower` goes** with `true_spark_knight`'s old body.
+3. **The strict Power is new C# and it is what blocks the eighth proto row.** A
+   `SparkAttackCostPower` on the shape of the game's own
+   `AbstractModel.TryModifyStarCost` / `Hook.ModifyStarCost` — an extension
+   point the game ships and nothing in the base game overrides. It must also
+   drive `CardModel.IsPlayable`, the same wiring `SparkPower.CanSpend` already
+   has. Then a registry row in `tools/gen_klee_cards.py`'s `APPLY_POWERS`, and
+   the row in §10.2 goes onto the surface and generates.
+4. **The starter swap** — `pop` → `proto_pop_spark`, one `kaboom` →
+   `proto_kaboom_sink`, at the mod's own starting-deck seam, flag-gated the way
+   `loader._starter_ids` is.
+5. **PICK 8 option 2: keep `SparkPower`, build a Klee Spark badge.** A cost
+   badge beside the energy orb mirroring `NCard.UpdateStarCostVisuals` — the
+   `_starIcon` / `_starLabel` pair, red when unaffordable, plus the persistent
+   counter. Option 1 (storing Sparks in `PlayerCombatState.Stars`) is free and
+   is a one-way door: Sparks would BE Stars, every reader re-points, and a
+   Regent star relic would top up Klee's bank in co-op. Not walked through on a
+   display question.
+6. **Nothing else.** `spend_spark`'s rail — `SparkPower.CanSpend` into the
+   generated `IsPlayable`, `SparkPower.Spend`, and
+   `gen_klee_cards._stmt_spend_spark` — is shipped and unchanged, so the seven
+   card rows need no new C# at all.
+
+### 10.11 What the packet left unsaid and I had to decide — each goes to you
+
+Five, and they are picks, not blanks.
+
+1. **The replacement name for candidate 1.** `Fwoosh!` (provisional, R179,
+   lint-clean). Alternatives in the same family that also came back clean:
+   `Whizz!`, `Whoosh!`, `Sputter`, `Fizzle`. — *(a) keep `Fwoosh!`; (b) one of
+   the four; (c) name it yourself.*
+2. **How many `kaboom` copies become the sink.** The packet says "`kaboom`
+   becomes 0 energy / Spend 1 Spark" and her starter holds four. I substituted
+   **one**, because Regent's ten ships one sink and four would make four of her
+   ten opening cards unplayable on an empty bank. — *(a) one, as built; (b) two;
+   (c) all four, and accept the dry opening.*
+3. **X-cost Attacks under the strict Power.** §5 is silent. I **exempted** them:
+   an X card's cost IS its energy spend, so a flat 3-Spark conversion resolves it
+   at X = 0 and deals nothing — R34's own reasoning reached from the other side.
+   — *(a) exempt, as built; (b) converted, and X becomes 0 by design.*
+4. **PICK 7's shape.** The seat ruled "derive it", and I derived **one** number
+   for both the gain and the spend side rather than two, and put it behind the
+   flag rather than moving either [USER]-held shipped dial. — *(a) one derived
+   dial at 4.00 under the flag, as built; (b) two dials; (c) move the shipped
+   dials and re-baseline.*
+5. **The eighth row is held on C#, not on doctrine.** The Power's sim half is
+   built and tested; the row cannot go on the surface until a `PowerModel`
+   exists. — *(a) write the C# next, then the row; (b) grade the seven card rows
+   first and leave the Power for a second slice.*
