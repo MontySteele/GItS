@@ -67,3 +67,10 @@ game_ref/
 
 # card gallery (tools/render_card_gallery.py) -- a local eyeball view, regenerated on demand
 card_gallery.html
+
+# Raw seat transcript sidecars from `understudy.seat review`. The committed
+# artifact of a pair read is the `.md` the seat wrote plus the prompt it
+# answered; these two are the rollout as codex printed it, and they carry a
+# third party's system prompt exactly as `understudy/logs/seat/` does.
+review/qa/*.stdout.txt
+review/qa/*.stderr.txt
