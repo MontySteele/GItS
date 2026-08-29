@@ -176,10 +176,12 @@ deploy label from R218 on rides the pin above; live numbers were never
 comparable across a game build anyway (R95), and the sim references no game
 assembly and is unaffected.
 
-The deployed build is **`0.2.1269`** (2026-08-29, from `eb171-port-0-111`
-`a332ad3`), the first package built against this pin and the first release
-package since `0.2.1209` — it replaces the `0.2.1252+proto` dev package that
-was left installed. `validate.ps1` OK; pack 9,586,076 bytes, 132 resources.
+The deployed build is **`0.2.1299`** (2026-08-29, from `kokomi-slice-2-funnel`
+`42577c7`), a clean release package with no `+proto` and no `+dirty` mark —
+deployed as the teardown of the slice-2 / slice-1-round-4 funnel run, which
+had `0.2.1293+proto` installed while it ran. It carries the same C# as
+`0.2.1269`, whose port and face fixes are described below; nothing on a
+shipped sheet moved between them. `validate.ps1` OK; pack 9,586,076 bytes.
 It carries `EB-171`'s port and the two face fixes `0.2.1209` was missing: the
 exhaust-selection rate (R215 C) and `EB-164`'s eighteen re-worded scaling
 faces. **Re-verified live on 0.111.0** (`EB-171`): the mod loads, all nine
