@@ -2288,3 +2288,451 @@ should rule from a play record:
 `mods\klee` carries `0.2.1456+proto`, installed and validated. All five embark
 ledger rows REVERTED, no game process, `steam_appid.txt` and the bridge removed.
 `KURAGEMEM002` and `KURAGEMEM003` unspent.
+
+---
+
+## 14. The memory gauge — [USER]'s direction (2026-08-29)
+
+This section supersedes `EB-198` as it was filed. `EB-198` was a *diagnosis*
+row: reproduce the two frames the blind tester misread, and file whatever
+turned out to be broken. The diagnosis is done and it found nothing broken.
+What it found instead is that the display is the wrong shape for the job, and
+[USER] has said so and said what to build in its place. The wording pick the
+diagnosis was heading toward — three re-phrasings of the strip's first line —
+is moot and is not carried anywhere.
+
+### 14.1 The words, in the order they were given
+
+First, the direction that retires the strip:
+
+> "I think that the strip is insufficiently ambitious. Downfall already has an
+> example of what I'm thinking for the Awakened - a new UI element that shows
+> the Charge gauge, how much will be spent next turn, a color based on whether
+> there is enough to play, and the ability to open a list to see what's
+> queued."
+
+Then the placement and the shape:
+
+> "Too many words. Make it a vertical bar on the left side of the screen (not
+> below Kokomi), color blue for 'fires next turn' and red for 'blocked' - big
+> number for current charge, small number in parentheses for the queued spend,
+> with a graphic for say the icons of the next 3 queued cards up (bottom is
+> next-to-play) that can be clicked into like the deck list."
+
+Then the removal of the meter:
+
+> "On the gauge - let's do one better and actually remove the bar. Color the
+> cards with a highlight instead (blue if they can be afforded, bottom to top)
+> so you see where you will run out of charge, and take back the real estate of
+> the gauge bar."
+
+Then the cut to the smallest honest element, answering three of the mock's own
+picks in passing:
+
+> "2) Let's drop the small number 3) Hide everything but the charge count 4)
+> Let's actually reduce the footprint - show the first currently queue'd card,
+> the rest would be in the pile selector"
+
+And finally the last look, which is conditional and therefore also a question
+back to engineering:
+
+> "1) is 'also red' possible in the pile view? If so, let's do that, otherwise
+> dimmed is fine"
+
+Read as one move, the five quotes walk the design steadily *down*. It began as
+a gauge with a list attached; it became a coloured stack that replaced the
+gauge; it ends as **one card and one number**, with everything else behind a
+click. Every step removed something rather than adding it, and the last
+removals are the largest: the queue's whole shape, which the strip printed in
+full and which nobody could read, is now something you ask for.
+
+### 14.2 Why the strip fell short, which is not the same as being wrong
+
+The blind run (§13.8) surfaced two tester sentences about the strip. Both were
+diagnosed against the code, and **both frames are true as drawn**:
+
+1. *"after Gorou it showed 'Charge 1 / 0,' then later said the memory was empty
+   despite Charge remaining."* — `KurageMemory.Reading()`
+   (`klee-mod/KleeCode/Powers/Prototype/KurageMemory.cs:1066-1076`) prints
+   `Charge {bank} / {front.Price}`, so a free front prints a literal `/ 0`.
+   Later, with the queue drained, the same function takes its empty branch and
+   prints `Charge 1 — memory empty` (`:1072`). Both lines are correct. The
+   tester read them as contradicting one another because the first looks like a
+   fraction over a zero denominator and the second looks like it is denying the
+   Charge the first just showed. Nothing is broken. The *form* — one line of
+   running prose carrying three unrelated facts in three different grammars —
+   is what turned two correct readings into one apparent error.
+
+2. *"The memory's 'Coral Guard blocked' entry also said nothing behind it
+   fires, yet Sayu remained listed behind it, so I could not tell exactly what
+   would replay."* — this is Rule 1 working exactly as ruled. A front the bank
+   cannot pay holds everything behind it and nothing is spent (`kurage_fire`,
+   `tier0/engine/effects.py:3722-3781`; the C# twin `KurageMemory.Fire`,
+   `KurageMemory.cs:744-767`). Sayu is still queued because Sayu has not fired.
+   The P3 read already noted that the tester took this for a display bug.
+
+So `EB-198`'s finding stands as a record — **two frames, both true, both
+misread** — and its next action is not a fix. It is a rebuild, because a
+display that is correct and still unreadable has failed at the only thing it
+exists for. It is worth saying why the strip ended up like this, because it was
+not carelessness: it was built under an explicit "NO NEW ART" constraint, which
+meant drawing an entire list into the single `%ValueLabel` of the shared gauge
+scene (`klee-mod/KleeCode/Vfx/GaugeBridge.cs:257-263`). It was the cheapest
+thing that could carry the facts, and it did carry them.
+
+### 14.3 The element as specified
+
+Mock: <https://claude.ai/code/artifact/7f4b1180-306a-4740-a091-95b70020ad20>
+
+The resting element, at the **left edge of the screen** as HUD — not at the
+second-row anchor above Kokomi where the strip lives today
+(`GaugeBridge.cs:63`, `SecondRowAnchor = (0, -340)`):
+
+- **One card**: the front of the memory queue, the one that fires next turn,
+  drawn at roughly deck-list thumbnail size.
+- **A ring on it**: **blue** when the bank can pay that card's price, **red**
+  when it cannot. That is the whole state, and it is `bank >= front.Price` —
+  one comparison, no projection.
+- **The Charge count** as a large number beneath it.
+- **Nothing else.** No bar, no track, no fill, no `(price)` number, no second
+  and third card. An empty queue draws the Charge count alone.
+
+Clicking opens **the whole queue** as a card list, in the shape of the deck /
+discard viewer:
+
+- every queued memory, front first, with its price and the body it will hit;
+- rings coloured by the **running subtraction** from the front — blue while the
+  bank can still reach that card, **red at the card where the Charge runs
+  out**;
+- and the cards the red one holds up are **also red**, per the last quote,
+  which §14.5 confirms is buildable.
+
+The division of labour is the point and worth stating plainly: **the HUD
+answers "does the next one fire", the pile answers "how far do I get".** The
+first is a fact and needs no forecast. The second is a forecast, and is
+therefore kept off the always-on surface, where a wrong prediction would be
+read as a lie.
+
+### 14.4 The affordability run, and where it lives
+
+The pile view needs one thing the code does not have: a running subtraction
+over the queue against the bank, producing a per-entry `affordable` flag and
+the index of the first entry that is not payable.
+
+    remaining = KokomiResources.GetCharge(creature)
+    for entry in queue:
+        if entry.Price <= remaining:
+            entry.affordable = True
+            remaining -= entry.Price
+        else:
+            entry.affordable = False
+            break            # and everything behind it is held, and also red
+
+It belongs as a **pure function beside `KurageMemory.Queue`**
+(`KurageMemory.cs:438`) — no mutation, no RNG, nothing read but the bank and
+the queue — with a **twin in tier0 beside `kurage_fire`**
+(`tier0/engine/effects.py:3722`) so the existing parity lint covers it. It must
+not be inlined into the drawing code. The reason the strip's numbers never
+drifted is that they come from the same expressions the resolution uses, and
+this is the first display fact with no resolution-side expression to borrow;
+giving it one function with a twin is how it stays that way.
+
+**It is a forecast, and three separate things falsify it** before the cards it
+colours ever fire:
+
+- Only **one memory fires per turn** (the `kurage_fired_this_turn` latch,
+  `effects.py:3754-3755`), so the second blue card is a *next turn plus one*
+  claim, not a next-turn one.
+- **Charge accrues at 1 per Exhaust**, and a player who keeps playing will
+  normally bank more before then, which moves the red card further up.
+- A **blocked front holds and pays nothing**, so the bank does not drain past
+  the red card — the red boundary is exactly where the projection stops being a
+  prediction and becomes a wall.
+
+The honest framing is "where you run out **if you bank nothing more**", and the
+same principle the shipped gauge already states about itself applies: *"a meter
+that lies about its own ceiling is worse than no meter"*
+(`GaugeBridge.cs:99-102`). [USER]'s fourth quote happens to protect this by
+construction — the forecast is only ever drawn on a surface the player opened
+on purpose. Both surfaces must **re-evaluate on every Charge change and every
+queue change**, which is the refresh discipline `GaugeBridge.Refresh` already
+runs on (`GaugeBridge.cs:345-379`, its funnels enumerated at `:342-343`).
+
+### 14.5 What the engine gives us
+
+**A citation caveat, first, because it bounds every base-game fact below.** The
+brief assumed decompiled game source at `game_ref/`. There is none:
+`C:\Users\Monty\Documents\GitHub\GItS\game_ref\` is 29 flat balance-data files
+with zero `.cs` and zero `.tscn`, and `docs/current/OPERATIONS.md:172` describes
+it as decompile-*derived* — extracted numbers, not code. The real decompile
+target, `sts2_decompiled/`, is gitignored (`.gitignore:47`) and **does not exist
+on this machine**. The base-game facts below were therefore read straight out of
+the shipped assembly with `ilspycmd -t <FullTypeName> "<GameDataDir>\sts2.dll"`,
+decompiling to stdout with nothing written. **Their line numbers are relative to
+that per-type stdout and are reproducible only by rerunning that command** —
+they are not file:line into any tree that exists. Every mod-side citation IS
+exact. Two hygiene observations fell out of the same work and are recorded here
+rather than filed, since neither is this branch's business: pinning a decompile
+output directory would give this study stable citations, and `.sentinel/dll.json`
+pins `sha256 a1f9e653…` at 9,364,480 bytes while the live dll is 9,757,184 bytes
+dated 2026-08-28 — **the sentinel pin is stale against the installed game.**
+
+With that said, every hard part of this design turns out to be already solved.
+
+**A card thumbnail is one property.** `CardModel.Portrait` returns a `Texture2D`
+directly, with no node instantiation at all:
+
+    public Texture2D Portrait => ResourceLoader.Load<Texture2D>(
+        PortraitPath, null, ResourceLoader.CacheMode.Reuse);   // CardModel :157
+
+with `PortraitPath` at `:143` and `HasPortrait` at `:153`. It is `CacheMode.Reuse`,
+so repeat loads are cheap, and `NCard.UpdatePortrait()` (`NCard :1244`) confirms
+this is the same texture the real card face uses. A mod can write
+`new TextureRect { Texture = entry.Card.Portrait }` and be finished. **This also
+removes the option-2 gap I expected**: it works for base-game cards in the queue
+as well as ours, which `RosterArt.CardPortrait` (`klee-mod/KleeCode/KleeArt.cs:54-83`)
+does not.
+
+Two things NOT to use. `NTinyCard` looks like the obvious miniature and is the
+wrong picture — `SetCardPortraitShape(card.Type)` assigns one of three generic
+silhouettes (`attack_portrait.png` / `skill_portrait.png` / `power_portrait.png`,
+`NTinyCard :120-129`), so it says "an Attack", never "*Coral Guard*". And
+`NCard.Create(CardModel, ModelVisibility)` (`NCard :772`) builds the full
+playable card node, pulling five assets including three blur/mask materials and
+a `CanvasGroup` (`:666`) — far too heavy for a HUD element that draws one
+picture.
+
+**The pile viewer takes an arbitrary card list.** This was the biggest unknown
+and the answer is clean. `CardPile` has a public constructor and a public adder:
+
+    public CardPile(PileType type)                                      // CardPile :43
+    public void AddInternal(CardModel card, int index = -1, ...)        // :90
+    public IReadOnlyList<CardModel> Cards => _cards;                    // :25
+    public event Action? ContentsChanged;                               // :33
+
+and the viewer's open method takes one:
+
+    public static NCardPileScreen ShowScreen(CardPile pile, string[] closeHotkeys)
+                                                          // NCardPileScreen :211
+
+So: build a `CardPile`, `AddInternal` the queue's `CardModel`s in order, call
+`ShowScreen`. Two caveats to carry: `NCardPileScreen._Ready` switches on
+`Pile.Type` for its bottom info text and logs *"CardPileScreen has no info
+text."* on a type it does not recognise; and it subscribes to
+`Pile.ContentsChanged` in `_EnterTree`, so our `CardPile` must stay alive for
+the screen's lifetime. Two alternatives exist if that screen proves awkward —
+`NSimpleCardSelectScreen.Create(IReadOnlyList<CardModel>, CardSelectorPrefs)`
+(`:123`) and the raw grid widget `NCardGrid.SetCards(IReadOnlyList<CardModel>,
+PileType, List<SortingOrders>, Task?)` (`:832`).
+
+Note this is **not** the `CardSelectCmd` route. `CardSelectCmd.FromSimpleGrid` /
+`FromChooseACardScreen`, which the mod already calls from card resolution
+(`Cards/Furina/Generated/CurtainUp.cs:67-69`,
+`Cards/Furina/SpotlightCards.cs:63-64`), are `await`ed *choices* against a
+`PlayerChoiceContext` that a HUD click does not have — and opening a selection
+screen outside resolution in a lockstep co-op game is the class of thing this
+repo has been careful about (`CardSelectCmd.PushSelector` / `UseSelector` is
+banned mod-wide for a neighbouring reason,
+`docs/current/atlas/klee-mod-runtime.md:82-89`,
+`tier0/tests/test_eb14_selection_hook.py`). `NCardPileScreen.ShowScreen` is the
+read-only cousin and is the correct door.
+
+**"Also red" in the pile view is POSSIBLE, and here is the mechanism.** The last
+quote made this conditional, so it is answered directly. The pile screen renders
+each entry as a real `NCard` node through `NCardGrid`, and this repo already
+ships a working per-card overlay on exactly that class: `SparkCostBadge`
+(`klee-mod/KleeCode/Vfx/Prototype/SparkCostBadge.cs`) is a Harmony postfix on
+`NCard.UpdateStarCostVisuals` (`:153-158`) that reads `nCard.Model` (`:97-99`)
+and paints a badge onto live card nodes **on every surface a card renders**. The
+same hook, keyed on whether that `CardModel` instance is in the memory queue and
+unaffordable under §14.4's run, colours the ring red per entry. Identity
+matching is sound because a queue `Entry` holds the live `CardModel` instance
+rather than an id, deliberately (`KurageMemory.cs:155-164`). The colours are the
+game's own: `StsColors.red` with `StsColors.unplayableEnergyCostOutline` is
+`CardCostHelper.GetStarCostColor`'s InsufficientResources arm
+(`SparkCostBadge.cs:41-43`, `:134-139`) — literally the engine's "you cannot pay
+this". **So the answer to [USER]'s question is yes, and the dimmed fallback is
+not needed.**
+
+**The HUD anchor exists, and the left edge is crowded.** There is no dedicated
+`CanvasLayer` for combat UI — it is a plain `Control` tree. `NCombatUi._Ready()`
+(`:283-294`) resolves every HUD child by Godot unique name (`%EndTurnButton`,
+`%CombatPileContainer`, `%Hand`, `%EnergyCounterContainer`, …), so arbitrary
+`Control` children under `%CombatUi` are an anticipated shape; `NCombatUi._Ready`
+at `:299-306` even iterates `GetChildren().OfType<Control>()`. Two candidate
+parents: **`NCombatRoom.Instance.Ui`** (`%CombatUi`), which inherits the combat
+show/hide and `AnimIn`/`AnimOut` (`:416`, `:426`); or **`NRun.Instance.GlobalUi`**
+(`%GlobalUi`), which survives room transitions and is where the game puts
+persistent chrome.
+
+The left edge, top to bottom, is: **relic inventory** (top-left, and it *grows
+downward as relics accumulate* — `NRelicInventory.GetBottomOfInventory()` returns
+a position derived from `lineCount`), then in co-op the **player state cards**
+(`NMultiplayerPlayerStateContainer.GetTargetPosition()` returns exactly
+`GlobalUi.RelicInventory.GetBottomOfInventory()`), then a gap, then at the bottom
+the **energy orb** (repositioned to `(100, 806)` for star characters,
+`NCombatUi.Activate :314`; hides by sliding to `(-480, 128)`, off the left) and
+the **draw pile** (`NDrawPileButton` hides to `Position + (-150, 100)`). Discard
+and exhaust are bottom-*right*.
+
+**The mid-left band is the only free vertical space, and its top boundary moves
+during a run.** The low-risk pattern is the one the game already uses for the
+same problem: position relative to `RelicInventory.GetBottomOfInventory()` and
+subscribe to the same two signals `NMultiplayerPlayerStateContainer` does —
+`RelicsChanged` and `Viewport.SizeChanged`. This is the largest remaining piece
+of real work in the whole build, and it is copying an existing pattern rather
+than inventing one.
+
+**Co-op: the HUD is shared, single-instance, and local-seat only.** There is
+exactly one `NCombatUi`, and `Activate(CombatState)` binds it with
+`Player me = LocalContext.GetMe(_state)` (`:319`), which propagates into
+`_combatPilesContainer.Initialize(me)` (`:320`), `_starCounter.Initialize(me)`
+(`:321`) and `NEnergyCounter.Create(me)` (`:327`). The accessor is
+**`LocalContext`** — `GetMe(ICombatState)` (`:52`), `IsMe(Player)` (`:88`),
+matching on `player.NetId` (`:70`). There is no `CombatState.LocalPlayer` and no
+`Player.IsLocal`. Teammates get a compact `NMultiplayerPlayerState` widget each
+under `%MultiplayerPlayerContainer`, not a duplicated HUD — and that container
+renders nothing at all when `Players.Count <= 1`.
+
+**This confirms a real regression and it should be named, not discovered.**
+Today every creature-tracked display is built for EVERY seat:
+`NCombatUi.Activate`'s postfix loops `state.Players` and calls `Setup` per
+player, deliberately — *"EVERY seat, not only the local one -- the whole point
+of the docket is that a partner's end of turn is legible"*
+(`GaugeBridge.cs:504-513`). Position is the attribution. The new element has one
+slot on a shared HUD and therefore **shows the local player's memory only**. At a
+Kokomi + Kokomi table the partner's queue becomes unreadable where today it is
+legible over her head. That is the price of moving off the creature. If it
+matters, the game's own answer is the `NMultiplayerPlayerStateContainer` pattern
+— a small per-seat widget — but that is a second display, and this whole
+direction is a move away from having two.
+
+**What the pck can carry**, for completeness, though the recommendation needs
+none of it: `.tscn` and `.tres` overlaid verbatim from `klee-mod/pck-src/`
+(`tools/build_pck.ps1:730-737`) plus PNGs from the gitignored ImageGen tree, with
+the contract line DERIVED from what landed (`:795-823`) so a new scene needs no
+contract edit. **No fonts** — nothing in the pipeline imports one, and every
+label in `gauge.tscn` and `turn_end_docket.tscn` uses `theme_override_font_sizes`
+against the project font. And the standing rule: **no scripts in pck scenes**,
+because the assembly has no ScriptPath mapping, so behaviour attaches from C#
+only (`klee-mod/pck-src/README.md:14-17`).
+
+**Nothing material was left undetermined.** The three unknowns this study opened
+with — how to get a thumbnail, whether the viewer takes an arbitrary list, and
+where a screen-space Control parents — are all answered above. The one soft spot
+is that none of it can be re-checked by opening a file, only by rerunning
+`ilspycmd -t`.
+
+### 14.6 Three ways to build it
+
+Costed in engineering days as S (≤1), M (2–4), L (5+), against
+`SalonVisualsBridge` at 649 lines and `TurnEndPreviewBridge` at 394 — both
+custom visual bridges built and playtested in this repo — as the calibration.
+
+---
+
+**Option 1 — recolour and relabel the existing gauge. Size: S.**
+
+Keep `shared/gauge.tscn` at the second-row anchor. Put the state colour on
+`%BarFill` / `%ValueLabel` through the existing `GaugeSkin` path
+(`GaugeBridge.cs:401-435`), and cut `StripText()` from a paragraph to the bank
+plus a coloured front line. Queue detail moves to the Bake-Kurage power's
+tooltip, via `NHoverTipSet.CreateAndShow` in the shape
+`TurnEndPreviewBridge.RefreshSlotHover` already uses (`:347-393`). Files:
+`GaugeBridge.cs`, `KurageMemory.cs`. No new scene, no new texture, no new hook,
+no HUD anchor, no co-op question — every seat keeps its own display as today.
+
+**What it gives up: the direction, all of it.** Not at the left edge, no card,
+no click, no queue view. It is carried here as the honest baseline — this is
+what the cheapest thing buys — and as the fallback if the HUD anchor turns out
+to be closed. It does answer `EB-198`'s two frames, since colour separates
+"free" from "empty" without either printing `/ 0`.
+
+---
+
+**Option 2 — a pck scene at the screen edge, with our own popup. Size: M.**
+
+A new script-less `pck-src/shared/kurage_memory.tscn`: a `TextureRect` for the
+front card's portrait, a `ColorRect` ring behind it, a `Label` for the bank —
+`turn_end_docket.tscn` reduced to one slot, and that scene already ships an
+`IconN` sprite, a `ChipN` plate, a `ChipLabelN` and a `HoverN` Control per slot
+(`:145-214`). A new `KurageMemoryBridge` on the `TrackedDisplayBridge` skeleton,
+parented to a screen-space node instead of tracked to a creature. The queue
+popup is ours: an `NHoverTipSet` over a `HoverN`-style Control, or a second
+scene we show and hide.
+
+**What it gives up:** the queue view will not be the pile selector, because it
+is not one — [USER] said "the rest would be in the pile selector", and this
+approximates it. It owns its own popup lifecycle, dismissal and z-order, which
+is the fiddly part; and "also red" would have to be re-implemented inside our
+own popup rather than falling out of the `NCard` postfix that already works.
+Given that §14.5 found the real viewer takes an arbitrary `CardPile`, this
+option now buys nothing that option 3 does not, and costs a pck rebuild per
+iteration.
+
+---
+
+**Option 3 — a C# HUD element over the game's own pile viewer. Size: S–M.**
+
+No new scene and no new art. The element is a `Control` under `%CombatUi` (or
+`%GlobalUi`) holding a `TextureRect` fed by `entry.Card.Portrait`, a ring
+`ColorRect`, and a `Label` for `KokomiResources.GetCharge`. Built and torn down
+on a postfix of `NCombatUi.Activate` / `Deactivate` — the hook `GaugeBridge`
+already patches (`GaugeBridge.cs:489-495`) — with the seat resolved by
+`LocalContext.GetMe(state)`, exactly as `NCombatUi.Activate` itself does.
+Refreshed on the same funnels `GaugeBridge.Refresh` uses. Click is
+`NClickableControl`'s `_GuiInput` / `OnRelease`, opening
+`NCardPileScreen.ShowScreen(pile, hotkeys)` over a `CardPile` we build from the
+queue. Per-entry red comes from the `SparkCostBadge` postfix on `NCard`.
+
+**What it gives up:** it is the most exposed to base-game internals — `NCard`'s
+visual-update contract, `NClickableControl`'s signals, `NCardPileScreen`'s
+`Pile.Type` switch and its `ContentsChanged` subscription. All three are
+characterised in §14.5 and none is a blocker. The residual risk is the left-edge
+band, which it shares with option 2.
+
+---
+
+### 14.7 Recommendation
+
+**Option 3, and after the engine read it is no longer a close call.**
+
+Every piece the direction asks for turns out to be a thing the engine hands
+over: the thumbnail is one cached property (`CardModel.Portrait`), the pile
+viewer takes a `CardPile` we construct (`NCardPileScreen.ShowScreen`), the click
+base is the same one the pile buttons use, the HUD parent is a plain `Control`
+tree that already resolves children by name, the seat accessor is
+`LocalContext.GetMe`, and per-entry red is the `SparkCostBadge` pattern this
+repo has already shipped on this exact class. Option 3 needs **no new scene, no
+new texture, no pck rebuild** — which also means no rebuild-and-validate cycle
+between iterations on a display that will want several. Option 2 now buys
+nothing option 3 does not, and pays a pck round trip for it. Option 1 remains
+the fallback only.
+
+**One thing to spike first, inside an hour, before the estimate is trusted:**
+park a coloured rectangle in the mid-left band under `%CombatUi`, positioned off
+`RelicInventory.GetBottomOfInventory()`, and confirm it survives a turn
+boundary, a relic pickup and a window resize. That is the only piece of this
+build the mod has never done, and everything else is characterised.
+
+**And one thing to flag back rather than decide: the co-op regression in
+§14.5.** Moving from the creature to a shared HUD trades a partner's legibility
+for the local player's, because there is exactly one `NCombatUi` and it is bound
+to `LocalContext.GetMe`. Nothing in the direction contemplates a co-op table and
+it may simply not matter — but it is a real loss against today's display, and it
+should be a known one rather than a surprise.
+
+### 14.8 The picks — `M61`
+
+**One pick, and it is the build.** The mock's four looks are all answered: the
+small number is dropped, the empty state shows the Charge count alone, the
+footprint is one card, and the held cards behind the red one are **also red** —
+which §14.5 proves is buildable via the `SparkCostBadge` postfix on `NCard`, so
+the "dimmed" fallback [USER] conditionally accepted is not needed and is not
+carried.
+
+1. **Option 3** — a C# HUD element over the game's own pile viewer.
+   **Recommended**, §14.7. No new scene, no new art, no pck rebuild.
+2. Option 2 — a pck scene at the screen edge with our own popup.
+3. Option 1 — recolour today's on-creature gauge. The fallback if the HUD
+   anchor turns out to be closed to mods.

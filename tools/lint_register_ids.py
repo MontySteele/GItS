@@ -309,7 +309,17 @@ CEILINGS: dict[str, int] = {
                  # exp_shop_companion_channel instrument (R68); EB-140 minted
                  # at the R211 W3 build (the codegen upgrade-delta gap);
                  # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
-    "M": 60,     # M59/M60 minted 2026-08-29 by the R220 slate, one row per
+    "M": 61,     # M61 minted 2026-08-29 by [USER]'s memory-gauge direction:
+                 # the strip is "insufficiently ambitious", so the display
+                 # becomes an element carrying the bank, the next spend, a
+                 # state colour and an openable queue. WHICH of the three
+                 # build options that is, and the mock's three eyes-on calls,
+                 # are a pick between genuinely different design directions
+                 # and a taste look -- both of which CLAUDE.md keeps as
+                 # [USER]'s, so neither can be settled from the ladder. The
+                 # row GATES `EB-198`, which the same commit re-scopes from a
+                 # diagnosis into the build.
+                 # M59/M60 minted 2026-08-29 by the R220 slate, one row per
                  # packet under one ruling (R206 as amended by R212): M59 the
                  # Furina reframe's sixteen design picks F1-F16, M60 the Burst
                  # retirement's four, K1/K2/KO1/KO2. Both packets reserved ids
@@ -392,8 +402,10 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # (2026-08-29): F countersigned the Sparks re-author, E handed the local
     # model a TESTER seat and no grading chair. M59/M60 join with the two
     # slate rows R220 mints.
+    # M61 joins 2026-08-29 with the memory-gauge direction: the build option
+    # and the mock's three eyes-on calls.
     "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 52,
-                    54, 55, 56, 57, 59, 60}),
+                    54, 55, 56, 57, 59, 60, 61}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
