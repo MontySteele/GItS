@@ -41,7 +41,13 @@ public static class PrototypeRoster
         },
         ["kokomi"] = new List<CardModel>
         {
+            ModelDb.Card<ProtoChargeModeGuard>(),
+            ModelDb.Card<ProtoChargeMusterPrice>(),
+            ModelDb.Card<ProtoChargeSpendStrike>(),
+            ModelDb.Card<ProtoChargeThresholdStrike>(),
             ModelDb.Card<ProtoPearlBarrageTurn>(),
+            ModelDb.Card<ProtoChargeModeGuardModeA>(),
+            ModelDb.Card<ProtoChargeModeGuardModeB>(),
         },
     };
 

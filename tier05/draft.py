@@ -645,6 +645,24 @@ def _op_price(fx: dict) -> float:
         return _neutral_amount(fx, 0) * STATIC_ENCORE_VALUE
     if op == "spend_encore":
         return -_neutral_amount(fx, 0) * STATIC_ENCORE_VALUE
+    # -- Kokomi's bank, cost side (R213 E1, QUARANTINED) -------------------
+    if op == "spend_charge":
+        # `spend_encore`'s shape and `spend_encore`'s reason, one meter over:
+        # the GAIN dial with the sign flipped, no new constant. Deliberately
+        # NOT `spend_spark`'s shape -- that op earned its own dial (R211)
+        # from three converging derivations off measured Spark waste and a
+        # measured threshold, and there is no equivalent measurement of what
+        # a Charge is worth AT THE MOMENT IT IS SPENT because until this
+        # slice no card could spend one.
+        #
+        # NO DRAFTER_VERSION BUMP, and that is a claim about output rather
+        # than an exemption: `spend_charge` lives on the quarantined
+        # prototype surface alone, which no pool, digest or drafter can see,
+        # so every drafted number in the world is byte-identical with and
+        # without this branch. If a spender is ever re-authored onto a real
+        # sheet, THAT is the change that moves the drafter and archives the
+        # numbers -- see the slice-2 packet.
+        return -_neutral_amount(fx, 0) * STATIC_CHARGE_VALUE
     if op == "raise_fanfare_cap":
         return _neutral_amount(fx, 0) * STATIC_FANFARE_CAP_VALUE
     if op == "crash_fanfare":
@@ -1677,6 +1695,9 @@ STATIC_OP_PRICING: dict[str, str] = {
                   "(R194) and its price is unmoved by the conversion",
     "conscript": "STATIC_CONSCRIPT_VALUE per recruit (v7)",
     "gain_charge": "STATIC_CHARGE_VALUE per printed point (v7)",
+    "spend_charge": "the same rate, NEGATIVE: a printed cost (R213 E1, "
+                    "prototype surface only -- no shipped row prints it and "
+                    "no drafted number moves)",
     "summon_kurage": "ONE pulse, not the duration (v8)",
     "gain_fanfare_floor": "STATIC_FANFARE_FLOOR_VALUE per point (v9)",
     "grow_damage": "one discounted future redraw",

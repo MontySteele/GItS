@@ -259,6 +259,14 @@ public static class KleeMod
                     // "card_keywords.KLEEMOD-MUSTER.title" as the keyword name
                     // on a live shop screen (0.2-634, EB-53 capture session).
                     [Cards.KokomiRiderTips.MusterKey + ".title"] = "Muster",
+                    // QUARANTINED (R213 E1): the Charge KEYWORD's title. The
+                    // BODY is built live in KokomiRiderTips, because it
+                    // quotes CHARGE_PER_EXHAUST and reads the current bank --
+                    // the same bargain the Muster and pulse tips already
+                    // make. Distinct from CHARGE_RIDER above, which titles a
+                    // per-card RATE tip on a card that READS the meter.
+                    [Cards.KokomiRiderTips.ChargeWordKey + ".title"] =
+                        "Charge",
                 };
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))

@@ -389,6 +389,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
         _hook("shared", "hand_contents", "write")],
     # --- Kokomi ---
     "gain_charge": [_hook("private", "charge", "write")],
+    # R213 E1, QUARANTINED. A competing USE of the bank, mirroring
+    # spend_spark: Charge paid here is Charge her readers no longer read.
+    # Nothing shipped prints it -- the op exists for the prototype surface --
+    # but the table is total by construction and a missing row is a finding.
+    "spend_charge": [_hook("private", "charge", "use")],
     "conscript": [_hook("private", "conscript_sly", "write"),
                   _hook("shared", "hand_contents", "use"),
                   _hook("shared", "card_identity", "write")],

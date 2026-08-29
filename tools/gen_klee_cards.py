@@ -255,8 +255,15 @@ PROFILES = {
 # delta reaches it -- a card that pays less on upgrade is a repricing, and
 # repricing is [USER]'s call, not codegen's). The cost LINE is emitted
 # separately as an IsPlayable override; see `spark_gate_member` in emit().
+# spend_charge (R213 E1) is the Charge SINK and it is QUARANTINED: no
+# shipped row prints it, only the prototype surface does, and R80 -- Charge is
+# read, never spent -- is the rule the slice reopened rather than repealed.
+# Built on spend_spark's rail entirely: literal price (a card that pays less
+# on upgrade is a repricing, and repricing is [USER]'s), the payment emitted
+# here, and the cost LINE emitted separately as an IsPlayable override (see
+# `charge_gate_member` in emit()).
 MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
-                  "spend_spark", "burst_energy",
+                  "spend_spark", "spend_charge", "burst_energy",
                   "gain_encore", "spend_encore", "raise_fanfare_cap",
                   "gain_fanfare_floor",
                   # Fanfare rework (2026-07-28): the Hyperbeam settle
@@ -565,7 +572,13 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # branch-legality criterion. The obvious future row is
               # "if the leftmost member is X, do Y" -- see the
               # leftmost_salon_member_ predicate below.
-              "salon_rotate", "salon_perform"}
+              "salon_rotate", "salon_perform",
+              # R213 E1, QUARANTINED. A single awaited call with no locals,
+              # which is the whole branch-legality criterion -- and a mode
+              # body is the one place a Charge price can go that the
+              # IsPlayable cost line cannot reach, which is exactly the
+              # arrangement the slice's `mode` arm is asking about.
+              "spend_charge"}
 
 # The exact key set each branch op may carry. Module-level because a modal's
 # mode body is emitted through the same `_emit_branch_op` resolvers as a
@@ -585,6 +598,7 @@ BRANCH_FIELDS = {
     "gain_spark": {"op", "amount"},
     "gain_encore": {"op", "amount"},
     "spend_encore": {"op", "amount"},
+    "spend_charge": {"op", "amount"},
     "burst_energy": {"op", "amount"},
     "energy": {"op", "amount"},
     "place_bomb": {"op", "amount", "target", "bomb_damage"},
@@ -1584,7 +1598,9 @@ def blocked_reason(
                   "gain_fanfare_floor", "crash_fanfare", "salon_bow",
                   # A Spark price the generator cannot read as a
                   # literal is a price the IsPlayable gate cannot show.
-                  "spend_spark"}:
+                  "spend_spark",
+                  # R213 E1, same sentence one meter over.
+                  "spend_charge"}:
             unknown = set(eff) - {"op", "amount"}
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
@@ -3919,6 +3935,25 @@ def _stmt_spend_spark(card: dict, eff: dict) -> str:
             f"{int(eff['amount'])}, this);")
 
 
+def _stmt_spend_charge(card: dict, eff: dict) -> str:
+    """R213 E1, QUARANTINED. The PAYMENT half of the Charge cost line.
+
+    GUARDED, which `_stmt_spend_spark` is not, and the difference is where
+    the two ops are allowed to appear. A Spark price is top-level only, so
+    the IsPlayable gate has always already run and the spend cannot be short.
+    A Charge price is legal inside a `choose_one` mode as well, and the
+    game's choose-a-card screen has no per-mode playability -- so the mode is
+    offered at any bank and the payment can fail. The early `return` abandons
+    the play where the price failed; the sim raises `effects.ChargeUnpaid`
+    at the same point and for the same reason.
+
+    Emitted the same way at top level, where it is defensive and unreachable.
+    One statement shape rather than two is deliberate: a guard that appears
+    only in one context is a guard nobody exercises."""
+    return ("if (!await KokomiResources.SpendCharge(choiceContext, "
+            f"Owner.Creature, {int(eff['amount'])}, this)) return;")
+
+
 def _stmt_burst_energy(card: dict, eff: dict) -> str:
     amount = ('DynamicVars["BurstEnergy"].IntValue' if burst_upgrade(card)
               else str(int(eff["amount"])))
@@ -4086,6 +4121,13 @@ def _emit_branch_op(
         lines.append(
             "await FurinaResources.SpendEncoreOrHp("
             f"choiceContext, Owner.Creature, {int(eff['amount'])}, this);")
+    elif op == "spend_charge":
+        # R213 E1, QUARANTINED. Byte-for-byte the call build_body's top-level
+        # arm makes. The GUARD is the point: a mode body has no IsPlayable to
+        # gate it, the choose-a-card screen offers every mode whatever the
+        # bank holds, and without the early return a short bank would collect
+        # the mode's payoff for free. Sim twin: effects.ChargeUnpaid.
+        lines.append(_stmt_spend_charge(card, eff))
     elif op == "salon_rotate":
         # EB-118 §5.5. Literal in a branch, like every other branch resolver:
         # no delta grammar reaches a rotation count.
@@ -4388,6 +4430,9 @@ def build_body(
 
         elif op == "spend_spark":
             lines.append(_stmt_spend_spark(card, eff))
+
+        elif op == "spend_charge":
+            lines.append(_stmt_spend_charge(card, eff))
 
         elif op == "burst_energy":
             lines.append(_stmt_burst_energy(card, eff))
@@ -5462,6 +5507,11 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
             # top-level arm in build_description prints it too.
             bits.append(f'spend {int(e["amount"])} [gold]Encore[/gold] '
                         "(losing HP for any shortfall)")
+        elif op == "spend_charge":
+            # R213 E1. NO shortfall clause, and the absence is the rule: her
+            # bank pays the whole price or nothing (LAW, no self-damage
+            # anywhere in her kit), so there is no overdraw to print.
+            bits.append(f'spend {int(e["amount"])} [gold]Charge[/gold]')
         elif op == "energy":
             bits.append(f"gain {int(e['amount'])} Energy")
         elif op == "place_bomb":
@@ -5909,6 +5959,13 @@ def build_description(card: dict) -> str:
             parts.append(
                 f"Spend {int(eff['amount'])} [gold]Encore[/gold]; "
                 "lose HP for any shortfall.")
+
+        elif op == "spend_charge":
+            # The price is printed FIRST because it is a cost line, the
+            # spend_spark sentence one meter over. The card is unplayable
+            # below it (the IsPlayable gate), so this describes a gate and
+            # never a partial spend.
+            parts.append(f"Spend {int(eff['amount'])} [gold]Charge[/gold].")
 
         # THE TWO FANFARE KEYWORDS (rework Track B, 2026-07-28, RULED). These
         # replaced sentences with a printed keyword each, because the value
@@ -7258,7 +7315,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard
     # pulse resolves at end of turn from a bank that will have moved, and the
     # Garment rider lands on OTHER cards -- so the hover tip is the only
     # surface either number has. See KokomiRiderTips for the argument.
-    if profile is KOKOMI_PROFILE:
+    # BY character_id, NOT by identity. A prototype row is emitted through a
+    # COPY of the owner's profile (gen_prototype_cards._profile_for calls
+    # dataclasses.replace to move the four location fields), so `is
+    # KOKOMI_PROFILE` was false for every Kokomi row on the quarantined
+    # surface and each of them silently lost every tip below -- the Muster
+    # definition, the Garment rider, the pulse. Silently, because a missing
+    # hover tip renders as nothing at all. Found while attaching the Charge
+    # keyword, which is why it is fixed here rather than filed: the keyword
+    # the slice exists to print would not have printed.
+    if profile.character_id == "kokomi":
         if any(eff.get("op") == "summon_kurage"
                for eff in card.get("effects", [])):
             tips_expr = (
@@ -7276,6 +7342,21 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard
                for eff in _effects_everywhere(card)):
             tips_expr = (
                 "KokomiRiderTips.ForMuster("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # R213 E1 / R215 D, QUARANTINED. A card that PRINTS a Charge price
+        # carries the keyword's definition, because until this slice the word
+        # named a meter with no rules text anywhere on screen -- the gap R215
+        # D deferred into E1, with a blind witness in run B6 ("Burst Energy
+        # accumulated ... although I never saw how to spend it"). Attached
+        # from the OP, the Muster rule above, so a new spender cannot ship
+        # printing a word nothing explains. SCOPED TO SPENDERS ON PURPOSE:
+        # the shipped `gain_charge` faces have the same gap and fixing them
+        # is wording-only hygiene on thirty generated files, which does not
+        # belong in the same commit as the arms it would be read beside.
+        if any(eff.get("op") == "spend_charge"
+               for eff in _effects_everywhere(card)):
+            tips_expr = (
+                "KokomiRiderTips.ForCharge("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     if tips_expr:
         tooltip_member = (
@@ -7350,6 +7431,26 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard
         "    protected override bool IsPlayable =>\n"
         f"        SparkPower.CanSpend(Owner.Creature, {spark_price});"
         if spark_price else "")
+    # R213 E1, QUARANTINED: the same cost line one meter over, and the mirror
+    # of tier0 combat.charge_cost. TOP-LEVEL spends only, for the sim's
+    # reason plus one of its own -- the choose-a-card screen has no per-mode
+    # playability, so a price inside a mode cannot be shown here and
+    # KokomiResources.SpendCharge stops the play there instead.
+    charge_price = sum(int(eff["amount"]) for eff in card["effects"]
+                       if eff.get("op") == "spend_charge")
+    charge_gate_member = (
+        "\n\n    // The Charge cost line (R213 E1): unplayable below"
+        " the price,\n"
+        "    // which is how the cost is shown rather than silently"
+        " failing.\n"
+        "    protected override bool IsPlayable =>\n"
+        f"        KokomiResources.CanSpendCharge(Owner.Creature, "
+        f"{charge_price});"
+        if charge_price else "")
+    if spark_price and charge_price:
+        raise ValueError(
+            f"{card['id']}: two resource cost lines on one card -- only one "
+            "IsPlayable override can be emitted")
     resource_cost_setup = []
     if int(card.get("encore_cost", 0)) > 0:
         resource_cost_setup.append(
@@ -7402,7 +7503,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{card["name"].replace('"', chr(92) + chr(34))}"),
         ("description", "{desc}"),
-    }};{tags_member}{spark_gate_member}
+    }};{tags_member}{spark_gate_member}{charge_gate_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
