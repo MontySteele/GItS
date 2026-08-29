@@ -472,6 +472,55 @@ the pilot's own score surface, quotable under R215 B's exception because it
 reads the TURN. SURVIVES means **not yet falsified** — nothing here rates a
 turn. Depth: `understudy/README.md`.
 
+### Blind play (`EB-167` / `EB-168`)
+
+The same blindness widened from one staged turn to a whole run, and a seat
+that plays it rather than grading it.
+
+```
+python -m understudy.blindplay observe [--raw-file <state.json>]
+python -m understudy.blindplay act "<command>" [--raw-file <f>] [--dry-run]
+python -m understudy.blindplay session [--model M] [--max-actions N]
+```
+
+**observe** renders whichever screen is up — combat, map, rewards, shop, rest,
+event, the selection overlays — as printed faces and nothing else, through
+`qa_packet`'s scrubber; an unknown or hazardous screen renders as
+`TOOL-BLOCKED: <state_type>` and is never driven. `--raw-file` renders a saved
+state (a `review/qa/<turn>/observed.json` envelope works), which is how the
+tests and a desk check run with no game. **act** resolves one player-language
+command — `play "<title>" [on "<enemy>"]`, `end turn`, `choose "<name>"`,
+`skip`, `go "<node>"`, `buy "<item>"`, `rest`, `upgrade`, `remove`,
+`use potion "<title>"`, `confirm`, `proceed` — against the current state by
+printed names only, and posts it; with `--raw-file` or `--dry-run` it resolves
+and posts nothing. **session** is the driver: one `codex exec` thread for the
+whole run, one command per screen, the fight and run records at the ends, and
+budgets on actions, wall time and consecutive refusals. All of it is built on
+`naming` / `staged_turn.execute`'s title resolution and **never on
+`harness state`**, which prints `policy_v0`'s recommendation beside the screen.
+
+**Live acceptance, from the art-bearing main checkout** — the row closes on
+this, not on the branch that built it. `session` attaches to a run already in
+progress and stops on a menu rather than driving one, so embark first:
+
+```
+klee-mod\build\deploy_bridge.ps1                 # deployed, NOT -BuildOnly
+# launch the game from its exe; pick the character; embark
+python -m understudy.seat check                  # signed in?
+python -m understudy.blindplay observe           # eyeball one live screen
+python -m understudy.blindplay session --max-actions 40
+```
+
+Acceptance is a model completing one fight and then one Act-1 run, every action
+in the transcript, and no internal id, policy hint or design tag in any
+observation. Sessions land in `understudy/logs/blindplay/`, **gitignored** —
+the prompts inline the screens and the rollout carries a third party's system
+prompt. The committed artifact is
+`review/qa/blindplay/<session>/record.md`: the identity block (model, codex
+version, build version string, run seed read back off the wire, prompt sha256,
+action count, termination reason) and the model's records verbatim under the
+R217 G label. The author's own model family is refused as tester (R217 C).
+
 `KleeTests` runs the shipped `klee.dll` against the real game
 assemblies **headless** — no Godot, no launch. It is opt-in, not a deploy gate;
 its boundary and its co-op coverage are in `klee-mod/KleeTests/README.md`.
