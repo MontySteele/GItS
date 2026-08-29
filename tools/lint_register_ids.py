@@ -116,7 +116,20 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 181,   # EB-178/179/180 minted 2026-08-29 from run B6 and the module-size note
+    "EB": 184,   # EB-184 minted 2026-08-29 by Kokomi slice 1 round 4: a
+                 # `choose_one` card typed as an Attack demands a target
+                 # even on a mode that attacks nothing, so a blind
+                 # grader's Block-mode line cannot be replayed. OPEN.
+                 # EB-182/183 minted 2026-08-29 by the Kokomi slice 2 funnel run.
+                 # EB-182: the choose-a-card screen has no per-option
+                 # playability, proven off the 0.111.0 decompile, so a
+                 # priced "Choose one" mode is offered on a short bank
+                 # and simply does nothing. OPEN.
+                 # EB-183: R216 D's per-companion half -- recruits from a
+                 # paid order paying no Charge on Exhaust -- is a funnel
+                 # property, not an effect list, and is owed as its own
+                 # matched pair. OPEN.
+                 # EB-178/179/180 minted 2026-08-29 from run B6 and the module-size note
                  # EB-181 minted 2026-08-29 by EB-179's close: the
                  # vendored bridge reports no enchantment on a card
                  # face and no maximum on a resource meter, and the
@@ -241,7 +254,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        180, 181,
+        180, 181, 182, 183, 184,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
