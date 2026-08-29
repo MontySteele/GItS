@@ -295,3 +295,144 @@
 - {id: proto_charge_muster_price, name: "Watatsumi Levy", character: kokomi,
    cost: 2, type: skill, rarity: uncommon,
    effects: [{op: spend_charge, amount: 6}, {op: conscript, amount: 2}]}
+
+# =============================================================================
+# KLEE SLICE 1 (R213 E2) -- three rows, three arms. A FOURTH ARM WAS PROPOSED
+# AND IS NOT HERE: `proto_spark_mode_bombs` / "Bag of Tricks" is HELD for
+# [USER] on the independent seat's doctrine verdict, and holding it is the
+# whole reason the seat was asked before anything was authored. The verdict is
+# in review/qa/klee-slice-1-doctrine-review-codex-gpt-5.6-sol.md; the pick list
+# is in the packet.
+#
+# THE QUESTION. R213 E2 reopened "Sparks mean free Attack" as "likely upstream
+# of Klee's Attack-spam identity". The engine says it more sharply than the
+# playtest did: `combat.card_cost` zeroes ANY Attack at the threshold and
+# `combat.play_card` debits the bank for it, both unconditionally, so the bank
+# has one destination and it is chosen for the player. Against D2's six
+# steerable verbs -- timing, targeting, placement, acquisition, conversion,
+# forgoing -- the base rule feeds none.
+#
+# WHAT THESE ROWS DO NOT DO. The automatic rule is UNTOUCHED. Making it opt-in
+# is a change to a character mechanic (klee-character-design.md section 3), it
+# cannot be quarantined on a card surface, and the seat agreed it should not
+# ride along with a card-level slice because it would destroy attribution. It
+# also said plainly that the rule is the upstream problem and must eventually
+# move; that is [USER]'s, and it is in the packet, not here.
+#
+# ONE PRICE ACROSS THE SLICE: every row charges THREE Sparks. An attribution
+# call, not a balance one. Three is LIFTED, not picked -- it is the free
+# Attack's own threshold, which is the thing under test, so each pair asks
+# whether the bank is worth more as this card than as the rule. The three
+# SHIPPED sinks (powder_charge, hold_the_line, smoke_and_sparks) charge 2, but
+# 2 was authored against True Spark Knight's reduced threshold and would have
+# confounded the question. The seat was asked about this directly and agreed:
+# "Three is the right controlled price for this slice."
+#
+# EVERY NUMBER IS A SHIPPED NUMBER. 6 damage at cost 0 is
+# `flame_on_the_wick`'s. `times: 2` is the sheet's standard multi-hit count
+# (jumpy_dumpty, pocket_fireworks). Draw 3 is the twin's ceiling plus its
+# floor. Block 5 is `clockwork_toy`'s. Burst 10 is `combustion_study`'s. THERE
+# IS NO DERIVED NUMBER IN THIS SLICE AT ALL -- an earlier draft had one, and
+# the seat's arithmetic correction removed the need for it.
+#
+# NO NEW OP, NO NEW PREDICATE, NO NEW PRICED VERB. `spend_spark` has been in
+# both engines since EB-118 Phase 2 and has been printed by three shipped
+# Uncommons since R211's W3 window; its playability gate (`combat.spark_cost`)
+# and its no-partial-spend rule are shipped behaviour these rows only reuse.
+# The proposal's arm 2 would have needed a `spark_at_least_` predicate; the
+# seat's re-authoring of that arm removed the conditional and with it the
+# predicate, so this branch adds NOTHING to either engine's vocabulary.
+#
+# NAMES are provisional and mine (R179), ordinary card names by construction:
+# a blind grader reads printed titles, so no title here says spend, price,
+# conversion or prototype.
+#
+# I DESIGNED THESE ROWS AND MAY NOT GRADE THEM (R213's first guard).
+# =============================================================================
+
+# ---------- ARM 1: the Attack pays the bank instead of being paid by it ------
+# Shipped twin: `flame_on_the_wick` (0, Attack, Uncommon -- 6 damage to a
+# single enemy, bank untouched). Cost, type, rarity, target and the damage
+# figure all match, so the pair differs in one idea: this card charges the bank
+# and hits twice for having done so.
+#
+# WHY THE PRINTED COST IS ZERO, AND IT IS NOT A ROUNDING CHOICE. A paid Attack
+# at a full bank is zeroed and DEBITED by the automatic rule, which would eat
+# the three Sparks before this card's own `spend_spark` ran -- the card would
+# pay for its cost line and then refuse its own payload. `play_card`'s debit
+# branch is guarded by `card.cost != 0` (there since R39/R34, for their own
+# reasons), so a printed-zero Attack takes no automatic debit and its top-level
+# spend is the only thing that moves the meter. The rule is sidestepped, not
+# altered.
+#
+# THE DECISION IT CREATES is the arm's whole content: with three Sparks and
+# this card plus any PAID Attack in hand, playing the paid Attack first makes
+# it free and empties the bank, which makes this card unplayable; playing this
+# card first takes the bank itself and leaves the other Attack at full price.
+# Two Attacks, one bank, and the player picks. That is D2's timing and
+# forgoing, on the Attack half of the kit that W3's three Skill sinks left
+# without a decision.
+- {id: proto_spark_priced_strike, name: "Second Helping", character: klee,
+   cost: 0, type: attack, rarity: uncommon,
+   effects: [{op: spend_spark, amount: 3},
+             {op: damage, amount: 6, target: enemy, times: 2}]}
+
+# ---------- ARM 2: the bank buys velocity instead of an Attack ---------------
+# Shipped twin: `eager_to_help` (1, Skill, Common -- draw 2 if you have any
+# Spark, otherwise draw 1, and the bank is UNTOUCHED). It is the purest "watch
+# it rise" card on the sheet: it looks at the bank, takes nothing, and pays
+# more for the bank merely existing. This row buys the draw instead.
+#
+# THIS ROW IS THE SEAT'S OWN RE-AUTHORING, NOT MINE. It was proposed as a
+# THRESHOLD arm -- "Draw 1. If you have 3 or more Sparks: spend 3 and draw 2"
+# -- and the seat ruled that REQUIRES_MODIFICATION against the rule authored at
+# `powder_charge`: "THE COST MUST STAY AT TOP LEVEL. A `spend_spark` inside a
+# conditional branch is invisible to the playability gate, and the payoff would
+# then fire unpaid. That is a structural rule about this verb, not a preference
+# about this card." The threshold guard would have prevented an unpaid payout,
+# but the rule is categorical and the price still would not have been a cost
+# line. The seat supplied the remedy verbatim -- "Spend 3 Sparks. Draw 3
+# cards." -- and confirmed on a second read that the altered row FOLLOWS. The
+# id lost the word `threshold` with the conditional; the slice has no threshold
+# arm any more, and the packet says so rather than pretending otherwise.
+#
+# The Klee generation limb ("no sub-Rare card is simultaneously a spark source
+# and a draw enabler") was put to the seat explicitly and does not reach this
+# row: it is a spark SINK and a draw enabler, and the limb bans a SOURCE.
+- {id: proto_spark_priced_draw, name: "Rummage", character: klee,
+   cost: 1, type: skill, rarity: uncommon,
+   effects: [{op: spend_spark, amount: 3},
+             {op: draw, amount: 3}]}
+
+# ---------- ARM 3: the bank leaves the Attack economy altogether -------------
+# Shipped twin: `clockwork_toy` / "Imaginary Friend" (1, Skill, Common,
+# skill_tag -- Block 5 and 3 Burst Energy, bank untouched). Cost, type, tag and
+# the Block figure are unmoved; the Burst rider stops being free and starts
+# being bought, and pays more for being bought.
+#
+# THE TWIN AND THE NUMBER ARE BOTH THE SEAT'S CORRECTIONS, CHECKED BEFORE USE.
+# I originally named `combustion_study` as the twin; it is actually Burst 10 +
+# Draw 1 (klee-cards.yaml line 160), and the Block 5 + Burst 3 skill_tag Common
+# is this one (line 195). And `skill_tag` pays BURST_PER_SKILL_TAG = 5
+# automatically (constants.py:69, combat.py:383), so the printed number is not
+# the meter movement. Both facts were verified in the repo, not taken.
+#
+# PRINTED 10, CHOSEN BY THE SEAT FROM TWO. Its first read said drop 10 to 5 so
+# the total matched a derivation I had written; that would have made three
+# Sparks buy 2 Burst over a Common costing no Sparks at all, leaving the
+# prototype half of the pair with no second line. Given both numbers and the
+# arithmetic, it chose 10: the bank buys 7 Burst over the twin, which is what
+# one free Attack is worth elsewhere in the kit (`kaboom`, a 1-cost basic
+# Attack, is 7). 10 is `combustion_study`'s own printed figure.
+#
+# WHY THIS ARM EXISTS AT ALL: Sparks and Burst have never interacted in either
+# direction. Sparks buy Attacks; Burst fills from Skills and reactions and
+# casts the kit Burst. This is the only shape in the slice where the bank buys
+# something that is neither damage, defence, nor a Bomb -- it buys progress
+# toward the one Klee payoff that is not an Attack. The Burst itself is
+# untouched: nothing here grants, drafts or alters Sparks 'n' Splash.
+- {id: proto_spark_burst_conversion, name: "Slow Burn", character: klee,
+   cost: 1, type: skill, rarity: uncommon, tags: [skill_tag],
+   effects: [{op: spend_spark, amount: 3},
+             {op: block, amount: 5},
+             {op: burst_energy, amount: 10}]}

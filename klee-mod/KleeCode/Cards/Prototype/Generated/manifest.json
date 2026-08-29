@@ -15,6 +15,9 @@
     "proto_pearl_barrage_turn",
     "proto_shinobu_sanctifying_ring_either",
     "proto_shinobu_sanctifying_ring_priced",
+    "proto_spark_burst_conversion",
+    "proto_spark_priced_draw",
+    "proto_spark_priced_strike",
     "proto_thoma_crimson_ooyoroi_either",
     "proto_thoma_crimson_ooyoroi_priced"
   ],
@@ -28,6 +31,9 @@
     "proto_pearl_barrage_turn": "kokomi",
     "proto_shinobu_sanctifying_ring_either": "klee",
     "proto_shinobu_sanctifying_ring_priced": "klee",
+    "proto_spark_burst_conversion": "klee",
+    "proto_spark_priced_draw": "klee",
+    "proto_spark_priced_strike": "klee",
     "proto_thoma_crimson_ooyoroi_either": "klee",
     "proto_thoma_crimson_ooyoroi_priced": "klee"
   },
