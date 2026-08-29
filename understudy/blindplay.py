@@ -117,6 +117,14 @@ UNDRIVEN_SCREENS = {
     "unknown": "the wire could not name this screen",
 }
 
+# How long the driver rides out a TRANSITION before calling it a screen.
+# `unknown` -- and a state with no `state_type` key at all -- is what the wire
+# answers for the moment between leaving one room and entering the next, which
+# is not a screen and must not be reported as one. `soak._settle_transient`
+# learned this on the same wire and these are its numbers.
+SETTLE_TRIES = 60
+SETTLE_DELAY_S = 0.5
+
 # EB-1. A REGISTER, NOT A HEURISTIC, and a deliberate SECOND COPY of
 # `soak.HAZARD_EVENTS`. Importing soak here would pull `policy_v1` and through
 # it every tier0 sheet loader into the design-blind module, which is the one
@@ -1399,9 +1407,13 @@ class Session:
     def __init__(self, thread: Any, *, wire: Any = bridge,
                  session_id: str = "", budget: Budget | None = None,
                  log_root: Path | None = None,
-                 prompt_path: Path | None = None):
+                 prompt_path: Path | None = None,
+                 settle_tries: int = SETTLE_TRIES,
+                 settle_delay_s: float = SETTLE_DELAY_S):
         self.thread = thread
         self.wire = wire
+        self.settle_tries = settle_tries
+        self.settle_delay_s = settle_delay_s
         self.budget = budget or Budget()
         self.session_id = session_id or time.strftime("%Y%m%d-%H%M%S",
                                                       time.gmtime())
@@ -1428,6 +1440,27 @@ class Session:
         parts.append("Answer with ONE command from the grammar.")
         return "\n\n".join(parts)
 
+    def _settle(self, state: dict[str, Any]) -> dict[str, Any]:
+        """Ride out a MOMENT rather than reporting it as a screen.
+
+        The first live acceptance run died here: the seat walked onto a Monster
+        node, the very next read answered `state_type: "unknown"` because the
+        room had not been entered yet, and the driver stopped the session
+        TOOL-BLOCKED against a transition. `soak._settle_transient` had already
+        learned this on the same wire, and the fix is the same shape -- poll,
+        bounded, and hand back whatever is there when the bound runs out so a
+        wire that really is stuck is still reported as blocked rather than
+        waited on forever. A missing `state_type` key is the same moment one
+        frame earlier and settles the same way.
+        """
+        for _ in range(self.settle_tries):
+            st = state.get("state_type")
+            if st is not None and str(st) != "unknown":
+                return state
+            time.sleep(self.settle_delay_s)
+            state = self.wire.get_state()
+        return state
+
     def _ask_record(self, questions: str) -> str:
         reply = self.thread.send(f"{questions}\n\n{RECORD_DISCLAIMER}\n",
                                  record_schema())
@@ -1449,7 +1482,7 @@ class Session:
                 self.stopped = "max_wall"
                 break
 
-            state = self.wire.get_state()
+            state = self._settle(self.wire.get_state())
             try:
                 obs = observation(state)
             except qa_packet.PacketLeak as exc:

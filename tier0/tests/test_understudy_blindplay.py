@@ -623,6 +623,49 @@ def test_resume_drops_the_flags_resume_does_not_take(tmp_path):
         assert "--ignore-user-config" in argv and "--json" in argv
 
 
+class _TransientWire(blindplay.ScriptedWire):
+    """A wire that answers with the transition before it answers with the room.
+
+    Two reads of `unknown` -- one of them with no `state_type` key at all --
+    and then the screen. Nothing is posted in between, which is exactly the
+    live shape: walking onto a map node changes the room before the bridge can
+    name it.
+    """
+
+    def __init__(self, states):
+        super().__init__(states)
+        self.transients = [{"state_type": "unknown"}, {}]
+
+    def get_state(self):
+        if self.transients:
+            return self.transients.pop(0)
+        return super().get_state()
+
+
+def test_a_transition_is_ridden_out_and_never_reported_as_a_screen(tmp_path):
+    """The first live acceptance run stopped TOOL-BLOCKED against the moment
+    between two rooms. A bounded settle rides it out; only a wire that STAYS
+    unnamed is blocked."""
+    thread = blindplay.ScriptedThread([{"command": "end turn",
+                                        "thinking": "."},
+                                       {"record": "r"}, {"record": "r"}])
+    wire = _TransientWire([combat_state(), game_over_state()])
+    s = blindplay.Session(thread, wire=wire, session_id="t",
+                          budget=blindplay.Budget(max_actions=1),
+                          log_root=tmp_path, settle_delay_s=0.0)
+    summary = s.run()
+    assert wire.posts and wire.posts[0]["action"] == "end_turn"
+    assert summary["termination"] != "tool_blocked"
+
+
+def test_a_wire_that_stays_unnamed_is_still_tool_blocked(tmp_path):
+    wire = blindplay.ScriptedWire([{"state_type": "unknown"}])
+    s = blindplay.Session(blindplay.ScriptedThread([]), wire=wire,
+                          session_id="t", log_root=tmp_path,
+                          settle_tries=3, settle_delay_s=0.0)
+    assert s.run()["termination"] == "tool_blocked" and wire.posts == []
+
+
 def test_the_session_stops_on_a_screen_it_will_not_drive(tmp_path):
     s, summary, wire, _ = _session(tmp_path, [], states=[hazard_event_state()])
     assert summary["termination"] == "tool_blocked" and wire.posts == []
