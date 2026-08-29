@@ -1575,6 +1575,22 @@ pipeline can consume.
 6. **It could not run the mirror under the flag.** On two boards the closeness
    falsifier scored the retired base rule. The error runs one way.
 
+**A design observation from the relayed review, recorded and NOT ruled.** All
+five Spark-priced non-starter rows are damage Attacks — `proto_spark_strike`
+(8 to one), `proto_spark_sweep` (4 to all), `proto_spark_double_tap` (5 ×2),
+`proto_spark_blast` (7 to all), `proto_spark_finisher` (18, Exhaust) — and so
+is the starter sink `proto_kaboom_sink`. `type: attack` on all six, checked on
+`docs/prototype-surface.yaml`; only the generator `proto_pop_spark` (Skill) and
+`proto_true_spark_knight` (Power) are anything else. The review's words:
+*"Five Spark-priced cards are still five damage Attacks… If whole-fight play
+still reduces to damage-per-Spark, re-author one or two sinks around Bomb
+manipulation, setup, targeting, draw/exhaust, or another qualitative payoff."*
+If every destination for a Spark is damage then choosing between two of them is
+arithmetic, which is exactly what the seat found on `t02` — a reason a board can
+fail to show a decision that is INDEPENDENT of the prices. It is a design call,
+so it goes on the pick list at §11.7 item 1 as option (e) rather than being
+settled here.
+
 ### 11.7 What goes back to [USER] — numbered picks, never blanks
 
 1. **P1 missed, so PICK 4 is reopened by its own registered decision. Which
@@ -1585,7 +1601,17 @@ pipeline can consume.
    than converting, so the pool grows and the cheap end is less crowded;
    (c) re-price rather than re-count: move Fwoosh! or Ka-pow! off 1 so two
    1-priced cards cannot sit in the same hand; (d) leave the set as built and
-   let whole-fight play answer it instead.*
+   let whole-fight play answer it instead; (e) re-author one or two sinks away
+   from damage — Bomb manipulation, setup, targeting, draw/exhaust or another
+   qualitative payoff — so that two Spark destinations differ in KIND and not
+   only in number.*
+   **Relayed review argues (d), and disputes the trigger:** on its reading `P1`
+   MISSED on an instrument that could not reach its own threshold (§11.5
+   erratum, `EB-202`), so the MISS is kept for audit and is *"not a trigger to
+   add/reprice cards"* — leave the set intact and let whole-fight play answer
+   it. It proposes (e) as the thing to do IF whole-fight play still reduces to
+   damage-per-Spark. Answering (a), (b) or (c) means ruling that the fire
+   stands despite the erratum, which is [USER]'s to say.
 2. **P4 split, and I will not close PICK 1 on boards I stacked.** Both
    empty-bank boards had the generator in hand, so "it reads as a plan" is
    partly my staging.
@@ -1593,6 +1619,9 @@ pipeline can consume.
    (b) accept the plan reading and close PICK 1 as answered; (c) take option 4's
    honest dead-turn anyway, on the grounds that a starter should not depend on
    drawing its one generator.*
+   **Relayed review argues (a)**, as a sanity check only: the meaningful test of
+   a dry sink is how OFTEN it happens across a fight and whether it frustrates,
+   which a staged single turn cannot ask.
 3. **The Rare Power: informative face, uninteresting turn.** Two of three
    readers found nothing to weigh on its boards, and the independent seat's form
    was refused for having no second line at all.
@@ -1601,13 +1630,23 @@ pipeline can consume.
    (c) reopen the price — 3 per Attack against an income near 1 per turn is a
    card that does nothing for three turns; (d) pull it from the slice and grade
    the seven card rows alone.*
+   **Relayed review argues (a):** re-read it in whole-fight play, where a bank
+   has a history, before touching its wording or its price.
 4. **The tester seat, on the seat's own RETURN.**
    *(a) keep Qwen in the tester seat and fix the two mechanical faults first —
    teach the form to carry a target, and put "which cards need a target" on the
    packet; (b) keep the seat but require a Codex spot-check on EVERY turn until
    it stops failing replays, which is an answer to `M58` as well; (c) take the
    seat out of the funnel until the two faults are fixed; (d) leave it and
-   accept that a quarter of its lines are untested.*
+   accept that a quarter of its lines are untested; (e) remove the seat as a
+   DECIDING tester until it is repaired AND requalified, while allowing it to
+   keep reading in SHADOW — its forms recorded and never graded — so the
+   repair has evidence to be measured against.*
+   **Relayed review argues (e)**, and attaches a condition: requalification on
+   a battery covering target selection, printed costs and intent sensitivity,
+   because *"fixing `target: null` alone does not address its semantic
+   failures."* The battery is a seat question and is noted on QUEUE `M62`; the
+   mechanical half of the fault is BACKLOG `EB-203`.
 5. **`M58` — WITHDRAWN as a pick, 2026-08-29 (hygiene).** It asked what the
    Codex spot-check rate should be. `M58` was **ANSWERED by R220 G at N = 4**
    before this section was written, and its QUEUE row is closed and gone from
@@ -1622,9 +1661,22 @@ pipeline can consume.
    *(a) treat it as an artefact of §10.5's pilot blind spots and teach the probe
    playability first (which P5's registered decision already asks for), then
    re-read; (b) treat it as a signal about the prices and re-price before any
-   further reading; (c) do neither until whole-fight play has run.*
+   further reading; (c) do neither until whole-fight play has run; (d) take (a) and then
+   RE-REGISTER the probe on normalized metrics — `spent / available Sparks`
+   and `affordable sinks skipped` per turn — rather than the raw per-turn
+   spend rate, which §11.5's `P5` note shows is confounded by fight length and
+   by income.*
+   **Relayed review argues (a) as amended by (d)**: fix pilot playability
+   first, then re-register a normalized probe, and *do not* reprice on the
+   40-versus-25 figure — normalized, the ON arm spent ~91% of what it
+   generated against OFF's ~88%, so the raw fall is a consumption artefact and
+   not evidence about the prices.
 7. **What runs next.** The pair read asked for whole-fight play by name.
    *(a) whole-fight blind play on the Sparks arm, Codex seat, as the next thing;
    (b) a round 2 of staged turns on the two RETURNED rows (`t02`'s Fwoosh! and
    `t06`'s AoE pair) on repaired boards first; (c) both, in that order;
    (d) hold the arm until picks 1 and 3 are settled.*
+   **Relayed review argues (c)**, in that order and with the round-2 half kept
+   minimal: whole-fight Codex play first, then a repaired staged round covering
+   the dry sink with NO generator in hand and a genuinely multi-enemy board for
+   the two AoE rows.

@@ -521,13 +521,16 @@ Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
 countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
-Art debt); the Fontaine Rares close-out (`M10`); and the twelve
+Art debt); the Fontaine Rares close-out (`M10`); and the thirteen
 prototype-slice, redesign, slate and funnel calls (`M47` Bag of Tricks; `M49` the
 pilot's Charge term, now superseded; `M50` the Kurage-memory redesign's four
 unruled rows, pick 3 answered on `M60`; `M52` the Furina reframe's two
 countersigns; `M54`–`M57` the blind run's four; `M59` the reframe's sixteen design picks; `M60` the Burst
 retirement's four picks; `M62` the criterion that retires the funnel's
-fresh-Opus control form, measured at 4/8 on `KLEESPARK-R1`). `M48` was answered by R219; `M58` by R220 G (N = 4); `M51` was answered by
+fresh-Opus control form, measured at 4/8 on `KLEESPARK-R1`, now also
+carrying the local seat's requalification battery as option (5); `M63` whether
+the funnel may REPAIR a filed form, which edits a grader's answer and is
+therefore measurement law rather than engineering). `M48` was answered by R219; `M58` by R220 G (N = 4); `M51` was answered by
 R220 F and `M53` by R220 E.
 
 ## Watch register (dormant)
