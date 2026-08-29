@@ -47,7 +47,11 @@
   </PropertyGroup>
 
   <Target Name="RequireLocalProps" BeforeTargets="PrepareForBuild">
-    <Error Condition="'$(GameDir)' == ''"
+    <!-- GameDir is only required when nothing else resolved GameDataDir: the
+         pinned-assemblies block above sets it without a GameDir, and a
+         worktree has no local.props, which is exactly the case the switch exists
+         for. Slice-2 packet §6: the first Error fired unconditionally. -->
+    <Error Condition="'$(GameDir)' == '' and '$(GameDataDir)' == ''"
            Text="GameDir is not set. Copy local.props.example to local.props and point GameDir at your Slay the Spire 2 install root." />
     <Error Condition="'$(GameDataDir)' == ''"
            Text="Could not locate the game's managed assembly directory under GameDir. Set GameDataDir explicitly in local.props." />

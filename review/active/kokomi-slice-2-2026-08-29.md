@@ -351,14 +351,15 @@ what should be, in the order I would file them:
   price in the card's own cost line. Gate: none today (the boards bank 8). It
   gates any *shipped* modal that prices a resource.
 
-- **A defect in `EB-172`'s pinned-assembly build.**
-  `dotnet build -p:UsePinnedAssemblies=true` still fails on `GameDir is not
-  set`: `Directory.Build.props`'s `RequireLocalProps` target errors
-  unconditionally, and its first `Error` does not stand down when the pinned
-  block has already set `GameDataDir`. A worktree has no `local.props`, which
-  is exactly the case the switch exists for. Worked around here by passing a
-  dummy `-p:GameDir=`; the fix is one condition. Acceptance: a clean worktree
-  compiles with the switch and nothing else.
+- **`EB-172`'s pinned-assembly switch was broken in a clean worktree, and is
+  fixed in place (commit D).** `dotnet build -p:UsePinnedAssemblies=true`
+  failed on `GameDir is not set`: `Directory.Build.props`'s `RequireLocalProps`
+  target's first `Error` fired whenever `GameDir` was empty, even after the
+  pinned block had already set `GameDataDir`. A worktree has no `local.props`,
+  which is exactly the case the switch exists for. The condition now also
+  requires `GameDataDir` to be empty; proven by a `--no-incremental` build in
+  this worktree with the switch and nothing else, 0 errors, with and without
+  `-p:PrototypeCards=true`. Hygiene under the norms, no row minted.
 
 - **Owed hygiene, wording only: the shipped `gain_charge` faces still print
   "Charge" with no keyword.** The definition now exists
@@ -422,7 +423,7 @@ what should be, in the order I would file them:
 - **See a prototype card render.** Prototype rows have no art by design — art
   is commissioned when a slice is accepted and its rows move to a real sheet —
   so they will draw with no portrait. That is correct, not a defect.
-- **Compile without a workaround.** The C# *did* build here, both with and
-  without `-p:PrototypeCards=true`, against the pinned assemblies in the
-  OneDrive vault — but only after passing a dummy `-p:GameDir=`, because of the
-  `EB-172` defect in §6. Zero errors either way.
+- **Compile without a workaround — until commit D.** Commits A–C built
+  against the pinned assemblies in the OneDrive vault only with a dummy
+  `-p:GameDir=`; §6's one-condition fix removed the need, and the branch now
+  builds in a clean worktree with the switch alone. Zero errors either way.
