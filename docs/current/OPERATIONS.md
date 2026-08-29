@@ -703,6 +703,93 @@ without ever being authoritative. Sessions land in
 `understudy/logs/local-seat/`, gitignored for the same reason the codex seat's
 are.
 
+**Serving flags that were measured, and the one that is the control.** The
+GGUF carries the model's MTP layer, so `--spec-type draft-mtp --cache-reuse
+256` is the intended launch: with it the server's own `timings` read 136 tok/s
+on short prompts and 94 tok/s at 47K context, against 70 and 58 without, at
+draft acceptance 69% and 53% and about +1.4 GB VRAM, all at temperature 0. The
+control for runaway thinking is **server-side**: `--reasoning-budget 4096`
+with `--reasoning-budget-message "Thinking budget exhausted. Stop thinking now
+and write the final answer in the required format."` With that budget a staged
+form completes in about 30 seconds and the 47K doctrine prompt answers in
+about 76; without it the model never reached `content` at all, at either an 8K
+or a 16K answer ceiling. **4096 is the standing budget**, not a provisional
+one: the quality re-run under these flags answered all twelve closed turns
+with **zero refusals** and returned a doctrine verdict in 73 s with the same
+vocabulary and clause hits as the recorded GPT review
+(`review/qa/local-sanity-2026-08-29-mtp4k/`, branch
+`local-sanity-2026-08-29`). The client never caps reasoning and never
+truncates — `answer_truncated` is the backstop, and it refuses.
+
+### Local tester seat
+
+[USER], 2026-08-29: *"Ask GPT for confirmation on the playtest findings … and
+if they agree, then we can hand off playtesting to Qwen."* The Codex seat
+answered **ADVANCE, for the staged single-turn tester seat only**, and attached
+four conditions. This is that seat, and those four conditions in code.
+
+**What runs where.** The local model fills the FORM — it picks a line and
+answers the four questions. `staged_turn grade` is still the grade: the
+falsifiers are mechanical and no model is in that loop. So the tester writes
+`form-local-<slug>.json` and a record `tester-local-<slug>.json` beside it,
+and the verdict is `verdict-local-<slug>.json` as before. The prompt is
+`seat.build_prompt`'s, unchanged, so the two seats cannot drift apart, and the
+`packet_sha256` pin and every refusal `local_seat` already kept are inherited
+whole. **Grader work, whole-fight blind play and the doctrine gate stay with
+the Codex seat**, and an ADVANCE here is not validation, not balance evidence
+and not ship approval.
+
+```
+export GITS_LOCAL_MODEL_URL=http://localhost:8010/v1
+python -m understudy.local_tester read <turn-id> [--position N]
+python -m understudy.local_tester read <turn-id> --dry-run
+python -m understudy.local_tester round <t01> <t02> … --plan-only
+python -m understudy.local_tester round <t01> <t02> … [--seat-spot-check N]
+```
+
+`read` reads one turn and hands the form to `staged_turn grade`; `--position`
+is the turn's one-based place in the round, which is what the spot-check rate
+counts. `round` reads a whole round in order and ends by printing the turns
+that still owe the Codex seat, with the `understudy.seat grade` command for
+each. `--plan-only` prints the schedule and sends nothing — commit the
+schedule before the readings, for the same reason a prediction slate is
+committed before a run.
+
+**The four conditions.**
+
+- **`answer_truncated` is a hard refusal, with no partial filing.** A reply
+  that stops at the ceiling produces a refusal record and NO form; the turn
+  then routes to the seat, because it has no reading at all.
+- **The family is not authorable.** `local` stays in
+  `authorship.FAMILIES` and out of `AUTHORABLE_FAMILIES` (`M53`), and
+  `tools/lint_prototype_authorship.py` grew a third check that walks the
+  tester records: one declaring an authoring family, one whose declared family
+  contradicts its own model string, and one whose family is recorded as an
+  author of a row it read are each a finding.
+- **Periodic seat review.** `--seat-spot-check N` makes turn 1 and every Nth
+  after it ALSO a Codex read. The default is **4** — a quarter of a round, and
+  never zero on the shortest round this funnel runs. `0` disables the periodic
+  half only.
+- **The order flag.** `understudy/resource_order.py` reads the card sheets'
+  effect ops and flags a line in which a card that SPENDS or converts a meter
+  (`spend_*`, `salon_*`, `crash_fanfare`) precedes a card that READS it
+  (`bonus_formula`, `requires`, a `conditional`'s `if:`). The record carries
+  `resource_order_flag` naming both cards, and the turn routes to the seat
+  **regardless of the rate**. A *Choose one* is judged on the mode the form
+  recorded; one with no mode recorded flags on the union.
+
+**The answer budget is configuration.** `GITS_LOCAL_MODEL_FORM_TOKENS` and
+`GITS_LOCAL_MODEL_REVIEW_TOKENS` set the two ceilings (both default 8192, junk
+falls back). They are not the runaway-thinking control — that is the server's
+`--reasoning-budget`, above.
+
+**The second misread class.** `understudy/misreads.py` now holds both: the
+round-1 cost claim ("X is free", against the cost the packet prints) and the
+arithmetic one the seat caught — *"the 3 HP that block would have prevented"*,
+where five Block against an eight-damage intent prevents five and three is
+what gets through. It fires only on the exact residual identity with all three
+numbers on the page, because a false MISREAD is worse than a missed one.
+
 ### Blind play (`EB-167` / `EB-168`)
 
 The same blindness widened from one staged turn to a whole run, and a seat

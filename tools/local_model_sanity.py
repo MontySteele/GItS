@@ -25,13 +25,17 @@ Three readings are compared on three axes, weakest claim first:
     fourth answer of "no"), so a model that writes a well-formed nothing
     matches every SURVIVES in the set.
   * **The LINE.** The ordered card titles it played. This is the reading.
-  * **The MISREAD CLASS.** Klee slice 1 round 1's failure was not a bad line;
-    it was a reader who thought the wrong Attack was free and reasoned
-    correctly from there. `free_card_misreads` looks for exactly that shape --
-    a claim that a card is free, checked against the cost the packet PRINTS --
-    because a grader that misreads the board produces confident, plausible,
-    useless feedback, and that is the specific failure a weaker model is most
-    likely to reproduce.
+  * **The MISREAD CLASSES.** Klee slice 1 round 1's failure was not a bad
+    line; it was a reader who thought the wrong Attack was free and reasoned
+    correctly from there. `understudy/misreads.py` looks for exactly that
+    shape -- a claim that a card is free, checked against the cost the packet
+    PRINTS -- and for the arithmetic one the Codex seat caught on this very
+    read, a prevention claim quoting the residual instead. Both live down
+    there rather than here because the LIVE tester path
+    (`understudy/local_tester.py`) runs the same two checks, and two copies
+    would drift. A grader that misreads the board produces confident,
+    plausible, useless feedback, and that is the specific failure a weaker
+    model is most likely to reproduce.
 
 None of the three is evidence about the GAME. Agreement says something about
 the READER; a local model agreeing with two hosted ones on eight closed turns
@@ -52,7 +56,19 @@ from typing import Any, Iterable, Sequence
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from understudy import local_model, local_seat, seat, staged_turn  # noqa: E402
+from understudy import (local_model, local_seat, misreads as _misreads,  # noqa: E402
+                        seat, staged_turn)
+
+# RE-EXPORTED, not re-implemented (see `understudy/misreads.py`): the live
+# tester path runs the same two checks, and two copies would drift the day
+# one of them grew a third class.
+FREE_CLAIMS = _misreads.FREE_CLAIMS
+CLAIM_WINDOW = _misreads.CLAIM_WINDOW
+printed_costs = _misreads.printed_costs
+free_card_misreads = _misreads.free_card_misreads
+intent_damages = _misreads.intent_damages
+block_prevention_misreads = _misreads.block_prevention_misreads
+misreads = _misreads.misreads
 
 QA_DIR = REPO / "review" / "qa"
 
@@ -81,18 +97,6 @@ DOCTRINE_PROMPTS: tuple[str, ...] = (
     "klee-sparks-doctrine-review-prompt.txt",
 )
 DOCTRINE_RECORDED = "*doctrine-review-codex-*.md"
-
-# A claim of the form "X is free". Deliberately literal: this is looking for
-# one known misread, not doing sentiment analysis on a grader's prose.
-FREE_CLAIMS: tuple[str, ...] = (
-    "free", "costs 0", "cost 0", "costs zero", "0 energy", "zero energy",
-    "0-cost", "zero-cost", "no energy",
-)
-# How far either side of the claim a card title still counts as its subject.
-CLAIM_WINDOW = 90
-
-_CARD_HEAD = re.compile(r"^###\s+(.+?)\s*$", re.MULTILINE)
-_COST = re.compile(r"^-\s*Cost:\s*(\d+)", re.MULTILINE)
 
 REPORT_GUARDRAIL = (
     "WHAT THIS IS. A local model re-read turns that are already CLOSED, and "
@@ -177,56 +181,8 @@ def reading(verdict_path: Path) -> dict[str, Any]:
     }
 
 
-# ------------------------------------------------------- the misread class -
-
-def printed_costs(packet_md: str) -> dict[str, int]:
-    """`{printed title: printed cost}` for every card the packet's hand shows.
-
-    Read off the PACKET rather than a sheet, deliberately: the question is
-    what the grader was SHOWN, and a sheet would answer what is true.
-    """
-    costs: dict[str, int] = {}
-    heads = list(_CARD_HEAD.finditer(packet_md))
-    for i, head in enumerate(heads):
-        end = heads[i + 1].start() if i + 1 < len(heads) else len(packet_md)
-        cost = _COST.search(packet_md[head.end():end])
-        if cost:
-            costs[head.group(1).strip()] = int(cost.group(1))
-    return costs
-
-
-def free_card_misreads(packet_md: str, text: str) -> list[str]:
-    """Every "<card> is free" claim in the prose that the packet contradicts.
-
-    This is round 1's failure made checkable. It is a NARROW check and stays
-    narrow: it fires only where a claim word sits within `CLAIM_WINDOW`
-    characters of a card title the packet prints a NON-ZERO cost for. A
-    cleverer matcher would start reporting a grader's hypotheticals ("if it
-    were free") as misreads, and a misread report nobody trusts is worse than
-    none.
-    """
-    costs = printed_costs(packet_md)
-    if not costs:
-        return []
-    low = str(text or "").casefold()
-    found: list[str] = []
-    for claim in FREE_CLAIMS:
-        start = 0
-        while (i := low.find(claim, start)) != -1:
-            window = low[max(0, i - CLAIM_WINDOW):i + len(claim)
-                         + CLAIM_WINDOW]
-            for title, cost in costs.items():
-                if cost != 0 and title.casefold() in window:
-                    line = (f"called {title!r} {claim!r}, but the packet "
-                            f"prints Cost: {cost}")
-                    if line not in found:
-                        found.append(line)
-            start = i + len(claim)
-    return found
-
-
 def prose_of(form: dict[str, Any]) -> str:
-    return "\n".join(str(form.get(q) or "") for q in staged_turn.QUESTIONS)
+    return _misreads.prose_of(form, staged_turn.QUESTIONS)
 
 
 # ------------------------------------------------------------- the run -----
@@ -274,7 +230,7 @@ def run_turn(turn_id: str, *, client: local_model.Client, out_dir: Path,
         "answers": {q: str(form.get(q) or "") for q in staged_turn.QUESTIONS},
     }
     packet_md = (d / "packet.md").read_text(encoding="utf-8")
-    row["misreads"] = free_card_misreads(packet_md, prose_of(form))
+    row["misreads"] = misreads(packet_md, prose_of(form))
     # ...and the same check on the RECORDED readings, so the report can say
     # whether the misread class is the local model's or the turn's.
     row["recorded_misreads"] = {
@@ -422,7 +378,7 @@ def dry_run(turn_ids: Sequence[str], notes: Sequence[str], *,
     ctx = client.ctx if client else local_model.DEFAULT_CTX
     lines: list[str] = []
     lines.append(f"PLAN -- nothing is sent. ctx {ctx}, "
-                 f"{local_seat.FORM_MAX_TOKENS} tokens reserved per answer.")
+                 f"{local_seat.form_max_tokens()} tokens reserved per answer.")
     if client:
         lines.append(f"endpoint: {client.base_url} "
                      f"(model {client.model or 'read from /v1/models'})")
@@ -440,7 +396,7 @@ def dry_run(turn_ids: Sequence[str], notes: Sequence[str], *,
             packet.read_text(encoding="utf-8"), "0" * 64)
         est = local_model.estimate_tokens(prompt)
         total += est
-        fits = ("fits" if est + local_seat.FORM_MAX_TOKENS <= ctx
+        fits = ("fits" if est + local_seat.form_max_tokens() <= ctx
                 else "DOES NOT FIT")
         lines.append(f"  {turn_id:28s} ~{est:6d} prompt tok  {fits}")
     lines.append(f"{len(turn_ids)} turn(s), ~{total} prompt token(s) total, "
@@ -453,7 +409,7 @@ def dry_run(turn_ids: Sequence[str], notes: Sequence[str], *,
         else:
             body = prompt_path.read_text(encoding="utf-8")
             est = local_model.estimate_tokens(seat.build_review_prompt(body))
-            fits = ("fits" if est + local_seat.REVIEW_MAX_TOKENS <= ctx
+            fits = ("fits" if est + local_seat.review_max_tokens() <= ctx
                     else "DOES NOT FIT")
             lines.append(f"doctrine: {prompt_path.name} ~{est} prompt tok  "
                          f"{fits}")
@@ -495,7 +451,7 @@ def run_doctrine(*, client: local_model.Client, out_dir: Path,
     (out_dir / "doctrine-prompt.md").write_text(prompt, encoding="utf-8")
 
     reply = client.chat([{"role": "user", "content": prompt}],
-                        max_tokens=local_seat.REVIEW_MAX_TOKENS,
+                        max_tokens=local_seat.review_max_tokens(),
                         temperature=local_seat.GRADE_TEMPERATURE)
     (out_dir / "doctrine-reply.md").write_text(reply.text, encoding="utf-8")
     if reply.reasoning:
