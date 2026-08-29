@@ -6,10 +6,12 @@ index of what to type, not how it works.
 
 ## Environment
 
-- Python 3.12. No requirements file in-tree; the suite's actual imports are
-  `pytest pyyaml pillow numpy`. CI installs exactly those. `pytest-xdist` is
-  optional, local, and not in that list — see the parallel-suite section below
-  for what it buys and why CI does not install it.
+- Python 3.12. The suite's actual imports are `pytest pyyaml pillow numpy`,
+  plus `pytest-xdist`. Since 2026-08-29 those five live in
+  `.github/requirements-ci.txt` and all three CI jobs install from it — that
+  file exists so `setup-python`'s pip cache has a key, and nothing outside CI
+  reads it. Locally, `pytest-xdist` is still optional (the push gate falls
+  back to a serial fast lane without it) but CI now runs the parallel arm.
 - Most sim entry points need `PYTHONPATH=.`. Codegen and tools run as
   `.venv/bin/python tools/<x>.py` (Windows: `.venv/Scripts/python`).
 - `tools/` is an implicit namespace package: both `python3 tools/x.py` and
@@ -82,7 +84,8 @@ registers marker names and sets no `addopts`, so a bare `python -m pytest`
 and CI's line behave exactly as before. What was proposed, and is now
 ratified, is the *workflow* — the discipline at the end of this section.
 
-One optional local dependency, deliberately NOT added to CI's install line:
+One local dependency. **Added to CI's install line 2026-08-29** ([USER]
+overturned the refusal recorded at the end of this section):
 
 ```sh
 python -m pip install pytest-xdist      # 3.8.0, pulls execnet 2.1.2
@@ -141,11 +144,15 @@ date-attributed shape the C11 ruling took):
 - **bare `pytest` stays bare.** No `addopts`. Anyone who types the CI line
   gets the CI run.
 
-CI is deliberately untouched. A hosted `ubuntu-latest` runner has 2–4 vCPU, so
-the gain there is the `-n 4` shape (52 s measured here) rather than the `-n 16`
-shape — real, but roughly a third of the local saving, and it would put a
-plugin install on the critical path of the one job that asserts the fresh-clone
-world is sound. That trade is [USER]'s to make, not this branch's.
+**SUPERSEDED 2026-08-29 — [USER] made the trade.** This section used to end
+"CI is deliberately untouched", on the grounds that a 2–4 vCPU runner only
+buys the `-n 4` shape and that xdist would sit on the critical path of the
+fresh-clone job. [USER] asked for the speed-up after watching a
+markdown-only pull request take about five minutes, and CI's `pytest` job now
+runs `-n auto --dist loadscope` over the full suite. Measured on the 16-CPU
+dev box 2026-08-29 at `917e07f`: 4451 passed / 46 skipped / 12 xfailed either
+way, **281.4 s serial → 59.2 s parallel**. No test needed isolating and no
+`serial` marker was added, exactly as the 2026-08-24 measurement predicted.
 
 Two facts this measurement turned up, neither fixed here:
 
@@ -770,4 +777,39 @@ Three jobs, all on `ubuntu-latest`: **(a) `pytest`** — the fresh-clone gate;
 **(b) `lints`** — the softlock lints above, invoked directly; **(c)
 `patch-sentinel`** — advisory, `continue-on-error`, never blocks a merge (a
 runner has no game, so it prints `skipped` by design). Set the `repo` check as
-required on `main` in branch protection ([USER]'s to click).
+required on `main` in branch protection ([USER]'s to click). **Those three job
+names are load-bearing** — they may be required checks, and a renamed job
+reports nothing and blocks every pull request. Rename nothing here.
+
+### Speed pass, 2026-08-29
+
+Three changes, no jobs added or renamed:
+
+1. **`pytest` runs in parallel** — `-n auto --dist loadscope`, the same arm
+   `tools/hooks/push_gate.py` runs, minus the gate's `-m "not battery"`
+   deselection. CI keeps the bands.
+2. **A docs-only fast path.** `tools/ci_changed_paths.py` (with `--self-test`)
+   answers `docs_only=true` only when EVERY changed path is a `.md` file under
+   `docs/current/`, `review/`, or the repo root. Anything else — a card sheet,
+   a `review/qa` JSON, a `.py`, a `.cs`, the workflow itself — is `false`, and
+   so is an empty or unreadable diff (it **fails safe** to the full run). On
+   `true`, the `pytest` job runs only the nine modules that read committed
+   markdown (named in the workflow, audited over a full run) and prints a
+   loud notice saying what it skipped; `patch-sentinel` skips its two steps.
+   The **`lints` job always runs in full** — the register, stamp and
+   namespace gates are lints, and they are the other half of what a markdown
+   edit can break.
+3. **pip cache** — `cache: 'pip'` keyed on `.github/requirements-ci.txt`,
+   which all three jobs install from.
+
+No `paths-ignore` at the trigger level, ever: a trigger-level filter makes a
+job report *nothing* rather than report success, and a required check that
+never reports blocks the pull request forever. That is precisely why the
+docs-only decision lives inside a job that always runs. A `concurrency:` block
+(cancel superseded runs on one branch) is optional and unclaimed.
+
+The blind spot, stated plainly: a docs-only pull request does not run the rest
+of pytest. It does not need to — no markdown under those three trees is read
+by anything else — and the push gate ran the whole fast lane locally before
+the push regardless. If a test starts reading one of those trees, add its
+module to the docs-only list in `repo.yml`.

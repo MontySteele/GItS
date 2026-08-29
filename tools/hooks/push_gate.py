@@ -39,9 +39,11 @@ items are the calibration bands -- **a band that was not run is not a band**.
 
   * `--dist loadscope` keeps a module on one worker, so a module-scoped
     battery fixture is computed once rather than once per worker.
-  * Without `pytest-xdist` (optional, local, deliberately not in CI's install
-    line) the same lane runs serially at ~55 s -- still inside budget, and the
-    note says which arm ran.
+  * Without `pytest-xdist` the same lane runs serially at ~55 s -- still
+    inside budget, and the note says which arm ran. CI installs xdist too as
+    of 2026-08-29 ([USER]) and its `pytest` job runs the SAME arm,
+    `-n auto --dist loadscope`, over the full suite: this gate and the
+    workflow now differ only in the `-m "not battery"` deselection below.
   * A timeout BLOCKS. A gate that waves the call through because it ran out of
     time reads green, which is the one thing it must never do wrongly.
   * Free: `--dry-run`, and anything `deny_dangerous_git.py` is about to refuse
