@@ -2736,3 +2736,86 @@ carried.
 2. Option 2 — a pck scene at the screen edge with our own popup.
 3. Option 1 — recolour today's on-creature gauge. The fallback if the HUD
    anchor turns out to be closed to mods.
+
+### 14.9 As built
+
+`M61` came back as **option 3**, and the co-op question §14.5 flagged came back
+with it: the element is **local-seat only**. Built on branch
+`kurage-memory-card`, stacked on the direction branch. Not deployed and not
+seen live — a blind run held the game.
+
+**Files.**
+
+| File | What it carries |
+|---|---|
+| `klee-mod/KleeCode/Vfx/Prototype/KurageMemoryCard.cs` (new) | the element, the click, the pile ring patch, the teardown patch |
+| `klee-mod/KleeCode/Powers/Prototype/KurageMemory.cs` | `EntryState`, `Affordability`, `RunOutIndex`, `Wire`, `Combat`; `run_out_index` and per-row `state` on the snapshot |
+| `klee-mod/KleeCode/Vfx/TrackedDisplayBridge.cs` | `Registry<TKey, TNode>`; the old `Registry<TKey>` is now its Node2D subclass |
+| `klee-mod/KleeCode/Vfx/GaugeBridge.cs` | the `kokomi_memory` spec deleted; Setup and Refresh call the element |
+| `tier0/engine/effects.py` | `kurage_affordability` / `kurage_run_out_index`, beside `kurage_fire` |
+| `docs/kurage-affordability-vectors.json` (new) | the parity table both suites read |
+| `tier0/tests/test_kurage_affordability.py` (new) | the sim's rule, two properties, and the fixture derivation |
+| `klee-mod/KleeTests/Prototype/KurageMemoryPinTests.cs` | six new pins (four cases, the parity run, two structural) |
+| `understudy/blindplay.py`, `tier0/tests/test_understudy_blindplay.py` | the page section and its lock |
+| `tools/lint_constant_parity.py` | seven new geometry constants declared UNMIRRORED |
+
+**The colours, and all four are the game's own.** Blue is **`StsColors.blue`**
+(`87CEEB`) with **`StsColors.defaultStarCostOutline`** (`175561DC`) behind it.
+The engine has no "affordable" colour to borrow — affordability is drawn in
+`cream` on a cost badge — so `blue` is the closest existing one and it is the
+colour the direction names. Red is **`StsColors.red`** (`FF5555`) with
+**`StsColors.unplayableEnergyCostOutline`** (`501717`), which is literally
+`CardCostHelper.GetStarCostColor`'s InsufficientResources arm and the pair
+`SparkCostBadge` already uses. The empty state draws the count in
+**`StsColors.cream`**: no card, no affordability, so no state colour.
+
+**The refresh path is the strip's, unchanged.** `KurageMemory.RefreshStrip` →
+`GaugeBridge.Refresh(creature)` → `KurageMemoryCard.Refresh(creature)`. The
+element is a screen-space `Control`, not a creature-tracked `Node2D`, so it is
+a call at the end of `Refresh` rather than one more `GaugeSpec` — but it rides
+the same funnels, and there is no polling and no `_Process` anywhere in it.
+Build and teardown are the `NCombatUi.Activate` postfix `GaugeBridge` already
+owned, plus a new `Deactivate` postfix.
+
+**Three decisions taken inside the option, each cheaper than what §14.5
+characterised.**
+
+1. **The anchor is the left edge, vertically centred** — not
+   `RelicInventory.GetBottomOfInventory()` with `RelicsChanged` and
+   `Viewport.SizeChanged` subscriptions. Centring puts it in the middle of the
+   free band by construction and follows a resize through Godot's own anchor
+   propagation, with no base-game type and no signal. The relic-relative
+   pattern remains the known upgrade if the live check finds a collision.
+2. **`PileType.None`** for the queue pile. `Draw` re-sorts by rarity in
+   `OnPileContentsChanged`, which would destroy the one thing the view is for;
+   `Discard` / `Exhaust` would print another pile's explanatory sentence.
+   `None` hides the label and logs one benign *"CardPileScreen has no info
+   text."*.
+3. **A plain `Control.GuiInput` handler** for the click rather than
+   `NClickableControl`. The type did not resolve under any namespace tried with
+   `ilspycmd -t`, and a Godot input event needs no base-game class at all — one
+   fewer internal to be exposed to.
+
+**What could not be pinned headless, stated rather than faked past.**
+
+- **That a partner's screen carries nothing.** The element is a Godot node and
+  no test in `KleeTests` may touch one. What IS pinned is that both entry
+  points resolve the seat through `LocalContext` rather than looping
+  `state.Players` the way the three creature-tracked bridges deliberately do.
+- **Every pixel of it**: the anchor clearing a deep relic column, the thumbnail
+  reading at 104px, the ring being legible, the badge not colliding with the
+  portrait, the pile ring covering an `NCard`'s rect under its own `Scale`.
+- **The pile viewer accepting `PileType.None`** end to end, and the ring
+  disarming when the screen closes.
+
+All of that is `EB-198`'s live acceptance: a `+proto` dev deploy, the four
+states of the mock on a live frame, blind-read.
+
+**Locks, each seen to FAIL before it passed.** Neutering the sim's held branch
+gives `assert ['payable','runs_out','payable'] == [..., 'held']` at index 3;
+the same neuter on the C# side fails three xUnit pins including the parity run;
+replacing `Snapshot`'s call to `Affordability` fails
+`The_element_draws_the_projection_rather_than_re_deriving_it`; swapping
+`LocalContext.GetMe` for `state.Players[0]` fails
+`The_memory_card_resolves_the_local_seat_and_only_the_local_seat`; renaming the
+page's run-out sentence fails the page lock.
