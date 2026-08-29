@@ -15,6 +15,13 @@
   GameDataDir is auto-detected for Windows x86_64, macOS arm64, and macOS
               x86_64. Set it explicitly only for an unusual install layout.
 
+  UsePinnedAssemblies (EB-172) — nothing to set here. Pass
+              `-p:UsePinnedAssemblies=true` on the dotnet command line to build
+              against the OneDrive vault copy of the four assemblies instead of
+              the live game, when Steam has moved the install off the pin and
+              the port is not written yet. Directory.Build.props owns it;
+              `python -m tools.backup_game_assemblies` fills the vault.
+
   macOS example:
     <GameDir>/Users/you/Library/Application Support/Steam/steamapps/common/Slay the Spire 2</GameDir>
     <BaseLibDll>/Users/you/Library/Application Support/Steam/steamapps/workshop/content/2868840/3737335127/BaseLib/BaseLib.dll</BaseLibDll>

@@ -5,6 +5,37 @@
   <Import Project="$(MSBuildThisFileDirectory)local.props"
           Condition="Exists('$(MSBuildThisFileDirectory)local.props')" />
 
+  <!-- EB-172 / R218 C — BUILD AGAINST THE PINNED ASSEMBLIES INSTEAD OF THE
+       LIVE GAME.
+
+         dotnet build ... -p:UsePinnedAssemblies=true
+
+       Every assembly below lives under Steam's control and is replaced by any
+       patch, on any branch, with no warning: on 2026-08-28 the install moved
+       to v0.111.0 mid-sitting and nothing C# compiled until the port landed.
+       `tools/backup_game_assemblies.py` mirrors the four into the OneDrive
+       vault beside game_ref, and this switch points the references there, so
+       a Steam update can stop a live RUN — nothing local fixes that, a run
+       needs the game — but never the BUILD.
+
+       Deliberately opt-in and never a default: a build silently taking a
+       stale local copy while the machine has moved on is the failure this is
+       meant to make VISIBLE, not the one it should cause. This must come
+       BEFORE the GameDir resolution below, whose conditions all test
+       '$(GameDataDir)' == '' and so stand down once this has set it.
+       PinnedAssembliesDir may be overridden for a vault elsewhere. -->
+  <PropertyGroup Condition="'$(UsePinnedAssemblies)' == 'true'">
+    <PinnedAssembliesDir Condition="'$(PinnedAssembliesDir)' == ''">$(USERPROFILE)\OneDrive\GItS-vault\game_assemblies</PinnedAssembliesDir>
+    <GameDataDir>$(PinnedAssembliesDir)</GameDataDir>
+    <BaseLibDll>$(PinnedAssembliesDir)\BaseLib.dll</BaseLibDll>
+  </PropertyGroup>
+
+  <Target Name="RequirePinnedAssemblies" BeforeTargets="PrepareForBuild"
+          Condition="'$(UsePinnedAssemblies)' == 'true'">
+    <Error Condition="!Exists('$(PinnedAssembliesDir)\sts2.dll')"
+           Text="UsePinnedAssemblies=true but no sts2.dll under $(PinnedAssembliesDir). Run: python -m tools.backup_game_assemblies" />
+  </Target>
+
   <!-- Resolve the platform-specific managed assembly directory from GameDir.
        Forward slashes are accepted by MSBuild on Windows and avoid baking a
        Windows-only separator into the shared project. GameDataDir may still
