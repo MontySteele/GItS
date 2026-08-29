@@ -1,0 +1,170 @@
+# KLEE SLICE 1, ROUND 2. Identical to the round-1 file of the same name in
+# `understudy/turns/klee-slice-1/`, on the same pinned seed and the same live
+# body, with one thing changed: the turn id. Seeds are per GAME BUILD and the
+# build has not moved, so re-staging on the same seed regenerates the same
+# encounter and the pair stays a pair.
+#
+# WHY THE ROUND EXISTS, and it is not the cards. Round 1's twelve graded lines
+# were read off a page that showed EVERY Attack at `Cost: 0` while Klee's rule
+# frees one, and ten of the twelve were then refused live with
+# `EnergyCostTooHigh`. The reviewer's closing said what that cost: the defect
+# "prevents conclusions about actual line closeness, affordability, or the
+# magnitude of each prototype's opportunity cost." Three instrument fixes
+# landed before this round -- the page now states Spark's own rule and each
+# card's printed cost, the observed board carries the bank, and the Burst
+# assumption no longer double-counts the tag the face prints -- and NOTHING
+# about any card, any board or any number was touched.
+#
+# KLEE SLICE 1 (R213 E2). One half of a MATCHED PAIR.
+#
+# HOW TO READ A PAIR. The files of a pair declare the SAME board -- same HP,
+# same Block, same energy, same Spark bank, same enemy, same alternatives in
+# hand -- and differ in EXACTLY ONE CARD: the one under test. If the boards
+# differed anywhere else, a change in how the turn plays could be attributed
+# to the staging instead of to the card.
+#
+# THE SEED IS PART OF THE PAIR. The encounter is GENERATED, so the first half
+# staged DISCOVERS a seed; every other half of that pair must then be staged
+# with `--seed <that run_seed>` or the halves are two different fights.
+# MANIFEST.md carries the seed, and it is pinned in this file as well.
+#
+# THE TURN ID IS DELIBERATELY OPAQUE. It is printed into the design-blind
+# packet the grader reads, so a word like "priced" or "burst" inside an id
+# would tell the grader which arm they were holding. The FILENAME names the
+# arm, because only the tooling and the packet-writer read filenames.
+# MANIFEST.md is the map between them.
+#
+# NOTHING HERE IS A CLAIM THAT ANY ARM IS BETTER. The funnel refuses turns and
+# never rates them (R213's first guard), and the designer of these rows may
+# not grade them.
+#
+# THE QUESTION THIS SLICE ASKS (R213 E2): "Sparks mean free Attack" is
+# reopened as likely upstream of Klee's Attack-spam identity. The engine puts
+# it more sharply than the playtest did -- `combat.card_cost` zeroes ANY Attack
+# at the threshold and `combat.play_card` debits the bank for it, both
+# unconditionally -- so the bank has one destination and it is chosen for the
+# player. Each pair below sets a shipped card that leaves the bank to the rule
+# against a prototype that CHARGES the bank instead.
+#
+# EVERY BOARD BANKS EXACTLY THREE SPARKS, WHICH IS THE WHOLE POINT. Three is
+# the free Attack's threshold and every prototype's price, so on every board
+# the bank buys exactly one of two things and the player must pick. A bank of
+# four or more would let both happen and there would be no question left.
+#
+# EVERY BOARD TELEGRAPHS AN ATTACK. Defence is worth nothing against any other
+# intent, and what the bank is worth against an incoming hit is half the
+# question.
+#
+# NO LINE ON ANY BOARD IS LETHAL. Each enemy's HP is written above the largest
+# total damage its board can produce at true values, so "just kill it" is never
+# the answer that ends the turn. The arithmetic is per board in MANIFEST.md.
+#
+# ONE FLAT-BLOCK COMPETITOR, deliberately: Duck and Cover (5 Block for 1) is in
+# hand on every board, because a Spark payoff that nothing competes with is not
+# a decision. It is the ONLY standalone Block here -- a second would make
+# "defend" the answer by arithmetic rather than by choice.
+#
+# RAPID FIRE IS ON THREE BOARDS AND IT IS THE CONTROL, not filler. It is a
+# 2-cost Attack, so at a bank of three the automatic rule makes it FREE and
+# eats the bank -- which is exactly the alternative use of the bank that every
+# prototype here is competing against. Without a paid Attack on the board the
+# free-Attack rule has nothing to spend itself on and the question cannot be
+# asked at all.
+#
+# ARM 2: CAN THE BANK BUY VELOCITY INSTEAD OF AN ATTACK? (R213 E2.)
+#
+# WHY THIS BOARD. TWO energy, a bank of three, and the paid Attack that the
+# rule would otherwise take the bank for. The card under test is the only
+# thing that moves:
+#
+#   SHIPPED: Eager to Help READS the bank, keeps it, and pays 2 cards for the
+#     bank merely existing -- the purest "watch it rise" face on the sheet.
+#   PROTOTYPE: the same draw is BOUGHT, at the free Attack's own price, so
+#     taking it means Rapid Fire is not free this turn.
+#
+# WHAT THIS BOARD'S CLOSENESS READING CANNOT SEE, disclosed rather than buried:
+# the tier0 mirror has NO DRAW PILE field, so in the mirror both halves draw
+# from an empty pile and every draw is worth zero. The error runs ONE WAY --
+# the arm is UNDER-valued, so it is less likely to dominate, and dominance is
+# the only thing the falsifier refuses. The LIVE board has a real deck, so the
+# blind packet is unaffected; it is the mirror alone that is blind here.
+
+id: klee-slice1-r2-t03
+character: KLEEMOD-KLEE
+
+# The pair's seed, discovered by staging the shipped half and then
+# pinned onto BOTH halves, so a re-stage reproduces the same fight.
+seed: LUMNB3D9GFKD
+
+exact_hand: true
+
+notes: |
+  42/62 HP, no Block, 2 energy, a Spark bank of 3, and
+  one enemy at 40 HP telegraphing an attack.
+
+# STAGING RULE, for the operator and not for the grader: the telegraph is
+# generated with the encounter, and defence is worth nothing against an intent
+# that is not an attack. If the live telegraph is not an attack, re-roll the
+# seed and stage again rather than recording the divergence.
+#
+# The list below is folded VERBATIM into the design-blind packet, so it carries
+# mechanical facts about the staging ONLY -- never why the board was built,
+# never which card is being looked at. The rationale lives in the header above,
+# where no grader reads.
+assumptions:
+  - "The hand is EXACTLY the list below and nothing else. The hand the
+     game dealt is emptied before these cards are given, and a packet
+     whose live hand is not this list is refused rather than written."
+  - "The encounter is GENERATED. This file can write the enemy's HP and
+     Block and cannot write its INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below
+     declares a telegraphed ATTACK as the falsifier's input. If the live
+     intent differs, the closeness reading is a reading of the DECLARED
+     board and the packet is a picture of the LIVE one; they are two
+     records, not one."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "The Spark bank is written to 3 through SPARK_POWER, which is how the
+     live game holds Sparks. At 3 Sparks the next Attack played costs 0
+     and consumes all 3."
+  - "The player has no Strength and the enemy carries no aura, Vulnerable
+     or Weak. Every Klee attack applies Pyro, and a reaction on top of a
+     hit would move every number the falsifier scores."
+
+staging:
+  - give: {card: KLEEMOD-EAGER_TO_HELP, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-KABOOM, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-RAPID_FIRE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-DUCK_AND_COVER, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 42}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 2}
+  - set_power: {who: player, name: SPARK_POWER, amount: 3}
+  - set_hp: {who: first, amount: 40}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+# The tier0 mirror. Read ONLY by `closeness`; never by the packet,
+# which reads the live game. The parser refuses this file if the hand
+# here and the hand staged above are not the same multiset of cards.
+board:
+  character: klee
+  pilot: generic
+  hp: 42
+  max_hp: 62
+  block: 0
+  energy: 2
+  turn: 3
+  resources:
+    sparks: 3
+  hand:
+    - eager_to_help
+    - kaboom
+    - rapid_fire
+    - duck_and_cover
+  enemies:
+    - name: "Nibbit"
+      hp: 40
+      max_hp: 43
+      block: 0
+      intent: {kind: attack, amount: 12}
