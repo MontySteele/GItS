@@ -482,6 +482,17 @@ def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
     # human at the mouse, so modelling one there would hand Havoc/Cascade a
     # judgement the mod never gives them -- the same argument that put the roll
     # here in the first place.
+    # QUARANTINED (C.KURAGE_MEMORY), and FIRST because it is an override of
+    # the forced-random branch below rather than a competitor to it. PICK E1
+    # says the jellyfish's replay "follows her lead" -- the enemy Kokomi's own
+    # last attack aimed at -- which is the one auto-play in the engine that is
+    # deliberately NOT random, because the whole defence of this design is
+    # that the strip can SHOW the target before it fires (D4). `kurage_aim` is
+    # non-None only for the duration of a memory auto-play, and only under
+    # KURAGE_TARGET_RULE == "follow_her_last_attack"; E2 leaves it None and
+    # falls through to the shipped roll.
+    if state.kurage_aim is not None and _card_aims_at_enemy(card):
+        return state.kurage_aim
     if state.force_random_targeting and _card_aims_at_enemy(card):
         return state.rng.choice(living)
     # EB-139 / R211: the aura-aware bind, for MANUALLY-MODELLED play only. If
@@ -3425,11 +3436,208 @@ def _op_summon_kurage(state: CombatState, fx: dict, card: Card) -> None:
     path. Duration is the only state; the pulse reads the Charge bank live
     at fire time, so a summon made at Charge 0 still grows all fight.
     """
-    turns = _amount(state, fx.get("amount", C.KURAGE_DURATION))
     p = state.player
+    if C.KURAGE_MEMORY and p.character_id == "kokomi":
+        # QUARANTINED. Under the memory rule the jellyfish is PERSISTENT for
+        # the fight: summoned once, never expiring, so `kurage_summon` stops
+        # being a countdown and becomes a presence bit (1). The proposal's
+        # §2 argument for this is not taste -- a memory queue that evaporates
+        # when a 1-turn summon lapses is a resource the player loses by not
+        # re-casting a basic, which is a D4 invisible-feed defect, and
+        # re-casting a basic every turn to keep your own bank alive is not a
+        # decision.
+        #
+        # TWO CONSEQUENCES, said out loud rather than discovered later:
+        # (1) KURAGE_DURATION is not read here, so the UPGRADE's `kurage_turns
+        #     +1` is INERT under the flag -- an upgraded Bake-Kurage is
+        #     mechanically identical to a base one, and giving the upgrade a
+        #     second job is a re-authoring question (§4), not a number;
+        # (2) a second copy of the card is likewise a no-op, and so is the
+        #     Garment's Tamakushi Casket refresh link, which `max()`es a 1
+        #     against a 1. Both retire with the duration.
+        p.powers["kurage_summon"] = 1
+        state.emit("summon_kurage", turns=1, persistent=True)
+        return
+    turns = _amount(state, fx.get("amount", C.KURAGE_DURATION))
     p.powers["kurage_summon"] = max(p.powers.get("kurage_summon", 0), turns)
     KNOB_READS["KURAGE_DURATION"] = KNOB_READS.get("KURAGE_DURATION", 0) + 1
     state.emit("summon_kurage", turns=p.powers["kurage_summon"])
+
+
+# --------------------------------------------------------------------------
+# THE KURAGE'S MEMORY (QUARANTINED, C.KURAGE_MEMORY). Everything below is
+# unreachable with the flag off -- each entry point returns on the flag
+# before touching anything. review/active/kokomi-kurage-memory-2026-08-29.md
+# --------------------------------------------------------------------------
+
+def _kokomi_memory_live(state: CombatState) -> bool:
+    """The one gate. Flag on, and the player IS Kokomi.
+
+    The character test is not decoration: the queue, the fuel narrowing and
+    the pulse rewrite are all `for Kokomi only` by construction, and a
+    Companion-playing Furina deck must not start banking a memory."""
+    return bool(C.KURAGE_MEMORY and state.player.character_id == "kokomi")
+
+
+def note_kurage_play(state: CombatState, card: Card) -> None:
+    """Called from `combat._finish_play`, i.e. at the ONE site both a manual
+    play and an auto-play pass through. Does the two pieces of bookkeeping
+    the memory rule needs, and carries BOTH recursion rules.
+
+    RECURSION RULE 1 -- the jellyfish's own plays never enter the memory.
+    Without it the queue is not self-bounding at all: a replayed Companion
+    would satisfy "Kokomi plays a Companion card", append another copy, and
+    the queue could never shrink. The proposal's §2 claimed self-bounding and
+    did not state the exclusion; the doctrine seat (§7) found the hole, and
+    this line is the answer.
+
+    RECURSION RULE 2 -- an auto-played card is not "the last card Kokomi
+    played", so it cannot determine or overwrite the pulse ahead of her own
+    turn. That is the seat's second finding (the PICK B interaction §5 did
+    not see): under B1 the replay happens at turn START, so without this the
+    jellyfish would set its own pulse key before the player has acted.
+
+    Both rules are the same one line, `state.kurage_autoplaying`, and they
+    are tested separately because they are two different claims.
+    """
+    if not _kokomi_memory_live(state) or state.kurage_autoplaying:
+        return
+    # The pulse key. Set for EVERY card she plays, Companion or not: the
+    # branch is on card TYPE, and a Companion is a Skill like any other.
+    state.kurage_last_card_type = card.type
+    if card.is_companion:
+        if not C.KURAGE_QUEUE_CAP or len(state.kurage_queue) < C.KURAGE_QUEUE_CAP:
+            state.kurage_queue.append(card.id)
+            state.emit("kurage_remember", card=card.id,
+                       queued=len(state.kurage_queue))
+        else:
+            state.emit("kurage_memory_full", card=card.id,
+                       queued=len(state.kurage_queue))
+    elif C.KURAGE_FUEL_MODE == "play_or_exhaust" and not card.is_junk:
+        # PICK A2 ONLY (not recommended, implemented so the arm can be
+        # swept). The same rate as the funnel, on the PLAY as well as the
+        # Exhaust. Gated on the relic hook for the same reason the funnel is:
+        # a player without the Pearl has no Charge engine at all.
+        if "tamakushi_casket" in state.player.relic_hooks:
+            resources.gain_charge(state, C.CHARGE_PER_EXHAUST, "play")
+
+
+def kurage_target(state: CombatState) -> Optional[Enemy]:
+    """PICK E. The enemy an auto-played attack (and the new pulse) aims at.
+
+    E1 `follow_her_last_attack`: the enemy Kokomi's own last attack was bound
+    to; if that enemy is dead, or she has attacked nobody yet, the enemy with
+    the MOST current HP. "Most HP" rather than tier0's usual lowest-HP aim is
+    deliberate and is the proposal's wording -- a free replay thrown at the
+    body that is already nearly dead is the least legible thing it could do.
+
+    E2 `random`: return None, which leaves `bind_card_aim`'s shipped
+    forced-random roll in charge. Returning None rather than rolling here
+    keeps the RNG draw on exactly the stream and at exactly the moment the
+    shipped free-play path already draws it.
+    """
+    living = state.living_enemies
+    if not living or C.KURAGE_TARGET_RULE != "follow_her_last_attack":
+        return None
+    led = state.kurage_last_attack_target
+    if led is not None and led.alive:
+        return led
+    return max(living, key=lambda e: e.hp)
+
+
+def kurage_fire(state: CombatState) -> bool:
+    """The threshold fire: the jellyfish plays the front of its memory for 0
+    energy and the bank pays KURAGE_THRESHOLD. At most ONCE per turn.
+
+    ONE CARD PER TURN, MAXIMUM, is the clause that stops a large bank from
+    becoming a burst-damage multiplier by another name; surplus Charge stays
+    banked toward the next turn.
+
+    PICK D1 (`hold`): with an EMPTY memory at the threshold nothing fires and
+    NOTHING IS PAID -- the queue is checked before the spend, so an empty
+    queue costs tempo and never Charge.
+
+    The play itself goes through `_free_play` -> `combat.resolve_free_play`,
+    which is the ONE way an effect may play a card. It is not a shortcut: the
+    replay fires the real card-played hooks, routes to its own result pile,
+    and counts toward `cards_played_this_turn`, which is what makes a
+    remembered Companion's own Exhaust behave the way the played one did.
+    """
+    p = state.player
+    if not _kokomi_memory_live(state) or state.kurage_fired_this_turn:
+        return False
+    if not p.powers.get("kurage_summon", 0):
+        # No jellyfish on the field, no memory to fire from. The queue still
+        # FILLS without one (see note_kurage_play): the memory is of what she
+        # played, and the summon is what acts on it.
+        return False
+    if p.charge < C.KURAGE_THRESHOLD:
+        return False
+    if not state.kurage_queue:
+        state.emit("kurage_memory_empty", bank=p.charge,
+                   threshold=C.KURAGE_THRESHOLD)
+        return False
+    card_id = state.kurage_queue[0]
+    if not resources.spend_charge(state, C.KURAGE_THRESHOLD,
+                                  source="kurage_memory", card=card_id):
+        return False                      # cannot happen; the bank was checked
+    state.kurage_queue.pop(0)
+    state.kurage_fired_this_turn = True
+    from tier0.content import loader                # late import (cycle)
+    token = loader.get_card(card_id)
+    state.emit("kurage_memory_fire", card=card_id, bank=p.charge,
+               remaining=len(state.kurage_queue))
+    prev_auto, prev_aim = state.kurage_autoplaying, state.kurage_aim
+    state.kurage_autoplaying = True
+    state.kurage_aim = kurage_target(state)
+    try:
+        _free_play(state, token, force_exhaust=False)
+    finally:
+        state.kurage_autoplaying = prev_auto
+        state.kurage_aim = prev_aim
+    return True
+
+
+def kurage_memory_pulse(state: CombatState) -> None:
+    """The rewritten turn-end pulse: keyed to the TYPE of the last card
+    Kokomi played this turn, and reading the bank not at all.
+
+    The per-Charge term is gone, and with it `kurage_amp` /
+    `before_sun_and_moon`, whose only body was raising that multiplier. That
+    constant is the whole "100+ hit" the playtest named and the reason the
+    shipped bank can only be watched.
+
+    NO CARD PLAYED -> NO PULSE. §2 states that outright ("a price on a wasted
+    turn rather than a free tick"), so a turn where she played nothing gets
+    an event and no effect.
+    """
+    p = state.player
+    kind = state.kurage_last_card_type
+    target = kurage_target(state)
+    if not kind:
+        state.emit("kurage_pulse", amount=0, kind="none", landed=False,
+                   memory=True)
+        return
+    if kind == "attack":
+        state.emit("kurage_pulse", amount=C.KURAGE_PULSE_BASE, kind=kind,
+                   landed=bool(state.living_enemies), memory=True)
+        if target is not None:
+            deal_damage_to_enemy(state, target, C.KURAGE_PULSE_BASE,
+                                 element="hydro", source="companion")
+    elif kind == "power":
+        # PICK C1: pure Hydro application, no number. Nothing lands on an
+        # empty board, and that is the honest read -- an aura needs a body.
+        state.emit("kurage_pulse", amount=0, kind=kind,
+                   landed=target is not None, memory=True)
+        if target is not None:
+            reactions.apply_aura(state, target, "hydro", source="kurage_pulse")
+    else:                                    # skill (and every other type)
+        blk = C.KURAGE_MEMORY_PULSE_BLOCK + p.powers.get("kurage_ward", 0)
+        state.emit("kurage_pulse", amount=blk, kind=kind, landed=True,
+                   memory=True)
+        if blk:
+            p.block += blk
+            state.emit("block", amount=blk)
 
 
 def _op_conscript(state: CombatState, fx: dict, card: Card) -> None:
@@ -3679,6 +3887,16 @@ def resolve_card(state: CombatState, card: Card) -> None:
     # instead of the last card's corpse.
     state.card_aim = bind_card_aim(state, card)
     state.card_aim_bound = True
+    # QUARANTINED (C.KURAGE_MEMORY): PICK E1's "her lead", recorded at the
+    # bind because the bind IS what "the enemy her attack hit" means under
+    # R210 -- one creature for the whole play, picked before any op runs.
+    # `kurage_autoplaying` excludes the jellyfish's own replay: the memory
+    # follows KOKOMI, not itself.
+    if (C.KURAGE_MEMORY and card.type == "attack"
+            and state.card_aim is not None
+            and not state.kurage_autoplaying
+            and state.player.character_id == "kokomi"):
+        state.kurage_last_attack_target = state.card_aim
     try:
         _resolve_card_bound(state, card)
     finally:
@@ -4133,7 +4351,15 @@ def player_turn_end_triggers(state: CombatState) -> None:
             deal_damage_to_enemy(state, enemy, C.OZ_DMG,
                                  element="electro", source="companion")
         p.powers["oz_summon"] -= 1
-    if p.powers.get("kurage_summon", 0):                # Kokomi (v0.4 §1)
+    if p.powers.get("kurage_summon", 0) and _kokomi_memory_live(state):
+        # QUARANTINED (C.KURAGE_MEMORY). The rewritten jellyfish: no duration
+        # decrement (it is persistent), no bank read, and PICK B2's fire rides
+        # here when the timing constant says so -- ahead of the pulse, so the
+        # free card is on the board before the turn's last effect resolves.
+        if C.KURAGE_FIRE_TIMING == "turn_end":
+            kurage_fire(state)
+        kurage_memory_pulse(state)
+    elif p.powers.get("kurage_summon", 0):              # Kokomi (v0.4 §1)
         # The jellyfish's turn-end pulse: a little damage that READS the
         # Charge bank (never spends it), hydro application, and Block for
         # the party. This is where O4 puts the periodic output that v0.3
