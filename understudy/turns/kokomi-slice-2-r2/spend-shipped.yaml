@@ -1,0 +1,157 @@
+# KOKOMI SLICE 2, ROUND 2 (R217 F, executing R213 E1). One half of a MATCHED
+# PAIR, and this round exists only to answer the two RETURNs the first round
+# left. The two arms that ADVANCED are not re-run and nothing else moved.
+#
+# HOW TO READ A PAIR. The files of a pair declare the SAME board -- same HP,
+# same Block, same energy, same Charge, same enemy, same alternatives in hand
+# -- and differ in EXACTLY ONE CARD: the one under test. If the boards
+# differed anywhere else, a change in how the turn plays could be attributed
+# to the staging instead of to the card.
+#
+# THE SEED IS PART OF THE PAIR, AND THIS FILE HAS NONE YET. The encounter is
+# GENERATED, so the first half staged DISCOVERS a seed; every other half of
+# that pair must then be staged with `--seed <that run_seed>` or the halves
+# are two different fights. Round 1's seeds do NOT carry here: a re-set board
+# is a new roll, and R95 plus round 4 of slice 1 already recorded that a
+# pinned seed only reproduces within one game build. Both halves read
+# `staged: pending` until an operator with the live game pins them.
+#
+# THE TURN ID IS DELIBERATELY OPAQUE. It is printed into the design-blind
+# packet the grader reads, so a word like "spend" or "formation" inside an id
+# would tell the grader which arm they were holding. The FILENAME names the
+# arm, because only the tooling and the packet-writer read filenames.
+# MANIFEST.md is the map between them.
+#
+# NOTHING HERE IS A CLAIM THAT ANY ARM IS BETTER. The funnel refuses turns and
+# never rates them (R213's first guard), and the designer of these rows may
+# not grade them.
+#
+# ---------------------------------------------------------------------------
+# ARM 1: DOES THE BANK BUY ANYTHING NOW? (R213 E1.)
+#
+# WHY THIS BOARD CHANGED. Round 1's pair read RETURNED this arm in these
+# words: "Only the numbers changed: both halves presented the same
+# damage-versus-Block allocation, with the prototype simply offering more
+# damage while consuming Charge." The repair it named is the BOARD, not the
+# card: "include another current-turn Charge use or reader so spending six
+# Charge creates an observable sacrifice rather than merely a future
+# hypothetical."
+#
+# So the energy went from TWO to THREE, and that is the whole repair. At two
+# energy the board's other Charge reader -- Gyorin Formation, 2 energy, Block
+# that READS the bank at one per two Charge without spending it -- was the
+# WHOLE turn, so the card under test and the reader could never be played
+# together and the bank's remaining value was always a next-turn question. At
+# three energy they are played on the SAME turn, and the price lands where the
+# grader can see it:
+#
+#   PROTOTYPE half, bank 8. Reader first, then the spender: Gyorin reads a
+#     bank of 8 for 6 + 4 = 10 Block, then the spend takes the bank to 2.
+#     Spender first, then the reader: the spend takes the bank to 2 and Gyorin
+#     then reads it for 6 + 1 = 7 Block. Same two cards, same three energy,
+#     THREE BLOCK apart -- an observable sacrifice, this turn.
+#   SHIPPED half, bank 8. The reader and the reader-Block never contend,
+#     because neither one touches the bank: 9 damage and 10 Block in either
+#     order, and the bank is still 8 at end of turn.
+#
+# That difference IS the arm. It is the same structure the round's other
+# reviewer sentence praised on the arm that ADVANCED -- "sequencing between a
+# Charge reader and spender" with "a concrete three-damage sequencing
+# penalty" -- asked here of a spender that pays for a flat hit instead of a
+# threshold.
+#
+# ONLY SHIPPED CARDS BESIDE THE ARM. Gyorin Formation, Coral Guard and Water's
+# Edge are all shipped Kokomi rows. A second prototype on the board would
+# confound the attribution the pair exists to make.
+#
+# ONE FLAT-BLOCK COMPETITOR, deliberately: Coral Guard (5 Block for 1) is in
+# hand on both halves, because a Charge payoff that nothing competes with is
+# not a decision. It is the ONLY standalone Block here -- a second one would
+# make "defend" the answer by arithmetic rather than by choice.
+#
+# EVERY BOARD TELEGRAPHS AN ATTACK. Defence is worth nothing against any other
+# intent, and what the bank is worth against an incoming hit is half the
+# question. The telegraph is 12 and the player is at 30, so three Block is
+# three hit points and not a rounding error.
+#
+# NO LINE IS LETHAL. The enemy's HP sits above the largest total damage this
+# board can produce at true values; the arithmetic is written per board in
+# MANIFEST.md.
+
+id: kokomi-slice2-r2-t01
+character: KLEEMOD-KOKOMI
+
+# staged: pending. No seed is pinned: this board has never been staged, and a
+# re-set board is a fresh roll. The operator discovers the seed on THIS half
+# and pins it onto both.
+
+exact_hand: true
+
+notes: |
+  30/70 HP, no Block, 3 energy, a Charge bank of 8, and one
+  enemy at 24 HP telegraphing an attack.
+
+# STAGING RULE, for the operator and not for the grader: the telegraph is
+# generated with the encounter, and defence is worth nothing against an intent
+# that is not an attack. If the live telegraph is not an attack, re-roll the
+# seed and stage again rather than recording the divergence.
+#
+# The list below is folded VERBATIM into the design-blind packet, so it carries
+# mechanical facts about the staging ONLY -- never why the board was built,
+# never which card is being looked at. The rationale lives in the header above,
+# where no grader reads.
+assumptions:
+  - "The hand is EXACTLY the list below and nothing else. The hand the
+     game dealt is emptied before these cards are given, and a packet
+     whose live hand is not this list is refused rather than written."
+  - "The encounter is GENERATED. This file can write the enemy's HP and
+     Block and cannot write its INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below
+     declares a telegraphed ATTACK as the falsifier's input. If the live
+     intent differs, the closeness reading is a reading of the DECLARED
+     board and the packet is a picture of the LIVE one; they are two
+     records, not one."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "Charge is written to 8 through the registered resource."
+  - "The player has no Strength and the enemy carries no aura, Vulnerable
+     or Weak. A reaction on top of a hit would move every number the
+     falsifier scores."
+
+staging:
+  - give: {card: KLEEMOD-ALL_STREAMS_FLOW, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-CORAL_GUARD, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-WATERS_EDGE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-GYORIN_FORMATION, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 30}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 3}
+  - set_resource: {name: KLEEMOD_CHARGE, amount: 8}
+  - set_hp: {who: first, amount: 24}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+# The tier0 mirror. Read ONLY by `closeness`; never by the packet,
+# which reads the live game. The parser refuses this file if the hand
+# here and the hand staged above are not the same multiset of cards.
+board:
+  character: kokomi
+  pilot: generic
+  hp: 30
+  max_hp: 70
+  block: 0
+  energy: 3
+  turn: 3
+  resources:
+    charge: 8
+  hand:
+    - all_streams_flow
+    - coral_guard
+    - waters_edge
+    - gyorin_formation
+  enemies:
+    - name: "Nibbit"
+      hp: 24
+      max_hp: 42
+      block: 0
+      intent: {kind: attack, amount: 12}
