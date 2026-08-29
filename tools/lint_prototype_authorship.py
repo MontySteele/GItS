@@ -37,16 +37,22 @@ row -- and the only way to see it is to join the form's grader against the
 sheet's author list, which is a join no person does by eye across four rounds
 of records.
 
-THE DEBT LIST IS THE FINDING, NOT AN EXEMPTION. Klee slice 1's rounds 1 and 2
-graded Rummage and Slow Burn with the family that re-wrote Rummage's text and
-picked Slow Burn's number. Those four records ARE the defect this row was
-opened for, they are already recorded as provisional in the slice packet's
-section 11, and deleting them would be rewriting a published measurement
-record (R101b). So they are named here, with the reason, and the lint is green
-today and BITES on the next one. The set can only shrink: an entry that has
-stopped tripping FAILS, exactly as `lint_register_shape`'s and
-`lint_face_defects`' debt sets do, so nobody can leave a stale exemption
-behind after the round is re-run.
+THE DEBT LIST IS THE FINDING, NOT AN EXEMPTION, AND IT IS NOW EMPTY. It opened
+with four entries -- Klee slice 1's rounds 1 and 2 graded Rummage and Slow Burn
+with the family that re-wrote Rummage's text and picked Slow Burn's number --
+and Klee ROUND 3 paid all four off on 2026-08-29 by re-deriving both rows from
+the seat's named clause and setting each `authored_by:` back to `[claude]`.
+With no contributing family left on either row, check (2) stops finding those
+four turns at all, and the debt set's own staleness rule then REQUIRED their
+deletion: an entry that has stopped tripping FAILS, exactly as
+`lint_register_shape`'s and `lint_face_defects`' debt sets do, and
+`tier0/tests/test_prototype_authorship.py` pins `offenders == set(DEBT)`.
+
+Deleting the entries is NOT deleting the records (R101b): rounds 1 and 2's
+forms, verdicts and packets all stand exactly as published, and the packet's
+sections 11 and 12 still say those outcomes were provisional. What left is the
+lint's carry-list, which was only ever a statement about what trips the lint
+TODAY. The set can only shrink, and it has shrunk to zero.
 
 Run: python tools/lint_prototype_authorship.py
      python tools/lint_prototype_authorship.py --self-test   # prove it bites
@@ -71,23 +77,15 @@ QA_DIR = REPO / "review" / "qa"
 
 # Turn ids whose committed grades break rule (2) TODAY, each with the reason
 # it is carried rather than fixed. Curated by hand; exact, not a prefix rule.
-DEBT: dict[str, str] = {
-    "klee-slice1-t04":
-        "Klee slice 1 round 1, Rummage (`proto_spark_priced_draw`): the seat "
-        "re-authored the card's text and its family then graded the turn. "
-        "Provisional; Klee round 3 re-authors the arm. Packet section 11.",
-    "klee-slice1-t06":
-        "Klee slice 1 round 1, Slow Burn (`proto_spark_burst_conversion`): "
-        "the seat chose the printed 10 and its family then graded the turn. "
-        "Provisional; Klee round 3 re-authors the arm. Packet section 11.",
-    "klee-slice1-r2-t04":
-        "Klee slice 1 round 2, Rummage. Same defect as round 1, re-run before "
-        "this door existed. Provisional; Klee round 3 re-authors the arm.",
-    "klee-slice1-r2-t06":
-        "Klee slice 1 round 2, Slow Burn. Same defect as round 1, re-run "
-        "before this door existed. Provisional; Klee round 3 re-authors the "
-        "arm.",
-}
+#
+# EMPTY since Klee round 3 (2026-08-29). The four entries it opened with --
+# `klee-slice1-t04`/`t06` and `klee-slice1-r2-t04`/`t06` -- describe grades
+# that are now SUPERSEDED: both rows were re-derived from the seat's clause
+# Claude-side and their `authored_by:` is `[claude]` again, so no contributing
+# family is recorded on either and check (2) no longer names those turns. The
+# staleness rule above then forced the deletion. See the module docstring for
+# why that is not an R101b rewrite.
+DEBT: dict[str, str] = {}
 
 
 def surface_findings(sheet: Path | None = None) -> list[str]:

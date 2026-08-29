@@ -32,11 +32,29 @@ from understudy import authorship, seat
 
 REPO = Path(__file__).resolve().parents[2]
 
-# Two REAL turns from Klee slice 1, and the difference between them is the
-# whole rule: t02's row is Claude's alone; t04's row is Rummage, whose text
-# the seat re-wrote.
+# Two REAL turns from Klee slice 1. t02's row has always been Claude's alone;
+# t04's row is Rummage, whose text the seat re-wrote in round 1.
+#
+# SINCE KLEE ROUND 3 (2026-08-29) THE SURFACE HOLDS NO `gpt`-AUTHORED ROW AT
+# ALL: Rummage and Slow Burn were re-derived Claude-side from the seat's named
+# clause and both read `authored_by: [claude]` again. So the refusal fixtures
+# below can no longer be driven off the shipped sheet, and they monkeypatch
+# `authorship.SURFACE` to a one-row sheet that puts `gpt` back on the row this
+# real turn carries. The TURN is still real and the CLI path is still the whole
+# path -- only the provenance the sheet records is supplied by the fixture.
 CLEAN_TURN = "klee-slice1-t02"
 AUTHORED_TURN = "klee-slice1-t04"
+AUTHORED_TURN_ROW = "proto_spark_priced_draw"
+
+
+def _sheet_with_a_gpt_authored_row(tmp_path, monkeypatch):
+    """Put `gpt` back on `AUTHORED_TURN`'s row, for the refusal fixtures."""
+    sheet = tmp_path / "surface-with-a-gpt-row.yaml"
+    sheet.write_text(yaml.safe_dump(
+        [{"id": AUTHORED_TURN_ROW, "authored_by": ["claude", "gpt"]}]),
+        encoding="utf-8")
+    monkeypatch.setattr(authorship, "SURFACE", sheet)
+    return sheet
 
 
 # ------------------------------------------------------------ the schema ---
@@ -49,13 +67,24 @@ def test_every_shipped_row_records_a_valid_authored_by():
         assert not authorship.field_findings(row), row.get("id")
 
 
-def test_the_klee_rows_the_seat_touched_name_the_gpt_family():
-    """The honest fill, and the reason the row exists. Rummage's text and
-    Slow Burn's number were the seat's; Second Helping's were not."""
+def test_the_klee_rows_are_claude_authored_again_after_round_three():
+    """Rummage's text and Slow Burn's number WERE the seat's, and rounds 1 and
+    2 recorded that honestly. Klee round 3 re-derived both from the clause the
+    seat named, discarded its text and its number, and set the provenance back
+    -- so all three Klee slice-1 rows are Claude's alone."""
     known = authorship.rows_authorship()
-    assert known["proto_spark_priced_draw"] == ["claude", "gpt"]
-    assert known["proto_spark_burst_conversion"] == ["claude", "gpt"]
+    assert known["proto_spark_priced_draw"] == ["claude"]
+    assert known["proto_spark_burst_conversion"] == ["claude"]
     assert known["proto_spark_priced_strike"] == ["claude"]
+
+
+def test_no_shipped_row_records_a_contributing_family():
+    """The state round 3 restored, asserted over the WHOLE surface rather than
+    three ids: `claude` authors, and nothing else is recorded as having
+    written a row. A future slice that accepts a seat's text will fail here,
+    which is the point -- it must be a deliberate edit, not a drift."""
+    for rid, families in authorship.rows_authorship().items():
+        assert families == [authorship.AUTHOR_FAMILY], rid
 
 
 @pytest.mark.parametrize("row", [
@@ -162,10 +191,16 @@ def test_both_declarations_are_read(tmp_path):
 
 # ------------------------------------------------------- `seat grade` -----
 
-def test_a_gpt_authored_row_refuses_the_gpt_seat(tmp_path, capsys):
+def test_a_gpt_authored_row_refuses_the_gpt_seat(tmp_path, capsys,
+                                                 monkeypatch):
     """THE RED FIXTURE. No network and no codex: the refusal lands before the
     binary is even located, which is also why `--dry-run` cannot get past it.
+
+    The provenance comes from a fixture sheet since round 3 emptied the real
+    surface of `gpt`-authored rows; the turn, the CLI and the refusal path are
+    the shipped ones.
     """
+    _sheet_with_a_gpt_authored_row(tmp_path, monkeypatch)
     rc = seat.main(["grade", AUTHORED_TURN, "--dry-run",
                     "--log-root", str(tmp_path)])
     assert rc == 1
@@ -251,9 +286,12 @@ def test_seat_review_refuses_a_remedy_asking_brief(tmp_path, capsys):
 
 
 def test_seat_review_refuses_a_brief_naming_the_seats_own_row(tmp_path,
-                                                              capsys):
+                                                              capsys,
+                                                              monkeypatch):
     """The pair-review half of the same door: the brief names its TURNS, the
-    turns resolve to rows, and one of those rows is the seat's own work."""
+    turns resolve to rows, and one of those rows is the seat's own work. Same
+    fixture sheet as the grade half, for the same round-3 reason."""
+    _sheet_with_a_gpt_authored_row(tmp_path, monkeypatch)
     brief = tmp_path / "prompt.txt"
     brief.write_text(
         f"Review the three arms. The turns are {CLEAN_TURN} and "
@@ -289,6 +327,64 @@ def test_the_protocol_carries_the_whole_rule():
     assert seat.build_review_prompt("BODY").endswith("BODY")
 
 
+def test_the_pair_read_has_its_own_output_shape_and_the_same_ban():
+    """The seat has TWO review jobs. Klee round 3 found that one protocol was
+    prepended to both: the doctrine gate's "That is the whole output" and "It
+    overrides anything below that conflicts with it" turned a pair read into
+    two lines of FOLLOWS, because the seat obeyed the protocol over the brief.
+
+    The REMEDY BAN is identical in both roles -- that half is the rule. Only
+    the output shape differs.
+    """
+    pair = seat.REVIEW_ROLES["pair"]
+    doctrine = seat.REVIEW_ROLES["doctrine"]
+    assert pair != doctrine
+
+    # The pair read's own output shape, which the doctrine text forbids.
+    for token in ("RETURN", "ADVANCE", "ESCALATE", "numbered questions"):
+        assert token in pair, token
+    assert "FOLLOWS" not in pair
+    # ...and it says plainly what ADVANCE is not.
+    flat = " ".join(pair.split())
+    assert "ADVANCE means the arm is worth asking again with whole-fight play" \
+        in flat
+    assert "It is NOT ship approval, not a balance reading and not validation" \
+        in flat
+
+    # The ban, in both, and in the same words.
+    for text in (pair, doctrine):
+        assert "DISCARDED" in text
+        for banned in ("card text", "a number", "a mode"):
+            assert banned in text
+        assert "MODEL FAMILY" in text
+
+    assert seat.build_review_prompt("BODY", "pair").startswith(pair)
+    assert seat.build_review_prompt("BODY", "pair").endswith("BODY")
+    # The DEFAULT is unchanged, so every existing caller still gets the gate.
+    assert seat.build_review_prompt("BODY") == \
+        seat.build_review_prompt("BODY", "doctrine")
+
+
+def test_an_unknown_review_role_raises_rather_than_falling_back():
+    """A silent fallback is how a pair read gets the gate's output shape
+    without anyone noticing -- which is the defect this door was added for."""
+    with pytest.raises(seat.SeatError) as excinfo:
+        seat.build_review_prompt("BODY", "whatever")
+    assert "whatever" in str(excinfo.value)
+
+
+def test_the_committed_pair_reads_are_run_in_the_pair_role(tmp_path, capsys):
+    """The CLI half, with `--dry-run` so nothing runs: `--role pair` reaches
+    the prompt, and the line the operator reads names the role."""
+    brief = tmp_path / "prompt.txt"
+    brief.write_text(f"Review {CLEAN_TURN}. Answer the five questions and "
+                     f"give RETURN, ADVANCE or ESCALATE.", encoding="utf-8")
+    assert seat.main(["review", str(brief), "--role", "pair",
+                      "--dry-run"]) == 0
+    out = capsys.readouterr().out
+    assert "protocol:   pair" in out
+
+
 # ------------------------------------------------------------- the lint ---
 
 def test_the_lint_is_green_on_the_shipped_tree():
@@ -307,8 +403,11 @@ def test_the_debt_list_is_exactly_the_records_that_trip(tmp_path):
         f"the debt list and the tree disagree: only in tree "
         f"{sorted(offenders - set(lint.DEBT))}, only in DEBT "
         f"{sorted(set(lint.DEBT) - offenders)}")
-    assert offenders == {"klee-slice1-t04", "klee-slice1-t06",
-                         "klee-slice1-r2-t04", "klee-slice1-r2-t06"}
+    # EMPTY since Klee round 3 re-derived Rummage and Slow Burn: with no
+    # contributing family on either row, the four records that opened this
+    # list stop tripping check (2), and the staleness rule then required their
+    # deletion. The rounds themselves stand as published (R101b).
+    assert offenders == set()
     for why in lint.DEBT.values():
         assert why.strip(), "every carried entry states its reason"
 

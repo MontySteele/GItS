@@ -1,0 +1,28 @@
+{
+  "turn_id": "klee-slice1-r3-t05",
+  "packet_sha256": "a5c6815252056b2da19e5001a72fbd0203de139d766487941f8fb0a47eb9fe87",
+  "grader": {
+    "id": "opus-5-fresh",
+    "kind": "llm",
+    "model": "claude-opus-5",
+    "designed_these_cards": false
+  },
+  "chosen_line": [
+    {
+      "card": "Rapid Fire",
+      "target": "Nibbit"
+    },
+    {
+      "card": "Kaboom!",
+      "target": "Nibbit"
+    },
+    {
+      "card": "Imaginary Friend"
+    }
+  ],
+  "q1_what_did_you_play": "Rapid Fire first, spending the 3-Spark bank on it so it costs 0 instead of its printed 2 — that is the larger discount available and it is the bigger hit, 4 damage four times into the only enemy on the board for 16. With the full 2 Energy still in hand I then paid 1 for Kaboom! at its printed cost for 7 more, taking Nibbit from 43 to 20. The last Energy went to Imaginary Friend for 5 Block, 3 Burst Energy and Burst +5, which leaves me eating 7 of the telegraphed 12 and puts me at 35/62 going into next turn with the Burst meter at 25 plus whatever the 3 Burst Energy is worth.",
+  "q2_other_line_considered": "Two. The first was spending the Spark on Kaboom! instead — that is plainly worse, since the discount is then worth 1 Energy rather than 2 and I would have to pay Rapid Fire's printed 2, spending my whole turn to deal the same 23 with no card left for Block. The second was a real one: Rapid Fire at 0, then Imaginary Friend and Duck and Cover for 10 Block total, cutting the 12 down to 2 chip damage but dealing only 16. I weighed that against the line I took and preferred the extra 7 damage over the extra 5 Block.",
+  "q3_what_it_gave_up": "5 Block, so 5 more HP off me this turn — 7 taken instead of 2. It also leaves Duck and Cover unplayed and my hand thinner on defence for whatever comes next. And it commits the Spark bank to a random-target attack; with one enemy that randomness costs nothing, but the bank is gone either way and Kaboom! got paid for out of pocket.",
+  "q4_different_intent": "Yes. The intent is doing real work here — 12 against 42 HP is affordable, which is exactly why I took the damage line. If Nibbit had telegraphed something in the low twenties or higher, or anything that would put a lethal or near-lethal number on me across this turn and the next, I would have dropped Kaboom! and played Rapid Fire, Imaginary Friend and Duck and Cover for 10 Block. If the intent had been a defensive or buffing one with no attack at all, I would have gone the other way — cut Imaginary Friend's Block value out of the decision and still played it purely for the Burst, or looked harder at whether Duck and Cover was simply dead this turn.",
+  "q4_changed": true
+}

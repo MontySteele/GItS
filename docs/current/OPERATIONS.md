@@ -544,7 +544,8 @@ Then:
 python -m understudy.seat check                          # path, version, login
 python -m understudy.seat grade <turn-id> [--model M] [--grader-id ID]
 python -m understudy.seat grade <turn-id> --dry-run      # prompt + argv only
-python -m understudy.seat review <prompt-file> [--out F] # NOT blind
+python -m understudy.seat review <prompt-file> --role doctrine [--out F]
+python -m understudy.seat review <prompt-file> --role pair     [--out F]
 ```
 
 **grade** builds the prompt from `understudy/qa_grader_prompt.md`, runs one
@@ -570,23 +571,51 @@ turn. Depth: `understudy/README.md`.
 
 ### Doctrine seat protocol
 
-The seat's other job — reading a slice proposal against the character charter
-before anything is built — answers **FOLLOWS** or **REQUIRES_MODIFICATION** per
-arm and **names the clause** it ruled against. That is the whole output. It may
-not supply card text, a number, a mode or a rewritten row: a remedy it
-volunteers is **discarded**, and Claude re-derives from the named clause. Where
-a number has to be chosen, Claude derives it by the shipped-face rule (lift the
-value off a shipped card, never invent a breakpoint) and the seat only confirms
-that the derived row FOLLOWS.
+**`seat review` has TWO jobs and `--role` picks which**, because they have
+different output shapes and one text for both is a text that silences one of
+them. The **remedy ban below is identical in both** — that half is the rule,
+not the shape.
+
+- **`--role doctrine`** (the default, so every existing caller is unchanged) —
+  reading a slice proposal against the character charter BEFORE anything is
+  built. Answers **FOLLOWS** or **REQUIRES_MODIFICATION** per arm and **names
+  the clause**. That is the whole output.
+- **`--role pair`** — the PAIR READ, run AFTER a round: shipped half against
+  prototype half, with the forms, the falsifier's verdicts and the live
+  replays inline. Answers the round's numbered questions per arm and ends each
+  with **RETURN / ADVANCE / ESCALATE**, and the protocol says in the seat's own
+  prompt that ADVANCE is not ship approval, not a balance reading and not
+  validation (R217 G).
+
+**Klee round 3 is why the roles are split.** `EB-190` shipped ONE protocol and
+prepended it to every review; its two strongest lines — *"It overrides anything
+below that conflicts with it"* and *"That is the whole output"* — did exactly
+what they say, and round 3's pair read came back as two lines, *"PAIR A:
+FOLLOWS"* / *"PAIR B: FOLLOWS"*, with no reading and no verdict. Round 3 was the
+first pair read since that door landed. An unknown `--role` RAISES rather than
+falling back, because a silent fallback is how a pair read gets the gate's
+shape without anyone noticing.
+
+**In both roles** the seat may not supply card text, a number, a mode or a
+rewritten row: a remedy it volunteers is **discarded**, and Claude re-derives
+from the named clause. Where a number has to be chosen, Claude derives it by
+the shipped-face rule (lift the value off a shipped card, never invent a
+breakpoint) and the seat only confirms that the derived row FOLLOWS. A pair
+read MAY say an arm's BOARD did not ask its question and RETURN it for that;
+it may not design the replacement board.
 
 The reason is R217 C: independence is by MODEL FAMILY, author against grader. A
 seat that writes a row and then grades it has graded its own work, and the
 outcome is not evidence. **Klee slice 1 is the case** — the seat authored
 Rummage's text and chose Slow Burn's number, then the same family graded and
-pair-read both, and those two arms' outcomes are provisional
-(`review/active/klee-slice-1-2026-08-29.md` §11). There is no third family and
-none is being added; the roles are fixed at two — **Claude authors, GPT grades
-and reviews** — so the separation has to be enforced structurally.
+pair-read both, and those two arms' outcomes were provisional. **They are not
+any more:** Klee ROUND 3 (2026-08-29) re-derived both rows Claude-side from the
+clause the seat named, set both `authored_by:` back to `[claude]`, re-ran the
+two arms on two graders and re-read the pair, and both arms ADVANCE on a clean
+independent read (`review/active/klee-slice-1-2026-08-29.md` §13). There is no
+third family and none is being added; the roles are fixed at two — **Claude
+authors, GPT grades and reviews** — so the separation has to be enforced
+structurally.
 
 **How it is enforced (`EB-190`).** Every prototype row on
 `docs/prototype-surface.yaml` records `authored_by:` as a list of model
