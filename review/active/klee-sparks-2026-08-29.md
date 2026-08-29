@@ -963,38 +963,119 @@ sim cannot see. The smoke's numbers are not used to set any prediction above.
 
 ### 10.10 The C# delta checklist
 
-None of this was written. It is what the dev build needs before a blind grade.
+**BUILT 2026-08-29, branch `klee-sparks-cs`, stacked on `klee-sparks-sim`.**
+Nothing was deployed and the game was not launched; the arm stops at
+build-green and deploy-ready. Every item below carries what was actually
+written, and where what was written differs from what the checklist asked for,
+the difference is a numbered pick in §10.11.
 
-1. **`SparkPower.cs` — delete the base rule's half.** `Threshold`,
-   `CurrentThreshold`, `AppliesTo`, `TryModifyEnergyCostInCombat`,
-   `BeforeCardPlayed`, `AfterCardPlayed`, `SparksAsResolved`, the
-   `_pendingSpendPlay` / `_pendingSpendAmount` pair, and the localisation string
-   *"At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks."* **Keep**
-   `Gain`, `CanSpend`, `Spend`, `SparksAtPlay` — those are the alternative-cost
-   machinery and they already work. Gate the deletion the way tier 0 gates it,
-   or compile the new body only under `-p:PrototypeCards=true`.
-2. **`SparkThresholdDownPower` goes** with `true_spark_knight`'s old body.
-3. **The strict Power is new C# and it is what blocks the eighth proto row.** A
-   `SparkAttackCostPower` on the shape of the game's own
-   `AbstractModel.TryModifyStarCost` / `Hook.ModifyStarCost` — an extension
-   point the game ships and nothing in the base game overrides. It must also
-   drive `CardModel.IsPlayable`, the same wiring `SparkPower.CanSpend` already
-   has. Then a registry row in `tools/gen_klee_cards.py`'s `APPLY_POWERS`, and
-   the row in §10.2 goes onto the surface and generates.
-4. **The starter swap** — `pop` → `proto_pop_spark`, one `kaboom` →
-   `proto_kaboom_sink`, at the mod's own starting-deck seam, flag-gated the way
-   `loader._starter_ids` is.
-5. **PICK 8 option 2: keep `SparkPower`, build a Klee Spark badge.** A cost
-   badge beside the energy orb mirroring `NCard.UpdateStarCostVisuals` — the
-   `_starIcon` / `_starLabel` pair, red when unaffordable, plus the persistent
-   counter. Option 1 (storing Sparks in `PlayerCombatState.Stars`) is free and
-   is a one-way door: Sparks would BE Stars, every reader re-points, and a
-   Regent star relic would top up Klee's bank in co-op. Not walked through on a
-   display question.
-6. **Nothing else.** `spend_spark`'s rail — `SparkPower.CanSpend` into the
-   generated `IsPlayable`, `SparkPower.Spend`, and
-   `gen_klee_cards._stmt_spend_spark` — is shipped and unchanged, so the seven
-   card rows need no new C# at all.
+1. **DONE — `SparkPower.cs`, the base rule retired.** `AppliesTo` gains
+   `BaseRuleActive` as its FIRST clause, which stands the zeroing hook, the
+   spend decision and the consume down together; they cannot be retired by
+   halves. The localisation string went with the rule — a counter printing *"At
+   3 Sparks, your Attacks cost 0"* while nothing costs 0 is the D4 defect, not
+   a loose end — and now reads *"A resource. Cards that print a Spark price
+   spend it."* `Gain`, `CanSpend`, `Spend` and `SparksAtPlay` are untouched.
+   **RETIRED, NOT DELETED**, which is the checklist's word changed and is
+   §10.11 item 7: `Threshold`, `CurrentThreshold`, `SparksAsResolved` and the
+   pending pair all stay, exactly as tier 0 keeps `combat.spark_threshold`,
+   because an OFF arm needs the shipped rule byte for byte.
+2. **NOT DONE, deliberately — `SparkThresholdDownPower` stays.** §10.11 item 8.
+   It is unread under the flag and it is still the body the SHIPPED
+   `true_spark_knight` prints in a release build; deleting it would break the
+   OFF arm the flag exists to preserve.
+3. **DONE — the strict Power, and the eighth row is on the surface.**
+   `Powers/Prototype/SparkAttackCostPower.cs`. **Not** on
+   `TryModifyStarCost`, and that is §10.11 item 9: that hook feeds the game's
+   STAR cost, whose gate reads `PlayerCombatState.Stars` — using it would have
+   made a Klee card unplayable for want of Stars she never has. The three
+   clauses ride three hooks the game already fans to every model in combat:
+   `TryModifyEnergyCostInCombat` (Energy to 0), `ShouldPlay` (the gate; `CanPlay`
+   reports `BlockedByHook` and names the power as preventer), and the
+   `BeforeCardPlayed`/`AfterCardPlayed` split for the payment. `Converts` is
+   the ONE predicate all four sites share — Attacks only, already-priced
+   Attacks unaffected, X-cost exempt, and the card's owner must be this power's
+   owner, which is co-op and which the sim cannot see at all.
+   `spark_attack_cost` is in `APPLY_POWERS`, and the row in §10.2 is on
+   `docs/prototype-surface.yaml` and generates `ProtoTrueSparkKnight`.
+   Its face reads §5's sentence unchanged.
+4. **DONE — the starter swap, at one seam.** `Klee.StartingDeck`, `#if
+   PROTOTYPE_CARDS`, mirroring `loader._starter_ids`: `Powers/Prototype/
+   SparkStarter.PricedKaboom()` for one of the four Ka-boom!s and
+   `SparkingPop()` for Pop. The sheet does not move. It composes with the
+   companion roll by construction, not by luck —
+   `KleeStartingCompanionsPatch.ReplaceFirst` matches
+   `GetType() == typeof(Kaboom)`, which `ProtoKaboomSink` is not — and that is
+   pinned.
+5. **DONE — the badge.** `Vfx/Prototype/SparkCostBadge.cs`, a postfix on
+   `NCard.UpdateStarCostVisuals` writing `%StarIcon` / `%StarLabel`: the same
+   position, the same shape and the same font as Regent's price, with Klee's
+   own `klee/powers/spark.png` as the glyph and no new art. `StsColors.red` +
+   `unplayableEnergyCostOutline` when the bank is short, in HAND only, which is
+   `CardCostHelper.GetStarCostColor`'s own arm. A second postfix on
+   `UpdateEnchantmentVisuals` puts the enchantment tab back down — the base
+   game lifts it 45px into the empty badge slot on any card with no Star cost,
+   which is every Klee card. **The persistent counter was NOT added** (§10.11
+   item 11): she already has a Spark counter in the power bar, and
+   `ShouldAlwaysShowStarCounter` belongs to the Stars door that was declined.
+6. **NOT TRUE ANY MORE — the seven card rows DID need C#, and it is the badge's
+   fault.** Until this branch a printed Spark price existed only as a literal
+   inside the generated `IsPlayable` expression, so nothing outside the card
+   could ask what a card costs — and a badge that reads a SECOND copy of the
+   number is the display-versus-gate drift the badge exists to repair. So every
+   card whose row prints a top-level `spend_spark` now declares
+   `PrintedSparkPrice` on `ISparkPricedCard` and gates through
+   `SparkCost.PriceOf`, the C# twin of `combat.spark_price`. Three SHIPPED Klee
+   Skills are regenerated by that change; their behaviour is identical, because
+   with the flag off `PriceOf` IS the printed price. §10.11 item 10.
+7. **DONE, and it was not on the checklist — the observed board can read a
+   price.** `EB-185` put the BANK on the wire; nothing carried the PRICE.
+   `cost` is the ENERGY cost and is 0 for every one of these cards, `can_play`
+   folds every refusal into one boolean, and under the strict Power the price
+   is not on the card at all. A hand card now carries `spark_price` and
+   `spark_affordable` (`vendor/STS2_MCP/gits/GitsSparkPrice.cs`, read by
+   reflection so "no klee mod" means "no Spark prices"), omitted for a card
+   that charges nothing. `understudy/adapter.py` reads them AND cross-checks
+   them against `combat.spark_price`, reporting disagreements by name — two
+   implementations of one rule in two languages, and a divergence is invisible
+   unless something asks. One status row makes the Power's price crossable:
+   `true_spark_knight` -> `spark_attack_cost`.
+8. **DONE — the bite-check.** `klee-mod/KleeTests/Prototype/
+   SparkAlternativeCostPinTests.cs`, 27 pins, and most of them are REAL rather
+   than structural: a card can be constructed, made mutable and given an owner,
+   so the price, the gate and the Energy zeroing are all called directly. The
+   retirement is measured (the hook declines at a bank of 5), the derived price
+   of every proto row is read off the emitted class, the gate is checked at 0 /
+   2 / 3 / 7 Sparks, and each of the three exemptions is checked against its
+   live alternative. Structural and labelled: the payment
+   (`SparkPower.Spend` needs a `PlayerChoiceContext`), the badge (Godot nodes
+   are process death in this host) and the starter seam (`ModelDb` is populated
+   only by the game's boot). The flag is pinned BOTH ways round — the file that
+   says the base rule is retired is not compiled without the switch, so the
+   release half lives in `SparkSinkPinTests` behind an `#if`.
+
+**Verification, verbatim.**
+
+```
+Build succeeded.  0 Error(s)   (dotnet build klee-mod/KleeCode/KleeCode.csproj -p:UsePinnedAssemblies=true)
+Build succeeded.  0 Error(s)   (… the same, plus -p:PrototypeCards=true)
+Passed!  - Failed:     0, Passed:   163, Skipped:     0, Total:   163   (dotnet test)
+Passed!  - Failed:     0, Passed:   190, Skipped:     0, Total:   190   (dotnet test -p:PrototypeCards=true)
+OK: 28 lint(s) passed                                    (python -m tools.run_lints --lane ci)
+3632 passed, 46 skipped, 12 xfailed, 3 warnings in 275.30s (0:04:35)   (pytest tier0/tests -q)
+lint_prototype_authorship: OK (22 surface row(s), 4 carried debt entr(ies))
+gen_prototype_cards: prototype surface up to date
+gen_klee_cards: up to date
+gen_roster_cards: furina up to date
+gen_roster_cards: kokomi up to date
+```
+
+**Where the bite-check ran, stated because it is a real limit.** The pinned
+assembly vault (`UsePinnedAssemblies`) has no `Sentry.Godot`, which the test
+HOST needs to load `sts2.dll` — the vault keeps the BUILD alive, not a test
+run. So the suite was run against the INSTALLED game assemblies, read-only,
+resolved through a local `klee-mod/local.props`. Same route the Kokomi arm
+took, for the same reason.
 
 ### 10.11 What the packet left unsaid and I had to decide — each goes to you
 
@@ -1022,3 +1103,78 @@ Five, and they are picks, not blanks.
    built and tested; the row cannot go on the surface until a `PowerModel`
    exists. — *(a) write the C# next, then the row; (b) grade the seven card rows
    first and leave the Power for a second slice.*
+   **ANSWERED by building it: (a).** The row is on the surface and generates.
+
+---
+
+**And six more from the C# half.** Same rule: picks, not blanks.
+
+6. **What the flag IS, in C#.** I made it the `-p:PrototypeCards=true` COMPILE
+   switch — the one that already quarantines the surface, defines
+   `PROTOTYPE_CARDS` and stamps a deploy `+proto` — rather than a runtime
+   constant. So one flag is the whole revert and a release build contains no
+   type from the arm at all; the cost is that a single installed build cannot
+   run both arms, which the sim's `SPARK_ALT_COST_ENABLED` can. — *(a) the
+   compile switch, as built; (b) a runtime constant too, so one dev build can
+   be flipped mid-session.*
+7. **Retired versus deleted.** §10.10 item 1 said DELETE. I retired instead:
+   `Threshold`, `CurrentThreshold`, `SparksAsResolved` and the pending pair all
+   stay, gated, exactly as tier 0 keeps `combat.spark_threshold` — because
+   option 1 exists so the two economies can be run as two arms and an OFF arm
+   needs the shipped rule byte for byte. — *(a) retired, as built; (b) delete
+   them now and accept that the OFF arm is gone.*
+8. **`SparkThresholdDownPower` did not go.** §10.10 item 2 said it should. It is
+   unread under the flag, but it is still what the SHIPPED `true_spark_knight`
+   prints in a release build, so removing it breaks the very arm item 7 keeps.
+   — *(a) leave it, as built; (b) delete the power and re-author the shipped
+   row in the same pass.*
+9. **The gate is `ShouldPlay`, not a patch on `IsPlayable`.** §10.10 item 3 said
+   the Power "must also drive `CardModel.IsPlayable`". `IsPlayable` is
+   `protected virtual` and a Harmony patch on it would MISS every card that
+   overrides it — which is exactly the already-priced cards. `ShouldPlay` is a
+   first-class `AbstractModel` override the game fans to every model in combat,
+   reports `BlockedByHook`, and names the power as the preventer in the
+   player's own tooltip. — *(a) `ShouldPlay`, as built; (b) patch `IsPlayable`
+   as well.*
+10. **Three shipped cards moved so the badge could exist.** The badge must read
+    the same number the gate charges or it is the defect it was built to
+    repair, and that number was a literal buried in generated code. So
+    `ISparkPricedCard` is emitted for every row that prints a top-level
+    `spend_spark`, shipped rows included, and the three Klee Skills that do were
+    regenerated. Behaviour is identical with the flag off. — *(a) one interface
+    for every priced card, as built; (b) confine it to proto rows and give the
+    badge a second table of prices for shipped ones.*
+11. **The badge repurposes the star slot, and there is no persistent counter.**
+    It writes the `%StarIcon` / `%StarLabel` pair rather than adding a node, so
+    a card cannot show a Star price and a Spark price at once — unreachable
+    today (no Klee card has a Star cost, and Sparks-are-Stars was declined) but
+    it is a real ceiling. And `ShouldAlwaysShowStarCounter` was left alone: she
+    already has a Spark counter in the power bar, and Regent's always-on
+    counter belongs to the door that was declined. — *(a) as built; (b) a badge
+    node of Klee's own; (c) add an always-visible bank counter too.*
+12. **The price is on the badge AND still in the rules text.** The generated
+    face still says *"Spend 1 [Spark]."* The base game says nothing about a
+    price in rules text, so this is one line of redundancy — but stripping it is
+    a face change on three SHIPPED cards as well as the prototypes, and P2 in
+    §10.9 is precisely the measurement that would justify it. — *(a) keep both
+    for the blind grade, as built; (b) strip the sentence now.*
+
+**Eyes-on for the next dev deploy — the badge's look is taste by definition.**
+
+1. **The Spark glyph at cost-badge size.** `klee/powers/spark.png` was drawn for
+   the power bar; at the badge's scale it may read as a blob. This is the single
+   most likely thing to need art.
+2. **The badge against the energy orb.** Two costs on one card, the Energy badge
+   reading 0 beside a Spark badge reading 1–3. Regent's cards look like this all
+   the time; hers never have.
+3. **Red when the bank is short**, and whether it reads as "cannot afford" or as
+   "something is wrong with this card".
+4. **Under the strict Power**, an unpriced Attack showing a 3-Spark badge it
+   does not print. That is the card's whole bet and it should look deliberate.
+5. **The enchantment tab's 45px correction**, on an enchanted Spark-priced card.
+6. **The Spark counter's new description** — *"A resource. Cards that print a
+   Spark price spend it."*
+7. **The strict Power's own icon**, which borrows `spark_threshold_down.png`
+   from the body it replaces.
+8. **Whether the rules-text price line reads as redundant** beside the badge
+   (item 12 above).
