@@ -350,10 +350,16 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   shipped controls), where round 2 was 4 / 7. **A REPLAY step is now part of
   the protocol:** every graded line is re-played live and the grader's
   arithmetic set against the board, a contradiction being recorded as
-  `misread` and never re-graded. **No turn was flagged `misread`** — eight of
-  eleven replays completed and all eight confirmed the form to the hit point;
-  the other three could not complete because `execute` cannot answer a modal
-  prompt (`EB-170`). The pair read
+  `misread` and never re-graded. **No turn was flagged `misread`**, and all
+  eleven replays now confirm the form to the hit point: eight completed on the
+  day, and the other three — held up because `execute` could not answer a modal
+  prompt — replayed on 2026-08-28 once **`EB-170` CLOSED**. A play in
+  `chosen_line` may state `exhaust` / `choose` in the printed vocabulary, an
+  unanswered prompt STOPS the replay as `modal_unanswered` rather than being
+  guessed at, and `--answer "<prompt>=<choice>"` carries an operator's answer
+  for a form written before the keys, logged as such: `t02` 38 → 21 with Block
+  0 → 5, `t04` both Leaf Slimes dead and Twig Slime (S) 10/6 → 4/0, `t10`
+  24 → 1. The pair read
   (`review/qa/kokomi-slice-1-r3-pair-review-codex-gpt-5.6-sol.md`, no
   correction attached) **ADVANCES five arms and RETURNS two**, with no
   ESCALATE: Thoma's either shape needs a more discriminating board, and
