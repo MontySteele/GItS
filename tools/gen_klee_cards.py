@@ -324,6 +324,37 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
 # destination is top-of-draw in both engines and there is no other placement.
 RECALL_FIELDS = {"op", "from", "position", "amount"}
 
+# The Charge KEYWORD's attach rule, in ONE place (used by `emit` below and
+# imported by `tools/lint_charge_keyword.py`, which derives nothing of its own).
+#
+# THE RULE IS THE PRINTED WORD, NOT THE OP, and the choice is forced. The
+# op-based rule the slice shipped (`spend_charge`) is not TOTAL, and a closed
+# op set listed beside MECHANICAL_OPS could not be made total either: three
+# shapes print the word with no Charge-touching op anywhere in the card --
+#   * `bonus_formula: 1_per_2_charge` (all_streams_flow, nereids_ascension,
+#     gyorin_formation), whose rider renders inside the card's own number and
+#     appends ", already including [gold]Charge[/gold]";
+#   * the `charge_at_least_N` conditional predicate (read_the_current), a
+#     branch CONDITION rather than an effect;
+#   * a power whose printed rules text names the meter something else will
+#     read later (before_sun_and_moon).
+# Meanwhile every `gain_charge` and every `spend_charge` face prints the word,
+# so the text rule strictly CONTAINS the op rule: it can only add faces, and it
+# adds exactly the faces a player sees the word on. That is also the property
+# the gap was reported against -- run B6 saw the word on a face and found
+# nothing on screen explaining it -- so reading the built description makes the
+# surface the attach rule reads the same surface the player reads.
+#
+# Word boundary, so "Electro-Charged" (the reaction, on the companion sheet)
+# and any future "Charged" are NOT the meter.
+CHARGE_WORD = re.compile(r"\bCharge\b")
+
+
+def prints_charge_word(description: str) -> bool:
+    """Does this built card description name the Charge meter?"""
+    return bool(CHARGE_WORD.search(description))
+
+
 # --- companion batch (2026-07-21) --------------------------------------------
 def companion_damage_effects(card: dict) -> list[dict]:
     """Every OFFENSIVE damage effect on a companion card, mode bodies included.
@@ -7343,18 +7374,18 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard
             tips_expr = (
                 "KokomiRiderTips.ForMuster("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
-        # R213 E1 / R215 D, QUARANTINED. A card that PRINTS a Charge price
-        # carries the keyword's definition, because until this slice the word
-        # named a meter with no rules text anywhere on screen -- the gap R215
-        # D deferred into E1, with a blind witness in run B6 ("Burst Energy
-        # accumulated ... although I never saw how to spend it"). Attached
-        # from the OP, the Muster rule above, so a new spender cannot ship
-        # printing a word nothing explains. SCOPED TO SPENDERS ON PURPOSE:
-        # the shipped `gain_charge` faces have the same gap and fixing them
-        # is wording-only hygiene on thirty generated files, which does not
-        # belong in the same commit as the arms it would be read beside.
-        if any(eff.get("op") == "spend_charge"
-               for eff in _effects_everywhere(card)):
+        # R213 E1 / R215 D. Every face that PRINTS the word Charge carries the
+        # keyword's definition, because until the slice the word named a meter
+        # with no rules text anywhere on screen -- the gap R215 D deferred into
+        # E1, with a blind witness in run B6 ("Burst Energy accumulated ...
+        # although I never saw how to spend it").
+        #
+        # The slice scoped this to `spend_charge` and left the gain faces for a
+        # wording-only commit; this IS that commit, and the rule widened to the
+        # printed word rather than to a longer op list, because the op list
+        # cannot be made total. See `prints_charge_word` for the three shapes
+        # that print the meter with no Charge op at all.
+        if prints_charge_word(desc):
             tips_expr = (
                 "KokomiRiderTips.ForCharge("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")

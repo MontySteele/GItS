@@ -41,7 +41,7 @@ public sealed class BakeKurage : CustomCardModel, ICharacterCard, ISkillTagCard
         new[] { KleeKeywords.ElementalSkill };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForKuragePulse(base.ExtraHoverTips, this);
+        KokomiRiderTips.ForCharge(KokomiRiderTips.ForKuragePulse(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("bake_kurage");
 

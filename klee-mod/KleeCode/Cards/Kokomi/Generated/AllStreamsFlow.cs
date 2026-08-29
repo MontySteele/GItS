@@ -44,7 +44,7 @@ public sealed class AllStreamsFlow : CustomCardModel, IElementalCard, ICharacter
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiRiderTips.ForGarmentAttack(KokomiRiderTips.ForChargeRider(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, chargePer: 1, chargeStep: 2), this);
+        KokomiRiderTips.ForCharge(KokomiRiderTips.ForGarmentAttack(KokomiRiderTips.ForChargeRider(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, includesBombRules: false), this, chargePer: 1, chargeStep: 2), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("all_streams_flow");
 

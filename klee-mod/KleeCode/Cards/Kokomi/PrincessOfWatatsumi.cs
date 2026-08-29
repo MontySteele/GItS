@@ -6,6 +6,7 @@ using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 
@@ -66,6 +67,13 @@ public sealed class PrincessOfWatatsumi : CustomCardModel, ICharacterCard
             "At the start of your turn, gain {PowerAmount:diff()} "
           + "[gold]Charge[/gold]."),
     };
+
+    // The Charge keyword, on the same rule codegen applies to her generated
+    // faces: this face PRINTS the word, so it carries the definition. Written
+    // out here because the card is hand-written; `tools/lint_charge_keyword.py`
+    // holds the two surfaces to one rule.
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KokomiRiderTips.ForCharge(base.ExtraHoverTips, this);
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
