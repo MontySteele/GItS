@@ -811,8 +811,12 @@ def test_the_sealed_record_carries_the_identity_and_the_words_verbatim(tmp_path)
     s, summary, _wire, thread = _session(tmp_path, replies,
                                          states=[combat_state()],
                                          max_actions=1)
-    identity = {**thread.identity(), "build_version": "0.2.1252+proto",
-                "build_version_source": "the bridge's health `mod_version`",
+    identity = {**thread.identity(), "build_version": "0.2.1269",
+                "build_version_source":
+                    "the deployed `mods\\klee\\manifest.json` `version`",
+                "game_version": "v0.111.0",
+                "game_version_source":
+                    "the game's own `release_info.json` `version`",
                 "run_seed": "HUMWKRKNCE",
                 "prompt_sha256": summary["prompt_sha256"],
                 "actions": summary["actions"],
@@ -820,26 +824,46 @@ def test_the_sealed_record_carries_the_identity_and_the_words_verbatim(tmp_path)
     path = blindplay.seal(summary, identity, log_dir=s.dir,
                           record_root=tmp_path / "committed")
     text = path.read_text(encoding="utf-8")
-    assert "0.2.1252+proto" in text and "HUMWKRKNCE" in text
+    assert "0.2.1269" in text and "v0.111.0" in text and "HUMWKRKNCE" in text
     assert summary["prompt_sha256"] in text
     assert "R217 G" in text and "not approval" in text
     assert "words" in text
 
 
-def test_the_build_version_is_read_or_left_empty_never_invented():
-    class Silent:
-        def health(self):
-            return {}
+def test_both_versions_are_read_off_disk_or_left_empty_never_invented(
+        tmp_path, monkeypatch):
+    """`EB-174`. A sealed record has to name the MOD build and the GAME build,
+    each labelled with where it was read -- and name neither rather than
+    invent one. The bridge's health payload is not consulted at all: it
+    carries the VENDORED bridge's own version and never ours, which is how
+    every record's identity block came to read `(not read)`."""
+    game = tmp_path / "Slay the Spire 2"
+    (game / "mods" / "klee").mkdir(parents=True)
+    props = tmp_path / "local.props"
+    props.write_text(f"<Project><PropertyGroup><GameDir>{game}</GameDir>"
+                     f"</PropertyGroup></Project>", encoding="utf-8")
+    monkeypatch.setattr(blindplay, "LOCAL_PROPS", props)
 
-    class Broken:
-        def health(self):
-            raise RuntimeError("no bridge")
+    # Nothing deployed and no release file: two empties, two reasons.
+    assert blindplay.build_version()[0] == ""
+    assert "no deployed package" in blindplay.build_version()[1]
+    assert blindplay.game_version()[0] == ""
+    assert "release_info.json" in blindplay.game_version()[1]
 
-    assert blindplay.build_version(blindplay.ScriptedWire([]))[0] == \
-        "0.0-scripted"
-    assert blindplay.build_version(Silent())[0] == ""
-    version, why = blindplay.build_version(Broken())
-    assert version == "" and "did not answer" in why
+    # `deploy.ps1` writes the manifest with a BOM; both reads survive one.
+    (game / "mods" / "klee" / "manifest.json").write_text(
+        '﻿{"id": "klee", "version": "0.2.1269"}', encoding="utf-8")
+    (game / "release_info.json").write_text(
+        '{"version": "v0.111.0", "commit": "41cef1ea"}', encoding="utf-8")
+    assert blindplay.build_version() == (
+        "0.2.1269", "the deployed `mods\\klee\\manifest.json` `version`")
+    assert blindplay.game_version() == (
+        "v0.111.0", "the game's own `release_info.json` `version`")
+
+    # No local.props at all is a reason, not a traceback and not a guess.
+    monkeypatch.setattr(blindplay, "LOCAL_PROPS", tmp_path / "absent.props")
+    assert blindplay.build_version()[0] == ""
+    assert blindplay.game_version()[0] == ""
 
 
 # --- EB-173: the deadlock a live session died on --------------------------

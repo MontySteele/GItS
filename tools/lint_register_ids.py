@@ -130,11 +130,14 @@ CEILINGS: dict[str, int] = {
                  # 55 ms later reads the round unchanged, the hand discarded
                  # to zero and `is_play_phase` FALSE. `blindplay.transient`
                  # now names that frame a transition and rides it out.
-                 # EB-174 minted 2026-08-29: the sealed blind-play record
-                 # cannot name the build it was taken on -- the bridge's
-                 # health payload carries no version and `build_version`
-                 # correctly refuses to invent one, so every record's identity
-                 # block reads `(not read)`. OPEN.
+                 # EB-174 minted 2026-08-29 and CLOSED 2026-08-29: the sealed
+                 # blind-play record could not name the build it was taken on
+                 # -- the bridge's health payload carries the VENDORED
+                 # bridge's version and never ours, and `build_version`
+                 # correctly refused to invent one. Both builds are now read
+                 # OFF DISK and labelled: the deployed
+                 # `mods\klee\manifest.json` and the game's own
+                 # `release_info.json`.
                  # EB-173 minted AND CLOSED 2026-08-29 by the EB-167 live
                  # acceptance: `_fold` erased the `+` the game prints on an
                  # upgraded title, so a hand holding a base and an upgraded
@@ -215,7 +218,6 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        174,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
