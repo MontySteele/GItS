@@ -60,8 +60,36 @@ PROTOTYPE_ID_PREFIX = "proto_"           # tier0.content.loader's, un-imported
 # Claude seat is refused however fresh its context is -- "a fresh context on
 # the same model does not satisfy it" is the ruling's own wording.
 AUTHOR_FAMILY = "claude"
-FAMILIES: tuple[str, ...] = ("claude", "gpt")
+
+# THE TWO SETS BELOW ARE NOT THE SAME SET, and the difference is the whole of
+# the local-model experiment's governance.
+#
+#   * `AUTHORABLE_FAMILIES` is what `authored_by:` may name -- who may WRITE a
+#     prototype row. Closed at two, and NOT being widened: OPERATIONS'
+#     "Doctrine seat protocol" says "there is no third family and none is
+#     being added", and a locally served model has authored nothing here and
+#     may author nothing.
+#   * `FAMILIES` is what `model_family()` may RECOGNISE -- whose chair the
+#     refusal has to be able to reason about. A model this machine serves is
+#     neither claude nor gpt, and a door that could not name its family would
+#     have to pass it blindly or refuse it blindly. Both are wrong; the honest
+#     answer is `local`.
+#
+# So a `local` seat passes `check_independent`'s author question, and
+# `conflicts()` can only ever fire for it if a row recorded it -- which
+# `field_findings` makes impossible. The asymmetry is deliberate: the family
+# exists so a reading can be ATTRIBUTED, never so it can be authoritative.
+LOCAL_FAMILY = "local"
+AUTHORABLE_FAMILIES: tuple[str, ...] = ("claude", "gpt")
+FAMILIES: tuple[str, ...] = ("claude", "gpt", "local")
 MODEL_FAMILIES: dict[str, tuple[str, ...]] = {
+    # Ordered, and `local` is FIRST: the explicit `local:` prefix that
+    # `understudy/local_seat.py` writes into `grader.model` must beat any
+    # substring an open-weight name happens to share with a vendor's -- a
+    # locally served `gpt-oss` is a LOCAL seat and not the Codex seat.
+    "local": ("local:", "local/", "ollama", "llama.cpp", "llama-server",
+              "lmstudio", "lm-studio", "gguf", "qwen", "llama", "mistral",
+              "mixtral", "gemma", "deepseek", "command-r"),
     "claude": ("claude", "anthropic", "opus", "sonnet", "haiku", "fable"),
     "gpt": ("gpt", "openai", "o1", "o3", "codex"),
 }
@@ -110,18 +138,22 @@ def field_findings(row: Mapping[str, Any]) -> list[str]:
     rid = str(row.get("id") or "<no id>")
     if FIELD not in row:
         return [f"{rid}: no `{FIELD}:`. Every prototype row records the model "
-                f"FAMILIES that wrote it, from {list(FAMILIES)} (EB-190). "
+                f"FAMILIES that wrote it, from {list(AUTHORABLE_FAMILIES)} "
+                f"(EB-190). "
                 f"Claude authors; a family is added when a seat contributed "
                 f"text, a number or a mode -- never for a clause name alone."]
     value = row.get(FIELD)
     if not isinstance(value, list) or not value:
         return [f"{rid}: `{FIELD}:` must be a non-empty LIST of families, "
                 f"got {value!r}"]
-    bad = [f for f in value if f not in FAMILIES]
+    bad = [f for f in value if f not in AUTHORABLE_FAMILIES]
     if bad:
-        return [f"{rid}: `{FIELD}:` names unknown famil(ies) {bad}; the set "
-                f"is closed at {list(FAMILIES)} -- there is no third family "
-                f"and none is being added (R217 C)"]
+        return [f"{rid}: `{FIELD}:` names unknown famil(ies) {bad} that may "
+                f"not author a row; the AUTHORING set is closed at "
+                f"{list(AUTHORABLE_FAMILIES)} -- there is no third AUTHOR "
+                f"family and none is being added (R217 C). "
+                f"{LOCAL_FAMILY!r} is a recognised GRADER family and is "
+                f"deliberately not authorable"]
     if len(set(value)) != len(value):
         return [f"{rid}: `{FIELD}:` repeats a family: {value!r}"]
     return []
@@ -260,7 +292,9 @@ def check_independent(model: str, author: str = AUTHOR_FAMILY, *,
         raise IndependenceError(
             f"{model!r} is in the {family!r} family, which authored this "
             f"slice. Independence is by model FAMILY, not by fresh context "
-            f"(R217 C): the tester must be the Codex seat.")
+            f"(R217 C): the tester must be the Codex seat, or -- for "
+            f"subjective feedback that is never a record -- the {LOCAL_FAMILY!r} "
+            f"seat.")
     hits = conflicts(model, rows, sheet)
     if hits:
         raise IndependenceError(

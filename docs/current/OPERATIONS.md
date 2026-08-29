@@ -626,6 +626,83 @@ text, a number, a mode — adds its family to that list. `seat grade` and
 family from the blind seat, and this generalises it from who is running to what
 the row records about who wrote it.
 
+### Local model as grader (experiment)
+
+A model served on this machine in the grader's chair, so the funnel can keep
+reading while a hosted quota is out. The stack is `llama-server` (llama.cpp
+b10433, native Windows CUDA) on port **8010**, serving unsloth's
+**Qwen3.8-27B-UD-Q4_K_XL** (17.9 GB GGUF), launched
+`-c 262144 -ngl 99 --jinja --reasoning-format deepseek -fa on -ctk q8_0
+-ctv q8_0 --host 0.0.0.0 --port 8010 --parallel 1` — ~39–57 tok/s decode,
+~4K tok/s prefill. `--parallel 1` means **one request at a time**; every caller
+here is serial and fanning out would queue behind itself and look like a hang.
+The grader talks to `llama-server` **directly** over its OpenAI-compatible
+routes; the LiteLLM proxy that fronts the same server (Anthropic `/v1/messages`
+→ `llama-server`, for Claude-Code-as-client use) is not in this path and is not
+needed for it.
+
+```
+export GITS_LOCAL_MODEL_URL=http://localhost:8010/v1   # required; no default
+export GITS_LOCAL_MODEL_CTX=262144                     # refuse, never truncate
+# GITS_LOCAL_MODEL_NAME    optional — default: whatever /v1/models reports
+# GITS_LOCAL_MODEL_TIMEOUT optional — seconds, default 1800
+
+python -m understudy.local_model --probe                 # models + one prompt
+python -m understudy.local_seat  grade <turn-id> [--dry-run] [--grader-id ID]
+python tools/local_model_sanity.py --dry-run             # plan + token estimate
+python tools/local_model_sanity.py [<turn-id>...] [--doctrine]
+```
+
+**local\_seat** runs the SAME prompt (`seat.build_prompt`, so the two seats
+cannot drift apart) against the same `packet.md` and writes the same artifacts
+— `form-local-<slug>.json`, then `staged_turn grade` writes
+`verdict-local-<slug>.json`. The grader id is `local-<slug of the served
+model>`; `grader.model` is written `local:<served name>`, and both
+`model_requested` and the server's own reported model land in the session's
+`seat.json`. It keeps every refusal that decides whether a packet may be read
+at all — `seat_authored_row`, `open_face_defect`, the turn and packet hashes —
+and adds `prompt_exceeds_ctx` and `answer_truncated`, because a prompt that
+does not fit is **refused and never truncated**: a grader answering a board it
+was only partly shown produces a form that looks like a grade. With
+`--reasoning-format deepseek` the reply carries `reasoning_content` beside
+`content`; it is recorded as `reasoning` and **never parsed** — the form is the
+`content`. Grading runs at **temperature 0** (the bakeoff's agentic sampling —
+temp 1.0 / top\_p 0.95 / top\_k 20 — is not what a grade wants), and the
+temperature is written into every artifact.
+
+**The sanity harness** re-reads turns that are already **CLOSED** — by default
+every `klee-slice1-r3-t*` and `kokomi-slice2-t*` directory carrying both an
+`opus-5-fresh` and a `codex-gpt-5.6-sol` verdict — and prints the three
+readings side by side: verdict agreement, whether the line matches, the local
+form's stated line against the recorded ones, and whether the reader made the
+round-1 **"which Attack is free"** misread (a claim of *free* checked against
+the cost the packet PRINTS), with wall-clock and token counts per call. It
+writes **only** under `review/qa/local-sanity-<date>/` and never inside a
+closed turn's own directory — a published record stands as published (R101b),
+and a third form beside two graded ones would read as a third grade.
+`--doctrine` runs the seat's doctrine-gate prompt through the same protocol
+frame and diffs the verdict words against the recorded GPT review. `--dry-run`
+answers the first question — do the packets fit the window — with no endpoint
+at all; a staged turn's prompt is ~1.9K tokens, so 32K would be ample and a
+doctrine brief is the only thing that needs the big context. With
+`$GITS_LOCAL_MODEL_URL` unset a real run says so and exits 2 having written
+nothing.
+
+**The limits, and they are the point (R217 G).** What a local model produces
+is **subjective feedback**. It is **not human validation**, **not balance
+evidence**, and the `local` family is **not an approved doctrine seat** — the
+doctrine chair is still GPT's and the authoring roles are still fixed at two.
+Nothing it produces enters a record, a register or the ledger. Its blindness
+claim is also weaker and says so in `seat.json`: one HTTP request with no
+tools, no filesystem and no repo root is a **structural** argument, not the
+codex seat's transcript-proved one. `understudy/authorship.py` therefore keeps
+two sets — `AUTHORABLE_FAMILIES` (`claude`, `gpt`, what `authored_by:` may
+name, unchanged) and `FAMILIES` (`claude`, `gpt`, `local`, what
+`model_family()` may recognise) — so a local reading can be **attributed**
+without ever being authoritative. Sessions land in
+`understudy/logs/local-seat/`, gitignored for the same reason the codex seat's
+are.
+
 ### Blind play (`EB-167` / `EB-168`)
 
 The same blindness widened from one staged turn to a whole run, and a seat
