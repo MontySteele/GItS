@@ -417,6 +417,15 @@ def _finish_play(state: CombatState, card: Card,
     reads energy or the hand, so both callers are correct by construction.
     """
     p = state.player
+    # QUARANTINED (C.KURAGE_MEMORY). HERE, at the shared half of a card play,
+    # for the same structural reason the Casket accrual sits at the one
+    # exhaust funnel: a manual play and an auto-play both enter through this
+    # function and nothing else does, so "when Kokomi plays a card" is one
+    # definition rather than per-site discipline. Ahead of the replay loop, so
+    # the memory records the CARD PLAY once even when Study Buddy resolves it
+    # twice -- a replay is one card being resolved again, not a second play.
+    if C.KURAGE_MEMORY:
+        effects.note_kurage_play(state, card)
     replays = 1
     if card.is_companion:
         # BFF-dedupe, RULED 2026-08-06: an upgraded companion IS the same
@@ -652,6 +661,14 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     state.encore_spend_draws_this_turn = 0       # Gallery Stirs latch (R85)
     state.cards_created_this_turn = 0            # engine_closure window
     state.charge_reads_this_turn = {}            # EB-78 (2) instrument
+    # QUARANTINED (C.KURAGE_MEMORY): the two per-TURN halves of the memory
+    # rule. The pulse key is cleared here so a turn where she plays nothing
+    # pulses nothing (§2's "a price on a wasted turn"), and the fire latch is
+    # cleared here so the one-card-per-turn cap is a turn boundary and not a
+    # bank size. `kurage_queue` and `kurage_last_attack_target` are per-FIGHT
+    # and deliberately survive this line.
+    state.kurage_last_card_type = ""
+    state.kurage_fired_this_turn = False
 
     for enemy in list(state.living_enemies):     # bombs from last turn go off
         if enemy.bombs:
@@ -720,6 +737,21 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
                    floor=p.fanfare_floor,
                    at_cap=p.fanfare >= p.fanfare_cap,
                    at_floor=p.fanfare <= p.fanfare_floor)
+
+    # QUARANTINED (C.KURAGE_MEMORY): PICK B1, the turn-START fire. HERE --
+    # after the block clear, the turn-start triggers, the energy refill, the
+    # draw and the relic/potion pass, and immediately BEFORE the first card is
+    # chosen -- because that is the whole argument for B1: the free card must
+    # land in the state the player is planning in, not be tacked onto a turn
+    # already spent. It is also the point the Fanfare snapshot above calls
+    # "the state the pilot actually decides in", so the two agree.
+    if C.KURAGE_MEMORY and C.KURAGE_FIRE_TIMING == "turn_start":
+        effects.kurage_fire(state)
+        _settle_phases(state)    # a replayed attack can drop a phased boss,
+        #                          the same hole the settles above close
+        _revive_player_if_needed(state)
+        if not p.alive or state.over:
+            return
 
     seen_states: set[tuple] = set()
     while not state.over:

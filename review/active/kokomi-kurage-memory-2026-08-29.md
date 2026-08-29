@@ -574,6 +574,139 @@ is the piece most likely to be wrong.
 
 ---
 
+## 6.1 What the sim build found
+
+**Built 2026-08-29 on this branch: the tier0 half of §6's first row, behind
+`KURAGE_MEMORY`, default off.** Python only — no C#, no bridge, no UI, no game.
+The full tier0 suite (3537), the tier05 suite (794), the 27 `--lane ci` lints,
+`gen_roster_cards --check` and the pinned `KleeCode` build are all green, and
+the flag being off is why: every read of every constant below sits inside an
+`if C.KURAGE_MEMORY` branch, so the shipped engine cannot reach any of it. No
+sheet row, card yaml, LAW line or register moved, so **no drafted number moved
+and `DRAFTER_VERSION` did not**.
+
+### The constants, and what each one's alternative is
+
+Every §5 pick is one named constant in `tier0/constants.py`, shipped at the
+proposal's recommendation:
+
+| constant | default | alternatives |
+|---|---|---|
+| `KURAGE_MEMORY` | `False` | the master flag |
+| `KURAGE_FUEL_MODE` | `"exhaust_own"` (A1) | `"play_or_exhaust"` (A2) — **implemented** |
+| `KURAGE_THRESHOLD` | `5` | **DERIVED, not picked** (§2's `ritual_purification` 4 + the funnel's 1) |
+| `KURAGE_FIRE_TIMING` | `"turn_start"` (B1) | `"turn_end"` (B2) — **implemented** |
+| `KURAGE_TARGET_RULE` | `"follow_her_last_attack"` (E1) | `"random"` (E2) — **implemented** |
+| `KURAGE_POWER_PULSE` | `"hydro"` (C1) | C2 / C3 **not implemented** (§5 argues both away) |
+| `KURAGE_EMPTY_QUEUE` | `"hold"` (D1) | D2 **not implemented** (it restores the thing being removed) |
+| `KURAGE_MEMORY_PULSE_BLOCK` | `5` | see (1) below — this constant is new |
+| `KURAGE_QUEUE_CAP` | `0` = uncapped | the first knob if sim finds a backlog |
+
+`KURAGE_DURATION` and `KURAGE_PULSE_PER_CHARGE` are **not read** under the flag.
+
+Where the rule lives: `effects.note_kurage_play` (the queue, the pulse key, A2's
+play-side fuel), `effects.kurage_fire` (the threshold fire, on slice 2's
+`resources.spend_charge` rail), `effects.kurage_memory_pulse` (the pulse),
+`effects.kurage_target` + a first branch in `effects.bind_card_aim` (the aim),
+`_op_summon_kurage` (persistence), `refpowers.after_card_exhausted` (the fuel's
+one clause), `combat._finish_play` (the one call site for "she played a card")
+and `combat._player_turn` (B1's fire and the per-turn clears).
+
+### The holes the build had to fill, which the proposal did not answer
+
+Each of these is a decision taken to make the code run, **not a ruling**, and
+each returns to [USER] with the picks.
+
+1. **The Skill pulse's 5 is not `KURAGE_PULSE_BLOCK`.** §2's table calls the
+   Skill branch "shipped: 5", but the shipped `KURAGE_PULSE_BLOCK` is **0** —
+   it was turned off at the v0.4 starter rework. The 5 is `kurages_oath`'s
+   printed `kurage_ward` grant, which is a *drafted* Common power and not the
+   pulse's own number. Built as a **new** constant, `KURAGE_MEMORY_PULSE_BLOCK
+   = 5`, so the shipped 0 stays reachable byte-for-byte with the flag off; the
+   Oath's ward still stacks on top of it. If [USER] means "the Skill pulse is
+   the Oath and only the Oath", this constant should be 0 and the row unmoved.
+2. **The queue is per FIGHT and lives on `CombatState`**, beside
+   `companions_played`, not on `Player` beside `charge`. That makes the reset
+   structural (`run_fight` builds a fresh state) instead of a line someone must
+   remember. §2's "per fight" is satisfied either way; this is the cheaper way.
+3. **The memory fills without a jellyfish; only the FIRE needs one.** §2 says
+   "the Bake-Kurage remembers", which could mean the queue does not start until
+   the summon is out. Built the other way: Companions played before the first
+   `bake_kurage` are remembered, and the summon is what acts on the memory. The
+   opposite reading punishes a turn-1 Companion for a card she had not drawn.
+4. **The new pulse aims by `KURAGE_TARGET_RULE`, like the replay.** The shipped
+   pulse rolls a random living enemy; §2 names a "pulse target" for PICK C1 and
+   never says which. Built so the Attack pulse, the Power pulse's Hydro and the
+   replay all land on the same forecastable body — which is the only version
+   the strip can draw.
+5. **Only the Charge funnel narrows; the Burst wage does not.** `CHARGE_PER_
+   EXHAUST` and `KOKOMI_BURST_PER_EXHAUST` are documented as one wage in two
+   currencies, and §4 removes the Muster *Charge* subsidy without mentioning
+   Burst. A Mustered Companion's Exhaust therefore still pays her burst
+   particles and pays no Charge.
+6. **The upgrade, the second copy, and the Casket link all go inert together.**
+   §2 retires `KURAGE_DURATION` and asks what the upgrade's +1 turn does; the
+   answer the code gives is *nothing* — a persistent summon has no turn to add,
+   so an upgraded `bake_kurage` is mechanically identical to a base one, a
+   second copy is a no-op, and the Garment's Tamakushi Casket refresh maxes a 1
+   against a 1. Giving the upgrade a second job is the re-authoring question
+   §4 already books.
+7. **`before_sun_and_moon` still drafts, and now does nothing.** §4 retires the
+   card with the multiplier, but the sheet is untouched on this branch, so
+   under the flag the row is a live draftable Common with no body. That is a
+   *sheet* edit, and it is [USER]'s.
+8. **`read_the_current`'s `charge_at_least_10` now reads a draining bank.**
+   Same cause: the sheet is untouched, so the one shipped Charge threshold
+   still fires against a bank the jellyfish is spending down. §4 already says
+   to re-author it; the flagged arm will simply show the interaction.
+9. **A non-jellyfish free play still counts as "she played it".** The recursion
+   rules are keyed to `state.kurage_autoplaying`, which is set only by the
+   memory fire — so a Sly or Havoc-style auto-play would enter the queue and
+   set the pulse key. Nothing in Kokomi's pool does that today, and narrowing
+   the exclusion to the jellyfish is what §7's finding actually asks for.
+10. **Study Buddy's replay is one play, not two.** The memory hook sits ahead
+    of `_finish_play`'s replay loop, so a replayed Companion is remembered once.
+11. **On the STARTER DECK the engine never fires, and that is a finding about
+    `T`, not a defect.** Across five whole fights the jellyfish is fielded and
+    pulses every turn, the memory fills (1–2 Companions), and the bank tops out
+    at **2** — so a threshold of 5 is never reached and the queue is still full
+    at fight end. The cause is arithmetic and it is exactly PICK A1: her
+    starter deck contains no card that Exhausts one of her own non-Companion
+    cards, so under "Exhausts only" a starter Kokomi has almost no fuel at all,
+    and the two Charge she does bank come from `bake_kurage`'s printed
+    `gain_charge`. This is the first thing a sim arm must move, and it moves in
+    one of three directions, all [USER]'s: lower `T`, take A2
+    (`play_or_exhaust`), or accept that the engine is a *drafted* engine that
+    the opening deck deliberately cannot run. **No number here is quotable** —
+    it is reported as the shape of a hole, not as a measurement.
+
+### What the pilot sees, stated so nobody mistakes this arm for a measurement
+
+`pilot/policy.py` no longer prices a retired multiplier: under the flag the
+summon is valued at one flat pulse, which badly understates a persistent
+jellyfish and is the declared safe direction to be wrong. **The pilot does not
+value the queue at all** — it does not know that playing a Companion banks a
+free replay, does not know a fire is a turn away, and does not steer play
+order. So the flagged sim arm exercises the *rule* end to end and never the
+*decision* the rule exists for, which is exactly why §6 routes acceptance
+through whole-fight blind play and forbids quoting a number off this arm.
+`M49`'s Charge valuation is untouched and stays superseded (§4).
+
+### The two recursion rules, as code
+
+Both are one line — `state.kurage_autoplaying` — and both are tested
+separately because they are two different claims, and both were verified
+**red-first** (removing the line fails four tests):
+
+- a card the jellyfish plays does **not** re-enter the memory, which is the
+  only reason §2's "self-bounding" claim is true;
+- an auto-played card is **not** "the last card Kokomi played", so the
+  turn-start replay cannot determine or overwrite the pulse before she acts.
+
+Both were owed to the doctrine seat's §7 findings rather than to the proposal.
+
+---
+
 ## 7. The doctrine seat's read
 
 The repo-visible seat — Codex CLI `0.150.1`, `gpt-5.6-sol`, independent by model

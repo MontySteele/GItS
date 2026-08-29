@@ -909,6 +909,42 @@ class CombatState:
     # BFF-dedupe, ruled 2026-08-06). combat._finish_play is the only writer
     # and owns that uniqueness; readers walk the list as-is.
     companions_played: list[str] = field(default_factory=list)
+    # --- THE KURAGE'S MEMORY (QUARANTINED, C.KURAGE_MEMORY; the proposal at
+    # review/active/kokomi-kurage-memory-2026-08-29.md). Every field below is
+    # written ONLY inside a flag branch, so with the flag off they hold their
+    # defaults for the life of every fight and nothing reads them.
+    #
+    # SCOPE IS PER FIGHT, and that is why the queue lives HERE rather than on
+    # Player beside `charge`: `companions_played` two lines up is the same
+    # scope for the same reason, and CombatState is rebuilt by `run_fight`, so
+    # the memory empties when the fight ends with no reset line to forget.
+    # (`Player.charge` needs its explicit rewind precisely because Player is
+    # the object that survives the fight.)
+    #
+    # The queue holds CARD IDS, not Card objects -- the `_op_copy_companions_
+    # played` grammar, where an id is re-materialised through the loader at
+    # use time. An id carries upgrade state (`foo` vs `foo+`), which is the
+    # "the face you played it with" half of the proposal's §2; what an id does
+    # NOT carry is a Muster cost reduction, and it does not need to, because
+    # the replay is free.
+    kurage_queue: list[str] = field(default_factory=list)
+    # The type ("attack"/"skill"/"power") of the last card KOKOMI HERSELF
+    # played this turn -- the pulse's key. Cleared at turn start; the
+    # jellyfish's own auto-play never writes it (recursion rule 2).
+    kurage_last_card_type: str = ""
+    # The enemy her own last attack was aimed at (PICK E1's "follows her
+    # lead"). Survives the turn deliberately: under PICK B1 the fire happens
+    # at turn START, so the only attack it can follow is last turn's.
+    kurage_last_attack_target: Optional[Enemy] = None
+    # True for exactly the duration of a jellyfish auto-play. BOTH recursion
+    # rules read it: a replayed Companion does not re-enter the memory, and it
+    # does not become "the last card Kokomi played".
+    kurage_autoplaying: bool = False
+    kurage_fired_this_turn: bool = False      # one card per turn, maximum
+    # PICK E1's aim, handed to `bind_card_aim` for the duration of the
+    # auto-play. None means "no override" -- E2 leaves it None on purpose and
+    # lets the shipped forced-random roll stand.
+    kurage_aim: Optional[Enemy] = None
     # Blocking Notes' slope (rework Track C.3, 2026-07-28). A per-TURN count
     # where companions_played above is a per-COMBAT list, so the two cannot be
     # derived from each other and both have to exist.

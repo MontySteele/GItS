@@ -478,11 +478,30 @@ def _expected_damage(state: CombatState, card: Card) -> float:
             # for once. The bank read is priced at the CURRENT bank: the
             # pilot cannot see its own future accrual, so this understates a
             # late-fight summon and that is the safe direction to be wrong.
-            turns = _est(state, fx.get("amount", C.KURAGE_DURATION),
-                         C.KURAGE_DURATION)
-            per_pulse = (C.KURAGE_PULSE_BASE
-                         + state.player.charge * C.KURAGE_PULSE_PER_CHARGE)
-            total += turns * per_pulse * C.PILOT_FUTURE_DAMAGE_DISCOUNT
+            if C.KURAGE_MEMORY:
+                # QUARANTINED. Under the memory rule neither term below
+                # exists: the summon is persistent (no duration to multiply)
+                # and the pulse carries no Charge multiplier. The pilot is
+                # priced at ONE flat pulse and no more, which UNDERSTATES a
+                # persistent jellyfish badly -- and that is the declared, safe
+                # direction to be wrong, the same stance the shipped comment
+                # above takes about a late-fight summon.
+                #
+                # WHAT THE PILOT DOES NOT SEE, stated rather than left to be
+                # discovered: it does not value the QUEUE at all. It does not
+                # know that playing a Companion banks a free replay, does not
+                # know a fire is one turn away, and does not steer play order.
+                # A flagged sim arm therefore exercises the RULE end to end
+                # and NOT the decision the rule exists for -- which is exactly
+                # why the proposal's §6 routes acceptance through whole-fight
+                # BLIND PLAY and forbids quoting any number off this arm.
+                total += C.KURAGE_PULSE_BASE * C.PILOT_FUTURE_DAMAGE_DISCOUNT
+            else:
+                turns = _est(state, fx.get("amount", C.KURAGE_DURATION),
+                             C.KURAGE_DURATION)
+                per_pulse = (C.KURAGE_PULSE_BASE
+                             + state.player.charge * C.KURAGE_PULSE_PER_CHARGE)
+                total += turns * per_pulse * C.PILOT_FUTURE_DAMAGE_DISCOUNT
         elif fx["op"] == "detonate":
             # Early detonation realizes bomb damage now but forfeits the
             # next-turn detonation it would get anyway — value it only
