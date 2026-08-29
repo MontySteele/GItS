@@ -1,0 +1,911 @@
+[
+ {
+  "turn_id": "klee-slice1-r3-t03",
+  "recorded": {
+   "claude": {
+    "grader": "opus-5-fresh",
+    "model": "claude-opus-5",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Eager to Help",
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Eager to Help first, for 1 energy, while the Spark bank is still 3 \u2014 that satisfies its 'If you have Spark' clause and draws 2 instead of 1. Only then Rapid Fire, which is showing 0 because of the bank; playing it consumes all 3 Sparks and puts 4 damage into Seapunk four times. There is exactly one enemy, so the random targeting is not random in practice \u2014 all 16 land on Seapunk, taking it to 30/46, and Pyro goes on. That leaves 3 energy for a hand I have just widened. The disclosure says the pile holds three 1-cost 7-damage Attacks and nothing above 2 cost, so the two cards I drew are very likely playable immediately: I spend energy on any 1-cost attacks I drew (each 7 more damage, and they cost full price now that the bank is spent), and I close with Duck and Cover for 5 Block with the last energy. If both draws are the 7-damage attacks that is 30 total damage this turn and Seapunk's 11 lands for 6. If the draws are unplayable, Duck and Cover still goes down and I simply hold the leftover energy.",
+     "q2_other_line_considered": "Two. The first was ordering \u2014 Rapid Fire before Eager to Help. Identical energy, strictly worse: spending the bank first drops Eager to Help to the 'Otherwise' half and I draw 1 instead of 2. I discarded it as soon as I read the clause. The second was skipping Eager to Help entirely and holding 3 energy for whatever Rapid Fire's damage left me needing \u2014 Rapid Fire free, Duck and Cover, 2 energy unspent. That is a real line but it burns the whole point of a full bank plus a cheap conditional draw, and unspent energy against a 46 HP enemy that is going to keep hitting is just discarded tempo.",
+     "q3_what_it_gave_up": "Certainty. Eager to Help spends 1 of 4 energy on cards I have not seen, and if the two draws come up as something I cannot use or cannot afford after Duck and Cover, that energy bought nothing and I did 16 damage on a turn that could have done 16 anyway. It also gives up the option of banking Rapid Fire for a later turn when there might be several enemies for the four hits to split across, or when a bigger Spark-discounted attack might be in hand instead \u2014 I am cashing a 0-cost window on the cheapest attack available rather than the biggest. And Duck and Cover at the end only blunts 5 of an 11, so I still take damage at 42/62; I never seriously tried to negate the hit.",
+     "q4_different_intent": "Yes, at the margin. The 11 is what buys Duck and Cover its slot; against a telegraph I could fully absorb or safely eat \u2014 a small chip hit, a block-up, a buff, anything under 5 \u2014 I would drop Duck and Cover and put that last energy into a third drawn 7-damage attack instead, going for 37 damage and taking the hit bare. The front half of the line does not move: Eager to Help then Rapid Fire is right against any attacking telegraph, because the draw clause and the free attack are both priced off my own Spark bank rather than off what the enemy is doing. A much larger telegraph would not change it either \u2014 5 Block does not save a turn against 25, so I would still spend into damage."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\klee-slice1-r3-t03\\verdict-opus-5-fresh.json"
+   },
+   "gpt": {
+    "grader": "codex-gpt-5.6-sol-fresh",
+    "model": "gpt-5.6-sol",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Eager to Help",
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Eager to Help first while Spark was still available, then Rapid Fire targeting Seapunk, then Duck and Cover.",
+     "q2_other_line_considered": "I seriously considered omitting Duck and Cover to preserve another energy for one of the two cards drawn by Eager to Help.",
+     "q3_what_it_gave_up": "It gave up one energy that could have been spent on a drawn card, potentially adding offense or another effect this turn.",
+     "q4_different_intent": "Yes. If Seapunk had not telegraphed damage, I would have omitted Duck and Cover and kept that energy available for the cards drawn by Eager to Help."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\klee-slice1-r3-t03\\verdict-codex-gpt-5.6-sol-fresh.json"
+   }
+  },
+  "seat": {
+   "grader_id": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "temperature": 0.0,
+   "refused": "",
+   "refused_why": null,
+   "wall_s": 40.0,
+   "prompt_tokens": 2112,
+   "completion_tokens": 4735,
+   "estimated_prompt_tokens": 2029,
+   "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\understudy\\logs\\local-seat\\klee-slice1-r3-t03-20260829-211629"
+  },
+  "local": {
+   "grader": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "verdict": "REFUSED",
+   "refused_by": [
+    "intent_insensitive"
+   ],
+   "line": [
+    "Eager to Help",
+    "Rapid Fire",
+    "Duck and Cover"
+   ],
+   "answers": {
+    "q1_what_did_you_play": "I played Eager to Help first while the Spark bank was still present, then Rapid Fire at its shown 0 cost, consuming the 3 Sparks, then Duck and Cover for 5 Block. I did not list any drawn cards in the ordered line because their exact printed titles are not on the page, even though the disclosure says the draw pile contains playable 1-energy 7-damage Attacks and I would play any such drawn Attack if it appeared while I still had energy.",
+    "q2_other_line_considered": "I seriously considered playing Rapid Fire first for 0, then Eager to Help, then Duck and Cover. That line would secure the 16 damage and 5 Block, but it would likely reduce Eager to Help to drawing only 1 card if its Spark condition depends on still having the Spark bank after the Attack is played.",
+    "q3_what_it_gave_up": "The chosen line gives up the possibility of playing Rapid Fire before Eager to Help. If Eager to Help\u2019s draw amount depends on having Spark at the moment it is played, playing it first is the safer way to get the larger draw. It also leaves the turn dependent on unknown drawn cards for extra damage, since I cannot name them exactly from the page.",
+    "q4_different_intent": "No. The enemy\u2019s telegraphed 11 Attack is survivable either way, and Duck and Cover is still useful because it reduces that damage. A different intent would not change the core ordering: Eager to Help should still be played before consuming the Spark bank with Rapid Fire, and Duck and Cover remains affordable and beneficial against an Attack intent."
+   }
+  },
+  "misreads": [],
+  "recorded_misreads": {
+   "claude": [
+    "called 'Duck and Cover' 'free', but the packet prints Cost: 1",
+    "called 'Duck and Cover' '0-cost', but the packet prints Cost: 1"
+   ],
+   "gpt": []
+  }
+ },
+ {
+  "turn_id": "klee-slice1-r3-t04",
+  "recorded": {
+   "claude": {
+    "grader": "opus-5-fresh",
+    "model": "claude-opus-5",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Rummage",
+     "Rapid Fire"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Rummage first for 1 energy, spending the 3-Spark bank to draw 3 cards. That leaves 3 energy and a hand that now contains the disclosed 1-energy 7-damage Attacks. Then Rapid Fire, which no longer shows 0 because the Sparks are gone, at its printed 2 energy into Seapunk (the only enemy, so all four 4-damage hits land on it) for 16. That leaves 1 energy, which I spend on one of the drawn 1-energy 7-damage Attacks for a total of 23 damage. I only list cards printed on this page in chosen_line; the third play is a drawn card whose title the page does not print, so I name it here instead of inventing a title. Seapunk ends around 23/46 and I take the full 11, going to 31/62.",
+     "q2_other_line_considered": "Yes, two. The obvious one is Rapid Fire at its shown cost of 0 (consuming the Sparks) plus Duck and Cover for 1: 16 damage, 5 Block, only 6 damage taken. But that spends 1 of 4 energy and empties the hand, leaving 3 energy on the table, so I rejected it as pure waste. The near-miss was Rummage, Rapid Fire, Duck and Cover, which costs exactly 4 and gives 16 damage plus 5 Block. I rejected that because the point of Rummage is to convert the Sparks into cards I actually cast this turn; ending on Duck and Cover means two of the three drawn cards go unplayed, so I paid a card and a Spark bank for 5 Block I already had access to without Rummage.",
+     "q3_what_it_gave_up": "All of the Block. Duck and Cover stays unplayed, so I eat the whole 11 instead of 6 \u2014 5 extra HP off a pool that is already down 20. It also spent the Spark bank on Rummage rather than on the free Rapid Fire, meaning Rapid Fire cost me 2 real energy; the Sparks bought cards instead of a discount. And it burns through draw pile now rather than banking Duck and Cover's mitigation for a turn where I need it more.",
+     "q4_different_intent": "Yes. Against 11 into 42 HP I can afford to race, because 5 HP is cheap and Seapunk's 46 needs three turns of pressure. If the telegraph were a big hit \u2014 say 20 or more \u2014 or if I were low enough that 11 threatened a two-turn death, I would take the Rummage / Rapid Fire / Duck and Cover version, or drop Rummage entirely and use the free Rapid Fire so I could hold energy for Block. Conversely, if Seapunk were blocking or buffing with no incoming damage at all, I would play the same cards but feel no tension about it \u2014 the 23-damage line becomes strictly correct rather than a trade."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\klee-slice1-r3-t04\\verdict-opus-5-fresh.json"
+   },
+   "gpt": {
+    "grader": "codex-gpt-5.6-sol-fresh",
+    "model": "gpt-5.6-sol",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Rummage",
+     "Rapid Fire",
+     "Duck and Cover"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Rummage first, spending the 3 Sparks and drawing three cards; then Rapid Fire for its printed cost of 2; then Duck and Cover.",
+     "q2_other_line_considered": "I seriously considered replacing Duck and Cover with a drawn 1-energy Attack dealing 7 damage, if Rummage drew one.",
+     "q3_what_it_gave_up": "It gave up 7 potential damage from that alternative in exchange for 5 Block against the telegraphed 11 damage.",
+     "q4_different_intent": "Yes. Against a non-damaging intent, I would favor the extra 7-damage Attack over Duck and Cover if Rummage drew one."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\klee-slice1-r3-t04\\verdict-codex-gpt-5.6-sol-fresh.json"
+   }
+  },
+  "seat": {
+   "grader_id": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "temperature": 0.0,
+   "refused": "",
+   "refused_why": null,
+   "wall_s": 39.2,
+   "prompt_tokens": 2109,
+   "completion_tokens": 4831,
+   "estimated_prompt_tokens": 2019,
+   "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\understudy\\logs\\local-seat\\klee-slice1-r3-t04-20260829-211709"
+  },
+  "local": {
+   "grader": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "verdict": "REFUSED",
+   "refused_by": [
+    "intent_insensitive"
+   ],
+   "line": [
+    "Rummage",
+    "Rapid Fire",
+    "Duck and Cover"
+   ],
+   "answers": {
+    "q1_what_did_you_play": "I played Rummage first, spending 3 Sparks and 1 energy to draw 3 cards. With the Spark bank gone, Rapid Fire reverted to its printed cost of 2, so I played it next for 2 energy, dealing 16 damage to Seapunk. I finished with Duck and Cover for 1 energy, gaining 5 Block before Seapunk\u2019s telegraphed 11 damage attack.",
+    "q2_other_line_considered": "I seriously considered playing Rapid Fire first at its Spark-discounted cost of 0, then Duck and Cover for 1 energy. That line would deal the same 16 damage and gain the same 5 Block, but it would leave 3 energy unused and would not draw the 3 cards that Rummage provides. I also considered skipping Duck and Cover after Rummage in order to spend the remaining energy on a drawn card, but the drawn card\u2019s exact printed title and effect were not known from the page, so I did not commit to that line.",
+    "q3_what_it_gave_up": "The chosen line gave up the chance to use the remaining energy on a card drawn by Rummage. It also gave up the immediate Spark discount on Rapid Fire, paying 2 energy instead of 0. In exchange, it gained 3 cards for later and kept the same immediate damage and Block as the simpler Rapid Fire plus Duck and Cover line.",
+    "q4_different_intent": "No. A different telegraphed intent would not have changed this line. If Seapunk had telegraphed a weaker attack, Duck and Cover would have been less valuable, but Rummage plus Rapid Fire would still be the strongest known immediate-damage line that does not depend on naming an unknown drawn card. If Seapunk had telegraphed a stronger attack, Duck and Cover would have been even more valuable, not less. The core tradeoff was between drawing with Rummage and using the Spark discount on Rapid Fire, and the declared 11 damage made keeping Duck and Cover reasonable."
+   }
+  },
+  "misreads": [],
+  "recorded_misreads": {
+   "claude": [
+    "called 'Rummage' 'free', but the packet prints Cost: 1",
+    "called 'Duck and Cover' 'free', but the packet prints Cost: 1"
+   ],
+   "gpt": []
+  }
+ },
+ {
+  "turn_id": "klee-slice1-r3-t05",
+  "recorded": {
+   "claude": {
+    "grader": "opus-5-fresh",
+    "model": "claude-opus-5",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Rapid Fire",
+     "Kaboom!",
+     "Imaginary Friend"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Rapid Fire first, spending the 3-Spark bank on it so it costs 0 instead of its printed 2 \u2014 that is the larger discount available and it is the bigger hit, 4 damage four times into the only enemy on the board for 16. With the full 2 Energy still in hand I then paid 1 for Kaboom! at its printed cost for 7 more, taking Nibbit from 43 to 20. The last Energy went to Imaginary Friend for 5 Block, 3 Burst Energy and Burst +5, which leaves me eating 7 of the telegraphed 12 and puts me at 35/62 going into next turn with the Burst meter at 25 plus whatever the 3 Burst Energy is worth.",
+     "q2_other_line_considered": "Two. The first was spending the Spark on Kaboom! instead \u2014 that is plainly worse, since the discount is then worth 1 Energy rather than 2 and I would have to pay Rapid Fire's printed 2, spending my whole turn to deal the same 23 with no card left for Block. The second was a real one: Rapid Fire at 0, then Imaginary Friend and Duck and Cover for 10 Block total, cutting the 12 down to 2 chip damage but dealing only 16. I weighed that against the line I took and preferred the extra 7 damage over the extra 5 Block.",
+     "q3_what_it_gave_up": "5 Block, so 5 more HP off me this turn \u2014 7 taken instead of 2. It also leaves Duck and Cover unplayed and my hand thinner on defence for whatever comes next. And it commits the Spark bank to a random-target attack; with one enemy that randomness costs nothing, but the bank is gone either way and Kaboom! got paid for out of pocket.",
+     "q4_different_intent": "Yes. The intent is doing real work here \u2014 12 against 42 HP is affordable, which is exactly why I took the damage line. If Nibbit had telegraphed something in the low twenties or higher, or anything that would put a lethal or near-lethal number on me across this turn and the next, I would have dropped Kaboom! and played Rapid Fire, Imaginary Friend and Duck and Cover for 10 Block. If the intent had been a defensive or buffing one with no attack at all, I would have gone the other way \u2014 cut Imaginary Friend's Block value out of the decision and still played it purely for the Burst, or looked harder at whether Duck and Cover was simply dead this turn."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\klee-slice1-r3-t05\\verdict-opus-5-fresh.json"
+   },
+   "gpt": {
+    "grader": "codex-gpt-5.6-sol-fresh",
+    "model": "gpt-5.6-sol",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Rapid Fire",
+     "Kaboom!",
+     "Imaginary Friend"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Rapid Fire on Nibbit first, consuming the 3 Sparks, then Kaboom! on Nibbit for 1 Energy, then Imaginary Friend for 1 Energy.",
+     "q2_other_line_considered": "Rapid Fire, Imaginary Friend, and Duck and Cover, trading Kaboom!'s 7 damage for 5 additional Block.",
+     "q3_what_it_gave_up": "It gave up the additional 5 Block from Duck and Cover, so only 5 of the incoming 12 damage is blocked.",
+     "q4_different_intent": "Yes. A substantially larger attack intent would have moved me to Rapid Fire, Imaginary Friend, and Duck and Cover for 10 Block."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\klee-slice1-r3-t05\\verdict-codex-gpt-5.6-sol-fresh.json"
+   }
+  },
+  "seat": {
+   "grader_id": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "temperature": 0.0,
+   "refused": "",
+   "refused_why": null,
+   "wall_s": 39.2,
+   "prompt_tokens": 2174,
+   "completion_tokens": 4676,
+   "estimated_prompt_tokens": 2076,
+   "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\understudy\\logs\\local-seat\\klee-slice1-r3-t05-20260829-211749"
+  },
+  "local": {
+   "grader": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "verdict": "SURVIVES",
+   "refused_by": [],
+   "line": [
+    "Rapid Fire",
+    "Kaboom!",
+    "Imaginary Friend"
+   ],
+   "answers": {
+    "q1_what_did_you_play": "I played Rapid Fire first at Nibbit, using the Spark bank to make it cost 0. Then I played Kaboom! at Nibbit for its printed cost of 1, and finally played Imaginary Friend for 1 energy. This deals 23 total damage, gains 5 Block, and adds the Burst-related value from Imaginary Friend while using all 2 energy.",
+    "q2_other_line_considered": "I seriously considered Rapid Fire, Imaginary Friend, and Duck and Cover. That line would deal 16 damage and gain 10 Block, trading 7 damage for 5 additional Block.",
+    "q3_what_it_gave_up": "The chosen line gave up the extra 5 Block from also playing Duck and Cover. Compared with the two-block line, it has less protection against the telegraphed 12 damage, but it deals 7 more damage and still keeps the Burst-related value from Imaginary Friend.",
+    "q4_different_intent": "Yes, in principle. A much larger attack intent could make the extra 5 Block from the two-block line more valuable, especially if it would be the difference between surviving and taking severe damage. A Defend intent or a smaller attack would not have moved me away from the higher-damage line."
+   }
+  },
+  "misreads": [],
+  "recorded_misreads": {
+   "claude": [],
+   "gpt": []
+  }
+ },
+ {
+  "turn_id": "klee-slice1-r3-t06",
+  "recorded": {
+   "claude": {
+    "grader": "opus-5-fresh",
+    "model": "claude-opus-5",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Rapid Fire",
+     "Kaboom!",
+     "Duck and Cover"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Rapid Fire first, then Kaboom!, then Duck and Cover. The Spark bank is 3 and only covers one discounted Attack, so I spent it on the card whose printed cost is highest: Rapid Fire prints 2 and shows 0, Kaboom! prints 1 and shows 0. Playing Rapid Fire first for free banks the bigger discount and leaves both energy. Nibbit is the only enemy, so all four of Rapid Fire's random 4-damage hits land on it for 16. Kaboom! then costs its printed 1 for 7 more, total 23 damage into a 43 HP enemy, and the last energy buys Duck and Cover for 5 Block, so the telegraphed 12 lands as 7 and I end at 35 HP with Nibbit at 20.",
+     "q2_other_line_considered": "Two. First, the mirrored order \u2014 Kaboom! at 0 and Rapid Fire at its printed 2 \u2014 same 23 damage but it eats both energy, leaves nothing for Duck and Cover, and I take the full 12. Strictly worse, so it was ruled out on sight. The one I actually weighed was the Slow Burn line: Slow Burn for 1 and Duck and Cover for 1, for 10 Block, 10 Burst Energy and Burst +5 off a meter sitting at 20 of 40. That takes the incoming 12 down to 2 and buys real meter progress. I rejected it because Slow Burn spends the 3 Sparks itself, so it burns the same resource that is currently worth a free Rapid Fire, and it deals zero damage into a 43 HP enemy I cannot kill this turn either way.",
+     "q3_what_it_gave_up": "The Burst meter and the fuller guard. I skipped Slow Burn entirely, so I gave up 10 Burst Energy and the Burst +5, and I left the meter where it was; Slow Burn also stays in hand competing for a future turn's Spark bank rather than being cashed now. I took 7 to the face instead of 2 by settling for 5 Block instead of 10, and I spent the whole Spark bank on damage, so my Attacks are back to printed cost next turn with nothing banked.",
+     "q4_different_intent": "Yes, though it takes a lot. Against this 12 the race maths is clear and 23 damage is worth 7 HP. If Nibbit had telegraphed something large enough that the extra 5 Block mattered for survival \u2014 roughly high thirties against my 42, or anything that would put me in lethal range \u2014 I would switch to Slow Burn plus Duck and Cover for 10 Block and bank the Burst instead. A defensive or block-gaining telegraph would also move me: chipping 23 into a wall that is about to gain armour is worth less than the meter, so I would take the Slow Burn line there too. A weaker attack, or a second enemy on the board, would not have changed anything \u2014 a second body only makes Rapid Fire's random split less certain, not less worth playing first."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\klee-slice1-r3-t06\\verdict-opus-5-fresh.json"
+   },
+   "gpt": {
+    "grader": "codex-gpt-5.6-sol-fresh",
+    "model": "gpt-5.6-sol",
+    "verdict": "REFUSED",
+    "refused_by": [
+     "intent_insensitive"
+    ],
+    "line": [
+     "Rapid Fire",
+     "Kaboom!",
+     "Duck and Cover"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Rapid Fire on Nibbit for 0, consuming 3 Sparks, then Kaboom! on Nibbit for its printed cost of 1, then Duck and Cover for 1.",
+     "q2_other_line_considered": "Kaboom! first for 0, consuming the Sparks, followed by Rapid Fire for its printed cost of 2. It dealt the same total damage but gained no Block.",
+     "q3_what_it_gave_up": "It gave up nothing in damage versus the other line; it retained 5 Block against Nibbit's telegraphed 12-damage attack.",
+     "q4_different_intent": "No. With only one enemy, this line deals the maximum available attack damage while also adding 5 Block, so a different telegraphed intent would not have changed it."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\klee-slice1-r3-t06\\verdict-codex-gpt-5.6-sol-fresh.json"
+   }
+  },
+  "seat": {
+   "grader_id": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "temperature": 0.0,
+   "refused": "",
+   "refused_why": null,
+   "wall_s": 39.5,
+   "prompt_tokens": 2180,
+   "completion_tokens": 4720,
+   "estimated_prompt_tokens": 2079,
+   "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\understudy\\logs\\local-seat\\klee-slice1-r3-t06-20260829-211828"
+  },
+  "local": {
+   "grader": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "verdict": "SURVIVES",
+   "refused_by": [],
+   "line": [
+    "Rapid Fire",
+    "Kaboom!"
+   ],
+   "answers": {
+    "q1_what_did_you_play": "I played Rapid Fire first, using the 3 Spark bank to make it cost 0, then played Kaboom! for its printed cost of 1. This deals 16 damage from Rapid Fire and 7 damage from Kaboom!, for 23 total damage to Nibbit, leaving it at 20 HP. I did not play Slow Burn or Duck and Cover.",
+    "q2_other_line_considered": "I seriously considered Rapid Fire followed by Duck and Cover, or Duck and Cover followed by Rapid Fire, for 16 damage and 5 Block. I also considered Slow Burn followed by Duck and Cover for 10 Block and no damage, but that gave up too much immediate damage against a 43 HP enemy that I could not kill this turn.",
+    "q3_what_it_gave_up": "The chosen line gave up all Block. Nibbit\u2019s telegraphed 12 damage will reduce my HP from 42 to 30. It also gave up the Burst-related value from Slow Burn and the extra survivability from Duck and Cover. In exchange, it maximized immediate damage by using the Spark discount on the higher-printed-cost attack and then spending the remaining energy on the other attack.",
+    "q4_different_intent": "Yes. If Nibbit\u2019s intent had been a much larger attack, especially one that could threaten my remaining 42 HP more seriously, I would have shifted toward a Block line such as Slow Burn plus Duck and Cover, or Rapid Fire plus Duck and Cover. If the intent had been Defend or a non-damaging Skill, the damage-maximizing line would have remained at least as attractive."
+   }
+  },
+  "misreads": [],
+  "recorded_misreads": {
+   "claude": [],
+   "gpt": []
+  }
+ },
+ {
+  "turn_id": "kokomi-slice2-t01",
+  "recorded": {
+   "claude": {
+    "grader": "opus-5-fresh",
+    "model": "claude-opus-5",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "All Streams Flow to the Sea",
+     "Water's Edge"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Both energy into damage: All Streams Flow to the Sea at the Sludge Spinner for 9 (Charge already counted), then Water's Edge for 6, total 15. That takes the Spinner from 34 to 19 and leaves me with no Block, so I eat the telegraphed 8 and end at 40/70. With only one enemy and a single 8-damage intent, 8 HP off a 48 pool is cheap, and 15 damage a turn puts the Spinner on a three-turn clock instead of a five-turn one. Both cards apply Hydro, so order between them carries nothing I can see; I led with the bigger hit in case anything unstated keys off the first strike.",
+     "q2_other_line_considered": "Gyorin Formation alone: 10 Block now plus 6 at the start of next turn, which fully eats the 8 and banks 2 plus the 6 carryover. I turned it down because it deals zero damage while the Spinner is at 34 \u2014 it buys a turn of unhurt life but adds a whole turn to the fight, and each extra turn is another 8 coming at me, so pure blocking against a single small attacker just trades my HP later for my HP now at no profit. I also weighed the split, All Streams plus Coral Guard: 9 damage and 5 Block, taking only 3. That's the safe middle, but it pays 6 damage for 5 Block, and at 48/70 against an 8 I don't need to buy that.",
+     "q3_what_it_gave_up": "All the defense in the hand and 8 HP of real life. I end the turn at 40/70 with 0 Block, and Gyorin's 6-Block start-of-next-turn rider is gone unless I draw it again. If the Spinner's next telegraph is much larger, or a second body joins, I face it lower and with nothing banked. I also spent the Charge-boosted All Streams into a target I can't kill this turn, so none of that 15 is lethal overkill value \u2014 it's purely putting the clock forward.",
+     "q4_different_intent": "Yes. If the Spinner had telegraphed something near or above 16-18, or anything that would put me low enough that the next hit threatened me, I'd play Gyorin Formation instead and take the 10-plus-6 to absorb it. A telegraphed defensive or buffing intent \u2014 Block gain in particular \u2014 would also move me, since blocking nothing is wasted and I'd want the damage in before the Block lands. And a telegraph in the middle band, say 12-14, would push me to the split line, All Streams plus Coral Guard, keeping pressure on while trimming the hit."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t01\\verdict-opus-5-fresh.json"
+   },
+   "gpt": {
+    "grader": "codex-gpt-5.6-sol-fresh",
+    "model": "gpt-5.6-sol",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "All Streams Flow to the Sea",
+     "Coral Guard"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "I played All Streams Flow to the Sea on Sludge Spinner, then Coral Guard, dealing 9 damage and gaining 5 Block against the incoming 8 damage.",
+     "q2_other_line_considered": "I seriously considered playing All Streams Flow to the Sea followed by Water's Edge for 15 total damage, accepting the full 8-damage attack.",
+     "q3_what_it_gave_up": "It gave up 6 immediate damage compared with the two-attack line and still allowed 3 damage through.",
+     "q4_different_intent": "Yes. If the enemy had not intended to attack, I would have played All Streams Flow to the Sea and Water's Edge for maximum immediate damage."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t01\\verdict-codex-gpt-5.6-sol-fresh.json"
+   }
+  },
+  "seat": {
+   "grader_id": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "temperature": 0.0,
+   "refused": "",
+   "refused_why": null,
+   "wall_s": 36.6,
+   "prompt_tokens": 1924,
+   "completion_tokens": 4601,
+   "estimated_prompt_tokens": 1828,
+   "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\understudy\\logs\\local-seat\\kokomi-slice2-t01-20260829-211908"
+  },
+  "local": {
+   "grader": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "verdict": "SURVIVES",
+   "refused_by": [],
+   "line": [
+    "Gyorin Formation"
+   ],
+   "answers": {
+    "q1_what_did_you_play": "I played Gyorin Formation for 2 energy, gaining 10 Block and setting 6 Block for the start of my next turn. The Sludge Spinner's telegraphed 8 damage attack is fully blocked, so I remain at 48 HP and the enemy remains at 34 HP.",
+    "q2_other_line_considered": "I seriously considered All Streams Flow to the Sea followed by Coral Guard: 9 damage and 5 Block, taking 3 damage but reducing the enemy to 25 HP. I rejected it because Gyorin Formation avoids all 8 damage and adds 6 Block next turn.",
+    "q3_what_it_gave_up": "It gave up immediate damage and Hydro applications: the enemy stays at 34 instead of 25, or 19 if I had played both damage cards, and both energy go to defense rather than pressure.",
+    "q4_different_intent": "Yes. If the intent had been a non-attack such as Defend or a buff, the 10 Block would be less valuable and I would have leaned toward damage, likely All Streams Flow to the Sea plus Water's Edge or All Streams Flow to the Sea plus Coral Guard. A larger attack would have made Gyorin Formation even more attractive."
+   }
+  },
+  "misreads": [],
+  "recorded_misreads": {
+   "claude": [],
+   "gpt": []
+  }
+ },
+ {
+  "turn_id": "kokomi-slice2-t02",
+  "recorded": {
+   "claude": {
+    "grader": "opus-5-fresh",
+    "model": "claude-opus-5",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Sounding Line",
+     "Water's Edge"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Both energy into damage: Sounding Line at the Sludge Spinner first (spending 6 of my 8 Charge for 12 damage and Hydro), then Water's Edge at it for 6 more. That is 18 damage, taking the Spinner from 34 to 16, and leaves me 2 Charge. I take the telegraphed 8 unblocked and end at 40/70. I played Sounding Line first purely so the Charge spend happens while I still hold it; nothing else in the hand competes for Charge.",
+     "q2_other_line_considered": "Two. Sounding Line plus Coral Guard \u2014 12 damage and 5 Block, eating only 3 \u2014 was the one I actually weighed, and I rejected it because 5 Block buys less than the 6 damage Water's Edge gives when the incoming hit is 8 and I am at 48/70. Gyorin Formation alone (10 Block now, 6 next turn) I looked at and dismissed faster: it fully absorbs the 8 and banks more, but deals nothing, and against a 34 HP enemy on a clock I set myself, a zero-damage turn just buys the Spinner another swing at me later.",
+     "q3_what_it_gave_up": "All defence. I ate the full 8 rather than turning any of it aside, so I am spending health as the resource this turn. It also empties most of my Charge \u2014 8 down to 2 \u2014 so if a Charge-hungry card shows up next turn I cannot pay for it, and Gyorin Formation's start-of-next-turn 6 Block is a future cushion I chose not to bank. In exchange I am 18 damage further along and the Spinner is inside reach of a two-card finish.",
+     "q4_different_intent": "Yes. The 8 is small enough that trading through it is clearly right; a much bigger telegraphed hit flips the turn. If the Spinner had shown something like 18 or more, Gyorin Formation becomes the play \u2014 the 10 Block plus 6 next turn actually pays for its 2 energy against a number that large. A telegraphed block or buff on the enemy instead of an attack would have pushed me the same way I went, only harder: all damage, and I would not have thought about Coral Guard at all. A defensive or non-damaging intent from the enemy would also make Coral Guard strictly wasted."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t02\\verdict-opus-5-fresh.json"
+   },
+   "gpt": {
+    "grader": "codex-gpt-5.6-sol-fresh",
+    "model": "gpt-5.6-sol",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Sounding Line",
+     "Coral Guard"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "I played Sounding Line on Sludge Spinner, then Coral Guard. This dealt 12 damage and gained 5 Block against the incoming 8 damage.",
+     "q2_other_line_considered": "I seriously considered playing Gyorin Formation alone to block all 8 incoming damage and gain 6 Block next turn.",
+     "q3_what_it_gave_up": "The chosen line gave up 3 HP, 6 Charge, and Gyorin Formation's 6 next-turn Block in exchange for dealing 12 damage now.",
+     "q4_different_intent": "Yes. If the enemy had not intended to attack, I would have played Sounding Line followed by Water's Edge for 18 damage instead of spending energy on Block."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t02\\verdict-codex-gpt-5.6-sol-fresh.json"
+   }
+  },
+  "seat": {
+   "grader_id": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "temperature": 0.0,
+   "refused": "",
+   "refused_why": null,
+   "wall_s": 37.9,
+   "prompt_tokens": 1921,
+   "completion_tokens": 4517,
+   "estimated_prompt_tokens": 1822,
+   "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\understudy\\logs\\local-seat\\kokomi-slice2-t02-20260829-211945"
+  },
+  "local": {
+   "grader": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "verdict": "SURVIVES",
+   "refused_by": [],
+   "line": [
+    "Gyorin Formation"
+   ],
+   "answers": {
+    "q1_what_did_you_play": "I played Gyorin Formation for 2 energy. It gave 10 Block immediately and set up 6 Block at the start of my next turn, which fully covers the telegraphed 8 damage from Sludge Spinner.",
+    "q2_other_line_considered": "I seriously considered Sounding Line followed by Coral Guard. That line would deal 12 damage, apply Hydro, spend 6 Charge, and gain 5 Block, but it would leave me taking 3 damage this turn and would forgo the extra 6 Block next turn.",
+    "q3_what_it_gave_up": "The chosen line gave up all immediate damage, all Hydro application this turn, and the chance to spend 6 Charge. It also left Sludge Spinner at full 34 HP instead of reducing it, trading pressure for stronger current and next-turn defense.",
+    "q4_different_intent": "Yes. If the enemy had telegraphed a non-attack, a very weak attack, or an effect that made immediate pressure more valuable than defense, I would have been more inclined to play Sounding Line with Coral Guard or Water's Edge to deal damage and spend Charge. Against the printed 8 Attack, Gyorin Formation was the clearer choice."
+   }
+  },
+  "misreads": [],
+  "recorded_misreads": {
+   "claude": [],
+   "gpt": []
+  }
+ },
+ {
+  "turn_id": "kokomi-slice2-t03",
+  "recorded": {
+   "claude": {
+    "grader": "opus-5-fresh",
+    "model": "claude-opus-5",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Read the Current",
+     "All Streams Flow to the Sea"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Read the Current into Nibbit first, then All Streams Flow to the Sea into Nibbit. That is both energy on the two biggest hits. Read the Current is 7 plus 6 for being at 12 Charge, so 13; All Streams is a printed 11 with the Charge already folded in. 24 damage total, taking Nibbit from 40 to 16. I led with Read the Current specifically because it is the card that cares about the Charge threshold \u2014 if anything I played consumed Charge, I wanted the 10-or-more check to happen while I was certainly at 12. All Streams reads as a fixed 11 regardless, so it loses nothing by going second.",
+     "q2_other_line_considered": "Coral Guard plus All Streams Flow to the Sea: 5 Block and 11 damage. I weighed it and dropped it. Block 5 against a 12-damage telegraph absorbs 5 and lets 7 through, so it buys 5 HP; playing Read the Current instead buys 13 damage. At 48/70 I am not near any threshold that makes 5 HP worth more than 13 damage on a 40-HP enemy I need at least two more turns to chew through. Water's Edge never got in \u2014 it is strictly a worse Read the Current at this Charge (6 versus 13 for the same 1 energy), so it was never a candidate for either slot.",
+     "q3_what_it_gave_up": "All the defence. I eat the full 12 and drop to 36/70, where the Coral Guard line would have left me at 41. I also spent the Charge-fed Read the Current now rather than banking it \u2014 if Charge drains and I do not rebuild it above 10, that card is a 7 next time instead of a 13, so I cashed the premium version at the moment it was worth the most. And I end the turn with Coral Guard and Water's Edge still in hand, which may or may not survive to next turn depending on how the hand cycles.",
+     "q4_different_intent": "Yes, though it takes a fairly specific telegraph. A 12-damage attack is survivable and 5 Block barely dents it, so no ordinary attack number moves me \u2014 even a considerably larger attack mostly argues for more damage, not for a 5-Block card that would still let most of it through. What would change the line is a telegraph where 5 Block crosses a real boundary: an attack in the 5-to-7 range that Coral Guard fully or nearly negates, or a multi-hit intent where each small hit gets blunted. A defensive or block-gaining intent on Nibbit would also swing me harder toward damage right now before its Block lands, but that is the line I am already playing. Nothing about this particular 12 changed my mind."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t03\\verdict-opus-5-fresh.json"
+   },
+   "gpt": {
+    "grader": "codex-gpt-5.6-sol-fresh",
+    "model": "gpt-5.6-sol",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Read the Current",
+     "All Streams Flow to the Sea"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Read the Current on Nibbit, then All Streams Flow to the Sea on Nibbit.",
+     "q2_other_line_considered": "All Streams Flow to the Sea on Nibbit followed by Coral Guard, trading damage for 5 Block against the incoming attack.",
+     "q3_what_it_gave_up": "It gave up 5 Block and therefore accepted the full telegraphed 12 damage in exchange for more damage to Nibbit.",
+     "q4_different_intent": "Yes. A sufficiently larger telegraphed attack would have made me play Coral Guard alongside All Streams Flow to the Sea."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t03\\verdict-codex-gpt-5.6-sol-fresh.json"
+   }
+  },
+  "seat": {
+   "grader_id": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "temperature": 0.0,
+   "refused": "",
+   "refused_why": null,
+   "wall_s": 39.1,
+   "prompt_tokens": 1932,
+   "completion_tokens": 4589,
+   "estimated_prompt_tokens": 1824,
+   "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\understudy\\logs\\local-seat\\kokomi-slice2-t03-20260829-212023"
+  },
+  "local": {
+   "grader": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "verdict": "SURVIVES",
+   "refused_by": [],
+   "line": [
+    "All Streams Flow to the Sea",
+    "Read the Current"
+   ],
+   "answers": {
+    "q1_what_did_you_play": "I played All Streams Flow to the Sea on Nibbit, then Read the Current on Nibbit, using both energy on damage cards because the telegraphed 12 damage is not lethal and no Hydro interaction is stated on the page.",
+    "q2_other_line_considered": "I seriously considered Coral Guard plus All Streams Flow to the Sea for 5 Block and 11 damage, but the enemy's declared 12 damage does not threaten my 48 HP, so I preferred the extra damage from Read the Current.",
+    "q3_what_it_gave_up": "The chosen line gave up the 5 Block from Coral Guard, leaving me with no Block and taking the full 12 damage from Nibbit's declared attack.",
+    "q4_different_intent": "Yes. If Nibbit had telegraphed a much larger attack, especially one where 5 Block would keep me above 0 HP, I would have prioritized Coral Guard over the second damage card."
+   }
+  },
+  "misreads": [],
+  "recorded_misreads": {
+   "claude": [],
+   "gpt": []
+  }
+ },
+ {
+  "turn_id": "kokomi-slice2-t04",
+  "recorded": {
+   "claude": {
+    "grader": "opus-5-fresh",
+    "model": "claude-opus-5",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "All Streams Flow to the Sea",
+     "Fathom the Tide"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Both energy into damage, in a specific order: All Streams Flow to the Sea first, then Fathom the Tide, both at Nibbit. The order is the whole point. All Streams prints 11 'already including Charge', and the disclosure says it reads Charge at one point per two Charge, so its 11 is what 12 Charge buys; Fathom the Tide spends 6 of that Charge for its extra 6. Cast All Streams while Charge is still 12 and it is worth 11; cast it after Fathom and it is reading only 6 Charge, so it would be worth about 8. Played in this order I deal 11 + 13 = 24 and leave Nibbit at 16 with 6 Charge banked. Reversed it is 21. I eat the full 12, going to 36/70, which is never close to dangerous.",
+     "q2_other_line_considered": "Two. The first was Fathom the Tide plus Coral Guard: 13 damage and 5 Block, so 7 through to face and Nibbit at 27. I rejected it because 5 Block against a 12 intent is not a wall, it is a discount, and buying 7 HP off a 48 HP pool with a card slot that could have been 11 damage is the wrong trade when nothing about this board threatens to kill me. The second was the Charge-conserving line, All Streams plus Water's Edge for 17, which leaves all 12 Charge intact so a future Fathom still has its full spend and All Streams keeps reading 11. That one I weighed properly, since Charge is a real resource and spending it now makes Fathom worse later, but 17 versus 24 is seven damage for a bank I have no printed reason to believe I need \u2014 nothing on this page tells me what a later turn looks like, and 24 now is the read I can actually justify from what is in front of me.",
+     "q3_what_it_gave_up": "The 5 Block, so I take the attack whole: 12 to the face rather than 7. It gave up half the Charge pool \u2014 12 down to 6 \u2014 which makes the next All Streams read 6 Charge instead of 12 and leaves Fathom's spend clause exactly on the line at 6. And it gave up Water's Edge and Coral Guard entirely, both unplayed at 2 energy. In exchange, Nibbit ends at 16, which is inside one more turn's reach.",
+     "q4_different_intent": "Yes. The intent is what makes Coral Guard a rounding error here. At 12 incoming against 48 HP I can simply absorb it, so blocking buys nothing I need. Push the telegraph high enough that the hit threatens me \u2014 or start me low enough that 12 is a meaningful fraction of what is left \u2014 and Coral Guard stops being a wasted slot and starts being the card that keeps me alive to spend the banked Charge. A defensive or buffing telegraph would push the other way and make me even more comfortable dumping everything into damage. There is also a specific number that would flip the whole line: if Nibbit were low enough that 24 killed it, or if some line reached lethal that this one does not, the order and the card choice would be dictated by exact lethal instead of by max damage, and the Charge question would stop mattering at all."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t04\\verdict-opus-5-fresh.json"
+   },
+   "gpt": {
+    "grader": "codex-gpt-5.6-sol-fresh",
+    "model": "gpt-5.6-sol",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Fathom the Tide",
+     "All Streams Flow to the Sea"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "I played Fathom the Tide on Nibbit, spending 6 Charge for 13 damage, then All Streams Flow to the Sea on Nibbit for 11 damage.",
+     "q2_other_line_considered": "I seriously considered Coral Guard followed by Fathom the Tide, trading 11 damage for 5 Block against the telegraphed attack.",
+     "q3_what_it_gave_up": "It gave up Coral Guard's 5 Block, so I take the full telegraphed 12 damage in exchange for dealing 24 damage.",
+     "q4_different_intent": "Yes. A substantially larger telegraphed attack would have moved me to Coral Guard plus Fathom the Tide; a non-attack intent would not have changed this line."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t04\\verdict-codex-gpt-5.6-sol-fresh.json"
+   }
+  },
+  "seat": {
+   "grader_id": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "temperature": 0.0,
+   "refused": "",
+   "refused_why": null,
+   "wall_s": 38.6,
+   "prompt_tokens": 1927,
+   "completion_tokens": 4584,
+   "estimated_prompt_tokens": 1829,
+   "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\understudy\\logs\\local-seat\\kokomi-slice2-t04-20260829-212102"
+  },
+  "local": {
+   "grader": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "verdict": "SURVIVES",
+   "refused_by": [],
+   "line": [
+    "Fathom the Tide",
+    "All Streams Flow to the Sea"
+   ],
+   "answers": {
+    "q1_what_did_you_play": "I played Fathom the Tide on Nibbit, spending 6 Charge for its extra 6 damage, then played All Streams Flow to the Sea on Nibbit. This used both energy and dealt the highest known damage available this turn.",
+    "q2_other_line_considered": "I seriously considered All Streams Flow to the Sea plus Coral Guard, because it would keep Charge at 12 and gain 5 Block against the telegraphed 12 damage attack, but it would deal much less damage.",
+    "q3_what_it_gave_up": "The chosen line gave up 5 Block and left 6 Charge unspent compared with the guard line. It also accepted taking the full 12 damage, leaving HP at 36 instead of 41 if Coral Guard had been played.",
+    "q4_different_intent": "Yes. If the enemy had telegraphed a much larger attack that threatened my HP, I would have prioritized Coral Guard for Block. Against the shown 12 damage attack, my HP is safe enough that extra damage is the better known trade."
+   }
+  },
+  "misreads": [],
+  "recorded_misreads": {
+   "claude": [],
+   "gpt": []
+  }
+ },
+ {
+  "turn_id": "kokomi-slice2-t05",
+  "recorded": {
+   "claude": {
+    "grader": "opus-5-fresh",
+    "model": "claude-opus-5",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "All Streams Flow to the Sea",
+     "Water's Edge"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "I spent both energy on damage: All Streams Flow to the Sea into Nibbit for 9 (Charge already counted), then Water's Edge for 6, for 15 total. That leaves Nibbit at 19/42 and I eat the full 12, going to 36/70. The reasoning is the clock. Nibbit is a single enemy at 34 HP hitting for 12 a turn; at roughly 15 damage a turn I need three attacking turns to kill it, and the enemy only gets to swing on the first two of those. That is 24 incoming across the fight. Anything I spend on defense now does not shorten the fight, it just moves the same 34 HP further out and buys the enemy another swing to be paid for later. With 48 HP I can afford two hits comfortably, so the cheapest total-damage-taken plan is to spend everything on closing the gap. I put All Streams first purely because it is the bigger hit and I wanted it on the board before anything could change; the page gives me no reaction or ordering effect that makes the sequence matter.",
+     "q2_other_line_considered": "Gyorin Formation alone, and I weighed it seriously \u2014 it is the closest call on the page. Two energy for 10 Block plus 6 at the start of next turn is 16 block against a 12-damage telegraph, which is more raw value than 15 damage and would have left me at 46/70 with a head start on the following swing. I rejected it because it deals zero: the fight still needs 34 damage out of me, and a turn of pure defense just adds a turn in which Nibbit gets to attack. Tallying both lines out to the kill, the totals came out within a few HP of each other, and I took the aggressive one because it ends the fight sooner and does not depend on future draws cooperating. I also looked at the middle line, Coral Guard plus All Streams \u2014 5 Block and 9 damage, take 7 \u2014 and dismissed it as the worst of both: not enough block to matter against a 12, and it throws away a third of my damage.",
+     "q3_what_it_gave_up": "It gave up all 16 points of blocking, including the 6 that would have carried into next turn, and it gave up the safe HP total: I am at 36 instead of 46, and after the next swing I will be at 24, which is where the fight starts to have a floor I care about. It also gave up flexibility \u2014 if my next hand is short on damage, the tempo I bought here is wasted and I will have taken 12 for nothing.",
+     "q4_different_intent": "Yes. Attack for 12 against 48 HP is exactly the band where racing is affordable; move the number and the answer moves. A substantially bigger hit \u2014 say high teens or more \u2014 makes Gyorin Formation correct, because 10 Block plus 6 next turn converts a threatening swing into a survivable one and my HP stops being a resource I can freely spend. A defensive or buffing intent, or any turn where Nibbit was not attacking at all, would have made the all-damage line strictly free rather than a trade, and I would have played it with no deliberation. A telegraph of a multi-hit attack would also have changed it, since 10 Block absorbs a big single hit far better than several small ones and I would have had to re-weigh Coral Guard."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t05\\verdict-opus-5-fresh.json"
+   },
+   "gpt": {
+    "grader": "codex-gpt-5.6-sol-fresh",
+    "model": "gpt-5.6-sol",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Gyorin Formation"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "I played Gyorin Formation, gaining 10 Block now and 6 Block at the start of my next turn.",
+     "q2_other_line_considered": "I seriously considered playing Coral Guard followed by All Streams Flow to the Sea, gaining 5 Block and dealing 9 damage to Nibbit.",
+     "q3_what_it_gave_up": "It gave up dealing damage and applying Hydro this turn in exchange for reducing the telegraphed 12 damage to 2 and gaining 6 Block next turn.",
+     "q4_different_intent": "Yes. If Nibbit had not telegraphed damage, I would have played Water's Edge and All Streams Flow to the Sea on Nibbit for 15 total damage and Hydro application."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t05\\verdict-codex-gpt-5.6-sol-fresh.json"
+   }
+  },
+  "seat": {
+   "grader_id": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "temperature": 0.0,
+   "refused": "",
+   "refused_why": null,
+   "wall_s": 27.3,
+   "prompt_tokens": 1926,
+   "completion_tokens": 3208,
+   "estimated_prompt_tokens": 1826,
+   "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\understudy\\logs\\local-seat\\kokomi-slice2-t05-20260829-212141"
+  },
+  "local": {
+   "grader": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "verdict": "SURVIVES",
+   "refused_by": [],
+   "line": [
+    "Gyorin Formation"
+   ],
+   "answers": {
+    "q1_what_did_you_play": "I played Gyorin Formation, using both energy to gain 10 Block now and 6 Block at the start of my next turn. Against Nibbit's telegraphed 12 damage, this leaves me taking only 2 damage and keeps the enemy at 34 HP.",
+    "q2_other_line_considered": "I seriously considered playing Coral Guard followed by All Streams Flow to the Sea, which would give 5 Block and deal 9 damage, but it would leave me taking 7 damage instead of 2 and would not provide the next-turn Block from Gyorin Formation.",
+    "q3_what_it_gave_up": "The chosen line gave up all damage this turn and any Hydro application. It leaves Nibbit at full 34 HP and spends both energy on defense instead of dealing 9 or 15 damage.",
+    "q4_different_intent": "Yes. If Nibbit had telegraphed a non-attack or a much smaller attack, I would have leaned more toward playing Water's Edge and All Streams Flow to the Sea for 15 damage, or at least Coral Guard plus an attack. The 12 damage intent is what makes Gyorin Formation's 10 Block the clear survival play."
+   }
+  },
+  "misreads": [],
+  "recorded_misreads": {
+   "claude": [],
+   "gpt": []
+  }
+ },
+ {
+  "turn_id": "kokomi-slice2-t06",
+  "recorded": {
+   "claude": {
+    "grader": "opus-5-fresh",
+    "model": "claude-opus-5",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "All Streams Flow to the Sea",
+     "Twin Tides"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "All Streams Flow to the Sea at Nibbit first, then Twin Tides taking the Spend 6 Charge half for 12 Block. Order was the whole point: All Streams reads Charge when it resolves, so it has to land while Charge is still 8 and it is printed at 9. If I had led with Twin Tides, Charge would be 2 and the attack would shrink. That sequencing turns 2 energy into 9 damage plus exactly enough Block to eat the telegraphed 12 with nothing spilling over \u2014 Nibbit to 25, me at 48 untouched.",
+     "q2_other_line_considered": "Two, seriously. First, Water's Edge plus All Streams Flow to the Sea for 15 damage, taking the full 12 to the face and dropping to 36. Trading 12 HP for 6 extra damage against an enemy still at 34 is a bad rate this early in the fight, so it lost. Second, Gyorin Formation alone: 10 Block now and 6 more at the start of next turn, which is 16 Block across two turns for 2 energy versus Twin Tides' 12. But it leaks 2 damage this turn and deals nothing, and its 10 is also charge-inflated, so it is buying next turn's defense at the price of this turn's tempo. Twin Tides plus an attack beat it on both axes that mattered.",
+     "q3_what_it_gave_up": "Charge, mainly. I burned 8 down to 2, which deflates All Streams Flow to the Sea and Gyorin Formation for the next few turns until it rebuilds \u2014 a copy of All Streams drawn next turn is a much smaller card than the one I just played. I also gave up the 6 Block that Gyorin would have deposited at the start of my next turn, so I enter that turn naked, and I gave up the 6 damage Water's Edge would have added, along with its Hydro application.",
+     "q4_different_intent": "Yes. The 12 is what made Twin Tides' expensive half worth the Charge \u2014 it is the exact number that makes 12 Block a full negation rather than an overpay. If Nibbit had telegraphed a small hit, a block, a buff, or anything non-damaging, I would have played Water's Edge and All Streams Flow to the Sea for 15 damage and kept all 8 Charge, since there would be nothing to defend against and Charge is worth more banked. If the intent had been much larger than 12, say 20-plus, Twin Tides would stop being a clean negation and I would have looked hard at Gyorin Formation instead, or just accepted the hit and pushed damage."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t06\\verdict-opus-5-fresh.json"
+   },
+   "gpt": {
+    "grader": "codex-gpt-5.6-sol-fresh",
+    "model": "gpt-5.6-sol",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "All Streams Flow to the Sea",
+     "Twin Tides"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "I played All Streams Flow to the Sea on Nibbit for 9 damage, then Twin Tides, spending 6 Charge to gain 12 Block and cover the incoming attack.",
+     "q2_other_line_considered": "I seriously considered Water's Edge followed by All Streams Flow to the Sea for 15 total damage, accepting the full 12 damage.",
+     "q3_what_it_gave_up": "It gave up 6 immediate damage compared with the two-attack line and spent 6 Charge in exchange for preventing the telegraphed 12 damage.",
+     "q4_different_intent": "Yes. With no attack or a substantially smaller attack telegraphed, I would have favored Water's Edge plus All Streams Flow to the Sea for more damage."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t06\\verdict-codex-gpt-5.6-sol-fresh.json"
+   }
+  },
+  "seat": {
+   "grader_id": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "temperature": 0.0,
+   "refused": "",
+   "refused_why": null,
+   "wall_s": 39.1,
+   "prompt_tokens": 1948,
+   "completion_tokens": 4704,
+   "estimated_prompt_tokens": 1839,
+   "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\understudy\\logs\\local-seat\\kokomi-slice2-t06-20260829-212209"
+  },
+  "local": {
+   "grader": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "verdict": "SURVIVES",
+   "refused_by": [],
+   "line": [
+    "All Streams Flow to the Sea",
+    "Twin Tides"
+   ],
+   "answers": {
+    "q1_what_did_you_play": "I played All Streams Flow to the Sea on Nibbit first for 9 damage, then played Twin Tides and chose Spend 6 Charge: gain 12 Block. This uses both energy, leaves Charge at 2, deals 9 damage, and blocks the telegraphed 12 damage attack.",
+    "q2_other_line_considered": "I seriously considered Gyorin Formation alone because it gives 10 Block now and 6 Block at the start of next turn, but it uses both energy and deals no damage. I also briefly checked Twin Tides' Gain 5 Block option to preserve Charge, but it is worse this turn because it leaves the 12 damage attack partially unblocked.",
+    "q3_what_it_gave_up": "The chosen line gave up Gyorin Formation's 6 Block at the start of next turn, gave up 6 Charge by spending it on Twin Tides, and gave up the chance to play Water's Edge for extra damage because both energy was used on All Streams Flow to the Sea and Twin Tides.",
+    "q4_different_intent": "Yes. If Nibbit had telegraphed Defend or a much smaller attack, I would have prioritized damage and played All Streams Flow to the Sea plus Water's Edge for 15 total damage instead of taking 12 Block. If it had telegraphed a larger attack, I would still likely have taken block, though Gyorin Formation might have become more attractive if next-turn block mattered more."
+   }
+  },
+  "misreads": [],
+  "recorded_misreads": {
+   "claude": [],
+   "gpt": []
+  }
+ },
+ {
+  "turn_id": "kokomi-slice2-t07",
+  "recorded": {
+   "claude": {
+    "grader": "opus-5-fresh",
+    "model": "claude-opus-5",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "All Streams Flow to the Sea",
+     "Water's Edge",
+     "Coral Guard"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "All three one-cost cards, spending exactly 3 energy: All Streams Flow to the Sea into Sludge Spinner for 9 (Charge already counted), Water's Edge into it for 6, then Coral Guard for 5 Block. That is 15 damage, taking the Spinner from 37 to 22, and the telegraphed 8-damage attack lands into 5 Block so I take 3 and end at 45/70. There is no lethal available this turn at any energy split, so the turn is about maximizing damage per energy while blunting a known hit, and the three cheap cards do both with nothing left over.",
+     "q2_other_line_considered": "Rally the Isles for 2, then one one-cost with the last energy. I weighed it as the setup line: Muster 2 turns two of the remaining hand cards into random Inazuma Companions and the +1 Charge nudges the Charge pool. Against a 37 HP enemy that will take roughly three turns to chew through, paying tempo for a possibly better hand is a real thought. I dropped it because Rally itself deals nothing and blocks nothing, it would cost me at least 6 known damage plus either the 5 Block or the other attack, the +1 Charge does nothing here since All Streams reads Charge at one point per two and 8 to 9 is not a step, and Muster's picks are the game's random roll, so I would be trading guaranteed value for an unknown against an enemy that is already hitting me.",
+     "q3_what_it_gave_up": "The Muster entirely. Two cards I would have transformed stay whatever they are, I do not see what companions the roll would have offered, and the Charge does not advance. If this fight runs long, the line I skipped is the one that could have compounded, and I spent the turn on flat rate instead. I also emptied my hand of all three cheap cards, so whatever I draw into next turn is unsupported by anything held back.",
+     "q4_different_intent": "Yes. If the Spinner had telegraphed nothing, a buff, or an attack small enough to shrug off, Coral Guard's 5 Block would be wasted and I would strongly consider Rally the Isles plus All Streams Flow to the Sea, taking the free window to Muster and set up rather than spending energy on unneeded Block. A much larger telegraphed hit would not have changed anything, since 5 Block plus two attacks is already the most I can do about it with this hand and I cannot outrace a 37 HP enemy by dropping the block."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t07\\verdict-opus-5-fresh.json"
+   },
+   "gpt": {
+    "grader": "codex-gpt-5.6-sol-fresh",
+    "model": "gpt-5.6-sol",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "Coral Guard",
+     "Water's Edge",
+     "All Streams Flow to the Sea"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "I played Coral Guard, then Water's Edge and All Streams Flow to the Sea at Sludge Spinner, gaining 5 Block and dealing 15 damage for all 3 Energy.",
+     "q2_other_line_considered": "I seriously considered Rally the Isles followed by Coral Guard, preserving the same 5 Block while gaining 1 Charge and triggering Muster 2, but the resulting cards are unspecified and random while that line deals no immediate damage.",
+     "q3_what_it_gave_up": "It gave up Rally the Isles' Muster 2 and 1 Charge in exchange for 15 known damage.",
+     "q4_different_intent": "Yes. If Sludge Spinner had not intended to attack, I would have been more willing to replace Coral Guard and the two-attack line with Rally the Isles plus one attack, since the known value of the Block would be lower."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t07\\verdict-codex-gpt-5.6-sol-fresh.json"
+   }
+  },
+  "seat": {
+   "grader_id": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "temperature": 0.0,
+   "refused": "",
+   "refused_why": null,
+   "wall_s": 40.2,
+   "prompt_tokens": 1957,
+   "completion_tokens": 4690,
+   "estimated_prompt_tokens": 1866,
+   "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\understudy\\logs\\local-seat\\kokomi-slice2-t07-20260829-212248"
+  },
+  "local": {
+   "grader": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "verdict": "REFUSED",
+   "refused_by": [
+    "intent_insensitive"
+   ],
+   "line": [
+    "All Streams Flow to the Sea",
+    "Water's Edge",
+    "Coral Guard"
+   ],
+   "answers": {
+    "q1_what_did_you_play": "I played All Streams Flow to the Sea at Sludge Spinner, then Water's Edge at Sludge Spinner, then Coral Guard. This used all 3 energy, dealt 15 damage, and gained 5 Block before the enemy's telegraphed 8 damage attack.",
+    "q2_other_line_considered": "I seriously considered playing Rally the Isles first to gain 1 Charge and possibly create random Inazuma Companion cards, then playing All Streams Flow to the Sea if it survived Muster. I rejected it because Muster 2 transforms two cards in hand at random, could remove All Streams Flow to the Sea or Coral Guard, and the guaranteed line with both damage cards and block is safer.",
+    "q3_what_it_gave_up": "It gave up Rally the Isles' Charge gain and random Companion transformation, any possible extra damage from higher Charge, and any chance at useful random cards. It also commits all energy, leaving no saved energy.",
+    "q4_different_intent": "No. The declared intent is an 8 damage attack, and the chosen line already uses all affordable cards with no known downside. A different telegraphed intent would not make me drop the two damage cards or Coral Guard; if the attack were larger, the 5 Block would be even more useful, and if it were non-attack, the Block is still harmless."
+   }
+  },
+  "misreads": [],
+  "recorded_misreads": {
+   "claude": [
+    "called 'Rally the Isles' 'free', but the packet prints Cost: 2",
+    "called 'All Streams Flow to the Sea' 'free', but the packet prints Cost: 1"
+   ],
+   "gpt": []
+  }
+ },
+ {
+  "turn_id": "kokomi-slice2-t08",
+  "recorded": {
+   "claude": {
+    "grader": "opus-5-fresh",
+    "model": "claude-opus-5",
+    "verdict": "SURVIVES",
+    "refused_by": [],
+    "line": [
+     "All Streams Flow to the Sea",
+     "Water's Edge",
+     "Coral Guard"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "All three one-cost cards, using the full 3 energy. All Streams Flow to the Sea into Sludge Spinner for 9 (it already folds in my 8 Charge), then Water's Edge for 6, then Coral Guard for 5 Block. That is 15 damage onto a 37 HP enemy, leaving it at 22, and I eat 3 of its telegraphed 8 instead of all 8, ending around 45/70. I led with All Streams rather than trailing it because it reads Charge, and I wanted no ordering risk that anything shaved the 8 Charge before it resolved.",
+     "q2_other_line_considered": "Yes: All Streams Flow to the Sea for 9, then Watatsumi Levy, spending 6 Charge to Muster 2 \u2014 which would transform the Water's Edge and Coral Guard still in my hand into random Inazuma Companion cards. That is the only line that uses the 2-cost card at all, since Levy plus anything else does not fit under 3 energy. I rejected it because it trades a known 6 damage and a known 5 Block for two unknown cards drawn from a pool I cannot see, at a point in the fight where nothing is urgent \u2014 no lethal in reach, no spike to survive, and Charge already fully cashed into All Streams. Paying 6 Charge on top, when Charge is what makes All Streams a 9 instead of a 5, made the trade worse rather than better.",
+     "q3_what_it_gave_up": "It gave up the Muster entirely \u2014 this hand's only route to the Inazuma Companion cards, and the only play with any upside I cannot enumerate. It also spent the 8 Charge for a flat 9 and banked nothing forward: after this turn my Charge is whatever the resource regenerates, and I have no card-quality improvement to show for the turn. Concretely I chose 15 damage and 5 Block now over 9 damage plus two random cards, i.e. I bought a known tempo turn and sold the fight's variance.",
+     "q4_different_intent": "Yes. Coral Guard is only worth its energy because an 8-damage attack is telegraphed; against a non-attack intent (a buff, a summon, a debuff) that 5 Block is dead, and with 3 energy the leftover slot cannot buy anything else useful \u2014 so I would drop Coral Guard and play All Streams plus Watatsumi Levy, Mustering away the now-dead Coral Guard and the held Water's Edge for two companion cards. A much larger telegraphed hit would not change the line: I would still play exactly what I played, since Coral Guard is already the only mitigation in hand and 5 Block is 5 Block whether the swing is 8 or 20."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t08\\verdict-opus-5-fresh.json"
+   },
+   "gpt": {
+    "grader": "codex-gpt-5.6-sol-fresh",
+    "model": "gpt-5.6-sol",
+    "verdict": "REFUSED",
+    "refused_by": [
+     "intent_insensitive"
+    ],
+    "line": [
+     "Water's Edge",
+     "All Streams Flow to the Sea",
+     "Coral Guard"
+    ],
+    "answers": {
+     "q1_what_did_you_play": "Water's Edge and All Streams Flow to the Sea on Sludge Spinner, then Coral Guard. This deals 15 damage and blocks 5 of the telegraphed 8 damage.",
+     "q2_other_line_considered": "Watatsumi Levy followed by one attack, but Muster 2 has an unspecified random result and gives up the known combination of 15 damage and 5 Block.",
+     "q3_what_it_gave_up": "It gave up spending 6 Charge to Muster 2 and the possible value of the random Inazuma Companion transformations.",
+     "q4_different_intent": "No. With the two attacks costing 2 Energy total, Coral Guard is the only remaining affordable card, so a different telegraphed intent would not produce a better known use of the third Energy."
+    },
+    "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\review\\qa\\kokomi-slice2-t08\\verdict-codex-gpt-5.6-sol-fresh.json"
+   }
+  },
+  "seat": {
+   "grader_id": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "temperature": 0.0,
+   "refused": "",
+   "refused_why": null,
+   "wall_s": 40.3,
+   "prompt_tokens": 1958,
+   "completion_tokens": 4665,
+   "estimated_prompt_tokens": 1866,
+   "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-sanity\\understudy\\logs\\local-seat\\kokomi-slice2-t08-20260829-212328"
+  },
+  "local": {
+   "grader": "local-qwen3-8-27b-ud-q4-k-xl",
+   "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+   "verdict": "REFUSED",
+   "refused_by": [
+    "intent_insensitive"
+   ],
+   "line": [
+    "All Streams Flow to the Sea",
+    "Water's Edge",
+    "Coral Guard"
+   ],
+   "answers": {
+    "q1_what_did_you_play": "I played All Streams Flow to the Sea on Sludge Spinner, then Water's Edge on Sludge Spinner, then Coral Guard. This uses all 3 energy, deals 15 known damage, and gains 5 Block before the telegraphed 8 damage attack.",
+    "q2_other_line_considered": "I seriously considered playing Watatsumi Levy with one of the 1-cost cards to spend Charge and Muster 2, but I rejected it because Muster transforms cards into random Inazuma Companion cards and the page gives no information about what those cards would be or how useful they would be.",
+    "q3_what_it_gave_up": "The chosen line gave up spending Charge and the possible random card generation from Watatsumi Levy. It also left Charge at 8 and did not create any Inazuma Companion cards, prioritizing the known immediate damage and Block instead.",
+    "q4_different_intent": "No. A different telegraphed intent would not have changed the line, because the chosen cards are all affordable and provide known immediate value: 15 damage and 5 Block. Without information making the random Muster result reliably better, no other known line is clearly superior."
+   }
+  },
+  "misreads": [],
+  "recorded_misreads": {
+   "claude": [],
+   "gpt": []
+  }
+ }
+]

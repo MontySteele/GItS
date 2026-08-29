@@ -1,0 +1,35 @@
+{
+ "turn_id": "klee-slice1-r3-t03",
+ "packet_sha256": "feefbcb4ef8fc9b878698facd277fdde8e804730868f5ae228abcf6c62a86d56",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Eager to Help",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Rapid Fire",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Eager to Help first while the Spark bank was still present, then Rapid Fire at its shown 0 cost, consuming the 3 Sparks, then Duck and Cover for 5 Block. I did not list any drawn cards in the ordered line because their exact printed titles are not on the page, even though the disclosure says the draw pile contains playable 1-energy 7-damage Attacks and I would play any such drawn Attack if it appeared while I still had energy.",
+ "q2_other_line_considered": "I seriously considered playing Rapid Fire first for 0, then Eager to Help, then Duck and Cover. That line would secure the 16 damage and 5 Block, but it would likely reduce Eager to Help to drawing only 1 card if its Spark condition depends on still having the Spark bank after the Attack is played.",
+ "q3_what_it_gave_up": "The chosen line gives up the possibility of playing Rapid Fire before Eager to Help. If Eager to Help\u2019s draw amount depends on having Spark at the moment it is played, playing it first is the safer way to get the larger draw. It also leaves the turn dependent on unknown drawn cards for extra damage, since I cannot name them exactly from the page.",
+ "q4_different_intent": "No. The enemy\u2019s telegraphed 11 Attack is survivable either way, and Duck and Cover is still useful because it reduces that damage. A different intent would not change the core ordering: Eager to Help should still be played before consuming the Spark bank with Rapid Fire, and Duck and Cover remains affordable and beneficial against an Attack intent.",
+ "q4_changed": false
+}
