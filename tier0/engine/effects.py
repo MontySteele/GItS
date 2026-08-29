@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import copy
 
-from typing import Optional
+from typing import Optional, Sequence
 
 from tier0 import constants as C
 from tier0.engine import powers, reactions, resources, statuses
@@ -3717,6 +3717,71 @@ def _remove_from_combat(state: CombatState, token: Card) -> None:
                 pile.pop(i)
                 state.emit("kurage_memory_removed", card=token.id)
                 return
+
+
+#: The three states one queued memory can be in under the affordability run.
+#: DISPLAY-ONLY: no resolution path reads them, and nothing here mutates.
+KURAGE_PAYABLE = "payable"
+KURAGE_RUNS_OUT = "runs_out"
+KURAGE_HELD = "held"
+
+
+def kurage_affordability(prices: Sequence[int], bank: int) -> list[str]:
+    """THE AFFORDABILITY RUN -- the running subtraction over the queue.
+
+    Spec: `review/active/kokomi-kurage-memory-2026-08-29.md` sec.14.4, which is
+    [USER]'s direction for the card element that replaced the strip. The HUD
+    answers "does the next one fire" (one comparison, no forecast); the PILE
+    VIEW answers "how far do I get", and this is that answer.
+
+    Front first, walking down the queue with the bank:
+
+      * `payable`  -- the bank, MINUS every price already passed, still covers
+        this entry. Drawn blue.
+      * `runs_out` -- the FIRST entry the bank cannot reach. Drawn red.
+      * `held`     -- every entry behind it. [USER]: "is 'also red' possible in
+        the pile view? If so, let's do that" -- and it is, so these are red
+        too. `kurage_fire` is why: an unaffordable front holds and pays
+        nothing, so nothing behind it fires and the bank does not drain past
+        it.
+
+    IT IS A FORECAST AND THREE THINGS FALSIFY IT (sec.14.4), which is exactly
+    why it is not on the always-on surface: only ONE memory fires per turn
+    (`kurage_fired_this_turn`), Charge accrues at 1 per Exhaust so a player who
+    keeps playing banks more before the far entries are reached, and a blocked
+    front holds rather than spends. The honest reading is "where you run out IF
+    YOU BANK NOTHING MORE".
+
+    PURE. Prices in, states out; no state, no RNG, no mutation. Its C# twin is
+    `KurageMemory.Affordability` and the two are held together by
+    `docs/kurage-affordability-vectors.json`, which both suites read.
+    """
+    remaining = bank
+    states: list[str] = []
+    short = False
+    for price in prices:
+        if short:
+            states.append(KURAGE_HELD)
+        elif price <= remaining:
+            remaining -= price
+            states.append(KURAGE_PAYABLE)
+        else:
+            short = True
+            states.append(KURAGE_RUNS_OUT)
+    return states
+
+
+def kurage_run_out_index(prices: Sequence[int], bank: int) -> int:
+    """The index of the first entry the bank cannot reach, or -1 when the bank
+    covers the whole queue (an empty queue included).
+
+    This is the number the wire snapshot carries beside `reading`, so the blind
+    page can say "Charge runs out at #3" without re-deriving the run.
+    """
+    for i, state in enumerate(kurage_affordability(prices, bank)):
+        if state == KURAGE_RUNS_OUT:
+            return i
+    return -1
 
 
 def kurage_fire(state: CombatState, manual: bool = False) -> bool:

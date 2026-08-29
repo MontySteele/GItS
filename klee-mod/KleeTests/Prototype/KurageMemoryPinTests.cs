@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using KleeMod.Cards;
@@ -437,5 +441,194 @@ public class KurageMemoryPinTests
         var calls = Il.Calls(Il.Method("Kokomi", "get_StartingDeck"));
 
         Assert.Contains("KurageMemory.StarterSlotEleven", calls);
+    }
+
+    // ------------------------------------------------ the affordability run --
+    //
+    // THE ONE DISPLAY FACT WITH NO RESOLUTION-SIDE EXPRESSION TO BORROW, and
+    // therefore the one that needed a function and a fixture of its own
+    // (review/active/kokomi-kurage-memory-2026-08-29.md sec.14.4). The engine
+    // only ever fires ONE memory, so nothing in it asks how far down the queue
+    // the bank reaches -- but the pile view the memory card opens has to answer
+    // exactly that, front first, red at the shortfall and red for everything
+    // behind it ([USER]: "also red").
+    //
+    // REACHABLE HERE, unlike almost everything else in this file, because it is
+    // PURE: prices in, states out. No CombatState, no card play, no pile move,
+    // no Godot. The sim twin is `tier0/engine/effects.py kurage_affordability`.
+
+    /// <summary>Prices to an Entry list. Every Entry field but the price is
+    /// irrelevant to the run and is filled with the least interesting legal
+    /// value, so a reader is not invited to think one of them matters.</summary>
+    private static IReadOnlyList<KurageMemory.Entry> Queue(params int[] prices)
+    {
+        var entries = new List<KurageMemory.Entry>();
+        foreach (var price in prices)
+        {
+            entries.Add(new KurageMemory.Entry
+            {
+                Card = new ProbeFace(),
+                Name = "probe",
+                Cost = price / KurageMemory.KurageMemoryLaw.CostPerEnergy,
+                Price = price,
+                Target = null,
+                Ephemeral = false,
+                Rule = "exhaust",
+            });
+        }
+        return entries;
+    }
+
+    private static string[] Wire(IReadOnlyList<KurageMemory.EntryState> states)
+    {
+        var wire = new string[states.Count];
+        for (var i = 0; i < states.Count; i++)
+        {
+            wire[i] = KurageMemory.Wire(states[i]);
+        }
+        return wire;
+    }
+
+    [Fact]
+    public void The_run_walks_the_queue_and_holds_everything_behind_the_shortfall()
+    {
+        // sec.14.3's mock, worked: bank 4 over 3 / free / 3 / free. The free
+        // card does not move the bank, so the first three fit and the second 3
+        // does not -- and the FREE card behind it is HELD, which is the case a
+        // naive per-card `bank >= price` test gets wrong and the reason this is
+        // a run rather than a comparison.
+        var states = KurageMemory.Affordability(Queue(3, 0, 3, 0), bank: 4);
+
+        Assert.Equal(new[] { "payable", "payable", "runs_out", "held" },
+                     Wire(states));
+        Assert.Equal(2, KurageMemory.RunOutIndex(states));
+    }
+
+    [Fact]
+    public void A_dry_bank_runs_out_at_the_front_and_holds_the_free_card()
+    {
+        var states = KurageMemory.Affordability(Queue(3, 0), bank: 0);
+
+        Assert.Equal(new[] { "runs_out", "held" }, Wire(states));
+        Assert.Equal(0, KurageMemory.RunOutIndex(states));
+    }
+
+    [Fact]
+    public void A_free_front_is_payable_and_the_run_stops_behind_it()
+    {
+        // `EB-198`'s own frame. The strip printed this state as "Charge 1 / 0"
+        // and the blind tester read it as a fraction over a zero denominator.
+        // Free is free: the front is PAYABLE and the 3 behind it is where the
+        // Charge stops.
+        var states = KurageMemory.Affordability(Queue(0, 3), bank: 1);
+
+        Assert.Equal(new[] { "payable", "runs_out" }, Wire(states));
+        Assert.Equal(1, KurageMemory.RunOutIndex(states));
+    }
+
+    [Fact]
+    public void An_empty_memory_has_no_entries_and_no_shortfall()
+    {
+        // AN EMPTY MEMORY IS NOT A BLOCKED ONE -- the same distinction the
+        // reading has always had to keep, now on the projection too. -1 rather
+        // than 0: there is no entry the bank failed to reach.
+        var states = KurageMemory.Affordability(Queue(), bank: 0);
+
+        Assert.Empty(states);
+        Assert.Equal(-1, KurageMemory.RunOutIndex(states));
+    }
+
+    [Fact]
+    public void The_run_matches_the_sims_table_case_for_case()
+    {
+        // THE PARITY CLAIM. `docs/kurage-affordability-vectors.json` is derived
+        // from the sim by `tier0/tests/test_kurage_affordability.py`, which also
+        // asserts the file on disk IS the sim's answer. This runs the C#
+        // arithmetic against the same file, so the two implementations cannot
+        // drift without one of the two suites going red.
+        var path = FixturePath("docs/kurage-affordability-vectors.json");
+        using var doc = JsonDocument.Parse(File.ReadAllText(path));
+
+        var cases = 0;
+        foreach (var row in doc.RootElement.EnumerateArray())
+        {
+            cases++;
+            var bank = row.GetProperty("bank").GetInt32();
+            var prices = new List<int>();
+            foreach (var price in row.GetProperty("prices").EnumerateArray())
+            {
+                prices.Add(price.GetInt32());
+            }
+
+            var expected = new List<string>();
+            foreach (var state in row.GetProperty("states").EnumerateArray())
+            {
+                expected.Add(state.GetString()!);
+            }
+
+            var states = KurageMemory.Affordability(prices, bank);
+            Assert.Equal(expected.ToArray(), Wire(states));
+            Assert.Equal(row.GetProperty("run_out_index").GetInt32(),
+                         KurageMemory.RunOutIndex(states));
+        }
+
+        // A fixture that silently emptied would pass every assertion above.
+        Assert.True(cases >= 7, "only " + cases + " parity cases were read");
+    }
+
+    /// <summary>Walk up from the test binary to the repo root, which is the
+    /// directory that carries the fixture. There is no build-time copy of it: a
+    /// stale copy beside the dll is exactly the drift this file prevents.</summary>
+    private static string FixturePath(string relative)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null)
+        {
+            var candidate = Path.Combine(
+                dir.FullName,
+                relative.Replace('/', Path.DirectorySeparatorChar));
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+            dir = dir.Parent;
+        }
+
+        throw new FileNotFoundException(
+            "no " + relative + " above " + AppContext.BaseDirectory);
+    }
+
+    // ------------------------------------------------ the element, in part --
+
+    [Fact]
+    public void The_memory_card_resolves_the_local_seat_and_only_the_local_seat()
+    {
+        // STRUCTURAL, and it has to be: the element is a Godot `Control` under
+        // `%CombatUi` and no test here may touch a Godot object, so "it draws
+        // nothing for a partner" is NOT assertable headless. What IS assertable
+        // is that both of its entry points go through `LocalContext` rather than
+        // looping `state.Players` the way `GaugeBridge`, `SalonVisualsBridge`
+        // and `TurnEndPreviewBridge` deliberately do -- which is the whole of
+        // the co-op behaviour [USER] signed off ("Local only is fine (partner
+        // doesn't need to see the queue)").
+        //
+        // THE LIVE HALF IS OWED: that a partner's screen carries no element at
+        // all is `EB-198`'s live acceptance on a `+proto` dev deploy, not a pin.
+        Assert.Contains("LocalContext.GetMe",
+                        Il.Calls(Il.Method("KurageMemoryCard", "Setup")));
+        Assert.Contains("LocalContext.IsMe",
+                        Il.Calls(Il.Method("KurageMemoryCard", "Refresh")));
+    }
+
+    [Fact]
+    public void The_element_draws_the_projection_rather_than_re_deriving_it()
+    {
+        // ONE EXPRESSION OF THE RULE PER ENGINE. If the drawing code ever
+        // inlines the subtraction, the pile view and the wire snapshot can
+        // disagree about where the Charge runs out and nothing catches it.
+        Assert.Contains("KurageMemory.Affordability",
+                        Il.Calls(Il.Method("KurageMemoryCard", "OpenQueue")));
+        Assert.Contains("KurageMemory.Affordability",
+                        Il.Calls(Il.Method("KurageMemory", "Snapshot")));
     }
 }

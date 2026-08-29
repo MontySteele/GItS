@@ -35,13 +35,24 @@ internal static class TrackedDisplayBridge
     /// <summary>
     /// Live displays for one bridge, keyed however that bridge needs (a Player
     /// for the Salon stage, a (Player, meter) pair for gauges).
+    ///
+    /// GENERIC OVER THE NODE TYPE because a creature-tracked display is a
+    /// <c>Node2D</c> in world space but a HUD element is a <c>Control</c> in
+    /// screen space, and <c>Control</c> is NOT a <c>Node2D</c> -- they are
+    /// sibling branches under <c>CanvasItem</c>. The Kurage memory card
+    /// (§14.3) is the first screen-space tenant. Nothing in this class ever
+    /// touched a Node2D member, so the widening cost nothing: staleness is
+    /// <c>IsInstanceValid</c> and teardown is <c>QueueFree</c>, both on
+    /// <c>Node</c>. <see cref="Registry{TKey}"/> below keeps every existing
+    /// caller's Node2D-typed reads exactly as they were.
     /// </summary>
-    internal sealed class Registry<TKey> where TKey : notnull
+    internal class Registry<TKey, TNode>
+        where TKey : notnull where TNode : Node
     {
-        private readonly Dictionary<TKey, Node2D> _displays = new();
+        private readonly Dictionary<TKey, TNode> _displays = new();
 
         /// <summary>The live display for this key, or null if absent/stale.</summary>
-        public Node2D? Get(TKey key)
+        public TNode? Get(TKey key)
         {
             var display = _displays.GetValueOrDefault(key);
             if (display != null && GodotObject.IsInstanceValid(display))
@@ -53,7 +64,7 @@ internal static class TrackedDisplayBridge
             return null;
         }
 
-        public void Set(TKey key, Node2D display) => _displays[key] = display;
+        public void Set(TKey key, TNode display) => _displays[key] = display;
 
         public void Discard(TKey key)
         {
@@ -64,6 +75,13 @@ internal static class TrackedDisplayBridge
             }
             _displays.Remove(key);
         }
+    }
+
+    /// <summary>The creature-tracked case, which is every pre-existing caller:
+    /// a registry of Node2D displays.</summary>
+    internal sealed class Registry<TKey> : Registry<TKey, Node2D>
+        where TKey : notnull
+    {
     }
 
     /// <summary>
