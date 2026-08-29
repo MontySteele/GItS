@@ -1,0 +1,176 @@
+# KOKOMI SLICE 2, ROUND 2 (R217 F, executing R213 E1). One half of a MATCHED
+# PAIR, and this round exists only to answer the two RETURNs the first round
+# left. The two arms that ADVANCED are not re-run and nothing else moved.
+#
+# HOW TO READ A PAIR. The files of a pair declare the SAME board -- same HP,
+# same Block, same energy, same Charge, same enemy, same alternatives in hand
+# -- and differ in EXACTLY ONE CARD: the one under test. If the boards
+# differed anywhere else, a change in how the turn plays could be attributed
+# to the staging instead of to the card.
+#
+# THE SEED IS PART OF THE PAIR, AND THIS FILE HAS NONE YET. The encounter is
+# GENERATED, so the first half staged DISCOVERS a seed; every other half of
+# that pair must then be staged with `--seed <that run_seed>` or the halves
+# are two different fights. Round 1's seeds do NOT carry here: a re-set board
+# is a new roll, and R95 plus round 4 of slice 1 already recorded that a
+# pinned seed only reproduces within one game build. Both halves read
+# `staged: pending` until an operator with the live game pins them.
+#
+# THE TURN ID IS DELIBERATELY OPAQUE. It is printed into the design-blind
+# packet the grader reads, so a word like "spend" or "formation" inside an id
+# would tell the grader which arm they were holding. The FILENAME names the
+# arm, because only the tooling and the packet-writer read filenames.
+# MANIFEST.md is the map between them.
+#
+# NOTHING HERE IS A CLAIM THAT ANY ARM IS BETTER. The funnel refuses turns and
+# never rates them (R213's first guard), and the designer of these rows may
+# not grade them.
+#
+# ---------------------------------------------------------------------------
+# ARM 4: IS THE FORMATION SUBSIDISED, OR BOUGHT? (R213 E1; R216 D.)
+#
+# WHY THIS BOARD CHANGED. Round 1's pair read RETURNED this arm in these
+# words: "Both shipped and prototype halves chose the identical three cheap
+# cards; replacing Charge gain with a Charge payment did not alter the
+# realized decision." The card was never played on either half. The repair it
+# named is the BOARD: "give Muster an observable near-term payoff and a
+# credible window to choose it, so Levy's Charge payment competes with known
+# value rather than unspecified randomness under incoming damage."
+#
+# THREE THINGS CHANGED, AND EACH ANSWERS ONE CLAUSE OF THAT SENTENCE.
+#
+# 1. THE THREE-CHEAP-CARDS LINE IS GONE. Round 1's hand was the order plus
+#    THREE 1-cost cards, which at three energy was a complete turn worth 15
+#    damage and 5 Block that never touched the card. One of those three is
+#    replaced by a 0-cost Companion, so the alternatives no longer consume the
+#    turn and the order has a window to be chosen in at all. This is round 4
+#    of slice 1's repair for the same failure, applied to a different hand.
+#
+# 2. THE PAYOFF IS NEAR-TERM AND THE COST IS KNOWN. A Muster transforms cards
+#    ALREADY IN HAND, and it never takes a card that is already a Companion.
+#    This hand holds exactly TWO cards it can take -- All Streams Flow to the
+#    Sea and Coral Guard -- so Muster 2 takes both, and what the order costs
+#    is a printed number rather than a roll: 9 damage at this bank and 5
+#    Block. A Mustered Companion costs one less, so the recruits are
+#    affordable on the turn that makes them rather than a turn later; that is
+#    the near-term payoff, and it is why three energy is still the budget.
+#
+# 3. A COMPANION IS IN HAND, PRINTED AND IMMEDIATE. Shinobu -- Grass Ring of
+#    Sanctification is a shipped Inazuma Companion at 0 cost for 4 Block. It
+#    is not a Muster victim (Companions are excluded), it costs nothing to
+#    play, and it shows on the face of the board what a recruit is worth. The
+#    order is now weighed against known value on both sides of the trade.
+#
+# AND THE WINDOW IS CREDIBLE, which is the clause the telegraph answers. The
+# incoming hit is 8. Coral Guard (5, one energy) and the Companion already in
+# hand (4, no energy) cover NINE between them, so the whole attack can be
+# answered for ONE of the three energy and the other two are still free for
+# the order. A set-up turn is not a death wish here; it is affordable, and
+# that is what makes declining it a choice.
+#
+# THE ONE THING THIS BOARD STILL CANNOT WRITE is which recruits the game rolls
+# -- Muster's pick is the game's, not this file's. What it CAN write, and now
+# does, is the cost side and the timing, which is what the reviewer's sentence
+# asked for.
+#
+# WHAT THE HALVES DIFFER BY, on this board, at a bank of 8:
+#   SHIPPED: the order costs 2 energy, takes both takeable cards, and PAYS a
+#     Charge on top -- bank 8 -> 9, and the reader it consumed is gone.
+#   PROTOTYPE: the same order, the same two victims, and it COSTS six Charge
+#     -- bank 8 -> 2. The outlet AND the fuel leave together.
+# Either half can instead cash the reader FIRST for 9 and then give the order,
+# which leaves Muster only one victim and one recruit. That trade is the same
+# on both halves; the bank at the end of it is not.
+#
+# ONLY SHIPPED CARDS BESIDE THE ARM. All Streams Flow to the Sea, Coral Guard
+# and the Shinobu Companion are all shipped rows. A second prototype on the
+# board would confound the attribution the pair exists to make.
+#
+# EVERY BOARD TELEGRAPHS AN ATTACK. Defence is worth nothing against any other
+# intent, and what the bank is worth against an incoming hit is half the
+# question.
+#
+# NO LINE IS LETHAL. The enemy's HP sits above the largest total damage this
+# board can produce at true values, recruits included; the arithmetic is
+# written per board in MANIFEST.md.
+
+id: kokomi-slice2-r2-t03
+character: KLEEMOD-KOKOMI
+
+# staged: pending. No seed is pinned: this board has never been staged, and a
+# re-set board is a fresh roll. The operator discovers the seed on THIS half
+# and pins it onto both.
+
+exact_hand: true
+
+notes: |
+  40/70 HP, no Block, 3 energy, a Charge bank of 8, and one
+  enemy at 26 HP telegraphing an attack.
+
+# STAGING RULE, for the operator and not for the grader: the telegraph is
+# generated with the encounter, and defence is worth nothing against an intent
+# that is not an attack. If the live telegraph is not an attack, re-roll the
+# seed and stage again rather than recording the divergence.
+#
+# The list below is folded VERBATIM into the design-blind packet, so it carries
+# mechanical facts about the staging ONLY -- never why the board was built,
+# never which card is being looked at. The rationale lives in the header above,
+# where no grader reads.
+assumptions:
+  - "The hand is EXACTLY the list below and nothing else. The hand the
+     game dealt is emptied before these cards are given, and a packet
+     whose live hand is not this list is refused rather than written."
+  - "The encounter is GENERATED. This file can write the enemy's HP and
+     Block and cannot write its INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below
+     declares a telegraphed ATTACK as the falsifier's input. If the live
+     intent differs, the closeness reading is a reading of the DECLARED
+     board and the packet is a picture of the LIVE one; they are two
+     records, not one."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "Charge is written to 8 through the registered resource."
+  - "The player has no Strength and the enemy carries no aura, Vulnerable
+     or Weak. A reaction on top of a hit would move every number the
+     falsifier scores."
+  - "Muster TRANSFORMS cards already in hand into random Inazuma Companion
+     cards, and never takes a card that is already a Companion. Which
+     cards it makes is the game's pick, not this file's."
+
+staging:
+  - give: {card: KLEEMOD-MASS_MOBILIZATION, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-ALL_STREAMS_FLOW, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-CORAL_GUARD, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SHINOBU_GRASS_RING_BOND, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 40}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 3}
+  - set_resource: {name: KLEEMOD_CHARGE, amount: 8}
+  - set_hp: {who: first, amount: 26}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+# The tier0 mirror. Read ONLY by `closeness`; never by the packet,
+# which reads the live game. The parser refuses this file if the hand
+# here and the hand staged above are not the same multiset of cards.
+board:
+  character: kokomi
+  pilot: generic
+  hp: 40
+  max_hp: 70
+  block: 0
+  energy: 3
+  turn: 3
+  resources:
+    charge: 8
+  hand:
+    - mass_mobilization
+    - all_streams_flow
+    - coral_guard
+    - shinobu_grass_ring_bond
+  enemies:
+    - name: "Sludge Spinner"
+      hp: 26
+      max_hp: 38
+      block: 0
+      intent: {kind: attack, amount: 8}
