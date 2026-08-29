@@ -1,0 +1,29 @@
+{
+ "turn_id": "klee-sparks-r1-t04",
+ "packet_sha256": "dafc66b691199ba27bfa26f996934c12bf40bd8f457354e10b2776346712b4e2",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Kaboom!",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Jumpy Dumpty",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Kaboom! first for 1 Energy, then Jumpy Dumpty for 2 Energy. This used all 3 Energy, dealt 7 plus 8 twice to the single enemy, applied Pyro from both attacks, and left the 3 Spark bank untouched.",
+ "q2_other_line_considered": "I seriously considered Jumpy Dumpty followed by Duck and Cover. That line would have used all 3 Energy, dealt the same 16 direct damage from Jumpy Dumpty, and gained 5 Block to fully absorb the telegraphed 4 damage.",
+ "q3_what_it_gave_up": "The chosen line gave up 5 Block and therefore took the full 4 damage, ending the turn at 38 HP instead of 42 HP. It also gave up the defensive option of preserving more health for future turns in exchange for 7 additional damage from Kaboom!.",
+ "q4_different_intent": "Yes. If the enemy had telegraphed a much larger attack, the extra 5 Block from Jumpy Dumpty plus Duck and Cover would have become much more valuable, and I would likely have chosen the defensive line instead.",
+ "q4_changed": true
+}

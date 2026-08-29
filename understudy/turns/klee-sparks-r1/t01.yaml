@@ -38,6 +38,11 @@
 id: klee-sparks-r1-t01
 character: KLEEMOD-KLEE
 
+# The seed the GAME rolled on this turn's first staging, written back after
+# the fact rather than placeheld before it, so a re-stage reproduces the
+# fight. Recorded 2026-08-29 on the dev build 0.2.1481+proto.
+seed: R805DJ56LZHM
+
 exact_hand: true
 
 prototype: true

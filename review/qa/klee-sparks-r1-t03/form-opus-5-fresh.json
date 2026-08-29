@@ -1,0 +1,32 @@
+{
+  "turn_id": "klee-sparks-r1-t03",
+  "packet_sha256": "fcc7b1796f93f60c73c3bbac0c3c6cb18ed4d2fb9580be6a92ec62a9d6cca770",
+  "grader": {
+    "id": "opus-5-fresh",
+    "kind": "llm",
+    "model": "claude-opus-5",
+    "designed_these_cards": false
+  },
+  "chosen_line": [
+    {
+      "card": "Bang Bang!",
+      "target": "Seapunk"
+    },
+    {
+      "card": "Kaboom!",
+      "target": "Seapunk"
+    },
+    {
+      "card": "Kaboom!",
+      "target": "Seapunk"
+    },
+    {
+      "card": "Duck and Cover"
+    }
+  ],
+  "q1_what_did_you_play": "Bang Bang! first, spending both Sparks: with Seapunk the only enemy, the two random 5-damage hits both land on it for 10. Then both Kaboom! for 7 each, using 2 of my 3 Energy, for 14 more. That is 24 damage, leaving Seapunk at 21. The third Energy has no attack left to buy, so it goes into Duck and Cover for 5 Block, cutting the telegraphed 11-damage Attack down to 6 and leaving me at 36/62. Fwoosh! stays in hand because I have no Spark left to pay for it.",
+  "q2_other_line_considered": "Fwoosh! instead of Bang Bang!, then both Kaboom! and Duck and Cover. That spends 1 Spark for 8 damage instead of 2 Sparks for 10, banking 1 Spark for a later turn at the price of 2 damage now (22 instead of 24). I took the extra damage: neither line comes near killing a 45-HP enemy this turn, but 24 versus 22 shortens the fight, and one leftover Spark with Fwoosh! still in hand is only worth something if I draw into more Spark generation, which I have no information about. I also checked whether dropping Duck and Cover for anything else was possible — it is not; there is no third attack I can afford with the last Energy.",
+  "q3_what_it_gave_up": "The Spark bank. I am at 0 Spark with Fwoosh! and Bang Bang! both dead in hand until Sparks come back, whereas the Fwoosh! line would have left 1 Spark and a live Fwoosh!. In exchange I got 2 damage and I keep the identical 5 Block either way.",
+  "q4_different_intent": "No. If the intent had been a bigger attack, I still have nothing more to block with — Duck and Cover is my only defensive card and the last Energy has no competing use. If Seapunk had telegraphed a block, a buff, or nothing at all, I would still dump all 24 damage and still put the spare Energy into Duck and Cover, since holding it buys me nothing. The only telegraph that would move me is one that punished attacking (a thorns- or reaction-style effect), and the disclosures say the enemy carries no aura.",
+  "q4_changed": false
+}
