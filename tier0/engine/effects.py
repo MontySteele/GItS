@@ -3798,6 +3798,34 @@ def kurage_fire(state: CombatState, manual: bool = False) -> bool:
                bank=p.charge, remaining=len(state.kurage_queue),
                ephemeral=entry.ephemeral, rule=entry.rule, manual=manual,
                same_target=aim is not None and aim is entry.target)
+    # KURAGE'S OATH, RE-KEYED TO THE MEMORY PLAY. [USER], 2026-08-29:
+    # "Let's rewrite it to '3 block per memory played, upgrade to 5' as a
+    # placeholder and see if it needs adjusting later."
+    #
+    # THE TRIGGER IS HERE AND ONLY HERE, which is what makes the rule one
+    # sentence: every memory play passes through this function -- the
+    # automatic turn-start fire and the acceleration keyword's ("Stir")
+    # manual fire alike -- so "per memory played" needs no second site and
+    # cannot drift between the two doors. It no longer rides the pulse; see
+    # `kurage_memory_pulse`, where the ward term is gone under the flag.
+    #
+    # THE AMOUNT IS THE CARD'S, never a constant: whatever stacks of
+    # `kurage_ward` are standing is what is paid, so the placeholder numbers
+    # live on the card face -- the quarantined surface row
+    # `proto_kurages_oath_memory`, 3 Block, upgrading to 5 -- and no
+    # code-side override exists that could disagree with them. They are a
+    # PLACEHOLDER in [USER]'s own word, and no measurement is attached.
+    #
+    # PAID BEFORE THE COPY RESOLVES, deliberately: the Block belongs to the
+    # fire and not to whatever the remembered card turns out to do, so a
+    # replayed attack that provokes a retaliation is defended by the ward its
+    # own fire paid.
+    ward = p.powers.get("kurage_ward", 0)
+    if ward:
+        p.block += ward
+        state.emit("block", amount=ward)
+        state.emit("kurage_ward_paid", amount=ward, card=entry.card_id,
+                   manual=manual)
     prev_auto, prev_aim = state.kurage_autoplaying, state.kurage_aim
     state.kurage_autoplaying = True
     state.kurage_aim = aim
@@ -3881,15 +3909,19 @@ def kurage_memory_pulse(state: CombatState) -> None:
                 reactions.apply_aura(state, target, "hydro",
                                      source="kurage_pulse")
     else:                                    # skill (and every other type)
-        # KURAGE'S OATH, UNDER THE BASE KIT. `kurage_ward` is unchanged here
-        # and that is the least-invasive default, but its printed reading has
-        # moved: the Oath was "5 Block per Bake-Kurage play" because the
-        # jellyfish pulsed once per summon at KURAGE_DURATION 1. With
-        # KURAGE_ALWAYS_ON the pulse fires at EVERY turn end, so the Oath now
-        # pays "5 Block per turn, for the rest of the fight" -- and only on
-        # the Skill branch. Nothing in code is wrong; the card's FACE is.
-        # sec.12 pick 4.
-        blk = C.KURAGE_MEMORY_PULSE_BLOCK + p.powers.get("kurage_ward", 0)
+        # KURAGE'S OATH IS NOT HERE ANY MORE. sec.12.4 pick 4 is RULED
+        # ([USER], 2026-08-29): the ward is keyed to a MEMORY PLAY, not to
+        # the pulse, and it is paid in `kurage_fire`. Under the base kit the
+        # pulse fires every turn end, which would have turned "per
+        # Bake-Kurage play" into "per turn" for free; a memory play is a
+        # thing she has to earn and can be blocked out of, so the ward now
+        # keys to that instead.
+        #
+        # `kurage_ward` DOES NOT APPEAR IN THIS EXPRESSION, and that is the
+        # whole of the change here. The shipped pulse's own term
+        # (`KURAGE_PULSE_BLOCK + kurage_ward`) is untouched, on the flag-off
+        # branch in `player_turn_end_triggers`, so nothing that ships moved.
+        blk = C.KURAGE_MEMORY_PULSE_BLOCK
         state.emit("kurage_pulse", amount=blk, kind=kind, landed=True,
                    memory=True)
         if blk:

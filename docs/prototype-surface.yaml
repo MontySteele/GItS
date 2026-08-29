@@ -480,3 +480,72 @@
 # THE DELETION RULE AT THE TOP OF THIS FILE APPLIES TO THIS BLOCK TOO: when
 # the arm is accepted or rejected, this block leaves with it.
 # =============================================================================
+
+# KOKOMI KURAGE BASE KIT (sec.12 of
+# review/active/kokomi-kurage-memory-2026-08-29.md) -- ONE row, one arm.
+#
+# THE QUESTION IT SETTLES IS ALREADY RULED, so this row is a STAGED FACE
+# rather than an experiment: sec.12.4 pick 4 asked what happens to Kurage's
+# Oath once the jellyfish is always on and its pulse therefore fires every
+# turn, and [USER] answered on 2026-08-29, verbatim --
+#
+#     "Let's rewrite it to '3 block per memory played, upgrade to 5' as a
+#      placeholder and see if it needs adjusting later."
+#
+# So the ward stops riding the pulse and starts riding a MEMORY PLAY. The
+# trigger half of that is engine (`effects.kurage_fire`, behind
+# `C.KURAGE_MEMORY`, one site covering both the automatic turn-start fire and
+# the "Stir" keyword's manual one). The FACE half is this row.
+#
+# THE NUMBERS ARE [USER]'S AND ARE A PLACEHOLDER IN HIS OWN WORD. 3, and 5
+# upgraded. No measurement is attached to either and none may be: nothing has
+# been run on this shape, and under R213 B / R215 B no number measured on this
+# surface would be quotable if it had. "See if it needs adjusting later" is
+# the disposition, not a band.
+#
+# AUTHORSHIP, recorded here because the surface has no `authored_by` FIELD --
+# `Card.from_dict` is total on unknown fields and refuses one, so the surface's
+# convention is a comment block, as every arm above records its own. NUMBERS
+# AND RULE: [USER]. IMPLEMENTATION AND WORDING: Claude. Nothing on this row
+# was designed by the doctrine seat, and nothing here has been graded.
+#
+# THE SHIPPED ROW IS UNTOUCHED. `kurages_oath` in docs/kokomi-cards.yaml still
+# prints ward 5 (7 upgraded) and still says "per Bake-Kurage play"; it is a
+# shipped number under an R213 freeze and it is not this branch's to move. The
+# consequence, stated so it is not discovered: with the flag on, a deck that
+# drafts the SHIPPED Oath gets 5 per memory play, because the ward's amount is
+# read off whatever card applied it. That is the surface working as designed --
+# a staged face beside its shipped twin -- and it is what makes accepting this
+# arm a one-row re-authoring rather than an engine change.
+#
+# NO UPGRADE ROW, AND THAT IS THE SURFACE'S CONVENTION, NOT AN OMISSION. This
+# file has never carried an upgrade: no row above declares one, the schema has
+# no field for it, and `tools/gen_prototype_cards.py` has no upgrade path --
+# upgrades live in `docs/<character>-upgrades.yaml`, keyed by shipped card id,
+# and putting a `proto_` key in a shipped sheet would give the R213 deletion
+# rule a second file to remember. So the upgraded 5 is recorded HERE, in the
+# row that owns it, and is owed to the upgrades sheet at the same moment this
+# row is re-authored onto her real sheet.
+#
+# NAME. "Kurage's Oath" is the shipped card's name and is [USER]'s; this row
+# keeps it, because the row IS that card with one clause rewritten and a blind
+# reader must see the card, not the experiment (R179).
+#
+# THE FACE, as it must read once the mod carries it:
+#
+#     Kurage's Oath -- 1 energy, Power, Common
+#     Whenever the Bake-Kurage plays a card from its memory, gain 3 Block.
+#     (Upgraded: 5.)
+#
+# THE GENERATED FACE DOES NOT SAY THAT YET, and it cannot be fixed from
+# here. `gen_klee_cards` renders a Power's description PER POWER ID, not
+# per row, so `kurage_ward` prints one string -- "Each Bake-Kurage pulse
+# also grants {X} Block." -- shared with the SHIPPED Oath. Moving that
+# string would move a shipped release face and make it false with the flag
+# off, where the ward really does ride the pulse. So the wording is owed to
+# the C# mirror, which needs its own power (or its own description channel)
+# for the prototype: it is on sec.12.6's checklist as item 14.
+# =============================================================================
+- {id: proto_kurages_oath_memory, name: "Kurage's Oath", character: kokomi,
+   cost: 1, type: power, rarity: common,
+   effects: [{op: apply_power, power: kurage_ward, amount: 3, target: self}]}

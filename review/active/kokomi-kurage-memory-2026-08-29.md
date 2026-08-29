@@ -1396,19 +1396,57 @@ base kit it is silent.
    visibly wakes the jellyfish.
 3. **Retire the link** and say so on the relic's face.
 
-**PICK 4 — Kurage's Oath (the `kurage_ward` Block).**
-*Built:* unchanged in code. But its printed reading has moved: it was "5 Block
-per Bake-Kurage play" because the jellyfish pulsed once per summon; it is now
-**5 Block every turn, for the rest of the fight**, on the Skill branch of the
-pulse. Nothing in the engine is wrong — the *face* is.
+**PICK 4 — Kurage's Oath (the `kurage_ward` Block). RULED, and BUILT.**
+[USER], 2026-08-29, verbatim:
 
-1. **Leave the number, rewrite the face** (built; the face rewrite is owed on
-   both engines).
-2. **Re-price it.** This is the card that already carries a [USER] "maybe too
-   strong" history (R130 took it 12 → 5), and per-turn is a much larger
-   promise than per-play. A re-price needs a measurement this arm cannot give.
-3. **Key the ward to something rarer than every turn** so its old reading
-   survives.
+> "Let's rewrite it to '3 block per memory played, upgrade to 5' as a
+> placeholder and see if it needs adjusting later."
+
+*What the pick was:* under the base kit the pulse fires at every turn end, so
+a ward that rode the pulse turned "5 Block per Bake-Kurage play" into 5 Block
+per turn for free.
+
+*What is now built:* the ward is keyed to a **memory play** and no longer to
+the pulse. Every time the jellyfish plays a card out of its memory — the
+automatic fire at turn start, and the acceleration keyword's ("Stir") extra
+fire alike — the Oath pays. A turn where the memory is empty pays nothing, and
+a turn where the front is **blocked** pays nothing either, which is the point:
+a memory play is something she has to earn and can be shut out of, and a pulse
+is not.
+
+*The numbers are a placeholder, in [USER]'s own word:* **3 Block, 5 upgraded.**
+No measurement is attached to either and none may be quoted from this arm.
+
+*The mechanism, in two halves.* The **trigger** is engine, behind
+`C.KURAGE_MEMORY`, at one site (`effects.kurage_fire`) that both doors pass
+through — so "per memory played" is one sentence and cannot drift between
+them. The **numbers** are the card's: the ward pays whatever stacks are
+standing, so there is no code-side override that could disagree with a printed
+face. The face itself is staged as a prototype row,
+`proto_kurages_oath_memory`, on `docs/prototype-surface.yaml` — the repo's
+established way to try a card face under an R213 flag. The shipped
+`kurages_oath` row is untouched, and **with the flag off the ward still rides
+the pulse at 5, exactly as it ships** (test-pinned as a hard requirement).
+
+*Two things about the surface that are worth saying plainly.* It carries **no
+upgrade channel** — no row on it has ever had one, the schema has no field for
+it and the generator has no path for it, because upgrades live in
+`docs/<character>-upgrades.yaml` keyed by shipped id. So the upgraded 5 is
+recorded on the row itself and is owed to the upgrades sheet at the moment
+this arm is re-authored onto her real sheet. And it carries **no `authored_by`
+field** — the row schema refuses unknown fields — so authorship is recorded
+the way every other arm on that surface records it, in the row's own comment
+block: **numbers and rule [USER], implementation and wording Claude**, no
+doctrine-seat involvement, nothing graded.
+
+*One consequence, so it is not discovered later:* with the flag on, a deck
+that drafts the **shipped** Oath gets 5 per memory play rather than 3, because
+the amount is read off the card that applied the ward. That is the surface
+working as intended — a staged face beside its shipped twin — and it is what
+makes accepting this arm a one-row re-authoring instead of an engine change.
+
+*Still open, and small:* whether 3/5 wants adjusting, which is what [USER]
+reserved.
 
 **PICK 5 — `KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON`.**
 *Built:* retired-under-flag. It asked "does the acceleration keyword work with
@@ -1490,6 +1528,20 @@ same quarantine flag.
 12. **The bridge** must expose the install as a fight-start fact, so a blind
     run can see the jellyfish before turn 1 rather than inferring it from the
     first pulse.
+13. **Move Kurage's Oath's ward off the pulse and onto the memory play**
+    (§12.4 pick 4, RULED). One trigger site covering both doors — the
+    automatic turn-start fire and the "Stir" fire — paid when the memory
+    actually plays, so an empty or blocked memory pays nothing. Under the
+    flag only: with the flag off the ward must still ride the pulse.
+14. **Give the prototype Oath its own face text**, which the sim's codegen
+    cannot do from here: `gen_klee_cards` renders a Power's description per
+    POWER ID, so `kurage_ward` prints one string shared with the shipped
+    Oath, and moving it would move a shipped release face and make it false
+    with the flag off. The mirror needs its own power (or its own
+    description channel) for the prototype row. The face must read:
+    **"Whenever the Bake-Kurage plays a card from its memory, gain 3 Block."**
+    — 5 upgraded. Until it does, the generated prototype card carries the
+    shipped pulse wording and is wrong on its face.
 
 ### 12.7 Green
 
@@ -1501,3 +1553,11 @@ date** -- no sheet moved, because the starter swap is code and every YAML
 file is byte-identical. Twelve
 mutations were run against the new test file and all twelve were caught. No
 LAW line, register row, sheet row or drafted number moved, so no stamp moved.
+
+**Pick 4's build (step P) re-ran all of it**: the ci lane again reports OK on
+27 lints, and the prototype-codegen lint required the surface's generated C#
+to be regenerated for the new row, which was done with the tool rather than
+by hand. Eight further mutations were run against the ward tests and all
+eight were caught. **The §12.5 smoke was not re-run and does not move**: no
+card in the starter deck grants `kurage_ward`, so the Oath cannot appear in
+a starter fight by any route.
