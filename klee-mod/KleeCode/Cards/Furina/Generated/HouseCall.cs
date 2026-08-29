@@ -45,7 +45,7 @@ public sealed class HouseCall : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "House Call"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with [gold]Salon[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, already including [gold]Salon[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

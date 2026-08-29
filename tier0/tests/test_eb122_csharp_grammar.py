@@ -138,8 +138,12 @@ def test_the_discards_this_turn_rider_is_mementomoris_triple():
             "static (card, _) => KokomiResources.DiscardsThisTurn(card))"
             in src)
     # The face says WHY the number moves, and says the count is per TURN --
-    # which is the whole play pattern: throw first, then swing.
-    assert "Scales with the cards you discarded this turn." in src
+    # which is the whole play pattern: throw first, then swing. EB-164: it
+    # says it INSIDE the number's sentence, so the count cannot be read as an
+    # addition on top of a number that has already made it.
+    assert ("Deal {CalculatedDamage:diff()} damage, already including the "
+            "cards you discarded this turn." in src)
+    assert "Scales with" not in src
 
 
 def test_the_ruled_formula_base_delta_lands_on_the_base_term():
@@ -180,8 +184,9 @@ def test_the_charge_rider_renders_through_the_block_var():
     assert ("new CalculatedBlockVar(ValueProp.Move).WithMultiplier("
             "static (card, _) => KokomiResources.GetCharge(card.Owner.Creature)"
             " / 2)" in src)
-    assert "Gain {CalculatedBlock:diff()} [gold]Block[/gold]." in src
-    assert "Scales with [gold]Charge[/gold]." in src
+    assert ("Gain {CalculatedBlock:diff()} [gold]Block[/gold], already "
+            "including [gold]Charge[/gold]." in src)
+    assert "Scales with" not in src
     # The block delta upgrades the base term, not a Block var the card no
     # longer declares.
     assert "DynamicVars.CalculationBase.UpgradeValueBy(3m);" in src

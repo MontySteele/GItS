@@ -375,8 +375,21 @@ def commits() -> list[Commit]:
     return found
 
 
+# NOT a ruling citation: the SLICE-ROUND tag. Kokomi slice 1's per-round
+# commits are subjected "Kokomi slice 1 (R2-A): ..." / "(R3-A): ...", where the
+# letter is the phase within the round and the number is the ROUND -- so `R3`
+# there is not ruling three and the commit records nothing about it. Left in,
+# "(R3-A)" is a SUBJECT-tier record of R3 and outranks the range `(R1-R7)` in
+# the subject that actually records it, silently reassigning the ruling to a
+# lint commit. The house cites a slate item with a space or parens instead
+# ("R215 C", "R212(1)", "R202 call (5)"), never `R<n>-<LETTER>`, so this shape
+# is unambiguous and is stripped before the subject is scanned.
+ROUND_TAG = re.compile(r"\(R\d+-[A-Z]\)")
+
+
 def subject_ids(subject: str) -> dict[int, int]:
     """id -> tier, for what a subject records: leading, named, or in a range."""
+    subject = ROUND_TAG.sub("", subject)
     tiers: dict[int, int] = {}
     for lo, hi in ((int(a), int(b)) for a, b in RANGE.findall(subject)):
         if lo < hi <= lo + 60:

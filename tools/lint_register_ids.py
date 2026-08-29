@@ -116,7 +116,14 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 168,   # EB-166/167/168 minted by R217 (2026-08-28): the automation
+    "EB": 170,   # EB-169/170 minted 2026-08-28 by the Kokomi slice-1 round-3
+                 # sitting, both under R213/R216 authority and neither a
+                 # design call: a funnel preflight that refuses a packet
+                 # holding a card with an OPEN face/runtime defect (round 2
+                 # staged one on all eleven boards), and the replayer's
+                 # inability to answer a modal prompt, which left three of
+                 # round 3's eleven replays untested.
+                 # EB-166/167/168 minted by R217 (2026-08-28): the automation
                  # the design course-correction authorized, in order -- the
                  # independent-model seat (Codex CLI on [USER]'s subscription),
                  # the design-blind any-screen render over the existing
@@ -166,8 +173,8 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
-        156, 157, 158, 159, 160, 161, 162, 163, 164,
-        166, 167, 168,
+        156, 157, 158, 159, 160, 161, 162, 163,
+        167, 168, 169, 170,
     }),
     "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
 }

@@ -1,0 +1,21 @@
+{
+ "turn_id": "kokomi-slice1-r3-t05",
+ "packet_sha256": "0feffa23d1cc823057a5f85a9b2a0bdf2b13ee947e6049623fd92d50bfc4d516",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Shinobu - Sanctifying Circle",
+   "target": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Shinobu - Sanctifying Circle, killing both Leaf Slimes, dealing no HP damage to Twig Slime because of its Block, and gaining 4 Block for its attack.",
+ "q2_other_line_considered": "I seriously considered playing Water's Edge and All Streams Flow to the Sea on the two Leaf Slimes, but that would spend two cards to secure the same kills while leaving the 4-damage attack unblocked.",
+ "q3_what_it_gave_up": "It gave up the possibility of using the stronger single-target hits against Twig Slime, though neither affordable alternative could both eliminate the two status-dealing enemies and block the incoming attack.",
+ "q4_different_intent": "No. With both Leaf Slimes at 3 HP, the all-enemy hit removes both for one play, and its Block is useful against the shown attack without costing those removals.",
+ "q4_changed": false
+}

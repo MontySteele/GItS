@@ -19,6 +19,43 @@ semantic reason.
 Every emitted file carries a DO-NOT-EDIT header naming this script and the
 sheet, so a hand edit is visibly wrong rather than quietly lost on regen.
 
+A FACE STATES A SCALING EXACTLY ONCE (EB-164)
+---------------------------------------------
+ONE rule, for every rider on every profile, prototype rows included.
+
+  (1) The scaler IS in the printed number -- the amount renders through a
+      `Calculated*` var whose multiplier can be read before the card resolves.
+      The face names the source in the SAME sentence as the number, as a
+      trailing ", already including <source>" clause, and emits NO separate
+      sentence about it.
+
+          Deal {CalculatedDamage:diff()} damage, already including
+          [gold]Charge[/gold].
+
+  (2) The scaler is NOT in the printed number -- the count does not exist
+      until the card resolves, so the preview is always the bare base. The
+      per-unit RATE is printed beside the number off its own live var
+      (R215 C, `EXHAUST_SELECTION_TEXT` below), and again no separate
+      sentence.
+
+          Deal {CalculatedDamage:diff()} damage, plus {ExtraDamage:diff()}
+          per cost of the card you just [gold]Exhausted[/gold].
+
+WHY, and it is not style. Until 2026-08-28 case (1) printed the folded number
+AND a bare "Scales with [gold]X[/gold]." sentence beneath it, which a reader
+can only take as "and it will scale further" -- so the number gets counted
+twice. In the round-2 Kokomi seat run four of eleven graders and the pair
+reviewer read *All Streams Flow to the Sea* as 13 where the game deals 9,
+which manufactured a lethal line and seven refusals; `staged_turn execute`
+settled it live at 22 HP -> 1. The assertion sentence is what has to go: it
+says nothing the clause does not, and its position invites the double count.
+The RATE itself is unaffected -- for a rehomed rider it lives in the hover tip
+(Track L-C) exactly as before.
+
+`tools/lint_face_scaling.py` is the join, on the ci lane: it refuses any card
+face that both prints a `Calculated*` amount and separately asserts that the
+card scales.
+
 Usage:  python tools/gen_klee_cards.py [--check] [--character klee|furina|kokomi|all]
         python tools/gen_roster_cards.py [--check]
         --check exits nonzero if regenerating would change anything (CI guard).
@@ -2051,6 +2088,21 @@ EXHAUST_SELECTION_TEXT = {
     "exhaust_selection_upgraded": "upgraded card you just "
                                   "[gold]Exhausted[/gold]",
 }
+
+
+# EB-164, case (1) of the docstring rule. The ONE way a face says that the
+# number it just printed already carries a rider. Written as a fold over a
+# list rather than an append per rider so that a card reading two folded
+# sources says "already including A and B" once, never twice in a row.
+def _already_including(sentence: str, sources: list[str]) -> str:
+    """Attach the folded sources to the sentence carrying the number."""
+    if not sources:
+        return sentence
+    if len(sources) == 1:
+        tail = sources[0]
+    else:
+        tail = ", ".join(sources[:-1]) + " and " + sources[-1]
+    return sentence.removesuffix(".") + f", already including {tail}."
 
 
 def exhaust_selection_calc_rider(card: dict,
@@ -5557,13 +5609,18 @@ def build_description(card: dict) -> str:
             # exact misread B1 shipped. The damage path has always emitted
             # this marker; the block path did not, so B1's fix traded a silent
             # drop for a silent number. Fixed here (A13).
+            #
+            # EB-164: it declares the scaling IN the number's own sentence
+            # now. As a following sentence ("Scales with X.") it read as a
+            # further addition on top of a number that already carried it.
             if block_calc_rider(card, eff) is not None:
                 formula = eff.get("bonus_formula", "")
                 stat = ("Salon" if formula.endswith("_per_salon_member")
                         else "Companions"
                         if formula.endswith("_per_companion_played_this_turn")
                         else formula.rpartition("_")[2].title())
-                parts.append(f"Scales with [gold]{stat}[/gold].")
+                parts[-1] = _already_including(
+                    parts[-1], [f"[gold]{stat}[/gold]"])
 
         elif op == "block_next_turn":
             if block_next_turn_upgrade(card):
@@ -5671,13 +5728,22 @@ def build_description(card: dict) -> str:
             # converted keeps its full sentence -- its number is not on the
             # face, so the text is the only place the player can read it.
             rehomed = calc_rider(card, eff) is not None
+            # EB-164, case (1): every source the printed number ALREADY
+            # carries, collected and stated once, inside the number's own
+            # sentence. Each of these used to be a following sentence
+            # asserting that the card scales -- which reads as a further
+            # addition on top of a number that had already added it.
+            folded: list[str] = []
+            # Pinned, not `parts[-1]`: the branches below can append their own
+            # sentences (a detonation rate, an unrehomed aura bonus) between
+            # here and the fold, and the clause belongs to the NUMBER.
+            dmg_idx = len(parts) - 1
             if exhaust_pile_calc_rider(card, eff) is not None:
                 # The number is already honest (it renders through the
-                # CalculatedVar); this sentence says WHY it moves. Without it
+                # CalculatedVar); this clause says WHY it moves. Without it
                 # the card is a damage number that changes for no stated
                 # reason, which is the exact confusion Track C exists to stop.
-                parts.append(
-                    "Scales with the number of cards [gold]Exhausted[/gold].")
+                folded.append("the cards [gold]Exhausted[/gold]")
             if exhaust_selection_calc_rider(card, eff) is not None:
                 # NOT the pile sentence's job, though it looks like it. The
                 # pile count exists before the card resolves, so
@@ -5692,12 +5758,11 @@ def build_description(card: dict) -> str:
                 parts[-1] = (parts[-1].removesuffix(".")
                              + ", plus {ExtraDamage:diff()} per " + unit + ".")
             if discards_turn_calc_rider(card, eff) is not None:
-                # EB-122. Third sentence in the same family: the number is
+                # EB-122. Third member of the same family: the number is
                 # honest (it renders through the CalculatedVar), and this says
                 # WHY it moves. It also tells the pilot the count is per TURN,
                 # which is the whole play pattern -- throw first, then swing.
-                parts.append(
-                    "Scales with the cards you discarded this turn.")
+                folded.append("the cards you discarded this turn")
             if exhausts_turn_calc_rider(card, eff) is not None:
                 # The EXHAUST-SELECTION shape, not the pile shape, and the
                 # difference is deliberate. Like the selection count, this one
@@ -5751,7 +5816,7 @@ def build_description(card: dict) -> str:
                         else "Companions"
                         if formula.endswith("_per_companion_played_this_turn")
                             else formula.rpartition("_")[2].title())
-                    parts.append(f"Scales with [gold]{stat}[/gold].")
+                    folded.append(f"[gold]{stat}[/gold]")
                 else:
                     n, _, rest = formula.partition("_per_")
                     step, _, stat = rest.partition("_")
@@ -5759,11 +5824,19 @@ def build_description(card: dict) -> str:
                         f"+{n} damage per {step} [gold]{stat.title()}[/gold].")
             if "bonus_vs_aura" in eff:
                 if rehomed:
-                    parts.append("Bonus damage vs. an elemental aura.")
+                    # Case (1) again, with the condition kept: the multiplier
+                    # reads the AIMED target, so the previewed number carries
+                    # the bonus exactly when that target has an aura. "Bonus
+                    # damage vs. an elemental aura." as its own sentence
+                    # promised an addition the number had already made.
+                    folded.append("{ExtraDamage:diff()} if the target has an "
+                                  "elemental aura")
                 else:
                     parts.append(
                         f"+{int(eff['bonus_vs_aura'])} damage if the enemy "
                         "has an elemental aura.")
+            if folded:
+                parts[dmg_idx] = _already_including(parts[dmg_idx], folded)
 
         elif op == "gain_spark":
             if spark_upgrade(card):
@@ -7164,8 +7237,8 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard
             f"FurinaRiderTips.ForCard({tips_expr or 'base.ExtraHoverTips'}, "
             f"this, {rider_args})")
     # L4b: the Charge rate, in Kokomi's own tip class. Same bargain as above
-    # -- the face keeps the short "Scales with Charge" marker, the rate and
-    # what it is paying right now live in the tip.
+    # -- the face names Charge in the number's own sentence (EB-164), and the
+    # rate and what it is paying right now live in the tip.
     if charge_rider_args:
         tips_expr = (
             "KokomiRiderTips.ForChargeRider("

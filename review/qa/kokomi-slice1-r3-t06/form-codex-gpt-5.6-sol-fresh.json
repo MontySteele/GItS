@@ -1,0 +1,29 @@
+{
+ "turn_id": "kokomi-slice1-r3-t06",
+ "packet_sha256": "4711afe5d2721035a63e2795cb5e58a98ce3f512f09778bf2782e363ba3e5b58",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Seapunk"
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Seapunk"
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Seapunk"
+  }
+ ],
+ "q1_what_did_you_play": "I played All Streams Flow to the Sea, then both copies of Water's Edge, all targeting Seapunk, for 21 total printed damage.",
+ "q2_other_line_considered": "I seriously considered Thoma \u2014 Crimson Ooyoroi followed by All Streams Flow to the Sea, dealing 17 total printed damage while gaining 3 Block.",
+ "q3_what_it_gave_up": "It gave up the 3 Block from Thoma \u2014 Crimson Ooyoroi, so the telegraphed attack deals 3 more unblocked damage, in exchange for 4 more damage to Seapunk.",
+ "q4_different_intent": "Yes. A sufficiently larger attack intent would have made the 3 Block from Thoma \u2014 Crimson Ooyoroi more valuable and could have changed my choice to the Thoma line.",
+ "q4_changed": true
+}

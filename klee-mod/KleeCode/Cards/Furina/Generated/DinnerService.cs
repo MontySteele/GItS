@@ -45,7 +45,7 @@ public sealed class DinnerService : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dinner Service"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Scales with [gold]Salon[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold], already including [gold]Salon[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

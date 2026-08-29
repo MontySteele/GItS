@@ -45,7 +45,7 @@ public sealed class ApplauseLine : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Applause Line"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with [gold]Fanfare[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, already including [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

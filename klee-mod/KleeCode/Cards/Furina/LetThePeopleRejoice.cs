@@ -31,10 +31,14 @@ public sealed class LetThePeopleRejoice
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Let the People Rejoice"),
+        // EB-164: the scaling is stated ONCE, inside the number's own
+        // sentence, by the generator's rule (1). As a following sentence
+        // asserting the Fanfare rider a second time, it read as a further
+        // addition on top of a number that already carried that rider.
         ("description",
             "Costs your full [gold]Burst Energy[/gold] meter. "
-          + "Deal {CalculatedDamage:diff()} damage to ALL enemies. "
-          + "Scales with [gold]Fanfare[/gold]. Gain 6 [gold]Encore[/gold]."),
+          + "Deal {CalculatedDamage:diff()} damage to ALL enemies, already "
+          + "including [gold]Fanfare[/gold]. Gain 6 [gold]Encore[/gold]."),
     };
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>

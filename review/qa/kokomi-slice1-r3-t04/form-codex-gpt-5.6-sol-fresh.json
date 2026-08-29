@@ -1,0 +1,25 @@
+{
+ "turn_id": "kokomi-slice1-r3-t04",
+ "packet_sha256": "ff4e6a54d3183d7b299eb7e045bfda3c81461d686d0c1300eed103a47caa57c1",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Shinobu - Warding Ring",
+   "target": null
+  },
+  {
+   "card": "All Streams Flow to the Sea",
+   "target": "Twig Slime (S)"
+  }
+ ],
+ "q1_what_did_you_play": "I used Shinobu - Warding Ring's damage mode, dealing 3 to all enemies and defeating both Leaf Slimes, then played All Streams Flow to the Sea on Twig Slime (S), leaving it at 4 HP after Block.",
+ "q2_other_line_considered": "I seriously considered playing Water's Edge and All Streams Flow to the Sea into the two Leaf Slimes, but that would leave Twig Slime (S) untouched behind its Block.",
+ "q3_what_it_gave_up": "It gave up the 4 Block mode of Shinobu - Warding Ring and left Twig Slime (S) alive to deal its telegraphed 4 damage.",
+ "q4_different_intent": "Yes. A sufficiently large attack telegraph, especially one threatening lethal at 16 HP, could have made the 4 Block mode preferable despite giving up the two Leaf Slime defeats.",
+ "q4_changed": true
+}

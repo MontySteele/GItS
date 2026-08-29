@@ -45,7 +45,7 @@ public sealed class GyorinFormation : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gyorin Formation"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Scales with [gold]Charge[/gold]. At the start of your next turn, gain 6 [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold], already including [gold]Charge[/gold]. At the start of your next turn, gain 6 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

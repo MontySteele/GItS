@@ -417,10 +417,18 @@ diagnostics under Guardrail-7 and nothing else. **The encounter is generated
 from the run seed**, so `stage` records the seed the game used into
 `packet.json` (not into the blind `packet.md`) and `execute` embarks with it —
 proven byte-identical on a re-stage. `execute` then compares the live enemies
-and hand against the packet and refuses `board_mismatch` before any play. **[USER] plays the same board cold** through `stage --hold` (attaches to a
-running game and leaves the board on screen) with `grader.id: user`, and
-**ledger** rebuilds `review/qa/ledger.tsv`, where a grader that keeps
-disagreeing with [USER] on question two loses its solo SURVIVES.
+and hand against the packet and refuses `board_mismatch` before any play.
+**ledger** rebuilds `review/qa/ledger.tsv`.
+
+**Who grades, since R217 A.** [USER] plays **no** forms and no calibration
+turns during iteration: the independent seat's form RETURNS a prototype or
+ADVANCES it with no [USER] involvement, and two seats materially disagreeing
+ESCALATES. So the ledger's `user` grader row stays empty **by rule**, and the
+down-weighting it feeds — a grader whose question two keeps disagreeing with
+[USER]'s losing its solo SURVIVES — is **DORMANT**: the pin stays in code and
+nothing exercises it. `stage --hold` (attaches to a running game and leaves the
+board on screen) is still there and still works, as a way to put a staged board
+in front of a person; it is not owed by the protocol.
 
 ### Understudy — the independent seat (Codex CLI)
 

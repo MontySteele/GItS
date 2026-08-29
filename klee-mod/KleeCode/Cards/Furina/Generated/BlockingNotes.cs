@@ -45,7 +45,7 @@ public sealed class BlockingNotes : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Blocking Notes"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Scales with [gold]Companions[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold], already including [gold]Companions[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

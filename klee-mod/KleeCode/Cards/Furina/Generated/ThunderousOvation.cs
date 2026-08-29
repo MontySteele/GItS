@@ -45,7 +45,7 @@ public sealed class ThunderousOvation : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thunderous Ovation"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Scales with [gold]Fanfare[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold], already including [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

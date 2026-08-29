@@ -51,7 +51,7 @@ public sealed class AllStreamsFlow : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "All Streams Flow to the Sea"),
-        ("description", "Deal {CalculatedDamage:diff()} damage. Scales with [gold]Charge[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, already including [gold]Charge[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

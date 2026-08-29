@@ -1,0 +1,93 @@
+{
+ "turn_id": "kokomi-slice1-r3-t05",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "intent_insensitive"
+ ],
+ "reasons": [
+  "intent_insensitive: question four is no: a different enemy intent would not have changed the line, so the intent is not part of the decision"
+ ],
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "0feffa23d1cc823057a5f85a9b2a0bdf2b13ee947e6049623fd92d50bfc4d516",
+ "chosen_line": [
+  {
+   "card": "Shinobu - Sanctifying Circle",
+   "target": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Shinobu - Sanctifying Circle, killing both Leaf Slimes, dealing no HP damage to Twig Slime because of its Block, and gaining 4 Block for its attack.",
+  "q2_other_line_considered": "I seriously considered playing Water's Edge and All Streams Flow to the Sea on the two Leaf Slimes, but that would spend two cards to secure the same kills while leaving the 4-damage attack unblocked.",
+  "q3_what_it_gave_up": "It gave up the possibility of using the stronger single-target hits against Twig Slime, though neither affordable alternative could both eliminate the two status-dealing enemies and block the incoming attack.",
+  "q4_different_intent": "No. With both Leaf Slimes at 3 HP, the all-enemy hit removes both for one play, and its Block is useful against the shown attack without costing those removals."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.0452,
+  "top1": 15.5,
+  "top2": 14.8,
+  "lines_considered": 4,
+  "playouts": 5,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Shinobu - Sanctifying Circle"
+    ],
+    "score": 15.5
+   },
+   {
+    "cards": [
+     "Water's Edge",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 14.8
+   },
+   {
+    "cards": [
+     "All Streams Flow to the Sea"
+    ],
+    "score": 8.9
+   },
+   {
+    "cards": [
+     "Water's Edge"
+    ],
+    "score": 5.9
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "unmapped_statuses": [],
+   "enemy_count": 3,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-28T19:32:56"
+}
