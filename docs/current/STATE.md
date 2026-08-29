@@ -176,14 +176,16 @@ deploy label from R218 on rides the pin above; live numbers were never
 comparable across a game build anyway (R95), and the sim references no game
 assembly and is unaffected.
 
-**No package is installed against this pin yet.** The last release build was
-`0.2.1209` (2026-08-27, from `main` `f291fb4`, `validate.ps1` OK, pack
-9,586,076 bytes / 132 resources), and what currently sits in the game's
-`mods\klee` is the dev package `0.2.1252+proto` — both built for 0.107.1 and
-neither able to load on 0.111.0. `EB-171` is the port and the re-deploy; until
-it lands nothing launches. Two face fixes are still owed a live build with it:
-the exhaust-selection rate (R215 C) and `EB-164`'s eighteen re-worded scaling
-faces.
+The deployed build is **`0.2.1269`** (2026-08-29, from `eb171-port-0-111`
+`a332ad3`), the first package built against this pin and the first release
+package since `0.2.1209` — it replaces the `0.2.1252+proto` dev package that
+was left installed. `validate.ps1` OK; pack 9,586,076 bytes, 132 resources.
+It carries `EB-171`'s port and the two face fixes `0.2.1209` was missing: the
+exhaust-selection rate (R215 C) and `EB-164`'s eighteen re-worded scaling
+faces. **Re-verified live on 0.111.0** (`EB-171`): the mod loads, all nine
+`understudy/scenarios/` scenarios PASS, `embark` reaches a live Kokomi run,
+and the prototype quarantine still refuses a `KLEEMOD-PROTO_…` grant from
+outside. The `klee` mod is ENABLED in the game's own mod settings.
 
 ## Systems
 
