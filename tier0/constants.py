@@ -2572,7 +2572,7 @@ CONSTANTS_VERSION = 20
 # moved, and the bump the move earns is still a judgement. Re-pin with
 # `python tools/lint_sheet_stamp.py --update`, in the SAME commit as the
 # sheet edit.
-SHEET_DIGEST = "a9eb3f1baecde24b12d59cec28cf8f578de5d113923bf5f786668423e038df70"
+SHEET_DIGEST = "c56553e690cbbb989af4505a144b990cabaae54b2683bb794c341b20bcc941d4"
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

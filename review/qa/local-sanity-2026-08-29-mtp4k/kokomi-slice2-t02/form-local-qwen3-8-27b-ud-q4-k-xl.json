@@ -1,0 +1,23 @@
+{
+ "turn_id": "kokomi-slice2-t02",
+ "packet_sha256": "948b08c6f1aa2bcf9a328eccf0f6bf542ef6c2a8acc8c6286ae5276db4f94942",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Gyorin Formation",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Gyorin Formation for 2 energy. It gave 10 Block immediately and set up 6 Block at the start of my next turn, which fully covers the telegraphed 8 damage from Sludge Spinner.",
+ "q2_other_line_considered": "I seriously considered Sounding Line followed by Coral Guard. That line would deal 12 damage, apply Hydro, spend 6 Charge, and gain 5 Block, but it would leave me taking 3 damage this turn and would forgo the extra 6 Block next turn.",
+ "q3_what_it_gave_up": "The chosen line gave up all immediate damage, all Hydro application this turn, and the chance to spend 6 Charge. It also left Sludge Spinner at full 34 HP instead of reducing it, trading pressure for stronger current and next-turn defense.",
+ "q4_different_intent": "Yes. If the enemy had telegraphed a non-attack, a very weak attack, or an effect that made immediate pressure more valuable than defense, I would have been more inclined to play Sounding Line with Coral Guard or Water's Edge to deal damage and spend Charge. Against the printed 8 Attack, Gyorin Formation was the clearer choice.",
+ "q4_changed": true
+}

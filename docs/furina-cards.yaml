@@ -9,8 +9,9 @@
 # (+ first-play trickle), limelight/top_billing gained spend lines, shared_billing/stage_lights riders swapped to
 # application/debuff, usher_the_waves gained Weak, blocking_notes rehomed block. ALL RE-AUTHORED NUMBERS PROPOSED
 # pending red-pen (furina-sheet-pass-3-report.md; pass-2 numbers are the selector-v2 archive).
-# Numbers tuned through 4 measured rounds against the declared statline (see furina-sheet-pass-1-report.md §2); 78 cards
-# since "The Tide Turns" F-B2 added lasting_impression, the common floor source (the Salon-v2 rework had brought it to 77).
+# Numbers tuned through 4 measured rounds against the declared statline (see furina-sheet-pass-1-report.md §2); 84 cards
+# today (it was 78 when "The Tide Turns" F-B2 added lasting_impression, the common floor source, the Salon-v2 rework having
+# brought it to 77; the richness pass took it to 82 and Win3's two Salon/Spotlight rows to 84 -- hygiene fix 2026-08-29, R220).
 # Element: hydro | Cadence: SKILL-grade (kickoff §1): damage on type:skill / burst-tag / skill_tag cards applies hydro; plain attacks never do.
 # Archetypes: salon (default plan / solo floor) | spotlight (draft-gated high-ceiling) | fanfare (tempo/velocity flux) | generic
 # Statline this sheet must produce (kickoff §2, CLEARED): A1 1.0-1.5 dreadful, A4 4.3 + A6 4.2 elite, A5 3.7, A7 ~2.0 weak.

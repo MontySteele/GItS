@@ -116,9 +116,17 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
+    # EB-199/EB-200 minted 2026-08-29 by the R220 slate: the roster-wide Burst
+    # retirement, in two rows. 199 is the retirement itself -- engine fields,
+    # ops, the requires gate, eight constants, three sheets' burst_max and the
+    # ~30 test files, gated on all three folds landing. 200 is its C# arm --
+    # the three pools, the keyword loc id and its consumer sweep, the
+    # retired-display registry and the GaugeBridge re-point. The Burst packet
+    # reserved 198/199 for these two; 198 was taken by the blind run first, so
+    # both shifted up one and the packet carries a pointer saying so.
     # EB-198 minted 2026-08-29 by the KURAGEMEM001 blind run: the tester read
     # the memory strip as inconsistent twice, undiagnosed on purpose.
-    "EB": 198,   # EB-196/197 minted 2026-08-29 by the Gate B diagnosis. 196:
+    "EB": 200,   # EB-196/197 minted 2026-08-29 by the Gate B diagnosis. 196:
                  # the C# memory could never hold an entry -- the per-fight
                  # clear sat in the subscription delegate, which the combat
                  # re-invokes on EVERY hook broadcast, so both entry rules
@@ -301,7 +309,24 @@ CEILINGS: dict[str, int] = {
                  # exp_shop_companion_channel instrument (R68); EB-140 minted
                  # at the R211 W3 build (the codegen upgrade-delta gap);
                  # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
-    "M": 57,     # M54-M57 minted 2026-08-29 by the KURAGEMEM001 blind run:
+    "M": 60,     # M59/M60 minted 2026-08-29 by the R220 slate, one row per
+                 # packet under one ruling (R206 as amended by R212): M59 the
+                 # Furina reframe's sixteen design picks F1-F16, M60 the Burst
+                 # retirement's four, K1/K2/KO1/KO2. Both packets reserved ids
+                 # that had since collided -- the reframe reserved M54 and the
+                 # retirement M52, and M54-M58 were minted by the blind run
+                 # and the tester seat in between -- so both moved up and each
+                 # packet's owed section carries a pointer to where it landed.
+                 # M51 and M53 LEFT OPEN_IDS in this same commit, answered by
+                 # R220 F (the Sparks countersign given, with LAW:481's
+                 # bounded-spark line amended with it) and R220 E (the local
+                 # tester seat, the Codex seat's ADVANCE being the condition
+                 # [USER] set). Ceilings never come down.
+                 # M58 minted 2026-08-29 by the local tester seat: the Codex
+                 # seat's ADVANCE requires "periodic review by this seat" and
+                 # names no rate, so the rate is [USER]'s. The mechanism ships
+                 # on the default and takes any N.
+                 # M54-M57 minted 2026-08-29 by the KURAGEMEM001 blind run:
                  # Rule 1 is not taught (P3 0 of 10), P4's half (b) failed so
                  # the acceleration keyword stops being optional, the sealed
                  # record cannot carry P2/P6's objective side, and the
@@ -352,14 +377,21 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 182, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
+        # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
+        # its C# arm, both gated on the three character folds landing first.
+        199, 200,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
     # M54-M57 minted 2026-08-29 by the KURAGEMEM001 blind run: Rule 1 is not
     # taught, P4's half (b) failed, the record cannot carry P2/P6's objective
     # side, and the prototype description channel is a generator contract.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 51, 52, 53,
-                    54, 55, 56, 57}),
+    # M51 and M53 left OPEN_IDS with their rows when R220 answered them
+    # (2026-08-29): F countersigned the Sparks re-author, E handed the local
+    # model a TESTER seat and no grading chair. M59/M60 join with the two
+    # slate rows R220 mints.
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 52,
+                    54, 55, 56, 57, 58, 59, 60}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

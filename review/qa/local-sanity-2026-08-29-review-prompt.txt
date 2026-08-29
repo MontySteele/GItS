@@ -1,0 +1,865 @@
+BRIEF -- CONFIRMATION READ ON A LOCAL MODEL'S TESTER READINGS
+
+WHAT THIS IS. A local open-weights model (Qwen3.8-27B-UD-Q4_K_XL, served on
+this machine by llama.cpp, temperature 0, grader id
+`local-qwen3-8-27b-ud-q4-k-xl`) was handed TEN staged single-turn packets that
+are already CLOSED, in the same prompt shape the two recorded seats got, and
+asked the tester's question: what do you play this turn, and why. Its answers
+are printed below beside the two readings this repo already has on record for
+the same packets -- Claude (`opus-5-fresh`) and you (`codex-gpt-5.6-sol-fresh`).
+
+Nothing below is a grade, a balance reading, or ship approval. The local
+family is NOT an approved authoring family (M53) and nothing it wrote has
+entered a record, a register or the ledger. This read is about the READER, not
+about any card.
+
+Two further facts you should have. (a) Two Klee turns -- klee-slice1-r3-t03
+and t04 -- were REFUSED by the local seat with `answer_truncated`: the model's
+chain of thought ran to the completion ceiling (16384 tokens) and the form
+came back incomplete, so the seat refused it rather than filing a partial
+form. (b) The seat's doctrine-gate brief (a ~47K-token proposal-against-charter
+read) came back from the local model with NO verdict word at all -- neither
+FOLLOWS nor REQUIRES_MODIFICATION appeared; the reasoning consumed the whole
+completion budget at 8192 tokens, and a rerun at a 16384 ceiling had not
+produced a verdict file either.
+
+Tally as the operator reads it, for your information and not as a finding you
+must accept: same card SET as the recorded seats on 10/10; exact ordered line
+identical to Claude's on 6, to yours on 2, remainder the same cards reordered;
+on the four turns where Claude and you chose DIFFERENT cards the local model
+sided with Claude 3 times and with you once; the harness's automatic
+"which card is free" misread check fired zero times against the local model
+(and twice against Claude on kokomi-slice2-t07).
+
+Each turn below gives you: the packet exactly as all three readers saw it, the
+local model's chosen line and its own words on what it played and what it gave
+up, and the two recorded lines.
+
+
+================================================================
+TURN kokomi-slice2-t01
+================================================================
+
+--- THE PACKET, VERBATIM ---
+
+# Staged turn `kokomi-slice2-t01`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 48/70
+- Block 0
+- Energy 2
+- Charge: 8
+
+## Your hand
+
+### All Streams Flow to the Sea
+
+- Cost: 1
+- Deal 9 damage, already including Charge. Applies Hydro.
+- (card text read from: bridge)
+
+### Coral Guard
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### Gyorin Formation
+
+- Cost: 2
+- Gain 10 Block, already including Charge. At the start of your next turn, gain 6 Block.
+- (card text read from: bridge)
+
+## The other side
+
+### Sludge Spinner
+
+- HP 34/38
+- Intent: Aggressive, 8, This enemy intends to Attack for 8 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- Charge is written to 8 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.
+
+--- LOCAL MODEL (`local-qwen3-8-27b-ud-q4-k-xl`) ---
+
+chosen line: All Streams Flow to the Sea -> Sludge Spinner ; then Water's Edge -> Sludge Spinner
+
+its q1 "what did you play, and why", verbatim:
+I played All Streams Flow to the Sea on Sludge Spinner, then Water's Edge on Sludge Spinner, using both energy. This deals 9 damage then 6 damage, for 15 total, and applies Hydro with each card as printed.
+
+its q3 "what did that line give up", verbatim:
+The chosen line gave up 10 Block this turn and 6 Block next turn, and it leaves me to take the full 8 damage, ending the turn at 40 HP instead of 48 HP with Gyorin. It also leaves Sludge Spinner at 19 HP rather than 34 HP, which is the trade.
+
+--- THE TWO RECORDED LINES ON THIS SAME PACKET ---
+
+claude (`opus-5-fresh`): All Streams Flow to the Sea -> Sludge Spinner ; then Water's Edge -> Sludge Spinner
+gpt (`codex-gpt-5.6-sol-fresh`): All Streams Flow to the Sea -> Sludge Spinner ; then Coral Guard
+
+
+================================================================
+TURN kokomi-slice2-t02
+================================================================
+
+--- THE PACKET, VERBATIM ---
+
+# Staged turn `kokomi-slice2-t02`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 48/70
+- Block 0
+- Energy 2
+- Charge: 8
+
+## Your hand
+
+### Sounding Line
+
+- Cost: 1
+- Spend 6 Charge. Deal 12 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### Coral Guard
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### Gyorin Formation
+
+- Cost: 2
+- Gain 10 Block, already including Charge. At the start of your next turn, gain 6 Block.
+- (card text read from: bridge)
+
+## The other side
+
+### Sludge Spinner
+
+- HP 34/38
+- Intent: Aggressive, 8, This enemy intends to Attack for 8 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- Charge is written to 8 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.
+
+--- LOCAL MODEL (`local-qwen3-8-27b-ud-q4-k-xl`) ---
+
+chosen line: Sounding Line -> Sludge Spinner ; then Water's Edge -> Sludge Spinner
+
+its q1 "what did you play, and why", verbatim:
+I played Sounding Line at Sludge Spinner, spending 6 Charge for 12 damage and Hydro, then played Water's Edge at Sludge Spinner for 6 damage and Hydro. This used both energy, left the enemy at 16 HP, and I would take the telegraphed 8 damage, ending at 40 HP.
+
+its q3 "what did that line give up", verbatim:
+The chosen line gave up 5 Block from Coral Guard and the 3 HP that block would have prevented, and it also passed on Gyorin Formation's 10 Block now and 6 Block at the start of next turn. It spent 6 Charge, leaving only 2 Charge.
+
+--- THE TWO RECORDED LINES ON THIS SAME PACKET ---
+
+claude (`opus-5-fresh`): Sounding Line -> Sludge Spinner ; then Water's Edge -> Sludge Spinner
+gpt (`codex-gpt-5.6-sol-fresh`): Sounding Line -> Sludge Spinner ; then Coral Guard
+
+
+================================================================
+TURN kokomi-slice2-t03
+================================================================
+
+--- THE PACKET, VERBATIM ---
+
+# Staged turn `kokomi-slice2-t03`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 48/70
+- Block 0
+- Energy 2
+- Charge: 12
+
+## Your hand
+
+### Read the Current
+
+- Cost: 1
+- Deal 7 damage. If you have at least 10 Charge: deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### Coral Guard
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### All Streams Flow to the Sea
+
+- Cost: 1
+- Deal 11 damage, already including Charge. Applies Hydro.
+- (card text read from: bridge)
+
+## The other side
+
+### Nibbit
+
+- HP 40/42
+- Intent: Aggressive, 12, This enemy intends to Attack for 12 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- Charge is written to 12 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.
+
+--- LOCAL MODEL (`local-qwen3-8-27b-ud-q4-k-xl`) ---
+
+chosen line: All Streams Flow to the Sea -> Nibbit ; then Read the Current -> Nibbit
+
+its q1 "what did you play, and why", verbatim:
+I played All Streams Flow to the Sea on Nibbit, then Read the Current on Nibbit, spending both energy. With Charge 12, Read the Current's conditional 6 damage applies, so the two attacks deal 24 total damage and leave Nibbit at 16 HP. I did not play Coral Guard or Water's Edge.
+
+its q3 "what did that line give up", verbatim:
+The chosen line gave up 5 Block and the reduced incoming damage. It takes the full 12 damage, leaving me at 36 HP after the telegraphed attack instead of 41 HP, and leaves no defensive buffer for the next turn.
+
+--- THE TWO RECORDED LINES ON THIS SAME PACKET ---
+
+claude (`opus-5-fresh`): Read the Current -> Nibbit ; then All Streams Flow to the Sea -> Nibbit
+gpt (`codex-gpt-5.6-sol-fresh`): Read the Current -> Nibbit ; then All Streams Flow to the Sea -> Nibbit
+
+
+================================================================
+TURN kokomi-slice2-t04
+================================================================
+
+--- THE PACKET, VERBATIM ---
+
+# Staged turn `kokomi-slice2-t04`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 48/70
+- Block 0
+- Energy 2
+- Charge: 12
+
+## Your hand
+
+### Fathom the Tide
+
+- Cost: 1
+- Deal 7 damage. If you have at least 6 Charge: spend 6 Charge and deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### Coral Guard
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### All Streams Flow to the Sea
+
+- Cost: 1
+- Deal 11 damage, already including Charge. Applies Hydro.
+- (card text read from: bridge)
+
+## The other side
+
+### Nibbit
+
+- HP 40/42
+- Intent: Aggressive, 12, This enemy intends to Attack for 12 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- Charge is written to 12 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.
+
+--- LOCAL MODEL (`local-qwen3-8-27b-ud-q4-k-xl`) ---
+
+chosen line: All Streams Flow to the Sea -> Nibbit ; then Fathom the Tide -> Nibbit
+
+its q1 "what did you play, and why", verbatim:
+I played All Streams Flow to the Sea on Nibbit first, then Fathom the Tide on Nibbit. All Streams is played before Fathom because the disclosure says it reads Charge at one point per two Charge, so it deals 11 at Charge 12. Fathom then spends 6 Charge for 13 damage. Total is 24 damage and two Hydro applications, leaving Charge 6.
+
+its q3 "what did that line give up", verbatim:
+It gave up the 5 Block from Coral Guard and the option to keep Charge at 12 by not playing Fathom. It also forgoes the lower-damage, safer guard line and accepts taking the full 12 damage, ending the turn at 36 HP instead of 41 HP with a guard line.
+
+--- THE TWO RECORDED LINES ON THIS SAME PACKET ---
+
+claude (`opus-5-fresh`): All Streams Flow to the Sea -> Nibbit ; then Fathom the Tide -> Nibbit
+gpt (`codex-gpt-5.6-sol-fresh`): Fathom the Tide -> Nibbit ; then All Streams Flow to the Sea -> Nibbit
+
+
+================================================================
+TURN kokomi-slice2-t05
+================================================================
+
+--- THE PACKET, VERBATIM ---
+
+# Staged turn `kokomi-slice2-t05`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 48/70
+- Block 0
+- Energy 2
+- Charge: 8
+
+## Your hand
+
+### Coral Guard
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### All Streams Flow to the Sea
+
+- Cost: 1
+- Deal 9 damage, already including Charge. Applies Hydro.
+- (card text read from: bridge)
+
+### Gyorin Formation
+
+- Cost: 2
+- Gain 10 Block, already including Charge. At the start of your next turn, gain 6 Block.
+- (card text read from: bridge)
+
+## The other side
+
+### Nibbit
+
+- HP 34/42
+- Intent: Aggressive, 12, This enemy intends to Attack for 12 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- Charge is written to 8 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.
+
+--- LOCAL MODEL (`local-qwen3-8-27b-ud-q4-k-xl`) ---
+
+chosen line: Gyorin Formation
+
+its q1 "what did you play, and why", verbatim:
+I played Gyorin Formation for 2 energy. It gave me 10 Block and set up 6 Block at the start of my next turn. Against Nibbit's telegraphed 12 damage Attack, that leaves me taking 2 damage and ending the turn at 46 HP.
+
+its q3 "what did that line give up", verbatim:
+Gyorin Formation gave up immediate damage and Hydro application. Compared with All Streams Flow to the Sea plus Coral Guard, it left 9 more HP on Nibbit. Compared with Water's Edge plus All Streams Flow to the Sea, it left 15 more HP on Nibbit. It also spent both energy on Block rather than damage, so if the enemy were not going to attack again, the extra next-turn Block might be less useful.
+
+--- THE TWO RECORDED LINES ON THIS SAME PACKET ---
+
+claude (`opus-5-fresh`): All Streams Flow to the Sea -> Nibbit ; then Water's Edge -> Nibbit
+gpt (`codex-gpt-5.6-sol-fresh`): Gyorin Formation
+
+
+================================================================
+TURN kokomi-slice2-t06
+================================================================
+
+--- THE PACKET, VERBATIM ---
+
+# Staged turn `kokomi-slice2-t06`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 48/70
+- Block 0
+- Energy 2
+- Charge: 8
+
+## Your hand
+
+### Twin Tides
+
+- Cost: 1
+- Choose one: Gain 5 Block | Spend 6 Charge: gain 12 Block.
+- (card text read from: bridge)
+
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### All Streams Flow to the Sea
+
+- Cost: 1
+- Deal 9 damage, already including Charge. Applies Hydro.
+- (card text read from: bridge)
+
+### Gyorin Formation
+
+- Cost: 2
+- Gain 10 Block, already including Charge. At the start of your next turn, gain 6 Block.
+- (card text read from: bridge)
+
+## The other side
+
+### Nibbit
+
+- HP 34/42
+- Intent: Aggressive, 12, This enemy intends to Attack for 12 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- Charge is written to 8 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.
+
+--- LOCAL MODEL (`local-qwen3-8-27b-ud-q4-k-xl`) ---
+
+chosen line: Twin Tides [choose: Spend 6 Charge: gain 12 Block.] ; then All Streams Flow to the Sea -> Nibbit
+
+its q1 "what did you play, and why", verbatim:
+I played Twin Tides, choosing Spend 6 Charge: gain 12 Block, then played All Streams Flow to the Sea on Nibbit. This used both energy, left 2 Charge, gave 12 Block against the telegraphed 12 Attack, and dealt 9 damage.
+
+its q3 "what did that line give up", verbatim:
+The chosen line gave up Gyorin Formation's 6 Block at the start of next turn and the 6 Charge that Twin Tides' charge option spends. It also gave up the no-Block 15 damage line from Water's Edge plus All Streams Flow to the Sea, and the lower-Block Charge-preserving Twin Tides option.
+
+--- THE TWO RECORDED LINES ON THIS SAME PACKET ---
+
+claude (`opus-5-fresh`): All Streams Flow to the Sea -> Nibbit ; then Twin Tides [choose: Spend 6 Charge: gain 12 Block.]
+gpt (`codex-gpt-5.6-sol-fresh`): All Streams Flow to the Sea -> Nibbit ; then Twin Tides [choose: Spend 6 Charge: gain 12 Block.]
+
+
+================================================================
+TURN kokomi-slice2-t07
+================================================================
+
+--- THE PACKET, VERBATIM ---
+
+# Staged turn `kokomi-slice2-t07`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 48/70
+- Block 0
+- Energy 3
+- Charge: 8
+
+## Your hand
+
+### Rally the Isles
+
+- Cost: 2
+- Muster 2. Gain 1 Charge.
+- (card text read from: bridge)
+
+### Coral Guard
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### All Streams Flow to the Sea
+
+- Cost: 1
+- Deal 9 damage, already including Charge. Applies Hydro.
+- (card text read from: bridge)
+
+## The other side
+
+### Sludge Spinner
+
+- HP 37/37
+- Intent: Aggressive, 8, This enemy intends to Attack for 8 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- Charge is written to 8 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.
+- Muster TRANSFORMS cards already in hand into random Inazuma Companion cards, so the hand after the play is not the hand declared here. Which cards it takes is the game's pick, not this file's.
+
+--- LOCAL MODEL (`local-qwen3-8-27b-ud-q4-k-xl`) ---
+
+chosen line: All Streams Flow to the Sea -> Sludge Spinner ; then Water's Edge -> Sludge Spinner ; then Coral Guard
+
+its q1 "what did you play, and why", verbatim:
+I played All Streams Flow to the Sea and Water's Edge on Sludge Spinner, then Coral Guard, using all 3 energy for 15 damage and 5 Block.
+
+its q3 "what did that line give up", verbatim:
+It gave up Rally the Isles' Gain 1 Charge and Muster 2, and the chance to turn two cards into random Inazuma Companion cards, in favor of immediate guaranteed damage and Block.
+
+--- THE TWO RECORDED LINES ON THIS SAME PACKET ---
+
+claude (`opus-5-fresh`): All Streams Flow to the Sea -> Sludge Spinner ; then Water's Edge -> Sludge Spinner ; then Coral Guard
+gpt (`codex-gpt-5.6-sol-fresh`): Coral Guard ; then Water's Edge -> Sludge Spinner ; then All Streams Flow to the Sea -> Sludge Spinner
+
+
+================================================================
+TURN kokomi-slice2-t08
+================================================================
+
+--- THE PACKET, VERBATIM ---
+
+# Staged turn `kokomi-slice2-t08`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 48/70
+- Block 0
+- Energy 3
+- Charge: 8
+
+## Your hand
+
+### Watatsumi Levy
+
+- Cost: 2
+- Spend 6 Charge. Muster 2.
+- (card text read from: bridge)
+
+### Coral Guard
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+### Water's Edge
+
+- Cost: 1
+- Deal 6 damage. Applies Hydro.
+- (card text read from: bridge)
+
+### All Streams Flow to the Sea
+
+- Cost: 1
+- Deal 9 damage, already including Charge. Applies Hydro.
+- (card text read from: bridge)
+
+## The other side
+
+### Sludge Spinner
+
+- HP 37/37
+- Intent: Aggressive, 8, This enemy intends to Attack for 8 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- Charge is written to 8 through the registered resource. All Streams Flow to the Sea reads it at one point per two Charge.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. A reaction on top of a hit would move every number the falsifier scores.
+- Muster TRANSFORMS cards already in hand into random Inazuma Companion cards, so the hand after the play is not the hand declared here. Which cards it takes is the game's pick, not this file's.
+
+--- LOCAL MODEL (`local-qwen3-8-27b-ud-q4-k-xl`) ---
+
+chosen line: All Streams Flow to the Sea -> Sludge Spinner ; then Water's Edge -> Sludge Spinner ; then Coral Guard
+
+its q1 "what did you play, and why", verbatim:
+I played All Streams Flow to the Sea on Sludge Spinner, then Water's Edge on Sludge Spinner, then Coral Guard. This used all 3 energy, dealt 15 damage, applied Hydro with each damage card, and gained 5 Block.
+
+its q3 "what did that line give up", verbatim:
+The chosen line gave up playing Watatsumi Levy, so it did not spend 6 Charge and did not generate any random Inazuma Companion cards. It also used all available energy, though no effect of unspent energy is stated.
+
+--- THE TWO RECORDED LINES ON THIS SAME PACKET ---
+
+claude (`opus-5-fresh`): All Streams Flow to the Sea -> Sludge Spinner ; then Water's Edge -> Sludge Spinner ; then Coral Guard
+gpt (`codex-gpt-5.6-sol-fresh`): Water's Edge -> Sludge Spinner ; then All Streams Flow to the Sea -> Sludge Spinner ; then Coral Guard
+
+
+================================================================
+TURN klee-slice1-r3-t05
+================================================================
+
+--- THE PACKET, VERBATIM ---
+
+# Staged turn `klee-slice1-r3-t05`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 42/62
+- Block 0
+- Energy 2
+- Burst: 20
+- Spark 3 — At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks.
+
+## Your hand
+
+Spark, and the costs below. Spark's own text reads: "At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks." Your bank is 3. 2 cards in your hand are shown at a cost LOWER than the cost printed on the card; each of them says so on its own line. Playing one of them at the shown cost consumes 3, so a bank of 3 covers 1 of the 2; anything after that costs what its card prints.
+
+### Imaginary Friend
+
+- Cost: 1
+- Gain 5 Block. Gain 3 Burst Energy. Burst +5. Elemental Skill.
+- (card text read from: bridge)
+
+### Kaboom!
+
+- Cost: 0
+- The cost printed on this card is 1; it is showing 0 here.
+- Deal 7 damage. Applies Pyro.
+- (card text read from: bridge)
+
+### Rapid Fire
+
+- Cost: 0
+- The cost printed on this card is 2; it is showing 0 here.
+- Deal 4 damage to random enemies four times. Applies Pyro.
+- (card text read from: bridge)
+
+### Duck and Cover
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+## The other side
+
+### Nibbit
+
+- HP 43/43
+- Intent: Aggressive, 12, This enemy intends to Attack for 12 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- The Spark bank is written to 3 through SPARK_POWER, which is how the live game holds Sparks. At 3 Sparks the next Attack played costs 0 and consumes all 3.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. Every Klee attack applies Pyro, and a reaction on top of a hit would move every number the falsifier scores.
+- The Burst meter is written to 20 of 40 through the registered resource. Where a card's face prints a Burst rider, that printed rider IS the whole of what playing the card adds to the meter on top of the card's own text -- nothing further is added behind it.
+
+--- LOCAL MODEL (`local-qwen3-8-27b-ud-q4-k-xl`) ---
+
+chosen line: Rapid Fire ; then Kaboom! -> Nibbit ; then Imaginary Friend
+
+its q1 "what did you play, and why", verbatim:
+I played Rapid Fire first at its shown 0 cost, consuming the 3 Spark bank; with one enemy, its random hits land on Nibbit. Then I played Kaboom! at Nibbit for 1 energy, and finally Imaginary Friend for 1 energy. This deals 23 damage, leaving Nibbit at 20 HP, gives 5 Block, and gains the printed Burst effects.
+
+its q3 "what did that line give up", verbatim:
+It gave up the extra 5 Block from Duck and Cover, so it ends with 5 Block instead of 10. It also left Duck and Cover unplayed and did not use the Spark on Kaboom! first, but the no-block damage line was inferior because it had no Block.
+
+--- THE TWO RECORDED LINES ON THIS SAME PACKET ---
+
+claude (`opus-5-fresh`): Rapid Fire -> Nibbit ; then Kaboom! -> Nibbit ; then Imaginary Friend
+gpt (`codex-gpt-5.6-sol-fresh`): Rapid Fire -> Nibbit ; then Kaboom! -> Nibbit ; then Imaginary Friend
+
+
+================================================================
+TURN klee-slice1-r3-t06
+================================================================
+
+--- THE PACKET, VERBATIM ---
+
+# Staged turn `klee-slice1-r3-t06`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 42/62
+- Block 0
+- Energy 2
+- Burst: 20
+- Spark 3 — At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks.
+
+## Your hand
+
+Spark, and the costs below. Spark's own text reads: "At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks." Your bank is 3. 2 cards in your hand are shown at a cost LOWER than the cost printed on the card; each of them says so on its own line. Playing one of them at the shown cost consumes 3, so a bank of 3 covers 1 of the 2; anything after that costs what its card prints.
+
+### Slow Burn
+
+- Cost: 1
+- Spend 3 Sparks. Gain 5 Block. Gain 10 Burst Energy. Burst +5. Elemental Skill.
+- (card text read from: bridge)
+
+### Kaboom!
+
+- Cost: 0
+- The cost printed on this card is 1; it is showing 0 here.
+- Deal 7 damage. Applies Pyro.
+- (card text read from: bridge)
+
+### Rapid Fire
+
+- Cost: 0
+- The cost printed on this card is 2; it is showing 0 here.
+- Deal 4 damage to random enemies four times. Applies Pyro.
+- (card text read from: bridge)
+
+### Duck and Cover
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+## The other side
+
+### Nibbit
+
+- HP 43/43
+- Intent: Aggressive, 12, This enemy intends to Attack for 12 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- The Spark bank is written to 3 through SPARK_POWER, which is how the live game holds Sparks. At 3 Sparks the next Attack played costs 0 and consumes all 3.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. Every Klee attack applies Pyro, and a reaction on top of a hit would move every number the falsifier scores.
+- The Burst meter is written to 20 of 40 through the registered resource. Where a card's face prints a Burst rider, that printed rider IS the whole of what playing the card adds to the meter on top of the card's own text -- nothing further is added behind it.
+
+--- LOCAL MODEL (`local-qwen3-8-27b-ud-q4-k-xl`) ---
+
+chosen line: Rapid Fire -> Nibbit ; then Duck and Cover ; then Kaboom! -> Nibbit
+
+its q1 "what did you play, and why", verbatim:
+I played Rapid Fire at Nibbit for its shown 0 cost, consuming all 3 Sparks, then Duck and Cover for 1 energy, then Kaboom! at Nibbit for its printed 1 cost. This dealt 16 damage from Rapid Fire and 7 damage from Kaboom!, for 23 total, and gained 5 Block.
+
+its q3 "what did that line give up", verbatim:
+The chosen line gave up the Burst gain from Slow Burn and any future value from building Burst. It also gave up the lower-damage, Burst-building alternative, but it did not give up damage or Block compared with the best affordable damage line.
+
+--- THE TWO RECORDED LINES ON THIS SAME PACKET ---
+
+claude (`opus-5-fresh`): Rapid Fire -> Nibbit ; then Kaboom! -> Nibbit ; then Duck and Cover
+gpt (`codex-gpt-5.6-sol-fresh`): Rapid Fire -> Nibbit ; then Kaboom! -> Nibbit ; then Duck and Cover
+
+
+================================================================
+THE QUESTIONS. Answer them in this order and in these shapes.
+================================================================
+
+1. PER TURN, one row each, as a table with exactly these columns:
+   turn | defensible Y/N | worse-than-recorded Y/N | one clause why.
+   DEFENSIBLE means: a line a competent tester could choose on that board,
+   whether or not it is the line you chose. WORSE-THAN-RECORDED means: worse
+   than either recorded line in a way that would CHANGE WHAT THE TURN TEACHES
+   -- i.e. the staged turn would have read differently as an instrument had
+   this been the only reading of it. A line that is merely a different
+   ordering with the same board consequence is not worse.
+
+2. The two truncated Klee turns and the doctrine no-verdict. Do you see any
+   reason for them BEYOND the output budget -- something in the material, the
+   board, or the prompt shape that a bigger completion ceiling would not fix?
+   Say so plainly if you do not.
+
+3. THE HANDOFF, scoped precisely. Should the local model take the TESTER seat
+   on staged single-turn reads -- the closeness/stage step only? It would NOT
+   take the grader seat, NOT whole-fight blind play, and NOT the doctrine
+   gate; those three stay with this seat. Answer ADVANCE, RETURN or ESCALATE,
+   and state the conditions you would attach. Candidate guardrails already on
+   the table, which you may endorse, reject, or add to: a periodic spot-check
+   of local reads by this seat at some stated rate; the `answer_truncated`
+   refusal stays hard, with no partial form ever filed; and the local family
+   stays NON-AUTHORABLE per M53, reading only, never writing a row. You are
+   not asked to design a new instrument or to write any card, number or text.
+
+4. MISREADS. Is there anything in the local model's stated reasoning above
+   that reads as a misreading of a card's PRINTED text or of the board as the
+   packet prints it? Quote the offending words. If there is nothing, say
+   nothing found.

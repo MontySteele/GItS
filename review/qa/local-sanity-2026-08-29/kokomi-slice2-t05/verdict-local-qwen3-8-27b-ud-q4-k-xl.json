@@ -1,0 +1,99 @@
+{
+ "turn_id": "kokomi-slice2-t05",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "203733a180bd71ae56c10daad6f4d0abc628fa3349c3575f08430c3b26fc61a1",
+ "chosen_line": [
+  {
+   "card": "Gyorin Formation",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Gyorin Formation for 2 energy. It gave me 10 Block and set up 6 Block at the start of my next turn. Against Nibbit's telegraphed 12 damage Attack, that leaves me taking 2 damage and ending the turn at 46 HP.",
+  "q2_other_line_considered": "The main alternative I seriously considered was All Streams Flow to the Sea plus Coral Guard: 9 damage and 5 Block, leaving Nibbit at 25 HP and me at 41 HP after the attack. I also noticed Water's Edge plus All Streams Flow to the Sea for 15 damage, but I did not seriously weigh it as a contender because it left me with no Block against a 12 damage Attack.",
+  "q3_what_it_gave_up": "Gyorin Formation gave up immediate damage and Hydro application. Compared with All Streams Flow to the Sea plus Coral Guard, it left 9 more HP on Nibbit. Compared with Water's Edge plus All Streams Flow to the Sea, it left 15 more HP on Nibbit. It also spent both energy on Block rather than damage, so if the enemy were not going to attack again, the extra next-turn Block might be less useful.",
+  "q4_different_intent": "Yes. If the intent had been Defend, or a small attack that made 5 Block enough, I would likely have shifted to damage, probably All Streams Flow to the Sea plus Coral Guard or Water's Edge plus All Streams Flow to the Sea. If the attack had been much larger, Gyorin Formation would have been even more clearly correct."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.0,
+  "top1": 14.8,
+  "top2": 14.8,
+  "lines_considered": 7,
+  "playouts": 10,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Coral Guard",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 14.8
+   },
+   {
+    "cards": [
+     "Water's Edge",
+     "All Streams Flow to the Sea"
+    ],
+    "score": 14.8
+   },
+   {
+    "cards": [
+     "Coral Guard",
+     "Water's Edge"
+    ],
+    "score": 11.8
+   },
+   {
+    "cards": [
+     "Gyorin Formation"
+    ],
+    "score": 11.8
+   },
+   {
+    "cards": [
+     "All Streams Flow to the Sea"
+    ],
+    "score": 8.9
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "unmapped_statuses": [],
+   "enemy_count": 1,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T16:27:52"
+}

@@ -1,0 +1,105 @@
+{
+ "turn_id": "kokomi-slice2-t02",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "948b08c6f1aa2bcf9a328eccf0f6bf542ef6c2a8acc8c6286ae5276db4f94942",
+ "chosen_line": [
+  {
+   "card": "Sounding Line",
+   "target": "Sludge Spinner",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Water's Edge",
+   "target": "Sludge Spinner",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Sounding Line at Sludge Spinner, spending 6 Charge for 12 damage and Hydro, then played Water's Edge at Sludge Spinner for 6 damage and Hydro. This used both energy, left the enemy at 16 HP, and I would take the telegraphed 8 damage, ending at 40 HP.",
+  "q2_other_line_considered": "I seriously considered Sounding Line plus Coral Guard: the same 12 damage and Hydro, but 5 Block instead of Water's Edge's 6 damage, reducing the incoming 8 to 3 damage. Gyorin Formation was a secondary defensive alternative, but it gave up all damage.",
+  "q3_what_it_gave_up": "The chosen line gave up 5 Block from Coral Guard and the 3 HP that block would have prevented, and it also passed on Gyorin Formation's 10 Block now and 6 Block at the start of next turn. It spent 6 Charge, leaving only 2 Charge.",
+  "q4_different_intent": "Yes. If the intent had been a much larger or lethal attack, I would likely have shifted to Gyorin Formation or Sounding Line plus Coral Guard. If the intent had been weak or non-attacking, the damage line would have been even more attractive."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "observed board (live wire state)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.0,
+  "top1": 17.8,
+  "top2": 17.8,
+  "lines_considered": 7,
+  "playouts": 10,
+  "plays_refused": 0,
+  "pilot": "generic",
+  "lines": [
+   {
+    "cards": [
+     "Sounding Line",
+     "Coral Guard"
+    ],
+    "score": 17.8
+   },
+   {
+    "cards": [
+     "Sounding Line",
+     "Water's Edge"
+    ],
+    "score": 17.8
+   },
+   {
+    "cards": [
+     "Sounding Line"
+    ],
+    "score": 11.9
+   },
+   {
+    "cards": [
+     "Coral Guard",
+     "Water's Edge"
+    ],
+    "score": 11.8
+   },
+   {
+    "cards": [
+     "Gyorin Formation"
+    ],
+    "score": 9.4
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap",
+  "observed_notes": {
+   "approximate_cards": [],
+   "unmapped_statuses": [],
+   "enemy_count": 1,
+   "auras_seen": [],
+   "unmapped_resources": [
+    "KLEEMOD_FANFARE_CAP_BONUS",
+    "KLEEMOD_FANFARE_FLOOR",
+    "KLEEMOD_SPOTLIGHT_MODE",
+    "KLEEMOD_SPOTLIGHT_MOVED",
+    "KLEEMOD_SPOTLIGHT_PLAYS",
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST"
+   ]
+  }
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T16:58:11"
+}

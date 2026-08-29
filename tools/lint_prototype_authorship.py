@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """EB-190: recorded authorship on the prototype surface, and the grades it bans.
 
-TWO CHECKS, AND THEY ARE THE SAME RULE READ FROM BOTH ENDS.
+THREE CHECKS, AND THEY ARE THE SAME RULE READ FROM THREE ENDS.
 
   (1) **The field.** Every row on `docs/prototype-surface.yaml` records
       `authored_by:` -- a non-empty list of model FAMILIES from the closed
@@ -23,6 +23,15 @@ TWO CHECKS, AND THEY ARE THE SAME RULE READ FROM BOTH ENDS.
       refuses at run time (`understudy/seat.py`), but a form is a FILE, and a
       file can be written by a hand, an older tool, or a branch that predates
       the door.
+
+  (3) **The tester records.** The Codex seat's 2026-08-29 ADVANCE put a local
+      model in the TESTER chair on staged single-turn reads, on four
+      conditions, one of which is *"keep the family non-authorable under
+      M53"*. A tester record (`tester-<id>.json`) states its family as a
+      literal field, so this holds that declaration to the same rule from the
+      other end: it may not name an AUTHORING family, it may not disagree
+      with its own model string, and it may not name a family the row it read
+      records as an author. See `tester_findings`.
 
 WHAT (2) DELIBERATELY DOES NOT ASK, AND WHERE THAT QUESTION LIVES INSTEAD.
 `AUTHOR_FAMILY` -- `claude` -- is on every row by construction, because Claude
@@ -127,6 +136,83 @@ def graded_by(turn_dir: Path) -> list[tuple[str, str]]:
     return out
 
 
+def tested_by(turn_dir: Path) -> list[tuple[str, str, str]]:
+    """`(file, model, declared family)` for every TESTER record in a turn dir.
+
+    Check (3)'s input. A tester record (`tester-<id>.json`, written by
+    `understudy/local_tester.py`) states its family as a literal field rather
+    than leaving it to be resolved out of a model name, so this reads the
+    DECLARATION and the model side by side -- a record whose two halves
+    disagree is exactly the shape a hand-edited or hand-copied file takes.
+    """
+    out: list[tuple[str, str, str]] = []
+    for path in sorted(turn_dir.glob("tester-*.json")):
+        try:
+            blob = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):                         # noqa: PERF203
+            continue
+        if isinstance(blob, dict):
+            out.append((path.name,
+                        str(blob.get("model_requested")
+                            or blob.get("model_observed") or ""),
+                        str(blob.get("tester_family") or "")))
+    return out
+
+
+def tester_findings(qa_dir: Path | None = None,
+                    turns: Path | None = None,
+                    sheet: Path | None = None) -> list[str]:
+    """Check (3): the TESTER path, held to the same two rules as a grade.
+
+    The Codex seat's 2026-08-29 ADVANCE put a local model in the tester chair
+    and made "keep the family non-authorable under M53" a condition of it. The
+    field check already refuses `local` in an `authored_by:` list; this is the
+    other end of the same rule, on the artifact the new chair produces:
+
+      * a tester record may not DECLARE an authorable family. A `local` seat
+        that filed itself as `claude` or `gpt` would pass every other door in
+        this tree, because every other door resolves the family from a model
+        string it would also have had to fake;
+      * a record whose declared family and whose model string disagree is a
+        finding whichever way round it is -- the declaration is what a later
+        reader trusts, so it may not be the half that is wrong;
+      * and a tester family recorded as an AUTHOR of a row it read is the
+        same offence check (2) names for a grade, so it is reported the same
+        way.
+    """
+    d = qa_dir or QA_DIR
+    known = authorship.rows_authorship(sheet)
+    index = authorship.turn_index(turns)
+    out: list[str] = []
+    if not d.is_dir():
+        return out
+    for turn_dir in sorted(p for p in d.iterdir() if p.is_dir()):
+        rows = index.get(turn_dir.name) or []
+        for name, model, declared in tested_by(turn_dir):
+            here = f"{turn_dir.name}: {name}"
+            if declared in authorship.AUTHORABLE_FAMILIES:
+                out.append(
+                    f"{here} declares tester_family {declared!r}, which is an "
+                    f"AUTHORING family. A tester record may not claim one -- "
+                    f"the authoring set is closed at "
+                    f"{list(authorship.AUTHORABLE_FAMILIES)} (R217 C, M53).")
+            resolved = authorship.model_family(model)
+            if declared and resolved and declared != resolved:
+                out.append(
+                    f"{here} declares tester_family {declared!r} but its "
+                    f"model {model!r} resolves to {resolved!r}. The "
+                    f"declaration is what a later reader trusts, so the two "
+                    f"halves may not disagree.")
+            for rid in rows:
+                if declared and declared in (known.get(rid) or []):
+                    out.append(
+                        f"{here} (family {declared!r}) tested {rid}, whose "
+                        f"authored_by is {list(known.get(rid) or [])}. A seat "
+                        f"may not answer for its own family's work "
+                        f"(R217 C, EB-190).")
+    return out
+
+
 def grade_offenders(qa_dir: Path | None = None,
                     turns: Path | None = None,
                     sheet: Path | None = None) -> dict[str, list[str]]:
@@ -164,7 +250,7 @@ def findings(qa_dir: Path | None = None, turns: Path | None = None,
              sheet: Path | None = None,
              debt: dict[str, str] | None = None) -> list[str]:
     carried = DEBT if debt is None else debt
-    out = surface_findings(sheet)
+    out = surface_findings(sheet) + tester_findings(qa_dir, turns, sheet)
     offenders = grade_offenders(qa_dir, turns, sheet)
 
     for turn_id, lines in sorted(offenders.items()):
@@ -227,6 +313,24 @@ def _self_test() -> int:
         stale = findings(qa.parent, turns, sheet,
                          debt={"selftest-t01": "carried", "ghost-t01": "why"})
         assert any("ghost-t01" in h for h in stale), stale
+
+        # CHECK (3), the tester path. A `local` record that filed itself as an
+        # authoring family, and one whose declaration contradicts its own
+        # model string, must both be findings; an honest one must not be.
+        (qa / "tester-local-q.json").write_text(json.dumps(
+            {"turn_id": "selftest-t01", "role": "tester",
+             "tester_family": "claude",
+             "model_requested": "Qwen3.8-27B.gguf"}), encoding="utf-8")
+        hits = findings(qa.parent, turns, sheet, debt={})
+        assert any("AUTHORING family" in h for h in hits), hits
+        assert any("resolves to" in h for h in hits), hits
+        (qa / "tester-local-q.json").write_text(json.dumps(
+            {"turn_id": "selftest-t01", "role": "tester",
+             "tester_family": authorship.LOCAL_FAMILY,
+             "model_requested": "Qwen3.8-27B.gguf"}), encoding="utf-8")
+        assert not [h for h in findings(qa.parent, turns, sheet, debt={})
+                    if "tester-local-q.json" in h], "an honest record must pass"
+        (qa / "tester-local-q.json").unlink()
 
         # And the documented exclusion: the STANDING AUTHOR family is on every
         # row by construction, so a claude grader is not what this check is
