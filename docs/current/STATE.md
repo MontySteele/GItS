@@ -489,6 +489,20 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `understudy/local_tester.py` is the mechanism and OPERATIONS' **Local
     tester seat** section is the amended rule. The periodic-review rate is
     settled at N = 4 (`M58`, answered by R220 G).
+  - **Funnel throughput — R221, BUILT, unproven live.** A blind-QA round
+    measured ~70 min for 8 turns, with roughly a third of it the game idling
+    while models read. `local_tester round` now RUNS a round rather than
+    reading it: stage / read / grade / replay pipelined behind one game lock
+    with a look-ahead of one board, ONE `soak.Session` for the whole round
+    (the process is still restarted between boards — the wire has no in-run
+    exit, so `abandon_run` from a fresh launch is the only way back to a
+    menu), `--first N` sequential stopping with UNRUN rows carrying pinned
+    seeds, and `staged_turn packet-section <slug>` writing the results block
+    from the records with the prose read left as a marked empty slot.
+    **The first pipelined round is its proof and has not run.** The
+    fresh-Opus control's retirement threshold is `M62`: `KLEESPARK-R1`
+    measured Qwen-vs-Opus verdict agreement at **4 of 8**, so the control
+    STANDS under every option on that row.
   - **Next.** Klee slice 1 has no open engineering: all three arms read
     ADVANCE on clean independent reads and Second Helping has its
     whole-fight run. Owed next are the whole-fight runs for Rummage and
@@ -507,12 +521,13 @@ Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
 countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
-Art debt); the Fontaine Rares close-out (`M10`); and the eleven
-prototype-slice, redesign and slate calls (`M47` Bag of Tricks; `M49` the
+Art debt); the Fontaine Rares close-out (`M10`); and the twelve
+prototype-slice, redesign, slate and funnel calls (`M47` Bag of Tricks; `M49` the
 pilot's Charge term, now superseded; `M50` the Kurage-memory redesign's four
 unruled rows, pick 3 answered on `M60`; `M52` the Furina reframe's two
 countersigns; `M54`–`M57` the blind run's four; `M59` the reframe's sixteen design picks; `M60` the Burst
-retirement's four picks). `M48` was answered by R219; `M58` by R220 G (N = 4); `M51` was answered by
+retirement's four picks; `M62` the criterion that retires the funnel's
+fresh-Opus control form, measured at 4/8 on `KLEESPARK-R1`). `M48` was answered by R219; `M58` by R220 G (N = 4); `M51` was answered by
 R220 F and `M53` by R220 E.
 
 ## Watch register (dormant)

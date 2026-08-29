@@ -479,3 +479,348 @@ def test_the_sheet_reader_is_not_in_scope_where_the_prompt_is_built():
             named += [a.name for a in node.names]
     assert "resource_order" not in named, named
     assert "misreads" not in named, named
+
+
+# ============================================================ R221 ==========
+#
+# The two rules the throughput ruling added, and the two engineering items
+# under them. NO GAME AND NO MODEL: the lane takes an injected session and a
+# state reader, and the phases take an injected `RoundSteps` that sleeps
+# instead of booting anything. A test that needed the real game is a test that
+# runs on one machine, at night, once.
+
+import time as _time
+
+from understudy import packet_section, staged_turn
+
+
+def _rows(spec):
+    """`{turn_id: (slots, closeness)}` as the order function wants them."""
+    class _T:
+        def __init__(self, tid, slots):
+            self.id, self._slots = tid, slots
+            self.path, self.seed, self.prototype = f"{tid}.yaml", "", False
+            self.board = None
+
+        def registered_slots(self):
+            return list(self._slots)
+    return {tid: _T(tid, slots) for tid, (slots, _gap) in spec.items()}
+
+
+def _order(spec, monkeypatch):
+    gaps = {tid: gap for tid, (_s, gap) in spec.items()}
+    monkeypatch.setattr(local_tester, "closeness_gap",
+                        lambda turn: gaps[turn.id])
+    return local_tester.preregistered_order(list(spec), turns=_rows(spec))
+
+
+# ------------------------------------------------- R221 B: the first set ----
+
+def test_the_first_set_is_the_smallest_twice_over_cover(monkeypatch):
+    """Four boards over two slots: two boards per slot is the whole cover, so
+    the cover size is four and `--first 2` is RAISED to it. A `--first` that
+    could leave a registered slot with one grade would make every slot
+    UNDECIDED by construction, which is not a stopping rule."""
+    spec = {"t01": (["A"], 0.9), "t02": (["A"], 0.1),
+            "t03": (["B"], 0.5), "t04": (["B"], 0.4)}
+    order = _order(spec, monkeypatch)
+    assert order[0]["cover_size"] == 4
+    first, rest = local_tester.split_first(order, 2)
+    assert len(first) == 4 and rest == []
+
+
+def test_the_cover_is_smallest_and_ties_go_to_the_closer_decision(monkeypatch):
+    """A board carrying BOTH slots covers two slot-slots at once, so it is
+    taken first; among boards with equal gain the closer decision wins."""
+    spec = {"both": (["A", "B"], 0.7),
+            "a-far": (["A"], 0.9), "a-near": (["A"], 0.2),
+            "b-far": (["B"], 0.8), "b-near": (["B"], 0.3)}
+    order = _order(spec, monkeypatch)
+    assert order[0]["turn_id"] == "both"
+    # After `both`, each slot still wants one, and the two `near` boards are
+    # the closer decisions.
+    assert {order[1]["turn_id"], order[2]["turn_id"]} == {"a-near", "b-near"}
+    assert order[0]["cover_size"] == 3
+
+
+def test_a_slot_only_one_board_carries_does_not_drag_in_the_round(monkeypatch):
+    """`min(COVER, boards carrying it)`. A target nothing can meet would put
+    every board in the first set and switch stopping off silently."""
+    spec = {"t01": (["A"], 0.1), "t02": (["A"], 0.2), "t03": (["solo"], 0.3),
+            "t04": (["A"], 0.4)}
+    order = _order(spec, monkeypatch)
+    assert order[0]["cover_size"] == 3          # two for A, one for `solo`
+    first, rest = local_tester.split_first(order, 4)
+    assert len(first) == 4 and rest == []
+
+
+def test_first_zero_runs_every_board(monkeypatch):
+    spec = {"t01": (["A"], 0.1), "t02": (["A"], 0.2), "t03": (["B"], 0.3)}
+    order = _order(spec, monkeypatch)
+    first, rest = local_tester.split_first(order, 0)
+    assert len(first) == 3 and rest == []
+
+
+# ------------------------------------- R221 B: DECIDED / UNDECIDED / UNRUN --
+
+def test_a_slot_is_decided_only_on_two_or_more_that_agree():
+    rows = [{"turn_id": "t01", "slots": ["A"]},
+            {"turn_id": "t02", "slots": ["A"]},
+            {"turn_id": "t03", "slots": ["B"]},
+            {"turn_id": "t04", "slots": ["C"]},
+            {"turn_id": "t05", "slots": ["D"]}]
+    grades = {"t01": ["PRED"], "t02": ["PRED"],       # agree -> DECIDED
+              "t03": ["PRED", "MISS"],                # split -> UNDECIDED
+              "t04": ["MISS"],                        # one    -> UNDECIDED
+              "t05": ["MISS", "MISS"]}                # agree  -> DECIDED
+    state = local_tester.slot_state(rows, grades)
+    assert state == {"A": "DECIDED", "B": "UNDECIDED",
+                     "C": "UNDECIDED", "D": "DECIDED"}
+
+
+def test_only_boards_carrying_an_undecided_slot_are_run():
+    rest = [{"turn_id": "t09", "slots": ["A"]},
+            {"turn_id": "t10", "slots": ["B", "A"]}]
+    run, unrun = local_tester.split_rest(rest, {"A": "DECIDED",
+                                                "B": "UNDECIDED"})
+    assert [r["turn_id"] for r in run] == ["t10"]
+    assert run[0]["undecided_slots"] == ["B"]
+    assert [r["turn_id"] for r in unrun] == ["t09"]
+
+
+def test_an_unrun_board_keeps_its_seed_and_reaches_the_ledger(tmp_path):
+    """The whole point of the UNRUN row: a later round runs THIS board."""
+    (tmp_path / "t09").mkdir()
+    staged_turn.mark_unrun("t09", seed="ABC123", slots=["A"],
+                           why="A was decided by the first set",
+                           root=tmp_path)
+    blob = json.loads((tmp_path / "t09" / "unrun.json").read_text(encoding="utf-8"))
+    assert blob["seed"] == "ABC123" and blob["run_state"] == "UNRUN"
+    assert "R101b" in blob["rule"]
+
+    text = staged_turn.build_ledger(tmp_path)
+    row = [r for r in text.splitlines() if r.startswith("t09")][0].split("\t")
+    cells = dict(zip(staged_turn.LEDGER_COLUMNS, row))
+    assert cells["verdict"] == "UNRUN"
+    assert cells["seed"] == "ABC123"
+    assert cells["run_state"] == "UNRUN"
+    assert "UNRUN:" in text                       # the banner travels with it
+
+
+def test_the_ledger_still_parses_a_row_written_before_the_two_columns(tmp_path):
+    head = "\t".join(staged_turn.LEDGER_COLUMNS[:12])
+    body = "\t".join(["t01", "g", "SURVIVES", "-", "a", "b", "c", "d",
+                      "-", "-", "-", "yes"])
+    (tmp_path / "ledger.tsv").write_text(head + "\n" + body + "\n",
+                                         encoding="utf-8")
+    rows = staged_turn.ledger_rows(tmp_path)
+    assert rows[0]["turn_id"] == "t01" and rows[0]["seed"] == ""
+
+
+# --------------------------------------------- R221 (3): the pipeline -------
+
+class _FakeSession:
+    def __init__(self):
+        self.calls = []
+
+    def setup(self):
+        self.calls.append("setup")
+
+    def restart(self):
+        self.calls.append("restart")
+
+    def teardown(self):
+        self.calls.append("teardown")
+
+
+class _FakeSteps(local_tester.RoundSteps):
+    """Every phase sleeps, and every phase says when it began and ended."""
+
+    def __init__(self, spans, delay=0.02):
+        self.spans, self.delay = spans, delay
+
+    def _span(self, kind, tid):
+        start = _time.monotonic()
+        _time.sleep(self.delay)
+        self.spans.append((kind, tid, start, _time.monotonic()))
+
+    def stage(self, row):
+        self._span("stage", row["turn_id"])
+
+    def read(self, row):
+        self._span("read", row["turn_id"])
+        return {"turn_id": row["turn_id"], "form": row["turn_id"] + ".json",
+                "refused": "", "seat_review_required": False}
+
+    def execute(self, row, record):
+        self._span("execute", row["turn_id"])
+
+
+def _overlap(a, b):
+    return min(a[3], b[3]) - max(a[2], b[2]) > 0
+
+
+def test_the_game_lock_serializes_game_steps_and_a_read_overlaps_one():
+    """R221 item (3), both halves in one assertion pair: no two GAME steps
+    ever overlap, and at least one MODEL step does overlap a game step --
+    which is the whole reason the phases were re-ordered."""
+    spans = []
+    lane = local_tester.GameLane()
+    steps = _FakeSteps(spans)
+    rows = [{"turn_id": "t0" + str(i), "position": i} for i in range(1, 5)]
+    records = local_tester.run_pipeline(rows, lane=lane, steps=steps)
+
+    assert [r["turn_id"] for r in records] == ["t01", "t02", "t03", "t04"]
+    game = [s for s in spans if s[0] in ("stage", "execute")]
+    for i, a in enumerate(game):
+        for b in game[i + 1:]:
+            assert not _overlap(a, b), "two game steps overlapped"
+    reads = [s for s in spans if s[0] == "read"]
+    assert any(_overlap(r, g) for r in reads for g in game), \
+        "no model step overlapped a game step -- the game still idles"
+
+
+def test_serial_keeps_the_old_phase_order_reachable():
+    spans = []
+    lane = local_tester.GameLane()
+    rows = [{"turn_id": "t0" + str(i), "position": i} for i in range(1, 4)]
+    local_tester.run_pipeline(rows, lane=lane, steps=_FakeSteps(spans),
+                              serial=True)
+    assert [s[0] for s in spans] == ["stage", "read", "execute"] * 3
+    for i, a in enumerate(spans):
+        for b in spans[i + 1:]:
+            assert not _overlap(a, b)
+
+
+def test_a_failed_stage_stops_the_round_rather_than_reading_a_dead_board():
+    class _Boom(_FakeSteps):
+        def stage(self, row):
+            raise local_tester.LocalTesterError("staging failed")
+    with pytest.raises(local_tester.LocalTesterError):
+        local_tester.run_pipeline(
+            [{"turn_id": "t01", "position": 1}],
+            lane=local_tester.GameLane(), steps=_Boom([]))
+
+
+# ------------------------------ R221 (5): one launch, and what it cannot buy
+
+def test_the_round_launches_once_and_tears_down_once():
+    session = _FakeSession()
+    lane = local_tester.GameLane(session=session,
+                                 state_reader=lambda: {"state_type": "menu"})
+    lane.launch()
+    for i in range(4):
+        lane.step("stage", "t0" + str(i), lambda: None)
+    lane.close()
+    assert session.calls == ["setup", "teardown"]
+    assert lane.launches == 1 and lane.relaunches == 0
+
+
+def test_a_board_left_mid_combat_costs_a_recorded_relaunch():
+    """The honest half of item (5). `_to_main_menu` starts from a MENU and the
+    wire has no in-run exit, so a staged board mid-combat can only be left by
+    restarting the process -- and the lane records that it did."""
+    session = _FakeSession()
+    screens = iter([{"state_type": "menu"}, {"state_type": "combat"},
+                    {"state_type": "menu"}])
+    lane = local_tester.GameLane(session=session,
+                                 state_reader=lambda: next(screens))
+    lane.launch()
+    lane.step("stage", "t01", lambda: None)
+    lane.step("execute", "t01", lambda: None)
+    lane.close()
+    assert session.calls == ["setup", "restart", "teardown"]
+    assert lane.relaunches == 1 and lane.launches == 2
+    assert lane.events[-1]["relaunched"].startswith("the game is at 'combat'")
+
+
+def test_a_crashed_game_relaunches_once_and_a_second_failure_stops():
+    session = _FakeSession()
+
+    def dead():
+        raise RuntimeError("connection refused")
+    lane = local_tester.GameLane(session=session, state_reader=dead)
+    lane.launch()
+    with pytest.raises(local_tester.LocalTesterError) as err:
+        lane.step("stage", "t01", lambda: None)
+    assert session.calls == ["setup", "restart"]
+    assert "could not be brought to a menu" in str(err.value)
+
+
+def test_attaching_owns_no_process_and_restarts_nothing():
+    lane = local_tester.GameLane()
+    lane.launch()
+    lane.step("stage", "t01", lambda: None)
+    lane.close()
+    assert lane.launches == 0 and lane.relaunches == 0
+
+
+# -------------------------------- R221 (4): the generator, on real records --
+
+def test_the_generator_writes_a_round_from_the_kokomi_slice2_records(tmp_path):
+    """Built on the records the slice-2 round actually left behind, so the
+    fixture is a real round rather than a hand-made one."""
+    fixture = tmp_path / "qa"
+    fixture.mkdir()
+    for src in sorted(QA_DIR.glob("kokomi-slice2-t0*")):
+        shutil.copytree(src, fixture / src.name)
+    shutil.copy(QA_DIR / "ledger.tsv", fixture / "ledger.tsv")
+
+    text = packet_section.render("kokomi-slice2", root=fixture)
+    assert "8 board(s) run, 0 UNRUN, 16 form(s) graded." in text
+    # the per-turn rows, one per (turn, grader)
+    assert text.count("`opus-5-fresh`") == 8
+    assert text.count("`codex-gpt-5.6-sol-fresh`") == 8
+    # t08's seat refusal, named by its falsifier
+    assert "intent_insensitive" in text
+    # the per-slot tally, and slice 2's one disagreement
+    assert "| `kokomi-slice2-t08` | MISS, PRED (2) | **UNDECIDED** |" in text
+    assert "| `kokomi-slice2-t01` | PRED, PRED (2) | **DECIDED** |" in text
+    # the spend, split by family
+    assert "**Codex seat reads:** 8" in text
+    # the banners, quoted from the ledger rather than restated
+    assert "> staged board: this hand and this board were set by hand" in text
+    # and the slot the agent fills, unmistakably empty
+    assert "NOT GENERATED. Replace this block." in text
+
+
+def test_the_generator_prints_unrun_boards_with_their_seeds(tmp_path):
+    fixture = tmp_path / "qa"
+    (fixture / "r-t01").mkdir(parents=True)
+    (fixture / "r-t02").mkdir(parents=True)
+    (fixture / "r-t01" / "packet.json").write_text(
+        json.dumps({"run_seed": "AAA"}), encoding="utf-8")
+    staged_turn.mark_unrun("r-t02", seed="BBB", slots=["B"],
+                           why="B was decided by the first set", root=fixture)
+    text = packet_section.render("r", root=fixture)
+    assert "1 board(s) run, 1 UNRUN" in text
+    assert "| `r-t02` | `BBB` |" in text
+    assert "Their seeds are pinned." in text
+
+
+def test_the_generator_appends_and_never_rewrites(tmp_path):
+    packet = tmp_path / "packet.md"
+    packet.write_text("# A packet\n\nBody.\n", encoding="utf-8")
+    packet_section.append_to(packet, "## THE ROUND\n\nrows\n")
+    text = packet.read_text(encoding="utf-8")
+    assert text.startswith("# A packet\n\nBody.\n")
+    assert text.rstrip().endswith("rows")
+
+
+def test_the_generator_refuses_a_round_with_no_records(tmp_path):
+    with pytest.raises(staged_turn.TurnError):
+        packet_section.render("nothing-here", root=tmp_path)
+
+
+# ------------------------------------------------------- slots on a turn ----
+
+def test_a_turn_declares_its_slots_and_defaults_to_its_own_id():
+    turn = staged_turn.load(REPO / "understudy" / "turns"
+                            / "kokomi-first-turn-example.yaml")
+    assert turn.registered_slots() == [turn.id]
+    with pytest.raises(staged_turn.TurnError):
+        staged_turn._parse_slots({"a": 1})
+    with pytest.raises(staged_turn.TurnError):
+        staged_turn._parse_slots(["ok", ""])
+    assert staged_turn._parse_slots(None) == []
+    assert staged_turn._parse_slots([" P1 ", "P2"]) == ["P1", "P2"]

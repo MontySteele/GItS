@@ -312,9 +312,12 @@ CEILINGS: dict[str, int] = {
                  # exp_shop_companion_channel instrument (R68); EB-140 minted
                  # at the R211 W3 build (the codegen upgrade-delta gap);
                  # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
-    "M": 61,     # M61 ANSWERED 2026-08-29: build option 3, and the element
-                 # is local-seat only. The row left QUEUE; the ceiling stays
-                 # at 61, ceilings never come down.
+    "M": 62,     # M62 minted 2026-08-29 by R221 A: the criterion that
+                 # retires the fresh-Opus control form from every packet of
+                 # a blind-QA round to the spot-check rate. The threshold is
+                 # a number, so it is [USER]'s.
+                 # M61 ANSWERED 2026-08-29: build option 3, and the element
+                 # is local-seat only. The row left QUEUE the same day.
                  # M59/M60 minted 2026-08-29 by the R220 slate, one row per
                  # packet under one ruling (R206 as amended by R212): M59 the
                  # Furina reframe's sixteen design picks F1-F16, M60 the Burst
@@ -403,8 +406,12 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # slate rows R220 mints.
     # M61 left 2026-08-29, answered the day it was minted: the build is
     # option 3 and the element is local-seat only.
+    # M62 minted 2026-08-29 by R221 A: the criterion that retires the
+    # fresh-Opus control form to the spot-check rate. KLEESPARK-R1 read
+    # 4/8, so the control stays on under every option; the row fixes the
+    # number that would take it off.
     "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 52,
-                    54, 55, 56, 57, 59, 60}),
+                    54, 55, 56, 57, 59, 60, 62}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

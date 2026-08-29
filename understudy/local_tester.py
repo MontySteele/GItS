@@ -53,6 +53,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import threading
 import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
@@ -250,6 +251,388 @@ def plan_round(turn_ids: Sequence[str],
             for i, t in enumerate(turn_ids, 1)]
 
 
+# ---------------------------------------- R221 B: the pre-registered order --
+
+DEFAULT_FIRST = 4
+COVER = 2          # "cover every registered slot AT LEAST TWICE"
+
+
+def turn_index(turn_dir: Path | None = None) -> dict[str, Any]:
+    """`turn id -> StagedTurn`, parsed once for the whole round."""
+    from understudy import staged_turn
+    out = {}
+    for path in staged_turn.all_turns(turn_dir):
+        try:
+            turn = staged_turn.load(path)
+        except Exception:                                     # noqa: BLE001
+            continue
+        out[turn.id] = turn
+    return out
+
+
+def closeness_gap(turn: Any) -> float:
+    """The R213 F falsifier's gap, as a SORT KEY and nothing else.
+
+    A smaller gap is a closer decision, and a closer decision is the more
+    informative board -- which is what "ties by closeness score" means in the
+    order. A board whose reading is not applicable sorts LAST rather than
+    first: an unreadable score may not win a tie it cannot claim. Nothing here
+    grades anything; closeness rates nothing (R213 F).
+    """
+    from understudy import staged_turn
+    try:
+        result = staged_turn.closeness(turn.board, prototype=turn.prototype)
+    except Exception:                                         # noqa: BLE001
+        return float("inf")
+    if not result.get("applicable"):
+        return float("inf")
+    return float(result.get("gap", float("inf")))
+
+
+def preregistered_order(turn_ids: Sequence[str], *,
+                        turn_dir: Path | None = None,
+                        turns: Mapping[str, Any] | None = None
+                        ) -> list[dict[str, Any]]:
+    """R221 B's order: the twice-over cover first, then the rest.
+
+    Greedy, and deliberately so. The set-cover this needs is over four to
+    eleven boards, so an exact solver would buy nothing a reader could check;
+    a greedy pass that takes, at each step, the board covering the most
+    still-uncovered slot-slots (ties to the closer decision, then to the id)
+    is reproducible from the turn files alone, which is what "pre-registered"
+    has to mean here -- somebody else must be able to derive the same order
+    from the same files without running this code.
+    """
+    index = dict(turns or turn_index(turn_dir))
+    rows = []
+    for tid in turn_ids:
+        turn = index.get(tid)
+        slots = turn.registered_slots() if turn is not None else [tid]
+        rows.append({"turn_id": tid, "slots": slots,
+                     "closeness": (closeness_gap(turn) if turn is not None
+                                   else float("inf")),
+                     "seed": (getattr(turn, "seed", None) or "") if turn
+                     else ""})
+
+    # A slot carried by only ONE board cannot be covered twice, and a cover
+    # target it can never meet would drag the whole order into the first set.
+    # So the target is `min(COVER, boards carrying it)`: as much coverage as
+    # exists, and no demand that cannot be met.
+    carried: dict[str, int] = {}
+    for r in rows:
+        for s in r["slots"]:
+            carried[s] = carried.get(s, 0) + 1
+    need = {s: min(COVER, n) for s, n in carried.items()}
+
+    order: list[dict[str, Any]] = []
+    pool = list(rows)
+    while pool:
+        def gain(r):
+            return sum(1 for s in r["slots"] if need.get(s, 0) > 0)
+        pool.sort(key=lambda r: (-gain(r), r["closeness"], r["turn_id"]))
+        pick = pool.pop(0)
+        for s in pick["slots"]:
+            if need.get(s, 0) > 0:
+                need[s] -= 1
+        order.append(pick)
+    for i, row in enumerate(order, 1):
+        row["order"] = i
+    # How many of the order the twice-over cover actually needed: the prefix
+    # after which no slot still wants a board.
+    cover_size = 0
+    want = {s: min(COVER, n) for s, n in carried.items()}
+    for i, row in enumerate(order, 1):
+        for s in row["slots"]:
+            want[s] = max(0, want.get(s, 0) - 1)
+        if not any(v > 0 for v in want.values()):
+            cover_size = i
+            break
+    else:
+        cover_size = len(order)
+    for row in order:
+        row["cover_size"] = cover_size
+    return order
+
+
+def split_first(order: Sequence[Mapping[str, Any]], first_n: int
+                ) -> tuple[list[dict], list[dict]]:
+    """`--first N`, raised where the twice-over cover needs more.
+
+    `first_n <= 0` disables sequential stopping: every board is in the first
+    set, which is the pre-R221 behaviour and stays reachable.
+    """
+    rows = [dict(r) for r in order]
+    if first_n <= 0:
+        return rows, []
+    take = max(first_n, int(rows[0].get("cover_size", first_n)) if rows
+               else first_n)
+    return rows[:take], rows[take:]
+
+
+def disk_grades(turn_ids: Sequence[str],
+                qa_dir: Path | None = None) -> dict[str, list[str]]:
+    """`turn id -> the grades on disk`, PRED for SURVIVES, MISS for REFUSED.
+
+    Read off `verdict-<grader>.json`, which is `staged_turn.grade`'s
+    mechanical output. The stopping rule never reads a FORM: it reads what the
+    falsifiers said about one, so the reader was blind at read time either way
+    and nothing here is a second opinion.
+    """
+    base = qa_dir or QA_DIR
+    out: dict[str, list[str]] = {}
+    for tid in turn_ids:
+        got = []
+        for path in sorted((base / tid).glob("verdict-*.json")):
+            try:
+                blob = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            got.append("PRED" if str(blob.get("verdict")) == "SURVIVES"
+                       else "MISS")
+        out[tid] = got
+    return out
+
+
+def slot_state(rows: Sequence[Mapping[str, Any]],
+               grades: Mapping[str, Sequence[str]]) -> dict[str, str]:
+    """DECIDED on two or more grades that ALL agree; UNDECIDED otherwise."""
+    per_slot: dict[str, list[str]] = {}
+    for row in rows:
+        for slot in row["slots"]:
+            per_slot.setdefault(slot, []).extend(grades.get(row["turn_id"], []))
+    return {slot: ("DECIDED" if len(g) >= 2 and len(set(g)) == 1
+                   else "UNDECIDED")
+            for slot, g in per_slot.items()}
+
+
+def split_rest(rest: Sequence[Mapping[str, Any]],
+               state: Mapping[str, str]) -> tuple[list[dict], list[dict]]:
+    """Of the boards left, which still carry an UNDECIDED slot.
+
+    Evaluated ONCE, against the first set's grades, and not re-evaluated as
+    the remainder runs. Re-reading the state after every board would make the
+    stopping rule adaptive, which is the forking path R221 B closes by fixing
+    the rule before any board is staged.
+    """
+    run, unrun = [], []
+    for row in rest:
+        undecided = [s for s in row["slots"]
+                     if state.get(s, "UNDECIDED") == "UNDECIDED"]
+        (run if undecided else unrun).append(
+            {**row, "undecided_slots": undecided})
+    return run, unrun
+
+
+# --------------------------------- R221 items (3) and (5): the game lane ---
+#
+# ONE GAME PER ROUND, AND WHAT THAT COULD NOT BUY.
+#
+# [USER]: "3) yes, let's not have the game idle" and "5) Also agreed" (one
+# launch per round). The first is buildable in full; the second is buildable
+# only in part, and the part it cannot buy is a fact about the wire rather
+# than about this file.
+#
+#   * `soak.Session` is what deploys `steam_appid.txt`, deploys the MCP
+#     bridge, launches the process, waits for the menu, sets Instant speed and
+#     writes the reversibility ledger. TODAY every `stage` and every `execute`
+#     builds its own, so a round of eight turns pays that setup and its
+#     teardown TWENTY-FOUR times -- twenty-four bridge deploys, twenty-four
+#     removals, twenty-four speed captures. This lane opens ONE Session for
+#     the whole round and hands every game step `do_setup=False`, which is
+#     exactly `stage --hold`'s existing attach path. That part is real and it
+#     is the bulk of the per-step overhead.
+#
+#   * IT STILL CANNOT AVOID RE-LAUNCHING THE PROCESS BETWEEN BOARDS, and the
+#     reason is in `soak.RunDriver._to_main_menu`: a run starts from a MENU,
+#     and anything else is `unexpected_start_state`, a stop-and-surface. A
+#     staged board leaves the game mid-combat, and THE WIRE HAS NO IN-RUN
+#     EXIT: `menu_select` is a menu verb, `abandon_run` is a MAIN-MENU option
+#     (`McpMod.StateBuilder` builds it from `_abandonRunButton` on the main
+#     screen), and no action in the vendored contract leaves a fight for the
+#     menu. `Session.restart`'s own docstring says the same thing from the
+#     other side: "a fresh process plus `abandon_run` is the only reliable way
+#     back to the main menu". So the lane checks the screen before every game
+#     step and restarts the PROCESS when it is not a menu -- keeping the
+#     appid, the bridge deploy, the speed capture and the ledger from the one
+#     Session, and recording every relaunch.
+#
+#   * Seed pinning is unaffected: the seed is fired at `_embark`, between the
+#     character pick and the confirm, on every path -- attach included -- and
+#     read back off the wire afterwards (R95). Nothing about attaching changes
+#     which seed a board runs on.
+#
+# A round that ends with the game on a menu (a `--first N` stop, say) pays no
+# relaunch at all for its last step.
+
+MAX_RELAUNCH_PER_STEP = 1
+
+
+class GameLane:
+    """The ONE game a round launches, and the only thing that may touch it.
+
+    Every game-bound step of the round goes through `step()`, which holds
+    `self.lock` for its whole duration. That lock is the serialization the
+    pipeline rests on: two `stage`s or a `stage` and an `execute` running at
+    once would be two processes driving one game.
+    """
+
+    def __init__(self, *, session: Any = None, state_reader: Any = None,
+                 clock: Any = None, log: Any = None):
+        self.session = session
+        self._state = state_reader
+        self._clock = clock or time.monotonic
+        self._log = log or (lambda _msg: None)
+        self.lock = threading.Lock()
+        self.events: list[dict[str, Any]] = []
+        self.relaunches = 0
+        self.launches = 0
+
+    # -- lifetime ---------------------------------------------------------
+    def launch(self) -> None:
+        if self.session is not None:
+            self.session.setup()
+            self.launches += 1
+            self._log("game: launched once for the round")
+
+    def close(self) -> None:
+        if self.session is not None:
+            self.session.teardown()
+            self._log("game: torn down")
+
+    # -- the one door -----------------------------------------------------
+    def step(self, kind: str, turn_id: str, fn: Any) -> Any:
+        with self.lock:
+            relaunched = self._ensure_menu()
+            start = self._clock()
+            try:
+                return fn()
+            finally:
+                self.events.append({"kind": kind, "turn_id": turn_id,
+                                    "start": start, "end": self._clock(),
+                                    "relaunched": relaunched})
+
+    def _ensure_menu(self) -> str:
+        """Bring the game to a menu, restarting the process if it must."""
+        if self.session is None or self._state is None:
+            return ""
+        relaunched = ""
+        for attempt in range(MAX_RELAUNCH_PER_STEP + 1):
+            try:
+                state = self._state()
+                screen = str((state or {}).get("state_type") or "")
+            except Exception as exc:                          # noqa: BLE001
+                screen, why = "", (f"the bridge did not answer ({exc}); the "
+                                   f"game is treated as crashed")
+            else:
+                if screen == "menu":
+                    # The REASON, not a boolean: the event row has to be able
+                    # to say why a relaunch happened, and "it did" is not that.
+                    return relaunched
+                why = (f"the game is at {screen!r}, not a menu, and the wire "
+                       f"has no in-run exit -- a fresh process plus "
+                       f"abandon_run is the only way back")
+            if attempt >= MAX_RELAUNCH_PER_STEP:
+                raise LocalTesterError(
+                    f"the game could not be brought to a menu after "
+                    f"{self.relaunches} relaunch(es): {why}")
+            self._log(f"game: RELAUNCH -- {why}")
+            self.session.restart()
+            self.relaunches += 1
+            self.launches += 1
+            relaunched = why
+        return relaunched                                     # unreachable
+
+
+# --------------------------------------------------- R221 item (3): phases --
+
+class RoundSteps:
+    """The three things a round does to a board, as one injectable surface.
+
+    Split out so the pipeline can be tested against a fake that sleeps instead
+    of booting a game. The live implementation below drives the EXISTING
+    verbs, argv and all: preserving `stage` / `grade` / `execute` exactly is
+    what keeps every record format, file name and refusal identical to a
+    serial round's.
+    """
+
+    def stage(self, row: Mapping[str, Any]) -> Any:            # pragma: no cover
+        raise NotImplementedError
+
+    def read(self, row: Mapping[str, Any]) -> dict[str, Any]:  # pragma: no cover
+        raise NotImplementedError
+
+    def execute(self, row: Mapping[str, Any],
+                record: Mapping[str, Any]) -> Any:             # pragma: no cover
+        raise NotImplementedError
+
+
+def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
+                 lane: GameLane, steps: RoundSteps,
+                 serial: bool = False,
+                 log: Any = None) -> list[dict[str, Any]]:
+    """stage -> read -> grade -> execute, per turn, with the game never idle.
+
+    TWO LANES, ONE GAME. Game-bound work (`stage`, `execute`) runs on a single
+    worker through `GameLane.step`, so it is serialized and ordered. The
+    model-bound half (`read`, which ends in `staged_turn grade`) runs on its
+    own single worker, so a reading never overlaps another reading -- there is
+    one local server -- but it DOES overlap the game's next step, which is the
+    whole point.
+    """
+    log = log or (lambda _m: None)
+    rows = list(rows)
+    if not rows:
+        return []
+    if serial:
+        out = []
+        for row in rows:
+            lane.step("stage", row["turn_id"], lambda r=row: steps.stage(r))
+            record = steps.read(row)
+            out.append(record)
+            lane.step("execute", row["turn_id"],
+                      lambda r=row, rec=record: steps.execute(r, rec))
+        return out
+
+    records: dict[str, dict[str, Any]] = {}
+    errors: list[BaseException] = []
+    staged = [threading.Event() for _ in rows]
+    model_lock = threading.Lock()
+
+    def worker(i: int, row: Mapping[str, Any]) -> None:
+        try:
+            # LOOK-AHEAD OF EXACTLY ONE. Turn i's stage is submitted only once
+            # turn i-1's stage has finished, so the game queue never holds
+            # more than one un-started stage and the interleave is the one the
+            # ruling asks for: the game stages the NEXT board while the model
+            # reads the last one.
+            if i:
+                staged[i - 1].wait()
+            if errors:
+                return
+            lane.step("stage", row["turn_id"], lambda: steps.stage(row))
+            staged[i].set()
+            with model_lock:
+                record = steps.read(row)
+            records[row["turn_id"]] = record
+            lane.step("execute", row["turn_id"],
+                      lambda: steps.execute(row, record))
+        except BaseException as exc:                          # noqa: BLE001
+            errors.append(exc)
+        finally:
+            staged[i].set()
+
+    threads = [threading.Thread(target=worker, args=(i, r), daemon=True,
+                                name=f"round-{r['turn_id']}")
+               for i, r in enumerate(rows)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    if errors:
+        raise errors[0]
+    return [records[r["turn_id"]] for r in rows if r["turn_id"] in records]
+
+
 def round_queue(records: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     """The turns this round owes the Codex seat, with the reason for each."""
     return [{"turn_id": r["turn_id"],
@@ -295,14 +678,108 @@ def cmd_read(args) -> int:
     return staged_turn.main(["grade", args.turn_id, str(record["form"])])
 
 
-def cmd_round(args) -> int:
-    plan = plan_round(args.turn_ids, args.seat_spot_check)
-    print(f"round of {len(plan)} turn(s), seat spot-check every "
-          f"{args.seat_spot_check or 'never'}")
-    for row in plan:
+class LiveSteps(RoundSteps):
+    """The three phases, driven through the EXISTING verbs and their argv.
+
+    `stage` and `execute` are `staged_turn`'s own subcommands with `--hold` /
+    `--no-setup`, which is the attach path the lane's one Session needs; the
+    grade is `staged_turn grade`, unchanged and still the only grade. Calling
+    the CLI rather than reaching into the functions is deliberate: every
+    record format, file name, refusal and printed line is then identical to a
+    serial round's by construction rather than by inspection.
+    """
+
+    def __init__(self, *, client, why: str, spot_check: int,
+                 log_root: Path | None = None):
+        self.client = client
+        self.why = why
+        self.spot_check = spot_check
+        self.log_root = log_root
+
+    def stage(self, row: Mapping[str, Any]) -> None:
+        from understudy import staged_turn
+        argv = ["stage", str(row["path"]), "--why", self.why, "--hold"]
+        if row.get("seed"):
+            argv += ["--seed", str(row["seed"])]
+        rc = staged_turn.main(argv)
+        if rc != 0:
+            raise LocalTesterError(
+                f"staging {row['turn_id']} failed (exit {rc}); the round "
+                f"stops rather than reading a board nobody set")
+
+    def read(self, row: Mapping[str, Any]) -> dict[str, Any]:
+        from understudy import staged_turn
+        record = read_turn(row["turn_id"], client=self.client,
+                           position=row["position"],
+                           spot_check=self.spot_check,
+                           log_root=self.log_root)
+        _print(record)
+        if not record.get("refused") and record.get("form"):
+            staged_turn.main(["grade", row["turn_id"], str(record["form"])])
+        return record
+
+    def execute(self, row: Mapping[str, Any],
+                record: Mapping[str, Any]) -> None:
+        from understudy import staged_turn
+        if record.get("refused") or not record.get("form"):
+            print(f"  no form for {row['turn_id']}; nothing to replay")
+            return
+        staged_turn.main(["execute", row["turn_id"], str(record["form"]),
+                          "--why", self.why, "--no-setup"])
+
+
+def _print_plan(first, rest, rate: int) -> None:
+    print(f"round of {len(first) + len(rest)} board(s) in R221 B's "
+          f"pre-registered order; seat spot-check every {rate or 'never'}; "
+          f"first set = {len(first)}")
+    for row in list(first) + list(rest):
         mark = "SEAT" if row["seat_spot_check"] else "    "
-        print(f"  {row['position']:>2}  {mark}  {row['turn_id']}")
+        where = "FIRST" if row in first else "  ..."
+        gap = ("n/a" if row["closeness"] == float("inf")
+               else f"{row['closeness']:.3f}")
+        print(f"  {row['position']:>2}  {where}  {mark}  {row['turn_id']}"
+              f"   slots={','.join(row['slots'])}  closeness={gap}")
+
+
+def cmd_round(args) -> int:
+    from understudy import staged_turn
+    index = turn_index()
+    order = preregistered_order(args.turn_ids, turns=index)
+    first, rest = split_first(order, args.first)
+    for i, row in enumerate(list(first) + list(rest), 1):
+        row["position"] = i
+        row["seat_spot_check"] = spot_check_due(i, args.seat_spot_check)
+        turn = index.get(row["turn_id"])
+        row["path"] = str(getattr(turn, "path", "") or "")
+    _print_plan(first, rest, args.seat_spot_check)
+
+    # EB-169 AND EB-187, FOR THE WHOLE ROUND, BEFORE THE ONE LAUNCH. `stage`
+    # runs both preflights itself, but per board and after the round has
+    # already started spending game time. Running them over every planned
+    # board here means a round with an open face defect or a double-counting
+    # assumption is refused by a parse, which is what the two rows cost their
+    # sittings to learn.
+    bad = []
+    for row in list(first) + list(rest):
+        turn = index.get(row["turn_id"])
+        if turn is None:
+            bad.append(f"{row['turn_id']}: no turn file with that id")
+            continue
+        try:
+            staged_turn.face_defect_preflight(turn)
+            staged_turn.assumption_preflight(turn)
+        except staged_turn.TurnError as exc:
+            bad.append(f"{row['turn_id']}: {exc}")
+    if bad:
+        for line in bad:
+            print(f"PREFLIGHT REFUSED  {line}", file=sys.stderr)
+        return 2
+    print("preflights: every board passes face-defect and assumption checks")
+
     if args.plan_only:
+        print("\n--plan-only: nothing was staged, read or run. Commit this "
+              "schedule before the round, for the same reason a prediction "
+              "slate is committed before a run.")
         return 0
 
     try:
@@ -311,23 +788,65 @@ def cmd_round(args) -> int:
         print(f"local tester: {exc}", file=sys.stderr)
         return 2
 
+    steps = LiveSteps(client=client, why=args.why,
+                      spot_check=args.seat_spot_check,
+                      log_root=Path(args.log_root) if args.log_root else None)
+    lane = _live_lane(args)
     records: list[dict[str, Any]] = []
-    for row in plan:
-        print(f"\n--- {row['turn_id']} ---")
-        record = read_turn(row["turn_id"], client=client,
-                           position=row["position"],
-                           spot_check=args.seat_spot_check,
-                           log_root=Path(args.log_root) if args.log_root
-                           else None)
-        _print(record)
-        records.append(record)
+    unrun: list[dict[str, Any]] = []
+    try:
+        lane.launch()
+        records += run_pipeline(first, lane=lane, steps=steps,
+                                serial=args.serial, log=print)
+        if rest:
+            state = slot_state(first, disk_grades([r["turn_id"]
+                                                   for r in first]))
+            to_run, skipped = split_rest(rest, state)
+            print("\nR221 B -- after the first set:")
+            for slot in sorted(state):
+                print(f"  {slot}: {state[slot]}")
+            for row in skipped:
+                staged_turn.mark_unrun(
+                    row["turn_id"], seed=str(row.get("seed") or "-"),
+                    slots=row["slots"],
+                    why=("every registered slot this board carries was "
+                         "DECIDED by the first set"))
+                print(f"  UNRUN {row['turn_id']} "
+                      f"(seed {row.get('seed') or '-'} still pinned)")
+            unrun = skipped
+            records += run_pipeline(to_run, lane=lane, steps=steps,
+                                    serial=args.serial, log=print)
+    finally:
+        lane.close()
 
+    print(f"\ngame: {lane.launches} launch(es), {lane.relaunches} relaunch(es) "
+          f"for the round")
+    staged_turn.main(["ledger"])
     queue = round_queue(records)
     print(f"\nseat review owed on {len(queue)} of {len(records)} turn(s):")
     for row in queue:
         print(f"  {row['turn_id']}  ({', '.join(row['reasons'])})")
         print(f"    {row['command']}")
+    if unrun:
+        print(f"\n{len(unrun)} board(s) recorded UNRUN with their seeds "
+              f"pinned; see review/qa/ledger.tsv")
     return 0
+
+
+def _live_lane(args) -> GameLane:
+    """One `soak.Session` for the round, or none if the operator holds it.
+
+    `--attach` is the escape hatch for a game somebody else launched (the same
+    contract `embark --hold` offers): the lane then owns no process, restarts
+    nothing and tears nothing down.
+    """
+    if args.attach:
+        return GameLane(log=print)
+    from understudy import bridge, soak
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    return GameLane(session=soak.Session(stamp, do_setup=True,
+                                         intent="staged-turn round"),
+                    state_reader=bridge.get_state, log=print)
 
 
 def _print(record: Mapping[str, Any]) -> None:
@@ -377,6 +896,24 @@ def main(argv: Sequence[str] | None = None) -> int:
     q.add_argument("turn_ids", nargs="+")
     q.add_argument("--plan-only", action="store_true",
                    help="print the schedule and send nothing")
+    q.add_argument("--why", default="staged-turn round (R221)",
+                   help="one line, logged on every staged and replayed row")
+    q.add_argument("--first", type=int, default=DEFAULT_FIRST,
+                   metavar="N",
+                   help=f"R221 B sequential stopping: run the first N boards "
+                        f"of the pre-registered order, then run the rest only "
+                        f"where a slot is still UNDECIDED (default "
+                        f"{DEFAULT_FIRST}; raised automatically where the "
+                        f"twice-over cover needs more; 0 runs every board)")
+    q.add_argument("--serial", action="store_true",
+                   help="the pre-R221 phase order -- stage, read, replay, one "
+                        "turn at a time with the game idle while the model "
+                        "reads. Kept reachable so a live comparison against "
+                        "the pipeline is possible")
+    q.add_argument("--attach", action="store_true",
+                   help="do not launch or tear down a game: attach to one "
+                        "somebody else is holding (`embark --hold`). The lane "
+                        "then owns no process and relaunches nothing")
     common(q)
     q.set_defaults(func=cmd_round)
 

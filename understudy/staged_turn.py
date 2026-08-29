@@ -122,7 +122,7 @@ import sys
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 import yaml
 
@@ -342,6 +342,18 @@ class StagedTurn:
     # Default False, so every turn written before this door existed still
     # stages exactly as it did.
     exact_hand: bool = False
+    # R221 B. THE REGISTERED SLOTS THIS BOARD IS EVIDENCE ABOUT. Sequential
+    # stopping is a rule about SLOTS, not about turns: "run the rest only if
+    # they carry an undecided slot" needs a board to say which slots it
+    # carries, and a board that says nothing carries exactly one -- itself.
+    # Declared on the turn file rather than derived, because a derived slot
+    # map would be a map chosen after the boards were written, which is the
+    # forking path the rule exists to close.
+    slots: list[str] = field(default_factory=list)
+
+    def registered_slots(self) -> list[str]:
+        """The slots this board covers. Its own id when it declares none."""
+        return list(self.slots) or [self.id]
 
     def as_scenario(self) -> scenario.Scenario:
         """The staging half as a `scenario.Scenario`, so the existing runner
@@ -430,10 +442,29 @@ def parse(blob: dict[str, Any], path: Path | None = None) -> StagedTurn:
         notes=str(blob.get("notes") or ""),
         assumptions=[str(a) for a in (blob.get("assumptions") or [])],
         prototype=bool(blob.get("prototype", False)),
-        exact_hand=bool(blob.get("exact_hand", False)))
+        exact_hand=bool(blob.get("exact_hand", False)),
+        slots=_parse_slots(blob.get("slots")))
     _check_halves_agree(turn)
     _check_assumptions_blind(turn)
     return turn
+
+
+def _parse_slots(raw: Any) -> list[str]:
+    """R221 B's `slots:` key: a list of short registered-slot names, or absent.
+
+    Refused rather than coerced. A slot name reaches the ledger, the packet's
+    results section and the stopping rule, so a mapping or a bare string here
+    would silently become a slot nobody registered.
+    """
+    if raw in (None, "", []):
+        return []
+    if not isinstance(raw, list) or not all(
+            isinstance(s, str) and s.strip() for s in raw):
+        raise TurnError(
+            "'slots' is a list of non-empty strings -- the registered "
+            "prediction slots this board is evidence about (R221 B). Omit it "
+            "and the board carries one slot, its own id")
+    return [s.strip() for s in raw]
 
 
 def _check_assumptions_blind(turn: StagedTurn) -> None:
@@ -1303,9 +1334,15 @@ def _closeness(state, pilot: str, unrepresentable: list[str], *,
 
 # ---------------------------------------------------------------- ledger ---
 
+# R221 B added the last two, at the END and nowhere else: `ledger_rows` pads
+# a short row, so every ledger written before this parses unchanged and every
+# reader that indexes by name keeps working. `seed` is the pin a later round
+# needs to run an UNRUN board rather than a re-rolled one, and `run_state` is
+# RUN for a graded row and UNRUN for a board sequential stopping did not run.
 LEDGER_COLUMNS = ("turn_id", "grader", "verdict", "refused_by",
                   "q1", "q2", "q3", "q4",
-                  "agree_q1", "agree_q2", "agree_q4", "survives_alone")
+                  "agree_q1", "agree_q2", "agree_q4", "survives_alone",
+                  "seed", "run_state")
 
 
 def _cell(text: Any, width: int = 90) -> str:
@@ -1388,6 +1425,54 @@ def _packet_titles(turn_id: str, root: Path | None = None) -> list[str]:
             for c in ((blob.get("board") or {}).get("hand") or [])]
 
 
+def _packet_seed(turn_id: str, root: Path | None = None) -> str:
+    p = (root or QA_DIR) / turn_id / "packet.json"
+    if not p.is_file():
+        return "-"
+    blob = json.loads(p.read_text(encoding="utf-8"))
+    return str(blob.get("run_seed") or "-")
+
+
+# ------------------------------------------------- R221 B: the UNRUN board --
+
+UNRUN_NOTE = (
+    "R221 B: sequential stopping. This board was staged in the round's "
+    "pre-registered order and NOT run, because every registered slot it "
+    "carries was already DECIDED -- two or more grades that all agreed -- "
+    "before its turn came. Its seed is pinned here so a later round runs THIS "
+    "board rather than a re-rolled one. Nothing about it was graded, and an "
+    "UNRUN board is a board with no record, never a struck one (R101b)")
+
+
+def mark_unrun(turn_id: str, *, seed: str, slots: Sequence[str],
+               why: str, root: Path | None = None) -> Path:
+    """Record a board the stopping rule did not run. One file, one row."""
+    home = (root or QA_DIR) / turn_id
+    home.mkdir(parents=True, exist_ok=True)
+    path = home / "unrun.json"
+    path.write_text(json.dumps({
+        "turn_id": turn_id,
+        "run_state": "UNRUN",
+        "seed": seed or "-",
+        "slots": list(slots),
+        "why": why,
+        "rule": UNRUN_NOTE,
+        "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }, indent=1) + "\n", encoding="utf-8")
+    return path
+
+
+def unrun_boards(root: Path | None = None) -> list[dict[str, Any]]:
+    """Every UNRUN marker on disk, by turn id."""
+    base = root or QA_DIR
+    out = []
+    for q in sorted(base.glob("*/unrun.json")):
+        blob = json.loads(q.read_text(encoding="utf-8"))
+        blob.setdefault("turn_id", q.parent.name)
+        out.append(blob)
+    return out
+
+
 def build_ledger(root: Path | None = None) -> str:
     """One row per (turn, grader), with the agreement columns filled in.
 
@@ -1436,11 +1521,27 @@ def build_ledger(root: Path | None = None) -> str:
                 _cell(answers.get("q4_different_intent")),
                 agree["agree_q1"], agree["agree_q2"], agree["agree_q4"],
                 _yn(bool(v.get("survives_alone"))),
+                _packet_seed(tid, root), "RUN",
             ]))
+    # R221 B. The boards the stopping rule did not run, with their seeds
+    # still pinned. They sit in the SAME table as the graded rows
+    # deliberately: a round's record has to say what it did not do, or
+    # "we ran four boards" and "there were only four boards" read the same
+    # way afterwards.
+    for blob in unrun_boards(root):
+        if str(blob.get("turn_id")) in by_turn:
+            continue
+        out.append("\t".join([
+            str(blob.get("turn_id") or ""), "-", "UNRUN",
+            _cell(blob.get("why")) or "-",
+            "-", "-", "-", "-", "-", "-", "-", "-",
+            str(blob.get("seed") or "-"), "UNRUN",
+        ]))
     out.append(f"# {qa_packet.PACKET_GUARDRAIL}")
     out.append(f"# down-weighting: a grader whose q2 disagrees with "
                f"[USER] on {WEIGHT_DISAGREE} of its last {WEIGHT_WINDOW} "
                f"shared turns cannot mark a turn SURVIVES alone")
+    out.append(f"# UNRUN: {UNRUN_NOTE}")
     return "\n".join(out) + "\n"
 
 
@@ -2003,6 +2104,24 @@ def cmd_execute(args) -> int:
     return 0 if policy.ok else 1
 
 
+def cmd_packet_section(args) -> int:
+    """R221 item (4): the round's results block, written from the records."""
+    from understudy import packet_section
+    text = packet_section.render(args.slug, heading=args.heading or "")
+    # The section quotes packet prose, and a packet is UTF-8. A Windows
+    # console defaults to cp1252 and would raise on the first em-dash it was
+    # handed, which is a generator that works on one operator's machine.
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except (AttributeError, ValueError):
+        pass
+    sys.stdout.write(text)
+    if args.write:
+        out = packet_section.append_to(Path(args.write), text)
+        print(f"appended to: {out}", file=sys.stderr)
+    return 0
+
+
 def cmd_ledger(args) -> int:
     QA_DIR.mkdir(parents=True, exist_ok=True)
     text = build_ledger()
@@ -2069,6 +2188,16 @@ def main(argv: list[str] | None = None) -> int:
                         "Repeatable; each is consumed at most once")
     e.add_argument("--no-setup", action="store_true")
     e.set_defaults(func=cmd_execute)
+
+    ps = sub.add_parser("packet-section",
+                        help="write a round's results block FROM the records")
+    ps.add_argument("slug", help="the round's slug -- the records are "
+                                 "review/qa/<slug>-t*/")
+    ps.add_argument("--write", default="",
+                    help="also APPEND the section to this packet file")
+    ps.add_argument("--heading", default="",
+                    help="override the section heading")
+    ps.set_defaults(func=cmd_packet_section)
 
     ld = sub.add_parser("ledger", help="rebuild review/qa/ledger.tsv")
     ld.set_defaults(func=cmd_ledger)
