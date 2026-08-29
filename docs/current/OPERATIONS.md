@@ -582,7 +582,14 @@ command — `play "<title>" [on "<enemy>"]`, `end turn`, `choose "<name>"`,
 `skip`, `go "<node>"`, `buy "<item>"`, `rest`, `upgrade`, `remove`,
 `use potion "<title>"`, `confirm`, `proceed` — against the current state by
 printed names only, and posts it; with `--raw-file` or `--dry-run` it resolves
-and posts nothing. **session** is the driver: one `codex exec` thread for the
+and posts nothing. Two things on one screen that print the SAME name are
+NUMBERED, in printed order, the way a map fork's nodes carry `(path N)`:
+`Water's Edge (1)` / `Water's Edge (2)`, `Slug (1)` / `Slug (2)`. The render
+prints the number and the grammar accepts it; a name that is unique on its
+screen is never numbered and stays valid bare; a bare name that is not unique
+is refused with the numbered forms listed back (`EB-177`). The `(upgraded)` /
+`(not upgraded)` qualifier (`EB-173`) is unchanged and still separates a base
+copy from an upgraded one, which the fold keeps as two different names. **session** is the driver: one `codex exec` thread for the
 whole run, one command per screen, the fight and run records at the ends, and
 budgets on actions, wall time and consecutive refusals. All of it is built on
 `naming` / `staged_turn.execute`'s title resolution and **never on

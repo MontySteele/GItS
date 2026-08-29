@@ -30,6 +30,13 @@ double quotes exactly as the screen prints it:
     go "<map node>"                      buy "<shop item>"
     rest                                 upgrade         remove
 
+**When two things on one screen print the same name,** the screen numbers
+them in the order it prints them — `Water's Edge (1)` and `Water's Edge (2)`,
+`Slug (1)` and `Slug (2)` — and you name the one you want with its number. A
+name that appears only once is never numbered: say it exactly as printed. A
+card the screen marks `(upgraded)` can also be named that way, and
+`(not upgraded)` names the other copy.
+
 Every screen lists the commands it accepts under **What you can say**. A
 command the screen cannot take is refused and told back to you in one line;
 read the refusal and try something else. Nothing is hidden from you as a

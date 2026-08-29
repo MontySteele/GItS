@@ -116,13 +116,29 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 180,   # EB-178/179/180 minted 2026-08-29 from run B6 and the module-size note   # EB-177 minted 2026-08-29 by run B6: two cards with the
+    "EB": 181,   # EB-178/179/180 minted 2026-08-29 from run B6 and the module-size note
+                 # EB-181 minted 2026-08-29 by EB-179's close: the
+                 # vendored bridge reports no enchantment on a card
+                 # face and no maximum on a resource meter, and the
+                 # game's own screen shows both. OPEN.
+                 # EB-179 CLOSED 2026-08-29: powers now print the
+                 # `type` the wire always carried, and the page states
+                 # out loud what the feed does not carry -- no power
+                 # expiry, no meter maximum or spend rule, and no
+                 # enchantment behind two cards printing one name.
+                 # EB-178 CLOSED 2026-08-29: the frame after a kill is a
+                 # combat screen with NO `battle` block at all, read live
+                 # across a victory (+0 ms `monster` and no battle key,
+                 # +250 ms `rewards`). `blindplay.transient` names it and
+                 # rides it out; it is never drawn as `round 0`.   # EB-177 minted 2026-08-29 by run B6: two cards with the
                  # same printed title that differ by anything but upgrade
                  # state are BOTH unplayable -- a Sharp-enchanted copy of
                  # `Water's Edge` beside a plain one, where the bare title
                  # is ambiguous and neither `(upgraded)` nor
                  # `(not upgraded)` separates them. The session died on the
-                 # refusal limit and the tester named it unprompted. OPEN.
+                 # refusal limit and the tester named it unprompted.
+                 # CLOSED 2026-08-29: repeats are numbered in printed
+                 # order, the way the map numbers a fork's paths.
                  # EB-176 minted AND CLOSED 2026-08-29 by the same acceptance:
                  # a live `hand_select` renders as `card_select`, only the
                  # WIRE's screen name was exempt from the snake_case rule, and
@@ -225,7 +241,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        177, 178, 179, 180,
+        180, 181,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

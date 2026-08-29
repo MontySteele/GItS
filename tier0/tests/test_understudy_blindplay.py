@@ -438,6 +438,156 @@ def test_the_map_numbers_its_paths_so_a_fork_is_nameable():
                                          "index": 1}
 
 
+def test_two_cards_printing_one_title_are_both_playable_by_number():
+    """`EB-177`, found live. Run B6 held two *Water's Edge*, one of them
+    enchanted, and could play NEITHER: the bare title was ambiguous and the
+    upgrade qualifier did not separate them. The render numbers them the way
+    the map numbers a fork, and each number resolves to its own copy."""
+    state = combat_state()
+    hand = state["player"]["hand"]
+    twin = json.loads(json.dumps(hand[3]))          # a second Coral Guard
+    twin["cost"] = "0"                              # ...with a different face
+    hand.append(twin)
+    page = blindplay.observe(state)
+    assert "Coral Guard (1)" in page and "Coral Guard (2)" in page
+
+    first = blindplay.act(state, 'play "Coral Guard (1)"')
+    assert first["ok"] and first["post"]["card_index"] == 3
+    assert first["printed"]["card"] == "Coral Guard (1)"
+    second = blindplay.act(state, 'play "Coral Guard (2)"')
+    assert second["ok"] and second["post"]["card_index"] == len(hand) - 1
+
+
+def test_the_ambiguous_bare_title_is_refused_with_the_numbers_it_could_use():
+    state = combat_state()
+    hand = state["player"]["hand"]
+    twin = json.loads(json.dumps(hand[3]))
+    twin["cost"] = "0"
+    hand.append(twin)
+    res = blindplay.act(state, 'play "Coral Guard"')
+    assert not res["ok"]
+    assert "Coral Guard (1)" in res["refusal"]
+    assert "Coral Guard (2)" in res["refusal"]
+
+
+def test_a_title_that_is_unique_on_its_screen_is_never_numbered():
+    """The number is a disambiguator, not decoration: a hand of distinct cards
+    reads exactly as it always did, and the bare title stays valid."""
+    page = blindplay.observe(combat_state())
+    assert "Pearl Barrage" in page and "Pearl Barrage (1)" not in page
+    assert blindplay.act(combat_state(), 'play "Pearl Barrage"')["ok"]
+
+
+def test_two_enemies_sharing_a_name_are_numbered_in_printed_order():
+    state = combat_state()
+    enemies = state["battle"]["enemies"]
+    twin = json.loads(json.dumps(enemies[0]))
+    twin["entity_id"] = "NIBBIT_1"
+    enemies.append(twin)
+    page = blindplay.observe(state)
+    assert "Nibbit (1)" in page and "Nibbit (2)" in page
+
+    bare = blindplay.act(state, 'play "Pearl Barrage" on "Nibbit"')
+    assert not bare["ok"] and "Nibbit (2)" in bare["refusal"]
+    res = blindplay.act(state, 'play "Pearl Barrage" on "Nibbit (2)"')
+    assert res["ok"] and res["post"]["target"] == "NIBBIT_1"
+
+
+def test_a_dead_enemy_does_not_renumber_the_one_still_standing():
+    """The render prints a corpse, so the grammar must number over the corpses
+    too -- otherwise `Nibbit (2)` becomes `Nibbit` the moment the first one
+    dies and the page and the grammar disagree mid-fight."""
+    state = combat_state()
+    enemies = state["battle"]["enemies"]
+    twin = json.loads(json.dumps(enemies[0]))
+    twin["entity_id"] = "NIBBIT_1"
+    enemies.append(twin)
+    enemies[0]["hp"] = 0
+    res = blindplay.act(state, 'play "Pearl Barrage" on "Nibbit (2)"')
+    assert res["ok"] and res["post"]["target"] == "NIBBIT_1"
+
+
+def test_a_numbered_screen_still_reads_as_blind():
+    state = combat_state()
+    state["player"]["hand"].append(
+        json.loads(json.dumps(state["player"]["hand"][3])))
+    state["battle"]["enemies"].append(
+        json.loads(json.dumps(state["battle"]["enemies"][0])))
+    qa_packet.assert_blind(blindplay.observation(state),
+                           allow={state["state_type"]})
+
+
+def _with_powers(state: dict) -> dict:
+    """RECORDED SHAPES. Both status rows are the wire's own, field for field,
+    read live on 2026-08-29 through the debug door: `id`, `name`, `amount`,
+    `type`, `description`, `keywords`, and no duration or expiry anywhere.
+
+    `Vulnerable` states its duration inside the printed text; `Thorns` states
+    none, which is the power run B6 watched come and go unexplained."""
+    out = json.loads(json.dumps(state))
+    out["player"]["status"] = [
+        {"id": "VULNERABLE_POWER", "name": "Vulnerable", "amount": 3,
+         "type": "Debuff", "keywords": [],
+         "description": "Receive 50% more damage from Attacks for 3 turns."}]
+    out["battle"]["enemies"][0]["status"] = [
+        {"id": "THORNS_POWER", "name": "Thorns", "amount": 3, "type": "Buff",
+         "keywords": [],
+         "description": "When hit by an attack, deal 3 damage back."}]
+    return out
+
+
+def test_a_power_prints_the_buff_or_debuff_the_wire_carries():
+    """`EB-179`, gap one. `type` was on the wire all along and the page was
+    dropping it."""
+    page = blindplay.observe(_with_powers(combat_state()))
+    assert "Vulnerable 3 (debuff) — Receive 50% more damage" in page
+    assert "Thorns 3 (buff) — When hit by an attack" in page
+
+
+def test_the_page_says_out_loud_that_a_power_carries_no_expiry():
+    """...and gap one's other half: there IS no duration field on the wire, so
+    the page states that rather than printing nothing and letting a power
+    vanish unexplained. Only where a power is actually on the board."""
+    assert blindplay.POWER_NOTE in blindplay.observe(_with_powers(combat_state()))
+    bare = json.loads(json.dumps(combat_state()))
+    bare["player"]["status"] = []
+    for e in bare["battle"]["enemies"]:
+        e["status"] = []
+    assert blindplay.POWER_NOTE not in blindplay.observe(bare)
+
+
+def test_a_meter_says_the_wire_carries_no_maximum_and_no_spend_rule():
+    """`EB-179`, gap two. The resource snapshot reflects an `Id` and an
+    `Amount` and nothing else, so `burst_max` is not a field this page is
+    failing to read -- it does not exist."""
+    state = json.loads(json.dumps(combat_state()))
+    state["player"]["resources"] = {"KLEEMOD_KOKOMI_BURST": 12}
+    page = blindplay.observe(state)
+    assert f"Kokomi Burst: 12 — {blindplay.METER_NOTE}" in page
+    assert "no maximum" in page and "how it is spent" in page
+
+
+def test_a_hand_printing_one_name_twice_says_an_enchant_would_not_show():
+    """`EB-179`, gap three. The card builder emits no enchantment field, and
+    the one place that bites a reader is a hand holding two cards they can see
+    are different and the page cannot tell apart."""
+    state = combat_state()
+    assert blindplay.HAND_REPEAT_NOTE not in blindplay.observe(state)
+    state["player"]["hand"].append(
+        json.loads(json.dumps(state["player"]["hand"][3])))
+    assert blindplay.HAND_REPEAT_NOTE in blindplay.observe(state)
+
+
+def test_the_three_honest_lines_still_read_as_blind():
+    state = _with_powers(combat_state())
+    state["player"]["resources"] = {"KLEEMOD_KOKOMI_BURST": 12}
+    state["player"]["hand"].append(
+        json.loads(json.dumps(state["player"]["hand"][3])))
+    obs = blindplay.observation(state)
+    qa_packet.assert_blind(obs, allow={state["state_type"]})
+    qa_packet.assert_blind(blindplay.render(obs), allow={state["state_type"]})
+
+
 def test_the_screen_decides_the_verb_not_the_command():
     """One `choose`, six wire actions. Each is the verb that screen advertises
     in `vendor/STS2_MCP/docs/raw-simplified.md`."""
@@ -752,6 +902,94 @@ def test_one_end_turn_from_the_tester_spends_exactly_one_round(tmp_path):
     s.run()
     assert [p["action"] for p in wire.posts] == ["end_turn"] * 3
     assert wire.posted_rounds == [1, 2, 3]
+
+
+def _victory_frame(state: dict) -> dict:
+    """The frame `EB-178` was read on, copied field for field.
+
+    Recorded live on 2026-08-29, 0 ms after the killing blow answered
+    `ok Playing 'Water's Edge' targeting Leaf Slime (S)`: `state_type` is
+    still `monster`, there is NO `battle` key at all, the `player` block has
+    lost its hand, energy, meters and pile counts, and `run.floor` has
+    ALREADY advanced. The next read, 250 ms later, answered `rewards`.
+    """
+    frame = json.loads(json.dumps(state))
+    frame.pop("battle", None)
+    for gone in ("hand", "energy", "max_energy", "resources",
+                 "draw_pile_count", "discard_pile_count",
+                 "exhaust_pile_count"):
+        frame["player"].pop(gone, None)
+    frame["run"] = {"act": 1, "floor": 2, "ascension": 3}
+    return frame
+
+
+class _VictoryWire:
+    """A wire that answers the torn-down frame ONCE after the killing blow."""
+
+    def __init__(self, combat: dict, after: dict):
+        self.combat, self.after = combat, after
+        self.pending: list[dict] = []
+        self.done = False
+        self.posts: list[dict] = []
+
+    def get_state(self) -> dict:
+        if self.pending:
+            return self.pending.pop(0)
+        return self.after if self.done else self.combat
+
+    def post(self, action: str, **params) -> dict:
+        self.posts.append({"action": action, **params})
+        if action == "play_card":
+            self.pending = [_victory_frame(self.combat)]
+            self.done = True
+        return {"status": "ok", "message": ""}
+
+    def health(self) -> dict:
+        return {"mod_version": "0.0-scripted"}
+
+
+def test_the_frame_after_a_kill_is_named_a_transition_not_a_new_fight():
+    """`EB-178`, the predicate. A combat screen with no `battle` block at all
+    is the fight being torn down, not a fight starting."""
+    live = combat_state()
+    assert blindplay.transient(live) == ""
+    assert blindplay.transient(_victory_frame(live))
+    # ...and a build that simply stops sending `is_play_phase` is still a
+    # screen, which is the neighbouring predicate this must not swallow.
+    no_key = json.loads(json.dumps(live))
+    no_key["battle"].pop("is_play_phase")
+    assert blindplay.transient(no_key) == ""
+
+
+def test_the_frame_after_a_kill_is_never_drawn_as_battle_round_zero():
+    """Belt and braces for a wire that got stuck in the moment: blocked, and
+    never a playable-looking round 0 with an empty hand."""
+    obs = blindplay.observation(_victory_frame(combat_state()))
+    assert obs["blocked"] and not obs["commands"]
+    page = blindplay.render(obs)
+    assert "round 0" not in page and "TOOL-BLOCKED" in page
+
+
+def test_a_victory_renders_once_as_the_rewards_screen(tmp_path):
+    """`EB-178`, end to end. Both of run B6's fight records read the moment
+    after a kill as a NEW FIGHT: an empty `Battle -- round 0`. The seat must
+    be shown the fight, then the rewards, and nothing in between."""
+    combat = combat_state()
+    wire = _VictoryWire(combat, rewards_state())
+    thread = blindplay.ScriptedThread(
+        [{"command": 'play "Pearl Barrage"', "thinking": "."},
+         {"record": "fight"},
+         {"command": 'choose "Gold"', "thinking": "."},
+         {"record": "run"}])
+    s = blindplay.Session(thread, wire=wire, session_id="t",
+                          budget=blindplay.Budget(max_actions=2),
+                          log_root=tmp_path,
+                          settle_tries=8, settle_delay_s=0.0)
+    s.run()
+    pages = thread.sent
+    assert not any("round 0" in p for p in pages), pages
+    assert any("# Battle" in p for p in pages)
+    assert any("What the fight left behind" in p for p in pages)
 
 
 def test_a_wire_that_stays_unnamed_is_still_tool_blocked(tmp_path):

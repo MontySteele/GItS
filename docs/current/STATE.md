@@ -284,7 +284,10 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     open-face-defect preflight (`EB-169`, register empty); a face states
     its scaling once (`EB-164`, `tools/lint_face_scaling.py`); blind play of
     any screen with a one-thread seat driver (`EB-167`/`EB-168`, six sealed
-    sessions under `review/qa/blindplay/`, records name both builds);
+    sessions under `review/qa/blindplay/`, records name both builds,
+    repeated printed names numbered `(1)`/`(2)` — `EB-177`; the frame
+    after a kill ridden out — `EB-178`; powers, meters and a repeated
+    card name say what the feed does not carry — `EB-179`);
     pinned managed assemblies in the vault (`EB-172`).
   - **Kokomi slice 1** (`review/active/kokomi-slice-1-2026-08-27.md`,
     §§Round 1–3): three rounds on the quarantined surface, **no shipped
@@ -300,8 +303,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     the repetitive state as "Water's Edge versus Coral Guard"; B6 reports
     Burst accumulating with no visible spend and Gorou's Charge/Burst grant
     unprinted — the Charge-keyword gap R215 D deferred into E1, now with a
-    blind witness. Open tool rows from the runs: `EB-177`, `EB-178`,
-    `EB-179`.
+    blind witness. The bridge gap the runs uncovered: `EB-181`.
   - **Next.** Kokomi slice 2 = R213 E1's Charge arms, before Klee. A4/A6
     unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
