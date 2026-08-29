@@ -118,7 +118,7 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 CEILINGS: dict[str, int] = {
     "EB": 195,   # EB-195 minted 2026-08-29: the twelve-arm re-baseline of
                  # the Furina and Kokomi arms at RT12/D18/P11/C20 is OWED
-                 # after the roster-HP ruling moved their HP (Kokomi 80, Furina 78, #156).
+                 # after R219 F moved their HP (Kokomi 80, Furina 78, #156).
                  # Under R68 every measured table quoting their rows is
                  # STALE until it runs. OPEN.
                  # EB-194 minted 2026-08-29 by the +proto deploy that was
