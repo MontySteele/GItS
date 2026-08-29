@@ -362,7 +362,7 @@ internal static class ReactionEffects
                         await CreatureCmd.Damage(
                             choiceContext, e, ReactionConstants.OverloadSplash,
                             ValueProp.Unblockable | ValueProp.Unpowered,
-                            dealer: null, cardSource: null);
+                            dealer: null, cardSource: null, cardPlay: null);
                     }
                 }
                 // Survival sprint: the explosion staggers the reacted target.

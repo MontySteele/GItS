@@ -78,7 +78,7 @@ public sealed class KaboomBeetleSwarm : CustomCardModel, IElementalCard
     private List<Creature>? _bombedAtCast;
 
     public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource)
+        Creature? target, decimal amount, ValueProp props, Creature? dealer, CardModel? cardSource, CardPlay? cardPlay)
     {
         if (cardSource != this || target == null) return 0m;
 
@@ -111,7 +111,7 @@ public sealed class KaboomBeetleSwarm : CustomCardModel, IElementalCard
         {
             await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
                 .WithHitCount(3)
-                .FromCard(this)
+                .FromCard(this, cardPlay)
                 .TargetingRandomOpponents(CombatState!)
                 .WithHitFx("vfx/vfx_attack_slash")
                 .Execute(choiceContext);

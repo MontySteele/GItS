@@ -70,7 +70,7 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard, ISkill
     {
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .WithHitCount(3)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .TargetingRandomOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);

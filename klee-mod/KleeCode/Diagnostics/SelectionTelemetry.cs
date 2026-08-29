@@ -27,8 +27,16 @@ namespace KleeMod.Diagnostics;
 /// THE SWEEP, WHICH LAW REQUIRES BEFORE BUILDING INFRASTRUCTURE (precedent:
 /// the "no combat-END hook" claim, retracted when `Hook.AfterCombatEnd` /
 /// `AfterCombatVictory` turned out to be first-party). Swept 2026-08-12
-/// against the pinned build — `sts2.dll` v0.107.1 (commit 59260271) and
-/// BaseLib 3.3.7.0, both decompiled with ilspycmd 8.2.0:
+/// against `sts2.dll` v0.107.1 (commit 59260271) and BaseLib 3.3.7.0, both
+/// decompiled with ilspycmd 8.2.0, and RE-SWEPT 2026-08-29 against the build
+/// that is pinned now — `sts2.dll` v0.111.0 (commit 41cef1ea) and BaseLib
+/// 3.4.5.0 (`EB-171`). The conclusion below is unchanged on the new build:
+/// `AbstractModel` still carries no selection hook (185 virtuals, none naming
+/// a selection or an offered list; `AfterCardChangedPiles` and
+/// `AfterRewardTaken` are still the nearest neighbours), and
+/// `CardSelectCmd.ICardSelector` is still the opener-not-observer described
+/// below. The 0.107.1 reading is kept beside it rather than overwritten,
+/// because each is a statement about its own build:
 ///
 ///   * `AbstractModel` — the ~180 first-party virtuals the mod already rides
 ///     via `SubscribeForCombatStateHooks`. There is a hook for a card changing

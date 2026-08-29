@@ -780,7 +780,16 @@ public static partial class McpMod
                 _ => lobby.NetService.Type.ToString().ToLowerInvariant()
             },
             ["game_mode"] = lobby.GameMode.ToString().ToLowerInvariant(),
-            ["max_players"] = lobby.MaxPlayers,
+            // GItS LOCAL EDIT (EB-171, game v0.111.0). `StartRunLobby.MaxPlayers`
+            // was removed; the value survives only as the private readonly
+            // `_maxPlayers` the constructor stores and `AddPlayer` /
+            // `SetLocalCharacter` compare `Players.Count` against. There is no
+            // public replacement and no other member carries the number -- the
+            // lobby's own UI reads the private field too -- so this is a
+            // reflection read with a null fallback rather than a guess. The key
+            // stays in the payload either way: a MISSING value now means "the
+            // game stopped exposing it", not "singleplayer".
+            ["max_players"] = StartRunLobbyMaxPlayers(lobby),
             ["ascension"] = lobby.Ascension,
             ["max_ascension"] = lobby.MaxAscension,
             ["all_ready"] = lobby.Players.Count > 0 && lobby.Players.All(p => p.isReady),
@@ -829,6 +838,22 @@ public static partial class McpMod
             lobbyState["seed"] = lobby.Seed;
 
         return lobbyState;
+    }
+
+    // GItS LOCAL EDIT (EB-171, game v0.111.0). See the call site in
+    // BuildStartRunLobbyState. Returns null rather than 0 or a made-up 2 when
+    // the field cannot be read, so a reader can tell "unknown" from "one seat".
+    private static int? StartRunLobbyMaxPlayers(StartRunLobby lobby)
+    {
+        try
+        {
+            var field = typeof(StartRunLobby).GetField(
+                "_maxPlayers",
+                System.Reflection.BindingFlags.NonPublic |
+                System.Reflection.BindingFlags.Instance);
+            return field?.GetValue(lobby) as int?;
+        }
+        catch { return null; }
     }
 
     private static bool SafeIsAboutToBeginGame(StartRunLobby lobby)
@@ -970,7 +995,15 @@ public static partial class McpMod
             catch { }
 
             info["expected_player_count"] = lobby.Run?.Players?.Count ?? 0;
-            info["connected_player_count"] = lobby.ConnectedPlayerIds?.Count ?? 0;
+            // GItS LOCAL EDIT (EB-171, game v0.111.0). `ConnectedPlayerIds` is
+            // gone from both lobbies; `LoadRunLobby` now holds a
+            // `List<LoadRunLobbyPlayer> Players` whose members are exactly the
+            // players connected to the load lobby (they are added by
+            // `OnConnectedToClientAsHost` / the join-response handler and
+            // removed on disconnect), and exposes `PlayerCount` and
+            // `PlayerIds` over it. Those two are the replacement, member for
+            // member -- the three reads below take them.
+            info["connected_player_count"] = lobby.PlayerCount;
 
             // LoadRunLobby no longer exposes IsAboutToBeginGame in the public game API,
             // so derive the same readiness summary from connected players and ready flags.
@@ -979,7 +1012,7 @@ public static partial class McpMod
             try
             {
                 var runPlayers = lobby.Run?.Players;
-                var connectedPlayerIds = lobby.ConnectedPlayerIds;
+                var connectedPlayerIds = lobby.PlayerIds?.ToList();   // GItS LOCAL EDIT (EB-171)
                 aboutToBegin = runPlayers != null
                     && connectedPlayerIds != null
                     && runPlayers.Count > 0
@@ -997,7 +1030,8 @@ public static partial class McpMod
                 {
                     foreach (var sp in lobby.Run.Players)
                     {
-                        bool isConnected = lobby.ConnectedPlayerIds?.Contains(sp.NetId) ?? false;
+                        // GItS LOCAL EDIT (EB-171)
+                        bool isConnected = lobby.Players?.Any(p => p.id == sp.NetId) ?? false;
                         bool isReady = false;
                         try { isReady = lobby.IsPlayerReady(sp.NetId); } catch { }
                         players.Add(new Dictionary<string, object?>

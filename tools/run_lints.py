@@ -187,6 +187,7 @@ REGISTRY: tuple[Lint, ...] = (
     _local("art-lint",            "tools/art_lint.py"),
     _local("card-distinctness",   "tools/card_distinctness_report.py", "--gate"),
     _local("game-ref-backup",     "tools/lint_game_ref_backup.py"),
+    _local("game-assemblies-backup", "tools/lint_game_assemblies_backup.py"),
 
     _suite("companion-shop-coverage",  "tools/lint_companion_shop_coverage.py"),
     _suite("effect-branch-scans",      "tools/lint_effect_branch_scans.py"),

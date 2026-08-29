@@ -14,7 +14,9 @@ ruling: docs/archive/understudy-p0-findings.md ruling 1, RATIFIED by [USER] 2026
 
 The latest tagged release is **0.4.0, dated 2026-05-05**, and it predates our
 game build. The pin above is the commit that carries the v0.107 compatibility
-fix, and v0.107.1 is exactly what we ship against. Installing the release
+fix. As of EB-171 (2026-08-29) we ship against **v0.111.0**, which upstream has
+no commit for at all — its tip IS this pin — so the four game-API repairs live
+here as marked local edits and the pin does not move. Installing the release
 binary instead of building this snapshot is the one way to reproduce the
 version-pin failure the kickoff brief worried about — P0 stop-and-surface
 item 2 says so, and this paragraph is where a hurried session is meant to
@@ -28,10 +30,10 @@ commit. Neither string is a version pin. **This file is the pin.**
 
 | Thing | Value |
 |---|---|
-| Game | v0.107.1, commit 59260271, dated 2026-06-18 |
-| main_assembly_hash | -1555940892 |
+| Game | **v0.111.0, commit 41cef1ea, dated 2026-08-13** (`public-beta`, buildid 24724944). Ported and re-verified 2026-08-29 under R218 / EB-171; it was v0.107.1, commit 59260271, dated 2026-06-18, through the vendoring and up to that day. |
+| main_assembly_hash | **222455745** (was -1555940892 on v0.107.1) |
 | Toolchain | .NET SDK 9.0.316, `net9.0` |
-| Build | `dotnet build -c Release` against `data_sts2_windows_x86_64` — 0 warnings, 0 errors |
+| Build | `dotnet build -c Release` against `data_sts2_windows_x86_64` — 0 warnings, 0 errors, re-verified on v0.111.0 |
 
 ## What was pruned from the snapshot
 
@@ -59,14 +61,22 @@ disagree in either direction.
 
 ## What we changed
 
-**Five lines across two upstream files, plus EB-92's two guards in a third.** Everything of substance lives in
-`gits/`, which the pin lint excludes from the upstream hash list entirely.
+**Five lines across two upstream files, EB-92's two guards in a third, and
+EB-171's four game-API repairs in that same third.** Everything of substance
+lives in `gits/`, which the pin lint excludes from the upstream hash list
+entirely.
+
+**On EB-171's four in particular.** They are here rather than upstream because
+upstream has no 0.111 commit to take: STS2MCP's tip IS our pin `55e0648`, whose
+subject is the v0.107 compatibility fix. When a 0.111 fix lands upstream, the
+refresh procedure below applies and these four are the first thing to compare
+against it.
 
 | File | Status | Change |
 |---|---|---|
 | `McpMod.cs` | `gits-modified` | Four `else if` arms on the `HandleRequest` route chain — `/api/v1/gits/speed` (W2), `/api/v1/gits/seed` (P1.5), `/api/v1/gits/give_card` (EB-52) and `/api/v1/gits/debug_state` (EB-142) — marked in-file with `GItS LOCAL EDIT`. Nothing else in the file is touched. |
 | `McpMod.Wiki.cs` | `gits-modified` | EB-92 (2026-08-13) — two guards in the result formatter, marked in-file with `GItS LOCAL EDIT`. Every mod-card query answered `500 ... Canonical model of type <generated class> used in incorrect place`, a different class each time: the formatter walks `ModelDb.AllCards` (where mod cards live) and reads properties off the CANONICAL instance, and one throwing card took the whole search down — including the base-game rows that had formatted fine. `BuildWikiResultSafely` degrades a throwing candidate to one row carrying id/name/score/`error`, and the hover-tip read degrades to empty. Neither guard fixes the throwing card, and the degraded row names it. Upstreamable as-is: any mod's custom model can do this. |
-| `McpMod.StateBuilder.cs` | `gits-modified` | One line in `BuildPlayerState`, inside the live-combat block: `state["resources"] = GitsResourceSnapshot(combatState)`. Marked in-file with `GItS LOCAL EDIT`. P1.5 spec item 2. |
+| `McpMod.StateBuilder.cs` | `gits-modified` | **(a)** One line in `BuildPlayerState`, inside the live-combat block: `state["resources"] = GitsResourceSnapshot(combatState)`. Marked in-file with `GItS LOCAL EDIT`. P1.5 spec item 2. **(b) EB-171 (2026-08-29), the v0.111.0 lobby port — four reads and one helper, all marked.** `StartRunLobby.MaxPlayers` was REMOVED and has no public replacement: the number survives only as the private readonly `_maxPlayers` the constructor stores, which the lobby's own code compares `Players.Count` against, so `max_players` is now a guarded reflection read (`StartRunLobbyMaxPlayers`) returning `int?` — null where it once could not fail, so a reader can tell "the game stopped exposing it" from "one seat". `LoadRunLobby.ConnectedPlayerIds` was also removed, and there the replacement is exact rather than inferred: the lobby now holds `List<LoadRunLobbyPlayer> Players`, populated by the join-response handler and `OnConnectedToClientAsHost` and emptied on disconnect — i.e. the connected set, by construction — with `PlayerCount` and `PlayerIds` over it. The three reads take those: the count becomes `lobby.PlayerCount`, the readiness derivation takes `lobby.PlayerIds`, and the per-player `is_connected` becomes a membership test on `Players`. No wire key changed name or meaning. |
 | `gits/GitsSpeed.cs` | GItS addition | Work item W2 — the speed affordance. EB-87 (2026-08-12): the captured original `FastMode` is persisted to `GitsSpeed.original.conf` in the mod directory (next to the `STS2_MCP.conf` this file's neighbours already write — JSON content under a `.conf` name, because ModManager parses every `*.json` under `mods/` as a manifest), a later process restores from that sidecar instead of re-capturing, and a successful disable deletes it. `PrefsSave.FastMode` persists to `prefs.save` (not `settings.save` — corrected 2026-08-13 by the round-2 correctness audit, along with the mechanism: prefs are flushed only by `NGame.Quit()` or `NSettingsScreen.OnSubmenuClosed`, neither reachable from a `TerminateProcess` kill, and `NGame` demotes a persisted `Instant` to `Fast` on every non-editor boot, so no second process can read `Instant` back. The reproducible laundering is one step narrower: after a flush, a second process captures the demoted `Fast` and "restores" a `Normal` user to `Fast`. The sidecar is the right fix for that; only its stated justification was wrong). `TimeScale` is deliberately not persisted — `Engine.TimeScale` starts at its default in every process, so the live capture is already the right original. |
 | `gits/GitsSeed.cs` | GItS addition | P1.5 item 1 — the chosen-seed endpoint. Documents in-file why upstream's own `charSelect.Lobby == null` refusal does not describe the game. |
 | `gits/GitsResources.cs` | GItS addition | P1.5 item 2 — a reflection-only reader for BaseLib's custom-resource registry. No compile-time BaseLib reference; a missing BaseLib yields an empty map. |
@@ -184,7 +194,10 @@ is the only one reachable when the type is resolved at runtime),
 `McpMod.StateBuilder.BuildEnemyState` does — if those two spellings ever
 diverge, a scenario's target is a creature nobody chose, and the build will not
 say so). A game-version bump is the event that invalidates those, and the check
-is the build: it fails loudly, which is the good case.
+is the build: it fails loudly, which is the good case. **The 0.111.0 bump is the
+first time that actually happened, and `gits/` came through it untouched** — all
+four errors were in `McpMod.StateBuilder.cs`, none in any file above, and the
+whole directory recompiled clean against the new assemblies (EB-171).
 
 Upstreaming the speed endpoint stays open; MIT does not require it and this
 sprint did not spend time on it.

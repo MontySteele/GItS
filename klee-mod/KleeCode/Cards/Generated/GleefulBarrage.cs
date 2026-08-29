@@ -68,7 +68,7 @@ public sealed class GleefulBarrage : CustomCardModel, IElementalCard
     {
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .WithHitCount(2 + SparkPower.SparksAtPlay(Owner.Creature))
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .TargetingRandomOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);

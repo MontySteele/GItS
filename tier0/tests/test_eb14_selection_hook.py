@@ -68,12 +68,16 @@ def test_the_sweep_result_is_recorded_in_the_file_that_acts_on_it():
 
 
 def test_the_sweep_names_the_build_it_was_taken_against():
-    """A sweep is a statement about one build. `sts2.dll` v0.107.1 is the
-    pinned one (STATE.md, "Mod build environment"); a later build could add
-    the hook this file concluded does not exist."""
+    """A sweep is a statement about one build, and a later build could add the
+    hook this file concluded does not exist -- so the file must name EVERY
+    build it has been read against, not just the newest. `v0.111.0` is the
+    pinned one (STATE.md, "Mod build environment") since R218; `v0.107.1` is
+    the build the original sweep ran on and is kept, not overwritten."""
     src = _hook()
     assert "v0.107.1" in src
     assert "BaseLib 3.3.7.0" in src
+    assert "v0.111.0" in src
+    assert "3.4.5.0" in src
 
 
 # ------------------------------------------- the measurement moves nothing --

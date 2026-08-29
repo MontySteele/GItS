@@ -82,7 +82,7 @@ public sealed class ProtoIttoSuperlativeSuperstrengthEither : CustomCardModel, I
         {
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 14m))
-                .FromCard(this)
+                .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
                 .Execute(choiceContext);

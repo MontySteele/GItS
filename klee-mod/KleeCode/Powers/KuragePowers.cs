@@ -329,7 +329,7 @@ public sealed class CeremonialGarmentPower : PowerModel, ILocalizationProvider
     /// </summary>
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (dealer != Owner || target == Owner) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
@@ -501,7 +501,7 @@ public sealed class PreventExhaustWardPower : PowerModel, ILocalizationProvider
     /// </summary>
     public override decimal ModifyDamageAdditive(
         Creature target, decimal amount, ValueProp props, Creature dealer,
-        CardModel cardSource)
+        CardModel cardSource, CardPlay? cardPlay)
     {
         if (target != Owner || _usedThisTurn || amount <= 0) return 0m;
         if (!props.IsPoweredAttack()) return 0m;   // attacks only, per the text

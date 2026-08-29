@@ -194,7 +194,8 @@ Route table (the whole surface): `/`, `/api/v1/singleplayer`,
 1. `vendor/STS2_MCP/docs/raw-simplified.md` — the whole contract in 213 lines:
    endpoints, `state_type` table, verb-per-screen.
 2. `vendor/STS2_MCP/PROVENANCE.md` — the pin, the environment it was verified
-   against, what was pruned, the one local edit, how to refresh.
+   against (v0.111.0 since EB-171), what was pruned, the marked local edits
+   across three upstream files, how to refresh.
 3. `vendor/STS2_MCP/McpMod.cs:175-296` — `HandleRequest`: the actual route chain,
    the 409 guard, and the marked local edit.
 4. `vendor/STS2_MCP/gits/` — the GItS-authored code; each file's header is its

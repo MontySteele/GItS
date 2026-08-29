@@ -116,7 +116,35 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 171,   # EB-171 minted 2026-08-28 by the EB-167/168 live acceptance,
+    "EB": 176,   # EB-176 minted AND CLOSED 2026-08-29 by the same acceptance:
+                 # a live `hand_select` renders as `card_select`, only the
+                 # WIRE's screen name was exempt from the snake_case rule, and
+                 # the tool's own name for the screen -- in the tool's own
+                 # observation -- tripped the blindness assertion and stopped
+                 # a session that had leaked nothing. Fixed in the same
+                 # commit, so the row never existed.
+                 # EB-175 minted 2026-08-29 by the same acceptance: `end turn`
+                 # has to be said twice, four times in one session, and the
+                 # two screens genuinely differ -- an intermediate state the
+                 # render presents as a playable turn. OPEN.
+                 # EB-174 minted 2026-08-29: the sealed blind-play record
+                 # cannot name the build it was taken on -- the bridge's
+                 # health payload carries no version and `build_version`
+                 # correctly refuses to invent one, so every record's identity
+                 # block reads `(not read)`. OPEN.
+                 # EB-173 minted AND CLOSED 2026-08-29 by the EB-167 live
+                 # acceptance: `_fold` erased the `+` the game prints on an
+                 # upgraded title, so a hand holding a base and an upgraded
+                 # copy made BOTH unplayable, and the `(upgraded)` escape the
+                 # refusal advertised was implemented nowhere. Run B died on
+                 # it at the refusal limit. Fixed in the same commit, so the
+                 # row never existed; the ceiling stays at the issued number.
+                 # EB-172 minted 2026-08-28 by R218 C: a gitignored backup of
+                 # the four PINNED managed assemblies in the OneDrive vault
+                 # beside game_ref, plus a local.props switch that builds
+                 # against it. A Steam update may stop a live run; it must not
+                 # be able to stop the build.
+                 # EB-171 minted 2026-08-28 by the EB-167/168 live acceptance,
                  # which could not run: the machine's game moved to v0.111.0
                  # on the `public-beta` branch and neither the vendored bridge
                  # nor the roster mod compiles against it any more. The PORT is
@@ -184,9 +212,11 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        167, 168, 171,
+        174, 175,
     }),
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 46}),
+    # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
+    # ceiling stays at 46, because ceilings never come down.
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

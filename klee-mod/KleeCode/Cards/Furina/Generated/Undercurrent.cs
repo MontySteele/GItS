@@ -62,7 +62,7 @@ public sealed class Undercurrent : CustomCardModel, ICharacterCard
     {
         await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
             .WithHitCount(DynamicVars["Times"].IntValue)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()

@@ -70,7 +70,7 @@ public sealed class MassedVolley : CustomCardModel, IElementalCard, ICharacterCa
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
@@ -87,8 +87,13 @@ public sealed class MassedVolley : CustomCardModel, IElementalCard, ICharacterCa
         PlayerChoiceContext choiceContext, CardModel card)
     {
         if (card != this) return;
+        // A discard is not a play, so there is no CardPlay to attribute
+        // these effects to. The shared body emitter threads one through for
+        // VFX and source attribution; null is the honest value here, and
+        // every API it reaches takes a nullable CardPlay.
+        CardPlay? cardPlay = null;
         await DamageCmd.Attack(4m)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .TargetingRandomOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);

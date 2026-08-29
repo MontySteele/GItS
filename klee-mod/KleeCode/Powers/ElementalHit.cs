@@ -53,7 +53,7 @@ internal static class ElementalHit
 
         await CreatureCmd.Damage(
             choiceContext, target, (int)SimDamagePipeline.TargetMods(target, dealt),
-            ValueProp.Unpowered, dealer: null, cardSource: null);
+            ValueProp.Unpowered, dealer: null, cardSource: null, cardPlay: null);
     }
 
     /// <summary>

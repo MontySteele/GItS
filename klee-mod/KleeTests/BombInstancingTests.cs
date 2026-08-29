@@ -379,7 +379,8 @@ public class BombInstancingTests
     /// <summary>The enemy swinging at the party -- what the -25% applies to.</summary>
     private static decimal Multiplier(BombPower pile, Creature enemy) =>
         pile.ModifyDamageMultiplicative(
-            target: null, amount: 10m, props: Attack, dealer: enemy, cardSource: null);
+            target: null, amount: 10m, props: Attack, dealer: enemy, cardSource: null,
+            cardPlay: null);
 
     private static AttackCommand Swing(Creature enemy)
     {

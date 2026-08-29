@@ -66,7 +66,7 @@ public sealed class UniversalRevelry : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)
             .WithHitFx("vfx/vfx_attack_slash")
             .SpawningHitVfxOnEachCreature()
@@ -74,7 +74,7 @@ public sealed class UniversalRevelry : CustomCardModel, ICharacterCard
         if (FurinaResources.ReadableFanfare(Owner.Creature) >= 15)
         {
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 6m))
-                .FromCard(this)
+                .FromCard(this, cardPlay)
                 .TargetingAllOpponents(CombatState!)
                 .WithHitFx("vfx/vfx_attack_slash")
                 .SpawningHitVfxOnEachCreature()

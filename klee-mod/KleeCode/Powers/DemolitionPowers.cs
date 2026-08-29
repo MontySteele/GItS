@@ -188,7 +188,7 @@ public sealed class DetonationSplashPower
             await CreatureCmd.Damage(
                 choiceContext, enemies, Amount,
                 ValueProp.Unblockable | ValueProp.Unpowered,
-                dealer: null, cardSource: null);
+                dealer: null, cardSource: null, cardPlay: null);
         }
 
         await KleeBurstResource.Gain(

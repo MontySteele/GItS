@@ -69,14 +69,14 @@ public sealed class BigBaddaBoom : CustomCardModel, IElementalCard
         var enemiesAtStart = CombatState!.HittableEnemies.ToList();
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
         if (enemiesAtStart.Any(e => e.IsDead))
         {
             await DamageCmd.Attack(8m)
-                .FromCard(this)
+                .FromCard(this, cardPlay)
                 .TargetingRandomOpponents(CombatState!)
                 .WithHitFx("vfx/vfx_attack_slash")
                 .Execute(choiceContext);

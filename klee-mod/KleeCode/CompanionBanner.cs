@@ -57,7 +57,9 @@ public static class CompanionBanner
     /// </summary>
     private const string RngStream = "kleemod_featured_banner";
 
-    private static readonly Dictionary<uint, HashSet<string>> Cache = new();
+    // v0.111.0 (`EB-171`): the game widened its RNG seeds from uint to
+    // ulong (`PlayerRngSet.Seed`, `Rng(ulong)`), so the cache key follows.
+    private static readonly Dictionary<ulong, HashSet<string>> Cache = new();
 
     /// <summary>The featured 5-star card ids for this player's run.</summary>
     public static IReadOnlyCollection<string> Featured(Player player)
@@ -81,7 +83,7 @@ public static class CompanionBanner
         return Featured(player).Contains(card.Id.Entry);
     }
 
-    private static HashSet<string> Roll(uint seed, Player player)
+    private static HashSet<string> Roll(ulong seed, Player player)
     {
         // Grouped by nation and SORTED BY ID inside each group before the
         // draw. CompanionRoster.All has no guaranteed order, and an unsorted

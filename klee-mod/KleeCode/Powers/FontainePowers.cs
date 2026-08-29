@@ -154,7 +154,7 @@ public sealed class NightVigilPower : PowerModel, ILocalizationProvider
 
     public override decimal ModifyDamageAdditive(
         Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource)
+        CardModel? cardSource, CardPlay? cardPlay)
     {
         if (dealer != Owner || target == Owner || target == null) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
@@ -255,11 +255,16 @@ public sealed class MasqueRedDeathPower : PowerModel, ILocalizationProvider
     /// eats what the turn actually produced rather than the jellyfish's
     /// mending -- a 5-Block-per-turn swing when the two race.
     /// </summary>
-    public async Task PayBondOfLife()
+    /// v0.111.0 (`EB-171`): `CreatureCmd.LoseBlock` now takes the choice
+    /// context and the REMOVER. `remover: null` is the game's own documented
+    /// "removed by a power" case, which is exactly what the Bond is; the
+    /// context is the turn-end sequencer's, previously discarded at the
+    /// `Resolve` delegate and now passed down.
+    public async Task PayBondOfLife(PlayerChoiceContext choiceContext)
     {
         if (Owner == null || Owner.Block <= 0) return;
         var paid = System.Math.Min(
             Owner.Block, CompanionConstants.MasqueBondBlock);
-        await CreatureCmd.LoseBlock(Owner, paid);
+        await CreatureCmd.LoseBlock(choiceContext, Owner, paid, remover: null);
     }
 }

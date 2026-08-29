@@ -47,9 +47,13 @@ THE COMMAND GRAMMAR IS THE WHOLE INTERFACE
     upgrade ["<title>"]                remove ["<title>"]
     use potion "<title>" [on "<enemy>"]                confirm        proceed
 
-Every name in it is a name the screen printed. A title matching two cards with
-DIFFERENT printed faces is refused as ambiguous rather than guessed at (say
-`"<title> (upgraded)"` to pick one); a title matching two identical faces takes
+Every name in it is a name the screen printed. The game prints an upgraded
+card's own `+`, and the fold keeps it, so `Coral Guard` and `Coral Guard+` are
+simply two names. A title matching two cards with DIFFERENT printed faces is
+refused as ambiguous rather than guessed at, and BOTH sides are then reachable:
+`"<title> (upgraded)"` and `"<title> (not upgraded)"` filter the hits, on
+either side of the title, so echoing the screen back verbatim works (EB-173, a
+live deadlock: neither copy was playable). A title matching two identical faces takes
 the first, because two copies of one card are interchangeable and refusing
 there would make a duplicate unplayable. A card the game says cannot be played,
 or an item the run cannot afford, is refused WITH THE GAME'S OWN REASON where
@@ -217,10 +221,15 @@ def _fold(text: Any) -> str:
     NOT `scenario.card_key`, which also folds the mod's id prefix -- an id may
     not reach this side of the line at all, so a grammar that quietly accepted
     one would be a grammar a tester could type an id into.
+
+    `EB-173`: `+` SURVIVES, because it is not punctuation here -- it is the
+    game's own printed mark for an upgraded card, and folding it away made
+    `Coral Guard` and `Coral Guard+` one key, which made both unplayable
+    whenever a hand held one of each.
     """
     s = str(text or "").casefold()
     s = s.replace("—", " ").replace("–", " ").replace("-", " ")
-    s = re.sub(r"[^a-z0-9 ]+", " ", s)
+    s = re.sub(r"[^a-z0-9+ ]+", " ", s)
     return " ".join(s.split())
 
 
@@ -422,6 +431,13 @@ def _map_options(state: dict[str, Any]) -> list[dict[str, Any]]:
     return nodes
 
 
+def _bundle_cards(bundle: Any) -> list[dict[str, Any]]:
+    """The cards inside one bundle entry, in the order the wire lists them."""
+    if not isinstance(bundle, dict):
+        return []
+    return [c for c in (bundle.get("cards") or []) if isinstance(c, dict)]
+
+
 def _screen_cards(state: dict[str, Any]) -> list[dict[str, Any]]:
     """The cards the CURRENT screen is offering, in POST index order."""
     st = _screen(state)
@@ -510,12 +526,23 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["can_skip"] = bool(blob.get("can_skip") or blob.get("can_cancel"))
         obs["commands"] = ['choose "<card title>"', "confirm", "skip"]
     elif st == "bundle_select":
+        # `EB-173`: A BUNDLE HAS NO NAME, and asking for one printed
+        # `- **(unnamed)**` twice, on a screen whose only verb is
+        # `choose "<bundle>"`. Nothing on it could be named, `confirm` before a
+        # selection is an error the game just repeats, and a live session sat
+        # there answering `confirm` until its action budget ran out. The wire
+        # gives each bundle an index and a LIST OF CARDS; the cards have
+        # printed titles, so the bundle is named by what is in it -- which is
+        # also how a player at the screen would say it out loud. No id and no
+        # invented label: every word below is one the game printed.
         blob = _blob(state, "bundle_select")
         obs["screen"] = "bundle_select"
         obs["prompt"] = _text(blob.get("prompt")) or "Choose a bundle."
-        obs["offers"] = [_named_option(b) for b in _screen_cards(state)]
+        obs["offers"] = [{"cards": [_card_face(c) for c in _bundle_cards(b)]}
+                         for b in _screen_cards(state)]
         obs["can_confirm"] = bool(blob.get("preview_showing"))
-        obs["commands"] = ['choose "<bundle>"', "confirm"]
+        obs["commands"] = ['choose "<any card title in the bundle you want>"',
+                           "confirm"]
     elif st in ("shop", "fake_merchant"):
         obs["screen"] = "shop"
         obs["gold"] = _int(_player(state).get("gold"))
@@ -569,7 +596,17 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
 
     # The wire's own screen name is the ONE token exempted from the snake_case
     # rule, and only because a refusal has to be able to name what it refused.
-    qa_packet.assert_blind(obs, allow={st})
+    #
+    # `EB-176`, FOUND LIVE. BOTH names are exempt, because there are two and
+    # they are not always the same string: `st` is what the WIRE called the
+    # screen, `obs["screen"]` is what this tool calls it, and the branches
+    # above deliberately fold several wire names onto one tool name --
+    # `hand_select` renders as `card_select`. Exempting only `st` meant a live
+    # `hand_select` wrote the un-exempt token `card_select` into its own
+    # observation and the blindness assertion killed the session on a screen
+    # that had leaked nothing. Both are screen vocabulary: neither names a
+    # card, a role or a ruling, which is the test the exemption exists for.
+    qa_packet.assert_blind(obs, allow={st, obs["screen"]})
     return obs
 
 
@@ -670,7 +707,14 @@ def render(obs: dict[str, Any]) -> str:
         if obs.get("can_skip"):
             out += ["", "You may skip this."]
     elif obs["screen"] == "bundle_select":
-        out += [f"# {obs['prompt']}", ""] + _render_options(obs["offers"])
+        out += [f"# {obs['prompt']}", ""]
+        for offer in obs["offers"]:
+            titles = ", ".join(c["title"] for c in offer["cards"]
+                               if c["title"])
+            out += [f"## A bundle of: {titles or '(nothing printed)'}", ""]
+            for card in offer["cards"]:
+                out += _render_card(card)
+            out.append("")
     elif obs["screen"] == "shop":
         out += ["# The shop", "", f"You have {obs['gold']} gold.", "",
                 "On the shelves:", ""] + _render_options(obs["items"])
@@ -790,6 +834,26 @@ def _refuse(why: str) -> Resolution:
     return Resolution(ok=False, refusal=why)
 
 
+# `EB-173`: the qualifier the refusal advertises, and the resolver now honours.
+# Accepted on either side of the title so a tester who echoes the screen back
+# ("Coral Guard+ (upgraded)") is understood, and negatable so the BASE copy is
+# reachable too -- a disambiguator that can only ever pick one of the two
+# leaves the other unplayable, which is the defect this exists to close.
+_QUALIFIER = re.compile(r"\s*\((not\s+)?upgraded\)\s*", re.I)
+
+
+def _split_qualifier(name: str) -> tuple[str, bool | None]:
+    """`(title without the qualifier, wanted upgrade state or None)`."""
+    m = _QUALIFIER.search(name)
+    if not m:
+        return name, None
+    return (name[:m.start()] + name[m.end():]).strip(), not m.group(1)
+
+
+def _is_upgraded(entry: dict[str, Any]) -> bool:
+    return bool(entry.get("is_upgraded") or entry.get("upgraded"))
+
+
 def _match(entries: list[dict[str, Any]], name: str, *,
            key: Callable[[dict[str, Any]], str],
            face: Callable[[dict[str, Any]], str] | None = None
@@ -802,13 +866,40 @@ def _match(entries: list[dict[str, Any]], name: str, *,
     player experiences. Two entries that print the same title with different
     faces (a base and an upgraded copy) ARE ambiguous, and the refusal says how
     to disambiguate rather than guessing.
+
+    `EB-173`, FOUND LIVE AND FIXED HERE. `_fold` strips punctuation, which is
+    right for apostrophes and dashes and WRONG for the `+` the game itself
+    appends to an upgraded title: `Coral Guard` and `Coral Guard+` folded to
+    the same key, so with both in hand every naming of either was ambiguous --
+    and the refusal's advice, `"(upgraded)"`, was documented in the grammar and
+    implemented nowhere, so the escape hatch answered "nothing here is called
+    that". NEITHER copy could be played. A blind session hit it on its fifth
+    combat round and died against the refusal limit. Two halves to the fix:
+    the qualifier is now PARSED and filters the hits (with `(not upgraded)`
+    for the other side), and `+` survives the fold as a distinguishing mark,
+    so the two titles are simply different names and the common case never
+    reaches the ambiguity arm at all.
     """
+    name, want_upgraded = _split_qualifier(name)
     want = _fold(name)
     if not want:
         return -1, "no name given"
-    hits = [i for i, e in enumerate(entries) if _fold(key(e)) == want]
-    if not hits:
-        hits = [i for i, e in enumerate(entries) if want in _fold(key(e))]
+    exact = [i for i, e in enumerate(entries) if _fold(key(e)) == want]
+    loose = [i for i, e in enumerate(entries) if want in _fold(key(e))]
+    hits = exact or loose
+    if want_upgraded is not None:
+        def _wanted(idx: list[int]) -> list[int]:
+            return [i for i in idx if _is_upgraded(entries[i]) == want_upgraded]
+        # Widen to the substring pass when the qualifier empties the exact
+        # one: `Coral Guard (upgraded)` names the `+` copy exactly, and its
+        # title is not the string the tester typed.
+        narrowed = _wanted(exact) or _wanted(loose)
+        if not narrowed and hits:
+            state = "upgraded" if want_upgraded else "un-upgraded"
+            return -1, (f"nothing here called {name!r} is {state}. "
+                        f"What is on the screen: "
+                        + ", ".join(sorted({key(entries[i]) for i in hits})))
+        hits = narrowed
     if not hits:
         offered = ", ".join(sorted({key(e) for e in entries if key(e)}))
         return -1, (f"nothing here is called {name!r}. "
@@ -817,13 +908,43 @@ def _match(entries: list[dict[str, Any]], name: str, *,
         faces = {face(entries[i]) for i in hits}
         if len(faces) > 1:
             return -1, (f"{name!r} matches more than one different thing on "
-                        f"this screen; name it exactly, and add "
-                        f"\"(upgraded)\" if that is the one you mean")
+                        f"this screen; name it exactly, or add "
+                        f"\"(upgraded)\" / \"(not upgraded)\" to pick one")
     elif len(hits) > 1:
         names = sorted({key(entries[i]) for i in hits})
         if len(names) > 1:
             return -1, (f"{name!r} matches {len(names)} different things "
                         f"({', '.join(names)}); name one exactly")
+    return hits[0], ""
+
+
+def _match_bundle(entries: list[dict[str, Any]], name: str
+                  ) -> tuple[int, str]:
+    """`(index, refusal)` for the bundle holding a card printed `name`.
+
+    `EB-173`. Exact title first, unique substring second -- `_match`'s order,
+    on a set of names per entry instead of one. A title that appears in TWO
+    bundles is refused rather than guessed at: which bundle the tester meant is
+    exactly the question, and the other cards are how they would say it.
+    """
+    name, _ = _split_qualifier(name)
+    want = _fold(name)
+    if not want:
+        return -1, "no name given"
+    titles = [[_card_title(c) for c in _bundle_cards(b)] for b in entries]
+    hits = [i for i, ts in enumerate(titles)
+            if any(_fold(t) == want for t in ts)]
+    if not hits:
+        hits = [i for i, ts in enumerate(titles)
+                if any(want in _fold(t) for t in ts)]
+    if not hits:
+        offered = "; ".join(f"[{', '.join(t for t in ts if t)}]"
+                            for ts in titles)
+        return -1, (f"no bundle here holds anything called {name!r}. "
+                    f"What is on the screen: {offered or '(nothing)'}")
+    if len(hits) > 1:
+        return -1, (f"{name!r} is in more than one bundle; name a card that "
+                    f"is only in the one you want")
     return hits[0], ""
 
 
@@ -921,9 +1042,11 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
         return Resolution(True, "choose", {"action": verb, key: idx},
                           {"card": _card_title(entries[idx])})
     if st == "bundle_select":
+        # `EB-173`: match on the printed title of any card IN a bundle, the
+        # only name this screen has. `_match` is deliberately not reused: its
+        # `key` is one string per entry, and a bundle is a set of names.
         entries = _screen_cards(state)
-        idx, why = _match(entries, cmd.name,
-                          key=lambda e: _named_option(e)["name"])
+        idx, why = _match_bundle(entries, cmd.name)
         if idx < 0:
             return _refuse(why)
         return Resolution(True, "choose",
@@ -1368,6 +1491,14 @@ class Budget:
     max_actions: int = 60
     max_wall_s: float = 3600.0
     max_refusals: int = 3
+    # `EB-173`. The other three stop a session that is going WRONG; this one
+    # stops a session that is going NOWHERE, which the first three cannot see.
+    # A command the resolver accepts and the wire answers with an error resets
+    # the refusal counter and spends an action, so a screen the tester cannot
+    # get off loops until the action budget is gone -- observed live, 150+
+    # identical `confirm`s at one bundle screen. Stall = the rendered page
+    # unchanged, this many times running.
+    max_stalls: int = 6
 
 
 FIGHT_QUESTIONS = """That fight is over. In a short paragraph each, and in
@@ -1474,6 +1605,8 @@ class Session:
         feedback = ""
         first = True
         in_fight = False
+        last_page_sha = ""
+        stalls = 0
         while True:
             if self.actions >= self.budget.max_actions:
                 self.stopped = "max_actions"
@@ -1490,11 +1623,22 @@ class Session:
                 self.transcript.write(kind="leak", detail=str(exc))
                 break
             page = render(obs)
+            page_sha = sha256(page)
+            if page_sha == last_page_sha:
+                stalls += 1
+                if stalls >= self.budget.max_stalls:
+                    self.stopped = "stalled"
+                    self.transcript.write(kind="stall", page_sha256=page_sha,
+                                          repeats=stalls)
+                    break
+            else:
+                stalls = 0
+            last_page_sha = page_sha
             self.transcript.write(kind="observation",
                                   state_type=obs["state_type"],
                                   screen=obs["screen"],
                                   blocked=obs["blocked"],
-                                  observation_sha256=sha256(page))
+                                  observation_sha256=page_sha)
 
             was_in_fight, in_fight = in_fight, obs["screen"] == "combat"
             if was_in_fight and not in_fight and self.actions:
@@ -1624,6 +1768,85 @@ def build_version(wire: Any) -> tuple[str, str]:
     return "", "the bridge's health payload carries no version"
 
 
+# --------------------------------------------------------- the leak audit --
+
+# The seed is added per-session; these are the standing extra rules, ON TOP of
+# `qa_packet.FORBIDDEN`, which the render already enforces at write time.
+#
+# WHY AN AUDIT AT ALL WHEN THE RENDER ALREADY SCRUBS. Because "the scrubber
+# ran" and "no observation carried a leak" are different claims, and only the
+# second one is `EB-167`'s acceptance. The scrubber is a belt on the render
+# path; this is a brace read back off what was ACTUALLY SHOWN to the tester --
+# every `turn-*/prompt.md`, the exact bytes `codex exec` was handed. A scrubber
+# that silently stopped running would still leave this audit able to say so.
+#
+# The four extra patterns are the SIM's vocabulary rather than the sheet's.
+# `qa_packet` guards ids, rulings and sheet fields; a prompt that said "policy"
+# or "EV" or "counterfactual" would be leaking the pilot's reasoning instead,
+# which is the specific thing R217 E forbids by naming `harness state` as the
+# endpoint this tool may never build on.
+AUDIT_EXTRA: tuple[tuple[str, str], ...] = (
+    ("pilot-vocabulary-policy", r"\bpolicy\b"),
+    ("pilot-vocabulary-score", r"\bscores?\b|\bscoring\b"),
+    ("pilot-vocabulary-ev", r"\bEV\b|\bexpected value\b"),
+    ("pilot-vocabulary-counterfactual", r"\bcounterfactual\b"),
+    ("pilot-vocabulary-pilot", r"\bpilot\b"),
+)
+
+
+def leak_audit(log_dir: Path, seed: str = "") -> dict[str, Any]:
+    """Scan every observation actually shown to the tester. Never writes.
+
+    Returns `{observations, rules: {rule: count}, offenders: [(file, rule,
+    hit, context)], total}`. An empty `rules` map with a non-zero
+    `observations` count is the finding this is for.
+
+    `seed` is audited as its own rule: the run seed is not design vocabulary,
+    but a tester who can see it can look the run up, and R95's whole point is
+    that a number is only comparable inside a labelled world.
+    """
+    rules: list[tuple[str, re.Pattern[str]]] = [
+        (rule, pattern) for rule, pattern in qa_packet.FORBIDDEN]
+    rules += [(rule, re.compile(pat, re.I)) for rule, pat in AUDIT_EXTRA]
+    if seed:
+        rules.append(("run-seed", re.compile(re.escape(seed), re.I)))
+
+    counts: dict[str, int] = {}
+    offenders: list[tuple[str, str, str, str]] = []
+    pages = sorted(log_dir.glob("turn-*/prompt.md"))
+    for page in pages:
+        text = page.read_text(encoding="utf-8")
+        for line in text.splitlines():
+            for rule, pattern in rules:
+                for m in pattern.finditer(line):
+                    counts[rule] = counts.get(rule, 0) + 1
+                    if len(offenders) < 40:
+                        offenders.append((page.parent.name, rule, m.group(0),
+                                          line.strip()[:160]))
+    return {"observations": len(pages), "rules": counts,
+            "offenders": offenders, "total": sum(counts.values())}
+
+
+def audit_markdown(audit: dict[str, Any]) -> str:
+    """The audit as the committed record carries it."""
+    out = ["## Leak audit", "",
+           f"Every observation the tester was actually shown — "
+           f"`turn-*/prompt.md`, the exact bytes handed to `codex exec` — "
+           f"scanned against `qa_packet.FORBIDDEN` plus the pilot-vocabulary "
+           f"rules and this run's seed.", "",
+           f"- **observations scanned**: {audit['observations']}",
+           f"- **total hits**: {audit['total']}"]
+    if audit["rules"]:
+        out += ["", "| rule | hits |", "|---|---|"]
+        out += [f"| `{r}` | {n} |" for r, n in sorted(audit["rules"].items())]
+        out += ["", "Offenders (first 40):", ""]
+        out += [f"- `{d}` — `{r}` matched `{hit}` in: {ctx}"
+                for d, r, hit, ctx in audit["offenders"]]
+    else:
+        out += ["", "No rule matched in any observation."]
+    return "\n".join(out) + "\n"
+
+
 def record_markdown(summary: dict[str, Any], identity: dict[str, Any]) -> str:
     """The COMMITTED half: identity, then the model's words verbatim."""
     out = [f"# Blind play session `{summary['session_id']}`", "",
@@ -1723,7 +1946,8 @@ def cmd_session(args) -> int:
     thread = CodexThread(log_dir, model=args.model)
     budget = Budget(max_actions=args.max_actions,
                     max_wall_s=args.max_wall_s,
-                    max_refusals=args.max_refusals)
+                    max_refusals=args.max_refusals,
+                    max_stalls=args.max_stalls)
     try:
         session = Session(thread, wire=bridge, session_id=session_id,
                           budget=budget)
@@ -1740,6 +1964,38 @@ def cmd_session(args) -> int:
     print(f"record:     {path}")
     print(f"actions:    {summary['actions']}   "
           f"stopped: {summary['termination']}")
+    return 0
+
+
+def cmd_audit(args) -> int:
+    """Read back what the tester was shown, and say so in the record.
+
+    Separate from `session` on purpose: the audit is a claim about a run that
+    has FINISHED, and a session that crashed mid-run should still be auditable
+    without re-running it. It reads the gitignored turn pages and writes only
+    the committed record.
+    """
+    log_dir = LOG_ROOT / args.session_id
+    if not log_dir.is_dir():
+        raise BlindPlayError(f"no session log at {log_dir}")
+    session = log_dir / "session.json"
+    seed = ""
+    if session.is_file():
+        seed = _text(json.loads(session.read_text(encoding="utf-8"))
+                     .get("run_seed"))
+    audit = leak_audit(log_dir, seed)
+
+    record = RECORD_ROOT / args.session_id / "record.md"
+    if record.is_file():
+        text = record.read_text(encoding="utf-8")
+        head = text.split("\n## Leak audit", 1)[0].rstrip()
+        record.write_text(head + "\n\n" + audit_markdown(audit),
+                          encoding="utf-8")
+        print(f"record:  {record}")
+    print(f"scanned: {audit['observations']} observation(s)")
+    print(f"hits:    {audit['total']}")
+    for rule, n in sorted(audit["rules"].items()):
+        print(f"  {rule}: {n}")
     return 0
 
 
@@ -1769,7 +2025,16 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--max-actions", type=int, default=60)
     s.add_argument("--max-wall-s", type=float, default=3600.0)
     s.add_argument("--max-refusals", type=int, default=3)
+    s.add_argument("--max-stalls", type=int, default=6,
+                   help="stop after this many identical screens running "
+                        "(EB-173: a screen the tester cannot get off)")
     s.set_defaults(func=cmd_session)
+
+    u = sub.add_parser("audit", help="leak-audit a finished session's own "
+                                     "observations and append the counts to "
+                                     "its committed record")
+    u.add_argument("session_id")
+    u.set_defaults(func=cmd_audit)
 
     args = ap.parse_args(argv)
     try:

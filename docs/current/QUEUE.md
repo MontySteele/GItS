@@ -63,12 +63,6 @@
 |---|---|---|---|
 | `M45` | **Ask:** ratify the pass's seven open calls as ONE slate (R206). **Pick (adopt / defer, audit first):** (1) `salon_rotate` reader / timing; (2) `smoke_and_sparks` re-body / cut; (3) `Win10`/`Win11` on choices / state; (4) Spotlight selector amend / accept; (5) `depths_judgment` flat-14 / rescale; (6) Kokomi Block cluster accept / amend; (7) Charge lever: `S4-G13`. **Gate:** the playtest | OPEN — after the playtest | R206; review/active/richness-playtest-brief-2026-08-26.md |
 
-## 6. Build environment
-
-| ID | Decision needed | Status | Provenance |
-|---|---|---|---|
-| `M46` | **Ask:** the machine's game left the pin — STS2 updated to **v0.111.0** on Steam's **`public-beta`**, and neither the vendored bridge nor `KleeCode` compiles against it. **Pick:** (1) opt back to `public`, pin unmoved; (2) port and re-pin (`EB-171`), which moves shipped C# behaviour; (3) keep a launchable 0.107.1 copy beside it. **Also:** `klee` is disabled in the game's own mod settings. **Gate:** none | OPEN — build-environment call | acceptance attempt 2026-08-28; `godot.log` |
-
 ---
 
 ## Not carried here

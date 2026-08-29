@@ -71,7 +71,7 @@ public sealed class MatineePerformance : CustomCardModel, IElementalCard, IChara
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, DynamicVars.Damage.BaseValue))
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
@@ -79,7 +79,7 @@ public sealed class MatineePerformance : CustomCardModel, IElementalCard, IChara
         {
             await DamageCmd.Attack(SpotlightSystem.PrintedDamage(this, 2m))
                 .WithHitCount(SalonMemberPower.Count(Owner.Creature))
-                .FromCard(this)
+                .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithHitFx("vfx/vfx_attack_slash")
                 .Execute(choiceContext);

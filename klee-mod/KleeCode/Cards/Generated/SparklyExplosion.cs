@@ -70,7 +70,7 @@ public sealed class SparklyExplosion : CustomCardModel, IElementalCard
         await BombPower.MoveAllTo(choiceContext, cardPlay.Target, CombatState!.HittableEnemies, 0, Owner.Creature, this);
         await BombPower.DetonateOn(choiceContext, cardPlay.Target, 3);
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .FromCard(this)
+            .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
