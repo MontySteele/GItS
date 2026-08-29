@@ -139,14 +139,28 @@ def _write_sidecar(stamp: str, blob: dict[str, Any]) -> None:
                                    encoding="utf-8")
 
 
+def _is_hold(path: Path) -> bool:
+    try:
+        return bool(json.loads(path.read_text(encoding="utf-8")).get("hold"))
+    except (OSError, ValueError):                            # noqa: PERF203
+        return False
+
+
 def latest_stamp() -> str:
-    """The most recent embark this checkout started, or `EmbarkError`."""
-    found = sorted(LOG_DIR.glob("embark-*.json"))
+    """The most recent embark that actually CHANGED something, or an error.
+
+    A `--hold` embark attaches to a game somebody else launched and records no
+    ledger rows at all, so it has nothing to tear down -- and picking one as
+    "the latest" would hide the launch that DOES need reverting behind it.
+    They are skipped here and answered by name below.
+    """
+    found = [p for p in sorted(LOG_DIR.glob("embark-*.json"))
+             if not _is_hold(p)]
     if not found:
         raise EmbarkError(
-            f"no embark sidecar in {LOG_DIR}; there is nothing to tear down "
-            f"(if the game was launched by hand, close it by hand and run "
-            f"`klee-mod\\build\\deploy_bridge.ps1 -Remove`)")
+            f"no launching embark sidecar in {LOG_DIR}; there is nothing to "
+            f"tear down (if the game was launched by hand, close it by hand "
+            f"and run `klee-mod\\build\\deploy_bridge.ps1 -Remove`)")
     return found[-1].stem[len("embark-"):]
 
 
@@ -154,6 +168,10 @@ def teardown(stamp: str = "") -> str:
     """Walk the ledger ON DISK through `Session`'s own undo steps."""
     stamp = stamp or latest_stamp()
     blob = json.loads(sidecar_path(stamp).read_text(encoding="utf-8"))
+    if blob.get("hold"):
+        return (f"embark {stamp} was a --hold: it attached to a game somebody "
+                f"else launched, changed nothing in the game directory, and "
+                f"has nothing to revert.")
     ledger_path = Path(blob["ledger"])
     if not ledger_path.exists():
         raise EmbarkError(f"the ledger named by the sidecar is gone: "

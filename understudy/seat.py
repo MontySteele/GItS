@@ -212,6 +212,16 @@ ALLOWED_EVENT_MSGS = frozenset({
     "agent_reasoning", "agent_reasoning_delta",
     "agent_reasoning_section_break",
     "item_started", "item_updated", "item_completed",
+    # ONLY EVER SEEN ON A RESUMED THREAD, which is why it took EB-168's first
+    # live session to find it: `seat grade` fires one-shot `codex exec` and
+    # never resumes, so this file had never met a `codex exec resume`. It is a
+    # SNAPSHOT OF THE THREAD'S OWN SETTINGS, not a model action -- and the
+    # snapshot is evidence FOR the seat rather than against it: the payload
+    # observed live on 0.150.1 carried a restricted read-only filesystem,
+    # restricted network, the temp scratch as cwd and a null
+    # `developer_instructions`. Refusing it made every blind run die on its
+    # second action.
+    "thread_settings_applied",
 })
 # ...and the item kinds an `item_*` event_msg may carry. CamelCase here: the
 # rollout and the stdout stream do not share a spelling, and assuming they did

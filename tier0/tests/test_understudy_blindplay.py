@@ -195,6 +195,31 @@ def test_soak_never_imports_blindplay():
     assert not [m for m in named if "blindplay" in m], named
 
 
+def test_a_base_game_sprite_tag_renders_instead_of_refusing():
+    """FOUND LIVE, on the first screen of the first acceptance run. Neow's boon
+    list prints Booming Conch as "...and gain [silent_energy_icon.png]" -- the
+    base game's own inline sprite tag, which the blunt snake_case rule reads as
+    an internal id. It refused the screen and no run could start. The tag names
+    an ICON THE PLAYER IS LOOKING AT, so it is rendered, not exempted: showing
+    a tester a filename is not showing them the screen."""
+    state = {"state_type": "event",
+             "event": {"event_id": "NEOW", "event_name": "Neow",
+                       "options": [
+                           {"index": 0, "title": "Booming Conch",
+                            "description": "At the start of Elite combats, "
+                                           "draw 2 additional cards and gain "
+                                           "[silent_energy_icon.png]."}]}}
+    page = blindplay.observe(state)                  # would raise PacketLeak
+    assert "[silent energy icon]" in page
+    assert ".png" not in page
+
+    # And the narrowness is the point: a bracketed token WITHOUT an image
+    # extension is still an id, and still refuses.
+    state["event"]["options"][0]["description"] = "gain [pearl_barrage]"
+    with pytest.raises(qa_packet.PacketLeak):
+        blindplay.observe(state)
+
+
 def test_blindplay_never_imports_the_operator_side_embark():
     """`embark.py` exists BECAUSE `blindplay` may not launch a game: it imports
     `soak`, and through it `policy_v1` and every tier0 sheet loader. An import
@@ -214,6 +239,22 @@ def test_embark_expands_a_roster_id_to_a_select_screen_option():
     assert embark.option_id("KLEEMOD-KOKOMI") == "KLEEMOD-KOKOMI"
     with pytest.raises(embark.EmbarkError):
         embark.option_id("")
+
+
+def test_a_hold_embark_has_nothing_to_tear_down(tmp_path, monkeypatch):
+    """FOUND LIVE. A `--hold` attaches to a game somebody else launched and
+    records no ledger rows -- so it must not be picked as "the latest embark"
+    by a teardown, or the launch that DOES need reverting hides behind it and
+    the mod stays in the game directory."""
+    monkeypatch.setattr(embark, "LOG_DIR", tmp_path)
+    (tmp_path / "embark-20260101-000000.json").write_text(json.dumps(
+        {"stamp": "20260101-000000", "hold": False,
+         "ledger": str(tmp_path / "led.json")}), encoding="utf-8")
+    (tmp_path / "embark-20260202-000000.json").write_text(json.dumps(
+        {"stamp": "20260202-000000", "hold": True, "ledger": "gone"}),
+        encoding="utf-8")
+    assert embark.latest_stamp() == "20260101-000000"
+    assert "nothing to revert" in embark.teardown("20260202-000000")
 
 
 def test_every_soak_ledger_row_has_an_embark_teardown_slot():
@@ -512,6 +553,74 @@ def test_the_session_stops_on_the_wall_clock(tmp_path):
                           budget=blindplay.Budget(max_wall_s=-1.0),
                           log_root=tmp_path)
     assert s.run()["termination"] == "max_wall"
+
+
+class _LimitedThread(blindplay.ScriptedThread):
+    """A seat whose account quota runs out after `after` replies."""
+
+    def __init__(self, replies, after: int):
+        super().__init__(replies)
+        self.after = after
+
+    def send(self, prompt, schema):
+        if self.calls >= self.after:
+            raise blindplay.SeatBudgetExhausted("codex exited 1 on a usage "
+                                                "limit: 429 rate limit")
+        return super().send(prompt, schema)
+
+
+def test_a_usage_limit_stops_the_session_under_its_own_name(tmp_path):
+    """SOMEBODY ELSE'S QUOTA IS NOT A FINDING ABOUT THIS GAME. A seat that runs
+    out of account budget mid-run is `budget:rate_limit`, not `seat_refused` --
+    the two read as opposite things in a sealed record, one a fact about the
+    tester's plan and the other a fact about the tool. The partial records
+    survive it either way."""
+    thread = _LimitedThread([{"command": "end turn", "thinking": "x"}], after=1)
+    wire = blindplay.ScriptedWire([combat_state()])
+    s = blindplay.Session(thread, wire=wire, session_id="t",
+                          budget=blindplay.Budget(), log_root=tmp_path)
+    summary = s.run()
+    assert summary["termination"] == "budget:rate_limit"
+    assert summary["actions"] == 1 and len(wire.posts) == 1
+    rows = [json.loads(l) for l in
+            (tmp_path / "t" / "transcript.jsonl").read_text(
+                encoding="utf-8").splitlines()]
+    assert any(r["kind"] == "seat_budget" for r in rows)
+
+
+@pytest.mark.parametrize("text,limited", [
+    ("stream error: 429 Too Many Requests", True),
+    ("You've hit your usage limit. Try again later.", True),
+    ("error: unexpected argument '-C' found", False),
+    ("", False),
+])
+def test_the_rate_limit_markers_read_a_third_party_s_wording(text, limited):
+    assert blindplay._is_rate_limited(text) is limited
+
+
+def test_resume_drops_the_flags_resume_does_not_take(tmp_path):
+    """FOUND LIVE, on the SECOND action of the first acceptance run. `codex
+    exec resume` accepts neither `-C` nor `--sandbox` nor `--color`, so a
+    session that pastes the first turn's argv after `resume` dies every time
+    one action in -- no fight, no record. The sandbox is not given up, it moves
+    to the config key the flag sets."""
+    t = blindplay.CodexThread.__new__(blindplay.CodexThread)
+    t.codex, t.model, t.scratch = "codex", "gpt-test", tmp_path
+    t.thread_id = ""
+    first = t._argv(tmp_path)
+    assert first[:2] == ["codex", "exec"] and "-C" in first
+    assert "--sandbox" in first
+
+    t.thread_id = "abc-123"
+    resumed = t._argv(tmp_path)
+    assert resumed[:4] == ["codex", "exec", "resume", "abc-123"]
+    for flag in ("-C", "--sandbox", "--color"):
+        assert flag not in resumed, flag
+    assert 'sandbox_mode="read-only"' in resumed
+    # Both arms still end on the stdin prompt and still name the model.
+    for argv in (first, resumed):
+        assert argv[-1] == "-" and "-m" in argv
+        assert "--ignore-user-config" in argv and "--json" in argv
 
 
 def test_the_session_stops_on_a_screen_it_will_not_drive(tmp_path):

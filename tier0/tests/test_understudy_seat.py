@@ -255,6 +255,23 @@ def test_an_unknown_event_msg_item_refuses_the_seat():
     assert offenders == ["CommandExecution"]
 
 
+def test_a_resumed_thread_s_settings_snapshot_passes_the_guard():
+    """FOUND LIVE, on EB-168's first session. `codex exec resume` emits
+    `thread_settings_applied`, which one-shot `codex exec` never does -- so
+    this file had never met it, and every blind run died on its second action.
+    It is a snapshot OF the thread's settings, not a model action, and the one
+    observed live carried a restricted read-only filesystem and no developer
+    instructions: evidence for the seat, not against it."""
+    rollout = CLEAN_ROLLOUT + [
+        {"ordinal": 9, "type": "event_msg",
+         "payload": {"type": "thread_settings_applied",
+                     "thread_settings": {"model": "gpt-5.6-sol",
+                                         "permission_profile":
+                                             {"network": "restricted"}}}}]
+    reason, offenders, _ = seat.guard(_events("agent_message"), rollout, "")
+    assert reason == "" and offenders == []
+
+
 def test_a_missing_rollout_refuses_the_seat():
     """No evidence is not the same as good evidence. `--ephemeral` would
     suppress the rollout, which is why `grade_argv` does not pass it."""

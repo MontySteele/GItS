@@ -134,7 +134,61 @@ class BlindPlayError(RuntimeError):
     """A command, a screen or a seat this module refuses to work with."""
 
 
+class SeatBudgetExhausted(BlindPlayError):
+    """The SEAT's own budget ran out -- somebody else's rate limit, not ours.
+
+    Kept apart from every other seat failure because the two mean opposite
+    things to whoever reads the record. `seat_refused` says the transcript
+    guard bit or the model would not answer, and that is a finding. A usage
+    limit says the session was cut off mid-run by an account quota, which is
+    not a finding about anything: the honest record is how far it got, under
+    its own termination reason, with the partial records kept.
+    """
+
+
+# The markers a usage limit reads as on the seat's stderr. Deliberately three
+# spellings and the HTTP status: the wording is a third party's and moves, and
+# a session that misfiles a quota stop as a refusal is a session that reads as
+# a finding about the game.
+_RATE_LIMIT_MARKERS = ("rate limit", "rate_limit", "usage limit",
+                       "usage_limit", "429", "quota", "too many requests")
+
+
+def _is_rate_limited(stderr_text: str) -> bool:
+    low = str(stderr_text or "").casefold()
+    return any(m in low for m in _RATE_LIMIT_MARKERS)
+
+
 # ------------------------------------------------------------ small reads --
+
+# The base game prints inline SPRITE TAGS in its own loc data -- Booming
+# Conch's face is "...draw 2 additional cards and gain
+# [silent_energy_icon.png]", and the game draws an energy pip where that tag
+# sits. To the deliberately blunt snake_case rule that reads as an internal id,
+# so the FIRST live screen of the first acceptance run -- Neow's boon list --
+# was refused outright and no run could start.
+#
+# It is not a leak: the tag names an ICON THE PLAYER IS LOOKING AT, no card, no
+# role and no ruling. So it is rendered rather than exempted, which is also the
+# more honest render: a tester shown `[silent_energy_icon.png]` is being shown
+# a filename, and a tester shown `[silent energy icon]` is being shown what the
+# screen shows. Deliberately narrow -- a bracketed bare token with an image
+# extension, and nothing else. Anything that is genuinely an id still refuses.
+_SPRITE_TAG = re.compile(r"\[([A-Za-z0-9_]+)\.(?:png|jpg|jpeg|svg|webp)\]",
+                         re.I)
+
+
+def _despritify(blob: Any) -> Any:
+    """Rewrite every sprite tag in a finished structure. Values only."""
+    if isinstance(blob, str):
+        return _SPRITE_TAG.sub(
+            lambda m: "[" + m.group(1).replace("_", " ") + "]", blob)
+    if isinstance(blob, dict):
+        return {k: _despritify(v) for k, v in blob.items()}
+    if isinstance(blob, list):
+        return [_despritify(v) for v in blob]
+    return blob
+
 
 def _text(value: Any) -> str:
     return qa_packet._text(value)
@@ -497,6 +551,13 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     else:
         obs["screen"] = "unknown"
         obs["blocked"] = "this tool has never seen this screen"
+
+    # Sprite tags are rewritten HERE, at the boundary, rather than in each of
+    # the dozen readers that could carry one: the wire prints them in card
+    # faces, relic faces, keyword bodies, event options and intent labels
+    # alike, and a rule applied in one reader is a rule that will be missing
+    # from the next one somebody adds.
+    obs = _despritify(obs)
 
     # The wire's own screen name is the ONE token exempted from the snake_case
     # rule, and only because a refusal has to be able to name what it refused.
@@ -1218,6 +1279,31 @@ class CodexThread:
     def close(self) -> None:
         shutil.rmtree(self.scratch, ignore_errors=True)
 
+    def _argv(self, d: Path) -> list[str]:
+        """`codex exec` for the first turn, `codex exec resume` after it.
+
+        THE TWO SUBCOMMANDS DO NOT TAKE THE SAME FLAGS, and the first live
+        acceptance run is what proved it: `codex exec resume` accepts neither
+        `-C` nor `--sandbox` nor `--color` (codex-cli 0.150.1 answers
+        `error: unexpected argument '-C' found` and exits 2), so a session
+        built by pasting the first turn's argv after `resume` dies on its
+        SECOND action every time -- one action in, no fight, no record.
+
+        What each dropped flag is replaced by, rather than given up:
+          `-C`        the process cwd, which is already `self.scratch`
+          `--sandbox` `-c sandbox_mode=...`, the config key the flag sets
+          `--color`   nothing; the stream is `--json` either way
+        """
+        common = ["--skip-git-repo-check", "--ignore-user-config",
+                  "--ignore-rules", "--json",
+                  "--output-schema", str(d / "schema.json"),
+                  "-o", str(d / "reply.json"), "-m", self.model, "-"]
+        if self.thread_id:
+            return [self.codex, "exec", "resume", self.thread_id,
+                    "-c", 'sandbox_mode="read-only"'] + common
+        return [self.codex, "exec", "-C", str(self.scratch),
+                "--sandbox", "read-only", "--color", "never"] + common
+
     def send(self, prompt: str, schema: dict[str, Any]) -> dict[str, Any]:
         self.turn += 1
         d = self.session / f"turn-{self.turn:03d}"
@@ -1225,16 +1311,7 @@ class CodexThread:
         (d / "prompt.md").write_text(prompt, encoding="utf-8")
         (d / "schema.json").write_text(json.dumps(schema, indent=1) + "\n",
                                        encoding="utf-8")
-        argv = [self.codex, "exec"]
-        if self.thread_id:
-            argv += ["resume", self.thread_id]
-        argv += [
-            "-C", str(self.scratch), "--skip-git-repo-check",
-            "--sandbox", "read-only", "--ignore-user-config", "--ignore-rules",
-            "--json", "--color", "never",
-            "--output-schema", str(d / "schema.json"),
-            "-o", str(d / "reply.json"), "-m", self.model, "-",
-        ]
+        argv = self._argv(d)
         (d / "argv.json").write_text(json.dumps(argv, indent=1) + "\n",
                                      encoding="utf-8")
         code, timed_out = seat._run(argv, stdin_text=prompt,
@@ -1259,7 +1336,12 @@ class CodexThread:
                 f"{seat.REFUSAL_REASONS.get(reason, reason)}"
                 + (f" -- {', '.join(offenders)}" if offenders else ""))
         if code != 0:
-            raise BlindPlayError(f"codex exited {code}")
+            if _is_rate_limited(stderr_text):
+                raise SeatBudgetExhausted(
+                    f"codex exited {code} on a usage limit: "
+                    f"{stderr_text.strip()[:300]}")
+            raise BlindPlayError(
+                f"codex exited {code}: {stderr_text.strip()[:300]}")
         self.model_observed = seat.rollout_model(rollout or [])
         try:
             reply = json.loads((d / "reply.json").read_text(encoding="utf-8"))
@@ -1383,7 +1465,22 @@ class Session:
 
             was_in_fight, in_fight = in_fight, obs["screen"] == "combat"
             if was_in_fight and not in_fight and self.actions:
-                self.fight_records.append(self._ask_record(FIGHT_QUESTIONS))
+                # SAME REASONING AS THE RUN RECORD BELOW (b0de780): a seat that
+                # cannot answer at a fight boundary must not take the fight
+                # records already gathered down with it.
+                try:
+                    self.fight_records.append(
+                        self._ask_record(FIGHT_QUESTIONS))
+                except SeatBudgetExhausted as exc:
+                    self.stopped = "budget:rate_limit"
+                    self.transcript.write(kind="seat_budget", detail=str(exc),
+                                          at="fight_record")
+                    break
+                except BlindPlayError as exc:
+                    self.stopped = "seat_refused"
+                    self.transcript.write(kind="seat_error", detail=str(exc),
+                                          at="fight_record")
+                    break
 
             if obs["blocked"]:
                 self.stopped = ("run_over" if obs["screen"] == "game_over"
@@ -1395,6 +1492,10 @@ class Session:
             first = False
             try:
                 reply = self.thread.send(prompt, command_schema())
+            except SeatBudgetExhausted as exc:
+                self.stopped = "budget:rate_limit"
+                self.transcript.write(kind="seat_budget", detail=str(exc))
+                break
             except BlindPlayError as exc:
                 self.stopped = "seat_refused"
                 self.transcript.write(kind="seat_error", detail=str(exc))
