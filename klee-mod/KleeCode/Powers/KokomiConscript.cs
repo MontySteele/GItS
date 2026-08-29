@@ -101,6 +101,26 @@ public static class KokomiConscript
                 Eligible, source)).ToList();
             if (picked.Count == 0) return;
 
+#if PROTOTYPE_CARDS
+            // QUARANTINED (Powers/Prototype/KurageMemory.cs), v3 RULE 1: the
+            // card SACRIFICED to the Muster enters the memory, on its original
+            // face, HERE -- at the one moment it is consumed, before it stops
+            // existing. [USER]: "We would be adding the card that was
+            // sacrificed for the Muster, not the new card - so the original
+            // face." create mode sacrifices nothing and `continue`s above, so
+            // it never reaches this line: no sacrifice, no memory.
+            KurageMemory.NoteMuster(owner, picked[0]);
+            // Bookkeeping, not an entry rule: the recruit's INTENDED face cost.
+            // tier0's _op_conscript writes recruit.cost permanently; the mod
+            // applies the same -1 as a combat modifier because CardModel has no
+            // settable base cost, so the price rule is TOLD the number instead
+            // of the shipped Muster being changed. sec.11.4: "a Muster's own -1
+            // counts on the RECRUIT's own entry", because the recruit is the
+            // card that Exhausted.
+            KurageMemory.NoteMusterRecruit(
+                owner, recruit,
+                recruit.EnergyCost.GetWithModifiers(CostModifiers.Local));
+#endif
             await CardCmd.Transform(
                 picked[0], recruit, CardPreviewStyle.None);
         }

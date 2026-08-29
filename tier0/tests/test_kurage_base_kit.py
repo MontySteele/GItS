@@ -25,6 +25,7 @@ NO NUMBER TAKEN OFF THIS ARM IS QUOTABLE ANYWHERE (R213 B / R215 B). Every
 assertion below is about what the engine DOES.
 """
 
+import copy
 import random
 
 import pytest
@@ -35,6 +36,7 @@ from tier0.engine import combat, effects
 from tier0.engine.state import CombatState, KurageMemory
 from tier0.pilot.policy import make_pilot
 from tier0.tests.conftest import make_enemy
+from tier05 import rewards, shop
 
 DROP = "bake_kurage"
 ADD = "to_the_front"
@@ -446,6 +448,178 @@ def test_flag_off_the_ward_still_rides_the_pulse():
     effects.player_turn_end_triggers(st)
     assert st.player.block == C.KURAGE_PULSE_BLOCK + 5
     assert not [e for e in st.log if e["event"] == "kurage_ward_paid"]
+
+
+# --------------------------------------------------------------------------
+# THE OFFERABLE POOL: under the flag, the staged Oath is the ONLY Oath.
+#
+# [USER], 2026-08-29, of the staged face: "Why does the power print 5 instead
+# of 3, exactly?" Because with the flag on the ward is paid on a MEMORY PLAY
+# and its amount is read off whatever card applied it -- so a flagged run that
+# DRAFTED the shipped `kurages_oath` paid 5 per memory play under a face that
+# says per pulse. Text that cannot bind is a defect (D4). Both sheets are
+# frozen, so the fix is on the OFFER side: `loader._pool_substitutions` swaps
+# the staged row in at the same rarity and `rewards.character_pool` -- the one
+# source every offer surface reads (fight rewards, the shop, the event card
+# screens, the tier 0.5 drafter) -- applies it.
+#
+# NO NUMBER HERE IS QUOTABLE (R213 B / R215 B). Every assertion is about which
+# ids a run can be handed.
+# --------------------------------------------------------------------------
+
+SHIPPED_OATH = "kurages_oath"
+PROTO_OATH = "proto_kurages_oath_memory"
+
+
+def _drop_pool_caches():
+    """Both memoized views of "what can be offered". The flag is read at pool
+    ASSEMBLY, so a monkeypatched flag over a warm cache tests nothing."""
+    loader.reset_caches()
+    rewards.character_pool.cache_clear()
+
+
+@pytest.fixture
+def cold_pools():
+    """Pools rebuilt on the way in and dropped again on the way out, so a
+    flag-off test after a flag-on one is never reading the flagged cache."""
+    _drop_pool_caches()
+    yield
+    _drop_pool_caches()
+
+
+@pytest.fixture
+def offer_pool(base_kit, cold_pools):
+    """The base kit, with cold pools. Order matters: `base_kit` sets the
+    flags, `cold_pools` then drops anything assembled without them."""
+
+
+def offered_ids(character="kokomi", seeds=range(40)):
+    """Every id the run layer can put in front of `character`, across the
+    surfaces that roll: the assembled pool itself, the post-fight reward
+    screen and the shop. The event card screens and the tier 0.5 drafter read
+    `rewards.character_pool` and nothing else, so the pool half of this set is
+    exactly what they can reach."""
+    ids = {c.id for cs in rewards.character_pool(character).values()
+           for c in cs}
+    for seed in seeds:
+        ids |= {c.id for c in rewards.roll_card_offers(
+            random.Random(seed), character, C.REWARD_CARD_OFFERS)}
+        ids |= {c.id for c in shop.shop_offer(random.Random(seed), character)}
+    return ids
+
+
+def test_flag_off_the_shipped_oath_is_the_only_oath_offered(cold_pools):
+    """THE GOLDEN. No flag, no substitution: the pool is the printed one and
+    the prototype id is unreachable from every offer surface."""
+    ids = offered_ids()
+    assert SHIPPED_OATH in ids
+    assert PROTO_OATH not in ids
+    assert loader.pool_substitutions("kokomi") == {}
+
+
+def test_flag_on_the_shipped_oath_is_never_offered(offer_pool):
+    """The defect itself: with the flag on, a run must not be able to draft
+    the 5."""
+    assert SHIPPED_OATH not in offered_ids()
+
+
+def test_flag_on_the_staged_oath_is_offered_in_its_place(offer_pool):
+    assert PROTO_OATH in offered_ids()
+    assert loader.pool_substitutions("kokomi") == {SHIPPED_OATH: PROTO_OATH}
+
+
+def test_the_swap_keeps_the_rarity_slot_and_the_slot_count(offer_pool):
+    """SAME SLOT, SAME WEIGHT. The prototype is filed where the shipped row
+    was and every rarity tier keeps the size it had, so the odds a Kokomi run
+    is offered any given tier are the odds it always had. The symmetric
+    difference pins that the swap moved TWO ids and no others."""
+    flagged = rewards.character_pool("kokomi")
+    shipped_rarity = loader.peek_card(SHIPPED_OATH).rarity
+    assert PROTO_OATH in {c.id for c in flagged[shipped_rarity]}
+    flagged_sizes = {r: len(cs) for r, cs in flagged.items()}
+    flagged_slot = {c.id for c in flagged[shipped_rarity]}
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(C, "KURAGE_MEMORY", False)
+        _drop_pool_caches()
+        plain = rewards.character_pool("kokomi")
+        plain_sizes = {r: len(cs) for r, cs in plain.items()}
+        plain_slot = {c.id for c in plain[shipped_rarity]}
+    assert flagged_sizes == plain_sizes
+    assert flagged_slot ^ plain_slot == {SHIPPED_OATH, PROTO_OATH}
+
+
+def test_the_offered_prototype_is_a_real_card_that_applies_three(offer_pool):
+    """Resolvable BY ID, which is the structural requirement: every offer
+    surface re-reads its pick through `loader.get_card(pick.id)` and the run
+    layer stores decks as id strings and re-derives them every screen."""
+    card = loader.get_card(PROTO_OATH)
+    assert card.name == "Kurage's Oath"
+    st = kokomi_state()
+    effects.resolve_card(st, card)
+    assert st.player.powers["kurage_ward"] == 3
+
+
+def test_the_quarantine_still_holds_for_the_shipped_index(offer_pool):
+    """R213 unweakened: the prototype is reachable through the substitution
+    table and nowhere else. `_card_index` is what the digests, the codegen,
+    the balance reports and the version stamps read."""
+    assert PROTO_OATH not in loader._card_index()
+    assert PROTO_OATH in loader._substituted_card_index()
+
+
+def test_no_upgraded_shipped_oath_can_be_offered(offer_pool):
+    """The 7 is the 5's upgrade and the same defect one step on. Offers are
+    base rows by construction; this pins that the flagged pool holds no
+    upgraded id at all, so the check cannot rot into a claim about one name."""
+    ids = offered_ids()
+    assert SHIPPED_OATH + "+" not in ids
+    assert not [i for i in ids if i.endswith("+")]
+
+
+def test_the_swap_is_hers_alone(offer_pool):
+    """A substitution keyed to a constant must not reach another roster."""
+    for other in ("klee", "furina"):
+        assert loader.pool_substitutions(other) == {}
+        assert PROTO_OATH not in offered_ids(other)
+
+
+# -- the mutations: each names a way the seam could have been written wrong --
+
+def test_mutation_a_substitution_that_moved_a_rarity_is_refused(offer_pool,
+                                                                monkeypatch):
+    """A face swap must not become a tier promotion, which would move the
+    odds the card is offered at -- a balance change smuggled in as a
+    quarantine."""
+    real = loader.peek_card
+
+    def wrong_rarity(card_id):
+        card = real(card_id)
+        if card_id == PROTO_OATH:
+            card = copy.deepcopy(card)
+            card.rarity = "rare"
+        return card
+
+    monkeypatch.setattr(loader, "peek_card", wrong_rarity)
+    rewards.character_pool.cache_clear()
+    with pytest.raises(ValueError, match="between rarity tiers"):
+        rewards.character_pool("kokomi")
+
+
+def test_mutation_a_substitution_pointing_at_a_deleted_row_is_refused(
+        offer_pool, monkeypatch):
+    """The R213 deletion rule takes rows OFF the surface. A constant left
+    pointing at one must say so at load, not as a KeyError on someone's
+    reward screen."""
+    monkeypatch.setattr(C, "KURAGE_MEMORY_POOL_ADD", "proto_not_on_the_sheet")
+    _drop_pool_caches()
+    with pytest.raises(ValueError, match="not on prototype-surface.yaml"):
+        loader._substituted_card_index()
+
+
+def test_mutation_the_flag_alone_gates_the_second_index(cold_pools):
+    """With the flag off there is no substitution table at all -- not an
+    empty filter over one, no table."""
+    assert loader._substituted_card_index() == {}
 
 
 # --------------------------------------------------------------------------

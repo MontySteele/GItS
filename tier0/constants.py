@@ -599,6 +599,26 @@ KURAGE_MEMORY_STARTER_ADD = "to_the_front"
                               # Common already sits in a printed starter), so
                               # no Basic twin is owed. sec.12 lists the three
                               # alternatives that were not built.
+KURAGE_MEMORY_POOL_DROP = "kurages_oath"
+KURAGE_MEMORY_POOL_ADD = "proto_kurages_oath_memory"
+                              # The OFFERABLE-POOL swap: the sec.12.4 twin of
+                              # the starter swap above, read the same way --
+                              # ONLY WHEN KURAGE_MEMORY IS ON, at
+                              # `loader._pool_substitutions`, with both sheets
+                              # UNTOUCHED. [USER] asked of the staged face,
+                              # 2026-08-29: "Why does the power print 5
+                              # instead of 3, exactly?" Because with the flag
+                              # on the ward is paid on a MEMORY PLAY and its
+                              # amount is read off whatever card applied it,
+                              # so a run that DRAFTED the shipped Oath paid 5
+                              # per memory play under a face that says per
+                              # pulse. Text that cannot bind is a defect (D4)
+                              # and the shipped row is frozen under R213, so
+                              # the fix is on the OFFER side: under the flag
+                              # the shipped Oath leaves Kokomi's offerable
+                              # pool and the staged row takes its slot, at the
+                              # SAME rarity, so a flagged run can only ever be
+                              # offered the 3.
 KURAGE_MEMORY_COST_PER_ENERGY = 3
                               # [USER], v3: "cards cost Charge equal to 3x
                               # their Cost". The whole price rule. A 0-cost

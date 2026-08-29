@@ -576,7 +576,98 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     # than the cost on its face.
     combat["spark_note"] = qa_packet.spark_note(combat["you"]["powers"],
                                                 combat["hand"])
+    memory = kurage_memory(p)
+    if memory is not None:
+        combat["memory"] = memory
     return combat
+
+
+def _pulse_phrase(memory: dict[str, Any]) -> str:
+    """What the jellyfish will do at the end of THIS turn, in words.
+
+    The pulse is keyed to the type of the last card she played, so it is a
+    forecast the player can still change -- which is the whole reason it has to
+    be on the page before the turn ends (D4).
+    """
+    amount, unit = memory["pulse_amount"], memory["pulse_unit"]
+    if unit == "none":
+        return "do nothing, because you have played no card this turn"
+    if unit == "damage":
+        return f"deal {amount} Hydro damage"
+    if unit == "block":
+        return f"give you {amount} Block"
+    if unit == "charge":
+        return f"give you {amount} Charge"
+    return "apply Hydro"
+
+
+def kurage_memory(player: dict[str, Any]) -> dict[str, Any] | None:
+    """The Kurage's memory as the observed board sees it (`EB-181`).
+
+    THE WIRE KEY IS ABSENT ON A BUILD WITHOUT THE RULE, and that absence is
+    load-bearing: the rule is quarantined behind the mod's prototype compile
+    switch, so a release build has no memory and must not be described as
+    having an empty one. `None` here keeps `memory` off the observed board
+    entirely; an empty QUEUE with a bank is a real state and IS reported.
+
+    Emitted by `vendor/STS2_MCP/gits/GitsKurageMemory.cs`, which lifts it by
+    reflection from `KleeMod.Powers.KurageMemory.Snapshot`. Every field name
+    below is that method's, and the two together are the contract:
+
+      bank / front_price / blocked / fires_next / empty / summon -- the meter,
+        and the target it now has. `front_price` is null on an empty queue,
+        which is the honest reading of "no ceiling" rather than a zero.
+      base_kit -- the jellyfish was INSTALLED at fight start rather than
+        summoned by a card, so it is on the field before turn 1 and there is
+        no state in which it is absent.
+      pulse_kind / pulse_amount / pulse_unit -- what the jellyfish will do at
+        the end of THIS turn, so a seat can forecast its own turn end.
+        `pulse_unit` can read `charge`, because the Power branch pays in Charge
+        rather than in damage or Block.
+      reading -- the strip's own one line, verbatim, so the observed board and
+        the screen cannot drift.
+      queue -- ordered, front first: name, cost, price, target ("random" when
+        the memory stored none), blocked, affordable, ephemeral, rule.
+    """
+    raw = player.get("kurage_memory")
+    if not isinstance(raw, dict):
+        return None
+    queue = []
+    for row in (raw.get("queue") or []):
+        if not isinstance(row, dict):
+            continue
+        queue.append({
+            "name": _text(row.get("name")),
+            "cost": _int(row.get("cost")),
+            "price": _int(row.get("price")),
+            # A memory that stored no target aims randomly, and the board says
+            # so in the word the strip uses rather than leaving a null for a
+            # reader to interpret.
+            "target": _text(row.get("target")) or "random",
+            "blocked": bool(row.get("blocked")),
+            "affordable": bool(row.get("affordable")),
+            "ephemeral": bool(row.get("ephemeral")),
+            "rule": _text(row.get("rule")),
+        })
+    front_price = raw.get("front_price")
+    return {
+        "bank": _int(raw.get("bank")),
+        "front_price": None if front_price is None else _int(front_price),
+        "blocked": bool(raw.get("blocked")),
+        "fires_next": bool(raw.get("fires_next")),
+        "empty": bool(raw.get("empty")),
+        "summon": bool(raw.get("summon")),
+        # The install as a FIGHT-START FACT, so a blind run can see the
+        # jellyfish before turn 1 rather than inferring it from the first
+        # pulse. `summon` says it is on the field; this says nobody summoned
+        # it -- it is base kit, and there is no state where it is absent.
+        "base_kit": bool(raw.get("base_kit")),
+        "pulse_kind": _text(raw.get("pulse_kind")) or "none",
+        "pulse_amount": _int(raw.get("pulse_amount")),
+        "pulse_unit": _text(raw.get("pulse_unit")) or "none",
+        "reading": _text(raw.get("reading")),
+        "queue": queue,
+    }
 
 
 def _map_nodes(state: dict[str, Any]) -> list[Any]:
@@ -902,6 +993,28 @@ def render(obs: dict[str, Any]) -> str:
         out.append(f"- Piles: {c['piles']['draw']} in the draw pile, "
                    f"{c['piles']['discard']} discarded, "
                    f"{c['piles']['exhaust']} exhausted")
+        if c.get("memory"):
+            # `EB-181`. The strip's own one line first, then the queue: those
+            # are the facts the screen shows, in the order it shows them.
+            # Absent entirely on a build without the rule.
+            m = c["memory"]
+            out += ["", "## The Bake-Kurage's memory", ""]
+            if m["base_kit"]:
+                out.append("- The Bake-Kurage is on the field for the whole "
+                           "fight. Nothing summons it and nothing removes it.")
+            out.append(f"- {m['reading']}")
+            if m["queue"]:
+                for i, e in enumerate(m["queue"], 1):
+                    price = "free" if not e["price"] else f"{e['price']} Charge"
+                    line = (f"- {i}. **{e['name']}** — {price} — "
+                            f"aims at {e['target']}")
+                    if e["blocked"]:
+                        line += " — BLOCKED: nothing behind it fires"
+                    out.append(line)
+            else:
+                out.append("- (the memory is empty)")
+            out.append(f"- At the end of this turn the jellyfish will "
+                       f"{_pulse_phrase(m)}.")
         if you["potions"]:
             out += ["", "## Potions", ""]
             for p in you["potions"]:
