@@ -8,3 +8,10 @@ _*
 # scratch for `--teardown`, not evidence -- the run seed it reads back is
 # carried into the sealed record instead.
 embark-*.json
+
+# One-off wire probes (`*-probe.jsonl`): a raw dump of `GET
+# /api/v1/singleplayer` either side of a posted action, taken to diagnose one
+# defect and superseded by the fix and its red test. Same rule as the
+# blind-play transcripts (R217 G) -- the raw read stays in a gitignored log
+# and the excerpt that carried the finding goes in the commit message.
+*-probe.jsonl

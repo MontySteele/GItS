@@ -237,6 +237,59 @@ def _screen(state: dict[str, Any]) -> str:
     return str(state.get("state_type") or "unknown")
 
 
+def transient(state: dict[str, Any]) -> str:
+    """Why this state is a MOMENT rather than a screen, or `""`.
+
+    Three shapes, all of them the wire caught mid-stride:
+
+      NO `state_type` KEY, and `state_type: "unknown"` -- the frame between
+        leaving one room and entering the next. `soak._settle_transient`
+        learned both on this wire; the reasoning is in `Session._settle`.
+
+      A COMBAT SCREEN WITH `battle.is_play_phase` FALSE (`EB-175`) -- the
+        turn has been handed back to the game and not yet handed on to the
+        player. `end_turn` is asynchronous: `ExecuteEndTurn` calls
+        `PlayerCmd.EndTurn` and answers `ok Ending turn` at once, and a GET
+        55 ms later reads the round UNCHANGED, the hand already discarded to
+        zero, energy still full, and `is_play_phase` false. Rendered as a
+        screen that is exactly what a blind tester saw four times in one
+        session: a playable turn with an empty hand. Its second `end turn`
+        then landed on the REAL next turn a quarter-second later and spent
+        it, which is why the rounds it recorded went 1 -> 3 -> 5. Nothing
+        here posts a second `end_turn` on the tester's behalf; the read
+        waits for the turn the game is already handing over.
+
+    `is_play_phase` is checked for an explicit `False` and never for
+    falsiness: a build whose battle block does not carry the key must not
+    have every combat screen read as a transition.
+    """
+    if state.get("state_type") is None:
+        return "the wire answered with no `state_type` key"
+    if str(state.get("state_type")) == "unknown":
+        return "the wire could not name this screen"
+    if (str(state.get("state_type")) in COMBAT_SCREENS
+            and _blob(state, "battle").get("is_play_phase") is False):
+        return "the game has not handed the turn back to the player yet"
+    return ""
+
+
+def settle(state: dict[str, Any], wire: Any = bridge,
+           tries: int = SETTLE_TRIES,
+           delay: float = SETTLE_DELAY_S) -> dict[str, Any]:
+    """Poll while the state is a transition; hand back whatever is there.
+
+    Bounded on purpose, and the bound does not raise: a wire that really is
+    stuck is reported as blocked by the caller, which is a better record than
+    a read that never returns.
+    """
+    for _ in range(tries):
+        if not transient(state):
+            return state
+        time.sleep(delay)
+        state = wire.get_state()
+    return state
+
+
 def _player(state: dict[str, Any]) -> dict[str, Any]:
     p = state.get("player")
     return p if isinstance(p, dict) else {}
@@ -1583,14 +1636,13 @@ class Session:
         wire that really is stuck is still reported as blocked rather than
         waited on forever. A missing `state_type` key is the same moment one
         frame earlier and settles the same way.
+
+        `EB-175` added the third shape -- a combat screen the game has not
+        handed back yet -- to `transient()`, which is where all three now
+        live so the CLI's own live reads ride out the same moments.
         """
-        for _ in range(self.settle_tries):
-            st = state.get("state_type")
-            if st is not None and str(st) != "unknown":
-                return state
-            time.sleep(self.settle_delay_s)
-            state = self.wire.get_state()
-        return state
+        return settle(state, self.wire, self.settle_tries,
+                      self.settle_delay_s)
 
     def _ask_record(self, questions: str) -> str:
         reply = self.thread.send(f"{questions}\n\n{RECORD_DISCLAIMER}\n",
@@ -1897,9 +1949,13 @@ def _load_state(args) -> dict[str, Any]:
     already writes around one (`review/qa/<turn>/observed.json` keeps it under
     `state`), so the recorded material is usable as a fixture without being
     unwrapped by hand first.
+
+    A LIVE read settles first and a saved one never does (`EB-175`): the
+    operator driving `observe` / `act` by hand reads the wire on exactly the
+    frames the driver does, and a fixture is a frame somebody chose.
     """
     if not args.raw_file:
-        return bridge.get_state()
+        return settle(bridge.get_state())
     blob = json.loads(Path(args.raw_file).read_text(encoding="utf-8"))
     inner = blob.get("state") if isinstance(blob, dict) else None
     if isinstance(inner, dict) and inner.get("state_type"):

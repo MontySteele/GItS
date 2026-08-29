@@ -658,6 +658,102 @@ def test_a_transition_is_ridden_out_and_never_reported_as_a_screen(tmp_path):
     assert summary["termination"] != "tool_blocked"
 
 
+def _mid_turn_frame(state: dict) -> dict:
+    """The frame `EB-175` was diagnosed on, copied field for field.
+
+    Recorded live on 2026-08-29, 55 ms after `end_turn` answered
+    `ok Ending turn`: still `state_type: monster`, still `turn: player`, the
+    ROUND UNCHANGED, the hand already discarded to zero, energy still full,
+    and `is_play_phase` FALSE. Two of these arrive before the real next round.
+    """
+    frame = json.loads(json.dumps(state))
+    frame["battle"]["is_play_phase"] = False
+    frame["player"]["hand"] = []
+    frame["player"]["discard_pile_count"] = \
+        int(frame["player"].get("discard_pile_count", 0) or 0) + 5
+    return frame
+
+
+class _EndTurnWire:
+    """A wire whose `end_turn` is ASYNCHRONOUS, as the bridge's really is.
+
+    `ExecuteEndTurn` calls `PlayerCmd.EndTurn` and answers at once; the next
+    two reads are the turn still being handed over. Every POST records the
+    round of the frame the TESTER WAS LOOKING AT, which is the whole
+    assertion: one `end turn` from the tester must spend exactly one round.
+
+    A turn ends only when it is ended from a play-phase frame -- ending from
+    the hand-over frame is what the game itself refuses ("Not in play phase")
+    and what the seat spent its real turns on.
+    """
+
+    def __init__(self, rounds: list[dict], tail: dict):
+        self.rounds, self.tail = list(rounds), tail
+        self.i = 0
+        self.pending: list[dict] = []
+        self.posts: list[dict] = []
+        self.posted_rounds: list[int | None] = []
+        self.handed: dict = {}
+
+    def _current(self) -> dict:
+        return (self.rounds[self.i] if self.i < len(self.rounds)
+                else self.tail)
+
+    def get_state(self) -> dict:
+        self.handed = self.pending.pop(0) if self.pending else self._current()
+        return self.handed
+
+    def post(self, action: str, **params) -> dict:
+        seen = self.handed or self._current()
+        battle = seen.get("battle") or {}
+        self.posts.append({"action": action, **params})
+        self.posted_rounds.append(battle.get("round"))
+        if action == "end_turn" and battle.get("is_play_phase"):
+            self.pending = [_mid_turn_frame(seen), _mid_turn_frame(seen)]
+            self.i += 1
+        return {"status": "ok", "message": "Ending turn"}
+
+    def health(self) -> dict:
+        return {"mod_version": "0.0-scripted"}
+
+
+def test_the_frame_between_two_turns_is_named_a_transition():
+    """`EB-175`, the predicate. A combat screen with `is_play_phase` false is
+    a moment, not a screen; a build that does not carry the key at all is not
+    read as one."""
+    live = combat_state()
+    assert blindplay.transient(live) == ""
+    assert blindplay.transient(_mid_turn_frame(live))
+    no_key = json.loads(json.dumps(live))
+    no_key["battle"].pop("is_play_phase")
+    assert blindplay.transient(no_key) == ""
+
+
+def test_one_end_turn_from_the_tester_spends_exactly_one_round(tmp_path):
+    """`EB-175`. Four times in one blind session the seat said `end turn`, was
+    answered `ok Ending turn`, and was then shown a combat screen with an
+    empty hand and full energy -- the frame above -- so it said `end turn`
+    again and spent a REAL turn on it. The rounds it recorded went 1 -> 3 -> 5.
+
+    Three `end turn`s, three rounds, and no round entered twice."""
+    rounds = []
+    for n, hp in ((1, 57), (2, 40), (3, 20)):
+        frame = json.loads(json.dumps(combat_state()))
+        frame["battle"]["round"] = n
+        frame["battle"]["enemies"][0]["hp"] = hp
+        rounds.append(frame)
+    wire = _EndTurnWire(rounds, game_over_state())
+    thread = blindplay.ScriptedThread(
+        [{"command": "end turn", "thinking": "."} for _ in range(3)]
+        + [{"record": "fight"}, {"record": "run"}])
+    s = blindplay.Session(thread, wire=wire, session_id="t",
+                          budget=blindplay.Budget(max_actions=3),
+                          log_root=tmp_path, settle_delay_s=0.0)
+    s.run()
+    assert [p["action"] for p in wire.posts] == ["end_turn"] * 3
+    assert wire.posted_rounds == [1, 2, 3]
+
+
 def test_a_wire_that_stays_unnamed_is_still_tool_blocked(tmp_path):
     wire = blindplay.ScriptedWire([{"state_type": "unknown"}])
     s = blindplay.Session(blindplay.ScriptedThread([]), wire=wire,

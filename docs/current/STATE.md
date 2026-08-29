@@ -331,9 +331,17 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   screen types with ZERO refusals, no stall and no leak in any of its 40
   observations — ending only because the character died on Act 1. That
   the tester never reached the Act-1 boss is the tester's play, not the
-  tool's code, and the row never asked for the boss. Two live findings are filed and open, `EB-174` (a sealed
-  record cannot name its build) and `EB-175` (`end turn` has to be said
-  twice). A4 and A6 wait and are NOT minted; A1-extended (enemy
+  tool's code, and the row never asked for the boss. Of the two live findings
+  that run filed, **`EB-175` is CLOSED (2026-08-29)** — the bridge's
+  `end_turn` is asynchronous, so a read 55 ms after it answers `ok` carries
+  the round unchanged, the hand already discarded to zero and `is_play_phase`
+  FALSE; the render showed that hand-over frame as a playable turn and the
+  seat's second `end turn` spent the real one, which is where the 1 → 3 → 5
+  rounds came from. `blindplay.transient` now names the frame a transition
+  beside the two it already knew and every live read rides it out — the
+  driver's and the CLI's `observe` / `act` — and nothing posts a second
+  `end_turn` on a tester's behalf. `EB-174` (a sealed record cannot name its
+  build) is open. A4 and A6 wait and are NOT minted; A1-extended (enemy
   composition/intent setters) and A5 (vision input) are DEFERRED.
   Routing: **Kokomi slice 2 = R213 E1's Charge arms, before Klee** — slice 1
   tests priced Companion Block at the turn and does not exhaust Kokomi.
