@@ -1,0 +1,25 @@
+{
+  "turn_id": "klee-sparks-r1-t06",
+  "packet_sha256": "7bd12040b45ea7d1c0c60b799cdadc7c16b71774ee339670c03cbbd53377a322",
+  "grader": {
+    "id": "opus-5-fresh",
+    "kind": "llm",
+    "model": "claude-opus-5",
+    "designed_these_cards": false
+  },
+  "chosen_line": [
+    {
+      "card": "Dodoco Blast",
+      "target": "Shrinker Beetle"
+    },
+    {
+      "card": "Kaboom!",
+      "target": "Shrinker Beetle"
+    }
+  ],
+  "q1_what_did_you_play": "Dodoco Blast first, spending both Sparks for 7 damage and Pyro on the Shrinker Beetle, then Kaboom! for another 7 and Pyro. That is 14 damage into a 39 HP enemy for 1 of my 3 Energy. The Beetle's telegraph is a debuff, not an attack, so nothing it does this turn can be blocked away — Block is dead value here, and the whole turn should be face damage. Both remaining cards were left unplayed: Tinder Toss because Dodoco Blast already consumed the Spark bank down to 0 and Tinder Toss needs 1, and Duck and Cover because 5 Block against a non-damaging intent buys nothing.",
+  "q2_other_line_considered": "Yes — Tinder Toss plus Kaboom!, which spends only 1 Spark for 4 damage and leaves 1 Spark banked for a later turn, total 11 damage this turn. I weighed banking that Spark against the 3 extra damage now, and took the damage: I have no printed way on this page to know I will draw a Spark spender next turn, and the Spark left over is worth nothing unless I do. I also briefly considered adding Duck and Cover with my spare Energy, since I have 2 unspent after Kaboom!, but against a Strategic debuff intent the 5 Block expires unused, so playing it only burns the card.",
+  "q3_what_it_gave_up": "It gives up the entire Spark bank in one card, so I enter next turn at 0 Sparks with Tinder Toss stranded in hand until I generate more. It also spends my only single-target burst, Kaboom!, on a turn where I take no damage, and it leaves Duck and Cover unplayed, so I face whatever the debuff turns into with 0 Block and 42 HP.",
+  "q4_different_intent": "Yes. If the Beetle had telegraphed an attack, Duck and Cover becomes live — I have 2 spare Energy doing nothing, so 5 Block is free mitigation and I would have added it after the two attacks. If the attack were large enough that 5 Block mattered but the fight was not close to over, I would still lead with Dodoco Blast and Kaboom! and just append Duck and Cover, since the Energy does not compete. The intent that would actually change my card choices is a second enemy appearing: with two targets, Tinder Toss's 4 to ALL and Dodoco Blast's 7 to ALL both scale, and the Spark-efficiency comparison against single-target Kaboom! flips.",
+  "q4_changed": true
+}

@@ -1,0 +1,35 @@
+{
+ "turn_id": "klee-sparks-r1-t06",
+ "packet_sha256": "7bd12040b45ea7d1c0c60b799cdadc7c16b71774ee339670c03cbbd53377a322",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Dodoco Blast",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Dodoco Blast for 7 damage to all enemies, then Kaboom! for 7 damage to Shrinker Beetle, then Duck and Cover for 5 Block. This used both Sparks, 2 Energy, and left 1 Energy unused.",
+ "q2_other_line_considered": "I considered Tinder Toss, Kaboom!, and Duck and Cover. It would have dealt 11 total damage instead of 14 and left 1 Spark unused, so it was worse with only one enemy and no stated future Spark use.",
+ "q3_what_it_gave_up": "The chosen line gave up playing Tinder Toss and the 1 Spark that would have remained if I had played Tinder Toss instead of Dodoco Blast. It did not give up Block or the single-target attack, because Duck and Cover and Kaboom! were still played.",
+ "q4_different_intent": "No. An attack intent would make Duck and Cover more clearly useful, but I already played it. A different non-attack intent would not make Tinder Toss preferable to Dodoco Blast with one enemy and no other stated information.",
+ "q4_changed": false
+}

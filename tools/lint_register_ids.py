@@ -313,16 +313,8 @@ CEILINGS: dict[str, int] = {
                  # retires the fresh-Opus control form from every packet of
                  # a blind-QA round to the spot-check rate. The threshold is
                  # a number, so it is [USER]'s.
-                 # M61 minted 2026-08-29 by [USER]'s memory-gauge direction:
-                 # the strip is "insufficiently ambitious", so the display
-                 # becomes an element carrying the bank, the next spend, a
-                 # state colour and an openable queue. WHICH of the three
-                 # build options that is, and the mock's three eyes-on calls,
-                 # are a pick between genuinely different design directions
-                 # and a taste look -- both of which CLAUDE.md keeps as
-                 # [USER]'s, so neither can be settled from the ladder. The
-                 # row GATES `EB-198`, which the same commit re-scopes from a
-                 # diagnosis into the build.
+                 # M61 ANSWERED 2026-08-29: build option 3, and the element
+                 # is local-seat only. The row left QUEUE the same day.
                  # M59/M60 minted 2026-08-29 by the R220 slate, one row per
                  # packet under one ruling (R206 as amended by R212): M59 the
                  # Furina reframe's sixteen design picks F1-F16, M60 the Burst
@@ -406,14 +398,14 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # (2026-08-29): F countersigned the Sparks re-author, E handed the local
     # model a TESTER seat and no grading chair. M59/M60 join with the two
     # slate rows R220 mints.
-    # M61 joins 2026-08-29 with the memory-gauge direction: the build option
-    # and the mock's three eyes-on calls.
+    # M61 left 2026-08-29, answered the day it was minted: the build is
+    # option 3 and the element is local-seat only.
     # M62 minted 2026-08-29 by R221 A: the criterion that retires the
     # fresh-Opus control form to the spot-check rate. KLEESPARK-R1 read
     # 4/8, so the control stays on under every option; the row fixes the
     # number that would take it off.
     "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 52,
-                    54, 55, 56, 57, 59, 60, 61, 62}),
+                    54, 55, 56, 57, 59, 60, 62}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

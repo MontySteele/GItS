@@ -211,6 +211,11 @@ public static class KurageMemory
     /// CombatState is the one place that can supply it.</summary>
     private static CombatState? _combat;
 
+    /// <summary>The stashed combat, read-only. The HUD element needs it to
+    /// resolve the local seat on a click and on a mid-combat rebuild, and it
+    /// must not have a second stash of its own to go stale.</summary>
+    public static CombatState? Combat => _combat;
+
     /// <summary>
     /// STASH ONLY -- no clear. `EB-196`.
     ///
@@ -439,6 +444,113 @@ public static class KurageMemory
         player != null && Queues.TryGetValue(player, out var q)
             ? q
             : (IReadOnlyList<Entry>)System.Array.Empty<Entry>();
+
+    // ------------------------------------------------- the affordability --
+
+    /// <summary>
+    /// The three states one queued memory can be in under the affordability
+    /// run. DISPLAY-ONLY: no resolution path reads them and nothing here
+    /// mutates. Twin: <c>tier0/engine/effects.py</c>'s KURAGE_PAYABLE /
+    /// KURAGE_RUNS_OUT / KURAGE_HELD, whose wire spellings are the lowercase
+    /// snake forms below.
+    /// </summary>
+    public enum EntryState
+    {
+        /// <summary>The bank, minus every price already passed, covers this
+        /// entry. Drawn blue.</summary>
+        Payable,
+
+        /// <summary>The FIRST entry the bank cannot reach. Drawn red.</summary>
+        RunsOut,
+
+        /// <summary>Behind the shortfall. [USER]: "also red".</summary>
+        Held,
+    }
+
+    /// <summary>The wire spelling of a state -- the sim's own string.</summary>
+    public static string Wire(EntryState state) => state switch
+    {
+        EntryState.Payable => "payable",
+        EntryState.RunsOut => "runs_out",
+        _ => "held",
+    };
+
+    /// <summary>
+    /// THE AFFORDABILITY RUN -- the running subtraction over the queue.
+    ///
+    /// Spec: <c>review/active/kokomi-kurage-memory-2026-08-29.md</c> §14.4,
+    /// which is [USER]'s direction for the card element that replaced the
+    /// strip. The HUD answers "does the next one fire" -- one comparison,
+    /// <c>bank &gt;= front.Price</c>, no forecast. The PILE VIEW answers "how
+    /// far do I get", and this is that answer.
+    ///
+    /// Front first, walking down the queue with the bank: an entry the
+    /// remaining bank covers is <see cref="EntryState.Payable"/> and spends;
+    /// the first it cannot is <see cref="EntryState.RunsOut"/>; every entry
+    /// BEHIND that one is <see cref="EntryState.Held"/> and is drawn red too,
+    /// because <see cref="Fire"/> holds on an unaffordable front and pays
+    /// nothing, so nothing behind it fires and the bank never drains past it.
+    ///
+    /// IT IS A FORECAST AND THREE THINGS FALSIFY IT (§14.4) -- one memory per
+    /// turn, Charge accruing at 1 per Exhaust, and the holding front -- which
+    /// is exactly why it is drawn only on a surface the player opened on
+    /// purpose. The honest reading is "where you run out IF YOU BANK NOTHING
+    /// MORE".
+    ///
+    /// PURE, and it is the ONLY expression of this rule on this engine: the
+    /// drawing code must call it rather than inline the loop. Twin:
+    /// <c>tier0/engine/effects.py kurage_affordability</c>, held to it by
+    /// <c>docs/kurage-affordability-vectors.json</c>, which both suites read.
+    /// </summary>
+    public static IReadOnlyList<EntryState> Affordability(
+        IReadOnlyList<int> prices, int bank)
+    {
+        var states = new List<EntryState>(prices.Count);
+        var remaining = bank;
+        var short_ = false;
+        foreach (var price in prices)
+        {
+            if (short_)
+            {
+                states.Add(EntryState.Held);
+            }
+            else if (price <= remaining)
+            {
+                remaining -= price;
+                states.Add(EntryState.Payable);
+            }
+            else
+            {
+                short_ = true;
+                states.Add(EntryState.RunsOut);
+            }
+        }
+        return states;
+    }
+
+    /// <summary>The same run over live queue entries.</summary>
+    public static IReadOnlyList<EntryState> Affordability(
+        IReadOnlyList<Entry> queue, int bank)
+    {
+        var prices = new List<int>(queue.Count);
+        foreach (var entry in queue) prices.Add(entry.Price);
+        return Affordability(prices, bank);
+    }
+
+    /// <summary>
+    /// The index of the first entry the bank cannot reach, or -1 when the bank
+    /// covers the whole queue (an empty queue included). This is the number the
+    /// wire snapshot carries beside <c>reading</c> so the blind page can say
+    /// "Charge runs out at #3" without re-deriving the run.
+    /// </summary>
+    public static int RunOutIndex(IReadOnlyList<EntryState> states)
+    {
+        for (var i = 0; i < states.Count; i++)
+        {
+            if (states[i] == EntryState.RunsOut) return i;
+        }
+        return -1;
+    }
 
     // -------------------------------------------------------------- price --
 
@@ -968,8 +1080,11 @@ public static class KurageMemory
     ///   pulse_amount  -- what the pulse will move
     ///   pulse_unit    -- "damage" / "block" / "charge" / "hydro" / "none"
     ///   reading       -- the strip's one line, verbatim
+    ///   run_out_index -- §14.4's running subtraction: the index of the first
+    ///                    entry the bank cannot reach, -1 when it covers the
+    ///                    whole queue. -1 on an empty queue.
     ///   queue         -- ordered, front first; each {name, price, cost,
-    ///                    target, blocked, ephemeral, rule, affordable}
+    ///                    target, blocked, ephemeral, rule, affordable, state}
     ///
     /// READ-ONLY, and it never throws: a state read must not take the run down.
     /// </summary>
@@ -1000,9 +1115,16 @@ public static class KurageMemory
         snapshot["pulse_unit"] = PulseUnit(player);
         snapshot["reading"] = Reading(player);
 
+        // §14.4's running subtraction, on the wire beside the reading so the
+        // blind page and the tests see the same projection the pile view
+        // paints. -1 means the bank covers everything queued.
+        var states = Affordability(queue, bank);
+        snapshot["run_out_index"] = RunOutIndex(states);
+
         var rows = new List<Dictionary<string, object?>>();
-        foreach (var entry in queue)
+        for (var i = 0; i < queue.Count; i++)
         {
+            var entry = queue[i];
             rows.Add(new Dictionary<string, object?>
             {
                 ["name"] = entry.Name,
@@ -1010,7 +1132,13 @@ public static class KurageMemory
                 ["price"] = entry.Price,
                 ["target"] = entry.Target is { IsAlive: true } t ? t.Name : null,
                 ["blocked"] = entry == front && blocked,
+                // AFFORDABLE is the standalone question -- "could the bank pay
+                // THIS card on its own" -- and STATE is the running one. They
+                // differ from the second entry on and both are wanted: the
+                // first says what a card costs against the bank, the second
+                // says where the queue stops.
                 ["affordable"] = bank >= entry.Price,
+                ["state"] = Wire(states[i]),
                 ["ephemeral"] = entry.Ephemeral,
                 ["rule"] = entry.Rule,
             });

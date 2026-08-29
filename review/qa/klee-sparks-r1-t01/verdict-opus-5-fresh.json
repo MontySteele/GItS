@@ -1,0 +1,104 @@
+{
+ "turn_id": "klee-sparks-r1-t01",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "opus-5-fresh",
+  "kind": "llm",
+  "model": "claude-opus-5",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "b005604787b2a3cad3892695748e30752b679225a92c338d2be03b8b092a5f7e",
+ "chosen_line": [
+  {
+   "card": "Powder Pop",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Jumpy Dumpty",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Ka-pow!",
+   "target": "Nibbit"
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit"
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "Everything except Duck and Cover. Powder Pop first, because it costs 0 and it is the only thing on the page that makes a Spark \u2014 with the Spark bank empty, Ka-pow! is printed as unplayable, and Powder Pop is what unlocks it. It also lays a 5-damage Bomb for free. Then Jumpy Dumpty for 2, which is the biggest single block of immediate damage available: two 8s at the only enemy on the board, so 16 with no randomness to worry about, plus a second Bomb for 6 and the Burst +5 rider. Then Ka-pow! for 0, spending the Spark I just banked, for 7. Then Kaboom! with the last energy for 7. That is 3 energy spent exactly and 30 damage delivered this turn into Nibbit's 46, with two Bombs and Pyro left sitting on it. The sequencing is the actual decision here: Powder Pop before Ka-pow! is mandatory, and Jumpy Dumpty before the 1-cost cards costs me nothing since I can afford all of them regardless.",
+  "q2_other_line_considered": "Yes \u2014 cutting Kaboom! and spending that last energy on Duck and Cover instead: Powder Pop, Jumpy Dumpty, Ka-pow!, Duck and Cover. That trades 7 damage for 5 Block against a telegraphed 12. I rejected it on the arithmetic of the health bar: I am at 62/62 with no chip damage anywhere, so the 12 costs me about a fifth of a full pool and nothing else \u2014 no death risk, no threshold I can see on this page. Blocking 5 of it leaves me taking 7 anyway, so the Block buys 5 HP I do not currently need in exchange for 7 damage off a 46-HP enemy I am trying to close out. I also weighed dropping Kaboom! and holding the energy, which is strictly worse than either.",
+  "q3_what_it_gave_up": "Five Block and the 5 HP it would have saved \u2014 I eat the full 12 and end the turn at 50/62 with no shield. More generally I gave up the defensive half of the hand entirely and committed to a damage race, so if Nibbit's next telegraph escalates I have already spent the card that would have softened it and it is not coming back this turn. I also left Duck and Cover as the only card still in hand, which is the least useful card to be holding if what I need next turn is more damage.",
+  "q4_different_intent": "Yes. The 12 is small enough relative to a full 62 that it does not move me, but a substantially larger number would: at roughly 25 or more, or any telegraph reading as a multi-hit or a debuff-plus-attack, I would swap Kaboom! for Duck and Cover and accept 23 damage instead of 30. A defensive intent \u2014 the enemy gaining Block \u2014 would push the other way and make me want the Bombs and Pyro landing even harder, so the same line but with more urgency about the order. An intent that threatened to remove or punish my Bombs before they resolve would change the plan most of all, since more than a third of this line's value is sitting in unexploded Bombs rather than damage already dealt."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "declared board (prototype route)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.0382,
+  "top1": 44.52,
+  "top2": 42.82,
+  "lines_considered": 20,
+  "playouts": 80,
+  "plays_refused": 0,
+  "pilot": "demolition",
+  "lines": [
+   {
+    "cards": [
+     "Ka-pow!",
+     "Powder Pop",
+     "Kaboom!",
+     "Jumpy Dumpty"
+    ],
+    "score": 44.52
+   },
+   {
+    "cards": [
+     "Ka-pow!",
+     "Powder Pop",
+     "Duck and Cover",
+     "Jumpy Dumpty"
+    ],
+    "score": 42.82
+   },
+   {
+    "cards": [
+     "Powder Pop",
+     "Kaboom!",
+     "Jumpy Dumpty"
+    ],
+    "score": 37.52
+   },
+   {
+    "cards": [
+     "Ka-pow!",
+     "Powder Pop",
+     "Jumpy Dumpty"
+    ],
+    "score": 36.92
+   },
+   {
+    "cards": [
+     "Powder Pop",
+     "Duck and Cover",
+     "Jumpy Dumpty"
+    ],
+    "score": 35.82
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T18:23:22"
+}

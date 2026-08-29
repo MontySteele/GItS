@@ -1,0 +1,105 @@
+{
+ "turn_id": "klee-sparks-r1-t07",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "intent_insensitive"
+ ],
+ "reasons": [
+  "intent_insensitive: question four is no: a different enemy intent would not have changed the line, so the intent is not part of the decision"
+ ],
+ "grader": {
+  "id": "opus-5-fresh",
+  "kind": "llm",
+  "model": "claude-opus-5",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "89966a5dc89810b8ed4a4401ea4739030ba18baefc54eeabdc2bd8cef352e328",
+ "chosen_line": [
+  {
+   "card": "Powder Pop",
+   "target": "Sludge Spinner"
+  },
+  {
+   "card": "Firework Finale",
+   "target": "Sludge Spinner"
+  },
+  {
+   "card": "Fwoosh!",
+   "target": "Sludge Spinner"
+  },
+  {
+   "card": "Duck and Cover"
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "The entire hand. Powder Pop first: it costs 0 energy, places a 5-damage Bomb on the Sludge Spinner, and banks a Spark, taking me from 4 Sparks to 5. Then Firework Finale for 18 (Sparks 5 to 2), then Fwoosh! for 8 (Sparks 2 to 1). That is 26 damage now plus a 5-damage Bomb pending, putting the Spinner from 39 to 13 before the Bomb resolves. All three of those cost 0 energy, so my whole 3 Energy was still free and I spent 1 of it on Duck and Cover for 5 Block against the telegraphed 8, taking 3 instead of 8 and ending at 39/62. Nothing in the hand had to be cut \u2014 the hand is entirely affordable, so the only real decision was sequencing.",
+  "q2_other_line_considered": "Two things. First, the ordering question: with 4 Sparks I can already pay Firework Finale (3) and Fwoosh! (1) exactly, so Powder Pop's Spark is not strictly needed \u2014 but leading with it costs nothing and leaves me at 1 Spark instead of 0, so leading was free upside and I took it. Second, and more seriously, holding Firework Finale. It Exhausts, so it is a one-use card, and 18 damage does not kill a 39 HP enemy this turn either way; I considered banking it (and the 3 Sparks) for a turn where it finishes the fight or lands on something bigger. I rejected that because the Spinner is the only enemy on the board, damage now is damage that shortens the number of 8-damage attacks I eat, and holding a card I cannot guarantee redrawing next turn is a worse bet than spending it into the only target.",
+  "q3_what_it_gave_up": "It burns Firework Finale permanently \u2014 it Exhausts, so there is no later turn where I get that 18 back \u2014 and it drains the Spark bank from 4 down to 1, so next turn I start near-empty and Spark-priced cards will mostly be unpayable until Powder Pop-style generation refills me. It also spends the Bomb's Burst +5 on a target I did not set up further, and leaves 2 Energy unused because nothing in hand could absorb it.",
+  "q4_different_intent": "No. Every card in the hand is affordable simultaneously \u2014 three at 0 energy and one at 1 of my 3 \u2014 so there is no card the intent could talk me out of playing. A bigger telegraphed attack would not change the line because Duck and Cover's 5 Block is already the only defense available and I am already playing it. A defensive or buffing intent would make that 5 Block worthless, but I would still play it, since holding it gains me nothing that carries to next turn. The most an intent could move is the ordering, and Powder Pop-first is already correct regardless."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "declared board (prototype route)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.1568,
+  "top1": 37.62,
+  "top2": 31.72,
+  "lines_considered": 15,
+  "playouts": 64,
+  "plays_refused": 0,
+  "pilot": "demolition",
+  "lines": [
+   {
+    "cards": [
+     "Firework Finale",
+     "Fwoosh!",
+     "Powder Pop",
+     "Duck and Cover"
+    ],
+    "score": 37.62
+   },
+   {
+    "cards": [
+     "Firework Finale",
+     "Fwoosh!",
+     "Powder Pop"
+    ],
+    "score": 31.72
+   },
+   {
+    "cards": [
+     "Firework Finale",
+     "Fwoosh!",
+     "Duck and Cover"
+    ],
+    "score": 31.7
+   },
+   {
+    "cards": [
+     "Firework Finale",
+     "Powder Pop",
+     "Duck and Cover"
+    ],
+    "score": 29.52
+   },
+   {
+    "cards": [
+     "Firework Finale",
+     "Fwoosh!"
+    ],
+    "score": 25.8
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T18:23:25"
+}
