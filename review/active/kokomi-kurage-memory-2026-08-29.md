@@ -1496,7 +1496,8 @@ same quarantine flag.
 `python -m tools.run_lints --lane ci` — **OK: 27 lint(s) passed**. Full tier 0
 suite **3556 passed, 46 skipped, 12 xfailed**; full tier 0.5 suite **794
 passed** — both with the flag off, which is the acceptance condition on the
-flag. `gen_roster_cards --check` was not re-run because **no sheet moved**:
-the starter swap is code and every YAML file is byte-identical. Twelve
+flag. `gen_roster_cards --check` reports **all three profiles up to
+date** -- no sheet moved, because the starter swap is code and every YAML
+file is byte-identical. Twelve
 mutations were run against the new test file and all twelve were caught. No
 LAW line, register row, sheet row or drafted number moved, so no stamp moved.
