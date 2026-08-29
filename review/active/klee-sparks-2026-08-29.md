@@ -1404,6 +1404,31 @@ the tight set is too thin at the cheap end, and PICK 4 reopens** at option 2
 (add the Rare cut) or option 3 (add rather than convert). Two 1-priced cards in
 one hand is not a decision when one of them simply prints a bigger number.
 
+**ERRATUM (2026-08-29, relayed independent review). The grade above STANDS AS
+PUBLISHED and nothing is re-graded (R101b). What is corrected is the
+INSTRUMENT: `P1`'s threshold of 4 was unreachable on this board set.** Counting
+each board's bank against the Spark prices its own hand held, only THREE boards
+can pose the question at all — `t02` (bank 1: Ka-pow! 1, Fwoosh! 1), `t03`
+(bank 2: Fwoosh! 1, Bang Bang! 2) and `t06` (bank 2: Tinder Toss 1, Dodoco
+Blast 2). `t07`'s bank of 4 pays Firework Finale (3) AND Fwoosh! (1) together,
+so it is not a competition; `t01` and `t08` sit at bank 0 with nothing
+affordable at all; `t04` and `t05` hold ONE Spark use each, the Power. A
+ceiling of three against a threshold of four means **no reading of this round
+could have met `P1`**, so the MISS cannot establish that the tight set is too
+thin at the cheap end — it establishes that the board set could not ask.
+`MANIFEST.md`'s pre-registered count of four is true as written and is a
+DIFFERENT predicate: "two or more Spark uses in hand that the bank can each
+individually afford" is not `P1`'s "two Spark uses COMPETING". The instrument
+defect is BACKLOG `EB-202`.
+
+**The registered decision-fire is CONTESTED, and it is NOT un-fired here.**
+The packet's published reading stands: `P1` MISSED and PICK 4 reopens by its
+own registered clause. The relayed review reads it the other way, verbatim:
+*"Keep the recorded MISS for audit purposes, but treat it as an instrument
+defect — not a trigger to add/reprice cards."* On that reading PICK 4 does not
+reopen and the question goes to a repaired board set instead. Both readings are
+on the pick list at §11.7 item 1, and which one governs is [USER]'s.
+
 **P2 — can the grader state the price off the FACE, without the rules box?
 Predicted NO; the badge is required. → SPLIT.**
 The first half is falsified cleanly. Across all eighteen forms the seat found
@@ -1466,6 +1491,28 @@ playability before any sim number about this economy is worth reading.** The
 largest of those blind spots is named there — under the Rare Power a pilot
 spends itself out of its own Attack suite, because `_spark_bank_probe` asks
 what a card is *worth* at a bank and never whether it is *playable* at one.
+
+**ERRATUM-STYLE NOTE (2026-08-29, relayed independent review). The grade
+STANDS; the METRIC is confounded** — nothing here is re-graded (R101b). The
+registered metric is Sparks moved PER PLAYER TURN, and the two arms differ in
+both of that ratio's inputs. **Turns:** ON 294, OFF 243 — the ON arm's fights
+ran longer, and it won 25 of 40 where OFF won 40 of 40. **Income:** the
+one-for-one map converts four GENERATORS out of the deck — `sparkly_treasure`
+(+1), `spark_collection` (+2), `sugar_rush` (+1), `cant_catch_me` (+1) — and
+puts five priced damage Attacks that generate nothing in their place
+(`docs/klee-cards.yaml`; the map is `tier05/exp_klee_sparks_r1.py:34-56`), so
+Sparks GAINED fell 276 -> 235 by construction rather than by pilot behaviour.
+Normalized against what was available to spend, the arms nearly tie and the
+direction reverses: **ON spent 213 of 235 generated = 90.6%; OFF spent 243 of
+276 = 88.0%** (`review/active/klee-sparks-r1-sim-2026-08-29.txt`). The review's
+91% / 88% and 294 / 243 are arithmetically correct against that raw output. The
+per-turn rate answers *"does a priced deck move more Sparks per turn than the
+automatic rule"*; *"does the pilot spend what it has"* is a different question,
+and it is the second one `P5`'s decision clause acts on. **That decision still
+fires** — the probe needs playability before any further sim reading — and this
+note does not disturb it. `spent / available Sparks` and `affordable sinks
+skipped` are offered as candidate metrics for the re-registration at §11.7
+item 6, option (d).
 
 **P6 — (sim) does the bank sit idle above the cheapest price for 3 or more
 consecutive turns in a drafted deck? Predicted NO. → PREDICTED.**
@@ -1561,10 +1608,15 @@ pipeline can consume.
    it stops failing replays, which is an answer to `M58` as well; (c) take the
    seat out of the funnel until the two faults are fixed; (d) leave it and
    accept that a quarter of its lines are untested.*
-5. **`M58`, which this round used the default for and did not answer.**
-   *(a) keep 4; (b) go to 2 while the local seat is under review and back to 4
-   after; (c) make it 1 — every turn — for any round whose tester seat is itself
-   on trial; (d) rule it per-round rather than as a constant.*
+5. **`M58` — WITHDRAWN as a pick, 2026-08-29 (hygiene).** It asked what the
+   Codex spot-check rate should be. `M58` was **ANSWERED by R220 G at N = 4**
+   before this section was written, and its QUEUE row is closed and gone from
+   HEAD — verified at `docs/current/STATE.md:491`, `EXPERIMENTS.md`'s R221 A
+   text, and no surviving `M58` row in `QUEUE.md`. §11.0's third disclosure is
+   unchanged: the round did use the default, and it does not bear on the rate.
+   The numbering below is left as published so citations to items 6 and 7 keep
+   their targets. *(Relayed review: "stale, M58 was answered by R220 G (N = 4)
+   — REMOVE the pick." Confirmed.)*
 6. **The 40-versus-25 win diagnostic.** Not quotable, not a balance claim, and
    not ignorable either.
    *(a) treat it as an artefact of §10.5's pilot blind spots and teach the probe
