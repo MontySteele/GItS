@@ -205,18 +205,63 @@ public static class KurageMemory
     /// played", so a copy cannot key or overwrite the pulse.</summary>
     public static bool Autoplaying { get; private set; }
 
-    /// <summary>
-    /// Per-fight reset. The sim gets this free (CombatState is rebuilt); the
-    /// mod's hook models are singletons, so the clear is explicit.
-    /// </summary>
     /// <summary>The combat this rule is running in, stashed at subscribe time.
     /// <c>AbstractModel.BeforeCombatStart</c> takes no arguments and the base
     /// kit's install needs the seat list, so the one place the mod is handed a
     /// CombatState is the one place that can supply it.</summary>
     private static CombatState? _combat;
 
+    /// <summary>
+    /// STASH ONLY -- no clear. `EB-196`.
+    ///
+    /// This is what <c>KokomiResourceHooks.Subscribe</c> calls, and the
+    /// subscription delegate is NOT run once per fight: the combat enumerates
+    /// its hook listeners on every hook broadcast
+    /// (<c>CombatState.IterateHookListeners</c> ->
+    /// <c>ModHelper.IterateAllCombatStateSubscribers</c> -> each mod's
+    /// delegate), so anything destructive in it runs between every pair of
+    /// hooks. It used to call <see cref="ResetForCombat"/>, which is why a live
+    /// Kokomi's queue was ALWAYS empty and why her strip said she had played
+    /// no card on turns when she had.
+    /// </summary>
+    public static void NoteCombat(CombatState? combat)
+    {
+        _combat = combat;
+    }
+
+    /// <summary>
+    /// Per-fight clear, WITHOUT touching the stashed combat. Called from
+    /// <c>KokomiResourceHooks.BeforeCombatStart</c> -- the hook the game
+    /// raises once per combat, and the one the base kit's install already
+    /// rides (`EB-196`).
+    /// </summary>
+    public static void ClearForNewCombat()
+    {
+        Queues.Clear();
+        EnrolledCards.Clear();
+        MemoryCopies.Clear();
+        PlayTargets.Clear();
+        MusterFaceCost.Clear();
+        LastCardType.Clear();
+        PlayedAnything.Clear();
+        LastAttackTarget.Clear();
+        FiredThisTurn.Clear();
+        Autoplaying = false;
+    }
+
+    /// <summary>
+    /// Per-fight reset: stash the combat AND clear. The sim gets this free
+    /// (CombatState is rebuilt); the mod's hook models are singletons, so the
+    /// clear is explicit.
+    ///
+    /// THE IDENTITY GUARD (`EB-196`) is the belt to
+    /// <see cref="ClearForNewCombat"/>'s braces: being handed the SAME combat
+    /// again is a re-enumeration of the subscriber list, never a new fight, and
+    /// it must not lose a memory. A different instance IS a different fight.
+    /// </summary>
     public static void ResetForCombat(CombatState? combat = null)
     {
+        if (combat != null && ReferenceEquals(combat, _combat)) return;
         _combat = combat;
         Queues.Clear();
         EnrolledCards.Clear();
@@ -473,12 +518,29 @@ public static class KurageMemory
             // "the original did not print Exhaust" -- the instance-level
             // ExhaustOnNextPlay counts, which is how a Muster recruit reads as
             // an Exhaust card without printing the keyword.
-            Ephemeral = !card.Keywords.Contains(CardKeyword.Exhaust)
-                        && !card.ExhaustOnNextPlay,
+            Ephemeral = !PrintsExhaust(card),
             Rule = rule,
         });
         RefreshStrip(owner.Creature);
         return true;
+    }
+
+    /// <summary>
+    /// Does this card burn itself when played? SafeTitle's idiom, for the same
+    /// reason (`EB-196`): <c>CardModel.Keywords</c> folds in keywords added by
+    /// whatever pile the card is in, so the getter walks
+    /// <c>Pile -> CombatState</c> and throws for a card that is not in one.
+    /// A card can reach the exhaust funnel already detached, and an enrolment
+    /// must not be lost to a read that only decorates the strip. The printed
+    /// keyword set is the fallback, and the instance flag is checked either
+    /// way -- a Muster recruit reads as an Exhaust card through it without
+    /// printing the keyword.
+    /// </summary>
+    private static bool PrintsExhaust(CardModel card)
+    {
+        if (card.ExhaustOnNextPlay) return true;
+        try { return card.Keywords.Contains(CardKeyword.Exhaust); }
+        catch { return card.CanonicalKeywords.Contains(CardKeyword.Exhaust); }
     }
 
     private static string SafeTitle(CardModel card)

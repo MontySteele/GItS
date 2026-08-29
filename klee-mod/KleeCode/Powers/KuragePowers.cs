@@ -39,7 +39,21 @@ public sealed class KurageSummonPower : PowerModel, ILocalizationProvider
           + $"{KokomiConstants.KuragePulseBase} plus "
           + $"{KokomiConstants.KuragePulsePerCharge} per [gold]Charge[/gold] "
           + "damage and applies [gold]Hydro[/gold] to a random enemy. "
+#if PROTOTYPE_CARDS
+            // `EB-197`. QUARANTINED. Under the memory rule the stacks stop
+            // being a countdown: KurageSummon.Field clamps them to 1, FirePulse
+            // returns before TickDownDuration, and under v4's base kit the
+            // jellyfish is installed at combat start and never removed
+            // (sec.12.6 items 1, 2 and 8). The shipped sentence below it still
+            // read "Lasts {Amount} more turn", so the buff and the strip's own
+            // "on the field for the whole fight" contradicted each other in the
+            // same frame -- caught eyes-on at Gate B. A duration this power does
+            // not have is not printed at all; the sentence says the lifetime it
+            // DOES have, in the strip's words.
+          + "It stays on the field for the whole fight."),
+#else
           + "Lasts {Amount} more turn{Amount:plural:|s}."),
+#endif
     };
 
     public override PowerType Type => PowerType.Buff;

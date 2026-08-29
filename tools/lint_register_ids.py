@@ -116,7 +116,16 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 195,   # EB-195 minted 2026-08-29: the twelve-arm re-baseline of
+    "EB": 197,   # EB-196/197 minted 2026-08-29 by the Gate B diagnosis. 196:
+                 # the C# memory could never hold an entry -- the per-fight
+                 # clear sat in the subscription delegate, which the combat
+                 # re-invokes on EVERY hook broadcast, so both entry rules
+                 # filed and were wiped between hooks (and the same line wiped
+                 # the pulse key, which is the strip's second wrong sentence).
+                 # 197: the Bake-Kurage buff printed "Lasts 1 more turn" under
+                 # a flag that never ticks it down. Both FIXED and CLOSED in
+                 # the minting commit, locks seen to FAIL first.
+                 # EB-195 minted 2026-08-29: the twelve-arm re-baseline of
                  # the Furina and Kokomi arms at RT12/D18/P11/C20 is OWED
                  # after R219 F moved their HP (Kokomi 80, Furina 78, #156).
                  # Under R68 every measured table quoting their rows is
@@ -335,7 +344,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 182, 183, 184,
-        189, 191, 192, 193, 194, 195,
+        189, 191, 192, 193, 194, 195, 196, 197,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
