@@ -448,7 +448,16 @@ GARMENT_CHARGE_DIVISOR = 2    # while the state is active, attack cards
 # act-1 clear by making the BURST a metronome, which the ratio instrument
 # correctly reads as frontload. O4 moves the periodic output to the summon,
 # where canon keeps it, and lets the Burst go back to being a window. ---
-KURAGE_DURATION = 1           # turns the jellyfish holds the field. Stacks
+KURAGE_DURATION = 1           # RETIRED UNDER THE KURAGE_MEMORY FLAG (v4 base
+                              # kit): with KURAGE_ALWAYS_ON the jellyfish is
+                              # installed at combat start and never expires,
+                              # so nothing reads this while the flag is on --
+                              # not the install, and not the Casket refresh,
+                              # which maxes a 1 against a 1. The value below
+                              # is the SHIPPED one and stays exact, because
+                              # with the flag off this constant is still the
+                              # whole of the summon.
+                              # turns the jellyfish holds the field. Stacks
                               # = turns remaining (the oz_summon grammar);
                               # re-summoning REFRESHES, never adds — a
                               # second jellyfish is not a bigger jellyfish.
@@ -571,8 +580,8 @@ GARMENT_ATTACK_BLOCK = 2      # while the Garment holds, her attack cards
 CONSCRIPT_COST_DELTA = -1     # kickoff §2.3: a conscripted card costs 1
                               # less (floor 0) and gains Exhaust.
 
-# --- THE KURAGE'S MEMORY: a QUARANTINED rule prototype
-# (review/active/kokomi-kurage-memory-2026-08-29.md §6). NOT SHIPPED, NOT
+# --- THE KURAGE'S MEMORY: a QUARANTINED rule prototype, VERSION 3
+# (review/active/kokomi-kurage-memory-2026-08-29.md sec.11). NOT SHIPPED, NOT
 # MEASURED, and no number taken off this arm is quotable anywhere -- the
 # R213 B / R215 B principle applied to a RULE rather than to a card row:
 # the quarantined surface exists to be PLAYED, not measured.
@@ -583,101 +592,186 @@ CONSCRIPT_COST_DELTA = -1     # kickoff §2.3: a conscripted card costs 1
 # engine cannot reach any of them; tier0/tests/test_kurage_memory.py holds
 # the golden that says so out loud (the shipped pulse is 4 + 3 x Charge).
 #
-# EVERY PICK IN THE PROPOSAL'S §5 IS ONE NAMED CONSTANT HERE, so [USER]'s
-# answer is a one-line edit rather than a re-implementation. The values
-# below are the proposal's RECOMMENDATIONS (A1/B1/C1/D1/E1), not rulings.
+# VERSION 3 ([USER], 2026-08-29) REPLACED v2's entry rule and its price.
+# v2 remembered every Companion she PLAYED and every memory cost one flat
+# threshold. v3 has TWO INDEPENDENT ENTRY RULES and a per-card price:
+#
+#   RULE 1 -- MUSTER. The card SACRIFICED to a Muster enters the memory at
+#   the moment of transformation, on its ORIGINAL face, with no stored
+#   target. It does not matter what the Muster produced or what becomes of
+#   it. ([USER]: "We would be adding the card that was sacrificed for the
+#   Muster, not the new card - so the original face.")
+#
+#   RULE 2 -- EXHAUST. A Companion that did not originate from the memory
+#   enters when it EXHAUSTS, however it came to exist -- drafted, Mustered
+#   or created -- carrying the target it was played against. ([USER]: "so
+#   cards with Exhaust get played twice, otherwise you have to manually
+#   exhaust them".)
+#
+# The two rules never reference each other ([USER]: "Those should be
+# independent mechanics"), so one Muster of a card whose recruit prints
+# Exhaust yields TWO memories in order, and that is intended ([USER]: "No,
+# if the Muster prints a card that Exhausts, then it gets added as well.").
+#
+# PRICE is per card: 3 x the remembered card's own face cost. FUEL is the
+# shipped exhaust funnel at CHARGE_PER_EXHAUST, on every Exhaust of an
+# ORIGINAL card of hers -- a memory copy pays nothing and is not an Exhaust
+# event at all. FIRE is one card per turn at turn start, and an unaffordable
+# front BLOCKS the queue.
 KURAGE_MEMORY = False         # the master quarantine flag. False = today's
                               # engine, exactly. True = the redesign: the
-                              # jellyfish is persistent, remembers the
-                              # Companions Kokomi plays, and spends Charge
-                              # to replay them for 0 energy.
-KURAGE_FUEL_MODE = "exhaust_own"
-                              # PICK A. "exhaust_own" (A1, recommended):
-                              # Charge accrues only where it does today --
-                              # the exhaust funnel, at CHARGE_PER_EXHAUST --
-                              # but a COMPANION pays nothing, Mustered or
-                              # drafted. (A Status/Curse already pays
-                              # nothing; that is the 2026-08-23 ruling and
-                              # it is untouched.) "play_or_exhaust" (A2):
-                              # the same rate ALSO on every PLAY of one of
-                              # her own non-Companion cards. A2 fires the
-                              # engine far more often and severs the
-                              # deck-as-second-HP-bar identity; it is
-                              # implemented so the arm can be swept, not
-                              # because it is recommended.
-KURAGE_THRESHOLD = 5          # DERIVED, NOT PICKED (R212's derived-not-
-                              # picked limb: one constant, one-way error
-                              # direction, archive scope). The derivation is
-                              # the proposal's §2: `ritual_purification`
-                              # (common, cost 1) is `exhaust 1 -> gain 4
-                              # Charge, draw 1`, and with the funnel's own
-                              # CHARGE_PER_EXHAUST that is 5 Charge off ONE
-                              # played card. A threshold of one card's worth
-                              # makes the jellyfish fire at roughly the rate
-                              # she rotates, which is the cadence the
-                              # kickoff's decision loop already describes.
-                              # It is a CANDIDATE and the first thing a sim
-                              # arm should move.
+                              # jellyfish is persistent, remembers what she
+                              # burns, and spends Charge to replay it for 0
+                              # energy.
+KURAGE_ALWAYS_ON = True       # v4 BASE KIT ([USER], 2026-08-29): "I think
+                              # that we will want to make Bake-Kurage part of
+                              # the base kit (always on) rather than a
+                              # separate card." READ ONLY WHEN KURAGE_MEMORY
+                              # IS ON. True = the jellyfish is installed at
+                              # the start of every one of Kokomi's combats and
+                              # holds for the whole fight: no duration, no
+                              # expiry, no summon needed, and the pulse fires
+                              # at every turn end. False leaves the v3 arm
+                              # reachable, where the jellyfish still had to be
+                              # summoned by the card and then never expired.
+                              # A separate constant so a revert to the v3
+                              # shape is a flip and not a re-authoring, the
+                              # same way KURAGE_THRESHOLD is for v2.
+KURAGE_MEMORY_STARTER_DROP = "bake_kurage"
+KURAGE_MEMORY_STARTER_ADD = "to_the_front"
+                              # The base-kit starter swap, and the ONLY sheet
+                              # fact the flag moves. READ ONLY WHEN
+                              # KURAGE_MEMORY IS ON, at `loader._starter_ids`,
+                              # so `docs/kokomi-cards.yaml` and
+                              # `tier0/content/characters/kokomi.yaml` are
+                              # UNTOUCHED and the shipped starter is still the
+                              # printed one. Bake-Kurage leaves because it
+                              # summons what is already there; ONE Muster card
+                              # enters in its place so RULE 1 (a Muster
+                              # remembers the card it ate, priced at 3x its
+                              # cost) is PRINTED in fight 1 rather than
+                              # drafted. The count is unchanged at twelve.
+                              # "To the Front!" is the plain Muster -- 0-cost
+                              # Skill, conscript 1, no rider -- and 0-cost
+                              # means it is playable on any turn, so fight 1
+                              # always shows the pattern. Rarity Common,
+                              # which is Furina's `an_invitation` precedent (a
+                              # Common already sits in a printed starter), so
+                              # no Basic twin is owed. sec.12 lists the three
+                              # alternatives that were not built.
+KURAGE_MEMORY_COST_PER_ENERGY = 3
+                              # [USER], v3: "cards cost Charge equal to 3x
+                              # their Cost". The whole price rule. A 0-cost
+                              # card therefore costs 0 Charge and autoplays
+                              # free (Gorou in the starter deck is the named
+                              # example); a 2-cost card costs 6.
+KURAGE_MEMORY_COST_BASIS = "remembered_face"
+                              # The face the price is read off, and there is
+                              # now only ONE reading of it: the printed cost
+                              # of the CARD THAT ENTERED, as that instance
+                              # reads it. Permanent upgrade changes count;
+                              # a Muster's own -1 counts on the recruit's own
+                              # entry (Rule 2) because the recruit IS the
+                              # card that Exhausted; TEMPORARY combat
+                              # discounts (cost_delta_this_turn, this_combat,
+                              # free_this_turn, the companion cost mod) are
+                              # ignored, because the price is read off the
+                              # card and never off `combat.card_cost`.
+                              # v2's "original_print" alternative is RETIRED
+                              # by v3's Muster ruling: the sacrificed card
+                              # enters on its own original face, so the two
+                              # readings no longer differ.
+KURAGE_MEMORY_TARGET_FALLBACK = "random"
+                              # [USER], v3: "Cards must play against the same
+                              # target the second time, unless that target no
+                              # longer exists, in which case they play
+                              # randomly against eligible targets." The
+                              # stored target is used whenever it is alive;
+                              # this constant is only the FALLBACK. "random"
+                              # (v3 default) leaves the shipped forced-random
+                              # roll in charge. "most_hp" (v2's PICK E1
+                              # fallback) is implemented so the arm can be
+                              # swept -- it is more forecastable and less
+                              # what [USER] asked for.
 KURAGE_FIRE_TIMING = "turn_start"
-                              # PICK B. "turn_start" (B1, recommended): the
-                              # free card lands BEFORE she acts, so it
-                              # changes the turn she is planning.
-                              # "turn_end" (B2): the fire rides the pulse,
-                              # one jellyfish moment instead of two, but the
-                              # card arrives after every decision it could
-                              # have informed. Both implemented.
+                              # [USER], v3: "At the start of Kokomi's turn".
+                              # "turn_end" is still implemented so the arm
+                              # can be swept; it is not what v3 asks for.
+KURAGE_QUEUE_CAP = 0          # 0 = UNCAPPED. [USER], v3: "I don't think we
+                              # need to cap this. If you load Memory with 20
+                              # cards, they slow-play over 20 turns ... if you
+                              # have the Charge." The queue is bounded by the
+                              # ONE FIRE PER TURN clause and by the bank, not
+                              # by a length.
+KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON = True
+                              # RETIRED UNDER THE FLAG by v4's base kit: with
+                              # KURAGE_ALWAYS_ON the jellyfish is on the field
+                              # for every turn of every fight, so "is there a
+                              # summon" is always yes and both settings of
+                              # this constant read the same. It is kept, and
+                              # kept True, so that turning KURAGE_ALWAYS_ON
+                              # back off restores the v3 arm whole. The
+                              # paragraph below is v3's and still describes
+                              # what it does THERE.
+                              # NOT A [USER] PICK -- a hole the build had to
+                              # fill. The acceleration keyword's op
+                              # (`play_front_memory`, provisional keyword name
+                              # "Stir") fires the front outside the automatic
+                              # rhythm. True: it still needs a jellyfish on
+                              # the field, i.e. one rule for what may act on
+                              # the memory. False (implemented): the keyword
+                              # works with no summon, so a card printing it is
+                              # never dead. sec.11 puts both to [USER].
+KURAGE_FUEL_MODE = "exhaust_any"
+                              # v3's fuel: "Charge now builds at a rate of
+                              # '1 Exhaust = 1 Charge'", on every Exhaust of
+                              # one of her ORIGINAL cards -- her own AND
+                              # original Companions. That is the SHIPPED
+                              # funnel, unnarrowed, so v3 RETIRES v2's PICK A1
+                              # ("exhaust_own", where a Companion paid
+                              # nothing). "play_or_exhaust" (v2's A2) is still
+                              # implemented so the arm can be swept.
+KURAGE_POWER_PULSE = "charge" # [USER], v3: the pulse when the last card she
+                              # played was a POWER grants CHARGE, not Hydro --
+                              # "Sacrificing a power seems like a bigger deal
+                              # than sacrificing anything else." The AMOUNT is
+                              # DERIVED, not picked (R212's derived-not-picked
+                              # limb): it is CHARGE_PER_EXHAUST, the Exhaust
+                              # rate, i.e. a Power pulse is worth exactly one
+                              # burnt card. "hydro" (v2's PICK C1) stays
+                              # implemented as the alternative.
+KURAGE_MEMORY_PULSE_BLOCK = 5 # the SKILL branch of the pulse, RULED at 5 by
+                              # [USER] on 2026-08-29 as a separate constant.
+                              # NOT KURAGE_PULSE_BLOCK, which ships at 0 since
+                              # the v0.4 starter rework and must stay reachable
+                              # byte-for-byte with the flag off. The Oath's
+                              # `kurage_ward` still stacks on top.
+KURAGE_EMPTY_QUEUE = "hold"   # an EMPTY memory fires nothing and pays
+                              # nothing; the bank keeps growing. Distinct from
+                              # a BLOCKED memory, which is v3's own clause:
+                              # [USER], "Sticking a card you can't afford into
+                              # Memory blocks Memory until it's played" --
+                              # nothing behind an unaffordable front fires and
+                              # the bank holds.
 KURAGE_TARGET_RULE = "follow_her_last_attack"
-                              # PICK E. "follow_her_last_attack" (E1,
-                              # recommended): an auto-played attack hits the
-                              # enemy Kokomi's OWN last attack aimed at; if
-                              # that enemy is dead or she has attacked
-                              # nobody, the enemy with the MOST current HP.
-                              # "random" (E2): the shipped free-play
-                              # behaviour, i.e. whatever `_free_play`'s
-                              # forced-random bind rolls. Both implemented.
-                              # NOTE the B1/E1 interaction the proposal
-                              # names: under turn_start "her last attack"
-                              # means LAST turn's, which is still
-                              # forecastable a whole turn ahead.
-KURAGE_POWER_PULSE = "hydro"  # PICK C: what the pulse does when the last
-                              # card she played was a POWER. "hydro" (C1,
-                              # recommended): pure Hydro application on the
-                              # pulse target -- set-up rather than a number,
-                              # and already shipped behaviour on the damage
-                              # pulse, so it is a re-use. The C2 (refresh)
-                              # and C3 (draw) alternatives are NOT
-                              # implemented: C2 is circular once the summon
-                              # is persistent and C3 puts card velocity on
-                              # an engine the player does not steer.
-KURAGE_EMPTY_QUEUE = "hold"   # PICK D. "hold" (D1, recommended): at the
-                              # threshold with an empty memory NOTHING
-                              # fires, no Charge is paid, and the bank keeps
-                              # growing -- the punishment is tempo, not
-                              # deletion. The D2 alternative ("the pulse
-                              # fires twice instead") is NOT implemented: it
-                              # restores the exact thing being removed, a
-                              # bank that pays damage on its own.
-KURAGE_MEMORY_PULSE_BLOCK = 5 # the SKILL branch of the new pulse. 5 is the
-                              # proposal's "shipped" number, and the row it
-                              # is shipped on is `kurages_oath`'s printed
-                              # `kurage_ward` grant (amount 5) -- NOT
-                              # KURAGE_PULSE_BLOCK, which ships at 0 since
-                              # the v0.4 starter rework. A separate constant
-                              # rather than a re-point of KURAGE_PULSE_BLOCK
-                              # because the shipped 0 must stay reachable
-                              # with the flag off, byte for byte.
-KURAGE_QUEUE_CAP = 0          # 0 = UNCAPPED, which is the proposal's
-                              # default. A queue is self-bounding in a way
-                              # the shipped bank is not -- every fire
-                              # removes one -- but ONLY because a card the
-                              # jellyfish plays does not re-enter the memory
-                              # (the recursion rule, coded in
-                              # `effects.note_kurage_play`). If sim finds an
-                              # unfireable backlog, this is the first knob.
-# KURAGE_DURATION and KURAGE_PULSE_PER_CHARGE are NOT READ under the flag.
-# The summon is persistent (so stacks stop being turns and the upgrade's
-# `kurage_turns +1` is inert), and the pulse carries no Charge term at all --
-# which is the whole point: the bank buys tempo, never magnitude.
+                              # v3 leaves this constant governing the PULSE's
+                              # aim only. The REPLAY's aim is v3's stored
+                              # target plus KURAGE_MEMORY_TARGET_FALLBACK
+                              # above, which supersedes v2's PICK E for the
+                              # replay and for the replay alone. "random" is
+                              # implemented for the pulse.
+# NOT READ under the flag: KURAGE_DURATION and KURAGE_PULSE_PER_CHARGE (the
+# summon is persistent and the pulse carries no Charge term), and
+# KURAGE_THRESHOLD, which v3's per-card price replaces outright.
+# v4 adds two more to that list, both RETIRED-UNDER-FLAG rather than deleted:
+# KURAGE_DURATION is now unread on BOTH of the jellyfish's doors (the base-kit
+# install reads nothing, and the Casket refresh maxes a 1 against a 1), and
+# KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON is unread in effect because the summon
+# check it gates can no longer fail. Both keep their shipped values so that a
+# flip of KURAGE_ALWAYS_ON restores the v3 arm without a re-authoring.
+KURAGE_THRESHOLD = 5          # RETIRED BY v3, kept only so a revert to the v2
+                              # arm is a flag flip rather than a re-authoring.
+                              # Nothing reads it.
 
 # --- Reference relics ---
 BURNING_BLOOD_HEAL = 6        # REF_IRONCLAD: heal after each won fight

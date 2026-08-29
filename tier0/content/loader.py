@@ -852,21 +852,37 @@ def _starting_relic_effects(spec: dict) -> list[dict]:
 
 
 def _starter_ids(spec: dict) -> list[str]:
-    """The printed starting deck, with the TWO quarantined substitutions the
-    Spark alternative-cost arm makes (`C.SPARK_ALT_COST_ENABLED`).
+    """The printed starting deck, with the quarantined starter substitutions
+    the two live prototype arms make. Each arm is flagged, each applies only
+    to its own character, and with both flags off this returns
+    `list(spec["starting_deck"])` and nothing else -- the acceptance condition
+    on both flags.
 
     THE SEAM IS HERE, IN CODE, AND NO PRINTED SHEET MOVES. Both readers of a
     printed starter go through this function -- `build_player` (the tier 0
     battery) and `starting_deck` (the tier 0.5 run) -- so the battery and the
-    run cannot disagree about what she opens with. That is the same argument
-    `_starting_relic_effects` above makes for her relic, and the same seam the
-    Kurage base kit opened for Kokomi.
+    run cannot disagree about what a character opens with. That is the same
+    argument `_starting_relic_effects` above makes for her relic. There is ONE
+    such function, not one per arm: two arms that each rewrote the starter
+    behind their own entry point is exactly the disagreement this seam exists
+    to prevent.
 
-    WHAT THE SWAP IS, and why. PICK 1 of the Sparks packet, options 1 and 5
-    together (the seat: "Options 1 and 5 together follow"). Regent's ten-card
-    starter ships exactly one Spark generator (`Venerate`) and exactly one
-    Spark sink (`FallingStar`, 0 energy / 2 stars), and [USER] asked to
-    "match their generation pattern". Klee's ten ship neither. So:
+    KOKOMI -- the Kurage base kit (`C.KURAGE_MEMORY` + `C.KURAGE_ALWAYS_ON`),
+    ONE substitution. [USER], 2026-08-29: "I think that we will want to make
+    Bake-Kurage part of the base kit (always on) rather than a separate card.
+    So yes, we could add one Muster card to the base deck to teach the
+    pattern." Bake-Kurage leaves -- a card that summons what is always on the
+    field is a card that does nothing -- and one Muster card takes the slot,
+    so that RULE 1 (the card sacrificed to a Muster enters the memory at three
+    times its cost) is printed in fight 1 instead of drafted. The deck size is
+    unchanged at twelve.
+
+    KLEE -- Sparks as an alternative cost (`C.SPARK_ALT_COST_ENABLED`), TWO
+    substitutions. PICK 1 of the Sparks packet, options 1 and 5 together (the
+    seat: "Options 1 and 5 together follow"). Regent's ten-card starter ships
+    exactly one Spark generator (`Venerate`) and exactly one Spark sink
+    (`FallingStar`, 0 energy / 2 stars), and [USER] asked to "match their
+    generation pattern". Klee's ten ship neither. So:
 
       * `pop` -> `proto_pop_spark`    -- the Basic that MAKES. Same Bomb, plus
                                          one Spark. Divine Right's job (a
@@ -884,22 +900,32 @@ def _starter_ids(spec: dict) -> list[str]:
     Regent's shape (one source, one sink); substituting all four would make
     four of ten opening cards unplayable on an empty bank, which is a
     different card game and not the one the packet priced. One copy is taken,
-    it is the smaller change, and it goes back to [USER] as a real pick.
-
-    THE DECK SIZE IS UNCHANGED at ten, which is what keeps this a
-    substitution rather than a starter rework. With the flag off this returns
-    `list(spec["starting_deck"])` and nothing else -- the acceptance condition
-    on the flag.
+    it is the smaller change, and it goes back to [USER] as a real pick. The
+    deck size is unchanged at ten, which is what keeps this a substitution
+    rather than a starter rework.
     """
     ids = list(spec["starting_deck"])
-    if not C.SPARK_ALT_COST_ENABLED or spec.get("id") != "klee":
-        return ids
-    for drop, add in C.SPARK_ALT_STARTER_SUBS:
+    character = spec.get("id")
+
+    if (character == "kokomi"
+            and C.KURAGE_MEMORY and C.KURAGE_ALWAYS_ON):
+        drop, add = C.KURAGE_MEMORY_STARTER_DROP, C.KURAGE_MEMORY_STARTER_ADD
         if drop not in ids:
+            # Loud rather than silent: if the printed starter ever stops
+            # carrying Bake-Kurage, this swap has become a no-op that nobody
+            # would notice until a smoke ran and the Muster was missing.
             raise ValueError(
-                f"klee: Spark starter substitution cannot replace missing "
-                f"card {drop!r}")
-        ids[ids.index(drop)] = add          # ONE copy: `.index` is the first
+                f"kurage base kit: {drop!r} is not in the printed starter, so "
+                f"the {add!r} substitution has nothing to replace")
+        ids[ids.index(drop)] = add
+
+    if character == "klee" and C.SPARK_ALT_COST_ENABLED:
+        for drop, add in C.SPARK_ALT_STARTER_SUBS:
+            if drop not in ids:
+                raise ValueError(
+                    f"klee: Spark starter substitution cannot replace missing "
+                    f"card {drop!r}")
+            ids[ids.index(drop)] = add      # ONE copy: `.index` is the first
     return ids
 
 
@@ -981,7 +1007,7 @@ def starting_deck(character_id: str, rng=None) -> list[str]:
     rewards, or any previously calibrated run randomness.
     """
     spec = _character_index()[character_id]
-    deck = _starter_ids(spec)          # the ONE seam; see `_starter_ids`
+    deck = _starter_ids(spec)         # the ONE seam; see `_starter_ids`
     if rng is None:
         return deck
     for slot in spec.get("randomized_starter", {}).values():
