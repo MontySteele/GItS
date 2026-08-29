@@ -442,10 +442,12 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     under xdist with a pip cache — the pytest job is ~3.5 min, from ~5.
     The scarce budget is the Codex seat's: GPT-played runs are paced per
     five-hour window, so a sitting plans around them rather than assuming
-    them. A **local-model grader** (Qwen 3.8 27B over llama.cpp) is being
-    built as a sanity backstop on already-CLOSED assignments only —
-    branch `local-model-grader`, unmerged, and the doctrine question it
-    raises is `M53`.
+    them. A **local-model grader** (Qwen 3.8 27B over llama.cpp) is a
+    sanity backstop on already-CLOSED assignments only, and it is
+    MERGED: `understudy/authorship.py` recognises a `local` family
+    (`FAMILIES`) without making it authorable (`AUTHORABLE_FAMILIES`
+    unchanged). That split is a read of the "no third family" rule, not
+    a ratified one — the row that ratifies or reverses it is `M53`.
   - **Next.** Klee slice 1 has no open engineering: all three arms read
     ADVANCE on clean independent reads and Second Helping has its
     whole-fight run. Owed next are the whole-fight runs for Rummage and
