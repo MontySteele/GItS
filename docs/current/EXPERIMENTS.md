@@ -151,6 +151,59 @@ carried while it was active is in the commit message that retired it.
   (`band = None`). The declaration is QUEUE `S4-G6`; its grading playtest is
   `docs/current/playtest/kokomi-playtest-protocol.md` (unrun, Answers block
   blank).
+- **`KLEESPARK-R1` — the Sparks arm on a live board** — **REGISTERED, unrun**,
+  no board staged and no form read at the time this entry is committed.
+  **Instrument:** the staged-turn blind QA funnel (`understudy/`, R213 step 2)
+  on the `+proto` DEV build built by `klee-mod\build\deploy_proto.ps1` — eight
+  boards under `understudy/turns/klee-sparks-r1/`, each `exact_hand: true`,
+  staged with `understudy.staged_turn stage`, graded by `staged_turn grade`'s
+  mechanical falsifiers and replayed with `execute`. It moves no `RT/D/P/C`
+  stamp; a prototype row's numbers are unquotable anywhere under R215 B and
+  every replay figure is a defect diagnostic under Guardrail-7.
+  **Tester seat:** the LOCAL Qwen seat (`python -m understudy.local_tester`),
+  its first live use, ruled available for the staged single-turn tester seat
+  only by R220 E on the Codex seat's ADVANCE (the generated `RULINGS.md` index
+  still runs to R219 and has not been regenerated past it). **Spot-check:** the Codex seat
+  ALSO reads turn 1 and every 4th after it — `--seat-spot-check 4`, which is
+  the shipped default and NOT a picked rate; `M58` is open on what the rate
+  should be, and this round discloses that it used the default rather than
+  answering that pick. Any turn `understudy/resource_order.py` flags routes to
+  the seat as well, regardless of the rate. A fresh-Opus form on every packet
+  is a SAME-FAMILY read (§7 of the packet: these rows are `authored_by:
+  [claude]`) and is recorded as such, never as the deciding read.
+  **Cell:** eight graded turns on the Sparks arm's eight
+  `docs/prototype-surface.yaml` rows with `character: klee` —
+  `proto_pop_spark`, `proto_kaboom_sink`, `proto_spark_strike`,
+  `proto_spark_sweep`, `proto_spark_double_tap`, `proto_spark_blast`,
+  `proto_spark_finisher`, `proto_true_spark_knight` — behind
+  `C.SPARK_ALT_COST_ENABLED` in tier 0 and `-p:PrototypeCards=true` in C#.
+  **Predictions:** `review/active/klee-sparks-2026-08-29.md` §10.9, slots
+  P1–P6, DRAFTED and committed before any run and COUNTERSIGNED by [USER] as
+  `M51` (2026-08-29) under R212(2). They are not restated here; §10.9 is the
+  registered text and the grade is written against it.
+  **The two sim slots (P5/P6)** are the drafted-deck arm and their one
+  registered command is
+  `PYTHONIOENCODING=utf-8 python -m tier05.exp_klee_sparks_r1` — a committed
+  A/B over one seed block: flag ON with the tight set drafted onto the
+  substituted starter, against flag OFF with the five shipped rows PICK 4
+  converts (`sparkly_treasure`, `spark_collection`, `pocket_fireworks`,
+  `sugar_rush`, `cant_catch_me`) and the shipped `true_spark_knight` on the
+  shipped starter, `punisher`, `demolition` pilot weights. It reports Spark
+  spend rate per player turn and the longest run of consecutive turns whose
+  bank sat at or above the cheapest Spark price with no spend. **Registered
+  blind spot on it:** `loader._pool_substitutions` returns `{}` for Klee, so
+  the tier 0.5 drafter cannot be offered a prototype Spark row at all; the
+  "drafted" deck is therefore ASSEMBLED by id and is not a drafter output, and
+  §10.5's four named pilot blind spots all push it toward spending.
+  **World:** `main` @ `d974303`.
+  **DISCLOSURE, before any reading.** (1) The roster-wide Burst retirement is
+  RULED — R220 B, `review/active/burst-retirement-2026-08-29.md` — and is NOT
+  BUILT: Klee's Burst meter is still live in the build this round stages on,
+  so any Burst a grader sees on a packet is the shipped meter and not a thing
+  this round is testing. (2) The Spark badge captured at
+  `review/qa/eb194-gates/frame-*gatec-*.png` has NOT had [USER]'s eyes-on, and
+  P2 is a prediction ABOUT that badge; a grader reading a face this round is
+  reading an unapproved badge. → `review/active/klee-sparks-2026-08-29.md`.
 
 New registrations add a pointer here and land their packet under
 `review/active/`. When one is graded, it moves to the **Graded** table above —
