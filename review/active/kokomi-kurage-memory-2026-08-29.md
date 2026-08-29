@@ -111,6 +111,9 @@ choosing when you decide which one to play and when.
 
 ## 2. The mechanic, stated exactly
 
+> **SUPERSEDED IN PART BY §11 (v3, 2026-08-29).** This section is the v2
+> mechanic and is kept as history. Where §11 disagrees with it, §11 wins.
+
 ### The queue — the Kurage's memory
 
 - **What enters it.** When Kokomi **plays a Companion card**, the Bake-Kurage
@@ -920,3 +923,357 @@ self-bounding claim depends on it (§7).
 
 A ruling id (`R219`) is due if [USER] takes the design, because the LAW
 amendments in §7's list are a slate, not eleven separate calls.
+
+---
+
+## 11. Version 3 (2026-08-29)
+
+**§2–§7 above are HISTORY and are not rewritten.** This section is the design
+as it now stands. Where v3 and §2 disagree, v3 wins; where §11 is silent, §2
+still holds. Built on `kokomi-kurage-memory-v3`, Python only, still behind
+`C.KURAGE_MEMORY`, still default off.
+
+### 11.1 [USER]'s words — this is the spec
+
+> "Cards must play against the same target the second time, unless that target
+> no longer exists, in which case they play randomly against eligible targets.
+> Companion cards only enter Memory when they themselves exhaust or are
+> Transformed via Muster (so cards with Exhaust get played twice, otherwise you
+> have to manually exhaust them) — thus you cannot just spam Raiden over and
+> over, you get a free Raiden when you Exhaust or Muster her. This would also
+> create natural synergy space for deliberately adding the Exhaust or Ethereal
+> tag to cards. Charge now builds at a rate of '1 Exhaust = 1 Charge' and cards
+> cost Charge equal to 3x their Cost. So 0-cost cards can autoplay for free
+> (e.g. Gorou in the starter deck) and otherwise the presumption is you need to
+> build Charge externally, such as through Kokomi's Skills or playing Exhaust
+> cards. Sticking a card you can't afford into Memory blocks Memory until it's
+> played. I don't think we need to cap this. If you load Memory with 20 cards,
+> they slow-play over 20 turns … if you have the Charge. If you stack infinite
+> Charge, then you still get only one play per turn. … infinites are fine as
+> long as they are not trivial to pull off. Memory / Order spam is a fine win
+> con as long as it's not literally the only thing Kokomi always does."
+
+Four further rulings, taken the same day, in [USER]'s words:
+
+> "We would be adding the card that was sacrificed for the Muster, not the new
+> card - so the original face."
+
+> "No, if the Muster prints a card that Exhausts, then it gets added as well."
+
+> "Those should be independent mechanics."
+
+> "Sacrificing a power seems like a bigger deal than sacrificing anything
+> else." *(the Power pulse grants Charge, not Hydro)*
+
+And the Skill pulse is **5**, on its own constant, as built.
+
+### 11.2 Design input (advisor)
+
+[USER]'s advisor (GPT) wrote the rule statement below and [USER] forwarded it
+as the design to build. It is quoted verbatim and implemented exactly, except
+where the four rulings above moved it (the Muster clause, chiefly).
+
+> "When a Companion not originating from Memory Exhausts, remember it. A
+> remembered card retains its original target and choices. At the start of
+> Kokomi's turn, if she can afford the front Memory, spend its Charge cost and
+> play it. Then remove that Memory from combat."
+
+Its consequences, also verbatim: a Memory-originated play never creates another
+Memory; its removal does not count as an Exhaust for Charge; it still triggers
+ordinary "when you play a Companion" effects; it must not program Kurage's
+Attack/Skill/Power pulse; a manually-Exhausted non-Exhaust Companion's copy is
+ephemeral — after autoplay it disappears rather than entering the discard pile.
+Same-target: a card played before entering Memory stores its original target;
+if dead/ineligible, random eligible. Cards entering Memory without having been
+played (Ethereal, manual Exhaust, Muster-direct) have no target → random
+fallback. Price: three times the card's base cost on its remembered face,
+including permanent upgrade changes, ignoring temporary combat discounts;
+X-cost Companions ineligible for now. Status/Curse exclusion retained. Original
+Companion Exhausts generate their one Charge; Memory copies do not.
+Acceleration: explicit Skills "Play the front Memory" preferred over a passive
+rate Power.
+
+**Authorship of the rule**: `authored_by: [user, claude, gpt]`. The RULE is
+jointly authored — [USER] specified it, the advisor wrote the statement, this
+build made it total. Row-level independence is unchanged: no card row was
+authored here, and nothing on any sheet moved.
+
+### 11.3 The rule as implemented
+
+**Two entry rules, and they are independent.** Neither function mentions the
+other; neither reads what the other did. That is [USER]'s "Those should be
+independent mechanics" taken as a construction rule rather than as a comment.
+
+**RULE 1 — MUSTER** (`effects.note_kurage_muster`, called from
+`effects._op_conscript`). The card **sacrificed** to the Muster enters the
+memory at the moment of transformation, on its own original face, with **no
+stored target** (it was never played). It does not matter what the Muster
+produced or what becomes of it. Create-mode conscription sacrifices nothing and
+so remembers nothing.
+
+Consequence [USER] asked for explicitly: the memory can hold one of **her own
+non-Companion cards**, because that is what a Muster usually eats. A remembered
+non-Companion replays by exactly the same rules — 0 energy, price paid, stored
+target or fallback — and its replay still never keys the pulse, never pays
+Charge and never enrols.
+
+**RULE 2 — EXHAUST** (`effects.note_kurage_exhaust`, called from
+`refpowers.after_card_exhausted`, the one funnel every exhaust route passes
+through). A Companion that did not originate from the memory enters when it
+**Exhausts**, however it came to exist — drafted, Mustered or created. A
+Companion that does not print Exhaust must be burned by hand (or by Ethereal)
+to enrol, which is the synergy space [USER] named for the Exhaust and Ethereal
+tags.
+
+**One Muster can therefore produce TWO memories**, in order: the sacrifice at
+the transformation, then the recruit when it burns. Ruled intended.
+
+**The one enrolment door** (`effects._enrol_memory`) is the only writer of the
+queue and carries the shared refusals: a card already enrolled, a memory copy,
+a Status or a Curse, and an X-cost card (ineligible for now — "X" has no cost
+to multiply, and pricing it off a finished turn's energy would be worse than
+refusing). The **once-only guard is general**: `Card.kurage_remembered`, one
+instance, one enrolment. It is the only such guard v3 keeps.
+
+**Each entry records** (`state.KurageMemory`): card id (upgrade state
+included), the remembered face's cost, the price, the stored target or `None`,
+`ephemeral`, and which rule filed it.
+
+**PRICE**: `3 × the remembered face's cost`, computed once at entry so the
+strip can show it for as long as the memory is queued. Permanent upgrade
+changes count. A Muster's own −1 counts on the **recruit's** entry, because the
+recruit is the card that Exhausted. Temporary combat discounts are ignored by
+construction — the price is read off the card, never off `combat.card_cost`.
+
+**FUEL**: `CHARGE_PER_EXHAUST` on every Exhaust of an **original** card of
+hers, her own **and** original Companions — the shipped funnel unnarrowed,
+which retires v2's PICK A1. Status and Curse still pay nothing (the 2026-08-23
+rotation ruling, untouched). A **memory copy pays nothing and is not an Exhaust
+event at all**: `kurage_fire` clears the copy's own `exhaust` flag, so the copy
+never reaches the funnel, and nothing hanging off that funnel — Burst,
+`exhausts_this_turn`, the rotation latch, a relic's `damage_per_exhaust` —
+pays out for a card that was never burned.
+
+**FIRE** (`effects.kurage_fire`, called from `combat._player_turn` at turn
+start): if the front's price ≤ the bank, spend it, play the front for 0 energy
+through `combat.resolve_free_play` against its stored target, and remove it. At
+most **one per turn**, however large the bank. A fire triggers ordinary "when
+you play a Companion" effects but does **not** fill the queue, pay Charge, or
+key the pulse (`state.kurage_autoplaying` plus the copy's own
+`from_kurage_memory` stamp).
+
+**BLOCK**: if the front is unaffordable, **nothing behind it fires** and the
+bank holds — unspent, not lost, not applied to something cheaper. That is
+[USER]'s clause, and it is distinct from an EMPTY memory, which also pays
+nothing but is not a block.
+
+**TARGET** (`effects._memory_aim`): the stored body whenever it is still alive,
+even when a fresh bind would now pick another — that is the whole content of
+"the same target the second time". Otherwise the fallback, and the default
+fallback is **random**, expressed as `None` so the shipped forced-random roll
+stays the one roll. A memory with no stored target takes the fallback by the
+same line, because absence and death are the same thing to a card that has to
+aim at something.
+
+**EPHEMERAL / removal from combat** (`effects._remove_from_combat`): **every**
+copy is removed from combat and reaches no pile. The advisor's statement ends
+"Then remove that Memory from combat", and that is taken literally for both
+kinds. This is a decision worth naming: for a copy whose original **did** print
+Exhaust, the alternative is that it Exhausts again — and an Exhaust pays
+Charge, which the same rule statement forbids. So `ephemeral` is **recorded and
+currently behaviour-free**. It is kept because it is what the strip must show
+and what a later ruling would attach behaviour to. **This goes back to [USER].**
+
+**THE ACCELERATION KEYWORD'S HOOK** (`effects._op_play_front_memory`, OPS row
+`play_front_memory`): a quarantined prototype-surface op, registered exactly
+the way `spend_charge` is — no card, no sheet row, no C#. It fires the front
+**outside** the automatic rhythm (it neither reads nor sets the per-turn latch)
+and still pays the price, because the keyword buys rhythm and never the card.
+**Provisional keyword name: "Stir"** (R179 — an ordinary word, cosmetic, listed
+here as provisional and renameable for free). No card is authored, per the
+brief; a Rare Power that raises the rate is likewise not authored.
+
+### 11.4 Every constant, and its alternative
+
+| constant | value | alternatives |
+|---|---|---|
+| `KURAGE_MEMORY` | `False` | the master quarantine flag |
+| `KURAGE_MEMORY_COST_PER_ENERGY` | `3` | [USER]'s "3x their Cost" |
+| `KURAGE_MEMORY_COST_BASIS` | `"remembered_face"` | **one basis only.** v2's `"original_print"` is RETIRED by the Muster ruling: the sacrifice enters on its own original face, so the two readings no longer differ |
+| `KURAGE_MEMORY_TARGET_FALLBACK` | `"random"` | `"most_hp"` — **implemented** (v2's PICK E1 fallback; more forecastable, less what v3 asks for) |
+| `KURAGE_FIRE_TIMING` | `"turn_start"` | `"turn_end"` — **implemented** |
+| `KURAGE_QUEUE_CAP` | `0` = uncapped | [USER]: "I don't think we need to cap this" |
+| `KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON` | `True` | `False` — **implemented**. NOT a [USER] pick; a hole the build filled (see 11.7) |
+| `KURAGE_FUEL_MODE` | `"exhaust_any"` | `"play_or_exhaust"` (v2's A2) — **implemented**. v2's `"exhaust_own"` (A1) is RETIRED by v3's fuel |
+| `KURAGE_POWER_PULSE` | `"charge"` | `"hydro"` (v2's C1) — **implemented**. The AMOUNT is DERIVED, not picked (R212): `CHARGE_PER_EXHAUST`, i.e. a Power pulse is worth exactly one burnt card |
+| `KURAGE_MEMORY_PULSE_BLOCK` | `5` | RULED. A separate constant, so the shipped `KURAGE_PULSE_BLOCK = 0` stays reachable byte-for-byte with the flag off; the Oath's `kurage_ward` still stacks on top |
+| `KURAGE_EMPTY_QUEUE` | `"hold"` | an empty memory pays nothing; a *blocked* memory is v3's own clause and is separate |
+| `KURAGE_TARGET_RULE` | `"follow_her_last_attack"` | governs the **pulse's** aim only now; `"random"` implemented |
+| `CHARGE_PER_EXHAUST` | shipped `1` | [USER]'s "1 Exhaust = 1 Charge" is the shipped rate; the constant did not move |
+| `KURAGE_THRESHOLD` | `5` | **RETIRED and unread.** v3's per-card price replaces it. Kept only so a revert to the v2 arm is a flag flip |
+| `KURAGE_DURATION`, `KURAGE_PULSE_PER_CHARGE` | — | **not read** under the flag |
+
+Where the rule lives, file and function: `effects._enrol_memory` (the one
+writer), `effects.note_kurage_muster` (Rule 1) called from
+`effects._op_conscript`, `effects.note_kurage_exhaust` (Rule 2) called from
+`refpowers.after_card_exhausted`, `effects._remembered_price` (the 3× and the
+X-cost refusal), `effects.kurage_fire` (fire, block, one-per-turn),
+`effects._memory_aim` (same target / fallback), `effects._remove_from_combat`
+(no pile), `effects.kurage_memory_pulse` (the pulse, Power branch now Charge),
+`effects.note_kurage_play` (the pulse key and recursion rule 2 only — the queue
+is gone from it), `effects._op_play_front_memory` + its OPS row (the keyword
+hook), `effects.resolve_card` (the per-card target record),
+`refpowers.after_card_exhausted` (the fuel), `combat._player_turn` (the
+turn-start fire), `state.KurageMemory` / `state.CombatState.kurage_queue` /
+`kurage_play_targets` / `Card.kurage_remembered` / `Card.from_kurage_memory`.
+
+### 11.5 The strip's new reading
+
+§3's strip design stands; **what it renders changes**, because the bank no
+longer has one threshold.
+
+- The Charge bar's **target is now the front memory's own price**, not a global
+  T. The strip reads `Charge 5 / 9 — Raiden blocked`: the bank, the front's
+  price, and the fact that the queue is blocked behind it. When the front is
+  affordable the same line reads as a forecast — *this fires next turn*.
+- **Each queued face carries its own price and its own target.** Under v2 every
+  memory cost the same and the strip only had to draw one number; under v3 the
+  strip must draw a price per card and, for a card that stored one, the body it
+  will hit. A 0-cost memory should read as free, because it is.
+- **The block is a state the strip must show**, not just a number that happens
+  to be too small. "Blocked" is a decision the player made (they banked a card
+  they cannot yet afford) and the whole legibility defence requires it be
+  visible and attributable.
+- **The last-card-type indicator gains a fourth reading**: the Power branch now
+  shows *Charge*, not an element.
+
+**What the bridge must expose** — §3's list, with v3's additions in bold:
+
+1. **The queue** — an ordered list of faces, front first, **each with its
+   price and its stored target**.
+2. **The bank** — `amount`, and **the front's price** in place of a global
+   threshold (still `EB-181`'s "a meter has no maximum" gap), plus **whether
+   the queue is blocked**.
+3. **The pulse** — type and amount, with **Charge** as a possible amount-kind.
+
+### 11.6 What v3 supersedes in §5's picks
+
+- **PICK A (the fuel source) — SUPERSEDED.** v3 is neither A1 nor A2: the fuel
+  is the shipped funnel, unnarrowed, on her own cards **and** original
+  Companions, at 1 per Exhaust. A1's Companion carve-out is gone. §4's "Muster's
+  Charge line", which settled R216 D in the direction of removal, is
+  **reversed by v3**: a Mustered Companion's Exhaust pays its Charge like any
+  other. A2 stays implemented as a sweepable arm and nothing more.
+- **PICK E (targeting) — SUPERSEDED for the replay.** The replay aims at the
+  body its original hit; the fallback is random. E1's "most HP" survives only as
+  the implemented alternative. `KURAGE_TARGET_RULE` still governs the pulse.
+- **T (the threshold) — SUPERSEDED and retired.** There is no threshold. Each
+  memory carries its own price at 3× its cost, so the derivation §5 asked for is
+  moot and `KURAGE_THRESHOLD` is unread.
+- **The starter-deck hole (§6.1 finding 11) — CLOSED.** Under v2 the starter
+  deck banked at most 2 Charge against a threshold of 5 and the engine never
+  fired. Under v3 it fires: see 11.8.
+- **PICK B (timing) — STANDS at turn start**, now on [USER]'s own words rather
+  than on a recommendation.
+- **PICK C (the Power pulse) — RULED, and not as §5 recommended**: Charge, not
+  Hydro.
+- **PICK D (the empty queue) — STANDS at "hold"**, and gains a sibling: the
+  *blocked* queue, which is v3's own clause and also pays nothing.
+
+**Still open, and [USER]'s**: nothing in the cost basis (v3 collapsed it), but
+these three —
+
+1. **`ephemeral` is recorded and inert** (11.3). Should a copy whose original
+   printed Exhaust behave differently from one that did not? Every option that
+   distinguishes them either pays Charge (forbidden) or files the copy in a pile
+   (which "remove from combat" forbids), so the build chose uniform removal.
+2. **`KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON`** — does "Stir" work with no
+   jellyfish on the field? Built `True` (one rule for what may act on the
+   memory); `False` is one edit and makes a card printing it never dead.
+3. **The Skill pulse's 5 and the Power pulse's derived 1** are now ruled, but
+   the *pulse as a whole* is still keyed to a type branch that no sim arm has
+   moved. It is the first thing a sweep should touch after the price.
+
+### 11.7 LAW and charter deltas v3 adds or changes against §4
+
+§4's list stands except where v3 moved it. The deltas:
+
+- **§4(i), the Charge bullet.** §4's proposed new text says Charge is "accrued
+  only from Kokomi's own **non-Companion** cards". **v3 strikes that clause.**
+  The correct new text is: *Charge is spent by the Bake-Kurage and by nothing
+  else — uncapped, accrued at 1 per Exhaust of one of her own cards, Companions
+  included, Status and Curse excluded; card-event-driven with no passive
+  accrual (Ancient carve-out: R127).*
+- **The relic's printed face.** §4 proposed adding "Companions do not pay
+  Charge." **v3 deletes that sentence from the proposal**: the funnel does not
+  narrow, so the face does not change at all. The relic edit §4 booked is no
+  longer owed.
+- **R216 D (Muster's Charge subsidy)** is settled in the direction of
+  **retention**, not removal — the opposite of §4. Muster's *new* consequence is
+  larger and different: a Muster now creates a memory of the card it ate, and
+  the recruit creates a second when it burns.
+- **A new LAW clause is owed that §4 did not book**: *the Bake-Kurage's memory
+  can hold one of her own non-Companion cards.* Every existing Companion-only
+  reading of the memory (including §2's) is wrong under Rule 1.
+- **A second new clause**: *a memory copy is removed from combat and is not an
+  Exhaust.* This is a lifecycle statement with consequences for every
+  exhaust-counting row on her sheet, and it belongs in LAW rather than in a
+  code comment.
+- **Unchanged from §4**: the reader-row table (every proportional read still
+  dies with the multiplier), `before_sun_and_moon` retiring with `kurage_amp`,
+  the slice-2 arms retiring under the surface's deletion rule, and M49 being
+  superseded. `read_the_current`'s `charge_at_least_10` is if anything *more*
+  urgent under v3, because the bank now drains at an irregular rate.
+
+### 11.8 What the smoke found
+
+Five whole fights, starter deck, commander weights, seeds 1–5, flag on. **The
+shape only. No number here is quotable and none is claimed** (R213 B / R215 B):
+the pilot does not value the memory, so this exercises the rule and never the
+decision.
+
+- **It fires now.** Under v2 the engine never fired on the starter deck at all.
+  Under v3 every one of the five fights fires — the memory rule reaches the
+  opening deck for the first time.
+- **The card that fires is Gorou** (`gorou_inuzaka_charge`), and it fires
+  because it is cost 0 and prints Exhaust: it enrols by Rule 2 the turn it is
+  played and costs **nothing** to replay. That is exactly the case [USER]
+  named, and it is the whole reason the engine is now reachable at turn 1.
+- **Memory plays per fight: one.** Not one per turn — one per fight. The starter
+  deck contains a single Companion that Exhausts, so the queue is fed once, is
+  emptied the next turn, and then reports an empty memory for the rest of the
+  fight (six to fourteen such turns per fight).
+- **Peak bank: two to five Charge**, and it is never spent, because the only
+  memory the deck ever produces is free. The bank ends the fight holding what it
+  banked.
+- **Nothing was ever blocked**, because nothing priced above 0 ever entered.
+
+**What this says, as a shape rather than a number**: v3 fixes v2's "the starter
+deck cannot run the engine" hole, but it fixes it at the floor — one free replay
+per fight, of the one free card. The *interesting* half of the design (banking
+toward a card you cannot yet afford, and the block that punishes over-banking)
+is entirely **drafted**, not printed: the starter deck cannot reach it. Whether
+that is correct — a floor that teaches the mechanic and a draft that deepens it
+— or too thin is a design read and it is [USER]'s.
+
+### 11.9 What the pilot sees
+
+Unchanged from §6.1 and worth restating because v3 does not fix it: the pilot
+does not value the memory. It does not know that Exhausting a Companion banks a
+free replay, does not know a Muster banks the card it ate, does not know a fire
+is a turn away, does not know a front is blocked, and does not steer play order
+or Muster targets to feed the queue. Under the flag the summon is priced at one
+flat pulse, which understates a persistent jellyfish — the declared safe
+direction to be wrong. So the flagged arm exercises the **rule** end to end and
+never the **decision** the rule exists for, which is why §6 routes acceptance
+through whole-fight blind play and forbids quoting a number off this arm.
+
+### 11.10 Green
+
+Full tier0 suite, tier05 suite, the 27 `--lane ci` lints, `gen_roster_cards
+--check` (no sheet moves) and the pinned `KleeCode` build, all green, with the
+flag off — which is the acceptance condition on the flag itself. No sheet row,
+card yaml, LAW line or register moved, so **no drafted number moved and
+`DRAFTER_VERSION` did not**. The new op is priced at a deliberate ZERO in
+`tier05.draft.STATIC_OP_PRICING` with its reason, and carries its row in the
+connectivity table, because both tables are total by construction.
