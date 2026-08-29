@@ -398,6 +398,12 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                   _hook("shared", "hand_contents", "use"),
                   _hook("shared", "card_identity", "write")],
     "summon_kurage": [_hook("private", "kurage", "write")],
+    # Kurage memory v3, QUARANTINED. It USES the bank (the front's price is
+    # spent) and it USES the jellyfish, which is what acts on the memory.
+    # Nothing shipped prints it -- the op exists for the prototype surface --
+    # but the table is total by construction and a missing row is a finding.
+    "play_front_memory": [_hook("private", "charge", "use"),
+                          _hook("private", "kurage", "use")],
 }
 
 # Ops whose value arrives at a card the player PICKS, through the pilot's

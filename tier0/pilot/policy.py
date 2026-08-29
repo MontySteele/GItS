@@ -16,7 +16,7 @@ from typing import Optional
 from tier0 import constants as C
 from tier0.engine import effects, powers, resources
 from tier0.engine.combat import (card_cost, card_playable, spark_cost,
-                                 spark_threshold)
+                                 spark_price, spark_threshold)
 from tier0.engine.state import Card, CombatState
 
 
@@ -478,11 +478,30 @@ def _expected_damage(state: CombatState, card: Card) -> float:
             # for once. The bank read is priced at the CURRENT bank: the
             # pilot cannot see its own future accrual, so this understates a
             # late-fight summon and that is the safe direction to be wrong.
-            turns = _est(state, fx.get("amount", C.KURAGE_DURATION),
-                         C.KURAGE_DURATION)
-            per_pulse = (C.KURAGE_PULSE_BASE
-                         + state.player.charge * C.KURAGE_PULSE_PER_CHARGE)
-            total += turns * per_pulse * C.PILOT_FUTURE_DAMAGE_DISCOUNT
+            if C.KURAGE_MEMORY:
+                # QUARANTINED. Under the memory rule neither term below
+                # exists: the summon is persistent (no duration to multiply)
+                # and the pulse carries no Charge multiplier. The pilot is
+                # priced at ONE flat pulse and no more, which UNDERSTATES a
+                # persistent jellyfish badly -- and that is the declared, safe
+                # direction to be wrong, the same stance the shipped comment
+                # above takes about a late-fight summon.
+                #
+                # WHAT THE PILOT DOES NOT SEE, stated rather than left to be
+                # discovered: it does not value the QUEUE at all. It does not
+                # know that playing a Companion banks a free replay, does not
+                # know a fire is one turn away, and does not steer play order.
+                # A flagged sim arm therefore exercises the RULE end to end
+                # and NOT the decision the rule exists for -- which is exactly
+                # why the proposal's §6 routes acceptance through whole-fight
+                # BLIND PLAY and forbids quoting any number off this arm.
+                total += C.KURAGE_PULSE_BASE * C.PILOT_FUTURE_DAMAGE_DISCOUNT
+            else:
+                turns = _est(state, fx.get("amount", C.KURAGE_DURATION),
+                             C.KURAGE_DURATION)
+                per_pulse = (C.KURAGE_PULSE_BASE
+                             + state.player.charge * C.KURAGE_PULSE_PER_CHARGE)
+                total += turns * per_pulse * C.PILOT_FUTURE_DAMAGE_DISCOUNT
         elif fx["op"] == "detonate":
             # Early detonation realizes bomb damage now but forfeits the
             # next-turn detonation it would get anyway — value it only
@@ -1150,9 +1169,85 @@ def _spark_reader_loss(state: CombatState, card: Card,
     return worst
 
 
+def _spark_unit_value(state: CombatState, card: Card) -> float:
+    """LEG 1 UNDER `C.SPARK_ALT_COST_ENABLED`: what one banked Spark is worth.
+
+    THE OLD LEG 1 IS RETIRED WITH THE RULE IT QUOTED. Its own comment said a
+    Spark is "a third of a free Attack" at `SPARKS_FOR_FREE_ATTACK` = 3, which
+    is a sentence about a rule that does not run under this flag. Nothing
+    zeroes and nothing consumes, so a Spark's whole worth is what it BUYS.
+
+    THE REPLACEMENT, and it is deliberately the floor rather than the best
+    case: A SHARE OF THE CHEAPEST AFFORDABLE SINK IN HAND. Walk the hand for
+    cards whose Spark price the bank can already meet, take the CHEAPEST such
+    price (ties broken by the larger payoff), and price one Spark at that
+    card's payoff divided by its price. With no affordable sink in hand a
+    Spark is worth EXACTLY ZERO, which is the honest reading of the new
+    economy and the sentence the packet's sec.6.3 puts at the centre of it:
+    "retire the threshold and holding has no payoff at all -- a Spark is worth
+    exactly what you buy with it."
+
+    WHY CHEAPEST AND NOT BEST-RATE. The cheapest affordable sink is the use
+    the bank is guaranteed to be able to make; the best rate may need Sparks
+    the bank does not hold. Under-valuing spends more readily, which is the
+    same safe direction R194 picks everywhere else in this file, and it is the
+    direction that cannot invent a hold the player has no way to cash.
+
+    HAND ONLY, inherited unchanged from leg 3: a sink in the draw pile is
+    information the player does not have at decision time.
+
+    The card being scored is excluded -- its own payoff is scored on its own
+    terms, which is leg 3's rule and the same reason.
+
+    WHAT THE PILOT STILL CANNOT SEE, stated rather than discovered later.
+    Every one of these makes it spend more readily than a player would, which
+    is the one-way direction, but they are real blind spots and the smoke's
+    "idle bank" number is measured against them:
+      (1) SINKS IN THE DRAW PILE. Hand-only is inherited and deliberate, so a
+          bank held for the Firework Finale two cards down reads as a bank
+          held for nothing.
+      (2) SPARKS ALREADY IN FLIGHT. Bombs on the board will pay the relic on
+          detonation; the pilot prices the bank it HAS, never the bank it is
+          about to have, so it cannot plan a two-turn purchase.
+      (3) THE FLOOR OF ITS OWN POWER, and this is the largest one. Under the
+          strict Rare Power, spending to 2 Sparks makes EVERY unpriced Attack
+          in hand unplayable. Leg 3 does NOT catch it: `_spark_bank_probe`
+          asks what a card is WORTH at a bank, not whether it is PLAYABLE at
+          one, and an Attack's expected damage is the same float either way.
+          A pilot holding the Power will therefore spend itself out of its own
+          Attack suite. Naming it is the honest move; fixing it means
+          teaching the probe playability, which is a policy version bump and
+          not this branch's to take.
+      (4) MULTI-TURN VALUE. One Spark banked across two turns and one Spark
+          spent now score identically; nothing in the term is a discount rate.
+    """
+    payoff_per_spark = 0.0
+    best_price: int | None = None
+    for other in state.player.hand:
+        if other is card:
+            continue
+        price = spark_price(state, other)
+        if not price or price > state.player.sparks:
+            continue
+        payoff = _spark_bank_probe(state, other, state.player.sparks) / price
+        if best_price is None or price < best_price:
+            best_price, payoff_per_spark = price, payoff
+        elif price == best_price and payoff > payoff_per_spark:
+            payoff_per_spark = payoff
+    return max(0.0, payoff_per_spark)
+
+
 def _spark_free_attack_loss(state: CombatState,
                             before: int, after: int) -> float:
-    """Leg 2: a free Attack forfeited outright by crossing the threshold."""
+    """Leg 2: a free Attack forfeited outright by crossing the threshold.
+
+    RETIRED-UNDER-FLAG. There is no threshold under
+    `C.SPARK_ALT_COST_ENABLED`, so there is no bar to cross and no free Attack
+    to forfeit; the leg returns 0.0 and the whole term collapses to legs 1
+    and 3, which is the collapse the packet's sec.6.3 predicted.
+    """
+    if C.SPARK_ALT_COST_ENABLED:
+        return 0.0
     threshold = spark_threshold(state)
     if before < threshold or after >= threshold:
         return 0.0          # nothing to forfeit, or the bar still cleared
@@ -1167,18 +1262,28 @@ def _spark_hold_cost(state: CombatState, card: Card) -> float:
     """What the Sparks this play consumes are worth BANKED. See the block
     comment above for the three legs and why the largest wins.
 
-    The price is `combat.spark_cost` -- the engine's own cost line, asked the
+    The price is `combat.spark_price` -- the engine's own cost line, asked the
     same way from both sides, so the pilot can never charge itself for a
     quantity the playability gate would not have demanded. That gate has
     already run (`pilot()` filters on `card_playable`), so the bank covers the
     price and the drop is the whole price.
+
+    `spark_price` rather than `spark_cost`, so that under the strict Rare
+    Power the pilot is charged for the three Sparks the Power takes off an
+    Attack that prints no price. With the flag off the two functions return
+    the same number for every card, so this line is byte-identical there.
     """
-    price = spark_cost(card)
+    price = spark_price(state, card)
     if not price:
         return 0.0
     before = state.player.sparks
     after = max(0, before - price)
-    return max((before - after) * C.PILOT_SPARK_VALUE,
+    # LEG 1. Under the flag the stock floor is not a fixed dial any more --
+    # see `_spark_unit_value` for why, and for what it costs in blindness.
+    stock = ((before - after) * _spark_unit_value(state, card)
+             if C.SPARK_ALT_COST_ENABLED
+             else (before - after) * C.PILOT_SPARK_VALUE)
+    return max(stock,
                _spark_free_attack_loss(state, before, after),
                _spark_reader_loss(state, card, before, after))
 

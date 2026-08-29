@@ -288,6 +288,46 @@ public static class KleeMod
             // looks up -- finding 23, same failure mode R4 documents for
             // cards. The self-check's R5 rule caught it at boot.
 
+#if PROTOTYPE_CARDS
+            // QUARANTINED (sec.12.6 ITEM 14): THE PROTOTYPE OATH'S OWN
+            // DESCRIPTION CHANNEL.
+            //
+            // `gen_klee_cards` renders a Power card's description PER POWER ID,
+            // so `kurage_ward` prints ONE string -- "Each Bake-Kurage pulse
+            // also grants {X} Block." -- shared between the shipped Oath and
+            // the prototype row. Moving that string in the generator would move
+            // a SHIPPED release face and make it false with the flag off, where
+            // the ward really does still ride the pulse. The generator cannot
+            // fix it from its side, so the mirror gives the prototype row its
+            // own channel here: one key, dev builds only, overriding the
+            // generated face and nothing else.
+            //
+            // THE KEY IS READ BACK OFF THE LIVE MODEL, which is R4's rule and
+            // the only way to be certain the string written is the string that
+            // will be read: BaseLib prefixes a CustomCardModel's id
+            // (KABOOM -> KLEEMOD-KABOOM), and hardcoding the unprefixed form
+            // registers against an id nothing looks up.
+            //
+            // The 3 is [USER]'s placeholder and lives on the surface row; it is
+            // restated here because a face has to say a number, and the row and
+            // this string are owed to each other. The upgraded 5 is on the row
+            // too and has no upgrades-sheet home yet, so it is not printed.
+            foreach (var proto in PrototypeCards.For("kokomi"))
+            {
+                if (proto is not Cards.Prototype.Generated.ProtoKuragesOathMemory)
+                {
+                    continue;
+                }
+                LocManager.Instance.GetTable("cards").MergeWith(
+                    new Dictionary<string, string>
+                    {
+                        [proto.Id.Entry + ".description"] =
+                            "Whenever the [gold]Bake-Kurage[/gold] plays a card "
+                            + "from its memory, gain 3 Block.",
+                    });
+            }
+#endif
+
             Log.Info($"[{ModId}] Localization strings injected.");
         }
         catch (Exception e)

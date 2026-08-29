@@ -116,7 +116,17 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 191,   # EB-188/189/190 minted 2026-08-29 by the process-review
+    "EB": 193,   # EB-192/193 minted 2026-08-29 by the Klee Sparks research
+                 # pass, both confirmed defects found decompiling the pinned
+                 # 0.111.0 build. EB-192: the `regent_forge` canon package is
+                 # a regex artifact fusing Regent's Stars with the unrelated
+                 # Forge card, so the anchor `klee/spark` is measured against
+                 # is about half a different mechanic -- [USER]'s
+                 # measurement-law call. OPEN. EB-193: the base-game pool
+                 # extractor requires a decimal `...m` literal and so drops
+                 # every int-typed var, leaving `game_ref/regent.json` with
+                 # no Star amounts at all. OPEN.
+                 # EB-188/189/190 minted 2026-08-29 by the process-review
                  # pass (EB-188: the prototype-arm door for whole-fight
                  # blind play -- BUILT, and CLOSED 2026-08-29 on its live
                  # acceptance: sealed session 20260829-181718 on
@@ -297,7 +307,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 182, 183, 184,
-        189, 191,
+        189, 191, 192, 193,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

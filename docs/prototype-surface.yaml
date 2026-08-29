@@ -529,3 +529,315 @@
    effects: [{op: spend_spark, amount: 3},
              {op: block, amount: 5},
              {op: burst_energy, amount: 10}]}
+
+# =============================================================================
+# KOKOMI -- THE KURAGE'S MEMORY v3 (a RULE arm, not a card row)
+#
+# DECLARED HERE AND CARRYING NO ROW, DELIBERATELY. Every row in this file is a
+# CARD: `tools/gen_prototype_cards.py` requires an `id` starting `proto_`, a
+# `character` in the codegen profiles, and an effects list it can emit as a
+# C# class, and `tier0/content/loader.prototype_cards()` schema-checks it as a
+# card. The Kurage's memory is ENGINE BEHAVIOUR -- two entry rules, a price, a
+# turn-start fire, a pulse and a strip -- and it authors no card at all. A row
+# for it would either be a card nobody designed or a new row KIND, taught to
+# the loader, the generator, four lints and the surface tests. That is
+# machinery bought for one arm, which is the same trade this file's header
+# already refused for `character: companion`.
+#
+# So it is declared, not rowed, and the declaration is the audit trail:
+#
+#   arm:          the Kurage's memory, v3
+#   character:    kokomi
+#   spec:         review/active/kokomi-kurage-memory-2026-08-29.md sec.11
+#                 (sec.11.1 is [USER]'s words and IS the spec)
+#   sim:          tier0 behind C.KURAGE_MEMORY, default off
+#   mod:          klee-mod/KleeCode/Powers/Prototype/KurageMemory.cs, compiled
+#                 only under `dotnet build -p:PrototypeCards=true` -- the SAME
+#                 switch that quarantines the card rows above, so a release
+#                 build contains no type from it and every seam that calls it
+#                 sits inside `#if PROTOTYPE_CARDS`
+#   authored_by:  [claude, gpt] -- the field's closed set is
+#                 {claude, gpt} (EB-190), so it records the MODEL FAMILIES and
+#                 not the people: Claude implemented the rule and made it
+#                 total, and [USER]'s advisor (GPT) wrote the rule statement
+#                 [USER] forwarded as the design, which is text and therefore
+#                 adds its family. [USER] SPECIFIED THE RULE and made four
+#                 rulings on it; that is not a model family and has no cell in
+#                 the field, so it is recorded here instead.
+#                 THE FIELD ITSELF IS ON ROWS, and this arm has none -- it
+#                 authors no card at all (see above) -- so `seat.py`'s refusal
+#                 has nothing to key on for the RULE. What it does key on is
+#                 the one row this chain does add,
+#                 `proto_kurages_oath_memory`, which carries `[claude]`:
+#                 [USER] ruled its numbers and its rule, Claude wrote it, and
+#                 no seat contributed text, a number or a mode to it.
+#   prints:       nothing. `play_front_memory` (provisional keyword "Stir",
+#                 R179) has its op in the sim and its door in the mod so
+#                 codegen can emit a card that prints it; no card does.
+#   revert:       the flag. Delete Powers/Prototype/KurageMemory.cs and its
+#                 `#if PROTOTYPE_CARDS` seams; the sim half is C.KURAGE_MEMORY.
+#
+# THE DELETION RULE AT THE TOP OF THIS FILE APPLIES TO THIS BLOCK TOO: when
+# the arm is accepted or rejected, this block leaves with it.
+# =============================================================================
+
+# KOKOMI KURAGE BASE KIT (sec.12 of
+# review/active/kokomi-kurage-memory-2026-08-29.md) -- ONE row, one arm.
+#
+# THE QUESTION IT SETTLES IS ALREADY RULED, so this row is a STAGED FACE
+# rather than an experiment: sec.12.4 pick 4 asked what happens to Kurage's
+# Oath once the jellyfish is always on and its pulse therefore fires every
+# turn, and [USER] answered on 2026-08-29, verbatim --
+#
+#     "Let's rewrite it to '3 block per memory played, upgrade to 5' as a
+#      placeholder and see if it needs adjusting later."
+#
+# So the ward stops riding the pulse and starts riding a MEMORY PLAY. The
+# trigger half of that is engine (`effects.kurage_fire`, behind
+# `C.KURAGE_MEMORY`, one site covering both the automatic turn-start fire and
+# the "Stir" keyword's manual one). The FACE half is this row.
+#
+# THE NUMBERS ARE [USER]'S AND ARE A PLACEHOLDER IN HIS OWN WORD. 3, and 5
+# upgraded. No measurement is attached to either and none may be: nothing has
+# been run on this shape, and under R213 B / R215 B no number measured on this
+# surface would be quotable if it had. "See if it needs adjusting later" is
+# the disposition, not a band.
+#
+# AUTHORSHIP. NUMBERS AND RULE: [USER]. IMPLEMENTATION AND WORDING: Claude.
+# Nothing on this row was designed by the doctrine seat, and nothing here has
+# been graded. `authored_by:` is a list of MODEL FAMILIES (EB-190, head of
+# file) and [USER] is not one of them, so the field on the row below reads
+# `[claude]` -- the family that wrote it -- and this paragraph is where his
+# ownership of the numbers is recorded.
+#
+# THE SHIPPED ROW IS UNTOUCHED. `kurages_oath` in docs/kokomi-cards.yaml still
+# prints ward 5 (7 upgraded) and still says "per Bake-Kurage play"; it is a
+# shipped number under an R213 freeze and it is not this branch's to move, and
+# leaving it alone is what makes accepting this arm a one-row re-authoring
+# rather than an engine change.
+#
+# THE SHIPPED TWIN IS NOT OFFERABLE UNDER THE FLAG, and that is a fix, not a
+# second staging rule. [USER] asked of the staged face: "Why does the power
+# print 5 instead of 3, exactly?" The answer was that the ward's amount is read
+# off whatever card applied it, so a flagged run that DRAFTED the shipped Oath
+# paid 5 per memory play under a face that says per pulse -- text that cannot
+# bind, which is D4. The sheets cannot move, so the OFFER side does: under
+# `C.KURAGE_MEMORY` this row substitutes for `kurages_oath` in Kokomi's
+# offerable pool at the same rarity (`loader._pool_substitutions`, read by
+# `rewards.character_pool`, which is every offer surface's one source). Flag
+# off, the shipped Oath is the only Oath and this row is unreachable as ever.
+#
+# NO UPGRADE ROW, AND THAT IS THE SURFACE'S CONVENTION, NOT AN OMISSION. This
+# file has never carried an upgrade: no row above declares one, the schema has
+# no field for it, and `tools/gen_prototype_cards.py` has no upgrade path --
+# upgrades live in `docs/<character>-upgrades.yaml`, keyed by shipped card id,
+# and putting a `proto_` key in a shipped sheet would give the R213 deletion
+# rule a second file to remember. So the upgraded 5 is recorded HERE, in the
+# row that owns it, and is owed to the upgrades sheet at the same moment this
+# row is re-authored onto her real sheet.
+#
+# NAME. "Kurage's Oath" is the shipped card's name and is [USER]'s; this row
+# keeps it, because the row IS that card with one clause rewritten and a blind
+# reader must see the card, not the experiment (R179).
+#
+# THE FACE, as it must read once the mod carries it:
+#
+#     Kurage's Oath -- 1 energy, Power, Common
+#     Whenever the Bake-Kurage plays a card from its memory, gain 3 Block.
+#     (Upgraded: 5.)
+#
+# THE GENERATED FACE DOES NOT SAY THAT YET, and it cannot be fixed from
+# here. `gen_klee_cards` renders a Power's description PER POWER ID, not
+# per row, so `kurage_ward` prints one string -- "Each Bake-Kurage pulse
+# also grants {X} Block." -- shared with the SHIPPED Oath. Moving that
+# string would move a shipped release face and make it false with the flag
+# off, where the ward really does ride the pulse. So the wording is owed to
+# the C# mirror, which needs its own power (or its own description channel)
+# for the prototype: it is on sec.12.6's checklist as item 14.
+# =============================================================================
+- {id: proto_kurages_oath_memory, name: "Kurage's Oath", character: kokomi,
+   cost: 1, type: power, rarity: common,
+   authored_by: [claude],
+   effects: [{op: apply_power, power: kurage_ward, amount: 3, target: self}]}
+
+# =============================================================================
+# KLEE SPARKS -- SPARKS AS AN ALTERNATIVE COST (R213 E2). Seven rows.
+#
+# AN EIGHTH ROW WAS AUTHORED AND IS NOT HERE, and the reason is the generator
+# rather than a doctrine hold. PICK 5's re-authored `true_spark_knight` --
+# "Spark Knight's Oath", Rare Power, 2 Energy, "Your Attacks that do not
+# already cost [Spark] cost 3 [Spark] instead of their Energy cost" -- applies
+# a power named `spark_attack_cost`, and `tools/gen_prototype_cards.py`
+# refuses it by name: "NOT EXPRESSIBLE: apply_power power 'spark_attack_cost'
+# (no PowerModel in the registry). A prototype row must be emittable today --
+# rewrite it inside the existing grammar, or take the runtime work first."
+# That refusal is correct and is left standing rather than worked around: the
+# C# `PowerModel` is owed work, and a row emitting a reference to a class that
+# does not exist would be a prototype that cannot be staged, which is the one
+# thing this surface promises its rows are not.
+#
+# THE SIM HALF OF THAT POWER IS BUILT AND TESTED ANYWAY, behind the same flag
+# (`combat.spark_power_price`, `C.SPARK_ATTACK_POWER_PRICE`,
+# tier0/tests/test_spark_alt_cost.py), because tier0 is the arm this branch is
+# for and the power is applied there by name. The row's exact text and the C#
+# it is waiting on are in the packet's sec.10, not commented out here -- the
+# deletion rule at the top of this file forbids a commented-out row.
+#
+# THESE ROWS DO NOT STAND ALONE, and that is the difference between this
+# slice and every other block on this surface. They are the CARD half of a
+# RULE change that lives in code behind `C.SPARK_ALT_COST_ENABLED` -- the
+# threshold rule ("At 3 Sparks, your Attacks cost 0. Playing one consumes 3")
+# is retired under that flag, and with it retired these rows are the only
+# thing the bank can be spent on. With the flag OFF the rule is the shipped
+# rule and these rows are eight cards nothing reaches. The packet is
+# review/active/klee-sparks-2026-08-29.md; sec.9 is the independent seat's
+# doctrine read and sec.1 is [USER]'s ruling that closed the direction.
+#
+# THE PICKS THESE ROWS ARE, in the seat's words (sec.9):
+#   PICK 1  "Options 1 and 5 together follow"  -- a Basic that MAKES and a
+#           Basic that SPENDS, exactly Regent's starter shape.
+#   PICK 3  "2, Tinder Toss; 3, Bang Bang!; 4, Dodoco Blast; 5, Firework
+#           Finale; best: 2. Option 1 ruled out -- R69 / R29d."
+#   PICK 4  "1, The tight set."  -- five conversions, pool stays 79.
+#   PICK 5  "1, STRICT conversion" + "(a), already-priced Attacks are
+#           unaffected".
+#
+# CANDIDATE 1 IS RENAMED, AND ONLY ITS NAME MOVED. sec.4.2 proposed `Sizzle`;
+# `Sizzle` is a shipped Klee Common Attack (docs/klee-cards.yaml:158) and the
+# seat ruled the candidate out by name under R69 / R29d. The card's rarity,
+# price, cost and body are the packet's, unchanged. The replacement is
+# `Fwoosh!` -- provisional and mine (R179), in the onomatopoeia family the
+# sheet already speaks (Snap!, Crackle, Pop!, Da-da-da!), checked against
+# docs/reserved-card-names.txt and every sheet name before use. The name is
+# [USER]'s to settle; the lint is the floor, not the ruling.
+#
+# EVERY DISPLAY NAME HERE IS PROVISIONAL (R179), including the two Basics'
+# and the Power's: a proto row may not reuse its twin's printed name, so
+# `Pop!`, `Kaboom!` and `True Spark Knight` each get a working title rather
+# than a design decision.
+#
+# THE PRICES ARE THE PACKET'S, and the packet says plainly what they are:
+# "shape, not ruled values", set against sec.2.4's measured income of ~1 Spark
+# per turn, so 1 Spark = one turn of income, 2 = a deck cycle, 3 = Regent's
+# median sink. NO NUMBER BELOW IS A BALANCE CLAIM (R215 B).
+#
+# EVERY DAMAGE FIGURE IS THE PACKET'S sec.4.2 TABLE VERBATIM, except the two
+# Basics, whose bodies are their shipped twins' unmoved (`kaboom` 7 damage,
+# `pop` one Bomb at 5) so that the starter substitution is a PRICE change and
+# nothing else.
+#
+# WHICH POOL ROW EACH ONE REPLACES (PICK 4, the tight set -- one for one, so
+# the pool stays at 79 and the generator:sink ratio moves at the same time).
+# The replacement is recorded HERE and executed nowhere: this surface cannot
+# reach a pool, and re-authoring the shipped sheet is what ACCEPTANCE means
+# under the deletion rule at the top of this file.
+#   Fwoosh!          <- sparkly_treasure  (Common, 0E, gain 1)
+#   Bang Bang!       <- spark_collection  (Common, 1E, gain 2)
+#   Tinder Toss      <- pocket_fireworks  (Common, 1E attack, no rider)
+#   Dodoco Blast     <- sugar_rush        (Uncommon, 1E, +1 energy + gain 1)
+#   Firework Finale  <- cant_catch_me     (Uncommon, 1E, block/gain/draw)
+#
+# I DESIGNED THESE ROWS AND MAY NOT GRADE THEM (R213's first guard). The seat
+# gated the PICKS; it wrote no text and picked no number here, so every row
+# is `authored_by: [claude]` -- including the renamed candidate, whose name
+# the seat ruled OUT and did not replace.
+# =============================================================================
+
+# ---------- PICK 1: the starter's Basic that MAKES ---------------------------
+# Shipped twin: `pop` / "Pop!" (0, Skill, Basic, skill_tag -- one Bomb at 5).
+# Cost, type, rarity, tag and the Bomb are unmoved; a Spark rider joins them,
+# which is the packet's option 1 verbatim: "the natural home is `pop` (0
+# energy, places a bomb), which becomes 'place a Bomb, gain 1 Spark'."
+#
+# WHY THE BUFFER GOES ON A CARD AND NOT ON THE RELIC (options 2 and 3): the
+# relic's grant would be unsteerable income, and the seat cited D2's "the
+# control must be reachable early and reliably -- starter kit, starting relic,
+# base system, or the ordinary pool" for putting it on a card the player
+# chooses to play. Pounding Surprise keeps its body unchanged and untouched.
+- {id: proto_pop_spark, name: "Powder Pop", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: basic, solve: [frontload], archetypes: [demolition], role: enabler, tags: [skill_tag],
+   effects: [{op: place_bomb, amount: 1, target: enemy, bomb_damage: 5},
+             {op: gain_spark, amount: 1}]}
+
+# ---------- PICK 1: the starter's Basic that SPENDS --------------------------
+# Shipped twin: `kaboom` / "Kaboom!" (1, Attack, Basic -- 7 damage). The
+# packet's option 5: "`kaboom` becomes 0 energy / Spend 1 Spark. This is
+# `FallingStar`'s exact role." The damage figure does not move, so the whole
+# delta is the CURRENCY: this Attack is bought with the bank instead of with
+# the turn.
+#
+# ONE COPY, NOT FOUR, AND THE PACKET DOES NOT SAY WHICH. Klee's starter holds
+# four `kaboom` and one `pop`; Regent's holds one generator and one sink out
+# of ten. Substituting one copy of each is the reading that "matches their
+# generation pattern" ([USER], sec.1(a)); substituting all four `kaboom` would
+# make four of her ten opening cards unplayable on an empty bank. The seam at
+# `loader._starter_ids` does one of each and says so; it goes back to [USER]
+# in the packet's sec.10.
+- {id: proto_kaboom_sink, name: "Ka-pow!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: basic, solve: [frontload], archetypes: [generic], role: glue,
+   effects: [{op: spend_spark, amount: 1},
+             {op: damage, amount: 7, target: enemy}]}
+
+# ---------- PICK 3 / PICK 4: the tight set of Spark-cost Attacks -------------
+# All five are 0 Energy with a top-level `spend_spark`, which is the whole of
+# "cost Sparks instead of Energy" in both engines: `combat.spark_cost` derives
+# the price off the op, `card_playable` gates on it, and the payment is
+# `effects.spend_sparks`, all-or-nothing. NOTHING WAS BUILT FOR THESE ROWS --
+# the rail has shipped since EB-118 Phase 2 and has been printed by three
+# Uncommon Skills since R211. The only new thing in the branch is the RULE
+# these five now have to compete with the absence of.
+#
+# THE COST MUST STAY AT TOP LEVEL (the rule authored at `powder_charge`, and
+# the one the seat enforced in Klee slice 1): a spend inside a conditional is
+# invisible to the playability gate. No row here has a conditional.
+
+# Candidate 1, renamed. sec.4.2: "Spend 1 / 8 damage", mirroring Regent's
+# `GuidingStar` (1 star, 12 damage). Its twin on the printed sheet is
+# `sparkly_treasure`, whose entire body is "gain 1 Spark" -- the purest
+# generator in the pool becoming the cheapest sink in it.
+- {id: proto_spark_strike, name: "Fwoosh!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: payoff,
+   effects: [{op: spend_spark, amount: 1},
+             {op: damage, amount: 8, target: enemy}]}
+
+# sec.4.2 candidate 2, the seat's "best: 2". Spend 1 / 4 damage to ALL,
+# mirroring `CloakOfStars` (1 star, the cheap utility). One turn of income
+# buys a board sweep, which is the cheapest interesting thing the bank can do.
+- {id: proto_spark_sweep, name: "Tinder Toss", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: payoff,
+   effects: [{op: spend_spark, amount: 1},
+             {op: damage, amount: 4, target: all_enemies}]}
+
+# sec.4.2 candidate 3. Spend 2 / 5 damage to a random enemy, twice --
+# mirroring `FallingStar`, Regent's own Basic sink, at his own price.
+# `times: 2` is the sheet's standard multi-hit count (jumpy_dumpty,
+# pocket_fireworks).
+- {id: proto_spark_double_tap, name: "Bang Bang!", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: common, solve: [frontload], archetypes: [spark], role: payoff,
+   effects: [{op: spend_spark, amount: 2},
+             {op: damage, amount: 5, target: random_enemy, times: 2}]}
+
+# sec.4.2 candidate 4. Spend 2 / 7 damage to ALL, mirroring `GammaBlast`
+# (3 stars AoE). The name reuses a word the mod already speaks in code --
+# `KleeCombatVfx.SpawnDodocoPop` is literally the Spark-spend effect.
+- {id: proto_spark_blast, name: "Dodoco Blast", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: uncommon, solve: [frontload], archetypes: [spark], role: payoff,
+   effects: [{op: spend_spark, amount: 2},
+             {op: damage, amount: 7, target: all_enemies}]}
+
+# sec.4.2 candidate 5. Spend 3, Exhaust / 18 damage single target, mirroring
+# `Devastate` (4 stars, the big hit). Three Sparks is Regent's median sink and
+# the retired threshold's own number, so this card is the direct question the
+# slice asks: is a full bank worth more as this, or as the free Attack the
+# rule used to hand out?
+- {id: proto_spark_finisher, name: "Firework Finale", character: klee,
+   authored_by: [claude],
+   cost: 0, type: attack, rarity: uncommon, solve: [frontload], archetypes: [spark], role: payoff, exhaust: true,
+   effects: [{op: spend_spark, amount: 3},
+             {op: damage, amount: 18, target: enemy}]}

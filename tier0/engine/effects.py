@@ -15,7 +15,8 @@ from typing import Optional
 from tier0 import constants as C
 from tier0.engine import powers, reactions, resources, statuses
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
-                                CombatState, Enemy, grant_sly_autoplay,
+                                CombatState, Enemy, KurageMemory,
+                                grant_sly_autoplay,
                                 remove_instance, sly_autoplays,
                                 sly_granted_this_turn, sly_riders,
                                 sync_fanfare_cap_to_max_hp)
@@ -482,6 +483,17 @@ def bind_card_aim(state: CombatState, card: Card) -> Optional[Enemy]:
     # human at the mouse, so modelling one there would hand Havoc/Cascade a
     # judgement the mod never gives them -- the same argument that put the roll
     # here in the first place.
+    # QUARANTINED (C.KURAGE_MEMORY), and FIRST because it is an override of
+    # the forced-random branch below rather than a competitor to it. PICK E1
+    # says the jellyfish's replay "follows her lead" -- the enemy Kokomi's own
+    # last attack aimed at -- which is the one auto-play in the engine that is
+    # deliberately NOT random, because the whole defence of this design is
+    # that the strip can SHOW the target before it fires (D4). `kurage_aim` is
+    # non-None only for the duration of a memory auto-play, and only under
+    # KURAGE_TARGET_RULE == "follow_her_last_attack"; E2 leaves it None and
+    # falls through to the shipped roll.
+    if state.kurage_aim is not None and _card_aims_at_enemy(card):
+        return state.kurage_aim
     if state.force_random_targeting and _card_aims_at_enemy(card):
         return state.rng.choice(living)
     # EB-139 / R211: the aura-aware bind, for MANUALLY-MODELLED play only. If
@@ -1478,6 +1490,12 @@ def _op_apply_power(state: CombatState, fx: dict, card: Card) -> None:
         # the Garment while the Kurage is fielded refreshes the jellyfish's
         # duration. The E-into-Q loop, verbatim. Guarded on the summon
         # already being out -- the Burst does not conjure one from nothing.
+        #
+        # QUARANTINED CONSEQUENCE (C.KURAGE_MEMORY + C.KURAGE_ALWAYS_ON): a
+        # refresh of a jellyfish that never expires is a `max(1, 1)`, i.e.
+        # NOTHING. Left exactly as written -- the least-invasive default, and
+        # the guard above is still the honest one -- but the canon E-into-Q
+        # link pays nothing under the base kit. sec.12 pick 3.
         if (fx["power"] == "ceremonial_garment"
                 and state.player.powers.get("kurage_summon", 0)):
             # max(), not a hard set (audit 2026-07-26 s1.4; fixed in EPOCH 1).
@@ -3425,11 +3443,490 @@ def _op_summon_kurage(state: CombatState, fx: dict, card: Card) -> None:
     path. Duration is the only state; the pulse reads the Charge bank live
     at fire time, so a summon made at Charge 0 still grows all fight.
     """
-    turns = _amount(state, fx.get("amount", C.KURAGE_DURATION))
     p = state.player
+    if C.KURAGE_MEMORY and C.KURAGE_ALWAYS_ON and p.character_id == "kokomi":
+        # QUARANTINED, v4 BASE KIT. The jellyfish was already on the field
+        # when the fight started (`combat.run_fight`), so this op has nothing
+        # left to do: it sets a bit that is already set. That IDEMPOTENT
+        # NO-OP is the deliberate least-invasive default -- the row keeps its
+        # second leg (`gain_charge 1`) and nothing about the jellyfish moves.
+        #
+        # SAID PLAINLY, because it is a design consequence and not a code
+        # detail: under the base kit `bake_kurage` is a 1-cost Skill that
+        # gains 1 Charge, and it has LEFT the starter deck (loader
+        # `_starter_ids`). Basics are not draftable, so with the flag on the
+        # row is unreachable in a run. sec.12 puts that to [USER] as pick 1,
+        # with its alternatives (retire the row / re-key it to fire an
+        # immediate extra pulse / give it a new job).
+        p.powers["kurage_summon"] = 1
+        state.emit("summon_kurage", turns=1, persistent=True, base_kit=True)
+        return
+    if C.KURAGE_MEMORY and p.character_id == "kokomi":
+        # QUARANTINED. Under the memory rule the jellyfish is PERSISTENT for
+        # the fight: summoned once, never expiring, so `kurage_summon` stops
+        # being a countdown and becomes a presence bit (1). The proposal's
+        # §2 argument for this is not taste -- a memory queue that evaporates
+        # when a 1-turn summon lapses is a resource the player loses by not
+        # re-casting a basic, which is a D4 invisible-feed defect, and
+        # re-casting a basic every turn to keep your own bank alive is not a
+        # decision.
+        #
+        # TWO CONSEQUENCES, said out loud rather than discovered later:
+        # (1) KURAGE_DURATION is not read here, so the UPGRADE's `kurage_turns
+        #     +1` is INERT under the flag -- an upgraded Bake-Kurage is
+        #     mechanically identical to a base one, and giving the upgrade a
+        #     second job is a re-authoring question (§4), not a number;
+        # (2) a second copy of the card is likewise a no-op, and so is the
+        #     Garment's Tamakushi Casket refresh link, which `max()`es a 1
+        #     against a 1. Both retire with the duration.
+        p.powers["kurage_summon"] = 1
+        state.emit("summon_kurage", turns=1, persistent=True)
+        return
+    turns = _amount(state, fx.get("amount", C.KURAGE_DURATION))
     p.powers["kurage_summon"] = max(p.powers.get("kurage_summon", 0), turns)
     KNOB_READS["KURAGE_DURATION"] = KNOB_READS.get("KURAGE_DURATION", 0) + 1
     state.emit("summon_kurage", turns=p.powers["kurage_summon"])
+
+
+# --------------------------------------------------------------------------
+# THE KURAGE'S MEMORY (QUARANTINED, C.KURAGE_MEMORY). Everything below is
+# unreachable with the flag off -- each entry point returns on the flag
+# before touching anything. review/active/kokomi-kurage-memory-2026-08-29.md
+# --------------------------------------------------------------------------
+
+def _kokomi_memory_live(state: CombatState) -> bool:
+    """The one gate. Flag on, and the player IS Kokomi.
+
+    The character test is not decoration: the queue, the fuel narrowing and
+    the pulse rewrite are all `for Kokomi only` by construction, and a
+    Companion-playing Furina deck must not start banking a memory."""
+    return bool(C.KURAGE_MEMORY and state.player.character_id == "kokomi")
+
+
+def note_kurage_play(state: CombatState, card: Card) -> None:
+    """Called from `combat._finish_play`, i.e. at the ONE site both a manual
+    play and an auto-play pass through.
+
+    v3 REMOVED THE QUEUE FROM THIS FUNCTION. Under v2 a Companion entered the
+    memory when Kokomi PLAYED it, which is the rule [USER] replaced -- "thus
+    you cannot just spam Raiden over and over, you get a free Raiden when you
+    Exhaust or Muster her." The two v3 entry rules live at the Muster and at
+    the exhaust funnel (`note_kurage_muster` / `note_kurage_exhaust` below);
+    what is left here is the PULSE KEY and v2's A2 fuel alternative.
+
+    RECURSION RULE 2 survives untouched and is still one line,
+    `state.kurage_autoplaying`: an auto-played card is not "the last card
+    Kokomi played", so a memory copy cannot determine or overwrite the pulse
+    ahead of her own turn. (Recursion rule 1 -- a memory copy never re-enters
+    the memory -- moved with the queue: it is now `from_kurage_memory` on the
+    copy itself, checked at the one enrolment door, which is exact where the
+    turn-scoped flag was merely sufficient.)
+    """
+    if not _kokomi_memory_live(state) or state.kurage_autoplaying:
+        return
+    # The pulse key. Set for EVERY card she plays, Companion or not: the
+    # branch is on card TYPE, and a Companion is a Skill like any other.
+    state.kurage_last_card_type = card.type
+    if C.KURAGE_FUEL_MODE == "play_or_exhaust" and not card.is_junk \
+            and not card.is_companion:
+        # v2's PICK A2 ONLY (not v3's fuel; implemented so the arm can be
+        # swept). The same rate as the funnel, on the PLAY as well as the
+        # Exhaust. Gated on the relic hook for the same reason the funnel is:
+        # a player without the Pearl has no Charge engine at all.
+        if "tamakushi_casket" in state.player.relic_hooks:
+            resources.gain_charge(state, C.CHARGE_PER_EXHAUST, "play")
+
+
+# --- The one enrolment door -------------------------------------------------
+
+def _remembered_price(cost) -> Optional[int]:
+    """3 x the face's cost, or None for a face that cannot be priced.
+
+    X-COST IS INELIGIBLE FOR NOW (the advisor's rule statement, ratified as
+    the design): "X" has no cost to multiply, and pricing it off the energy
+    the ORIGINAL captured would make one memory's price depend on a turn that
+    is over. Refused at the door and emitted, never silently dropped.
+    """
+    if not isinstance(cost, int):
+        return None
+    return max(0, cost) * C.KURAGE_MEMORY_COST_PER_ENERGY
+
+
+def _enrol_memory(state: CombatState, card: Card, *,
+                  target: Optional[Enemy], rule: str) -> bool:
+    """THE ONE WRITER OF `state.kurage_queue`. Both v3 entry rules end here.
+
+    The rules themselves are independent ([USER]: "Those should be independent
+    mechanics") and neither reads the other; what they SHARE is the set of
+    things that can never enter, and those live here so there is one list of
+    them rather than two that drift:
+
+      * a card that has already enrolled (the general once-only guard, and
+        the only one v3 keeps -- a Companion cannot enrol twice for one
+        Exhaust);
+      * a MEMORY COPY, ever, by either rule (recursion rule 1);
+      * a Status or a Curse -- not "your cards" in the sense Kokomi's rotation
+        law uses ([USER], 2026-08-23), and the reading that governs the Charge
+        funnel governs the memory too;
+      * an X-cost card, which has no price (see `_remembered_price`).
+
+    Returns whether the card enrolled, so a caller may report it.
+    """
+    if card.kurage_remembered or card.from_kurage_memory:
+        state.emit("kurage_memory_refused", card=card.id, rule=rule,
+                   reason="copy" if card.from_kurage_memory else "already")
+        return False
+    if card.is_junk:
+        state.emit("kurage_memory_refused", card=card.id, rule=rule,
+                   reason="junk")
+        return False
+    price = _remembered_price(card.cost)
+    if price is None:
+        state.emit("kurage_memory_refused", card=card.id, rule=rule,
+                   reason="x_cost")
+        return False
+    if C.KURAGE_QUEUE_CAP and len(state.kurage_queue) >= C.KURAGE_QUEUE_CAP:
+        state.emit("kurage_memory_full", card=card.id, rule=rule,
+                   queued=len(state.kurage_queue))
+        return False
+    card.kurage_remembered = True
+    entry = KurageMemory(card_id=card.id, cost=card.cost, price=price,
+                         target=target, ephemeral=not card.exhaust, rule=rule)
+    state.kurage_queue.append(entry)
+    state.emit("kurage_remember", card=card.id, rule=rule, price=price,
+               cost=card.cost, ephemeral=entry.ephemeral,
+               targeted=target is not None, queued=len(state.kurage_queue))
+    return True
+
+
+def note_kurage_muster(state: CombatState, card: Card) -> None:
+    """RULE 1 -- MUSTER. Called from `_op_conscript` with the SACRIFICED card.
+
+    [USER], 2026-08-29: "We would be adding the card that was sacrificed for
+    the Muster, not the new card - so the original face."
+
+    So the memory takes the card the transformation CONSUMED, on its own
+    printed face, at the moment it is consumed -- and it does not care in the
+    slightest what the Muster produced or what becomes of it. That is why this
+    function does not mention Companions, Exhaust, or Rule 2: [USER] asked for
+    two independent mechanics, and a rule that reached across to check the
+    recruit would not be one.
+
+    The sacrificed card is usually one of her own NON-Companion cards, so the
+    memory holds non-Companion cards under v3 and replays them by exactly the
+    same rules. It was never played, so it stores NO target and the fallback
+    aims the copy.
+    """
+    if not _kokomi_memory_live(state):
+        return
+    _enrol_memory(state, card, target=None, rule="muster")
+
+
+def note_kurage_exhaust(state: CombatState, card: Card) -> None:
+    """RULE 2 -- EXHAUST. Called from `refpowers.after_card_exhausted`, the ONE
+    exhaust funnel every route passes through (played, mid-card, ethereal, the
+    autoplay sweep, the ward), which is what makes this structural rather than
+    per-site discipline -- the same argument that put the Casket accrual there.
+
+    The advisor's rule statement, ratified by [USER] as the design: "When a
+    Companion not originating from Memory Exhausts, remember it."
+
+    HOWEVER IT CAME TO EXIST: drafted, Mustered, created. A Muster's recruit
+    prints Exhaust, so it enrols here on its own face when it burns -- which
+    is a SECOND memory from one Muster, and [USER] ruled that intended: "No,
+    if the Muster prints a card that Exhausts, then it gets added as well."
+    This function still does not know Rule 1 exists.
+
+    A Companion that does NOT print Exhaust never reaches here on its own; the
+    player has to burn it by hand (or by Ethereal), and its copy is stamped
+    `ephemeral` when they do.
+    """
+    if not _kokomi_memory_live(state) or not card.is_companion:
+        return
+    _enrol_memory(state, card, rule="exhaust",
+                  target=state.kurage_play_targets.get(id(card)))
+
+
+# --- The aim ----------------------------------------------------------------
+
+def kurage_target(state: CombatState) -> Optional[Enemy]:
+    """The PULSE's aim, and v2's PICK E in its remaining job.
+
+    v3 took the REPLAY's aim away from this function -- a memory now stores
+    the body its original hit (`_memory_aim` below) -- so what is left here is
+    the pulse: `follow_her_last_attack` aims at the enemy Kokomi's own last
+    attack was bound to, or, if that enemy is dead, the enemy with the MOST
+    current HP. `random` returns None and leaves the shipped roll in charge.
+    """
+    living = state.living_enemies
+    if not living or C.KURAGE_TARGET_RULE != "follow_her_last_attack":
+        return None
+    led = state.kurage_last_attack_target
+    if led is not None and led.alive:
+        return led
+    return max(living, key=lambda e: e.hp)
+
+
+def _memory_aim(state: CombatState, entry: KurageMemory) -> Optional[Enemy]:
+    """v3's targeting rule, and it is [USER]'s sentence almost verbatim:
+    "Cards must play against the same target the second time, unless that
+    target no longer exists, in which case they play randomly against eligible
+    targets."
+
+    So: the stored body whenever it is still alive. Otherwise the fallback,
+    and the default fallback is RANDOM -- expressed as None, which leaves
+    `bind_card_aim`'s shipped forced-random roll in charge rather than rolling
+    a second stream here. `most_hp` (v2's PICK E1 fallback) is implemented
+    because it is the more forecastable rule and the strip's whole defence is
+    legibility; it is not what v3 asks for.
+
+    A memory with NO stored target -- a Muster's sacrifice, an Ethereal burn,
+    a hand-Exhaust -- takes the fallback by the same line, because absence and
+    death are the same thing to a card that has to aim at something.
+    """
+    if entry.target is not None and entry.target.alive:
+        return entry.target
+    living = state.living_enemies
+    if living and C.KURAGE_MEMORY_TARGET_FALLBACK == "most_hp":
+        return max(living, key=lambda e: e.hp)
+    return None
+
+
+def _remove_from_combat(state: CombatState, token: Card) -> None:
+    """A memory copy goes to NO PILE.
+
+    The advisor's rule statement ends "Then remove that Memory from combat",
+    and this is that clause taken literally for EVERY copy, ephemeral or not.
+    The alternative for a copy whose original printed Exhaust would be to let
+    it Exhaust again -- and an Exhaust pays Charge, which the same rule
+    statement forbids ("Original Companion Exhausts generate their one Charge;
+    Memory copies do not"). One removal rather than two lifecycles.
+
+    Mechanically the copy is played with its own `exhaust` flag cleared (see
+    `kurage_fire`), so it is never an Exhaust EVENT at all: it does not reach
+    the funnel, pays no Charge and no Burst, and does not move
+    `exhausts_this_turn` or the rotation latch. This sweep then lifts the card
+    object out of whichever pile `resolve_free_play` filed it in. A Power was
+    already removed from combat by the shipped pile rule and this finds
+    nothing, which is correct rather than lucky.
+    """
+    p = state.player
+    for pile in (p.discard_pile, p.exhaust_pile, p.hand, p.draw_pile):
+        for i, c in enumerate(pile):
+            if c is token:
+                pile.pop(i)
+                state.emit("kurage_memory_removed", card=token.id)
+                return
+
+
+def kurage_fire(state: CombatState, manual: bool = False) -> bool:
+    """The fire: the jellyfish plays the FRONT of its memory for 0 energy and
+    the bank pays that memory's own price.
+
+    [USER], v3: "At the start of Kokomi's turn, if she can afford the front
+    Memory, spend its Charge cost and play it. Then remove that Memory from
+    combat."
+
+    THE BLOCK is v3's own clause and the reason this returns before touching
+    anything behind the front: "Sticking a card you can't afford into Memory
+    blocks Memory until it's played." Nothing behind an unaffordable front
+    fires, and the bank HOLDS -- it is not spent down on something cheaper and
+    it is not lost.
+
+    ONE CARD PER TURN, MAXIMUM: "If you stack infinite Charge, then you still
+    get only one play per turn." That clause is what keeps a large bank from
+    becoming a burst multiplier by another name, and it is a TURN boundary
+    (`kurage_fired_this_turn`, cleared in `combat._player_turn`) rather than a
+    bank size.
+
+    `manual=True` is the acceleration keyword's door (`_op_play_front_memory`,
+    provisional name "Stir"). It neither reads nor sets the per-turn latch --
+    that is the whole point of an accelerator -- and it still pays the price,
+    because the keyword buys RHYTHM and never the card.
+
+    The play goes through `_free_play` -> `combat.resolve_free_play`, the ONE
+    legal way an effect may play a card, so a memory copy fires the real
+    card-played hooks and every ordinary "when you play a Companion" effect,
+    exactly as the rule statement requires.
+    """
+    p = state.player
+    if not _kokomi_memory_live(state):
+        return False
+    if not manual and state.kurage_fired_this_turn:
+        return False
+    if (not manual or C.KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON) \
+            and not p.powers.get("kurage_summon", 0):
+        # No jellyfish on the field, no memory to fire from. The queue still
+        # FILLS without one: the memory is of what she burned, and the summon
+        # is what acts on it.
+        #
+        # UNDER C.KURAGE_ALWAYS_ON this branch cannot be taken in a real
+        # fight -- the jellyfish is installed at combat start -- and it is
+        # kept, unchanged, because it is still the whole of the rule with
+        # KURAGE_ALWAYS_ON off, and because a unit test may build a state
+        # without one. That is also why KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON is
+        # RETIRED-under-flag rather than deleted: both of its settings read
+        # the same while the jellyfish cannot be absent.
+        return False
+    if not state.kurage_queue:
+        # KURAGE_EMPTY_QUEUE "hold": nothing fires and NOTHING IS PAID. The
+        # punishment for an empty memory is tempo, never deletion.
+        state.emit("kurage_memory_empty", bank=p.charge)
+        return False
+    entry = state.kurage_queue[0]
+    if p.charge < entry.price:
+        state.emit("kurage_memory_blocked", card=entry.card_id,
+                   price=entry.price, bank=p.charge,
+                   queued=len(state.kurage_queue))
+        return False
+    if entry.price and not resources.spend_charge(
+            state, entry.price, source="kurage_memory", card=entry.card_id):
+        return False                      # cannot happen; the bank was checked
+    state.kurage_queue.pop(0)
+    if not manual:
+        state.kurage_fired_this_turn = True
+    from tier0.content import loader                # late import (cycle)
+    token = loader.get_card(entry.card_id)
+    token.from_kurage_memory = True
+    token.kurage_remembered = True
+    # The copy is not an Exhaust EVENT (see `_remove_from_combat`): clearing
+    # the flag here is what makes that true at the pile rule rather than by a
+    # special case inside the funnel.
+    token.exhaust = False
+    aim = _memory_aim(state, entry)
+    state.emit("kurage_memory_fire", card=entry.card_id, price=entry.price,
+               bank=p.charge, remaining=len(state.kurage_queue),
+               ephemeral=entry.ephemeral, rule=entry.rule, manual=manual,
+               same_target=aim is not None and aim is entry.target)
+    # KURAGE'S OATH, RE-KEYED TO THE MEMORY PLAY. [USER], 2026-08-29:
+    # "Let's rewrite it to '3 block per memory played, upgrade to 5' as a
+    # placeholder and see if it needs adjusting later."
+    #
+    # THE TRIGGER IS HERE AND ONLY HERE, which is what makes the rule one
+    # sentence: every memory play passes through this function -- the
+    # automatic turn-start fire and the acceleration keyword's ("Stir")
+    # manual fire alike -- so "per memory played" needs no second site and
+    # cannot drift between the two doors. It no longer rides the pulse; see
+    # `kurage_memory_pulse`, where the ward term is gone under the flag.
+    #
+    # THE AMOUNT IS THE CARD'S, never a constant: whatever stacks of
+    # `kurage_ward` are standing is what is paid, so the placeholder numbers
+    # live on the card face -- the quarantined surface row
+    # `proto_kurages_oath_memory`, 3 Block, upgrading to 5 -- and no
+    # code-side override exists that could disagree with them. They are a
+    # PLACEHOLDER in [USER]'s own word, and no measurement is attached.
+    #
+    # PAID BEFORE THE COPY RESOLVES, deliberately: the Block belongs to the
+    # fire and not to whatever the remembered card turns out to do, so a
+    # replayed attack that provokes a retaliation is defended by the ward its
+    # own fire paid.
+    ward = p.powers.get("kurage_ward", 0)
+    if ward:
+        p.block += ward
+        state.emit("block", amount=ward)
+        state.emit("kurage_ward_paid", amount=ward, card=entry.card_id,
+                   manual=manual)
+    prev_auto, prev_aim = state.kurage_autoplaying, state.kurage_aim
+    state.kurage_autoplaying = True
+    state.kurage_aim = aim
+    try:
+        _free_play(state, token, force_exhaust=False)
+    finally:
+        state.kurage_autoplaying = prev_auto
+        state.kurage_aim = prev_aim
+        _remove_from_combat(state, token)
+    return True
+
+
+def _op_play_front_memory(state: CombatState, fx: dict, card: Card) -> None:
+    """QUARANTINED PROTOTYPE SURFACE, and nothing authored uses it.
+
+    The hook for v3's acceleration keyword -- [USER] and the advisor both
+    prefer explicit Skills that say "Play the front Memory" over a passive
+    rate Power, so the engine needs a door a Skill can call before any Skill
+    exists. PROVISIONAL KEYWORD NAME: "Stir" (R179 -- an ordinary word, listed
+    as provisional in the proposal, cosmetic by lint, renameable for free).
+
+    NO CARD ROW, NO SHEET, NO C#. It is registered in OPS the way
+    `spend_charge` is -- prototype surface only -- and it is deleted with the
+    slice if the slice is rejected. `amount` fires the front that many times,
+    stopping at the first refusal (an empty or blocked memory, or a bank that
+    cannot pay the next front).
+    """
+    if not C.KURAGE_MEMORY:
+        state.emit("kurage_memory_refused", card=card.id, rule="keyword",
+                   reason="flag_off")
+        return
+    for _ in range(_amount(state, fx.get("amount", 1))):
+        if not kurage_fire(state, manual=True):
+            break
+
+
+def kurage_memory_pulse(state: CombatState) -> None:
+    """The rewritten turn-end pulse: keyed to the TYPE of the last card
+    Kokomi played this turn, and reading the bank not at all.
+
+    The per-Charge term is gone, and with it `kurage_amp` /
+    `before_sun_and_moon`, whose only body was raising that multiplier. That
+    constant is the whole "100+ hit" the playtest named and the reason the
+    shipped bank can only be watched.
+
+    NO CARD PLAYED -> NO PULSE. §2 states that outright ("a price on a wasted
+    turn rather than a free tick"), so a turn where she played nothing gets
+    an event and no effect.
+    """
+    p = state.player
+    kind = state.kurage_last_card_type
+    target = kurage_target(state)
+    if not kind:
+        state.emit("kurage_pulse", amount=0, kind="none", landed=False,
+                   memory=True)
+        return
+    if kind == "attack":
+        state.emit("kurage_pulse", amount=C.KURAGE_PULSE_BASE, kind=kind,
+                   landed=bool(state.living_enemies), memory=True)
+        if target is not None:
+            deal_damage_to_enemy(state, target, C.KURAGE_PULSE_BASE,
+                                 element="hydro", source="companion")
+    elif kind == "power":
+        if C.KURAGE_POWER_PULSE == "charge":
+            # [USER], 2026-08-29: "Sacrificing a power seems like a bigger
+            # deal than sacrificing anything else." So the Power branch pays
+            # in the currency the whole rule runs on. The AMOUNT is DERIVED,
+            # not picked (R212): CHARGE_PER_EXHAUST, i.e. a Power pulse is
+            # worth exactly one burnt card, one-way error direction and one
+            # constant. It lands with no board and no target -- a bank does
+            # not need a body, which is the branch's other honest half.
+            resources.gain_charge(state, C.CHARGE_PER_EXHAUST, "kurage_pulse")
+            state.emit("kurage_pulse", amount=C.CHARGE_PER_EXHAUST, kind=kind,
+                       landed=True, memory=True)
+        else:
+            # v2's PICK C1, kept implemented: pure Hydro application, no
+            # number. Nothing lands on an empty board -- an aura needs a body.
+            state.emit("kurage_pulse", amount=0, kind=kind,
+                       landed=target is not None, memory=True)
+            if target is not None:
+                reactions.apply_aura(state, target, "hydro",
+                                     source="kurage_pulse")
+    else:                                    # skill (and every other type)
+        # KURAGE'S OATH IS NOT HERE ANY MORE. sec.12.4 pick 4 is RULED
+        # ([USER], 2026-08-29): the ward is keyed to a MEMORY PLAY, not to
+        # the pulse, and it is paid in `kurage_fire`. Under the base kit the
+        # pulse fires every turn end, which would have turned "per
+        # Bake-Kurage play" into "per turn" for free; a memory play is a
+        # thing she has to earn and can be blocked out of, so the ward now
+        # keys to that instead.
+        #
+        # `kurage_ward` DOES NOT APPEAR IN THIS EXPRESSION, and that is the
+        # whole of the change here. The shipped pulse's own term
+        # (`KURAGE_PULSE_BLOCK + kurage_ward`) is untouched, on the flag-off
+        # branch in `player_turn_end_triggers`, so nothing that ships moved.
+        blk = C.KURAGE_MEMORY_PULSE_BLOCK
+        state.emit("kurage_pulse", amount=blk, kind=kind, landed=True,
+                   memory=True)
+        if blk:
+            p.block += blk
+            state.emit("block", amount=blk)
 
 
 def _op_conscript(state: CombatState, fx: dict, card: Card) -> None:
@@ -3478,6 +3975,15 @@ def _op_conscript(state: CombatState, fx: dict, card: Card) -> None:
             state.emit("conscript_whiffed")
             return
         victim = _worst_card(candidates)
+        # QUARANTINED (C.KURAGE_MEMORY), v3 RULE 1: the card SACRIFICED to the
+        # Muster enters the memory, on its original face, HERE -- at the one
+        # moment it is consumed, before it stops existing. [USER]: "We would
+        # be adding the card that was sacrificed for the Muster, not the new
+        # card - so the original face." create-mode conscription sacrifices
+        # nothing and `continue`s above, so it never reaches this line, which
+        # is the correct reading: no sacrifice, no memory.
+        if C.KURAGE_MEMORY:
+            note_kurage_muster(state, victim)
         hand[hand.index(victim)] = recruit
         state.emit("conscript", was=victim.id, into=recruit.id)
 
@@ -3645,6 +4151,10 @@ OPS = {
     "spend_charge": _op_spend_charge,
     "conscript": _op_conscript,
     "summon_kurage": _op_summon_kurage,          # v0.4 O4 salvage
+    # QUARANTINED (C.KURAGE_MEMORY v3) -- prototype surface only, exactly as
+    # `spend_charge` above. No card, no sheet row, no C#; the hook the
+    # acceleration keyword ("Stir", provisional) will call if it is authored.
+    "play_front_memory": _op_play_front_memory,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,
@@ -3679,6 +4189,24 @@ def resolve_card(state: CombatState, card: Card) -> None:
     # instead of the last card's corpse.
     state.card_aim = bind_card_aim(state, card)
     state.card_aim_bound = True
+    # QUARANTINED (C.KURAGE_MEMORY): PICK E1's "her lead", recorded at the
+    # bind because the bind IS what "the enemy her attack hit" means under
+    # R210 -- one creature for the whole play, picked before any op runs.
+    # `kurage_autoplaying` excludes the jellyfish's own replay: the memory
+    # follows KOKOMI, not itself.
+    if (C.KURAGE_MEMORY and state.card_aim is not None
+            and not state.kurage_autoplaying
+            and state.player.character_id == "kokomi"):
+        if card.type == "attack":
+            state.kurage_last_attack_target = state.card_aim
+        # v3: the card's OWN target, kept against the instance, because
+        # "cards must play against the same target the second time" is a
+        # per-card promise and not a per-turn one. Recorded for every card she
+        # plays rather than for Companions alone: under v3 the memory can hold
+        # a non-Companion (a Muster's sacrifice), and a rule that only watched
+        # Companions would have to be widened the first time one of those is
+        # ever played before it is burned.
+        state.kurage_play_targets[id(card)] = state.card_aim
     try:
         _resolve_card_bound(state, card)
     finally:
@@ -4133,7 +4661,15 @@ def player_turn_end_triggers(state: CombatState) -> None:
             deal_damage_to_enemy(state, enemy, C.OZ_DMG,
                                  element="electro", source="companion")
         p.powers["oz_summon"] -= 1
-    if p.powers.get("kurage_summon", 0):                # Kokomi (v0.4 §1)
+    if p.powers.get("kurage_summon", 0) and _kokomi_memory_live(state):
+        # QUARANTINED (C.KURAGE_MEMORY). The rewritten jellyfish: no duration
+        # decrement (it is persistent), no bank read, and PICK B2's fire rides
+        # here when the timing constant says so -- ahead of the pulse, so the
+        # free card is on the board before the turn's last effect resolves.
+        if C.KURAGE_FIRE_TIMING == "turn_end":
+            kurage_fire(state)
+        kurage_memory_pulse(state)
+    elif p.powers.get("kurage_summon", 0):              # Kokomi (v0.4 §1)
         # The jellyfish's turn-end pulse: a little damage that READS the
         # Charge bank (never spends it), hydro application, and Block for
         # the party. This is where O4 puts the periodic output that v0.3

@@ -663,6 +663,19 @@ def _op_price(fx: dict) -> float:
         # sheet, THAT is the change that moves the drafter and archives the
         # numbers -- see the slice-2 packet.
         return -_neutral_amount(fx, 0) * STATIC_CHARGE_VALUE
+    if op == "play_front_memory":
+        # ZERO, and a DELIBERATE zero (the Kurage's memory v3, QUARANTINED
+        # behind C.KURAGE_MEMORY). The op plays a card the memory already
+        # holds, so its whole value is the value of THAT card -- which the
+        # drafter priced when it priced the card, and would double-count if
+        # it priced it again here. There is also nothing to price against: no
+        # sheet row prints this op, no pool or digest can see it, and with the
+        # flag off it cannot even fire. `spend_charge`'s argument for not
+        # bumping DRAFTER_VERSION applies unchanged: every drafted number in
+        # the world is byte-identical with and without this branch. If an
+        # acceleration keyword is ever authored onto a real sheet, THAT is the
+        # change that moves the drafter and archives the old world.
+        return 0.0
     if op == "raise_fanfare_cap":
         return _neutral_amount(fx, 0) * STATIC_FANFARE_CAP_VALUE
     if op == "crash_fanfare":
@@ -707,7 +720,7 @@ def _op_price(fx: dict) -> float:
             return 0.0
         return -_neutral_amount(fx) * STATIC_RANDOM_DISCARD_COST
     if op == "discard_for_sparks":
-        return fx.get("sparks", 0) * STATIC_SPARK_VALUE    # chosen fodder
+        return fx.get("sparks", 0) * spark_gain_value()     # chosen fodder
     if op == "exhaust_from":
         per = (STATIC_STATUS_EXHAUST_VALUE
                if fx.get("filter") == "status" else STATIC_EXHAUST_VALUE)
@@ -744,7 +757,10 @@ def _op_price(fx: dict) -> float:
     if op == "cost_mod":
         return abs(fx.get("delta", 1)) * STATIC_ENERGY_VALUE
     if op == "gain_spark":
-        return _neutral_amount(fx) * STATIC_SPARK_VALUE
+        # `spark_gain_value()`, not the constant: PICK 7 gives the
+        # alternative-cost arm its own derived dial and leaves this one at
+        # 0.0 for the shipped world. See SPARK_ALT_VALUE.
+        return _neutral_amount(fx) * spark_gain_value()
     if op == "spend_spark":
         # A PRINTED COST, PRICED AS ONE -- spend_encore's shape and
         # spend_encore's reason, and since W3 (R211) it has its OWN dial
@@ -762,7 +778,8 @@ def _op_price(fx: dict) -> float:
         # re-prices at this bump -- the archive scope is the three new sink
         # rows and nothing else. See STATIC_SPARK_SPEND_COST for the
         # derivation and for what waking the gain side would reach.
-        return -_neutral_amount(fx) * STATIC_SPARK_SPEND_COST
+        # `spark_spend_cost()` for the reason on the gain branch above.
+        return -_neutral_amount(fx) * spark_spend_cost()
     if op == "burst_energy":
         return _neutral_amount(fx, 0) * STATIC_BURST_VALUE
 
@@ -1673,6 +1690,78 @@ STATIC_BURST_VALUE = 0.0           # burst_energy
 STATIC_SPARK_SPEND_COST = 2.5      # spend_spark, per Spark. NOT the gain
                                    # dial's mirror -- see above.
 
+# =============================================================================
+# PICK 7, ANSWERED THE WAY THE SEAT RULED IT: "3, derive it from the new sink
+# prices once sec.4's numbers are ruled". They are now set, so it is derived.
+#
+# DERIVED, NOT PICKED (R212's ladder: one-way error direction, archive scope
+# bounded by the flag, ONE constant). NEITHER SHIPPED DIAL MOVES BY ONE BYTE.
+# `STATIC_SPARK_VALUE` (0.0) and `STATIC_SPARK_SPEND_COST` (2.5) are both
+# [USER]-held, and both were derived against a rule that does not run under
+# `C.SPARK_ALT_COST_ENABLED` -- 2.5's own route (1) reads "2 Sparks is one
+# free Attack under True Spark Knight", a sentence with no referent once the
+# threshold is retired. So the flag gets ONE number of its own and the
+# shipped world keeps both of its own.
+#
+# WHY ONE NUMBER FOR BOTH SIDES. R211 gave the gain side 0.0 and the spend
+# side 2.5 because a Spark only fed a discount: the gain was invisible value,
+# the spend a real price. Under an alternative-cost economy a Spark is worth
+# exactly what it buys and it is bought for exactly what it is worth, so gain
+# and spend are the SAME number in the same unit, and printing two would be
+# asserting an asymmetry the new rule does not have.
+#
+# THE ARITHMETIC, in the file's own unit ("the same rough units as one point
+# of printed damage or Block", the v3 header). For each of the five sinks
+# PICK 3/4 sets: what does the Spark price buy OVER a 0-energy neighbour of
+# the same rarity? Every one of these five is 0 energy, so the energy line
+# cancels out and the whole delta is the Sparks.
+#
+#   The 0-energy baselines, off the shipped sheet and not invented here:
+#     Common 0E Attack   -- `crackle` 3 damage, `study_of_explosions` 4
+#                           damage: baseline 3.5.
+#     Uncommon 0E Attack -- `flame_on_the_wick` 6 damage: baseline 6.0.
+#   AoE bodies count `STATIC_AOE_MULT` = 2.0 enemies, which is this file's
+#   own convention (`_static_power`, v6) and not a new assumption.
+#
+#     Fwoosh!          8            - 3.5 = 4.5 over 1 Spark  -> 4.50
+#     Tinder Toss      4 x 2.0 = 8  - 3.5 = 4.5 over 1 Spark  -> 4.50
+#     Bang Bang!       5 x 2  = 10  - 3.5 = 6.5 over 2 Sparks -> 3.25
+#     Dodoco Blast     7 x 2.0 = 14 - 6.0 = 8.0 over 2 Sparks -> 4.00
+#     Firework Finale  18          - 6.0 = 12.0 over 3 Sparks -> 4.00
+#
+#   MEDIAN of {4.50, 4.50, 3.25, 4.00, 4.00} = 4.00.
+#
+# THE MEDIAN, NOT THE MEAN, for the reason the 2.5 derivation gave: a median
+# is what makes an outlier row (Bang Bang!'s deliberately poor rate, which is
+# what the sheet charges for a two-Spark purchase) fail to move the dial.
+# Firework Finale's Exhaust is NOT discounted here -- discounting it would
+# lower the number, and a LOWER number is the unsafe direction on the spend
+# side. Left undiscounted and named.
+#
+# THE ERROR DIRECTION, and it is one-way on both sides at 4.00 because the
+# two sides want opposite things and the median sits between them: on the
+# GAIN side 4.00 is the first non-zero price a `gain_spark` has ever had, so
+# the drafter can finally see a generator at all (0.0 made twelve shipped
+# rows invisible); on the SPEND side 4.00 is 1.6x the shipped 2.5, so a sink
+# is charged MORE, never less, which is the direction that cannot make the
+# drafter pay for a cost it cannot see.
+#
+# WHAT IT DOES: under the flag every `gain_spark` row gains
+# `amount x 4.00` and every `spend_spark` row loses `amount x 4.00`. Flag
+# off, nothing reads this and both shipped dials stand.
+SPARK_ALT_VALUE = 4.0              # derived above. ONE dial, both sides.
+
+
+def spark_gain_value() -> float:
+    """The per-Spark GAIN dial in force. `SPARK_ALT_VALUE` under the flag."""
+    return SPARK_ALT_VALUE if C.SPARK_ALT_COST_ENABLED else STATIC_SPARK_VALUE
+
+
+def spark_spend_cost() -> float:
+    """The per-Spark SPEND dial in force. `SPARK_ALT_VALUE` under the flag."""
+    return (SPARK_ALT_VALUE if C.SPARK_ALT_COST_ENABLED
+            else STATIC_SPARK_SPEND_COST)
+
 
 # The op-parity table (Task 2 of the same sprint). EVERY key of
 # tier0.engine.effects.OPS must appear here exactly once, with the one-line
@@ -1699,6 +1788,10 @@ STATIC_OP_PRICING: dict[str, str] = {
                     "prototype surface only -- no shipped row prints it and "
                     "no drafted number moves)",
     "summon_kurage": "ONE pulse, not the duration (v8)",
+    "play_front_memory": "ZERO: the memory's own card carries the value and "
+                         "was priced once already (Kurage memory v3, "
+                         "prototype surface only -- no shipped row prints it "
+                         "and no drafted number moves)",
     "gain_fanfare_floor": "STATIC_FANFARE_FLOOR_VALUE per point (v9)",
     "grow_damage": "one discounted future redraw",
     # --- damage/Block-shaped, new in v13 ---------------------------------

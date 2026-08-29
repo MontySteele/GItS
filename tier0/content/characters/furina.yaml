@@ -6,7 +6,18 @@
 # (declared weakness). Exactly two elite axes: A4 + A6.
 id: furina
 name: "Furina"
-hp: 60                   # RATIFIED (R17, 2026-07-20)
+hp: 78                   # RATIFIED (R17, 2026-07-20) at 60; RAISED to 78 by
+                         # sitting slate 2026-08-29: "we forgot that Furina
+                         # and Kokomi are canonically HP-scalers, so it's
+                         # weird to give them lower HP pools than the average
+                         # of the canonical characters. Klee being low makes
+                         # total sense, but Furina should probably be
+                         # medium-high and Kokomi be high, relative to the
+                         # base cast." Derived, not picked: base cast is
+                         # Ironclad 80 / Defect 75 / Regent 75 / Silent 70 /
+                         # Necrobinder 66 (game_ref/*_char_facts.yaml), median
+                         # 75, top 80. "Medium-high" = above the median and
+                         # below Kokomi's 80.
 nation: fontaine         # §4.1 reward weighting: Fontaine is her half
 element: hydro
 cadence: skill           # Skill-grade (kickoff §1): only Skill/Burst-tagged

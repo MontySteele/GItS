@@ -86,6 +86,20 @@ public sealed class KurageSummonPower : PowerModel, ILocalizationProvider
     {
         if (Owner.Player == null) return;
 
+#if PROTOTYPE_CARDS
+        // QUARANTINED (Powers/Prototype/KurageMemory.cs). Under the memory rule
+        // the pulse is keyed to the TYPE of the last card Kokomi herself played
+        // and reads the bank not at all -- and the summon is PERSISTENT, so
+        // this branch deliberately never reaches the TickDownDuration below.
+        // ([USER] 2026-08-29 goes further: the Bake-Kurage becomes base kit and
+        // is always on. That swap is KurageMemory.SummonIsFielded alone, and
+        // nothing here or in the strip changes with it.)
+        if (KurageMemory.IsLive(Owner))
+        {
+            await KurageMemory.Pulse(choiceContext, this);
+            return;
+        }
+#endif
         var damage = PulseDamage(Owner);
 
         var candidates = CombatState.HittableEnemies.ToList();
@@ -130,6 +144,32 @@ public static class KurageSummon
         PlayerChoiceContext choiceContext, Creature owner, int turns,
         CardModel? source)
     {
+#if PROTOTYPE_CARDS
+        // QUARANTINED. Under the memory rule the jellyfish holds the field for
+        // the whole fight: summoned once, never expiring, so the stacks stop
+        // being a countdown and one is all it ever needs. KURAGE_DURATION is
+        // not read here, which makes the Bake-Kurage upgrade's `+1 turn` INERT
+        // under the flag (sec.12.6 ITEM 8) -- named in sec.11 and true on both
+        // engines.
+        //
+        // v4 BASE KIT: with the jellyfish installed at combat start, this
+        // clamp is also what makes the two remaining callers NO-OPS rather
+        // than needing edits of their own, which is the least-invasive default
+        // and the one the sim took:
+        //
+        //   ITEM 7 -- the Bake-Kurage card's summon leg sets a bit that is
+        //   already set. The card keeps its second leg (`gain 1 Charge`), so
+        //   under the base kit it is a 1-cost Skill that banks 1. It has left
+        //   the starter deck and Basics are not draftable, so with the flag on
+        //   the row is unreachable in a run. sec.12.4 PICK 1 puts that to
+        //   [USER] with its alternatives; nothing is retired here.
+        //
+        //   ITEM 9 -- the Tamakushi Casket link (CeremonialGarment's refresh)
+        //   is a max(1, 1), i.e. NOTHING. Her canon E-into-Q loop is silent
+        //   under the base kit. Left exactly as written on both engines, and
+        //   sec.12.4 PICK 3 is where it goes back to [USER].
+        if (KurageMemory.IsLive(owner)) turns = 1;
+#endif
         var existing = owner.Powers
             .FirstOrDefault(p => p is KurageSummonPower);
         if (existing != null)

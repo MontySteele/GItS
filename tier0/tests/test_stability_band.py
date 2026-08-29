@@ -113,7 +113,7 @@ def test_the_worst_fight_is_per_run_then_averaged():
 
 
 def test_everything_is_a_fraction_of_max_hp():
-    """So a band declared for Kokomi reads against Klee (62) and the
+    """So a band declared for Kokomi (80) reads against Klee (62) and the
     REF_IRONCLAD anchor (80) without rescaling -- the survival_profile rule."""
     small = run_metrics.stability_profile([_Run([_Fight(50, 25)])], 50)
     large = run_metrics.stability_profile([_Run([_Fight(100, 50)])], 100)
