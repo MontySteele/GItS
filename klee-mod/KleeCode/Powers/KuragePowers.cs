@@ -86,6 +86,20 @@ public sealed class KurageSummonPower : PowerModel, ILocalizationProvider
     {
         if (Owner.Player == null) return;
 
+#if PROTOTYPE_CARDS
+        // QUARANTINED (Powers/Prototype/KurageMemory.cs). Under the memory rule
+        // the pulse is keyed to the TYPE of the last card Kokomi herself played
+        // and reads the bank not at all -- and the summon is PERSISTENT, so
+        // this branch deliberately never reaches the TickDownDuration below.
+        // ([USER] 2026-08-29 goes further: the Bake-Kurage becomes base kit and
+        // is always on. That swap is KurageMemory.SummonIsFielded alone, and
+        // nothing here or in the strip changes with it.)
+        if (KurageMemory.IsLive(Owner))
+        {
+            await KurageMemory.Pulse(choiceContext, this);
+            return;
+        }
+#endif
         var damage = PulseDamage(Owner);
 
         var candidates = CombatState.HittableEnemies.ToList();
@@ -130,6 +144,15 @@ public static class KurageSummon
         PlayerChoiceContext choiceContext, Creature owner, int turns,
         CardModel? source)
     {
+#if PROTOTYPE_CARDS
+        // QUARANTINED. Under the memory rule the jellyfish holds the field for
+        // the whole fight: summoned once, never expiring, so the stacks stop
+        // being a countdown and one is all it ever needs. KURAGE_DURATION is
+        // not read here, which makes the Bake-Kurage upgrade's `+1 turn` INERT
+        // under the flag -- named in sec.11 and true on both engines. Nothing
+        // new is built around expiry, per [USER]'s 2026-08-29 always-on ruling.
+        if (KurageMemory.IsLive(owner)) turns = 1;
+#endif
         var existing = owner.Powers
             .FirstOrDefault(p => p is KurageSummonPower);
         if (existing != null)
