@@ -512,8 +512,8 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     ADVANCE on clean independent reads and Second Helping has its
     whole-fight run. Owed next are the whole-fight runs for Rummage and
     Slow Burn, the boot fix that unblocks the sealed Kokomi run, slice 1's
-    `EB-184`, and the eleven open [USER] rows `M47`, `M49`, `M50`, `M52`,
-    `M54`–`M60`.
+    `EB-184`, and the ten open [USER] rows `M47`, `M49`, `M50`, `M52`,
+    `M54`–`M57`, `M59`, `M60`.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
@@ -526,7 +526,7 @@ Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
 countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
-Art debt); the Fontaine Rares close-out (`M10`); and the eleven
+Art debt); the Fontaine Rares close-out (`M10`); and the ten
 prototype-slice, redesign and slate calls (`M47` Bag of Tricks; `M49` the
 pilot's Charge term, now superseded; `M50` the Kurage-memory redesign's four
 unruled rows, pick 3 answered on `M60`; `M52` the Furina reframe's two
