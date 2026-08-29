@@ -1,0 +1,45 @@
+{
+  "bank": 1,
+  "front_price": 0,
+  "blocked": false,
+  "fires_next": true,
+  "empty": false,
+  "summon": true,
+  "base_kit": true,
+  "pulse_kind": "none",
+  "pulse_amount": 0,
+  "pulse_unit": "none",
+  "reading": "Charge 1 / 0 \u2014 Shinobu \u2014 Grass Ring of Sanctification fires next turn",
+  "queue": [
+    {
+      "name": "Shinobu \u2014 Grass Ring of Sanctification",
+      "cost": 0,
+      "price": 0,
+      "target": null,
+      "blocked": false,
+      "affordable": true,
+      "ephemeral": true,
+      "rule": "exhaust"
+    },
+    {
+      "name": "Water's Edge",
+      "cost": 1,
+      "price": 3,
+      "target": null,
+      "blocked": false,
+      "affordable": false,
+      "ephemeral": true,
+      "rule": "muster"
+    },
+    {
+      "name": "Kujou Sara \u2014 Tengu Stormcall",
+      "cost": 0,
+      "price": 0,
+      "target": "Sludge Spinner",
+      "blocked": false,
+      "affordable": true,
+      "ephemeral": true,
+      "rule": "exhaust"
+    }
+  ]
+}

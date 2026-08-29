@@ -1600,6 +1600,51 @@ The arm has no card row and never had one (`docs/prototype-surface.yaml`, the
 declared-not-rowed block), so nothing here bumps a stamp, moves a sheet or
 touches a drafted number.
 
+### 13.0 DISCLOSURE — the world moved between the draft and the run (R212)
+
+Written before the first sealed seed was embarked, and committed before it.
+
+The slate was drafted against an earlier `+proto` build. Three defects were
+found and fixed after the draft and before the run, and the build the sealed
+run executes on is **`0.2.1456+proto`**, not the build the slate was written
+against:
+
+1. **`EB-194`** — the loc merge called `PrototypeCards.For` from a Harmony
+   postfix on `LocManager.Initialize`, which forced the eager `PrototypeRoster`
+   initializer against an empty `ModelDb` and poisoned the type for the
+   process, so no run of any character could start. Fixed by moving the merge to
+   `KokomiOffPoolCards.InjectPrototypeLoc` and making the generated roster lazy.
+2. **`EB-196`** — `KurageMemory.ResetForCombat` was called from
+   `KokomiResourceHooks.Subscribe`, which a combat re-invokes on every hook
+   broadcast, so the memory was cleared between every pair of hooks and an entry
+   filed by one hook was gone before the next could read it. Fixed by moving the
+   per-fight clear to `BeforeCombatStart`, plus a `SafeTitle`-style guard on the
+   `ephemeral` read in `Enrol`.
+3. **`EB-197`** — the Bake-Kurage's buff printed *"Lasts {Amount} more turn"*,
+   a countdown nothing under the flag ticks. Under `PROTOTYPE_CARDS` it now
+   prints the lifetime it has. The release face is byte-identical.
+
+**P1 through P6 STAND AS WRITTEN, and are not re-drafted.** Each slot describes
+the arm's DESIGNED behaviour — the strip's front entry and its price (P1), the
+`blocked` / `fires_next` pair (P2), Rule 1's sacrifice-enters (P3), the blocked
+state read as a state (P4), the Oath's per-Memory-play condition (P5), and the
+stored-target aim (P6). None of the three fixes changes a stated mechanism:
+`EB-194` was a boot-order regression that let no run start at all, `EB-196`
+restored a queue that could never hold anything to the rule §11.3 already
+states, and `EB-197` corrected a face no slot grades. The fixes made the
+predicted behaviour **observable**; they did not alter what was predicted. Under
+R212 that is a disclosure, not a re-signature: nothing below is re-signed, no
+threshold, denominator or falsifier is touched, and the slate remains the one
+committed DRAFTED before any seed run.
+
+One consequence worth naming so it is not read as a revision: §13.6's first Gate
+B run could not reach the BLOCKED or FIRES-NEXT states, so P4 was recorded there
+as UNGRADEABLE. On `0.2.1456+proto` all three strip states were observed (Gate B
+re-run, fresh seed `YU4EBKU3XHEG`, which is **not** one of the sealed seeds —
+`KURAGEMEM001/002/003` were UNSPENT at the moment this block was written). P4's
+prediction, threshold and unreached branch are exactly as drafted; only its
+reachability changed.
+
 ### 13.1 The decisive question
 
 **Can a blind reader, from the page alone — the strip, the hand, the bank —
@@ -1870,186 +1915,258 @@ looked at once the dev build is up and before the tester is let in:
   exactly that distinction, so a strip that fails it here fails the slot before
   the run starts.
 
-### 13.6 Pre-tester gates — RUN 2026-08-29, BOTH BLOCKED
+### 13.6 Pre-tester gates — RUN 2026-08-29
 
-The two eyes-on gates of 13.5 item 7 were attempted on the `+proto` dev build
-before letting any tester in. **Neither gate could be read, because the `+proto`
-build cannot start a run at all.** The sealed blind run is NOT runnable on the
-build as it stands. Nothing below is a grade of the design; it is a report that
-the instrument is broken.
+Run on the re-verified pin (`release_info.json` v0.111.0 / `41cef1ea`;
+`appmanifest` buildid `24724944`, `BetaKey public-beta`; Workshop `3737335127`
+BaseLib v3.4.5), game closed at the start, from the art-bearing main checkout.
+**Installed stamp: `0.2.1441+proto`, `validate: OK` on the full gate.** No
+sealed run was started and the pinned seeds `KURAGEMEM001/002/003` are unspent.
 
-**Pin, re-verified before the deploy** — all four facts match `STATE.md`:
-`release_info.json` `v0.111.0` / commit `41cef1ea` / `main_assembly_hash`
-`222455745`; `appmanifest_2868840.acf` `buildid 24724944`, `BetaKey
-public-beta`; Workshop `3737335127` `BaseLib.json` `v3.4.5`. No game process
-was running at the start.
+**The first attempt at this deploy could not start a run at all**, for any
+character: §12.6 item 14's loc merge called `PrototypeCards.For` from
+`InjectLocStrings`, a Harmony postfix on `LocManager.Initialize` that runs
+before any mod card model exists, which forced the eager `PrototypeRoster`
+initializer against an empty `ModelDb` and poisoned the type for the process.
+That is `EB-194`, fixed before these gates ran: the merge moved to
+`KokomiOffPoolCards.InjectPrototypeLoc` (models present, R4's read-back kept)
+and the generated roster became lazy per character. Both locks were **seen to
+FAIL against the pre-fix build first** —
+`The_prototype_roster_survives_a_touch_with_an_empty_model_db` reproduced
+`TypeInitializationException ---> KeyNotFoundException: The given key
+'CARD.PROTO_ITTO_SUPERLATIVE_SUPERSTRENGTH_EITHER' was not present in the
+dictionary`, and `Loc_injection_never_touches_the_prototype_surface` reported
+`Assert.DoesNotContain() Failure: Filter matched in collection … "PrototypeCards.For"`
+— then green on the fix. **The §12.7 smoke was re-run this time**, which is the
+step whose absence let the regression ship: 213 C# tests with the flag on, 163
+with it off, tier 0 **3752 passed / 12 xfailed**, **28 lints OK**,
+`gen_prototype_cards --check` up to date.
 
-**The deploy, which succeeded.** `gen_prototype_cards --check` reported the
-surface up to date; `klee-mod\build\deploy_proto.ps1` stamped and installed
-**`0.2.1416+proto`**, `validate: OK` on the full gate (418.7 s, S7 suite
-400.4 s). The build that was replaced was the release build `0.2.1357`. So the
-package is well-formed and the failure below is a runtime one that no lint,
-no IL test and no validate rule sees.
+#### Gate A — the prototype Oath's face: **PASS**
 
-#### The blocker: the `+proto` build throws before a run can open
-
-`python -m understudy.embark --character kokomi --arm proto_kurages_oath_memory`
-(seedless — a gate check, not the sealed run) ended:
-
-```
-embark error: no_embark_path: menu_screen 'popup' offers none of the embark
-options; saw ['report_bug']
-```
-
-The popup is an error popup. `godot.log` carries the cause three times, and the
-first occurrence is the one that matters:
-
-```
-[ERROR] [klee] Failed to inject loc strings:
-System.TypeInitializationException: The type initializer for
-'KleeMod.Cards.Prototype.Generated.PrototypeRoster' threw an exception.
- ---> System.Collections.Generic.KeyNotFoundException: The given key
- 'CARD.KLEEMOD-PROTO_ITTO_SUPERLATIVE_SUPERSTRENGTH_EITHER' was not present
- in the dictionary.
-   at MegaCrit.Sts2.Core.Models.ModelDb.Get[T]()
-   at MegaCrit.Sts2.Core.Models.ModelDb.Card[T]()
-   at KleeMod.Cards.Prototype.Generated.PrototypeRoster..cctor()
-   at KleeMod.PrototypeCards.For(String characterId)
-   at KleeMod.KleeMod.InjectLocStrings()
-```
-
-then, from the same poisoned type, `[ERROR] [klee] SELFCHECK aborted: …` and
-finally, on Embark:
+Read where the player reads it: the card in hand, on a Kokomi run embarked
+`--arm proto_kurages_oath_memory` (seedless; a gate check, not the sealed run).
+Verbatim, from `review/qa/eb194-gates/gateA-oath-in-hand.md`:
 
 ```
-[ERROR] Exception starting singleplayer run :
-System.TypeInitializationException … PrototypeRoster …
-   at KleeMod.KokomiOffPoolCards.BuildAll()
-   at KleeMod.KokomiCardPool.GenerateAllCards()
-   at MegaCrit.Sts2.Core.Nodes.NGame.StartRun(RunState runState)
+- **Kurage's Oath** — cost 1, power
+    Whenever the Bake-Kurage plays a card from its memory, gain 3 Block.
 ```
 
-**The ordering, with file:line.** Three facts compose into the failure and no
-one of them is wrong on its own.
+That is 13.5 item 7's required string exactly, so **P5 is not VOID**. The
+override is now trusted in the way the Klee protocol asks for: it was seen to
+FAIL — on the pre-fix build it never ran at all — and is now seen to run.
 
-1. `klee-mod/KleeCode/KleeMod.cs:352-356` — `LocManager_Initialize_Patch` is a
-   Harmony **postfix on `LocManager.Initialize`**, so `InjectLocStrings` runs
-   during localisation bring-up, early in boot.
-2. `klee-mod/KleeCode/KleeMod.cs:316-329` — §12.6 item 14's block, added by
-   commit `0b357b6` ("Kurage's Oath keys to the memory play, and the prototype
-   face says so"), calls `PrototypeCards.For("kokomi")` inside that postfix in
-   order to read the key back off the live model (R4). That call is the FIRST
-   touch of `PrototypeRoster` in the process.
-3. `klee-mod/KleeCode/Cards/Prototype/Generated/PrototypeRoster.cs:22-62` — the
-   roster is an **eager `static readonly` dictionary** that resolves
-   `ModelDb.Card<T>()` for every prototype row of every character. The mod's
-   card models are `autoAdd: false`
-   (`ProtoIttoSuperlativeSuperstrengthEither.cs:67-70`, and every generated row)
-   and are constructed lazily at pool-build time — the run-start stack above is
-   where that happens. At `LocManager.Initialize` time **no mod card is in
-   `ModelDb` yet**, so the first entry in the dictionary's `"klee"` list throws.
+The control side holds. The shipped `kurages_oath` still prints the pulse
+string, `"Each [gold]Bake-Kurage[/gold] pulse also grants {PowerAmount:diff()}
+Block."` (`Cards/Kokomi/Generated/KuragesOath.cs:41-45`), and the generator
+emits that identically in both builds. It was read from the release-build
+generated source rather than from a rendered card, because under item 15's
+substitution the shipped Oath is unofferable on a `+proto` build and cannot be
+brought on screen there.
 
-The Kokomi rows are not implicated: `"furina"` is empty and `"klee"` is
-enumerated before `"kokomi"`, so the first Itto row is simply the first thing
-resolved. Any prototype row would have thrown in its place.
+#### Gate B — the strip: **PARTIAL. One state of three observed.**
 
-**Why it takes the whole build down rather than one card.** A static
-constructor that throws poisons its type for the life of the process — the CLR
-caches the `TypeInitializationException` and rethrows it on every later access.
-So one premature touch during loc injection permanently disables
-`PrototypeRoster`, which is why the self-check aborts and why
-`KokomiCardPool.GenerateAllCards()` — a legitimate, correctly-ordered caller —
-also throws. **No run of any character can be started on a `+proto` build.**
+**Observed, verbatim** (`review/qa/eb194-gates/gateB-state1-strip-empty.md`),
+present from turn 1 with nothing played, on the base kit:
 
-**Why nothing caught it.** §12.7 records that the §12.5 smoke was not re-run for
-pick 4's build, and the prototype pin tests
-(`klee-mod/KleeTests/Prototype/KurageMemoryPinTests.cs:342-346`) assert on the
-IL **strings** inside `InjectLocStrings`, not on when it runs. `validate.ps1`
-passed whole. This defect is only visible by booting the dev build, which is
-`OPERATIONS.md`'s port-checklist item 6 ("re-verify live, do not infer") applied
-to a flag rather than to a game update.
+```
+## The Bake-Kurage's memory
 
-**The proposed fix, NOT applied.** Do not hardcode the key — the block's own
-comment gives R4's reason and it is right. Move the call site instead: lift the
-`#if PROTOTYPE_CARDS` block out of `InjectLocStrings`
-(`KleeMod.cs:316-329`) and run it from `KokomiOffPoolCards.BuildAll()`, which
-already calls `PrototypeCards.For("kokomi")` at a point where the models exist,
-merging into `LocManager.Instance.GetTable("cards")` there. That keeps the
-read-back-off-the-live-model property and removes the premature touch.
-A second, independent hardening worth taking with it: make
-`PrototypeRoster.ByCharacter` **lazy and per-character** in
-`tools/gen_prototype_cards.py` so a premature touch can never poison every
-character's rows at once. Both are engineering, not design, but they are on
-this packet's own critical path, so they are written here rather than acted on
-by the deploying agent.
+- The Bake-Kurage is on the field for the whole fight. Nothing summons it and nothing removes it.
+- Charge 0 — memory empty
+- (the memory is empty)
+```
 
-#### Gate A — the prototype Oath's face: **BLOCKED, and FAIL on the static read**
+**The base-kit wire facts are confirmed** (`gateB-wire-basekit.json`, off
+`/api/v1/singleplayer`, `player.kurage_memory`): `base_kit: true`,
+`summon: true` at fight start, `empty: true`, `queue: []`,
+`reading: "Charge 0 — memory empty"`. The starter reads twelve cards plus the
+granted Oath; `to_the_front` is in it and `bake_kurage` is not — the swap at
+item 5 is live.
 
-Not observable in game: the loc injection that would have written the override
-is the exact call that threw, and no run opens. What can be stated from the
-build's own sources, which is weaker than eyes-on and is labelled as such:
+**The other two states were NOT reached, and that is the finding.** Across two
+whole fights the queue never took a single entry. The plays that should have
+fed it did not: **Gorou — Inuzaka All-Round Defense** ("Deal 4 damage.
+Exhaust.") moved the bank `Charge 0 → 1` and left `memory empty`; the starter
+Muster **To the Front!** transformed Coral Guard+ into **Raiden Shogun — Musou
+no Hitotachi** ("Exhaust") and playing it also left the queue empty. So
+`fires next turn` and `(blocked)` were never rendered, and **P4's question —
+whether a blocked front reads differently from `memory empty` at a glance —
+is UNGRADED**. On the evidence here the C# mirror prints the strip but nothing
+enters the memory; §12.6's entry rules (items 1–4, 13) are the place to look.
+Stated as observation, not diagnosis: I did not read the C# entry path.
 
-- **The shipped `kurages_oath` control still prints the pulse string.**
-  `klee-mod/KleeCode/Cards/Kokomi/Generated/KuragesOath.cs:41-45`:
-  `("description", "Each [gold]Bake-Kurage[/gold] pulse also grants
-  {PowerAmount:diff()} Block.")`. The generator emits this identically in the
-  release and the `+proto` build, so the control side of the trap is intact.
-- **The prototype row's generated face is the pulse string too.**
-  `klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKuragesOathMemory.cs:41-45`:
-  `("description", "Each [gold]Bake-Kurage[/gold] pulse also grants 3 Block.")`.
-  This is a per-class `Localization` override that BaseLib takes off the model
-  itself — a channel §12.6 item 14 and the sheet's own comment
-  (`docs/prototype-surface.yaml:581-588`) both assumed did not exist for a
-  prototype row, because both reasoned about `gen_klee_cards`'s power-id-keyed
-  renderer rather than about `gen_prototype_cards.py`. `gen_prototype_cards.py`
-  has no per-row `description:` field today, so taking that channel is a
-  generator change, not a sheet edit.
-- **Therefore the override is unproven in both directions.** It has not been
-  seen to succeed and it has not been seen to FAIL, which is the Klee-protocol
-  rule ("a lock isn't trusted till seen to FAIL") restated. On the evidence
-  available, **the deployed prototype card would print the shipped pulse
-  wording**, which is 13.2's VOID condition for P5. That verdict is recorded as
-  provisional: it is a read of the generated source, not of a rendered card, and
-  the loc merge that was meant to beat it never got to run.
+Two smaller things seen on the same screens, both eyes-on calls rather than
+defects I should rule:
 
-**What must be seen before the sealed run**, unchanged from 13.5 item 7:
-*"Whenever the Bake-Kurage plays a card from its memory, gain 3 Block."*
+1. The Bake-Kurage's buff still prints **"Lasts 1 more turn."** §12.6 item 2
+   says never expire it and item 8 says neutralise the duration upgrade; the
+   strip's own line says the opposite in the same frame ("on the field for the
+   whole fight"). Two surfaces disagree about the same creature.
+2. The strip prints **"At the end of this turn the jellyfish will do nothing,
+   because you have played no card this turn"** on turns where cards *had*
+   been played.
 
-#### Gate B — the strip: **BLOCKED, nothing observed**
+#### Gate C — the Sparks badges (new, captures only)
 
-No fight was reached, so none of the three states was captured. Not observed,
-not inferred, not stated: `Charge N — memory empty`, a front that fires next
-turn, and a blocked front are all unread, and so are the base-kit wire facts
-(`base_kit: true`, `summon` present at fight start, starter carries
-`to_the_front` and not `bake_kurage`). The whole gate is owed at the next
-deploy.
+Klee embarked on the same build, `--arm proto_spark_priced_strike --arm
+proto_spark_priced_draw`. One hand carried both wanted states at once, with the
+bank at 1 Spark: **Ka-pow!+** — *"Spend 1 Spark. Deal 7 damage."* — affordable,
+and **Rummage** — *"Spend 3 Sparks. Draw 3 cards."* — short. A second frame was
+taken after spending the bank to 0.
 
-#### VRAM, the metric [USER] asked for
+- `review/qa/eb194-gates/frame-20260829-160116-gatec-spark-badges.png`
+- `review/qa/eb194-gates/frame-20260829-160129-gatec-spark-bank-zero.png`
 
-`nvidia-smi --query-gpu=memory.used,memory.total`, on the 32607 MiB card:
+3842×2160, `printwindow` route. **These are MATERIAL, not evidence**: whether
+the spark glyph reads as a blob at badge size, and whether the short state
+reads as a state, are [USER]'s eyes only (Guardrail-7). Nothing is claimed here
+about how they look.
+
+#### VRAM
+
+`nvidia-smi --query-gpu=memory.used`, 32607 MiB card, same method throughout.
 
 | when | used | delta over idle |
 |---|---|---|
-| idle, game closed, before launch | 3098 MiB | — |
-| game up, at the character-select / error popup | 3933 MiB | **835 MiB** |
-| game up, second sample, same screen | 3934 MiB | 836 MiB |
-| idle, game closed, after teardown | 2959 MiB | — |
+| idle, game closed | 2947 MiB | — |
+| menu / character select | 3933 MiB | 986 MiB |
+| **in a Kokomi fight** | **4410 MiB** | **1463 MiB** |
+| Kokomi reward screen | 4354 MiB | 1407 MiB |
+| **in a Klee fight** | **4432–4498 MiB** | **1485–1551 MiB** |
 
-**The two in-fight samples [USER] asked for were not taken and are not
-estimated here** — no fight was reachable. 835 MiB is a floor on the game's
-footprint, not the figure a co-tenant should budget against: it is a menu with
-run assets partly preloaded and no combat scene, no VFX and no card art on
-screen. The honest headroom statement for a local 27B model sharing this card
-is that ~28.6 GiB was free with the game at a menu, and that the in-fight number
-is still unmeasured and will be larger.
+The in-fight figure is the one to budget against: **~1.5 GiB**, and it is
+~0.5 GiB above the menu reading, so the menu sample taken on the blocked
+attempt understated it by a third. With the game in a fight, roughly **28.1
+GiB** stayed free on this card.
+
+#### A finding for [USER] — the prototype rows DO have a per-row description channel
+
+§12.6 item 14 and the sheet comment at `docs/prototype-surface.yaml:581-588`
+both say the generated face "cannot be fixed from here". That reasoning is
+about `gen_klee_cards`, whose Power descriptions are keyed per POWER ID and are
+shared with the shipped card. It does not hold for a prototype row:
+`gen_prototype_cards.py` emits each row as its own class with its own
+`Localization` list (`ProtoKuragesOathMemory.cs:41-45`), which BaseLib reads off
+the model — a per-row channel that moves no shipped face. The loc merge now
+overrides that list at pool-build time, so **two channels describe one card**
+and the generated one is wrong on its face until the override runs.
+
+Nothing was changed about this: adding a `description:` field to the prototype
+surface is a **generator contract change** and returns to [USER]. The pick:
+
+1. **Keep the loc merge as it is.** One mechanism, already proven live; the
+   generated face stays wrong in the file and is corrected at runtime.
+2. **Take the `Localization` channel** — add an optional `description:` to the
+   prototype surface row, let `gen_prototype_cards.py` emit it, and delete the
+   merge. The face is then right in the generated source, with no boot-order
+   surface at all — which is the class of bug `EB-194` just was.
+3. **Both** — emit the row's own description AND keep the merge as a belt-and-
+   braces override.
+
+My read, offered as a read and not a decision: (2) removes a moving part on the
+boot path, and the defect this sitting spent itself on came from that part
+existing. But it widens a generator contract, which is [USER]'s to widen.
 
 #### State left on disk
 
-`mods\klee` carries **`0.2.1416+proto`** — installed, validated, and **unable to
-start a run**. The bridge (`mods\STS2_MCP`) and `steam_appid.txt` were removed
-by `embark --teardown`, which reverted all four ledger rows; no game process is
-running. The pinned seeds `KURAGEMEM001/002/003` were not used and remain
-unspent. Nothing under `review/qa/blindplay/` was read or written.
+`mods\klee` carries **`0.2.1441+proto`** — installed, validated, and now
+**proven to start runs** (Kokomi and Klee both embarked and fought on it). The
+bridge and `steam_appid.txt` were removed by `embark --teardown`, all four
+ledger rows REVERTED; no game process is running. Seeds unspent. Nothing under
+`review/qa/blindplay/` was read or written.
+
+
+#### Gate B — DIAGNOSED and RE-RUN 2026-08-29: **PASS, all three states**
+
+The record above stands as published (R101b). What it observed was real; what
+it could not say is the cause, and the cause was neither entry rule and neither
+reader.
+
+**`EB-196` — the memory was cleared between every pair of hooks.**
+`KurageMemory.ResetForCombat` was called from `KokomiResourceHooks.Subscribe`,
+on the reading that the subscription delegate is handed a fresh combat once per
+fight. It is not. `CombatState.IterateHookListeners` is an iterator over
+`ModHelper.IterateAllCombatStateSubscribers(combatState)`, which re-invokes
+every mod's delegate, and a combat enumerates its hook listeners on EVERY hook
+broadcast — so the clear ran between every pair of hooks and an entry filed by
+one hook was gone before the next could read it. That is verdict **(a)** in the
+strict sense that the arm shipped with a memory that could never HOLD anything,
+and it is why both rules looked broken at once: they share nothing except the
+queue that was being wiped. The same line clears `PlayedAnything`, which is the
+strip's second wrong sentence — "you have played no card this turn" after cards
+were played. One cause, both symptoms.
+
+The fix: the per-fight clear moved to `BeforeCombatStart` (the hook the game
+raises once per combat, already proven to fire because it is where the base
+kit's jellyfish is installed), `Subscribe` keeps only the stash it exists for,
+and `ResetForCombat` gained an identity guard. Also in `Enrol`:
+`CardModel.Keywords` walks `Pile -> CombatState` and throws for a card that is
+not in a pile, which a card reaching the exhaust funnel can be — the `ephemeral`
+read is now `SafeTitle`'s try/catch idiom, because an enrolment must not be lost
+to a read that only decorates the strip.
+
+**`EB-197` — the buff printed a countdown it does not have.** Nothing under the
+flag ticks the Bake-Kurage down (§12.6 items 1, 2 and 8), but its face kept the
+shipped "Lasts {Amount} more turn". Under `PROTOTYPE_CARDS` it now prints the
+lifetime it has. The release face is byte-identical.
+
+**Locks, all seen to FAIL against the pre-fix build first**, in
+`klee-mod/KleeTests/Prototype/`: `KurageMemoryLifecycleTests` — the two entry
+rules PLAYED rather than declared unreachable (a `Seat` carries a real
+`Creature`, which is all `Enrol` reads); the bite,
+`The_memory_survives_the_subscriber_list_being_re_enumerated`, which files one
+Muster and one Exhaust — the two the live gate played and lost — and re-hands
+the same combat; `The_pulse_key_survives_the_same_re_enumeration`; and two
+structural pins on where the clear lives, plus one that reads the
+re-enumeration off `sts2.dll` rather than trusting a comment. Pre-fix output,
+verbatim: `Assert.DoesNotContain() Failure: Item found in set … Found:
+"KurageMemory.ResetForCombat"`, `Assert.Contains() Failure: Item not found in
+set … Not found: "KurageMemory.ClearForNewCombat"`, and both entry-rule tests
+`System.NullReferenceException … CardModel.get_Keywords`. `KurageBuffFaceTests`
+failed pre-fix on `Found: "Lasts"` and `Not found: "whole fight"`.
+
+**THE RE-RUN**, from the art-bearing main checkout on the same pin, installed
+stamp **`0.2.1456+proto`, `validate: OK`** on the full gate. A fresh Kokomi run
+(seed `YU4EBKU3XHEG`, seedless of the sealed slate — the pinned
+`KURAGEMEM001/002/003` are still UNSPENT), first fight, base kit only, no
+prototype arm granted. Captures in `review/qa/eb196-gateb/`.
+
+| state | file | the strip, verbatim |
+|---|---|---|
+| EMPTY | `gateB-state0-turn1-empty.md` | `Charge 0 — memory empty` |
+| BLOCKED | `gateB-state2-blocked.md` | `Charge 0 / 3 — Coral Guard blocked` + `1. Coral Guard — 3 Charge — aims at random — BLOCKED: nothing behind it fires` |
+| a QUEUE | `gateB-state3-two-entries.md` | the blocked front with a `free` memory behind it |
+| FIRES NEXT | `gateB-state4-fires-next.md` | `Charge 4 / 3 — Coral Guard fires next turn` |
+| FIRED | `gateB-state5-after-fire.md` | front gone, bank 4 -> 1, Block 5 on the board |
+
+**So P4 is now GRADEABLE**: a blocked front does not read like an empty memory
+— the empty state says `memory empty` and lists nothing, the blocked state
+prints the bank against the front's own price, names the card and says
+`BLOCKED: nothing behind it fires`. Whether that is legible ENOUGH is the
+tester's answer to give, and it is not given here.
+
+Everything else the gate proves in passing, none of it a measurement: **Rule 1**
+filed the SACRIFICE (`Coral Guard`, price 3) and not the recruit; **Rule 2**
+filed the recruit when it burned, so one Muster produced two memories, as ruled;
+a 0-cost memory printed `free`; the ONE-PER-TURN latch held (the free memory
+behind the front did not also fire); the BLOCK held the bank across a whole turn
+rather than spending it on something cheaper; and the TARGET rule showed both
+faces on one screen — `aims at Sludge Spinner` for a memory that was played at a
+body, `aims at random` for one that never was. The wire agrees field for field
+(`gateB-wire-after-fire.json`, `rule: "muster"` / `rule: "exhaust"` per row).
+
+One observation, not a defect and not fixed: a Muster recruit enrols with
+`ephemeral: true`, i.e. the rule does not see the Exhaust the Muster grants it
+at the moment it files. `ephemeral` is RECORDED AND BEHAVIOUR-FREE by
+construction (§11.3), so nothing today reads it; whoever attaches behaviour to
+it under §11.6 item 1 has to fix this first, and [USER]'s ruling on that field
+is where it belongs.
+
+**State left on disk.** `mods\klee` carries **`0.2.1456+proto`** — installed,
+validated, and proven to start and play a run. All four `embark` ledger rows
+REVERTED, no game process, seeds unspent.
 
 ### 13.7 What this run cannot answer
 
@@ -2071,3 +2188,103 @@ Written down so nobody overclaims off it.
   in the draft. A run granted one prototype row into a twelve-card starter tests
   the teaching surface, not the built deck, and cannot say whether one Muster is
   the right dose.
+
+### 13.8 THE SEALED RUN — GRADED 2026-08-29
+
+Run and graded on the branch `kokomi-blind-run`, from the art-bearing main
+checkout, on the disclosed build (13.0). No grade below was read by anybody
+before it was written, and none has been edited since.
+
+#### What was spent
+
+| | |
+|---|---|
+| seeds spent | **`KURAGEMEM001` only** |
+| seeds still UNSPENT | `KURAGEMEM002`, `KURAGEMEM003` |
+| build | `0.2.1456+proto`, off `mods\klee\manifest.json` |
+| game | v0.111.0, off `release_info.json` |
+| run seed, read back off the wire (R95) | `KURAGEMEM001` — the chosen seed was accepted, no deviation to disclose |
+| arm granted | `KLEEMOD-PROTO_KURAGES_OATH_MEMORY` into the starting deck |
+| actions | 60, stopped on `max_actions`; five fights and the run record written |
+| sealed record | `review/qa/blindplay/kuragemem001/record.md`, committed before any grader opened it |
+| leak audit | 66 observations, **1 hit**, and it is the blind prompt's own sentence *"no card list, no score, no recommendation"* matching the `pilot-vocabulary-score` rule. Not a leak; recorded rather than filtered |
+| Codex calls | **67** — 60 observations + 6 record prompts inside the one session thread, plus 1 pair read. No rate limit was hit |
+
+**Why 002 and 003 were not run, on the slate's own rule.** §13.5 pins them as
+conditional: run 2 is taken *"only if run 1 terminates before P4 is reachable
+(no blocked turn) or before the Oath is drawn"*. Neither condition holds — the
+observation pages carry a blocked front on eleven turns and the Oath on
+thirty-six — so the reserve seeds stay unspent. That is the registration being
+obeyed, not a budget decision, and it happens also to spend no Codex.
+
+#### The grades, slot by slot
+
+Graders as §13.4 fixes them: the Codex seat (GPT family) on P1, P2, P4, P5, P6;
+`opus-5-fresh` (Claude family, with the stated limit recorded beside it) on P3.
+Verbatim reads at `review/qa/kokomi-kurage-blind-001-pair-review-codex-gpt-5.6-sol.md`
+and `review/qa/kokomi-kurage-blind-001-p3-read-opus-5-fresh.md`; the prompts
+they were handed are committed beside them.
+
+| slot | grader | verdict | pair read | the count against the slot's own threshold |
+|---|---|---|---|---|
+| **P1** | seat (GPT) | **SPLIT** | RETURN | Front entries were named (`turn-006`, "the jellyfish is already set to replay Gorou next turn") but the paired card-AND-price read the threshold asks for is not in the record on 4 of the first 5 non-empty-queue turns; the falsifier's two wrong prices are not established either |
+| **P2** | seat (GPT) | **SPLIT** | RETURN | Advance fire calls exist on `turn-006`, `turn-009`, `turn-019`; neither 5 correct nor 2 wrong can be counted, because the record does not carry the `blocked` / `fires_next` pair to count them against. No FIRES-direction miss is established |
+| **P3** | `opus-5-fresh` (Claude) | **SPLIT** | RETURN | **0 of 10** qualifying turns, and **0 of six Musters** state a Memory consequence — every Muster target was chosen *because the card was dead*, the exact inverse of Rule 1, and the run record concludes that Exhaust builds Charge. The falsifier as written ("never once plays toward the queue") does not fire: `turn-005` and `turn-010` play a free card explicitly to give the jellyfish something to remember |
+| **P4** | seat (GPT) | **MISS** | RETURN | Half (a) landed on the first evidenced block — the tester read `Coral Guard blocked` as a block and said nothing behind it fires. Half (b) failed: no play was named that would supply the Charge to unblock it |
+| **P5** | seat (GPT) | **SPLIT** | RETURN | Gradable, not VOID — Gate A's face held and the Oath was drawn and played (`turn-006`). The required no-pay statement never occurs; a contrary expectation is not conclusively established either |
+| **P6** | seat (GPT) | **SPLIT** | RETURN | Advance target calls exist (`turn-019`, `turn-025`, `turn-034`), so the "no advance call at all" falsifier does not fire and no fresh-bind expectation is stated; but no call can be verified correct, because the record does not carry what the automatic play actually hit |
+
+**The pair read: 0 ADVANCE / 6 RETURN / 0 ESCALATE.** The seat's closing
+paragraph: *"the run shows that the reader sometimes planned around an
+anticipated replay, block, and target, but it does not demonstrate reliable
+planning with the queue at the committed thresholds. The evidence is incomplete
+rather than internally irreconcilable, so nothing warrants ESCALATE."*
+
+**The decisive question (13.1) is not carried.** Its falsifier — that every
+mention of the jellyfish is a report of something that already happened — does
+NOT fire: the tester names the front before it fires and twice plays toward the
+queue on purpose. But P3 at 0 of 10 says D2's steering is not there on the base
+kit as built, and P4's half (b) says the Charge sources are not discoverable
+from the page. D4 stands better than D2, which is the split the slate was built
+to tell apart, and it read the way the slate said it would read if D2 failed.
+
+#### An instrument finding this run made, recorded and NOT acted on
+
+Two of the six thresholds name an objective side the committed record cannot
+carry. P2 counts a call *"against the `blocked` / `fires_next` pair the bridge
+carried for that turn"* and P6 asks whether an advance aim call was *correct* —
+both need the wire or the replay beside the tester's sentence, and
+`record.md` carries the tester's words only. The seat said so itself on both
+slots, and both are SPLIT partly for that reason.
+
+**Nothing was re-graded and nothing was added to the record to fix it.** A
+replay that contradicts a form is the finding, not a correction (§13.5 item 6,
+R101b). The gap is written down here and returned as a numbered pick below.
+
+One thing WAS fixed, before the run and disclosed here rather than after it:
+the blind prompt requires a per-turn sentence and the reply schema enforces one,
+but nothing carried it out of the gitignored turn pages into the committed
+record — so the record could not evidence §13.5's own requirement that some turn
+state IN ADVANCE what the jellyfish was about to play. `blindplay notes` now
+carries that channel, with `_splice` stopping the leak audit truncating it;
+five locks in `tier0/tests/test_blindplay_turn_notes.py`. Hygiene on the
+instrument, committed before the seed was embarked, changing no prediction, no
+threshold and no denominator.
+
+#### Two observations from the record, neither diagnosed here
+
+Both are the tester's words, both concern the strip, and neither is a defect I
+should rule from a play record:
+
+1. Fight 1: *"after Gorou it showed 'Charge 1 / 0,' then later said the memory
+   was empty despite Charge remaining."*
+2. Fight 2: *"The memory's 'Coral Guard blocked' entry also said nothing behind
+   it fires, yet Sayu remained listed behind it, so I could not tell exactly
+   what would replay."* — and the P3 read notes that this line is Rule 1 having
+   worked, read by the tester as a display bug.
+
+#### State left on disk
+
+`mods\klee` carries `0.2.1456+proto`, installed and validated. All five embark
+ledger rows REVERTED, no game process, `steam_appid.txt` and the bridge removed.
+`KURAGEMEM002` and `KURAGEMEM003` unspent.

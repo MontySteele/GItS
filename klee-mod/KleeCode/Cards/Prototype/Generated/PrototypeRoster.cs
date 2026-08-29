@@ -19,12 +19,27 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public static class PrototypeRoster
 {
-    private static readonly Dictionary<string, List<CardModel>> ByCharacter = new()
-    {
-        ["furina"] = new List<CardModel>
+    // LAZY, AND PER CHARACTER (`EB-194`). This was one eager
+    // `static readonly` dictionary that resolved EVERY character's rows in the
+    // type initializer. `ModelDb.Card<T>()` throws KeyNotFoundException until
+    // the models are built -- they are `autoAdd: false` and constructed at
+    // pool-build time -- and a static constructor that throws POISONS ITS TYPE
+    // for the life of the process. So one premature touch (a Harmony postfix on
+    // `LocManager.Initialize` reaching in during boot) permanently disabled the
+    // whole prototype surface for every character, and no run could start.
+    // Building per character on first ask confines a premature touch to the
+    // character that made it, and leaves the type recoverable.
+    private static List<CardModel>? _furina;
+    private static List<CardModel>? _klee;
+    private static List<CardModel>? _kokomi;
+
+    private static List<CardModel> BuildFurina() =>
+        new()
         {
-        },
-        ["klee"] = new List<CardModel>
+        };
+
+    private static List<CardModel> BuildKlee() =>
+        new()
         {
             ModelDb.Card<ProtoIttoSuperlativeSuperstrengthEither>(),
             ModelDb.Card<ProtoIttoSuperlativeSuperstrengthPriced>(),
@@ -49,8 +64,10 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoShinobuSanctifyingRingEitherModeB>(),
             ModelDb.Card<ProtoThomaCrimsonOoyoroiEitherModeA>(),
             ModelDb.Card<ProtoThomaCrimsonOoyoroiEitherModeB>(),
-        },
-        ["kokomi"] = new List<CardModel>
+        };
+
+    private static List<CardModel> BuildKokomi() =>
+        new()
         {
             ModelDb.Card<ProtoChargeModeGuard>(),
             ModelDb.Card<ProtoChargeMusterPrice>(),
@@ -60,12 +77,15 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoPearlBarrageTurn>(),
             ModelDb.Card<ProtoChargeModeGuardModeA>(),
             ModelDb.Card<ProtoChargeModeGuardModeB>(),
-        },
-    };
+        };
 
     /// <summary>Prototype rows owned by one character, or none.</summary>
     public static IReadOnlyList<CardModel> For(string characterId) =>
-        ByCharacter.TryGetValue(characterId, out var cards)
-            ? cards
-            : new List<CardModel>();
+        characterId switch
+        {
+            "furina" => _furina ??= BuildFurina(),
+            "klee" => _klee ??= BuildKlee(),
+            "kokomi" => _kokomi ??= BuildKokomi(),
+            _ => System.Array.Empty<CardModel>(),
+        };
 }

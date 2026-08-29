@@ -2323,6 +2323,48 @@ def leak_audit(log_dir: Path, seed: str = "") -> dict[str, Any]:
             "offenders": offenders, "total": sum(counts.values())}
 
 
+def turn_notes(log_dir: Path) -> list[tuple[str, str, str]]:
+    """The tester's own per-turn sentence, off the gitignored turn pages.
+
+    `(turn, command, thinking)` per answered turn. The blind prompt REQUIRES a
+    `thinking` field on every answer and the schema enforces it, but until now
+    nothing carried it into the committed record — so a record could not
+    evidence a claim about what the tester said IN ADVANCE of a play, which is
+    exactly what a legibility slate grades. Reads only; the material is the
+    tester's own words, the same class the fight records already carry
+    verbatim, and no observation text is copied out.
+    """
+    rows: list[tuple[str, str, str]] = []
+    for reply in sorted(log_dir.glob("turn-*/reply.json")):
+        try:
+            data = json.loads(reply.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        rows.append((reply.parent.name, _text(data.get("command")),
+                     _text(data.get("thinking"))))
+    return rows
+
+
+def notes_markdown(rows: list[tuple[str, str, str]]) -> str:
+    """The per-turn channel as the committed record carries it."""
+    out = ["## Turn by turn, in the tester's own words", "",
+           "One line per answered turn: the command the tester gave and the "
+           "sentence it gave for it, verbatim, off `turn-*/reply.json`. The "
+           "same R217 G label rides on it as on the fight records — it is one "
+           "model's account, not a measurement.", ""]
+    if not rows:
+        out += ["No answered turn carried a note."]
+        return "\n".join(out) + "\n"
+    out += ["| turn | command | the tester's sentence |", "|---|---|---|"]
+    for turn, command, thinking in rows:
+        note = thinking.replace("|", "\\|").replace("\n", " ").strip()
+        cmd = command.replace("|", "\\|").strip()
+        out.append(f"| `{turn}` | `{cmd}` | {note} |")
+    return "\n".join(out) + "\n"
+
+
 def audit_markdown(audit: dict[str, Any]) -> str:
     """The audit as the committed record carries it."""
     out = ["## Leak audit", "",
@@ -2474,6 +2516,58 @@ def cmd_session(args) -> int:
     return 0
 
 
+SECTIONS = ("## Turn by turn", "## Leak audit")
+
+
+def _splice(record: Path, heading: str, block: str) -> None:
+    """Replace one appended section of a sealed record, keeping the others.
+
+    The record is the head the seal wrote plus appended sections in `SECTIONS`
+    order. Each post-hoc writer replaces its own section and never truncates a
+    sibling — the bug this exists to stop is a second writer silently dropping
+    the first one's block.
+    """
+    text = record.read_text(encoding="utf-8")
+    blocks: dict[str, str] = {}
+    for name in SECTIONS:
+        head, sep, tail = text.partition("\n" + name)
+        if sep:
+            blocks[name] = (sep.lstrip("\n") + tail).rstrip() + "\n"
+            text = head
+    blocks[heading] = block.rstrip() + "\n"
+    # A block may itself have swallowed a later sibling on an older record.
+    for name in SECTIONS:
+        if name in blocks and name != heading:
+            body, sep, _ = blocks[name].partition("\n## ")
+            if sep:
+                blocks[name] = body.rstrip() + "\n"
+    out = text.rstrip()
+    for name in SECTIONS:
+        if name in blocks:
+            out += "\n\n" + blocks[name].rstrip()
+    record.write_text(out + "\n", encoding="utf-8")
+
+
+def cmd_notes(args) -> int:
+    """Carry the tester's per-turn sentences into the committed record.
+
+    Separate from `session` for the reason `audit` is: it reads the gitignored
+    turn pages of a run that has FINISHED and writes only the committed
+    record, so a session sealed before this existed is still completable.
+    """
+    log_dir = LOG_ROOT / args.session_id
+    if not log_dir.is_dir():
+        raise BlindPlayError(f"no session log at {log_dir}")
+    rows = turn_notes(log_dir)
+    record = RECORD_ROOT / args.session_id / "record.md"
+    if not record.is_file():
+        raise BlindPlayError(f"no sealed record at {record}")
+    _splice(record, "## Turn by turn", notes_markdown(rows))
+    print(f"record: {record}")
+    print(f"turns:  {len(rows)}")
+    return 0
+
+
 def cmd_audit(args) -> int:
     """Read back what the tester was shown, and say so in the record.
 
@@ -2494,10 +2588,7 @@ def cmd_audit(args) -> int:
 
     record = RECORD_ROOT / args.session_id / "record.md"
     if record.is_file():
-        text = record.read_text(encoding="utf-8")
-        head = text.split("\n## Leak audit", 1)[0].rstrip()
-        record.write_text(head + "\n\n" + audit_markdown(audit),
-                          encoding="utf-8")
+        _splice(record, "## Leak audit", audit_markdown(audit))
         print(f"record:  {record}")
     print(f"scanned: {audit['observations']} observation(s)")
     print(f"hits:    {audit['total']}")
@@ -2542,6 +2633,11 @@ def main(argv: list[str] | None = None) -> int:
                                      "its committed record")
     u.add_argument("session_id")
     u.set_defaults(func=cmd_audit)
+
+    n = sub.add_parser("notes", help="carry a finished session's per-turn "
+                                     "sentences into its committed record")
+    n.add_argument("session_id")
+    n.set_defaults(func=cmd_notes)
 
     args = ap.parse_args(argv)
     try:

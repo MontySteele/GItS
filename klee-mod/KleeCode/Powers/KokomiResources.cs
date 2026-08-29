@@ -469,11 +469,15 @@ public sealed class KokomiResourceHooks : AbstractModel
         _instance ??= ModelDb.GetById<KokomiResourceHooks>(
             ModelDb.GetId<KokomiResourceHooks>());
 #if PROTOTYPE_CARDS
-        // QUARANTINED (Powers/Prototype/KurageMemory.cs). The memory is PER
-        // FIGHT, which the sim gets free because CombatState is rebuilt by
-        // run_fight; this hook model is a singleton and has to be told. This
-        // is the one place the mod is handed a fresh combat.
-        KurageMemory.ResetForCombat(combatState);
+        // QUARANTINED (Powers/Prototype/KurageMemory.cs). STASH ONLY: this is
+        // the one place the mod is handed a CombatState, and the base kit's
+        // install needs it, but it is NOT a per-fight seam. `EB-196`: the
+        // combat re-enumerates its hook listeners on every hook broadcast
+        // (CombatState.IterateHookListeners -> ModHelper's subscriber walk ->
+        // this delegate), so this line used to clear the memory between every
+        // pair of hooks and nothing could ever stay remembered. The per-fight
+        // clear is BeforeCombatStart's, below.
+        KurageMemory.NoteCombat(combatState);
 #endif
         yield return _instance;
     }
@@ -495,6 +499,13 @@ public sealed class KokomiResourceHooks : AbstractModel
     /// </summary>
     public override async Task BeforeCombatStart()
     {
+        // THE PER-FIGHT CLEAR LIVES HERE (`EB-196`), beside the install and
+        // for the same reason: the game raises this hook ONCE per combat,
+        // after every creature is in and before the first turn opens, while
+        // the subscription delegate that used to hold the clear runs on every
+        // hook broadcast. The memory is per fight; this is the only line that
+        // starts a fight with an empty one.
+        KurageMemory.ClearForNewCombat();
         await KurageMemory.InstallAll();
     }
 #endif
