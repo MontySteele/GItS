@@ -35,6 +35,13 @@ internal static class KleePowerIcons
         SparkPerTurnPower => KleePck.Path("klee/powers/spark_per_turn.png"),
         ZeroCostAttacksUpPower => KleePck.Path("klee/powers/zero_cost_attacks_up.png"),
         SparkThresholdDownPower => KleePck.Path("klee/powers/spark_threshold_down.png"),
+#if PROTOTYPE_CARDS
+        // QUARANTINED (the Sparks alternative-cost arm). It borrows the icon of
+        // the power it replaces -- True Spark Knight's old body was
+        // spark_threshold_down and the re-authored card keeps the id, the
+        // rarity and the cost. No new art for a prototype row, per the slice.
+        SparkAttackCostPower => KleePck.Path("klee/powers/spark_threshold_down.png"),
+#endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
         SparksNSplashPower => KleePck.Path("klee/powers/sparks_n_splash.png"),

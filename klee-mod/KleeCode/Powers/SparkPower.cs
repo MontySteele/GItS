@@ -41,6 +41,31 @@ namespace KleeMod.Powers;
 /// </summary>
 public sealed class SparkPower : PowerModel, ILocalizationProvider
 {
+    /// <summary>
+    /// THE ALTERNATIVE-COST FLAG, C# side (review/active/klee-sparks-2026-08-29.md
+    /// sec.10.1, PICK 6 option 1). Twin of tier0's
+    /// <c>C.SPARK_ALT_COST_ENABLED</c>, and it is the SAME switch that
+    /// quarantines the prototype surface: <c>-p:PrototypeCards=true</c> defines
+    /// <c>PROTOTYPE_CARDS</c>, compiles <c>Cards/Prototype/**</c> and
+    /// <c>Powers/Prototype/**</c>, and stamps a deploy <c>+proto</c>. One flag,
+    /// one revert.
+    ///
+    /// FALSE means the base rule is RETIRED: at no bank do Attacks cost 0 and
+    /// nothing is consumed automatically. It is a const rather than a
+    /// <c>#if</c> at each site so the retirement reads as one fact with three
+    /// call sites, and so the bite-check can assert the fact itself.
+    ///
+    /// NOTHING BELOW IS DELETED, which is deliberate and is tier0's own posture
+    /// (<c>combat.spark_threshold</c> carries the identical RETIRED-UNDER-FLAG
+    /// note): the two economies are meant to be runnable as two arms, and an
+    /// OFF arm needs the shipped rule byte for byte.
+    /// </summary>
+#if PROTOTYPE_CARDS
+    internal const bool BaseRuleActive = false;
+#else
+    internal const bool BaseRuleActive = true;
+#endif
+
     /// <summary>Mirrors tier0 constants.py SPARKS_FOR_FREE_ATTACK = 3.</summary>
     public const int Threshold = 3;
 
@@ -55,12 +80,22 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
            - (Owner?.Powers.OfType<SparkThresholdDownPower>()
                   .FirstOrDefault()?.Amount ?? 0));
 
+    /// <summary>
+    /// The counter's face. Under the flag the base rule's sentence is a lie --
+    /// nothing costs 0 and nothing is consumed -- and D4 makes a power that
+    /// prints a rule it does not run a defect, not a cosmetic loose end. So the
+    /// text retires with the rule it describes and the bank says only what it
+    /// is: a resource cards charge for.
+    /// </summary>
     public List<(string, string)>? Localization => new()
     {
         ("title", "Spark"),
         ("description",
-            "At 3 [gold]Sparks[/gold], your Attacks cost 0. "
-          + "Playing one consumes 3 [gold]Sparks[/gold]."),
+            BaseRuleActive
+                ? "At 3 [gold]Sparks[/gold], your Attacks cost 0. "
+                  + "Playing one consumes 3 [gold]Sparks[/gold]."
+                : "A resource. Cards that print a [gold]Spark[/gold] price "
+                  + "spend it."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -144,8 +179,15 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
         return true;
     }
 
+    /// <summary>
+    /// The base rule's predicate. RETIRED-UNDER-FLAG: the first clause is the
+    /// flag itself, so the zeroing hook, the spend DECISION and the consume all
+    /// stand down together and cannot be retired by halves. Kept rather than
+    /// deleted for the reason on <see cref="BaseRuleActive"/>.
+    /// </summary>
     private bool AppliesTo(CardModel card) =>
-        Amount >= CurrentThreshold
+        BaseRuleActive
+        && Amount >= CurrentThreshold
         && card.Type == CardType.Attack
         && !card.EnergyCost.CostsX
         && card.Owner?.Creature == Owner;
