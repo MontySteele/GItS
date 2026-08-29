@@ -1,0 +1,27 @@
+{
+  "turn_id": "klee-slice1-r3-t03",
+  "packet_sha256": "feefbcb4ef8fc9b878698facd277fdde8e804730868f5ae228abcf6c62a86d56",
+  "grader": {
+    "id": "opus-5-fresh",
+    "kind": "llm",
+    "model": "claude-opus-5",
+    "designed_these_cards": false
+  },
+  "chosen_line": [
+    {
+      "card": "Eager to Help"
+    },
+    {
+      "card": "Rapid Fire",
+      "target": "Seapunk"
+    },
+    {
+      "card": "Duck and Cover"
+    }
+  ],
+  "q1_what_did_you_play": "Eager to Help first, for 1 energy, while the Spark bank is still 3 — that satisfies its 'If you have Spark' clause and draws 2 instead of 1. Only then Rapid Fire, which is showing 0 because of the bank; playing it consumes all 3 Sparks and puts 4 damage into Seapunk four times. There is exactly one enemy, so the random targeting is not random in practice — all 16 land on Seapunk, taking it to 30/46, and Pyro goes on. That leaves 3 energy for a hand I have just widened. The disclosure says the pile holds three 1-cost 7-damage Attacks and nothing above 2 cost, so the two cards I drew are very likely playable immediately: I spend energy on any 1-cost attacks I drew (each 7 more damage, and they cost full price now that the bank is spent), and I close with Duck and Cover for 5 Block with the last energy. If both draws are the 7-damage attacks that is 30 total damage this turn and Seapunk's 11 lands for 6. If the draws are unplayable, Duck and Cover still goes down and I simply hold the leftover energy.",
+  "q2_other_line_considered": "Two. The first was ordering — Rapid Fire before Eager to Help. Identical energy, strictly worse: spending the bank first drops Eager to Help to the 'Otherwise' half and I draw 1 instead of 2. I discarded it as soon as I read the clause. The second was skipping Eager to Help entirely and holding 3 energy for whatever Rapid Fire's damage left me needing — Rapid Fire free, Duck and Cover, 2 energy unspent. That is a real line but it burns the whole point of a full bank plus a cheap conditional draw, and unspent energy against a 46 HP enemy that is going to keep hitting is just discarded tempo.",
+  "q3_what_it_gave_up": "Certainty. Eager to Help spends 1 of 4 energy on cards I have not seen, and if the two draws come up as something I cannot use or cannot afford after Duck and Cover, that energy bought nothing and I did 16 damage on a turn that could have done 16 anyway. It also gives up the option of banking Rapid Fire for a later turn when there might be several enemies for the four hits to split across, or when a bigger Spark-discounted attack might be in hand instead — I am cashing a 0-cost window on the cheapest attack available rather than the biggest. And Duck and Cover at the end only blunts 5 of an 11, so I still take damage at 42/62; I never seriously tried to negate the hit.",
+  "q4_different_intent": "Yes, at the margin. The 11 is what buys Duck and Cover its slot; against a telegraph I could fully absorb or safely eat — a small chip hit, a block-up, a buff, anything under 5 — I would drop Duck and Cover and put that last energy into a third drawn 7-damage attack instead, going for 37 damage and taking the hit bare. The front half of the line does not move: Eager to Help then Rapid Fire is right against any attacking telegraph, because the draw clause and the free attack are both priced off my own Spark bank rather than off what the enemy is doing. A much larger telegraph would not change it either — 5 Block does not save a turn against 25, so I would still spend into damage.",
+  "q4_changed": true
+}

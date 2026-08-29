@@ -1,0 +1,35 @@
+{
+ "turn_id": "klee-slice1-r3-t04",
+ "packet_sha256": "e71c5bdaea737b72ff217427ea604d693c9b7c455b0fc7bb37f17bcb508d2852",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Rummage",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Rapid Fire",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "Rummage first, spending the 3 Sparks and drawing three cards; then Rapid Fire for its printed cost of 2; then Duck and Cover.",
+ "q2_other_line_considered": "I seriously considered replacing Duck and Cover with a drawn 1-energy Attack dealing 7 damage, if Rummage drew one.",
+ "q3_what_it_gave_up": "It gave up 7 potential damage from that alternative in exchange for 5 Block against the telegraphed 11 damage.",
+ "q4_different_intent": "Yes. Against a non-damaging intent, I would favor the extra 7-damage Attack over Duck and Cover if Rummage drew one.",
+ "q4_changed": true
+}

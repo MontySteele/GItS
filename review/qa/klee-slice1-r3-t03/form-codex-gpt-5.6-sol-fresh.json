@@ -1,0 +1,35 @@
+{
+ "turn_id": "klee-slice1-r3-t03",
+ "packet_sha256": "feefbcb4ef8fc9b878698facd277fdde8e804730868f5ae228abcf6c62a86d56",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Eager to Help",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Rapid Fire",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "Eager to Help first while Spark was still available, then Rapid Fire targeting Seapunk, then Duck and Cover.",
+ "q2_other_line_considered": "I seriously considered omitting Duck and Cover to preserve another energy for one of the two cards drawn by Eager to Help.",
+ "q3_what_it_gave_up": "It gave up one energy that could have been spent on a drawn card, potentially adding offense or another effect this turn.",
+ "q4_different_intent": "Yes. If Seapunk had not telegraphed damage, I would have omitted Duck and Cover and kept that energy available for the cards drawn by Eager to Help.",
+ "q4_changed": true
+}
