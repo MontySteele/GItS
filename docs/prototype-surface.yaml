@@ -436,3 +436,47 @@
    effects: [{op: spend_spark, amount: 3},
              {op: block, amount: 5},
              {op: burst_energy, amount: 10}]}
+
+# =============================================================================
+# KOKOMI -- THE KURAGE'S MEMORY v3 (a RULE arm, not a card row)
+#
+# DECLARED HERE AND CARRYING NO ROW, DELIBERATELY. Every row in this file is a
+# CARD: `tools/gen_prototype_cards.py` requires an `id` starting `proto_`, a
+# `character` in the codegen profiles, and an effects list it can emit as a
+# C# class, and `tier0/content/loader.prototype_cards()` schema-checks it as a
+# card. The Kurage's memory is ENGINE BEHAVIOUR -- two entry rules, a price, a
+# turn-start fire, a pulse and a strip -- and it authors no card at all. A row
+# for it would either be a card nobody designed or a new row KIND, taught to
+# the loader, the generator, four lints and the surface tests. That is
+# machinery bought for one arm, which is the same trade this file's header
+# already refused for `character: companion`.
+#
+# So it is declared, not rowed, and the declaration is the audit trail:
+#
+#   arm:          the Kurage's memory, v3
+#   character:    kokomi
+#   spec:         review/active/kokomi-kurage-memory-2026-08-29.md sec.11
+#                 (sec.11.1 is [USER]'s words and IS the spec)
+#   sim:          tier0 behind C.KURAGE_MEMORY, default off
+#   mod:          klee-mod/KleeCode/Powers/Prototype/KurageMemory.cs, compiled
+#                 only under `dotnet build -p:PrototypeCards=true` -- the SAME
+#                 switch that quarantines the card rows above, so a release
+#                 build contains no type from it and every seam that calls it
+#                 sits inside `#if PROTOTYPE_CARDS`
+#   authored_by:  [user, claude, gpt] -- [USER] specified the rule and made
+#                 four rulings on it; [USER]'s advisor (GPT) wrote the rule
+#                 statement [USER] forwarded as the design; Claude implemented
+#                 it and made it total. Recorded in the shape `EB-190` asks
+#                 for; that lint is UNBUILT, and no row in this file carries
+#                 an `authored_by:` field yet, so this is prose rather than
+#                 schema. NO CARD ROW WAS AUTHORED HERE and nothing on any
+#                 sheet moved, so row-level independence is untouched.
+#   prints:       nothing. `play_front_memory` (provisional keyword "Stir",
+#                 R179) has its op in the sim and its door in the mod so
+#                 codegen can emit a card that prints it; no card does.
+#   revert:       the flag. Delete Powers/Prototype/KurageMemory.cs and its
+#                 `#if PROTOTYPE_CARDS` seams; the sim half is C.KURAGE_MEMORY.
+#
+# THE DELETION RULE AT THE TOP OF THIS FILE APPLIES TO THIS BLOCK TOO: when
+# the arm is accepted or rejected, this block leaves with it.
+# =============================================================================
