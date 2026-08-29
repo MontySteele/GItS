@@ -624,10 +624,22 @@ def kurage_memory(player: dict[str, Any]) -> dict[str, Any] | None:
         the end of THIS turn, so a seat can forecast its own turn end.
         `pulse_unit` can read `charge`, because the Power branch pays in Charge
         rather than in damage or Block.
-      reading -- the strip's own one line, verbatim, so the observed board and
-        the screen cannot drift.
+      reading -- the ONE-LINE reading, verbatim. Kept on the wire because the
+        rule still computes it, but the PAGE no longer prints it: sec.14
+        replaced the strip with an element whose facts stand one per line.
+      run_out_index -- sec.14.4's running subtraction over the queue: the index
+        of the first entry the bank cannot reach, and -1 when it covers the
+        whole queue. It is the pile view's own colouring, on the wire so the
+        page and the screen cannot drift about where the Charge stops.
       queue -- ordered, front first: name, cost, price, target ("random" when
         the memory stored none), blocked, affordable, ephemeral, rule.
+
+    THE WIRE'S PER-ROW `state` IS DELIBERATELY NOT CARRIED. `Snapshot` sends one
+    -- "payable" / "runs_out" / "held", the pile view's own colouring -- and it
+    is an INTERNAL SNAKE-CASE ID, which `qa_packet.assert_blind` refuses on the
+    observed board and is right to: a blind tester must never be handed a
+    developer's vocabulary. `run_out_index` says the same thing as a number,
+    and the page turns it into a sentence.
     """
     raw = player.get("kurage_memory")
     if not isinstance(raw, dict):
@@ -666,6 +678,10 @@ def kurage_memory(player: dict[str, Any]) -> dict[str, Any] | None:
         "pulse_amount": _int(raw.get("pulse_amount")),
         "pulse_unit": _text(raw.get("pulse_unit")) or "none",
         "reading": _text(raw.get("reading")),
+        # -1 rather than None on a wire that never sent the field: "the bank
+        # covers everything queued" is the safe reading, and an empty queue
+        # says the same thing.
+        "run_out_index": _int(raw.get("run_out_index", -1)),
         "queue": queue,
     }
 
@@ -994,25 +1010,61 @@ def render(obs: dict[str, Any]) -> str:
                    f"{c['piles']['discard']} discarded, "
                    f"{c['piles']['exhaust']} exhausted")
         if c.get("memory"):
-            # `EB-181`. The strip's own one line first, then the queue: those
-            # are the facts the screen shows, in the order it shows them.
-            # Absent entirely on a build without the rule.
+            # `EB-181`, rewritten for the memory CARD that replaced the strip
+            # (review/active/kokomi-kurage-memory-2026-08-29.md §14). The page
+            # mirrors THE ELEMENT'S facts, in the element's own order, because
+            # a blind reader must be given what a sighted player sees and
+            # nothing else:
+            #
+            #   1. the Charge count -- the big number under the card;
+            #   2. the FRONT card, its price, and whether it fires next turn --
+            #      the blue/red ring, which is one comparison and no forecast;
+            #   3. the queue, in order, as the pile view shows it on a click,
+            #      with the run-out called out.
+            #
+            # `EB-198` is why the first two are separate lines. The strip put
+            # the bank, the price and the state into one sentence with three
+            # grammars ("Charge 1 / 0"), and the tester read a free front as a
+            # fraction over zero and an empty memory as a contradiction of the
+            # Charge it had just been shown. Both frames were TRUE. One fact
+            # per line is the repair.
             m = c["memory"]
             out += ["", "## The Bake-Kurage's memory", ""]
             if m["base_kit"]:
                 out.append("- The Bake-Kurage is on the field for the whole "
                            "fight. Nothing summons it and nothing removes it.")
-            out.append(f"- {m['reading']}")
+            out.append(f"- Charge: {m['bank']}")
             if m["queue"]:
+                front = m["queue"][0]
+                price = ("costs nothing" if not front["price"]
+                         else f"costs {front['price']} Charge")
+                if m["blocked"]:
+                    state = ("you cannot pay it, so NOTHING in the memory "
+                             "fires next turn")
+                else:
+                    state = "it fires at the start of your next turn"
+                out.append(f"- Next to fire: **{front['name']}** — {price} — "
+                           f"{state}.")
+                out.append("- The whole memory, front first:")
                 for i, e in enumerate(m["queue"], 1):
                     price = "free" if not e["price"] else f"{e['price']} Charge"
-                    line = (f"- {i}. **{e['name']}** — {price} — "
-                            f"aims at {e['target']}")
-                    if e["blocked"]:
-                        line += " — BLOCKED: nothing behind it fires"
-                    out.append(line)
+                    out.append(f"  {i}. **{e['name']}** — {price} — "
+                               f"aims at {e['target']}")
+                # §14.4's running subtraction, the pile view's own colouring:
+                # blue while the bank still reaches, red from the shortfall AND
+                # every entry behind it. -1 means the bank covers the queue.
+                run_out = m.get("run_out_index", -1)
+                if run_out is None or run_out < 0:
+                    out.append("- Your Charge covers every memory queued, if "
+                               "you spend none of it elsewhere.")
+                else:
+                    out.append(f"- Charge runs out at #{run_out + 1} "
+                               f"(**{m['queue'][run_out]['name']}**): that one "
+                               f"and everything behind it are held until the "
+                               f"bank catches up.")
             else:
-                out.append("- (the memory is empty)")
+                out.append("- The memory is empty. Nothing is queued and "
+                           "nothing fires next turn.")
             out.append(f"- At the end of this turn the jellyfish will "
                        f"{_pulse_phrase(m)}.")
         if you["potions"]:
