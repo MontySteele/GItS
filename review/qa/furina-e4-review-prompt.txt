@@ -1,3 +1,578 @@
+You are the DOCTRINE SEAT for a card game modification. You did not write the
+proposal below, you are not being asked whether it is good, fun or balanced,
+and you are NOT being asked to design anything.
+
+THE PROTOCOL YOU ARE UNDER, verbatim from the repository's OPERATIONS.md:
+
+    The seat's other job -- reading a slice proposal against the character
+    charter before anything is built -- answers FOLLOWS or
+    REQUIRES_MODIFICATION per arm and NAMES THE CLAUSE it ruled against. That
+    is the whole output. It may not supply card text, a number, a mode or a
+    rewritten row: a remedy it volunteers is DISCARDED, and Claude re-derives
+    from the named clause.
+
+So: name clauses, not remedies. If you find yourself writing a number, a card
+face, or "you should instead...", stop and name the clause that forced it. Any
+remedy you volunteer anyway will be recorded and marked DISCARDED, and it will
+disqualify your model family from grading the row later, so it costs the
+process something real.
+
+WHY YOU: independence is by MODEL FAMILY, author against grader. Claude
+authored the SPECIFICS of this proposal. You are the other family.
+
+============================================================================
+WHAT IS AND IS NOT IN SCOPE FOR YOU
+============================================================================
+
+THE DIRECTION IS SETTLED AND IT IS PARTLY YOURS. The architecture this packet
+implements -- Salon and Companions as one cast, Spotlight directing it, Encore
+paying for it, Fanfare merged into the Burst meter as the finale -- was
+proposed by your own model family and accepted by the project owner. It is not
+open. DO NOT RE-LITIGATE THE DIRECTION. Do not argue that Center Stage should
+stay, that Fanfare should remain a separate meter, that the three archetypes
+should change, or that a different architecture would be better. A verdict that
+does any of those is out of scope and will be recorded as such.
+
+WHAT YOU ARE GATING, and only this:
+
+  G1  The E4 RULING TEXT in section 3 -- what it reopens, and each of the five
+      things it explicitly RETIRES.
+  G2  The LAW AMENDMENT WORDING in sections 3.1 and 3.2 -- as replacement text
+      for the clauses quoted above each of them.
+  G3  The ARCHITECTURE SPECIFICS in section 4 -- the shared performance hook,
+      the two Featured outcomes (one per lane), the persistent Spotlight and
+      its combat-start choice, the Encore-priced move, the merged meter's two
+      legs and their rates, the DERIVED meter size and its arithmetic, Grand
+      Performance, and the Encore display.
+  G4  The PICK LIST in section 9 -- whether each pick is genuinely a call the
+      packet cannot settle, and whether any pick smuggles in something already
+      settled by LAW or by the charter, or omits something that should have
+      been a pick and was instead assumed.
+
+Answer FOLLOWS or REQUIRES_MODIFICATION for EACH of G1, G2, G3, G4, and then
+OVERALL. For every REQUIRES_MODIFICATION, NAME THE CLAUSE -- quote or cite the
+LAW line, the D-charter item, or the kickoff section it violates. If a clause
+you would cite is one this packet itself proposes to retire or amend, say so
+explicitly, because a retirement is not automatically a violation.
+
+You may also, within G3, rule on whether the two Featured outcomes are
+"meaningfully different" in the sense the direction requires -- that choosing
+Salon versus Guest is not merely selecting which body produces meter. That
+question is in scope because it is a doctrine question, not a taste question.
+
+THE SANDBOX. You are read-only and previous runs of this seat found the command
+policy on this machine rejects every file read. DO NOT TRY TO READ THE
+REPOSITORY. Everything you need is pasted below verbatim and nothing has been
+summarised for you.
+
+============================================================================
+GOVERNING LAW -- the D1-D9 design charter (R213/R217), verbatim
+============================================================================
+
+construction: each is a question a reader answers about a card, a package or a
+pool, not a number a report computes.
+
+1. **D1 — Character brief before pool construction.** No pool is built before
+   its character has a short [USER]-owned brief: the player promise; two or
+   three core verbs; one or two recurring tensions; the three archetype loops;
+   the bridges among them; the intended weakness; what the starting relic and
+   starter deck teach; and the failure modes to avoid, named. A tension
+   sentence *summarises* the character — it does not mandate that every card
+   serve one mechanic. Zhongli's brief is the entry gate of his deep dive.
+2. **D2 — Player-controlled leverage.** Every persistent resource and every
+   automatic engine must feed a decision the player can steer: timing,
+   targeting, placement, acquisition, conversion, or forgoing. "Watch it rise
+   until the number is large" is not a decision. The control must be reachable
+   early and reliably — starter kit, starting relic, base system, or the
+   ordinary pool — not only through a rare.
+3. **D3 — Benefits carry binding prices.** Defence and engine advancement may
+   share a card, but not both at full rate without a binding cost: energy or
+   tempo, a below-rate half, mutually exclusive outcomes, target or timing
+   awkwardness, a card or resource spent, identity position, a future draw or
+   deck cost, or the loss of another action. The counterfactual test: remove
+   the defence — is what remains still a full-rate play the player already
+   wanted? If yes, the defence was a subsidy.
+4. **D4 — Visible and live effects.** At the decision point the player can
+   perceive and forecast the consequences that matter, through the card, a
+   keyword, a persistent UI element or a character rule — not necessarily
+   verbatim on every face. Text that cannot bind in the shipped world,
+   invisible feeds and misleading calculated displays are defects. A rare
+   intentional edge case is not removed for being rare.
+5. **D5 — Simple surfaces, deep interactions.** Richness comes from
+   interactions — between cards, enemies, energy, draw order, piles, targets
+   and future turns — not from clauses on faces. Commons establish the verbs
+   and stay concise. Any added line of text must alter a decision.
+6. **D6 — Every card has a place.** Each card has one primary decision home:
+   acquisition and build; combat (sequencing, targeting, holding, conversion,
+   timing); teaching or utility, deliberately plain; or bridge. Plain cards are
+   legal and necessary, and a pool of them is not a defect to be edited away.
+7. **D7 — Mesh without preassembly.** Each pool carries linear signposts AND
+   modular tools. No preassembled deck; no archetype written in a private
+   language only its own cards speak; bridges exist so combinations arrive
+   unexpectedly. Shared-verb and hook counts describe a pool — they are never
+   acceptance bands.
+8. **D8 — Distinct play patterns.** Archetypes differ in how turns and drafts
+   unfold, not in the label on a bigger number. Damage may stay terminal; the
+   route, cadence, constraint, targeting, transformation, control or economy
+   must differ. One non-scalar payoff does not rescue an otherwise automatic
+   loop.
+9. **D9 — Shared layer and starting tutorial.** Companion packages connect to
+   both character verbs and universal verbs; not every Companion card needs a
+   hook, but every package needs a distinctive identity. The starting relic and
+   starter deck introduce the central verbs and one recurring tension from
+   fight one, with visible triggers and no invisible feed.
+
+**Provisional through the Klee slice**, then reviewed. **Nothing here is a
+numeric band and nothing here gates:** hook share, bridge %, payoff-role %,
+scalar-payoff %, random-target %, Powers-per-universal-verb count, plain-card
+%, word count and "turns with a named alternative" rate are descriptive only.
+No subjective front-matter fields enter card YAML, and there is no waiver
+mechanism. Decision closeness (R213 F) remains the only numeric design
+falsifier, and it falsifies one way. (R217 — drafted by GPT, sharpened by
+Claude, ratified by [USER].)
+
+============================================================================
+GOVERNING LAW -- Combat & reactions, including the clause section 3.1 replaces
+============================================================================
+
+  aura; off-element access comes only from companions or a co-op partner.
+  (principles Pillar 2 / Guardrail 2)
+- **Amplifiers are per-hit and consume the aura.** No reaction ever produces a
+  persistent or compounding damage multiplier — this is the iron rule and the
+  balance governor. (Whether a particular card's scaling that happens to get
+  duplicated is *too strong* is a balance question, not a law.) (principles §2.2)
+- **One aura per enemy (v1), 2 player-turns, refreshed by same-element hit.**
+  Anemo/Geo leave no aura — they only trigger. (principles §2.1)
+- **Canonical Frozen is a per-turn-decrementing, per-creature duration counter.**
+  Non-boss Frozen = −50% next-action damage + Shatter (first Attack hit only,
+  direct HP damage, cannot shatter the freeze it just applied). In boss rooms
+  only creatures carrying `MinionPower` are Frozen; every other creature takes
+  the Vulnerable substitution. (principles §2.2; R44; R116 NC-7 / R117 Q13)
+- **Elemental application coexists with Artifact.** An Aura or a Bomb lands
+  beside Artifact rather than consuming a charge — only an actual debuff
+  reduces Artifact. Scope: Auras and Bombs coexist; Frozen and
+  reaction-applied Vulnerable/Weak/Poison stay real debuffs and are negated
+  as normal. Bomb's "first attack −25%" rider lands through Artifact under
+  the same rule — ruled acceptable. ([USER] 2026-08-23)
+- **Hard CC is payoff-tier only.** No reaction and no companion card produces an
+  intent-skip/stun at repeatable-common economics; full stun is priced at or
+  above base-game stun scarcity with per-combat diminishing returns. Companions
+  never source hard CC (the `control_uptime` / `SUPPORT_CARRY` detector enforces
+  it). (principles §2.2a, §4.3; R45)
+- **Reaction credit — damage attribution and Burst energy — goes to the
+  triggering player;** auras live on shared enemies so cross-player reactions
+  need no special-casing. (principles §2.5)
+- **Overload splash (to all enemies) and Electro-Charged (stacking DoT) bypass
+  Block and are damage-pipeline-free** (no strength/vulnerable recursion).
+  **Shatter** is separate: bonus damage on the first Attack hit against a Frozen
+  enemy, which removes Frozen — it is not a DoT. (M1; principles §2.2)
+- **Application cadence is a per-character dial** — catalyst-grade (every attack
+  applies, low base numbers) vs. skill-grade (only Skill/Burst-tagged cards
+  apply, higher base numbers). (principles §2.3)
+- **Spotlight/empowerment boosts numbers only, never turn-economy effects.**
+  (principles §2.2a, v1.10)
+
+
+============================================================================
+GOVERNING LAW -- Economy: companion pool, and the clause section 3.2 amends
+============================================================================
+
+  Commons. (principles §4.7; R59; R116 NC-10; R117/R118 Q16; [USER] 2026-08-10)
+- **An empty companion slot is omitted, never faked, in both engines.** When the
+  fallback ladder runs out (no drawable companion at any nation or band) the slot is
+  not created; the mod does not substitute a base colorless card. Omission happens
+  upstream of `MerchantCardEntry.Populate`, which has no no-card path.
+  ([USER] 2026-08-10; R59, R60)
+- **Gold price is the balance governor, never a stat nerf.** Companion pricing is
+  50/75/150 by rarity; the ×1.15 colorless surcharge applies to `ColorlessCardPool`
+  only, so companions are exempt. (principles §4.7; R61, R63)
+- **Price, shelf composition, and shelf order JOINTLY govern the premium channel.**
+  Price alone is not the governor: what is on the shelf (the rarity floor) and when
+  the player is asked (companions resolve before the relic shelf, so they get first
+  claim on the purse) move the same outcome, and a channel tuned on price alone is
+  tuned on one of three levers. Amends the older "pricing is the governor" thesis,
+  which stands as the pricing half of it. ([USER] 2026-08-10, S4-G10)
+- **Neutral action-energy / draw / thin are legal enabler-grade companion utility**
+  (one-shot, Exhaust-gated, costed) — the pool must let any character draft a
+  kit-gap fix. **Burst-meter (`burst_energy`) generation stays character-kit-scoped**
+  and must never be cheaply repeatable from companions. (principles §4.7, §2.4)
+- **The Featured Banner governs 5-star availability:** each run rolls
+  min(roster, slots) limited 5-stars per nation, without replacement, fixed for
+  the run, per-player in co-op; 4-stars never gated; reward slot, shop slot 1,
+  and sim are wired together. Standard-banner 5-stars carry `standard: true` so
+  an off-banner floor is one flag, not a redesign. (principles §4.2, v1.8; R64)
+- **An unreleased-nation character sits in their nation of operation until their
+  home sheet ships** (Arlecchino→Fontaine, Childe→Liyue). (R65)
+- **Artifacts are relic subcategories with 2-piece set bonuses** — no 4-piece
+  sets, no main/substat rolls; themed to reaction styles, not characters
+  (cross-character content). (principles §5)
+- **Infinite cycling engines gate to Uncommon+** (a hand- and energy-neutral
+  self-replacing card is a cycling engine whatever else it does). (R109 X2; R114
+  FLAG-1)
+
+## Character identity — Klee
+
+- **Pyro, catalyst-grade:** every attack applies Pyro, base numbers run low;
+  enables any reaction, triggers none alone. (klee §1)
+- **Declared statline is load-bearing:** elite A1 (frontload) and A6
+  (utility/AoE); weak A3 (block) and A4 (sustain ~0.5). **Her scaling never tops
+  her frontload — A2 < A1 and A2 ≤ 4.0** (Klee-scoped, not mod-wide), scaling
+  powers stack-capped. (klee §2, §9; R52 ask 3)
+- **Bombs detonate at the start of Klee's turn,** early on any Attack-card hit;
+  multiple bombs stack independently, each keeping its own damage. (klee §3)
+- **Repeatable spark generation satisfies one of two limbs:** it sits at
+  Uncommon+, or no sub-Rare card is simultaneously a spark source and a draw
+  enabler — infinite sparks unreachable at Common (an unboundedness test, not a
+  ban on Common spark-minting). X-cost attacks are exempt from spark-spend.
+  (R109 X7 + [USER] annotation; R34)
+- **The Burst (Sparks 'n' Splash) is kit, not loot:** never draftable, granted to
+  hand on meter fill, casting empties the whole meter (overflow lost at cast),
+  re-granted on refill, carries Retain. (principles §2.4, v1.9)
+- **Detonation lifesteal patches A4 at relic rarity, not card rarity.** (klee §5)
+
+
+============================================================================
+GOVERNING LAW -- Character identity: Furina, verbatim and entire
+============================================================================
+
+## Character identity — Furina
+
+- **Hydro, skill-grade support-protagonist:** modest numbers, scaling routes
+  through others (elite A4 sustain + A6 utility; weak A1 + A7). (furina §1, §2)
+- **Spotlight runs in exactly two modes** (the retired self-Spotlight model is
+  not law): **CENTER STAGE** designates Furina — her cards generate Fanfare, no
+  numeric bonus; **GUEST CAST** designates the Companion *category* — companion
+  cards get the +50% multiplier and Spotlight texture, generate no Fanfare. The
+  `character:` field, invalid-target rule, freely-movable persisting designation,
+  inert duplicate selectors, per-player registry, and the per-turn Spotlighted-card
+  cap stay live. (R41; principles §4.5 v1.14; furina §3)
+- **Encore is an unbounded per-combat buffer** absorbing after Block and before
+  HP (overdraw drains true HP); **Encore absorption credits A4, never A3.**
+  (principles v1.10; furina §2, §4)
+- **Fanfare is capped at %maxHP; generation is activity-based, never passive**
+  *(Encore's per-turn-trickle ban carries the same Ancient carve-out: R127)*.
+  Design invariant: **every point of damage past Block prints exactly 1 Fanfare.**
+  Live legs: HP lost / Encore spent / Encore absorbed / Spotlighted card played.
+  Cards use printed `Fanfare Cap +X` (raises cap) and `Fanfare +X` (full grant,
+  rare POWER payoff only); cards raise a permanent floor (`gain_fanfare_floor`),
+  not the cap. **`Fanfare Cap +X` is an AVAILABLE EXPLICIT VERB, not a rider
+  every Power carries** — a card prints it when raising the ceiling is that
+  card's job. The incidental carriers were removed along with the register
+  lint that required one on every Power (`EB-118` §5.2, 2026-08-24; lint `R7`
+  retired, `R6` untouched — the full grant is still a rare-POWER payoff).
+  Fanfare is a global pool on Furina surviving Spotlight moves.
+  (principles v1.12 RATIFIED; furina §4; R41; R114 FLAG-3; EB-118 §5.2)
+- **Delete-test applies unmodified, no detector carve-outs:** deleting Furina's
+  cards from a winning Spotlight deck must gut it; companions winning anyway is
+  `SUPPORT_CARRY`. **Self-carry must not be the median-best plan** (Salon and
+  Spotlight beat self-carry at median draft quality; self-carry owns the ceiling
+  only on cracked-Rare draws). The Ethereal Spotlight selector is kit machinery
+  and does not count toward A5. (furina §8, §2; R61)
+- **Guest Star generators — four guardrails:** this-combat-only; generators
+  Exhaust; equal-rarity (sub-Rare cannot create 5-star Rares); pull only from the
+  shared companion pool + purpose-built Guest Star sets, never playable pools.
+  Guest cameos are Furina-personal-pool only. (furina §9; principles §4.5; D2)
+- **Fontaine Cryo-convergence is managed in kit, not roster exclusion:**
+  Charlotte and Freminet each get one Cryo-applying card; Chevreuse is the
+  authored Overload/Vaporize counterweight (buff other routes, never nerf
+  freeze); Fontaine's zero 4-star Electro is scarce by construction, not a bug.
+  Freminet is one applier + one defensive/trigger + one enabler — no fake-support
+  reflavor of a DPS kit. (furina §10)
+
+
+============================================================================
+GOVERNING LAW -- the animation / funnel contract and the Burst indicator
+============================================================================
+
+
+## Art & visual layer
+
+- **Ship pre-sized art, no runtime minification** — except where the layout pitch
+  is a per-player stat, where bounded runtime fitting is allowed with the bound
+  written down and asserted (Salon members capped at 0.5). (principles v1.13
+  RATIFIED)
+- **Visuals bind to funnels, never to values (Funnel Contract):** a number a kit
+  redesign moves must not be able to break a display. Contracted binding points:
+  Salon = 3 slot-index-keyed slots (duplicates legal); Encore-absorbs-before-HP;
+  Spotlight-is-a-designation-event. A breach = stop-work on that track, flagged
+  in the PR/commit; visuals never chase an unlanded kit change. (animation-sprint-2)
+- **The centered-overhead creature-space slot is the cross-character Burst
+  indicator;** gauge skins are unique per character. A mirror belongs above the
+  animated node, never on it; **never write `Visuals.Scale`** (a sign flip inverts
+  the hitbox — a gameplay bug in visual-bug clothing). A node a bridge depends on
+  is a contract with a side-effect-free boot check. (animation-sprint-2 C4;
+  klee-mod placement rules)
+- **Art dedupe (`art_lint` L1):** effective pick = auto or shortlist rank 1 unless
+  red-pen resolves; register-crossing reuse is legal; known collisions sit in a
+
+============================================================================
+GOVERNING LAW -- card-sheet material-edit rule and measurement authority
+============================================================================
+
+- **Ancient-tier pool gaps are fixed with real content, never option removal;**
+  each character needs one Ancient card, gated by a deploy lint that fails on an
+  empty ledger. (klee-mod Ancient ruling)
+- **A material card-sheet edit is a world change and lands under a
+  `CONSTANTS_VERSION` bump.** *"A card-sheet edit that materially changes the
+  drafted or combat world — card additions or removals, cost changes,
+  effect-number changes, rarity moves — is a world change. It lands under a
+  `CONSTANTS_VERSION` bump like any other balance constant, and numbers are not
+  comparable across it."* The sheets sit outside the `RT/D/P/C` stamp, so
+  without this rule two worlds differing in whether a card exists at all are
+  indistinguishable to a reader of the stamp. **Rename amendment:** a
+  *cosmetic* rename is exempt from the bump **only when neither the card id nor
+  the display name is read mechanically** — and the burden is on the renamer to
+  establish that, because at least one relic reads both. `card_name_damage_bonus`
+  matches a **substring** against the card id **OR** the display name
+  (`tier0/engine/relics.py:385-398`); its one carrier is `strike_dummy`,
+  substring `"strike"`, `+3` to attacks only, FROZEN. A rename that adds or
+  removes such a substring on either field moves damage and is not cosmetic.
+  (R179; M15 draft text ratified as written, amended on the rename clause)
+  **Role/archetype amendment (RATIFIED 2026-08-24, R202):** a change to a card's
+  `role` or `archetypes` is a material card-sheet edit because both fields are
+  mechanically read by drafting. It requires a `CONSTANTS_VERSION` bump, and
+  drafted-world numbers are not comparable across it.
+
+## Design governance & measurement authority
+
+- **The simulator's authority is relative deltas and structural findings, not
+  absolute human-play winrates;** a ratification resting on an absolute winrate
+  rests on the wrong number. (principles §7)
+- **Seven-axis numbers are reportable, not load-bearing:** **all seven** axes are
+  permanently CLOSED as reportable-only (never a gate, target, or justification
+  to move a value). There is **no "Fanfare axis"** — R118's term names no axis;
+  Fanfare is a Furina mechanic that falls under **scaling**, and the per-axis
+  disposition therefore collapses to one disposition for all seven. (principles
+  §7; D3; R90 Q7; R118; R138)
+- **Every archetype passes aura-starvation / bricking checks in the sim before
+  implementation;** test packages model plausible drafts, never monocultures.
+  (principles Guardrail 4)
+- **Ratified 1000-fight winrate bands change only by ruling, with archives;**
+  small-n heuristic locks may be retuned to measured-noise reality only with a
+  dated comment and disclosure. Authored Tier-0 25-card batteries are
+  ceiling-saturated and keep only their matchup floors; Tier 0.5 owns the
+
+============================================================================
+THE CHARACTER CHARTER -- Furina kickoff v0.1, sections 1-9, verbatim
+============================================================================
+
+
+- **Element:** Hydro. **Cadence: Skill-grade** — only Skill/Burst-tagged
+  cards apply Hydro; higher base numbers than catalyst-grade *within her
+  low-statline identity*. Salon members are her repeatable application
+  engine (see §5).
+- **Companion appetite: Standard.** Spotlight is draft-gated high-ceiling,
+  not her only plan; the self-Spotlight fallback means companion-poor runs
+  are dimmer, never bricked (Pillar 4).
+- **Burst:** kit-Burst per v1.9 (granted on meter fill, Retain, re-grant on
+  refill; never in pool). Meter size and card design deferred to the sheet
+  pass; her particle economy leans on Salon application and Encore spend.
+
+## 2. Statline declaration (7-axis, declared before any card is written)
+
+| Axis | Target | Rationale |
+|---|---|---|
+| A1 Frontload | **1.0–1.5** | The load-bearing weakness. Dreadful, by design. |
+| A2 Scaling | ~3.0 | Fanfare gives her a curve; her scaling *identity* routes through others. Declared on starter+median per acceptance law — companion-dense decks measuring higher is the design working, not a violation. |
+| A3 Block economy | ~2.5 | Encore is not Block; see harness note. |
+| A4 Sustain | **4.3** | The healing metric's protagonist. Encore absorption + rare-tier true heals. |
+| A5 Velocity | 3.7 | Encore-spend tempo, card-level velocity texture. Strong, deliberately sub-elite (heuristic: exactly two elite axes). *(Redpen 2026-07-20, ruling (a): selector cadence struck — the Ethereal selector is kit-delivery machinery and does NOT count toward A5.)* |
+| A6 Utility | **4.2** | Hydro aura uptime (Klee's dream co-op partner), party buffs, debuff texture. |
+| A7 Setup tax | ~2.0 | Second declared weakness. Punisher fights should genuinely hurt. |
+
+**Harness note (Tier 0, binding):** Encore absorption credits **A4**
+(chip-reduction), never A3. Without this accounting rule she grows a
+phantom third elite axis and the declaration is unfalsifiable.
+
+## 3. Signature subsystem: Spotlight (the one Ghostflames-scale system, §3.2)
+
+**Subsystem budget ruling:** Spotlight is THE subsystem. Encore and Fanfare
+are resource counters (cheap). Salon rides existing summon machinery
+pending the check-if-solved audit (§5). Pneuma/Ousia is **pure flavor,
+zero mechanics** (ratified). Nothing else novel ships in her v1.
+
+### 3.1 Designation (two modes — R41, v1.14)
+
+- Spotlight runs in **exactly two modes**. **CENTER STAGE** designates
+  Furina herself: her own cards generate Fanfare when played and receive
+  **no numeric Spotlight bonus**. **GUEST CAST** designates the
+  **Companion category**, not one character: companion cards receive the
+  empowerment multiplier and Spotlight texture, and generate no Fanfare
+  (`review/active/red-pen-2026-07-26.md` R2(a); LAW "Character identity —
+  Furina").
+- Every card gains a **`character:` schema field** (shared schema change,
+  not Furina-private — Columbina inherits it). Companion cards carry their
+  character implicitly; Klee's cards tag Klee; Furina's tag Furina. Cards
+  with no tag are **invalid Spotlight targets** (selector greys them out).
+- **Delivery:** her starting relic adds an **Ethereal Spotlight selector**
+  card to hand each turn. Applying it to a companion card designates
+  Guest Cast; applying it to one of Furina's own cards designates Center
+  Stage. In co-op, the
+  selector may instead be passed to a teammate, who applies it to one of
+  their own cards (first cross-player designation — Appendix A.4's
+  engineering, arriving early).
+- **Movable freely; persists until moved.** Designation lasts until
+  re-aimed; moving costs only the (free) selector play. Commitment is
+  rewarded through Fanfare throughput (§4), never enforced through rules —
+  drafting a second companion or a 5-star splash must never feel like a
+  pre-nerfed pick.
+- **Global registry:** one live designation per Furina player at a
+  time, tracked globally; duplicate selector cards are inert. Registry is
+  per-player in co-op (two Furinas = two independent Spotlights).
+
+### 3.2 Empowerment
+
+- **Baseline (v1, boring on purpose):** under Guest Cast, companion cards
+  get **+50% printed numbers** — damage, Block, element-application
+  counts. Center Stage grants no numeric bonus; its payoff is Fanfare
+  throughput (§4). Flat rate is the knob; texture lives in cards, not the
+  baseline.
+- **§2.2a guard — RATIFIED law:** Spotlight/empowerment boosts numbers
+  only, never turn-economy effects. Canonical text in
+  `docs/current/LAW.md` ("Combat & reactions"); the retired principles
+  doc's §2.2a extension (v1.10) reads at the pre-simplification tag.
+- **Center Stage = the solo fallback** (Appendix A.4 mandate, satisfied
+  structurally): a companion-poor run holds the stage herself and
+  converts play volume into Fanfare instead of a multiplier. The
+  anti-self-buff lever is structural — her own cards receive no numeric
+  bonus at all, legible on card text.
+- **Held in reserve, schematized but OFF:** per-turn Spotlighted-card cap
+  (raiseable via powers as design space). Turns on only if Tier 0 shows
+  asymmetry alone fails the §6 acceptance criterion.
+- **Texture design space (ratified, uncommon/power tier):** "first
+  Spotlighted card each turn costs 1 less," "first Spotlighted card each
+  turn draws 1," etc. — cheap riders on top of the flat baseline.
+
+## 4. Resources: Encore & Fanfare
+
+**Supersedes furina-predesign-notes Part 2 where they conflict** (that doc
+predates the v1.6 amendment).
+
+- **Encore** (per v1.6): **unbounded per-combat** buffer pool (Osty/
+  Regent-star house style — governed by opportunity cost, made safe by
+  per-combat reset). Her "healing" effects grant Encore; it absorbs damage
+  before HP; potent cards carry "Spend N Encore:" cost lines; **Salon
+  overdraw drains true HP when Encore is empty** — greed is legal and
+  priced. **True healing is Rare-tier AND Exhausts** (Pneuma/Singer
+  identity; tightened from v1.5's disjunctive form by user ruling — see
+  m7-rulings R8).
+- **Fanfare: capped at %maxHP** — the cap is a high safety rail, not a
+  first-order dial: no sheet carries `raise_fanfare_cap` (the uncapper
+  clause died with "The Tide Turns", F-A5); cards raise a permanent
+  **floor** instead (`gain_fanfare_floor`), and proportional decay means
+  nothing reaches the rail. Stacks grant flat power bonuses.
+  **Generation is activity-based, never passive** (v1.12): the live legs
+  are **HP lost / Encore spent / Encore absorbed / Spotlighted card
+  played**. Fanfare prints when Encore goes **down**, never when it goes
+  up (ruled 2026-07-28, post-playtest-3; shipped in both engines). No
+  per-turn passive accrual, ever — passive accrual = stall payoff, the
+  healing policy exists to kill exactly that, and a floor is static value
+  that does not grow with time, so stalling still earns nothing.
+- **Fanfare is a global pool on Furina** — it survives Spotlight moves.
+  Commitment texture comes from throughput (a deep single-partner kit
+  plays more Spotlighted cards per turn), not from reset punishment. The
+  formerly-proposed "move Ovation" uncommon is unnecessary and cut.
+- **Co-op:** partner HP/Encore flux counts toward Fanfare (her Genshin
+  identity; first ally-coupled mechanic). **Audit at sheet pass:**
+  exclude or discount self-inflicted partner damage (Klee's Hot Hands)
+  or Fanfare farms itself.
+
+## 5. Salon Members
+
+Off-field Hydro application engine (her repeatable aura source under
+Skill-grade cadence) with HP-drain overdraw per §4.
+
+**Engineering directive — check-if-solved FIRST:** audit Necrobinder/Osty
+and BaseLib summon machinery before building anything. Salon ships on
+existing rails or it ships smaller. (House norm; 3-for-3 last time.)
+
+## 6. Keyword budget (guardrail 5 amendment — RATIFIED by user)
+
+Census: **Spotlight, Encore, Fanfare = 3 named keywords** vs guardrail 5's
+≤2 (Klee: Bombs, Sparks = 2). Ratified as a deliberate, logged exception:
+support-protagonists carry structurally more machinery, and Furina pays
+for the third keyword with flavor-only stances, zero new reaction content,
+and Salon riding existing rails.
+
+**Proposed principles amendment text:** guardrail 5 becomes "≤2 new
+keywords per character; support-protagonists (§4.4 High-appetite or
+Appendix A lineage) may carry one additional keyword via logged amendment
+with compensating cuts." Note for the record: Columbina will pressure even
+the amended budget (she touches every Nod-Krai mechanic); the amendment
+sanctions *one* extra, not open season — her kickoff fights that fight.
+
+## 7. Archetypes (template §3.3)
+
+1. **Salon** — default plan; off-field Hydro engine + modest personal
+   damage; the solo floor.
+2. **Spotlight** — draft-gated high-ceiling; commit to companion depth
+   (or your co-op partner) and direct the stage. Allowed to be luck-gated;
+   that is what the slot means.
+3. **Fanfare** — tempo/velocity plan; the drain→refill→spend flux cycle.
+
+Card-slot competition separates them: Salon wants member cards and Encore
+generation; Spotlight wants companion depth and selector payoffs; Fanfare
+wants flux accelerants and spend payoffs.
+
+## 8. Acceptance criteria (pre-registered, sim-enforceable)
+
+1. **Self-carry is not the median-best plan:** at median draft quality,
+   Salon and Spotlight archetype winrates must beat the self-carry
+   (Encore/Fanfare-pumping-own-kit) package. Self-carry may own the
+   ceiling when the draft hands it cracked Rares — lean-in reward, not
+   default plan.
+2. **The delete-test applies to her unmodified:** deleting Furina's cards
+   from a winning Spotlight deck must gut it (her cards are the mult). If
+   companions win anyway, that is SUPPORT_CARRY — real failure, even for
+   the support character. **No detector carve-outs.**
+3. **Standard floors:** strict relevance ≥35%/archetype; winrate bands at
+   ≥1000 fights; identity heuristic on starter+median, never monoculture.
+
+**Pre-registered achievability experiment (blocks Spotlight card tuning,
+not sheet drafting):** P(≥N same-character companion cards by act 2)
+under nation-weighted rewards, swept over 2-card vs 3-card Fontaine kits,
+with and without Encore Performance (§9) in the drafted deck, and with
+and without Guest Star generators (§9) — three arms: duplication lifts the
+committed archetype's ceiling; generation lifts its floor; the bet is that
+neither substitutes for drafted depth.
+**Registered prediction:** 3-card kits alone put one-character depth 4+ at
+"reachable but luck-gated" (correct for the slot); duplication separates
+the archetype's median from its ceiling. Null results binding as usual.
+
+## 9. Personal-pool design space (pre-sheet notes)
+
+- **Encore Performance** (duplication): "add a copy of a Spotlighted card
+  to your deck/hand" — the archetype's kit-deepener and Columbina's replay
+  grammar on schedule. **Watchlist notes:** duplicating a 5-star Rare is
+  copies-of-one-support (does not break banner scarcity); duplicating an
+  amp-booster (Durin-analogue) goes on the **amp-cap watchlist** —
+  bounded in principle by the iron rule, confirm in provenance logs.
+- **Guest Star suite** (generation — user design, ratified this session):
+  personal-pool cards that create companion cards for this combat only,
+  Discovery-class machinery. Four binding guardrails: this-combat-only;
+  generators Exhaust; equal-rarity clause (sub-Rare generators cannot
+  create 5-star Rares — banner untouched); pulls from the shared companion
+  pool + a purpose-built Guest Star set, NEVER from playable characters'
+  pools (cadence rules live on the character dial — generated playable
+  cards would have undefined element behavior). Guest Star set v0.1: 2–3
+  Neuvillette cards at common/uncommon, support-shaped, explicit
+  applies_element flags, personal-scoped and banner-exempt (temporary
+  cameos). Generated cards are legal Spotlight targets — this is
+  Spotlight's bricking mitigation, the soft form of Appendix A.3.
+  Tea-party flavor is the identity: she invites guests; the Iudex always
+  comes.
+- Selector-payoff cards ("if you moved the Spotlight this turn…" /
+  "…if it hasn't moved this combat"), Fanfare spenders, Encore-cost
+  potent cards, rare-tier true heals.
+- Naming sources per §3.6: constellations for rares, talent names for
+  relics, voice lines for flavor. Her material is theatrical; it will
+  write itself.
+
+
+============================================================================
+THE PROPOSAL -- review/active/furina-e4-2026-08-29.md, verbatim and entire
+============================================================================
+
 # Furina E4 — the redesign packet
 
 > **Lifecycle: ACTIVE.** A design packet, not law. §3 is a DRAFT ruling
@@ -395,20 +970,7 @@ overturned by E4 and is load-bearing for §4.3's rate arithmetic.
 >    meter does not decay, has no floor, and its ceiling is the meter size.
 >    Register lint `R6` and `L12`, which exist to police those keywords,
 >    retire with them.
-> 6. **The two co-op provisions that depend on the retired machinery.**
->    Cross-player selector passing (kickoff §3.1: "In co-op, the selector may
->    instead be passed to a teammate, who applies it to one of their own
->    cards") is retired, because there is no selector card to pass — the
->    lane is a persistent state on Furina. Partner-coupled Fanfare (kickoff
->    §4: "partner HP/Encore flux counts toward Fanfare") is retired, because
->    HP loss and Encore flux stop generating for Furina herself under item 1
->    and cannot survive as a partner-only leg. **Both are retired, not
->    deferred**, and neither is replaced by this packet. Furina's co-op
->    identity is thereby left with no ally-coupled mechanic at all, which is
->    a real loss against Appendix A.4's mandate and is called out as such;
->    what replaces it is future design space and is not E4's to author.
 >
-
 > **Two LAW amendments** (exact replacement text at §3.1 and §3.2 below).
 >
 > **What the animation contract keeps.** All three contracted binding points
@@ -479,13 +1041,11 @@ Replacement — the first two sentences are unchanged; one clause is appended:
   (one-shot, Exhaust-gated, costed) — the pool must let any character draft a
   kit-gap fix. **Burst-meter (`burst_energy`) generation stays character-kit-scoped**
   and must never be cheaply repeatable from companions. **Furina's meter is
-  the narrow case (R213 E4): it is generated by exactly two things — a
-  Featured performance resolving, and Encore deliberately spent through a
-  Furina card that commands a performance — each bounded to at most once per
-  turn. A Companion card generates none by being played; a Companion Featured
-  by Furina's kit generates it under the first bound. HP loss, automatic
-  Salon upkeep, Encore absorption and Skill tags feed her meter not at
-  all.** (principles §4.7, §2.4; R213 E4)
+  the narrow case (R213 E4): only a Featured performance generates it, and at
+  most once per turn. A Companion card generates none by being played; a
+  Companion Featured by Furina's kit generates it under that same
+  once-per-turn bound. HP loss, automatic Salon upkeep, Encore absorption and
+  Skill tags feed her meter not at all.** (principles §4.7, §2.4; R213 E4)
 ```
 
 This is the clause GPT's Constraint 1 says resolves the companion Burst-law
@@ -528,32 +1088,7 @@ Constraint 3.
 matches the live Spotlight designation is **Featured**. Featured is a
 per-performance property, bounded once per turn by §3.2.
 
-**Which body is Featured, exactly.** The lane names a half of the cast, and
-each half resolves to one body by a rule that already ships:
-
-- **Salon lane → the FRONT member**, `p.salon[0]`, the head of the FIFO
-  queue. That is the same position `salon_bow` takes, the same position a
-  deploy landing on a full stage displaces, and the same position the
-  `leftmost_salon_member_*` predicates read
-  (`tier0/engine/effects.py:1928-1949`). With `SALON_MEMBER_SLOTS = 3`
-  (`tier0/constants.py:313`) up to three members act each turn; exactly one
-  of them — the front one — is Featured, and the other two tick normally.
-- **Guest Cast lane → the FIRST Companion played this turn.** Same
-  once-per-turn bound, and it is the wording GPT's proposal already uses.
-
-**This is what finally gives `change_the_bill` a reader.** The card rotates
-the front member to the back (`docs/furina-cards.yaml:472-473`,
-`{op: salon_rotate}` + `{op: salon_perform}`), and the richness brief's own
-standing complaint about it is that nothing cares:
-"No card anywhere on her sheet cares which member is at the front. So 'why
-would I play this' is the correct reaction, and it is a hole we already know
-about" (`review/active/richness-playtest-brief-2026-08-26.md:100-105`).
-Under E4, which member is at the front decides which act gets Featured, and
-the rotate becomes the Salon lane's aiming verb. That is a hole E4 closes
-without adding a card, and it is evidence for the architecture rather than a
-convenience of it.
-
-**Salon lane, Featured — my reading:** *the front member performs its BOW
+**Salon lane, Featured — my reading:** *the Featured member performs its BOW
 act in place of its tick, and is not displaced.* The numbers already exist,
 ratified, per member (`tier0/constants.py:301-310`, ratified R187):
 
@@ -985,16 +1520,13 @@ keywords. Nothing on any shipped sheet carries `raise_fanfare_cap` today
 (`STATE.md`: "Furina's pool carries **zero** `raise_fanfare_cap` riders"), so
 that half is already free.
 
-**Co-op.** Both of Furina's ally-coupled mechanics are **retired by §3 item
-6**, not deferred: partner-coupled Fanfare dies with the HP-loss leg, and
-cross-player selector passing has no selector card to pass. Nothing replaces
-them in E4, so after this she has no co-op-specific mechanic at all — a real
-loss against the kickoff's Appendix A.4 lineage, stated plainly rather than
-left to be discovered. It cannot be settled by a test either way: there is no
-automated co-op backstop for anything needing a live `CombatState`
-(`klee-mod/KleeTests/README.md`), so every co-op defect here would be
-play-derived. Authoring a replacement is future design space and is
-deliberately outside this packet.
+**Co-op.** Not addressed by this packet and deliberately so. The kickoff's
+co-op Fanfare coupling ("partner HP/Encore flux counts toward Fanfare",
+kickoff §4) dies with the HP-loss leg, and cross-player selector passing
+(kickoff §3.1) has no selector card to pass. Both are consequences of E4 that
+need their own pass; there is no automated co-op backstop for a live
+`CombatState` (`klee-mod/KleeTests/README.md`), so neither can be settled by
+a test. Flagged here, not resolved.
 
 ---
 
@@ -1041,22 +1573,14 @@ protocol, and it is what keeps `seat grade` from refusing the turn later.
 Only what the packet cannot settle. Everything else is derived, cited, or
 already ruled.
 
-**P1 — when the queued slice opens.** R213 already forecloses the parallel
-option — "Then Klee's reaction slice, then Furina after the Companion
-result. Not three explorations in parallel" — so E4's build steps are
-**queued**, and that is not a pick. What is a pick is the gate that opens
-them, because R213's own condition ("after the Companion result") has been
-partly overtaken: the Companion audit closed at `EB-148`, and Kokomi slice 2
-and Klee round 3 are both still open.
- (1) E4 step 2 opens when **Klee round 3 reports**, whatever it says.
- (2) E4 step 2 opens when **both** Kokomi slice 2's picks (`M49`/`M50`) and
-     Klee round 3 are closed — the strictest reading of R213's order.
- (3) E4 step 2 opens **now**, by ruling, on the grounds that the Companion
-     result R213 conditioned on has already landed. This is an amendment to
-     R213's sequence and should be named as one if taken.
- *(Claude's read: (1). This packet and its doctrine gate are R213's own step
- 1 and consume no slice capacity either way; the queue is about step 2
- onward.)*
+**P1 — sequencing.** R213 ordered Kokomi → Klee → Furina, "not three
+explorations in parallel"; Kokomi slice 2 round 2 and Klee round 3 are both
+open.
+ (1) E4's build steps run **in parallel** on their own branch, starting now.
+ (2) E4 stays **queued** behind the open Kokomi and Klee rounds; this packet
+     and its doctrine gate land now, and step 2 waits.
+ *(Claude's read: (2). The packet is R213's own step 1 and consumes no slice
+ capacity; starting step 2 in parallel is the thing R213 named and declined.)*
 
 **P2 — the two LAW amendments (§3.1, §3.2).**
  (1) Ratify both as written.
@@ -1132,37 +1656,18 @@ the existing prototype convention and settles nothing new.
 
 ---
 
-## 10. The doctrine gate
 
-Run 2026-08-29 against this packet as committed at `b25485d`, before the
-edits recorded in the last column. Seat: OpenAI Codex CLI `0.150.1`, model
-`gpt-5.6-sol`, through `understudy/seat.py`'s repo-visible review door.
-Verbatim output and full provenance:
-`review/qa/furina-e4-doctrine-review-codex-gpt-5.6-sol.md`; the prompt is
-`review/qa/furina-e4-review-prompt.txt`, sha256
-`5538382fc7142598e6715618c53f8844b9ba8e3461557cf28e777ddd2c661c71`.
+============================================================================
+YOUR OUTPUT
 
-The seat was told, in the prompt and in those words, that the direction is
-settled and co-authored by its own family, and that it was gating §3's ruling
-text, §4's specifics, the LAW wording and §9's picks against D2/D4, LAW and
-the kickoff — not re-litigating the direction. It stayed inside that scope,
-named clauses, and **volunteered no remedy**, so nothing is marked DISCARDED
-and its family stays eligible to grade these rows later. Every quotation
-below is the seat's, unedited.
+One verdict block per gate, in this order: G1, G2, G3, G4, OVERALL.
 
-| item | verdict | clause cited (verbatim) | why (verbatim) | what Claude re-derived |
-|---|---|---|---|---|
-| **G1** — the E4 ruling text and its retirements (§3) | `REQUIRES_MODIFICATION` | "Furina kickoff §3.1, "In co-op, the selector may instead be passed to a teammate"; and §4, "partner HP/Encore flux counts toward Fanfare."" | "E4 removes the selector and the flux-based Fanfare legs while leaving these binding co-op provisions neither operative nor explicitly retired." | **Fixed.** §3 gains a sixth retirement naming both co-op provisions, retiring them explicitly rather than letting them lapse, and stating the cost: Furina is left with no ally-coupled mechanic. §7's co-op paragraph is rewritten from "flagged, not resolved" to point at that retirement. |
-| **G2** — the two LAW amendment wordings (§3.1, §3.2) | `REQUIRES_MODIFICATION` | "D4 — "Text that cannot bind in the shipped world… [is a defect]."" | "The Burst-scope amendment says only a Featured performance generates Furina's meter, while the ruling and architecture also make deliberate Encore spending an independent generation leg." | **Fixed, and it was a real contradiction.** §3.2's replacement text said "only a Featured performance" while §3's prose and §4.3's table both carry two legs. The amendment now reads "generated by exactly two things — a Featured performance resolving, and Encore deliberately spent through a Furina card that commands a performance — each bounded to at most once per turn." §3.1 drew no verdict and is unchanged. |
-| **G3** — the §4 architecture specifics | `REQUIRES_MODIFICATION` | "D4 — "At the decision point the player can perceive and forecast the consequences that matter."" | "The Salon lane designates a lane whose hook fires for each member act, but the Featured outcome refers to a particular member without defining how that member is selected." | **Fixed.** §4.1 gains "Which body is Featured, exactly": Salon lane → the FRONT member, `p.salon[0]`, the FIFO head that `salon_bow`, full-stage displacement and the `leftmost_salon_member_*` predicates already read (`tier0/engine/effects.py:1928-1949`); Guest Cast lane → the first Companion played this turn. The seat did not rule the two Featured outcomes insufficiently different, which was the other question put to it inside G3. |
-| **G4** — the §9 pick list | `REQUIRES_MODIFICATION` | "R213 sequencing — "Then Klee's reaction slice, then Furina after the Companion result. Not three explorations in parallel."" | "P1 presents parallel Furina implementation as an unsettled choice even though the governing sequence already excludes it." | **Fixed.** P1's option (1) offered a parallel start R213 forecloses, which is a settled thing dressed as a pick — exactly the failure G4 was scoped to catch. P1 is re-cut as *when the queued slice opens*, with the queue stated as not-a-pick and the three options now naming which report opens step 2; the "start now" option survives only as an explicit, labelled amendment to R213's sequence. |
-| **OVERALL** | `REQUIRES_MODIFICATION` | "D4 — "Text that cannot bind in the shipped world… [is a defect]."" | "The unresolved rule contradiction and undefined Featured-member selection prevent the proposed architecture from binding unambiguously." | Both named causes are the G2 and G3 rows above, and both are fixed. The packet has **not** been re-gated; a second gate on the revised text is available and is not owed by the protocol, which asks the seat to name clauses and Claude to re-derive from them. |
+Each block:
 
-**What the gate did not touch, and what that does and does not mean.** The
-seat ruled on four items and returned no verdict on the derived meter size,
-the two legs' rates, the flag ladder, the prediction slate's shape, or the
-blast-radius reading. Under this protocol silence is not endorsement — the
-seat answers what it is asked and stops — so those remain Claude-authored and
-ungated, and §8's allocation stands: the seat is the independent grader for
-§4–§6, and a fresh Claude is the independent reader on §3's rule rows, which
-the seat's own family co-authored.
+  <GATE>: FOLLOWS | REQUIRES_MODIFICATION
+  Clause: <the LAW line, D-charter item, or kickoff section -- only when
+           REQUIRES_MODIFICATION; quote enough of it to be unambiguous>
+  Why: <one short paragraph naming what in the packet collides with that
+        clause. No remedy. No number. No rewritten text.>
+
+Nothing else. No preamble, no summary of the packet back to me, no advice.
