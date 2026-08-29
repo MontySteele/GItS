@@ -488,14 +488,21 @@
 #                 switch that quarantines the card rows above, so a release
 #                 build contains no type from it and every seam that calls it
 #                 sits inside `#if PROTOTYPE_CARDS`
-#   authored_by:  [user, claude, gpt] -- [USER] specified the rule and made
-#                 four rulings on it; [USER]'s advisor (GPT) wrote the rule
-#                 statement [USER] forwarded as the design; Claude implemented
-#                 it and made it total. Recorded in the shape `EB-190` asks
-#                 for; that lint is UNBUILT, and no row in this file carries
-#                 an `authored_by:` field yet, so this is prose rather than
-#                 schema. NO CARD ROW WAS AUTHORED HERE and nothing on any
-#                 sheet moved, so row-level independence is untouched.
+#   authored_by:  [claude, gpt] -- the field's closed set is
+#                 {claude, gpt} (EB-190), so it records the MODEL FAMILIES and
+#                 not the people: Claude implemented the rule and made it
+#                 total, and [USER]'s advisor (GPT) wrote the rule statement
+#                 [USER] forwarded as the design, which is text and therefore
+#                 adds its family. [USER] SPECIFIED THE RULE and made four
+#                 rulings on it; that is not a model family and has no cell in
+#                 the field, so it is recorded here instead.
+#                 THE FIELD ITSELF IS ON ROWS, and this arm has none -- it
+#                 authors no card at all (see above) -- so `seat.py`'s refusal
+#                 has nothing to key on for the RULE. What it does key on is
+#                 the one row this chain does add,
+#                 `proto_kurages_oath_memory`, which carries `[claude]`:
+#                 [USER] ruled its numbers and its rule, Claude wrote it, and
+#                 no seat contributed text, a number or a mode to it.
 #   prints:       nothing. `play_front_memory` (provisional keyword "Stir",
 #                 R179) has its op in the sim and its door in the mod so
 #                 codegen can emit a card that prints it; no card does.
@@ -573,4 +580,5 @@
 # =============================================================================
 - {id: proto_kurages_oath_memory, name: "Kurage's Oath", character: kokomi,
    cost: 1, type: power, rarity: common,
+   authored_by: [claude],
    effects: [{op: apply_power, power: kurage_ward, amount: 3, target: self}]}
