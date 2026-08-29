@@ -463,6 +463,56 @@
              {op: burst_energy, amount: 10}]}
 
 # =============================================================================
+# KOKOMI -- THE KURAGE'S MEMORY v3 (a RULE arm, not a card row)
+#
+# DECLARED HERE AND CARRYING NO ROW, DELIBERATELY. Every row in this file is a
+# CARD: `tools/gen_prototype_cards.py` requires an `id` starting `proto_`, a
+# `character` in the codegen profiles, and an effects list it can emit as a
+# C# class, and `tier0/content/loader.prototype_cards()` schema-checks it as a
+# card. The Kurage's memory is ENGINE BEHAVIOUR -- two entry rules, a price, a
+# turn-start fire, a pulse and a strip -- and it authors no card at all. A row
+# for it would either be a card nobody designed or a new row KIND, taught to
+# the loader, the generator, four lints and the surface tests. That is
+# machinery bought for one arm, which is the same trade this file's header
+# already refused for `character: companion`.
+#
+# So it is declared, not rowed, and the declaration is the audit trail:
+#
+#   arm:          the Kurage's memory, v3
+#   character:    kokomi
+#   spec:         review/active/kokomi-kurage-memory-2026-08-29.md sec.11
+#                 (sec.11.1 is [USER]'s words and IS the spec)
+#   sim:          tier0 behind C.KURAGE_MEMORY, default off
+#   mod:          klee-mod/KleeCode/Powers/Prototype/KurageMemory.cs, compiled
+#                 only under `dotnet build -p:PrototypeCards=true` -- the SAME
+#                 switch that quarantines the card rows above, so a release
+#                 build contains no type from it and every seam that calls it
+#                 sits inside `#if PROTOTYPE_CARDS`
+#   authored_by:  [claude, gpt] -- the field's closed set is
+#                 {claude, gpt} (EB-190), so it records the MODEL FAMILIES and
+#                 not the people: Claude implemented the rule and made it
+#                 total, and [USER]'s advisor (GPT) wrote the rule statement
+#                 [USER] forwarded as the design, which is text and therefore
+#                 adds its family. [USER] SPECIFIED THE RULE and made four
+#                 rulings on it; that is not a model family and has no cell in
+#                 the field, so it is recorded here instead.
+#                 THE FIELD ITSELF IS ON ROWS, and this arm has none -- it
+#                 authors no card at all (see above) -- so `seat.py`'s refusal
+#                 has nothing to key on for the RULE. What it does key on is
+#                 the one row this chain does add,
+#                 `proto_kurages_oath_memory`, which carries `[claude]`:
+#                 [USER] ruled its numbers and its rule, Claude wrote it, and
+#                 no seat contributed text, a number or a mode to it.
+#   prints:       nothing. `play_front_memory` (provisional keyword "Stir",
+#                 R179) has its op in the sim and its door in the mod so
+#                 codegen can emit a card that prints it; no card does.
+#   revert:       the flag. Delete Powers/Prototype/KurageMemory.cs and its
+#                 `#if PROTOTYPE_CARDS` seams; the sim half is C.KURAGE_MEMORY.
+#
+# THE DELETION RULE AT THE TOP OF THIS FILE APPLIES TO THIS BLOCK TOO: when
+# the arm is accepted or rejected, this block leaves with it.
+# =============================================================================
+
 # KOKOMI KURAGE BASE KIT (sec.12 of
 # review/active/kokomi-kurage-memory-2026-08-29.md) -- ONE row, one arm.
 #
@@ -530,4 +580,5 @@
 # =============================================================================
 - {id: proto_kurages_oath_memory, name: "Kurage's Oath", character: kokomi,
    cost: 1, type: power, rarity: common,
+   authored_by: [claude],
    effects: [{op: apply_power, power: kurage_ward, amount: 3, target: self}]}
