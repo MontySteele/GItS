@@ -833,6 +833,94 @@ def test_one_end_turn_from_the_tester_spends_exactly_one_round(tmp_path):
     assert wire.posted_rounds == [1, 2, 3]
 
 
+def _victory_frame(state: dict) -> dict:
+    """The frame `EB-178` was read on, copied field for field.
+
+    Recorded live on 2026-08-29, 0 ms after the killing blow answered
+    `ok Playing 'Water's Edge' targeting Leaf Slime (S)`: `state_type` is
+    still `monster`, there is NO `battle` key at all, the `player` block has
+    lost its hand, energy, meters and pile counts, and `run.floor` has
+    ALREADY advanced. The next read, 250 ms later, answered `rewards`.
+    """
+    frame = json.loads(json.dumps(state))
+    frame.pop("battle", None)
+    for gone in ("hand", "energy", "max_energy", "resources",
+                 "draw_pile_count", "discard_pile_count",
+                 "exhaust_pile_count"):
+        frame["player"].pop(gone, None)
+    frame["run"] = {"act": 1, "floor": 2, "ascension": 3}
+    return frame
+
+
+class _VictoryWire:
+    """A wire that answers the torn-down frame ONCE after the killing blow."""
+
+    def __init__(self, combat: dict, after: dict):
+        self.combat, self.after = combat, after
+        self.pending: list[dict] = []
+        self.done = False
+        self.posts: list[dict] = []
+
+    def get_state(self) -> dict:
+        if self.pending:
+            return self.pending.pop(0)
+        return self.after if self.done else self.combat
+
+    def post(self, action: str, **params) -> dict:
+        self.posts.append({"action": action, **params})
+        if action == "play_card":
+            self.pending = [_victory_frame(self.combat)]
+            self.done = True
+        return {"status": "ok", "message": ""}
+
+    def health(self) -> dict:
+        return {"mod_version": "0.0-scripted"}
+
+
+def test_the_frame_after_a_kill_is_named_a_transition_not_a_new_fight():
+    """`EB-178`, the predicate. A combat screen with no `battle` block at all
+    is the fight being torn down, not a fight starting."""
+    live = combat_state()
+    assert blindplay.transient(live) == ""
+    assert blindplay.transient(_victory_frame(live))
+    # ...and a build that simply stops sending `is_play_phase` is still a
+    # screen, which is the neighbouring predicate this must not swallow.
+    no_key = json.loads(json.dumps(live))
+    no_key["battle"].pop("is_play_phase")
+    assert blindplay.transient(no_key) == ""
+
+
+def test_the_frame_after_a_kill_is_never_drawn_as_battle_round_zero():
+    """Belt and braces for a wire that got stuck in the moment: blocked, and
+    never a playable-looking round 0 with an empty hand."""
+    obs = blindplay.observation(_victory_frame(combat_state()))
+    assert obs["blocked"] and not obs["commands"]
+    page = blindplay.render(obs)
+    assert "round 0" not in page and "TOOL-BLOCKED" in page
+
+
+def test_a_victory_renders_once_as_the_rewards_screen(tmp_path):
+    """`EB-178`, end to end. Both of run B6's fight records read the moment
+    after a kill as a NEW FIGHT: an empty `Battle -- round 0`. The seat must
+    be shown the fight, then the rewards, and nothing in between."""
+    combat = combat_state()
+    wire = _VictoryWire(combat, rewards_state())
+    thread = blindplay.ScriptedThread(
+        [{"command": 'play "Pearl Barrage"', "thinking": "."},
+         {"record": "fight"},
+         {"command": 'choose "Gold"', "thinking": "."},
+         {"record": "run"}])
+    s = blindplay.Session(thread, wire=wire, session_id="t",
+                          budget=blindplay.Budget(max_actions=2),
+                          log_root=tmp_path,
+                          settle_tries=8, settle_delay_s=0.0)
+    s.run()
+    pages = thread.sent
+    assert not any("round 0" in p for p in pages), pages
+    assert any("# Battle" in p for p in pages)
+    assert any("What the fight left behind" in p for p in pages)
+
+
 def test_a_wire_that_stays_unnamed_is_still_tool_blocked(tmp_path):
     wire = blindplay.ScriptedWire([{"state_type": "unknown"}])
     s = blindplay.Session(blindplay.ScriptedThread([]), wire=wire,

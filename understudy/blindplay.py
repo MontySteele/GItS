@@ -303,18 +303,42 @@ def transient(state: dict[str, Any]) -> str:
         here posts a second `end_turn` on the tester's behalf; the read
         waits for the turn the game is already handing over.
 
+      A COMBAT SCREEN WITH NO `battle` BLOCK AT ALL (`EB-178`) -- the
+        killing blow has landed, the game has torn the combat down, and the
+        rewards screen has not gone up yet. Read live across a victory: at
+        +0 ms the wire answers `state_type: "monster"` with NO `battle` key,
+        a `player` block stripped of its hand, energy and meters, and
+        `run.floor` ALREADY advanced to the next floor; by +250 ms it answers
+        `rewards`. Rendered as a screen it is `# Battle -- round 0` with an
+        empty hand and no enemies, which both of run B6's fight records read
+        as a NEW FIGHT starting. Riding it out is all it needs: the frame is
+        gone in a quarter-second, and nothing here posts on the tester's
+        behalf to make it go.
+
     `is_play_phase` is checked for an explicit `False` and never for
     falsiness: a build whose battle block does not carry the key must not
-    have every combat screen read as a transition.
+    have every combat screen read as a transition. The `EB-178` shape is
+    checked on the block's ABSENCE rather than on any key inside it, for the
+    same reason from the other side -- a live fight always has a battle
+    block, and a build that stops sending one is a wire this tool should
+    wait on and then report blocked, never draw a round 0 from.
     """
     if state.get("state_type") is None:
         return "the wire answered with no `state_type` key"
     if str(state.get("state_type")) == "unknown":
         return "the wire could not name this screen"
+    if _combat_torn_down(state):
+        return "the fight is over and the next screen is not up yet"
     if (str(state.get("state_type")) in COMBAT_SCREENS
             and _blob(state, "battle").get("is_play_phase") is False):
         return "the game has not handed the turn back to the player yet"
     return ""
+
+
+def _combat_torn_down(state: dict[str, Any]) -> bool:
+    """`EB-178`: a combat screen whose `battle` block the game has removed."""
+    return (str(state.get("state_type")) in COMBAT_SCREENS
+            and not isinstance(state.get("battle"), dict))
 
 
 def settle(state: dict[str, Any], wire: Any = bridge,
@@ -606,6 +630,14 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
     elif st in UNDRIVEN_SCREENS:
         obs["screen"] = "undriven"
         obs["blocked"] = UNDRIVEN_SCREENS[st]
+    elif st in COMBAT_SCREENS and _combat_torn_down(state):
+        # `EB-178`, belt and braces. `settle` rides this out in well under a
+        # second, but a wire that got STUCK here must be reported as stuck --
+        # the one thing it must never do is render `Battle -- round 0` with an
+        # empty hand, which is the fight-that-never-was run B6 recorded twice.
+        obs["screen"] = "combat"
+        obs["blocked"] = ("the fight is over and the game has not put up the "
+                          "next screen; nothing here can be played")
     elif st in COMBAT_SCREENS:
         obs["screen"] = "combat"
         obs["combat"] = _combat(state)

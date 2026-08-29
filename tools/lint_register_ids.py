@@ -116,7 +116,12 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 180,   # EB-178/179/180 minted 2026-08-29 from run B6 and the module-size note   # EB-177 minted 2026-08-29 by run B6: two cards with the
+    "EB": 180,   # EB-178/179/180 minted 2026-08-29 from run B6 and the module-size note
+                 # EB-178 CLOSED 2026-08-29: the frame after a kill is a
+                 # combat screen with NO `battle` block at all, read live
+                 # across a victory (+0 ms `monster` and no battle key,
+                 # +250 ms `rewards`). `blindplay.transient` names it and
+                 # rides it out; it is never drawn as `round 0`.   # EB-177 minted 2026-08-29 by run B6: two cards with the
                  # same printed title that differ by anything but upgrade
                  # state are BOTH unplayable -- a Sharp-enchanted copy of
                  # `Water's Edge` beside a plain one, where the bare title
@@ -227,7 +232,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        178, 179, 180,
+        179, 180,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
