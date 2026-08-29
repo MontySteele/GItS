@@ -485,11 +485,11 @@
 # surface would be quotable if it had. "See if it needs adjusting later" is
 # the disposition, not a band.
 #
-# AUTHORSHIP, recorded here because the surface has no `authored_by` FIELD --
-# `Card.from_dict` is total on unknown fields and refuses one, so the surface's
-# convention is a comment block, as every arm above records its own. NUMBERS
-# AND RULE: [USER]. IMPLEMENTATION AND WORDING: Claude. Nothing on this row
-# was designed by the doctrine seat, and nothing here has been graded.
+# AUTHORSHIP. The row carries `authored_by: [claude]`, the field EB-190 added
+# and every row above records. This block says the same thing in prose, which
+# is what the field cannot carry: NUMBERS AND RULE: [USER]. IMPLEMENTATION AND
+# WORDING: Claude. Nothing on this row was designed by the doctrine seat, and
+# nothing here has been graded.
 #
 # THE SHIPPED ROW IS UNTOUCHED. `kurages_oath` in docs/kokomi-cards.yaml still
 # prints ward 5 (7 upgraded) and still says "per Bake-Kurage play"; it is a
@@ -529,5 +529,6 @@
 # for the prototype: it is on sec.12.6's checklist as item 14.
 # =============================================================================
 - {id: proto_kurages_oath_memory, name: "Kurage's Oath", character: kokomi,
+   authored_by: [claude],
    cost: 1, type: power, rarity: common,
    effects: [{op: apply_power, power: kurage_ward, amount: 3, target: self}]}
