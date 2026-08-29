@@ -117,19 +117,40 @@ def _strings(blob: Any) -> list[str]:
     return out
 
 
-def leaks(blob: Any) -> list[tuple[str, str, str]]:
-    """`(rule, matched-text, the-string-it-was-in)` for every leak found."""
+def leaks(blob: Any, allow: frozenset[str] | set[str] = frozenset()
+          ) -> list[tuple[str, str, str]]:
+    """`(rule, matched-text, the-string-it-was-in)` for every leak found.
+
+    `allow` (EB-167) exempts EXACT matched tokens from the snake_case rule and
+    from that rule ALONE. It exists because a design-blind render of ANY screen
+    has to be able to say which screen it refused to drive, and the wire's own
+    name for a screen -- `rest_site`, `card_select`, or an unknown one this
+    repo has never seen -- reads as an internal id to a rule that is
+    deliberately blunt. A screen name is the game's public API vocabulary, not
+    design vocabulary: it names no card, no role and no ruling. The caller
+    passes the ONE token it is about to print and nothing else, so the
+    exemption is auditable at the call site rather than sitting in a growing
+    constant here. Every other rule -- register ids, ruling numbers, sheet
+    fields, the mod prefix -- is never exempt.
+
+    Matched with `finditer` rather than `search`: a string holding an exempt
+    token AND a real id must still report the id, and a first-match-only scan
+    would stop at the exempt one.
+    """
     found: list[tuple[str, str, str]] = []
     for s in _strings(blob):
         for rule, pattern in FORBIDDEN:
-            m = pattern.search(s)
-            if m:
+            for m in pattern.finditer(s):
+                if rule == "internal-snake-case-id" and m.group(0) in allow:
+                    continue
                 found.append((rule, m.group(0), s))
+                break
     return found
 
 
-def assert_blind(blob: Any) -> None:
-    bad = leaks(blob)
+def assert_blind(blob: Any, allow: frozenset[str] | set[str] = frozenset()
+                 ) -> None:
+    bad = leaks(blob, allow)
     if bad:
         detail = "; ".join(f"{rule}: {hit!r} in {ctx[:120]!r}"
                            for rule, hit, ctx in bad[:5])

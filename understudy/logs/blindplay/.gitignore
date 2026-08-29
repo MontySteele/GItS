@@ -1,0 +1,14 @@
+# Blind-play sessions (`understudy/blindplay.py`, EB-167/EB-168, R217 G). One
+# directory per run: the transcript, the prompt handed to the seat on each
+# turn, the `--json` event stream, the copied session rollout (which carries
+# Codex's own system prompt and the model's raw reasoning), stderr, and the
+# model's fight and run records.
+#
+# Same rule and the same reason as seat/ and scenario/ next door: the seat's
+# TESTIMONY travels as the committed record under
+# `review/qa/blindplay/<session-id>/record.md`. The transcript is what you read
+# to trust that record, not the record itself -- and it is a third party's
+# system prompt and a third party's model output, neither of which is this
+# repo's to redistribute.
+*
+!.gitignore
