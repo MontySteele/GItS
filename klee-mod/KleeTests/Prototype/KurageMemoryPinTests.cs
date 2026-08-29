@@ -339,7 +339,11 @@ public class KurageMemoryPinTests
         // POWER ID, so the generated prototype face carries the SHIPPED Oath's
         // pulse wording and is wrong. The mirror overrides that one key and
         // nothing else; the shipped face must not move.
-        var strings = Il.Strings(Il.Method("KleeMod", "InjectLocStrings"));
+        // `EB-194`: the merge moved OUT of InjectLocStrings and into the
+        // off-pool builder. The string pin follows it; the call-site pin below
+        // is what keeps it from moving back.
+        var strings = Il.Strings(
+            Il.Method("KokomiOffPoolCards", "InjectPrototypeLoc"));
 
         Assert.Contains(strings, s =>
             s.Contains("plays a card from its memory")
@@ -348,6 +352,54 @@ public class KurageMemoryPinTests
         // a hardcoded id.
         Assert.DoesNotContain(strings, s =>
             s.Contains("PROTO_KURAGES_OATH_MEMORY"));
+    }
+
+    [Fact]
+    public void Loc_injection_never_touches_the_prototype_surface()
+    {
+        // `EB-194` LOCK (a). InjectLocStrings is a Harmony postfix on
+        // LocManager.Initialize, so it runs during boot, BEFORE any mod card
+        // model exists -- the generated rows are `autoAdd: false` and are
+        // constructed at pool-build time. Reaching into the prototype surface
+        // from there forced PrototypeRoster's initializer against an empty
+        // ModelDb, ModelDb.Card<T>() threw KeyNotFoundException, and a static
+        // constructor that throws POISONS ITS TYPE for the process: the
+        // self-check aborted and GenerateAllCards rethrew at StartRun, so NO
+        // run of ANY character could start on a +proto build.
+        //
+        // The rule this pins is a TIMING rule, and the only structural shadow
+        // it casts is the call itself. So: the loc postfix may name neither
+        // seam, in either build. It is a compile-time-shaped guard on a
+        // runtime-ordering bug, which is the honest amount this test can do --
+        // the bite-check in KleeTests/Prototype is what proves the ordering.
+        var calls = Il.Calls(Il.Method("KleeMod", "InjectLocStrings"));
+
+        Assert.DoesNotContain(calls, c => c.Contains("PrototypeRoster"));
+        Assert.DoesNotContain(calls, c => c.Contains("PrototypeCards"));
+    }
+
+    [Fact]
+    public void The_prototype_roster_survives_a_touch_with_an_empty_model_db()
+    {
+        // `EB-194` LOCK (b), the bite-check: ask the roster for a character
+        // while ModelDb holds no prototype models -- exactly the state boot was
+        // in -- and it must not throw, and must not poison itself for the ask
+        // that follows. Before the laziness fix the eager static dictionary
+        // resolved EVERY character's rows in the type initializer, so this threw
+        // TypeInitializationException on the first line and again on the second.
+        //
+        // This is a HEADLESS test: nothing here builds a card, so ModelDb is
+        // empty by construction and no game bring-up is needed.
+        var furina = Record.Exception(() => PrototypeCards.For("furina"));
+        Assert.Null(furina);
+
+        // The type is still usable after the touch above -- a poisoned type
+        // would rethrow its cached TypeInitializationException here.
+        var again = Record.Exception(() => PrototypeCards.For("furina"));
+        Assert.Null(again);
+
+        // An unknown character is empty, not a throw.
+        Assert.Empty(PrototypeCards.For("nobody"));
     }
 
     [Fact]

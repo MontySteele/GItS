@@ -116,7 +116,22 @@ SERIES_NUM = re.compile(r"^(?P<series>[A-Z][A-Z0-9]*?)-?(?P<num>\d+)$")
 # — `tools/lint_r_numbers.py` owns those two series and one namespace must not
 # have two ceilings; rule 7 below refuses a row that tries to define one.
 CEILINGS: dict[str, int] = {
-    "EB": 193,   # EB-192/193 minted 2026-08-29 by the Klee Sparks research
+    "EB": 195,   # EB-195 minted 2026-08-29: the twelve-arm re-baseline of
+                 # the Furina and Kokomi arms at RT12/D18/P11/C20 is OWED
+                 # after the roster-HP ruling moved their HP (Kokomi 80, Furina 78, #156).
+                 # Under R68 every measured table quoting their rows is
+                 # STALE until it runs. OPEN.
+                 # EB-194 minted 2026-08-29 by the +proto deploy that was
+                 # meant to run the Kurage-memory pre-tester gates: the dev
+                 # build could not start a run for ANY character. sec.12.6
+                 # item 14's loc merge called PrototypeCards.For from a
+                 # Harmony postfix on LocManager.Initialize, forcing the
+                 # eager PrototypeRoster initializer while ModelDb was still
+                 # empty; the throwing static ctor poisoned the type for the
+                 # process and every later caller rethrew. FIXED and CLOSED
+                 # in the minting commit -- both locks were seen to FAIL
+                 # against the pre-fix build first.
+                 # EB-192/193 minted 2026-08-29 by the Klee Sparks research
                  # pass, both confirmed defects found decompiling the pinned
                  # 0.111.0 build. EB-192: the `regent_forge` canon package is
                  # a regex artifact fusing Regent's Stars with the unrelated
@@ -307,7 +322,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 182, 183, 184,
-        189, 191, 192, 193,
+        189, 191, 192, 193, 194, 195,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
