@@ -291,7 +291,15 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     on every release build since `0.2.1209`. GPT's **D1–D9 are LAW** as the
     design charter, provisional through the Klee slice, **no numeric design
     bands**, decision closeness (R213 F) the only numeric falsifier. Kokomi →
-    Klee → Furina, sequentially; E1–E4 reopened. **The independent seat**
+    Klee → Furina, sequentially; E1–E4 reopened. **R220 B gives that sequence
+    a tail:** the shared Burst meter is retired roster-wide, and the order is
+    **Kokomi → Klee → Furina for the three folds, the shared retirement
+    LAST** — each fold lands behind its own flag and its own slice's grading,
+    and the one branch that touches the engine, the three sheets, the pilot,
+    the C# and LAW at once lands after all three so no character is ever left
+    holding a dead gauge (`EB-199`/`EB-200`). Furina's reframe carries her
+    fold, so it is one of R220's three and it is the last of them.
+    **The independent seat**
     ([USER]'s ChatGPT/Codex subscription through `understudy/seat.py`;
     independence by model FAMILY) RETURNS a prototype or ADVANCES it with
     no [USER] form; two seats disagreeing ESCALATES; SURVIVES is never ship
@@ -394,12 +402,15 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     ACCEPTED LIVE — `EB-188` **CLOSED** on sealed session
     `20260829-181718` (`0.2.1353+proto`, seed `71D8JS1VSKRN`, 120
     actions, six fights, the record naming `arms_granted`), where Second
-    Helping was granted, drawn and played. `M48` is ANSWERED (R219 A/B). What is open for [USER]
+    Helping was granted, drawn and played. `M48` is ANSWERED (R219 A/B); `M51` and
+    `M53` are ANSWERED by R220 (F and E). What is open for [USER]
     is `M47` (Bag of Tricks), `M49` (the pilot's Charge term, now
     superseded and needing closing), `M50` (re-pointed at the
-    Kurage-memory redesign's four unruled rows), `M51` (the Sparks
-    re-author's countersign), `M52` (Furina E4 C1–C3) and `M53` (whether
-    a local model may hold a grading chair). Slice 2's round-2 boards
+    Kurage-memory redesign's four unruled rows, pick 3 now answered on
+    `M60`), `M52` (the Furina reframe's two countersigns), `M54`–`M57`
+    (the blind run's four), `M58` (the tester seat's spot-check rate),
+    `M59` (the reframe's sixteen picks) and `M60` (the Burst
+    retirement's four). Slice 2's round-2 boards
     stay **drafted and HELD** on `M50` (branch `kokomi-slice-2-round-2`,
     unstaged), and the redesign is what they now wait on.
   - **Klee Sparks — RE-AUTHORED, both engines, behind a flag**
@@ -413,8 +424,13 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     behind `-p:PrototypeCards=true` (so a release build contains no type
     from the arm), and the price moved out of the rules box onto a **cost
     badge** that reads the same number the gate charges. The packet's §9
-    doctrine-seat read is CLEAN. Nothing shipped moved; the countersign
-    and the eleven as-built calls are `M51`.
+    doctrine-seat read is CLEAN. Nothing shipped moved. **`M51` is
+    COUNTERSIGNED (R220 F):** the DRAFT prediction slate P1–P6 is signed
+    under R212(2) and the eleven as-built calls at §10.11 stand as built,
+    none vetoed. `LAW.md:481` moved `spark` from the bounded meters to the
+    unbounded with it — the re-author has no cap, so the bounded-at-3 entry
+    was a dead reference. Klee's Burst fold rides this arm (R220 B), and
+    `M60`'s `K1` sets its rarity.
   - **Kokomi Kurage memory — BASE KIT** (`review/active/kokomi-kurage-memory-2026-08-29.md`
     §11–§13). R219 D: the Bake-Kurage is **always on**, part of the base
     kit rather than a summoned card, and one Muster card joins the base
@@ -425,34 +441,51 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     measurement attached and none quotable. Sim, C# and the blind-run
     prediction slate are all merged; the run itself waits on the boot
     regression above. Four rows the redesign leaves unruled are `M50`.
-  - **Furina E4 — PACKET CLOSED, COUNTERSIGN OPEN**
-    (`review/active/furina-e4-2026-08-29.md`, revisions 2–4). The doctrine
-    seat's implementation RETURN was accepted in full and its r2 approval
-    recorded; revision 3 paid the fresh-Claude independent read of the
-    GPT-authored rows and revision 4 closed all five of its findings in
-    place, so what [USER] signs is corrected text. No code, no constant,
-    no sheet row and no LAW line has moved. `M52` carries C1 (the §3
-    ruling text and its seven retirements), C2 (the prospective LAW text,
-    §3.1/§3.2, as prospective) and C3 (the §7.1 P7 triage plan), plus the
-    co-op consequence to be signed with C1. Under R213's sequence the
-    Furina slice is now gated on **C1–C3 and nothing else** — Klee round
-    3 reported, both arms ADVANCE.
+  - **Furina REFRAME — PACKET CLOSED, COUNTERSIGN OPEN**
+    (`review/active/furina-reframe-2026-08-29.md`). R220 A, from [USER]'s
+    brief and his four answers: the Salon is an **orb board** in the Defect
+    shape whose members never auto-play, **Fanfare is its Focus and its
+    Burst** — a full meter is a maximally scaled Salon and that fill state
+    IS the reward — Encore is both her deferred Block and the currency that
+    aims the stage, a Companion play triggers one member without evoking it,
+    and her own cards Evoke. No Burst card prints at a threshold; "drain it
+    all for a giant effect" becomes an optional **Rare payoff card**,
+    drafted, not base kit. Spotlight is named as deliberately unresolved.
+    The packet **supersedes E4 §3, §4, §7.1 and §12 on paper**
+    (`review/active/furina-e4-2026-08-29.md` stays in place as the record).
+    No code, no constant, no sheet row and no LAW line has moved.
+    **`M52` is re-pointed** onto this packet's §3 ruling text and its §3.1
+    prospective LAW text, and the sixteen design picks are **`M59`**. Under
+    R213's sequence the Furina slice is gated on **`M52` and `M59`** — Klee
+    round 3 reported, both arms ADVANCE. Her Burst fold is one of R220 B's
+    three, and it is the last of them.
   - **Build and grading rhythm (facts, not rulings).** CI takes a
     **docs-only fast path** (`tools/ci_changed_paths.py`) and runs pytest
     under xdist with a pip cache — the pytest job is ~3.5 min, from ~5.
     The scarce budget is the Codex seat's: GPT-played runs are paced per
     five-hour window, so a sitting plans around them rather than assuming
-    them. A **local-model grader** (Qwen 3.8 27B over llama.cpp) is a
-    sanity backstop on already-CLOSED assignments only, and it is
-    MERGED: `understudy/authorship.py` recognises a `local` family
-    (`FAMILIES`) without making it authorable (`AUTHORABLE_FAMILIES`
-    unchanged). That split is a read of the "no third family" rule, not
-    a ratified one — the row that ratifies or reverses it is `M53`.
+    them. The **local model** (Qwen 3.8 27B over llama.cpp) now holds a
+    **TESTER seat on staged single-turn reads**, handed off by R220 E:
+    [USER]'s condition — GPT confirming the playtest findings first — was
+    met by the Codex seat's **ADVANCE** at
+    `review/qa/local-sanity-2026-08-29-seat-review-codex-gpt-5.6-sol.md`,
+    and `M53` is ANSWERED as pick (1) by entailment. The `local` family is
+    RECOGNISED and never AUTHORABLE (`understudy/authorship.py`:
+    `FAMILIES` yes, `AUTHORABLE_FAMILIES` no), and **no grading chair is
+    granted** — grader work, whole-fight blind play and the doctrine gate
+    stay with the Codex seat. The seat runs under its own four conditions
+    (`answer_truncated` a hard refusal with no partial filing, the family
+    non-authorable, periodic seat review, and review of any line that
+    spends a resource before a resource-reading play);
+    `understudy/local_tester.py` is the mechanism and OPERATIONS' **Local
+    tester seat** section is the amended rule. One pick is left open there:
+    the periodic-review rate, `M58`.
   - **Next.** Klee slice 1 has no open engineering: all three arms read
     ADVANCE on clean independent reads and Second Helping has its
     whole-fight run. Owed next are the whole-fight runs for Rummage and
     Slow Burn, the boot fix that unblocks the sealed Kokomi run, slice 1's
-    `EB-184`, and the six open [USER] rows `M47`/`M49`–`M53`.
+    `EB-184`, and the eleven open [USER] rows `M47`, `M49`, `M50`, `M52`,
+    `M54`–`M60`.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
@@ -465,11 +498,14 @@ Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
 countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
-Art debt); the Fontaine Rares close-out (`M10`); and the six prototype-slice
-and redesign calls (`M47` Bag of Tricks; `M49` the pilot's Charge term, now
-superseded; `M50` the Kurage-memory redesign's four unruled rows; `M51` the
-Klee Sparks re-author's countersign; `M52` Furina E4's C1–C3; `M53` whether a
-local model may hold a grading chair). `M48` was answered by R219.
+Art debt); the Fontaine Rares close-out (`M10`); and the eleven
+prototype-slice, redesign and slate calls (`M47` Bag of Tricks; `M49` the
+pilot's Charge term, now superseded; `M50` the Kurage-memory redesign's four
+unruled rows, pick 3 answered on `M60`; `M52` the Furina reframe's two
+countersigns; `M54`–`M57` the blind run's four; `M58` the local tester seat's
+spot-check rate; `M59` the reframe's sixteen design picks; `M60` the Burst
+retirement's four picks). `M48` was answered by R219; `M51` was answered by
+R220 F and `M53` by R220 E.
 
 ## Watch register (dormant)
 
