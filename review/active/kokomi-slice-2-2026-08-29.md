@@ -583,46 +583,59 @@ disclosure predicted before the round ran.
 
 ---
 
-## 9. What the run leaves for [USER] — numbered picks, not blanks
+## 9. What the run leaves — what is already moving, and two picks that are yours
 
-Nothing below is settled here. Each is a pick between directions, which is what
-the ladder still returns.
+The independent seat RETURNS or ADVANCES with no [USER] form
+(`docs/current/OPERATIONS.md`), so what to do with a returned board, and in what
+order to build the work behind it, is Claude's call and is recorded here as
+status rather than returned as a question. Two things are genuinely yours, and
+they are below.
 
-**PICK 1 — the two RETURNed arms.** The reviewer returned the boards, not the
-cards. What should happen to arms 1 and 4?
+### What is already moving
 
-1. Re-board both and run a round 2 of slice 2, the way slice 1's rounds 2–4 did.
-   Cheapest, and the reviewer wrote both prescriptions already.
-2. Re-board arm 1 only, and treat arm 4's failure as the answer — the formation
-   arm asked its question and the answer is that the sign of a Muster subsidy does
-   not reach a turn.
-3. Close both under the surface's deletion rule (R213 B) and take arms 2 and 3
-   forward alone.
+- **The two RETURNed arms — executed.** Round-2 boards for arms 1 and 4 are
+  drafted on branch `kokomi-slice-2-round-2`, unstaged. The reviewer returned
+  the boards, not the cards, and wrote both prescriptions itself.
+- **What ADVANCE buys arms 2 and 3 — the automatic next gate.** Whole-fight
+  blind play on the `blindplay` seat is what follows an ADVANCE; there is no
+  pick in it. It is **blocked on `EB-188`**, not skipped: prototype rows are
+  quarantined out of every pool, so a blind run on a dev build cannot draw one
+  until the build grows a `+proto` inclusion or a dev door that grants the arm.
+- **The fifth pair, `EB-183` — sequenced.** The Muster board repair comes
+  first, because arm 4's board could not ask a Muster question at all (the
+  prototype was never played on either half), and a fifth pair staged on a
+  comparable board would produce a fifth uninterpretable result. `EB-183` is
+  built against a board that has been proven able to separate a Muster arm.
 
-**PICK 2 — what ADVANCE buys arms 2 and 3 next.** ADVANCE means whole-fight play,
-not ship.
+### PICK 1 — the pilot's Charge term
 
-1. Whole-fight blind play on the `blindplay` seat, both arms, before any
-   re-authoring.
-2. Re-author onto the real sheet first (ruled numbers, stamp bump, art) and play
-   them there. This is a one-way door, which is why it is a pick and not a
-   default.
-3. Hold both until Klee's slice has run, so the two slices are compared on the
-   same instrument.
+Unchanged from §6 and still yours: it is a `POLICY_VERSION` change with a
+re-baseline attached, and both are frozen.
 
-**PICK 3 — the fifth pair, `EB-183`.** Pair 4's read came back UNSEPARATED on both
-halves, which was the trigger this session carried for building R216 D's
-per-companion half as a fifth matched pair. **It was not built, and the reason is
-the reviewer's own finding:** arm 4's board could not ask a Muster question at all
-— the prototype was never played on either half — so a fifth pair staged on a
-comparable board would produce a fifth uninterpretable result. The order matters,
-and the pick is which order.
+### PICK 2 — the Charge rule itself
 
-1. Repair the arm-4 board FIRST (the reviewer's prescription), prove it can
-   separate a Muster arm at all, and only then build `EB-183` against it.
-2. Build `EB-183` now anyway, on a board designed for it from scratch rather than
-   inherited from arm 4.
-3. Leave `EB-183` owed and unbuilt until R213 E1 is otherwise closed.
+Charge accrues universally on Exhaust and never resets, so the bank is a ramp
+and a spend on it is an investment rather than a decision on the turn. This is
+the rule the four arms were authored against.
 
-**PICK 4 — the pilot's Charge term**, unchanged from §6 and still yours: it is a
-`POLICY_VERSION` change with a re-baseline attached, and both are frozen.
+1. Charge becomes per-turn — resets at end of turn; the jellyfish pulses on this
+   turn's Exhausts; Exhaust stays her identity, relic and summon stay; readers'
+   numbers re-derived; LAW R80 amended.
+2. The relic loses the universal Exhaust→Charge rule, keeps Strength→Charge;
+   Charge comes only from cards that print it.
+3. Both 1 and 2.
+4. Retire Charge outright and scale the summon on something else.
+5. Leave Charge; accept a ramp character and get the interesting turns from
+   Companions (the E3 slice).
+
+**Staging the round-2 boards and whole-fight play of the two advanced arms are
+HELD on this pick.** Options 1–4 retire arms 1–4 as authored — every one of them
+prices or banks Charge under the current accrual rule — so running them first
+would spend the instrument on a rule that is about to move. And a per-turn rule
+is testable only by whole-fight blind play, never by a staged turn: a single
+turn cannot show a bank that resets.
+
+The accrual rule was an open choice from the start:
+`docs/current/characters/kokomi-kickoff-v1.md` §2.1 lists it as item 5, *"Charge
+accrual rule — universal exhaust→Charge (recommended) vs tag-gated"*, and it has
+never been ruled.

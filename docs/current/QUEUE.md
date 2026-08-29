@@ -63,6 +63,18 @@
 |---|---|---|---|
 | `M45` | **Ask:** ratify the pass's seven open calls as ONE slate (R206). **Pick (adopt / defer, audit first):** (1) `salon_rotate` reader / timing; (2) `smoke_and_sparks` re-body / cut; (3) `Win10`/`Win11` on choices / state; (4) Spotlight selector amend / accept; (5) `depths_judgment` flat-14 / rescale; (6) Kokomi Block cluster accept / amend; (7) Charge lever: `S4-G13`. **Gate:** the playtest | OPEN — after the playtest | R206; review/active/richness-playtest-brief-2026-08-26.md |
 
+## 6. Prototype slices (R213) — held arms and the rules under them
+
+Each row points at the packet section that carries the options in full; the
+packet is the argument and this is the register.
+
+| ID | Decision needed | Status | Provenance |
+|---|---|---|---|
+| `M47` | **Ask:** choose what happens to *Bag of Tricks*, the arm the doctrine gate held on a top-level-cost clause and a D4 defect. **Pick:** (1) drop it; (2) amend the top-level-cost rule to admit a mode price; (3) build per-mode playability (`EB-182`) first, then re-ask — my reading; (4) re-author as two cards; (5) price the whole card. In full: §6.1 | OPEN — design call; nothing is gated on it | review/active/klee-slice-1-2026-08-29.md §6.1; R213 E2 |
+| `M48` | **Ask:** rule on the automatic free-Attack rule the seat calls facially in tension with D2 — it picks the Attack and forces the spend. **Pick:** (1) leave it; (2) opt-in; (3) targetable; (4) forgoable only; (5) rule that D2 does not reach a starting mechanic. The seat's words and the options: §6.2 | OPEN — blocks any claim that R213 E2 is doctrinally resolved | review/active/klee-slice-1-2026-08-29.md §6.2 |
+| `M49` | **Ask:** approve the pilot's Charge hold-versus-spend term — without it every closeness reading on a Charge spender is taken by a pilot that prices the spend at zero (error direction conservative). **Pick:** (1) build it, `POLICY_VERSION` bump and re-baseline; (2) leave it and keep reading Charge turns with the caveat | OPEN — the version and the baseline are both frozen | review/active/kokomi-slice-2-2026-08-29.md §9 PICK 1 |
+| `M50` | **Ask:** choose Kokomi's Charge accrual rule, open since the kickoff (`characters/kokomi-kickoff-v1.md` §2.1 item 5) and never ruled. **Pick:** (1) per-turn, resets at end of turn (LAW R80 amended); (2) relic keeps Strength→Charge only; (3) both; (4) retire Charge; (5) leave it, take the turns from Companions. In full: §9 | HELD — slice 2 staging and whole-fight play wait on it | review/active/kokomi-slice-2-2026-08-29.md §9 PICK 2 |
+
 ---
 
 ## Not carried here

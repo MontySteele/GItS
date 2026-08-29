@@ -335,8 +335,21 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     automatic rule now has a live witness. Also minted: `EB-187` (a
     staged board's Burst assumption double-counts the Skill tag and
     corrupted a grade).
-  - **Next.** Slice 2's §9 picks, slice 1's `EB-184`, Klee's `EB-186`
-    before any re-run of its arms, and §6's two held [USER] calls.
+  - **Process status (2026-08-29 review pass).** Two Klee arms are
+    **PROVISIONAL** on an independence breach — the doctrine seat authored
+    Rummage's text and chose Slow Burn's number and the same family then
+    graded them. **No third family** (`[USER]`, 2026-08-29); role
+    separation is enforced by recorded authorship instead (`EB-190`), and
+    both arms wait on a **Klee round 3** re-authored from the clause.
+    Whole-fight blind play is the **automatic** gate after ADVANCE and is
+    **blocked on `EB-188`** — no prototype arm can be drawn in a blind run
+    yet. Kokomi's Charge accrual rule is now an open [USER] pick (`M50`),
+    with the pilot's Charge term at `M49` and Klee's two held calls at
+    `M47`/`M48`; slice 2's round-2 boards are **drafted and HELD** on
+    `M50` (branch `kokomi-slice-2-round-2`, unstaged).
+  - **Next.** Slice 2's two §9 picks (`M49`/`M50`), slice 1's `EB-184`,
+    Klee's `EB-186` before any re-run of its arms, and Klee §6's two held
+    [USER] calls (`M47`/`M48`).
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
@@ -349,7 +362,9 @@ Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
 countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
-Art debt); and the Fontaine Rares close-out (`M10`).
+Art debt); the Fontaine Rares close-out (`M10`); and the four prototype-slice
+calls (`M47` Bag of Tricks, `M48` the automatic free-Attack rule, `M49` the
+pilot's Charge term, `M50` the Charge accrual rule).
 
 ## Watch register (dormant)
 
