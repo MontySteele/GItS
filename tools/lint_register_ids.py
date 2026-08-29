@@ -126,7 +126,10 @@ CEILINGS: dict[str, int] = {
     # both shifted up one and the packet carries a pointer saying so.
     # EB-198 minted 2026-08-29 by the KURAGEMEM001 blind run: the tester read
     # the memory strip as inconsistent twice, undiagnosed on purpose.
-    "EB": 200,   # EB-196/197 minted 2026-08-29 by the Gate B diagnosis. 196:
+    "EB": 201,   # EB-201 minted 2026-08-29 by EB-198's live acceptance: the
+                 # pile view's affordability rings never paint, on a hook that
+                 # binds without error and a pile that demonstrably opens.
+                 # EB-196/197 minted 2026-08-29 by the Gate B diagnosis. 196:
                  # the C# memory could never hold an entry -- the per-fight
                  # clear sat in the subscription delegate, which the combat
                  # re-invokes on EVERY hook broadcast, so both entry rules
@@ -382,6 +385,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 182, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
+        # 201 minted 2026-08-29 by EB-198's live acceptance: the pile view's
+        # affordability rings never paint.
+        201,
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,

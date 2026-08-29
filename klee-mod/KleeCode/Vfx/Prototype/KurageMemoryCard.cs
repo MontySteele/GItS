@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BaseLib.Abstracts;
 using Godot;
 using HarmonyLib;
 using KleeMod.Powers;
@@ -337,9 +338,34 @@ internal static class KurageMemoryCard
         ring.Visible = true;
         ring.AddThemeStyleboxOverride(PanelStyleBox,
                                       RingStyle(edge, deep));
-        thumb.Texture = front.Card.HasPortrait ? front.Card.Portrait : null;
+        thumb.Texture = Portrait(front.Card);
         badge.Text = front.Price == 0 ? "free" : front.Price.ToString();
         count.AddThemeColorOverride(ThemeConstants.Label.FontColor, edge);
+    }
+
+    /// <summary>
+    /// The card's picture, OURS FIRST.
+    ///
+    /// `EB-198`'s live acceptance caught §14.5 exactly backwards. That section
+    /// read `CardModel.Portrait` off the decompile and concluded it "works for
+    /// base-game cards in the queue as well as ours"; the first live frame drew
+    /// an empty ring, because a MOD card has no `PortraitPath` to load. Our art
+    /// is a runtime `ImageTexture` handed over through BaseLib's portrait patch
+    /// as <c>CustomCardModel.CustomPortrait</c> (`RosterArt.CardPortrait`,
+    /// KleeArt.cs) and never reaches the base path at all.
+    ///
+    /// So: the override when the model has one, the base property otherwise --
+    /// which keeps the half of §14.5 that WAS right, a base-game card in the
+    /// queue drawing its own face with no per-roster art table.
+    /// </summary>
+    private static Texture2D? Portrait(CardModel card)
+    {
+        if (card is CustomCardModel custom && custom.CustomPortrait != null)
+        {
+            return custom.CustomPortrait;
+        }
+
+        return card.HasPortrait ? card.Portrait : null;
     }
 
     private static StyleBoxFlat RingStyle(Color edge, Color deep)
