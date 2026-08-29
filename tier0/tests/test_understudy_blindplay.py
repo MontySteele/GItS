@@ -438,6 +438,85 @@ def test_the_map_numbers_its_paths_so_a_fork_is_nameable():
                                          "index": 1}
 
 
+def test_two_cards_printing_one_title_are_both_playable_by_number():
+    """`EB-177`, found live. Run B6 held two *Water's Edge*, one of them
+    enchanted, and could play NEITHER: the bare title was ambiguous and the
+    upgrade qualifier did not separate them. The render numbers them the way
+    the map numbers a fork, and each number resolves to its own copy."""
+    state = combat_state()
+    hand = state["player"]["hand"]
+    twin = json.loads(json.dumps(hand[3]))          # a second Coral Guard
+    twin["cost"] = "0"                              # ...with a different face
+    hand.append(twin)
+    page = blindplay.observe(state)
+    assert "Coral Guard (1)" in page and "Coral Guard (2)" in page
+
+    first = blindplay.act(state, 'play "Coral Guard (1)"')
+    assert first["ok"] and first["post"]["card_index"] == 3
+    assert first["printed"]["card"] == "Coral Guard (1)"
+    second = blindplay.act(state, 'play "Coral Guard (2)"')
+    assert second["ok"] and second["post"]["card_index"] == len(hand) - 1
+
+
+def test_the_ambiguous_bare_title_is_refused_with_the_numbers_it_could_use():
+    state = combat_state()
+    hand = state["player"]["hand"]
+    twin = json.loads(json.dumps(hand[3]))
+    twin["cost"] = "0"
+    hand.append(twin)
+    res = blindplay.act(state, 'play "Coral Guard"')
+    assert not res["ok"]
+    assert "Coral Guard (1)" in res["refusal"]
+    assert "Coral Guard (2)" in res["refusal"]
+
+
+def test_a_title_that_is_unique_on_its_screen_is_never_numbered():
+    """The number is a disambiguator, not decoration: a hand of distinct cards
+    reads exactly as it always did, and the bare title stays valid."""
+    page = blindplay.observe(combat_state())
+    assert "Pearl Barrage" in page and "Pearl Barrage (1)" not in page
+    assert blindplay.act(combat_state(), 'play "Pearl Barrage"')["ok"]
+
+
+def test_two_enemies_sharing_a_name_are_numbered_in_printed_order():
+    state = combat_state()
+    enemies = state["battle"]["enemies"]
+    twin = json.loads(json.dumps(enemies[0]))
+    twin["entity_id"] = "NIBBIT_1"
+    enemies.append(twin)
+    page = blindplay.observe(state)
+    assert "Nibbit (1)" in page and "Nibbit (2)" in page
+
+    bare = blindplay.act(state, 'play "Pearl Barrage" on "Nibbit"')
+    assert not bare["ok"] and "Nibbit (2)" in bare["refusal"]
+    res = blindplay.act(state, 'play "Pearl Barrage" on "Nibbit (2)"')
+    assert res["ok"] and res["post"]["target"] == "NIBBIT_1"
+
+
+def test_a_dead_enemy_does_not_renumber_the_one_still_standing():
+    """The render prints a corpse, so the grammar must number over the corpses
+    too -- otherwise `Nibbit (2)` becomes `Nibbit` the moment the first one
+    dies and the page and the grammar disagree mid-fight."""
+    state = combat_state()
+    enemies = state["battle"]["enemies"]
+    twin = json.loads(json.dumps(enemies[0]))
+    twin["entity_id"] = "NIBBIT_1"
+    enemies.append(twin)
+    enemies[0]["hp"] = 0
+    res = blindplay.act(state, 'play "Pearl Barrage" on "Nibbit (2)"')
+    assert res["ok"] and res["post"]["target"] == "NIBBIT_1"
+
+
+def test_a_numbered_screen_still_reads_as_blind():
+    state = combat_state()
+    state["player"]["hand"].append(
+        json.loads(json.dumps(state["player"]["hand"][3])))
+    state["battle"]["enemies"].append(
+        json.loads(json.dumps(state["battle"]["enemies"][0])))
+    qa_packet.assert_blind(blindplay.observation(state),
+                           allow={state["state_type"]})
+
+
 def test_the_screen_decides_the_verb_not_the_command():
     """One `choose`, six wire actions. Each is the verb that screen advertises
     in `vendor/STS2_MCP/docs/raw-simplified.md`."""

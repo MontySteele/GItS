@@ -122,7 +122,9 @@ CEILINGS: dict[str, int] = {
                  # `Water's Edge` beside a plain one, where the bare title
                  # is ambiguous and neither `(upgraded)` nor
                  # `(not upgraded)` separates them. The session died on the
-                 # refusal limit and the tester named it unprompted. OPEN.
+                 # refusal limit and the tester named it unprompted.
+                 # CLOSED 2026-08-29: repeats are numbered in printed
+                 # order, the way the map numbers a fork's paths.
                  # EB-176 minted AND CLOSED 2026-08-29 by the same acceptance:
                  # a live `hand_select` renders as `card_select`, only the
                  # WIRE's screen name was exempt from the snake_case rule, and
@@ -225,7 +227,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        177, 178, 179, 180,
+        178, 179, 180,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

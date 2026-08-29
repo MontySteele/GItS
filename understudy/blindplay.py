@@ -233,6 +233,50 @@ def _fold(text: Any) -> str:
     return " ".join(s.split())
 
 
+def _number_names(names: list[str]) -> list[str]:
+    """Printed names with the repeats numbered, in printed order.
+
+    `EB-177`, FOUND LIVE. Two cards printing one title that differ by anything
+    but upgrade state were BOTH unplayable: the bare title is ambiguous,
+    `(upgraded)` says nothing here is, `(not upgraded)` narrows to both again,
+    and run B6 died against the refusal limit holding two *Water's Edge*, one
+    of them enchanted. Two enemies sharing a printed name had the same hole.
+
+    The fix is the one the map already uses for a fork offering two `Monster`
+    nodes (`_map_options`, `(path N)`): give each repeat a number, in the order
+    the screen prints them, so every face on the screen has a name of its own.
+    A title that appears ONCE is left exactly as the game printed it -- the
+    number is a disambiguator, not decoration, and a hand of eight distinct
+    cards must read the way it always did.
+
+    Folded, not compared raw, so the numbering agrees with the matcher: two
+    faces the grammar cannot tell apart are the two the render must number.
+    `EB-173`'s surviving `+` keeps `Coral Guard` and `Coral Guard+` two
+    different names, so an upgraded pair is still separated by `(upgraded)`
+    and never reaches this.
+
+    Called on BOTH sides of the line -- once by the observation that prints the
+    names and once by the resolver that reads them back -- from the same
+    printed-name sequence, which is what keeps the page and the grammar in
+    step. Give it a different sequence on the two sides and they diverge; see
+    `_resolve_enemy`, which numbers over EVERY enemy and only then drops the
+    dead ones, because the render prints the dead ones too.
+    """
+    counts: dict[str, int] = {}
+    for n in names:
+        counts[_fold(n)] = counts.get(_fold(n), 0) + 1
+    seen: dict[str, int] = {}
+    out: list[str] = []
+    for n in names:
+        k = _fold(n)
+        if counts[k] > 1 and k:
+            seen[k] = seen.get(k, 0) + 1
+            out.append(f"{n} ({seen[k]})")
+        else:
+            out.append(n)
+    return out
+
+
 def _screen(state: dict[str, Any]) -> str:
     return str(state.get("state_type") or "unknown")
 
@@ -420,6 +464,14 @@ def _named_option(entry: Any) -> dict[str, Any]:
     }
 
 
+def _number_faces(faces: list[dict[str, Any]], field: str
+                  ) -> list[dict[str, Any]]:
+    """`_number_names` over one field of a list of already-built faces."""
+    for face, name in zip(faces, _number_names([f[field] for f in faces])):
+        face[field] = name
+    return faces
+
+
 def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
     return qa_packet._powers(blob)
 
@@ -451,16 +503,17 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
                         for x in _potions(state)],
         },
         "round": _int(battle.get("round")),
-        "hand": [_card_face(c) for c in _hand(state)],
+        "hand": _number_faces([_card_face(c) for c in _hand(state)], "title"),
         "piles": {"draw": _int(p.get("draw_pile_count")),
                   "discard": _int(p.get("discard_pile_count")),
                   "exhaust": _int(p.get("exhaust_pile_count"))},
-        "enemies": [{"name": _text(e.get("name")),
-                     "hp": _int(e.get("hp")),
-                     "max_hp": _int(e.get("max_hp", e.get("hp"))),
-                     "block": _int(e.get("block")),
-                     "intent": _intent(e.get("intents") or e.get("intent")),
-                     "powers": _powers(e)} for e in _enemies(state)],
+        "enemies": _number_faces(
+            [{"name": _text(e.get("name")),
+              "hp": _int(e.get("hp")),
+              "max_hp": _int(e.get("max_hp", e.get("hp"))),
+              "block": _int(e.get("block")),
+              "intent": _intent(e.get("intents") or e.get("intent")),
+              "powers": _powers(e)} for e in _enemies(state)], "name"),
     }
 
 
@@ -567,14 +620,16 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         blob = _blob(state, "card_reward")
         obs["screen"] = "card_reward"
         obs["prompt"] = _text(blob.get("prompt")) or "Add a card to your deck."
-        obs["offers"] = [_card_face(c) for c in _screen_cards(state)]
+        obs["offers"] = _number_faces(
+            [_card_face(c) for c in _screen_cards(state)], "title")
         obs["can_skip"] = blob.get("can_skip") is not False
         obs["commands"] = ['choose "<card title>"', "skip"]
     elif st in SELECT_SCREENS:
         blob = _blob(state, st)
         obs["screen"] = "card_select"
         obs["prompt"] = _text(blob.get("prompt")) or "Choose a card."
-        obs["offers"] = [_card_face(c) for c in _screen_cards(state)]
+        obs["offers"] = _number_faces(
+            [_card_face(c) for c in _screen_cards(state)], "title")
         obs["can_confirm"] = bool(blob.get("can_confirm"))
         obs["can_skip"] = bool(blob.get("can_skip") or blob.get("can_cancel"))
         obs["commands"] = ['choose "<card title>"', "confirm", "skip"]
@@ -909,8 +964,8 @@ def _is_upgraded(entry: dict[str, Any]) -> bool:
 
 def _match(entries: list[dict[str, Any]], name: str, *,
            key: Callable[[dict[str, Any]], str],
-           face: Callable[[dict[str, Any]], str] | None = None
-           ) -> tuple[int, str]:
+           face: Callable[[dict[str, Any]], str] | None = None,
+           number: bool = False) -> tuple[int, str]:
     """`(index, refusal)` for `name` among `entries`, by PRINTED name only.
 
     Exact fold first, unique substring second. Two entries whose printed FACE
@@ -919,6 +974,14 @@ def _match(entries: list[dict[str, Any]], name: str, *,
     player experiences. Two entries that print the same title with different
     faces (a base and an upgraded copy) ARE ambiguous, and the refusal says how
     to disambiguate rather than guessing.
+
+    `number` (`EB-177`) matches against `_number_names`'s output instead of the
+    bare printed names, which is what the RENDER prints on the same screen: a
+    repeated title carries `(1)`, `(2)` in printed order and a unique one is
+    untouched, so the bare title stays valid wherever it is unique and the
+    numbered form is the handle wherever it is not. Callers turn it on exactly
+    where the observation numbers the same list; a caller that does not number
+    its page must not number its grammar.
 
     `EB-173`, FOUND LIVE AND FIXED HERE. `_fold` strips punctuation, which is
     right for apostrophes and dashes and WRONG for the `+` the game itself
@@ -933,12 +996,15 @@ def _match(entries: list[dict[str, Any]], name: str, *,
     so the two titles are simply different names and the common case never
     reaches the ambiguity arm at all.
     """
+    printed = [key(e) for e in entries]
+    if number:
+        printed = _number_names(printed)
     name, want_upgraded = _split_qualifier(name)
     want = _fold(name)
     if not want:
         return -1, "no name given"
-    exact = [i for i, e in enumerate(entries) if _fold(key(e)) == want]
-    loose = [i for i, e in enumerate(entries) if want in _fold(key(e))]
+    exact = [i for i, p in enumerate(printed) if _fold(p) == want]
+    loose = [i for i, p in enumerate(printed) if want in _fold(p)]
     hits = exact or loose
     if want_upgraded is not None:
         def _wanted(idx: list[int]) -> list[int]:
@@ -951,23 +1017,45 @@ def _match(entries: list[dict[str, Any]], name: str, *,
             state = "upgraded" if want_upgraded else "un-upgraded"
             return -1, (f"nothing here called {name!r} is {state}. "
                         f"What is on the screen: "
-                        + ", ".join(sorted({key(entries[i]) for i in hits})))
+                        + ", ".join(sorted({printed[i] for i in hits})))
         hits = narrowed
     if not hits:
-        offered = ", ".join(sorted({key(e) for e in entries if key(e)}))
+        offered = ", ".join(sorted({p for p in printed if p}))
         return -1, (f"nothing here is called {name!r}. "
                     f"What is on the screen: {offered or '(nothing)'}")
-    if len(hits) > 1 and face is not None:
-        faces = {face(entries[i]) for i in hits}
-        if len(faces) > 1:
+    if len(hits) > 1:
+        # Identical FACES first, and before the numbering: two copies of one
+        # card are interchangeable, refusing there would make the second copy
+        # unplayable, and that is not an ambiguity a player experiences. The
+        # numbered names are still on the page for anyone who wants to be
+        # explicit -- they are a handle, not an obligation.
+        if face is not None and len({face(entries[i]) for i in hits}) == 1:
+            return hits[0], ""
+        # `EB-177`: otherwise the refusal ADVERTISES the names that would have
+        # worked. With `number` on, two copies of one title print as `... (1)`
+        # and `... (2)`, so a bare ambiguous title lands here and the way out
+        # is already on the screen -- name it back rather than describe it.
+        choices = sorted({printed[i] for i in hits})
+        # The upgrade qualifier is advertised only where it would actually
+        # narrow -- EB-173's rule that advice a tester cannot act on costs a
+        # turn of the refusal budget to discover. Where BOTH handles work
+        # (`EB-177`: two copies of one printed title, one of them upgraded)
+        # both are offered, because the numbered name is the one the page in
+        # front of them already prints.
+        qualifier = ""
+        if len({_is_upgraded(entries[i]) for i in hits}) > 1:
+            qualifier = ('; or add "(upgraded)" / "(not upgraded)" to pick '
+                         "one")
+        if len(choices) > 1:
+            return -1, (f"{name!r} matches more than one thing on this "
+                        f"screen; name one exactly: {', '.join(choices)}"
+                        + qualifier)
+        if face is not None:
+            # One printed name over different faces, and this caller does not
+            # number: the upgrade qualifier is the only handle there is.
             return -1, (f"{name!r} matches more than one different thing on "
                         f"this screen; name it exactly, or add "
                         f"\"(upgraded)\" / \"(not upgraded)\" to pick one")
-    elif len(hits) > 1:
-        names = sorted({key(entries[i]) for i in hits})
-        if len(names) > 1:
-            return -1, (f"{name!r} matches {len(names)} different things "
-                        f"({', '.join(names)}); name one exactly")
     return hits[0], ""
 
 
@@ -1005,6 +1093,11 @@ def _card_title(entry: dict[str, Any]) -> str:
     return _text(entry.get("name"))
 
 
+def _numbered_titles(entries: list[dict[str, Any]]) -> list[str]:
+    """The printed titles of a card list, numbered as the render numbers them."""
+    return _number_names([_card_title(e) for e in entries])
+
+
 def _card_face_key(entry: dict[str, Any]) -> str:
     c = _card_face(entry)
     return f"{c['title']}|{c['cost']}|{c['upgraded']}|{c['text']}"
@@ -1012,30 +1105,40 @@ def _card_face_key(entry: dict[str, Any]) -> str:
 
 def _resolve_enemy(state: dict[str, Any], name: str) -> tuple[str, str]:
     """`(entity id, refusal)` for an enemy named the way the screen names it."""
-    living = [e for e in _enemies(state) if _int(e.get("hp")) > 0]
+    enemies = _enemies(state)
+    # `EB-177`: numbered over EVERY enemy, then narrowed to the living ones.
+    # The render prints a corpse (HP 0) as a line of its own, so numbering the
+    # survivors alone would rename `Slug (2)` to `Slug` the moment the first
+    # slug died -- the page and the grammar would disagree about which one the
+    # tester is looking at, which is the whole defect this closes.
+    names = _number_names([_text(e.get("name")) for e in enemies])
+    living = [i for i, e in enumerate(enemies) if _int(e.get("hp")) > 0]
     if not name:
         if len(living) == 1:
-            return _entity_id(living[0]), ""
+            return _entity_id(enemies[living[0]]), ""
         return "", ("there is more than one enemy, so say which: "
-                    f"{', '.join(_text(e.get('name')) for e in living)}")
-    idx, why = _match(living, name, key=lambda e: _text(e.get("name")))
+                    f"{', '.join(names[i] for i in living)}")
+    idx, why = _match([{"n": names[i]} for i in living], name,
+                      key=lambda e: e["n"])
     if idx < 0:
         return "", why
-    return _entity_id(living[idx]), ""
+    return _entity_id(enemies[living[idx]]), ""
 
 
 def _play(state: dict[str, Any], cmd: Command) -> Resolution:
     hand = _hand(state)
-    idx, why = _match(hand, cmd.name, key=_card_title, face=_card_face_key)
+    titles = _numbered_titles(hand)
+    idx, why = _match(hand, cmd.name, key=_card_title, face=_card_face_key,
+                      number=True)
     if idx < 0:
         return _refuse(why)
     entry = hand[idx]
     if entry.get("can_play") is False:
         reason = _text(entry.get("unplayable_reason"))
-        return _refuse(f"{_card_title(entry)!r} cannot be played right now"
+        return _refuse(f"{titles[idx]!r} cannot be played right now"
                        + (f": {reason}" if reason else ""))
     post: dict[str, Any] = {"action": "play_card", "card_index": idx}
-    printed = {"card": _card_title(entry)}
+    printed = {"card": titles[idx]}
     needs_target = str(entry.get("target_type") or "").lower() in (
         "anyenemy", "enemy", "singleenemy", "targetenemy")
     if cmd.target or needs_target:
@@ -1044,7 +1147,8 @@ def _play(state: dict[str, Any], cmd: Command) -> Resolution:
             return _refuse(why)
         post["target"] = eid
         printed["target"] = next(
-            (_text(e.get("name")) for e in _enemies(state)
+            (n for e, n in zip(_enemies(state), _number_names(
+                [_text(x.get("name")) for x in _enemies(state)]))
              if _entity_id(e) == eid), "")
     return Resolution(True, "play", post, printed)
 
@@ -1078,22 +1182,22 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
     if st == "card_reward":
         entries = _screen_cards(state)
         idx, why = _match(entries, cmd.name, key=_card_title,
-                          face=_card_face_key)
+                          face=_card_face_key, number=True)
         if idx < 0:
             return _refuse(why)
         return Resolution(True, "choose",
                           {"action": "select_card_reward", "card_index": idx},
-                          {"card": _card_title(entries[idx])})
+                          {"card": _numbered_titles(entries)[idx]})
     if st in SELECT_SCREENS:
         entries = _screen_cards(state)
         idx, why = _match(entries, cmd.name, key=_card_title,
-                          face=_card_face_key)
+                          face=_card_face_key, number=True)
         if idx < 0:
             return _refuse(why)
         verb = "select_card" if st == "card_select" else "combat_select_card"
         key = "index" if st == "card_select" else "card_index"
         return Resolution(True, "choose", {"action": verb, key: idx},
-                          {"card": _card_title(entries[idx])})
+                          {"card": _numbered_titles(entries)[idx]})
     if st == "bundle_select":
         # `EB-173`: match on the printed title of any card IN a bundle, the
         # only name this screen has. `_match` is deliberately not reused: its
