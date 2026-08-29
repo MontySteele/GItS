@@ -422,7 +422,15 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
                 f"{path.name}: prototype {card_id!r} must declare "
                 f"`character:` as one of {sorted(known_characters)}, "
                 f"got {character!r}")
-        card = Card.from_dict(dict(d))
+        # EB-190: `authored_by:` is PROVENANCE, not card schema -- which model
+        # families wrote the row. `Card.from_dict` is total on unknown fields
+        # by design, so the field is removed here rather than added to `Card`:
+        # a card object carrying an author list would put the fact inside the
+        # engine, where nothing may ever read it. `understudy/authorship.py`
+        # is the one reader, and `tools/gen_prototype_cards.py` refuses a row
+        # that omits it.
+        card = Card.from_dict({k: v for k, v in d.items()
+                               if k != "authored_by"})
         _validate_card_shape(card)
         cards.append(card)
     return cards

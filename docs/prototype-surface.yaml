@@ -40,6 +40,17 @@
 # shipped card, and it is what makes "did this slice leave the surface?"
 # answerable with a grep.
 #
+# `authored_by:` IS REQUIRED ON EVERY ROW, AND IT IS NOT A CREDIT LINE
+# (EB-190). It is a list of MODEL FAMILIES from the closed set
+# {claude, gpt}. The roles are fixed at two -- Claude authors, GPT grades and
+# reviews (R217 C; OPERATIONS "Doctrine seat protocol") -- so this list is what
+# `understudy/seat.py` reads in order to REFUSE a seat that would grade or
+# review its own family's work. Anything a seat contributed BEYOND A CLAUSE
+# NAME -- card text, a number, a mode -- adds its family to the row. A row with
+# no field, or with a family outside the set, is refused by
+# `tools/gen_prototype_cards.py`; the field is stripped before the emitter sees
+# the row, so it cannot move one byte of generated C#.
+#
 # STAGING ONE: docs/current/OPERATIONS.md, "Prototype surface (EB-147)".
 #
 # There is deliberately no `[]` below for a staged row to trip over: an empty
@@ -92,6 +103,7 @@
 # Base 5 and per 3 are the shipped numbers, UNMOVED: the counting basis is the
 # question, and moving a number too would make the answer unattributable.
 - {id: proto_pearl_barrage_turn, name: "Tidal Barrage", character: kokomi,
+   authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
    effects: [{op: exhaust_from, amount: 1, select: chosen},
              {op: damage, amount_formula: {base: 5, per: 3, count: exhausts_this_turn}, target: enemy}]}
@@ -123,6 +135,7 @@
 # badge say WHICH ELEMENT. Both `either` rows are worded the same way so the
 # two arms differ only in the card under test.
 - {id: proto_shinobu_sanctifying_ring_either, name: "Shinobu - Warding Ring", character: klee,
+   authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro, cost: 2, type: skill,
    effects: [{op: choose_one, modes: [
               {label: "Deal 3 damage to ALL enemies, applying its element",
@@ -134,6 +147,7 @@
 # Same scope fix as the row above, same reason, same runtime reading: the
 # Pyro is the damage mode's and the Block mode applies nothing.
 - {id: proto_thoma_crimson_ooyoroi_either, name: "Thoma - Blazing Ooyoroi", character: klee,
+   authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: pyro, cost: 2, type: attack,
    effects: [{op: choose_one, modes: [
               {label: "Deal 8 damage, applying its element",
@@ -153,6 +167,7 @@
 # element" on both modes would be answering a question the card does not
 # raise.
 - {id: proto_itto_superlative_superstrength_either, name: "Itto - Oni Rush", character: klee,
+   authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo, cost: 2, type: attack,
    effects: [{op: choose_one, modes: [
               {label: "Deal 14 damage",
@@ -166,14 +181,17 @@
 # opposite way from arm 2: you keep the whole card, and it competes for the
 # turn instead of riding along in it.
 - {id: proto_shinobu_sanctifying_ring_priced, name: "Shinobu - Sanctifying Circle", character: klee,
+   authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: applier, element: electro, cost: 3, type: skill,
    effects: [{op: damage, amount: 3, target: all_enemies, applies_element: true}, {op: block, amount: 4}]}
 
 - {id: proto_thoma_crimson_ooyoroi_priced, name: "Thoma - Crimson Guard", character: klee,
+   authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: pyro, cost: 3, type: attack,
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true}, {op: block, amount: 3}]}
 
 - {id: proto_itto_superlative_superstrength_priced, name: "Itto - Superlative Guard", character: klee,
+   authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo, cost: 3, type: attack,
    effects: [{op: damage, amount: 14, target: enemy, applies_element: false}, {op: block, amount: 6}]}
 
@@ -236,6 +254,7 @@
 # 12 rather than a formula, because a spend has nothing to scale off once it
 # has paid. See the header for where 12 comes from.
 - {id: proto_charge_spend_strike, name: "Sounding Line", character: kokomi,
+   authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
    effects: [{op: spend_charge, amount: 6},
              {op: damage, amount: 12, target: enemy}]}
@@ -249,6 +268,7 @@
 # empty-ish bank. It does not scale past the bar, by construction -- R58's
 # threshold grammar, which is why this shape is legal below Rare at all.
 - {id: proto_charge_threshold_strike, name: "Fathom the Tide", character: kokomi,
+   authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
    effects: [{op: damage, amount: 7, target: enemy},
              {op: conditional, if: charge_at_least_6,
@@ -271,6 +291,7 @@
 # that is a real visibility gap rather than a nicety -- it is written up in the
 # packet's section 6 as owed engineering, not papered over here.
 - {id: proto_charge_mode_guard, name: "Twin Tides", character: kokomi,
+   authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
    effects: [{op: choose_one, modes: [
               {label: "Gain 5 Block",
@@ -293,6 +314,7 @@
 # the funnel in both engines. It is listed in the packet's section 6 for the
 # coordinator rather than smuggled in beside four card rows.
 - {id: proto_charge_muster_price, name: "Watatsumi Levy", character: kokomi,
+   authored_by: [claude],
    cost: 2, type: skill, rarity: uncommon,
    effects: [{op: spend_charge, amount: 6}, {op: conscript, amount: 2}]}
 
@@ -373,6 +395,7 @@
 # forgoing, on the Attack half of the kit that W3's three Skill sinks left
 # without a decision.
 - {id: proto_spark_priced_strike, name: "Second Helping", character: klee,
+   authored_by: [claude],
    cost: 0, type: attack, rarity: uncommon,
    effects: [{op: spend_spark, amount: 3},
              {op: damage, amount: 6, target: enemy, times: 2}]}
@@ -400,6 +423,7 @@
 # and a draw enabler") was put to the seat explicitly and does not reach this
 # row: it is a spark SINK and a draw enabler, and the limb bans a SOURCE.
 - {id: proto_spark_priced_draw, name: "Rummage", character: klee,
+   authored_by: [claude, gpt],
    cost: 1, type: skill, rarity: uncommon,
    effects: [{op: spend_spark, amount: 3},
              {op: draw, amount: 3}]}
@@ -432,6 +456,7 @@
 # toward the one Klee payoff that is not an Attack. The Burst itself is
 # untouched: nothing here grants, drafts or alters Sparks 'n' Splash.
 - {id: proto_spark_burst_conversion, name: "Slow Burn", character: klee,
+   authored_by: [claude, gpt],
    cost: 1, type: skill, rarity: uncommon, tags: [skill_tag],
    effects: [{op: spend_spark, amount: 3},
              {op: block, amount: 5},

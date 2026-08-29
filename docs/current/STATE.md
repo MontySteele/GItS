@@ -176,11 +176,13 @@ deploy label from R218 on rides the pin above; live numbers were never
 comparable across a game build anyway (R95), and the sim references no game
 assembly and is unaffected.
 
-The deployed build is **`0.2.1318`** (2026-08-29, from `klee-slice-1-funnel`
-`614620a`), a clean release package with no `+proto` and no `+dirty` mark —
-deployed as the teardown of the Klee slice 1 funnel run, which had
-`0.2.1314+proto` installed while it ran. The bridge is uninstalled and no
-game process is up. It carries the same C# as
+The deployed build is **`0.2.1328`** (2026-08-29, from `klee-slice-1-funnel`
+`34d567f`), a clean release package with no `+proto` and no `+dirty` mark —
+deployed as the teardown of the Klee slice 1 ROUND 2 funnel run, which had
+`0.2.1323+proto` installed while it ran (that dev build was left installed by
+the session that staged round 2's boards, and was reused rather than rebuilt so
+the replays ran on the package that wrote the packets). The bridge is
+uninstalled and no game process is up. It carries the same C# as
 `0.2.1269`, whose port and face fixes are described below; nothing on a
 shipped sheet moved between them. `validate.ps1` OK; pack 9,586,076 bytes.
 It carries `EB-171`'s port and the two face fixes `0.2.1209` was missing: the
@@ -320,36 +322,45 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `EB-182` (no per-option playability on the choose-a-card screen,
     proven off the decompile), `EB-183` (R216 D's per-companion half,
     owed and unbuilt).
-  - **Klee slice 1** (`review/active/klee-slice-1-2026-08-29.md`, §11):
-    R213 E2's three Spark-spending arms, RUN 2026-08-29 on
-    `0.2.1314+proto`. Six turns in three matched pairs, seeds pinned
+  - **Klee slice 1** (`review/active/klee-slice-1-2026-08-29.md`, §11–§12):
+    R213 E2's three Spark-spending arms. **Round 1** RUN 2026-08-29 on
+    `0.2.1314+proto`: six turns in three matched pairs, seeds pinned
     after 11 rolls; closeness SURVIVES on all six both ways, though the
-    OBSERVED reading is blind to the Spark bank (`EB-185`), so the
+    OBSERVED reading was blind to the Spark bank (`EB-185`), so the
     DECLARED reading is the one committed. Twelve forms on two graders
     (7 SURVIVES / 5 REFUSED). **Ten of twelve replays were refused live**
     — at a bank of 3 the game prints every Attack at cost 0 while the
-    rule frees one (`EB-186`, shipped surface, D4). Pair read: **two
-    ADVANCE** (Second Helping, Rummage) and **one RETURN** (Slow Burn —
-    its board and presentation, per the review). A fourth arm, Bag of
-    Tricks, stays held for [USER] at §6.1, and §6.2's question about the
-    automatic rule now has a live witness. Also minted: `EB-187` (a
-    staged board's Burst assumption double-counts the Skill tag and
-    corrupted a grade).
+    rule frees one (`EB-186`, shipped surface, D4). Pair read: two
+    ADVANCE (Second Helping, Rummage), one RETURN (Slow Burn — its board
+    and presentation). Minted there: `EB-187` (a staged board's Burst
+    assumption double-counted the Skill tag and corrupted a grade).
+    **Round 2** RUN 2026-08-29 on `0.2.1323+proto`, same seeds, same
+    boards, same cards, new turn ids: `EB-185` and `EB-187` CLOSED and
+    `EB-186`'s page half fixed, so the packet now prints Spark's rule and
+    each card's printed cost. Twelve fresh forms (7 SURVIVES / 5 REFUSED)
+    and **all twelve replays played to completion**. Pair read: **two
+    ADVANCE** (Second Helping, Slow Burn) and **one RETURN** (Rummage —
+    priced honestly, the draw destination costs 16 damage and 5 Block and
+    no grader took it). A fourth arm, Bag of Tricks, stays held for
+    [USER] at §6.1, and §6.2's question about the automatic rule now has
+    two rounds of live witness. Also minted: `EB-191` (a replay's run
+    seed reads back `None` on 7 of 12 launches; a retry always works).
   - **Process status (2026-08-29 review pass).** Two Klee arms are
     **PROVISIONAL** on an independence breach — the doctrine seat authored
     Rummage's text and chose Slow Burn's number and the same family then
     graded them. **No third family** (`[USER]`, 2026-08-29); role
     separation is enforced by recorded authorship instead (`EB-190`), and
     both arms wait on a **Klee round 3** re-authored from the clause.
-    Whole-fight blind play is the **automatic** gate after ADVANCE and is
-    **blocked on `EB-188`** — no prototype arm can be drawn in a blind run
-    yet. Kokomi's Charge accrual rule is now an open [USER] pick (`M50`),
+    Whole-fight blind play is the **automatic** gate after ADVANCE; the
+    door is BUILT (`EB-188`, `embark --arm`) and its live acceptance —
+    one sealed run on a dev build — is owed. Kokomi's Charge accrual rule is now an open [USER] pick (`M50`),
     with the pilot's Charge term at `M49` and Klee's two held calls at
     `M47`/`M48`; slice 2's round-2 boards are **drafted and HELD** on
     `M50` (branch `kokomi-slice-2-round-2`, unstaged).
-  - **Next.** Slice 2's two §9 picks (`M49`/`M50`), slice 1's `EB-184`,
-    Klee's `EB-186` before any re-run of its arms, and Klee §6's two held
-    [USER] calls (`M47`/`M48`).
+  - **Next.** Klee round 3 (Rummage and Slow Burn re-authored from the
+    clause, `authored_by: [claude]`) and `EB-188`'s live run with Second
+    Helping granted; slice 2's two §9 picks (`M49`/`M50`), slice 1's
+    `EB-184`, and Klee §6's two held [USER] calls (`M47`/`M48`).
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
