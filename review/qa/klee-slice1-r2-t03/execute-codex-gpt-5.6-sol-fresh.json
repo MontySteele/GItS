@@ -1,0 +1,107 @@
+{
+ "turn_id": "klee-slice1-r2-t03",
+ "grader": "codex-gpt-5.6-sol-fresh",
+ "packet_sha256": "af45bd5a1907dd4148ec2c17454c5b1f5cce66c312df6d4e40458bb7f92d6b3e",
+ "seed_requested": "LUMNB3D9GFKD",
+ "seed_used": "LUMNB3D9GFKD",
+ "seed_honoured": true,
+ "board_check": {
+  "step": "board_check",
+  "rule": "board_mismatch",
+  "ok": true,
+  "differences": [],
+  "packet_sha256": "af45bd5a1907dd4148ec2c17454c5b1f5cce66c312df6d4e40458bb7f92d6b3e",
+  "run_seed": "LUMNB3D9GFKD",
+  "ts": 1788018931.996114,
+  "i": 14,
+  "scenario": "klee-slice1-r2-t03/executed",
+  "why": "Klee slice 1 round 2: replay the graded line on the honest page, EB-186 removed the cost-display defect",
+  "guardrail": "dev card grant: this run's deck is not one the generators produced, so nothing measured on it is comparable to any other run"
+ },
+ "chosen_line": [
+  {
+   "card": "Rapid Fire",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "played": [
+  "play Rapid Fire",
+  "play Kaboom!",
+  "play Duck and Cover"
+ ],
+ "modals": [],
+ "operator_answers": [],
+ "operator_answers_used": [],
+ "ok": true,
+ "failures": [],
+ "outcome": {
+  "player": {
+   "before": {
+    "hp": 42,
+    "block": 0
+   },
+   "after": {
+    "hp": 42,
+    "block": 5
+   },
+   "resources_before": {
+    "KLEEMOD_BURST": 0,
+    "KLEEMOD_CHARGE": 0,
+    "KLEEMOD_ENCORE": 0,
+    "KLEEMOD_FANFARE": 0,
+    "KLEEMOD_FANFARE_CAP_BONUS": 0,
+    "KLEEMOD_FANFARE_FLOOR": 0,
+    "KLEEMOD_FURINA_BURST": 0,
+    "KLEEMOD_KOKOMI_BURST": 0,
+    "KLEEMOD_SPOTLIGHT_MODE": 0,
+    "KLEEMOD_SPOTLIGHT_MOVED": 0,
+    "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+   },
+   "resources_after": {
+    "KLEEMOD_BURST": 0,
+    "KLEEMOD_CHARGE": 0,
+    "KLEEMOD_ENCORE": 0,
+    "KLEEMOD_FANFARE": 0,
+    "KLEEMOD_FANFARE_CAP_BONUS": 0,
+    "KLEEMOD_FANFARE_FLOOR": 0,
+    "KLEEMOD_FURINA_BURST": 0,
+    "KLEEMOD_KOKOMI_BURST": 0,
+    "KLEEMOD_SPOTLIGHT_MODE": 0,
+    "KLEEMOD_SPOTLIGHT_MOVED": 0,
+    "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+   }
+  },
+  "enemies": [
+   {
+    "id": "NIBBIT_0",
+    "name": "Nibbit",
+    "hp_before": 40,
+    "hp_after": 17,
+    "block_before": 0,
+    "block_after": 0
+   }
+  ],
+  "reading": "diagnostic only: a hand-set board, played once. A number here is evidence of a DEFECT or of nothing at all",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun"
+ },
+ "reading": "diagnostic only, under Guardrail-7: a hand-set board played once. A number here is evidence of a DEFECT or of nothing at all -- never a comparison, never a balance reading, and never a claim about the turn",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "log": "C:\\Users\\Monty\\Documents\\GitHub\\GItS\\understudy\\logs\\scenario\\executed-klee-slice1-r2-t03-20260829-115457.jsonl",
+ "executed_at": "2026-08-29T11:55:40"
+}

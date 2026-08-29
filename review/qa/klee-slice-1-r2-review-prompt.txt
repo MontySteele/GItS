@@ -1,0 +1,792 @@
+You are reviewing a blind-QA round on a card game's PROTOTYPE cards. You did
+not design them and you are not being asked whether they are good, fun, or
+balanced. You are being asked ONE question per arm, from evidence only.
+
+THIS IS ROUND TWO OF THE SAME SIX BOARDS. Round one ran on the same seeds, the
+same enemies and the same hands, and its page carried a defect: at a bank of
+three the game printed EVERY Attack in hand at "Cost: 0" while the rule frees
+only ONE of them, so every grader read "all my Attacks are free", built a line
+on it, and TEN OF TWELVE lines were then refused by the live game with
+EnergyCostTooHigh. Round one's reviewer said what that cost: the defect
+"prevents conclusions about actual line closeness, affordability, or the
+magnitude of each prototype's opportunity cost." Round two exists to remove
+that caveat. Three instrument fixes landed and NOTHING about any card, any
+board, any enemy or any number was touched. You are not being asked to compare
+the two rounds; you are being asked to judge THIS round's evidence.
+
+WHAT THE PAGE NOW SAYS. Each board's page prints the Spark rule verbatim from
+the game's own keyword text, states the bank, and marks every card shown at a
+cost LOWER than the cost printed on its face, naming the printed cost on its
+own line. So a grader on these boards could see, before playing, that only one
+Attack would actually be free and which cards were being discounted.
+
+THE SHAPE OF THE EVIDENCE. Six staged turns in THREE MATCHED PAIRS. Within a
+pair the two turns are the SAME board -- same HP, Block, energy, resource bank,
+same enemy on the same generated seed, same other cards in hand -- and differ in
+EXACTLY ONE CARD. One half holds a SHIPPED card; the other holds a PROTOTYPE
+card being tried in its place. The turn ids are opaque on purpose and you are
+told below which half of each pair is which.
+
+Each turn was played by TWO independent blind graders. Neither had repo access,
+history, or any prior turn; each saw only the page reproduced below and answered
+four questions. Their answers are reproduced VERBATIM and unedited. The
+falsifier's verdict on each form is given: SURVIVES means the form was not
+refused; REFUSED names the rule that refused it. The refusal rule that fires
+here is `intent_insensitive` (the grader answered that a different telegraphed
+enemy intent would not have changed their line, so the intent was not part of
+the decision).
+
+THE REPLAY, AND YOU MUST READ IT BEFORE YOU JUDGE ANY ARM. Every one of the
+twelve graded lines was REPLAYED on the live game, on that turn's own pinned
+seed and staged board, and the board's actual answer is printed beside each
+form. THIS ROUND ALL TWELVE LINES PLAYED TO COMPLETION -- no refusal, no
+EnergyCostTooHigh, no unanswered prompt. The numbers beside each form are what
+the board actually did.
+
+THE CHARACTER RULE UNDER TEST. The character banks a resource called Spark. At
+3 Sparks the rule makes the next Attack played cost 0 and consumes all 3. It is
+automatic and unconditional: the player cannot choose which Attack receives it,
+cannot decline it, and cannot spend the bank on anything else -- only WHICH
+Attack goes first, which is what decides where the discount lands. Until these
+prototypes the bank had exactly one destination. Each prototype gives the bank a
+SECOND destination: a card that CHARGES 3 Sparks itself. The question is whether
+a bank that can be spent on something other than the automatic discount feeds a
+decision the player STEERS rather than one made for them.
+
+FOR EACH OF THE THREE ARMS, answer these five, numbered, in this order:
+
+1. **Card involvement.** Was the prototype played, seriously weighed, or
+   ignored? Quote the grader.
+2. **Change in kind of choice.** Compare the prototype half against its shipped
+   half. Did the KIND of decision change, or only its numbers?
+3. **Did the cost bind?** Did spending the bank cost the player something
+   concrete on this turn? Name it.
+4. **Text problem?** Did either grader misread the printed face? Say so plainly
+   if a replay contradicts a form.
+5. **Judgment: RETURN, ADVANCE, or ESCALATE.** ADVANCE means the arm is worth
+   asking again with whole-fight play -- NOT that it should ship. RETURN means
+   the arm or its board needs rework before it is asked again. ESCALATE means
+   something here needs a human decision before either.
+
+Answer in markdown, one section per arm, nothing else. Quote the graders' own
+words where they carry the point.
+
+
+##########################################################################
+## PAIR 1 - the priced Attack
+## the SHIPPED half is `klee-slice1-r2-t01` (the card under test: Flame on the Wick)
+## the PROTOTYPE half is `klee-slice1-r2-t02` (the card under test: Second Helping)
+##########################################################################
+
+--------------------------------------------------------------------------
+THE PAGE BOTH GRADERS SAW -- `klee-slice1-r2-t01` (SHIPPED half)
+--------------------------------------------------------------------------
+
+# Staged turn `klee-slice1-r2-t01`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 42/62
+- Block 0
+- Energy 2
+- Spark 3 — At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks.
+
+## Your hand
+
+Spark, and the costs below. Spark's own text reads: "At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks." Your bank is 3. 2 cards in your hand are shown at a cost LOWER than the cost printed on the card; each of them says so on its own line. Playing one of them at the shown cost consumes 3, so a bank of 3 covers 1 of the 2; anything after that costs what its card prints.
+
+### Flame on the Wick
+
+- Cost: 0
+- Deal 6 damage. Applies Pyro.
+- (card text read from: bridge)
+
+### Kaboom!
+
+- Cost: 0
+- The cost printed on this card is 1; it is showing 0 here.
+- Deal 7 damage. Applies Pyro.
+- (card text read from: bridge)
+
+### Rapid Fire
+
+- Cost: 0
+- The cost printed on this card is 2; it is showing 0 here.
+- Deal 4 damage to random enemies four times. Applies Pyro.
+- (card text read from: bridge)
+
+### Duck and Cover
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+## The other side
+
+### Seapunk
+
+- HP 45/45
+- Intent: Aggressive, 11, This enemy intends to Attack for 11 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- The Spark bank is written to 3 through SPARK_POWER, which is how the live game holds Sparks. At 3 Sparks the next Attack played costs 0 and consumes all 3.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. Every Klee attack applies Pyro, and a reaction on top of a hit would move every number the falsifier scores.
+
+
+======================================================================
+GRADER `opus-5-fresh`  --  VERDICT: REFUSED  (intent_insensitive)
+======================================================================
+LINE PLAYED: Rapid Fire (on Seapunk) -> Flame on the Wick (on Seapunk) -> Kaboom! (on Seapunk) -> Duck and Cover
+
+Q1 What did you play?
+   The whole hand. I led with Rapid Fire so the 3-Spark bank paid for the most expensive card: it prints 2, shows 0, and four hits of 4 into the only enemy on the board is 16 damage for nothing. With the bank spent, Flame on the Wick still costs 0 on its own card, so it went next for 6 more. That left my 2 energy for Kaboom! at its printed cost of 1 (7 damage) and Duck and Cover at 1 for 5 Block. Total 29 damage into Seapunk, leaving it at 16/45, and I eat 6 of the telegraphed 11 instead of the full swing, going to 36 HP.
+
+Q2 What other line did you seriously consider?
+   Yes — spending the Spark bank on Kaboom! instead of Rapid Fire. That line is Kaboom! at 0, Flame on the Wick at 0, then Rapid Fire at its printed 2, which is the same 29 damage but consumes both energy and leaves nothing for Duck and Cover. Same damage, no Block, so it loses 5 HP for free; the bank should buy the 2-cost, not the 1-cost. I also checked whether dropping Duck and Cover for anything else was possible and it wasn't — there is no fifth card, so the last energy has exactly one use.
+
+Q3 What did your chosen line give up?
+   Nothing in the hand — every card was played. What it gives up is the ordering risk: I assumed Flame on the Wick, an Attack printed at 0, does not itself eat the Spark bank, so I discharged the bank on Rapid Fire first to make that assumption harmless. It also gives up any notion of holding a card for a later turn; I have no draw or scaling shown, so I took all of it now. And it does not kill — Seapunk lives at 16 with a 45-HP pool, so I have committed my whole hand to a fight I cannot end this turn.
+
+Q4 Would a different enemy intent have changed it?
+   Barely. With four cards and no card left unplayable, the hand empties under any telegraph. If Seapunk had shown a block or a buff instead of an 11-damage swing, Duck and Cover would be dead weight — but there is no competing use for that 1 energy, so I would still play it rather than float it. A much larger telegraphed hit would not change it either: 5 Block is the only defense on the page and I already took it. So the intent set the value of the last card, not the choice.
+
+THE LIVE REPLAY OF THAT LINE:
+   cards the board actually accepted: Rapid Fire, Flame on the Wick, Kaboom!, Duck and Cover
+   the board refused nothing; the whole line was played
+   enemy Seapunk: 45 HP -> 16 HP   (29 damage actually dealt)
+   player before: {"hp": 42, "block": 0}
+   player after : {"hp": 42, "block": 5}
+   meters that were non-zero or moved: {}
+
+======================================================================
+GRADER `codex-gpt-5.6-sol-fresh`  --  VERDICT: REFUSED  (intent_insensitive)
+======================================================================
+LINE PLAYED: Rapid Fire -> Flame on the Wick (on Seapunk) -> Kaboom! (on Seapunk) -> Duck and Cover
+
+Q1 What did you play?
+   Rapid Fire first, consuming the 3 Sparks, then Flame on the Wick and Kaboom! on Seapunk, followed by Duck and Cover.
+
+Q2 What other line did you seriously consider?
+   I considered playing Kaboom! first with the Spark discount, then Rapid Fire for 2 energy and Flame on the Wick, but that would leave no energy for Duck and Cover while dealing the same total damage.
+
+Q3 What did your chosen line give up?
+   It gave up all 3 Sparks, all 2 energy, and every card in hand; it did not give up damage or available Block compared with the other line considered.
+
+Q4 Would a different enemy intent have changed it?
+   No. Given only the printed information, no different intent would improve on playing all three attacks while still gaining the available 5 Block.
+
+THE LIVE REPLAY OF THAT LINE:
+   cards the board actually accepted: Rapid Fire, Flame on the Wick, Kaboom!, Duck and Cover
+   the board refused nothing; the whole line was played
+   enemy Seapunk: 45 HP -> 16 HP   (29 damage actually dealt)
+   player before: {"hp": 42, "block": 0}
+   player after : {"hp": 42, "block": 5}
+   meters that were non-zero or moved: {}
+
+--------------------------------------------------------------------------
+THE PAGE BOTH GRADERS SAW -- `klee-slice1-r2-t02` (PROTOTYPE half)
+--------------------------------------------------------------------------
+
+# Staged turn `klee-slice1-r2-t02`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 42/62
+- Block 0
+- Energy 2
+- Spark 3 — At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks.
+
+## Your hand
+
+Spark, and the costs below. Spark's own text reads: "At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks." Your bank is 3. 2 cards in your hand are shown at a cost LOWER than the cost printed on the card; each of them says so on its own line. Playing one of them at the shown cost consumes 3, so a bank of 3 covers 1 of the 2; anything after that costs what its card prints.
+
+### Second Helping
+
+- Cost: 0
+- Spend 3 Sparks. Deal 6 damage twice. Applies Pyro.
+- (card text read from: bridge)
+
+### Kaboom!
+
+- Cost: 0
+- The cost printed on this card is 1; it is showing 0 here.
+- Deal 7 damage. Applies Pyro.
+- (card text read from: bridge)
+
+### Rapid Fire
+
+- Cost: 0
+- The cost printed on this card is 2; it is showing 0 here.
+- Deal 4 damage to random enemies four times. Applies Pyro.
+- (card text read from: bridge)
+
+### Duck and Cover
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+## The other side
+
+### Seapunk
+
+- HP 45/45
+- Intent: Aggressive, 11, This enemy intends to Attack for 11 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- The Spark bank is written to 3 through SPARK_POWER, which is how the live game holds Sparks. At 3 Sparks the next Attack played costs 0 and consumes all 3.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. Every Klee attack applies Pyro, and a reaction on top of a hit would move every number the falsifier scores.
+
+
+======================================================================
+GRADER `opus-5-fresh`  --  VERDICT: REFUSED  (intent_insensitive)
+======================================================================
+LINE PLAYED: Rapid Fire (on Seapunk) -> Kaboom! (on Seapunk) -> Duck and Cover
+
+Q1 What did you play?
+   Rapid Fire first, spending the 3-Spark bank to play it at 0 for four hits of 4 into Seapunk (16 damage, and Pyro). That empties the bank, so Kaboom! reverts to its printed cost of 1; I paid that for 7 more damage, putting Seapunk from 45 to 22. With my last energy I played Duck and Cover for 5 Block, so the telegraphed 11 lands as 6 and I end at 36/62. Second Helping stayed in hand: it demands 3 Sparks to fire and the bank was gone, so after Rapid Fire it was not a legal play regardless of its 0 cost.
+
+Q2 What other line did you seriously consider?
+   Yes — leading Second Helping with the bank instead. It is the card that explicitly eats 3 Sparks, so spending them there for 6 twice felt like the 'intended' use. I dropped it because the bank is a discount and the discount is worth the most on the most expensive card: sinking it into Second Helping buys 12 damage and leaves 2 energy that can only buy Kaboom! (7) plus nothing, or Kaboom! and no Block. Sinking it into Rapid Fire buys 16 damage and still leaves enough energy for Kaboom! and the Block. Same three-card turn, 23 damage instead of 19, and Second Helping was the card that ended up stranded either way. I also checked whether to skip Duck and Cover for more offence, but with the bank spent there was no fourth attack I could afford, so the energy had no other home.
+
+Q3 What did your chosen line give up?
+   It gives up Second Helping entirely — the card is bricked for the turn once the Sparks are gone, so I lose its 12 damage and its Pyro application, and I lose whatever value holding Sparks into next turn would have had, since the bank is at 0 going forward. It also caps me at 5 Block, which is not enough to fully eat the 11; I chose to take 6 rather than find more mitigation, because there was none to find. And Rapid Fire's damage is split into four 4s, so against anything with per-hit mitigation this is the worse 16 — here, with one enemy carrying no Block and no aura, the split costs nothing.
+
+Q4 Would a different enemy intent have changed it?
+   No. The line is forced by the arithmetic of the discount, not by what Seapunk is doing. A bigger attack, a smaller one, a block-up, or a pure buff all leave the same fact: the Spark bank pays for exactly one card, it pays the most on Rapid Fire, and the leftover energy has no competing use — Second Helping is dead once the bank empties, so the last point of energy goes to Duck and Cover whether or not the Block matters. Only a change to the board itself would move me: enemy Block, a second target, or a Weak/Vulnerable aura would re-price the four-small-hits versus one-big-hit choice and could push the bank back onto Second Helping or Kaboom!.
+
+THE LIVE REPLAY OF THAT LINE:
+   cards the board actually accepted: Rapid Fire, Kaboom!, Duck and Cover
+   the board refused nothing; the whole line was played
+   enemy Seapunk: 45 HP -> 22 HP   (23 damage actually dealt)
+   player before: {"hp": 42, "block": 0}
+   player after : {"hp": 42, "block": 5}
+   meters that were non-zero or moved: {}
+
+======================================================================
+GRADER `codex-gpt-5.6-sol-fresh`  --  VERDICT: SURVIVES
+======================================================================
+LINE PLAYED: Rapid Fire (on Seapunk) -> Kaboom! (on Seapunk) -> Duck and Cover
+
+Q1 What did you play?
+   I played Rapid Fire on Seapunk for 0, consuming the 3 Sparks, then Kaboom! on Seapunk for 1 and Duck and Cover for 1.
+
+Q2 What other line did you seriously consider?
+   Second Helping followed by Rapid Fire, dealing 28 total damage but gaining no Block.
+
+Q3 What did your chosen line give up?
+   It gave up 5 damage in exchange for 5 Block against the telegraphed 11-damage attack.
+
+Q4 Would a different enemy intent have changed it?
+   Yes. If Seapunk had not intended to attack, I would have favored Second Helping followed by Rapid Fire for 28 damage.
+
+THE LIVE REPLAY OF THAT LINE:
+   cards the board actually accepted: Rapid Fire, Kaboom!, Duck and Cover
+   the board refused nothing; the whole line was played
+   enemy Seapunk: 45 HP -> 22 HP   (23 damage actually dealt)
+   player before: {"hp": 42, "block": 0}
+   player after : {"hp": 42, "block": 5}
+   meters that were non-zero or moved: {}
+
+
+##########################################################################
+## PAIR 2 - the priced draw
+## the SHIPPED half is `klee-slice1-r2-t03` (the card under test: Eager to Help)
+## the PROTOTYPE half is `klee-slice1-r2-t04` (the card under test: Rummage)
+##########################################################################
+
+--------------------------------------------------------------------------
+THE PAGE BOTH GRADERS SAW -- `klee-slice1-r2-t03` (SHIPPED half)
+--------------------------------------------------------------------------
+
+# Staged turn `klee-slice1-r2-t03`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 42/62
+- Block 0
+- Energy 2
+- Spark 3 — At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks.
+
+## Your hand
+
+Spark, and the costs below. Spark's own text reads: "At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks." Your bank is 3. 2 cards in your hand are shown at a cost LOWER than the cost printed on the card; each of them says so on its own line. Playing one of them at the shown cost consumes 3, so a bank of 3 covers 1 of the 2; anything after that costs what its card prints.
+
+### Eager to Help
+
+- Cost: 1
+- If you have Spark: draw 2 cards. Otherwise: draw 1 card.
+- (card text read from: bridge)
+
+### Kaboom!
+
+- Cost: 0
+- The cost printed on this card is 1; it is showing 0 here.
+- Deal 7 damage. Applies Pyro.
+- (card text read from: bridge)
+
+### Rapid Fire
+
+- Cost: 0
+- The cost printed on this card is 2; it is showing 0 here.
+- Deal 4 damage to random enemies four times. Applies Pyro.
+- (card text read from: bridge)
+
+### Duck and Cover
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+## The other side
+
+### Nibbit
+
+- HP 40/43
+- Intent: Aggressive, 12, This enemy intends to Attack for 12 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- The Spark bank is written to 3 through SPARK_POWER, which is how the live game holds Sparks. At 3 Sparks the next Attack played costs 0 and consumes all 3.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. Every Klee attack applies Pyro, and a reaction on top of a hit would move every number the falsifier scores.
+
+
+======================================================================
+GRADER `opus-5-fresh`  --  VERDICT: SURVIVES
+======================================================================
+LINE PLAYED: Rapid Fire (on Nibbit) -> Kaboom! (on Nibbit) -> Duck and Cover
+
+Q1 What did you play?
+   Rapid Fire first, spending the whole 3-Spark bank on the most expensive attack in hand so the 2-cost is the one that gets discounted to 0. With one enemy on the board all four random 4-damage hits land on Nibbit, so that is 16 damage and Pyro for free. That left both energy intact. Kaboom! then costs its printed 1 (the Spark is gone) for 7 more, taking Nibbit from 40 to 17. The last energy went into Duck and Cover for 5 Block, which turns the telegraphed 12 into 7 and leaves me at 35/62.
+
+Q2 What other line did you seriously consider?
+   Yes. The real alternative was leading Eager to Help while the bank still read 3, so it draws 2 instead of 1, then Rapid Fire free and Kaboom! for the last energy. Same 23 damage, plus two extra cards. I rejected it because after that sequence I am at 0 energy, so the two cards are only useful if they happen to cost 0, and I would eat the full 12 instead of 7. I also weighed spending the Spark on Kaboom! instead of Rapid Fire, but that discounts a 1-cost rather than a 2-cost and costs me a whole card's worth of play this turn.
+
+Q3 What did your chosen line give up?
+   Card draw and whatever it would have set up for next turn — Eager to Help stays stranded in hand, and with the Spark bank empty it will only draw 1 whenever I do play it, so the 2-card version of that card is gone for now. It also gives up nothing on damage, since 23 was the ceiling either way; what it buys with the last energy is 5 HP of mitigation rather than information.
+
+Q4 Would a different enemy intent have changed it?
+   Yes. Duck and Cover is only there because of the 12-damage attack. If Nibbit had telegraphed a buff, a debuff, or anything non-damaging, the last energy would have gone to Eager to Help instead — and in that case I would have played Eager to Help first, before Rapid Fire, so the Spark bank was still at 3 and it drew 2 rather than 1. A much larger incoming number would not have changed the line either; 5 Block is still the best use of the final energy, it just matters less.
+
+THE LIVE REPLAY OF THAT LINE:
+   cards the board actually accepted: Rapid Fire, Kaboom!, Duck and Cover
+   the board refused nothing; the whole line was played
+   enemy Nibbit: 40 HP -> 17 HP   (23 damage actually dealt)
+   player before: {"hp": 42, "block": 0}
+   player after : {"hp": 42, "block": 5}
+   meters that were non-zero or moved: {}
+
+======================================================================
+GRADER `codex-gpt-5.6-sol-fresh`  --  VERDICT: SURVIVES
+======================================================================
+LINE PLAYED: Rapid Fire (on Nibbit) -> Kaboom! (on Nibbit) -> Duck and Cover
+
+Q1 What did you play?
+   I played Rapid Fire on Nibbit for 0, consuming the 3 Sparks; then Kaboom! on Nibbit for its printed cost of 1; then Duck and Cover for 1. This deals 23 damage and gains 5 Block.
+
+Q2 What other line did you seriously consider?
+   I seriously considered replacing Duck and Cover with Eager to Help, keeping the same 23 damage while drawing two cards.
+
+Q3 What did your chosen line give up?
+   It gave up drawing two cards in exchange for 5 Block against the telegraphed 12-damage attack.
+
+Q4 Would a different enemy intent have changed it?
+   Yes. If Nibbit had telegraphed no attack, I would have replaced Duck and Cover with Eager to Help.
+
+THE LIVE REPLAY OF THAT LINE:
+   cards the board actually accepted: Rapid Fire, Kaboom!, Duck and Cover
+   the board refused nothing; the whole line was played
+   enemy Nibbit: 40 HP -> 17 HP   (23 damage actually dealt)
+   player before: {"hp": 42, "block": 0}
+   player after : {"hp": 42, "block": 5}
+   meters that were non-zero or moved: {}
+
+--------------------------------------------------------------------------
+THE PAGE BOTH GRADERS SAW -- `klee-slice1-r2-t04` (PROTOTYPE half)
+--------------------------------------------------------------------------
+
+# Staged turn `klee-slice1-r2-t04`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 42/62
+- Block 0
+- Energy 2
+- Spark 3 — At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks.
+
+## Your hand
+
+Spark, and the costs below. Spark's own text reads: "At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks." Your bank is 3. 2 cards in your hand are shown at a cost LOWER than the cost printed on the card; each of them says so on its own line. Playing one of them at the shown cost consumes 3, so a bank of 3 covers 1 of the 2; anything after that costs what its card prints.
+
+### Rummage
+
+- Cost: 1
+- Spend 3 Sparks. Draw 3 cards.
+- (card text read from: bridge)
+
+### Kaboom!
+
+- Cost: 0
+- The cost printed on this card is 1; it is showing 0 here.
+- Deal 7 damage. Applies Pyro.
+- (card text read from: bridge)
+
+### Rapid Fire
+
+- Cost: 0
+- The cost printed on this card is 2; it is showing 0 here.
+- Deal 4 damage to random enemies four times. Applies Pyro.
+- (card text read from: bridge)
+
+### Duck and Cover
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+## The other side
+
+### Nibbit
+
+- HP 40/43
+- Intent: Aggressive, 12, This enemy intends to Attack for 12 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- The Spark bank is written to 3 through SPARK_POWER, which is how the live game holds Sparks. At 3 Sparks the next Attack played costs 0 and consumes all 3.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. Every Klee attack applies Pyro, and a reaction on top of a hit would move every number the falsifier scores.
+
+
+======================================================================
+GRADER `opus-5-fresh`  --  VERDICT: REFUSED  (intent_insensitive)
+======================================================================
+LINE PLAYED: Rapid Fire (on Nibbit) -> Kaboom! (on Nibbit) -> Duck and Cover
+
+Q1 What did you play?
+   Rapid Fire first, spending the 3-Spark bank on it so it costs 0: four hits of 4 into the only enemy on the board, 16 damage. With the bank gone, Kaboom! reverts to its printed cost of 1 and I paid that for another 7, putting Nibbit at 40 - 23 = 17. That left exactly 1 energy for Duck and Cover, 5 Block against the telegraphed 12, so I eat 7 instead of 12 and end at 35/62. The whole shape of the turn is the single question of which attack the Spark discount is spent on, and Rapid Fire prints 2 and deals 16 while Kaboom! prints 1 and deals 7 — the discount is worth more energy and more damage on Rapid Fire, and there is no targeting risk in 'random enemies' because there is only one enemy. Spending it there and paying cash for the cheap attack is the only way to fit both attacks and the Block into 2 energy.
+
+Q2 What other line did you seriously consider?
+   Rummage. It costs 1 and draws 3, which is the only card in hand that could change what the turn is, so I priced it: it also spends the 3 Sparks, so after it my remaining 1 energy buys Kaboom! at printed cost for 7 damage and no Block, or Duck and Cover for 5 Block and no damage, and Rapid Fire at printed 2 is unaffordable in either case. That trades 16 guaranteed damage plus the Block for three unknown cards I mostly cannot pay for. I also checked the mirror line — Spark on Kaboom!, then Rapid Fire at printed 2 — which costs all my energy for 23 damage and no Block, strictly worse than the same 23 with 5 Block. Both were dismissed quickly; the Rummage line was the one that took actual arithmetic.
+
+Q3 What did your chosen line give up?
+   The three cards from Rummage, and with them any chance that this hand was hiding a better turn. It also empties the Spark bank now rather than carrying it, so next turn's attacks pay printed cost from zero. And 5 Block is a small answer to a 12 — I still take 7, so the line accepts chip damage rather than trying to blank the hit, which was never available anyway.
+
+Q4 Would a different enemy intent have changed it?
+   Not in any way that changes the cards. The attacks are correct against any intent — 23 damage into a 40 HP enemy is the most this hand can produce and the Spark allocation does not depend on what Nibbit does. Duck and Cover is the only thing 1 energy can buy once both attacks are down: if Nibbit had telegraphed a buff or a defensive move instead of the 12, the Block would be wasted, but Rummage is dead by then with the Sparks spent, so I would play it regardless rather than pass. A much larger telegraphed hit would not have helped either, since 5 is all the Block on offer.
+
+THE LIVE REPLAY OF THAT LINE:
+   cards the board actually accepted: Rapid Fire, Kaboom!, Duck and Cover
+   the board refused nothing; the whole line was played
+   enemy Nibbit: 40 HP -> 17 HP   (23 damage actually dealt)
+   player before: {"hp": 42, "block": 0}
+   player after : {"hp": 42, "block": 5}
+   meters that were non-zero or moved: {}
+
+======================================================================
+GRADER `codex-gpt-5.6-sol-fresh`  --  VERDICT: SURVIVES
+======================================================================
+LINE PLAYED: Rapid Fire (on Nibbit) -> Kaboom! (on Nibbit) -> Duck and Cover
+
+Q1 What did you play?
+   Rapid Fire on Nibbit first, consuming the 3 Sparks, then Kaboom! on Nibbit, then Duck and Cover. This deals 23 damage and gains 5 Block.
+
+Q2 What other line did you seriously consider?
+   Rapid Fire, Kaboom!, then Rummage instead of Duck and Cover, keeping the same damage and drawing 3 cards but taking the full telegraphed attack.
+
+Q3 What did your chosen line give up?
+   It gave up Rummage's draw of 3 cards in exchange for 5 Block against the incoming 12 damage.
+
+Q4 Would a different enemy intent have changed it?
+   Yes. If Nibbit were not attacking, I would replace Duck and Cover with Rummage.
+
+THE LIVE REPLAY OF THAT LINE:
+   cards the board actually accepted: Rapid Fire, Kaboom!, Duck and Cover
+   the board refused nothing; the whole line was played
+   enemy Nibbit: 40 HP -> 17 HP   (23 damage actually dealt)
+   player before: {"hp": 42, "block": 0}
+   player after : {"hp": 42, "block": 5}
+   meters that were non-zero or moved: {}
+
+
+##########################################################################
+## PAIR 3 - the Burst conversion
+## the SHIPPED half is `klee-slice1-r2-t05` (the card under test: Imaginary Friend)
+## the PROTOTYPE half is `klee-slice1-r2-t06` (the card under test: Slow Burn)
+##########################################################################
+
+--------------------------------------------------------------------------
+THE PAGE BOTH GRADERS SAW -- `klee-slice1-r2-t05` (SHIPPED half)
+--------------------------------------------------------------------------
+
+# Staged turn `klee-slice1-r2-t05`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 42/62
+- Block 0
+- Energy 2
+- Burst: 20
+- Spark 3 — At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks.
+
+## Your hand
+
+Spark, and the costs below. Spark's own text reads: "At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks." Your bank is 3. 2 cards in your hand are shown at a cost LOWER than the cost printed on the card; each of them says so on its own line. Playing one of them at the shown cost consumes 3, so a bank of 3 covers 1 of the 2; anything after that costs what its card prints.
+
+### Imaginary Friend
+
+- Cost: 1
+- Gain 5 Block. Gain 3 Burst Energy. Burst +5. Elemental Skill.
+- (card text read from: bridge)
+
+### Kaboom!
+
+- Cost: 0
+- The cost printed on this card is 1; it is showing 0 here.
+- Deal 7 damage. Applies Pyro.
+- (card text read from: bridge)
+
+### Rapid Fire
+
+- Cost: 0
+- The cost printed on this card is 2; it is showing 0 here.
+- Deal 4 damage to random enemies four times. Applies Pyro.
+- (card text read from: bridge)
+
+### Duck and Cover
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+## The other side
+
+### Nibbit
+
+- HP 43/43
+- Intent: Aggressive, 12, This enemy intends to Attack for 12 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- The Spark bank is written to 3 through SPARK_POWER, which is how the live game holds Sparks. At 3 Sparks the next Attack played costs 0 and consumes all 3.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. Every Klee attack applies Pyro, and a reaction on top of a hit would move every number the falsifier scores.
+- The Burst meter is written to 20 of 40 through the registered resource. Where a card's face prints a Burst rider, that printed rider IS the whole of what playing the card adds to the meter on top of the card's own text -- nothing further is added behind it.
+
+
+======================================================================
+GRADER `opus-5-fresh`  --  VERDICT: SURVIVES
+======================================================================
+LINE PLAYED: Rapid Fire (on Nibbit) -> Kaboom! (on Nibbit) -> Imaginary Friend
+
+Q1 What did you play?
+   I spent the Spark bank on the biggest attack first: Rapid Fire, which prints 2 but shows 0, for 4 damage four times into the only enemy — 16 damage, and Nibbit is the sole target so all four hits land on it. That consumed the 3 Sparks, so Kaboom! reverted to its printed cost of 1; I paid it for 7 more damage, putting Nibbit at 20 of 43. My last energy went to Imaginary Friend for 5 Block, 3 Burst Energy and Burst +5, taking the meter from 20 toward the top. Nibbit's 12 lands into 5 Block, so I take 7 and end at 35/62. Total energy spent: 0 + 1 + 1 = 2, exactly what I had.
+
+Q2 What other line did you seriously consider?
+   Rapid Fire, then Duck and Cover, then Imaginary Friend — 10 Block against the telegraphed 12, taking only 2 damage instead of 7. I weighed it and dropped it: 5 extra HP is cheap at 42/62 with no second attacker on the board, and Kaboom!'s 7 damage is worth more against a 43 HP enemy I want dead a turn sooner. I also briefly checked the ordering question — making Kaboom! the free card instead of Rapid Fire — and rejected it immediately, since the discount is worth 2 energy on Rapid Fire and only 1 on Kaboom!, and spending it on the 16-damage card rather than the 7-damage one is not close.
+
+Q3 What did your chosen line give up?
+   5 HP, and Duck and Cover stays unplayed in hand for whatever the discard rule does with it. I also gave up nothing on the Burst side by choosing Imaginary Friend over Duck and Cover — that swap was free — so the whole cost of the line is the 5 HP I chose not to block, traded for 7 damage now.
+
+Q4 Would a different enemy intent have changed it?
+   Yes. If Nibbit had telegraphed something big enough that 5 Block left me in real trouble — say an attack in the mid-20s or higher, or a multi-hit that ate the block cheaply — I would have cut Kaboom! for Duck and Cover and stacked 10 Block, conceding the 7 damage. A defensive or buffing intent with no incoming damage would have pushed me the other way, but there was nothing else damaging I could afford, so the same three cards would have been played with the block simply wasted. The 12 sits in the middle: survivable bare, so the block is a convenience and the damage is the point.
+
+THE LIVE REPLAY OF THAT LINE:
+   cards the board actually accepted: Rapid Fire, Kaboom!, Imaginary Friend
+   the board refused nothing; the whole line was played
+   enemy Nibbit: 43 HP -> 20 HP   (23 damage actually dealt)
+   player before: {"hp": 42, "block": 0}
+   player after : {"hp": 42, "block": 5}
+   meters that were non-zero or moved: {"KLEEMOD_BURST": [20, 28]}
+
+======================================================================
+GRADER `codex-gpt-5.6-sol-fresh`  --  VERDICT: REFUSED  (intent_insensitive)
+======================================================================
+LINE PLAYED: Rapid Fire (on Nibbit) -> Kaboom! (on Nibbit) -> Imaginary Friend
+
+Q1 What did you play?
+   Rapid Fire on Nibbit for 0, consuming the 3 Sparks; Kaboom! on Nibbit for its printed cost of 1; then Imaginary Friend for 1.
+
+Q2 What other line did you seriously consider?
+   I seriously considered playing Kaboom! first for 0, then Rapid Fire for 2. It dealt the same total damage but left no energy for Imaginary Friend.
+
+Q3 What did your chosen line give up?
+   It spent all 2 Energy and left Duck and Cover unplayed. It also committed the Spark discount to Rapid Fire rather than Kaboom!.
+
+Q4 Would a different enemy intent have changed it?
+   No. On the information given, the same line deals 23 damage, gains 5 Block, and gains the printed Burst benefits while fitting exactly within the available Energy, so a different telegraphed intent would not change it.
+
+THE LIVE REPLAY OF THAT LINE:
+   cards the board actually accepted: Rapid Fire, Kaboom!, Imaginary Friend
+   the board refused nothing; the whole line was played
+   enemy Nibbit: 43 HP -> 20 HP   (23 damage actually dealt)
+   player before: {"hp": 42, "block": 0}
+   player after : {"hp": 42, "block": 5}
+   meters that were non-zero or moved: {"KLEEMOD_BURST": [20, 28]}
+
+--------------------------------------------------------------------------
+THE PAGE BOTH GRADERS SAW -- `klee-slice1-r2-t06` (PROTOTYPE half)
+--------------------------------------------------------------------------
+
+# Staged turn `klee-slice1-r2-t06`
+
+staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+
+You are looking at one turn of a card battle, exactly as the game prints it. Everything you are allowed to know is on this page.
+
+## You
+
+- HP 42/62
+- Block 0
+- Energy 2
+- Burst: 20
+- Spark 3 — At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks.
+
+## Your hand
+
+Spark, and the costs below. Spark's own text reads: "At 3 Sparks, your Attacks cost 0. Playing one consumes 3 Sparks." Your bank is 3. 2 cards in your hand are shown at a cost LOWER than the cost printed on the card; each of them says so on its own line. Playing one of them at the shown cost consumes 3, so a bank of 3 covers 1 of the 2; anything after that costs what its card prints.
+
+### Slow Burn
+
+- Cost: 1
+- Spend 3 Sparks. Gain 5 Block. Gain 10 Burst Energy. Burst +5. Elemental Skill.
+- (card text read from: bridge)
+
+### Kaboom!
+
+- Cost: 0
+- The cost printed on this card is 1; it is showing 0 here.
+- Deal 7 damage. Applies Pyro.
+- (card text read from: bridge)
+
+### Rapid Fire
+
+- Cost: 0
+- The cost printed on this card is 2; it is showing 0 here.
+- Deal 4 damage to random enemies four times. Applies Pyro.
+- (card text read from: bridge)
+
+### Duck and Cover
+
+- Cost: 1
+- Gain 5 Block.
+- (card text read from: bridge)
+
+## The other side
+
+### Nibbit
+
+- HP 43/43
+- Intent: Aggressive, 12, This enemy intends to Attack for 12 damage.
+
+## Disclosures
+
+- A decision-closeness falsifier reads this turn with a dominance threshold of 0.5.
+- You are not being asked whether this turn is fun.
+- The hand is EXACTLY the list below and nothing else. The hand the game dealt is emptied before these cards are given, and a packet whose live hand is not this list is refused rather than written.
+- The encounter is GENERATED. This file can write the enemy's HP and Block and cannot write its INTENT -- the packet records whichever telegraph the game actually drew, and the mirrored board below declares a telegraphed ATTACK as the falsifier's input. If the live intent differs, the closeness reading is a reading of the DECLARED board and the packet is a picture of the LIVE one; they are two records, not one.
+- Every card is granted unupgraded. An upgrade moves printed numbers, so an upgraded grant is a different board.
+- The Spark bank is written to 3 through SPARK_POWER, which is how the live game holds Sparks. At 3 Sparks the next Attack played costs 0 and consumes all 3.
+- The player has no Strength and the enemy carries no aura, Vulnerable or Weak. Every Klee attack applies Pyro, and a reaction on top of a hit would move every number the falsifier scores.
+- The Burst meter is written to 20 of 40 through the registered resource. Where a card's face prints a Burst rider, that printed rider IS the whole of what playing the card adds to the meter on top of the card's own text -- nothing further is added behind it.
+
+
+======================================================================
+GRADER `opus-5-fresh`  --  VERDICT: SURVIVES
+======================================================================
+LINE PLAYED: Rapid Fire (on Nibbit) -> Kaboom! (on Nibbit) -> Duck and Cover
+
+Q1 What did you play?
+   Rapid Fire first, spending the 3-Spark discount on it, then Kaboom! at its printed cost of 1, then Duck and Cover with the last energy. The bank of 3 only pays for one attack, so it goes on the bigger one: Rapid Fire is four hits of 4 for 16, and with Nibbit the only enemy every random hit lands on it, so the 'random' clause costs me nothing. Kaboom! is only 7, so it is the cheaper card to pay full price for at 1 energy. That is 23 damage into a 43 HP enemy, leaving it at 20, plus 5 Block against the telegraphed 12, so I take 7 and end at 35/62.
+
+Q2 What other line did you seriously consider?
+   Slow Burn first. It is the only card that uses the Spark bank for something other than a discount — 5 Block, 10 Burst Energy and Burst +5 on a meter sitting at 20 of 40. But playing it consumes the 3 Sparks, which un-discounts both attacks: after Slow Burn's 1 energy I have 1 left, enough for Kaboom! at its printed 1 and nothing else, since Rapid Fire reverts to 2. That is 7 damage for the turn instead of 23, in exchange for the same 5 Block and the Burst progress. Against a 43 HP enemy with no chip damage on the board I judged 16 lost damage too steep a price for meter I cannot spend this turn. I also checked the reverse order — Kaboom! at 0 off the bank, then Rapid Fire at 2 — which is 23 damage as well but spends all my energy on attacks and leaves me at 0 Block eating the full 12; strictly worse than putting the discount on Rapid Fire.
+
+Q3 What did your chosen line give up?
+   The Burst line. Slow Burn is the only Burst rider in the hand and it is dead for the rest of the turn once the Sparks are gone, so this line banks no meter progress at all and leaves Burst at 20. It also empties the Spark bank to 0, so next turn's attacks start at full cost unless the deck rebuilds Sparks. And it accepts 7 damage rather than the 2 I could have taken by doubling up on Block.
+
+Q4 Would a different enemy intent have changed it?
+   Yes, at the extremes. A much larger telegraph — roughly 30 or more, i.e. genuinely threatening against 42 HP — would flip me to the defensive line: Slow Burn plus Duck and Cover for 10 Block and the Burst rider, taking the damage loss to survive. A defensive or buffing intent with no incoming hit would make Duck and Cover's 5 Block dead, and since Slow Burn cannot be paid for once Rapid Fire eats the Sparks, I would still spend the last energy on it rather than nothing, so the played line would be unchanged in cards even though its value would be. At the actual 12 into 42 HP, neither pull is strong enough to move me: the damage race is the only thing that matters and 23 beats 7.
+
+THE LIVE REPLAY OF THAT LINE:
+   cards the board actually accepted: Rapid Fire, Kaboom!, Duck and Cover
+   the board refused nothing; the whole line was played
+   enemy Nibbit: 43 HP -> 20 HP   (23 damage actually dealt)
+   player before: {"hp": 42, "block": 0}
+   player after : {"hp": 42, "block": 5}
+   meters that were non-zero or moved: {"KLEEMOD_BURST": [20, 20]}
+
+======================================================================
+GRADER `codex-gpt-5.6-sol-fresh`  --  VERDICT: SURVIVES
+======================================================================
+LINE PLAYED: Rapid Fire (on Nibbit) -> Kaboom! (on Nibbit) -> Duck and Cover
+
+Q1 What did you play?
+   Rapid Fire first, consuming the 3 Sparks, then Kaboom! on Nibbit, then Duck and Cover.
+
+Q2 What other line did you seriously consider?
+   I seriously considered playing Kaboom! first and Rapid Fire second, spending all 2 Energy on Rapid Fire and forgoing defense.
+
+Q3 What did your chosen line give up?
+   It gave up nothing in immediate attack damage versus that alternative; it gave up the possibility of preserving the Sparks for a different attack ordering, in exchange for 5 Block.
+
+Q4 Would a different enemy intent have changed it?
+   Yes. If Nibbit had not intended to attack, I would have omitted Duck and Cover and played Kaboom! first, then Rapid Fire at its printed cost of 2.
+
+THE LIVE REPLAY OF THAT LINE:
+   cards the board actually accepted: Rapid Fire, Kaboom!, Duck and Cover
+   the board refused nothing; the whole line was played
+   enemy Nibbit: 43 HP -> 20 HP   (23 damage actually dealt)
+   player before: {"hp": 42, "block": 0}
+   player after : {"hp": 42, "block": 5}
+   meters that were non-zero or moved: {"KLEEMOD_BURST": [20, 20]}
+
+
+##########################################################################
+## Now answer, arm by arm, in the five-question form above.
+##########################################################################
