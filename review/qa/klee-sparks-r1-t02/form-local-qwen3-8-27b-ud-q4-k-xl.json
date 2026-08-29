@@ -1,0 +1,41 @@
+{
+ "turn_id": "klee-sparks-r1-t02",
+ "packet_sha256": "b0e6e894526de068a196ee67da16255a6584646f8ce6c985b056b325afb97333",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Fwoosh!",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Duck and Cover first, then Fwoosh! at Shrinker Beetle, then both Kaboom! cards at Shrinker Beetle. This used all 3 Energy and the 1 Spark, dealing 22 damage and gaining 5 Block.",
+ "q2_other_line_considered": "The only real alternative was spending the Spark on Ka-pow! instead of Fwoosh!. I rejected it because Fwoosh! has the same cost and Spark spend but deals 8 damage instead of 7.",
+ "q3_what_it_gave_up": "It gave up the 7 damage from Ka-pow! because only one Spark card could be paid for. It also spent energy on 5 Block, which may be unnecessary against a debuff intent, though there was no other card to spend that energy on this turn.",
+ "q4_different_intent": "No. A different telegraphed intent would not have changed the selection: Fwoosh! still dominates Ka-pow! for the single Spark, both Kaboom! cards are affordable, and Duck and Cover has no downside this turn.",
+ "q4_changed": false
+}

@@ -1,0 +1,108 @@
+# KLEESPARK-R1, TURN 1. THE OPENING HAND WITH A DRY BANK.
+#
+# THE ROUND. `KLEESPARK-R1` (docs/current/EXPERIMENTS.md) is the first LIVE
+# round of the Klee Sparks arm: `C.SPARK_ALT_COST_ENABLED` in tier 0 and
+# `-p:PrototypeCards=true` in C#, eight rows on docs/prototype-surface.yaml.
+# The countersigned prediction slate is klee-sparks-2026-08-29.md sec.10.9
+# (M51, [USER], 2026-08-29). NOTHING IN THIS FILE IS DESIGNED TO CONFIRM A
+# SLOT OF IT. These are staging facts drawn from hands the arm's own deck can
+# actually deal; where a slot happens to be visible on a board, it is visible
+# because the deck put it there.
+#
+# WHAT THIS BOARD IS. Klee's opening ten under the flag, dealt: three Kaboom!,
+# one Ka-pow! (the substituted Basic sink), four Duck and Cover, Jumpy Dumpty,
+# and Powder Pop (the substituted Basic generator). This is TURN ONE, so the
+# bank is EMPTY -- Sparks are gained by play and by detonation, and neither has
+# happened yet.
+#
+# THE SLOT THIS BOARD HAPPENS TO SIT UNDER IS P4, and it is one of TWO empty
+# bank boards in the round (t08 is the other), which is the cap the round set
+# itself. Turn one is the only turn on which the bank is empty BY
+# CONSTRUCTION rather than by choice, so a round that never staged it would be
+# unable to say anything about the opening at all.
+#
+# NO LINE HERE IS LETHAL. The largest immediate total the hand can produce is
+# Jumpy Dumpty (2 energy, 8 x2 = 16) plus Kaboom! (1 energy, 7) = 23, with a
+# Bomb at 6 and a Bomb at 5 landing later; the enemy's HP is set above the sum
+# of all of it.
+#
+# WHAT THE MIRROR CANNOT SEE, disclosed rather than buried. The tier0 mirror
+# under `board:` is built by `staged_turn.build_combat_state`, which runs in
+# THIS tree, where `C.SPARK_ALT_COST_ENABLED` is False. So the mirror still
+# applies the SHIPPED base rule (an Attack goes free at a bank of 3 and eats
+# the bank) that the live +proto build has retired. On this board the bank is
+# 0, so the shipped rule cannot fire and the mirror and the live build agree;
+# on the boards where the bank reaches 3 they do not, and those files say so.
+# The packet and the replay read the LIVE game either way.
+
+id: klee-sparks-r1-t01
+character: KLEEMOD-KLEE
+
+# The seed the GAME rolled on this turn's first staging, written back after
+# the fact rather than placeheld before it, so a re-stage reproduces the
+# fight. Recorded 2026-08-29 on the dev build 0.2.1481+proto.
+seed: R805DJ56LZHM
+
+exact_hand: true
+
+prototype: true
+
+notes: |
+  Turn one. 62/62 HP, no Block, 3 energy, an EMPTY Spark bank, and Klee's
+  opening hand.
+
+# Folded VERBATIM into the design-blind packet: mechanical staging facts only,
+# never why the board is set this way and never which card is being looked at.
+assumptions:
+  - "The hand is EXACTLY the list below and nothing else. The hand the
+     game dealt is emptied before these cards are given, and a packet
+     whose live hand is not this list is refused rather than written."
+  - "The Spark bank is EMPTY, and the Spark power is absent rather than
+     present at zero. Nothing has been played and nothing has detonated."
+  - "The encounter is GENERATED. This file can write the enemy's HP and
+     Block and cannot write its INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below
+     declares a telegraphed ATTACK as the falsifier's input."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "The player has no Strength and the enemy carries no aura, Vulnerable
+     or Weak. Every Klee attack applies Pyro, and a reaction on top of a
+     hit would move every number the falsifier scores."
+
+# Needs a dev build carrying the prototype rows (klee-mod/build/deploy_proto.ps1).
+
+staging:
+  - give: {card: KLEEMOD-PROTO_KABOOM_SINK, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_POP_SPARK, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-KABOOM, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-DUCK_AND_COVER, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-JUMPY_DUMPTY, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 62}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 3}
+  - set_hp: {who: first, amount: 46}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+board:
+  character: klee
+  pilot: demolition
+  hp: 62
+  max_hp: 62
+  block: 0
+  energy: 3
+  turn: 1
+  resources:
+    sparks: 0
+  hand:
+    - proto_kaboom_sink
+    - proto_pop_spark
+    - kaboom
+    - duck_and_cover
+    - jumpy_dumpty
+  enemies:
+    - name: "Act 1 enemy"
+      hp: 46
+      max_hp: 46
+      block: 0
+      intent: {kind: attack, amount: 11}

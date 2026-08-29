@@ -1,0 +1,32 @@
+{
+ "turn_id": "klee-sparks-r1-t07",
+ "role": "tester",
+ "tester_family": "local",
+ "tester_id": "local-qwen3-8-27b-ud-q4-k-xl",
+ "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+ "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+ "temperature": 0.0,
+ "max_tokens": 8192,
+ "packet_sha256": "89966a5dc89810b8ed4a4401ea4739030ba18baefc54eeabdc2bd8cef352e328",
+ "prompt_sha256": "3b038a0ba38a7e9abad78f24167f9bb275b143c25c5208d5e7481f2834dd3cef",
+ "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS\\understudy\\logs\\local-seat\\klee-sparks-r1-t07-20260829-221602",
+ "form": "C:\\Users\\Monty\\Documents\\GitHub\\GItS\\review\\qa\\klee-sparks-r1-t07\\form-local-qwen3-8-27b-ud-q4-k-xl.json",
+ "refused": "",
+ "refused_why": "",
+ "read_at": "2026-08-29T22:16:43Z",
+ "position_in_round": 7,
+ "seat_spot_check_rate": 4,
+ "resource_order_flag": [],
+ "resource_order": {
+  "flagged": false,
+  "findings": [],
+  "unresolved_titles": [],
+  "rule": "a card whose printed text SPENDS or converts a meter may not precede a card whose printed text READS that meter without a seat reading the turn"
+ },
+ "misreads": [],
+ "seat_review_required": false,
+ "seat_review_reasons": [],
+ "blindness": "STRUCTURAL, not evidentiary: this seat is one HTTP chat request with no tools, no filesystem and no repo root, so there is nothing it could have read -- but unlike the codex seat there is no transcript here PROVING it, and this reading is never a substitute for that one",
+ "guardrail": "a local model in the TESTER chair produces SUBJECTIVE FEEDBACK on one staged turn. It is not human validation, not balance evidence, not ship approval, and not a grade -- `staged_turn grade` is the grade. Grader work, whole-fight blind play and the doctrine gate stay with the Codex seat (its 2026-08-29 ADVANCE, in its own words)",
+ "scope": "staged single-turn reads only; grader work, whole-fight blind play and the doctrine gate remain with the Codex seat"
+}

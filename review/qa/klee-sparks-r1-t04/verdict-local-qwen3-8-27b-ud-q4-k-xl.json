@@ -1,0 +1,96 @@
+{
+ "turn_id": "klee-sparks-r1-t04",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "dafc66b691199ba27bfa26f996934c12bf40bd8f457354e10b2776346712b4e2",
+ "chosen_line": [
+  {
+   "card": "Kaboom!",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Jumpy Dumpty",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Kaboom! first for 1 Energy, then Jumpy Dumpty for 2 Energy. This used all 3 Energy, dealt 7 plus 8 twice to the single enemy, applied Pyro from both attacks, and left the 3 Spark bank untouched.",
+  "q2_other_line_considered": "I seriously considered Jumpy Dumpty followed by Duck and Cover. That line would have used all 3 Energy, dealt the same 16 direct damage from Jumpy Dumpty, and gained 5 Block to fully absorb the telegraphed 4 damage.",
+  "q3_what_it_gave_up": "The chosen line gave up 5 Block and therefore took the full 4 damage, ending the turn at 38 HP instead of 42 HP. It also gave up the defensive option of preserving more health for future turns in exchange for 7 additional damage from Kaboom!.",
+  "q4_different_intent": "Yes. If the enemy had telegraphed a much larger attack, the extra 5 Block from Jumpy Dumpty plus Duck and Cover would have become much more valuable, and I would likely have chosen the defensive line instead."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "declared board (prototype route)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.1154,
+  "top1": 37.7,
+  "top2": 33.35,
+  "lines_considered": 14,
+  "playouts": 37,
+  "plays_refused": 0,
+  "pilot": "demolition",
+  "lines": [
+   {
+    "cards": [
+     "Kaboom!",
+     "Jumpy Dumpty",
+     "Duck and Cover"
+    ],
+    "score": 37.7
+   },
+   {
+    "cards": [
+     "Spark Knight's Oath",
+     "Kaboom!",
+     "Jumpy Dumpty"
+    ],
+    "score": 33.35
+   },
+   {
+    "cards": [
+     "Kaboom!",
+     "Jumpy Dumpty"
+    ],
+    "score": 31.8
+   },
+   {
+    "cards": [
+     "Spark Knight's Oath",
+     "Jumpy Dumpty",
+     "Duck and Cover"
+    ],
+    "score": 31.65
+   },
+   {
+    "cards": [
+     "Jumpy Dumpty",
+     "Duck and Cover"
+    ],
+    "score": 30.1
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T18:14:32"
+}

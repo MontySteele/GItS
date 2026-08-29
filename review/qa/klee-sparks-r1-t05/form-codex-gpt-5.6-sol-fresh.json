@@ -1,0 +1,41 @@
+{
+ "turn_id": "klee-sparks-r1-t05",
+ "packet_sha256": "a95d080886606915c2bcce3b20e44d6389631ab0561d6937d8fbc683c36202ae",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Ka-pow!",
+   "target": "Sludge Spinner",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Sludge Spinner",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Sludge Spinner",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "Ka-pow! on Sludge Spinner, both copies of Kaboom! on Sludge Spinner, then Duck and Cover.",
+ "q2_other_line_considered": "none",
+ "q3_what_it_gave_up": "It spent the 1 Spark, left Spark Knight's Oath unplayed, and accepted 3 unblocked damage in exchange for dealing 21 damage.",
+ "q4_different_intent": "No. With this hand and these resources, a different telegraphed intent would not have produced a stronger affordable line.",
+ "q4_changed": false
+}

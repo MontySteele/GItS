@@ -1,0 +1,29 @@
+{
+  "turn_id": "klee-sparks-r1-t02",
+  "packet_sha256": "b0e6e894526de068a196ee67da16255a6584646f8ce6c985b056b325afb97333",
+  "grader": {
+    "id": "opus-5-fresh",
+    "kind": "llm",
+    "model": "claude-opus-5",
+    "designed_these_cards": false
+  },
+  "chosen_line": [
+    {
+      "card": "Fwoosh!",
+      "target": "Shrinker Beetle"
+    },
+    {
+      "card": "Kaboom!",
+      "target": "Shrinker Beetle"
+    },
+    {
+      "card": "Kaboom!",
+      "target": "Shrinker Beetle"
+    }
+  ],
+  "q1_what_did_you_play": "Fwoosh! first, spending my single Spark on the bigger of the two Spark cards (8 rather than 7), then both Kaboom! for 7 each. That is 22 damage into the Shrinker Beetle, taking it from 40 to 18, and three applications of Pyro. Fwoosh! and Ka-pow! cost 0 energy but compete for the same one Spark, so the only real choice between them is which prints the larger number; Fwoosh! does. The two Kaboom! cost 1 each, leaving 1 energy unspent. I did not play Duck and Cover: the Beetle's telegraph is Strategic, a Debuff, so there is no incoming damage for 5 Block to absorb, and Block does not stop a debuff.",
+  "q2_other_line_considered": "Yes — the same three attacks plus Duck and Cover with the leftover energy, on the reasoning that 5 Block costs me nothing I was otherwise going to use this turn. I dropped it because the telegraph is a debuff, not an attack, so the Block does nothing this turn, and holding the card keeps a 1-cost 5 Block available for a turn where the Beetle actually swings. I also weighed Ka-pow! over Fwoosh! for the Spark and rejected it as strictly one damage worse with identical cost and identical Pyro.",
+  "q3_what_it_gave_up": "One energy left unspent and 5 Block not gained, so I eat whatever the debuff is at full effect with nothing on top. It also empties the Spark bank to 0, so if a Spark card comes off the deck next turn I cannot pay for it. And with the Beetle at 18 after this turn, I have committed to a race I cannot finish this turn regardless — 22 is the ceiling the hand allows, so nothing was given up on the damage side.",
+  "q4_different_intent": "Yes. If the Beetle had telegraphed an attack, Duck and Cover would go in on the spare energy — it is free in the sense that the third energy has no other use, and 5 Block against a real hit is strictly better than nothing. If the telegraphed hit were large enough that 5 Block was irrelevant chip mitigation, I would go back to the pure-damage line to shorten the fight instead. The attack order and the Fwoosh!-over-Ka-pow! Spark choice would not change under any intent.",
+  "q4_changed": true
+}

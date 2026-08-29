@@ -1184,3 +1184,395 @@ Five, and they are picks, not blanks.
    from the body it replaces.
 8. **Whether the rules-text price line reads as redundant** beside the badge
    (item 12 above).
+
+---
+
+## 11. ROUND 1 (2026-08-29) — the Sparks arm on a live board, Qwen in the tester seat
+
+### 11.0 What has to be said before any result
+
+**The build.** Everything below was read on a dev build stamped
+**`0.2.1481+proto`**, deployed from the art-bearing main checkout with the game
+closed, confirmed by reading `+proto` out of the installed
+`mods\klee\manifest.json`. The world is `main` @ `d974303`. The registration is
+`KLEESPARK-R1` in `EXPERIMENTS.md`, committed before a board was staged.
+
+**What [USER] settled, and what this round therefore rests on.** `M51`,
+verbatim: *"M51 countersigned, let's get Klee moving and see how things look."*
+That countersigns the §10.9 slate P1–P6 under R212(2) and lets all eleven
+as-built calls at §10.11 stand. Nothing in this round re-opens either.
+
+**The first deploy attempt was REFUSED and the refusal was right.** The
+registration cited `R220` for two things that are genuinely ruled, and `R220`
+is not issued — `R_CEILING` is 219. `validate.ps1`'s own suite caught it
+(`test_r_numbers_lint::test_the_real_tree_is_one_clean_namespace`) before a
+build was staged. The citations moved to the documents that carry the words;
+nothing about what is ruled changed. It is recorded here because a gate that
+bites is worth more than a gate that passes.
+
+**Three disclosures, made before any form was read.**
+
+1. **The roster-wide Burst retirement is RULED and NOT BUILT.** It lives at
+   `review/active/burst-retirement-2026-08-29.md`. Klee's Burst meter is still
+   live in this build, and `Burst +5` appears on the printed face of Powder
+   Pop and Jumpy Dumpty on four of the eight packets. No reader was asked
+   about it and no result below turns on it, but it was on the page.
+2. **The Spark badge has not had [USER]'s eyes-on.** The frames are at
+   `review/qa/eb194-gates/frame-*gatec-*.png`. P2 is a prediction *about* that
+   badge, and this is stated again under P2 because it decides how P2 can be
+   graded at all.
+3. **The spot-check rate was the DEFAULT, and `M58` is still open.**
+   `--seat-spot-check 4` is what ships. This round used it and does not answer
+   the question of what the rate should be. On eight turns the default put the
+   Codex seat on turn 1 and turn 5; the resource-order flag routed nothing,
+   and a caught misread routed `t05` a second time.
+
+**And the ordinary standing limits.** R215 B: no number a prototype row
+produces is quotable anywhere. Guardrail-7: every replay figure below is a
+defect diagnostic and never a design or balance claim. The funnel refuses
+turns and never rates them.
+
+### 11.1 The boards
+
+Eight, at `understudy/turns/klee-sparks-r1/`, with `MANIFEST.md` beside them.
+All `exact_hand: true` and `prototype: true`, all on Klee's base 3 energy, all
+with the bank written through the `set_power` op on `SPARK_POWER` (the
+precedent is `understudy/scenarios/set-power-sparks.yaml`). They were committed,
+with the round's schedule and all eight closeness readings, before the build
+that would produce the readings existed.
+
+| turn | bank | seed | the encounter the seed drew | what the board is |
+|---|---|---|---|---|
+| `t01` | 0 | `R805DJ56LZHM` | Nibbit 46/46, attack 12 | turn one, the substituted starter dealt |
+| `t02` | 1 | `YX7PB48WR7R4` | Shrinker Beetle 40/40, **debuff** | two sinks priced 1 |
+| `t03` | 2 | `JH4T8MSN10KS` | Seapunk 45/45, attack 11 | a price-1 beside a price-2 |
+| `t04` | 3 | `XT4BE7LFY5XH` | Fuzzy Wurm Crawler 46/56, attack 4 | the Rare Power, bank can pay |
+| `t05` | 1 | `VEZY6KLK71XR` | Sludge Spinner 37/37, attack 8 | the Rare Power, bank short |
+| `t06` | 2 | `VG1MYKCZD93V` | Shrinker Beetle 39/39, **debuff** | the two AoE sinks |
+| `t07` | 4 | `EW3ZC40K83G4` | Sludge Spinner 39/39, attack 8 | a bank deep enough to buy both |
+| `t08` | 0 | `PRX320N09RMK` | Fuzzy Wurm Crawler 46/57, attack 4 | empty bank with the generator in hand |
+
+Every seed was honoured on every one of the sixteen replays. All eight
+closeness readings SURVIVE, gaps 0.0377 to 0.2100 against a `DOMINANCE_GAP` of
+0.5.
+
+**Four things the boards could not do, and each of them bears on a grade
+below.**
+
+- **The tier0 mirror runs FLAG-OFF.** `build_combat_state` runs in this tree,
+  where `SPARK_ALT_COST_ENABLED` is `False`, so on `t04` (bank 3) and `t07`
+  (bank 4) it still applies the retired base rule and scores those boards
+  richer than the live game. The error runs one way and can only make the
+  falsifier stricter. Fixing it is a per-turn flag on the mirror, owed.
+- **The intents are the seed's.** `t02` and `t06` telegraphed a DEBUFF, not an
+  attack, while the mirrored board declares an attack. Two records, not one.
+- **`t06` asked an AoE question of a one-enemy encounter.** The board was set
+  for the two ALL-enemies sinks and the seed produced a single Shrinker
+  Beetle, so both AoE clauses were worth single-target damage. The pair read
+  returned that board for exactly this.
+- **Both empty-bank boards had the GENERATOR in hand.** `t01` and `t08` each
+  hold Powder Pop beside the locked sink, and I put it there. A hand holding
+  the sink with *no* way to fill the bank was never staged. This matters to P4
+  and it is why P4 does not close its pick below.
+
+### 11.2 The forms — eighteen of them, three readers
+
+**The tester seat is the LOCAL Qwen seat and this is its first live use**
+(`understudy.local_tester`, `local-qwen3-8-27b-ud-q4-k-xl`, family `local`,
+role `tester`). It filled all eight forms; `staged_turn grade` applied the
+falsifiers, as it does for every reader, with no model in that loop.
+
+**The fresh-Opus read is SAME-FAMILY and is recorded as such.** §7 is
+unchanged: these rows are `authored_by: [claude]`, so an Opus grade is family
+and is never the deciding read. One agent per packet, never reused, no repo
+access, the packet inline, the three identity fields a model cannot know about
+itself filled by the orchestrator, the unedited reply kept as
+`form-raw-opus-5-fresh.json`.
+
+**The Codex seat read two packets**, `t01` and `t05`, which is what the
+shipped `--seat-spot-check 4` default put on it.
+
+| turn | local Qwen tester | fresh Opus (same family) | Codex seat |
+|---|---|---|---|
+| `t01` | **REFUSED** `intent_insensitive` | SURVIVES | SURVIVES |
+| `t02` | **REFUSED** `intent_insensitive` | SURVIVES | — |
+| `t03` | **REFUSED** `intent_insensitive` | **REFUSED** `intent_insensitive` | — |
+| `t04` | SURVIVES | SURVIVES | — |
+| `t05` | SURVIVES (+ **MISREAD**) | SURVIVES | **REFUSED** `no_second_line`, `intent_insensitive` |
+| `t06` | **REFUSED** `intent_insensitive` | SURVIVES | — |
+| `t07` | SURVIVES | **REFUSED** `intent_insensitive` | — |
+| `t08` | **REFUSED** `intent_insensitive` | **REFUSED** `intent_insensitive` | — |
+
+**Every refusal by name.** `intent_insensitive` ten times — five of the
+tester's eight, three of Opus's eight, and once against the seat.
+`no_second_line` once, against the **Codex seat on `t05`**, whose question two
+was the single word *"none"* and whose question four was *"With this hand and
+these resources, a different telegraphed intent would not have produced a
+stronger affordable line."* That is the round's sharpest single result: on the
+Rare Power's short-bank board the INDEPENDENT reader considered nothing else at
+all.
+
+**The one flag the tooling raised on its own.** `t05`, from the local tester's
+post-read: *"MISREAD: called 'Duck and Cover' 'free', but the packet prints
+Cost: 1."* That routed `t05` to the seat for a second reason on top of the
+periodic rate. `understudy/resource_order.py` flagged nothing in the round.
+
+**Agreement.** The Opus read and the Qwen read reached the same verdict on
+**4 of 8** turns (`t03`, `t04`, `t05`, `t08`) and differed on four — Qwen
+refused `t01`, `t02` and `t06` where Opus survived, and Opus refused `t07`
+where Qwen survived. On the two spot-checked turns the Codex seat agreed with
+**neither** the tester (0 of 2) nor, on `t05`, with Opus (1 of 2).
+
+### 11.3 The replays — sixteen, and two of them stopped
+
+Every graded line was replayed live on its own pinned seed. `execute` compared
+the live enemies and hand against the packet first and refused no board.
+
+| turn | tester line | Opus line |
+|---|---|---|
+| `t01` | **STOPPED at play 1**, 46 → 46 | 4 plays, 46 → 5 |
+| `t02` | 4 plays, 40 → 18 | 3 plays, 40 → 18 |
+| `t03` | 4 plays, 45 → 21 | 4 plays, 45 → 21 |
+| `t04` | 2 plays, 46 → 23 | 2 plays, 46 → 17 |
+| `t05` | 3 plays, 37 → 16 | 4 plays, 37 → 16 |
+| `t06` | 3 plays, 39 → 25 | 2 plays, 39 → 25 |
+| `t07` | **STOPPED at play 1**, 39 → 39 | 4 plays, 39 → 8 |
+| `t08` | 4 plays, 46 → 27 | 4 plays, 46 → 27 |
+
+**The two stoppages share one cause and it is mechanical.** On `t01` and `t07`
+the local tester wrote `Powder Pop` with `target: null`, and the bridge refused
+it in its own words: *"Card requires a target. Provide 'target' with an
+entity_id."* Powder Pop places a Bomb on an enemy, so it is a targeted card;
+the packet does not say which cards need a target, and the Opus forms supplied
+one. Both lines stopped at their first play and dealt nothing. Those two forms
+are **UNTESTED, not contradicted** — a quarter of the tester seat's lines could
+not be executed at all.
+
+Where both lines ran, they agreed with each other on the board to the hit
+point on `t02`, `t03`, `t05`, `t06` and `t08`. They differ on `t04` (23 against
+29) because Opus's Jumpy Dumpty Bomb detonated inside the replay window and
+Qwen's line placed no second Bomb.
+
+### 11.4 The pair read, verbatim on the outcomes
+
+One Codex call, `understudy.seat review --role pair`, over the whole round —
+every packet, every form, every verdict and every replay inline. The full text
+is `review/qa/klee-sparks-r1-pair-review-codex-gpt-5.6-sol.md`. Its outcome
+table, verbatim:
+
+| Row | Trial card | Outcome | Reason |
+|---|---|---:|---|
+| t01 | Powder Pop — starter generator | ADVANCE | Multiple readers saw the empty-bank Ka-pow! as initially dead and Powder Pop as the explicit unlocking plan; two independent valid reads survived, although the tester's replay did not. |
+| t02 | Fwoosh! | RETURN | The competing equal-price card was treated as "strictly one damage worse"; the board exposed simple numerical dominance rather than a meaningful spend-versus-hold choice. |
+| t03 | Bang Bang! | ADVANCE | Both readers explicitly valued the alternative bank state—"preserves a Spark at the cost of only 2 damage"—even though both chose immediate damage. |
+| t04 | Spark Knight's Oath, bank 3 | ADVANCE | The page supported exact conversion accounting and a recognizable setup alternative; readers could tell that precisely one converted Attack was fundable. |
+| t05 | Spark Knight's Oath, bank 1 | ADVANCE | Readers correctly distinguished this state from t04 and recognized the immediate brick/setup tension; disagreement was about whether setup was serious, not about the game state. |
+| t06 | Dodoco Blast and Tinder Toss | RETURN | The generated one-enemy encounter erased the intended AoE dimension, so this board did not adequately ask what these two all-enemy rows were meant to reveal. |
+| t07 | Firework Finale | ADVANCE | The price was fully affordable, while Exhaust generated a visible hold-versus-spend alternative; the valid replay confirmed the complete line. |
+| t08 | Ka-pow! — starter spender | ADVANCE | Both readers correctly read it as dead at an empty bank and live after generation, then consciously chose it over the competing priced card. |
+
+Its overall lines, verbatim: *"No row requires ESCALATE."* — *"Overall arm
+judgment: ADVANCE. The page consistently communicated affordability, bank
+depletion, and generator-to-spender sequencing. Whole-fight play is warranted
+to test whether the visible future value readers mentioned actually sustains
+spend-versus-hold decisions beyond staged single turns; this is neither ship
+approval nor a balance conclusion."*
+
+And on the seat, verbatim: *"Overall tester-seat judgment: RETURN. It can
+articulate alternatives, but its intent reasoning and replay-valid line
+construction are not dependable enough for this seat."*
+
+**Six ADVANCE, two RETURN, no ESCALATE, and a RETURN on the tester seat
+itself.**
+
+### 11.5 The slate, slot by slot
+
+**P1 — does a graded turn contain a visible spend-versus-hold choice, two
+Spark uses competing and both affordable, in one hand? Predicted YES on at
+least 4 of 8. → MISS.**
+Four boards opened with two priced cards both individually affordable (`t02`,
+`t03`, `t06`, `t07`), a count taken and written into `MANIFEST.md` before any
+form was read. But `t07`'s bank of 4 pays for both, and the seat said so:
+*"t07 is not actually a board where the bank could not pay for both sinks."*
+Of the three where the bank genuinely could not, the seat found the choice
+visible on two — *"t03: this produced the clearest actual spend-versus-hold
+comparison… both visibly recognized the banked Spark as the thing
+surrendered"*, and `t06` the same — and found `t02` was numerical dominance
+rather than a decision: *"the only real choice between them is which prints the
+larger number."* Two of eight is below four. **The registered decision fires:
+the tight set is too thin at the cheap end, and PICK 4 reopens** at option 2
+(add the Rare cut) or option 3 (add rather than convert). Two 1-priced cards in
+one hand is not a decision when one of them simply prints a bigger number.
+
+**P2 — can the grader state the price off the FACE, without the rules box?
+Predicted NO; the badge is required. → SPLIT.**
+The first half is falsified cleanly. Across all eighteen forms the seat found
+*"No reader misstated a printed Spark price, miscounted the available Spark
+bank, or treated an unaffordable priced Attack as free."* Readers quoted the
+prices back correctly at every bank from 0 to 4, including the Power's
+conversion arithmetic. The second half is **UNTESTED and cannot be tested by
+this instrument**: the funnel's packet is a text rendering with no badges of
+any kind on it, so a reader who succeeded off the text line says nothing about
+whether a badge would beat the text line on a rendered card. **PICK 8 does not
+retire and does not become blocking on this evidence.** The one thing this
+round does add is that the text line alone is legible to a careful reader,
+which was not previously known.
+
+**P3 — does the strict Rare Power read as a payoff or as a brick on a turn
+where the bank is short, and can the grader tell which from the hand?
+Predicted brick on an unbuilt deck, payoff on a built one, and the grader can
+tell. → PREDICTED.**
+The seat, on `t04` against `t05`: *"the page communicated 'one conversion
+available' versus 'conversion unavailable'. Oath read as conditional
+setup/payoff at t04 and as an immediate brick at t05; it was not mistaken for
+an unconditional discount."* The Opus form on `t04` did the arithmetic
+unprompted — *"with exactly 3 Spark I can pay for exactly one Attack"* — and on
+`t05` reached the brick from the other side: *"both Kaboom!s would want 3 Spark
+each and I would have 0 Spark."* **But the caveat is real and it cuts at the
+card, not the prediction:** the local tester *"did not engage with Oath at
+all"* on `t04`, and the independent seat's own `t05` form was refused for
+having no second line whatsoever. Two of the three readers on the Power's
+boards found nothing to weigh. The face is informative; whether the card is
+worth playing is a different question this round did not ask.
+
+**P4 — does the starter's opening hand ever contain the sink with an empty
+bank? Predicted YES, and it reads as a dead card rather than a plan.
+→ SPLIT.**
+The YES is uncontested: `t01` and `t08` both printed *"Cannot be played right
+now: BlockedByCardLogic"* on a priced card. The *dead* half is falsified. The
+seat: *"On both boards, the priced card read as dead before generation and as a
+plan once Powder Pop was noticed… the blocked message therefore communicated a
+present dead card, while the generator made it a visible sequencing plan within
+the same hand."* Every reader on both boards led with the generator and then
+spent the Spark it made.
+**The registered decision — "a YES that reads as a plan closes PICK 1" — is NOT
+taken, and the reason is a limitation of my own boards.** On both empty-bank
+boards I put Powder Pop in the hand. A hand holding the priced sink with no way
+to fill the bank was never staged, and that is the hand PICK 1 is actually
+worried about. What this round shows is that the sink plus the generator reads
+as a plan; it shows nothing about the sink alone. PICK 1 goes back to [USER] as
+a pick rather than closing.
+
+**P5 — (sim) does the pilot's spend rate rise when the flag is on and the
+tight set is drafted? Predicted YES. → MISS.**
+`tier05/exp_klee_sparks_r1.py`, 40 fights per arm from seed 1, `punisher`,
+`demolition` weights; raw output at
+`review/active/klee-sparks-r1-sim-2026-08-29.txt`. Flag OFF the shipped economy
+moved **1.00 Sparks per player turn** (all of it the automatic consume). Flag
+ON the priced economy moved **0.72** (all of it priced, zero automatic, zero
+refused). It did not rise; it fell by roughly a quarter. **The registered
+decision fires: the pilot's blind spots (§10.5) dominate, and the probe needs
+playability before any sim number about this economy is worth reading.** The
+largest of those blind spots is named there — under the Rare Power a pilot
+spends itself out of its own Attack suite, because `_spark_bank_probe` asks
+what a card is *worth* at a bank and never whether it is *playable* at one.
+
+**P6 — (sim) does the bank sit idle above the cheapest price for 3 or more
+consecutive turns in a drafted deck? Predicted NO. → PREDICTED.**
+Longest streak **2 turns**, on both arms. And the definition was set against
+the prediction rather than for it: a turn counts as idle when it ends at or
+above the cheapest price the *deck* prints, not the cheapest the *hand* holds,
+which over-counts idleness. The streak is at least as long as the true one and
+it still never reached 3.
+
+**Tally: 2 PREDICTED (P3, P6), 2 SPLIT (P2, P4), 2 MISS (P1, P5).**
+
+### 11.6 What the round means, and what it could not do
+
+**The arm's page works and its economy does not yet.** Those are two different
+findings and they point in opposite directions. On the page, every reader
+handled printed prices, empty banks, locked cards and a conversion Power
+without a single price misread — the seat's ADVANCE on six of eight rows rests
+on that, and so does P2's falsified first half and P3's PREDICTED. Underneath
+it, the priced economy moved *fewer* Sparks per turn than the automatic rule it
+replaces, and only two boards in eight produced a spend-versus-hold decision an
+independent reader would call one. A price the player can read perfectly and
+rarely has to think about is not obviously better than a rule that thought for
+them; it is only more honest.
+
+**A number that is NOT a balance claim and is recorded because it should be
+looked at.** Over the same 40 fights per arm, the flag-OFF deck won 40 and the
+flag-ON deck won 25. R215 B forbids quoting it and Guardrail-7 forbids reading
+design into it, and neither is being done here: it is a one-encounter,
+one-pilot, hand-assembled-deck diagnostic, and §10.5's four blind spots all
+push the ON arm toward over-spending. It is written down because a fifteen-fight
+gap is the kind of thing that is worse to discover later, and because it is a
+reason to want whole-fight play before anything else.
+
+**The tester seat's first live use returned a RETURN**, and the evidence for it
+is not opinion. Five of eight forms answered question four "no" and were
+refused as intent-insensitive; two of eight lines could not be replayed at all
+because the model omitted a target on a targeted card; and one form called a
+1-cost card free, which the seat's own misread check caught before any human
+did. The seat did the one thing it was built to do — it named a real second
+line on five of eight boards — but it does not yet write a form the rest of the
+pipeline can consume.
+
+**What this round could not do.**
+
+1. **It could not ask the decisive question.** §10.9 says so plainly: whether a
+   price creates a spend-versus-hold decision is a face-and-turn question, and
+   a staged single turn shows one hand with no memory of what the bank was
+   held *for*. The pair read reached the same conclusion independently:
+   *"whole-fight play is warranted."*
+2. **It could not test the badge.** The packet has no badges. P2's second half
+   stays open and PICK 8 with it.
+3. **It could not test the dry sink alone**, because both empty-bank boards
+   carried the generator. P4's pick stays open for that reason.
+4. **It could not put an AoE card in front of two enemies.** The encounter is
+   the seed's, and the seed gave one body on both AoE boards.
+5. **It could not draft.** `loader._pool_substitutions` returns `{}` for Klee,
+   so the tier 0.5 drafter structurally cannot be offered a prototype Spark
+   row; P5 and P6 read a deck assembled by id from PICK 4's own one-for-one
+   map, which is what the arm intends but is not what a drafter picked.
+6. **It could not run the mirror under the flag.** On two boards the closeness
+   falsifier scored the retired base rule. The error runs one way.
+
+### 11.7 What goes back to [USER] — numbered picks, never blanks
+
+1. **P1 missed, so PICK 4 is reopened by its own registered decision. Which
+   way?** The tight set is too thin at the cheap end: two cards priced 1 in one
+   hand read as "take the bigger number", not as a choice.
+   *(a) option 2 — add the Rare cut to the conversion list, so the set gets a
+   sink at a price that is not 1 or 2; (b) option 3 — ADD the priced rows rather
+   than converting, so the pool grows and the cheap end is less crowded;
+   (c) re-price rather than re-count: move Fwoosh! or Ka-pow! off 1 so two
+   1-priced cards cannot sit in the same hand; (d) leave the set as built and
+   let whole-fight play answer it instead.*
+2. **P4 split, and I will not close PICK 1 on boards I stacked.** Both
+   empty-bank boards had the generator in hand, so "it reads as a plan" is
+   partly my staging.
+   *(a) re-run two boards with the sink and NO generator before touching PICK 1;
+   (b) accept the plan reading and close PICK 1 as answered; (c) take option 4's
+   honest dead-turn anyway, on the grounds that a starter should not depend on
+   drawing its one generator.*
+3. **The Rare Power: informative face, uninteresting turn.** Two of three
+   readers found nothing to weigh on its boards, and the independent seat's form
+   was refused for having no second line at all.
+   *(a) leave it as built and re-read it in whole-fight play, where a bank has a
+   history; (b) reopen §5's wording for a face that suggests what to hold for;
+   (c) reopen the price — 3 per Attack against an income near 1 per turn is a
+   card that does nothing for three turns; (d) pull it from the slice and grade
+   the seven card rows alone.*
+4. **The tester seat, on the seat's own RETURN.**
+   *(a) keep Qwen in the tester seat and fix the two mechanical faults first —
+   teach the form to carry a target, and put "which cards need a target" on the
+   packet; (b) keep the seat but require a Codex spot-check on EVERY turn until
+   it stops failing replays, which is an answer to `M58` as well; (c) take the
+   seat out of the funnel until the two faults are fixed; (d) leave it and
+   accept that a quarter of its lines are untested.*
+5. **`M58`, which this round used the default for and did not answer.**
+   *(a) keep 4; (b) go to 2 while the local seat is under review and back to 4
+   after; (c) make it 1 — every turn — for any round whose tester seat is itself
+   on trial; (d) rule it per-round rather than as a constant.*
+6. **The 40-versus-25 win diagnostic.** Not quotable, not a balance claim, and
+   not ignorable either.
+   *(a) treat it as an artefact of §10.5's pilot blind spots and teach the probe
+   playability first (which P5's registered decision already asks for), then
+   re-read; (b) treat it as a signal about the prices and re-price before any
+   further reading; (c) do neither until whole-fight play has run.*
+7. **What runs next.** The pair read asked for whole-fight play by name.
+   *(a) whole-fight blind play on the Sparks arm, Codex seat, as the next thing;
+   (b) a round 2 of staged turns on the two RETURNED rows (`t02`'s Fwoosh! and
+   `t06`'s AoE pair) on repaired boards first; (c) both, in that order;
+   (d) hold the arm until picks 1 and 3 are settled.*
