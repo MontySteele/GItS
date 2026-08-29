@@ -38,11 +38,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 from understudy import local_model, seat
 
@@ -53,8 +54,42 @@ LOG_ROOT = Path(__file__).resolve().parent / "logs" / "local-seat"
 # A form is a few hundred tokens of JSON; a reasoning model asked for one can
 # spend thousands getting there. Generous, and it is a CEILING rather than a
 # target -- `finish_reason: "length"` is recorded and refuses the form.
-FORM_MAX_TOKENS = 8192
-REVIEW_MAX_TOKENS = 8192
+#
+# CONFIGURATION, NOT A CONSTANT (R219, the tester-seat conditions). The sanity
+# read raised both ceilings and the answers still ran off the end, so the
+# number is an operator's dial and the two env vars below are it. THE CLIENT
+# SIDE IS THE BACKSTOP, NOT THE CONTROL: runaway thinking is bounded on the
+# SERVER, by `llama-server --reasoning-budget`, because only the server can
+# stop a model mid-scratchpad. Nothing here caps reasoning, and nothing here
+# ever truncates -- a ceiling hit is `answer_truncated`, a hard refusal.
+ENV_FORM_TOKENS = "GITS_LOCAL_MODEL_FORM_TOKENS"
+ENV_REVIEW_TOKENS = "GITS_LOCAL_MODEL_REVIEW_TOKENS"
+DEFAULT_FORM_MAX_TOKENS = 8192
+DEFAULT_REVIEW_MAX_TOKENS = 8192
+
+
+def _tokens_env(key: str, default: int,
+                env: "Mapping[str, str] | None" = None) -> int:
+    """A positive int from the environment, or the default.
+
+    A junk or non-positive value falls back to the default rather than
+    raising: an operator who exports `FOO=` in a shell profile should not
+    discover it as a traceback halfway through a round.
+    """
+    raw = str((env if env is not None else os.environ).get(key) or "").strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    return value if value > 0 else default
+
+
+def form_max_tokens(env: "Mapping[str, str] | None" = None) -> int:
+    return _tokens_env(ENV_FORM_TOKENS, DEFAULT_FORM_MAX_TOKENS, env)
+
+
+def review_max_tokens(env: "Mapping[str, str] | None" = None) -> int:
+    return _tokens_env(ENV_REVIEW_TOKENS, DEFAULT_REVIEW_MAX_TOKENS, env)
 
 # Grading is not agentic work. Greedy, and written into every artifact.
 GRADE_TEMPERATURE = 0.0
@@ -158,6 +193,7 @@ def grade_turn(turn_id: str, *, client: local_model.Client,
         envelope = json.loads(packet_json_path.read_text(encoding="utf-8"))
     packet_sha = str(envelope.get("packet_sha256") or seat.sha256(packet_md))
 
+    ceiling = form_max_tokens()
     model = client.model or (client.resolve_model() if not dry_run
                              else "(unresolved)")
     gid = grader_id or local_model.grader_id(model)
@@ -178,7 +214,7 @@ def grade_turn(turn_id: str, *, client: local_model.Client,
         "model_requested": model,
         "model_observed": "",
         "temperature": GRADE_TEMPERATURE,
-        "max_tokens": FORM_MAX_TOKENS,
+        "max_tokens": ceiling,
         "ctx": client.ctx,
         "prompt_sha256": seat.sha256(prompt),
         "prompt_chars": len(prompt),
@@ -216,9 +252,9 @@ def grade_turn(turn_id: str, *, client: local_model.Client,
         return _refuse(blob, session, "open_face_defect",
                        [f"{h['matched']} -- {h['eb']}" for h in defects])
 
-    if client.ctx and estimate + FORM_MAX_TOKENS > client.ctx:
+    if client.ctx and estimate + ceiling > client.ctx:
         return _refuse(blob, session, "prompt_exceeds_ctx",
-                       [f"~{estimate} + {FORM_MAX_TOKENS} > {client.ctx}"])
+                       [f"~{estimate} + {ceiling} > {client.ctx}"])
 
     if dry_run:
         blob["dry_run"] = True
@@ -227,7 +263,7 @@ def grade_turn(turn_id: str, *, client: local_model.Client,
 
     try:
         reply = client.chat([{"role": "user", "content": prompt}],
-                            max_tokens=FORM_MAX_TOKENS,
+                            max_tokens=ceiling,
                             temperature=GRADE_TEMPERATURE)
     except local_model.LocalModelError as exc:
         return _refuse(blob, session, "endpoint_error", [str(exc)])
@@ -244,8 +280,9 @@ def grade_turn(turn_id: str, *, client: local_model.Client,
 
     if reply.finish_reason == "length":
         return _refuse(blob, session, "answer_truncated",
-                       [f"the model hit the {FORM_MAX_TOKENS}-token ceiling "
-                        f"mid-answer"])
+                       [f"the model hit the {ceiling}-token ceiling "
+                        f"mid-answer (${ENV_FORM_TOKENS} raises it; runaway "
+                        f"thinking is the server's --reasoning-budget)"])
 
     try:
         raw = extract_json(reply.text)
@@ -347,7 +384,7 @@ def cmd_grade(args) -> int:
         print(f"grader:  {blob['grader_id']}")
         print(f"prompt:  {Path(blob['session']) / 'prompt.md'}")
         print(f"tokens:  ~{blob['estimated_prompt_tokens']} + "
-              f"{FORM_MAX_TOKENS} reserved, ctx {blob['ctx']}")
+              f"{blob['max_tokens']} reserved, ctx {blob['ctx']}")
         return 0
 
     print(f"seat: {blob['session']}")
