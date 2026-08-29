@@ -1433,17 +1433,31 @@ upgrade channel** — no row on it has ever had one, the schema has no field for
 it and the generator has no path for it, because upgrades live in
 `docs/<character>-upgrades.yaml` keyed by shipped id. So the upgraded 5 is
 recorded on the row itself and is owed to the upgrades sheet at the moment
-this arm is re-authored onto her real sheet. And it carries **no `authored_by`
-field** — the row schema refuses unknown fields — so authorship is recorded
-the way every other arm on that surface records it, in the row's own comment
-block: **numbers and rule [USER], implementation and wording Claude**, no
-doctrine-seat involvement, nothing graded.
+this arm is re-authored onto her real sheet. And its authorship is recorded in
+two places, because `authored_by:` is a list of model **families** (EB-190) and
+[USER] is not one: the field on the row reads `[claude]`, the family that wrote
+it, and the row's comment block carries the fact that matters — **numbers and
+rule [USER], implementation and wording Claude**, no doctrine-seat involvement,
+nothing graded.
 
-*One consequence, so it is not discovered later:* with the flag on, a deck
-that drafts the **shipped** Oath gets 5 per memory play rather than 3, because
-the amount is read off the card that applied the ward. That is the surface
-working as intended — a staged face beside its shipped twin — and it is what
-makes accepting this arm a one-row re-authoring instead of an engine change.
+*The shipped twin is no longer offerable under the flag, and this is the
+answer to [USER]'s question about it.* He asked: **"Why does the power print 5
+instead of 3, exactly?"** Because the ward's amount is read off whatever card
+applied it, and the **shipped** `kurages_oath` — 5, 7 upgraded, face "per
+Bake-Kurage play" — was still in Kokomi's draft pool with the flag on. A
+flagged run that drafted it therefore paid 5 per memory play under text that
+cannot bind, which is a defect (D4), not a balance question. Neither sheet may
+move, so the fix is on the **offer** side: under `C.KURAGE_MEMORY` the shipped
+id is substituted for `proto_kurages_oath_memory` in her offerable pool, at the
+same rarity and the same weight. The seam is one function next to the starter
+swap (`loader._pool_substitutions`, the twin of `_starter_ids`) applied at the
+single source of truth for what a character can be handed
+(`rewards.character_pool`), which fight rewards, the shop, every event card
+screen and the tier 0.5 drafter all read and nothing bypasses. With the flag
+off it returns `{}` and the pool is byte-identical, test-pinned. The one thing
+this costs: the prototype has no upgrade row, so the substituted Oath cannot be
+upgraded at a campfire — which is honest while the upgraded 5 is still owed to
+a sheet, and it goes away when the arm is re-authored.
 
 *Still open, and small:* whether 3/5 wants adjusting, which is what [USER]
 reserved.
@@ -1542,6 +1556,15 @@ same quarantine flag.
     **"Whenever the Bake-Kurage plays a card from its memory, gain 3 Block."**
     — 5 upgraded. Until it does, the generated prototype card carries the
     shipped pulse wording and is wrong on its face.
+15. **Substitute the prototype Oath for the shipped one on every offer
+    surface**, under the flag only (§12.4 pick 4). Same seam pattern as the
+    starter swap at item 5: ONE gate, in code, with both sheets untouched, and
+    it must be the only one — the mod's reward roll, its shop stock and any
+    other place a card is offered must read the same substituted pool, or the
+    mod and the sim will disagree about which Oath a flagged run can draft.
+    The substitution keeps the card's **rarity slot and weight**; it is a face
+    swap, never a tier move. With the flag off the shipped Oath is the only
+    Oath offered and the prototype is unreachable, exactly as today.
 
 ### 12.7 Green
 
