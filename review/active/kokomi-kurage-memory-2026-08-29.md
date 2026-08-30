@@ -2562,10 +2562,187 @@ guard refuses, the run stops cleanly and the round grades what ran** — an
 unrun slot is UNREACHED, an unread record is not a grade, and no board is
 re-read on a repaired copy.
 
-#### 13.9.7 THE RERUN — results
+#### 13.9.7 THE RERUN — GRADED 2026-08-30
 
-*(Empty until the run. The prose read is a marked empty slot and is never
-generated.)*
+Run and graded from the art-bearing main checkout on the integration branch
+`kuragemem002-rerun`. No grade below was read by anybody before it was written,
+and none has been edited since. **Nothing in §13.8 is re-read, re-scored or
+withdrawn (R101b).**
+
+##### What was spent
+
+| | |
+|---|---|
+| seeds spent | **`KURAGEMEM002`** (`KURAGEMEM001` was spent by §13.8) |
+| seeds still UNSPENT | `KURAGEMEM003` |
+| world | `kuragemem002-rerun` at **`10799139`** — the merge `b49de52`, the registration `142f0f1`, and the `EB-213` recursion fix on top |
+| build | **`0.2.1627+proto.dirty`**, off `mods\klee\manifest.json`; `validate.ps1` **OK** on the whole gate (S7 suite 333.4 s) |
+| the dirty mark | another workstream's untracked scratch under `review/qa/local-sanity-2026-08-29*/`, `review/qa/two-instance/` and `understudy/logs/*.log` — not this branch's to commit, so a clean stamp was not reachable and the mark is honest rather than incidental |
+| R225 soak gate | `bounded seed=XAK56TVB9QDL actions=56 **fights=3 defects=0**`, reversibility log all REVERTED |
+| game | v0.111.0, off `release_info.json` |
+| run seed, read back off the wire (R95) | `KURAGEMEM002` — the chosen seed was accepted, **no deviation to disclose** |
+| arm granted | `KLEEMOD-PROTO_KURAGES_OATH_MEMORY` into the starting deck |
+| actions | 60, stopped on `max_actions`; four fights and the run record written |
+| sealed record | `review/qa/blindplay/20260830-083819/record.md`, committed at `397c8266` **before any grader opened it** |
+| the objective side, first time | `wire.json` beside it — **32 snapshots**, one per `play` and per `end turn`, machine-written and never shown to the tester (`EB-216`). Of the 32: **12 EMPTY, 12 FIRES-NEXT, 8 BLOCKED** |
+| leak audit | **66 observations, 1 hit**, and it is the same false positive `KURAGEMEM001` recorded — the blind prompt's own sentence *"no card list, no score, no recommendation"* matching `pilot-vocabulary-score`. Not a leak; recorded rather than filtered |
+| Codex calls | **67** — 66 prompts inside the one session thread (60 actions plus the four fight records and the run record, one of which took a second prompt) plus 1 pair read. Cap was 70 (§13.9.6); `KURAGEMEM001` spent 67 on the same recipe |
+| guard before | `codex: 5h 41% (resets 04:40 EDT) · week 17% (resets Sep 05 17:58)` |
+| guard after | `codex: 5h 6% (resets 09:40 EDT) · week 18% (resets Sep 05 17:58)` — the five-hour window rolled over mid-run, which is why the second number is smaller; **neither stop line (85% / 50%) was approached and the guard never refused** |
+| shadow | the local (Qwen) seat read the same prompt at temperature 0, `review/qa/kuragemem002-shadow-read-local-qwen3.md`, **recorded and never graded** |
+
+##### The grades, slot by slot
+
+Graders as §13.9.5 fixes them: **the Codex seat (GPT family) DECIDING on P1, P2
+and P4** under `M64`(1), and **`opus-5-fresh` (Claude family) on P3** under
+§13.4's stricter family rule, with its limit recorded beside it. Verbatim reads
+at `review/qa/kuragemem002-pair-review-codex-gpt-5.6-sol.md` and
+`review/qa/kuragemem002-p3-read-opus-5-fresh.md`; the prompts they were handed
+are committed beside them, and the wire table both were given is
+`review/qa/kuragemem002-wire-table.md`.
+
+| slot | grader | verdict | judgment | the count against the slot's own threshold |
+|---|---|---|---|---|
+| **P1** | seat (GPT) | **UNREACHED** | RETURN | Zero assessable front-and-price statements in the first five graded turns with a non-empty queue, against a threshold of 4. **The falsifier did not fire either** — no stated price disagrees with `queue[0].price` and the tester never said it could not tell what was queued. The observable was never produced, so it is neither PREDICTED nor MISS |
+| **P2** | seat (GPT) | **UNREACHED** | RETURN | Zero assessable fire-versus-blocked calls against the six wire states (five FIRES-NEXT then one BLOCKED). Neither five correct nor two wrong can be counted, and **no FIRES-direction miss is established** |
+| **P3** | `opus-5-fresh` (Claude) | **PREDICTED** | **ADVANCE** | **5 of 10** qualifying turns, threshold 3, **with 2 Musters** among them against a threshold of 1 — `turn-014` and `turn-058` (Rule 1), `turn-018`, `turn-036` and `turn-052` (Rule 2), spread across three fights. The falsifier at 0 is nowhere near firing. The count still clears at 4 and 1 if the weakest qualifier is struck |
+| **P4** | seat (GPT) | **UNREACHED** | RETURN | The first blocked state is snapshot 009 (`turn-021`) and the tester's sentence there is about Block against Thorns damage: it neither names the memory as blocked-rather-than-empty nor names a play that would unblock it. **Neither registered falsifier fired** — the tester did not say "not enough Charge yet, I will wait" and did not conflate blocked with empty. Later retrospective evidence shows the understanding (the run record: an expensive memory *"stopped every card behind it"*), but P4 grades the FIRST blocked turn only |
+
+**Tally: 1 PREDICTED / 0 SPLIT / 0 MISS / 3 UNREACHED**, and P6 RECORDED AND
+NOT GRADED below. **Judgment: 1 ADVANCE (P3) / 3 RETURN (P1, P2, P4) / 0
+ESCALATE.** The seat's closing paragraph: *"the retrospective records suggest
+the tester could reason about Charge, an expensive front entry, and memories
+held behind it, but the assigned turn-level boards did not collect the
+observations needed to show that the tester could plan with the queue
+prospectively. … Nothing warrants ESCALATE: the problem is missing evidence,
+not irreconcilable evidence."*
+
+##### The shadow read, recorded and not graded
+
+The local (Qwen) seat was handed the SAME prompt as the deciding read, at
+temperature 0, and answered **SPLIT / SPLIT / MISS** on `P1` / `P2` / `P4`,
+RETURN on all three. **Verdict agreement with the deciding read: 0 of 3.** That
+number is filed and nothing else: R222 B says a shadow reading is recorded,
+never graded, enters no tally and is never replayed, and this one decides
+nothing about the slots or about the seat's chair — three boards is not one of
+`M62`'s rounds. The disagreement is instructive rather than damning, and it is
+the same disagreement the deciding read describes: where the observable was
+never produced the shadow scored the ABSENCE as evidence against the tester
+(SPLIT, MISS) and the deciding read scored it as no evidence at all
+(UNREACHED), which is what the slate's own UNREACHED clause requires.
+
+##### `P3` carried, and that is the row's acceptance
+
+`EB-214`'s acceptance is *"`P3` is re-posed at its published threshold on a
+record carrying `EB-216`'s snapshot"*. It was, and it came in at **5 of 10 with
+two Musters** where §13.8 read **0 of 10 with 0 of six Musters**. `M54`(1)'s
+diagnosis — the failure is WORDING and not dose — is **carried on its own
+terms**: the sentence was printed on the surface the tester reads, and the
+tester planned into the queue by both rules.
+
+**Two honest qualifications, both from the grader's own read, neither changing
+the verdict.**
+
+1. **The comprehension is retrospective, not prospective.** At both Muster
+   SELECTION screens (`turn-016`, `turn-060`) the sacrifice was still picked for
+   being the most useless card in hand, with no memory reasoning printed. The
+   tester states Rule 1 correctly — *"transforming it created a 3-Charge memory
+   at the front of the queue that blocked free memories behind it"* — in the RUN
+   record, after the fact, and as a regret. The wire agrees it is fact
+   (snapshots 029–032: `Before Sun and Moon @3` front, BLOCKED, `Sayu @0` held
+   behind it). So the record shows the pattern being **learned across the run**
+   rather than held before the first Muster. `P3`'s threshold does not ask for
+   the sacrifice-versus-recruit half to be priced at the moment of choosing, and
+   it is not graded on it.
+2. **This is one run on one seed.** Every threshold is a within-run rate and
+   nothing here is compared with `KURAGEMEM001` (§13.9.5).
+
+##### The three UNREACHED are an INSTRUMENT finding, and the display is not what returned
+
+**The display was on the page, correct, and legible.** Thirty-four of the sixty
+observation pages carry the memory section, and the blocked page the seat graded
+`P4` on printed, in full:
+
+> - Charge: 2
+> - Next to fire: **Coral Guard** — costs 3 Charge — you cannot pay it, so NOTHING in the memory fires next turn.
+> - Opening the memory shows "Gain 1 Charge when a card of yours Exhausts", and then the whole memory, front first:
+>   1. **Coral Guard** — 3 Charge — aims at random
+>   2. **Gorou — General's War Banner** — free — aims at random
+> - Charge runs out at #1 (**Coral Guard**): that one and everything behind it are held until the bank catches up.
+
+Both halves of `P4` are answerable off that page, and `P1`'s and `P2`'s
+observables are printed on it verbatim. **What is missing is the QUESTION.**
+`blindplay session`'s reply schema is exactly two fields, `command` and
+`thinking` (`turn-*/schema.json`), so the tester writes the reason for the play
+it is making and is never asked what the jellyfish will do next turn. §13.5's
+own third record requirement — *"at least one turn where the tester stated IN
+ADVANCE what the jellyfish was about to play"* — is a requirement on the record
+that **nothing in the harness enforces**, and `KURAGEMEM001` met it by accident
+rather than by construction.
+
+That is the same class of finding `M56` fixed for the objective half: a
+threshold whose evidence the instrument does not collect. `EB-216` gave this run
+the wire's side of `P2` and `P6`; it did not, and was never scoped to, make the
+tester produce the stated side. **Filed as `EB-228`.** Under §13.9.3 an UNREACHED
+slot is not a pass and **nothing is inferred from an absence** — and, symmetrically,
+nothing is inferred against the display, which no reading of this record faults.
+
+##### `P6` — RECORDED AND NOT GRADED
+
+Registered as such at §13.9.2, so this decides nothing and enters no tally.
+
+**What the wire carried.** Twenty front-entry rows across the run name an aim:
+`Gorou — Inuzaka All-Round Defense` aiming at `Toadpole` (snapshot 004), then
+`random` for four snapshots, `Seapunk` (014–017), `Sludge Spinner` (023–025);
+`Coral Guard` and `Before Sun and Moon` at `random` throughout their blocked
+spells. So the stored-target rule and its random fallback were both live and both
+printed.
+
+**What the tester said.** Two advance statements name what the memory will DO —
+`turn-040`, *"The jellyfish will deal 4 damage and Kurage's Oath should add 3
+Block"*, and `turn-064`, *"The jellyfish will reduce the enemy to 5 HP"* — and
+neither names WHICH BODY on a board carrying more than one. No fresh-bind
+expectation is stated anywhere. That is the whole of it, filed for whoever
+registers `P6`'s own rerun; it is not a grade and may not be read back as one.
+
+##### What returns to [USER]: nothing
+
+§13.9.4's numbered pick list fires on a **`P3` RETURN** or a **`P4` half-(b)
+RETURN**. `P3` ADVANCED, so its four-item list is not opened. `P4` is
+**UNREACHED, not RETURNED on its threshold** — the deciding grader found the
+question was never asked rather than answered badly, and §13.9.3 forbids
+inferring either way from an absence — so the acceleration keyword ("Stir")
+does **not** become non-optional on this run and no item of that list opens
+either. **No [USER] row opens on this round.** The one thing owed is
+engineering: `EB-228`.
+
+##### Register moves this run makes
+
+- **`EB-214` CLOSES.** Its acceptance is met on its own words and its row leaves
+  HEAD. `214` comes out of `lint_register_ids.OPEN_IDS` in the same commit,
+  because the lint refuses a manifest entry that outlives its row — **and only
+  214 was removed.**
+- **`EB-228` is MINTED** for the elicitation gap above.
+- **`EXPERIMENTS.md`** moves the registration from *Active* to *Graded*.
+- Nothing else. No stamp moved, no sheet moved, no shipped number moved, and
+  **no number from this run is quotable** (R213 B / R215 B, R217 G).
+  Guardrail-7: floors.
+
+##### Two observations from the record, neither diagnosed here
+
+Both are the tester's words and neither is mine to rule from a play record.
+
+1. **The end-of-turn pulse preview.** Fight 1: *"its end-of-turn preview changed
+   from granting Block to dealing Hydro damage depending on the latest card
+   played"*; fight 4: it *"continued to alternate between copying a card's effect
+   and its printed pulse behavior in a way that was difficult to reconcile"*.
+   This is `KURAGEMEM001`'s fight-1 and fight-3 observation again, on a rebuilt
+   display that did not touch the pulse line.
+2. **A harness sequencing report.** Fight 2 and fight 4 both say the fight-record
+   prompt arrived before the Muster selection and confirmation screens had
+   resolved — *"the game asked for a fight record before that interaction and the
+   fight itself had actually finished"*.
+
 
 ---
 
