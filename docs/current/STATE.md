@@ -350,12 +350,20 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     graders (15 SURVIVES / 1 REFUSED), sixteen replays, one flagged
     `misread`. Pair read: **two ADVANCE** (Fathom the Tide, Twin Tides)
     and **two RETURN** (Sounding Line, Watatsumi Levy — their boards, per
-    the review). **Round 2 is HELD and the hold is now registered:** its two
-    re-set boards are drafted at `understudy/turns/kokomi-slice-2-r2/`, and
-    §9 PICK 2 holds their staging on the CHARGE ACCRUAL RULE — whose options
-    1–4 retire all four arms as authored — a pick that was written in the
-    packet and never minted, so it is **QUEUE `M67`** as of 2026-08-30, and
-    the round-2 run scheduled that night stopped at the door unstaged. Two
+    the review). **Round 2 is HELD, and what holds it is no longer the
+    accrual rule:** its two re-set boards are drafted at
+    `understudy/turns/kokomi-slice-2-r2/`, and the round-2 run scheduled
+    2026-08-30 stopped at the door unstaged. **A sitting one branch over
+    ANSWERED accrual** (`425912a`, not merged here, so it is cited by hash
+    rather than by its R-number) —
+    uncapped, 1 per Exhaust of one of her own cards, Companions included,
+    spent only by the Bake-Kurage, and *no card prints a Charge price*
+    (PROSPECTIVE on the `C.KURAGE_MEMORY` flip). So all four arms print a
+    Charge price and retire as authored, **the two ADVANCED included**, and
+    no round-2 board survives. `M67` keeps its number, **re-scoped to that
+    consequence**: (1) the signed clause stands, arms and boards delete and the spend
+    plumbing stays — Claude's default; (2) a LAW carve-out for priced arms;
+    (3) hold slice 2 until `KURAGEMEM002` reruns. Two
     numbered picks wait in §9. Defects minted:
     `EB-182` (no per-option playability on the choose-a-card screen,
     proven off the decompile), `EB-183` (R216 D's per-companion half,
@@ -423,11 +431,16 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     sentence that was true of the register and false of the work, because
     Kokomi slice 2's Charge-accrual pick was holding round 2 from inside its
     packet and had never been minted. It is **`M67`** since 2026-08-30, and
-    it is the one prototype-slice row open. The slate's own
+    it is the one prototype-slice row open — re-scoped the same day, once
+    a sitting one branch over answered the accrual rule, to that answer's
+    CONSEQUENCE for the
+    four priced arms. The slate's own
     engineering is `EB-213`–`EB-219`, and the packet stays in
     `review/active/` as the record, every item carrying its RULED marker. Slice 2's round-2 boards
     (branch `kokomi-slice-2-round-2`, unstaged) no longer wait on `M50`:
-    its four rows are ruled, so they re-board against the ruled kit.
+    its four rows are ruled — but under the signed Charge clause they are
+    MOOT rather than
+    re-boardable, since both re-boarded arms price Charge.
   - **Klee Sparks — RE-AUTHORED, both engines, behind a flag**
     (`review/active/klee-sparks-2026-08-29.md`; evidence
     `docs/current/research/regent-stars-economy.md`). R219 B/C: the
@@ -603,9 +616,11 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     run, slice 1's `EB-184`, and R224's seven new rows
     `EB-213`–`EB-219` — of which `EB-219` (Prune's re-author) and
     `EB-218` (the Spark-only migration) precede the mixed-pool fight.
-    No [USER] row is open on the KLEE slice work; on Kokomi's, `M67` is, and
-    it holds slice 2's round 2 and the whole-fight play of its two ADVANCED
-    arms.
+    No [USER] row is open on the KLEE slice work; on Kokomi's, `M67` is —
+    no longer the accrual rule (a sitting one branch over answered that) but
+    its CONSEQUENCE, and
+    it holds the retirement of slice 2's round 2 and of all four arms, the
+    two ADVANCED included.
     **Klee's order, as R225 sets it:** `EB-205`'s sim-drafted read first, then
     a live controlled-ratio registration, then *Bag of Tricks* (`EB-224`);
     whole fights are unblocked, the two lifecycle throws being fixed and the
@@ -620,8 +635,11 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
 
 Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`), her protocol playtest (`S4-G14`) and her
-CHARGE ACCRUAL RULE (**`M67`**, minted 2026-08-30 — the pick slice 2's packet
-had been holding round 2 on since 2026-08-29 without ever being minted); the shop-rerun slate entry and
+RETIREMENT OF THE FOUR PRICED SLICE-2 ARMS (**`M67`**, minted 2026-08-30 as the
+Charge accrual pick slice 2's packet had been holding round 2 on unminted, and
+re-scoped the same day — the accrual half was answered one branch over, so
+what returns is its
+consequence for the arms, the two ADVANCED included); the shop-rerun slate entry and
 countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
 Art debt); the Fontaine Rares close-out (`M10`); and — after **R224
@@ -653,7 +671,9 @@ every prototype Harmony patch is character-scoped and seat-guarded
 (`EB-225`), with a three-fight soak on every dev deploy. `EB-220` is ruled
 too: Encore and Charge get glyphs now, under R212's art ladder. **`M67` is the
 one prototype-slice row open**, minted 2026-08-30 out of Kokomi slice 2 §9,
-where it had been holding round 2 unregistered.
+where it had been holding round 2 unregistered — and re-scoped the same day,
+because a sitting one branch over answered its accrual question and left only the
+consequence: whether the four priced arms retire as authored.
 
 ## Watch register (dormant)
 

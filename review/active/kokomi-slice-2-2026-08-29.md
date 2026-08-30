@@ -614,6 +614,46 @@ re-baseline attached, and both are frozen.
 
 ### PICK 2 — the Charge rule itself (`M67`)
 
+**RE-SCOPED 2026-08-30 (later the same day): the accrual question below is
+ANSWERED by R226, one branch over.** `r226-sitting-2026-08-30`, `git show
+425912a`, signs Kokomi's accrual as *"uncapped, accrued at 1 per Exhaust of one
+of her own cards, Companions included"* with exactly one destination — the
+Bake-Kurage pays it at the threshold — and adds *"no card prints a Charge price
+and no card reads the bank proportionally."* Against the five options below:
+**1–4 are foreclosed** (a per-turn wipe is a passive spend the clause forbids;
+the accrual funnel was widened, not narrowed, and R226 explicitly declined both
+the Companion-exclusion clause and the relic-face edit; Charge is retained as the
+kit's fuel), and **(5) survives as amended by the kit** — the bank is not a pure
+ramp, because the jellyfish drains it. The clause is PROSPECTIVE on the
+`C.KURAGE_MEMORY` flip; until the flip the shipped rule is still R80's *"Charge
+is never spent"*, which forecloses the priced arms today just as firmly.
+
+**What returns to [USER] is therefore the consequence, not the rule.** All four
+slice-2 arms print a Charge PRICE — Sounding Line, Fathom the Tide (its bonus
+costs the Charge it read), Twin Tides (mode 2), Watatsumi Levy — so all four
+retire as authored, **including the two that ADVANCED**, which is what the memory
+packet already stated at `review/active/kokomi-kurage-memory-2026-08-29.md:391-399`.
+No round-2 board survives: `t01`/`t02` are arm 1's and `t03`/`t04` are arm 4's,
+both category (a). `M67` stays OPEN and keeps its number, re-scoped to:
+
+1. **R226 stands — CLAUDE'S DEFAULT.** The four prototype rows and the four
+   `kokomi-slice-2-r2` boards delete under the prototype surface's own deletion
+   rule. The engine machinery is KEPT — `spend_charge` on `spend_spark`'s rail in
+   both engines, `ChargeResource.Spend` through its one named door,
+   `combat.charge_cost` / `IsPlayable`, and `KokomiRiderTips.ForCharge` — because
+   the kit's threshold fire is a spend. The Charge question moves whole into
+   `KURAGEMEM002`'s whole-fight rerun.
+2. **Carve-out — amend the R226 clause to admit priced arms.** A LAW amendment,
+   [USER]'s alone, needing R226 re-countersigned. It reopens exactly the
+   Encore-shaped-face precedent the clause was written to close.
+3. **Hold slice 2 entire until `KURAGEMEM002` reruns**, deciding nothing now.
+
+**Gate: [USER]** — a signed LAW's consequence reaching two graded arms is not
+Claude's to take under R212.
+
+The five options and the hold text below are kept as the record of what was
+asked, unstruck: this is a design packet, not a measurement record.
+
 **REGISTERED 2026-08-30 as QUEUE `M67`.** This pick was written here and never
 minted, so `STATE.md` — which reads the register — reported that no
 prototype-slice row was open while this hold was in force. The round-2 run was
@@ -648,6 +688,17 @@ accrual rule — universal exhaust→Charge (recommended) vs tag-gated"*, and it
 never been ruled.
 
 ## §10. Round 2 — the two boards, re-set
+
+**THESE BOARDS ARE MOOT UNDER §9 PICK 2 OPTION (1), and held pending `M67`
+(2026-08-30).** Both re-boarded arms price Charge — `t01`/`t02` are arm 1
+(Sounding Line), `t03`/`t04` are arm 4 (Watatsumi Levy) — so under R226 they
+retire with their arms and nothing in round 2 survives to run. What survives is
+METHOD, not boards: round 1's two RETURN prescriptions (*"another current-turn
+Charge use or reader so spending six Charge creates an observable sacrifice"*;
+*"give Muster an observable near-term payoff and a credible window to choose
+it"*) are the design brief for the memory kit's gate, and belong in
+`KURAGEMEM002`'s board design rather than here. The section below is kept as
+written, because it is the record of the repair those prescriptions bought.
 
 **2026-08-29, branch `kokomi-slice-2-round-2`, cut from `main` at `a51b0ea`.**
 This section is written by a session that owns neither the live game nor the

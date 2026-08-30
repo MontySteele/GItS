@@ -1,13 +1,17 @@
 # Kokomi slice 2, round 2 — turn manifest
 
-**STAGING IS HELD ON QUEUE `M67` (the Charge accrual rule), as of 2026-08-30.**
-The packet's §9 PICK 2 holds these four boards, and the pick is [USER]'s: its
-options 1–4 retire all four slice-2 arms as authored, because every one of them
-prices or banks Charge under the current accrual rule. A round-2 run was
-scheduled on 2026-08-30 and stopped here unstaged — no board staged, no model
-called. Everything below is the design of the boards and is unchanged; when
-`M67` is ruled, re-read it against the ruled rule before staging, because a
-rule change moves the numbers this file computes.
+**STAGING IS HELD ON QUEUE `M67`, as of 2026-08-30 — and `M67` is no longer the
+accrual rule.** R226 (branch `r226-sitting-2026-08-30`, `git show 425912a`)
+answered accrual — uncapped, 1 per Exhaust of one of her own cards, Companions
+included, spent only by the Bake-Kurage — and added that **no card prints a
+Charge price**. `M67` is re-scoped to that clause's CONSEQUENCE, and under its
+default option (1) **these four boards are MOOT**: both re-boarded arms price
+Charge (`t01`/`t02` arm 1, `t03`/`t04` arm 4), so they retire with their arms.
+A round-2 run was scheduled on 2026-08-30 and stopped here unstaged — no board
+staged, no model called. Nothing is deleted until `M67` is ruled, because the
+consequence reaches two ADVANCED arms and is [USER]'s to see. Everything below
+is the design of the boards and is unchanged; the round-1 prescriptions it
+encodes carry to `KURAGEMEM002`'s board design, not to a re-stage here.
 
 Four staged turns, two matched pairs. **This round exists only to answer the
 two RETURNs round 1 left**, and it changes nothing else: the two arms that
