@@ -76,11 +76,12 @@ shapes, and Ceremonial Garment's acquisition (**LOOT**: draftable Rare,
 `kit_card` and `requires: burst_energy_full` dropped, the kit-grant machinery
 deleted outright). The packet's own §6 architecture paragraph and all eight
 §3.2 LAW blocks are countersigned **AS PROSPECTIVE** — **no `LAW.md` line
-moved**. The engineering it created is `EB-213`–`EB-219` in `BACKLOG.md`;
-nothing in section 6 is open.
+moved**. The engineering it created is `EB-213`–`EB-219` in `BACKLOG.md`.
+One row has since returned from it: `M65`, the re-ask R224 item 17 = (3) ordered.
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
+| `M65` | **Ask:** *Bag of Tricks*, re-read by the doctrine seat after `EB-182` (R224 item 17 = (3)): D4 RESOLVED, one clause left — the written top-level-cost rule must admit a mode price. **Pick:** (1) amend the clause — the engineering is paid by `EB-182`, this is the clause and nothing else; (2) drop the arm, losing the only arm that put Sparks on the bomb board. | OPEN — **Gate:** no default; (1) is LAW-adjacent, (2) a design direction | klee-slice-1 §6.1.1 |
 
 ---
 
