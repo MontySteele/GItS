@@ -243,6 +243,28 @@ carried while it was active is in the commit message that retired it.
 
 ## Active registrations (pointers — packets live in `review/active/`)
 
+- **`KURAGEMEM002` the Kurage-memory teaching pass** — **REGISTERED, UNRUN.**
+  Packet `review/active/kokomi-kurage-memory-2026-08-29.md` §13.9, drafted and
+  committed before the deploy that runs it (R212(2)); §13.2's slate is what it
+  re-poses and **no threshold, denominator, falsifier or error direction is
+  moved**. **Instrument:** whole-fight blind play (`understudy.blindplay
+  session`) on a `+proto` dev build, with `EB-216`'s per-turn wire snapshot and
+  per-play meter ledger as the objective side — the grader's, never the
+  tester's. **Cell:** an integration build of `eb214-muster-keyword` and
+  `eb216-wire-snapshot` (merge `b49de52`), memory kit ON under
+  `-p:PrototypeCards=true`, one seed `KURAGEMEM002` pinned and unspent at
+  §13.5, the Oath granted into the starting deck. **Re-posed: `P1`, `P2`,
+  `P3`, `P4` (both halves)** — the four whose surface the pass replaced.
+  **`P5` and `P6` are NOT re-posed and their `KURAGEMEM001` grades stand as
+  published (R101b);** `P6`'s advance aim calls are RECORDED AND NOT GRADED.
+  **Decision linkage:** all four ADVANCE confirms the teaching pass and closes
+  `EB-214`; a `P3` RETURN falsifies `M54`(1)'s wording diagnosis and returns a
+  four-item numbered pick to [USER] (§13.9.4), which a `P4` half-(b) RETURN
+  joins as a fifth. **Seat:** the round can ADVANCE an arm, so `M64`(1) puts
+  the DECIDING read on the Codex seat, which is also the tester (R217 C);
+  `P3` alone is read by fresh Opus under §13.4's stricter family rule, both
+  reads labelled and neither presented as clean. Nothing here is a balance
+  measurement and no number from it is quotable (R213 B / R215 B, R217 G).
 - **`EB-118` card-connectivity instrument** — static pre-registration at
   `review/active/eb118-richness-phase0-2026-08-23.md` §2, [USER]-approved
   2026-08-23. **Instrument:** `tools/card_connectivity_report.py` —

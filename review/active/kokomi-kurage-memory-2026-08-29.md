@@ -2346,6 +2346,227 @@ should rule from a play record:
 ledger rows REVERTED, no game process, `steam_appid.txt` and the bridge removed.
 `KURAGEMEM002` and `KURAGEMEM003` unspent.
 
+### 13.9 `KURAGEMEM002` — the rerun
+
+**DRAFTED, REGISTERED, UNRUN, and committed before the deploy that runs it.**
+Drafted by Claude under R212(2) from written intent that already exists — §13.2
+is the slate this re-poses, R224 `M54`(1), `M55` and `M56` are [USER]'s
+rulings, and `EB-214`'s own acceptance line is the cell's shape — and
+countersigned in batch. **Nothing here is re-signed and no threshold is
+touched:** every re-posed slot carries §13.2's prediction, denominator,
+falsifier and one-way error direction character for character. What this
+section adds is which slots are asked again, why, what each grade permits, and
+what the round is contaminated by.
+
+**Nothing in §13.8 is re-read, re-scored or withdrawn (R101b).** `KURAGEMEM001`
+stands as published, including the two slots below that are NOT re-posed.
+
+#### 13.9.1 What changed under the slate, and therefore what may be asked again
+
+Three builds landed between the sealed run and this one, and between them they
+replaced the surface four of the six slots are read off.
+
+1. **The Muster keyword states Rule 1** (`EB-214` item 6, `M54`(1)).
+   `KokomiRiderTips.ForMuster`'s body gains, under `#if PROTOTYPE_CARDS`, *"A
+   Muster creates a memory of the card it ate, and the recruit creates a second
+   when it burns. A memory replays for Charge equal to 3x its Cost."* It is the
+   keyword's own body and not a second tip beside it — hover text is that
+   keyword's detail, and "tooltip" is not a third surface. The blind page
+   prints keyword bodies under every card in hand (`_render_card`), so the
+   sentence reaches a tester who cannot hover.
+2. **The strip is gone and the memory is an element** (`M61` option 3,
+   §14.9–§14.11). The page section was rewritten with it: the bank, the front
+   entry with its price and its state, the queue with its aims, and the run-out
+   sentence are now **one fact per line** where the strip put three grammars in
+   one sentence (`Charge 1 / 0`) — which is the frame the sealed tester read as
+   a contradiction and reported as a display bug.
+3. **The pile view says where Charge comes from** (`EB-214` item 7, `M55`
+   re-scoped). *"Gain 1 Charge when a card of yours Exhausts"* heads the
+   click-through view.
+
+**One instrument repair, done here, before the run, and disclosed rather than
+discovered afterwards.** Item 3 was a Godot `Label` and nothing else: a sighted
+player reads it on a click and **a blind tester has no click**, so `P4`'s half
+(b) would have been re-posed against a line the tester was never shown. The
+page now carries the screen's sentence verbatim at the head of the same queue
+block it already renders as "the queue, as the pile view shows it on a click"
+(`understudy/blindplay.CHARGE_SOURCE_LINE`, one lock, seen to FAIL first). The
+rate is spelled rather than imported, because `blindplay` may not reach `tier0`
+at all — the no-leak pin — so the test holds the two in step from the other
+side, the way `lint_constant_parity` holds the C# copy. **This changes no
+prediction, no threshold and no denominator**; it makes a registered surface
+reachable by the instrument that grades it, which is §13.8's own precedent
+(`blindplay notes`, fixed before the sealed seed was embarked and disclosed in
+the same place).
+
+#### 13.9.2 The re-posed slots — four of six, and the two that are not
+
+| slot | re-posed? | why |
+|---|---|---|
+| **P1** — the front entry and its price, off the page | **YES** | The surface it grades no longer exists. `P1` was written against the strip's `Charge {bank} / {price} — {name} {state}`; the page now prints `- Charge: N` and `- Next to fire: **X** — costs N Charge — …` as separate facts. A slot whose display was replaced has not been asked on the display it now has. |
+| **P2** — fires next turn, or blocked | **YES** | Same surface, same reason: the state is now a full clause on the front line rather than a word at the end of a fraction. And `EB-216`'s snapshot carries the `blocked` / `fires_next` pair for the turn the call was made on, so **the threshold is countable for the first time** — §13.8 graded it SPLIT partly because the record could not count it. |
+| **P3** — planning INTO the memory (Rule 1) | **YES** | `EB-214`'s own acceptance, and the reason the row exists. `M54`(1) ruled the 0-of-10 a WORDING failure; the wording is now printed and the claim is falsifiable. |
+| **P4** — the block, and what unblocks it | **YES, both halves** | Half (b) is what `M55`'s line addresses and is the half §13.8 recorded as failed. Half (a) is re-posed **with it and not separately**, because the empty-versus-blocked distinction it grades is drawn by the rebuilt element and its rebuilt page section — the same replacement that re-poses `P1`. A repeat of half (a)'s landing is not new evidence about the rule; it is the check that the rebuild did not lose what the strip had. |
+| **P5** — the Oath reads per-Memory-play | **NO** | Nothing in the pass touches the Oath's face, its condition or its wording. §13.8's **SPLIT stands as published** (R101b) and is not re-asked on a build that changed nothing about it. `EB-213`'s upgrade channel is in this build but the slot is about the base face, not the upgrade. |
+| **P6** — the automatic play's aim | **NO** | Nothing in the pass touches aim. The queue lines print `aims at {target}` exactly as the strip's queue lines did, so the surface is unchanged, and §13.8's **SPLIT stands as published** (R101b). It is not re-posed merely because `EB-216` would now make it gradable: a slot is re-asked when the thing it grades has moved, not when the instrument improves. **Recorded and NOT graded** below instead. |
+
+**`P6` is RECORDED AND NOT GRADED, and that is a registered outcome, not a
+grade.** §13.8's instrument finding was that `P6` needs the aim the automatic
+play actually took, and `record.md` held words only. This run's snapshot holds
+it. So every advance aim call in this record is **counted and filed** in the
+results, against the snapshot, with no verdict attached and no entry in any
+tally — the shape `KLEESPARK-W2` gave `W5'`. It is evidence for whoever
+registers `P6`'s own rerun; it decides nothing here, and it may not be read
+back as `P6` having been re-graded.
+
+**A blind spot, declared.** The re-posed set is chosen from §13.8's grades,
+which the drafter has read. **No threshold, denominator, falsifier or error
+direction is taken from them** — every one is §13.2's, unmoved — and WHICH
+slots are asked is R224's ruling and `EB-214`'s acceptance rather than a choice
+made against the numbers. The honest cost is that the four re-posed slots are
+the four that did not come in, so this round cannot say the display is good in
+general; it can only say whether the named repairs carried.
+
+#### 13.9.3 Thresholds, unchanged, and the condition on each grade
+
+The prediction, the threshold, the falsifier and the one-way error direction of
+each slot below are §13.2's, unaltered. What is new is only the third column:
+what the round is permitted to conclude.
+
+| slot | threshold (§13.2, unchanged) | ADVANCE | RETURN | ESCALATE |
+|---|---|---|---|---|
+| **P1** | YES on at least **4 of the first 5** graded turns with a non-empty queue — the tester names the head of the memory AND what it will cost | 4 or 5 of 5 | 3 or fewer of 5, **or** the falsifier fires (a stated price disagreeing with the snapshot's `front_price`, or "I cannot tell what is queued", on 2 or more of those 5) | the two recorded reads reach opposite verdicts on the same five turns |
+| **P2** | CORRECT on at least **5 of 6** graded turns with a non-empty queue, counted against the `blocked` / `fires_next` pair the wire carried for that turn | 5 or 6 of 6 | 4 or fewer, **or** 2+ wrong calls, and a wrong call in the FIRES direction is the serious one | as above |
+| **P3** | at least **3 of 10** graded turns carry a plan naming the Memory consequence, **and at least one of them is a Muster** | 3 or more of 10 with a qualifying Muster | 0, 1 or 2 of 10, **or** 3+ with no Muster among them | as above |
+| **P4** | YES on the **FIRST blocked turn of the run**, **both halves**: (a) says BLOCKED, distinctly from empty, and (b) names a play that would unblock it | both halves on the first blocked turn | either half missing on the first blocked turn; "not enough Charge yet, I will wait" with no named source is the registered example of (b) failing | as above |
+
+**UNREACHED, and it is not a pass.** §13.2's slot dependencies carry over
+whole: `P2` and `P4` are gradable only on turns the queue is non-empty, and a
+run producing **no blocked turn** leaves `P4` **UNREACHED, not PASSED** — which
+is itself a finding about the base kit's dose. `P1` needs five non-empty-queue
+graded turns and `P3` needs ten graded turns; short of those denominators the
+slot is UNREACHED and says so. Nothing is inferred from an absence.
+
+**ESCALATE, defined once.** A slot ESCALATES where its two recorded reads —
+the deciding grader's and the second read filed beside it — reach opposite
+verdicts on the same evidence. That is R213's guard in its own words (two seats
+materially disagreeing ESCALATES); it is not a third outcome a single grader
+can reach alone.
+
+#### 13.9.4 The decision each grade permits (R206)
+
+**Every re-posed slot ADVANCEs** — and `P3` is the one that must, because it is
+the row's acceptance. Then **the teaching pass is CONFIRMED**: `EB-214` closes,
+`M54`(1)'s diagnosis (wording, not dose) is carried, `M55`'s line and `M61`'s
+element are answered on the base kit, and the arm's next question is the one
+§13.7 declared out of scope — **the drafted pool**, banking toward a card you
+cannot yet afford out of a deck you chose. That needs its own registration and
+its own deck, and it is not taken here.
+
+**`P3` RETURNs** — 0, 1 or 2 of 10, or no qualifying Muster. Then `M54`(1) has
+been TRIED AND HAS NOT CARRIED, and the diagnosis "wording, not dose" is
+falsified on its own terms: the rule was printed on the surface the tester
+reads and the tester still did not plan into the queue. **That is the pick that
+returns to [USER], and it is a numbered pick list, not a blank:**
+
+1. **Take `M54`(2) after all** — change the starter Muster's DOSE (§12.3 slot
+   11, and the three Musters not chosen), on the reading that one Muster in a
+   twelve-card starter is too few occasions to learn a rule from.
+2. **Re-scope the arm to Rule 2 only** — the recruit's burn creates the memory,
+   the sacrifice does not; one rule instead of two, at the cost of the half
+   [USER] specified.
+3. **Keep the rule and concede D2 on this arm** — the queue is an automatic
+   engine the player watches, priced as one, with no claim that it is steered.
+4. **Retire the memory queue** and return to v2's threshold, which is the
+   design this replaced.
+
+**`P4` half (b) RETURNs.** The Charge sources are still not discoverable from
+the page with the line printed on it, which is the second time that half has
+failed. §13.2's registered consequence is that **the acceleration keyword
+("Stir", §11.3, provisional under R179) stops being optional** — a design call,
+so it joins the pick list above as its own numbered item rather than being
+taken by an integration.
+
+**`P1` or `P2` RETURNs.** The rebuilt element and page do not carry the front
+entry, its price or its state, and that is engineering on `EB-198`/`M61`'s
+element rather than a [USER] pick: the row goes back to BACKLOG with the
+failing frame named. **If BOTH return**, the display has now failed twice on
+two different shapes, and the third attempt is a direction question for [USER]
+rather than another integration's redraw.
+
+**`P4` half (a) RETURNs alone.** The rebuild LOST what the strip had — §13.8
+recorded half (a) landing — and that is a straight regression report against
+the element, filed and fixed, with no design question attached.
+
+#### 13.9.5 Contaminations
+
+Stated before the run, in full.
+
+- **The build is a `+proto` INTEGRATION of two unmerged branches and exists
+  nowhere else.** `kuragemem002-rerun` merges `eb216-wire-snapshot` into
+  `eb214-muster-keyword` at **`b49de52`**, with this registration and the
+  §13.9.1 page repair on top; neither parent is on `main`. Nothing measured
+  here is comparable to any other build, and a defect found here is this
+  integration's until it is seen elsewhere. The exact deployed commit and the
+  installed stamp are recorded in §13.9.7 before any observation is read.
+- **The memory kit is ON under the flag.** `-p:PrototypeCards=true` in C#,
+  `C.KURAGE_MEMORY` in sim. The rows are off-pool by construction, no shipped
+  number moved, and the release build was proven byte-identical when the
+  keyword landed. **Nothing here is a balance measurement and no number from it
+  is quotable** (R213 B / R215 B, R217 G).
+- **One seed, one session.** `KURAGEMEM002`, pinned in §13.5's table and
+  UNSPENT, taken in order. Every threshold is a **within-run rate** and
+  **nothing is compared with `KURAGEMEM001`** — different build, different
+  display, different page. Where a §13.8 figure appears in the results it is
+  context for a reader, never an arm.
+- **The deck is `KURAGEMEM001`'s.** `--arm proto_kurages_oath_memory` is
+  granted into the starting deck exactly as §13.5 pins it, even though `P5` is
+  not re-posed: the recipe is the registered one, and removing the card would
+  make this a different cell for no gain.
+- **Seat policy, `M64`, and the one place §13.4 overrides it.** This round
+  **can ADVANCE an arm**, so `M64`(1) applies and **the DECIDING read is the
+  Codex seat**. The tester is the Codex seat too (R217 C: the author's own
+  family may not play). **`P3` is the exception, and it is §13.4's, registered
+  before `M64` existed and stricter than it:** the GPT family supplied the rule
+  statement `P3` grades, so a GPT read of `P3` would be that family grading its
+  own clause. `P3` is read by **fresh Opus**, with its family marked in the
+  record and the honest limit written beside it — Claude implemented the rule,
+  so the read is independent of the *statement* and not of the
+  *implementation*. Neither read is presented as clean. **"Fresh Opus grades it"
+  is not a general rule** (§13.4 item 4).
+- **The local (Qwen) seat rides in SHADOW.** It may read the record; its
+  reading is filed, labelled, and **never graded, never tallied, never
+  replayed**. The `local` family is recognised and not authorable.
+- **`EB-216`'s snapshot is carried for the first time, and it is the GRADER'S
+  and never the tester's.** One row per `play` and per `end turn`, taken off
+  the state the command was resolved against; it lands gitignored as
+  `wire.jsonl` and beside the sealed record as `wire.json`, and `record.md`
+  names it and its row count and inlines nothing. Nothing in `observation()`,
+  `render()` or the feedback line reads a snapshot, and a test pins that no
+  card id and no `entity_id` from one reaches any prompt. The per-play meter
+  ledger rides with it.
+- **The drafter has read §13.8 in full**, and §13.9.2's blind spot says what
+  that costs.
+
+#### 13.9.6 The Codex call budget, and the guard
+
+**Cap: 70 Codex calls.** Up to 60 observation turns inside the one session
+thread (`--max-actions 60`, §13.5's recipe), up to 6 record prompts, 1 pair
+read, and 3 spare. `KURAGEMEM001` spent 67 on the same recipe.
+
+`python -m understudy.codex_usage` is **read before the first call and again
+after the last, and both lines are recorded verbatim in §13.9.7.** The stop
+lines are **85% of the five-hour window and 50% of the week**; `EB-227` makes
+the seat read its own window before every call and refuse past them. **If the
+guard refuses, the run stops cleanly and the round grades what ran** — an
+unrun slot is UNREACHED, an unread record is not a grade, and no board is
+re-read on a repaired copy.
+
+#### 13.9.7 THE RERUN — results
+
+*(Empty until the run. The prose read is a marked empty slot and is never
+generated.)*
+
 ---
 
 ## 14. The memory gauge — [USER]'s direction (2026-08-29)

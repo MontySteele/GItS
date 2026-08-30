@@ -27,6 +27,7 @@ from pathlib import Path
 
 import pytest
 
+from tier0 import constants as C
 from understudy import blindplay, embark, qa_packet, soak
 
 REPO = Path(__file__).resolve().parents[2]
@@ -1454,6 +1455,34 @@ def test_the_page_shows_the_bank_the_price_the_block_and_the_pulse():
     assert "the jellyfish will give you 5 Block" in page
     # The strip's grammars are gone with the strip.
     assert "Charge 5 / 9" not in page
+
+
+def test_the_pile_views_charge_source_header_reaches_the_blind_page():
+    """`EB-214` item 7 (`M55`, re-scoped by R224).
+
+    The Charge-source line is a Godot Label at the head of the pile view
+    (`KurageMemoryText.ChargeSource`), so a SIGHTED player reads it on a
+    click and a blind tester -- who has no click -- would never see it at
+    all. `P4`'s half (b) is exactly "name a play that would supply the
+    Charge", so a rerun grading that half against a line the page does not
+    carry would be grading a surface the tester was never shown.
+
+    The rate INTERPOLATES from the same constant the C# reads, which
+    `lint_constant_parity` pins equal (`KokomiConstants.ChargePerExhaust ==
+    C.CHARGE_PER_EXHAUST`), so a retune moves both sentences or neither.
+    """
+    page = blindplay.render(blindplay.observation(
+        memory_combat_state(BLOCKED_MEMORY)))
+    assert blindplay.CHARGE_SOURCE_LINE == (
+        f"Gain {C.CHARGE_PER_EXHAUST} Charge when a card of yours Exhausts")
+    assert blindplay.CHARGE_SOURCE_LINE in page
+    # It heads the QUEUE, where the pile view puts it -- not the top of the
+    # section, and never on an empty queue, which has no view to head.
+    assert "and then the whole memory, front first:" in page
+    empty = dict(BLOCKED_MEMORY, front_price=None, blocked=False,
+                 fires_next=False, empty=True, queue=[])
+    assert "when a card of yours Exhausts" not in blindplay.render(
+        blindplay.observation(memory_combat_state(empty)))
 
 
 def test_the_page_says_a_payable_front_fires_and_names_no_run_out():

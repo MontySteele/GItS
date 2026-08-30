@@ -92,6 +92,16 @@ from typing import Any, Callable
 
 from understudy import authorship, bridge, qa_packet, report, seat
 
+# `EB-214` item 7 (`M55`, re-scoped by R224). The pile view's own header, as
+# `KurageMemoryText.ChargeSource` renders it on screen. THE RATE IS SPELLED
+# RATHER THAN IMPORTED, deliberately: this module may not reach `tier0` at all
+# (`test_blindplay_cannot_reach_a_sheet_or_a_policy` is the structural
+# no-leak pin), so the number is held in step from the OTHER side --
+# `test_the_pile_views_charge_source_header_reaches_the_blind_page` reads
+# `C.CHARGE_PER_EXHAUST` and fails the moment this sentence falls behind a
+# retune, the same way `lint_constant_parity` holds the C# copy.
+CHARGE_SOURCE_LINE = "Gain 1 Charge when a card of yours Exhausts"
+
 REPO = Path(__file__).resolve().parents[1]
 LOG_ROOT = Path(__file__).resolve().parent / "logs" / "blindplay"
 RECORD_ROOT = REPO / "review" / "qa" / "blindplay"
@@ -1062,7 +1072,18 @@ def render(obs: dict[str, Any]) -> str:
                     state = "it fires at the start of your next turn"
                 out.append(f"- Next to fire: **{front['name']}** — {price} — "
                            f"{state}.")
-                out.append("- The whole memory, front first:")
+                # `EB-214` item 7 (`M55`, re-scoped by R224): the pile
+                # view's own header line. The page's contract above is the
+                # element's facts in the element's order, and item 3 is "the
+                # queue, as the pile view shows it on a click" -- the header
+                # is part of that view, and a reader who cannot click gets it
+                # here or nowhere. The screen's sentence VERBATIM, with the
+                # rate off the same constant `KurageMemoryText.ChargeSource`
+                # interpolates (`lint_constant_parity` pins the pair equal),
+                # so the two surfaces cannot drift on a retune.
+                out.append(
+                    f"- Opening the memory shows “{CHARGE_SOURCE_LINE}”, "
+                    "and then the whole memory, front first:")
                 for i, e in enumerate(m["queue"], 1):
                     price = "free" if not e["price"] else f"{e['price']} Charge"
                     out.append(f"  {i}. **{e['name']}** — {price} — "
