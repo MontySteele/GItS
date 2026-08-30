@@ -598,7 +598,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
         74, 78, 80, 83, 84, 116, 128,
         154,
-        156, 157, 158, 159, 160, 161, 162, 163,
+        157, 158, 159, 160, 161, 162, 163,
         180, 181, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
         # 202/203 were minted 2026-08-29 by the KLEESPARK-R1 relayed review
@@ -756,6 +756,15 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # was written under the OLD reading; re-planning that CLOSED round
         # reports ceiling 0 against threshold 1, and `slots.yaml` is NOT
         # edited -- a published measurement stands as published.
+        # 156 LEFT OPEN_IDS 2026-08-30 with its row: the per-fight telemetry
+        # row now reads `ReactionEffects.ResolvedThisCombat(combat, player)`,
+        # a per-seat counter keyed exactly like `BombPower`'s detonation
+        # totals next door. `TotalResolved` is UNCHANGED and still global --
+        # that scope is a sealed ruling (red-pen R1) about GAMEPLAY, and the
+        # defect was sampling it into a per-seat ROW. A dealer-less reaction
+        # belongs to no seat, so the seats sum to at most the team-wide count;
+        # that asymmetry is pinned, not hidden. `understudy/README.md`'s schema
+        # line is corrected. Tests: `KleeTests/ReactionSeatCountTests.cs`.
         # 155 LEFT OPEN_IDS 2026-08-30 with its row: KleeSelfCheck rule R20
         # sweeps this assembly's `KLEEMOD-` keyword CONSTANTS -- found by
         # reflection, never a curated list, because the failure being fixed IS
