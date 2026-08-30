@@ -169,6 +169,13 @@ MIRRORED: dict[str, object] = {
     "DemolitionConstants.SplashBurst": C.DETONATION_SPLASH_BURST,
     "DemolitionConstants.SplashProcCapPerTurn": C.DETONATION_SPLASH_PROC_CAP,
     "DemolitionConstants.PlaytimeBombDamage": C.PLAYTIME_BOMB_DAMAGE,
+    # EB-219 / LAW:145 -- "Little Hexenzirkul", Klee's kit answering a PERSONAL
+    # Companion play. These four ARE the declaration the clause requires, so a
+    # drift between the engines would be a drift in a rule, not in a tunable.
+    "KleeCompanionSpark.Base": C.KLEE_COMPANION_SPARK_BASE,
+    "KleeCompanionSpark.ReactionBonus": C.KLEE_COMPANION_SPARK_REACTION_BONUS,
+    "KleeCompanionSpark.UpgradedBonus": C.KLEE_COMPANION_SPARK_UPGRADED_BONUS,
+    "KleeCompanionSpark.MaxPerPlay": C.KLEE_COMPANION_SPARK_MAX_PER_PLAY,
     "CompanionConstants.OzDamage": C.OZ_DMG,
     "CompanionConstants.WitchsFlameBurst": C.WITCHS_FLAME_BURST,
     "CompanionConstants.SolarIsotomaBlock": C.SOLAR_ISOTOMA_BLOCK,

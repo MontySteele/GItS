@@ -100,10 +100,27 @@
 
 # ---------- PERSONAL POOL (Klee — designated teammate, not in shared pool) ----------
 - {id: prune_witch_hunt, name: "Prune — Little Witch's Hunt", star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 1, type: skill, personal_pool: klee,
-   effects: [{op: swirl, target: enemy}, {op: conditional, if: reaction_triggered_by_this, then: [{op: gain_spark, amount: 1}], else: [{op: block, amount: 5}]}, {op: gain_spark, amount: 1}]}
+   effects: [{op: swirl, target: enemy}, {op: conditional, if: reaction_triggered_by_this, then: [], else: [{op: block, amount: 5}]}]}
    # Swirl already spreads the consumed aura to every enemy; targeting ALL
    # cascaded through those freshly spread auras and over-triggered reactions.
    # The fallback is mutually exclusive with Swirl, so Prune has a Defend-sized
-   # body when drawn alone. A successful Swirl instead pays a second Spark,
-   # making her the reaction starter's energy-cheating support rather than a
-   # flat bundle of stats.
+   # body when drawn alone.
+   #
+   # SHE NO LONGER GRANTS SPARKS OFF HER OWN FACE (EB-219). She used to print
+   # `gain_spark 1` inside the conditional AND `gain_spark 1` unconditionally at
+   # top level -- two Sparks on a successful Swirl, one on a whiff, three
+   # upgraded -- and LAW:145 as countersigned (R224, 2026-08-30) says (lint-ok: 145 is a LAW clause number, not a card number)
+   # "Companion cards may not themselves grant signature resources." The grant
+   # moved WHOLE into Klee's kit, which is the other half of that clause: "A
+   # character-owned engine may respond to a Companion play and generate its
+   # resource where that character's kit explicitly declares the trigger and
+   # bounds the amount generated per Companion play." The declaration is
+   # constants.KLEE_COMPANION_SPARK_* ("Little Hexenzirkul"), the engine site is
+   # effects.klee_personal_companion_spark, and the player's yield is UNCHANGED
+   # -- 1 / 2 / 2 / 3, the same four numbers this row used to pay.
+   #
+   # The `then: []` branch is deliberate and is not a stub: the conditional
+   # still decides, it simply has nothing left to pay on the success side now
+   # that the Spark is the kit's. The Block is the whole of the failure side and
+   # stays here, because Block is not a signature resource and LAW:145 does not (lint-ok: 145 is a LAW clause number, not a card number)
+   # reach it. Her cost, her Swirl and her non-Exhaust body are untouched.

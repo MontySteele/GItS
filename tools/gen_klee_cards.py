@@ -595,6 +595,26 @@ def predicate_text(name: str) -> str | None:
     return PREDICATE_TEXT.get(name)
 
 
+# EB-219. A conditional whose THEN-branch is EMPTY is a real shape, not a stub:
+# `prune_witch_hunt` still decides on the reaction, she simply has nothing left
+# to pay on the success side now that LAW:145 moved her Spark into Klee's kit.
+# Rendering that as "If X: . Otherwise: Y" would print a dangling colon and emit
+# an empty `if` block, so both the face and the body INVERT -- and an inversion
+# needs the predicate said the other way round, which no predicate knows how to
+# do for itself. Entries are written ONE AT A TIME, by hand, for the card that
+# needs one: a predicate with no entry here BLOCKS the card loudly rather than
+# letting the generator guess at English.
+PREDICATE_TEXT_NEGATED: dict[str, str] = {
+    "reaction_triggered_by_this":
+        "If it did not trigger an [gold]Elemental Reaction[/gold]",
+}
+
+
+def negated_predicate_text(name: str) -> str | None:
+    """The if-clause for the FALSE arm, or None if nobody has written one."""
+    return PREDICATE_TEXT_NEGATED.get(name or "")
+
+
 CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 
 # Ops legal inside a conditional branch: plain resolvers with literal (or
@@ -1187,7 +1207,18 @@ HAND_WRITTEN_ROSTER = {"let_the_people_rejoice", "ceremonial_garment"}
 #                  curtain_cue's shape for the `encore` key. Distinct from
 #                  `conditional_bonus`, which moves ONE branch number through
 #                  the ExtraDamage var; these move ALL of them.
-EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark", "encore",
+EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
+                       # EB-219 / LAW:145: the upgrade of a PERSONAL COMPANION
+                       # whose Spark grant lives in its owner's KIT and not on
+                       # its face. There is no face number to bump -- that is
+                       # what the clause forbids -- so this is emitted the way
+                       # `condition` is: a play-time IsUpgraded read, made by
+                       # the kit hook rather than by the card, with a comment in
+                       # OnUpgrade saying where the upgrade went. It must NOT
+                       # reach `no_upgrade_path`: the campfire choice is real
+                       # and paid, it simply is not paid by this file's output.
+                       "kit_spark",
+                       "encore",
                        "encore_cost", "fanfare_cost", "fanfare_cap",
                        "fanfare_floor", "heal",
                        "bomb_damage", "burst_energy", "cost",
@@ -3222,6 +3253,15 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # the chance_bomb_per_detonation replacement.
         "bonus": any(e["op"] in BONUS_OPS and "bonus" in e for e in effects),
         "chance": any(e["op"] == "chance_bomb_per_detonation" for e in effects),
+        # EB-219 / LAW:145. The requirement is not an OP on the card -- the
+        # whole point of the clause is that the Companion prints no Spark
+        # number -- it is that the card is a PERSONAL COMPANION, whose owning
+        # character's kit is what reads the upgraded flag at play time. A
+        # `kit_spark` delta on any other row is a sheet/card mismatch and is
+        # reported as one, exactly like every other key here. tier0 raises on
+        # the same condition (upgrades.apply), so neither engine can drift into
+        # accepting it quietly.
+        "kit_spark": bool(card.get("personal_pool")),
         # Structural `add` upgrades are validated by VALUE below, not here:
         # which shapes are expressible depends on the added op and on what the
         # base card already declares, so the whole key is owned by the loop.
@@ -4255,6 +4295,13 @@ def _conditional_block(pred: str, then_lines: list[str],
     def body(stmts: list[str]) -> str:
         return "\n".join("            " + s.replace("\n", "\n    ")
                          for s in stmts)
+    if not then_lines and else_lines:
+        # EB-219: empty THEN, real ELSE -- the inverted single-armed
+        # form, rather than an empty `if` block followed by an `else`.
+        # Same decision, same predicate, one arm. PREDICATE_TEXT_NEGATED
+        # is the face half of the same inversion.
+        return (f"if (!({pred}))\n        {{\n"
+                f"{body(else_lines)}\n        }}")
     out = f"if ({pred})\n        {{\n{body(then_lines)}\n        }}"
     if else_lines:
         out += f"\n        else\n        {{\n{body(else_lines)}\n        }}"
@@ -6363,10 +6410,27 @@ def build_description(card: dict) -> str:
             if any(e.get("op") == "repeat_this" for e in then):
                 parts.append(f"{pred_txt}: play this card again.")
             else:
+                els = eff.get("else", [])
+                if not then and els:
+                    # EB-219: the inverted single-armed form. The predicate is
+                    # said the other way round and the ELSE payload is the whole
+                    # clause -- no "Otherwise", because there is no first arm for
+                    # it to be otherwise than.
+                    neg = negated_predicate_text(eff["if"])
+                    if neg is None:
+                        raise SystemExit(
+                            f"{card['id']}: conditional on {eff['if']!r} has an "
+                            "empty then-branch and no PREDICATE_TEXT_NEGATED "
+                            "entry -- write the negated face text rather than "
+                            "letting the generator guess")
+                    parts.append(
+                        f"{neg}: "
+                        + _branch_text(card, els, in_then=False,
+                                       predicate=eff["if"]))
+                    continue
                 then_txt = _branch_text(card, then, in_then=True,
                                         predicate=eff["if"])
                 clause = f"{pred_txt}: {then_txt}"
-                els = eff.get("else", [])
                 if els:
                     clause += (" Otherwise: "
                                + _branch_text(card, els, in_then=False,
@@ -6776,6 +6840,17 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(
             "// condition: unconditional -- expressed at play time as "
             "(IsUpgraded || predicate); the text swaps via {IfUpgraded:show:...}.")
+    if "kit_spark" in deltas:
+        done.add("kit_spark")
+        lines.append(
+            "// kit_spark: expressed at play time as an IsUpgraded read by the "
+            "owning character's kit")
+        lines.append(
+            "// (KleeElementalHooks / KleeCompanionSpark) -- LAW:145 forbids "
+            "the Companion card itself from")
+        lines.append(
+            "// carrying the Spark number, upgraded or not. tier0 twin: "
+            "upgrades.apply key 'kit_spark'.")
     if "bombs" in deltas:
         done.add("bombs")
         lines.append(f'DynamicVars["Bombs"].UpgradeValueBy({int(deltas["bombs"])}m);')

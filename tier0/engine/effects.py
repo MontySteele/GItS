@@ -909,6 +909,57 @@ def gain_sparks(state: CombatState, n: int) -> None:
     state.emit("gain_spark", amount=n, total=state.player.sparks)
 
 
+def klee_personal_companion_spark(state: CombatState, card: Card) -> None:
+    """"Little Hexenzirkul" -- Klee's kit answering a Personal Companion play.
+
+    THE DECLARATION LAW:145 REQUIRES, and the ONLY place a Companion play mints
+    Sparks. The clause (countersigned R224, 2026-08-30) reads: "Companion cards
+    may not themselves grant signature resources. A character-owned engine may
+    respond to a Companion play and generate its resource where that
+    character's kit explicitly declares the trigger and bounds the amount
+    generated per Companion play." So the grant is HERE, in Klee's kit, keyed on
+    her PERSONAL Companion pool -- and `prune_witch_hunt`'s face, which used to
+    print two `gain_spark` ops, prints none (EB-219).
+
+    WHY THE CALL SITE IS WHERE IT IS (`combat._finish_play`, after the FIRST
+    resolution of the play):
+      * ONCE PER PLAY. `_finish_play` is the shared half of every card play --
+        manual and auto -- and the replay loop sits inside it, so minting on the
+        first pass is "once per Companion play" by construction rather than by
+        discipline. A replay (Study Buddy) is one card being resolved twice, and
+        a per-play bound a replay can double is not a bound.
+      * AFTER a resolution, because `reactions_this_card` is the answer to "did
+        this play trigger a reaction" and it does not exist before one.
+    C# says the same thing at the twin site (`KleeElementalHooks`), where
+    `CompanionPlays.Record` already means "once per Companion play".
+
+    PARITY IS THE WHOLE SPEC. See the constants block: 1 / 2 / 2 / 3 are the
+    four numbers Prune's face paid and the three limbs reproduce them.
+    """
+    from tier0.content import upgrades          # late import avoids cycle
+    if not card.is_companion or card.personal_pool is None:
+        return
+    if card.personal_pool != state.player.character_id:
+        # The pool names its owner, so this is the kit-scoping LAW:145 asks for
+        # rather than a redundancy: a Personal Companion that somehow reached
+        # another character's deck mints nothing, because it is not that
+        # character's kit that declared it.
+        return
+    n = C.KLEE_COMPANION_SPARK_BASE
+    if state.reactions_this_card > 0:
+        n += C.KLEE_COMPANION_SPARK_REACTION_BONUS
+    if card.id.endswith(upgrades.SUFFIX):
+        # The upgrade is expressed at play time as an upgraded-flag read, which
+        # is what the sheet's `kit_spark` key declares: a Companion may not
+        # print a signature-resource number, upgraded or not.
+        n += C.KLEE_COMPANION_SPARK_UPGRADED_BONUS
+    n = min(n, C.KLEE_COMPANION_SPARK_MAX_PER_PLAY)
+    if n <= 0:
+        return
+    state.emit("klee_companion_spark", card=card.id, amount=n)
+    gain_sparks(state, n)
+
+
 def spend_spark_amount(fx: dict) -> int:
     """The literal Spark price on one `spend_spark` effect.
 

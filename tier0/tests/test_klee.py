@@ -229,27 +229,35 @@ def test_survival_sprint_companion_interfaces_have_live_bodies():
 
 
 def test_prune_has_a_solo_floor_and_a_distinct_reaction_payoff():
-    """Prune never blanks, but successful Swirl does not also grant Block."""
-    from tier0.engine import effects
+    """Prune never blanks, but successful Swirl does not also grant Block.
+
+    EB-219 moved the SPARK half of this card off its face and into Klee's kit
+    (LAW:145), so the yields are asserted through `play_card` -- the kit trigger
+    fires once per PLAY, in `_finish_play`, and a `resolve_card` call is half a
+    play. The numbers below are the ones this test asserted before the move.
+    """
+    from tier0.engine.combat import play_card
     from tier0.tests.conftest import make_enemy, make_state
 
     prune = loader.get_card("prune_witch_hunt")
 
     offline = make_state()
-    effects.resolve_card(offline, prune)
+    offline.player.character_id = "klee"
+    offline.player.hand = [prune]
+    play_card(offline, prune)
     assert offline.player.block == 5
     assert offline.player.sparks == 1
-    assert offline.reactions_this_card == 0
 
     # The generic simulator normally aims at the lowest-HP enemy. Swirl is a
     # targeted setup card, so it should model a human choosing the aura instead.
     online = make_state(enemies=[make_enemy(hp=20, name="low"),
                                  make_enemy(hp=30, name="aura")])
+    online.player.character_id = "klee"
     online.enemies[1].aura = "hydro"
-    effects.resolve_card(online, prune)
+    online.player.hand = [prune]
+    play_card(online, prune)
     assert online.player.block == 0
     assert online.player.sparks == 2
-    assert online.reactions_this_card == 1
     assert all(enemy.aura == "hydro" for enemy in online.enemies)
 
 

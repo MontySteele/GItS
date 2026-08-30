@@ -56,13 +56,13 @@ public sealed class PruneWitchHunt : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Prune — Little Witch's Hunt"),
-        ("description", "[gold]Swirl[/gold] an enemy's aura. If it triggered an [gold]Elemental Reaction[/gold]: gain 1 [gold]Spark[/gold]. Otherwise: gain 5 [gold]Block[/gold]. Gain {Sparks:diff()} [gold]Spark{Sparks:plural:|s}[/gold]."),
+        ("description", "[gold]Swirl[/gold] an enemy's aura. If it did not trigger an [gold]Elemental Reaction[/gold]: gain 5 [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Sparks", 1m)
+
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -78,19 +78,16 @@ public sealed class PruneWitchHunt : CustomCardModel, ICompanionCard
         var reactionsAtStart = ReactionEffects.TotalResolved;
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Anemo, Owner.Creature);
-        if (ReactionEffects.TotalResolved > reactionsAtStart)
-        {
-            await SparkPower.Gain(choiceContext, Owner.Creature, 1, this);
-        }
-        else
+        if (!(ReactionEffects.TotalResolved > reactionsAtStart))
         {
             await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(SpotlightSystem.PrintedBlock(this, 5m), ValueProp.Move), cardPlay);
         }
-        await SparkPower.Gain(choiceContext, Owner.Creature, DynamicVars["Sparks"].IntValue, this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Sparks"].UpgradeValueBy(1m);
+        // kit_spark: expressed at play time as an IsUpgraded read by the owning character's kit
+        // (KleeElementalHooks / KleeCompanionSpark) -- LAW:145 forbids the Companion card itself from
+        // carrying the Spark number, upgraded or not. tier0 twin: upgrades.apply key 'kit_spark'.
     }
 }

@@ -31,6 +31,7 @@ from pathlib import Path
 
 import yaml
 
+from tier0 import constants as C
 from tier0.content import local_reference
 
 _DOCS = Path(__file__).parents[2] / "docs"
@@ -456,6 +457,33 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
         elif key == "spark":
             ok = _bump_first((fx for fx in top if fx.get("op") == "gain_spark"),
                              "amount", val)
+        elif key == "kit_spark":
+            # EB-219 / LAW:145. The upgrade of a PERSONAL COMPANION whose Spark
+            # grant lives in its owner's kit rather than on its face. There is
+            # nothing on the face to bump -- that is the point of the clause --
+            # so this key applies NO effect delta and is not a silent no-op
+            # either: the engine expresses it at play time by reading the
+            # upgraded flag (effects.klee_personal_companion_spark), the same
+            # shape the `condition` key uses, and the codegen emits the matching
+            # play-time comment rather than flagging a missing upgrade path.
+            #
+            # THE VALUE IS CHECKED RATHER THAN TRUSTED. The sheet number and the
+            # engine constant are two writings of one fact, and a sheet that
+            # said +2 while the kit minted +1 would be exactly the class of
+            # defect this file's `exhaust` branch was added to stop (a key live
+            # in one engine and dead in the other). So the row must name a card
+            # the kit actually reaches, and must agree with the constant.
+            if card.personal_pool is None:
+                raise ValueError(
+                    f"upgrade {base_id!r}: key 'kit_spark' is only meaningful "
+                    "on a personal_pool companion -- no kit declares a trigger "
+                    "for a shared row")
+            if val != C.KLEE_COMPANION_SPARK_UPGRADED_BONUS:
+                raise ValueError(
+                    f"upgrade {base_id!r}: kit_spark {val:+d} disagrees with "
+                    "KLEE_COMPANION_SPARK_UPGRADED_BONUS "
+                    f"{C.KLEE_COMPANION_SPARK_UPGRADED_BONUS:+d}; the sheet and "
+                    "the kit are two writings of one number")
         elif key == "discard":
             # R36 grammar: moves the chosen-discard count on Crackle's op.
             #

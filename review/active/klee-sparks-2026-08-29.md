@@ -3275,22 +3275,34 @@ Pyro specifically. C# says the same thing the same way
 - **Prune's face keeps everything else**: the Swirl, the conditional, the Block,
   the cost, the non-Exhaust. Only the two `gain_spark` ops leave.
 
-**The Pyro narrowing was NOT taken, and that is deliberate.** The direction as
-relayed names *"a Personal Companion's Swirl on a Pyro aura"*. Prune's face
-today pays on ANY reaction and pays 1 Spark even when the Swirl finds no aura at
-all, so a Pyro-scoped, Swirl-scoped trigger would pay **0** on a whiffed Swirl
-and **0** on a Swirl into a Cryo or Electro aura, and the acceptance line — *the
-same Sparks* — would fail on both. A narrowing to Pyro is a real design
-direction, it is a **nerf** of unmeasured size, and it is not mine to take. It
-is recorded here as an alternative for [USER] and **nothing is defaulted**:
+**THE PYRO NARROWING IS WITHDRAWN — it was never [USER]'s words.** An earlier
+draft of this section carried *"a Personal Companion's Swirl on a Pyro aura"* as
+though it were part of the ruling. **It is not.** It was a paraphrase written
+into the working brief that reached this desk, and it is withdrawn here rather
+than quietly deleted, because the first doctrine read (§15.7) returned on it and
+that return has to stay legible. [USER]'s ruling is, in full and with nothing
+else in it:
 
-> **ALTERNATIVE, NOT BUILT — [USER]'s to take or leave.** *"When Klee plays a
-> Personal Companion whose Swirl consumes a Pyro aura, her kit mints 2 Sparks
-> (3 if that Companion is upgraded). At most 3 per Companion play."* It reads
-> closer to *"ties in directly with Klee's engine"* — Pyro is her element — and
-> it costs the 1 Spark Prune pays today for a whiffed or off-element Swirl. It
-> is **not** parity and it does **not** satisfy `EB-219`'s acceptance line as
-> written, so taking it would move that line too.
+> *"Let's try to re-author her. As a Personal Companion, she should tie in
+> directly with Klee's engine."*
+
+Read against those words plus `EB-219`'s acceptance line — *"no `gain_spark`,
+one declaration, the same Sparks"* — **§15.3 is the DERIVED reading, not a
+picked one.** "Tie in directly with Klee's engine" is satisfied exactly by the
+kit declaring the trigger; "the same Sparks" fixes every number, so nothing here
+is chosen. That is R212(6), derived-not-picked: the error direction is one-way
+(any deviation moves a shipped number), the scope is one card, and no constant
+is invented — all four amounts are lifted off the committed face.
+
+**A Pyro-scoped trigger is not an available alternative today, and the reason is
+R213.** It would pay **0** where Prune pays **1** — on a Swirl that finds no
+aura, and on a Swirl into a Cryo or Electro aura — so it is a **nerf of
+unmeasured size**. That makes it a **tuning lever**, and the R213 design freeze
+holds levers. It is therefore not a design pick standing beside parity; it is a
+balance change that cannot be pulled at all right now. **It is recorded as a
+possible balance item for after the freeze and NO REGISTER ROW IS MINTED for
+it** — if it is ever wanted, it is drafted, measured and pulled as a lever in
+its own right, never folded into a legality fix.
 
 ### 15.4 Which companions the rule reaches
 
@@ -3388,34 +3400,134 @@ other and choosing neither, which is the only thing it is permitted to do: it
 may not pick between two design directions and it may not write a third. It
 volunteered **no remedy**, so nothing here is DISCARDED.
 
-**BUILD STOPPED, at the seat (R217).** A doctrine read that returns is a stop,
-and this one returns on exactly the question §15.3 flagged as not Claude's: the
-relayed ruling names *a Swirl on a Pyro aura* and the acceptance line demands
-*the same Sparks*, and the two cannot both be honoured. Nothing was built. The
-sheets, the constants, both engines and the generated card are **untouched** —
-Prune still grants her own Sparks and `EB-219` is still open. The declaration
-above stands DRAFTED and unbuilt, which is what R217 asks a returned read to
-leave behind.
+**THE BUILD STOPPED HERE, at the seat (R217),** and the stop stands as
+published — a returned read is not re-graded away (R101b). What it returned on
+is the next paragraph's business. At the moment of the return nothing had been
+built: the sheets, the constants, both engines and the generated card were
+untouched, and the declaration stood DRAFTED and unbuilt, which is what R217
+asks a returned read to leave behind.
 
-**What goes back to [USER] — a NUMBERED PICK LIST, no default marked.** One
-pick, and it is a pick between two genuinely different design directions, which
-the delegation ladder (R212) reserves to [USER]:
+**WHAT THE FIRST READ ACTUALLY RETURNED ON, and it was not the declaration.**
+G1 set [USER]'s ruling against `EB-219`'s acceptance line and asked which
+reading to take. **That opposition was manufactured by the brief.** The
+*"Swirl on a Pyro aura"* half of it was a **paraphrase in the working brief,
+not [USER]'s words** — the ruling is only *"Let's try to re-author her. As a
+Personal Companion, she should tie in directly with Klee's engine."* The
+paraphrase is **WITHDRAWN** (§15.3). With it withdrawn there are not two
+readings: the ruling and the acceptance line agree, and §15.3 is what they
+derive to.
 
-1. **PARITY.** Build §15.3 as drafted: any Personal Companion play mints 1
-   Spark, +1 on a reaction, +1 if upgraded, capped 3 per play. Prune's four
-   yields are unchanged; the acceptance line is met as written; the *"Pyro
-   aura"* half of the relayed words is not honoured. Cost: nothing measured
-   moves except the replayed-Prune case in §15.5.
-2. **PYRO-SCOPED.** Build §15.3's recorded ALTERNATIVE: a Personal Companion
-   whose Swirl consumes a **Pyro** aura mints 2 Sparks (3 upgraded), capped 3
-   per play, and nothing otherwise. It honours *"tie in directly with Klee's
-   engine"* literally. Cost: Prune loses the 1 Spark she pays today on a
-   whiffed or off-element Swirl, so this is a **nerf of unmeasured size**, and
-   `EB-219`'s acceptance line — *"the same Sparks"* — **moves with it** and has
-   to be re-written in the same act.
-3. **PARITY NOW, PYRO LATER.** Take (1) to close `EB-219` under its own
-   acceptance line, and mint a separate row for the Pyro narrowing so it is
-   measured as a balance change rather than smuggled in as a legality fix.
+**OPTION (1), PARITY AS DRAFTED, IS TAKEN — under the R212 ladder, and it does
+NOT return to [USER].** The three options this section first offered are
+resolved as follows, and the resolution is recorded rather than left implied:
 
-The seat cannot answer this and neither can Claude. Everything else in §15 is
-CLEAN on an independent read and is ready to build the moment this is answered.
+1. **PARITY as drafted — TAKEN.** R212(6), derived-not-picked: one card, one
+   one-way error direction, no invented constant — all four Spark amounts are
+   lifted off Prune's committed face. Nothing here is a taste call, so nothing
+   here is [USER]'s.
+2. **PYRO-SCOPED — NOT AVAILABLE, and not because it lost a pick.** It is a
+   nerf of unmeasured size, which makes it a **tuning lever**, and the **R213
+   design freeze holds levers**. There is no version of this sitting today
+   where option (2) could be taken, by Claude or by [USER], as part of a
+   legality fix.
+3. **A LATER NARROWING — possible, unminted.** If the Pyro scoping is ever
+   wanted it is drafted, measured and pulled as a balance lever in its own
+   right after the freeze. **No register row is minted for it here**, because a
+   row minted now would be a transient one for a decision nobody has asked for
+   (R206/R212).
+
+**So the build proceeds on §15.3 as drafted**, and the amended §15 goes back to
+the seat once — the return was on the withdrawn paraphrase, and a section that
+no longer contains it has not been read.
+
+### 15.8 The doctrine-seat read, second run — on the amended §15
+
+Run 2026-08-30, same convention and same seat, on the AMENDED §15 — the
+paraphrase withdrawn, the derivation claim stated. Prompt:
+`review/qa/eb219-prune-doctrine-review-r2-prompt.txt`; verbatim output:
+`review/qa/eb219-prune-doctrine-review-r2-codex-gpt-5.6-sol.md`. One Codex call.
+The brief re-asked ARMS A–C unchanged, told the seat what its first read had
+answered and why it is being asked twice (it has no memory of the first), and
+replaced the withdrawn gate with a fourth arm on the derivation itself.
+
+**The seat's output, verbatim and unedited:**
+
+> 1. ARM A — FOLLOWS. CLAUSE: LAW:145. RISK: None.
+>
+> 2. ARM B — FOLLOWS. CLAUSES: D3, D4. RISK: None.
+>
+> 3. ARM C — FOLLOWS. CLAUSES: D7, D9. RISK: None.
+>
+> 4. ARM D — FOLLOWS. CLAUSES: D2, D4. The derivation holds. RISK: None.
+
+**CLEAN — four arms, no return, no remedy volunteered.** ARM D is the one that
+was not asked the first time and it is the one that matters: *"The derivation
+holds."* The build proceeded on that.
+
+### 15.9 What was built
+
+**Branch `eb219-prune-reauthor`. Shipped-pool behaviour, not flag-gated** —
+LAW:145 governs the shipped game, `SPARK_ALT_COST_ENABLED` gates an economy
+experiment, and both arms of that flag see the re-authored Prune.
+
+| where | what |
+|---|---|
+| `docs/mondstadt-companions.yaml` | both `gain_spark` ops leave her face; the conditional keeps deciding with an empty `then` and the 5 Block on the `else`; cost, Swirl, non-Exhaust untouched |
+| `docs/klee-upgrades.yaml` | `{spark: +1}` → `{kit_spark: +1}`, the same +1 declared where the grant now lives |
+| `tier0/constants.py` | the declaration: `KLEE_COMPANION_SPARK_BASE/REACTION_BONUS/UPGRADED_BONUS/MAX_PER_PLAY` = 1/1/1/3, and `CONSTANTS_VERSION` 20 → **21** with `SHEET_DIGEST` re-pinned in the same commit |
+| `tier0/engine/effects.py` | `klee_personal_companion_spark` — the one site |
+| `tier0/engine/combat.py` | called from `_finish_play`, inside the replay loop but gated to the first pass |
+| `tier0/content/upgrades.py` | the `kit_spark` key, which applies no face delta and **raises** if the sheet number and the kit constant disagree, or if the row is not a Personal Companion |
+| `tools/gen_klee_cards.py` | `kit_spark` made expressible (play-time `IsUpgraded` read, the `condition` key's shape) + `PREDICATE_TEXT_NEGATED` so an empty `then` renders as the inverted single-armed form instead of a dangling colon |
+| `klee-mod/.../PruneWitchHunt.cs` | REGENERATED, not hand-edited |
+| `klee-mod/.../KleeCompanionSpark.cs` | the C# twin, armed at `BeforeCardPlayed` and settled at `AfterCardPlayed`, both on `IsFirstInSeries` |
+| `klee-mod/.../ElementalApplication.cs` | the two call sites, beside `CompanionPlays.Record` |
+| `tools/lint_constant_parity.py` | the four constants classified **MIRRORED** — a drift between the engines here would be a drift in a RULE, not in a tunable |
+
+**Her printed face, before and after:**
+
+> *before:* "Swirl an enemy's aura. If it triggered an Elemental Reaction: gain
+> 1 Spark. Otherwise: gain 5 Block. Gain 1 Spark."
+>
+> *after:* "Swirl an enemy's aura. If it did not trigger an Elemental Reaction:
+> gain 5 Block."
+
+**The `CONSTANTS_VERSION` bump, and why one was taken on a parity change.** The
+four yields do not move, so on outcomes this is as close to a no-op as a sheet
+edit gets. It is stamped anyway because the SHEET moved and LAW's material-edit
+clause names "effect-number changes" with no exemption for an edit that restores
+the number elsewhere — and because §15.5's replayed-Prune case is a real world
+difference. `RT`/`D`/`P` are untouched, and `D` is arithmetic rather than hope:
+`draft.STATIC_SPARK_VALUE` is **0.0**, so deleting two `gain_spark` ops from a
+printed row changes her offer score by exactly nothing.
+
+**Green lines, verbatim.**
+
+```
+4753 passed, 46 skipped, 12 xfailed, 18 warnings in 308.89s
+OK: 28 lint(s) passed                                    (run_lints --lane ci)
+face scaling OK: 18 face(s) state a fold once and none state one twice, of 333 card class(es) read
+upgrade coverage OK: 284 draftable cards across 6 sheets, 0 curated codegen debt(s), 277 generated OnUpgrade bodies read
+constant parity: OK (83 mirrored, 25 declared unmirrored, 2 ratified invariants held)
+sheet-stamp OK: every content sheet is accounted for by the digest pinned beside CONSTANTS_VERSION.
+Build succeeded.  0 Error(s)            (dotnet build klee-mod/KleeCode -c Release)
+Build succeeded.  0 Error(s)            (…the same, -p:PrototypeCards=true)
+Passed! - Failed: 0, Passed: 171, Skipped: 0, Total: 171   (KleeTests)
+```
+
+**NEITHER EXEMPTION LIST GREW.** `lint_upgrade_coverage`'s `SHEET_EXEMPT` and
+`CODEGEN_DEBT` are both still EMPTY, which was the deciding constraint on how
+the upgrade was expressed: the honest reading of that lint is that Prune's
+campfire choice is REAL — upgrading her mints one more Spark — so silencing the
+lint with a curated entry would have been recording a defect where there is
+none. `kit_spark` says the true thing instead, in the sheet, in both engines.
+
+**ONE LINT FAILS AND IT IS ENVIRONMENTAL, not this change:**
+`card-distinctness` exits 2 with *"NO OFFICIAL ANCHOR IN THIS RUN — thresholds
+are calibrated against one and cannot be checked without it"* — the worktree has
+no `game_ref/` pools. It fails identically on the parent commit.
+
+**What this section does not do.** It closes no register row (`BACKLOG`,
+`QUEUE`, `STATE`, `LAW` are untouched — those close after merge), it deploys
+nothing, and it launches no game. `EB-219`'s acceptance line is met in full: no
+`gain_spark`, one declaration, the same Sparks.
