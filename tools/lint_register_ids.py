@@ -397,10 +397,14 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 182, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
-        # 202/203 minted 2026-08-29 by the KLEESPARK-R1 relayed review:
-        # the unreachable-threshold check, and the pre-seal target check
-        # whose repair half went to QUEUE M63.
-        202, 203,
+        # 202/203 were minted 2026-08-29 by the KLEESPARK-R1 relayed review
+        # and LEFT OPEN_IDS with their rows the same day, both BUILT under
+        # R222: the slot-reachability check (`understudy/slot_plan.py`, a
+        # round's `slots.yaml`, refused by `round --plan-only` and
+        # `staged_turn check`) and the pre-grade target refusal
+        # (`understudy/targeting.py`, falsifier `target_missing`). The repair
+        # half stayed out of both and is QUEUE `M63`. Ceilings never come
+        # down.
         # 205 minted 2026-08-29 by R222 pick 6(d): a drafted arm for the
         # Klee Spark economy, now that the drafter can be offered the rows.
         205,

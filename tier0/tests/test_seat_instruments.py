@@ -1,0 +1,331 @@
+"""EB-203 AND EB-202: the two instrument defects `KLEESPARK-R1` surfaced.
+
+Both locks are stated on the ROUND'S OWN SEALED RECORD rather than on a
+fixture invented for them, because both defects were invisible to every check
+the round ran and visible only in the pair read. A lock written on a synthetic
+board would be a lock on the sentence I wrote, not on the failure.
+
+  * **EB-203** -- `t01` and `t07`'s local-seat forms are refused
+    `target_missing`, and Duck and Cover's `target: null` on that same `t07`
+    line stays legal. The sealed forms are read-only inputs (R101b); nothing
+    here writes into the closed directories.
+  * **EB-202** -- the eight committed `KLEESPARK-R1` boards refuse `P1` at
+    threshold 4 and NAME the ceiling 3, on the same three boards the packet's
+    erratum names (`t02`, `t03`, `t06`).
+"""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+
+from understudy import (local_tester, qualify, resource_order, slot_plan,
+                        staged_turn, targeting)
+
+REPO = Path(__file__).resolve().parents[2]
+QA = REPO / "review" / "qa"
+SPARKS = REPO / "understudy" / "turns" / "klee-sparks-r1"
+LOCAL_FORM = "form-local-qwen3-8-27b-ud-q4-k-xl.json"
+
+
+def _sealed_line(turn_id: str) -> list[dict]:
+    blob = json.loads((QA / turn_id / LOCAL_FORM).read_text(encoding="utf-8"))
+    return list(blob["chosen_line"])
+
+
+# ============================================================== EB-203 =====
+
+def test_the_two_sealed_lines_the_bridge_refused_are_refused_here(tmp_path):
+    """THE LOCK. `t01` and `t07` carried a null target on a card that aims.
+
+    These are the two of eight lines `KLEESPARK-R1` sealed and could not
+    replay. The refusal names the play, so the reason is actionable off the
+    page the reader was shown.
+    """
+    for turn_id, expected in (("klee-sparks-r1-t01", "Powder Pop"),
+                              ("klee-sparks-r1-t07", "Powder Pop")):
+        d = QA / turn_id
+        summary = targeting.summary(_sealed_line(turn_id),
+                                    hand=targeting.packet_titles(d))
+        assert summary["refused"], turn_id
+        assert expected in [h["card"] for h in summary["findings"]]
+        assert "target_missing" in staged_turn.apply_falsifiers(
+            turn_id, {"chosen_line": _sealed_line(turn_id)},
+            packet_sha=None, closeness=None, targets=summary)
+
+
+def test_a_no_target_cards_null_is_legal():
+    """`target: null` is the RIGHT answer for a card that aims at nobody.
+
+    Duck and Cover is on `t07`'s own refused line with a null target and it is
+    not one of the findings -- the refusal is about the aimed card beside it,
+    which is the whole difference between this check and "always name an
+    enemy".
+    """
+    line = _sealed_line("klee-sparks-r1-t07")
+    duck = [p for p in line if p["card"] == "Duck and Cover"]
+    assert duck and duck[0]["target"] is None
+    hits = targeting.findings(line)
+    assert "Duck and Cover" not in [h["card"] for h in hits]
+    # And alone, that play refuses nothing at all.
+    assert not targeting.findings(duck)
+
+
+def test_a_clean_line_is_not_refused():
+    """`t02`'s sealed line aims everything it must, and survives the rule."""
+    summary = targeting.summary(_sealed_line("klee-sparks-r1-t02"))
+    assert not summary["refused"]
+    assert not summary["findings"]
+
+
+def test_the_rule_is_the_effect_spec_and_not_the_card_type():
+    """A Skill that aims (Powder Pop) needs a target; an AoE Attack does not.
+
+    Typing the rule off `type: attack` would have been wrong in both
+    directions, and both directions are pinned here.
+    """
+    index = resource_order.card_index()
+    assert targeting.takes_a_target("Powder Pop", index=index)      # Skill
+    assert targeting.takes_a_target("Kaboom!", index=index)         # Attack
+    assert not targeting.takes_a_target("Tinder Toss", index=index)  # AoE
+    assert not targeting.takes_a_target("Duck and Cover", index=index)
+
+
+def test_a_title_no_sheet_prints_refuses_nothing():
+    """The same call `resource_order.unresolved` makes: a missing row names
+    the harness, not the reading, so it may not refuse a form."""
+    assert not targeting.findings([{"card": "A Card That Does Not Exist"}])
+
+
+def test_the_refusal_prints_the_hands_aimed_cards():
+    """Half a message is not actionable: the refusal lists what takes a target."""
+    d = QA / "klee-sparks-r1-t07"
+    summary = targeting.summary(_sealed_line("klee-sparks-r1-t07"),
+                                hand=targeting.packet_titles(d))
+    assert summary["hand_takes_a_target"] == ["Firework Finale", "Fwoosh!",
+                                              "Powder Pop"]
+    assert "Duck and Cover" not in summary["hand_takes_a_target"]
+
+
+def test_the_derivation_is_recorded_because_the_packet_has_none():
+    """The packet carries NO targeting field, so the summary says where the
+    fact came from. A refusal whose source is unrecorded is unarguable."""
+    summary = targeting.summary([{"card": "Kaboom!"}])
+    assert "card sheets" in summary["derived_from"]
+    assert "M63" in summary["repair"]
+    hand = json.loads((QA / "klee-sparks-r1-t07" /
+                       "packet.json").read_text(encoding="utf-8"))
+    for card in hand["board"]["hand"]:
+        assert "target" not in card
+
+
+def test_the_grade_carries_the_reading_even_when_it_survives(tmp_path):
+    """`targets` rides every verdict, so a clean form records that it ran."""
+    qa = tmp_path / "qa"
+    (qa / "t").mkdir(parents=True)
+    verdict = staged_turn.grade("t", {
+        "grader": {"id": "x"},
+        "chosen_line": [{"card": "Duck and Cover", "target": None}],
+        "q1_what_did_you_play": "a", "q2_other_line_considered": "b",
+        "q3_what_it_gave_up": "c", "q4_different_intent": "yes"},
+        root=qa)
+    assert verdict["verdict"] == "SURVIVES"
+    assert verdict["targets"]["refused"] is False
+
+
+def test_the_falsifier_is_named_in_the_table():
+    """Every refusal this funnel can make is data a reader can find."""
+    assert "target_missing" in staged_turn.FALSIFIERS
+    assert "aim" in staged_turn.FALSIFIERS["target_missing"]
+
+
+# ============================================================== EB-202 =====
+
+def _sparks_turns() -> list:
+    return [staged_turn.load(p) for p in sorted(SPARKS.glob("t*.yaml"))]
+
+
+def test_p1s_threshold_of_four_is_refused_at_a_ceiling_of_three():
+    """THE LOCK, on the committed board set and its own registered threshold.
+
+    The packet's erratum counted three boards that could pose `P1` at all --
+    `t02`, `t03`, `t06` -- against a threshold of four. The check has to reach
+    the same three and name the same number.
+    """
+    turns = _sparks_turns()
+    assert len(turns) == 8
+    slots = slot_plan.load_slots(SPARKS)
+    assert [s.id for s in slots] == ["P1"]
+    row = slot_plan.ceiling(slots[0], turns)
+    assert row["threshold"] == 4
+    assert row["ceiling"] == 3
+    assert row["qualifying"] == ["klee-sparks-r1-t02", "klee-sparks-r1-t03",
+                                 "klee-sparks-r1-t06"]
+    assert not row["reachable"]
+    refusals = slot_plan.refusals([row])
+    assert len(refusals) == 1
+    assert "threshold 4" in refusals[0] and "ceiling of 3" in refusals[0]
+
+
+@pytest.mark.parametrize("turn_id,why", [
+    ("klee-sparks-r1-t07", "a bank of 4 pays 3 + 1 outright"),
+    ("klee-sparks-r1-t01", "bank 0: nothing is reachable"),
+    ("klee-sparks-r1-t04", "the Rare Power prices no Sparks"),
+])
+def test_the_boards_that_cannot_pose_the_question_do_not_qualify(turn_id, why):
+    """The three shapes the erratum names, each for its own reason."""
+    slot = slot_plan.load_slots(SPARKS)[0]
+    turn = next(t for t in _sparks_turns() if t.id == turn_id)
+    assert not slot.qualifies(turn), why
+
+
+def test_an_undefined_fact_makes_a_clause_false_rather_than_raising():
+    """A board that cannot be ASKED does not qualify, and does not explode.
+
+    `t04`'s hand prices no Spark use, so `min_spark_price` is undefined; the
+    clause is false and the board is simply not counted.
+    """
+    turn = next(t for t in _sparks_turns() if t.id == "klee-sparks-r1-t04")
+    assert slot_plan.FACTS["min_spark_price"](turn) is None
+    assert slot_plan.FACTS["spark_bank"](turn) == 3
+
+
+def test_the_round_check_runs_over_a_directory_and_refuses_it():
+    """A round is a DIRECTORY: checking one board would give a ceiling of one."""
+    report, bad = slot_plan.check_round(_sparks_turns())
+    assert [r["slot"] for r in report] == ["P1"]
+    assert len(bad) == 1
+
+
+def test_a_round_with_no_slot_file_is_legal():
+    """Absent is legal: every round committed before EB-202 carries none."""
+    other = REPO / "understudy" / "turns" / "kokomi-slice-2"
+    assert slot_plan.load_slots(other) == []
+
+
+def test_a_reachable_threshold_passes():
+    """Lower the threshold to what the set can produce and it stops refusing."""
+    turns = _sparks_turns()
+    slot = slot_plan.load_slots(SPARKS)[0]
+    slot.threshold = 3
+    row = slot_plan.ceiling(slot, turns)
+    assert row["reachable"] and not slot_plan.refusals([row])
+
+
+@pytest.mark.parametrize("blob,fragment", [
+    ({"slots": [{"id": "P", "predicate": [{"left": 1, "op": "<",
+                                           "right": 2}]}]}, "threshold"),
+    ({"slots": [{"id": "P", "threshold": 1}]}, "predicate"),
+    ({"slots": [{"id": "P", "threshold": 1,
+                 "predicate": [{"left": "spark_bank", "op": "~",
+                                "right": 1}]}]}, "not a comparison"),
+    ({"slots": [{"id": "P", "threshold": 1,
+                 "predicate": [{"left": "vibes", "op": "<",
+                                "right": 1}]}]}, "neither an integer"),
+])
+def test_the_schema_refuses_rather_than_coerces(blob, fragment):
+    """A slot nobody can read is worse than no slot file: prose is what let a
+    threshold of four ride on a ceiling of three."""
+    with pytest.raises(slot_plan.SlotError) as exc:
+        slot_plan.parse_slots(blob)
+    assert fragment in str(exc.value)
+
+
+def test_the_slot_file_is_not_read_as_a_turn():
+    """`check` would call `slots.yaml` a BAD turn; `all_turns` skips it."""
+    assert staged_turn.SLOT_FILE_NAME == slot_plan.SLOT_FILE
+    assert not [p for p in staged_turn.all_turns()
+                if p.name == slot_plan.SLOT_FILE]
+
+
+def test_check_returns_nonzero_on_an_unreachable_slot(capsys):
+    """`staged_turn check` is where a plan is validated, so it must refuse."""
+    assert staged_turn.slot_report(_sparks_turns()) == 1
+    out = capsys.readouterr()
+    assert "ceiling 3 of 8" in out.out
+    assert "EB-202" in out.err
+
+
+# ================================================== the battery's shape ====
+
+def test_the_battery_covers_every_category_to_its_floor():
+    items = qualify.load_battery()
+    assert set(qualify.CATEGORIES) == {"targets", "costs", "intent"}
+    for cat, n in qualify.coverage(items).items():
+        assert n >= qualify.MIN_ITEMS_PER_CATEGORY, cat
+    assert qualify.thin_categories(items) == []
+
+
+def test_every_battery_packet_is_a_sealed_one_already_on_disk():
+    """No new board: every item names a packet a closed round already wrote."""
+    for item in qualify.load_battery():
+        assert (QA / item.turn_id / "packet.md").is_file(), item.turn_id
+
+
+def test_the_battery_draws_on_three_rounds():
+    """A seat tuned on one character's vocabulary may not qualify on it."""
+    rounds = {local_tester.round_slug([i.turn_id])
+              for i in qualify.load_battery()}
+    assert rounds == {"kokomi-slice2", "klee-slice1-r3", "klee-sparks-r1"}
+
+
+def test_the_battery_fixes_no_threshold():
+    """M62's, not this tool's."""
+    card = qualify.run_battery(qualify.load_battery(),
+                               reader=lambda _i: None)
+    assert card["threshold"] is None
+    assert "M62" in card["threshold_owner"]
+    assert card["total"]["passed"] == 0
+    assert "no pass mark" in qualify.one_line(card)
+
+
+def test_a_refusal_is_a_failed_item_and_never_a_skipped_one():
+    card = qualify.run_battery(qualify.load_battery()[:1],
+                               reader=lambda _i: None)
+    assert card["items"][0]["passed"] is False
+    assert "filed no form" in card["items"][0]["why"]
+
+
+def test_each_category_scores_the_failure_it_was_written_for():
+    """One fake seat per category, answering wrongly, then rightly."""
+    items = {i.category: i for i in qualify.load_battery()}
+
+    bad_targets = {"chosen_line": _sealed_line("klee-sparks-r1-t07")}
+    ok, _ = qualify.score_targets(bad_targets, QA / "klee-sparks-r1-t07")
+    assert not ok
+    good = [dict(p, target="Sludge Spinner") if p["card"] != "Duck and Cover"
+            else p for p in bad_targets["chosen_line"]]
+    ok, _ = qualify.score_targets({"chosen_line": good},
+                                  QA / "klee-sparks-r1-t07")
+    assert ok
+
+    turn = items["costs"].turn_id
+    ok, why = qualify.score_costs(
+        {"q1_what_did_you_play": "Duck and Cover is free so I played it"},
+        QA / turn)
+    assert not ok or "Duck and Cover" not in why  # only fires where priced
+    ok, _ = qualify.score_costs({"q1_what_did_you_play": "I blocked"},
+                                QA / turn)
+    assert ok
+
+    ok, _ = qualify.score_intent({"q4_different_intent": "no"}, QA / turn)
+    assert not ok
+    ok, _ = qualify.score_intent({"q4_different_intent": "yes, a block "
+                                                        "intent flips it"},
+                                 QA / turn)
+    assert ok
+
+
+def test_an_aimed_card_named_at_nobody_and_a_targetless_one_named_at_someone():
+    """Both directions of the targets category, which is the whole item.
+
+    `t03`'s own sealed form names an enemy on Bang Bang!, which hits at
+    random -- the second direction, found in the record rather than invented.
+    """
+    ok, why = qualify.score_targets(
+        {"chosen_line": _sealed_line("klee-sparks-r1-t03")},
+        QA / "klee-sparks-r1-t03")
+    assert not ok
+    assert "aims at nobody" in why
