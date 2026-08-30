@@ -1,0 +1,72 @@
+{
+ "turn_id": "klee-sparks-r2-t03",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "intent_insensitive"
+ ],
+ "reasons": [
+  "intent_insensitive: question four is no: a different enemy intent would not have changed the line, so the intent is not part of the decision"
+ ],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "3aa3c4b75240b2bd92c722ffba499148591e36903d7f928b4622e83209adb0f7",
+ "chosen_line": [
+  {
+   "card": "Bang Bang!",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played all four cards: Bang Bang! spending the 2 Sparks, then both Kaboom! cards at Shrinker Beetle, then Duck and Cover. This deals 24 printed damage and gains 5 Block, leaving Shrinker Beetle at 16 HP.",
+  "q2_other_line_considered": "I seriously considered playing both Kaboom! cards and Duck and Cover while saving the 2 Sparks. That line would deal 14 damage, gain 5 Block, and preserve the Spark bank, but it gives up the 10 damage from Bang Bang! with no current-turn benefit from keeping the Sparks.",
+  "q3_what_it_gave_up": "The chosen line gave up the 2 Sparks and all 3 Energy. The main real cost is spending the Spark bank; if Sparks persist, this removes a future resource. It also leaves no cards unplayed, but none of the unplayed alternatives would have provided a better response to the telegraphed debuff.",
+  "q4_different_intent": "No. A different enemy intent would not have changed the line. The chosen line already plays the only Block card and all affordable damage. An Attack intent would make the 5 Block more relevant, but it would not make saving Sparks or skipping damage preferable; a Debuff or Strategic intent does not create a reason to hold back either."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Kaboom!"
+  ],
+  "hand": [
+   "Bang Bang!",
+   "Kaboom!",
+   "Kaboom!",
+   "Duck and Cover"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T20:57:19"
+}

@@ -1,0 +1,65 @@
+{
+ "turn_id": "klee-sparks-r2-t05",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "c2c11e7ac5902a401556738882ee8d534af58536241c39c04ab5668e010f503e",
+ "chosen_line": [
+  {
+   "card": "Kaboom!",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played both copies of Kaboom! on Fuzzy Wurm Crawler, then Duck and Cover, dealing 14 damage and gaining 5 Block against the telegraphed 4 damage.",
+  "q2_other_line_considered": "I seriously considered playing only both copies of Kaboom!, since that dealt the same damage, but it would leave the incoming attack unblocked.",
+  "q3_what_it_gave_up": "It gave up nothing immediately available: the Spark cards were unplayable, and Duck and Cover did not reduce the damage dealt by the two playable attacks.",
+  "q4_different_intent": "Yes. If the enemy had not intended to deal damage, I would have omitted Duck and Cover because its Block had no other stated benefit."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Firework Finale",
+   "Ka-pow!",
+   "Kaboom!"
+  ],
+  "hand": [
+   "Firework Finale",
+   "Ka-pow!",
+   "Kaboom!",
+   "Kaboom!",
+   "Duck and Cover"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T21:07:05"
+}

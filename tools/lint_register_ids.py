@@ -129,7 +129,13 @@ CEILINGS: dict[str, int] = {
     # EB-202/EB-203 minted 2026-08-29 by the KLEESPARK-R1 relayed review:
     # a slot whose threshold the board set could not reach, and a form
     # whose play line is never checked for a target before it is graded.
-    "EB": 206,   # EB-206 minted 2026-08-29 by the two-instance funnel build:
+    # EB-208/EB-209 minted 2026-08-29 by KLEESPARK-R2: a staged board
+    # cannot REQUIRE an enemy count, so a slot that needs one can pass
+    # every check and still not be posed; and in the shadow chair R221 B's
+    # stopping rule reads shadow grades, which decide nothing. 207 is
+    # another branch of the same sitting; this branch took the next free
+    # numbers above it.
+    "EB": 209,   # EB-206 minted 2026-08-29 by the two-instance funnel build:
                  # two game processes from one install, per-process APPDATA
                  # and a per-process bridge port.
                  # EB-205 minted 2026-08-29 by R222 pick 6(d): the Klee Spark
@@ -411,6 +417,10 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 205 minted 2026-08-29 by R222 pick 6(d): a drafted arm for the
         # Klee Spark economy, now that the drafter can be offered the rows.
         205,
+        # 208/209 minted 2026-08-29 by KLEESPARK-R2 (packet section 13.4): the
+        # declared-versus-reached enemy count, which no check can see, and the
+        # stopping rule reading shadow grades in the shadow chair.
+        208, 209,
         # 206 was minted AND CLOSED on 2026-08-29 by the two-instance funnel
         # build -- it left OPEN_IDS in the same commit that closed it, with
         # the ceiling above holding the number so nothing re-takes it.

@@ -1,0 +1,40 @@
+{
+ "turn_id": "klee-sparks-r2-t06",
+ "role": "shadow",
+ "seat_mode": "shadow",
+ "deciding": false,
+ "tester_family": "local",
+ "tester_id": "local-qwen3-8-27b-ud-q4-k-xl",
+ "model_requested": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+ "model_observed": "C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+ "temperature": 0.0,
+ "max_tokens": 8192,
+ "packet_sha256": "353d470830f0edbfb3b09fb5c5e9f7a9624542face326e9787baaea6c75fa829",
+ "prompt_sha256": "2b07be7e12f7d94ef4529a239d156e0949082cd3700b378a87f1b6f3c08e2dbc",
+ "session": "C:\\Users\\Monty\\Documents\\GitHub\\GItS\\understudy\\logs\\local-seat\\klee-sparks-r2-t06-20260830-005404",
+ "form": "C:\\Users\\Monty\\Documents\\GitHub\\GItS\\review\\qa\\klee-sparks-r2-t06\\form-local-qwen3-8-27b-ud-q4-k-xl.json",
+ "refused": "",
+ "refused_why": "",
+ "read_at": "2026-08-30T00:54:55Z",
+ "position_in_round": 1,
+ "instance": "lane0",
+ "seat_spot_check_rate": 4,
+ "resource_order_flag": [],
+ "resource_order": {
+  "flagged": false,
+  "findings": [],
+  "unresolved_titles": [],
+  "rule": "a card whose printed text SPENDS or converts a meter may not precede a card whose printed text READS that meter without a seat reading the turn"
+ },
+ "misreads": [],
+ "seat_review_required": true,
+ "seat_review_reasons": [
+  "spot_check"
+ ],
+ "blindness": "STRUCTURAL, not evidentiary: this seat is one HTTP chat request with no tools, no filesystem and no repo root, so there is nothing it could have read -- but unlike the codex seat there is no transcript here PROVING it, and this reading is never a substitute for that one",
+ "guardrail": "a local model in the TESTER chair produces SUBJECTIVE FEEDBACK on one staged turn. It is not human validation, not balance evidence, not ship approval, and not a grade -- `staged_turn grade` is the grade. Grader work, whole-fight blind play and the doctrine gate stay with the Codex seat (its 2026-08-29 ADVANCE, in its own words)",
+ "scope": "staged single-turn reads only; grader work, whole-fight blind play and the doctrine gate remain with the Codex seat",
+ "seat_review_why": {
+  "spot_check": "the periodic seat review the ADVANCE requires -- this turn's position in the round fell on the rate"
+ }
+}

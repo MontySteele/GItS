@@ -1,0 +1,62 @@
+{
+ "turn_id": "klee-sparks-r2-t03",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "intent_insensitive"
+ ],
+ "reasons": [
+  "intent_insensitive: question four is no: a different enemy intent would not have changed the line, so the intent is not part of the decision"
+ ],
+ "grader": {
+  "id": "opus-5-fresh",
+  "kind": "llm",
+  "model": "claude-opus-5",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "3aa3c4b75240b2bd92c722ffba499148591e36903d7f928b4622e83209adb0f7",
+ "chosen_line": [
+  {
+   "card": "Bang Bang!"
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Shrinker Beetle"
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Shrinker Beetle"
+  },
+  {
+   "card": "Duck and Cover"
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played my entire hand. Bang Bang! costs no energy and I had exactly the 2 Sparks it asks for, so it went first: with a single enemy on the board, its two random 5-damage hits both land on the Shrinker Beetle for 10. Then both copies of Kaboom! into the Beetle for 7 apiece, 14 more, which spends two of my three energy. That leaves one energy and one card, so Duck and Cover goes down for 5 Block. Total: 24 damage onto a 40 HP enemy, leaving it at 16, plus 5 Block standing. I did not have to leave a single card or a single point of energy unused, which is the whole reason the turn resolved itself in about two seconds.",
+  "q2_other_line_considered": "Honestly, no. I looked for a reason to hold something back and there wasn't one. The only shape of a choice here would be whether the 5 Block is worth an energy, but there is nothing else on the page to spend that energy on, and no retain or carryover is printed anywhere, so holding Duck and Cover would just throw it away. The only other thing I weighed for a moment was Spark economy: Bang Bang! eats my whole bank of 2 and nothing in this hand rebuilds it, so if I expected a bigger Spark payoff next turn I might want to bank. But the page shows me nothing about what I draw next and Bang Bang! is free, so refusing to spend Sparks would mean refusing 10 free damage for a payoff I have no evidence exists. Playing everything is strictly better than every alternative I could name \u2014 that is dominance, not a decision.",
+  "q3_what_it_gave_up": "It gave up the 2 Sparks and it gave up nothing else. Since I could afford the whole hand, there was no opportunity cost between cards \u2014 no damage traded for block, no tempo traded for setup. The Spark spend is the only real expenditure, and it is only a cost at all if some future turn wanted a bank of 2, which I cannot see from here. In a normal turn the interesting sacrifice would be exactly that tension: Sparks or damage, block or aggression. This turn has neither, so what I gave up is best described as the chance to make a choice.",
+  "q4_different_intent": "No. The Beetle telegraphing a debuff rather than an attack made the 5 Block feel cosmetic \u2014 Block does not stop a debuff \u2014 but it changed nothing, because the Block cost me an energy I had no other use for. Swap the intent to a big attack and I still play all four cards in the same order; the Block just starts mattering. Swap it to a heal or a summon and I still play all four, because more damage now is right against either. The only intent that could plausibly move me is one that punishes attacking (a thorns- or retaliate-style telegraph), and even then the page prints no such thing and my hand contains only attacks plus a block, so I would have no line to switch to. Across every intent I can imagine, the play is: empty the hand."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Kaboom!"
+  ],
+  "hand": [
+   "Bang Bang!",
+   "Kaboom!",
+   "Kaboom!",
+   "Duck and Cover"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T21:02:36"
+}

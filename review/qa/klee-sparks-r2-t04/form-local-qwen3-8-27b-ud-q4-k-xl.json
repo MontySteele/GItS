@@ -1,0 +1,37 @@
+{
+ "turn_id": "klee-sparks-r2-t04",
+ "packet_sha256": "2391164fc8cb85e100771f8fda8c24dcbc60f0fb39f5e0b7b7a5ad07cb1084c9",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Fwoosh!",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Fwoosh! at Shrinker Beetle, then Kaboom! at Shrinker Beetle, then Duck and Cover. This spends 1 Energy and 1 Spark, deals 15 total damage, and gains 5 Block.",
+ "q2_other_line_considered": "I seriously considered Dodoco Blast, Kaboom!, and Duck and Cover. That line would spend both Sparks and hit all enemies, but with only one enemy it deals 14 total damage instead of 15 and uses more Spark for less single-target value.",
+ "q3_what_it_gave_up": "The chosen line gave up Dodoco Blast, including its all-enemies effect and the chance to spend the second Spark. It also leaves 1 Energy and 1 Spark unused, but there was no better affordable use for them against this single enemy.",
+ "q4_different_intent": "No. A different intent would not have changed the line. If the enemy intended to attack, Duck and Cover is already being played. If it intended to apply a debuff, Duck and Cover is still harmless and the attack choice remains the same. Dodoco Blast is still inferior to Fwoosh! against a single enemy.",
+ "q4_changed": false,
+ "role": "shadow",
+ "seat_mode": "shadow"
+}
