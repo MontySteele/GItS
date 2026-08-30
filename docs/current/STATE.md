@@ -489,7 +489,8 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `understudy/local_tester.py` is the mechanism and OPERATIONS' **Local
     tester seat** section is the amended rule. The periodic-review rate is
     settled at N = 4 (`M58`, answered by R220 G).
-  - **Funnel throughput — R221, BUILT, unproven live.** A blind-QA round
+  - **Funnel throughput — R221 BUILT AND PROVEN LIVE; R222 D and R223 in
+    force.** A blind-QA round
     measured ~70 min for 8 turns, with roughly a third of it the game idling
     while models read. `local_tester round` now RUNS a round rather than
     reading it: stage / read / grade / replay pipelined behind one game lock
@@ -499,15 +500,32 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     menu), `--first N` sequential stopping with UNRUN rows carrying pinned
     seeds, and `staged_turn packet-section <slug>` writing the results block
     from the records with the prose read left as a marked empty slot.
-    **The first pipelined round is its proof and has not run.** The
-    fresh-Opus control's retirement threshold was `M62`, **answered by
-    R222 B**: `KLEESPARK-R1` measured Qwen-vs-Opus verdict agreement at
-    **4 of 8**, so the control STANDS — and the seats have swapped roles.
-    The fresh-Opus form now DECIDES; the local seat reads in SHADOW,
+    **`KLEESPARK-R2` (2026-08-30) was the first pipelined round: 372 s for
+    six boards — stage 89 s, read+grade 295 s, replay 124 s — and it showed
+    the round is MODEL-bound (a read is ~3× a stage).** Built since and
+    proven on `funnel-bench-1` (2026-08-30, R2's six boards under bench
+    ids, shadow chair, no Codex; `review/qa/funnel-bench-1-record.md`):
+    `--lanes N` (`EB-206`: two `SlayTheSpire2.exe` from one install, own
+    `APPDATA` and bridge port; `EB-210`'s seed crossing fixed, 6 of 6
+    seeds honoured) and `--read-workers N` (a semaphore over the read
+    phase, refused above the server's slot count; `serve.ps1 -Parallel 2`
+    since 2026-08-30) — **six reads in 219 s against 295 s, 1.35×; staging
+    a wash on two lanes (93 s against 89 s, the second game competes for
+    the same GPU); 251 s launch-to-teardown against ~313 s**. Also live:
+    `--seat-mode shadow|deciding`, the `target_missing` falsifier
+    (`EB-203`), and `qualify`, the requalification battery, with R223's
+    pass mark (targets 6/6, costs ≥ 4/6, intent ≥ 4/6; first run 10/18,
+    FAIL). The fresh-Opus control's retirement threshold was `M62`,
+    **answered by R222 B**: verdict agreement **4 of 8** on `KLEESPARK-R1`
+    and 3 of 6 on `R2`, so the control STANDS — and the seats have swapped
+    roles. The fresh-Opus form DECIDES; the local seat reads in SHADOW,
     recorded and never graded, until it clears **≥ 6/8 over one round**
-    AND the requalification battery (target selection, printed costs,
-    intent sensitivity). `M63` is answered by R222 C: the funnel refuses
-    a bad form and never repairs one.
+    AND the battery. `M63` is answered by R222 C: the funnel refuses a bad
+    form and never repairs one. Open on the instrument: `EB-205`,
+    `EB-208` (a board cannot require an enemy count; the fix shape is a
+    pick), `EB-211` (costs passes on silence), `EB-212` (intent
+    self-report), and `M64` (an author-disjoint deciding read while the
+    seat is shadow).
   - **Next.** Klee slice 1 has no open engineering: all three arms read
     ADVANCE on clean independent reads and Second Helping has its
     whole-fight run. Owed next are the whole-fight runs for Rummage and
