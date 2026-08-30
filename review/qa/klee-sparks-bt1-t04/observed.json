@@ -1,0 +1,324 @@
+{
+ "turn_id": "klee-sparks-bt1-t04",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "pilot": "demolition",
+ "run_seed": "XT4BE7LFY5XH",
+ "not_a_packet": "the RAW wire state, ids included. Tool side only -- never hand this to a grader",
+ "digest": {
+  "state_type": "monster",
+  "round": 1,
+  "turn": "player",
+  "player": {
+   "hp": 42,
+   "block": 0,
+   "energy": 3,
+   "status": {
+    "spark": 2
+   },
+   "resources": {
+    "KLEEMOD_BURST": 0,
+    "KLEEMOD_CHARGE": 0,
+    "KLEEMOD_ENCORE": 0,
+    "KLEEMOD_FANFARE": 0,
+    "KLEEMOD_FANFARE_CAP_BONUS": 0,
+    "KLEEMOD_FANFARE_FLOOR": 0,
+    "KLEEMOD_FURINA_BURST": 0,
+    "KLEEMOD_KOKOMI_BURST": 0,
+    "KLEEMOD_SPOTLIGHT_MODE": 0,
+    "KLEEMOD_SPOTLIGHT_MOVED": 0,
+    "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+   }
+  },
+  "hand": [
+   {
+    "name": "Bag of Tricks",
+    "id": "KLEEMOD-PROTO_SPARK_MODE_BOMBS",
+    "cost": "0",
+    "can_play": true,
+    "unplayable_reason": null,
+    "is_upgraded": false
+   },
+   {
+    "name": "Powder Pop",
+    "id": "KLEEMOD-PROTO_POP_SPARK",
+    "cost": "0",
+    "can_play": true,
+    "unplayable_reason": null,
+    "is_upgraded": false
+   },
+   {
+    "name": "Quick Fuse",
+    "id": "KLEEMOD-QUICK_FUSE",
+    "cost": "0",
+    "can_play": true,
+    "unplayable_reason": null,
+    "is_upgraded": false
+   },
+   {
+    "name": "Kaboom!",
+    "id": "KLEEMOD-KABOOM",
+    "cost": "1",
+    "can_play": true,
+    "unplayable_reason": null,
+    "is_upgraded": false
+   }
+  ],
+  "enemies": [
+   {
+    "id": "FUZZY_WURM_CRAWLER_0",
+    "name": "Fuzzy Wurm Crawler",
+    "hp": 40,
+    "block": 0,
+    "status": {}
+   }
+  ],
+  "prompt": null
+ },
+ "state": {
+  "state_type": "monster",
+  "battle": {
+   "round": 1,
+   "turn": "player",
+   "is_play_phase": true,
+   "enemies": [
+    {
+     "entity_id": "FUZZY_WURM_CRAWLER_0",
+     "combat_id": 1,
+     "name": "Fuzzy Wurm Crawler",
+     "hp": 40,
+     "max_hp": 56,
+     "block": 0,
+     "status": [],
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "4",
+       "title": "Aggressive",
+       "description": "This enemy intends to Attack for 4 damage."
+      }
+     ]
+    }
+   ]
+  },
+  "run": {
+   "act": 1,
+   "floor": 2,
+   "ascension": 0
+  },
+  "player": {
+   "character": "Klee",
+   "hp": 42,
+   "max_hp": 62,
+   "block": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "resources": {
+    "KLEEMOD_BURST": 0,
+    "KLEEMOD_CHARGE": 0,
+    "KLEEMOD_ENCORE": 0,
+    "KLEEMOD_FANFARE": 0,
+    "KLEEMOD_FANFARE_CAP_BONUS": 0,
+    "KLEEMOD_FANFARE_FLOOR": 0,
+    "KLEEMOD_FURINA_BURST": 0,
+    "KLEEMOD_KOKOMI_BURST": 0,
+    "KLEEMOD_SPOTLIGHT_MODE": 0,
+    "KLEEMOD_SPOTLIGHT_MOVED": 0,
+    "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+    "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+   },
+   "kurage_memory": {},
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_SPARK_MODE_BOMBS",
+     "name": "Bag of Tricks",
+     "type": "Skill",
+     "cost": "0",
+     "star_cost": null,
+     "description": "Choose one: Place 1 Bomb dealing 5 | Spend 3 Sparks: place 3 Bombs dealing 5.",
+     "rarity": "Uncommon",
+     "is_upgraded": false,
+     "keywords": [
+      {
+       "name": "Bomb",
+       "description": "Detonates at the start of your turn or early when its enemy takes unblocked Attack damage. The first attack that enemy makes while Bombed each combat deals 25% less damage."
+      }
+     ],
+     "index": 0,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "unplayable_reason": null
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "type": "Skill",
+     "cost": "0",
+     "star_cost": null,
+     "description": "Place a Bomb dealing 5 damage. Gain 1 Spark. Burst +5. Elemental Skill.",
+     "rarity": "Basic",
+     "is_upgraded": false,
+     "keywords": [
+      {
+       "name": "Bomb",
+       "description": "Detonates at the start of your turn or early when its enemy takes unblocked Attack damage. The first attack that enemy makes while Bombed each combat deals 25% less damage."
+      },
+      {
+       "name": "Burst Energy",
+       "description": "Burst Energy: your character's meter, empty at the start of each combat. Playing a card with Elemental Skill grants 5 and every Elemental Reaction grants 5; some cards, powers and relics grant more. The moment the meter is FULL your character's Burst card is put into your hand, and casting it spends the WHOLE meter -- energy past full is lost at the cast, not at the gain. You hold 0 of 40 Burst Energy."
+      },
+      {
+       "name": "Elemental Skill",
+       "description": "Playing this card grants 5 Burst Energy."
+      }
+     ],
+     "index": 1,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "unplayable_reason": null
+    },
+    {
+     "id": "KLEEMOD-QUICK_FUSE",
+     "name": "Quick Fuse",
+     "type": "Skill",
+     "cost": "0",
+     "star_cost": null,
+     "description": "Detonate an enemy's Bombs. ",
+     "rarity": "Common",
+     "is_upgraded": false,
+     "keywords": [
+      {
+       "name": "Bomb",
+       "description": "Detonates at the start of your turn or early when its enemy takes unblocked Attack damage. The first attack that enemy makes while Bombed each combat deals 25% less damage."
+      }
+     ],
+     "index": 2,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "unplayable_reason": null
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "type": "Attack",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 7 damage. Applies Pyro.",
+     "rarity": "Basic",
+     "is_upgraded": false,
+     "keywords": [
+      {
+       "name": "Applies Pyro",
+       "description": "If the target has no aura, this applies Pyro for 2 turns. A different aura is consumed to trigger a Reaction instead."
+      }
+     ],
+     "index": 3,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "unplayable_reason": null
+    }
+   ],
+   "draw_pile_count": 10,
+   "discard_pile_count": 0,
+   "exhaust_pile_count": 0,
+   "draw_pile": [
+    {
+     "name": "Duck and Cover",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Gain 5 Block."
+    },
+    {
+     "name": "Duck and Cover",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Gain 5 Block."
+    },
+    {
+     "name": "Duck and Cover",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Gain 5 Block."
+    },
+    {
+     "name": "Jumpy Dumpty",
+     "cost": "2",
+     "star_cost": null,
+     "description": "Deal 8 damage to random enemies twice. Place a Bomb dealing 6 damage. Burst +5. Applies Pyro. Elemental Skill."
+    },
+    {
+     "name": "Kaboom!",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 7 damage. Applies Pyro."
+    },
+    {
+     "name": "Kaboom!",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 7 damage. Applies Pyro."
+    },
+    {
+     "name": "Ka-pow!",
+     "cost": "0",
+     "star_cost": null,
+     "description": "Spend 1 Spark. Deal 7 damage. Applies Pyro."
+    },
+    {
+     "name": "Powder Pop",
+     "cost": "0",
+     "star_cost": null,
+     "description": "Place a Bomb dealing 5 damage. Gain 1 Spark. Burst +5. Elemental Skill."
+    },
+    {
+     "name": "Barbara \u2014 Let the Show Begin\u266a",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Gain 6 Block. Gain 4 Burst Energy."
+    },
+    {
+     "name": "Kaeya \u2014 Frostgnaw",
+     "cost": "1",
+     "star_cost": null,
+     "description": "Deal 6 damage. Applies Cryo."
+    }
+   ],
+   "discard_pile": [],
+   "exhaust_pile": [],
+   "gold": 99,
+   "status": [
+    {
+     "id": "SPARK_POWER",
+     "name": "Spark",
+     "amount": 2,
+     "type": "Buff",
+     "description": "A resource. Cards that print a Spark price spend it.",
+     "keywords": []
+    }
+   ],
+   "relics": [
+    {
+     "id": "KLEEMOD-POUNDING_SURPRISE",
+     "name": "Pounding Surprise",
+     "description": "Whenever a Bomb detonates, gain 1 Spark. Card rewards after a fight offer a fourth Companion choice.",
+     "counter": null,
+     "keywords": []
+    },
+    {
+     "id": "BOOMING_CONCH",
+     "name": "Booming Conch",
+     "description": "At the start of Elite combats, draw 2 additional cards and gain [ironclad_energy_icon.png].",
+     "counter": null,
+     "keywords": [
+      {
+       "name": "Energy",
+       "description": "Energy is used to play cards from your Hand."
+      }
+     ]
+    }
+   ],
+   "potions": [],
+   "max_potion_slots": 3
+  }
+ }
+}

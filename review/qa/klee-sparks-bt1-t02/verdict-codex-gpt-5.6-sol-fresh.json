@@ -1,0 +1,130 @@
+{
+ "turn_id": "klee-sparks-bt1-t02",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "intent_insensitive"
+ ],
+ "reasons": [
+  "intent_insensitive: question four is no: a different enemy intent would not have changed the line, so the intent is not part of the decision"
+ ],
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "342f63453a46f59652dbc051a792bd3bab299c45768c03b3364c26c3dcb36c64",
+ "chosen_line": [
+  {
+   "card": "Bag of Tricks",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": "Place 1 Bomb dealing 5"
+  },
+  {
+   "card": "Quick Fuse",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Firework Finale",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "Bag of Tricks choosing \u201cPlace 1 Bomb dealing 5\u201d on Nibbit, Quick Fuse on Nibbit, Firework Finale on Nibbit, then Duck and Cover.",
+  "q2_other_line_considered": "I considered spending 3 Sparks with Bag of Tricks to place 3 Bombs, detonating them with Quick Fuse, and playing Duck and Cover.",
+  "q3_what_it_gave_up": "It gave up the three-Bomb option, using the Sparks on Firework Finale instead.",
+  "q4_different_intent": "No. With the printed hand and resources, I would still take the available damage and Block without sacrificing another play."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "declared board (prototype route)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.0,
+  "top1": 22.4,
+  "top2": 22.4,
+  "lines_considered": 15,
+  "playouts": 45,
+  "plays_refused": 0,
+  "pilot": "demolition",
+  "lines": [
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Quick Fuse",
+     "Duck and Cover"
+    ],
+    "score": 22.4
+   },
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Duck and Cover"
+    ],
+    "score": 22.4
+   },
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Firework Finale",
+     "Quick Fuse",
+     "Duck and Cover"
+    ],
+    "score": 21.2
+   },
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Firework Finale",
+     "Duck and Cover"
+    ],
+    "score": 21.2
+   },
+   {
+    "cards": [
+     "Bag of Tricks"
+    ],
+    "score": 16.5
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap"
+ },
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Bag of Tricks",
+   "Firework Finale",
+   "Quick Fuse"
+  ],
+  "hand": [
+   "Bag of Tricks",
+   "Firework Finale",
+   "Quick Fuse",
+   "Duck and Cover"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-30T14:28:36"
+}

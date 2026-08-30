@@ -1,0 +1,43 @@
+{
+ "turn_id": "klee-sparks-bt1-t03",
+ "packet_sha256": "60a429e128e287bf4939bee55915afedbc0f4520d88d89ba607fc68244ced97a",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Bag of Tricks",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": "Place 1 Bomb dealing 5"
+  },
+  {
+   "card": "Quick Fuse",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Bag of Tricks on Shrinker Beetle, choosing Place 1 Bomb dealing 5. Then I played Quick Fuse on Shrinker Beetle to detonate the placed Bomb. Then I played Kaboom! on Shrinker Beetle for 7 damage and Pyro. Finally I played Duck and Cover for 5 Block, using the remaining energy.",
+ "q2_other_line_considered": "I seriously considered playing Kaboom! before Quick Fuse so that Pyro would already be on Shrinker Beetle when the Bomb detonated, in case that produced a reaction. I also briefly considered skipping Duck and Cover because the printed intent is a Debuff rather than an attack, but the energy was otherwise unused and the Block had no obvious downside.",
+ "q3_what_it_gave_up": "By detonating the Bomb before playing Kaboom!, I gave up any possible Pyro reaction bonus that might have occurred if the Bomb detonated after Pyro was applied. By playing Duck and Cover, I gave up nothing except one energy that had no other use in this hand, though the Block may be irrelevant against a pure Debuff intent.",
+ "q4_different_intent": "No. A different intent would not have changed the line. If the enemy had telegraphed an attack, Duck and Cover would have been more clearly useful, but I would still play it. No other telegraphed intent would make the 3-Spark option affordable, remove the value of detonating the placed Bomb, or change the need to play the available damage cards.",
+ "q4_changed": false,
+ "role": "shadow",
+ "seat_mode": "shadow"
+}

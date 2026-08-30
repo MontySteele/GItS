@@ -1,0 +1,41 @@
+{
+ "turn_id": "klee-sparks-bt1-t02",
+ "packet_sha256": "342f63453a46f59652dbc051a792bd3bab299c45768c03b3364c26c3dcb36c64",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Bag of Tricks",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": "Place 1 Bomb dealing 5"
+  },
+  {
+   "card": "Quick Fuse",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Firework Finale",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "Bag of Tricks choosing \u201cPlace 1 Bomb dealing 5\u201d on Nibbit, Quick Fuse on Nibbit, Firework Finale on Nibbit, then Duck and Cover.",
+ "q2_other_line_considered": "I considered spending 3 Sparks with Bag of Tricks to place 3 Bombs, detonating them with Quick Fuse, and playing Duck and Cover.",
+ "q3_what_it_gave_up": "It gave up the three-Bomb option, using the Sparks on Firework Finale instead.",
+ "q4_different_intent": "No. With the printed hand and resources, I would still take the available damage and Block without sacrificing another play.",
+ "q4_changed": false
+}

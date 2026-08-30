@@ -1,0 +1,133 @@
+{
+ "turn_id": "klee-sparks-bt1-t04",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "intent_insensitive"
+ ],
+ "reasons": [
+  "intent_insensitive: question four is no: a different enemy intent would not have changed the line, so the intent is not part of the decision"
+ ],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "96c1ad0d144abe6f6836378ab7a4464f2bb017867656bb1f20e4947a3074f845",
+ "chosen_line": [
+  {
+   "card": "Powder Pop",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Bag of Tricks",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."
+  },
+  {
+   "card": "Quick Fuse",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Powder Pop first to place a Bomb and raise Spark from 2 to 3. Then I played Bag of Tricks and chose the 3-Spark option to place 3 more Bombs. I played Quick Fuse to detonate the enemy's Bombs, and finally played Kaboom! for direct damage.",
+  "q2_other_line_considered": "I considered opening with Bag of Tricks for its 1-Bomb option, then playing Powder Pop, Quick Fuse, and Kaboom!. That line would make only 2 Bombs and less total explicit damage, so I rejected it.",
+  "q3_what_it_gave_up": "The chosen line gave up the smaller Bag of Tricks option, all remaining Spark, and any chance to hold cards back for later. It also commits the turn to damage with no block or defensive value, but the hand contains no defensive cards and the explicit damage total is higher than the alternatives.",
+  "q4_different_intent": "No. The available cards are all damage or bomb setup, with no block or defensive effect. Since the line is chosen to maximize explicit damage and the enemy's telegraphed Attack for 4 does not create a defensive need that the hand can address, a different intent would not have changed the play."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "declared board (prototype route)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.0,
+  "top1": 30.02,
+  "top2": 30.02,
+  "lines_considered": 15,
+  "playouts": 64,
+  "plays_refused": 0,
+  "pilot": "demolition",
+  "lines": [
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Powder Pop",
+     "Quick Fuse",
+     "Kaboom!"
+    ],
+    "score": 30.02
+   },
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Powder Pop",
+     "Kaboom!"
+    ],
+    "score": 30.02
+   },
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Powder Pop"
+    ],
+    "score": 22.42
+   },
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Powder Pop",
+     "Quick Fuse"
+    ],
+    "score": 22.42
+   },
+   {
+    "cards": [
+     "Powder Pop",
+     "Quick Fuse",
+     "Kaboom!"
+    ],
+    "score": 13.62
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap"
+ },
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Bag of Tricks",
+   "Powder Pop",
+   "Quick Fuse",
+   "Kaboom!"
+  ],
+  "hand": [
+   "Bag of Tricks",
+   "Powder Pop",
+   "Quick Fuse",
+   "Kaboom!"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-30T14:27:46"
+}

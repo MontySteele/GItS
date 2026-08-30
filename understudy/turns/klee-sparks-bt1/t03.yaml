@@ -1,0 +1,101 @@
+# KLEESPARK-BT1, BOARD C. BELOW THE PRICE, WITH NO WAY UP.
+#
+# See t01's header for what the round is, what Quick Fuse is doing in the hand,
+# and what the slot machinery cannot see.
+#
+# WHAT THIS BOARD IS. `t01` with the bank moved from 3 to 2 and NOTHING ELSE
+# CHANGED. The priced mode is one Spark short and there is no `gain_spark`
+# anywhere in the hand, so the bank cannot reach 3 on this turn by any line.
+# This is the low half of the round's bank >= 3 / bank < 3 pair, and it is the
+# board `EB-182`'s omission rule is asked on: the unaffordable mode is NOT
+# OFFERED on the choose-a-card screen (omission, not greying -- the 0.111.0
+# decompile gives that screen no per-option disabled state), while the card
+# stays PLAYABLE because its free mode is affordable.
+#
+# NOTHING IN THE HAND MAKES A SPARK, and that is checked rather than assumed:
+# Quick Fuse (`detonate`), Kaboom! (`damage`) and Duck and Cover (`block`) are
+# read off `docs/klee-cards.yaml` and none prints a `gain_spark` rider. A Bomb
+# placed by the free mode can yield Sparks when it detonates on a LATER turn;
+# it yields none on this one, which is what makes the board's short bank short.
+#
+# THE ARITHMETIC.
+#   free mode -> 1 Bomb at 5, Quick Fuse detonates    =  5
+#                plus Kaboom!                          = +7   -> 12
+# The priced mode is not on the table at all. NO LINE HERE IS LETHAL: the enemy
+# is set to 40.
+#
+# THE SLOT THIS BOARD SITS UNDER IS B3: a bank BELOW the mode's price of 3,
+# with no other affordable Spark-priced card in hand.
+
+id: klee-sparks-bt1-t03
+character: KLEEMOD-KLEE
+
+# Pinned before the round (MANIFEST.md). `klee-sparks-r2-t03`'s seed, recorded
+# ONE-BODY on a Klee run.
+seed: YX7PB48WR7R4
+
+exact_hand: true
+
+prototype: true
+
+slots:
+  - B3
+
+notes: |
+  42/62 HP, no Block, 3 energy, a Spark bank of 2 -- one short of the mode's
+  price -- and one enemy telegraphing an attack.
+
+assumptions:
+  - "The hand is EXACTLY the list below and nothing else. The hand the
+     game dealt is emptied before these cards are given, and a packet
+     whose live hand is not this list is refused rather than written."
+  - "The Spark bank is written to 2 through SPARK_POWER. Nothing in the
+     hand can raise it this turn, so 2 is the bank for the whole turn."
+  - "The encounter is GENERATED. This file can write the enemy's HP and
+     Block and cannot write its INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below
+     declares a telegraphed ATTACK as the falsifier's input."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "No Bomb is on the board when the turn starts. Every Bomb the packet
+     shows is one this turn's line places."
+  - "The player has no Strength and the enemy carries no aura, Vulnerable
+     or Weak. Every Klee attack applies Pyro, and a reaction on top of a
+     hit would move every number the falsifier scores."
+
+# Needs a dev build carrying the prototype rows (klee-mod/build/deploy_proto.ps1).
+
+staging:
+  - give: {card: KLEEMOD-PROTO_SPARK_MODE_BOMBS, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-QUICK_FUSE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-KABOOM, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-DUCK_AND_COVER, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 42}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 3}
+  - set_power: {who: player, name: SPARK_POWER, amount: 2}
+  - set_hp: {who: first, amount: 40}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+board:
+  character: klee
+  pilot: demolition
+  hp: 42
+  max_hp: 62
+  block: 0
+  energy: 3
+  turn: 4
+  resources:
+    sparks: 2
+  hand:
+    - proto_spark_mode_bombs
+    - quick_fuse
+    - kaboom
+    - duck_and_cover
+  enemies:
+    - name: "Act 1 enemy"
+      hp: 40
+      max_hp: 40
+      block: 0
+      intent: {kind: attack, amount: 11}
