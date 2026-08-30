@@ -403,15 +403,15 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `20260829-181718` (`0.2.1353+proto`, seed `71D8JS1VSKRN`, 120
     actions, six fights, the record naming `arms_granted`), where Second
     Helping was granted, drawn and played. `M48` is ANSWERED (R219 A/B); `M51` and
-    `M53` are ANSWERED by R220 (F and E). What is open for [USER]
-    is `M47` (Bag of Tricks), `M49` (the pilot's Charge term, now
-    superseded and needing closing), `M50` (re-pointed at the
-    Kurage-memory redesign's four unruled rows, pick 3 now answered on
-    `M60`), `M52` (the Furina reframe's two countersigns), `M54`–`M57`
-    (the blind run's four), `M59` (the reframe's sixteen picks) and `M60` (the Burst
-    retirement's four). Slice 2's round-2 boards
-    stay **drafted and HELD** on `M50` (branch `kokomi-slice-2-round-2`,
-    unstaged), and the redesign is what they now wait on.
+    `M53` are ANSWERED by R220 (F and E). **`M47`, `M49`, `M50`, `M52`,
+    `M54`, `M55`, `M56`, `M57`, `M59`, `M60` and `M64` are CLOSED by R224
+    (2026-08-30)** —
+    the sitting slate landed WHOLE, `M47`, `M55` and `M64` with them, so
+    **no prototype-slice row is open for [USER]**. The slate's own
+    engineering is `EB-213`–`EB-219`, and the packet stays in
+    `review/active/` as the record, every item carrying its RULED marker. Slice 2's round-2 boards
+    (branch `kokomi-slice-2-round-2`, unstaged) no longer wait on `M50`:
+    its four rows are ruled, so they re-board against the ruled kit.
   - **Klee Sparks — RE-AUTHORED, both engines, behind a flag**
     (`review/active/klee-sparks-2026-08-29.md`; evidence
     `docs/current/research/regent-stars-economy.md`). R219 B/C: the
@@ -429,7 +429,16 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     none vetoed. `LAW.md:481` moved `spark` from the bounded meters to the
     unbounded with it — the re-author has no cap, so the bounded-at-3 entry
     was a dead reference. Klee's Burst fold rides this arm (R220 B), and
-    `M60`'s `K1` sets its rarity.
+    `M60`'s `K1` set its rarity: **R224 D rules it Rare, once per combat,
+    gated by Exhaust on the body**, with the feed table taken as written
+    (`K2`). **The §14 direction is option (5), migrate before you
+    duplicate, and its BRANCH is Spark-only, FLAG-GATED** (R224 B): the
+    three hybrids go to 0 Energy with the price paid wholly in Sparks as a
+    dev-only substitution under `SPARK_ALT_COST_ENABLED` (`EB-218`), the
+    shipped pool byte-identical with the flag off. The round-2 picks are
+    answered with it: `EB-208`'s fix is
+    (a) then (c), `P4` stays UNREACHED as published, and the next gate is
+    (e).
   - **Kokomi Kurage memory — BASE KIT** (`review/active/kokomi-kurage-memory-2026-08-29.md`
     §11–§13). R219 D: the Bake-Kurage is **always on**, part of the base
     kit rather than a summoned card, and one Muster card joins the base
@@ -439,7 +448,20 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     at *3 Block per memory played, 5 upgraded* — [USER]'s placeholder, no
     measurement attached and none quotable. Sim, C# and the blind-run
     prediction slate are all merged; the run itself waits on the boot
-    regression above. Four rows the redesign leaves unruled are `M50`.
+    regression above. **The four rows the redesign left unruled are RULED
+    (R224, ex-`M50`):** the *Bake-Kurage* row and its upgrade delta retire
+    together under the re-authoring (carried on `EB-199`, not deleted while
+    the flag is off), the Tamakushi Casket refresh re-keys to an immediate
+    extra pulse under `KO1`(a), and `KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON` is
+    deleted with its branch (`EB-217`). Kurage's Oath stays as [USER] ruled
+    it — 3 Block per memory played, 5 upgraded, a placeholder with no
+    measurement attached — and the surface's missing upgrade channel is now
+    `EB-213`. The blind run's own four picks are ruled with them: Rule 1
+    prints as the Muster KEYWORD and the gate re-runs on `KURAGEMEM002`
+    (`EB-214`), the published grades stand while future records carry a
+    per-turn wire snapshot (`EB-216`), and the prototype face takes the
+    per-row `description:` channel with the loc merge deleted (`EB-215`).
+    Where the Charge-source line goes is still `M55`.
     **The memory's DISPLAY is being rebuilt**: the strip the blind run
     tested was diagnosed true on both misread frames and found
     insufficient rather than defective, so [USER]'s direction turns it
@@ -464,9 +486,14 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     (`review/active/furina-e4-2026-08-29.md` stays in place as the record).
     No code, no constant, no sheet row and no LAW line has moved.
     **`M52` is re-pointed** onto this packet's §3 ruling text and its §3.1
-    prospective LAW text, and the sixteen design picks are **`M59`**. Under
-    R213's sequence the Furina slice is gated on **`M52` and `M59`** — Klee
-    round 3 reported, both arms ADVANCE. Her Burst fold is one of R220 B's
+    prospective LAW text, and the sixteen design picks are **`M59`**.
+    **BOTH ARE COUNTERSIGNED BY R224 (2026-08-30) and both rows are
+    CLOSED:** §3 signed, §3.1 signed AS PROSPECTIVE (adopting amendments 3
+    and 4), LAW:145 taken as the relayed rewrite (b) with the packet's own
+    tightening — "directly" defined, "cheaply repeatable" kept — also
+    prospective, so **no `LAW.md` line moved**; and `F1`, `F13`, `F14` at
+    option (2) with the other thirteen at their defaults, Slot 6 kept.
+    **Nothing implements before Klee closes** (R213). Her Burst fold is one of R220 B's
     three, and it is the last of them.
   - **Build and grading rhythm (facts, not rulings).** CI takes a
     **docs-only fast path** (`tools/ci_changed_paths.py`) and runs pytest
@@ -522,16 +549,24 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     recorded and never graded, until it clears **≥ 6/8 over one round**
     AND the battery. `M63` is answered by R222 C: the funnel refuses a bad
     form and never repairs one. Open on the instrument: `EB-205`,
-    `EB-208` (a board cannot require an enemy count; the fix shape is a
-    pick), `EB-211` (costs passes on silence), `EB-212` (intent
-    self-report), and `M64` (an author-disjoint deciding read while the
-    seat is shadow).
+    `EB-208` (its (a) live-count preflight is BUILT and merged, #197;
+    (c), the character/build/context-keyed seed ledger, remains — R224
+    ruled the sequence), `EB-211` (costs passes on silence) and `EB-212`
+    (intent self-report). **`M64` is ANSWERED by R224** as a SPLIT: Codex
+    decides every board on a round that can ADVANCE an arm; fresh-Opus
+    rounds are INSTRUMENT rounds.
   - **Next.** Klee slice 1 has no open engineering: all three arms read
     ADVANCE on clean independent reads and Second Helping has its
-    whole-fight run. Owed next are the whole-fight runs for Rummage and
-    Slow Burn, the boot fix that unblocks the sealed Kokomi run, slice 1's
-    `EB-184`, and the ten open [USER] rows `M47`, `M49`, `M50`, `M52`,
-    `M54`–`M57`, `M59`, `M60`.
+    whole-fight run. **Rummage's and Slow Burn's whole fights are RULED
+    (R224, item 19)**: Rummage FOLDS into the §14 mixed-pool deck rather
+    than being staged as a separate fight for the same hybrid-price
+    question, and Slow Burn's fight is HELD until `M60`/`EB-199` settle
+    what its Burst rider becomes. What is owed next is the boot fix that
+    unblocks the sealed Kokomi
+    run, slice 1's `EB-184`, and R224's seven new rows
+    `EB-213`–`EB-219` — of which `EB-219` (Prune's re-author) and
+    `EB-218` (the Spark-only migration) precede the mixed-pool fight.
+    No [USER] row is open on the slice work.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
@@ -544,13 +579,26 @@ Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
 countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
-Art debt); the Fontaine Rares close-out (`M10`); and the ten
-prototype-slice, redesign and slate calls (`M47` Bag of Tricks; `M49` the
-pilot's Charge term, now superseded; `M50` the Kurage-memory redesign's four
-unruled rows, pick 3 answered on `M60`; `M52` the Furina reframe's two
-countersigns; `M54`–`M57` the blind run's four; `M59` the reframe's sixteen design picks; `M60` the Burst
-retirement's four picks). `M48` was answered by R219; `M58` by R220 G (N = 4); `M51` was answered by
-R220 F and `M53` by R220 E; `M62` and `M63` by R222 B and R222 C.
+Art debt); the Fontaine Rares close-out (`M10`); and — after **R224
+(2026-08-30) closed `M49`, `M50`, `M52`, `M54`, `M56`, `M57`, `M59` and `M60`**
+— **`M47`, `M55` and `M64` with them, so NO prototype-slice row is open.**
+R224 landed `review/active/sitting-2026-08-30.md` WHOLE: the Klee round-2
+picks and the §14 direction with its Spark-only migration branch (`EB-218`);
+`M47` at option (3), build per-mode playability (`EB-182`) then re-ask; `M55`
+at (5) re-scoped to the pile view, folded into `EB-214`; `M64` at a SPLIT —
+Codex decides any round that can ADVANCE an arm, fresh-Opus rounds are
+INSTRUMENT rounds, the rule written into OPERATIONS' *Local tester seat*
+section; Rummage folded into the §14 mixed-pool deck and Slow Burn's fight
+HELD on `EB-199`; the Spark drain sequenced after the mixed-pool read; and the
+burst packet's architecture paragraph plus **all eight** §3.2 LAW blocks
+countersigned AS PROSPECTIVE — **no `LAW.md` line moved**. **Ceremonial Garment
+is LOOT** — draftable Rare, `kit_card` and `requires: burst_energy_full`
+dropped, the v1.9 kit-grant machinery deleted outright, prospective and carried
+on `EB-199`. LAW:145 as signed opened one new item, ruled the same day:
+**Prune** is re-authored, her Spark grant becoming a declared Klee-engine
+response (`EB-219`). `M48` was answered by R219; `M58`
+by R220 G (N = 4); `M51` was answered by R220 F and `M53` by R220 E; `M62` and
+`M63` by R222 B and R222 C.
 
 ## Watch register (dormant)
 
