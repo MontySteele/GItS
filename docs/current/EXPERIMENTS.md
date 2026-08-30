@@ -343,6 +343,29 @@ carried while it was active is in the commit message that retired it.
   (`band = None`). The declaration is QUEUE `S4-G6`; its grading playtest is
   `docs/current/playtest/kokomi-playtest-protocol.md` (unrun, Answers block
   blank).
+- **`KOKOMI-SLICE1-WF` — the six ADVANCED slice-1 arms across whole fights** —
+  **DRAFTED 2026-08-30, unrun, not countersigned.** Drafted by Claude from
+  written design intent and committed before any seed is spent (R212(2)); it
+  is offered for batch countersign. **Why:** the six arms' four rounds of
+  ADVANCE feed nothing registered — they land only on the accept-to-sheet
+  signoff, which is the prototype surface's own deletion rule (R213 B), a
+  one-way door with no measurement in front of it. **Unit:** one complete
+  fight, Codex seat, `understudy.blindplay session` with the arm granted by
+  `understudy.embark --arm`; **30 Codex calls per fight** (`--max-actions 24`,
+  `--max-refusals 2`, worst case 28), three fights, 90-call ceiling.
+  **Slate:** eight slots, `WF1`–`WF8`, every falsifier counting plays, turns
+  or sentences off the run's own artefacts — cadence and stacked rotations for
+  arm A, whether 3 energy binds and is named for the three priced Companion
+  arms, and whether the Block mode is ever taken, ever named, and ever handed
+  back by the memory replay for the two exclusive arms. **Contaminations:**
+  granted deck, `+proto` build, `C.KURAGE_MEMORY` ON as a deliberate second
+  variable with its error direction stated (the kit makes a priced Companion
+  easier to afford, so *the price binds* is a floor and *it does not* is
+  confounded), and the GPT seat under R217 C/G. **Sequenced after** `M67` and
+  after `KURAGEMEM002`'s rerun; F3 additionally behind `EB-184`. Thoma —
+  Blazing Ooyoroi, the slice's one open RETURN, is excluded. No board staged,
+  no seed pinned →
+  `review/active/kokomi-slice-1-2026-08-27.md`, *Whole-fight blind play*.
 
 New registrations add a pointer here and land their packet under
 `review/active/`. When one is graded, it moves to the **Graded** table above —

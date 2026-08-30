@@ -354,7 +354,19 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     graders (15 SURVIVES / 1 REFUSED), sixteen replays, one flagged
     `misread`. Pair read: **two ADVANCE** (Fathom the Tide, Twin Tides)
     and **two RETURN** (Sounding Line, Watatsumi Levy — their boards, per
-    the review). Four numbered picks wait in §9. Defects minted:
+    the review). **Round 2 is HELD, and what holds it is no longer the
+    accrual rule:** its two re-set boards are drafted at
+    `understudy/turns/kokomi-slice-2-r2/`, and the round-2 run scheduled
+    2026-08-30 stopped at the door unstaged. **R226 ANSWERED accrual** —
+    uncapped, 1 per Exhaust of one of her own cards, Companions included,
+    spent only by the Bake-Kurage, and *no card prints a Charge price*
+    (PROSPECTIVE on the `C.KURAGE_MEMORY` flip). So all four arms print a
+    Charge price and retire as authored, **the two ADVANCED included**, and
+    no round-2 board survives. `M67` keeps its number, **re-scoped to that
+    consequence**: (1) the signed clause stands, arms and boards delete and the spend
+    plumbing stays — Claude's default; (2) a LAW carve-out for priced arms;
+    (3) hold slice 2 until `KURAGEMEM002` reruns. Two
+    numbered picks wait in §9. Defects minted:
     `EB-182` (no per-option playability on the choose-a-card screen,
     proven off the decompile), `EB-183` (R216 D's per-companion half,
     owed and unbuilt).
@@ -417,11 +429,20 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `M54`, `M55`, `M56`, `M57`, `M59`, `M60` and `M64` are CLOSED by R224
     (2026-08-30)** —
     the sitting slate landed WHOLE, `M47`, `M55` and `M64` with them, so
-    **no prototype-slice row is open for [USER]**. The slate's own
+    no prototype-slice row was open for [USER] **in the register** — a
+    sentence that was true of the register and false of the work, because
+    Kokomi slice 2's Charge-accrual pick was holding round 2 from inside its
+    packet and had never been minted. It is **`M67`** since 2026-08-30, and
+    it is the one prototype-slice row open — re-scoped the same day, once
+    a sitting one branch over answered the accrual rule, to that answer's
+    CONSEQUENCE for the
+    four priced arms. The slate's own
     engineering is `EB-213`–`EB-219`, and the packet stays in
     `review/active/` as the record, every item carrying its RULED marker. Slice 2's round-2 boards
     (branch `kokomi-slice-2-round-2`, unstaged) no longer wait on `M50`:
-    its four rows are ruled, so they re-board against the ruled kit.
+    its four rows are ruled — but under the signed Charge clause they are
+    MOOT rather than
+    re-boardable, since both re-boarded arms price Charge.
   - **Klee Sparks — RE-AUTHORED, both engines, behind a flag**
     (`review/active/klee-sparks-2026-08-29.md`; evidence
     `docs/current/research/regent-stars-economy.md`). R219 B/C: the
@@ -630,7 +651,10 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     run, slice 1's `EB-184`, and R224's seven new rows
     `EB-213`–`EB-219` — of which `EB-219` (Prune's re-author) and
     `EB-218` (the Spark-only migration) precede the mixed-pool fight.
-    No [USER] row is open on the slice work.
+    No [USER] row is open on the KLEE slice work; on Kokomi's, `M67` is —
+    no longer the accrual rule (R226 answered that) but its CONSEQUENCE, and
+    it holds the retirement of slice 2's round 2 and of all four arms, the
+    two ADVANCED included.
     **Klee's order, as R225 set it, is DONE through the income question.**
     `EB-205` is **CLOSED**, on both of its halves. `KLEESPARK-S1` (2026-08-30,
     2 PREDICTED / 3 MISS at `RT12/D18/P11/C21`) measured the arm DRAFTED in
@@ -683,12 +707,18 @@ drafts, after the Kokomi fold), and `S4-G14` itself. The slate's third section i
 `review/active/sitting-2026-08-30.md` carries that list.
 
 Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
-stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
+stability-band declaration (`S4-G6`), her protocol playtest (`S4-G14`) and her
+RETIREMENT OF THE FOUR PRICED SLICE-2 ARMS (**`M67`**, minted 2026-08-30 as the
+Charge accrual pick slice 2's packet had been holding round 2 on unminted, and
+re-scoped the same day — the accrual half was answered one branch over, so
+what returns is its
+consequence for the arms, the two ADVANCED included); the shop-rerun slate entry and
 countersign (`M14`); the name/lore and art eyes-on pile
 (`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
 Art debt); the Fontaine Rares close-out (`M10`); and — after **R224
 (2026-08-30) closed `M49`, `M50`, `M52`, `M54`, `M56`, `M57`, `M59` and `M60`**
-— **`M47`, `M55` and `M64` with them, so NO prototype-slice row is open.**
+— **`M47`, `M55` and `M64` with them, so the only prototype-slice row open is
+`M67`.**
 R224 landed `review/active/sitting-2026-08-30.md` WHOLE: the Klee round-2
 picks and the §14 direction with its Spark-only migration branch (`EB-218`);
 `M47` at option (3), build per-mode playability (`EB-182`) then re-ask; `M55`
@@ -712,8 +742,11 @@ mode-head price so *Bag of Tricks* proceeds (`EB-224`); `M66` at option (2),
 keep the single `PROTOTYPE_CARDS` switch and buy its guard with a lint that
 every prototype Harmony patch is character-scoped and seat-guarded
 (`EB-225`), with a three-fight soak on every dev deploy. `EB-220` is ruled
-too: Encore and Charge get glyphs now, under R212's art ladder. **No
-prototype-slice row is open.**
+too: Encore and Charge get glyphs now, under R212's art ladder. **`M67` is the
+one prototype-slice row open**, minted 2026-08-30 out of Kokomi slice 2 §9,
+where it had been holding round 2 unregistered — and re-scoped the same day,
+because a sitting one branch over answered its accrual question and left only the
+consequence: whether the four priced arms retire as authored.
 
 ## Watch register (dormant)
 

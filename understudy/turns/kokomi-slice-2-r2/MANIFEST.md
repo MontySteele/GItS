@@ -1,12 +1,28 @@
 # Kokomi slice 2, round 2 — turn manifest
 
+**STAGING IS HELD ON QUEUE `M67`, as of 2026-08-30 — and `M67` is no longer the
+accrual rule.** R226
+answered accrual — uncapped, 1 per Exhaust of one of her own cards, Companions
+included, spent only by the Bake-Kurage — and added that **no card prints a
+Charge price**. `M67` is re-scoped to that clause's CONSEQUENCE, and under its
+default option (1) **these four boards are MOOT**: both re-boarded arms price
+Charge (`t01`/`t02` arm 1, `t03`/`t04` arm 4), so they retire with their arms.
+A round-2 run was scheduled on 2026-08-30 and stopped here unstaged — no board
+staged, no model called. Nothing is deleted until `M67` is ruled, because the
+consequence reaches two ADVANCED arms and is [USER]'s to see. Everything below
+is the design of the boards and is unchanged; the round-1 prescriptions it
+encodes carry to `KURAGEMEM002`'s board design, not to a re-stage here.
+
 Four staged turns, two matched pairs. **This round exists only to answer the
 two RETURNs round 1 left**, and it changes nothing else: the two arms that
 ADVANCED (`t03`/`t04` threshold, `t05`/`t06` mode) are not re-run, no printed
 card number moved anywhere (R213 freeze), and no register row is minted or
-closed here. `EB-183`, the fifth pair, is deliberately **not built** — the
-run's own PICK 3 says arm 4's board has to be proved able to separate a Muster
-arm at all before anything is built against it.
+closed here. `EB-183`, the fifth pair, is deliberately **not built** — the run's
+own reading (packet §9, *the fifth pair, sequenced*) says arm 4's board has to
+be proved able to separate a Muster arm at all before anything is built against
+it. *(That reading was PICK 3 when this file was written; §9 was renumbered at
+`a1df7d6`, which took three of the five picks as iteration calls and left two —
+the surviving second of which is now `M67`.)*
 
 **Nothing in this file rates an arm.** The designer of these rows may not grade
 them (R213's first guard). The columns record what was set and why; the
