@@ -242,6 +242,37 @@ carried while it was active is in the commit message that retired it.
 
 ## Active registrations (pointers — packets live in `review/active/`)
 
+- **`KLEESPARK-W2` the mixed-pool whole fight** — **DRAFTED, unrun.** The
+  §14.4 proof R224 ordered when it took option (5): the alternative-cost Spark
+  economy read on a deck that carries the real sink pool. **Instrument:** one
+  sealed blind-play session (`understudy.blindplay session`) on a dev build,
+  the arm granted into the starting deck by `understudy.embark --arm`; graded
+  by `review/qa/blindplay/kleespark-w2/grade.py`, committed before the deploy.
+  **Cell:** the installed dev build named in the sealed record's identity
+  block, plus the game build; no `RT/D/P/C` version moves. **Unit:** a CAPPED
+  BATCH of live fights (§14.4 condition 1), bounded by
+  `--max-actions 40 --max-refusals 2 --max-stalls 6 --max-wall-s 5400`, one
+  session only. **Deck — eleven arms:** the seven-rung prototype ladder
+  (`proto_pop_spark`, `proto_kaboom_sink`, `proto_spark_strike`,
+  `proto_spark_sweep`, `proto_spark_double_tap`, `proto_spark_blast`,
+  `proto_spark_finisher`), the three `EB-218` Spark-only twins
+  (`proto_powder_charge_spark`, `proto_hold_the_line_spark`,
+  `proto_smoke_and_sparks_spark`) and `proto_spark_priced_draw` (Rummage,
+  R224 item 19). `proto_true_spark_knight` is LEFT OUT on §12.2's published
+  D4 grounds — a Rare Power that reprices every Attack is a second variable in
+  a window whose one variable is the priced-sink economy — and stays [USER]'s
+  at §11.7 pick 3. **Slate (§16.4), DRAFTED under R212(2) and committed before
+  any deploy:** `W1'` the bank holds two affordable uses with a non-damage sink
+  among them on ≥ 3 combat turns; `W2'` a non-damage sink is played over an
+  equally affordable damage sink at least once; `W3'` §14.4 condition 2's
+  named hold, at least once. `W4'` — the price-3 rung — is **UNREACHED BY
+  CONSTRUCTION** and printed as such: Powder Keg was not built, so option (5)
+  put no redesigned card at price 3 and §14.4 condition 4 refuses the
+  prediction. `W5'` (attack share) is RECORDED, NOT GRADED. Every slot carries
+  a printed UNREACHED condition. **Independence (§14.4 condition 5):** Codex
+  (`gpt-5.6-sol`) plays, refused-by-family through
+  `blindplay.check_independent`; `M64` is ANSWERED by R224, so the run does not
+  wait on it. Packet §16 → `review/active/klee-sparks-2026-08-29.md`.
 - **`EB-118` card-connectivity instrument** — static pre-registration at
   `review/active/eb118-richness-phase0-2026-08-23.md` §2, [USER]-approved
   2026-08-23. **Instrument:** `tools/card_connectivity_report.py` —
