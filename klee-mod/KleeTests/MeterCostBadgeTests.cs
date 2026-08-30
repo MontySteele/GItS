@@ -165,6 +165,43 @@ public class MeterCostBadgeTests
             c => c.EndsWith("Log.Warn"));
     }
 
+    // --- R225 item 5: every meter wears a glyph ---------------------------
+
+    [Fact]
+    public void Every_meter_resolves_a_glyph_of_its_own()
+    {
+        // [USER], R225 item 5: "I would prefer glyphs regardless, let's do it
+        // now." Encore and Charge shipped with `IconPathFor` returning null --
+        // number only, no icon -- which left the two meters separated by HUE
+        // alone, and both hues are cyan-adjacent. Three facts are pinned here
+        // because each one is a way the repair could rot:
+        //
+        //   * every meter declares a path (a new meter added without art shows
+        //     up here rather than silently drawing a bare number),
+        //   * no two meters share one (a shared glyph would read as
+        //     intentional, the reason KleePowerIcons names its powers one by
+        //     one), and
+        //   * each path is under its OWN character's namespace, which is what
+        //     makes build_pck carry it: the pck copies <character>/powers
+        //     wholesale, so a glyph filed under the wrong character is a file
+        //     that ships and an icon that never appears.
+        //
+        // The FILES are the art pipeline's business (tools/gen_meter_glyphs.py,
+        // registered in art_lint.GENERATOR_OWNED); a pck is not present in this
+        // host, so what is provable here is the declaration.
+        var path = Il.Method("MeterCostBadge", "Paint").DeclaringType!
+            .GetMethod("IconPathFor", All)!;
+        var glyphs = System.Enum.GetValues(typeof(Meter)).Cast<Meter>()
+            .ToDictionary(m => m, m => (string?)path.Invoke(null, new object[] { m }));
+
+        Assert.Empty(glyphs.Where(kv => string.IsNullOrEmpty(kv.Value)));
+        Assert.Equal(glyphs.Count, glyphs.Values.Distinct().Count());
+
+        Assert.Equal("klee/powers/spark.png", glyphs[Meter.Sparks]);
+        Assert.Equal("furina/powers/encore.png", glyphs[Meter.Encore]);
+        Assert.Equal("kokomi/powers/charge.png", glyphs[Meter.Charge]);
+    }
+
     // --- Sparks, unchanged by the generalisation --------------------------
 
     [Fact]

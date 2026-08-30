@@ -46,21 +46,26 @@ namespace KleeMod.Vfx;
 ///     font, on every surface that renders a card.
 ///   * DIFFERENT ICONOGRAPHY, PER METER. Sparks wear Klee's own
 ///     `klee/powers/spark.png` -- the icon her Spark counter already wears --
-///     so the badge says SPARK and never STAR.
+///     Encore a stage curtain and Charge a filled droplet, so the badge says
+///     SPARK, ENCORE or CHARGE and never STAR.
 ///   * SAME COLOUR RULES. <c>StsColors.red</c> with
 ///     <c>unplayableEnergyCostOutline</c> when the bank cannot pay, which is
 ///     <c>CardCostHelper.GetStarCostColor</c>'s own InsufficientResources arm.
 ///
-/// ENCORE AND CHARGE HAVE NO ICON, and no art was authored to give them one.
-/// Neither meter owns a glyph anywhere in the mod: Encore's ambient display is
-/// the Salon stage RIBBON (a coloured bar and a number, D3) and Charge's is the
-/// second-row GAUGE (a bare climbing number, no cap icon). So the badge borrows
-/// what those two displays actually use to say which meter they are -- their
-/// COLOUR, read off the same values the ribbon and the gauge are drawn with --
-/// and HIDES the icon rather than showing a star. The result is a number in the
-/// card's second cost slot, in the colour of the meter it spends, on a card
-/// whose text names that meter. If [USER] wants a glyph instead, that is an art
-/// pick with a contact sheet, not something to improvise here.
+/// ENCORE AND CHARGE NOW HAVE ONE TOO (R225 item 5, [USER]: "I would prefer
+/// glyphs regardless, let's do it now"). They shipped without: neither meter
+/// owned a glyph anywhere in the mod -- Encore's ambient display is the Salon
+/// stage RIBBON (a coloured bar and a number, D3) and Charge's is the second-row
+/// GAUGE (a bare climbing number, no cap icon) -- so the badge hid the icon and
+/// said which meter it was with COLOUR alone, read off the same values the
+/// ribbon and the gauge are drawn with. That left the two meters separated by
+/// hue and nothing else, and both hues are cyan-adjacent. So the pair was drawn:
+/// `tools/gen_meter_glyphs.py` emits a stage CURTAIN for Encore and a DROPLET
+/// FILLED TO A LINE for Charge, on spark.png's own composition (a soft dark
+/// disc under a two-tone motif) in each meter's own colour. They are separated
+/// by SILHOUETTE -- a round bloom, a wide arch with a hole in it, a pointed
+/// droplet -- because hue is what a busy board and a colour-blind player lose
+/// first. The colours below still apply, to the NUMBER.
 ///
 /// A POSTFIX, NOT A PREFIX, deliberately: the base method runs first and does
 /// its own work (including hiding the icon for a card with no Star cost, which
@@ -83,15 +88,25 @@ internal static class MeterCostBadge
     /// <summary>
     /// The pck-relative glyph for a meter, or null when the meter owns none.
     ///
-    /// Sparks reuse the Spark counter's own icon. Encore and Charge return null
-    /// because no such asset exists -- see the class note. Null here means "draw
-    /// the number, hide the icon", which is a deliberate rendering; it is NOT
-    /// the pck-missing case, which is a null from <c>KleePck.Path</c> for a path
-    /// that IS declared and which falls back to drawing nothing at all.
+    /// ALL THREE METERS NOW OWN ONE (R225 item 5, [USER]: "I would prefer
+    /// glyphs regardless, let's do it now"). Sparks reuse the Spark counter's
+    /// own icon; Encore and Charge wear glyphs drawn for this badge by
+    /// <c>tools/gen_meter_glyphs.py</c> -- a stage curtain and a droplet filled
+    /// to a line, separated from the Spark bloom and from each other by
+    /// SILHOUETTE, since the two numbers are both cyan-adjacent and hue alone
+    /// was doing all the work before.
+    ///
+    /// The null arm is kept and is not dead: it is the meter a future character
+    /// adds before its art lands. Null here means "draw the number, hide the
+    /// icon", which is a deliberate rendering; it is NOT the pck-missing case,
+    /// which is a null from <c>KleePck.Path</c> for a path that IS declared and
+    /// which falls back to drawing nothing at all.
     /// </summary>
     private static string? IconPathFor(Meter meter) => meter switch
     {
         Meter.Sparks => "klee/powers/spark.png",
+        Meter.Encore => "furina/powers/encore.png",
+        Meter.Charge => "kokomi/powers/charge.png",
         _ => null,
     };
 
@@ -102,6 +117,9 @@ internal static class MeterCostBadge
     /// Sparks keep <c>StsColors.cream</c> -- the base game's own cost colour --
     /// because the spark GLYPH already carries the identity there, and recolour-
     /// ing a look [USER] has not yet had eyes on would be two changes in one.
+    /// Encore and Charge keep theirs now that they have glyphs too: the glyph is
+    /// drawn IN this colour (gen_meter_glyphs.py reads the same two values), so
+    /// number and icon are one object rather than two decisions.
     /// Encore's value is the Salon stage ribbon's fill
     /// (`furina/ui/salon_stage.tscn`, %Seg1) and Charge's is the second-row
     /// gauge's fill (<see cref="GaugeBridge"/>, the `kokomi_charge` spec).
@@ -265,9 +283,10 @@ internal static class MeterCostBadge
             WarnFreedGlyph("IsInstanceValid was false for the loaded texture");
         }
 
-        // null here is one of two: this meter owns no glyph (Encore, Charge --
-        // number only, by design), or the engine freed the one it had (EB-222 --
-        // number only, warned once). Both draw the badge; neither throws.
+        // null here is one of two: this meter owns no glyph (no shipped meter
+        // is in that state since R225 -- it is the next one, before its art
+        // lands), or the engine freed the one it had (EB-222 -- number only,
+        // warned once). Both draw the badge; neither throws.
         SetGlyph(icon, texture);
 
         label.SetTextAutoSize(price.Amount.ToString());
