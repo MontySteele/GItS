@@ -266,7 +266,17 @@ CEILINGS: dict[str, int] = {
     # prototype-slice row was open. The row is the lint that would have caught
     # it: a hold verb in a `review/active/` packet naming no OPEN QUEUE id.
     # The pick itself is M67, minted in the same commit.
-    "EB": 229,   # EB-229 minted 2026-08-30 by the `KURAGEMEM002` rerun: the
+    # EB-230/231/232 minted 2026-08-30 by the night's runs, three defects that
+    # each surfaced where nothing was looking for them. 230 the `KLEESPARK-W3`
+    # record's §18.9 item 1, promoted from defect CANDIDATE to a row now that
+    # the mechanism is read off the generated file: a face rendering a live
+    # modifier its body ignores. 231 the same session's teardown, which wrote
+    # REVERTED over a process it had not killed and then failed the bridge
+    # removal on the live PID twice. 232 the lane test, whose flake this
+    # integration reproduced and then diagnosed off the quoted save path --
+    # it is a cross-SESSION leak, and the standing "rerun the file alone"
+    # workaround is the reason nobody had looked.
+    "EB": 232,   # EB-229 minted 2026-08-30 by the `KURAGEMEM002` rerun: the
                  # blind-play reply schema collects no forecast, so three
                  # display slots graded UNREACHED on a display that was
                  # demonstrably on the page and correct.
@@ -644,6 +654,11 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 228 minted 2026-08-30 by the Kokomi slice-2 round-2 job: the lint
         # for a packet that HOLDS live work on an unminted pick.
         228,
+        # 230/231/232 minted 2026-08-30 by the overnight integration, from the
+        # night's two live runs and from the integration's own suite: the
+        # `place_bomb` face, the teardown that reports a kill it did not make,
+        # and the lane test leaking across pytest sessions. All three OPEN.
+        230, 231, 232,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
