@@ -280,6 +280,64 @@ carried while it was active is in the commit message that retired it.
   gate is discharged. Under R212(2) the §5 slate is drafted and committed
   DRAFTED by Claude, then countersigned in batch →
   `review/active/charge-reads-per-turn-registration-2026-08-13.md`.
+- **`KLEESPARK-W4` — the strict Rare Power's whole fight, and `W1''`'s longer
+  batch (`EB-223`)** — **DRAFTED 2026-08-30, NOT RUN.** Registration
+  `review/active/klee-sparks-2026-08-29.md` §19, committed before any run under
+  R212(2) and offered for batch countersign; the grader
+  (`review/qa/blindplay/kleespark-w4/grade.py`) is owed as its own commit before
+  the session, in §17's shape. **Instrument:** `understudy.blindplay session`
+  over a live dev build, graded by that committed mechanical script off the
+  run's own pages, replies and transcript; it moves no `RT/D/P/C` stamp.
+  **Cell:** the installed `+proto` dev build, one capped batch, one seed rolled
+  and read back off the wire (R95). **Arm:** `KLEESPARK-W3`'s exact granted
+  deck — the derived **8 makers : 5 sinks = 1.600** — **plus
+  `proto_true_spark_knight`** (Spark Knight's Oath, Rare Power, 2 Energy,
+  *"Your Attacks that do not already cost [Spark] cost 3 [Spark] instead of
+  their Energy cost"*, the price a constant at `C.SPARK_ATTACK_POWER_PRICE` =
+  3). The Power carries no top-level `gain_spark` or `spend_spark`, so the
+  counted ratio is unchanged; the deck is 24 cards against `W3`'s 23. **ONE
+  registration serving TWO owed reads, with the linkages registered separately
+  so neither contaminates the other:** `W1'''` continues `W1''`'s SPLIT (1 of
+  19 combat pages) at the longer batch and is graded on **PRE-POWER pages
+  only**, where the deck is `W3`'s deck exactly; `K1'''`/`K2'''`/`K3'''` are
+  graded on **POST-POWER pages only** and are UNREACHED if the Power never
+  resolves. **Slate:** `W1'''` ≥ 3 pre-Power pages holding two affordable uses
+  with a non-damage destination among them (1–2 SPLIT, 0 MISS); `K1'''` ≥ 2
+  converted Attacks actually paid at 3 on pages printing a bank ≥ 3, its
+  denominator printed (1 SPLIT, 0 MISS, UNREACHED on a zero denominator);
+  `K2'''` both halves of §5's own observable — every converted Attack's cost
+  corner printing Spark 3 / Energy 0 on every post-Power page, AND one page on
+  which Energy buys a Skill or Power while the bank buys a converted Attack
+  (one half SPLIT, neither MISS); `K3'''` ≥ 1 post-Power page where a converted
+  Attack and a price-2 non-damage sink were both affordable and the sink was
+  the play (0 with denominator ≥ 3 MISS, 0 with 1–2 SPLIT, denominator 0
+  UNREACHED); `K4'''` RECORDED and NOT GRADED. **Why a whole fight and not a
+  staged turn:** R222 (a)'s own words — *"an investment Power needs fight
+  history before its wording or its price can be judged"* — and `P3` already
+  read the only thing a staged board can read about it. **§12.2's D4 objection
+  is recorded, not withdrawn:** the Power is now the window's one variable and
+  the ratio is what is held fixed, so this read can say what the Power does at
+  a known ratio and can NOT compare itself to `W3`, attribute anything to the
+  Power alone, or treat the pre/post-Power split as a controlled contrast.
+  **What the grades permit:** `K1'''`+`K2'''`+`K3'''` all PREDICTED makes the
+  Power an ADVANCE-to-sheet CANDIDATE — a numbered proposal to [USER], never a
+  Claude decision; a `K2'''` or `K3'''` MISS RETURNS to a staged round (and, for
+  `K2'''` half (i), files an `EB-164`-family display defect); and **`K1'''` MISS
+  with a NON-ZERO denominator is the ONE registered outcome on this slate that
+  may reopen §5's wording and the price of 3 to [USER]** — R222 closed that
+  question and no other slot here may reopen it. **Budget:** `--max-actions 80`,
+  Codex cap **90 calls** (`W3` spent 45 for 4 fights ≈ 11.25/fight, so ~8 fights
+  and ~0.85 meter points per call), starting only at ≤ 8% of the five-hour
+  window and ≤ 35% of the week, under `EB-227`'s stop lines of 85% and 50%; one
+  session, no second. **Contaminations, §19.5:** granted not drafted; `+proto`,
+  so the automatic Spark rule is NOT live and 3 is the only price a converted
+  Attack carries; Neow's unskippable boon, taken by a registered deck-neutral
+  rule (`W3` took Silken Tress); Pounding Surprise and Endless Fireworks are
+  income the ratio cannot count, so every income figure is a FLOOR; one seed for
+  the whole batch, so the fights are not independent; the additive starter and
+  the fourteenth card move draw frequency, not the ratio. **Sequencing:** after
+  the morning's merges, at the next game-time slot. Guardrail-7 and R217 G ride
+  the whole row.
 - **Kokomi stability band (D5)** — no band is declared, so it rides DARK
   (`band = None`). The declaration is QUEUE `S4-G6`; its grading playtest is
   `docs/current/playtest/kokomi-playtest-protocol.md` (unrun, Answers block

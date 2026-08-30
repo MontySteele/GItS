@@ -616,7 +616,13 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     nineteen, and `W2''`/`W3''` MISSED with their registered precondition
     (`W1''` PREDICTED) unmet, so **no re-price and no new sink row comes off
     it** and the registered next unit is a LONGER BATCH at the same deck,
-    bounded by the Codex cap rather than by the game. Then *Bag of Tricks*
+    bounded by the Codex cap rather than by the game. **The next Klee read is `KLEESPARK-W4`, DRAFTED 2026-08-30 and NOT RUN**
+    (§19; `EB-223`): one session that grants `proto_true_spark_knight` on top of
+    `W3`'s exact derived deck — the Power moves neither side of the 1.600 ratio —
+    so R222 (a)'s owed whole-fight read of the strict Rare Power and `W1''`'s
+    registered longer batch are served at once, their linkages held apart by a
+    pre-Power / post-Power page partition, at 80 actions on a Codex cap of 90.
+    Then *Bag of Tricks*
     (`EB-224`). Whole fights are unblocked, the two lifecycle throws being
     fixed and the three-fight soak green.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5

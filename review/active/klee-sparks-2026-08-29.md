@@ -4800,3 +4800,358 @@ positive** — `pilot-vocabulary-score` matching the word `score` inside the
 guide's own sentence *"no card list, no score, no recommendation"*, exactly as
 `W1` and `W2` recorded it. No card id, design tag, policy hint or run seed
 reached any page.
+
+---
+
+## 19. `KLEESPARK-W4` — the strict Rare Power's whole fight, and `W1''`'s longer batch
+
+**2026-08-30 · branch `eb223-rare-power-registration`, stacked on
+`kleespark-w3` (`36f162a`). REGISTRATION, DRAFTED AND COMMITTED BEFORE ANY
+RUN. NOTHING RAN TONIGHT.** Under R212(2) the slate is Claude's to draft from
+written design intent and commit DRAFTED before any run; it is offered for
+batch countersign and is **never re-signed**. R101b binds: nothing already
+published in §11–§18 is re-read, re-graded or rewritten here. `W3`'s
+`W1''`–`W6''` stand exactly as published, and the slot names below carry a
+**triple prime** so no reader can confuse a grade here with one of theirs.
+
+### 19.1 Why this registration exists, and why it is ONE registration serving TWO owed reads
+
+**Owed read A — `EB-223`, the Rare Power.** R222 answered §11.7 pick 3 as
+**(a)**, verbatim: *"leave it as built and re-read it in whole-fight play. Its
+face is legible — that is what `P3` PREDICTED — and an investment Power needs
+fight history before its wording or its price can be judged. Neither §5's
+wording nor the price of 3 is reopened."* That answer is a **work order, not a
+decision** (§16.2's erratum, 2026-08-30), and the work is this read.
+
+**Why it must be a WHOLE FIGHT and not a staged turn, in R222 (a)'s own
+terms.** *An investment Power needs fight history.* A staged turn hands the
+reader a board and a bank that somebody chose; the Power's entire question is
+whether a bet placed on turn N is paid back over turns N+1…end, off a bank the
+run itself produced. `KLEESPARK-R1`'s `P3` already read the only thing a
+staged turn CAN read about it — the face is legible — and PREDICTED it, so a
+second staged round would re-ask an answered question and could not ask the
+open one. The three slots at §19.4 are each a statement about pages that come
+AFTER a play, which is a shape a single staged board does not have.
+
+**Owed read B — `W1''`'s own registered act.** §18.4 registered, for a `W1''`
+SPLIT: *"the bank reaches the rung but rarely; the next unit is a longer
+batch, not a new row."* `W1''` came in SPLIT (1 of 19 combat pages), and
+§18.10 item 4 named the unit: *"a longer batch at this same deck… the binding
+constraint is the Codex cap, not the game."* This registration IS that longer
+batch — same deck, same derived ratio, roughly double the actions.
+
+**Two reads, one session, and the linkages are registered SEPARATELY so
+neither contaminates the other.** The whole hazard of folding them together is
+that the Power reprices Attacks, and a repriced Attack changes what "two
+affordable uses" means — which is exactly the D4 objection §12.2 raised when
+it kept the Power out of `W1`, `W2` and `S1`. The separation is mechanical and
+is fixed here, before the run:
+
+- **`W1'''` is graded on PRE-POWER combat pages only** — every page from the
+  session's first up to and including the last page before `proto_true_spark_
+  knight` resolves. On those pages the deck is `W3`'s deck exactly: the Power
+  carries neither a top-level `gain_spark` nor a top-level `spend_spark`, so
+  while it sits unplayed the counted ratio is still **8 makers : 5 sinks =
+  1.600**, and no Attack's price has moved. `W1'''` is therefore a strict
+  continuation of `W1''` at a longer batch, and its denominator is printed
+  with its grade.
+- **`K1'''`, `K2'''` and `K3'''` are graded on POST-POWER combat pages only**,
+  and every one of them is UNREACHED if the Power never resolves. None of them
+  reads a pre-Power page and `W1'''` reads no post-Power page; the two sets are
+  disjoint by construction and the grader partitions them once, at the
+  transition, off the transcript's own `play` row.
+- **The post-Power count for `W1'''`'s question is RECORDED and NOT GRADED**,
+  beside the graded pre-Power count. It is printed so the number exists, and it
+  grades nothing, because on those pages the affordability question is a
+  different question.
+
+### 19.2 The D4 objection, recorded, and what this read CAN and CANNOT say about it
+
+**The objection as published (§12.2, and §18.2 repeating it):** *"The strict
+Rare Power would change the price of every Attack in the deck at once, which is
+a second variable in a window whose one variable is the priced-sink economy
+(D4)."* It was correct in `W1`, `W2`, `S1` and `W3`, and it is not withdrawn
+here. What changes is the question the window is asked: `W3` and `S1` between
+them ANSWERED the income question (`EB-205` DISCHARGED, `W6''` PREDICTED at a
+median per-fight peak bank of 4.0), so the priced-sink economy is no longer the
+one variable this window is protecting. The Power is now the variable, and the
+ratio is the thing held fixed.
+
+**What this read CAN say.** What the strict Power does on a deck whose
+maker : sink ratio is **known, derived and held constant at 1.600**, checked
+page by page the way §18.7 checked `W3`'s — whether the converted price of 3 is
+ever actually paid, whether the conversion is visible where §5 says it is
+visible, and whether the price-3 rung takes the bank away from the price-2
+rungs.
+
+**What this read CANNOT say, stated before the run so it is not claimed
+after.**
+
+1. **It is not a comparison with `W3` and no number here may be quoted as
+   one.** Different seed, different batch length, a fourteenth card in the
+   deck, and a different draw order. `W3`'s grades stand as published (R101b)
+   and nothing below re-reads them.
+2. **The pre-Power / post-Power split inside ONE session is NOT a controlled
+   contrast**, and it is not offered as one. The two halves differ in fight
+   order, in what the run has drafted and drunk by then, and in the enemies
+   they faced. The split exists to keep the two OWED READS from grading each
+   other's pages, and it buys nothing else.
+3. **It cannot attribute anything to the Power alone.** A whole fight is one
+   arm; there is no Power-off arm here and none is registered.
+4. **It says nothing about whether the Power should be on the sheet.** The best
+   outcome available on this slate is an ADVANCE-to-sheet **candidate** — a
+   numbered proposal to [USER] — never a Claude decision (the ladder: a pick
+   between genuinely different design directions is [USER]'s).
+
+### 19.3 The deck — `W3`'s exact granted deck PLUS the Rare Power, and nothing else
+
+**Fourteen granted cards: §18.2's thirteen, unchanged and in the same order,
+plus `proto_true_spark_knight`.** Not one of the thirteen is re-chosen here;
+they are the derived deck `S4`'s inherited floor of 1.500 produced, and
+re-deriving them would be picking them.
+
+| # | `--arm` id | printed name | Energy | Spark | role |
+|---|---|---|---|---|---|
+| 1 | `proto_pop_spark` **×2** | Powder Pop | 0 | makes 1 | maker (starter sub, doubled to the floor) |
+| 2 | `skip_and_hop` | Skip and Hop | 0 | makes 1 | maker |
+| 3 | `warm_glow` | Warm Glow | 1 | makes 1 | maker |
+| 4 | `snap` | Snap! | 1 | makes 1 | maker |
+| 5 | `hot_hands` | Hot Hands | 1 | makes 3 | maker |
+| 6 | `all_my_treasures` | All of My Treasures! | 3 | makes 2 | maker |
+| 7 | `da_da_da` | Da-da-da! | 0 | makes 1 | maker |
+| 8 | `proto_kaboom_sink` | Ka-pow! | 0 | spends 1 | sink — damage (cheapest) |
+| 9 | `proto_powder_charge_spark` | Set It Off | 0 | spends 2 | sink — detonation |
+| 10 | `proto_hold_the_line_spark` | Dig In | 0 | spends 2 | sink — Block |
+| 11 | `proto_smoke_and_sparks_spark` | Powder Smoke | 0 | spends 2 | sink — Vulnerable |
+| 12 | `proto_spark_priced_draw` | Rummage | 1 | spends 3 | sink — draw |
+| 13 | **`proto_true_spark_knight`** | **Spark Knight's Oath** | **2** | — | **the Rare Power, and the subject of this read** |
+
+**The row as authored, quoted off the surface** (`docs/prototype-surface.yaml`,
+§5 wording (1) STRICT with sub-pick (a); neither the wording nor the price is
+reopened here — R222 closed both):
+
+> **Spark Knight's Oath** — Rare · Power · 2 Energy
+> *"Your Attacks that do not already cost [Spark] cost 3 [Spark] instead of
+> their Energy cost."*
+
+The **3** is not on the card and is not a stack: `amount: 1` is one stack of
+`spark_attack_cost`, and the price is a constant of the rule —
+`C.SPARK_ATTACK_POWER_PRICE = 3` in tier0, printed as a literal by the C#
+registry template, implemented by
+`klee-mod/KleeCode/Powers/Prototype/SparkAttackCostPower.cs` (compiled only
+under `-p:PrototypeCards=true`). **Sub-pick (a) rides it:** an Attack that
+ALREADY prints a Spark price is untouched, so **Ka-pow! stays at 1** and the
+five Spark-priced damage rungs `W3` left out stay left out.
+
+**The ratio is UNCHANGED at 8 : 5 = 1.600.** The Power carries no top-level
+`gain_spark` and no top-level `spend_spark`, so by §17.2's sheet definitions —
+used unchanged by `S1`, `W3` and this read — it is neither a maker nor a sink
+and moves neither side. **Deck size is 24** against `W3`'s 23; that is a draw
+frequency difference and it is disclosed rather than corrected (§19.5
+contamination 6).
+
+**`arms_granted` verbatim, as the sealed record will name them** (wire ids —
+`KLEEMOD-` plus the id upper-cased, `embark.wire_id`; Powder Pop appears twice
+because it is granted twice):
+
+```
+KLEEMOD-PROTO_POP_SPARK
+KLEEMOD-PROTO_POP_SPARK
+KLEEMOD-SKIP_AND_HOP
+KLEEMOD-WARM_GLOW
+KLEEMOD-SNAP
+KLEEMOD-HOT_HANDS
+KLEEMOD-ALL_MY_TREASURES
+KLEEMOD-DA_DA_DA
+KLEEMOD-PROTO_KABOOM_SINK
+KLEEMOD-PROTO_POWDER_CHARGE_SPARK
+KLEEMOD-PROTO_HOLD_THE_LINE_SPARK
+KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK
+KLEEMOD-PROTO_SPARK_PRICED_DRAW
+KLEEMOD-PROTO_TRUE_SPARK_KNIGHT
+```
+
+**What is still left out, and why it stays left out.** The five damage rungs
+above price 1 (Fwoosh!, Tinder Toss, Bang Bang!, Dodoco Blast, Firework
+Finale), for §18.2's reason unchanged — granting the ladder would put the ratio
+back where `W2` had it. And a shipped maker converted by PICK 4's map, for
+§18.2's reason unchanged.
+
+### 19.4 The slate — one continuation slot, three Rare-Power slots, two linkages
+
+Every falsifier below is computed by
+`review/qa/blindplay/kleespark-w4/grade.py`, **owed as its own commit BEFORE
+the run** — the shape §17 used, where the instrument is a separate, later
+commit than the slate and both precede the run. It reads only artefacts the run
+writes by itself: the rendered observation pages (`turn-*/prompt.md` — printed
+bank, printed Energy, printed hand, printed cost corners), the per-turn
+`reply.json`, and `transcript.jsonl`'s command rows. No grade reads a design
+judgement and no grade reads the tester's prose.
+
+**AFFORDABLE, defined once for the whole slate and taken from §18.4
+unchanged:** on a combat page a hand card is AFFORDABLE when its printed Spark
+price is ≤ the printed Spark bank AND its printed Energy cost is ≤ the printed
+current Energy.
+
+**THE PARTITION, defined once.** The **POWER PAGE** is the combat page on which
+a successful `play` of *Spark Knight's Oath* is recorded. **PRE-POWER PAGES**
+are every combat page up to and including it; **POST-POWER PAGES** are every
+combat page after it. If the Power is never played there are no post-Power
+pages and every `K` slot grades UNREACHED.
+
+**THE FOUR NON-DAMAGE SINKS in this deck**: Set It Off, Dig In, Powder Smoke,
+Rummage. **THE ONE PRINTED DAMAGE SINK**: Ka-pow!. **A CONVERTED ATTACK** is a
+hand card the page prints as an Attack that carries no printed Spark price on a
+pre-Power page and prints **Spark 3 / Energy 0** on a post-Power page.
+
+| # | slot | prediction | falsifier, mechanically | UNREACHED when | the decision the outcome changes |
+|---|---|---|---|---|---|
+| `W1'''` | **`W1''`'s question at the longer batch, on the SAME deck**: does the bank hold two affordable uses at once, with a non-damage destination among them? | **YES, on at least 3 PRE-POWER combat pages** — `W2`'s and `W3`'s threshold, unchanged, and deliberately not re-derived at the longer batch. | Count PRE-POWER combat pages where **two or more distinct Spark-priced titles in hand are each affordable** and **at least one of the affordable ones is a non-damage sink**. **≥ 3 = PREDICTED, 1–2 = SPLIT, 0 = MISS.** The pre-Power page count is printed as the denominator; the same count over POST-POWER pages is printed beside it, RECORDED and NOT GRADED. | the session records **zero pre-Power combat pages** | **PREDICTED**: the two-destination choice IS posed regularly at the inherited ratio once the batch is long enough, and `W3`'s SPLIT was a batch-length artefact rather than a composition fact. That authorises **re-posing `W2''` and `W3''` in a FRESH registration at this batch length** — and it authorises no re-price and no new sink row on its own, because neither of those slots is graded here. **SPLIT**: the rate is real and low for the second read running; the next unit is NOT a third batch bought on Claude's own authority — it goes to [USER] as a numbered pick on whether to keep buying batch length (§18.10 item 4: a budget question, not an engineering one). **MISS on a denominator of ≥ 30 pre-Power pages**: the choice is not posed at the inherited ratio even at double the batch, which is the composition finding `W3`'s single page could not make; it returns to [USER] as a numbered pick between §14.3's options, and Claude does not settle it. **MISS on a denominator below 30**: the batch did not happen and the slot is a batch-length reading, not a composition one. |
+| `K1'''` | **Is the converted price of 3 ever actually PAID?** §5's whole bet — *"roughly one Attack every three turns unless you have drafted generation — which is the payoff loop working"* — is a claim about a price being paid, not about a face being read. `W3` saw per-fight peak banks of **5 / 0 / 3 / 9**, so a bank of ≥ 3 was reached in three fights of four and the rung is plausibly reachable. **This is registered as a threshold, not as a hope.** | **YES, on at least 2 post-Power pages**: a successful `play` of a CONVERTED ATTACK on a page whose printed Spark bank was ≥ 3. | Count successful `play` commands naming a converted Attack, on post-Power pages whose printed bank was ≥ 3 at the moment of the play. **≥ 2 = PREDICTED, 1 = SPLIT, 0 = MISS.** The **DENOMINATOR is printed with the grade**: the number of post-Power combat pages whose printed bank was ≥ 3, i.e. the pages that could pose the question at all. | the Power never resolves (no post-Power page); **or** zero post-Power pages printed a bank of ≥ 3 — in which case the fault is INCOME AT THE PRICE-3 RUNG on this batch and nothing about the Power's price is learned | **PREDICTED**: the price of 3 is payable in live play on a deck at the inherited ratio, and — with `K2'''` and `K3'''` also PREDICTED — the Power becomes an **ADVANCE-to-sheet CANDIDATE**, put to [USER] as a numbered proposal (§5's row, unchanged, moving from the prototype surface to the sheet). **SPLIT**: payable but barely; **RETURN to a staged round** built to hand the reader a bank of exactly 3 with a converted Attack in hand, which a whole fight cannot guarantee. **MISS with a NON-ZERO denominator** — pages that could pay 3 existed and none did — is **the ONE registered outcome on this slate that REOPENS §5's wording and the price of 3 to [USER]**, as a numbered pick. R222 closed that question; only this MISS, on this slot, with its denominator non-zero, may reopen it, and no other slot here may. **MISS with a ZERO denominator** grades UNREACHED by the rule above and reopens nothing. |
+| `K2'''` | **Once played, is the effect FELT — and the observable is the one §5 names.** §5: *"every Attack in the deck now reads `0 energy / 3 Sparks`… Energy becomes almost pure Skill currency. It is legible: every Attack's cost corner shows the same number."* Two halves, both read off the printed page. | **BOTH halves hold.** **(i) THE COST CORNER**: on **every** post-Power combat page, every Attack in hand that printed no Spark price before the Power prints **Spark 3 and Energy 0**. **(ii) ENERGY BECOMES SKILL CURRENCY**: on **at least 1** post-Power page, a Skill or a Power is played AND a converted Attack is paid in Sparks on the SAME page — the Energy and the bank buying different things on one turn. | (i) is a page read over every post-Power page: any converted Attack still printing its Energy cost, or printing a Spark price other than 3, FAILS half (i) and the failing page is named. (ii) is a transcript read over one page's successful `play` rows. **Both = PREDICTED; exactly one = SPLIT; neither = MISS.** | the Power never resolves; **or**, for half (i) alone, no post-Power page ever printed an Attack in hand — in which case (i) is UNREACHED and the slot grades on (ii) alone, recorded as such | **PREDICTED**: the conversion is visible where §5 said it would be and the freed Energy has somewhere to go; it is one of the three conditions of the ADVANCE-to-sheet candidate. **SPLIT or MISS on half (i)** — a printed corner that disagrees with the price the gate charges — is a **display defect in the `EB-164` family**, filed to `BACKLOG` as a defect row and **RETURNED to a staged round**, which is where a one-board legibility read belongs; it does NOT reopen §5. **MISS on half (ii) alone**: the conversion is legible and the freed Energy went nowhere, which is a deck-composition observation about a deck holding one Skill-shaped sink family, and it is recorded, not acted on. |
+| `K3'''` | **Does the price-3 rung CROWD OUT the price-2 rungs?** The hold-versus-spend tension the tester has now named unprompted on three reads running (`W1` §12.7, `W2` §16.10, `W3` §18.9 item 4) while every bare detector read zero. With the Power up, the bank has a THIRD destination at a HIGHER price, and §5's own worry is that the payoff *"bricks hard when you do not"* have the engine. | **NO, it does not erase them: on at least 1 post-Power page where a CONVERTED ATTACK (3) and a price-2 NON-DAMAGE SINK were BOTH affordable, the non-damage sink was the play.** | The **CROWDING DENOMINATOR** is the count of post-Power combat pages posing that pair. Of those pages, count the ones whose successful `play` named the non-damage sink. **≥ 1 = PREDICTED.** **0 with a denominator ≥ 3 = MISS.** **0 with a denominator of 1–2 = SPLIT** — posed too rarely to say. The share taken by the converted Attack is printed beside the grade, RECORDED and NOT GRADED. | the crowding denominator is **0** — the pair was never posed, the fault is draw and bank, and nothing about crowding is learned | **PREDICTED**: the price-3 rung coexists with the price-2 rungs and the bank has three destinations rather than one; the third condition of the ADVANCE-to-sheet candidate. **MISS**: every posed page went to the converted Attack — the Power crowds out the rungs the `EB-218` migration exists to create, which is a finding about the INTERACTION and not about §5's wording, and its act is a **RETURN to a staged round** built to pose the 3-versus-2 pair deliberately at a fixed bank, which a whole fight cannot guarantee. It does not reopen §5 and it authorises no re-price. **SPLIT**: the same RETURN, on weaker evidence. |
+| `K4'''` | **RECORDED, NOT GRADED — three numbers the next reader will want and no slot claims.** | none. | (a) Whether the Power was DRAWN at all, and on which page it resolved. (b) The attack share of successful plays, pre-Power and post-Power, in `W5''`'s shape — `W1` read 50.0%, `W2` 75.0%, `W3` 40.0%. (c) The per-fight peak printed Spark bank, in `W6''`'s shape, so the batch's income is on the record beside `W3`'s median of 4.0. | n/a | none. Printed so a later reader cannot mistake their absence for an omission, and so no one is tempted to grade them after the fact. |
+
+**Only `K1'''` may reopen §5, and that is registered here rather than decided
+later.** R222 closed §5's wording and the price of 3 — *"Neither §5's wording
+nor the price of 3 is reopened"* — and a closed question is not reopened by a
+reading Claude finds interesting. The one thing that would make the closure
+untenable is the price being unpayable in the play it was closed for, and that
+is `K1'''` MISS with a non-zero denominator, and nothing else on this slate.
+Claude does not settle it either way: it goes back as a numbered pick with this
+run as the reading.
+
+### 19.5 Contamination and blind spots, stated before the run
+
+1. **GRANTED, NOT DRAFTED.** `bridge.GRANT_GUARDRAIL` rides the record: this
+   run's deck is not one the generators produced, so nothing measured on it is
+   comparable to any other run. The ratio and the Power are both staged
+   deliberately — that IS the experiment — and neither is evidence about what a
+   player would draft. `S3` already measured the draft half and MISSED (3.2%
+   of decks held a non-damage sink), and `S5` proved Rummage undraftable at 0
+   of 600, which is why the sinks are granted; the Power's own draft rate is
+   not measured here and no number below is one.
+2. **`+proto`, so the shipped automatic Spark rule is NOT LIVE.** The build is
+   stamped `+proto` by `deploy_proto.ps1`, which compiles
+   `-p:PrototypeCards=true`, under which `SparkPower.BaseRuleActive` is the
+   compile-time constant **`false`** (`klee-mod/KleeCode/Powers/SparkPower.cs`,
+   pinned by `SparkAlternativeCostPinTests` and `SparkSinkPinTests`). At no
+   bank do Attacks cost 0 and nothing is consumed automatically. **This matters
+   more here than in any previous read**: it means the converted price of 3 is
+   the ONLY Spark cost a converted Attack carries, so `K1'''` and `K2'''` are
+   reading the Power's rule and not a rule underneath it. This is the R101b
+   erratum §16.4's contamination 1 carries, stated as a fact and not a hedge.
+3. **NEOW'S FORCED BOON, and the deck-neutral rule the next operator follows.**
+   `embark` leaves the run on the **Neow** screen at floor 1, and Neow cannot
+   be skipped — a bare `proceed` is refused by the wire. `W3`'s three boons
+   were *Scroll Boxes* (add a pack of cards to the deck), *Precise Scissors*
+   (remove a card) and *Silken Tress* (lose all Gold; enchant the first card
+   reward with Glam); two of the three rewrite the deck the registration exists
+   to control, and the operator took the only deck-neutral one. **The rule,
+   registered here so it is followed rather than re-invented: the operator
+   takes the boon that changes NEITHER the deck's card list NOR the counted
+   maker : sink ratio, and if more than one qualifies, the first such option in
+   the order the screen prints them. The boons offered and the one taken are
+   recorded verbatim in §19.6.** It is an operator action, declared, and it is
+   not the tester's choice. `W3` found one cost of Silken Tress worth naming:
+   the Glam enchantment reached a card reward and the duplicate `Powder Pop
+   (1)` / `Powder Pop` pair then carried an enchantment warning without saying
+   which copy was enchanted (§18.9 item 5).
+4. **TWO INCOME SOURCES THE RATIO CANNOT COUNT, and `W6''` was a FLOOR because
+   of them.** **Pounding Surprise**, Klee's starter relic, pays **+1 Spark per
+   detonation**; **Endless Fireworks** grants `spark_per_turn` and carries no
+   top-level `gain_spark`, so the counted maker set never included it either.
+   `W3`'s fight 4 peak of 9 followed a six-Bomb stack and the tester called the
+   jump *"unexplained by the visible cards or buffs"* (§18.9 item 2). Both
+   sources push in the same direction as §17.7's blind spot 1: **the counted
+   ratio understates generation and never overstates it, so any income figure
+   here — including `K1'''`'s bank-≥-3 denominator — is a FLOOR and never a
+   ceiling.** A `K1'''` MISS on a non-zero denominator is therefore the
+   conservative direction, and a `K1'''` UNREACHED on a zero denominator is
+   not evidence that the rung is unreachable in general.
+5. **ONE SEED for the whole batch**, rolled by the game and read back off the
+   wire (R95), never chosen and never pinned. Every fight in the batch is a
+   fight of that one run, so **the fights are not independent samples of
+   anything** and a per-fight median over eight fights is not eight
+   observations. `EB-191` (the `run seed: (unread)` read-back defect) is known
+   to fire and its repair is the one §18.6 records: re-read off the wire from
+   the same process, with the run open, before the session starts, and written
+   into the embark sidecar — or the sealed record says `arms_granted: (none)`
+   about fourteen granted cards.
+6. **THE STARTER IS SUBSTITUTED ADDITIVELY, and the deck is one card larger
+   than `W3`'s.** `S1`'s sim arm substitutes one `pop` → Powder Pop and one
+   `kaboom` → Ka-pow! at `loader._starter_ids`; the live game has no such seam,
+   so the two prototype Basics are GRANTED on top and the printed starter keeps
+   its `Pop!` and its four `Kaboom!`. Deck 24 against `W3`'s 23 against `W2`'s
+   21. Neither shipped starter row is a maker or a sink, so the RATIO is
+   unaffected; **draw frequency is**, and it is disclosed rather than
+   corrected. The Power itself is the fourteenth granted card and must be drawn
+   before any `K` slot can be reached — which is why every `K` slot registers
+   UNREACHED on a Power that never resolves, and why that outcome is a draw
+   fact and not a reading about the card.
+7. **THE CONTROLLED VARIABLE IS CHECKED, NOT ASSUMED.** §18.7's check is
+   repeated here as a registered obligation: every card added mid-run —
+   drafted, from a potion, from an event — is examined for a top-level
+   `gain_spark` or `spend_spark`, and if one is added the page at which the
+   ratio moved is named in §19.6 and every slot's pages are reported on both
+   sides of it. A run whose ratio moves is reported as it ran; it is not
+   re-run.
+8. **Guardrail-7 and R217 G.** Every number here is a FLOOR off one capped
+   batch, one seed, one pilot and a granted deck. The tester's words are
+   iteration feedback — never validation, never balance evidence, never
+   approval — and no win rate, comparison or fun claim may be taken off this
+   run.
+
+### 19.6 The cell, the batch, the budget and the stop lines
+
+| | |
+|---|---|
+| cell | the **installed dev build**, named in the sealed record's identity block, read off the deployed `mods\klee\manifest.json`, plus the game build off `release_info.json` |
+| build stamp EXPECTED | **`0.2.1610+proto.dirty`** or later — whatever is deployed when the slot opens. **NOTHING IS DEPLOYED BY THIS PIECE**; the build that is installed is the build that runs |
+| build stamp RULE | the cell is whatever the deployed manifest says, and a difference from the expected string is DISCLOSED in §19.6's run block rather than treated as a stop. `embark --arm` refuses a build with no `+proto` anyway (`embark.check_arms`), which is the check that actually matters |
+| the pck contract check | **owed before the embark, as §18.3 registered it**: `git diff <the commit the deployed package was built at>..HEAD -- klee-mod docs/klee-cards.yaml docs/prototype-surface.yaml tier0/constants.py` must be **EMPTY**, so every granted row's printed text on the installed build is this tree's sheet text. **If a granted row's printed face on a live page differs from its sheet row, the run STOPS and says so** — with the one exception `W3` already recorded, a face whose divergence is a runtime render of a live modifier (§18.9 item 1) rather than a stale build |
+| action budget | `--max-actions 80 --max-wall-s 14400 --max-refusals 2 --max-stalls 6` |
+| **Codex cap** | **90 calls.** The driver spends one `codex exec` per answered screen, one per fight record and one for the run record. `W3` spent **45 of 45 for 4 fights — 11.25 calls per fight** — at 40 actions; 80 actions on that rate is 80 answered screens + ~8 fight records + 1 run record = **89**, so 90 is the smallest cap that covers the batch and 80 is the largest action count the cap pays for. **The Codex cap is what bounds this batch, not the game** |
+| **N fights** | **~8**, on `W3`'s own measured rate of 4 fights per 40 actions (19 combat pages). The batch is bounded by the action cap and NOT by a fight target: it runs until `max_actions`, and `N` is what that buys. §19.4's `W1'''` MISS branch turns on a denominator of **≥ 30 pre-Power combat pages**, which is the number `W3`'s 19-pages-per-40-actions rate says 80 actions should clear even with half the session on the far side of the Power |
+| **the guard's stop lines** | `EB-227`: **85% of the five-hour window and 50% of the week**. `W3`'s 45 calls cost **~38 points of the five-hour window** (3% → 41%) and **~6 of the week** (11% → 17%) — about **0.85 points per call**. 90 calls is therefore **~76 points of the five-hour window** and ~12 of the week. **REGISTERED PRECONDITION: the batch starts only when `python -m understudy.codex_usage` reads ≤ 8% of the five-hour window and ≤ 35% of the week**, printed into the record before the embark; otherwise the action cap is cut to what the headroom pays for at 0.85 points per call, and §19.6's run block states the cut cap before the session starts. The meter is printed **before and after** either way. **If the guard refuses mid-batch the run stops cleanly, what ran is graded on the denominators it actually reached, and §19.6 says so.** No second session is started |
+| sessions | **ONE.** If the session ends early it is recorded as it ended and NO second session is started |
+| the R225 soak gate | `python -m understudy.soak --runs 1 --character KLEEMOD-KLEE --max-fights 3` is run as the preflight and its answer recorded. `EB-226`'s power request is held for the soak and again for the embark, and released at each teardown |
+| the seed | **rolled by the game and read back off the wire (R95)** — not chosen and not pinned, exactly as `W1`, `W2` and `W3` took theirs. There is no declared board, so `EB-208` (a)'s live-count preflight has no declared count to compare against; **no slot above reads `enemy_count`**, so no page can be UNREACHED on a body-count gap. `EB-208` (c)'s seed ledger is not built and is not used |
+| the stopping rule | R221 B's sequential stopping reaches the STAGED-TURN funnel and does not reach a whole-fight batch: there are no boards to order and none to leave UNRUN. The batch's only bound is the action cap |
+| grader | `review/qa/blindplay/kleespark-w4/grade.py`, **owed as its own commit before the run** (§17's shape: slate first, instrument second, run third), copying `kleespark-w3/grade.py`'s shapes — the same page parser, the same AFFORDABLE rule, the same fight boundary (a maximal run of consecutive combat pages) — plus the pre/post-Power partition §19.4 defines and the converted-Attack cost-corner read `K2'''` (i) needs |
+| record | `review/qa/blindplay/kleespark-w4/record.md`, in `kleespark-w3/record.md`'s shape: identity block, the tester's per-fight records and its run record verbatim, the per-turn sentence table, the leak audit |
+
+### 19.7 Independence, who holds the deciding chair, and when this runs
+
+**Independence.** `proto_true_spark_knight` and all five prototype sink rows
+and both prototype Basics are `authored_by: [claude]`; the six shipped makers
+are shipped content and carry no authorship claim of the seat's. **The seat
+that plays is Codex (`gpt-5.6-sol`)**, refused-by-family through
+`blindplay.check_independent` (R217 C), so the playing chair is
+author-disjoint.
+
+**The deciding chair — OPERATIONS' rule, applied.** *"A round that can ADVANCE
+an arm gets the Codex seat deciding every board… A round that is an INSTRUMENT
+round… stays on the fresh-Opus deciding form. The round's own registration says
+which it is, before it runs."* **This batch CAN ADVANCE**: `K1'''`, `K2'''` and
+`K3'''` all PREDICTED makes the Rare Power an ADVANCE-to-sheet candidate. It is
+therefore **not** an instrument round, the deciding read is **Codex's**, and
+there is no fresh-Opus form in this registration at all — which in whole-fight
+blind play is the same thing as saying the tester decides, because the tester
+is the only reader. The **GRADING** chair is a committed mechanical script, not
+a model, so author-disjointness does not arise for it: no falsifier above reads
+the tester's prose, not even `W3''`'s keyword half, which this slate does not
+carry.
+
+**Sequencing.** After the morning's merges, at **the next game-time slot** —
+the game is one of the two scarce things and this batch asks for a long,
+uninterrupted hold of it. The order inside the slot is fixed: the grader
+commit, then the meter read and the soak gate, then the pck contract check,
+then the embark and the Neow rule, then one session to `max_actions`.
+
+**Countersign.** DRAFTED under R212(2) and offered for BATCH countersign. It is
+signed once; a moved world means re-drafting the affected slots and disclosing
+the diff, and it never means re-signing (R212, EXPERIMENTS *Countersign once*).
+
+**NOT RUN.** As of this commit no board has been staged, no session opened, no
+Codex call spent and no number taken.
