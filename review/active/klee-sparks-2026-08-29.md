@@ -5653,3 +5653,232 @@ is minted here.
 by a drafter; and a staged single turn has no memory of what a bank was held
 for. §11.6 item 1 is unchanged, and whole-fight play — `EB-224`'s remaining
 next action — is the instrument for it.
+
+## 22. `KLEESPARK-BT1` — RUN AND GRADED
+
+Generated from the records by
+`python -m understudy.staged_turn packet-section klee-sparks-bt1` on
+2026-08-30. Every table in §22.1 is transcribed from
+`review/qa/klee-sparks-bt1-t*/` and `review/qa/ledger.tsv`; nothing there is
+re-graded and nothing is re-read (R101b).
+
+### 22.1 What actually ran — the session, the stamp, and one instrument stop
+
+Dev build **`0.2.1676+proto.dirty`**, read off the deployed
+`mods\klee\manifest.json`; game **`v0.111.0`**; world **`eb224-staging`** @
+`acb543b9`, which is the registration commit itself. **Nothing was deployed for
+this round** — the installed build already carried the row, proven read-only
+before staging (§21.7).
+
+**4 boards run, 0 UNRUN, 8 forms graded.**
+
+| turn | seed | grader | family | verdict | refused by | replay |
+|---|---|---|---|---|---|---|
+| `klee-sparks-bt1-t01` | `JH4T8MSN10KS` | `codex-gpt-5.6-sol-fresh` | gpt | **SURVIVES** | -- | confirms — Seapunk 40 → 18; Block 0 → 5 |
+|  |  | `local-qwen3-8-27b-ud-q4-k-xl` | local | **REFUSED** | intent_insensitive | - |
+| `klee-sparks-bt1-t02` | `R805DJ56LZHM` | `codex-gpt-5.6-sol-fresh` | gpt | **REFUSED** | intent_insensitive | - |
+|  |  | `local-qwen3-8-27b-ud-q4-k-xl` | local | **REFUSED** | intent_insensitive | - |
+| `klee-sparks-bt1-t03` | `YX7PB48WR7R4` | `codex-gpt-5.6-sol-fresh` | gpt | **REFUSED** | intent_insensitive | - |
+|  |  | `local-qwen3-8-27b-ud-q4-k-xl` | local | **REFUSED** | intent_insensitive | - |
+| `klee-sparks-bt1-t04` | `XT4BE7LFY5XH` | `codex-gpt-5.6-sol-fresh` | gpt | **REFUSED** | intent_insensitive | - |
+|  |  | `local-qwen3-8-27b-ud-q4-k-xl` | local | **REFUSED** | intent_insensitive | - |
+
+**The funnel's own generic board-slot table reads `B1` UNDECIDED, `B2` DECIDED,
+`B3` DECIDED under its convention that SURVIVES is PREDICTED and REFUSED is
+MISSED. That convention is NOT this round's slate** and grades nothing here:
+`B1`–`B3` are board-QUALIFICATION slots, and §21.4's `P1`–`P5` are the
+predictions. §22.2 is the grading.
+
+**What the round spent:** 4 Codex seat reads (the deciding chair, one per
+board), 4 local tester reads (shadow), 0 control reads — fresh-Opus is not
+seated in a design round (§21.6).
+
+**One instrument stop, and its repair.** `t04` FAILED TO STAGE on the round's
+first pass with `seed_not_honoured: asked for seed 'XT4BE7LFY5XH', the run
+reads back None` — `EB-191`, the same defect that cost `KLEESPARK-R2` a board
+and that `KLEESPARK-W3` had to work around off the wire. **Nothing had been
+read**, so the board was re-staged alone from the unchanged committed file and
+then read in the pre-registered position; the seed came back honoured on the
+second attempt. A board that failed to stage is not a board that was read, so
+this is a re-attempt and not a re-roll, and it is recorded rather than smoothed.
+
+### 22.2 The slate, graded mechanically
+
+**2 PREDICTED (`P1`, `P5`) / 0 SPLIT / 0 MISS / 3 UNREACHED (`P2`, `P3`,
+`P4`).**
+
+**`P1` PREDICTED at 1 of 1.** `t01`'s deciding form SURVIVES and its chosen
+line opens *"Bag of Tricks on Seapunk [mode: Spend 3 Sparks: place 3 Bombs
+dealing 5.]"*. Its own words: *"I spent 3 Sparks with Bag of Tricks to place 3
+Bombs on Seapunk, detonated them with Quick Fuse…"*, and its second answer
+names the alternative it declined — *"I seriously considered taking the
+single-Bomb option on Bag of Tricks to preserve all 3 Sparks."* The priced mode
+is taken where three Bombs pay, and the reader can say what the price bought.
+
+**`P2` UNREACHED.** `t02`'s deciding form was REFUSED for `intent_insensitive`
+(Q4: *"No. With the printed hand and resources, I would still take the
+available damage and Block without sacrificing another play."*), and the
+registered rule is that a refused deciding form grades its slot UNREACHED.
+**ANSWERED OUT OF SLOT, and recorded as such rather than as a grade:** the
+refused form's line is *"Bag of Tricks on Nibbit [mode: Place 1 Bomb dealing 5]
+→ Quick Fuse → Firework Finale → Duck and Cover"*, which is exactly what `P2`
+predicted, and its third answer says *"It gave up the three-Bomb option, using
+the Sparks on Firework Finale instead."* The shadow form did the same thing in
+the other order. **That evidence does not move `P2`, which stays UNREACHED as
+published (R101b).**
+
+**`P3` UNREACHED.** Both `B3` boards' deciding forms were REFUSED for
+`intent_insensitive`, so the 2-of-2 threshold has a denominator of 0. **Out of
+slot:** neither refused form claimed the priced mode was available at a bank of
+2, and `t04`'s deciding form planned the raise explicitly — *"I played Powder
+Pop on Fuzzy Wurm Crawler to place a Bomb and reach 3 Sparks, then Bag of
+Tricks choosing 'Spend 3 Sparks: place 3 Bombs dealing 5.'"* — which is the
+reading §21.4 printed in advance as correct. `P3` stays UNREACHED.
+
+**`P4` UNREACHED.** `t03`'s deciding form was REFUSED and a refused form is not
+replayed, so the slot's own denominator produced no replay. **Absence of a
+counterexample is not PREDICTED**, exactly as registered. `EB-182`'s omission
+rule is therefore NOT read live on this row by this round, and that is what the
+round owes.
+
+**`P5` PREDICTED at 1 of 1**, and it is the round's second finding. On `t01`'s
+replay the `card_select` screen offered **both** mode texts at a bank of 3
+(`["Place 1 Bomb dealing 5", "Spend 3 Sparks: place 3 Bombs dealing 5"]`); the
+wire then reads, step by step:
+
+```
+staged board          player spark 3    Seapunk 40 HP, no bomb
+after Bag of Tricks   player spark 0    Seapunk 40 HP, bomb 15
+after Quick Fuse      player spark 3    Seapunk 25 HP, no bomb
+after Kaboom!         player spark 3    Seapunk 18 HP
+after Duck and Cover  player spark 3    Seapunk 18 HP, player Block 5
+```
+
+The post-play bank is exactly **0**, and the payload is three Bombs at 5: the
+wire carries no bomb COUNT field — its `bomb` figure is the aggregate bomb
+damage standing on the target — so **3** is established twice over, by
+`bomb: 15` immediately after the play and by the detonation delivering exactly
+15. **The mode-head price is charged once and pays out what it prints**, which
+is the live half of the codegen gap `EB-224`'s build closed.
+
+**Judgment, per slot: `P1` ADVANCE, `P2` RETURN, `P3` RETURN, `P4` RETURN,
+`P5` ADVANCE — 2 ADVANCE / 3 RETURN / 0 ESCALATE, overall RETURN, on the
+INSTRUMENT and not on the arm's design.**
+
+**`P1` AND `P2` DO NOT DELIVER THEIR JOINT FINDING**, and §21.4 registered that
+in advance: `P1` alone is not the result, and it is not reported as one. The
+pair read says it in its own words: *"P1 was predicted, but P2 was unreached;
+this round does not show that the decision changed with the board rather than
+reflecting a habit."*
+
+### 22.3 The pair read
+
+`review/qa/klee-sparks-bt1-pair-review-codex-gpt-5.6-sol.md`, prompt beside it
+at `klee-sparks-bt1-pair-review-prompt.txt`; model observed `gpt-5.6-sol` via
+Codex, `--role pair`, one call, no re-send. It grades **exactly** the five
+verdicts above and the same per-slot judgments, and closes:
+
+> The boards only partly did what they were built to do. t01 successfully
+> exercised priced-mode selection and its replay validated the offer list,
+> immediate payment, and Bomb payload. But t02's intended comparison was
+> refused, neither affordability board reached replay, and the repeated
+> intent-insensitive construction prevented most of the arm's registered
+> questions from being asked. […] **Overall judgment: RETURN.**
+
+### 22.4 Two things the round found that are not slots
+
+**1. The priced mode REFUNDED ITS OWN PRICE inside the same turn, and the
+boards did not control for it.** `t01`'s bank read 3 → 0 on the mode and **3
+again** after Quick Fuse. The mechanism is not in doubt: Klee's STARTER RELIC,
+*Pounding Surprise*, pays **+1 Spark per Bomb detonated**
+(`klee-mod/KleeCode/Klee.cs:152` seats it as her starter;
+`Relics/PoundingSurprise.cs`'s `OnBombDetonated` gains the Spark), and the
+priced mode places exactly **3** Bombs. So on any board where the Bombs the
+mode buys are detonated on the same turn, the mode is **net-free** — the "spend"
+in spend-versus-hold is returned before the turn ends. `KLEESPARK-W3` §18.9
+already named this relic as one of *"two sources the ratio cannot count"*; this
+is the first record in which it lands on the card under test.
+
+**This changes no grade and the pair read says so:** `P5` asks for the bank
+*immediately after the priced mode*, when it was 0, and `P1` asks which mode was
+chosen. Neither is disturbed. It is a **board confound** — the registration did
+not control the starter relic and the blind page does not print relics — and it
+is the round's most consequential finding. It is **not** filed as a defect: the
+relic behaved as built. What it questions is whether a Spark price on a
+*Bomb-placement* mode is a price at all on this character, and that is a design
+question that returns to [USER] at §22.6.
+
+**2. Seven of eight forms were REFUSED for `intent_insensitive`, and the boards
+are why.** Three of four deciding forms and four of four shadow forms. The
+readers say the reason plainly and consistently: `t03`'s deciding form — *"With
+enough energy to play both costed cards and both zero-cost cards, a different
+telegraphed intent would not have changed this line"*; `t04`'s — *"The hand
+contains no printed defensive or intent-dependent effect."* **Every board of
+this round gave one enemy with a fixed telegraph, three Energy, and a hand of
+at most two Energy-costed cards** — so the whole hand was always playable and
+the telegraph never forced a trade. §21.3 chose that construction deliberately,
+to hold everything but the bank constant across the four boards; the cost was
+that the round's central falsifier fires on the construction rather than on the
+cards. **This is a REGISTRATION defect, and it is the round's RETURN.** It is
+reported as a `BACKLOG` candidate — a board-design rule for resource rounds,
+and/or the reach of the `intent_insensitive` falsifier on a board whose question
+is not a defensive one — and nothing is minted here.
+
+### 22.5 What the round spent, and what it did not settle
+
+- **5 Codex calls of a cap of 15**: four deciding seat reads and one pair read,
+  exactly the plan at §21.7. The meter read **`5h 40% / week 25%`** before the
+  round and **`5h 48% / week 26%`** after; `EB-227`'s guard (85% / 50%) never
+  refused and never came close.
+- **Shadow-versus-deciding verdict agreement: 3 of 4** — both REFUSED on `t02`,
+  `t03` and `t04`, disagreeing only on `t01`, where the shadow seat refused the
+  board the deciding seat survived. **RECORDED AND NOT GRADED** (§21.4): a
+  four-board denominator decides nothing about the seat's chair and `M62` is
+  not at issue.
+- **NOT SETTLED, and owed:** `EB-182`'s omission rule is not read live on this
+  row (`P4` UNREACHED); the one-versus-three decision is not established
+  (`P1`+`P2` incomplete); and the whole fight `EB-224`'s row owes is untouched.
+  Nothing about the row's price, its wording or R225's clause moved, and under
+  §21.5 nothing here licenses moving them.
+
+### 22.6 What this leaves — numbered picks, never blanks
+
+`EB-224`'s row keeps its remaining next action. What returns to [USER] is a
+choice about the FIRST finding at §22.4, because it is a design question about
+what a Spark price means on a Bomb-placement mode, and the ladder keeps that
+kind of call with [USER]:
+
+1. **Accept the refund and re-pose the round with it printed.** The mode is
+   net-free whenever its Bombs detonate the same turn; say so in the arm's own
+   terms, put the relic on the record, and re-run a repaired staged round whose
+   boards separate *"the Bombs detonate now"* from *"the Bombs sit until next
+   turn"*. This is the cheapest option and it changes no number.
+2. **Re-pose the round WITHOUT the starter relic**, if the harness can suppress
+   it, so the price is measured before the refund. This measures the price the
+   sheet prints rather than the price the character pays, and it is the more
+   honest instrument and the less honest world.
+3. **Treat the refund as the finding and take it to the whole fight
+   unchanged.** The refund is a real property of a real deck; let a whole fight
+   say whether a self-refunding mode price is a decision, and skip a second
+   staged round entirely.
+4. **Hold the arm here.** Bank `P1` and `P5`, and let the mode-head machinery's
+   live proof wait for other consumers, because two of the four boards this
+   round could ask were refused by their own construction.
+
+**No default and no recommendation on the price.** Under §21.5 a MISS licenses
+no re-price, and this round did not even produce a MISS — it produced three
+UNREACHED. **Nothing here re-prices the 3, re-words the row, re-reads R225's
+clause, or moves any LAW line.**
+
+A second item is engineering rather than a decision and is reported to
+`BACKLOG` rather than to [USER]: the board-construction rule §22.4 item 2 names,
+and `slot_plan`'s blindness to a mode-head price (§21.8). Both are candidates;
+neither is minted here (R206/R212, one batch per sitting).
+
+### 22.7 What this round does NOT settle
+
+It says nothing about whether *Bag of Tricks* is fun, whether 3 is the right
+price, or anything comparable to any run (Guardrail-7, R215 B). It does not
+discharge `EB-224`'s acceptance line, which asks for the arm graded, replayed
+**and** its whole fight run: one board of four was replayed, and the whole
+fight is untouched.
