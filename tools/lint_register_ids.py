@@ -396,10 +396,14 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 201 minted 2026-08-29 by EB-198's live acceptance: the pile view's
         # affordability rings never paint.
         201,
-        # 202/203 minted 2026-08-29 by the KLEESPARK-R1 relayed review:
-        # the unreachable-threshold check, and the pre-seal target check
-        # whose repair half went to QUEUE M63.
-        202, 203,
+        # 202/203 were minted 2026-08-29 by the KLEESPARK-R1 relayed review
+        # and LEFT OPEN_IDS with their rows the same day, both BUILT under
+        # R222: the slot-reachability check (`understudy/slot_plan.py`, a
+        # round's `slots.yaml`, refused by `round --plan-only` and
+        # `staged_turn check`) and the pre-grade target refusal
+        # (`understudy/targeting.py`, falsifier `target_missing`). The repair
+        # half stayed out of both and is QUEUE `M63`. The ceiling stays at
+        # 203, because ceilings never come down.
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,

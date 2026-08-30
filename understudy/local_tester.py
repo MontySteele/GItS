@@ -52,6 +52,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 import threading
 import time
@@ -65,6 +66,31 @@ QA_DIR = REPO / "review" / "qa"
 
 ROLE = "tester"
 TESTER_FAMILY = "local"
+
+# R221 A / pick 4(e). THE LOCAL SEAT'S CHAIR, AND IT IS NOW THE SHADOW ONE.
+#
+# The calibration arm was measured on `KLEESPARK-R1` at 4 of 8 verdict
+# agreement, and the fresh-Opus control STANDS under every option on `M62`.
+# A seat that agrees with the control half the time cannot be the read a round
+# is decided on while the control is still riding every packet -- so the
+# default flips: the local seat READS every packet, its form and record are
+# written under the usual names, and neither is the deciding verdict and
+# neither is replayed. The fresh-Opus form is the deciding tester and it is
+# what `execute` replays.
+#
+# `deciding` restores today's behaviour exactly, and it is the mode a round
+# runs in the day `M62` retires the control. Nothing else about the seat
+# changes between the two: the same prompt, the same refusals, the same
+# post-read checks, the same routing to the Codex seat.
+SEAT_MODES: tuple[str, ...] = ("shadow", "deciding")
+DEFAULT_SEAT_MODE = "shadow"
+SHADOW_ROLE = "shadow"
+
+# A form that is NOT the local seat's. `form-raw-*` is the unparsed reply the
+# local wrapper keeps beside the form it recovered, so it is excluded by name
+# rather than by family -- it is the same seat's text, twice.
+DECIDING_FORM_GLOB = "form-*.json"
+_NOT_DECIDING = ("form-local-", "form-raw-")
 
 # CONDITION 3, as a number. A round of this funnel has run between 4 and 11
 # turns (klee slice 1 r3 = 4, kokomi slice 2 = 8, kokomi slice 1 = 11), so a
@@ -127,6 +153,7 @@ def read_turn(turn_id: str, *, client: local_model.Client,
               tester_id: str = "",
               position: int = 1,
               spot_check: int = DEFAULT_SPOT_CHECK,
+              seat_mode: str = DEFAULT_SEAT_MODE,
               dry_run: bool = False) -> dict[str, Any]:
     """One staged turn, READ by the local model in the tester role.
 
@@ -135,27 +162,62 @@ def read_turn(turn_id: str, *, client: local_model.Client,
     work lands somewhere else and leaves the closed directory byte-clean
     (R101b).
     """
+    if seat_mode not in SEAT_MODES:
+        raise LocalTesterError(
+            f"unknown seat mode {seat_mode!r}; the local seat has two chairs "
+            f"and they are not interchangeable: {', '.join(SEAT_MODES)}")
     blob = local_seat.grade_turn(turn_id, client=client,
                                  grader_id=tester_id, qa_dir=qa_dir,
                                  land_dir=land_dir, log_root=log_root,
                                  dry_run=dry_run)
-    record = _record(turn_id, blob, position=position, spot_check=spot_check)
+    record = _record(turn_id, blob, position=position, spot_check=spot_check,
+                     seat_mode=seat_mode)
 
     if blob.get("refused") or dry_run or not blob.get("form"):
         if blob.get("refused"):
             _route(record, "local_read_refused")
         return _land(record, blob, land_dir, qa_dir, turn_id)
 
+    _stamp_form(blob["form"], record["role"], seat_mode)
     form = json.loads(Path(blob["form"]).read_text(encoding="utf-8"))
     _post_read(record, form, turn_id, qa_dir)
     return _land(record, blob, land_dir, qa_dir, turn_id)
 
 
+def _stamp_form(path: str | Path, role: str, seat_mode: str) -> None:
+    """Write the chair onto the FORM as well as the record.
+
+    The form travels on its own -- into a packet's appendix, into a ledger
+    rebuild, into somebody's diff six months later -- and "whose reading is
+    this, and was it the deciding one" has to be answerable from the file in
+    hand. Added AFTER the model replied and outside every hashed surface: the
+    packet hash is what the form is answered against and it is untouched, and
+    `staged_turn.load_form` ignores keys it does not require, so a stamped
+    form loads and grades exactly as an unstamped one.
+    """
+    p = Path(path)
+    try:
+        blob = json.loads(p.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return
+    if not isinstance(blob, dict):
+        return
+    blob["role"] = role
+    blob["seat_mode"] = seat_mode
+    p.write_text(json.dumps(blob, indent=1) + "\n", encoding="utf-8")
+
+
 def _record(turn_id: str, blob: Mapping[str, Any], *, position: int,
-            spot_check: int) -> dict[str, Any]:
+            spot_check: int,
+            seat_mode: str = DEFAULT_SEAT_MODE) -> dict[str, Any]:
     record: dict[str, Any] = {
         "turn_id": turn_id,
-        "role": ROLE,
+        # `shadow` in the shadow chair, and the historical `tester` in the
+        # deciding one -- an old record read beside a new one must not have to
+        # be told which chair the seat was in when there was only one.
+        "role": SHADOW_ROLE if seat_mode == SHADOW_ROLE else ROLE,
+        "seat_mode": seat_mode,
+        "deciding": seat_mode != SHADOW_ROLE,
         "tester_family": TESTER_FAMILY,
         "tester_id": blob.get("grader_id", ""),
         "model_requested": blob.get("model_requested", ""),
@@ -633,6 +695,136 @@ def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
     return [records[r["turn_id"]] for r in rows if r["turn_id"] in records]
 
 
+# ------------------------------------- pick 4(e): the two chairs, on disk --
+
+def deciding_form(turn_id: str, qa_dir: Path | None = None) -> Path | None:
+    """The form the round REPLAYS in shadow mode: the fresh-Opus control's.
+
+    Found by elimination rather than by naming a model, because the deciding
+    tester is whoever is not this seat: `form-local-*` is the shadow read and
+    `form-raw-*` is the same reply unparsed. The newest of what is left wins,
+    so a re-taken control form supersedes the one it replaced. `None` means
+    the control has not been taken yet -- the board's replay is OWED, and a
+    round says so rather than quietly replaying the shadow.
+    """
+    home = (qa_dir or QA_DIR) / turn_id
+    if not home.is_dir():
+        return None
+    candidates = [p for p in home.glob(DECIDING_FORM_GLOB)
+                  if not any(p.name.startswith(x) for x in _NOT_DECIDING)]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda p: (p.stat().st_mtime, p.name))
+
+
+def _verdicts(turn_id: str, qa_dir: Path | None = None) -> dict[str, str]:
+    """`{grader id: verdict}` from the per-grader verdicts on disk."""
+    home = (qa_dir or QA_DIR) / turn_id
+    out: dict[str, str] = {}
+    for path in sorted(home.glob("verdict-*.json")):
+        try:
+            blob = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        gid = str((blob.get("grader") or {}).get("id")
+                  or path.stem[len("verdict-"):])
+        out[gid] = str(blob.get("verdict") or "")
+    return out
+
+
+def agreement(turn_ids: Sequence[str], *, shadow_ids: Mapping[str, str],
+              qa_dir: Path | None = None) -> dict[str, Any]:
+    """R221 A's per-turn agreement count, SHADOW against DECIDING.
+
+    On the VERDICT and nothing else -- SURVIVES against SURVIVES, REFUSED
+    against REFUSED -- which is what the ruling says and is deliberately not a
+    prose comparison. A turn with only one of the two graded is not counted
+    either way: an absent control is not a disagreement, exactly as an absent
+    [USER] form is not one in `is_down_weighted`.
+
+    `shadow_ids` maps a turn to the local seat's grader id, so the counter
+    never has to guess which of two verdicts on a board is this seat's.
+    """
+    rows = []
+    for tid in turn_ids:
+        verdicts = _verdicts(tid, qa_dir)
+        sid = shadow_ids.get(tid, "")
+        shadow = verdicts.get(sid, "")
+        others = {g: v for g, v in verdicts.items() if g != sid}
+        # The deciding verdict is the one belonging to the deciding form.
+        form = deciding_form(tid, qa_dir)
+        deciding_gid = ""
+        if form is not None:
+            try:
+                deciding_gid = str((json.loads(
+                    form.read_text(encoding="utf-8")).get("grader")
+                    or {}).get("id") or "")
+            except (OSError, ValueError):
+                deciding_gid = ""
+        deciding = others.get(deciding_gid, "")
+        if not deciding and len(others) == 1:
+            deciding_gid, deciding = next(iter(others.items()))
+        rows.append({"turn_id": tid, "shadow_grader": sid,
+                     "shadow_verdict": shadow,
+                     "deciding_grader": deciding_gid,
+                     "deciding_verdict": deciding,
+                     "comparable": bool(shadow and deciding),
+                     "agree": bool(shadow and deciding
+                                   and shadow == deciding)})
+    compared = [r for r in rows if r["comparable"]]
+    return {
+        "rule": ("R221 A: agreement is counted per TURN, on the verdict -- "
+                 "SURVIVES against SURVIVES or REFUSED against REFUSED. It is "
+                 "not a prose comparison and does not pretend to be one"),
+        "turns": rows,
+        "compared": len(compared),
+        "agreed": sum(1 for r in compared if r["agree"]),
+        "criterion_owner": ("M62 -- the criterion that retires the fresh-Opus "
+                            "control is [USER]'s and is not set here"),
+    }
+
+
+def round_slug(turn_ids: Sequence[str]) -> str:
+    """`klee-sparks-r1` out of `klee-sparks-r1-t01…t08`. The round's own name."""
+    if not turn_ids:
+        return "round"
+    head = str(turn_ids[0])
+    for tid in turn_ids[1:]:
+        while head and not str(tid).startswith(head):
+            head = head[:-1]
+    trimmed = re.sub(r"-t\d*$", "", head).rstrip("-")
+    return trimmed or str(turn_ids[0])
+
+
+def round_summary(records: Sequence[Mapping[str, Any]], *,
+                  seat_mode: str, unrun: Sequence[Mapping[str, Any]] = (),
+                  replays: Sequence[Mapping[str, Any]] = (),
+                  qa_dir: Path | None = None) -> dict[str, Any]:
+    """The round's own record, including the agreement M62 will be read off."""
+    ids = [str(r["turn_id"]) for r in records]
+    shadow_ids = {str(r["turn_id"]): str(r.get("tester_id") or "")
+                  for r in records}
+    return {
+        "round": round_slug(ids),
+        "seat_mode": seat_mode,
+        "turns": ids,
+        "unrun": [str(r.get("turn_id") or "") for r in unrun],
+        "replays": list(replays),
+        "seat_review_owed": round_queue(records),
+        "agreement": agreement(ids, shadow_ids=shadow_ids, qa_dir=qa_dir),
+        "written_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }
+
+
+def write_round_summary(summary: Mapping[str, Any],
+                        qa_dir: Path | None = None) -> Path:
+    base = qa_dir or QA_DIR
+    base.mkdir(parents=True, exist_ok=True)
+    path = base / f"{summary['round']}-round-summary.json"
+    path.write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
+    return path
+
+
 def round_queue(records: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     """The turns this round owes the Codex seat, with the reason for each."""
     return [{"turn_id": r["turn_id"],
@@ -661,6 +853,7 @@ def cmd_read(args) -> int:
                            tester_id=args.tester_id,
                            position=args.position,
                            spot_check=args.seat_spot_check,
+                           seat_mode=args.seat_mode,
                            log_root=Path(args.log_root) if args.log_root
                            else None,
                            dry_run=args.dry_run)
@@ -690,11 +883,15 @@ class LiveSteps(RoundSteps):
     """
 
     def __init__(self, *, client, why: str, spot_check: int,
-                 log_root: Path | None = None):
+                 log_root: Path | None = None,
+                 seat_mode: str = DEFAULT_SEAT_MODE):
         self.client = client
         self.why = why
         self.spot_check = spot_check
         self.log_root = log_root
+        self.seat_mode = seat_mode
+        # What each board was replayed FROM, so the round summary can say it.
+        self.replays: list[dict[str, Any]] = []
 
     def stage(self, row: Mapping[str, Any]) -> None:
         from understudy import staged_turn
@@ -712,19 +909,48 @@ class LiveSteps(RoundSteps):
         record = read_turn(row["turn_id"], client=self.client,
                            position=row["position"],
                            spot_check=self.spot_check,
+                           seat_mode=self.seat_mode,
                            log_root=self.log_root)
         _print(record)
+        # THE GRADE STILL RUNS IN BOTH CHAIRS. `staged_turn grade` is a
+        # falsifier, not an opinion, and a shadow read with no verdict beside
+        # it could not be compared with the control at all -- which is the one
+        # thing the shadow chair exists to make possible. What the shadow read
+        # does NOT get is the replay and the deciding column.
         if not record.get("refused") and record.get("form"):
             staged_turn.main(["grade", row["turn_id"], str(record["form"])])
         return record
 
     def execute(self, row: Mapping[str, Any],
                 record: Mapping[str, Any]) -> None:
+        """Replay the DECIDING line, which in shadow mode is not this seat's."""
         from understudy import staged_turn
-        if record.get("refused") or not record.get("form"):
-            print(f"  no form for {row['turn_id']}; nothing to replay")
+        tid = row["turn_id"]
+        if self.seat_mode == SHADOW_ROLE:
+            form = deciding_form(tid)
+            if form is None:
+                self.replays.append({"turn_id": tid, "replayed": False,
+                                     "form": "",
+                                     "why": ("shadow mode: the deciding "
+                                             "(fresh-Opus) form has not been "
+                                             "taken yet, and the shadow read "
+                                             "is never replayed")})
+                print(f"  {tid}: NO DECIDING FORM yet -- the replay is OWED. "
+                      f"The shadow read is never replayed (pick 4(e)).")
+                return
+            self.replays.append({"turn_id": tid, "replayed": True,
+                                 "form": str(form), "role": "deciding"})
+            staged_turn.main(["execute", tid, str(form),
+                              "--why", self.why, "--no-setup"])
             return
-        staged_turn.main(["execute", row["turn_id"], str(record["form"]),
+        if record.get("refused") or not record.get("form"):
+            print(f"  no form for {tid}; nothing to replay")
+            self.replays.append({"turn_id": tid, "replayed": False,
+                                 "form": "", "why": "no form"})
+            return
+        self.replays.append({"turn_id": tid, "replayed": True,
+                             "form": str(record["form"]), "role": "deciding"})
+        staged_turn.main(["execute", tid, str(record["form"]),
                           "--why", self.why, "--no-setup"])
 
 
@@ -776,6 +1002,18 @@ def cmd_round(args) -> int:
         return 2
     print("preflights: every board passes face-defect and assumption checks")
 
+    # EB-202. THE REACHABILITY CHECK, AND IT RUNS BEFORE THE PLAN IS ACCEPTED
+    # -- with the preflights, on the committed boards, before the one launch.
+    # A threshold above what this set can produce is an instrument that cannot
+    # answer its own question, and the round is refused rather than run to a
+    # MISS that says nothing (KLEESPARK-R1 `P1`: threshold 4, ceiling 3).
+    planned = [index[row["turn_id"]] for row in list(first) + list(rest)
+               if row["turn_id"] in index]
+    if staged_turn.slot_report(planned):
+        print("ROUND REFUSED: a registered slot cannot be reached by this "
+              "board set (EB-202)", file=sys.stderr)
+        return 2
+
     if args.plan_only:
         print("\n--plan-only: nothing was staged, read or run. Commit this "
               "schedule before the round, for the same reason a prediction "
@@ -790,6 +1028,7 @@ def cmd_round(args) -> int:
 
     steps = LiveSteps(client=client, why=args.why,
                       spot_check=args.seat_spot_check,
+                      seat_mode=args.seat_mode,
                       log_root=Path(args.log_root) if args.log_root else None)
     lane = _live_lane(args)
     records: list[dict[str, Any]] = []
@@ -822,6 +1061,29 @@ def cmd_round(args) -> int:
     print(f"\ngame: {lane.launches} launch(es), {lane.relaunches} relaunch(es) "
           f"for the round")
     staged_turn.main(["ledger"])
+
+    # pick 4(e) / R221 A. The round says, in its own record, how often the
+    # shadow seat and the deciding tester reached the same verdict -- which is
+    # the number `M62`'s criterion is read off. It is written whichever chair
+    # the seat sat in: a `deciding` round has no shadow and the count is
+    # honestly zero-of-zero rather than absent.
+    summary = round_summary(records, seat_mode=args.seat_mode, unrun=unrun,
+                            replays=steps.replays)
+    path = write_round_summary(summary)
+    agree = summary["agreement"]
+    print(f"\nseat mode: {args.seat_mode}   agreement (shadow vs deciding): "
+          f"{agree['agreed']} of {agree['compared']} comparable turn(s)")
+    for row in agree["turns"]:
+        if not row["comparable"]:
+            print(f"  {row['turn_id']}: not comparable "
+                  f"(shadow {row['shadow_verdict'] or '-'}, deciding "
+                  f"{row['deciding_verdict'] or '-'})")
+            continue
+        print(f"  {row['turn_id']}: shadow {row['shadow_verdict']} vs "
+              f"deciding {row['deciding_verdict']} -- "
+              f"{'AGREE' if row['agree'] else 'DIFFER'}")
+    print(f"round summary: {path}")
+
     queue = round_queue(records)
     print(f"\nseat review owed on {len(queue)} of {len(records)} turn(s):")
     for row in queue:
@@ -830,6 +1092,58 @@ def cmd_round(args) -> int:
     if unrun:
         print(f"\n{len(unrun)} board(s) recorded UNRUN with their seeds "
               f"pinned; see review/qa/ledger.tsv")
+    return 0
+
+
+def cmd_qualify(args) -> int:
+    """M62 (5). Run the seat against the fixed battery and print the counts.
+
+    The battery's packets are SEALED and closed, so every read lands in
+    `--land-dir` rather than beside them: a requalification may not write into
+    a turn directory whose round is published (R101b).
+    """
+    from understudy import qualify
+    try:
+        items = qualify.load_battery(Path(args.battery) if args.battery
+                                     else None)
+    except (OSError, qualify.BatteryError) as exc:
+        print(f"qualify: {exc}", file=sys.stderr)
+        return 2
+    thin = qualify.thin_categories(items)
+    if thin:
+        print(f"qualify: the battery is thin in {', '.join(thin)} "
+              f"(floor {qualify.MIN_ITEMS_PER_CATEGORY} per category)",
+              file=sys.stderr)
+        return 2
+    try:
+        client = _client(args)
+    except local_model.LocalModelError as exc:
+        print(f"qualify: {exc}", file=sys.stderr)
+        return 2
+
+    land_root = Path(args.land_dir) if args.land_dir else (
+        QA_DIR / "qualify" / time.strftime("%Y%m%d-%H%M%S"))
+
+    def reader(item) -> dict[str, Any] | None:
+        land = land_root / item.turn_id
+        land.mkdir(parents=True, exist_ok=True)
+        record = read_turn(item.turn_id, client=client, land_dir=land,
+                           seat_mode=args.seat_mode,
+                           spot_check=0,
+                           log_root=Path(args.log_root) if args.log_root
+                           else None)
+        if record.get("refused") or not record.get("form"):
+            return None
+        return json.loads(Path(record["form"]).read_text(encoding="utf-8"))
+
+    card = qualify.run_battery(items, reader=reader, seat_id=args.tester_id)
+    out = qualify.write_scorecard(card, Path(args.out) if args.out else
+                                  land_root / "scorecard.json")
+    for row in card["items"]:
+        print(f"  {'PASS' if row['passed'] else 'FAIL'}  {row['item']:<3} "
+              f"{row['category']:<8} {row['turn_id']}  {row['why']}")
+    print(qualify.one_line(card))
+    print(f"scorecard: {out}")
     return 0
 
 
@@ -878,6 +1192,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                             f"read by the Codex seat (default {DEFAULT_SPOT_CHECK}; "
                             f"0 disables the periodic half, never the "
                             f"resource-order route)")
+        p.add_argument("--seat-mode", choices=SEAT_MODES,
+                       default=DEFAULT_SEAT_MODE,
+                       help=f"which chair the local seat sits in (default "
+                            f"{DEFAULT_SEAT_MODE!r}). In shadow it reads "
+                            f"every packet and is graded, but it is never the "
+                            f"deciding verdict and is never replayed -- the "
+                            f"fresh-Opus control is. 'deciding' restores the "
+                            f"pre-R221-A behaviour")
 
     r = sub.add_parser("read", help="the local model READS one staged turn")
     r.add_argument("turn_id")
@@ -916,6 +1238,21 @@ def main(argv: Sequence[str] | None = None) -> int:
                         "then owns no process and relaunches nothing")
     common(q)
     q.set_defaults(func=cmd_round)
+
+    b = sub.add_parser("qualify",
+                       help="run the seat against the fixed battery of sealed "
+                            "packets and print a scorecard (M62 (5))")
+    b.add_argument("--battery", default="",
+                   help=f"the battery file (default "
+                        f"understudy/battery/battery.yaml)")
+    b.add_argument("--out", default="",
+                   help="where to write the scorecard JSON")
+    b.add_argument("--land-dir", default="",
+                   help="where the battery's reads land; NEVER the sealed "
+                        "turn directories (R101b)")
+    b.add_argument("--tester-id", default="")
+    common(b)
+    b.set_defaults(func=cmd_qualify)
 
     args = ap.parse_args(list(argv) if argv is not None else sys.argv[1:])
     return args.func(args)
