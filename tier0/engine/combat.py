@@ -14,8 +14,8 @@ import random
 from typing import Callable
 
 from tier0 import constants as C
-from tier0.engine import (effects, potions, powers, reactions, refpowers,
-                          relics, resources)
+from tier0.engine import (effects, furina_reframe, potions, powers,
+                          reactions, refpowers, relics, resources)
 from tier0.engine.state import (Card, CombatState, Enemy, Player,
                                 remove_instance, sync_fanfare_cap_to_max_hp)
 
@@ -473,7 +473,14 @@ def play_card(state: CombatState, card: Card) -> None:
         # Stage the mode" stops being the same question as "does this card
         # mint Fanfare". Companions are lit under the upgrade and still mint
         # nothing -- the upgrade drops the exclusivity, not the targeting.
-        if effects.center_stage_active(state, card):
+        if (effects.center_stage_active(state, card)
+                and not furina_reframe.meter_active(p)):
+            # RETIRED UNDER `FURINA_REFRAME_METER` (reframe §4.1): a
+            # Spotlighted card played mints nothing, because only a member
+            # PERFORMING mints. R228's one-mode Spotlight retires Center Stage
+            # outright as well, and `center_stage_active` answers False under
+            # its own flag -- two flags, two reasons, and either alone is
+            # enough to empty this leg.
             resources.gain_fanfare(
                 state, C.FANFARE_PER_SPOTLIGHT_CARD, "center_stage")
         # Card-level Spotlight texture (sheet pass 1, ratified design
@@ -599,6 +606,14 @@ def _finish_play(state: CombatState, card: Card,
         effects.resolve_card(state, card)
         refpowers.after_card_played(state, card, snap)
         if replay_index == 0 and card.is_companion:
+            # FURINA REFRAME (§4.3, `F3` (1) / `F4` (1)): a Companion play
+            # makes the FRONT Salon member perform, then rotates it to the
+            # back. Beside Klee's mint and gated the same way for the same two
+            # reasons -- once per PLAY (a replay is one card resolved twice),
+            # and after a resolution has run. Inert unless
+            # `FURINA_REFRAME_MANUAL` is on, and inert for every other
+            # character in every world.
+            furina_reframe.companion_play_trigger(state, card)
             # "Little Hexenzirkul" (EB-219): Klee's kit answering a PERSONAL
             # Companion play, which is where LAW:145 puts the grant now that
             # Prune's face may not carry it. INSIDE the loop but gated to the
