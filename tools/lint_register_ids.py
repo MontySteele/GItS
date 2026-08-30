@@ -133,7 +133,14 @@ CEILINGS: dict[str, int] = {
     # cannot REQUIRE an enemy count, so a slot that needs one can pass
     # every check and still not be posed; and in the shadow chair R221 B's
     # stopping rule reads shadow grades, which decide nothing.
-    "EB": 209,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+    # EB-211/EB-212 minted 2026-08-29 by the KLEESPARK-R2 relayed review:
+    # R223's battery has two soft categories -- `costs` only FAILS a positive
+    # misread, so silence passes it, and `intent` is scored on self-report.
+    # 210 is DELIBERATELY SKIPPED: the in-flight two-lane funnel branch mints
+    # it, and a number taken twice is exactly what this manifest exists to
+    # stop. 210 is therefore ISSUED and un-re-mintable from here, and it joins
+    # OPEN_IDS with its own row on that branch, not on this one.
+    "EB": 212,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
                  # told the tester it had played no card.
@@ -332,7 +339,11 @@ CEILINGS: dict[str, int] = {
                  # EB-138/EB-139 minted by R211; EB-131/EB-133 retired
     # M63 minted 2026-08-29 by the KLEESPARK-R1 relayed review: whether the
     # funnel may repair a filed form is measurement law, not engineering.
-    "M": 63,     # M62 minted 2026-08-29 by R221 A: the criterion that
+    # M64 minted 2026-08-29 by the KLEESPARK-R2 relayed review: R222 B seats
+    # fresh Opus as the DECIDING reader on rows `authored_by: [claude]`, which
+    # R217 C calls same-family. How a round buys an author-disjoint deciding
+    # read while the local seat is in shadow is [USER]'s, and has no default.
+    "M": 64,     # M62 minted 2026-08-29 by R221 A: the criterion that
                  # retires the fresh-Opus control form from every packet of
                  # a blind-QA round to the spot-check rate. The threshold is
                  # a number, so it is [USER]'s.
@@ -423,6 +434,10 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # declared-versus-reached enemy count, which no check can see, and the
         # stopping rule reading shadow grades in the shadow chair.
         208, 209,
+        # 211/212 minted 2026-08-29 by the KLEESPARK-R2 relayed review (packet
+        # section 13.8): the battery's costs category passes on silence, and its
+        # intent category is self-report. 210 is skipped -- see the ceiling.
+        211, 212,
         # 206 was minted AND CLOSED on 2026-08-29 by the two-instance funnel
         # build -- it left OPEN_IDS in the same commit that closed it, with
         # the ceiling above holding the number so nothing re-takes it.
@@ -451,8 +466,10 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # return condition (>= 6/8 over one round AND the requalification
     # battery) and "refuse only, never repair". Both rows left HEAD in
     # that commit, so both numbers leave this manifest with them.
+    # M64 minted 2026-08-29 by the KLEESPARK-R2 relayed review: the
+    # author-disjoint deciding read while the local seat is in shadow.
     "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 52,
-                    54, 55, 56, 57, 59, 60}),
+                    54, 55, 56, 57, 59, 60, 64}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

@@ -2243,6 +2243,15 @@ Klee three-body seed found first, which is game time either way.*
 *(d) Neither: stop staging multi-enemy boards, and leave the AoE question to
 whole-fight play, where the encounters are the run's.*
 
+**Relayed review (recorded, never answered): (c), guarded by (a).** The seed
+ledger is the fix; the live-count preflight sits behind it so a board that
+misses its declared count still cannot report a slot as graded. **Its condition
+on (c): the ledger must be keyed by CHARACTER, by GAME/BUILD VERSION, and by
+ENCOUNTER CONTEXT** — `NMQLUYZDLV` drew three slimes on six Kokomi stagings and
+one Shrinker Beetle on Klee (§13.4 item 1), and the arm has already been ported
+across a game version once (R218). A ledger keyed on the seed alone records the
+same thing that misled `t04`.
+
 **2. `P4` is UNREACHED because its board's form was refused, not because the
 board was wrong (`t03`). What runs next for it?** The Bang Bang! arithmetic is
 answered in fact by `t01`'s replay — bank 3 → Fwoosh! → Bang Bang! at exactly
@@ -2260,6 +2269,11 @@ bank of exactly 2, rather than against the two `S4` boards — which is a
 threshold change and therefore a NEW registration, never an edit to this one
 (R101b).*
 
+**Relayed review (recorded, never answered): (a).** `t01`'s replay answers the
+arithmetic in fact, `P4` stays UNREACHED as published, and the question closes
+without spending game time re-staging a board whose answer is already on the
+record out of slot.
+
 **3. The pair read returned the instrument (3 ADVANCE / 2 RETURN, overall
 RETURN). What runs next for the arm?**
 
@@ -2271,6 +2285,31 @@ evidence about its own premise.*
 *(c) Treat `P1` and `P2` as the two answers the round was actually for — the
 price does pose a choice, the dry sink does read as dead — accept `P3` and
 `P4` as unreached, and move the arm to its next gate without a top-up.*
+*(e) **ADDED 2026-08-29 by the relayed review**, which its own column says is
+where it stands and which the three options above did not carry: accept `P2` as
+the round's answer; record `P1` only as *"alternative sinks are legible"* and
+NOT as a spend-versus-hold result (the erratum at §13.1); take NO AoE or
+payment top-up round; and resolve the two open questions about the SINK SET —
+whether every Spark destination is damage arithmetic, and whether Firework
+Finale's price of 3 is reachable at all — BEFORE the arm advances unchanged.
+This is (b) amended, not (c): it withholds the advance rather than staging
+more boards for it.*
+
+**Relayed review (recorded, never answered): NOT (c) as worded**, because (c)
+rests on `P1` reading as a spend-versus-hold result and §13.1's erratum says it
+does not. Its position is **(e)**, above, added verbatim in substance at its
+request.
+
+**And one condition has come due — a pick for [USER], not a ruling here.** R222
+took §11.7 item 1 option **(d)**, *leave the set intact and let whole-fight play
+answer it*, and left option **(e)** — *re-author one or two sinks away from
+damage* — as what to do IF whole-fight play still reduced to damage-per-Spark.
+The whole fight has now run: `KLEESPARK-W1` graded `W1` = 0, `W3` = 0 and `W4`
+SPLIT at exactly 50% (§12.6). **The condition (d) deferred on is therefore MET,
+and §11.7 item 1(e) is back on the table as a live pick.** The relayed review
+recommends taking it — *"re-author one or two Spark sinks away from pure damage
+arithmetic, then another whole fight with Codex or an author-disjoint model"* —
+and that recommendation is recorded, not adopted.
 
 ### 13.7 What this round does NOT settle
 
@@ -2282,3 +2321,55 @@ It does not answer §12.9 pick 1, which is [USER]'s. It does not close `PICK 3`,
 staged. And it still cannot ask the face-and-turn question — §11.6 item 1 is
 untouched by anything here.
 
+
+### 13.8 The relayed review of this round, fact-checked (2026-08-29)
+
+An independent review (GPT) of `KLEESPARK-R2` and R223 was relayed by [USER].
+Its column on §13.6's three picks is recorded above, beside each pick. Three
+further claims are checked here against the record; none re-grades anything.
+
+**1. `P1` measured a choice between sinks, not spend-versus-hold. RIGHT**, and
+the erratum is at §13.1. The registered predicates are the evidence:
+`slots.yaml:44-52` and the MANIFEST's `P1` falsifier.
+
+**2. The DECIDING tester was same-family with the rows' author. RIGHT, and the
+packet already said so before the round ran.** §7: *"a fresh-Opus grade on
+those same rows is same-family and is recorded as such, not as the deciding
+read"*; R217 C, `OPERATIONS.md:607`: *"independence is by MODEL FAMILY, author
+against grader"*; `understudy/seat.py:275-279` refuses a seat that would grade
+its own family's work. All eight Spark rows carry `authored_by: [claude]`
+(`docs/prototype-surface.yaml`, `proto_pop_spark` through
+`proto_true_spark_knight`). R222 B seated fresh Opus as the DECIDING reader for
+an operational reason — the local seat had just been returned — and that
+authorisation is real; it is not a finding of independence. **So `KLEESPARK-R2`
+is a sound round and is NOT author-disjoint alpha feedback, and the record
+should not be read as though it were.** Nothing is re-graded on this: the
+grades stand as published (R101b). What it should cost a future round is a
+[USER] pick, QUEUE **`M64`**, with three options and no default — R217 C
+implies the deciding read must be author-disjoint, R222 B authorised this one,
+and the law does not choose between them.
+
+**3. R223's battery has two soft categories. RIGHT on both, and `qualify.py`
+concedes half of it in its own docstring.** `costs` is a NEGATIVE check only —
+`score_costs` runs `misreads.free_card_misreads` over the reader's prose and
+returns PASS on no hits (`understudy/qualify.py:195-206`), so a form that never
+mentions a price passes the category and R223's mark of 4/6 is satisfiable by
+silence. `intent` is SELF-REPORT — `score_intent` passes any form whose
+`q4_changed` is not `False` and whose `q4_different_intent` is not negative
+(`understudy/qualify.py:209-216`), so a seat that learns to answer *yes* passes
+without the telegraph having entered its line; and the module's own docstring
+already says the record cannot do better today (*"The intent category asks for
+two packets identical except the enemy intent. No such pair exists in the
+record"*, `understudy/qualify.py:43-51`). Both are BACKLOG rows now, `EB-211`
+and `EB-212`. Both are PROSPECTIVE instrument design: no sealed form is
+re-scored and no published battery result moves, including the seat's live
+FAIL at 10 of 18 (R223).
+
+**4. A stopping decision must be applied in the PRE-REGISTERED BOARD ORDER even
+where parallel reads finish out of order.** Sent to the engineering branch by
+[USER]; recorded here as an amended acceptance condition on `EB-209`, which is
+the row that already owns R221 B's stopping rule.
+
+**What this section does not do.** It answers no pick, adopts no
+recommendation, and moves no grade. The three picks at §13.6, the added option
+(e), §11.7 item 1(e), and `M64` are all [USER]'s.
