@@ -88,11 +88,36 @@ internal static class TrackedDisplayBridge
     /// Instantiate a pck scene into the room's VFX container, or return null
     /// after warning exactly once. A missing scene degrades to "no display"
     /// rather than throwing — the visual layer never takes the run down.
+    ///
+    /// A ROOM WITHOUT A VFX CONTAINER IS THE SAME KIND OF NOTHING, and it is
+    /// the shape that DID take a run down. `NCombatRoom._Ready` can be
+    /// interrupted — it calls `NCombatUi.Deactivate`, and anything that throws
+    /// out of that leaves the room half-built with `CombatVfxContainer` still
+    /// null. `NCombatUi.Activate` then runs a frame later, this line NRE'd
+    /// inside `AddChildSafely` (a null PARENT, not a null child), and the
+    /// exception escaped `CombatManager.SetUpCombat`: the fight never started,
+    /// and the bridge answered `monster` with no `battle` block until the
+    /// blind-play driver gave up (`KLEESPARK-W1`, `KLEESPARK-W2`). The
+    /// interruption is fixed at its own source; this guard is here because the
+    /// promise one line above — the visual layer never takes the run down —
+    /// has to hold against the NEXT thing that interrupts a room, too.
     /// </summary>
     public static Node2D? Spawn(
         NCombatRoom combatRoom, string relativePath, ref bool warned,
         string disabledMessage)
     {
+        if (combatRoom?.CombatVfxContainer is not { } container)
+        {
+            if (!warned)
+            {
+                warned = true;
+                MegaCrit.Sts2.Core.Logging.Log.Warn(
+                    $"[{KleeMod.ModId}] the combat room has no vfx container "
+                    + $"(half-built room?); {disabledMessage}");
+            }
+            return null;
+        }
+
         string? scenePath = KleePck.Path(relativePath);
         if (scenePath == null)
         {
@@ -110,7 +135,7 @@ internal static class TrackedDisplayBridge
         var display = ResourceLoader
             .Load<PackedScene>(scenePath)
             .Instantiate<Node2D>();
-        combatRoom.CombatVfxContainer.AddChildSafely(display);
+        container.AddChildSafely(display);
         return display;
     }
 
