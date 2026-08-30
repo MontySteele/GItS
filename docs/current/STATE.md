@@ -603,7 +603,10 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     scorer finding, not an income one) — so the live controlled-ratio
     registration comes next and INHERITS `S4`'s floor-15 median of **1.500
     makers per sink**, granting Rummage and its non-damage sinks rather than
-    drafting them; then *Bag of Tricks* (`EB-224`);
+    drafting them; then *Bag of Tricks* (`EB-224`), whose row is now BUILT in
+    both engines on `EB-182`'s mode-head price — the first card in the repo to
+    use the half of R225's amended clause that admits a price inside a mode —
+    and waits on staging;
     whole fights are unblocked, the two lifecycle throws being fixed and the
     three-fight soak green.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5

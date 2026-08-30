@@ -25,6 +25,7 @@
     "proto_spark_burst_conversion",
     "proto_spark_double_tap",
     "proto_spark_finisher",
+    "proto_spark_mode_bombs",
     "proto_spark_priced_draw",
     "proto_spark_priced_strike",
     "proto_spark_strike",
@@ -53,6 +54,7 @@
     "proto_spark_burst_conversion": "klee",
     "proto_spark_double_tap": "klee",
     "proto_spark_finisher": "klee",
+    "proto_spark_mode_bombs": "klee",
     "proto_spark_priced_draw": "klee",
     "proto_spark_priced_strike": "klee",
     "proto_spark_strike": "klee",
@@ -73,6 +75,10 @@
     "proto_shinobu_sanctifying_ring_either": [
       "ProtoShinobuSanctifyingRingEitherModeA",
       "ProtoShinobuSanctifyingRingEitherModeB"
+    ],
+    "proto_spark_mode_bombs": [
+      "ProtoSparkModeBombsModeA",
+      "ProtoSparkModeBombsModeB"
     ],
     "proto_thoma_crimson_ooyoroi_either": [
       "ProtoThomaCrimsonOoyoroiEitherModeA",

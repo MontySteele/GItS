@@ -655,7 +655,24 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # body is the one place a Charge price can go that the
               # IsPlayable cost line cannot reach, which is exactly the
               # arrangement the slice's `mode` arm is asking about.
-              "spend_charge"}
+              "spend_charge",
+              # EB-224 (R225): the Spark price, at a MODE HEAD. Until R225 the
+              # written clause said a Spark spend must stay at the card's TOP
+              # LEVEL; it now reads top level OR the head of a `choose_one`
+              # mode, so this op joins its two sibling meters here. A single
+              # awaited call with no locals, which is the whole
+              # branch-legality criterion.
+              #
+              # AND IT CLOSES A LATENT SILENT DROP RATHER THAN ONLY OPENING A
+              # DOOR. `blocked_reason` refused the row, but `emit()` does not
+              # consult it, and `_emit_branch_op` had no `spend_spark` arm --
+              # so the one caller that reaches emit directly
+              # (`test_eb118_modal_parity`'s badge case) produced a mode that
+              # DECLARED a 3-Spark price in `ModePrices`, was OFFERED only to
+              # a bank that could pay it, and then paid out without debiting
+              # that bank. An op a price table knows and an emitter does not
+              # is an unpaid payoff, not a blocked one.
+              "spend_spark"}
 
 # The exact key set each branch op may carry. Module-level because a modal's
 # mode body is emitted through the same `_emit_branch_op` resolvers as a
@@ -676,6 +693,7 @@ BRANCH_FIELDS = {
     "gain_encore": {"op", "amount"},
     "spend_encore": {"op", "amount"},
     "spend_charge": {"op", "amount"},
+    "spend_spark": {"op", "amount"},
     "burst_energy": {"op", "amount"},
     "energy": {"op", "amount"},
     "place_bomb": {"op", "amount", "target", "bomb_damage"},
@@ -4056,6 +4074,22 @@ def _stmt_spend_spark(card: dict, eff: dict) -> str:
             f"{int(eff['amount'])}, this);")
 
 
+def _stmt_spend_spark_guarded(card: dict, eff: dict) -> str:
+    """EB-224 (R225). The MODE-HEAD form of the Spark price.
+
+    Same call as `_stmt_spend_spark`, with its bool consumed instead of
+    dropped -- the difference is where the op is allowed to appear. At top
+    level the `IsPlayable` gate has already run and the spend cannot be
+    short. At the head of a `choose_one` mode the gate is EB-182's per-option
+    filter, which is a property of the screen: it stops the option being
+    offered, it does not stop the body resolving if anything ever hands the
+    card a mode index another way. The early `return` is what makes the price
+    a price there, and it mirrors `_stmt_spend_charge` line for line.
+    """
+    return ("if (!await SparkPower.Spend(choiceContext, Owner.Creature, "
+            f"{int(eff['amount'])}, this)) return;")
+
+
 def _stmt_spend_charge(card: dict, eff: dict) -> str:
     """R213 E1, QUARANTINED. The PAYMENT half of the Charge cost line.
 
@@ -4249,6 +4283,17 @@ def _emit_branch_op(
         # bank holds, and without the early return a short bank would collect
         # the mode's payoff for free. Sim twin: effects.ChargeUnpaid.
         lines.append(_stmt_spend_charge(card, eff))
+    elif op == "spend_spark":
+        # EB-224 (R225). GUARDED, unlike the top-level arm's
+        # `_stmt_spend_spark`, and for exactly the reason `spend_charge` is:
+        # a mode body has no `IsPlayable` of its own. EB-182's per-mode
+        # filter means an unaffordable mode is not OFFERED, so in ordinary
+        # play the payment cannot be short -- but the filter is a screen, and
+        # a screen is not the engine. `SparkPower.Spend` is all-or-nothing
+        # and returns whether the bank paid, so the early `return` abandons a
+        # play whose price failed instead of handing out the payoff for free.
+        # Sim twin: `effects.spend_sparks`, which refuses the same way.
+        lines.append(_stmt_spend_spark_guarded(card, eff))
     elif op == "salon_rotate":
         # EB-118 §5.5. Literal in a branch, like every other branch resolver:
         # no delta grammar reaches a rotation count.
