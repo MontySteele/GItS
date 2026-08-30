@@ -110,10 +110,47 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     /// </summary>
     public static async Task Gain(
         PlayerChoiceContext choiceContext, Creature player, int amount,
-        CardModel? cardSource)
+        CardModel? cardSource, string? source = null)
     {
+        // `EB-216`. THE LEDGER RIDES THE CHOKEPOINT, which is the whole reason
+        // this method's doc comment above promised "one line to instrument".
+        // The bank is read either side of the mutation, so what is recorded is
+        // the delta that LANDED and not the delta that was asked for -- the
+        // game's ModifyPowerAmountGiven chain can resize a grant, and a ledger
+        // recording the request would not add up against the bank the wire
+        // reports.
+        int before = Bank(player);
         await PowerCmd.Apply<SparkPower>(
             choiceContext, player, amount, applier: player, cardSource: cardSource);
+        Diagnostics.MeterLedger.Note(Diagnostics.MeterLedger.Spark,
+            source ?? SourceOf(cardSource), Bank(player) - before, before);
+    }
+
+    /// <summary>The bank right now, 0 when the counter is not on the creature
+    /// yet. LEDGER READS ONLY -- <see cref="SparksAtPlay"/> and
+    /// <see cref="SparksAsResolved"/> are the accessors a RULE reads, and they
+    /// are spelled separately on purpose.</summary>
+    private static int Bank(Creature owner) =>
+        owner.Powers.OfType<SparkPower>().FirstOrDefault()?.Amount ?? 0;
+
+    /// <summary>
+    /// The ledger label for a site that did not name itself: the card that
+    /// caused the change. Every GENERATED card reaches the ledger through
+    /// this, which is why no generated file needed editing; the handful of
+    /// powers, relics and kit responses that are not a card rider pass their
+    /// own label. `unknown` is deliberately not spelled `card:` -- a source
+    /// nobody named must not read as one that did.
+    /// </summary>
+    internal static string SourceOf(CardModel? card)
+    {
+        try
+        {
+            return card == null ? "unknown" : "card:" + card.Id.Entry;
+        }
+        catch (System.Exception)
+        {
+            return "unknown";
+        }
     }
 
     /// <summary>
@@ -161,7 +198,7 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     /// </summary>
     public static async Task<bool> Spend(
         PlayerChoiceContext choiceContext, Creature player, int amount,
-        CardModel? cardSource)
+        CardModel? cardSource, string? source = null)
     {
         if (!CanSpend(player, amount))
         {
@@ -174,8 +211,14 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
             return false;
         }
 
+        // `EB-216`. A REFUSED spend writes nothing at all -- the two returns
+        // above mutate nothing, and a ledger row saying "paid 0" would read as
+        // a free play rather than as a play that never happened.
+        int before = power.Amount;
         await PowerCmd.ModifyAmount(
             choiceContext, power, -amount, applier: null, cardSource: cardSource);
+        Diagnostics.MeterLedger.Note(Diagnostics.MeterLedger.Spark,
+            source ?? SourceOf(cardSource), power.Amount - before, before);
         return true;
     }
 
@@ -300,9 +343,16 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
         // applier: null -- the spend is bookkeeping, not a power "given" by
         // anyone; keeping it out of the ModifyPowerAmountGiven hook chain
         // means nothing can inflate or shrink the exact spend.
+        int before = Amount;
         await PowerCmd.ModifyAmount(
             choiceContext, this, -_pendingSpendAmount, applier: null,
             cardSource: cardPlay.Card);
+        // `EB-216`. NAMED AS THE RULE AND NOT AS THE CARD: the base free-Attack
+        // consume is charged by the threshold rule, not printed on the card
+        // that triggered it, and a grader reading `card:` here would count a
+        // printed price the face never showed.
+        Diagnostics.MeterLedger.Note(Diagnostics.MeterLedger.Spark,
+            "rule:threshold_consume", Amount - before, before);
 
         // Sparks-spend VFX (sprint plan E3); concurrency-capped in the
         // spawner so burst turns cannot particle-storm the screen.

@@ -200,6 +200,7 @@ public sealed class SparkAttackCostPower : PowerModel, ILocalizationProvider
         }
 
         _pendingSpendPlay = null;
-        await SparkPower.Spend(choiceContext, Owner, Price, cardPlay.Card);
+        await SparkPower.Spend(choiceContext, Owner, Price, cardPlay.Card,
+            source: "power:spark_attack_cost/price");
     }
 }

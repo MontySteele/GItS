@@ -206,7 +206,60 @@ CEILINGS: dict[str, int] = {
     # `proto_true_spark_knight` is owed WORK, not an open decision -- the
     # packet's "stays [USER]'s at 11.7 pick 3" is struck as erratum 2 and the
     # read is filed in BACKLOG behind 16.11 pick 1.
-    "EB": 225,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+    # EB-226 minted 2026-08-30 by the overnight-harness sitting and CLOSED in
+    # the minting commit. Two overnight runs died to the power plan rather
+    # than to anything this repo owns: the System log records `Kernel-Power
+    # 42 -- "entering sleep -- Sleep Reason: System Idle"` at 2026-08-29
+    # 07:05:40, resumed 11:21:48 on a mouse movement -- a 4 h 16 m hole
+    # through the middle of a live funnel, the game suspended mid-fight --
+    # and again at 2026-08-30 00:56:17. The AC standby timeout was five
+    # hours and [USER] has since set it to never, but a power plan is machine
+    # state nothing in this tree can see, survives no reinstall and no plan
+    # reset, so the harness now asks for what it needs itself.
+    # `understudy/keepawake.py` holds `ES_CONTINUOUS | ES_SYSTEM_REQUIRED`
+    # for exactly as long as a `soak.Session` holds the game (`setup` ->
+    # `teardown`), refcounted so two lanes share one hold, and deliberately
+    # WITHOUT `ES_DISPLAY_REQUIRED` -- the run needs the CPU, not the
+    # monitor. The flags are per-THREAD, and `Session.setup` and `teardown`
+    # are reached from different lane workers under a two-lane round, so the
+    # request lives on its own thread whose only job is to stay alive; set
+    # inline it would have been released by the OS when the worker exited,
+    # which looks correct in a diff and holds nothing. Non-Windows or a
+    # missing kernel32 is one logged line and a no-op.
+    # `tier0/tests/test_understudy_keepawake.py` asserts the flag sequence a
+    # fake setter records, that both calls land on one non-caller thread,
+    # that the context manager releases when its body raises, and the
+    # two-holder case. Confirm live with `powercfg /requests` (elevated):
+    # the harness's `python.exe` under `SYSTEM:`.
+    # EB-227 minted 2026-08-30 by the same sitting and CLOSED in its minting
+    # commit: the Codex seat judged its own budget by hand. The standing rule
+    # -- three calls per graded turn (R217, `M64`'s split) -- is written in
+    # OPERATIONS and obeyed by a person, which is fine for a sitting somebody
+    # is watching and useless overnight, where the failure mode is the seat
+    # burning the week's window at 02:00 and every round after it returning
+    # `codex_failed exit 1` with no explanation. `understudy/codex_usage.py`
+    # reads the meter out of the rate-limit line Codex itself writes into its
+    # newest session rollout (`$CODEX_HOME/sessions/YYYY/MM/DD/rollout-*.jsonl`,
+    # `payload.rate_limits`, primary = 5 h, secondary = the week); nothing
+    # here asks OpenAI anything, so THE READ IS AS-OF THE LAST CALL, and a
+    # window whose `resets_at` has passed is counted 0% used rather than
+    # billed for a window that no longer exists. `python -m
+    # understudy.codex_usage` prints one line. `seat grade` and `seat review`
+    # both probe before every `codex exec` and refuse -- in each role's own
+    # refusal shape, never an exception that would kill a round -- at or past
+    # `CODEX_PRIMARY_STOP_PERCENT` (85) or `CODEX_WEEKLY_STOP_PERCENT` (50),
+    # env-overridable via `GITS_CODEX_PRIMARY_STOP` / `GITS_CODEX_WEEKLY_STOP`;
+    # the two lines are asymmetric because the five-hour window refills in
+    # five hours and the week does not. The percentages land in the call's own
+    # record (`seat.json`, `<out>.usage.json`) so per-call cost is learnable
+    # overnight. A missing rollout logs and PROCEEDS -- a file that is not
+    # there must not be able to stop a round. Live read at the time of the
+    # commit: `codex: 5h 3% (resets 04:40 EDT) - week 11% (resets Sep 05
+    # 17:58)`. Locked by `tier0/tests/test_understudy_codex_usage.py`
+    # (fresh / rolled-over / missing fixtures, both stop lines, both roles'
+    # refusal branches with `seat._run` monkeypatched, and the under-the-line
+    # case that must still reach codex). The three-calls rule is UNTOUCHED.
+    "EB": 227,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
                  # told the tester it had played no card.
@@ -544,7 +597,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # channel on the row, emitted through the shipped upgrade path.
         # 215 LEFT OPEN_IDS 2026-08-30: the face is on the row and the
         # boot-time loc merge is deleted -- one channel per card.
-        214, 216,
+        # 216 LEFT OPEN_IDS 2026-08-30: every blind run writes a per-turn wire
+        # snapshot and a per-play meter ledger the tester never sees.
+        214,
         # 220 minted 2026-08-30 -- the meter cost badge (Encore, Charge).
         220,
         # 223 minted 2026-08-30 by the relayed open-items review, fact-checked:
