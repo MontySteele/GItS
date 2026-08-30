@@ -71,6 +71,17 @@ the per-play meter ledger) (`McpMod.HandleRequest`). Anything else is 404.
   bridge, not combat ids (`vendor/STS2_MCP/docs/raw-full.md:346`, `vendor/STS2_MCP/docs/raw-simplified.md:113`).
   Every other selector on the wire is an integer `index` into the array the same
   GET response just returned.
+- **Whether a play owes a target is the CHOSEN MODE's answer, not the
+  card type's** (`EB-184`, `McpMod.Actions.cs` `ExecutePlayCard` +
+  `gits/GitsModalTargeting.cs`). `play_card` takes an OPTIONAL `mode`,
+  matched against the card's own printed mode labels, read off the card
+  by name (`KleeMod.Cards.IModalCard`) with no compile-time reference.
+  A named mode that aims still refuses a missing target; a named mode
+  that aims at nobody is played at an inert aim the game's own play path
+  wants and the mode discards, and the response says so. A play naming
+  no mode, or a card that is not modal, reaches upstream's card-type rule
+  untouched -- the strict direction, and the same fallback
+  `understudy.targeting` takes.
 - **Only `localhost`/`127.0.0.1` are bound, with no authentication and
   `Access-Control-Allow-Origin: *`** (`McpMod.cs:94-97`, `:181-183`). Port is
   overridable via `STS2_MCP.conf` next to the DLL, default 15526

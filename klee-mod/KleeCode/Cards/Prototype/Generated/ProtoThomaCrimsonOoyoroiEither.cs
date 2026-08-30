@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoThomaCrimsonOoyoroiEither : CustomCardModel, IElementalCard, ICompanionCard
+public sealed class ProtoThomaCrimsonOoyoroiEither : CustomCardModel, IElementalCard, ICompanionCard, IModalCard
 {
     /// <summary>Block arrives from a conditional row, so this card declares no
     /// BlockVar and BaseLib's auto-detect cannot see it (EB-84).</summary>
@@ -65,6 +65,18 @@ public sealed class ProtoThomaCrimsonOoyoroiEither : CustomCardModel, IElemental
         ("title", "Thoma - Blazing Ooyoroi"),
         ("description", "Choose one: Deal 8 damage, applying its element | Gain 3 Block, applying no element."),
     };
+
+    // EB-184: what each mode does about AIMING, in sheet order.
+    // The card's own TargetType is fixed before a mode is chosen (the
+    // game aims first), so it answers for the card and not for the
+    // play -- an Attack-typed modal declares AnyEnemy for the mode
+    // that aims, and the bridge then demanded a target on the mode
+    // that attacks nothing. These two rows are what it reads instead.
+    public IReadOnlyList<string> ModeLabels =>
+        new[] { "Deal 8 damage, applying its element", "Gain 3 Block, applying no element" };
+
+    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
+        new[] { true, false };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
