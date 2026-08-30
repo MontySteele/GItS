@@ -169,7 +169,9 @@ CEILINGS: dict[str, int] = {
     # half BUILT and merged as #197. M55's pile-view line folds into EB-214
     # rather than minting. M47/M49/M50/M52/M54/M55/M56/M57/M59/M60/M64 LEFT
     # OPEN_IDS in the same commit as their rows.
-    "EB": 219,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+    # EB-220 minted 2026-08-30 by [USER]'s word on EB-182's build: Encore- and
+    # Charge-priced modes and cards get the cost badge the Spark price has.
+    "EB": 220,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
                  # told the tester it had played no card.
@@ -257,6 +259,8 @@ CEILINGS: dict[str, int] = {
                  # even on a mode that attacks nothing, so a blind
                  # grader's Block-mode line cannot be replayed. OPEN.
                  # EB-182/183 minted 2026-08-29 by the Kokomi slice 2 funnel run.
+                 # 182 LEFT OPEN_IDS 2026-08-30: built and merged (#200);
+                 # the seat's re-ask of Bag of Tricks is EB-220's sibling, not a row.
                  # EB-182: the choose-a-card screen has no per-option
                  # playability, proven off the 0.111.0 decompile, so a
                  # priced "Choose one" mode is offered on a short bank
@@ -446,7 +450,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
-        180, 181, 182, 183, 184,
+        180, 181, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
         # 202/203 were minted 2026-08-29 by the KLEESPARK-R1 relayed review
         # and LEFT OPEN_IDS with their rows the same day, both BUILT under
@@ -491,7 +495,10 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # comment above for what each one is, and for why the Bake-Kurage
         # retirement, the five burst-fold shapes and M55's pile-view line
         # minted nothing.
-        213, 214, 215, 216, 217, 218, 219,
+        # 218 LEFT OPEN_IDS 2026-08-30: built and merged (#199).
+        213, 214, 215, 216, 217, 219,
+        # 220 minted 2026-08-30 -- the meter cost badge (Encore, Charge).
+        220,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
