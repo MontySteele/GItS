@@ -1,0 +1,78 @@
+{
+ "turn_id": "klee-sparks-bt2-t03",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "target_missing",
+  "forecast_missing"
+ ],
+ "reasons": [
+  "target_missing: a play names a card whose printed effects aim at ONE enemy and carries no target, so the line cannot be replayed at all",
+  "forecast_missing: the board registered questions to be answered BEFORE the line and the form carries no answer, or fewer answers than questions -- a forecast collected after the line is a rationalisation"
+ ],
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "6a807f73c511f07d5e27c90b0a331ecaa4fb2d8c3a1962b71854d1698a8270a1",
+ "chosen_line": [
+  {
+   "card": "Bag of Tricks",
+   "target": null,
+   "exhaust": null,
+   "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."
+  },
+  {
+   "card": "Mine Toss",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Run Away!",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I spent 3 Sparks with Bag of Tricks to place three Bombs, then played Mine Toss on Shrinker Beetle to place another Bomb, then played Run Away! for 4 Block. My forecasts were: 0 Spark at the end of this turn, 4 Spark at the start of next turn, and 25 damage dealt by then.",
+  "q2_other_line_considered": "I seriously considered adding Spirited Away after Mine Toss for 12 more Block, using the remaining 2 Energy.",
+  "q3_what_it_gave_up": "It gave up 12 additional Block from Spirited Away, preserving no benefit from the remaining 2 Energy against the displayed debuff intent.",
+  "q4_different_intent": "Yes. A sufficiently large attack intent would have made me add Spirited Away after Mine Toss, while retaining the same Bomb setup and Run Away!."
+ },
+ "forecast_asked": 3,
+ "forecast": [],
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": true,
+  "findings": [
+   {
+    "position": 1,
+    "card": "Bag of Tricks",
+    "mode": "Spend 3 Sparks: place 3 Bombs dealing 5.",
+    "why": "play 1 names 'Bag of Tricks', whose printed effects aim at ONE enemy, and carries no target. The bridge has nothing to aim at, so this line cannot be replayed -- it is sealed and UNTESTED, which is the state KLEESPARK-R1 ended two of its eight lines in"
+   }
+  ],
+  "hand_takes_a_target": [
+   "Bag of Tricks"
+  ],
+  "hand": [
+   "Bag of Tricks",
+   "Mine Toss",
+   "Duck and Cover",
+   "Spirited Away",
+   "Run Away!"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-30T16:17:28"
+}

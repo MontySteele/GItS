@@ -231,6 +231,15 @@ FALSIFIERS: dict[str, str] = {
     "intent_insensitive":
         "question four is no: a different enemy intent would not have "
         "changed the line, so the intent is not part of the decision",
+    # `EB-236` item (d), the staged twin of `EB-229`. A board that REGISTERED
+    # pre-commit questions and got a form with no answers to them has not
+    # been read the way it was registered: the forecast is the one answer
+    # that has to be written before the line, and a form that skips it is
+    # answering a different board. Absent on every board that asks nothing.
+    "forecast_missing":
+        "the board registered questions to be answered BEFORE the line and "
+        "the form carries no answer, or fewer answers than questions -- a "
+        "forecast collected after the line is a rationalisation",
     # EB-203. A card that aims at one enemy, played at nobody. Checked BEFORE
     # every rule that reads the reader's prose, because a line the bridge
     # cannot play is not a reading that failed -- it is a reading that was
@@ -368,6 +377,35 @@ class StagedTurn:
     # map would be a map chosen after the boards were written, which is the
     # forking path the rule exists to close.
     slots: list[str] = field(default_factory=list)
+    # EB-236. THE BOARD'S OWN DECLARATION OF ITS RESOURCE QUESTION -- an
+    # `slot_plan.ResourceRound`, or None where the file declares none, which
+    # is legal and is what every board committed before this row carries. A
+    # board that claims two uses are MUTUALLY EXCLUSIVE says so HERE and not
+    # in a header comment, and `local_tester round --plan-only` walks every
+    # order of play, relic refunds included, to see whether the claim holds.
+    # `KLEESPARK-BT1`'s `t02` made that claim in prose and the shipped world
+    # falsified it three plays later.
+    #
+    # TYPED `Any` ON PURPOSE: `slot_plan` reads the card SHEETS and this
+    # module builds the blind packet, so the import stays lazy -- exactly as
+    # `slot_report`'s does, and for the same reason.
+    resource_round: Any = None
+    # `EB-236` item (d), and the STAGED-ROUND TWIN of `EB-229`. The
+    # questions a registration asks the reader to answer BEFORE it commits
+    # to a line, in printed vocabulary, one per entry. They are printed at
+    # the TOP of the blind packet and the form carries one answer each; a
+    # board that registers none prints no such block and is graded exactly
+    # as every board written before this key existed. `EB-229` is the blind
+    # RUN's half of the same gap -- a reply schema of `command` and
+    # `thinking` has nowhere to put a prediction -- and it stays open.
+    forecast: list[str] = field(default_factory=list)
+    # `EB-236` item (e). A staged single turn has no next turn (packet
+    # §11.6 item 1), so a board whose question is *"what does the bank read
+    # NEXT turn"* has to buy one: with this set, `execute` ends the turn
+    # after the graded line and takes one more reading. Opt-in, because
+    # ending the turn hands the enemy its telegraphed attack, and no board
+    # written before this key existed asked for that.
+    replay_next_turn: bool = False
 
     def registered_slots(self) -> list[str]:
         """The slots this board covers. Its own id when it declares none."""
@@ -461,7 +499,10 @@ def parse(blob: dict[str, Any], path: Path | None = None) -> StagedTurn:
         assumptions=[str(a) for a in (blob.get("assumptions") or [])],
         prototype=bool(blob.get("prototype", False)),
         exact_hand=bool(blob.get("exact_hand", False)),
-        slots=_parse_slots(blob.get("slots")))
+        slots=_parse_slots(blob.get("slots")),
+        resource_round=_parse_resource_round(blob, path),
+        forecast=_parse_forecast(blob.get("forecast")),
+        replay_next_turn=bool(blob.get("replay_next_turn", False)))
     _check_halves_agree(turn)
     _check_assumptions_blind(turn)
     return turn
@@ -485,6 +526,38 @@ def _parse_slots(raw: Any) -> list[str]:
     return [s.strip() for s in raw]
 
 
+def _parse_resource_round(blob: dict[str, Any], path: Path | None) -> Any:
+    """EB-236's `resource_round:` block, or None. Refuses, never coerces.
+
+    The import is LAZY -- `slot_plan` reads the card sheets, this module
+    builds the blind packet, and the two are kept a function call apart on
+    purpose (see `SLOT_FILE_NAME` and `slot_report`).
+    """
+    raw = blob.get("resource_round")
+    if raw is None:
+        return None
+    from understudy import slot_plan
+    try:
+        return slot_plan.parse_resource_round(raw, where=str(path or blob["id"]))
+    except slot_plan.BoardDesignError as exc:
+        raise TurnError(str(exc)) from exc
+
+
+def _parse_forecast(raw: Any) -> list[str]:
+    """`forecast:` -- the pre-commit questions, or absent. Refuses, never
+    coerces. Blindness is checked with the assumptions, since these are
+    printed on the page beside them."""
+    if raw in (None, "", []):
+        return []
+    if not isinstance(raw, list) or not all(
+            isinstance(q, str) and q.strip() for q in raw):
+        raise TurnError(
+            "'forecast' is a list of non-empty question strings, printed at "
+            "the top of the blind packet and answered BEFORE the line. Omit "
+            "it and the board asks for no forecast")
+    return [q.strip() for q in raw]
+
+
 def _check_assumptions_blind(turn: StagedTurn) -> None:
     """The assumptions are folded into the packet's disclosures VERBATIM, so
     they are scrubbed by the same rules as a card face -- and the scrub runs
@@ -502,6 +575,16 @@ def _check_assumptions_blind(turn: StagedTurn) -> None:
             f"{ctx[:80]!r}): assumptions are printed in the blind packet, "
             f"so they follow the packet's own scrub -- state the fact, not "
             f"the citation")
+    # The forecast questions are printed on the same page and follow the same
+    # scrub, for the same reason: a question naming an id would teach a
+    # reader the one thing the page exists to withhold.
+    bad = qa_packet.leaks(list(turn.forecast))
+    if bad:
+        rule, hit, ctx = bad[0]
+        raise TurnError(
+            f"forecast question leaks design vocabulary ({rule}: {hit!r} in "
+            f"{ctx[:80]!r}): it is printed at the top of the blind packet -- "
+            f"ask it in the vocabulary the page prints")
 
 
 def _parse_board(raw: Any) -> Board:
@@ -888,7 +971,8 @@ def export_packet(turn: StagedTurn, state: dict[str, Any], *,
         "You are not being asked whether this turn is fun.",
     ] + list(turn.assumptions)
     packet = qa_packet.build(state, turn.id, repo=REPO,
-                             disclosures=disclosures)
+                             disclosures=disclosures,
+                             forecast=list(turn.forecast))
     md = qa_packet.render(packet)
     digest = qa_packet.sha256(md)
     # THE ENVELOPE, ADDED AFTER THE SCRUB AND NEVER RENDERED INTO packet.md.
@@ -984,10 +1068,27 @@ def grader_id(form: dict[str, Any]) -> str:
 
 # ------------------------------------------------------------- the grade ---
 
+def forecast_answers(form: dict[str, Any]) -> list[str]:
+    """The form's `forecast` list as strings. `EB-236` item (d).
+
+    A LIST AND NOT A MAPPING: the questions are printed and numbered on the
+    page, so the answers are positional and a grader never has to spell a
+    key. Numbers are accepted and stringified -- most of these ask for one.
+    """
+    raw = form.get("forecast")
+    if raw is None:
+        return []
+    if not isinstance(raw, list):
+        raise FormError("'forecast' is a LIST of answers, one per question "
+                        "the page numbered, in that order")
+    return [str(a).strip() for a in raw]
+
+
 def apply_falsifiers(turn_id: str, form: dict[str, Any], *,
                      packet_sha: str | None,
                      closeness: dict[str, Any] | None,
-                     targets: dict[str, Any] | None = None) -> list[str]:
+                     targets: dict[str, Any] | None = None,
+                     forecast_asks: int = 0) -> list[str]:
     """Every rule that refuses this form, in the order they are checked.
 
     `targets` is EB-203's reading, computed by `grade` off the card sheet and
@@ -1016,6 +1117,13 @@ def apply_falsifiers(turn_id: str, form: dict[str, Any], *,
         refused.append("intent_insensitive")
     if closeness and closeness.get("verdict") == "REFUSED":
         refused.append("line_dominates")
+    # DEFAULTS TO ZERO -- absent, not clean -- so every caller with no packet
+    # (the ledger rebuilders, the tests that hand a bare form) grades exactly
+    # as it did before this rule existed.
+    if forecast_asks:
+        answers = [a for a in forecast_answers(form) if a]
+        if len(answers) < forecast_asks:
+            refused.append("forecast_missing")
     return refused
 
 
@@ -1037,8 +1145,19 @@ def grade(turn_id: str, form: dict[str, Any], *,
     targets = targeting.summary(form.get("chosen_line") or [],
                                 hand=targeting.packet_titles(d))
 
+    # `EB-236` item (d). HOW MANY QUESTIONS THE BOARD ASKED IS READ OFF THE
+    # PACKET, not off the turn file: the packet is what the grader was
+    # handed, and a turn file edited after a packet was written would be
+    # grading a form against questions nobody was shown.
+    packet_json = d / "packet.json"
+    asks = 0
+    if packet_json.is_file():
+        blob = json.loads(packet_json.read_text(encoding="utf-8"))
+        asks = len(blob.get("forecast") or [])
+
     refused = apply_falsifiers(turn_id, form, packet_sha=packet_sha,
-                               closeness=closeness, targets=targets)
+                               closeness=closeness, targets=targets,
+                               forecast_asks=asks)
     gid = grader_id(form)
     down, why_down = is_down_weighted(gid, root=root)
     verdict = {
@@ -1050,6 +1169,13 @@ def grade(turn_id: str, form: dict[str, Any], *,
         "packet_sha256": packet_sha,
         "chosen_line": list(form.get("chosen_line") or []),
         "answers": {q: str(form.get(q) or "") for q in QUESTIONS},
+        # `EB-236` item (d): A FIELD TO COUNT. `EB-229`'s finding was that a
+        # forecast slot had nothing to grade because nothing recorded one;
+        # this is the record, positional against the questions the packet
+        # printed, and it is carried on every verdict including a refused
+        # one.
+        "forecast_asked": asks,
+        "forecast": forecast_answers(form),
         # SURVIVES means NOT YET FALSIFIED and nothing else. It is written out
         # in the record because a one-word verdict read six months later is
         # exactly the kind of thing that gets promoted into "the tool liked
@@ -1800,6 +1926,16 @@ def execute_steps(turn: StagedTurn, form: dict[str, Any]
                    if play.get(k) is not None}
         steps.append(("answer_modal", {"card": str(play["card"]), **answers}))
     steps.append(("read", {"label": "after the graded line"}))
+    if turn.replay_next_turn:
+        # `EB-236` item (e). END THE TURN AND READ AGAIN. A price whose refund
+        # arrives at the START of the next turn -- Bombs sitting on a body
+        # until the turn-start sweep pops them and `Pounding Surprise` pays
+        # one Spark each -- cannot be read on a board that stops when the
+        # line does. The enemy takes its telegraphed turn in between, which
+        # is why this is opt-in and why the board that asks for it declares
+        # the incoming damage in its own assumptions.
+        steps.append(("end_turn", {}))
+        steps.append(("read", {"label": "the start of the next turn"}))
     return steps
 
 

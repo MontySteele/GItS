@@ -1,0 +1,18 @@
+{
+ "rollout": "C:\\Users\\Monty\\.codex\\sessions\\2026\\08\\30\\rollout-2026-08-30T16-17-00-01a05451-7939-7912-9b69-675b611ba66b.jsonl",
+ "observed_at": "2026-08-30T20:17:27Z",
+ "primary_stop_percent": 85.0,
+ "weekly_stop_percent": 50.0,
+ "primary_used_percent": 59.0,
+ "primary_reported_percent": 59.0,
+ "primary_window_minutes": 300,
+ "primary_stale": false,
+ "primary_resets_at": "2026-08-30T16:36:55-04:00",
+ "secondary_used_percent": 28.0,
+ "secondary_reported_percent": 28.0,
+ "secondary_window_minutes": 10080,
+ "secondary_stale": false,
+ "secondary_resets_at": "2026-09-05T17:58:41-04:00",
+ "plan_type": "plus",
+ "available": true
+}

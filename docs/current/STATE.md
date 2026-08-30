@@ -722,7 +722,15 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     mode — was STAGED as `KLEESPARK-BT1` (2026-08-30): the mode-head price is
     proven live, the round RETURNED on the INSTRUMENT (3 slots UNREACHED on
     `intent_insensitive` refusals), and the priced mode's self-refund off
-    *Pounding Surprise* is the sitting packet's DRAFT pick 1.
+    *Pounding Surprise* went to [USER] as the sitting packet's pick 1.
+    **R229 (2026-08-30) ruled it at option (1), QUALIFIED: the refund is
+    accepted as an observed TEST CONDITION and not as approval of the card's
+    design, so *Bag of Tricks* is AT RISK rather than presumptively
+    advancing** — under a PRE-REGISTERED RETURN CONDITION (if immediate
+    detonation restores enough bank to play the competing sink, or the price
+    otherwise imposes no meaningful opportunity cost across the turn and the
+    next, the arm RETURNS TO DESIGN) that binds `KLEESPARK-BT2`, the repaired
+    round, before it is drafted.
     Whole fights are unblocked, the two lifecycle throws being
     fixed and the three-fight soak green.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5

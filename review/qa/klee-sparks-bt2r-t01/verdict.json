@@ -1,0 +1,77 @@
+{
+ "turn_id": "klee-sparks-bt2r-t01",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "2f0f6028fb9f50a8c9ddbd0939b3a9f77be88bb04b92bb1356b17f62915429fc",
+ "chosen_line": [
+  {
+   "card": "Bag of Tricks",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Firework Finale",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Spirited Away",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I spent 3 Sparks with Bag of Tricks to place three Bombs on Seapunk, then played Kaboom! on Seapunk, causing the Bombs to detonate and restore 3 Sparks. I spent those Sparks on Firework Finale targeting Seapunk, then played Spirited Away for 12 Block.",
+  "q2_other_line_considered": "I seriously considered taking Bag of Tricks' single-Bomb option, then playing Kaboom!, Firework Finale, and Spirited Away. That preserved more Spark but dealt 10 less damage.",
+  "q3_what_it_gave_up": "It gave up the Spark that the single-Bomb line would have retained at turn end, in exchange for 10 additional Bomb damage.",
+  "q4_different_intent": "Yes. Against a non-attacking intent, I would omit Spirited Away because its Block would not answer the telegraphed action."
+ },
+ "forecast_asked": 3,
+ "forecast": [
+  "0",
+  "3",
+  "0"
+ ],
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Bag of Tricks",
+   "Kaboom!",
+   "Firework Finale"
+  ],
+  "hand": [
+   "Bag of Tricks",
+   "Kaboom!",
+   "Firework Finale",
+   "Duck and Cover",
+   "Spirited Away"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-30T16:43:12"
+}

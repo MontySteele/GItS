@@ -301,7 +301,13 @@ def test_the_recorded_combat_screen_prints_the_faces_and_no_ids():
     assert "Pearl Barrage" in page and "Nibbit" in page
     assert "Intent: Aggressive, 12" in page
     assert "Charge: 8" in page                    # a meter that holds something
-    assert "Burst" not in page                    # ...and one that does not
+    # ...and one that does not. `EB-238` NARROWED THIS ASSERTION FROM THE
+    # WHOLE PAGE TO THE METER LINES, deliberately: the claim was always "a
+    # meter holding nothing is not drawn", and the page now also prints the
+    # run's relics -- one of which says *"gain 1 Charge and 2 Burst Energy"*
+    # in its own hover text. That is a word the player reads off the HUD,
+    # not a meter this screen drew at zero.
+    assert not [ln for ln in page.splitlines() if ln.startswith("- Burst")]
     assert "11 in the draw pile" in page          # pile COUNTS, not contents
     assert "Bake-Kurage" not in page              # ...which is in the draw pile
     assert "KLEEMOD" not in page and "_" not in page.replace("state_type", "")
@@ -1790,3 +1796,60 @@ def test_the_grader_reads_one_meters_plays_with_the_four_fields(tmp_path):
     # `meter` is a parameter for the reason it is a field on the mod side.
     assert [p["card"] for p in
             blindplay.meter_plays(summary["wire"], meter="charge")] == ["oath"]
+
+
+# ============================================================== EB-238 =====
+#
+# THE PAGE PRINTED NO RELIC ON A COMBAT SCREEN, and `KLEESPARK-BT1` §22.4 is
+# the bill: Klee's starter *Pounding Surprise* refunded the very Spark price
+# the round was registered to measure, in front of eight blind readers, none
+# of whom could see it. The relic row is on the HUD for the whole of a run;
+# it is on the page now for the same reason.
+
+POUNDING_SURPRISE = {
+    "id": "KLEEMOD-POUNDING_SURPRISE",
+    "name": "Pounding Surprise",
+    "description": ("Whenever a Bomb detonates, gain 1 Spark. Card rewards "
+                    "after a fight offer a fourth Companion choice."),
+    "counter": None,
+    "keywords": [],
+}
+
+
+def _klee_combat_state() -> dict:
+    """The recorded combat board, carrying Klee's starter relic."""
+    state = combat_state()
+    state["player"]["relics"] = [POUNDING_SURPRISE]
+    return state
+
+
+def test_the_combat_page_prints_the_run_s_relics():
+    """THE LOCK. The relic that refunded the price is on the combat page."""
+    page = blindplay.observe(_klee_combat_state())
+    assert "## Your relics" in page
+    assert "**Pounding Surprise**" in page
+    assert "Whenever a Bomb detonates, gain 1 Spark." in page
+
+
+def test_the_relic_line_carries_no_id_and_stays_blind():
+    """Printed name and printed hover text; the wire's id never lands."""
+    obs = blindplay.observation(_klee_combat_state())
+    assert obs["combat"]["you"]["relics"] == [
+        {"name": "Pounding Surprise",
+         "text": POUNDING_SURPRISE["description"]}]
+    page = blindplay.render(obs)
+    assert "KLEEMOD" not in page and "POUNDING_SURPRISE" not in page
+
+
+def test_a_relic_counter_is_printed_only_when_the_icon_draws_one():
+    """`counter` is null on most relics and a number on a few; both render."""
+    state = _klee_combat_state()
+    state["player"]["relics"] = [dict(POUNDING_SURPRISE, counter=4)]
+    assert "(4)" in blindplay.observe(state)
+
+
+def test_a_run_with_no_relics_prints_no_relic_block():
+    """Absent where there is nothing, like every other block on this page."""
+    state = combat_state()
+    state["player"]["relics"] = []
+    assert "## Your relics" not in blindplay.observe(state)

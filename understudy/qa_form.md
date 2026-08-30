@@ -36,7 +36,8 @@ reads it.
   "q2_other_line_considered": "...",
   "q3_what_it_gave_up": "...",
   "q4_different_intent": "...",
-  "q4_changed": true
+  "q4_changed": true,
+  "forecast": ["0", "3", "0"]
 }
 ```
 
@@ -55,6 +56,32 @@ reads it.
 | `choose` | optional, per play: if the card asked to **choose one**, the printed text of the option taken, exactly as the card prints it (`"Deal 14 damage"`) |
 | `q1`–`q4` | the four answers, in prose |
 | `q4_changed` | the fourth answer as a boolean, so a refusal cannot hinge on parsing prose. `false` REFUSES the form; so does a `q4` that reads as a flat "no" |
+| `forecast` | OPTIONAL, and required only where the packet printed a **Before you decide** block. One answer per numbered question, in that order, written **before** the line is chosen. A board that asks and gets fewer answers than questions is REFUSED `forecast_missing` |
+
+## The forecast, where a board asks for one (`EB-236` (d), `EB-229`'s twin)
+
+The four questions above are all **past tense**: they ask what you played and
+what you gave up. A registration that wants to know what a reader **expected**
+has nowhere to put it, and that is why `KURAGEMEM002` graded three of its
+slots UNREACHED — not because the display failed, but because the question was
+never asked.
+
+So a board may register a short list of questions, printed at the **top** of
+the packet under **Before you decide**, numbered. Answer them there and then,
+before you settle on a line, and write the answers into `forecast` in the same
+order — one entry per question, a bare number where the question asks for one.
+A forecast collected after the line is a rationalisation, which is the whole
+reason for the position on the page.
+
+Most boards ask for none, print no such block, and are graded exactly as they
+always were.
+
+The two seats answer through a STRICT reply schema (`understudy/seat.py`'s
+`form_schema()`, printed into the local tester's prompt as well), so there
+`forecast` is nullable-and-REQUIRED on the same rule as `target`: `null` or
+`[]` says "this board asked for none". A hand-written form may still omit the
+key entirely. `KLEESPARK-BT2` refused all six of its forms `forecast_missing`
+because that schema had no such property at all (`EB-239`).
 
 A line is **replayed on the live game** after it is graded, so a choice the
 form does not state is a choice the replayer cannot make: it stops at the

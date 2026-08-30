@@ -1,0 +1,103 @@
+{
+ "round": "klee-sparks-bt2r",
+ "seat_mode": "shadow",
+ "turns": [
+  "klee-sparks-bt2r-t02",
+  "klee-sparks-bt2r-t01",
+  "klee-sparks-bt2r-t03"
+ ],
+ "unrun": [],
+ "unreached": [],
+ "unreached_note": "a board that staged fewer bodies than it declared is UNREACHED on the slots whose predicate counts enemies, and contributes no grade to them. It was still read, graded and replayed for its other slots (EB-208)",
+ "replays": [
+  {
+   "turn_id": "klee-sparks-bt2r-t02",
+   "replayed": false,
+   "form": "",
+   "why": "shadow mode: the deciding (fresh-Opus) form has not been taken yet, and the shadow read is never replayed"
+  },
+  {
+   "turn_id": "klee-sparks-bt2r-t01",
+   "replayed": false,
+   "form": "",
+   "why": "shadow mode: the deciding (fresh-Opus) form has not been taken yet, and the shadow read is never replayed"
+  },
+  {
+   "turn_id": "klee-sparks-bt2r-t03",
+   "replayed": false,
+   "form": "",
+   "why": "shadow mode: the deciding (fresh-Opus) form has not been taken yet, and the shadow read is never replayed"
+  }
+ ],
+ "read_workers": 1,
+ "registered_order": [
+  "klee-sparks-bt2r-t02",
+  "klee-sparks-bt2r-t01",
+  "klee-sparks-bt2r-t03"
+ ],
+ "read_completion_order": [
+  "klee-sparks-bt2r-t02",
+  "klee-sparks-bt2r-t01",
+  "klee-sparks-bt2r-t03"
+ ],
+ "order_note": "R221 B's stopping rule is applied in the PRE-REGISTERED order and only after the whole first set is graded. `read_completion_order` is the order the model finished in and is recorded so the two can be seen not to have influenced each other; with read_workers 1 they are the same list",
+ "seat_review_owed": [
+  {
+   "turn_id": "klee-sparks-bt2r-t02",
+   "reasons": [
+    "spot_check"
+   ],
+   "command": "python -m understudy.seat grade klee-sparks-bt2r-t02"
+  },
+  {
+   "turn_id": "klee-sparks-bt2r-t01",
+   "reasons": [
+    "spot_check"
+   ],
+   "command": "python -m understudy.seat grade klee-sparks-bt2r-t01"
+  },
+  {
+   "turn_id": "klee-sparks-bt2r-t03",
+   "reasons": [
+    "spot_check"
+   ],
+   "command": "python -m understudy.seat grade klee-sparks-bt2r-t03"
+  }
+ ],
+ "agreement": {
+  "rule": "R221 A: agreement is counted per TURN, on the verdict -- SURVIVES against SURVIVES or REFUSED against REFUSED. It is not a prose comparison and does not pretend to be one",
+  "turns": [
+   {
+    "turn_id": "klee-sparks-bt2r-t02",
+    "shadow_grader": "local-qwen3-8-27b-ud-q4-k-xl",
+    "shadow_verdict": "SURVIVES",
+    "deciding_grader": "",
+    "deciding_verdict": "",
+    "comparable": false,
+    "agree": false
+   },
+   {
+    "turn_id": "klee-sparks-bt2r-t01",
+    "shadow_grader": "local-qwen3-8-27b-ud-q4-k-xl",
+    "shadow_verdict": "REFUSED",
+    "deciding_grader": "",
+    "deciding_verdict": "",
+    "comparable": false,
+    "agree": false
+   },
+   {
+    "turn_id": "klee-sparks-bt2r-t03",
+    "shadow_grader": "local-qwen3-8-27b-ud-q4-k-xl",
+    "shadow_verdict": "REFUSED",
+    "deciding_grader": "",
+    "deciding_verdict": "",
+    "comparable": false,
+    "agree": false
+   }
+  ],
+  "compared": 0,
+  "agreed": 0,
+  "criterion_owner": "M62 -- the criterion that retires the fresh-Opus control is [USER]'s and is not set here"
+ },
+ "written_at": "2026-08-30T20:42:11Z"
+}

@@ -21,8 +21,9 @@ from pathlib import Path
 
 import pytest
 
-from understudy import (local_tester, qualify, resource_order, slot_plan,
-                        staged_turn, targeting)
+from understudy import (local_seat, local_tester, qa_packet, qualify,
+                        resource_order, seat, slot_plan, staged_turn,
+                        targeting)
 
 REPO = Path(__file__).resolve().parents[2]
 QA = REPO / "review" / "qa"
@@ -574,3 +575,323 @@ def test_the_preregistered_order_covers_every_r2_slot_twice():
         "klee-sparks-r2-t06", "klee-sparks-r2-t04", "klee-sparks-r2-t02",
         "klee-sparks-r2-t03", "klee-sparks-r2-t05"]
     assert [r["turn_id"] for r in rest] == ["klee-sparks-r2-t01"]
+
+
+# ============================================================== EB-237 =====
+#
+# THE LOCK IS WRITTEN ON `KLEESPARK-BT1`'s OWN COMMITTED BOARD, not on a
+# fixture: the defect was invisible to every check the round ran, and a lock
+# on a board I invented would be a lock on the sentence I wrote. The boards
+# and `slots.yaml` of that closed round are read-only inputs here (R101b);
+# nothing in this file writes into them.
+
+BT1 = REPO / "understudy" / "turns" / "klee-sparks-bt1"
+
+
+def _bt1(turn_id: str):
+    return staged_turn.load(BT1 / f"{turn_id}.yaml")
+
+
+def test_the_mode_head_price_is_in_t01s_plan():
+    """THE LOCK. *Bag of Tricks* prices 3 at a mode head, and the plan says so.
+
+    Before `EB-237` `_spark_prices` read a top-level `spend_spark` and
+    nothing else, so the row the whole round was about priced nothing as far
+    as every fact below could see: `affordable_spark_uses` read 0 on a board
+    holding a priced mode the bank could pay exactly.
+    """
+    turn = _bt1("t01")
+    assert slot_plan._spark_prices(turn) == [3]
+    assert slot_plan.FACTS["spark_use_count"](turn) == 1
+    assert slot_plan.FACTS["affordable_spark_uses"](turn) == 1
+    assert slot_plan.FACTS["min_spark_price"](turn) == 3
+    assert slot_plan.FACTS["affordable_spark_price_sum"](turn) == 3
+
+
+def test_t02s_two_sinks_are_both_counted():
+    """`t02` swaps in Firework Finale: two priced uses, both at 3."""
+    turn = _bt1("t02")
+    assert slot_plan._spark_prices(turn) == [3, 3]
+    assert slot_plan.FACTS["affordable_spark_uses"](turn) == 2
+    assert slot_plan.FACTS["affordable_spark_price_sum"](turn) == 6
+
+
+def test_a_bank_below_the_mode_price_affords_nothing():
+    """`t03`'s bank of 2 reaches neither the mode nor anything else."""
+    turn = _bt1("t03")
+    assert slot_plan._spark_prices(turn) == [3]
+    assert slot_plan.FACTS["affordable_spark_uses"](turn) == 0
+
+
+def test_only_a_mode_head_counts_and_nothing_nested():
+    """R225's clause is the whole rule: the HEAD of a mode, and no deeper.
+
+    A `spend_spark` sitting second in a mode's effect list is nested by
+    construction, and admitting it would turn this into a search for any
+    spend anywhere in a row.
+    """
+    head = {"effects": [{"op": "choose_one", "modes": [
+        {"effects": [{"op": "spend_spark", "amount": 2},
+                     {"op": "damage", "amount": 9}]}]}]}
+    nested = {"effects": [{"op": "choose_one", "modes": [
+        {"effects": [{"op": "damage", "amount": 9},
+                     {"op": "spend_spark", "amount": 2}]}]}]}
+    assert slot_plan.card_spark_prices(head) == [2]
+    assert slot_plan.card_spark_prices(nested) == []
+
+
+# ============================================================== EB-236 =====
+#
+# THE LOCK IS ON `KLEESPARK-BT1`'s `t02`, UNEDITED. That board's header
+# declares, in prose, that "the bank of 3 now buys EXACTLY ONE of two things
+# -- the card's priced mode, or the whole of another card", and the shipped
+# world buys both three plays later because Klee's starter relic refunds one
+# Spark per detonated Bomb. The board file is the committed record of a run
+# and graded round and stays exactly as registered (R101b), so the CLAIM it
+# made in prose is supplied here, in the machine-readable shape a board
+# writes it in today, and the check is run against the board as it stands.
+
+# `t02`'s header sentence, as a `resource_round:` block would say it.
+BT1_T02_CLAIM = slot_plan.ResourceRound(
+    claim="the bank of 3 buys EXACTLY ONE of two things",
+    exclusive=[slot_plan.Use("proto_spark_mode_bombs", 2),
+               slot_plan.Use("proto_spark_finisher")])
+
+
+def test_bt1s_declined_half_is_bought_by_a_sequence_it_never_registered():
+    """THE LOCK. The both-buyable order is found, and it is THE order.
+
+    Priced mode (bank 3 -> 0, three Bombs), a detonator (the relic pays one
+    Spark per Bomb, bank 0 -> 3), the rival sink (bank 3 -> 0). 15 + 18.
+    """
+    orders = slot_plan.buying_orders(_bt1("t02"), BT1_T02_CLAIM)
+    assert orders, "the exclusive pair is bought by no order at all"
+    assert ["proto_spark_mode_bombs (mode 2)", "quick_fuse",
+            "proto_spark_finisher"] in orders
+
+
+def test_the_refund_is_what_buys_the_second_half():
+    """Take the relic away and the same board's claim holds.
+
+    Not a board this repo has -- a control, so the finding is attributed to
+    the relic and not to the arithmetic being wrong somewhere else.
+    """
+    without = slot_plan.ResourceRound(
+        claim=BT1_T02_CLAIM.claim, exclusive=list(BT1_T02_CLAIM.exclusive),
+        relic_hooks=[])
+    assert slot_plan.buying_orders(_bt1("t02"), without) == []
+
+
+@pytest.mark.parametrize("turn_id", ["t01", "t02", "t03", "t04"])
+def test_every_bt1_board_lets_the_energy_pay_for_the_whole_hand(turn_id):
+    """The weaker half, and it is the round's RETURN.
+
+    One enemy, a fixed telegraph, three Energy and at most two Energy-costed
+    cards: the whole hand is always playable, so the telegraph forces no
+    trade and question four is honestly answered "no".
+    `intent_insensitive` refused SEVEN OF EIGHT forms on this construction.
+    """
+    turn = _bt1(turn_id)
+    assert slot_plan.hand_is_wholly_playable(turn)
+    assert any("no_forced_trade" in f
+               for f in slot_plan.board_design_findings(turn))
+
+
+def test_an_exclusive_pair_of_one_is_refused_rather_than_read():
+    """One use is not a claim about anything."""
+    with pytest.raises(slot_plan.BoardDesignError) as exc:
+        slot_plan.parse_resource_round({"exclusive": [{"card": "kaboom"}]})
+    assert "TWO OR MORE" in str(exc.value)
+
+
+def test_a_pair_naming_a_card_that_is_not_in_hand_is_refused():
+    """A claim about a card the board does not hold is not a claim."""
+    spec = slot_plan.ResourceRound(
+        exclusive=[slot_plan.Use("proto_spark_finisher"),
+                   slot_plan.Use("proto_spark_blast")])
+    with pytest.raises(slot_plan.BoardDesignError):
+        slot_plan.buying_orders(_bt1("t02"), spec)
+
+
+# ------------------------------ EB-236, on the REPAIRED round -------------
+
+BT2 = REPO / "understudy" / "turns" / "klee-sparks-bt2"
+
+
+def _bt2_turns() -> list:
+    return [staged_turn.load(p) for p in sorted(BT2.glob("t*.yaml"))]
+
+
+def test_the_repaired_boards_pass_the_check():
+    """THE OTHER HALF OF THE LOCK: `KLEESPARK-BT2` is clean.
+
+    Its `t02` claims the same exclusivity `KLEESPARK-BT1`'s `t02` did and
+    HOLDS it, because the only Attack in that hand is the rival sink itself
+    and it has to be paid for before it can pop anything.
+    """
+    turns = _bt2_turns()
+    assert [t.id for t in turns] == ["klee-sparks-bt2-t01",
+                                     "klee-sparks-bt2-t02",
+                                     "klee-sparks-bt2-t03"]
+    assert slot_plan.check_board_design(turns) == []
+
+
+def test_the_repaired_exclusive_board_declares_its_claim_in_the_file():
+    """A claim that lives only in a header comment is what BT1 shipped."""
+    turn = next(t for t in _bt2_turns() if t.id == "klee-sparks-bt2-t02")
+    spec = turn.resource_round
+    assert spec.exclusive == [slot_plan.Use("proto_spark_mode_bombs", 2),
+                              slot_plan.Use("proto_spark_finisher")]
+    assert slot_plan.buying_orders(turn, spec) == []
+
+
+def test_the_repaired_rounds_ceilings_read_the_mode_price():
+    """`EB-237` is what lets these predicates say what they mean."""
+    turns = _bt2_turns()
+    rows = {r["slot"]: r for r in
+            slot_plan.reachability(slot_plan.load_slots(BT2), turns)}
+    assert rows["C1"]["threshold"] == 2
+    assert rows["C1"]["qualifying"] == ["klee-sparks-bt2-t01",
+                                        "klee-sparks-bt2-t02"]
+    assert rows["C2"]["threshold"] == 1
+    assert rows["C2"]["qualifying"] == ["klee-sparks-bt2-t03"]
+    assert slot_plan.refusals(rows.values()) == []
+
+
+# ------------------------------------------- EB-236 (d): the forecast ------
+
+def test_the_forecast_is_asked_at_the_top_of_the_page_and_counted():
+    """`EB-229`'s staged twin: a field to count, asked BEFORE the line.
+
+    The schema carried nothing of the sort -- a form is four PAST-TENSE
+    questions -- so a registration that wanted a prediction had nowhere to
+    put it, and `KURAGEMEM002` graded three slots UNREACHED for exactly that
+    reason: not because the display failed but because the question was
+    never asked.
+    """
+    turn = next(t for t in _bt2_turns() if t.id == "klee-sparks-bt2-t01")
+    assert len(turn.forecast) == 3
+    packet = qa_packet.build(
+        {"state_type": "battle",
+         "player": {"hp": 42, "max_hp": 62, "block": 0, "energy": 3,
+                    "hand": [], "status": [], "relics": []},
+         "battle": {"round": 4, "enemies": []}},
+        turn.id, forecast=list(turn.forecast))
+    page = qa_packet.render(packet)
+    assert "## Before you decide" in page
+    assert page.index("## Before you decide") < page.index("## Your hand")
+    # A form that skips it is answering a different board.
+    base = {"grader": {"id": "x"}, "chosen_line": [{"card": "Kaboom!"}],
+            "q1_what_did_you_play": "a", "q2_other_line_considered": "b",
+            "q3_what_it_gave_up": "c", "q4_different_intent": "yes"}
+    assert "forecast_missing" in staged_turn.apply_falsifiers(
+        turn.id, base, packet_sha=None, closeness=None, forecast_asks=3)
+    answered = dict(base, forecast=["0", "3", "0"])
+    assert "forecast_missing" not in staged_turn.apply_falsifiers(
+        turn.id, answered, packet_sha=None, closeness=None, forecast_asks=3)
+    # And a board that asks nothing is graded exactly as it was before.
+    assert staged_turn.apply_falsifiers(
+        turn.id, base, packet_sha=None, closeness=None) == []
+
+
+def test_the_next_turn_reading_is_opt_in_and_ends_the_turn():
+    """`EB-236` item (e). A delayed refund needs one more reading."""
+    sit = next(t for t in _bt2_turns() if t.id == "klee-sparks-bt2-t03")
+    now = next(t for t in _bt2_turns() if t.id == "klee-sparks-bt2-t01")
+    form = {"chosen_line": [{"card": "Bag of Tricks"}]}
+    assert sit.replay_next_turn and not now.replay_next_turn
+    verbs = [v for v, _ in staged_turn.execute_steps(sit, form)]
+    assert verbs[-2:] == ["end_turn", "read"]
+    assert "end_turn" not in [v for v, _ in staged_turn.execute_steps(now, form)]
+
+
+# --------------------- EB-239: the forecast's FORM half, and its lock ------
+
+def _strict_schema_refusals(schema: dict, blob: dict) -> list[str]:
+    """A minimal reader of the ONE schema rule this lock is about.
+
+    `form_schema()` is handed to codex as `--output-schema` and printed into
+    the local tester's prompt, and both enforce it strictly: a key that is
+    not a declared property may not appear, and every `required` key must.
+    There is no `jsonschema` in this environment, so the rule is read here
+    rather than imported -- and it is read the way the two seats read it,
+    which is all this lock needs to say.
+    """
+    bad = []
+    if schema.get("additionalProperties") is False:
+        bad += [f"undeclared:{k}" for k in blob
+                if k not in schema["properties"]]
+    bad += [f"missing:{k}" for k in schema.get("required", [])
+            if k not in blob]
+    return sorted(bad)
+
+
+def _bt2_answered_form() -> dict:
+    """`KLEESPARK-BT2`'s own `t01` reply, as it would have had to be written
+    to answer the three questions the page printed."""
+    return {
+        "turn_id": "klee-sparks-bt2-t01",
+        "packet_sha256": "0" * 64,
+        "grader": {"id": "x", "kind": "llm", "model": "m",
+                   "designed_these_cards": False},
+        "chosen_line": [{"card": "Bag of Tricks", "target": "Seapunk",
+                         "exhaust": None,
+                         "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."}],
+        "q1_what_did_you_play": "a", "q2_other_line_considered": "b",
+        "q3_what_it_gave_up": "c", "q4_different_intent": "yes",
+        "q4_changed": True,
+        "forecast": ["0", "3", "0"],
+    }
+
+
+def test_the_reply_schema_can_carry_a_forecast():
+    """`EB-239`. `KLEESPARK-BT2` refused all six of its forms
+    `forecast_missing` (§24.4) because the packet asked a question the REPLY
+    had no field to answer into: `form_schema()` was strict, nine named
+    properties, and `forecast` was not one of them. Declared, not loosened --
+    `additionalProperties` stays `False` and the field joins `target` on the
+    nullable-and-required rule.
+
+    Seen to FAIL before the fix: the answered form below was refused
+    `undeclared:forecast` by the seat's own schema, which is exactly the
+    reply codex was not allowed to emit.
+    """
+    schema = seat.form_schema()
+    assert schema["additionalProperties"] is False
+    assert schema["properties"]["forecast"]["type"] == ["array", "null"]
+    assert "forecast" in schema["required"]
+    assert _strict_schema_refusals(schema, _bt2_answered_form()) == []
+    # A board that asks nothing still has somewhere to say so.
+    assert _strict_schema_refusals(
+        schema, dict(_bt2_answered_form(), forecast=None)) == []
+
+
+def test_a_form_that_omits_the_forecast_is_still_refused_on_an_asking_board():
+    """The other half of the same lock: declaring the field must not make
+    the falsifier stop biting. `EB-236` item (d)'s refusal is what makes the
+    forecast a PRE-commitment rather than a courtesy."""
+    form = dict(_bt2_answered_form())
+    form.pop("forecast")
+    assert _strict_schema_refusals(seat.form_schema(), form) == [
+        "missing:forecast"]
+    assert "forecast_missing" in staged_turn.apply_falsifiers(
+        "klee-sparks-bt2-t01", form, packet_sha=None, closeness=None,
+        forecast_asks=3)
+    # And short counts, not just absent ones.
+    short = dict(_bt2_answered_form(), forecast=["0", ""])
+    assert "forecast_missing" in staged_turn.apply_falsifiers(
+        "klee-sparks-bt2-t01", short, packet_sha=None, closeness=None,
+        forecast_asks=3)
+    assert "forecast_missing" not in staged_turn.apply_falsifiers(
+        "klee-sparks-bt2-t01", _bt2_answered_form(), packet_sha=None,
+        closeness=None, forecast_asks=3)
+
+
+def test_the_local_tester_reads_the_same_schema_as_the_codex_seat():
+    """One schema, two seats: `local_seat` prints `seat.form_schema()` into
+    its prompt verbatim, which is why `KLEESPARK-BT2`'s shadow chair was
+    refused for the same structural reason as the deciding one -- and why
+    one fix repairs both."""
+    prompt = local_seat.build_grade_prompt("PACKET", "0" * 64)
+    assert '"forecast"' in prompt
+    assert json.dumps(seat.form_schema(), indent=1) in prompt

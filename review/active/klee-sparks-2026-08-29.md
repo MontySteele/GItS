@@ -5870,6 +5870,21 @@ no re-price, and this round did not even produce a MISS — it produced three
 UNREACHED. **Nothing here re-prices the 3, re-words the row, re-reads R225's
 clause, or moves any LAW line.**
 
+> **RULED (R229, 2026-08-30): option (1), QUALIFIED.** The starter relic stays
+> and the round is re-posed in the SHIPPED world, but *"accept the refund"*
+> means accept it as an observed TEST CONDITION, not as approval of the card's
+> design — the arm is AT RISK, not presumptively advancing. A RETURN CONDITION
+> is PRE-REGISTERED before `KLEESPARK-BT2` is drafted: if immediate detonation
+> restores enough bank to play the competing sink, or the price otherwise
+> imposes no meaningful opportunity cost across the turn and the next, the arm
+> RETURNS TO DESIGN rather than advancing unchanged. The ruling's evidence is a
+> consequence §22.4 did not draw: `t02`'s header prices the bank of 3 as buying
+> exactly ONE of two things, but in the shipped world *priced mode → Quick Fuse
+> → Firework Finale* buys BOTH (15 + 18, not 15-versus-23), so the price is
+> collateral — it gates the play at 3 and usually consumes nothing. The full
+> record, the qualification and the repaired round's five required contents are
+> in `review/active/sitting-2026-08-30.md` §R229.
+
 A second item is engineering rather than a decision and is reported to
 `BACKLOG` rather than to [USER]: the board-construction rule §22.4 item 2 names,
 and `slot_plan`'s blindness to a mode-head price (§21.8). Both are candidates;
@@ -5882,3 +5897,772 @@ price, or anything comparable to any run (Guardrail-7, R215 B). It does not
 discharge `EB-224`'s acceptance line, which asks for the arm graded, replayed
 **and** its whole fight run: one board of four was replayed, and the whole
 fight is untouched.
+
+
+## 23. `KLEESPARK-BT2` — the repaired *Bag of Tricks* round, under R229's return condition
+
+**REGISTERED — NOT RUN; Claude drafts (R212 item 2), [USER] countersigns in
+batch.** The three boards, `slots.yaml`, `MANIFEST.md` and the slate below
+were committed **before anything was staged, deployed or read**. Nothing here
+has been run: no board staged, no game launched, no Codex call spent. The
+machine-readable half is `understudy/turns/klee-sparks-bt2/`; the round this
+one repairs is §21 (registration) and §22 (results).
+
+### 23.1 Why this round exists, and what R229 settled
+
+§22.4 item 1 found, off `t01`'s replay, that the priced mode **refunded its own
+price inside the same turn** — bank 3 → 0 on the mode, **3 again** after the
+detonator. Klee's starter relic *Pounding Surprise* pays **+1 Spark per Bomb
+detonated** (`klee-mod/KleeCode/Relics/PoundingSurprise.cs`; the sim's twin is
+the `spark_on_detonation` hook, `tier0/engine/effects.py:874`) and the priced
+mode places exactly three Bombs. The registration had not controlled for it,
+and the blind page printed no relics at all, so no reader could see it.
+
+**R229, in three parts.** *Bag of Tricks* **stays under test in the SHIPPED
+world** — the starter relic is kept. The refund is accepted as an **observed
+TEST CONDITION and not a design approval**; nothing about it licenses a
+re-price. And the arm is **AT RISK under a pre-registered RETURN CONDITION**,
+written at §23.4 as a graded predicate with its numbers.
+
+**Three engineering rows were closed first, and each of them is why this round
+can be written honestly.**
+
+- **`EB-238`** — the blind page printed relics only where one is OFFERED. Both
+  surfaces now print the run's relics: the combat page's header and, more to
+  the point, the STAGED packet, which is the page `KLEESPARK-BT1`'s eight forms
+  actually read. Printed name and printed hover text, nothing the shipped game
+  does not show the player (R217).
+- **`EB-237`** — `slot_plan._spark_prices` read a top-level `spend_spark` and
+  nothing else, so the row under test priced nothing as far as every ceiling
+  and predicate could see. It now reads R225's amended clause in full: the top
+  level **or** the head of a `choose_one` mode, and nothing nested. §22 could
+  only write its predicates about the OTHER cards in hand; this round's
+  `slots.yaml` says what it means.
+- **`EB-236`** — a board-design check for resource rounds, in the STRONG form
+  GPT asked for and R229 adopted: not *"are the two prices greater than the
+  bank"* but *"can **any order of play**, counting every relic-triggered gain
+  along the way, pay for all of them"*. It refuses `KLEESPARK-BT1`'s `t02` on
+  the exact sequence, and all four of that round's boards on the weaker half.
+
+### 23.2 The three boards
+
+Body 55 HP on all three, no lethal line, every seed a `KLEESPARK-BT1` seed
+recorded ONE-BODY on a Klee run. **Every hand costs 4 Energy against 3**, which
+is the thing that round never did: its four boards all let 3 Energy pay for the
+whole hand, so the telegraph forced no trade and `intent_insensitive` refused
+**seven of its eight forms** (§22.4 item 2).
+
+| turn | seed | bank | HP | hand | what the board is | slot |
+|---|---|---|---|---|---|---|
+| `t01` | `JH4T8MSN10KS` | **3** | 42/62 | Bag of Tricks, **Kaboom!**, Firework Finale, Duck and Cover, Spirited Away | **A** — the exact *priced mode → ordinary Attack → rival price-3 sink* sequence: 3 → 0 → 3 → 0, for 7 + 15 + 18. **The return-condition board.** | `C1` |
+| `t02` | `R805DJ56LZHM` | **3** | 42/62 | Bag of Tricks, Firework Finale, Mine Toss, Duck and Cover, Spirited Away | **B** — §21's `t02` REPAIRED: the same exclusivity claim, and this time no order of play buys both | `C1` |
+| `t03` | `YX7PB48WR7R4` | **3** | **24**/62 | Bag of Tricks, Mine Toss, Duck and Cover, Spirited Away, Run Away! | **C** — no Attack and no detonator, so three Bombs SIT: a delayed refund against a telegraphed 16 into 24 HP, and the next turn's bank is read | `C2` |
+
+**The detonator is an ORDINARY ATTACK and not *Quick Fuse*.** §21 put a free
+single-purpose `detonate` in three of four hands, which makes the refund read
+as a property of one strange card. It is not: any Attack that gets HP damage
+through pops the target's Bombs (`_detonate_bombs_on_hit`; the C# twin is
+`Powers/BombPower.cs` with `IBombDetonationListener`). `t01`'s detonator is
+Kaboom!, a basic card in the starting deck, and there is no Quick Fuse in this
+round at all.
+
+**Why `t02`'s claim holds where §21's did not.** The only Attack in that hand
+is *Firework Finale* itself, and it must be paid for before it can pop
+anything. Priced mode first → bank 0 and three Bombs nothing can detonate.
+Finale first → bank 0, and its 18 lands on a body carrying at most Mine Toss's
+one Bomb, so the relic pays at most 1 and the bank reaches 1, not 3. `EB-236`
+walks every order and finds none that buys both.
+
+**`C1` ceiling 2 / threshold 2, `C2` 1 / 1**, computed by `local_tester round
+--plan-only` over these three boards before staging, which also printed *board
+design: every board forces a trade, and every declared exclusive pair is
+exclusive*. `--first 0`: every board runs, because each is the only one of its
+kind.
+
+### 23.3 The forecast — a pre-commit question, and it is new machinery
+
+`EB-229` found `KURAGEMEM002`'s forecast slots UNREACHED **not because the
+display failed but because the question is never asked**: a blind run's reply
+schema is `command` and `thinking`, and the staged form's four questions are
+all past tense. **This round is the STAGED TWIN of that row, and the twin is
+built here.**
+
+A turn file may now carry `forecast:` — a short list of questions printed at
+the **top** of the blind packet under *Before you decide*, numbered, answered
+into the form's `forecast` list in the same order, **before** the line is
+chosen. A form that skips it where a board asked is REFUSED
+`forecast_missing`; a board that asks nothing prints no such block and is
+graded exactly as before. The questions are asked CONDITIONALLY (*"if you spend
+3 Sparks on Bag of Tricks…"*) so that asking them does not recommend a line,
+and they go through the packet's own leak scrub like every other printed
+string. **`EB-229` itself stays open**: this is the staged half, and a blind
+RUN's reply schema is untouched.
+
+`replay_next_turn: true` on `t03` makes the replay **end the turn after the
+graded line and take one more reading**. A staged single turn has no next turn
+(§11.6 item 1), which is why §22 could say nothing about a delayed refund;
+this buys exactly one turn of it.
+
+### 23.4 The slate — five slots, and the return condition among them
+
+Full text in `understudy/turns/klee-sparks-bt2/MANIFEST.md`.
+
+| slot | board | prediction | threshold | falsifier |
+|---|---|---|---|---|
+| `F1` | `t01` | the deciding line plays the priced mode, an Attack, and Firework Finale in one turn, **and** the replay reads bank **0** after the mode and **≥ 3** after the Attack | 1 of 1 | the bank does not reach 3 again; or the line cannot pay for both |
+| `F2` | `t03` | where the replayed line takes the priced mode: the third answer names a concrete thing this turn gave up, **and** the next-turn reading shows the bank back at **3** | 1 of 1 | no cost named; or a next-turn bank other than 3 |
+| `F3` | `t02` | the deciding line pays for **exactly one** of the two priced uses, and the second answer names the other as declined | 1 of 1 | both paid in one turn; or the second answer names neither |
+| `F4` | all three | every deciding form carries a full `forecast`; none is refused `forecast_missing` | 3 of 3 | a missing or short forecast on any board |
+| `F5` | `t01` | where the line takes the priced mode: the first forecast answer reads **0** and the second reads **3** | 1 of 1 | either number wrong |
+
+> **THE PRE-REGISTERED RETURN CONDITION (R229), AS A GRADED PREDICATE.**
+> `F1` and `F2` are ONE finding and are read together.
+>
+> **The arm RETURNS TO DESIGN if EITHER**
+> **(a) `F1` is PREDICTED — the bank reads ≥ 3 again after the detonation, on
+> the same turn, and the reader pays for both priced uses; OR**
+> **(b) `F2`'s form names NO cost given up AND `F2`'s next-turn bank reads 3.**
+>
+> (a) is R229's *"immediate detonation restores enough bank to play the
+> competing sink"* — **3** is the competing sink's exact price and is the
+> number. (b) is *"the price otherwise imposes no meaningful opportunity cost
+> across the turn and the next"* — the bank comes back one turn later and the
+> reader can name nothing it cost. Either alone RETURNS the arm; both is the
+> strongest form and is reported as one finding, not two.
+
+**Refusals and absences, ruled in advance.** A REFUSED deciding form grades its
+slot **UNREACHED**, not MISSED (`EB-209`). `F1`, `F2` and `F5` are UNREACHED —
+never PREDICTED — where the replayed line does not reach the play they are
+about; absence of a counterexample is not a pass. Any slot UNREACHED is not a
+pass and not a fail, and no [USER] row opens on it.
+
+**A MISS on `F3` is an INSTRUMENT finding, not a design one:** `EB-236` says no
+order of play buys both on that board, so a form that does is a defect in the
+check or in the build, filed to `BACKLOG`, and it blocks `EB-224`'s whole
+fight until fixed. **A MISS on `F5` is a LEGIBILITY finding** — the page shows
+the relic and the reader still could not do the arithmetic — also to `BACKLOG`.
+
+### 23.5 What a MISS does NOT license
+
+**A MISS licenses nothing on its own.** It does NOT license a re-price of the
+mode's 3, a change to §4.2's price table, a new sink row (R225), any amendment
+to or re-reading of R225's mode-head clause, the removal or suppression of
+*Pounding Surprise*, any LAW or measurement-law change, or any claim about win
+rate, balance or fun (R215 B, Guardrail-7). **A RETURN under §23.4's condition
+returns the arm to [USER] as a numbered pick list; it does not itself move a
+number, and Claude picks nothing on it.**
+
+### 23.6 Who grades, and what it costs
+
+**The Codex seat decides every board** (`--seat-spot-check 1`): a DESIGN round
+on which an ADVANCE rests, so `M64` (1) / R224 puts the deciding chair there
+on every board. **The local seat sits in the SHADOW chair** (`--seat-mode
+shadow`, R222 B) — read, graded, never deciding, never replayed.
+**Fresh-Opus is NOT seated**: R222 B seats it for INSTRUMENT rounds, the row is
+`authored_by: [claude]`, and a same-family deciding read would not be
+author-disjoint under R217 C.
+
+- **Plan: 3 deciding seat reads + 1 pair read = 4 Codex calls expected, cap 9**
+  (≈3 per board). Three boards is the minimum that carries the three distinct
+  questions — immediate refund, exclusive pair, delayed refund.
+- **The meter as this registration was drafted:** `5h 48%`, resetting **16:36
+  EDT**; the round is planned for after that reset, and the operator reads the
+  meter again immediately before it. `EB-227`'s guard refuses at **85%** of the
+  five-hour window and 50% of the week; if it refuses mid-round the round
+  **STOPS at that board** and the results record how many were read, rather
+  than finishing on a cheaper chair.
+- **Preconditions, each of which stops the round:** `gits-game.lock` absent;
+  Steam running; the installed dev build carrying the row, proven read-only off
+  the deployed `mods\klee\manifest.json` and the installed `klee.dll` before
+  anything is staged.
+
+### 23.7 What these boards still cannot do
+
+**The tier0 mirror cannot see a mode, and it cannot see the relic.**
+`closeness` enumerates CARD SETS and scores them through the pilot's own
+surface with no run layer, so neither the mode choice nor the refund is
+visible to it. All three boards SURVIVE at `DOMINANCE_GAP` 0.5 — `t01` gap
+0.0313 (38.3 / 37.1, 5 lines), `t02` 0.0194 (36.1 / 35.4, 5), `t03` 0.1174
+(40.9 / 36.1, 5) — and every one of those numbers bounds card sets and nothing
+this round is about.
+
+**One turn plus one reading is not a fight.** `loader._pool_substitutions`
+returns `{}` for Klee, so nothing here is picked by a drafter, and `t03` buys
+exactly ONE turn of the future. `EB-224`'s whole fight stays owed and this
+round does not touch it.
+
+**R217 G rides on everything this round will produce.** A tester's or a
+grader's words are one model's account, never validation and never balance
+evidence; Guardrail-7 stands on top of that, and nothing measured on a
+prototype row is quotable anywhere except the decision-closeness falsifier
+(R215 B).
+
+## 24. `KLEESPARK-BT2` — RUN AND GRADED
+
+Generated from the records by
+`python -m understudy.staged_turn packet-section klee-sparks-bt2` on
+2026-08-30. Every table in §24.1 is transcribed from
+`review/qa/klee-sparks-bt2-t*/` and `review/qa/ledger.tsv`; nothing there is
+re-graded and nothing is re-read (R101b).
+
+### 24.1 What actually ran — the session and the stamp
+
+Dev build **`0.2.1676+proto.dirty`**, read off the deployed
+`mods\klee\manifest.json`; game **`v0.111.0`**, read off `release_info.json`;
+world `r229-2026-08-30` @ `94e1a4a5`. **Nothing was deployed for this round** —
+the installed build already carried the row, proven read-only off both files
+before anything was staged (§23.6). The game lock was absent, Steam was
+running, and the meter read **`5h 48%` / week 26%** immediately before the
+round and **`5h 59%` / week 28%** immediately after; `EB-227`'s guard never
+refused.
+
+**3 boards run, 0 UNRUN, 6 forms graded, 0 lines replayed.**
+
+| turn | seed | grader | family | verdict | refused by | replay |
+|---|---|---|---|---|---|---|
+| `klee-sparks-bt2-t01` | `JH4T8MSN10KS` | `codex-gpt-5.6-sol-fresh` | gpt | **REFUSED** | `forecast_missing` | - |
+|  |  | `local-qwen3-8-27b-ud-q4-k-xl` | local | **REFUSED** | `forecast_missing` | - |
+| `klee-sparks-bt2-t02` | `R805DJ56LZHM` | `codex-gpt-5.6-sol-fresh` | gpt | **REFUSED** | `forecast_missing` | - |
+|  |  | `local-qwen3-8-27b-ud-q4-k-xl` | local | **REFUSED** | `forecast_missing` | - |
+| `klee-sparks-bt2-t03` | `YX7PB48WR7R4` | `codex-gpt-5.6-sol-fresh` | gpt | **REFUSED** | `target_missing`, `forecast_missing` | - |
+|  |  | `local-qwen3-8-27b-ud-q4-k-xl` | local | **REFUSED** | `forecast_missing` | - |
+
+**Every seed came back as requested on the first attempt** — no `EB-191`
+re-stage on any board — and **all three previously unverified `give_card` ids
+staged live**: `KLEEMOD-MINE_TOSS`, `KLEEMOD-SPIRITED_AWAY` and
+`KLEEMOD-RUN_AWAY` are in `t03`'s live hand at costs 1, 2 and 0. Nothing
+refused an id and the round never had to stop.
+
+**The funnel's own generic slot table reads `C1` and `C2` DECIDED under its
+convention that SURVIVES is PREDICTED and REFUSED is MISSED. That convention
+is NOT this round's slate** and grades nothing here: `C1`/`C2` are board
+COUNTING slots, and §23.4's `F1`–`F5` are the predictions.
+
+**What the round spent:** 3 Codex seat reads (the deciding chair, one per
+board) + 1 Codex pair read = **4 calls of a cap of 9**, exactly the plan.
+3 local tester reads in the shadow chair. 0 control reads — fresh-Opus is not
+seated in a design round (§23.6).
+
+### 24.2 The slate, graded mechanically
+
+**0 PREDICTED / 0 SPLIT / 1 MISS (`F4`) / 4 UNREACHED (`F1`, `F2`, `F3`,
+`F5`).**
+
+**`F1` UNREACHED.** `t01`'s deciding form was REFUSED, and a refused form is
+not replayed, so there is **no wire reading anywhere in this round** and the
+slot's own denominator produced nothing. Absence of a counterexample is not
+PREDICTED, exactly as registered.
+
+**`F2` UNREACHED.** `t03`'s deciding form was REFUSED twice over, no replay
+ran, and the `replay_next_turn` reading this round was built to buy **does not
+exist**. The delayed refund is exactly as unmeasured as it was after
+`KLEESPARK-BT1`.
+
+**`F3` UNREACHED.** `t02`'s deciding form was REFUSED.
+
+**`F4` MISSED at 0 of 3, and it is the round's finding.** Every deciding form
+carried **0 forecast answers against 3 questions asked**, on every board. `F4`
+is the one slot the UNREACHED rule does not swallow, because its registered
+falsifier *is* a `forecast_missing` refusal — "a missing or short forecast on
+any board" — and a slot whose falsifier can only ever grade UNREACHED would be
+unfalsifiable by construction. It is graded on its own falsifier and it is an
+INSTRUMENT reading, as registered.
+
+**`F5` UNREACHED**, by its own registered rule: `F4` was MISSED on `t01`.
+
+**Judgment, per slot: `F1` RETURN, `F2` RETURN, `F3` RETURN, `F4` RETURN,
+`F5` RETURN — 0 ADVANCE / 5 RETURN / 0 ESCALATE, overall RETURN, on the
+INSTRUMENT and not on the arm's design.** That is the same verdict
+`KLEESPARK-BT1` returned, for a different reason, and it is the second round
+in a row on which this arm has been asked a design question and has not been
+able to answer one.
+
+### 24.3 THE PRE-REGISTERED RETURN CONDITION — **IT DID NOT FIRE**
+
+R229's condition, read exactly as §23.4 wrote it:
+
+- **(a) is not satisfied.** `F1` is **UNREACHED, not PREDICTED**. The clause
+  requires the bank to read ≥ 3 again after the detonation *on the replay's
+  wire readings*, and no replay ran.
+- **(b) is not satisfied.** It is a conjunction — `F2`'s form names NO cost
+  **AND** `F2`'s next-turn bank reads 3 — and **both halves fail**: the form
+  did name a cost (below), and there is no next-turn bank reading at all.
+
+**The arm therefore does NOT return to design on this round.** It stays where
+R229 put it: **under test and AT RISK**, with the condition still standing and
+still unanswered. Nothing here licenses a re-price, a sheet move, a change to
+§4.2's price table, a re-reading of R225's mode-head clause, the removal of
+*Pounding Surprise*, or any claim about win rate, balance or fun (§23.5,
+R215 B, Guardrail-7). **No numbered pick list is owed**, because the condition
+that would have opened one did not fire.
+
+### 24.4 Why every form was refused — the instrument finding, stated plainly
+
+**The forecast machinery shipped one half of itself.** `EB-229`'s staged twin
+was built into the PACKET — `qa_packet` prints the numbered questions at the
+top of the page under *Before you decide*, and `staged_turn` refuses a form
+that carries fewer answers than questions. **The FORM half was never built.**
+`understudy/seat.py`'s `form_schema()` is a strict schema —
+`additionalProperties: false`, nine named properties, all of them `required` —
+and **`forecast` is not one of them**. The reply the seat is allowed to emit
+has no field to answer the question into. The local tester's schema has the
+same shape and the same gap.
+
+**Both readers answered the question anyway, in prose, in the wrong box**,
+which is the proof that the packet half works and the form half is what is
+missing:
+
+- `t02`, deciding form, Q1 opens: *"Forecast: 3; yes; 1. I used Bag of Tricks'
+  3-Spark option on Nibbit…"*
+- `t03`, deciding form, Q1 closes: *"My forecasts were: 0 Spark at the end of
+  this turn, 4 Spark at the start of next turn, and 25 damage dealt by then."*
+
+A forecast smuggled into a past-tense answer is not a pre-commitment and the
+falsifier is right to refuse it — but the refusal is a defect in the
+instrument this round shipped, not a reading about the reader. **This is
+`EB-229`'s other half and it is the round's owed engineering.** The staged
+twin cannot be graded until a form can carry a forecast.
+
+**The second refusal, `t03`'s `target_missing`,** is `EB-203`'s check doing its
+job: the deciding form played *Bag of Tricks* with no target, and the card
+aims at one enemy. It is independent of the forecast gap and would have
+refused that board on its own.
+
+### 24.5 Out of slot — recorded, and graded nowhere (R101b)
+
+**The evidence the round could not admit is exactly the evidence it was built
+to take.** All three of these are reader prose on REFUSED forms; none moves a
+slot, none is a measurement, and none is quoted anywhere as one.
+
+1. **`t01` — the same-turn refund, in the reader's own words.** The deciding
+   form's line is *Bag of Tricks* [priced mode] → Kaboom! → Firework Finale →
+   Spirited Away, and Q1 reads: *"I spent 3 Sparks with Bag of Tricks to place
+   three Bombs on Seapunk, played Kaboom! on Seapunk, **spent the Sparks gained
+   from the Bomb detonations** on Firework Finale targeting Seapunk."* The
+   shadow reader is more explicit still: *"the bombs detonating under
+   **Pounding Surprise** restore 3 Sparks, and Firework Finale spends those 3
+   Sparks for 18 damage."* That is `F1`'s predicate as prose. **It is not
+   `F1`'s evidence**: `F1` asks for the replay's wire readings, and no replay
+   ran. The arithmetic is the readers', unverified against the game.
+2. **`t02` — the exclusivity claim, contradicted on paper and not on the
+   wire.** The deciding line pays for BOTH priced uses — *Bag of Tricks*
+   [priced mode] → Firework Finale → Mine Toss → Duck and Cover — on the board
+   `EB-236` certified as having no order of play that buys both, and its Q2
+   names *Spirited Away* rather than either priced use as the declined line.
+   Read on paper the line is unpayable: the mode takes the bank to 0, and
+   Firework Finale must be PAID before it can detonate anything. **Whether the
+   game would have refused it is exactly what a replay would have shown, and
+   no replay ran.** So this is not `F3`'s MISS and not `EB-236`'s
+   counterexample; it is an unresolved reading, and it is the first thing the
+   repaired round should settle.
+3. **`t03` — a cost was named.** Q3: *"It gave up 12 additional Block from
+   Spirited Away."* That is half of `F2`'s predicate, and it is the half that
+   made `(b)` fail rather than fire.
+
+### 24.6 What `EB-238` bought, and one thing it exposed
+
+**`EB-238`'s acceptance is met and its row closes.** The staged page prints
+the run's relics with printed name and printed hover text, and a form quotes
+one: the `t01` shadow form names *Pounding Surprise* and uses it to do the
+turn's arithmetic, and the `t01` deciding form quotes its effect (*"the Sparks
+gained from the Bomb detonations"*) without naming it. A reader can now see
+what `KLEESPARK-BT1`'s readers could not.
+
+**And printing the relics immediately falsified a printed assumption.** Every
+board of this round asserts *"The run carries Klee's starting relic and no
+other."* The staged pages print **two**: *Pounding Surprise* and *Fishing Rod*
+(*"Every 3 normal combats, Upgrade a random card in your Deck"*). Fishing Rod
+does nothing inside a combat and moves no number this round scores, so no
+grade is affected — but the assumption as printed is FALSE on the page, the
+preflight's assumption check cannot see it, and a reader who noticed would be
+right to distrust the rest. It is recorded here rather than fixed silently.
+
+### 24.7 The pair read
+
+`review/qa/klee-sparks-bt2-pair-review-codex-gpt-5.6-sol.md`, prompt beside it
+at `klee-sparks-bt2-pair-review-prompt.txt`. The independent seat read the
+completed round against the slate and **agreed slot for slot**: `F1`, `F2`,
+`F3`, `F5` UNREACHED; `F4` **MISS** at 0 of 3, on the same reasoning that `F4`
+is exempt from the refusal rule; **0 ADVANCE / 5 RETURN**, and on the return
+condition, in its own words:
+
+> **DID NOT FIRE.** `F1` is UNREACHED, not PREDICTED. `F2` is also UNREACHED;
+> moreover, its out-of-slot text names a cost and there is no next-turn bank
+> reading. Neither registered predicate is satisfied on the grades above.
+
+and on the round:
+
+> The boards exposed the intended same-turn Spark-repayment question on `t01`,
+> the claimed exclusivity question on `t02`, and the delayed-detonation
+> question on `t03` in the readers' prose. But the completed instrument did not
+> obtain admissible answers… The round therefore cannot answer the design
+> questions it was built to test. … **Overall: RETURN.** This is an instrument
+> return, not a balance reading, validation, or design return under the
+> pre-registered `F1`/`F2` predicate.
+
+The shadow seat is recorded and not graded: it was refused `forecast_missing`
+on all three boards for the same structural reason, so shadow-versus-deciding
+agreement has **0 comparable turns** and says nothing about `M62`.
+
+### 24.8 What is and is not licensed by this round
+
+**Licensed.** One engineering row: the forecast's FORM half — a reply schema
+that can carry a `forecast` list, in both the Codex seat and the local tester —
+without which the staged twin of `EB-229` cannot be graded at all. `EB-238`
+closes. `EB-224` stays open with a third round owed.
+
+**Not licensed.** Nothing about the card. No re-price, no re-wording, no sheet
+move, no change to §4.2 or to R225's clause, no removal of *Pounding
+Surprise*, and no claim about win rate, balance or fun. The arm has now been
+staged twice and read on neither: the return condition stands, unanswered, and
+the next round is the one that answers it. **A third staged round is not a
+re-roll of this one** — the boards, the seeds and the slate are unchanged and
+stay pinned; what has to change is the instrument, and R101b keeps this round's
+grades exactly as published while it does.
+
+**R217 G rides on every word a reader wrote above.** A tester's account is one
+model's account, never validation and never balance evidence, and nothing
+measured on a prototype row is quotable anywhere except the
+decision-closeness falsifier (R215 B).
+
+### 24.9 THE RERUN — `klee-sparks-bt2r`
+
+**REGISTERED — NOT RUN when this was committed. Claude drafts (R212 item 2),
+[USER] countersigns in batch.** The boards, the slate and this section were
+committed **before anything was staged, deployed or read**, exactly as §23
+was. The machine-readable half is `understudy/turns/klee-sparks-bt2r/`.
+
+**THIS IS NOT A NEW ROUND AND NOT A RE-ROLL.** §24.8 says what has to change
+and what may not: *"the boards, the seeds and the slate are unchanged and stay
+pinned; what has to change is the instrument"*. It is `KLEESPARK-BT2` asked
+again with a form that can answer it, and it follows the `KURAGEMEM002`
+precedent at kurage §13.9 — a new dated cell, drafted and committed before the
+run, disclosing exactly what moved.
+
+**§24's grades stand exactly as published (R101b).** `F4` MISSED at 0 of 3;
+`F1`, `F2`, `F3` and `F5` UNREACHED; 0 ADVANCE / 5 RETURN / 0 ESCALATE; the
+return condition DID NOT FIRE. Nothing in this cell re-reads, re-scores or
+withdraws one of them, and the first run's forms and verdicts under
+`review/qa/klee-sparks-bt2-t0*/` are not written over — which is the whole
+reason the rerun's boards carry an `r` in their turn ids.
+
+#### 24.9.1 What changed — the disclosure list, and it is three items long
+
+1. **The reply schema can carry a forecast (`EB-239`, CLOSED on its lock).**
+   `understudy/seat.py`'s `form_schema()` now declares `forecast`, nullable
+   and required on exactly `target`'s rule; `additionalProperties` stays
+   `False`, so the field is DECLARED and the schema is not loosened.
+   `staged_turn.forecast_answers` already read a missing `forecast` as the
+   empty list, so nothing downstream moved.
+2. **Both chairs, from one function.** `local_seat.build_grade_prompt` prints
+   `seat.form_schema()` into the local tester's prompt verbatim, which is why
+   the shadow chair was refused for the same structural reason as the
+   deciding one (§24.7) and why one fix repairs both. There is no second
+   schema to keep in step.
+3. **`qa_form.md` says so.** The form contract now states that the two seats
+   answer through the strict schema, where `forecast` is nullable-and-required
+   and `null` means *this board asked for none*, while a hand-written form may
+   still omit the key.
+
+**The lock, seen to FAIL first**, in `tier0/tests/test_seat_instruments.py`:
+an ANSWERED form — `KLEESPARK-BT2`'s own `t01` reply as it would have had to
+be written — was refused `undeclared:forecast` by the old schema and validates
+under the new one; and a form that OMITS the field is still refused
+`missing:forecast` by the schema and `forecast_missing` by the falsifier on an
+asking board, because declaring the field must not stop the falsifier biting
+or the forecast stops being a pre-commitment.
+
+**`t03`'s second refusal, `target_missing`, is NOT an instrument defect and
+nothing was changed for it.** The verdict names the cause exactly: the
+deciding form played *Bag of Tricks* with `target: null` on a board whose one
+enemy it had already named elsewhere in the same line (*Mine Toss* → *Shrinker
+Beetle*). The form CAN express a target — `target` has been a declared,
+required, nullable property of the schema since `EB-149`, and it is the
+precedent this cell's fix was written to follow — so this is a READER's
+omission on a board with somewhere to aim, caught by `EB-203`'s check doing
+its job (§24.4 says so and this cell agrees). **The board is not edited and
+neither is the check.** It is disclosed here because it is a second reason
+`t03` was refused, and if it recurs on the rerun it is a reading about the
+reader and not about the arm.
+
+#### 24.9.2 What is unchanged, and it is everything else
+
+- **The three boards**, byte-identical to `understudy/turns/klee-sparks-bt2/`
+  except the turn id: same seeds `JH4T8MSN10KS` / `R805DJ56LZHM` /
+  `YX7PB48WR7R4`, same hands, same 55 HP body, same 4-Energy-against-3 trade,
+  same assumptions, same three forecast questions per board, same
+  `replay_next_turn: true` on `t03`.
+- **`slots.yaml`**: `C1` threshold 2 ceiling 2 (`t01`, `t02`), `C2` threshold 1
+  ceiling 1 (`t03`), re-computed by `local_tester round --plan-only` before
+  staging and identical to §23.2's numbers, closeness gaps included (0.031 /
+  0.019 / 0.117).
+- **The slate `F1`–`F5`**, §23.4's table verbatim — the same predictions, the
+  same thresholds (1/1, 1/1, 1/1, 3/3, 1/1), the same falsifiers, the same
+  UNREACHED rule (`EB-209`), the same reading that a MISS on `F3` is an
+  INSTRUMENT finding and a MISS on `F5` a LEGIBILITY one, and the same §23.5
+  list of what a MISS does not license.
+- **The return condition, verbatim from §23.4:**
+
+> **THE PRE-REGISTERED RETURN CONDITION (R229), AS A GRADED PREDICATE.**
+> `F1` and `F2` are ONE finding and are read together.
+>
+> **The arm RETURNS TO DESIGN if EITHER**
+> **(a) `F1` is PREDICTED — the bank reads ≥ 3 again after the detonation, on
+> the same turn, and the reader pays for both priced uses; OR**
+> **(b) `F2`'s form names NO cost given up AND `F2`'s next-turn bank reads 3.**
+>
+> Either alone RETURNS the arm; both is the strongest form and is reported as
+> one finding, not two.
+
+#### 24.9.3 The chair, the budget and the guard
+
+**Unchanged from §23.6.** The Codex seat DECIDES every board
+(`--seat-spot-check 1`), the local seat sits SHADOW (`--seat-mode shadow`,
+R222 B), fresh-Opus is NOT seated — the row is `authored_by: [claude]` and a
+same-family deciding read is not author-disjoint under R217 C.
+
+- **Plan: 3 deciding seat reads + 1 pair read = 4 Codex calls.** The cap is
+  **9 minus the 4 the first run spent = 5**; the plan sits one under it. A
+  round that needs a sixth call STOPS rather than borrowing from the cap.
+- **The meter**, read immediately before the round: `5h 59%` (resets 16:36
+  EDT) / week 28%. `EB-227`'s guard refuses at **85%** of the five-hour window
+  and 50% of the week; if it refuses mid-round the round **STOPS at that
+  board** and the results record how many were read, rather than finishing on
+  a cheaper chair.
+- **Preconditions, each of which stops the round:** `gits-game.lock` under the
+  user's Temp directory absent; Steam running; the installed dev build
+  `0.2.1676+proto.dirty` carrying the row, proven read-only off the deployed
+  `mods\klee\manifest.json` before anything is staged. **Nothing is deployed
+  for this cell** — the fix is in Python, not in the mod.
+
+#### 24.9.4 What this cell can and cannot settle
+
+It can settle exactly what §24 could not reach: whether the priced mode's
+same-turn refund happens **on the wire** (`F1`), what one turn of the future
+does to the bank (`F2`), and whether `EB-236`'s exclusivity certification
+survives contact with a reader (`F3`). It cannot settle the whole fight —
+`EB-224`'s third owed piece — and it cannot make the tier0 mirror see a mode
+or a relic (§23.7 stands word for word). **R217 G rides on every word any
+reader writes here.**
+
+#### 24.9.5 What actually ran — the session and the stamp
+
+Dev build **`0.2.1676+proto.dirty`**, read off the deployed
+`mods\klee\manifest.json`; game **`v0.111.0`** (`min_game_version` on the same
+file); world `r229-2026-08-30` @ `bac66284`, the commit that registered this
+cell. **Nothing was deployed** — the fix is Python and the installed build
+already carried the row. The game lock was absent and Steam was running.
+
+**The meter, and one thing it did on its own.** Read immediately before the
+round: **`5h 59%` / week 28%**. The five-hour window **ROLLED OVER at 16:36
+EDT, between the local reads and the first Codex call**, exactly as §23.6 had
+noted the reset time; the first deciding read printed `5h 0% (rolled over)` and
+the round finished at **`5h 1%` / week 28%** (a new window, resetting 21:42
+EDT). `EB-227`'s guard never came near refusing. This is recorded rather than
+smoothed: the round's four calls were paid out of a window that had just reset,
+which is *cheaper* than the plan assumed and is not a licence to spend more.
+
+**3 boards run, 0 UNRUN, 6 forms graded, 2 lines replayed.**
+
+| turn | seed | grader | family | verdict | refused by | replay |
+|---|---|---|---|---|---|---|
+| `klee-sparks-bt2r-t01` | `JH4T8MSN10KS` | `codex-gpt-5.6-sol-fresh` | gpt | **SURVIVES** | – | **replayed, every step ok** |
+|  |  | `local-qwen3-8-27b-ud-q4-k-xl` | local | REFUSED | `target_missing` | – (shadow) |
+| `klee-sparks-bt2r-t02` | `R805DJ56LZHM` | `codex-gpt-5.6-sol-fresh` | gpt | **SURVIVES** | – | **replayed; the game refused play 2** |
+|  |  | `local-qwen3-8-27b-ud-q4-k-xl` | local | SURVIVES | – | – (shadow) |
+| `klee-sparks-bt2r-t03` | `YX7PB48WR7R4` | `codex-gpt-5.6-sol-fresh` | gpt | **REFUSED** | `no_second_line`, `intent_insensitive` | – |
+|  |  | `local-qwen3-8-27b-ud-q4-k-xl` | local | REFUSED | `intent_insensitive` | – (shadow) |
+
+Every seed came back as requested on the first attempt (no `EB-191`), every
+board passed its face-defect and assumption preflights, and `--plan-only`
+reproduced §23.2's numbers exactly: `C1` threshold 2 ceiling 2, `C2` threshold
+1 ceiling 1, closeness 0.031 / 0.019 / 0.117.
+
+**And `forecast_missing` refused NOTHING.** All six forms carried three answers
+against three questions. That is `EB-239` working, and it is the whole
+difference between this cell and §24.
+
+**What the round spent:** 3 Codex deciding reads + 1 Codex pair read = **4
+calls**, exactly the plan, against a cap of 5 (9 minus §24's 4). 3 local reads
+in the shadow chair. 0 control reads — fresh-Opus is not seated in a design
+round.
+
+#### 24.9.6 THE WIRE LEDGER — the readings §24 could not take
+
+The Spark bank is a player status **printed only when non-zero**, so an empty
+status block is a bank of 0.
+
+**`t01`, the return-condition board. Every step completed.**
+
+| step | bank | Seapunk |
+|---|---|---|
+| staged read | **3** | 45 HP, no statuses |
+| *Bag of Tricks*, priced mode, resolves | **0** | 45 HP, `bomb: 15` |
+| *Kaboom!* at Seapunk | **3** | 23 HP, `pyro aura: 2` |
+| *Firework Finale* at Seapunk | **0** | **5 HP** |
+| *Spirited Away* | 0 | 5 HP; player Block 12 |
+
+40 damage in one turn, the player untouched at 42 HP with 12 Block, and **both
+3-Spark uses paid and resolved inside the turn.** The refund `KLEESPARK-BT1`
+saw in passing and §24 could only quote as prose is now a wire reading:
+3 → 0 → **3** → 0.
+
+**`t02`, the exclusivity board. The game refused the second play.**
+
+| step | bank | Nibbit |
+|---|---|---|
+| staged read | **3** | 46 HP |
+| *Bag of Tricks*, priced mode, resolves | **0** | 46 HP, `bomb: 15` |
+| *Firework Finale* at Nibbit | — | **REFUSED by the bridge** |
+
+*"Card 'Firework Finale' cannot be played: `BlockedByCardLogic`"*, and the live
+hand entry reads `can_play: false`, `unplayable_reason: BlockedByCardLogic`.
+**`EB-236`'s certification holds on the wire**: on a hand with no Attack to pop
+the Bombs, no order of play buys both, and §24.5 item 2's unresolved reading —
+*"whether the game would have refused it is exactly what a replay would have
+shown"* — is now resolved, in `EB-236`'s favour. The reader's line was
+unpayable on paper and unpayable in the game.
+
+**`t03`**: the deciding form was REFUSED, so no replay ran and the
+`replay_next_turn` reading is absent for the third round running.
+
+#### 24.9.7 The slate, graded mechanically
+
+**3 PREDICTED (`F1`, `F4`, `F5`) / 0 SPLIT / 1 MISS (`F3`) / 1 UNREACHED
+(`F2`).**
+
+**`F1` PREDICTED at 1 of 1.** `t01`'s deciding line is *Bag of Tricks* [priced
+mode] → *Kaboom!* → *Firework Finale* → *Spirited Away*, all in one turn, and
+the replay reads the bank at **0 immediately after the mode** and at **3
+immediately after the Attack**. Both halves of the predicate, on the wire.
+
+**`F2` UNREACHED.** `t03`'s deciding form was REFUSED — `no_second_line` (its
+Q2 reads *"none"*) and `intent_insensitive` — so no replay ran and there is no
+next-turn bank reading. The delayed refund is still unmeasured, and both
+refusals are about the reader, not about the instrument.
+
+**`F3` MISSED at 0 of 1, and WHICH CLAUSE FIRED MATTERS.** The falsifier has
+two clauses — *both priced uses paid in one turn*, or *the second answer names
+neither*. **The first did NOT fire:** exactly one priced use was paid, because
+the game refused the other. **The second did:** `t02`'s Q2 reads *"I seriously
+considered replacing Mine Toss with Duck and Cover"*, which names neither *Bag
+of Tricks*' priced mode nor *Firework Finale*. §23.4 calls a MISS here an
+INSTRUMENT finding on the reasoning that *"a form that does [buy both] is a
+defect in the check or in the build"* — **and that reasoning belongs to the
+clause that did not fire.** `EB-236` is vindicated and the build behaved, so
+there is no defect to file and **nothing is minted on `F3`**. What the slot
+caught is a reader who wrote a line the board could not pay for and then
+discussed a different trade-off entirely.
+
+**`F4` PREDICTED at 3 of 3.** Every deciding form carries a full forecast —
+`t01` `["0", "3", "0"]`, `t02` `["3", "yes", "1"]`, `t03` `["4", "4", "20"]` —
+and no form on either chair was refused `forecast_missing`. `EB-229`'s staged
+twin works end to end for the first time.
+
+**`F5` PREDICTED at 1 of 1.** On `t01`, where the line takes the priced mode,
+the first forecast answer reads **0** and the second reads **3** — and the wire
+read 0 and 3. The reader did the arithmetic in advance, off a page that prints
+the relic, and got it right. That is the legibility reading §23.4 asked for.
+
+**Judgment, per slot: `F1` RETURN (it is the return-condition slot and it
+fires), `F2` RETURN, `F3` RETURN, `F4` ADVANCE, `F5` ADVANCE — 2 ADVANCE /
+3 RETURN / 0 ESCALATE, overall RETURN.** Unlike §22 and §24, **this RETURN is
+on the ARM'S DESIGN and not on the instrument**: the instrument did its job on
+every board it was handed a survivable form on.
+
+#### 24.9.8 THE PRE-REGISTERED RETURN CONDITION — **IT FIRED**
+
+R229's condition, read exactly as §23.4 and §24.9.2 wrote it:
+
+- **(a) IS SATISFIED.** `F1` is **PREDICTED**. The bank read **3 again after
+  the detonation, on the same turn** (`0` after the mode, `3` after *Kaboom!*),
+  and the reader **paid for both priced uses** — *Bag of Tricks*' 3-Spark mode
+  and *Firework Finale*, both resolved, 45 → 23 → 5 HP.
+- **(b) is not satisfied.** `F2` is UNREACHED: its form was refused and there
+  is no next-turn bank reading. It contributes no inference either way.
+
+**THE ARM RETURNS TO DESIGN.** (a) alone returns it, as registered, and it is
+reported as ONE finding and not two. The independent pair read
+(`review/qa/klee-sparks-bt2r-pair-review-codex-gpt-5.6-sol.md`, prompt beside
+it) agreed slot for slot — `F1` PREDICTED, `F2` UNREACHED, `F3` MISS, `F4` and
+`F5` PREDICTED, 2 ADVANCE / 3 RETURN, overall RETURN — and on the condition, in
+its own words:
+
+> **FIRED.** `F1` is PREDICTED: the bank returned to 3 after the same-turn
+> detonation, and the reader paid for both priced uses. Predicate (a) therefore
+> returns the arm independently of `F2`.
+
+**What a RETURN does and does not do.** §23.5 still binds: it does **not**
+itself re-price the mode, move §4.2's price table, re-read R225's mode-head
+clause, remove *Pounding Surprise*, amend LAW, or say anything about win rate,
+balance or fun (R215 B, Guardrail-7). It returns the arm to [USER] as a
+**numbered pick list**, and Claude picks nothing on it.
+
+#### 24.9.9 THE PICK LIST — [USER]'s, and it is four numbered directions
+
+**What was measured, because the pick rests on it.** The price is REAL where
+nothing can pop the Bombs: on `t02` the mode took the bank to 0 and the game
+itself refused *Firework Finale*. The price is NET-FREE where an ordinary
+Attack lands the same turn: on `t01` the same 3 Sparks bought three Bombs,
+*Kaboom!* popped them, *Pounding Surprise* handed the 3 back, and the rival
+3-Spark sink was paid out of the refund. The mode's cost is therefore
+**contingent on whether the hand holds a detonator** — and on `t01` the reader
+did not experience it as a cost at all: it forecast `0, 3, 0` before playing,
+and was right.
+
+1. **Re-price the mode.** Move the printed 3 so the refund cannot cover the
+   rival sink. Cheapest to write; but the refund scales with the BOMB COUNT, so
+   any price the mode can pay for itself at is a price the relic can hand back.
+   Fixes the number rather than the loop.
+2. **Restructure the mode so its own Bombs cannot pay for it.** Bombs placed by
+   the priced mode do not trigger *Pounding Surprise*, or resolve only at the
+   start of the next turn. Kills the loop directly; costs a special case in the
+   Bomb/relic seam that BOTH engines must carry, and `t03` shows the delayed
+   half is still unmeasured.
+3. **Accept the refund as the card's POINT, and write the design intent to say
+   so.** R229 already accepted it as an observed test condition; this makes it
+   deliberate — *Bag of Tricks* is the card that turns a bank plus a detonator
+   into a free second sink, and the decision it poses is *does this hand hold
+   an Attack?* Costs nothing to build; costs a written intent, and re-poses
+   `F2` on the delayed half.
+4. **Drop the arm.** Retire `proto_spark_mode_bombs`' priced mode from the
+   prototype surface. Cleanest; spends three staged rounds of work, and leaves
+   R225's mode-head price clause without the row it was amended for.
+
+**Claude's recommendation, which is not a decision: 3.** The one thing this
+round measured on the wire is that the price behaves DIFFERENTLY on two hands
+that differ only in whether an Attack is in them, and that the game enforces
+the difference by itself, with no rule written for it. 1 and 2 move a number or
+add a seam on the strength of a single graded turn; 4 discards a row that three
+rounds of instrument work were built around. 3 is the only option the evidence
+positively supports, and the only one that leaves `F2`'s unmeasured half worth
+asking. **The pick is [USER]'s** (CLAUDE.md's ladder: a pick between genuinely
+different design directions).
+
+#### 24.9.10 Out of slot — recorded, graded nowhere (R101b)
+
+1. **The declared body HP is 55 and the live body is 45 / 46 / 40.** Every
+   board writes `set_hp: {who: first, amount: 55}`; the packets read Seapunk
+   45, Nibbit 46, Shrinker Beetle 40, and `board_check` passed with no
+   differences on all three because the `board:` block it compares against is
+   what the packet records. **It is identical in §24's first run** — the boards
+   are reproduced exactly — and it moves no grade: the largest line is 40
+   damage against 45 HP, so §23.2's *"no lethal line"* holds, by 5. It is the
+   same shape of blind spot as `EB-240` (a declared board fact the preflight
+   cannot check against the wire), and it is recorded rather than fixed
+   silently.
+2. **The shadow chair, recorded and not graded.** `t02` SURVIVES, `t01`
+   REFUSED `target_missing` — it played *Bag of Tricks* at no target, the same
+   refusal the DECIDING chair drew on `t03` in §24, and again a reader's
+   omission rather than the schema's — and `t03` REFUSED
+   `intent_insensitive`. Shadow-versus-deciding agreement is **1 of 3
+   comparable turns** and says nothing about `M62` at that denominator.
+3. **`t03` was refused for something `EB-239` cannot fix.** Its Q2 reads
+   *"none"*. A reader that considers no second line fails R213's readiness
+   test, and the funnel is right to refuse it; neither the board nor the form
+   schema is at fault.
+
+**R217 G rides on every word any reader wrote above.** A tester's or a grader's
+account is one model's account, never validation and never balance evidence,
+and nothing measured on a prototype row is quotable anywhere except the
+decision-closeness falsifier (R215 B).

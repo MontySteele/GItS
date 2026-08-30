@@ -395,6 +395,43 @@ def _potions(state: dict[str, Any]) -> list[dict[str, Any]]:
             if isinstance(p, dict)]
 
 
+def _relics(state: dict[str, Any]) -> list[dict[str, Any]]:
+    return [r for r in (_player(state).get("relics") or [])
+            if isinstance(r, dict)]
+
+
+def relic_faces(state: dict[str, Any]) -> list[dict[str, str]]:
+    """The run's relics as PRINTED name and one-line effect. `EB-238`.
+
+    THE DEFECT THIS CLOSES. Until now the page showed a relic on the reward
+    and relic-select screens -- the moment it is OFFERED -- and never again.
+    So a blind reader played every combat of a run without the one part of
+    the board that is on screen for the whole of it, and `KLEESPARK-BT1`
+    §22.4 is what that cost: Klee's starter *Pounding Surprise* pays +1 Spark
+    per Bomb detonated, the priced mode under test placed three Bombs, and
+    the mode REFUNDED ITS OWN PRICE inside the turn in front of eight readers
+    none of whom could see why. A registration cannot control a relic the
+    page does not print.
+
+    IT PRINTS WHAT THE GAME PRINTS AND NOTHING ELSE (R217's quarantine): the
+    relic's own title and its own hover description, off the wire, exactly as
+    the HUD shows them on a mouse-over. No id, no rarity, no pool, no sim
+    hook name -- and the `counter` the wire carries only when the relic draws
+    one on its own icon.
+    """
+    out: list[dict[str, str]] = []
+    for r in _relics(state):
+        name = _text(r.get("name")) or _label(r.get("id"))
+        if not name:
+            continue
+        row = {"name": name, "text": _text(r.get("description"))}
+        counter = r.get("counter")
+        if counter is not None:
+            row["counter"] = _text(counter)
+        out.append(row)
+    return out
+
+
 def _blob(state: dict[str, Any], key: str) -> dict[str, Any]:
     b = state.get(key)
     return b if isinstance(b, dict) else {}
@@ -562,6 +599,10 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             "potions": [{"title": _text(x.get("name")),
                          "text": _text(x.get("description"))}
                         for x in _potions(state)],
+            # `EB-238`. ON THE COMBAT PAGE, not only where a relic is offered.
+            # The HUD carries the relic row through every screen of the run;
+            # the page did not, and `KLEESPARK-BT1` paid for it.
+            "relics": relic_faces(state),
         },
         "round": _int(battle.get("round")),
         "hand": _number_faces([_card_face(c) for c in _hand(state)], "title"),
@@ -1036,6 +1077,16 @@ def render(obs: dict[str, Any]) -> str:
         out.append(f"- Piles: {c['piles']['draw']} in the draw pile, "
                    f"{c['piles']['discard']} discarded, "
                    f"{c['piles']['exhaust']} exhausted")
+        # `EB-238`. IN THE HEADER, with HP and Energy, because that is where
+        # the game keeps it: the relic row sits along the top of every screen
+        # of a run, and a reader who is shown it only when one is OFFERED has
+        # been shown the shop and not the board.
+        if you["relics"]:
+            out += ["", "## Your relics", ""] + [
+                f"- **{r['name']}**"
+                + (f" ({r['counter']})" if r.get("counter") else "")
+                + (f" — {r['text']}" if r["text"] else "")
+                for r in you["relics"]]
         if c.get("memory"):
             # `EB-181`, rewritten for the memory CARD that replaced the strip
             # (review/active/kokomi-kurage-memory-2026-08-29.md §14). The page

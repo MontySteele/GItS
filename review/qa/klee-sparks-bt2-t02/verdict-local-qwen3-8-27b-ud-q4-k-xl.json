@@ -1,0 +1,76 @@
+{
+ "turn_id": "klee-sparks-bt2-t02",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "forecast_missing"
+ ],
+ "reasons": [
+  "forecast_missing: the board registered questions to be answered BEFORE the line and the form carries no answer, or fewer answers than questions -- a forecast collected after the line is a rationalisation"
+ ],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "7a37f1e7d2c963d4907200af0831312213e704c5c2bce85ba8527bc0e4457ac1",
+ "chosen_line": [
+  {
+   "card": "Bag of Tricks",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."
+  },
+  {
+   "card": "Firework Finale",
+   "target": "Nibbit",
+   "exhaust": "Firework Finale",
+   "choose": null
+  },
+  {
+   "card": "Mine Toss",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Spirited Away",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Bag of Tricks using its 3-Spark option, then Firework Finale, then Mine Toss, then Spirited Away. This uses all 3 Energy and the available Spark economy, deals the maximum damage I could confidently score from the printed text, and leaves enough Block to fully absorb Nibbit\u2019s telegraphed 12 damage.",
+  "q2_other_line_considered": "I seriously considered playing Firework Finale first and then Bag of Tricks\u2019 1-Bomb option, but that line is strictly worse on damage and does not improve survivability. I also considered replacing Spirited Away with Duck and Cover, but that only reduces Block from 12 to 5 with no compensating benefit.",
+  "q3_what_it_gave_up": "This line gives up the possibility of keeping Firework Finale un-exhausted for a future turn, and it gives up any extra Spark bank that might have been generated if a different bomb-detonation timing were available. It also spends all Energy on damage and Block, leaving no defensive flexibility if the enemy intent were different or if an unexpected extra threat appeared.",
+  "q4_different_intent": "Yes. If Nibbit had telegraphed a weaker attack, I might have skipped Spirited Away and kept Energy for a different defensive or offensive choice. If it had telegraphed a much larger attack, I would have prioritized Block even more aggressively, possibly choosing Duck and Cover in addition to Spirited Away if Energy allowed, or reconsidering whether to spend Energy on damage at all."
+ },
+ "forecast_asked": 3,
+ "forecast": [],
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Bag of Tricks",
+   "Firework Finale"
+  ],
+  "hand": [
+   "Bag of Tricks",
+   "Firework Finale",
+   "Mine Toss",
+   "Duck and Cover",
+   "Spirited Away"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-30T16:12:59"
+}

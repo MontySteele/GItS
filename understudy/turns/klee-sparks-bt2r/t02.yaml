@@ -1,0 +1,138 @@
+# KLEESPARK-BT2, BOARD B. THE EXCLUSIVE PAIR, AND THIS TIME IT IS EXCLUSIVE.
+#
+# See `t01`'s header for what the round is, what R229 settled, and why the
+# detonator on this round is an ordinary Attack.
+#
+# WHAT THIS BOARD IS. `KLEESPARK-BT1`'s `t02` REPAIRED. That board claimed
+# "the bank of 3 buys EXACTLY ONE of two things" and the shipped world bought
+# both three plays later, because a free `detonate` in the same hand handed
+# the price straight back. This board makes the same claim and holds it: the
+# bank is the same 3, both candidates still price 3, and NOTHING IN THIS HAND
+# CAN DETONATE A BOMB EXCEPT *Firework Finale* ITSELF -- which has to be paid
+# for before it can hit anything.
+#
+# WHY THAT IS ENOUGH, WALKED OUT IN FULL. The refund can only arrive through a
+# detonation, and a detonation on this board needs an Attack that gets HP
+# damage through. The only Attack here is Firework Finale.
+#
+#   priced mode first   bank 3 -> 0, three Bombs sit. Firework Finale now
+#                       needs 3 and the bank is 0, and no other card in hand
+#                       can pop a Bomb, so nothing refunds. ONE of the two.
+#   Finale first        bank 3 -> 0. Its 18 lands on a body carrying at most
+#                       the one Bomb Mine Toss placed, so the relic pays at
+#                       most 1 and the bank reaches 1, not 3. Bag of Tricks'
+#                       priced mode is unaffordable. ONE of the two.
+#
+# The `resource_round` block below states the claim in machine-readable form
+# and `EB-236`'s check walks EVERY order of play, relic gains included, before
+# the round is allowed to run. This board passes it. `KLEESPARK-BT1`'s `t02`
+# does not, and the lock in `tier0/tests/test_seat_instruments.py` is written
+# on that board rather than on a fixture.
+#
+# THE ARITHMETIC, PRINTED SO THE FALSIFIER IS NOT A MATTER OF OPINION.
+#   free mode + Finale  -> 1 Bomb at 5 placed, Finale for 18, the Bomb pops
+#                          on Finale's hit for 5 more and refunds 1 Spark = 23
+#   priced mode         -> 3 Bombs at 5 placed and NOT detonated this turn.
+#                          0 damage now, 15 at the start of the next turn.
+# So the choice is 23 now against 15 later plus a bank that comes back, and it
+# is a real one on a body at 55 that no line here kills.
+#
+# THE ENERGY FORCES A TRADE: the hand costs 0 + 0 + 1 + 1 + 2 = 4 against 3.
+
+id: klee-sparks-bt2r-t02
+character: KLEEMOD-KLEE
+
+# Pinned before the round. `klee-sparks-bt1-t02`'s seed, recorded ONE-BODY on
+# a Klee run.
+seed: R805DJ56LZHM
+
+exact_hand: true
+
+prototype: true
+
+slots:
+  - C1
+
+forecast:
+  - >-
+    If you spend 3 Sparks on Bag of Tricks this turn, what number will your
+    Spark bank show IMMEDIATELY after that card resolves?
+  - >-
+    On the line you are about to play, can you pay for BOTH Bag of Tricks'
+    3-Spark option and Firework Finale this turn? Answer yes or no.
+  - >-
+    What will your Spark bank show at the very end of this turn, on the line
+    you are about to play?
+
+notes: |
+  42/62 HP, no Block, 3 energy, a Spark bank of exactly 3, and one enemy
+  telegraphing an attack. The hand costs 4 Energy in total.
+
+assumptions:
+  - "The hand is EXACTLY the list below and nothing else. The hand the
+     game dealt is emptied before these cards are given, and a packet
+     whose live hand is not this list is refused rather than written."
+  - "The Spark bank is written to 3 through SPARK_POWER, which is how the
+     live game holds Sparks. 3 is BOTH candidates' price exactly."
+  - "The run carries Klee's starting relic and no other. It is printed on
+     the page: that relic pays 1 Spark for every Bomb that detonates, and
+     a reader who cannot see it cannot do the turn's arithmetic."
+  - "The encounter is GENERATED. This file can write the enemy's HP and
+     Block and cannot write its INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below
+     declares a telegraphed ATTACK as the falsifier's input."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "No Bomb is on the board when the turn starts. Every Bomb the packet
+     shows is one this turn's line places."
+  - "The player has no Strength and the enemy carries no aura, Vulnerable
+     or Weak. Every Klee attack applies Pyro, and a reaction on top of a
+     hit would move every number the falsifier scores."
+
+# Needs a dev build carrying the prototype rows (klee-mod/build/deploy_proto.ps1).
+
+staging:
+  - give: {card: KLEEMOD-PROTO_SPARK_MODE_BOMBS, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_SPARK_FINISHER, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-MINE_TOSS, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-DUCK_AND_COVER, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SPIRITED_AWAY, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 42}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 3}
+  - set_power: {who: player, name: SPARK_POWER, amount: 3}
+  - set_hp: {who: first, amount: 55}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+resource_round:
+  claim: >-
+    A bank of 3 buys the priced mode of Bag of Tricks OR the whole of
+    Firework Finale, and no order of play buys both -- relic refunds
+    included.
+  exclusive:
+    - {card: proto_spark_mode_bombs, mode: 2}
+    - {card: proto_spark_finisher}
+
+board:
+  character: klee
+  pilot: demolition
+  hp: 42
+  max_hp: 62
+  block: 0
+  energy: 3
+  turn: 4
+  resources:
+    sparks: 3
+  hand:
+    - proto_spark_mode_bombs
+    - proto_spark_finisher
+    - mine_toss
+    - duck_and_cover
+    - spirited_away
+  enemies:
+    - name: "Act 1 enemy"
+      hp: 55
+      max_hp: 55
+      block: 0
+      intent: {kind: attack, amount: 16}

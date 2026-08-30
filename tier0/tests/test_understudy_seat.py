@@ -476,7 +476,10 @@ def test_the_form_schema_names_every_field_the_form_needs():
     schema = seat.form_schema()
     for field in ("turn_id", "packet_sha256", "grader", "chosen_line",
                   "q1_what_did_you_play", "q2_other_line_considered",
-                  "q3_what_it_gave_up", "q4_different_intent", "q4_changed"):
+                  "q3_what_it_gave_up", "q4_different_intent", "q4_changed",
+                  # EB-239: the forecast's FORM half. Declared, not a
+                  # loosening -- nullable-and-required on `target`'s rule.
+                  "forecast"):
         assert field in schema["properties"]
         assert field in schema["required"]
     assert schema["additionalProperties"] is False

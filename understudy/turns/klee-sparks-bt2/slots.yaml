@@ -1,0 +1,60 @@
+# `KLEESPARK-BT2` -- the counting slots of the round's slate, machine-readable.
+#
+# WRITTEN BEFORE THE ROUND, and its ceilings computed by
+# `local_tester round --plan-only` over these three boards before a single
+# board is staged, which is what `EB-202` exists to make possible.
+#
+# WHAT CHANGED SINCE `KLEESPARK-BT1`, AND IT IS THE WHOLE REASON THESE
+# PREDICATES CAN BE WRITTEN AT ALL. That round's `slots.yaml` had to disclose,
+# at length, that `slot_plan._spark_prices` read a TOP-LEVEL `spend_spark` and
+# nothing else -- so *Bag of Tricks*, whose price sits at a MODE HEAD and which
+# is the entire subject of the arm, was invisible to `affordable_spark_uses`,
+# `spark_use_count` and `min_spark_price` on every board of the round. Every
+# predicate there was written about the OTHER cards in hand, and
+# `affordable_spark_uses == 0` had to be read as "no OTHER Spark sink".
+#
+# `EB-237` closed that. `card_spark_prices` now reads R225's amended clause in
+# full -- the top level OR the head of a `choose_one` mode, and nothing nested
+# and nothing conditional -- so the row under test PRICES ITSELF as far as
+# every fact below is concerned, and the predicates here say what they mean:
+#
+#   `affordable_spark_uses == 1`   the priced mode and nothing else
+#   `affordable_spark_uses >= 2`   the priced mode AND a rival sink
+#
+# THE CEILINGS, computed by hand and checked against `slot_plan.ceiling` at
+# plan time:
+#
+#   C1  the priced mode is affordable AND contested   t01, t02   ceiling 2, threshold 2
+#   C2  the priced mode is the only Spark sink        t03        ceiling 1, threshold 1
+#
+# EVERY THRESHOLD EQUALS ITS CEILING, which is what "the minimum that answers
+# the question" costs: each board is the only one of its kind in the round, so
+# a MISS on any of them is a real MISS about the card rather than a sampling
+# accident. What `EB-202` forbids is the other direction -- a threshold ABOVE
+# the ceiling, which `KLEESPARK-R1`'s `P1` carried at 4 against 3.
+#
+# THE SLATE'S OWN PREDICTIONS ARE NOT IN HERE. `F1`-`F5` are counted off forms
+# and off `execute-*.json` replay records rather than off a board's declared
+# shape, so they carry no board predicate; they name their boards in the
+# manifest's slate instead. This file holds COUNTING slots and nothing else.
+
+slots:
+  - id: C1
+    threshold: 2
+    question: >-
+      Is the priced mode AFFORDABLE and CONTESTED -- a Spark bank at or above
+      the mode's price of 3, with at least one other Spark-priced use in hand
+      the bank could also pay for?
+    predicate:
+      - {left: spark_bank, op: ">=", right: 3}
+      - {left: affordable_spark_uses, op: ">=", right: 2}
+
+  - id: C2
+    threshold: 1
+    question: >-
+      Is the priced mode the ONLY affordable Spark sink -- a bank at or above
+      3 and nothing else in hand that prices Sparks, so the question is what
+      the bank buys rather than which sink it goes to?
+    predicate:
+      - {left: spark_bank, op: ">=", right: 3}
+      - {left: affordable_spark_uses, op: "==", right: 1}

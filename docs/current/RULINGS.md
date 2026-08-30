@@ -238,8 +238,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R226 | 2026-08-30 | the Kokomi Charge law signed as amended (prospective), Klee's generator survival matches Regent, Furina's Spotlight gets an options packet when Klee is close | `425912a` |
 | R227 | 2026-08-30 | landed: M67 (1), Regent stands, three registrations countersigned, Furina paper work starts | `29c7f16` |
 | R228 | 2026-08-30 | landed: sink set 4 + 6 as fold baseline, M68 (1) one-mode priced Spotlight, EB-235 minted | `071f280` |
+| R229 | 2026-08-30 | landed: Bag of Tricks refund accepted as a test condition, arm AT RISK under a pre-registered return | `b3c33d0` |
 
-227 rows over the R1..R228 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 116 from a commit message, 0 unresolved.
+228 rows over the R1..R229 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 117 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 

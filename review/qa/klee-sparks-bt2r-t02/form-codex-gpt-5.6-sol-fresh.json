@@ -1,0 +1,46 @@
+{
+ "turn_id": "klee-sparks-bt2r-t02",
+ "packet_sha256": "c428e336665f2b574813149e0bfdbe2ce23a4f8c7c641827ce62a8f9b5ff6524",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Bag of Tricks",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."
+  },
+  {
+   "card": "Firework Finale",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Mine Toss",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Spirited Away",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I used Bag of Tricks' 3-Spark option on Nibbit, played Firework Finale on Nibbit, then Mine Toss and Spirited Away.",
+ "q2_other_line_considered": "I seriously considered replacing Mine Toss with Duck and Cover for 17 total Block, but 12 Block already covers the telegraphed attack.",
+ "q3_what_it_gave_up": "It gave up 5 surplus Block from Duck and Cover and retained no flexibility from leaving energy unspent.",
+ "q4_different_intent": "Yes. With no incoming attack I would omit Spirited Away; against a sufficiently larger attack I would replace Mine Toss with Duck and Cover.",
+ "q4_changed": true,
+ "forecast": [
+  "3",
+  "yes",
+  "1"
+ ]
+}
