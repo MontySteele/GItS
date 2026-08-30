@@ -68,6 +68,11 @@
 Each row points at the packet section that carries the options in full; the
 packet is the argument and this is the register.
 
+→ `review/active/sitting-2026-08-30.md` holds the DRAFTED sitting slate (GPT's
+audit fact-checked, Claude's column marked default) covering `M47`, `M49`,
+`M50`, `M52`, `M54`–`M57`, `M59`, `M60`, `M64` and the Klee R2 picks; one
+countersign closes them.
+
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
 | `M47` | **Ask:** choose what happens to *Bag of Tricks*, the arm the doctrine gate held on a top-level-cost clause and a D4 defect. **Pick:** (1) drop it; (2) amend the top-level-cost rule to admit a mode price; (3) build per-mode playability (`EB-182`) first, then re-ask — my reading; (4) re-author as two cards; (5) price the whole card. In full: §6.1 | OPEN — design call; nothing is gated on it | review/active/klee-slice-1-2026-08-29.md §6.1; R213 E2 |
