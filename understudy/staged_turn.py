@@ -406,6 +406,24 @@ class StagedTurn:
     # ending the turn hands the enemy its telegraphed attack, and no board
     # written before this key existed asked for that.
     replay_next_turn: bool = False
+    # `EB-240`. THE STRUCTURED HALF OF `assumptions:`, AND THE ONLY HALF A
+    # MACHINE CAN CHECK. Every `KLEESPARK-BT2` board asserted in prose that
+    # *"the run carries Klee's starting relic and no other"* while the page
+    # printed TWO, and every board declared `set_hp: {who: first, amount: 55}`
+    # against live bodies of 45, 46 and 40. Neither moved a grade -- the
+    # second relic is inert in combat, and the largest line was 40 against 45
+    # so *no lethal line* held by 5 -- and both were false as printed, in a
+    # block the packet reproduces for the reader verbatim.
+    #
+    # THE ENGLISH IS NOT PARSED AND NEVER WILL BE: a preflight that reads
+    # prose is a preflight that is wrong in a new way on every board. A board
+    # that wants a wire fact CHECKED declares it here, in a shape with one
+    # meaning, and the stage REFUSES on a mismatch. Absent on every board
+    # written before this key existed, and absent is not a failure -- it is
+    # the same board it always was, with the automatic `set_hp` read-back as
+    # its only check, which costs nothing to declare because the `set_hp`
+    # step already declared it.
+    expects: dict[str, Any] = field(default_factory=dict)
 
     def registered_slots(self) -> list[str]:
         """The slots this board covers. Its own id when it declares none."""
@@ -502,7 +520,8 @@ def parse(blob: dict[str, Any], path: Path | None = None) -> StagedTurn:
         slots=_parse_slots(blob.get("slots")),
         resource_round=_parse_resource_round(blob, path),
         forecast=_parse_forecast(blob.get("forecast")),
-        replay_next_turn=bool(blob.get("replay_next_turn", False)))
+        replay_next_turn=bool(blob.get("replay_next_turn", False)),
+        expects=_parse_expects(blob.get("expects")))
     _check_halves_agree(turn)
     _check_assumptions_blind(turn)
     return turn
@@ -556,6 +575,157 @@ def _parse_forecast(raw: Any) -> list[str]:
             "the top of the blind packet and answered BEFORE the line. Omit "
             "it and the board asks for no forecast")
     return [q.strip() for q in raw]
+
+
+# ------------- EB-240: the assumptions the wire can be asked about ---------
+
+EXPECTS_KEYS = ("relics", "hp")
+
+
+def _parse_expects(raw: Any) -> dict[str, Any]:
+    """`expects:` -- the structured, checkable half of `assumptions:`, or
+    absent. Refuses, never coerces, for the reason every other block here
+    does: a declaration that is silently reinterpreted is a declaration that
+    can be false without anybody being told.
+
+    Two keys, and both are optional inside it:
+
+      * `relics:` a list of the run's relics by PRINTED NAME, and it means
+        EXACTLY that list -- an extra relic on the wire is a mismatch, which
+        is precisely the case `KLEESPARK-BT2` printed and nothing caught.
+      * `hp:` a mapping of `who` (`player`, or one of `scenario`'s enemy
+        symbols) to the HP the board expects to READ. It is for a body no
+        `set_hp` step writes; a body one does write is checked automatically
+        and does not need declaring.
+    """
+    if raw in (None, "", {}):
+        return {}
+    if not isinstance(raw, dict) or not raw:
+        raise TurnError(
+            "'expects' is a mapping of wire facts this board asserts -- "
+            "'relics' (a list of printed names, meaning exactly those) and "
+            "'hp' (who -> the HP the board expects to read). Omit it and the "
+            "board asserts nothing a machine can check")
+    unknown = sorted(k for k in raw if k not in EXPECTS_KEYS)
+    if unknown:
+        raise TurnError(
+            f"'expects' knows {', '.join(EXPECTS_KEYS)} and nothing else; "
+            f"got {', '.join(unknown)}. A key nobody reads is an assumption "
+            f"that looks checked and is not")
+    out: dict[str, Any] = {}
+    if "relics" in raw:
+        relics = raw["relics"]
+        if not isinstance(relics, list) or not all(
+                isinstance(r, str) and r.strip() for r in relics):
+            raise TurnError(
+                "'expects.relics' is a list of non-empty printed relic names "
+                "-- the run's relics, exactly those. An empty list is written "
+                "as [] and means the run carries none")
+        out["relics"] = [r.strip() for r in relics]
+    if "hp" in raw:
+        hp = raw["hp"]
+        if not isinstance(hp, dict) or not hp or not all(
+                isinstance(k, str) and k.strip()
+                and isinstance(v, int) and not isinstance(v, bool)
+                for k, v in hp.items()):
+            raise TurnError(
+                "'expects.hp' is a mapping of who -> whole-number HP, e.g. "
+                "{player: 42, first: 55}")
+        out["hp"] = {str(k).strip(): int(v) for k, v in hp.items()}
+    return out
+
+
+def _live_relics(state: dict[str, Any]) -> list[str]:
+    """The run's relics off the wire, by printed name. The same field the
+    blind page prints (`EB-238`), read here rather than off the page, because
+    the page is what a mismatch would already have gone out on."""
+    out = []
+    for r in (state.get("player") or {}).get("relics") or []:
+        if isinstance(r, dict) and str(r.get("name") or "").strip():
+            out.append(str(r["name"]).strip())
+    return out
+
+
+def _declared_hp(turn: StagedTurn) -> dict[str, int]:
+    """Every HP this board asserts, `who` -> amount: the `set_hp` steps
+    (automatic -- the step IS the declaration) with `expects.hp` on top,
+    which is how a board says a thing about a body it does not write. The
+    LAST `set_hp` for a `who` is the one that stands, because it is the one
+    the game ran."""
+    out: dict[str, int] = {}
+    for verb, body in turn.staging:
+        if verb == "set_hp":
+            out[str(body.get("who") or "player").strip()] = int(body["amount"])
+    out.update(turn.expects.get("hp") or {})
+    return out
+
+
+def wire_assumption_preflight(turn: StagedTurn,
+                              state: dict[str, Any]) -> None:
+    """`EB-240`. Refuse a staged board whose declared facts are not the wire's.
+
+    WHY THERE IS A CHECK HERE AT ALL. A board's `assumptions:` block is
+    printed into the blind packet verbatim and a reader does arithmetic on
+    it. `KLEESPARK-BT2` shipped two false ones on all three boards -- one
+    relic asserted where the run carried two, and `set_hp: {who: first,
+    amount: 55}` against live bodies of 45, 46 and 40 -- and neither was
+    catchable, because nothing compared a printed assertion against the
+    machine. Both were harmless there and neither is harmless by
+    construction: the HP one is what `no lethal line` rests on, and it held
+    by 5.
+
+    WHY IT CHECKS THESE TWO AND NOT THE PROSE. `set_hp` is a step the board
+    already wrote down, so reading it back costs the file nothing and catches
+    a write the game did not take. Relics are the case that needs a
+    DECLARATION, because a relic list is a fact about the RUN that no staging
+    step sets -- and a board that declares none is not thereby asserting none,
+    it is asserting nothing, which is the state every board written before
+    this row is in.
+
+    RAISED AT STAGE TIME, ON THE LIVE STATE, so the refusal lands before a
+    packet is written, before a reader is paid for and before a grade exists
+    to be corrupted. Nothing here re-reads or re-grades a published round
+    (R101b) -- the boards under `understudy/turns/klee-sparks-bt2r/` and
+    earlier are records and are not edited.
+    """
+    problems: list[str] = []
+
+    want = turn.expects.get("relics")
+    if want is not None:
+        live = _live_relics(state)
+        fold = [r.casefold() for r in live]
+        missing = [r for r in want if r.casefold() not in fold]
+        extra = [r for r in live
+                 if r.casefold() not in [w.casefold() for w in want]]
+        if missing or extra:
+            problems.append(
+                "relics: the board declares "
+                + (", ".join(repr(r) for r in want) or "(none)")
+                + " and the wire carries "
+                + (", ".join(repr(r) for r in live) or "(none)")
+                + (f" -- missing {', '.join(repr(r) for r in missing)}"
+                   if missing else "")
+                + (f" -- unexpected {', '.join(repr(r) for r in extra)}"
+                   if extra else ""))
+
+    for who, amount in sorted(_declared_hp(turn).items()):
+        blob = scenario._who_blob(state, who)
+        if not blob:
+            problems.append(
+                f"hp: the board declares {who!r} at {amount} and the wire has "
+                f"no such creature to read")
+            continue
+        live_hp = blob.get("hp")
+        if live_hp is None or int(live_hp) != int(amount):
+            problems.append(
+                f"hp: the board declares {who!r} at {amount} and the wire "
+                f"reads {live_hp if live_hp is not None else '(no hp field)'}")
+
+    if problems:
+        raise TurnError(
+            f"{turn.id}: the board's declared assumptions are not the wire's, "
+            f"so the packet would print a falsehood a reader does arithmetic "
+            f"on (`EB-240`). " + "; ".join(problems))
 
 
 def _check_assumptions_blind(turn: StagedTurn) -> None:
@@ -760,6 +930,14 @@ def stage_board(turn: StagedTurn, why: str, *, hold: bool,
         raise TurnError(
             f"a staging step failed; the board is not the one the file "
             f"describes. See {out_path}")
+    # `EB-240`. LAST, ON THE STAGED STATE, AND IT REFUSES THE STAGE. Every
+    # step above can report success and still leave a board the file's own
+    # printed assertions are false about -- `KLEESPARK-BT2`'s three boards
+    # each ran `set_hp: {who: first, amount: 55}` to a clean report and were
+    # then read at 45, 46 and 40. The comparison is against the WIRE and not
+    # against the packet, because the packet is the document the falsehood
+    # would go out on.
+    wire_assumption_preflight(turn, policy.staged_state)
     return policy.staged_state, summary
 
 
@@ -1913,6 +2091,17 @@ def execute_steps(turn: StagedTurn, form: dict[str, Any]
         body: dict[str, Any] = {"card": str(play["card"])}
         if play.get("target"):
             body["target"] = str(play["target"])
+        # EB-184: THE MODE TRAVELS WITH THE PLAY, not only with the screen that
+        # follows it. The form's `choose` is answered a step later, on the
+        # choose-a-card screen -- but the bridge has to decide whether the play
+        # needs aiming BEFORE that screen exists, because the game aims a card
+        # before its mode is chosen. Told the mode here, it asks the mode; told
+        # nothing, it asks the card TYPE and refuses a targetless Block half of
+        # an Attack-typed modal, which is exactly how slice 1 round 4 `t02`
+        # ended UNTESTED. The value is the same string the `answer_modal` step
+        # below carries, off the same form key: one reading, two readers.
+        if play.get("choose"):
+            body["mode"] = str(play["choose"])
         steps.append(("play", body))
         # EB-170. ONE AFTER EVERY PLAY, unconditionally, and not only after
         # the plays whose form entry carries a key. A modal is a property of

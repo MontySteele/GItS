@@ -4459,6 +4459,38 @@ def mode_is_priced(card: dict, index: int) -> bool:
     return index < len(prices) and prices[index] is not None
 
 
+def mode_aims(card: dict) -> list[tuple[str, bool]] | None:
+    """EB-184: per mode, its printed LABEL and whether taking it AIMS.
+
+    None for a card with no `choose_one`, so nothing is emitted for the rows
+    the rule does not reach and that regen stays a byte comparison.
+
+    WHY THE CARD HAS TO CARRY THIS. The declared `TargetType` is the CARD's and
+    is fixed before a mode is chosen -- the game aims first, and the 0.111.0
+    decompile has no mid-play enemy picker -- so an Attack-typed modal declares
+    `AnyEnemy` for the sake of the mode that aims, and every reader that asks
+    the card TYPE whether a play needs a target then gets the wrong answer for
+    the mode that aims at nobody. That is `EB-184`: the bridge refused the
+    targetless Block half of `proto_thoma_crimson_ooyoroi_either` with "Card
+    requires a target", and Kokomi slice 1 round 4 `t02` ended UNTESTED. The
+    per-mode answer is emitted here, read by the bridge through `IModalCard`,
+    and asked of the same sheet on the Python side by
+    `understudy.targeting.needs_target(row, choose)`.
+
+    The aiming test is `_aims_at_chosen_enemy` over the mode's WHOLE body,
+    branches included -- the same predicate and the same walk the card-level
+    TargetType scan uses, so the two cannot come to disagree about what aiming
+    is.
+    """
+    eff = modal_effect(card)
+    if eff is None:
+        return None
+    return [(str(mode.get("label") or ""),
+             any(_aims_at_chosen_enemy(e)
+                 for e in iter_effects(mode.get("effects") or [])))
+            for mode in eff["modes"]]
+
+
 def _modal_option_names(cards: list[dict], emitted_ids) -> list[str]:
     """Every mode-face class name emitted for this sheet, sorted.
 
@@ -7368,6 +7400,15 @@ def emit(
     if any(eff.get("op") == "spend_charge" for eff in card["effects"]):
         interfaces += ", IMeterPricedCard"
 
+    # EB-184: a modal card DECLARES what each of its modes does about aiming,
+    # because its own TargetType cannot -- that is the card's, fixed before a
+    # mode is chosen. See `mode_aims` for the defect this repairs and
+    # `IModalCard` for the member names, which are a wire contract the bridge
+    # reads by reflection.
+    aims = mode_aims(card)
+    if aims is not None:
+        interfaces += ", IModalCard"
+
     ind = "\n        "
     vars_cs = (",".join(f"{ind}    {v}" for v in vars_)).lstrip()
     vars_block = f"            {vars_cs}\n" if vars_cs else ""
@@ -7877,6 +7918,35 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "    // choose-a-card screen either.\n"
             "    protected override bool IsPlayable =>\n"
             "        ModalChoice.AnyAffordable(Owner, ModePrices);")
+    # EB-184: the per-mode aiming answer, as data, on the card the bridge is
+    # holding. ONE declaration -- the labels here and the labels the emit row
+    # records come from the same sheet key -- and it is emitted for every modal
+    # card rather than only the mixed ones, because "every mode aims" is an
+    # answer a caller needs too (it is the case where a missing target is still
+    # a refusal).
+    modal_aim_member = ""
+    if aims is not None:
+        labels_cs = ", ".join(
+            '"' + label.replace("\\", "\\\\").replace('"', '\\"') + '"'
+            for label, _ in aims)
+        flags_cs = ", ".join("true" if a else "false" for _, a in aims)
+        modal_aim_member = (
+            "\n\n    // EB-184: what each mode does about AIMING, in sheet"
+            " order.\n"
+            "    // The card's own TargetType is fixed before a mode is chosen"
+            " (the\n"
+            "    // game aims first), so it answers for the card and not for"
+            " the\n"
+            "    // play -- an Attack-typed modal declares AnyEnemy for the"
+            " mode\n"
+            "    // that aims, and the bridge then demanded a target on the"
+            " mode\n"
+            "    // that attacks nothing. These two rows are what it reads"
+            " instead.\n"
+            f"    public IReadOnlyList<string> ModeLabels =>\n"
+            f"        new[] {{ {labels_cs} }};\n\n"
+            "    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>\n"
+            f"        new[] {{ {flags_cs} }};")
     if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member)) > 1:
         raise ValueError(
             f"{card['id']}: two resource cost lines on one card -- only one "
@@ -7933,7 +8003,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{card["name"].replace('"', chr(92) + chr(34))}"),
         ("description", "{desc}"),
-    }};{tags_member}{spark_gate_member}{charge_gate_member}{modal_prices_member}{modal_gate_member}
+    }};{tags_member}{spark_gate_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

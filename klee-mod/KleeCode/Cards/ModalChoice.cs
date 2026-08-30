@@ -232,6 +232,45 @@ public static class ModalChoice
 }
 
 /// <summary>
+/// EB-184: WHAT EACH MODE DOES ABOUT AIMING, declared on the card so a caller
+/// outside this assembly can ask.
+///
+/// THE DEFECT THIS EXISTS FOR. A <c>choose_one</c> card takes its
+/// <c>TargetType</c> from the first mode that aims (codegen: the
+/// <c>choose_one</c> arm of the TargetType scan) because the game aims a card
+/// BEFORE its mode is chosen — <c>TargetType</c> is a property of the CARD and
+/// the 0.111.0 decompile has no mid-play enemy picker. That is right for the
+/// game and wrong for anything asking "does THIS play need a target": the
+/// bridge read <c>card.TargetType</c> alone and refused the targetless Block
+/// mode of an Attack-typed modal with "Card requires a target", which is how
+/// Kokomi slice 1 round 4 <c>t02</c> ended UNTESTED.
+///
+/// So the aiming question is answered PER MODE, in sheet order, and the card
+/// carries the answer. <c>ModeAimsAtChosenEnemy[i]</c> is true when mode i
+/// dereferences <c>cardPlay.Target</c>; <c>ModeLabels[i]</c> is the printed
+/// label a form names that mode by.
+///
+/// THE MEMBER NAMES ARE A WIRE CONTRACT. The bridge does not reference this
+/// assembly: <c>vendor/STS2_MCP/gits/GitsModalTargeting.cs</c> reads these two
+/// members by NAME off the played card's runtime type. Renaming either member
+/// silently restores the defect, so both names are pinned from the Python side
+/// in <c>tier0/tests/test_eb184_mode_targeting.py</c>.
+///
+/// Sim twin: <c>understudy.targeting.needs_target(row, choose)</c>, which asks
+/// the same question of the same sheet row and the same mode.
+/// </summary>
+public interface IModalCard
+{
+    /// <summary>The printed mode labels, in the order the sheet prints them —
+    /// the order both engines record a chosen mode's index in.</summary>
+    IReadOnlyList<string> ModeLabels { get; }
+
+    /// <summary>Per mode, in the same order: does taking it aim at ONE chosen
+    /// enemy?</summary>
+    IReadOnlyList<bool> ModeAimsAtChosenEnemy { get; }
+}
+
+/// <summary>
 /// EB-182: the price ONE mode prints, and the bank it is read against.
 ///
 /// THE RULE, one sentence: a mode whose body OPENS with a resource spend is

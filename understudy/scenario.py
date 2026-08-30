@@ -1023,6 +1023,16 @@ class Runner:
                             f"{[adapter.enemy_id(e) for e in adapter.enemy_blobs(self.state)]}",
                     self.state, self.state)
             action["target"] = adapter.enemy_id(enemy)
+        # EB-184: the chosen MODE, when the step names one, so the bridge can
+        # ask that mode whether the play aims rather than asking the card's
+        # printed type. A `choose_one` card typed as an Attack declares
+        # `AnyEnemy` for the sake of the mode that aims -- the game fixes the
+        # aim before the mode is chosen -- so the type answers for the CARD and
+        # not for the play, and the targetless mode was refused with "Card
+        # requires a target". Passed through verbatim: the bridge owns the
+        # match against the card's own printed mode labels.
+        if body.get("mode"):
+            action["mode"] = str(body["mode"])
         self._post(action, f"play {entry.get('name') or name}")
 
     def _do_select(self, body: dict[str, Any]) -> None:

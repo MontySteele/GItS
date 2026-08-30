@@ -83,7 +83,16 @@ def test_our_additions_live_apart_from_upstreams_source():
     # is an edit rather than a gits/ addition for the same reason EB-92's was:
     # the failure is inside a private resolution chain with nothing to route,
     # and a patch would have to re-implement it. Upstreamable as it stands.
-    assert modified == ["McpMod.Compendium.cs", "McpMod.cs",
-                        "McpMod.StateBuilder.cs", "McpMod.Wiki.cs"], (
+    # EB-184 (2026-08-30) added a FIFTH, and for EB-92's reason again: the
+    # whole defect is three statements inside `ExecutePlayCard`, which decided
+    # that a play needs aiming by reading `card.TargetType` -- the CARD's aim,
+    # fixed before a `choose_one` card's mode is chosen -- and so refused the
+    # targetless Block mode of an Attack-typed modal. There is nothing to
+    # route: a patch would have to re-implement the method to reach the three
+    # lines. The per-mode reading it now consults is a gits/ addition
+    # (`GitsModalTargeting.cs`) and this file only asks it the question.
+    assert modified == ["McpMod.Actions.cs", "McpMod.Compendium.cs",
+                        "McpMod.cs", "McpMod.StateBuilder.cs",
+                        "McpMod.Wiki.cs"], (
         f"upstream files we have edited changed: {modified}. Update PROVENANCE.md's "
         f"'What we changed' table and this assertion together, deliberately.")
