@@ -1,8 +1,10 @@
+using System;
 using Godot;
 using HarmonyLib;
 using KleeMod.Powers;
 using MegaCrit.Sts2.addons.mega_text;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Entities.UI;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
@@ -111,22 +113,115 @@ internal static class MeterCostBadge
         _ => StsColors.cream,
     };
 
-    private static readonly
-        System.Collections.Generic.Dictionary<Meter, Texture2D?> Icons = new();
+    private static bool _warnedFreedGlyph;
 
-    private static Texture2D? Icon(Meter meter)
+    /// <summary>
+    /// The glyph for a meter, RESOLVED FRESH ON EVERY PAINT (EB-222).
+    ///
+    /// THE DEFECT THIS IS. EB-220 shipped a `Dictionary&lt;Meter, Texture2D?&gt;`
+    /// static cache in front of this load -- one `ResourceLoader.Load` for the
+    /// life of the process, its result held in a static field forever. The game
+    /// does not let a texture live that long: it PRELOADS a room's asset set and
+    /// TEARS IT DOWN with the room ("Preloading 'Combat Room' assets... count=9"
+    /// on the way in, `Asset not cached: res://klee/powers/bomb.png` once it is
+    /// gone). So the `CompressedTexture2D` combat #1 loaded was freed with combat
+    /// #1's assets, our static field kept pointing at the corpse, and the FIRST
+    /// card drawn in combat #2 handed it to `TextureRect.SetTexture` --
+    /// `ObjectDisposedException` out of `NCard.UpdateStarCostVisuals`, up through
+    /// `CardPileCmd.Draw` and into the turn loop, which died with the combat in
+    /// progress and stuck the room (`understudy.soak`, every run).
+    ///
+    /// SO THE MOD HOLDS NO TEXTURE ACROSS SCENES, and this method is the whole
+    /// rule: ask `ResourceLoader` each time. That is not the expensive read it
+    /// looks like -- the engine keeps its own resource cache and answers a
+    /// second load of a live path from it -- and it is the only source that can
+    /// tell us the truth about a resource whose lifetime the engine owns.
+    /// `KleePck.Path` still caches, but it caches a STRING and a bool.
+    ///
+    /// AND THE ANSWER IS STILL CHECKED, because a cache we do not own can hand
+    /// back a wrapper for an object that is already gone. A freed texture is
+    /// reported through <paramref name="freed"/> rather than as a plain null:
+    /// null means "this meter owns no glyph" (Encore, Charge -- draw the number,
+    /// hide the icon) or "the glyph is declared and the pck lacks it" (draw
+    /// nothing), and neither of those is what a disposed resource means.
+    /// </summary>
+    private static Texture2D? Glyph(Meter meter, out bool freed)
     {
-        if (Icons.TryGetValue(meter, out Texture2D? cached))
-        {
-            return cached;
-        }
+        freed = false;
 
         string? declared = IconPathFor(meter);
         string? path = declared == null ? null : KleePck.Path(declared);
-        Texture2D? texture =
-            path == null ? null : ResourceLoader.Load<Texture2D>(path);
-        Icons[meter] = texture;
+        if (path == null)
+        {
+            return null;
+        }
+
+        Texture2D? texture = ResourceLoader.Load<Texture2D>(path);
+        if (texture == null)
+        {
+            return null;
+        }
+
+        if (!GodotObject.IsInstanceValid(texture))
+        {
+            freed = true;
+            return null;
+        }
+
         return texture;
+    }
+
+    /// <summary>
+    /// Put the glyph on the badge, or take the badge's glyph off -- and never,
+    /// under any circumstance, throw at the caller.
+    ///
+    /// `Paint` runs inside `CardPileCmd.Draw`, i.e. INSIDE THE TURN LOOP, and
+    /// EB-222 is what an exception from here costs: the loop dies, the combat is
+    /// stuck, and the run is over. `IsInstanceValid` above is the guard; this
+    /// `catch` is the promise, for the resource the engine frees between the
+    /// check and the write and for the icon node torn down under us. Either way
+    /// the card draws without a glyph and the badge still shows its NUMBER,
+    /// which is the half of the display the price actually lives in. Warned
+    /// once, like every other degrade in this layer.
+    /// </summary>
+    private static void SetGlyph(TextureRect icon, Texture2D? texture)
+    {
+        try
+        {
+            if (texture == null || !GodotObject.IsInstanceValid(icon))
+            {
+                icon.Visible = false;
+                return;
+            }
+
+            icon.Texture = texture;
+            icon.Visible = true;
+        }
+        catch (ObjectDisposedException e)
+        {
+            WarnFreedGlyph(e.Message);
+            try
+            {
+                icon.Visible = false;
+            }
+            catch (ObjectDisposedException)
+            {
+                // The icon node itself is gone. Nothing to draw on, and
+                // nothing further to do: the caller paints the number next.
+            }
+        }
+    }
+
+    private static void WarnFreedGlyph(string detail)
+    {
+        if (_warnedFreedGlyph)
+        {
+            return;
+        }
+
+        _warnedFreedGlyph = true;
+        Log.Warn($"[{KleeMod.ModId}] meter cost badge: the meter glyph was freed "
+               + $"by the engine ({detail}); drawing the price with no glyph.");
     }
 
     /// <summary>
@@ -159,21 +254,21 @@ internal static class MeterCostBadge
             return;
         }
 
-        Texture2D? texture = Icon(price.Meter);
-        if (texture == null && IconPathFor(price.Meter) != null)
+        Texture2D? texture = Glyph(price.Meter, out bool freed);
+        if (texture == null && !freed && IconPathFor(price.Meter) != null)
         {
             return;                 // a glyph is declared and absent: no STAR
         }
 
-        if (texture == null)
+        if (freed)
         {
-            icon.Visible = false;   // this meter owns no glyph: number only
+            WarnFreedGlyph("IsInstanceValid was false for the loaded texture");
         }
-        else
-        {
-            icon.Texture = texture;
-            icon.Visible = true;
-        }
+
+        // null here is one of two: this meter owns no glyph (Encore, Charge --
+        // number only, by design), or the engine freed the one it had (EB-222 --
+        // number only, warned once). Both draw the badge; neither throws.
+        SetGlyph(icon, texture);
 
         label.SetTextAutoSize(price.Amount.ToString());
 
