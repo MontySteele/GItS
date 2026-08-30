@@ -789,7 +789,12 @@ python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md
   does not show up. **The deciding fresh-Opus form and the Codex spot-check are
   produced OUTSIDE the funnel** — nothing here calls a hosted model, the round
   finds the control form on disk by elimination — so neither is in this budget
-  and neither is made concurrent by this flag.
+  and neither is made concurrent by this flag. **Measured live on
+  `funnel-bench-1` (2026-08-30, R2's six boards under bench ids,
+  `--lanes 2 --read-workers 2`, `review/qa/funnel-bench-1-record.md`): six
+  reads in 219 s against R2's 295 s, ~37 s per board effective, 1.35× — below
+  the server's raw 1.76× because each read's ~10–15k-token prompt competes for
+  the same GPU; a paired read took ~74 s where a solo one took 49 s.**
   `--read-workers N` is a semaphore of N over the read phase (N = 1 is the old
   single lock, exactly). **It needs a server with N slots:** `serve.ps1` runs
   `--parallel 2` since 2026-08-30 (`-Parallel`, default 2; measured on two
@@ -945,8 +950,14 @@ deals the boards to the two lanes in the pre-registered order.
   Two is what has been measured; nothing here says three works.
 - **What two lanes buy, stated honestly.** The GAME half — staging and
   replaying — runs two boards at once. The MODEL half does not: there is one
-  local server, so readings stay serialized across lanes. The win is the game
-  time, not a doubling of the round.
+  local server, so readings stay serialized across lanes unless
+  `--read-workers` widens them. **Measured on `funnel-bench-1` (2026-08-30,
+  the first full two-lane round, `review/qa/funnel-bench-1-record.md`): six
+  stages took 93 s on two lanes against R2's 89 s on one — each stage stretched
+  from ~15 s to ~30 s with two games up, so on this machine the second game
+  competes with the first for the same CPU/GPU and the stage figure is a wash.**
+  What the round proved is the routing: 6 of 6 seeds honoured, no crossing
+  (`EB-210`'s fix, first time under a whole round), 4 launches per lane.
 - **The order is unchanged, and so is the stopping rule.** R221 B's
   pre-registered order is the order boards are DEALT in; lanes decide which
   process stages next, never which board is next. `slot_state` /

@@ -1,0 +1,70 @@
+{
+ "turn_id": "funnel-bench-1-t02",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "target_missing"
+ ],
+ "reasons": [
+  "target_missing: a play names a card whose printed effects aim at ONE enemy and carries no target, so the line cannot be replayed at all"
+ ],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "71be7375bfbbfa23388f1b5f3c2715f966e0369767c736489af91973107fed7f",
+ "chosen_line": [
+  {
+   "card": "Jumpy Dumpty",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Jumpy Dumpty first, then Kaboom! at Nibbit, spending all 3 energy. Fwoosh! was not played because it was blocked by card logic and the Spark bank was empty.",
+  "q2_other_line_considered": "I seriously considered Jumpy Dumpty plus Duck and Cover. That line would have gained 5 Block and reduced the telegraphed 12 damage to 7, but it would have sacrificed the 7 damage from Kaboom! for Block I did not need against a 12-damage attack.",
+  "q3_what_it_gave_up": "The chosen line gave up 5 Block from Duck and Cover. It prioritized immediate damage and leaving Nibbit at lower HP over reducing this turn's incoming damage, which is a tradeoff if a later turn or a larger attack made that Block valuable.",
+  "q4_different_intent": "Yes. If Nibbit's intent had been a much larger attack, especially one that could kill me or deal much more damage, I would have prioritized Duck and Cover, likely with Jumpy Dumpty, to gain 5 Block. A small attack or non-attack intent would not have changed the line."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": true,
+  "findings": [
+   {
+    "position": 1,
+    "card": "Jumpy Dumpty",
+    "mode": "",
+    "why": "play 1 names 'Jumpy Dumpty', whose printed effects aim at ONE enemy, and carries no target. The bridge has nothing to aim at, so this line cannot be replayed -- it is sealed and UNTESTED, which is the state KLEESPARK-R1 ended two of its eight lines in"
+   }
+  ],
+  "hand_takes_a_target": [
+   "Fwoosh!",
+   "Kaboom!",
+   "Jumpy Dumpty"
+  ],
+  "hand": [
+   "Fwoosh!",
+   "Kaboom!",
+   "Kaboom!",
+   "Duck and Cover",
+   "Jumpy Dumpty"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T22:22:19"
+}

@@ -1,0 +1,31 @@
+{
+ "turn_id": "funnel-bench-1-t02",
+ "packet_sha256": "71be7375bfbbfa23388f1b5f3c2715f966e0369767c736489af91973107fed7f",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Jumpy Dumpty",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Jumpy Dumpty first, then Kaboom! at Nibbit, spending all 3 energy. Fwoosh! was not played because it was blocked by card logic and the Spark bank was empty.",
+ "q2_other_line_considered": "I seriously considered Jumpy Dumpty plus Duck and Cover. That line would have gained 5 Block and reduced the telegraphed 12 damage to 7, but it would have sacrificed the 7 damage from Kaboom! for Block I did not need against a 12-damage attack.",
+ "q3_what_it_gave_up": "The chosen line gave up 5 Block from Duck and Cover. It prioritized immediate damage and leaving Nibbit at lower HP over reducing this turn's incoming damage, which is a tradeoff if a later turn or a larger attack made that Block valuable.",
+ "q4_different_intent": "Yes. If Nibbit's intent had been a much larger attack, especially one that could kill me or deal much more damage, I would have prioritized Duck and Cover, likely with Jumpy Dumpty, to gain 5 Block. A small attack or non-attack intent would not have changed the line.",
+ "q4_changed": true,
+ "role": "shadow",
+ "seat_mode": "shadow"
+}
