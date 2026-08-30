@@ -23,6 +23,7 @@ import gen_klee_cards as gen                                   # noqa: E402
 from tier0.engine import effects                               # noqa: E402
 
 MODAL_CS = ROOT / "klee-mod" / "KleeCode" / "Cards" / "ModalChoice.cs"
+METER_CS = ROOT / "klee-mod" / "KleeCode" / "Powers" / "MeterCost.cs"
 
 
 def modal_card(*modes, **overrides):
@@ -84,33 +85,53 @@ def test_a_priced_mode_declares_its_price_and_gates_the_card():
     """EB-182, the C# leg of the rule. The price is DATA -- one declaration,
     read by the screen filter and by the card-level gate -- and the bank read
     is the one the paying call gates on, so the price offered and the price
-    charged cannot drift."""
+    charged cannot drift.
+
+    EB-220 dropped the emitted bank LAMBDA: a `ModePrice` now names its meter
+    and `MeterCost.BankOf` holds one read per meter, the same one the badge
+    consults."""
     src = gen.emit(modal_card(ENCORE, DRAW), gen.FURINA_PROFILE)
-    assert "private static readonly ModePrice?[] ModePrices" in src
-    assert ('new ModePrice("Encore", 2, p => FurinaResources.Encore('
-            'p.Creature))') in src
+    assert "internal static readonly ModePrice?[] ModePrices" in src
+    assert "new ModePrice(Meter.Encore, 2)" in src
     assert ("protected override bool IsPlayable =>\n"
             "        ModalChoice.AnyAffordable(Owner, ModePrices);") in src
     # Mode 1 prices nothing and says so in the same table, by position.
     assert src.split("ModePrices =")[1].lstrip().startswith("{\n        null,")
 
 
-def test_a_spark_priced_mode_face_carries_the_shipped_cost_badge():
-    """EB-182, the arm this unblocks (Bag of Tricks). A Spark-priced mode's
-    FACE declares `ISparkPricedCard`, which is what the shipped Spark cost
-    badge reads -- the price lands on the option a player is choosing between,
-    in the look that already exists, off the same single declaration."""
+def test_a_priced_mode_face_carries_the_shipped_cost_badge():
+    """EB-182, the arm this unblocks (Bag of Tricks), generalised by EB-220 to
+    every meter. A priced mode's FACE declares `IMeterPricedCard`, which is what
+    the shipped METER cost badge reads -- the price lands on the option a player
+    is choosing between, in the look that already exists.
+
+    The face declares no number of its own: it READS the card's `ModePrices`
+    row, so the badge, the screen filter and the gate share one literal."""
     spend = {"label": "Spend 3 Sparks: deal 12",
              "effects": [{"op": "spend_spark", "amount": 3},
                          {"op": "damage", "amount": 12, "target": "enemy"}]}
     src = gen.emit(modal_card(HIT, spend), gen.FURINA_PROFILE)
-    assert ('new ModePrice("Sparks", 3, p => SparkPower.SparksAsResolved('
-            'p.Creature))') in src
+    assert "new ModePrice(Meter.Sparks, 3)" in src
     assert ("public sealed class ModalProbeModeB : ModalOptionCard, "
-            "ISparkPricedCard") in src
-    assert "public int PrintedSparkPrice => 3;" in src
+            "IMeterPricedCard") in src
+    assert ("public Meter PricedMeter =>\n"
+            "        ModalProbe.ModePrices[1]!.Value.Meter;") in src
+    assert ("public int PrintedMeterPrice =>\n"
+            "        ModalProbe.ModePrices[1]!.Value.Amount;") in src
     # The unpriced mode's face is untouched -- no badge, no interface.
     assert "public sealed class ModalProbeModeA : ModalOptionCard\n" in src
+
+
+def test_an_encore_priced_mode_face_is_badged_too():
+    """EB-220, [USER] 2026-08-30: "Yes, I think Encore and Charge need badges."
+    Before it, only a Spark-priced face carried one; an Encore- or Charge-priced
+    mode printed its price in the label and nowhere else."""
+    src = gen.emit(modal_card(HIT, DRAW), gen.FURINA_PROFILE)
+    assert "new ModePrice(Meter.Encore, 2)" in src
+    assert ("public sealed class ModalProbeModeB : ModalOptionCard, "
+            "IMeterPricedCard") in src
+    assert ("public Meter PricedMeter =>\n"
+            "        ModalProbe.ModePrices[1]!.Value.Meter;") in src
 
 
 def test_a_state_dependent_mode_price_is_refused_rather_than_emitted():
@@ -135,7 +156,10 @@ def test_the_sim_and_the_generator_price_the_same_modes():
     added to one side and not the other is a mode gated in the sim and offered
     in the mod, which is the drift EB-182 exists to close."""
     assert set(gen.MODE_PRICE_OPS) == set(effects.MODE_PRICE_OPS)
-    for op, (meter, _bank) in gen.MODE_PRICE_OPS.items():
+    for op, meter in gen.MODE_PRICE_OPS.items():
+        # EB-220: the generator's value is now the C# `Meter` member, and the
+        # member NAMES are the sim's printed meter names -- the strings both
+        # engines put in a refusal line ("needs 3 Encore, bank holds 2").
         assert effects.MODE_PRICE_OPS[op][1] == meter
 
 
@@ -259,6 +283,20 @@ def test_the_cs_emit_row_mirrors_the_tier0_event():
     assert name.group(1) == "mode_chosen"
     assert re.findall(r'"([a-z]+)"', fields.group(1)) == \
         ["card", "index", "label"]
+
+
+def test_the_cs_meter_enum_prints_the_sims_meter_names():
+    """EB-220. A `ModePrice` names a `Meter` member instead of a string, and a
+    refusal line prints that member's NAME -- so the enum's members are the
+    sim's printed meter names, or the same refused mode reads differently in
+    the two engines. The badge reads the same enum, which is why it is here and
+    not only in C#."""
+    src = METER_CS.read_text(encoding="utf-8")
+    body = re.search(r"public enum Meter\s*\{([^}]*)\}", src)
+    assert body
+    members = re.findall(r"([A-Z][A-Za-z]*),", body.group(1))
+    assert set(members) == {meter for _field, meter
+                            in effects.MODE_PRICE_OPS.values()}
 
 
 def test_the_cs_side_reuses_the_base_game_choice_screen():
