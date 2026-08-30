@@ -39,6 +39,15 @@ registration packets themselves live under `review/active/` — one home, not tw
   cannot be re-read later without rebuilding the world it was taken in. Nothing
   here relaxes stamping or citability — see *Versioning* below — and every
   already-registered read stands as registered.
+- **An engine legality fix is absorbed at the next planned bump, not
+  re-baselined on its own ([USER], 2026-08-30, on `EB-182`).** `EB-182`
+  made a priced `choose_one` mode unofferable when the bank cannot pay it;
+  shipped `deep_breath`'s second mode used to overdraw Encore into HP and
+  now is simply not offered below 3 Encore, which moves tier 0.5 numbers for
+  any arm holding the card. None of the four stamps names an engine rule, so
+  no stamp moved; published numbers stand (R101b); the next planned
+  `RT/D/P/C` bump carries the re-baseline that absorbs it, and until then a
+  read of an arm holding `deep_breath` says which side of the fix it is on.
 
 ### Versioning
 - **Version stamps are mandatory exactly as before (R207 left this untouched):**
