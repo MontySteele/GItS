@@ -3728,7 +3728,17 @@ def _enrol_memory(state: CombatState, card: Card, *,
         state.emit("kurage_memory_refused", card=card.id, rule=rule,
                    reason="copy" if card.from_kurage_memory else "already")
         return False
-    if card.is_junk:
+    if card.is_junk or card.type == "status":
+        # THE `type` LIMB IS NOT REDUNDANT and it is the reason a run could
+        # die. `Card.is_junk` is a RARITY test, and `engine.statuses`
+        # synthesizes its six clogs with `rarity="basic"`, `type="status"` --
+        # so a Toxic a Muster ate passed this door, enrolled, and then could
+        # not be rebuilt at the fire (a status is in no loader index at all,
+        # EB-123's own seam). The docstring above already says a Status can
+        # never enter; this is that sentence, made true for the synthesized
+        # half as well. `is_junk` itself is NOT touched: it is shipped, the
+        # conscript pool and the Charge funnel read it, and narrowing it
+        # would move numbers outside this quarantine.
         state.emit("kurage_memory_refused", card=card.id, rule=rule,
                    reason="junk")
         return False
@@ -4000,8 +4010,13 @@ def kurage_fire(state: CombatState, manual: bool = False) -> bool:
     state.kurage_queue.pop(0)
     if not manual:
         state.kurage_fired_this_turn = True
-    from tier0.content import loader                # late import (cycle)
-    token = loader.get_card(entry.card_id)
+    # `token_card`, NOT `loader.get_card`: the one door from a stored card ID
+    # back to a fresh instance, which asks the loader first and opens the
+    # status door only inside the handler for the loader's own KeyError
+    # (EB-123). Every id the loader resolves resolves identically; the only
+    # behaviour that can differ is behaviour that used to be a crash, and this
+    # path crashed a tier-0.5 run on a remembered `status_toxic`.
+    token = token_card(entry.card_id)
     token.from_kurage_memory = True
     token.kurage_remembered = True
     # The copy is not an Exhaust EVENT (see `_remove_from_combat`): clearing
@@ -4093,13 +4108,22 @@ def kurage_memory_pulse(state: CombatState) -> None:
     p = state.player
     kind = state.kurage_last_card_type
     target = kurage_target(state)
+    # `charge` RIDES EVERY EMIT BELOW, and it is not decoration: the shipped
+    # pulse's own emit carries it, and `tier05.kurage_telemetry.trace` reads
+    # `ev["charge"]` off EVERY `kurage_pulse` row without a default -- so a
+    # memory-branch pulse that omitted the field raised `KeyError` the moment
+    # a tier-0.5 run was taken with the flag on, which is why no run-level
+    # arm on this rule had ever completed. The bank is not READ by the rule
+    # any more (that is the whole of the v3 rewrite), but it is still the
+    # bank at pulse time and it is what the telemetry column means.
     if not kind:
         state.emit("kurage_pulse", amount=0, kind="none", landed=False,
-                   memory=True)
+                   memory=True, charge=p.charge)
         return
     if kind == "attack":
         state.emit("kurage_pulse", amount=C.KURAGE_PULSE_BASE, kind=kind,
-                   landed=bool(state.living_enemies), memory=True)
+                   landed=bool(state.living_enemies), memory=True,
+                   charge=p.charge)
         if target is not None:
             deal_damage_to_enemy(state, target, C.KURAGE_PULSE_BASE,
                                  element="hydro", source="companion")
@@ -4114,12 +4138,13 @@ def kurage_memory_pulse(state: CombatState) -> None:
             # not need a body, which is the branch's other honest half.
             resources.gain_charge(state, C.CHARGE_PER_EXHAUST, "kurage_pulse")
             state.emit("kurage_pulse", amount=C.CHARGE_PER_EXHAUST, kind=kind,
-                       landed=True, memory=True)
+                       landed=True, memory=True, charge=p.charge)
         else:
             # v2's PICK C1, kept implemented: pure Hydro application, no
             # number. Nothing lands on an empty board -- an aura needs a body.
             state.emit("kurage_pulse", amount=0, kind=kind,
-                       landed=target is not None, memory=True)
+                       landed=target is not None, memory=True,
+                       charge=p.charge)
             if target is not None:
                 reactions.apply_aura(state, target, "hydro",
                                      source="kurage_pulse")
@@ -4138,7 +4163,7 @@ def kurage_memory_pulse(state: CombatState) -> None:
         # branch in `player_turn_end_triggers`, so nothing that ships moved.
         blk = C.KURAGE_MEMORY_PULSE_BLOCK
         state.emit("kurage_pulse", amount=blk, kind=kind, landed=True,
-                   memory=True)
+                   memory=True, charge=p.charge)
         if blk:
             p.block += blk
             state.emit("block", amount=blk)
