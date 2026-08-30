@@ -32,6 +32,7 @@ SPEED = f"{BASE}/api/v1/gits/speed"
 SEED = f"{BASE}/api/v1/gits/seed"
 GIVE_CARD = f"{BASE}/api/v1/gits/give_card"
 DEBUG_STATE = f"{BASE}/api/v1/gits/debug_state"
+METER_LEDGER = f"{BASE}/api/v1/gits/meter_ledger"
 
 
 class BridgeError(RuntimeError):
@@ -335,6 +336,30 @@ def give_card(card_id: str, count: int = 1, upgraded: bool = False,
 def give_card_info() -> dict:
     """The route's own description, including whether a run is in progress."""
     return _request(GIVE_CARD)
+
+
+# ---------------------------------------------------- the meter ledger ----
+#
+# `EB-216` / R225's clause. `GET /api/v1/gits/meter_ledger` -> the per-play
+# ledger the mod keeps: for every card played, bank before, price paid, gains
+# BY SOURCE (the engine event that made each one -- the starter relic's
+# detonation refund, a kit response, a card rider) and bank after.
+#
+# IT IS ITS OWN ROUTE AND NOT PART OF THE STATE, deliberately: the state
+# payload is what `blindplay` builds the TESTER'S page out of, and the ledger
+# names engine events in a developer's vocabulary. A grading surface (R101b)
+# is easiest to keep clean by never putting the material on the same payload.
+
+
+def meter_ledger() -> dict:
+    """The ledger's rows, oldest first.
+
+    `available: False` with an empty list means "this build has no klee mod to
+    ask", which is a different fact from "nothing has moved a meter yet" --
+    and the caller is entitled to tell them apart, so neither is flattened
+    into an empty answer here.
+    """
+    return _request(METER_LEDGER)
 
 
 # ------------------------------------------------------ board setup -------

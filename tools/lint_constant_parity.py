@@ -245,6 +245,12 @@ MIRRORED: dict[str, object] = {
 # legitimate is leaving the question unanswered.
 # --------------------------------------------------------------------------
 UNMIRRORED: dict[str, str] = {
+    "MeterLedger.MaxRows":
+        "`EB-216`. INSTRUMENT, not balance: how many per-play ledger rows the "
+        "mod keeps before dropping the oldest. It touches no game number, no "
+        "card and no meter -- it is the size of a diagnostic buffer, and the "
+        "sim has no ledger to size. R225 filed the ledger as instrument work "
+        "that does not gate an arm; this is the only number it has.",
     "ExplosiveFrags.SparksPerDetonation":
         "the BASE starter's rate, carried forward unchanged by the upgrade -- "
         "which is the ratified design (the windfall is OpeningSparks; the "

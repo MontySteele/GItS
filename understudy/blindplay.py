@@ -1316,6 +1316,44 @@ def wire_snapshot(state: dict[str, Any], *, index: int, verb: str,
 SNAPSHOT_VERBS = ("play", "end turn")
 
 
+def ledger_rows(wire: Any, after_index: int = 0) -> tuple[list[dict[str, Any]],
+                                                          str]:
+    """The meter-ledger rows minted since `after_index`, and a note.
+
+    `EB-216` / R225's clause. The mod keeps one ledger of every meter mutation
+    routed through its own gain/spend chokepoints, each named by the ENGINE
+    EVENT that made it. This is the read; `understudy.bridge.meter_ledger` is
+    the route.
+
+    THE NOTE IS RETURNED RATHER THAN RAISED, and the distinction it carries is
+    the one the bridge is careful about: `unavailable` means this build has no
+    klee mod to ask, and is a different fact from a ledger that exists and is
+    empty. A wire that cannot answer at all is `error: ...` -- a snapshot with
+    no ledger is still a snapshot, and a run must never die because an
+    instrument did.
+    """
+    read = getattr(wire, "meter_ledger", None)
+    if read is None:
+        return [], "no ledger route on this wire"
+    try:
+        blob = read()
+    except bridge.BridgeError as exc:
+        return [], f"error: {exc}"
+    if not isinstance(blob, dict):
+        return [], "error: the ledger route did not answer with an object"
+    if not blob.get("available"):
+        return [], "unavailable: this build has no meter ledger"
+    all_rows = [r for r in (blob.get("rows") or []) if isinstance(r, dict)]
+    # THE LEDGER RESTARTS ITS NUMBERING AT EVERY COMBAT, because a row carried
+    # between fights would let a grader attribute a spend to the wrong one. A
+    # watermark the ledger has fallen behind therefore means "new fight", not
+    # "nothing new" -- filtering on it blindly would drop a whole fight.
+    highest = max((_int(r.get("index")) for r in all_rows), default=0)
+    if highest < after_index:
+        return all_rows, ""
+    return [r for r in all_rows if _int(r.get("index")) > after_index], ""
+
+
 # --------------------------------------------------------------- grammar ---
 
 _QUOTED = re.compile(r'"([^"]*)"|“([^”]*)”')
@@ -1965,10 +2003,15 @@ class ScriptedWire:
     grammar produced.
     """
 
-    def __init__(self, states: list[dict[str, Any]]):
+    def __init__(self, states: list[dict[str, Any]],
+                 ledger: list[list[dict[str, Any]]] | None = None):
         self.states = list(states)
         self.posts: list[dict[str, Any]] = []
         self.i = 0
+        # `EB-216`. The meter ledger the far side would be keeping: one list
+        # per POST, cumulative, the way the mod's own is. `None` scripts a wire
+        # with no ledger route at all, which is a release build.
+        self.ledger = None if ledger is None else list(ledger)
 
     def get_state(self) -> dict[str, Any]:
         return self.states[min(self.i, len(self.states) - 1)]
@@ -1980,6 +2023,15 @@ class ScriptedWire:
 
     def health(self) -> dict[str, Any]:
         return {"mod_version": "0.0-scripted"}
+
+    def meter_ledger(self) -> dict[str, Any]:
+        if self.ledger is None:
+            # What a release build answers: the route is there, the mod that
+            # keeps a ledger is not.
+            return {"status": "ok", "available": False, "rows": [], "count": 0}
+        rows = self.ledger[min(max(self.i - 1, 0), len(self.ledger) - 1)]
+        return {"status": "ok", "available": True, "rows": rows,
+                "count": len(rows)}
 
 
 class CodexThread:
@@ -2168,6 +2220,10 @@ class Session:
         # `EB-216`. One row per play and per end turn, machine-written off the
         # wire and never rendered to the seat.
         self.wire_rows: list[dict[str, Any]] = []
+        # The highest meter-ledger row index already filed on a snapshot, so
+        # each snapshot carries the rows THIS action minted and not the fight's
+        # whole history over again.
+        self._ledger_seen = 0
         self.fight_records: list[str] = []
         self.run_record = ""
         self.stopped = ""
@@ -2309,6 +2365,7 @@ class Session:
             # `EB-216`. The board the seat decided on, written down before the
             # POST moves it. Only `play` and `end turn`: a map walk or a shop
             # purchase has no turn, no bank and no intent to count against.
+            snap = None
             if res["verb"] in SNAPSHOT_VERBS:
                 snap = wire_snapshot(state, index=len(self.wire_rows) + 1,
                                      verb=res["verb"], command=command)
@@ -2318,6 +2375,20 @@ class Session:
             post = dict(res["post"] or {})
             action = post.pop("action")
             result = self.wire.post(action, **post)
+            # `EB-216`, R225's clause. AFTER the POST, because the ledger row
+            # this play minted does not exist until the play has resolved --
+            # the board above is the decision, this is what the decision cost
+            # and what it gave back. A gain that lands later (a turn-start kit
+            # response after an `end turn`) is on the NEXT snapshot's rows,
+            # which is where the engine actually put it.
+            if snap is not None:
+                rows, note = ledger_rows(self.wire, self._ledger_seen)
+                snap["ledger"] = rows
+                if note:
+                    snap["ledger_note"] = note
+                for row in rows:
+                    self._ledger_seen = max(self._ledger_seen,
+                                            _int(row.get("index")))
             self.actions += 1
             feedback = _result_line(result)
             self.transcript.write(kind="result", action=action,
@@ -2590,6 +2661,61 @@ def notes_markdown(rows: list[tuple[str, str, str]]) -> str:
         cmd = command.replace("|", "\\|").strip()
         out.append(f"| `{turn}` | `{cmd}` | {note} |")
     return "\n".join(out) + "\n"
+
+
+def read_snapshots(path: Path) -> list[dict[str, Any]]:
+    """The wire snapshots of a finished session, from either half.
+
+    `EB-216`. A grader is handed one of two directories and should not have to
+    care which: the GITIGNORED log dir (`wire.jsonl`, which is what every
+    committed `review/qa/blindplay/*/grade.py` is pointed at, beside the
+    `turn-*/` pages they already read) or the COMMITTED record dir
+    (`wire.json`, which is what survives the log being swept). A directory
+    with neither answers with nothing rather than raising: a session sealed
+    before this channel existed has no snapshots, and that is a fact about the
+    session, not an error in the reader.
+    """
+    jsonl = path / "wire.jsonl"
+    if jsonl.is_file():
+        rows = []
+        for line in jsonl.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                rows.append(json.loads(line))
+        return rows
+    blob = path / "wire.json"
+    if blob.is_file():
+        data = json.loads(blob.read_text(encoding="utf-8"))
+        return [r for r in (data.get("snapshots") or [])
+                if isinstance(r, dict)]
+    return []
+
+
+def meter_plays(snapshots: list[dict[str, Any]],
+                meter: str = "spark") -> list[dict[str, Any]]:
+    """Every ledger row for one meter, flattened out of the snapshots.
+
+    `EB-216` / R225's clause: the per-play `{card, before, price_paid, gains
+    {source: n}, after}` a grader counts against. The snapshot a row rides on
+    is carried through as `snapshot` and `turn`, because a play is only
+    interesting beside the board it was made on.
+
+    NOTHING PUBLISHED IS RE-GRADED THROUGH THIS (R101b, R224 A). It is the
+    read the NEXT run's slate has; a record sealed before the channel existed
+    has no rows and stays exactly as it was graded.
+
+    `meter` is a parameter for the reason it is a field on the mod side:
+    Charge and Encore are the same shape and will want the same counts.
+    """
+    out = []
+    for snap in snapshots:
+        for row in (snap.get("ledger") or []):
+            if not isinstance(row, dict):
+                continue
+            if meter and _text(row.get("meter")) != meter:
+                continue
+            out.append({**row, "snapshot": _int(snap.get("index")),
+                        "turn": _int(row.get("turn", snap.get("turn")))})
+    return out
 
 
 def audit_markdown(audit: dict[str, Any]) -> str:

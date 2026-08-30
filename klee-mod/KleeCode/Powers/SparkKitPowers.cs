@@ -37,7 +37,8 @@ public sealed class SparkPerTurnPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Player player)
     {
         if (player.Creature != Owner || Amount <= 0) return;
-        await SparkPower.Gain(choiceContext, Owner, Amount, cardSource: null);
+        await SparkPower.Gain(choiceContext, Owner, Amount, cardSource: null,
+            source: "power:spark_per_turn/turn_start");
     }
 }
 
