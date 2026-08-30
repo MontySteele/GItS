@@ -4207,3 +4207,127 @@ a shrinking denominator is never read as a shrinking ratio.
 5. **No win rate is registered and none may be quoted off this read** (R215 B).
    The instrument prints one because the run layer produces it; it is a
    diagnostic, it grades nothing, and it is not comparable to any published arm.
+
+### 17.5 What actually ran — the cell, the stamp, and one disclosure
+
+**RUN 2026-08-30.** `python -m tier05.exp_klee_sparks_s1 --json
+review/qa/kleespark-s1/record.json`, 600 runs per arm at seed 11, `jobs=1`,
+completed inside the driver's 600-second allowance and well inside §17.3's
+registered 30-minute budget. Record, raw JSON and the driver's unedited stdout
+are under `review/qa/kleespark-s1/`.
+
+**THE STAMP DIFFERED FROM THE ONE §17.3 DECLARED, and §17.3's own rule is that
+it is disclosed here.** §17.3 wrote the expected stamp as `RT12/D18/P11/C20`,
+copied from `STATE.md`'s Live cell. The tree's live stamp is
+**`RT12/D18/P11/C21`**. `STATE.md` was **stale at `HEAD`**:
+`CONSTANTS_VERSION` moved to **21** on 2026-08-30 under `EB-219` — Prune's
+Sparks moved off her printed face into Klee's kit declaration, at parity on all
+four yields.
+
+**The world did not move under this read.** It was C21 before §17 was written,
+during the run and after it, so what differed is the registration's
+transcription of a stale document, not the world the numbers were taken in.
+§17.3's clause — *the read is not published against a moved world* — is
+therefore satisfied rather than triggered: there is one world here, and every
+number below is published stamped **C21**, which is where it was taken.
+Nothing is re-run, no threshold moves, and `STATE.md`'s Live cell is corrected
+as hygiene in the same commit that lands this section.
+
+**C21 is not neutral for this read and it is named rather than left to be
+found.** `EB-219` is exactly the edit that moved a Klee Spark SOURCE off a
+printed row, so §17.2's sheet-only maker definition cannot see it — see the
+blind spot at §17.7 item 1, which is why the inherited ratio is stated as a
+floor on generation and never as a ceiling.
+
+### 17.6 The slate, graded
+
+**2 PREDICTED / 0 SPLIT / 3 MISS / 0 UNREACHED.** Every grade is the committed
+grader's own output against §17.4's registered thresholds and no others.
+
+| slot | grade | the read | the registered threshold |
+|---|---|---|---|
+| `S1` per-fight peak Spark bank | **PREDICTED** | median peak **5.0**, and **90.7%** of 8,428 fights peaked at ≥ 2 | median ≥ 2 AND ≥ 60% of fights peak ≥ 2 |
+| `S2` share of turns with a non-damage sink affordable | **MISS** | **0.62%** of 34,597 player turns (216 turns) | ≥ 15% PREDICTED, 5–15% SPLIT, < 5% MISS |
+| `S3` share of drafted decks holding one | **MISS** | **3.2%** of 600 runs — 19 decks | ≥ 50% PREDICTED, 20–50% SPLIT, < 20% MISS |
+| `S4` maker : sink at floors 5 / 10 / 15 | **MISS** | medians **1.000** (n=576) / **1.000** (n=538) / **1.500** (n=510). The ratio **ROSE**, and floor 15 sits **above** the band | median FALLS 5 → 15 AND floor-15 median in [0.30, 0.80] |
+| `S5` Rummage | **PREDICTED** | **0.0%** — 0 of 600 decks, as the seam says it must be | exactly 0.0% PREDICTED, anything > 0 MISS |
+
+**The two arms side by side.** The flag-OFF column is the paired control and is
+**RECORDED, NOT GRADED**.
+
+| | flag OFF (control) | flag ON (the arm) |
+|---|---|---|
+| runs / fights / player turns | 600 / 9,237 / 37,009 | 600 / 8,428 / 34,597 |
+| peak Spark bank, median (mean) | 3.0 (3.48) | **5.0 (5.94)** |
+| fights peaking ≥ 2 | 86.3% | **90.7%** |
+| turns with a NON-DAMAGE sink affordable | 0.00% | **0.62%** |
+| turns with ANY priced sink affordable | 0.44% | **20.50%** |
+| decks holding a non-damage sink | 0.0% | **3.2%** |
+| decks holding any prototype row | 0.0% | 99.8% |
+| median maker:sink, floors 5 / 10 / 15 | 0.000 / 0.000 / 0.000 | **1.000 / 1.000 / 1.500** |
+| mean deck size | 25.2 | 23.8 |
+| runs won — diagnostic, NOT A BALANCE CLAIM (R215 B) | 5.5% | 1.7% |
+
+**What each registered decision now says, quoted from §17.4 and applied.**
+
+- **`S1` PREDICTED.** §17.4: *"the drafted economy reaches the price-2 rung,
+  `W1'`'s null is a property of `W2`'s GRANTED deck and not of the one-for-one
+  economy."* Taken. On a deck the drafter built, the bank's median per-fight
+  peak is **5** — two and a half times the cheapest non-damage price — against
+  `W2`'s printed ceiling of **1**. **In the sim, income is not the governor.**
+- **`S2` MISS** and **`S3` MISS**, and they are one finding rather than two.
+  §17.4 registered `S3`'s MISS as *"a SCORER finding and not an income
+  finding"*, going *"to `BACKLOG` as an instrument row"*, with the live
+  controlled-ratio deck **granting** its non-damage sinks. Taken, and it is
+  what `S2` is made of: the destination was usually not in the deck at all
+  (3.2%), so 0.62% of turns is an OFFER number wearing a bank number's clothes.
+  `S2`'s registered UNREACHED condition was `S3` **exactly 0**; `S3` was 19, so
+  the slot grades MISS as registered and is not relabelled (R101b).
+- **`S4` MISS, on the branch §17.4 printed for it.** *"MISS with a ratio ABOVE
+  0.80: `W2`'s 2:11 was an artefact of granting, the drafted economy is
+  generator-rich, and the live deck is staged at the drafted median rather than
+  at `W2`'s."* Taken exactly as written. The prediction that the ratio would
+  FALL was wrong in sign: under the flag a `gain_spark` is priced at
+  `SPARK_ALT_VALUE` = 4.00 for the first time, so the drafter can finally see a
+  generator, and it drafts them.
+- **`S5` PREDICTED.** §14.4 condition 3's Rummage half is **unreachable by
+  draft**, confirmed at 0 of 600. The live controlled-ratio deck must **GRANT**
+  Rummage; a drafted live deck would silently drop it.
+
+### 17.7 What the live registration INHERITS, and what it does not
+
+**IT INHERITS ONE NUMBER: `1.500` makers per sink** — `S4`'s floor-15 median
+under the arm, i.e. **3 makers to 2 sinks**. §17.4 registered that *any* graded
+outcome of `S4` hands the live deck its ratio, so the live controlled-ratio
+registration takes a **derived** number rather than a pick, and it is the
+inverse of `W2`'s granted **2 : 11**.
+
+**IT INHERITS NOTHING ELSE. Named, so the next registration cannot borrow
+more:**
+
+1. **No re-price of §4.2's table and no new sink row.** R225 forbids both until
+   income is answered, and this read answers income **in the sim only**.
+2. **No conclusion that the sink set is fine.** `S2` and `S3` MISSED. What they
+   establish is that the drafter does not TAKE the three migrated twins, which
+   is a scorer question the live deck sidesteps by granting them — it does not
+   establish that a player would not.
+3. **No win rate, no comparison, no balance or fun claim** (R215 B,
+   Guardrail-7). The 1.7% / 5.5% column is a diagnostic of a scoring pilot.
+4. **Nothing about presentation.** The sim has no display and never saw the
+   cost badge.
+
+**Blind spots the run made concrete, stated rather than left to be found:**
+
+1. **The maker count is a FLOOR, on both arms equally.** §17.2 defined a MAKER
+   as a top-level `gain_spark`, so two real Spark sources are invisible to the
+   ratio: `crackle`'s `discard_for_sparks`, and — since **C21** — **Klee's kit
+   declaration** (`effects.klee_personal_companion_spark`), which is where
+   `prune_witch_hunt`'s two printed `gain_spark` ops went under `EB-219`. The
+   inherited 1.500 therefore understates generation and never overstates it.
+2. **The control's maker:sink medians read 0.000 at every floor, and that is a
+   scorer fact rather than a fault.** `draft.STATIC_SPARK_VALUE` is **0.0**:
+   with the flag off a `gain_spark` is worth literally nothing to the drafter,
+   so the median shipped deck drafts none. It is precisely why the control is
+   RECORDED and NOT GRADED.
+3. **One pilot, one policy, one route, one seed base.** Six hundred runs is a
+   sample of one cell, not of the game.

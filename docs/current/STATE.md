@@ -12,7 +12,7 @@
 
 ## Live cell
 
-**`RT12 / D18 / P11 / C20`**, read live via `tier05/cells.py`, with
+**`RT12 / D18 / P11 / C21`**, read live via `tier05/cells.py`, with
 `PILOT_WEIGHTS_VERSION` **6**. Numbers are never comparable across a stamp
 boundary unless labeled, and a report without a stamp is not citable
 (`EXPERIMENTS.md`). What each level below the live value covered, and what it
@@ -23,7 +23,7 @@ archived, is in [`STAMPS.md`](STAMPS.md) — not here.
 | `RT` `RUNTEMPLATE_VERSION` | **12** | `tier0/constants.py` | The run-layer half of the window-2 correctness batch (`EB-104`): banner-aware shop, relic-derived potion capacity, floored rest heal, one-door Book of Five Rings counting, and event card rewards rolling `RARITY_ODDS`. History → [`STAMPS.md`](STAMPS.md). |
 | `D` `DRAFTER_VERSION` | **18** | `tier0/constants.py` | `EB-28`: the drafter prices Furina's Salon deploy through ONE new [USER]-overridable dial, `STATIC_SALON_MEMBER_VALUE = 1.5` — nine salon rows re-price on both faces, nothing else moves. History → [`STAMPS.md`](STAMPS.md). |
 | `P` `POLICY_VERSION` | **11** | `tier05/draft.py` | The scorer-literacy window (R207): the pilot gains a Spark hold-versus-spend term, five state predicates and payout-aware selection scoring, repairing the standing read's three diagnostic caveats in code — they clear at the re-baseline, not here. History → [`STAMPS.md`](STAMPS.md). |
-| `C` `CONSTANTS_VERSION` | **20** | `tier0/constants.py` | `EB-139`'s Swirl aura-aware bind (R211) — an aimed Swirl binds whole to the lowest-HP aura-bearer; one companion's damage moves, the anchor does not — plus the ruled Sweet Dreams body (R189/R205, joined 2026-08-26): new any-aura predicate `target_has_aura`, Block 8 → 5. History → [`STAMPS.md`](STAMPS.md). |
+| `C` `CONSTANTS_VERSION` | **21** | `tier0/constants.py` | `EB-219`: Prune's two printed `gain_spark` ops leave the sheet and her Spark grant becomes Klee's own kit declaration (`KLEE_COMPANION_SPARK_*`, LAW:145), at parity on all four yields; a REPLAYED Prune now mints once per PLAY. History → [`STAMPS.md`](STAMPS.md). |
 
 **Standing baseline:** `review/active/sitting-reads-2026-08-26-c20-d18-p11.md`
 — twelve arms at `RT12/D18/P11/C20` (`main` = `190e598`), all twelve in ONE
