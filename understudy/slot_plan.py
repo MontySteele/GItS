@@ -109,13 +109,55 @@ def _resource(turn: Any, keys: Sequence[str]) -> int | None:
     return None
 
 
+def card_spark_prices(row: Mapping[str, Any]) -> list[int]:
+    """Every Spark price ONE sheet row can charge, in the order it prints them.
+
+    `EB-237`. R225's amended clause, in as many words: a Spark price sits at
+    the card's TOP LEVEL **or** at the HEAD OF A `choose_one` MODE, and
+    nothing nested and nothing conditional. This function reads both, and the
+    mode half is why it exists.
+
+    THE DEFECT IT REPAIRS. Until `EB-237` this read a top-level `spend_spark`
+    and stopped there, so *Bag of Tricks* -- `proto_spark_mode_bombs`, the
+    first row in the tree to price itself at a mode head, and the whole
+    subject of `KLEESPARK-BT1` -- was INVISIBLE to `affordable_spark_uses`,
+    `min_spark_price`, `spark_use_count` and every ceiling `--plan-only`
+    printed. The round's own `slots.yaml` had to write every predicate about
+    the OTHER cards in hand and say so at length. A check that cannot see the
+    row under test is not a check on that round.
+
+    HEAD, AND STRICTLY THE HEAD. A mode prices Sparks only when the FIRST
+    effect of that mode is `spend_spark`; a `spend_spark` further down a
+    mode's list is nested-or-conditional by construction and is not admitted,
+    which is the half of R225's clause that keeps this from becoming a search
+    for any spend anywhere in a row.
+    """
+    out: list[int] = []
+    for eff in (row.get("effects") or []):
+        if not isinstance(eff, Mapping):
+            continue
+        op = str(eff.get("op"))
+        if op == "spend_spark":
+            out.append(int(eff.get("amount", 0)))
+        elif op == "choose_one":
+            for mode in (eff.get("modes") or []):
+                if not isinstance(mode, Mapping):
+                    continue
+                head = next(iter(mode.get("effects") or []), None)
+                if (isinstance(head, Mapping)
+                        and str(head.get("op")) == "spend_spark"):
+                    out.append(int(head.get("amount", 0)))
+    return out
+
+
 def _spark_prices(turn: Any) -> list[int]:
     """What each card in the declared hand costs IN SPARKS, cheapest first.
 
-    Off the sheet's own top-level `spend_spark` op, which is where the price
-    has to live for the playability gate to see it (the rule authored at
-    `powder_charge` and enforced through Klee slice 1). A card with no such op
-    prices no Sparks and contributes nothing.
+    ONE PRICE PER CARD, and where a card prices more than one way to play it
+    -- a `choose_one` with two priced modes -- the CHEAPEST is the one this
+    list carries, because these facts count *uses the bank can reach* and the
+    cheapest way in is the one that decides that. A card with no admitted
+    price prices no Sparks and contributes nothing.
     """
     rows = sheet_rows_by_id()
     out: list[int] = []
@@ -123,10 +165,9 @@ def _spark_prices(turn: Any) -> list[int]:
         row = rows.get(str(card_id))
         if row is None:
             continue
-        for eff in (row.get("effects") or []):
-            if isinstance(eff, Mapping) and str(eff.get("op")) == "spend_spark":
-                out.append(int(eff.get("amount", 0)))
-                break
+        prices = card_spark_prices(row)
+        if prices:
+            out.append(min(prices))
     return sorted(out)
 
 

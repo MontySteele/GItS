@@ -574,3 +574,66 @@ def test_the_preregistered_order_covers_every_r2_slot_twice():
         "klee-sparks-r2-t06", "klee-sparks-r2-t04", "klee-sparks-r2-t02",
         "klee-sparks-r2-t03", "klee-sparks-r2-t05"]
     assert [r["turn_id"] for r in rest] == ["klee-sparks-r2-t01"]
+
+
+# ============================================================== EB-237 =====
+#
+# THE LOCK IS WRITTEN ON `KLEESPARK-BT1`'s OWN COMMITTED BOARD, not on a
+# fixture: the defect was invisible to every check the round ran, and a lock
+# on a board I invented would be a lock on the sentence I wrote. The boards
+# and `slots.yaml` of that closed round are read-only inputs here (R101b);
+# nothing in this file writes into them.
+
+BT1 = REPO / "understudy" / "turns" / "klee-sparks-bt1"
+
+
+def _bt1(turn_id: str):
+    return staged_turn.load(BT1 / f"{turn_id}.yaml")
+
+
+def test_the_mode_head_price_is_in_t01s_plan():
+    """THE LOCK. *Bag of Tricks* prices 3 at a mode head, and the plan says so.
+
+    Before `EB-237` `_spark_prices` read a top-level `spend_spark` and
+    nothing else, so the row the whole round was about priced nothing as far
+    as every fact below could see: `affordable_spark_uses` read 0 on a board
+    holding a priced mode the bank could pay exactly.
+    """
+    turn = _bt1("t01")
+    assert slot_plan._spark_prices(turn) == [3]
+    assert slot_plan.FACTS["spark_use_count"](turn) == 1
+    assert slot_plan.FACTS["affordable_spark_uses"](turn) == 1
+    assert slot_plan.FACTS["min_spark_price"](turn) == 3
+    assert slot_plan.FACTS["affordable_spark_price_sum"](turn) == 3
+
+
+def test_t02s_two_sinks_are_both_counted():
+    """`t02` swaps in Firework Finale: two priced uses, both at 3."""
+    turn = _bt1("t02")
+    assert slot_plan._spark_prices(turn) == [3, 3]
+    assert slot_plan.FACTS["affordable_spark_uses"](turn) == 2
+    assert slot_plan.FACTS["affordable_spark_price_sum"](turn) == 6
+
+
+def test_a_bank_below_the_mode_price_affords_nothing():
+    """`t03`'s bank of 2 reaches neither the mode nor anything else."""
+    turn = _bt1("t03")
+    assert slot_plan._spark_prices(turn) == [3]
+    assert slot_plan.FACTS["affordable_spark_uses"](turn) == 0
+
+
+def test_only_a_mode_head_counts_and_nothing_nested():
+    """R225's clause is the whole rule: the HEAD of a mode, and no deeper.
+
+    A `spend_spark` sitting second in a mode's effect list is nested by
+    construction, and admitting it would turn this into a search for any
+    spend anywhere in a row.
+    """
+    head = {"effects": [{"op": "choose_one", "modes": [
+        {"effects": [{"op": "spend_spark", "amount": 2},
+                     {"op": "damage", "amount": 9}]}]}]}
+    nested = {"effects": [{"op": "choose_one", "modes": [
+        {"effects": [{"op": "damage", "amount": 9},
+                     {"op": "spend_spark", "amount": 2}]}]}]}
+    assert slot_plan.card_spark_prices(head) == [2]
+    assert slot_plan.card_spark_prices(nested) == []
