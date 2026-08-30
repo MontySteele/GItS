@@ -72,6 +72,99 @@ public class MeterCostBadgeTests
         Assert.Contains(calls, c => c.EndsWith("KokomiResources.GetCharge"));
     }
 
+    // --- EB-222: the badge holds no texture across scenes ------------------
+
+    [Fact]
+    public void The_badge_caches_no_engine_owned_object_in_a_static_field()
+    {
+        // THE REGRESSION, made impossible. EB-220 kept its glyphs in a
+        // `static readonly Dictionary<Meter, Texture2D?>`: one load for the
+        // process, held forever. The game frees a room's assets WITH the room
+        // ("Preloading 'Combat Room' assets" in, `Asset not cached:
+        // res://klee/powers/bomb.png` out), so by the first card drawn in
+        // combat #2 that field held a disposed `CompressedTexture2D`, and
+        // handing it to `TextureRect.SetTexture` threw
+        // `ObjectDisposedException` out of the TURN LOOP -- the combat stuck,
+        // the run over, every `understudy.soak` run.
+        //
+        // A resource whose lifetime the engine owns therefore may not be
+        // reachable from a static of ours, not directly and not inside a
+        // collection. This reads FIELD TYPES ONLY -- no Godot object is
+        // touched, which is itself the headless boundary (README).
+        var badge = Il.Method("MeterCostBadge", "Paint").DeclaringType!;
+        var offenders = badge
+            .GetFields(BindingFlags.Static | BindingFlags.Public
+                       | BindingFlags.NonPublic)
+            .Where(f => IsEngineOwned(f.FieldType))
+            .Select(f => f.Name)
+            .ToList();
+
+        Assert.Empty(offenders);
+    }
+
+    /// <summary>A type that is, or contains, something the ENGINE allocates and
+    /// frees. Names only: comparing a type's name does not touch a Godot
+    /// object, which is the headless boundary this pin has to respect.</summary>
+    private static bool IsEngineOwned(System.Type type)
+        => (type.FullName ?? string.Empty)
+               .StartsWith("Godot.", System.StringComparison.Ordinal)
+           || type.GetGenericArguments().Any(IsEngineOwned)
+           || (type.IsArray && IsEngineOwned(type.GetElementType()!));
+
+    [Fact]
+    public void The_glyph_is_resolved_from_the_loader_on_every_paint()
+    {
+        // STRUCTURAL PIN (painting needs Godot nodes -- README's boundary).
+        // Two halves of EB-222's fix, both in the one method the badge asks for
+        // a texture through: it goes to `ResourceLoader` each time (so the
+        // engine's own cache, which knows what it has freed, is the source),
+        // and it asks `IsInstanceValid` before answering (so a wrapper for an
+        // object that is already gone is never handed on). Re-introduce a
+        // dictionary in front of the load and the pin above fails; drop the
+        // validity check and this one does.
+        var calls = Il.Calls(Il.Method("MeterCostBadge", "Glyph"));
+
+        Assert.Contains(calls, c => c.EndsWith("ResourceLoader.Load"));
+        Assert.Contains(calls, c => c.EndsWith("GodotObject.IsInstanceValid"));
+    }
+
+    [Fact]
+    public void A_freed_glyph_degrades_to_no_glyph_and_still_paints_the_number()
+    {
+        // STRUCTURAL PIN, and the shape is EB-221's: warn once, draw less, never
+        // throw at the caller. `Paint` runs inside `CardPileCmd.Draw`, i.e.
+        // inside the turn loop, so the ONE thing it may never do is propagate.
+        //
+        // Three facts, in the order they matter: the write to the icon goes
+        // through the guarded setter rather than straight at the node; that
+        // setter catches `ObjectDisposedException` (the exact exception the
+        // shipped stack carries) instead of letting it out; and the number is
+        // painted AFTER the glyph, so the degraded path still leaves a price on
+        // the card. The last one is a sequence read: `SetGlyph` precedes
+        // `SetTextAutoSize` in `Paint`'s call order.
+        var paint = Il.CallSequence(Il.Method("MeterCostBadge", "Paint"))
+            .Select(c => c.Split('<')[0])
+            .ToList();
+
+        Assert.Contains("MeterCostBadge.SetGlyph", paint);
+        Assert.True(
+            paint.IndexOf("MeterCostBadge.SetGlyph")
+                < paint.FindIndex(c => c.EndsWith("SetTextAutoSize")),
+            "the number must be painted after the glyph, so a freed glyph still "
+            + "leaves the price on the card");
+
+        var handled = Il.Method("MeterCostBadge", "SetGlyph")
+            .GetMethodBody()!.ExceptionHandlingClauses
+            .Where(c => c.Flags == ExceptionHandlingClauseOptions.Clause)
+            .Select(c => c.CatchType?.Name)
+            .ToList();
+
+        Assert.Contains("ObjectDisposedException", handled);
+        Assert.Contains(
+            Il.Calls(Il.Method("MeterCostBadge", "WarnFreedGlyph")),
+            c => c.EndsWith("Log.Warn"));
+    }
+
     // --- Sparks, unchanged by the generalisation --------------------------
 
     [Fact]
