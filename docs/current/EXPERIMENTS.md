@@ -310,6 +310,48 @@ carried while it was active is in the commit message that retired it.
   Blazing Ooyoroi, the slice's one open RETURN, is excluded. No board staged,
   no seed pinned →
   `review/active/kokomi-slice-1-2026-08-27.md`, *Whole-fight blind play*.
+- **`KLEESPARK-BT2` — the repaired *Bag of Tricks* round, under R229's return
+  condition (`EB-224`)** — **REGISTERED 2026-08-30, NOT RUN.** Registration
+  `review/active/klee-sparks-2026-08-29.md` §23, with the machine-readable half
+  at `understudy/turns/klee-sparks-bt2/` (`MANIFEST.md`, `slots.yaml`,
+  `t01`–`t03`); all of it committed **before anything was staged, deployed or
+  read**, under R212(2), and offered for batch countersign. **Instrument:**
+  `understudy.local_tester round` over three staged boards on the installed
+  `+proto` dev build, graded off the forms, the wire readings and one replay;
+  it moves no `RT/D/P/C` stamp. **Cell:** `proto_spark_mode_bombs` (Bag of
+  Tricks, 0 Energy Skill, *choose one* with a **mode-head price of 3 Sparks**
+  for three Bombs at 5) on **three boards**, every seed a `KLEESPARK-BT1` seed
+  recorded ONE-BODY, 55 HP, no lethal line, and **every hand costing 4 Energy
+  against 3** — the forced trade `KLEESPARK-BT1` never had, whose absence
+  refused seven of its eight forms. `t01` is the return-condition board (priced
+  mode → ordinary **Kaboom!** → rival price-3 sink; no *Quick Fuse* in the
+  round at all), `t02` is `KLEESPARK-BT1`'s `t02` repaired so that no order of
+  play buys both priced uses, `t03` lets three Bombs SIT and reads the NEXT
+  turn's bank (`replay_next_turn: true`). **Slots:** `C1` threshold 2 /
+  ceiling 2, `C2` 1 / 1, `--first 0` so every board runs. **Slate:** `F1`–`F5`
+  — `F1` the bank at 0 after the mode and ≥ 3 after the Attack with both
+  priced uses paid (1 of 1); `F2` a named cost given up and a next-turn bank of
+  3 (1 of 1); `F3` exactly one of the two priced uses paid on `t02`, the other
+  named as declined (1 of 1, a MISS here is an INSTRUMENT finding); `F4` a full
+  `forecast` on every board, none refused `forecast_missing` (3 of 3 —
+  `EB-229`'s staged twin); `F5` the `t01` forecast reading 0 then 3 (1 of 1, a
+  MISS is a LEGIBILITY finding). **THE PRE-REGISTERED RETURN CONDITION
+  (R229):** `F1` and `F2` are ONE finding, and the arm **RETURNS TO DESIGN** if
+  either (a) `F1` is PREDICTED, or (b) `F2`'s form names no cost AND its
+  next-turn bank reads 3 — a RETURN goes to [USER] as a numbered pick list and
+  Claude picks nothing on it. **Who decides:** the **Codex seat on every
+  board** (`M64` (1) / R224 — a design round), the local seat in the SHADOW
+  chair (R222 B), fresh-Opus not seated (`authored_by: [claude]`, R217 C).
+  **Budget:** 3 deciding reads + 1 pair read = **~4 Codex calls, cap 9**, with
+  `EB-227`'s guard (85% of the five-hour window) as the stop; a mid-round
+  refusal STOPS the round at that board. **Contaminations, registered:** the
+  shipped starter relic *Pounding Surprise* is KEPT and its refund is an
+  accepted TEST CONDITION and not a design approval (R229); `+proto`; granted
+  hands, nothing drafted; the tier0 mirror can see neither the mode nor the
+  relic, so its gaps (0.0313 / 0.0194 / 0.1174, all SURVIVE) bound card sets
+  and nothing this round is about. A MISS licenses no re-price, no sheet move
+  and no balance claim (R215 B, Guardrail-7) →
+  `review/active/klee-sparks-2026-08-29.md` §23.
 
 New registrations add a pointer here and land their packet under
 `review/active/`. When one is graded, it moves to the **Graded** table above —

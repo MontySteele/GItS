@@ -710,9 +710,24 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # TOP-LEVEL `spend_spark` only, so the row under test is invisible to
         # its ceilings, and the blind page printing no relics, which is why
         # Pounding Surprise refunding the mode's own price inside the turn was
-        # invisible to every form and uncontrolled by the registration. All
-        # three OPEN.
-        236, 237, 238,
+        # invisible to every form and uncontrolled by the registration.
+        #
+        # 237 LEFT OPEN_IDS 2026-08-30 with its row: `slot_plan._spark_prices`
+        # now reads R225's clause in full -- a top-level `spend_spark` or the
+        # head of a `choose_one` mode, and nothing nested -- the lock was seen
+        # to FAIL first, and BT1's `t01` plan lists the three prices with
+        # `affordable_spark_uses` 1. DISCLOSURE (R101b): BT1's `B1` predicate
+        # was written under the OLD reading; re-planning that CLOSED round
+        # reports ceiling 0 against threshold 1, and `slots.yaml` is NOT
+        # edited -- a published measurement stands as published.
+        # 236 LEFT OPEN_IDS 2026-08-30 with its row: `board_design_findings`
+        # in `--plan-only` walks EVERY order of play with relic gains counted
+        # (`both_buyable`, R229's strong form) and refuses a hand the Energy
+        # pays for whole (`no_forced_trade`). BT1's four boards fail it --
+        # `t02` on four both-buyable orders -- and BT2's three pass. It is
+        # deliberately NOT a `ci` lint: a tree-wide sweep would refuse a
+        # closed round's published boards. The lint count stays 29.
+        238,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
