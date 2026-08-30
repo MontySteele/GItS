@@ -225,6 +225,17 @@ def _selected(row: Mapping[str, Any], choose: Any) -> Any:
     return effects
 
 
+def selected_effects(row: Mapping[str, Any], choose: Any = None) -> Any:
+    """`_selected` under a public name, for the other sheet readers.
+
+    `understudy/targeting.py` (EB-203) has to resolve a *Choose one* exactly
+    the way this module does -- one aimed mode, one that is not, which is
+    `EB-184` from the other side -- and two implementations of "which mode did
+    the form record" is two places for the answer to drift.
+    """
+    return _selected(row, choose)
+
+
 # ----------------------------------------------------------- the finding --
 
 def findings(chosen_line: Sequence[Mapping[str, Any]], *,

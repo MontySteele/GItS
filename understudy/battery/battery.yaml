@@ -1,0 +1,68 @@
+# THE REQUALIFICATION BATTERY — M62 (5). See `understudy/qualify.py` for what
+# each category asks and why there is no pass mark in this file.
+#
+# EVERY ITEM IS A SEALED PACKET FROM A CLOSED ROUND. Nothing here stages a
+# board, launches a game or writes into the turn directory it names; the
+# packets are read-only inputs (R101b) and the battery's own output lands
+# elsewhere. Three rounds contribute equally so a seat cannot qualify by
+# having been tuned on one character's vocabulary:
+#
+#   kokomi-slice2   (Charge, R213 E1)      — 2 items per category
+#   klee-slice1-r3  (Sparks, R213 E2 r3)   — 2 items in two categories
+#   klee-sparks-r1  (the alt-cost re-author) — 2 items per category
+#
+# HOW THE BOARDS WERE PICKED, so a later reader can add to the set on the same
+# rule rather than by taste:
+#
+#   targets — the hand must hold BOTH an aimed card and a card that aims at
+#     nobody, or the item can only be failed in one direction and "always name
+#     an enemy" would pass it.
+#   costs   — the hand must print at least two non-zero costs, so a "free"
+#     claim has something to be wrong about.
+#   intent  — the packet must TELEGRAPH an attack (`misreads.intent_damages`
+#     is non-empty), so question four has a telegraph to be sensitive to.
+#
+# Six per category is the floor `qualify.MIN_ITEMS_PER_CATEGORY` enforces.
+
+items:
+  # ------------------------------------------------------------- targets ---
+  - {id: T1, category: targets, turn_id: kokomi-slice2-t01,
+     why: "2 aimed, 2 targetless in one hand"}
+  - {id: T2, category: targets, turn_id: kokomi-slice2-t05,
+     why: "2 aimed, 2 targetless in one hand"}
+  - {id: T3, category: targets, turn_id: klee-slice1-r3-t05,
+     why: "one aimed card among three that aim at nobody"}
+  - {id: T4, category: targets, turn_id: klee-slice1-r3-t06,
+     why: "one aimed card among three that aim at nobody"}
+  - {id: T5, category: targets, turn_id: klee-sparks-r1-t03,
+     why: "2 aimed, 3 targetless; the AoE sinks are the trap"}
+  - {id: T6, category: targets, turn_id: klee-sparks-r1-t07,
+     why: "3 aimed, 1 targetless — the board EB-203 was found on"}
+
+  # --------------------------------------------------------------- costs ---
+  - {id: C1, category: costs, turn_id: kokomi-slice2-t02,
+     why: "four priced cards, none free"}
+  - {id: C2, category: costs, turn_id: kokomi-slice2-t06,
+     why: "four priced cards, none free"}
+  - {id: C3, category: costs, turn_id: klee-slice1-r3-t03,
+     why: "two priced cards beside a 0-cost one"}
+  - {id: C4, category: costs, turn_id: klee-slice1-r3-t04,
+     why: "two priced cards beside a 0-cost one"}
+  - {id: C5, category: costs, turn_id: klee-sparks-r1-t04,
+     why: "four priced cards; the Spark bank invites a 'free' claim"}
+  - {id: C6, category: costs, turn_id: klee-sparks-r1-t05,
+     why: "three priced cards; the Rare Power is short of its price"}
+
+  # -------------------------------------------------------------- intent ---
+  - {id: I1, category: intent, turn_id: kokomi-slice2-t03,
+     why: "a telegraphed attack"}
+  - {id: I2, category: intent, turn_id: kokomi-slice2-t04,
+     why: "a telegraphed attack"}
+  - {id: I3, category: intent, turn_id: kokomi-slice2-t07,
+     why: "a telegraphed attack"}
+  - {id: I4, category: intent, turn_id: kokomi-slice2-t08,
+     why: "a telegraphed attack"}
+  - {id: I5, category: intent, turn_id: klee-sparks-r1-t01,
+     why: "a telegraphed attack on the opening board"}
+  - {id: I6, category: intent, turn_id: klee-sparks-r1-t08,
+     why: "a telegraphed attack on the second dry-bank board"}

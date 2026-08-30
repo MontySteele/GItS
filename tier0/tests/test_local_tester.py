@@ -229,6 +229,7 @@ def test_a_tester_record_names_its_family_in_words(server, tmp_path):
                            [{"card": "All Streams Flow to the Sea"}])
     record = local_tester.read_turn(FIXTURE_TURN, client=_client(server),
                                     qa_dir=qa, land_dir=land,
+                                    seat_mode="deciding",
                                     log_root=tmp_path / "logs")
     assert record["role"] == "tester"
     assert record["tester_family"] == "local"
@@ -824,3 +825,180 @@ def test_a_turn_declares_its_slots_and_defaults_to_its_own_id():
         staged_turn._parse_slots(["ok", ""])
     assert staged_turn._parse_slots(None) == []
     assert staged_turn._parse_slots([" P1 ", "P2"]) == ["P1", "P2"]
+
+
+# ============================ pick 4(e): the shadow chair and the deciding one
+
+def _verdict(qa: Path, turn: str, gid: str, verdict: str) -> None:
+    (qa / turn).mkdir(parents=True, exist_ok=True)
+    (qa / turn / f"verdict-{gid}.json").write_text(
+        json.dumps({"turn_id": turn, "verdict": verdict,
+                    "grader": {"id": gid}}), encoding="utf-8")
+
+
+def test_the_seat_sits_in_the_shadow_chair_by_default(server, tmp_path):
+    """R221 A measured 4-of-8 agreement and the control STANDS, so the local
+    seat is not the read a round is decided on. The record says so in words --
+    `role`, `seat_mode` and `deciding` are literal fields, because "whose
+    testimony is this, and was it the deciding one" has to be answerable from
+    the file rather than from the flag somebody typed."""
+    qa = _qa(tmp_path)
+    land = tmp_path / "land"
+    server.content = _form(qa, FIXTURE_TURN,
+                           [{"card": "All Streams Flow to the Sea"}])
+    record = local_tester.read_turn(FIXTURE_TURN, client=_client(server),
+                                    qa_dir=qa, land_dir=land,
+                                    log_root=tmp_path / "logs")
+    assert local_tester.DEFAULT_SEAT_MODE == "shadow"
+    assert record["role"] == "shadow"
+    assert record["seat_mode"] == "shadow"
+    assert record["deciding"] is False
+    # The FORM carries it too: it travels on its own, into an appendix or a
+    # diff, and must not need the record beside it to be legible.
+    form = json.loads(Path(record["form"]).read_text(encoding="utf-8"))
+    assert form["role"] == "shadow"
+    # ... and it still loads and grades as an ordinary form.
+    assert staged_turn.load_form(record["form"])["chosen_line"]
+    # The usual names, unchanged: a shadow read is not filed somewhere else.
+    assert Path(record["form"]).name == f"form-{TESTER_ID}.json"
+    assert Path(record["record"]).name == f"tester-{TESTER_ID}.json"
+
+
+def test_an_unknown_chair_raises_rather_than_falling_back(server, tmp_path):
+    qa = _qa(tmp_path)
+    with pytest.raises(local_tester.LocalTesterError):
+        local_tester.read_turn(FIXTURE_TURN, client=_client(server),
+                               qa_dir=qa, land_dir=tmp_path / "l",
+                               seat_mode="whichever")
+
+
+def test_the_deciding_chair_restores_the_old_record(server, tmp_path):
+    qa = _qa(tmp_path)
+    server.content = _form(qa, FIXTURE_TURN,
+                           [{"card": "All Streams Flow to the Sea"}])
+    record = local_tester.read_turn(FIXTURE_TURN, client=_client(server),
+                                    qa_dir=qa, land_dir=tmp_path / "land",
+                                    seat_mode="deciding",
+                                    log_root=tmp_path / "logs")
+    assert record["role"] == local_tester.ROLE == "tester"
+    assert record["deciding"] is True
+
+
+def test_the_deciding_form_is_the_one_that_is_not_this_seats(tmp_path):
+    """Found by elimination, never by naming a model: `form-local-*` is the
+    shadow read and `form-raw-*` is the same reply unparsed."""
+    qa = tmp_path / "qa"
+    (qa / "t01").mkdir(parents=True)
+    for name in (f"form-{TESTER_ID}.json", "form-raw-opus-5-fresh.json"):
+        (qa / "t01" / name).write_text("{}", encoding="utf-8")
+    assert local_tester.deciding_form("t01", qa) is None
+    (qa / "t01" / "form-opus-5-fresh.json").write_text("{}", encoding="utf-8")
+    assert local_tester.deciding_form("t01", qa).name == \
+        "form-opus-5-fresh.json"
+
+
+def test_the_shadow_read_is_never_replayed_and_the_control_is(tmp_path,
+                                                              monkeypatch):
+    """THE LOCK on the chair. In shadow the round replays the fresh-Opus form;
+    the local form is graded and left alone."""
+    from understudy import staged_turn as st
+    calls = []
+    monkeypatch.setattr(st, "main", lambda argv: calls.append(list(argv)) or 0)
+    control = tmp_path / "form-opus-5-fresh.json"
+    control.write_text("{}", encoding="utf-8")
+    monkeypatch.setattr(local_tester, "deciding_form",
+                        lambda tid, qa=None: control)
+
+    steps = local_tester.LiveSteps(client=None, why="w", spot_check=0)
+    steps.execute({"turn_id": "t01"}, {"form": "/local/form.json"})
+    assert calls[0][:3] == ["execute", "t01", str(control)]
+    assert steps.replays[0]["role"] == "deciding"
+
+    calls.clear()
+    steps = local_tester.LiveSteps(client=None, why="w", spot_check=0,
+                                   seat_mode="deciding")
+    steps.execute({"turn_id": "t01"}, {"form": "/local/form.json"})
+    assert calls[0][:3] == ["execute", "t01", "/local/form.json"]
+
+
+def test_a_board_with_no_control_form_yet_is_an_owed_replay(tmp_path,
+                                                            monkeypatch):
+    """It is never quietly replayed from the shadow read: the round says the
+    replay is OWED and moves on."""
+    from understudy import staged_turn as st
+    calls = []
+    monkeypatch.setattr(st, "main", lambda argv: calls.append(list(argv)) or 0)
+    monkeypatch.setattr(local_tester, "deciding_form",
+                        lambda tid, qa=None: None)
+    steps = local_tester.LiveSteps(client=None, why="w", spot_check=0)
+    steps.execute({"turn_id": "t01"}, {"form": "/local/form.json"})
+    assert calls == []
+    assert steps.replays[0]["replayed"] is False
+
+
+def test_the_agreement_count_is_the_verdict_and_only_the_verdict(tmp_path):
+    """R221 A: SURVIVES against SURVIVES or REFUSED against REFUSED, per turn.
+    A board with only one of the two graded is not counted either way."""
+    qa = tmp_path / "qa"
+    for turn, shadow, control in (("t01", "SURVIVES", "SURVIVES"),
+                                  ("t02", "REFUSED", "SURVIVES"),
+                                  ("t03", "REFUSED", "REFUSED")):
+        _verdict(qa, turn, TESTER_ID, shadow)
+        _verdict(qa, turn, "opus-5-fresh", control)
+        (qa / turn / "form-opus-5-fresh.json").write_text(
+            json.dumps({"grader": {"id": "opus-5-fresh"}}), encoding="utf-8")
+    _verdict(qa, "t04", TESTER_ID, "SURVIVES")            # no control at all
+    ids = ["t01", "t02", "t03", "t04"]
+    got = local_tester.agreement(ids, qa_dir=qa,
+                                 shadow_ids={t: TESTER_ID for t in ids})
+    assert got["compared"] == 3 and got["agreed"] == 2
+    assert [r["agree"] for r in got["turns"]] == [True, False, True, False]
+    assert got["turns"][3]["comparable"] is False
+    assert "M62" in got["criterion_owner"]
+
+
+def test_the_round_summary_carries_the_agreement_m62_is_read_off(tmp_path):
+    qa = tmp_path / "qa"
+    _verdict(qa, "klee-sparks-r1-t01", TESTER_ID, "SURVIVES")
+    _verdict(qa, "klee-sparks-r1-t01", "opus-5-fresh", "SURVIVES")
+    (qa / "klee-sparks-r1-t01" / "form-opus-5-fresh.json").write_text(
+        json.dumps({"grader": {"id": "opus-5-fresh"}}), encoding="utf-8")
+    summary = local_tester.round_summary(
+        [{"turn_id": "klee-sparks-r1-t01", "tester_id": TESTER_ID}],
+        seat_mode="shadow", qa_dir=qa)
+    assert summary["round"] == "klee-sparks-r1"
+    assert summary["seat_mode"] == "shadow"
+    assert summary["agreement"]["agreed"] == 1
+    path = local_tester.write_round_summary(summary, qa)
+    assert path.name == "klee-sparks-r1-round-summary.json"
+    assert json.loads(path.read_text(encoding="utf-8"))["turns"]
+
+
+def test_the_round_slug_is_the_rounds_own_name():
+    assert local_tester.round_slug(
+        [f"klee-sparks-r1-t0{i}" for i in range(1, 9)]) == "klee-sparks-r1"
+    assert local_tester.round_slug(["kokomi-slice2-t06"]) == "kokomi-slice2"
+    assert local_tester.round_slug([]) == "round"
+
+
+def test_the_ledger_row_carries_the_chair_and_an_old_row_still_parses(tmp_path):
+    """APPENDED, never inserted. A row written before the chair existed reads
+    `deciding`, which is the only chair there was."""
+    assert staged_turn.LEDGER_COLUMNS[-1] == "role"
+    qa = tmp_path
+    _verdict(qa, "t01", TESTER_ID, "SURVIVES")
+    (qa / "t01" / f"tester-{TESTER_ID}.json").write_text(
+        json.dumps({"role": "shadow"}), encoding="utf-8")
+    _verdict(qa, "t01", "opus-5-fresh", "SURVIVES")
+    text = staged_turn.build_ledger(qa)
+    rows = {r.split("\t")[1]: r.split("\t")[-1]
+            for r in text.splitlines() if r.startswith("t01")}
+    assert rows[TESTER_ID] == "shadow"
+    assert rows["opus-5-fresh"] == "deciding"
+
+    head = "\t".join(staged_turn.LEDGER_COLUMNS[:12])
+    body = "\t".join(["t02", "g", "SURVIVES", "-", "a", "b", "c", "d",
+                      "-", "-", "-", "yes"])
+    (qa / "ledger.tsv").write_text(head + "\n" + body + "\n", encoding="utf-8")
+    old = [r for r in staged_turn.ledger_rows(qa) if r["turn_id"] == "t02"][0]
+    assert old["role"] == "deciding"
