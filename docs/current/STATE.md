@@ -648,9 +648,10 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     question, and Slow Burn's fight is HELD until `M60`/`EB-199` settle
     what its Burst rider becomes. What is owed next is the boot fix that
     unblocks the sealed Kokomi
-    run, slice 1's `EB-184`, and R224's seven new rows
-    `EB-213`–`EB-219` — of which `EB-219` (Prune's re-author) and
-    `EB-218` (the Spark-only migration) precede the mixed-pool fight.
+    run and slice 1's `EB-184`. R224's seven rows `EB-213`–`EB-219` are
+    all CLOSED as of 2026-08-30 — the upgrade channel, the Muster keyword
+    and its rerun, the description channel, the per-turn wire snapshot, the
+    summon dial's deletion, the Spark-only migration and Prune's re-author.
     No [USER] row is open on the KLEE slice work; on Kokomi's, `M67` is —
     no longer the accrual rule (R226 answered that) but its CONSEQUENCE, and
     it holds the retirement of slice 2's round 2 and of all four arms, the
