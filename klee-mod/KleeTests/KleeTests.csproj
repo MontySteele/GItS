@@ -40,6 +40,18 @@
     <Compile Remove="Prototype/**/*.cs" />
   </ItemGroup>
 
+  <!-- THE BRIDGE'S PORT RESOLVER, compiled into this assembly rather than
+       referenced. `vendor/STS2_MCP/gits/GitsPort.cs` is deliberately free of
+       Godot, Harmony and game types precisely so the one decision that must
+       be right for two instances to coexist can be exercised headlessly; the
+       bridge project itself cannot be referenced here because it targets the
+       game's own assemblies through a different property set. One file, no
+       fork: this compiles the SAME source the mod ships. -->
+  <ItemGroup>
+    <Compile Include="../../vendor/STS2_MCP/gits/GitsPort.cs"
+             Link="Vendor/GitsPort.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />

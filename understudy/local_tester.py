@@ -59,7 +59,7 @@ import time
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
-from understudy import local_model, local_seat
+from understudy import bridge, local_model, local_seat
 
 REPO = Path(__file__).resolve().parents[1]
 QA_DIR = REPO / "review" / "qa"
@@ -232,6 +232,11 @@ def _record(turn_id: str, blob: Mapping[str, Any], *, position: int,
         "refused_why": blob.get("refused_why", ""),
         "read_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "position_in_round": position,
+        # WHICH LANE READ IT. The read itself is model-bound and touches no
+        # game, but the BOARD it reads was staged by one particular process,
+        # and a record that cannot be matched to that process cannot be
+        # matched to its log or its frames either.
+        "instance": bridge.current_label(),
         "seat_spot_check_rate": spot_check,
         "resource_order_flag": [],
         "resource_order": {},
@@ -539,37 +544,62 @@ class GameLane:
     """
 
     def __init__(self, *, session: Any = None, state_reader: Any = None,
-                 clock: Any = None, log: Any = None):
+                 clock: Any = None, log: Any = None,
+                 instance: Any = None, label: str = ""):
         self.session = session
         self._state = state_reader
         self._clock = clock or time.monotonic
         self._log = log or (lambda _msg: None)
+        # THE LANE'S OWN GAME. `None` is lane 0 -- the port and user tree the
+        # funnel has always used -- so a one-lane round is unchanged.
+        self.instance = (instance if instance is not None
+                         else getattr(session, "instance", None))
+        self.label = label or getattr(self.instance, "label", "lane0")
         self.lock = threading.Lock()
         self.events: list[dict[str, Any]] = []
         self.relaunches = 0
         self.launches = 0
 
+    def bind(self) -> None:
+        """Point the CALLING THREAD's bridge at this lane's game.
+
+        `bridge`'s current-instance is thread-local, so every thread that
+        will touch this lane's wire calls this once. A lane with no instance
+        (the `--attach` path, and every existing test double) binds nothing
+        and the thread keeps the process default.
+        """
+        if self.instance is not None:
+            bridge.use(self.instance)
+
     # -- lifetime ---------------------------------------------------------
     def launch(self) -> None:
+        self.bind()
         if self.session is not None:
             self.session.setup()
             self.launches += 1
-            self._log("game: launched once for the round")
+            self._log(f"game[{self.label}]: launched once for the round")
 
     def close(self) -> None:
+        self.bind()
         if self.session is not None:
             self.session.teardown()
-            self._log("game: torn down")
+            self._log(f"game[{self.label}]: torn down")
 
     # -- the one door -----------------------------------------------------
     def step(self, kind: str, turn_id: str, fn: Any) -> Any:
         with self.lock:
+            self.bind()
             relaunched = self._ensure_menu()
             start = self._clock()
             try:
                 return fn()
             finally:
                 self.events.append({"kind": kind, "turn_id": turn_id,
+                                    # ON EVERY EVENT ROW: with two lanes the
+                                    # timings are interleaved, and a row that
+                                    # does not say which game it is cannot be
+                                    # read back into a per-lane wall clock.
+                                    "instance": self.label,
                                     "start": start, "end": self._clock(),
                                     "relaunched": relaunched})
 
@@ -597,7 +627,7 @@ class GameLane:
                 raise LocalTesterError(
                     f"the game could not be brought to a menu after "
                     f"{self.relaunches} relaunch(es): {why}")
-            self._log(f"game: RELAUNCH -- {why}")
+            self._log(f"game[{self.label}]: RELAUNCH -- {why}")
             self.session.restart()
             self.relaunches += 1
             self.launches += 1
@@ -628,31 +658,63 @@ class RoundSteps:
         raise NotImplementedError
 
 
+def deal(rows: Sequence[Mapping[str, Any]], lane_count: int
+         ) -> list[int]:
+    """Which lane stages each board, in the PRE-REGISTERED ORDER.
+
+    THE DEALING IS NOT A RE-ORDERING. R221 B's order is the order the boards
+    are dealt IN, and it is unchanged by this build: board 1 goes to lane 0,
+    board 2 to lane 1, board 3 back to lane 0, and so on. Two lanes change
+    only WHICH PROCESS stages next, never which board is next.
+
+    THE STOPPING RULE READS THE SAME GRADES WHICHEVER LANE PRODUCED THEM.
+    `split_rest` and `slot_state` take grades off disk by turn id and slot;
+    neither has, or wants, a lane term. A board's grade is a fact about the
+    board, and the process that staged it is bookkeeping the record carries so
+    a reader can find the log -- not an input to the decision.
+    """
+    return [i % max(1, int(lane_count)) for i in range(len(rows))]
+
+
 def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
-                 lane: GameLane, steps: RoundSteps,
+                 lane: GameLane | None = None,
+                 lanes: Sequence[GameLane] | None = None,
+                 steps: RoundSteps,
                  serial: bool = False,
                  log: Any = None) -> list[dict[str, Any]]:
-    """stage -> read -> grade -> execute, per turn, with the game never idle.
+    """stage -> read -> grade -> execute, per turn, with no game ever idle.
 
-    TWO LANES, ONE GAME. Game-bound work (`stage`, `execute`) runs on a single
-    worker through `GameLane.step`, so it is serialized and ordered. The
-    model-bound half (`read`, which ends in `staged_turn grade`) runs on its
-    own single worker, so a reading never overlaps another reading -- there is
-    one local server -- but it DOES overlap the game's next step, which is the
-    whole point.
+    ONE OR TWO GAMES, ONE MODEL. Game-bound work (`stage`, `execute`) is
+    serialized PER LANE by `GameLane.step`'s lock, so two boards never drive
+    one process. The model-bound half (`read`, which ends in `staged_turn
+    grade`) is serialized ACROSS lanes by `model_lock`: there is one local
+    server, and two readings at once would queue inside it anyway while making
+    the record's timings a lie about what the model did.
+
+    So the win from a second lane is the game half -- staging and replaying
+    two boards at once -- and it is stated that way rather than as a doubling.
+
+    `lane=` (one lane) is kept for every existing caller; `lanes=` is the
+    two-lane form. Passing both is an error rather than a merge.
     """
     log = log or (lambda _m: None)
     rows = list(rows)
+    if lane is not None and lanes is not None:
+        raise ValueError("pass lane= or lanes=, not both")
+    pool = list(lanes) if lanes is not None else [lane or GameLane()]
     if not rows:
         return []
+    assignment = deal(rows, len(pool))
+
     if serial:
         out = []
-        for row in rows:
-            lane.step("stage", row["turn_id"], lambda r=row: steps.stage(r))
+        for row, li in zip(rows, assignment):
+            one = pool[li]
+            one.step("stage", row["turn_id"], lambda r=row: steps.stage(r))
             record = steps.read(row)
             out.append(record)
-            lane.step("execute", row["turn_id"],
-                      lambda r=row, rec=record: steps.execute(r, rec))
+            one.step("execute", row["turn_id"],
+                     lambda r=row, rec=record: steps.execute(r, rec))
         return out
 
     records: dict[str, dict[str, Any]] = {}
@@ -661,23 +723,30 @@ def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
     model_lock = threading.Lock()
 
     def worker(i: int, row: Mapping[str, Any]) -> None:
+        one = pool[assignment[i]]
         try:
-            # LOOK-AHEAD OF EXACTLY ONE. Turn i's stage is submitted only once
-            # turn i-1's stage has finished, so the game queue never holds
-            # more than one un-started stage and the interleave is the one the
-            # ruling asks for: the game stages the NEXT board while the model
-            # reads the last one.
-            if i:
-                staged[i - 1].wait()
+            # LOOK-AHEAD OF EXACTLY ONE, PER LANE. Turn i's stage is
+            # submitted only once the previous board ON ITS OWN LANE has
+            # finished staging, so each game queue holds at most one
+            # un-started stage and the interleave is the one R221 asks for:
+            # a game stages the NEXT board while the model reads the last.
+            # With one lane this is the previous board, unchanged.
+            prev = i - len(pool)
+            if prev >= 0:
+                staged[prev].wait()
             if errors:
                 return
-            lane.step("stage", row["turn_id"], lambda: steps.stage(row))
+            # The worker thread binds its own lane before it touches the wire:
+            # `bridge`'s current-instance is thread-local exactly so these two
+            # threads can hold two different ports at once.
+            one.bind()
+            one.step("stage", row["turn_id"], lambda: steps.stage(row))
             staged[i].set()
             with model_lock:
                 record = steps.read(row)
             records[row["turn_id"]] = record
-            lane.step("execute", row["turn_id"],
-                      lambda: steps.execute(row, record))
+            one.step("execute", row["turn_id"],
+                     lambda: steps.execute(row, record))
         except BaseException as exc:                          # noqa: BLE001
             errors.append(exc)
         finally:
@@ -686,10 +755,10 @@ def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
     threads = [threading.Thread(target=worker, args=(i, r), daemon=True,
                                 name=f"round-{r['turn_id']}")
                for i, r in enumerate(rows)]
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
+    for th in threads:
+        th.start()
+    for th in threads:
+        th.join()
     if errors:
         raise errors[0]
     return [records[r["turn_id"]] for r in rows if r["turn_id"] in records]
@@ -954,16 +1023,24 @@ class LiveSteps(RoundSteps):
                           "--why", self.why, "--no-setup"])
 
 
-def _print_plan(first, rest, rate: int) -> None:
+def _print_plan(first, rest, rate: int, lane_count: int = 1) -> None:
     print(f"round of {len(first) + len(rest)} board(s) in R221 B's "
           f"pre-registered order; seat spot-check every {rate or 'never'}; "
-          f"first set = {len(first)}")
-    for row in list(first) + list(rest):
+          f"first set = {len(first)}; lanes = {lane_count}")
+    if lane_count > 1:
+        print("  the ORDER is unchanged: lanes decide which process stages "
+              "next, never which board is next, and the stopping rule reads "
+              "the same grades whichever lane produced them")
+    all_rows = list(first) + list(rest)
+    where_first = deal(first, lane_count)
+    where_rest = deal(rest, lane_count)
+    for row, li in zip(all_rows, list(where_first) + list(where_rest)):
         mark = "SEAT" if row["seat_spot_check"] else "    "
         where = "FIRST" if row in first else "  ..."
         gap = ("n/a" if row["closeness"] == float("inf")
                else f"{row['closeness']:.3f}")
-        print(f"  {row['position']:>2}  {where}  {mark}  {row['turn_id']}"
+        print(f"  {row['position']:>2}  {where}  {mark}  lane{li}  "
+              f"{row['turn_id']}"
               f"   slots={','.join(row['slots'])}  closeness={gap}")
 
 
@@ -977,7 +1054,8 @@ def cmd_round(args) -> int:
         row["seat_spot_check"] = spot_check_due(i, args.seat_spot_check)
         turn = index.get(row["turn_id"])
         row["path"] = str(getattr(turn, "path", "") or "")
-    _print_plan(first, rest, args.seat_spot_check)
+    _print_plan(first, rest, args.seat_spot_check,
+                getattr(args, 'lanes', 1))
 
     # EB-169 AND EB-187, FOR THE WHOLE ROUND, BEFORE THE ONE LAUNCH. `stage`
     # runs both preflights itself, but per board and after the round has
@@ -1030,12 +1108,13 @@ def cmd_round(args) -> int:
                       spot_check=args.seat_spot_check,
                       seat_mode=args.seat_mode,
                       log_root=Path(args.log_root) if args.log_root else None)
-    lane = _live_lane(args)
+    pool = _live_lanes(args)
     records: list[dict[str, Any]] = []
     unrun: list[dict[str, Any]] = []
     try:
-        lane.launch()
-        records += run_pipeline(first, lane=lane, steps=steps,
+        for one in pool:
+            one.launch()
+        records += run_pipeline(first, lanes=pool, steps=steps,
                                 serial=args.serial, log=print)
         if rest:
             state = slot_state(first, disk_grades([r["turn_id"]
@@ -1053,13 +1132,19 @@ def cmd_round(args) -> int:
                 print(f"  UNRUN {row['turn_id']} "
                       f"(seed {row.get('seed') or '-'} still pinned)")
             unrun = skipped
-            records += run_pipeline(to_run, lane=lane, steps=steps,
+            records += run_pipeline(to_run, lanes=pool, steps=steps,
                                     serial=args.serial, log=print)
     finally:
-        lane.close()
+        # IN REVERSE. Lane 0 owns the shared game-directory changes -- the
+        # appid file and the `mods/STS2_MCP` install -- and removing them
+        # while a later lane's game is still up would pull the bridge out
+        # from under a running process (and delete a dll it holds a lock on).
+        for one in reversed(pool):
+            one.close()
 
-    print(f"\ngame: {lane.launches} launch(es), {lane.relaunches} relaunch(es) "
-          f"for the round")
+    for one in pool:
+        print(f"\ngame[{one.label}]: {one.launches} launch(es), "
+              f"{one.relaunches} relaunch(es) for the round")
     staged_turn.main(["ledger"])
 
     # pick 4(e) / R221 A. The round says, in its own record, how often the
@@ -1147,20 +1232,38 @@ def cmd_qualify(args) -> int:
     return 0
 
 
-def _live_lane(args) -> GameLane:
-    """One `soak.Session` for the round, or none if the operator holds it.
+def _live_lanes(args) -> list[GameLane]:
+    """One `soak.Session` per lane, or none at all if the operator holds it.
 
     `--attach` is the escape hatch for a game somebody else launched (the same
     contract `embark --hold` offers): the lane then owns no process, restarts
-    nothing and tears nothing down.
+    nothing and tears nothing down. It is single-lane by construction -- there
+    is one game being held, and this cannot attach to a second one it did not
+    launch.
+
+    ONLY THE FIRST LANE INSTALLS THE BRIDGE. Both lanes run out of ONE game
+    directory, `deploy_bridge.ps1` deletes and rewrites `mods/STS2_MCP`, and
+    it refuses outright while a game is running -- so lane 1, which launches
+    after lane 0's game is up, is given `install_bridge=False`. The same flag
+    keeps its teardown from removing the shared directory.
     """
+    from understudy import instances, soak
+    count = max(1, int(getattr(args, "lanes", 1) or 1))
     if args.attach:
-        return GameLane(log=print)
-    from understudy import bridge, soak
+        if count > 1:
+            raise LocalTesterError(
+                "--attach holds ONE game, so it cannot drive two lanes; drop "
+                "--lanes or drop --attach")
+        return [GameLane(log=print)]
     stamp = time.strftime("%Y%m%d-%H%M%S")
-    return GameLane(session=soak.Session(stamp, do_setup=True,
-                                         intent="staged-turn round"),
-                    state_reader=bridge.get_state, log=print)
+    out = []
+    for i, inst in enumerate(instances.lanes(count)):
+        session = soak.Session(f"{stamp}-{inst.label}", do_setup=True,
+                               intent="staged-turn round",
+                               instance=inst, install_bridge=(i == 0))
+        out.append(GameLane(session=session, state_reader=bridge.get_state,
+                            log=print, instance=inst))
+    return out
 
 
 def _print(record: Mapping[str, Any]) -> None:
@@ -1232,6 +1335,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                         "turn at a time with the game idle while the model "
                         "reads. Kept reachable so a live comparison against "
                         "the pipeline is possible")
+    q.add_argument("--lanes", type=int, default=1, metavar="N",
+                   help="how many GAME INSTANCES the round drives (default "
+                        "1, the single-instance funnel unchanged). 2 runs a "
+                        "second SlayTheSpire2.exe from the same install with "
+                        "its own APPDATA and its own bridge port, and deals "
+                        "the pre-registered boards to the lanes in order -- "
+                        "the order and the stopping rule are unchanged")
     q.add_argument("--attach", action="store_true",
                    help="do not launch or tear down a game: attach to one "
                         "somebody else is holding (`embark --hold`). The lane "

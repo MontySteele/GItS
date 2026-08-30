@@ -129,7 +129,10 @@ CEILINGS: dict[str, int] = {
     # EB-202/EB-203 minted 2026-08-29 by the KLEESPARK-R1 relayed review:
     # a slot whose threshold the board set could not reach, and a form
     # whose play line is never checked for a target before it is graded.
-    "EB": 205,   # EB-205 minted 2026-08-29 by R222 pick 6(d): the Klee Spark
+    "EB": 206,   # EB-206 minted 2026-08-29 by the two-instance funnel build:
+                 # two game processes from one install, per-process APPDATA
+                 # and a per-process bridge port.
+                 # EB-205 minted 2026-08-29 by R222 pick 6(d): the Klee Spark
                  # arm became DRAFTABLE (the pool seam) and has never been
                  # measured drafted. 202-204 are other branches of the same
                  # sitting; this branch took the next free number above them.
@@ -408,6 +411,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 205 minted 2026-08-29 by R222 pick 6(d): a drafted arm for the
         # Klee Spark economy, now that the drafter can be offered the rows.
         205,
+        # 206 was minted AND CLOSED on 2026-08-29 by the two-instance funnel
+        # build -- it left OPEN_IDS in the same commit that closed it, with
+        # the ceiling above holding the number so nothing re-takes it.
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,
