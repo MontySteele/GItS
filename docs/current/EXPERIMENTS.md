@@ -244,12 +244,19 @@ carried while it was active is in the commit message that retired it.
   slot**: it is the shadow-versus-deciding verdict agreement read off
   `review/qa/klee-sparks-r2-round-summary.json`, which is the number `M62`'s
   criterion is taken from, and it is registered here rather than in `slots.yaml`
-  for exactly that reason. **Precondition disclosure (R222 §11.7 item 7):** the
-  order registered there is whole-fight Codex play FIRST, then this round. At
-  the moment of registration the packet carries no §12 and no whole-fight record
-  is on disk, so this round is registered and run on the [USER] brief that
-  directed it; the departure is recorded here rather than assumed, and the
-  results section says whether the whole-fight read had landed by run time.
+  for exactly that reason. **Precondition (R222 §11.7 item 7) — MET.** The order
+  registered there is whole-fight Codex play FIRST, then this round. The boards
+  and the slate above were authored while the packet still carried no §12; the
+  whole-fight round `KLEESPARK-W1` landed on `main` before this round was RUN
+  (packet §12, session `kleespark-w1`, build `0.2.1517+proto.dirty`, seed
+  `21H4Y89QDRP6`), and its §12.9 pick 2 names three boards the repaired round
+  needs — **A** (a bank of 3 paying any one of Fwoosh! / Bang Bang! / Firework
+  Finale and no two), **B** (the dry sink with no generator anywhere in hand)
+  and **C** (Bang Bang! at a bank of exactly 2 with no Bomb on the field, which
+  §12.8 item 1 left as an unresolved arithmetic candidate). Those are `t01`,
+  `t02`/`t05` and `t03` of this round, authored independently and matching; the
+  multi-enemy pair `t04`/`t06` is §11.7 item 7's own second half. §12.9 pick 1
+  is [USER]'s and is not settled by this registration.
   **Results:** packet `review/active/klee-sparks-2026-08-29.md` §13; records
   under `review/qa/klee-sparks-r2-t0*/`.
 
