@@ -493,7 +493,11 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     per-row `description:` channel with the boot-time loc merge deleted
     (`EB-215`, closed 2026-08-30): one channel describes one card, and the
     generated file is right as committed.
-    Where the Charge-source line goes is still `M55`.
+    `EB-214`'s BUILD half landed 2026-08-30 — Rule 1 is printed in the Muster
+    keyword's own text and R224's Charge-source line heads the click-through
+    pile view, both under the flag only, with the shipped keyword proved
+    byte-identical in a release build — and the row stays OPEN on the
+    `KURAGEMEM002` rerun.
     **The memory's DISPLAY is being rebuilt**: the strip the blind run
     tested was diagnosed true on both misread frames and found
     insufficient rather than defective, so [USER]'s direction turns it

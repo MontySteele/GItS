@@ -26,6 +26,7 @@ assertion below is about what the engine DOES.
 """
 
 import copy
+import pathlib
 import random
 
 import pytest
@@ -687,3 +688,83 @@ def test_five_starter_fights_run_to_completion_under_the_base_kit(base_kit):
         st = fight(seed=seed)
         assert st.over or not st.living_enemies or not st.player.alive
         assert not [e for e in st.log if e["event"] == "UNIMPLEMENTED"]
+
+
+# --------------------------------------------------------------------------
+# EB-214 / R224 item 6 (M54 pick 1): THE TEACHING SURFACE
+#
+# The blind run graded P3 at 0 of 10 turns and 0 of six Musters naming a
+# Memory consequence -- every Muster target was chosen BECAUSE the card was
+# dead, the exact inverse of Rule 1. R224 ruled the failure to be WORDING and
+# not dose, and printed Rule 1 as the Muster KEYWORD's own text (hover text is
+# that keyword's detail; "tooltip" is not a third surface).
+#
+# THE KEYWORD IS DEFINED IN EXACTLY ONE PLACE, and this is the sim's pin on
+# it. There is no keyword table on the sheet and gen_klee_cards renders only
+# the FACE phrase ("Muster N", _conscript_phrase): the definition itself lives
+# in KokomiRiderTips.ForMuster and nowhere else, which is R78's whole point.
+# So the sim asserts against that source, the way the keyword-meter lint
+# already does, rather than against a copy it would have to keep in step.
+#
+# BOTH SIGNS. The rule must be inside `#if PROTOTYPE_CARDS` -- a release build
+# must not be able to print a sentence about a jellyfish whose type it does
+# not compile -- and the shipped definition must be word for word R78's.
+# --------------------------------------------------------------------------
+
+TIPS = (
+    pathlib.Path(__file__).resolve().parents[2]
+    / "klee-mod" / "KleeCode" / "Cards" / "KokomiRiderTips.cs")
+
+RULE_ONE = (
+    "creates a memory of the card it ate",
+    "recruit creates a second when it burns",
+)
+
+SHIPPED_MUSTER_TEXT = (
+    "[gold]Muster N[/gold]: transform N cards in your hand into ",
+    "random Inazuma [gold]Companion[/gold] cards. Each costs ",
+    " less and [gold]Exhausts[/gold]. Kit cards and ",
+    "Companions you already hold are never chosen.",
+)
+
+
+def _for_muster_body():
+    """`ForMuster`'s source, from its signature to the method's close."""
+    text = TIPS.read_text(encoding="utf-8-sig")
+    start = text.index("public static IEnumerable<IHoverTip> ForMuster(")
+    end = text.index("\n    }", start)
+    return text[start:end]
+
+
+def _quarantined_span(body):
+    """The part of `body` the release build never sees."""
+    start = body.index("#if PROTOTYPE_CARDS")
+    return body[start:body.index("#endif", start)]
+
+
+def test_the_muster_keyword_prints_rule_one(base_kit):
+    """Under the flag the keyword carries the memory-creation rule itself."""
+    quarantined = _quarantined_span(_for_muster_body())
+    for phrase in RULE_ONE:
+        assert phrase in quarantined, phrase
+
+
+def test_the_muster_keyword_states_the_price_from_the_constant(base_kit):
+    """P3 asks a tester to say "at price Y", so the price is on the keyword --
+    and it is READ from the C# law constant rather than typed, the same
+    discipline the Muster discount above it already keeps."""
+    quarantined = _quarantined_span(_for_muster_body())
+    assert "KurageMemoryLaw.CostPerEnergy" in quarantined
+    assert "3" not in quarantined, "the multiplier must not be hand-typed"
+
+
+def test_the_shipped_muster_keyword_did_not_move():
+    """THE RELEASE PIN, and it takes no fixture: with the flag off this is the
+    text R78 shipped, and every added word is inside the quarantined span."""
+    body = _for_muster_body()
+    released = body.replace(_quarantined_span(body), "")
+
+    for chunk in SHIPPED_MUSTER_TEXT:
+        assert chunk in released, chunk
+    for phrase in RULE_ONE + ("Charge", "memory"):
+        assert phrase not in released, phrase
