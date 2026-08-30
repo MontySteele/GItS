@@ -4331,3 +4331,260 @@ more:**
    RECORDED and NOT GRADED.
 3. **One pilot, one policy, one route, one seed base.** Six hundred runs is a
    sample of one cell, not of the game.
+
+---
+
+## 18. `KLEESPARK-W3` — the live controlled-ratio whole fight
+
+**2026-08-30 · branch `kleespark-w3`, stacked on `eb205-drafted-read`
+(`4e1f2ae`). REGISTRATION, DRAFTED AND COMMITTED BEFORE ANY RUN.** This
+section and its `EXPERIMENTS.md` row are the registration R225 ordered when it
+answered §16.11 pick 1 as **(a′)**: *"then a live controlled-ratio deck under a
+fresh registration Claude drafts."* Under R212(2) the slate is Claude's to
+draft from written design intent and commit DRAFTED before any run; it is
+offered for batch countersign and is never re-signed. R101b binds: nothing
+already published in §11–§17 is re-read, re-graded or rewritten here.
+`KLEESPARK-S1` (§17) is the sim half of the same order and this is the live
+half; §17.7 is the list of what may travel between them, and this section
+takes **one number** off it and nothing else.
+
+### 18.1 The unit, and what is different from `KLEESPARK-W2`
+
+**The unit is a CAPPED BATCH of live fights** — §14.4 condition 1 — begun at
+the first Monster room of a live Act-1 Klee run and played by the Codex seat
+through `understudy.blindplay session`, with the deck granted by
+`understudy.embark --arm`. `W2` was registered as a batch and **did not get
+one**: it stopped at 17 of 40 funded actions on `tool_blocked` at the second
+Monster room's first frame, the same shape `W1` ended on. Two lifecycle throws
+were the cause and both are fixed — `EB-221` (a `Deactivate` postfix resolving
+the local seat on a combat that has none) and `EB-222` (the meter cost badge
+painting a texture the room preloader had freed) — and
+`understudy.soak --max-fights 3` now answers `fights=3 defects=0`. **So the
+batch is attempted here for the first time on a build that can carry one**, and
+§18.6 records what it actually got rather than what it was funded for.
+
+**The one thing that changed in the DECK, and it is the whole point.** `W2`
+granted **two Spark makers against eleven Spark-priced sinks** and its printed
+bank never exceeded 1 against a cheapest non-damage price of 2. R225 read that
+as a fact about THAT deck rather than about the economy, and §17's sim read
+then measured the economy on decks the drafter itself built: the maker : sink
+ratio at floor 15 came in at a median of **1.500 — three makers to two sinks** —
+and the per-fight peak bank at a median of **5.0**. This deck is staged at that
+ratio. It is the same arm, the same build family and the same slate; what moves
+is the composition, and it moves to a number §17 derived rather than to one
+anybody picked.
+
+### 18.2 The deck — derived from the inherited ratio, row by row
+
+**What is inherited, and it is one number** (§17.7): **1.500 makers per sink**,
+`S4`'s floor-15 median under the arm. It is taken as a **FLOOR**, not as a
+target — §17.7's blind spot 1 says the maker count is a floor on both arms
+because two real Spark sources (`crackle`'s `discard_for_sparks` and, since
+`C21`, Klee's kit declaration) carry no top-level `gain_spark` and are
+invisible to the definition. A deck staged BELOW the inherited ratio would be
+asking a question `S1` has already answered; a deck at or above it is asking
+this one.
+
+**A MAKER is a deck card carrying a top-level `gain_spark`; a SINK is a deck
+card carrying a top-level `spend_spark`** — §17.2's definitions, unchanged, so
+the two reads count the same things.
+
+**The derivation, in order, with nothing picked at any step.**
+
+1. **The SINKS are named by §14.4 condition 3 and by §16.4, not chosen here**:
+   the three `EB-218` Spark-only twins (Set It Off, Dig In, Powder Smoke),
+   **Rummage** — which R224 item 19 folded into this fight and which `S5`
+   proved is **unreachable by draft** (0 of 600 decks), so it must be GRANTED —
+   and **the cheapest damage sink, so a choice exists**. The cheapest damage
+   sink in the arm is priced **1**, and one of the three price-1 faces is
+   `proto_kaboom_sink` (Ka-pow!), which the substituted starter already
+   supplies. It is therefore counted once and no second price-1 damage row is
+   minted: **five sinks**.
+2. **The MAKERS follow from the ratio**: 5 sinks × 1.500 = 7.5, and the
+   inherited number is a FLOOR, so the count rounds **UP to 8**. Seven makers
+   would put the deck at 1.400, below the floor this read exists to stage.
+3. **WHICH makers is not a pick either.** Under `SPARK_ALT_COST_ENABLED` four
+   of Klee's ten shipped `gain_spark` rows are converted into sinks by PICK 4's
+   map (`sparkly_treasure`, `spark_collection`, `sugar_rush`, `cant_catch_me`),
+   leaving **exactly six** shipped makers in the offerable pool. All six are
+   granted, one copy each — the whole set, so no selection among them is made —
+   and the eighth is a **second copy of the substituted starter's own maker**,
+   `proto_pop_spark`, which is the row the arm already establishes rather than
+   a seventh row somebody chose.
+
+**THE GRANTED DECK — thirteen cards, one copy each except where noted.**
+
+| # | `--arm` id | printed name | Energy | Spark | role | body |
+|---|---|---|---|---|---|---|
+| 1 | `proto_pop_spark` **×2** | Powder Pop | 0 | **makes 1** | maker (starter sub, doubled to the floor) | Bomb 5, gain 1 Spark |
+| 2 | `skip_and_hop` | Skip and Hop | 0 | makes 1 | maker (shipped, common) | Block 2, gain 1 Spark |
+| 3 | `warm_glow` | Warm Glow | 1 | makes 1 | maker (shipped, common) | Block 6, gain 1 Spark |
+| 4 | `snap` | Snap! | 1 | makes 1 | maker (shipped, common) | 6 damage, gain 1 Spark |
+| 5 | `hot_hands` | Hot Hands | 1 | makes 3 | maker (shipped, uncommon) | gain 3 Sparks, 2 damage to self |
+| 6 | `all_my_treasures` | All of My Treasures! | 3 | makes 2 | maker (shipped, rare) | 6 Bombs at 6, gain 2 Sparks |
+| 7 | `da_da_da` | Da-da-da! | 0 | makes 1 | maker (shipped, rare) | 4 damage ×3 random, gain 1 Spark |
+| 8 | `proto_kaboom_sink` | Ka-pow! | 0 | **spends 1** | sink — damage (starter sub, and the cheapest damage sink) | Spend 1, 7 damage |
+| 9 | `proto_powder_charge_spark` | Set It Off | 0 | spends 2 | sink — **detonation** (`EB-218` twin) | Spend 2, detonate +4 |
+| 10 | `proto_hold_the_line_spark` | Dig In | 0 | spends 2 | sink — **Block** (`EB-218` twin) | Spend 2, Block 5 (+6 vs an attack intent) |
+| 11 | `proto_smoke_and_sparks_spark` | Powder Smoke | 0 | spends 2 | sink — **Vulnerable** (`EB-218` twin) | Spend 2, Vulnerable 3 |
+| 12 | `proto_spark_priced_draw` | Rummage | 1 | spends 3 | sink — **draw** (R224 item 19) | Spend 3, draw 3 |
+
+**The arithmetic the deck is staged on:** **8 makers : 5 sinks = 1.600**, at or
+above the inherited floor of 1.500, against `W2`'s granted **2 : 11 = 0.182**.
+Klee's printed starter (4 × Kaboom!, 4 × Duck and Cover, Jumpy Dumpty, Pop!)
+carries **no maker and no sink** by the sheet definition, so it moves neither
+side of the ratio.
+
+**Deck size: 23** — the printed ten plus thirteen granted — against `W2`'s
+**21**. The two records are comparable on composition and near enough on size
+that draw frequency is not the difference between them.
+
+**`arms_granted` verbatim, as the sealed record will name them** (wire ids —
+`KLEEMOD-` plus the id upper-cased, `embark.wire_id`; Powder Pop appears twice
+because it is granted twice):
+
+```
+KLEEMOD-PROTO_POP_SPARK
+KLEEMOD-PROTO_POP_SPARK
+KLEEMOD-SKIP_AND_HOP
+KLEEMOD-WARM_GLOW
+KLEEMOD-SNAP
+KLEEMOD-HOT_HANDS
+KLEEMOD-ALL_MY_TREASURES
+KLEEMOD-DA_DA_DA
+KLEEMOD-PROTO_KABOOM_SINK
+KLEEMOD-PROTO_POWDER_CHARGE_SPARK
+KLEEMOD-PROTO_HOLD_THE_LINE_SPARK
+KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK
+KLEEMOD-PROTO_SPARK_PRICED_DRAW
+```
+
+**WHAT IS LEFT OUT, and why.**
+
+- **`proto_true_spark_knight` (Spark Knight's Oath)** — excluded on §12.2's
+  published D4 grounds, exactly as `W1`, `W2` and `S1` excluded it: a Rare
+  Power that reprices every Attack in the deck is a second variable in a window
+  whose one variable is the maker : sink ratio. Its own whole-fight read is
+  **`EB-223`** and is not this read.
+- **The five damage rungs above price 1** — Fwoosh! and Tinder Toss at 1, Bang
+  Bang! and Dodoco Blast at 2, Firework Finale at 3. `W2` granted the whole
+  ladder and the ladder is not what is being asked about; a deck carrying every
+  damage face at every price would put the ratio back where `W2` had it. **One**
+  cheapest damage sink is in, because §14.4's question needs a rival for the
+  bank, and nothing above it is.
+- **A shipped maker converted by PICK 4's map.** Granting `sparkly_treasure`
+  under the flag would put a row in the deck that the arm's own pool cannot
+  offer.
+
+### 18.3 The cell, the batch, the budget and the stopping rule
+
+| | |
+|---|---|
+| cell | the **installed dev build**, named in the sealed record's identity block, read off the deployed `mods\klee\manifest.json`, plus the game build off `release_info.json` |
+| build stamp EXPECTED | **`0.2.1610+proto.dirty`** — read before this registration was written, from `main` `d45785a` (both prototype arms, `EB-222`'s badge fix, `EB-220`'s glyphs). **NOTHING IS DEPLOYED BY THIS PIECE**: the build that is installed is the build that runs |
+| build stamp RULE | the cell is whatever the deployed manifest says, and a difference from the expected string is DISCLOSED in §18.6 rather than treated as a stop — `embark --arm` refuses a build with no `+proto` anyway (`embark.check_arms`), which is the check that actually matters |
+| the pck contract check | the deployed package was built at `main` `d45785a`; this branch is that commit plus `EB-226`, `EB-227` and §17, and `git diff d45785a..HEAD -- klee-mod docs/klee-cards.yaml docs/prototype-surface.yaml tier0/constants.py` is **EMPTY**. So every granted row's printed text on the installed build is this tree's sheet text. **If a granted row's printed face on a live page differs from its sheet row, the run STOPS and says so** |
+| action budget | `--max-actions 40 --max-wall-s 7200 --max-refusals 2 --max-stalls 6` |
+| Codex cap | **45 calls** — the driver spends one `codex exec` per answered screen plus one per fight record and one for the run record, so 40 actions is the largest cap that fits inside 45. **The Codex cap is what bounds this batch, not the game**: `--max-actions` is set to the number the cap can pay for |
+| the batch's bound | the action budget IS the batch bound, as it was in `W2`. On `W2`'s own rate — 12 combat pages and 5 navigation pages for one fight and its rewards — 40 actions is **two to three fights**. §14.4's stopping condition (*stop as soon as three or more combat turns have held two simultaneously affordable uses*) is evaluated **at grading, off the wire record**, not live: the driver is a blind one-thread seat and no operator reads a page mid-session |
+| the seed | **rolled by the game and read back off the wire (R95)** — not chosen and not pinned, exactly as `W1` and `W2` took theirs. There is no declared board here, so `EB-208`'s (a) live-count preflight has no declared count to compare against; **no slot below reads `enemy_count`**, so no page can be UNREACHED on a body-count gap and (a) cannot bite. `EB-208` (c)'s character/build/context-keyed seed ledger is **not built and is not used** |
+| sessions | **ONE.** If the session ends early it is recorded as it ended and NO second session is started |
+| the seat's meter | `python -m understudy.codex_usage` is printed **before and after** the run into §18.6 (`EB-227`, stop lines 85% of the five-hour window and 50% of the week). If the guard refuses mid-batch the run stops cleanly, what ran is graded, and §18.6 says so |
+| the R225 soak gate | `python -m understudy.soak --runs 1 --character KLEEMOD-KLEE --max-fights 3` is run as the preflight and its answer is recorded in §18.6 |
+
+### 18.4 The slate — `W1'`–`W5'` re-used at their `W2` thresholds, plus one new slot
+
+Every falsifier is computed by `review/qa/blindplay/kleespark-w3/grade.py`,
+**committed in this same commit, before any run**, off artefacts the run writes
+by itself: the rendered observation pages (`turn-*/prompt.md` — printed bank,
+printed Energy, printed hand), the per-turn `reply.json`, and
+`transcript.jsonl`'s command rows. No grade reads a design judgement, and no
+grade reads the tester's prose except `W3''`, whose §14.4-condition-2 half is a
+fixed keyword rule over the tester's own recorded sentence and is stated as
+such. The slot names carry a **double prime** so no reader can confuse a grade
+here with `W2`'s published `W1'`–`W5'`, which stand as published (R101b).
+
+**Affordability, defined once for the whole slate, and taken from §16.4
+unchanged.** On a combat page a hand card is AFFORDABLE when its printed Spark
+price is ≤ the printed Spark bank AND its printed Energy cost is ≤ the printed
+current Energy. Every sink but Rummage costs 0 Energy; the Energy half binds
+anyway, because an unpayable card is not a declined one.
+
+**The four NON-DAMAGE sinks in this deck**: Set It Off, Dig In, Powder Smoke,
+Rummage. **The one DAMAGE sink**: Ka-pow!.
+
+| # | slot | prediction | falsifier, mechanically | UNREACHED when | the decision the outcome changes |
+|---|---|---|---|---|---|
+| `W1''` | **The precondition `W1` and `W2` never met**: does the bank ever hold two affordable uses at once, with a non-damage destination among them? | **YES, on at least 3 combat turns** — `W2`'s threshold, unchanged. | Count combat pages where **two or more distinct Spark-priced titles in hand are each affordable**, and **at least one of the affordable ones is a non-damage sink**. **≥ 3 = PREDICTED, 1–2 = SPLIT, 0 = MISS.** | the session reaches **zero combat pages** | **PREDICTED**: the precondition is met at the inherited ratio, `W3''` is a real reading, and `W1'`'s null is established as a property of `W2`'s composition (R101b leaves `W1'` itself untouched). **MISS**: the precondition fails at a deck staged three makers to two sinks, which is the strongest evidence available that generation and not composition is the governor — **PICK 1 REOPENS to [USER]** (see `W6''`). **SPLIT**: the bank reaches the rung but rarely; the next unit is a longer batch, not a new row. |
+| `W2''` | **The mixed pool's own question**: is a non-damage sink ever chosen over a damage sink the bank could equally have paid? | **YES, on at least 1 turn** — `W2`'s threshold, unchanged. | A successful `play` of a non-damage priced row on a turn whose page showed **at least one damage sink also affordable at that moment, at a Spark price ≤ the played row's price**. **≥ 1 = PREDICTED, 0 = MISS.** | **no page ever showed a non-damage sink and a damage sink affordable at the same moment** — the deck never posed the choice, which is a draw fact and not a design reading | **PREDICTED**: the bank has a second kind of destination in live play at this ratio, and §14.3's question about minting NEW sink rows can at last be asked against a measured alternative rather than a null. **MISS with `W1''` PREDICTED**: the choice was posed and damage won every time — the migration did not buy a decision, and §14.3 options (1)/(2)'s new rows are back on the table. **UNREACHED**: the fault is draw, and the next act is more fights. |
+| `W3''` | **§14.4 condition 2 — a hold that names what it is saving for.** | **YES, on at least 1 turn** — `W2`'s threshold, unchanged. | A turn ended with `end turn` while an **affordable** Spark-priced sink sat in hand (`W3`'s bare detector, unchanged), **AND** that turn's recorded sentence both matches the fixed hold vocabulary and **names a Spark-priced title or the bank itself**. **≥ 1 = PREDICTED, 0 = MISS.** | **`W1''` grades MISS** — §14.4 condition 1 in so many words: a hold prediction evaluated on a board that never offered a choice measures the generator, not the sink | **PREDICTED**: the single number §14 exists to move off zero has moved, and the arm's economy creates a decision in live play at the inherited ratio. **MISS with `W1''` PREDICTED**: the choice existed and was never declined — §14.3's option (4) reading is finished and re-pricing §4.2's table becomes the next act to put to [USER]. **UNREACHED**: nothing about the sinks is learned. |
+| `W4''` | **§14.4 condition 4 — the price-3 rung is bought at least once.** | **NOT A GRADED SLOT. `UNREACHED` BY CONSTRUCTION, and printed here before the run**, exactly as §16.4 printed it. | §14.4 condition 4 registers this prediction **only if the chosen option puts a REDESIGNED card at price 3**. R224 took (5) in its migrate-only form, **Powder Keg was not built**, and the twins are priced 2. There is no redesigned price-3 rung in this deck. | by construction, before the run | nothing. It is printed so a later reader cannot mistake its absence for an omission. **What IS recorded, ungraded**: whether the one price-3 face in this deck (Rummage) was ever bought. |
+| `W5''` | **§14.4's fourth item — the attack share.** | **RECORDED, NOT GRADED.** | Share of successful `play` commands that name an Attack, by the kind the page printed. `W1` read 50.0%, `W2` read 75.0%. | n/a | none on its own. A deck of six new makers and four non-damage sinks should read lower than `W2`'s 75%; it is recorded so that claim can be checked later, and it grades nothing. |
+| `W6''` | **NEW, and the only slot §17 hands this registration a number for: the LIVE per-fight peak Spark bank against `S1`'s sim median of 5.0.** | **The median per-fight peak printed bank is ≥ 2.** Registered as a **FLOOR relation, not an equality**: `S1`'s 5.0 was taken in the sim, on decks the drafter built, over 8,428 fights, and a live median that merely CLEARS the cheapest non-damage price is what this read needs. **It is registered as "≥ 2" and never as "= 5".** | Per fight, the **maximum printed Spark bank** across that fight's combat pages (an absent Spark line on a combat page is a bank of 0 — `W1`'s and `W2`'s graders' own rule). The median over fights carrying at least one combat page. **median ≥ 2 = PREDICTED; median = 1 = SPLIT; median 0 = MISS.** | the session records **zero combat pages** | **PREDICTED**: income clears the price-2 rung in live play at the inherited ratio, `S1`'s sim reading survives contact with the build, and **`EB-205` is DISCHARGED** — the income question R225 put first is answered on both engines, and the arm's remaining question is SPENDING, which is `W2''`'s. **SPLIT**: income reaches the rung only sometimes; the live deck is not re-staged and the next act is a longer batch. **MISS**: **income fails live on a deck staged at three makers to two sinks.** This is the first evidence that would **REOPEN Klee PICK 1 (the generation pattern) to [USER]** — a MISS here cannot be blamed on composition, because composition is the one thing this registration controlled, and it goes back as a numbered pick rather than as a Claude decision. |
+
+**A MISS on income reopens PICK 1, and that is registered here rather than
+decided later.** R225 forbids a new sink row and a re-price *until income is
+answered*. `S1` answered it in the sim. If `W6''` (and with it `W1''`) MISSES
+on a deck built to §17's own inherited ratio, then the answer differs between
+the engines on the one question the whole sequence turns on, and **Claude does
+not settle that**: it returns to [USER] as PICK 1 reopened, with this run and
+`S1` as the two readings. Any other combination of grades leaves PICK 1 closed.
+
+**Contamination and blind spots, stated before the run.**
+
+1. **GRANTED, NOT DRAFTED.** `bridge.GRANT_GUARDRAIL` rides the record: this
+   run's deck is not one the generators produced, so nothing measured on it is
+   comparable to any other run. The ratio is staged deliberately — that is the
+   experiment — and it is not evidence about what a player would draft. `S3`
+   already measured the draft half and MISSED (3.2%), which is why the sinks
+   are granted here.
+2. **THE STARTER IS SUBSTITUTED ADDITIVELY, NOT REPLACED.** `S1`'s arm
+   substitutes one `pop` → Powder Pop and one `kaboom` → Ka-pow! at
+   `loader._starter_ids`; the live game has no such seam, so the two prototype
+   Basics are GRANTED on top and the printed starter keeps its `Pop!` and its
+   four `Kaboom!`. The deck therefore holds two Bomb-placers and five
+   7-damage Attacks where the sim's holds one and four. Neither shipped row is
+   a maker or a sink, so the **ratio is unaffected**; what is affected is draw
+   frequency, and it is disclosed rather than corrected.
+3. **`+proto`, so the shipped automatic Spark rule is NOT LIVE.** The build is
+   stamped `+proto` by `deploy_proto.ps1`, which compiles
+   `-p:PrototypeCards=true`, under which `SparkPower.BaseRuleActive` is the
+   compile-time constant **`false`** (`klee-mod/KleeCode/Powers/SparkPower.cs`,
+   pinned by `SparkAlternativeCostPinTests` and `SparkSinkPinTests`). At no
+   bank do Attacks cost 0 and nothing is consumed automatically. This is the
+   R101b erratum §16.4 contamination 1 carries, stated here as a fact and not
+   as a hedge.
+4. **ONE SEED for the whole batch**, rolled by the game and read back. Every
+   fight in the batch is a fight of that one run, so the fights are not
+   independent samples of anything.
+5. **Pounding Surprise, Klee's starter relic, pays +1 Spark per detonation.**
+   It is an income source the deck's maker count does not see, in the same
+   direction as §17.7's blind spot 1: the inherited ratio understates
+   generation and never overstates it. `W2`'s own Spark-arithmetic candidate
+   was explained by exactly this, and R225 closed the class at pick 3 (b).
+6. **Guardrail-7 and R217 G.** Every number here is a FLOOR off one capped
+   batch, one seed, one pilot and a granted deck. The tester's words are
+   iteration feedback — never validation, never balance evidence, never
+   approval — and no win rate, comparison or fun claim may be taken off this
+   run.
+
+### 18.5 Independence, and who holds the deciding chair
+
+All five prototype sink rows and both prototype Basics are
+`authored_by: [claude]`; the six shipped makers are shipped content and carry
+no authorship claim of the seat's. **The seat that plays is Codex
+(`gpt-5.6-sol`)**, refused-by-family through `blindplay.check_independent`
+(R217 C), so the playing chair is author-disjoint.
+
+**Who holds the DECIDING chair — OPERATIONS' own rule, applied.** *"A round
+that can ADVANCE an arm gets the Codex seat deciding every board … A round
+that is an INSTRUMENT round — a repair, a bench, anything on which no ADVANCE
+rests — stays on the fresh-Opus deciding form. The round's own registration
+says which it is, before it runs."* **This batch CAN ADVANCE**: it decides the
+income question `EB-205` and R225 put first, and `W6''` PREDICTED discharges
+`EB-205`. It is therefore **not** an instrument round, the deciding read is
+**Codex's**, and there is no fresh-Opus form in this registration at all —
+which in whole-fight blind play is the same thing as saying the tester decides,
+because the tester is the only reader. The **GRADING** chair is a committed
+mechanical script, not a model, so author-disjointness does not arise for it
+except on `W3''`'s keyword half, which is a fixed rule written before the run.
