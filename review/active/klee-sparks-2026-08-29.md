@@ -2053,6 +2053,39 @@ one asked for two out of a set that could produce three and got three. **That
 is what a reachable threshold buys, and it is the whole of `EB-202`'s value:
 the same question, asked where it can be answered.**
 
+**ERRATUM 2026-08-29 (relayed review) — the GRADE STANDS and is NOT re-graded
+(R101b); the LABEL on it is superseded.** `P1`'s slot title says
+*spend-versus-hold*. Its registered predicate does not. `S1` asks only that the
+bank reach the cheapest Spark price and fall short of the sum of the affordable
+ones (`understudy/turns/klee-sparks-r2/slots.yaml:44-52`), and the MANIFEST
+grades `P1` on *"the DECIDING form's answer to question 2 names a Spark-priced
+card DIFFERENT from the Spark-priced card its chosen line plays"* — a choice
+BETWEEN SINKS. Nothing in either predicate requires a hold line, and nothing in
+the three forms supplies one. `t01`'s two candidates — Firework Finale against
+Fwoosh! + Bang Bang! — **both spend all three Sparks**, and the hold it does
+raise it kills in the same sentence (*"a banked Spark is just damage I did not
+deal"*). `t04` names Dodoco Blast, finds it dominated, and says *"this turn did
+not present me with a decision — it presented me with a sum"*. `t06`'s two
+candidates are **both priced 2**, and it calls the board *"not close"* with
+Dodoco Blast dominating *"outright"*. On no board was an affordable sink
+deliberately left unplayed.
+
+**So the sentence "3 of 3 spend-versus-hold" above is SUPERSEDED by: on 3 of 3
+`S1` boards the ALTERNATIVE SINK IS LEGIBLE** — the reader sees a second
+Spark-priced use, prices it against the one it played, and can say why it lost.
+That is a real result about the faces and it is what `P1` measured. It is NOT
+the whole-fight result: `W1` = 0 and `W3` = 0 (§12.6) said the bank never held
+two affordable uses and no affordable sink was ever declined, and nothing in
+this round overturns that.
+
+**The registered wording that would have caught it**, stated so a later slate
+can use it rather than re-derive it: (i) require the named alternative to be a
+HOLD LINE — a second line that plays NO Spark-priced card — which is a strictly
+narrower reading of the same question 2; or (ii) `W3`'s falsifier, *a turn
+ended with an affordable Spark-priced row still in hand*, which is mechanical,
+reads off the replayed line rather than off prose, applies to a staged board
+exactly as it applies to a fight, and which no board of this round produced.
+
 **`P2` is the sanity check §11.7 item 2 authorised, and it passes cleanly.**
 Both dry boards printed the Spark cards as *"Cannot be played right now"* and
 every reader — deciding, shadow and the third seat — read them that way and
