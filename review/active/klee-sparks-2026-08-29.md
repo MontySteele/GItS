@@ -5462,3 +5462,194 @@ Ka-pow! was drawn once in fifty, and income was never the binding constraint.
 **No QUEUE row is minted for it here** (R206/R212, one batch per sitting): the
 pick is assembled into the sitting's slate by the orchestrator, and this
 section is where its evidence lives.
+
+## 21. `KLEESPARK-BT1` — *Bag of Tricks*, the staging round (`EB-224`)
+
+**Registration. DRAFTED by Claude under R212 item 2 and committed, with its
+four boards and its `slots.yaml`, BEFORE anything was staged, deployed or
+read.** [USER] countersigns in batch or vetoes. The machine-readable half is
+`understudy/turns/klee-sparks-bt1/` (`MANIFEST.md`, `slots.yaml`, `t01`–`t04`);
+the published record is `docs/current/EXPERIMENTS.md` → `KLEESPARK-BT1`; the
+results are §22.
+
+### 21.1 Why this read exists
+
+`BACKLOG` `EB-224`'s next action reads *stage, grade, replay, whole-fight*.
+This is **stage, grade and replay**. The whole fight stays owed and this
+section does not touch it.
+
+The row is `proto_spark_mode_bombs` — **Bag of Tricks**, 0 Energy, Skill,
+Uncommon: *Choose one: Place 1 Bomb dealing 5 | Spend 3 Sparks: place 3 Bombs
+dealing 5.* It is **the first row in the tree whose price sits at the HEAD OF A
+MODE** rather than at the card's top level. The doctrine seat held the arm on
+that clause twice (klee-slice-1 packet §6.1 and §6.1.1); R225 amended the
+written clause on 2026-08-30 — *top level **or** the head of a `choose_one`
+mode, and nothing nested or conditional* — and the arm proceeds. It is built on
+`EB-182`'s mode-price machinery, whose behaviour is what half this round tests
+live on this row.
+
+**The sequencing gate is discharged.** `EB-224`'s row is sequenced behind
+`EB-205`'s read; `KLEESPARK-S1` and `KLEESPARK-W3` took that read on
+2026-08-30 and `EB-205` is DISCHARGED. Nothing in this round re-opens it and
+nothing here is compared to either of those runs.
+
+### 21.2 The question, in two halves
+
+1. **Does a price of 3 that buys Bomb PLACEMENT create a real
+   spend-versus-hold / one-versus-three decision** — is the expensive mode
+   *taken* where three Bombs plainly pay, and *declined* where the same bank
+   has a better home?
+2. **Is the mode-head price LEGIBLE** — the face shows the price, the
+   unaffordable mode is omitted (`EB-182`), and the bank is debited exactly once
+   when the mode is taken?
+
+**What is NOT asked:** whether the card is fun; whether 3 is the right number;
+anything about win rate. Nothing measured on a prototype row is quotable
+anywhere (R215 B), and a staged board is comparable to no run (Guardrail-7).
+
+### 21.3 The boards — four, matched in pairs
+
+Player HP 42/62, Block 0, Energy 3, enemy 40 HP on all four, so **the only
+things that move across the round are the bank and one card in hand**. Every
+seed is a `KLEESPARK-R2` seed recorded ONE-BODY on a Klee run, and every board
+wants one body — so unlike `KLEESPARK-R2`'s `P3`, no slot here can go UNREACHED
+on an encounter roll.
+
+| turn | seed | bank | hand | what the board is | slot |
+|---|---|---|---|---|---|
+| `t01` | `JH4T8MSN10KS` | **3** | Bag of Tricks, Quick Fuse, Kaboom!, Duck and Cover | **A** — three Bombs pay (22 against 12), nothing else wants the bank | `B1` |
+| `t02` | `R805DJ56LZHM` | **3** | Bag of Tricks, **Firework Finale**, Quick Fuse, Duck and Cover | **B** — `t01` with ONE card swapped: the bank buys the mode **or** the rival, and the rival is worth more (23 against 15) | `B2` |
+| `t03` | `YX7PB48WR7R4` | **2** | Bag of Tricks, Quick Fuse, Kaboom!, Duck and Cover | **C** — `t01` at a bank one short with no `gain_spark` in hand: the priced mode must be OMITTED and the card must stay playable | `B3` |
+| `t04` | `XT4BE7LFY5XH` | **2** | Bag of Tricks, **Powder Pop**, Quick Fuse, Kaboom! | **D** — one short, but the hand holds the missing Spark: affordability must RECOMPUTE inside the turn | `B3` |
+
+**The matched pairs are the design.** `t01`/`t02` turns on one swapped card, so
+a reader who takes the priced mode on both is taking it out of habit rather
+than off the board. `t01`/`t03` turns on one number, and is the *bank ≥ 3
+versus bank < 3* pair. `t03`/`t04` splits `EB-182`'s omission rule into its two
+halves — withheld when short, opened when the bank is raised mid-turn.
+
+**Quick Fuse is in three of the four hands** because Bombs detonate at the START
+of the player's turn, so a Bomb placed now is next turn's damage; the shipped
+0-Energy `detonate` is the only way a one-turn packet can put 15 and 5 side by
+side. It prices no Sparks and moves no slot. **No line on any board is lethal**
+(enemy 40, largest mirrored total 30.0).
+
+**`B1` ceiling 1 / threshold 1, `B2` 1 / 1, `B3` 2 / 2**, computed by
+`local_tester round --plan-only` over these four boards before staging.
+`--first 0`: every board runs, because each is the only one of its kind and
+R221 B's early stop would leave a question unasked rather than an answer
+duplicated.
+
+### 21.4 The slate — five slots, every falsifier mechanical
+
+Full text in `understudy/turns/klee-sparks-bt1/MANIFEST.md`; the thresholds and
+falsifiers, in summary:
+
+| slot | board(s) | prediction | threshold | falsifier |
+|---|---|---|---|---|
+| `P1` | `t01` | the deciding form's `chosen_line` plays Bag of Tricks with `choose` naming the **priced** mode | 1 of 1 | the card is omitted, or `choose` names the free mode |
+| `P2` | `t02` | the deciding form's `chosen_line` plays Bag of Tricks with `choose` naming the **free** mode **and** plays Firework Finale | 1 of 1 | `choose` names the priced mode; or the free mode is taken and the bank is left unspent |
+| `P3` | `t03`, `t04` | no deciding form claims the priced mode is available at a bank of 2 without first raising the bank; no `free_card_misreads` hit | 2 of 2 | such a claim, or a misread, on either board |
+| `P4` | `t03` | where the replayed line plays the card: the play is accepted, and the modal record raises no screen or one whose `offered` list omits the priced mode's text | 1 of 1 | the priced mode among the offers at bank 2, or a refused play |
+| `P5` | `t01` | where the replayed line takes the priced mode: `offered` contains **both** texts, post-play bank **0**, target carries **3** Bombs | 1 of 1 | fewer than two offers; a bank other than 0; a Bomb count other than 3 |
+
+**`P1` and `P2` are ONE finding and are read together.** Both PREDICTED is the
+only result that says the decision is real — driven by the board rather than by
+a habit of buying the expensive thing or a habit of hoarding. Either alone is
+not that result and is not reported as one. Registered here so it cannot be
+assembled afterwards.
+
+**Refusals and absences, ruled in advance.** A REFUSED deciding form grades its
+slot **UNREACHED**, not MISSED (`EB-209`). `P4` and `P5` are UNREACHED — never
+PREDICTED — where the replayed line does not reach the play they are about;
+absence of a counterexample is not a pass. That is `KLEESPARK-R2`'s `P4` lesson
+applied before the run rather than after it. **`t04` planning *Powder Pop
+first* is a correct reading and not a `P3` counterexample**: the board is built
+so the bank can reach 3 inside the turn.
+
+**RECORDED AND NOT GRADED:** the shadow-versus-deciding verdict agreement. A
+four-board denominator decides nothing about the seat's chair and `M62` is not
+at issue here.
+
+### 21.5 What each result decides — and what a MISS does NOT license
+
+- **`P1` and `P2` both PREDICTED** → the mode price poses a real
+  one-versus-three decision at the staged surface; `EB-224`'s staged half is
+  discharged and the row advances to the whole fight **unchanged**. No number
+  moves.
+- **Either MISSED** → the decision is not posed at the staged surface, and it
+  returns to [USER] as a numbered pick list in §22. **A MISS licenses nothing
+  on its own.** It does NOT license a re-price of the mode's 3, a change to
+  §4.2's price table, a new sink row (R225), any amendment to or re-reading of
+  R225's mode-head clause, any LAW change, or any claim about win rate, balance
+  or fun (R215 B, Guardrail-7). Claude does not reprice a row on a staged read,
+  and this is written before the run so it cannot be argued after it.
+- **`P3` MISSED** → a FACE finding, to `BACKLOG` as a defect candidate with the
+  failing form attached. Not a re-price.
+- **`P4` or `P5` MISSED** → an `EB-182`/codegen defect on this row, to
+  `BACKLOG`, and it **blocks** `EB-224`'s whole-fight step until fixed.
+  Engineering, not a design result: it moves no design slot.
+- **Any slot UNREACHED** → not a pass and not a fail; nothing is inferred from
+  the absence and no [USER] row opens on it.
+
+### 21.6 Who grades, and who does not
+
+**This is a DESIGN round — an ADVANCE for the arm rests on it — so under
+`M64` (1) / R224 the Codex seat decides EVERY board** (`--seat-spot-check 1`),
+and the round costs more Codex calls than the standing three for exactly that
+reason.
+
+**The local seat sits in the SHADOW chair** (`--seat-mode shadow`, R222 B): it
+reads every packet, it is graded, it is never the deciding verdict and it is
+never replayed.
+
+**Fresh-Opus is NOT the deciding chair here.** R222 B seats it for INSTRUMENT
+rounds; `M64` (1) takes it out of a round on which an ADVANCE rests. The row is
+`authored_by: [claude]`, so a same-family deciding read would not be
+author-disjoint under R217 C — which is the whole reason the split exists.
+
+### 21.7 The budget, the meter, and the stop lines
+
+- **Plan: 4 deciding seat reads + 1 pair read = 5 Codex calls expected, cap 15
+  for the round.** Four boards is the minimum that carries the four distinct
+  questions; a fifth would add a duplicate and a call.
+- **Meter read BEFORE anything was staged:** `5h 40% (resets 16:36 EDT) ·
+  week 25% (resets Sep 05 17:58)`. `EB-227`'s guard refuses at 85% of the
+  five-hour window and 50% of the week; the plan is well inside both. **If the
+  guard refuses mid-round the round STOPS at that board** and §22 records how
+  many boards were read, rather than finishing on a cheaper chair.
+- **Preconditions checked before the run, each of which stops the round:** the
+  game lock `gits-game.lock` under the user's Temp directory absent; Steam
+  running; the installed dev build carrying the row. The build was verified
+  read-only at `0.2.1676+proto.dirty` against the game's own
+  `mods\klee\manifest.json`, and the row's presence proven off the installed
+  `klee.dll` — `ProtoSparkModeBombs` ×4 in the UTF-8 metadata, and *"Bag of
+  Tricks"* and `proto_spark_mode_bombs` each once in the UTF-16 user strings.
+  **Nothing was deployed for this round.**
+
+### 21.8 What these boards still cannot do
+
+**The tier0 mirror cannot see a mode.** `closeness` enumerates CARD SETS, so its
+lines read *"Bag of Tricks + Quick Fuse + Kaboom!"* without saying which mode —
+which is why `t02`'s mirrored top line is not the line `P2` predicts. Every gap
+below is a bound on card sets and **not** on the choice this round is about; the
+packet and every replay read the LIVE game. All four SURVIVE at
+`DOMINANCE_GAP` 0.5: `t01` gap 0.0000 (30.000 / 30.000, 15 lines), `t02`
+0.0000 (22.400 / 22.400, 15), `t03` 0.0000 (19.000 / 19.000, 15), `t04` 0.0000
+(30.020 / 30.020, 15).
+
+**`slot_plan` cannot see a mode price either.** `_spark_prices` reads a
+top-level `spend_spark` and nothing else, so *Bag of Tricks* is invisible to
+`affordable_spark_uses` on every board here. `slots.yaml` says so at length and
+writes every predicate about the OTHER Spark cards: `affordable_spark_uses == 0`
+reads *"no other Spark sink"*, never *"no Spark sink"*, and the banks are
+compared against integer literals because 3 is a number the file knows and
+`min_spark_price` is not. Making `slot_plan` mode-aware is engineering this
+round does not need and does not do; it is reported as a candidate and nothing
+is minted here.
+
+**It still cannot draft, and it still cannot ask a face-and-turn question.**
+`loader._pool_substitutions` returns `{}` for Klee, so nothing here was picked
+by a drafter; and a staged single turn has no memory of what a bank was held
+for. §11.6 item 1 is unchanged, and whole-fight play — `EB-224`'s remaining
+next action — is the instrument for it.
