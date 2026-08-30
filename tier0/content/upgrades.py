@@ -101,7 +101,15 @@ UNAPPLIABLE: frozenset[str] = frozenset()
 
 
 @lru_cache(maxsize=1)
-def _upgrade_index() -> dict[str, dict]:
+def _shipped_upgrade_index() -> dict[str, dict]:
+    """Every delta keyed by SHIPPED card id: the sheets, and nothing else.
+
+    Split out of `_upgrade_index` when `EB-213` gave the prototype surface
+    an upgrade channel and, with it, a cycle that only a checkout carrying
+    `game_ref/` can reach. See `_upgrade_index` below for the whole shape
+    of it; this half is the one a base-game id may be answered from
+    without touching a prototype row, which is what breaks the loop.
+    """
     merged: dict[str, dict] = {}
     for sheet in (*UPGRADE_SHEETS, *EXTERNAL_UPGRADE_SHEETS):
         if not sheet.exists():
@@ -114,8 +122,47 @@ def _upgrade_index() -> dict[str, dict]:
         if dupes:
             raise ValueError(f"{sheet.name}: duplicate upgrade ids {sorted(dupes)}")
         merged.update(entries)
-    merged.update(_prototype_deltas(merged))
     return merged
+
+
+@lru_cache(maxsize=1)
+def _prototype_upgrade_index() -> dict[str, dict]:
+    """The `EB-213` half: deltas carried on a reachable prototype ROW."""
+    return _prototype_deltas(_shipped_upgrade_index())
+
+
+@lru_cache(maxsize=1)
+def _upgrade_index() -> dict[str, dict]:
+    """Both halves, for every caller that ITERATES the whole index.
+
+    THE TWO HALVES ARE SEPARATE BECAUSE THE MERGED ONE CANNOT BE BUILT ON
+    THE PATH THAT ASKS FOR IT. `loader._card_index` folds in the
+    gitignored `game_ref/` reference rows, and `_external_cards` asks
+    `has_upgrade` of every one of them -- the atomic-coverage rule. Under
+    `EB-213` that question built this index, which reads the prototype
+    surface through `loader.prototype_cards`, which asks `_card_index`
+    for the shipped ids it may not collide with. `_card_index` ->
+    `_external_cards` -> `has_upgrade` -> here -> `prototype_cards` ->
+    `_card_index`, and `lru_cache` does not memoize a call still in
+    flight, so it is unbounded.
+
+    IT IS INVISIBLE WITHOUT `game_ref/`. `_external_cards` returns early
+    on a tree that has no reference layer, so CI, every fresh clone and
+    every worktree load the content tree cleanly and only the art-bearing
+    main checkout raises -- as a `RecursionError` inside PyYAML, naming
+    neither end of the cycle. `test_eb213_upgrade_index_reentrancy` is the
+    lock, and it fakes the reference layer so a tree without one still
+    runs it.
+
+    The repair is that a lookup by id answers from ONE half
+    (`_delta_for` below): a `proto_` id from the prototype half, anything
+    else from the sheets. `has_upgrade("bash")` therefore never reads a
+    prototype row, and the cycle has no first step. This function is the
+    union and is for iteration only -- it is not on the `_card_index`
+    path and must never be put back on it.
+    """
+    return {**_shipped_upgrade_index(), **_prototype_upgrade_index()}
+
 
 
 def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
@@ -164,16 +211,27 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     return deltas
 
 
-def has_upgrade(card_id: str) -> bool:
+def has_upgrade(card_id: str, *, shipped_only: bool = False) -> bool:
     """Can this card be upgraded AND can the sim express the result?
 
     An enchantment mark is looked PAST (R82 reopened): enchanting a card
     never costs it its upgrade path, and the two decorations compose in
     either order (see content/enchantments.py).
+
+    `shipped_only` ANSWERS FROM THE SHEETS AND NEVER READS A PROTOTYPE ROW,
+    and it has exactly one caller: `loader._external_cards`, which asks this
+    of every gitignored `game_ref/` row to enforce the atomic-coverage rule.
+    Those ids are base-game ids and can never be prototype ones, so the
+    answer is identical -- what the flag buys is that the question does not
+    build `_upgrade_index`'s prototype half, which reads the surface through
+    `loader.prototype_cards`, which asks `_card_index` for the shipped ids it
+    may not collide with, which is the caller. See `_upgrade_index` for the
+    whole cycle and why no checkout without `game_ref/` can see it.
     """
     from tier0.content import enchantments      # late: enchantments imports us
     card_id = enchantments.split(card_id)[0]
-    delta = _upgrade_index().get(card_id)
+    delta = (_shipped_upgrade_index().get(card_id) if shipped_only
+             else _upgrade_index().get(card_id))
     return (isinstance(delta, dict)
             and bool(delta)
             and "_unexpressible" not in delta

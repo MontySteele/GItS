@@ -276,7 +276,14 @@ def _external_cards() -> list[dict]:
         # external reference as one atomic artifact: either every row resolves
         # through the shared `<id>+` path, or real_ironclad does not load.
         missing_upgrades = sorted(
-            d["id"] for d in docs if not upgrades.has_upgrade(d["id"])
+            # `shipped_only` is the cycle break and not an optimisation:
+            # asking the merged index here would build `EB-213`'s prototype
+            # half, which reads the surface through `prototype_cards`, which
+            # asks `_card_index` -- the function this one is inside. See
+            # `upgrades._upgrade_index`. These are base-game ids; the answer
+            # is the same either way.
+            d["id"] for d in docs
+            if not upgrades.has_upgrade(d["id"], shipped_only=True)
         )
         if missing_upgrades:
             raise ValueError(
@@ -1206,6 +1213,8 @@ def reset_caches() -> None:
     # resolves its id), so it is a memoized view of the content tree like the
     # six above and belongs behind the same one door.
     upgrades._upgrade_index.cache_clear()
+    upgrades._shipped_upgrade_index.cache_clear()
+    upgrades._prototype_upgrade_index.cache_clear()
 
 
 def pilot_weights(pilot_id: str) -> dict:
