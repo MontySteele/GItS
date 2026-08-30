@@ -1937,3 +1937,81 @@ would actually matter tonight is a leg leaking into a game somebody is playing.
 
 The one thing the slice was asked to look at directly is slot 6, and §11.5
 carries what it found.
+
+### 11.5 The slot 6 probe — what the two Evoke routes actually pay
+
+Slot 6 was added to the slate after it was drafted, out of a worry someone
+raised: under the ruled §4.2 a deploy onto a full stage Evokes the front member
+**for nothing**, lands a replacement, and performs the replacement, while a
+dedicated Evoke card pays Encore, expends the front member and puts nothing
+back. The packet ordered it staged **first** among the six, because if it is
+real it reopens the picks the other five predictions are drafted from.
+
+It can be looked at before any grader sees a board, because half of it is
+arithmetic, and slice 1 was asked to do that. `tier0/tests/test_furina_reframe_
+slot6.py` stages the packet's own required board — a full stage, both cards in
+hand, one turn — and plays each line on identical copies of it.
+
+**The board.** Three members (a full stage), 30 held Fanfare (the top Focus
+tier, +3, with room left so a mint is not lost against the ceiling), 9 Encore,
+both cards costing 1 energy, the Evoke card printing a price of 2 Encore. The
+only thing that changes between rows is which member is at the front.
+
+| front member | line | damage | Block | Fanfare | Encore spent | stage after |
+|---|---|---|---|---|---|---|
+| Usher | deploy over the top | 9 | 18 | +7 | 1 | 3 |
+| Usher | dedicated Evoke | 0 | 18 | +5 | 2 | 2 |
+| Crabaletta | deploy over the top | 32 | 0 | +7 | 1 | 3 |
+| Crabaletta | dedicated Evoke | 23 | 0 | +5 | 2 | 2 |
+| Chevalmarin | deploy over the top | 9 | 0 | +7 | **−2** | 3 |
+| Chevalmarin | dedicated Evoke | 0 | 0 | +5 | **−1** | 2 |
+
+*(Negative Encore spend is a refund: Chevalmarin's Evoke hands Encore back.
+Under R215 B these are prototype numbers and none of them is quotable as a
+balance fact anywhere; the reading below is structural.)*
+
+**The plain reading. On this board the dedicated Evoke is dominated on every
+axis measured, and it is not close.** The deploy card gets *the identical
+Evoke* — the same member, off the same end of the queue, with the same
+tripled Fanfare bonus — and then gets three more things on top of it: the
+replacement's performance (worth 9 more damage or Block in every row), two more
+Fanfare, and a stage that is still full instead of one member short. It also
+spends **one less** Encore doing it, because the only Encore it pays is the
+upkeep of the performance it bought, while the Evoke card pays a printed price
+of 2 on top of nothing.
+
+So the worry reads as confirmed on the arithmetic: as the rules are currently
+ruled, **a player holding both cards over a full stage has no reason to play
+the Evoke** — and "Encore, spent down to direct the Stage via Evoke-style
+plays" is the sentence in [USER]'s own brief that the Evoke family exists to
+deliver.
+
+**Three honest limits on that reading, stated so it is not over-read.**
+
+1. **This is one board, and it is the board the asymmetry is worst on** — a
+   FULL stage. The dedicated Evoke has a job the deploy cannot do at all on a
+   stage of one or two: it takes a member off without putting one on, and there
+   is no member to displace. What the probe shows is that on the board where
+   both cards are live, one dominates.
+2. **The arithmetic is not the question slot 6 asks.** Slot 6 asks whether
+   blind graders take the deploy line and whether any of them names an
+   advantage the Evoke has. A dominated line that reads as dominant is a
+   different (and worse) finding than a dominated line that reads as a real
+   choice, and only a grader can tell the two apart. The probe does not
+   pre-empt that read; it says what the graders' board will do.
+3. **Nothing was measured about alternative effects**, because none is built.
+   Chevalmarin's Evoke is the one alternative-shaped effect that ships, and
+   the row above shows it giving Encore back — which is a *shape* the deploy
+   route also gets, since the deploy Evokes her too.
+
+**No fix is proposed here, and that is deliberate.** Slot 6's own text says a
+confirmation returns `F7` and §4.2's full-stage rule to [USER] **together, as
+one numbered pick**, and that Claude does not settle the direction. The
+directions the probe makes visible, offered as material for that pick rather
+than as a recommendation, are: price the deploy's Evoke (Encore, or a reduced
+performance); give the dedicated Evoke something the deploy structurally cannot
+give (aiming a member other than the front, or an effect only the dedicated
+card unlocks); or accept the asymmetry as the intended reward for building a
+full stage and let the Evoke family be a small-stage tool. The instrument stays
+in the tree, and the test that would go red if any of those changed the answer
+is `test_the_dedicated_evoke_wins_on_no_measured_axis`.
