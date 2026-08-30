@@ -314,37 +314,6 @@ public class SparkAlternativeCostPinTests
         Assert.Contains(calls, c => c.EndsWith("SparkCost.PriceOf"));
     }
 
-    // --- the Charge cost line, the same rule one meter over ---------------
-
-    [Fact]
-    public void A_charge_priced_row_declares_its_price_once()
-    {
-        // EB-220: the printed Charge price is on IMeterPricedCard and the gate
-        // reads it BACK through MeterCost, so the number the badge draws is the
-        // number the gate refuses on. Before this the gate carried its own
-        // literal and nothing outside the card could ask what it charged.
-        var card = new ProtoChargeSpendStrike();
-
-        Assert.Equal(Meter.Charge, card.PricedMeter);
-        Assert.Equal(6, card.PrintedMeterPrice);
-        Assert.Equal(6, MeterCost.PriceIn(card, Meter.Charge));
-        Assert.Equal(Meter.Charge, MeterCost.Priced(card)!.Value.Meter);
-        Assert.Equal(0, MeterCost.PriceIn(card, Meter.Sparks));
-    }
-
-    [Fact]
-    public void The_charge_gate_reads_the_declared_price()
-    {
-        // STRUCTURAL PIN, and the drift it forbids is a second literal inside
-        // the gate expression: IsPlayable asks MeterCost for the price rather
-        // than repeating it.
-        var calls = Il.Calls(typeof(ProtoChargeSpendStrike)
-            .GetProperty("IsPlayable", All)!.GetMethod!);
-
-        Assert.Contains(calls, c => c.EndsWith("MeterCost.PriceIn"));
-        Assert.Contains(calls, c => c.EndsWith("KokomiResources.CanSpendCharge"));
-    }
-
     // --- the starter ------------------------------------------------------
 
     [Fact]

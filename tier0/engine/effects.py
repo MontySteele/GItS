@@ -2645,9 +2645,8 @@ MIN_MODES = 2
 # a short bank and overdrew the shortfall into HP. It is now not offered below
 # 3 Encore. That is the acceptance EB-182 was filed with -- "a short bank
 # cannot pick a dead mode" -- and it is a real behaviour change on one shipped
-# card, not a display fix. `proto_charge_mode_guard` on the quarantined
-# surface is the second consumer; the Klee arm this unblocks (Bag of Tricks, a
-# Spark-priced mode) is the third.
+# card, not a display fix. The Klee arm this unblocks (Bag of Tricks, a
+# Spark-priced mode) is the second consumer.
 MODE_PRICE_OPS = {
     "spend_encore": ("encore", "Encore"),
     "spend_spark": ("sparks", "Sparks"),
