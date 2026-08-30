@@ -75,14 +75,8 @@ public static class PrototypeRoster
     private static List<CardModel> BuildKokomi() =>
         new()
         {
-            ModelDb.Card<ProtoChargeModeGuard>(),
-            ModelDb.Card<ProtoChargeMusterPrice>(),
-            ModelDb.Card<ProtoChargeSpendStrike>(),
-            ModelDb.Card<ProtoChargeThresholdStrike>(),
             ModelDb.Card<ProtoKuragesOathMemory>(),
             ModelDb.Card<ProtoPearlBarrageTurn>(),
-            ModelDb.Card<ProtoChargeModeGuardModeA>(),
-            ModelDb.Card<ProtoChargeModeGuardModeB>(),
         };
 
     /// <summary>Prototype rows owned by one character, or none.</summary>

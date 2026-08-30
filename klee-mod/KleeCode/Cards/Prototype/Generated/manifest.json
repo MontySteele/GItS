@@ -6,10 +6,6 @@
     "reachable_by": "understudy give_card / scenario `give:` step"
   },
   "generated": [
-    "proto_charge_mode_guard",
-    "proto_charge_muster_price",
-    "proto_charge_spend_strike",
-    "proto_charge_threshold_strike",
     "proto_hold_the_line_spark",
     "proto_itto_superlative_superstrength_either",
     "proto_itto_superlative_superstrength_priced",
@@ -35,10 +31,6 @@
     "proto_true_spark_knight"
   ],
   "owners": {
-    "proto_charge_mode_guard": "kokomi",
-    "proto_charge_muster_price": "kokomi",
-    "proto_charge_spend_strike": "kokomi",
-    "proto_charge_threshold_strike": "kokomi",
     "proto_hold_the_line_spark": "klee",
     "proto_itto_superlative_superstrength_either": "klee",
     "proto_itto_superlative_superstrength_priced": "klee",
@@ -64,10 +56,6 @@
     "proto_true_spark_knight": "klee"
   },
   "mode_faces": {
-    "proto_charge_mode_guard": [
-      "ProtoChargeModeGuardModeA",
-      "ProtoChargeModeGuardModeB"
-    ],
     "proto_itto_superlative_superstrength_either": [
       "ProtoIttoSuperlativeSuperstrengthEitherModeA",
       "ProtoIttoSuperlativeSuperstrengthEitherModeB"

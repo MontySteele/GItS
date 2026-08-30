@@ -331,6 +331,28 @@ def _fixture_line(name: str) -> list[dict]:
 T06_LOCAL_LINE = _fixture_line("form-local-kokomi-slice2-t06-uncapped.json")
 T06_CAPPED_LINE = _fixture_line("form-local-kokomi-slice2-t06-capped.json")
 
+# `Twin Tides` LEFT THE SHEETS. R227 pick 1 (`M67`) retired Kokomi slice 2's
+# four Charge-priced arms under R226's "no card prints a Charge price", so the
+# row this case was recorded against is no longer on the prototype surface
+# (`git show 1f07d94a:docs/prototype-surface.yaml`). The FLAG is not retired --
+# it is the seat's condition (d) over live machinery -- and the recorded forms
+# are records, so neither is rewritten. The row is declared here instead, as
+# the fixture it always was, and handed to `findings(index=...)`.
+RETIRED_TWIN_TIDES = {
+    "id": "proto_charge_mode_guard", "name": "Twin Tides",
+    "character": "kokomi", "cost": 1, "type": "skill", "rarity": "uncommon",
+    "effects": [{"op": "choose_one", "modes": [
+        {"label": "Gain 5 Block", "effects": [{"op": "block", "amount": 5}]},
+        {"label": "Spend 6 [gold]Charge[/gold]: gain 12 Block",
+         "effects": [{"op": "spend_charge", "amount": 6},
+                     {"op": "block", "amount": 12}]}]}]}
+
+
+def _index_with_retired() -> dict:
+    index = dict(resource_order.card_index())
+    index[resource_order.normalise(RETIRED_TWIN_TIDES["name"])] =         RETIRED_TWIN_TIDES
+    return index
+
 # The recorded `opus-5-fresh` order on the same board: the Charge-reading
 # attack FIRST, then the mode that spends the Charge.
 T06_RECORDED_LINE = [
@@ -343,7 +365,8 @@ def test_t06_local_line_trips_the_order_flag():
     """CONDITION (d), on the exact form that produced it. The local reading
     played Twin Tides' *Spend 6 Charge* mode and THEN the attack whose damage
     reads Charge -- the seat's finding, and the shape it wants routed."""
-    hits = resource_order.findings(T06_LOCAL_LINE)
+    hits = resource_order.findings(T06_LOCAL_LINE,
+                                   index=_index_with_retired())
     assert hits, "the seat's own case must trip the flag"
     assert {h["resource"] for h in hits} == {"charge"}
     named = {(h["spent_by"], h["read_by"]) for h in hits}
@@ -356,13 +379,15 @@ def test_t06_capped_rerun_does_not_trip_it():
     the flag must be silent on it -- otherwise it is flagging the seat rather
     than the line."""
     assert T06_CAPPED_LINE[0]["card"] == "All Streams Flow to the Sea"
-    assert resource_order.findings(T06_CAPPED_LINE) == []
+    assert resource_order.findings(T06_CAPPED_LINE,
+                                   index=_index_with_retired()) == []
 
 
 def test_t06_recorded_order_does_not_trip_it():
     """The other half of the lock: the read comes BEFORE the spend, which is
     the ordinary correct line, and a flag there would be noise."""
-    assert resource_order.findings(T06_RECORDED_LINE) == []
+    assert resource_order.findings(T06_RECORDED_LINE,
+                                   index=_index_with_retired()) == []
 
 
 def test_the_unspent_mode_of_a_choose_one_does_not_trip_it():
@@ -371,7 +396,7 @@ def test_the_unspent_mode_of_a_choose_one_does_not_trip_it():
     recorded."""
     line = [{"card": "Twin Tides", "choose": "Gain 5 Block"},
             {"card": "All Streams Flow to the Sea"}]
-    assert resource_order.findings(line) == []
+    assert resource_order.findings(line, index=_index_with_retired()) == []
 
 
 def test_an_unrecorded_mode_falls_back_to_the_union():
@@ -379,13 +404,14 @@ def test_an_unrecorded_mode_falls_back_to_the_union():
     resolve is a turn a person should read."""
     line = [{"card": "Twin Tides"},
             {"card": "All Streams Flow to the Sea"}]
-    assert resource_order.findings(line)
+    assert resource_order.findings(line, index=_index_with_retired())
 
 
 def test_a_title_no_sheet_prints_is_disclosed_not_flagged():
     line = [{"card": "Not A Real Card"}, {"card": "Twin Tides"}]
-    assert resource_order.findings(line) == []
-    assert resource_order.unresolved(line) == ["Not A Real Card"]
+    index = _index_with_retired()
+    assert resource_order.findings(line, index=index) == []
+    assert resource_order.unresolved(line, index=index) == ["Not A Real Card"]
 
 
 def test_a_gain_before_a_read_is_never_flagged():
@@ -398,9 +424,17 @@ def test_a_gain_before_a_read_is_never_flagged():
 
 def test_the_flag_routes_the_turn_regardless_of_the_rate(server, tmp_path):
     """The condition's own words: *require* review. So it is not subject to
-    the spot-check rate, and it is not subject to the rate being zero."""
+    the spot-check rate, and it is not subject to the rate being zero.
+
+    The LINE here is Furina's shipped pair rather than the seat's recorded
+    `t06` one, because this test reads the sheets through `read_turn` and
+    cannot be handed an index: `Twin Tides` left the surface with R227's
+    retirement, and a routing pin that depended on a retired row would be a
+    pin on the fixture rather than on the routing. The shape is the same one
+    -- a spend, then a play that reads what it spent."""
+    line = [{"card": "Slip Backstage"}, {"card": "Compose Herself"}]
     qa = _qa(tmp_path, ORDER_TURN)
-    server.content = _form(qa, ORDER_TURN, T06_LOCAL_LINE)
+    server.content = _form(qa, ORDER_TURN, line)
     record = local_tester.read_turn(ORDER_TURN, client=_client(server),
                                     qa_dir=qa, land_dir=tmp_path / "land",
                                     log_root=tmp_path / "logs",
@@ -408,8 +442,8 @@ def test_the_flag_routes_the_turn_regardless_of_the_rate(server, tmp_path):
     assert record["seat_review_required"]
     assert record["seat_review_reasons"] == ["resource_order"]
     flag = record["resource_order_flag"]
-    assert flag and flag[0]["spent_by"] == "Twin Tides"
-    assert flag[0]["read_by"] == "All Streams Flow to the Sea"
+    assert flag and flag[0]["spent_by"] == "Slip Backstage"
+    assert flag[0]["read_by"] == "Compose Herself"
     assert "charge" in record["resource_order"]["rule"] or \
         "meter" in record["resource_order"]["rule"]
 
