@@ -421,3 +421,355 @@ def check_round(turns: Sequence[Any]) -> tuple[list[dict[str, Any]], list[str]]:
         report += rows
         bad += refusals(rows)
     return report, bad
+
+
+# ------------------------------------ EB-236: the resource-round check ------
+#
+# `KLEESPARK-BT1` REGISTERED A CLAIM ITS OWN BOARD DID NOT HOLD, and no check
+# in this repo could see it. `t02`'s header reads, in as many words: *"the
+# bank of 3 now buys EXACTLY ONE of two things -- the card's priced mode, or
+# the whole of another card"*. In the SHIPPED world that sentence is false.
+# Klee's starter relic *Pounding Surprise* pays +1 Spark for every Bomb that
+# detonates, and the priced mode places three Bombs, so
+#
+#     Bag of Tricks, priced mode   bank 3 -> 0,  three Bombs on the target
+#     any detonator or Attack      bombs pop,    +3 Sparks -> bank 3
+#     Firework Finale              bank 3 -> 0,  18 damage
+#
+# buys BOTH, for 15 + 18. The round graded a decision the board never posed.
+# R229 accepted the refund as an observed TEST CONDITION and put the arm under
+# a pre-registered RETURN CONDITION; this is the check that stops a board from
+# claiming an exclusivity it does not have, and it is the STRONG form GPT
+# asked for: not "are the two prices greater than the bank" but "can ANY ORDER
+# OF PLAY, counting every relic-triggered gain along the way, pay for both".
+#
+# TWO HALVES, AND THE SECOND IS THE ONE THAT REFUSED SEVEN OF EIGHT FORMS.
+#
+#   `both_buyable`      -- a board DECLARES an exclusive pair and some legal
+#                          order pays for every member of it.
+#   `no_forced_trade`   -- the whole hand is playable at once with the Energy
+#                          the board gives, so the telegraph forces no trade
+#                          and a reader answering question four honestly
+#                          answers "no". All FOUR of `KLEESPARK-BT1`'s boards
+#                          are this shape (one enemy, fixed telegraph, three
+#                          Energy, at most two Energy-costed cards), and
+#                          `intent_insensitive` refused seven of the eight
+#                          forms they produced. §22.4 item 2 calls it a
+#                          REGISTRATION defect and it is that round's RETURN.
+#
+# WHERE IT RUNS, AND WHY IT IS NOT A LINT.
+# `local_tester round --plan-only`, beside `EB-202`'s reachability ceiling:
+# before the one launch, on the committed boards, so a board that cannot ask
+# its question costs a parse instead of a round. It is deliberately NOT a
+# `tools/lint_*.py` in the CI lane. A lint sweeps every board in the tree,
+# including `KLEESPARK-BT1`'s four -- which are the committed record of a run
+# and graded round and stay exactly as registered (R101b). A check that turns
+# CI red on a closed round's published boards is not a check, it is an erratum
+# nobody can clear. The lint count is unchanged at 29.
+#
+# THE SIMPLIFICATIONS, STATED RATHER THAN LEFT TO BE FOUND. The rule this
+# walks is the engine's (`tier0/engine/effects.py`'s `detonate_bombs` and
+# `_detonate_bombs_on_hit`; the C# twin is `Powers/BombPower.cs` and
+# `IBombDetonationListener`): a Bomb detonates when a `detonate` op resolves
+# against its target, or when an ATTACK deals HP damage to it, and each
+# detonated Bomb pays every `spark_on_detonation` listener one Spark.
+#
+#   1. ONE TURN, and no turn-start sweep. Bombs placed and not detonated in
+#      the sequence simply sit; their next-turn payout is not counted, which
+#      is the CONSERVATIVE direction -- it can only make a board look MORE
+#      exclusive than it is, never less.
+#   2. ONE ENEMY. Every Bomb is on the same body and every detonation takes
+#      all of them. A multi-enemy board is out of this check's scope and is
+#      refused rather than approximated.
+#   3. AN ATTACK DETONATES WHEN ITS PRINTED DAMAGE EXCEEDS THE ENEMY'S
+#      DECLARED BLOCK. Strength, Vulnerable, Weak, auras and multi-hit are not
+#      modelled: this check counts the BANK, not damage, and a board that
+#      needs any of those to answer its own question is a board whose claim is
+#      not arithmetic.
+#   4. ENERGY IS THE PRINTED COST, PAID ONCE PER CARD. A card printing an `X`
+#      cost is refused rather than guessed at.
+#   5. EVERY CARD IS PLAYED AT MOST ONCE and only from the declared hand: no
+#      draw, no discard, no Exhaust-and-replay.
+#
+# None of the five can make a both-buyable sequence look exclusive. That is
+# the direction a check like this has to err in.
+
+RESOURCE_ROUND_KEY = "resource_round"
+SPARK_ON_DETONATION = "spark_on_detonation"
+_CHARACTER_SHEETS = Path("tier0") / "content" / "characters"
+
+
+class BoardDesignError(RuntimeError):
+    """A `resource_round:` block this check cannot read, or cannot walk."""
+
+
+@dataclass(frozen=True)
+class Use:
+    """One WAY TO PLAY a card that the board's claim is about.
+
+    `mode` is the 1-based index of a `choose_one` mode, or `None` for the
+    card's top level. 1-based because a registration written by hand counts
+    the modes the way the card prints them.
+    """
+    card: str
+    mode: int | None = None
+
+    def __str__(self) -> str:
+        return self.card + (f" (mode {self.mode})" if self.mode else "")
+
+
+@dataclass
+class ResourceRound:
+    """A board's own declaration of what its resource question is."""
+    claim: str = ""
+    exclusive: list[Use] = field(default_factory=list)
+    relic_hooks: list[str] | None = None
+
+
+def parse_resource_round(raw: Any, where: str = "") -> "ResourceRound | None":
+    """The `resource_round:` block of a turn file. `None` where none is.
+
+    ABSENT IS LEGAL: every board committed before this row existed carries no
+    block, and only the `no_forced_trade` half is checked on those. A board
+    that makes an EXCLUSIVITY CLAIM has to say so HERE, because a claim that
+    lives only in a header comment is exactly what `KLEESPARK-BT1` shipped.
+    """
+    if raw is None:
+        return None
+    if not isinstance(raw, Mapping):
+        raise BoardDesignError(f"{where}: {RESOURCE_ROUND_KEY!r} is a mapping")
+    uses: list[Use] = []
+    for i, entry in enumerate(raw.get("exclusive") or []):
+        if not isinstance(entry, Mapping) or not entry.get("card"):
+            raise BoardDesignError(
+                f"{where}: exclusive[{i}] is a mapping with a 'card' -- the "
+                f"sheet id -- and an optional 1-based 'mode'")
+        mode = entry.get("mode")
+        uses.append(Use(card=str(entry["card"]),
+                        mode=int(mode) if mode is not None else None))
+    if len(uses) == 1:
+        raise BoardDesignError(
+            f"{where}: an exclusive pair is TWO OR MORE uses. One use is not "
+            f"a claim about anything")
+    hooks = raw.get("relic_hooks")
+    return ResourceRound(
+        claim=str(raw.get("claim") or ""),
+        exclusive=uses,
+        relic_hooks=None if hooks is None else [str(h) for h in hooks])
+
+
+# ---------------------------------------------------------------- the walk --
+
+def _variants(row: Mapping[str, Any]
+              ) -> list[tuple[int | None, list[Mapping[str, Any]]]]:
+    """The ways one card can be played: `(mode, effects in printed order)`.
+
+    A `choose_one` becomes one variant per mode, with the card's other
+    effects kept in place around it, which is how the game resolves one.
+    """
+    effects = [e for e in (row.get("effects") or []) if isinstance(e, Mapping)]
+    modal = next((e for e in effects if str(e.get("op")) == "choose_one"), None)
+    if modal is None:
+        return [(None, effects)]
+    out: list[tuple[int | None, list[Mapping[str, Any]]]] = []
+    for i, mode in enumerate(modal.get("modes") or [], 1):
+        if not isinstance(mode, Mapping):
+            continue
+        expanded: list[Mapping[str, Any]] = []
+        for eff in effects:
+            if eff is modal:
+                expanded += [m for m in (mode.get("effects") or [])
+                             if isinstance(m, Mapping)]
+            else:
+                expanded.append(eff)
+        out.append((i, expanded))
+    return out
+
+
+def _energy_cost(row: Mapping[str, Any], card_id: str) -> int:
+    cost = row.get("cost")
+    try:
+        return int(cost)
+    except (TypeError, ValueError):
+        raise BoardDesignError(
+            f"{card_id} prints cost {cost!r}; this check pays the PRINTED "
+            f"Energy cost once per card and does not guess at an X") from None
+
+
+def _character_relic_hooks(character: str,
+                           repo: Path | None = None) -> list[str]:
+    """The starter relic's hooks off the character sheet, or `[]`.
+
+    `tier0/content/characters/klee.yaml` carries
+    `relic_hooks: [spark_on_detonation]`, with *Pounding Surprise* named in
+    the comment beside it. READ rather than declared per board, so a board
+    cannot forget the relic every run of that character starts with -- which
+    is the omission `KLEESPARK-BT1` is the record of.
+    """
+    path = (repo or resource_order.REPO) / _CHARACTER_SHEETS / f"{character}.yaml"
+    if not path.is_file():
+        return []
+    blob = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return [str(h) for h in (blob.get("relic_hooks") or [])]
+
+
+@dataclass
+class _Walk:
+    bank: int
+    energy: int
+    bombs: int
+    block: int
+    refunds: bool
+
+
+def _resolve(state: _Walk, effects: Sequence[Mapping[str, Any]],
+             is_attack: bool) -> "_Walk | None":
+    """Resolve one play. `None` where its Spark price cannot be paid."""
+    bank, bombs = state.bank, state.bombs
+    for eff in effects:
+        op = str(eff.get("op"))
+        amount = int(eff.get("amount", 0) or 0)
+        if op == "spend_spark":
+            if bank < amount:
+                return None
+            bank -= amount
+        elif op == "gain_spark":
+            bank += amount
+        elif op == "place_bomb":
+            bombs += amount
+        elif op == "detonate":
+            bank += bombs if state.refunds else 0
+            bombs = 0
+        elif op == "damage" and is_attack and bombs and amount > state.block:
+            # `_detonate_bombs_on_hit`: an Attack that gets HP damage through
+            # pops the target's Bombs, and every one pays the relic.
+            bank += bombs if state.refunds else 0
+            bombs = 0
+    return _Walk(bank=bank, energy=state.energy, bombs=bombs,
+                 block=state.block, refunds=state.refunds)
+
+
+def _enemy_block(enemy: Any) -> int:
+    if isinstance(enemy, Mapping):
+        return int(enemy.get("block", 0) or 0)
+    return int(getattr(enemy, "block", 0) or 0)
+
+
+def buying_orders(turn: Any, spec: ResourceRound,
+                  repo: Path | None = None) -> list[list[str]]:
+    """Every order of play that pays for EVERY use the board calls exclusive.
+
+    An EMPTY list is the passing answer: no order buys both, so the claim the
+    board registered is a claim its own arithmetic holds.
+    """
+    rows = sheet_rows_by_id(repo)
+    board = getattr(turn, "board", None)
+    hand = [str(c) for c in (getattr(board, "hand", None) or [])]
+    enemies = list(getattr(board, "enemies", None) or [])
+    if len(enemies) != 1:
+        raise BoardDesignError(
+            f"{getattr(turn, 'id', '?')}: this check walks ONE body. A board "
+            f"with {len(enemies)} enem(ies) is refused rather than "
+            f"approximated")
+    hooks = (spec.relic_hooks if spec.relic_hooks is not None
+             else _character_relic_hooks(str(getattr(board, "character", "")),
+                                         repo))
+    start = _Walk(
+        bank=int((getattr(board, "resources", None) or {}).get("sparks", 0)),
+        energy=int(getattr(board, "energy", 0)),
+        bombs=0,
+        block=_enemy_block(enemies[0]),
+        refunds=SPARK_ON_DETONATION in hooks)
+    wanted = set(spec.exclusive)
+    if not wanted:
+        return []
+    missing = sorted({u.card for u in wanted} - set(hand))
+    if missing:
+        raise BoardDesignError(
+            f"{getattr(turn, 'id', '?')}: the exclusive pair names "
+            f"{', '.join(missing)}, which is not in the declared hand")
+
+    found: list[list[str]] = []
+
+    def walk(state: _Walk, left: list[int], paid: frozenset,
+             order: list[str]) -> None:
+        if wanted <= paid:
+            found.append(list(order))
+            return
+        for pos, idx in enumerate(left):
+            card_id = hand[idx]
+            row = rows.get(card_id)
+            if row is None:
+                continue
+            cost = _energy_cost(row, card_id)
+            if cost > state.energy:
+                continue
+            is_attack = str(row.get("type")) == "attack"
+            for mode, effects in _variants(row):
+                after = _resolve(state, effects, is_attack)
+                if after is None:
+                    continue
+                after.energy = state.energy - cost
+                use = Use(card=card_id, mode=mode)
+                walk(after, left[:pos] + left[pos + 1:],
+                     paid | ({use} if use in wanted else frozenset()),
+                     order + [str(use)])
+
+    walk(start, list(range(len(hand))), frozenset(), [])
+    return found
+
+
+def hand_is_wholly_playable(turn: Any, repo: Path | None = None) -> bool:
+    """Does the Energy pay for EVERY card in the declared hand at once?
+
+    The `no_forced_trade` reading, and it is exactly the construction §22.4
+    item 2 names: three Energy against a hand of at most two Energy-costed
+    cards, so the telegraph never forces a choice and question four is
+    honestly answered "no".
+    """
+    rows = sheet_rows_by_id(repo)
+    total = 0
+    for card_id in (getattr(getattr(turn, "board", None), "hand", None) or []):
+        row = rows.get(str(card_id))
+        if row is None:
+            continue
+        total += _energy_cost(row, str(card_id))
+    return total <= int(getattr(getattr(turn, "board", None), "energy", 0))
+
+
+def board_design_findings(turn: Any, repo: Path | None = None) -> list[str]:
+    """Every reason this board cannot ask the resource question it registers."""
+    spec = getattr(turn, "resource_round", None)
+    out: list[str] = []
+    if hand_is_wholly_playable(turn, repo):
+        out.append(
+            f"{turn.id}: no_forced_trade -- the Energy on this board pays for "
+            f"the WHOLE declared hand at once, so the telegraph forces no "
+            f"trade and a reader answering question four honestly answers "
+            f"'no'. Seven of eight forms in the first Bag of Tricks round "
+            f"were refused intent_insensitive on exactly this construction; a "
+            f"resource round needs one line the board cannot buy")
+    if spec is None or not spec.exclusive:
+        return out
+    orders = buying_orders(turn, spec, repo)
+    if orders:
+        out.append(
+            f"{turn.id}: both_buyable -- this board declares "
+            + " and ".join(str(u) for u in spec.exclusive)
+            + " mutually exclusive"
+            + (f" ({spec.claim})" if spec.claim else "")
+            + f", and {len(orders)} order(s) of play pay for every one of "
+              f"them, counting relic-triggered Spark gains. The first is: "
+            + " -> ".join(orders[0])
+            + ". A board whose exclusive pair is not exclusive grades a "
+              "decision it never posed (EB-236)")
+    return out
+
+
+def check_board_design(turns: Sequence[Any],
+                       repo: Path | None = None) -> list[str]:
+    """`board_design_findings` over a whole planned round, in board order."""
+    out: list[str] = []
+    for turn in turns:
+        out += board_design_findings(turn, repo)
+    return out

@@ -368,6 +368,19 @@ class StagedTurn:
     # map would be a map chosen after the boards were written, which is the
     # forking path the rule exists to close.
     slots: list[str] = field(default_factory=list)
+    # EB-236. THE BOARD'S OWN DECLARATION OF ITS RESOURCE QUESTION -- an
+    # `slot_plan.ResourceRound`, or None where the file declares none, which
+    # is legal and is what every board committed before this row carries. A
+    # board that claims two uses are MUTUALLY EXCLUSIVE says so HERE and not
+    # in a header comment, and `local_tester round --plan-only` walks every
+    # order of play, relic refunds included, to see whether the claim holds.
+    # `KLEESPARK-BT1`'s `t02` made that claim in prose and the shipped world
+    # falsified it three plays later.
+    #
+    # TYPED `Any` ON PURPOSE: `slot_plan` reads the card SHEETS and this
+    # module builds the blind packet, so the import stays lazy -- exactly as
+    # `slot_report`'s does, and for the same reason.
+    resource_round: Any = None
 
     def registered_slots(self) -> list[str]:
         """The slots this board covers. Its own id when it declares none."""
@@ -461,7 +474,8 @@ def parse(blob: dict[str, Any], path: Path | None = None) -> StagedTurn:
         assumptions=[str(a) for a in (blob.get("assumptions") or [])],
         prototype=bool(blob.get("prototype", False)),
         exact_hand=bool(blob.get("exact_hand", False)),
-        slots=_parse_slots(blob.get("slots")))
+        slots=_parse_slots(blob.get("slots")),
+        resource_round=_parse_resource_round(blob, path))
     _check_halves_agree(turn)
     _check_assumptions_blind(turn)
     return turn
@@ -483,6 +497,23 @@ def _parse_slots(raw: Any) -> list[str]:
             "prediction slots this board is evidence about (R221 B). Omit it "
             "and the board carries one slot, its own id")
     return [s.strip() for s in raw]
+
+
+def _parse_resource_round(blob: dict[str, Any], path: Path | None) -> Any:
+    """EB-236's `resource_round:` block, or None. Refuses, never coerces.
+
+    The import is LAZY -- `slot_plan` reads the card sheets, this module
+    builds the blind packet, and the two are kept a function call apart on
+    purpose (see `SLOT_FILE_NAME` and `slot_report`).
+    """
+    raw = blob.get("resource_round")
+    if raw is None:
+        return None
+    from understudy import slot_plan
+    try:
+        return slot_plan.parse_resource_round(raw, where=str(path or blob["id"]))
+    except slot_plan.BoardDesignError as exc:
+        raise TurnError(str(exc)) from exc
 
 
 def _check_assumptions_blind(turn: StagedTurn) -> None:

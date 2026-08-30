@@ -21,8 +21,8 @@ from pathlib import Path
 
 import pytest
 
-from understudy import (local_tester, qualify, resource_order, slot_plan,
-                        staged_turn, targeting)
+from understudy import (local_tester, qa_packet, qualify, resource_order,
+                        slot_plan, staged_turn, targeting)
 
 REPO = Path(__file__).resolve().parents[2]
 QA = REPO / "review" / "qa"
@@ -637,3 +637,76 @@ def test_only_a_mode_head_counts_and_nothing_nested():
                      {"op": "spend_spark", "amount": 2}]}]}]}
     assert slot_plan.card_spark_prices(head) == [2]
     assert slot_plan.card_spark_prices(nested) == []
+
+
+# ============================================================== EB-236 =====
+#
+# THE LOCK IS ON `KLEESPARK-BT1`'s `t02`, UNEDITED. That board's header
+# declares, in prose, that "the bank of 3 now buys EXACTLY ONE of two things
+# -- the card's priced mode, or the whole of another card", and the shipped
+# world buys both three plays later because Klee's starter relic refunds one
+# Spark per detonated Bomb. The board file is the committed record of a run
+# and graded round and stays exactly as registered (R101b), so the CLAIM it
+# made in prose is supplied here, in the machine-readable shape a board
+# writes it in today, and the check is run against the board as it stands.
+
+# `t02`'s header sentence, as a `resource_round:` block would say it.
+BT1_T02_CLAIM = slot_plan.ResourceRound(
+    claim="the bank of 3 buys EXACTLY ONE of two things",
+    exclusive=[slot_plan.Use("proto_spark_mode_bombs", 2),
+               slot_plan.Use("proto_spark_finisher")])
+
+
+def test_bt1s_declined_half_is_bought_by_a_sequence_it_never_registered():
+    """THE LOCK. The both-buyable order is found, and it is THE order.
+
+    Priced mode (bank 3 -> 0, three Bombs), a detonator (the relic pays one
+    Spark per Bomb, bank 0 -> 3), the rival sink (bank 3 -> 0). 15 + 18.
+    """
+    orders = slot_plan.buying_orders(_bt1("t02"), BT1_T02_CLAIM)
+    assert orders, "the exclusive pair is bought by no order at all"
+    assert ["proto_spark_mode_bombs (mode 2)", "quick_fuse",
+            "proto_spark_finisher"] in orders
+
+
+def test_the_refund_is_what_buys_the_second_half():
+    """Take the relic away and the same board's claim holds.
+
+    Not a board this repo has -- a control, so the finding is attributed to
+    the relic and not to the arithmetic being wrong somewhere else.
+    """
+    without = slot_plan.ResourceRound(
+        claim=BT1_T02_CLAIM.claim, exclusive=list(BT1_T02_CLAIM.exclusive),
+        relic_hooks=[])
+    assert slot_plan.buying_orders(_bt1("t02"), without) == []
+
+
+@pytest.mark.parametrize("turn_id", ["t01", "t02", "t03", "t04"])
+def test_every_bt1_board_lets_the_energy_pay_for_the_whole_hand(turn_id):
+    """The weaker half, and it is the round's RETURN.
+
+    One enemy, a fixed telegraph, three Energy and at most two Energy-costed
+    cards: the whole hand is always playable, so the telegraph forces no
+    trade and question four is honestly answered "no".
+    `intent_insensitive` refused SEVEN OF EIGHT forms on this construction.
+    """
+    turn = _bt1(turn_id)
+    assert slot_plan.hand_is_wholly_playable(turn)
+    assert any("no_forced_trade" in f
+               for f in slot_plan.board_design_findings(turn))
+
+
+def test_an_exclusive_pair_of_one_is_refused_rather_than_read():
+    """One use is not a claim about anything."""
+    with pytest.raises(slot_plan.BoardDesignError) as exc:
+        slot_plan.parse_resource_round({"exclusive": [{"card": "kaboom"}]})
+    assert "TWO OR MORE" in str(exc.value)
+
+
+def test_a_pair_naming_a_card_that_is_not_in_hand_is_refused():
+    """A claim about a card the board does not hold is not a claim."""
+    spec = slot_plan.ResourceRound(
+        exclusive=[slot_plan.Use("proto_spark_finisher"),
+                   slot_plan.Use("proto_spark_blast")])
+    with pytest.raises(slot_plan.BoardDesignError):
+        slot_plan.buying_orders(_bt1("t02"), spec)
