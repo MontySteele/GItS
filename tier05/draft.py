@@ -591,12 +591,18 @@ def _added_card_value(fx: dict) -> float:
     return STATIC_GENERATED_CARD_VALUE
 
 
-def _op_price(fx: dict) -> float:
+def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
     """The DRAFTER_VERSION 13 static price of one effect dict.
 
     Every rationale is one line in STATIC_OP_PRICING, and
     `tools/lint_op_parity.py` asserts this function and that table between
     them cover the engine's whole OPS registry. All values PROPOSED.
+
+    `prints_damage` is the ONE piece of card context this function takes, and
+    exactly one branch (`spend_spark`, EB-233) reads it: whether the card the
+    effect belongs to prints an Attack body anywhere. It is keyword-only and
+    defaults to None -- "the caller did not say" -- which every branch treats
+    as the conservative reading, so a card-less call is unchanged.
     """
     op = fx.get("op")
     if op in _PRICED_INLINE:
@@ -779,7 +785,12 @@ def _op_price(fx: dict) -> float:
         # rows and nothing else. See STATIC_SPARK_SPEND_COST for the
         # derivation and for what waking the gain side would reach.
         # `spark_spend_cost()` for the reason on the gain branch above.
-        return -_neutral_amount(fx) * spark_spend_cost()
+        #
+        # EB-233: the rate is card-shaped under the flag. `prints_damage` is
+        # the caller's read of whether THIS card prints an Attack body; None
+        # means the caller could not say, and that keeps the dearer rate.
+        return -_neutral_amount(fx) * spark_spend_cost(
+            prints_damage=prints_damage)
     if op == "burst_energy":
         return _neutral_amount(fx, 0) * STATIC_BURST_VALUE
 
@@ -806,6 +817,12 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
         for fx in all_effects
     )
     has_bomb = any(fx.get("op") == "place_bomb" for fx in all_effects)
+    # EB-233. Read ONCE per card, off the same `all_effects` walk, and handed
+    # down to `_op_price` so the `spend_spark` branch can charge a sink at the
+    # rate its own body is denominated in. Whole-card context by construction:
+    # a nested `damage` still makes the card an Attack body for this purpose.
+    has_attack_body = any(fx.get("op") in STATIC_ATTACK_BODY_OPS
+                          for fx in all_effects)
 
     def effect_power(effect_list: list[dict]) -> float:
         total = 0.0
@@ -1005,7 +1022,7 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 # them; the lint above guarantees no op reaches this `else`
                 # without an entry, and _op_price returns 0.0 only for the
                 # ops whose entry says ZERO.
-                total += _op_price(fx)
+                total += _op_price(fx, prints_damage=has_attack_body)
         return total
 
     total = effect_power(card.effects)
@@ -1751,16 +1768,99 @@ STATIC_SPARK_SPEND_COST = 2.5      # spend_spark, per Spark. NOT the gain
 # off, nothing reads this and both shipped dials stand.
 SPARK_ALT_VALUE = 4.0              # derived above. ONE dial, both sides.
 
+# =============================================================================
+# EB-233. THE SPEND SIDE IS TWO RATES, NOT ONE, AND NO NEW NUMBER IS MINTED.
+#
+# THE DEFECT, in the derivation printed immediately above rather than in a
+# measurement. Every one of the five rows whose median is `SPARK_ALT_VALUE`
+# -- Fwoosh!, Tinder Toss, Bang Bang!, Dodoco Blast, Firework Finale -- prints
+# `damage`, and every baseline it is netted against ("Common 0E Attack ...
+# 3.5", "Uncommon 0E Attack ... 6.0") is an Attack. 4.00 is therefore the
+# price of a Spark SPENT ON DAMAGE, stated in the one unit the file prices at
+# face value. It has NO REFERENT on a sink that prints no Attack body: such a
+# card's whole worth is carried by ops the file prices at a SHARE or a proxy
+# (Block, `detonate` at STATIC_DETONATE_VALUE, a debuff at
+# STATIC_DEBUFF_VALUE), which the 4.00 median never saw. Charged 4.00 anyway,
+# every non-damage sink under the flag scores NEGATIVE before the offer screen
+# is reached -- Set It Off -1.00, Powder Smoke -2.00, Dig In -3.00 -- so the
+# drafter cannot take one at any bank, from any deck, on any seed. That is a
+# SCORER fact, and it is what makes a share of drafted decks holding one an
+# OFFER number rather than a bank number.
+#
+# THE FIX IS THE FILE'S OTHER ALREADY-DERIVED PER-SPARK PRICE, USED WHOLE.
+# `STATIC_SPARK_SPEND_COST` = 2.50 is the only per-Spark spend price this
+# repository has derived WITHOUT a damage row anywhere in it: its route (1) is
+# the ENERGY a free Attack refunds (Klee's pool's median price-per-energy
+# 5.00, over the 2 Sparks that buy one) and its route (2) is
+# `spark_collection`'s slot price for a purchase of exactly two (5.00 over 2).
+# Both are slot-and-energy arithmetic, which is precisely the unit a sink that
+# prints no damage trades in. So: a sink that prints an Attack body pays the
+# damage-derived rate; a sink that prints none pays the slot-derived rate.
+# NOTHING IS PICKED HERE -- both numbers were derived before this row existed,
+# and this dial only routes between them.
+#
+# ERROR DIRECTION, ONE-WAY (R194, and R212's ladder clause). 2.50 < 4.00, so
+# this can only ever charge a non-damage sink LESS. It cannot charge one less
+# than the SHIPPED world already does, because 2.50 *is* the shipped charge:
+# `STATIC_SPARK_SPEND_COST`'s own disclosure publishes these three rows at it
+# -- powder_charge 2.00, hold_the_line 0.00, smoke_and_sparks 1.00 -- and
+# those are the numbers this branch reproduces under the flag. R194's rule is
+# that the drafter must pass on a good card rather than pay for a cost it
+# cannot see; today it pays 4.00 a Spark for a purchase it can see NO value in
+# at all, which is the failure the rule exists to forbid.
+#
+# ARCHIVE SCOPE, bounded twice. `C.SPARK_ALT_COST_ENABLED` ships FALSE, so no
+# shipped drafted number moves by one byte and DRAFTER_VERSION is NOT bumped
+# -- the same licence, on the same flag, that `SPARK_ALT_VALUE` landed under.
+# Under the flag the scope is sink rows printing no Attack body: the three
+# `EB-218` twins and Rummage. The six damage sinks are untouched.
+#
+# WHAT "PRINTS DAMAGE" MEANS, named so it cannot drift: a `damage` or
+# `chain_attack` op anywhere in the card's printed branches and modes. Those
+# are the only two ops STATIC_OP_PRICING prices at FACE VALUE damage, so they
+# are exactly the rows the 4.00 median is denominated in. `place_bomb` and
+# `detonate` are deliberately NOT counted -- both are priced at a share, not
+# at face value, which is the whole distinction this dial turns on.
+SPARK_ALT_NONDAMAGE_SPEND_COST = STATIC_SPARK_SPEND_COST   # 2.50, see above.
+
 
 def spark_gain_value() -> float:
     """The per-Spark GAIN dial in force. `SPARK_ALT_VALUE` under the flag."""
     return SPARK_ALT_VALUE if C.SPARK_ALT_COST_ENABLED else STATIC_SPARK_VALUE
 
 
-def spark_spend_cost() -> float:
-    """The per-Spark SPEND dial in force. `SPARK_ALT_VALUE` under the flag."""
-    return (SPARK_ALT_VALUE if C.SPARK_ALT_COST_ENABLED
-            else STATIC_SPARK_SPEND_COST)
+def spark_spend_cost(*, prints_damage: Optional[bool] = None) -> float:
+    """The per-Spark SPEND dial in force, for a card of this shape.
+
+    Flag off: `STATIC_SPARK_SPEND_COST`, whatever the card prints -- the
+    shipped world has one rate and EB-233 does not give it a second.
+
+    Flag on: `SPARK_ALT_VALUE` for a card that prints an Attack body, and
+    `SPARK_ALT_NONDAMAGE_SPEND_COST` for one that does not. `prints_damage`
+    is None when the caller has no card in hand; that keeps the dearer rate,
+    so an un-informed call can never under-charge a sink.
+    """
+    if not C.SPARK_ALT_COST_ENABLED:
+        return STATIC_SPARK_SPEND_COST
+    return (SPARK_ALT_NONDAMAGE_SPEND_COST if prints_damage is False
+            else SPARK_ALT_VALUE)
+
+
+#: The ops STATIC_OP_PRICING prices at FACE VALUE printed damage, and so the
+#: ops `SPARK_ALT_VALUE`'s median is denominated in. See EB-233 above.
+STATIC_ATTACK_BODY_OPS = frozenset({"damage", "chain_attack"})
+
+
+def prints_attack_body(card: Card) -> bool:
+    """EB-233: does this card print an Attack body anywhere?
+
+    Reads every printed branch and mode (`_nested_effects`), on the same
+    "does this card print X anywhere" rule every other classifier in this
+    file uses. `_static_power` inlines the identical test over the walk it
+    already holds; a test pins the two to agree.
+    """
+    return any(fx.get("op") in STATIC_ATTACK_BODY_OPS
+               for fx in _nested_effects(card.effects))
 
 
 # The op-parity table (Task 2 of the same sprint). EVERY key of
@@ -1864,7 +1964,11 @@ STATIC_OP_PRICING: dict[str, str] = {
     "gain_spark": "ZERO: STATIC_SPARK_VALUE, the v3 flat-proxy sweep",
     "spend_spark": "NEGATIVE STATIC_SPARK_SPEND_COST, its own live dial: a "
                    "Spark price is a printed cost (W3/R211; the gain side "
-                   "stays dead on purpose)",
+                   "stays dead on purpose). Under SPARK_ALT_COST_ENABLED the "
+                   "rate is card-shaped (EB-233): SPARK_ALT_VALUE for a sink "
+                   "printing an Attack body, SPARK_ALT_NONDAMAGE_SPEND_COST "
+                   "for one that does not, because the 4.00 median is "
+                   "denominated in damage rows only",
     "burst_energy": "ZERO: STATIC_BURST_VALUE, the v3 flat-proxy sweep",
 }
 
