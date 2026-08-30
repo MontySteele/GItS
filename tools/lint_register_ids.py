@@ -394,9 +394,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 201 minted 2026-08-29 by EB-198's live acceptance: the pile view's
         # affordability rings never paint.
         201,
-        # 202 minted 2026-08-29 by the two-instance funnel build (R221's
-        # throughput tail): the blind-QA round drives two games at once.
-        202,
+        # 202 was minted AND CLOSED on 2026-08-29 by the two-instance funnel
+        # build -- it left OPEN_IDS in the same commit that closed it, with
+        # the ceiling above holding the number so nothing re-takes it.
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,

@@ -48,11 +48,25 @@ LANE_ROOT = Path(os.environ.get("LOCALAPPDATA")
 GAME_APPDATA_DIR = "SlayTheSpire2"
 LOG_RELATIVE = (GAME_APPDATA_DIR, "logs", "godot.log")
 
-#: The one file a fresh lane MUST inherit. Without it the game boots with no
-#: mod profile and the klee mod is not loaded, so a lane's first launch would
-#: be a vanilla game wearing the harness's name.
+#: WHAT A FRESH LANE INHERITS, AND WHAT IT MUST NOT. Both halves were learned
+#: live rather than reasoned out:
+#:
+#:  * `settings.save` — without it the game boots with NO MOD PROFILE and the
+#:    klee mod is not loaded, so the lane's first launch is a vanilla game
+#:    wearing the harness's name.
+#:  * `profile.save`, `prefs.save`, `progress.save` — without these the lane
+#:    is a FIRST-EVER launch, and the game opens on the tutorial prompt. The
+#:    driver's embark stops there and files `no_embark_path: menu_screen
+#:    'tutorial_prompt' offers none of the embark options; saw ['no', 'yes']`,
+#:    which is a correct refusal about a screen the funnel has no verb for.
+#:
+#: `current_run.save` is DELIBERATELY ABSENT from this list: copying it would
+#: resume lane 0's run inside lane 1, which is the one way a disposable
+#: profile could reach back into a real one. Nothing here is ever read as
+#: data — a lane's profile is scratch (see this module's header).
 SETTINGS_RELATIVE = (GAME_APPDATA_DIR, "steam")
 SETTINGS_NAME = "settings.save"
+SEED_FILES = ("settings.save", "profile.save", "prefs.save", "progress.save")
 
 
 @dataclass(frozen=True)
@@ -150,13 +164,17 @@ def lanes(count: int, *, game_dir: Path | None = None) -> list[Instance]:
 
 def seed_profile(inst: Instance,
                  source_appdata: Path | None = None) -> list[Path]:
-    """Copy lane 0's `settings.save` into this lane's tree, once.
+    """Copy the `SEED_FILES` out of lane 0's tree into this lane's, once.
 
-    Returns the files it wrote (empty when the lane already had one, and on
-    lane 0, which has nothing to seed). The copy is per Steam id directory,
-    because that is how the game files it, and an EXISTING file is never
-    overwritten: a lane that has been used has its own settings and they are
-    the ones its next launch should read.
+    Returns the files it wrote (empty on a lane that already has them, and on
+    lane 0, which has nothing to seed). Every file keeps its path RELATIVE to
+    `SlayTheSpire2/steam/`, because that path is how the game finds it — the
+    same name means different things under `steam/<id>/` and under
+    `steam/<id>/modded/profile1/saves/`.
+
+    AN EXISTING FILE IS NEVER OVERWRITTEN. A lane that has been used has its
+    own settings and its own progress, and those are what its next launch
+    should read; re-seeding would silently roll it back to lane 0's.
     """
     if inst.appdata is None:
         return []
@@ -166,9 +184,10 @@ def seed_profile(inst: Instance,
     written: list[Path] = []
     if not src_root.is_dir():
         return written
-    for src in sorted(src_root.glob(f"*/{SETTINGS_NAME}")):
+    for src in sorted(p for p in src_root.rglob("*")
+                      if p.is_file() and p.name in SEED_FILES):
         dest = inst.appdata.joinpath(*SETTINGS_RELATIVE,
-                                     src.parent.name, SETTINGS_NAME)
+                                     *src.relative_to(src_root).parts)
         if dest.exists():
             continue
         dest.parent.mkdir(parents=True, exist_ok=True)

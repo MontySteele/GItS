@@ -1,0 +1,50 @@
+[
+ {
+  "lane": "lane0",
+  "pid": 12972,
+  "port": 15526,
+  "status": "ok",
+  "message": "captured 3842 2160 via printwindow",
+  "guardrail": "MATERIAL, not evidence. A frame captured by this apparatus is something for a person to look at. Nothing a bot or an LLM derives from it is a claim about look, legibility, readability or fun -- those stay [USER]-only instruments (Guardrail-7, and the no-fun rule).",
+  "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-instances\\review\\qa\\two-instance\\frame-20260829-201509-eb202-lane0.png",
+  "route": "printwindow",
+  "row": {
+   "record": "frame",
+   "ts": 1788048909.9375904,
+   "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-instances\\review\\qa\\two-instance\\frame-20260829-201509-eb202-lane0.png",
+   "label": "eb202-lane0",
+   "note": "EB-202: both lanes up, this is lane0 on port 15526",
+   "size": "3842 2160",
+   "route": "printwindow",
+   "route_requested": "auto",
+   "pid": 12972,
+   "instance": "lane0",
+   "context": {},
+   "guardrail": "MATERIAL, not evidence. A frame captured by this apparatus is something for a person to look at. Nothing a bot or an LLM derives from it is a claim about look, legibility, readability or fun -- those stay [USER]-only instruments (Guardrail-7, and the no-fun rule)."
+  }
+ },
+ {
+  "lane": "lane1",
+  "pid": 43720,
+  "port": 15527,
+  "status": "ok",
+  "message": "captured 3842 2160 via printwindow",
+  "guardrail": "MATERIAL, not evidence. A frame captured by this apparatus is something for a person to look at. Nothing a bot or an LLM derives from it is a claim about look, legibility, readability or fun -- those stay [USER]-only instruments (Guardrail-7, and the no-fun rule).",
+  "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-instances\\review\\qa\\two-instance\\frame-20260829-201509-eb202-lane1.png",
+  "route": "printwindow",
+  "row": {
+   "record": "frame",
+   "ts": 1788048910.4703693,
+   "path": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-instances\\review\\qa\\two-instance\\frame-20260829-201509-eb202-lane1.png",
+   "label": "eb202-lane1",
+   "note": "EB-202: both lanes up, this is lane1 on port 15527",
+   "size": "3842 2160",
+   "route": "printwindow",
+   "route_requested": "auto",
+   "pid": 43720,
+   "instance": "lane1",
+   "context": {},
+   "guardrail": "MATERIAL, not evidence. A frame captured by this apparatus is something for a person to look at. Nothing a bot or an LLM derives from it is a claim about look, legibility, readability or fun -- those stay [USER]-only instruments (Guardrail-7, and the no-fun rule)."
+  }
+ }
+]

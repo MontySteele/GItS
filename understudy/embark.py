@@ -236,7 +236,8 @@ def embark(character: str, *, hold: bool = False,
         # nobody can attribute once two of them can be open at once; the
         # label, the port and the user tree are all three facts a reader needs
         # to find the log that belongs to it.
-        **session.instance.as_row(),
+        **(session.instance.as_row() if session.instance is not None
+           else {"instance": bridge.current_label()}),
         "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
     _write_sidecar(stamp, sidecar)

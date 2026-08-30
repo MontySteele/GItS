@@ -906,9 +906,21 @@ def test_the_profile_is_seeded_once_and_never_overwritten(tmp_path):
     lane1 = instances.Instance(game_dir=tmp_path / "game", port=15527,
                                appdata=tmp_path / "lane1", label="lane1")
 
+    # The tutorial-prompt half, learned live: a lane with no `progress.save`
+    # is a first-EVER launch and opens on the tutorial prompt, which the
+    # driver correctly refuses (`no_embark_path`). And `current_run.save` is
+    # deliberately NOT carried -- copying it would resume lane 0's run.
+    saves = src / "SlayTheSpire2" / "steam" / "76561" / "modded" / "p1" / "saves"
+    saves.mkdir(parents=True)
+    (saves / "progress.save").write_text("PROGRESS", encoding="utf-8")
+    (saves / "current_run.save").write_text("A RUN", encoding="utf-8")
+
     written = instances.seed_profile(lane1, source_appdata=src)
-    assert len(written) == 1
-    assert written[0].read_text(encoding="utf-8") == "PROFILE"
+    names = sorted(p.name for p in written)
+    assert names == ["progress.save", "settings.save"]
+    assert not any(p.name == "current_run.save" for p in written)
+    assert written[-1].read_text(encoding="utf-8") == "PROFILE"
+    written = [p for p in written if p.name == "settings.save"]
 
     written[0].write_text("THE LANE'S OWN", encoding="utf-8")
     assert instances.seed_profile(lane1, source_appdata=src) == []

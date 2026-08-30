@@ -847,6 +847,39 @@ deals the boards to the two lanes in the pre-registered order.
   game mid-board. A leftover game from a crashed soak is now the deploy
   script's own refusal to report (it lists the pids) and the operator's call.
 
+**PROVEN LIVE 2026-08-29** (`review/qa/two-instance/live-proof.json`, and
+`understudy/twolane_proof.py` / `twolane_frames.py` are the two scripts that
+did it). Both lanes up in **30.6 s** (lane 0 at 16.7 s, lane 1 at 30.6 s);
+both bridges answering `menu` at once on 15526 and 15527; one board staged per
+lane concurrently and both packets read back with the right hashes; one frame
+per lane captured **by pid** through `PrintWindow`, with two identical windows
+on the screen. Wall clock for the two boards: **52.4 s concurrent, 59.6 s
+serial on one lane** — and the concurrent figure is honest rather than
+flattering, because 37 s of it is one lane taking `EB-191`'s retry. Without a
+retry a stage is ~14 s on either lane, so the real shape is two ~14 s stages
+overlapping instead of running end to end.
+
+**Three defects the live proof found, all three fixed here:**
+
+1. `soak.run_scripted` rebound this MODULE'S `policy_v1` name for the duration
+   of a run. With two lanes, lane 0's driver called LANE 1'S policy, whose
+   `Runner` had already closed its log — `I/O operation on closed file`. The
+   policy is a field on the driver now.
+2. A `Session` with no instance USED to mean "lane 0" and rebound the calling
+   thread. `stage_board` opens exactly such a Session on the lane worker's
+   thread, so lane 1's board was staged into lane 0's game; both boards came
+   back refused by `exact_hand`, each holding the other's cards. `None` means
+   INHERIT the thread's lane.
+3. Two drivers starting in the same second took the same
+   `soak-<stamp>-run001.jsonl` and wrote one interleaved file. The lane is in
+   the name now; a session with no lane adds no infix.
+
+**What the live proof did NOT cover.** No graded two-lane round has run: the
+proof staged boards and read packets, and never called a model, a grade or a
+replay. `EB-191` (a chosen seed reading back `None`) fires often enough with
+two games on one machine to need the retry above, and it is not fixed here.
+Three lanes are untested and unregistered.
+
 **The four conditions.**
 
 - **`answer_truncated` is a hard refusal, with no partial filing.** A reply

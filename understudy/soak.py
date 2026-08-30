@@ -353,11 +353,21 @@ class Session:
         # Passed to the launched game so the mod's own hook labels its
         # records with the same declaration the bot feed is stamping.
         self.intent = intent
-        # WHICH GAME THIS SESSION IS. `None` means lane 0 -- the machine's own
-        # APPDATA and port 15526 -- so every caller written before lanes
-        # existed gets exactly the process it used to get.
-        self.instance = instance if instance is not None else instances.lane(
-            "lane0", game_dir=game_dir())
+        # WHICH GAME THIS SESSION IS, and `None` MEANS "WHATEVER THIS THREAD
+        # IS ALREADY ON" -- not "lane 0".
+        #
+        # That distinction is the whole of a defect the first live two-lane
+        # stage found. `staged_turn.stage_board` opens its own attach Session
+        # with no instance, on the lane worker's thread; a `None` that meant
+        # lane 0 made that Session's `wire()` REBIND the thread to port 15526,
+        # so lane 1's board was staged into lane 0's game. Both boards came
+        # back refused by `exact_hand` -- each holding the other's cards --
+        # which is the good failure: the packet was not written.
+        #
+        # With `None` meaning "inherit", an attach Session on a bound thread
+        # stays on that lane, and a Session on an unbound thread behaves
+        # exactly as every Session did before lanes existed.
+        self.instance = instance
         # TWO LANES SHARE ONE INSTALL, SO ONLY ONE OF THEM MAY DEPLOY.
         # `deploy_bridge.ps1` deletes and rewrites `mods\STS2_MCP` and refuses
         # outright while a game is running -- so lane 1, which launches while
@@ -365,7 +375,8 @@ class Session:
         # teardown that must NOT remove the shared directory out from under
         # lane 0. One flag says both.
         self.install_bridge = install_bridge
-        self.dir = self.instance.game_dir
+        self.dir = (self.instance.game_dir if self.instance is not None
+                    else game_dir())
         self.ledger = Reversibility(LOG_DIR / f"reversibility-{stamp}.json")
         self.proc: subprocess.Popen | None = None
         self._appid_entry: dict | None = None
@@ -376,6 +387,13 @@ class Session:
         self.speed_before: dict | None = None
 
     # -- setup ------------------------------------------------------------
+    @property
+    def label(self) -> str:
+        """This session's lane label, or the thread's if it inherited one."""
+        if self.instance is not None:
+            return self.instance.label
+        return bridge.current_label()
+
     def wire(self) -> None:
         """Bind the CALLING THREAD's bridge calls to this session's game.
 
@@ -394,8 +412,9 @@ class Session:
         # A LANE WITH ITS OWN user:// TREE INHERITS ONE FILE AND NO MORE. The
         # mod profile lives in `settings.save`; without it the lane boots
         # vanilla and the whole round would read a game with no klee mod in it.
-        for path in instances.seed_profile(self.instance):
-            print(f"lane {self.instance.label}: seeded {path}")
+        if self.instance is not None:
+            for path in instances.seed_profile(self.instance):
+                print(f"lane {self.instance.label}: seeded {path}")
         self._steam_appid()
         self._deploy_bridge()
         self._launch()
@@ -419,7 +438,7 @@ class Session:
         if not self.install_bridge:
             # Nothing recorded, so nothing is reverted: this lane did not
             # install the bridge and may not remove it.
-            print(f"lane {self.instance.label}: bridge deploy skipped "
+            print(f"lane {self.label}: bridge deploy skipped "
                   f"(another lane owns the shared mods directory)")
             return
         self._bridge_entry = self.ledger.record(
@@ -454,7 +473,8 @@ class Session:
         # mod_configs, logs) and `STS2_MCP_PORT` (which listener this process
         # binds). On lane 0 the APPDATA half is a no-op by construction, so the
         # single-instance path launches exactly the process it always did.
-        env = self.instance.env()
+        env = (self.instance.env() if self.instance is not None
+               else dict(os.environ))
         env["GITS_TELEMETRY_FEED"] = "bot"
         # THE INTENT LABEL IS PINNED THE SAME WAY, AND THE EMPTY STRING IS
         # LOAD-BEARING. `env` starts as a copy of this shell's environment, so
@@ -1060,6 +1080,16 @@ class RunDriver:
     # __init__ -- and so the OFF state is the default everywhere.
     sampler: Any = None
 
+    # WHICH POLICY THIS DRIVER FLIES, and it is a FIELD because two drivers
+    # can now be running at once. `None` means the module's own `policy_v1`,
+    # which is every unscripted run. See `run_scripted` below for what this
+    # replaced and what the old shape cost.
+    policy: Any = None
+
+    @property
+    def pol(self) -> Any:
+        return self.policy if self.policy is not None else policy_v1
+
     # EB-117, and a class attribute for the same reason: UNVERIFIED is the
     # default on every construction path, so nothing can read a character name
     # off a driver that never embarked.
@@ -1071,7 +1101,8 @@ class RunDriver:
                  chosen_seed: str | None = None,
                  max_fights: int | None = None,
                  hazard_guard: bool = True,
-                 p2_capture: bool = False):
+                 p2_capture: bool = False,
+                 policy: Any = None):
         self.session = session
         self.run_index = run_index
         self.character = character
@@ -1095,7 +1126,8 @@ class RunDriver:
         # only arm whose numbers are comparable to R98's.
         self.commit = commit
         self.stamp = stamp
-        self.memo = policy_v1.Memo()
+        self.policy = policy
+        self.memo = self.pol.Memo()
         # P2 leg one (R94). OFF unless the soak asked for it; the baseline arm
         # R98 validated is the arm without it. Capture only -- no model is
         # called from this loop.
@@ -1103,7 +1135,16 @@ class RunDriver:
             from understudy import p2capture
             self.sampler = p2capture.Sampler(stamp, run_index, enabled=True)
         self.seed: str | None = None
-        self.log = LOG_DIR / f"soak-{stamp}-run{run_index:03d}.jsonl"
+        # THE LANE IS IN THE FILE NAME, and the live proof is why. Two
+        # lanes staging at once both reach `stage_board`, which stamps
+        # the second, so both drivers took `soak-<stamp>-run001.jsonl`
+        # and wrote ONE interleaved file -- two runs' records mixed,
+        # with nothing on a row saying which run it belonged to. The
+        # single-lane name is unchanged: a session with no lane adds
+        # no infix.
+        lane = getattr(getattr(session, "instance", None), "label", "")
+        infix = f"-{lane}" if lane else ""
+        self.log = LOG_DIR / f"soak-{stamp}{infix}-run{run_index:03d}.jsonl"
         self.actions = 0
         self.started = time.time()
         self.fights: list[FightTelemetry] = []
@@ -1423,14 +1464,14 @@ class RunDriver:
         # embarked; that is exactly the run whose character is unknowable.
         self.emit({"record": "run_begin", "character": None,
                    "character_requested": self.character,
-                   "policy": policy_v1.POLICY_VERSION,
+                   "policy": self.pol.POLICY_VERSION,
                    # The arm, recorded per run for the same reason the dials
                    # are: a log has to stay self-describing when the flag moves.
                    "commit": self.commit,
                    "dials": {"BLOCK_MATTERS_FRACTION":
-                             policy_v1.BLOCK_MATTERS_FRACTION,
+                             self.pol.BLOCK_MATTERS_FRACTION,
                              "COMPANION_SHARE_FOR_GUEST_CAST":
-                             policy_v1.COMPANION_SHARE_FOR_GUEST_CAST,
+                             self.pol.COMPANION_SHARE_FOR_GUEST_CAST,
                              "TIME_SCALE": TIME_SCALE}})
         outcome, detail = "unknown", ""
         try:
@@ -1926,7 +1967,8 @@ class RunDriver:
                 state = self.post(state, mech, mechanical=True)
                 continue
 
-            decision = policy_v1.decide(state, self.memo, commit=self.commit)
+            decision = self.pol.decide(state, self.memo,
+                                       commit=self.commit)
             # P2: a TURN OPENING is the first decision of a combat round, so
             # the sample is taken here -- after the policy has answered, so
             # the record carries what policy_v1 actually did rather than a
@@ -2169,11 +2211,18 @@ def _trim_state(state: dict) -> dict:
 # `RunDriver`'s, unchanged, and the caller's object only decides what to do once
 # a screen is in front of it.
 #
-# THE SWAP IS THE ONLY SEAM, AND IT IS RESTORED IN A `finally`. Leaving this
-# module's `policy_v1` name pointing at somebody's script would make the NEXT
-# run in the same process fly a policy nobody chose, and the log would not say
-# so -- `run_begin` records `policy_v1.POLICY_VERSION`, which is why every
-# script here PREFIXES that string rather than replacing it.
+# THE SWAP IS GONE, AND A LIVE TWO-LANE RUN IS WHY (`EB-202`, 2026-08-29).
+# It used to rebind this MODULE'S `policy_v1` name for the duration of the run
+# and restore it in a `finally`. That is safe for one run at a time and wrong
+# the moment there are two: the funnel's first concurrent stage had lane 0's
+# driver calling LANE 1'S policy, whose Runner had already closed its log --
+# `I/O operation on closed file`, a cross-wired run wearing a harness
+# exception, on a board nobody could have diagnosed from the log it did not
+# write. The policy is now a FIELD on the driver that flies it, so two drivers
+# in one process cannot see each other's, and no `finally` has to hold a
+# global right. `run_begin` still records the FLYING policy's
+# `POLICY_VERSION`, which is why every script here PREFIXES that string
+# rather than replacing it.
 
 
 def run_scripted(policy: Any, stamp: str,
@@ -2181,7 +2230,9 @@ def run_scripted(policy: Any, stamp: str,
                  max_fights: int | None = 1,
                  chosen_seed: str | None = None,
                  do_setup: bool = True,
-                 intent: str = "") -> dict:
+                 intent: str = "",
+                 instance: "instances.Instance | None" = None,
+                 install_bridge: bool = True) -> dict:
     """Drive ONE run with `policy` standing in for `policy_v1`.
 
     `policy` must offer what `RunDriver` reaches through the module for:
@@ -2190,17 +2241,15 @@ def run_scripted(policy: Any, stamp: str,
     than reimplementing them is the probes' pattern, and the reason a script
     overrides WHAT is chosen and never the bookkeeping around it.
     """
-    global policy_v1
-    session = Session(stamp, do_setup=do_setup, intent=intent)
-    real = policy_v1
-    policy_v1 = policy
+    session = Session(stamp, do_setup=do_setup, intent=intent,
+                      instance=instance, install_bridge=install_bridge)
     try:
         session.setup()
         driver = RunDriver(session, 1, stamp, character=character,
-                           max_fights=max_fights, chosen_seed=chosen_seed)
+                           max_fights=max_fights, chosen_seed=chosen_seed,
+                           policy=policy)
         return driver.run()
     finally:
-        policy_v1 = real
         session.teardown()
 
 
