@@ -1691,12 +1691,32 @@ case is 24 command calls + 2 refusals + 1 fight record + 1 run record = **28**.
    with `blindplay act`, at zero Codex cost, so the seat's budget is spent
    inside the fight rather than on a map fork. Every such action is listed in
    §12.4. The seat sees its first page at the combat screen.
-2. **The shipped automatic Spark rule is still live in the build.** The
+2. ~~**The shipped automatic Spark rule is still live in the build.** The
    re-author retires it only on acceptance (§6.1), so the fight is played on a
    build where the granted priced rows sit BESIDE the shipped threshold
    discount. That is a contaminant and it runs one way: it makes Sparks *more*
    valuable to hold than the re-authored economy alone would, so a thin
-   spend-versus-hold reading here is a floor, not a ceiling.
+   spend-versus-hold reading here is a floor, not a ceiling.~~
+
+   **ERRATUM 2026-08-30 (relayed review, fact-checked) — R101b: the GRADES
+   STAND and are NOT re-graded; the CONTAMINATION CLAIM is struck.** ~~"The
+   shipped automatic Spark rule is still live in the build."~~ It was not.
+   `+proto` is stamped by `klee-mod/build/deploy_proto.ps1`, which builds
+   `-p:PrototypeCards=true`, which defines `PROTOTYPE_CARDS`, under which
+   `SparkPower.BaseRuleActive` is the compile-time constant **`false`**
+   (`klee-mod/KleeCode/Powers/SparkPower.cs:64`, pinned by
+   `SparkAlternativeCostPinTests:66` and `SparkSinkPinTests:50`) — *"at no bank
+   do Attacks cost 0 and nothing is consumed automatically"*. Both `W1`
+   (`0.2.1517+proto.dirty`) and `W2` (`0.2.1600+proto.dirty`) ran on `+proto`
+   builds, so the shipped threshold discount was RETIRED in both, not live
+   beside the priced rows. **No grade moves in either run**: the retired rule's
+   threshold is 3, `W1`'s peak printed bank was 2 and `W2`'s was 1, so the rule
+   could not have fired under either reading. The *"floor, not a ceiling"* hedge
+   this note attached to the `W1`/`W3` hold readings is therefore **withdrawn as
+   unnecessary**, not as wrong-in-direction. The three back-references that
+   inherit this item — §12.9's *"what the record does NOT say"*, §16.4
+   contamination 1 and §16.11's *"what the record does NOT say"* — are struck
+   with it.
 
 ### 12.2 What is granted, and what is not
 
@@ -1959,9 +1979,17 @@ a 3-rung should be dead;
 
 **5. What the record does NOT say.** No win rate, no comparison with any other
 build or seed, and no claim about whether the arm is fun or good. One fight, one
-seed, one pilot, a granted deck the generators did not produce, and the shipped
-automatic Spark rule still live beside the priced rows (§12.1 item 2).
-Guardrail-7: these are floors.
+seed, one pilot, a granted deck the generators did not produce, ~~and the
+shipped automatic Spark rule still live beside the priced rows (§12.1 item
+2)~~. Guardrail-7: these are floors.
+
+**ERRATUM 2026-08-30 (relayed review, fact-checked) — R101b: the grades STAND
+and are NOT re-graded.** The struck clause inherits §12.1 item 2, which is
+itself struck: `W1` ran on a `+proto` build, so `SparkPower.BaseRuleActive` was
+the compile-time constant `false` and the shipped threshold rule was retired,
+not live. See the erratum at §12.1 item 2 for the citations. `W1`'s peak
+printed bank was 2 against the retired rule's threshold of 3, so no grade
+moves.
 
 ---
 
@@ -3611,9 +3639,19 @@ not §11.7 pick 3. §14.4's own condition 3 names *"the prototype ladder"* plus
 the three twins plus Rummage, and a Rare Power that reprices every Attack in the
 deck is not a ladder rung. It is therefore left out on the SAME published
 grounds `W1` left it out on, recorded here under §14.4 condition 1's instruction
-to record which rows were left out and why, and it stays [USER]'s at §11.7 pick
-3. **`embark` caps nothing** — eleven arms is not a tooling limit, it is this
-call, and it is one [USER] may overturn.
+to record which rows were left out and why, ~~and it stays [USER]'s at §11.7
+pick 3~~. **`embark` caps nothing** — eleven arms is not a tooling limit, it is
+this call, and it is one [USER] may overturn.
+
+**ERRATUM 2026-08-30 (relayed review, fact-checked) — R101b: the exclusion
+STANDS, the disposition line is struck.** ~~"and it stays [USER]'s at §11.7
+pick 3"~~ — §11.7 pick 3 is ANSWERED. **R222** (`13a0537`) took option (a):
+*"leave the Rare Power as built and re-read it in whole-fight play"*, and
+*"Neither §5's wording nor the price of 3 is reopened."*
+`proto_true_spark_knight`'s exclusion from `W2` on §12.2's published D4 grounds
+is unaffected; what is outstanding is the whole-fight read R222 ordered, which
+is **engineering work, not an open decision**, and is filed as `EB-223` in
+`BACKLOG.md` rather than in a pick list.
 
 ### 16.3 The cell, the budget, and the stopping rule
 
@@ -3658,11 +3696,27 @@ Dodoco Blast, Firework Finale.
 
 **Contamination, stated before the run.**
 
-1. **The shipped automatic Spark rule is still live in the build** (§12.1 item
-   2, unchanged): the re-author retires it only on acceptance, so the priced
-   rows sit beside the shipped threshold discount. It runs one way — it makes
-   Sparks more valuable to hold — so a thin hold reading here is a floor, not a
-   ceiling.
+1. ~~**The shipped automatic Spark rule is still live in the build** (§12.1
+   item 2, unchanged): the re-author retires it only on acceptance, so the
+   priced rows sit beside the shipped threshold discount. It runs one way — it
+   makes Sparks more valuable to hold — so a thin hold reading here is a floor,
+   not a ceiling.~~
+
+   **ERRATUM 2026-08-30 (relayed review, fact-checked) — R101b: the GRADES
+   STAND and are NOT re-graded; the CONTAMINATION CLAIM is struck.** It was not
+   live. `W2`'s build was `0.2.1600+proto.dirty`, and `+proto` is stamped by
+   `klee-mod/build/deploy_proto.ps1`, which builds `-p:PrototypeCards=true`,
+   which defines `PROTOTYPE_CARDS`, under which `SparkPower.BaseRuleActive` is
+   the compile-time constant **`false`**
+   (`klee-mod/KleeCode/Powers/SparkPower.cs:64`, pinned by
+   `SparkAlternativeCostPinTests:66` and `SparkSinkPinTests:50`) — *"at no bank
+   do Attacks cost 0 and nothing is consumed automatically"*. The shipped
+   threshold discount was therefore RETIRED for this run, not sitting beside
+   the priced rows. **No grade moves**: §16.7's one number is that the printed
+   bank never exceeded 1, against the retired rule's threshold of 3, so the
+   rule could not have fired under either reading. The *"floor, not a ceiling"*
+   hedge is **withdrawn as unnecessary**, not as wrong-in-direction. Same
+   erratum at §12.1 item 2, its origin.
 2. **`W1`'s results have been read, and `KLEESPARK-R2`'s.** Neither sets a
    number above: `W1'` is the precondition `W1` measured at 0 on a deck that
    could not pose it, and `W2'` names a card kind `W1`'s deck did not contain at
@@ -3936,7 +3990,15 @@ future page has to be read for arithmetic.*
 
 **4. What the record does NOT say.** No win rate, no comparison with any other
 build or seed, and no claim about whether the arm is fun or good. One fight, one
-seed, one pilot, a granted deck the generators did not produce, and the shipped
-automatic Spark rule still live beside the priced rows (§16.4 contamination 1).
-Guardrail-7: these are floors. R217 G: §16.10's words are iteration feedback,
-never validation.
+seed, one pilot, a granted deck the generators did not produce, ~~and the
+shipped automatic Spark rule still live beside the priced rows (§16.4
+contamination 1)~~. Guardrail-7: these are floors. R217 G: §16.10's words are
+iteration feedback, never validation.
+
+**ERRATUM 2026-08-30 (relayed review, fact-checked) — R101b: the grades STAND
+and are NOT re-graded.** The struck clause inherits §16.4 contamination 1,
+which is itself struck: `W2` ran on `0.2.1600+proto.dirty`, so
+`SparkPower.BaseRuleActive` was the compile-time constant `false` and the
+shipped threshold rule was retired, not live. See the erratum at §16.4
+contamination 1 for the citations. The printed bank never exceeded 1 against
+that rule's threshold of 3, so no grade moves.

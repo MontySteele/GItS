@@ -82,6 +82,7 @@ One row has since returned from it: `M65`, the re-ask R224 item 17 = (3) ordered
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
 | `M65` | **Ask:** *Bag of Tricks*, re-read by the doctrine seat after `EB-182` (R224 item 17 = (3)): D4 RESOLVED, one clause left — the written top-level-cost rule must admit a mode price. **Pick:** (1) amend the clause — the engineering is paid by `EB-182`, this is the clause and nothing else; (2) drop the arm, losing the only arm that put Sparks on the bomb board. | OPEN — **Gate:** no default; (1) is LAW-adjacent, (2) a design direction | klee-slice-1 §6.1.1 |
+| `M66` | **Ask:** choose the C# prototype gate shape. One symbol gates three `Compile Remove` dirs (`KleeCode.csproj:30-46`); the sim has per-fold flags. Cross-arm breakage twice (`EB-194`, `EB-221`). **Pick:** (1) split per arm, each with its own removes; (2) one switch plus a lint that prototype patches are character-scoped and seat-guarded (`d217b4f`), soak per deploy — Claude's rec; (3) one switch, soak only. | OPEN — **Gate:** design call; revises Furina §6.1 | relayed review 2026-08-30 |
 
 ---
 

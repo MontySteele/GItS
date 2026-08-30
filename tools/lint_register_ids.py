@@ -194,7 +194,12 @@ CEILINGS: dict[str, int] = {
     # --max-fights 3` -> `bounded  seed=None  actions=46  fights=3
     # defects=0`. The same command returned `fights=1` before 221 and
     # `fights=2 defects=1` on 221 alone.
-    "EB": 222,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+    # EB-223 minted 2026-08-30 by the relayed open-items review, fact-checked:
+    # R222 (a)'s whole-fight read of the strict Rare Power
+    # `proto_true_spark_knight` is owed WORK, not an open decision -- the
+    # packet's "stays [USER]'s at 11.7 pick 3" is struck as erratum 2 and the
+    # read is filed in BACKLOG behind 16.11 pick 1.
+    "EB": 223,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
                  # told the tester it had played no card.
@@ -401,7 +406,11 @@ CEILINGS: dict[str, int] = {
     # read while the local seat is in shadow is [USER]'s, and has no default.
     # M65 minted 2026-08-30 by the Bag of Tricks re-ask (R224 item 17 = (3)):
     # the one clause the doctrine seat left, the top-level-cost rule.
-    "M": 65,     # M62 minted 2026-08-29 by R221 A: the criterion that
+    # M66 minted 2026-08-30 by the relayed open-items review, fact-checked:
+    # per-fold C# feature gates versus the single PROTOTYPE_CARDS switch. It
+    # is a design call and it revises the Furina reframe's countersigned
+    # section 6.1 plan, which keys FURINA_REFRAME to the same compile symbol.
+    "M": 66,     # M62 minted 2026-08-29 by R221 A: the criterion that
                  # retires the fresh-Opus control form from every packet of
                  # a blind-QA round to the spot-check rate. The threshold is
                  # a number, so it is [USER]'s.
@@ -525,6 +534,10 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         213, 214, 215, 216, 217,
         # 220 minted 2026-08-30 -- the meter cost badge (Encore, Charge).
         220,
+        # 223 minted 2026-08-30 by the relayed open-items review, fact-checked:
+        # R222 (a)'s whole-fight read of the strict Rare Power, owed work and
+        # not a pick, gated on section 16.11 pick 1's deck composition.
+        223,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -560,7 +573,12 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # list and their engineering is EB-214/218/219. Ceilings never come down.
     "M": frozenset({10, 13, 14, 16, 19, 26, 45,
                     # 65 minted 2026-08-30: Bag of Tricks, one clause left.
-                    65}),
+                    65,
+                    # 66 minted 2026-08-30 by the relayed open-items review,
+                    # fact-checked: per-fold C# gates versus the single
+                    # PROTOTYPE_CARDS switch, a design call that revises the
+                    # Furina reframe's countersigned 6.1 plan.
+                    66}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
