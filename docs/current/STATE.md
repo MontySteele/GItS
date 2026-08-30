@@ -12,7 +12,7 @@
 
 ## Live cell
 
-**`RT12 / D18 / P11 / C20`**, read live via `tier05/cells.py`, with
+**`RT12 / D18 / P11 / C21`**, read live via `tier05/cells.py`, with
 `PILOT_WEIGHTS_VERSION` **6**. Numbers are never comparable across a stamp
 boundary unless labeled, and a report without a stamp is not citable
 (`EXPERIMENTS.md`). What each level below the live value covered, and what it
@@ -23,7 +23,7 @@ archived, is in [`STAMPS.md`](STAMPS.md) — not here.
 | `RT` `RUNTEMPLATE_VERSION` | **12** | `tier0/constants.py` | The run-layer half of the window-2 correctness batch (`EB-104`): banner-aware shop, relic-derived potion capacity, floored rest heal, one-door Book of Five Rings counting, and event card rewards rolling `RARITY_ODDS`. History → [`STAMPS.md`](STAMPS.md). |
 | `D` `DRAFTER_VERSION` | **18** | `tier0/constants.py` | `EB-28`: the drafter prices Furina's Salon deploy through ONE new [USER]-overridable dial, `STATIC_SALON_MEMBER_VALUE = 1.5` — nine salon rows re-price on both faces, nothing else moves. History → [`STAMPS.md`](STAMPS.md). |
 | `P` `POLICY_VERSION` | **11** | `tier05/draft.py` | The scorer-literacy window (R207): the pilot gains a Spark hold-versus-spend term, five state predicates and payout-aware selection scoring, repairing the standing read's three diagnostic caveats in code — they clear at the re-baseline, not here. History → [`STAMPS.md`](STAMPS.md). |
-| `C` `CONSTANTS_VERSION` | **20** | `tier0/constants.py` | `EB-139`'s Swirl aura-aware bind (R211) — an aimed Swirl binds whole to the lowest-HP aura-bearer; one companion's damage moves, the anchor does not — plus the ruled Sweet Dreams body (R189/R205, joined 2026-08-26): new any-aura predicate `target_has_aura`, Block 8 → 5. History → [`STAMPS.md`](STAMPS.md). |
+| `C` `CONSTANTS_VERSION` | **21** | `tier0/constants.py` | `EB-219`: Prune's two printed `gain_spark` ops leave the sheet and her Spark grant becomes Klee's own kit declaration (`KLEE_COMPANION_SPARK_*`, LAW:145), at parity on all four yields; a REPLAYED Prune now mints once per PLAY. History → [`STAMPS.md`](STAMPS.md). |
 
 **Standing baseline:** `review/active/sitting-reads-2026-08-26-c20-d18-p11.md`
 — twelve arms at `RT12/D18/P11/C20` (`main` = `190e598`), all twelve in ONE
@@ -621,10 +621,37 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `EB-213`–`EB-219` — of which `EB-219` (Prune's re-author) and
     `EB-218` (the Spark-only migration) precede the mixed-pool fight.
     No [USER] row is open on the slice work.
-    **Klee's order, as R225 sets it:** `EB-205`'s sim-drafted read first, then
-    a live controlled-ratio registration, then *Bag of Tricks* (`EB-224`);
-    whole fights are unblocked, the two lifecycle throws being fixed and the
-    three-fight soak green.
+    **Klee's order, as R225 set it, is DONE through the income question.**
+    `EB-205` is **CLOSED**, on both of its halves. `KLEESPARK-S1` (2026-08-30,
+    2 PREDICTED / 3 MISS at `RT12/D18/P11/C21`) measured the arm DRAFTED in
+    the sim: the per-fight peak Spark bank medians **5.0** against `W2`'s
+    printed ceiling of 1, so the null was `W2`'s grant rather than the
+    one-for-one economy, while the drafter takes a migrated non-damage twin in
+    only 3.2% of decks — a scorer finding, not an income one. It handed the
+    live read exactly one number, `S4`'s floor-15 median of **1.500 makers per
+    sink**, and `KLEESPARK-W3` (2026-08-30, dev build `0.2.1610+proto.dirty`,
+    1 PREDICTED / 1 SPLIT / 2 MISS / 1 UNREACHED) staged a live deck at it —
+    eight makers to five sinks, **1.600**, thirteen cards granted, Rummage and
+    the non-damage sinks granted rather than drafted. **It is also the first
+    whole-fight session that was a BATCH: four fights, 19 combat pages, 40 of
+    40 funded actions**, `EB-221` and `EB-222` being the difference from two
+    `tool_blocked` endings. **`W6''` PREDICTED at a median per-fight peak bank
+    of 4.0**, so **income is not the governor on a representative deck on
+    either engine, and Klee PICK 1 does NOT reopen** — the one registered
+    condition that would have reopened it was a `W6''` MISS. What the live run
+    did NOT settle is the sink set: `W1''` SPLIT at one qualifying page in
+    nineteen, and `W2''`/`W3''` MISSED with their registered precondition
+    (`W1''` PREDICTED) unmet, so **no re-price and no new sink row comes off
+    it** and the registered next unit is a LONGER BATCH at the same deck,
+    bounded by the Codex cap rather than by the game. **The next Klee read is `KLEESPARK-W4`, DRAFTED 2026-08-30 and NOT RUN**
+    (§19; `EB-223`): one session that grants `proto_true_spark_knight` on top of
+    `W3`'s exact derived deck — the Power moves neither side of the 1.600 ratio —
+    so R222 (a)'s owed whole-fight read of the strict Rare Power and `W1''`'s
+    registered longer batch are served at once, their linkages held apart by a
+    pre-Power / post-Power page partition, at 80 actions on a Codex cap of 90.
+    Then *Bag of Tricks*
+    (`EB-224`). Whole fights are unblocked, the two lifecycle throws being
+    fixed and the three-fight soak green.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces

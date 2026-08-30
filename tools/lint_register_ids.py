@@ -558,9 +558,12 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # (`understudy/targeting.py`, falsifier `target_missing`). The repair
         # half stayed out of both and is QUEUE `M63`. Ceilings never come
         # down.
-        # 205 minted 2026-08-29 by R222 pick 6(d): a drafted arm for the
-        # Klee Spark economy, now that the drafter can be offered the rows.
-        205,
+        # 205 was minted 2026-08-29 by R222 pick 6(d) -- a drafted arm for
+        # the Klee Spark economy, now that the drafter can be offered the
+        # rows -- and CLOSED 2026-08-30 by both of its halves landing:
+        # KLEESPARK-S1 in the sim and KLEESPARK-W3 live. It leaves OPEN_IDS
+        # with its row, which is what makes the number un-re-mintable; the
+        # ceiling above still holds it.
         # 208/209 minted 2026-08-29 by KLEESPARK-R2 (packet section 13.4): the
         # declared-versus-reached enemy count, which no check can see, and the
         # stopping rule reading shadow grades in the shadow chair. 209 LEFT
