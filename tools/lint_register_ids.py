@@ -129,7 +129,11 @@ CEILINGS: dict[str, int] = {
     # EB-202/EB-203 minted 2026-08-29 by the KLEESPARK-R1 relayed review:
     # a slot whose threshold the board set could not reach, and a form
     # whose play line is never checked for a target before it is graded.
-    "EB": 203,   # EB-201 minted 2026-08-29 by EB-198's live acceptance: the
+    "EB": 205,   # EB-205 minted 2026-08-29 by R222 pick 6(d): the Klee Spark
+                 # arm became DRAFTABLE (the pool seam) and has never been
+                 # measured drafted. 202-204 are other branches of the same
+                 # sitting; this branch took the next free number above them.
+                 # EB-201 minted 2026-08-29 by EB-198's live acceptance: the
                  # pile view's affordability rings never paint, on a hook that
                  # binds without error and a pile that demonstrably opens.
                  # EB-196/197 minted 2026-08-29 by the Gate B diagnosis. 196:
@@ -397,6 +401,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # the unreachable-threshold check, and the pre-seal target check
         # whose repair half went to QUEUE M63.
         202, 203,
+        # 205 minted 2026-08-29 by R222 pick 6(d): a drafted arm for the
+        # Klee Spark economy, now that the drafter can be offered the rows.
+        205,
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,
