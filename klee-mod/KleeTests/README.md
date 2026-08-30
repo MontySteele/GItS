@@ -29,8 +29,8 @@ and only the second one is worth anything to a reader.
 
 ```
 cd klee-mod/KleeTests
-dotnet test                       # 163 tests, ~0.7s after build
-dotnet test -p:PrototypeCards=true # 211: the 163 plus Prototype/
+dotnet test                       # 214 tests, ~0.7s after build
+dotnet test -p:PrototypeCards=true # 310: the 214 plus Prototype/
 dotnet test --filter CoopSeamTests
 dotnet test --filter "FullyQualifiedName~H3_authority"
 ```

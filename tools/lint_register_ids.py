@@ -597,7 +597,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
         12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
         74, 78, 80, 83, 84, 116, 128,
-        154, 155,
+        154,
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
@@ -756,6 +756,14 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # was written under the OLD reading; re-planning that CLOSED round
         # reports ceiling 0 against threshold 1, and `slots.yaml` is NOT
         # edited -- a published measurement stands as published.
+        # 155 LEFT OPEN_IDS 2026-08-30 with its row: KleeSelfCheck rule R20
+        # sweeps this assembly's `KLEEMOD-` keyword CONSTANTS -- found by
+        # reflection, never a curated list, because the failure being fixed IS
+        # the commit that adds a key and forgets its row -- for a `.title` row
+        # in `card_keywords`. The three salon-member keys were hoisted out of a
+        # switch body in the same commit, since a key that is only a literal
+        # inside a method is one reflection cannot see. Seen to fail in
+        # `klee-mod/KleeTests/KeywordTitleRowTests.cs`.
         # 153 LEFT OPEN_IDS 2026-08-30 with its row: `tools/lint_power_icons.py`
         # (ci lane) bites on both shapes the row named -- a concrete
         # `PowerModel` with no `PathFor` case, no `IconExempt` entry and no
