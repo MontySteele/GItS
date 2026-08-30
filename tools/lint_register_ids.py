@@ -597,7 +597,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
         12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
         74, 78, 80, 83, 84, 116, 128,
-        153, 154, 155,
+        154, 155,
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
@@ -756,13 +756,22 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # was written under the OLD reading; re-planning that CLOSED round
         # reports ceiling 0 against threshold 1, and `slots.yaml` is NOT
         # edited -- a published measurement stands as published.
+        # 153 LEFT OPEN_IDS 2026-08-30 with its row: `tools/lint_power_icons.py`
+        # (ci lane) bites on both shapes the row named -- a concrete
+        # `PowerModel` with no `PathFor` case, no `IconExempt` entry and no
+        # `ICON_DEBT` row, and an aura element whose icon path `PathFor` builds
+        # by CONCATENATION with nothing behind it. Both are exercised against
+        # synthetic input in `tier0/tests/test_eb153_power_icons_lint.py`. The
+        # seven powers the row names ship as named debt rather than a silent
+        # pass: no icon was invented for any of them.
         # 236 LEFT OPEN_IDS 2026-08-30 with its row: `board_design_findings`
         # in `--plan-only` walks EVERY order of play with relic gains counted
         # (`both_buyable`, R229's strong form) and refuses a hand the Energy
         # pays for whole (`no_forced_trade`). BT1's four boards fail it --
         # `t02` on four both-buyable orders -- and BT2's three pass. It is
         # deliberately NOT a `ci` lint: a tree-wide sweep would refuse a
-        # closed round's published boards. The lint count stays 29.
+        # closed round's published boards. The lint count is 30 since
+        # EB-153 added `power-icons` (2026-08-30).
         # 238 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word for
         # word -- "a staged page shows the relic line and a form quotes it".
         # KLEESPARK-BT2's pages printed the run's relics and `t01`'s shadow form
