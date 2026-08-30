@@ -730,7 +730,23 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # file's named test fails `DID NOT RAISE LaneCrossed` where the new
         # one passes; two concurrent sessions of the old file give 1 failed /
         # 13 passed against 14 passed, and of the new file 91 passed twice.
-        231,
+        #
+        # 231 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word
+        # for word -- "teardown proves the PID gone before the marker, lock
+        # seen to FAIL". `embark --teardown` rebuilds the session from the
+        # ledger on disk and so holds no `Popen`; `_kill` found `proc is
+        # None`, did nothing, and `_stop_game` returned "process terminated"
+        # anyway. Two halves: `_launch` writes the pid onto the launch entry
+        # (the only copy that outlives the process that made it), and
+        # `_kill_and_prove` polls the process table for up to
+        # `PID_EXIT_TIMEOUT_S` and RAISES on a survivor, so `_step` records
+        # NOT REVERTED naming the image still holding the number. An
+        # unanswerable probe counts as ALIVE, and a pre-change ledger with no
+        # pid refuses rather than assumes. `halt_spin`'s marker goes through
+        # the same proof. SEEN TO FAIL against a live pid (this python
+        # process, `taskkill` stubbed, real `tasklist`): old soak.py wrote
+        # REVERTED / "process terminated", new soak.py writes NOT REVERTED /
+        # "pid N (python.exe) is STILL ALIVE".
         # 233/234 minted 2026-08-30 by the post-merge review: the scorer/pool
         # half of KLEESPARK-S1's S3 miss, and the memory-cadence read on a
         # developed deck the kurage packet defers.

@@ -228,6 +228,13 @@ TIME_SCALE = 3.0
 # alive" asked in the same millisecond answers the wrong question. See
 # `Session.died`.
 PROCESS_EXIT_GRACE_S = 8.0
+# EB-231. How long teardown waits for the game's pid to leave the process
+# table before it REFUSES to write REVERTED. Generous, because the alternative
+# to waiting is a marker that lies: `KLEESPARK-W3`'s teardown reported the
+# process terminated, the bridge removal then failed on that live pid twice,
+# and the operator finished it by hand.
+PID_EXIT_TIMEOUT_S = 30.0
+PID_EXIT_POLL_S = 0.5
 
 # ---------------------------------------------------------- EB-1 guard ----
 #
@@ -317,6 +324,62 @@ class Reversibility:
         return "\n".join(rows)
 
 
+# --------------------------------------------------- EB-231, the pid probe --
+#
+# A TEARDOWN MAY NOT REPORT A KILL IT DID NOT MAKE. `--teardown` rebuilds the
+# session from the ledger ON DISK, so `self.proc` is None and `_kill` had
+# nothing to terminate -- and `_stop_game` returned "process terminated"
+# anyway, which the ledger wrote as REVERTED over a running game. The next
+# step then tried to delete `mods/STS2_MCP` out from under a process holding
+# the dll, and the marker had already said the process was gone.
+#
+# Two halves fix it, and they are separate on purpose. The pid is RECORDED on
+# the launch entry, so a session rebuilt from disk knows which process it
+# owns and can kill it by number; and the exit is PROVEN by the process table
+# before the marker is written. On a timeout `_stop_game` raises, `_step`
+# records NOT REVERTED with what is still alive, and nobody is told the game
+# is closed while it is on screen.
+
+
+def pid_image(pid: int) -> str | None:
+    """The image name of a live pid, or None when nothing holds that number.
+
+    THE UNKNOWN ANSWER COUNTS AS ALIVE. A probe that cannot run -- no
+    `tasklist`, a non-zero exit, a permission wall -- has not proved the
+    process gone, and this function exists to prove it gone. So a failed probe
+    returns a string saying so, which every caller reads as "still there".
+    """
+    try:
+        done = subprocess.run(
+            ["tasklist", "/FI", f"PID eq {int(pid)}", "/NH", "/FO", "CSV"],
+            capture_output=True, text=True, timeout=30)
+    except Exception as exc:                                 # noqa: BLE001
+        return f"<pid probe failed: {type(exc).__name__}: {exc}>"
+    if done.returncode != 0:
+        return (f"<pid probe exited {done.returncode}: "
+                f"{(done.stderr or '').strip()[:120]}>")
+    for row in (done.stdout or "").splitlines():
+        # `"SlayTheSpire2.exe","31448","Console","1","1,234,567 K"`. The pid is
+        # matched inside its own quotes so 3144 cannot match 31448.
+        if f'"{int(pid)}"' in row:
+            name = row.split('","')[0].lstrip('"')
+            return name or "unknown.exe"
+    return None
+
+
+def wait_for_exit(pid: int, timeout_s: float = PID_EXIT_TIMEOUT_S,
+                  poll_s: float = PID_EXIT_POLL_S) -> str | None:
+    """Poll until the pid is gone. None when it left, the image when it stayed."""
+    deadline = time.time() + float(timeout_s)
+    while True:
+        image = pid_image(pid)
+        if image is None:
+            return None
+        if time.time() >= deadline:
+            return image
+        time.sleep(poll_s)
+
+
 def game_dir() -> Path:
     if not LOCAL_PROPS.exists():
         raise SystemExit(
@@ -343,6 +406,10 @@ class Session:
     instance: Any = None
     install_bridge: bool = True
     proc: Any = None
+    # EB-231. The `pid` property reads the launch entry when there is no
+    # `Popen`, so a double built with `Session.__new__` needs the attribute to
+    # exist and to mean "this session launched nothing".
+    _launch_entry: Any = None
     # EB-226. A double built with `Session.__new__` never runs `setup`, so it
     # holds no power request and its `teardown` must not release one.
     _power_counted: bool = False
@@ -504,6 +571,13 @@ class Session:
                                      env=env,
                                      stdout=subprocess.DEVNULL,
                                      stderr=subprocess.DEVNULL)
+        # EB-231: THE PID GOES ON THE LEDGER, immediately. `--teardown` rebuilds
+        # this session from the ledger file and holds no `Popen`, so without
+        # the number written down there is nothing for it to kill and nothing
+        # for it to verify -- which is exactly how a REVERTED marker came to
+        # be written over a running game.
+        self._launch_entry["pid"] = self.proc.pid
+        self.ledger.flush()
 
     def wait_for_menu(self, timeout: float = MENU_TIMEOUT_S) -> dict:
         """R97/5a. Poll for the `options` key on a menu state -- never `GET /`.
@@ -640,8 +714,43 @@ class Session:
                 f"{after.get('time_scale')}")
 
     def _stop_game(self) -> str:
+        """EB-231: kill, then PROVE the pid is gone, and only then report it.
+
+        The return value of this function becomes a REVERTED marker, so it may
+        say nothing it has not checked. A pid that outlives the wait RAISES:
+        `_step` writes NOT REVERTED with the image name still holding the
+        number, the later steps still run, and the person reading the ledger
+        is told the game is up rather than told it is closed.
+        """
+        return "process terminated -- " + self._kill_and_prove()
+
+    def _kill_and_prove(self) -> str:
+        """Kill by pid and return the words that PROVE it, or raise.
+
+        Shared by the ordinary teardown step and the hang watchdog's, because
+        both write a REVERTED marker and a marker is a claim.
+        """
+        pid = self.pid
         self._kill()
-        return "process terminated"
+        if pid is None:
+            # Nothing was ever launched under this entry -- but the entry
+            # exists, so something launched a game and did not write down
+            # which. That is not a kill and must not be marked as one.
+            raise RuntimeError(
+                "the launch entry carries no pid, so this teardown cannot "
+                "prove any process is gone; find the game's pid, close it, "
+                "and re-run `deploy_bridge.ps1 -Remove` by hand")
+        # The constant is read HERE rather than taken as a default, so a test
+        # (and an operator with a reason) can move the wait without editing a
+        # signature.
+        alive = wait_for_exit(pid, PID_EXIT_TIMEOUT_S, PID_EXIT_POLL_S)
+        if alive is not None:
+            raise RuntimeError(
+                f"pid {pid} ({alive}) is STILL ALIVE after "
+                f"{PID_EXIT_TIMEOUT_S:.0f}s -- NOT marking this reverted. "
+                f"The next deploy would fight a running game; close it "
+                f"(`taskkill /F /T /PID {pid}`) and run this teardown again")
+        return f"pid {pid} verified gone"
 
     def _read_speed_sidecar(self) -> str | None:
         """The FastMode `GitsSpeed` still says is outstanding, or None."""
@@ -722,11 +831,29 @@ class Session:
             subprocess.run(["taskkill", "/F", "/T", "/PID",
                             str(self.proc.pid)],
                            capture_output=True, text=True)
+        elif self.proc is None and self.pid is not None:
+            # EB-231: the `--teardown` path. There is no `Popen` here -- this
+            # session was rebuilt from the ledger on disk -- so the ONLY
+            # handle on the game is the pid the launch entry recorded. Still
+            # by pid and still with /T; the `taskkill /IM` belt stays gone,
+            # for the reason above.
+            subprocess.run(["taskkill", "/F", "/T", "/PID", str(self.pid)],
+                           capture_output=True, text=True)
 
     @property
     def pid(self) -> int | None:
-        """This session's game pid, or None when it launched nothing."""
-        return self.proc.pid if self.proc is not None else None
+        """This session's game pid, or None when it launched nothing.
+
+        THE LEDGER IS THE FALLBACK, not an alternative source of truth: a live
+        session answers from its own `Popen`, and a session rebuilt from disk
+        (`embark --teardown`) answers from the number `_launch` wrote onto the
+        launch entry. Same pid either way -- one of the two is just the only
+        copy that outlives the process that made it (EB-231).
+        """
+        if self.proc is not None:
+            return self.proc.pid
+        recorded = (self._launch_entry or {}).get("pid")
+        return int(recorded) if isinstance(recorded, int) else None
 
     def halt_spin(self, why: str) -> dict:
         """Stop a spinning game NOW, and leave the ledger telling the truth.
@@ -771,8 +898,11 @@ class Session:
             self._speed_entry = None
 
         def _terminate() -> str:
-            self._kill()
-            return f"terminated by the hang watchdog: {why}"
+            # EB-231: the watchdog's marker is a marker too. A pid that
+            # outlives the kill raises here and the row reads NOT REVERTED,
+            # which is what a spinning game that would not die looks like.
+            return (f"terminated by the hang watchdog: {why} -- "
+                    + self._kill_and_prove())
 
         if self._launch_entry is not None:
             self._step(self._launch_entry, _terminate)
