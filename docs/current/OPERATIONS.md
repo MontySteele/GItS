@@ -809,6 +809,18 @@ python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md
   serialized under one lock; the model-bound read runs beside the game's next
   stage, with a look-ahead of exactly one board. `--serial` restores the old
   strictly-phased order so a live comparison is possible.
+- **The machine stays awake for as long as a session holds the game (EB-226).**
+  `soak.Session.setup` takes a Windows power request
+  (`ES_CONTINUOUS | ES_SYSTEM_REQUIRED`, `understudy/keepawake.py`) and
+  `teardown` gives it back; it is refcounted, so two lanes share one hold. The
+  flags are per-thread and a lane worker can outlive neither, so the request
+  lives on its own thread that does nothing but stay alive. This does NOT
+  depend on the power plan: an idle standby timeout ate 4 h 16 m out of a
+  running funnel on 2026-08-29 and 56 minutes on 2026-08-30 before the
+  timeout was set to never, and a setting nothing in this tree can see is not
+  a fix. To confirm a live run is holding it, run `powercfg /requests` in an
+  elevated shell — the harness's `python.exe` is listed under `SYSTEM:`, and
+  `None.` there while a round is up means the request was not taken.
 - **`--read-workers N`: the model half, and it is where the round is.**
   `KLEESPARK-R2` is the first pipelined round with a wall clock, and it says
   plainly what the funnel is bound by: six boards, 372 s total — **stage 89 s

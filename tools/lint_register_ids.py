@@ -206,7 +206,32 @@ CEILINGS: dict[str, int] = {
     # `proto_true_spark_knight` is owed WORK, not an open decision -- the
     # packet's "stays [USER]'s at 11.7 pick 3" is struck as erratum 2 and the
     # read is filed in BACKLOG behind 16.11 pick 1.
-    "EB": 225,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+    # EB-226 minted 2026-08-30 by the overnight-harness sitting and CLOSED in
+    # the minting commit. Two overnight runs died to the power plan rather
+    # than to anything this repo owns: the System log records `Kernel-Power
+    # 42 -- "entering sleep -- Sleep Reason: System Idle"` at 2026-08-29
+    # 07:05:40, resumed 11:21:48 on a mouse movement -- a 4 h 16 m hole
+    # through the middle of a live funnel, the game suspended mid-fight --
+    # and again at 2026-08-30 00:56:17. The AC standby timeout was five
+    # hours and [USER] has since set it to never, but a power plan is machine
+    # state nothing in this tree can see, survives no reinstall and no plan
+    # reset, so the harness now asks for what it needs itself.
+    # `understudy/keepawake.py` holds `ES_CONTINUOUS | ES_SYSTEM_REQUIRED`
+    # for exactly as long as a `soak.Session` holds the game (`setup` ->
+    # `teardown`), refcounted so two lanes share one hold, and deliberately
+    # WITHOUT `ES_DISPLAY_REQUIRED` -- the run needs the CPU, not the
+    # monitor. The flags are per-THREAD, and `Session.setup` and `teardown`
+    # are reached from different lane workers under a two-lane round, so the
+    # request lives on its own thread whose only job is to stay alive; set
+    # inline it would have been released by the OS when the worker exited,
+    # which looks correct in a diff and holds nothing. Non-Windows or a
+    # missing kernel32 is one logged line and a no-op.
+    # `tier0/tests/test_understudy_keepawake.py` asserts the flag sequence a
+    # fake setter records, that both calls land on one non-caller thread,
+    # that the context manager releases when its body raises, and the
+    # two-holder case. Confirm live with `powercfg /requests` (elevated):
+    # the harness's `python.exe` under `SYSTEM:`.
+    "EB": 226,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
                  # told the tester it had played no card.

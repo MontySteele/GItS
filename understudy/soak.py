@@ -109,8 +109,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from understudy import (bridge, deckwatch, hangwatch, instances, naming,
-                        policy_v1)
+from understudy import (bridge, deckwatch, hangwatch, instances, keepawake,
+                        naming, policy_v1)
 
 REPO = Path(__file__).resolve().parent.parent
 LOG_DIR = Path(__file__).resolve().parent / "logs" / "soak"
@@ -343,6 +343,10 @@ class Session:
     instance: Any = None
     install_bridge: bool = True
     proc: Any = None
+    # EB-226. A double built with `Session.__new__` never runs `setup`, so it
+    # holds no power request and its `teardown` must not release one.
+    _power_counted: bool = False
+    _power_held: bool = False
 
     def __init__(self, stamp: str, do_setup: bool = True,
                  intent: str | None = None,
@@ -406,6 +410,16 @@ class Session:
 
     def setup(self) -> None:
         self.wire()
+        # EB-226, AND BEFORE THE `do_setup` BRANCH. From here to `teardown`
+        # this process is driving a game, whether it launched it or attached
+        # to one, and an idle sleep in that window is a hole in a run rather
+        # than a rest -- 2026-08-29 lost 4 h 16 m of a live funnel to exactly
+        # that. Refcounted process-wide, so a two-lane round's second session
+        # does not take a second hold and the first teardown does not drop
+        # the one they share. See `understudy/keepawake.py` for why the flag
+        # cannot simply be set on this thread.
+        self._power_counted = True
+        self._power_held = keepawake.acquire(f"session {self.stamp}")
         if not self.do_setup:
             self._require_bridge()
             return
@@ -597,6 +611,15 @@ class Session:
         self._step(self._launch_entry, self._stop_game)
         self._step(self._bridge_entry, self._remove_bridge)
         self._step(self._appid_entry, self._remove_appid)
+        # EB-226, LAST and outside the ledger: the power request is not a
+        # change to the game directory, it is a change to this machine, and
+        # it is given back only once every step that still needs the machine
+        # awake has run. Guarded by the flag so a `teardown` without a
+        # matching `setup` -- a test double, a half-built session -- cannot
+        # decrement a count it never incremented.
+        if getattr(self, "_power_counted", False):
+            self._power_counted = False
+            keepawake.release()
 
     def _step(self, entry: dict | None, undo) -> None:
         if not entry:
