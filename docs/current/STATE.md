@@ -594,8 +594,16 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `EB-213`–`EB-219` — of which `EB-219` (Prune's re-author) and
     `EB-218` (the Spark-only migration) precede the mixed-pool fight.
     No [USER] row is open on the slice work.
-    **Klee's order, as R225 sets it:** `EB-205`'s sim-drafted read first, then
-    a live controlled-ratio registration, then *Bag of Tricks* (`EB-224`);
+    **Klee's order, as R225 sets it:** `EB-205`'s sim-drafted read is **TAKEN**
+    — `KLEESPARK-S1`, 2026-08-30, 2 PREDICTED / 3 MISS at `RT12/D18/P11/C21`:
+    on a DRAFTED deck the per-fight peak Spark bank medians **5.0** against
+    `W2`'s printed ceiling of 1, so **in the sim income is not the governor**
+    and the null was `W2`'s grant rather than the one-for-one economy, while
+    the drafter takes a migrated non-damage twin in only 3.2% of decks (a
+    scorer finding, not an income one) — so the live controlled-ratio
+    registration comes next and INHERITS `S4`'s floor-15 median of **1.500
+    makers per sink**, granting Rummage and its non-damage sinks rather than
+    drafting them; then *Bag of Tricks* (`EB-224`);
     whole fights are unblocked, the two lifecycle throws being fixed and the
     three-fight soak green.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
