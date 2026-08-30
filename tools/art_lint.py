@@ -433,6 +433,11 @@ GENERATOR_OWNED = {
     "ImageGen/images/furina/salon/glyph_damage.png":        "gen_salon_glyphs.py",
     "ImageGen/images/furina/salon/glyph_block.png":         "gen_salon_glyphs.py",
     "ImageGen/images/furina/salon/glyph_support.png":       "gen_salon_glyphs.py",
+    # R225 item 5: the meter cost badge's Encore and Charge glyphs. Pure
+    # geometry drawn to a silhouette brief, like the salon chips above -- there
+    # is no wiki art for one of OUR meters to plan a row against.
+    "ImageGen/images/furina/powers/encore.png":             "gen_meter_glyphs.py",
+    "ImageGen/images/kokomi/powers/charge.png":             "gen_meter_glyphs.py",
     "ImageGen/images/kokomi/summon/bake_kurage.png":        "cut_kurage_summon.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
