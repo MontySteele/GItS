@@ -648,7 +648,15 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 223 minted 2026-08-30 by the relayed open-items review, fact-checked:
         # R222 (a)'s whole-fight read of the strict Rare Power, owed work and
         # not a pick, gated on section 16.11 pick 1's deck composition.
-        223,
+        #
+        # 223 LEFT OPEN_IDS 2026-08-30 with its row, on its own acceptance
+        # word for word -- "the read recorded in EXPERIMENTS.md". KLEESPARK-W4
+        # ran and is graded (packet section 20; 0 PREDICTED / 1 MISS / 3
+        # UNREACHED). The read is TAKEN and it is not the reading the row
+        # wanted: `proto_true_spark_knight` was drawn on seven combat pages and
+        # never played, so every K slot is UNREACHED by the slate's own rule
+        # and R222 (a)'s question is still open. That is an outcome, not an
+        # unfinished row, and no second session is started (section 19.6).
         # 224/225 minted 2026-08-30 by R225: Bag of Tricks on EB-182's
         # mode-price machinery, gated on EB-205's read; and the
         # prototype-patch scope lint that keeps one PROTOTYPE_CARDS switch

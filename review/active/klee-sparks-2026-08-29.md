@@ -5196,3 +5196,269 @@ the diff, and it never means re-signing (R212, EXPERIMENTS *Countersign once*).
 
 **NOT RUN.** As of this commit no board has been staged, no session opened, no
 Codex call spent and no number taken.
+
+---
+
+## 20. `KLEESPARK-W4` — RUN AND GRADED
+
+**2026-08-30 · branch `kleespark-w4`, cut from `gpt-review-2026-08-30`
+(`af265de1`). THE RUN, AND NOTHING ELSE.** §19 is the registration and it is
+not touched here: no slot was re-worded, no threshold re-derived, no
+contamination added after the fact. R101b binds — §11–§19 stand exactly as
+published, and this section reports what §19.4's committed grader answered.
+
+### 20.1 What actually ran — the session, the stamp, and the operator's two actions
+
+**RUN 2026-08-30, sealed session `kleespark-w4`.** The committed record is
+`review/qa/blindplay/kleespark-w4/record.md` — identity block, the tester's
+five fight records and its run record verbatim, the per-turn sentence table,
+the leak audit — with `wire.json` and `grades.json` beside it. The rendered
+pages, the replies and `transcript.jsonl` are the gitignored operator half
+under `understudy/logs/blindplay/kleespark-w4/`.
+
+**The preconditions, printed as §19.6 requires.**
+
+| | |
+|---|---|
+| working tree | `git status --porcelain --untracked-files=no` **empty** at `af265de1`; the only uncommitted paths are gitignored operator scratch, which is why the package stamps `+proto.dirty` |
+| the game lock | `%LOCALAPPDATA%\Temp\gits-game.lock` **absent** before the deploy |
+| Steam | **running** (PID 17556) — the game is launched directly and needs it |
+| **the registered Codex precondition** | **`5h 0% (rolled over) · week 18%`**, against §19.6's *≤ 8% of the five-hour window and ≤ 35% of the week*. **BOTH MET, so no cut cap was applied**: the batch ran at the registered `--max-actions 80` on the registered cap of 90 calls |
+
+| | |
+|---|---|
+| pilot | `gpt-5.6-sol` requested and observed, `codex-cli 0.150.1` |
+| build | **`0.2.1676+proto.dirty`**, read off the deployed `mods\klee\manifest.json`. §19.6 expected *"`0.2.1610+proto.dirty` or later — whatever is deployed when the slot opens"*, and this is later; **the difference is DISCLOSED here rather than treated as a stop**, exactly as the build-stamp rule says. It carries `EB-230`'s `place_bomb` face fix, which §19.3's build note scheduled to land before this run, so the `All of My Treasures!` confound §19.3 pre-declared did not arise |
+| game | `v0.111.0`, read off the game's own `release_info.json` |
+| the pck contract check | the package was built at this branch's `af265de1`; `git diff af265de1..HEAD -- klee-mod docs/klee-cards.yaml docs/prototype-surface.yaml tier0/constants.py` is **EMPTY** — trivially so, because the only commit between them is the grader, which touches `review/qa/` alone. **And the stop rule was checked rather than assumed**: every printed Spark price on every combat page matched the sheet — Powder Smoke 2, Set It Off 2, Dig In 2, Rummage 3, Ka-pow! 1, with **no disagreement on any of the 50 combat pages** |
+| the R225 soak gate | **PASSED before the embark**: `bounded seed=V4823EVDU888 actions=51 fights=3 defects=0`, reversibility log all REVERTED |
+| run seed | **`KGU5LKM77PB5`**, rolled by the game and read back off the wire (R95). **`EB-191` did NOT fire** — the seed came back on the first read and no sidecar repair was needed |
+| arms granted | **all fourteen of §19.3**, by wire id, into the starting deck, each answering `ok` on `0.2.1676+proto.dirty` |
+| actions | **80 of 80**, termination **`max_actions`** |
+| refusals / stalls | **0 and 0.** All eighty commands were accepted by the wire |
+| fights | **SIX** |
+| Codex calls | **86 of the registered 90** — 80 answered screens, five fight records, one run record |
+| seat meter, BEFORE | `codex: 5h 0% (rolled over) · week 18% (resets Sep 05 17:58)` |
+| seat meter, AFTER | `codex: 5h 40% (resets 16:36 EDT) · week 25% (resets Sep 05 17:58)` |
+| the guard | `EB-227`'s stop lines are 85% of the five-hour window and 50% of the week. Neither was reached and **the guard never refused a call**; the batch cost ~40 points of the five-hour window and ~7 of the week, ~0.47 per call against `W3`'s ~0.85 |
+| the power request | `EB-226` held for the soak and again for the embark, and released at each teardown |
+| wire snapshots | **48**, machine-written off the API and never shown to the tester (`EB-216`) |
+
+**Two operator actions before the seat was handed the game, taken by §19.5
+contamination 3's registered rule and not re-invented.** `embark` left the run
+on the **Neow** screen at floor 1. The three boons printed were **Nutritious
+Oyster** (*"Raise your Max HP by 11"*), **Neow's Talisman** (*"Upgrade 1 of
+your Strikes and 1 of your Defends"*) and **Silver Crucible** (*"The first 3
+card rewards you see are Upgraded. The first Treasure Chest you open is
+empty"*). The rule is *the boon that changes NEITHER the deck's card list NOR
+the counted maker : sink ratio, and if more than one qualifies, the first such
+option in the order the screen prints them.* Only Nutritious Oyster changes no
+card at all — the Talisman rewrites two faces and the Crucible rewrites three
+future ones — so it was taken, and it is the first in printed order regardless.
+The two commands were `choose "Nutritious Oyster"` and `choose "Proceed"`. The
+tester's first screen was the map above the first Monster room, which is the
+state §19.1 registers as the start. **`W3` took Silken Tress; this run took a
+different boon because a different screen was printed, and what is held
+constant is the RULE and not the boon.**
+
+**The teardown.** `embark --teardown` reverted the seed, the speed and the
+process; the bridge removal refused while the game still held its dll and was
+run again by hand (`deploy_bridge.ps1 -Remove`), and the leftover
+`steam_appid.txt` was removed. **The dev build stays installed**, as the
+sequencing requires — `deploy.ps1` was NOT run.
+
+### 20.2 The batch, fight by fight, and the partition
+
+**Six fights, 50 combat pages**, in pages: **7 / 6 / 8 / 14 / 11 / 4**. That is
+`W3`'s 19 pages more than doubled, which is the longer batch §18.10 item 4
+named and the unit `W1'''` was registered on.
+
+| fight | pages | peak printed Spark bank |
+|---|---|---|
+| 1 | 7 | **3** |
+| 2 | 6 | **13** |
+| 3 | 8 | **8** |
+| 4 | 14 | **3** |
+| 5 | 11 | **8** |
+| 6 | 4 | **0** |
+
+**THE PARTITION, and it is the run's first fact: `power_page` is `null`.**
+*Spark Knight's Oath* was **DRAWN** — it sat in the tester's hand on seven
+combat pages (`turn-033`, `-034`, `-035`, `-069`, `-070`, `-071`, `-072`) —
+and was **never played**. So there are **50 PRE-POWER pages and 0 POST-POWER
+pages**, and by §19.4's own rule every `K` slot is UNREACHED. §19.5
+contamination 6 registered that outcome in advance and its reading with it: the
+Power *"must be drawn before any `K` slot can be reached — which is why every
+`K` slot registers UNREACHED on a Power that never resolves, and why that
+outcome is a draw fact and not a reading about the card."* Here it is one step
+short of a draw fact — the card was drawn and declined — and **nothing is
+inferred from that absence**, because the slate registers no slot that grades a
+decision not to play.
+
+**The controlled variable is CHECKED, not assumed (§19.5 contamination 7).**
+Twenty-two distinct card titles reached the tester's hand across the six
+fights. Every one of them that carries a top-level `gain_spark` or
+`spend_spark` is one of the twelve granted rows — the seven makers and the five
+sinks — and **not one card added mid-run (drafted, from a potion, from an
+event) carries either op**. The deck's counted maker : sink ratio was
+therefore **8 : 5 = 1.600 on every page of every fight**, and no page has to be
+reported on two sides of a moved ratio.
+
+### 20.3 The slate, graded mechanically
+
+**0 PREDICTED / 0 SPLIT / 1 MISS (`W1'''`) / 3 UNREACHED (`K1'''`, `K2'''`,
+`K3'''`)**, plus `K4'''` RECORDED and NOT GRADED. Every grade is
+`review/qa/blindplay/kleespark-w4/grade.py`'s own output against §19.4's
+registered thresholds and no others; the raw output is `grades.json`.
+
+| slot | grade | the read | the registered threshold |
+|---|---|---|---|
+| `W1'''` two affordable uses on a pre-Power page, one non-damage | **MISS** | **0** of **50** pre-Power combat pages. Post-Power count 0 of 0, RECORDED and NOT GRADED as §19.1 requires | ≥ 3 PREDICTED, 1–2 SPLIT, 0 MISS. **Denominator 50, i.e. ≥ 30** |
+| `K1'''` the converted price of 3 actually paid | **UNREACHED** | the Power never resolved. Denominator of post-Power pages printing a bank ≥ 3: **0 of 0** | ≥ 2 PREDICTED, 1 SPLIT, 0 MISS; UNREACHED on a Power that never resolves |
+| `K2'''` the conversion is felt where §5 says it is | **UNREACHED** | the Power never resolved; half (i) had no post-Power page to read and half (ii) no post-Power turn | both PREDICTED, one SPLIT, neither MISS; UNREACHED on a Power that never resolves |
+| `K3'''` the price-3 rung crowding out the price-2 rungs | **UNREACHED** | crowding denominator **0** — the pair was never posed, because there were no post-Power pages | ≥ 1 PREDICTED; 0 with denominator ≥ 3 MISS; 0 with 1–2 SPLIT; denominator 0 UNREACHED |
+| `K4'''` three numbers | **RECORDED, NOT GRADED** | (a) the Power was **drawn** on seven pages and **resolved on none**. (b) attack share **15 of 39 successful plays, 38.5%** over the whole session, against `W1`'s 50.0%, `W2`'s 75.0% and `W3`'s 40.0%; there is no pre/post split to print, because there is no post. (c) per-fight peak printed bank **3 / 13 / 8 / 3 / 8 / 0, median 5.5**, on the record beside `W3`'s 4.0 exactly as §19.4 asked and as **no comparison** — §19.2 item 1 forbids quoting it as one | none |
+
+**What each registered decision now says, quoted from §19.4 and applied.**
+
+- **`W1'''` MISS on a denominator of 50.** §19.4, verbatim: *"MISS on a
+  denominator of ≥ 30 pre-Power pages: the choice is not posed at the inherited
+  ratio even at double the batch, which is the composition finding `W3`'s
+  single page could not make; it returns to [USER] as a numbered pick between
+  §14.3's options, and Claude does not settle it."* **The branch is taken as
+  written.** The pick is at §20.5, it is numbered, and nothing is decided here.
+- **`K1'''`, `K2'''` and `K3'''` UNREACHED, and they AUTHORISE NOTHING.** The
+  one registered outcome on this slate that could reopen §5's wording or the
+  price of 3 is a `K1'''` **MISS with a non-zero denominator**, and the
+  denominator is zero. R222's closure of §5 therefore **stands untouched**, and
+  the ADVANCE-to-sheet candidate — which needed `K1'''`, `K2'''` and `K3'''`
+  all PREDICTED — **is not reached and is not refused**. `EB-223`'s owed work
+  is DONE in the sense the row asked for (the read is taken and recorded);
+  what it did not produce is a reading about the Power, and §20.5 says so.
+
+### 20.4 What the run found that is not a slot
+
+1. **The Oath was declined, three times in the tester's own words, and that
+   is R217 G iteration feedback and nothing else.** Its run record item 5:
+   *"Next time I would avoid narrow powers such as Spark Knight's Oath or True
+   Spark Knight unless the deck already had enough compatible attacks; the Oath
+   repeatedly sat dead while costing too much tempo."* Fight 3's item 4:
+   *"Spark Knight's Oath and Kaboom! were unnecessary once Melt showed
+   lethal."* Fight 5's item 4: *"Hot Hands, Spark Knight's Oath, Prune, and the
+   round-three Block cards were dead in their respective hands."* **No slot
+   grades this and no slot may be read off it.** It is the clearest statement
+   any of the four reads has produced about why the Power did not get played,
+   and it is exactly the kind of sentence R217 G says is feedback and never
+   evidence: the slate asked whether a paid price is legible and payable, and a
+   card that is never played answers neither question.
+2. **`W1'''`'s zero has a mechanical shape, and it is a DRAW fact about the
+   damage side.** Two or more distinct Spark-priced titles were in hand on
+   **four** of the 50 combat pages, all four in the last fight and all four at
+   a printed bank of **0**. The non-damage sinks were drawn plentifully —
+   Powder Smoke on 12 pages, Set It Off on 9, Dig In on 6, Rummage on 3 — and
+   **the deck's one printed damage sink, Ka-pow!, reached the hand on exactly
+   one page in fifty.** An affordable non-damage sink sat in hand on **9**
+   pages, so the bank had a destination often; what it never had was a
+   **second** one. This is recorded as the observation it is: at this deck and
+   this batch length the two-destination choice was not posed, and the reason
+   visible in the pages is the draw of the one-price rung rather than the
+   bank.
+3. **Income again cleared the rung comfortably, and again with a source the
+   ratio cannot count.** Per-fight peaks of 3 / 13 / 8 / 3 / 8 / 0 sit above
+   the cheapest non-damage price of 2 in five fights of six. **Prune — Little
+   Witch's Hunt** entered the deck mid-run: it prints no `gain_spark`, so the
+   counted ratio is formally untouched, but since **C21** (`EB-219`) a
+   Personal Companion play is a declared Klee-engine Spark grant
+   (`KLEE_COMPANION_SPARK_*`), so it is income the maker count cannot see —
+   the same direction as §19.5 contamination 4 and §17.7's blind spot 1.
+   **Every income figure here is a FLOOR and never a ceiling.**
+4. **One instrument artefact, named because it touches a recorded number.**
+   The six record prompts are written as `turn-081`…`turn-086`, so the grader's
+   "was the previous command accepted" read — which chains off the NEXT page —
+   returns false for the five plays that immediately preceded a fight record.
+   That costs `K4'''` (b)'s per-partition play count five plays, which is why
+   the attack share is quoted off the transcript's own 39 successful plays
+   (38.5%) rather than off the page chain's 34. **No graded slot reads
+   `accepted`**: `W1'''` counts pages and hands, and the three `K` slots are
+   UNREACHED. The artefact is disclosed and it moves no grade.
+5. **The run ended inside fight 6 and the tester could not tell why.** Its run
+   record item 5: *"The run ended unexpectedly immediately after playing Powder
+   Pop at 31 HP, so I cannot tell from the final screen whether that choice
+   caused the loss or whether an unprinted effect resolved."* The session's own
+   termination is `max_actions` at 80 of 80, so the batch was not cut short by
+   the ending; it is recorded as an unexplained frame, not diagnosed, and it
+   grades nothing.
+
+**Leak audit: 86 observations scanned, 1 hit, and it is the known false
+positive** — `pilot-vocabulary-score` matching the word `score` inside the
+guide's own sentence *"no card list, no score, no recommendation"*, exactly as
+`W1`, `W2` and `W3` recorded it. No card id, design tag, policy hint or run
+seed reached any page.
+
+### 20.5 What this leaves, and the one pick that returns to [USER]
+
+**What the grades permit, stated once and no further.**
+
+1. **`EB-223`'s read is TAKEN and the row CLOSES on its own acceptance** — *"the
+   read recorded in `EXPERIMENTS.md`"* — which this run and the row above it
+   satisfy. What the row wanted, a whole-fight reading of the strict Rare
+   Power, **is not what it got**: the Power was drawn and declined, all three
+   of its slots are UNREACHED, and R222 (a)'s question is still open. That is
+   reported as the outcome rather than repaired by a second session (§19.6:
+   *"ONE. If the session ends early it is recorded as it ended and NO second
+   session is started"*, and this session did not even end early).
+2. **§5's wording and the price of 3 are NOT reopened.** The single registered
+   reopening condition was a `K1'''` MISS on a non-zero denominator. The
+   denominator is zero, so the slot grades UNREACHED and R222's closure stands.
+3. **Nothing here is an ADVANCE and nothing here is a RETURN for the Power.**
+   The ADVANCE-to-sheet candidate needed three PREDICTEDs and has none; the
+   RETURN-to-a-staged-round acts are hung on a `K2'''` or `K3'''` MISS and
+   there is none. Under the slate's own rule an UNREACHED slot is not a pass
+   and not a fail, so **no [USER] row opens on the Power** off this run.
+4. **Nothing here is a balance or fun claim.** One batch, one seed, one pilot,
+   a granted deck the generators did not produce, one uncounted income source.
+   Guardrail-7: floors. R217 G: §20.1's and §20.4's quoted sentences are
+   iteration feedback, never validation, never approval.
+
+**THE ONE PICK THAT RETURNS TO [USER] — `W1'''`'s registered act, as a numbered
+list and never a blank.** The two-destination choice was posed **0 times in 50
+combat pages** at the derived ratio of 1.600, against `W3`'s 1 in 19. §19.4
+sends that back as a pick between §14.3's options, and Claude does not settle
+it. The evidence to weigh with it: the non-damage sinks were drawn and
+affordable often (an affordable one in hand on 9 pages), the damage rung
+Ka-pow! was drawn once in fifty, and income was never the binding constraint.
+
+> **PICK — the sink set, now that the longer batch has reported.**
+>
+> **(1) §14.3 option (1): re-author two — `Fwoosh!` → Behind the Barrel and
+> `Firework Finale` → Powder Keg.** Builds the price-1 and price-3 rungs the
+> ladder is missing, so a full bank chooses between one investment and two
+> small plays by construction rather than by draw.
+>
+> **(2) §14.3 option (2): the alternative pair — `Bang Bang!` → Slow Fuse and
+> its partner.** The same act on a different two rows.
+>
+> **(3) §14.3 option (3): one only — `Fwoosh!` → Behind the Barrel.** The
+> cheapest version of (1), and the one that changes the fewest shipped faces.
+>
+> **(4) §14.3 option (4): none — keep the set as built.** Read the zero as a
+> DRAW fact rather than a composition fact: the one damage rung in the deck
+> reached the hand once in fifty pages, and a set whose second destination is
+> not drawn is not a set that lacks a second destination.
+>
+> **(5) Change the DECK and not the SET: re-derive the granted deck so more
+> than one damage rung is in it, and re-pose `W1'''` under a fresh
+> registration.** This run granted exactly one printed damage sink because
+> `S4`'s inherited ratio put the cheapest one there; the zero may be a
+> property of that choice rather than of the sink set. Costs another batch of
+> game time and another 90 Codex calls.
+>
+> **(6) Stop buying batch length on this question.** §18.10 item 4 already
+> called a longer batch *"a budget question for [USER] and not an engineering
+> one"*, and this batch — double the length, 86 calls — moved the count from 1
+> to 0. Bank the two readings and let the sink set be settled by the mixed-pool
+> design work rather than by more live pages.
+
+**No QUEUE row is minted for it here** (R206/R212, one batch per sitting): the
+pick is assembled into the sitting's slate by the orchestrator, and this
+section is where its evidence lives.
