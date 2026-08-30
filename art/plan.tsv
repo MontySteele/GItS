@@ -262,6 +262,37 @@ power_amp_reaction_up	ImageGen/images/powers/amp_reaction_up.png	256	256	contain
 # unmistakably "the Burst is running" next to the burst meter badge.
 power_sparks_n_splash	ImageGen/images/powers/sparks_n_splash.png	256	256	contain	center	auto	1	png	Talent Sparks 'n' Splash.png		icon
 relic_pounding_surprise	ImageGen/images/relics/pounding_surprise.png	256	256	cover	top	auto	1	png	Pounding Surprise Equipment Card.png		icon
+# ---------- KLEE'S SECOND RELIC ICON -- EB-162 (2026-08-30) ----------
+# Dodoco Tales (the Touch-of-Orobas UPGRADE of Pounding Surprise, R69) was
+# pointing KleePck.Path at pounding_surprise.png, so the two drew ONE icon.
+# Exactly the defect the Furina block further down fixed for
+# ethereal_spotlight, and reachable in a single run: the upgrade swaps the
+# starter at an act boundary, so a player who has seen both has seen the same
+# picture twice for two unrelated relics.
+# Register `icon` matches every other relic row (pounding_surprise,
+# ethereal_spotlight, pearl_of_wisdom). L1 never reads these rows -- only
+# /cards/ out-paths enter the dedupe law -- so the crossing with a card's
+# rank 1 below is legal BY CONSTRUCTION, and it is already the shipped
+# pattern four times over in Klee's own power rows above (power_bomb,
+# power_amp_reaction_up, power_spark_threshold_down,
+# power_bomb_and_spark_per_turn each wear a live card's item source).
+# The shortlist is drawn ONLY from material already in art/raw and already
+# cleared through art/SOURCES.tsv. No fetch was run. The catalyst's own
+# weapon icon -- the literal Dodoco Tales -- is NOT on disk; reaching it is a
+# fetch window, and this pick is made without it.
+# P1 Dodoco's Bomb-Tastic Adventure -- the in-game picture BOOK about Dodoco,
+#    i.e. a Dodoco tale, which is the closest object in the cleared pool to
+#    the catalyst the relic is named for; 256x256 native item art, the exact
+#    register a relic strip wants. Crosses bomb_voyage's card rank 1.
+# P2 Let's Go, Dodoco! -- the other Dodoco storybook. Ranked BELOW P1 only
+#    because it already carries two live claims (playtime_forever and
+#    power_bomb_and_spark_per_turn), so a third would be the third sighting.
+# P3 Item Jumbo Sparks 'n' Splash Statue -- the one genuinely UNCLAIMED Klee
+#    item source in the census (claimed 0 of 1 slot), so zero reuse; ranked
+#    last on content, since a statue of the Burst is not a tale.
+relic_dodoco_tales	ImageGen/images/relics/dodoco_tales.png	256	256	contain	center	shortlist	1	png	Item Dodoco's Bomb-Tastic Adventure.png		icon
+relic_dodoco_tales	ImageGen/images/relics/dodoco_tales.png	256	256	contain	center	shortlist	2	png	Item Let's Go, Dodoco!.png		icon
+relic_dodoco_tales	ImageGen/images/relics/dodoco_tales.png	256	256	contain	center	shortlist	3	png	Item Jumbo Sparks 'n' Splash Statue.png		icon
 # Constellation-sigil redirect queue (taste pass: sigils are BANNED from card
 # portraits but are native 128px icon-shaped art — they fill future C3 power
 # and relic/upgrade icon slots as those land; keep the mapping here).

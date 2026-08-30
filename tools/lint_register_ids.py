@@ -598,7 +598,16 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
         74, 78, 80, 83, 84, 116, 128,
         153, 154, 155,
-        156, 157, 158, 159, 160, 161, 162, 163,
+        156, 157, 158, 159, 160, 161, 163,
+        # EB-162 LEFT OPEN_IDS 2026-08-30 with its row, closed by the art pass:
+        # Dodoco Tales stopped wearing Pounding Surprise's icon. The shortlist
+        # was hunted entirely from material already in art/raw and already
+        # cleared through art/SOURCES.tsv -- no fetch -- and rank 1 was APPLIED
+        # under R212(1), which the row itself delegated ("Claude picks, [USER]
+        # vetoes on the sheet"). Source: Item Dodoco's Bomb-Tastic Adventure,
+        # the in-game picture book "Dodoco Tales" is named for. The sheet is
+        # art/contact_sheet_eb162_dodoco_tales.html, gitignored Tier F, cited
+        # by path. The number is permanently un-re-mintable; the ceiling holds.
         180, 181, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
         # 202/203 were minted 2026-08-29 by the KLEESPARK-R1 relayed review
