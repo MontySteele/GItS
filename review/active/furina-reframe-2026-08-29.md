@@ -1521,6 +1521,24 @@ right. That is what §6.4's whole-fight gate is for.
 
 ## 9. What returns to [USER]
 
+> **COUNTERSIGNED (R224, 2026-08-30). Both rows close.** **`M52`:** C1, the §3
+> ruling text, signed; C2, the §3.1 LAW text, signed **AS PROSPECTIVE** (R213),
+> **explicitly adopting amendment 3** (the Salon overdraw hygiene sentence) and
+> **amendment 4** (the scaling invariant) — worth saying out loud, since
+> amendment 3 is otherwise hygiene and amendment 4 is what answers the `F1`
+> objection; and LAW:145's clause taken as the **relayed rewrite (b) WITH this
+> packet's own tightening** — "directly" defined rather than left to carry the
+> whole prohibition, and "cheaply repeatable" KEPT, so the rate guard does not
+> survive only in what the kit declaration bounds. That text is PROSPECTIVE
+> too: **no line moves in `LAW.md` today.**
+> **`M59`:** `F1` = (2) — taken on this packet's own ground, that a per-turn
+> energy faucet on a board is the most dangerous thing here, and NOT on the
+> scaling objection, which amendment 4 already answers; `F13` = (2); `F14` =
+> (2); **`F2`–`F12`, `F15`, `F16` = (1)**, the marked defaults. **Slot 6
+> stays**, as an instruction to Claude rather than an `M59` answer.
+> **NOTHING IMPLEMENTS BEFORE KLEE CLOSES** (R213; Furina's fold lands last,
+> R220 B).
+
 ### 9.1 The countersigns
 
 **C1 — the §3 ruling text.** One signature covers the architecture, the fold of

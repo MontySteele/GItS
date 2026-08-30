@@ -150,7 +150,26 @@ CEILINGS: dict[str, int] = {
     # EB-211/EB-212 minted 2026-08-29 by the KLEESPARK-R2 relayed review:
     # R223's battery has two soft categories -- `costs` only FAILS a positive
     # misread, so silence passes it, and `intent` is scored on self-report.
-    "EB": 212,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+    # EB-213..EB-219 minted 2026-08-30 by R224, the sitting slate landed whole
+    # -- the engineering the countersign creates, seven rows, all OPEN:
+    # 213 the prototype surface has no upgrade channel, so the substituted
+    # Kurage's Oath cannot be upgraded at a campfire; 214 print Rule 1 as the
+    # Muster keyword and re-run the memory gate on KURAGEMEM002 (M54);
+    # 215 the prototype surface's per-row `description:` channel, emitted by
+    # gen_prototype_cards.py, and the loc merge deleted (M57); 216 a per-turn
+    # wire snapshot in every future blind-run record (M56, published grades
+    # standing under R101b); 217 delete KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON
+    # and its branch (M50 pick 4); 218 the three hybrid spenders migrated to
+    # Spark-only behind SPARK_ALT_COST_ENABLED (slate item 16); 219 Prune
+    # re-authored under the countersigned LAW:145, her Spark grant becoming a
+    # declared Klee-engine response (slate item 31, which R224's own LAW text
+    # opened). The Bake-Kurage retirement and the five K1/K2/KO1/KO1a/KO2
+    # shapes were NOT minted -- they attach to the existing Burst-fold rows
+    # EB-199/EB-200, and EB-208 gained its ruled fix shape in place, its (a)
+    # half BUILT and merged as #197. M55's pile-view line folds into EB-214
+    # rather than minting. M47/M49/M50/M52/M54/M55/M56/M57/M59/M60/M64 LEFT
+    # OPEN_IDS in the same commit as their rows.
+    "EB": 219,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
                  # told the tester it had played no card.
@@ -467,6 +486,12 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,
+        # 213-219 minted 2026-08-30 by R224: the engineering the sitting
+        # slate creates, now that every item on it is ruled. See the ceiling
+        # comment above for what each one is, and for why the Bake-Kurage
+        # retirement, the five burst-fold shapes and M55's pile-view line
+        # minted nothing.
+        213, 214, 215, 216, 217, 218, 219,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -485,8 +510,22 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # that commit, so both numbers leave this manifest with them.
     # M64 minted 2026-08-29 by the KLEESPARK-R2 relayed review: the
     # author-disjoint deciding read while the local seat is in shadow.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 52,
-                    54, 55, 56, 57, 59, 60, 64}),
+    # M47, M49, M50, M52, M54, M55, M56, M57, M59, M60 and M64 LEFT OPEN_IDS
+    # on 2026-08-30 with their rows: R224 landed the sitting slate WHOLE, so
+    # every row it covered closed. M47 took option (3), build per-mode
+    # playability (EB-182) first then re-ask, and EB-182 now names its two
+    # consumers; M55 took (5) re-scoped to the pile view and folds into
+    # EB-214; M64 took the SPLIT -- Codex decides any round that can ADVANCE
+    # an arm, fresh-Opus rounds are INSTRUMENT rounds -- written into
+    # OPERATIONS' Local tester seat section. The rest:
+    # the pilot's obsolete Charge term closed, the Kurage-memory redesign's
+    # four unruled rows ruled, the Furina reframe and its sixteen picks
+    # countersigned PROSPECTIVE, the blind run's Rule-1, instrument-gap and
+    # description-channel picks taken, and the Burst retirement's five shapes
+    # ruled. No slate row survives, and the five rowless items (16, 19, 20,
+    # 28 and 31) minted no M row either -- the slate packet was their pick
+    # list and their engineering is EB-214/218/219. Ceilings never come down.
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

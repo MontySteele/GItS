@@ -329,11 +329,33 @@ and offered option (2) as the repair.
 > **A character's signature-resource generation (Sparks, Fanfare, Charge) stays
 > character-kit-scoped** and must never be cheaply repeatable from companions.
 
-**(2) The relayed rewrite, verbatim.**
+**(2) The relayed rewrite — COUNTERSIGNED (R224) AS TIGHTENED, and this is the
+prospective clause.** The tightening §3.2 asked for is now applied in the text
+itself: "directly" is replaced by "themselves", and the rate guard the original
+carried in "cheaply repeatable" is restored as an explicit bound.
 
-> **Companion cards may not directly grant signature resources. A
+> **Companion cards may not themselves grant signature resources. A
 > character-owned engine may respond to a Companion play and generate its
-> resource where explicitly declared by that character's kit.**
+> resource where that character's kit explicitly declares the trigger and
+> bounds the amount generated per Companion play.**
+
+*One word is deliberately absent: "only".* An exhaustive "only where the kit
+declares" would put Kokomi's engine-level Exhaust→Charge on the wrong side of
+the clause — it is declared in `LAW.md` (~237), not on her sheet.
+
+*The rewrite for reference, as relayed and before tightening:* "Companion cards
+may not directly grant signature resources. A character-owned engine may
+respond to a Companion play and generate its resource where explicitly declared
+by that character's kit."
+
+**OPEN under this clause, and not ruled here — Prune.**
+*Prune — Little Witch's Hunt* (`docs/mondstadt-companions.yaml:102-103`) grants
+Sparks off her own face — one on the body, a second on a successful Swirl — and
+does not Exhaust, so she is **illegal** under the clause above. Her disposition
+is a pick for [USER], carried as **item 31 of
+`review/active/sitting-2026-08-30.md`**: re-author the grant as a declared
+Klee-engine response, strike the Spark line from her face, or retire her. No
+default is marked and no register row is minted for it.
 
 *Checked 2026-08-29, not rewritten (it is GPT's text offered as an option):
 both sentences are complete clauses, and Furina's Companion-play → member
@@ -343,6 +365,14 @@ would want tightening on countersign:** "directly" is undefined, and it is
 carrying the whole prohibition; and the rewrite drops the original's
 "cheaply repeatable", so the rate guard survives only in whatever the kit
 declaration itself bounds.*
+
+**COUNTERSIGNED (R224, 2026-08-30): option (2) AS TIGHTENED above** — the
+sentence printed in bold there IS the prospective clause, as **PROSPECTIVE**
+text under R213. `LAW.md` is not edited today; this binds when the folds land.
+LAW:176 is countersigned with the Garment ruling, and R224 (item 28) signs the
+architecture paragraph and the remaining six blocks the same way — all eight
+PROSPECTIVE, none of them — they are item 28 of
+`review/active/sitting-2026-08-30.md` (§6 item 1).
 
 **What each reading does to Furina.** Her reframe makes every Companion play
 — hers or an ally's — trigger a Salon member's performance, and a performance
@@ -371,14 +401,20 @@ pool is safe today, and re-pointing it is not optional bookkeeping.
 
 *PROSPECTIVE replacement:*
 
-> - **Whether a character's signature payoff is kit or loot is a per-character
->   call, declared on her sheet.** Furina's *Let the People Rejoice* and Klee's
->   *Sparks 'n' Splash* are LOOT — draftable, priced at their rarity, paid for
->   out of the signature resource ([USER] 2026-08-29). Kokomi's *Ceremonial
->   Garment* is unruled and belongs to the next Kokomi slice. Where a payoff
->   remains kit, the v1.9 grant machinery is what it uses: never draftable,
->   granted on threshold, re-granted after a spend, carries Retain.
->   (principles §2.4; Burst retirement 2026-08-29)
+> - **Every character's signature payoff is LOOT, declared on her sheet.**
+>   Furina's *Let the People Rejoice*, Klee's *Sparks 'n' Splash* and Kokomi's
+>   *Ceremonial Garment* are all LOOT — draftable, priced at their rarity, paid
+>   for out of the signature resource ([USER] 2026-08-29; Garment [USER]
+>   2026-08-30, R224). **No payoff remains kit, so the v1.9 grant machinery is
+>   DELETED outright** rather than retained for anyone: no threshold grant, no
+>   re-grant after a spend, no kit Retain.
+>   (principles §2.4; Burst retirement 2026-08-29; R224)
+
+*The Garment's sheet consequence, PROSPECTIVE with the rest:* the shipped
+`ceremonial_garment` row drops `kit_card: true` and loses
+`requires: burst_energy_full`, whose referent goes with the meter. **Neither
+`docs/kokomi-cards.yaml` nor `LAW.md` is edited today** — the edit rides
+`EB-199`, and it is in that row's acceptance line.
 
 **LAW:248 — rotation law.** Drops the parenthetical.
 
@@ -452,8 +488,14 @@ a character with a dead bar:
 
 1. Kokomi's fold ships (next Kokomi slice) — her Garment reads Charge, but
    `burst_max` 20 still exists.
-2. Klee's fold ships (the Sparks arm's next round) — Sparks 'n' Splash becomes a
-   Spark drain behind `SPARK_ALT_COST_ENABLED`.
+2. Klee's fold ships — Sparks 'n' Splash becomes a Spark drain behind
+   `SPARK_ALT_COST_ENABLED`. **SEQUENCED BY R224 (item 20): the drain lands
+   only AFTER the §14 mixed-pool read is in**, not in the Sparks arm's next
+   round. A repeatable spend-all Attack invalidates every small Spark spender
+   on the turns it is drawn, so it may not be in the deck the mixed-pool fight
+   reads. (The hoard incentive the relayed review named exists only because
+   R220 F moved `spark` to the unbounded list; under the old bounded-at-3
+   reading it would not.)
 3. Furina's fold ships (the reframe) — Rejoice drains Fanfare.
 4. **Then and only then** the shared retirement lands: the meter, the two
    roster-wide feeds, the `requires` gate, the kit-grant machinery, the LAW
@@ -553,7 +595,13 @@ rarity across that gap copies the wrong half of the card.
    correct. Choose this if the bounded-Sparks reading is the one that holds.
    **Note:** R220 F moved `spark` to the unbounded list, so that condition no
    longer holds and this option now rests on the precedent argument alone.
-3. **Rare, once per combat — Exhaust on the body.** The finale keeps the kit
+3. **Rare, once per combat — Exhaust on the body. RULED (R224)**, with Exhaust
+   named as the concrete mechanism: no Exhaust-recovery op exists anywhere in
+   `tier0/` or the sheets, so the "sufficient only if recovery cannot trivially
+   replay it" caveat is moot today and should be re-checked if one is ever
+   added. **Flagged on the countersign:** this is a packet-added third shape,
+   not one of the two [USER] named at §1.3.
+   The finale keeps the kit
    name and the spend-ALL verb, but it fires once: `Exhaust` (or an equivalent
    once-per-combat gate) means the whole bank is cashed one time and every
    `Spend 2`/`Spend 3` card still has a job on every other turn. It is the
@@ -596,7 +644,8 @@ retires on the strength of the replacement clause itself.
 
 1. **The table as written** — *Claude's recommendation.* Two retire, Catalytic
    Converter and Blazing Delight convert to Sparks at derived rates, Durin
-   retires under LAW:145.
+   retires under LAW:145. **RULED (R224)** — Durin retires under either
+   LAW:145 reading, so nothing here waits on the clause.
 2. **The table, but Durin converts too** — accept a companion paying Sparks, and
    carve an explicit exception into the replacement clause for a Rare
    Klee-flavoured companion.
@@ -604,8 +653,9 @@ retires on the strength of the replacement clause itself.
    and Blazing Delight lose their resource rider and are re-authored as
    damage/utility cards in the Sparks round.
 
-**Timing.** This rides the unsigned **M51** pick list
-(`docs/current/QUEUE.md:76`) or the Sparks arm's next round, and everything ships
+**Timing.** `M51` is countersigned (R220 F), and R224 fixes the order: the
+drain lands after the §14 mixed-pool read, not in the Sparks arm's next round.
+Everything ships
 behind **`SPARK_ALT_COST_ENABLED`** (`review/active/klee-sparks-2026-08-29.md:453,
 459, 631`), which is `False` in `tier0/constants.py` today. Nothing here opens a
 window.
@@ -627,7 +677,10 @@ currency. Under the fold it is a window bought with the currency it reads.
 #### Options for the fold
 
 **(a) State length paid from Charge.** Spend N Charge, get N/k turns of Garment
-(floor 1). The player chooses how long the window is. The only option where both
+(floor 1). Under `KO1a`(1), the pair R224 signed, **N and the duration are both
+printed constants**, so the choice the player makes is not how long the window
+lasts but **whether and when to cast it, and how much Charge to keep back** for
+`GARMENT_CHARGE_DIVISOR`'s potency read. The only option where both
 numbers the card already has (`CEREMONIAL_GARMENT_TURNS` 3,
 `GARMENT_CHARGE_DIVISOR` 2) stay meaningful.
 
@@ -684,9 +737,13 @@ Three consequences, and they are not all in the same direction:
 
 #### PICK KO1 — the Kokomi fold shape
 
-1. **(a) State length paid from Charge** — *Claude's recommendation.* It keeps
+1. **(a) State length paid from Charge** — *Claude's recommendation.*
+   **RULED (R224).** It keeps
    R74's ruling intact (the card is still a state, not a nuke), it makes the
-   player's banked Charge buy something the player chooses, and it is the option
+   player's banked Charge buy a window on terms the player decides — under
+   `KO1a`(1) that is **whether and when to spend the printed N, and how much
+   Charge to keep back for potency**, not the window's length — and it is the
+   option
    where "more useful" (§1.1) is delivered by *agency* rather than by numbers.
    Both existing constants survive with meaning.
 2. **(b) Pulse count paid from Charge** — folds Kurage PICK 3 for free and gives
@@ -700,7 +757,10 @@ Three consequences, and they are not all in the same direction:
 
 #### PICK KO2 — the Tamakushi Casket link (Kurage PICK 3, re-homed)
 
-1. **Fold it into the answer to KO1** — *Claude's recommendation.* If KO1
+1. **Fold it into the answer to KO1** — *Claude's recommendation.*
+   **RULED (R224), and `KO1` resolved to (a)** — so this lands on the
+   **immediate extra pulse**, and Kurage PICK 3 is answered as its option 2.
+   If KO1
    resolves to (b), the link is live and PICK 3 answers itself as its option 2.
    Under (a), (c) or (d), re-key the refresh to an immediate extra pulse so her
    canon E-into-Q loop still visibly fires.
@@ -717,7 +777,7 @@ Three consequences, and they are not all in the same direction:
 |---|---|---|
 | player field | `burst_energy`, `burst_max` on the player state | removed after step 4 of §3.3 |
 | character sheets | `furina.yaml:25`, `klee.yaml:11`, `kokomi.yaml:35` | `burst_max` rows deleted |
-| kit grant | `combat.py:116` `grant_charged_kit` | deleted, or retained for whichever payoff stays kit (Kokomi's, pending KO1) |
+| kit grant | `combat.py:116` `grant_charged_kit` | deleted (R224: every payoff is loot, Kokomi's included) |
 | playability gate | `combat.py:213` `requires == "burst_energy_full"` | the whole `requires` value retires; `draw_pile_empty` is unaffected |
 | the drain | `combat.py:471` | deleted with the skill-tag grant beside it |
 | card op | `effects.py:1677` `_op_burst_energy` | retires; any surviving card rider re-points to `gain_spark` / Fanfare / `gain_charge` |
@@ -817,12 +877,36 @@ combined re-baseline.
 
 Three things, and one conditional sub-pick under the third.
 
+> **RULED (R224, 2026-08-30).** `K1` = **(3)** Rare, once per combat, the gate
+> being **Exhaust on the body**; `K2` = **(1)**, the feed table as written;
+> `KO1` = **(1) = (a)**, state length paid from Charge; `KO1a` = **(1)**,
+> fixed N printed on the card; `KO2` = **(1)**, folded into `KO1` — and under
+> (a) that means **re-key the Casket refresh to an immediate extra pulse**.
+> The `M60` QUEUE row CLOSES on those five picks. **Ceremonial Garment's
+> ACQUISITION is separately RULED (R224): LOOT** — draftable Rare, `kit_card:
+> true` dropped and `requires: burst_energy_full` gone, and the v1.9 kit-grant
+> machinery (`combat.py` `grant_charged_kit`, the *kit, not loot* rule) DELETED
+> outright rather than retained for her. PROSPECTIVE like the rest of this
+> packet: `docs/kokomi-cards.yaml` and `LAW.md` are untouched today and the
+> sheet edit rides `EB-199`. **Item 1 below still does NOT close.**
+
 1. **The concept countersign and the LAW text** — §3.1's architecture paragraph
    and the eight replacement blocks in §3.2. This is a LAW amendment, which the
    delegation ladder keeps with [USER] regardless of anything else here. **One
    of those blocks now offers two options rather than one:** LAW:145's
    replacement, where option (2) is the relayed rewrite that keeps Furina's
    Companion-triggered Fanfare loop legal (§3.2).
+   **PARTLY COUNTERSIGNED (R224) — LAW:145 ONLY.** Its option **(2), the
+   relayed rewrite, is countersigned WITH the tightening this section itself
+   asks for**: "directly" defined rather than left carrying the whole
+   prohibition, and "cheaply repeatable" KEPT. It is **PROSPECTIVE text**
+   (R213) — no `LAW.md` line moves on the day.
+   **FULLY COUNTERSIGNED (R224, item 28 = option (1)):** §3.1's architecture
+   paragraph and **all eight** §3.2 replacement blocks — LAW:64, :72, :145,
+   :176, :248, :266, :481, :508 — are countersigned **AS PROSPECTIVE**, the
+   same standing as reframe §3.1, implemented last. LAW:145 is the tightened
+   sentence above; LAW:176 names Ceremonial Garment loot. **Nothing in
+   `LAW.md` moves today**; these bind when the folds land.
 2. **PICK K1** — Sparks 'n' Splash at Rare with a stronger body (recommended),
    Uncommon matching Stardust, Rare-but-once-per-combat, or Rare with a capped
    spend — four options at §4.2. **Plus PICK K2**, the five feed dispositions.
@@ -842,7 +926,10 @@ duration is a point off potency. That duration-versus-potency trade is the
 best thing in option (a) and it only exists if the player can see both numbers
 at the moment of the choice. Three drafted rule texts, whole; pick one.
 
-1. **Fixed N, printed on the card.** *"Spend 4 Charge. Gain Ceremonial Garment
+1. **Fixed N, printed on the card. RULED (R224)**, on the **zero-new-UI and
+   co-op-no-prompt** grounds rather than on the potency argument — that
+   argument rules out (2), not (3), and (3) is the modal this option beats.
+   *"Spend 4 Charge. Gain Ceremonial Garment
    (2 turns)."* N and the duration are both printed constants; a second,
    higher-rarity carrier prints a bigger pair. **Minimum:** the card is
    unplayable below N, greyed like any unaffordable cost — the same block the

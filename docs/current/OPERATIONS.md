@@ -739,6 +739,15 @@ whole. **Grader work, whole-fight blind play and the doctrine gate stay with
 the Codex seat**, and an ADVANCE here is not validation, not balance evidence
 and not ship approval.
 
+**Who holds the DECIDING chair (R224, `M64`) — a SPLIT, by what the round can
+do.** A round that can **ADVANCE an arm** gets the **Codex seat deciding every
+board** — roughly seven Codex calls a round against the standing three, and
+that cost is accepted because an ADVANCE resting on a same-family read is not
+author-disjoint (R217 C). A round that is an **INSTRUMENT round** — a repair,
+a bench, anything on which **no ADVANCE rests** — stays on the **fresh-Opus**
+deciding form, which R222 B seats. The round's own registration says which it
+is, before it runs.
+
 ```
 export GITS_LOCAL_MODEL_URL=http://localhost:8010/v1
 python -m understudy.local_tester read <turn-id> [--position N]

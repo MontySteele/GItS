@@ -2252,6 +2252,12 @@ one Shrinker Beetle on Klee (§13.4 item 1), and the arm has already been ported
 across a game version once (R218). A ledger keyed on the seed alone records the
 same thing that misled `t04`.
 
+**ANSWERED (R224): (c) + (a), SEQUENCED.** (a) ships FIRST — it costs nothing,
+it is hygiene under the ladder, and it alone closes `EB-208`'s acceptance line;
+(c) follows, keyed by character, build version and encounter context, when a
+Klee three-body seed hunt happens, which is game time either way. `EB-208`'s
+`BACKLOG` row carries the shape.
+
 **2. `P4` is UNREACHED because its board's form was refused, not because the
 board was wrong (`t03`). What runs next for it?** The Bang Bang! arithmetic is
 answered in fact by `t01`'s replay — bank 3 → Fwoosh! → Bang Bang! at exactly
@@ -2273,6 +2279,9 @@ threshold change and therefore a NEW registration, never an edit to this one
 arithmetic in fact, `P4` stays UNREACHED as published, and the question closes
 without spending game time re-staging a board whose answer is already on the
 record out of slot.
+
+**ANSWERED (R224): (a).** R101b-clean — the published record is not rewritten,
+`P4` stays UNREACHED as published, and §12.8 item 1 closes out of slot.
 
 **3. The pair read returned the instrument (3 ADVANCE / 2 RETURN, overall
 RETURN). What runs next for the arm?**
@@ -2299,6 +2308,11 @@ more boards for it.*
 rests on `P1` reading as a spend-versus-hold result and §13.1's erratum says it
 does not. Its position is **(e)**, above, added verbatim in substance at its
 request.
+
+**ANSWERED (R224): (e).** The only option consistent with §13.1's erratum —
+(c) is explicitly ruled out on it. `P2` is the round's answer, `P1` records
+only that alternative sinks are legible, no top-up round is staged, and the
+two open questions about the sink set are resolved before the arm advances.
 
 **And one condition has come due — a pick for [USER], not a ruling here.** R222
 took §11.7 item 1 option **(d)**, *leave the set intact and let whole-fight play
@@ -2918,6 +2932,21 @@ It is not a candidate for *this* re-authoring.
 
 ### 14.3 Recommendation — a numbered pick, and nothing is marked default
 
+> **TAKEN (R224): option (5), migrate before you duplicate.** No new prototype
+> row is created; the first act is the ruling on the three existing non-damage
+> spenders, and the next whole fight grants the mixed pool.
+> **Its migration BRANCH is RULED too (R224, slate item 16): SPARK-ONLY,
+> FLAG-GATED.** `powder_charge`, `hold_the_line` and `smoke_and_sparks` go to
+> 0 Energy with the price paid wholly in Sparks, as a **dev-only substitution**
+> — `loader._pool_substitutions`' Klee half under `SPARK_ALT_COST_ENABLED` in
+> sim, and `-p:PrototypeCards=true` in C#. Energy-gating would make a null read
+> uninterpretable, and the flag removes the one cost (5) records against
+> itself: that a migration is a shipped-pool edit and therefore heavier and
+> less reversible than a dev-only prototype row. **With the flag off the pool
+> is byte-identical to shipped.** Engineering: `EB-218`.
+> Under (5), Minefield and Powder Trail are no-ops — Minefield lives only
+> inside option (2), and Powder Trail appears in no numbered option.
+
 This is a design call between genuinely different directions, so it goes back
 whole. Options (1) through (3) keep the set at eight and replace Attacks only;
 (4) changes nothing; (5) — added 2026-08-29 on the relayed review — creates no
@@ -3076,9 +3105,14 @@ here rather than returned; the pick at §14.3 is untouched by all five.
    the future board state the bank is being preserved for**. A player who
    simply forgot the card is in hand produces the same transcript as a player
    who held, and the whole question is which of those §14.1 has created.
-3. **The deck includes the existing utility spenders.** The granted deck carries
-   `hold_the_line`, `smoke_and_sparks` and `powder_charge` — in whichever form
-   option (5)'s migration ruling gives them — alongside the prototype ladder.
+3. **The deck includes the existing utility spenders, and Rummage.** The
+   granted deck carries `hold_the_line`, `smoke_and_sparks` and
+   `powder_charge` — **Spark-only under `SPARK_ALT_COST_ENABLED`**, the form
+   R224 gave them — alongside the prototype ladder, **and
+   `proto_spark_priced_draw` (Rummage), FOLDED IN by R224 (slate item 19)**
+   rather than staged as a separate whole fight: it is the same hybrid-price
+   shape as the three, so a separate fight would ask this fight's question
+   twice.
    §12.2 granted none of them, so the fight that produced the null never
    contained a non-damage destination at all, and repeating that grant would
    repeat the artefact rather than test the fix.

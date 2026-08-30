@@ -1180,19 +1180,32 @@ longer has one threshold.
 - **PICK D (the empty queue) — STANDS at "hold"**, and gains a sibling: the
   *blocked* queue, which is v3's own clause and also pays nothing.
 
-**Still open, and [USER]'s**: nothing in the cost basis (v3 collapsed it), but
-these three —
+**RULED (R224), all three.** Nothing in the cost basis was outstanding (v3
+collapsed it), and these three went to [USER] on the sitting slate — items 10
+and 11, and item 5 via `M50` pick 4 — and were signed at the Claude column:
 
 1. **`ephemeral` is recorded and inert** (11.3). Should a copy whose original
    printed Exhaust behave differently from one that did not? Every option that
    distinguishes them either pays Charge (forbidden) or files the copy in a pile
    (which "remove from combat" forbids), so the build chose uniform removal.
+   **RULED (R224): keep uniform removal** — `ephemeral` stays recorded and
+   behaviour-free. It is the packet's own lean and the reversible branch;
+   authoring a distinguishing rule would need a new answer to the Charge
+   clause first.
 2. **`KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON`** — does "Stir" work with no
    jellyfish on the field? Built `True` (one rule for what may act on the
    memory); `False` is one edit and makes a card printing it never dead.
+   **RULED (R224): option (2) at §12.4 PICK 5 — DELETE the constant and the
+   branch.** Under the base kit there is never no jellyfish, so both branches
+   read the same; the stated cost is that the v3 fallback stops being one flip
+   away, and that fallback is dead once the base kit is the design.
+   Engineering: `EB-217`.
 3. **The Skill pulse's 5 and the Power pulse's derived 1** are now ruled, but
    the *pulse as a whole* is still keyed to a type branch that no sim arm has
    moved. It is the first thing a sweep should touch after the price.
+   **RULED (R224): leave the branch as built** and let the next sweep touch it
+   after the price, which is the packet's own sentence. Collapsing it now would
+   be a design change with no measurement behind it.
 
 ### 11.7 LAW and charter deltas v3 adds or changes against §4
 
@@ -1356,6 +1369,15 @@ muddying, plus it makes the Muster a rider on an attack).
 
 ### 12.4 The picks — numbered, and all five are [USER]'s
 
+> **RULED (R224, 2026-08-30)** on the sitting slate, as `M50`, which closes:
+> **PICK 1 = (2)** retire the row, *under the re-authoring*; **PICK 2 = (2)**
+> retire the delta with it; **PICK 3 = (2) by way of `M60` `KO2`(1) under
+> `KO1`(a)** — re-key the Casket refresh to an immediate extra pulse;
+> **PICK 4** stands as [USER] ruled it (3/5 placeholder), with `EB-213` filed
+> for the missing upgrade channel; **PICK 5 = (2)** delete the constant
+> (`EB-217`). The two retirements attach to the Burst-fold rows `EB-199` /
+> `EB-200` rather than minting their own.
+
 Five rows still print or ride "summon the Bake-Kurage" and now mean something
 different. Each one was built the **least invasive** way — nothing was
 re-authored, nothing was deleted — and each is a real decision that belongs to
@@ -1369,7 +1391,9 @@ run at all.**
 
 1. **Leave it** (what is built): the row survives on paper, unreachable.
 2. **Retire the row.** Honest — the card's job is gone. Costs her a Basic and
-   a name.
+   a name. **RULED (R224)**, with one word added: retire **under the
+   re-authoring**. With `C.KURAGE_MEMORY` off the row is still the shipped
+   Basic, so this is not a deletion today; it lands with the fold (`EB-199`).
 3. **Re-key it to "the jellyfish acts now"**: playing it fires an immediate
    extra pulse. Keeps the card and the fantasy, but it is a new card in an old
    row's clothes and needs authoring.
@@ -1382,7 +1406,9 @@ run at all.**
 a base one.
 
 1. **Leave it inert** (built).
-2. **Retire the delta** with the row, under pick 1.
+2. **Retire the delta** with the row, under pick 1. **RULED (R224)** — the
+   only answer that leaves no dead upgrade row behind pick 1, and the delta is
+   already inert.
 3. **Give the upgrade a memory-side job** instead of a duration one.
 
 **PICK 3 — the Tamakushi Casket link (casting her Burst refreshes the
@@ -1393,7 +1419,11 @@ base kit it is silent.
 
 1. **Leave it silent** (built).
 2. **Re-key the refresh to an immediate extra pulse**, so the Burst still
-   visibly wakes the jellyfish.
+   visibly wakes the jellyfish. **RULED (R224), by way of `M60` `KO2`.** The
+   pick was folded into `KO1`, and `KO1` resolved to **(a)** — under (a) the
+   fold's own text says re-key the refresh to an immediate extra pulse, so
+   this option is what the ruling lands on. It was recorded as CONDITIONAL
+   until `KO1` was answered, never as a flat "immediate pulse".
 3. **Retire the link** and say so on the relic's face.
 
 **PICK 4 — Kurage's Oath (the `kurage_ward` Block). RULED, and BUILT.**
@@ -1457,7 +1487,9 @@ screen and the tier 0.5 drafter all read and nothing bypasses. With the flag
 off it returns `{}` and the pool is byte-identical, test-pinned. The one thing
 this costs: the prototype has no upgrade row, so the substituted Oath cannot be
 upgraded at a campfire — which is honest while the upgraded 5 is still owed to
-a sheet, and it goes away when the arm is re-authored.
+a sheet, and it goes away when the arm is re-authored. **Filed by R224 as
+`EB-213`**, so the gap is a row rather than a paragraph: any rerun that wants
+to see the upgraded 5 needs it fixed first.
 
 *Still open, and small:* whether 3/5 wants adjusting, which is what [USER]
 reserved.
@@ -1469,7 +1501,9 @@ answers read the same.
 
 1. **Leave it retired-under-flag** (built).
 2. **Delete the constant** and the branch with it, accepting that the v3 arm
-   is then no longer one flip away.
+   is then no longer one flip away. **RULED (R224)** — the stated cost is
+   accepted, because the v3 fallback is dead once the base kit is the design.
+   Engineering: `EB-217`.
 
 *(Nereid's Ascension is named as a "refresh" row in the brief; on the sheet it
 carries no summon leg at all — its only Kurage-adjacent term is a Charge read,
@@ -2069,6 +2103,13 @@ My read, offered as a read and not a decision: (2) removes a moving part on the
 boot path, and the defect this sitting spent itself on came from that part
 existing. But it widens a generator contract, which is [USER]'s to widen.
 
+**RULED (R224): option (2)** — take the `Localization` channel, add the
+optional `description:`, delete the merge. The contract is widened. The
+recorded reason is DUPLICATION, not risk: the boot-path danger is not live any
+more (`EB-194` is closed and the merge already moved to pool-build time behind
+two locks seen to FAIL first), so the surviving argument is that two channels
+describe one card and (2) leaves one fewer moving part. Engineering: `EB-215`.
+
 #### State left on disk
 
 `mods\klee` carries **`0.2.1441+proto`** — installed, validated, and now
@@ -2248,6 +2289,16 @@ kit as built, and P4's half (b) says the Charge sources are not discoverable
 from the page. D4 stands better than D2, which is the split the slate was built
 to tell apart, and it read the way the slate said it would read if D2 failed.
 
+**`P3` is RULED (R224) as `M54`: option (1).** Rule 1 prints as the **Muster
+KEYWORD** — hover text is that keyword's detail, and "tooltip" is not a third
+surface — and the gate is then re-run on `KURAGEMEM002`, which is unspent. The
+diagnosed failure is **wording, not dose**, so option (2) (change the starter
+Muster's dose) is not taken and the arm is not re-scoped to Rule 2 only.
+Engineering: `EB-214`. Nothing above is re-graded (R101b).
+**`P4`'s half (b) is NOT closed here** — where the Charge-source line goes is
+`M55`, held as item 7 of `review/active/sitting-2026-08-30.md`, because the
+persistent-display surface option (5) named was retired by `M61` option 3.
+
 #### An instrument finding this run made, recorded and NOT acted on
 
 Two of the six thresholds name an objective side the committed record cannot
@@ -2260,6 +2311,12 @@ slots, and both are SPLIT partly for that reason.
 **Nothing was re-graded and nothing was added to the record to fix it.** A
 replay that contradicts a form is the finding, not a correction (§13.5 item 6,
 R101b). The gap is written down here and returned as a numbered pick below.
+
+**RULED (R224) as `M56`: option (1).** Carry a per-turn wire snapshot in future
+records; **these grades stand** and nothing is re-registered or re-graded.
+Option (2)'s re-registration is explicitly NOT taken, because `M54`'s rerun on
+`KURAGEMEM002` (`EB-214`) carries the snapshot anyway — the objective side
+arrives free. Engineering: `EB-216`.
 
 One thing WAS fixed, before the run and disclosed here rather than after it:
 the blind prompt requires a per-turn sentence and the reply schema enforces one,
