@@ -863,3 +863,83 @@
    cost: 2, type: power, rarity: rare, solve: [scaling], archetypes: [spark], role: payoff,
    effects: [{op: apply_power, power: spark_attack_cost, amount: 1, target: self,
               note: "Attacks that do not already cost Sparks cost 3 Sparks and 0 Energy"}]}
+
+# =============================================================================
+# KLEE SPARKS -- THE THREE HYBRID SPENDERS MIGRATE (R224 slate item 16;
+# BACKLOG EB-218). Three rows, and no new design.
+#
+# WHAT THIS IS. The shipped Klee pool already holds three Spark spenders whose
+# payoff is not a plain Attack -- `powder_charge`, `hold_the_line` and
+# `smoke_and_sparks`, all ratified in W3 (R211), all three HYBRIDS: 1 Energy
+# AND a top-level `spend_spark 2`. The packet's sec.14.2 preface records them
+# and sec.14.3 option (5) -- TAKEN by R224 -- rules what they become in the
+# priced-sink world: SPARK-ONLY. 0 Energy, the price paid wholly in Sparks,
+# which is the economy the eight rows above are testing.
+#
+# NOTHING IS REPRICED. Each row keeps its shipped Spark number (2) and its
+# shipped body byte for byte; the ONLY delta is that the 1 Energy is gone. A
+# migration that also moved a number would confound the question sec.14.4
+# asks, which is whether a bank with a NON-DAMAGE destination produces a hold.
+#
+# WHY THEY ARE PROTOTYPE ROWS AND NOT A SHEET EDIT. R224: "a dev-only
+# substitution, not a shipped-pool edit". `loader._pool_substitutions`' Klee
+# half under `C.SPARK_ALT_COST_ENABLED` (`C.SPARK_ALT_POOL_SUBS`) swaps each
+# shipped row for its Spark-only twin at the SAME rarity -- three Uncommons in,
+# three Uncommons out, so the offer odds do not move -- and with the flag OFF
+# the pool is byte-identical to shipped. That is the one cost sec.14.3 records
+# option (5) against itself, removed: no shipped face moves, and the act is as
+# reversible as deleting three rows.
+#
+# ENERGY-GATING IS THE THING BEING REMOVED, and sec.14.3 says why: a hybrid
+# cannot be reached by the bank alone, so a null read on a hybrid measures the
+# Energy gate rather than the sink. Under this migration the bank alone
+# reaches all three.
+#
+# NAMES ARE PROVISIONAL AND MINE (R179). A proto row may not reuse its twin's
+# printed name, so each takes a working title in the sheet's own register.
+# They are deliberately ordinary card names rather than "(Spark)" variants:
+# the QA grader reads printed titles on a design-blind packet, and a title
+# that names the experiment tells the grader what to answer. [USER] settles
+# the names; `lint_unique_names` is the floor, not the ruling.
+#
+# I AUTHORED NOTHING BUT THE NAMES AND THE ENERGY DELETION, and both are
+# R224's instruction, so every row is `authored_by: [claude]` and R213's first
+# guard applies to it: I may not grade these rows.
+# =============================================================================
+
+# Shipped twin: `powder_charge` / "Powder Charge" (docs/klee-cards.yaml:248 --
+# 1 Energy, Spend 2 Sparks, Uncommon Skill: detonate the target's Bombs for
+# +4 each). Cost 1 -> 0; the Spark price, the detonation and the +4 are
+# unmoved. Its shipped caveats ride along unchanged: dead on an unbombed
+# target, and the bank is spent either way.
+- {id: proto_powder_charge_spark, name: "Set It Off", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon, solve: [utility], archetypes: [demolition, spark], role: glue,
+   effects: [{op: spend_spark, amount: 2},
+             {op: detonate, target: enemy, bonus: 4}]}
+
+# Shipped twin: `hold_the_line` / "Hold the Line" (docs/klee-cards.yaml:303 --
+# 1 Energy, Spend 2 Sparks, Uncommon Skill: Block 5, and 6 more if the enemy
+# intends to attack). Cost 1 -> 0; both Block halves and the conditional are
+# unmoved. This is the row sec.14.2's candidate 3 (Behind the Barrel) turned
+# out to be a duplicate of, which is the finding that produced option (5) --
+# so migrating it is what makes minting that candidate unnecessary.
+- {id: proto_hold_the_line_spark, name: "Dig In", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon, solve: [block], archetypes: [spark], role: glue,
+   effects: [{op: spend_spark, amount: 2},
+             {op: block, amount: 5},
+             {op: conditional, if: enemy_intends_attack, then: [{op: block, amount: 6}]}]}
+
+# Shipped twin: `smoke_and_sparks` / "Smoke and Sparks"
+# (docs/klee-cards.yaml:320 -- 1 Energy, Spend 2 Sparks, Uncommon Skill: apply
+# 3 Vulnerable). Cost 1 -> 0; the three stacks are unmoved. Note the shipped
+# row's own exchange-rate comment prices the Sparks against `surprise_visit`
+# (1 Energy, 2 Vulnerable) -- with the Energy gone that comparison is no
+# longer the one the card makes, and re-reading it is acceptance work, not
+# this row's.
+- {id: proto_smoke_and_sparks_spark, name: "Powder Smoke", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon, solve: [utility], archetypes: [spark, generic], role: glue,
+   effects: [{op: spend_spark, amount: 2},
+             {op: apply_power, power: vulnerable, amount: 3, target: enemy}]}

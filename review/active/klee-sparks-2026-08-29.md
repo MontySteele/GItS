@@ -2944,6 +2944,9 @@ It is not a candidate for *this* re-authoring.
 > itself: that a migration is a shipped-pool edit and therefore heavier and
 > less reversible than a dev-only prototype row. **With the flag off the pool
 > is byte-identical to shipped.** Engineering: `EB-218`.
+> **BUILT on branch `eb218-hybrid-migration`** (three rows on
+> `docs/prototype-surface.yaml`, three entries in `C.SPARK_ALT_POOL_SUBS`,
+> both engines, no reprice).
 > Under (5), Minefield and Powder Trail are no-ops — Minefield lives only
 > inside option (2), and Powder Trail appears in no numbered option.
 

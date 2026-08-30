@@ -402,6 +402,15 @@ preconditions in `understudy/scenarios/eb147-prototype-grant.yaml`. A row the
 emitter cannot express STOPS the run by name: a prototype that cannot be
 printed cannot be tried.
 
+**A dev build also MIGRATES three shipped rows (`EB-218`, R224).** Under the
+same flag pair — `C.SPARK_ALT_COST_ENABLED` in sim, `-p:PrototypeCards=true`
+in C# — Klee's three hybrid Spark spenders (`powder_charge`, `hold_the_line`,
+`smoke_and_sparks`) are swapped out of the offerable pool for Spark-only twins:
+0 Energy, the same printed Spend 2, same rarity, same body. It rides
+`C.SPARK_ALT_POOL_SUBS` like the other substitutions, so a dev build shows the
+twins and a release build cannot reach them; flag off, the pool is
+byte-identical to shipped (`tier0/tests/test_eb218_hybrid_migration.py`).
+
 **THE DELETION RULE (R213 B).** *Once a slice is accepted or rejected, its rows
 LEAVE the surface.* Accepted rows are re-authored onto the owning character's
 real sheet — ruled numbers, stamp bump, art — and deleted here in the same
