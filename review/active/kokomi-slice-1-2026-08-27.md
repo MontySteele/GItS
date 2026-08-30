@@ -787,3 +787,200 @@ Nothing here rates a card, and nothing here is ship approval: a seat's SURVIVES
 and a seat's ADVANCE are both "not yet falsified" (R217 G). What a round 5 would
 carry, if one runs, is one turn: `EB-184` fixed, and group C's `either` arm
 re-staged on the same board so the Block-mode line finally replays.
+
+## Whole-fight blind play (`KOKOMI-SLICE1-WF`) — registration, DRAFTED before any run
+
+**DRAFTED 2026-08-30. Not run, not countersigned.** Under R212(2) the slate is
+Claude's to draft from written design intent and commit DRAFTED before any seed
+is spent; [USER] countersigns it in batch, or vetoes within five days. Nothing
+below is staged: **no board is staged, no seed is pinned, no Codex call is
+spent, and no fight has been played.** `KURAGEMEM002` and `KURAGEMEM003` stay
+UNSPENT — they are the memory kit's seeds, not this slate's, and this slate
+pins none.
+
+**Why it exists.** Six of slice 1's seven arms read ADVANCE across four rounds,
+and the decision inventory of 2026-08-30 found that those six results feed
+**nothing registered**. They land only on the accept-to-sheet signoff — the
+prototype surface's own deletion rule, *"once a slice is ACCEPTED or REJECTED,
+its rows LEAVE this surface"* (`docs/prototype-surface.yaml` header, R213 B),
+under which an accepted row is re-authored onto a real sheet with its numbers
+ruled, its stamp bumped and its art commissioned. That is a one-way door with
+no measurement in front of it. This registration puts one in front of it, and
+it is the same automatic gate slice 1's own *what the outcome means next*
+paragraphs assume without ever registering: an ADVANCE is *"not yet
+falsified"* (R217 G), and what has not been asked yet is whether the shape
+survives a whole fight.
+
+### What a whole fight can ask that a staged turn structurally cannot
+
+Every one of slice 1's four rounds read a SINGLE staged turn per arm, and three
+things about these arms are invisible on one:
+
+1. **Cadence.** Whether the priced or exclusive shape produces its decision
+   more than once in a fight, or once and then never again as the deck opens
+   up. Arm 1's whole-turn count is a *sequencing* question by construction —
+   it separates from the shipped count only on turns that stack rotations, and
+   a staged turn holds exactly the rotations it was dealt.
+2. **The arm's play share.** A staged board puts the card in a four-card hand;
+   a fight decides how often the row is reached and played at all against a
+   whole deck. Round 1's *"neither grader played or seriously weighed the
+   card"* was a board finding; the same sentence about a fight would be an
+   arm finding.
+3. **The Muster/memory interaction**, which did not exist when the boards were
+   set. Arms 2 and 3 are Companion rows, and under `C.KURAGE_MEMORY` a Muster
+   creates a memory and a Mustered Companion costs one less — so the kit hands
+   arm 3's cost-line price a discount the staged boards never applied to it,
+   and hands arm 2's exclusive modes a 0-energy replay of whichever mode was
+   taken. Neither is reachable on one turn.
+
+### The six arms, and what is NOT in this slate
+
+| # | arm | row | printed shape | the ADVANCE read this slate drafts from |
+|---|---|---|---|---|
+| A | counting basis | `proto_pearl_barrage_turn` — **Tidal Barrage** (1, Attack) | base 5, +3 per card Exhausted **this turn** | r2: *"changed the turn from sacrifice-cost selection to Exhaust sequencing, with 5 Block genuinely surrendered"*; r3: *"whole-turn counting moved the scaling attack into the defended line, while Coral Guard explicitly cost nine damage."* |
+| B-e | exclusive modes | `proto_shinobu_sanctifying_ring_either` — **Shinobu — Warding Ring** (2, Skill) | 3 to ALL **or** 4 Block | r3: *"Played in damage mode; unlike shipped, killing both Leaf Slimes required giving up four Block and taking the attack."* |
+| B-p | cost-line price | `proto_shinobu_sanctifying_ring_priced` — **Shinobu — Sanctifying Circle** (3, Skill) | 3 to ALL **and** 4 Block, at 3 energy | r4: *"The repaired board isolated the intended pricing question and showed a concrete change from bundled defence-plus-follow-up to an all-in defensive turn."* |
+| C-p | cost-line price | `proto_thoma_crimson_ooyoroi_priced` — **Thoma — Crimson Guard** (3, Attack) | 8 **and** 3 Block, at 3 energy | r3: *"Seriously weighed; pricing Block into the cost line created an explicit 13-damage defensive price."* |
+| D-e | exclusive modes | `proto_itto_superlative_superstrength_either` — **Itto — Oni Rush** (2, Attack) | 14 **or** 6 Block | r3: *"Played in damage mode; the prototype forced a clean choice between 14 damage and six Block."* |
+| D-p | cost-line price | `proto_itto_superlative_superstrength_priced` — **Itto — Superlative Guard** (3, Attack) | 14 **and** 6 Block, at 3 energy | r3: *"Seriously weighed; paying for six Block cost seven damage and the entire three-energy turn."* |
+
+**NOT in this slate: `proto_thoma_crimson_ooyoroi_either` — Thoma — Blazing
+Ooyoroi.** It is slice 1's one open RETURN, returned in round 4 on `EB-184`
+(*"the game incorrectly demands a target for the targetless Block mode"*) — an
+implementation defect with a named fix, not a design finding. It re-enters at
+round 5, not here.
+
+**None of the six is Charge-PRICED, so none falls under `M67`'s consequence.**
+Checked row by row against `docs/prototype-surface.yaml`: the only `spend_charge`
+rows on the surface are slice 2's four. Arm A COUNTS Exhausts — which is what
+accrues Charge — but prints no Charge price and reads no bank; arms 2 and 3 are
+priced in outcome and in energy. The signed Charge clause (`425912a`) touches
+none of them. `M67` still sequences this slate, for the reason under
+*Sequencing* below, but it deletes none of it.
+
+### The unit, the fights, and the budget
+
+**The unit is ONE COMPLETE FIGHT**, as it is for `KLEESPARK-W1` (§12.1 of
+`review/active/klee-sparks-2026-08-29.md`) — the first Monster room of a live
+Act-1 Kokomi run, played end to end by the Codex seat through
+`understudy.blindplay session`, with the arm granted into the starting deck by
+`understudy.embark --arm`. The screens before the first Monster room are driven
+by the operator with `blindplay act`, at zero Codex cost; the seat sees its
+first page at the combat screen.
+
+**Codex budget: 30 calls per fight, enforced in the driver and not trusted to
+the fight's length** — `--max-actions 24`, `--max-refusals 2`, so the worst case
+is 24 command calls + 2 refusals + 1 fight record + 1 run record = **28**. Three
+fights is a **90-call ceiling**, which is why they are three sittings and not
+one; pace them against the seat's own rate-limit window (`EB-227`).
+
+Three fights, because three groups of arms ask three different questions and a
+fight that granted all six rows at once could attribute nothing:
+
+| fight | rows granted | the arms it asks about |
+|---|---|---|
+| **F1** | Tidal Barrage, one copy | A |
+| **F2** | Shinobu — Sanctifying Circle, Thoma — Crimson Guard, Itto — Superlative Guard, one copy each | B-p, C-p, D-p |
+| **F3** | Shinobu — Warding Ring, Itto — Oni Rush, one copy each | B-e, D-e |
+
+The three priced rows ride ONE fight together deliberately: they are the same
+question at three prices, and a hand that can hold two of them at once is the
+only way to see whether the 3-energy price competes with itself. The two
+`either` rows ride one fight for the mirror reason. Arm A rides alone because
+its question is about the turn's own Exhaust sequence, and any second prototype
+in the deck adds Exhaust fodder the shipped deck does not have.
+
+### The slate — eight slots, mechanical falsifiers
+
+Every falsifier is computed from artefacts the run writes by itself: the
+per-turn `thinking` sentences in `turn-*/reply.json`, the rendered observations
+in `turn-*/prompt.md`, and the command rows of `transcript.jsonl`. **No grade
+reads a judgement, and no falsifier carries a card number out of this packet** —
+R213 B forbids quoting a number measured on a prototype row, so every threshold
+below counts PLAYS, TURNS or SENTENCES.
+
+#### Arm A — Tidal Barrage (fight F1)
+
+| # | slot | prediction | falsifier | the decision the outcome changes |
+|---|---|---|---|---|
+| `WF1` | Does whole-turn counting produce **sequencing** across a fight, and not only on a board set to reward it? | **YES, on ≥ 2 combat turns.** | Count combat turns whose `thinking` names playing an Exhaust source BEFORE Tidal Barrage, or names the running Exhaust count as a reason to order the turn. **≥ 2 = PREDICTED, 1 = SPLIT, 0 = MISS.** | PREDICTED: arm A is an ADVANCE-to-sheet candidate and its re-author is unblocked. SPLIT: the shape is real but rare, and a sheet row needs a second Exhaust source in the starter before it is worth a slot — a design item, not a delete. MISS: the two counting bases are indistinguishable in play, R215 C's shipped basis STANDS, and the row is deleted under the surface's deletion rule. |
+| `WF2` | Does a **stacked-rotation turn** ever actually happen in a fight? | **YES, ≥ 1 resolution at an Exhaust count ≥ 2.** | Count successful `play` commands naming Tidal Barrage whose observation shows a damage figure above the base rung — i.e. the turn held ≥ 2 Exhausts at resolution, the card's own included. **≥ 1 = PREDICTED, 0 = MISS.** No SPLIT: it is a yes/no. | MISS makes `WF1` unreadable rather than negative — the two counting bases land on the same number whenever a turn holds exactly one rotation (§2, arm 1), so a fight with no stacked turn asked the question and had no board to ask it on. That is an UNREACHED slot under R221 B's rule, and it escalates to *rerun F1 on a deck carrying a second rotation source*, not to a verdict. |
+
+#### Arms B-p, C-p, D-p — the cost-line price (fight F2)
+
+| # | slot | prediction | falsifier | the decision the outcome changes |
+|---|---|---|---|---|
+| `WF3` | Does 3 energy **bind** across a fight — is a priced row ever left in hand because the turn bought two cheaper cards instead? | **YES, on ≥ 2 turns.** | Count turns ended with `end turn` while the hand held a priced row the turn's starting energy could have paid for alone. **≥ 2 = PREDICTED, 1 = SPLIT, 0 = MISS.** | PREDICTED: all three priced arms are ADVANCE-to-sheet candidates together — the shape, not any individual number, is what carried. SPLIT: the price binds but thinly; the arms advance and the re-author carries an explicit note that the 3-energy rung is the whole mechanism. MISS: defence is still riding along, R213 E3's diagnosis is unaddressed by this shape, and the three priced rows RETURN to a staged round on a board built out of competing 1-costs. |
+| `WF4` | Is the price **named** as a trade, or only paid? | **YES, on ≥ 3 combat turns.** | Count combat turns whose `thinking` names a priced row AND either a second card it was played instead of, or an explicit decision to forgo the turn's other line. **≥ 3 = PREDICTED, 1–2 = SPLIT, 0 = MISS.** | A `WF3` PREDICTED beside a `WF4` MISS is the arm's own escalation: the price binds mechanically and is invisible to the player, which is a LEGIBILITY defect (the `EB-220` badge family), filed to BACKLOG rather than returning the design. Both PREDICTED is the strongest ADVANCE-to-sheet reading this funnel can produce. |
+| `WF5` | Does the kit's **Muster discount defuse the price**? | **NO — fewer than half of the priced rows' plays are at a discount.** | Of the successful `play` commands naming a priced row, count those whose observation shows a cost below the printed 3 (a Mustered Companion costs one less). **< 50% = PREDICTED, 50–75% = SPLIT, > 75% = MISS.** | MISS: the cost-line price is a price the kit routinely refunds, and the arm cannot advance to a sheet at 3 until the Muster discount and the price are reconciled — a design call for [USER], minted as a QUEUE row, NOT a delete. SPLIT: advance with the interaction named in the re-author. This slot is the reason the flag is ON, and it is stated as a contamination below. |
+
+#### Arms B-e, D-e — exclusive modes (fight F3)
+
+| # | slot | prediction | falsifier | the decision the outcome changes |
+|---|---|---|---|---|
+| `WF6` | Is the **Block mode ever taken** in live play, or is exclusivity a decision only a set board creates? | **YES, ≥ 1 Block-mode play across the fight.** | Count successful `play` commands on a granted `either` row that select the Block mode. **≥ 1 per row = PREDICTED, ≥ 1 across the two = SPLIT, 0 = MISS.** | MISS: the exclusive shape reduces to a strictly worse attack in play and the two `either` rows RETURN — a mode that is never the answer is not an option. PREDICTED on both rows makes arm 2 an ADVANCE-to-sheet candidate whole. |
+| `WF7` | Is the **forgone mode** named as the cost? | **YES, on ≥ 2 combat turns.** | Count combat turns whose `thinking` names the mode NOT taken as something given up. **≥ 2 = PREDICTED, 1 = SPLIT, 0 = MISS.** | Mirrors `WF4`: mechanical exclusivity with no named cost is a legibility finding, not a design return. `WF6` and `WF7` both PREDICTED closes R216 C option 1 in the direction the round-3 pair read pointed. |
+| `WF8` | Does the **memory replay re-subsidise** what exclusivity removed — does the jellyfish replay a mode the player already paid to forgo? | **NO — ≤ 1 turn where a replayed `either` row fires the mode the player did not choose that turn.** | Read the memory panel in the observation beside each jellyfish fire; count fires whose replayed card is a granted `either` row, and whether the fired mode differs from the mode last played. **≤ 1 = PREDICTED, 2–3 = SPLIT, ≥ 4 = MISS.** | MISS: the kit hands back the outcome the arm exists to make you choose between, so arm 2 cannot advance while `C.KURAGE_MEMORY` is on — a genuine interaction finding that goes to [USER] as a numbered pick (re-author the arm, or scope the memory), never a silent delete. |
+
+### Contaminations, stated before the run
+
+1. **The deck is GRANTED, not drafted.** Rows arrive in the starting deck via
+   `understudy.embark --arm`, so nothing here says anything about draft rates,
+   pool pressure, or how often a player would ever own the card. Every slot
+   above is conditional on holding the row.
+2. **`+proto` dev build.** `klee-mod/build/deploy_proto.ps1`
+   (`-p:PrototypeCards=true`); the shipped release does not compile these
+   classes and cannot reach them by any route, including a hand-typed id.
+3. **The memory kit is ON, under `C.KURAGE_MEMORY` — a deliberate second
+   variable, and D4 requires that it be named.** It is on because it is the
+   world these rows would ship into and because `WF5` and `WF8` ARE the
+   interaction. **The error direction is stated:** the kit adds free tempo (a
+   0-energy replay of the memory's front) and a Muster discount, both of which
+   make a priced Companion EASIER to afford — so a `WF3` PREDICTED (*the price
+   binds*) is a **floor**, and a `WF3` MISS is **confounded** and must be
+   re-read with the flag OFF before it fires any repricing. `WF5` exists to
+   measure that confound rather than argue about it.
+4. **Seat policy.** The Codex seat (GPT family) plays and writes the run
+   record; all seven slice-1 rows are `authored_by: [claude]`, so the seat is
+   author-disjoint under R217 C and `understudy/seat.py` will not refuse it.
+   **R217 G rides on every line of the record: iteration feedback, never
+   validation, never balance evidence, never approval.** Guardrail-7: bot
+   numbers are floors. No number here is a win-rate or a comparison with any
+   other build.
+5. **R213 B.** No number measured on a prototype row is quotable. The slots
+   count plays, turns and sentences; the two places a printed figure is read
+   (`WF2`, `WF5`) read it as *above the base rung* or *below the printed cost* —
+   a comparison inside one row's own face, never a figure carried out of this
+   packet.
+6. **Slice 1's four staged rounds have been read, and they set no threshold
+   above.** The thresholds are drafted from the ADVANCE reads' own language and
+   from §1's hypothesis, never from a staged number.
+
+### Sequencing, and the preconditions
+
+In order, and none of it is Claude's to start:
+
+1. **`M67` is ruled.** It deletes none of these six rows, but it decides
+   whether the Kokomi prototype surface is being emptied of slice 2 in the same
+   sitting, and a fight staged into a surface that is about to lose four rows
+   is a fight staged twice.
+2. **`KURAGEMEM002`'s rerun happens first** — `EB-214`'s Muster keyword, then
+   the memory gate re-posed on the unspent seed. Every fight here runs with the
+   kit ON, and running them before the kit's own gate is re-read would put two
+   unread instruments in one window.
+3. **`EB-184` before F3, and only F3.** An Attack-typed `choose_one` demands a
+   target even on a mode that attacks nothing; **Itto — Oni Rush is
+   Attack-typed with a Block mode**, so `WF6` cannot be answered for it until
+   the fix lands. Shinobu — Warding Ring is Skill-typed and is not blocked.
+   Running F3 early would return a second arm for the defect that already
+   returned Thoma's.
+4. **Then F1, then F2, then F3** — arm A first because it has no kit dependency
+   beyond the flag, the priced trio second, the exclusive pair last behind its
+   defect.
+
+**What this slate does not do.** It stages no board, pins no seed, spends no
+call and grades nothing. It advances no row to a sheet: an ADVANCE-to-sheet
+CANDIDATE is a candidate, and the accept-to-sheet signoff — re-authoring onto a
+real sheet, ruling the numbers, bumping the stamp, commissioning the art —
+stays [USER]'s one-way door, which is the whole reason this registration was
+written.
