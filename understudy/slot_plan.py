@@ -290,6 +290,39 @@ def load_slots(directory: Path) -> list[Slot]:
     return parse_slots(blob, where=str(path))
 
 
+# -------------------------------------------- EB-208: which slots COUNT ----
+#
+# THE CEILING IS TAKEN OFF THE DECLARED BOARD AND MUST STAY THAT WAY -- a
+# ceiling taken off the live board would be taken after staging, which is too
+# late to refuse a plan. What EB-208 adds is the OTHER end: once a board is
+# staged, the slots whose predicate actually READS the enemy count are the
+# only ones a wrong live count can invalidate, and they are named here so the
+# preflight marks those and nothing else. A slot that never mentions
+# `enemy_count` is unaffected by how many bodies rolled.
+
+ENEMY_COUNT_FACT = "enemy_count"
+
+
+def reads_fact(slot: Slot, fact: str) -> bool:
+    """Does any clause of this slot's predicate name this fact?"""
+    return any(str(clause.get(side)) == fact
+               for clause in slot.predicate for side in ("left", "right"))
+
+
+def slots_reading(slots: Sequence[Slot], fact: str) -> list[str]:
+    return [s.id for s in slots if reads_fact(s, fact)]
+
+
+def enemy_count_slots(directory: Path) -> list[str]:
+    """The ids in this round's `slots.yaml` whose predicate counts enemies.
+
+    `[]` where the round has no slot file, which is legal and common: a round
+    with no machine-readable predicate has no slot this check can name, and
+    guessing one from prose is the thing EB-202 exists to stop.
+    """
+    return slots_reading(load_slots(directory), ENEMY_COUNT_FACT)
+
+
 # ------------------------------------------------------- the reachability --
 
 def ceiling(slot: Slot, turns: Sequence[Any]) -> dict[str, Any]:

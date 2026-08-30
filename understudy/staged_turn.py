@@ -1545,6 +1545,104 @@ def mark_unrun(turn_id: str, *, seed: str, slots: Sequence[str],
     return path
 
 
+# ------------------------------------------ EB-208: the UNREACHED board ----
+
+UNREACHED_NOTE = (
+    "EB-208: the live-count preflight. A staged board cannot REQUIRE an enemy "
+    "count -- the encounter is generated and a seed grants or refuses the "
+    "bodies the turn file asked for -- and EB-202's ceiling is computed off "
+    "the DECLARED board by construction, so a board that declared three and "
+    "staged one still counted toward a counting slot's ceiling. After staging, "
+    "the live enemy count is compared with the declared one; where they "
+    "differ, this board is UNREACHED for every registered slot whose "
+    "predicate reads `enemy_count`, and those slots take NO GRADE from it -- "
+    "a board that cannot be asked is UNREACHED by the slate's own rule. The "
+    "board is still read, graded and replayed: it may answer its other slots, "
+    "and a shadow read costs nothing. Nothing here is struck (R101b); the "
+    "board's own grades stand for the slots it could pose")
+
+
+def live_enemy_count(turn_id: str, root: Path | None = None) -> int | None:
+    """How many bodies the game actually staged, or `None` where nothing says.
+
+    OFF `observed.json`, which is the tool's own record of the RAW wire state
+    (`export_packet`). Its `digest.enemies` is the same list the packet's
+    scrubbed board is built from, and it is read first because it is the
+    unscrubbed one; `state.battle.enemies` and then the packet's own board are
+    read after it so a board staged by an older build still answers.
+
+    `None` IS NOT ZERO. A board with no record on disk has not been staged and
+    says nothing about its live count, and the preflight must not read that
+    silence as a mismatch.
+    """
+    home = (root or QA_DIR) / turn_id
+    for name, path_to in (("observed.json",
+                           (("digest", "enemies"),
+                            ("state", "battle", "enemies"))),
+                          ("packet.json", (("board", "enemies"),))):
+        path = home / name
+        if not path.is_file():
+            continue
+        try:
+            blob = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        for keys in path_to:
+            node: Any = blob
+            for key in keys:
+                node = node.get(key) if isinstance(node, dict) else None
+            if isinstance(node, list):
+                return len(node)
+    return None
+
+
+def mark_unreached(turn_id: str, *, seed: str, slots: Sequence[str],
+                   declared: int, live: int,
+                   root: Path | None = None) -> Path:
+    """Record the slots this board cannot pose. One file, beside the rest."""
+    home = (root or QA_DIR) / turn_id
+    home.mkdir(parents=True, exist_ok=True)
+    path = home / "unreached.json"
+    why = (f"the board declared {declared} enem(ies) and the game staged "
+           f"{live} on seed {seed or '-'}; a slot that counts enemies cannot "
+           f"be posed by this board")
+    path.write_text(json.dumps({
+        "turn_id": turn_id,
+        "instance": bridge.current_label(),
+        # THE BOARD RAN. `run_state` is the ledger's own column and this
+        # board earns its RUN: it was staged, read, graded and replayed. What
+        # is UNREACHED is a SLOT ON IT, which is why that is a separate key
+        # and not a second ledger column.
+        "run_state": "RUN",
+        "slot_state": "UNREACHED",
+        "seed": seed or "-",
+        "slots": list(slots),
+        "declared_enemies": int(declared),
+        "live_enemies": int(live),
+        "why": why,
+        "rule": UNREACHED_NOTE,
+        "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+    }, indent=1) + "\n", encoding="utf-8")
+    return path
+
+
+def unreached_boards(root: Path | None = None) -> list[dict[str, Any]]:
+    """Every UNREACHED marker on disk, by turn id."""
+    base = root or QA_DIR
+    out = []
+    for q in sorted(base.glob("*/unreached.json")):
+        blob = json.loads(q.read_text(encoding="utf-8"))
+        blob.setdefault("turn_id", q.parent.name)
+        out.append(blob)
+    return out
+
+
+def unreached_slots(root: Path | None = None) -> dict[str, list[str]]:
+    """`turn id -> the slots that board may not be graded on` (EB-208)."""
+    return {str(b["turn_id"]): [str(s) for s in (b.get("slots") or [])]
+            for b in unreached_boards(root)}
+
+
 def unrun_boards(root: Path | None = None) -> list[dict[str, Any]]:
     """Every UNRUN marker on disk, by turn id."""
     base = root or QA_DIR

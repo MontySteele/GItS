@@ -854,6 +854,17 @@ python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md
   qualify. There is no `or` and no nesting on purpose. **A round with no
   `slots.yaml` is legal** — every round committed before this existed carries
   none — and `staged_turn check` runs the same check per directory.
+- **The LIVE-COUNT preflight, after each staging (`EB-208`).** The ceiling
+  above is computed off the DECLARED board by construction, and the encounter
+  is generated — a turn file can wish for three bodies and the seed can give
+  one. So once `stage` has written `observed.json`, the round compares the
+  live enemy count with the declared one; where they differ it writes
+  `review/qa/<turn-id>/unreached.json` — declared, live, seed, slots — and the
+  board is **UNREACHED** on every registered slot whose predicate reads
+  `enemy_count`, and on no other. Those slots take **no grade** from that
+  board in the stopping rule, in the round summary and in `packet-section`.
+  The round does not stop: the board is still read, graded and replayed for
+  the slots it could pose.
 - **`staged_turn packet-section <slug>`** writes the round's results block
   from `review/qa/<slug>-t*/` and `review/qa/ledger.tsv`: per-turn rows, the
   per-slot tally, what the round spent (Codex reads counted separately), the

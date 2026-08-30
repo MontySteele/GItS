@@ -36,7 +36,7 @@ from unittest import mock
 
 from understudy import (authorship, bridge, frames, hangwatch, instances,
                         local_model, local_seat, local_tester, misreads,
-                        resource_order, soak)
+                        packet_section, resource_order, soak)
 
 import tools.lint_prototype_authorship as auth_lint
 
@@ -1792,3 +1792,220 @@ def test_the_slot_count_reads_llama_servers_two_routes(tmp_path):
     assert local_model.slot_count(
         local_model.Client(base_url="http://localhost:15593/v1"),
         timeout_s=0.5) is None
+
+
+# ======================================================================
+# EB-208 -- A BOARD THAT STAGED FEWER BODIES THAN IT DECLARED
+# ======================================================================
+#
+# `KLEESPARK-R2`'s `t04` declared three enemies, drew one, and reported `S3`
+# as graded: the encounter is generated, a staged board cannot REQUIRE a
+# count, and `EB-202`'s ceiling is computed off the DECLARED board by
+# construction. R224 took the live-count preflight: after staging, compare the
+# two counts and mark the counting slots UNREACHED on that board.
+
+_EB208_GRADER = "opus-5-fresh"
+
+
+def _eb208_turn(directory: Path, tid: str, enemies: int, slots: list[str],
+                seed: str) -> Path:
+    """A minimal turn file: one card, `enemies` declared bodies."""
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / f"{tid}.yaml"
+    path.write_text(json.dumps({
+        "id": tid,
+        "character": "KLEEMOD-KLEE",
+        "seed": seed,
+        "slots": slots,
+        "staging": [{"give": {"card": "KLEEMOD-KABOOM", "pile": "hand"}}],
+        "board": {
+            "character": "klee",
+            "hand": ["kaboom"],
+            "enemies": [{"name": f"Act 1 enemy ({i + 1})", "hp": 30}
+                        for i in range(enemies)],
+        },
+    }), encoding="utf-8")                    # JSON is valid YAML
+    return path
+
+
+def _eb208_slots(directory: Path) -> None:
+    """`S3` counts enemies; `S1` does not, and must be untouched."""
+    (directory / "slots.yaml").write_text(json.dumps({"slots": [
+        {"id": "S1", "threshold": 1,
+         "predicate": [{"left": "hand_size", "op": ">=", "right": 1}]},
+        {"id": "S3", "threshold": 1,
+         "predicate": [{"left": "enemy_count", "op": ">=", "right": 3},
+                       {"left": "hand_size", "op": ">=", "right": 1}]},
+    ]}), encoding="utf-8")
+
+
+class _CountSteps(local_tester.RoundSteps):
+    """A fake seat: `stage` writes the observed board the game gave, `read`
+    writes the verdict `staged_turn grade` would have written."""
+
+    def __init__(self, qa_dir: Path, live: dict[str, int]):
+        self.qa = qa_dir
+        self.live = live
+        self.replayed: list[str] = []
+
+    def stage(self, row):
+        home = self.qa / row["turn_id"]
+        home.mkdir(parents=True, exist_ok=True)
+        (home / "observed.json").write_text(json.dumps({
+            "turn_id": row["turn_id"],
+            "run_seed": row.get("seed"),
+            "digest": {"enemies": [{"name": f"body {i}"}
+                                   for i in range(self.live[row["turn_id"]])]},
+        }), encoding="utf-8")
+
+    def read(self, row):
+        home = self.qa / row["turn_id"]
+        home.mkdir(parents=True, exist_ok=True)
+        (home / f"verdict-{_EB208_GRADER}.json").write_text(json.dumps({
+            "turn_id": row["turn_id"],
+            "grader": {"id": _EB208_GRADER},
+            "verdict": "SURVIVES"}), encoding="utf-8")
+        return {"turn_id": row["turn_id"]}
+
+    def execute(self, row, record):
+        self.replayed.append(row["turn_id"])
+
+
+def _eb208_round(tmp_path: Path, live: dict[str, int]):
+    """Two boards, both declaring three bodies, both carrying `S1` and `S3`."""
+    turns = tmp_path / "turns"
+    qa = tmp_path / "qa"
+    turns.mkdir(parents=True, exist_ok=True)
+    _eb208_slots(turns)
+    rows = []
+    for i, tid in enumerate(("eb208-t01", "eb208-t02"), 1):
+        path = _eb208_turn(turns, tid, 3, ["S1", "S3"], f"SEED{i}")
+        rows.append({"turn_id": tid, "path": str(path), "slots": ["S1", "S3"],
+                     "seed": f"SEED{i}", "position": i})
+    steps = _CountSteps(qa, live)
+    out: list[dict] = []
+    local_tester.run_pipeline(rows, lane=local_tester.GameLane(), steps=steps,
+                              qa_dir=qa, unreached_out=out)
+    return rows, qa, steps, out
+
+
+def test_a_board_that_stages_one_body_is_unreached_on_its_enemy_count_slot(
+        tmp_path):
+    """THE ROW'S ACCEPTANCE: a round whose live board misses a declared enemy
+    count cannot report that slot graded.
+
+    `t01` declares three bodies and the game gives one; `t02` declares three
+    and gets three. `S3` counts enemies, so it takes no grade from `t01` and
+    is left UNDECIDED on `t02`'s single grade. `S1` does not count enemies, is
+    unaffected on both boards, and is DECIDED by the two grades that agree --
+    which is the same board's grade, still counting, on the slot it could
+    pose.
+    """
+    rows, qa, steps, out = _eb208_round(tmp_path, {"eb208-t01": 1,
+                                                   "eb208-t02": 3})
+    assert [r["turn_id"] for r in out] == ["eb208-t01"]
+    assert out[0]["slots"] == ["S3"]
+    assert (out[0]["declared_enemies"], out[0]["live_enemies"]) == (3, 1)
+
+    blob = json.loads((qa / "eb208-t01" / "unreached.json")
+                      .read_text(encoding="utf-8"))
+    assert blob["slot_state"] == "UNREACHED" and blob["run_state"] == "RUN"
+    assert blob["seed"] == "SEED1" and blob["slots"] == ["S3"]
+    assert "declared 3 enem(ies) and the game staged 1" in blob["why"]
+    assert not (qa / "eb208-t02" / "unreached.json").exists()
+
+    # (3) The board is still read, graded and REPLAYED -- only the counting
+    # slot is excluded.
+    assert steps.replayed == ["eb208-t01", "eb208-t02"]
+    assert (qa / "eb208-t01" / f"verdict-{_EB208_GRADER}.json").is_file()
+
+    ids = [r["turn_id"] for r in rows]
+    grades = local_tester.disk_grades(ids, qa)
+    assert grades == {"eb208-t01": ["PRED"], "eb208-t02": ["PRED"]}
+
+    # THE LOCK, AND IT FAILS WITHOUT THE EXCLUSION: two agreeing grades on
+    # `S3`, one of them off a board that could not pose it.
+    assert local_tester.slot_state(rows, grades) == {"S1": "DECIDED",
+                                                     "S3": "DECIDED"}
+    fixed = local_tester.slot_state(rows, grades,
+                                    local_tester.unreached_map(ids, qa))
+    assert fixed == {"S1": "DECIDED", "S3": "UNDECIDED"}
+
+    # (2) And the round's own summary names the two counts.
+    summary = local_tester.round_summary(
+        [{"turn_id": t} for t in ids], seat_mode="deciding", unreached=out,
+        qa_dir=qa)
+    said = json.dumps(summary["unreached"])
+    assert '"declared_enemies": 3' in said and '"live_enemies": 1' in said
+    assert summary["unreached"][0]["slots"] == ["S3"]
+
+
+def test_the_generator_prints_the_unreached_slot_rather_than_grading_it(
+        tmp_path):
+    """`packet-section` is the round's published results block, and an
+    UNREACHED slot has to be legible there or the record reads as a grade."""
+    rows, qa, steps, out = _eb208_round(tmp_path, {"eb208-t01": 1,
+                                                   "eb208-t02": 3})
+    b1 = packet_section.board(qa / "eb208-t01")
+    b1["slots"] = ["S1", "S3"]
+    b2 = packet_section.board(qa / "eb208-t02")
+    b2["slots"] = ["S1", "S3"]
+    assert b1["unreached_slots"] == ["S3"] and b2["unreached_slots"] == []
+    grades = packet_section.slot_grades([b1, b2])
+    assert grades == {"S1": ["PRED", "PRED"], "S3": ["PRED"]}
+    assert packet_section.slot_state(grades)["S3"] == "UNDECIDED"
+
+
+def test_a_matching_enemy_count_changes_nothing(tmp_path):
+    """THE REGRESSION: where the game gives what the file declared, this
+    check writes no file, returns no row, and leaves the stopping rule
+    byte-for-byte the rule that shipped with R221 B."""
+    rows, qa, steps, out = _eb208_round(tmp_path, {"eb208-t01": 3,
+                                                   "eb208-t02": 3})
+    assert out == []
+    assert list(local_tester.unreached_map(qa_dir=qa)) == []
+    written = sorted(p.relative_to(qa).as_posix()
+                     for p in qa.rglob("*") if p.is_file())
+    assert written == sorted([
+        "eb208-t01/observed.json",
+        f"eb208-t01/verdict-{_EB208_GRADER}.json",
+        "eb208-t02/observed.json",
+        f"eb208-t02/verdict-{_EB208_GRADER}.json"])
+
+    ids = [r["turn_id"] for r in rows]
+    grades = local_tester.disk_grades(ids, qa)
+    assert (local_tester.slot_state(rows, grades)
+            == local_tester.slot_state(rows, grades,
+                                       local_tester.unreached_map(ids, qa))
+            == {"S1": "DECIDED", "S3": "DECIDED"})
+
+
+def test_a_slot_that_does_not_count_enemies_is_not_marked(tmp_path):
+    """Only the slots whose PREDICATE reads `enemy_count` are UNREACHED. A
+    board carrying none of those misses its declared count and says so in the
+    log, and no record is written -- there is no slot to write one about."""
+    turns = tmp_path / "turns"
+    qa = tmp_path / "qa"
+    turns.mkdir(parents=True, exist_ok=True)
+    _eb208_slots(turns)
+    path = _eb208_turn(turns, "eb208-t09", 3, ["S1"], "SEED9")
+    row = {"turn_id": "eb208-t09", "path": str(path), "slots": ["S1"],
+           "seed": "SEED9", "position": 1}
+    _CountSteps(qa, {"eb208-t09": 1}).stage(row)
+    said: list[str] = []
+    assert local_tester.live_count_preflight(
+        row, qa_dir=qa, log=said.append) is None
+    assert not (qa / "eb208-t09" / "unreached.json").exists()
+    assert "no registered slot on this board counts enemies" in said[0]
+
+
+def test_no_staged_record_is_not_a_mismatch(tmp_path):
+    """`None` is not zero. A board with nothing on disk has not been staged,
+    and the preflight may not read that silence as a missing enemy."""
+    turns = tmp_path / "turns"
+    turns.mkdir(parents=True, exist_ok=True)
+    _eb208_slots(turns)
+    path = _eb208_turn(turns, "eb208-t10", 3, ["S1", "S3"], "SEED10")
+    assert local_tester.live_count_preflight(
+        {"turn_id": "eb208-t10", "path": str(path), "slots": ["S1", "S3"]},
+        qa_dir=tmp_path / "qa") is None
