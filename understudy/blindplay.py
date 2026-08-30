@@ -2027,13 +2027,56 @@ def check_independent(model: str, author: str = AUTHOR_FAMILY, *,
         raise BlindPlayError(str(exc)) from None
 
 
-def command_schema() -> dict[str, Any]:
-    """The reply shape for a play turn. Shape only -- never content."""
+def command_schema(forecast_asks: int = 0) -> dict[str, Any]:
+    """The reply shape for a play turn. Shape only -- never content.
+
+    `EB-229`, the RUN-lane twin of `EB-239`. `KURAGEMEM002` graded `P1`, `P2`
+    and `P4` UNREACHED not because the display failed but because THE QUESTION
+    WAS NEVER ASKED: this schema was `command` and `thinking` and nothing
+    else, so the tester says why it plays what it plays and is never asked
+    what it EXPECTS. §13.5's *stated IN ADVANCE* rule was on the record with
+    nothing enforcing it, and `KURAGEMEM001` met it by accident.
+
+    A registration that wants a forecast switches it on and the field
+    APPEARS; every other run gets this function's default and the schema it
+    has always had, byte for byte. When it is on the field is DECLARED and
+    required, `additionalProperties` stays `False`, and `forecast` is the
+    FIRST property and the FIRST required key -- a reply is written top to
+    bottom, so the pre-commitment is asked BEFORE the command rather than
+    beside it.
+    """
+    if forecast_asks <= 0:
+        return {"type": "object",
+                "properties": {"command": {"type": "string"},
+                               "thinking": {"type": "string"}},
+                "required": ["command", "thinking"],
+                "additionalProperties": False}
     return {"type": "object",
-            "properties": {"command": {"type": "string"},
+            "properties": {"forecast": {"type": "array",
+                                        "items": {"type": "string"}},
+                           "command": {"type": "string"},
                            "thinking": {"type": "string"}},
-            "required": ["command", "thinking"],
+            "required": ["forecast", "command", "thinking"],
             "additionalProperties": False}
+
+
+def forecast_block(questions: list[str]) -> str:
+    """The pre-commit questions, printed for a blind RUN's tester.
+
+    The same position `qa_packet` gives the staged twin: BEFORE the board,
+    because a forecast collected after the line is a rationalisation. An
+    empty list prints nothing at all, which is what every unregistered run
+    gets.
+    """
+    if not questions:
+        return ""
+    out = ["## Before you decide", "",
+           "Answer these BEFORE you choose your command, and write the "
+           "answers into your reply's `forecast` list in this order. They "
+           "are predictions about what is about to happen, not questions "
+           "about what you did:", ""]
+    out += [f"{i}. {q}" for i, q in enumerate(questions, 1)]
+    return "\n".join(out)
 
 
 def record_schema() -> dict[str, Any]:
@@ -2051,6 +2094,9 @@ class ScriptedThread:
         self.replies = list(replies)
         self.model = model
         self.sent: list[str] = []
+        # `EB-229`. The SCHEMA is half of what a turn asks for, so a test that
+        # wants to know what the tester was asked has to be able to read it.
+        self.schemas: list[dict[str, Any]] = []
         self.calls = 0
 
     def identity(self) -> dict[str, Any]:
@@ -2059,6 +2105,7 @@ class ScriptedThread:
 
     def send(self, prompt: str, schema: dict[str, Any]) -> dict[str, Any]:
         self.sent.append(prompt)
+        self.schemas.append(schema)
         self.calls += 1
         if not self.replies:
             raise BlindPlayError("the scripted tester ran out of replies")
@@ -2271,6 +2318,7 @@ class Session:
                  session_id: str = "", budget: Budget | None = None,
                  log_root: Path | None = None,
                  prompt_path: Path | None = None,
+                 forecast: list[str] | None = None,
                  settle_tries: int = SETTLE_TRIES,
                  settle_delay_s: float = SETTLE_DELAY_S):
         self.thread = thread
@@ -2287,6 +2335,22 @@ class Session:
             encoding="utf-8")
         self.prompt = seat.template_body(self.prompt_text)
         self.prompt_sha = sha256(self.prompt)
+        # `EB-229`. OPT-IN and EMPTY BY DEFAULT: a run that registers no
+        # forecast prints no such block, is sent the schema it has always
+        # been sent, and seals a record with no forecast key in it.
+        self.forecast = [str(q).strip() for q in (forecast or [])
+                         if str(q).strip()]
+        # The questions are printed on the blind page, so they answer to the
+        # same leak rule every other line of it does (`staged_turn` checks
+        # its own the same way).
+        bad = qa_packet.leaks(list(self.forecast))
+        if bad:
+            rule, hit, ctx = bad[0]
+            raise BlindPlayError(
+                f"forecast question leaks design vocabulary ({rule}: {hit!r} "
+                f"in {ctx[:80]!r}): it is printed at the top of the blind "
+                f"page -- ask it in the vocabulary the page prints")
+        self.forecasts: list[dict[str, Any]] = []
         self.actions = 0
         self.refusals = 0
         # `EB-216`. One row per play and per end turn, machine-written off the
@@ -2303,8 +2367,17 @@ class Session:
 
     # -- the two things the seat is ever sent ------------------------------
 
-    def _page(self, obs_md: str, feedback: str) -> str:
-        parts = [obs_md]
+    def _page(self, obs_md: str, feedback: str,
+              forecast: list[str] | None = None) -> str:
+        parts = []
+        # `EB-229`. FIRST, and that position is the whole point -- the same
+        # one `qa_packet` gives the staged twin. The tester reads top to
+        # bottom, so a question printed under the board is a question asked
+        # after the line has been chosen.
+        block = forecast_block(list(forecast or []))
+        if block:
+            parts.append(block)
+        parts.append(obs_md)
         if feedback:
             parts.append(f"## What happened last time\n\n{feedback}")
         parts.append("Answer with ONE command from the grammar.")
@@ -2402,11 +2475,16 @@ class Session:
                                 else "tool_blocked")
                 break
 
-            body = self._page(page, feedback)
+            # `EB-229`. A forecast is a PER-TURN pre-commitment, so it is
+            # asked on the screens that have turns. A map walk, a shop or a
+            # reward screen has no next turn to predict, and asking there
+            # would collect a forecast about a board the tester is not on.
+            asks = list(self.forecast) if obs["screen"] == "combat" else []
+            body = self._page(page, feedback, asks)
             prompt = f"{self.prompt}\n\n---\n\n{body}\n" if first else body
             first = False
             try:
-                reply = self.thread.send(prompt, command_schema())
+                reply = self.thread.send(prompt, command_schema(len(asks)))
             except SeatBudgetExhausted as exc:
                 self.stopped = "budget:rate_limit"
                 self.transcript.write(kind="seat_budget", detail=str(exc))
@@ -2415,6 +2493,27 @@ class Session:
                 self.stopped = "seat_refused"
                 self.transcript.write(kind="seat_error", detail=str(exc))
                 break
+            if asks:
+                # RECORDED, NEVER GRADED HERE. The registration that switched
+                # the channel on is what grades the answers against the wire;
+                # this driver's whole job is that the answer EXISTS, is
+                # attached to the page it was written on, and is countable.
+                # A short answer is COUNTED SHORT rather than stopping the
+                # run: the staged lane can refuse a form and re-read it, a
+                # live run cannot un-spend the game time, and a slot whose
+                # denominator is short is a fact its grader can see.
+                answers = [str(a).strip()
+                           for a in (reply.get("forecast") or [])]
+                row = {"action": self.actions + 1,
+                       "observation_sha256": page_sha,
+                       "questions": list(asks),
+                       "answers": answers,
+                       "asked": len(asks),
+                       "answered": len([a for a in answers if a])}
+                row["short"] = row["answered"] < row["asked"]
+                self.forecasts.append(row)
+                self.transcript.write(kind="forecast", **row)
+
             command = str(reply.get("command") or "").strip()
             if not command:
                 self.stopped = "no_command"
@@ -2479,7 +2578,13 @@ class Session:
         return self.summary()
 
     def summary(self) -> dict[str, Any]:
+        # `EB-229`. The key is present only where the channel was switched
+        # on, so an unregistered run's sealed record is what it has always
+        # been -- the same discipline `wire` is written under.
+        extra = {"forecast_questions": list(self.forecast),
+                 "forecasts": list(self.forecasts)} if self.forecast else {}
         return {
+            **extra,
             "session_id": self.session_id,
             "actions": self.actions,
             "termination": self.stopped or "unknown",
@@ -2822,7 +2927,10 @@ def record_markdown(summary: dict[str, Any], identity: dict[str, Any]) -> str:
                 "build_version", "build_version_source",
                 "game_version", "game_version_source", "run_seed",
                 "arms_granted", "arms_granted_source",
-                "prompt_sha256", "actions", "termination"):
+                "prompt_sha256", "actions", "termination",
+                # `EB-229`. Present only where a registration switched the
+                # forecast channel on, so nothing moves on a run that did not.
+                "forecast_asked"):
         if key in identity:
             out.append(f"- **{key}**: {identity[key] or '(not read)'}")
     out += ["", f"- **guardrail**: {summary['guardrail']}", ""]
@@ -2835,6 +2943,30 @@ def record_markdown(summary: dict[str, Any], identity: dict[str, Any]) -> str:
                 f"`wire.json` beside this file — one row per play and per "
                 f"end turn, machine-written off the API and never shown to "
                 f"the tester (`EB-216`, R101b)", ""]
+    # `EB-229`. The forecasts are on the COMMITTED half, because they are the
+    # thing a registration that asked for them has to count, and the
+    # gitignored log is swept. Absent entirely on a run that asked for none.
+    if summary.get("forecast_questions"):
+        rows = summary.get("forecasts") or []
+        short = len([r for r in rows if r.get("short")])
+        out += ["## Forecasts, stated in advance", "",
+                "One row per combat turn the tester was asked on, written "
+                "BEFORE its command and never graded here (`EB-229`).", "",
+                f"- **asked on**: {len(rows)} turns, "
+                f"{short} of them answered short", ""]
+        out += [f"{i}. {q}"
+                for i, q in enumerate(summary["forecast_questions"], 1)]
+        out += ["", "| action | " + " | ".join(
+            f"answer {i}" for i in range(
+                1, len(summary["forecast_questions"]) + 1)) + " |",
+            "|---" * (len(summary["forecast_questions"]) + 1) + "|"]
+        for r in rows:
+            cells = list(r.get("answers") or [])
+            cells += [""] * (len(summary["forecast_questions"]) - len(cells))
+            out.append(f"| {r.get('action')} | " + " | ".join(
+                str(c).replace("|", "\\|").replace("\n", " ")
+                for c in cells) + " |")
+        out.append("")
     for i, text in enumerate(summary["fight_records"], 1):
         out += [f"## Fight {i}, in the tester's own words", "", text.rstrip(),
                 ""]
@@ -2942,7 +3074,8 @@ def cmd_session(args) -> int:
                     max_stalls=args.max_stalls)
     try:
         session = Session(thread, wire=bridge, session_id=session_id,
-                          budget=budget)
+                          budget=budget,
+                          forecast=list(args.forecast or []))
         summary = session.run()
     finally:
         thread.close()
@@ -2955,6 +3088,8 @@ def cmd_session(args) -> int:
                 "prompt_sha256": summary["prompt_sha256"],
                 "actions": summary["actions"],
                 "termination": summary["termination"]}
+    if summary.get("forecast_questions"):
+        identity["forecast_asked"] = len(summary["forecast_questions"])
     path = seal(summary, identity, log_dir=session.dir)
     print(f"transcript: {summary['transcript']}")
     print(f"record:     {path}")
@@ -3073,6 +3208,12 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--max-stalls", type=int, default=6,
                    help="stop after this many identical screens running "
                         "(EB-173: a screen the tester cannot get off)")
+    s.add_argument("--forecast", action="append", metavar="QUESTION",
+                   help="EB-229: ask this question BEFORE the command on "
+                        "every combat turn, and seal the answers with the "
+                        "record. Repeatable, in the order the registration "
+                        "numbers them. Omit it and the run is asked, sent "
+                        "and sealed exactly as it always was.")
     s.set_defaults(func=cmd_session)
 
     u = sub.add_parser("audit", help="leak-audit a finished session's own "

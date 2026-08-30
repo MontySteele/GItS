@@ -313,6 +313,39 @@ carried while it was active is in the commit message that retired it.
   no seed pinned →
   `review/active/kokomi-slice-1-2026-08-27.md`, *Whole-fight blind play*.
 
+- **`KLEESPARK-BT3` and `KLEESPARK-W5` — the two cells R230 left owed
+  (`EB-224`)** — **DRAFTED 2026-08-30, unrun, not countersigned.** Drafted by
+  Claude from written design intent and committed before any board is staged
+  or any seed is spent (R212 item 2); offered for batch countersign.
+  **Why:** R230 took §24.9.9's pick at option (3) QUALIFIED — *Bag of Tricks*
+  keeps its refund loop as a deliberate BRIDGE mechanic — and left exactly two
+  things owed: the `F2` repair, and the whole fight.
+  **`KLEESPARK-BT3`**, first: two staged boards
+  (`understudy/turns/klee-sparks-bt3/`, seeds `YX7PB48WR7R4` /
+  `R805DJ56LZHM`), taking R230's SECOND repair — *Mine Toss* leaves the board,
+  so nothing but the mode under test places a Bomb and the refund is
+  attributable by construction rather than by subtraction. Slate `G1`–`G4`:
+  the re-posed `F2` at 2 of 2 with a one-refusal rule written in advance, a
+  pressure control that is a declared subset of it, the forecast channel's
+  denominator, and the delayed arithmetic. Counting slot `C1`, threshold 2,
+  ceiling 2. Codex seat decides both boards (`M64` (1) / R224), local seat
+  SHADOW, 3 calls expected of a cap of 6. First round to declare `EB-240`'s
+  `expects:` block — both relics and each seed's recorded body, refused at
+  stage on a mismatch. **`KLEESPARK-W5`**, after it: one whole fight carrying
+  **R230's PRE-REGISTERED COLLAPSE CONDITION in graded-predicate form** —
+  priced-mode takes ≥ 90% of opportunity pages on a denominator of ≥ 4, ZERO
+  free-mode takes, and ZERO pages naming a reason to preserve the extra Spark;
+  all three, and the arm RETURNS TO DESIGN again; fewer than 4 opportunity
+  pages is UNREACHED and infers nothing. Slots `B1`–`B4` graded, `B5` recorded
+  and not graded. **First registration to switch `EB-229`'s blind-run forecast
+  channel ON**, with its error direction declared: asking *what are you giving
+  up* every turn makes clause (iii) harder to satisfy, so a collapse that
+  fires is a FLOOR. `EB-235` is deliberately NOT folded in — the Rare Power is
+  not granted and grades nothing here. Contaminations: granted deck, `+proto`
+  build, *Pounding Surprise* present by design, the Neow deck-neutral rule,
+  `EB-191`, and every income figure a floor. 45-call cap →
+  `review/active/klee-sparks-2026-08-29.md` §25.
+
 New registrations add a pointer here and land their packet under
 `review/active/`. When one is graded, it moves to the **Graded** table above —
 the packet and its raw results stay where they are, unedited (R101b), and the
