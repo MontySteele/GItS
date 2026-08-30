@@ -1,0 +1,88 @@
+{
+ "turn_id": "klee-sparks-bt2r-t01",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "target_missing"
+ ],
+ "reasons": [
+  "target_missing: a play names a card whose printed effects aim at ONE enemy and carries no target, so the line cannot be replayed at all"
+ ],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "2f0f6028fb9f50a8c9ddbd0939b3a9f77be88bb04b92bb1356b17f62915429fc",
+ "chosen_line": [
+  {
+   "card": "Bag of Tricks",
+   "target": null,
+   "exhaust": null,
+   "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Firework Finale",
+   "target": "Seapunk",
+   "exhaust": "Firework Finale",
+   "choose": null
+  },
+  {
+   "card": "Spirited Away",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Bag of Tricks using its 3-Spark option to place 3 Bombs dealing 5, then played Kaboom! on Seapunk to detonate those bombs and recover Spark, then played Firework Finale on Seapunk for 18 damage and Exhaust, and finally played Spirited Away for 12 Block. This uses all 3 Energy and leaves the turn with 12 Block against the telegraphed 11 damage.",
+  "q2_other_line_considered": "I seriously considered playing Bag of Tricks, Kaboom!, and Firework Finale without Spirited Away, or replacing Spirited Away with Duck and Cover. The no-block line has the same damage but leaves me at 31 HP instead of 42 HP after the enemy attack, so Spirited Away is strictly better for this turn. Duck and Cover was worse because it gives only 5 Block for the same relevant purpose.",
+  "q3_what_it_gave_up": "The chosen line gives up the single Bomb option from Bag of Tricks, which would preserve 3 Sparks but produce much less bomb damage. It also gives up keeping Firework Finale in the deck by Exhausting it, and it spends all Energy on damage and block, leaving no spare Energy for a different defensive or offensive follow-up if the board changed.",
+  "q4_different_intent": "Yes. If the enemy had telegraphed a much larger attack, I would still likely prioritize Spirited Away, but I might have avoided Firework Finale or Kaboom! if the goal were pure survival. If the enemy had telegraphed a weaker attack or a non-attack, I might have skipped block and used the Energy differently, though with only these cards the damage line would still be attractive. The current 11 damage makes Spirited Away clearly worth playing."
+ },
+ "forecast_asked": 3,
+ "forecast": [
+  "0",
+  "3",
+  "0"
+ ],
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": true,
+  "findings": [
+   {
+    "position": 1,
+    "card": "Bag of Tricks",
+    "mode": "Spend 3 Sparks: place 3 Bombs dealing 5.",
+    "why": "play 1 names 'Bag of Tricks', whose printed effects aim at ONE enemy, and carries no target. The bridge has nothing to aim at, so this line cannot be replayed -- it is sealed and UNTESTED, which is the state KLEESPARK-R1 ended two of its eight lines in"
+   }
+  ],
+  "hand_takes_a_target": [
+   "Bag of Tricks",
+   "Kaboom!",
+   "Firework Finale"
+  ],
+  "hand": [
+   "Bag of Tricks",
+   "Kaboom!",
+   "Firework Finale",
+   "Duck and Cover",
+   "Spirited Away"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-30T16:41:19"
+}

@@ -1,0 +1,67 @@
+{
+ "turn_id": "klee-sparks-bt2r-t03",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "intent_insensitive"
+ ],
+ "reasons": [
+  "intent_insensitive: question four is no: a different enemy intent would not have changed the line, so the intent is not part of the decision"
+ ],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "da7d7fde58885781628a8ff7a63d738a139b0919b5ee0ed31575418a1c8c6735",
+ "chosen_line": [
+  {
+   "card": "Mine Toss",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Bag of Tricks",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Mine Toss on Shrinker Beetle, then played Bag of Tricks and chose the option that spends 3 Sparks to place 3 Bombs dealing 5. This places a total of 4 Bombs on the enemy for 20 base bomb damage, spends the starting 3 Sparks, and then regains 1 Spark per Bomb detonation through Pounding Surprise.",
+  "q2_other_line_considered": "I seriously considered playing only Bag of Tricks with the 3-Spark option, which would place 3 Bombs for 15 damage and leave the Spark bank at 3 at the end of the turn. I also briefly considered adding a free block card such as Run Away!, but the enemy\u2019s telegraphed action is only a Debuff, so block did not change the known outcome.",
+  "q3_what_it_gave_up": "The chosen line gave up the chance to keep the 3 Sparks unspent by taking the 1-Bomb option of Bag of Tricks, and it gave up the chance to gain Block this turn. It also left 2 Energy unused because the only damage card in hand is Mine Toss and the remaining cards are Block cards.",
+  "q4_different_intent": "No. A different enemy intent would not have changed the line as long as the enemy was not telegraphing an attack large enough to make Block necessary. If the enemy had telegraphed a high-damage attack, I would have considered spending the remaining Energy on Spirited Away or Duck and Cover, but the printed intent is Strategic/Debuff, so the damage-and-Spark line remains best."
+ },
+ "forecast_asked": 3,
+ "forecast": [
+  "3",
+  "4",
+  "20"
+ ],
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Bag of Tricks"
+  ],
+  "hand": [
+   "Bag of Tricks",
+   "Mine Toss",
+   "Duck and Cover",
+   "Spirited Away",
+   "Run Away!"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-30T16:42:10"
+}
