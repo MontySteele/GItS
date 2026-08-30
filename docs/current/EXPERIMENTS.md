@@ -346,6 +346,41 @@ carried while it was active is in the commit message that retired it.
   `EB-191`, and every income figure a floor. 45-call cap →
   `review/active/klee-sparks-2026-08-29.md` §25.
 
+- **`KURAGECAD-S1` and `KURAGECAD-W1` — the Kurage memory's CADENCE across a
+  drafted deck (`EB-234`)** — **DRAFTED 2026-08-30, committed before any run,
+  not countersigned.** Drafted by Claude from written design intent (R212 item
+  2); offered for batch countersign. **Why:** §13.7 defers the whole cadence
+  question — how often the memory fires over sixteen floors, what sits in the
+  queue once Exhaust cards are drafted into it, and whether Memory/Order spam is
+  all she does — because every observation the rule has ever produced was taken
+  on the twelve-card STARTER. **`KURAGECAD-S1`**, the sim leg and the only one
+  taken now: `cells.CANONICAL.but(character="kokomi", archetype="commander",
+  name="kuragecad-s1", jobs=1)` — 600 runs, seed 11, `jobs=1` because the
+  observer wraps `model.run_one` and `model._RunCtx._record_traces` and reaches
+  no worker process; arm = `C.KURAGE_MEMORY` ON (base kit, both substitutions),
+  control = the same 600 seeds with the flag off, **RECORDED and NOT GRADED**.
+  Slate `C1`–`C9`, every falsifier a count off the fight log's own memory events
+  (`kurage_remember` / `_fire` / `_blocked` / `_empty`): the fire rate per player
+  turn, whether it RISES from act 1 to act 3, the Muster/Exhaust mix of what
+  enrols, how often the front BLOCKS, the two spam counts, the share of fires
+  that are free replays, the backlog under the uncapped queue, the Exhaust
+  density of the drafted deck, and one instrument check — **Ethereal is
+  unreachable in this arm by construction** (the one draftable carrier in the
+  repo is Klee's, and the two others are junk the door refuses), so `EB-234`'s
+  Ethereal half is carried to the live leg rather than answered here. `R1`–`R4`
+  are RECORDED AND NOT GRADED. **Three repairs are disclosed with the arm**: the
+  memory-branch pulse's missing `charge` field, the enrolment door's blindness to
+  engine-synthesized Statuses, and `kurage_fire` rebuilding through
+  `loader.get_card` instead of `token_card` — each crashed the first tier-0.5 run
+  ever taken under the flag, each is inside the quarantine, and none moves a
+  shipped byte. **Contaminations:** the tier-0 pilot values the queue at zero, so
+  every number is a FLOOR; no display, so no legibility claim; R213 B / R215 B
+  bind, so nothing here is a balance number. **`KURAGECAD-W1`**, the owed second
+  leg: one whole fight on a DEVELOPED deck, **gated on GAME TIME**, inheriting
+  only the staging SHAPE (a rhythm fight or a jam fight) and no threshold — its
+  slate is deliberately not drafted before its board is known →
+  `review/active/kokomi-kurage-memory-2026-08-29.md` §15.
+
 New registrations add a pointer here and land their packet under
 `review/active/`. When one is graded, it moves to the **Graded** table above —
 the packet and its raw results stay where they are, unedited (R101b), and the
