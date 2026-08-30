@@ -1406,6 +1406,29 @@ def test_a_board_without_the_key_has_no_memory_at_all():
     assert "memory" not in blindplay.render(obs)
 
 
+def test_an_empty_map_is_a_seat_that_is_not_kokomi_and_gets_no_section():
+    """`EB-207`: the Klee page carried her jellyfish and told him it had
+    played no card.
+
+    THREE wire states, not two (`vendor/STS2_MCP/gits/GitsKurageMemory.cs`):
+    an ABSENT key is a build with no memory rule, an EMPTY MAP is the rule
+    present on a seat that is not hers -- exactly what
+    `KurageMemory.Snapshot` returns off a failed `IsLive` -- and a populated
+    map is a memory. Reading `{}` as a memory built the whole section out of
+    `_int`/`_text` defaults, and the `none` pulse default rendered as a
+    sentence about a card the tester HAD played.
+    """
+    obs = blindplay.observation(memory_combat_state({}))
+    assert "memory" not in obs["combat"]
+    page = blindplay.render(obs)
+    assert "Bake-Kurage" not in page
+    assert "you have played no card this turn" not in page
+    # A real memory beside it is untouched: refusing `{}` cannot suppress one,
+    # because `Snapshot` writes twelve keys before it writes the queue.
+    assert "Bake-Kurage" in blindplay.render(
+        blindplay.observation(memory_combat_state(BLOCKED_MEMORY)))
+
+
 def test_the_page_shows_the_bank_the_price_the_block_and_the_pulse():
     """D4: everything that will fire next turn is readable this turn.
 

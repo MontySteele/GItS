@@ -1,5 +1,7 @@
-# THE REQUALIFICATION BATTERY — M62 (5). See `understudy/qualify.py` for what
-# each category asks and why there is no pass mark in this file.
+# THE REQUALIFICATION BATTERY — M62 (5), pass mark R223. See
+# `understudy/qualify.py` for what each category asks; the pass mark is the
+# `threshold:` block at the foot of this file and it is [USER]'s, not the
+# tool's.
 #
 # EVERY ITEM IS A SEALED PACKET FROM A CLOSED ROUND. Nothing here stages a
 # board, launches a game or writes into the turn directory it names; the
@@ -23,6 +25,10 @@
 #     is non-empty), so question four has a telegraph to be sensitive to.
 #
 # Six per category is the floor `qualify.MIN_ITEMS_PER_CATEGORY` enforces.
+#
+# THE PASS MARK IS PER CATEGORY, NOT A TOTAL, so a seat cannot buy a blind
+# spot back with the two categories it still reads: targets is the one that
+# returned the seat (`EB-203`), and it is scored at par.
 
 items:
   # ------------------------------------------------------------- targets ---
@@ -66,3 +72,16 @@ items:
      why: "a telegraphed attack on the opening board"}
   - {id: I6, category: intent, turn_id: klee-sparks-r1-t08,
      why: "a telegraphed attack on the second dry-bank board"}
+
+# ---------------------------------------------------------------------------
+# THE PASS MARK — R223 (2026-08-29). [USER], answering the pick list (every
+# category >= 5/6 | total >= 15/18 | targets 6/6 and the other two >= 4/6),
+# verbatim: "targets 6/6, others >= 4/6 works for me".
+#
+# All three must hold. There is no total, and no trading one category off
+# against another.
+threshold:
+  owner: R223
+  targets: 6
+  costs: 4
+  intent: 4

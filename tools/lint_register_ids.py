@@ -132,10 +132,12 @@ CEILINGS: dict[str, int] = {
     # EB-208/EB-209 minted 2026-08-29 by KLEESPARK-R2: a staged board
     # cannot REQUIRE an enemy count, so a slot that needs one can pass
     # every check and still not be posed; and in the shadow chair R221 B's
-    # stopping rule reads shadow grades, which decide nothing. 207 is
-    # another branch of the same sitting; this branch took the next free
-    # numbers above it.
-    "EB": 209,   # EB-206 minted 2026-08-29 by the two-instance funnel build:
+    # stopping rule reads shadow grades, which decide nothing.
+    "EB": 209,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+                 # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
+                 # printed Kokomi's Bake-Kurage memory block on a KLEE run and
+                 # told the tester it had played no card.
+                 # EB-206 minted 2026-08-29 by the two-instance funnel build:
                  # two game processes from one install, per-process APPDATA
                  # and a per-process bridge port.
                  # EB-205 minted 2026-08-29 by R222 pick 6(d): the Klee Spark
@@ -424,6 +426,12 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 206 was minted AND CLOSED on 2026-08-29 by the two-instance funnel
         # build -- it left OPEN_IDS in the same commit that closed it, with
         # the ceiling above holding the number so nothing re-takes it.
+        # 207 was minted 2026-08-29 by the Klee Sparks whole-fight run (the
+        # blind page printed the Bake-Kurage memory block on a Klee run) and
+        # LEFT OPEN_IDS in the same branch on its live acceptance: an empty
+        # wire map is an absent memory in the reader, the element's Refresh
+        # asks the character test its Setup already asked, and the two frames
+        # are in kokomi-kurage-memory-2026-08-29.md 14.12.
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,
