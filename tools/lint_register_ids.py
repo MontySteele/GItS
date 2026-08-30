@@ -664,7 +664,20 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # UNREACHED because a blind run's reply schema is `command` and
         # `thinking` and never a forecast, so a slate slot that grades one has
         # no per-turn field to count. EB-216's other half.
-        229,
+        #
+        # 229 LEFT OPEN_IDS 2026-08-30 on its acceptance word for word -- "a
+        # forecast slot has a field to count". `blindplay.command_schema()`
+        # takes a forecast count: at zero (the default, and every run already
+        # registered) it returns the object it always returned, and above zero
+        # it declares `forecast` as the FIRST property and the FIRST required
+        # key, `additionalProperties` still False. `--forecast QUESTION`,
+        # repeatable, is the switch a registration throws; the block prints
+        # above the board on combat pages only, the answers are sealed on the
+        # COMMITTED half of the record with an asked/answered count, and a
+        # short answer is counted short rather than stopping a live run. The
+        # lock was seen to FAIL first, on all three halves -- the OFF schema,
+        # the field's order in the reply, and the block's position on the
+        # page. Staged twin: EB-239.
         # 220 minted 2026-08-30 -- the meter cost badge (Encore, Charge).
         220,
         # 223 minted 2026-08-30 by the relayed open-items review, fact-checked:

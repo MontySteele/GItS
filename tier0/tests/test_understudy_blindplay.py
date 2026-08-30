@@ -1853,3 +1853,162 @@ def test_a_run_with_no_relics_prints_no_relic_block():
     state = combat_state()
     state["player"]["relics"] = []
     assert "## Your relics" not in blindplay.observe(state)
+
+
+# ------------------- EB-229: the forecast channel for a blind RUN ----------
+#
+# `KURAGEMEM002` graded `P1`, `P2` and `P4` UNREACHED and the display was not
+# what failed: the reply schema was `command` and `thinking`, so the tester
+# says why it plays what it plays and is never asked what it EXPECTS. §13.5's
+# *stated IN ADVANCE* rule was on the record with nothing enforcing it. The
+# staged twin is `EB-239`; this is the RUN lane's, and it is OPT-IN, which is
+# the first thing these tests pin.
+
+_OFF_SCHEMA = {"type": "object",
+               "properties": {"command": {"type": "string"},
+                              "thinking": {"type": "string"}},
+               "required": ["command", "thinking"],
+               "additionalProperties": False}
+
+
+def test_the_run_lane_schema_is_byte_identical_with_the_channel_off():
+    """THE LOCK, AND IT MUST BE SEEN TO FAIL. Every registration already run
+    and every replay of one was asked through this exact object; a channel
+    that changes it when nobody switched it on has silently re-registered
+    them. `command_schema()` with no argument, and with an explicit zero, is
+    the schema `KLEESPARK-W1` through `W4` and both `KURAGEMEM` runs were
+    sent."""
+    assert blindplay.command_schema() == _OFF_SCHEMA
+    assert blindplay.command_schema(0) == _OFF_SCHEMA
+    assert blindplay.command_schema(-1) == _OFF_SCHEMA
+    assert "forecast" not in json.dumps(blindplay.command_schema())
+
+
+def test_switching_the_channel_on_adds_the_field_and_asks_it_first():
+    """Declared, not loosened -- `additionalProperties` stays `False` -- and
+    `forecast` is the FIRST property and the FIRST required key, because a
+    reply is written top to bottom and a forecast written after the command
+    is a rationalisation."""
+    schema = blindplay.command_schema(3)
+    assert schema["additionalProperties"] is False
+    assert list(schema["properties"]) == ["forecast", "command", "thinking"]
+    assert schema["required"] == ["forecast", "command", "thinking"]
+    assert schema["properties"]["forecast"] == {
+        "type": "array", "items": {"type": "string"}}
+    # Shape only, never content -- the standing rule for both reply schemas.
+    blob = json.dumps(schema)
+    assert "enum" not in blob and "minLength" not in blob
+
+
+def test_the_questions_are_printed_above_the_board_and_above_the_command(
+        tmp_path):
+    """Position is the whole point, and it is `qa_packet`'s position for the
+    staged twin: the block sits above the board and far above the line that
+    asks for a command."""
+    asks = ["What will the enemy do next turn?",
+            "How much Block will you have?"]
+    session = blindplay.Session(
+        blindplay.ScriptedThread([]), wire=blindplay.ScriptedWire([]),
+        session_id="t", log_root=tmp_path, forecast=asks)
+    page = session._page("## The board", "", asks)
+    assert page.index("## Before you decide") < page.index("## The board")
+    assert page.index("## Before you decide") < page.index("ONE command")
+    assert "1. What will the enemy do next turn?" in page
+    assert "2. How much Block will you have?" in page
+    # And the same method with no questions is the page it always was.
+    assert session._page("## The board", "") == (
+        "## The board\n\nAnswer with ONE command from the grammar.")
+
+
+def test_a_run_that_registers_no_forecast_is_asked_and_sealed_as_before(
+        tmp_path):
+    """The other half of the lock, end to end: no block on any page, the OFF
+    schema on every send, and no forecast key anywhere in the summary or the
+    committed record."""
+    thread = blindplay.ScriptedThread(
+        [{"command": "end turn", "thinking": "."}, {"record": "r"}])
+    s = blindplay.Session(thread, wire=blindplay.ScriptedWire(
+        [combat_state(), game_over_state()]), session_id="t",
+        budget=blindplay.Budget(max_actions=1), log_root=tmp_path,
+        settle_delay_s=0.0)
+    summary = s.run()
+    assert all("Before you decide" not in p for p in thread.sent)
+    assert thread.schemas[0] == _OFF_SCHEMA
+    assert "forecast" not in json.dumps(summary)
+    assert "Forecasts" not in blindplay.record_markdown(summary, {})
+
+
+def test_a_registered_run_asks_every_combat_turn_and_counts_the_answers(
+        tmp_path):
+    """The acceptance: a forecast slot with a field to COUNT. The answers are
+    attached to the page they were written on, sealed on the committed half,
+    and never graded here -- the registration that switched the channel on is
+    what grades them against the wire."""
+    thread = blindplay.ScriptedThread(
+        [{"forecast": ["it attacks", "5"], "command": "end turn",
+          "thinking": "."},
+         {"record": "r"}])
+    asks = ["What will the enemy do next turn?",
+            "How much Block will you have?"]
+    s = blindplay.Session(thread, wire=blindplay.ScriptedWire(
+        [combat_state(), game_over_state()]), session_id="t",
+        budget=blindplay.Budget(max_actions=1), log_root=tmp_path,
+        settle_delay_s=0.0, forecast=asks)
+    summary = s.run()
+    assert "## Before you decide" in thread.sent[0]
+    assert thread.schemas[0] == blindplay.command_schema(2)
+    assert summary["forecast_questions"] == asks
+    row = summary["forecasts"][0]
+    assert row["action"] == 1 and row["questions"] == asks
+    assert row["answers"] == ["it attacks", "5"]
+    assert (row["asked"], row["answered"], row["short"]) == (2, 2, False)
+    assert len(row["observation_sha256"]) == 64
+    rows = [r for r in s.transcript.rows if r["kind"] == "forecast"]
+    assert len(rows) == 1 and rows[0]["answered"] == 2
+    record = blindplay.record_markdown(summary, {})
+    assert "## Forecasts, stated in advance" in record
+    assert "**asked on**: 1 turns, 0 of them answered short" in record
+    assert "| 1 | it attacks | 5 |" in record
+
+
+def test_a_short_forecast_is_counted_short_and_never_stops_the_run(tmp_path):
+    """A live run cannot un-spend the game time a staged form can re-read, so
+    the driver records the shortfall rather than refusing: a slot whose
+    denominator is short is a fact its grader can see."""
+    thread = blindplay.ScriptedThread(
+        [{"forecast": ["it attacks", ""], "command": "end turn",
+          "thinking": "."}, {"record": "r"}])
+    s = blindplay.Session(thread, wire=blindplay.ScriptedWire(
+        [combat_state(), game_over_state()]), session_id="t",
+        budget=blindplay.Budget(max_actions=1), log_root=tmp_path,
+        settle_delay_s=0.0, forecast=["q one", "q two"])
+    summary = s.run()
+    assert summary["termination"] == "max_actions"
+    assert summary["forecasts"][0]["short"] is True
+    assert summary["forecasts"][0]["answered"] == 1
+
+
+def test_a_screen_with_no_turn_to_predict_is_not_asked(tmp_path):
+    """A map walk, a shop or a reward screen has no next turn, so asking
+    there would collect a forecast about a board the tester is not on."""
+    thread = blindplay.ScriptedThread(
+        [{"command": 'go "Monster"', "thinking": "."}, {"record": "r"}])
+    s = blindplay.Session(thread, wire=blindplay.ScriptedWire(
+        [map_state(), game_over_state()]), session_id="t",
+        budget=blindplay.Budget(max_actions=1), log_root=tmp_path,
+        settle_delay_s=0.0, forecast=["q one"])
+    s.run()
+    assert "Before you decide" not in thread.sent[0]
+    assert thread.schemas[0] == _OFF_SCHEMA
+    assert s.forecasts == []
+
+
+def test_a_forecast_question_answers_to_the_pages_own_leak_rule(tmp_path):
+    """It is printed on the blind page, so it is scrubbed like every other
+    line of it -- `staged_turn` checks its own the same way."""
+    with pytest.raises(blindplay.BlindPlayError) as exc:
+        blindplay.Session(blindplay.ScriptedThread([]),
+                          wire=blindplay.ScriptedWire([]), session_id="t",
+                          log_root=tmp_path,
+                          forecast=["will kurage_memory fire?"])
+    assert "leaks design vocabulary" in str(exc.value)
