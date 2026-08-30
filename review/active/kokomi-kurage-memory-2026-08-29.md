@@ -3555,6 +3555,10 @@ first. **They are named before the numbers because they change what the arm
 does** — without repair 2 a Toxic could sit in the memory, which is not the rule
 §11.3 states.
 
+**STRUCK by `C9`'s MISS — see §15.6. The paragraph stands as published and is
+not rewritten (R101b); what it got wrong is the DECK half, and the enrolment
+half held at 0.**
+
 **ETHEREAL IS UNREACHABLE IN THIS ARM, and this is a seam fact read off the
 sheets BEFORE the run, not a result.** `EB-234` asks how the queue behaves once
 *Exhaust and Ethereal* cards are drafted into it. The Exhaust half is reachable
@@ -3650,12 +3654,150 @@ decision attached — they are context for whoever reads the graded nine:
 
 ### 15.5 What actually ran
 
-*Written after the run, in the same commit as the graded read. Empty until
-then.*
+**RUN 2026-08-30.** `PYTHONPATH=. python -m tier05.exp_kurage_cadence_s1 --json
+review/qa/kuragecad-s1/record.json`, 600 runs per arm at seed 11, `jobs=1`,
+**about two and a half minutes for both arms** — far inside §15.3's registered
+thirty. The record, the raw JSON and the driver's unedited stdout are under
+`review/qa/kuragecad-s1/`.
+
+**The stamp is the one §15.3 declared: `RT12/D18/P11/C21`**, read live off
+`cells.world_stamp()` at run time and printed in the record's header. The world
+did not move under this read, so there is nothing to disclose and nothing to
+re-run.
+
+**One instrument note, and it is a reading of §15.2's own definition rather than
+a change to it.** A FIRE turn's queue length is that turn's
+`kurage_memory_fire`.`remaining` **plus one**, because `remaining` is counted
+after the front has been popped and the definition is the length *at the turn*.
+BLOCKED and EMPTY take their event's `queued` unmodified. This is in the
+instrument's pin (`test_a_turns_state_is_its_one_memory_event`), which was
+committed before the run.
+
+**0.03% of the arm's player turns carry no memory state event at all** (26 turns
+of 78,126). They are reported in the record as `no_state_share` and are **not
+diagnosed here** — at that size they move no slot in either direction, and
+guessing at a cause after the fact is exactly what a registered read is for
+avoiding.
 
 ### 15.6 The slate, graded
 
-*Written after the run. Empty until then.*
+**5 PREDICTED / 3 SPLIT / 1 MISS / 0 UNREACHED.** Every grade is the committed
+grader's own output against §15.4's registered thresholds and no others.
+
+| slot | grade | the read | the registered threshold |
+|---|---|---|---|
+| `C1` the fire rate | **PREDICTED** | **60.90%** of 78,126 player turns end in a FIRE | ≥ 20% PREDICTED, 5–20% SPLIT, < 5% MISS |
+| `C2` cadence act 1 → act 3 | **PREDICTED** | act 1 **47.14%** (n=26,491) → act 3 **71.24%** (n=18,232) | act 3 > act 1 AND act 3 ≥ 1.25 × act 1 |
+| `C3` what sits in the memory | **PREDICTED** | Exhaust **61.0%** / Muster **39.0%** of 108,177 enrolments | Exhaust ≥ 50% AND Muster ≥ 20% |
+| `C4` how often it is dead | **PREDICTED** | BLOCKED on **10.78%** of turns; EMPTY **28.29%** (ungraded) | ≤ 25% PREDICTED, 25–50% SPLIT, > 50% MISS |
+| `C5` Memory/Order spam | **PREDICTED** | memory copies **12.02%** of 395,926 plays; memory-only turns **1.73%** | copies ≤ 25% of plays AND memory-only ≤ 10% of turns |
+| `C6` the 3× price and the free replay | **SPLIT** | **57.2%** of 47,577 fires are free; median fired price **0**, median bank at fire **5** | ≤ 50% PREDICTED, 50–75% SPLIT, > 75% MISS |
+| `C7` the uncapped queue | **SPLIT** | median queue **2.0**, **p95 9.0**, max **31**; 0 queue-full events | median ≤ 3 AND p95 ≤ 8 |
+| `C8` drafted Exhaust fuel | **SPLIT** | median **3.0** Exhaust cards per final deck (mean 3.26) | ≥ 4 PREDICTED, 2–4 SPLIT, < 2 MISS |
+| `C9` Ethereal — instrument check | **MISS** | **165** of 600 final decks hold an Ethereal card; **0** enrolments do | exactly 0 and 0 PREDICTED, anything > 0 MISS |
+
+**The two arms side by side.** The flag-OFF column is `R3`, the paired control,
+and it is **RECORDED, NOT GRADED**.
+
+| | flag OFF (control) | flag ON (the arm) |
+|---|---|---|
+| runs / fights / player turns / card plays | 600 / 7,457 / 39,003 / 156,431 | 600 / 13,587 / 78,126 / 395,926 |
+| turn state FIRE / BLOCKED / EMPTY | — (no rule) | **60.90% / 10.78% / 28.29%** |
+| fire rate act 1 / 2 / 3 | — | **47.14% / 66.16% / 71.24%** |
+| enrolments (Exhaust / Muster) | 0 | **108,177 (61.0% / 39.0%)** |
+| fires (share free) | 0 | **47,577 (57.2%)** |
+| fires per run, mean / median / max | 0 | **79.3 / 81 / 141** |
+| queue length median / p95 / max | 0 | **2.0 / 9.0 / 31** |
+| refusals by reason | — | `already` 1,314, `junk` 895; no `x_cost`, no `copy` |
+| median Exhaust cards in the final deck | 2.0 (mean 2.52) | **3.0 (mean 3.26)** |
+| mean deck size | 23.9 | 31.3 |
+| runs won — diagnostic, NOT A BALANCE CLAIM (R215 B) | 4.3% | 26.7% |
+
+**What each registered decision now says, quoted from §15.4 and applied.**
+
+- **`C1` and `C2` PREDICTED, and they are one finding.** §15.4: *"the memory has
+  a cadence on a drafted deck, and the whole-fight leg is staged to watch a
+  RHYTHM."* Taken. The memory fires on **three turns in five**, and the rate
+  climbs from just under half of act-1 turns to just over seven in ten by act 3
+  — the drafted engine behaves like a drafted engine. **`KURAGECAD-W1` is
+  therefore staged as a RHYTHM fight**, which is the one thing §15.7 said this
+  leg hands it.
+- **`C3` PREDICTED.** Both doors are live on a deck the drafter built — the
+  Exhaust door carries the queue at 61% and the Muster door is a full 39%, so
+  the whole-fight leg may treat the queue as mixed and the printed starter Muster
+  is not carrying the rule by itself.
+- **`C4` PREDICTED**, and the shape underneath it is worth naming: the block is
+  an act-1 phenomenon (19.16% of act-1 turns) that **falls to 3.81% by act 3**
+  as the bank outgrows the prices. The jam is a *teaching-stage* state, not a
+  late-run one. §15.4's PREDICTED branch is taken: the block is an occasional
+  tempo cost, and the whole-fight leg watches the rhythm rather than the jam.
+- **`C5` PREDICTED, and §15.4's own blind spot 2 applies to it.** Memory copies
+  are an eighth of what she plays and she almost never plays *only* the copy
+  (1.73% of turns). But the registration wrote before the run that a PREDICTED
+  here is nearly a tautology — the pilot never plays toward the queue — so this
+  retires the spam worry **for the sim seat only**, and the whole-fight leg still
+  has to ask a reader whether it FEELS like spam.
+- **`C6` SPLIT.** The free replay is the **majority** of fires (57.2%) and the
+  median fired price is **0**. §15.4's SPLIT branch carries no decision beyond
+  recording it, and this section takes none: what the number says is that the 3×
+  price governs a large minority of replays rather than most of them, and **no
+  re-price is proposed, derived or implied** — the 3 is [USER]'s placeholder and
+  this read does not adjust it (§13.7's first bullet).
+- **`C7` SPLIT, and this is the slot that returns to [USER].** The median queue
+  is short (2) and the tail is not: **p95 9, max 31**. §15.4 registered a MISS as
+  the first evidence for the cap knob; a SPLIT is half of that, and it goes back
+  as a numbered pick and not as an edit — *does an uncapped memory that reaches
+  thirty entries in the tail want a cap, a drain, or nothing?* [USER]'s words
+  were *"If you load Memory with 20 cards, they slow-play over 20 turns … if you
+  have the Charge"*, and the tail says that is a real state and not a
+  hypothetical.
+- **`C8` SPLIT.** The median drafted deck holds **3** Exhaust cards against the
+  control's 2. The fuel is drafted, but thinly; §15.4's MISS branch (grant the
+  Exhaust cards live) is NOT triggered, and the SPLIT means `KURAGECAD-W1` may
+  draft or grant its Exhaust rows, with the choice made when its board is staged.
+- **`C9` MISS, and §15.2's Ethereal paragraph is STRUCK as the slate said it
+  would be** (R101b: struck, never rewritten). What was wrong is narrower than
+  the paragraph: the sheet read missed **`curse_clumsy`**, a CURSE that carries
+  `tags: [ethereal]` and reaches a deck through an event, which is why 165 of 600
+  final decks hold an "Ethereal card" and 87 of the control's do. **The enrolment
+  half held exactly as written: 0 of 108,177 enrolments came from an Ethereal
+  card**, because the memory's door refuses junk. So the registered conclusion
+  stands on its own terms — **`EB-234`'s Ethereal question is unanswerable in the
+  sim** — but for a different reason than the one §15.2 gave: the only Ethereal
+  cards a Kokomi run can hold are ones the memory is not allowed to remember.
+
+**What this read does NOT establish. Named so the next registration cannot
+borrow more:**
+
+1. **No balance claim of any kind** (R213 B / R215 B, Guardrail-7). The flagged
+   arm's runs are longer and win far more often than the control's — 13,587
+   fights against 7,457, 26.7% against 4.3% — and **that comparison is not a
+   measurement and may not be quoted as one.** It is recorded because it is a
+   **denominator fact**: every share in the arm column is taken over the turns of
+   longer runs, so ON and OFF are not two samples of one population.
+2. **Nothing about legibility.** The sim has no display; §14's element, the
+   strip and the gauge were not on trial and are not graded by anything here.
+3. **Nothing about the dose.** `C1` says the rule fires often; it does not say
+   that is the right amount, and no constant is moved by this section.
+4. **One character, one archetype, one route, one policy, one seed base.**
+
+**Findings for the next sitting — written down, NOT settled here.**
+
+- **`F1`** The `is_junk` predicate is a RARITY test and the engine synthesizes
+  its Statuses at `rarity="basic"`. Repair 2 fixed the memory's door; the same
+  blindness still sits on the **shipped** conscript pool and Charge funnel, which
+  share the predicate. Narrowing it would move shipped numbers, so it is
+  [USER]'s, not hygiene. The arm refused 895 such enrolments, so the case is not
+  rare.
+- **`F2`** The arm's survival and deck size diverge sharply from the control's.
+  Whatever that is, it is not measured here and this section makes no claim about
+  it; it is flagged because anyone reading the two columns will want to.
+- **`F3`** `C7`'s tail (p95 9, max 31) is the cap question, and it is a pick for
+  [USER] as written above.
+- **`F4`** The Ethereal keyword has exactly one draftable carrier in the whole
+  repository and it is Klee's. Whether Kokomi's pool should print one at all —
+  which is what would make `EB-234`'s Ethereal half answerable anywhere — is a
+  design question nobody has asked yet.
 
 ### 15.7 THE SECOND LEG, OWED: `KURAGECAD-W1`, the whole fight
 

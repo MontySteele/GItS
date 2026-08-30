@@ -1,0 +1,6 @@
+C:\Users\Monty\Documents\GitHub\GItS-eb234\tier05\relics.py:78: UserWarning: relic 'bronze_scales' SKIPPED: Thorns now exists (2026-07-27); un-skipping is a [USER] ruling because it arms a relic and moves the tier 0.5 world -- not implemented, not faked (house rule).
+  return dict(_pool().get("neow") or {})
+C:\Users\Monty\Documents\GitHub\GItS-eb234\tier05\relics.py:78: UserWarning: relic 'oddly_smooth_stone' SKIPPED: Dexterity now exists (2026-07-27); un-skipping is a [USER] ruling because it arms a relic and moves the tier 0.5 world -- not implemented, not faked (house rule).
+  return dict(_pool().get("neow") or {})
+C:\Users\Monty\Documents\GitHub\GItS-eb234\tier05\relics.py:78: UserWarning: relic 'juzu_bracelet' SKIPPED: held relics have no channel into maps.resolve_unknown -- not implemented, not faked (house rule).
+  return dict(_pool().get("neow") or {})
