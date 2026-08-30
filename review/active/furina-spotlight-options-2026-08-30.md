@@ -1,10 +1,12 @@
 # Furina — Spotlight: the options packet
 
-> **Lifecycle: ACTIVE. PAPER ONLY.** Nothing here is ruled. No code, no sheet
-> row, no constant and no register entry moves because of this file. §3 is a
-> numbered list of design directions and §5 is the pick, which is [USER]'s
-> (the R212 ladder: "a pick between genuinely different design directions" is
-> still his). Claude drafts the list; Claude does not choose.
+> **Lifecycle: RULED. PAPER ONLY.** §5's pick is ANSWERED — **R228
+> (2026-08-30) took option (1), one mode, priced** — and still **no code, no
+> sheet row, no constant and no LAW line moves because of this file**. §3 is
+> the numbered list of design directions as it was offered, in the register's
+> numbering; §5 carries the ruling. The pick was [USER]'s (the R212 ladder: "a
+> pick between genuinely different design directions" is still his): Claude
+> drafted the list and did not choose.
 
 **Date:** 2026-08-30. **Branch:** `furina-paper-2026-08-30`, stacked on
 `gpt-review-2026-08-30`. **Authority:** R226 owed this packet
@@ -374,6 +376,15 @@ retirement stops looking expensive.
 
 ## 5. The pick
 
+**RULED (R228, 2026-08-30): option (1).** One mode, priced — Center Stage
+retires, Guest Cast and `SPOTLIGHT_BASE_MULT = 1.5` stay, and the selector aims
+a Companion and costs Encore. §4's own biggest risk is tested rather than
+assumed away: **the third claim on Encore is measured by the slate slot below,
+staged as a MATCHED PAIR against slot 2 (the Evoke price), and the designation
+price RETURNS with evidence if Encore proves over-subscribed.** `M68` closes
+and `M45`(4) is answered with it. **Nothing migrates before the reframe's own
+whole-fight read.**
+
 **ONE numbered pick list for [USER]. Item (1) is Claude's recommendation.**
 
 **`Spotlight`. What happens to Spotlight under the reframe?**
@@ -425,10 +436,11 @@ reframe's architecture has a verdict (§7 of the reframe: sheet edits are a
 - **No implementation.** No C#, no `tier0`, no test, no constant.
 - **No sheet edits.** `docs/furina-cards.yaml` is read-only here; not one of the
   18 rows is touched, re-tagged or re-priced.
-- **Nothing here is ruled.** §3's five options are directions, §4 is a
-  recommendation and §5 is a pick that has not been made. No LAW text is
-  drafted, no register row is minted, no ruling id is claimed, and `M45`(4)
-  stays OPEN until [USER] answers §5.
+- **Nothing here implements the ruling.** §3's five options are directions and
+  §4 is a recommendation; §5's pick is answered by R228 at option (1), and that
+  answer closes `M68` and `M45`(4) and nothing else. **No LAW text is drafted
+  and no sheet row moves** — the migration §5's `(1)` bullet describes is the
+  next unit of work, and it waits on the reframe's own whole-fight read.
 - **No re-opening of the reframe.** The reframe's countersigned §3 and §3.1 and
   R224's F-pick answers are untouched by this packet; the only line it adds
   there is the dated pointer under the R226 paragraph.

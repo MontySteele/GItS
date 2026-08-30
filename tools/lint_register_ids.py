@@ -276,7 +276,12 @@ CEILINGS: dict[str, int] = {
     # integration reproduced and then diagnosed off the quoted save path --
     # it is a cross-SESSION leak, and the standing "rerun the file alone"
     # workaround is the reason nobody had looked.
-    "EB": 234,   # EB-233/EB-234 minted 2026-08-30 by the post-merge review,
+    "EB": 235,   # EB-235 minted 2026-08-30 by R228 pick 1: the successor to
+                 # the closed EB-223, carrying R222 (a)'s whole-fight read of
+                 # the strict Rare Power, which KLEESPARK-W4 left UNREACHED
+                 # because the Power was drawn on seven pages and played on
+                 # none. Its unit is an uptake slot, not W4 repeated.
+                 # EB-233/EB-234 minted 2026-08-30 by the post-merge review,
                  # fact-checked against main 21a078c4. 233 is KLEESPARK-S1's
                  # S3 miss, which both the registration and the result route
                  # to BACKLOG as an instrument row and which reached none:
@@ -684,6 +689,12 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # half of KLEESPARK-S1's S3 miss, and the memory-cadence read on a
         # developed deck the kurage packet defers. Both OPEN.
         233, 234,
+        # 235 minted 2026-08-30 by R228 pick 1, successor to the CLOSED
+        # EB-223: KLEESPARK-W4 drew the strict Rare Power on seven pages and
+        # the tester played it on none, so R222 (a)'s owed whole-fight read
+        # is UNREACHED and a new registration -- an uptake slot, not W4
+        # repeated -- carries it.
+        235,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -730,9 +741,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # plumbing stays, and the Charge question moves whole to the memory
     # program (EB-229, then whole fights). Ceilings never come down.
     # M68 minted 2026-08-30 under R227 pick 4: the Furina Spotlight pick R226
-    # owed, drafted as an options packet the same day. It closes M45(4) when
-    # ruled; M45 itself stays until its other six calls are answered.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 68}),
+    # owed, drafted as an options packet the same day. It LEFT OPEN_IDS the
+    # same day with its row, closed by R228 at option (1) -- one mode, priced:
+    # Center Stage retires, Guest Cast and SPOTLIGHT_BASE_MULT = 1.5 stay, and
+    # the selector aims a Companion and costs Encore. M45(4) is answered with
+    # it; M45 itself stays until its other six calls are answered. Ceilings
+    # never come down.
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

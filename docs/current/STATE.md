@@ -578,7 +578,15 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     took that timing call at option (1): the paper work STARTED 2026-08-30, in
     parallel with `W4`** — the five blank predictions from R224's `F`-picks, a
     co-op rotation slot for the ally-rotates-the-queue cost, and the Spotlight
-    options packet. **No implementation rides it.**
+    options packet. **No implementation rides it.** **R228 (2026-08-30) then
+    ruled the Spotlight direction at option (1) — ONE MODE, PRICED:** Center
+    Stage retires, Guest Cast and `SPOTLIGHT_BASE_MULT = 1.5` stay, and the
+    selector aims a Companion and costs Encore, with the third-consumer-of-
+    Encore risk tested by a slate slot matched against Evoke and the price
+    returning with evidence if Encore proves over-subscribed. `M68` CLOSES and
+    `M45`(4) is answered with it; **nothing migrates before the reframe's own
+    whole-fight read**
+    (`review/active/furina-spotlight-options-2026-08-30.md`).
     The packet **supersedes E4 §3, §4, §7.1 and §12 on paper**
     (`review/active/furina-e4-2026-08-29.md` stays in place as the record).
     No code, no constant, no sheet row and no LAW line has moved.
@@ -697,7 +705,17 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     [USER]) / 3 UNREACHED — `proto_true_spark_knight` was drawn on seven pages
     and never played, so §5 is NOT reopened, the ADVANCE-to-sheet candidate is
     neither reached nor refused, and `EB-223` CLOSES on its own acceptance**
-    (§19 registration, §20 results).
+    (§19 registration, §20 results). **R228 (2026-08-30) took that returned
+    pick at options 4 + 6: the current sink set is KEPT as the FOLD BASELINE —
+    not proven fine, merely not condemned by an artificial granted deck — and
+    NO THIRD granted-deck batch is bought**; the `EB-233`-corrected drafted
+    mixed-pool read may still RETURN the set if natural decks fail to present
+    multiple destinations. The null is composition AND timing, not luck: two or
+    more distinct Spark-priced titles were in hand on **four** of the 50 pages
+    and **all four at a printed bank of 0**. **`EB-235` (minted by R228)
+    carries the Rare Power's whole-fight read (R222 (a)), which `W4` left
+    UNREACHED** — a NEW registration with an uptake slot, not `W4` repeated,
+    sequenced after `EB-224`'s staging.
     Then *Bag of Tricks* (`EB-224`), whose row is now BUILT in both
     engines on `EB-182`'s mode-head price — the first card in the repo to
     use the half of R225's amended clause that admits a price inside a
@@ -720,7 +738,11 @@ review's four picks, all at option (1)**: `M67` stands so Kokomi slice 2
 retires; Regent stands at `1/4/4/2` with the returned 1.500 read and the cuts
 named at the fold; `KOKOMI-SLICE1-WF`, `KLEESPARK-W4` and `KURAGEMEM002` §13.9
 are countersigned in one batch; and the Furina paper work starts in parallel
-with `W4`. So what remains here returns only WITH EVIDENCE or
+with `W4`. **R228 (2026-08-30) closed the two picks `W4` raised**: the Klee
+sink set is kept as the FOLD BASELINE with no third granted-deck batch (options
+4 + 6, the drafted mixed-pool read free to return it), and `M68` is ruled at
+option (1), one-mode priced Spotlight, so no `M`-row is open on either. So what
+remains here returns only WITH EVIDENCE or
 WITH TABLE TIME: Klee `PICK 1` (reopens if the income reads short), `M45`'s five
 (after `S4-G14`), Slot 6's fork (only on confirmation), `S4-G6`'s band (Claude
 drafts, after the Kokomi fold), and `S4-G14` itself. The slate's third section in
