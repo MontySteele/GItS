@@ -102,6 +102,9 @@ def board(directory: Path,
     tid = directory.name
     packet = _read(directory / "packet.json")
     unrun = _read(directory / "unrun.json")
+    # EB-208. NOT the same thing as UNRUN: this board ran, and what it could
+    # not do is pose the slots that count enemies.
+    unreached = _read(directory / "unreached.json")
     closeness = _read(directory / "closeness.json")
 
     graders: list[dict[str, Any]] = []
@@ -128,6 +131,9 @@ def board(directory: Path,
                       or unrun.get("slots") or [tid]),
         "unrun": bool(unrun),
         "unrun_why": str(unrun.get("why") or ""),
+        "unreached_slots": [str(s) for s in (unreached.get("slots") or [])],
+        "declared_enemies": unreached.get("declared_enemies"),
+        "live_enemies": unreached.get("live_enemies"),
         "closeness": closeness,
         "graders": graders,
     }
@@ -196,12 +202,18 @@ def slot_grades(boards: Iterable[dict[str, Any]]) -> dict[str, list[str]]:
     mechanical verdicts, mapped onto the registration vocabulary the stopping
     rule is written in. A board that declares no slot carries one, its own id
     (`StagedTurn.registered_slots`).
+
+    TWO WAYS A BOARD CARRIES NO GRADE. UNRUN is the whole board (R221 B's
+    stopping rule); UNREACHED is one slot on a board that otherwise graded
+    normally (`EB-208`: it staged fewer bodies than it declared, so a slot
+    that counts enemies was never posed on it). Either way the slot keeps its
+    bucket and simply takes nothing from that board.
     """
     out: dict[str, list[str]] = {}
     for b in boards:
         for slot in (b["slots"] or [b["turn_id"]]):
             bucket = out.setdefault(slot, [])
-            if b["unrun"]:
+            if b["unrun"] or slot in (b.get("unreached_slots") or []):
                 continue
             for g in b["graders"]:
                 bucket.append("PRED" if g["verdict"] == "SURVIVES" else "MISS")
@@ -256,6 +268,7 @@ def render(slug: str, root: Path | None = None,
     spend = codex_spend(boards)
     run = [b for b in boards if not b["unrun"]]
     unrun = [b for b in boards if b["unrun"]]
+    unreached = [b for b in boards if b["unreached_slots"]]
 
     L: list[str] = []
     L.append(heading or f"## THE ROUND -- `{slug}`")
@@ -306,6 +319,22 @@ def render(slug: str, root: Path | None = None,
         L.append(f"| `{slot}` | {', '.join(got) or '--'} "
                  f"({len(got)}) | **{state[slot]}** |")
     L.append("")
+    if unreached:
+        L.append("**Some of those grades were not taken (`EB-208`).** A board "
+                 "that staged fewer bodies than it declared is UNREACHED on "
+                 "the slots whose predicate counts enemies, and the counts "
+                 "above exclude it there -- the board was still read, graded "
+                 "and replayed for the slots it could pose.")
+        L.append("")
+        L.append("| turn | seed | slot | declared enemies | live enemies | "
+                 "reading |")
+        L.append("|---|---|---|---|---|---|")
+        for b in unreached:
+            for slot in b["unreached_slots"]:
+                L.append(f"| `{b['turn_id']}` | `{b['seed']}` | `{slot}` | "
+                         f"{b['declared_enemies']} | {b['live_enemies']} | "
+                         f"**UNREACHED** |")
+        L.append("")
 
     # --- spend
     L.append("### What the round spent")

@@ -504,15 +504,104 @@ def disk_grades(turn_ids: Sequence[str],
 
 
 def slot_state(rows: Sequence[Mapping[str, Any]],
-               grades: Mapping[str, Sequence[str]]) -> dict[str, str]:
-    """DECIDED on two or more grades that ALL agree; UNDECIDED otherwise."""
+               grades: Mapping[str, Sequence[str]],
+               unreached: Mapping[str, Sequence[str]] | None = None,
+               ) -> dict[str, str]:
+    """DECIDED on two or more grades that ALL agree; UNDECIDED otherwise.
+
+    `unreached` IS `EB-208`, AND IT IS A (BOARD, SLOT) EXCLUSION rather than a
+    board-wide one. A board that staged fewer bodies than it declared could
+    not pose the slots that COUNT enemies, so it contributes no grade to
+    those -- "a board that cannot be asked is UNREACHED by the slate's own
+    rule" -- while every other slot it carries is graded off it exactly as
+    before. The slot still appears in the state, at whatever the boards that
+    COULD pose it said, which is UNDECIDED when that is nothing.
+
+    Omitted, this is byte-for-byte the rule that shipped with R221 B.
+    """
+    skip = {str(k): {str(s) for s in v} for k, v in (unreached or {}).items()}
     per_slot: dict[str, list[str]] = {}
     for row in rows:
+        blocked = skip.get(str(row["turn_id"]), set())
         for slot in row["slots"]:
-            per_slot.setdefault(slot, []).extend(grades.get(row["turn_id"], []))
+            bucket = per_slot.setdefault(slot, [])
+            if slot in blocked:
+                continue
+            bucket.extend(grades.get(row["turn_id"], []))
     return {slot: ("DECIDED" if len(g) >= 2 and len(set(g)) == 1
                    else "UNDECIDED")
             for slot, g in per_slot.items()}
+
+
+def unreached_map(turn_ids: Sequence[str] = (),
+                  qa_dir: Path | None = None) -> dict[str, list[str]]:
+    """`turn id -> the slots EB-208 says that board may not be graded on`."""
+    from understudy import staged_turn
+    found = staged_turn.unreached_slots(qa_dir)
+    if not turn_ids:
+        return found
+    wanted = {str(t) for t in turn_ids}
+    return {k: v for k, v in found.items() if k in wanted}
+
+
+def live_count_preflight(row: Mapping[str, Any], *,
+                         qa_dir: Path | None = None,
+                         log: Any = None) -> dict[str, Any] | None:
+    """`EB-208` (a). After staging: did the game give the declared bodies?
+
+    A staged board cannot REQUIRE an enemy count -- `scenario`'s enemy
+    selectors pick among whatever spawned and nothing spawns -- so "three
+    bodies" is a wish the turn file makes and the seed grants or refuses.
+    `KLEESPARK-R2`'s `t04` declared three, drew one, and reported `S3` as
+    graded, because `EB-202`'s ceiling is computed off the DECLARED board by
+    construction and no later check looked again.
+
+    So this looks again, at the one moment the live board first exists on
+    disk: right after `stage` wrote `observed.json`. Where the counts differ,
+    the board is marked UNREACHED for the slots whose predicate READS
+    `enemy_count`, and for no others. It returns `None` -- and writes nothing
+    -- whenever it has nothing to say: no turn file, no staged record, a
+    matching count, or a round whose slots never count enemies.
+
+    IT DOES NOT STOP THE ROUND. The read, the grade and the replay all still
+    happen: the board may answer its other slots, and a read that is already
+    paid for costs nothing more. Only the counting slots are excluded.
+    """
+    from understudy import slot_plan, staged_turn
+    log = log or (lambda _m: None)
+    tid = str(row["turn_id"])
+    path = str(row.get("path") or "")
+    if not path:
+        return None
+    try:
+        turn = staged_turn.load(path)
+    except Exception:                                          # noqa: BLE001
+        # A board whose file will not parse never staged; the round has a
+        # louder problem than this check and it is not this check's to raise.
+        return None
+    declared = len(turn.board.enemies)
+    live = staged_turn.live_enemy_count(tid, root=qa_dir)
+    if live is None or live == declared:
+        return None
+    try:
+        counting = set(slot_plan.enemy_count_slots(Path(path).parent))
+    except slot_plan.SlotError:
+        counting = set()
+    carried = [s for s in (row.get("slots") or turn.registered_slots())
+               if s in counting]
+    seed = str(row.get("seed") or turn.seed or "-")
+    if not carried:
+        log(f"  {tid}: declared {declared} enem(ies), staged {live} "
+            f"(seed {seed}) -- no registered slot on this board counts "
+            f"enemies, so nothing is UNREACHED (EB-208)")
+        return None
+    staged_turn.mark_unreached(tid, seed=seed, slots=carried,
+                               declared=declared, live=live, root=qa_dir)
+    log(f"  UNREACHED {tid}: declared {declared} enem(ies), staged {live} "
+        f"(seed {seed}) -- {', '.join(carried)} take no grade from this "
+        f"board (EB-208)")
+    return {"turn_id": tid, "seed": seed, "slots": carried,
+            "declared_enemies": declared, "live_enemies": live}
 
 
 def split_rest(rest: Sequence[Mapping[str, Any]],
@@ -719,6 +808,20 @@ def deal(rows: Sequence[Mapping[str, Any]], lane_count: int
     return [i % max(1, int(lane_count)) for i in range(len(rows))]
 
 
+def _live_count(row: Mapping[str, Any],
+                out: list[dict[str, Any]] | None,
+                qa_dir: Path | None, log: Any) -> None:
+    """`live_count_preflight`, recorded. One call site's worth of bookkeeping.
+
+    A `list.append` is the only cross-thread write here and it is atomic; the
+    order the rows land in is completion order and is read by nothing but the
+    round's record, exactly like `read_order`.
+    """
+    hit = live_count_preflight(row, qa_dir=qa_dir, log=log)
+    if hit is not None and out is not None:
+        out.append(hit)
+
+
 def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
                  lane: GameLane | None = None,
                  lanes: Sequence[GameLane] | None = None,
@@ -726,8 +829,17 @@ def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
                  serial: bool = False,
                  read_workers: int = 1,
                  read_order: list[str] | None = None,
+                 unreached_out: list[dict[str, Any]] | None = None,
+                 qa_dir: Path | None = None,
                  log: Any = None) -> list[dict[str, Any]]:
     """stage -> read -> grade -> execute, per turn, with no game ever idle.
+
+    `EB-208`'S LIVE-COUNT PREFLIGHT RUNS BETWEEN THE STAGE AND THE READ, on
+    every path, because that is the first moment the live board exists on
+    disk and the last moment before a grade is taken off it. It never stops
+    the round: it writes an `unreached.json` beside the board's other records
+    and appends its row to `unreached_out`, and the read, grade and replay
+    proceed exactly as they did.
 
     ONE OR TWO GAMES, ONE MODEL. Game-bound work (`stage`, `execute`) is
     serialized PER LANE by `GameLane.step`'s lock, so two boards never drive
@@ -790,6 +902,7 @@ def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
         for row, li in zip(rows, assignment):
             one = pool[li]
             one.step("stage", row["turn_id"], lambda r=row: steps.stage(r))
+            _live_count(row, unreached_out, qa_dir, log)
             record = steps.read(row)
             if read_order is not None:
                 read_order.append(str(row["turn_id"]))
@@ -825,6 +938,7 @@ def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
             # threads can hold two different ports at once.
             one.bind()
             one.step("stage", row["turn_id"], lambda: steps.stage(row))
+            _live_count(row, unreached_out, qa_dir, log)
             staged[i].set()
             with model_lock:
                 record = steps.read(row)
@@ -957,6 +1071,7 @@ def round_slug(turn_ids: Sequence[str]) -> str:
 
 def round_summary(records: Sequence[Mapping[str, Any]], *,
                   seat_mode: str, unrun: Sequence[Mapping[str, Any]] = (),
+                  unreached: Sequence[Mapping[str, Any]] = (),
                   replays: Sequence[Mapping[str, Any]] = (),
                   registered_order: Sequence[str] = (),
                   read_order: Sequence[str] = (),
@@ -980,6 +1095,15 @@ def round_summary(records: Sequence[Mapping[str, Any]], *,
         "seat_mode": seat_mode,
         "turns": ids,
         "unrun": [str(r.get("turn_id") or "") for r in unrun],
+        # EB-208. PER (BOARD, SLOT), and named in the round's own record so a
+        # later reader sees which slot was not asked on which board rather
+        # than a grade that looks like every other grade.
+        "unreached": [dict(r) for r in unreached],
+        "unreached_note": (
+            "a board that staged fewer bodies than it declared is UNREACHED "
+            "on the slots whose predicate counts enemies, and contributes no "
+            "grade to them. It was still read, graded and replayed for its "
+            "other slots (EB-208)"),
         "replays": list(replays),
         "read_workers": int(read_workers),
         "registered_order": [str(t) for t in registered_order] or ids,
@@ -1248,6 +1372,7 @@ def cmd_round(args) -> int:
     pool = _live_lanes(args)
     records: list[dict[str, Any]] = []
     unrun: list[dict[str, Any]] = []
+    unreached: list[dict[str, Any]] = []
     read_order: list[str] = []
     registered = [str(r["turn_id"]) for r in list(first) + list(rest)]
     try:
@@ -1256,7 +1381,8 @@ def cmd_round(args) -> int:
         records += run_pipeline(first, lanes=pool, steps=steps,
                                 serial=args.serial,
                                 read_workers=read_workers,
-                                read_order=read_order, log=print)
+                                read_order=read_order,
+                                unreached_out=unreached, log=print)
         if rest:
             # EB-209. IN THE SHADOW CHAIR THE STOPPING RULE READS THE DECIDING
             # GRADES AND NOTHING ELSE. The shadow forms are the only verdicts
@@ -1267,8 +1393,15 @@ def cmd_round(args) -> int:
             # runs, which is the safe direction, and is what KLEESPARK-R2 did
             # by accident rather than by rule.
             shadow = args.seat_mode == SHADOW_ROLE
-            state = slot_state(first, disk_grades(
-                [r["turn_id"] for r in first], deciding_only=shadow))
+            # EB-208. The (board, slot) pairs the live-count preflight
+            # excluded are dropped from the stopping rule's arithmetic before
+            # it runs: a slot decided by a board that could not pose it is
+            # decided by nothing.
+            state = slot_state(
+                first,
+                disk_grades([r["turn_id"] for r in first],
+                            deciding_only=shadow),
+                unreached_map([r["turn_id"] for r in first]))
             to_run, skipped = split_rest(rest, state)
             print("\nR221 B -- after the first set"
                   + (" (EB-209: DECIDING grades only; a refused deciding "
@@ -1287,7 +1420,8 @@ def cmd_round(args) -> int:
             records += run_pipeline(to_run, lanes=pool, steps=steps,
                                     serial=args.serial,
                                     read_workers=read_workers,
-                                    read_order=read_order, log=print)
+                                    read_order=read_order,
+                                    unreached_out=unreached, log=print)
     finally:
         # IN REVERSE. Lane 0 owns the shared game-directory changes -- the
         # appid file and the `mods/STS2_MCP` install -- and removing them
@@ -1307,6 +1441,7 @@ def cmd_round(args) -> int:
     # the seat sat in: a `deciding` round has no shadow and the count is
     # honestly zero-of-zero rather than absent.
     summary = round_summary(records, seat_mode=args.seat_mode, unrun=unrun,
+                            unreached=unreached,
                             replays=steps.replays,
                             registered_order=registered,
                             read_order=read_order,
@@ -1334,6 +1469,14 @@ def cmd_round(args) -> int:
     if unrun:
         print(f"\n{len(unrun)} board(s) recorded UNRUN with their seeds "
               f"pinned; see review/qa/ledger.tsv")
+    if unreached:
+        print(f"\nEB-208 -- {len(unreached)} board(s) staged an enemy count "
+              f"the file did not declare; those slots take NO grade from "
+              f"them:")
+        for row in unreached:
+            print(f"  {row['turn_id']} (seed {row['seed']}): declared "
+                  f"{row['declared_enemies']}, live {row['live_enemies']} -- "
+                  f"UNREACHED on {', '.join(row['slots'])}")
     return 0
 
 
