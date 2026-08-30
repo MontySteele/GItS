@@ -4026,3 +4026,184 @@ which is itself struck: `W2` ran on `0.2.1600+proto.dirty`, so
 shipped threshold rule was retired, not live. See the erratum at §16.4
 contamination 1 for the citations. The printed bank never exceeded 1 against
 that rule's threshold of 3, so no grade moves.
+
+## 17. `KLEESPARK-S1` — the Spark arm measured DRAFTED, in the sim
+
+**REGISTRATION. Drafted from written intent and committed BEFORE any run**
+(R212(2), EXPERIMENTS *Pre-registration + blind grading*). Nothing below was
+written after a number was seen; the instrument that produces the numbers is a
+SEPARATE, LATER commit, and the run is a third. R101b binds: nothing already
+published in §11–§16 is re-read, re-graded or rewritten by this section.
+
+### 17.1 Intent — why this read exists, quoted
+
+**R225 item 1, answering §16.11 pick 1, verbatim:**
+
+> **ANSWERED by R225 (2026-08-30): (a′).** Option (a) — the generation question
+> first, no new sink row and no re-price — with one qualification adopted from
+> the relayed review. `W2`'s granted deck ran **two Spark makers against eleven
+> Spark-priced sinks**, both starter rows granted a second time, so the run
+> shows that THAT deck could not fund its pool, not yet that the one-for-one
+> draft economy needs more generation. The `W1'` decision text stands as
+> registered (R101b); this is its reading. The next evidence is a
+> **representative deck, not a `W2` re-grant**: first `EB-205`'s sim-drafted
+> arm, which costs no game time and is now the next Klee read, then a live
+> controlled-ratio deck under a fresh registration Claude drafts.
+
+**§14.4's conditions, the two that reach a SIM read, verbatim:**
+
+> 1. **A capped batch, and UNREACHED is a real outcome.** […] If the batch's
+>    cap is reached without that, the registration grades **UNREACHED**, not
+>    FALSE: §12.9 already found the precondition was never met once, and a hold
+>    prediction evaluated on a board that never offered a choice measures the
+>    generator, not the sink. UNREACHED must be a printed outcome on the slate
+>    before the run, or the grader will be tempted to read a null as a
+>    refutation.
+
+> 3. **The deck includes the existing utility spenders, and Rummage.** The
+>    granted deck carries `hold_the_line`, `smoke_and_sparks` and
+>    `powder_charge` — **Spark-only under `SPARK_ALT_COST_ENABLED`**, the form
+>    R224 gave them — alongside the prototype ladder, **and
+>    `proto_spark_priced_draw` (Rummage), FOLDED IN by R224 (slate item 19)**
+>    […]
+
+**§14.4's conditions 2, 4 and 5 do NOT reach this read, and are printed here so
+their absence is not read as an omission.** Condition 2 (a hold counts only
+when the model NAMES what it is holding for) has no referent: the tier-0.5
+pilot is a scoring function with no recorded reasoning, so the *named-hold*
+half is unmeasurable in sim by construction and no slot below claims it — the
+bare detector is all a sim can carry, and it is carried as a RECORDED number,
+not as a hold reading. Condition 4 (the price-3 rung) is UNREACHED by
+construction for the same reason §16.4 printed it so: R224 took option (5) in
+its **migrate-only** form, Powder Keg was not built, and there is no redesigned
+price-3 row to buy. Condition 5 (an author-disjoint deciding seat) reaches a
+MODEL-GRADED run; every number below is produced by a committed mechanical
+script over the sim's own log, so there is no grading chair for authorship to
+attach to.
+
+**What this read is FOR, stated as the act it selects between.** R225 puts the
+generation question ahead of every sink question and names a **live
+controlled-ratio deck** as the evidence after this one. This read answers, in
+the sim and at no game cost, whether the ONE-FOR-ONE DRAFT ECONOMY reaches its
+non-damage sinks on a deck the drafter actually built — and it hands the live
+registration the **maker:sink ratio** it should stage, derived from the drafted
+decks' own median rather than picked.
+
+### 17.2 The arm, exactly
+
+**The shipped Klee pool with `SPARK_ALT_COST_ENABLED` set true**, and nothing
+else. No card is granted, injected or forced; `force_cards` is `None`. What the
+flag turns on, exhaustively, is what `tier0/constants.py` says it turns on:
+
+1. **The substituted starter** (`loader._starter_ids`,
+   `C.SPARK_ALT_STARTER_SUBS`): one `pop` → `proto_pop_spark` (Powder Pop, the
+   Basic that MAKES) and one `kaboom` → `proto_kaboom_sink` (Ka-pow!, the Basic
+   that SPENDS). Klee's starter is randomized per run off its own rng stream,
+   so the substituted pair is present in every run of the arm by construction
+   and the rest of the ten vary.
+2. **The one-for-one pool substitutions** (`loader._pool_substitutions`,
+   `C.SPARK_ALT_POOL_SUBS`), PICK 4's map: `sparkly_treasure` → Fwoosh!,
+   `spark_collection` → Bang Bang!, `pocket_fireworks` → Tinder Toss,
+   `sugar_rush` → Dodoco Blast, `cant_catch_me` → Firework Finale. Same rarity
+   in and out, so the offer odds are untouched.
+3. **The three `EB-218` Spark-only twins**, migrated by R224 slate item 16:
+   `powder_charge` → Set It Off, `hold_the_line` → Dig In, `smoke_and_sparks` →
+   Powder Smoke — the same bodies at 0 Energy with the price paid wholly in
+   Sparks. Three Uncommons in, three Uncommons out.
+
+**`proto_true_spark_knight` is EXCLUDED**, on §12.2's published D4 grounds and
+exactly as `KLEESPARK-W2` excluded it. Mechanically: the arm pops the
+`true_spark_knight` key out of `C.SPARK_ALT_POOL_SUBS` for the duration of the
+run, so the Rare offer slot serves the SHIPPED row and the offer odds are again
+untouched. Its own whole-fight read is `EB-223` and is not this read.
+
+**Rummage (`proto_spark_priced_draw`) is IN §14.4 condition 3's deck and is NOT
+REACHABLE BY DRAFT, and this is stated before the run rather than found after
+it.** `C.SPARK_ALT_POOL_SUBS` carries no entry for it — it has no shipped twin
+to substitute for, because it was authored as a new row rather than as a
+conversion — so `rewards.character_pool("klee")` cannot offer it under the flag
+and no drafted deck can contain it. **This is a fact about the seam, read off
+`constants.py` and confirmed against `rewards.character_pool` before any run,
+not a result.** Slot `S5` below registers it as an instrument check and names
+the decision it changes: a live controlled-ratio deck must GRANT Rummage rather
+than expect a draft to find it.
+
+**The four NON-DAMAGE sinks, named once and taken from §16.4 unchanged so the
+two reads are comparable**: Set It Off, Dig In, Powder Smoke, Rummage. **The
+six DAMAGE sinks**: Ka-pow!, Fwoosh!, Tinder Toss, Bang Bang!, Dodoco Blast,
+Firework Finale. Under this arm's pool the reachable non-damage sinks are the
+three twins, **every one of them priced 2**, which is why every affordability
+threshold below is 2 — the same *cheapest non-damage price of 2* `W1'` was
+graded against.
+
+**A MAKER is a deck card carrying a top-level `gain_spark` op**; a **SINK** is
+a deck card carrying a top-level `spend_spark` op (`combat.spark_cost`'s own
+rule). Both are read off the card sheet, not off play, so the ratio is a
+property of the DECK and not of a draw.
+
+### 17.3 The cell, the control, and the budget
+
+| | |
+|---|---|
+| cell | `cells.CANONICAL.but(character="klee", archetype="demolition", name="kleespark-s1")` — **600 runs, seed 11, route `hunter`, `assigned` policy, realistic loadout (relics + potions), every act** |
+| world stamp | **`RT12 / D18 / P11 / C20`**, `PILOT_WEIGHTS_VERSION` 6, read live off `tier05.cells.world_stamp()` and printed in the record's header. A stamp that differs at run time is DISCLOSED in §17.6 and the read is not published against a moved world |
+| stamps this read moves | **NONE.** The instrument is a new module plus its test; it adds no constant, no drafter dial, no policy branch and no engine rule. `SPARK_ALT_VALUE` and the two shipped dials are untouched, and the flag is flipped at run time and restored in a `finally` |
+| arms | **TWO. `flag ON` is the arm.** `flag OFF` — the shipped Klee pool, same cell, same seeds — is a paired CONTROL, **RECORDED and NOT GRADED**: it exists so the ON arm's maker:sink ratio can be read against the pool it was converted out of, and no prediction below is registered on it |
+| jobs | **0 (in-process).** The observer wraps the pilot and `run_fight`, and a `jobs > 0` batch runs in worker processes the wrapper never reaches. Stated because it is a real constraint on the cell, not a preference |
+| compute budget | **≤ 30 minutes for both arms.** Sized before the run off a bare 20-run timing probe on this tree (1.0 s / 20 runs, no telemetry), so 1,200 instrumented runs has ample headroom. **If the driver exceeds 30 minutes it is stopped and the record publishes what completed, with the completed run count as the denominator** |
+| grader | `tier05/exp_klee_sparks_s1.py`, committed BEFORE the run in its own commit. Every falsifier below is one of its printed fields; no grade reads a judgement |
+
+### 17.4 The slate — five predictions, drafted from §14's written intent
+
+**Affordability, defined once for the whole slate.** At a pilot decision, a hand
+card is **AFFORDABLE** when its printed Spark price is ≥ 1 and ≤ the player's
+current Spark bank. A second, stricter count — affordable AND
+`combat.card_playable` — is printed beside every affordability figure so the
+Energy/gate half is visible, but **every threshold below is registered on the
+bank-only count**, because R225 puts the INCOME question first and the bank is
+what income buys.
+
+**A drafted deck** is a run's `deck_ids` at the floor named. Floors are the
+run's own floor indices (`node_kinds` index; `MAP_FLOORS` = 16 per act), and a
+deck is counted at floor F only if the run REACHED floor F — which is stated so
+a shrinking denominator is never read as a shrinking ratio.
+
+| # | slot | prediction | falsifier, mechanically | UNREACHED when | the decision the outcome changes |
+|---|---|---|---|---|---|
+| `S1` | **Per-fight PEAK Spark bank.** `W1'` read a printed peak that never exceeded 1 on a granted deck; §14's intent is that a deck whose generators were NOT converted away funds its own pool. | **The median per-fight peak bank is ≥ 2, AND ≥ 60% of fights reach a peak of ≥ 2.** | Peak = `max` over the fight's log of every `gain_spark`/`spend_spark` event's `total` field, and 0 for a fight with no Spark event. Both halves hold = **PREDICTED**; exactly one = **SPLIT**; neither = **MISS**. | fewer than 100 fights are recorded across the arm | **PREDICTED**: the drafted economy reaches the price-2 rung, `W1'`'s null is a property of `W2`'s GRANTED deck and not of the one-for-one economy, and the live controlled-ratio deck is registered to test SPENDING rather than income. **MISS**: the generation pattern is confirmed as the governor on a representative deck too, and it stays ahead of every sink question — the live registration is about INCOME, and no sink row and no re-price may be proposed off either read. **SPLIT**: the live deck is registered at the ratio `S4` hands it and the income question stays open. |
+| `S2` | **Share of player turns on which a NON-DAMAGE sink was affordable at least once.** The number §16.11 pick 1 says a representative deck has to produce; `W2`'s was 0. | **≥ 15% of player turns.** | Over every pilot decision in every fight: a turn counts when at least one card in hand is a registered non-damage sink AND its price (2) ≤ the bank at that decision. **≥ 15% = PREDICTED; 5% to < 15% = SPLIT; < 5% = MISS.** | `S3` reads 0 — no drafted deck ever held a non-damage sink, so no turn could pose the question and the fault is the OFFER, not the bank | **PREDICTED**: the non-damage destination is reachable in a drafted deck, and the live controlled-ratio deck is staged to ask whether it is CHOSEN. **MISS**: the destination is unreachable on a representative deck as well, which is the same finding `W1'` made and is a second, independent witness for the generation-first order. **UNREACHED**: the question is a draft-offer question and the live deck must grant its non-damage sinks outright. |
+| `S3` | **Share of drafted decks holding ≥ 1 non-damage sink** (final deck). Three Uncommon twins sit in a 31-card uncommon tier, so this is an offer-and-score question, not a bank question. | **≥ 50% of runs.** | Count runs whose final `deck_ids` contain any of Set It Off / Dig In / Powder Smoke / Rummage. **≥ 50% = PREDICTED; 20% to < 50% = SPLIT; < 20% = MISS.** | never — the pool is verified to contain all three before the run | **PREDICTED**: `S2`'s reading is about the BANK, and the live deck may take the drafted composition as representative. **MISS**: the drafter does not value the migrated twins at `SPARK_ALT_VALUE` = 4.00, which is a SCORER finding and not an income finding — it goes to `BACKLOG` as an instrument row, and the live controlled-ratio deck must grant its non-damage sinks. **SPLIT**: same, weaker; the live deck grants them and the scorer question is recorded. |
+| `S4` | **Maker : sink ratio of the drafted deck at floors 5, 10 and 15.** PICK 4's map converts five makers into sinks in the offerable pool, so the intent's own arithmetic says the ratio falls as a run drafts. **THIS SLOT'S FLOOR-15 MEDIAN IS THE NUMBER THE LIVE REGISTRATION INHERITS.** | **The median ratio FALLS from floor 5 to floor 15, AND the floor-15 median lies in [0.30, 0.80].** | Ratio = makers ÷ sinks in the deck at that floor, undefined (excluded) when sinks = 0. Both halves hold = **PREDICTED**; exactly one = **SPLIT**; neither = **MISS**. | fewer than 30 runs reach floor 15 | **ANY graded outcome hands the live registration its ratio** — the live controlled-ratio deck is staged at the floor-15 MEDIAN, whatever it is, so the live registration inherits a number rather than a pick. **PREDICTED**: the drafted economy dilutes its own generation, which is the mechanism `W1'`'s null pointed at, and the live deck tests that ratio directly. **MISS with a ratio ABOVE 0.80**: `W2`'s 2:11 was an artefact of granting, the drafted economy is generator-rich, and the live deck is staged at the drafted median rather than at `W2`'s. |
+| `S5` | **Rummage draw rate — an INSTRUMENT CHECK, not a reading about the card.** | **EXACTLY 0.0%**, because `C.SPARK_ALT_POOL_SUBS` carries no Rummage entry and no drafted deck can contain it. | Share of runs whose deck ever contains `proto_spark_priced_draw`, and share of fights in which it is drawn. **Exactly 0 = PREDICTED; anything > 0 = MISS** (which would mean the substitution map or this instrument is wrong, and the whole read would be withdrawn before publication). | never | **PREDICTED**: §14.4 condition 3's Rummage half is UNREACHABLE BY DRAFT, so the live controlled-ratio deck must **GRANT** Rummage; a drafted live deck would silently drop it. **MISS**: the instrument is wrong and no number in this section is published. |
+
+**Contamination and blind spots, stated before the run.**
+
+1. **`W1`, `W2` and `R2`'s results have been read.** None sets a number above.
+   `S1`'s threshold of 2 is §16.4's own cheapest-non-damage price, not `W2`'s
+   observed 1; `S2`'s 15% and `S3`'s 50% are drafted from §14.1's intent that
+   the bank have a second kind of destination, and have no live counterpart at
+   all (`W2`'s was 0 on a deck whose composition this arm does not share);
+   `S4`'s band is derived below rather than observed.
+2. **`S4`'s band is DERIVED, and the derivation is printed so it can be
+   checked.** Klee's starter under the flag ships exactly one maker (Powder
+   Pop) and one sink (Ka-pow!) among the substituted pair — ratio 1.0 from the
+   substitution alone. The offerable pool loses five makers to PICK 4's map and
+   gains five sinks, and the three `EB-218` twins add three more sinks with no
+   maker beside them, so every draft that touches the Spark family moves the
+   ratio DOWN. Eight added sinks against zero added makers, on a substitution
+   at 1:1, puts a fully-drafted ratio well under 1; **0.80** is the loosest
+   reading that still says "fell", and **0.30** is roughly the ratio a deck
+   reaches if it drafts the family hard (1 maker : 3 sinks). The band is wide on
+   purpose: a narrow band drafted from arithmetic rather than from data would be
+   a guess wearing a threshold.
+3. **The sim is one seat and has no display.** Nothing here measures legibility,
+   a badge, a face or a player's understanding. Guardrail-7 applies whole: every
+   number below is a FLOOR produced by a scoring pilot, and none of them is a
+   claim about whether the arm is fun, good, or ready.
+4. **The pilot is `P11`, whose Spark literacy is a hold-versus-spend term.** It
+   is not a player. A low `S2` is a statement about the BANK on the turns the
+   pilot reached, and a high one is not evidence that a human would notice the
+   destination.
+5. **No win rate is registered and none may be quoted off this read** (R215 B).
+   The instrument prints one because the run layer produces it; it is a
+   diagnostic, it grades nothing, and it is not comparable to any published arm.

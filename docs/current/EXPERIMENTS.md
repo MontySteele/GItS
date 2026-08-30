@@ -277,6 +277,32 @@ carried while it was active is in the commit message that retired it.
   gate is discharged. Under R212(2) the §5 slate is drafted and committed
   DRAFTED by Claude, then countersigned in batch →
   `review/active/charge-reads-per-turn-registration-2026-08-13.md`.
+- **`KLEESPARK-S1` — the Klee Spark arm measured DRAFTED, in the sim
+  (`EB-205`)** — **REGISTERED, UNRUN**; packet
+  `review/active/klee-sparks-2026-08-29.md` §17, slate at §17.4, committed
+  DRAFTED before any run under R212(2). **Why:** R225 item 1 (a′) puts the
+  GENERATION question ahead of every sink question and rules that `W2`'s
+  granted deck (2 makers : 11 Spark-priced sinks) cannot answer whether the
+  ONE-FOR-ONE DRAFT ECONOMY reaches its non-damage sinks; the next evidence is
+  a REPRESENTATIVE deck — this sim-drafted arm first, at no game cost, then a
+  live controlled-ratio deck under a fresh registration. **Arm:** the shipped
+  Klee pool with `SPARK_ALT_COST_ENABLED` true — substituted starter, PICK 4's
+  one-for-one pool substitutions, the three `EB-218` Spark-only twins;
+  `proto_true_spark_knight` EXCLUDED on §12.2's grounds as `KLEESPARK-W2`
+  excluded it; nothing granted or forced. Rummage is registered UNREACHABLE BY
+  DRAFT (no `SPARK_ALT_POOL_SUBS` entry) as slot `S5`'s instrument check.
+  **Instrument:** `tier05/exp_klee_sparks_s1.py`, committed BEFORE the run;
+  emit-only, moves no `RT/D/P/C` version. **Cell:**
+  `cells.CANONICAL.but(character="klee", archetype="demolition")` — 600 runs,
+  seed 11, hunter, realistic, `jobs=0`, at `RT12/D18/P11/C20`; a paired
+  flag-OFF control is RECORDED and NOT GRADED. **Slots:** `S1` per-fight peak
+  Spark bank, `S2` share of turns with a non-damage sink affordable, `S3` share
+  of drafted decks holding one, `S4` maker:sink ratio at floors 5/10/15 — whose
+  floor-15 MEDIAN is the ratio the live registration INHERITS — and `S5`
+  Rummage. **Decision linkage (R206), and it is the only one:** whether the
+  generation pattern moves ahead of the remaining sink questions, and what the
+  live controlled-ratio deck looks like. No re-price and no new sink row may be
+  taken off it (R225).
 - **Kokomi stability band (D5)** — no band is declared, so it rides DARK
   (`band = None`). The declaration is QUEUE `S4-G6`; its grading playtest is
   `docs/current/playtest/kokomi-playtest-protocol.md` (unrun, Answers block
