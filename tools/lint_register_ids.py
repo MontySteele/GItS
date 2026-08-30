@@ -126,7 +126,11 @@ CEILINGS: dict[str, int] = {
     # both shifted up one and the packet carries a pointer saying so.
     # EB-198 minted 2026-08-29 by the KURAGEMEM001 blind run: the tester read
     # the memory strip as inconsistent twice, undiagnosed on purpose.
-    "EB": 201,   # EB-201 minted 2026-08-29 by EB-198's live acceptance: the
+    "EB": 205,   # EB-205 minted 2026-08-29 by R220 pick 6(d): the Klee Spark
+                 # arm became DRAFTABLE (the pool seam) and has never been
+                 # measured drafted. 202-204 are other branches of the same
+                 # sitting; this branch took the next free number above them.
+                 # EB-201 minted 2026-08-29 by EB-198's live acceptance: the
                  # pile view's affordability rings never paint, on a hook that
                  # binds without error and a pile that demonstrably opens.
                  # EB-196/197 minted 2026-08-29 by the Gate B diagnosis. 196:
@@ -391,6 +395,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 201 minted 2026-08-29 by EB-198's live acceptance: the pile view's
         # affordability rings never paint.
         201,
+        # 205 minted 2026-08-29 by R220 pick 6(d): a drafted arm for the
+        # Klee Spark economy, now that the drafter can be offered the rows.
+        205,
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,

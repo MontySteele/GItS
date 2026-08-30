@@ -1209,15 +1209,16 @@ def _spark_unit_value(state: CombatState, card: Card) -> float:
       (2) SPARKS ALREADY IN FLIGHT. Bombs on the board will pay the relic on
           detonation; the pilot prices the bank it HAS, never the bank it is
           about to have, so it cannot plan a two-turn purchase.
-      (3) THE FLOOR OF ITS OWN POWER, and this is the largest one. Under the
-          strict Rare Power, spending to 2 Sparks makes EVERY unpriced Attack
-          in hand unplayable. Leg 3 does NOT catch it: `_spark_bank_probe`
-          asks what a card is WORTH at a bank, not whether it is PLAYABLE at
-          one, and an Attack's expected damage is the same float either way.
-          A pilot holding the Power will therefore spend itself out of its own
-          Attack suite. Naming it is the honest move; fixing it means
-          teaching the probe playability, which is a policy version bump and
-          not this branch's to take.
+      (3) THE FLOOR OF ITS OWN POWER -- REPAIRED, and this note is kept
+          because it says what the repair had to be. Under the strict Rare
+          Power, spending to 2 Sparks makes EVERY unpriced Attack in hand
+          unplayable, and leg 3 could not catch it: `_spark_bank_probe` asks
+          what a card is WORTH at a bank, not whether it is PLAYABLE at one,
+          and an Attack's expected damage is the same float either way. That
+          is now LEG 4, `_spark_playability_loss`, which walks the hand for
+          cards affordable BEFORE this spend and not after and charges the
+          largest of their payoffs. It is gated on this same flag and moves no
+          flag-off number, so it is not a `POLICY_VERSION` event.
       (4) MULTI-TURN VALUE. One Spark banked across two turns and one Spark
           spent now score identically; nothing in the term is a discount rate.
     """
@@ -1258,6 +1259,80 @@ def _spark_free_attack_loss(state: CombatState,
     return threshold * C.PILOT_SPARK_VALUE
 
 
+def _spark_playability_loss(state: CombatState, card: Card,
+                            before: int, after: int) -> float:
+    """LEG 4, and it exists ONLY under `C.SPARK_ALT_COST_ENABLED` (R220 pick
+    6(d), the first half: make the pilot able to PLAY a priced economy).
+
+    THE HOLE IT FILLS, named verbatim by `_spark_unit_value`'s blind spot (3)
+    and by the `KLEESPARK-R1` packet sec.11.5: `_spark_bank_probe` asks what a
+    card is WORTH at a bank, never whether it is PLAYABLE at one, and an
+    Attack's expected damage is the same float at bank 0 and bank 9. So leg 3
+    -- which is a difference of two probes -- returns EXACTLY 0.0 for the one
+    consequence a human prices first: paying for the small sink now means the
+    big sink in the same hand cannot be played at all this turn.
+
+    THE TERM. Walk the rest of the hand for cards that carry a Spark price the
+    bank can meet at `before` and cannot meet at `after`. Each one is a card
+    that was playable and is not; the loss is its WHOLE payoff at the bank it
+    would have been played at, not a difference. The LARGEST such payoff is
+    taken, matching legs 1-3's "the biggest single thing forfeited" shape --
+    the pilot gets one more turn, so it could only have cashed one of them.
+
+    WHY THE WHOLE PAYOFF AND NOT A DISCOUNTED ONE. A card locked out this turn
+    is not destroyed; it is deferred, and the deferral is usually one turn.
+    Charging the whole payoff therefore OVER-values holding, which is the
+    opposite of R194's usual direction -- and it is deliberate here, because
+    the standing error runs the other way (the packet measures the ON arm
+    spending a higher share of its income than the OFF arm) and because the
+    losing side of the trade is the visible one: the pilot that cannot see
+    this spends 1 Spark on a 5-damage Attack and forfeits a 20-damage
+    finisher. The term still cannot invent a hold: with no OTHER priced card
+    in hand it is exactly 0.0, and it is capped by that card's own payoff, so
+    a bank held for nothing is still worth nothing.
+
+    HAND ONLY, and the scored card excluded -- legs 1 and 3's rules, for the
+    same two reasons (draw-pile knowledge the player does not have; a card's
+    own payoff is scored on its own terms).
+    """
+    if not C.SPARK_ALT_COST_ENABLED:
+        return 0.0
+    if not C.SPARK_ALT_COST_ENABLED:
+        return 0.0
+    return max(0.0, (_spark_best_alternative(state, card, before)
+                     - _spark_best_alternative(state, card, after)))
+
+
+def _spark_best_alternative(state: CombatState, card: Card,
+                            bank: int) -> float:
+    """The best OTHER thing in hand this bank can buy right now, or 0.0.
+
+    ONE card, not a basket. The pilot plays one card per decision and the
+    Sparks it does not spend stay in the bank, so the alternative to this
+    play is the single best affordable sink in the same hand -- never a sum,
+    and never a per-Spark rate multiplied back up by a price the hand has no
+    second sink to absorb. That multiplication is what leg 1 does, and it is
+    why leg 1 is CAPPED by this function under the flag: with one 3-priced
+    sink in hand, `3 x (its payoff / 3)` and `its payoff` agree, but with a
+    1-priced sink setting the rate, `3 x rate` claims three copies of a card
+    the hand holds once.
+
+    Payoff is read at `bank`, the counterfactual the caller is asking about,
+    through the same `_spark_bank_probe` legs 1 and 3 use.
+    """
+    best = 0.0
+    for other in state.player.hand:
+        if other is card:
+            continue
+        price = spark_price(state, other)
+        if not price or price > bank:
+            continue
+        payoff = _spark_bank_probe(state, other, bank)
+        if payoff > best:
+            best = payoff
+    return best
+
+
 def _spark_hold_cost(state: CombatState, card: Card) -> float:
     """What the Sparks this play consumes are worth BANKED. See the block
     comment above for the three legs and why the largest wins.
@@ -1283,9 +1358,22 @@ def _spark_hold_cost(state: CombatState, card: Card) -> float:
     stock = ((before - after) * _spark_unit_value(state, card)
              if C.SPARK_ALT_COST_ENABLED
              else (before - after) * C.PILOT_SPARK_VALUE)
+    if C.SPARK_ALT_COST_ENABLED:
+        # THE CAP (R220 pick 6(d)). Leg 1 is a per-Spark RATE multiplied by
+        # the whole price, and the hand may hold nothing to spend the rest
+        # on: a 1-priced sink setting the rate makes a 3-Spark play look
+        # like three of it. Bounded by the single best thing the bank could
+        # otherwise buy, the term stops charging for purchases the hand
+        # cannot make -- which is what made the pilot score its whole hand
+        # negative and pass the turn holding a bank it had no bigger use
+        # for. Flag-gated; the else-branch above is untouched.
+        stock = min(stock, _spark_best_alternative(state, card, before))
     return max(stock,
                _spark_free_attack_loss(state, before, after),
-               _spark_reader_loss(state, card, before, after))
+               _spark_reader_loss(state, card, before, after),
+               # LEG 4, flag-gated and 0.0 with the flag off: the sink in hand
+               # this spend makes UNPLAYABLE. See `_spark_playability_loss`.
+               _spark_playability_loss(state, card, before, after))
 
 
 def _stoke_value(state: CombatState, card: Card) -> float:
@@ -1382,7 +1470,18 @@ def _score(state: CombatState, card: Card, w: dict,
     # body a mode resolves. Gated on the printed price, which is 0 for every
     # card in the repo but three -- so nothing else pays for the lookup and
     # nothing else moves.
-    if spark_cost(card):
+    #
+    # THE FLAG'S HALF (R220 pick 6(d), the playability repair). With
+    # `C.SPARK_ALT_COST_ENABLED` on a price can also come from the strict Rare
+    # Power, which is NOT printed on the card -- so gating the lookup on
+    # `spark_cost` alone let a converted Attack drain three Sparks and be
+    # charged nothing for them, which is exactly the blind spot (3)
+    # `_spark_unit_value` names. The disjunct is DEAD with the flag off
+    # (`spark_power_price` returns 0 there, so `spark_price == spark_cost` for
+    # every card in the repo), which is what keeps every shipped number
+    # byte-identical and `POLICY_VERSION` still.
+    if spark_cost(card) or (C.SPARK_ALT_COST_ENABLED
+                            and spark_price(state, card)):
         total -= SPARK_HOLD_VALUE_WEIGHT * _spark_hold_cost(state, card)
     # EB-29t: every Skill played feeds each Enraged enemy its enrage stacks
     # in PERMANENT Strength (R128 _finish_play). Priced as +n damage on each
