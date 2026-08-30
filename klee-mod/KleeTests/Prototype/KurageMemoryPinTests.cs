@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
+using Godot;
 using KleeMod.Cards;
 using KleeMod.Cards.Generated;
 using KleeMod.Powers;
@@ -630,5 +631,77 @@ public class KurageMemoryPinTests
                         Il.Calls(Il.Method("KurageMemoryCard", "OpenQueue")));
         Assert.Contains("KurageMemory.Affordability",
                         Il.Calls(Il.Method("KurageMemory", "Snapshot")));
+    }
+
+    // ------------------------------------------- the pile ring (`EB-201`) --
+    //
+    // WHY THESE ARE STRUCTURAL AND ONE IS A VALUE. The ring is a Godot `Panel`
+    // parented to a pooled `NCard` inside the base game's pile grid: nothing
+    // headless can see it drawn. What CAN be reached is the one thing that was
+    // actually wrong -- its RECT -- because that is arithmetic on a base-game
+    // constant, and the two calls that put it on screen.
+
+    [Fact]
+    public void The_pile_ring_takes_its_rect_from_the_card_face_not_an_anchor()
+    {
+        // EB-201's cause. The first cut anchored the ring `FullRect` to the
+        // `NCard`, whose own Control rect is NOT the card face: the holder pins
+        // `CardNode.Position` to zero and the grid places holders at the CELL
+        // CENTRE, and `NCard.GetCurrentSize` returns the CONSTANT
+        // `defaultSize * Scale` rather than reading `Size`. The preset
+        // therefore produced a 0x0 Panel -- correctly parented, correctly
+        // coloured, zero pixels wide. This pin FAILS on that cut, where
+        // `RingRect` does not exist at all.
+        Assert.Contains("KurageMemoryPileRing.RectFor",
+                        Il.Calls(Il.Method("KurageMemoryPileRing", "RingRect")));
+    }
+
+    [Fact]
+    public void The_pile_ring_is_the_card_face_centred_on_the_node_origin()
+    {
+        // The value, not just the shape: 300x422 (`NCard.defaultSize`) with its
+        // top-left at minus half of that, because the face is drawn centred on
+        // the node's origin. Neutering the offset back to `Vector2.Zero` -- the
+        // top-left rect an anchor preset would have produced -- fails here.
+        // `RectFor` rather than `RingRect`: reading `NCard.defaultSize` runs
+        // NCard's static constructor, which builds `StringName`s through the
+        // native library and kills the test host (0xC0000005). The split is
+        // what makes the value reachable at all.
+        var rect = (Rect2)Il.Method("KurageMemoryPileRing", "RectFor")
+                            .Invoke(null, new object[] { new Vector2(300f, 422f) })!;
+
+        Assert.Equal(300f, rect.Size.X);
+        Assert.Equal(422f, rect.Size.Y);
+        Assert.Equal(-150f, rect.Position.X);
+        Assert.Equal(-211f, rect.Position.Y);
+    }
+
+    [Fact]
+    public void The_pile_ring_sizes_itself_and_moves_over_the_face()
+    {
+        // Both halves of the repair, at the one seam that applies them. The
+        // rect is re-applied every paint because a pooled `NCard` arrives
+        // carrying whatever the last screen left on it, and the ring is moved
+        // to LAST CHILD so it draws over `%CardContainer` rather than under it.
+        var calls = Il.Calls(Il.Method("KurageMemoryPileRing", "Paint"));
+
+        Assert.Contains("KurageMemoryPileRing.RingRect", calls);
+        Assert.Contains("Control.set_Size", calls);
+        Assert.Contains("GodotTreeExtensions.MoveChildSafely", calls);
+    }
+
+    [Fact]
+    public void The_pile_ring_still_arms_off_the_redraw_the_game_already_does()
+    {
+        // NOT re-pointed. `NCardGrid.InitGrid` calls `nCard.UpdateVisuals` on
+        // every entry it builds and `NCardHolder.ReassignToCard` calls it again
+        // on the scrolled-window reuse path; `UpdateVisuals` calls
+        // `UpdateStarCostVisuals` unconditionally. The hook was never the
+        // defect, so this pin exists to catch a later "fix" that moves it.
+        Assert.Contains(
+            "KurageMemoryPileRing.Paint",
+            Il.Calls(Il.Method(
+                "NCard_UpdateStarCostVisuals_KurageQueueRing_Patch",
+                "Postfix")));
     }
 }
