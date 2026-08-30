@@ -612,7 +612,14 @@ they are below.
 Unchanged from §6 and still yours: it is a `POLICY_VERSION` change with a
 re-baseline attached, and both are frozen.
 
-### PICK 2 — the Charge rule itself
+### PICK 2 — the Charge rule itself (`M67`)
+
+**REGISTERED 2026-08-30 as QUEUE `M67`.** This pick was written here and never
+minted, so `STATE.md` — which reads the register — reported that no
+prototype-slice row was open while this hold was in force. The round-2 run was
+scheduled against it on 2026-08-30 and STOPPED at the door, unstaged: no board
+was staged, no model was called, no Codex budget was spent. The hold below is
+why. Nothing here is answered.
 
 Charge accrues universally on Exhaust and never resets, so the bank is a ramp
 and a spend on it is an investment rather than a decision on the turn. This is
@@ -647,7 +654,9 @@ This section is written by a session that owns neither the live game nor the
 main checkout, so **nothing here is staged, seeded, built or launched**. It
 records the two RETURNed boards re-set as declared boards, and it settles
 nothing: §9's picks are untouched, no register row is minted or closed, and no
-printed card number moved (R213 freeze). PICK 1 option 1 is what this executes.
+printed card number moved (R213 freeze). It executes the re-board of the two RETURNed arms — PICK 1 option 1 under the
+§9 numbering of the day, which `a1df7d6` then took as an iteration call and
+recorded under *What is already moving*.
 **`EB-183` is deliberately not built** — PICK 3's own first option says arm 4's
 board must be proved able to separate a Muster arm before anything is built
 against it, and that proof does not exist yet.

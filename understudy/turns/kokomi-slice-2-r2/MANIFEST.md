@@ -1,12 +1,24 @@
 # Kokomi slice 2, round 2 — turn manifest
 
+**STAGING IS HELD ON QUEUE `M67` (the Charge accrual rule), as of 2026-08-30.**
+The packet's §9 PICK 2 holds these four boards, and the pick is [USER]'s: its
+options 1–4 retire all four slice-2 arms as authored, because every one of them
+prices or banks Charge under the current accrual rule. A round-2 run was
+scheduled on 2026-08-30 and stopped here unstaged — no board staged, no model
+called. Everything below is the design of the boards and is unchanged; when
+`M67` is ruled, re-read it against the ruled rule before staging, because a
+rule change moves the numbers this file computes.
+
 Four staged turns, two matched pairs. **This round exists only to answer the
 two RETURNs round 1 left**, and it changes nothing else: the two arms that
 ADVANCED (`t03`/`t04` threshold, `t05`/`t06` mode) are not re-run, no printed
 card number moved anywhere (R213 freeze), and no register row is minted or
-closed here. `EB-183`, the fifth pair, is deliberately **not built** — the
-run's own PICK 3 says arm 4's board has to be proved able to separate a Muster
-arm at all before anything is built against it.
+closed here. `EB-183`, the fifth pair, is deliberately **not built** — the run's
+own reading (packet §9, *the fifth pair, sequenced*) says arm 4's board has to
+be proved able to separate a Muster arm at all before anything is built against
+it. *(That reading was PICK 3 when this file was written; §9 was renumbered at
+`a1df7d6`, which took three of the five picks as iteration calls and left two —
+the surviving second of which is now `M67`.)*
 
 **Nothing in this file rates an arm.** The designer of these rows may not grade
 them (R213's first guard). The columns record what was set and why; the

@@ -31,6 +31,7 @@
 |---|---|---|---|
 | `S4-G6` | **Ask:** declare Kokomi's HP stability band from design intent — never revisable against the playtest that grades it (D5). **Pick:** (1) Claude drafts the band DRAFTED from written design intent and you countersign in batch — **default** (R212(2)); (2) declare it at the table; (3) leave it DARK (`band = None`). **Gate:** the post-wave EXPLORATORY run comes first, the confirmatory protocol run after (R175) | OPEN — declare | user-queue §2; `DEC-D5` clauses 2–4; R156; R175; R212 |
 | `S4-G14` | **Ask:** run the Kokomi confirmatory protocol and rule on its written question list — an exploratory run cannot be graded, and this one fills the Answers block. **Eyes-on:** `docs/current/playtest/kokomi-playtest-protocol.md`, question by question. **Gate:** the sequence R175 fixed — post-wave exploratory run → `S4-G6`'s band declaration → this run; plus `EB-53`'s remnant | OPEN — table time | user-queue §2/§7; R115; R152; R175 |
+| `M67` | **Ask:** rule Kokomi's CHARGE ACCRUAL RULE — it accrues on every Exhaust and never resets, so the bank is a ramp and a spend an investment, not a turn decision. **Pick:** (1) per-turn, LAW R80 amended; (2) relic keeps Strength→Charge only, Charge otherwise printed; (3) both; (4) retire Charge; (5) leave it, turns come from Companions — **no default: 1–4 and 5 differ in direction.** **Gate:** none — it GATES slice 2 round 2 | OPEN — direction | slice 2 §9 PICK 2, 2026-08-30 |
 
 ## 2. Shop, pricing, and money
 

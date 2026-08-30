@@ -259,7 +259,14 @@ CEILINGS: dict[str, int] = {
     # (fresh / rolled-over / missing fixtures, both stop lines, both roles'
     # refusal branches with `seat._run` monkeypatched, and the under-the-line
     # case that must still reach codex). The three-calls rule is UNTOUCHED.
-    "EB": 227,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+    # EB-228 minted 2026-08-30 by the Kokomi slice-2 round-2 job, which was
+    # scheduled to RUN and stopped at the door instead: the packet's own §9
+    # PICK 2 held round-2 staging on the Charge accrual rule, that pick had
+    # never been minted, and so STATE -- which reads the register -- said no
+    # prototype-slice row was open. The row is the lint that would have caught
+    # it: a hold verb in a `review/active/` packet naming no OPEN QUEUE id.
+    # The pick itself is M67, minted in the same commit.
+    "EB": 228,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
                  # told the tester it had played no card.
@@ -470,7 +477,11 @@ CEILINGS: dict[str, int] = {
     # per-fold C# feature gates versus the single PROTOTYPE_CARDS switch. It
     # is a design call and it revises the Furina reframe's countersigned
     # section 6.1 plan, which keys FURINA_REFRAME to the same compile symbol.
-    "M": 66,     # M62 minted 2026-08-29 by R221 A: the criterion that
+    # M67 minted 2026-08-30 out of Kokomi slice 2 §9 PICK 2, which had been
+    # holding round-2 staging since 2026-08-29 without ever reaching this
+    # register: the Charge accrual rule. It is a pick between design
+    # directions and option (1) amends LAW R80, so it is [USER]'s twice over.
+    "M": 67,     # M62 minted 2026-08-29 by R221 A: the criterion that
                  # retires the fresh-Opus control form from every packet of
                  # a blind-QA round to the spot-check rate. The threshold is
                  # a number, so it is [USER]'s.
@@ -603,6 +614,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # prototype-patch scope lint that keeps one PROTOTYPE_CARDS switch
         # honest.
         224, 225,
+        # 228 minted 2026-08-30 by the Kokomi slice-2 round-2 job: the lint
+        # for a packet that HOLDS live work on an unminted pick.
+        228,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -640,8 +654,10 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # top-level-cost clause is amended to admit a mode-head price, so Bag of
     # Tricks proceeds as EB-224; and the single PROTOTYPE_CARDS switch stands
     # with a scope lint (EB-225) plus a three-fight soak on every dev deploy.
-    # The ceiling stays at 66 -- ceilings never come down.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
+    # M67 minted 2026-08-30: Kokomi's Charge accrual rule, out of slice 2 §9
+    # PICK 2, where it had been holding round-2 staging unregistered since
+    # 2026-08-29.
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 67}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
