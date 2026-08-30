@@ -52,6 +52,17 @@
              Link="Vendor/GitsPort.cs" />
   </ItemGroup>
 
+  <!-- EB-184's per-mode aiming reader, on the same terms and for the same
+       reason. `GitsModalTargeting.cs` reads two members off a played card BY
+       NAME and holds no game type of its own, so the decision that repairs the
+       "Card requires a target" refusal on a targetless mode can be exercised
+       headlessly against fake cards, including the half that must NOT move:
+       an aiming mode still owing its target. One file, no fork. -->
+  <ItemGroup>
+    <Compile Include="../../vendor/STS2_MCP/gits/GitsModalTargeting.cs"
+             Link="Vendor/GitsModalTargeting.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />

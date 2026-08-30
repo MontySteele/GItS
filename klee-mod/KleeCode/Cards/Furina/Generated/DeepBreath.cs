@@ -31,7 +31,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Furina.Generated;
 
-public sealed class DeepBreath : CustomCardModel, ICharacterCard
+public sealed class DeepBreath : CustomCardModel, ICharacterCard, IModalCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
@@ -46,6 +46,18 @@ public sealed class DeepBreath : CustomCardModel, ICharacterCard
         ("title", "Deep Breath"),
         ("description", "Choose one: Gain 1 Energy and 2 Encore | Spend 3 Encore: draw 3."),
     };
+
+    // EB-184: what each mode does about AIMING, in sheet order.
+    // The card's own TargetType is fixed before a mode is chosen (the
+    // game aims first), so it answers for the card and not for the
+    // play -- an Attack-typed modal declares AnyEnemy for the mode
+    // that aims, and the bridge then demanded a target on the mode
+    // that attacks nothing. These two rows are what it reads instead.
+    public IReadOnlyList<string> ModeLabels =>
+        new[] { "Gain 1 Energy and 2 Encore", "Spend 3 Encore: draw 3" };
+
+    public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
+        new[] { false, false };
 
     // EB-182: what each mode PRINTS as its price, and the meter
     // to read it against. One declaration, read by the screen filter,

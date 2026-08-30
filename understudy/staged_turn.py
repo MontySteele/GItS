@@ -1913,6 +1913,17 @@ def execute_steps(turn: StagedTurn, form: dict[str, Any]
         body: dict[str, Any] = {"card": str(play["card"])}
         if play.get("target"):
             body["target"] = str(play["target"])
+        # EB-184: THE MODE TRAVELS WITH THE PLAY, not only with the screen that
+        # follows it. The form's `choose` is answered a step later, on the
+        # choose-a-card screen -- but the bridge has to decide whether the play
+        # needs aiming BEFORE that screen exists, because the game aims a card
+        # before its mode is chosen. Told the mode here, it asks the mode; told
+        # nothing, it asks the card TYPE and refuses a targetless Block half of
+        # an Attack-typed modal, which is exactly how slice 1 round 4 `t02`
+        # ended UNTESTED. The value is the same string the `answer_modal` step
+        # below carries, off the same form key: one reading, two readers.
+        if play.get("choose"):
+            body["mode"] = str(play["choose"])
         steps.append(("play", body))
         # EB-170. ONE AFTER EVERY PLAY, unconditionally, and not only after
         # the plays whose form entry carries a key. A modal is a property of

@@ -123,26 +123,81 @@ public static partial class McpMod
         if (!card.CanPlay(out var reason, out _))
             return Error($"Card '{card.Title}' cannot be played: {reason}");
 
+        // GItS LOCAL EDIT (EB-184). WHICH MODE, if the caller named one. A `choose_one`
+        // card's aiming is the chosen MODE's business, not the card TYPE's --
+        // see vendor/STS2_MCP/gits/GitsModalTargeting.cs for the whole
+        // argument and for the defect it repairs. A card that is not modal, or
+        // a play that names no mode, reaches exactly the rule below that it
+        // always did.
+        var modes = GitsModalTargeting.Modes(card);
+        int modeIndex = GitsModalTargeting.NoMode;
+        if (modes != null
+            && data.TryGetValue("mode", out var modeElem)
+            && modeElem.ValueKind == JsonValueKind.String)
+        {
+            string wanted = modeElem.GetString() ?? "";
+            if (wanted.Trim().Length > 0)
+            {
+                modeIndex = GitsModalTargeting.Match(modes, wanted);
+                if (modeIndex == GitsModalTargeting.Ambiguous)
+                    return Error($"Mode '{wanted}' matches more than one mode of '{card.Title}'. Modes: {GitsModalTargeting.Labels(modes)}");
+                if (modeIndex < 0)
+                    return Error($"Card '{card.Title}' has no mode matching '{wanted}'. Modes: {GitsModalTargeting.Labels(modes)}");
+            }
+        }
+
         // Resolve target
         Creature? target = null;
+        bool inertAim = false;
         if (card.TargetType == TargetType.AnyEnemy)
         {
-            if (!data.TryGetValue("target", out var targetElem))
-                return Error("Card requires a target. Provide 'target' with an entity_id.");
-
-            string targetId = targetElem.GetString() ?? "";
-            target = ResolveTarget(combatState, targetId);
-            if (target == null)
-                return Error($"Target '{targetId}' not found among alive enemies");
+            // GItS LOCAL EDIT (EB-184). the aiming question, asked of the chosen mode where
+            // one was named and of the card where none was. The no-mode
+            // fallback is deliberately the strict direction -- refusing a play
+            // whose mode nobody stated is recoverable, and playing it at
+            // nobody is not.
+            bool aims = modeIndex >= 0 ? modes![modeIndex].Aims : true;
+            if (data.TryGetValue("target", out var targetElem)
+                && targetElem.ValueKind == JsonValueKind.String)
+            {
+                string targetId = targetElem.GetString() ?? "";
+                target = ResolveTarget(combatState, targetId);
+                if (target == null)
+                    return Error($"Target '{targetId}' not found among alive enemies");
+            }
+            else if (aims)
+            {
+                return Error("Card requires a target. Provide 'target' with an entity_id."
+                           + (modes != null ? $" The chosen mode aims at one enemy; the other mode(s) of '{card.Title}' may not. Name the mode with 'mode' to be told which. Modes: {GitsModalTargeting.Labels(modes)}" : ""));
+            }
+            else
+            {
+                // GItS LOCAL EDIT (EB-184). the chosen mode aims at nobody, but the GAME
+                // aims the card before the mode is chosen -- a human playing
+                // this card drags it onto an enemy and then picks Block, and
+                // the aim is discarded. So the bridge supplies the aim the
+                // game's own play path wants and the chosen mode ignores. It
+                // is REPORTED, never silent: nothing about the resolved line
+                // depends on it, and a reader who sees it in the log can check
+                // that for themselves.
+                target = combatState.Enemies.FirstOrDefault(c => c.IsAlive);
+                if (target == null)
+                    return Error("No living enemy to aim at");
+                inertAim = true;
+            }
         }
 
         // Play the card via the action queue (same path as the game UI)
         RunManager.Instance.ActionQueueSynchronizer.RequestEnqueue(new PlayCardAction(card, target));
 
+        string aimText = target == null ? ""
+            : inertAim
+                ? $" aimed at {SafeGetText(() => target.Monster?.Title) ?? "target"} (inert: the chosen mode '{modes![modeIndex].Label}' aims at nobody)"
+                : $" targeting {SafeGetText(() => target.Monster?.Title) ?? "target"}";
         return new Dictionary<string, object?>
         {
             ["status"] = "ok",
-            ["message"] = $"Playing '{card.Title}'" + (target != null ? $" targeting {SafeGetText(() => target.Monster?.Title) ?? "target"}" : "")
+            ["message"] = $"Playing '{card.Title}'" + aimText
         };
     }
 
