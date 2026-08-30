@@ -1,0 +1,151 @@
+{
+ "log_dir": "understudy\\logs\\blindplay\\kleespark-w1",
+ "turns": 22,
+ "combat_turns": 12,
+ "W1": {
+  "slot": "W1",
+  "value": 0,
+  "grade": "MISS",
+  "hits": []
+ },
+ "W2": {
+  "slot": "W2",
+  "generated": 4,
+  "spent": 2,
+  "ratio": 0.5,
+  "grade": "PREDICTED",
+  "banks": [
+   [
+    "turn-001",
+    0
+   ],
+   [
+    "turn-002",
+    0
+   ],
+   [
+    "turn-003",
+    0
+   ],
+   [
+    "turn-004",
+    0
+   ],
+   [
+    "turn-005",
+    0
+   ],
+   [
+    "turn-006",
+    2
+   ],
+   [
+    "turn-007",
+    1
+   ],
+   [
+    "turn-008",
+    1
+   ],
+   [
+    "turn-009",
+    2
+   ],
+   [
+    "turn-010",
+    1
+   ],
+   [
+    "turn-011",
+    1
+   ],
+   [
+    "turn-012",
+    2
+   ]
+  ],
+  "deltas": [
+   {
+    "from": "turn-005",
+    "to": "turn-006",
+    "delta": 2
+   },
+   {
+    "from": "turn-006",
+    "to": "turn-007",
+    "delta": -1
+   },
+   {
+    "from": "turn-008",
+    "to": "turn-009",
+    "delta": 1
+   },
+   {
+    "from": "turn-009",
+    "to": "turn-010",
+    "delta": -1
+   },
+   {
+    "from": "turn-011",
+    "to": "turn-012",
+    "delta": 1
+   }
+  ]
+ },
+ "W3": {
+  "slot": "W3",
+  "value": 0,
+  "grade": "MISS",
+  "hits": []
+ },
+ "W4": {
+  "slot": "W4",
+  "plays": 10,
+  "attacks": 5,
+  "pct": 50.0,
+  "grade": "SPLIT",
+  "unknown_kind": [],
+  "played": [
+   {
+    "title": "Kaboom!",
+    "kind": "attack"
+   },
+   {
+    "title": "Duck and Cover",
+    "kind": "skill"
+   },
+   {
+    "title": "Duck and Cover",
+    "kind": "skill"
+   },
+   {
+    "title": "Prune \u2014 Little Witch's Hunt",
+    "kind": "skill"
+   },
+   {
+    "title": "Fwoosh!",
+    "kind": "attack"
+   },
+   {
+    "title": "Kaboom!",
+    "kind": "attack"
+   },
+   {
+    "title": "Powder Pop",
+    "kind": "skill"
+   },
+   {
+    "title": "Bang Bang!",
+    "kind": "attack"
+   },
+   {
+    "title": "Powder Pop",
+    "kind": "skill"
+   },
+   {
+    "title": "Ka-pow!",
+    "kind": "attack"
+   }
+  ]
+ }
+}

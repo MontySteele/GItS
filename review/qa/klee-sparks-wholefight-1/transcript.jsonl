@@ -1,0 +1,63 @@
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "", "observation_sha256": "b1b214c03ebc1cb5cd3cb56860a6f8b4e74f7fc5e230b1727853c40db101cb6f", "ts": "2026-08-30T00:18:20Z"}
+{"kind": "command", "command": "play \"Kaboom!\" on \"Toadpole (2)\"", "ok": true, "verb": "play", "printed": {"card": "Kaboom!", "target": "Toadpole (2)"}, "post": {"action": "play_card", "card_index": 3, "target": "TOADPOLE_1"}, "refusal": "", "ts": "2026-08-30T00:18:30Z"}
+{"kind": "result", "action": "play_card", "summary": "ok Playing 'Kaboom!' targeting Toadpole", "ts": "2026-08-30T00:18:30Z"}
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "", "observation_sha256": "77252954337f5501954080aeb333741d0975c5a48ddf336aae9041724ab737f8", "ts": "2026-08-30T00:18:30Z"}
+{"kind": "command", "command": "play \"Duck and Cover (1)\"", "ok": true, "verb": "play", "printed": {"card": "Duck and Cover (1)"}, "post": {"action": "play_card", "card_index": 0}, "refusal": "", "ts": "2026-08-30T00:18:36Z"}
+{"kind": "result", "action": "play_card", "summary": "ok Playing 'Duck and Cover'", "ts": "2026-08-30T00:18:36Z"}
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "", "observation_sha256": "6ecddc502785fa8f21bb48d591e225483615de00da373727f19a3db90650b3d8", "ts": "2026-08-30T00:18:36Z"}
+{"kind": "command", "command": "play \"Duck and Cover\"", "ok": true, "verb": "play", "printed": {"card": "Duck and Cover"}, "post": {"action": "play_card", "card_index": 0}, "refusal": "", "ts": "2026-08-30T00:18:42Z"}
+{"kind": "result", "action": "play_card", "summary": "ok Playing 'Duck and Cover'", "ts": "2026-08-30T00:18:42Z"}
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "", "observation_sha256": "614537cf504c8da3553efed2aaf848ed2dde6c3ec4f86b707ce2efefa2f238ac", "ts": "2026-08-30T00:18:42Z"}
+{"kind": "command", "command": "end turn", "ok": true, "verb": "end turn", "printed": {}, "post": {"action": "end_turn"}, "refusal": "", "ts": "2026-08-30T00:18:46Z"}
+{"kind": "result", "action": "end_turn", "summary": "ok Ending turn", "ts": "2026-08-30T00:18:46Z"}
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "", "observation_sha256": "b140cf75b2680f078256e4d204cf190e6b3fbda8fd8e105c257675c53ca03778", "ts": "2026-08-30T00:18:46Z"}
+{"kind": "command", "command": "play \"Prune — Little Witch's Hunt\" on \"Toadpole (2)\"", "ok": true, "verb": "play", "printed": {"card": "Prune — Little Witch's Hunt", "target": "Toadpole (2)"}, "post": {"action": "play_card", "card_index": 0, "target": "TOADPOLE_1"}, "refusal": "", "ts": "2026-08-30T00:18:55Z"}
+{"kind": "result", "action": "play_card", "summary": "ok Playing 'Prune — Little Witch's Hunt' targeting Toadpole", "ts": "2026-08-30T00:18:55Z"}
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "", "observation_sha256": "7045179f49e896c2afec4d213da5890fc478f67c230da823c1b5c03f43b21203", "ts": "2026-08-30T00:18:55Z"}
+{"kind": "command", "command": "play \"Fwoosh!\" on \"Toadpole (2)\"", "ok": true, "verb": "play", "printed": {"card": "Fwoosh!", "target": "Toadpole (2)"}, "post": {"action": "play_card", "card_index": 0, "target": "TOADPOLE_1"}, "refusal": "", "ts": "2026-08-30T00:19:05Z"}
+{"kind": "result", "action": "play_card", "summary": "ok Playing 'Fwoosh!' targeting Toadpole", "ts": "2026-08-30T00:19:05Z"}
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "", "observation_sha256": "f40d47084476768db3c0803486b9a1453209daf11763a9aa210356e37af7d522", "ts": "2026-08-30T00:19:05Z"}
+{"kind": "command", "command": "play \"Kaboom!\" on \"Toadpole (2)\"", "ok": true, "verb": "play", "printed": {"card": "Kaboom!", "target": "Toadpole (2)"}, "post": {"action": "play_card", "card_index": 1, "target": "TOADPOLE_1"}, "refusal": "", "ts": "2026-08-30T00:19:09Z"}
+{"kind": "result", "action": "play_card", "summary": "ok Playing 'Kaboom!' targeting Toadpole", "ts": "2026-08-30T00:19:09Z"}
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "", "observation_sha256": "fba06b873d547bd72039b43050509c06ea0d529651de28bbddc31f346afc22a4", "ts": "2026-08-30T00:19:09Z"}
+{"kind": "command", "command": "play \"Powder Pop\" on \"Toadpole\"", "ok": true, "verb": "play", "printed": {"card": "Powder Pop", "target": "Toadpole"}, "post": {"action": "play_card", "card_index": 1, "target": "TOADPOLE_0"}, "refusal": "", "ts": "2026-08-30T00:19:14Z"}
+{"kind": "result", "action": "play_card", "summary": "ok Playing 'Powder Pop' targeting Toadpole", "ts": "2026-08-30T00:19:14Z"}
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "", "observation_sha256": "9c0c9d0bdff2a1626b502f79d21311980b5f22683bcbd8d0a4a11ae96845686d", "ts": "2026-08-30T00:19:14Z"}
+{"kind": "command", "command": "play \"Bang Bang!\" on \"Toadpole\"", "ok": true, "verb": "play", "printed": {"card": "Bang Bang!", "target": "Toadpole"}, "post": {"action": "play_card", "card_index": 0, "target": "TOADPOLE_0"}, "refusal": "", "ts": "2026-08-30T00:19:22Z"}
+{"kind": "result", "action": "play_card", "summary": "ok Playing 'Bang Bang!'", "ts": "2026-08-30T00:19:22Z"}
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "", "observation_sha256": "66d1cd5f34caf413934167e80aaf41e223626263a0138f7fe91213019e575f5c", "ts": "2026-08-30T00:19:22Z"}
+{"kind": "command", "command": "end turn", "ok": true, "verb": "end turn", "printed": {}, "post": {"action": "end_turn"}, "refusal": "", "ts": "2026-08-30T00:19:27Z"}
+{"kind": "result", "action": "end_turn", "summary": "ok Ending turn", "ts": "2026-08-30T00:19:27Z"}
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "", "observation_sha256": "04b8996caba5517d434cc725fd7da1c7d370d5cc07615ade9acda93f8acd1ea1", "ts": "2026-08-30T00:19:28Z"}
+{"kind": "command", "command": "play \"Powder Pop\" on \"Toadpole\"", "ok": true, "verb": "play", "printed": {"card": "Powder Pop", "target": "Toadpole"}, "post": {"action": "play_card", "card_index": 3, "target": "TOADPOLE_0"}, "refusal": "", "ts": "2026-08-30T00:19:34Z"}
+{"kind": "result", "action": "play_card", "summary": "ok Playing 'Powder Pop' targeting Toadpole", "ts": "2026-08-30T00:19:34Z"}
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "", "observation_sha256": "b554b011c449b2404b3a2ccec7be071baa63b4c232d538056785056ea94a85e3", "ts": "2026-08-30T00:19:34Z"}
+{"kind": "command", "command": "play \"Ka-pow!\" on \"Toadpole\"", "ok": true, "verb": "play", "printed": {"card": "Ka-pow!", "target": "Toadpole"}, "post": {"action": "play_card", "card_index": 1, "target": "TOADPOLE_0"}, "refusal": "", "ts": "2026-08-30T00:19:40Z"}
+{"kind": "result", "action": "play_card", "summary": "ok Playing 'Ka-pow!' targeting Toadpole", "ts": "2026-08-30T00:19:40Z"}
+{"kind": "observation", "state_type": "rewards", "screen": "rewards", "blocked": "", "observation_sha256": "29ad6eb03a91bfa4a562a804c9380d9e9a6cd252373b97d4231e6d30b4d4d62e", "ts": "2026-08-30T00:19:41Z"}
+{"kind": "record", "chars": 1846, "ts": "2026-08-30T00:19:57Z"}
+{"kind": "command", "command": "choose \"Card\"", "ok": true, "verb": "choose", "printed": {"option": "Card"}, "post": {"action": "claim_reward", "index": 2}, "refusal": "", "ts": "2026-08-30T00:20:10Z"}
+{"kind": "result", "action": "claim_reward", "summary": "ok Claiming reward: card (opens card selection)", "ts": "2026-08-30T00:20:10Z"}
+{"kind": "observation", "state_type": "card_reward", "screen": "card_reward", "blocked": "", "observation_sha256": "72989bdc356afb52e16d89d2d1bb362cec046c4edb97529f422a62709002d33f", "ts": "2026-08-30T00:20:10Z"}
+{"kind": "command", "command": "choose \"Kaeya — Frostgnaw\"", "ok": true, "verb": "choose", "printed": {"card": "Kaeya — Frostgnaw"}, "post": {"action": "select_card_reward", "card_index": 3}, "refusal": "", "ts": "2026-08-30T00:20:19Z"}
+{"kind": "result", "action": "select_card_reward", "summary": "ok Selecting card: Kaeya — Frostgnaw", "ts": "2026-08-30T00:20:19Z"}
+{"kind": "observation", "state_type": "rewards", "screen": "rewards", "blocked": "", "observation_sha256": "25a0e4edf485bbb5cb6bfde683396ffc420f41854c644420df8850289568fe37", "ts": "2026-08-30T00:20:19Z"}
+{"kind": "command", "command": "choose \"Gold\"", "ok": true, "verb": "choose", "printed": {"option": "Gold"}, "post": {"action": "claim_reward", "index": 0}, "refusal": "", "ts": "2026-08-30T00:20:24Z"}
+{"kind": "result", "action": "claim_reward", "summary": "ok Claiming reward: gold (12)", "ts": "2026-08-30T00:20:24Z"}
+{"kind": "observation", "state_type": "rewards", "screen": "rewards", "blocked": "", "observation_sha256": "bc06cc9f4985c73d44b0f954cd8ee988a5f016e5f1c97cdec0f35cd830658b60", "ts": "2026-08-30T00:20:24Z"}
+{"kind": "command", "command": "choose \"Potion\"", "ok": true, "verb": "choose", "printed": {"option": "Potion"}, "post": {"action": "claim_reward", "index": 0}, "refusal": "", "ts": "2026-08-30T00:20:28Z"}
+{"kind": "result", "action": "claim_reward", "summary": "ok Claiming reward: potion (Flex Potion)", "ts": "2026-08-30T00:20:28Z"}
+{"kind": "observation", "state_type": "rewards", "screen": "rewards", "blocked": "", "observation_sha256": "3fc4698758c1775d5cde01886693662b75168a9175474f1eae9e70c05ec78f2c", "ts": "2026-08-30T00:20:28Z"}
+{"kind": "command", "command": "proceed", "ok": true, "verb": "proceed", "printed": {}, "post": {"action": "proceed"}, "refusal": "", "ts": "2026-08-30T00:20:33Z"}
+{"kind": "result", "action": "proceed", "summary": "ok Proceeding from rewards", "ts": "2026-08-30T00:20:33Z"}
+{"kind": "observation", "state_type": "map", "screen": "map", "blocked": "", "observation_sha256": "243378ef5b84b201393226120c63949764d4724f1ca41a3ea4eb052f5ffc5c84", "ts": "2026-08-30T00:20:33Z"}
+{"kind": "command", "command": "go \"Shop (path 1)\"", "ok": true, "verb": "go", "printed": {"node": "Shop (path 1)"}, "post": {"action": "choose_map_node", "index": 0}, "refusal": "", "ts": "2026-08-30T00:20:37Z"}
+{"kind": "result", "action": "choose_map_node", "summary": "ok Traveling to Shop at (1,2)", "ts": "2026-08-30T00:20:37Z"}
+{"kind": "observation", "state_type": "shop", "screen": "shop", "blocked": "", "observation_sha256": "f64179650863c26bfed55378de48e5047429e53a9cd701a65acee19a20fd0f68", "ts": "2026-08-30T00:20:38Z"}
+{"kind": "command", "command": "proceed", "ok": true, "verb": "proceed", "printed": {}, "post": {"action": "proceed"}, "refusal": "", "ts": "2026-08-30T00:20:44Z"}
+{"kind": "result", "action": "proceed", "summary": "ok Proceeding from shop", "ts": "2026-08-30T00:20:44Z"}
+{"kind": "observation", "state_type": "map", "screen": "map", "blocked": "", "observation_sha256": "78078971ffb193805eefad79a0f149db5f1c558d3801d885f8825b152e3a1a6c", "ts": "2026-08-30T00:20:44Z"}
+{"kind": "command", "command": "go \"Monster (path 1)\"", "ok": true, "verb": "go", "printed": {"node": "Monster (path 1)"}, "post": {"action": "choose_map_node", "index": 0}, "refusal": "", "ts": "2026-08-30T00:20:48Z"}
+{"kind": "result", "action": "choose_map_node", "summary": "ok Traveling to Monster at (0,3)", "ts": "2026-08-30T00:20:48Z"}
+{"kind": "observation", "state_type": "monster", "screen": "combat", "blocked": "the fight is over and the game has not put up the next screen; nothing here can be played", "observation_sha256": "76ac185e4accffef08e9863ea7e65035b8da8cdaa0bbba61881f5cb8fd81de3d", "ts": "2026-08-30T00:21:20Z"}
+{"kind": "record", "chars": 1510, "ts": "2026-08-30T00:21:35Z"}
