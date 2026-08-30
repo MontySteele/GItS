@@ -745,6 +745,8 @@ python -m understudy.local_tester read <turn-id> [--position N]
 python -m understudy.local_tester read <turn-id> --dry-run
 python -m understudy.local_tester round <t01> <t02> … --plan-only
 python -m understudy.local_tester round <t01> <t02> … [--seat-spot-check N]
+python -m understudy.local_tester round <t01> … --seat-mode shadow|deciding
+python -m understudy.local_tester qualify [--battery F] [--out F] [--land-dir D]
 ```
 
 `read` reads one turn and hands the form to `staged_turn grade`; `--position`
@@ -795,11 +797,77 @@ python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md
 - **Both preflights run over every planned board before the launch**, so
   `EB-169` and `EB-187` refuse a round at a parse rather than after it has
   started spending game time.
+- **And so does the slot REACHABILITY check (`EB-202`).** A round whose boards
+  sit beside a `slots.yaml` has every counting slot's ceiling computed over
+  the planned set before the one launch, and the plan is **REFUSED** when a
+  ceiling is below the slot's threshold, naming the number. `KLEESPARK-R1`'s
+  `P1` asked for 4 of 8 on a set with a ceiling of 3, and no reading of that
+  round could have met it. The file is the smallest thing that says so: one
+  `id`, one integer `threshold`, and a `predicate` that is a LIST OF CLAUSES,
+  all of which must hold — `{left: <fact or int>, op: <comparison>, right:
+  <fact or int>}`. The facts are named readings of one board's declared half
+  (`spark_bank`, `energy`, `hp`, `block`, `hand_size`, `enemy_count`,
+  `min_spark_price`, `affordable_spark_uses`, `affordable_spark_price_sum`,
+  `spark_use_count`, `charge_bank`); a fact a board cannot answer is
+  UNDEFINED and its clause is FALSE, so a board that cannot be asked does not
+  qualify. There is no `or` and no nesting on purpose. **A round with no
+  `slots.yaml` is legal** — every round committed before this existed carries
+  none — and `staged_turn check` runs the same check per directory.
 - **`staged_turn packet-section <slug>`** writes the round's results block
   from `review/qa/<slug>-t*/` and `review/qa/ledger.tsv`: per-turn rows, the
   per-slot tally, what the round spent (Codex reads counted separately), the
   UNRUN boards, and the ledger's own banners quoted. `--write <packet.md>`
   appends it. **The prose read is a marked empty slot and is never generated.**
+
+**The seat sits in the SHADOW chair by default (`--seat-mode`).** R221 A
+measured this seat against the fresh-Opus control at **4 of 8** verdict
+agreement, and the control STANDS under every option on `M62`, so the local
+read is not what a round is decided on while the control still rides every
+packet. In `shadow` the seat reads every packet and its form and record are
+written under the usual names — plus `role: "shadow"`, `seat_mode` and
+`deciding: false`, on **both** files, so a form that travels alone is still
+legible — and `staged_turn grade` still grades it, because a shadow read with
+no verdict beside it could not be compared with the control at all. What it
+does not get is the replay: **the fresh-Opus form is the deciding tester and
+it is what `execute` replays**, found by elimination (`form-*.json` that is
+neither `form-local-*` nor `form-raw-*`, newest wins). A board whose control
+form has not been taken yet has its replay recorded as **OWED** and is never
+quietly replayed from the shadow read. `--seat-mode deciding` restores the
+pre-R221-A behaviour exactly. The round writes
+`review/qa/<round>-round-summary.json` carrying the **per-turn agreement
+count, shadow against deciding, on the VERDICT only** — which is the number
+`M62`'s criterion is read off — and the ledger grew a trailing **`role`**
+column (`shadow` / `deciding`; a row written before the chair existed parses
+and reads `deciding`).
+
+**A form is refused for a missing target (`EB-203`, `target_missing`).** A
+play that names a card whose printed effects aim at ONE enemy and carries no
+target cannot be replayed at all, and `KLEESPARK-R1` sealed two of eight
+lines in that state. The rule is a falsifier like every other, refused before
+the grade, and the refusal names the play **and prints the hand's cards that
+take a target**. **`target: null` stays legal and is the required answer for
+a card that aims at nobody.** The blind packet carries no targeting field —
+the wire's hand entry has none — so the fact is derived from the card sheets
+(`understudy/resource_order.SHEETS`) through each effect's own `target:` key,
+where `enemy` is the one aimed spec and `all_enemies` / `random_enemy` /
+`self` are not; a *Choose one* is judged on the mode the form recorded.
+**Repair is out of scope (`M63`): this refuses and never repairs.**
+
+**Requalification (`M62` (5)): `local_tester qualify`.** A fixed battery of
+**18 sealed packets, six per category**, drawn equally from `kokomi-slice2`,
+`klee-slice1-r3` and `klee-sparks-r1` (`understudy/battery/battery.yaml`) —
+no new board is staged and no game is launched. The categories are the three
+failures this funnel has actually seen: **targets** (an aimed card carries
+one, a targetless card does not — both directions), **printed costs**
+(`misreads.free_card_misreads`, the shipped check), and **intent
+sensitivity** (the `intent_insensitive` falsifier itself). It writes a
+scorecard JSON and one summary line of per-category counts. **There is no
+pass mark in the tool**: the threshold is `M62` and is [USER]'s. The reads
+land in `--land-dir`, never in the sealed turn directories (R101b). The one
+item shape the sealed record cannot give is the intent category's *two
+packets identical except the telegraph* — no such pair has been staged, every
+matched pair differs in the arm under test — so that category is scored one
+board at a time, and the item shape widens when such a pair exists.
 
 **`--lanes N`: two game instances, one install (`EB-206`).**
 
@@ -831,7 +899,9 @@ deals the boards to the two lanes in the pre-registered order.
   process stages next, never which board is next. `slot_state` /
   `split_rest` read grades by turn id and slot and have no lane term — a
   grade is a fact about the board, and the lane is bookkeeping the record
-  carries so a reader can find the log.
+  carries so a reader can find the log. The ledger's trailing **`instance`**
+  column sits AFTER `role` — `role` was appended first — and `ledger_rows`
+  pads both, so a row written before either column existed still parses.
 - **Only lane 0 installs the bridge, and lanes tear down in reverse.**
   `deploy_bridge.ps1` rewrites the shared `mods\STS2_MCP` and refuses while a
   game is running, so lane 1 is given `install_bridge=False` and removes
@@ -879,6 +949,7 @@ proof staged boards and read packets, and never called a model, a grade or a
 replay. `EB-191` (a chosen seed reading back `None`) fires often enough with
 two games on one machine to need the retry above, and it is not fixed here.
 Three lanes are untested and unregistered.
+
 
 **The four conditions.**
 

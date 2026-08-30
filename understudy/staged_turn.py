@@ -131,6 +131,14 @@ from understudy import bridge, face_defects, qa_packet, scenario
 
 REPO = Path(__file__).resolve().parents[1]
 TURN_DIR = Path(__file__).resolve().parent / "turns"
+# EB-202's slot registration, which lives beside a round's boards and is NOT a
+# board. The name is repeated here rather than imported because
+# `understudy/slot_plan.py` READS THE CARD SHEETS, and this module builds the
+# blind packet: a sheet reader may not be in scope where the packet is built,
+# which is the same rule `resource_order` states about itself and
+# `local_tester._post_read` keeps. `cmd_check` imports `slot_plan` lazily.
+# `test_the_slot_file_name_is_the_same_string_in_both_modules` pins the pair.
+SLOT_FILE_NAME = "slots.yaml"
 # COMMITTED, unlike `understudy/logs/`. A packet is the artifact the funnel
 # exists to produce and a verdict is the record of a refusal; both are prose
 # about one hand-set board and neither is a measurement, so they belong in the
@@ -223,6 +231,15 @@ FALSIFIERS: dict[str, str] = {
     "intent_insensitive":
         "question four is no: a different enemy intent would not have "
         "changed the line, so the intent is not part of the decision",
+    # EB-203. A card that aims at one enemy, played at nobody. Checked BEFORE
+    # every rule that reads the reader's prose, because a line the bridge
+    # cannot play is not a reading that failed -- it is a reading that was
+    # never tested, and KLEESPARK-R1 sealed two of eight in that state. The
+    # derivation is the card sheet (`understudy/targeting.py`); the packet
+    # carries no targeting field.
+    "target_missing":
+        "a play names a card whose printed effects aim at ONE enemy and "
+        "carries no target, so the line cannot be replayed at all",
     "board_mismatch":
         "the live board is not the board the packet showed, so replaying the "
         "graded line would be playing a different turn",
@@ -546,12 +563,16 @@ def all_turns(directory: Path | None = None) -> list[Path]:
     (`understudy/turns/kokomi-slice-1/`) rather than scattered through a flat
     list beside the worked example. `fixtures/` is excluded by name: it holds
     grader FORMS, not turns, and `check` would report every one of them BAD.
+    `slots.yaml` is excluded for the same reason: it is EB-202's slot
+    registration for the round it sits in, not a board, and `check` reads it
+    through `slot_plan` rather than as a turn.
     """
     d = directory or TURN_DIR
     if not d.is_dir():
         return []
     return sorted(path for path in d.rglob("*.yaml")
-                  if "fixtures" not in path.relative_to(d).parts)
+                  if "fixtures" not in path.relative_to(d).parts
+                  and path.name != SLOT_FILE_NAME)
 
 
 def turn_dir(turn_id: str) -> Path:
@@ -965,9 +986,18 @@ def grader_id(form: dict[str, Any]) -> str:
 
 def apply_falsifiers(turn_id: str, form: dict[str, Any], *,
                      packet_sha: str | None,
-                     closeness: dict[str, Any] | None) -> list[str]:
-    """Every rule that refuses this form, in the order they are checked."""
+                     closeness: dict[str, Any] | None,
+                     targets: dict[str, Any] | None = None) -> list[str]:
+    """Every rule that refuses this form, in the order they are checked.
+
+    `targets` is EB-203's reading, computed by `grade` off the card sheet and
+    the packet's hand. It defaults to `None` -- absent, not clean -- so a
+    caller with no board (the ledger rebuilders, the tests that hand a bare
+    form) grades exactly as it did before this rule existed.
+    """
     refused: list[str] = []
+    if targets and targets.get("refused"):
+        refused.append("target_missing")
     given = str(form.get("packet_sha256") or "")
     if packet_sha and given and given != packet_sha:
         refused.append("packet_mismatch")
@@ -999,8 +1029,16 @@ def grade(turn_id: str, form: dict[str, Any], *,
     closeness = (json.loads(closeness_path.read_text(encoding="utf-8"))
                  if closeness_path.is_file() else None)
 
+    # EB-203, and it reads a SHEET, so it is imported here rather than at
+    # module scope -- the same rule `local_tester._post_read` keeps and for
+    # the same reason: nothing that builds a blind packet may be one refactor
+    # away from a design sheet.
+    from understudy import targeting
+    targets = targeting.summary(form.get("chosen_line") or [],
+                                hand=targeting.packet_titles(d))
+
     refused = apply_falsifiers(turn_id, form, packet_sha=packet_sha,
-                               closeness=closeness)
+                               closeness=closeness, targets=targets)
     gid = grader_id(form)
     down, why_down = is_down_weighted(gid, root=root)
     verdict = {
@@ -1021,6 +1059,10 @@ def grade(turn_id: str, form: dict[str, Any], *,
         "survives_alone": not refused and not down,
         "why_not_alone": why_down if (down and not refused) else "",
         "closeness": closeness,
+        # EB-203. Carried on every verdict, refused or not: the list of the
+        # hand's aimed cards is what makes the refusal actionable, and on a
+        # clean form it is the record that the check ran.
+        "targets": targets,
         "closeness_quotability": (
             "the decision-closeness gap is a falsifier reading of the TURN "
             "and is quotable under R215 B's exception; it is never evidence "
@@ -1347,7 +1389,18 @@ def _closeness(state, pilot: str, unrepresentable: list[str], *,
 LEDGER_COLUMNS = ("turn_id", "grader", "verdict", "refused_by",
                   "q1", "q2", "q3", "q4",
                   "agree_q1", "agree_q2", "agree_q4", "survives_alone",
-                  "seed", "run_state", "instance")
+                  "seed", "run_state",
+                  # pick 4(e). WHICH CHAIR this row's grader sat in --
+                  # `shadow` for a read that was taken but is not the deciding
+                  # verdict, `deciding` for everything else, which is every
+                  # row written before the chair existed. APPENDED, never
+                  # inserted: `ledger_rows` zips the columns onto whatever
+                  # cells a line has, so a short historical row parses and
+                  # simply reads `deciding`.
+                  "role",
+                  # The two-instance build's lane, LAST -- after `role`, which
+                  # main countersigned first. Same padding argument.
+                  "instance")
 
 
 def _cell(text: Any, width: int = 90) -> str:
@@ -1391,8 +1444,32 @@ def ledger_rows(root: Path | None = None) -> list[dict[str, str]]:
         cells = raw.split("\t")
         if i == 0 and cells and cells[0] == "turn_id":
             continue
-        rows.append(dict(zip(LEDGER_COLUMNS, cells + [""] * len(LEDGER_COLUMNS))))
+        row = dict(zip(LEDGER_COLUMNS, cells + [""] * len(LEDGER_COLUMNS)))
+        # A row written before the chair existed says nothing about it, and
+        # "nothing" means the only chair there was.
+        row["role"] = row.get("role") or DECIDING_ROLE
+        rows.append(row)
     return rows
+
+
+DECIDING_ROLE = "deciding"
+
+
+def grader_role(turn_id: str, gid: str, root: Path | None = None) -> str:
+    """Which chair a grader sat in for this turn, off its own tester record.
+
+    Only the local seat writes a `tester-<id>.json`, and only it can be in the
+    shadow chair; every other grader, and every record written before the
+    chair existed, is `deciding`.
+    """
+    path = (root or QA_DIR) / turn_id / f"tester-{gid}.json"
+    if not path.is_file():
+        return DECIDING_ROLE
+    try:
+        blob = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return DECIDING_ROLE
+    return str(blob.get("role") or DECIDING_ROLE)
 
 
 def is_down_weighted(gid: str, root: Path | None = None) -> tuple[bool, str]:
@@ -1556,6 +1633,7 @@ def build_ledger(root: Path | None = None) -> str:
                 agree["agree_q1"], agree["agree_q2"], agree["agree_q4"],
                 _yn(bool(v.get("survives_alone"))),
                 _packet_seed(tid, root), "RUN",
+                grader_role(tid, gid, root),
                 _row_instance(tid, gid, root),
             ]))
     # R221 B. The boards the stopping rule did not run, with their seeds
@@ -1570,7 +1648,7 @@ def build_ledger(root: Path | None = None) -> str:
             str(blob.get("turn_id") or ""), "-", "UNRUN",
             _cell(blob.get("why")) or "-",
             "-", "-", "-", "-", "-", "-", "-", "-",
-            str(blob.get("seed") or "-"), "UNRUN",
+            str(blob.get("seed") or "-"), "UNRUN", "-",
             str(blob.get("instance") or "-"),
         ]))
     out.append(f"# {qa_packet.PACKET_GUARDRAIL}")
@@ -1875,11 +1953,13 @@ def cmd_check(args) -> int:
         print("no turn files found", file=sys.stderr)
         return 1
     bad = 0
+    loaded: list[StagedTurn] = []
     for p in paths:
         try:
             t = load(p)
             face_defect_preflight(t)
             assumption_preflight(t)
+            loaded.append(t)
             print(f"OK   {p.name}: id={t.id} {len(t.staging)} staging step(s), "
                   f"{len(t.board.hand)} card(s) in hand, "
                   f"{len(t.board.enemies)} enem(ies), "
@@ -1888,7 +1968,34 @@ def cmd_check(args) -> int:
         except (TurnError, scenario.ScenarioError, yaml.YAMLError) as e:
             bad += 1
             print(f"BAD  {p.name}: {e}", file=sys.stderr)
+    # EB-202. A slot's threshold against what its own board set can produce.
+    # Checked over whole DIRECTORIES, because a round is a directory: checking
+    # one file would compute a ceiling of one and pass everything.
+    bad += slot_report(loaded)
     return 1 if bad else 0
+
+
+def slot_report(turns: Sequence["StagedTurn"]) -> int:
+    """Print each counting slot's ceiling. Returns the number unreachable.
+
+    `slot_plan` is imported HERE: it reads the card sheets and this module
+    builds the blind packet (see `SLOT_FILE_NAME`).
+    """
+    from understudy import slot_plan
+    try:
+        report, refusals = slot_plan.check_round(turns)
+    except slot_plan.SlotError as exc:
+        print(f"SLOTS BAD  {exc}", file=sys.stderr)
+        return 1
+    for row in report:
+        mark = "OK  " if row["reachable"] else "LOW "
+        print(f"SLOT {mark} {row['slot']}: threshold {row['threshold']}, "
+              f"ceiling {row['ceiling']} of {row['boards']} board(s)"
+              + (f"  [{', '.join(row['qualifying'])}]"
+                 if row["qualifying"] else ""))
+    for line in refusals:
+        print(f"SLOT REFUSED  {line}", file=sys.stderr)
+    return len(refusals)
 
 
 def cmd_closeness(args) -> int:
@@ -1985,6 +2092,18 @@ def cmd_grade(args) -> int:
           f"(grader {grader_id(form)})")
     for reason in verdict["reasons"]:
         print(f"  REFUSED BY {reason}")
+    # EB-203. The refusal names the play AND prints the hand's aimed cards --
+    # half a message ("you played it at nobody") is not actionable by somebody
+    # holding the page.
+    targets = verdict.get("targets") or {}
+    if "target_missing" in (verdict.get("refused_by") or []):
+        for hit in targets.get("findings") or []:
+            print(f"    play {hit['position']}: {hit['card']} takes a target "
+                  f"and carried none")
+        takes = targets.get("hand_takes_a_target") or []
+        print(f"    cards in this hand that take a target: "
+              f"{', '.join(takes) if takes else '(none)'}")
+        print(f"    derived from {targets.get('derived_from')}")
     if verdict["verdict"] == "SURVIVES":
         print(f"  {verdict['survives_means']}")
         if not verdict["survives_alone"]:
