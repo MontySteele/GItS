@@ -21,6 +21,14 @@
 #     an enemy" would pass it.
 #   costs   — the hand must print at least two non-zero costs, so a "free"
 #     claim has something to be wrong about.
+#     THIS RULE IS OWED A RE-PICK (`EB-211`, 2026-08-30). The category gained
+#     a second half — a per-play price ledger scored against the printed costs
+#     and the printed bank, so silence FAILS — and these six were picked for
+#     the first half alone. Which sealed boards best ask "can this reader track
+#     a bank across a line", and whether R223's mark of 4 survives a category
+#     twice as hard, are [USER]'s: the write-up is
+#     `review/active/klee-sparks-2026-08-29.md` section 26. Nothing below was
+#     swapped in the meantime and all six remain scorable.
 #   intent  — the packet must TELEGRAPH an attack (`misreads.intent_damages`
 #     is non-empty), so question four has a telegraph to be sensitive to.
 #
