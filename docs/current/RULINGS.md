@@ -233,8 +233,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R221 | 2026-08-29 | A -- SEAT-CONTROL RETIREMENT. The fresh-Opus control form on every packet is a CALIBRATION ARM for the local seat's first live rounds, not a standing chair. | `af137bb` |
 | R222 | 2026-08-29 | A -- P1'S DECISION-FIRE IS NOT A TRIGGER. The MISS stands as published and is not re-graded (R101b); | `13a0537` |
 | R223 | 2026-08-29 | - THE PASS MARK IS PER CATEGORY AND THERE IS NO TOTAL. | `170821e` |
+| R224 | 2026-08-29 | (2026-08-30): the sitting slate lands whole -- eleven QUEUE rows closed, Klee's R2 picks answered, Furina and the Burst retirement countersigned prospective | `ed41d9a` |
 
-222 rows over the R1..R223 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 111 from a commit message, 0 unresolved.
+223 rows over the R1..R224 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 112 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
