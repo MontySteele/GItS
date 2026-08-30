@@ -22,11 +22,14 @@ funnel has actually seen:
     of the decision. Scored with the `intent_insensitive` falsifier itself,
     for the same reason.
 
-WHAT IT DOES NOT DECIDE. **There is no pass mark here.** The scorecard prints
-per-category counts and the per-item reasons and stops; the threshold that
-would qualify or disqualify a seat is `M62`'s and is [USER]'s to fix. A tool
-that picked its own threshold would be answering the open question in the act
-of instrumenting it.
+THE PASS MARK — R223 (2026-08-29), and it is [USER]'s, not this tool's. It
+lives in the battery file's `threshold:` block, where it can be read beside
+the boards it grades, and this module only applies it. [USER], answering the
+pick list, verbatim: *"targets 6/6, others >= 4/6 works for me"* — so
+**targets 6 of 6, costs 4 of 6, intent 4 of 6, and all three must hold.**
+The mark is PER CATEGORY and there is no total: a seat cannot buy back the
+blind spot that returned it (targets, `EB-203`) with the two categories it
+still reads.
 
 WHERE THE BOARDS COME FROM. `understudy/battery/battery.yaml`, and every item
 names a SEALED packet under `review/qa/` from a closed round — `kokomi-slice2`,
@@ -66,9 +69,9 @@ CATEGORIES: tuple[str, ...] = ("targets", "costs", "intent")
 MIN_ITEMS_PER_CATEGORY = 6
 
 THRESHOLD_NOTE = (
-    "there is no pass mark in this file. The per-item and per-category counts "
-    "are the output; the threshold that qualifies or disqualifies a seat is "
-    "QUEUE M62 and is [USER]'s")
+    "the pass mark is R223 (2026-08-29) and is [USER]'s, carried in the "
+    "battery file's threshold block: targets 6/6, costs 4/6, intent 4/6, all "
+    "three holding. Per category, never a total")
 
 
 class BatteryError(RuntimeError):
@@ -81,6 +84,17 @@ class Item:
     category: str
     turn_id: str
     why: str = ""
+
+
+@dataclass
+class Threshold:
+    """R223's pass mark: one required count per category, and no total."""
+
+    per_category: dict[str, int]
+    owner: str = ""
+
+    def required(self, category: str) -> int:
+        return self.per_category[category]
 
 
 def load_battery(path: Path | None = None) -> list[Item]:
@@ -103,6 +117,40 @@ def load_battery(path: Path | None = None) -> list[Item]:
                           turn_id=str(raw["turn_id"]),
                           why=str(raw.get("why") or "")))
     return items
+
+
+def load_threshold(path: Path | None = None) -> Threshold:
+    """R223's pass mark, read from the same file as the boards it grades."""
+    p = Path(path or BATTERY_FILE)
+    blob = yaml.safe_load(p.read_text(encoding="utf-8"))
+    raw = blob.get("threshold") if isinstance(blob, Mapping) else None
+    if not isinstance(raw, Mapping):
+        raise BatteryError(f"{p}: no 'threshold' block -- the pass mark is "
+                           "R223's and a battery without one grades nothing")
+    marks: dict[str, int] = {}
+    for cat in CATEGORIES:
+        if cat not in raw:
+            raise BatteryError(f"{p}: the threshold names no mark for {cat!r}; "
+                               "R223 is per category, so all of "
+                               + ", ".join(CATEGORIES) + " are required")
+        value = raw[cat]
+        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            raise BatteryError(f"{p}: the {cat!r} mark is {value!r}; a mark is "
+                               "a count of items, not a rate")
+        marks[cat] = value
+    for key in raw:
+        if str(key) not in CATEGORIES and str(key) != "owner":
+            raise BatteryError(f"{p}: the threshold names {key!r}, which is "
+                               "not a category")
+    return Threshold(per_category=marks, owner=str(raw.get("owner") or ""))
+
+
+def unreachable_marks(items: Sequence[Item],
+                      threshold: Threshold) -> list[str]:
+    """Marks above what the battery can produce — R222 A's lesson as a check."""
+    have = coverage(items)
+    return [f"{cat} asks {threshold.required(cat)} of {have[cat]} item(s)"
+            for cat in CATEGORIES if threshold.required(cat) > have[cat]]
 
 
 def coverage(items: Sequence[Item]) -> dict[str, int]:
@@ -181,13 +229,19 @@ SCORERS: dict[str, Callable[[Mapping[str, Any], Path], tuple[bool, str]]] = {
 def run_battery(items: Sequence[Item], *,
                 reader: Callable[[Item], Mapping[str, Any] | None],
                 qa_dir: Path | None = None,
-                seat_id: str = "") -> dict[str, Any]:
+                seat_id: str = "",
+                threshold: Threshold | None = None) -> dict[str, Any]:
     """Score every item. `reader` returns the seat's form for one item.
 
     Injected rather than called: the locks run this against a fake seat, and a
     battery that could only be exercised with a 27B model on a loopback port
     would be a battery nobody runs in CI.
+
+    `threshold` omitted means the shipped battery's mark (R223). Pass the one
+    loaded beside a custom `--battery` file, so the boards and the mark that
+    grades them always come from the same place.
     """
+    threshold = threshold or load_threshold()
     base = qa_dir or QA_DIR
     rows: list[dict[str, Any]] = []
     for item in items:
@@ -209,31 +263,43 @@ def run_battery(items: Sequence[Item], *,
         rows.append({"item": item.id, "category": item.category,
                      "turn_id": item.turn_id, "passed": bool(ok), "why": why})
 
-    per_category = {
-        cat: {"items": sum(1 for r in rows if r["category"] == cat),
-              "passed": sum(1 for r in rows
-                            if r["category"] == cat and r["passed"])}
-        for cat in CATEGORIES}
+    per_category = {}
+    for cat in CATEGORIES:
+        passed = sum(1 for r in rows if r["category"] == cat and r["passed"])
+        need = threshold.required(cat)
+        per_category[cat] = {
+            "items": sum(1 for r in rows if r["category"] == cat),
+            "passed": passed,
+            "required": need,
+            "pass": passed >= need,
+        }
+    overall = all(v["pass"] for v in per_category.values())
     return {
         "seat": seat_id,
         "items": rows,
         "per_category": per_category,
         "total": {"items": len(rows),
-                  "passed": sum(1 for r in rows if r["passed"])},
-        "threshold": None,
-        "threshold_owner": THRESHOLD_NOTE,
+                  "passed": sum(1 for r in rows if r["passed"]),
+                  "pass": overall},
+        "pass": overall,
+        "threshold": dict(threshold.per_category),
+        "threshold_owner": threshold.owner or THRESHOLD_NOTE,
+        "threshold_note": THRESHOLD_NOTE,
         "thin_categories": thin_categories(items),
         "run_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
 
 
 def one_line(scorecard: Mapping[str, Any]) -> str:
-    """The summary a person reads. Counts only; it grades nothing."""
+    """The summary a person reads: the counts, and R223's verdict on them."""
     parts = [f"{cat} {v['passed']}/{v['items']}"
+             f" (need {v['required']}) {'PASS' if v['pass'] else 'FAIL'}"
              for cat, v in scorecard["per_category"].items()]
     total = scorecard["total"]
-    return (f"qualify: {total['passed']}/{total['items']} items "
-            f"({', '.join(parts)}) -- no pass mark here; the threshold is M62")
+    verdict = "PASS" if scorecard["pass"] else "FAIL"
+    return (f"qualify: {verdict} -- {total['passed']}/{total['items']} items "
+            f"({'; '.join(parts)}); pass mark R223, all three categories must "
+            "hold")
 
 
 def write_scorecard(scorecard: Mapping[str, Any],
