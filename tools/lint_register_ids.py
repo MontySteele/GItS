@@ -597,8 +597,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
         12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
         74, 78, 80, 83, 84, 116, 128,
-        154,
-        157, 158, 159, 160, 161, 162, 163,
+        154, 158, 159, 160, 161, 162, 163,
         180, 181, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
         # 202/203 were minted 2026-08-29 by the KLEESPARK-R1 relayed review
@@ -756,6 +755,19 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # was written under the OLD reading; re-planning that CLOSED round
         # reports ceiling 0 against threshold 1, and `slots.yaml` is NOT
         # edited -- a published measurement stands as published.
+        # 157 LEFT OPEN_IDS 2026-08-30 with its row: one pin. The manifest's
+        # BaseLib `min_version` was 3.3.6, a floor nothing compared to
+        # anything; it is now 3.4.5, the release this machine compiles against,
+        # the assembly vault's `PIN.json` records and the installed Workshop
+        # item reports -- the same number STATE.md's pin block carries.
+        # `tier0/tests/test_eb157_baselib_pin.py` is the gate: manifest vs
+        # STATE.md, plus a curated enumeration of the BaseLib types we call so
+        # a reach for a new API meets the pin. RESIDUAL UNKNOWN, disclosed
+        # rather than closed: the 3.3.6 SURFACE could not be obtained (Steam
+        # serves only a Workshop item's current version and no older copy
+        # exists here or in the vault), so the enumeration was taken against
+        # 3.4.5 and whether those symbols exist in 3.3.6 is still unknown.
+        # Raising the floor to the verified number is what makes it harmless.
         # 156 LEFT OPEN_IDS 2026-08-30 with its row: the per-fight telemetry
         # row now reads `ReactionEffects.ResolvedThisCombat(combat, player)`,
         # a per-seat counter keyed exactly like `BombPower`'s detonation

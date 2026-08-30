@@ -168,7 +168,8 @@ Slay the Spire 2 **v0.111.0**, commit `41cef1ea` (2026-08-13), Steam buildid
 `222455745`. MegaDot v4.5.1 (`v4.5.1.m.14.mono.custom_build`, the editor
 `tools/build_pck.ps1` drives — a local download, not a Steam artifact, so the
 game update did not move it), BaseLib **3.4.5.0** (Workshop item
-`3737335127`), .NET SDK 9.0.316, ilspycmd 8.2.0.7535. The PCK contract version
+`3737335127`, and since `EB-157` the manifest's BaseLib `min_version` is
+that same release rather than a floor nothing checked), .NET SDK 9.0.316, ilspycmd 8.2.0.7535. The PCK contract version
 is `roster-pck-v3`; the shipped mod package is `klee` **v0.2**
 (`klee-mod/Klee/manifest.json`, `min_game_version` **0.111.0** — the hooks the
 port binds do not exist on 0.107.1, so the old floor was a claim the game's own
