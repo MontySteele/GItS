@@ -448,7 +448,8 @@ def _enemies(state: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def build(state: dict[str, Any], turn_id: str, *, repo: Path | None = None,
-          disclosures: list[str] | None = None) -> dict[str, Any]:
+          disclosures: list[str] | None = None,
+          forecast: list[str] | None = None) -> dict[str, Any]:
     """One blind packet from one live wire state. Raises on any leak.
 
     `turn_id` is the only caller-supplied string that reaches the packet, and
@@ -502,6 +503,11 @@ def build(state: dict[str, Any], turn_id: str, *, repo: Path | None = None,
             "enemies": _enemies(state),
         },
         "disclosures": list(disclosures or []),
+        # `EB-236` item (d) / the staged twin of `EB-229`. THE QUESTIONS A
+        # REGISTRATION ASKS BEFORE THE LINE. Empty on every board that
+        # registers none, which is every board written before this key
+        # existed. See `render` for why they are printed FIRST.
+        "forecast": [str(q) for q in (forecast or [])],
     }
     packet["board"]["spark_note"] = spark_note(packet["board"]["you"]["powers"],
                                                packet["board"]["hand"])
@@ -553,6 +559,25 @@ def render(packet: dict[str, Any]) -> str:
         out.append(f"- Relic — {r['name']}"
                    + (f" ({r['counter']})" if r.get("counter") else "")
                    + (f": {r['text']}" if r["text"] else ""))
+    if packet.get("forecast"):
+        # BEFORE THE HAND, AND THAT POSITION IS THE WHOLE POINT.
+        #
+        # `EB-229` found `KURAGEMEM002`'s `P1`, `P2` and `P4` UNREACHED not
+        # because the display failed but because THE QUESTION WAS NEVER
+        # ASKED: a reply schema of `command` and `thinking` lets a tester say
+        # why it plays what it plays and never what it EXPECTS, and the
+        # staged form's four questions are all past-tense. A forecast
+        # collected after the line is a rationalisation.
+        #
+        # So a registration that wants one asks it here, at the top of the
+        # page, in printed vocabulary, and the form carries one answer per
+        # question. It is OPT-IN: a board that registers no forecast prints
+        # no such block and its form is graded exactly as before.
+        out += ["", "## Before you decide", "",
+                "Answer these BEFORE you choose a line, and write the answers "
+                "into your form's `forecast` list in this order. They are "
+                "predictions, not questions about what you did:", ""]
+        out += [f"{i}. {q}" for i, q in enumerate(packet["forecast"], 1)]
     out += ["", "## Your hand", ""]
     if b.get("spark_note"):
         out += [b["spark_note"], ""]

@@ -710,3 +710,95 @@ def test_a_pair_naming_a_card_that_is_not_in_hand_is_refused():
                    slot_plan.Use("proto_spark_blast")])
     with pytest.raises(slot_plan.BoardDesignError):
         slot_plan.buying_orders(_bt1("t02"), spec)
+
+
+# ------------------------------ EB-236, on the REPAIRED round -------------
+
+BT2 = REPO / "understudy" / "turns" / "klee-sparks-bt2"
+
+
+def _bt2_turns() -> list:
+    return [staged_turn.load(p) for p in sorted(BT2.glob("t*.yaml"))]
+
+
+def test_the_repaired_boards_pass_the_check():
+    """THE OTHER HALF OF THE LOCK: `KLEESPARK-BT2` is clean.
+
+    Its `t02` claims the same exclusivity `KLEESPARK-BT1`'s `t02` did and
+    HOLDS it, because the only Attack in that hand is the rival sink itself
+    and it has to be paid for before it can pop anything.
+    """
+    turns = _bt2_turns()
+    assert [t.id for t in turns] == ["klee-sparks-bt2-t01",
+                                     "klee-sparks-bt2-t02",
+                                     "klee-sparks-bt2-t03"]
+    assert slot_plan.check_board_design(turns) == []
+
+
+def test_the_repaired_exclusive_board_declares_its_claim_in_the_file():
+    """A claim that lives only in a header comment is what BT1 shipped."""
+    turn = next(t for t in _bt2_turns() if t.id == "klee-sparks-bt2-t02")
+    spec = turn.resource_round
+    assert spec.exclusive == [slot_plan.Use("proto_spark_mode_bombs", 2),
+                              slot_plan.Use("proto_spark_finisher")]
+    assert slot_plan.buying_orders(turn, spec) == []
+
+
+def test_the_repaired_rounds_ceilings_read_the_mode_price():
+    """`EB-237` is what lets these predicates say what they mean."""
+    turns = _bt2_turns()
+    rows = {r["slot"]: r for r in
+            slot_plan.reachability(slot_plan.load_slots(BT2), turns)}
+    assert rows["C1"]["threshold"] == 2
+    assert rows["C1"]["qualifying"] == ["klee-sparks-bt2-t01",
+                                        "klee-sparks-bt2-t02"]
+    assert rows["C2"]["threshold"] == 1
+    assert rows["C2"]["qualifying"] == ["klee-sparks-bt2-t03"]
+    assert slot_plan.refusals(rows.values()) == []
+
+
+# ------------------------------------------- EB-236 (d): the forecast ------
+
+def test_the_forecast_is_asked_at_the_top_of_the_page_and_counted():
+    """`EB-229`'s staged twin: a field to count, asked BEFORE the line.
+
+    The schema carried nothing of the sort -- a form is four PAST-TENSE
+    questions -- so a registration that wanted a prediction had nowhere to
+    put it, and `KURAGEMEM002` graded three slots UNREACHED for exactly that
+    reason: not because the display failed but because the question was
+    never asked.
+    """
+    turn = next(t for t in _bt2_turns() if t.id == "klee-sparks-bt2-t01")
+    assert len(turn.forecast) == 3
+    packet = qa_packet.build(
+        {"state_type": "battle",
+         "player": {"hp": 42, "max_hp": 62, "block": 0, "energy": 3,
+                    "hand": [], "status": [], "relics": []},
+         "battle": {"round": 4, "enemies": []}},
+        turn.id, forecast=list(turn.forecast))
+    page = qa_packet.render(packet)
+    assert "## Before you decide" in page
+    assert page.index("## Before you decide") < page.index("## Your hand")
+    # A form that skips it is answering a different board.
+    base = {"grader": {"id": "x"}, "chosen_line": [{"card": "Kaboom!"}],
+            "q1_what_did_you_play": "a", "q2_other_line_considered": "b",
+            "q3_what_it_gave_up": "c", "q4_different_intent": "yes"}
+    assert "forecast_missing" in staged_turn.apply_falsifiers(
+        turn.id, base, packet_sha=None, closeness=None, forecast_asks=3)
+    answered = dict(base, forecast=["0", "3", "0"])
+    assert "forecast_missing" not in staged_turn.apply_falsifiers(
+        turn.id, answered, packet_sha=None, closeness=None, forecast_asks=3)
+    # And a board that asks nothing is graded exactly as it was before.
+    assert staged_turn.apply_falsifiers(
+        turn.id, base, packet_sha=None, closeness=None) == []
+
+
+def test_the_next_turn_reading_is_opt_in_and_ends_the_turn():
+    """`EB-236` item (e). A delayed refund needs one more reading."""
+    sit = next(t for t in _bt2_turns() if t.id == "klee-sparks-bt2-t03")
+    now = next(t for t in _bt2_turns() if t.id == "klee-sparks-bt2-t01")
+    form = {"chosen_line": [{"card": "Bag of Tricks"}]}
+    assert sit.replay_next_turn and not now.replay_next_turn
+    verbs = [v for v, _ in staged_turn.execute_steps(sit, form)]
+    assert verbs[-2:] == ["end_turn", "read"]
+    assert "end_turn" not in [v for v, _ in staged_turn.execute_steps(now, form)]
