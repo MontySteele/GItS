@@ -2680,7 +2680,13 @@ CONSTANTS_VERSION = 21
 # moved, and the bump the move earns is still a judgement. Re-pin with
 # `python tools/lint_sheet_stamp.py --update`, in the SAME commit as the
 # sheet edit.
-SHEET_DIGEST = "3d3f83ade3c2c5d61036f1a33954a695f267c64ea8552debeebf2bb068bfeb53"
+#
+# R226 (2026-08-30) re-pins it for a COMMENT-ONLY edit: the R80 standing-law
+# header block in `docs/kokomi-cards.yaml` was rewritten to the amended Charge
+# rule, marked PROSPECTIVE. No row, no number and no field moved, so
+# `CONSTANTS_VERSION` does not bump -- the digest is a fingerprint over bytes
+# and the bytes include comments (R225 precedent).
+SHEET_DIGEST = "12531a9826dc794b09b9c9e97ab8019d3626979b75127ecb6072109c3962d7d7"
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

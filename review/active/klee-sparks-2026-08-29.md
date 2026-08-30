@@ -218,6 +218,18 @@ brick.
    because Klee's relic supplies income Regent's does not. Defensible, and
    riskier.
 
+> **PICK 2 — ANSWERED (R226, 2026-08-30): option (1), match Regent exactly —
+> `Basic 1 / Common 4 / Uncommon 4 / Rare 2`.** The conversion is 2 Commons,
+> 1 Uncommon and 3 Rares, and §4.3's caveat about how deep the Rare cut goes
+> rides with it. **One condition, and it is the only one:** if `EB-205`'s
+> sim-drafted arm (`KLEESPARK-S1`) shows a drafted-deck maker:sink ratio that
+> CONTRADICTS Regent's shape, PICK 2 **RETURNS to [USER] with that number** —
+> it is not re-decided by Claude, and no other evidence reopens it. The
+> shipped-pool edit itself is a fold edit and lands at the
+> `SPARK_ALT_COST_ENABLED` flip, not before. **PICK 1 is untouched and still
+> open** — R225's order stands: the generator question is answered first, on a
+> representative deck.
+
 ---
 
 ## 4. Attacks that cost Sparks — PICK 3
