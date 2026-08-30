@@ -2683,7 +2683,7 @@ rather than by construction.
 That is the same class of finding `M56` fixed for the objective half: a
 threshold whose evidence the instrument does not collect. `EB-216` gave this run
 the wire's side of `P2` and `P6`; it did not, and was never scoped to, make the
-tester produce the stated side. **Filed as `EB-228`.** Under §13.9.3 an UNREACHED
+tester produce the stated side. **Filed as `EB-229`.** Under §13.9.3 an UNREACHED
 slot is not a pass and **nothing is inferred from an absence** — and, symmetrically,
 nothing is inferred against the display, which no reading of this record faults.
 
@@ -2714,7 +2714,7 @@ question was never asked rather than answered badly, and §13.9.3 forbids
 inferring either way from an absence — so the acceleration keyword ("Stir")
 does **not** become non-optional on this run and no item of that list opens
 either. **No [USER] row opens on this round.** The one thing owed is
-engineering: `EB-228`.
+engineering: `EB-229`.
 
 ##### Register moves this run makes
 
@@ -2722,7 +2722,7 @@ engineering: `EB-228`.
   HEAD. `214` comes out of `lint_register_ids.OPEN_IDS` in the same commit,
   because the lint refuses a manifest entry that outlives its row — **and only
   214 was removed.**
-- **`EB-228` is MINTED** for the elicitation gap above.
+- **`EB-229` is MINTED** for the elicitation gap above.
 - **`EXPERIMENTS.md`** moves the registration from *Active* to *Graded*.
 - Nothing else. No stamp moved, no sheet moved, no shipped number moved, and
   **no number from this run is quotable** (R213 B / R215 B, R217 G).

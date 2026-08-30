@@ -513,7 +513,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     34 of 60 observation pages and the blocked page printed both halves of
     `P4`'s question in full, but a blind run's reply schema is `command` and
     `thinking` and never a forecast, so the tester is never ASKED what the
-    jellyfish will do next turn (`EB-228`, `EB-216`'s other half). `P5` and `P6`
+    jellyfish will do next turn (`EB-229`, `EB-216`'s other half). `P5` and `P6`
     were NOT re-posed and their sealed grades stand as published (R101b).
     **No [USER] row opens on the round.**
     **The memory's DISPLAY is being rebuilt**: the strip the blind run

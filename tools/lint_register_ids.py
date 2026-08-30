@@ -259,7 +259,7 @@ CEILINGS: dict[str, int] = {
     # (fresh / rolled-over / missing fixtures, both stop lines, both roles'
     # refusal branches with `seat._run` monkeypatched, and the under-the-line
     # case that must still reach codex). The three-calls rule is UNTOUCHED.
-    "EB": 228,   # EB-228 minted 2026-08-30 by the `KURAGEMEM002` rerun: the
+    "EB": 229,   # EB-229 minted 2026-08-30 by the `KURAGEMEM002` rerun: the
                  # blind-play reply schema collects no forecast, so three
                  # display slots graded UNREACHED on a display that was
                  # demonstrably on the page and correct.
@@ -606,11 +606,11 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 214 LEFT OPEN_IDS 2026-08-30: the KURAGEMEM002 rerun ran and P3 came
         # in at 5 of 10 with two Musters against a threshold of 3-with-1, which
         # is the row's acceptance word for word. Only 214 was removed.
-        # 228 minted 2026-08-30 by that same rerun: P1, P2 and P4 all read
+        # 229 minted 2026-08-30 by that same rerun: P1, P2 and P4 all read
         # UNREACHED because a blind run's reply schema is `command` and
         # `thinking` and never a forecast, so a slate slot that grades one has
         # no per-turn field to count. EB-216's other half.
-        228,
+        229,
         # 220 minted 2026-08-30 -- the meter cost badge (Encore, Charge).
         220,
         # 223 minted 2026-08-30 by the relayed open-items review, fact-checked:
