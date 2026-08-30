@@ -2443,6 +2443,33 @@ they are not comparable by subtraction.
 
 ### 14.2 The candidates
 
+**PREFACE — what already exists (added 2026-08-29 on the relayed review; see
+§14.5 claim (a)).** Before any candidate is read, the record has to say that
+the shipped Klee pool already contains **three Spark spenders whose payoff is
+not a plain Attack**, all three ratified in W3/R211, all three **hybrids: 1
+Energy *and* a top-level `spend_spark 2`**:
+
+| id | face as shipped | payoff kind | file |
+|---|---|---|---|
+| `powder_charge` | 1 Energy · Spend 2 Sparks · Skill · Uncommon — *detonate the target's Bombs, +4 each* | damage, but **board-conditional** — dead on an unbombed target | `docs/klee-cards.yaml:248-249` |
+| `hold_the_line` | 1 Energy · Spend 2 Sparks · Skill · Uncommon — *Gain 5 Block; if the enemy intends to attack, gain 6 more* | **defence** (non-damage) | `docs/klee-cards.yaml:303-306` |
+| `smoke_and_sparks` | 1 Energy · Spend 2 Sparks · Skill · Uncommon — *Apply 3 Vulnerable* | **debuff** (non-damage) | `docs/klee-cards.yaml:320-322` |
+
+**None of the three was granted to the whole-fight deck.** §12.2's grant is six
+prototype rows and nothing else — `Powder Pop`, `Ka-pow!`, `Fwoosh!`,
+`Tinder Toss`, `Bang Bang!`, `Firework Finale`. So *"the bank has exactly one
+destination and that destination is damage"* is **true of the granted deck and
+of the eight-row prototype set, and false of the shipped pool.** That does not
+retire §14.1 — the prototype arm is the priced-sink economy under test, and the
+three rows above sit in the *other* economy: they charge Energy as well, so
+they are not reachable by a bank alone, and the whole point of the arm is a
+price paid in Sparks only. But it changes what a re-authoring is *for*. It is
+not "give the Spark a second kind of destination for the first time"; it is
+"give the **0-Energy, Spark-priced** economy a second kind, and decide what
+happens to the three hybrids that already do this at a different price". That
+second half is now recommendation option **(5)**, and it did not exist before
+the review supplied it.
+
 Eight, numbered. Seven are buildable with what both engines already have; the
 eighth is included because it is the shape the brief most wants and it is
 honestly out of reach today, and saying so is more useful than smuggling in a
@@ -2468,22 +2495,42 @@ moving it would undo a different ruling. That leaves five replaceable rows:
 > *Bombs you placed this turn deal 3 more damage.*
 
 Replaces **Bang Bang!** (price 2, Common). The body is `Chain Fuse`'s exactly —
-same op, same scope, same figure — with the energy cost swapped for a Spark
-price and the free Bomb dropped.
+same op, same scope, same figure (`docs/klee-cards.yaml:117-118`) — with the
+energy cost swapped for a Spark price and the free Bomb dropped.
 
-**The decision:** hold 2 Sparks now so that on the turn you actually place two
-or three Bombs, all of them get bigger — instead of spending the same 2 on ten
-damage today.
+**SEQUENCING — CORRECTED 2026-08-29 (relayed review, §14.5 claim (c)); the
+first draft of this candidate had it backwards.** `_op_modify_bombs`
+(`tier0/engine/effects.py:1667-1673`) iterates the Bombs **already on living
+enemies** and adds the bonus to each; it schedules nothing and it cannot reach
+a Bomb that does not exist yet. So this card is played **AFTER** the placement
+cards on the same turn, never before them. The shipped precedent says the same
+thing from the other side: `Chain Fuse` prints `modify_bombs` *first* and
+`place_bomb` second, so **`Chain Fuse` does not buff its own Bomb** — it buffs
+whatever was already placed this turn. Every sentence below is written in the
+corrected order.
 
-**The board state that makes it beat damage:** a turn where the hand holds
-`Double Pop`, `Bomb Voyage`, `Mine Toss` or `Jumpy Dumpty`. One Bomb makes this
-a bad ten damage; three Bombs make it nine damage that also feeds the relic and
-every detonation payoff in the deck.
+**The decision:** hold 2 Sparks through the placement so that on the turn you
+have actually put two or three Bombs down, one more card makes all of them
+bigger — instead of spending the same 2 on ten damage today.
 
-**The failure mode:** it is dead on a turn with no Bomb card in hand, which is
+**The board state that makes it beat damage:** a turn on which `Double Pop`,
+`Bomb Voyage`, `Mine Toss` or `Jumpy Dumpty` has **already resolved**. One Bomb
+makes this a bad ten damage; three Bombs make it nine damage that also feeds
+the relic and every detonation payoff in the deck.
+
+**The failure mode:** it is dead on a turn with no Bomb placed yet, which is
 most opening hands, and "dead card" is what §13.1's `P2` says a dry sink already
-reads as. It also arrives *before* the payoff is visible, so a player who has
-not internalised the scope clause will read it as a nothing card.
+reads as. And because the buff arrives *after* the placements rather than
+before them, a player who has not internalised the scope clause will sequence
+it first, get nothing, and read it as a nothing card — a legibility cost that
+`Chain Fuse` already carries and that this row inherits whole.
+
+**Overlap with `Chain Fuse`, stated plainly (§14.5 claim (c), second half):**
+against a player who holds both, this card is `Chain Fuse` minus the 4-damage
+Bomb, bought with Sparks instead of Energy. The only thing it tests that
+`Chain Fuse` does not is **whether the currency changes the decision**. That is
+a real question for this arm and a thin one for the pool, and it is the reason
+this candidate is weaker as a *novelty* argument than as a *price* argument.
 
 **Can tier 0 price it?** **No — it needs a `_spark_unit_value` leg.**
 `modify_bombs` appears nowhere in `_expected_damage`, so the pilot values this
@@ -2492,9 +2539,12 @@ prices a Spark as the cheapest affordable sink's payoff over its price) would
 therefore price the whole bank at zero on a hand holding only this. That is the
 declared blind spot working exactly as its docstring says it does.
 
-**The falsifier:** an affordable damage sink is in hand at `end turn` on a turn
-this card was played, or — sharper — the recorded reason for a `Slow Fuse` play
-names a Bomb card it intends to play afterwards.
+**The falsifier (corrected with the sequencing):** an affordable damage sink is
+in hand at `end turn` on a turn this card was played, or — sharper — the
+recorded reason for a `Slow Fuse` play names **the Bombs it has already placed
+this turn**. A reason that names a Bomb card the player intends to play
+*afterwards* is now evidence of a **misread**, not of a hold, and the grader
+script must score it that way.
 
 ---
 
@@ -2516,6 +2566,30 @@ bodies it is 15 damage on a one-turn delay plus three Spark refunds from the
 relic; `Dodoco Blast` is 21 now and nothing afterwards. Against one body it is
 plainly worse than the card it replaced, and that is intended.
 
+**IT IS PARTLY A GENERATOR, AND THE FIRST DRAFT DID NOT DO THIS ARITHMETIC
+(relayed review, §14.5 claim (d)).** Klee's **starter** relic Pounding Surprise
+carries `spark_on_detonation`, and `detonate_bombs` grants **1 Spark per Bomb
+detonated** (`tier0/engine/effects.py:874-875`) — it is not a draft-dependent
+upside, it is in the kit from turn one. So the bank arithmetic for one play of
+this card, once the Bombs go off, is:
+
+| bodies | Sparks spent | Bombs placed | Sparks refunded | net |
+|---|---|---|---|---|
+| 1 | 2 | 1 | 1 | **−1** |
+| 2 | 2 | 2 | 2 | **0** |
+| 3 | 2 | 3 | 3 | **+1** |
+
+**On three or more bodies this sink pays for itself and then some**, and a sink
+that refills the bank it drains cannot create the scarcity that §14.1 says a
+hold requires. The refunds are one turn late and are forfeit on any body that
+dies before its Bomb resolves, so it is not free income — but it is closer to
+`Powder Pop` than the section intends, and against a four-body board it is
+strictly Spark-positive. That is a real argument against this candidate and it
+is recorded as one rather than as a bonus. If [USER] takes it anyway, the
+honest repair is to price it at **3** rather than 2, which puts every row of the
+table at −1 or worse; that is a design change, not hygiene, so it is not made
+here.
+
 **The failure mode:** the delay is a real cost against anything that dies this
 turn, and Klee's own Attacks detonate Bombs early *by accident*, so an
 inattentive player will often convert this back into ordinary damage without
@@ -2535,7 +2609,7 @@ on a turn this card is held for a Bomb-and-detonate turn.
 
 ---
 
-#### 3. Behind the Barrel — the bank buys survival, and only when survival is at stake
+#### 3. Behind the Barrel — the bank buys survival, and only when survival is at stake — **DOMINATES `Hold the Line`, see the finding below**
 
 > **Behind the Barrel** — 0 Energy · Spend 1 Spark · Skill · Common
 > *Gain 5 Block. If the enemy intends to attack, gain 6 more.*
@@ -2562,6 +2636,25 @@ proves the kind works and is exactly why it is the cheapest candidate to be
 confident about, but it does mean this row tests placement and price, not
 novelty.
 
+**FINDING — THIS ROW STRICTLY DOMINATES `Hold the Line`, and the first draft
+did not say so (relayed review, §14.5 claim (b)).** The two faces, side by
+side: `hold_the_line` is **1 Energy + 2 Sparks, Uncommon**
+(`docs/klee-cards.yaml:303-306`); this candidate is **0 Energy + 1 Spark,
+Common**, with the **identical body** — Block 5, plus 6 more on
+`enemy_intends_attack`. It is cheaper on **both** currencies, and it is
+*commoner*, so it is also easier to draft. There is no board state on which a
+player prefers `Hold the Line`. **The row is kept listed and is not deleted** —
+the record went out with it in, and R101b's habit is to strike rather than
+rewrite — but it now carries this finding, and anything downstream must read
+the two together. The mitigating fact, which is real but does not dissolve the
+problem: prototype rows are dev-only and are not in the draftable pool, so the
+two faces never sit in one deck **today**. The domination becomes live the
+moment (e) is accepted and a row moves to the real sheet, which is precisely
+when nobody will be looking for it. So if [USER] takes this candidate, the
+acceptance step owes **either** a reprice of this row **or** a migration
+decision for `Hold the Line` — which is option **(5)**, and the second reason
+that option now exists.
+
 **Can tier 0 price it?** **Yes, today.** `_block_value` reads printed Block, and
 `_active_effects` evaluates the `enemy_intends_attack` branch live, so the pilot
 sees the conditional half on the turns it fires. The one honest caveat is that
@@ -2580,7 +2673,25 @@ informative: the same board, damage taken anyway, and the Block left unbought.
 #### 4. Powder Keg — the whole bank buys next turn instead of this one
 
 > **Powder Keg** — 0 Energy · Spend 3 Sparks · Skill · Uncommon · Exhaust
-> *Your Bombs deal 3 more damage. Place a 5-damage Bomb on ALL enemies.*
+> *Place a 5-damage Bomb on ALL enemies. Your Bombs deal 3 more damage.*
+
+**TEXT AND EFFECT ORDER CORRECTED 2026-08-29 (relayed review, §14.5 claim
+(e)).** The first draft printed the `modify_bombs` clause first, which — by the
+same engine fact as candidate 1, `tier0/engine/effects.py:1667-1673` — means
+the Bomb this card places is put down **after** the buff has already run and
+therefore does **not** get the `+3`. The draft's headline arithmetic (three
+existing Bombs plus this one, `+3` each, **12** extra damage) counted a Bomb the
+printed order could not reach; as printed it was **9**. The two available
+repairs were (i) reverse the effects so `place_bomb` resolves first and the
+`scope: all` buff then catches every Bomb including the new one, keeping 12, or
+(ii) keep the order, print *"existing Bombs"*, and say 9. **Taken: (i)** — it is
+the ordering that matches the sentence the candidate was written to make ("every
+Bomb on the board, including the ones already ticking"), so it corrects the text
+to the intent rather than shrinking the intent to the text. Option (ii) remains
+available to [USER] at a stroke and is a strictly smaller card. Note this makes
+the row's order the **opposite** of `Chain Fuse`'s shipped order, deliberately;
+the effects list must read `place_bomb` then `modify_bombs`, and a build that
+copies `Chain Fuse` verbatim reintroduces the bug.
 
 Replaces **Firework Finale** (price 3, Uncommon, Exhaust, 18 damage) — the rung
 that was dead for the entire whole-fight run and was named twice by the tester
@@ -2594,8 +2705,14 @@ damage to one enemy right now.
 **The board state that makes it beat damage:** a board that already carries
 Bombs and a fight with turns left in it. Against a pile of three existing Bombs
 plus the one this places, the `+3` alone is 12 extra damage arriving at the
-start of your next turn, with the Bomb on top and a relic Spark per detonation
-feeding the next purchase. Against an enemy about to die it is strictly worse
+start of your next turn **— on the corrected order above; it is 9 if [USER]
+takes repair (ii) —** with the Bomb on top and a relic Spark per detonation
+feeding the next purchase. That refund is the same Pounding Surprise income
+candidate 2 was corrected for, and it applies here too: on a board of three
+carrying four Bombs each detonation returns a Spark, so the 3 spent here come
+back over the following turn. Unlike candidate 2 the card still consumes the
+whole bank at the moment of decision, which is the property the hold test
+needs, but the section should not pretend the bank is gone for good. Against an enemy about to die it is strictly worse
 than 18 now, which is the trade.
 
 **The failure mode:** this is the most likely of the eight to be *dead* rather
@@ -2642,6 +2759,21 @@ other direction — a cheap card that draws is played on sight in most decks, an
 a player who does not care which card comes back will just play it for the draw.
 Turn one, with an empty discard, it is a 1-Spark cantrip and nothing else.
 
+**AND IT ADDS A SELECTOR, WHICH IS A COST THIS HOUSE HAS PRICED BEFORE (relayed
+review, §14.5 claim (f1)).** `recall_to_draw` fetches a **chosen** card
+(`docs/current/calibration/sprint-sim-hygiene-log-2026-07-29.md:130`), so every
+play opens the discard pile and stops the turn while the player reads it. The
+adjacent precedent is real but is **not** the same object: what [USER] rejected
+on Kokomi was a **mode selector fired on every play** — *"forces an extra
+selector step"*, `review/active/kokomi-kurage-memory-2026-08-29.md:46`, and the
+Charge design was then built with *"no selector, and that is deliberate"*
+(`:127-129`), refusing pick-at-fire-time as *"the selector step [USER]
+rejected"* (`:478-481`). A discard fetch is opt-in, on one card, at a moment the
+player chose — a smaller object than a mandatory per-play mode prompt. It is
+still the shape [USER] has twice declined to pay for, and on a card meant to be
+played most turns the difference narrows. Recorded against this candidate; not
+decided here.
+
 **Can tier 0 price it?** **No — it needs a `_spark_unit_value` leg.**
 `_tempo_value` prices `draw` and `energy`; `recall_to_draw` appears nowhere in
 it, so the pilot sees this as "draw 1 for a Spark" and prices the fetch — the
@@ -2660,7 +2792,14 @@ fetched.
 > *Move all Bombs onto the target. They deal 2 more damage.*
 
 Replaces **Tinder Toss** (price 1, Common, 4 damage to all). The body is
-`Careful Arrangement`'s exactly.
+`Careful Arrangement`'s exactly (`move_bombs`, bonus 2 —
+`docs/klee-cards.yaml:119-120`), which means it carries the same
+currency-conversion-duplicate objection candidate 1 does: against a player
+holding both, this is `Careful Arrangement` bought with Sparks instead of
+Energy. It does **not** overlap `powder_charge`, contrary to the relayed review
+(§14.5 claim (f2)) — that card runs `detonate`, this one runs `move_bombs`, and
+gathering a pile is the setup for a detonation rather than a second way to do
+one.
 
 **The decision:** hold 1 Spark so that when your Bombs have scattered across
 three bodies you can gather them onto the one that is about to matter, instead
@@ -2711,6 +2850,19 @@ axis is 2.0 — deliberately low. A card that hands her steady defence for a
 resource she generates every turn moves her off her own statline, and it does it
 quietly.
 
+**The declared weakness, with its citation (relayed review, §14.5 claim
+(f3)).** `docs/current/characters/klee-character-design.md:15` — *"A3 Block
+**2.0** — Reluctant, **conditional** defense"* — and the adjective is the whole
+distinction between this candidate and candidate 3. `Hold the Line` and Behind
+the Barrel are *conditional*: their large half is gated on
+`enemy_intends_attack`, so they buy defence only on the turns the enemy is
+swinging, which is what "reluctant, conditional" describes. Powder Trail is
+**unconditional and pre-emptive** — 4 now and 4 next turn regardless of what
+anything intends — so it is not a low, conditional Block axis at a Spark price;
+it is a *steady* Block axis, which is a different character. That is not a
+reason it cannot be picked, but it is a **statline amendment** and belongs to
+[USER] under the identity rail, not to a sink re-authoring.
+
 **Can tier 0 price it?** **No — it needs a leg on the block side.** `_raw_block`
 reads only `op == "block"`; `block_next_turn` is not in it, so the pilot sees
 four Block for two Sparks and will price this as the worst card in the set.
@@ -2727,6 +2879,20 @@ the set can produce it.
 > Sparks have been held — "at the end of your turn, if you did not spend a
 > Spark, this costs 1 less" or "spend your whole bank: deal 4 damage per Spark
 > spent, to all enemies".
+
+**AMENDED 2026-08-29 (relayed review, §14.5 claim (f4)): the spend-all half of
+that sketch is struck as a hold shape.** *"Spend your whole bank: 4 damage per
+Spark"* is linear — the Sparks are worth exactly 4 each whenever you spend them
+— so it rewards *batching*, not *holding*, and it pays in damage, which puts it
+back in the one kind this whole section is trying to leave. What the shape
+actually needs is one or both of: **increasing returns** (the per-Spark rate
+rises with the size of the bank, so a bank of 3 is worth strictly more than
+three banks of 1) and **Retain**, so the card survives the draw that would
+otherwise force the spend — Retain already ships in this world (Bursts carry it
+per principles v1.4, `docs/current/characters/klee-character-design.md:52`).
+Both were absent from the sketch and both are now part of it. Neither changes
+the refusal below: the engine work is still unbuilt, and increasing returns need
+the same missing bank-reading formula.
 
 This is the only shape on §14.1's list that rewards holding **directly** rather
 than through circumstance, and it is therefore the shape most likely to produce
@@ -2836,3 +3002,61 @@ re-authorings should move down if they are doing anything at all. And the run
 sits on an **author-disjoint seat** — whoever writes these rows may not grade
 them, which is the independence question now open on QUEUE and which this branch
 does not settle. The rows above are Claude's, so the grading chair is not.
+
+### 14.5 The relayed review of §14, fact-checked (2026-08-29)
+
+An independent review (GPT) of §14 was relayed by [USER]. Every claim is checked
+against the files below; where a claim found a wrong effect ordering or wrong
+arithmetic in a candidate's text, the candidate was **corrected in place** as
+hygiene and the correction is named in one line here. **No pick is answered.**
+
+| # | claim | verdict | where |
+|---|---|---|---|
+| a | Klee already ships three non-damage Spark spenders, and the whole-fight deck omitted all three, so "one destination" was true of the granted deck and not the pool | **PARTLY RIGHT — and materially** | `docs/klee-cards.yaml:248,303,320`; §12.2's six-row grant |
+| b | Behind the Barrel is `Hold the Line`'s body at 0E+1 Spark, Common vs Uncommon — strictly dominates | **RIGHT** | `docs/klee-cards.yaml:303-306` vs candidate 3 |
+| c | Slow Fuse's sequencing is documented backwards; and it overlaps `Chain Fuse` | **RIGHT on the sequencing; PARTLY on the overlap** | `tier0/engine/effects.py:1667-1673`; `docs/klee-cards.yaml:117-118` |
+| d | Minefield on three bodies spends 2 and refunds 3 through the relic — partly a generator | **RIGHT** | `tier0/engine/effects.py:874-875`; `docs/current/characters/klee-character-design.md:25` |
+| e | Powder Keg as ordered gives the new Bomb no `+3`; the four-Bomb/+12 arithmetic is wrong | **RIGHT** | `tier0/engine/effects.py:1667-1673` |
+| f1 | Second Pocket adds a discard selector — the run-length UX cost rejected for Kokomi | **PARTLY RIGHT** | `.../sprint-sim-hygiene-log-2026-07-29.md:130`; `review/active/kokomi-kurage-memory-2026-08-29.md:46,127-129,478-481` |
+| f2 | Regroup overlaps `Careful Arrangement` and `Powder Charge` | **RIGHT on `Careful Arrangement`, WRONG on `Powder Charge`** | `docs/klee-cards.yaml:119-120` vs `:248-249` |
+| f3 | Powder Trail erases Klee's deliberate defensive weakness | **RIGHT, and the doc exists** | `docs/current/characters/klee-character-design.md:15` |
+| f4 | Saving Up needs Retain and/or increasing returns, not spend-all | **PARTLY RIGHT — the spend-all half is struck** | candidate 8, amended |
+| g | add an option: migrate the existing utility spenders first, test the mixed pool, and prototype only a corrected Powder Keg if a price-3 rung is still wanted; and (4) reads as "pause and migrate", not "the set is fine" | **ADOPTED as option (5)**, and (4)'s reading recorded beside (4) | §14.3 |
+| h | five tightened proof conditions | **ADOPTED into §14.4** as instrument conditions | §14.4 |
+
+**On (a), precisely.** Two of the three are non-damage — `hold_the_line` pays in
+Block, `smoke_and_sparks` in Vulnerable. The third, `powder_charge`, pays in
+**damage**: it detonates. It is still not a plain Attack — its payoff is
+board-conditional and is nothing at all on an unbombed target — but the claim's
+word "non-damage" is wrong for one row of three. The load-bearing half of the
+claim is right and stands: all three are in the shipped pool, all three charge
+Sparks at the top level, and §12.2 granted **none** of them, so the whole-fight
+null was measured on a deck whose bank genuinely had one destination. §14.2 now
+opens with them.
+
+**On (c), the second half.** The overlap is real and the memo disclosed it in
+its own first line (*"The body is `Chain Fuse`'s exactly"*), so this is not a
+finding the memo hid — but the review is right that the memo drew no conclusion
+from it. It has one now, at candidate 1: against a player holding both, Slow
+Fuse is `Chain Fuse` minus the Bomb, in a different currency, and the only thing
+it tests is whether the currency changes the decision.
+
+**The four corrections made, one line each.**
+
+1. **Slow Fuse (candidate 1)** — sequencing reversed in the prose: the card is
+   played **after** the placement cards, never before; the falsifier now scores
+   a reason naming a *future* Bomb card as a **misread** rather than a hold.
+2. **Minefield (candidate 2)** — the relic refund arithmetic added as a table:
+   net **−1 / 0 / +1** Sparks on one / two / three bodies, so on three or more
+   the sink partly refills the bank it drains, recorded as an argument against
+   the candidate.
+3. **Behind the Barrel (candidate 3)** — marked in its heading as **strictly dominating `hold_the_line`** and given the finding in full; **kept listed, not deleted**, because
+   the record already went out with it.
+4. **Powder Keg (candidate 4)** — printed text and effect order swapped to
+   `place_bomb` then `modify_bombs`, which keeps the intended **+12**; repair
+   (ii) (keep the order, print *"existing Bombs"*, say **+9**) is recorded as
+   available to [USER] at a stroke.
+
+**What this section does not do.** It answers no pick. §14.3's five options —
+including the new (5) — §11.7 item 1(e), the Minefield reprice, the Powder Keg
+repair choice, the Powder Trail statline question, and `M64` are all [USER]'s.
