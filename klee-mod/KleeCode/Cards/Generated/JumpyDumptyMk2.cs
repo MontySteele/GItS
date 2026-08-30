@@ -47,14 +47,14 @@ public sealed class JumpyDumptyMk2 : CustomCardModel, IElementalCard, ISkillTagC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Dumpty Mk.II"),
-        ("description", "Deal {Damage:diff()} damage to random enemies twice. Place a [gold]Bomb[/gold] on EACH enemy dealing {ExtraDamage:diff()} damage. [gold]Burst[/gold] +5."),
+        ("description", "Deal {Damage:diff()} damage to random enemies twice. Place a [gold]Bomb[/gold] on EACH enemy dealing {BombDamage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(8m, ValueProp.Move),
-            new ExtraDamageVar(6m)
+            new DynamicVar("BombDamage", 6m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -75,7 +75,7 @@ public sealed class JumpyDumptyMk2 : CustomCardModel, IElementalCard, ISkillTagC
             .Execute(choiceContext);
         foreach (var bombTarget in CombatState!.HittableEnemies.ToList())
         {
-            await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars.ExtraDamage.BaseValue, Owner.Creature, this);
+            await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars["BombDamage"].BaseValue, Owner.Creature, this);
         }
     }
 

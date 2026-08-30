@@ -665,8 +665,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 230/231/232 minted 2026-08-30 by the overnight integration, from the
         # night's two live runs and from the integration's own suite: the
         # `place_bomb` face, the teardown that reports a kill it did not make,
-        # and the lane test leaking across pytest sessions. All three OPEN.
-        230, 231, 232,
+        # and the lane test leaking across pytest sessions.
+        #
+        # 230 LEFT OPEN_IDS 2026-08-30 with its row: every `place_bomb` face
+        # prints the Bomb's own amount, carried by a plain "BombDamage" var
+        # instead of the attack-var family, and the lock was seen to FAIL on
+        # all seventeen shipped faces first.
+        231, 232,
         # 233/234 minted 2026-08-30 by the post-merge review: the scorer/pool
         # half of KLEESPARK-S1's S3 miss, and the memory-cadence read on a
         # developed deck the kurage packet defers. Both OPEN.

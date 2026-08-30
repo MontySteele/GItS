@@ -41,14 +41,14 @@ public sealed class SorryJean : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sorry, Jean..."),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Place a [gold]Bomb[/gold] dealing {BombDamage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new BlockVar(4m, ValueProp.Move),
-            new DamageVar(4m, ValueProp.Move)
+            new DynamicVar("BombDamage", 4m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -63,7 +63,7 @@ public sealed class SorryJean : CustomCardModel
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
+        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars["BombDamage"].BaseValue, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
