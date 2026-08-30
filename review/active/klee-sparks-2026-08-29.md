@@ -4955,6 +4955,18 @@ under `-p:PrototypeCards=true`). **Sub-pick (a) rides it:** an Attack that
 ALREADY prints a Spark price is untouched, so **Ka-pow! stays at 1** and the
 five Spark-priced damage rungs `W3` left out stay left out.
 
+**Build note, disclosed before the run — `EB-230`.** Granted card 6, All of My
+Treasures!, prints its Bomb damage as `{Damage:diff()}`, which resolves against
+the player's live attack modifiers while its body (`place_bomb bomb_damage: 6`)
+does not read them, so under a debuff the face can understate the stack
+(`KLEESPARK-W3` `turn-029`: face 4, dealt 6). The fix — every `place_bomb` face
+prints the bomb's own amount — is scheduled to land BEFORE this run, and the
+run's stamp records the build. If the run happens on a build without it, the
+disagreement is a pre-declared confound on the tester's play and NOT a Spark
+quantity: the card's `gain_spark 2` and every price on this slate are
+unaffected, and no slot here grades a Bomb damage number. Stated now so it is
+not read back into any grade after the run.
+
 **The ratio is UNCHANGED at 8 : 5 = 1.600.** The Power carries no top-level
 `gain_spark` and no top-level `spend_spark`, so by §17.2's sheet definitions —
 used unchanged by `S1`, `W3` and this read — it is neither a maker nor a sink
