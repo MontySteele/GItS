@@ -594,18 +594,31 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `EB-213`–`EB-219` — of which `EB-219` (Prune's re-author) and
     `EB-218` (the Spark-only migration) precede the mixed-pool fight.
     No [USER] row is open on the slice work.
-    **Klee's order, as R225 sets it:** `EB-205`'s sim-drafted read is **TAKEN**
-    — `KLEESPARK-S1`, 2026-08-30, 2 PREDICTED / 3 MISS at `RT12/D18/P11/C21`:
-    on a DRAFTED deck the per-fight peak Spark bank medians **5.0** against
-    `W2`'s printed ceiling of 1, so **in the sim income is not the governor**
-    and the null was `W2`'s grant rather than the one-for-one economy, while
-    the drafter takes a migrated non-damage twin in only 3.2% of decks (a
-    scorer finding, not an income one) — so the live controlled-ratio
-    registration comes next and INHERITS `S4`'s floor-15 median of **1.500
-    makers per sink**, granting Rummage and its non-damage sinks rather than
-    drafting them; then *Bag of Tricks* (`EB-224`);
-    whole fights are unblocked, the two lifecycle throws being fixed and the
-    three-fight soak green.
+    **Klee's order, as R225 set it, is DONE through the income question.**
+    `EB-205` is **CLOSED**, on both of its halves. `KLEESPARK-S1` (2026-08-30,
+    2 PREDICTED / 3 MISS at `RT12/D18/P11/C21`) measured the arm DRAFTED in
+    the sim: the per-fight peak Spark bank medians **5.0** against `W2`'s
+    printed ceiling of 1, so the null was `W2`'s grant rather than the
+    one-for-one economy, while the drafter takes a migrated non-damage twin in
+    only 3.2% of decks — a scorer finding, not an income one. It handed the
+    live read exactly one number, `S4`'s floor-15 median of **1.500 makers per
+    sink**, and `KLEESPARK-W3` (2026-08-30, dev build `0.2.1610+proto.dirty`,
+    1 PREDICTED / 1 SPLIT / 2 MISS / 1 UNREACHED) staged a live deck at it —
+    eight makers to five sinks, **1.600**, thirteen cards granted, Rummage and
+    the non-damage sinks granted rather than drafted. **It is also the first
+    whole-fight session that was a BATCH: four fights, 19 combat pages, 40 of
+    40 funded actions**, `EB-221` and `EB-222` being the difference from two
+    `tool_blocked` endings. **`W6''` PREDICTED at a median per-fight peak bank
+    of 4.0**, so **income is not the governor on a representative deck on
+    either engine, and Klee PICK 1 does NOT reopen** — the one registered
+    condition that would have reopened it was a `W6''` MISS. What the live run
+    did NOT settle is the sink set: `W1''` SPLIT at one qualifying page in
+    nineteen, and `W2''`/`W3''` MISSED with their registered precondition
+    (`W1''` PREDICTED) unmet, so **no re-price and no new sink row comes off
+    it** and the registered next unit is a LONGER BATCH at the same deck,
+    bounded by the Codex cap rather than by the game. Then *Bag of Tricks*
+    (`EB-224`). Whole fights are unblocked, the two lifecycle throws being
+    fixed and the three-fight soak green.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
