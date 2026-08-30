@@ -376,7 +376,9 @@ CEILINGS: dict[str, int] = {
     # fresh Opus as the DECIDING reader on rows `authored_by: [claude]`, which
     # R217 C calls same-family. How a round buys an author-disjoint deciding
     # read while the local seat is in shadow is [USER]'s, and has no default.
-    "M": 64,     # M62 minted 2026-08-29 by R221 A: the criterion that
+    # M65 minted 2026-08-30 by the Bag of Tricks re-ask (R224 item 17 = (3)):
+    # the one clause the doctrine seat left, the top-level-cost rule.
+    "M": 65,     # M62 minted 2026-08-29 by R221 A: the criterion that
                  # retires the fresh-Opus control form from every packet of
                  # a blind-QA round to the spot-check rate. The threshold is
                  # a number, so it is [USER]'s.
@@ -496,7 +498,8 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # retirement, the five burst-fold shapes and M55's pile-view line
         # minted nothing.
         # 218 LEFT OPEN_IDS 2026-08-30: built and merged (#199).
-        213, 214, 215, 216, 217, 219,
+        # 219 LEFT OPEN_IDS 2026-08-30: Prune re-authored, merged.
+        213, 214, 215, 216, 217,
         # 220 minted 2026-08-30 -- the meter cost badge (Encore, Charge).
         220,
     }),
@@ -532,7 +535,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # ruled. No slate row survives, and the five rowless items (16, 19, 20,
     # 28 and 31) minted no M row either -- the slate packet was their pick
     # list and their engineering is EB-214/218/219. Ceilings never come down.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45,
+                    # 65 minted 2026-08-30: Bag of Tricks, one clause left.
+                    65}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
