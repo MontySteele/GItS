@@ -542,7 +542,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # is deleted in both engines and both doors ask the one question.
         # 213 LEFT OPEN_IDS 2026-08-30: the prototype surface has an upgrade
         # channel on the row, emitted through the shipped upgrade path.
-        214, 215, 216,
+        # 215 LEFT OPEN_IDS 2026-08-30: the face is on the row and the
+        # boot-time loc merge is deleted -- one channel per card.
+        214, 216,
         # 220 minted 2026-08-30 -- the meter cost badge (Encore, Charge).
         220,
         # 223 minted 2026-08-30 by the relayed open-items review, fact-checked:

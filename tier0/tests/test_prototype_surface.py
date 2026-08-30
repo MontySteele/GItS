@@ -322,6 +322,75 @@ def test_the_sim_reads_the_same_row_carried_delta_and_only_when_reachable(
         loader.reset_caches()
 
 
+# --- (b3) the row's own face (EB-215) ----------------------------------------
+#
+# `gen_klee_cards` renders a card's text from its BODY, and a Power's text per
+# POWER ID -- which is what makes a shipped face unable to drift from what the
+# card does. A prototype that rewrites a shipped power's clause therefore
+# could not say so without moving the shipped card's face with it, and the mod
+# worked around that by MERGING a replacement string into the loc table at
+# pool-build time. Two channels described one card and the generated file was
+# wrong until the override ran. R224 A takes `M57`(2) on those duplication
+# grounds: the row states its face, codegen emits it into the same
+# `Localization` list every shipped row uses, and the merge is gone.
+
+FACED = dict(FIXTURE, description="Gain {Block:diff()} Block. Draw a card.")
+
+
+def test_a_rows_description_is_the_emitted_face(monkeypatch, tmp_path):
+    genproto, plan, _ = _proto_plan(monkeypatch, tmp_path, [FACED])
+    source = plan.generated["proto_kokomi_tidecall"]
+    assert ('("description", "Gain {Block:diff()} Block. Draw a card."),'
+            in source)
+
+
+def test_a_row_without_a_description_is_still_rendered_from_its_body(
+        monkeypatch, tmp_path):
+    """The channel is opt-in and the body renderer is still the default --
+    which is the property that keeps a face honest wherever it is not
+    overridden."""
+    genproto, plan, _ = _proto_plan(monkeypatch, tmp_path, [FIXTURE])
+    source = plan.generated["proto_kokomi_tidecall"]
+    assert '("description", "Gain' in source
+    assert "Draw" in source
+
+
+def test_the_face_reaches_the_generated_file_with_no_merge_in_the_path():
+    """`EB-215`'s acceptance, on the SHIPPED surface rather than a fixture:
+    the committed C# is right as committed. Before this the file carried the
+    shipped Oath's pulse wording and only a boot-time loc merge made it read
+    correctly, so the generated artifact and the played card disagreed."""
+    row = next(r for r in yaml.safe_load(
+        loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
+        if r["id"] == "proto_kurages_oath_memory")
+    emitted = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+               / "Generated" / "ProtoKuragesOathMemory.cs").read_text(
+                   encoding="utf-8")
+    assert f'("description", "{row["description"]}"),' in emitted
+    assert "memory" in row["description"]
+
+
+def test_no_shipped_sheet_row_carries_a_description():
+    """The field is the prototype surface's alone. A shipped face is rendered
+    from the body so it cannot drift from what the card does; hand text on a
+    shipped row would put that guarantee back in a person's hands."""
+    for sheet in loader.DOCS_CARD_SHEETS:
+        path = loader.DOCS_DIR / sheet
+        if not path.exists():
+            continue
+        rows = yaml.safe_load(path.read_text(encoding="utf-8")) or []
+        assert not [r["id"] for r in rows if "description" in r], sheet
+
+
+def test_the_loc_merge_is_gone_from_the_mod():
+    """The other half of the duplication: one channel means the pool builder
+    no longer rewrites a face it did not generate."""
+    pool = (REPO / "klee-mod" / "KleeCode" / "KokomiCardPool.cs").read_text(
+        encoding="utf-8")
+    assert "InjectPrototypeLoc" not in pool
+    assert "LocManager" not in pool
+
+
 # --- (c) no pool, no manifest, no digest, no distinctness, no stamp ----------
 
 def test_prototype_rows_never_enter_the_sim_card_index(tmp_path, monkeypatch):

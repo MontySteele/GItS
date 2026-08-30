@@ -655,20 +655,28 @@
 #     Whenever the Bake-Kurage plays a card from its memory, gain 3 Block.
 #     (Upgraded: 5.)
 #
-# THE GENERATED FACE DOES NOT SAY THAT YET, and it cannot be fixed from
-# here. `gen_klee_cards` renders a Power's description PER POWER ID, not
-# per row, so `kurage_ward` prints one string -- "Each Bake-Kurage pulse
-# also grants {X} Block." -- shared with the SHIPPED Oath. Moving that
-# string would move a shipped release face and make it false with the flag
-# off, where the ward really does ride the pulse. So the wording is owed to
-# the C# mirror, which needs its own power (or its own description channel)
-# for the prototype: it is on sec.12.6's checklist as item 14.
+# THE ROW SAYS IT, through `description:` (`EB-215`). `gen_klee_cards`
+# renders a Power's description PER POWER ID, not per row, so `kurage_ward`
+# would print one string -- "Each Bake-Kurage pulse also grants {X} Block."
+# -- shared with the SHIPPED Oath, and moving that string would move a
+# shipped release face and make it false with the flag off, where the ward
+# really does ride the pulse. The mod used to work around that by MERGING a
+# replacement into the loc table at pool-build time, which left two channels
+# describing one card and the generated file wrong until the override ran.
+# R224 A takes `M57`(2) on those DUPLICATION grounds: the row's own text is
+# the one channel, emitted by codegen into the same `Localization` list every
+# shipped row uses, and the merge is deleted.
+#
+# The `{PowerAmount:diff()}` token is the SHIPPED renderer, not a prototype
+# one: it prints the ruled 3 and, past a campfire, the ruled 5, off the same
+# var `EB-213`'s upgrade delta moves.
 # =============================================================================
 - {id: proto_kurages_oath_memory, name: "Kurage's Oath", character: kokomi,
    cost: 1, type: power, rarity: common,
    authored_by: [claude],
    effects: [{op: apply_power, power: kurage_ward, amount: 3, target: self}],
-   upgrade: {kurage_ward: +2}}
+   upgrade: {kurage_ward: +2},
+   description: "Whenever the [gold]Bake-Kurage[/gold] plays a card from its memory, gain {PowerAmount:diff()} Block."}
 
 # =============================================================================
 # KLEE SPARKS -- SPARKS AS AN ALTERNATIVE COST (R213 E2). Seven rows.

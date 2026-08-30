@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using KleeMod.Cards.Kokomi;
-using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Unlocks;
 
@@ -112,67 +111,7 @@ public static class KokomiOffPoolCards
         // or the card throws "You monster!" on draw, and GetUnlockedCards
         // must not see it or a reward roll could offer a card nobody ruled.
         // See KleeMod.PrototypeCards.
-        var prototypes = PrototypeCards.For("kokomi");
-        cards.AddRange(prototypes);
-        InjectPrototypeLoc(prototypes);
+        cards.AddRange(PrototypeCards.For("kokomi"));
         return cards;
-    }
-
-    /// <summary>
-    /// QUARANTINED (sec.12.6 ITEM 14): THE PROTOTYPE OATH'S OWN DESCRIPTION
-    /// CHANNEL.
-    ///
-    /// <c>gen_klee_cards</c> renders a Power card's description PER POWER ID,
-    /// so <c>kurage_ward</c> prints ONE string -- "Each Bake-Kurage pulse also
-    /// grants {X} Block." -- shared between the shipped Oath and the prototype
-    /// row. Moving that string in the generator would move a SHIPPED release
-    /// face and make it false with the flag off, where the ward really does
-    /// still ride the pulse. So the mirror gives the prototype row its own
-    /// channel here: one key, dev builds only, overriding the generated face
-    /// and nothing else.
-    ///
-    /// THE KEY IS READ BACK OFF THE LIVE MODEL, which is R4's rule and the only
-    /// way to be certain the string written is the string that will be read:
-    /// BaseLib prefixes a CustomCardModel's id (KABOOM -> KLEEMOD-KABOOM), and
-    /// hardcoding the unprefixed form registers against an id nothing looks up.
-    ///
-    /// WHY IT LIVES HERE AND NOT IN <c>KleeMod.InjectLocStrings</c> (`EB-194`).
-    /// That method is a Harmony postfix on <c>LocManager.Initialize</c>, which
-    /// runs during localisation bring-up -- BEFORE any mod card model exists.
-    /// The generated cards are <c>autoAdd: false</c> and are constructed
-    /// lazily at pool-build time, which is HERE. Calling
-    /// <c>PrototypeCards.For</c> from the loc postfix forced
-    /// <c>PrototypeRoster</c>'s initializer while <c>ModelDb</c> was still
-    /// empty, so <c>ModelDb.Card&lt;T&gt;()</c> threw KeyNotFoundException --
-    /// and a static constructor that throws POISONS ITS TYPE for the life of
-    /// the process, so every later honest caller (the self-check,
-    /// <c>GenerateAllCards</c> at StartRun) rethrew the cached
-    /// TypeInitializationException and NO run of any character could start.
-    /// The merge has to happen where the models are already built; this is that
-    /// place, and it is on the run-start path so it runs before a card is seen.
-    ///
-    /// The 3 is [USER]'s placeholder and lives on the surface row; it is
-    /// restated here because a face has to say a number, and the row and this
-    /// string are owed to each other. The upgraded 5 is on the row too and has
-    /// no upgrades-sheet home yet, so it is not printed.
-    /// </summary>
-    private static void InjectPrototypeLoc(IReadOnlyList<CardModel> prototypes)
-    {
-#if PROTOTYPE_CARDS
-        foreach (var proto in prototypes)
-        {
-            if (proto is not Cards.Prototype.Generated.ProtoKuragesOathMemory)
-            {
-                continue;
-            }
-            LocManager.Instance.GetTable("cards").MergeWith(
-                new Dictionary<string, string>
-                {
-                    [proto.Id.Entry + ".description"] =
-                        "Whenever the [gold]Bake-Kurage[/gold] plays a card "
-                        + "from its memory, gain 3 Block.",
-                });
-        }
-#endif
     }
 }

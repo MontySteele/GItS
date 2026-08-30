@@ -429,8 +429,13 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
         # engine, where nothing may ever read it. `understudy/authorship.py`
         # is the one reader, and `tools/gen_prototype_cards.py` refuses a row
         # that omits it.
+        #
+        # EB-215: `description:` is stripped for the same reason and it is the
+        # same kind of fact -- the row's own FACE, which only the mod prints.
+        # tier0 has no card text and never renders one, so a `description` on
+        # `Card` would be a field the engine carries and nothing reads.
         card = Card.from_dict({k: v for k, v in d.items()
-                               if k != "authored_by"})
+                               if k not in ("authored_by", "description")})
         _validate_card_shape(card)
         cards.append(card)
     return cards

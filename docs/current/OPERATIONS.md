@@ -413,6 +413,15 @@ any measured run, handoff or co-op session. No `-Package` switch, deliberately
 KLEEMOD-KLEE --max-fights 3` and read `fights=3 defects=0` before any
 registered run (R225).**
 
+**A face may be on the ROW too** (`EB-215`). `gen_klee_cards` renders a card's
+text from its BODY, and a Power's per POWER ID, which is what stops a shipped
+face drifting from what the card does — so a prototype that rewrites a shipped
+power's clause could not say so without moving the shipped card's face with
+it. A row states its own face with `description:`, emitted into the same
+`Localization` list every shipped row uses. There is no loc merge and no
+second channel; `description:` is the prototype surface's field alone and no
+`docs/*-cards.yaml` row may carry it.
+
 **An upgrade is on the ROW** (`EB-213`). Shipped deltas live in
 `docs/<character>-upgrades.yaml` keyed by shipped id; a `proto_` key there
 would give the deletion rule below a second file to remember, so a prototype

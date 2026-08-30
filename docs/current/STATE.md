@@ -489,8 +489,10 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     substituted Oath smiths to the ruled 5 at a campfire. The blind run's own four picks are ruled with them: Rule 1
     prints as the Muster KEYWORD and the gate re-runs on `KURAGEMEM002`
     (`EB-214`), the published grades stand while future records carry a
-    per-turn wire snapshot (`EB-216`), and the prototype face takes the
-    per-row `description:` channel with the loc merge deleted (`EB-215`).
+    per-turn wire snapshot (`EB-216`), and the prototype face NOW TAKES the
+    per-row `description:` channel with the boot-time loc merge deleted
+    (`EB-215`, closed 2026-08-30): one channel describes one card, and the
+    generated file is right as committed.
     Where the Charge-source line goes is still `M55`.
     **The memory's DISPLAY is being rebuilt**: the strip the blind run
     tested was diagnosed true on both misread frames and found
