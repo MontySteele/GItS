@@ -393,9 +393,6 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 182, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
-        # 201 minted 2026-08-29 by EB-198's live acceptance: the pile view's
-        # affordability rings never paint.
-        201,
         # 202/203 minted 2026-08-29 by the KLEESPARK-R1 relayed review:
         # the unreachable-threshold check, and the pre-seal target check
         # whose repair half went to QUEUE M63.
