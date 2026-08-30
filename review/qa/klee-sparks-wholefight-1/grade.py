@@ -48,7 +48,7 @@ HOLD = re.compile(
 BANK = re.compile(r"^\s*-\s*Spark[:\s]\s*(\d+)", re.I | re.M)
 CARD = re.compile(r"^\s*-\s+\*\*(.+?)\*\*(?:\s+\(upgraded\))?"
                   r"(?:\s+—\s+(.*))?$", re.M)
-COMBAT = re.compile(r"^#\s.*combat", re.I | re.M)
+COMBAT = re.compile(r"^#\s+Battle", re.I | re.M)
 
 
 def _pages(log_dir: Path) -> list[dict]:
@@ -66,10 +66,18 @@ def _pages(log_dir: Path) -> list[dict]:
                 reply = {}
         bank = BANK.search(page)
         hand = _hand(page)
+        combat = bool(COMBAT.search(page))
+        # AN ABSENT SPARK LINE ON A COMBAT PAGE IS A BANK OF ZERO, NOT AN
+        # UNREAD ONE. The game prints a power only while it is held, so a
+        # spent-out bank prints nothing at all -- seen on this run's very
+        # first combat page. Reading that as "unread" would drop every
+        # return-to-zero out of W2's deltas, which is exactly the movement
+        # the slot is about.
+        value = int(bank.group(1)) if bank else (0 if combat else None)
         rows.append({
             "turn": turn,
-            "combat": bool(COMBAT.search(page)) or bank is not None,
-            "bank": int(bank.group(1)) if bank else None,
+            "combat": combat or bank is not None,
+            "bank": value,
             "hand": hand,
             "command": str(reply.get("command") or "").strip(),
             "thinking": str(reply.get("thinking") or "").strip(),

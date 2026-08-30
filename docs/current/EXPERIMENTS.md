@@ -189,6 +189,7 @@ carried while it was active is in the commit message that retired it.
 | force-first-copy re-registered under `P7` (`M17`) | 2026-08-26 | `RT12/D17/P10/C19` | 4 PREDICTED / 1 SPLIT / 0 MISS; `Q4` PREDICTED on both halves (bare-form play rate 5.99%). §8.1's redesign trigger silent for **every** card — for `elemental_ecstasy` by 0.17 pp, on a delta whose sign is not established at that `N`. `C2` landed at Block 5, `a49bf20` | packet `review/active/m17-sweep-reregistration-p7-2026-08-13.md` §12; raw `review/active/m17-sweep-results-2026-08-26.txt` |
 | shop companion channel re-run (`S4-G10`) | 2026-08-26 | `RT12/D17/P10/C19` | 2 PREDICTED / 1 SPLIT / 2 MISS over 6,000 runs. The redesign trigger FIRED on condition 4 alone, mean winrate Δ −0.07 pp; conditions 1–3 did not. The design call it raised is open at QUEUE `M14` | packet `review/active/shop-rerun-registration-2026-08-10.md` §8; raw `review/active/shop-rerun-results-2026-08-26.txt` |
 | `KLEESPARK-R1` the Sparks arm on a live board | 2026-08-29 | dev build `0.2.1481+proto`, world `main` @ `d974303` | 2 PREDICTED (`P3`, `P6`) / 2 SPLIT (`P2`, `P4`) / 2 MISS (`P1`, `P5`). `P1`'s registered decision FIRED and PICK 4 is reopened; `P5`'s FIRED and the pilot's Spark probe needs playability before any further sim reading. `P2` and `P4` each have one half the instrument could not reach — no badge on a packet, and no dry-sink board without the generator — so PICK 8 and PICK 1 both stay open. Pair read: 6 ADVANCE / 2 RETURN / 0 ESCALATE, arm ADVANCE, and a RETURN on the LOCAL tester seat's first live use | packet `review/active/klee-sparks-2026-08-29.md` §11; raw `review/active/klee-sparks-r1-sim-2026-08-29.txt`, forms and replays under `review/qa/klee-sparks-r1-t0*/`, pair read `review/qa/klee-sparks-r1-pair-review-codex-gpt-5.6-sol.md` |
+| `KLEESPARK-W1` the Sparks arm across a WHOLE FIGHT | 2026-08-29 | dev build `0.2.1517+proto.dirty`, game `v0.111.0`, seed `21H4Y89QDRP6`, six priced rows granted into the starting deck | 1 PREDICTED (`W2`, on its boundary at 0.50) / 1 SPLIT (`W4`, on its boundary at 50.0%) / 2 MISS (`W1` = 0 named trade-offs, `W3` = 0 affordable sinks skipped). The bank never once held two affordable uses, so the decision the arm exists to create did not occur and was never declined — yet the tester named the spend-versus-hold tension unprompted in its run record. Legible as a shape, inert as a decision. `W1`'s and `W3`'s registered decisions FIRE: the minimal repaired staged round of 7(c) is warranted and needs the three boards at §12.9 pick 2. Two non-slot findings: a defect candidate on `Bang Bang!`'s price, and Kokomi's Bake-Kurage panel rendering on a Klee run | packet `review/active/klee-sparks-2026-08-29.md` §12; records, pages, grader and grades under `review/qa/klee-sparks-wholefight-1/`; house record `review/qa/blindplay/kleespark-w1/record.md` |
 
 ## Active registrations (pointers — packets live in `review/active/`)
 
@@ -226,26 +227,6 @@ carried while it was active is in the commit message that retired it.
   gate is discharged. Under R212(2) the §5 slate is drafted and committed
   DRAFTED by Claude, then countersigned in batch →
   `review/active/charge-reads-per-turn-registration-2026-08-13.md`.
-- **`KLEESPARK-W1` the Sparks arm across a WHOLE FIGHT** — **DRAFTED and
-  committed before the run**, slate at
-  `review/active/klee-sparks-2026-08-29.md` §12.3, per R212(2), offered for
-  batch countersign. **Unit:** ONE COMPLETE FIGHT — the first Monster room of a
-  live Act-1 Klee run — and not the larger floor-1-to-Act-1 run, because that
-  unit was measured at **120 Codex calls** on sealed session `20260829-181718`
-  and tonight's standing budget caps this piece at 30. **Instrument:**
-  `understudy.blindplay session`, Codex seat as the pilot (R217 G testimony,
-  never validation; Guardrail-7 rides on every number), with six of §10.2's
-  priced rows granted into the starting deck by `understudy.embark --arm`.
-  **Cell:** the installed dev build, named in the sealed record's identity
-  block off `mods\klee\manifest.json`. **Slots:** `W1` a named Spark trade-off
-  on ≥ 3 combat turns; `W2` spent/generated Sparks ≥ 0.5; `W3` ≥ 1 affordable
-  sink deliberately skipped; `W4` ≥ 70% of plays are Attacks. Each falsifier is
-  computed from the run's own transcript and per-turn notes, never from a
-  judgement. **Declared contaminants (§12.1):** the shipped automatic Spark
-  rule is still live beside the granted priced rows, and the pre-fight screens
-  are operator-driven so the seat's budget is spent inside the fight.
-  **Status:** registered before the bridge was deployed; the read lands as
-  §12.5 and the row moves to the Graded table with it.
 - **Kokomi stability band (D5)** — no band is declared, so it rides DARK
   (`band = None`). The declaration is QUEUE `S4-G6`; its grading playtest is
   `docs/current/playtest/kokomi-playtest-protocol.md` (unrun, Answers block
