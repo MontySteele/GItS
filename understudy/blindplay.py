@@ -610,6 +610,23 @@ def kurage_memory(player: dict[str, Any]) -> dict[str, Any] | None:
     having an empty one. `None` here keeps `memory` off the observed board
     entirely; an empty QUEUE with a bank is a real state and IS reported.
 
+    AN EMPTY MAP IS AN ABSENT MEMORY TOO (`EB-207`), and this is the second
+    half of the same contract rather than a new rule. The bridge header spells
+    three states, not two: an ABSENT key is "no memory rule in this build", an
+    EMPTY MAP is "the rule is here and this player is not Kokomi" -- which is
+    exactly what `KurageMemory.Snapshot` returns off a seat that fails
+    `IsLive` -- and a POPULATED map is a memory. This reader only ever split
+    the first from the rest, so on a KLEE run every combat page grew a
+    "The Bake-Kurage's memory" heading built entirely out of `_int`/`_text`
+    defaults: Charge 0, an empty queue, and a pulse of `none` rendered as
+    "you have played no card this turn". The blind tester on the Klee
+    whole-fight run reported that sentence as the most confusing thing on the
+    screen, and it was describing a jellyfish Klee does not have.
+
+    A Kokomi seat's memory is never empty as a MAP -- `Snapshot` writes twelve
+    keys before it writes the queue -- so refusing `{}` cannot suppress a real
+    one. The queue being empty is a different fact and still reaches the page.
+
     Emitted by `vendor/STS2_MCP/gits/GitsKurageMemory.cs`, which lifts it by
     reflection from `KleeMod.Powers.KurageMemory.Snapshot`. Every field name
     below is that method's, and the two together are the contract:
@@ -642,7 +659,7 @@ def kurage_memory(player: dict[str, Any]) -> dict[str, Any] | None:
     and the page turns it into a sentence.
     """
     raw = player.get("kurage_memory")
-    if not isinstance(raw, dict):
+    if not isinstance(raw, dict) or not raw:
         return None
     queue = []
     for row in (raw.get("queue") or []):

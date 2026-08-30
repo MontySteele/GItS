@@ -159,11 +159,24 @@ internal static class KurageMemoryCard
     /// queue move, and `GaugeBridge.Refresh` now calls this. Reusing the funnel
     /// rather than adding one is the whole reason the strip's numbers never
     /// drifted, and there is no polling anywhere in this file.
+    ///
+    /// TWO PREDICATES, NOT ONE (`EB-207`). Being the local seat is not being
+    /// KOKOMI's seat, and this entry point used to ask only the first: a Klee
+    /// or Furina seat reached the rebuild branch below and was turned away by
+    /// <see cref="Setup"/>'s own character test, one call further in. That was
+    /// correct and it was INDIRECT -- the scope rule lived in exactly one
+    /// place, and the other door into the element leaned on it. It is spelled
+    /// at both doors now, because the defect this row is named for was a
+    /// second reader (the blind page) making precisely that mistake against
+    /// the same rule, and the fix is worth nothing if it holds in one engine.
+    /// The predicate is `KokomiResources.IsKokomi`, the one the gauge specs,
+    /// `KurageMemory.IsLive` and `Setup` all already ask.
     /// </summary>
     public static void Refresh(Creature? creature)
     {
         var player = creature?.Player;
         if (player == null || !LocalContext.IsMe(player)) return;
+        if (!KokomiResources.IsKokomi(creature)) return;
 
         var root = Displays.Get(player);
         if (root == null)

@@ -1181,16 +1181,21 @@ def cmd_round(args) -> int:
 
 
 def cmd_qualify(args) -> int:
-    """M62 (5). Run the seat against the fixed battery and print the counts.
+    """M62 (5). Run the seat against the fixed battery and grade it (R223).
 
     The battery's packets are SEALED and closed, so every read lands in
     `--land-dir` rather than beside them: a requalification may not write into
     a turn directory whose round is published (R101b).
+
+    The verdict is R223's pass mark -- targets 6/6, costs 4/6, intent 4/6, and
+    all three must hold -- and it is the EXIT CODE: 0 for PASS, 1 for FAIL.
+    Only a battery that cannot be run at all exits 2.
     """
     from understudy import qualify
+    battery_path = Path(args.battery) if args.battery else None
     try:
-        items = qualify.load_battery(Path(args.battery) if args.battery
-                                     else None)
+        items = qualify.load_battery(battery_path)
+        threshold = qualify.load_threshold(battery_path)
     except (OSError, qualify.BatteryError) as exc:
         print(f"qualify: {exc}", file=sys.stderr)
         return 2
@@ -1199,6 +1204,11 @@ def cmd_qualify(args) -> int:
         print(f"qualify: the battery is thin in {', '.join(thin)} "
               f"(floor {qualify.MIN_ITEMS_PER_CATEGORY} per category)",
               file=sys.stderr)
+        return 2
+    unreachable = qualify.unreachable_marks(items, threshold)
+    if unreachable:
+        print("qualify: the pass mark cannot be reached on this battery -- "
+              + "; ".join(unreachable), file=sys.stderr)
         return 2
     try:
         client = _client(args)
@@ -1221,15 +1231,19 @@ def cmd_qualify(args) -> int:
             return None
         return json.loads(Path(record["form"]).read_text(encoding="utf-8"))
 
-    card = qualify.run_battery(items, reader=reader, seat_id=args.tester_id)
+    card = qualify.run_battery(items, reader=reader, seat_id=args.tester_id,
+                               threshold=threshold)
     out = qualify.write_scorecard(card, Path(args.out) if args.out else
                                   land_root / "scorecard.json")
     for row in card["items"]:
         print(f"  {'PASS' if row['passed'] else 'FAIL'}  {row['item']:<3} "
               f"{row['category']:<8} {row['turn_id']}  {row['why']}")
+    for cat, v in card["per_category"].items():
+        print(f"  {'PASS' if v['pass'] else 'FAIL'}  {cat:<8} "
+              f"{v['passed']}/{v['items']}, mark {v['required']}")
     print(qualify.one_line(card))
     print(f"scorecard: {out}")
-    return 0
+    return 0 if card["pass"] else 1
 
 
 def _live_lanes(args) -> list[GameLane]:
@@ -1351,7 +1365,9 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     b = sub.add_parser("qualify",
                        help="run the seat against the fixed battery of sealed "
-                            "packets and print a scorecard (M62 (5))")
+                            "packets and grade it against R223's pass mark "
+                            "(targets 6/6, costs 4/6, intent 4/6); exits 0 on "
+                            "PASS, 1 on FAIL")
     b.add_argument("--battery", default="",
                    help=f"the battery file (default "
                         f"understudy/battery/battery.yaml)")

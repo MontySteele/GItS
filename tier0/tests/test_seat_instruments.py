@@ -271,14 +271,170 @@ def test_the_battery_draws_on_three_rounds():
     assert rounds == {"kokomi-slice2", "klee-slice1-r3", "klee-sparks-r1"}
 
 
-def test_the_battery_fixes_no_threshold():
-    """M62's, not this tool's."""
-    card = qualify.run_battery(qualify.load_battery(),
-                               reader=lambda _i: None)
-    assert card["threshold"] is None
-    assert "M62" in card["threshold_owner"]
-    assert card["total"]["passed"] == 0
-    assert "no pass mark" in qualify.one_line(card)
+# ============================================ R223: the pass mark applied ====
+#
+# [USER], 2026-08-29, answering the pick list: "targets 6/6, others >= 4/6
+# works for me". Per category, all three holding, no total to trade against.
+
+def _graded(passes: dict, monkeypatch, threshold=None):
+    """A scorecard in which each category passes exactly `passes[cat]` items.
+
+    The scorers themselves are locked above, board by board, on the sealed
+    record; what is under test HERE is the pass mark applied to the counts, so
+    the counts are the fixture and the boards are not re-read.
+    """
+    budget = dict(passes)
+
+    def scorer(form, _turn_dir):
+        cat = form["category"]
+        if budget[cat] > 0:
+            budget[cat] -= 1
+            return True, "fixture pass"
+        return False, "fixture fail"
+
+    monkeypatch.setattr(qualify, "SCORERS",
+                        {c: scorer for c in qualify.CATEGORIES})
+    return qualify.run_battery(qualify.load_battery(),
+                               reader=lambda i: {"category": i.category},
+                               threshold=threshold)
+
+
+def test_the_pass_mark_is_r223s_and_is_read_from_the_battery_file():
+    """The mark lives beside the boards it grades, and the tool only applies it."""
+    mark = qualify.load_threshold()
+    assert mark.per_category == {"targets": 6, "costs": 4, "intent": 4}
+    assert mark.owner == "R223"
+    assert qualify.unreachable_marks(qualify.load_battery(), mark) == []
+
+
+_NO_BLOCK = ""
+_MISSING_CATEGORY = """threshold:
+  owner: R223
+  targets: 6
+  costs: 4
+"""
+_A_RATE_NOT_A_COUNT = """threshold:
+  owner: R223
+  targets: 1.0
+  costs: 4
+  intent: 4
+"""
+_A_FOURTH_AXIS = """threshold:
+  owner: R223
+  targets: 6
+  costs: 4
+  intent: 4
+  vibes: 3
+"""
+
+
+@pytest.mark.parametrize("block, why", [
+    (_NO_BLOCK, "a battery with no threshold block grades nothing"),
+    (_MISSING_CATEGORY,
+     "R223 is per category, so a missing category is not a pass"),
+    (_A_RATE_NOT_A_COUNT, "a mark is a count of items, not a rate"),
+    (_A_FOURTH_AXIS, "an unknown category is a typo, not a fourth axis"),
+])
+def test_a_threshold_the_tool_cannot_apply_is_refused(tmp_path, block, why):
+    body = (REPO / "understudy" / "battery" / "battery.yaml").read_text(
+        encoding="utf-8").split("threshold:")[0]
+    path = tmp_path / "battery.yaml"
+    path.write_text(body + block, encoding="utf-8")
+    with pytest.raises(qualify.BatteryError):
+        qualify.load_threshold(path)
+    assert why
+
+
+def test_a_mark_the_battery_cannot_reach_is_refused_before_the_seat_runs():
+    """R222 A's lesson: an unreachable threshold is an instrument, not a MISS."""
+    items = qualify.load_battery()
+    tall = qualify.Threshold({"targets": 7, "costs": 4, "intent": 4}, "test")
+    assert qualify.unreachable_marks(items, tall) == ["targets asks 7 of 6 item(s)"]
+
+
+def test_a_seat_that_meets_every_category_passes(monkeypatch):
+    card = _graded({"targets": 6, "costs": 6, "intent": 6}, monkeypatch)
+    assert card["pass"] is True
+    assert card["total"] == {"items": 18, "passed": 18, "pass": True}
+    assert all(v["pass"] for v in card["per_category"].values())
+    assert card["threshold"] == {"targets": 6, "costs": 4, "intent": 4}
+    assert card["threshold_owner"] == "R223"
+    assert "PASS" in qualify.one_line(card)
+
+
+def test_one_short_on_targets_fails_and_the_other_two_cannot_buy_it_back(
+        monkeypatch):
+    """17 of 18, and it still FAILS: targets is scored at par (EB-203)."""
+    card = _graded({"targets": 5, "costs": 6, "intent": 6}, monkeypatch)
+    assert card["total"]["passed"] == 17
+    assert card["pass"] is False
+    assert card["per_category"]["targets"] == {"items": 6, "passed": 5,
+                                               "required": 6, "pass": False}
+    assert card["per_category"]["costs"]["pass"] is True
+    assert card["per_category"]["intent"]["pass"] is True
+    assert "FAIL" in qualify.one_line(card)
+
+
+def test_three_of_six_on_intent_fails_even_with_both_other_categories_full(
+        monkeypatch):
+    card = _graded({"targets": 6, "costs": 6, "intent": 3}, monkeypatch)
+    assert card["pass"] is False
+    assert card["per_category"]["intent"]["pass"] is False
+    assert card["per_category"]["targets"]["pass"] is True
+
+
+def test_the_seats_first_live_scorecard_reads_FAIL_under_R223(monkeypatch):
+    """The requalification run of 2026-08-29: 10/18, targets 2, costs 5, intent 3.
+
+    Costs alone clears its mark. Under a total of 15/18 this would have been a
+    FAIL too, but under R223 it fails on the two categories that matter most:
+    the blind spot that returned the seat, and the falsifier that caught it.
+    """
+    card = _graded({"targets": 2, "costs": 5, "intent": 3}, monkeypatch)
+    assert card["total"]["passed"] == 10
+    assert card["pass"] is False
+    assert card["per_category"]["targets"]["pass"] is False
+    assert card["per_category"]["costs"]["pass"] is True
+    assert card["per_category"]["intent"]["pass"] is False
+
+
+@pytest.mark.parametrize("passes, rc", [
+    ({"targets": 6, "costs": 4, "intent": 4}, 0),
+    ({"targets": 5, "costs": 6, "intent": 6}, 1),
+    ({"targets": 2, "costs": 5, "intent": 3}, 1),
+])
+def test_the_verdict_is_the_exit_code(tmp_path, monkeypatch, passes, rc):
+    """PASS exits 0 and FAIL exits 1; only an unrunnable battery exits 2."""
+    budget = dict(passes)
+
+    def scorer(form, _turn_dir):
+        cat = form["category"]
+        if budget[cat] > 0:
+            budget[cat] -= 1
+            return True, "fixture pass"
+        return False, "fixture fail"
+
+    monkeypatch.setattr(qualify, "SCORERS",
+                        {c: scorer for c in qualify.CATEGORIES})
+    monkeypatch.setattr(local_tester, "_client", lambda _a: object())
+
+    def fake_read(turn_id, **kw):
+        form = Path(kw["land_dir"]) / "form.json"
+        form.write_text(json.dumps({"category": _CATEGORY_OF[turn_id]}),
+                        encoding="utf-8")
+        return {"form": str(form)}
+
+    monkeypatch.setattr(local_tester, "read_turn", fake_read)
+    land = tmp_path / "land"
+    assert local_tester.main(["qualify", "--land-dir", str(land),
+                              "--out", str(tmp_path / "card.json")]) == rc
+    card = json.loads((tmp_path / "card.json").read_text(encoding="utf-8"))
+    assert card["pass"] is (rc == 0)
+    # R101b: the sealed directories are untouched; the reads land where told.
+    assert land.is_dir()
+
+
+_CATEGORY_OF = {i.turn_id: i.category for i in qualify.load_battery()}
 
 
 def test_a_refusal_is_a_failed_item_and_never_a_skipped_one():

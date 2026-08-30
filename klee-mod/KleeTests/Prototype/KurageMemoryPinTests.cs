@@ -622,6 +622,33 @@ public class KurageMemoryPinTests
     }
 
     [Fact]
+    public void Both_doors_into_the_element_ask_whether_the_seat_is_hers()
+    {
+        // `EB-207`. THE LOCAL SEAT IS NOT KOKOMI'S SEAT, and the element has
+        // two entry points off the one `GaugeBridge` funnel: `Setup` from the
+        // `NCombatUi.Activate` postfix, and `Refresh` from every Charge
+        // mutation and queue move. `Setup` always asked the character test.
+        // `Refresh` asked only `LocalContext.IsMe` and leaned on `Setup`'s
+        // test one call further in through its rebuild branch -- correct, and
+        // reachable only by reading two methods. This pin FAILS on that cut.
+        //
+        // It is a pin and not the fix: the DEFECT the row is named for was in
+        // the other engine entirely (`blindplay.kurage_memory` read the
+        // bridge's empty map as a real memory and printed the whole section on
+        // a Klee page). What this asserts is that the C# scope rule is spelled
+        // where it is enforced, at both doors, on the same predicate the gauge
+        // specs and `KurageMemory.IsLive` ask.
+        //
+        // STRUCTURAL for the reason the pin above is: "a Klee seat's screen
+        // carries no element" is a Godot fact and no test here may touch a
+        // Godot object. The live half is a capture on a `+proto` deploy.
+        Assert.Contains("KokomiResources.IsKokomi",
+                        Il.Calls(Il.Method("KurageMemoryCard", "Setup")));
+        Assert.Contains("KokomiResources.IsKokomi",
+                        Il.Calls(Il.Method("KurageMemoryCard", "Refresh")));
+    }
+
+    [Fact]
     public void The_element_draws_the_projection_rather_than_re_deriving_it()
     {
         // ONE EXPRESSION OF THE RULE PER ENGINE. If the drawing code ever
