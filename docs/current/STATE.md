@@ -719,7 +719,10 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     Then *Bag of Tricks* (`EB-224`), whose row is now BUILT in both
     engines on `EB-182`'s mode-head price — the first card in the repo to
     use the half of R225's amended clause that admits a price inside a
-    mode — and waits on staging.
+    mode — was STAGED as `KLEESPARK-BT1` (2026-08-30): the mode-head price is
+    proven live, the round RETURNED on the INSTRUMENT (3 slots UNREACHED on
+    `intent_insensitive` refusals), and the priced mode's self-refund off
+    *Pounding Surprise* is the sitting packet's DRAFT pick 1.
     Whole fights are unblocked, the two lifecycle throws being
     fixed and the three-fight soak green.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5

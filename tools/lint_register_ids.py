@@ -276,7 +276,14 @@ CEILINGS: dict[str, int] = {
     # integration reproduced and then diagnosed off the quoted save path --
     # it is a cross-SESSION leak, and the standing "rerun the file alone"
     # workaround is the reason nobody had looked.
-    "EB": 235,   # EB-235 minted 2026-08-30 by R228 pick 1: the successor to
+    "EB": 238,   # EB-236/237/238 minted 2026-08-30 by KLEESPARK-BT1 (Klee
+                 # Sparks packet section 22): the board-design trap that drew
+                 # `intent_insensitive` refusals from 7 of 8 forms, slot_plan's
+                 # blindness to a mode-head Spark price, and the blind page
+                 # printing no relics -- which is why the priced mode's
+                 # self-refund off Pounding Surprise was invisible to every
+                 # form and uncontrolled by the registration.
+                 # EB-235 minted 2026-08-30 by R228 pick 1: the successor to
                  # the closed EB-223, carrying R222 (a)'s whole-fight read of
                  # the strict Rare Power, which KLEESPARK-W4 left UNREACHED
                  # because the Power was drawn on seven pages and played on
@@ -695,6 +702,17 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # is UNREACHED and a new registration -- an uptake slot, not W4
         # repeated -- carries it.
         235,
+        # 236/237/238 minted 2026-08-30 by KLEESPARK-BT1, all three out of
+        # what the round found that was not a slot: the resource-round board
+        # trap (holding everything but the bank constant leaves the whole hand
+        # playable, so the `intent_insensitive` falsifier fires on the
+        # construction -- 7 of 8 forms), `slot_plan._spark_prices` reading a
+        # TOP-LEVEL `spend_spark` only, so the row under test is invisible to
+        # its ceilings, and the blind page printing no relics, which is why
+        # Pounding Surprise refunding the mode's own price inside the turn was
+        # invisible to every form and uncontrolled by the registration. All
+        # three OPEN.
+        236, 237, 238,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
