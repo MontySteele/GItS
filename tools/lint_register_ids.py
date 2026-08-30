@@ -129,6 +129,20 @@ CEILINGS: dict[str, int] = {
     # EB-202/EB-203 minted 2026-08-29 by the KLEESPARK-R1 relayed review:
     # a slot whose threshold the board set could not reach, and a form
     # whose play line is never checked for a target before it is graded.
+    # EB-210 minted 2026-08-29 by the two-lane repair, and CLOSED in the
+    # minting commit: `bridge.current_seed` is a FILE read on the mod's
+    # side, and the path resolved through
+    # `Environment.GetFolderPath(ApplicationData)`, which ignores the
+    # `APPDATA` that separates two lanes' user trees -- so both lanes read
+    # lane 0's `current_run.save` and a round filed `seed_not_honoured`
+    # against a game that had honoured its seed. Fixed in
+    # `McpMod.Compendium.cs` (globalize `user://`; the env var first) with
+    # `bridge.LaneCrossed` as the harness-side refusal. Five locks, each
+    # seen to FAIL first.
+    # EB-209 CLOSED 2026-08-29 in the same commit: the stopping rule reads
+    # DECIDING grades in the shadow chair, and a refused deciding form is
+    # no grade. It LEFT OPEN_IDS there. EB-208 stays open (its fix is a
+    # pick).
     # EB-208/EB-209 minted 2026-08-29 by KLEESPARK-R2: a staged board
     # cannot REQUIRE an enemy count, so a slot that needs one can pass
     # every check and still not be posed; and in the shadow chair R221 B's
@@ -136,10 +150,6 @@ CEILINGS: dict[str, int] = {
     # EB-211/EB-212 minted 2026-08-29 by the KLEESPARK-R2 relayed review:
     # R223's battery has two soft categories -- `costs` only FAILS a positive
     # misread, so silence passes it, and `intent` is scored on self-report.
-    # 210 is DELIBERATELY SKIPPED: the in-flight two-lane funnel branch mints
-    # it, and a number taken twice is exactly what this manifest exists to
-    # stop. 210 is therefore ISSUED and un-re-mintable from here, and it joins
-    # OPEN_IDS with its own row on that branch, not on this one.
     "EB": 212,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
@@ -432,11 +442,18 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         205,
         # 208/209 minted 2026-08-29 by KLEESPARK-R2 (packet section 13.4): the
         # declared-versus-reached enemy count, which no check can see, and the
-        # stopping rule reading shadow grades in the shadow chair.
-        208, 209,
+        # stopping rule reading shadow grades in the shadow chair. 209 LEFT
+        # OPEN_IDS the same day, FIXED and CLOSED with its row: the rule reads
+        # DECIDING grades in the shadow chair and a refused deciding form is
+        # no grade. 208's fix is a pick, so 208 stays.
+        # 210 was minted AND CLOSED on 2026-08-29 by the same commit -- the
+        # two-lane seed crossing, which was a save-file resolution in the mod
+        # and never the harness's ports. It left OPEN_IDS in the commit that
+        # closed it, with the ceiling above holding the number.
+        208,
         # 211/212 minted 2026-08-29 by the KLEESPARK-R2 relayed review (packet
         # section 13.8): the battery's costs category passes on silence, and its
-        # intent category is self-report. 210 is skipped -- see the ceiling.
+        # intent category is self-report.
         211, 212,
         # 206 was minted AND CLOSED on 2026-08-29 by the two-instance funnel
         # build -- it left OPEN_IDS in the same commit that closed it, with

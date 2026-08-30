@@ -764,6 +764,7 @@ before a run.
 python -m understudy.local_tester round <t01> <t02> … --plan-only
 python -m understudy.local_tester round <t01> <t02> … [--first N] [--why ...]
 python -m understudy.local_tester round <t01> … --lanes 2     # two games at once
+python -m understudy.local_tester round <t01> … --read-workers 2  # N reads at once
 python -m understudy.local_tester round <t01> … --serial      # the old order
 python -m understudy.local_tester round <t01> … --attach      # someone else's game
 python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md>]
@@ -773,6 +774,38 @@ python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md
   serialized under one lock; the model-bound read runs beside the game's next
   stage, with a look-ahead of exactly one board. `--serial` restores the old
   strictly-phased order so a live comparison is possible.
+- **`--read-workers N`: the model half, and it is where the round is.**
+  `KLEESPARK-R2` is the first pipelined round with a wall clock, and it says
+  plainly what the funnel is bound by: six boards, 372 s total — **stage 89 s
+  (14.8 s/board), read+grade 295 s (49.2 s/board), replay 124 s** — with the
+  reads running back to back for 313 of the 372 s. Stage plus read is 384 s of
+  work in 372 s of wall clock, so the pipeline hid ~73 s of the 89 s of
+  game-bound work, about 16% of the round. **A read is three times a stage, so
+  a second GAME instance cannot shorten a model-bound round and this flag can.**
+  The 49.2 s is ONE local generation per board and essentially nothing else:
+  the seat's own artifacts (`understudy/logs/local-seat/<turn>-<stamp>/`) are
+  all written at the moment the reply lands, ~4,650 completion tokens at the
+  server's ~95 tok/s; `staged_turn grade` is a mechanical pass over files and
+  does not show up. **The deciding fresh-Opus form and the Codex spot-check are
+  produced OUTSIDE the funnel** — nothing here calls a hosted model, the round
+  finds the control form on disk by elimination — so neither is in this budget
+  and neither is made concurrent by this flag.
+  `--read-workers N` is a semaphore of N over the read phase (N = 1 is the old
+  single lock, exactly). **It needs a server with N slots:** `serve.ps1` runs
+  `--parallel 1`, and the round REFUSES `N > 1` when the server reports fewer
+  slots than asked, read from llama-server's own `/slots` (a list) or `/props`
+  (`total_slots`). A server that answers neither is not a refusal — the
+  operator is told the number is unknown. The cost of a second slot is KV
+  cache: at `-c 131072` with a `q8_0` cache, `--parallel 2` splits the context
+  per slot, so it is a shorter window per read or a bigger allocation, and
+  nothing here changes the running server.
+  **Concurrency may not reach the stopping rule.** The reads can COMPLETE out
+  of order; every board of a set is joined before the rule is applied, the
+  records are rebuilt in the pre-registered order, and `slot_state` reads
+  grades off disk by turn id, which has no order term. Which boards run is a
+  pure function of the grades. The round summary records
+  `registered_order` beside `read_completion_order` so a reader can check that
+  rather than take it.
 - **`--first N`** is R221 B's sequential stopping, default **4**. The order is
   the smallest set covering every registered slot twice (ties to the closer
   closeness reading), and `--first` is raised automatically where the cover
@@ -833,7 +866,17 @@ it is what `execute` replays**, found by elimination (`form-*.json` that is
 neither `form-local-*` nor `form-raw-*`, newest wins). A board whose control
 form has not been taken yet has its replay recorded as **OWED** and is never
 quietly replayed from the shadow read. `--seat-mode deciding` restores the
-pre-R221-A behaviour exactly. The round writes
+pre-R221-A behaviour exactly. **And in the shadow chair the STOPPING RULE
+reads the deciding grades and nothing else (`EB-209`)**: the shadow verdicts
+are the only ones on disk while a shadow round runs — which is exactly what an
+OWED replay means — and R222 B says a shadow reading decides nothing, so a
+round that stopped on two agreeing shadow grades would have stopped on a
+reading with no standing. A **refused deciding form is no grade** there: a
+refusal is the funnel saying the form cannot be read against the board, not a
+reading of it, which is also why it is not replayed. With no deciding grade
+taken yet every slot reads UNDECIDED and the whole pre-registered order runs —
+the safe direction, and what `KLEESPARK-R2` did by accident rather than by
+rule. The round writes
 `review/qa/<round>-round-summary.json` carrying the **per-turn agreement
 count, shadow against deciding, on the VERDICT only** — which is the number
 `M62`'s criterion is read off — and the ledger grew a trailing **`role`**
@@ -951,11 +994,46 @@ overlapping instead of running end to end.
    `soak-<stamp>-run001.jsonl` and wrote one interleaved file. The lane is in
    the name now; a session with no lane adds no infix.
 
-**What the live proof did NOT cover.** No graded two-lane round has run: the
-proof staged boards and read packets, and never called a model, a grade or a
-replay. `EB-191` (a chosen seed reading back `None`) fires often enough with
-two games on one machine to need the retry above, and it is not fixed here.
-Three lanes are untested and unregistered.
+**What the live proof did NOT cover.** The proof staged boards and read
+packets, and never called a model, a grade or a replay. `EB-191` (a chosen
+seed reading back `None`) fires often enough with two games on one machine to
+need the retry above, and it is not fixed here. Three lanes are untested and
+unregistered.
+
+**THE FOURTH DEFECT, AND IT IS THE ONE A GRADED ROUND FOUND (`EB-210`).**
+`KLEESPARK-R2` was the first graded two-lane attempt and it died on its second
+board: one lane asked for `NMQLUYZDLV`, the run read back the other lane's
+`R7W86HG7WHUD`, and `t04` was refused by `seed_not_honoured`. **The ports were
+never crossed.** `bridge`'s current-instance is thread-local, every lane worker
+binds, and the whole seed dance routes correctly through the real pipeline.
+
+**The seed read-back is a FILE read, and the file crossed.**
+`bridge.current_seed` asks the compendium, and the mod builds that block by
+OPENING `current_run.save` (`McpMod.Compendium.cs`, `BuildCurrentRunContext`).
+`ResolveCurrentRunPath` fell through to `EnumerateSteamDataRoots`, which asks
+`Environment.GetFolderPath(SpecialFolder.ApplicationData)` — and that API
+reads the SHELL's roaming folder and **ignores the `APPDATA` environment
+variable**, which is the one and only thing separating two lanes' user trees.
+Godot honours the variable, so lane 1 wrote its saves to its own tree and
+embarked on its own seed (its own `godot.log` says so); this API does not, so
+both lanes read lane 0's save. The round then filed a defect against a game
+that had honoured its seed exactly.
+
+**Fixed in three places, each lock seen to fail first.** The `user://`
+progress path is globalized through Godot before the rooted check, so the
+enumeration is not reached at all; `APPDATA` goes first among its candidates
+as the belt; and `bridge.LaneCrossed` refuses a `current_run` whose
+`save_path` is outside this lane's tree instead of believing it, filed as
+**`seed_read_back_crossed`** — its own defect kind, because "the game ignored
+a seed" and "this harness read the wrong game's save" need different answers.
+Lane 0, and every single-lane round ever run, has no `appdata` of its own and
+is not checked.
+
+**THE LANE-SEED FACT, stated once:** a lane's seed is honoured by its own
+game; what a lane could not previously trust was the READ-BACK. Any harness
+value the compendium derives from a save FILE is suspect under two lanes for
+the same reason, and the fix above is per-process by construction rather than
+by another list of paths.
 
 
 **The four conditions.**

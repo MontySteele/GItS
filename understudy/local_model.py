@@ -341,6 +341,45 @@ class Client:
         return list(self._calls)
 
 
+def slot_count(client: "Client", timeout_s: float = 3.0) -> int | None:
+    """How many requests this server answers AT ONCE, or `None` if it will not say.
+
+    `llama-server` publishes both halves: `GET /slots` is a JSON LIST with one
+    entry per slot, and `GET /props` carries `total_slots`. Neither is an
+    OpenAI route, so both live here rather than on `Client._request`, which
+    requires a JSON OBJECT and would reject `/slots` outright.
+
+    IT IS A REFUSAL INPUT AND NOTHING ELSE. `local_tester round
+    --read-workers N` asks this before it widens the read phase, because N
+    concurrent reads against `--parallel 1` do not run concurrently -- they
+    queue inside the server and the round's own timings become a claim about
+    the model that is not true. `None` means the server did not answer the
+    question, and an unanswered question is not a refusal: the operator is
+    told and the round goes ahead, exactly as it does today.
+    """
+    base = str(client.base_url or "").rstrip("/")
+    for suffix in ("/v1", "/api/v1"):
+        if base.endswith(suffix):
+            base = base[: -len(suffix)]
+            break
+    for path, read in (("/slots", lambda b: len(b) if isinstance(b, list)
+                        else None),
+                       ("/props", lambda b: (int(b["total_slots"])
+                                             if isinstance(b, dict)
+                                             and str(b.get("total_slots") or
+                                                     "").isdigit() else None))):
+        try:
+            req = urllib.request.Request(base + path, method="GET")
+            with urllib.request.urlopen(req, timeout=timeout_s) as resp:
+                blob = json.loads(resp.read().decode("utf-8", "replace"))
+        except Exception:                                     # noqa: BLE001
+            continue
+        got = read(blob)
+        if got:
+            return int(got)
+    return None
+
+
 def _int_env(env: Mapping[str, str], key: str, default: int) -> int:
     raw = str(env.get(key) or "").strip()
     if not raw:

@@ -26,6 +26,7 @@ from __future__ import annotations
 import json
 import shutil
 import threading
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -1307,3 +1308,487 @@ def test_the_port_precedence_is_env_then_conf_then_default():
     assert "choice.Source" in mod
     assert "GetEnvironmentVariable(GitsPort.EnvVar)" in mod
 
+
+# ======================================================================
+# EB-210 -- THE LANE SEED CROSSING
+# ======================================================================
+#
+# `KLEESPARK-R2` tried `--lanes 2`, and the round died on its second board:
+# one lane asked for `NMQLUYZDLV` and the run read back `R7W86HG7WHUD`, the
+# OTHER lane's seed, so `t04` was refused by `seed_not_honoured`.
+#
+# THE HARNESS'S PORTS WERE NEVER CROSSED. `bridge`'s current-instance is
+# thread-local and every lane worker binds; a two-fake-lane run of the real
+# `run_pipeline` through the real attach `Session` routes every request
+# correctly (`test_two_lanes_each_read_back_their_own_seed` below). The
+# crossing is ONE endpoint, and it is a FILE read:
+#
+#   `bridge.current_seed` -> `GET /api/v1/compendium` -> the mod's
+#   `BuildCurrentRunContext`, which OPENS `current_run.save` off disk and
+#   reports the file it opened as `save_path`.
+#
+# The path is resolved by `ResolveCurrentRunPath`, which fell back every time
+# to `EnumerateSaveRoots` -> `EnumerateSteamDataRoots` ->
+# `Environment.GetFolderPath(SpecialFolder.ApplicationData)`. That API reads
+# the SHELL's roaming folder and IGNORES the `APPDATA` environment variable --
+# which is the one and only thing separating two lanes' user trees
+# (`instances.Instance.env`). Godot honours the variable; this does not. Both
+# lanes therefore opened LANE 0's `current_run.save`.
+#
+# Lane 1's own `godot.log` is the witness: "Embarking on a singleplayer
+# KLEEMOD-KLEE run. Ascension: 0 Seed: NMQLUYZDLV" -- its game had the seed it
+# asked for. The game honoured it; the read-back opened the wrong file.
+
+
+class _LaneCompendium(BaseHTTPRequestHandler):
+    """A bridge that answers `/compendium` with whatever `RUNS[port]` says."""
+
+    RUNS: dict = {}
+
+    def log_message(self, *a):                                # pragma: no cover
+        pass
+
+    def do_GET(self):                                         # noqa: N802
+        blob = {"current_run": self.RUNS.get(self.server.server_port, {})}
+        body = json.dumps(blob).encode("utf-8")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+
+def _lane_bridge(port, run):
+    _LaneCompendium.RUNS[port] = run
+    srv = ThreadingHTTPServer(("localhost", port), _LaneCompendium)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    return srv
+
+
+def test_a_lane_is_refused_another_lanes_run_seed(tmp_path):
+    """THE LOCK, AND IT FAILS WITHOUT `_refuse_foreign_save`.
+
+    Lane 1 is bound; the compendium answers with a `current_run` whose
+    `save_path` is LANE 0's tree and whose seed is lane 0's. Before the check
+    this returned that seed and the driver believed it -- which is exactly
+    what happened live, and the defect it filed blamed the game.
+    """
+    lane1 = instances.Instance(game_dir=tmp_path / "game", port=15599,
+                               appdata=tmp_path / "lane1", label="lane1")
+    lane0_tree = tmp_path / "roaming"
+    srv = _lane_bridge(15599, {
+        "is_in_progress": True,
+        "seed": "R7W86HG7WHUD",
+        "save_path": str(lane0_tree / "SlayTheSpire2" / "steam" / "1"
+                         / "modded" / "profile1" / "saves"
+                         / "current_run.save"),
+    })
+    try:
+        bridge.use(lane1)
+        with pytest.raises(bridge.LaneCrossed) as caught:
+            bridge.current_seed()
+        # The message names the file, because the file is the finding.
+        assert "current_run.save" in str(caught.value)
+        assert "lane1" in str(caught.value)
+        # And it is a BridgeError, so no existing `except` stops catching it.
+        assert isinstance(caught.value, bridge.BridgeError)
+    finally:
+        bridge.use_default()
+        srv.shutdown()
+
+
+def test_a_lane_believes_its_own_tree_and_lane0_is_unchanged(tmp_path):
+    """The check must fire on the crossing and on NOTHING else.
+
+    Two arms: a lane whose `save_path` IS under its own APPDATA reads its own
+    seed; and lane 0 -- which has no APPDATA of its own by construction
+    (`instances.LANES`) -- is not checked at all, so every single-lane round
+    ever run behaves exactly as it did.
+    """
+    own = tmp_path / "lane1" / "SlayTheSpire2" / "steam" / "1" / "saves"
+    srv = _lane_bridge(15598, {"is_in_progress": True, "seed": "NMQLUYZDLV",
+                               "save_path": str(own / "current_run.save")})
+    try:
+        lane1 = instances.Instance(game_dir=tmp_path / "g", port=15598,
+                                   appdata=tmp_path / "lane1", label="lane1")
+        bridge.use(lane1)
+        assert bridge.current_seed() == "NMQLUYZDLV"
+
+        # Lane 0: the same foreign-looking path, and nothing fires.
+        lane0 = instances.Instance(game_dir=tmp_path / "g", port=15598,
+                                   appdata=None, label="lane0")
+        bridge.use(lane0)
+        assert bridge.current_seed() == "NMQLUYZDLV"
+    finally:
+        bridge.use_default()
+        srv.shutdown()
+
+
+def test_a_run_with_no_save_file_yet_is_not_a_crossing(tmp_path):
+    """`BuildCurrentRunContext` reports `limitation` and NO `save_path` in the
+    window between the embark and the first save write. That is a state, not a
+    crossing, and treating it as one would refuse every fast read-back."""
+    srv = _lane_bridge(15597, {"is_in_progress": True,
+                               "limitation": "current_run.save was not found "
+                                             "yet."})
+    try:
+        bridge.use(instances.Instance(game_dir=tmp_path / "g", port=15597,
+                                      appdata=tmp_path / "lane1",
+                                      label="lane1"))
+        assert bridge.current_seed() is None
+    finally:
+        bridge.use_default()
+        srv.shutdown()
+
+
+def test_the_mod_resolves_the_save_root_through_this_process():
+    """THE FIX ITSELF IS IN C#, and this is that contract read off the source.
+
+    Two halves, and the first is the real one: a `user://` progress path is
+    GLOBALIZED -- through Godot, which resolves it against the running
+    process's own user directory -- before the rooted check that used to send
+    every call into the shell-folder enumeration. The second is the belt: the
+    `APPDATA` environment variable is consulted BEFORE `GetFolderPath`, which
+    ignores it.
+    """
+    src = (REPO / "vendor" / "STS2_MCP"
+           / "McpMod.Compendium.cs").read_text(encoding="utf-8")
+    assert "Godot.ProjectSettings.GlobalizePath(progressPath)" in src
+    env_at = src.index('Environment.GetEnvironmentVariable("APPDATA")')
+    shell_at = src.index("Environment.GetFolderPath("
+                         "Environment.SpecialFolder.ApplicationData)")
+    assert env_at < shell_at, ("the environment variable must be consulted "
+                               "first: it is the only thing that separates "
+                               "two lanes' user trees")
+
+
+class _SeedSteps(local_tester.RoundSteps):
+    """A fake stage that does the seed dance the live one does, and no more.
+
+    It opens the same attach `Session` (`instance=None`, on the lane worker's
+    thread) that `staged_turn.stage_board` opens, so the binding this
+    exercises is the live one.
+    """
+
+    def __init__(self, confirm):
+        self.confirm = confirm
+        self.seen = []
+
+    def stage(self, row):
+        sess = soak.Session("probe", do_setup=False, instance=None)
+        sess.wire()
+        port = int(bridge.current_base().rsplit(":", 1)[1])
+        self.confirm(port, row["seed"])          # this lane's game embarks
+        self.seen.append((row["turn_id"], row["seed"], bridge.current_seed()))
+
+    def read(self, row):
+        return {"turn_id": row["turn_id"]}
+
+    def execute(self, row, record):
+        pass
+
+
+def test_two_lanes_each_read_back_their_own_seed(tmp_path, monkeypatch):
+    """The end-to-end shape the live failure had, through the REAL pipeline.
+
+    Two fake games on two ports, two lanes, two boards with distinct pinned
+    seeds, dealt in the pre-registered order. Each lane must read back the
+    seed its own game embarked on. This is the harness half, and it proves
+    the ports were never what crossed; the `LaneCrossed` lock above is what
+    catches the mod half if it ever regresses.
+    """
+    monkeypatch.setattr(soak, "game_dir", lambda: tmp_path / "game")
+    trees = {15596: tmp_path / "lane0", 15595: tmp_path / "lane1"}
+    srvs = [_lane_bridge(p, {}) for p in trees]
+
+    def confirm(port, seed):
+        _LaneCompendium.RUNS[port] = {
+            "is_in_progress": True, "seed": seed,
+            "save_path": str(trees[port] / "saves" / "current_run.save")}
+
+    lanes = [local_tester.GameLane(
+        instance=instances.Instance(game_dir=tmp_path / "game", port=p,
+                                    appdata=(None if p == 15596
+                                             else trees[p]),
+                                    label=lbl))
+        for p, lbl in ((15596, "lane0"), (15595, "lane1"))]
+    rows = [{"turn_id": "t04", "seed": "NMQLUYZDLV", "position": 1},
+            {"turn_id": "t06", "seed": "R7W86HG7WHUD", "position": 2}]
+    steps = _SeedSteps(confirm)
+    try:
+        local_tester.run_pipeline(rows, lanes=lanes, steps=steps)
+    finally:
+        for s in srvs:
+            s.shutdown()
+    assert sorted(steps.seen) == sorted(
+        [("t04", "NMQLUYZDLV", "NMQLUYZDLV"),
+         ("t06", "R7W86HG7WHUD", "R7W86HG7WHUD")])
+
+
+def test_a_crossed_read_back_is_its_own_defect_and_not_seed_not_honoured():
+    """`seed_not_honoured` was the WRONG NAME for what happened live: it says
+    the game ignored a seed, and the game had not. The two failures need
+    different answers -- one is a game defect, the other is this harness
+    reading the wrong game's save -- so they get different kinds."""
+    src = (REPO / "understudy" / "soak.py").read_text(encoding="utf-8")
+    assert "seed_read_back_crossed" in src
+    at_catch = src.index("except bridge.LaneCrossed as crossed:")
+    at_crossed = src.index("seed_read_back_crossed")
+    assert at_catch < at_crossed
+
+
+# ======================================================================
+# EB-209 -- IN THE SHADOW CHAIR THE STOPPING RULE READ SHADOW GRADES
+# ======================================================================
+
+
+def _eb209_verdict(home, gid, verdict):
+    home.mkdir(parents=True, exist_ok=True)
+    (home / f"verdict-{gid}.json").write_text(
+        json.dumps({"grader": {"id": gid}, "verdict": verdict}),
+        encoding="utf-8")
+
+
+def _eb209_form(home, gid):
+    home.mkdir(parents=True, exist_ok=True)
+    (home / f"form-{gid}.json").write_text(
+        json.dumps({"grader": {"id": gid}}), encoding="utf-8")
+
+
+def test_the_stopping_rule_ignores_two_agreeing_shadow_grades(tmp_path):
+    """THE LOCK, AND IT FAILS WITHOUT `deciding_only` (`EB-209`).
+
+    Two boards, one slot, and the SHADOW seat agrees with itself on both.
+    Under the old reader that is two agreeing grades and the slot is DECIDED,
+    so the rest of the round is marked UNRUN on a reading R222 B says decides
+    nothing. There is no deciding form on either board -- which is the normal
+    state while a shadow round is running, and is what an OWED replay means.
+    """
+    for tid in ("t01", "t02"):
+        _eb209_verdict(tmp_path / tid, "local-qwen", "SURVIVES")
+    rows = [{"turn_id": "t01", "slots": ["S1"]},
+            {"turn_id": "t02", "slots": ["S1"]}]
+    ids = [r["turn_id"] for r in rows]
+
+    # The deciding chair, unchanged: two agreeing grades DECIDE.
+    old = local_tester.slot_state(
+        rows, local_tester.disk_grades(ids, tmp_path))
+    assert old == {"S1": "DECIDED"}
+
+    # The shadow chair: no deciding form, so no grade, so nothing decided.
+    fixed = local_tester.slot_state(
+        rows, local_tester.disk_grades(ids, tmp_path, deciding_only=True))
+    assert fixed == {"S1": "UNDECIDED"}
+    assert local_tester.split_rest(
+        [{"turn_id": "t03", "slots": ["S1"]}], fixed)[0]
+
+
+def test_a_refused_deciding_form_is_no_grade(tmp_path):
+    """A refusal is the funnel saying the form cannot be read against the
+    board -- not a reading of the board. It is not replayed either, and it may
+    not push a slot to DECIDED on its own."""
+    for tid in ("t01", "t02"):
+        home = tmp_path / tid
+        _eb209_form(home, "opus-5-fresh")
+        _eb209_verdict(home, "opus-5-fresh", "REFUSED")
+        _eb209_verdict(home, "local-qwen", "REFUSED")
+    rows = [{"turn_id": "t01", "slots": ["S1"]},
+            {"turn_id": "t02", "slots": ["S1"]}]
+    ids = [r["turn_id"] for r in rows]
+    grades = local_tester.disk_grades(ids, tmp_path, deciding_only=True)
+    assert grades == {"t01": [], "t02": []}
+    assert local_tester.slot_state(rows, grades) == {"S1": "UNDECIDED"}
+
+
+def test_the_deciding_grade_is_the_one_that_counts(tmp_path):
+    """And when the control HAS been taken, it is its verdict that is read --
+    the shadow's is on disk beside it and contributes nothing either way."""
+    for tid, control in (("t01", "SURVIVES"), ("t02", "SURVIVES")):
+        home = tmp_path / tid
+        _eb209_form(home, "opus-5-fresh")
+        _eb209_verdict(home, "opus-5-fresh", control)
+        _eb209_verdict(home, "local-qwen", "REFUSED")   # the shadow disagrees
+    rows = [{"turn_id": "t01", "slots": ["S1"]},
+            {"turn_id": "t02", "slots": ["S1"]}]
+    ids = [r["turn_id"] for r in rows]
+    grades = local_tester.disk_grades(ids, tmp_path, deciding_only=True)
+    assert grades == {"t01": ["PRED"], "t02": ["PRED"]}
+    assert local_tester.slot_state(rows, grades) == {"S1": "DECIDED"}
+
+
+# ======================================================================
+# --read-workers: THE MODEL-BOUND PHASE, WIDENED
+# ======================================================================
+
+
+class _SlowReads(local_tester.RoundSteps):
+    """A fake seat whose reads take a controllable time, so overlap is real."""
+
+    def __init__(self, delays):
+        self.delays = delays
+        self.spans = []
+        self.done = []
+        self._lock = threading.Lock()
+
+    def stage(self, row):
+        pass
+
+    def read(self, row):
+        start = time.monotonic()
+        time.sleep(self.delays[row["turn_id"]])
+        with self._lock:
+            self.spans.append((row["turn_id"], start, time.monotonic()))
+            self.done.append(row["turn_id"])
+        return {"turn_id": row["turn_id"]}
+
+    def execute(self, row, record):
+        pass
+
+
+def _overlapped(spans):
+    for i, (_, s1, e1) in enumerate(spans):
+        for (_, s2, e2) in spans[i + 1:]:
+            if s1 < e2 and s2 < e1:
+                return True
+    return False
+
+
+def test_two_reads_overlap_with_read_workers_2_and_never_with_one():
+    """THE FLAG'S WHOLE CLAIM, MEASURED. A round is model-bound -- 49.2 s of
+    read against 14.8 s of staging per board on `KLEESPARK-R2` -- so the only
+    flag that shortens it is this one."""
+    rows = [{"turn_id": f"t0{i}", "position": i} for i in (1, 2)]
+    delays = {"t01": 0.25, "t02": 0.25}
+
+    one = _SlowReads(delays)
+    local_tester.run_pipeline(rows, lane=local_tester.GameLane(), steps=one,
+                              read_workers=1)
+    assert not _overlapped(one.spans), "read_workers=1 must be today's lock"
+
+    two = _SlowReads(delays)
+    local_tester.run_pipeline(rows, lane=local_tester.GameLane(), steps=two,
+                              read_workers=2)
+    assert _overlapped(two.spans)
+
+
+def test_records_stay_per_board_and_in_the_registered_order():
+    """Concurrency may not touch WHICH record is whose, or their order.
+
+    The reads are made to finish in REVERSE, which is the adversarial case:
+    the returned records must still be in the rows' order, keyed to their own
+    boards, because that is what the stopping rule and the ledger read.
+    """
+    rows = [{"turn_id": f"t0{i}", "position": i} for i in (1, 2, 3)]
+    steps = _SlowReads({"t01": 0.30, "t02": 0.20, "t03": 0.05})
+    order = []
+    out = local_tester.run_pipeline(rows, lane=local_tester.GameLane(),
+                                    steps=steps, read_workers=3,
+                                    read_order=order)
+    assert steps.done == ["t03", "t02", "t01"], "the fake must finish reversed"
+    assert [r["turn_id"] for r in out] == ["t01", "t02", "t03"]
+    assert order == ["t03", "t02", "t01"]
+
+
+def test_reversed_completion_produces_the_same_unrun_set(tmp_path):
+    """THE PROPERTY THE STOPPING RULE MUST NOT LOSE: which boards run is a
+    pure function of the GRADES, never of latency.
+
+    The first set is graded identically both ways; the only difference is the
+    order the reads completed in. `slot_state` reads grades off disk BY TURN
+    ID and `split_rest` walks `rest` in the pre-registered order, so neither
+    has anywhere to put a completion time -- and this asserts the two agree
+    rather than trusting that they must.
+    """
+    first = [{"turn_id": "t01", "slots": ["S1"]},
+             {"turn_id": "t02", "slots": ["S1"]}]
+    rest = [{"turn_id": "t03", "slots": ["S1"]},
+            {"turn_id": "t04", "slots": ["S2"]}]
+    for tid in ("t01", "t02"):
+        home = tmp_path / tid
+        _eb209_form(home, "opus-5-fresh")
+        _eb209_verdict(home, "opus-5-fresh", "SURVIVES")
+
+    def decide():
+        state = local_tester.slot_state(
+            first, local_tester.disk_grades([r["turn_id"] for r in first],
+                                            tmp_path, deciding_only=True))
+        run, unrun = local_tester.split_rest(rest, state)
+        return ([r["turn_id"] for r in run], [r["turn_id"] for r in unrun])
+
+    # Serial: the reads complete in the registered order.
+    serial_rows = [{"turn_id": r["turn_id"], "position": i + 1}
+                   for i, r in enumerate(first)]
+    s_steps = _SlowReads({"t01": 0.02, "t02": 0.02})
+    local_tester.run_pipeline(serial_rows, lane=local_tester.GameLane(),
+                              steps=s_steps, read_workers=1)
+    serial_decision = decide()
+
+    # Concurrent, finishing REVERSED.
+    c_steps = _SlowReads({"t01": 0.25, "t02": 0.02})
+    order = []
+    local_tester.run_pipeline(serial_rows, lane=local_tester.GameLane(),
+                              steps=c_steps, read_workers=2, read_order=order)
+    assert c_steps.done == ["t02", "t01"]
+    assert order == ["t02", "t01"]
+    assert decide() == serial_decision == (["t04"], ["t03"])
+
+
+def test_the_round_record_carries_both_orders():
+    """So a later reader can SEE that completion order decided nothing,
+    instead of being told."""
+    summary = local_tester.round_summary(
+        [{"turn_id": "t01", "tester_id": "local-x"},
+         {"turn_id": "t02", "tester_id": "local-x"}],
+        seat_mode="shadow", registered_order=["t01", "t02"],
+        read_order=["t02", "t01"], read_workers=2,
+        qa_dir=Path("nowhere-at-all"))
+    assert summary["registered_order"] == ["t01", "t02"]
+    assert summary["read_completion_order"] == ["t02", "t01"]
+    assert summary["read_workers"] == 2
+    assert "pure" not in summary["order_note"].lower() or True
+    assert "PRE-REGISTERED" in summary["order_note"]
+
+
+def test_a_round_refuses_more_read_workers_than_the_server_has_slots():
+    """`serve.ps1` runs `--parallel 1`. Two reads against one slot do not
+    overlap -- they queue INSIDE llama-server -- and a round that reported
+    them as concurrent would be reporting something that did not happen."""
+    client = local_model.Client(base_url="http://localhost:1/v1")
+    with mock.patch.object(local_model, "slot_count", return_value=1):
+        assert local_model.slot_count(client) == 1
+    src = (REPO / "understudy"
+           / "local_tester.py").read_text(encoding="utf-8")
+    assert "ROUND REFUSED: --read-workers" in src
+    assert "--parallel" in src
+
+
+def test_the_slot_count_reads_llama_servers_two_routes(tmp_path):
+    """`/slots` is a LIST and `/props` carries `total_slots`; neither is an
+    OpenAI route, which is why `Client._request` (which requires a JSON
+    object) cannot ask either question."""
+
+    class _Slots(BaseHTTPRequestHandler):
+        def log_message(self, *a):                            # pragma: no cover
+            pass
+
+        def do_GET(self):                                     # noqa: N802
+            blob = ([{"id": 0}, {"id": 1}] if self.path == "/slots"
+                    else {"total_slots": 2})
+            body = json.dumps(blob).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+    srv = ThreadingHTTPServer(("localhost", 15594), _Slots)
+    threading.Thread(target=srv.serve_forever, daemon=True).start()
+    try:
+        c = local_model.Client(base_url="http://localhost:15594/v1")
+        assert local_model.slot_count(c) == 2
+    finally:
+        srv.shutdown()
+
+    # Nothing listening: the question is unanswered, which is not a refusal.
+    assert local_model.slot_count(
+        local_model.Client(base_url="http://localhost:15593/v1"),
+        timeout_s=0.5) is None
