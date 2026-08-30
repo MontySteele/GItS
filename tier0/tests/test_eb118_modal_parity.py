@@ -56,13 +56,87 @@ def test_a_modal_row_generates_rather_than_blocking():
 
 def test_the_body_routes_through_the_games_own_choice_surface():
     src = gen.emit(modal_card(ENCORE, DRAW), gen.FURINA_PROFILE)
-    assert "ModalChoice.SelectMode(choiceContext, Owner, modeOptions)" in src
+    # EB-182: this pair PRICES mode 2, so the body asks the selection that
+    # offers the affordable modes only. It is the same screen -- the C# pin
+    # `ModalChoicePinTests` is what says so structurally.
+    assert ("ModalChoice.SelectAffordableMode(choiceContext, Owner, "
+            "modeOptions, ModePrices)") in src
     assert "ModalChoice.CreateOption<ModalProbeModeA>(Owner)" in src
     assert "ModalChoice.CreateOption<ModalProbeModeB>(Owner)" in src
     assert "if (modeIndex == 0)" in src
     # One class per mode, in the card's own file, off the shared base.
     assert "public sealed class ModalProbeModeA : ModalOptionCard" in src
     assert "public sealed class ModalProbeModeB : ModalOptionCard" in src
+
+
+def test_an_unpriced_modal_emits_the_body_it_always_emitted():
+    """EB-182's regression, at the codegen seam. No mode of this pair opens
+    with a spend, so nothing is priced, no `ModePrices` table is declared, no
+    `IsPlayable` gate appears, and the selection call is the one that shipped
+    before per-option playability existed."""
+    src = gen.emit(modal_card(ENCORE, HIT), gen.FURINA_PROFILE)
+    assert "ModalChoice.SelectMode(choiceContext, Owner, modeOptions)" in src
+    assert "ModePrices" not in src
+    assert "IsPlayable" not in src
+
+
+def test_a_priced_mode_declares_its_price_and_gates_the_card():
+    """EB-182, the C# leg of the rule. The price is DATA -- one declaration,
+    read by the screen filter and by the card-level gate -- and the bank read
+    is the one the paying call gates on, so the price offered and the price
+    charged cannot drift."""
+    src = gen.emit(modal_card(ENCORE, DRAW), gen.FURINA_PROFILE)
+    assert "private static readonly ModePrice?[] ModePrices" in src
+    assert ('new ModePrice("Encore", 2, p => FurinaResources.Encore('
+            'p.Creature))') in src
+    assert ("protected override bool IsPlayable =>\n"
+            "        ModalChoice.AnyAffordable(Owner, ModePrices);") in src
+    # Mode 1 prices nothing and says so in the same table, by position.
+    assert src.split("ModePrices =")[1].lstrip().startswith("{\n        null,")
+
+
+def test_a_spark_priced_mode_face_carries_the_shipped_cost_badge():
+    """EB-182, the arm this unblocks (Bag of Tricks). A Spark-priced mode's
+    FACE declares `ISparkPricedCard`, which is what the shipped Spark cost
+    badge reads -- the price lands on the option a player is choosing between,
+    in the look that already exists, off the same single declaration."""
+    spend = {"label": "Spend 3 Sparks: deal 12",
+             "effects": [{"op": "spend_spark", "amount": 3},
+                         {"op": "damage", "amount": 12, "target": "enemy"}]}
+    src = gen.emit(modal_card(HIT, spend), gen.FURINA_PROFILE)
+    assert ('new ModePrice("Sparks", 3, p => SparkPower.SparksAsResolved('
+            'p.Creature))') in src
+    assert ("public sealed class ModalProbeModeB : ModalOptionCard, "
+            "ISparkPricedCard") in src
+    assert "public int PrintedSparkPrice => 3;" in src
+    # The unpriced mode's face is untouched -- no badge, no interface.
+    assert "public sealed class ModalProbeModeA : ModalOptionCard\n" in src
+
+
+def test_a_state_dependent_mode_price_is_refused_rather_than_emitted():
+    """EB-182's red case, and the guard it LEANS ON rather than adds. The
+    price reaches C# as a literal (`ModePrices`), so a formula at the head of
+    a mode body would be a number the screen filter could not show before the
+    choice -- a row the sim gates per option while the mod offers it whatever
+    the bank holds. `_branch_op_reason` already refuses it; this is what makes
+    that refusal load-bearing rather than incidental."""
+    formula = {"label": "Spend Encore: draw 2",
+               "effects": [{"op": "spend_encore",
+                            "amount": {"count": "fanfare", "per": 1}},
+                           {"op": "draw", "amount": 2}]}
+    reason = gen.blocked_reason(modal_card(ENCORE, formula),
+                                gen.FURINA_PROFILE)
+    assert reason == "branch spend_encore amount must be a literal int"
+
+
+def test_the_sim_and_the_generator_price_the_same_modes():
+    """One rule, two engines: `effects.MODE_PRICE_OPS` names the ops that make
+    a mode's cost line, and the generator's table is the same set. A meter
+    added to one side and not the other is a mode gated in the sim and offered
+    in the mod, which is the drift EB-182 exists to close."""
+    assert set(gen.MODE_PRICE_OPS) == set(effects.MODE_PRICE_OPS)
+    for op, (meter, _bank) in gen.MODE_PRICE_OPS.items():
+        assert effects.MODE_PRICE_OPS[op][1] == meter
 
 
 def test_the_taken_mode_is_recorded_in_the_generated_body():
@@ -210,7 +284,8 @@ def test_the_prototypes_committed_cs_carries_both_ruled_modes():
     rather than a fresh emit, because what ships is the file: `--check` keeps
     the two in step, and this says what the file has to contain."""
     src = _deep_breath_cs()
-    assert "ModalChoice.SelectMode(choiceContext, Owner, modeOptions)" in src
+    assert ("ModalChoice.SelectAffordableMode(choiceContext, Owner, "
+            "modeOptions, ModePrices)") in src
     assert "ModalChoice.CreateOption<DeepBreathModeA>(Owner)" in src
     assert "ModalChoice.CreateOption<DeepBreathModeB>(Owner)" in src
     assert "public sealed class DeepBreathModeA : ModalOptionCard" in src

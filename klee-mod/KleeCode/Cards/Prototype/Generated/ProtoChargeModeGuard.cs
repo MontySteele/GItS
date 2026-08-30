@@ -52,6 +52,22 @@ public sealed class ProtoChargeModeGuard : CustomCardModel, ICharacterCard
         ("description", "Choose one: Gain 5 Block | Spend 6 [gold]Charge[/gold]: gain 12 Block."),
     };
 
+    // EB-182: what each mode PRINTS as its price, and the bank to
+    // read it against. One declaration, read by the screen filter and
+    // by the playability gate below, so the price offered and the
+    // price charged cannot drift. `null` is an unpriced mode.
+    private static readonly ModePrice?[] ModePrices =
+    {
+        null,
+        new ModePrice("Charge", 6, p => KokomiResources.GetCharge(p.Creature)),
+    };
+
+    // The per-mode cost lines (EB-182): unplayable when NO mode is
+    // affordable, and the unaffordable modes are not offered on the
+    // choose-a-card screen either.
+    protected override bool IsPlayable =>
+        ModalChoice.AnyAffordable(Owner, ModePrices);
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
@@ -72,7 +88,7 @@ public sealed class ProtoChargeModeGuard : CustomCardModel, ICharacterCard
             ModalChoice.CreateOption<ProtoChargeModeGuardModeA>(Owner),
             ModalChoice.CreateOption<ProtoChargeModeGuardModeB>(Owner),
         };
-        var modeIndex = await ModalChoice.SelectMode(choiceContext, Owner, modeOptions);
+        var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, ModePrices);
         ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 5 Block", "Spend 6 [gold]Charge[/gold]: gain 12 Block" }[modeIndex]);
         if (modeIndex == 0)
         {

@@ -2575,6 +2575,93 @@ MODAL_FIELDS = frozenset({"op", MODES_KEY})
 MIN_MODES = 2
 
 
+# --- EB-182: per-option playability (R224 item 17, option 3) ---------------
+#
+# THE RULE, one sentence: a mode whose body OPENS with a resource spend is
+# that mode's COST LINE, and a mode the bank cannot pay is not offered.
+#
+# WHY THE OPENING EFFECT AND NOT ANY SPEND IN THE BODY. The label a priced
+# mode prints is "Spend 3 Encore: draw 3" -- a price, a colon, a payout -- and
+# the colon is exactly the boundary this reads. A spend further down a body is
+# a CONSEQUENCE of the mode rather than its admission fee (it may be paid out
+# of what the same body just generated), and the engine keeps refusing those
+# where they resolve: `spend_sparks` is all-or-nothing, `ChargeUnpaid` stops
+# the card, `spend_encore_or_hp` overdraws. So this is the modal twin of
+# `combat.spark_cost` / `combat.charge_cost`'s "TOP-LEVEL ops only" rule, one
+# nesting level down, and it stops exactly where those stop.
+#
+# CONSEQUENCE, STATED: `deep_breath` mode 2 (`spend_encore 3`) was takeable on
+# a short bank and overdrew the shortfall into HP. It is now not offered below
+# 3 Encore. That is the acceptance EB-182 was filed with -- "a short bank
+# cannot pick a dead mode" -- and it is a real behaviour change on one shipped
+# card, not a display fix. `proto_charge_mode_guard` on the quarantined
+# surface is the second consumer; the Klee arm this unblocks (Bag of Tricks, a
+# Spark-priced mode) is the third.
+MODE_PRICE_OPS = {
+    "spend_encore": ("encore", "Encore"),
+    "spend_spark": ("sparks", "Sparks"),
+    "spend_charge": ("charge", "Charge"),
+}
+
+
+def mode_price(state: CombatState, mode: dict):
+    """`(bank field, meter name, amount)` for a priced mode, else None.
+
+    The amount is read the way the PAYING op reads it: the two literal-only
+    meters through their own validators (so a malformed price fails here the
+    way it fails at resolution), Encore through `_amount`, which admits the
+    state-dependent forms that op already accepts.
+    """
+    body = mode.get("effects") or []
+    if not body:
+        return None
+    fx = body[0]
+    op = fx.get("op")
+    if op not in MODE_PRICE_OPS:
+        return None
+    field, meter = MODE_PRICE_OPS[op]
+    if op == "spend_spark":
+        amount = spend_spark_amount(fx)
+    elif op == "spend_charge":
+        amount = spend_charge_amount(fx)
+    else:
+        amount = _amount(state, fx["amount"])
+    return field, meter, int(amount)
+
+
+def mode_affordable(state: CombatState, mode: dict) -> bool:
+    """Can the bank pay this mode's price? True for an unpriced mode."""
+    price = mode_price(state, mode)
+    if price is None:
+        return True
+    field, _meter, amount = price
+    return getattr(state.player, field) >= amount
+
+
+def mode_refusal(state: CombatState, mode: dict) -> Optional[str]:
+    """Why this mode is not offered -- naming the price AND the bank.
+
+    None when the mode IS offered. The string is the printable half of the
+    rule: a staged-turn packet, the falsifier and a replay all reach it
+    through `combat.modal_refusal`, so a refused line can say what was short
+    instead of merely not appearing.
+    """
+    price = mode_price(state, mode)
+    if price is None:
+        return None
+    field, meter, amount = price
+    bank = getattr(state.player, field)
+    if bank >= amount:
+        return None
+    label = mode.get("label") or "(unlabelled mode)"
+    return f"{label!r} needs {amount} {meter}, bank holds {bank}"
+
+
+def offered_modes(state: CombatState, modes: list[dict]) -> list[int]:
+    """The mode indexes a player may actually pick, in sheet order."""
+    return [i for i, mode in enumerate(modes) if mode_affordable(state, mode)]
+
+
 def _chosen_mode(state: CombatState, modes: list[dict], card: Card) -> int:
     """Which mode does the pilot take?
 
@@ -2598,11 +2685,26 @@ def _chosen_mode(state: CombatState, modes: list[dict], card: Card) -> int:
     `tier0.pilot.policy._active_effects` calls this same function for its
     forecast, so the pilot's read of a modal card and the mode that actually
     resolves cannot disagree.
+
+    EB-182: the choice is made over the OFFERED modes only, so the pilot, the
+    falsifier and a replay all inherit per-option playability from this one
+    seam without knowing the rule. On a board where every mode is offered the
+    filter is the identity and the chooser sees the list it always saw --
+    which is what keeps an unpriced fixture byte-identical.
     """
+    offered = offered_modes(state, modes)
+    if not offered:
+        # `combat.card_playable` refuses a card whose TOP-LEVEL `choose_one`
+        # has no affordable mode, so the only way here is a modal nested
+        # inside a conditional branch -- a shape no sheet uses and one the
+        # cost line cannot see. Offer everything rather than resolving
+        # nothing: the paying ops still refuse at resolution, which is the
+        # loud half of the same rule.
+        offered = list(range(len(modes)))
     pol = _mode_chooser()
     if pol is None:
-        return 0
-    return pol.choose_mode(state, modes, card)
+        return offered[0]
+    return offered[pol.choose_mode(state, [modes[i] for i in offered], card)]
 
 
 def _op_choose_one(state: CombatState, fx: dict, card: Card) -> None:
@@ -3391,11 +3493,11 @@ class ChargeUnpaid(Exception):
 
     A TOP-LEVEL price never reaches this: `combat.charge_cost` derives the
     cost line off the printed op and `combat.card_playable` refuses the card
-    below it, exactly as the Spark sink does. What CAN reach it is a price
-    inside a `choose_one` mode, because the game's choose-a-card screen has
-    no per-mode playability -- a mode is selectable whatever the bank holds.
-    That gap is real and it is named in the slice-2 packet; this exception is
-    what keeps it from paying a mode's payoff for free."""
+    below it, exactly as the Spark sink does. Since EB-182 a price at the
+    HEAD of a `choose_one` mode does not reach it either -- that mode is not
+    offered below its price. What is left is a spend deeper in a mode body,
+    which is a consequence rather than an admission fee; this exception is
+    what keeps one from paying a mode's payoff for free."""
 
 
 def spend_charge_amount(fx: dict) -> int:
