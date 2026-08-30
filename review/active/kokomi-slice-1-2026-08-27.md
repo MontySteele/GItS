@@ -798,6 +798,17 @@ spent, and no fight has been played.** `KURAGEMEM002` and `KURAGEMEM003` stay
 UNSPENT — they are the memory kit's seeds, not this slate's, and this slate
 pins none.
 
+> **COUNTERSIGNED (R227, 2026-08-30): `KOKOMI-SLICE1-WF` is SIGNED**, in the
+> batch of three, at PICK 3 option (1) — none vetoed. Signed once and never
+> re-signed (R212, EXPERIMENTS *Countersign once*). **Two of the three
+> sequencing preconditions below are now DISCHARGED:** `M67` is RULED at
+> option (1) (R227), so the Kokomi prototype surface loses slice 2's four rows
+> in this same sitting and no fight here is staged twice; and
+> `KURAGEMEM002`'s rerun has RUN and been GRADED (2026-08-30, `P3` ADVANCE).
+> **`EB-184` is still OPEN and still precedes `F3`, and only `F3`** — the
+> Attack-typed `choose_one` target demand is unfixed, so `WF6` cannot be
+> answered for Itto — Oni Rush until it lands. `F1` and `F2` are unblocked.
+
 **Why it exists.** Six of slice 1's seven arms read ADVANCE across four rounds,
 and the decision inventory of 2026-08-30 found that those six results feed
 **nothing registered**. They land only on the accept-to-sheet signoff — the

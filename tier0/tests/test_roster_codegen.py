@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import yaml
@@ -1454,3 +1455,132 @@ def test_a_second_top_level_target_keeps_a_conditional_delta_structural(
                         {"eb118_codegen_probe": {"conditional_block": 3}})
     reason = gen.upgrade_plan(card)[1]
     assert "2 top-level" in reason and "structural upgrade" in reason
+
+
+# --------------------------------------------------------------------------
+# EB-230: a Bomb's face prints the Bomb's own amount
+# --------------------------------------------------------------------------
+
+# Vars whose rendered value is resolved against the PLAYER's live attack
+# modifiers (Strength, Weak, and every ModifyDamage hook). `DamageVar`,
+# `ExtraDamageVar` and `CalculatedDamageVar` are all of that family.
+_LIVE_ATTACK_VARS = {"Damage", "ExtraDamage", "CalculatedDamage"}
+
+# Every "N-damage Bomb" shape a face can carry. Group 1 is the number the
+# face shows for one Bomb's payload.
+_BOMB_FACE_SHAPES = (
+    # "...[gold]Bomb[/gold] on EACH enemy dealing X damage"
+    # "...[gold]Bombs[/gold], each dealing X damage"
+    re.compile(r"\[gold\]Bombs?\[/gold\][^.|]*?dealing (\{\w+:diff\(\)\}|\d+)"),
+    # chance_bomb_per_detonation: "place a new X-damage [gold]Bomb[/gold]"
+    re.compile(r"(\{\w+:diff\(\)\}|\d+)-damage \[gold\]Bomb\[/gold\]"),
+)
+
+_DESCRIPTION_LINE = re.compile(r'\("description", "(.*)"\),')
+
+
+def _bomb_card_sources() -> dict[str, str]:
+    """Every C# card source that could carry a Bomb face -- generated,
+    prototype-generated and hand-written alike. The defect shipped on a
+    GENERATED face, but Pop and Jumpy Dumpty Mk.Omega are hand-written and
+    print the same clause, so the lock sweeps them too."""
+    out = {}
+    dirs = _ALL_GENERATED_DIRS + [
+        gen.REPO / "klee-mod" / "KleeCode" / "Cards",
+        gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated",
+    ]
+    for d in dirs:
+        for path in sorted(d.glob("*.cs")):
+            src = path.read_text(encoding="utf-8")
+            if "[gold]Bomb" not in src:
+                continue
+            out[str(path.relative_to(gen.REPO))] = src
+    return out
+
+
+def test_every_place_bomb_face_prints_the_bombs_own_amount():
+    """EB-230. `place_bomb` hands `BombPower.Place` / tier0's `_op_place_bomb`
+    a LITERAL payload (the sheet's `bomb_damage`, or the var's BaseValue) --
+    neither engine reads the player's attack modifiers at placement or at
+    detonation (BombPower deals its charge `ValueProp.Unpowered`). A face
+    token from the DamageVar family resolves against those modifiers anyway:
+    `AllMyTreasures` printed "each dealing 4 damage" under a debuff
+    (KLEESPARK-W3 turn-029) while the stack dealt 6.
+
+    So a Bomb clause may print a literal, or a var that is a PLAIN
+    `DynamicVar` -- never `Damage` / `ExtraDamage` / `CalculatedDamage`.
+    """
+    offenders = []
+    for rel, src in _bomb_card_sources().items():
+        for desc in _DESCRIPTION_LINE.findall(src):
+            for shape in _BOMB_FACE_SHAPES:
+                for shown in shape.findall(desc):
+                    if not shown.startswith("{"):
+                        continue
+                    name = shown[1:shown.index(":")]
+                    if name in _LIVE_ATTACK_VARS:
+                        offenders.append(
+                            f"{rel}: Bomb face prints {{{name}:diff()}}, "
+                            "which resolves against live attack modifiers")
+                    elif f'new DynamicVar("{name}", ' not in src:
+                        offenders.append(
+                            f"{rel}: Bomb face prints {{{name}:diff()}} with "
+                            "no plain DynamicVar declaring it")
+    assert not offenders, (
+        "A Bomb's face must print the Bomb's own amount (EB-230):\n  "
+        + "\n  ".join(offenders))
+
+
+def test_every_sheet_bomb_amount_reaches_its_face_unmodified():
+    """The other half of the lock: the number the face SHOWS is the sheet's
+    `bomb_damage`. Walks both sheets a `place_bomb` can live on -- the ruled
+    roster sheet and the quarantined prototype surface -- so a prototype row
+    cannot reintroduce the drift the shipped rows just lost."""
+    from tools.effect_walk import iter_effects
+
+    sheets = [
+        (gen.KLEE_PROFILE, yaml.safe_load(
+            (gen.REPO / "docs" / "klee-cards.yaml").read_text(
+                encoding="utf-8"))),
+        (None, yaml.safe_load(
+            (gen.REPO / "docs" / "prototype-surface.yaml").read_text(
+                encoding="utf-8"))),
+    ]
+    proto_dir = (gen.REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+                 / "Generated")
+    hand_dir = gen.REPO / "klee-mod" / "KleeCode" / "Cards"
+    checked, offenders = 0, []
+    for profile, sheet in sheets:
+        rows = sheet["cards"] if isinstance(sheet, dict) else sheet
+        for card in rows:
+            amounts = {int(e["bomb_damage"])
+                       for e in iter_effects(card)
+                       if e.get("op") in {"place_bomb",
+                                          "chance_bomb_per_detonation"}}
+            if not amounts:
+                continue
+            name = gen.pascal(card["id"]) + ".cs"
+            path = next((d / name for d in (
+                (profile.out_dir if profile else proto_dir), proto_dir,
+                hand_dir) if (d / name).exists()), None)
+            if path is None:
+                continue                      # not emitted (blocked row)
+            src = path.read_text(encoding="utf-8")
+            for desc in _DESCRIPTION_LINE.findall(src):
+                for shape in _BOMB_FACE_SHAPES:
+                    for shown in shape.findall(desc):
+                        checked += 1
+                        if shown.isdigit():
+                            if int(shown) not in amounts:
+                                offenders.append(
+                                    f"{card['id']}: face prints {shown}, "
+                                    f"sheet says {sorted(amounts)}")
+                            continue
+                        var = shown[1:shown.index(":")]
+                        if not any(f'new DynamicVar("{var}", {a}m)' in src
+                                   for a in amounts):
+                            offenders.append(
+                                f"{card['id']}: face var {var} is not "
+                                f"declared at {sorted(amounts)}")
+    assert checked, "no Bomb faces found -- the sweep is not looking at them"
+    assert not offenders, "\n  ".join(offenders)

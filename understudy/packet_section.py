@@ -10,8 +10,10 @@ None of that is judgment. All of it is in `review/qa/<turn>/` and
 table that can disagree with them.
 
 So this module reads the records and prints the section. It renders the shape
-the packets already use -- `review/active/kokomi-slice-2-2026-08-29.md` §8 is
-the reference -- with one deliberate difference: **the prose read is a marked
+the packets already use -- the reference is Kokomi slice 2's §8, retired from
+HEAD with its arms under R227 and retrievable at
+`git show 1f07d94a:review/active/kokomi-slice-2-2026-08-29.md` -- with one
+deliberate difference: **the prose read is a marked
 EMPTY SLOT.** The tables are mechanical and this tool owns them; the paragraph
 that says what the round MEANS is the agent's and is never generated. A
 generator that wrote that paragraph would be a generator inventing a reading,

@@ -196,129 +196,6 @@
    effects: [{op: damage, amount: 14, target: enemy, applies_element: false}, {op: block, amount: 6}]}
 
 # =============================================================================
-# KOKOMI SLICE 2 (R217 F, executing R213 E1) -- four rows, four arms, one each.
-#
-# THE QUESTION. R213 E1 reopened "Charge is uncapped and never spent" (R80).
-# Slice 1 priced Companion Block at the turn and could not answer the other
-# half of the 2026-08-26 playtest finding -- [USER]'s "her best turn is usually
-# 'spam companion cards to block until you can hit with the Charge'" -- because
-# nothing in it gave the bank a second use. These four rows are the four
-# shapes R217 F names, each one a different answer to "is there a payoff
-# besides waiting":
-#
-#   SPEND       -- the bank buys something NOW, at a rate that has to beat
-#                  holding it for the readers.
-#   THRESHOLD   -- the payoff steps up at a bar and stops, so there is a point
-#                  to bank TO rather than a slope to wait on.
-#   MODE        -- two halves paid in different currencies, one of them the
-#                  bank.
-#   FORMATION   -- R216 D's Muster subsidy with its sign flipped: the
-#                  formation is bought WITH the finisher instead of feeding it.
-#
-# ONE PRICE ACROSS THE SLICE: every row that charges Charge charges SIX. Not a
-# balance judgement -- an attribution one. Four arms differing in shape AND in
-# price would leave nothing about a turn attributable to the shape. Six sits
-# under the eight the boards bank, so a spend leaves a bank behind and the
-# readers stay live either way; and it is the same number the threshold row's
-# bar is set at, so the bar and the price cannot be read apart.
-#
-# EVERY OTHER NUMBER IS A SHIPPED NUMBER, UNMOVED. 7 and +6 are
-# `read_the_current`'s. 5 Block is `coral_guard`'s. Muster 2 at cost 2 is
-# `mass_mobilization`'s. The one number that is not lifted off a shipped face
-# is 12, and it is derived rather than picked: the shipped readers pay 1 per 2
-# Charge PER CAST and keep the bank, so a spend of 6 that empties it has to be
-# worth about four casts of a reader to compete at all -- 2 per Charge spent.
-# It is used TWICE (the spend row's whole payload, and the mode row's Charge
-# half) so that the mode row's only new content is the alternative currency.
-#
-# THE CHARGE KEYWORD ships with these rows and is the R215 D / EB-152 gap
-# closed on the prototype surface only: a printed [gold]Charge[/gold] with a
-# hover tip carrying the rule and the live bank, attached by codegen from the
-# `spend_charge` op. The packet's section 2 has the decision and its scope.
-#
-# NAMES are provisional and mine (R179), ordinary card names by construction:
-# a blind grader reads printed titles, so no title here says spend, threshold,
-# mode, formation, or prototype.
-#
-# I DESIGNED THESE ROWS AND MAY NOT GRADE THEM (R213's first guard).
-# =============================================================================
-
-# ---------- ARM 1: the bank buys something NOW -------------------------------
-# Shipped twin: `all_streams_flow` / "All Streams Flow to the Sea" (1, Attack,
-# Uncommon -- 5 damage, +1 per 2 Charge, single target, and the bank is
-# UNTOUCHED). Cost, type, rarity, target and the noun all match it, so the pair
-# differs in one thing only: that card READS the bank and keeps it, this one
-# SPENDS it. There is no closer twin because nothing she owns spends Charge at
-# all -- that is the rule the slice reopened.
-#
-# 12 rather than a formula, because a spend has nothing to scale off once it
-# has paid. See the header for where 12 comes from.
-- {id: proto_charge_spend_strike, name: "Sounding Line", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: uncommon,
-   effects: [{op: spend_charge, amount: 6},
-             {op: damage, amount: 12, target: enemy}]}
-
-# ---------- ARM 2: a bar to bank TO, not a slope to wait on ------------------
-# Shipped twin: `read_the_current` (1, Attack, Uncommon -- 7 damage, +6 more at
-# 10 or more Charge, and the bank is untouched). Both of its numbers are
-# unmoved. Two things differ, and they are one idea: the bonus now COSTS the
-# Charge it read, and the bar moves to the slice's single price so the bar and
-# the price are the same fact. Off the bar it is a playable 7; on it, 13 and an
-# empty-ish bank. It does not scale past the bar, by construction -- R58's
-# threshold grammar, which is why this shape is legal below Rare at all.
-- {id: proto_charge_threshold_strike, name: "Fathom the Tide", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: uncommon,
-   effects: [{op: damage, amount: 7, target: enemy},
-             {op: conditional, if: charge_at_least_6,
-              then: [{op: spend_charge, amount: 6},
-                     {op: damage, amount: 6, target: enemy}]}]}
-
-# ---------- ARM 3: two prices for one outcome --------------------------------
-# Slice 1 arm 2's shape (Prune's "choose one"), with the currency swapped: there
-# the two halves cost each other, here one half costs nothing but the card and
-# the other costs the bank. The cheap half is `coral_guard`'s 5 Block exactly;
-# the Charge half is arm 1's whole card, on purpose -- the only thing this row
-# adds to that one is an alternative that is always available, so a turn that
-# plays differently here is playing differently because of the ALTERNATIVE.
-#
-# THE GAME HAS NO PER-MODE PLAYABILITY. The choose-a-card screen offers both
-# modes whatever the bank holds, so the Charge mode is the one place a price
-# can be picked and not met. It does not pay out when that happens: the emitted
-# body is `if (!await SpendCharge(...)) return;` and the sim raises
-# ChargeUnpaid at the same point. The face still cannot GREY the mode out, and
-# that is a real visibility gap rather than a nicety -- it is written up in the
-# packet's section 6 as owed engineering, not papered over here.
-- {id: proto_charge_mode_guard, name: "Twin Tides", character: kokomi,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   effects: [{op: choose_one, modes: [
-              {label: "Gain 5 Block",
-               effects: [{op: block, amount: 5}]},
-              {label: "Spend 6 [gold]Charge[/gold]: gain 12 Block",
-               effects: [{op: spend_charge, amount: 6}, {op: block, amount: 12}]}]}]}
-
-# ---------- ARM 4: the formation is bought, not subsidised -------------------
-# Shipped twin: `mass_mobilization` / "Rally the Isles" (2, Skill, Uncommon --
-# Muster 2 and gain 1 Charge). Cost, type, rarity and the Muster count are all
-# unmoved; the CHARGE LINE flips sign. That is R216 D's deferral in a row: it
-# ruled that Muster's subsidy -- a Mustered Companion costs 1 less, Exhausts,
-# and pays 1 Charge, so blocking with one advances the finisher for free --
-# folds into E1, and this asks whether the formation should cost the finisher
-# instead of feeding it.
-#
-# THE PER-COMPANION FORM OF R216 D IS NOT BUILT HERE. "Recruits from this order
-# grant no Charge when they Exhaust" is a property of the exhaust FUNNEL, not
-# of a card's effect list, and it needs a flag on the recruit plus a check at
-# the funnel in both engines. It is listed in the packet's section 6 for the
-# coordinator rather than smuggled in beside four card rows.
-- {id: proto_charge_muster_price, name: "Watatsumi Levy", character: kokomi,
-   authored_by: [claude],
-   cost: 2, type: skill, rarity: uncommon,
-   effects: [{op: spend_charge, amount: 6}, {op: conscript, amount: 2}]}
-
-# =============================================================================
 # KLEE SLICE 1 (R213 E2) -- four rows, four arms. THE FOURTH ARM WAS HELD AND
 # IS NOW ADMITTED: `proto_spark_mode_bombs` / "Bag of Tricks" was stopped by
 # the independent seat's doctrine verdict, and holding it is the whole reason
@@ -567,7 +444,7 @@
 # THE SIM NEEDED NOTHING. `choose_one` has shipped since EB-118 Phase 2;
 # `effects.mode_price` / `offered_modes` / `mode_refusal` and
 # `combat.modal_refusal` are `EB-182`'s, already carrying Furina's shipped
-# `deep_breath` and Kokomi's `proto_charge_mode_guard`; the C# half is
+# `deep_breath`; the C# half is
 # `ModalChoice.ModePrice` / `SelectAffordableMode` plus the generated
 # `ModePrices` table, and `EB-220`'s `MeterCostBadge` paints the mode's Spark
 # price by READING that table rather than a second literal. This row is the

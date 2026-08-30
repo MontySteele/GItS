@@ -47,14 +47,14 @@ public sealed class ClusterCharge : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Cluster Charge"),
-        ("description", "Deal {Damage:diff()} damage. Place a [gold]Bomb[/gold] on EACH enemy dealing {ExtraDamage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage. Place a [gold]Bomb[/gold] on EACH enemy dealing {BombDamage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(10m, ValueProp.Move),
-            new ExtraDamageVar(5m)
+            new DynamicVar("BombDamage", 5m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -75,7 +75,7 @@ public sealed class ClusterCharge : CustomCardModel, IElementalCard
             .Execute(choiceContext);
         foreach (var bombTarget in CombatState!.HittableEnemies.ToList())
         {
-            await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars.ExtraDamage.BaseValue, Owner.Creature, this);
+            await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars["BombDamage"].BaseValue, Owner.Creature, this);
         }
     }
 

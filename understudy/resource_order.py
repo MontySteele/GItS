@@ -31,8 +31,10 @@ happened, for that reason, and `tier0/tests/test_local_tester.py` pins it.
 
 THE MODE REFINEMENT, WHICH IS THE DIFFERENCE BETWEEN A FLAG AND A NUISANCE
 --------------------------------------------------------------------------
-`Twin Tides` is a *Choose one*: one mode spends Charge and one does not. The
-form records the chosen mode's PRINTED text in `choose:`, so when a play names
+The case that produced this was a *Choose one* -- `Twin Tides`, one mode
+spending Charge and one not; the row itself retired with Kokomi slice 2 under
+R227 and the shape is Furina's shipped `Deep Breath` and Klee's `Bag of
+Tricks`. The form records the chosen mode's PRINTED text in `choose:`, so when a play names
 a mode only that mode's effects count. A choose-one play with no `choose:`
 recorded falls back to the UNION of its modes -- flagging a turn nobody can
 resolve is the safe direction here, because the cost of a flag is one seat

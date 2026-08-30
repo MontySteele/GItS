@@ -276,7 +276,15 @@ CEILINGS: dict[str, int] = {
     # integration reproduced and then diagnosed off the quoted save path --
     # it is a cross-SESSION leak, and the standing "rerun the file alone"
     # workaround is the reason nobody had looked.
-    "EB": 232,   # EB-229 minted 2026-08-30 by the `KURAGEMEM002` rerun: the
+    "EB": 234,   # EB-233/EB-234 minted 2026-08-30 by the post-merge review,
+                 # fact-checked against main 21a078c4. 233 is KLEESPARK-S1's
+                 # S3 miss, which both the registration and the result route
+                 # to BACKLOG as an instrument row and which reached none:
+                 # the drafter does not TAKE the migrated non-damage twins,
+                 # so the bank number S2 quotes is an OFFER number. 234 is
+                 # the memory's cadence over a DEVELOPED deck, deferred in
+                 # the kurage packet at :2225 and registered nowhere.
+                 # EB-229 minted 2026-08-30 by the `KURAGEMEM002` rerun: the
                  # blind-play reply schema collects no forecast, so three
                  # display slots graded UNREACHED on a display that was
                  # demonstrably on the page and correct.
@@ -495,7 +503,7 @@ CEILINGS: dict[str, int] = {
     # holding round-2 staging since 2026-08-29 without ever reaching this
     # register: the Charge accrual rule. It is a pick between design
     # directions and option (1) amends LAW R80, so it is [USER]'s twice over.
-    "M": 67,     # M62 minted 2026-08-29 by R221 A: the criterion that
+    "M": 68,     # M62 minted 2026-08-29 by R221 A: the criterion that
                  # retires the fresh-Opus control form from every packet of
                  # a blind-QA round to the spot-check rate. The threshold is
                  # a number, so it is [USER]'s.
@@ -657,8 +665,17 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 230/231/232 minted 2026-08-30 by the overnight integration, from the
         # night's two live runs and from the integration's own suite: the
         # `place_bomb` face, the teardown that reports a kill it did not make,
-        # and the lane test leaking across pytest sessions. All three OPEN.
-        230, 231, 232,
+        # and the lane test leaking across pytest sessions.
+        #
+        # 230 LEFT OPEN_IDS 2026-08-30 with its row: every `place_bomb` face
+        # prints the Bomb's own amount, carried by a plain "BombDamage" var
+        # instead of the attack-var family, and the lock was seen to FAIL on
+        # all seventeen shipped faces first.
+        231, 232,
+        # 233/234 minted 2026-08-30 by the post-merge review: the scorer/pool
+        # half of KLEESPARK-S1's S3 miss, and the memory-cadence read on a
+        # developed deck the kurage packet defers. Both OPEN.
+        233, 234,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -698,8 +715,16 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # with a scope lint (EB-225) plus a three-fight soak on every dev deploy.
     # M67 minted 2026-08-30: Kokomi's Charge accrual rule, out of slice 2 §9
     # PICK 2, where it had been holding round-2 staging unregistered since
-    # 2026-08-29.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 67}),
+    # 2026-08-29. It was re-scoped the same day to the CONSEQUENCE of that
+    # rule once R226 answered accrual one branch over, and it LEFT OPEN_IDS
+    # 2026-08-30 with its row, closed by R227 at option (1): slice 2 retires,
+    # its four Charge-priced arms and their round-2 boards delete, the spend
+    # plumbing stays, and the Charge question moves whole to the memory
+    # program (EB-229, then whole fights). Ceilings never come down.
+    # M68 minted 2026-08-30 under R227 pick 4: the Furina Spotlight pick R226
+    # owed, drafted as an options packet the same day. It closes M45(4) when
+    # ruled; M45 itself stays until its other six calls are answered.
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 68}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

@@ -31,7 +31,6 @@
 |---|---|---|---|
 | `S4-G6` | **Ask:** declare Kokomi's HP stability band from design intent — never revisable against the playtest that grades it (D5). **Pick:** (1) Claude drafts the band DRAFTED from written design intent and you countersign in batch — **default** (R212(2)); (2) declare it at the table; (3) leave it DARK (`band = None`). **Gate:** the post-wave EXPLORATORY run comes first, the confirmatory protocol run after (R175) | OPEN — declare | user-queue §2; `DEC-D5` clauses 2–4; R156; R175; R212 |
 | `S4-G14` | **Ask:** run the Kokomi confirmatory protocol and rule on its written question list — an exploratory run cannot be graded, and this one fills the Answers block. **Eyes-on:** `docs/current/playtest/kokomi-playtest-protocol.md`, question by question. **Gate:** the sequence R175 fixed — post-wave exploratory run → `S4-G6`'s band declaration → this run; plus `EB-53`'s remnant | OPEN — table time | user-queue §2/§7; R115; R152; R175 |
-| `M67` | **Ask:** accrual is ANSWERED by R226 (uncapped, 1/Exhaust, jellyfish-only, no card prices it); what returns is the CONSEQUENCE: all four slice-2 arms price Charge and retire as authored, ADVANCED included. **Pick:** (1) it stands — arms/boards delete, plumbing stays, Charge moves to `KURAGEMEM002` — **default**; (2) a carve-out for priced arms (LAW amendment); (3) hold slice 2 till the rerun | OPEN — **Gate:** [USER], signed LAW reaching graded arms | slice 2 §9 PICK 2 |
 
 ## 2. Shop, pricing, and money
 
@@ -83,9 +82,18 @@ Two rows returned from it and both are now closed: `M65`, the re-ask R224 item
 raised. **R225 (2026-08-30)** ruled the open-items slate: the top-level-cost
 clause is amended to admit a mode-head price and *Bag of Tricks* proceeds
 (`EB-224`); the single `PROTOTYPE_CARDS` switch stands, with a scope lint
-(`EB-225`) and a three-fight soak on every dev deploy.
+(`EB-225`) and a three-fight soak on every dev deploy. **R227 (2026-08-30)**
+then closed `M67` at option (1): Kokomi slice 2 RETIRES — its four
+Charge-priced arms and their round-2 boards delete, the spend plumbing stays,
+and the Charge question moves whole to the memory program (`EB-229`, then whole
+fights). That row has left this register with the rest.
 
-**Nothing is open in this section.**
+One row is open in this section — the Furina Spotlight pick R226 owed and R227
+pick 4 started:
+
+| ID | Decision needed | Status | Provenance |
+|---|---|---|---|
+| `M68` | **Ask:** the Spotlight pick R226 owed, at `review/active/furina-spotlight-options-2026-08-30.md` (Center Stage's payoff retires under reframe §4.1). **Pick:** (1) one mode, priced — Center Stage retires, Guest Cast and the 1.5 stay, the selector aims a Companion and costs Encore — **default**; (2) ship as-is; (3) fold into Fanfare; (4) fold into the stage; (5) retire Spotlight. Closes `M45`(4) | OPEN — **Gate:** [USER]; no migration before the reframe reads | R226; R227 pick 4 |
 
 ---
 

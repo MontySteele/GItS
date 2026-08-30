@@ -45,13 +45,13 @@ public sealed class ProtoPopSpark : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Powder Pop"),
-        ("description", "Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage. Gain 1 [gold]Spark[/gold]. [gold]Burst[/gold] +5."),
+        ("description", "Place a [gold]Bomb[/gold] dealing {BombDamage:diff()} damage. Gain 1 [gold]Spark[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move)
+            new DynamicVar("BombDamage", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,7 +64,7 @@ public sealed class ProtoPopSpark : CustomCardModel, ISkillTagCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
+        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars["BombDamage"].BaseValue, Owner.Creature, this);
         await SparkPower.Gain(choiceContext, Owner.Creature, 1, this);
     }
 

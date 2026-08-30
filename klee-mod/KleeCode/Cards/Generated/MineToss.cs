@@ -44,13 +44,13 @@ public sealed class MineToss : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mine Toss"),
-        ("description", "Place a [gold]Bomb[/gold] on EACH enemy dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
+        ("description", "Place a [gold]Bomb[/gold] on EACH enemy dealing {BombDamage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move)
+            new DynamicVar("BombDamage", 5m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -65,12 +65,12 @@ public sealed class MineToss : CustomCardModel, ISkillTagCard
     {
         foreach (var bombTarget in CombatState!.HittableEnemies.ToList())
         {
-            await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
+            await BombPower.Place(choiceContext, bombTarget, (int)DynamicVars["BombDamage"].BaseValue, Owner.Creature, this);
         }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars["BombDamage"].UpgradeValueBy(2m);
     }
 }

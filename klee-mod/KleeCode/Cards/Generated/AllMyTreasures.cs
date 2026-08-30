@@ -44,13 +44,13 @@ public sealed class AllMyTreasures : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "All of My Treasures!"),
-        ("description", "Place 6 [gold]Bombs[/gold], each dealing {Damage:diff()} damage. Gain 2 [gold]Sparks[/gold]. [gold]Burst[/gold] +5."),
+        ("description", "Place 6 [gold]Bombs[/gold], each dealing {BombDamage:diff()} damage. Gain 2 [gold]Sparks[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(6m, ValueProp.Move)
+            new DynamicVar("BombDamage", 6m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -66,7 +66,7 @@ public sealed class AllMyTreasures : CustomCardModel, ISkillTagCard
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         for (var i = 0; i < 6; i++)
         {
-            await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
+            await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars["BombDamage"].BaseValue, Owner.Creature, this);
         }
         await SparkPower.Gain(choiceContext, Owner.Creature, 2, this);
     }

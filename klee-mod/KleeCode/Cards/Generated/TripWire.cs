@@ -44,13 +44,13 @@ public sealed class TripWire : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Trip Wire"),
-        ("description", "Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage. Apply 1 [gold]Weak[/gold]. [gold]Burst[/gold] +5."),
+        ("description", "Place a [gold]Bomb[/gold] dealing {BombDamage:diff()} damage. Apply 1 [gold]Weak[/gold]. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move)
+            new DynamicVar("BombDamage", 7m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -64,12 +64,12 @@ public sealed class TripWire : CustomCardModel, ISkillTagCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
+        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars["BombDamage"].BaseValue, Owner.Creature, this);
         await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars["BombDamage"].UpgradeValueBy(3m);
     }
 }

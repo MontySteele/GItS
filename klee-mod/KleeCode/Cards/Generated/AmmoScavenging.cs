@@ -44,13 +44,13 @@ public sealed class AmmoScavenging : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ammo Scavenging"),
-        ("description", "Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage. Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Burst[/gold] +5."),
+        ("description", "Place a [gold]Bomb[/gold] dealing {BombDamage:diff()} damage. Draw {Cards:diff()} card{Cards:plural:|s}. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move),
+            new DynamicVar("BombDamage", 5m),
             new CardsVar(1)
         };
 
@@ -65,12 +65,12 @@ public sealed class AmmoScavenging : CustomCardModel, ISkillTagCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
+        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars["BombDamage"].BaseValue, Owner.Creature, this);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars["BombDamage"].UpgradeValueBy(2m);
     }
 }
