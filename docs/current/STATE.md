@@ -186,9 +186,9 @@ assembly and is unaffected.
 
 The installed build is **`0.2.1627+proto.dirty`** (2026-08-30), a dev package
 built from `kuragemem002-rerun` `10799139` — an INTEGRATION of
-`eb214-muster-keyword` and `eb216-wire-snapshot`, **neither of which is on
-`main`** — deployed for the `KURAGEMEM002` rerun and left installed. It carries
-BOTH prototype arms — Kokomi's Kurage-memory base kit and Klee's Spark
+`eb214-muster-keyword` and `eb216-wire-snapshot`, **both of which landed on
+`main` in #211** — deployed for the `KURAGEMEM002` rerun and left installed. It
+carries BOTH prototype arms — Kokomi's Kurage-memory base kit and Klee's Spark
 alternative-cost rows — behind the `-p:PrototypeCards=true` compile switch.
 R225's gate: `python -m understudy.soak --runs 1 --character KLEEMOD-KLEE
 --max-fights 3` answers `bounded  seed=XAK56TVB9QDL  actions=56  fights=3
