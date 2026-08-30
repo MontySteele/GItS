@@ -1444,3 +1444,183 @@ def test_the_staged_packet_prints_the_runs_relics():
     assert ("- Relic — Pounding Surprise: Whenever a Bomb detonates, gain 1 "
             "Spark." in page)
     assert "KLEEMOD" not in page
+
+
+# ------- EB-240: the assumptions a machine can check, checked at stage -----
+#
+# `KLEESPARK-BT2` printed two false assumptions on all three boards -- "the
+# run carries Klee's starting relic and no other" against a wire carrying
+# TWO, and `set_hp: {who: first, amount: 55}` against live bodies of 45, 46
+# and 40 -- and nothing could see either, because the block a reader does
+# arithmetic on is English prose. The English is not parsed here and never
+# will be; a board declares the fact it wants checked in a shape with one
+# meaning, and the stage refuses on a mismatch.
+#
+# The wire is MOCKED: these are the two states the preflight is about, the
+# one BT2 staged and the one it thought it had.
+
+
+def _bt2_wire(*, relics=("Pounding Surprise", "Fishing Rod"), enemy_hp=45,
+              player_hp=42):
+    """The board `KLEESPARK-BT2` ACTUALLY staged, field for field: two relics
+    where every board asserted one, and a body at 45 where every board wrote
+    55. Both are recorded at klee-sparks §24.9 and neither moved a grade."""
+    return {
+        "state_type": "battle",
+        "player": {"hp": player_hp, "max_hp": 62, "block": 0, "energy": 3,
+                   "hand": [], "status": [],
+                   "relics": [{"id": f"KLEEMOD-{n.upper().replace(' ', '_')}",
+                               "name": n, "description": "", "counter": None}
+                              for n in relics]},
+        "battle": {"round": 4, "turn": 4,
+                   "enemies": [{"id": "e1", "name": "Act 1 enemy",
+                                "hp": enemy_hp, "max_hp": enemy_hp,
+                                "block": 0, "status": []}]},
+    }
+
+
+def _bt2_board(**over):
+    """`klee-sparks-bt2r/t01.yaml`'s shape, cut to what the preflight reads.
+    The published file itself is a RECORD and is not edited (R101b); this is
+    a copy of its declarations, which is what the row asked be seen to
+    fail."""
+    blob = {
+        "id": "eb240-board", "character": "KLEEMOD-KLEE",
+        "staging": [
+            {"give": {"card": "KLEEMOD-KABOOM", "pile": "hand"}},
+            {"set_hp": {"who": "player", "amount": 42}},
+            {"set_hp": {"who": "first", "amount": 55}},
+            {"read": "the staged board"}],
+        "board": {"character": "klee", "hp": 42, "max_hp": 62, "energy": 3,
+                  "hand": ["kaboom"],
+                  "enemies": [{"name": "Act 1 enemy", "hp": 55,
+                               "intent": {"kind": "attack", "amount": 16}}]},
+    }
+    blob.update(over)
+    return staged_turn.parse(blob)
+
+
+def test_a_board_that_declares_nothing_is_checked_on_what_it_already_wrote():
+    """Absent `expects:` is not a failure: it is every board written before
+    this key existed, and it still gets the automatic read-back, because a
+    `set_hp` step IS a declaration and reading it back costs the file
+    nothing."""
+    turn = _bt2_board()
+    assert turn.expects == {}
+    staged_turn.wire_assumption_preflight(turn, _bt2_wire(enemy_hp=55))
+
+
+def test_the_hp_a_board_wrote_and_the_game_did_not_take_refuses_the_stage():
+    """SEEN TO FAIL ON BT2's OWN DECLARATIONS. All three boards ran
+    `set_hp: {who: first, amount: 55}` to a clean staging report and were
+    then read at 45, 46 and 40. It moved no grade there -- the largest line
+    was 40, so *no lethal line* held by 5 -- and it is what that clause
+    rested on."""
+    with pytest.raises(staged_turn.TurnError) as e:
+        staged_turn.wire_assumption_preflight(_bt2_board(), _bt2_wire())
+    assert "'first' at 55" in str(e.value) and "reads 45" in str(e.value)
+    assert "EB-240" in str(e.value)
+
+
+def test_the_relic_a_board_declares_is_compared_against_the_wires_list():
+    """THE OTHER HALF, SEEN TO FAIL ON BT2's OWN WORDS. Every board asserted
+    Klee's starting relic *and no other*; the page printed two. Declared as
+    one relic, the extra is named and the stage is refused."""
+    turn = _bt2_board(expects={"relics": ["Pounding Surprise"]})
+    assert turn.expects["relics"] == ["Pounding Surprise"]
+    with pytest.raises(staged_turn.TurnError) as e:
+        staged_turn.wire_assumption_preflight(turn, _bt2_wire(enemy_hp=55))
+    assert "unexpected 'Fishing Rod'" in str(e.value)
+    # A relic the board declares and the wire does NOT carry is the same
+    # kind of falsehood and is refused the same way.
+    with pytest.raises(staged_turn.TurnError) as e:
+        staged_turn.wire_assumption_preflight(
+            _bt2_board(expects={"relics": ["Pounding Surprise"]}),
+            _bt2_wire(relics=(), enemy_hp=55))
+    assert "missing 'Pounding Surprise'" in str(e.value)
+
+
+def test_a_board_whose_declarations_are_the_wires_stages():
+    """The green case, and it is the board BT2 believed it had: the relic
+    list declared truthfully, and the body at the number the file wrote."""
+    turn = _bt2_board(
+        expects={"relics": ["Pounding Surprise", "Fishing Rod"]})
+    staged_turn.wire_assumption_preflight(turn, _bt2_wire(enemy_hp=55))
+    # Case and order are the run's business, not the board's.
+    turn = _bt2_board(expects={"relics": ["fishing rod", "POUNDING SURPRISE"]})
+    staged_turn.wire_assumption_preflight(turn, _bt2_wire(enemy_hp=55))
+
+
+def test_a_board_may_declare_hp_for_a_body_no_step_writes():
+    """`expects.hp` is for the body a `set_hp` does not set -- the automatic
+    half cannot see a fact the file never wrote down."""
+    turn = _bt2_board(expects={"hp": {"player": 40}})
+    with pytest.raises(staged_turn.TurnError) as e:
+        staged_turn.wire_assumption_preflight(turn, _bt2_wire(enemy_hp=55))
+    assert "'player' at 40" in str(e.value) and "reads 42" in str(e.value)
+
+
+def test_a_declared_creature_the_wire_does_not_have_is_refused_not_skipped():
+    """An enemy symbol that resolves to nobody is a board about a fight that
+    is not on the screen, which is the loudest possible mismatch and must
+    not read as *nothing to check*."""
+    wire = _bt2_wire(enemy_hp=55)
+    wire["battle"]["enemies"] = []
+    with pytest.raises(staged_turn.TurnError) as e:
+        staged_turn.wire_assumption_preflight(_bt2_board(), wire)
+    assert "no such creature" in str(e.value)
+
+
+def test_the_expects_block_refuses_a_shape_it_cannot_mean_one_thing_by():
+    """Refused, never coerced -- the rule every other block in this file
+    follows. A key nobody reads is an assumption that looks checked."""
+    for bad in ({"relics": "Pounding Surprise"},
+                {"relics": [""]},
+                {"hp": {"first": "55"}},
+                {"hp": {}},
+                {"relics": ["x"], "starting_deck": ["y"]},
+                "the usual"):
+        with pytest.raises(staged_turn.TurnError):
+            _bt2_board(expects=bad)
+    # An empty list is a real declaration: this run carries NO relics.
+    turn = _bt2_board(expects={"relics": []})
+    assert turn.expects == {"relics": []}
+    with pytest.raises(staged_turn.TurnError) as e:
+        staged_turn.wire_assumption_preflight(turn, _bt2_wire(enemy_hp=55))
+    assert "declares (none)" in str(e.value)
+
+
+def test_the_stage_is_what_refuses_and_it_refuses_before_the_packet():
+    """Position matters as much as the check: `stage_board` calls the
+    preflight after the last staging step and before it hands the state
+    back, so nothing downstream -- packet, reader, grade -- exists yet."""
+    src = (REPO / "understudy" / "staged_turn.py").read_text(encoding="utf-8")
+    body = src.split("def stage_board(")[1].split("\ndef ")[0]
+    assert "wire_assumption_preflight(turn, policy.staged_state)" in body
+    assert body.index("if not policy.ok") < body.index(
+        "wire_assumption_preflight(turn, policy.staged_state)")
+
+
+def test_bt2s_own_published_boards_are_what_this_check_was_seen_to_fail_on():
+    """THE ROW'S ACCEPTANCE, ON THE FILES THEMSELVES. `KLEESPARK-BT2`'s three
+    boards are READ here and never edited -- they are a published record and
+    stand as published (R101b). Every one of them declares
+    `set_hp: {who: first, amount: 55}`, and the live bodies were 45, 46 and
+    40; parsed as they are committed and put in front of the wire that round
+    actually had, all three are refused."""
+    import yaml
+    boards = sorted((TURNS / "klee-sparks-bt2r").glob("t0*.yaml"))
+    assert len(boards) == 3
+    for path, live in zip(boards, (45, 46, 40)):
+        turn = staged_turn.parse(
+            yaml.safe_load(path.read_text(encoding="utf-8")), path)
+        assert turn.expects == {}, "the published files are not edited"
+        mine = staged_turn._declared_hp(turn)["player"]
+        with pytest.raises(staged_turn.TurnError) as e:
+            staged_turn.wire_assumption_preflight(
+                turn, _bt2_wire(enemy_hp=live, player_hp=mine))
+        assert f"declares 'first' at 55" in str(e.value)
+        assert f"reads {live}" in str(e.value)
+        # And the same board against the body it declared stages clean.
+        staged_turn.wire_assumption_preflight(
+            turn, _bt2_wire(enemy_hp=55, player_hp=mine))
