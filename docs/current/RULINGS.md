@@ -236,7 +236,7 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R224 | 2026-08-29 | (2026-08-30): the sitting slate lands whole -- eleven QUEUE rows closed, Klee's R2 picks answered, Furina and the Burst retirement countersigned prospective | `ed41d9a` |
 | R225 | 2026-08-30 | the open-items slate — generator question first on a representative deck, Bag of Tricks admitted at mode-head price, one prototype switch with a scope lint… | `e302cda` |
 | R226 | 2026-08-30 | the Kokomi Charge law signed as amended (prospective), Klee's generator survival matches Regent, Furina's Spotlight gets an options packet when Klee is close | `425912a` |
-| R227 | 2026-08-30 | DRAFT slate: the post-merge review, four picks | `c146d80` |
+| R227 | 2026-08-30 | landed: M67 (1), Regent stands, three registrations countersigned, Furina paper work starts | `29c7f16` |
 
 226 rows over the R1..R227 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 115 from a commit message, 0 unresolved.
 

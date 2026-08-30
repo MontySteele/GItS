@@ -386,6 +386,15 @@ def commits() -> list[Commit]:
 # is unambiguous and is stripped before the subject is scanned.
 ROUND_TAG = re.compile(r"\(R\d+-[A-Z]\)")
 
+# NOT a ruling record either: a DRAFTED slate. R212 has Claude commit a slate
+# BEFORE [USER] rules it, subjected "R227 DRAFT slate: ...", and that commit
+# is earlier than the landing by construction -- left in, it takes the LEAD
+# tier and the index sends a reader to the proposal instead of the ruling
+# (first seen on R227, 2026-08-30). A DRAFT subject is demoted to the NEARBY
+# tier: it still resolves an id nothing else records, and loses to any
+# commit that records the ruling itself.
+DRAFT_SUBJECT = re.compile(r"\bDRAFT\b")
+
 
 def subject_ids(subject: str) -> dict[int, int]:
     """id -> tier, for what a subject records: leading, named, or in a range."""
@@ -432,7 +441,11 @@ def commit_entries(log: list[Commit]) -> dict[int, Entry]:
         paras = body_paragraphs(c.body)
         tiers: dict[int, int] = {n: NEARBY for n in nearby_ids(c.body)}
         tiers.update({n: PARA for n in paras})
-        tiers.update(subject_ids(c.subject))
+        subj = subject_ids(c.subject)
+        if DRAFT_SUBJECT.search(c.subject):
+            subj = {n: NEARBY for n in subj}
+            tiers = {n: NEARBY for n in tiers}
+        tiers.update(subj)
         for n, tier in tiers.items():
             if not 1 <= n <= R_CEILING:
                 continue

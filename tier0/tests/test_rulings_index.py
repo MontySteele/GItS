@@ -252,6 +252,31 @@ def test_a_body_paragraph_headed_by_the_id_beats_the_range_subject(fixture_repo)
     assert rows["R15"][1] == "the fifteenth ruling, likewise."
 
 
+def test_a_draft_slate_commit_yields_to_the_landing(fixture_repo):
+    """R212 has Claude commit a slate BEFORE [USER] rules it, subjected
+    "R<n> DRAFT slate: ...". That subject leads with the id and is earlier
+    than the landing by construction, so without a rule the index would send
+    a reader to the proposal. A DRAFT subject is demoted to NEARBY: it loses
+    to the landing, and still resolves an id nothing else records."""
+    mod = _configured(fixture_repo)
+    _commit(fixture_repo, "R16 DRAFT slate: the proposal, four picks")
+    _commit(fixture_repo, "R16 landed: the sixteenth ruling, as ruled")
+    _cite(fixture_repo, "See R16.\n")
+    rows = _rows(mod.render()[0])
+    assert "DRAFT" not in rows["R16"][1]
+    assert "the sixteenth ruling, as ruled" in rows["R16"][1]
+    assert rows["R16"][2].strip("`") == mod.commits()[0].short
+
+
+def test_a_draft_alone_still_resolves_its_id(fixture_repo):
+    mod = _configured(fixture_repo)
+    _commit(fixture_repo, "R16 DRAFT slate: the proposal, four picks")
+    _cite(fixture_repo, "See R16.\n")
+    rows = _rows(mod.render()[0])
+    assert rows["R16"][1] != mod.UNRESOLVED
+    assert "DRAFT" in rows["R16"][1]
+
+
 def test_an_id_with_no_definition_gets_the_unresolved_row(fixture_repo):
     mod = _configured(fixture_repo)
     _cite(fixture_repo, "See R16, which nothing ever defined.\n")
