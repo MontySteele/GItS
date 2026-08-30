@@ -5870,6 +5870,21 @@ no re-price, and this round did not even produce a MISS — it produced three
 UNREACHED. **Nothing here re-prices the 3, re-words the row, re-reads R225's
 clause, or moves any LAW line.**
 
+> **RULED (R229, 2026-08-30): option (1), QUALIFIED.** The starter relic stays
+> and the round is re-posed in the SHIPPED world, but *"accept the refund"*
+> means accept it as an observed TEST CONDITION, not as approval of the card's
+> design — the arm is AT RISK, not presumptively advancing. A RETURN CONDITION
+> is PRE-REGISTERED before `KLEESPARK-BT2` is drafted: if immediate detonation
+> restores enough bank to play the competing sink, or the price otherwise
+> imposes no meaningful opportunity cost across the turn and the next, the arm
+> RETURNS TO DESIGN rather than advancing unchanged. The ruling's evidence is a
+> consequence §22.4 did not draw: `t02`'s header prices the bank of 3 as buying
+> exactly ONE of two things, but in the shipped world *priced mode → Quick Fuse
+> → Firework Finale* buys BOTH (15 + 18, not 15-versus-23), so the price is
+> collateral — it gates the play at 3 and usually consumes nothing. The full
+> record, the qualification and the repaired round's five required contents are
+> in `review/active/sitting-2026-08-30.md` §R229.
+
 A second item is engineering rather than a decision and is reported to
 `BACKLOG` rather than to [USER]: the board-construction rule §22.4 item 2 names,
 and `slot_plan`'s blindness to a mode-head price (§21.8). Both are candidates;
