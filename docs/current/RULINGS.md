@@ -235,8 +235,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R223 | 2026-08-29 | - THE PASS MARK IS PER CATEGORY AND THERE IS NO TOTAL. | `170821e` |
 | R224 | 2026-08-29 | (2026-08-30): the sitting slate lands whole -- eleven QUEUE rows closed, Klee's R2 picks answered, Furina and the Burst retirement countersigned prospective | `ed41d9a` |
 | R225 | 2026-08-30 | the open-items slate — generator question first on a representative deck, Bag of Tricks admitted at mode-head price, one prototype switch with a scope lint… | `e302cda` |
+| R226 | 2026-08-30 | the Kokomi Charge law signed as amended (prospective), Klee's generator survival matches Regent, Furina's Spotlight gets an options packet when Klee is close | `425912a` |
 
-224 rows over the R1..R225 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 113 from a commit message, 0 unresolved.
+225 rows over the R1..R226 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 114 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 

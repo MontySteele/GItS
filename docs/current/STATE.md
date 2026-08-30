@@ -445,7 +445,13 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     duplicate, and its BRANCH is Spark-only, FLAG-GATED** (R224 B): the
     three hybrids go to 0 Energy with the price paid wholly in Sparks as a
     dev-only substitution under `SPARK_ALT_COST_ENABLED` (`EB-218`), the
-    shipped pool byte-identical with the flag off. The round-2 picks are
+    shipped pool byte-identical with the flag off. **`PICK 2` is ANSWERED
+    (R226, 2026-08-30): the shipped-pool edit takes REGENT'S SHAPE at the flag
+    flip** — `Basic 1 / Common 4 / Uncommon 4 / Rare 2`, converting 2 Commons,
+    1 Uncommon and 3 Rares — *unless* `EB-205`'s sim-drafted arm
+    (`KLEESPARK-S1`) shows a drafted-deck ratio that contradicts it, in which
+    case the pick RETURNS to [USER] with that number rather than being
+    re-decided. `PICK 1` is untouched and still goes first. The round-2 picks are
     answered with it: `EB-208`'s fix is
     (a) then (c), `P4` stays UNREACHED as published, and the next gate is
     (e).
@@ -535,7 +541,11 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     aims the stage, a Companion play triggers one member without evoking it,
     and her own cards Evoke. No Burst card prints at a threshold; "drain it
     all for a giant effect" becomes an optional **Rare payoff card**,
-    drafted, not base kit. Spotlight is named as deliberately unresolved.
+    drafted, not base kit. Spotlight is named as deliberately unresolved —
+    and **R226 (2026-08-30) makes an options packet OWED on it**: Claude drafts
+    the numbered pick list under the R212 ladder and judges the timing (when
+    Klee closes, or is close enough to be worth drafting in parallel), the pick
+    itself stays [USER]'s, and `M45`(4) migrates into it.
     The packet **supersedes E4 §3, §4, §7.1 and §12 on paper**
     (`review/active/furina-e4-2026-08-29.md` stays in place as the record).
     No code, no constant, no sheet row and no LAW line has moved.
@@ -662,6 +672,15 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   Track A / Track E logs.
 
 ## Open [USER] pile (pointers)
+
+**R226 (2026-08-30) settled the three whole-project forks that needed no new
+run** — the Kokomi Charge LAW slate signed as amended and applied as PROSPECTIVE
+text, Klee `PICK 2` at "match Regent", and a Spotlight options packet owed from
+Claude when Klee is close — so what remains here returns only WITH EVIDENCE or
+WITH TABLE TIME: Klee `PICK 1` (reopens if the income reads short), `M45`'s five
+(after `S4-G14`), Slot 6's fork (only on confirmation), `S4-G6`'s band (Claude
+drafts, after the Kokomi fold), and `S4-G14` itself. The slate's third section in
+`review/active/sitting-2026-08-30.md` carries that list.
 
 Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and

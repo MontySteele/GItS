@@ -286,6 +286,8 @@ strip is the whole reason [USER] judged this legible where Sparks are not.
 
 ### LAW deltas — [USER]'s to make, quoted verbatim, old → new
 
+> **COUNTERSIGNED (R226, 2026-08-30): SIGNED AS AMENDED BY §11.7 v3, AS PROSPECTIVE TEXT (R213).** (i) the Charge bullet lands in `LAW.md` in v3's wording ("Companions included, Status and Curse excluded"), (ii) the R80 header block in `docs/kokomi-cards.yaml` is rewritten, and v3's **two new clauses** are added to the same LAW section — the memory may hold one of her own non-Companion cards, and a memory copy is removed from combat and is **not** an Exhaust. **(iii)'s Companion-exclusion rotation clause and (iv)'s relic-face edit are NOT applied** — v3 withdrew both. Every line is marked PROSPECTIVE and binds when `C.KURAGE_MEMORY` flips; until then the shipped rule is "Charge is never spent".
+
 **(i) `docs/current/LAW.md`, "Character identity — Kokomi", the Charge bullet.**
 
 Old, verbatim:
@@ -1237,6 +1239,8 @@ and 11, and item 5 via `M50` pick 4 — and were signed at the Claude column:
   the slice-2 arms retiring under the surface's deletion rule, and M49 being
   superseded. `read_the_current`'s `charge_at_least_10` is if anything *more*
   urgent under v3, because the bank now drains at an irregular rate.
+
+> **COUNTERSIGNED (R226, 2026-08-30): §4's slate is signed AS AMENDED BY THIS SECTION, as PROSPECTIVE text** — v3's Charge wording and both new clauses are now in `LAW.md`; §4's Companion-exclusion rotation clause and its relic-face edit are withdrawn and NOT applied. See the line under §4.
 
 ### 11.8 What the smoke found
 
