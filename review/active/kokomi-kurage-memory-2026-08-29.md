@@ -3,7 +3,7 @@
 **2026-08-29. Branch `kokomi-kurage-memory`, cut from
 `origin/process-review-2026-08-29` at `e352db4`.** This is a document and a
 review. **No engine code, no card row, no LAW line moves on this branch** — not
-one shipped file is edited by it. It supersedes `review/active/kokomi-slice-2-2026-08-29.md`
+one shipped file is edited by it. It supersedes `git show 1f07d94a:review/active/kokomi-slice-2-2026-08-29.md`
 §9 PICK 2, which asked you to choose among five ways to change the Charge rule.
 [USER] proposed a sixth on 2026-08-29, and it is better than the five, so the
 five are withdrawn and this is the proposal that replaces them.
@@ -887,7 +887,7 @@ list for the sitting, not an action. Next free ids for reference: `EB-191`,
 
 **Amend in place:**
 
-- **`M50`** — its text points at `review/active/kokomi-slice-2-2026-08-29.md` §9
+- **`M50`** — its text points at `git show 1f07d94a:review/active/kokomi-slice-2-2026-08-29.md` §9
   PICK 2 and offers five options. Those five are withdrawn: the ask should point
   at **this** proposal, and the pick it puts is no longer "choose an accrual
   rule" but "take the Kurage-memory redesign, with picks A–E, or don't." It
@@ -899,7 +899,7 @@ list for the sitting, not an action. Next free ids for reference: `EB-191`,
 
 **Mark superseded:**
 
-- `review/active/kokomi-slice-2-2026-08-29.md` **§9 PICK 2** — superseded by
+- `git show 1f07d94a:review/active/kokomi-slice-2-2026-08-29.md` **§9 PICK 2** — superseded by
   this document, in [USER]'s own direction of 2026-08-29.
 - The four slice-2 prototype rows on `docs/prototype-surface.yaml`, and the
   round-2 boards on `kokomi-slice-2-round-2`, retire under the surface's

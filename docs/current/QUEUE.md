@@ -88,7 +88,12 @@ Charge-priced arms and their round-2 boards delete, the spend plumbing stays,
 and the Charge question moves whole to the memory program (`EB-229`, then whole
 fights). That row has left this register with the rest.
 
-**Nothing is open in this section.**
+One row is open in this section — the Furina Spotlight pick R226 owed and R227
+pick 4 started:
+
+| ID | Decision needed | Status | Provenance |
+|---|---|---|---|
+| `M68` | **Ask:** the Spotlight pick R226 owed, drafted at `review/active/furina-spotlight-options-2026-08-30.md` — Center Stage's only payoff retires under reframe §4.1, so the selector ships with a dead branch. **Pick:** (1) one mode, priced: Center Stage retires, Guest Cast and the 1.5 stay, the selector aims a Companion and costs Encore — **default**; (2) ship as-is; (3) fold into Fanfare; (4) fold into the stage, front member spotlit; (5) retire Spotlight. Closes `M45`(4) | OPEN — **Gate:** [USER]; nothing migrates before the reframe's verdict | R226; R227 pick 4 |
 
 ---
 

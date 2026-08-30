@@ -503,7 +503,7 @@ CEILINGS: dict[str, int] = {
     # holding round-2 staging since 2026-08-29 without ever reaching this
     # register: the Charge accrual rule. It is a pick between design
     # directions and option (1) amends LAW R80, so it is [USER]'s twice over.
-    "M": 67,     # M62 minted 2026-08-29 by R221 A: the criterion that
+    "M": 68,     # M62 minted 2026-08-29 by R221 A: the criterion that
                  # retires the fresh-Opus control form from every packet of
                  # a blind-QA round to the spot-check rate. The threshold is
                  # a number, so it is [USER]'s.
@@ -721,7 +721,10 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # its four Charge-priced arms and their round-2 boards delete, the spend
     # plumbing stays, and the Charge question moves whole to the memory
     # program (EB-229, then whole fights). Ceilings never come down.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
+    # M68 minted 2026-08-30 under R227 pick 4: the Furina Spotlight pick R226
+    # owed, drafted as an options packet the same day. It closes M45(4) when
+    # ruled; M45 itself stays until its other six calls are answered.
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 68}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

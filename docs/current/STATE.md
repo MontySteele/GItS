@@ -347,7 +347,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     Burst accumulating with no visible spend and Gorou's Charge/Burst grant
     unprinted — the Charge-keyword gap R215 D deferred into E1, now with a
     blind witness. The bridge gap the runs uncovered: `EB-181`.
-  - **Kokomi slice 2** (`review/active/kokomi-slice-2-2026-08-29.md`, §8):
+  - **Kokomi slice 2** (`git show 1f07d94a:review/active/kokomi-slice-2-2026-08-29.md`, §8):
     R213 E1's four Charge arms, RUN 2026-08-29 on `0.2.1293+proto`. Eight
     turns in four matched pairs, seeds pinned after 29 rolls; closeness
     SURVIVES on all eight, declared and observed. Sixteen forms on two
