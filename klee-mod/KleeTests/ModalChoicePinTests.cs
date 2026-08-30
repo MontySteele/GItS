@@ -14,7 +14,9 @@ namespace KleeMod.Tests;
 /// selection goes through the base game's own choice surface rather than a
 /// prompt this mod invented.
 ///
-/// STAGED: no shipped card is modal, so none of this is on a live path yet.
+/// ONE SHIPPED CARD IS MODAL (`deep_breath`), and since EB-182 the selection
+/// is made over the AFFORDABLE modes only -- pinned below on the same ground
+/// as the unfiltered path.
 /// </summary>
 public class ModalChoicePinTests
 {
@@ -78,6 +80,18 @@ public class ModalChoicePinTests
     public void Mode_selection_goes_through_the_games_own_choice_screen()
     {
         var calls = Il.Calls(Il.Method("ModalChoice", "SelectMode"));
+
+        Assert.Contains("CardSelectCmd.FromChooseACardScreen", calls);
+        Assert.Contains("ModalChoice.ResolveIndex", calls);
+    }
+
+    [Fact]
+    public void The_affordable_selection_path_uses_the_same_choice_screen()
+    {
+        // EB-182: filtering the offered modes must not fork the selection off
+        // the base game's screen -- that is the whole co-op/automation
+        // argument, and the filtered path is the one a priced card takes.
+        var calls = Il.Calls(Il.Method("ModalChoice", "SelectAffordableMode"));
 
         Assert.Contains("CardSelectCmd.FromChooseACardScreen", calls);
         Assert.Contains("ModalChoice.ResolveIndex", calls);

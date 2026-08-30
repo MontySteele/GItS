@@ -780,6 +780,11 @@ def _modal_reason(eff: dict) -> str | None:
             reason = _branch_op_reason(e, "mode body")
             if reason:
                 return reason
+        # EB-182 LEANS ON THE LOOP ABOVE: a spend at the head of a mode body
+        # is that mode's PRICE and reaches C# as a literal (`ModePrices`), and
+        # `_branch_op_reason` already refuses a non-literal spend amount
+        # anywhere in a branch or mode body. No second guard is added here;
+        # the red case is pinned in `test_eb118_modal_parity`.
     # TargetType is a property of the CARD, declared before a mode is picked,
     # so modes that would aim differently are inexpressible -- the player would
     # have aimed the card before choosing what it does.
@@ -4272,6 +4277,59 @@ def modal_effect(card: dict) -> dict | None:
                  if eff.get("op") == "choose_one"), None)
 
 
+# EB-182, per-option playability. A mode whose body OPENS with a resource
+# spend prints that spend as the MODE's cost line, and a mode the bank cannot
+# pay is not offered. `("meter name", "the C# bank read")`, keyed by op --
+# the sim's `effects.MODE_PRICE_OPS`, one column wider because C# keeps its
+# three meters in three classes. The accessor mirrors the one the matching
+# PAYING call gates on, so the price shown and the price charged read the same
+# number: `SparkPower.CanSpend` reads `SparksAsResolved`, and
+# `KokomiResources.CanSpendCharge` reads `GetCharge`.
+MODE_PRICE_OPS = {
+    "spend_encore": ("Encore", "p => FurinaResources.Encore(p.Creature)"),
+    "spend_spark": ("Sparks", "p => SparkPower.SparksAsResolved(p.Creature)"),
+    "spend_charge": ("Charge", "p => KokomiResources.GetCharge(p.Creature)"),
+}
+
+
+def mode_prices(card: dict) -> list[tuple[str, int, str] | None] | None:
+    """Per-mode prices for a modal card, or None when nothing is priced.
+
+    None -- not a list of Nones -- for an unpriced modal card, so codegen
+    emits exactly what it emitted before EB-182 for every card the rule does
+    not reach. That is what makes the regression a byte comparison.
+    """
+    eff = modal_effect(card)
+    if eff is None:
+        return None
+    prices: list[tuple[str, int, str] | None] = []
+    for mode in eff["modes"]:
+        body = mode.get("effects") or []
+        head = body[0] if body else {}
+        if head.get("op") in MODE_PRICE_OPS:
+            meter, bank = MODE_PRICE_OPS[head["op"]]
+            prices.append((meter, int(head["amount"]), bank))
+        else:
+            prices.append(None)
+    return prices if any(p is not None for p in prices) else None
+
+
+def mode_spark_price(card: dict, index: int) -> int:
+    """The Spark price on one mode, 0 for any other meter or for none.
+
+    The mode FACE declares it (`ISparkPricedCard`) so the shipped Spark cost
+    badge paints the option with no second look invented -- the same "one
+    number, one source" rule `SparkCost` was built on. Encore and Charge have
+    no badge anywhere in the mod; their price is carried by the mode's own
+    label, which is where every priced mode prints it today.
+    """
+    prices = mode_prices(card) or []
+    if index >= len(prices) or prices[index] is None:
+        return 0
+    meter, amount, _bank = prices[index]
+    return amount if meter == "Sparks" else 0
+
+
 def _modal_option_names(cards: list[dict], emitted_ids) -> list[str]:
     """Every mode-face class name emitted for this sheet, sorted.
 
@@ -5336,8 +5394,15 @@ def build_body(
             lines.append(
                 "var modeOptions = new List<CardModel>\n        {\n"
                 f"            {options},\n        }};")
-            lines.append("var modeIndex = await ModalChoice.SelectMode("
-                         "choiceContext, Owner, modeOptions);")
+            # EB-182: a priced card asks the selection that FILTERS, and
+            # the index it returns is still the sheet's, so the ladder below
+            # is untouched. An unpriced card emits the call it always emitted.
+            lines.append(
+                "var modeIndex = await ModalChoice.SelectAffordableMode("
+                "choiceContext, Owner, modeOptions, ModePrices);"
+                if mode_prices(card) is not None else
+                "var modeIndex = await ModalChoice.SelectMode("
+                "choiceContext, Owner, modeOptions);")
             labels = ", ".join(f'"{cs_escape(m["label"])}"' for m in modes)
             lines.append("ModalChoice.RecordChoice(this, modeIndex, "
                          f"new[] {{ {labels} }}[modeIndex]);")
@@ -7154,19 +7219,33 @@ def emit(
     if modal_eff is not None:
         for i, mode in enumerate(modal_eff["modes"]):
             label = cs_escape(mode["label"])
+            # EB-182: a Spark-priced mode's FACE declares its price, so the
+            # shipped Spark cost badge paints the option exactly as it paints
+            # any priced card -- the price is on the option a player is
+            # choosing between, in the look that already exists, off the same
+            # single declaration. Encore and Charge have no badge in the mod;
+            # their price is carried by the label, which prints it.
+            spark = mode_spark_price(card, i)
+            face_interface = (", ISparkPricedCard" if spark else "")
+            spark_member = (
+                "\n\n    /// <summary>EB-182: the price this MODE prints, so"
+                " the Spark\n"
+                "    /// cost badge renders it on the option.</summary>\n"
+                f"    public int PrintedSparkPrice => {spark};"
+                if spark else "")
             modal_option_classes += f'''
 /// <summary>Mode {i} of {card["id"]}. A face for the choose-a-card screen;
 /// never played, never in a pile, never a reward -- but a POOL MEMBER, via
 /// the generated ModalOptions roster the character's off-pool list carries.
 /// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class {modal_option_class(card, i)} : ModalOptionCard
+public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interface}
 {{
     public override List<(string, string)>? Localization => new()
     {{
         ("title", "{label}"),
         ("description", "{label}"),
-    }};
+    }};{spark_member}
 }}
 '''
 
@@ -7541,10 +7620,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard
         "        SparkPower.CanSpend(Owner.Creature, SparkCost.PriceOf(this));"
         if spark_price else "")
     # R213 E1, QUARANTINED: the same cost line one meter over, and the mirror
-    # of tier0 combat.charge_cost. TOP-LEVEL spends only, for the sim's
-    # reason plus one of its own -- the choose-a-card screen has no per-mode
-    # playability, so a price inside a mode cannot be shown here and
-    # KokomiResources.SpendCharge stops the play there instead.
+    # of tier0 combat.charge_cost. TOP-LEVEL spends only, the sim's rule --
+    # a price at the head of a `choose_one` MODE is that mode's cost line and
+    # is gated per option instead (EB-182, `modal_gate_member` below).
     charge_price = sum(int(eff["amount"]) for eff in card["effects"]
                        if eff.get("op") == "spend_charge")
     charge_gate_member = (
@@ -7556,7 +7634,40 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard
         f"        KokomiResources.CanSpendCharge(Owner.Creature, "
         f"{charge_price});"
         if charge_price else "")
-    if spark_price and charge_price:
+    # EB-182, per-option playability. The PRICES are declared once, as data,
+    # and both halves read that one declaration: the screen filter (build_body
+    # passes `ModePrices` to `SelectMode`) and the card-level gate below. A
+    # card whose every mode is priced out has no line to offer and is
+    # unplayable, exactly as a card below a top-level price is -- the two
+    # gates above, one nesting level down. Sim twin: `combat.modal_refusal`
+    # reached through `card_playable`.
+    prices = mode_prices(card)
+    modal_gate_member = ""
+    modal_prices_member = ""
+    if prices is not None:
+        rows = ",\n".join(
+            "        null" if p is None
+            else f'        new ModePrice("{p[0]}", {p[1]}, {p[2]})'
+            for p in prices)
+        modal_prices_member = (
+            "\n\n    // EB-182: what each mode PRINTS as its price, and the"
+            " bank to\n"
+            "    // read it against. One declaration, read by the screen"
+            " filter and\n"
+            "    // by the playability gate below, so the price offered and"
+            " the\n"
+            "    // price charged cannot drift. `null` is an unpriced mode.\n"
+            "    private static readonly ModePrice?[] ModePrices =\n"
+            "    {\n" + rows + ",\n    };")
+        modal_gate_member = (
+            "\n\n    // The per-mode cost lines (EB-182): unplayable when NO"
+            " mode is\n"
+            "    // affordable, and the unaffordable modes are not offered on"
+            " the\n"
+            "    // choose-a-card screen either.\n"
+            "    protected override bool IsPlayable =>\n"
+            "        ModalChoice.AnyAffordable(Owner, ModePrices);")
+    if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member)) > 1:
         raise ValueError(
             f"{card['id']}: two resource cost lines on one card -- only one "
             "IsPlayable override can be emitted")
@@ -7612,7 +7723,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{card["name"].replace('"', chr(92) + chr(34))}"),
         ("description", "{desc}"),
-    }};{tags_member}{spark_gate_member}{charge_gate_member}
+    }};{tags_member}{spark_gate_member}{charge_gate_member}{modal_prices_member}{modal_gate_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

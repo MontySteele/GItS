@@ -112,15 +112,24 @@ def test_a_mode_body_spends_through_the_overdraw_primitive(state, fixed_index):
 def test_a_mode_body_spend_overdraws_into_hp(state, fixed_index):
     """The half the substitution could never have modelled. A spend past the
     buffer drains TRUE HP; a negative `gain_encore` would have clamped at
-    zero and charged nothing."""
+    zero and charged nothing.
+
+    EB-182 MOVED THE SPEND ONE LINE DOWN and the claim is unchanged. A spend
+    at the HEAD of a mode body is that mode's PRICE, and the mode is not
+    offered below it; a spend after something else is a CONSEQUENCE of the
+    mode -- here paid partly out of what the same body just generated -- and
+    still rides the overdraw primitive exactly as EB-119 left it. Both sides
+    of that boundary are pinned in `test_eb182_mode_playability`.
+    """
     state.player.encore = 1
-    c = card(effects=[modal([{"op": "spend_encore", "amount": 4}],
+    c = card(effects=[modal([{"op": "gain_encore", "amount": 1},
+                             {"op": "spend_encore", "amount": 4}],
                             [{"op": "gain_encore", "amount": 2}])])
     effects.resolve_card(state, c)
     assert state.player.encore == 0
-    assert state.player.hp == 77
+    assert state.player.hp == 78
     assert [e["amount"] for e in state.log
-            if e["event"] == "encore_overdraw"] == [3]
+            if e["event"] == "encore_overdraw"] == [2]
 
 
 # --- the chooser seam ------------------------------------------------------

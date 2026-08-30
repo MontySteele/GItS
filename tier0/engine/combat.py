@@ -239,8 +239,39 @@ def card_playable(state: CombatState, card: Card) -> bool:
         return False        # QUARANTINED (R213 E1), the Charge sink's cost
                             # line -- the Spark gate above, one meter over,
                             # and DERIVED from the op for the same reason.
+    # EB-182, per-option playability: a card whose top-level `choose_one`
+    # prices EVERY mode above the bank has no line left to offer, so it is
+    # unplayable -- the two gates above, one nesting level down.
+    # `modal_refusal` is the same predicate with the reason attached.
+    if modal_refusal(state, card) is not None:
+        return False
     # No Fanfare playability gate: Fanfare is read, never spent (F-A4).
     return card_cost(state, card) <= state.player.energy
+
+
+def modal_refusal(state: CombatState, card: Card) -> str | None:
+    """Why no mode of this card can be paid for, or None (EB-182).
+
+    THE PRINTABLE HALF of the rule in `effects.mode_price`. `card_playable`
+    is a bool on the pilot's hot path and cannot carry a reason; every reader
+    that shows a refused line to a human or a grader -- a staged-turn packet,
+    the falsifier, a replay -- asks here instead, and gets a string naming
+    each dead mode's PRICE and the BANK that fell short.
+
+    TOP-LEVEL `choose_one` only, matching `spark_cost` / `charge_cost`: a
+    modal nested inside a conditional branch is not a cost line, because the
+    branch that would reach it is not settled when the card is offered.
+    """
+    for fx in card.effects:
+        if fx.get("op") != "choose_one":
+            continue
+        modes = fx.get(effects.MODES_KEY) or []
+        if not modes or effects.offered_modes(state, modes):
+            continue
+        reasons = [effects.mode_refusal(state, mode) for mode in modes]
+        return (f"{card.id}: no mode is affordable -- "
+                + "; ".join(r for r in reasons if r))
+    return None
 
 
 def spark_cost(card: Card) -> int:
@@ -266,11 +297,10 @@ def charge_cost(card: Card) -> int:
     slice reopened rather than what it repealed.
 
     TOP-LEVEL ops only, `spark_cost`'s rule verbatim. A spend inside a
-    `choose_one` mode is a price the player cannot be shown before choosing
-    to play the card, so it is not part of the cost line -- and the game's
-    choose-a-card screen has no per-mode playability to put it on either.
-    `effects._op_spend_charge` stops the card there instead, which is the
-    loud half of the same rule.
+    `choose_one` mode is not part of THIS cost line: it is the MODE's cost
+    line, gated per option by `modal_refusal` since EB-182, and
+    `effects._op_spend_charge` still stops the card if one ever resolves
+    short -- the loud half of the same rule.
     """
     total = 0
     for fx in card.effects:
