@@ -61,7 +61,7 @@
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `M45` | **Ask:** ratify the pass's seven open calls as ONE slate (R206). **Pick (adopt / defer, audit first):** (1) `salon_rotate` reader / timing; (2) `smoke_and_sparks` re-body / cut; (3) `Win10`/`Win11` on choices / state; (4) Spotlight selector amend / accept; (5) `depths_judgment` flat-14 / rescale; (6) Kokomi Block cluster accept / amend; (7) Charge lever: `S4-G13`. **Gate:** the playtest | OPEN — after the playtest | R206; review/active/richness-playtest-brief-2026-08-26.md |
+| `M45` | **Ask:** ratify the pass's six open calls as ONE slate (R206). **Pick (adopt / defer, audit first):** (1) `salon_rotate` reader / timing; (2) `smoke_and_sparks` re-body / cut; (3) `Win10`/`Win11` on choices / state; (4) Spotlight: ANSWERED R228 = one mode, priced; (5) `depths_judgment` flat-14 / rescale; (6) Kokomi Block cluster accept / amend; (7) Charge lever: `S4-G13`. **Gate:** the playtest | OPEN — after the playtest | R206; review/active/richness-playtest-brief-2026-08-26.md |
 
 ## 6. Prototype slices (R213) — held arms, re-authored kits, and the rules under them
 
@@ -88,12 +88,14 @@ Charge-priced arms and their round-2 boards delete, the spend plumbing stays,
 and the Charge question moves whole to the memory program (`EB-229`, then whole
 fights). That row has left this register with the rest.
 
-One row is open in this section — the Furina Spotlight pick R226 owed and R227
-pick 4 started:
+**R228 (2026-08-30)** then closed `M68`, the Furina Spotlight pick R226 owed
+and R227 pick 4 started, at option (1) — **one mode, priced**: Center Stage
+retires, Guest Cast and `SPOTLIGHT_BASE_MULT = 1.5` stay, and the selector aims
+a Companion and costs Encore. `M45`(4) is answered with it. Nothing migrates
+before the reframe's own whole-fight read, which was that row's gate and stays
+true of the work as a sequencing fact.
 
-| ID | Decision needed | Status | Provenance |
-|---|---|---|---|
-| `M68` | **Ask:** the Spotlight pick R226 owed, at `review/active/furina-spotlight-options-2026-08-30.md` (Center Stage's payoff retires under reframe §4.1). **Pick:** (1) one mode, priced — Center Stage retires, Guest Cast and the 1.5 stay, the selector aims a Companion and costs Encore — **default**; (2) ship as-is; (3) fold into Fanfare; (4) fold into the stage; (5) retire Spotlight. Closes `M45`(4) | OPEN — **Gate:** [USER]; no migration before the reframe reads | R226; R227 pick 4 |
+**Nothing is open in this section.**
 
 ---
 

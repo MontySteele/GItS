@@ -1,0 +1,41 @@
+{
+ "turn_id": "klee-sparks-bt1-t04",
+ "packet_sha256": "96c1ad0d144abe6f6836378ab7a4464f2bb017867656bb1f20e4947a3074f845",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Powder Pop",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Bag of Tricks",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Quick Fuse",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Powder Pop on Fuzzy Wurm Crawler to place a Bomb and reach 3 Sparks, then Bag of Tricks choosing \u201cSpend 3 Sparks: place 3 Bombs dealing 5.\u201d on it, Kaboom! on it, and Quick Fuse on it to detonate all four Bombs.",
+ "q2_other_line_considered": "I seriously considered detonating the four Bombs before playing Kaboom!; with only the printed information, that preserves the same listed damage but changes the timing of Pyro application.",
+ "q3_what_it_gave_up": "It gave up retaining any of the cards, the 1 Energy spent on Kaboom!, and all 3 Sparks spent through Bag of Tricks.",
+ "q4_different_intent": "No. The hand contains no printed defensive or intent-dependent effect, and every affordable card can be used against the sole enemy, so a different telegraphed intent would not have changed this line.",
+ "q4_changed": false
+}

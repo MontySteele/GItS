@@ -1,10 +1,12 @@
 # Furina — Spotlight: the options packet
 
-> **Lifecycle: ACTIVE. PAPER ONLY.** Nothing here is ruled. No code, no sheet
-> row, no constant and no register entry moves because of this file. §3 is a
-> numbered list of design directions and §5 is the pick, which is [USER]'s
-> (the R212 ladder: "a pick between genuinely different design directions" is
-> still his). Claude drafts the list; Claude does not choose.
+> **Lifecycle: RULED. PAPER ONLY.** §5's pick is ANSWERED — **R228
+> (2026-08-30) took option (1), one mode, priced** — and still **no code, no
+> sheet row, no constant and no LAW line moves because of this file**. §3 is
+> the numbered list of design directions as it was offered, in the register's
+> numbering; §5 carries the ruling. The pick was [USER]'s (the R212 ladder: "a
+> pick between genuinely different design directions" is still his): Claude
+> drafted the list and did not choose.
 
 **Date:** 2026-08-30. **Branch:** `furina-paper-2026-08-30`, stacked on
 `gpt-review-2026-08-30`. **Authority:** R226 owed this packet
@@ -204,45 +206,7 @@ visual binding point, and a breach is stop-work on that track
 *empowered* Companions, but the delete-test still has to gut the deck when her
 own cards are removed.
 
-### Option 1 — ACCEPT. Ship Spotlight exactly as it is.
-
-**What Spotlight becomes:** unchanged. Two modes, a heuristic selector, `1.5`,
-the token, the relic, the upgrade that deletes the choice.
-**The 18 rows:** all 18 kept, 0 re-authored, 0 retired.
-**Selector / relic / the 1.5:** all unchanged.
-**Co-op:** unchanged — Spotlight is single-seat and does not touch the table.
-**Build cost:** zero.
-**Biggest risk:** it ratifies a mode that the reframe empties. With
-`FANFARE_PER_SPOTLIGHT_CARD` retired, Center Stage does nothing at all, so
-family A's five rows become the only Spotlight rows that pay and the selector's
-"choice" is between a multiplier and a no-op. It also leaves the collapse
-finding standing and unanswered on the record.
-
-### Option 2 — RETIRE Spotlight entirely.
-
-**What Spotlight becomes:** nothing. The designation, both modes, the
-multiplier, the selector token and the relic flag all go. Companions are
-ordinary cards that trigger the stage.
-**The 18 rows:** family A's **5 rows retire or are re-authored** (their bodies
-are pure Spotlight terms); family B's **3 rows re-author** (their condition
-ceases to exist); family C's **5 rows re-author** onto a different trigger
-("the first Companion played each turn" is the obvious one, and it is not a
-Spotlight read); family D's **5 rows are untouched** and simply lose the tag.
-Net: **5 retired or re-authored, 8 re-authored, 5 kept**.
-**Selector / relic / the 1.5:** the token retires; `SPOTLIGHT_BASE_MULT`
-retires; the starting relic needs a new job entirely, and "The Curtain Never
-Falls" has nothing to flag.
-**Co-op:** simpler — one less single-seat system.
-**Build cost:** the largest of the five. Thirteen sheet rows, a starting relic,
-an upgraded relic, a token, four engine readers, the C# `SpotlightSystem`, and
-every test that pins the modes.
-**Biggest risk:** it breaches the Funnel Contract's Spotlight binding point
-outright (`LAW.md:525-527`) and it removes Furina's only *numeric* companion
-coupling, which is the mechanism LAW's companion-synergy clause was written
-for. It also spends a starting relic and its ruled upgrade — a [USER] design
-(R2) — to buy simplicity.
-
-### Option 3 — ONE MODE, PRICED. Guest Cast survives; the selector aims and costs Encore.
+### Option 1 — ONE MODE, PRICED. Guest Cast survives; the selector aims and costs Encore.
 
 **What Spotlight becomes:** one mode. Center Stage retires with its own payoff
 (`FANFARE_PER_SPOTLIGHT_CARD`, already retired by the reframe). The
@@ -276,7 +240,21 @@ if it is over-priced the Evoke family starves. That is a real interaction with
 slots 2 and 3 of the reframe's own slate and it is stated here rather than
 discovered later.
 
-### Option 4 — FOLD SPOTLIGHT INTO FANFARE. One scaling number for the whole character.
+### Option 2 — ACCEPT. Ship Spotlight exactly as it is.
+
+**What Spotlight becomes:** unchanged. Two modes, a heuristic selector, `1.5`,
+the token, the relic, the upgrade that deletes the choice.
+**The 18 rows:** all 18 kept, 0 re-authored, 0 retired.
+**Selector / relic / the 1.5:** all unchanged.
+**Co-op:** unchanged — Spotlight is single-seat and does not touch the table.
+**Build cost:** zero.
+**Biggest risk:** it ratifies a mode that the reframe empties. With
+`FANFARE_PER_SPOTLIGHT_CARD` retired, Center Stage does nothing at all, so
+family A's five rows become the only Spotlight rows that pay and the selector's
+"choice" is between a multiplier and a no-op. It also leaves the collapse
+finding standing and unanswered on the record.
+
+### Option 3 — FOLD SPOTLIGHT INTO FANFARE. One scaling number for the whole character.
 
 **What Spotlight becomes:** a property of the meter. `SPOTLIGHT_BASE_MULT`
 retires and Companion card numerics scale off **held Fanfare**, the way member
@@ -300,7 +278,7 @@ the second application of one number and it needs its own written bound before
 it is safe. The secondary risk is compounding: Companion plays mint Fanfare
 through the trigger, and Fanfare would then scale Companion plays.
 
-### Option 5 — FOLD SPOTLIGHT INTO THE STAGE. The front member is the spotlit one.
+### Option 4 — FOLD SPOTLIGHT INTO THE STAGE. The front member is the spotlit one.
 
 **What Spotlight becomes:** a **slot**, not a card class. The light sits on the
 front Salon member. A Companion play triggers that member (as the reframe
@@ -332,13 +310,37 @@ Second risk: on a one-member stage the light never moves (the §2.7b constraint
 the reframe already carries), so every "the light moved" payoff is worth zero
 on the board a starter deck actually has.
 
+### Option 5 — RETIRE Spotlight entirely.
+
+**What Spotlight becomes:** nothing. The designation, both modes, the
+multiplier, the selector token and the relic flag all go. Companions are
+ordinary cards that trigger the stage.
+**The 18 rows:** family A's **5 rows retire or are re-authored** (their bodies
+are pure Spotlight terms); family B's **3 rows re-author** (their condition
+ceases to exist); family C's **5 rows re-author** onto a different trigger
+("the first Companion played each turn" is the obvious one, and it is not a
+Spotlight read); family D's **5 rows are untouched** and simply lose the tag.
+Net: **5 retired or re-authored, 8 re-authored, 5 kept**.
+**Selector / relic / the 1.5:** the token retires; `SPOTLIGHT_BASE_MULT`
+retires; the starting relic needs a new job entirely, and "The Curtain Never
+Falls" has nothing to flag.
+**Co-op:** simpler — one less single-seat system.
+**Build cost:** the largest of the five. Thirteen sheet rows, a starting relic,
+an upgraded relic, a token, four engine readers, the C# `SpotlightSystem`, and
+every test that pins the modes.
+**Biggest risk:** it breaches the Funnel Contract's Spotlight binding point
+outright (`LAW.md:525-527`) and it removes Furina's only *numeric* companion
+coupling, which is the mechanism LAW's companion-synergy clause was written
+for. It also spends a starting relic and its ruled upgrade — a [USER] design
+(R2) — to buy simplicity.
+
 ### Where `M45`(4) lands
 
 `M45`(4) asks for the Spotlight selector to be **amended or accepted**
-(`docs/current/QUEUE.md:65`). **Option 1 is "accept" in so many words.**
-**Option 3 is the narrowest "amend"** — it keeps the selector and changes what
-it chooses and what it costs. **Options 4 and 5 amend it by making it something
-else** (a Fanfare verb; a slot-aimer), and **option 2 answers `M45`(4) by
+(`docs/current/QUEUE.md:65`). **Option 2 is "accept" in so many words.**
+**Option 1 is the narrowest "amend"** — it keeps the selector and changes what
+it chooses and what it costs. **Options 3 and 4 amend it by making it something
+else** (a Fanfare verb; a slot-aimer), and **option 5 answers `M45`(4) by
 deleting its subject.** Whichever is picked, `M45`(4) closes on the answer;
 `M45`'s other six items are untouched by this packet.
 
@@ -346,11 +348,11 @@ deleting its subject.** Whichever is picked, `M45`(4) closes on the answer;
 
 ## 4. Claude's recommendation
 
-**Option 3 — one mode, and the selector aims and costs Encore.**
+**Option 1 — one mode, and the selector aims and costs Encore.**
 
 Center Stage's only mechanical payoff is retired by the reframe's own ruled
 §4.1, so "accept" would ratify a branch that is already empty and the two-mode
-law would describe a system with one mode in it. Option 3 is the smallest
+law would describe a system with one mode in it. Option 1 is the smallest
 change that converts the collapsed heuristic into a real decision, because a
 designation that costs Encore is priced under D3 and steerable under D2, which
 is precisely what the collapse finding says is missing. It is also the only
@@ -362,17 +364,26 @@ once.
 reframe's slate **slot 2 or slot 3** shows Encore is fully subscribed as the
 Evoke price — graders naming the buffer as the reason they decline an Evoke —
 then a third consumer would starve the family [USER]'s brief calls central, and
-**option 4** becomes the better answer because it prices nothing. If the
+**option 3** becomes the better answer because it prices nothing. If the
 whole-fight gate (§6.4) shows Companion density is already the dominant lever
 on the board, so that Companion plays need no second multiplier at all, then
-**option 5** is better because it puts the scaling where the decisions are. A
+**option 4** is better because it puts the scaling where the decisions are. A
 third, blunter reading: if the migration read finds family A's five rows do not
-survive re-basing in any option, the cost gap between 3 and 2 narrows and
+survive re-basing in any option, the cost gap between 1 and 5 narrows and
 retirement stops looking expensive.
 
 ---
 
 ## 5. The pick
+
+**RULED (R228, 2026-08-30): option (1).** One mode, priced — Center Stage
+retires, Guest Cast and `SPOTLIGHT_BASE_MULT = 1.5` stay, and the selector aims
+a Companion and costs Encore. §4's own biggest risk is tested rather than
+assumed away: **the third claim on Encore is measured by the slate slot below,
+staged as a MATCHED PAIR against slot 2 (the Evoke price), and the designation
+price RETURNS with evidence if Encore proves over-subscribed.** `M68` closes
+and `M45`(4) is answered with it. **Nothing migrates before the reframe's own
+whole-fight read.**
 
 **ONE numbered pick list for [USER]. Item (1) is Claude's recommendation.**
 
@@ -425,10 +436,11 @@ reframe's architecture has a verdict (§7 of the reframe: sheet edits are a
 - **No implementation.** No C#, no `tier0`, no test, no constant.
 - **No sheet edits.** `docs/furina-cards.yaml` is read-only here; not one of the
   18 rows is touched, re-tagged or re-priced.
-- **Nothing here is ruled.** §3's five options are directions, §4 is a
-  recommendation and §5 is a pick that has not been made. No LAW text is
-  drafted, no register row is minted, no ruling id is claimed, and `M45`(4)
-  stays OPEN until [USER] answers §5.
+- **Nothing here implements the ruling.** §3's five options are directions and
+  §4 is a recommendation; §5's pick is answered by R228 at option (1), and that
+  answer closes `M68` and `M45`(4) and nothing else. **No LAW text is drafted
+  and no sheet row moves** — the migration §5's `(1)` bullet describes is the
+  next unit of work, and it waits on the reframe's own whole-fight read.
 - **No re-opening of the reframe.** The reframe's countersigned §3 and §3.1 and
   R224's F-pick answers are untouched by this packet; the only line it adds
   there is the dated pointer under the R226 paragraph.

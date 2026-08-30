@@ -276,7 +276,19 @@ CEILINGS: dict[str, int] = {
     # integration reproduced and then diagnosed off the quoted save path --
     # it is a cross-SESSION leak, and the standing "rerun the file alone"
     # workaround is the reason nobody had looked.
-    "EB": 234,   # EB-233/EB-234 minted 2026-08-30 by the post-merge review,
+    "EB": 238,   # EB-236/237/238 minted 2026-08-30 by KLEESPARK-BT1 (Klee
+                 # Sparks packet section 22): the board-design trap that drew
+                 # `intent_insensitive` refusals from 7 of 8 forms, slot_plan's
+                 # blindness to a mode-head Spark price, and the blind page
+                 # printing no relics -- which is why the priced mode's
+                 # self-refund off Pounding Surprise was invisible to every
+                 # form and uncontrolled by the registration.
+                 # EB-235 minted 2026-08-30 by R228 pick 1: the successor to
+                 # the closed EB-223, carrying R222 (a)'s whole-fight read of
+                 # the strict Rare Power, which KLEESPARK-W4 left UNREACHED
+                 # because the Power was drawn on seven pages and played on
+                 # none. Its unit is an uptake slot, not W4 repeated.
+                 # EB-233/EB-234 minted 2026-08-30 by the post-merge review,
                  # fact-checked against main 21a078c4. 233 is KLEESPARK-S1's
                  # S3 miss, which both the registration and the result route
                  # to BACKLOG as an instrument row and which reached none:
@@ -684,6 +696,23 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # half of KLEESPARK-S1's S3 miss, and the memory-cadence read on a
         # developed deck the kurage packet defers. Both OPEN.
         233, 234,
+        # 235 minted 2026-08-30 by R228 pick 1, successor to the CLOSED
+        # EB-223: KLEESPARK-W4 drew the strict Rare Power on seven pages and
+        # the tester played it on none, so R222 (a)'s owed whole-fight read
+        # is UNREACHED and a new registration -- an uptake slot, not W4
+        # repeated -- carries it.
+        235,
+        # 236/237/238 minted 2026-08-30 by KLEESPARK-BT1, all three out of
+        # what the round found that was not a slot: the resource-round board
+        # trap (holding everything but the bank constant leaves the whole hand
+        # playable, so the `intent_insensitive` falsifier fires on the
+        # construction -- 7 of 8 forms), `slot_plan._spark_prices` reading a
+        # TOP-LEVEL `spend_spark` only, so the row under test is invisible to
+        # its ceilings, and the blind page printing no relics, which is why
+        # Pounding Surprise refunding the mode's own price inside the turn was
+        # invisible to every form and uncontrolled by the registration. All
+        # three OPEN.
+        236, 237, 238,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -730,9 +759,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # plumbing stays, and the Charge question moves whole to the memory
     # program (EB-229, then whole fights). Ceilings never come down.
     # M68 minted 2026-08-30 under R227 pick 4: the Furina Spotlight pick R226
-    # owed, drafted as an options packet the same day. It closes M45(4) when
-    # ruled; M45 itself stays until its other six calls are answered.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 68}),
+    # owed, drafted as an options packet the same day. It LEFT OPEN_IDS the
+    # same day with its row, closed by R228 at option (1) -- one mode, priced:
+    # Center Stage retires, Guest Cast and SPOTLIGHT_BASE_MULT = 1.5 stay, and
+    # the selector aims a Companion and costs Encore. M45(4) is answered with
+    # it; M45 itself stays until its other six calls are answered. Ceilings
+    # never come down.
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

@@ -1,0 +1,132 @@
+{
+ "turn_id": "klee-sparks-bt1-t01",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "intent_insensitive"
+ ],
+ "reasons": [
+  "intent_insensitive: question four is no: a different enemy intent would not have changed the line, so the intent is not part of the decision"
+ ],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "dda96d6aa3b41f67ea44f78006b9ab4d7324fe31ca0a6b03542978036ec3d60a",
+ "chosen_line": [
+  {
+   "card": "Kaboom!",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Bag of Tricks",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."
+  },
+  {
+   "card": "Quick Fuse",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played all four cards: first Kaboom! on Seapunk for 7 damage and Pyro, then Bag of Tricks choosing the 3-bomb option to place 3 Bombs dealing 5 on Seapunk, then Quick Fuse on Seapunk to detonate those Bombs for 15 more damage, and finally Duck and Cover for 5 Block. This uses 2 Energy and 3 Sparks, leaving 1 Energy unused.",
+  "q2_other_line_considered": "I seriously considered the same cards in a different order, especially whether to play Bag of Tricks and Quick Fuse before Kaboom!. I chose Kaboom! first because it applies Pyro before the Bombs detonate, which is the safer order if any Pyro interaction exists, while still producing the same printed damage if it does not.",
+  "q3_what_it_gave_up": "The line gave up nothing playable from the hand, since every card was affordable. It leaves 1 Energy unused and, by taking the 3-bomb option, forgoes the 1-bomb option of Bag of Tricks, which is strictly worse here because Quick Fuse is available and the 3 Sparks are already in hand.",
+  "q4_different_intent": "No. The chosen line plays every affordable card and already includes Duck and Cover, so a different telegraphed enemy intent would not have changed which cards I could or should play on this turn."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": {
+  "source": "declared board (prototype route)",
+  "falsifier": "decision-closeness (R213 F)",
+  "dominance_gap": 0.5,
+  "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+  "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+  "applicable": true,
+  "verdict": "SURVIVES",
+  "gap": 0.0,
+  "top1": 30.0,
+  "top2": 30.0,
+  "lines_considered": 15,
+  "playouts": 64,
+  "plays_refused": 0,
+  "pilot": "demolition",
+  "lines": [
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Quick Fuse",
+     "Kaboom!",
+     "Duck and Cover"
+    ],
+    "score": 30.0
+   },
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Kaboom!",
+     "Duck and Cover"
+    ],
+    "score": 30.0
+   },
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Quick Fuse",
+     "Kaboom!"
+    ],
+    "score": 24.1
+   },
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Kaboom!"
+    ],
+    "score": 24.1
+   },
+   {
+    "cards": [
+     "Bag of Tricks",
+     "Quick Fuse",
+     "Duck and Cover"
+    ],
+    "score": 22.4
+   }
+  ],
+  "reason": "no line dominates by more than the derived gap"
+ },
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Bag of Tricks",
+   "Quick Fuse",
+   "Kaboom!"
+  ],
+  "hand": [
+   "Bag of Tricks",
+   "Quick Fuse",
+   "Kaboom!",
+   "Duck and Cover"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-30T14:24:00"
+}

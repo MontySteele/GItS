@@ -1,0 +1,43 @@
+{
+ "turn_id": "klee-sparks-bt1-t02",
+ "packet_sha256": "342f63453a46f59652dbc051a792bd3bab299c45768c03b3364c26c3dcb36c64",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Firework Finale",
+   "target": "Nibbit",
+   "exhaust": "Firework Finale",
+   "choose": null
+  },
+  {
+   "card": "Bag of Tricks",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": "Place 1 Bomb dealing 5"
+  },
+  {
+   "card": "Quick Fuse",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Firework Finale on Nibbit, spending 3 Sparks for 18 damage and exhausting it. Then I played Bag of Tricks on Nibbit and chose Place 1 Bomb dealing 5. Then I played Quick Fuse on Nibbit to detonate that Bomb for 5 damage. Finally I played Duck and Cover for 5 Block.",
+ "q2_other_line_considered": "I seriously considered using Bag of Tricks' other option, Spend 3 Sparks: place 3 Bombs dealing 5, followed by Quick Fuse and Duck and Cover. That would use the same 3 Sparks to place 3 Bombs instead of playing Firework Finale, but the Firework Finale plus one Bomb line deals more damage on the information given.",
+ "q3_what_it_gave_up": "The chosen line gave up the 3-Bomb option from Bag of Tricks, including the two extra Bombs that option would place, because Firework Finale consumes the same 3 Sparks. It also gave up keeping Firework Finale available by exhausting it.",
+ "q4_different_intent": "No. The only intent-sensitive card in the hand is Duck and Cover, and it has no meaningful downside here: it costs 1 Energy that would otherwise go unused, and the rest of the line is unchanged. A different telegraphed intent would not make me drop the damage sequence or the Block.",
+ "q4_changed": false,
+ "role": "shadow",
+ "seat_mode": "shadow"
+}
