@@ -2365,6 +2365,12 @@ what the round is contaminated by.
 **Nothing in §13.8 is re-read, re-scored or withdrawn (R101b).** `KURAGEMEM001`
 stands as published, including the two slots below that are NOT re-posed.
 
+> **COUNTERSIGNED (R227, 2026-08-30): this cell is SIGNED**, in the batch of
+> three, at PICK 3 option (1) — none vetoed. The cell had already RUN when the
+> signature landed, and that is regular: R212 item 2 locates pre-registration
+> in committing the slate BEFORE the run, which this section was, so there is
+> no separate signature class for a countersign that arrives after the grade.
+
 #### 13.9.1 What changed under the slate, and therefore what may be asked again
 
 Three builds landed between the sealed run and this one, and between them they

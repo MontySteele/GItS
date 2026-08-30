@@ -31,7 +31,6 @@
 |---|---|---|---|
 | `S4-G6` | **Ask:** declare Kokomi's HP stability band from design intent — never revisable against the playtest that grades it (D5). **Pick:** (1) Claude drafts the band DRAFTED from written design intent and you countersign in batch — **default** (R212(2)); (2) declare it at the table; (3) leave it DARK (`band = None`). **Gate:** the post-wave EXPLORATORY run comes first, the confirmatory protocol run after (R175) | OPEN — declare | user-queue §2; `DEC-D5` clauses 2–4; R156; R175; R212 |
 | `S4-G14` | **Ask:** run the Kokomi confirmatory protocol and rule on its written question list — an exploratory run cannot be graded, and this one fills the Answers block. **Eyes-on:** `docs/current/playtest/kokomi-playtest-protocol.md`, question by question. **Gate:** the sequence R175 fixed — post-wave exploratory run → `S4-G6`'s band declaration → this run; plus `EB-53`'s remnant | OPEN — table time | user-queue §2/§7; R115; R152; R175 |
-| `M67` | **Ask:** R226 answered accrual (uncapped, 1/Exhaust, jellyfish-only, no card prices it); the CONSEQUENCE returns: all four slice-2 arms price Charge and retire as authored, ADVANCED included. **Pick:** (1) it stands — arms/boards delete, plumbing stays, Charge moves to the continuing memory program (`EB-229`, whole-fight) — **default**; (2) a carve-out for priced arms (LAW amendment) | OPEN — **Gate:** [USER], signed LAW reaching graded arms | slice 2 §9 PICK 2 |
 
 ## 2. Shop, pricing, and money
 
@@ -83,7 +82,11 @@ Two rows returned from it and both are now closed: `M65`, the re-ask R224 item
 raised. **R225 (2026-08-30)** ruled the open-items slate: the top-level-cost
 clause is amended to admit a mode-head price and *Bag of Tricks* proceeds
 (`EB-224`); the single `PROTOTYPE_CARDS` switch stands, with a scope lint
-(`EB-225`) and a three-fight soak on every dev deploy.
+(`EB-225`) and a three-fight soak on every dev deploy. **R227 (2026-08-30)**
+then closed `M67` at option (1): Kokomi slice 2 RETIRES — its four
+Charge-priced arms and their round-2 boards delete, the spend plumbing stays,
+and the Charge question moves whole to the memory program (`EB-229`, then whole
+fights). That row has left this register with the rest.
 
 **Nothing is open in this section.**
 

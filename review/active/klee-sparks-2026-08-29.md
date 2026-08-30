@@ -230,6 +230,18 @@ brick.
 > open** — R225's order stands: the generator question is answered first, on a
 > representative deck.
 
+> **R227 (2026-08-30): the condition FIRED, the number was RETURNED, and
+> REGENT STANDS — `1/4/4/2`.** `KLEESPARK-S1`'s `S4` read the drafted floor-15
+> maker:sink median at **1.500, rising** from floor 5 rather than falling as
+> the registered arithmetic predicted. The number was returned to [USER]
+> exactly as R226 required, and [USER] ruled that Regent stands. The ratio is
+> **maker-heavy**, and its sink denominator is contaminated by `EB-233` — the
+> drafter undervalues the non-damage Spark sinks — so it is evidence for
+> neither a softer nor a deeper cut. **The exact card cuts are named in the
+> fold packet with `W4` in hand**: 2 Commons, 1 Uncommon and 3 Rares, of which
+> `true_spark_knight` is already re-authored; `W4` may decide whether Spark
+> Knight's Oath takes one of the Rare slots.
+
 ---
 
 ## 4. Attacks that cost Sparks — PICK 3
@@ -5176,6 +5188,11 @@ then the embark and the Neow rule, then one session to `max_actions`.
 **Countersign.** DRAFTED under R212(2) and offered for BATCH countersign. It is
 signed once; a moved world means re-drafting the affected slots and disclosing
 the diff, and it never means re-signing (R212, EXPERIMENTS *Countersign once*).
+
+> **COUNTERSIGNED (R227, 2026-08-30): `KLEESPARK-W4` is SIGNED**, in the batch
+> of three, at PICK 3 option (1) — none vetoed. The `EB-230` build note at
+> §19.3 stands as disclosed. Signed once: it is not re-signed, and a moved
+> world means re-drafting the affected slots and disclosing the diff.
 
 **NOT RUN.** As of this commit no board has been staged, no session opened, no
 Codex call spent and no number taken.

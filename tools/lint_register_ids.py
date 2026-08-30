@@ -715,8 +715,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # with a scope lint (EB-225) plus a three-fight soak on every dev deploy.
     # M67 minted 2026-08-30: Kokomi's Charge accrual rule, out of slice 2 §9
     # PICK 2, where it had been holding round-2 staging unregistered since
-    # 2026-08-29.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45, 67}),
+    # 2026-08-29. It was re-scoped the same day to the CONSEQUENCE of that
+    # rule once R226 answered accrual one branch over, and it LEFT OPEN_IDS
+    # 2026-08-30 with its row, closed by R227 at option (1): slice 2 retires,
+    # its four Charge-priced arms and their round-2 boards delete, the spend
+    # plumbing stays, and the Charge question moves whole to the memory
+    # program (EB-229, then whole fights). Ceilings never come down.
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
