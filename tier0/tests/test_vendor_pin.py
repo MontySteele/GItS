@@ -77,7 +77,13 @@ def test_our_additions_live_apart_from_upstreams_source():
     # guards are upstreamable as they stand -- any mod's custom model can do
     # this to upstream's wiki -- so this row is expected to shrink again if
     # the fix ever goes home.
-    assert modified == ["McpMod.cs", "McpMod.StateBuilder.cs",
-                        "McpMod.Wiki.cs"], (
+    # EB-210 (2026-08-29) added a FOURTH, and deliberately: the seed read-back
+    # is a file read, and `McpMod.Compendium.cs` resolved that file through an
+    # API that ignores the per-lane `APPDATA`, so two lanes read one save. It
+    # is an edit rather than a gits/ addition for the same reason EB-92's was:
+    # the failure is inside a private resolution chain with nothing to route,
+    # and a patch would have to re-implement it. Upstreamable as it stands.
+    assert modified == ["McpMod.Compendium.cs", "McpMod.cs",
+                        "McpMod.StateBuilder.cs", "McpMod.Wiki.cs"], (
         f"upstream files we have edited changed: {modified}. Update PROVENANCE.md's "
         f"'What we changed' table and this assertion together, deliberately.")

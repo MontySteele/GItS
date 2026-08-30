@@ -524,6 +524,14 @@ public static partial class McpMod
     {
         var candidates = new List<string?>();
 
+        // GItS LOCAL EDIT (EB-210), and it is the belt to the braces above:
+        // `GetFolderPath` reads the SHELL's roaming folder and IGNORES the
+        // `APPDATA` environment variable, which is the one thing separating
+        // two game processes launched from one install. The variable goes
+        // FIRST so a lane that reaches this fallback still lands in its own
+        // tree; the shell folder stays, and on a one-lane machine the two are
+        // the same directory and the HashSet below drops the duplicate.
+        candidates.Add(Environment.GetEnvironmentVariable("APPDATA"));
         candidates.Add(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
         candidates.Add(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData));
         candidates.Add(Environment.GetEnvironmentVariable("XDG_DATA_HOME"));
@@ -609,8 +617,35 @@ public static partial class McpMod
         return null;
     }
 
+    // GItS LOCAL EDIT (EB-210) -- the only change in this upstream file, and it
+    // is four lines. `ProgressSaveManager.GetProgressPathForProfile` answers a
+    // GODOT path (`user://steam/<id>/modded/profile1/saves/progress.save`,
+    // exactly as godot.log prints it), which is not `Path.IsPathRooted`, so
+    // this method returned null on EVERY call and every resolution below fell
+    // through to `EnumerateSaveRoots`.
+    //
+    // THAT FALLBACK IS NOT PER-PROCESS. It builds its candidate roots from
+    // `Environment.GetFolderPath(SpecialFolder.ApplicationData)`, which on
+    // Windows reads the SHELL folder and ignores the `APPDATA` environment
+    // variable -- and `APPDATA` is precisely what `understudy/instances.py`
+    // gives a second lane so its `user://` tree is its own. Godot honours the
+    // variable; this API does not. So with two game processes running, lane 1
+    // embarked on its own seed (its own godot.log says so) and this endpoint
+    // handed the harness LANE 0's `current_run.save` and lane 0's seed. The
+    // round filed `seed_not_honoured` against a game that had honoured it.
+    //
+    // Globalizing is the fix and it is also simply what this method meant:
+    // Godot's own `GlobalizePath` resolves `user://` through the running
+    // process's user directory, which is the one that wrote the file.
     private static string? GetSaveDirectoryFromProgressPath(string? progressPath)
     {
+        if (!string.IsNullOrWhiteSpace(progressPath)
+            && progressPath!.StartsWith("user://", StringComparison.OrdinalIgnoreCase))
+        {
+            try { progressPath = Godot.ProjectSettings.GlobalizePath(progressPath); }
+            catch { /* no scene tree: fall through to the enumeration below */ }
+        }
+
         if (string.IsNullOrWhiteSpace(progressPath) || !Path.IsPathRooted(progressPath))
             return null;
 

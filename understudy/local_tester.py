@@ -436,24 +436,67 @@ def split_first(order: Sequence[Mapping[str, Any]], first_n: int
     return rows[:take], rows[take:]
 
 
+def deciding_grader(turn_id: str, qa_dir: Path | None = None) -> str:
+    """The grader id on the DECIDING form, or `""` if none has been taken."""
+    form = deciding_form(turn_id, qa_dir)
+    if form is None:
+        return ""
+    try:
+        blob = json.loads(form.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return ""
+    return str((blob.get("grader") or {}).get("id") or "")
+
+
 def disk_grades(turn_ids: Sequence[str],
-                qa_dir: Path | None = None) -> dict[str, list[str]]:
+                qa_dir: Path | None = None, *,
+                deciding_only: bool = False) -> dict[str, list[str]]:
     """`turn id -> the grades on disk`, PRED for SURVIVES, MISS for REFUSED.
 
     Read off `verdict-<grader>.json`, which is `staged_turn.grade`'s
     mechanical output. The stopping rule never reads a FORM: it reads what the
     falsifiers said about one, so the reader was blind at read time either way
     and nothing here is a second opinion.
+
+    `deciding_only` IS `EB-209`, AND IT IS THE SHADOW CHAIR'S RULE. With the
+    seat in `shadow`, the deciding forms do not exist while the round is
+    running -- that is exactly what an OWED replay means -- so every verdict on
+    disk when `split_rest` is evaluated is the SHADOW's, and R222 B says a
+    shadow reading decides nothing. On `KLEESPARK-R2` it happened to change
+    nothing (every slot read UNDECIDED and every board ran); a round whose
+    shadow seat agreed with itself twice would have stopped on a reading with
+    no standing.
+
+    Under this flag a turn contributes ONLY its deciding grader's verdict, and
+    **a REFUSED deciding form contributes nothing at all**: a refusal is the
+    funnel saying the form cannot be read against the board, not a reading of
+    it -- which is why a refused form is not replayed either. A turn with no
+    deciding form yet contributes nothing, so a round with none runs its whole
+    pre-registered order, which is the safe direction.
+
+    The default is FALSE and the deciding chair is byte-for-byte unchanged.
     """
     base = qa_dir or QA_DIR
     out: dict[str, list[str]] = {}
     for tid in turn_ids:
         got = []
+        wanted = deciding_grader(tid, qa_dir) if deciding_only else ""
+        if deciding_only and not wanted:
+            out[tid] = got
+            continue
         for path in sorted((base / tid).glob("verdict-*.json")):
             try:
                 blob = json.loads(path.read_text(encoding="utf-8"))
             except (OSError, ValueError):
                 continue
+            if deciding_only:
+                gid = str((blob.get("grader") or {}).get("id")
+                          or path.stem[len("verdict-"):])
+                if gid != wanted:
+                    continue
+                if str(blob.get("verdict")) != "SURVIVES":
+                    # A refused deciding form is NO GRADE (EB-209).
+                    continue
             got.append("PRED" if str(blob.get("verdict")) == "SURVIVES"
                        else "MISS")
         out[tid] = got
@@ -681,6 +724,8 @@ def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
                  lanes: Sequence[GameLane] | None = None,
                  steps: RoundSteps,
                  serial: bool = False,
+                 read_workers: int = 1,
+                 read_order: list[str] | None = None,
                  log: Any = None) -> list[dict[str, Any]]:
     """stage -> read -> grade -> execute, per turn, with no game ever idle.
 
@@ -696,6 +741,40 @@ def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
 
     `lane=` (one lane) is kept for every existing caller; `lanes=` is the
     two-lane form. Passing both is an error rather than a merge.
+
+    `read_workers=N` WIDENS THE MODEL HALF, AND IT IS WHERE THE ROUND ACTUALLY
+    IS. `KLEESPARK-R2` measured a board at 14.8 s of staging against 49.2 s of
+    read-and-grade: the read is three times the game work and it is one local
+    generation each time (the seat's own record puts every artifact's write at
+    the moment the reply lands, ~4,650 completion tokens at the server's
+    ~95 tok/s). N is a SEMAPHORE, not a pool -- the boards' threads already
+    exist -- so `N=1` is today's single `model_lock` exactly, and nothing
+    about a record changes: every read writes under its own turn id, the
+    grade is per form, and blind grading is per turn by construction.
+
+    THE CEILING IS THE SERVER'S, NOT THIS FUNCTION'S. `serve.ps1` runs
+    `--parallel 1`, so two requests to it serialize INSIDE it and N > 1 would
+    buy nothing while making the record's timings a lie about what the model
+    did. `cmd_round` refuses that combination where it can read the slot
+    count; this function does what it is told.
+
+    **CONCURRENT READS MAY FINISH OUT OF ORDER, AND NOTHING DOWNSTREAM MAY
+    NOTICE.** This is the one property `--read-workers` must not cost, and it
+    is bought in three places rather than assumed:
+
+      * every board of a set is joined before this function returns, so the
+        stopping rule is never applied to a partial set;
+      * the return value is rebuilt IN THE ROWS' ORDER (`for r in rows`), not
+        in completion order, so `slot_state` sees the same grades whatever
+        order they landed in -- and it reads them off DISK by turn id anyway,
+        which has no order term at all;
+      * `read_order`, if a list is passed, is appended to as each read
+        COMPLETES, purely so the round's record can show the two orders side
+        by side and a later reader can see they never touched.
+
+    So which boards run is a pure function of the grades. Latency decides
+    nothing, and the lock for that is a fake seat whose reads finish reversed
+    producing an identical UNRUN set.
     """
     log = log or (lambda _m: None)
     rows = list(rows)
@@ -712,6 +791,8 @@ def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
             one = pool[li]
             one.step("stage", row["turn_id"], lambda r=row: steps.stage(r))
             record = steps.read(row)
+            if read_order is not None:
+                read_order.append(str(row["turn_id"]))
             out.append(record)
             one.step("execute", row["turn_id"],
                      lambda r=row, rec=record: steps.execute(r, rec))
@@ -720,7 +801,10 @@ def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
     records: dict[str, dict[str, Any]] = {}
     errors: list[BaseException] = []
     staged = [threading.Event() for _ in rows]
-    model_lock = threading.Lock()
+    # ONE PERMIT IS THE OLD `threading.Lock()`, and deliberately spelled as a
+    # semaphore of one rather than kept as a special case: two code paths for
+    # the round's only concurrency decision is one more than the round needs.
+    model_lock = threading.Semaphore(max(1, int(read_workers)))
 
     def worker(i: int, row: Mapping[str, Any]) -> None:
         one = pool[assignment[i]]
@@ -745,6 +829,12 @@ def run_pipeline(rows: Sequence[Mapping[str, Any]], *,
             with model_lock:
                 record = steps.read(row)
             records[row["turn_id"]] = record
+            if read_order is not None:
+                # APPENDED WHERE IT COMPLETES, and read by nothing but the
+                # record. `records` is a dict keyed by turn id and the return
+                # below is rebuilt in the ROWS' order, so this list is the
+                # only place completion order survives at all.
+                read_order.append(str(row["turn_id"]))
             one.step("execute", row["turn_id"],
                      lambda: steps.execute(row, record))
         except BaseException as exc:                          # noqa: BLE001
@@ -868,8 +958,20 @@ def round_slug(turn_ids: Sequence[str]) -> str:
 def round_summary(records: Sequence[Mapping[str, Any]], *,
                   seat_mode: str, unrun: Sequence[Mapping[str, Any]] = (),
                   replays: Sequence[Mapping[str, Any]] = (),
+                  registered_order: Sequence[str] = (),
+                  read_order: Sequence[str] = (),
+                  read_workers: int = 1,
                   qa_dir: Path | None = None) -> dict[str, Any]:
-    """The round's own record, including the agreement M62 will be read off."""
+    """The round's own record, including the agreement M62 will be read off.
+
+    `registered_order` and `read_order` are written side by side ON PURPOSE.
+    With `--read-workers > 1` the reads can COMPLETE out of order, and the one
+    thing that must remain true is that nothing downstream noticed: the
+    stopping rule runs after the whole first set is joined, off grades read by
+    turn id, and the boards that run are a pure function of those grades. A
+    record that shows both orders lets a later reader check that claim instead
+    of taking it, and the two differing is expected rather than alarming.
+    """
     ids = [str(r["turn_id"]) for r in records]
     shadow_ids = {str(r["turn_id"]): str(r.get("tester_id") or "")
                   for r in records}
@@ -879,6 +981,15 @@ def round_summary(records: Sequence[Mapping[str, Any]], *,
         "turns": ids,
         "unrun": [str(r.get("turn_id") or "") for r in unrun],
         "replays": list(replays),
+        "read_workers": int(read_workers),
+        "registered_order": [str(t) for t in registered_order] or ids,
+        "read_completion_order": [str(t) for t in read_order],
+        "order_note": ("R221 B's stopping rule is applied in the "
+                       "PRE-REGISTERED order and only after the whole first "
+                       "set is graded. `read_completion_order` is the order "
+                       "the model finished in and is recorded so the two can "
+                       "be seen not to have influenced each other; with "
+                       "read_workers 1 they are the same list"),
         "seat_review_owed": round_queue(records),
         "agreement": agreement(ids, shadow_ids=shadow_ids, qa_dir=qa_dir),
         "written_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -1104,6 +1215,32 @@ def cmd_round(args) -> int:
         print(f"local tester: {exc}", file=sys.stderr)
         return 2
 
+    # THE READ PHASE IS THE ROUND, AND THE SERVER IS ITS CEILING. Widening it
+    # past what the server answers at once does not overlap anything: the
+    # requests queue inside llama-server and the round reports a concurrency
+    # it did not have. So the count is ASKED FOR rather than assumed, and a
+    # server that will not say is not treated as a refusal -- the operator is
+    # told the number is unknown and the round runs.
+    read_workers = max(1, int(getattr(args, "read_workers", 1) or 1))
+    if read_workers > 1:
+        slots = local_model.slot_count(client)
+        if slots is not None and slots < read_workers:
+            print(f"ROUND REFUSED: --read-workers {read_workers} needs a "
+                  f"server answering {read_workers} requests at once, and "
+                  f"{client.base_url} reports {slots} slot(s). Restart "
+                  f"llama-server with --parallel {read_workers} (serve.ps1 "
+                  f"pins --parallel 1); the extra slot costs KV cache, so "
+                  f"lower -c or accept the shorter window.",
+                  file=sys.stderr)
+            return 2
+        if slots is None:
+            print(f"read-workers {read_workers}: the server did not report a "
+                  f"slot count, so nothing here can check it. If it is "
+                  f"running --parallel 1 the reads will queue inside it.")
+        else:
+            print(f"read-workers {read_workers} against {slots} server "
+                  f"slot(s)")
+
     steps = LiveSteps(client=client, why=args.why,
                       spot_check=args.seat_spot_check,
                       seat_mode=args.seat_mode,
@@ -1111,16 +1248,31 @@ def cmd_round(args) -> int:
     pool = _live_lanes(args)
     records: list[dict[str, Any]] = []
     unrun: list[dict[str, Any]] = []
+    read_order: list[str] = []
+    registered = [str(r["turn_id"]) for r in list(first) + list(rest)]
     try:
         for one in pool:
             one.launch()
         records += run_pipeline(first, lanes=pool, steps=steps,
-                                serial=args.serial, log=print)
+                                serial=args.serial,
+                                read_workers=read_workers,
+                                read_order=read_order, log=print)
         if rest:
-            state = slot_state(first, disk_grades([r["turn_id"]
-                                                   for r in first]))
+            # EB-209. IN THE SHADOW CHAIR THE STOPPING RULE READS THE DECIDING
+            # GRADES AND NOTHING ELSE. The shadow forms are the only verdicts
+            # on disk at this moment, and R222 B says a shadow reading decides
+            # nothing -- so a round that stopped on them would have stopped on
+            # a reading with no standing. With no deciding grade taken yet
+            # every slot reads UNDECIDED and the whole pre-registered order
+            # runs, which is the safe direction, and is what KLEESPARK-R2 did
+            # by accident rather than by rule.
+            shadow = args.seat_mode == SHADOW_ROLE
+            state = slot_state(first, disk_grades(
+                [r["turn_id"] for r in first], deciding_only=shadow))
             to_run, skipped = split_rest(rest, state)
-            print("\nR221 B -- after the first set:")
+            print("\nR221 B -- after the first set"
+                  + (" (EB-209: DECIDING grades only; a refused deciding "
+                     "form is no grade)" if shadow else "") + ":")
             for slot in sorted(state):
                 print(f"  {slot}: {state[slot]}")
             for row in skipped:
@@ -1133,7 +1285,9 @@ def cmd_round(args) -> int:
                       f"(seed {row.get('seed') or '-'} still pinned)")
             unrun = skipped
             records += run_pipeline(to_run, lanes=pool, steps=steps,
-                                    serial=args.serial, log=print)
+                                    serial=args.serial,
+                                    read_workers=read_workers,
+                                    read_order=read_order, log=print)
     finally:
         # IN REVERSE. Lane 0 owns the shared game-directory changes -- the
         # appid file and the `mods/STS2_MCP` install -- and removing them
@@ -1153,7 +1307,10 @@ def cmd_round(args) -> int:
     # the seat sat in: a `deciding` round has no shadow and the count is
     # honestly zero-of-zero rather than absent.
     summary = round_summary(records, seat_mode=args.seat_mode, unrun=unrun,
-                            replays=steps.replays)
+                            replays=steps.replays,
+                            registered_order=registered,
+                            read_order=read_order,
+                            read_workers=read_workers)
     path = write_round_summary(summary)
     agree = summary["agreement"]
     print(f"\nseat mode: {args.seat_mode}   agreement (shadow vs deciding): "
@@ -1356,6 +1513,17 @@ def main(argv: Sequence[str] | None = None) -> int:
                         "its own APPDATA and its own bridge port, and deals "
                         "the pre-registered boards to the lanes in order -- "
                         "the order and the stopping rule are unchanged")
+    q.add_argument("--read-workers", type=int, default=1, metavar="N",
+                   help="how many boards are READ at once (default 1, the "
+                        "single-reader funnel unchanged). The round is "
+                        "MODEL-bound -- KLEESPARK-R2 measured 49.2 s of "
+                        "read+grade against 14.8 s of staging per board -- so "
+                        "this is the flag that shortens it, and --lanes is "
+                        "not. It needs a server with N slots: llama-server's "
+                        "serve.ps1 runs --parallel 1, and N > 1 against one "
+                        "slot is refused rather than run, because the reads "
+                        "would queue inside the server and the round's "
+                        "timings would say otherwise")
     q.add_argument("--attach", action="store_true",
                    help="do not launch or tear down a game: attach to one "
                         "somebody else is holding (`embark --hold`). The lane "

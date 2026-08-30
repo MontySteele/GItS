@@ -1,0 +1,99 @@
+{
+ "what": "EB-210 live proof: two lanes, two pinned seeds, each read back its own",
+ "seeds_requested": {
+  "klee-sparks-r2-t01": "JH4T8MSN10KS",
+  "klee-sparks-r2-t03": "YX7PB48WR7R4"
+ },
+ "lanes": [
+  {
+   "label": "lane0",
+   "port": 15526,
+   "pid": 43112,
+   "appdata": "default",
+   "up_at_s": 25.2
+  },
+  {
+   "label": "lane1",
+   "port": 15527,
+   "pid": 43932,
+   "appdata": "C:\\Users\\Monty\\AppData\\Local\\gits-lanes\\lane1",
+   "up_at_s": 39.5
+  }
+ ],
+ "boards": [
+  {
+   "turn_id": "klee-sparks-r2-t01",
+   "seed_requested": "JH4T8MSN10KS",
+   "seed_read_back": "JH4T8MSN10KS",
+   "honoured": true,
+   "sha256": "d15aedaf17312124a7c3abbeaa5725daf8f6c3ee4dc1045a03b6b0112fbbcaed",
+   "cards": 0
+  },
+  {
+   "turn_id": "klee-sparks-r2-t03",
+   "seed_requested": "YX7PB48WR7R4",
+   "seed_read_back": "YX7PB48WR7R4",
+   "honoured": true,
+   "sha256": "3aa3c4b75240b2bd92c722ffba499148591e36903d7f928b4622e83209adb0f7",
+   "cards": 0
+  }
+ ],
+ "timings": {
+  "both_bridges_up_s": 39.5,
+  "two_boards_concurrent_s": 30.9
+ },
+ "scratch": "C:\\Users\\Monty\\Documents\\GitHub\\GItS-lanefix\\review\\qa\\two-instance\\eb210-scratch",
+ "marks": [
+  {
+   "turn": "klee-sparks-r2-t03",
+   "lane": "lane1",
+   "base": "http://localhost:15527",
+   "seconds": 14.0,
+   "rc": 0,
+   "eb191_retry": false
+  },
+  {
+   "turn": "klee-sparks-r2-t01",
+   "lane": "lane0",
+   "base": "http://localhost:15526",
+   "seconds": 15.5,
+   "rc": 0,
+   "eb191_retry": false
+  }
+ ],
+ "events": [
+  {
+   "kind": "stage",
+   "turn_id": "klee-sparks-r2-t01",
+   "instance": "lane0",
+   "start": 211207.5932081,
+   "end": 211223.1210184,
+   "relaunched": ""
+  },
+  {
+   "kind": "execute",
+   "turn_id": "klee-sparks-r2-t01",
+   "instance": "lane0",
+   "start": 211238.5019165,
+   "end": 211238.5019187,
+   "relaunched": "the game is at 'monster', not a menu, and the wire has no in-run exit -- a fresh process plus abandon_run is the only way back"
+  },
+  {
+   "kind": "stage",
+   "turn_id": "klee-sparks-r2-t03",
+   "instance": "lane1",
+   "start": 211207.6369899,
+   "end": 211221.5994518,
+   "relaunched": ""
+  },
+  {
+   "kind": "execute",
+   "turn_id": "klee-sparks-r2-t03",
+   "instance": "lane1",
+   "start": 211237.1772887,
+   "end": 211237.1772911,
+   "relaunched": "the game is at 'monster', not a menu, and the wire has no in-run exit -- a fresh process plus abandon_run is the only way back"
+  }
+ ],
+ "verdict": "PASS"
+}

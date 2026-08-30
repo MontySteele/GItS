@@ -23,6 +23,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
+from pathlib import Path
 
 BASE = "http://localhost:15526"
 SINGLEPLAYER = f"{BASE}/api/v1/singleplayer"
@@ -35,6 +36,14 @@ DEBUG_STATE = f"{BASE}/api/v1/gits/debug_state"
 
 class BridgeError(RuntimeError):
     pass
+
+
+class LaneCrossed(BridgeError):
+    """This lane was answered with ANOTHER lane's run (`EB-210`).
+
+    A BridgeError so every existing caller's `except` still catches it, and a
+    subclass so the two callers that can say something better may.
+    """
 
 
 # ------------------------------------------------------ which game this is --
@@ -74,15 +83,26 @@ def current_label() -> str:
     return getattr(_local, "label", "lane0")
 
 
+def current_instance():
+    """The `instances.Instance` this thread is bound to, or `None`.
+
+    Kept beside the base and the label because `EB-210`'s check needs the
+    lane's `appdata`, not just its port: the crossing it exists to catch is
+    about which USER TREE answered, and the port cannot say.
+    """
+    return getattr(_local, "instance", None)
+
+
 def use(instance) -> None:
     """Point THIS THREAD's calls at `instance` (an `instances.Instance`)."""
     _local.base = instance.base
     _local.label = instance.label
+    _local.instance = instance
 
 
 def use_default() -> None:
     """Undo `use` for this thread."""
-    for attr in ("base", "label"):
+    for attr in ("base", "label", "instance"):
         if hasattr(_local, attr):
             delattr(_local, attr)
 
@@ -141,16 +161,81 @@ def compendium() -> dict:
     return _request(COMPENDIUM)
 
 
-def current_seed() -> str | None:
-    """The seed the GAME generated for the active run.
+def current_run() -> dict:
+    """The compendium's `current_run` block, or `{}` if nothing answers.
 
-    Recorded, never fed to a policy stream -- see understudy/rng.py.
+    IT IS NOT AN IN-MEMORY READ, AND THAT IS THE WHOLE OF `EB-210`. The mod
+    builds this block by opening `current_run.save` OFF DISK
+    (`vendor/STS2_MCP/McpMod.Compendium.cs`, `BuildCurrentRunContext` ->
+    `ResolveCurrentRunPath`), and it reports the file it opened as
+    `save_path`. So a lane reads the seed of whatever run owns the file that
+    resolution landed on -- which, before the fix in that file, was lane 0's
+    for BOTH lanes.
     """
     try:
         c = compendium()
     except BridgeError:
-        return None
-    run = c.get("current_run") or {}
+        return {}
+    run = c.get("current_run")
+    return run if isinstance(run, dict) else {}
+
+
+def _refuse_foreign_save(run: dict) -> None:
+    """`EB-210`. Refuse a `current_run` block that came from another lane.
+
+    THE CHECK IS ON THE FILE, BECAUSE THE FILE IS WHAT CROSSED. Lane 1 runs
+    with its own `APPDATA`, which is what Godot resolves `user://` through --
+    but `Environment.GetFolderPath(SpecialFolder.ApplicationData)`, which the
+    mod's save-root enumeration used, reads the SHELL folder and ignores that
+    variable entirely (verified: `APPDATA=<anywhere else> powershell -c
+    [Environment]::GetFolderPath('ApplicationData')` still answers the real
+    roaming path). So lane 1 asked for its own seed, its own game embarked on
+    it -- `godot.log`: "Embarking on a singleplayer KLEEMOD-KLEE run ... Seed:
+    NMQLUYZDLV" in lane 1's own tree -- and the read-back opened lane 0's
+    `current_run.save` and answered `R7W86HG7WHUD`. The round then filed
+    `seed_not_honoured` against a game that had honoured the seed exactly.
+
+    The mod-side fix is in `McpMod.Compendium.cs`. This is the harness-side
+    lock, and it is worth keeping after that fix for the reason every
+    read-back exists: a seed that is silently somebody else's cannot be
+    detected afterwards, from the numbers, by anyone.
+
+    LANE 0 AND EVERY UNBOUND THREAD ARE UNCHANGED. A lane with no `appdata`
+    (which is lane 0 by construction, `instances.LANES`) has no tree of its
+    own to be outside of, so there is nothing here to check and nothing here
+    fires.
+    """
+    inst = current_instance()
+    home = getattr(inst, "appdata", None)
+    if home is None:
+        return
+    where = str(run.get("save_path") or "")
+    if not where:
+        # The block says it has no file yet (`limitation`), which is a state
+        # this endpoint legitimately reports right after an embark. Not a
+        # crossing, and not this function's business.
+        return
+    try:
+        inside = Path(where).resolve().is_relative_to(Path(home).resolve())
+    except (OSError, ValueError):
+        inside = False
+    if not inside:
+        raise LaneCrossed(
+            f"lane {current_label()} was answered with a run from another "
+            f"lane's user tree: current_run.save resolved to {where!r}, which "
+            f"is not under this lane's APPDATA ({home}). EB-210 -- the seed "
+            f"read-back is a FILE read and the file crossed; nothing about "
+            f"this lane's own run is wrong.")
+
+
+def current_seed() -> str | None:
+    """The seed the GAME generated for the active run.
+
+    Recorded, never fed to a policy stream -- see understudy/rng.py. Raises
+    `LaneCrossed` rather than answering with another lane's seed (`EB-210`).
+    """
+    run = current_run()
+    _refuse_foreign_save(run)
     return run.get("seed")
 
 

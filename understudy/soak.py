@@ -1482,7 +1482,18 @@ class RunDriver:
             # unrecoverable after the fact -- the numbers are somebody else's
             # and nothing in the log says so.
             state = self._verify_character(state)
-            self.seed = bridge.current_seed()
+            # EB-210: THE READ-BACK CAN BE ANOTHER LANE'S. It is a FILE
+            # read on the mod's side, and the file resolution ignored the
+            # per-lane APPDATA -- so a two-lane round filed `seed_not_honoured`
+            # against a game that had honoured its seed exactly. It is a
+            # defect of its own now, with its own name, because the two need
+            # different answers: one is the game refusing a seed, the other is
+            # this harness reading the wrong game's save.
+            try:
+                self.seed = bridge.current_seed()
+            except bridge.LaneCrossed as crossed:
+                raise Defect("seed_read_back_crossed", str(crossed),
+                             self._last_state or {}) from crossed
             self.emit({"record": "seed_read_back", "seed": self.seed,
                        "chosen": self.chosen_seed,
                        "honoured": (None if not self.chosen_seed
