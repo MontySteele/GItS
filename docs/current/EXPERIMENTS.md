@@ -219,6 +219,39 @@ carried while it was active is in the commit message that retired it.
 
 ## Active registrations (pointers — packets live in `review/active/`)
 
+- **`KLEESPARK-R2` — R222 D's minimal repaired staged round** (registered
+  2026-08-29, **DRAFTED, unrun at registration**). **Instrument:** the blind-QA
+  staged-turn funnel — `understudy.local_tester round --seat-mode shadow
+  --seat-spot-check 4`, R221 B stopping at the default `--first` (raised to 5 by
+  the twice-over cover), on a dev `+proto` build carrying the Sparks arm.
+  **Cell:** six boards under `understudy/turns/klee-sparks-r2/`, seeds pinned in
+  the turn files before staging, four counting slots machine-declared in
+  `understudy/turns/klee-sparks-r2/slots.yaml` and their ceilings computed by
+  `--plan-only` before the round was accepted (`S1` 3/2, `S2` 2/2, `S3` 2/2,
+  `S4` 2/2 — ceiling/threshold; every slot REACHABLE). **What it repairs, and
+  it repairs only these:** the dry sink with NO generator in hand (§11.7 item 2,
+  `S2`), a genuinely multi-enemy board for the two AoE rows (§11.6 item 4,
+  `S3`), a spend-versus-hold board with a threshold its own board set can reach
+  (`EB-202`, `S1`), and the one open price-arithmetic candidate — does a
+  2-priced row spend exactly 2 on a bank of exactly 2 (`S4`). **The Rare Power
+  is NOT staged**: §11.7 item 3 left it as built for whole-fight play, and
+  re-staging it would re-ask an answered question. **The slate is five
+  predictions with mechanical falsifiers, DRAFTED by Claude (R212) from §11.6
+  and §11.7 and committed before any board was staged** —
+  `understudy/turns/klee-sparks-r2/MANIFEST.md`, which is also the round's
+  manifest and carries the pre-registered reading order. **`P5` is not a board
+  slot**: it is the shadow-versus-deciding verdict agreement read off
+  `review/qa/klee-sparks-r2-round-summary.json`, which is the number `M62`'s
+  criterion is taken from, and it is registered here rather than in `slots.yaml`
+  for exactly that reason. **Precondition disclosure (R222 §11.7 item 7):** the
+  order registered there is whole-fight Codex play FIRST, then this round. At
+  the moment of registration the packet carries no §12 and no whole-fight record
+  is on disk, so this round is registered and run on the [USER] brief that
+  directed it; the departure is recorded here rather than assumed, and the
+  results section says whether the whole-fight read had landed by run time.
+  **Results:** packet `review/active/klee-sparks-2026-08-29.md` §13; records
+  under `review/qa/klee-sparks-r2-t0*/`.
+
 - **`EB-118` card-connectivity instrument** — static pre-registration at
   `review/active/eb118-richness-phase0-2026-08-23.md` §2, [USER]-approved
   2026-08-23. **Instrument:** `tools/card_connectivity_report.py` —
