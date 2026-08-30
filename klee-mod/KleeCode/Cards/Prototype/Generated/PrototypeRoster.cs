@@ -41,12 +41,15 @@ public static class PrototypeRoster
     private static List<CardModel> BuildKlee() =>
         new()
         {
+            ModelDb.Card<ProtoHoldTheLineSpark>(),
             ModelDb.Card<ProtoIttoSuperlativeSuperstrengthEither>(),
             ModelDb.Card<ProtoIttoSuperlativeSuperstrengthPriced>(),
             ModelDb.Card<ProtoKaboomSink>(),
             ModelDb.Card<ProtoPopSpark>(),
+            ModelDb.Card<ProtoPowderChargeSpark>(),
             ModelDb.Card<ProtoShinobuSanctifyingRingEither>(),
             ModelDb.Card<ProtoShinobuSanctifyingRingPriced>(),
+            ModelDb.Card<ProtoSmokeAndSparksSpark>(),
             ModelDb.Card<ProtoSparkBlast>(),
             ModelDb.Card<ProtoSparkBurstConversion>(),
             ModelDb.Card<ProtoSparkDoubleTap>(),

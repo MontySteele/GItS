@@ -155,6 +155,16 @@ SPARK_ALT_POOL_SUBS: dict[str, str] = {
     "sugar_rush": "proto_spark_blast",             # Dodoco Blast,    uncommon
     "cant_catch_me": "proto_spark_finisher",       # Firework Finale, uncommon
     "true_spark_knight": "proto_true_spark_knight",  # the Oath,      rare
+    # THE THREE HYBRID SPENDERS, MIGRATED (R224 slate item 16, EB-218). These
+    # three are NOT conversions in PICK 4's sense -- no body and no number
+    # moves. Each shipped row is a HYBRID (1 Energy AND `spend_spark 2`), and
+    # its twin here is the same card at 0 Energy, so the whole delta is that
+    # the bank alone can now reach it. Same rarity in and out (three
+    # Uncommons), so the offer odds are untouched here too, and with the flag
+    # off none of this is read.
+    "powder_charge": "proto_powder_charge_spark",        # Set It Off,   uncommon
+    "hold_the_line": "proto_hold_the_line_spark",        # Dig In,       uncommon
+    "smoke_and_sparks": "proto_smoke_and_sparks_spark",  # Powder Smoke, uncommon
 }
 BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played
 BURST_PER_REACTION = 5        # burst energy per reaction triggered
