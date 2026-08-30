@@ -184,13 +184,17 @@ deploy label from R218 on rides the pin above; live numbers were never
 comparable across a game build anyway (R95), and the sim references no game
 assembly and is unaffected.
 
-The installed build is **`0.2.1608+proto.dirty`** (2026-08-30), a dev package
-built from `eb222-badge-disposed-texture` `fa1fffe` (main `23acafd` plus the
-`EB-222` fix), carrying BOTH prototype arms — Kokomi's Kurage-memory base kit
-and Klee's Spark alternative-cost rows — behind the `-p:PrototypeCards=true`
-compile switch. It carries a whole fight: `python -m understudy.soak --runs 1
---character KLEEMOD-KLEE --max-fights 3` answers `bounded  seed=None
-actions=46  fights=3  defects=0`, reversibility log all REVERTED. Two lifecycle
+The installed build is **`0.2.1627+proto.dirty`** (2026-08-30), a dev package
+built from `kuragemem002-rerun` `10799139` — an INTEGRATION of
+`eb214-muster-keyword` and `eb216-wire-snapshot`, **neither of which is on
+`main`** — deployed for the `KURAGEMEM002` rerun and left installed. It carries
+BOTH prototype arms — Kokomi's Kurage-memory base kit and Klee's Spark
+alternative-cost rows — behind the `-p:PrototypeCards=true` compile switch.
+R225's gate: `python -m understudy.soak --runs 1 --character KLEEMOD-KLEE
+--max-fights 3` answers `bounded  seed=XAK56TVB9QDL  actions=56  fights=3
+defects=0`, reversibility log all REVERTED. Its predecessor was
+`0.2.1608+proto.dirty`, built from `eb222-badge-disposed-texture` `fa1fffe`
+(main `23acafd` plus the `EB-222` fix). Two lifecycle
 throws had capped every whole fight at one fight since `0.2.1353+proto` —
 `EB-221`, a `Deactivate` postfix resolving the local seat on a combat that has
 none (`d217b4f`), and `EB-222`, the meter cost badge painting a texture the
@@ -493,11 +497,25 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     per-row `description:` channel with the boot-time loc merge deleted
     (`EB-215`, closed 2026-08-30): one channel describes one card, and the
     generated file is right as committed.
-    `EB-214`'s BUILD half landed 2026-08-30 — Rule 1 is printed in the Muster
-    keyword's own text and R224's Charge-source line heads the click-through
-    pile view, both under the flag only, with the shipped keyword proved
-    byte-identical in a release build — and the row stays OPEN on the
-    `KURAGEMEM002` rerun.
+    **`EB-214` IS CLOSED (2026-08-30) and its rerun is GRADED.** Rule 1 is
+    printed in the Muster keyword's own text and R224's Charge-source line
+    heads the click-through pile view, both under the flag only, with the
+    shipped keyword proved byte-identical in a release build; the
+    `KURAGEMEM002` gate then ran on `0.2.1627+proto.dirty` (packet §13.9,
+    EXPERIMENTS' Graded table) and **`P3` came in at 5 of 10 qualifying turns
+    with two Musters** against a threshold of 3-with-1, where the sealed
+    `KURAGEMEM001` read 0 of 10 with 0 of six — so **`M54`(1)'s diagnosis, that
+    the failure was WORDING and not dose, is carried on its own terms**. The
+    grader's own qualification travels with it: the comprehension is
+    RETROSPECTIVE, stated in the run record as a regret rather than held before
+    the first Muster, and `P3` does not grade that. **`P1`, `P2` and `P4` read
+    UNREACHED and the display is not what returned** — the memory section was on
+    34 of 60 observation pages and the blocked page printed both halves of
+    `P4`'s question in full, but a blind run's reply schema is `command` and
+    `thinking` and never a forecast, so the tester is never ASKED what the
+    jellyfish will do next turn (`EB-228`, `EB-216`'s other half). `P5` and `P6`
+    were NOT re-posed and their sealed grades stand as published (R101b).
+    **No [USER] row opens on the round.**
     **The memory's DISPLAY is being rebuilt**: the strip the blind run
     tested was diagnosed true on both misread frames and found
     insufficient rather than defective, so [USER]'s direction turns it

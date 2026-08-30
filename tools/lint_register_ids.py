@@ -259,7 +259,11 @@ CEILINGS: dict[str, int] = {
     # (fresh / rolled-over / missing fixtures, both stop lines, both roles'
     # refusal branches with `seat._run` monkeypatched, and the under-the-line
     # case that must still reach codex). The three-calls rule is UNTOUCHED.
-    "EB": 227,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+    "EB": 228,   # EB-228 minted 2026-08-30 by the `KURAGEMEM002` rerun: the
+                 # blind-play reply schema collects no forecast, so three
+                 # display slots graded UNREACHED on a display that was
+                 # demonstrably on the page and correct.
+                 # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
                  # told the tester it had played no card.
@@ -599,7 +603,14 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # boot-time loc merge is deleted -- one channel per card.
         # 216 LEFT OPEN_IDS 2026-08-30: every blind run writes a per-turn wire
         # snapshot and a per-play meter ledger the tester never sees.
-        214,
+        # 214 LEFT OPEN_IDS 2026-08-30: the KURAGEMEM002 rerun ran and P3 came
+        # in at 5 of 10 with two Musters against a threshold of 3-with-1, which
+        # is the row's acceptance word for word. Only 214 was removed.
+        # 228 minted 2026-08-30 by that same rerun: P1, P2 and P4 all read
+        # UNREACHED because a blind run's reply schema is `command` and
+        # `thinking` and never a forecast, so a slate slot that grades one has
+        # no per-turn field to count. EB-216's other half.
+        228,
         # 220 minted 2026-08-30 -- the meter cost badge (Encore, Charge).
         220,
         # 223 minted 2026-08-30 by the relayed open-items review, fact-checked:
