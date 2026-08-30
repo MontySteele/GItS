@@ -2910,3 +2910,59 @@ per pile open. The `[WARN] [klee] No card art at …` block and the
 light portrait (it is cream on white here, and low-contrast on Water's Edge);
 whether 104px is the right size; whether the left edge is the right home. Those
 are taste, not correctness, and §14.1's five quotes are the only spec they have.
+
+### 14.11 The pile rings (`EB-201`)
+
+Run 2026-08-29 on **`0.2.1517+proto.dirty`** from the art-bearing main checkout
+at `eb201-pile-rings` (detached), game v0.111.0, `validate.ps1` OK on the whole
+gate (S7 suite 325.9s). The dirty mark is the same untracked scratch under
+`review/qa/local-sanity-2026-08-29*/` and `review/qa/two-instance/` that §14.10
+carried; it is another workstream's and not this branch's to commit.
+
+**The cause, settled off the decompile.** §14.10 left two candidates. The
+first — that the hook does not run for a pile-grid `NCard` — is **false, by
+construction**: `NCardGrid.InitGrid` builds each entry with `NCard.Create` and
+`NGridCardHolder.Create`, adds the holder to the live scroll container, and
+then calls `nCard.UpdateVisuals(_pileType, CardPreviewMode.Normal)`, which
+calls `UpdateStarCostVisuals` unconditionally; the scrolled-window reuse path
+`NCardHolder.ReassignToCard` calls the same `UpdateVisuals` again.
+
+The defect was the **rect**. An `NCard` is a `Control` whose own rect is not
+the card face: `NCardHolder.ConnectSignals` pins `CardNode.Position` to
+`Vector2.Zero` and `NCardGrid.UpdateGridPositions` places each holder at the
+CELL CENTRE, so the face is drawn centred on the node's origin — and
+`NCard.GetCurrentSize` returns the constant `defaultSize * Scale` rather than
+reading `Size`, carrying the base game's own warning that you want the HOLDER's
+size instead. The `FullRect` anchor preset therefore sized the ring to that
+rect: a `Panel` correctly parented, correctly coloured, and zero pixels wide.
+No exception, no ring — the frame §14.10 captured. (These line numbers do not
+exist: the decompile is `ilspycmd -t <FullTypeName>` to stdout, per §14.5.)
+
+**The fix is a rect and a draw order, and the hook is unchanged.** The ring
+takes `NCard.defaultSize` centred on the origin, re-applied on every paint
+because a pooled `NCard` arrives carrying whatever the last screen left on it,
+and is moved to last child so it draws over `%CardContainer` rather than under
+it. One INFO line per pile open now names how many entries were painted, so the
+next reading of this can tell a dead hook from an invisible ring without a
+second deploy.
+
+**What rendered.** Live Kokomi run, seed `V0BBVV03WPJ2`, first fight of act 1.
+The queue was built through the dev door and the bank moved with
+`set_resource`, so `bridge.GRANT_GUARDRAIL` applies to every frame here and
+nothing in this section is a measurement. Queue: Coral Guard (price 3), Gorou
+(0), Water's Edge (3), read back off the wire.
+
+| State | Board | Result |
+|---|---|---|
+| Covering bank | bank 7, queue 3 / 0 / 3 | **RENDERS.** Three blue rings. `state-f-pile-view-covering.png` |
+| Runs out | bank 3, same queue | **RENDERS.** Blue, blue, **red** on Water's Edge — the wire agrees (`run_out_index` 2). `state-e-pile-view-runs-out.png` |
+| Disarm | our pile closed, the base game's DRAW pile opened | **NO RINGS.** Its Coral Guard and Water's Edge are different instances of the same faces and carry nothing. `state-g-drawpile-disarmed.png` |
+
+**`godot.log`.** Two pile opens, each `[INFO] CardPileScreen has no info text.`
+followed by `[INFO] [klee] kurage pile ring: painted 3 of 3 entries at
+300x422.` No exception, no error and no warning from `KurageMemoryCard`,
+`KurageMemory` or `NCardPileScreen`.
+
+**Not covered.** A queue long enough to scroll — the reuse path is decompiled,
+not witnessed. Whether the ring reads against every card frame colour is
+[USER]'s eyes-on, like §14.10's other three.

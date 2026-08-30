@@ -9,6 +9,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Helpers;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.addons.mega_text;
 using MegaCrit.Sts2.Core.Nodes.Cards;
@@ -450,6 +451,31 @@ internal static class KurageMemoryCard
 /// instance that is in the projection, and a card with no ring of ours gets its
 /// ring node hidden rather than left painted -- so a pooled `NCard` reused for
 /// somebody else's deck cannot inherit a memory colour.
+///
+/// EB-201: WHY THE FIRST CUT DREW NOTHING, off the decompile rather than a
+/// guess. The HOOK was never the problem. `NCardGrid.InitGrid` builds each
+/// entry with `NCard.Create` / `NGridCardHolder.Create`, adds the holder to the
+/// live scroll container and then calls `nCard.UpdateVisuals(_pileType, ...)`,
+/// which calls `UpdateStarCostVisuals` unconditionally -- so this postfix runs
+/// once per grid card by construction, and the scrolled-window reuse path
+/// (`NCardHolder.ReassignToCard`) calls the same `UpdateVisuals` again.
+///
+/// The GEOMETRY was. An `NCard` is a `Control` whose own rect is NOT the card:
+/// `NCardHolder.ConnectSignals` pins `CardNode.Position = Vector2.Zero` and
+/// `NCardGrid.UpdateGridPositions` places each holder at the CELL CENTRE, so
+/// the face is drawn centred on the node's origin -- and `NCard.GetCurrentSize`
+/// returns the CONSTANT `defaultSize * Scale` rather than reading `Size`,
+/// carrying the base game's own warning that you want the HOLDER's size
+/// instead. A `FullRect` anchor preset therefore sized this ring to the card
+/// node's empty rect: a 0x0 Panel, correctly parented, correctly coloured, and
+/// zero pixels wide. No error, no exception, no ring -- exactly the frame
+/// sec.14.10 captured.
+///
+/// So the ring now takes its rect from `NCard.defaultSize`, the game's own
+/// constant, centred on the origin the holder pins the node to, and is moved to
+/// last child so it draws over the face rather than under it. Both halves are
+/// the same class of fix -- a rect and a draw order -- and neither re-points
+/// the hook.
 /// </summary>
 internal static class KurageMemoryPileRing
 {
@@ -466,9 +492,32 @@ internal static class KurageMemoryPileRing
     private static Dictionary<CardModel, KurageMemory.EntryState> _projection
         = new();
 
+    /// <summary>Entries painted since the last <see cref="Arm"/>, so one line
+    /// of live evidence says whether the hook reached the grid at all. This is
+    /// the reading EB-201 had to deploy twice to get.</summary>
+    private static readonly HashSet<string> _painted = new();
+
+    private static bool _reported;
+
     /// <summary>The pile we opened, so `_ExitTree` can tell it from any
     /// other.</summary>
     internal static CardPile? OpenPile => _pile;
+
+    /// <summary>
+    /// The ring's rect in the card node's own coordinates: the card face, from
+    /// the base game's constant, CENTRED on the origin -- see the EB-201 note
+    /// on the class for why it cannot be an anchor preset. Pure, so the one
+    /// thing about this element a headless test can reach is the thing that
+    /// was wrong.
+    /// </summary>
+    internal static Rect2 RingRect() => RectFor(NCard.defaultSize);
+
+    /// <summary>The centring arithmetic, split out from the constant it reads
+    /// so a headless test can assert the VALUE. Touching `NCard` at all is not
+    /// headless: its static constructor builds `StringName`s and takes the
+    /// process down outside the engine, which is why the split exists.</summary>
+    internal static Rect2 RectFor(Vector2 cardSize)
+        => new Rect2(-cardSize * 0.5f, cardSize);
 
     internal static void Arm(
         CardPile pile,
@@ -476,12 +525,16 @@ internal static class KurageMemoryPileRing
     {
         _pile = pile;
         _projection = projection;
+        _painted.Clear();
+        _reported = false;
     }
 
     internal static void Disarm()
     {
         _pile = null;
         _projection = new Dictionary<CardModel, KurageMemory.EntryState>();
+        _painted.Clear();
+        _reported = false;
     }
 
     internal static void Paint(NCard nCard)
@@ -507,10 +560,23 @@ internal static class KurageMemoryPileRing
                 MouseFilter = Control.MouseFilterEnum.Ignore,
             };
             nCard.AddChildSafely(ring);
-            // FullRect rather than a measured size: the ring then covers the
-            // card's own rect whatever `NCard.defaultSize` and Scale are doing,
-            // with no geometry of ours to drift against the base game's.
-            ring.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        }
+
+        // The rect, every paint rather than only on creation: a pooled `NCard`
+        // reaches us with whatever the last screen left on it.
+        // No anchor preset at all: a `Control` is created with its anchors at
+        // zero, so Position and Size ARE the rect and nothing recomputes them
+        // against a parent whose own rect is empty. That recompute is the bug.
+        var rect = RingRect();
+        ring.Position = rect.Position;
+        ring.Size = rect.Size;
+
+        // Draw order. The face lives in `%CardContainer`, an earlier child, so
+        // last child is over it -- the same idiom `NCard.ActivateRewardScreenGlow`
+        // uses in the other direction to put a glow UNDER the frame.
+        if (ring.GetParent() == nCard)
+        {
+            nCard.MoveChildSafely(ring, nCard.GetChildCount() - 1);
         }
 
         // Payable is blue; RunsOut and Held are BOTH red -- that is the whole
@@ -527,6 +593,23 @@ internal static class KurageMemoryPileRing
 
         ring.Visible = true;
         ring.AddThemeStyleboxOverride(PanelStyleBox, style);
+
+        Report(card);
+    }
+
+    /// <summary>One INFO line per pile open, once the whole projection has been
+    /// reached. It is the evidence, not decoration: a silent log is a hook that
+    /// did not run, and that is the distinction EB-201 could not make from a
+    /// frame.</summary>
+    private static void Report(CardModel card)
+    {
+        _painted.Add(card.Id.ToString() + "#" + card.GetHashCode());
+        if (_reported || _painted.Count < _projection.Count) return;
+
+        _reported = true;
+        Log.Info($"[{KleeMod.ModId}] kurage pile ring: painted "
+               + $"{_painted.Count} of {_projection.Count} entries at "
+               + $"{RingRect().Size.X}x{RingRect().Size.Y}.");
     }
 }
 

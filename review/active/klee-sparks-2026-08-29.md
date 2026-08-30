@@ -1591,92 +1591,70 @@ fail to show a decision that is INDEPENDENT of the prices. It is a design call,
 so it goes on the pick list at §11.7 item 1 as option (e) rather than being
 settled here.
 
-### 11.7 What goes back to [USER] — numbered picks, never blanks
+### 11.7 What went back to [USER] — ANSWERED by R222 (2026-08-29)
 
-1. **P1 missed, so PICK 4 is reopened by its own registered decision. Which
-   way?** The tight set is too thin at the cheap end: two cards priced 1 in one
-   hand read as "take the bigger number", not as a choice.
-   *(a) option 2 — add the Rare cut to the conversion list, so the set gets a
-   sink at a price that is not 1 or 2; (b) option 3 — ADD the priced rows rather
-   than converting, so the pool grows and the cheap end is less crowded;
-   (c) re-price rather than re-count: move Fwoosh! or Ka-pow! off 1 so two
-   1-priced cards cannot sit in the same hand; (d) leave the set as built and
-   let whole-fight play answer it instead; (e) re-author one or two sinks away
-   from damage — Bomb manipulation, setup, targeting, draw/exhaust or another
-   qualitative payoff — so that two Spark destinations differ in KIND and not
-   only in number.*
-   **Relayed review argues (d), and disputes the trigger:** on its reading `P1`
-   MISSED on an instrument that could not reach its own threshold (§11.5
-   erratum, `EB-202`), so the MISS is kept for audit and is *"not a trigger to
-   add/reprice cards"* — leave the set intact and let whole-fight play answer
-   it. It proposes (e) as the thing to do IF whole-fight play still reduces to
-   damage-per-Spark. Answering (a), (b) or (c) means ruling that the fire
-   stands despite the erratum, which is [USER]'s to say.
-2. **P4 split, and I will not close PICK 1 on boards I stacked.** Both
-   empty-bank boards had the generator in hand, so "it reads as a plan" is
-   partly my staging.
-   *(a) re-run two boards with the sink and NO generator before touching PICK 1;
-   (b) accept the plan reading and close PICK 1 as answered; (c) take option 4's
-   honest dead-turn anyway, on the grounds that a starter should not depend on
-   drawing its one generator.*
-   **Relayed review argues (a)**, as a sanity check only: the meaningful test of
-   a dry sink is how OFTEN it happens across a fight and whether it frustrates,
-   which a staged single turn cannot ask.
-3. **The Rare Power: informative face, uninteresting turn.** Two of three
-   readers found nothing to weigh on its boards, and the independent seat's form
-   was refused for having no second line at all.
-   *(a) leave it as built and re-read it in whole-fight play, where a bank has a
-   history; (b) reopen §5's wording for a face that suggests what to hold for;
-   (c) reopen the price — 3 per Attack against an income near 1 per turn is a
-   card that does nothing for three turns; (d) pull it from the slice and grade
-   the seven card rows alone.*
-   **Relayed review argues (a):** re-read it in whole-fight play, where a bank
-   has a history, before touching its wording or its price.
-4. **The tester seat, on the seat's own RETURN.**
-   *(a) keep Qwen in the tester seat and fix the two mechanical faults first —
-   teach the form to carry a target, and put "which cards need a target" on the
-   packet; (b) keep the seat but require a Codex spot-check on EVERY turn until
-   it stops failing replays, which is an answer to `M58` as well; (c) take the
-   seat out of the funnel until the two faults are fixed; (d) leave it and
-   accept that a quarter of its lines are untested; (e) remove the seat as a
-   DECIDING tester until it is repaired AND requalified, while allowing it to
-   keep reading in SHADOW — its forms recorded and never graded — so the
-   repair has evidence to be measured against.*
-   **Relayed review argues (e)**, and attaches a condition: requalification on
-   a battery covering target selection, printed costs and intent sensitivity,
+**All seven items are ruled.** [USER] countersigned the relayed review's column
+whole, verbatim: *"Yep, agreed on those items - please proceed"* — recorded as
+ONE slate under **R222**, the day's SECOND batch, because R221 had already been
+merged when these answers arrived. Each item below carries the option that was
+taken; the unchosen options are gone from HEAD, and the relayed review's
+argument is kept beside each answer because it is the record of why.
+
+1. **P1 missed, and PICK 4 does NOT reopen. → (d): leave the set as built and
+   let whole-fight play answer it.** No repricing and no enlargement come out of
+   `P1`. The published MISS stands as an audit record (R101b) and is an
+   INSTRUMENT defect, BACKLOG `EB-202` — the threshold of 4 was unreachable on a
+   board set that could pose the question on at most three boards (§11.5
+   erratum). **The registered decision-fire is therefore NOT a trigger**, and
+   PICK 4 is not reopened.
+   **Relayed review, adopted:** *"Keep the recorded MISS for audit purposes, but
+   treat it as an instrument defect — not a trigger to add/reprice cards."* Its
+   option (e) — re-author one or two sinks away from damage — remains what to do
+   IF whole-fight play still reduces to damage-per-Spark, and is not ruled here.
+2. **P4 split, and PICK 1 does not close on boards I stacked. → (a): re-run two
+   boards with the sink and NO generator, as a sanity check only.**
+   **Relayed review, adopted:** the sanity check is a sanity check; the
+   meaningful test of a dry sink is how OFTEN it happens across a fight and
+   whether it frustrates, which a staged single turn cannot ask. The
+   whole-fight starter test is the real one, and the dry-sink boards ride the
+   minimal repaired staged round at item 7.
+3. **The Rare Power: informative face, uninteresting turn. → (a): leave it as
+   built and re-read it in whole-fight play.** Its face is legible — that is what
+   `P3` PREDICTED — and an investment Power needs fight history before its
+   wording or its price can be judged. Neither §5's wording nor the price of 3
+   is reopened.
+   **Relayed review, adopted** as written.
+4. **The tester seat, on the seat's own RETURN. → (e): the local seat is REMOVED
+   as a DECIDING tester until it is repaired AND requalified, and reads in
+   SHADOW meanwhile — forms recorded, never graded.** The measurement half is
+   law and is written into `EXPERIMENTS.md` under R222 B; the mechanical half of
+   the fault is BACKLOG `EB-203`.
+   **Relayed review, adopted with its condition:** requalification runs on a
+   battery covering target selection, printed costs and intent sensitivity,
    because *"fixing `target: null` alone does not address its semantic
-   failures."* The battery is a seat question and is noted on QUEUE `M62`; the
-   mechanical half of the fault is BACKLOG `EB-203`.
-5. **`M58` — WITHDRAWN as a pick, 2026-08-29 (hygiene).** It asked what the
-   Codex spot-check rate should be. `M58` was **ANSWERED by R220 G at N = 4**
-   before this section was written, and its QUEUE row is closed and gone from
-   HEAD — verified at `docs/current/STATE.md:491`, `EXPERIMENTS.md`'s R221 A
-   text, and no surviving `M58` row in `QUEUE.md`. §11.0's third disclosure is
-   unchanged: the round did use the default, and it does not bear on the rate.
-   The numbering below is left as published so citations to items 6 and 7 keep
-   their targets. *(Relayed review: "stale, M58 was answered by R220 G (N = 4)
-   — REMOVE the pick." Confirmed.)*
-6. **The 40-versus-25 win diagnostic.** Not quotable, not a balance claim, and
-   not ignorable either.
-   *(a) treat it as an artefact of §10.5's pilot blind spots and teach the probe
-   playability first (which P5's registered decision already asks for), then
-   re-read; (b) treat it as a signal about the prices and re-price before any
-   further reading; (c) do neither until whole-fight play has run; (d) take (a) and then
-   RE-REGISTER the probe on normalized metrics — `spent / available Sparks`
-   and `affordable sinks skipped` per turn — rather than the raw per-turn
-   spend rate, which §11.5's `P5` note shows is confounded by fight length and
-   by income.*
-   **Relayed review argues (a) as amended by (d)**: fix pilot playability
-   first, then re-register a normalized probe, and *do not* reprice on the
-   40-versus-25 figure — normalized, the ON arm spent ~91% of what it
+   failures."* `M62` carried both halves and is ANSWERED by R222 — the criterion
+   is **≥ 6/8 over one round** AND that battery, together, as the seat's return
+   condition.
+5. **`M58` — WITHDRAWN as a pick, 2026-08-29 (hygiene), and it stays withdrawn.**
+   It asked what the Codex spot-check rate should be. `M58` was **ANSWERED by
+   R220 G at N = 4** before this section was written, and its QUEUE row is closed
+   and gone from HEAD. §11.0's third disclosure is unchanged: the round did use
+   the default, and it does not bear on the rate. The numbering here is left as
+   published so citations to items 6 and 7 keep their targets. *(Relayed review:
+   "stale, M58 was answered by R220 G (N = 4) — REMOVE the pick." Confirmed.)*
+6. **The 40-versus-25 win diagnostic. → (d): teach the probe playability first,
+   THEN re-register it on normalized metrics.** No repricing comes out of the
+   40-versus-25 figure. The re-registration's metrics are fixed now and are
+   recorded in `EXPERIMENTS.md` as the `P5` rerun's metrics-to-be:
+   **`spent / available Sparks`** and **`affordable sinks skipped` per turn**,
+   in place of the raw per-turn spend rate.
+   **Relayed review, adopted:** normalized, the ON arm spent ~91% of what it
    generated against OFF's ~88%, so the raw fall is a consumption artefact and
    not evidence about the prices.
-7. **What runs next.** The pair read asked for whole-fight play by name.
-   *(a) whole-fight blind play on the Sparks arm, Codex seat, as the next thing;
-   (b) a round 2 of staged turns on the two RETURNED rows (`t02`'s Fwoosh! and
-   `t06`'s AoE pair) on repaired boards first; (c) both, in that order;
-   (d) hold the arm until picks 1 and 3 are settled.*
-   **Relayed review argues (c)**, in that order and with the round-2 half kept
-   minimal: whole-fight Codex play first, then a repaired staged round covering
-   the dry sink with NO generator in hand and a genuinely multi-enemy board for
-   the two AoE rows.
+7. **What runs next. → (c): whole-fight Codex play FIRST, then a minimal
+   repaired staged round.** The repaired round covers the dry sink with NO
+   generator in hand (item 2) and a genuinely multi-enemy board for the two AoE
+   rows. The order is a REGISTRATION PRECONDITION, not a preference: the arm's
+   next staged round may not be registered until the whole-fight Codex play has
+   run. `EXPERIMENTS.md` carries it.
+   **Relayed review, adopted** in that order, with the round-2 half kept minimal.

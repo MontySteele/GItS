@@ -129,7 +129,11 @@ CEILINGS: dict[str, int] = {
     # EB-202/EB-203 minted 2026-08-29 by the KLEESPARK-R1 relayed review:
     # a slot whose threshold the board set could not reach, and a form
     # whose play line is never checked for a target before it is graded.
-    "EB": 203,   # EB-201 minted 2026-08-29 by EB-198's live acceptance: the
+    "EB": 205,   # EB-205 minted 2026-08-29 by R222 pick 6(d): the Klee Spark
+                 # arm became DRAFTABLE (the pool seam) and has never been
+                 # measured drafted. 202-204 are other branches of the same
+                 # sitting; this branch took the next free number above them.
+                 # EB-201 minted 2026-08-29 by EB-198's live acceptance: the
                  # pile view's affordability rings never paint, on a hook that
                  # binds without error and a pile that demonstrably opens.
                  # EB-196/197 minted 2026-08-29 by the Gate B diagnosis. 196:
@@ -393,17 +397,17 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         156, 157, 158, 159, 160, 161, 162, 163,
         180, 181, 182, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
-        # 201 minted 2026-08-29 by EB-198's live acceptance: the pile view's
-        # affordability rings never paint.
-        201,
         # 202/203 were minted 2026-08-29 by the KLEESPARK-R1 relayed review
         # and LEFT OPEN_IDS with their rows the same day, both BUILT under
         # R222: the slot-reachability check (`understudy/slot_plan.py`, a
         # round's `slots.yaml`, refused by `round --plan-only` and
         # `staged_turn check`) and the pre-grade target refusal
         # (`understudy/targeting.py`, falsifier `target_missing`). The repair
-        # half stayed out of both and is QUEUE `M63`. The ceiling stays at
-        # 203, because ceilings never come down.
+        # half stayed out of both and is QUEUE `M63`. Ceilings never come
+        # down.
+        # 205 minted 2026-08-29 by R222 pick 6(d): a drafted arm for the
+        # Klee Spark economy, now that the drafter can be offered the rows.
+        205,
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,
@@ -419,16 +423,12 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # slate rows R220 mints.
     # M61 left 2026-08-29, answered the day it was minted: the build is
     # option 3 and the element is local-seat only.
-    # M62 minted 2026-08-29 by R221 A: the criterion that retires the
-    # fresh-Opus control form to the spot-check rate. KLEESPARK-R1 read
-    # 4/8, so the control stays on under every option; the row fixes the
-    # number that would take it off.
+    # M62 and M63 closed 2026-08-29 by R222 B and R222 C -- the seat's
+    # return condition (>= 6/8 over one round AND the requalification
+    # battery) and "refuse only, never repair". Both rows left HEAD in
+    # that commit, so both numbers leave this manifest with them.
     "M": frozenset({10, 13, 14, 16, 19, 26, 45, 47, 49, 50, 52,
-                    54, 55, 56, 57, 59, 60, 62,
-                    # M63 minted 2026-08-29: may the funnel repair a filed
-                    # form? EB-203 refuses one; repairing one edits a
-                    # grader's answer, which is measurement law.
-                    63}),
+                    54, 55, 56, 57, 59, 60}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
