@@ -1,0 +1,90 @@
+{
+ "log_dir": "understudy\\logs\\blindplay\\kleespark-w4",
+ "turns": 86,
+ "combat_turns": 50,
+ "partition": {
+  "power_page": null,
+  "pre_pages": 50,
+  "post_pages": 0,
+  "power_active_pages": 0,
+  "power_drawn": true
+ },
+ "W1'''": {
+  "slot": "W1'''",
+  "value": 0,
+  "pre_power_pages": 50,
+  "grade": "MISS",
+  "hits": [],
+  "post_power_count_recorded_not_graded": 0,
+  "post_power_pages": 0,
+  "post_power_hits": [],
+  "denominator_ge_30": true
+ },
+ "K1'''": {
+  "slot": "K1'''",
+  "value": 0,
+  "grade": "UNREACHED",
+  "why": "the Power never resolved",
+  "denominator_post_power_pages_bank_ge_3": 0,
+  "denominator_turns": [],
+  "hits": []
+ },
+ "K2'''": {
+  "slot": "K2'''",
+  "grade": "UNREACHED",
+  "half_i_cost_corner": "UNREACHED",
+  "half_i_post_power_pages_printing_an_attack": 0,
+  "half_i_failures": [],
+  "half_ii_energy_is_skill_currency": "FAIL",
+  "half_ii_turns": [],
+  "plays_post_power": []
+ },
+ "K3'''": {
+  "slot": "K3'''",
+  "value": 0,
+  "grade": "UNREACHED",
+  "crowding_denominator": 0,
+  "posed": [],
+  "share_taken_by_converted_attack_recorded_not_graded": null
+ },
+ "K4'''": {
+  "slot": "K4'''",
+  "grade": "NOT GRADED",
+  "a_power_drawn": true,
+  "a_power_page": null,
+  "a_power_active_pages": 0,
+  "b_attack_share_pre_power": {
+   "plays": 34,
+   "attacks": 11,
+   "pct": 32.35294117647059
+  },
+  "b_attack_share_post_power": {
+   "plays": 0,
+   "attacks": 0,
+   "pct": null
+  },
+  "b_attack_share_whole_session": {
+   "plays": 39,
+   "attacks": 15,
+   "pct": 38.46153846153847
+  },
+  "c_fights": 6,
+  "c_peaks": [
+   3,
+   13,
+   8,
+   3,
+   8,
+   0
+  ],
+  "c_median_peak_bank": 5.5,
+  "c_pages_per_fight": [
+   7,
+   6,
+   8,
+   14,
+   11,
+   4
+  ]
+ }
+}

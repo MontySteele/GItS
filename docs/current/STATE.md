@@ -689,12 +689,15 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     nineteen, and `W2''`/`W3''` MISSED with their registered precondition
     (`W1''` PREDICTED) unmet, so **no re-price and no new sink row comes off
     it** and the registered next unit is a LONGER BATCH at the same deck,
-    bounded by the Codex cap rather than by the game. **The next Klee read is `KLEESPARK-W4`, DRAFTED 2026-08-30, COUNTERSIGNED by R227 and NOT RUN — it is next at game time**
-    (§19; `EB-223`): one session that grants `proto_true_spark_knight` on top of
-    `W3`'s exact derived deck — the Power moves neither side of the 1.600 ratio —
-    so R222 (a)'s owed whole-fight read of the strict Rare Power and `W1''`'s
-    registered longer batch are served at once, their linkages held apart by a
-    pre-Power / post-Power page partition, at 80 actions on a Codex cap of 90.
+    bounded by the Codex cap rather than by the game. **`KLEESPARK-W4` RAN AND
+    IS GRADED (2026-08-30, dev build `0.2.1676+proto.dirty`, seed
+    `KGU5LKM77PB5`, 80 of 80 actions over six fights and 50 combat pages,
+    86 Codex calls of 90): 0 PREDICTED / 1 MISS (`W1'''` at 0 of 50 pre-Power
+    pages, denominator ≥ 30, so its pick between §14.3's options returns to
+    [USER]) / 3 UNREACHED — `proto_true_spark_knight` was drawn on seven pages
+    and never played, so §5 is NOT reopened, the ADVANCE-to-sheet candidate is
+    neither reached nor refused, and `EB-223` CLOSES on its own acceptance**
+    (§19 registration, §20 results).
     Then *Bag of Tricks* (`EB-224`), whose row is now BUILT in both
     engines on `EB-182`'s mode-head price — the first card in the repo to
     use the half of R225's amended clause that admits a price inside a

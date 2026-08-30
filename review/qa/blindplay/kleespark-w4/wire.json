@@ -1,0 +1,7143 @@
+{
+ "session_id": "kleespark-w4",
+ "snapshots": [
+  {
+   "index": 1,
+   "verb": "play",
+   "command": "play \"Powder Pop (1)\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 73,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "name": "Powder Smoke",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-SNAP",
+     "name": "Snap!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 19,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 44,
+     "max_hp": 44,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "verb": "play",
+   "command": "play \"Powder Pop\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 73,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "name": "Powder Smoke",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-SNAP",
+     "name": "Snap!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 19,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 44,
+     "max_hp": 44,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "verb": "play",
+   "command": "play \"Powder Smoke\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 73,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "name": "Powder Smoke",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 2,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-SNAP",
+     "name": "Snap!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 19,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 44,
+     "max_hp": 44,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "card_name": "Powder Smoke",
+     "before": 2,
+     "price_paid": 2,
+     "gains": {},
+     "after": 0,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+       "delta": -2,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "verb": "play",
+   "command": "play \"Kaboom!\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 73,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-SNAP",
+     "name": "Snap!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 19,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 44,
+     "max_hp": 44,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 0
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "verb": "play",
+   "command": "play \"Snap!\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 73,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-SNAP",
+     "name": "Snap!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 19,
+    "discard": 4,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 20,
+     "max_hp": 44,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SNAP",
+     "card_name": "Snap!",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SNAP": 1
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SNAP",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 73,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [],
+   "piles": {
+    "draw": 19,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 11,
+     "max_hp": 44,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "11",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 7,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Seapunk\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_POWDER_CHARGE_SPARK",
+     "name": "Set It Off",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 2,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 14,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SEAPUNK_0",
+     "name": "Seapunk",
+     "hp": 11,
+     "max_hp": 44,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "2x4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {},
+     "after": 3,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "verb": "play",
+   "command": "play \"Skip and Hop\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-SKIP_AND_HOP",
+     "name": "Skip and Hop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-ALL_MY_TREASURES",
+     "name": "All of My Treasures!",
+     "kind": "Skill",
+     "energy_cost": "3",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 20,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "verb": "play",
+   "command": "play \"Powder Pop (1)\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 73,
+   "block": 2,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-ALL_MY_TREASURES",
+     "name": "All of My Treasures!",
+     "kind": "Skill",
+     "energy_cost": "3",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 20,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "verb": "play",
+   "command": "play \"Powder Pop\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 73,
+   "block": 2,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-ALL_MY_TREASURES",
+     "name": "All of My Treasures!",
+     "kind": "Skill",
+     "energy_cost": "3",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 20,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 11,
+   "verb": "play",
+   "command": "play \"All of My Treasures!\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 73,
+   "block": 2,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-ALL_MY_TREASURES",
+     "name": "All of My Treasures!",
+     "kind": "Skill",
+     "energy_cost": "3",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 20,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-ALL_MY_TREASURES",
+     "card_name": "All of My Treasures!",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-ALL_MY_TREASURES": 2
+     },
+     "after": 5,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-ALL_MY_TREASURES",
+       "delta": 2,
+       "bank_before": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 12,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 73,
+   "block": 2,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 15,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 5
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 20,
+    "discard": 3,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 37,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-ALL_MY_TREASURES",
+     "card_name": "All of My Treasures!",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-ALL_MY_TREASURES": 2,
+      "relic:pounding_surprise/detonation": 8
+     },
+     "after": 13,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-ALL_MY_TREASURES",
+       "delta": 2,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 5
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 6
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 7
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 8
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 9
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 10
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 11
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 12
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 13,
+   "verb": "play",
+   "command": "play \"Da-da-da!\" on \"Sludge Spinner\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 58,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 15,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 13,
+     "WEAK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DA_DA_DA",
+     "name": "Da-da-da!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AllEnemies",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-HOT_HANDS",
+     "name": "Hot Hands",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POWDER_CHARGE_SPARK",
+     "name": "Set It Off",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 2,
+     "spark_affordable": true
+    }
+   ],
+   "piles": {
+    "draw": 15,
+    "discard": 4,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SLUDGE_SPINNER_0",
+     "name": "Sludge Spinner",
+     "hp": 7,
+     "max_hp": 37,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-ALL_MY_TREASURES",
+     "card_name": "All of My Treasures!",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-ALL_MY_TREASURES": 2,
+      "relic:pounding_surprise/detonation": 8
+     },
+     "after": 13,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-ALL_MY_TREASURES",
+       "delta": 2,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 5
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 6
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 7
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 8
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 9
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 10
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 11
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 12
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-DA_DA_DA",
+     "card_name": "Da-da-da!",
+     "before": 13,
+     "price_paid": 0,
+     "gains": {},
+     "after": 13,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 14,
+   "verb": "play",
+   "command": "play \"All of My Treasures!\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 58,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "REGEN_POWER": 5
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-BOMB_VOYAGE",
+     "name": "Bomb Voyage",
+     "kind": "Skill",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "name": "Powder Smoke",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-QUICK_FUSE",
+     "name": "Quick Fuse",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-ALL_MY_TREASURES",
+     "name": "All of My Treasures!",
+     "kind": "Skill",
+     "energy_cost": "3",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 21,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-ALL_MY_TREASURES",
+     "card_name": "All of My Treasures!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-ALL_MY_TREASURES": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-ALL_MY_TREASURES",
+       "delta": 2,
+       "bank_before": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 15,
+   "verb": "play",
+   "command": "play \"Quick Fuse\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 58,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "REGEN_POWER": 5,
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-BOMB_VOYAGE",
+     "name": "Bomb Voyage",
+     "kind": "Skill",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "name": "Powder Smoke",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 2,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-QUICK_FUSE",
+     "name": "Quick Fuse",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 21,
+    "discard": 0,
+    "exhaust": 1
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-ALL_MY_TREASURES",
+     "card_name": "All of My Treasures!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-ALL_MY_TREASURES": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-ALL_MY_TREASURES",
+       "delta": 2,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-QUICK_FUSE",
+     "card_name": "Quick Fuse",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 6
+     },
+     "after": 8,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 4
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 5
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 6
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 7
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 16,
+   "verb": "play",
+   "command": "play \"Powder Smoke\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 58,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "REGEN_POWER": 5,
+     "SPARK_POWER": 8
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-BOMB_VOYAGE",
+     "name": "Bomb Voyage",
+     "kind": "Skill",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "name": "Powder Smoke",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 2,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 21,
+    "discard": 1,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-ALL_MY_TREASURES",
+     "card_name": "All of My Treasures!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-ALL_MY_TREASURES": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-ALL_MY_TREASURES",
+       "delta": 2,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-QUICK_FUSE",
+     "card_name": "Quick Fuse",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 6
+     },
+     "after": 8,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 4
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 5
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 6
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 7
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "card_name": "Powder Smoke",
+     "before": 8,
+     "price_paid": 2,
+     "gains": {},
+     "after": 6,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+       "delta": -2,
+       "bank_before": 8
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 17,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 58,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "REGEN_POWER": 5,
+     "SPARK_POWER": 6
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-BOMB_VOYAGE",
+     "name": "Bomb Voyage",
+     "kind": "Skill",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 21,
+    "discard": 2,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-ALL_MY_TREASURES",
+     "card_name": "All of My Treasures!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-ALL_MY_TREASURES": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-ALL_MY_TREASURES",
+       "delta": 2,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-QUICK_FUSE",
+     "card_name": "Quick Fuse",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 6
+     },
+     "after": 8,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 4
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 5
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 6
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 7
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "card_name": "Powder Smoke",
+     "before": 8,
+     "price_paid": 2,
+     "gains": {},
+     "after": 6,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+       "delta": -2,
+       "bank_before": 8
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 18,
+   "verb": "play",
+   "command": "play \"Powder Pop\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "REGEN_POWER": 4,
+     "SPARK_POWER": 6
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_POWDER_CHARGE_SPARK",
+     "name": "Set It Off",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 2,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_TRUE_SPARK_KNIGHT",
+     "name": "Spark Knight's Oath",
+     "kind": "Power",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KAEYA_FROSTGNAW",
+     "name": "Kaeya \u2014 Frostgnaw",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 16,
+    "discard": 4,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-ALL_MY_TREASURES",
+     "card_name": "All of My Treasures!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-ALL_MY_TREASURES": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-ALL_MY_TREASURES",
+       "delta": 2,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-QUICK_FUSE",
+     "card_name": "Quick Fuse",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 6
+     },
+     "after": 8,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 4
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 5
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 6
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 7
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "card_name": "Powder Smoke",
+     "before": 8,
+     "price_paid": 2,
+     "gains": {},
+     "after": 6,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+       "delta": -2,
+       "bank_before": 8
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 6,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 7,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 6
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 19,
+   "verb": "play",
+   "command": "play \"Set It Off\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "REGEN_POWER": 4,
+     "SPARK_POWER": 7
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_POWDER_CHARGE_SPARK",
+     "name": "Set It Off",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 2,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_TRUE_SPARK_KNIGHT",
+     "name": "Spark Knight's Oath",
+     "kind": "Power",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KAEYA_FROSTGNAW",
+     "name": "Kaeya \u2014 Frostgnaw",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 16,
+    "discard": 5,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "5x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-ALL_MY_TREASURES",
+     "card_name": "All of My Treasures!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-ALL_MY_TREASURES": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-ALL_MY_TREASURES",
+       "delta": 2,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-QUICK_FUSE",
+     "card_name": "Quick Fuse",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 6
+     },
+     "after": 8,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 4
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 5
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 6
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 7
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "card_name": "Powder Smoke",
+     "before": 8,
+     "price_paid": 2,
+     "gains": {},
+     "after": 6,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+       "delta": -2,
+       "bank_before": 8
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 6,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 7,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 6
+      }
+     ]
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_POWDER_CHARGE_SPARK",
+     "card_name": "Set It Off",
+     "before": 7,
+     "price_paid": 2,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 6,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POWDER_CHARGE_SPARK",
+       "delta": -2,
+       "bank_before": 7
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 20,
+   "verb": "play",
+   "command": "play \"Kaeya \u2014 Frostgnaw\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "REGEN_POWER": 4,
+     "SPARK_POWER": 6
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_TRUE_SPARK_KNIGHT",
+     "name": "Spark Knight's Oath",
+     "kind": "Power",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KAEYA_FROSTGNAW",
+     "name": "Kaeya \u2014 Frostgnaw",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 16,
+    "discard": 6,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 13,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7x2",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 21,
+   "verb": "play",
+   "command": "play \"Snap!\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WARM_GLOW",
+     "name": "Warm Glow",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KAEYA_FROSTGNAW",
+     "name": "Kaeya \u2014 Frostgnaw",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POWDER_CHARGE_SPARK",
+     "name": "Set It Off",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-SNAP",
+     "name": "Snap!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 22,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 55,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SNAP",
+     "card_name": "Snap!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SNAP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SNAP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 22,
+   "verb": "play",
+   "command": "play \"Kaeya \u2014 Frostgnaw\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1,
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WARM_GLOW",
+     "name": "Warm Glow",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KAEYA_FROSTGNAW",
+     "name": "Kaeya \u2014 Frostgnaw",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POWDER_CHARGE_SPARK",
+     "name": "Set It Off",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 22,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 48,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SNAP",
+     "card_name": "Snap!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SNAP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SNAP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KAEYA_FROSTGNAW",
+     "card_name": "Kaeya \u2014 Frostgnaw",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 23,
+   "verb": "play",
+   "command": "play \"Kaboom!\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1,
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WARM_GLOW",
+     "name": "Warm Glow",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POWDER_CHARGE_SPARK",
+     "name": "Set It Off",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 22,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 36,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SNAP",
+     "card_name": "Snap!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SNAP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SNAP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KAEYA_FROSTGNAW",
+     "card_name": "Kaeya \u2014 Frostgnaw",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 24,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1,
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WARM_GLOW",
+     "name": "Warm Glow",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_POWDER_CHARGE_SPARK",
+     "name": "Set It Off",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    }
+   ],
+   "piles": {
+    "draw": 22,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 28,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SNAP",
+     "card_name": "Snap!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SNAP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SNAP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KAEYA_FROSTGNAW",
+     "card_name": "Kaeya \u2014 Frostgnaw",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 25,
+   "verb": "play",
+   "command": "play \"Duck and Cover (1)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1,
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "name": "Powder Smoke",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 17,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 28,
+     "max_hp": 55,
+     "block": 10,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "5x2",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SNAP",
+     "card_name": "Snap!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SNAP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SNAP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KAEYA_FROSTGNAW",
+     "card_name": "Kaeya \u2014 Frostgnaw",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 26,
+   "verb": "play",
+   "command": "play \"Duck and Cover\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 6,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1,
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "name": "Powder Smoke",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 17,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 28,
+     "max_hp": 55,
+     "block": 10,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "5x2",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SNAP",
+     "card_name": "Snap!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SNAP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SNAP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KAEYA_FROSTGNAW",
+     "card_name": "Kaeya \u2014 Frostgnaw",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 27,
+   "verb": "play",
+   "command": "play \"Kaboom!\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 12,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1,
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "name": "Powder Smoke",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 17,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 28,
+     "max_hp": 55,
+     "block": 10,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "5x2",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 28,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 12,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1,
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "name": "Powder Smoke",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 17,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 28,
+     "max_hp": 55,
+     "block": 2,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "5x2",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 29,
+   "verb": "play",
+   "command": "play \"Powder Pop (1)\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1,
+     "SPARK_POWER": 1,
+     "FRAIL_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-ALL_MY_TREASURES",
+     "name": "All of My Treasures!",
+     "kind": "Skill",
+     "energy_cost": "3",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_HOLD_THE_LINE_SPARK",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-FLAME_ON_THE_WICK",
+     "name": "Flame on the Wick",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 12,
+    "discard": 10,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 28,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "14",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 30,
+   "verb": "play",
+   "command": "play \"Powder Pop\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1,
+     "SPARK_POWER": 2,
+     "FRAIL_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-ALL_MY_TREASURES",
+     "name": "All of My Treasures!",
+     "kind": "Skill",
+     "energy_cost": "3",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_HOLD_THE_LINE_SPARK",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 2,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-FLAME_ON_THE_WICK",
+     "name": "Flame on the Wick",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 12,
+    "discard": 11,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 28,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "10",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 31,
+   "verb": "play",
+   "command": "play \"Dig In\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 15,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1,
+     "SPARK_POWER": 3,
+     "FRAIL_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-ALL_MY_TREASURES",
+     "name": "All of My Treasures!",
+     "kind": "Skill",
+     "energy_cost": "3",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_HOLD_THE_LINE_SPARK",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true,
+     "spark_price": 2,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-FLAME_ON_THE_WICK",
+     "name": "Flame on the Wick",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 12,
+    "discard": 12,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 28,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "10",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-PROTO_HOLD_THE_LINE_SPARK",
+     "card_name": "Dig In",
+     "before": 3,
+     "price_paid": 2,
+     "gains": {},
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_HOLD_THE_LINE_SPARK",
+       "delta": -2,
+       "bank_before": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 32,
+   "verb": "play",
+   "command": "play \"All of My Treasures!\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 9,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 15,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1,
+     "SPARK_POWER": 1,
+     "FRAIL_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-ALL_MY_TREASURES",
+     "name": "All of My Treasures!",
+     "kind": "Skill",
+     "energy_cost": "3",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-FLAME_ON_THE_WICK",
+     "name": "Flame on the Wick",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 12,
+    "discard": 13,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 28,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "10",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 10,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-ALL_MY_TREASURES",
+     "card_name": "All of My Treasures!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-ALL_MY_TREASURES": 2
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-ALL_MY_TREASURES",
+       "delta": 2,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 33,
+   "verb": "play",
+   "command": "play \"Flame on the Wick\" on \"Punch Construct\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 9,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 20,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "STRENGTH_POWER": 1,
+     "DEXTERITY_POWER": 1,
+     "SPARK_POWER": 3,
+     "FRAIL_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-FLAME_ON_THE_WICK",
+     "name": "Flame on the Wick",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 12,
+    "discard": 13,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "PUNCH_CONSTRUCT_0",
+     "name": "Punch Construct",
+     "hp": 28,
+     "max_hp": 55,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "10",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 11,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-FLAME_ON_THE_WICK",
+     "card_name": "Flame on the Wick",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 3
+     },
+     "after": 6,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 4
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 34,
+   "verb": "play",
+   "command": "play \"Skip and Hop\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-HOT_HANDS",
+     "name": "Hot Hands",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-SKIP_AND_HOP",
+     "name": "Skip and Hop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-QUICK_FUSE",
+     "name": "Quick Fuse",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 23,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 35,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 2,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-HOT_HANDS",
+     "name": "Hot Hands",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-QUICK_FUSE",
+     "name": "Quick Fuse",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 23,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 25,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 36,
+   "verb": "play",
+   "command": "play \"Kaboom!\" on \"Corpse Slug (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 2,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-HOT_HANDS",
+     "name": "Hot Hands",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-QUICK_FUSE",
+     "name": "Quick Fuse",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 23,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 3,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 9,
+     "max_hp": 25,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_2",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "8",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 37,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 2,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-HOT_HANDS",
+     "name": "Hot Hands",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-QUICK_FUSE",
+     "name": "Quick Fuse",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 23,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 38,
+   "verb": "play",
+   "command": "play \"Bomb Voyage\" on \"Corpse Slug (2)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_TRUE_SPARK_KNIGHT",
+     "name": "Spark Knight's Oath",
+     "kind": "Power",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-FLAME_ON_THE_WICK",
+     "name": "Flame on the Wick",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-BOMB_VOYAGE",
+     "name": "Bomb Voyage",
+     "kind": "Skill",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 18,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-BOMB_VOYAGE",
+     "card_name": "Bomb Voyage",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 39,
+   "verb": "play",
+   "command": "play \"Flame on the Wick\" on \"Corpse Slug (2)\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_TRUE_SPARK_KNIGHT",
+     "name": "Spark Knight's Oath",
+     "kind": "Power",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-FLAME_ON_THE_WICK",
+     "name": "Flame on the Wick",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 18,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 26,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-BOMB_VOYAGE",
+     "card_name": "Bomb Voyage",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-FLAME_ON_THE_WICK",
+     "card_name": "Flame on the Wick",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 3
+     },
+     "after": 5,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 4
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 40,
+   "verb": "play",
+   "command": "play \"Duck and Cover\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 5
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_TRUE_SPARK_KNIGHT",
+     "name": "Spark Knight's Oath",
+     "kind": "Power",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 18,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 5,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-BOMB_VOYAGE",
+     "card_name": "Bomb Voyage",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-FLAME_ON_THE_WICK",
+     "card_name": "Flame on the Wick",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 3
+     },
+     "after": 5,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 4
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 5,
+     "price_paid": 0,
+     "gains": {},
+     "after": 5,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 41,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 63,
+   "max_hp": 73,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 5
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_TRUE_SPARK_KNIGHT",
+     "name": "Spark Knight's Oath",
+     "kind": "Power",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 18,
+    "discard": 8,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7x2",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 5,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-BOMB_VOYAGE",
+     "card_name": "Bomb Voyage",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-FLAME_ON_THE_WICK",
+     "card_name": "Flame on the Wick",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 3
+     },
+     "after": 5,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 4
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 5,
+     "price_paid": 0,
+     "gains": {},
+     "after": 5,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 42,
+   "verb": "play",
+   "command": "play \"Da-da-da!\" on \"Corpse Slug (2)\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 42,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 5
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WARM_GLOW",
+     "name": "Warm Glow",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DA_DA_DA",
+     "name": "Da-da-da!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AllEnemies",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-ALL_MY_TREASURES",
+     "name": "All of My Treasures!",
+     "kind": "Skill",
+     "energy_cost": "3",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 13,
+    "discard": 10,
+    "exhaust": 0
+   },
+   "enemy_count": 2,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 27,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    },
+    {
+     "entity_id": "CORPSE_SLUG_1",
+     "name": "Corpse Slug",
+     "hp": 5,
+     "max_hp": 26,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Debuff",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-BOMB_VOYAGE",
+     "card_name": "Bomb Voyage",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-FLAME_ON_THE_WICK",
+     "card_name": "Flame on the Wick",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 3
+     },
+     "after": 5,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 4
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 5,
+     "price_paid": 0,
+     "gains": {},
+     "after": 5,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-DA_DA_DA",
+     "card_name": "Da-da-da!",
+     "before": 5,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-DA_DA_DA": 1
+     },
+     "after": 6,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-DA_DA_DA",
+       "delta": 1,
+       "bank_before": 5
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 43,
+   "verb": "play",
+   "command": "play \"All of My Treasures!\" on \"Corpse Slug\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 42,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 6
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WARM_GLOW",
+     "name": "Warm Glow",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-ALL_MY_TREASURES",
+     "name": "All of My Treasures!",
+     "kind": "Skill",
+     "energy_cost": "3",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 13,
+    "discard": 10,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 23,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-BOMB_VOYAGE",
+     "card_name": "Bomb Voyage",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-FLAME_ON_THE_WICK",
+     "card_name": "Flame on the Wick",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 3
+     },
+     "after": 5,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 4
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 5,
+     "price_paid": 0,
+     "gains": {},
+     "after": 5,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-DA_DA_DA",
+     "card_name": "Da-da-da!",
+     "before": 5,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-DA_DA_DA": 1
+     },
+     "after": 6,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-DA_DA_DA",
+       "delta": 1,
+       "bank_before": 5
+      }
+     ]
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-ALL_MY_TREASURES",
+     "card_name": "All of My Treasures!",
+     "before": 6,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-ALL_MY_TREASURES": 2
+     },
+     "after": 8,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-ALL_MY_TREASURES",
+       "delta": 2,
+       "bank_before": 6
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 44,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 42,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 15,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 8
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WARM_GLOW",
+     "name": "Warm Glow",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 13,
+    "discard": 10,
+    "exhaust": 2
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "CORPSE_SLUG_0",
+     "name": "Corpse Slug",
+     "hp": 23,
+     "max_hp": 27,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Stun",
+       "label": "",
+       "title": "Stunned"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SKIP_AND_HOP",
+     "card_name": "Skip and Hop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SKIP_AND_HOP": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SKIP_AND_HOP",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {},
+     "after": 1,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-BOMB_VOYAGE",
+     "card_name": "Bomb Voyage",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    },
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-FLAME_ON_THE_WICK",
+     "card_name": "Flame on the Wick",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 3
+     },
+     "after": 5,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 4
+      }
+     ]
+    },
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 5,
+     "price_paid": 0,
+     "gains": {},
+     "after": 5,
+     "entries": []
+    },
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-DA_DA_DA",
+     "card_name": "Da-da-da!",
+     "before": 5,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-DA_DA_DA": 1
+     },
+     "after": 6,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-DA_DA_DA",
+       "delta": 1,
+       "bank_before": 5
+      }
+     ]
+    },
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-ALL_MY_TREASURES",
+     "card_name": "All of My Treasures!",
+     "before": 6,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-ALL_MY_TREASURES": 2,
+      "relic:pounding_surprise/detonation": 3
+     },
+     "after": 11,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-ALL_MY_TREASURES",
+       "delta": 2,
+       "bank_before": 6
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 8
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 9
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 10
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 45,
+   "verb": "play",
+   "command": "play \"Duck and Cover\"",
+   "state_type": "elite",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 42,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_HOLD_THE_LINE_SPARK",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_SPARK_PRICED_DRAW",
+     "name": "Rummage",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 3,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-KABOOM_BEETLE_SWARM",
+     "name": "Kaboom Beetle Swarm",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AllEnemies",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 24,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "TERROR_EEL_0",
+     "name": "Terror Eel",
+     "hp": 140,
+     "max_hp": 140,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "16",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 46,
+   "verb": "play",
+   "command": "play \"Kaboom Beetle Swarm\" on \"Terror Eel\"",
+   "state_type": "elite",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 42,
+   "max_hp": 73,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_HOLD_THE_LINE_SPARK",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_SPARK_PRICED_DRAW",
+     "name": "Rummage",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 3,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-KABOOM_BEETLE_SWARM",
+     "name": "Kaboom Beetle Swarm",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AllEnemies",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 24,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "TERROR_EEL_0",
+     "name": "Terror Eel",
+     "hp": 140,
+     "max_hp": 140,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "16",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM_BEETLE_SWARM",
+     "card_name": "Kaboom Beetle Swarm",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 47,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "elite",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 42,
+   "max_hp": 73,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PRUNE_WITCH_HUNT",
+     "name": "Prune \u2014 Little Witch's Hunt",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_HOLD_THE_LINE_SPARK",
+     "name": "Dig In",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_SPARK_PRICED_DRAW",
+     "name": "Rummage",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false,
+     "spark_price": 3,
+     "spark_affordable": false
+    }
+   ],
+   "piles": {
+    "draw": 24,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "TERROR_EEL_0",
+     "name": "Terror Eel",
+     "hp": 125,
+     "max_hp": 140,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "16",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM_BEETLE_SWARM",
+     "card_name": "Kaboom Beetle Swarm",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 48,
+   "verb": "play",
+   "command": "play \"Powder Pop\" on \"Terror Eel\"",
+   "state_type": "elite",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 31,
+   "max_hp": 73,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_SMOKE_AND_SPARKS_SPARK",
+     "name": "Powder Smoke",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 2,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KABOOM_SINK",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    },
+    {
+     "id": "KLEEMOD-WARM_GLOW",
+     "name": "Warm Glow",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 19,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "TERROR_EEL_0",
+     "name": "Terror Eel",
+     "hp": 125,
+     "max_hp": 140,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3x3",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-KABOOM_BEETLE_SWARM",
+     "card_name": "Kaboom Beetle Swarm",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
