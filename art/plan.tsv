@@ -1275,3 +1275,46 @@ power_kokomi_vigil_of_the_deep	ImageGen/images/kokomi/powers/vigil_of_the_deep.p
 power_kokomi_princess_of_watatsumi	ImageGen/images/kokomi/powers/princess_of_watatsumi.png	256	256	contain	center	shortlist	1	png	Talent Princess of Watatsumi.png		icon
 power_kokomi_princess_of_watatsumi	ImageGen/images/kokomi/powers/princess_of_watatsumi.png	256	256	contain	center	shortlist	2	png	Sangonomiya Kokomi Item.png		icon
 power_kokomi_princess_of_watatsumi	ImageGen/images/kokomi/powers/princess_of_watatsumi.png	256	256	contain	center	shortlist	3	png	Side by Side We Venture Character Kokomi.png		icon
+# --- 2026-08-30 art pass: KLEE SPARES HUNT for the three uncommons the Sparks
+#     redesign added (hold_the_line, powder_charge, smoke_and_sparks). Every row
+#     below is rank >= 2 BY DESIGN -- art_process promotes only rank 1, so this
+#     candidate set lands WITHOUT making a pick. These are PROPOSALS, not picks.
+#
+#     WHY NOT APPLIED. R212 delegates 'apply shortlist rank 1' for art, but there
+#     is no Klee art-pass requirements doc and no written Klee SOURCING policy at
+#     HEAD -- only the registers (restated in furina-art-pass-requirements.md §2,
+#     'use the Klee art-pass registers and lint rules') and the lint. Klee's pool
+#     was instead ratified eyes-on, card by card, over three red-pen rounds
+#     (archived klee-art-redpen-round2/round3), and nothing since has replaced
+#     that with a written delegation. So the shortlist is offered and the promotion
+#     to rank 1 is one word from [USER].
+#
+#     SOURCE POOL. Klee cards carry NO source_group, so strict L1 binds: one
+#     effective source per card, no reuse. Only FIVE Klee-register titles are
+#     unclaimed at rank 1 (tools/art_source_census.py --character klee): Klee
+#     Portrait, Statue of The Seven - Jumbo Sparks 'n' Splash Statue, Klee Birthday
+#     2022 - Shorts, Klee Shorts 2023-06-12, Item Jumbo Sparks 'n' Splash Statue.
+#     All five are already in art/SOURCES.tsv and already on disk -- no fetch was
+#     run for this pass. The three P1s below take three DISTINCT titles, so the set
+#     is L1-clean if promoted together. The July claim in 6f1b969 that 'every Klee
+#     illustration is claimed at rank 1' is STALE; these five arrived after it.
+#
+#     P1 = rank 2, P2 = rank 3, P3 = rank 4 in each shortlist.
+#     powder_charge  P1 Klee Portrait y0.44 -- the bomb satchel and the Dodoco pouch
+#        sit dead centre of the crop; the most literal content match in the pool.
+#     hold_the_line  P1 Statue of The Seven y0.45 -- her statue planted against the
+#        cliff, the only architectural piece Klee has; the immovable read a block
+#        skill wants. Small-in-frame, which the round-3 pipeline lesson warns about,
+#        hence the two figure fallbacks below it.
+#     smoke_and_sparks  P1 Klee Shorts 2023-06-12 y0.50 -- chibi Klee grinning in
+#        balloons and spray; the misdirection read. y0.38 is deliberately NOT
+#        offered: the GENSHIN IMPACT wordmark is burnt into that band (L9's shape).
+powder_charge	ImageGen/images/cards/klee/powder_charge.png	500	380	cover	y0.44	shortlist	2	png	Klee Portrait.png		splash
+powder_charge	ImageGen/images/cards/klee/powder_charge.png	500	380	cover	y0.75	shortlist	3	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash
+powder_charge	ImageGen/images/cards/klee/powder_charge.png	500	380	cover_autocrop	contain@0.08	shortlist	4	png	Item Jumbo Sparks 'n' Splash Statue.png		item
+hold_the_line	ImageGen/images/cards/klee/hold_the_line.png	500	380	cover	y0.45	shortlist	2	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash
+hold_the_line	ImageGen/images/cards/klee/hold_the_line.png	500	380	cover	y0.32	shortlist	3	png	Klee Portrait.png		splash
+hold_the_line	ImageGen/images/cards/klee/hold_the_line.png	500	380	cover	y0.50	shortlist	4	png	Klee Birthday 2022 - Shorts.png		splash
+smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y0.50	shortlist	2	png	Klee Shorts 2023-06-12.png		splash
+smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y0.38	shortlist	3	png	Klee Birthday 2022 - Shorts.png		splash
+smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y0.65	shortlist	4	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash
