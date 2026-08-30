@@ -624,7 +624,12 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # mode-price machinery, gated on EB-205's read; and the
         # prototype-patch scope lint that keeps one PROTOTYPE_CARDS switch
         # honest.
-        224, 225,
+        #
+        # 225 LEFT OPEN_IDS 2026-08-30 with its row: the lint is written
+        # (`tools/lint_prototype_patch_scope.py`, `ci` lane), it was seen to
+        # FAIL on three real prototype patches first, and all three were
+        # fixed. The ceiling stays at 225 -- ceilings never come down.
+        224,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

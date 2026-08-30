@@ -1310,6 +1310,12 @@ not yet name (`lint_register_shape.py`, `lint_stamp_rows.py`,
 --update` is the one that re-pins `SHEET_DIGEST` after a sheet edit, and it
 belongs in the same commit as the edit.
 
+`lint_prototype_patch_scope.py` (`EB-225`, R225 item 6) is in that same `ci`
+lane and walks the three `Compile Remove` prototype directories: every Harmony
+patch there must be character-scoped and seat-guarded (`LocalContext.GetMe`
+THROWS on a seatless combat — `d217b4f`), and the only exemption is a
+`// lint: no-seat: <reason>` marker, which the tool prints on every run.
+
 Local-only (not in CI): `lint_text_encoding.py`, `lint_generated_structure.py`,
 `art_lint.py`, `card_distinctness_report.py --gate`,
 `lint_game_ref_backup.py`, `dump_claimed_sources.py`.

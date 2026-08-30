@@ -193,10 +193,22 @@ internal static class KurageMemoryCard
         Paint(root, player, creature!);
     }
 
+    /// <summary>
+    /// Teardown, and it is CHARACTER-SCOPED like every other door into this
+    /// element (EB-225 / R225 item 6). The seat guard alone was never the
+    /// whole rule: the one `PROTOTYPE_CARDS` switch compiles Kokomi's memory
+    /// and Klee's Sparks together, so a patch of this arm's that asks only
+    /// "is there a seat" still runs on a Klee or Furina seat. Nothing was
+    /// ever built for one -- <see cref="Setup"/> refuses at the door -- so
+    /// the predicate here costs a teardown nothing and says the scope out
+    /// loud at the third door rather than leaving it to be inferred from the
+    /// first, which is exactly the `EB-207` correction one level up.
+    /// </summary>
     public static void DiscardAll(CombatState? state)
     {
         var me = TryGetMe(state);
-        if (me != null) Discard(me);
+        if (me == null || !KokomiResources.IsKokomi(me.Creature)) return;
+        Discard(me);
     }
 
     private static void Discard(Player player) => Displays.Discard(player);
@@ -229,10 +241,11 @@ internal static class KurageMemoryCard
     /// room down. The warning is loud because a seat that cannot be resolved
     /// mid-combat would be a real defect -- it is just not one worth ending a
     /// run over.
+    ///
+    /// `internal` rather than `private` since EB-225: the queue ring below is
+    /// a second element in this file that must name the seat to scope itself,
+    /// and it must reach the SAME guard rather than a second copy of it.
     /// </summary>
-    /// <summary>INTERNAL, not private, so <see cref="KurageMemoryPileRing"/>
-    /// resolves the seat through this same guard rather than growing a second
-    /// copy of it -- one door, and the `EB-225` seat rule reads it here.</summary>
     internal static Player? TryGetMe(CombatState? state)
     {
         if (state == null) return null;
@@ -714,6 +727,22 @@ internal static class KurageMemoryPileRing
             return;
         }
 
+        // EB-225 / R225 item 6: the CHARACTER SCOPE, spelled here rather than
+        // inherited from the arming point. The projection is only ever filled
+        // by `OpenQueue`, which is Kokomi-gated, so this was true INDIRECTLY
+        // -- and indirect is precisely the shape `EB-207` had to correct one
+        // level up: one arming door holding the rule for every reader of it.
+        // Under a single `PROTOTYPE_CARDS` switch a stale projection left by
+        // a previous combat is a Kokomi element painted on a Klee card, and
+        // this is one dictionary hit past the early return above, so it costs
+        // nothing on the frames that are not ours.
+        if (!KurageMemory.IsLive(
+                KurageMemoryCard.TryGetMe(KurageMemory.Combat)?.Creature))
+        {
+            if (ring != null) ring.Visible = false;
+            return;
+        }
+
         if (ring == null)
         {
             ring = new Panel
@@ -802,7 +831,18 @@ internal static class NCardPileScreen_Ready_KurageQueueHeader_Patch
 /// Disarm when the viewer leaves the tree. `_ExitTree` rather than
 /// `AfterCapstoneClosed` because it fires on every removal path, including the
 /// ones a capstone close does not run.
+///
+/// THE ONE EXEMPT PATCH ON THIS SURFACE (EB-225). It reads no run, no combat
+/// and no seat: its whole body compares the screen that is leaving against a
+/// static field this file set, and clears static fields. A character test
+/// here would be a test of somebody ELSE's identity -- whoever happens to
+/// hold a seat while a pile screen closes -- and would leave a stale
+/// projection armed on the frame it answered no, which is the defect the
+/// scope rule exists to prevent rather than an instance of obeying it.
 /// </summary>
+// lint: no-seat: pure static teardown of this file's own fields -- it reads
+// neither a run nor a seat, and a character test here would leave the ring
+// armed on the frame it answered no.
 [HarmonyPatch(typeof(NCardPileScreen), nameof(NCardPileScreen._ExitTree))]
 internal static class NCardPileScreen_ExitTree_KurageQueueRing_Patch
 {
