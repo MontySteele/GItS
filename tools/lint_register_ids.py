@@ -727,7 +727,15 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # `t02` on four both-buyable orders -- and BT2's three pass. It is
         # deliberately NOT a `ci` lint: a tree-wide sweep would refuse a
         # closed round's published boards. The lint count stays 29.
-        238,
+        # 238 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word for
+        # word -- "a staged page shows the relic line and a form quotes it".
+        # KLEESPARK-BT2's pages printed the run's relics and `t01`'s shadow form
+        # quoted one by name, doing the turn's arithmetic with it: "the bombs
+        # detonating under Pounding Surprise restore 3 Sparks". The deciding
+        # form on the same board quoted the effect without the name. Both
+        # halves met; that the forms were later REFUSED for an unrelated
+        # falsifier (`forecast_missing`) does not bear on whether the relic
+        # reached the reader, which is all this row asked.
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
