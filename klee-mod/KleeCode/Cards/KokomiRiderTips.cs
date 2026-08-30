@@ -170,6 +170,29 @@ public static class KokomiRiderTips
     /// The cost is stated from the constant, so a CONSCRIPT_COST_DELTA retune
     /// cannot leave nine card faces and this definition disagreeing -- which
     /// is exactly the failure mode the restatements had.
+    ///
+    /// `EB-214` / R224 item 6 (`M54` pick 1): RULE 1 IS PRINTED HERE, and only
+    /// under the flag. The blind run graded `P3` at 0 of 10 turns and 0 of six
+    /// Musters naming a Memory consequence -- every Muster target was chosen
+    /// BECAUSE the card was dead, the exact inverse of the rule -- and the
+    /// diagnosis was wording, not dose. So the rule joins the keyword's OWN
+    /// text rather than becoming a second tip: "hover text is that keyword's
+    /// detail, and 'tooltip' is not a third surface"
+    /// (review/active/sitting-2026-08-30.md, item 6).
+    ///
+    /// The sentence is the packet's §11.7 v3 ruled wording ("a Muster now
+    /// creates a memory of the card it ate, and the recruit creates a second
+    /// when it burns") plus the price, which is what `P3` asks a tester to be
+    /// able to state ("this puts X in the queue at price Y"). The multiplier
+    /// is read from `KurageMemoryLaw.CostPerEnergy` for the same reason the
+    /// discount above is read from its constant. R55 voice law: the word is
+    /// never "sacrifice" on a player-facing surface, which is why the packet's
+    /// §12.2 phrasing is not the one printed.
+    ///
+    /// THE `#if` IS THE WHOLE GUARANTEE. The release build's preprocessed
+    /// source for this method is character-for-character what it was, so the
+    /// shipped keyword text cannot move; `tier0/tests/test_kurage_base_kit.py`
+    /// and `KokomiKeywordTextTests` pin both halves.
     /// </summary>
     public static IEnumerable<IHoverTip> ForMuster(
         IEnumerable<IHoverTip> inherited, CardModel card)
@@ -181,7 +204,14 @@ public static class KokomiRiderTips
             $"[gold]Muster N[/gold]: transform N cards in your hand into "
           + $"random Inazuma [gold]Companion[/gold] cards. Each costs "
           + $"{cheaper} less and [gold]Exhausts[/gold]. Kit cards and "
-          + "Companions you already hold are never chosen.");
+          + "Companions you already hold are never chosen."
+#if PROTOTYPE_CARDS
+          + " A [gold]Muster[/gold] creates a memory of the card it ate, and "
+          + "the recruit creates a second when it burns. A memory replays for "
+          + $"[gold]Charge[/gold] equal to "
+          + $"{Powers.KurageMemory.KurageMemoryLaw.CostPerEnergy}x its Cost."
+#endif
+            );
     }
 
     /// <summary>

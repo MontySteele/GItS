@@ -44,9 +44,10 @@ curl -s -X POST http://localhost:15526/api/v1/gits/speed -d '{"enabled":true,"ti
 
 Route table (the whole surface): `/`, `/api/v1/singleplayer`,
 `/api/v1/multiplayer`, `/api/v1/profiles`, `/api/v1/profile`,
-`/api/v1/compendium`, `/api/v1/wiki`, and the four GItS forks
+`/api/v1/compendium`, `/api/v1/wiki`, and the five GItS forks
 `/api/v1/gits/speed`, `/api/v1/gits/seed`, `/api/v1/gits/give_card`,
-`/api/v1/gits/debug_state` (`McpMod.HandleRequest`). Anything else is 404.
+`/api/v1/gits/debug_state`, `/api/v1/gits/meter_ledger` (`EB-216`, GET only —
+the per-play meter ledger) (`McpMod.HandleRequest`). Anything else is 404.
 
 ## 3. Key invariants
 

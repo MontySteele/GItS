@@ -606,6 +606,16 @@ docs-only for `review/active/`.
 > unanswered. **That is a known open hole, named so it is not mistaken for a
 > decision.** The 18 `spotlight` rows are untouched by this packet.
 >
+> **2026-08-30 (R226) — an OPTIONS PACKET is now OWED on this hole.** [USER]
+> ruled that Spotlight gets a numbered pick list rather than staying a blank:
+> Claude drafts it under the R212 ladder (a numbered pick list, never a blank
+> to fill), the pick itself stays [USER]'s, and the timing is Claude's judgement
+> — when Klee closes, or gets close enough that drafting in parallel is worth
+> doing. The packet is the correct home for `M45`(4), the Spotlight selector
+> amend/accept, and it must carry the two modes, `SPOTLIGHT_BASE_MULT = 1.5`,
+> the selector card, the relic and the 18 sheet rows. This is an appended line
+> on a design packet, not a rewrite: the paragraph above stands as written.
+>
 > **Co-op.** An ally's Companion card play triggers Furina's stage exactly as
 > her own does: one member performs and rotates, and an empty Salon does
 > nothing extra. This restores an ally-coupled mechanic that E4 removed and

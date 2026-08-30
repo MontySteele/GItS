@@ -205,7 +205,8 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         if (player != Owner || player.PlayerCombatState?.TurnNumber != 1) return;
         Flash();
         await SparkPower.Gain(
-            choiceContext, Owner.Creature, OpeningSparks, cardSource: null);
+            choiceContext, Owner.Creature, OpeningSparks, cardSource: null,
+            source: "relic:explosive_frags/combat_start");
     }
 
     public async Task OnBombDetonated(
@@ -218,7 +219,8 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         Flash();
         await SparkPower.Gain(
             choiceContext, Owner.Creature, SparksPerDetonation,
-            cardSource: null);
+            cardSource: null,
+            source: "relic:explosive_frags/detonation");
     }
 }
 

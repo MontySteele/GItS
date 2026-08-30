@@ -797,25 +797,6 @@ KURAGE_QUEUE_CAP = 0          # 0 = UNCAPPED. [USER], v3: "I don't think we
                               # have the Charge." The queue is bounded by the
                               # ONE FIRE PER TURN clause and by the bank, not
                               # by a length.
-KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON = True
-                              # RETIRED UNDER THE FLAG by v4's base kit: with
-                              # KURAGE_ALWAYS_ON the jellyfish is on the field
-                              # for every turn of every fight, so "is there a
-                              # summon" is always yes and both settings of
-                              # this constant read the same. It is kept, and
-                              # kept True, so that turning KURAGE_ALWAYS_ON
-                              # back off restores the v3 arm whole. The
-                              # paragraph below is v3's and still describes
-                              # what it does THERE.
-                              # NOT A [USER] PICK -- a hole the build had to
-                              # fill. The acceleration keyword's op
-                              # (`play_front_memory`, provisional keyword name
-                              # "Stir") fires the front outside the automatic
-                              # rhythm. True: it still needs a jellyfish on
-                              # the field, i.e. one rule for what may act on
-                              # the memory. False (implemented): the keyword
-                              # works with no summon, so a card printing it is
-                              # never dead. sec.11 puts both to [USER].
 KURAGE_FUEL_MODE = "exhaust_any"
                               # v3's fuel: "Charge now builds at a rate of
                               # '1 Exhaust = 1 Charge'", on every Exhaust of
@@ -857,12 +838,15 @@ KURAGE_TARGET_RULE = "follow_her_last_attack"
 # NOT READ under the flag: KURAGE_DURATION and KURAGE_PULSE_PER_CHARGE (the
 # summon is persistent and the pulse carries no Charge term), and
 # KURAGE_THRESHOLD, which v3's per-card price replaces outright.
-# v4 adds two more to that list, both RETIRED-UNDER-FLAG rather than deleted:
+# v4 adds one more to that list, RETIRED-UNDER-FLAG rather than deleted:
 # KURAGE_DURATION is now unread on BOTH of the jellyfish's doors (the base-kit
-# install reads nothing, and the Casket refresh maxes a 1 against a 1), and
-# KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON is unread in effect because the summon
-# check it gates can no longer fail. Both keep their shipped values so that a
-# flip of KURAGE_ALWAYS_ON restores the v3 arm without a re-authoring.
+# install reads nothing, and the Casket refresh maxes a 1 against a 1). It
+# keeps its shipped value so that a flip of KURAGE_ALWAYS_ON restores the v3
+# arm without a re-authoring. The accelerator keyword's own summon dial is NOT
+# on that list: it is DELETED (R224 A, ex-`M50` pick 4). Under the base kit the
+# check it gated can never fail, so both of its settings read the same, and the
+# keyword now asks the one question the automatic fire asks -- is there a
+# jellyfish.
 KURAGE_THRESHOLD = 5          # RETIRED BY v3, kept only so a revert to the v2
                               # arm is a flag flip rather than a re-authoring.
                               # Nothing reads it.
@@ -2680,7 +2664,13 @@ CONSTANTS_VERSION = 21
 # moved, and the bump the move earns is still a judgement. Re-pin with
 # `python tools/lint_sheet_stamp.py --update`, in the SAME commit as the
 # sheet edit.
-SHEET_DIGEST = "3d3f83ade3c2c5d61036f1a33954a695f267c64ea8552debeebf2bb068bfeb53"
+#
+# R226 (2026-08-30) re-pins it for a COMMENT-ONLY edit: the R80 standing-law
+# header block in `docs/kokomi-cards.yaml` was rewritten to the amended Charge
+# rule, marked PROSPECTIVE. No row, no number and no field moved, so
+# `CONSTANTS_VERSION` does not bump -- the digest is a fingerprint over bytes
+# and the bytes include comments (R225 precedent).
+SHEET_DIGEST = "12531a9826dc794b09b9c9e97ab8019d3626979b75127ecb6072109c3962d7d7"
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

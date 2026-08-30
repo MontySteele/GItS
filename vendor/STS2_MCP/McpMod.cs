@@ -294,6 +294,11 @@ public static partial class McpMod
             {
                 HandleGitsDebugState(request, response);
             }
+            // GItS LOCAL EDIT - EB-216, the per-play meter ledger (read-only).
+            else if (path == "/api/v1/gits/meter_ledger")
+            {
+                HandleGitsMeterLedger(request, response);
+            }
             else
             {
                 SendError(response, 404, "Not found");

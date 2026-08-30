@@ -1,0 +1,49 @@
+KLEESPARK-S1 — the Klee Spark arm measured DRAFTED, in the sim.
+  REGISTRATION: review/active/klee-sparks-2026-08-29.md §17 (slate §17.4), committed before this file and before this run.
+  world stamp RT12/D18/P11/C21   cell klee/demolition (pilot demolition), route hunter, policy assigned, relics + potions, all registered acts
+  NOT A BALANCE READ (R215 B). Counts only; Guardrail-7 applies.
+  ARM = flag ON: substituted starter + PICK 4's pool subs + the three EB-218 twins, true_spark_knight EXCLUDED (§12.2).
+  CONTROL = flag OFF, same cell and seeds: RECORDED, NOT GRADED.
+
+flag OFF (shipped pool) — CONTROL, NOT GRADED
+    runs 600   fights 9237   player turns 37009
+    peak Spark bank      median 3.0   mean 3.48   >=2 on 86.3% of fights
+    peak histogram       {'0': 236, '1': 1029, '2': 1413, '3': 2983, '4': 1458, '5': 884, '6': 497, '7': 295, '8': 185, '9': 109, '10': 81, '11': 32, '12': 24, '13': 5, '14': 3, '15': 2, '16': 1}
+    turns w/ non-damage sink affordable   0.00%   (and playable 0.00%)
+    turns w/ ANY priced sink affordable   0.44%
+    decks holding a non-damage sink       0.0%
+    decks holding ANY prototype row       0.0%
+    maker:sink at floor 5    0.000   (n=577 decks reached it)
+    maker:sink at floor 10   0.000   (n=532 decks reached it)
+    maker:sink at floor 15   0.000   (n=503 decks reached it)
+    runs holding Rummage  0 (0.0%)
+    mean deck size 25.2   runs won 5.5%   NOT A BALANCE CLAIM (R215 B)
+
+flag ON  (the arm) — GRADED
+    runs 600   fights 8428   player turns 34597
+    peak Spark bank      median 5.0   mean 5.94   >=2 on 90.7% of fights
+    peak histogram       {'0': 93, '1': 688, '2': 983, '3': 1092, '4': 956, '5': 802, '6': 755, '7': 639, '8': 523, '9': 432, '10': 353, '11': 278, '12': 198, '13': 159, '14': 125, '15': 93, '16': 72, '17': 48, '18': 30, '19': 21, '20': 15, '21': 14, '22': 9, '23': 12, '24': 7, '25': 8, '26': 4, '27': 2, '28': 3, '29': 3, '30': 2, '31': 1, '32': 2, '35': 2, '36': 1, '37': 1, '42': 1, '43': 1}
+    turns w/ non-damage sink affordable   0.62%   (and playable 0.62%)
+    turns w/ ANY priced sink affordable   20.50%
+    decks holding a non-damage sink       3.2%
+    decks holding ANY prototype row       99.8%
+    maker:sink at floor 5    1.000   (n=576 decks reached it)
+    maker:sink at floor 10   1.000   (n=538 decks reached it)
+    maker:sink at floor 15   1.500   (n=510 decks reached it)
+    runs holding Rummage  0 (0.0%)
+    mean deck size 23.8   runs won 1.7%   NOT A BALANCE CLAIM (R215 B)
+
+THE SLATE, graded against §17.4's registered thresholds:
+  S1  PREDICTED   median peak 5.0, share of fights peaking >= 2 90.7%
+      threshold: median >= 2 AND >= 60% of fights peak >= 2
+  S2  MISS        0.62% of 34597 player turns (216 turns)
+      threshold: >= 15% PREDICTED, 5-15% SPLIT, < 5% MISS
+  S3  MISS        3.2% of 600 runs (19 decks)
+      threshold: >= 50% PREDICTED, 20-50% SPLIT, < 20% MISS
+  S4  MISS        median maker:sink floor 5 = 1.000 (n=576), floor 10 = 1.000 (n=538), floor 15 = 1.500 (n=510)
+      threshold: median FALLS 5 -> 15 AND floor-15 median in [0.30, 0.80]
+  S5  PREDICTED   0.0% of runs (0 decks) hold Rummage
+      threshold: exactly 0.0% PREDICTED, anything > 0 MISS
+
+THE RATIO THE LIVE REGISTRATION INHERITS (§17.4 `S4`): 1.500 makers per sink at floor 15
+record written to review/qa/kleespark-s1/record.json

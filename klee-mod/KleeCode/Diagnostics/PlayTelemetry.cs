@@ -1140,13 +1140,59 @@ public sealed class PlayTelemetryHooks : AbstractModel
     public override Task BeforeCombatStart()
     {
         PlayTelemetry.OpenFight();
+        // `EB-216`. A ledger carrying one fight's rows into the next would let
+        // a grader attribute a spend to the wrong fight.
+        MeterLedger.ResetFight();
         return Task.CompletedTask;
     }
 
     public override Task AfterSideTurnStart(CombatSide side,
         IReadOnlyList<Creature> participants, ICombatState combatState)
     {
-        if (side == CombatSide.Player) PlayTelemetry.OpenTurn();
+        if (side == CombatSide.Player)
+        {
+            PlayTelemetry.OpenTurn();
+            MeterLedger.OpenTurn(
+                CombatManager.Instance?.DebugOnlyGetState()?.RoundNumber ?? 0);
+        }
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// `EB-216`. THE PLAY BOUNDARY the meter ledger's rows hang off. It runs
+    /// here rather than inside <c>SparkPower</c> for two reasons: the ledger is
+    /// meter-agnostic by design and must not be opened by whichever meter
+    /// happens to move first, and a card that spends Sparks while the counter
+    /// is not yet on the creature has no <c>SparkPower</c> to run a hook at
+    /// all — the row still has to exist, reading `before: 0`.
+    ///
+    /// PRE-RESOLUTION, so `before` is the bank the player was looking at when
+    /// they chose the card. <c>IsFirstInSeries</c> keeps it to one row per
+    /// play across replays, the same gate <c>SparkPower.BeforeCardPlayed</c>
+    /// and the fight record already use.
+    /// </summary>
+    public override Task BeforeCardPlayed(CardPlay cardPlay)
+    {
+        try
+        {
+            if (cardPlay?.Card == null || !cardPlay.IsFirstInSeries)
+            {
+                return Task.CompletedTask;
+            }
+            var creature = cardPlay.Card.Owner?.Creature;
+            if (creature == null) return Task.CompletedTask;
+            MeterLedger.OpenPlay(
+                MeterLedger.Spark,
+                cardPlay.Card.Id.Entry,
+                cardPlay.Card.Title ?? cardPlay.Card.Id.Entry,
+                CombatManager.Instance?.DebugOnlyGetState()?.RoundNumber ?? 0,
+                SparkPower.SparksAtPlay(creature));
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] meter ledger play boundary: "
+                   + $"{e.GetType().Name}: {e.Message}");
+        }
         return Task.CompletedTask;
     }
 

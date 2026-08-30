@@ -655,7 +655,24 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # body is the one place a Charge price can go that the
               # IsPlayable cost line cannot reach, which is exactly the
               # arrangement the slice's `mode` arm is asking about.
-              "spend_charge"}
+              "spend_charge",
+              # EB-224 (R225): the Spark price, at a MODE HEAD. Until R225 the
+              # written clause said a Spark spend must stay at the card's TOP
+              # LEVEL; it now reads top level OR the head of a `choose_one`
+              # mode, so this op joins its two sibling meters here. A single
+              # awaited call with no locals, which is the whole
+              # branch-legality criterion.
+              #
+              # AND IT CLOSES A LATENT SILENT DROP RATHER THAN ONLY OPENING A
+              # DOOR. `blocked_reason` refused the row, but `emit()` does not
+              # consult it, and `_emit_branch_op` had no `spend_spark` arm --
+              # so the one caller that reaches emit directly
+              # (`test_eb118_modal_parity`'s badge case) produced a mode that
+              # DECLARED a 3-Spark price in `ModePrices`, was OFFERED only to
+              # a bank that could pay it, and then paid out without debiting
+              # that bank. An op a price table knows and an emitter does not
+              # is an unpaid payoff, not a blocked one.
+              "spend_spark"}
 
 # The exact key set each branch op may carry. Module-level because a modal's
 # mode body is emitted through the same `_emit_branch_op` resolvers as a
@@ -676,6 +693,7 @@ BRANCH_FIELDS = {
     "gain_encore": {"op", "amount"},
     "spend_encore": {"op", "amount"},
     "spend_charge": {"op", "amount"},
+    "spend_spark": {"op", "amount"},
     "burst_energy": {"op", "amount"},
     "energy": {"op", "amount"},
     "place_bomb": {"op", "amount", "target", "bomb_damage"},
@@ -1396,6 +1414,15 @@ CARD_FIELDS = {
     # here because that view is now run through blocked_reason like any
     # other card, and the field whitelist is deliberately total.
     "_sly_branch",
+    # EB-215: the row's OWN face, and the one field on this list that a
+    # SHIPPED sheet must never carry -- a shipped face is rendered from the
+    # body so it cannot drift from what the card does. The quarantined
+    # prototype surface is its only home, because that surface stages
+    # rewritten clauses of shipped cards and the renderers key on the op:
+    # a staged row cannot say what it now does without moving the shipped
+    # card's face with it. See `build_description`; the no-shipped-carrier
+    # rule is pinned in tier0/tests/test_prototype_surface.py.
+    "description",
 }
 
 
@@ -3155,6 +3182,30 @@ def upgrade_deltas() -> dict:
     return _upgrade_deltas
 
 
+def register_upgrade_deltas(card_id: str, deltas: dict) -> None:
+    """Add ONE id's deltas to the merged index, for a sheet that keys its
+    upgrades ON THE ROW rather than in a `docs/<character>-upgrades.yaml`.
+
+    `EB-213`. The quarantined prototype surface is the only such sheet and is
+    meant to be the only one: its rows are deleted whole when their slice is
+    accepted or rejected (R213 B), so a `proto_` key sitting in a shipped
+    upgrades sheet would give that deletion rule a second file to remember.
+    Registering here instead means the delta travels with the row, and
+    everything downstream -- `upgrade_plan`, every `*_upgrade` reader, the
+    emitted `OnUpgrade` -- is the SHIPPED path, unchanged and unforked.
+
+    In-process only: nothing is written to a sheet, and a generator run that
+    never registers reads exactly what it read before.
+    """
+    index = upgrade_deltas()
+    if card_id in index and index[card_id] != deltas:
+        raise SystemExit(
+            f"gen_klee_cards: {card_id}: a row-carried upgrade block "
+            "contradicts a delta already ratified in an upgrades sheet -- "
+            "one id, one delta.")
+    index[card_id] = dict(deltas)
+
+
 def upgrade_plan(card: dict) -> tuple[dict, str | None]:
     """(deltas, None) when every ruled delta key is expressible on this card,
     ({}, reason) otherwise.
@@ -4056,6 +4107,22 @@ def _stmt_spend_spark(card: dict, eff: dict) -> str:
             f"{int(eff['amount'])}, this);")
 
 
+def _stmt_spend_spark_guarded(card: dict, eff: dict) -> str:
+    """EB-224 (R225). The MODE-HEAD form of the Spark price.
+
+    Same call as `_stmt_spend_spark`, with its bool consumed instead of
+    dropped -- the difference is where the op is allowed to appear. At top
+    level the `IsPlayable` gate has already run and the spend cannot be
+    short. At the head of a `choose_one` mode the gate is EB-182's per-option
+    filter, which is a property of the screen: it stops the option being
+    offered, it does not stop the body resolving if anything ever hands the
+    card a mode index another way. The early `return` is what makes the price
+    a price there, and it mirrors `_stmt_spend_charge` line for line.
+    """
+    return ("if (!await SparkPower.Spend(choiceContext, Owner.Creature, "
+            f"{int(eff['amount'])}, this)) return;")
+
+
 def _stmt_spend_charge(card: dict, eff: dict) -> str:
     """R213 E1, QUARANTINED. The PAYMENT half of the Charge cost line.
 
@@ -4249,6 +4316,17 @@ def _emit_branch_op(
         # bank holds, and without the early return a short bank would collect
         # the mode's payoff for free. Sim twin: effects.ChargeUnpaid.
         lines.append(_stmt_spend_charge(card, eff))
+    elif op == "spend_spark":
+        # EB-224 (R225). GUARDED, unlike the top-level arm's
+        # `_stmt_spend_spark`, and for exactly the reason `spend_charge` is:
+        # a mode body has no `IsPlayable` of its own. EB-182's per-mode
+        # filter means an unaffordable mode is not OFFERED, so in ordinary
+        # play the payment cannot be short -- but the filter is a screen, and
+        # a screen is not the engine. `SparkPower.Spend` is all-or-nothing
+        # and returns whether the bank paid, so the early `return` abandons a
+        # play whose price failed instead of handing out the payoff for free.
+        # Sim twin: `effects.spend_sparks`, which refuses the same way.
+        lines.append(_stmt_spend_spark_guarded(card, eff))
     elif op == "salon_rotate":
         # EB-118 §5.5. Literal in a branch, like every other branch resolver:
         # no delta grammar reaches a rotation count.
@@ -5804,7 +5882,26 @@ def build_description(card: dict) -> str:
     Card text. Syntax is copied from base-game strings observed at runtime:
     single-braced SmartFormat placeholders, :diff() for the upgrade delta, and
     [gold] for keyword highlight.
+
+    A ROW MAY STATE ITS OWN FACE with `description:`, and exactly one sheet
+    does (`EB-215`). The quarantined prototype surface stages rewritten
+    clauses of SHIPPED cards, and the renderers below key on the OP -- a Power
+    card's text is rendered per power id -- so a staged row that rewrites what
+    a power does cannot say so without moving the shipped card's face with it.
+    That was the whole of the defect: the mod worked around it by MERGING a
+    replacement string into the loc table at pool-build time, which meant two
+    channels described one card and the generated file was wrong until the
+    override ran. The row's own text is the one channel now, emitted here into
+    the same `Localization` list every shipped row uses.
+
+    It is deliberately NOT a shipped-sheet field: a shipped face is rendered
+    from the body so it cannot drift from what the card does, and hand text
+    would put that guarantee back in a human's hands.
+    `tier0/tests/test_prototype_surface.py` pins that no `docs/*-cards.yaml`
+    row carries the key.
     """
+    if card.get("description"):
+        return card["description"]
     parts = []
     deltas = upgrade_plan(card)[0]
     for field, label in (("encore_cost", "Encore"),

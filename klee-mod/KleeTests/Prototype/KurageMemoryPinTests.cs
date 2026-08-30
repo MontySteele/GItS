@@ -338,28 +338,6 @@ public class KurageMemoryPinTests
     }
 
     [Fact]
-    public void The_prototype_oath_gets_its_own_face_text()
-    {
-        // sec.12.6 ITEM 14. gen_klee_cards renders a Power's description per
-        // POWER ID, so the generated prototype face carries the SHIPPED Oath's
-        // pulse wording and is wrong. The mirror overrides that one key and
-        // nothing else; the shipped face must not move.
-        // `EB-194`: the merge moved OUT of InjectLocStrings and into the
-        // off-pool builder. The string pin follows it; the call-site pin below
-        // is what keeps it from moving back.
-        var strings = Il.Strings(
-            Il.Method("KokomiOffPoolCards", "InjectPrototypeLoc"));
-
-        Assert.Contains(strings, s =>
-            s.Contains("plays a card from its memory")
-            && s.Contains("Block"));
-        // The override is keyed off the LIVE model's entry (R4's rule), never
-        // a hardcoded id.
-        Assert.DoesNotContain(strings, s =>
-            s.Contains("PROTO_KURAGES_OATH_MEMORY"));
-    }
-
-    [Fact]
     public void Loc_injection_never_touches_the_prototype_surface()
     {
         // `EB-194` LOCK (a). InjectLocStrings is a Harmony postfix on

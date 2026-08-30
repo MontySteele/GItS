@@ -234,11 +234,28 @@ combat grammar comes with us. (principles §1)
 - **Deck-size grammar:** in her personal pool, Common cards never increase deck
   size (net delta ≤ 0); only Uncommon/Rare may create cards. Machine-checked;
   her personal pool only. (Law 4)
-- **Charge is never spent** — uncapped, read but never consumed, card-event-driven
-  with no passive accrual *(Ancient carve-out: R127, see card-sheet rules)*.
-  The engine is kit-level (relic + starter), never
-  draft-gated; the relic holds only bookkeeping, all payoff magnitude lives in
-  cards. (kokomi §0, §2.1; R80; R16)
+- **Charge is spent by the Bake-Kurage and by nothing else** — uncapped, accrued
+  at 1 per Exhaust of one of her own cards, Companions included, Status and Curse
+  excluded; card-event-driven with no passive accrual *(Ancient carve-out: R127,
+  see card-sheet rules)*. It has exactly one destination: at the threshold the
+  jellyfish pays it to play the front of its memory for 0 energy, one card per
+  turn. **No card prints a Charge price and no card reads the bank
+  proportionally** — the firewall R80 built against Regent-Stars convergence
+  moves from "never spent" to "spent one way, by the kit, on tempo and never on
+  magnitude." The engine is kit-level (relic + starter), never draft-gated; the
+  relic holds only bookkeeping, all payoff magnitude lives in cards.
+  ***PROSPECTIVE (R213), countersigned R226:*** *this bullet binds when
+  `C.KURAGE_MEMORY` flips; until the flip the shipped rule is the one it
+  replaces — **Charge is never spent**, read but never consumed.*
+  (kokomi §0, §2.1; R80 amended by R226; R16)
+- **The Bake-Kurage's memory can hold one of her own non-Companion cards.**
+  Every Companion-only reading of the memory is wrong under Rule 1.
+  ***PROSPECTIVE (R213), countersigned R226:*** *binds when `C.KURAGE_MEMORY`
+  flips.* (kokomi §11.7; R226)
+- **A memory copy is removed from combat and is not an Exhaust.** It is a
+  lifecycle statement, not an implementation detail, and it binds every
+  exhaust-counting row on her sheet. ***PROSPECTIVE (R213), countersigned
+  R226:*** *binds when `C.KURAGE_MEMORY` flips.* (kokomi §11.7; R226)
 - **Elite pair A2 Scaling + A6 Utility;** acceptance signature is HP-trajectory
   flatness (the stability band); ward prevention stays reported telemetry, never
   axis-credited. Canonical archetypes: priest / commander / assist (+ generic).

@@ -319,12 +319,18 @@
    effects: [{op: spend_charge, amount: 6}, {op: conscript, amount: 2}]}
 
 # =============================================================================
-# KLEE SLICE 1 (R213 E2) -- three rows, three arms. A FOURTH ARM WAS PROPOSED
-# AND IS NOT HERE: `proto_spark_mode_bombs` / "Bag of Tricks" is HELD for
-# [USER] on the independent seat's doctrine verdict, and holding it is the
-# whole reason the seat was asked before anything was authored. The verdict is
-# in review/qa/klee-slice-1-doctrine-review-codex-gpt-5.6-sol.md; the pick list
-# is in the packet.
+# KLEE SLICE 1 (R213 E2) -- four rows, four arms. THE FOURTH ARM WAS HELD AND
+# IS NOW ADMITTED: `proto_spark_mode_bombs` / "Bag of Tricks" was stopped by
+# the independent seat's doctrine verdict, and holding it is the whole reason
+# the seat was asked before anything was authored. Round 1's verdict is in
+# review/qa/klee-slice-1-doctrine-review-codex-gpt-5.6-sol.md. The RE-ASK,
+# taken after `EB-182` built per-mode playability, is in
+# review/qa/bag-of-tricks-reask-doctrine-codex-gpt-5.6-sol.md: it RESOLVED D4
+# and left ONE clause -- the top-level-cost rule -- in front of [USER]. R225
+# amended that clause on 2026-08-30 (top level OR mode head) and the arm
+# proceeds as `EB-224`. Its row is at the foot of this block. NOTHING about it
+# was re-authored: the name, the id, the cost, the type, the rarity and both
+# mode bodies are the packet's, unmoved, and the verdict changed no number.
 #
 # THE QUESTION. R213 E2 reopened "Sparks mean free Attack" as "likely upstream
 # of Klee's Attack-spam identity". The engine says it more sharply than the
@@ -530,6 +536,88 @@
              {op: block, amount: 5},
              {op: burst_energy, amount: 10}]}
 
+# ---------- ARM 4: two prices for one card (EB-224) --------------------------
+# Shipped twin: `pop` / "Pop!" (0, Skill, basic -- one Bomb dealing 5). The
+# CHEAP MODE IS THAT TWIN PRINTED ALONE, exactly, so the pair asks what the
+# SECOND mode is worth and nothing else. The expensive mode is `bomb_voyage`'s
+# body verbatim (3 Bombs dealing 5), which SHIPS AT 2 ENERGY; here the bank
+# buys those two energy instead. Every number on the face is lifted off a
+# shipped face and nothing is picked -- the packet's own rule, kept.
+#
+# WHAT THE BANK BUYS THAT IT HAS NEVER BOUGHT BEFORE: PLACEMENT. D2 lists
+# placement as a steerable verb, Klee is the only character in the roster who
+# has one, and Sparks have never touched it. It is also the only arm in the
+# slice that changes the SHAPE of a turn rather than its size: three Bombs are
+# delayed damage on a board the player must survive to collect, so taking the
+# expensive mode is a decision about the next turn, not this one.
+#
+# WHY THIS ROW WAS HELD, AND WHAT UNHELD IT. The seat stopped it on two written
+# clauses (packet sec.6.1). D4 -- "at the decision point the player can
+# perceive and forecast the consequences that matter" -- because the
+# choose-a-card screen had no per-mode playability, so an unpayable mode was
+# offered anyway. `EB-182` built that in both engines and the RE-ASK graded D4
+# RESOLVED by name: unaffordable modes are OMITTED (the 0.111.0 decompile gives
+# the screen no per-option disabled state to grey), a fully priced-out card is
+# REFUSED with a reason naming the price and the bank, and an offered priced
+# mode DECLARES its price on its own face. The other clause was the top-level
+# cost rule, and R225 amended it: a spend may sit at the card's TOP LEVEL or at
+# the HEAD of a `choose_one` MODE, nothing nested or conditional. This row is
+# the first in the repo to use the second half of that sentence.
+#
+# THE SIM NEEDED NOTHING. `choose_one` has shipped since EB-118 Phase 2;
+# `effects.mode_price` / `offered_modes` / `mode_refusal` and
+# `combat.modal_refusal` are `EB-182`'s, already carrying Furina's shipped
+# `deep_breath` and Kokomi's `proto_charge_mode_guard`; the C# half is
+# `ModalChoice.ModePrice` / `SelectAffordableMode` plus the generated
+# `ModePrices` table, and `EB-220`'s `MeterCostBadge` paints the mode's Spark
+# price by READING that table rather than a second literal. This row is the
+# third consumer of machinery that was owed to a SHIPPED defect anyway.
+#
+# ONE THING WAS OWED, AND IT WAS A DEFECT RATHER THAN A FEATURE. The C#
+# GENERATOR knew `spend_spark` as a mode PRICE (`MODE_PRICE_OPS` -> the
+# `ModePrices` literal) but not as a mode-body RESOLVER: it was in neither
+# `BRANCH_OPS` nor `_emit_branch_op`. So the row blocked -- and any caller
+# reaching `emit()` past `blocked_reason` got a mode that declared a 3-Spark
+# price, was offered only to a bank that could pay it, and then placed the
+# Bombs WITHOUT DEBITING THAT BANK. `EB-224` added the resolver in its GUARDED
+# form, matching `spend_charge`: `if (!await SparkPower.Spend(...)) return;`,
+# because a mode body has no `IsPlayable` of its own and a screen filter is
+# not the engine. Shipped generated output did not move one byte.
+#
+# THE PRICE IS THE SLICE'S ONE PRICE: THREE. Same attribution rule as the other
+# three arms -- 3 is the retired free-Attack threshold, lifted, not picked --
+# so this pair asks the same question the slice asks: is the bank worth more as
+# this card than as the rule?
+#
+# NO `skill_tag`, AND THAT IS DELIBERATE. Both donor faces carry it (`pop` and
+# `bomb_voyage` are both tagged, and BURST_PER_SKILL_TAG pays 5 automatically),
+# but the arm as authored and as put to the seat prints no Burst line. Carrying
+# the tag would add an unpriced meter movement to BOTH modes and confound a
+# pair whose whole content is the second mode's price.
+#
+# NO POOL SUBSTITUTION, LIKE ITS THREE SIBLINGS. The slice-1 arms are reached
+# by GRANT BY ID against a dev build (`understudy/scenarios/eb147-prototype-
+# grant.yaml`), not through `C.SPARK_ALT_POOL_SUBS`, which is the SPARKS
+# packet's own one-for-one conversion map and carries none of these four rows.
+# The only shipped row this arm names is `pop`, and `pop` is a BASIC starter
+# card already substituted through the other seam entirely
+# (`C.SPARK_ALT_STARTER_SUBS`); a pool substitution across rarity tiers is
+# refused by `rewards.character_pool` by construction. So there is nothing here
+# to substitute one-for-one, and inventing a donor Uncommon would be a picked
+# number in a slice that has none.
+#
+# I DESIGNED THIS ROW AND MAY NOT GRADE IT (R213's first guard). The seat GATED
+# it twice and wrote no text, no number and no mode, so `authored_by: [claude]`.
+- {id: proto_spark_mode_bombs, name: "Bag of Tricks", character: klee,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon,
+   effects: [{op: choose_one, modes: [
+              {label: "Place 1 [gold]Bomb[/gold] dealing 5",
+               effects: [{op: place_bomb, amount: 1, target: enemy, bomb_damage: 5}]},
+              {label: "Spend 3 [gold]Sparks[/gold]: place 3 [gold]Bombs[/gold] dealing 5",
+               effects: [{op: spend_spark, amount: 3},
+                         {op: place_bomb, amount: 3, target: enemy, bomb_damage: 5}]}]}]}
+
 # =============================================================================
 # KOKOMI -- THE KURAGE'S MEMORY v3 (a RULE arm, not a card row)
 #
@@ -627,14 +715,23 @@
 # `rewards.character_pool`, which is every offer surface's one source). Flag
 # off, the shipped Oath is the only Oath and this row is unreachable as ever.
 #
-# NO UPGRADE ROW, AND THAT IS THE SURFACE'S CONVENTION, NOT AN OMISSION. This
-# file has never carried an upgrade: no row above declares one, the schema has
-# no field for it, and `tools/gen_prototype_cards.py` has no upgrade path --
-# upgrades live in `docs/<character>-upgrades.yaml`, keyed by shipped card id,
-# and putting a `proto_` key in a shipped sheet would give the R213 deletion
-# rule a second file to remember. So the upgraded 5 is recorded HERE, in the
-# row that owns it, and is owed to the upgrades sheet at the same moment this
-# row is re-authored onto her real sheet.
+# THE UPGRADE IS ON THE ROW (`EB-213`). It used to be prose here and nothing
+# else: the surface had no upgrade channel at all, so the substituted Oath
+# could not be smithed at a campfire and [USER]'s upgraded 5 was a row note
+# rather than a card. The channel is now the `upgrade:` key below, registered
+# into the merged delta index by `tools/gen_prototype_cards.py` and read from
+# there by the SHIPPED upgrade path -- same expressibility check, same
+# `OnUpgrade`, same campfire. It lives on the row rather than in
+# `docs/kokomi-upgrades.yaml` because a `proto_` key in a shipped sheet would
+# give R213's deletion rule a second file to remember; when this row is
+# re-authored onto her real sheet the delta travels with it, into the
+# upgrades sheet, and both leave here together.
+#
+# THE DELTA IS THE SHIPPED OATH'S OWN, `kurage_ward: +2`. [USER] ruled the two
+# ENDPOINTS -- "3 block per memory played, upgrade to 5" -- and +2 is the
+# arithmetic between them, not a second pick; it is also, exactly, the delta
+# `kurages_oath` already carries (5 -> 7, R130). Nothing new is invented here
+# and no measurement is attached to either endpoint.
 #
 # NAME. "Kurage's Oath" is the shipped card's name and is [USER]'s; this row
 # keeps it, because the row IS that card with one clause rewritten and a blind
@@ -646,19 +743,28 @@
 #     Whenever the Bake-Kurage plays a card from its memory, gain 3 Block.
 #     (Upgraded: 5.)
 #
-# THE GENERATED FACE DOES NOT SAY THAT YET, and it cannot be fixed from
-# here. `gen_klee_cards` renders a Power's description PER POWER ID, not
-# per row, so `kurage_ward` prints one string -- "Each Bake-Kurage pulse
-# also grants {X} Block." -- shared with the SHIPPED Oath. Moving that
-# string would move a shipped release face and make it false with the flag
-# off, where the ward really does ride the pulse. So the wording is owed to
-# the C# mirror, which needs its own power (or its own description channel)
-# for the prototype: it is on sec.12.6's checklist as item 14.
+# THE ROW SAYS IT, through `description:` (`EB-215`). `gen_klee_cards`
+# renders a Power's description PER POWER ID, not per row, so `kurage_ward`
+# would print one string -- "Each Bake-Kurage pulse also grants {X} Block."
+# -- shared with the SHIPPED Oath, and moving that string would move a
+# shipped release face and make it false with the flag off, where the ward
+# really does ride the pulse. The mod used to work around that by MERGING a
+# replacement into the loc table at pool-build time, which left two channels
+# describing one card and the generated file wrong until the override ran.
+# R224 A takes `M57`(2) on those DUPLICATION grounds: the row's own text is
+# the one channel, emitted by codegen into the same `Localization` list every
+# shipped row uses, and the merge is deleted.
+#
+# The `{PowerAmount:diff()}` token is the SHIPPED renderer, not a prototype
+# one: it prints the ruled 3 and, past a campfire, the ruled 5, off the same
+# var `EB-213`'s upgrade delta moves.
 # =============================================================================
 - {id: proto_kurages_oath_memory, name: "Kurage's Oath", character: kokomi,
    cost: 1, type: power, rarity: common,
    authored_by: [claude],
-   effects: [{op: apply_power, power: kurage_ward, amount: 3, target: self}]}
+   effects: [{op: apply_power, power: kurage_ward, amount: 3, target: self}],
+   upgrade: {kurage_ward: +2},
+   description: "Whenever the [gold]Bake-Kurage[/gold] plays a card from its memory, gain {PowerAmount:diff()} Block."}
 
 # =============================================================================
 # KLEE SPARKS -- SPARKS AS AN ALTERNATIVE COST (R213 E2). Seven rows.

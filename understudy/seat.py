@@ -245,6 +245,13 @@ REFUSAL_REASONS = {
     "cwd_inside_repo": "the seat's scratch directory is inside the repo, so "
                        "AGENTS.md and the design docs were in reach",
     "codex_missing": "no `codex` on PATH",
+    # EB-227. Not a defect in the turn and not a failure of the seat: the
+    # meter says this call would spend budget the harness was told to keep.
+    "codex_budget_primary": "the Codex five-hour window is at or past the "
+                            "stop line, so this call was not spent",
+    "codex_budget_weekly": "the Codex WEEKLY window is at or past the stop "
+                           "line, so this call was not spent -- a week spent "
+                           "early is a week with no independent seat in it",
     "codex_failed": "codex exited non-zero",
     "codex_error": "the event stream carries an error or a failed turn",
     "codex_timeout": "the seat did not answer inside the timeout",
@@ -1027,6 +1034,16 @@ def cmd_grade(args) -> int:
         print(f"scratch: {scratch}")
         return 0
 
+    # EB-227, and BEFORE the sandbox checks for the same reason EB-190 comes
+    # before codex is located: whether this call may be spent AT ALL is prior
+    # to whether the seat is set up correctly to spend it. The record lands in
+    # `seat.json` either way, so the per-call cost of a graded turn is
+    # learnable from a night's sessions rather than guessed.
+    seat["codex_usage"], over_budget = budget_check()
+    if over_budget:
+        return _refuse(seat, session, over_budget[0], [over_budget[1]],
+                       scratch=scratch)
+
     if is_inside_repo(scratch):
         return _refuse(seat, session, "cwd_inside_repo", [str(scratch)],
                        scratch=None)
@@ -1112,6 +1129,37 @@ def cmd_grade(args) -> int:
     return staged_turn.main(["grade", turn_id, str(landed)])
 
 
+def budget_check(*, quiet: bool = False) -> tuple[dict[str, Any],
+                                                   tuple[str, str] | None]:
+    """EB-227: read the seat's own meter, and say whether to spend the call.
+
+    Returns `(record, over)` -- the record goes into whatever this call
+    already writes (`seat.json` for `grade`, `<out>.usage.json` for
+    `review`) so an overnight run learns what a call actually COSTS, and
+    `over` is `(reason, detail)` when a stop line is reached.
+
+    A MISSING ROLLOUT IS NOT A REFUSAL. The read is a convenience the harness
+    gets for free from a file codex already wrote; a machine that has never
+    run `codex`, or a pruned `$CODEX_HOME`, must not be able to stop a round.
+    Log it and proceed.
+    """
+    from understudy import codex_usage
+
+    usage = codex_usage.probe()
+    if usage is None:
+        if not quiet:
+            print("codex budget: no rate-limit read available -- proceeding",
+                  file=sys.stderr)
+        return {"available": False,
+                "primary_stop_percent": codex_usage.primary_stop(),
+                "weekly_stop_percent": codex_usage.weekly_stop()}, None
+    if not quiet:
+        print(usage.summary())
+    record = usage.record()
+    record["available"] = True
+    return record, usage.over()
+
+
 def _drop_scratch(scratch: Path | None) -> None:
     if scratch is not None and not is_inside_repo(scratch):
         shutil.rmtree(scratch, ignore_errors=True)
@@ -1195,6 +1243,26 @@ def cmd_review(args) -> int:
         print(f"protocol:   {role} ({len(REVIEW_ROLES[role])} chars) "
               f"prepended; rows covered: {', '.join(rows) or '(none)'}")
         return 0
+
+    # EB-227. The review role spends the same meter the grade role does, so
+    # it reads it first and refuses in the shape this role already refuses in
+    # -- printed and returning 1, never an exception that would kill a round
+    # mid-flight. The record lands beside the review's own output.
+    usage_record, over_budget = budget_check()
+    try:
+        out.with_suffix(".usage.json").write_text(
+            json.dumps(usage_record, indent=1) + "\n",
+            encoding="utf-8")
+    except OSError:
+        pass
+    if over_budget:
+        print(f"SEAT REFUSED  {over_budget[0]}: "
+              f"{REFUSAL_REASONS[over_budget[0]]}", file=sys.stderr)
+        print(f"  {over_budget[1]}", file=sys.stderr)
+        print("  Raise it for one run with GITS_CODEX_PRIMARY_STOP / "
+              "GITS_CODEX_WEEKLY_STOP, or wait for the window.",
+              file=sys.stderr)
+        return 1
 
     # NOT BLIND and not a grader: this seat reads the repo on purpose, so
     # there is no transcript guard here, and its output may never be filed as

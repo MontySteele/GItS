@@ -158,6 +158,16 @@ REGISTRY: tuple[Lint, ...] = (
     # graded. Carries a curated debt set -- the four Klee slice 1 records this
     # row was opened for -- so it is green today and bites on the next one.
     _ci("prototype-authorship", "tools/lint_prototype_authorship.py"),
+    # EB-225 (R225 item 6, M66 pick 2), the third row on the same surface for
+    # the third hazard: the codegen gate asks whether the surface still matches
+    # the C#, authorship asks who wrote it, and this asks whether the C# is SAFE
+    # TO RUN under the single PROTOTYPE_CARDS switch M66 kept. Every Harmony
+    # patch in the three quarantined directories must be character-scoped (one
+    # flag compiles two arms, so an unscoped patch acts on the other arm's seat
+    # -- EB-194, EB-221) and seat-guarded (`LocalContext.GetMe` THROWS on a
+    # seatless combat: d217b4f, two whole blind sessions). Exemptions are
+    # `// lint: no-seat` markers and are printed on every run, green or red.
+    _ci("prototype-patch-scope", "tools/lint_prototype_patch_scope.py"),
     _ci("pool-membership",      "tools/lint_pool_membership.py"),
     _ci("ancient-coverage",     "tools/lint_ancient_coverage.py"),
     _ci("role-tempo-artifacts", "tools/suggest_role_tempo_tags.py", "--check"),

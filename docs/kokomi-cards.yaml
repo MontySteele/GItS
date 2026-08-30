@@ -70,12 +70,20 @@
 #   ONLY as riders on exhaust/Sly engine pieces, never a spammable cheap AoE debuff like Furina's commanding_gaze;
 #   uncommon-gated so no such shape exists at common), A4 LOW BY DESIGN (the stability band owns the healer
 #   fantasy in the act sims), A7 mid (engine assembly tax).
-# R80 (STANDING LAW, healing-law register — Neap Tide v2.1): CHARGE IS NEVER SPENT. Read or thresholded, never
-#   expended. Not a current implementation detail to be revisited: it is the structural firewall against
-#   Regent-Stars convergence, and it is what every scaling number on this sheet was measured against. A bank
-#   that can be spent is a different resource wearing the same name, and every per-point read here would be
-#   describing a curve that no longer exists. Already true on both sides by construction — ChargeResource.Spend
-#   is a documented no-op and tier0 has no spend_charge — and recorded so it stays that way.
+# R80 (STANDING LAW, healing-law register — Neap Tide v2.1), AMENDED BY R226 (2026-08-30):
+#   CHARGE IS SPENT BY THE BAKE-KURAGE AND BY NOTHING ELSE. Uncapped, accrued at 1 per Exhaust of one of her
+#   own cards (Companions included, Status and Curse excluded), card-event-driven with no passive accrual.
+#   ONE DOOR ONLY: at the threshold the jellyfish pays the bank to play the front of its memory for 0 energy,
+#   one card per turn. THE ANTI-CONVERGENCE CLAUSE STANDS AND IS THE POINT: no card prints a Charge cost and
+#   no card reads the bank proportionally, so no Encore-shaped face can enter her pool by precedent. R80's own
+#   warning is why every number below is marked re-derive rather than kept — "a bank that can be spent is a
+#   different resource wearing the same name, and every per-point read here would be describing a curve that
+#   no longer exists" — and the firewall it built against Regent-Stars convergence moves from "never spent" to
+#   "spent one way, by the kit, on tempo and never on magnitude."
+#   *** PROSPECTIVE (R213), countersigned R226: this block binds when C.KURAGE_MEMORY flips. Until the flip
+#   the SHIPPED rule is the one it replaces — CHARGE IS NEVER SPENT, read or thresholded, never expended —
+#   and that is still true on both sides by construction (ChargeResource.Spend is a documented no-op and tier0
+#   has no spend_charge). No row on this sheet moves on this comment. ***
 # Charge grammar: the universal exhaust->Charge accrual lives on the relic (engine funnel), NEVER as card text;
 #   gain_charge lines here are the §2.1 "premium" bonuses on top. Charge is read, never spent — readers are
 #   rate-limited per §2.2 (Rare / Exhaust / cost >= 2 on the nuke; the garment state is the kit).

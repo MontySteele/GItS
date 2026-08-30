@@ -193,10 +193,22 @@ internal static class KurageMemoryCard
         Paint(root, player, creature!);
     }
 
+    /// <summary>
+    /// Teardown, and it is CHARACTER-SCOPED like every other door into this
+    /// element (EB-225 / R225 item 6). The seat guard alone was never the
+    /// whole rule: the one `PROTOTYPE_CARDS` switch compiles Kokomi's memory
+    /// and Klee's Sparks together, so a patch of this arm's that asks only
+    /// "is there a seat" still runs on a Klee or Furina seat. Nothing was
+    /// ever built for one -- <see cref="Setup"/> refuses at the door -- so
+    /// the predicate here costs a teardown nothing and says the scope out
+    /// loud at the third door rather than leaving it to be inferred from the
+    /// first, which is exactly the `EB-207` correction one level up.
+    /// </summary>
     public static void DiscardAll(CombatState? state)
     {
         var me = TryGetMe(state);
-        if (me != null) Discard(me);
+        if (me == null || !KokomiResources.IsKokomi(me.Creature)) return;
+        Discard(me);
     }
 
     private static void Discard(Player player) => Displays.Discard(player);
@@ -229,8 +241,12 @@ internal static class KurageMemoryCard
     /// room down. The warning is loud because a seat that cannot be resolved
     /// mid-combat would be a real defect -- it is just not one worth ending a
     /// run over.
+    ///
+    /// `internal` rather than `private` since EB-225: the queue ring below is
+    /// a second element in this file that must name the seat to scope itself,
+    /// and it must reach the SAME guard rather than a second copy of it.
     /// </summary>
-    private static Player? TryGetMe(CombatState? state)
+    internal static Player? TryGetMe(CombatState? state)
     {
         if (state == null) return null;
         try
@@ -536,11 +552,65 @@ internal static class KurageMemoryCard
 /// the same class of fix -- a rect and a draw order -- and neither re-points
 /// the hook.
 /// </summary>
+/// <summary>
+/// The pile view's one sentence, ALONE IN ITS OWN TYPE, and the reason is the
+/// headless boundary rather than tidiness.
+///
+/// A test that reads a `static readonly` field runs the declaring type's
+/// STATIC CONSTRUCTOR, and <see cref="KurageMemoryPileRing"/>'s builds a Godot
+/// `StringName` -- the same trap <see cref="KurageMemoryCard.RectFor"/> is
+/// split out for, and it does not throw, it takes the test HOST down mid-run:
+/// the suite reported 90, 117 and 180 of 271 passing on three consecutive
+/// invocations with nothing failing. So the sentence lives where reading it
+/// initializes nothing but a string.
+///
+/// THE RATE IS INTERPOLATED, never typed. `lint_prose_constants` reads a
+/// hand-typed 1 beside the words "charge" and "exhaust" as
+/// `ChargePerExhaust`'s value spelled a second time, and it is right: a rate
+/// retune must not leave the one sentence that explains the funnel saying the
+/// old number. The RENDERED text is R224's, character for character.
+/// </summary>
+internal static class KurageMemoryText
+{
+    /// <summary>R224 item 7's sentence, and nothing added to it
+    /// (review/active/sitting-2026-08-30.md, item 7).</summary>
+    internal static readonly string ChargeSource =
+        $"Gain {KokomiConstants.ChargePerExhaust} Charge when a card of "
+      + "yours Exhausts";
+}
+
 internal static class KurageMemoryPileRing
 {
     private const string RingName = "KleeKurageQueueRing";
 
     private const int RingWidth = 8;
+
+    // ------------------------------------------- the head of the view --
+
+    /// <summary>
+    /// `EB-214` / R224 item 7 (`M55` re-scoped). WHERE THE CHARGE-SOURCE LINE
+    /// GOES, and it is here because everywhere else was retired: the blind
+    /// run's `P4` half (b) said the Charge sources are not discoverable from
+    /// the page, `M55`'s printed option aimed the sentence at the persistent
+    /// display's LIST, and `M61` option 3 had already cut that display to one
+    /// card, one ring, one number. There is no bar and no always-on list to
+    /// hold a sentence, so the line goes at the head of the click-through pile
+    /// view -- the only text-bearing memory surface left. "Stir" is NOT built.
+    ///
+    /// The wording is R224's, verbatim (review/active/sitting-2026-08-30.md,
+    /// item 7), and it is a rules sentence rather than a live read: the bank
+    /// itself is on the HUD, and repeating it here would be the division of
+    /// labour §14.3 exists to keep.
+    /// </summary>
+    private const string HeaderName = "KleeKurageQueueHeader";
+
+    private const int HeaderFontSize = 30;
+
+    /// <summary>Screen-space, in the game's 1920x1080 design resolution: above
+    /// the grid, below the screen's own title band.</summary>
+    private const float HeaderTop = 22f;
+
+    private const float HeaderHeight = 40f;
 
     /// <summary>Godot's theme entry for a `Panel`'s stylebox; see the twin note
     /// on <see cref="KurageMemoryCard"/>.</summary>
@@ -588,6 +658,52 @@ internal static class KurageMemoryPileRing
         _reported = false;
     }
 
+    /// <summary>
+    /// Print the Charge-source line at the head of OUR pile view.
+    ///
+    /// Called from an `NCardPileScreen._Ready` postfix. Three guards, and they
+    /// are the `EB-225` rules rather than caution: the screen must be the one
+    /// we armed (so the game's own draw/discard/exhaust viewers are untouched),
+    /// the seat is resolved through <see cref="KurageMemoryCard.TryGetMe"/>
+    /// (which cannot throw on a combat with no local seat), and the seat must
+    /// be KOKOMI's -- one `PROTOTYPE_CARDS` switch also compiles Klee's Sparks,
+    /// and a header that ran on a Klee seat would be exactly the cross-arm
+    /// shape `EB-194` and `EB-221` were.
+    ///
+    /// Idempotent by node name: `_Ready` runs once per screen, but a rebuilt
+    /// screen reusing the node must not stack two labels.
+    /// </summary>
+    internal static void Header(NCardPileScreen screen)
+    {
+        if (_pile == null || !ReferenceEquals(screen.Pile, _pile)) return;
+
+        var me = KurageMemoryCard.TryGetMe(KurageMemory.Combat);
+        if (me == null || !KokomiResources.IsKokomi(me.Creature)) return;
+        if (screen.GetNodeOrNull<Label>(HeaderName) != null) return;
+
+        var line = new Label
+        {
+            Name = HeaderName,
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            AnchorLeft = 0f,
+            AnchorRight = 1f,
+            AnchorTop = 0f,
+            AnchorBottom = 0f,
+            OffsetTop = HeaderTop,
+            OffsetBottom = HeaderTop + HeaderHeight,
+            Text = KurageMemoryText.ChargeSource,
+        };
+        line.AddThemeFontSizeOverride(ThemeConstants.Label.FontSize,
+                                      HeaderFontSize);
+        line.AddThemeColorOverride(ThemeConstants.Label.FontColor,
+                                   StsColors.cream);
+        screen.AddChildSafely(line);
+
+        Log.Info($"[{KleeMod.ModId}] kurage pile header: "
+               + $"\"{KurageMemoryText.ChargeSource}\".");
+    }
+
     internal static void Disarm()
     {
         _pile = null;
@@ -607,6 +723,22 @@ internal static class KurageMemoryPileRing
         {
             // Not ours, or ours is closed. Hide any ring this node still
             // carries from a previous open; never leave one painted.
+            if (ring != null) ring.Visible = false;
+            return;
+        }
+
+        // EB-225 / R225 item 6: the CHARACTER SCOPE, spelled here rather than
+        // inherited from the arming point. The projection is only ever filled
+        // by `OpenQueue`, which is Kokomi-gated, so this was true INDIRECTLY
+        // -- and indirect is precisely the shape `EB-207` had to correct one
+        // level up: one arming door holding the rule for every reader of it.
+        // Under a single `PROTOTYPE_CARDS` switch a stale projection left by
+        // a previous combat is a Kokomi element painted on a Klee card, and
+        // this is one dictionary hit past the early return above, so it costs
+        // nothing on the frames that are not ours.
+        if (!KurageMemory.IsLive(
+                KurageMemoryCard.TryGetMe(KurageMemory.Combat)?.Creature))
+        {
             if (ring != null) ring.Visible = false;
             return;
         }
@@ -683,10 +815,34 @@ internal static class NCard_UpdateStarCostVisuals_KurageQueueRing_Patch
 }
 
 /// <summary>
+/// `EB-214`: the Charge-source line, at the head of the view, the first frame
+/// the screen is ready. `_Ready` rather than `ShowScreen` because the node tree
+/// does not exist until then, and the label needs a parent.
+/// </summary>
+[HarmonyPatch(typeof(NCardPileScreen), nameof(NCardPileScreen._Ready))]
+internal static class NCardPileScreen_Ready_KurageQueueHeader_Patch
+{
+    [HarmonyPostfix]
+    public static void Postfix(NCardPileScreen __instance)
+        => KurageMemoryPileRing.Header(__instance);
+}
+
+/// <summary>
 /// Disarm when the viewer leaves the tree. `_ExitTree` rather than
 /// `AfterCapstoneClosed` because it fires on every removal path, including the
 /// ones a capstone close does not run.
+///
+/// THE ONE EXEMPT PATCH ON THIS SURFACE (EB-225). It reads no run, no combat
+/// and no seat: its whole body compares the screen that is leaving against a
+/// static field this file set, and clears static fields. A character test
+/// here would be a test of somebody ELSE's identity -- whoever happens to
+/// hold a seat while a pile screen closes -- and would leave a stale
+/// projection armed on the frame it answered no, which is the defect the
+/// scope rule exists to prevent rather than an instance of obeying it.
 /// </summary>
+// lint: no-seat: pure static teardown of this file's own fields -- it reads
+// neither a run nor a seat, and a character test here would leave the ring
+// armed on the frame it answered no.
 [HarmonyPatch(typeof(NCardPileScreen), nameof(NCardPileScreen._ExitTree))]
 internal static class NCardPileScreen_ExitTree_KurageQueueRing_Patch
 {

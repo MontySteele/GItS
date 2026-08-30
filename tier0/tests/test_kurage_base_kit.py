@@ -26,12 +26,13 @@ assertion below is about what the engine DOES.
 """
 
 import copy
+import pathlib
 import random
 
 import pytest
 
 from tier0 import constants as C
-from tier0.content import loader
+from tier0.content import loader, upgrades
 from tier0.engine import combat, effects
 from tier0.engine.state import CombatState, KurageMemory
 from tier0.pilot.policy import make_pilot
@@ -308,12 +309,29 @@ def test_c4_the_oaths_ward_is_ruled_and_no_longer_rides_the_pulse(base_kit):
 
 def test_c5_the_fires_summon_gate_can_no_longer_fail_in_a_real_fight(
         base_kit):
-    """Pick 5. `KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON` is retired-under-flag:
-    both settings read the same while the jellyfish cannot be absent."""
+    """Pick 5, RULED (R224 A). The dial that let the accelerator keyword fire
+    without a jellyfish is DELETED, so both doors -- the automatic fire and the
+    keyword -- ask the one question. Under the base kit that question can never
+    be answered no in a real fight, which is why the two settings read the same
+    and only one of them survives."""
     st = kokomi_state()
     assert st.player.powers.get("kurage_summon", 0) == 0   # a bare state
     st = fight()
     assert st.player.powers.get("kurage_summon", 0) == 1   # a real fight
+
+
+def test_c5b_the_keyword_asks_the_same_summon_question_as_the_automatic_fire(
+        base_kit):
+    """The collapsed branch, pinned from the manual side: on a state with no
+    jellyfish the keyword fires nothing and pays nothing, exactly as the
+    automatic door does. This is the assertion the deleted dial's `False`
+    setting used to break."""
+    st = armed([memory_entry(price=0)], charge=0)
+    st.player.powers.pop("kurage_summon", None)
+    effects.OPS["play_front_memory"](st, {"op": "play_front_memory"},
+                                     loader.get_card("waters_edge"))
+    assert len(st.kurage_queue) == 1
+    assert not effects.kurage_fire(st, manual=True)
 
 
 # --------------------------------------------------------------------------
@@ -576,6 +594,42 @@ def test_no_upgraded_shipped_oath_can_be_offered(offer_pool):
     assert not [i for i in ids if i.endswith("+")]
 
 
+# -- EB-213: the substituted Oath can be smithed, and to the ruled number ----
+#
+# [USER]'s placeholder is "3 block per memory played, upgrade to 5". The 5 was
+# a note on the row and nothing else: the prototype surface had NO upgrade
+# channel, so `has_upgrade` was False for every substituted row and the
+# campfire skipped it. The row now carries `upgrade: {kurage_ward: +2}` -- the
+# arithmetic between his two endpoints, and the same delta the shipped Oath
+# already carries (R130) -- and the shipped upgrade path reads it from there.
+
+def test_the_substituted_oath_can_be_upgraded(offer_pool):
+    assert upgrades.has_upgrade(PROTO_OATH)
+
+
+def test_the_substituted_oaths_upgrade_is_the_ruled_five(offer_pool):
+    """The whole of `EB-213`'s acceptance on the sim side. Not a balance
+    claim: nothing on this surface is quotable (R213 B / R215 B), and the
+    assertion is that the campfire reaches the number [USER] ruled."""
+    base = loader.get_card(PROTO_OATH)
+    up = loader.get_card(PROTO_OATH + upgrades.SUFFIX)
+    assert base.effects[0]["amount"] == C.KURAGE_MEMORY_PULSE_BLOCK - 2
+    assert up.effects[0]["amount"] == C.KURAGE_MEMORY_PULSE_BLOCK
+
+
+def test_the_upgraded_ward_is_what_a_memory_play_actually_pays(base_kit):
+    """The number reaches the ENGINE, not just the sheet: a card is a face
+    until the ward it applies is the ward the memory play pays."""
+    st = kokomi_state()
+    st.player.powers["kurage_summon"] = 1
+    effects.resolve_card(st, loader.get_card(PROTO_OATH + upgrades.SUFFIX))
+    assert st.player.powers["kurage_ward"] == 5
+    st.kurage_queue.append(memory_entry(price=0))
+    st.player.block = 0
+    assert effects.kurage_fire(st) is True
+    assert st.player.block == 5
+
+
 def test_the_swap_is_hers_alone(offer_pool):
     """A substitution keyed to a constant must not reach another roster."""
     for other in ("klee", "furina"):
@@ -634,3 +688,83 @@ def test_five_starter_fights_run_to_completion_under_the_base_kit(base_kit):
         st = fight(seed=seed)
         assert st.over or not st.living_enemies or not st.player.alive
         assert not [e for e in st.log if e["event"] == "UNIMPLEMENTED"]
+
+
+# --------------------------------------------------------------------------
+# EB-214 / R224 item 6 (M54 pick 1): THE TEACHING SURFACE
+#
+# The blind run graded P3 at 0 of 10 turns and 0 of six Musters naming a
+# Memory consequence -- every Muster target was chosen BECAUSE the card was
+# dead, the exact inverse of Rule 1. R224 ruled the failure to be WORDING and
+# not dose, and printed Rule 1 as the Muster KEYWORD's own text (hover text is
+# that keyword's detail; "tooltip" is not a third surface).
+#
+# THE KEYWORD IS DEFINED IN EXACTLY ONE PLACE, and this is the sim's pin on
+# it. There is no keyword table on the sheet and gen_klee_cards renders only
+# the FACE phrase ("Muster N", _conscript_phrase): the definition itself lives
+# in KokomiRiderTips.ForMuster and nowhere else, which is R78's whole point.
+# So the sim asserts against that source, the way the keyword-meter lint
+# already does, rather than against a copy it would have to keep in step.
+#
+# BOTH SIGNS. The rule must be inside `#if PROTOTYPE_CARDS` -- a release build
+# must not be able to print a sentence about a jellyfish whose type it does
+# not compile -- and the shipped definition must be word for word R78's.
+# --------------------------------------------------------------------------
+
+TIPS = (
+    pathlib.Path(__file__).resolve().parents[2]
+    / "klee-mod" / "KleeCode" / "Cards" / "KokomiRiderTips.cs")
+
+RULE_ONE = (
+    "creates a memory of the card it ate",
+    "recruit creates a second when it burns",
+)
+
+SHIPPED_MUSTER_TEXT = (
+    "[gold]Muster N[/gold]: transform N cards in your hand into ",
+    "random Inazuma [gold]Companion[/gold] cards. Each costs ",
+    " less and [gold]Exhausts[/gold]. Kit cards and ",
+    "Companions you already hold are never chosen.",
+)
+
+
+def _for_muster_body():
+    """`ForMuster`'s source, from its signature to the method's close."""
+    text = TIPS.read_text(encoding="utf-8-sig")
+    start = text.index("public static IEnumerable<IHoverTip> ForMuster(")
+    end = text.index("\n    }", start)
+    return text[start:end]
+
+
+def _quarantined_span(body):
+    """The part of `body` the release build never sees."""
+    start = body.index("#if PROTOTYPE_CARDS")
+    return body[start:body.index("#endif", start)]
+
+
+def test_the_muster_keyword_prints_rule_one(base_kit):
+    """Under the flag the keyword carries the memory-creation rule itself."""
+    quarantined = _quarantined_span(_for_muster_body())
+    for phrase in RULE_ONE:
+        assert phrase in quarantined, phrase
+
+
+def test_the_muster_keyword_states_the_price_from_the_constant(base_kit):
+    """P3 asks a tester to say "at price Y", so the price is on the keyword --
+    and it is READ from the C# law constant rather than typed, the same
+    discipline the Muster discount above it already keeps."""
+    quarantined = _quarantined_span(_for_muster_body())
+    assert "KurageMemoryLaw.CostPerEnergy" in quarantined
+    assert "3" not in quarantined, "the multiplier must not be hand-typed"
+
+
+def test_the_shipped_muster_keyword_did_not_move():
+    """THE RELEASE PIN, and it takes no fixture: with the flag off this is the
+    text R78 shipped, and every added word is inside the quarantined span."""
+    body = _for_muster_body()
+    released = body.replace(_quarantined_span(body), "")
+
+    for chunk in SHIPPED_MUSTER_TEXT:
+        assert chunk in released, chunk
+    for phrase in RULE_ONE + ("Charge", "memory"):
+        assert phrase not in released, phrase

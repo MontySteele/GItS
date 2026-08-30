@@ -283,7 +283,8 @@ public sealed class BombAndSparkPerTurnPower : PowerModel, ILocalizationProvider
                         Owner, cardSource: null);
                 }
             }
-            await SparkPower.Gain(choiceContext, Owner, 1, cardSource: null);
+            await SparkPower.Gain(choiceContext, Owner, 1, cardSource: null,
+                source: "power:bomb_and_spark_per_turn/turn_start");
         }
     }
 }
