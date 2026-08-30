@@ -2373,3 +2373,466 @@ the row that already owns R221 B's stopping rule.
 **What this section does not do.** It answers no pick, adopts no
 recommendation, and moves no grade. The three picks at §13.6, the added option
 (e), §11.7 item 1(e), and `M64` are all [USER]'s.
+
+---
+
+## 14. Sink candidates for 1(e) — sinks that are not damage
+
+**Written 2026-08-29 on branch `klee-sink-candidates`. This is a design memo and
+a pick list. Nothing is built, no row is staged, no id is minted, and no number
+below is a balance claim.**
+
+The thing being answered is §11.7 pick 1's option (e), which R222 left standing
+rather than ruling: *"re-author one or two sinks away from damage — Bomb
+manipulation, setup, targeting, draw/exhaust or another qualitative payoff — so
+that two Spark destinations differ in KIND and not only in number."* Six of the
+eight prototype rows are Attacks. The whole fight (§12) then showed the bank
+being spent as soon as it was earned, the price-3 top rung dead from turn one to
+the end, and the generator — not any sink — becoming the automatic play.
+
+### 14.1 What a real hold decision needs
+
+A player leaves an affordable damage sink unplayed only when the same Sparks
+have a **future use that is worth more than the damage is worth now**. That is
+the whole of it, and it is a comparison the current set cannot stage, because
+every destination the bank has is damage, so the comparison is arithmetic —
+eight now against ten later, and later loses to now every time an enemy is alive
+in front of you. There are five shapes that produce a genuine hold, and they are
+worth naming separately because they fail for different reasons:
+
+- **A delayed payoff that grows with the bank.** Spend later and the same Sparks
+  buy strictly more. This is the only shape where holding is *directly* rewarded
+  rather than rewarded by circumstance.
+- **A payoff that only exists on a later board state** — a second body on the
+  field, a Bomb already placed, an enemy telegraphing a big attack. Holding is
+  not rewarded; it is simply the only way to have the Sparks when the board
+  finally makes the card good.
+- **A defensive use that competes with damage when you are threatened.** The
+  bank has to choose between killing faster and not dying, which is the oldest
+  real decision in the genre and the one Klee's kit is deliberately short of.
+- **An investment.** Spend the bank on something that pays across the rest of
+  the fight instead of this turn, so the question is "how long is this fight?"
+  rather than "how much damage?".
+- **A tempo or draw use.** The bank buys cards or card order, so spending is a
+  bet on the deck rather than on the enemy's health bar.
+
+**None of the six Attacks can produce any of these, and the reason is
+structural rather than a matter of their numbers.** All six resolve entirely on
+the turn they are played, all six pay in the same currency (enemy hit points),
+and none of them reads anything about the board except how many bodies are on
+it. So the only difference between any two of them is damage-per-Spark, and a
+player choosing between two rates does not hold — they take the better rate and
+empty the bank. §13.1's `P1` is not a counter-example to this: the readers there
+genuinely weighed two priced cards against each other, but every one of those
+sentences compared *amounts of damage* (18 in one hit against 8 + 5 + 5; 21
+spread against 10 with no guarantee), which is a choice about which Attack to
+play, not a choice about whether to spend at all. And `W3` — the funnel's only
+detector of an actual hold, "an affordable sink was in hand when the player
+ended the turn" — read **zero** across the whole fight.
+
+**Why Powder Pop into an Attack became automatic.** The generator is 0 energy,
+it advances the Bomb plan you wanted to advance anyway, and it hands you a Spark
+that has exactly one thing to do with it. Playing it costs nothing and forecloses
+nothing, so there is no reason ever to hold it and no reason ever to play it
+second. Once the Spark exists it goes into the cheapest Attack in hand, because
+that is the only destination it has. The sequence is not a decision that happens
+to have an obvious answer — it is a sequence with no branch in it at all. Adding
+a sink of a *different kind* is the smallest change that puts a branch there,
+because for the first time the Spark in hand has two things it could become and
+they are not comparable by subtraction.
+
+### 14.2 The candidates
+
+Eight, numbered. Seven are buildable with what both engines already have; the
+eighth is included because it is the shape the brief most wants and it is
+honestly out of reach today, and saying so is more useful than smuggling in a
+worse version of it.
+
+Every number below is lifted off a shipped Klee or companion face, never
+invented — the same rule §4 set for the damage sinks. All seven buildable rows
+are **0 Energy with a top-level Spark price**, which is what makes the price a
+playability gate in both engines; none has a Spark cost inside a conditional.
+
+Two constraints on what a candidate may replace, both of which narrow the field:
+the set stays at eight, and only Attacks may be replaced — and of the six
+Attacks, `Ka-pow!` is the **starter** sink that PICK 1 exists to create, so
+moving it would undo a different ruling. That leaves five replaceable rows:
+`Fwoosh!` (price 1), `Tinder Toss` (price 1, area), `Bang Bang!` (price 2),
+`Dodoco Blast` (price 2, area) and `Firework Finale` (price 3).
+
+---
+
+#### 1. Slow Fuse — the bank pumps the Bombs you are about to place
+
+> **Slow Fuse** — 0 Energy · Spend 2 Sparks · Skill · Common
+> *Bombs you placed this turn deal 3 more damage.*
+
+Replaces **Bang Bang!** (price 2, Common). The body is `Chain Fuse`'s exactly —
+same op, same scope, same figure — with the energy cost swapped for a Spark
+price and the free Bomb dropped.
+
+**The decision:** hold 2 Sparks now so that on the turn you actually place two
+or three Bombs, all of them get bigger — instead of spending the same 2 on ten
+damage today.
+
+**The board state that makes it beat damage:** a turn where the hand holds
+`Double Pop`, `Bomb Voyage`, `Mine Toss` or `Jumpy Dumpty`. One Bomb makes this
+a bad ten damage; three Bombs make it nine damage that also feeds the relic and
+every detonation payoff in the deck.
+
+**The failure mode:** it is dead on a turn with no Bomb card in hand, which is
+most opening hands, and "dead card" is what §13.1's `P2` says a dry sink already
+reads as. It also arrives *before* the payoff is visible, so a player who has
+not internalised the scope clause will read it as a nothing card.
+
+**Can tier 0 price it?** **No — it needs a `_spark_unit_value` leg.**
+`modify_bombs` appears nowhere in `_expected_damage`, so the pilot values this
+card at exactly zero and will never buy it, and `_spark_unit_value` (which
+prices a Spark as the cheapest affordable sink's payoff over its price) would
+therefore price the whole bank at zero on a hand holding only this. That is the
+declared blind spot working exactly as its docstring says it does.
+
+**The falsifier:** an affordable damage sink is in hand at `end turn` on a turn
+this card was played, or — sharper — the recorded reason for a `Slow Fuse` play
+names a Bomb card it intends to play afterwards.
+
+---
+
+#### 2. Minefield — the bank buys a delayed board sweep instead of an instant one
+
+> **Minefield** — 0 Energy · Spend 2 Sparks · Skill · Uncommon
+> *Place a 5-damage Bomb on ALL enemies.*
+
+Replaces **Dodoco Blast** (price 2, Uncommon, 7 damage to all). The body is
+`Mine Toss`'s exactly, at Spark price instead of 1 Energy.
+
+**The decision:** hold 2 Sparks now so that the Bombs land on a turn you can
+also detonate them, instead of taking 7 to each body immediately.
+
+**The board state that makes it beat damage:** two or more enemies AND a
+detonator (`Quick Fuse`, `Remote Detonator`, `Powder Charge`, or simply any
+Attack, since a hit detonates early) either in hand or expected. Against three
+bodies it is 15 damage on a one-turn delay plus three Spark refunds from the
+relic; `Dodoco Blast` is 21 now and nothing afterwards. Against one body it is
+plainly worse than the card it replaced, and that is intended.
+
+**The failure mode:** the delay is a real cost against anything that dies this
+turn, and Klee's own Attacks detonate Bombs early *by accident*, so an
+inattentive player will often convert this back into ordinary damage without
+meaning to. It also risks being read as simply a slower `Dodoco Blast` — the
+same kind, differently timed — rather than a different kind.
+
+**Can tier 0 price it?** **Partly, and the gap is precise.** `_expected_damage`
+credits `place_bomb` as `bomb_damage × amount` and **never multiplies by the
+number of targets**, so an all-enemies Bomb is valued as one Bomb. Against three
+bodies the pilot sees 5 where the card delivers 15. A one-line leg fixes it; the
+direction of the error is under-valuing, which is the safe direction this file
+takes everywhere.
+
+**The falsifier:** `Dodoco Blast` or `Bang Bang!` affordable and in hand while
+this is played, on a board with two or more enemies — or the W3 detector firing
+on a turn this card is held for a Bomb-and-detonate turn.
+
+---
+
+#### 3. Behind the Barrel — the bank buys survival, and only when survival is at stake
+
+> **Behind the Barrel** — 0 Energy · Spend 1 Spark · Skill · Common
+> *Gain 5 Block. If the enemy intends to attack, gain 6 more.*
+
+Replaces **Fwoosh!** (price 1, Common, 8 damage). The body is `Hold the Line`'s
+exactly — same Block figures, same predicate — at price 1 instead of 2 and 0
+Energy instead of 1.
+
+**The decision:** hold 1 Spark now so that when the telegraph turns red you can
+pay for eleven Block, instead of converting it into eight damage the moment you
+earn it.
+
+**The board state that makes it beat damage:** any turn where the incoming
+number is larger than the damage you would trade it for — which, on a 62-HP
+character, is most turns after act 1. It is the only candidate whose value is
+set by the *enemy's* next move rather than by your own hand.
+
+**The failure mode:** on a turn where the enemy is not attacking it is five
+Block for a Spark, which is thin, so it may simply read as a worse `Run Away!`
+and never be drafted. There is also a legitimate objection that the shipped pool
+already has this card at 1 Energy and 2 Sparks, so the prototype is a reprice of
+an existing idea rather than a new kind — the answer is that `Hold the Line`
+proves the kind works and is exactly why it is the cheapest candidate to be
+confident about, but it does mean this row tests placement and price, not
+novelty.
+
+**Can tier 0 price it?** **Yes, today.** `_block_value` reads printed Block, and
+`_active_effects` evaluates the `enemy_intends_attack` branch live, so the pilot
+sees the conditional half on the turns it fires. The one honest caveat is that
+Block is valued only up to the damage it actually prevents this turn, so on a
+turn with a big incoming hit the pilot will value it correctly and on a quiet
+turn it will value it at zero — which is, for once, exactly the behaviour we
+want to observe.
+
+**The falsifier:** a turn on which `Tinder Toss` or `Bang Bang!` is affordable
+and in hand, the enemy telegraphs an attack, and this is played instead — with
+the recorded reason naming the incoming damage. The mirror case is just as
+informative: the same board, damage taken anyway, and the Block left unbought.
+
+---
+
+#### 4. Powder Keg — the whole bank buys next turn instead of this one
+
+> **Powder Keg** — 0 Energy · Spend 3 Sparks · Skill · Uncommon · Exhaust
+> *Your Bombs deal 3 more damage. Place a 5-damage Bomb on ALL enemies.*
+
+Replaces **Firework Finale** (price 3, Uncommon, Exhaust, 18 damage) — the rung
+that was dead for the entire whole-fight run and was named twice by the tester
+as a reason not to draft more spenders. The `+3` is `Chain Fuse`'s figure at
+`modify_bombs`' other shipped scope; the Bomb is `Mine Toss`'s.
+
+**The decision:** hold 3 Sparks so that one turn is spent making every Bomb on
+the board — including the ones already ticking — bigger, instead of taking 18
+damage to one enemy right now.
+
+**The board state that makes it beat damage:** a board that already carries
+Bombs and a fight with turns left in it. Against a pile of three existing Bombs
+plus the one this places, the `+3` alone is 12 extra damage arriving at the
+start of your next turn, with the Bomb on top and a relic Spark per detonation
+feeding the next purchase. Against an enemy about to die it is strictly worse
+than 18 now, which is the trade.
+
+**The failure mode:** this is the most likely of the eight to be *dead* rather
+than merely automatic — it wants a board state that the opening turns of a fight
+never have, and a fight short enough to be worth playing is a fight where next
+turn may not matter. It is also the candidate most exposed to the identity rail
+in LAW: Klee's scaling must never top her frontload, and a card that converts
+the bank into future damage is a scaling card wearing a Spark price. If it
+overperforms it overperforms in exactly the direction the character is not
+allowed to go.
+
+**Can tier 0 price it?** **No — the same `modify_bombs` leg as candidate 1, plus
+candidate 2's target-count fix.** With neither, the pilot values this at 5 (one
+Bomb) against a real payload several times that, and will never spend a full
+bank on it.
+
+**The falsifier:** the W3 detector firing at all — a bank of 3 held through a
+turn on which `Bang Bang!` and `Tinder Toss` were both affordable — plus, on the
+turn it is finally played, a recorded reason that names the Bombs already on the
+board rather than the Bomb it places.
+
+---
+
+#### 5. Second Pocket — the bank buys the card you need, not the damage you have
+
+> **Second Pocket** — 0 Energy · Spend 1 Spark · Skill · Common
+> *Put a card from your discard pile on top of your draw pile. Draw 1 card.*
+
+Replaces **Fwoosh!** (price 1, Common) — the alternative to candidate 3 in that
+slot. The fetch is `A Moment Alone`'s op used in the same direction it already
+ships in.
+
+**The decision:** hold 1 Spark so that the turn after your best Bomb card goes
+to the discard, you can have it back on top — instead of turning the Spark into
+eight damage the moment you get it.
+
+**The board state that makes it beat damage:** a discard pile containing
+`Jumpy Dumpty`, `Bombs Away!`, `All of My Treasures!` or a detonator, and a
+fight long enough for the deck to have cycled once. It is the only candidate
+that makes the bank buy *the shape of your next turn*.
+
+**The failure mode:** it is the candidate most likely to be automatic in the
+other direction — a cheap card that draws is played on sight in most decks, and
+a player who does not care which card comes back will just play it for the draw.
+Turn one, with an empty discard, it is a 1-Spark cantrip and nothing else.
+
+**Can tier 0 price it?** **No — it needs a `_spark_unit_value` leg.**
+`_tempo_value` prices `draw` and `energy`; `recall_to_draw` appears nowhere in
+it, so the pilot sees this as "draw 1 for a Spark" and prices the fetch — the
+entire point of the card — at zero. Worse than the other gaps, the pilot has no
+concept of *which* card it would fetch, so even a leg would be crude.
+
+**The falsifier:** an affordable damage sink left in hand at `end turn` while
+this is held, or a recorded reason for the play that names the card being
+fetched.
+
+---
+
+#### 6. Regroup — the bank buys aim
+
+> **Regroup** — 0 Energy · Spend 1 Spark · Skill · Common
+> *Move all Bombs onto the target. They deal 2 more damage.*
+
+Replaces **Tinder Toss** (price 1, Common, 4 damage to all). The body is
+`Careful Arrangement`'s exactly.
+
+**The decision:** hold 1 Spark so that when your Bombs have scattered across
+three bodies you can gather them onto the one that is about to matter, instead
+of spending it on four damage to each.
+
+**The board state that makes it beat damage:** Bombs spread across two or more
+enemies with one of them near a kill threshold, or an elite that wants the whole
+pile. This is D2's *targeting* verb, which the current set feeds not at all.
+
+**The failure mode:** Klee's Bombs mostly go where you put them, so a
+disciplined player rarely needs to move them, and against one enemy the card
+does nothing but the `+2`. It is also the narrowest of the eight — narrow enough
+that it may simply never be drafted, which is a different failure from being
+automatic and arguably a worse one.
+
+**Can tier 0 price it?** **Partly.** The pilot has a `move_bombs` reader
+(`BOMB_MOVE_READER_AIM_VALUE`) and `_hand_has_op` checks for it, so unlike
+candidates 1, 4 and 5 it is not invisible — but the value is a flat constant
+rather than a read of where the Bombs actually are, so the pilot cannot tell a
+gathering worth making from one that is not.
+
+**The falsifier:** the card played on a board with Bombs on two or more enemies
+while a damage sink was affordable, with the recorded reason naming the enemy
+being gathered onto.
+
+---
+
+#### 7. Powder Trail — the bank buys defence you have not needed yet
+
+> **Powder Trail** — 0 Energy · Spend 2 Sparks · Skill · Uncommon
+> *Gain 4 Block. Gain 4 Block at the start of your next turn.*
+
+Replaces **Bang Bang!** (price 2, Common) — the alternative to candidate 1 in
+that slot; at Uncommon it would go into `Dodoco Blast`'s slot instead. Both
+figures are Charlotte's shipped pair in `docs/fontaine-companions.yaml`.
+
+**The decision:** hold 2 Sparks so that a turn you can afford to spend
+defensively buys defence for the turn you cannot — instead of buying ten damage
+now.
+
+**The board state that makes it beat damage:** a known two-turn threat — an
+elite winding up, or the turn before a boss's big beat — where the Block you
+want is not the Block you can pay for on the turn it lands.
+
+**The failure mode:** pre-emptive Block is the exact shape the watch register
+already worries about on another character (`W6`), and Klee's declared Block
+axis is 2.0 — deliberately low. A card that hands her steady defence for a
+resource she generates every turn moves her off her own statline, and it does it
+quietly.
+
+**Can tier 0 price it?** **No — it needs a leg on the block side.** `_raw_block`
+reads only `op == "block"`; `block_next_turn` is not in it, so the pilot sees
+four Block for two Sparks and will price this as the worst card in the set.
+
+**The falsifier:** played on a turn when the incoming damage was *low* and a
+damage sink was affordable — that combination is the hold, and nothing else in
+the set can produce it.
+
+---
+
+#### 8. Saving Up — the shape the brief most wants, and it cannot be built today
+
+> *Sketch, not a row.* A card or Power whose payoff scales with how long the
+> Sparks have been held — "at the end of your turn, if you did not spend a
+> Spark, this costs 1 less" or "spend your whole bank: deal 4 damage per Spark
+> spent, to all enemies".
+
+This is the only shape on §14.1's list that rewards holding **directly** rather
+than through circumstance, and it is therefore the shape most likely to produce
+a genuine hold. It is recorded here as refused rather than proposed, for two
+reasons:
+
+1. **A bank-scaled payoff has no op.** There is no `spend_all_sparks`, and no
+   damage formula that reads the Spark bank as a count except `2_plus_sparks`,
+   which reads it and does not spend it. Writing one is engine work in both
+   engines.
+2. **A cost that decays while you hold is a new Power**, and
+   `tools/gen_prototype_cards.py` refuses a row applying a power with no
+   `PowerModel` in the registry — by name, exactly as it refused
+   `spark_attack_cost` (§10, the eighth row). That refusal is the surface's
+   promise that a staged row can actually be staged, and it should not be worked
+   around.
+
+If [USER] wants this shape, the honest route is the one `Spark Knight's Oath`
+took: take the runtime work first, in its own step, and stage the card after.
+It is not a candidate for *this* re-authoring.
+
+---
+
+### 14.3 Recommendation — a numbered pick, and nothing is marked default
+
+This is a design call between genuinely different directions, so it goes back
+whole. Every option keeps the set at eight and replaces Attacks only.
+
+**(1) Re-author two: `Fwoosh!` → Behind the Barrel (candidate 3), and
+`Firework Finale` → Powder Keg (candidate 4).**
+
+Why these two. They differ from each other about as far as two sinks can: one is
+defence bought on the enemy's turn, one is offence bought on a future turn of
+yours, and neither can be compared to the other by subtraction — the first is
+priced by the incoming number, the second by how many turns the fight has left.
+Both differ from every remaining damage sink in kind and not only in amount. And
+they sit at the two ends of the price ladder deliberately: at price 1, the
+cheapest thing the bank can do stops being "eight damage" and starts being a
+question; at price 3, the rung that was dead for an entire fight gets a body
+that a dead rung is *supposed* to have — something you save up for. After the
+swap the damage ladder still reads `Tinder Toss` at 1, `Bang Bang!` and
+`Dodoco Blast` at 2, and nothing at 3, which is the point: a full bank of 3 must
+now choose between one investment and two small damage plays, and that is a hold
+decision by construction rather than by hope.
+
+What it costs to build. **No new C#**: every op involved — `block`, the
+`enemy_intends_attack` conditional, `modify_bombs`, `place_bomb` — already ships
+in the Klee mod on `Hold the Line`, `Chain Fuse` and `Mine Toss`, and the
+prototype generator emits all four today. **Two tier-0 pricing legs**, both in
+`_expected_damage`: `modify_bombs` (currently invisible) and a target count on
+`place_bomb` (currently valued as one Bomb regardless of targets). Candidate 3
+needs none. **No art**: prototype rows are dev-only and carry no portrait; art is
+owed at acceptance, when the rows move to the real sheet, and would be two
+portraits.
+
+**(2) An alternative pair: `Bang Bang!` → Slow Fuse (candidate 1), and
+`Dodoco Blast` → Minefield (candidate 2).**
+
+Both Bomb-facing, both in the middle of the ladder, and the damage rungs at 1
+and 3 stay exactly as they are. This is the more conservative direction: it
+tests whether *Bomb manipulation* is a real second kind while leaving the top and
+bottom of the price ladder untouched, so if it fails, nothing else about the arm
+has moved. It is weaker on the finding that motivated all of this — the dead top
+rung is still `Firework Finale` and still dead — and it puts both new cards in
+the same family, so a null result cannot distinguish "Bomb sinks don't work"
+from "this pair of Bomb sinks doesn't work". It needs the same two pricing legs
+and no C#.
+
+**(3) One only: `Fwoosh!` → Behind the Barrel (candidate 3).**
+
+The cheapest possible test of the whole idea. It is the one candidate that needs
+**no engine work at all** — buildable and sim-priceable today, in both engines,
+with numbers lifted whole off a shipped card — and it is the only kind on
+§14.1's list that has already been proved to work in this pool, because
+`Hold the Line` is that card at a different price. If the answer to "does a
+non-damage sink create a hold?" is no even here, the other six candidates are
+not worth building.
+
+**(4) None: keep the set as built and move to the next gate.**
+
+The case for this is real and should not be strawmanned. §13.1's `P1` came back
+PREDICTED on three of three boards: readers did weigh two priced cards against
+each other and said so in their own words. The whole-fight null on `W3` came off
+**one fight, one seed, one pilot and a granted deck**, and the fight's own record
+says the bank never held two affordable uses — which may be a generation problem
+(PICK 1's question) rather than a sink-kind problem. Under this option the arm's
+next gate is a second whole fight with the generation question answered first,
+and (e) stays available afterwards with better evidence behind it.
+
+### 14.4 What would prove it
+
+Whichever pair is chosen, the unit that decides it is **another whole fight**,
+not a staged round — §11.6 item 1 and §13.7 both say a staged single turn cannot
+ask a face-and-turn question, and this is the most face-and-turn question the arm
+has. The registration would carry three mechanical predictions, all falsifiable
+off the transcript by a grader script committed before the run: the funnel's own
+hold detector (**an affordable damage sink in hand at `end turn`**) fires at
+least once, which is the single number this whole section exists to move off
+zero; the bank holds **two affordable uses on at least three combat turns**,
+which is the precondition §12.9 found was never met and without which the first
+prediction is untestable rather than false; and the **price-3 rung is bought at
+least once**, which is the direct answer to §12.9 pick 4 and to the tester's
+"I would hesitate to draft additional expensive Spark spenders". A fourth,
+recorded and not graded, is worth carrying: the share of successful plays that
+are Attacks, which came in at exactly 50% last time and which these
+re-authorings should move down if they are doing anything at all. And the run
+sits on an **author-disjoint seat** — whoever writes these rows may not grade
+them, which is the independence question now open on QUEUE and which this branch
+does not settle. The rows above are Claude's, so the grading chair is not.
