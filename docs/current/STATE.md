@@ -184,14 +184,20 @@ deploy label from R218 on rides the pin above; live numbers were never
 comparable across a game build anyway (R95), and the sim references no game
 assembly and is unaffected.
 
-The installed build is **`0.2.1416+proto`** (2026-08-29), a dev package
-carrying BOTH prototype arms — Kokomi's Kurage-memory base kit and Klee's
-Spark alternative-cost rows — behind the `-p:PrototypeCards=true` compile
-switch. **It does not boot:** a regression in that package stops the mod
-loading, so the sealed Kokomi blind run it was built for HAS NOT STARTED. The
-fix is in flight on branch `kokomi-blind-run`, which mints the defect row; that
-row is not carried here because it does not exist on this branch yet. **The
-last runnable install is the release package `0.2.1357`** (2026-08-29, from
+The installed build is **`0.2.1608+proto.dirty`** (2026-08-30), a dev package
+built from `eb222-badge-disposed-texture` `fa1fffe` (main `23acafd` plus the
+`EB-222` fix), carrying BOTH prototype arms — Kokomi's Kurage-memory base kit
+and Klee's Spark alternative-cost rows — behind the `-p:PrototypeCards=true`
+compile switch. It carries a whole fight: `python -m understudy.soak --runs 1
+--character KLEEMOD-KLEE --max-fights 3` answers `bounded  seed=None
+actions=46  fights=3  defects=0`, reversibility log all REVERTED. Two lifecycle
+throws had capped every whole fight at one fight since `0.2.1353+proto` —
+`EB-221`, a `Deactivate` postfix resolving the local seat on a combat that has
+none (`d217b4f`), and `EB-222`, the meter cost badge painting a texture the
+room preloader had freed with the previous combat (`fa1fffe`) — both fixed.
+`validate.ps1` OK; pack 9,586,076 bytes. `deploy.ps1` restores the release
+build, and is run before any measured run or handoff (R217 D). **The
+last RELEASE package deployed remains `0.2.1357`** (2026-08-29, from
 `klee-slice-1-round-3` `605b76f`) — no `+proto`, no `+dirty`, deployed as the
 teardown of the Klee slice 1 ROUND 3 funnel run and of `EB-188`'s live
 acceptance, both of which ran on `0.2.1353+proto`. It carries the same C# as
@@ -439,6 +445,27 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     answered with it: `EB-208`'s fix is
     (a) then (c), `P4` stays UNREACHED as published, and the next gate is
     (e).
+    **R225 (2026-08-30) rules the open items the `W2` whole-fight read
+    left.** The registered `W1'` MISS stands as published (R101b) and its
+    reading is narrowed: `W2`'s granted deck ran two Spark makers against
+    eleven Spark-priced sinks, both starter rows granted a second time, so the
+    run shows that THAT deck could not fund its pool — not yet that the
+    one-for-one draft economy needs more generation. The generation question
+    goes first regardless: no new sink row and no re-price until income is
+    answered. The next evidence is a REPRESENTATIVE deck rather than a `W2`
+    re-grant — first `EB-205`'s sim-drafted arm, which costs no game time and
+    is now the next Klee read, then a live controlled-ratio deck under a fresh
+    registration Claude drafts. The Spark-arithmetic class is settled by round
+    2's out-of-slot replay (bank 3 → Fwoosh! → Bang Bang! at exactly 2 → 0
+    with no Bomb); `W2`'s own instance is the starter relic Pounding
+    Surprise's +1 per detonation, and nothing further is recorded on the arm.
+    A four-field per-play ledger — bank before, price paid, gains by source,
+    bank after — is folded into `EB-216`'s per-turn wire snapshot as
+    instrument work that gates nothing. **The written top-level-cost clause is
+    AMENDED** (`docs/klee-cards.yaml`, `docs/prototype-surface.yaml`): a Spark
+    spend may sit at the card's top level or at the HEAD of a `choose_one`
+    mode, and nothing nested or conditional. *Bag of Tricks* is admitted on
+    that clause and is `EB-224`, sequenced after `EB-205`'s read.
   - **Kokomi Kurage memory — BASE KIT** (`review/active/kokomi-kurage-memory-2026-08-29.md`
     §11–§13). R219 D: the Bake-Kurage is **always on**, part of the base
     kit rather than a summoned card, and one Muster card joins the base
@@ -567,6 +594,10 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     `EB-213`–`EB-219` — of which `EB-219` (Prune's re-author) and
     `EB-218` (the Spark-only migration) precede the mixed-pool fight.
     No [USER] row is open on the slice work.
+    **Klee's order, as R225 sets it:** `EB-205`'s sim-drafted read first, then
+    a live controlled-ratio registration, then *Bag of Tricks* (`EB-224`);
+    whole fights are unblocked, the two lifecycle throws being fixed and the
+    three-fight soak green.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
 - **Enemy remapping** — planned. **Art passes** — Furina and Kokomi surfaces
@@ -599,6 +630,14 @@ on `EB-199`. LAW:145 as signed opened one new item, ruled the same day:
 response (`EB-219`). `M48` was answered by R219; `M58`
 by R220 G (N = 4); `M51` was answered by R220 F and `M53` by R220 E; `M62` and
 `M63` by R222 B and R222 C.
+The relayed open-items review minted two more rows and **R225 (2026-08-30)
+closed both**: `M65` at option (1), amend the top-level-cost clause to admit a
+mode-head price so *Bag of Tricks* proceeds (`EB-224`); `M66` at option (2),
+keep the single `PROTOTYPE_CARDS` switch and buy its guard with a lint that
+every prototype Harmony patch is character-scoped and seat-guarded
+(`EB-225`), with a three-fight soak on every dev deploy. `EB-220` is ruled
+too: Encore and Charge get glyphs now, under R212's art ladder. **No
+prototype-slice row is open.**
 
 ## Watch register (dormant)
 

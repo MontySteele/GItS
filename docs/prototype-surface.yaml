@@ -789,9 +789,13 @@
 # Uncommon Skills since R211. The only new thing in the branch is the RULE
 # these five now have to compete with the absence of.
 #
-# THE COST MUST STAY AT TOP LEVEL (the rule authored at `powder_charge`, and
-# the one the seat enforced in Klee slice 1): a spend inside a conditional is
-# invisible to the playability gate. No row here has a conditional.
+# THE COST SITS AT TOP LEVEL OR AT A MODE HEAD (the rule authored at
+# `powder_charge`, enforced by the seat in Klee slice 1, and AMENDED BY R225 on
+# 2026-08-30 to admit a mode price): a spend at the card's top level is the
+# CARD's price, a spend at the HEAD of a `choose_one` mode is that MODE's
+# price, and a spend nested in a conditional or further down a mode body is
+# invisible to the playability gate and is refused. No row here has a
+# conditional.
 
 # Candidate 1, renamed. sec.4.2: "Spend 1 / 8 damage", mirroring Regent's
 # `GuidingStar` (1 star, 12 damage). Its twin on the printed sheet is

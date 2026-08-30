@@ -171,7 +171,42 @@ CEILINGS: dict[str, int] = {
     # OPEN_IDS in the same commit as their rows.
     # EB-220 minted 2026-08-30 by [USER]'s word on EB-182's build: Encore- and
     # Charge-priced modes and cards get the cost badge the Spark price has.
-    "EB": 220,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+    # EB-224/EB-225 minted 2026-08-30 by R225, the open-items slate: 224 is
+    # Bag of Tricks, admitted now that the top-level-cost clause reads top
+    # level OR mode head, built on EB-182's mode-price machinery and
+    # sequenced after EB-205's read; 225 is the prototype-patch scope lint
+    # that buys the single PROTOTYPE_CARDS switch its guard -- every
+    # prototype Harmony patch character-scoped and seat-guarded. M65 and M66
+    # LEFT OPEN_IDS in the same commit as their rows.
+    # EB-221/EB-222 minted 2026-08-30 by the first whole-fight soak of the
+    # `+proto` package, and both CLOSED in the minting commit -- two
+    # lifecycle throws, each of which ended every whole fight at the second
+    # combat since `0.2.1353+proto`. 221: `KurageMemoryCard`'s `Deactivate`
+    # postfix called `LocalContext.GetMe` on a combat with no local seat --
+    # the next room's, still being built -- and that API throws rather than
+    # answering null, so the room never finished readying and the fight was
+    # never set up. Fixed in d217b4f (#207): a `TryGetMe` guard for all three
+    # callers and a `TrackedDisplayBridge.Spawn` degrade, locked by
+    # `KurageMemorySeatGuardTests`. 222: `MeterCostBadge` (EB-220) held the
+    # glyph in a process-lifetime static cache; the room preloader freed
+    # combat 1's `CompressedTexture2D` with the room, combat 2's first
+    # `UpdateStarCostVisuals` handed the freed object to
+    # `TextureRect.SetTexture`, and the `ObjectDisposedException` escaped
+    # `Paint` into `CardPileCmd.Draw` and killed the turn loop. Fixed in
+    # fa1fffe: the glyph is resolved from `ResourceLoader` per paint, checked
+    # with `GodotObject.IsInstanceValid`, and a freed resource degrades to no
+    # glyph with one `Log.Warn`; three structural locks in
+    # `MeterCostBadgeTests`. PROOF, on `0.2.1608+proto.dirty`:
+    # `python -m understudy.soak --runs 1 --character KLEEMOD-KLEE
+    # --max-fights 3` -> `bounded  seed=None  actions=46  fights=3
+    # defects=0`. The same command returned `fights=1` before 221 and
+    # `fights=2 defects=1` on 221 alone.
+    # EB-223 minted 2026-08-30 by the relayed open-items review, fact-checked:
+    # R222 (a)'s whole-fight read of the strict Rare Power
+    # `proto_true_spark_knight` is owed WORK, not an open decision -- the
+    # packet's "stays [USER]'s at 11.7 pick 3" is struck as erratum 2 and the
+    # read is filed in BACKLOG behind 16.11 pick 1.
+    "EB": 225,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
                  # told the tester it had played no card.
@@ -378,7 +413,11 @@ CEILINGS: dict[str, int] = {
     # read while the local seat is in shadow is [USER]'s, and has no default.
     # M65 minted 2026-08-30 by the Bag of Tricks re-ask (R224 item 17 = (3)):
     # the one clause the doctrine seat left, the top-level-cost rule.
-    "M": 65,     # M62 minted 2026-08-29 by R221 A: the criterion that
+    # M66 minted 2026-08-30 by the relayed open-items review, fact-checked:
+    # per-fold C# feature gates versus the single PROTOTYPE_CARDS switch. It
+    # is a design call and it revises the Furina reframe's countersigned
+    # section 6.1 plan, which keys FURINA_REFRAME to the same compile symbol.
+    "M": 66,     # M62 minted 2026-08-29 by R221 A: the criterion that
                  # retires the fresh-Opus control form from every packet of
                  # a blind-QA round to the spot-check rate. The threshold is
                  # a number, so it is [USER]'s.
@@ -502,6 +541,15 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         213, 214, 215, 216, 217,
         # 220 minted 2026-08-30 -- the meter cost badge (Encore, Charge).
         220,
+        # 223 minted 2026-08-30 by the relayed open-items review, fact-checked:
+        # R222 (a)'s whole-fight read of the strict Rare Power, owed work and
+        # not a pick, gated on section 16.11 pick 1's deck composition.
+        223,
+        # 224/225 minted 2026-08-30 by R225: Bag of Tricks on EB-182's
+        # mode-price machinery, gated on EB-205's read; and the
+        # prototype-patch scope lint that keeps one PROTOTYPE_CARDS switch
+        # honest.
+        224, 225,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -535,9 +583,12 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # ruled. No slate row survives, and the five rowless items (16, 19, 20,
     # 28 and 31) minted no M row either -- the slate packet was their pick
     # list and their engineering is EB-214/218/219. Ceilings never come down.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45,
-                    # 65 minted 2026-08-30: Bag of Tricks, one clause left.
-                    65}),
+    # M65 and M66 LEFT OPEN_IDS 2026-08-30 (R225), with their rows: the
+    # top-level-cost clause is amended to admit a mode-head price, so Bag of
+    # Tricks proceeds as EB-224; and the single PROTOTYPE_CARDS switch stands
+    # with a scope lint (EB-225) plus a three-fight soak on every dev deploy.
+    # The ceiling stays at 66 -- ceilings never come down.
+    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

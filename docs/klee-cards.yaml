@@ -253,9 +253,11 @@
    # PLAYABILITY GATE derived from the printed effect. This row is what arms all of it, and
    # it is what makes `STATIC_SPARK_SPEND_COST` load-bearing -- the drafter bump that op's own
    # comment declared owed "with the first sink card that prints it" is discharged here.
-   # THE COST MUST STAY AT TOP LEVEL. A `spend_spark` inside a conditional branch is invisible
-   # to the playability gate, and the payoff would then fire unpaid. That is a structural rule
-   # about this verb, not a preference about this card.
+   # THE COST SITS AT THE CARD'S TOP LEVEL OR AT THE HEAD OF A `choose_one` MODE, and nowhere
+   # else (AMENDED BY R225, 2026-08-30, from "must stay at top level"; the two-level derivation
+   # is built in both engines by `EB-182`). A `spend_spark` nested in a conditional branch, or
+   # further down a mode body, is invisible to the playability gate and the payoff would then
+   # fire unpaid. That is a structural rule about this verb, not a preference about this card.
    # ROLE IS `glue`, NOT `payoff` (R211). The plan calls the card a BRIDGE, and a bridge is glue
    # in the guardrails' vocabulary; so klee/demolition payoff supply holds at 7 and klee/spark (lint-ok: payoff supply counts)
    # at 5, and R199 guardrail (1) is not reached. (lint-ok: payoff supply counts)
