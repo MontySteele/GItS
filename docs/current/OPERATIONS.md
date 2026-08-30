@@ -409,6 +409,9 @@ ordinary play is unchanged. **To restore the release build run
 absence of `+proto` in the in-game version is the confirmation. Do that before
 any measured run, handoff or co-op session. No `-Package` switch, deliberately
 — a dev build is never handed to a peer.
+**After every dev deploy, run `python -m understudy.soak --runs 1 --character
+KLEEMOD-KLEE --max-fights 3` and read `fights=3 defects=0` before any
+registered run (R225).**
 
 **Staging a row** — edit the sheet, regen, dev-build, then grant it by id from
 a scenario (`give: {card: KLEEMOD-PROTO_..., pile: hand}`); template and

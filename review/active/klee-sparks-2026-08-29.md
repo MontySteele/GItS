@@ -3965,6 +3965,17 @@ instead — a staged board with a bank of 3 and the twins in hand — on the
 grounds that a whole fight has now twice failed to produce the precondition and
 a staged turn produces it by construction.*
 
+**ANSWERED by R225 (2026-08-30): (a′).** Option (a) — the generation question
+first, no new sink row and no re-price — with one qualification adopted from
+the relayed review. `W2`'s granted deck ran **two Spark makers against eleven
+Spark-priced sinks**, both starter rows granted a second time, so the run shows
+that THAT deck could not fund its pool, not yet that the one-for-one draft
+economy needs more generation. The `W1'` decision text stands as registered
+(R101b); this is its reading. The next evidence is a **representative deck, not
+a `W2` re-grant**: first `EB-205`'s sim-drafted arm, which costs no game time
+and is now the next Klee read, then a live controlled-ratio deck under a fresh
+registration Claude drafts.
+
 **2. The batch that was funded and did not happen.** §14.4 condition 1 asked for
 a bounded batch of fights; the driver stopped at 17 of 40 actions on
 `tool_blocked` at the second Monster room's first frame, which is the shape
@@ -3977,6 +3988,11 @@ before any further whole-fight registration;
 as "one fight, repeated on N seeds, N sessions";
 (c) neither — accept single fights and stop registering batch conditions.*
 
+**ANSWERED by R225 (2026-08-30): (a)**, already done. `EB-221` and `EB-222`
+were the two lifecycle throws that ended every whole fight at combat 2, both
+fixed, and the soak reads `fights=3 defects=0` on `0.2.1608+proto.dirty`. The
+batch re-run waits on pick 1's deck composition.
+
 **3. The Spark-arithmetic candidate, a second time.** §16.9 item 1 is §12.8
 item 1 in a new place, with the same benign detonation explanation and the same
 inability of the page to distinguish it. `KLEESPARK-R2` settled the first
@@ -3987,6 +4003,14 @@ and settle it once for the whole arm;
 nothing further;
 (c) instrument it instead: have the wire report the Spark delta per play, so no
 future page has to be read for arithmetic.*
+
+**ANSWERED by R225 (2026-08-30): (b).** Round 2's out-of-slot replay settles
+the class — bank 3 → Fwoosh! → Bang Bang! at exactly 2 → 0 with no Bomb — and
+`W2`'s instance is the starter relic Pounding Surprise's +1 per detonation.
+Nothing further is recorded on the arm. A four-field ledger — bank before,
+price paid, gains by source, bank after — is adopted as INSTRUMENT work folded
+into `EB-216`'s per-turn wire snapshot; it gates nothing, and it is not
+`EB-211`, which is a tester-form schema.
 
 **4. What the record does NOT say.** No win rate, no comparison with any other
 build or seed, and no claim about whether the arm is fun or good. One fight, one
