@@ -276,7 +276,17 @@ CEILINGS: dict[str, int] = {
     # integration reproduced and then diagnosed off the quoted save path --
     # it is a cross-SESSION leak, and the standing "rerun the file alone"
     # workaround is the reason nobody had looked.
-    "EB": 238,   # EB-236/237/238 minted 2026-08-30 by KLEESPARK-BT1 (Klee
+    "EB": 240,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+                 # packet section 24). 239 is the forecast's FORM half --
+                 # `EB-236` item (d) shipped the packet and the falsifier and
+                 # not the field, so the reply schema both seats answer
+                 # through had nowhere to put a forecast and all six of BT2's
+                 # forms were refused `forecast_missing`. It was CLOSED in
+                 # the commit that minted it and never entered OPEN_IDS.
+                 # 240 is the staged board's blind spot for the run's relics:
+                 # every BT2 board asserted "the run carries Klee's starting
+                 # relic and no other" while the page printed two.
+                 # EB-236/237/238 minted 2026-08-30 by KLEESPARK-BT1 (Klee
                  # Sparks packet section 22): the board-design trap that drew
                  # `intent_insensitive` refusals from 7 of 8 forms, slot_plan's
                  # blindness to a mode-head Spark price, and the blind page
@@ -736,6 +746,19 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # halves met; that the forms were later REFUSED for an unrelated
         # falsifier (`forecast_missing`) does not bear on whether the relic
         # reached the reader, which is all this row asked.
+        #
+        # 239 NEVER ENTERED OPEN_IDS: minted and CLOSED in the same commit,
+        # on its lock. `seat.form_schema()` now declares `forecast` --
+        # nullable-and-required on `target`'s rule, `additionalProperties`
+        # still `False`, and the local tester prints the same schema, so one
+        # fix repairs both chairs. Seen to FAIL first: an answered form was
+        # refused `undeclared:forecast` by the old schema, and a form that
+        # OMITS the field is still refused `forecast_missing` on an asking
+        # board after the fix.
+        # 240 minted 2026-08-30 by KLEESPARK-BT2 §24.6: printing the relics
+        # immediately falsified a printed assumption, and the preflight's
+        # assumption check cannot see the wire's relic list.
+        240,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

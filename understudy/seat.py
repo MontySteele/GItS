@@ -740,6 +740,18 @@ def form_schema() -> dict[str, Any]:
     that are about the game's MACHINERY rather than the grader's reasoning,
     and they are still stated in the printed vocabulary -- a card's title, an
     option's own text -- because that is all a blind grader has.
+
+    `forecast` (`EB-239`) is listed on the SAME rule, and it is the field
+    without which `EB-236` item (d) is half a machine: `qa_packet` prints the
+    numbered questions at the top of the page and `staged_turn` refuses a
+    form that answers fewer of them than were asked, but a strict schema with
+    no `forecast` property gave the reply nowhere to put the answers, so
+    `KLEESPARK-BT2` refused all six of its forms `forecast_missing` (§24.4).
+    It is nullable-and-required rather than optional for the reason `target`
+    is: `null` (or `[]`) reads as "this board asked for no forecast", which
+    is what an omitted one meant, and `staged_turn.forecast_answers` already
+    reads a missing `forecast` as the empty list. The field is DECLARED, not
+    a loosening -- `additionalProperties` stays `False`.
     """
     play = {
         "type": "object",
@@ -771,11 +783,13 @@ def form_schema() -> dict[str, Any]:
             "q3_what_it_gave_up": {"type": "string"},
             "q4_different_intent": {"type": "string"},
             "q4_changed": {"type": "boolean"},
+            "forecast": {"type": ["array", "null"],
+                         "items": {"type": "string"}},
         },
         "required": ["turn_id", "packet_sha256", "grader", "chosen_line",
                      "q1_what_did_you_play", "q2_other_line_considered",
                      "q3_what_it_gave_up", "q4_different_intent",
-                     "q4_changed"],
+                     "q4_changed", "forecast"],
         "additionalProperties": False,
     }
 

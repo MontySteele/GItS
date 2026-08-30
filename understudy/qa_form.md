@@ -76,6 +76,13 @@ reason for the position on the page.
 Most boards ask for none, print no such block, and are graded exactly as they
 always were.
 
+The two seats answer through a STRICT reply schema (`understudy/seat.py`'s
+`form_schema()`, printed into the local tester's prompt as well), so there
+`forecast` is nullable-and-REQUIRED on the same rule as `target`: `null` or
+`[]` says "this board asked for none". A hand-written form may still omit the
+key entirely. `KLEESPARK-BT2` refused all six of its forms `forecast_missing`
+because that schema had no such property at all (`EB-239`).
+
 A line is **replayed on the live game** after it is graded, so a choice the
 form does not state is a choice the replayer cannot make: it stops at the
 prompt and records `modal_unanswered` rather than guessing. That is the whole

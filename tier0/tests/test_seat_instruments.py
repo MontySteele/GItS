@@ -21,8 +21,9 @@ from pathlib import Path
 
 import pytest
 
-from understudy import (local_tester, qa_packet, qualify, resource_order,
-                        slot_plan, staged_turn, targeting)
+from understudy import (local_seat, local_tester, qa_packet, qualify,
+                        resource_order, seat, slot_plan, staged_turn,
+                        targeting)
 
 REPO = Path(__file__).resolve().parents[2]
 QA = REPO / "review" / "qa"
@@ -802,3 +803,95 @@ def test_the_next_turn_reading_is_opt_in_and_ends_the_turn():
     verbs = [v for v, _ in staged_turn.execute_steps(sit, form)]
     assert verbs[-2:] == ["end_turn", "read"]
     assert "end_turn" not in [v for v, _ in staged_turn.execute_steps(now, form)]
+
+
+# --------------------- EB-239: the forecast's FORM half, and its lock ------
+
+def _strict_schema_refusals(schema: dict, blob: dict) -> list[str]:
+    """A minimal reader of the ONE schema rule this lock is about.
+
+    `form_schema()` is handed to codex as `--output-schema` and printed into
+    the local tester's prompt, and both enforce it strictly: a key that is
+    not a declared property may not appear, and every `required` key must.
+    There is no `jsonschema` in this environment, so the rule is read here
+    rather than imported -- and it is read the way the two seats read it,
+    which is all this lock needs to say.
+    """
+    bad = []
+    if schema.get("additionalProperties") is False:
+        bad += [f"undeclared:{k}" for k in blob
+                if k not in schema["properties"]]
+    bad += [f"missing:{k}" for k in schema.get("required", [])
+            if k not in blob]
+    return sorted(bad)
+
+
+def _bt2_answered_form() -> dict:
+    """`KLEESPARK-BT2`'s own `t01` reply, as it would have had to be written
+    to answer the three questions the page printed."""
+    return {
+        "turn_id": "klee-sparks-bt2-t01",
+        "packet_sha256": "0" * 64,
+        "grader": {"id": "x", "kind": "llm", "model": "m",
+                   "designed_these_cards": False},
+        "chosen_line": [{"card": "Bag of Tricks", "target": "Seapunk",
+                         "exhaust": None,
+                         "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."}],
+        "q1_what_did_you_play": "a", "q2_other_line_considered": "b",
+        "q3_what_it_gave_up": "c", "q4_different_intent": "yes",
+        "q4_changed": True,
+        "forecast": ["0", "3", "0"],
+    }
+
+
+def test_the_reply_schema_can_carry_a_forecast():
+    """`EB-239`. `KLEESPARK-BT2` refused all six of its forms
+    `forecast_missing` (§24.4) because the packet asked a question the REPLY
+    had no field to answer into: `form_schema()` was strict, nine named
+    properties, and `forecast` was not one of them. Declared, not loosened --
+    `additionalProperties` stays `False` and the field joins `target` on the
+    nullable-and-required rule.
+
+    Seen to FAIL before the fix: the answered form below was refused
+    `undeclared:forecast` by the seat's own schema, which is exactly the
+    reply codex was not allowed to emit.
+    """
+    schema = seat.form_schema()
+    assert schema["additionalProperties"] is False
+    assert schema["properties"]["forecast"]["type"] == ["array", "null"]
+    assert "forecast" in schema["required"]
+    assert _strict_schema_refusals(schema, _bt2_answered_form()) == []
+    # A board that asks nothing still has somewhere to say so.
+    assert _strict_schema_refusals(
+        schema, dict(_bt2_answered_form(), forecast=None)) == []
+
+
+def test_a_form_that_omits_the_forecast_is_still_refused_on_an_asking_board():
+    """The other half of the same lock: declaring the field must not make
+    the falsifier stop biting. `EB-236` item (d)'s refusal is what makes the
+    forecast a PRE-commitment rather than a courtesy."""
+    form = dict(_bt2_answered_form())
+    form.pop("forecast")
+    assert _strict_schema_refusals(seat.form_schema(), form) == [
+        "missing:forecast"]
+    assert "forecast_missing" in staged_turn.apply_falsifiers(
+        "klee-sparks-bt2-t01", form, packet_sha=None, closeness=None,
+        forecast_asks=3)
+    # And short counts, not just absent ones.
+    short = dict(_bt2_answered_form(), forecast=["0", ""])
+    assert "forecast_missing" in staged_turn.apply_falsifiers(
+        "klee-sparks-bt2-t01", short, packet_sha=None, closeness=None,
+        forecast_asks=3)
+    assert "forecast_missing" not in staged_turn.apply_falsifiers(
+        "klee-sparks-bt2-t01", _bt2_answered_form(), packet_sha=None,
+        closeness=None, forecast_asks=3)
+
+
+def test_the_local_tester_reads_the_same_schema_as_the_codex_seat():
+    """One schema, two seats: `local_seat` prints `seat.form_schema()` into
+    its prompt verbatim, which is why `KLEESPARK-BT2`'s shadow chair was
+    refused for the same structural reason as the deciding one -- and why
+    one fix repairs both."""
+    prompt = local_seat.build_grade_prompt("PACKET", "0" * 64)
+    assert '"forecast"' in prompt
+    assert json.dumps(seat.form_schema(), indent=1) in prompt
