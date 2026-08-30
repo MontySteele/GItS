@@ -294,7 +294,7 @@ carried while it was active is in the commit message that retired it.
   **Instrument:** `tier05/exp_klee_sparks_s1.py`, committed BEFORE the run;
   emit-only, moves no `RT/D/P/C` version. **Cell:**
   `cells.CANONICAL.but(character="klee", archetype="demolition")` — 600 runs,
-  seed 11, hunter, realistic, `jobs=0`, at `RT12/D18/P11/C20`; a paired
+  seed 11, hunter, realistic, `jobs=1` (serial), at `RT12/D18/P11/C20`; a paired
   flag-OFF control is RECORDED and NOT GRADED. **Slots:** `S1` per-fight peak
   Spark bank, `S2` share of turns with a non-damage sink affordable, `S3` share
   of drafted decks holding one, `S4` maker:sink ratio at floors 5/10/15 — whose
