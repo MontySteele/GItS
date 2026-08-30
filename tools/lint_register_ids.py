@@ -132,10 +132,10 @@ CEILINGS: dict[str, int] = {
     "EB": 207,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
-                 # told the tester it had played no card. 206 is deliberately
-                 # NOT taken here -- it is the two-instance funnel lanes on an
-                 # unmerged branch, so this branch minted PAST it rather than
-                 # colliding with it, and the number stays that branch's.
+                 # told the tester it had played no card.
+                 # EB-206 minted 2026-08-29 by the two-instance funnel build:
+                 # two game processes from one install, per-process APPDATA
+                 # and a per-process bridge port.
                  # EB-205 minted 2026-08-29 by R222 pick 6(d): the Klee Spark
                  # arm became DRAFTABLE (the pool seam) and has never been
                  # measured drafted. 202-204 are other branches of the same
@@ -415,13 +415,15 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 205 minted 2026-08-29 by R222 pick 6(d): a drafted arm for the
         # Klee Spark economy, now that the drafter can be offered the rows.
         205,
+        # 206 was minted AND CLOSED on 2026-08-29 by the two-instance funnel
+        # build -- it left OPEN_IDS in the same commit that closed it, with
+        # the ceiling above holding the number so nothing re-takes it.
         # 207 was minted 2026-08-29 by the Klee Sparks whole-fight run (the
         # blind page printed the Bake-Kurage memory block on a Klee run) and
         # LEFT OPEN_IDS in the same branch on its live acceptance: an empty
         # wire map is an absent memory in the reader, the element's Refresh
         # asks the character test its Setup already asked, and the two frames
-        # are in kokomi-kurage-memory-2026-08-29.md 14.12. 206 belongs to the
-        # unmerged two-instance branch and was never taken here.
+        # are in kokomi-kurage-memory-2026-08-29.md 14.12.
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,
