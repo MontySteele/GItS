@@ -1,0 +1,361 @@
+You are the DOCTRINE SEAT for a card game modification. You did not write the
+proposal below, you are not being asked whether it is good, fun or balanced,
+and you are NOT being asked to design anything.
+
+THE PROTOCOL YOU ARE UNDER, verbatim from the repository's OPERATIONS.md:
+
+    The seat's other job -- reading a slice proposal against the character
+    charter before anything is built -- answers FOLLOWS or
+    REQUIRES_MODIFICATION per arm and NAMES THE CLAUSE it ruled against. That
+    is the whole output. It may not supply card text, a number, a mode or a
+    rewritten row: a remedy it volunteers is DISCARDED, and Claude re-derives
+    from the named clause.
+
+So: name clauses, not remedies. If you find yourself writing a number, a card
+face, or "you should instead...", stop and name the clause that forced it. Any
+remedy you volunteer anyway will be recorded and marked DISCARDED, and it will
+disqualify your model family from grading the row later, so it costs the
+process something real.
+
+WHY YOU: independence is by MODEL FAMILY, author against grader. The proposal
+below was authored by Claude. You are the other family.
+
+THE THINGS YOU MAY NOT GRADE, AND WHY.
+
+  (a) THE DIRECTION. The human owner ruled on 2026-08-30, verbatim: "Let's try
+      to re-author her. As a Personal Companion, she should tie in directly
+      with Klee's engine." That Prune is re-authored rather than retired or
+      stripped is CLOSED. Do not re-litigate it.
+  (b) LAW:145 ITSELF. The clause quoted below was countersigned by the human
+      owner on 2026-08-30 and your own model family drafted the text it is
+      based on. You are not asked whether the clause is right. You are asked
+      whether the declaration below SATISFIES it.
+  (c) WHETHER THE AMOUNTS ARE THE RIGHT AMOUNTS. They are not chosen. Every
+      Spark number in the declaration is lifted off the card's committed face
+      so that the player's yield does not move; the repository's rule for a
+      number that has to exist is exactly that, "lift the value off a shipped
+      card, never invent a breakpoint". Balance is not this seat's job in
+      either of its roles.
+
+WHAT CHANGED SINCE YOUR FIRST READ OF THIS SECTION, stated plainly because you
+have no memory of it and because it is the reason you are being asked twice.
+Your first read answered: ARM A FOLLOWS (LAW:145), ARM B FOLLOWS (D3, D4), ARM
+C FOLLOWS (D7, D9), and its one gate question REQUIRES_MODIFICATION. That gate
+asked which of two readings to take -- a parity reading, and a reading scoped to
+"a Swirl on a Pyro aura" said to come from the human owner. THAT SECOND READING
+WAS A PARAPHRASE IN THE WORKING BRIEF AND NOT THE OWNER'S WORDS. It has been
+WITHDRAWN. The owner's ruling contains no Pyro scoping and no Swirl scoping at
+all; it is quoted in full below. The gate you returned on therefore no longer
+exists, and it is not re-asked here. The three ARMS are re-asked unchanged,
+against a section whose text has moved, plus one new arm on the withdrawal
+itself.
+
+THE SANDBOX. You are read-only and previous runs of this seat found the command
+policy on this machine rejects every file read. DO NOT TRY TO READ THE
+REPOSITORY. Everything you need is pasted below verbatim and nothing has been
+summarised for you.
+
+============================================================================
+WHAT YOU ARE ASKED
+============================================================================
+
+There are FOUR ARMS. For each, answer, numbered, in this order:
+
+  1. DOCTRINE. FOLLOWS or REQUIRES_MODIFICATION.
+  2. CLAUSE. For anything you rule against, NAME THE CLAUSE -- by its
+     identifier (LAW:145, D1..D9, a Klee identity bullet, a ruling id) -- and
+     QUOTE the sentence you ruled against. That list of clauses is the single
+     most useful thing you produce.
+  3. RISK. Anything about that arm you see that the proposal has not.
+
+  ARM A -- THE DECLARATION. Does the kit declaration in section 15.3
+      ("Little Hexenzirkul") satisfy LAW:145's second sentence: is the trigger
+      EXPLICITLY DECLARED by the character's kit, and is the amount BOUNDED
+      PER COMPANION PLAY? And does Prune's remaining face satisfy LAW:145's
+      first sentence -- does the Companion card still itself grant a signature
+      resource?
+  ARM B -- THE FACE THAT REMAINS. Prune keeps a Swirl, a 1-Energy cost, a
+      non-Exhaust body and 5 Block on the branch where no reaction triggered.
+      Read that remaining face against D3 (benefits carry binding prices) and
+      D4 (visible and live effects): with the Spark line moved off the card and
+      into a character rule the card does not print, is the effect still
+      VISIBLE within D4's meaning?
+  ARM C -- THE GENERALITY. The declaration is written over the PERSONAL
+      COMPANION POOL, not over Prune by name, and exactly one card in the
+      shipped sheets is in that pool today. Read that choice against D7 and D9.
+      Is a rule that is general in form and single-card in fact a doctrine
+      problem?
+
+  ARM D -- THE DERIVATION. With the paraphrase withdrawn, section 15.3 is
+      presented as DERIVED rather than picked: the owner's ruling ("she should
+      tie in directly with Klee's engine") fixes WHERE the trigger lives, and
+      the backlog row's acceptance line ("the same Sparks") fixes EVERY AMOUNT,
+      so no number and no scope is chosen by the author. Read that claim
+      against D2 and D4. Is anything in the declaration a design choice the
+      section is presenting as a derivation? If so, name it and name the
+      clause. This is the arm on which a return would be most useful, so say
+      plainly whether the derivation holds.
+
+Keep each answer to a short paragraph. Quote the clause text you rule on. Do
+not restate the proposal back to me.
+
+############################################################################
+## THE GOVERNING CLAUSE
+############################################################################
+
+LAW:145, countersigned 2026-08-30, PROSPECTIVE:
+
+    Companion cards may not themselves grant signature resources. A
+    character-owned engine may respond to a Companion play and generate its
+    resource where that character's kit explicitly declares the trigger and
+    bounds the amount generated per Companion play.
+
+The backlog row it governs (EB-219), verbatim:
+
+    Scope: Prune -- Little Witch's Hunt grants Sparks off her own face, twice
+    on a successful Swirl and without Exhausting -- ILLEGAL under LAW:145 as
+    signed. R224 re-authors her: the grant becomes a declared Klee-engine
+    response, the kit declaring the trigger and bounding the amount per play.
+    Next action: strip gain_spark from her row and add the declaration in both
+    engines, seat-read first (R217). Gate: none; it precedes the mixed-pool
+    fight. Acceptance: no gain_spark, one declaration, the same Sparks
+
+############################################################################
+## THE DESIGN CHARTER (LAW.md, R217) -- D1 through D9, verbatim
+############################################################################
+
+1. D1 -- Character brief before pool construction. No pool is built before its
+   character has a short owner-owned brief: the player promise; two or three
+   core verbs; one or two recurring tensions; the three archetype loops; the
+   bridges among them; the intended weakness; what the starting relic and
+   starter deck teach; and the failure modes to avoid, named. A tension
+   sentence summarises the character -- it does not mandate that every card
+   serve one mechanic.
+2. D2 -- Player-controlled leverage. Every persistent resource and every
+   automatic engine must feed a decision the player can steer: timing,
+   targeting, placement, acquisition, conversion, or forgoing. "Watch it rise
+   until the number is large" is not a decision. The control must be reachable
+   early and reliably -- starter kit, starting relic, base system, or the
+   ordinary pool -- not only through a rare.
+3. D3 -- Benefits carry binding prices. Defence and engine advancement may
+   share a card, but not both at full rate without a binding cost: energy or
+   tempo, a below-rate half, mutually exclusive outcomes, target or timing
+   awkwardness, a card or resource spent, identity position, a future draw or
+   deck cost, or the loss of another action. The counterfactual test: remove
+   the defence -- is what remains still a full-rate play the player already
+   wanted? If yes, the defence was a subsidy.
+4. D4 -- Visible and live effects. At the decision point the player can
+   perceive and forecast the consequences that matter, through the card, a
+   keyword, a persistent UI element or a character rule -- not necessarily
+   verbatim on every face. Text that cannot bind in the shipped world,
+   invisible feeds and misleading calculated displays are defects. A rare
+   intentional edge case is not removed for being rare.
+5. D5 -- Simple surfaces, deep interactions. Richness comes from interactions
+   -- between cards, enemies, energy, draw order, piles, targets and future
+   turns -- not from clauses on faces. Commons establish the verbs and stay
+   concise. Any added line of text must alter a decision.
+6. D6 -- Every card has a place. Each card has one primary decision home:
+   acquisition and build; combat (sequencing, targeting, holding, conversion,
+   timing); teaching or utility, deliberately plain; or bridge. Plain cards are
+   legal and necessary, and a pool of them is not a defect to be edited away.
+7. D7 -- Mesh without preassembly. Each pool carries linear signposts AND
+   modular tools. No preassembled deck; no archetype written in a private
+   language only its own cards speak; bridges exist so combinations arrive
+   unexpectedly. Shared-verb and hook counts describe a pool -- they are never
+   acceptance bands.
+8. D8 -- Distinct play patterns. Archetypes differ in how turns and drafts
+   unfold, not in the label on a bigger number. Damage may stay terminal; the
+   route, cadence, constraint, targeting, transformation, control or economy
+   must differ. One non-scalar payoff does not rescue an otherwise automatic
+   loop.
+9. D9 -- Shared layer and starting tutorial. Companion packages connect to both
+   character verbs and universal verbs; not every Companion card needs a hook,
+   but every package needs a distinctive identity. The starting relic and
+   starter deck introduce the central verbs and one recurring tension from
+   fight one, with visible triggers and no invisible feed.
+
+############################################################################
+## CHARACTER IDENTITY -- KLEE (LAW.md), verbatim
+############################################################################
+
+- Pyro, catalyst-grade: every attack applies Pyro, base numbers run low;
+  enables any reaction, triggers none alone.
+- Declared statline is load-bearing: elite A1 (frontload) and A6 (utility/AoE);
+  weak A3 (block) and A4 (sustain ~0.5). Her scaling never tops her frontload
+  -- A2 < A1 and A2 <= 4.0 (Klee-scoped, not mod-wide), scaling powers
+  stack-capped.
+- Bombs detonate at the start of Klee's turn, early on any Attack-card hit;
+  multiple bombs stack independently, each keeping its own damage.
+- Repeatable spark generation satisfies one of two limbs: it sits at Uncommon+,
+  or no sub-Rare card is simultaneously a spark source and a draw enabler --
+  infinite sparks unreachable at Common (an unboundedness test, not a ban on
+  Common spark-minting). X-cost attacks are exempt from spark-spend.
+- The Burst (Sparks 'n' Splash) is kit, not loot: never draftable, granted to
+  hand on meter fill, casting empties the whole meter (overflow lost at cast),
+  re-granted on refill, carries Retain.
+- Detonation lifesteal patches A4 at relic rarity, not card rarity.
+
+Also relevant, from the same document:
+
+- Guest Star generators -- four guardrails: this-combat-only; generators
+  Exhaust; equal-rarity (sub-Rare cannot create 5-star Rares); pull only from
+  the shared companion pool. personal_pool rows are the owning character's kit
+  and are excluded from that generation.
+- A material card-sheet edit is a world change and lands under a
+  CONSTANTS_VERSION bump: "A card-sheet edit that materially changes the
+  drafted or combat world -- card additions or removals, cost changes,
+  effect-number changes, rarity moves -- is a world change."
+
+############################################################################
+## FACTS ABOUT THE SHIPPED GAME YOU WILL NEED
+############################################################################
+
+- SPARKS are Klee's signature resource. They are banked on the player, they do
+  not decay, and they are spent by printed Spark prices on her own cards. In
+  the shipped pool they also make an Attack free at 3 (the base rule); an
+  alternative-cost economy exists behind a development flag and is not what
+  this read is about.
+- A COMPANION is a card drafted from a shared, nation-keyed pool that any
+  character can be offered. A PERSONAL COMPANION is a companion row carrying a
+  personal_pool field naming one character; it is offered only to that
+  character and is excluded from cross-character generation. Exactly one row in
+  all four shipped companion sheets carries the field: Prune, personal_pool
+  klee.
+- SWIRL is the Anemo reaction: it consumes the aura on the target and spreads
+  that aura to every other enemy. A Swirl aimed at a body with no aura does
+  nothing at all. Klee applies Pyro on every attack, so in her own deck the
+  aura a Swirl finds is usually but not always Pyro.
+- A REPLAY (the companion card "Study Buddy") resolves the next companion card
+  a second time within one card play.
+
+############################################################################
+## PRUNE AS SHE IS TODAY
+############################################################################
+
+Sheet row, docs/mondstadt-companions.yaml, effect list in resolution order:
+
+    id: prune_witch_hunt, name: "Prune -- Little Witch's Hunt", star: 4,
+    rarity: uncommon, role_c: trigger, element: anemo, cost: 1, type: skill,
+    personal_pool: klee,
+    effects: [{op: swirl, target: enemy},
+              {op: conditional, if: reaction_triggered_by_this,
+                                then: [{op: gain_spark, amount: 1}],
+                                else: [{op: block, amount: 5}]},
+              {op: gain_spark, amount: 1}]
+
+Her upgrade row, docs/klee-upgrades.yaml: prune_witch_hunt: {spark: +1}, which
+bumps the first top-level gain_spark -- the unconditional one.
+
+Her printed text in the shipped game:
+
+    Swirl an enemy's aura. If it triggered an Elemental Reaction: gain 1 Spark.
+    Otherwise: gain 5 Block. Gain 1 Spark.
+
+The second gain_spark is TOP LEVEL and UNCONDITIONAL: it is outside the
+conditional and fires on every play, whether the Swirl found an aura or not. So
+the exact yields today are:
+
+    base Prune, a reaction triggered ........ 2 Sparks
+    base Prune, no reaction ................. 1 Spark + 5 Block
+    upgraded Prune, a reaction triggered .... 3 Sparks
+    upgraded Prune, no reaction ............. 2 Sparks + 5 Block
+
+The condition "reaction_triggered_by_this" means ANY elemental reaction this
+card triggered -- it is not Swirl-specific and it is not Pyro-specific.
+
+############################################################################
+## THE PROPOSAL -- section 15 of the Klee Sparks packet, verbatim
+############################################################################
+
+### 15.3 The declaration -- ONE wording, and it is parity
+
+    Little Hexenzirkul (Klee kit trigger). When Klee plays a card from her
+    Personal Companion pool, her kit mints 1 Spark; 1 more if that play
+    triggered an Elemental Reaction; 1 more if that Companion is upgraded. At
+    most 3 Sparks per Companion play, and once per play -- a Companion resolved
+    a second time by a replay is one play, not two.
+
+- The trigger is explicitly declared by the kit, which is what LAW:145 requires
+  of the responding engine, and it is declared in ONE place per engine rather
+  than per card.
+- The bound is per Companion play and it is printed in the declaration: 3. That
+  is the rate guard the clause's tightening restored in place of "cheaply
+  repeatable".
+- Parity, row for row: base+reaction 1+1 = 2; base, no reaction 1;
+  upgraded+reaction 1+1+1 = 3; upgraded, no reaction 1+1 = 2. All four match
+  the shipped face. The 5 Block on the no-reaction branch stays on her face --
+  Block is not a signature resource and LAW:145 does not reach it.
+- Prune's face keeps everything else: the Swirl, the conditional, the Block,
+  the cost, the non-Exhaust. Only the two gain_spark ops leave.
+
+THE PYRO NARROWING IS WITHDRAWN -- it was never the owner's words. An earlier
+draft of this section carried "a Personal Companion's Swirl on a Pyro aura" as
+though it were part of the ruling. It is not. It was a paraphrase written into
+the working brief, and it is withdrawn here rather than quietly deleted, because
+the first doctrine read returned on it and that return has to stay legible. The
+owner's ruling is, in full and with nothing else in it:
+
+    "Let's try to re-author her. As a Personal Companion, she should tie in
+    directly with Klee's engine."
+
+Read against those words plus EB-219's acceptance line -- "no gain_spark, one
+declaration, the same Sparks" -- section 15.3 is the DERIVED reading, not a
+picked one. "Tie in directly with Klee's engine" is satisfied exactly by the kit
+declaring the trigger; "the same Sparks" fixes every number, so nothing here is
+chosen. All four amounts are lifted off the committed face.
+
+A Pyro-scoped trigger is not an available alternative today. It would pay 0
+where Prune pays 1 -- on a Swirl that finds no aura, and on a Swirl into a Cryo
+or Electro aura -- so it is a nerf of unmeasured size. That makes it a TUNING
+LEVER, and the repository's standing design freeze holds levers: it is not a
+design option standing beside parity, it is a balance change that cannot be
+pulled at all right now. It is recorded as a possible balance item for after the
+freeze and no register row is minted for it. If it is ever wanted it is drafted,
+measured and pulled as a lever in its own right, never folded into a legality
+fix.
+
+### 15.4 Which companions the rule reaches
+
+The rule is GENERAL IN FORM and PRUNE-ONLY IN FACT. personal_pool is the field
+that marks a Personal Companion, and across every committed companion sheet --
+Mondstadt, Liyue, Inazuma, Fontaine -- exactly one row carries it:
+prune_witch_hunt, personal_pool klee. A second Personal Companion authored for
+Klee later would fall under the declaration automatically, which is the point of
+declaring the trigger on the POOL rather than on the card -- a per-card
+declaration would have to be re-argued under LAW:145 every time, and a general
+one is bounded once.
+
+Of the six live rows carrying an aimed Swirl -- sayu_yoohoo_windwheel,
+lynette_enigmatic_feint, lynette_astonishing_shift, sucrose_gust,
+sucrose_astable, prune_witch_hunt -- the last is the only one with a
+personal_pool. The other five are shared-pool companions and the declaration
+does not reach them, before or after this change.
+
+NO OTHER SPARK GENERATOR MOVES. The declaration adds one site and removes one;
+every other Spark source is untouched: the printed gain_spark rows on Klee's
+own card sheet, the Endless Fireworks power, discard_for_sparks, the relic
+path, and the detonation feed.
+
+### 15.5 The one behaviour that is NOT parity
+
+A replayed Prune. Today her face resolves inside the replay loop, so a Companion
+replayed by Study Buddy resolves her effect list twice and mints twice -- up to
+4 Sparks base, 6 upgraded, from one card play. The declaration mints once per
+play, so that combination pays half what it pays today. This is not an oversight
+and it is not a free choice: LAW:145 bounds "the amount generated per Companion
+play", and a per-play bound that a replay can double is not a bound. It is the
+only observable divergence from the face.
+
+### 15.6 Where it is built
+
+The declaration lives in ONE function per engine, called once per Companion
+play, after the Companion's first resolution (the point at which "did this play
+trigger a reaction" is answerable). Prune's generated card is regenerated from
+the sheet rather than hand-edited. This is SHIPPED-POOL behaviour, not
+flag-gated: LAW:145 governs the shipped game.
+
+Nothing about the card's printed face other than the two Spark lines changes.
+Her new printed text would read: "Swirl an enemy's aura. If it did not trigger
+an Elemental Reaction: gain 5 Block." -- the same conditional she has today with
+its Spark branch emptied -- and the Spark income is described by Klee's
+character rule instead of on her face.

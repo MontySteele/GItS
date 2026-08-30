@@ -169,6 +169,40 @@ SPARK_ALT_POOL_SUBS: dict[str, str] = {
 BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played
 BURST_PER_REACTION = 5        # burst energy per reaction triggered
 
+# =============================================================================
+# KLEE'S PERSONAL-COMPANION SPARK TRIGGER -- "Little Hexenzirkul" (EB-219).
+#
+# LAW:145, countersigned R224 (2026-08-30): "Companion cards may not themselves
+# grant signature resources. A character-owned engine may respond to a
+# Companion play and generate its resource where that character's kit
+# explicitly declares the trigger and bounds the amount generated per Companion
+# play." THIS BLOCK IS THAT DECLARATION, and it is the only place either engine
+# says what a Companion play is worth in Sparks.
+#
+# THE TRIGGER: Klee plays a card from her PERSONAL Companion pool
+# (`personal_pool: klee`). Not a shared companion, not another character's.
+# THE BOUND: at most MAX_PER_PLAY, once per CARD PLAY -- a Companion resolved a
+# second time by a replay (Study Buddy) is one play, not two. A per-play bound a
+# replay can double is not a bound.
+#
+# NOTHING HERE IS PICKED. All four numbers are lifted off `prune_witch_hunt`'s
+# committed face so that the player's yield does not move (R212(6),
+# derived-not-picked): her row printed `gain_spark 1` inside a
+# `reaction_triggered_by_this` conditional AND `gain_spark 1` unconditionally at
+# top level, with `{spark: +1}` on the upgrade bumping the unconditional one.
+# So she paid 1 / 2 / 2 / 3 (base-no-reaction / base-reaction / upgraded-no-
+# reaction / upgraded-reaction) and BASE + REACTION + UPGRADED reproduces all
+# four. The cap is the arithmetic ceiling of the three, not a fifth number.
+#
+# REACH: general in form, Prune-only in fact -- exactly one row in the four
+# committed companion sheets carries `personal_pool`. A second Personal
+# Companion authored for Klee later falls under this declaration automatically,
+# which is why the trigger is declared over the POOL and not over one card.
+KLEE_COMPANION_SPARK_BASE = 1              # any Personal Companion play
+KLEE_COMPANION_SPARK_REACTION_BONUS = 1    # ...that triggered a reaction
+KLEE_COMPANION_SPARK_UPGRADED_BONUS = 1    # ...and/or is upgraded
+KLEE_COMPANION_SPARK_MAX_PER_PLAY = 3      # the bound LAW:145 requires
+
 # --- Klee power tunables (notes in klee-cards.yaml / companions sheet) ---
 SPARKS_N_SPLASH_HITS = 4          # end of turn: N hits...
 SPARKS_N_SPLASH_HIT_DMG = 5       # ...of this damage, each applies pyro
@@ -2600,7 +2634,41 @@ BANNER_FEATURED_SLOTS = 3
 # READ AND NO REGISTERED EXPERIMENT ATTACHES TO THIS WINDOW: nothing here is
 # graded against a committed prediction.
 # ---------------------------------------------------------------------------
-CONSTANTS_VERSION = 20
+# v21 (2026-08-30, EB-219). PRUNE'S SPARKS MOVED OFF HER FACE AND INTO KLEE'S
+# KIT, at parity. `prune_witch_hunt` printed `gain_spark 1` inside a
+# `reaction_triggered_by_this` conditional AND `gain_spark 1` unconditionally at
+# top level; both ops are GONE from the sheet, and the grant is now the kit
+# declaration LAW:145 requires (`KLEE_COMPANION_SPARK_*`,
+# `effects.klee_personal_companion_spark`, C# `KleeCompanionSpark`).
+#
+# WHY A BUMP AT ALL, GIVEN THE PARITY. The four yields do not move -- 1 / 2 / 2
+# / 3, asserted case by case in `tier0/tests/test_eb219_prune_kit_spark.py` --
+# so on outcomes this is as close to a no-op as a sheet edit gets. It is stamped
+# anyway for two reasons. (1) THE SHEET MOVED, and LAW's material-edit clause
+# names "effect-number changes" without an exemption for edits that restore the
+# number elsewhere; an unstamped world whose sheets differ is exactly the
+# indistinguishability the clause exists to prevent, and `SHEET_DIGEST` below is
+# re-pinned in this same commit. (2) ONE BEHAVIOUR REALLY DOES DIFFER, and it is
+# written down rather than left to be found: a REPLAYED Prune (Study Buddy,
+# `replay_next_companion`) used to resolve her face twice and mint twice, up to
+# 4 Sparks base and 6 upgraded from one card play. The kit mints ONCE PER PLAY,
+# so that combination now pays half. That is not an oversight -- LAW:145 bounds
+# "the amount generated per Companion play", and a per-play bound a replay can
+# double is not a bound -- but it is a world difference and it is what this
+# integer labels.
+#
+# `RT`, `D` and `P` ARE UNTOUCHED, each on its own ground. No run-layer content
+# moved (`RT`). NO DRAFTER PRICE MOVES (`D`), and this is arithmetic rather than
+# hope: `draft.STATIC_SPARK_VALUE` is 0.0 -- a `gain_spark` has been priced at
+# ZERO since the v3 flat-proxy sweep -- so deleting two of them from a printed
+# row changes her offer score by exactly nothing, and the kit's mint is not a
+# printed row for the drafter to read at all. No pilot weight moved (`P`).
+# NO STANDING BASELINE IS OWED AT THIS BUMP (R207): the movement is one
+# companion row, at parity on every case a measured arm can reach, no pending
+# decision waits on its size, and no registered experiment attaches to this
+# window.
+# ---------------------------------------------------------------------------
+CONSTANTS_VERSION = 21
 
 # Correction D (2026-08-26). The content sheets carry no version integer of
 # their own, and a sheet edit moves every measured arm: a pool that grows by
@@ -2612,7 +2680,7 @@ CONSTANTS_VERSION = 20
 # moved, and the bump the move earns is still a judgement. Re-pin with
 # `python tools/lint_sheet_stamp.py --update`, in the SAME commit as the
 # sheet edit.
-SHEET_DIGEST = "c56553e690cbbb989af4505a144b990cabaae54b2683bb794c341b20bcc941d4"
+SHEET_DIGEST = "bee151673d98ada91d4e10d0dd3fa3a16208bd191b77bfc9dc54e139bf8de636"
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

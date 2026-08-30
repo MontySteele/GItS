@@ -594,10 +594,21 @@ def _finish_play(state: CombatState, card: Card,
     # per play index -- so a doubled attack pays Rage twice, counts twice for
     # Juggling, and burns two FreeAttack stacks.
     replays += refpowers.extra_replays(state, card)
-    for _ in range(replays):
+    for replay_index in range(replays):
         snap = refpowers.before_card_played(state, card)
         effects.resolve_card(state, card)
         refpowers.after_card_played(state, card, snap)
+        if replay_index == 0 and card.is_companion:
+            # "Little Hexenzirkul" (EB-219): Klee's kit answering a PERSONAL
+            # Companion play, which is where LAW:145 puts the grant now that
+            # Prune's face may not carry it. INSIDE the loop but gated to the
+            # first pass, for two reasons that pull in opposite directions and
+            # meet exactly here: the mint has to be ONCE PER PLAY (a replay is
+            # one card resolved twice -- the same argument that put Navia's
+            # Cannon Fire Support above this loop), and it has to be able to
+            # read `reactions_this_card`, which does not exist until a
+            # resolution has run. C# does the same at KleeElementalHooks.
+            effects.klee_personal_companion_spark(state, card)
     # THE AUTOMATIC POWER FLOOR GRANT USED TO LIVE HERE. Deleted by the
     # Fanfare rework (2026-07-28, Track B, RULED): playing any Power silently
     # raised floor, cap and current by 5 (rares 8), printed on no card and

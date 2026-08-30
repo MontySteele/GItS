@@ -91,6 +91,14 @@ public sealed class KleeElementalHooks : AbstractModel
         if (cardPlay.Card is ICompanionCard && cardPlay.IsFirstInSeries)
         {
             CompanionPlays.Record(cardPlay.Card.CombatState, cardPlay.Card);
+            // "Little Hexenzirkul" (EB-219 / LAW:145): Klee's kit answering a
+            // PERSONAL Companion play, armed here and settled in
+            // AfterCardPlayed. Same IsFirstInSeries gate as the ledger above,
+            // and for the same reason -- once per play_card call, never once
+            // per replay. The sim's twin brackets the same span
+            // (effects.klee_personal_companion_spark, called from
+            // combat._finish_play after the FIRST resolution).
+            KleeCompanionSpark.Arm(cardPlay);
         }
         return Task.CompletedTask;
     }
@@ -113,6 +121,15 @@ public sealed class KleeElementalHooks : AbstractModel
         // Same ownerless-play guard as BeforeCardPlayed above.
         var owner = cardPlay.Card?.Owner;
         if (owner?.Creature is not { } creature) return;
+        // The Personal-Companion Spark mint, settled BEFORE the gauge sync and
+        // the kit-grant check: a Spark is not Burst Energy, but a reader of
+        // this method should see the resource writes finish before the display
+        // and the grant read them. Settle is a no-op unless BeforeCardPlayed
+        // armed it, and it disarms itself either way.
+        if (cardPlay.IsFirstInSeries)
+        {
+            await KleeCompanionSpark.Settle(choiceContext, cardPlay);
+        }
         KleeBurstResource.SyncGauge(creature);
         await KitGrant.GrantIfCharged(choiceContext, owner);
     }
