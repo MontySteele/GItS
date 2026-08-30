@@ -363,6 +363,26 @@ def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
     return out
 
 
+def _relics(player: dict[str, Any]) -> list[dict[str, str]]:
+    """Printed relic name and hover text. No relic ids, no counters invented.
+
+    `EB-238`. The wire's relic row is `id`, `name`, `description`, `counter`,
+    `keywords`; two of those are printed on the HUD and the rest are not.
+    """
+    out = []
+    for r in player.get("relics") or []:
+        if not isinstance(r, dict):
+            continue
+        name = _text(r.get("name")) or label(r.get("id"))
+        if not name:
+            continue
+        row = {"name": name, "text": _text(r.get("description"))}
+        if r.get("counter") is not None:
+            row["counter"] = _text(r.get("counter"))
+        out.append(row)
+    return out
+
+
 def _intent(blob: Any) -> dict[str, str]:
     """The telegraph as the game draws it: its label and its hover text.
 
@@ -459,6 +479,24 @@ def build(state: dict[str, Any], turn_id: str, *, repo: Path | None = None,
                                if _int(v)}
                               if isinstance(resources, dict) else {}),
                 "powers": _powers(p),
+                # `EB-238`. THE RUN'S RELICS, ON THE STAGED PAGE.
+                #
+                # `KLEESPARK-BT1` §22.4 is why. Klee's starter relic
+                # *Pounding Surprise* pays +1 Spark for every Bomb that
+                # detonates; the row under test placed three Bombs for a
+                # price of 3 Sparks; and on the replay the bank read
+                # 3 -> 0 -> 3 inside one turn. The mode REFUNDED ITS OWN
+                # PRICE in front of eight blind readers, none of whom could
+                # see the relic that did it -- because this page printed no
+                # relic at all. A registration cannot control what its own
+                # page does not show.
+                #
+                # PRINTED NAME AND PRINTED HOVER TEXT, off the wire, and
+                # nothing else: no id, no rarity, no pool, no sim hook. That
+                # is the same quarantine every other line here keeps -- what
+                # the player sees at the machine, and not one word the game
+                # does not put on the screen.
+                "relics": _relics(p),
             },
             "hand": _hand(state, loc, costs),
             "enemies": _enemies(state),
@@ -507,6 +545,14 @@ def render(packet: dict[str, Any]) -> str:
     for pw in you["powers"]:
         out.append(f"- {pw['name']} {pw['stacks']}"
                    + (f" — {pw['text']}" if pw["text"] else ""))
+    # `EB-238`. Between the header and the hand, which is where the HUD keeps
+    # it: a relic is on screen for the whole of a run, and a page that shows
+    # one only where it is OFFERED has shown the reader the shop, not the
+    # board. Absent where the run carries none, like every other block here.
+    for r in you.get("relics") or []:
+        out.append(f"- Relic — {r['name']}"
+                   + (f" ({r['counter']})" if r.get("counter") else "")
+                   + (f": {r['text']}" if r["text"] else ""))
     out += ["", "## Your hand", ""]
     if b.get("spark_note"):
         out += [b["spark_note"], ""]

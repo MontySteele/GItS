@@ -1411,3 +1411,36 @@ def test_every_shipped_turn_passes_the_rider_check():
     bad = {p.name: staged_turn.assumption_rider_conflicts(staged_turn.load(p))
            for p in staged_turn.all_turns()}
     assert not {k: v for k, v in bad.items() if v}
+
+
+# ============================================================== EB-238 =====
+
+def test_the_staged_packet_prints_the_runs_relics():
+    """THE LOCK, on the surface `KLEESPARK-BT1`'s readers actually read.
+
+    The staged packet is `packet.md`, not the blind-play page, and it printed
+    no relic either -- which is how a round measuring a 3-Spark price ran
+    four boards in front of a starter relic that hands the price back one
+    Spark per detonated Bomb (§22.4).
+    """
+    state = {
+        "state_type": "battle",
+        "player": {
+            "hp": 42, "max_hp": 62, "block": 0, "energy": 3,
+            "hand": [], "status": [],
+            "relics": [{"id": "KLEEMOD-POUNDING_SURPRISE",
+                        "name": "Pounding Surprise",
+                        "description": "Whenever a Bomb detonates, gain 1 "
+                                       "Spark.",
+                        "counter": None}],
+        },
+        "battle": {"round": 4, "enemies": []},
+    }
+    packet = qa_packet.build(state, "eb238-relic-line")
+    assert packet["board"]["you"]["relics"] == [
+        {"name": "Pounding Surprise",
+         "text": "Whenever a Bomb detonates, gain 1 Spark."}]
+    page = qa_packet.render(packet)
+    assert ("- Relic — Pounding Surprise: Whenever a Bomb detonates, gain 1 "
+            "Spark." in page)
+    assert "KLEEMOD" not in page
