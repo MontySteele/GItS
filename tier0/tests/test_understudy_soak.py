@@ -13,7 +13,9 @@ is validated by running it (H4, `docs/archive/sprint-understudy-p1-log-2026-08-0
 
 import json
 
-from understudy import report, soak
+from pathlib import Path
+
+from understudy import bridge, instances, report, soak
 
 
 def _combat(hp=50, round_=1, enemies=(("JAW_0", "Jaxfruit", 30, 40),),
@@ -993,3 +995,68 @@ def test_the_report_header_refuses_to_print_an_unstarted_name():
     # `character` IS the request. Reading it as unverified is the truth.
     legacy = report._character_header({"character": "furina"})
     assert "UNVERIFIED" in legacy
+
+
+def test_two_drivers_fly_their_own_policies_and_never_each_others():
+    """THE CROSS-WIRE THE FIRST LIVE TWO-LANE STAGE FOUND (`EB-206`).
+
+    `run_scripted` used to rebind this MODULE'S `policy_v1` name for the
+    duration of a run and restore it in a `finally`. With two lanes staging at
+    once that is not a seam, it is a shared mutable: lane 0's driver called
+    LANE 1'S policy, whose `Runner` had already closed its log, and the run
+    died as `I/O operation on closed file` -- a harness exception standing in
+    for a cross-wired run. The policy is a FIELD now, and this is the lock.
+    """
+    class _Pol:
+        POLICY_VERSION = 99
+        BLOCK_MATTERS_FRACTION = 0.0
+        COMPANION_SHARE_FOR_GUEST_CAST = 0.0
+
+        def __init__(self, name):
+            self.name = name
+
+        def Memo(self):                                      # noqa: N802
+            return self.name
+
+        def decide(self, state, memo, commit=None):          # pragma: no cover
+            return self.name
+
+    a = soak.RunDriver.__new__(soak.RunDriver)
+    b = soak.RunDriver.__new__(soak.RunDriver)
+    a.policy, b.policy = _Pol("lane0"), _Pol("lane1")
+    assert a.pol.Memo() == "lane0"
+    assert b.pol.Memo() == "lane1"
+
+    # A driver that was never handed one still flies the module's own, which
+    # is every unscripted run and every path written before lanes existed.
+    plain = soak.RunDriver.__new__(soak.RunDriver)
+    assert plain.pol is soak.policy_v1
+    # And nothing a scripted run does may move that name.
+    assert soak.policy_v1.__name__.endswith("policy_v1")
+
+
+def test_a_session_with_no_instance_inherits_the_threads_lane(monkeypatch):
+    """THE SECOND CROSS-WIRE THE LIVE PROOF FOUND (`EB-206`).
+
+    `staged_turn.stage_board` opens its own attach `Session` with no instance,
+    ON THE LANE WORKER'S THREAD. When `None` meant "lane 0", that Session's
+    `wire()` rebound the thread to port 15526 and lane 1's board was staged
+    into lane 0's game -- both boards came back refused by `exact_hand`, each
+    holding the other's cards. `None` means INHERIT.
+    """
+    lane1 = instances.lane("lane1", game_dir=Path("G:/game"))
+    monkeypatch.setattr(soak, "game_dir", lambda: Path("G:/game"))
+    try:
+        bridge.use(lane1)
+        sess = soak.Session("s", do_setup=False)
+        assert sess.instance is None
+        sess.wire()
+        # Unchanged: still lane 1's, because the Session did not claim a lane.
+        assert bridge.current_base() == lane1.base
+        assert sess.label == "lane1"
+        assert sess.dir == Path("G:/game")
+    finally:
+        bridge.use_default()
+
+    # And on an unbound thread it is the process default, as it always was.
+    assert soak.Session("s", do_setup=False).label == "lane0"

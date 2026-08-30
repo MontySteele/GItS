@@ -1658,3 +1658,307 @@ argument is kept beside each answer because it is the record of why.
    next staged round may not be registered until the whole-fight Codex play has
    run. `EXPERIMENTS.md` carries it.
    **Relayed review, adopted** in that order, with the round-2 half kept minimal.
+
+## 12. WHOLE-FIGHT BLIND PLAY (`KLEESPARK-W1`) — registration, drafted before the run
+
+**7(c) is [USER]'s ruling of §11.7 pick 7: both, whole-fight first.** This
+section is the first half of that — the registration, the unit, the slate and
+the falsifiers — written and committed BEFORE the bridge was deployed and
+before any Codex call was spent. Under R212(2) the slate is Claude's to draft
+from written design intent and commit DRAFTED; it is offered for batch
+countersign. §12.5 onward is the read, appended after the run.
+
+### 12.1 The unit, and why it is one fight and not a run
+
+**The unit is ONE COMPLETE FIGHT** — the first Monster room of a live Act-1
+Klee run, played end to end by the Codex seat through `understudy.blindplay
+session`, with the Sparks arm granted into the starting deck by
+`understudy.embark --arm`.
+
+The house's larger blind-play unit is the floor-1-to-Act-1 run, and it was
+measured: sealed session `20260829-181718` spent **120 Codex calls** on 120
+actions across six fights, one `codex exec resume` per screen, plus one call
+per fight record and one for the run record — **~20 calls per fight all in,
+and 128 for the run**. The standing budget rule for tonight caps this piece at
+**30 Codex calls**. A run unit is four times over that cap; one fight is inside
+it. So the unit is one fight, the cap is set in the driver rather than trusted
+to the fight's length (`--max-actions 24`, `--max-refusals 2`), and the worst
+case is 24 command calls + 2 refusals + 1 fight record + 1 run record = **28**.
+
+**Two operator facts that ride with the unit, disclosed rather than tidied:**
+
+1. **The screens before the first Monster room are driven by the operator**,
+   with `blindplay act`, at zero Codex cost, so the seat's budget is spent
+   inside the fight rather than on a map fork. Every such action is listed in
+   §12.4. The seat sees its first page at the combat screen.
+2. **The shipped automatic Spark rule is still live in the build.** The
+   re-author retires it only on acceptance (§6.1), so the fight is played on a
+   build where the granted priced rows sit BESIDE the shipped threshold
+   discount. That is a contaminant and it runs one way: it makes Sparks *more*
+   valuable to hold than the re-authored economy alone would, so a thin
+   spend-versus-hold reading here is a floor, not a ceiling.
+
+### 12.2 What is granted, and what is not
+
+Six rows of §10.2's tight set, one copy each, into the starting deck — the
+whole price ladder so a hand can hold competing prices:
+
+| row | printed name | Spark price | shape |
+|---|---|---|---|
+| `proto_pop_spark` | Powder Pop | — (generates 1) | the income |
+| `proto_kaboom_sink` | Ka-pow! | 1 | the Basic sink |
+| `proto_spark_strike` | Fwoosh! | 1 | the Common sink |
+| `proto_spark_sweep` | Tinder Toss | 1 | the AoE at the cheap end |
+| `proto_spark_double_tap` | Bang Bang! | 2 | the middle rung |
+| `proto_spark_finisher` | Firework Finale | 3 | the top rung, Exhaust |
+
+**`proto_true_spark_knight` is NOT granted.** The strict Rare Power would
+change the price of every Attack in the deck at once, which is a second
+variable in a window whose one variable is the priced-sink economy (D4). §11.7
+pick 3 is where it goes, and it stays there.
+
+**Guardrail-7 and R217 G both ride on everything below.** Nothing here is a
+win-rate, a comparison with any other build, or a claim about whether the arm
+is fun or good. Bot numbers are floors. A blind-play record is iteration
+feedback and is never validation, balance evidence or approval.
+
+### 12.3 The slate — four predictions, mechanical falsifiers
+
+Every falsifier is computed from artefacts the run writes by itself: the
+gitignored `turn-*/reply.json` per-turn `thinking` sentences, the rendered
+observations (`turn-*/prompt.md`), and `transcript.jsonl`'s command rows. No
+grade reads a judgement.
+
+| # | slot | prediction | falsifier, mechanically | the decision the outcome changes |
+|---|---|---|---|---|
+| `W1` | Does the Spark price get *named* as a trade-off across a fight, rather than only on a staged board? | **YES, on at least 3 combat turns** of the fight. | Count the fight's combat turns whose `thinking` string names a Spark-priced row AND either a second Spark-priced row or an explicit hold/save of the bank. **≥ 3 = PREDICTED, 1–2 = SPLIT, 0 = MISS.** | Below 3, §11.7 pick 1 is confirmed by a second instrument and the minimal repaired staged round of 7(c) must carry a two-affordable-sinks board and a dry-sink board rather than more rows. |
+| `W2` | The spend rate `P5` asked for, read on a real fight instead of a hand-assembled sim deck. | **Sparks spent ≥ 50% of Sparks generated** over the fight. | Sum the positive and the negative deltas of the printed Spark bank across the fight's observations; `spent / generated`. **≥ 0.5 = PREDICTED, 0.25–0.5 = SPLIT, < 0.25 = MISS.** | Below 0.25 the bank is a pool the player sits on and the ladder is priced above the income — pick 1 option (c), re-price, rather than re-count. Above 0.5 with `W3` at zero, the bank is a pass-through and the price is doing no holding work. |
+| `W3` | Is an affordable sink ever *deliberately skipped*? | **YES, on at least 1 turn.** | Count turns ended with `end turn` while the hand held a Spark-priced row whose Spark price ≤ the printed bank. **≥ 1 = PREDICTED, 0 = MISS.** (No SPLIT: the slot is a yes/no.) | Zero says the price creates no hold decision at all in live play, which reopens §4.2's table downward before any further staged round is worth staging. |
+| `W4` | GPT's attack-spam concern, as a count rather than an impression — six of eight proto rows are Attacks. | **≥ 70% of the fight's successful `play` commands name an Attack.** | Successful `play` commands in `transcript.jsonl`, typed against the granted rows and Klee's shipped starter. **≥ 70% = PREDICTED, 50–70% = SPLIT, < 50% = MISS.** | A PREDICTED `W4` beside a MISS or SPLIT `W1` is the concern confirmed: the repaired staged round must build its boards around non-Attack competition (the generator, the Burst conversion) rather than adding Attack rows. A `W4` MISS retires the concern for this build. |
+
+**Contamination stated.** §11's eight staged boards have been read, and §10.6's
+starter smoke has been read. Neither sets a number above: `W1`–`W3` are
+whole-fight questions a single staged turn structurally cannot answer (§11.6
+item 1), and `W4` is a count of live plays, which no staged board produces.
+The 40-versus-25 sim diagnostic of §11.6 is not quoted and sets nothing.
+
+### 12.4 What actually ran — the session, the stamp, and the four operator actions
+
+**RUN 2026-08-29, sealed session `kleespark-w1`.** Records under
+`review/qa/klee-sparks-wholefight-1/` — the house record (`record.md`, its
+identity block, the tester's fight and run records verbatim, the per-turn
+sentence table and the leak audit), the raw `transcript.jsonl`, `session.json`,
+the two record answers as written (`fight-01.md`, `run.md`), all 22 rendered
+observation pages and all 22 replies under `pages/`, the grader (`grade.py`)
+and its output (`grades.json`).
+
+| | |
+|---|---|
+| pilot | `gpt-5.6-sol` requested and observed, `codex-cli 0.150.1` |
+| build | **`0.2.1517+proto.dirty`**, read off the deployed `mods\klee\manifest.json` |
+| game | `v0.111.0`, read off the game's own `release_info.json` |
+| run seed | `21H4Y89QDRP6`, read back off the wire (R95) |
+| arms granted | the six of §12.2, by wire id, into the starting deck |
+| actions | 20 |
+| termination | `tool_blocked` — the second fight's first frame, torn down (`EB-178`'s shape) |
+| Codex calls | **24** — 22 turn prompts plus 2 record calls. Cap was 30. |
+| leak audit | 22 observations scanned, **1 hit**, and it is a false positive: the rule `pilot-vocabulary-score` matched the word *score* inside the prompt's own disclaimer, *"no card list, no score, no recommendation"* |
+
+**The stamp is NOT the one the brief named, and this is the first thing to say.**
+The brief named `0.2.1506+proto` and said to stop if the stamp differed. It did
+differ. `0.2.1506+proto.dirty` was on disk when this piece began; another agent
+deployed `EB-201`'s pile-ring fix while this piece was waiting out the
+shared-machine lock; the build the run actually met is
+**`0.2.1517+proto.dirty`**. Nothing here deployed anything. I carried on rather
+than stopping, and the reason is that the check's purpose — *this build carries
+the Sparks arm* — is satisfied more strongly than a matching stamp would have
+shown it: `embark --arm` refuses any build without `+proto`, and all six grants
+returned `ok`, which is the arm's own classes answering. **That is a call under
+the ladder and it is [USER]'s to overturn.** The registration was written so the
+cell reads *the installed dev build, named in the record's identity block*,
+precisely because `MAJOR.AUTO` moves under a piece that waits.
+
+**The four operator actions, in full**, per §12.1 item 1 — all before the seat
+saw anything, none of them a play:
+
+1. `choose "Golden Pearl"` at Neow — the option that changes the deck least, so
+   the fight tests the granted ladder and not a Neow modifier.
+2. `choose "Proceed"` to leave Neow. (A bare `proceed` was refused there first
+   and posted nothing.)
+3. `go "Monster (path 1)"` — of the two nodes offered, both Monster.
+
+The seat's first page was that Monster room's combat screen, and its opening
+hand held two priced sinks — `Ka-pow!` at 1 and `Firework Finale` at 3 —
+against an empty bank. That is `P4`'s dry-sink board arrived at by the seed
+rather than by staging, and both cards printed `CANNOT BE PLAYED`.
+
+### 12.5 The fight, turn by turn
+
+Two Toadpoles, 24 and 21 HP, one buffing and one attacking for 7. Three rounds.
+
+- **Round 1** (turns 1–4). Bank **0**. Kaboom! (the shipped 1-cost twin) into
+  the attacker, then both Duck and Covers for 10 Block against a 7. `end turn`
+  with the reason *"No remaining card is playable"* — the two priced sinks in
+  hand were unaffordable, not declined.
+- **Round 2** (turns 5–10). Prune — Little Witch's Hunt Swirls the Pyro aura
+  and the bank goes **0 → 2**. Fwoosh! (price 1) then Kaboom! kill the
+  non-attacker. Powder Pop puts a Bomb on the survivor and returns the bank to
+  **2**. Bang Bang! (price 2) goes into it. `end turn` on an empty hand.
+- **Round 3** (turns 11–12). Powder Pop again, bank **1 → 2**, then Ka-pow!
+  (price 1) detonates the Bomb and finishes the fight.
+
+Then rewards (it took the card, Kaeya — Frostgnaw), gold, a potion, a shop it
+left without buying from because *"every item is unnamed"*, and the next
+Monster room, whose first frame was torn down and stopped the session.
+
+### 12.6 The four slots, graded mechanically
+
+`python review/qa/klee-sparks-wholefight-1/grade.py <log dir>`, committed before
+the run, full output at `grades.json`.
+
+| slot | prediction | measured | grade |
+|---|---|---|---|
+| `W1` | a named Spark trade-off on **≥ 3** combat turns | **0** | **MISS** |
+| `W2` | Sparks spent / generated **≥ 0.5** | generated 4, spent 2, **0.50** | **PREDICTED** (on the boundary) |
+| `W3` | **≥ 1** affordable sink deliberately skipped | **0** | **MISS** |
+| `W4` | **≥ 70%** of successful plays are Attacks | 5 of 10, **50.0%** | **SPLIT** (on the boundary) |
+
+**Two grades landed exactly on their own boundary and neither is nudged.** `W2`
+is PREDICTED at 0.50 by the rule as written, and `W4` is SPLIT at 50.0% by the
+rule as written. Both rules were fixed before the run.
+
+**Three honest limits on the numbers, none of which changes a grade.**
+
+1. **`W2` reads NET deltas of the printed bank, page to page, so a turn that
+   both generates and spends undercounts both halves.** Round 2 is exactly that
+   turn. The true spend is higher than 2 and the true generation higher than 4;
+   the ratio is what the instrument can see, and the error moves it in only one
+   direction — up.
+2. **The fight's last play spent a Spark no page could witness.** `Ka-pow!` at
+   price 1 ended the fight, so there is no following combat page to read the
+   bank off. Counting it would make the ratio 0.75.
+3. **`W1` is strict on purpose and it cost the arm two near-misses.** Turn 6's
+   sentence is *"Spend 1 Spark to bring the non-attacking Toadpole within range
+   of Kaboom!"*; turn 8's is *"gain a Spark, and unlock Bang Bang!"*. Each names
+   one priced row and a Spark, and neither names a second use or a hold, which
+   is what the falsifier required. The count is 0 and it stands.
+
+**And the finding the count alone would hide.** The tester never weighed two
+Spark uses against each other *on a turn* — and then, asked at the end what the
+recurring tension was, answered it unprompted:
+
+> *"The recurring tension was whether to spend Sparks immediately for damage or
+> preserve them for stronger cards such as Bang Bang! and Firework Finale."*
+
+That is §10.9's decisive question answered YES by the tester's retrospective and
+NO by every one of its twelve turn-time sentences. **The economy is legible as a
+shape and inert as a decision** — the tension is describable after the fact and
+was never actually faced, because the bank never once held more than one
+affordable use.
+
+### 12.7 The pilot's own words on the Spark decisions
+
+Verbatim, R217 G — one model's account, never validation, never balance
+evidence, never approval.
+
+1. > *"The recurring tension was whether to spend Sparks immediately for damage
+   > or preserve them for stronger cards such as Bang Bang! and Firework
+   > Finale."* — the run record, question 2.
+2. > *"Firework Finale was dead without 3 Sparks, and the Spark attacks were
+   > dead whenever the resource was unavailable."* — the fight record, question
+   > 4. The top rung of §4.2's ladder never became payable in the whole fight.
+3. > *"Powder Pop was also automatic when followed by an attack, since it
+   > generated a Spark, reduced an attack, and added detonation damage."* — the
+   > fight record, question 4. The *generator* is what became automatic, not a
+   > sink.
+4. > *"Play became repetitive once Powder Pop followed by an attack was clearly
+   > the default sequence. Applying Pyro, generating Sparks, and spending them
+   > on zero-cost attacks also repeated quickly."* — the run record, question 4.
+5. > *"I would hesitate to draft additional expensive Spark spenders when
+   > Firework Finale already became unusable whenever the resource engine did
+   > not line up."* — the run record, question 5.
+6. > *"Bang Bang! also appeared to spend only 1 Spark despite printing a cost of
+   > 2."* — the fight record, question 6, and the printed bank agrees with it:
+   > 2 before, 1 after. See §12.8 item 1.
+
+### 12.8 Two things the run found that are not slots
+
+1. **`Bang Bang!` may be charging 1 for a printed 2 — UNRESOLVED, and the
+   tester is what caught it.** The bank read 2 on the page before the play and 1
+   on the page after. There is a benign explanation — the play detonated a Bomb
+   on the same turn, and if a detonation itself pays a Spark the arithmetic is
+   `2 − 2 + 1 = 1` — and the page cannot distinguish the two. **It is a defect
+   candidate, not a defect.** Settling it wants a staged board with the sink, a
+   full bank and no Bomb on the field, which is one of the boards §12.9 asks for
+   anyway.
+2. **Kokomi's Bake-Kurage memory panel renders on a KLEE run, and says the wrong
+   thing.** Every combat page in this session carried a *"The Bake-Kurage's
+   memory"* block with a Charge count, and the tester reported it as the most
+   confusing thing on the screen: *"The Bake-Kurage memory repeatedly said I had
+   played no card even after several cards had been played."* That is a live
+   defect on the installed build and it belongs to the Kurage-memory
+   workstream, not to this arm. It is reported here rather than filed, because a
+   register row minted on this branch would collide with the branch that owns
+   it.
+
+### 12.9 What this leaves — numbered picks, never blanks
+
+**1. Is the "minimal repaired staged round" of 7(c) still warranted? The read is
+YES, and this run sharpened what it must contain.** The whole-fight unit did the
+thing §11.6 said a staged board could not — it put the price in front of a bank
+with a history — and what came back is that **the bank never once held two
+affordable uses**. So the decision the arm exists to create did not occur, was
+never declined (`W3` = 0), and was named only in retrospect. That is not a
+reason to stage more of the same boards; it is a reason to stage the three
+boards this fight could not produce.
+
+*(a) run the minimal repaired round on the three boards below;
+(b) those three plus a re-read of §11.7 pick 3's Rare Power, which this run
+deliberately did not carry;
+(c) stage nothing yet — re-price §4.2's table first on the strength of `W1` = 0
+and `W3` = 0, then stage;
+(d) run a second whole fight on a different seed instead, on the grounds that
+one fight is one seed.*
+
+**2. The three boards the repaired round needs, if pick 1 goes (a) or (b).** Each
+exists because this fight could not produce it, and each is a board whose
+outcome changes something already on the table.
+
+- **Board A — TWO AFFORDABLE USES, ONE BANK.** A bank of 3; `Fwoosh!` (1),
+  `Bang Bang!` (2) and `Firework Finale` (3) in hand; one enemy. The bank pays
+  any one and cannot pay two. This is `W1`'s and `W3`'s question with the
+  precondition actually met, and §11.7 pick 1's four options are what its
+  outcome selects between.
+- **Board B — THE DRY SINK WITH NO GENERATOR**, which §11.7 pick 2 asked for by
+  name and this fight *nearly* delivered: the opening hand was dry with two
+  unplayable sinks, but `Powder Pop` was in the deck and arrived on round two.
+  The board wants the sink, an empty bank, and no generator anywhere in hand.
+- **Board C — THE PRICE THE BANK PAYS, WITH NO BOMB ON THE FIELD.** `Bang Bang!`
+  at a bank of exactly 2, one enemy, no Bomb. This settles §12.8 item 1 in one
+  turn, and until it is settled every Spark-arithmetic reading in this packet
+  carries an asterisk.
+
+**3. GPT's attack-spam concern, now a count.** `W4` came in at exactly 50% —
+SPLIT — and the five non-Attack plays were two Blocks, the Swirl, and two
+generators. The concern is **neither confirmed nor retired** by one fight.
+*(a) treat 50% as inside tolerance and drop the concern;
+(b) hold it open and re-count on the repaired round, where the boards are chosen
+rather than drawn;
+(c) act now by converting one of §4.2's six Attack rows to a non-Attack sink —
+which is `PICK 4` option (c) under another name.*
+
+**4. The top rung.** `Firework Finale` (price 3) sat in the opening hand, stayed
+in hand for the whole fight, was named DEAD in the fight record and named again
+in the run record as a reason not to draft more spenders. Income across the
+fight was 4 Sparks in three rounds.
+*(a) re-price the top rung down;
+(b) leave the price and raise generation, which is `PICK 1`'s question;
+(c) leave both, on the grounds that one fight on a starter deck is exactly where
+a 3-rung should be dead;
+(d) pull the 3-rung from the tight set.*
+
+**5. What the record does NOT say.** No win rate, no comparison with any other
+build or seed, and no claim about whether the arm is fun or good. One fight, one
+seed, one pilot, a granted deck the generators did not produce, and the shipped
+automatic Spark rule still live beside the priced rows (§12.1 item 2).
+Guardrail-7: these are floors.

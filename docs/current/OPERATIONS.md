@@ -763,6 +763,7 @@ before a run.
 ```
 python -m understudy.local_tester round <t01> <t02> … --plan-only
 python -m understudy.local_tester round <t01> <t02> … [--first N] [--why ...]
+python -m understudy.local_tester round <t01> … --lanes 2     # two games at once
 python -m understudy.local_tester round <t01> … --serial      # the old order
 python -m understudy.local_tester round <t01> … --attach      # someone else's game
 python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md>]
@@ -867,6 +868,88 @@ item shape the sealed record cannot give is the intent category's *two
 packets identical except the telegraph* — no such pair has been staged, every
 matched pair differs in the arm under test — so that category is scored one
 board at a time, and the item shape widens when such a pair exists.
+
+**`--lanes N`: two game instances, one install (`EB-206`).**
+
+`--lanes 1` is the default and is the funnel exactly as it was — the
+machine's own `APPDATA`, port 15526, no flag, no environment change. `--lanes
+2` launches a SECOND `SlayTheSpire2.exe` from the SAME Steam install and
+deals the boards to the two lanes in the pre-registered order.
+
+- **Two processes, one install, and what makes that work.** Steam initialises
+  twice on one account with no restart-if-necessary. Each process gets a
+  wholly separate `user://` tree — saves, settings, shader cache,
+  `mod_configs`, logs — by being launched with its own **`APPDATA`**. Lane 1's
+  is `%LOCALAPPDATA%\gits-lanes\lane1`.
+- **The port is the part a shared install cannot give you.** `STS2_MCP.conf`
+  lives beside the mod dll INSIDE the game directory, so two processes read
+  one conf and want one port. The vendored bridge now reads
+  **`STS2_MCP_PORT`** from the environment FIRST, then the conf, then 15526,
+  and logs which source won (`vendor/STS2_MCP/gits/GitsPort.cs`). Lane 0 is
+  15526; lane 1 is 15527. With the variable absent the conf behaviour is
+  upstream's, unchanged.
+- **Cost:** roughly **1.3 GiB of VRAM and 1 GB of RAM per extra instance**.
+  Two is what has been measured; nothing here says three works.
+- **What two lanes buy, stated honestly.** The GAME half — staging and
+  replaying — runs two boards at once. The MODEL half does not: there is one
+  local server, so readings stay serialized across lanes. The win is the game
+  time, not a doubling of the round.
+- **The order is unchanged, and so is the stopping rule.** R221 B's
+  pre-registered order is the order boards are DEALT in; lanes decide which
+  process stages next, never which board is next. `slot_state` /
+  `split_rest` read grades by turn id and slot and have no lane term — a
+  grade is a fact about the board, and the lane is bookkeeping the record
+  carries so a reader can find the log. The ledger's trailing **`instance`**
+  column sits AFTER `role` — `role` was appended first — and `ledger_rows`
+  pads both, so a row written before either column existed still parses.
+- **Only lane 0 installs the bridge, and lanes tear down in reverse.**
+  `deploy_bridge.ps1` rewrites the shared `mods\STS2_MCP` and refuses while a
+  game is running, so lane 1 is given `install_bridge=False` and removes
+  nothing shared.
+- **STANDING RULE: lane 1's profile is DISPOSABLE.** It is seeded once from
+  lane 0's `settings.save` (without it the lane boots with no mod profile) and
+  nothing in it is ever read back. No run of record is played on it. If it
+  goes wrong, delete `%LOCALAPPDATA%\gits-lanes\lane1`.
+- **`--attach` is single-lane by construction**: it holds ONE game it did not
+  launch, and refuses `--lanes 2` rather than guessing at a second.
+- **A kill takes a pid, never an image name.** `soak._kill`'s old
+  `taskkill /IM SlayTheSpire2.exe` belt would have torn down the other lane's
+  game mid-board. A leftover game from a crashed soak is now the deploy
+  script's own refusal to report (it lists the pids) and the operator's call.
+
+**PROVEN LIVE 2026-08-29** (`review/qa/two-instance/live-proof.json`, and
+`understudy/twolane_proof.py` / `twolane_frames.py` are the two scripts that
+did it). Both lanes up in **30.6 s** (lane 0 at 16.7 s, lane 1 at 30.6 s);
+both bridges answering `menu` at once on 15526 and 15527; one board staged per
+lane concurrently and both packets read back with the right hashes; one frame
+per lane captured **by pid** through `PrintWindow`, with two identical windows
+on the screen. Wall clock for the two boards: **52.4 s concurrent, 59.6 s
+serial on one lane** — and the concurrent figure is honest rather than
+flattering, because 37 s of it is one lane taking `EB-191`'s retry. Without a
+retry a stage is ~14 s on either lane, so the real shape is two ~14 s stages
+overlapping instead of running end to end.
+
+**Three defects the live proof found, all three fixed here:**
+
+1. `soak.run_scripted` rebound this MODULE'S `policy_v1` name for the duration
+   of a run. With two lanes, lane 0's driver called LANE 1'S policy, whose
+   `Runner` had already closed its log — `I/O operation on closed file`. The
+   policy is a field on the driver now.
+2. A `Session` with no instance USED to mean "lane 0" and rebound the calling
+   thread. `stage_board` opens exactly such a Session on the lane worker's
+   thread, so lane 1's board was staged into lane 0's game; both boards came
+   back refused by `exact_hand`, each holding the other's cards. `None` means
+   INHERIT the thread's lane.
+3. Two drivers starting in the same second took the same
+   `soak-<stamp>-run001.jsonl` and wrote one interleaved file. The lane is in
+   the name now; a session with no lane adds no infix.
+
+**What the live proof did NOT cover.** No graded two-lane round has run: the
+proof staged boards and read packets, and never called a model, a grade or a
+replay. `EB-191` (a chosen seed reading back `None`) fires often enough with
+two games on one machine to need the retry above, and it is not fixed here.
+Three lanes are untested and unregistered.
+
 
 **The four conditions.**
 

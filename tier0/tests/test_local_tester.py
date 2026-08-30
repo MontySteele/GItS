@@ -31,8 +31,11 @@ from pathlib import Path
 
 import pytest
 
-from understudy import (authorship, local_model, local_seat, local_tester,
-                        misreads, resource_order)
+from unittest import mock
+
+from understudy import (authorship, bridge, frames, hangwatch, instances,
+                        local_model, local_seat, local_tester, misreads,
+                        resource_order, soak)
 
 import tools.lint_prototype_authorship as auth_lint
 
@@ -984,14 +987,19 @@ def test_the_round_slug_is_the_rounds_own_name():
 def test_the_ledger_row_carries_the_chair_and_an_old_row_still_parses(tmp_path):
     """APPENDED, never inserted. A row written before the chair existed reads
     `deciding`, which is the only chair there was."""
-    assert staged_turn.LEDGER_COLUMNS[-1] == "role"
+    # APPENDED after every column that existed when the chair was minted.
+    # The two-instance build later appended `instance` behind it, so `role`
+    # is the LAST of main's columns rather than the last column outright.
+    role_at = staged_turn.LEDGER_COLUMNS.index("role")
+    assert staged_turn.LEDGER_COLUMNS[role_at - 1] == "run_state"
+    assert staged_turn.LEDGER_COLUMNS[role_at + 1:] == ("instance",)
     qa = tmp_path
     _verdict(qa, "t01", TESTER_ID, "SURVIVES")
     (qa / "t01" / f"tester-{TESTER_ID}.json").write_text(
         json.dumps({"role": "shadow"}), encoding="utf-8")
     _verdict(qa, "t01", "opus-5-fresh", "SURVIVES")
     text = staged_turn.build_ledger(qa)
-    rows = {r.split("\t")[1]: r.split("\t")[-1]
+    rows = {r.split("\t")[1]: r.split("\t")[role_at]
             for r in text.splitlines() if r.startswith("t01")}
     assert rows[TESTER_ID] == "shadow"
     assert rows["opus-5-fresh"] == "deciding"
@@ -1002,3 +1010,300 @@ def test_the_ledger_row_carries_the_chair_and_an_old_row_still_parses(tmp_path):
     (qa / "ledger.tsv").write_text(head + "\n" + body + "\n", encoding="utf-8")
     old = [r for r in staged_turn.ledger_rows(qa) if r["turn_id"] == "t02"][0]
     assert old["role"] == "deciding"
+
+
+# ============================== TWO GAME INSTANCES, ONE INSTALL =============
+#
+# The funnel's throughput ceiling was one game: a round staged one board at a
+# time because there was one process to stage it in. A live experiment
+# (2026-08-29, `review/qa/two-instance/`) proved two `SlayTheSpire2.exe`
+# processes run side by side out of ONE Steam install once each is given its
+# own `APPDATA`, and left exactly one thing unproven -- the bridge port, which
+# comes from a conf file INSIDE the shared game directory. These are the locks
+# on the build that closed it.
+
+
+def test_the_registry_defaults_are_todays_funnel_exactly():
+    """LANE 0 IS NOT A NEW MODE. Every command that ran before this build
+    still runs on the machine's own APPDATA and port 15526, with no flag."""
+    lane0 = instances.lane("lane0", game_dir=Path("G:/game"))
+    assert lane0.port == instances.DEFAULT_PORT == 15526
+    assert lane0.appdata is None
+    assert lane0.is_default
+    assert lane0.base == "http://localhost:15526"
+
+    lane1 = instances.lane("lane1", game_dir=Path("G:/game"))
+    assert lane1.port == 15527
+    assert not lane1.is_default
+    assert lane1.appdata == instances.LANE_ROOT / "lane1"
+    # ONE INSTALL. The second lane is a second PROCESS, never a second copy.
+    assert lane1.game_dir == lane0.game_dir
+
+    with pytest.raises(KeyError):
+        instances.lane("lane9", game_dir=Path("G:/game"))
+    with pytest.raises(ValueError):
+        instances.lanes(0, game_dir=Path("G:/game"))
+
+
+def test_lane1s_environment_carries_its_own_tree_and_its_own_port():
+    base = {"APPDATA": r"C:\Users\X\AppData\Roaming", "PATH": "p"}
+    lane0 = instances.lane("lane0", game_dir=Path("G:/game"))
+    lane1 = instances.lane("lane1", game_dir=Path("G:/game"))
+
+    e0 = lane0.env(base)
+    # Lane 0 does not touch APPDATA: rewriting it would move where the
+    # ordinary single-instance funnel keeps its saves.
+    assert e0["APPDATA"] == base["APPDATA"]
+    # The port IS assigned even on lane 0, and deliberately: an operator with
+    # a stray STS2_MCP_PORT in their shell must not be able to move the bridge
+    # out from under a lane that thinks it knows where it is.
+    assert e0[instances.PORT_ENV] == "15526"
+
+    e1 = lane1.env(base)
+    assert e1["APPDATA"] == str(instances.LANE_ROOT / "lane1")
+    assert e1[instances.PORT_ENV] == "15527"
+    assert e1["PATH"] == "p"
+
+
+def test_each_lane_reads_its_own_godot_log(monkeypatch):
+    """PER-LANE LOGS ARE A CONSEQUENCE OF PER-LANE APPDATA, and the watchdog
+    has to follow: with two games up, one log is not the machine's log."""
+    monkeypatch.setenv("APPDATA", r"C:\Roaming")
+    lane0 = instances.lane("lane0", game_dir=Path("G:/game"))
+    lane1 = instances.lane("lane1", game_dir=Path("G:/game"))
+    assert lane0.log_path() == Path(r"C:\Roaming") / "SlayTheSpire2" \
+        / "logs" / "godot.log"
+    assert lane1.log_path() == instances.LANE_ROOT / "lane1" \
+        / "SlayTheSpire2" / "logs" / "godot.log"
+    assert lane0.log_path() != lane1.log_path()
+
+
+def test_the_profile_is_seeded_once_and_never_overwritten(tmp_path):
+    """Without `settings.save` the lane boots with no mod profile -- a vanilla
+    game wearing the harness's name. With one already there, it is the lane's
+    own and the seeding may not touch it."""
+    src = tmp_path / "roaming"
+    (src / "SlayTheSpire2" / "steam" / "76561").mkdir(parents=True)
+    (src / "SlayTheSpire2" / "steam" / "76561" / "settings.save").write_text(
+        "PROFILE", encoding="utf-8")
+    lane1 = instances.Instance(game_dir=tmp_path / "game", port=15527,
+                               appdata=tmp_path / "lane1", label="lane1")
+
+    # The tutorial-prompt half, learned live: a lane with no `progress.save`
+    # is a first-EVER launch and opens on the tutorial prompt, which the
+    # driver correctly refuses (`no_embark_path`). And `current_run.save` is
+    # deliberately NOT carried -- copying it would resume lane 0's run.
+    saves = src / "SlayTheSpire2" / "steam" / "76561" / "modded" / "p1" / "saves"
+    saves.mkdir(parents=True)
+    (saves / "progress.save").write_text("PROGRESS", encoding="utf-8")
+    (saves / "current_run.save").write_text("A RUN", encoding="utf-8")
+
+    written = instances.seed_profile(lane1, source_appdata=src)
+    names = sorted(p.name for p in written)
+    assert names == ["progress.save", "settings.save"]
+    assert not any(p.name == "current_run.save" for p in written)
+    assert written[-1].read_text(encoding="utf-8") == "PROFILE"
+    written = [p for p in written if p.name == "settings.save"]
+
+    written[0].write_text("THE LANE'S OWN", encoding="utf-8")
+    assert instances.seed_profile(lane1, source_appdata=src) == []
+    assert written[0].read_text(encoding="utf-8") == "THE LANE'S OWN"
+
+    # Lane 0 has nothing to seed and must not be given one.
+    lane0 = instances.Instance(game_dir=tmp_path / "game", port=15526,
+                               appdata=None, label="lane0")
+    assert instances.seed_profile(lane0, source_appdata=src) == []
+
+
+def test_the_bridge_is_per_thread_and_lane0_is_the_default():
+    """A PLAIN GLOBAL WOULD GIVE TWO LANES ONE PORT -- the exact bug this
+    build removes, moved from the mod side to ours."""
+    lane1 = instances.lane("lane1", game_dir=Path("G:/game"))
+    seen = {}
+
+    def run():
+        bridge.use(lane1)
+        seen["worker"] = (bridge.current_base(), bridge.current_label(),
+                          bridge._rebase(bridge.SEED))
+
+    t = threading.Thread(target=run)
+    t.start()
+    t.join()
+    assert seen["worker"] == ("http://localhost:15527", "lane1",
+                              "http://localhost:15527/api/v1/gits/seed")
+    # This thread never bound one, so it is still lane 0's.
+    assert bridge.current_base() == bridge.BASE
+    assert bridge.current_label() == "lane0"
+    assert bridge._rebase(bridge.SEED) == bridge.SEED
+
+
+def test_a_kill_takes_this_sessions_pid_and_no_other_game():
+    """THE `taskkill /IM` BELT IS GONE. By image name it killed every game on
+    the machine, which with two lanes is one lane tearing down the other's
+    board mid-round."""
+    ran = []
+
+    class _Proc:
+        pid = 4242
+
+        def poll(self):
+            return None if len(ran) < 1 else 0
+
+        def terminate(self):
+            ran.append(["terminate"])
+
+        def kill(self):                                       # pragma: no cover
+            ran.append(["kill"])
+
+    sess = soak.Session.__new__(soak.Session)
+    sess.proc = _Proc()
+    calls = []
+    with mock.patch.object(soak.subprocess, "run",
+                           lambda *a, **k: calls.append(a[0])):
+        sess._kill()
+    assert calls == [["taskkill", "/F", "/T", "/PID", "4242"]]
+    assert not any("/IM" in c for c in calls[0])
+
+
+def test_the_watchdog_matches_a_pid_rather_than_an_image():
+    asked = []
+
+    def query(image, pid=None):
+        asked.append((image, pid))
+        return ""
+
+    assert hangwatch.windows_responding("G.exe", query=query, pid=99) is True
+    assert asked == [("G.exe", 99)]
+
+    # A double written before pids existed still works.
+    def old_style(image):
+        asked.append((image, "one-arg"))
+        return ""
+
+    assert hangwatch.windows_responding("G.exe", query=old_style) is True
+    assert asked[-1] == ("G.exe", "one-arg")
+
+
+def test_a_capture_selects_the_window_by_pid():
+    """`Get-Process -Name` takes whichever the OS lists first, so a two-lane
+    capture by name photographs the wrong game roughly half the time."""
+    script = frames.build_script("SlayTheSpire2", Path("C:/out.png"), pid=77)
+    assert "Get-Process -Id 77 -ErrorAction SilentlyContinue" in script
+    assert "Get-Process -Name" not in script
+    by_name = frames.build_script("SlayTheSpire2", Path("C:/out.png"))
+    assert "Get-Process -Name 'SlayTheSpire2'" in by_name
+
+
+def test_a_record_carries_its_instance_and_a_legacy_one_still_parses(tmp_path):
+    """A row that cannot be matched to a process cannot be matched to a log,
+    a frame or a crash -- and every row written BEFORE lanes existed must
+    still parse, which is why the column went on the END."""
+    rec = local_tester._record("t01", {"grader_id": "local-x"},
+                               position=1, spot_check=0)
+    assert rec["instance"] == "lane0"
+
+    fixture = tmp_path / "qa"
+    (fixture / "r-t02").mkdir(parents=True)
+    staged_turn.mark_unrun("r-t02", seed="BBB", slots=["B"], why="decided",
+                           root=fixture)
+    blob = json.loads((fixture / "r-t02" / "unrun.json")
+                      .read_text(encoding="utf-8"))
+    assert blob["instance"] == "lane0"
+
+    # A ledger written before this build: fourteen columns, no `instance`.
+    legacy = "\t".join(["t01", "g", "SURVIVES", "-", "a", "b", "c", "d",
+                         "-", "-", "-", "no", "SEED", "RUN"])
+    (fixture / "ledger.tsv").write_text(
+        "\t".join(staged_turn.LEDGER_COLUMNS[:14]) + "\n" + legacy + "\n",
+        encoding="utf-8")
+    rows = staged_turn.ledger_rows(fixture)
+    assert rows[0]["turn_id"] == "t01" and rows[0]["run_state"] == "RUN"
+    assert rows[0]["instance"] == ""
+    assert staged_turn.LEDGER_COLUMNS[-1] == "instance"
+
+
+def test_two_lanes_deal_the_preregistered_order_and_serialize_per_lane():
+    """THE DEALING IS NOT A RE-ORDERING. R221 B's order is the order the
+    boards are dealt IN; two lanes change only which process stages next."""
+    spans = []
+    a = local_tester.GameLane(label="lane0")
+    b = local_tester.GameLane(label="lane1")
+    steps = _FakeSteps(spans)
+    rows = [{"turn_id": "t0" + str(i), "position": i} for i in range(1, 5)]
+
+    assert local_tester.deal(rows, 2) == [0, 1, 0, 1]
+    assert local_tester.deal(rows, 1) == [0, 0, 0, 0]
+
+    records = local_tester.run_pipeline(rows, lanes=[a, b], steps=steps)
+    # The order out is the pre-registered order in, whichever lane ran it.
+    assert [r["turn_id"] for r in records] == ["t01", "t02", "t03", "t04"]
+    assert [e["turn_id"] for e in a.events if e["kind"] == "stage"] \
+        == ["t01", "t03"]
+    assert [e["turn_id"] for e in b.events if e["kind"] == "stage"] \
+        == ["t02", "t04"]
+    assert {e["instance"] for e in a.events} == {"lane0"}
+    assert {e["instance"] for e in b.events} == {"lane1"}
+
+    # WITHIN a lane, no two game steps overlap: one process, one board.
+    for lane in (a, b):
+        ids = {e["turn_id"] for e in lane.events}
+        mine = [s for s in spans
+                if s[0] in ("stage", "execute") and s[1] in ids]
+        for i, x in enumerate(mine):
+            for y in mine[i + 1:]:
+                assert not _overlap(x, y), "one lane ran two game steps at once"
+    # ACROSS lanes, at least one pair does -- that is the throughput.
+    game = [s for s in spans if s[0] in ("stage", "execute")]
+    assert any(_overlap(x, y) for i, x in enumerate(game) for y in game[i + 1:])
+
+
+def test_the_ledger_write_is_serialized_and_the_grades_carry_no_lane():
+    """Per-turn artifacts live in per-turn directories, so the one shared file
+    is `ledger.tsv` -- rebuilt from disk, under one lock. And the stopping
+    rule reads the same grades whichever lane produced them: `slot_state`
+    takes turn ids and slots and has no lane term at all."""
+    assert isinstance(staged_turn.LEDGER_LOCK, type(threading.Lock()))
+    rows = [{"turn_id": "t01", "slots": ["S1"]},
+            {"turn_id": "t02", "slots": ["S1"]}]
+    grades = {"t01": ["ADVANCE", "ADVANCE"], "t02": []}
+    state = local_tester.slot_state(rows, grades)
+    assert state["S1"].startswith("DECIDED")
+
+
+def test_attach_refuses_a_second_lane_it_did_not_launch():
+    class _Args:
+        attach = True
+        lanes = 2
+
+    with pytest.raises(local_tester.LocalTesterError):
+        local_tester._live_lanes(_Args())
+    _Args.lanes = 1
+    assert len(local_tester._live_lanes(_Args())) == 1
+
+
+# ------------------------------------------------- the port, on both sides --
+
+def test_the_port_precedence_is_env_then_conf_then_default():
+    """THE ONE THING THE PLATFORM EXPERIMENT COULD NOT GIVE US. Two processes
+    from one install read ONE `STS2_MCP.conf`, because it lives beside the dll
+    inside the game directory. The environment is the per-PROCESS source, and
+    this is the C# resolver's contract asserted against the C# source."""
+    src = (REPO / "vendor" / "STS2_MCP" / "gits" / "GitsPort.cs").read_text(
+        encoding="utf-8")
+    # The two names Python and C# must agree on, or a lane sets a variable
+    # nothing reads and binds a port nobody is listening on.
+    assert f'EnvVar = "{instances.PORT_ENV}"' in src
+    assert f"DefaultPort = {instances.DEFAULT_PORT}" in src
+    # The order, read off the resolver: the environment is consulted before
+    # the conf is looked at at all.
+    env_at = src.index("if (env.Length > 0)")
+    conf_at = src.index("return FromConf(confText);")
+    assert env_at < conf_at
+    # And the choice is LOGGED -- a bridge listening somewhere other than
+    # where its operator thinks is the failure this file exists to prevent.
+    mod = (REPO / "vendor" / "STS2_MCP" / "McpMod.cs").read_text(
+        encoding="utf-8")
+    assert "GitsPort.Resolve(env, confText)" in mod
+    assert "choice.Source" in mod
+    assert "GetEnvironmentVariable(GitsPort.EnvVar)" in mod
+

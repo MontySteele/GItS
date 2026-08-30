@@ -20,7 +20,10 @@ namespace STS2_MCP;
 public static partial class McpMod
 {
     public const string Version = "0.4.0";
-    public const int DefaultPort = 15526;
+    // GItS LOCAL EDIT: one definition of the default, in `gits/GitsPort.cs`,
+    // so the fallback the resolver uses and the one the written conf carries
+    // cannot drift apart. The value is unchanged.
+    public const int DefaultPort = GitsPort.DefaultPort;
     private const string ConfigFileName = "STS2_MCP.conf";
 
     private static HttpListener? _listener;
@@ -34,48 +37,59 @@ public static partial class McpMod
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
+    // GItS LOCAL EDIT (funnel two-instances, 2026-08-29) - the port now has
+    // THREE sources, in the order env > conf > default, and the winner is
+    // logged. The conf half below is upstream's, byte for byte, including the
+    // write-a-default-conf side effect; all that changed is that the
+    // environment is consulted first and that the decision runs through
+    // `gits/GitsPort.cs`, which is Godot-free and therefore unit-testable.
+    //
+    // WHY: two SlayTheSpire2.exe processes launched from one install share one
+    // `STS2_MCP.conf`, because the conf lives beside the dll inside the game
+    // directory. One conf is one port and the second listener loses. An
+    // environment variable is per-PROCESS, so `understudy`'s lane 1 gets its
+    // own bridge with no second copy of the game.
+    //
+    // With `STS2_MCP_PORT` absent, behaviour is IDENTICAL to upstream's.
     private static int LoadPort()
     {
+        string? env = System.Environment.GetEnvironmentVariable(GitsPort.EnvVar);
+        string? confText = null;
         try
         {
             string? modDir = Path.GetDirectoryName(
                 System.Reflection.Assembly.GetExecutingAssembly().Location);
-            if (modDir == null) return DefaultPort;
-
-            string configPath = Path.Combine(modDir, ConfigFileName);
-            if (!File.Exists(configPath))
+            if (modDir != null)
             {
-                try
+                string configPath = Path.Combine(modDir, ConfigFileName);
+                if (!File.Exists(configPath))
                 {
-                    var defaultConfig = new Dictionary<string, object> { ["port"] = DefaultPort };
-                    string json = JsonSerializer.Serialize(defaultConfig, _jsonOptions);
-                    File.WriteAllText(configPath, json);
-                    GD.Print($"[STS2 MCP] Created default config at {configPath}");
+                    try
+                    {
+                        var defaultConfig = new Dictionary<string, object> { ["port"] = DefaultPort };
+                        string json = JsonSerializer.Serialize(defaultConfig, _jsonOptions);
+                        File.WriteAllText(configPath, json);
+                        GD.Print($"[STS2 MCP] Created default config at {configPath}");
+                    }
+                    catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+                    {
+                        GD.Print($"[STS2 MCP] No config found at {configPath}; using default port {DefaultPort}");
+                    }
                 }
-                catch (Exception ex) when (ex is UnauthorizedAccessException or IOException)
+                else
                 {
-                    GD.Print($"[STS2 MCP] No config found at {configPath}; using default port {DefaultPort}");
+                    confText = File.ReadAllText(configPath);
                 }
-                return DefaultPort;
             }
-
-            string content = File.ReadAllText(configPath);
-            using var doc = JsonDocument.Parse(content);
-            if (doc.RootElement.TryGetProperty("port", out var portElem)
-                && portElem.TryGetInt32(out int port)
-                && port is > 0 and <= 65535)
-            {
-                return port;
-            }
-
-            GD.PrintErr($"[STS2 MCP] Invalid or missing 'port' in {configPath}, using default {DefaultPort}");
-            return DefaultPort;
         }
         catch (Exception ex)
         {
-            GD.PrintErr($"[STS2 MCP] Failed to load config: {ex.Message}, using default port {DefaultPort}");
-            return DefaultPort;
+            GD.PrintErr($"[STS2 MCP] Failed to load config: {ex.Message}");
         }
+
+        PortChoice choice = GitsPort.Resolve(env, confText);
+        GD.Print($"[STS2 MCP] port {choice.Port} from {choice.Source}: {choice.Note}");
+        return choice.Port;
     }
 
     public static void Initialize()

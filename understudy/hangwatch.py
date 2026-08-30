@@ -115,15 +115,23 @@ def file_size(path: Path | None) -> int | None:
         return None
 
 
-def _tasklist(image_name: str) -> str:
+def _tasklist(image_name: str, pid: int | None = None) -> str:
+    # BY PID WHERE THERE IS ONE. With two lanes running, an IMAGENAME filter
+    # answers about BOTH games: lane 0 hanging would read as lane 1 hanging,
+    # and a watchdog that files a defect against the wrong process is worse
+    # than one that files none. The image filter stays for the single-lane
+    # callers that have no pid to give.
+    where = ([f"PID eq {int(pid)}"] if pid is not None
+             else [f"IMAGENAME eq {image_name}"])
     r = subprocess.run(
-        ["tasklist", "/FI", f"IMAGENAME eq {image_name}",
+        ["tasklist", "/FI", where[0],
          "/FI", "STATUS eq NOT RESPONDING", "/NH"],
         capture_output=True, text=True, timeout=20)
     return r.stdout or ""
 
 
-def windows_responding(image_name: str, query=_tasklist) -> bool | None:
+def windows_responding(image_name: str, query=_tasklist,
+                       pid: int | None = None) -> bool | None:
     """`False` when Windows says the image is Not Responding, else `True`.
 
     `None` is "cannot tell", and it is deliberately common: a non-Windows host,
@@ -131,7 +139,13 @@ def windows_responding(image_name: str, query=_tasklist) -> bool | None:
     reads as a positive is a watchdog that files defects against nothing.
     """
     try:
-        out = query(image_name)
+        # A caller-supplied `query` written before pids existed takes one
+        # argument; the two-argument call is tried first and falls back, so
+        # every existing test double keeps working.
+        try:
+            out = query(image_name, pid)
+        except TypeError:
+            out = query(image_name)
     except Exception:                                        # noqa: BLE001
         return None
     if out is None:
@@ -194,7 +208,8 @@ def sample(log_path: Path | None, image_name: str,
            samples: int = PROBE_SAMPLES,
            interval: float = PROBE_INTERVAL_S,
            sizer=file_size, responder=windows_responding,
-           sleep=time.sleep, clock=time.monotonic) -> Probe:
+           sleep=time.sleep, clock=time.monotonic,
+           pid: int | None = None) -> Probe:
     """Watch the log and the message pump for `samples` ticks.
 
     Every OS call is a parameter. That is not ceremony: the whole value of this
@@ -205,10 +220,16 @@ def sample(log_path: Path | None, image_name: str,
     samples = max(2, int(samples))
     start_bytes = sizer(log_path)
     t0 = clock()
-    responding: list = [responder(image_name)]
+    def ask():
+        try:
+            return responder(image_name, pid=pid)
+        except TypeError:
+            return responder(image_name)
+
+    responding: list = [ask()]
     for _ in range(samples - 1):
         sleep(interval)
-        responding.append(responder(image_name))
+        responding.append(ask())
     end_bytes = sizer(log_path)
     return Probe(
         log_path=None if log_path is None else str(log_path),
@@ -281,9 +302,16 @@ def classify(probe: Probe, *, alive: bool, wire_dead: bool,
 
 
 def diagnose(image_name: str, *, alive: bool, wire_dead: bool = True,
-             log_path: Path | None = None, **probe_kwargs) -> Verdict:
-    """`sample` then `classify`, which is the whole of the live entry point."""
+             log_path: Path | None = None, pid: int | None = None,
+             **probe_kwargs) -> Verdict:
+    """`sample` then `classify`, which is the whole of the live entry point.
+
+    `log_path` and `pid` are how a LANE is watched rather than a machine: with
+    two games up, `%APPDATA%` is per-process, so each lane has its own
+    `godot.log` and its own pid, and a watchdog given neither is watching
+    whichever game the shell happened to point at.
+    """
     if log_path is None:
         log_path = default_log_path()
-    probe = sample(log_path, image_name, **probe_kwargs)
+    probe = sample(log_path, image_name, pid=pid, **probe_kwargs)
     return classify(probe, alive=alive, wire_dead=wire_dead)
