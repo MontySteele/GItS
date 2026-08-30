@@ -54,6 +54,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoSparkBurstConversion>(),
             ModelDb.Card<ProtoSparkDoubleTap>(),
             ModelDb.Card<ProtoSparkFinisher>(),
+            ModelDb.Card<ProtoSparkModeBombs>(),
             ModelDb.Card<ProtoSparkPricedDraw>(),
             ModelDb.Card<ProtoSparkPricedStrike>(),
             ModelDb.Card<ProtoSparkStrike>(),
@@ -65,6 +66,8 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoIttoSuperlativeSuperstrengthEitherModeB>(),
             ModelDb.Card<ProtoShinobuSanctifyingRingEitherModeA>(),
             ModelDb.Card<ProtoShinobuSanctifyingRingEitherModeB>(),
+            ModelDb.Card<ProtoSparkModeBombsModeA>(),
+            ModelDb.Card<ProtoSparkModeBombsModeB>(),
             ModelDb.Card<ProtoThomaCrimsonOoyoroiEitherModeA>(),
             ModelDb.Card<ProtoThomaCrimsonOoyoroiEitherModeB>(),
         };

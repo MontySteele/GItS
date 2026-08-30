@@ -649,8 +649,11 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     so R222 (a)'s owed whole-fight read of the strict Rare Power and `W1''`'s
     registered longer batch are served at once, their linkages held apart by a
     pre-Power / post-Power page partition, at 80 actions on a Codex cap of 90.
-    Then *Bag of Tricks*
-    (`EB-224`). Whole fights are unblocked, the two lifecycle throws being
+    Then *Bag of Tricks* (`EB-224`), whose row is now BUILT in both
+    engines on `EB-182`'s mode-head price — the first card in the repo to
+    use the half of R225's amended clause that admits a price inside a
+    mode — and waits on staging.
+    Whole fights are unblocked, the two lifecycle throws being
     fixed and the three-fight soak green.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
     DEFERRED. Slice 1 stays under R213/R216.
