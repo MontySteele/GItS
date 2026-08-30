@@ -1395,6 +1395,10 @@ together — either the deploy's free Evoke has to carry a cost (Encore, or a
 reduced performance), or the dedicated Evoke family needs something the deploy
 cannot give it. Falsification retires the objection.
 
+**Ordering (2026-08-30):** slot 6 is staged FIRST among the six, because a
+confirmation here returns `F7` and §4.2 together and would re-open the picks
+the other five slots' predictions are drafted from.
+
 **Required boards, from §2.7b.** At least one staged board carries **exactly
 one Salon member**, because that is the board on which rotation is a no-op and
 any positional pricing is zero — and it is the board a starter deck actually
