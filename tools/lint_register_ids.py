@@ -129,7 +129,14 @@ CEILINGS: dict[str, int] = {
     # EB-202/EB-203 minted 2026-08-29 by the KLEESPARK-R1 relayed review:
     # a slot whose threshold the board set could not reach, and a form
     # whose play line is never checked for a target before it is graded.
-    "EB": 205,   # EB-205 minted 2026-08-29 by R222 pick 6(d): the Klee Spark
+    "EB": 207,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+                 # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
+                 # printed Kokomi's Bake-Kurage memory block on a KLEE run and
+                 # told the tester it had played no card. 206 is deliberately
+                 # NOT taken here -- it is the two-instance funnel lanes on an
+                 # unmerged branch, so this branch minted PAST it rather than
+                 # colliding with it, and the number stays that branch's.
+                 # EB-205 minted 2026-08-29 by R222 pick 6(d): the Klee Spark
                  # arm became DRAFTABLE (the pool seam) and has never been
                  # measured drafted. 202-204 are other branches of the same
                  # sitting; this branch took the next free number above them.
@@ -408,6 +415,10 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 205 minted 2026-08-29 by R222 pick 6(d): a drafted arm for the
         # Klee Spark economy, now that the drafter can be offered the rows.
         205,
+        # 207 minted 2026-08-29 by the Klee Sparks whole-fight run: the blind
+        # page printed the Bake-Kurage memory block on a Klee run. 206 belongs
+        # to the unmerged two-instance branch and is not taken here.
+        207,
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,
