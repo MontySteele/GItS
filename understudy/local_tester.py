@@ -1327,6 +1327,32 @@ def cmd_round(args) -> int:
               "board set (EB-202)", file=sys.stderr)
         return 2
 
+    # EB-236. THE BOARD-DESIGN CHECK FOR RESOURCE ROUNDS, and it sits here for
+    # the same reason the ceiling above does: before the one launch, on the
+    # committed boards. `KLEESPARK-BT1` spent four boards and five Codex calls
+    # to learn two things this walk says from a parse -- that its `t02`
+    # declared an exclusive pair the starter relic's refund lets a reader buy
+    # BOTH of, and that all four of its boards let the Energy pay for the
+    # whole hand, so `intent_insensitive` refused seven of the eight forms.
+    #
+    # NOT A LINT IN THE CI LANE, on purpose: a lint sweeps every board in the
+    # tree, including that closed round's four, which stand exactly as
+    # registered (R101b). This is a PLAN-TIME refusal of a round about to run.
+    from understudy import slot_plan
+    try:
+        design = slot_plan.check_board_design(planned)
+    except slot_plan.BoardDesignError as exc:
+        print(f"BOARD DESIGN BAD  {exc}", file=sys.stderr)
+        return 2
+    if design:
+        for line in design:
+            print(f"BOARD REFUSED  {line}", file=sys.stderr)
+        print("ROUND REFUSED: a board cannot pose the resource question it "
+              "registers (EB-236)", file=sys.stderr)
+        return 2
+    print("board design: every board forces a trade, and every declared "
+          "exclusive pair is exclusive")
+
     if args.plan_only:
         print("\n--plan-only: nothing was staged, read or run. Commit this "
               "schedule before the round, for the same reason a prediction "
