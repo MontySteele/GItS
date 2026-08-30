@@ -2966,3 +2966,41 @@ followed by `[INFO] [klee] kurage pile ring: painted 3 of 3 entries at
 **Not covered.** A queue long enough to scroll — the reuse path is decompiled,
 not witnessed. Whether the ring reads against every card frame colour is
 [USER]'s eyes-on, like §14.10's other three.
+
+### 14.12 The memory reached a Klee page (`EB-207`)
+
+The Klee Sparks whole-fight blind run (`klee-sparks-2026-08-29.md` §12.8 item
+2) reported that every combat page in its session carried a *"The Bake-Kurage's
+memory"* block, and that the block repeatedly said it had played no card after
+several cards had been played — the tester's most confusing item on the screen,
+on a **Klee** run. The C# element was never the leak: `KurageMemoryCard.Setup`
+has asked `LocalContext.GetMe` **and** `KokomiResources.IsKokomi` since it was
+built, so no non-Kokomi seat has ever drawn it on any build. The leak was the
+reader. `vendor/STS2_MCP/gits/GitsKurageMemory.cs` spells three wire states —
+an ABSENT `kurage_memory` key is a build with no memory rule compiled in, an
+EMPTY MAP is the rule present on a seat that is not hers (what
+`KurageMemory.Snapshot` returns off a failed `IsLive`), and a populated map is
+a memory — and `blindplay.kurage_memory` only ever split the first from the
+rest, so `{}` was rebuilt into a whole section out of `_int`/`_text` defaults:
+Charge 0, an empty queue, and a `none` pulse rendered as "you have played no
+card this turn". The scope rule is now the same one in both engines: the
+element and the page draw the memory **only for the local seat when that seat's
+character is Kokomi**, a Kokomi *partner* included in the exclusion under
+§14.5's ruled local-only loss. `Refresh` gained the character test `Setup`
+already had, so the rule is spelled at both doors rather than at one and
+inherited at the other. Both locks were seen to FAIL before the fix and pass
+after
+(`test_an_empty_map_is_a_seat_that_is_not_kokomi_and_gets_no_section`;
+`KurageMemoryPinTests.Both_doors_into_the_element_ask_whether_the_seat_is_hers`).
+**Live, on `0.2.1543+proto.dirty`:** a Klee run (seed `NWTJYHNQF50C`, act 1
+first fight, two cards played) whose page carries no memory section and whose
+left edge is empty —
+`understudy/logs/frames/frame-20260829-204611-eb207-klee-no-memory-element.png`
+— and a Kokomi run (seed `P36RUZK9MLEA`, same floor) whose page still carries
+the section and whose left edge still carries the element, drawn in its
+documented empty-queue state of the Charge count alone —
+`frame-20260829-204721-eb207-kokomi-memory-element-present.png`. Frames are
+MATERIAL under the capture guardrail, not measurements. Unproven: the co-op
+half. A Kokomi partner beside a Klee local seat was not played, so that the
+partner's memory reaches neither the local element nor the local page is
+argued from `LocalContext` and the wire's per-player scoping, not witnessed.

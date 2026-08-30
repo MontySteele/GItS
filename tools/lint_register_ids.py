@@ -415,10 +415,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 205 minted 2026-08-29 by R222 pick 6(d): a drafted arm for the
         # Klee Spark economy, now that the drafter can be offered the rows.
         205,
-        # 207 minted 2026-08-29 by the Klee Sparks whole-fight run: the blind
-        # page printed the Bake-Kurage memory block on a Klee run. 206 belongs
-        # to the unmerged two-instance branch and is not taken here.
-        207,
+        # 207 was minted 2026-08-29 by the Klee Sparks whole-fight run (the
+        # blind page printed the Bake-Kurage memory block on a Klee run) and
+        # LEFT OPEN_IDS in the same branch on its live acceptance: an empty
+        # wire map is an absent memory in the reader, the element's Refresh
+        # asks the character test its Setup already asked, and the two frames
+        # are in kokomi-kurage-memory-2026-08-29.md 14.12. 206 belongs to the
+        # unmerged two-instance branch and was never taken here.
         # 199/200 minted 2026-08-29 by R220 B: the shared Burst retirement and
         # its C# arm, both gated on the three character folds landing first.
         199, 200,
