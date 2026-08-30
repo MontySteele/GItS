@@ -186,3 +186,58 @@ def test_the_guardrail_travels_with_the_grant():
     record. The endpoint stamps it, `bridge` keeps the harness-side copy, and
     the sidecar records it beside the grant."""
     assert "not one the generators produced" in bridge.GRANT_GUARDRAIL
+
+
+# ------------------------------- the shipped half (`KLEESPARK-W3`) ---------
+#
+# A registration can need a deck at a stated maker : sink ratio, and on the
+# Spark arm the sinks are prototype rows while the makers are SHIPPED ones.
+# The door granted prototypes only, so that deck could not be built at all --
+# and granting the makers around the harness would leave them out of the
+# embark sidecar, which is where the sealed record reads `arms_granted` from.
+
+SHIPPED_MAKER = "skip_and_hop"
+
+
+def test_a_shipped_card_id_is_accepted():
+    """`KLEESPARK-W3` sec 18.2's six makers are shipped rows, not prototypes."""
+    assert embark.check_arms([SHIPPED_MAKER], DEV) == DEV
+
+
+def test_a_shipped_only_grant_does_not_need_a_proto_build():
+    """A shipped row exists in a release build, so refusing one there would
+    be the door refusing to open on a question nobody asked."""
+    assert embark.check_arms([SHIPPED_MAKER], RELEASE) == RELEASE
+
+
+def test_a_prototype_row_in_the_list_still_forces_the_proto_check():
+    """One prototype id anywhere in the list and the build stamp binds."""
+    with pytest.raises(embark.EmbarkError) as excinfo:
+        embark.check_arms([SHIPPED_MAKER, ARM], RELEASE)
+    assert "+proto" in str(excinfo.value)
+
+
+def test_an_id_on_neither_surface_is_still_refused():
+    with pytest.raises(embark.EmbarkError) as excinfo:
+        embark.check_arms(["not_a_card_anywhere"], DEV)
+    assert "not_a_card_anywhere" in str(excinfo.value)
+    assert "shipped card id" in str(excinfo.value)
+
+
+def test_the_kind_is_recorded_beside_every_grant(monkeypatch):
+    """The sidecar says which surface each granted row came off, so a record
+    of a mixed deck does not read as a record of an all-prototype one."""
+    monkeypatch.setattr(bridge, "give_card",
+                        lambda *a, **k: {"status": "ok", "card_name": "x"})
+    granted = embark.grant_arms([ARM, SHIPPED_MAKER])
+    assert [g["kind"] for g in granted] == ["prototype", "shipped"]
+
+
+def test_the_shipped_index_holds_the_six_klee_makers():
+    """Named rather than counted: these are the rows sec 18.2 grants, and a
+    sheet rename that dropped one would silently shrink the deck."""
+    ids = embark.shipped_ids()
+    for cid in ("skip_and_hop", "warm_glow", "snap", "hot_hands",
+                "all_my_treasures", "da_da_da"):
+        assert cid in ids
+    assert ARM not in ids          # the prototype surface is NOT in this set

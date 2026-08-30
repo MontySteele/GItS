@@ -84,6 +84,8 @@ import time
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from understudy import authorship, bridge, report, soak
 
 LOG_DIR = Path(__file__).resolve().parent / "logs"
@@ -129,8 +131,52 @@ def option_id(name: str) -> str:
 # --------------------------------------------------------- prototype arms --
 
 def wire_id(arm: str) -> str:
-    """A prototype row id as `give_card` spells it: `KLEEMOD-PROTO_...`."""
+    """A row id as `give_card` spells it: `KLEEMOD-<SHEET_ID>`.
+
+    The same spelling for a prototype row and a shipped one -- the mod's ids
+    are `KLEEMOD-` plus the sheet id, upper-cased (`understudy/adapter.py`).
+    """
     return f"KLEEMOD-{str(arm).strip().upper()}"
+
+
+def shipped_ids() -> set[str]:
+    """Every card id on a SHIPPED roster or companion sheet.
+
+    `KLEESPARK-W3` is why this exists. A registration can need a deck at a
+    stated maker : sink ratio, and the makers are shipped rows -- Klee's six
+    unconverted `gain_spark` cards -- while the sinks are prototype ones. The
+    door granted prototypes only, so a controlled-ratio deck could not be
+    built at all, and granting the makers around the harness would leave them
+    out of the embark sidecar and therefore out of the sealed record's
+    `arms_granted` line, which is the one place the record says what the deck
+    was. A grant nothing records is worse than a grant nobody can make.
+
+    THE SHEET LIST IS NOT COPIED HERE: `resource_order.SHEETS` already
+    declares every sheet that can print a face, and the prototype surface is
+    excluded because `authorship.rows_authorship()` owns that half.
+    """
+    from understudy import resource_order          # yaml only; no tier0 pull
+    out: set[str] = set()
+    for rel in resource_order.SHEETS:
+        if Path(rel).name == authorship.SURFACE.name:
+            continue
+        path = resource_order.REPO / rel
+        if not path.is_file():
+            continue
+        blob = yaml.safe_load(path.read_text(encoding="utf-8"))
+        if isinstance(blob, dict):
+            blob = blob.get("cards") or blob.get("rows") or []
+        for row in blob or []:
+            if isinstance(row, dict):
+                cid = str(row.get("id") or "").strip()
+                if cid:
+                    out.add(cid)
+    return out
+
+
+def arm_kind(arm: str) -> str:
+    """`"prototype"` or `"shipped"` -- which surface this id came off."""
+    return "prototype" if arm in authorship.rows_authorship() else "shipped"
 
 
 def check_arms(arms: list[str],
@@ -140,15 +186,33 @@ def check_arms(arms: list[str],
     Returns `(build version, where it was read)` when the grant may proceed.
     `version` is injectable so the tests can put a release build, a dev build
     and an unreadable one in front of this without a game.
+
+    TWO SURFACES, ONE DOOR. An id is legal if it is a row on the prototype
+    surface OR a card on a shipped roster/companion sheet; anything else is
+    refused HERE, naming both, rather than by the far side's `unknown card
+    id`. The `+proto` build check binds only when a PROTOTYPE row is named --
+    a shipped row exists in a release build, so refusing one there would be a
+    door refusing to open on a question nobody asked.
     """
     known = authorship.rows_authorship()
-    unknown = [a for a in arms if a not in known]
+    shipped = shipped_ids()
+    unknown = [a for a in arms if a not in known and a not in shipped]
     if unknown:
         raise EmbarkError(
-            f"not prototype row(s) on {authorship.SURFACE.name}: "
-            f"{', '.join(unknown)}. `--arm` names a row by its `id:`, and the "
-            f"surface is the only place those ids exist -- a slice whose rows "
-            f"have already left it cannot be granted (the deletion rule).")
+            f"not a row on {authorship.SURFACE.name} and not a shipped card "
+            f"id: {', '.join(unknown)}. `--arm` names a row by its `id:`, on "
+            f"the prototype surface or on a shipped sheet -- a slice whose "
+            f"rows have already left the surface cannot be granted (the "
+            f"deletion rule).")
+
+    if not any(a in known for a in arms):
+        # Shipped rows only: the prototype classes are irrelevant, so the
+        # build stamp decides nothing here. The read is still made and
+        # returned, because the record names the build either way.
+        if version is None:
+            from understudy import blindplay
+            version = blindplay.build_version()
+        return version
 
     if version is None:
         # LAZY, and the direction matters. `blindplay` may never import this
@@ -197,6 +261,7 @@ def grant_arms(arms: list[str]) -> list[dict[str, Any]]:
                 f"granting {card_id} failed: "
                 f"{reply.get('message') or reply}")
         granted.append({"arm": arm, "card_id": card_id, "pile": "deck",
+                        "kind": arm_kind(arm),
                         "count": 1, "upgraded": False,
                         "card_name": reply.get("card_name") or "",
                         "message": reply.get("message") or ""})
@@ -353,12 +418,14 @@ def main(argv: list[str] | None = None) -> int:
                          "recorded on the ledger for those")
     ap.add_argument("--arm", action="append", default=[], metavar="PROTO_ID",
                     dest="arms",
-                    help="EB-188: grant a prototype row from "
-                         "docs/prototype-surface.yaml into the STARTING DECK "
-                         "once the run is open, so a blind whole-fight run "
-                         "can meet an arm the pools quarantine. Repeatable. "
-                         "Refused unless the deployed build is stamped "
-                         "`+proto`")
+                    help="EB-188: grant a row into the STARTING DECK once the "
+                         "run is open, so a blind whole-fight run can meet an "
+                         "arm the pools quarantine. A prototype row from "
+                         "docs/prototype-surface.yaml, or a SHIPPED card id "
+                         "from a roster/companion sheet (KLEESPARK-W3's "
+                         "controlled-ratio deck needs both). Repeatable, and "
+                         "repeat an id to grant a second copy. A prototype id "
+                         "is refused unless the deployed build is `+proto`")
     ap.add_argument("--seed", default=None,
                     help="embark on a CHOSEN seed instead of one the game "
                          "rolls; the read-back still decides what is recorded")
