@@ -1230,7 +1230,7 @@ labelled with the file it came from, `mods\klee\manifest.json` and
 `release_info.json`, never the bridge's health payload, which carries the
 vendored bridge's own version and never ours — run seed read back off the
 wire, prompt sha256, action count, termination reason) and the model's
-records verbatim under the R217 G label. The author's own model family is refused as tester (R217 C).
+records verbatim under the R217 G label. The author's own model family is refused as tester (R217 C). Beside it, `wire.json` carries the **per-turn wire snapshot** (`EB-216` / `M56`): one machine-written row per play and per `end turn` — turn, energy, every meter (BaseLib's registered resources AND the power-shaped ones, which is where Sparks ride), the hand with its printed energy and Spark prices, the Kurage queue strip where the build serves one, and the enemy count with intents — lifted off the API and **never shown to the tester**, because the tester's page is the grading surface and this is the grader's (R101b).
 
 **After ADVANCE.** A prototype arm the pair read ADVANCES goes to **whole-fight
 blind play on a dev build**, automatically. It is the next gate, not a pick, and

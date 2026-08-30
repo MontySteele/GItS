@@ -1517,3 +1517,119 @@ def test_a_summoned_jellyfish_is_not_announced_as_base_kit():
     page = blindplay.render(blindplay.observation(
         memory_combat_state(summoned)))
     assert "on the field for the whole fight" not in page
+
+
+# ------------------------------------------------- EB-216: the wire snapshot -
+#
+# `M56` (R224 A). The record's OBJECTIVE side: a machine-written board per
+# play and per end turn, so `P2` (a call against that turn's
+# `blocked`/`fires_next` pair) and `P6` (was the aim right) are countable at
+# all. Nothing already published is re-graded (R101b); these pin the channel
+# the NEXT run writes.
+
+
+def test_the_wire_snapshot_is_taken_on_every_play_and_every_end_turn(tmp_path):
+    replies = [
+        {"command": 'play "Pearl Barrage" on "Nibbit"', "thinking": "chip"},
+        {"command": "end turn", "thinking": "done"},
+        {"record": "fight"},
+        {"command": 'choose "Gold"', "thinking": "take it"},
+        {"record": "run"},
+    ]
+    _s, summary, _wire, _thread = _session(tmp_path, replies)
+    rows = summary["wire"]
+    # Three actions were posted; the reward claim is not a turn and gets no row.
+    assert [r["verb"] for r in rows] == ["play", "end turn"]
+    assert [r["index"] for r in rows] == [1, 2]
+    assert rows[0]["command"] == 'play "Pearl Barrage" on "Nibbit"'
+
+
+def test_the_wire_snapshot_reads_the_board_off_the_wire_not_the_page():
+    """Every field is the API's own, ids included -- which is the whole point:
+    the tester's page hides ids by construction and a grader reading it back
+    would be grading a rendering of the board rather than the board."""
+    snap = blindplay.wire_snapshot(combat_state(), index=1, verb="end turn")
+    assert snap["state_type"] and snap["turn"] >= 0
+    assert snap["energy"] == combat_state()["player"]["energy"]
+    assert snap["enemy_count"] == len(combat_state()["battle"]["enemies"])
+    assert snap["enemies"][0]["entity_id"] == "NIBBIT_0"
+    assert snap["enemies"][0]["intents"][0]["type"] == "Attack"
+    assert snap["hand"][0]["id"] == "KLEEMOD-PEARL_BARRAGE"
+    assert snap["hand"][0]["energy_cost"] == "1"
+    assert set(snap["piles"]) == {"draw", "discard", "exhaust"}
+
+
+def test_the_wire_snapshot_carries_every_meter_including_the_zeroes():
+    """The observed board prints only NON-ZERO meters, deliberately. A grader
+    counting "the bank was empty when the call was made" needs the zero, and
+    it needs the Spark bank too -- which is a POWER, not a registered
+    resource, so a snapshot reading one source would lose whichever meter the
+    character in front of it actually uses."""
+    state = combat_state()
+    state["player"]["status"] = [
+        {"id": "KLEEMOD-SPARK", "name": "Spark", "amount": 2,
+         "type": "Buff", "description": "A resource."}]
+    snap = blindplay.wire_snapshot(state, index=1, verb="end turn")
+    assert snap["meters"]["resources"]["KLEEMOD_CHARGE"] == 8
+    assert snap["meters"]["resources"]["KLEEMOD_ENCORE"] == 0
+    assert snap["meters"]["powers"]["KLEEMOD-SPARK"] == 2
+
+
+def test_the_wire_snapshot_carries_the_memory_strip_only_when_the_wire_does():
+    """The bridge's three-state contract, kept: an ABSENT key is "no memory
+    rule in this build", and inventing an empty one here would make a release
+    build look like a Kokomi seat holding nothing."""
+    with_memory = blindplay.wire_snapshot(
+        memory_combat_state(BLOCKED_MEMORY), index=1, verb="end turn")
+    assert with_memory["kurage_memory"]["blocked"] is True
+    assert with_memory["kurage_memory"]["fires_next"] is False
+    # UNSCRUBBED, unlike the page: the per-row `state` id the observed board
+    # must never print is exactly what an erratum reader wants.
+    assert "queue" in with_memory["kurage_memory"]
+    without = blindplay.wire_snapshot(memory_combat_state(None), index=1,
+                                      verb="end turn")
+    assert "kurage_memory" not in without
+
+
+def test_the_wire_snapshot_omits_a_spark_price_the_wire_omits():
+    state = combat_state()
+    state["player"]["hand"][0]["spark_price"] = 2
+    state["player"]["hand"][0]["spark_affordable"] = False
+    snap = blindplay.wire_snapshot(state, index=1, verb="play")
+    assert snap["hand"][0]["spark_price"] == 2
+    assert snap["hand"][0]["spark_affordable"] is False
+    assert "spark_price" not in snap["hand"][1]
+
+
+def test_the_wire_snapshot_never_reaches_the_tester(tmp_path):
+    """R101b. The tester's page is the grading surface; the snapshot is the
+    grader's. A card id is the cheapest proof: it is in every snapshot row and
+    must be in no prompt."""
+    replies = [{"command": "end turn", "thinking": "x"} for _ in range(2)]
+    replies.append({"record": "words"})
+    _s, summary, _wire, thread = _session(tmp_path, replies,
+                                          states=[combat_state()],
+                                          max_actions=2)
+    assert summary["wire"] and summary["wire"][0]["hand"][0]["id"]
+    for sent in thread.sent:
+        assert "KLEEMOD-PEARL_BARRAGE" not in sent
+        assert "entity_id" not in sent and "NIBBIT_0" not in sent
+
+
+def test_seal_writes_the_snapshot_beside_the_record_and_names_it(tmp_path):
+    replies = [{"command": "end turn", "thinking": "x"}, {"record": "words"}]
+    s, summary, _wire, thread = _session(tmp_path, replies,
+                                         states=[combat_state()],
+                                         max_actions=1)
+    path = blindplay.seal(summary, dict(thread.identity()), log_dir=s.dir,
+                          record_root=tmp_path / "committed")
+    blob = json.loads((path.parent / "wire.json").read_text(encoding="utf-8"))
+    assert blob["session_id"] == "t"
+    assert len(blob["snapshots"]) == 1
+    # The gitignored half too: every committed grader takes the LOG dir.
+    lines = (s.dir / "wire.jsonl").read_text(encoding="utf-8").splitlines()
+    assert [json.loads(x)["index"] for x in lines] == [1]
+    # The record NAMES the channel and does not inline the board.
+    text = path.read_text(encoding="utf-8")
+    assert "1 in `wire.json`" in text
+    assert "KLEEMOD-PEARL_BARRAGE" not in text

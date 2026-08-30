@@ -1171,6 +1171,151 @@ def sha256(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+# -------------------------------------------------------- the wire snapshot -
+
+# `EB-216` / `M56` (R224 A). THE OBJECTIVE SIDE OF A BLIND RUN.
+#
+# Two of the six thresholds a blind run is graded on need a fact the record
+# did not carry. `P2` counts a tester's call against THAT TURN'S
+# `blocked` / `fires_next` pair; `P6` asks whether an aim call was correct.
+# `record.md` holds words -- the tester's own sentences -- and words cannot be
+# counted against a board nobody wrote down. The grades already published
+# STAND (R101b, R224 A); this is the channel the NEXT run has.
+#
+# THREE RULES, and each of them is why a field is shaped the way it is.
+#
+# 1. IT IS MACHINE-WRITTEN FROM THE WIRE, NOT FROM THE TESTER'S PAGE. The page
+#    is a scrubbed, printed-faces-only render whose whole purpose is to hide
+#    ids; a grader reading it back is reading a rendering of the board and not
+#    the board. Every value below is lifted straight off the state the driver
+#    already held when it posted, ids and all.
+#
+# 2. IT IS NEVER SHOWN TO THE TESTER. R101b: the tester's page is the grading
+#    surface and this is the erratum reader's. It goes into the session record
+#    and the gitignored log; nothing in `observation()` / `render()` consults
+#    it, and no snapshot text is ever fed back as feedback.
+#
+# 3. IT INVENTS NO FIELD. Every key is one the API already serves --
+#    `battle.round`, `player.energy`, `player.resources` (BaseLib's registered
+#    meters, which is Charge / Encore / Fanfare / Burst), `player.status` (a
+#    POWER-shaped meter, which is where Sparks ride), the hand's own `cost`
+#    and `spark_price` / `spark_affordable`, `player.kurage_memory` (the queue
+#    strip, `gits/GitsKurageMemory.cs`), and the enemies' `intents`. A build
+#    without the prototype rule serves no `kurage_memory` and the key is
+#    absent here too, which is the same three-state contract the bridge
+#    header spells and `kurage_memory()` above honours.
+#
+# ALL METERS, INCLUDING THE ZEROES, unlike the observed board -- which prints
+# only non-zero ones so a tester is not taught about a meter this screen does
+# not show. A grader counting "the bank was empty when the call was made"
+# needs the zero written down.
+
+
+def _snapshot_hand(state: dict[str, Any]) -> list[dict[str, Any]]:
+    """The hand as the wire has it: id, printed prices, playability."""
+    out = []
+    for c in _hand(state):
+        row = {
+            "id": _text(c.get("id")),
+            "name": _text(c.get("name")),
+            "kind": _text(c.get("type")),
+            "energy_cost": _text(c.get("cost")),
+            "upgraded": bool(c.get("is_upgraded") or c.get("upgraded")),
+            "target_type": _text(c.get("target_type")),
+            "can_play": c.get("can_play") is not False,
+        }
+        # OMITTED WHERE THE WIRE OMITS THEM, which is the bridge's own
+        # contract: an absent pair means "this card charges no Sparks", and
+        # writing 0 here would make a priced card and a free one look alike
+        # to a grader counting affordable sinks.
+        if c.get("spark_price") is not None:
+            row["spark_price"] = _int(c.get("spark_price"))
+            row["spark_affordable"] = bool(c.get("spark_affordable"))
+        out.append(row)
+    return out
+
+
+def _snapshot_meters(state: dict[str, Any]) -> dict[str, Any]:
+    """Every meter the character has, from the two places the API keeps them.
+
+    `resources` is BaseLib's registered custom-resource registry (Charge,
+    Encore, Fanfare, Burst and their riders). `powers` is the creature's own
+    power list, which is where the Spark bank lives -- `spark` is a
+    `PowerModel`, not a registered resource, and a snapshot that read only one
+    of the two would silently lose whichever meter the character in front of
+    it actually uses.
+    """
+    p = _player(state)
+    resources = p.get("resources")
+    powers = {}
+    for row in (p.get("status") or []):
+        if isinstance(row, dict) and _text(row.get("id")):
+            powers[_text(row.get("id"))] = _int(row.get("amount"))
+    return {
+        "resources": ({_text(k): _int(v) for k, v in resources.items()}
+                      if isinstance(resources, dict) else {}),
+        "powers": powers,
+    }
+
+
+def wire_snapshot(state: dict[str, Any], *, index: int, verb: str,
+                  command: str = "") -> dict[str, Any]:
+    """One turn of the board, off the wire, for the grader and nobody else.
+
+    Taken from the state the seat ACTED ON -- pre-post, the board the decision
+    was made against -- because every threshold this exists for asks whether a
+    call matched the board the caller could see.
+    """
+    p = _player(state)
+    battle = _blob(state, "battle")
+    enemies = _enemies(state)
+    snap: dict[str, Any] = {
+        "index": index,
+        "verb": verb,
+        "command": command,
+        "state_type": _text(state.get("state_type")),
+        "turn": _int(battle.get("round")),
+        "battle_turn": _int(battle.get("turn")),
+        "energy": _int(p.get("energy")),
+        "max_energy": _int(p.get("max_energy")),
+        "hp": _int(p.get("hp")),
+        "max_hp": _int(p.get("max_hp")),
+        "block": _int(p.get("block")),
+        "meters": _snapshot_meters(state),
+        "hand": _snapshot_hand(state),
+        "piles": {"draw": _int(p.get("draw_pile_count")),
+                  "discard": _int(p.get("discard_pile_count")),
+                  "exhaust": _int(p.get("exhaust_pile_count"))},
+        "enemy_count": len(enemies),
+        "enemies": [{
+            "entity_id": _entity_id(e),
+            "name": _text(e.get("name")),
+            "hp": _int(e.get("hp")),
+            "max_hp": _int(e.get("max_hp", e.get("hp"))),
+            "block": _int(e.get("block")),
+            "intents": [{"type": _text(i.get("type")),
+                         "label": _text(i.get("label")),
+                         "title": _text(i.get("title"))}
+                        for i in (e.get("intents") or [])
+                        if isinstance(i, dict)],
+        } for e in enemies],
+    }
+    # THE QUEUE STRIP, VERBATIM AND UNSCRUBBED. `kurage_memory()` above is the
+    # PAGE's reading and deliberately drops the per-row `state` id; a grader is
+    # entitled to the developer's vocabulary the page must not print, so the
+    # raw map goes here. An absent key stays absent: no memory rule in this
+    # build (`PROTOTYPE_CARDS` undefined) is a different fact from an empty
+    # memory, and both differ from a populated one.
+    memory = p.get("kurage_memory")
+    if isinstance(memory, dict):
+        snap["kurage_memory"] = memory
+    return snap
+
+
+# The two verbs a snapshot is taken on: every play, and every end of turn.
+SNAPSHOT_VERBS = ("play", "end turn")
+
+
 # --------------------------------------------------------------- grammar ---
 
 _QUOTED = re.compile(r'"([^"]*)"|“([^”]*)”')
@@ -2020,6 +2165,9 @@ class Session:
         self.prompt_sha = sha256(self.prompt)
         self.actions = 0
         self.refusals = 0
+        # `EB-216`. One row per play and per end turn, machine-written off the
+        # wire and never rendered to the seat.
+        self.wire_rows: list[dict[str, Any]] = []
         self.fight_records: list[str] = []
         self.run_record = ""
         self.stopped = ""
@@ -2158,6 +2306,15 @@ class Session:
                 continue
 
             self.refusals = 0
+            # `EB-216`. The board the seat decided on, written down before the
+            # POST moves it. Only `play` and `end turn`: a map walk or a shop
+            # purchase has no turn, no bank and no intent to count against.
+            if res["verb"] in SNAPSHOT_VERBS:
+                snap = wire_snapshot(state, index=len(self.wire_rows) + 1,
+                                     verb=res["verb"], command=command)
+                self.wire_rows.append(snap)
+                self.transcript.write(kind="wire", index=snap["index"],
+                                      verb=snap["verb"], turn=snap["turn"])
             post = dict(res["post"] or {})
             action = post.pop("action")
             result = self.wire.post(action, **post)
@@ -2184,6 +2341,7 @@ class Session:
             "actions": self.actions,
             "termination": self.stopped or "unknown",
             "prompt_sha256": self.prompt_sha,
+            "wire": list(self.wire_rows),
             "fight_records": list(self.fight_records),
             "run_record": self.run_record,
             "transcript": str(self.transcript.path),
@@ -2470,6 +2628,15 @@ def record_markdown(summary: dict[str, Any], identity: dict[str, Any]) -> str:
         if key in identity:
             out.append(f"- **{key}**: {identity[key] or '(not read)'}")
     out += ["", f"- **guardrail**: {summary['guardrail']}", ""]
+    # `EB-216`. The record NAMES the machine channel and does not inline it:
+    # `wire.json` is a board, not prose, and a reader who wants a count wants
+    # the file rather than a table of it. The count is here so a missing file
+    # is visible from the record alone.
+    if summary.get("wire") is not None:
+        out += [f"- **wire snapshots**: {len(summary['wire'])} in "
+                f"`wire.json` beside this file — one row per play and per "
+                f"end turn, machine-written off the API and never shown to "
+                f"the tester (`EB-216`, R101b)", ""]
     for i, text in enumerate(summary["fight_records"], 1):
         out += [f"## Fight {i}, in the tester's own words", "", text.rstrip(),
                 ""]
@@ -2492,6 +2659,19 @@ def seal(summary: dict[str, Any], identity: dict[str, Any], *,
                                         encoding="utf-8")
     out = (record_root or RECORD_ROOT) / summary["session_id"]
     out.mkdir(parents=True, exist_ok=True)
+    # `EB-216`. BOTH SIDES GET IT, and for the reason the graders are written
+    # the way they are: every `review/qa/blindplay/*/grade.py` takes the
+    # GITIGNORED log dir as its argument and reads the run's own artefacts out
+    # of it, while the committed half is what survives the log being swept. It
+    # is the same rows either way.
+    rows = summary.get("wire") or []
+    (log_dir / "wire.jsonl").write_text(
+        "".join(json.dumps(r, ensure_ascii=False, default=str) + "\n"
+                for r in rows), encoding="utf-8")
+    (out / "wire.json").write_text(
+        json.dumps({"session_id": summary["session_id"],
+                    "snapshots": rows}, indent=1, default=str) + "\n",
+        encoding="utf-8")
     path = out / "record.md"
     path.write_text(record_markdown(summary, identity), encoding="utf-8")
     return path
