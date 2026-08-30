@@ -1,4 +1,4 @@
-"""LIVE PROOF for `EB-202`: two lanes, two bridges, two boards at once.
+"""LIVE PROOF for `EB-206`: two lanes, two bridges, two boards at once.
 
 Not a graded round and not a measurement -- it stages one board on each lane
 CONCURRENTLY through the real `staged_turn stage` verb, reads both packets
@@ -19,7 +19,7 @@ from understudy import bridge, frames, instances, local_tester, soak, staged_tur
 
 REPO = Path(__file__).resolve().parents[1]
 QA = REPO / "review" / "qa"
-WHY = "EB-202 live proof: two lanes staging two boards at once"
+WHY = "EB-206 live proof: two lanes staging two boards at once"
 
 
 class StageOnly(local_tester.RoundSteps):
@@ -88,7 +88,7 @@ def main(argv):
     stamp = time.strftime("%Y%m%d-%H%M%S")
     for i, inst in enumerate(instances.lanes(2)):
         session = soak.Session(f"{stamp}-{inst.label}", do_setup=True,
-                               intent="EB-202 two-lane proof",
+                               intent="EB-206 two-lane proof",
                                instance=inst, install_bridge=(i == 0))
         lanes.append(local_tester.GameLane(session=session,
                                            state_reader=bridge.get_state,
@@ -116,7 +116,7 @@ def main(argv):
         # A frame of each window, by PID.
         for lane in lanes:
             r = frames.capture(label=f"eb202-{lane.label}",
-                               note="EB-202 live proof: both lanes up",
+                               note="EB-206 live proof: both lanes up",
                                pid=lane.session.pid, instance=lane.label,
                                out_dir=QA / "two-instance")
             report["lanes"][[l.label for l in lanes].index(lane.label)][

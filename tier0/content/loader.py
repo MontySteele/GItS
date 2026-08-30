@@ -959,15 +959,27 @@ def _pool_substitutions(spec: dict) -> dict[str, str]:
     the shipped id leaves the pool and the prototype takes its slot at the
     SAME rarity, so the only Oath a flagged run can be offered is the 3.
 
-    With the flag off this returns `{}` and nothing else, which is the
-    acceptance condition on the flag: no substitution, no second index, and
-    `_card_prototype` never leaves `_card_index`.
+    THE SECOND ARM, KLEE, under `C.SPARK_ALT_COST_ENABLED`
+    (`C.SPARK_ALT_POOL_SUBS`). `KLEESPARK-R1` sec.11.6 item 5 records the
+    absence of this branch as a limitation of the round -- with no pool seam
+    the drafter could never be OFFERED a priced Spark row, so the sim's P5/P6
+    read a deck assembled by id from PICK 4's own map instead of a drafted
+    one. The map here IS that map, one for one, at matching rarities. It is
+    the same shape as Kokomi's above and it is gated the same way; the only
+    difference is that Kokomi's swap fixes text that cannot bind and this one
+    makes an arm REACHABLE, which is what a two-arm flag is for.
+
+    With EITHER flag off this returns `{}` for that character, and with both
+    off `{}` and nothing else, which is the acceptance condition on the flags:
+    no substitution, no second index, and `_card_prototype` never leaves
+    `_card_index`.
     """
-    if not C.KURAGE_MEMORY:
-        return {}
-    if spec.get("id") != "kokomi":
-        return {}
-    return {C.KURAGE_MEMORY_POOL_DROP: C.KURAGE_MEMORY_POOL_ADD}
+    character = spec.get("id")
+    if character == "kokomi" and C.KURAGE_MEMORY:
+        return {C.KURAGE_MEMORY_POOL_DROP: C.KURAGE_MEMORY_POOL_ADD}
+    if character == "klee" and C.SPARK_ALT_COST_ENABLED:
+        return dict(C.SPARK_ALT_POOL_SUBS)
+    return {}
 
 
 def pool_substitutions(character_id: str) -> dict[str, str]:

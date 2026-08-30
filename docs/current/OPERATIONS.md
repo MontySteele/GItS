@@ -801,7 +801,7 @@ python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md
   UNRUN boards, and the ledger's own banners quoted. `--write <packet.md>`
   appends it. **The prose read is a marked empty slot and is never generated.**
 
-**`--lanes N`: two game instances, one install (`EB-202`).**
+**`--lanes N`: two game instances, one install (`EB-206`).**
 
 `--lanes 1` is the default and is the funnel exactly as it was — the
 machine's own `APPDATA`, port 15526, no flag, no environment change. `--lanes

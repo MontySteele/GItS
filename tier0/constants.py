@@ -126,6 +126,36 @@ SPARK_ALT_STARTER_SUBS: tuple[tuple[str, str], ...] = (
     ("pop", "proto_pop_spark"),          # opt 1: the Basic that MAKES
     ("kaboom", "proto_kaboom_sink"),     # opt 5: the Basic that SPENDS
 )
+
+# THE OFFERABLE-POOL SUBSTITUTIONS -- PICK 4's own one-for-one map, read at
+# `loader._pool_substitutions` under this same flag and nowhere else.
+#
+# WHY IT EXISTS. `KLEESPARK-R1` sec.11.6 item 5 records the gap as a limitation
+# of the round: "`loader._pool_substitutions` returns `{}` for Klee, so the
+# tier 0.5 drafter structurally cannot be offered a prototype Spark row",
+# which forced P5 and P6 to read a deck assembled BY ID rather than drafted.
+# The Kokomi arm had a pool seam and this one did not; the asymmetry was an
+# omission, not a decision, and this is the same seam Kokomi already uses.
+#
+# THE MAP IS NOT NEW AND NOTHING HERE IS PICKED: it is the surface's own
+# header, the one-for-one conversion PICK 4 describes, in the order the packet
+# prints it. Each prototype is filed at the SHIPPED row's rarity and
+# `rewards.character_pool` REFUSES a substitution that would move a card
+# between tiers, so the offer odds are untouched -- three commons, two
+# uncommons, one rare, in and out.
+#
+# WITH THE FLAG OFF this constant is UNREAD: `_pool_substitutions` returns
+# `{}` for Klee exactly as before, `_substituted_card_index` stays empty, and
+# no pool, reward, shop, event or drafter can see a `proto_` id. That is the
+# acceptance condition, pinned by test rather than intended.
+SPARK_ALT_POOL_SUBS: dict[str, str] = {
+    "sparkly_treasure": "proto_spark_strike",      # Fwoosh!,         common
+    "spark_collection": "proto_spark_double_tap",  # Bang Bang!,      common
+    "pocket_fireworks": "proto_spark_sweep",       # Tinder Toss,     common
+    "sugar_rush": "proto_spark_blast",             # Dodoco Blast,    uncommon
+    "cant_catch_me": "proto_spark_finisher",       # Firework Finale, uncommon
+    "true_spark_knight": "proto_true_spark_knight",  # the Oath,      rare
+}
 BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played
 BURST_PER_REACTION = 5        # burst energy per reaction triggered
 

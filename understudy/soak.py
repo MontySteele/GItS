@@ -2211,7 +2211,7 @@ def _trim_state(state: dict) -> dict:
 # `RunDriver`'s, unchanged, and the caller's object only decides what to do once
 # a screen is in front of it.
 #
-# THE SWAP IS GONE, AND A LIVE TWO-LANE RUN IS WHY (`EB-202`, 2026-08-29).
+# THE SWAP IS GONE, AND A LIVE TWO-LANE RUN IS WHY (`EB-206`, 2026-08-29).
 # It used to rebind this MODULE'S `policy_v1` name for the duration of the run
 # and restore it in a `finally`. That is safe for one run at a time and wrong
 # the moment there are two: the funnel's first concurrent stage had lane 0's

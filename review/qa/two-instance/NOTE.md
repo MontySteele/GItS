@@ -1,6 +1,6 @@
 # Two game instances, one install — the platform evidence
 
-**2026-08-29.** The experiment behind `EB-202`, run before any of the funnel
+**2026-08-29.** The experiment behind `EB-206`, run before any of the funnel
 code existed. It answers one question and deliberately leaves one open.
 
 ## What was proved
@@ -31,7 +31,7 @@ game directory*. One conf is one port, so two listeners needed either two
 installs or another port source. The experiment could not answer that and did
 not try.
 
-`EB-202` closed it with the third source rather than a second install:
+`EB-206` closed it with the third source rather than a second install:
 `vendor/STS2_MCP/gits/GitsPort.cs` resolves the port **env > conf > default**
 and logs which won, and `understudy/instances.py` sets `STS2_MCP_PORT` per
 launched process. With the variable absent the conf behaviour is upstream's,

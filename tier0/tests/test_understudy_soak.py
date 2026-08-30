@@ -998,7 +998,7 @@ def test_the_report_header_refuses_to_print_an_unstarted_name():
 
 
 def test_two_drivers_fly_their_own_policies_and_never_each_others():
-    """THE CROSS-WIRE THE FIRST LIVE TWO-LANE STAGE FOUND (`EB-202`).
+    """THE CROSS-WIRE THE FIRST LIVE TWO-LANE STAGE FOUND (`EB-206`).
 
     `run_scripted` used to rebind this MODULE'S `policy_v1` name for the
     duration of a run and restore it in a `finally`. With two lanes staging at
@@ -1036,7 +1036,7 @@ def test_two_drivers_fly_their_own_policies_and_never_each_others():
 
 
 def test_a_session_with_no_instance_inherits_the_threads_lane(monkeypatch):
-    """THE SECOND CROSS-WIRE THE LIVE PROOF FOUND (`EB-202`).
+    """THE SECOND CROSS-WIRE THE LIVE PROOF FOUND (`EB-206`).
 
     `staged_turn.stage_board` opens its own attach `Session` with no instance,
     ON THE LANE WORKER'S THREAD. When `None` meant "lane 0", that Session's

@@ -1,4 +1,4 @@
-"""Both lanes up, one frame each, captured BY PID (`EB-202`).
+"""Both lanes up, one frame each, captured BY PID (`EB-206`).
 
 Separate from the staging proof because it is a different claim: that the
 capture helper photographs the window it was asked for when two identical
@@ -24,7 +24,7 @@ def main() -> int:
     for i, inst in enumerate(instances.lanes(2)):
         lanes.append(local_tester.GameLane(
             session=soak.Session(f"{stamp}-{inst.label}", do_setup=True,
-                                 intent="EB-202 two-lane frames",
+                                 intent="EB-206 two-lane frames",
                                  instance=inst, install_bridge=(i == 0)),
             state_reader=bridge.get_state, log=print, instance=inst))
     out = []
@@ -33,7 +33,7 @@ def main() -> int:
             lane.launch()
         for lane in lanes:
             r = frames.capture(label=f"eb202-{lane.label}",
-                               note=(f"EB-202: both lanes up, this is "
+                               note=(f"EB-206: both lanes up, this is "
                                      f"{lane.label} on port "
                                      f"{lane.instance.port}"),
                                pid=lane.session.pid, instance=lane.label,
