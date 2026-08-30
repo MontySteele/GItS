@@ -43,21 +43,47 @@ DROP = "bake_kurage"
 ADD = "to_the_front"
 
 
+def _flag_flip(monkeypatch, *, memory: bool, always_on: bool):
+    """Flip the two constants AND drop the caches that were built under them.
+
+    HYGIENE, FOUND UNDER `-n auto`. `loader._substituted_card_index`,
+    `loader._card_prototype` and `upgrades._upgrade_index` are all
+    `lru_cache`d memoized views that read `_pool_substitutions`, which is
+    gated on `C.KURAGE_MEMORY`. So a worker that had already resolved any
+    card with the flag OFF held an empty substitution table AND an upgrade
+    index with no prototype delta in it, and the next test to ask for
+    `proto_kurages_oath_memory+` under this fixture got a `KeyError` and then
+    a *"no applicable upgrade"* -- intermittently, because which tests share
+    a worker depends on the split. It surfaced when an unrelated branch added
+    twenty-two tests and moved that split; it was never about those tests.
+
+    `loader.reset_caches()` is the ONE DOOR, and its own docstring says so:
+    *"anything that changes what is on disk, or monkeypatches where the
+    loader looks, must call this rather than picking caches by hand."* This
+    fixture monkeypatches a constant those views are derived from, which is
+    the same thing, so it goes through the same door -- on both sides of the
+    test, because the next test in the worker is owed a clean one too.
+    """
+    loader.reset_caches()
+    monkeypatch.setattr(C, "KURAGE_MEMORY", memory)
+    monkeypatch.setattr(C, "KURAGE_ALWAYS_ON", always_on)
+    yield
+    loader.reset_caches()
+
+
 @pytest.fixture
 def base_kit(monkeypatch):
     """The flag ON, and the base kit with it. Every test that takes this
     fixture is testing the prototype; every test that does not is testing
     the shipped engine."""
-    monkeypatch.setattr(C, "KURAGE_MEMORY", True)
-    monkeypatch.setattr(C, "KURAGE_ALWAYS_ON", True)
+    yield from _flag_flip(monkeypatch, memory=True, always_on=True)
 
 
 @pytest.fixture
 def v3_arm(monkeypatch):
     """The memory rule WITHOUT the base kit -- the v3 arm, kept reachable by
     one constant so a revert is a flip and not a re-authoring."""
-    monkeypatch.setattr(C, "KURAGE_MEMORY", True)
-    monkeypatch.setattr(C, "KURAGE_ALWAYS_ON", False)
+    yield from _flag_flip(monkeypatch, memory=True, always_on=False)
 
 
 def kokomi_state(enemies=None, seed=0):
