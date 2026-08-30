@@ -479,8 +479,9 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     (R224, ex-`M50`):** the *Bake-Kurage* row and its upgrade delta retire
     together under the re-authoring (carried on `EB-199`, not deleted while
     the flag is off), the Tamakushi Casket refresh re-keys to an immediate
-    extra pulse under `KO1`(a), and `KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON` is
-    deleted with its branch (`EB-217`). Kurage's Oath stays as [USER] ruled
+    extra pulse under `KO1`(a), and the accelerator keyword's summon dial is
+    DELETED with its branch, so both memory doors ask the one question
+    (`EB-217`, closed 2026-08-30). Kurage's Oath stays as [USER] ruled
     it — 3 Block per memory played, 5 upgraded, a placeholder with no
     measurement attached — and the surface's missing upgrade channel is now
     `EB-213`. The blind run's own four picks are ruled with them: Rule 1

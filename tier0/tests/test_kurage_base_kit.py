@@ -308,12 +308,29 @@ def test_c4_the_oaths_ward_is_ruled_and_no_longer_rides_the_pulse(base_kit):
 
 def test_c5_the_fires_summon_gate_can_no_longer_fail_in_a_real_fight(
         base_kit):
-    """Pick 5. `KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON` is retired-under-flag:
-    both settings read the same while the jellyfish cannot be absent."""
+    """Pick 5, RULED (R224 A). The dial that let the accelerator keyword fire
+    without a jellyfish is DELETED, so both doors -- the automatic fire and the
+    keyword -- ask the one question. Under the base kit that question can never
+    be answered no in a real fight, which is why the two settings read the same
+    and only one of them survives."""
     st = kokomi_state()
     assert st.player.powers.get("kurage_summon", 0) == 0   # a bare state
     st = fight()
     assert st.player.powers.get("kurage_summon", 0) == 1   # a real fight
+
+
+def test_c5b_the_keyword_asks_the_same_summon_question_as_the_automatic_fire(
+        base_kit):
+    """The collapsed branch, pinned from the manual side: on a state with no
+    jellyfish the keyword fires nothing and pays nothing, exactly as the
+    automatic door does. This is the assertion the deleted dial's `False`
+    setting used to break."""
+    st = armed([memory_entry(price=0)], charge=0)
+    st.player.powers.pop("kurage_summon", None)
+    effects.OPS["play_front_memory"](st, {"op": "play_front_memory"},
+                                     loader.get_card("waters_edge"))
+    assert len(st.kurage_queue) == 1
+    assert not effects.kurage_fire(st, manual=True)
 
 
 # --------------------------------------------------------------------------

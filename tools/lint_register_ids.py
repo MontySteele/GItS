@@ -538,7 +538,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # minted nothing.
         # 218 LEFT OPEN_IDS 2026-08-30: built and merged (#199).
         # 219 LEFT OPEN_IDS 2026-08-30: Prune re-authored, merged.
-        213, 214, 215, 216, 217,
+        # 217 LEFT OPEN_IDS 2026-08-30: the accelerator keyword's summon dial
+        # is deleted in both engines and both doors ask the one question.
+        213, 214, 215, 216,
         # 220 minted 2026-08-30 -- the meter cost badge (Encore, Charge).
         220,
         # 223 minted 2026-08-30 by the relayed open-items review, fact-checked:

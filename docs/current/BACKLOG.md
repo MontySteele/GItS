@@ -54,7 +54,6 @@
 
 | ID | Item | Provenance |
 |---|---|---|
-| `EB-217` | **Scope:** `KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON` and the branch it selects are dead under the base kit — there is never no jellyfish, so both answers read the same. R224 A takes `M50` pick 4 option (2): delete both, accepting the stated cost, that the v3 arm stops being one flip away — a fallback dead once the base kit is the design. **Next action:** delete the constant, collapse the branch, drop any test pinning the other arm. **Gate:** none. **Acceptance:** the grep is empty and the keyword behaves identically in both engines | kurage-memory §12.4 PICK 5; R224 A |
 | `EB-71` | **Scope:** Sly grammar is landed in both engines and deployed; `Card.sly` is the one field and the base-game keyword rides it as the reserved `{op: sly_autoplay}` rider. The `CardKeyword.Sly` rail has never been exercised in game and cannot be — **no committed sheet prints `sly_autoplay`**, so there is no card to play. **Next action:** whoever prints the first `sly_autoplay` row owns the in-game check. **Gate:** a committed sheet printing the marker. **Acceptance:** it plays on a real card | R174; `tools/lint_sly_grammar.py` (pinned by `tier0/tests/test_eb71_cs_parity.py`) |
 
 ## tier0.5 — draft / run layer / measurement
