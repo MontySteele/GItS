@@ -6324,3 +6324,124 @@ grades exactly as published while it does.
 model's account, never validation and never balance evidence, and nothing
 measured on a prototype row is quotable anywhere except the
 decision-closeness falsifier (R215 B).
+
+### 24.9 THE RERUN — `klee-sparks-bt2r`
+
+**REGISTERED — NOT RUN when this was committed. Claude drafts (R212 item 2),
+[USER] countersigns in batch.** The boards, the slate and this section were
+committed **before anything was staged, deployed or read**, exactly as §23
+was. The machine-readable half is `understudy/turns/klee-sparks-bt2r/`.
+
+**THIS IS NOT A NEW ROUND AND NOT A RE-ROLL.** §24.8 says what has to change
+and what may not: *"the boards, the seeds and the slate are unchanged and stay
+pinned; what has to change is the instrument"*. It is `KLEESPARK-BT2` asked
+again with a form that can answer it, and it follows the `KURAGEMEM002`
+precedent at kurage §13.9 — a new dated cell, drafted and committed before the
+run, disclosing exactly what moved.
+
+**§24's grades stand exactly as published (R101b).** `F4` MISSED at 0 of 3;
+`F1`, `F2`, `F3` and `F5` UNREACHED; 0 ADVANCE / 5 RETURN / 0 ESCALATE; the
+return condition DID NOT FIRE. Nothing in this cell re-reads, re-scores or
+withdraws one of them, and the first run's forms and verdicts under
+`review/qa/klee-sparks-bt2-t0*/` are not written over — which is the whole
+reason the rerun's boards carry an `r` in their turn ids.
+
+#### 24.9.1 What changed — the disclosure list, and it is three items long
+
+1. **The reply schema can carry a forecast (`EB-239`, CLOSED on its lock).**
+   `understudy/seat.py`'s `form_schema()` now declares `forecast`, nullable
+   and required on exactly `target`'s rule; `additionalProperties` stays
+   `False`, so the field is DECLARED and the schema is not loosened.
+   `staged_turn.forecast_answers` already read a missing `forecast` as the
+   empty list, so nothing downstream moved.
+2. **Both chairs, from one function.** `local_seat.build_grade_prompt` prints
+   `seat.form_schema()` into the local tester's prompt verbatim, which is why
+   the shadow chair was refused for the same structural reason as the
+   deciding one (§24.7) and why one fix repairs both. There is no second
+   schema to keep in step.
+3. **`qa_form.md` says so.** The form contract now states that the two seats
+   answer through the strict schema, where `forecast` is nullable-and-required
+   and `null` means *this board asked for none*, while a hand-written form may
+   still omit the key.
+
+**The lock, seen to FAIL first**, in `tier0/tests/test_seat_instruments.py`:
+an ANSWERED form — `KLEESPARK-BT2`'s own `t01` reply as it would have had to
+be written — was refused `undeclared:forecast` by the old schema and validates
+under the new one; and a form that OMITS the field is still refused
+`missing:forecast` by the schema and `forecast_missing` by the falsifier on an
+asking board, because declaring the field must not stop the falsifier biting
+or the forecast stops being a pre-commitment.
+
+**`t03`'s second refusal, `target_missing`, is NOT an instrument defect and
+nothing was changed for it.** The verdict names the cause exactly: the
+deciding form played *Bag of Tricks* with `target: null` on a board whose one
+enemy it had already named elsewhere in the same line (*Mine Toss* → *Shrinker
+Beetle*). The form CAN express a target — `target` has been a declared,
+required, nullable property of the schema since `EB-149`, and it is the
+precedent this cell's fix was written to follow — so this is a READER's
+omission on a board with somewhere to aim, caught by `EB-203`'s check doing
+its job (§24.4 says so and this cell agrees). **The board is not edited and
+neither is the check.** It is disclosed here because it is a second reason
+`t03` was refused, and if it recurs on the rerun it is a reading about the
+reader and not about the arm.
+
+#### 24.9.2 What is unchanged, and it is everything else
+
+- **The three boards**, byte-identical to `understudy/turns/klee-sparks-bt2/`
+  except the turn id: same seeds `JH4T8MSN10KS` / `R805DJ56LZHM` /
+  `YX7PB48WR7R4`, same hands, same 55 HP body, same 4-Energy-against-3 trade,
+  same assumptions, same three forecast questions per board, same
+  `replay_next_turn: true` on `t03`.
+- **`slots.yaml`**: `C1` threshold 2 ceiling 2 (`t01`, `t02`), `C2` threshold 1
+  ceiling 1 (`t03`), re-computed by `local_tester round --plan-only` before
+  staging and identical to §23.2's numbers, closeness gaps included (0.031 /
+  0.019 / 0.117).
+- **The slate `F1`–`F5`**, §23.4's table verbatim — the same predictions, the
+  same thresholds (1/1, 1/1, 1/1, 3/3, 1/1), the same falsifiers, the same
+  UNREACHED rule (`EB-209`), the same reading that a MISS on `F3` is an
+  INSTRUMENT finding and a MISS on `F5` a LEGIBILITY one, and the same §23.5
+  list of what a MISS does not license.
+- **The return condition, verbatim from §23.4:**
+
+> **THE PRE-REGISTERED RETURN CONDITION (R229), AS A GRADED PREDICATE.**
+> `F1` and `F2` are ONE finding and are read together.
+>
+> **The arm RETURNS TO DESIGN if EITHER**
+> **(a) `F1` is PREDICTED — the bank reads ≥ 3 again after the detonation, on
+> the same turn, and the reader pays for both priced uses; OR**
+> **(b) `F2`'s form names NO cost given up AND `F2`'s next-turn bank reads 3.**
+>
+> Either alone RETURNS the arm; both is the strongest form and is reported as
+> one finding, not two.
+
+#### 24.9.3 The chair, the budget and the guard
+
+**Unchanged from §23.6.** The Codex seat DECIDES every board
+(`--seat-spot-check 1`), the local seat sits SHADOW (`--seat-mode shadow`,
+R222 B), fresh-Opus is NOT seated — the row is `authored_by: [claude]` and a
+same-family deciding read is not author-disjoint under R217 C.
+
+- **Plan: 3 deciding seat reads + 1 pair read = 4 Codex calls.** The cap is
+  **9 minus the 4 the first run spent = 5**; the plan sits one under it. A
+  round that needs a sixth call STOPS rather than borrowing from the cap.
+- **The meter**, read immediately before the round: `5h 59%` (resets 16:36
+  EDT) / week 28%. `EB-227`'s guard refuses at **85%** of the five-hour window
+  and 50% of the week; if it refuses mid-round the round **STOPS at that
+  board** and the results record how many were read, rather than finishing on
+  a cheaper chair.
+- **Preconditions, each of which stops the round:** `gits-game.lock` under the
+  user's Temp directory absent; Steam running; the installed dev build
+  `0.2.1676+proto.dirty` carrying the row, proven read-only off the deployed
+  `mods\klee\manifest.json` before anything is staged. **Nothing is deployed
+  for this cell** — the fix is in Python, not in the mod.
+
+#### 24.9.4 What this cell can and cannot settle
+
+It can settle exactly what §24 could not reach: whether the priced mode's
+same-turn refund happens **on the wire** (`F1`), what one turn of the future
+does to the bank (`F2`), and whether `EB-236`'s exclusivity certification
+survives contact with a reader (`F3`). It cannot settle the whole fight —
+`EB-224`'s third owed piece — and it cannot make the tier0 mirror see a mode
+or a relic (§23.7 stands word for word). **R217 G rides on every word any
+reader writes here.**
+

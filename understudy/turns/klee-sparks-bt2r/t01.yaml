@@ -1,0 +1,150 @@
+# KLEESPARK-BT2, BOARD A. THE PRICE THAT HANDS ITSELF BACK.
+#
+# THE ROUND. `EB-224`'s REPAIRED staging round for *Bag of Tricks*
+# (`proto_spark_mode_bombs`, 0 Energy, Skill, Uncommon), registered under R229
+# and drafted before anything is staged. The registration is
+# `review/active/klee-sparks-2026-08-29.md` sec.23; `KLEESPARK-BT1` is the
+# round this one repairs, at sec.21 and sec.22.
+#
+# WHAT R229 SETTLED, AND WHY THIS BOARD EXISTS. `KLEESPARK-BT1` registered, on
+# its `t02`, that "the bank of 3 buys EXACTLY ONE of two things". In the
+# SHIPPED world that is false. Klee's starter relic *Pounding Surprise* pays
+# +1 Spark for every Bomb that detonates and the priced mode places three
+# Bombs, so the priced mode -> a detonator -> the rival sink pays for BOTH
+# inside one turn. R229 keeps the relic, accepts the refund as an observed
+# TEST CONDITION rather than a design approval, and puts the arm under a
+# pre-registered RETURN CONDITION. THIS BOARD IS THE ONE THAT GRADES IT.
+#
+# THE SEQUENCE THE BOARD IS BUILT AROUND, PRINTED SO THE FALSIFIER IS NOT A
+# MATTER OF OPINION:
+#
+#   Bag of Tricks, priced mode   bank 3 -> 0    three Bombs at 5 on the body
+#   Kaboom!                      7 damage, and an ATTACK that gets through
+#                                pops those Bombs: 15 more, and the relic
+#                                pays one Spark each   bank 0 -> 3
+#   Firework Finale              bank 3 -> 0    18 damage
+#                                                       total 7 + 15 + 18 = 40
+#
+# THE DETONATOR IS AN ORDINARY ATTACK AND NOT *Quick Fuse*, deliberately.
+# `KLEESPARK-BT1` put a free, single-purpose `detonate` card in three of four
+# hands, which makes the refund look like a property of one strange card. It
+# is not: any Attack that gets HP damage through pops the target's Bombs
+# (`tier0/engine/effects.py`'s `_detonate_bombs_on_hit`; the C# twin is
+# `Powers/BombPower.cs` with `IBombDetonationListener`). Kaboom! is a BASIC
+# card in the starting deck. There is no Quick Fuse on any board of this round.
+#
+# THE ENERGY FORCES A TRADE, WHICH `KLEESPARK-BT1` NEVER DID. Its four boards
+# all let 3 Energy pay for the WHOLE hand, so the telegraph never forced a
+# choice, and seven of its eight forms were refused `intent_insensitive`
+# (sec.22.4 item 2). Here the hand costs 0 + 1 + 0 + 1 + 2 = 4 Energy against
+# 3: the reader can have Kaboom! and Duck and Cover, or Kaboom! and Spirited
+# Away, and not all of it. The board-design check (`EB-236`) refuses a
+# resource board that does not.
+#
+# NO LINE HERE IS LETHAL: the body is set to 55 and the largest total is 40.
+#
+# THIS BOARD MAKES NO EXCLUSIVITY CLAIM, and says so by carrying no
+# `resource_round.exclusive` block. The whole point of it is that the two
+# priced uses are NOT exclusive; `t02` is the board that claims exclusivity,
+# and it is built so the claim is true.
+
+id: klee-sparks-bt2r-t01
+character: KLEEMOD-KLEE
+
+# Pinned before the round. `klee-sparks-bt1-t01`'s seed, recorded ONE-BODY on
+# a Klee run; every board of this round wants one body, and this check walks
+# one body.
+seed: JH4T8MSN10KS
+
+exact_hand: true
+
+prototype: true
+
+slots:
+  - C1
+
+# The pre-commit questions, printed at the TOP of the page and answered before
+# the line (`EB-236` item (d), the staged twin of `EB-229`). They are asked
+# CONDITIONALLY and in printed vocabulary, so that asking them does not
+# recommend a line.
+forecast:
+  - >-
+    If you spend 3 Sparks on Bag of Tricks this turn, what number will your
+    Spark bank show IMMEDIATELY after that card resolves?
+  - >-
+    If you then play Kaboom! at the same enemy, what will your Spark bank
+    show immediately after Kaboom! resolves?
+  - >-
+    What will your Spark bank show at the very end of this turn, on the line
+    you are about to play?
+
+notes: |
+  42/62 HP, no Block, 3 energy, a Spark bank of exactly 3, and one enemy
+  telegraphing an attack. The hand costs 4 Energy in total.
+
+assumptions:
+  - "The hand is EXACTLY the list below and nothing else. The hand the
+     game dealt is emptied before these cards are given, and a packet
+     whose live hand is not this list is refused rather than written."
+  - "The Spark bank is written to 3 through SPARK_POWER, which is how the
+     live game holds Sparks. 3 is the price of the mode and the price of
+     the other Spark-priced card in hand, exactly."
+  - "The run carries Klee's starting relic and no other. It is printed on
+     the page, which is a change from the first version of this round:
+     that relic pays 1 Spark for every Bomb that detonates, and a reader
+     who cannot see it cannot do the turn's arithmetic."
+  - "The encounter is GENERATED. This file can write the enemy's HP and
+     Block and cannot write its INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below
+     declares a telegraphed ATTACK as the falsifier's input."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "No Bomb is on the board when the turn starts. Every Bomb the packet
+     shows is one this turn's line places."
+  - "The player has no Strength and the enemy carries no aura, Vulnerable
+     or Weak. Every Klee attack applies Pyro, and a reaction on top of a
+     hit would move every number the falsifier scores."
+
+# Needs a dev build carrying the prototype rows (klee-mod/build/deploy_proto.ps1).
+
+staging:
+  - give: {card: KLEEMOD-PROTO_SPARK_MODE_BOMBS, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-KABOOM, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_SPARK_FINISHER, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-DUCK_AND_COVER, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SPIRITED_AWAY, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 42}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 3}
+  - set_power: {who: player, name: SPARK_POWER, amount: 3}
+  - set_hp: {who: first, amount: 55}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+resource_round:
+  claim: >-
+    The two Spark-priced uses on this board are NOT exclusive, and this board
+    exists to grade that. It declares no exclusive pair.
+
+board:
+  character: klee
+  pilot: demolition
+  hp: 42
+  max_hp: 62
+  block: 0
+  energy: 3
+  turn: 4
+  resources:
+    sparks: 3
+  hand:
+    - proto_spark_mode_bombs
+    - kaboom
+    - proto_spark_finisher
+    - duck_and_cover
+    - spirited_away
+  enemies:
+    - name: "Act 1 enemy"
+      hp: 55
+      max_hp: 55
+      block: 0
+      intent: {kind: attack, amount: 16}
