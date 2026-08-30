@@ -616,6 +616,14 @@ docs-only for `review/active/`.
 > the selector card, the relic and the 18 sheet rows. This is an appended line
 > on a design packet, not a rewrite: the paragraph above stands as written.
 >
+> **2026-08-30 (R227) pick 4 — the paper work started this day.** Claude judged
+> the timing "close enough": Klee's `KLEESPARK-W4` is registered and unrun, so
+> drafting Spotlight on paper in parallel costs no game time and no Codex call.
+> The Spotlight options packet is
+> `review/active/furina-spotlight-options-2026-08-30.md`. It is paper only —
+> no implementation, no sheet edit, nothing in it is ruled, and the pick stays
+> [USER]'s.
+>
 > **Co-op.** An ally's Companion card play triggers Furina's stage exactly as
 > her own does: one member performs and rotates, and an empty Salon does
 > nothing extra. This restores an ally-coupled mechanic that E4 removed and
@@ -1312,55 +1320,161 @@ None enters `docs/furina-cards.yaml`'s draftable pool, and the quarantine that
 refuses a `KLEEMOD-PROTO_…` grant from outside a prototype build is proven
 live on every release build since `0.2.1209` (STATE).
 
-### 6.3 The prediction slate — SKELETON, predictions BLANK
+### 6.3 The prediction slate — slots 1–5 DRAFTED 2026-08-30, slot 7 OBSERVATION
 
 Under R212, prediction slates are DRAFTED by Claude from written design intent
-and committed before any run. **The slots are drafted here; the predicted
-values are blank, because every one depends on a §4 pick that is [USER]'s.**
-This slate is not countersignable until F1–F16 are answered; it is here so the
-shape is fixed before the numbers are, which is the point of pre-registration.
+and committed before any run. **The five blank slots are now filled.** R224
+answered the picks they waited on — `F1` = (2), `F13` = (2), `F14` = (2), and
+`F2`–`F12`, `F15`, `F16` = (1) (§9) — so each prediction below is derived from
+a written, answered pick rather than from taste. Every one is marked with the
+picks it comes from. The slate is **DRAFTED and UNCOUNTERSIGNED**; it is
+offered for BATCH countersign under R212, and it is signed once — a moved world
+means re-drafting the affected slots and disclosing the diff, never re-signing.
+
+**How a slot is counted, stated once for the whole slate.** Boards are staged,
+not played; each staged board is read by **two independent blind graders**
+(`EB-149`), so **one board yields two forms**, and every graded line is
+replayed (`EB-170`). A slot's denominator is **forms**, and it is printed with
+the grade. A "form names X" means the grader's own recorded reasoning names X —
+never Claude's reading of it, and never a keyword the grader was shown.
+
+**The §2.7b rule binds every count below.** On a one-member stage rotation is a
+no-op, so **no slot may count a one-member board toward any test about which
+member is front, about rotation, or about a positional price.** The one-member
+board is required (see "Required boards") and it is read for the other half of
+slot 1 only.
 
 **Slot 1 — does the board read as a board?**
-*Predicted:* ⟨blank — depends on F3, F13, F14⟩.
-*Falsified if:* blind forms describe the Salon as a passive that happens to
-them rather than as something they made perform; **or** no form names which
-member was front as a reason for a line taken.
-*Decision it changes:* falsification returns F3 and F14 — either the
-front-of-queue marker is not doing its job, or the trigger needs to be a
-choice rather than a rotation.
+*Predicted — DRAFTED 2026-08-30 under R212 item 2 (R227 pick 4), from `F3` (1)
+front-performs-then-rotates, `F13` (2) trigger line on the face and Evoke as a
+keyword, `F14` (2) the slot showing trigger AND Evoke at current Focus, and
+§2.7b's staged-board rule:* **both halves hold.** **(i)** On the
+**multi-member** boards — at least three of them, so a denominator of at least
+six forms — **at least 4 of 6 forms** name a specific member (by name or by
+slot) as a reason for the line taken **and** name a play of their own that made
+a member perform (a Companion play, a deploy, or an Evoke). **(ii)** On the
+full-stage board, **at least 1 form names which member is FRONT** as a reason.
+*Grading rule:* both halves = **PREDICTED**; exactly one = **SPLIT**; neither =
+**MISS**. On half (i), 2–3 of 6 grades **SPLIT** on its own and 0–1 grades
+**MISS**. The multi-member form denominator is printed with the grade.
+*UNREACHED when:* fewer than **two** multi-member boards are staged, or fewer
+than two graders read a board — the denominator cannot pose the question. A
+one-member board is never counted here and never makes this slot UNREACHED.
+*Decision it changes:* **PREDICTED** licenses the §7 display work to proceed on
+`F14` (2)'s slot layout and `F13` (2)'s face, and it licenses **nothing about
+the rules** — it says the board is legible, not that the trigger is priced.
+**MISS on half (ii) alone** is a DISPLAY finding: it returns `F14` as a
+numbered pick on the front-of-queue marker, filed to `BACKLOG` in the `EB-164`
+family, and it does **not** license moving `F3`. **MISS on both halves**
+returns `F3` and `F14` together to [USER] as one numbered pick — and it
+explicitly does **not** license Claude adopting `F3` (3) (the player chooses),
+because this slot cannot tell a display failure from a rules failure. **SPLIT**
+buys one repaired staged round, not a design change.
 
 **Slot 2 — is trigger-versus-Evoke a real decision?**
-*Predicted:* ⟨blank — depends on F6, F7⟩.
-*Falsified if:* `closeness` fails on a matched pair of boards built so that
-Evoking now and triggering twice more are within one card of each other
-(R213 F); **or** both graders take the same line on both boards.
-*Decision it changes:* falsification returns F6 and F7 — the Evoke multiplier
-is wrong, or the Encore price is not a real cost.
+*Predicted — DRAFTED 2026-08-30 under R212 item 2 (R227 pick 4), from `F6` (1)
+the printed ×N Evoke multiplier on the same Focus term and `F7` (1) every Evoke
+card carrying a printed `encore_cost`, against §4.2's deploy rules:* **both
+halves hold**, on a matched pair of boards built so that Evoking now and
+triggering twice more are within one card of each other (R213 F closeness).
+**(i) The graders do NOT agree**: across the pair's **4 forms**, at least one
+takes the Evoke line and at least one takes the trigger line. **(ii) The price
+is read**: **at least 3 of 4 forms** name the printed ×N multiplier **and** the
+Encore cost in the reasoning for the line they took.
+*Grading rule:* both = **PREDICTED**; exactly one = **SPLIT**; neither =
+**MISS**. The 4-form denominator is printed with the grade.
+*UNREACHED when:* the closeness check (R213 F) fails on the pair before the
+round runs — the two lines were not within one card of each other, so the
+boards never posed a decision and nothing about `F6` or `F7` is learned; **or**
+fewer than two graders read either board.
+*Decision it changes:* **PREDICTED** validates `F6` (1) and `F7` (1) as priced
+and lets the Evoke family go to build; it licenses **no** re-price and **no**
+new member row. **MISS with every form on the Evoke line** says the multiplier
+is too large or the Encore price too small; **MISS with every form on the
+trigger line** says the opposite. Either way it returns `F6` and `F7` to [USER]
+as ONE numbered pick with this round as the reading — Claude does not settle
+the direction. It does **not** license reopening `F5` (which member Evoke
+expends) or §4.2's full-stage rule; that asymmetry is slot 6's ground and only
+slot 6 may reopen it.
 
 **Slot 3 — does Encore feel like two things?**
-*Predicted:* ⟨blank — depends on F7, F16⟩.
-*Falsified if:* no form names holding Encore as Block as a reason for
-declining an Evoke, across a set of boards where holding is correct on at
-least one.
-*Decision it changes:* falsification returns F7 — Encore is not the right
-currency for Evoke and the price moves to energy.
+*Predicted — DRAFTED 2026-08-30 under R212 item 2 (R227 pick 4), from `F7` (1)
+the printed `encore_cost` on Evoke and `F16` (1) the starter's one cheap Evoke
+card, against §3's Encore keep-list (unbounded, absorbing after Block and
+before HP):* **both halves hold**, across a set of at least three boards
+staging real incoming damage, built so that holding Encore as Block is the
+correct line on at least one and the wrong line on at least one. **(i)** On the
+board where holding is correct, **at least 1 of 2 forms declines the Evoke and
+names Encore's absorbing job as the reason**. **(ii)** Across the slot's forms,
+**at least 3 name Encore in BOTH roles** — as the Evoke's price and as the
+buffer — at least once each.
+*Grading rule:* both = **PREDICTED**; exactly one = **SPLIT**; neither =
+**MISS**. The form denominator is printed with the grade.
+*UNREACHED when:* no staged board puts incoming damage at or above the printed
+Encore, so the buffer's job is never live and the slot reads only the price.
+*Decision it changes:* **PREDICTED** says Encore's double job is felt and `F7`
+(1) stands; it licenses nothing else. **MISS** returns `F7` to [USER] as a
+numbered pick between (1) keeping the Encore price and (3) moving the Evoke
+price to energy. It does **not** license touching Encore's defensive job, which
+is LAW (`docs/current/LAW.md:192-194`) and not this packet's to move, and it
+does **not** license a starter change: `F16` is read here only as the reason an
+Evoke card is in hand at all.
 
 **Slot 4 — is a full meter felt as a payoff?**
-*Predicted:* ⟨blank — depends on F8, F9, F10, F15⟩.
-*Falsified if:* on a staged board at or near the cap, no form names the Focus
-bonus as a reason for a line taken; **or** graders cannot say what the meter
-is worth to them without being told.
-*Decision it changes:* falsification returns F9 and F15 — either +3 is too
-small to be its own payoff and the ceiling has to move, or the meter is not
-legible enough for the player to price it.
+*Predicted — DRAFTED 2026-08-30 under R212 item 2 (R227 pick 4), from `F8` (1)
+the shipped additive Focus shape, `F9` (1) the cap left at
+`FANFARE_CAP_FRACTION = 0.5` with drafted `raise_fanfare_cap` carriers, `F10`
+(1) decay left at `FANFARE_DECAY_FRACTION = 0.20`, `F15` (1) the meter printing
+value, Focus tier and next turn's decayed value, and `SALON_FOCUS_PER = 10`
+(`tier0/constants.py:445` on 2026-08-30 — the value has not moved, its line
+has; §2.1's table quotes the line it had at `77eea5f`):* **both halves hold**,
+on a pair of boards
+identical but for the meter — one staged within one Focus tier of the cap (39
+at 78 HP, Focus **+3**) and one staged below 10 held Fanfare (Focus **+0**).
+**(i)** On the near-cap board, **at least 3 of 4 forms name the Focus bonus** —
+the +3, or a member's raised number — as a reason for the line taken.
+**(ii)** **At least 1 form names next turn's decayed value** (the `F15` (1)
+preview) as part of deciding to act now rather than later.
+*Grading rule:* both = **PREDICTED**; exactly one = **SPLIT**; neither =
+**MISS**. Denominators printed with the grade.
+*UNREACHED when:* no board is staged within one Focus tier of the cap — the
+payoff was never on screen; **or**, for half (ii) alone, the build under test
+does not render the decay preview, in which case (ii) is UNREACHED, the slot
+grades on (i) alone, and the record says so.
+*Decision it changes:* **PREDICTED** says +3 at the shipped ceiling is felt,
+`F9` (1)'s seed stands, and the `raise_fanfare_cap` carriers become a draft
+question rather than a repair. **MISS on half (i)** returns `F9` to [USER] as a
+numbered pick — raise `FANFARE_CAP_FRACTION`, lower `SALON_FOCUS_PER`, or add
+carriers — and it explicitly does **not** license moving `F10`'s decay, which
+is a different lever this slot does not read. **MISS on half (ii) alone** is a
+legibility defect in the `EB-164` family: it goes to `BACKLOG` and RETURNS to a
+staged round, and it reopens neither `F9` nor `F15`'s pick.
 
 **Slot 5 — is the never-drain line a real alternative?**
-*Predicted:* ⟨blank — depends on F11, F12⟩.
-*Falsified if:* on a staged board holding a full meter with a drain card in
-hand, every grader drains; **or** graders decline and cannot say what they
-gain by declining.
-*Decision it changes:* falsification returns F12 — the drain card is
-dominant, and either its payoff or the meter's standing value is mispriced.
+*Predicted — DRAFTED 2026-08-30 under R212 item 2 (R227 pick 4), from `F11` (1)
+`let_the_people_rejoice` re-authored in place as the drafted Rare drain and
+`F12` (1) two drain cards, one for damage and one for Block, against §4.6:*
+**not every grader drains.** On a staged board holding a full meter with a
+drain card in hand, built so that draining does **not** end the fight this
+turn, **at least 1 of 2 forms declines the drain AND names what holding buys**
+— the Focus bonus, a member's raised number, or the meter itself. A second
+board where draining **does** end the fight is staged beside it as a control
+and is **RECORDED and NOT GRADED**: a grader who drains there is taking the win
+and is saying nothing about the never-drain line.
+*Grading rule:* on the graded board, **≥ 1 declining form that names what
+holding buys = PREDICTED**; a form declines but names nothing = **SPLIT**;
+**every form drains = MISS**.
+*UNREACHED when:* the staged meter is low enough that the drain's payoff is
+below the alternative line on the turn — the choice was never posed, which is a
+staging fact and not a reading about the card.
+*Decision it changes:* **PREDICTED** says the never-drain line survives contact
+with a drafted drain and `F12` (1)'s two-card plan proceeds to build; it
+licenses no re-price. **MISS** says the drain dominates and returns `F12`
+together with the drain's own payoff to [USER] as ONE numbered pick. It does
+**not** license retiring the drain card, and it does **not** reopen `F11` —
+which row carries the drain is a lineage and codegen question this slot cannot
+read. **SPLIT** buys one repaired staged round with the holding value printed
+on the board, not a design change.
 
 **Slot 6 — is the Encore-spending Evoke family worth its price? — DRAFT,
 unrun, added after the slate was drafted.** Prompted by external review
@@ -1398,6 +1512,47 @@ cannot give it. Falsification retires the objection.
 **Ordering (2026-08-30):** slot 6 is staged FIRST among the six, because a
 confirmation here returns `F7` and §4.2 together and would re-open the picks
 the other five slots' predictions are drafted from.
+
+**Slot 7 — the co-op queue-rotation cost. OBSERVATION SLOT: RECORDED and NOT
+GRADED.** Added 2026-08-30 under R212 item 2 (R227 pick 4), from §3's co-op
+paragraph and §4.8. It stages no board and it takes no place in the ordering
+above.
+
+*What it watches.* §3 states the cost of the co-op coupling out loud rather
+than leaving it to be discovered: *an ally playing three Companions has rotated
+Furina's queue three times without asking, and the member she was saving to
+Evoke is now at the back.* The observation is three numbers and one sentence,
+per co-op turn Furina's seat takes: **(a)** how many times her queue rotated
+since her last decision, and how many of those rotations came from an ally's
+Companion play rather than her own; **(b)** which member was front when she
+decided, and which member — if any — she had said she was saving; **(c)**
+whether her recorded reasoning names the ally's plays at all.
+
+*The instrument note, which is why this is not a prediction.* **No blind co-op
+driver exists.** The blind funnel (`EB-149`) drives ONE seat, and tier 0.5
+models one seat, so **co-op has no sim backstop and every co-op defect is
+play-derived** — there is no engine that can produce a second seat's Companion
+plays for a staged board or a whole fight. A predicate written today would have
+no instrument to compute it, and a prediction with no instrument is not
+pre-registration, it is a wish.
+
+*What would have to exist to grade it.* Three things, all absent: **(1)** a
+two-seat blind driver — two independent seats through the same wire, kept
+author-disjoint by family under R217 C; **(2)** a staged co-op board format
+carrying a scripted ally action list, so the number of ally Companion plays
+before Furina's decision is a controlled variable rather than a draw fact; and
+**(3)** a falsifier that reads Furina's seat's form against that recorded ally
+action log — the shape every other slot's grader has, mechanically computed and
+committed before the run. **Until all three exist, this slot is RECORDED and
+NOT GRADED.** It is printed so that a later reader cannot mistake its absence
+for an omission, and so that no one is tempted to grade it after the fact.
+
+*Decision it changes:* **none, by construction.** Nothing on this slate is
+gated on it, and no observation recorded here may be quoted as evidence for or
+against §3's co-op rule, `F3` (1), or the ordering of the queue. What it may do
+is motivate a numbered pick to [USER] on whether to BUILD the two-seat driver —
+which is an engineering-budget question and returns to him as one, never a
+Claude decision.
 
 **Required boards, from §2.7b.** At least one staged board carries **exactly
 one Salon member**, because that is the board on which rotation is a no-op and
