@@ -171,7 +171,30 @@ CEILINGS: dict[str, int] = {
     # OPEN_IDS in the same commit as their rows.
     # EB-220 minted 2026-08-30 by [USER]'s word on EB-182's build: Encore- and
     # Charge-priced modes and cards get the cost badge the Spark price has.
-    "EB": 220,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+    # EB-221/EB-222 minted 2026-08-30 by the first whole-fight soak of the
+    # `+proto` package, and both CLOSED in the minting commit -- two
+    # lifecycle throws, each of which ended every whole fight at the second
+    # combat since `0.2.1353+proto`. 221: `KurageMemoryCard`'s `Deactivate`
+    # postfix called `LocalContext.GetMe` on a combat with no local seat --
+    # the next room's, still being built -- and that API throws rather than
+    # answering null, so the room never finished readying and the fight was
+    # never set up. Fixed in d217b4f (#207): a `TryGetMe` guard for all three
+    # callers and a `TrackedDisplayBridge.Spawn` degrade, locked by
+    # `KurageMemorySeatGuardTests`. 222: `MeterCostBadge` (EB-220) held the
+    # glyph in a process-lifetime static cache; the room preloader freed
+    # combat 1's `CompressedTexture2D` with the room, combat 2's first
+    # `UpdateStarCostVisuals` handed the freed object to
+    # `TextureRect.SetTexture`, and the `ObjectDisposedException` escaped
+    # `Paint` into `CardPileCmd.Draw` and killed the turn loop. Fixed in
+    # fa1fffe: the glyph is resolved from `ResourceLoader` per paint, checked
+    # with `GodotObject.IsInstanceValid`, and a freed resource degrades to no
+    # glyph with one `Log.Warn`; three structural locks in
+    # `MeterCostBadgeTests`. PROOF, on `0.2.1608+proto.dirty`:
+    # `python -m understudy.soak --runs 1 --character KLEEMOD-KLEE
+    # --max-fights 3` -> `bounded  seed=None  actions=46  fights=3
+    # defects=0`. The same command returned `fights=1` before 221 and
+    # `fights=2 defects=1` on 221 alone.
+    "EB": 222,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
                  # told the tester it had played no card.

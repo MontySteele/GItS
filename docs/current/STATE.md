@@ -184,14 +184,20 @@ deploy label from R218 on rides the pin above; live numbers were never
 comparable across a game build anyway (R95), and the sim references no game
 assembly and is unaffected.
 
-The installed build is **`0.2.1416+proto`** (2026-08-29), a dev package
-carrying BOTH prototype arms — Kokomi's Kurage-memory base kit and Klee's
-Spark alternative-cost rows — behind the `-p:PrototypeCards=true` compile
-switch. **It does not boot:** a regression in that package stops the mod
-loading, so the sealed Kokomi blind run it was built for HAS NOT STARTED. The
-fix is in flight on branch `kokomi-blind-run`, which mints the defect row; that
-row is not carried here because it does not exist on this branch yet. **The
-last runnable install is the release package `0.2.1357`** (2026-08-29, from
+The installed build is **`0.2.1608+proto.dirty`** (2026-08-30), a dev package
+built from `eb222-badge-disposed-texture` `fa1fffe` (main `23acafd` plus the
+`EB-222` fix), carrying BOTH prototype arms — Kokomi's Kurage-memory base kit
+and Klee's Spark alternative-cost rows — behind the `-p:PrototypeCards=true`
+compile switch. It carries a whole fight: `python -m understudy.soak --runs 1
+--character KLEEMOD-KLEE --max-fights 3` answers `bounded  seed=None
+actions=46  fights=3  defects=0`, reversibility log all REVERTED. Two lifecycle
+throws had capped every whole fight at one fight since `0.2.1353+proto` —
+`EB-221`, a `Deactivate` postfix resolving the local seat on a combat that has
+none (`d217b4f`), and `EB-222`, the meter cost badge painting a texture the
+room preloader had freed with the previous combat (`fa1fffe`) — both fixed.
+`validate.ps1` OK; pack 9,586,076 bytes. `deploy.ps1` restores the release
+build, and is run before any measured run or handoff (R217 D). **The
+last RELEASE package deployed remains `0.2.1357`** (2026-08-29, from
 `klee-slice-1-round-3` `605b76f`) — no `+proto`, no `+dirty`, deployed as the
 teardown of the Klee slice 1 ROUND 3 funnel run and of `EB-188`'s live
 acceptance, both of which ran on `0.2.1353+proto`. It carries the same C# as
