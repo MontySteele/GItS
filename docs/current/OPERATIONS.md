@@ -413,6 +413,16 @@ any measured run, handoff or co-op session. No `-Package` switch, deliberately
 KLEEMOD-KLEE --max-fights 3` and read `fights=3 defects=0` before any
 registered run (R225).**
 
+**An upgrade is on the ROW** (`EB-213`). Shipped deltas live in
+`docs/<character>-upgrades.yaml` keyed by shipped id; a `proto_` key there
+would give the deletion rule below a second file to remember, so a prototype
+row carries `upgrade: {<key>: <delta>}` itself. `gen_prototype_cards.py`
+registers it into the merged delta index before emitting, and everything after
+that is the shipped path — same expressibility check, same `OnUpgrade`, same
+campfire — with `tier0/content/upgrades.py` merging the same block so both
+engines read one place. A row that declares nothing is base-only; a declared
+delta the emitter cannot express STOPS the run, like an inexpressible body.
+
 **Staging a row** — edit the sheet, regen, dev-build, then grant it by id from
 a scenario (`give: {card: KLEEMOD-PROTO_..., pile: hand}`); template and
 preconditions in `understudy/scenarios/eb147-prototype-grant.yaml`. A row the

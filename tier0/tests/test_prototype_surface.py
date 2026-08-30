@@ -176,6 +176,12 @@ def _proto_plan(monkeypatch, tmp_path, rows):
     monkeypatch.setattr(genproto, "DIR_PROFILE", replace(
         genproto.DIR_PROFILE, sheet=sheet, out_dir=out,
         manifest=out / "manifest.json"))
+    # EB-213: a row's `upgrade:` block is REGISTERED into the merged delta
+    # index, which is memoized module-wide. Hand the plan a COPY so a fixture
+    # id cannot survive into another test's index -- monkeypatch puts the real
+    # one back on teardown.
+    import tools.gen_klee_cards as gen
+    monkeypatch.setattr(gen, "_upgrade_deltas", dict(gen.upgrade_deltas()))
     return genproto, genproto.plan(), out
 
 
@@ -229,6 +235,91 @@ def test_an_inexpressible_prototype_row_stops_the_run(monkeypatch, tmp_path):
     with pytest.raises(SystemExit) as excinfo:
         _proto_plan(monkeypatch, tmp_path, [row])
     assert "NOT EXPRESSIBLE" in str(excinfo.value)
+
+
+# --- (b2) the row's own upgrade channel (EB-213) -----------------------------
+#
+# Shipped upgrades are keyed by shipped card id in
+# `docs/<character>-upgrades.yaml`. A `proto_` key there would give R213 B's
+# deletion rule a second file to remember, so a prototype row carries its
+# `upgrade:` block itself and the generator registers it into the merged delta
+# index BEFORE emitting. Everything downstream is the shipped path: same
+# expressibility check, same `OnUpgrade`, same campfire. Before this the
+# surface had no channel at all and a staged card could not be smithed.
+
+UPGRADEABLE = dict(FIXTURE, upgrade={"block": +3})
+
+
+def test_a_row_carrying_an_upgrade_emits_the_shipped_upgrade_path(
+        monkeypatch, tmp_path):
+    genproto, plan, _ = _proto_plan(monkeypatch, tmp_path, [UPGRADEABLE])
+    source = plan.generated["proto_kokomi_tidecall"]
+    assert "protected override void OnUpgrade()" in source
+    assert 'DynamicVars.Block.UpgradeValueBy(3m)' in source
+    # And the delta is on the ROW's manifest, not in an upgrades sheet.
+    assert json.loads(plan.manifest_src)["upgrades"] == {
+        "proto_kokomi_tidecall": {"block": 3}}
+
+
+def test_a_row_without_an_upgrade_stays_base_only(monkeypatch, tmp_path):
+    """The channel is opt-in. Every row on this surface was base-only before
+    EB-213 and a row that declares nothing still is -- and says so, rather
+    than acquiring a delta from somewhere."""
+    genproto, plan, _ = _proto_plan(monkeypatch, tmp_path, [FIXTURE])
+    source = plan.generated["proto_kokomi_tidecall"]
+    assert "NO upgrade path" in source
+    assert json.loads(plan.manifest_src)["upgrades"] == {}
+
+
+def test_an_inexpressible_declared_upgrade_stops_the_run(monkeypatch,
+                                                         tmp_path):
+    """Same rule as the body, for the same reason: a declared upgrade the
+    emitter silently drops is a campfire that does nothing on a card staged
+    to be tried at a campfire. On a character sheet that is a
+    `no_upgrade_path` manifest line; here it is a build failure."""
+    row = dict(FIXTURE, upgrade={"vulnerable": +2})
+    with pytest.raises(SystemExit) as excinfo:
+        _proto_plan(monkeypatch, tmp_path, [row])
+    assert "`upgrade:` is NOT EXPRESSIBLE" in str(excinfo.value)
+
+
+def test_the_row_and_a_shipped_sheet_cannot_both_rule_one_id(monkeypatch):
+    """One id, one delta. The registration is in-process, so the only way two
+    homes could disagree is a `proto_` key that reached an upgrades sheet --
+    which is exactly what the row-carried channel exists to prevent."""
+    import tools.gen_klee_cards as gen
+    monkeypatch.setattr(gen, "_upgrade_deltas", dict(gen.upgrade_deltas()))
+    gen.register_upgrade_deltas("proto_kokomi_tidecall", {"block": 3})
+    gen.register_upgrade_deltas("proto_kokomi_tidecall", {"block": 3})   # idempotent
+    with pytest.raises(SystemExit, match="one id, one delta"):
+        gen.register_upgrade_deltas("proto_kokomi_tidecall", {"block": 4})
+
+
+def test_the_sim_reads_the_same_row_carried_delta_and_only_when_reachable(
+        tmp_path, monkeypatch):
+    """The two engines take the delta off ONE place -- tier0 merges the row's
+    own block into its upgrade index (`upgrades._prototype_deltas`). The merge
+    is filtered by REACHABILITY, and that filter is the quarantine: this index
+    is what `has_upgrade` answers from, and `get_card` must be able to honour
+    every yes it gives. A row no live door resolves is registered nowhere, so
+    a flag-off tree -- which is every shipped tree -- has the index it always
+    had.
+
+    The substituted case, where the answer is YES and the campfire reaches the
+    ruled number, is `tier0/tests/test_kurage_base_kit.py`'s EB-213 block; it
+    needs a live substitution, which a fixture row does not have.
+    """
+    from tier0.content import upgrades
+    monkeypatch.setattr(loader, "PROTOTYPE_SHEET", _sheet(tmp_path,
+                                                          [UPGRADEABLE]))
+    loader.reset_caches()
+    try:
+        assert loader.prototype_cards()[0].upgrade == {"block": 3}
+        assert not loader._substituted_card_index()      # no live door
+        assert not upgrades.has_upgrade("proto_kokomi_tidecall")
+        assert "proto_kokomi_tidecall" not in upgrades._upgrade_index()
+    finally:
+        loader.reset_caches()
 
 
 # --- (c) no pool, no manifest, no digest, no distinctness, no stamp ----------

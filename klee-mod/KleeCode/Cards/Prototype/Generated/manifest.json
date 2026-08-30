@@ -78,5 +78,10 @@
       "ProtoThomaCrimsonOoyoroiEitherModeA",
       "ProtoThomaCrimsonOoyoroiEitherModeB"
     ]
+  },
+  "upgrades": {
+    "proto_kurages_oath_memory": {
+      "kurage_ward": 2
+    }
   }
 }

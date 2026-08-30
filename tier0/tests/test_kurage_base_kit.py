@@ -31,7 +31,7 @@ import random
 import pytest
 
 from tier0 import constants as C
-from tier0.content import loader
+from tier0.content import loader, upgrades
 from tier0.engine import combat, effects
 from tier0.engine.state import CombatState, KurageMemory
 from tier0.pilot.policy import make_pilot
@@ -591,6 +591,42 @@ def test_no_upgraded_shipped_oath_can_be_offered(offer_pool):
     ids = offered_ids()
     assert SHIPPED_OATH + "+" not in ids
     assert not [i for i in ids if i.endswith("+")]
+
+
+# -- EB-213: the substituted Oath can be smithed, and to the ruled number ----
+#
+# [USER]'s placeholder is "3 block per memory played, upgrade to 5". The 5 was
+# a note on the row and nothing else: the prototype surface had NO upgrade
+# channel, so `has_upgrade` was False for every substituted row and the
+# campfire skipped it. The row now carries `upgrade: {kurage_ward: +2}` -- the
+# arithmetic between his two endpoints, and the same delta the shipped Oath
+# already carries (R130) -- and the shipped upgrade path reads it from there.
+
+def test_the_substituted_oath_can_be_upgraded(offer_pool):
+    assert upgrades.has_upgrade(PROTO_OATH)
+
+
+def test_the_substituted_oaths_upgrade_is_the_ruled_five(offer_pool):
+    """The whole of `EB-213`'s acceptance on the sim side. Not a balance
+    claim: nothing on this surface is quotable (R213 B / R215 B), and the
+    assertion is that the campfire reaches the number [USER] ruled."""
+    base = loader.get_card(PROTO_OATH)
+    up = loader.get_card(PROTO_OATH + upgrades.SUFFIX)
+    assert base.effects[0]["amount"] == C.KURAGE_MEMORY_PULSE_BLOCK - 2
+    assert up.effects[0]["amount"] == C.KURAGE_MEMORY_PULSE_BLOCK
+
+
+def test_the_upgraded_ward_is_what_a_memory_play_actually_pays(base_kit):
+    """The number reaches the ENGINE, not just the sheet: a card is a face
+    until the ward it applies is the ward the memory play pays."""
+    st = kokomi_state()
+    st.player.powers["kurage_summon"] = 1
+    effects.resolve_card(st, loader.get_card(PROTO_OATH + upgrades.SUFFIX))
+    assert st.player.powers["kurage_ward"] == 5
+    st.kurage_queue.append(memory_entry(price=0))
+    st.player.block = 0
+    assert effects.kurage_fire(st) is True
+    assert st.player.block == 5
 
 
 def test_the_swap_is_hers_alone(offer_pool):

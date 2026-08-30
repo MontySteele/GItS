@@ -627,14 +627,23 @@
 # `rewards.character_pool`, which is every offer surface's one source). Flag
 # off, the shipped Oath is the only Oath and this row is unreachable as ever.
 #
-# NO UPGRADE ROW, AND THAT IS THE SURFACE'S CONVENTION, NOT AN OMISSION. This
-# file has never carried an upgrade: no row above declares one, the schema has
-# no field for it, and `tools/gen_prototype_cards.py` has no upgrade path --
-# upgrades live in `docs/<character>-upgrades.yaml`, keyed by shipped card id,
-# and putting a `proto_` key in a shipped sheet would give the R213 deletion
-# rule a second file to remember. So the upgraded 5 is recorded HERE, in the
-# row that owns it, and is owed to the upgrades sheet at the same moment this
-# row is re-authored onto her real sheet.
+# THE UPGRADE IS ON THE ROW (`EB-213`). It used to be prose here and nothing
+# else: the surface had no upgrade channel at all, so the substituted Oath
+# could not be smithed at a campfire and [USER]'s upgraded 5 was a row note
+# rather than a card. The channel is now the `upgrade:` key below, registered
+# into the merged delta index by `tools/gen_prototype_cards.py` and read from
+# there by the SHIPPED upgrade path -- same expressibility check, same
+# `OnUpgrade`, same campfire. It lives on the row rather than in
+# `docs/kokomi-upgrades.yaml` because a `proto_` key in a shipped sheet would
+# give R213's deletion rule a second file to remember; when this row is
+# re-authored onto her real sheet the delta travels with it, into the
+# upgrades sheet, and both leave here together.
+#
+# THE DELTA IS THE SHIPPED OATH'S OWN, `kurage_ward: +2`. [USER] ruled the two
+# ENDPOINTS -- "3 block per memory played, upgrade to 5" -- and +2 is the
+# arithmetic between them, not a second pick; it is also, exactly, the delta
+# `kurages_oath` already carries (5 -> 7, R130). Nothing new is invented here
+# and no measurement is attached to either endpoint.
 #
 # NAME. "Kurage's Oath" is the shipped card's name and is [USER]'s; this row
 # keeps it, because the row IS that card with one clause rewritten and a blind
@@ -658,7 +667,8 @@
 - {id: proto_kurages_oath_memory, name: "Kurage's Oath", character: kokomi,
    cost: 1, type: power, rarity: common,
    authored_by: [claude],
-   effects: [{op: apply_power, power: kurage_ward, amount: 3, target: self}]}
+   effects: [{op: apply_power, power: kurage_ward, amount: 3, target: self}],
+   upgrade: {kurage_ward: +2}}
 
 # =============================================================================
 # KLEE SPARKS -- SPARKS AS AN ALTERNATIVE COST (R213 E2). Seven rows.

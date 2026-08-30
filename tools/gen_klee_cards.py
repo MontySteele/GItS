@@ -3155,6 +3155,30 @@ def upgrade_deltas() -> dict:
     return _upgrade_deltas
 
 
+def register_upgrade_deltas(card_id: str, deltas: dict) -> None:
+    """Add ONE id's deltas to the merged index, for a sheet that keys its
+    upgrades ON THE ROW rather than in a `docs/<character>-upgrades.yaml`.
+
+    `EB-213`. The quarantined prototype surface is the only such sheet and is
+    meant to be the only one: its rows are deleted whole when their slice is
+    accepted or rejected (R213 B), so a `proto_` key sitting in a shipped
+    upgrades sheet would give that deletion rule a second file to remember.
+    Registering here instead means the delta travels with the row, and
+    everything downstream -- `upgrade_plan`, every `*_upgrade` reader, the
+    emitted `OnUpgrade` -- is the SHIPPED path, unchanged and unforked.
+
+    In-process only: nothing is written to a sheet, and a generator run that
+    never registers reads exactly what it read before.
+    """
+    index = upgrade_deltas()
+    if card_id in index and index[card_id] != deltas:
+        raise SystemExit(
+            f"gen_klee_cards: {card_id}: a row-carried upgrade block "
+            "contradicts a delta already ratified in an upgrades sheet -- "
+            "one id, one delta.")
+    index[card_id] = dict(deltas)
+
+
 def upgrade_plan(card: dict) -> tuple[dict, str | None]:
     """(deltas, None) when every ruled delta key is expressible on this card,
     ({}, reason) otherwise.

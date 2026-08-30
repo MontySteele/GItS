@@ -483,8 +483,10 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     DELETED with its branch, so both memory doors ask the one question
     (`EB-217`, closed 2026-08-30). Kurage's Oath stays as [USER] ruled
     it — 3 Block per memory played, 5 upgraded, a placeholder with no
-    measurement attached — and the surface's missing upgrade channel is now
-    `EB-213`. The blind run's own four picks are ruled with them: Rule 1
+    measurement attached — and the surface's upgrade channel is BUILT
+    (`EB-213`, closed 2026-08-30): a prototype row carries its own `upgrade:`
+    block, emitted through the shipped upgrade path in both engines, so the
+    substituted Oath smiths to the ruled 5 at a campfire. The blind run's own four picks are ruled with them: Rule 1
     prints as the Muster KEYWORD and the gate re-runs on `KURAGEMEM002`
     (`EB-214`), the published grades stand while future records carry a
     per-turn wire snapshot (`EB-216`), and the prototype face takes the

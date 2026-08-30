@@ -114,7 +114,54 @@ def _upgrade_index() -> dict[str, dict]:
         if dupes:
             raise ValueError(f"{sheet.name}: duplicate upgrade ids {sorted(dupes)}")
         merged.update(entries)
+    merged.update(_prototype_deltas(merged))
     return merged
+
+
+def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
+    """Deltas carried ON the row by the quarantined prototype surface.
+
+    `EB-213`. Every sheet above keys its upgrades by shipped card id in a
+    `docs/<character>-upgrades.yaml`. The prototype surface keys them on the
+    row instead, because R213 B deletes a prototype row WHOLE when its slice
+    is accepted or rejected, and a `proto_` key in a shipped upgrades file
+    would be a second place to remember. Reading them here is what makes
+    `has_upgrade` -- and so the rest-smith and every other upgrade site --
+    true of a SUBSTITUTED prototype. Without it the substituted Kurage's Oath
+    could not be smithed at all and its ruled upgraded value was prose.
+
+    NOT a hole in the quarantine, and the REACHABILITY filter is what keeps it
+    honest rather than a promise. A row is registered here only if some live,
+    flagged door already resolves its plain id -- the substitution table, or
+    the Spark arm's starter substitution -- because this index is what
+    `has_upgrade` answers from and `get_card` must be able to honour every yes
+    it gives. On a flag-off tree (which is every shipped tree) no prototype id
+    is reachable and none is registered, so the index is byte-identical to
+    what it was before EB-213. Nothing here puts a row in `_card_index`:
+    pools, rewards, drafts, digests and every version stamp remain
+    structurally unable to see one.
+
+    Note the inline `upgrade:` key is DEPRECATED and IGNORED on the shipped
+    sheets (R20, `_card_index`) and that is unchanged -- this reads the
+    prototype surface and nothing else.
+    """
+    from tier0.content import loader           # late: loader imports us
+    reachable = set(loader._substituted_card_index())
+    if C.SPARK_ALT_COST_ENABLED:
+        # The Spark arm's own door (`_card_prototype`): with that flag on any
+        # `proto_` id resolves, because its starter substitution hands one out
+        # by id string.
+        reachable |= {c.id for c in loader.prototype_cards()}
+    deltas: dict[str, dict] = {}
+    for card in loader.prototype_cards():
+        if not card.upgrade or card.id not in reachable:
+            continue
+        if card.id in merged:
+            raise ValueError(
+                f"prototype row {card.id!r} carries an `upgrade:` block and "
+                "an upgrades sheet already rules that id -- one id, one delta")
+        deltas[card.id] = dict(card.upgrade)
+    return deltas
 
 
 def has_upgrade(card_id: str) -> bool:
