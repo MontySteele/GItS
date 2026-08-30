@@ -1834,3 +1834,106 @@ R219 slate branch owns those and is unmerged. What is owed when they next open:
 8. **No `EB` row is minted by this packet.** The §2.7 findings are design
    constraints and doc corrections, not engineering defects. Next free `EB` id
    is **`EB-194`** and it stays free.
+
+---
+
+## 11. Slice 1 — what was built, and what was deliberately left out
+
+**2026-08-30. Branch `furina-slice-1`, cut from `main` at `79db9a4a`.** This is
+the first code the reframe has ever had. Everything above it was paper.
+
+Written before the code and committed before it, because a slice that decides
+its own scope after the fact is not a slice — it is whatever happened to get
+finished.
+
+### 11.1 The one sentence
+
+**Slice 1 builds the core loop in the simulator, behind flags that are all off,
+and builds nothing else.** The loop is: the stage stops playing by itself, a
+Companion play makes one member perform, Furina's own card Evokes one for
+Encore, performing is what mints Fanfare, and Fanfare scales the stage. R228's
+Spotlight ruling rides along because it touches the same currency.
+
+Nothing is deployed, nothing is run, no card the player can draw has changed,
+and no version stamp moves. **R213's sequencing gate is untouched: nothing
+implements before Klee closes, and this is a build, not a run.** With the flags
+off — which is how they ship — the engine is the engine that was there this
+morning, and a test says so before it says anything else.
+
+### 11.2 What is in
+
+Five things, chosen because they are the smallest set that can pose the
+questions the packet's own slate asks.
+
+1. **Members stop playing by themselves.** The turn-start upkeep is suppressed
+   for Furina. There is no other automatic Salon path in the game, so removing
+   that one call removes the automatic engine entirely. The stage now performs
+   only when the player makes it perform.
+2. **A Companion play makes the front member perform, then sends it to the back
+   of the queue.** Once per Companion card played, as many times a turn as you
+   have Companions to play. An empty stage does nothing extra and says so in
+   the log, so a display can tell the player why nothing happened.
+3. **Deploy cards pay on the turn they are played.** A deploy makes the member
+   it deployed perform once; a deploy onto a full stage Evokes the front member
+   to make room. Both were ruled, and the second one is the rule the engine
+   already had under a different name.
+4. **Evoke.** Furina's own card takes the front member off the stage, applies
+   the Fanfare bonus three times instead of once, and is paid for in Encore
+   through the printed cost line the game already supports. Below the price the
+   card is simply unplayable, which is the shipped behaviour for that field.
+5. **Fanfare is minted by performing, and by nothing else.** A member that
+   performs and stays mints the small amount; one that performs and leaves
+   mints the larger. The four things that used to mint it — losing HP, spending
+   Encore, absorbing with Encore, playing a Spotlighted card — mint nothing.
+   Decay is untouched, which matters: the decay is the only reason "hold a full
+   meter" is a decision rather than a wait.
+
+And R228's Spotlight ruling, because it spends the same Encore: **one mode,
+priced.** Center Stage retires, Guest Cast and its 1.5 multiplier are exactly
+what they ship, and aiming the light costs Encore. An aim that cannot be paid
+for does not happen, rather than happening for free.
+
+### 11.3 What is out, and why each
+
+Every one of these is a thing a reader might expect to find and will not.
+
+- **The fourth Salon member** (`F1` = 2, the scaling member). It is a new
+  member row, a new set of numbers and a new thing the player has to learn, and
+  none of the questions this slice asks needs it. It is the obvious slice-2
+  opener.
+- **The drain card and the cap-raisers** (`F9`, `F11`, `F12`). These are sheet
+  rows. Sheet edits are a stamp event under LAW and they happen after the
+  architecture has a verdict, which is the packet's own §7 rule, not a
+  preference.
+- **The starter deltas** (`F16`). Same reason, plus a stronger one: a starter
+  change is what a player meets in fight one, and it should be decided with a
+  played fight behind it rather than in front of it.
+- **The display work** (`F13`, `F14`, `F15`). It is C# and art, and it is
+  worth doing once the rules underneath it are known to be worth showing.
+- **Aiming the Spotlight at a named Companion.** R228 says the selector aims a
+  Companion; this slice aims the Companion category, which is the sentinel the
+  engine already has. A named target needs a new kind of target and a card face
+  that can print it, and neither is a small change.
+- **Retiring Furina's Burst meter.** It is one of three folds on a different
+  branch (R220 B) and hers lands last of the three. Doing it here would take
+  that branch's work hostage.
+- **The C# engine leg, and the prototype card rows that would ride on it.**
+  This is the one deferral worth arguing rather than asserting. Prototype rows
+  are staged for a *dev build* and read by blind graders through the real game.
+  The rules this slice adds live in the simulator only, so a card printed into
+  a dev build today would say "Evoke" on its face and do a plain final bow in
+  the player's hands — a card that lies to the person grading it, which is
+  worse than no card. The rows and the C# behaviour are one unit of work and
+  they belong together, in slice 2.
+
+### 11.4 How this gets read later
+
+Nothing here is evidence of anything. The engine can say what a line pays; it
+cannot say whether a player can see what a line pays, and that is what the
+packet's slate is for. Slice 1's job is to make the slate's boards possible to
+build, and its own tests are pinned in that spirit: every behavioural test is a
+pair, the same board with the flag on and with it off, because the failure that
+would actually matter tonight is a leg leaking into a game somebody is playing.
+
+The one thing the slice was asked to look at directly is slot 6, and §11.5
+carries what it found.
