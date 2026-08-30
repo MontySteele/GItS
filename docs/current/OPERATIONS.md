@@ -792,7 +792,10 @@ python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md
   and neither is made concurrent by this flag.
   `--read-workers N` is a semaphore of N over the read phase (N = 1 is the old
   single lock, exactly). **It needs a server with N slots:** `serve.ps1` runs
-  `--parallel 1`, and the round REFUSES `N > 1` when the server reports fewer
+  `--parallel 2` since 2026-08-30 (`-Parallel`, default 2; measured on two
+  concurrent 1000-token generations: 11.9 s against 21.0 s serial, 1.76x, per-stream
+  87 tok/s against 103 solo, VRAM unchanged because the KV cache splits per slot),
+  and the round REFUSES `N > 1` when the server reports fewer
   slots than asked, read from llama-server's own `/slots` (a list) or `/props`
   (`total_slots`). A server that answers neither is not a refusal — the
   operator is told the number is unknown. The cost of a second slot is KV
