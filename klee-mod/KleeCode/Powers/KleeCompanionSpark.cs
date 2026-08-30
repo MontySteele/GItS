@@ -118,6 +118,7 @@ public static class KleeCompanionSpark
         if (amount > MaxPerPlay) amount = MaxPerPlay;
         if (amount <= 0) return;
 
-        await SparkPower.Gain(choiceContext, creature, amount, cardPlay.Card);
+        await SparkPower.Gain(choiceContext, creature, amount, cardPlay.Card,
+            source: "companion:prune/play");
     }
 }

@@ -283,7 +283,8 @@ internal static class ReactionEffects
                 .OfType<ReactionBonusSparkEnergyPower>().FirstOrDefault()?.Amount ?? 0;
             if (catalytic > 0)
             {
-                await SparkPower.Gain(choiceContext, dealer, catalytic, cardSource);
+                await SparkPower.Gain(choiceContext, dealer, catalytic, cardSource,
+                    source: "power:catalytic_converter/reaction");
                 await KleeBurstResource.Gain(
                     choiceContext, dealer,
                     ReactionKitConstants.CatalyticBurstPerReaction * catalytic,

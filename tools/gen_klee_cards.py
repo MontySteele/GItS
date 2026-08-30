@@ -1396,6 +1396,15 @@ CARD_FIELDS = {
     # here because that view is now run through blocked_reason like any
     # other card, and the field whitelist is deliberately total.
     "_sly_branch",
+    # EB-215: the row's OWN face, and the one field on this list that a
+    # SHIPPED sheet must never carry -- a shipped face is rendered from the
+    # body so it cannot drift from what the card does. The quarantined
+    # prototype surface is its only home, because that surface stages
+    # rewritten clauses of shipped cards and the renderers key on the op:
+    # a staged row cannot say what it now does without moving the shipped
+    # card's face with it. See `build_description`; the no-shipped-carrier
+    # rule is pinned in tier0/tests/test_prototype_surface.py.
+    "description",
 }
 
 
@@ -3153,6 +3162,30 @@ def upgrade_deltas() -> dict:
             merged.update(entries)
         _upgrade_deltas = merged
     return _upgrade_deltas
+
+
+def register_upgrade_deltas(card_id: str, deltas: dict) -> None:
+    """Add ONE id's deltas to the merged index, for a sheet that keys its
+    upgrades ON THE ROW rather than in a `docs/<character>-upgrades.yaml`.
+
+    `EB-213`. The quarantined prototype surface is the only such sheet and is
+    meant to be the only one: its rows are deleted whole when their slice is
+    accepted or rejected (R213 B), so a `proto_` key sitting in a shipped
+    upgrades sheet would give that deletion rule a second file to remember.
+    Registering here instead means the delta travels with the row, and
+    everything downstream -- `upgrade_plan`, every `*_upgrade` reader, the
+    emitted `OnUpgrade` -- is the SHIPPED path, unchanged and unforked.
+
+    In-process only: nothing is written to a sheet, and a generator run that
+    never registers reads exactly what it read before.
+    """
+    index = upgrade_deltas()
+    if card_id in index and index[card_id] != deltas:
+        raise SystemExit(
+            f"gen_klee_cards: {card_id}: a row-carried upgrade block "
+            "contradicts a delta already ratified in an upgrades sheet -- "
+            "one id, one delta.")
+    index[card_id] = dict(deltas)
 
 
 def upgrade_plan(card: dict) -> tuple[dict, str | None]:
@@ -5804,7 +5837,26 @@ def build_description(card: dict) -> str:
     Card text. Syntax is copied from base-game strings observed at runtime:
     single-braced SmartFormat placeholders, :diff() for the upgrade delta, and
     [gold] for keyword highlight.
+
+    A ROW MAY STATE ITS OWN FACE with `description:`, and exactly one sheet
+    does (`EB-215`). The quarantined prototype surface stages rewritten
+    clauses of SHIPPED cards, and the renderers below key on the OP -- a Power
+    card's text is rendered per power id -- so a staged row that rewrites what
+    a power does cannot say so without moving the shipped card's face with it.
+    That was the whole of the defect: the mod worked around it by MERGING a
+    replacement string into the loc table at pool-build time, which meant two
+    channels described one card and the generated file was wrong until the
+    override ran. The row's own text is the one channel now, emitted here into
+    the same `Localization` list every shipped row uses.
+
+    It is deliberately NOT a shipped-sheet field: a shipped face is rendered
+    from the body so it cannot drift from what the card does, and hand text
+    would put that guarantee back in a human's hands.
+    `tier0/tests/test_prototype_surface.py` pins that no `docs/*-cards.yaml`
+    row carries the key.
     """
+    if card.get("description"):
+        return card["description"]
     parts = []
     deltas = upgrade_plan(card)[0]
     for field, label in (("encore_cost", "Encore"),

@@ -101,7 +101,15 @@ UNAPPLIABLE: frozenset[str] = frozenset()
 
 
 @lru_cache(maxsize=1)
-def _upgrade_index() -> dict[str, dict]:
+def _shipped_upgrade_index() -> dict[str, dict]:
+    """Every delta keyed by SHIPPED card id: the sheets, and nothing else.
+
+    Split out of `_upgrade_index` when `EB-213` gave the prototype surface
+    an upgrade channel and, with it, a cycle that only a checkout carrying
+    `game_ref/` can reach. See `_upgrade_index` below for the whole shape
+    of it; this half is the one a base-game id may be answered from
+    without touching a prototype row, which is what breaks the loop.
+    """
     merged: dict[str, dict] = {}
     for sheet in (*UPGRADE_SHEETS, *EXTERNAL_UPGRADE_SHEETS):
         if not sheet.exists():
@@ -117,16 +125,113 @@ def _upgrade_index() -> dict[str, dict]:
     return merged
 
 
-def has_upgrade(card_id: str) -> bool:
+@lru_cache(maxsize=1)
+def _prototype_upgrade_index() -> dict[str, dict]:
+    """The `EB-213` half: deltas carried on a reachable prototype ROW."""
+    return _prototype_deltas(_shipped_upgrade_index())
+
+
+@lru_cache(maxsize=1)
+def _upgrade_index() -> dict[str, dict]:
+    """Both halves, for every caller that ITERATES the whole index.
+
+    THE TWO HALVES ARE SEPARATE BECAUSE THE MERGED ONE CANNOT BE BUILT ON
+    THE PATH THAT ASKS FOR IT. `loader._card_index` folds in the
+    gitignored `game_ref/` reference rows, and `_external_cards` asks
+    `has_upgrade` of every one of them -- the atomic-coverage rule. Under
+    `EB-213` that question built this index, which reads the prototype
+    surface through `loader.prototype_cards`, which asks `_card_index`
+    for the shipped ids it may not collide with. `_card_index` ->
+    `_external_cards` -> `has_upgrade` -> here -> `prototype_cards` ->
+    `_card_index`, and `lru_cache` does not memoize a call still in
+    flight, so it is unbounded.
+
+    IT IS INVISIBLE WITHOUT `game_ref/`. `_external_cards` returns early
+    on a tree that has no reference layer, so CI, every fresh clone and
+    every worktree load the content tree cleanly and only the art-bearing
+    main checkout raises -- as a `RecursionError` inside PyYAML, naming
+    neither end of the cycle. `test_eb213_upgrade_index_reentrancy` is the
+    lock, and it fakes the reference layer so a tree without one still
+    runs it.
+
+    The repair is that a lookup by id answers from ONE half
+    (`_delta_for` below): a `proto_` id from the prototype half, anything
+    else from the sheets. `has_upgrade("bash")` therefore never reads a
+    prototype row, and the cycle has no first step. This function is the
+    union and is for iteration only -- it is not on the `_card_index`
+    path and must never be put back on it.
+    """
+    return {**_shipped_upgrade_index(), **_prototype_upgrade_index()}
+
+
+
+def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
+    """Deltas carried ON the row by the quarantined prototype surface.
+
+    `EB-213`. Every sheet above keys its upgrades by shipped card id in a
+    `docs/<character>-upgrades.yaml`. The prototype surface keys them on the
+    row instead, because R213 B deletes a prototype row WHOLE when its slice
+    is accepted or rejected, and a `proto_` key in a shipped upgrades file
+    would be a second place to remember. Reading them here is what makes
+    `has_upgrade` -- and so the rest-smith and every other upgrade site --
+    true of a SUBSTITUTED prototype. Without it the substituted Kurage's Oath
+    could not be smithed at all and its ruled upgraded value was prose.
+
+    NOT a hole in the quarantine, and the REACHABILITY filter is what keeps it
+    honest rather than a promise. A row is registered here only if some live,
+    flagged door already resolves its plain id -- the substitution table, or
+    the Spark arm's starter substitution -- because this index is what
+    `has_upgrade` answers from and `get_card` must be able to honour every yes
+    it gives. On a flag-off tree (which is every shipped tree) no prototype id
+    is reachable and none is registered, so the index is byte-identical to
+    what it was before EB-213. Nothing here puts a row in `_card_index`:
+    pools, rewards, drafts, digests and every version stamp remain
+    structurally unable to see one.
+
+    Note the inline `upgrade:` key is DEPRECATED and IGNORED on the shipped
+    sheets (R20, `_card_index`) and that is unchanged -- this reads the
+    prototype surface and nothing else.
+    """
+    from tier0.content import loader           # late: loader imports us
+    reachable = set(loader._substituted_card_index())
+    if C.SPARK_ALT_COST_ENABLED:
+        # The Spark arm's own door (`_card_prototype`): with that flag on any
+        # `proto_` id resolves, because its starter substitution hands one out
+        # by id string.
+        reachable |= {c.id for c in loader.prototype_cards()}
+    deltas: dict[str, dict] = {}
+    for card in loader.prototype_cards():
+        if not card.upgrade or card.id not in reachable:
+            continue
+        if card.id in merged:
+            raise ValueError(
+                f"prototype row {card.id!r} carries an `upgrade:` block and "
+                "an upgrades sheet already rules that id -- one id, one delta")
+        deltas[card.id] = dict(card.upgrade)
+    return deltas
+
+
+def has_upgrade(card_id: str, *, shipped_only: bool = False) -> bool:
     """Can this card be upgraded AND can the sim express the result?
 
     An enchantment mark is looked PAST (R82 reopened): enchanting a card
     never costs it its upgrade path, and the two decorations compose in
     either order (see content/enchantments.py).
+
+    `shipped_only` ANSWERS FROM THE SHEETS AND NEVER READS A PROTOTYPE ROW,
+    and it has exactly one caller: `loader._external_cards`, which asks this
+    of every gitignored `game_ref/` row to enforce the atomic-coverage rule.
+    Those ids are base-game ids and can never be prototype ones, so the
+    answer is identical -- what the flag buys is that the question does not
+    build `_upgrade_index`'s prototype half, which reads the surface through
+    `loader.prototype_cards`, which asks `_card_index` for the shipped ids it
+    may not collide with, which is the caller. See `_upgrade_index` for the
+    whole cycle and why no checkout without `game_ref/` can see it.
     """
     from tier0.content import enchantments      # late: enchantments imports us
     card_id = enchantments.split(card_id)[0]
-    delta = _upgrade_index().get(card_id)
+    delta = (_shipped_upgrade_index().get(card_id) if shipped_only
+             else _upgrade_index().get(card_id))
     return (isinstance(delta, dict)
             and bool(delta)
             and "_unexpressible" not in delta

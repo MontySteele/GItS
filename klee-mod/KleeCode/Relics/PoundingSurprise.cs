@@ -119,6 +119,7 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
         if (applier?.Player != Owner) return;
 
         Flash();
-        await SparkPower.Gain(choiceContext, Owner.Creature, 1, cardSource: null);
+        await SparkPower.Gain(choiceContext, Owner.Creature, 1, cardSource: null,
+            source: "relic:pounding_surprise/detonation");
     }
 }

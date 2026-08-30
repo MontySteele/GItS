@@ -28,6 +28,22 @@ manifest and namespace. Element cadence, art loader and `CharacterId` come
 from the owner untouched, because a Kokomi prototype that does not apply Hydro
 off its Attacks is not a Kokomi prototype.
 
+THE UPGRADE CHANNEL IS ON THE ROW (`EB-213`)
+--------------------------------------------
+Shipped upgrades live in `docs/<character>-upgrades.yaml`, keyed by shipped
+card id. A `proto_` key in one of those files would give R213 B's deletion
+rule a second file to remember, and a substituted prototype would carry its
+upgrade in a place the row's own deletion does not reach. So a prototype row
+carries `upgrade: {<key>: <delta>}` itself, and this script registers it into
+the merged delta index (`gen.register_upgrade_deltas`) before emitting the
+card. Everything after that is the SHIPPED path, unforked: `gen.upgrade_plan`
+decides expressibility, the ordinary `*_upgrade` readers emit the vars, and
+the card gets the same `OnUpgrade` a shipped card gets -- which is the whole
+point, because the question a prototype answers is whether the card can SHIP.
+A row with no `upgrade:` block is base-only, as every row on this surface was
+before EB-213; a row whose declared delta the emitter cannot express is a
+build failure for the reason in the next section.
+
 A BLOCKED PROTOTYPE ROW IS A BUILD FAILURE, NOT A MANIFEST LINE
 ---------------------------------------------------------------
 The character profiles list blocked cards in their manifests: a sheet is a
@@ -119,6 +135,10 @@ def plan() -> gen.ProfilePlan:
     rows = _rows()
     generated: dict[str, str] = {}
     owners: dict[str, str] = {}
+    # EB-213: the row-carried upgrade deltas, recorded so "can this staged
+    # card be smithed, and to what?" is answerable from the manifest rather
+    # than by re-reading the sheet.
+    upgrades: dict[str, dict] = {}
     # EB-150's lesson, carried onto this surface: a choose-one card's MODE
     # FACES are pool members too. `CardModel.Pool` falls through to
     # MockCardPool and throws "You monster!" inside
@@ -154,6 +174,20 @@ def plan() -> gen.ProfilePlan:
                 f"gen_prototype_cards: {card_id}: `character:` must name a "
                 f"roster character {sorted(gen.PROFILES)}, got {character!r}.")
         profile = _profile_for(character)
+        # EB-213, and it happens BEFORE `blocked_reason`: R20 blocks a card
+        # carrying an inline `upgrade:` key, because on a shipped sheet that
+        # key could silently diverge from the ratified upgrades file. Here the
+        # row IS the ratified home, so the block is lifted by taking the key
+        # off the card and putting it in the index the shipped path reads.
+        upgrade = card.pop("upgrade", None)
+        if upgrade is not None:
+            if not isinstance(upgrade, dict) or not upgrade:
+                raise SystemExit(
+                    f"gen_prototype_cards: {card_id}: `upgrade:` must be a "
+                    "non-empty map of delta keys, as an upgrades sheet's "
+                    "entry is; drop the key for a base-only row.")
+            gen.register_upgrade_deltas(card_id, upgrade)
+            upgrades[card_id] = dict(upgrade)
         reason = gen.blocked_reason(card, profile)
         if reason:
             # See the module docstring: a prototype that cannot be emitted
@@ -162,6 +196,20 @@ def plan() -> gen.ProfilePlan:
                 f"gen_prototype_cards: {card_id} is NOT EXPRESSIBLE: {reason}. "
                 "A prototype row must be emittable today -- rewrite it inside "
                 "the existing grammar, or take the runtime work first.")
+        if upgrade is not None:
+            _, upgrade_reason = gen.upgrade_plan(card)
+            if upgrade_reason:
+                # Same rule as the body above, for the same reason: a
+                # declared upgrade the emitter drops is a campfire that does
+                # nothing on a card staged to be tried at a campfire. On a
+                # character sheet this is a `no_upgrade_path` manifest line;
+                # here it stops the run.
+                raise SystemExit(
+                    f"gen_prototype_cards: {card_id}'s `upgrade:` is NOT "
+                    f"EXPRESSIBLE: {upgrade_reason}. A staged upgrade must be "
+                    "emittable today -- rewrite the delta inside the existing "
+                    "grammar, drop the key to stage a base-only row, or take "
+                    "the runtime work first.")
         generated[card_id] = gen.emit(card, profile)
         owners[card_id] = character
         mode_faces[card_id] = gen._modal_option_names([card], {card_id})
@@ -190,6 +238,12 @@ def plan() -> gen.ProfilePlan:
         # because nothing wrote that question down anywhere.
         "mode_faces": {cid: names
                        for cid, names in sorted(mode_faces.items()) if names},
+        # EB-213. Keyed on the row, not on a `docs/<character>-upgrades.yaml`
+        # entry, so a row's deletion takes its upgrade with it (R213 B). An
+        # id absent here is base-only by declaration; there is no
+        # `no_upgrade_path` on this surface, because a declared delta the
+        # emitter cannot express stops the run instead.
+        "upgrades": dict(sorted(upgrades.items())),
     }
 
     count = len(owners)

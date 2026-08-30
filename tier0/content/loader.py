@@ -276,7 +276,14 @@ def _external_cards() -> list[dict]:
         # external reference as one atomic artifact: either every row resolves
         # through the shared `<id>+` path, or real_ironclad does not load.
         missing_upgrades = sorted(
-            d["id"] for d in docs if not upgrades.has_upgrade(d["id"])
+            # `shipped_only` is the cycle break and not an optimisation:
+            # asking the merged index here would build `EB-213`'s prototype
+            # half, which reads the surface through `prototype_cards`, which
+            # asks `_card_index` -- the function this one is inside. See
+            # `upgrades._upgrade_index`. These are base-game ids; the answer
+            # is the same either way.
+            d["id"] for d in docs
+            if not upgrades.has_upgrade(d["id"], shipped_only=True)
         )
         if missing_upgrades:
             raise ValueError(
@@ -429,8 +436,13 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
         # engine, where nothing may ever read it. `understudy/authorship.py`
         # is the one reader, and `tools/gen_prototype_cards.py` refuses a row
         # that omits it.
+        #
+        # EB-215: `description:` is stripped for the same reason and it is the
+        # same kind of fact -- the row's own FACE, which only the mod prints.
+        # tier0 has no card text and never renders one, so a `description` on
+        # `Card` would be a field the engine carries and nothing reads.
         card = Card.from_dict({k: v for k, v in d.items()
-                               if k != "authored_by"})
+                               if k not in ("authored_by", "description")})
         _validate_card_shape(card)
         cards.append(card)
     return cards
@@ -742,7 +754,16 @@ def _card_prototype(card_id: str) -> Card:
     """
     plain, ench, amount = enchantments.split(card_id)
     if plain.endswith(upgrades.SUFFIX):
-        base = copy.deepcopy(_card_index()[plain[:-len(upgrades.SUFFIX)]])
+        base_id = plain[:-len(upgrades.SUFFIX)]
+        index = _card_index()
+        # EB-213: the upgraded form of a SUBSTITUTED prototype resolves the
+        # way its plain form does -- the shipped index first, the substitution
+        # table only on a miss. The surface now carries its own `upgrade:`
+        # deltas (`upgrades._prototype_deltas`), so `has_upgrade` is true of
+        # such a row and the campfire will ask for `<proto id>+`; before this
+        # it asked and got a KeyError, which is why the row was base-only.
+        base = copy.deepcopy(index[base_id] if base_id in index
+                             else _substituted_card_index()[base_id])
         card = upgrades.apply_upgrade(base)
     elif (C.SPARK_ALT_COST_ENABLED
             and plain.startswith(PROTOTYPE_ID_PREFIX)):
@@ -1007,11 +1028,15 @@ def _substituted_card_index() -> dict[str, Card]:
     id strings and re-derives them on every reward screen. An offered card
     whose id does not resolve is a run that dies on the next screen.
 
-    There is no upgraded form. `docs/prototype-surface.yaml` carries no
-    upgrade rows by convention (upgrades are keyed by shipped id in
-    `docs/<character>-upgrades.yaml`), so `has_upgrade` is False for these ids
-    and the campfire and event upgrade sites skip them, which is the honest
-    behaviour while the upgraded 5 is still owed to a sheet.
+    THERE IS AN UPGRADED FORM SINCE `EB-213`, and it is keyed on the row.
+    `docs/prototype-surface.yaml` rows may carry their own `upgrade:` block,
+    merged into the delta index by `upgrades._prototype_deltas`, so
+    `has_upgrade` answers for a substituted row and `_card_prototype`'s `+`
+    branch resolves its base through this table. Before that the surface had
+    no upgrade channel at all: `has_upgrade` was False, the campfire skipped
+    every substituted row, and the substituted Kurage's Oath's ruled upgraded
+    value existed only as prose on the row. A row that declares no `upgrade:`
+    is still base-only, and is still skipped honestly.
     """
     targets = {proto
                for spec in _character_index().values()
@@ -1183,6 +1208,13 @@ def reset_caches() -> None:
     for cache in (_card_index, _card_prototype, _character_index,
                   _substituted_card_index, _encounter_index, _pilot_index):
         cache.cache_clear()
+    # EB-213: the merged upgrade index is derived from `_substituted_card_index`
+    # (a prototype row's `upgrade:` block registers only while a live door
+    # resolves its id), so it is a memoized view of the content tree like the
+    # six above and belongs behind the same one door.
+    upgrades._upgrade_index.cache_clear()
+    upgrades._shipped_upgrade_index.cache_clear()
+    upgrades._prototype_upgrade_index.cache_clear()
 
 
 def pilot_weights(pilot_id: str) -> dict:

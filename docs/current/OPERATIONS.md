@@ -413,6 +413,25 @@ any measured run, handoff or co-op session. No `-Package` switch, deliberately
 KLEEMOD-KLEE --max-fights 3` and read `fights=3 defects=0` before any
 registered run (R225).**
 
+**A face may be on the ROW too** (`EB-215`). `gen_klee_cards` renders a card's
+text from its BODY, and a Power's per POWER ID, which is what stops a shipped
+face drifting from what the card does — so a prototype that rewrites a shipped
+power's clause could not say so without moving the shipped card's face with
+it. A row states its own face with `description:`, emitted into the same
+`Localization` list every shipped row uses. There is no loc merge and no
+second channel; `description:` is the prototype surface's field alone and no
+`docs/*-cards.yaml` row may carry it.
+
+**An upgrade is on the ROW** (`EB-213`). Shipped deltas live in
+`docs/<character>-upgrades.yaml` keyed by shipped id; a `proto_` key there
+would give the deletion rule below a second file to remember, so a prototype
+row carries `upgrade: {<key>: <delta>}` itself. `gen_prototype_cards.py`
+registers it into the merged delta index before emitting, and everything after
+that is the shipped path — same expressibility check, same `OnUpgrade`, same
+campfire — with `tier0/content/upgrades.py` merging the same block so both
+engines read one place. A row that declares nothing is base-only; a declared
+delta the emitter cannot express STOPS the run, like an inexpressible body.
+
 **Staging a row** — edit the sheet, regen, dev-build, then grant it by id from
 a scenario (`give: {card: KLEEMOD-PROTO_..., pile: hand}`); template and
 preconditions in `understudy/scenarios/eb147-prototype-grant.yaml`. A row the
@@ -584,6 +603,25 @@ show tool-call attempts. A refused seat never reaches `grade`. The wrapper
 fills exactly three fields (`grader.id/kind/model`) and the raw reply is kept
 beside the filled form. **review** is the other role: not blind, read-only at
 the repo root, for a second opinion on a diff.
+
+**The seat reads its own meter before every call (EB-227).**
+`python -m understudy.codex_usage` prints one line — the five-hour window and
+the weekly window, each with its percentage and reset, and the rollout the
+numbers came from. Both `seat grade` and `seat review` probe it before every
+`codex exec` and **REFUSE**, in that role's own refusal shape, at or past
+`CODEX_PRIMARY_STOP_PERCENT` (85% of the five-hour window) or
+`CODEX_WEEKLY_STOP_PERCENT` (50% of the week) — overridable for one run with
+`GITS_CODEX_PRIMARY_STOP` / `GITS_CODEX_WEEKLY_STOP`. The percentages are
+recorded into the call's own record (`seat.json`, and `<out>.usage.json` for
+a review) so a night's sessions say what a call actually costs. **The read is
+as-of the last `codex` call**, not as of now: it comes from the rate-limit
+line Codex itself wrote into its newest session rollout, nothing here asks
+OpenAI anything, and a window whose `resets_at` has passed is counted as 0%
+used. A machine with no rollout at all logs and proceeds — a missing file
+never blocks a round. This is a floor under the standing budget, not a
+replacement for it: the **three Codex calls per graded turn** (R217, and
+`M64`'s split above, "Who holds the DECIDING chair") is still the rule, and
+is unchanged.
 
 Sessions land in `understudy/logs/seat/`, which is **gitignored** — the
 prompt inlines the packet and the rollout carries a third party's system
@@ -809,6 +847,18 @@ python -m understudy.staged_turn packet-section <round-slug> [--write <packet.md
   serialized under one lock; the model-bound read runs beside the game's next
   stage, with a look-ahead of exactly one board. `--serial` restores the old
   strictly-phased order so a live comparison is possible.
+- **The machine stays awake for as long as a session holds the game (EB-226).**
+  `soak.Session.setup` takes a Windows power request
+  (`ES_CONTINUOUS | ES_SYSTEM_REQUIRED`, `understudy/keepawake.py`) and
+  `teardown` gives it back; it is refcounted, so two lanes share one hold. The
+  flags are per-thread and a lane worker can outlive neither, so the request
+  lives on its own thread that does nothing but stay alive. This does NOT
+  depend on the power plan: an idle standby timeout ate 4 h 16 m out of a
+  running funnel on 2026-08-29 and 56 minutes on 2026-08-30 before the
+  timeout was set to never, and a setting nothing in this tree can see is not
+  a fix. To confirm a live run is holding it, run `powercfg /requests` in an
+  elevated shell — the harness's `python.exe` is listed under `SYSTEM:`, and
+  `None.` there while a round is up means the request was not taken.
 - **`--read-workers N`: the model half, and it is where the round is.**
   `KLEESPARK-R2` is the first pipelined round with a wall clock, and it says
   plainly what the funnel is bound by: six boards, 372 s total — **stage 89 s
@@ -1199,7 +1249,7 @@ labelled with the file it came from, `mods\klee\manifest.json` and
 `release_info.json`, never the bridge's health payload, which carries the
 vendored bridge's own version and never ours — run seed read back off the
 wire, prompt sha256, action count, termination reason) and the model's
-records verbatim under the R217 G label. The author's own model family is refused as tester (R217 C).
+records verbatim under the R217 G label. The author's own model family is refused as tester (R217 C). Beside it, `wire.json` carries the **per-turn wire snapshot** (`EB-216` / `M56`): one machine-written row per play and per `end turn` — turn, energy, every meter (BaseLib's registered resources AND the power-shaped ones, which is where Sparks ride), the hand with its printed energy and Spark prices, the Kurage queue strip where the build serves one, and the enemy count with intents — lifted off the API and **never shown to the tester**, because the tester's page is the grading surface and this is the grader's (R101b); each row also carries the **meter ledger** the play minted (R225: `before / price paid / gains by source / after`, read after the POST off `GET /api/v1/gits/meter_ledger`, with `blindplay.read_snapshots` and `blindplay.meter_plays` as the grader's read — instrument only, and nothing already published is re-graded on it).
 
 **After ADVANCE.** A prototype arm the pair read ADVANCES goes to **whole-fight
 blind play on a dev build**, automatically. It is the next gate, not a pick, and

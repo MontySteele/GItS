@@ -3972,19 +3972,17 @@ def kurage_fire(state: CombatState, manual: bool = False) -> bool:
         return False
     if not manual and state.kurage_fired_this_turn:
         return False
-    if (not manual or C.KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON) \
-            and not p.powers.get("kurage_summon", 0):
+    if not p.powers.get("kurage_summon", 0):
         # No jellyfish on the field, no memory to fire from. The queue still
         # FILLS without one: the memory is of what she burned, and the summon
         # is what acts on it.
         #
-        # UNDER C.KURAGE_ALWAYS_ON this branch cannot be taken in a real
-        # fight -- the jellyfish is installed at combat start -- and it is
-        # kept, unchanged, because it is still the whole of the rule with
-        # KURAGE_ALWAYS_ON off, and because a unit test may build a state
-        # without one. That is also why KURAGE_MEMORY_KEYWORD_NEEDS_SUMMON is
-        # RETIRED-under-flag rather than deleted: both of its settings read
-        # the same while the jellyfish cannot be absent.
+        # ONE rule for both doors, automatic and manual (R224 A, ex-`M50`
+        # pick 4): the dial that let the accelerator keyword fire with no
+        # summon is DELETED, because under C.KURAGE_ALWAYS_ON the jellyfish is
+        # installed at combat start and both of its settings read the same.
+        # The branch itself stays: it is still the whole of the rule with
+        # KURAGE_ALWAYS_ON off, and a unit test may build a state without one.
         return False
     if not state.kurage_queue:
         # KURAGE_EMPTY_QUEUE "hold": nothing fires and NOTHING IS PAID. The

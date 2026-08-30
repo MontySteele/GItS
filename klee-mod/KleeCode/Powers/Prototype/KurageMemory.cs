@@ -110,20 +110,6 @@ public static class KurageMemory
         public static readonly string PowerPulse = "charge";
 
         /// <summary>
-        /// NOT A [USER] PICK -- §11.6 item 2, a hole the build filled, and it
-        /// goes back to [USER]. True: the acceleration keyword still needs a
-        /// jellyfish on the field (one rule for what may act on the memory).
-        ///
-        /// SUPERSEDED IN SPIRIT by [USER]'s 2026-08-29 ruling that the
-        /// Bake-Kurage becomes base kit and is ALWAYS on: when the jellyfish
-        /// cannot be absent, this constant and every duration question stop
-        /// having a case. Mirrored minimally as v3 has it and nothing new is
-        /// built around it; the always-on swap is <see cref="SummonIsFielded"/>
-        /// and nothing else.
-        /// </summary>
-        public static readonly bool KeywordNeedsSummon = true;
-
-        /// <summary>
         /// v4 BASE KIT ([USER], 2026-08-29): "I think that we will want to
         /// make Bake-Kurage part of the base kit (always on) rather than a
         /// separate card. So yes, we could add one Muster card to the base
@@ -859,11 +845,15 @@ public static class KurageMemory
         var creature = player?.Creature;
         if (player == null || !IsLive(creature)) return false;
         if (!manual && FiredThisTurn.Contains(player)) return false;
-        if ((!manual || KurageMemoryLaw.KeywordNeedsSummon) && !SummonIsFielded(creature))
+        if (!SummonIsFielded(creature))
         {
             // No jellyfish on the field, no memory to fire from. The queue
             // still FILLS without one: the memory is of what she burned, and
-            // the summon is what acts on it.
+            // the summon is what acts on it. ONE rule for both doors,
+            // automatic and manual (R224 A, ex-`M50` pick 4): the dial that
+            // let the accelerator keyword fire with no summon is deleted,
+            // because under the always-on base kit the two settings read the
+            // same.
             return false;
         }
         if (creature!.CombatState is not { } combat) return false;
