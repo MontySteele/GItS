@@ -6805,3 +6805,295 @@ Surprise* stays exactly as it is in both engines. It says nothing about win
 rate, balance or fun (R215 B, Guardrail-7). It discharges no part of `EB-224`'s
 acceptance line beyond the redesign direction itself — the whole fight is still
 owed, and it is what comes next.
+
+---
+
+## 25. `KLEESPARK-BT3` and `KLEESPARK-W5` — the two cells R230 left owed (`EB-224`)
+
+**REGISTERED — NOT RUN. Drafted by Claude from written intent under R212 item
+2 and committed BEFORE anything is staged, deployed, launched or read;
+[USER] countersigns in BATCH, or vetoes within five days.** Nothing in this
+section has been run. No board has been staged, no seat has been called, the
+game has not been launched, and no number below was chosen after seeing a
+result.
+
+R230 ruled §24.9.9's four-item pick at **option (3), QUALIFIED**: *Bag of
+Tricks* keeps its refund loop, the loop is the card's stated point rather than
+an accident the round tripped over, and the arm carries on. It left **exactly
+two things owed**, and this section registers both of them, in the order the
+ruling put them:
+
+1. **the `F2` repair**, which comes first — `KLEESPARK-BT3`, two staged
+   boards, `understudy/turns/klee-sparks-bt3/`;
+2. **the whole fight**, carrying the **pre-registered collapse condition R230
+   wrote before the fight was drafted** — `KLEESPARK-W5`.
+
+### 25.1 What R230 settled, in the terms these two cells are written in
+
+**The corrected economics.** §24.9.9 called the priced mode *"net-free where an
+ordinary Attack lands the same turn"*, and R230 corrects it. On a bank of 3
+with a detonator in hand the free mode places one Bomb, the Attack pops it, and
+*Pounding Surprise* takes the bank **3 → 4**; the priced mode places three, the
+Attack pops all three, and the relic takes it **3 → 0 → 3**. The player ends the
+turn on **3 instead of 4**. The real trade is **one net Spark for two extra
+Bombs, 10 extra damage**, behind a **three-Spark up-front liquidity
+requirement** the free mode does not carry. A same-turn detonator changes
+**when** the locked liquidity returns and **whether** another sink can be
+chained onto it; it does not make the two modes economically identical.
+
+**Why that matters to both cells below.** A cost of one Spark is a real cost
+**only if a Spark is sometimes worth more elsewhere**. `KLEESPARK-BT3` asks
+whether a reader can NAME what the locked liquidity cost on a single turn;
+`KLEESPARK-W5` asks whether, across a whole fight, the player ever prefers the
+Spark. Those are the two halves of the same question and neither substitutes
+for the other.
+
+**The `F2` defect, and the repair taken.** R230, verbatim: *"a re-posed `F2`
+must grade the refund ATTRIBUTABLE TO Bag of Tricks' own Bombs — at least 3 —
+or else the extra Bomb source must leave the board entirely."* `KLEESPARK-BT3`
+takes the **second** repair. *Mine Toss* is gone; nothing in either hand places
+a Bomb except the card under test and neither board starts with one, so every
+Spark the relic pays back is the mode's own **by construction rather than by
+subtraction**. `G1`'s predicate is written both ways so it reads the same
+whichever way it is checked. **`klee-sparks-bt2r`'s boards and MANIFEST are NOT
+edited (R101b)** — they are the record of a run that happened.
+
+### 25.2 `KLEESPARK-BT3` — the two boards
+
+Full manifest, slate and both files:
+`understudy/turns/klee-sparks-bt3/` (`MANIFEST.md`, `slots.yaml`, `t01`,
+`t02`). Both are `exact_hand: true`, `prototype: true`,
+`replay_next_turn: true`; both seeds are recorded ONE-BODY on a Klee run over
+three earlier rounds.
+
+| turn | seed | bank | HP | body | hand | Energy | the board | slot |
+|---|---|---|---|---|---|---|---|---|
+| `t01` | `YX7PB48WR7R4` | **3** | **24**/62 | 40 | Bag of Tricks, Duck and Cover, Spirited Away, Run Away! | 2 of 3 needed | the delayed refund with the pressure ON — a telegraphed 16 into 24 HP | `C1` |
+| `t02` | `R805DJ56LZHM` | **3** | **40**/62 | 46 | the same four | 2 of 3 | the same question with the pressure OFF | `C1` |
+
+**Two boards and not one, for a stated reason.** `F2` has graded UNREACHED
+three rounds running and twice of those because one deciding form was REFUSED.
+A slot posed on one board has a denominator of one and one refusal takes it to
+zero — which is what happened at §24 and again at §24.9. Two boards is the
+cheapest repair for that failure mode, and the second board is not a duplicate:
+it moves the incoming pressure, so that a cost only nameable at 24 HP is
+separable from a cost the card itself imposes.
+
+**Every board forces a trade** (`EB-236`): each hand costs 3 Energy against 2.
+**The Energy is this round's one other change and it is disclosed** — dropping
+*Mine Toss* out of `klee-sparks-bt2r-t03`'s hand would have left 3 Energy
+paying for the whole hand, which `no_forced_trade` refuses, so the Energy moves
+3 → 2. No card is added.
+
+**`EB-240`'s `expects:` block is declared on both**, and it is new machinery
+whose first use this is. §24.9.10 recorded two printed falsehoods: one relic
+asserted where the page printed two, and `set_hp: {who: first, amount: 55}`
+against bodies of 45 / 46 / 40. These boards **declare both relics** and
+**write no enemy HP at all**, declaring instead the body each seed is recorded
+at; the stage refuses on a mismatch before a packet is written. A refusal
+**stops the round at that board with nothing read**; the declaration is
+corrected from the observed value, the correction is disclosed with the
+results, and the board is re-staged from the corrected file — a re-attempt on
+`EB-191`'s precedent and **not a re-roll**.
+
+**The plan, printed before anything was staged:**
+
+```
+round of 2 board(s) in R221 B's pre-registered order; seat spot-check every 4; first set = 2; lanes = 1
+   1  FIRST  SEAT  lane0  klee-sparks-bt3-t01   slots=C1  closeness=0.135
+   2  FIRST        lane0  klee-sparks-bt3-t02   slots=C1  closeness=0.135
+preflights: every board passes face-defect and assumption checks
+SLOT OK   C1: threshold 2, ceiling 2 of 2 board(s)  [klee-sparks-bt3-t01, klee-sparks-bt3-t02]
+board design: every board forces a trade, and every declared exclusive pair is exclusive
+```
+
+Run with `--first 0` (every board runs; both are the only board of their kind)
+and `--seat-spot-check 1` (the Codex seat decides every board — a DESIGN round
+under `M64` (1) / R224; fresh-Opus is not seated, the row being
+`authored_by: [claude]` under R217 C; the local seat sits SHADOW).
+
+**The slate is `G1`–`G4` and lives in the manifest**, written out in full
+there rather than duplicated here. In one line each: **`G1`** re-poses `F2`
+under R230's corrected predicate — the third answer names a concrete thing the
+turn gave up AND the next-turn bank reads ≥ 3, all of it the mode's own —
+threshold 2 of 2, with the one-refusal rule written in advance; **`G2`** is
+`G1` read on `t02` alone, the pressure control, and is a SUBSET of `G1` and
+reported as one; **`G3`** gives the forecast channel its denominator at 2 of 2;
+**`G4`** grades the delayed arithmetic (`0` then `3`) at 1 of 2. Every
+UNREACHED rule, every decision linkage and the *what a MISS does not license*
+block are in the manifest and bind as written.
+
+**Budget: 2 deciding reads + 1 pair read = 3 Codex calls expected, cap 6.**
+
+### 25.3 `KLEESPARK-W5` — the whole fight, and the collapse condition
+
+`EB-224`'s last owed half. **It runs only after `KLEESPARK-BT3` is graded**, and
+it does not run at all where `G1` MISSES on its engine clause (ii) or where
+`G3` MISSES — both of those are instrument or engine findings that would make
+the fight unreadable, and both are written into `BT3`'s decision linkage.
+
+**Unit.** One `understudy.blindplay session` on a live dev build carrying the
+prototype rows, Codex seat, the arm's rows granted into the starting deck by
+`understudy.embark --arm`, the whole fight (or fights) to the action budget.
+
+#### 25.3.1 THE COLLAPSE CONDITION — R230's words, then the numbers
+
+R230 registered this **before the fight was drafted, so that no later reading
+of the result can pick its own threshold after seeing it.** Quoted verbatim:
+
+> When the arm reaches whole-fight play: **if the priced mode proves effectively
+> automatic** — taken on essentially every turn where an affordable detonator is
+> in hand, with no free-mode choices actually taken and no named reason on any
+> turn to preserve the extra Spark — **then the bridge has collapsed into free
+> damage and the arm RETURNS TO DESIGN again.**
+
+**In graded-predicate form.** Three definitions, all read off the run's own
+artefacts — the sealed record's combat pages, the per-page `wire.json`
+snapshots (`EB-216`) and the forecast rows (`EB-229`) — and none of them read
+off prose written after the fact:
+
+- **An OPPORTUNITY PAGE** is a combat page on which the printed Spark bank is
+  **≥ 3**, *Bag of Tricks* is in hand, and at least one **affordable
+  detonator** is in hand — an Attack the page's printed Energy can pay for.
+  (Any Attack that gets HP damage through pops the target's Bombs; there is no
+  special detonator card in this deck.)
+- **A PRICED-MODE TAKE** is an opportunity page whose command plays *Bag of
+  Tricks* choosing the priced mode. **A FREE-MODE TAKE** is any page whose
+  command plays it choosing the one-Bomb mode while the bank was ≥ 3.
+- **A PRESERVED-SPARK REASON** is a forecast answer or a `thinking` sentence
+  naming a reason to keep Sparks rather than spend them this turn — a named
+  alternative use, a named next-turn plan, or the liquidity itself.
+
+> **`B1` — THE COLLAPSE FIRES, AND THE ARM RETURNS TO DESIGN AGAIN, IF ALL
+> THREE HOLD:**
+>
+> **(i) priced-mode takes ≥ 90% of opportunity pages, on a denominator of at
+> least 4 opportunity pages;**
+> **(ii) ZERO free-mode takes across the whole session; AND**
+> **(iii) ZERO pages carry a preserved-Spark reason.**
+>
+> *"Effectively every turn"* is **≥ 90% with a floor of 4** — a floor, because
+> two-of-two is not a habit. *"No free-mode choices actually taken"* is **0**.
+> *"No stated reason on any turn"* is **0**. **Any one of the three failing
+> refuses the collapse**, and the arm stands where R230 put it.
+>
+> **UNREACHED where fewer than 4 opportunity pages occur.** A fight that never
+> posed the question has measured the GENERATOR and not the card — which is
+> exactly what `W1'` found and `W3` confirmed — and under the slate's own rule
+> an UNREACHED slot is not a pass and not a fail. Nothing is inferred, no
+> [USER] row opens, and the act is another fight, not a reading.
+
+*What a `B1` collapse decides:* the arm RETURNS TO DESIGN a second time, as a
+numbered pick list to [USER] and nothing else. A RETURN moves no number by
+itself (R215 B, Guardrail-7). *What a refused collapse decides:* nothing is
+licensed by it either — it is the absence of a failure, not a pass, and it does
+not advance the row to the sheet.
+
+#### 25.3.2 The rest of the slate
+
+**`B2` — the one-Spark trade is NAMED at least once.** On ≥ 1 page where both
+modes were affordable, the tester's own sentence names the liquidity, the net
+Spark, or what the bank was being kept for. *Threshold:* 1. *Falsifier:* no
+page does. *UNREACHED* where no page ever offered both modes at a bank ≥ 3.
+*A MISS with `B1` not collapsed is a LEGIBILITY finding* — the intent is real
+and unreadable — filed to `BACKLOG` as a page or wording row, **never** a
+re-price.
+
+**`B3` — the up-front liquidity BINDS at least once.** ≥ 1 page where *Bag of
+Tricks* is in hand at a bank of 1 or 2 and the priced mode is therefore not
+available. *Threshold:* 1. *Falsifier:* 0 such pages on a denominator of at
+least 3 pages with the card in hand. *UNREACHED* where the card reaches the
+hand on fewer than 3 pages. This is the half of R230's intent that says the
+three Sparks are *"real liquidity, locked up"*; a bank that is never below the
+price has no liquidity requirement in it.
+
+**`B4` — the delayed refund at fight scale.** ≥ 1 page where the priced mode is
+taken with NO affordable detonator in hand, and the following combat page's
+printed bank shows the refund arrived. *Threshold:* 1. *Falsifier:* every
+priced-mode take has a detonator in hand. *UNREACHED* where the priced mode is
+never taken. This is `BT3`'s question asked where the player, not the board,
+chose the hand.
+
+**`B5` — RECORDED AND NOT GRADED.** Per-fight peak printed Spark bank;
+priced-mode takes against free-mode takes; and the count of pages carrying a
+preserved-Spark reason. Beside `W3`'s 4.0 and `W4`'s 5.5 medians and **NOT a
+comparison** (§19.2 item 1) — a comparator, never a threshold.
+
+#### 25.3.3 `EB-229`'s forecast channel is switched ON, and what that costs
+
+This is the first registration to use the blind RUN's forecast channel
+(`understudy.blindplay session --forecast`, opt-in, asked before the command on
+every combat page). Two questions, asked conditionally so that asking them does
+not recommend a line:
+
+1. *"What will your Spark bank read at the very end of this turn, on the line
+   you are about to play?"*
+2. *"If you are about to spend Sparks this turn, what are you giving up by
+   spending them rather than keeping them? If you are not spending any this
+   turn, write 'not spending'."*
+
+**The error direction is declared before the run and it runs one way.** Asking
+question 2 every turn makes a preserved-Spark reason EASIER to produce, so
+`B1` clause (iii) — *zero pages carry one* — becomes **harder to satisfy**.
+The channel therefore biases the collapse condition toward NOT firing: a
+collapse that fires anyway is a **floor**, and a refused collapse is
+correspondingly weaker evidence than it would have been on a silent page. That
+is the trade, and it is taken because `KURAGEMEM002` graded three slots
+UNREACHED for want of exactly this channel and the alternative is mining
+`thinking` prose for a pre-commitment it was never asked for.
+
+#### 25.3.4 Contaminations, blind spots and what is NOT folded in
+
+1. **The deck is GRANTED, not drafted** — as `W1` through `W4` were. Nothing
+   here is a drafted-economy reading and `S1`'s and `W3`'s findings on the
+   generator are not re-opened.
+2. **`+proto` build, prototype surface.** Every number is about a prototype row
+   (R215 B) and nothing is quotable except the decision-closeness falsifier.
+3. ***Pounding Surprise* is present and is meant to be.** R230 keeps it; it is
+   the mechanism under test, not a confound to control.
+4. **`EB-235` is NOT folded in here.** The Rare Power's uptake slot rides the
+   fold's mixed-pool read and is registered nowhere in this section.
+   `proto_true_spark_knight` is **not granted**; if it is drafted mid-run it is
+   RECORDED and grades nothing, and nothing in this section is evidence about
+   it in either direction.
+5. **Neow.** `embark` leaves the run on the Neow screen, which cannot be
+   skipped and two of whose three boons rewrite the deck. The operator takes
+   **the only deck-neutral boon offered**, by `W4` §19.5's registered rule, and
+   names which one it was in the results.
+6. **`EB-191`** — the run seed is re-read off the wire from the same process
+   before the session starts and written into the sidecar.
+7. **The maker/sink ratio cannot see a kit declaration** (`EB-219`, C21) or
+   *Pounding Surprise*'s per-detonation gain, so every income figure this
+   session produces is a **FLOOR** and never a ceiling.
+8. **R217 G rides on every sentence the tester writes.** One model's account,
+   never validation, never balance evidence, never approval.
+
+#### 25.3.5 Budget, gates and stop lines
+
+- **Codex calls:** `--max-actions 40`, `--max-refusals 2`, one fight record and
+  one run record — worst case **45 calls**, which is `W3`'s shape and its
+  actual spend. The cap for the session is **45**.
+- **`EB-227`'s guard** refuses at 85% of the five-hour window and 50% of the
+  week; the meter is read immediately before and after and both readings are
+  recorded, unsmoothed.
+- **R225's soak gate** (`fights=3 defects=0`) passes before the session starts.
+- **The pck contract check** is empty and **the printed-Spark-price stop rule**
+  is checked, as `W4` ran them.
+- **Preconditions that stop the session:** the game lock absent; Steam running;
+  the installed build proven read-only to carry the row before anything is
+  granted.
+
+### 25.4 What these two cells do NOT license
+
+**Neither cell licenses any of this, and it is registered before the run so it
+cannot be argued after:** a re-price of the mode's 3; a change to §4.2's price
+table; a new sink row (R225); any amendment to or re-reading of R225's
+mode-head clause; the removal or suppression of *Pounding Surprise*; a sheet
+move or an accept-to-sheet signoff for the row; any LAW or measurement-law
+change; or any claim about win rate, balance or fun (R215 B, Guardrail-7).
+
+**R230's ruled direction is not reopened by any result here.** `KLEESPARK-BT3`
+measures the half that ruling left owed, and `KLEESPARK-W5` carries the failure
+condition that ruling wrote. The only thing either can do to the direction is
+what R230 already said one of them could: fire the collapse, and send the arm
+back to [USER] as a numbered pick.

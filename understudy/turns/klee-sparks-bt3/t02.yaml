@@ -1,0 +1,143 @@
+# KLEESPARK-BT3, BOARD B. THE SAME QUESTION WITH THE PRESSURE OFF.
+#
+# See `t01`'s header for what this round is and what R230 ruled.
+#
+# WHY A SECOND BOARD, AND WHY THIS ONE. `F2` has graded UNREACHED THREE ROUNDS
+# RUNNING, and twice of those three because a single deciding form was
+# REFUSED. A slot posed on one board has a denominator of one, and one refusal
+# takes it to zero -- which is exactly what happened at sec.24 and again at
+# sec.24.9. Two boards is the cheapest repair for that: one refusal leaves the
+# slot with a board still standing, and the round is not spent for nothing.
+#
+# IT IS NOT A DUPLICATE, AND THE DIFFERENCE IS THE PRESSURE. `t01` asks the
+# question with the enemy telegraphing 16 into 24 HP, where the Block lines
+# are urgent and the bank's payout is a whole enemy turn away. This board asks
+# it at 40 HP against the same telegraph, where the Block is worth much less
+# and holding the bank costs correspondingly less to prefer. If the mode's
+# up-front liquidity is a REAL cost -- which is what R230's rewritten intent
+# claims -- a reader should be able to name what it cost on BOTH boards. If it
+# can only be named where the player is nearly dead, the cost is the
+# telegraph's and not the card's, and the slate says so in advance.
+#
+#   the Energy, and it does not stretch:  Spirited Away 2  = 12 Block, all of
+#                                         it, nothing else played
+#                                         Duck and Cover 1 = 5 Block, 1 spare
+#   the bank:                             3 Bombs at 5 for NEXT turn
+#
+# NOTHING IN THIS HAND PLACES A BOMB EXCEPT THE CARD UNDER TEST, which is
+# R230's repair and the reason this round exists. There is no *Mine Toss* on
+# any board of this round.
+#
+# NO LINE HERE IS LETHAL: nothing in this hand deals damage on this turn, and
+# the three Bombs pop next turn for 15 against a body of 46.
+#
+# THIS BOARD MAKES NO EXCLUSIVITY CLAIM: one Spark-priced use in the hand.
+
+id: klee-sparks-bt3-t02
+character: KLEEMOD-KLEE
+
+# Pinned before the round. `klee-sparks-bt2r-t02`'s seed, recorded ONE-BODY on
+# a Klee run and recorded at a body of 46.
+seed: R805DJ56LZHM
+
+exact_hand: true
+
+prototype: true
+
+slots:
+  - C1
+
+replay_next_turn: true
+
+forecast:
+  - >-
+    If you spend 3 Sparks on Bag of Tricks this turn, what number will your
+    Spark bank show at the very END of this turn?
+  - >-
+    What will your Spark bank show at the START of your next turn, on the
+    line you are about to play?
+  - >-
+    How much damage, if any, will the enemy have taken by the start of your
+    next turn, on the line you are about to play?
+
+notes: |
+  40/62 HP, no Block, 2 energy, a Spark bank of exactly 3, and one enemy
+  telegraphing an attack for 16. The hand costs 3 Energy in total, holds no
+  Attack, and holds nothing that places a Bomb except the card under test.
+
+assumptions:
+  - "The hand is EXACTLY the list below and nothing else. The hand the
+     game dealt is emptied before these cards are given, and a packet
+     whose live hand is not this list is refused rather than written."
+  - "The Spark bank is written to 3 through SPARK_POWER, which is how the
+     live game holds Sparks. 3 is the mode's printed price exactly."
+  - "The run carries Klee's starting relic AND the run-start gift the
+     staging path takes, and no others. Both are printed on the page. The
+     starting relic pays 1 Spark for every Bomb that detonates, and a
+     reader who cannot see it cannot do the turn's arithmetic; the gift
+     does nothing inside a combat. The pair is DECLARED in this file and
+     checked against the wire before the packet is written."
+  - "The encounter is GENERATED. This file writes no enemy HP at all --
+     it declares the body the seed is recorded at and the stage refuses
+     on a different one, rather than writing a number the game may not
+     take."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "No Bomb is on the board when the turn starts, and nothing in this
+     hand places one except the card under test. Every Bomb the packet
+     shows is one this turn's line placed with Bag of Tricks."
+  - "The player has no Strength and the enemy carries no aura, Vulnerable
+     or Weak. Every Klee attack applies Pyro, and a reaction on top of a
+     hit would move every number the falsifier scores."
+  - "The turn is ended after the graded line and the board is read once
+     more, so the reading that follows is taken after the enemy has taken
+     its telegraphed turn."
+
+expects:
+  relics:
+    - "Pounding Surprise"
+    - "Fishing Rod"
+  hp:
+    first: 46
+
+# Needs a dev build carrying the prototype rows (klee-mod/build/deploy_proto.ps1).
+
+staging:
+  - give: {card: KLEEMOD-PROTO_SPARK_MODE_BOMBS, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-DUCK_AND_COVER, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-SPIRITED_AWAY, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-RUN_AWAY, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 40}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 2}
+  - set_power: {who: player, name: SPARK_POWER, amount: 3}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+resource_round:
+  claim: >-
+    One Spark-priced use in hand, no detonator, no Attack and no other Bomb
+    source. The same question as `t01` with the incoming damage far less
+    urgent. No exclusive pair is claimed.
+
+board:
+  character: klee
+  pilot: demolition
+  hp: 40
+  max_hp: 62
+  block: 0
+  energy: 2
+  turn: 4
+  resources:
+    sparks: 3
+  hand:
+    - proto_spark_mode_bombs
+    - duck_and_cover
+    - spirited_away
+    - run_away
+  enemies:
+    - name: "Act 1 enemy"
+      hp: 46
+      max_hp: 46
+      block: 0
+      intent: {kind: attack, amount: 16}
