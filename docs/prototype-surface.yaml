@@ -425,8 +425,29 @@
 # placement as a steerable verb, Klee is the only character in the roster who
 # has one, and Sparks have never touched it. It is also the only arm in the
 # slice that changes the SHAPE of a turn rather than its size: three Bombs are
-# delayed damage on a board the player must survive to collect, so taking the
-# expensive mode is a decision about the next turn, not this one.
+# delayed damage on a board the player must survive to collect.
+#
+# THE DESIGN INTENT, REWRITTEN UNDER R230 (2026-08-30) after KLEESPARK-BT2's
+# rerun read the loop on the wire. This row is a BRIDGE. Its priced mode asks
+# the player to hold a bank of 3 -- real liquidity, locked up and unavailable
+# to anything else until it is released -- in order to buy TWO ADDITIONAL BOMBS
+# for a NET COST OF ONE SPARK relative to the free mode once the Bombs
+# detonate. (The arithmetic, on a bank of 3 with a detonator in hand: the free
+# mode places one Bomb and the starter relic's +1-per-detonation takes the bank
+# 3 -> 4; the priced mode places three and takes it 3 -> 0 -> 3. One Spark, for
+# 10 more damage.) If an Attack is already in hand that liquidity comes back
+# IMMEDIATELY and can be sequenced straight into another sink the same turn; if
+# it is not, the bank stays locked until the Bombs go off on their own next
+# turn. So the card poses two questions at once: CAN I AFFORD TO TIE UP THREE
+# SPARKS RIGHT NOW, and DO I HOLD SOMETHING THAT UNTIES THEM THIS TURN.
+#
+# The mode is NOT net-free with a detonator in hand, and the refund does NOT
+# make the two modes equivalent -- an earlier reading of BT1 said both and R230
+# corrects it. R230 also PRE-REGISTERS the arm's whole-fight failure condition:
+# if the priced mode proves effectively automatic wherever an affordable
+# detonator exists, with no free-mode choices taken and no named reason to
+# preserve the extra Spark, the bridge has collapsed into free damage and the
+# arm RETURNS TO DESIGN. Packet: klee-sparks-2026-08-29 sec.24.9.11.
 #
 # WHY THIS ROW WAS HELD, AND WHAT UNHELD IT. The seat stopped it on two written
 # clauses (packet sec.6.1). D4 -- "at the decision point the player can

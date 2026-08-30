@@ -6624,7 +6624,7 @@ and was right.
    deliberate — *Bag of Tricks* is the card that turns a bank plus a detonator
    into a free second sink, and the decision it poses is *does this hand hold
    an Attack?* Costs nothing to build; costs a written intent, and re-poses
-   `F2` on the delayed half.
+   `F2` on the delayed half. **← RULED (R230), QUALIFIED.**
 4. **Drop the arm.** Retire `proto_spark_mode_bombs`' priced mode from the
    prototype surface. Cleanest; spends three staged rounds of work, and leaves
    R225's mode-head price clause without the row it was amended for.
@@ -6638,6 +6638,18 @@ rounds of instrument work were built around. 3 is the only option the evidence
 positively supports, and the only one that leaves `F2`'s unmeasured half worth
 asking. **The pick is [USER]'s** (CLAUDE.md's ladder: a pick between genuinely
 different design directions).
+
+> **RULED (R230, 2026-08-30): option (3), QUALIFIED.** The refund loop is
+> accepted as the card's deliberate bridge mechanic — but the qualification
+> corrects the economics this section stated. The priced mode is **not**
+> net-free with a detonator in hand: it costs **one net Spark** relative to the
+> free mode after detonation, and it demands **three Sparks of up-front
+> liquidity** to open at all. A same-turn detonator changes WHEN that liquidity
+> comes back and whether a second sink can be chained onto it; it does not make
+> the priced mode economically identical to the free one. The rewritten design
+> intent, the F2 registration correction owed before any re-pose, and a NEW
+> pre-registered whole-fight collapse condition are at §24.9.11. The full
+> record is `review/active/sitting-2026-08-30.md` §R230.
 
 #### 24.9.10 Out of slot — recorded, graded nowhere (R101b)
 
@@ -6666,3 +6678,130 @@ different design directions).
 account is one model's account, never validation and never balance evidence,
 and nothing measured on a prototype row is quotable anywhere except the
 decision-closeness falsifier (R215 B).
+
+#### 24.9.11 R230 — the pick list is RULED, and what the ruling actually says
+
+**The ruled option is (3), qualified.** *Bag of Tricks* keeps its refund loop.
+The loop is now the card's stated point rather than an accident the round
+tripped over, and the design intent has been rewritten to say so (below). The
+arm does **not** return to design a second time; it carries on to the whole
+fight under a new failure condition that is registered here, before that fight
+is played.
+
+Everything under this heading is written in plain English on purpose. This is
+the section a reader should be able to open cold and understand without any of
+the register shorthand the rest of the packet uses.
+
+**1. What the mode actually costs — the number this ruling corrects.**
+
+§24.9.9 above said the priced mode is *"net-free where an ordinary Attack lands
+the same turn."* **That framing was wrong, and this ruling corrects it.** Put
+the two modes side by side on the same turn, with a detonator in hand and a
+bank of 3:
+
+- **Free mode.** Place one Bomb. The Attack pops it. The starter relic pays 1
+  Spark per Bomb detonated, so the bank goes **3 → 4**.
+- **Priced mode.** Pay 3 for three Bombs. The Attack pops all three. The relic
+  pays 3 back, so the bank goes **3 → 0 → 3**.
+
+The player ends the turn on **3 instead of 4**. The real trade is therefore
+**one net Spark for two extra Bombs — 10 extra damage** — and not a free
+upgrade. The deciding form says exactly this in its own third answer: the line
+*"gave up the Spark that the single-Bomb line would have retained at turn end,
+in exchange for 10 additional Bomb damage."*
+
+There is a second cost the earlier framing missed entirely. The mode cannot be
+opened at all below a bank of 3, so it demands **three Sparks of up-front
+liquidity** even though only one of them is spent in the end. That is a real
+constraint on when the card can be played, and it is a large part of what makes
+the card a decision rather than a formality.
+
+A same-turn detonator changes two things and only two: **when** the locked
+liquidity comes back (immediately, instead of at the start of the next turn),
+and **whether** a second sink can be chained onto the refund in the same turn.
+It does not erase the one-Spark difference between the modes.
+
+**2. Who recommended what — the attribution, stated plainly.**
+
+Option (3) was **Claude's recommendation alone.** The independent pair read
+(`review/qa/klee-sparks-bt2r-pair-review-codex-gpt-5.6-sol.md`) graded the five
+slots and confirmed that the return condition fired; it offered **no opinion**
+on the four redesign directions and recommended none of them. Nothing in this
+packet, in `BACKLOG.md` or in `EXPERIMENTS.md` claims otherwise, and nothing
+should be written later that does.
+
+**3. The design intent, rewritten under R230 (2026-08-30).**
+
+The intent statement that governs this row lives with the row itself, in
+`docs/prototype-surface.yaml` under *ARM 4: two prices for one card*, and it has
+been rewritten there. In full, and in the same words:
+
+> *Bag of Tricks* is a **bridge**. Its priced mode asks the player to hold a
+> bank of **3** — real liquidity, locked up, and unavailable to anything else
+> until it is released — in order to buy **two additional Bombs** for a **net
+> cost of one Spark** relative to the free mode once the Bombs detonate. If an
+> Attack is already in hand, that liquidity is returned **immediately** and can
+> be sequenced straight into another sink in the same turn. If it is not, the
+> bank stays locked until the Bombs go off on their own next turn. So the card
+> poses two questions at once: *can I afford to tie up three Sparks right now*,
+> and *do I hold something that unties them this turn*.
+
+Note what the intent does **not** claim: it does not claim the mode is free, and
+it does not claim the refund makes the two modes equivalent.
+
+**4. A registration defect that must be fixed before `F2` is re-posed.**
+
+`F2` — the second half of R229's return condition — has never been graded; it
+has come back UNREACHED three rounds running. Before it is posed a fourth time,
+its predicate has to be repaired, because as written it cannot pass.
+
+The predicate (`understudy/turns/klee-sparks-bt2r/MANIFEST.md`, `F2`) requires
+the Spark bank to read **exactly 3** at the start of the next turn. But board
+`t03` also grants *Mine Toss*, which places a Bomb of its own, so the proposed
+line puts **four** Bombs on the board and the refund is **4**. The reader
+forecast 4 and was correct; the predicate would have failed it anyway. That is
+the registration's defect, not the reader's.
+
+**The correction owed:** a re-posed `F2` must grade the refund **attributable to
+Bag of Tricks' own Bombs — at least 3** — or else the extra Bomb source must
+leave the board entirely. Either repair is acceptable; what is not acceptable is
+re-posing the exact-3 predicate on a board that cannot produce a 3.
+
+**The published boards and MANIFEST are NOT edited** (R101b): they are the
+record of a run that has already happened, and they stand as published. The
+correction applies to the next registration, which is a new document.
+
+**5. THE WHOLE-FIGHT FAILURE CONDITION — pre-registered NOW, by this ruling.**
+
+This is registered before the whole fight is drafted, so that no later reading
+of the result can pick its own threshold after seeing it.
+
+> When the arm reaches whole-fight play: **if the priced mode proves effectively
+> automatic** — taken on essentially every turn where an affordable detonator is
+> in hand, with no free-mode choices actually taken and no named reason on any
+> turn to preserve the extra Spark — **then the bridge has collapsed into free
+> damage and the arm RETURNS TO DESIGN again.**
+
+The reasoning is the one-Spark cost above. A cost of one Spark is a real cost
+only if a Spark is sometimes worth more elsewhere. If a whole fight never once
+shows the player preferring that Spark, the cost is nominal and the decision the
+card exists to create does not exist.
+
+**6. Three sunk rounds are not evidence, in either direction.**
+
+`KLEESPARK-BT1`, `KLEESPARK-BT2` and its rerun cost real work, and none of that
+work argues for keeping the arm. The two earlier rounds returned on the
+**instrument**, which says nothing about the card. The rerun returned on the
+**design**, which is why this ruling exists at all. What earned the arm its
+continuation is the corrected one-Spark trade in item 1 — a real, if small,
+decision that the wire shows and that the reader articulated unprompted. Had the
+economics come back genuinely free, option (4), dropping the arm, would have
+been the honest ruling, and the three rounds already spent would not have saved
+it.
+
+**What this ruling does NOT do.** It re-prices nothing: the 3 stands, §4.2's
+price table is untouched, R225's mode-head clause is unchanged, and *Pounding
+Surprise* stays exactly as it is in both engines. It says nothing about win
+rate, balance or fun (R215 B, Guardrail-7). It discharges no part of `EB-224`'s
+acceptance line beyond the redesign direction itself — the whole fight is still
+owed, and it is what comes next.

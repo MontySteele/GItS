@@ -730,7 +730,18 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     detonation restores enough bank to play the competing sink, or the price
     otherwise imposes no meaningful opportunity cost across the turn and the
     next, the arm RETURNS TO DESIGN) that binds `KLEESPARK-BT2`, the repaired
-    round, before it is drafted.
+    round, before it is drafted. **`KLEESPARK-BT2`'s RERUN fired that
+    condition on (a) and the arm RETURNED TO DESIGN; R230 (2026-08-30) then
+    ruled the redesign at option (3), QUALIFIED: the refund loop is ACCEPTED as
+    the card's deliberate BRIDGE mechanic and the design intent is rewritten**
+    — the priced mode costs ONE NET Spark relative to the free mode after
+    detonation (bank 3 → 4 free, 3 → 0 → 3 priced) and locks THREE Sparks of
+    up-front liquidity, so it is not net-free and a detonator changes only WHEN
+    the liquidity returns. Owed before the whole fight: `F2`'s predicate must
+    grade the refund ATTRIBUTABLE to Bag's own Bombs (≥ 3), the published `bt2r`
+    boards standing as they are (R101b). R230 PRE-REGISTERS the whole-fight
+    failure condition: if the priced mode is effectively automatic wherever an
+    affordable detonator exists, the arm RETURNS TO DESIGN again.
     Whole fights are unblocked, the two lifecycle throws being
     fixed and the three-fight soak green.
     A4/A6 unminted until their prerequisites are real; A1-extended and A5
