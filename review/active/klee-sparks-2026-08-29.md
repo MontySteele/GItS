@@ -2919,7 +2919,9 @@ It is not a candidate for *this* re-authoring.
 ### 14.3 Recommendation — a numbered pick, and nothing is marked default
 
 This is a design call between genuinely different directions, so it goes back
-whole. Every option keeps the set at eight and replaces Attacks only.
+whole. Options (1) through (3) keep the set at eight and replace Attacks only;
+(4) changes nothing; (5) — added 2026-08-29 on the relayed review — creates no
+prototype row at all and acts on the shipped pool instead.
 
 **(1) Re-author two: `Fwoosh!` → Behind the Barrel (candidate 3), and
 `Firework Finale` → Powder Keg (candidate 4).**
@@ -2947,6 +2949,16 @@ prototype generator emits all four today. **Two tier-0 pricing legs**, both in
 needs none. **No art**: prototype rows are dev-only and carry no portrait; art is
 owed at acceptance, when the rows move to the real sheet, and would be two
 portraits.
+
+**What the 2026-08-29 corrections add to this option's cost, and nothing else
+moved.** (i) Powder Keg's effects must be emitted `place_bomb` **then**
+`modify_bombs` — the opposite of `Chain Fuse`'s shipped order — or the card
+loses 3 of its 12 (candidate 4's correction block). That is a build instruction,
+not a new leg. (ii) Candidate 3 now carries a **strict domination over
+`hold_the_line`** that is inert in the dev arm and live at acceptance, so this
+option's *acceptance* step owes either a reprice of the new row or a migration
+of the old one — see option (5). Neither correction changes the two pricing
+legs, the "no new C#" finding, or the art count.
 
 **(2) An alternative pair: `Bang Bang!` → Slow Fuse (candidate 1), and
 `Dodoco Blast` → Minefield (candidate 2).**
@@ -2982,6 +2994,45 @@ says the bank never held two affordable uses — which may be a generation probl
 next gate is a second whole fight with the generation question answered first,
 and (e) stays available afterwards with better evidence behind it.
 
+*Relayed review, on option (4):* the reviewer's reading of this option is **not**
+"the damage-only set is fine". It is **"pause replacement, and test or migrate
+the existing utility sinks first"** — i.e. the case for doing nothing to the
+prototype set is really a case for doing something to the *pool* rows in §14.2's
+preface. Recorded beside (4) because it is a different option from (4) as
+written, and it is now carried as (5) rather than folded in here.
+
+**(5) Migrate before you duplicate: rule on the three existing non-damage
+spenders under the alternative-cost economy first, test the real mixed sink
+pool, and create no new rows until that read is in.**
+
+The three hybrids in §14.2's preface — `powder_charge`, `hold_the_line`,
+`smoke_and_sparks` — already do what candidates 3, 5, 6 and 7 propose to do,
+one economy over. Under this option the first act is an explicit decision about
+**what they become in the priced-sink world**: either they stay **hybrid**
+(1 Energy *and* a Spark price, so the bank alone cannot reach them and they
+remain a second, Energy-gated tier of sink), or they migrate to **Spark-only**
+(0 Energy, price paid entirely in Sparks, which is the economy the eight
+prototype rows are testing). That is one ruling covering three rows, and it is
+prior to any re-authoring because it decides whether a new row is a *new kind*
+or a *duplicate at a second price* — which is exactly what candidate 3 turned
+out to be against `hold_the_line`, and candidates 1 and 6 against `Chain Fuse`
+and `Careful Arrangement`. The next whole fight then grants **the mixed pool**
+— the prototype ladder plus the migrated utility spenders — and asks §14.4's
+hold question of a deck that actually contains a non-damage destination,
+without minting a single new id. **If, after that read, a qualitative rung at
+price 3 is still wanted, the smallest next step is to prototype the corrected
+Powder Keg (candidate 4) alone, in `Firework Finale`'s slot, and nothing else.**
+
+What it costs: no new C#, no art, and no new prototype row in the migrate-only
+form. It does need the same **two tier-0 pricing legs** if Powder Keg follows
+(and none if it does not), plus whatever the migration itself moves on the real
+sheet — which is a shipped-pool edit and therefore a heavier, less reversible
+act than a dev-only prototype row, and that is the honest argument against this
+option. What it gives up: a whole fight's delay before any new kind is tested,
+and the possibility that the hybrids' Energy cost is precisely why they never
+compete with the bank, in which case the read comes back null for a reason that
+has nothing to do with kind.
+
 ### 14.4 What would prove it
 
 Whichever pair is chosen, the unit that decides it is **another whole fight**,
@@ -3002,6 +3053,48 @@ re-authorings should move down if they are doing anything at all. And the run
 sits on an **author-disjoint seat** — whoever writes these rows may not grade
 them, which is the independence question now open on QUEUE and which this branch
 does not settle. The rows above are Claude's, so the grading chair is not.
+
+**THE AMENDED PROOF (2026-08-29). The five conditions below were supplied by
+the relayed independent review and are adopted into this proposal as written.**
+They are **instrument conditions, not design picks** — none of them chooses a
+candidate, a price or an option — so the ladder (R212) lets them be adopted
+here rather than returned; the pick at §14.3 is untouched by all five.
+
+1. **A capped batch, and UNREACHED is a real outcome.** The run is a bounded
+   batch of fights rather than one, and it stops as soon as **three or more
+   combat turns have held two simultaneously affordable uses of the bank**. If
+   the batch's cap is reached without that, the registration grades
+   **UNREACHED**, not FALSE: §12.9 already found the precondition was never met
+   once, and a hold prediction evaluated on a board that never offered a choice
+   measures the generator, not the sink. UNREACHED must be a printed outcome on
+   the slate before the run, or the grader will be tempted to read a null as a
+   refutation.
+2. **A hold counts only when the model names what it is holding for.** The bare
+   `W3` detector — an affordable damage sink in hand at `end turn` — stays as
+   the mechanical floor, but it is **not sufficient** on its own: the turn
+   scores as a hold only if the recorded reasoning **names the future sink or
+   the future board state the bank is being preserved for**. A player who
+   simply forgot the card is in hand produces the same transcript as a player
+   who held, and the whole question is which of those §14.1 has created.
+3. **The deck includes the existing utility spenders.** The granted deck carries
+   `hold_the_line`, `smoke_and_sparks` and `powder_charge` — in whichever form
+   option (5)'s migration ruling gives them — alongside the prototype ladder.
+   §12.2 granted none of them, so the fight that produced the null never
+   contained a non-damage destination at all, and repeating that grant would
+   repeat the artefact rather than test the fix.
+4. **The price-3 prediction is conditional.** *"The price-3 rung is bought at
+   least once"* is registered **only if the chosen option puts a redesigned card
+   at price 3** — i.e. options (1) or (5)-with-Powder-Keg. Under option (2) the
+   rung is still `Firework Finale` and the prediction would be a re-run of a
+   settled finding; under option (3) there is no price-3 row to buy. A
+   prediction that cannot apply must not be on the slate.
+5. **The deciding player is author-disjoint.** As above, and now stated as a
+   registration condition rather than an aspiration: the seat that plays and
+   the seat that grades may not share a model family with the rows' author
+   (R217 C, `OPERATIONS.md:607`; `understudy/seat.py:275-279`). All eight
+   prototype rows carry `authored_by: [claude]`, and any row added by this
+   section will too. This is the same condition QUEUE `M64` is open on; if
+   `M64` is still open when this run is registered, the run waits on it.
 
 ### 14.5 The relayed review of §14, fact-checked (2026-08-29)
 
