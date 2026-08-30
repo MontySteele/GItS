@@ -1152,6 +1152,24 @@ confiscated	ImageGen/images/cards/klee/confiscated.png	500	380	cover_autocrop	co
 watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	y0.16	shortlist	2	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
 watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
 watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover_autocrop	contain@0.08	shortlist	4	png	Sangonomiya Kokomi Multi Wish.png		splash	kokomi_pool
+# --- 2026-08-30 art pass: watch_of_the_shallows CENSUS-DERIVED SHORTLIST (PROPOSAL,
+#     NOT a pick). Built by tools/art_source_census.py's own method -- every row
+#     below takes an UNCLAIMED (source, anchor) slot off the free_anchors column of
+#     docs/current/art/kokomi-source-census.tsv, so nothing displaces an incumbent.
+#     Ranks stay >= 5 BY DESIGN, for the same reason the run-9 block above stays
+#     >= 2: art_process promotes only rank 1, so a candidate set lands without
+#     making a pick, and that block's 'do not renumber to rank 1 without a ruling'
+#     still binds this face. The proposal ORDER is P1=rank 5, P2=rank 6, P3=rank 7.
+#     P1 Profile x0.55 -- splash, figure legible, the composed standing read a ward
+#        power wants; free anchor on a source whose only rank-1 claim is x0.64.
+#     P2 Namecard The Deep x0.50 -- literally a shallows: coral and a shoal, no
+#        figure. Environment art as a card face is §6 open question 2 and STILL
+#        UNANSWERED; offered because ebb_tide already ships this source at rank 1,
+#        so the precedent exists, not because the question is settled.
+#     P3 Profile x0.36 -- same source, tighter on her; the fallback if P1 reads busy.
+watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	x0.55	shortlist	5	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	x0.50	shortlist	6	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
+watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	x0.36	shortlist	7	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
 # EB-121: shortlists for EB-69's fourteen fill faces (R198). Ranks 1-2 are UNCLAIMED (source, anchor) slots from the recounted census (docs/current/art/kokomi-source-census.tsv); rank 3 keeps the shipped convention of one deliberate kit-art option that must never be the default.
 the_gunbai_turns	ImageGen/images/cards/kokomi/the_gunbai_turns.png	500	380	cover	y0.22	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
 the_gunbai_turns	ImageGen/images/cards/kokomi/the_gunbai_turns.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
