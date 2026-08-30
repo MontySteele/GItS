@@ -1,0 +1,245 @@
+You are reading a COMPLETED round of a blind staged-turn playtest funnel for a
+card game's PROTOTYPE mechanic, against a prediction slate written and committed
+BEFORE any board was staged. You did not design the mechanic, you did not write
+the slate, and you are NOT being asked whether the mechanic is good, fun or
+balanced. You are being asked, slot by slot, whether the recorded evidence meets
+each prediction's own stated threshold, and then whether this round's instrument
+should ADVANCE or be RETURNED.
+
+THE MECHANIC, only as much as you need. The character banks a resource called
+Sparks. Some Attacks cost 0 Energy and instead print a SPARK PRICE ("Spend 2
+Sparks"). Payment is all-or-nothing: a card whose price the bank cannot meet is
+printed as unplayable. The prices in this round are Ka-pow! 1, Fwoosh! 1,
+Bang Bang! 2, Dodoco Blast 2, Firework Finale 3. The generator (Powder Pop) is
+in NO hand of this round, deliberately.
+
+THE SHAPE OF THE EVIDENCE. Six boards were staged in the live game through a dev
+door. Each board's page was shown, blind, to two readers: a LOCAL model in a
+SHADOW chair (recorded, graded, never replayed, decides nothing) and a fresh
+Claude Opus reader with no repo access, which is the DECIDING tester. Two boards
+were additionally read by a third, independent seat. Every form is graded by
+mechanical falsifiers, not by a model: a form whose second question has no
+answer is REFUSED (no_second_line); a form whose fourth question is "no" is
+REFUSED (intent_insensitive); a form naming a single-target card with no target
+is REFUSED (target_missing). REFUSED means "falsified", not "bad". A SURVIVING
+line is then REPLAYED on the live game and the board read back.
+
+WHAT THIS ROUND EXISTS TO REPAIR. The previous round could not stage (a) an
+empty bank with a Spark-priced card and NO generator in hand, (b) more than one
+enemy on a board with an area-of-effect Spark card, (c) a spend-versus-hold
+board whose registered threshold its own board set could reach, and (d) any
+replay that paid a price of 2 off a bank of exactly 2.
+
+HOW TO GRADE. For each slot below, in order, answer these four, numbered:
+ 1. The evidence. Quote the readers' own words, naming the board.
+ 2. Against the threshold. Count against the slot's own threshold and
+    denominator exactly as written. Do not substitute one you prefer.
+ 3. Verdict: PREDICTED, SPLIT, MISS, UNREACHED or VOID.
+ 4. Judgment: RETURN, ADVANCE or ESCALATE, for that slot.
+
+You may not propose a remedy beyond naming what needs rework, and you may not
+supply a card text, a number or a price. Where the record does not contain the
+observable a slot needs, UNREACHED is the honest answer and saying so is the
+finding.
+
+Close with: (a) one paragraph on whether the REPAIRED INSTRUMENT did what it was
+built to do, (b) one line on the local shadow seat, and (c) an overall
+RETURN / ADVANCE / ESCALATE for the arm.
+
+##########################################################################
+## THE SLATE
+
+P1  On at least 2 of the boards carrying slot S1 (t01, t04, t06 -- the bank
+    reaches the cheapest Spark price and cannot buy every affordable one), the
+    DECIDING form's answer to question 2 names a Spark-priced card DIFFERENT
+    from the Spark-priced card its chosen line plays. Falsifier: fewer than 2.
+
+P2  On BOTH boards carrying slot S2 (t02, t05 -- empty bank, Spark-priced card
+    in hand, no generator), the DECIDING form's chosen line plays NO
+    Spark-priced card and no reader claims a Spark-priced card is free or
+    affordable. Falsifier: either board violating that.
+
+P3  On BOTH boards carrying slot S3 (t04, t06 -- three or more enemies with two
+    affordable Spark uses), the DECIDING form's chosen line plays the ALL-enemies
+    sink rather than the other affordable Spark sink. Falsifier: either board
+    choosing the non-area sink. A board that draws fewer than three live enemies
+    is UNREACHED, not MISSED.
+
+P4  On the boards carrying slot S4 (t03, t06 -- a 2-price on a bank of exactly
+    2), where the REPLAYED line plays Bang Bang!: the game accepts it at a bank
+    of 2 and the post-play bank reads exactly 0. Falsifier: a refusal, or a
+    post-play bank other than 0. Where no replayed line plays Bang Bang! at all,
+    P4 is UNGRADED and is not scored PREDICTED by the absence of a
+    counterexample.
+
+P5  The per-turn verdict agreement between the SHADOW local seat and the
+    DECIDING fresh-Opus reader over the first five boards is BELOW 4 of 5.
+    Falsifier: agreement of 4 or 5 out of 5.
+
+##########################################################################
+## WHAT THE GAME ACTUALLY DREW, board by board
+
+
+### Board t06
+bank 2; hand Dodoco Blast(2, ALL enemies) / Bang Bang!(2, 5 twice at random) / Kaboom! / Duck and Cover; THREE enemies: Twig Slime (S) 9 HP Attack 4, Leaf Slime (M) 32 HP giving 2 Status cards, Leaf Slime (S) 15 HP Attack 3.
+
+**DECIDING (fresh Opus, no repo access)** -- verdict SURVIVES
+- line: Dodoco Blast -> Kaboom! on Twig Slime (S) -> Duck and Cover
+- Q1: I opened with Dodoco Blast, which costs no energy and eats both of my Sparks to put 7 on every slime: the Twig drops to 2, the small Leaf to 8, and the big Leaf to 25. Then Kaboom! for 1 energy finishes the Twig Slime outright, which removes the 4-damage attack from the incoming total. That leaves only the small Leaf's 3-damage swing, so I spent another energy on Duck and Cover for 5 Block and take zero damage this turn. Two energy spent of three, both Sparks spent, one enemy dead, and chip damage on both survivors. At 40 of 62 HP I am happy to buy a clean turn rather than push face damage I cannot convert into a kill anyway.
+- Q2: The only real branch was Bang Bang! instead of Dodoco Blast, since I have exactly one Spark card's worth of Sparks and playing one locks the other out. Bang Bang! is 5 twice into random targets, which against three enemies is 10 total damage with no guarantee either hit lands on the Twig, versus Dodoco Blast's guaranteed 21 spread across the board with the Twig left in Kaboom! range. I gave it about five seconds. I also briefly weighed skipping Duck and Cover and pointing Kaboom! at the 32-HP Leaf Slime to start chewing on the real health bar, but eating 3 damage and gaining nothing else was strictly worse than a full-block turn when I have the spare energy for both. Honest answer: this turn is not close. Dodoco Blast dominates Bang Bang! outright with three bodies on the board, and the rest of the line falls out of the energy count.
+- Q3: It gave up Bang Bang! entirely — the Spark bank goes to 0 and that card sits dead in my hand for the rest of the combat unless something refills Sparks, so in practice I burned a card by drawing a second Spark card I could never afford. It also gave up a point of energy, which went nowhere, and it gave up tempo on the Leaf Slime (M): it is at 25 of 32 after all that and it is still going to hand me 2 Status cards, which is the thing that will actually cost me over the next few turns. And a little of Dodoco Blast's damage was wasted as overkill once Kaboom! landed on the Twig — 7 of the 21 went into a body that needed 9 total.
+- Q4 (True): Yes, but only in the last two plays. If nothing on the board were attacking — say both slimes were Strategic and only handing me Status cards — Duck and Cover becomes pure waste and I would drop it, and Kaboom! would go into the Leaf Slime (M) instead of the Twig, because with no damage coming in the priority flips from shutting off attacks to making progress on the 32-HP body that is generating the Status cards. Dodoco Blast, on the other hand, is intent-proof here: three enemies, free to cast, and it is the only way to spend my Sparks well, so it leads no matter what the telegraphs say. Conversely, if the big Leaf were winding up a large attack instead of the Status play, I would still open the same way and still kill the Twig, so the change only comes from removing the incoming damage, not from making it worse.
+
+**SHADOW (local model; recorded, never replayed)** -- verdict SURVIVES
+- line: Dodoco Blast -> Kaboom! on Leaf Slime (S) -> Duck and Cover
+- Q1: I played Dodoco Blast first, spending 2 Sparks to deal 7 damage to all enemies, killing Twig Slime (S) and reducing both Leaf Slimes. Then I played Kaboom! on Leaf Slime (S), killing it. Finally I played Duck and Cover for 5 Block. I left 1 Energy unused.
+- Q2: I considered playing Bang Bang! instead of Dodoco Blast, since it also costs 0 and spends 2 Sparks, but its 5 damage twice to random enemies is less controlled and lower total than Dodoco Blast's 7 damage to all enemies, so I rejected it.
+- Q3: It gave up the 2 Spark bank for future turns and the chance to use Bang Bang!'s random hits. It also left 1 Energy unused, and the 5 Block may be wasted if the remaining Leaf Slime (M) does not attack.
+- Q4 (True): Yes. If the Leaf Slime (S) were not an immediate attacker or the Leaf Slime (M) telegraphed a larger attack, I would likely retarget Kaboom! at the higher-priority enemy; Dodoco Blast and Duck and Cover would probably remain.
+
+**THIRD SEAT (independent model)** -- verdict SURVIVES
+- line: Dodoco Blast -> Kaboom! on Twig Slime (S) -> Duck and Cover
+- Q1: I played Dodoco Blast, then Kaboom! on Twig Slime (S), killing it, then Duck and Cover.
+- Q2: I seriously considered Bang Bang! instead of Dodoco Blast, followed by Kaboom! and Duck and Cover, but its random 10 damage was less reliable than dealing 7 to every enemy.
+- Q3: It gave up the chance for Bang Bang!'s two random hits to concentrate 10 damage on one enemy; instead, it guaranteed broader damage and removed the 4-damage attacker.
+- Q4 (True): Yes. A sufficiently dangerous attack telegraphed by one of the Leaf Slimes could have made me consider the concentrated but random Bang Bang! line or change the Kaboom! target.
+
+**REPLAY on the live game** -- ok=True, played ['play Dodoco Blast', 'play Kaboom!', 'play Duck and Cover']
+- enemies: [('Twig Slime (S)', 9, None), ('Leaf Slime (M)', 32, 25), ('Leaf Slime (S)', 15, 8)]
+- player before {'hp': 40, 'block': 0} after {'hp': 40, 'block': 5}
+
+
+### Board t04
+bank 2; hand Dodoco Blast(2, ALL enemies) / Fwoosh!(1, one enemy) / Kaboom! / Duck and Cover; the seed drew ONE enemy, Shrinker Beetle 30/39, telegraphing a Debuff. THE BOARD WAS BUILT FOR THREE ENEMIES AND THE GAME GAVE ONE.
+
+**DECIDING (fresh Opus, no repo access)** -- verdict SURVIVES
+- line: Fwoosh! on Shrinker Beetle -> Kaboom! on Shrinker Beetle
+- Q1: I played Fwoosh! into the Shrinker Beetle and then Kaboom! into it, for 15 damage total, and I stopped there. The beetle sits at 30 HP and there is no arrangement of this hand that kills it, so the turn is just about squeezing out the most damage I can without paying for anything I do not need. Fwoosh! is free in energy and costs one of my two Sparks for 8 damage; Kaboom! costs one of my three energy for 7. That leaves me two unspent energy and one unspent Spark, and I could not find anything worth doing with either. I deliberately did not play Duck and Cover: the beetle's telegraph says it is applying a debuff, not swinging, so 5 Block would sit there and expire without ever touching anything. Playing it would have looked like a turn with more actions in it, but it would have bought me exactly nothing.
+- Q2: The only thing I actually weighed was Dodoco Blast, and it fell apart the moment I did the arithmetic. It wants both of my Sparks and pays 7 damage to everything on the board — but there is only one thing on the board, so the 'ALL enemies' clause is worth nothing here, and 7 is less than the 8 Fwoosh! gives me for half the Spark cost. It is strictly worse in every column that matters on this board. After spending on Fwoosh! I am down to one Spark, so Dodoco Blast is not even castable as a follow-up; the two Spark cards are mutually exclusive and one of them is plainly dominated. I also briefly considered whether holding the second Spark for a future turn was a real consideration, but since nothing in this hand can bank or spend it further this turn, holding it is what happens by default rather than a choice I made. Honestly, this turn did not present me with a decision — it presented me with a sum.
+- Q3: In concrete terms I gave up the 5 Block from Duck and Cover, one Spark, and two energy, and I do not think any of the three was worth having. The Block is the only one that could theoretically matter, and it only matters if I have misread the beetle or if it does something on its turn that the printed intent does not tell me about — that is the real risk I took, trusting the telegraph. I also gave up the AoE tag on Dodoco Blast, which is meaningless against a single target but would be the thing I regret if the fight were about to add bodies. The other cost is tempo-shaped rather than immediate: I emptied my Spark bank down to 1 to squeeze out one extra point of damage over the Dodoco line, so if next turn hands me something that wants two Sparks I will not have them. Against a 30 HP enemy where I am chipping 15 a turn, I judged the point of damage now was worth more than the option later.
+- Q4 (True): Yes, though only at the margin. If the beetle were telegraphing an attack of any real size, Duck and Cover goes from dead card to obvious inclusion — I have three energy and Kaboom! only wants one, so I would play both and end the turn with 5 Block up rather than leaving energy on the table. The two attacks would not change: Fwoosh! and Kaboom! are still the best damage available regardless of what the enemy is doing, and Dodoco Blast stays dominated no matter the intent, because the intent does not change how many enemies there are. So the attacking half of my line is intent-proof and the defensive half is entirely intent-driven. An intent that added a second enemy — a summon, say — would be the one thing that could genuinely flip the Spark decision toward Dodoco Blast, but a debuff telegraph is not that.
+
+**SHADOW (local model; recorded, never replayed)** -- verdict REFUSED
+- line: Fwoosh! on Shrinker Beetle -> Kaboom! on Shrinker Beetle -> Duck and Cover
+- Q1: I played Fwoosh! at Shrinker Beetle, then Kaboom! at Shrinker Beetle, then Duck and Cover. This spends 1 Energy and 1 Spark, deals 15 total damage, and gains 5 Block.
+- Q2: I seriously considered Dodoco Blast, Kaboom!, and Duck and Cover. That line would spend both Sparks and hit all enemies, but with only one enemy it deals 14 total damage instead of 15 and uses more Spark for less single-target value.
+- Q3: The chosen line gave up Dodoco Blast, including its all-enemies effect and the chance to spend the second Spark. It also leaves 1 Energy and 1 Spark unused, but there was no better affordable use for them against this single enemy.
+- Q4 (False): No. A different intent would not have changed the line. If the enemy intended to attack, Duck and Cover is already being played. If it intended to apply a debuff, Duck and Cover is still harmless and the attack choice remains the same. Dodoco Blast is still inferior to Fwoosh! against a single enemy.
+
+**REPLAY on the live game** -- ok=True, played ['play Fwoosh!', 'play Kaboom!']
+- enemies: [('Shrinker Beetle', 30, 15)]
+- player before {'hp': 42, 'block': 0} after {'hp': 42, 'block': 0}
+
+
+### Board t02
+bank EMPTY; hand Fwoosh!(1, printed 'Cannot be played right now') / Kaboom! x2 / Duck and Cover / Jumpy Dumpty; ONE enemy, Nibbit 46 HP, Attack 12. No generator in hand.
+
+**DECIDING (fresh Opus, no repo access)** -- verdict REFUSED
+- line: Jumpy Dumpty -> Kaboom! on Nibbit
+- Q1: I played Jumpy Dumpty for 2 energy and then one Kaboom! with the last energy. Fwoosh! is dead on arrival because the Spark bank is empty, so my real budget is 3 energy across two Kabooms, Duck and Cover, and Jumpy Dumpty. Jumpy Dumpty is by far the best energy-for-damage in the hand: with only Nibbit on the board, 'random enemies twice' can only go one place, so it is a flat 16 now, plus a Bomb that will land 6 more later, all for 2 energy. Adding a Kaboom pushes this turn to 23 face damage on a 46 HP enemy, meaning I am halfway through it on turn one and the pending Bomb carries the rest of the way. Against a lone 46 HP body with a plain 12-damage swing and 40 HP in my pocket, I am not under any pressure that would make me want to spend energy on anything but shortening the fight.
+- Q2: The line I actually weighed was Jumpy Dumpty plus Duck and Cover instead of the Kaboom: 16 damage and 5 Block, blunting the incoming 12 down to 7. I also glanced at the double-Kaboom-plus-Duck-and-Cover line for 14 damage and 5 Block, but that is strictly worse on damage than the Jumpy Dumpty opening and I dropped it quickly. The Duck and Cover version was the only one I thought about for more than a moment, and it lost on simple arithmetic: 5 Block saves exactly 5 HP once, while 7 extra damage is a fifth of the enemy's health and plausibly the difference between the fight ending in three turns instead of four. Saving a whole enemy turn is worth more than 12 HP, so trading 5 HP for that acceleration is not close.
+- Q3: It gave up the 5 Block, so I take the full 12 and drop to 28 HP, and it also spends the tempo card I would otherwise be able to hold if a bigger swing shows up later. More concretely, I burned one of my two Kabooms this turn rather than keeping a spread of options for a turn where the Bomb has already gone off and I might want to line up an exact lethal. Duck and Cover is now still in hand for a later turn, which is fine, but I have effectively decided that my defensive card is a luxury and that I intend to win this by out-damaging a body that only hits for 12. If Nibbit has some on-death or on-low-HP behavior I cannot see from this page, I am walking into it at 28 HP with no Block instead of 33 with 5.
+- Q4 (False): Honestly, no — I could not construct an intent that flips this. A bigger telegraphed attack makes 5 Block a smaller and smaller fraction of the hit, so it argues even harder for killing faster rather than chip-mitigating; a defensive or buffing intent removes the reason for Block entirely; and a small attack makes Block pointless. Duck and Cover would only start to matter if the intent were something like a hit I could fully absorb, and 5 Block cannot fully absorb anything Nibbit is plausibly doing at this HP total. The one thing that would change the line is not the intent at all but the board: a second enemy would make Jumpy Dumpty's random targeting unreliable and might push me toward the two guaranteed Kabooms instead. Given only one enemy, the play is forced enough that I would call the decision not close.
+
+**SHADOW (local model; recorded, never replayed)** -- verdict SURVIVES
+- line: Kaboom! on Nibbit -> Jumpy Dumpty on Nibbit
+- Q1: I played Kaboom! on Nibbit, then Jumpy Dumpty on Nibbit. Fwoosh! was unplayable because the Spark bank is empty and the card is blocked by card logic. I did not play Duck and Cover because the telegraphed 12 damage is survivable at 40 HP.
+- Q2: I seriously considered playing both Kaboom! cards plus Duck and Cover for 14 damage and 5 Block, but I rejected it because the enemy's 12 damage does not threaten me and the extra damage from Jumpy Dumpty is more valuable than 5 Block.
+- Q3: The chosen line gave up 5 Block from Duck and Cover. It also gave up playing the second Kaboom!, but Jumpy Dumpty's 16 damage more than replaces that missing 7 damage while using the same total energy.
+- Q4 (True): Yes. If the enemy intent had been a much larger attack where 5 Block could be the difference between surviving and dying, I would have considered or chosen the two Kaboom! plus Duck and Cover line. The printed 12 attack does not make that tradeoff worthwhile.
+
+**REPLAY**: none. The deciding form was REFUSED, and a refused form is not replayed.
+
+
+### Board t03
+bank 2; hand Bang Bang!(2) / Kaboom! x2 / Duck and Cover; ONE enemy, Shrinker Beetle 40 HP, telegraphing a Debuff. No Bomb on the field.
+
+**DECIDING (fresh Opus, no repo access)** -- verdict REFUSED
+- line: Bang Bang! -> Kaboom! on Shrinker Beetle -> Kaboom! on Shrinker Beetle -> Duck and Cover
+- Q1: I played my entire hand. Bang Bang! costs no energy and I had exactly the 2 Sparks it asks for, so it went first: with a single enemy on the board, its two random 5-damage hits both land on the Shrinker Beetle for 10. Then both copies of Kaboom! into the Beetle for 7 apiece, 14 more, which spends two of my three energy. That leaves one energy and one card, so Duck and Cover goes down for 5 Block. Total: 24 damage onto a 40 HP enemy, leaving it at 16, plus 5 Block standing. I did not have to leave a single card or a single point of energy unused, which is the whole reason the turn resolved itself in about two seconds.
+- Q2: Honestly, no. I looked for a reason to hold something back and there wasn't one. The only shape of a choice here would be whether the 5 Block is worth an energy, but there is nothing else on the page to spend that energy on, and no retain or carryover is printed anywhere, so holding Duck and Cover would just throw it away. The only other thing I weighed for a moment was Spark economy: Bang Bang! eats my whole bank of 2 and nothing in this hand rebuilds it, so if I expected a bigger Spark payoff next turn I might want to bank. But the page shows me nothing about what I draw next and Bang Bang! is free, so refusing to spend Sparks would mean refusing 10 free damage for a payoff I have no evidence exists. Playing everything is strictly better than every alternative I could name — that is dominance, not a decision.
+- Q3: It gave up the 2 Sparks and it gave up nothing else. Since I could afford the whole hand, there was no opportunity cost between cards — no damage traded for block, no tempo traded for setup. The Spark spend is the only real expenditure, and it is only a cost at all if some future turn wanted a bank of 2, which I cannot see from here. In a normal turn the interesting sacrifice would be exactly that tension: Sparks or damage, block or aggression. This turn has neither, so what I gave up is best described as the chance to make a choice.
+- Q4 (False): No. The Beetle telegraphing a debuff rather than an attack made the 5 Block feel cosmetic — Block does not stop a debuff — but it changed nothing, because the Block cost me an energy I had no other use for. Swap the intent to a big attack and I still play all four cards in the same order; the Block just starts mattering. Swap it to a heal or a summon and I still play all four, because more damage now is right against either. The only intent that could plausibly move me is one that punishes attacking (a thorns- or retaliate-style telegraph), and even then the page prints no such thing and my hand contains only attacks plus a block, so I would have no line to switch to. Across every intent I can imagine, the play is: empty the hand.
+
+**SHADOW (local model; recorded, never replayed)** -- verdict REFUSED
+- line: Bang Bang! -> Kaboom! on Shrinker Beetle -> Kaboom! on Shrinker Beetle -> Duck and Cover
+- Q1: I played all four cards: Bang Bang! spending the 2 Sparks, then both Kaboom! cards at Shrinker Beetle, then Duck and Cover. This deals 24 printed damage and gains 5 Block, leaving Shrinker Beetle at 16 HP.
+- Q2: I seriously considered playing both Kaboom! cards and Duck and Cover while saving the 2 Sparks. That line would deal 14 damage, gain 5 Block, and preserve the Spark bank, but it gives up the 10 damage from Bang Bang! with no current-turn benefit from keeping the Sparks.
+- Q3: The chosen line gave up the 2 Sparks and all 3 Energy. The main real cost is spending the Spark bank; if Sparks persist, this removes a future resource. It also leaves no cards unplayed, but none of the unplayed alternatives would have provided a better response to the telegraphed debuff.
+- Q4 (False): No. A different enemy intent would not have changed the line. The chosen line already plays the only Block card and all affordable damage. An Attack intent would make the 5 Block more relevant, but it would not make saving Sparks or skipping damage preferable; a Debuff or Strategic intent does not create a reason to hold back either.
+
+**REPLAY**: none. The deciding form was REFUSED, and a refused form is not replayed.
+
+
+### Board t05
+bank EMPTY; hand Firework Finale(3, unplayable) / Ka-pow!(1, unplayable) / Kaboom! x2 / Duck and Cover; ONE enemy, Fuzzy Wurm Crawler 46/56, Attack 4. No generator in hand.
+
+**DECIDING (fresh Opus, no repo access)** -- verdict REFUSED
+- line: Kaboom! on Fuzzy Wurm Crawler -> Kaboom! on Fuzzy Wurm Crawler -> Duck and Cover
+- Q1: I played both Kaboom! copies into the Fuzzy Wurm Crawler and then Duck and Cover. That is literally my whole playable hand: two of my five cards are switched off because they want Sparks and I have none, and nothing else in the hand makes a Spark, so the only three cards I can touch cost exactly the three energy I have. Two Kaboom! take the Crawler from 46 to 32 and stick Pyro on it, and the 5 Block from Duck and Cover swallows the incoming 4 without a scratch. I did not have to weigh anything; I just spent everything because there was nothing to hold it for and no cost to spending it.
+- Q2: Honestly, no. The only thing that looked like a choice for a moment was whether Duck and Cover was worth an energy against a 4-damage hit, but since there is no third attack to spend that energy on and no reason to keep a card in hand, playing it is free value rather than a tradeoff. I also looked twice at Ka-pow! and Firework Finale hoping the Kaboom! attacks would bank a Spark on hit and open them up mid-turn, but nothing printed on them says so and the page says the Spark power is absent, so that was a dead end rather than a considered line. The hand plays itself.
+- Q3: Very little, which is my main complaint. In pure resource terms I gave up nothing: no card kept, no energy floated, no future turn compromised, and the only damage on the table was fully absorbed. What the line gave up is any chance of ever using the two Spark cards this turn, and by exhausting my playable cards I go into the next turn with a hand that is entirely redraw plus two blocked cards that will still be blocked unless a Spark source appears. So the cost is not paid this turn; it is that 40% of my hand is inert paper and I had no way to change that.
+- Q4 (False): No. Against a bigger attack I still play the same three cards in the same order, because there is nothing stronger to convert the energy into and 5 Block is all the defense I own. Against a non-attack intent, a buff, or a block, Duck and Cover becomes wasted Block, but it still costs me nothing real to play, so I would play it anyway rather than end the turn with an unspent energy and a card I have no plan for. The intent line is decoration here; the hand determines the turn entirely.
+
+**SHADOW (local model; recorded, never replayed)** -- verdict REFUSED
+- line: Duck and Cover -> Kaboom! on Fuzzy Wurm Crawler -> Kaboom! on Fuzzy Wurm Crawler
+- Q1: I played Duck and Cover, then both Kaboom! cards at Fuzzy Wurm Crawler. This costs all 3 energy, deals 14 damage, and gains 5 Block, which fully blocks the telegraphed 4 damage attack. Firework Finale and Ka-pow! were not played because the page says they cannot be played right now.
+- Q2: none
+- Q3: It gave up no playable card, damage, or Block. The only cards not played were already marked as unplayable, and all affordable playable cards were played.
+- Q4 (False): No. The chosen line plays every affordable playable card, and no card in the hand has a target choice, Exhaust choice, or Choose one option that would be affected by the enemy intent. A different telegraphed intent would not make any of the playable cards unplayable or create a better affordable alternative.
+
+**THIRD SEAT (independent model)** -- verdict SURVIVES
+- line: Kaboom! on Fuzzy Wurm Crawler -> Kaboom! on Fuzzy Wurm Crawler -> Duck and Cover
+- Q1: I played both copies of Kaboom! on Fuzzy Wurm Crawler, then Duck and Cover, dealing 14 damage and gaining 5 Block against the telegraphed 4 damage.
+- Q2: I seriously considered playing only both copies of Kaboom!, since that dealt the same damage, but it would leave the incoming attack unblocked.
+- Q3: It gave up nothing immediately available: the Spark cards were unplayable, and Duck and Cover did not reduce the damage dealt by the two playable attacks.
+- Q4 (True): Yes. If the enemy had not intended to deal damage, I would have omitted Duck and Cover because its Block had no other stated benefit.
+
+**REPLAY**: none. The deciding form was REFUSED, and a refused form is not replayed.
+
+
+### Board t01
+bank 3; hand Fwoosh!(1) / Bang Bang!(2) / Firework Finale(3) / Kaboom!(1 energy) / Duck and Cover; ONE enemy, Seapunk 45 HP, telegraphing Attack 11.
+
+**DECIDING (fresh Opus, no repo access)** -- verdict SURVIVES
+- line: Kaboom! on Seapunk -> Fwoosh! on Seapunk -> Bang Bang! -> Duck and Cover
+- Q1: I emptied the hand except for Firework Finale. Kaboom! into Seapunk for 7, Fwoosh! for 8, Bang Bang! for 5 twice into the only body on the field for 10, and then Duck and Cover with my last energy for 5 Block. That is 25 damage, taking Seapunk from 45 to 20, and it turns the incoming 11 into 6, so I end the turn at 38 of 62 instead of 33. The reason I ended up here is that the three Spark cards happen to sit on the same exchange rate: Fwoosh! is 8 for one Spark, Bang Bang! is 10 for two, and together they are exactly 18 for three Sparks, which is exactly what Firework Finale buys for the same three. Since the damage is a tie, everything else broke it. The two-card version leaves both cards in my deck instead of exhausting one, and it puts three separate Pyro applications on the enemy instead of one, and it does not gamble on my only enemy dying mid-card. Kaboom! and Duck and Cover are not competing for anything - I have 3 energy, they cost 1 each, and there is nothing else on the page to spend energy on - so both simply get played.
+- Q2: The real alternative was Firework Finale plus Kaboom! plus Duck and Cover: 18 + 7 = 25 damage, the same 25, with a card left over in hand. I looked at that one properly rather than dismissing it, because a single 18-damage hit is not always the same as 8 + 5 + 5 - if the enemy had a threshold effect, or if some kind of per-hit mitigation existed, the shapes would diverge. Nothing on this page gives Seapunk any such text, so the two lines collapse to the same number and I picked the one that keeps a card and stacks more Pyro. I also briefly weighed holding Duck and Cover to keep a Block card for a later, bigger telegraph, and holding Sparks rather than spending them all. Both of those died fast: Block does not carry across turns in anything this page tells me, my energy has no other outlet, and there is no Spark income printed anywhere here, so a banked Spark is just damage I did not deal.
+- Q3: It gave up Firework Finale as a live option for the rest of the fight in the sense that it is now stranded - my Spark bank is 0 and the page tells me nothing about how Sparks come back, so a card that demands three of them may sit dead in my hand for several turns. If Sparks refill generously, that is nothing; if they trickle, I have kept a card I cannot cast and spent the two I could recast cheaply, which is the inverse of what I want. It also gave up the option of dealing all 18 in one packet, which matters if Seapunk turns out to have something that punishes being hit repeatedly, and it gave up all defensive flexibility: I am at 0 Block going into next turn with nothing banked and no cards left except an uncastable Finale, so whatever the next telegraph is, I meet it with a fresh draw and no cushion.
+- Q4 (True): Yes, but only at the edges - the damage half of the turn is untouchable. Against a non-attacking intent, a buff or a block or a debuff telegraph, I would drop Duck and Cover entirely and end the turn with the energy unspent, since 5 Block against nothing is pure waste and there is at least a chance the card is worth more next turn when something is actually swinging at me. Against a much larger attack, say 25 or 30, the line would also not change but for a different reason: 5 Block is all the mitigation this hand can produce, so I would still play it, still dump everything, and just race. The three Spark cards and Kaboom! are effectively forced no matter what Seapunk is doing - I have exactly one target, exactly one way to convert 3 Sparks into 18 damage, and no defensive option large enough to make turtling a real plan. So the intent moves one card, and only one card.
+
+**SHADOW (local model; recorded, never replayed)** -- verdict REFUSED
+- line: Bang Bang! on Seapunk -> Fwoosh! on Seapunk -> Kaboom! on Seapunk -> Duck and Cover
+- Q1: I played Bang Bang! at Seapunk, then Fwoosh! at Seapunk, then Kaboom! at Seapunk, then Duck and Cover. This spends all 3 Spark and 2 Energy, deals 25 total damage to Seapunk, and gains 5 Block before the telegraphed 11 damage attack.
+- Q2: I seriously considered Firework Finale, then Kaboom!, then Duck and Cover. That line also deals 25 total damage and gains 5 Block, but it Exhausts Firework Finale and uses one larger hit instead of Bang Bang! plus Fwoosh!.
+- Q3: The chosen line gave up the chance to Exhaust Firework Finale and to deal the 18 damage as a single hit. It also leaves 1 Energy unused, though the main alternative did as well. In exchange, it avoids Exhausting Firework Finale and uses the two non-Exhaust Spark cards instead.
+- Q4 (False): No. The chosen line already takes the maximum available damage and the available Block without sacrificing damage. A different telegraphed attack would make the Block more or less important, but it would not change the fact that this line is damage-maximal and still affordable. A non-attack intent would not make the Block harmful based on the information given.
+
+**REPLAY on the live game** -- ok=True, played ['play Kaboom!', 'play Fwoosh!', 'play Bang Bang!', 'play Duck and Cover']
+- enemies: [('Seapunk', 45, 20)]
+- player before {'hp': 44, 'block': 0} after {'hp': 44, 'block': 5}
+
+
+## THE SPARK BANK, READ OFF THE LIVE GAME BEFORE AND AFTER THE REPLAYED LINE
+
+- t01: bank 3 before. Line was Kaboom! (1 energy), then Fwoosh! (price 1), then
+  Bang Bang! (price 2), then Duck and Cover. Bank AFTER the line: 0. Enemy HP
+  45 -> 20, a fall of 25, which is 7 + 8 + (5 and 5). Nothing on this board
+  places or detonates a Bomb.
+- t06: bank 2 before. Line was Dodoco Blast (price 2), Kaboom!, Duck and Cover.
+  Bank AFTER: 0. Twig Slime (S) 9 -> dead, Leaf Slime (M) 32 -> 25, Leaf Slime
+  (S) 15 -> 8.
+- t04: bank 2 before. Line was Fwoosh! (price 1), Kaboom!. Enemy 30 -> 15.
+
+## THE VERDICT TABLE, SHADOW AGAINST DECIDING
+
+| board | shadow | deciding |
+|---|---|---|
+| t06 | SURVIVES | SURVIVES |
+| t04 | REFUSED | SURVIVES |
+| t02 | SURVIVES | REFUSED |
+| t03 | REFUSED | REFUSED |
+| t05 | REFUSED | REFUSED |
+| t01 | REFUSED | SURVIVES |
+
+The first five boards in the pre-registered order are t06, t04, t02, t03, t05.

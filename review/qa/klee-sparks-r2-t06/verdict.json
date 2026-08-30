@@ -1,0 +1,62 @@
+{
+ "turn_id": "klee-sparks-r2-t06",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "353d470830f0edbfb3b09fb5c5e9f7a9624542face326e9787baaea6c75fa829",
+ "chosen_line": [
+  {
+   "card": "Dodoco Blast",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Twig Slime (S)",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Dodoco Blast, then Kaboom! on Twig Slime (S), killing it, then Duck and Cover.",
+  "q2_other_line_considered": "I seriously considered Bang Bang! instead of Dodoco Blast, followed by Kaboom! and Duck and Cover, but its random 10 damage was less reliable than dealing 7 to every enemy.",
+  "q3_what_it_gave_up": "It gave up the chance for Bang Bang!'s two random hits to concentrate 10 damage on one enemy; instead, it guaranteed broader damage and removed the 4-damage attacker.",
+  "q4_different_intent": "Yes. A sufficiently dangerous attack telegraphed by one of the Leaf Slimes could have made me consider the concentrated but random Bang Bang! line or change the Kaboom! target."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Kaboom!"
+  ],
+  "hand": [
+   "Dodoco Blast",
+   "Bang Bang!",
+   "Kaboom!",
+   "Duck and Cover"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T21:06:42"
+}

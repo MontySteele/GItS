@@ -1,0 +1,43 @@
+{
+ "turn_id": "klee-sparks-r2-t01",
+ "packet_sha256": "d15aedaf17312124a7c3abbeaa5725daf8f6c3ee4dc1045a03b6b0112fbbcaed",
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Bang Bang!",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Fwoosh!",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Seapunk",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played Bang Bang! at Seapunk, then Fwoosh! at Seapunk, then Kaboom! at Seapunk, then Duck and Cover. This spends all 3 Spark and 2 Energy, deals 25 total damage to Seapunk, and gains 5 Block before the telegraphed 11 damage attack.",
+ "q2_other_line_considered": "I seriously considered Firework Finale, then Kaboom!, then Duck and Cover. That line also deals 25 total damage and gains 5 Block, but it Exhausts Firework Finale and uses one larger hit instead of Bang Bang! plus Fwoosh!.",
+ "q3_what_it_gave_up": "The chosen line gave up the chance to Exhaust Firework Finale and to deal the 18 damage as a single hit. It also leaves 1 Energy unused, though the main alternative did as well. In exchange, it avoids Exhausting Firework Finale and uses the two non-Exhaust Spark cards instead.",
+ "q4_different_intent": "No. The chosen line already takes the maximum available damage and the available Block without sacrificing damage. A different telegraphed attack would make the Block more or less important, but it would not change the fact that this line is damage-maximal and still affordable. A non-attack intent would not make the Block harmful based on the information given.",
+ "q4_changed": false,
+ "role": "shadow",
+ "seat_mode": "shadow"
+}

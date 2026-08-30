@@ -1,0 +1,54 @@
+{
+ "turn_id": "klee-sparks-r2-t06",
+ "verdict": "SURVIVES",
+ "refused_by": [],
+ "reasons": [],
+ "grader": {
+  "id": "opus-5-fresh",
+  "kind": "llm",
+  "model": "claude-opus-5",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "353d470830f0edbfb3b09fb5c5e9f7a9624542face326e9787baaea6c75fa829",
+ "chosen_line": [
+  {
+   "card": "Dodoco Blast"
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Twig Slime (S)"
+  },
+  {
+   "card": "Duck and Cover"
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I opened with Dodoco Blast, which costs no energy and eats both of my Sparks to put 7 on every slime: the Twig drops to 2, the small Leaf to 8, and the big Leaf to 25. Then Kaboom! for 1 energy finishes the Twig Slime outright, which removes the 4-damage attack from the incoming total. That leaves only the small Leaf's 3-damage swing, so I spent another energy on Duck and Cover for 5 Block and take zero damage this turn. Two energy spent of three, both Sparks spent, one enemy dead, and chip damage on both survivors. At 40 of 62 HP I am happy to buy a clean turn rather than push face damage I cannot convert into a kill anyway.",
+  "q2_other_line_considered": "The only real branch was Bang Bang! instead of Dodoco Blast, since I have exactly one Spark card's worth of Sparks and playing one locks the other out. Bang Bang! is 5 twice into random targets, which against three enemies is 10 total damage with no guarantee either hit lands on the Twig, versus Dodoco Blast's guaranteed 21 spread across the board with the Twig left in Kaboom! range. I gave it about five seconds. I also briefly weighed skipping Duck and Cover and pointing Kaboom! at the 32-HP Leaf Slime to start chewing on the real health bar, but eating 3 damage and gaining nothing else was strictly worse than a full-block turn when I have the spare energy for both. Honest answer: this turn is not close. Dodoco Blast dominates Bang Bang! outright with three bodies on the board, and the rest of the line falls out of the energy count.",
+  "q3_what_it_gave_up": "It gave up Bang Bang! entirely \u2014 the Spark bank goes to 0 and that card sits dead in my hand for the rest of the combat unless something refills Sparks, so in practice I burned a card by drawing a second Spark card I could never afford. It also gave up a point of energy, which went nowhere, and it gave up tempo on the Leaf Slime (M): it is at 25 of 32 after all that and it is still going to hand me 2 Status cards, which is the thing that will actually cost me over the next few turns. And a little of Dodoco Blast's damage was wasted as overkill once Kaboom! landed on the Twig \u2014 7 of the 21 went into a body that needed 9 total.",
+  "q4_different_intent": "Yes, but only in the last two plays. If nothing on the board were attacking \u2014 say both slimes were Strategic and only handing me Status cards \u2014 Duck and Cover becomes pure waste and I would drop it, and Kaboom! would go into the Leaf Slime (M) instead of the Twig, because with no damage coming in the priority flips from shutting off attacks to making progress on the 32-HP body that is generating the Status cards. Dodoco Blast, on the other hand, is intent-proof here: three enemies, free to cast, and it is the only way to spend my Sparks well, so it leads no matter what the telegraphs say. Conversely, if the big Leaf were winding up a large attack instead of the Status play, I would still open the same way and still kill the Twig, so the change only comes from removing the incoming damage, not from making it worse."
+ },
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": true,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Kaboom!"
+  ],
+  "hand": [
+   "Dodoco Blast",
+   "Bang Bang!",
+   "Kaboom!",
+   "Duck and Cover"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-29T21:02:35"
+}

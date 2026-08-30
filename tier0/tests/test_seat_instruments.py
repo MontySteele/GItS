@@ -485,3 +485,92 @@ def test_an_aimed_card_named_at_nobody_and_a_targetless_one_named_at_someone():
         QA / "klee-sparks-r1-t03")
     assert not ok
     assert "aims at nobody" in why
+
+
+# =========================================================== KLEESPARK-R2 ==
+
+R2 = REPO / "understudy" / "turns" / "klee-sparks-r2"
+
+
+def _r2_turns() -> list:
+    return [staged_turn.load(p) for p in sorted(R2.glob("t*.yaml"))]
+
+
+def test_kleespark_r2s_four_slots_are_all_reachable_on_its_own_boards():
+    """THE LOCK on the repaired round, and it is the opposite of `P1`'s.
+
+    `KLEESPARK-R1`'s slot could not be reached by the boards it was registered
+    against, and nobody could see it until the pair read. `KLEESPARK-R2` was
+    planned the other way round -- the ceilings were computed before the plan
+    was accepted -- and this pins the four numbers so an edit to a board
+    cannot quietly move one. Every qualifying set is named, because a ceiling
+    that stays at 2 while the boards under it change is not the same
+    instrument.
+    """
+    turns = _r2_turns()
+    assert len(turns) == 6
+    slots = slot_plan.load_slots(R2)
+    assert [s.id for s in slots] == ["S1", "S2", "S3", "S4"]
+    rows = {r["slot"]: r for r in slot_plan.reachability(slots, turns)}
+    expected = {
+        "S1": (2, ["klee-sparks-r2-t01", "klee-sparks-r2-t04",
+                   "klee-sparks-r2-t06"]),
+        "S2": (2, ["klee-sparks-r2-t02", "klee-sparks-r2-t05"]),
+        "S3": (2, ["klee-sparks-r2-t04", "klee-sparks-r2-t06"]),
+        "S4": (2, ["klee-sparks-r2-t03", "klee-sparks-r2-t06"]),
+    }
+    for slot_id, (threshold, qualifying) in expected.items():
+        row = rows[slot_id]
+        assert row["threshold"] == threshold, slot_id
+        assert row["qualifying"] == qualifying, slot_id
+        assert row["ceiling"] == len(qualifying), slot_id
+        assert row["reachable"], slot_id
+    assert slot_plan.refusals(rows.values()) == []
+
+
+def test_the_two_dry_sink_boards_carry_no_spark_generator_in_hand():
+    """§11.7 item 2's whole point: round 1's empty banks held Powder Pop.
+
+    A generator in the hand answers the dry-sink question before it is asked,
+    so `S2`'s two boards are checked against the SHEETS rather than against
+    the manifest's prose -- the same failure mode `EB-202` was about.
+    """
+    rows = slot_plan.sheet_rows_by_id()
+    for turn in _r2_turns():
+        if turn.id not in ("klee-sparks-r2-t02", "klee-sparks-r2-t05"):
+            continue
+        for card_id in turn.board.hand:
+            effects = (rows.get(str(card_id)) or {}).get("effects") or []
+            ops = [str(e.get("op")) for e in effects if isinstance(e, dict)]
+            assert "gain_spark" not in ops, f"{turn.id}: {card_id} gains Sparks"
+        assert turn.board.resources.get("sparks") == 0, turn.id
+
+
+def test_the_bang_bang_board_puts_no_bomb_maker_in_the_hand():
+    """`t03` settles §12.8 item 1, and only if nothing can detonate.
+
+    The whole-fight run could not tell "Bang Bang! charged 1" from "Bang Bang!
+    charged 2 and a detonation refunded 1", because a Bomb was on the field.
+    A board that answers it has no card in hand that places one.
+    """
+    rows = slot_plan.sheet_rows_by_id()
+    turn = next(t for t in _r2_turns() if t.id == "klee-sparks-r2-t03")
+    for card_id in turn.board.hand:
+        effects = (rows.get(str(card_id)) or {}).get("effects") or []
+        ops = [str(e.get("op")) for e in effects if isinstance(e, dict)]
+        assert "place_bomb" not in ops, f"{card_id} places a Bomb"
+
+
+def test_the_preregistered_order_covers_every_r2_slot_twice():
+    """R221 B's order, pinned: five boards in the first set, `t01` the rest.
+
+    The cover is what raises `--first` from 4 to 5, and a board set whose
+    cover changed would change which boards can be recorded UNRUN.
+    """
+    index = {t.id: t for t in _r2_turns()}
+    order = local_tester.preregistered_order(sorted(index), turns=index)
+    first, rest = local_tester.split_first(order, 4)
+    assert [r["turn_id"] for r in first] == [
+        "klee-sparks-r2-t06", "klee-sparks-r2-t04", "klee-sparks-r2-t02",
+        "klee-sparks-r2-t03", "klee-sparks-r2-t05"]
+    assert [r["turn_id"] for r in rest] == ["klee-sparks-r2-t01"]

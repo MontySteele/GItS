@@ -1962,3 +1962,290 @@ build or seed, and no claim about whether the arm is fun or good. One fight, one
 seed, one pilot, a granted deck the generators did not produce, and the shipped
 automatic Spark rule still live beside the priced rows (§12.1 item 2).
 Guardrail-7: these are floors.
+
+---
+
+## 13. ROUND 2 (`KLEESPARK-R2`) — R222 D's minimal repaired staged round
+
+Generated from the records by `python -m understudy.staged_turn packet-section klee-sparks-r2` on 2026-08-29. Every table below is transcribed from `review/qa/klee-sparks-r2-t*/` and `review/qa/ledger.tsv`; nothing here is re-graded and nothing is re-read (R101b).
+
+**6 board(s) run, 0 UNRUN, 14 form(s) graded.**
+
+### The boards, grader by grader
+
+| turn | seed | grader | family | verdict | refused by | falsifier hits | replay |
+|---|---|---|---|---|---|---|---|
+| `klee-sparks-r2-t01` | `JH4T8MSN10KS` | `local-qwen3-8-27b-ud-q4-k-xl` | local | **REFUSED** | intent_insensitive | -- | - |
+|  |  | `opus-5-fresh` | claude | **SURVIVES** | -- | -- | confirms -- Seapunk 45 -> 20; Block 0 -> 5 |
+| `klee-sparks-r2-t02` | `R805DJ56LZHM` | `local-qwen3-8-27b-ud-q4-k-xl` | local | **SURVIVES** | -- | -- | - |
+|  |  | `opus-5-fresh` | claude | **REFUSED** | target_missing, intent_insensitive | -- | - |
+| `klee-sparks-r2-t03` | `YX7PB48WR7R4` | `local-qwen3-8-27b-ud-q4-k-xl` | local | **REFUSED** | intent_insensitive | -- | - |
+|  |  | `opus-5-fresh` | claude | **REFUSED** | intent_insensitive | -- | - |
+| `klee-sparks-r2-t04` | `NMQLUYZDLV` | `local-qwen3-8-27b-ud-q4-k-xl` | local | **REFUSED** | intent_insensitive | -- | - |
+|  |  | `opus-5-fresh` | claude | **SURVIVES** | -- | -- | confirms -- Shrinker Beetle 30 -> 15; Block 0 -> 0 |
+| `klee-sparks-r2-t05` | `XT4BE7LFY5XH` | `codex-gpt-5.6-sol-fresh` | gpt | **SURVIVES** | -- | -- | - |
+|  |  | `local-qwen3-8-27b-ud-q4-k-xl` | local | **REFUSED** | no_second_line, intent_insensitive | spot_check | - |
+|  |  | `opus-5-fresh` | claude | **REFUSED** | intent_insensitive | -- | - |
+| `klee-sparks-r2-t06` | `R7W86HG7WHUD` | `codex-gpt-5.6-sol-fresh` | gpt | **SURVIVES** | -- | -- | - |
+|  |  | `local-qwen3-8-27b-ud-q4-k-xl` | local | **SURVIVES** | -- | spot_check | - |
+|  |  | `opus-5-fresh` | claude | **SURVIVES** | -- | -- | confirms -- Twig Slime (S) 9 -> None; Leaf Slime (M) 32 -> 25; Leaf Slime (S) 15 -> 8; Block 0 -> 5 |
+
+### The registered slots
+
+A slot is **DECIDED** on two or more grades that all agree, **UNDECIDED** on any split or on fewer than two (R221 B). SURVIVES reads PREDICTED, REFUSED reads MISSED.
+
+| slot | grades | reading |
+|---|---|---|
+| `S1` | MISS, PRED, MISS, PRED, PRED, PRED, PRED (7) | **UNDECIDED** |
+| `S2` | PRED, MISS, PRED, MISS, MISS (5) | **UNDECIDED** |
+| `S3` | MISS, PRED, PRED, PRED, PRED (5) | **UNDECIDED** |
+| `S4` | MISS, MISS, PRED, PRED, PRED (5) | **UNDECIDED** |
+
+### What the round spent
+
+- **Codex seat reads:** 2 -- the scarce budget, one record each.
+- **Local tester reads:** 6.
+- **Control / other reads:** 6.
+
+### UNRUN boards (R221 B)
+
+None -- every board in the pre-registered order was run.
+
+### The banners the ledger carries
+
+> staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun
+> down-weighting: a grader whose q2 disagrees with [USER] on 3 of its last 5 shared turns cannot mark a turn SURVIVES alone
+> UNRUN: R221 B: sequential stopping. This board was staged in the round's pre-registered order and NOT run, because every registered slot it carries was already DECIDED -- two or more grades that all agreed -- before its turn came. Its seed is pinned here so a later round runs THIS board rather than a re-rolled one. Nothing about it was graded, and an UNRUN board is a board with no record, never a struck one (R101b)
+
+### The read
+
+**Everything above this line is transcribed from the records. Everything below
+it is a judgment.** The slate is `understudy/turns/klee-sparks-r2/MANIFEST.md`,
+DRAFTED and committed before any board was staged; the registration is
+`EXPERIMENTS.md` → `KLEESPARK-R2`. Build `0.2.1517+proto.dirty`, read off the
+deployed `mods\klee\manifest.json`; game `v0.111.0`; world `main` @ `712c75e`.
+
+### 13.1 The slate, graded
+
+**3 PREDICTED / 0 SPLIT / 0 MISS / 2 UNREACHED.** The two UNREACHED are the
+finding, and they are the same finding twice: a staged board can be *authored*
+to ask a question and still fail to *pose* it, and this round found two more
+ways for that to happen than `EB-202`'s ceiling check can see.
+
+| slot | verdict | why |
+|---|---|---|
+| `P1` — the price creates a visible spend-versus-hold choice | **PREDICTED** | 3 of 3 `S1` boards, against a threshold of 2 |
+| `P2` — a dry sink reads as a dead card | **PREDICTED** | 2 of 2 `S2` boards |
+| `P3` — at three bodies the AoE sink is chosen | **UNREACHED** | one of the two `S3` boards drew one enemy |
+| `P4` — Bang Bang! spends exactly 2 on a bank of exactly 2 | **UNREACHED** | neither `S4` board produced a replay that played it |
+| `P5` — the shadow seat is below `M62`'s bar | **PREDICTED** | agreement 3 of 5 on the first set |
+
+**`P1` is the repair working.** On all three `S1` boards the deciding reader's
+second line named a *different Spark-priced card* from the one it played, and
+named it as a trade rather than as an also-ran: on `t01`, *"the real
+alternative was Firework Finale"* — 18 in one hit against 8 + 5 + 5 out of the
+same bank of three; on `t04`, *"the only thing I actually weighed was Dodoco
+Blast"*; on `t06`, *"the only real branch was Bang Bang! instead of Dodoco
+Blast, since I have exactly one Spark card's worth of Sparks and playing one
+locks the other out."* `KLEESPARK-R1`'s `P1` asked for four such boards out of
+a set that could produce three, and its MISS said nothing about the cards. This
+one asked for two out of a set that could produce three and got three. **That
+is what a reachable threshold buys, and it is the whole of `EB-202`'s value:
+the same question, asked where it can be answered.**
+
+**`P2` is the sanity check §11.7 item 2 authorised, and it passes cleanly.**
+Both dry boards printed the Spark cards as *"Cannot be played right now"* and
+every reader — deciding, shadow and the third seat — read them that way and
+played around them. Nobody called a priced card free. The dry sink is legible
+at an empty bank; whether it is *frustrating* is a fight-length question and
+this board cannot ask it, which §11.6 item 1 already said.
+
+**`P3` UNREACHED, and the reason is worth more than the slot.** `t06` drew its
+three bodies and the reader took the AoE without hesitation, for the reason the
+board was built to elicit: *"Dodoco Blast's guaranteed 21 spread across the
+board with the Twig left in Kaboom! range"* against Bang Bang!'s *"10 total
+damage with no guarantee either hit lands on the Twig."* `t04` was built the
+same way and **the game gave it one enemy**, on a seed recorded three-body on
+six earlier stagings. So the arm's AoE rows now have exactly one live
+observation, and one is not two — R221 B decides a slot on two agreeing grades
+and this one has one. The registration said in advance that a board drawing
+fewer than three enemies is UNREACHED rather than MISSED, and that is what it
+is.
+
+**`P4` UNREACHED, and this one is the sharper instrument lesson.** `t03` was
+built for exactly this: Bang Bang! at a bank of exactly 2, nothing else priced
+in Sparks, no Bomb in hand or on the field. The board did its job — the deciding
+reader played Bang Bang! — and then the form was REFUSED for
+`intent_insensitive`, because the reader honestly answered that a Debuff
+telegraph changed nothing, and **a refused form is not replayed**. `t06`, the
+other `S4` board, spent its bank on Dodoco Blast. So the slot's own denominator
+produced no replay. *`P4` is UNREACHED, not PREDICTED*, and the pair read's
+words are the reason it stays that way: *"absence of a counterexample does not
+count as PREDICTED."*
+
+**The Bang Bang! arithmetic is nevertheless ANSWERED, out of slot, and the
+answer is recorded here rather than laundered into `P4`.** `t01`'s replay is on
+the live game: the bank read **3** before the line; the reader played Kaboom!
+(1 Energy), then **Fwoosh!** (price 1), then **Bang Bang!** at a bank of
+**exactly 2**, then Duck and Cover; the bank read **0** after, and Seapunk fell
+45 → 20, a drop of exactly 25 = 7 + 8 + (5 and 5). **Bang Bang! charged its
+printed 2 and dealt its printed 10, with no Bomb anywhere on the board to
+refund anything.** §12.8 item 1's candidate — *"Bang Bang! may be charging 1
+for a printed 2"* — is therefore explained by the detonation that shared the
+whole-fight turn, and there is no pricing defect. `t06` corroborates on the
+other 2-priced row: Dodoco Blast off a bank of 2 to 0, 7 to each of three
+bodies. **This is evidence, and it is not a graded slot**; `P4` remains
+UNREACHED and the board that would have graded it is `t03`, which needs a
+telegraph its reader will answer "yes" to.
+
+**`P5` PREDICTED.** Shadow against deciding: `t06` agreed (both SURVIVES),
+`t03` and `t05` agreed (both REFUSED), `t04`, `t02` and `t01` disagreed —
+**3 of 5** on the first set and **3 of 6** over the round, against `M62`'s
+≥ 6/8 bar. The seat stays in the shadow chair and `local_tester qualify`'s
+battery remains its route back. Nothing here is a pick.
+
+### 13.2 Shadow versus deciding, and what the disagreements were made of
+
+The three disagreements are not noise and they do not all point the same way.
+On `t02` and `t01` the shadow seat was STRICTER than the deciding reader —
+`intent_insensitive` on boards the deciding reader answered "yes" to. On `t04`
+it was stricter again, and on `t02` the *deciding* reader was the one refused,
+for `target_missing`: fresh Opus omitted the target on Kaboom!, which is the
+same fault `EB-203` was built for and it fired on the CONTROL rather than on
+the seat. **That is worth saying plainly: the missing-target failure is not a
+local-model failure, it is a form-writing failure, and the funnel now catches
+it in whichever chair it happens.**
+
+The third seat read two boards and disagreed with both of the others on `t05`:
+it marked SURVIVES where the shadow seat and the deciding reader both refused.
+One board is not a pattern and nothing is claimed from it.
+
+### 13.3 The pair read
+
+Three ADVANCE (`P1`, `P2`, `P5`), two RETURN (`P3`, `P4`), and **overall
+RETURN** — on the instrument, not on the arm's design:
+
+> *"The repaired instrument successfully staged the empty-bank/no-generator
+> condition on t02 and t05, the multi-enemy area-choice condition on t06, and
+> reachable spend-versus-hold comparisons across S1. It did not complete both
+> remaining repairs: t04 drew one enemy instead of the required three, and no
+> surviving replay exercised Bang Bang! from an exact bank of 2."*
+
+Verbatim at `review/qa/klee-sparks-r2-pair-review-codex-gpt-5.6-sol.md`; its
+prompt, which is the whole evidence it saw, is beside it.
+
+### 13.4 Two instrument findings the round produced, neither of them a slot
+
+1. **A seed does not pin an encounter across characters.** `NMQLUYZDLV` drew
+   three slimes on six recorded Kokomi stagings and one Shrinker Beetle here,
+   on Klee. `R7W86HG7WHUD` drew its three on both. **A board that needs an
+   enemy count has no way to require one** — `scenario`'s enemy selectors are
+   `first` / `lowest_hp` / `highest_hp` and nothing spawns — so "three bodies"
+   is a wish the turn file makes and the seed grants or refuses. `EB-202`
+   computes ceilings off the DECLARED board, by construction (a ceiling taken
+   off the live board would be taken after staging), so a board declaring three
+   enemies counts toward `S3`'s ceiling whatever the game does. **The gap
+   between the declared ceiling and the reached one is invisible to every check
+   this funnel has.**
+2. **In the shadow chair, R221 B's stopping rule reads SHADOW grades.** The
+   deciding forms do not exist while the round is running — that is what the
+   OWED replay means — so `slot_state` saw only the local seat's verdicts when
+   it decided whether to run `t01`. Here it made no difference (every slot read
+   UNDECIDED and every board ran), but a round where the shadow seat happens to
+   agree with itself twice would stop early on a reading that decides nothing.
+
+### 13.5 The wall clock — R221's timing claim gets its first number
+
+Single-lane pipelined round, six boards, one game, seven launches (six
+relaunches, each because a staged board leaves the game mid-combat):
+
+| phase | total | per board |
+|---|---|---|
+| stage (game-bound) | 89 s | 14.8 s |
+| read + grade (model-bound) | 295 s | 49.2 s |
+| replay (game-bound) | 124 s | 41.3 s over the 3 surviving lines |
+| **round wall clock** | **372 s** | — |
+
+The reads ran back to back for 313 of the round's 372 seconds; everything the
+pipeline hid is inside that. **Stage plus read is 384 s of work done in 372 s
+of wall clock, so the two lanes saved roughly 73 s of the 89 s of game-bound
+work — about 16% of the round.** That is the honest shape of the claim: the
+pipeline hides almost all of the game time, and the game time is only about a
+quarter of the round, because a read is three times a stage. **A round of this
+funnel is model-bound, and a second GAME instance cannot fix a model-bound
+round** — which `--lanes`' own documentation says, and this round is the first
+number behind it.
+
+**The two-lane attempt, and it failed.** `--lanes 2` was tried first, as the
+brief directed, and it **crossed the seeds**: lane 1 asked for `NMQLUYZDLV`
+and the run read back `R7W86HG7WHUD`, which is lane 0's seed, so `t04` was
+refused by `seed_not_honoured` and the round stopped. `OPERATIONS.md` already
+says no graded two-lane round has run and that `EB-191` fires often with two
+games on one machine; this is the first graded attempt and it did not survive
+its second board. The round was re-run whole on `--lanes 1` so that every board
+sits under one instrument, and no reading was carried over from the two-lane
+attempt. **The 372 s above is the single-lane number.**
+
+### 13.6 What goes back to [USER] — numbered picks, never blanks
+
+Three, and only three. Everything else this round produced is either a graded
+slot, a confirmed defect on `BACKLOG` (`EB-208`, `EB-209`), or an observation
+recorded above and claiming nothing.
+
+**1. A staged board cannot require an enemy count (`EB-208`). Which shape does
+the fix take?** `t04` was authored for three bodies, declared three bodies,
+passed `EB-202`'s ceiling check on those three, and drew one. The declared
+board is what every check reads, by construction.
+
+*(a) A LIVE-COUNT PREFLIGHT: after staging, compare the live enemy count with
+the declared one and mark the slot UNREACHED on that board automatically, so a
+round can never report a slot as graded on a board that did not pose it. Cheap,
+catches it every time, and fixes nothing about getting the board.*
+*(b) A STAGING VERB: `require_enemies: 3`, which refuses the staging and
+re-rolls or fails rather than reading a board nobody wanted. Gets the board or
+says why not, and costs game time per attempt.*
+*(c) A SEED LEDGER PER CHARACTER: record the encounter each seed drew per
+character and let a turn file pin from it. Costs nothing new to run and needs a
+Klee three-body seed found first, which is game time either way.*
+*(d) Neither: stop staging multi-enemy boards, and leave the AoE question to
+whole-fight play, where the encounters are the run's.*
+
+**2. `P4` is UNREACHED because its board's form was refused, not because the
+board was wrong (`t03`). What runs next for it?** The Bang Bang! arithmetic is
+answered in fact by `t01`'s replay — bank 3 → Fwoosh! → Bang Bang! at exactly
+2 → 0, 25 damage, no Bomb — but that is not `P4`'s denominator and it is not
+being counted as one.
+
+*(a) Nothing: §12.8 item 1 is answered by the `t01` replay as an out-of-slot
+observation, `P4` stays UNREACHED in the published record, and the arithmetic
+question closes.*
+*(b) Re-stage `t03` on a seed that draws an ATTACK telegraph rather than a
+Debuff, so its reader has something to answer question four with, and re-run
+`P4` alone as a two-board top-up.*
+*(c) Re-pose `P4` against the replayed line wherever a 2-price is paid off a
+bank of exactly 2, rather than against the two `S4` boards — which is a
+threshold change and therefore a NEW registration, never an edit to this one
+(R101b).*
+
+**3. The pair read returned the instrument (3 ADVANCE / 2 RETURN, overall
+RETURN). What runs next for the arm?**
+
+*(a) A two-board top-up round — a Klee three-body board for `P3` and a
+re-telegraphed `t03` for `P4` — registered fresh, then the arm's next gate.*
+*(b) Nothing staged until §12.9 pick 1 is answered, since that pick asks
+whether a repaired staged round was warranted at all and this round is now
+evidence about its own premise.*
+*(c) Treat `P1` and `P2` as the two answers the round was actually for — the
+price does pose a choice, the dry sink does read as dead — accept `P3` and
+`P4` as unreached, and move the arm to its next gate without a top-up.*
+
+### 13.7 What this round does NOT settle
+
+It does not price anything, it does not compare the arm with the retired base
+rule, and it says nothing about whether the mechanic is fun — `R215 B` and
+Guardrail-7 both still bind, and every board was hand-set through a dev door.
+It does not answer §12.9 pick 1, which is [USER]'s. It does not close `PICK 3`,
+`PICK 4` or `PICK 8`: `P3`'s single live AoE board is not two, and no badge was
+staged. And it still cannot ask the face-and-turn question — §11.6 item 1 is
+untouched by anything here.
+

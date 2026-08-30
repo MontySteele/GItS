@@ -1,0 +1,35 @@
+{
+ "turn_id": "klee-sparks-r2-t05",
+ "packet_sha256": "c2c11e7ac5902a401556738882ee8d534af58536241c39c04ab5668e010f503e",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Kaboom!",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Kaboom!",
+   "target": "Fuzzy Wurm Crawler",
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Duck and Cover",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I played both copies of Kaboom! on Fuzzy Wurm Crawler, then Duck and Cover, dealing 14 damage and gaining 5 Block against the telegraphed 4 damage.",
+ "q2_other_line_considered": "I seriously considered playing only both copies of Kaboom!, since that dealt the same damage, but it would leave the incoming attack unblocked.",
+ "q3_what_it_gave_up": "It gave up nothing immediately available: the Spark cards were unplayable, and Duck and Cover did not reduce the damage dealt by the two playable attacks.",
+ "q4_different_intent": "Yes. If the enemy had not intended to deal damage, I would have omitted Duck and Cover because its Block had no other stated benefit.",
+ "q4_changed": true
+}

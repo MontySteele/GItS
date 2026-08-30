@@ -1,0 +1,107 @@
+# KLEESPARK-R2, BOARD A. A BANK OF THREE AND THREE PRICES IT CANNOT ALL PAY.
+#
+# THE ROUND. `KLEESPARK-R2` (docs/current/EXPERIMENTS.md) is R222 D's minimal
+# repaired staged round for the Klee Sparks arm: `C.SPARK_ALT_COST_ENABLED` in
+# tier 0 and `-p:PrototypeCards=true` in C#, the eight prototype rows on
+# docs/prototype-surface.yaml. The slate and the reachability file are
+# committed before anything is staged (MANIFEST.md, slots.yaml).
+#
+# WHAT THIS BOARD IS. A mid-Act-1 hand holding three Spark-priced Attacks at
+# three different prices -- 1, 2 and 3 -- against a bank of 3. Every one of
+# them is individually affordable and the bank cannot buy two of the three, so
+# the hand poses the spend-versus-hold question `KLEESPARK-R1` could not: on
+# that round the only competing banks were 1 and 2, and the one deep bank
+# (t07, bank 4) paid both its sinks outright.
+#
+# THE SLOT THIS BOARD SITS UNDER IS S1, declared below and machine-checked by
+# understudy/slot_plan.py before the round is accepted: bank >= the cheapest
+# price AND bank < the sum of the affordable prices. 3 >= 1 and 3 < 6.
+#
+# NO LINE HERE IS LETHAL. The largest immediate total is Firework Finale (0
+# energy, spends the whole bank, 18) plus Kaboom! (1 energy, 7) = 25, and the
+# enemy's HP is set above it.
+#
+# WHAT THE MIRROR CANNOT SEE, disclosed rather than buried. The tier0 mirror
+# under `board:` is built by `staged_turn.build_combat_state`, which runs in
+# THIS tree, where `C.SPARK_ALT_COST_ENABLED` is False. So the mirror still
+# applies the SHIPPED base rule (an Attack goes free at a bank of 3 and eats
+# the bank) that the live +proto build has retired. THIS BOARD IS AT A BANK OF
+# 3, so the mirror IS richer than the live board here. The error runs one way:
+# richer lines can only make the dominance falsifier stricter, never laxer.
+# The packet and the replay read the LIVE game and are unaffected.
+
+id: klee-sparks-r2-t01
+character: KLEEMOD-KLEE
+
+# PINNED BEFORE THE ROUND, not written back after it -- which is a CHANGE from
+# `KLEESPARK-R1` and is disclosed in MANIFEST.md. R222 D requires a board set
+# whose encounters this file can be held to; the encounter is the seed's, so
+# the seeds are drawn from encounters already recorded on disk from earlier
+# rounds. This one is `klee-sparks-r1-t03`'s seed, which drew one body.
+seed: JH4T8MSN10KS
+
+exact_hand: true
+
+prototype: true
+
+slots:
+  - S1
+
+notes: |
+  44/62 HP, no Block, 3 energy, a Spark bank of 3, and one enemy
+  telegraphing an attack.
+
+assumptions:
+  - "The hand is EXACTLY the list below and nothing else. The hand the
+     game dealt is emptied before these cards are given, and a packet
+     whose live hand is not this list is refused rather than written."
+  - "The Spark bank is written to 3 through SPARK_POWER, which is how the
+     live game holds Sparks."
+  - "The encounter is GENERATED. This file can write the enemy's HP and
+     Block and cannot write its INTENT -- the packet records whichever
+     telegraph the game actually drew, and the mirrored board below
+     declares a telegraphed ATTACK as the falsifier's input."
+  - "Every card is granted unupgraded. An upgrade moves printed numbers,
+     so an upgraded grant is a different board."
+  - "The player has no Strength and the enemy carries no aura, Vulnerable
+     or Weak. Every Klee attack applies Pyro, and a reaction on top of a
+     hit would move every number the falsifier scores."
+
+# Needs a dev build carrying the prototype rows (klee-mod/build/deploy_proto.ps1).
+
+staging:
+  - give: {card: KLEEMOD-PROTO_SPARK_STRIKE, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_SPARK_DOUBLE_TAP, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-PROTO_SPARK_FINISHER, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-KABOOM, pile: hand, upgraded: false}
+  - give: {card: KLEEMOD-DUCK_AND_COVER, pile: hand, upgraded: false}
+  - set_hp: {who: player, amount: 44}
+  - set_block: {who: player, amount: 0}
+  - set_energy: {amount: 3}
+  - set_power: {who: player, name: SPARK_POWER, amount: 3}
+  - set_hp: {who: first, amount: 46}
+  - set_block: {who: first, amount: 0}
+  - read: "the staged board"
+
+board:
+  character: klee
+  pilot: demolition
+  hp: 44
+  max_hp: 62
+  block: 0
+  energy: 3
+  turn: 5
+  resources:
+    sparks: 3
+  hand:
+    - proto_spark_strike
+    - proto_spark_double_tap
+    - proto_spark_finisher
+    - kaboom
+    - duck_and_cover
+  enemies:
+    - name: "Act 1 enemy"
+      hp: 46
+      max_hp: 46
+      block: 0
+      intent: {kind: attack, amount: 11}
