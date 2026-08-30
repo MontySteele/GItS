@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using BaseLib.Abstracts;
 using Godot;
@@ -130,7 +131,7 @@ internal static class KurageMemoryCard
     /// </summary>
     public static void Setup(CombatState state)
     {
-        var me = LocalContext.GetMe(state);
+        var me = TryGetMe(state);
         var creature = me?.Creature;
         if (me == null || !KokomiResources.IsKokomi(creature))
         {
@@ -194,11 +195,56 @@ internal static class KurageMemoryCard
 
     public static void DiscardAll(CombatState? state)
     {
-        var me = state == null ? null : LocalContext.GetMe(state);
+        var me = TryGetMe(state);
         if (me != null) Discard(me);
     }
 
     private static void Discard(Player player) => Displays.Discard(player);
+
+    /// <summary>
+    /// The local seat, or null when the combat cannot name one.
+    ///
+    /// `LocalContext.GetMe(ICombatState)` DOES NOT ANSWER NULL FOR "not
+    /// there". Its whole body is: no `NetId` -> null; otherwise
+    /// `state.GetPlayer(NetId.Value)`, and a miss is
+    /// `throw new InvalidOperationException("Local player not found in
+    /// combat.")`. Every call in this file was written against the first arm
+    /// and read the second as impossible -- `me == null` guards that can never
+    /// see the case they were guarding.
+    ///
+    /// IT IS NOT IMPOSSIBLE, and it ended two whole-fight blind sessions
+    /// (`KLEESPARK-W1`, `KLEESPARK-W2`) at the first frame of their SECOND
+    /// Monster room. `NCombatRoom._Ready` calls `NCombatUi.Deactivate` while
+    /// the incoming room is still being built, our Deactivate postfix asked
+    /// the combat we still hold for its local seat, the combat had no players
+    /// in it yet, and the throw escaped `_Ready`. The room's `_Ready` then
+    /// never finished, so `CombatVfxContainer` was null when `Activate` ran a
+    /// frame later, the gauge spawn NRE'd out of `CombatManager.SetUpCombat`,
+    /// and the fight never started at all: the wire answered `monster` with no
+    /// `battle` block for as long as anyone cared to poll it.
+    ///
+    /// So the resolution is guarded here, once, for all three callers, in the
+    /// same shape `SelectionTelemetry` already uses on this API. A visual
+    /// element that cannot find its seat draws nothing; it does not take the
+    /// room down. The warning is loud because a seat that cannot be resolved
+    /// mid-combat would be a real defect -- it is just not one worth ending a
+    /// run over.
+    /// </summary>
+    private static Player? TryGetMe(CombatState? state)
+    {
+        if (state == null) return null;
+        try
+        {
+            return LocalContext.GetMe(state);
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] kurage memory: no local seat in this "
+                   + $"combat ({e.GetType().Name}: {e.Message}); drawing "
+                   + "nothing.");
+            return null;
+        }
+    }
 
     // ----------------------------------------------------------- drawing --
 
@@ -418,7 +464,7 @@ internal static class KurageMemoryCard
     /// </summary>
     private static void OpenQueue()
     {
-        var player = LocalContext.GetMe(KurageMemory.Combat);
+        var player = TryGetMe(KurageMemory.Combat);
         var creature = player?.Creature;
         if (player == null || !KurageMemory.IsLive(creature)) return;
 

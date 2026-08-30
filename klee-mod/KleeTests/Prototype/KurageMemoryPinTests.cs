@@ -615,8 +615,19 @@ public class KurageMemoryPinTests
         //
         // THE LIVE HALF IS OWED: that a partner's screen carries no element at
         // all is `EB-198`'s live acceptance on a `+proto` dev deploy, not a pin.
-        Assert.Contains("LocalContext.GetMe",
+        //
+        // `Setup` reaches `LocalContext.GetMe` through `TryGetMe` rather than
+        // calling it inline, and the indirection is load-bearing rather than
+        // cosmetic: `GetMe` THROWS on a combat that holds no local seat, and
+        // the throw escaping our `NCombatUi.Deactivate` postfix is what ended
+        // `KLEESPARK-W1`/`W2` at their second Monster room
+        // (`KurageMemorySeatGuardTests`). So the seat rule is pinned one call
+        // deeper, and the pin below says the deeper call is still
+        // `LocalContext` and still not a `state.Players` loop.
+        Assert.Contains("KurageMemoryCard.TryGetMe",
                         Il.Calls(Il.Method("KurageMemoryCard", "Setup")));
+        Assert.Contains("LocalContext.GetMe",
+                        Il.Calls(Il.Method("KurageMemoryCard", "TryGetMe")));
         Assert.Contains("LocalContext.IsMe",
                         Il.Calls(Il.Method("KurageMemoryCard", "Refresh")));
     }
