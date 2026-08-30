@@ -585,6 +585,25 @@ fills exactly three fields (`grader.id/kind/model`) and the raw reply is kept
 beside the filled form. **review** is the other role: not blind, read-only at
 the repo root, for a second opinion on a diff.
 
+**The seat reads its own meter before every call (EB-227).**
+`python -m understudy.codex_usage` prints one line — the five-hour window and
+the weekly window, each with its percentage and reset, and the rollout the
+numbers came from. Both `seat grade` and `seat review` probe it before every
+`codex exec` and **REFUSE**, in that role's own refusal shape, at or past
+`CODEX_PRIMARY_STOP_PERCENT` (85% of the five-hour window) or
+`CODEX_WEEKLY_STOP_PERCENT` (50% of the week) — overridable for one run with
+`GITS_CODEX_PRIMARY_STOP` / `GITS_CODEX_WEEKLY_STOP`. The percentages are
+recorded into the call's own record (`seat.json`, and `<out>.usage.json` for
+a review) so a night's sessions say what a call actually costs. **The read is
+as-of the last `codex` call**, not as of now: it comes from the rate-limit
+line Codex itself wrote into its newest session rollout, nothing here asks
+OpenAI anything, and a window whose `resets_at` has passed is counted as 0%
+used. A machine with no rollout at all logs and proceeds — a missing file
+never blocks a round. This is a floor under the standing budget, not a
+replacement for it: the **three Codex calls per graded turn** (R217, and
+`M64`'s split above, "Who holds the DECIDING chair") is still the rule, and
+is unchanged.
+
 Sessions land in `understudy/logs/seat/`, which is **gitignored** — the
 prompt inlines the packet and the rollout carries a third party's system
 prompt and raw output. The committed artifact is the form and the verdict

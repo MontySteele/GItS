@@ -231,7 +231,35 @@ CEILINGS: dict[str, int] = {
     # that the context manager releases when its body raises, and the
     # two-holder case. Confirm live with `powercfg /requests` (elevated):
     # the harness's `python.exe` under `SYSTEM:`.
-    "EB": 226,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
+    # EB-227 minted 2026-08-30 by the same sitting and CLOSED in its minting
+    # commit: the Codex seat judged its own budget by hand. The standing rule
+    # -- three calls per graded turn (R217, `M64`'s split) -- is written in
+    # OPERATIONS and obeyed by a person, which is fine for a sitting somebody
+    # is watching and useless overnight, where the failure mode is the seat
+    # burning the week's window at 02:00 and every round after it returning
+    # `codex_failed exit 1` with no explanation. `understudy/codex_usage.py`
+    # reads the meter out of the rate-limit line Codex itself writes into its
+    # newest session rollout (`$CODEX_HOME/sessions/YYYY/MM/DD/rollout-*.jsonl`,
+    # `payload.rate_limits`, primary = 5 h, secondary = the week); nothing
+    # here asks OpenAI anything, so THE READ IS AS-OF THE LAST CALL, and a
+    # window whose `resets_at` has passed is counted 0% used rather than
+    # billed for a window that no longer exists. `python -m
+    # understudy.codex_usage` prints one line. `seat grade` and `seat review`
+    # both probe before every `codex exec` and refuse -- in each role's own
+    # refusal shape, never an exception that would kill a round -- at or past
+    # `CODEX_PRIMARY_STOP_PERCENT` (85) or `CODEX_WEEKLY_STOP_PERCENT` (50),
+    # env-overridable via `GITS_CODEX_PRIMARY_STOP` / `GITS_CODEX_WEEKLY_STOP`;
+    # the two lines are asymmetric because the five-hour window refills in
+    # five hours and the week does not. The percentages land in the call's own
+    # record (`seat.json`, `<out>.usage.json`) so per-call cost is learnable
+    # overnight. A missing rollout logs and PROCEEDS -- a file that is not
+    # there must not be able to stop a round. Live read at the time of the
+    # commit: `codex: 5h 3% (resets 04:40 EDT) - week 11% (resets Sep 05
+    # 17:58)`. Locked by `tier0/tests/test_understudy_codex_usage.py`
+    # (fresh / rolled-over / missing fixtures, both stop lines, both roles'
+    # refusal branches with `seat._run` monkeypatched, and the under-the-line
+    # case that must still reach codex). The three-calls rule is UNTOUCHED.
+    "EB": 227,   # EB-207 minted 2026-08-29 by the Klee Sparks whole-fight run
                  # (klee-sparks-2026-08-29.md 12.8 item 2): the blind page
                  # printed Kokomi's Bake-Kurage memory block on a KLEE run and
                  # told the tester it had played no card.
