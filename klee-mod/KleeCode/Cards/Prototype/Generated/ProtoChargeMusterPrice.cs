@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoChargeMusterPrice : CustomCardModel, ICharacterCard
+public sealed class ProtoChargeMusterPrice : CustomCardModel, ICharacterCard, IMeterPricedCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
@@ -50,8 +50,18 @@ public sealed class ProtoChargeMusterPrice : CustomCardModel, ICharacterCard
 
     // The Charge cost line (R213 E1): unplayable below the price,
     // which is how the cost is shown rather than silently failing.
+    // EB-220: the printed price is declared ONCE here, on
+    // IMeterPricedCard, and the gate reads it back through MeterCost --
+    // the same number the meter cost BADGE renders, so the price
+    // shown and the price charged cannot drift. The Spark cost line's
+    // rule (EB-118 / PICK 8), one meter over.
+    public Meter PricedMeter => Meter.Charge;
+
+    public int PrintedMeterPrice => 6;
+
     protected override bool IsPlayable =>
-        KokomiResources.CanSpendCharge(Owner.Creature, 6);
+        KokomiResources.CanSpendCharge(
+            Owner.Creature, MeterCost.PriceIn(this, Meter.Charge));
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -4279,20 +4279,23 @@ def modal_effect(card: dict) -> dict | None:
 
 # EB-182, per-option playability. A mode whose body OPENS with a resource
 # spend prints that spend as the MODE's cost line, and a mode the bank cannot
-# pay is not offered. `("meter name", "the C# bank read")`, keyed by op --
-# the sim's `effects.MODE_PRICE_OPS`, one column wider because C# keeps its
-# three meters in three classes. The accessor mirrors the one the matching
-# PAYING call gates on, so the price shown and the price charged read the same
-# number: `SparkPower.CanSpend` reads `SparksAsResolved`, and
-# `KokomiResources.CanSpendCharge` reads `GetCharge`.
+# pay is not offered. Keyed by op, valued with the C# `Meter` member -- the
+# sim's `effects.MODE_PRICE_OPS`, same three meters under the same names.
+#
+# EB-220 removed the fourth column, which used to be a hand-written bank
+# accessor per op (`p => FurinaResources.Encore(p.Creature)`, ...). The meter
+# now IS the accessor: `MeterCost.BankOf` holds one read per meter, the paying
+# call's own, and the cost badge consults the same function -- so the number a
+# mode is filtered on, the number it is charged, and the number drawn on its
+# face are one number by construction rather than three literals that agree.
 MODE_PRICE_OPS = {
-    "spend_encore": ("Encore", "p => FurinaResources.Encore(p.Creature)"),
-    "spend_spark": ("Sparks", "p => SparkPower.SparksAsResolved(p.Creature)"),
-    "spend_charge": ("Charge", "p => KokomiResources.GetCharge(p.Creature)"),
+    "spend_encore": "Encore",
+    "spend_spark": "Sparks",
+    "spend_charge": "Charge",
 }
 
 
-def mode_prices(card: dict) -> list[tuple[str, int, str] | None] | None:
+def mode_prices(card: dict) -> list[tuple[str, int] | None] | None:
     """Per-mode prices for a modal card, or None when nothing is priced.
 
     None -- not a list of Nones -- for an unpriced modal card, so codegen
@@ -4302,32 +4305,28 @@ def mode_prices(card: dict) -> list[tuple[str, int, str] | None] | None:
     eff = modal_effect(card)
     if eff is None:
         return None
-    prices: list[tuple[str, int, str] | None] = []
+    prices: list[tuple[str, int] | None] = []
     for mode in eff["modes"]:
         body = mode.get("effects") or []
         head = body[0] if body else {}
         if head.get("op") in MODE_PRICE_OPS:
-            meter, bank = MODE_PRICE_OPS[head["op"]]
-            prices.append((meter, int(head["amount"]), bank))
+            prices.append((MODE_PRICE_OPS[head["op"]], int(head["amount"])))
         else:
             prices.append(None)
     return prices if any(p is not None for p in prices) else None
 
 
-def mode_spark_price(card: dict, index: int) -> int:
-    """The Spark price on one mode, 0 for any other meter or for none.
+def mode_is_priced(card: dict, index: int) -> bool:
+    """Does mode `index` print a meter price (EB-220)?
 
-    The mode FACE declares it (`ISparkPricedCard`) so the shipped Spark cost
-    badge paints the option with no second look invented -- the same "one
-    number, one source" rule `SparkCost` was built on. Encore and Charge have
-    no badge anywhere in the mod; their price is carried by the mode's own
-    label, which is where every priced mode prints it today.
+    A priced mode's FACE declares `IMeterPricedCard` by READING the card's own
+    `ModePrices` row -- it copies no number of its own -- so the meter cost
+    badge paints the option with the very literal the screen filter and the
+    playability gate consulted. Before EB-220 only a Spark-priced face carried
+    a price at all, and it carried it as a second literal.
     """
     prices = mode_prices(card) or []
-    if index >= len(prices) or prices[index] is None:
-        return 0
-    meter, amount, _bank = prices[index]
-    return amount if meter == "Sparks" else 0
+    return index < len(prices) and prices[index] is not None
 
 
 def _modal_option_names(cards: list[dict], emitted_ids) -> list[str]:
@@ -7182,6 +7181,16 @@ def emit(
     if any(eff.get("op") == "spend_spark" for eff in card["effects"]):
         interfaces += ", ISparkPricedCard"
 
+    # EB-220, the same rule one meter over: a row printing a TOP-LEVEL
+    # `spend_charge` declares that price on IMeterPricedCard, and the generated
+    # Charge gate reads it back through `MeterCost.PriceIn` rather than
+    # carrying its own literal. Sparks keep their own interface because their
+    # price is state-aware (the strict Rare Power adds to it); Encore needs no
+    # interface at all, because an `encore_cost` IS a BaseLib resource cost and
+    # the number is already on the card where `MeterCost` reads it.
+    if any(eff.get("op") == "spend_charge" for eff in card["effects"]):
+        interfaces += ", IMeterPricedCard"
+
     ind = "\n        "
     vars_cs = (",".join(f"{ind}    {v}" for v in vars_)).lstrip()
     vars_block = f"            {vars_cs}\n" if vars_cs else ""
@@ -7219,20 +7228,27 @@ def emit(
     if modal_eff is not None:
         for i, mode in enumerate(modal_eff["modes"]):
             label = cs_escape(mode["label"])
-            # EB-182: a Spark-priced mode's FACE declares its price, so the
-            # shipped Spark cost badge paints the option exactly as it paints
-            # any priced card -- the price is on the option a player is
-            # choosing between, in the look that already exists, off the same
-            # single declaration. Encore and Charge have no badge in the mod;
-            # their price is carried by the label, which prints it.
-            spark = mode_spark_price(card, i)
-            face_interface = (", ISparkPricedCard" if spark else "")
-            spark_member = (
-                "\n\n    /// <summary>EB-182: the price this MODE prints, so"
-                " the Spark\n"
-                "    /// cost badge renders it on the option.</summary>\n"
-                f"    public int PrintedSparkPrice => {spark};"
-                if spark else "")
+            # EB-182 / EB-220: a priced mode's FACE declares its price, so
+            # the meter cost badge paints the option exactly as it paints any
+            # priced card -- the price is on the option a player is choosing
+            # between, in the look that already exists. The face declares no
+            # NUMBER of its own: it reads the card's `ModePrices` row, the very
+            # row the screen filter and the playability gate read, so a mode's
+            # badge cannot drift from the price that mode was filtered on.
+            priced_mode = mode_is_priced(card, i)
+            face_interface = (", IMeterPricedCard" if priced_mode else "")
+            face_price_member = (
+                "\n\n    /// <summary>EB-220: the price this MODE prints,"
+                " read off\n"
+                "    /// the card's own ModePrices row so the badge, the"
+                " filter and\n"
+                "    /// the gate share one literal.</summary>\n"
+                f"    public Meter PricedMeter =>\n"
+                f"        {pascal(card['id'])}.ModePrices[{i}]!.Value.Meter;"
+                "\n\n"
+                f"    public int PrintedMeterPrice =>\n"
+                f"        {pascal(card['id'])}.ModePrices[{i}]!.Value.Amount;"
+                if priced_mode else "")
             modal_option_classes += f'''
 /// <summary>Mode {i} of {card["id"]}. A face for the choose-a-card screen;
 /// never played, never in a pile, never a reward -- but a POOL MEMBER, via
@@ -7245,7 +7261,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     {{
         ("title", "{label}"),
         ("description", "{label}"),
-    }};{spark_member}
+    }};{face_price_member}
 }}
 '''
 
@@ -7630,9 +7646,19 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         " the price,\n"
         "    // which is how the cost is shown rather than silently"
         " failing.\n"
+        "    // EB-220: the printed price is declared ONCE here, on\n"
+        "    // IMeterPricedCard, and the gate reads it back through"
+        " MeterCost --\n"
+        "    // the same number the meter cost BADGE renders, so the price"
+        "\n"
+        "    // shown and the price charged cannot drift. The Spark cost"
+        " line's\n"
+        "    // rule (EB-118 / PICK 8), one meter over.\n"
+        "    public Meter PricedMeter => Meter.Charge;\n\n"
+        f"    public int PrintedMeterPrice => {charge_price};\n\n"
         "    protected override bool IsPlayable =>\n"
-        f"        KokomiResources.CanSpendCharge(Owner.Creature, "
-        f"{charge_price});"
+        "        KokomiResources.CanSpendCharge(\n"
+        "            Owner.Creature, MeterCost.PriceIn(this, Meter.Charge));"
         if charge_price else "")
     # EB-182, per-option playability. The PRICES are declared once, as data,
     # and both halves read that one declaration: the screen filter (build_body
@@ -7647,17 +7673,24 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     if prices is not None:
         rows = ",\n".join(
             "        null" if p is None
-            else f'        new ModePrice("{p[0]}", {p[1]}, {p[2]})'
+            else f'        new ModePrice(Meter.{p[0]}, {p[1]})'
             for p in prices)
         modal_prices_member = (
             "\n\n    // EB-182: what each mode PRINTS as its price, and the"
-            " bank to\n"
-            "    // read it against. One declaration, read by the screen"
-            " filter and\n"
-            "    // by the playability gate below, so the price offered and"
-            " the\n"
-            "    // price charged cannot drift. `null` is an unpriced mode.\n"
-            "    private static readonly ModePrice?[] ModePrices =\n"
+            " meter\n"
+            "    // to read it against. One declaration, read by the screen"
+            " filter,\n"
+            "    // by the playability gate below and -- EB-220 -- by the mode"
+            "\n"
+            "    // FACE's own cost badge, so the price offered, the price"
+            " charged\n"
+            "    // and the price DRAWN cannot drift. `null` is an unpriced"
+            " mode.\n"
+            "    // INTERNAL rather than private: the faces below read their"
+            " own\n"
+            "    // row out of this table instead of carrying a second copy."
+            "\n"
+            "    internal static readonly ModePrice?[] ModePrices =\n"
             "    {\n" + rows + ",\n    };")
         modal_gate_member = (
             "\n\n    // The per-mode cost lines (EB-182): unplayable when NO"

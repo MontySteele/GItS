@@ -295,18 +295,54 @@ public class SparkAlternativeCostPinTests
     // --- the badge --------------------------------------------------------
 
     [Fact]
-    public void The_badge_renders_the_gate_s_own_number()
+    public void The_badge_still_renders_the_spark_gate_s_own_number()
     {
         // STRUCTURAL PIN: painting needs Godot nodes, which are process death in
         // this host (README, the headless boundary). What the pin CAN say is the
-        // property the badge exists for -- it reads SparkCost.PriceOf, the same
-        // expression the generated IsPlayable gate reads, so there is no second
-        // literal for the display to drift from. A badge with its own copy of
-        // the price would show up here as the absence of this call.
-        var calls = Il.Calls(Il.Method("SparkCostBadge", "Paint"));
+        // property the badge exists for -- the SPARK price it draws is
+        // SparkCost.PriceOf, the same expression the generated IsPlayable gate
+        // reads, so there is no second literal for the display to drift from.
+        //
+        // EB-220 moved the badge out of the quarantine and generalised it to
+        // three meters; its own pins are in `MeterCostBadgeTests`. This one
+        // stays HERE because the fact it guards is the flagged one: under
+        // `-p:PrototypeCards=true` the Spark price is state-aware (the strict
+        // Rare Power adds to it), and the badge's read must keep going through
+        // SparkCost rather than off a card's printed declaration.
+        var calls = Il.Calls(Il.Method("MeterCost", "Priced"));
 
         Assert.Contains(calls, c => c.EndsWith("SparkCost.PriceOf"));
-        Assert.Contains(calls, c => c.EndsWith("SparkCost.Affordable"));
+    }
+
+    // --- the Charge cost line, the same rule one meter over ---------------
+
+    [Fact]
+    public void A_charge_priced_row_declares_its_price_once()
+    {
+        // EB-220: the printed Charge price is on IMeterPricedCard and the gate
+        // reads it BACK through MeterCost, so the number the badge draws is the
+        // number the gate refuses on. Before this the gate carried its own
+        // literal and nothing outside the card could ask what it charged.
+        var card = new ProtoChargeSpendStrike();
+
+        Assert.Equal(Meter.Charge, card.PricedMeter);
+        Assert.Equal(6, card.PrintedMeterPrice);
+        Assert.Equal(6, MeterCost.PriceIn(card, Meter.Charge));
+        Assert.Equal(Meter.Charge, MeterCost.Priced(card)!.Value.Meter);
+        Assert.Equal(0, MeterCost.PriceIn(card, Meter.Sparks));
+    }
+
+    [Fact]
+    public void The_charge_gate_reads_the_declared_price()
+    {
+        // STRUCTURAL PIN, and the drift it forbids is a second literal inside
+        // the gate expression: IsPlayable asks MeterCost for the price rather
+        // than repeating it.
+        var calls = Il.Calls(typeof(ProtoChargeSpendStrike)
+            .GetProperty("IsPlayable", All)!.GetMethod!);
+
+        Assert.Contains(calls, c => c.EndsWith("MeterCost.PriceIn"));
+        Assert.Contains(calls, c => c.EndsWith("KokomiResources.CanSpendCharge"));
     }
 
     // --- the starter ------------------------------------------------------

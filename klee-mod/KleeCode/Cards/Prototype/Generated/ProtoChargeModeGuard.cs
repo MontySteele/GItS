@@ -52,14 +52,17 @@ public sealed class ProtoChargeModeGuard : CustomCardModel, ICharacterCard
         ("description", "Choose one: Gain 5 Block | Spend 6 [gold]Charge[/gold]: gain 12 Block."),
     };
 
-    // EB-182: what each mode PRINTS as its price, and the bank to
-    // read it against. One declaration, read by the screen filter and
-    // by the playability gate below, so the price offered and the
-    // price charged cannot drift. `null` is an unpriced mode.
-    private static readonly ModePrice?[] ModePrices =
+    // EB-182: what each mode PRINTS as its price, and the meter
+    // to read it against. One declaration, read by the screen filter,
+    // by the playability gate below and -- EB-220 -- by the mode
+    // FACE's own cost badge, so the price offered, the price charged
+    // and the price DRAWN cannot drift. `null` is an unpriced mode.
+    // INTERNAL rather than private: the faces below read their own
+    // row out of this table instead of carrying a second copy.
+    internal static readonly ModePrice?[] ModePrices =
     {
         null,
-        new ModePrice("Charge", 6, p => KokomiResources.GetCharge(p.Creature)),
+        new ModePrice(Meter.Charge, 6),
     };
 
     // The per-mode cost lines (EB-182): unplayable when NO mode is
@@ -126,11 +129,20 @@ public sealed class ProtoChargeModeGuardModeA : ModalOptionCard
 /// the generated ModalOptions roster the character's off-pool list carries.
 /// EB-150: a card in no pool takes CardModel.Pool through MockCardPool, which
 /// throws inside the screen's _Ready and soft-locks the turn.</summary>
-public sealed class ProtoChargeModeGuardModeB : ModalOptionCard
+public sealed class ProtoChargeModeGuardModeB : ModalOptionCard, IMeterPricedCard
 {
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Spend 6 [gold]Charge[/gold]: gain 12 Block"),
         ("description", "Spend 6 [gold]Charge[/gold]: gain 12 Block"),
     };
+
+    /// <summary>EB-220: the price this MODE prints, read off
+    /// the card's own ModePrices row so the badge, the filter and
+    /// the gate share one literal.</summary>
+    public Meter PricedMeter =>
+        ProtoChargeModeGuard.ModePrices[1]!.Value.Meter;
+
+    public int PrintedMeterPrice =>
+        ProtoChargeModeGuard.ModePrices[1]!.Value.Amount;
 }

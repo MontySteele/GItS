@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using Godot;
+using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -118,10 +119,11 @@ public static class ModalChoice
     /// <c>CanPlay</c> is never read on an option — so there is no disabled
     /// state to paint, and a mode we cannot grey out we must not offer. The
     /// price stays legible either way, because a priced mode's LABEL is its
-    /// price ("Spend 3 Encore: draw 3"), and a Spark-priced mode option also
-    /// carries the ordinary Spark cost badge (it implements
-    /// <c>ISparkPricedCard</c>, so <c>SparkCostBadge</c> paints it with no
-    /// second look invented).
+    /// price ("Spend 3 Encore: draw 3"), and since EB-220 a priced mode option
+    /// also carries the ordinary METER cost badge in its own meter: the face
+    /// implements <c>IMeterPricedCard</c> by reading the card's own
+    /// <c>ModePrices</c> row, so <c>MeterCostBadge</c> paints the very number
+    /// this filter charged, with no second look and no second literal.
     ///
     /// THE EMPTY CASE IS LOUD, not silent. The card's own <c>IsPlayable</c>
     /// gate (codegen: <c>modal_gate_member</c>) already refuses a card with no
@@ -238,31 +240,32 @@ public static class ModalChoice
 /// body is a consequence of the mode rather than its admission fee, and the
 /// paying calls keep refusing those where they stand.
 ///
-/// The bank read is a delegate rather than a switch on a meter name, so this
-/// type references no resource class: Sparks, Encore and Charge live in three
-/// places and one of them is behind <c>PROTOTYPE_CARDS</c>. The codegen emits
-/// the accessor beside the number it belongs to.
+/// THE BANK READ IS THE METER'S, NOT THIS TYPE'S (EB-220). It used to be a
+/// delegate emitted beside each price, on the grounds that the three meters
+/// live in three classes. They now have one reader — <c>MeterCost.BankOf</c>,
+/// which the cost BADGE consults too — so a mode's price and the badge painted
+/// on that mode's face agree by construction rather than by two generated
+/// lambdas happening to name the same accessor.
 ///
 /// Sim twin: <c>tier0.engine.effects.mode_price</c> / <c>mode_refusal</c>.
 /// </summary>
 public readonly struct ModePrice
 {
-    private readonly Func<Player, int> _bank;
-
-    public ModePrice(string meter, int amount, Func<Player, int> bank)
+    public ModePrice(Meter meter, int amount)
     {
         Meter = meter;
         Amount = amount;
-        _bank = bank;
     }
 
-    /// <summary>The meter's printed name — "Encore", "Sparks", "Charge".</summary>
-    public string Meter { get; }
+    /// <summary>Which meter. Its NAME is what a refusal line prints —
+    /// "Sparks", "Encore", "Charge".</summary>
+    public Meter Meter { get; }
 
     /// <summary>The printed price, a literal off the sheet.</summary>
     public int Amount { get; }
 
-    public bool Affordable(Player owner) => _bank(owner) >= Amount;
+    public bool Affordable(Player owner) =>
+        MeterCost.BankOf(owner.Creature, Meter) >= Amount;
 
     /// <summary>
     /// Why this mode is not offered, naming the PRICE and the BANK. The log
@@ -270,7 +273,8 @@ public readonly struct ModePrice
     /// so a refused line reads the same in either engine.
     /// </summary>
     public string Refusal(Player owner, string label) =>
-        $"'{label}' needs {Amount} {Meter}, bank holds {_bank(owner)}";
+        $"'{label}' needs {Amount} {Meter}, bank holds "
+      + $"{MeterCost.BankOf(owner.Creature, Meter)}";
 }
 
 /// <summary>
