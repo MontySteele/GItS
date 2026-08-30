@@ -123,6 +123,18 @@ costs, and intent sensitivity** — because fixing `target: null` alone does not
 address the semantic failures the round found. The mechanical half of the fault
 is BACKLOG `EB-203`. `M62` and `M63` leave the QUEUE on this ruling.
 
+**R223 — the battery's PASS MARK, per category and never a total.** [USER],
+2026-08-29: *"targets 6/6, others >= 4/6 works for me"*. The battery half of
+R222 B is therefore met at **targets 6 of 6, costs 4 of 6, intent 4 of 6, and
+all three must hold**. There is no total to trade against: a seat may not buy
+back the blind spot that returned it (targets, `EB-203`) with the two
+categories it still reads, which a 15-of-18 total would have let it do. The
+mark lives in `understudy/battery/battery.yaml`'s `threshold:` block, beside
+the boards it grades; `local_tester qualify` applies it, prints PASS/FAIL per
+category and overall, and **exits 0 on PASS and 1 on FAIL**. The seat's first
+live requalification — 10 of 18, targets 2, costs 5, intent 3 — reads **FAIL**
+under it, on targets and on intent.
+
 **R222 C — the funnel REFUSES a bad form and never repairs one** (`M63`'s
 default, taken). A form that fails the pre-seal check is refused whole; no
 field of it is rewritten, not even a mechanical one, and nothing is re-read on

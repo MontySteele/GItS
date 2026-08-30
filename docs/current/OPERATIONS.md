@@ -853,7 +853,7 @@ where `enemy` is the one aimed spec and `all_enemies` / `random_enemy` /
 `self` are not; a *Choose one* is judged on the mode the form recorded.
 **Repair is out of scope (`M63`): this refuses and never repairs.**
 
-**Requalification (`M62` (5)): `local_tester qualify`.** A fixed battery of
+**Requalification (`M62` (5), pass mark R223): `local_tester qualify`.** A fixed battery of
 **18 sealed packets, six per category**, drawn equally from `kokomi-slice2`,
 `klee-slice1-r3` and `klee-sparks-r1` (`understudy/battery/battery.yaml`) —
 no new board is staged and no game is launched. The categories are the three
@@ -861,9 +861,16 @@ failures this funnel has actually seen: **targets** (an aimed card carries
 one, a targetless card does not — both directions), **printed costs**
 (`misreads.free_card_misreads`, the shipped check), and **intent
 sensitivity** (the `intent_insensitive` falsifier itself). It writes a
-scorecard JSON and one summary line of per-category counts. **There is no
-pass mark in the tool**: the threshold is `M62` and is [USER]'s. The reads
-land in `--land-dir`, never in the sealed turn directories (R101b). The one
+scorecard JSON and one summary line of per-category counts. **The pass mark
+is R223's and it is per category: targets 6 of 6, costs 4 of 6, intent 4 of
+6, and all three must hold — there is no total.** The mark is [USER]'s, not
+the tool's, so it lives in the battery file's `threshold:` block beside the
+boards it grades; the tool only applies it. `qualify` prints PASS/FAIL per
+category and overall, the scorecard JSON carries `pass` at both levels, and
+the verdict is the **exit code — 0 on PASS, 1 on FAIL** (2 only when the
+battery cannot be run at all: malformed, thin, or a mark it cannot reach).
+The reads land in `--land-dir`, never in the sealed turn directories (R101b),
+unchanged. The one
 item shape the sealed record cannot give is the intent category's *two
 packets identical except the telegraph* — no such pair has been staged, every
 matched pair differs in the arm under test — so that category is scored one
