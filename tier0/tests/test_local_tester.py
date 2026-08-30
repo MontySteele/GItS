@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import socket
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -1392,11 +1393,127 @@ class _LaneCompendium(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
 
-def _lane_bridge(port, run):
+# ----------------------------------------------------------------- EB-232 --
+#
+# THE LEAK WAS THE PORT, NOT THE TEMP TREE, and the row's own evidence says so
+# once the mechanism is named. The 2026-08-30 failure quoted a
+# `pytest-2295/popen-gw3/...` save path while the run was `pytest-2296`.
+# `tmp_path` is ALREADY session-unique -- `pytest-2295` and `pytest-2296` are
+# two different base directories -- so no file was shared. A path out of
+# another session's tree can only have reached this session's assertion over
+# the WIRE: the client asked `http://localhost:15599/...` and another PROCESS
+# answered.
+#
+# `ThreadingHTTPServer` sets `allow_reuse_address`, and on Windows that means
+# a second process binding the SAME loopback port SUCCEEDS -- no `OSError`,
+# nothing to notice -- and connections go to whichever process bound FIRST.
+# Measured on this box: two servers on 15599 both bind, and five requests in a
+# row all reach the first. So a sibling worktree's session that got there
+# first serves every lane read this file makes, for as long as its own server
+# is up. The same mechanism covers the xdist half the row had ruled out as
+# insufficient: xdist workers are separate PROCESSES on one machine, and a
+# fixed port is machine-wide.
+#
+# The fix is therefore not a save path but the ADDRESS: every server in this
+# file binds port 0 and the test reads back the port the OS gave it, which no
+# other process can be holding. `_LaneServer` also refuses
+# `allow_reuse_address`, so any future fixed port fails LOUDLY at the bind
+# instead of quietly stealing or being stolen from.
+# `test_no_server_in_this_file_binds_a_fixed_port` is the lock, and the old
+# code fails it by construction.
+
+
+class _LaneServer(ThreadingHTTPServer):
+    """Ephemeral by construction, and never a squatter.
+
+    `allow_reuse_address = False` is the load-bearing half: with it on, a
+    collision on a fixed port is silent on Windows, and the process that lost
+    the race answers nothing while the one that won answers everybody.
+    """
+
+    allow_reuse_address = False
+
+
+def _lane_bridge(run):
+    """Bind a lane bridge on an EPHEMERAL port. Returns `(server, port)`.
+
+    The port is not an argument any more: a caller that can pass one can pass
+    a constant, and a constant is the cross-session leak this closes.
+    """
+    srv = _LaneServer(("localhost", 0), _LaneCompendium)
+    port = srv.server_address[1]
     _LaneCompendium.RUNS[port] = run
-    srv = ThreadingHTTPServer(("localhost", port), _LaneCompendium)
     threading.Thread(target=srv.serve_forever, daemon=True).start()
-    return srv
+    return srv, port
+
+
+def _dead_port() -> int:
+    """A port with nothing listening on it, for the "no answer" arm.
+
+    Bound and released, so the number is one the OS handed out rather than one
+    a person picked -- and that every concurrent session picked too.
+    """
+    s = socket.socket()
+    try:
+        s.bind(("localhost", 0))
+        return s.getsockname()[1]
+    finally:
+        s.close()
+
+
+def test_no_server_in_this_file_binds_a_fixed_port():
+    """THE LOCK (EB-232), and the old code fails it four times over.
+
+    Read off this file's own source rather than off a running server, because
+    the failure it prevents is a port a FUTURE test picks by hand: a bind
+    address whose port is a literal other than 0 is a machine-wide name, and
+    two pytest sessions in sibling worktrees are two processes on one machine.
+
+    Every `(host, port)` literal in the file is checked, not only the ones
+    handed to a constructor this test can name -- `_Server` binds through
+    `super().__init__` and would slip a narrower scan.
+    """
+    import ast
+
+    source = Path(__file__).read_text(encoding="utf-8")
+    hosts = {"localhost", "127.0.0.1", "0.0.0.0", ""}
+    fixed = []
+    for node in ast.walk(ast.parse(source)):
+        if not isinstance(node, ast.Tuple) or len(node.elts) != 2:
+            continue
+        host, port = node.elts
+        if not (isinstance(host, ast.Constant) and host.value in hosts):
+            continue
+        if not (isinstance(port, ast.Constant)
+                and isinstance(port.value, int)):
+            continue
+        if port.value != 0:
+            fixed.append(f"line {node.lineno}: ({host.value!r}, {port.value})")
+    assert not fixed, (
+        "a test server binds a FIXED loopback port; on Windows a second "
+        "process binds it too and the first binder answers both sessions "
+        "(EB-232): " + "; ".join(fixed))
+
+
+def test_two_lane_bridges_never_share_a_port(tmp_path):
+    """Two bridges up at once answer their OWN payloads, on their own ports.
+
+    The in-process shadow of the acceptance -- two concurrent sessions stay
+    green -- and the reason `_lane_bridge` returns the port it was given by
+    the OS instead of the one a caller wanted.
+    """
+    a, port_a = _lane_bridge({"is_in_progress": True, "seed": "AAAAAAAAAA"})
+    b, port_b = _lane_bridge({"is_in_progress": True, "seed": "BBBBBBBBBB"})
+    try:
+        assert port_a != port_b
+        for port, seed in ((port_a, "AAAAAAAAAA"), (port_b, "BBBBBBBBBB")):
+            bridge.use(instances.Instance(game_dir=tmp_path / "g", port=port,
+                                          appdata=None, label="lane0"))
+            assert bridge.current_seed() == seed
+    finally:
+        bridge.use_default()
+        a.shutdown()
+        b.shutdown()
 
 
 def test_a_lane_is_refused_another_lanes_run_seed(tmp_path):
@@ -1407,16 +1524,16 @@ def test_a_lane_is_refused_another_lanes_run_seed(tmp_path):
     this returned that seed and the driver believed it -- which is exactly
     what happened live, and the defect it filed blamed the game.
     """
-    lane1 = instances.Instance(game_dir=tmp_path / "game", port=15599,
-                               appdata=tmp_path / "lane1", label="lane1")
     lane0_tree = tmp_path / "roaming"
-    srv = _lane_bridge(15599, {
+    srv, port = _lane_bridge({
         "is_in_progress": True,
         "seed": "R7W86HG7WHUD",
         "save_path": str(lane0_tree / "SlayTheSpire2" / "steam" / "1"
                          / "modded" / "profile1" / "saves"
                          / "current_run.save"),
     })
+    lane1 = instances.Instance(game_dir=tmp_path / "game", port=port,
+                               appdata=tmp_path / "lane1", label="lane1")
     try:
         bridge.use(lane1)
         with pytest.raises(bridge.LaneCrossed) as caught:
@@ -1440,16 +1557,16 @@ def test_a_lane_believes_its_own_tree_and_lane0_is_unchanged(tmp_path):
     ever run behaves exactly as it did.
     """
     own = tmp_path / "lane1" / "SlayTheSpire2" / "steam" / "1" / "saves"
-    srv = _lane_bridge(15598, {"is_in_progress": True, "seed": "NMQLUYZDLV",
-                               "save_path": str(own / "current_run.save")})
+    srv, port = _lane_bridge({"is_in_progress": True, "seed": "NMQLUYZDLV",
+                              "save_path": str(own / "current_run.save")})
     try:
-        lane1 = instances.Instance(game_dir=tmp_path / "g", port=15598,
+        lane1 = instances.Instance(game_dir=tmp_path / "g", port=port,
                                    appdata=tmp_path / "lane1", label="lane1")
         bridge.use(lane1)
         assert bridge.current_seed() == "NMQLUYZDLV"
 
         # Lane 0: the same foreign-looking path, and nothing fires.
-        lane0 = instances.Instance(game_dir=tmp_path / "g", port=15598,
+        lane0 = instances.Instance(game_dir=tmp_path / "g", port=port,
                                    appdata=None, label="lane0")
         bridge.use(lane0)
         assert bridge.current_seed() == "NMQLUYZDLV"
@@ -1462,11 +1579,11 @@ def test_a_run_with_no_save_file_yet_is_not_a_crossing(tmp_path):
     """`BuildCurrentRunContext` reports `limitation` and NO `save_path` in the
     window between the embark and the first save write. That is a state, not a
     crossing, and treating it as one would refuse every fast read-back."""
-    srv = _lane_bridge(15597, {"is_in_progress": True,
-                               "limitation": "current_run.save was not found "
-                                             "yet."})
+    srv, port = _lane_bridge({"is_in_progress": True,
+                              "limitation": "current_run.save was not found "
+                                            "yet."})
     try:
-        bridge.use(instances.Instance(game_dir=tmp_path / "g", port=15597,
+        bridge.use(instances.Instance(game_dir=tmp_path / "g", port=port,
                                       appdata=tmp_path / "lane1",
                                       label="lane1"))
         assert bridge.current_seed() is None
@@ -1532,8 +1649,10 @@ def test_two_lanes_each_read_back_their_own_seed(tmp_path, monkeypatch):
     catches the mod half if it ever regresses.
     """
     monkeypatch.setattr(soak, "game_dir", lambda: tmp_path / "game")
-    trees = {15596: tmp_path / "lane0", 15595: tmp_path / "lane1"}
-    srvs = [_lane_bridge(p, {}) for p in trees]
+    bound = [_lane_bridge({}) for _ in range(2)]
+    srvs = [s for s, _ in bound]
+    lane0_port, lane1_port = (p for _, p in bound)
+    trees = {lane0_port: tmp_path / "lane0", lane1_port: tmp_path / "lane1"}
 
     def confirm(port, seed):
         _LaneCompendium.RUNS[port] = {
@@ -1542,10 +1661,10 @@ def test_two_lanes_each_read_back_their_own_seed(tmp_path, monkeypatch):
 
     lanes = [local_tester.GameLane(
         instance=instances.Instance(game_dir=tmp_path / "game", port=p,
-                                    appdata=(None if p == 15596
+                                    appdata=(None if p == lane0_port
                                              else trees[p]),
                                     label=lbl))
-        for p, lbl in ((15596, "lane0"), (15595, "lane1"))]
+        for p, lbl in ((lane0_port, "lane0"), (lane1_port, "lane1"))]
     rows = [{"turn_id": "t04", "seed": "NMQLUYZDLV", "position": 1},
             {"turn_id": "t06", "seed": "R7W86HG7WHUD", "position": 2}]
     steps = _SeedSteps(confirm)
@@ -1814,17 +1933,18 @@ def test_the_slot_count_reads_llama_servers_two_routes(tmp_path):
             self.end_headers()
             self.wfile.write(body)
 
-    srv = ThreadingHTTPServer(("localhost", 15594), _Slots)
+    srv = _LaneServer(("localhost", 0), _Slots)
+    port = srv.server_address[1]
     threading.Thread(target=srv.serve_forever, daemon=True).start()
     try:
-        c = local_model.Client(base_url="http://localhost:15594/v1")
+        c = local_model.Client(base_url=f"http://localhost:{port}/v1")
         assert local_model.slot_count(c) == 2
     finally:
         srv.shutdown()
 
     # Nothing listening: the question is unanswered, which is not a refusal.
     assert local_model.slot_count(
-        local_model.Client(base_url="http://localhost:15593/v1"),
+        local_model.Client(base_url=f"http://localhost:{_dead_port()}/v1"),
         timeout_s=0.5) is None
 
 
