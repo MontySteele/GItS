@@ -1,0 +1,70 @@
+# `KLEESPARK-R2` — the counting slots of the round's slate, machine-readable.
+#
+# WRITTEN BEFORE THE ROUND, which is the difference between this file and
+# `klee-sparks-r1/slots.yaml`. That one is `EB-202`'s worked case, reconstructed
+# after a graded round to show what the check would have refused. This one is
+# the check doing its job: every counting slot of `KLEESPARK-R2`'s slate has
+# its ceiling computed over these six boards, by
+# `local_tester round --plan-only`, before a single board is staged.
+#
+# WHAT IS AND IS NOT IN HERE. This file holds COUNTING slots — a slot with an
+# integer threshold and a predicate a board's declared half can answer. The
+# slate's fifth prediction (`P5`, the shadow-versus-deciding verdict agreement)
+# is counted off `review/qa/klee-sparks-r2-round-summary.json` rather than off a
+# board's shape, so it has no board predicate and does not belong here.
+#
+# THE CEILINGS, computed by hand here and by `slot_plan.ceiling` at plan time.
+# They are stated so the plan output can be checked against an expectation
+# rather than merely read:
+#
+#   S1  spend-versus-hold reachable   t01, t04, t06        ceiling 3, threshold 2
+#   S2  the dry sink, no generator    t02, t05             ceiling 2, threshold 2
+#   S3  three bodies, two sinks       t04, t06             ceiling 2, threshold 2
+#   S4  a 2-price on a bank of 2      t03, t06             ceiling 2, threshold 2
+#
+# THREE OF THE FOUR SIT AT THEIR CEILING, and that is a deliberate consequence
+# of "minimal" (R222 D) rather than an oversight. A slot whose threshold equals
+# its ceiling is one that every qualifying board must show; a MISS on it is a
+# real MISS about the cards, because the board set could have produced the
+# YES. What `EB-202` forbids is the other direction — a threshold ABOVE the
+# ceiling, which `KLEESPARK-R1`'s `P1` carried at 4 against 3.
+
+slots:
+  - id: S1
+    threshold: 2
+    question: >-
+      Does the board pose a spend-versus-hold choice — the bank reaches the
+      cheapest Spark-priced card in hand, and cannot buy every one it could
+      afford?
+    predicate:
+      - {left: spark_bank, op: ">=", right: min_spark_price}
+      - {left: spark_bank, op: "<", right: affordable_spark_price_sum}
+
+  - id: S2
+    threshold: 2
+    question: >-
+      Is the board a DRY SINK — an empty bank with at least one Spark-priced
+      card in hand and none of them affordable?
+    predicate:
+      - {left: spark_bank, op: "==", right: 0}
+      - {left: spark_use_count, op: ">=", right: 1}
+      - {left: affordable_spark_uses, op: "==", right: 0}
+
+  - id: S3
+    threshold: 2
+    question: >-
+      Are three or more enemies alive with two or more affordable Spark uses
+      in hand — the AoE-versus-single-target board `KLEESPARK-R1` could not
+      stage?
+    predicate:
+      - {left: enemy_count, op: ">=", right: 3}
+      - {left: affordable_spark_uses, op: ">=", right: 2}
+
+  - id: S4
+    threshold: 2
+    question: >-
+      Does a Spark price of exactly 2 sit on a bank of exactly 2 — the price
+      arithmetic no `KLEESPARK-R1` replay reached?
+    predicate:
+      - {left: spark_bank, op: "==", right: 2}
+      - {left: min_spark_price, op: "==", right: 2}
