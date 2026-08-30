@@ -657,8 +657,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 230/231/232 minted 2026-08-30 by the overnight integration, from the
         # night's two live runs and from the integration's own suite: the
         # `place_bomb` face, the teardown that reports a kill it did not make,
-        # and the lane test leaking across pytest sessions. All three OPEN.
-        230, 231, 232,
+        # and the lane test leaking across pytest sessions.
+        #
+        # 230 LEFT OPEN_IDS 2026-08-30 with its row: every `place_bomb` face
+        # prints the Bomb's own amount, carried by a plain "BombDamage" var
+        # instead of the attack-var family, and the lock was seen to FAIL on
+        # all seventeen shipped faces first. The ceiling stays at 232.
+        231, 232,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

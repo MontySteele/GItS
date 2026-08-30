@@ -44,13 +44,13 @@ public sealed class DoublePop : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Double Pop"),
-        ("description", "Place 2 [gold]Bombs[/gold], each dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
+        ("description", "Place 2 [gold]Bombs[/gold], each dealing {BombDamage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(4m, ValueProp.Move)
+            new DynamicVar("BombDamage", 4m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -66,12 +66,12 @@ public sealed class DoublePop : CustomCardModel, ISkillTagCard
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         for (var i = 0; i < 2; i++)
         {
-            await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
+            await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars["BombDamage"].BaseValue, Owner.Creature, this);
         }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars["BombDamage"].UpgradeValueBy(2m);
     }
 }

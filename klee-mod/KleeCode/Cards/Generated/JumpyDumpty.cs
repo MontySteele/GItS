@@ -47,7 +47,7 @@ public sealed class JumpyDumpty : CustomCardModel, IElementalCard, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Dumpty"),
-        ("description", "Deal {Damage:diff()} damage to random enemies twice. Place a [gold]Bomb[/gold] dealing {ExtraDamage:diff()} damage. [gold]Burst[/gold] +5."),
+        ("description", "Deal {Damage:diff()} damage to random enemies twice. Place a [gold]Bomb[/gold] dealing {BombDamage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
@@ -56,7 +56,7 @@ public sealed class JumpyDumpty : CustomCardModel, IElementalCard, ISkillTagCard
         new List<DynamicVar>
         {
             new DamageVar(8m, ValueProp.Move),
-            new ExtraDamageVar(6m)
+            new DynamicVar("BombDamage", 6m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -76,12 +76,12 @@ public sealed class JumpyDumpty : CustomCardModel, IElementalCard, ISkillTagCard
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.ExtraDamage.BaseValue, Owner.Creature, this);
+        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars["BombDamage"].BaseValue, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(2m);
-        DynamicVars.ExtraDamage.UpgradeValueBy(2m);
+        DynamicVars["BombDamage"].UpgradeValueBy(2m);
     }
 }

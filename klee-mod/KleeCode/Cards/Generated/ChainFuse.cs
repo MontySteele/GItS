@@ -44,14 +44,14 @@ public sealed class ChainFuse : CustomCardModel, ISkillTagCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chain Fuse"),
-        ("description", "[gold]Bombs[/gold] placed this turn deal {Bonus:diff()} more damage. Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
+        ("description", "[gold]Bombs[/gold] placed this turn deal {Bonus:diff()} more damage. Place a [gold]Bomb[/gold] dealing {BombDamage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DynamicVar("Bonus", 3m),
-            new DamageVar(4m, ValueProp.Move)
+            new DynamicVar("BombDamage", 4m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -66,7 +66,7 @@ public sealed class ChainFuse : CustomCardModel, ISkillTagCard
     {
         BombPower.ModifyAll(CombatState!.HittableEnemies, DynamicVars["Bonus"].IntValue, placedThisRoundOnly: true, CombatState!.RoundNumber);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.Damage.BaseValue, Owner.Creature, this);
+        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars["BombDamage"].BaseValue, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()

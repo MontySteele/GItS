@@ -32,15 +32,20 @@ public sealed class Pop : CustomCardModel, ISkillTagCard
         // hand-written, so the line is hand-carried; the generated cards
         // get the identical text from build_description. NOT a keyword --
         // sec.1 rail 1 -- so it stays out of CanonicalKeywords below.
-        ("description", "Place a [gold]Bomb[/gold] dealing {Damage:diff()} damage. [gold]Burst[/gold] +5."),
+        ("description", "Place a [gold]Bomb[/gold] dealing {BombDamage:diff()} damage. [gold]Burst[/gold] +5."),
     };
 
     /// <summary>
-    /// The bomb's payload. Held as a DynamicVar so upgrades and card text stay
-    /// in sync; BombPower stores the resolved number at placement time.
+    /// The bomb's payload. Held as a PLAIN DynamicVar so upgrades and card
+    /// text stay in sync; BombPower banks this literal number at placement.
+    ///
+    /// EB-230: it was a DamageVar, whose rendered value resolves against the
+    /// player's live attack modifiers -- which BombPower.Place never reads --
+    /// so the face said 4 under a debuff while the bomb dealt 5. Same var
+    /// name and same emission codegen now produces (gen_klee_cards.bomb_var).
     /// </summary>
     protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new List<DynamicVar> { new DamageVar(5m, ValueProp.Move) };
+        new List<DynamicVar> { new DynamicVar("BombDamage", 5m) };
 
     /// <summary>Sheet `skill_tag`, made visible (display only -- gameplay
     /// reads ISkillTagCard). Same emission codegen produces for generated
@@ -68,12 +73,12 @@ public sealed class Pop : CustomCardModel, ISkillTagCard
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
 
         await BombPower.Place(
-            choiceContext, cardPlay.Target, (int)DynamicVars.Damage.BaseValue,
+            choiceContext, cardPlay.Target, (int)DynamicVars["BombDamage"].BaseValue,
             applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars["BombDamage"].UpgradeValueBy(2m);
     }
 }

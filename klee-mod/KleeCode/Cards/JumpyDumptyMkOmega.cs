@@ -49,14 +49,17 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard, ISkill
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jumpy Dumpty Mk.Omega"),
-        ("description", "Deal {Damage:diff()} damage to random enemies 3 times. Place a [gold]Bomb[/gold] on EVERY enemy dealing {ExtraDamage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage to random enemies 3 times. Place a [gold]Bomb[/gold] on EVERY enemy dealing {BombDamage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(12m, ValueProp.Move),
-            new ExtraDamageVar(12m)
+            // EB-230: the bomb payload is a plain var, not an attack var --
+            // BombPower banks it literally, so the face must not resolve it
+            // against live attack modifiers.
+            new DynamicVar("BombDamage", 12m)
         };
 
     // autoAdd: false -- RosterAncientCards.Klee owns membership (concat into
@@ -77,7 +80,7 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard, ISkill
         foreach (var enemy in CombatState!.HittableEnemies.ToList())
         {
             await BombPower.Place(
-                choiceContext, enemy, (int)DynamicVars.ExtraDamage.BaseValue,
+                choiceContext, enemy, (int)DynamicVars["BombDamage"].BaseValue,
                 Owner.Creature, this);
         }
     }
@@ -85,6 +88,6 @@ public sealed class JumpyDumptyMkOmega : CustomCardModel, IElementalCard, ISkill
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(4m);
-        DynamicVars.ExtraDamage.UpgradeValueBy(4m);
+        DynamicVars["BombDamage"].UpgradeValueBy(4m);
     }
 }

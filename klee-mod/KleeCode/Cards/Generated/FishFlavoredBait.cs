@@ -47,14 +47,14 @@ public sealed class FishFlavoredBait : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fish-Flavored Bait"),
-        ("description", "Deal {Damage:diff()} damage. Place a [gold]Bomb[/gold] dealing {ExtraDamage:diff()} damage."),
+        ("description", "Deal {Damage:diff()} damage. Place a [gold]Bomb[/gold] dealing {BombDamage:diff()} damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(5m, ValueProp.Move),
-            new ExtraDamageVar(5m)
+            new DynamicVar("BombDamage", 5m)
         };
 
     // autoAdd: false -- KleeCardPool declares pool membership itself in
@@ -73,11 +73,11 @@ public sealed class FishFlavoredBait : CustomCardModel, IElementalCard
             .Targeting(cardPlay.Target)
             .WithHitFx("vfx/vfx_attack_slash")
             .Execute(choiceContext);
-        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars.ExtraDamage.BaseValue, Owner.Creature, this);
+        await BombPower.Place(choiceContext, cardPlay.Target, (int)DynamicVars["BombDamage"].BaseValue, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.ExtraDamage.UpgradeValueBy(2m);
+        DynamicVars["BombDamage"].UpgradeValueBy(2m);
     }
 }

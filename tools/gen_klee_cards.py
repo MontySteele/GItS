@@ -1191,7 +1191,8 @@ HAND_WRITTEN_ROSTER = {"let_the_people_rejoice", "ceremonial_garment"}
 #   block       -> block effect (DynamicVars.Block)
 #   draw        -> draw effect (DynamicVars.Cards)
 #   spark       -> gain_spark effect (DynamicVars["Sparks"], M9 ruling)
-#   bomb_damage -> place_bomb effect (Damage or ExtraDamage, see bomb_var)
+#   bomb_damage -> place_bomb effect (the plain "BombDamage" var, see
+#                  bomb_var -- NOT an attack var: EB-230)
 #   cost        -> EnergyCost.UpgradeBy(n) -- the idiom CardModel.OnUpgrade's
 #                  own doc comment prescribes (verified in the decompile)
 # Structural upgrades stay blocked unless an exact play-time mirror exists.
@@ -2136,21 +2137,25 @@ def blocked_reason(
 
 def bomb_var(card: dict) -> str:
     """
-    Which DynamicVar carries bomb damage.
+    Which DynamicVar carries bomb damage. ONE name, for every card.
 
-    A card that both attacks and places a bomb needs two distinct numbers, and
-    both cannot be "Damage" -- DynamicVarSet is keyed by name, so the second
-    would overwrite the first. ExtraDamage is a real base-game var with its own
-    accessor, so the loc system resolves {ExtraDamage} without inventing a
-    custom name whose placeholder support is unverified.
+    EB-230. It used to be Damage (bomb-only cards) or ExtraDamage (cards that
+    also attack) -- both members of the base game's ATTACK var family, whose
+    rendered value is resolved against the player's live attack modifiers. A
+    bomb's payload is not: `BombPower.Place` banks the literal charge and
+    `Detonate` deals it `ValueProp.Unpowered` with no card source, and tier0's
+    `_op_place_bomb` appends `Bomb(damage=fx["bomb_damage"])`. So the face and
+    the body disagreed the moment a debuff landed -- KLEESPARK-W3 turn-029
+    printed "each dealing 4 damage" while the stack dealt 6.
 
-    Cards that only place bombs keep plain Damage, which matches the
-    hand-written Pop and keeps their card text reading naturally.
+    "BombDamage" is a PLAIN DynamicVar: the loc system renders it as given,
+    upgrade diff included, with nothing between the printed number and the
+    number BombPower banks. Custom var names are proven on shipped faces
+    ("Sparks", "Bombs", "Chance", "Discards"). One name also retires the
+    two-claims-on-one-var problem -- a card may attack AND place bombs without
+    the two numbers competing for a name.
     """
-    has_attack = any(
-        e["op"] == "damage" and e["target"] != "self" for e in card.get("effects", [])
-    )
-    return "ExtraDamage" if has_attack else "Damage"
+    return "BombDamage"
 
 
 def fanfare_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
@@ -3019,10 +3024,11 @@ def build_vars(card: dict) -> list[str]:
             # is `Cards`, and this card already spends that on its draw).
             out.append(f'new DynamicVar("Discards", {int(eff["amount"])}m)')
         elif op == "place_bomb":
-            if bomb_var(card) == "ExtraDamage":
-                out.append(f'new ExtraDamageVar({eff["bomb_damage"]}m)')
-            else:
-                out.append(f'new DamageVar({eff["bomb_damage"]}m, ValueProp.Move)')
+            # EB-230: a PLAIN DynamicVar, never a Damage/ExtraDamage var --
+            # the payload is banked literally, so the face must not resolve it
+            # against the player's attack modifiers. See bomb_var().
+            out.append(
+                f'new DynamicVar("{bomb_var(card)}", {eff["bomb_damage"]}m)')
             if isinstance(eff.get("amount"), str) and bombs_upgrade(card):
                 # X_plus_N with a ruled bombs delta: the +N renders/upgrades.
                 n = int(eff["amount"][len("X_plus_"):])
@@ -3698,16 +3704,15 @@ def bombs_upgrade(card: dict) -> int:
 
 def conditional_bonus_upgrade(card: dict) -> int:
     """Ruled `conditional_bonus: +N` (tail_of_flame): bumps the then-branch's
-    first damage. 0 = none. The bump rides the ExtraDamage var, so a card
-    whose bombs already claim ExtraDamage is a loud stop."""
-    delta = int(upgrade_plan(card)[0].get("conditional_bonus", 0))
-    if delta and any(e.get("op") == "place_bomb"
-                     for e in _effects_everywhere(card)):
-        raise SystemExit(
-            f"gen_klee_cards: {card['id']}: conditional_bonus needs the "
-            "ExtraDamage var but the card also places bombs -- two claims "
-            "on one var name.")
-    return delta
+    first damage. 0 = none. The bump rides the ExtraDamage var.
+
+    The loud stop that used to live here -- "this card also places bombs, two
+    claims on one var name" -- is GONE with EB-230: a bomb's payload moved off
+    the attack vars onto its own plain "BombDamage", so ExtraDamage is this
+    key's alone and a card may do both. Deleted rather than left standing,
+    because a guard whose stated reason is no longer true is a guard the next
+    reader has to disprove."""
+    return int(upgrade_plan(card)[0].get("conditional_bonus", 0))
 
 
 # --- EB-140: the two "bump every matching op" keys --------------------------
@@ -4614,7 +4619,7 @@ def build_body(
 
         elif op == "place_bomb":
             _emit_place_bomb(card, eff, lines, ctx,
-                             f"(int)DynamicVars.{bomb_var(card)}.BaseValue")
+                             f'(int)DynamicVars["{bomb_var(card)}"].BaseValue')
 
         elif op == "damage":
             if calc_rider(card, eff) is not None:
@@ -6915,7 +6920,7 @@ def build_upgrade(card: dict) -> list[str]:
             # Converted block has no "Block" var -- its base is CalculationBase.
             var = "DynamicVars.CalculationBase"
         elif key == "bomb_damage":
-            var = f"DynamicVars.{bomb_var(card)}"
+            var = f'DynamicVars["{bomb_var(card)}"]'
         else:
             var = var_for[op]
         lines.append(f"{var}.UpgradeValueBy({int(deltas[key])}m);")
