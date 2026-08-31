@@ -545,3 +545,92 @@ for it, and that is a taxonomy question rather than a card question.
 
 **Neither row carries art.** Two portraits are owed at the fold, on the ordinary
 art path, under the R212 ladder's art clause.
+
+---
+
+## 9. R235 — RULED 2026-08-31 (the `K1`–`K6` slate)
+
+**Provenance.** [USER] reviewed §6's six picks with their external GPT seat and
+relayed its recommendation on 2026-08-31: **all six defaults**, plus **four
+corrections to be made before the faces are signed**. The main session
+fact-checked all four against the repo and **all four are CONFIRMED**; they are
+this branch's amendment commit, and they were landed *before* this ruling so the
+signature falls on a packet that is true. The ruling is recorded under the
+**standing both-agreed authorization** (the seat and the session agree, so it
+lands without a fresh ask), with the **usual veto window** — [USER] may strike or
+change any line below and nothing downstream has moved in the meantime.
+
+### 9.1 The six picks — all six defaults RULED
+
+| pick | RULED | the face it fixes |
+|---|---|---|
+| `K1` | **option 1 — Razor, *Claw and Thunder*** | Card 1's carrier: Electro, the pool's thinnest 4-star element, and a peer rather than a chaperone |
+| `K2` | **option 1 — `bonus_vs_bombed 3`** | Card 1 reads the **Bomb board**, the read no other card in the set takes |
+| `K3` | **option 1 — Amber, *Explosive Puppet*** | Card 2's carrier: Pyro, and Baron Bunny is a Bomb in everything but name |
+| `K4` | **option 1 — read the bank (`has_spark`)** | Card 2 adds **no Spark sink**, so the sink program is untouched |
+| `K5` | **option 1 — `{bomb_damage: +2}`** | the upgrade keeps the gate printed on **both** faces |
+| `K6` | **option 1 — `{damage: +2}`** | Card 1's upgrade pays in both the reaction deck and the demolition deck |
+
+Both faces therefore stand exactly as §4.1 and §5.1 print them, with §8's
+prospective rows as amended (each now carrying `kit_spark: +1`).
+
+**`K2` was re-argued, not waved through.** Amendment 1 moved Card 1's ordinary
+play *down* — 1 Spark and no Overload, where the draft credited every play with a
+reaction — so `+3` sits on a weaker base than the one it was first sized against.
+The corrected table does not break it, and the note under `K2` records the
+counterweight (14 on a reacted, bombed target at base; 16 upgraded) so the fold
+inherits the argument rather than the conclusion. **The ruled value stays at 3.**
+
+### 9.2 The four amendments — all CONFIRMED and landed
+
+1. **Razor's Spark arithmetic.** A Companion applies its own element
+   (`tier0/engine/effects.py:572`), so the reaction limb is conditional on a
+   standing Pyro aura: **1 / 2 / 2 / 3** across (bare, upgraded-bare, reacted,
+   upgraded-reacted), against `KLEE_COMPANION_SPARK_*`
+   (`tier0/constants.py:201-204`). Overload's body verified in the engine and
+   quoted as the code has it: **6 damage to every living enemy plus Weak 1 on the
+   reacted target** (`tier0/engine/reactions.py:154-161`; `OVERLOAD_SPLASH = 6`,
+   `OVERLOAD_WEAK = 1`). The review's numbers and the code's numbers agree.
+2. **Amber's floor.** The kit rider fires after the play resolves
+   (`tier0/engine/combat.py:626`), so an empty-bank Amber still mints 1 Spark
+   (2 upgraded) and the gate can never read the card's own grant. §5.4 now carries
+   the bank-0 / bank-≥1 × one-enemy / three-enemy block with per-line totals.
+3. **`kit_spark: +1` on both prospective upgrade rows**
+   (`tier0/content/upgrades.py:565` — no effect delta, and the value is *checked*
+   against the constant rather than trusted), with the fold-time note that
+   `tier0/tests/test_eb219_prune_kit_spark.py`'s single-Personal enumeration must
+   become an enumeration over all three. **No test is edited today**; the rows are
+   fold-gated.
+4. **The Bag-of-Tricks sequencing prose.** Corrected to *"unresolved after an
+   under-denominator read"* — `KLEESPARK-W5` (2026-08-30) returned `B1`
+   **UNREACHED** at one opportunity page against a registered floor of four.
+   `K4`'s reasoning survives unchanged: an under-denominator read licenses
+   nothing.
+
+### 9.3 Two things this ruling also settles
+
+**`role_c` on Card 2 stays `buffer`, and no fourth global role word is minted.**
+§8's note flagged the field as the weakest on either row and asked whether the
+taxonomy wants a word for "places Bombs". It does not need one **here**, because
+the field is not load-bearing in the only place it is read: `tier05/draft.py`
+gives special treatment to exactly one value — `_is_applier` (`draft.py:236-237`,
+`return card.role_c == "applier"`), consulted at the deck-composition and
+valuation sites — and every non-`applier` value is treated identically. So
+`buffer` and a hypothetical fourth word are the same value to the drafter, the
+flag **resolves as answered**, and **the taxonomy question does not travel to the
+fold**. If a later card makes the drafter read a second role value, that is when
+the vocabulary question becomes real.
+
+**`P5a` (Rare Personal access) stays DEFERRED — reaffirmed.** Nothing in this
+slate touches it: both faces are 4-star, neither argues for a Rare, and neither
+depends on one existing. R234 `P5a` remains open on its own terms and continues
+to bar any Rare Personal design until it is answered.
+
+### 9.4 What this ruling does NOT do
+
+It mints no `EB` and no `M` row, moves no register, writes no sheet row, and
+edits no test. `EB-251` keeps its gate: **the rows land at the Burst retirement
+fold and not before**, per R234 `P3`. §7's list of untouched things stands as
+written, as amended.
+
+Next free ids as of this landing: R236 / `EB-253` / `M70`.
