@@ -249,6 +249,10 @@ carried while it was active is in the commit message that retired it.
 | `KLEESPARK-BT2` **THE RERUN** — the same three boards on a form that can carry a forecast (`EB-224`) | 2026-08-30 | dev build `0.2.1676+proto.dirty`, game `v0.111.0`, world `r229-2026-08-30` @ `bac66284` (the registration commit), the SAME three boards byte-identical to `klee-sparks-bt2/` except their turn ids, seeds `JH4T8MSN10KS` / `R805DJ56LZHM` / `YX7PB48WR7R4` | **3 PREDICTED (`F1`, `F4`, `F5`) / 0 SPLIT / 1 MISS (`F3`) / 1 UNREACHED (`F2`)**. Judgment **2 ADVANCE / 3 RETURN / 0 ESCALATE, overall RETURN — and this time on the ARM'S DESIGN, not on the instrument.** **R229'S PRE-REGISTERED RETURN CONDITION FIRED, on (a): `F1` is PREDICTED.** On `t01` the deciding line is *Bag of Tricks* [priced mode] → *Kaboom!* → *Firework Finale* → *Spirited Away*, and the live replay reads the Spark bank **3 → 0 on the mode → 3 after the Attack → 0 on Firework Finale**, with the body 45 → 23 → **5** HP: 40 damage, **both 3-Spark uses paid and resolved inside one turn**, the second bought entirely out of *Pounding Surprise*'s refund. **THE ARM RETURNS TO DESIGN.** (b) is not satisfied — `F2` is UNREACHED — and the finding is reported as ONE, not two. A RETURN moves no number by itself (§23.5, R215 B, Guardrail-7): it returns the arm to [USER] as the four-item numbered pick list at §24.9.9 (re-price / restructure so the mode's own Bombs cannot pay for it / accept the refund as the card's point and write the intent / drop the arm), on which Claude recommends 3 and picks nothing. **THIS IS A RERUN AND NOT A RE-ROLL:** §24's grades stand exactly as published (R101b) and the boards, seeds, slate, thresholds and return condition are unchanged; what changed is the INSTRUMENT — `EB-239` closed, so `seat.form_schema()` declares a `forecast` field (nullable-and-required on `target`'s rule, `additionalProperties` still `False`) and the local tester prints the same schema. **`forecast_missing` refused nothing this time:** all six forms carried three answers against three questions, where §24's six carried none. **`F5` PREDICTED is the legibility half:** `t01`'s reader forecast `0` and `3` BEFORE choosing its line and the wire read 0 and 3, off a page that prints the relic (`EB-238`). **`F3` MISSED at 0 of 1, and the clause matters:** exactly one priced use was paid — on `t02` the game itself refused the second, *“Card 'Firework Finale' cannot be played: BlockedByCardLogic”*, which **vindicates `EB-236`'s certification on the wire** and settles §24.5 item 2's unresolved reading; the slot missed on its OTHER clause, the second answer naming neither priced use. §23.4's rationale for filing a MISS here belongs to the clause that did not fire, so **nothing is minted on it**. **`F2` UNREACHED for the third round running:** `t03`'s deciding form was refused `no_second_line` (Q2 reads *“none”*) and `intent_insensitive`, so no replay ran and the `replay_next_turn` reading still does not exist — a reading about the reader, not the instrument. **Grading chair unchanged:** Codex decided every board (`--seat-spot-check 1`, `M64` (1) / R224), fresh-Opus not seated (`authored_by: [claude]`, R217 C), local seat SHADOW at **1 of 3** comparable turns — nothing about `M62` at that denominator. **4 Codex calls** (3 deciding + 1 pair), exactly the plan, against a cap of 5 (9 minus §24's 4); the meter read `5h 59%` / week 28% immediately before, the five-hour window **rolled over at 16:36 EDT mid-round**, and the round finished at `5h 1%` / week 28% — recorded, not smoothed. **Nothing was deployed.** Every seed came back on the first attempt (no `EB-191`). **Out of slot, graded nowhere:** every board declares `set_hp: {who: first, amount: 55}` and the live bodies read 45 / 46 / 40 — identical in §24, so the boards are reproduced exactly, and it moves no grade (the largest line is 40 against 45, so *no lethal line* holds by 5); it is `EB-240`'s shape of blind spot. **What this licenses:** the pick list, and nothing else. **What it does not:** any re-price, re-wording, sheet move, change to §4.2 or R225's clause, removal of *Pounding Surprise*, or claim about win rate, balance or fun | packet `review/active/klee-sparks-2026-08-29.md` §24.9 (registration §24.9.1–§24.9.4, results §24.9.5–§24.9.10; the round it reruns is §23/§24); boards `understudy/turns/klee-sparks-bt2r/`; forms, verdicts and the two replays under `review/qa/klee-sparks-bt2r-t0*/`; pair read `review/qa/klee-sparks-bt2r-pair-review-codex-gpt-5.6-sol.md` and its prompt beside it |
 | `KURAGECAD-S1` the Kurage memory's CADENCE measured DRAFTED, in the sim (`EB-234`) | 2026-08-30 | `RT12/D18/P11/C21`, cell `kokomi/commander`, hunter, `assigned`, realistic, 600 runs, seed 11, `jobs=1` | **5 PREDICTED (`C1`–`C5`) / 3 SPLIT (`C6`, `C7`, `C8`) / 1 MISS (`C9`) / 0 UNREACHED.** The memory fires on **60.9%** of 78,126 player turns and the rate CLIMBS act 1 → act 3 (47.1% → 71.2%); both entry doors are live (Exhaust 61% / Muster 39% of 108,177 enrolments); the BLOCK is an act-1 state (19.2% → 3.8%); Memory/Order spam does not appear on the sim seat (copies 12.0% of plays, memory-only turns 1.7%) — with §15.4's own caveat that a pilot which never plays toward the queue makes that nearly a tautology. **SPLITs:** the free replay is the majority of fires (57.2%, median fired price 0); the uncapped queue is short at the median (2) and long in the tail (p95 9, max 31), which returns to [USER] as the cap pick; the drafted deck holds a median 3 Exhaust cards. **`C9` MISS**, and §15.2's Ethereal paragraph is STRUCK not rewritten (R101b): the seam read missed `curse_clumsy`, an event-granted CURSE tagged `ethereal`, so 165 of 600 decks hold one — but 0 of 108,177 enrolments did, because the door refuses junk, and `EB-234`'s Ethereal half stays unanswerable in the sim. Three engine repairs are disclosed with the arm (§15.2). No balance claim (R213 B / R215 B): the ON/OFF columns are not two samples of one population | packet `review/active/kokomi-kurage-memory-2026-08-29.md` §15, §15.5–§15.6; raw `review/qa/kuragecad-s1/` |
 | `X9READ-S1` Kokomi's charge READS PER TURN, descriptive (`EB-78`) | 2026-08-30 | `RT12/D18/P11/C21`, cell `kokomi` × `priest`/`commander`/`assist`, hunter, `assigned`, realistic, 600 runs each (1,800), seed 11, `jobs=1`, 53 s of a 1-hour ceiling | **4 PREDICTED (`X2`, `X4`, `X6`, `X7`) / 1 SPLIT (`X5`) / 2 MISS (`X1`, `X3`) / 0 UNREACHED**, over 106,861 sampled player turns and 176,995 attack plays. **`W9` FIRED on Limb A** — the repeatable readers are **58.91%** of completed-turn reads against its `> 50%`, and **51.68%** with `EB-242`'s contamination removed, so the firing does not depend on the defect; the margin does (+8.91 pp → +1.68 pp). Limb B did not fire and is not close: R188's ruled double read lands on **0.22%** of attack plays, rarer than `X6`'s own PREDICTED band. Severity **QUIET** (`p50` **0.00**, against §5.1's ceiling of 5): the median turn of this world contains no read at all. The act is discharged as QUEUE `M69`, a numbered pick — nothing is nerfed, capped, deduped or budgeted. **`X1` MISS is a MISS-LOW**, which §5.3 calls INVALID rather than quiet; `X7`'s cross-check exonerates the instrument (46 dropped turns of 106,907, carrying zero reads between them) and the erratum is §5.0(3)'s: `KURAGE_ALWAYS_ON` is read **only** under `C.KURAGE_MEMORY`, which is the shipped quarantine `False`, so the pulse floor the whole slate was drafted against does not exist at this cell and 74.6% of sampled turns carry no pulse. **`X3` MISS is `EB-242`**, not the cost-reduction route its decision column expected: the 15-read turn (seed 11, `priest`, run 446, act 2, turn 3) is 14 pilot valuation calls and one resolution. Per archetype (`R1`, graded by nothing): Limb A fires on `priest` (65.5%) and `commander` (60.9%) and NOT on `assist` (43.9%); `X5`'s SPLIT is `priest`'s 39.6% diluted by two arms. No balance claim (R213 B / R215 B, Guardrail-7): the pilot never plays toward the double read, so `X4` and `X6` are floors | packet `review/active/charge-reads-per-turn-registration-2026-08-13.md` §5, §9; raw `review/qa/x9read-s1/` |
+| `KLEESPARK-BT3` the `F2` repair, *Bag of Tricks*' third staged round (`EB-224`) | 2026-08-30 | dev build `0.2.1786+proto.dirty`, game `v0.111.0` `public-beta`, branch `bt3-w5-run` off `wave-2026-08-30-night` `df952bb1`, two boards, Codex seat deciding both, local seat SHADOW | `G1` **UNREACHED** (both deciding forms REFUSED `intent_insensitive` — the slot's own rule), `G2` **UNREACHED** (subset of `G1`), `G3` **PREDICTED 2 of 2** (the forecast channel carried on both forms — `EB-239`'s repair holds on its second round), `G4` **UNREACHED** (`EB-209`: a refused form's slot is UNREACHED, never MISSED). **`F2` is UNREACHED for the fourth round running.** The cause is a defect and it is `EB-244`: both boards declared *"one enemy telegraphing an attack for 16"* and the wire carried a **Debuff** on `t01` and an attack for **12** on `t02` — the encounter is generated, the board writes no intent, and `EB-240`'s `expects:` block has no `intent` leg. `EB-243`'s relic re-draft was read off the wire and disclosed before the round (a DIFFERENT gift on each seed). 2 Codex calls of a cap of 6; the pair read was not taken and §25.5.4 says why. No [USER] row opens | packet `review/active/klee-sparks-2026-08-29.md` §25.5; window record `review/qa/bt3-w5-2026-08-30/record.md` |
+| `KLEESPARK-W5` the whole fight, carrying R230's pre-registered collapse condition (`EB-224`) | 2026-08-30 | dev build `0.2.1786+proto.dirty`, game `v0.111.0` `public-beta`, sealed session `20260831-022129`, run seed `UVPVUS1BVEQ0`, Codex seat, `proto_spark_mode_bombs` granted, 40 actions, **19 combat pages**, `EB-229`'s forecast channel ON and answered on all 19 | `B1` **UNREACHED** — **1 opportunity page against a registered floor of 4**, so **R230's collapse did not fire and could not have**; nothing is inferred and no [USER] row opens. `B2` **PREDICTED** (threshold 1, observed 6: the tester named the liquidity in its own pre-commit words, *"Keeping the 3 Sparks for later Spark-priced cards; the three detonations should refund them"*). `B3` **PREDICTED** (threshold 1, observed 3 of the 5 pages the card reached hand — R230's *"real liquidity, locked up"* clause graded live for the first time and it holds). `B4` **MISSED** on its registered falsifier — the one priced-mode take had four affordable detonators in hand — **on a denominator of one take**, and a MISS licenses nothing (§25.4). `B5` recorded: peak bank 2/2/4, priced takes 1, free takes 0, preserved-Spark reasons 6 of 19. Recorded and graded nowhere: clause (iii) failed on those 6, so the collapse would have been refused had the denominator been reached — which the declared error direction predicted. The arm stands where R230 put it; **no number and no threshold moved**. Minted: `EB-245` (a `card_select` overlay triggers a phantom fight record — FOUR records for THREE fights) and `EB-246` (BBCode in a printed option name) | packet `review/active/klee-sparks-2026-08-29.md` §25.6; record `review/qa/blindplay/20260831-022129/record.md`; window `review/qa/bt3-w5-2026-08-30/record.md` |
+| `KURAGECAD-W1` the Kurage memory's cadence across a WHOLE FIGHT (`EB-234`, second leg) | 2026-08-30 | dev build `0.2.1786+proto.dirty`, game `v0.111.0` `public-beta`, sealed session `20260831-023544`, run seed `0EEMNL2RE8UY`, Codex seat, the intentionally enriched stress deck (five granted rows), 40 actions, **22 combat pages**, forecast channel ON with all three questions | `K1` **half (a) PASS at 6 of 6** — the front card named correctly on the first six QUEUED pages, no wrong call in the FIRES direction anywhere — **half (b) UNREACHED**, no page carried `run_out_index ≥ 0`. `K2` **SPLIT**: 3 FIRE pages ÷ 22 combat pages = **13.6%**, inside the registered 10%–<25% band; `S1`'s 60.9% rides as a COMPARATOR and is neither confirmed nor refuted. `K3` **UNREACHED** — peak queue 3, no page reached 4; zero jam episodes observed but the tail was never examined, and **no cap, drain or dose is implied in either direction** (R231 A2). `K4` **SPLIT** — 3 STEERs on the first 10 pages against a threshold of 3, but none names a Muster door; the one Muster steer landed on page 12. `K5` **UNREACHED** — zero blocked pages. `K6` recorded: 2 of 3 fires at price 0, 6 `exhaust` / 1 `muster` enrolments, 0 blocked pages, peak queue 3 and 2, fires 2 and 1, all five granted rows reached play. **ONE CAUSE, THREE UNREACHEDS: the Charge was never scarce** — the enriched deck over-samples enrolment and UNDER-samples scarcity, which is what `K1`(b), `K3` and `K5` were all about. `EB-198` is **HALF discharged and STAYS OPEN** (§15.9.4). Minted: `EB-247` (the jellyfish's text disagrees with its pulse) and `EB-248` (a discounted entry's price is not derivable from the printed face), both display rows. **No number, threshold or constant moved and no [USER] row opens** | packet `review/active/kokomi-kurage-memory-2026-08-29.md` §15.9; record `review/qa/blindplay/20260831-023544/record.md`; window `review/qa/bt3-w5-2026-08-30/record.md` |
+| `KOKOMI-SLICE1-WF` the six ADVANCED slice-1 arms across whole fights | 2026-08-30 | dev build `0.2.1786+proto.dirty`, game `v0.111.0` `public-beta`, **three fights in three separate game sessions** (the whole-fight cap is one per session), sealed sessions `20260831-025000` / `20260831-025720` / `20260831-030325`, Codex seat, `--max-actions 24 --max-refusals 2`, **0 refusals across all three**, the memory kit ON as registered | **Arm A carries the round**: `WF1` **PREDICTED** (2 actions name an Exhaust played before the card, or the running count as the reason to order the turn) and `WF2` **PREDICTED** (one resolution at 2 Exhausts; the wire's HP delta is 11, the sheet's `base 5 + 3×2` exactly). **The three priced arms split**: `WF3` **SPLIT** (1 of 2 — one turn ended holding a priced row the starting energy could have paid for alone), `WF4` **SPLIT** (1 of 3, and the one is disclosed as marginal — a narrower reading of its second clause gives MISS), `WF5` **PREDICTED** (0 of 3 priced-row plays below the printed 3, so the Muster discount does NOT defuse the price and `WF3` is not confounded in the direction contamination 3 warned about). **The two exclusive arms are the weak half**: `WF6` **MISS** on 0 Block-mode plays — but *Itto — Oni Rush* was played ONCE, at exactly lethal range, and *Shinobu — Warding Ring* **never reached the hand**, so the PREDICTED band was unreachable by construction and what the MISS licenses is a rerun with both rows held, not an edit; `WF7` **MISS** (0 of 2, a legibility finding by its own decision column, not a design return); `WF8` **PREDICTED and VACUOUSLY so** — no granted `either` row ever entered the memory, so the interaction was never posed. **No number, threshold, sheet row or constant moved and no row was accepted to a sheet.** Recorded and graded nowhere: a THIRD independent witness to `EB-247` | packet `review/active/kokomi-slice-1-2026-08-27.md` *KOKOMI-SLICE1-WF — RUN AND GRADED*; window `review/qa/bt3-w5-2026-08-30/record.md` |
 
 
 ## Active registrations (pointers — packets live in `review/active/`)
@@ -282,30 +286,6 @@ carried while it was active is in the commit message that retired it.
   (`band = None`). The declaration is QUEUE `S4-G6`; its grading playtest is
   `docs/current/playtest/kokomi-playtest-protocol.md` (unrun, Answers block
   blank).
-- **`KOKOMI-SLICE1-WF` — the six ADVANCED slice-1 arms across whole fights** —
-  **DRAFTED 2026-08-30, unrun, not countersigned.** Drafted by Claude from
-  written design intent and committed before any seed is spent (R212(2)); it
-  is offered for batch countersign. **Why:** the six arms' four rounds of
-  ADVANCE feed nothing registered — they land only on the accept-to-sheet
-  signoff, which is the prototype surface's own deletion rule (R213 B), a
-  one-way door with no measurement in front of it. **Unit:** one complete
-  fight, Codex seat, `understudy.blindplay session` with the arm granted by
-  `understudy.embark --arm`; **30 Codex calls per fight** (`--max-actions 24`,
-  `--max-refusals 2`, worst case 28), three fights, 90-call ceiling.
-  **Slate:** eight slots, `WF1`–`WF8`, every falsifier counting plays, turns
-  or sentences off the run's own artefacts — cadence and stacked rotations for
-  arm A, whether 3 energy binds and is named for the three priced Companion
-  arms, and whether the Block mode is ever taken, ever named, and ever handed
-  back by the memory replay for the two exclusive arms. **Contaminations:**
-  granted deck, `+proto` build, `C.KURAGE_MEMORY` ON as a deliberate second
-  variable with its error direction stated (the kit makes a priced Companion
-  easier to afford, so *the price binds* is a floor and *it does not* is
-  confounded), and the GPT seat under R217 C/G. **Sequenced after** `M67` and
-  after `KURAGEMEM002`'s rerun; F3 additionally behind `EB-184`. Thoma —
-  Blazing Ooyoroi, the slice's one open RETURN, is excluded. No board staged,
-  no seed pinned →
-  `review/active/kokomi-slice-1-2026-08-27.md`, *Whole-fight blind play*.
-
 - **`EB183-MF` — Muster's Charge subsidy asked at the FUNNEL, the fifth matched
   pair (`EB-183`)** — **DRAFTED 2026-08-30, unrun, not countersigned.** Drafted
   by Claude from written design intent and committed before any board is staged
@@ -331,76 +311,6 @@ carried while it was active is in the commit message that retired it.
   the R226 reading in §1 as well as on the slate, then game time. Boards
   `understudy/turns/eb183-muster-funnel/`; no board staged, no seed pinned →
   `review/active/eb183-muster-funnel-2026-08-30.md` §4.
-
-- **`KLEESPARK-BT3` and `KLEESPARK-W5` — the two cells R230 left owed
-  (`EB-224`)** — **DRAFTED 2026-08-30, unrun, not countersigned.** Drafted by
-  Claude from written design intent and committed before any board is staged
-  or any seed is spent (R212 item 2); offered for batch countersign.
-  **Why:** R230 took §24.9.9's pick at option (3) QUALIFIED — *Bag of Tricks*
-  keeps its refund loop as a deliberate BRIDGE mechanic — and left exactly two
-  things owed: the `F2` repair, and the whole fight.
-  **`KLEESPARK-BT3`**, first: two staged boards
-  (`understudy/turns/klee-sparks-bt3/`, seeds `YX7PB48WR7R4` /
-  `R805DJ56LZHM`), taking R230's SECOND repair — *Mine Toss* leaves the board,
-  so nothing but the mode under test places a Bomb and the refund is
-  attributable by construction rather than by subtraction. Slate `G1`–`G4`:
-  the re-posed `F2` at 2 of 2 with a one-refusal rule written in advance, a
-  pressure control that is a declared subset of it, the forecast channel's
-  denominator, and the delayed arithmetic. Counting slot `C1`, threshold 2,
-  ceiling 2. Codex seat decides both boards (`M64` (1) / R224), local seat
-  SHADOW, 3 calls expected of a cap of 6. First round to declare `EB-240`'s
-  `expects:` block — both relics and each seed's recorded body, refused at
-  stage on a mismatch. **`KLEESPARK-W5`**, after it: one whole fight carrying
-  **R230's PRE-REGISTERED COLLAPSE CONDITION in graded-predicate form** —
-  priced-mode takes ≥ 90% of opportunity pages on a denominator of ≥ 4, ZERO
-  free-mode takes, and ZERO pages naming a reason to preserve the extra Spark;
-  all three, and the arm RETURNS TO DESIGN again; fewer than 4 opportunity
-  pages is UNREACHED and infers nothing. Slots `B1`–`B4` graded, `B5` recorded
-  and not graded. **First registration to switch `EB-229`'s blind-run forecast
-  channel ON**, with its error direction declared: asking *what are you giving
-  up* every turn makes clause (iii) harder to satisfy, so a collapse that
-  fires is a FLOOR. `EB-235` is deliberately NOT folded in — the Rare Power is
-  not granted and grades nothing here. Contaminations: granted deck, `+proto`
-  build, *Pounding Surprise* present by design, the Neow deck-neutral rule,
-  `EB-191`, and every income figure a floor. 45-call cap →
-  `review/active/klee-sparks-2026-08-29.md` §25.
-
-- **`KURAGECAD-W1` — the Kurage memory's cadence across a WHOLE FIGHT
-  (`EB-234`, second leg)** — **DRAFTED AND COMMITTED, NOT RUN, NOT
-  COUNTERSIGNED.** The slate is `review/active/kokomi-kurage-memory-2026-08-29.md`
-  §15.8, drafted under R212 item 2 and committed before anything is staged; the
-  ruling that authorised it authorised **the drafting and the RHYTHM shape
-  only, and explicitly did not countersign a blank registration**, so the
-  countersign is a later batch act.
-  Its sim sibling `KURAGECAD-S1` is finished and sits in the published table
-  above; the live leg inherits from it the staging SHAPE and **no threshold**.
-  **Unit:** one `understudy.blindplay session` on a `+proto` build, Codex seat,
-  Kokomi's flagged starter plus five GRANTED rows (§15.8.2 — an
-  **INTENTIONALLY ENRICHED STRESS DECK**: the starter's own
-  `gorou_inuzaka_charge` prints Exhaust, so with Sucrose, Bennett and
-  Waterspout the live deck carries FOUR Exhaust printers against the sim's
-  drafted median of three, and `conscription_notice` can enrol more mid-fight.
-  *Revised 2026-08-30 on the pair review's correction: this previously read
-  "three Exhaust printers, the sim's own median and not above it, so a jam
-  observed live is a FLOOR" — the count forgot the starter. **The cell
-  over-samples enrolment pressure and extrapolates to no drafted deck in
-  either direction**: a jam here is not a floor, a clean run here clears
-  nothing, and what a jam licenses is the return of §15.6's cap pick.*). **Slate:** `K1` readability off the live page — does anything fire
-  next turn, and where does the Charge run out — which folds in `EB-198`'s blind
-  read deliberately, for the page mirror only (§15.8.6); `K2` the live beat on a
-  deliberately wide band (≥ 25% of combat pages), with `S1`'s 60.9% riding as a
-  COMPARATOR that one fight can neither confirm nor refute; `K3` the tail —
-  zero jam episodes AND the longest-queue page still readable — which is the ruled
-  live re-read of the UNCAPPED queue and licenses no cap in either direction;
-  `K4` steering INTO the memory; `K5` the block named and unblocked on the first
-  page it bites; `K6` the four levers RECORDED AND NOT GRADED, because one fight
-  cannot ground them. **`EB-229`'s forecast channel is ON** with three
-  prospective questions and its error direction declared one way: the asking
-  points the player at the element every turn, so a PASS on `K1`/`K3`(ii)/`K4`/
-  `K5` is a CEILING and a jam episode observed is a FLOOR. **Ethereal is
-  DEFERRED by the same ruling — no slot demands a carrier. Gate: GAME TIME** — a `+proto`
-  build, the deploy, an operator and the seat's window; 45-call cap →
-  `review/active/kokomi-kurage-memory-2026-08-29.md` §15.8.
 
 New registrations add a pointer here and land their packet under
 `review/active/`. When one is graded, it moves to the **Graded** table above —

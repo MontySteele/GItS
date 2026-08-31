@@ -286,7 +286,18 @@ CEILINGS: dict[str, int] = {
     # boards declare a relic the wire does not carry on their pinned seed
     # (renumbered from EB-242 at the fold: two parallel windows both took
     # the next free id; X9READ-S1's mint keeps 242).
-    "EB": 243,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-244 minted 2026-08-30 by the KLEESPARK-BT3 round: a staged board can
+    # declare an enemy INTENT the wire does not carry, because EB-240 expects:
+    # has a relics leg and an hp leg and no intent leg. Both BT3 boards
+    # declared a telegraphed attack for 16 and the wire carried a Debuff on
+    # t01 and an attack for 12 on t02.
+    # EB-245/246 minted 2026-08-30 by the KLEESPARK-W5 whole fight: the
+    # phantom fight record a card_select overlay triggers mid-play, and
+    # the BBCode a printed option name carries into the blind render.
+    # EB-247/248 minted 2026-08-30 by KURAGECAD-W1: the jellyfish's own
+    # text disagrees with the pulse it delivers, and the memory's price
+    # cannot be derived from the printed face on a discounted entry.
+    "EB": 248,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -937,7 +948,64 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # a relic pair the wire does not carry on their pinned seed, so the
         # round cannot stage until they are re-drafted (renumbered from
         # EB-242 at the fold; X9READ-S1's mint keeps 242).
-        243,
+        #
+        # 243 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word
+        # for word -- "both BT3 boards stage". The gift was read OFF THE WIRE
+        # at both pinned seeds before anything was re-drafted, by staging each
+        # board AS COMMITTED and taking its refusal as the reading: `t01`
+        # (`YX7PB48WR7R4`) carries *Stone Humidifier* and `t02`
+        # (`R805DJ56LZHM`) carries *Scroll Boxes* -- a DIFFERENT gift on each,
+        # so the registered single name assumed a constant the staging path
+        # does not have. Both `expects.relics` blocks were re-drafted to what
+        # is true now with a disclosure line in each board and in the MANIFEST
+        # (R212: a moved world means re-draft and disclose, never re-sign; the
+        # R231 countersign stands and the slate G1-G4 is untouched), the
+        # re-draft was committed BEFORE the round ran, and both boards then
+        # staged clean through the EB-240 preflight. Both `hp.first` legs
+        # (40 and 46) matched the wire unchanged.
+        # 244 minted 2026-08-30 by the KLEESPARK-BT3 round (packet section
+        # 25.5.2): the third leg of the same class as EB-240 and EB-243 -- a
+        # board asserting a fact the wire does not carry -- on the one leg the
+        # expects: block does not check. The encounter is generated from the
+        # seed and the board writes no intent, so both boards notes and
+        # board: mirror printed "one enemy telegraphing an attack for 16"
+        # while t01 drew a Debuff intent and t02 an attack for 12. It is
+        # causal, not cosmetic: t01 holds no Attack in hand, so against a
+        # Debuff no intent could change the line, both deciding forms were
+        # refused `intent_insensitive`, and G1/G2/G4 all graded UNREACHED --
+        # F2 UNREACHED for the fourth round running.
+        244,
+        # 245/246 minted 2026-08-30 by KLEESPARK-W5 (packet section 25.6.3).
+        # 245: blindplay session asked for a FIGHT RECORD on a card_select
+        # observation -- Bag of Tricks' own Choose one mode screen, which is
+        # the middle of a play. The sealed record carries FOUR fight records
+        # for THREE fights and the phantom one reports the fight over while
+        # the enemy stood at 44/44; it cost a Codex call and put a falsehood
+        # in a sealed record. It touched no graded slot: B1-B5 are counted off
+        # per-page wire snapshots and forecast rows, and the mode was still the
+        # tester's own free choice one transcript row later.
+        # 246: the printed option name reaches the blind observation AND the
+        # command with its markup intact -- choose "Spend 3 [gold]Sparks[/gold]
+        # : place 3 [gold]Bombs[/gold] dealing 5". scenario.py folds those tags
+        # out for the staged packet and the blind render does not, so one
+        # choice has two printed names. The W5 tester named it unprompted.
+        245,
+        246,
+        # 247/248 minted 2026-08-30 by KURAGECAD-W1 (kurage packet section
+        # 15.9.5). Both are DISPLAY and WORDING rows, which is the destination
+        # K1's and K4's decision columns name; neither is a re-price, a dose
+        # change or a move to any constant (R231 A2).
+        # 247: the Bake-Kurage's persistent buff promises damage scaling with
+        # Charge while the pulse it actually delivers is 4 damage or 5 Block
+        # depending on the last card played. The blind tester named it in BOTH
+        # fight records, unprompted, and the wire's pulse_kind agrees with the
+        # tester rather than with the text.
+        # 248: a Muster-discounted Thoma prints cost 2 on the sheet and enrols
+        # at cost 1 / price 3. The 3x rule is applied correctly to the card's
+        # EFFECTIVE cost; what the player cannot do is get from the printed 2
+        # to the queued 3, and the tester said so in those words.
+        247,
+        248,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

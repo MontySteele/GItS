@@ -1,0 +1,2340 @@
+{
+ "session_id": "20260831-022129",
+ "snapshots": [
+  {
+   "index": 1,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Nibbit\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "name": "Dahlia \u2014 Sacramental Shower",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 43,
+     "max_hp": 43,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "verb": "play",
+   "command": "play \"Dahlia \u2014 Sacramental Shower\" on \"Nibbit\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "name": "Dahlia \u2014 Sacramental Shower",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 27,
+     "max_hp": 43,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "9",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "card_name": "Dahlia \u2014 Sacramental Shower",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 12,
+     "max_hp": 43,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 4,
+   "verb": "play",
+   "command": "play \"Powder Pop\" on \"Nibbit\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KABOOM_SINK",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_SPARK_MODE_BOMBS",
+     "name": "Bag of Tricks",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-BARBARA_MELODY",
+     "name": "Barbara \u2014 Let the Show Begin\u266a",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 12,
+     "max_hp": 43,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Nibbit\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 15,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_KABOOM_SINK",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_SPARK_MODE_BOMBS",
+     "name": "Bag of Tricks",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-BARBARA_MELODY",
+     "name": "Barbara \u2014 Let the Show Begin\u266a",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 1,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 12,
+     "max_hp": 43,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "4",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KABOOM_SINK",
+     "card_name": "Ka-pow!",
+     "before": 2,
+     "price_paid": 1,
+     "gains": {},
+     "after": 1,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KABOOM_SINK",
+       "delta": -1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 6,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Shrinker Beetle\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "name": "Dahlia \u2014 Sacramental Shower",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-BARBARA_MELODY",
+     "name": "Barbara \u2014 Let the Show Begin\u266a",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KABOOM_SINK",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SHRINKER_BEETLE_0",
+     "name": "Shrinker Beetle",
+     "hp": 39,
+     "max_hp": 39,
+     "block": 0,
+     "intents": [
+      {
+       "type": "DebuffStrong",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "verb": "play",
+   "command": "play \"Dahlia \u2014 Sacramental Shower\" on \"Shrinker Beetle\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "name": "Dahlia \u2014 Sacramental Shower",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-BARBARA_MELODY",
+     "name": "Barbara \u2014 Let the Show Begin\u266a",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KABOOM_SINK",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false,
+     "spark_price": 1,
+     "spark_affordable": false
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SHRINKER_BEETLE_0",
+     "name": "Shrinker Beetle",
+     "hp": 23,
+     "max_hp": 39,
+     "block": 0,
+     "intents": [
+      {
+       "type": "DebuffStrong",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "card_name": "Dahlia \u2014 Sacramental Shower",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Shrinker Beetle\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-BARBARA_MELODY",
+     "name": "Barbara \u2014 Let the Show Begin\u266a",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-PROTO_KABOOM_SINK",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SHRINKER_BEETLE_0",
+     "name": "Shrinker Beetle",
+     "hp": 8,
+     "max_hp": 39,
+     "block": 0,
+     "intents": [
+      {
+       "type": "DebuffStrong",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "card_name": "Dahlia \u2014 Sacramental Shower",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KABOOM_SINK",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 1,
+     "gains": {},
+     "after": 0,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KABOOM_SINK",
+       "delta": -1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-BARBARA_MELODY",
+     "name": "Barbara \u2014 Let the Show Begin\u266a",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SHRINKER_BEETLE_0",
+     "name": "Shrinker Beetle",
+     "hp": 1,
+     "max_hp": 39,
+     "block": 0,
+     "intents": [
+      {
+       "type": "DebuffStrong",
+       "label": "",
+       "title": "Strategic"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "card_name": "Dahlia \u2014 Sacramental Shower",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 1,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 0
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_KABOOM_SINK",
+     "card_name": "Ka-pow!",
+     "before": 1,
+     "price_paid": 1,
+     "gains": {},
+     "after": 0,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KABOOM_SINK",
+       "delta": -1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "verb": "play",
+   "command": "play \"Sparkly Treasure\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SHRINK_POWER": -1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_SPARK_MODE_BOMBS",
+     "name": "Bag of Tricks",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-SPARKLY_TREASURE",
+     "name": "Sparkly Treasure",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 2,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SHRINKER_BEETLE_0",
+     "name": "Shrinker Beetle",
+     "hp": 1,
+     "max_hp": 39,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 11,
+   "verb": "play",
+   "command": "play \"Kaboom!\" on \"Shrinker Beetle\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SHRINK_POWER": -1,
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_SPARK_MODE_BOMBS",
+     "name": "Bag of Tricks",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 2,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "SHRINKER_BEETLE_0",
+     "name": "Shrinker Beetle",
+     "hp": 1,
+     "max_hp": 39,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "7",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-KABOOM",
+     "card_name": "Kaboom!",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {},
+     "after": 2,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 12,
+   "verb": "play",
+   "command": "play \"Sparkly Treasure\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {}
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-SPARKLY_TREASURE",
+     "name": "Sparkly Treasure",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "name": "Dahlia \u2014 Sacramental Shower",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "FUZZY_WURM_CRAWLER_0",
+     "name": "Fuzzy Wurm Crawler",
+     "hp": 57,
+     "max_hp": 57,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SPARKLY_TREASURE",
+     "card_name": "Sparkly Treasure",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SPARKLY_TREASURE": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SPARKLY_TREASURE",
+       "delta": 1,
+       "bank_before": 0
+      },
+      {
+       "source": "card:KLEEMOD-SPARKLY_TREASURE",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 13,
+   "verb": "play",
+   "command": "play \"Powder Pop\" on \"Fuzzy Wurm Crawler\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 2
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_POP_SPARK",
+     "name": "Powder Pop",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "name": "Dahlia \u2014 Sacramental Shower",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "FUZZY_WURM_CRAWLER_0",
+     "name": "Fuzzy Wurm Crawler",
+     "hp": 57,
+     "max_hp": 57,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SPARKLY_TREASURE",
+     "card_name": "Sparkly Treasure",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SPARKLY_TREASURE": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SPARKLY_TREASURE",
+       "delta": 1,
+       "bank_before": 0
+      },
+      {
+       "source": "card:KLEEMOD-SPARKLY_TREASURE",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 14,
+   "verb": "play",
+   "command": "play \"Dahlia \u2014 Sacramental Shower\" on \"Fuzzy Wurm Crawler\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 5,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 3
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "name": "Dahlia \u2014 Sacramental Shower",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "FUZZY_WURM_CRAWLER_0",
+     "name": "Fuzzy Wurm Crawler",
+     "hp": 57,
+     "max_hp": 57,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "3",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SPARKLY_TREASURE",
+     "card_name": "Sparkly Treasure",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SPARKLY_TREASURE": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SPARKLY_TREASURE",
+       "delta": 1,
+       "bank_before": 0
+      },
+      {
+       "source": "card:KLEEMOD-SPARKLY_TREASURE",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "card_name": "Dahlia \u2014 Sacramental Shower",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 15,
+   "verb": "play",
+   "command": "play \"Duck and Cover (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 3,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "FUZZY_WURM_CRAWLER_0",
+     "name": "Fuzzy Wurm Crawler",
+     "hp": 44,
+     "max_hp": 57,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SPARKLY_TREASURE",
+     "card_name": "Sparkly Treasure",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SPARKLY_TREASURE": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SPARKLY_TREASURE",
+       "delta": 1,
+       "bank_before": 0
+      },
+      {
+       "source": "card:KLEEMOD-SPARKLY_TREASURE",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "card_name": "Dahlia \u2014 Sacramental Shower",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 16,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 5,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-DUCK_AND_COVER",
+     "name": "Duck and Cover",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 4,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "FUZZY_WURM_CRAWLER_0",
+     "name": "Fuzzy Wurm Crawler",
+     "hp": 44,
+     "max_hp": 57,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SPARKLY_TREASURE",
+     "card_name": "Sparkly Treasure",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-SPARKLY_TREASURE": 2
+     },
+     "after": 2,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-SPARKLY_TREASURE",
+       "delta": 1,
+       "bank_before": 0
+      },
+      {
+       "source": "card:KLEEMOD-SPARKLY_TREASURE",
+       "delta": 1,
+       "bank_before": 1
+      }
+     ]
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_POP_SPARK",
+     "card_name": "Powder Pop",
+     "before": 2,
+     "price_paid": 0,
+     "gains": {
+      "card:KLEEMOD-PROTO_POP_SPARK": 1
+     },
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_POP_SPARK",
+       "delta": 1,
+       "bank_before": 2
+      }
+     ]
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DAHLIA_SACRAMENTAL_SHOWER",
+     "card_name": "Dahlia \u2014 Sacramental Shower",
+     "before": 3,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 1
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    },
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-DUCK_AND_COVER",
+     "card_name": "Duck and Cover",
+     "before": 4,
+     "price_paid": 0,
+     "gains": {},
+     "after": 4,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 17,
+   "verb": "play",
+   "command": "play \"Bag of Tricks\" on \"Fuzzy Wurm Crawler\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-PROTO_SPARK_MODE_BOMBS",
+     "name": "Bag of Tricks",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-FISH_FLAVORED_BAIT",
+     "name": "Fish-Flavored Bait",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KABOOM_SINK",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "FUZZY_WURM_CRAWLER_0",
+     "name": "Fuzzy Wurm Crawler",
+     "hp": 44,
+     "max_hp": 57,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": []
+  },
+  {
+   "index": 18,
+   "verb": "play",
+   "command": "play \"Jumpy Dumpty\" on \"Fuzzy Wurm Crawler\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 10,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-JUMPY_DUMPTY",
+     "name": "Jumpy Dumpty",
+     "kind": "Attack",
+     "energy_cost": "2",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-FISH_FLAVORED_BAIT",
+     "name": "Fish-Flavored Bait",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KABOOM_SINK",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "FUZZY_WURM_CRAWLER_0",
+     "name": "Fuzzy Wurm Crawler",
+     "hp": 44,
+     "max_hp": 57,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-JUMPY_DUMPTY",
+     "card_name": "Jumpy Dumpty",
+     "before": 1,
+     "price_paid": 0,
+     "gains": {
+      "relic:pounding_surprise/detonation": 3
+     },
+     "after": 4,
+     "entries": [
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 1
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 2
+      },
+      {
+       "source": "relic:pounding_surprise/detonation",
+       "delta": 1,
+       "bank_before": 3
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "index": 19,
+   "verb": "play",
+   "command": "play \"Ka-pow!\" on \"Fuzzy Wurm Crawler\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 50,
+   "max_hp": 62,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 15,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "SPARK_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-KABOOM",
+     "name": "Kaboom!",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-FISH_FLAVORED_BAIT",
+     "name": "Fish-Flavored Bait",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_KABOOM_SINK",
+     "name": "Ka-pow!",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true,
+     "spark_price": 1,
+     "spark_affordable": true
+    }
+   ],
+   "piles": {
+    "draw": 3,
+    "discard": 7,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "FUZZY_WURM_CRAWLER_0",
+     "name": "Fuzzy Wurm Crawler",
+     "hp": 13,
+     "max_hp": 57,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {},
+   "ledger": [
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_KABOOM_SINK",
+     "card_name": "Ka-pow!",
+     "before": 4,
+     "price_paid": 1,
+     "gains": {},
+     "after": 3,
+     "entries": [
+      {
+       "source": "card:KLEEMOD-PROTO_KABOOM_SINK",
+       "delta": -1,
+       "bank_before": 4
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

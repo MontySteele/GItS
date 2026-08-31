@@ -1,0 +1,72 @@
+{
+ "turn_id": "klee-sparks-bt3-t01",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "intent_insensitive"
+ ],
+ "reasons": [
+  "intent_insensitive: question four is no: a different enemy intent would not have changed the line, so the intent is not part of the decision"
+ ],
+ "grader": {
+  "id": "local-qwen3-8-27b-ud-q4-k-xl",
+  "kind": "llm",
+  "model": "local:C:\\models\\qwen3.8-27b\\Qwen3.8-27B-UD-Q4_K_XL.gguf",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "94d0fe9f91e276ebc1ebb6e67d7bb0d79fa2d5f17cc41dd89155e672706a8bfa",
+ "chosen_line": [
+  {
+   "card": "Bag of Tricks",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."
+  },
+  {
+   "card": "Spirited Away",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Run Away!",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Bag of Tricks on Shrinker Beetle, taking the option to spend 3 Sparks and place 3 Bombs dealing 5. Then I played Spirited Away for 12 Block, and Run Away! for 4 Block. This used all 2 Energy and all 3 Sparks, leaving 16 Block and placing 3 Bombs on the enemy.",
+  "q2_other_line_considered": "I seriously considered playing Bag of Tricks with the free option to place only 1 Bomb dealing 5, then Spirited Away and Run Away!. That line would preserve more Spark if the bombs do not immediately return it, but it deals 10 less damage this turn for no immediate benefit against a debuff intent.",
+  "q3_what_it_gave_up": "The chosen line gave up the Spark bank that would remain if I had taken the free 1-Bomb option. It also committed all available Spark to the 3-Bomb option, so if those Bombs do not detonate and return Spark this turn, the turn ends with no Spark bank. It also spent Energy on Block even though the telegraphed enemy action is a Debuff rather than an attack.",
+  "q4_different_intent": "No. The enemy\u2019s telegraphed intent is to apply a Debuff, not to attack. A different intent would not change the core arithmetic: the 3-Bomb option still deals more damage this turn, and the available Energy still allows the same Block package. If the intent were a large attack, the Block would be more clearly valuable, but the same line would still be playable and likely preferred."
+ },
+ "forecast_asked": 3,
+ "forecast": [
+  "3",
+  "3",
+  "15"
+ ],
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Bag of Tricks"
+  ],
+  "hand": [
+   "Bag of Tricks",
+   "Duck and Cover",
+   "Spirited Away",
+   "Run Away!"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-30T22:10:40"
+}

@@ -1,0 +1,69 @@
+{
+ "turn_id": "klee-sparks-bt3-t01",
+ "packet_sha256": "94d0fe9f91e276ebc1ebb6e67d7bb0d79fa2d5f17cc41dd89155e672706a8bfa",
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "chosen_line": [
+  {
+   "card": "Bag of Tricks",
+   "target": "Shrinker Beetle",
+   "exhaust": null,
+   "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."
+  },
+  {
+   "card": "Spirited Away",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Run Away!",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "q1_what_did_you_play": "I spent 3 Sparks with Bag of Tricks to place three 5-damage Bombs on Shrinker Beetle, then played Spirited Away and Run Away! for 16 Block.",
+ "q2_other_line_considered": "I seriously considered taking Bag of Tricks' single-Bomb option to preserve the 3 Sparks, then playing the same Block cards.",
+ "q3_what_it_gave_up": "It gave up all 2 Energy and temporarily spent all 3 Sparks, while using the two Block cards against an intent that showed no damage.",
+ "q4_different_intent": "No. This line already dealt the available damage and gained the maximum Block available from the hand, so a different telegraphed intent would not have changed it.",
+ "q4_changed": false,
+ "forecast": [
+  "3",
+  "3",
+  "15"
+ ],
+ "price_ledger": [
+  {
+   "card": "Bag of Tricks",
+   "energy_before": 2,
+   "energy_price": 0,
+   "energy_after": 2,
+   "spark_before": 3,
+   "spark_price": 3,
+   "spark_after": 0
+  },
+  {
+   "card": "Spirited Away",
+   "energy_before": 2,
+   "energy_price": 2,
+   "energy_after": 0,
+   "spark_before": 0,
+   "spark_price": 0,
+   "spark_after": 0
+  },
+  {
+   "card": "Run Away!",
+   "energy_before": 0,
+   "energy_price": 0,
+   "energy_after": 0,
+   "spark_before": 0,
+   "spark_price": 0,
+   "spark_after": 0
+  }
+ ]
+}

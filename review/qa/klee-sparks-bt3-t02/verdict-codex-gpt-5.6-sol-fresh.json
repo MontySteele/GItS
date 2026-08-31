@@ -1,0 +1,72 @@
+{
+ "turn_id": "klee-sparks-bt3-t02",
+ "verdict": "REFUSED",
+ "refused_by": [
+  "intent_insensitive"
+ ],
+ "reasons": [
+  "intent_insensitive: question four is no: a different enemy intent would not have changed the line, so the intent is not part of the decision"
+ ],
+ "grader": {
+  "id": "codex-gpt-5.6-sol-fresh",
+  "kind": "llm",
+  "model": "gpt-5.6-sol",
+  "designed_these_cards": false
+ },
+ "packet_sha256": "e332ab2ebe1c88d8f39cc121248b3745458d68070701ee42d30bad3be03ed695",
+ "chosen_line": [
+  {
+   "card": "Bag of Tricks",
+   "target": "Nibbit",
+   "exhaust": null,
+   "choose": "Spend 3 Sparks: place 3 Bombs dealing 5."
+  },
+  {
+   "card": "Spirited Away",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  },
+  {
+   "card": "Run Away!",
+   "target": null,
+   "exhaust": null,
+   "choose": null
+  }
+ ],
+ "answers": {
+  "q1_what_did_you_play": "I played Bag of Tricks on Nibbit, spending 3 Sparks to place three 5-damage Bombs, then Spirited Away and Run Away! for 16 Block total.",
+  "q2_other_line_considered": "I seriously considered Bag of Tricks with Duck and Cover and Run Away!, which would deal the same damage but provide only 9 Block and leave 1 Energy unused.",
+  "q3_what_it_gave_up": "It gave up playing Duck and Cover and left that card unused; it spent all 2 Energy to maximize Block.",
+  "q4_different_intent": "No. With this hand, no different enemy intent would change the line: the three-Bomb option maximizes damage and restores its spent Sparks when the Bombs detonate, while Spirited Away plus Run Away! provides the most Block available without sacrificing that damage."
+ },
+ "forecast_asked": 3,
+ "forecast": [
+  "3",
+  "3",
+  "15"
+ ],
+ "survives_means": "not yet falsified -- this funnel refuses turns and never rates them",
+ "survives_alone": false,
+ "why_not_alone": "",
+ "closeness": null,
+ "targets": {
+  "refused": false,
+  "findings": [],
+  "hand_takes_a_target": [
+   "Bag of Tricks"
+  ],
+  "hand": [
+   "Bag of Tricks",
+   "Duck and Cover",
+   "Spirited Away",
+   "Run Away!"
+  ],
+  "rule": "a play that names a card whose effects aim at ONE enemy must carry that enemy's printed name in `target`; a card that aims at nobody must carry `target: null`",
+  "derived_from": "the card sheets (understudy/resource_order.SHEETS: the three character sheets, the three companion sheets and docs/prototype-surface.yaml), read through each effect's own `target:` key. The blind packet carries NO targeting field -- the wire's hand entry has none -- so the sheet is the derivation and this is the record of it",
+  "repair": "out of scope by M63: this refuses a form and never repairs one"
+ },
+ "closeness_quotability": "the decision-closeness gap is a falsifier reading of the TURN and is quotable under R215 B's exception; it is never evidence that a decision is fun",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "graded_at": "2026-08-30T22:12:53"
+}

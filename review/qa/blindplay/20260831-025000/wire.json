@@ -1,0 +1,1843 @@
+{
+ "session_id": "20260831-025000",
+ "snapshots": [
+  {
+   "index": 1,
+   "verb": "play",
+   "command": "play \"Water's Edge\" on \"Nibbit\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 64,
+   "max_hp": 80,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WATERS_EDGE",
+     "name": "Water's Edge",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-TACTICAL_RETREAT",
+     "name": "Tactical Retreat",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 46,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 0,
+    "front_price": null,
+    "blocked": false,
+    "fires_next": false,
+    "empty": true,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "none",
+    "pulse_amount": 0,
+    "pulse_unit": "none",
+    "reading": "Charge 0 \u2014 memory empty",
+    "run_out_index": -1,
+    "queue": []
+   },
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-WATERS_EDGE",
+     "card_name": "Water's Edge",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 2,
+   "verb": "play",
+   "command": "play \"Coral Guard+\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 64,
+   "max_hp": 80,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-TACTICAL_RETREAT",
+     "name": "Tactical Retreat",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard+",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 1,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 40,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 0,
+    "front_price": null,
+    "blocked": false,
+    "fires_next": false,
+    "empty": true,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "attack",
+    "pulse_amount": 4,
+    "pulse_unit": "damage",
+    "reading": "Charge 0 \u2014 memory empty",
+    "run_out_index": -1,
+    "queue": []
+   },
+   "ledger": [
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-CORAL_GUARD",
+     "card_name": "Coral Guard+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 3,
+   "verb": "play",
+   "command": "play \"Tactical Retreat\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 64,
+   "max_hp": 80,
+   "block": 8,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-TACTICAL_RETREAT",
+     "name": "Tactical Retreat",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 8,
+    "discard": 2,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 40,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 0,
+    "front_price": null,
+    "blocked": false,
+    "fires_next": false,
+    "empty": true,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "skill",
+    "pulse_amount": 5,
+    "pulse_unit": "block",
+    "reading": "Charge 0 \u2014 memory empty",
+    "run_out_index": -1,
+    "queue": []
+   },
+   "ledger": [
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-TACTICAL_RETREAT",
+     "card_name": "Tactical Retreat",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 4,
+   "verb": "play",
+   "command": "play \"Coral Guard (1)\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 64,
+   "max_hp": 80,
+   "block": 8,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 4,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 40,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 0,
+    "front_price": null,
+    "blocked": false,
+    "fires_next": false,
+    "empty": true,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "skill",
+    "pulse_amount": 5,
+    "pulse_unit": "block",
+    "reading": "Charge 0 \u2014 memory empty",
+    "run_out_index": -1,
+    "queue": []
+   },
+   "ledger": [
+    {
+     "index": 4,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-CORAL_GUARD",
+     "card_name": "Coral Guard",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 5,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 64,
+   "max_hp": 80,
+   "block": 13,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": false
+    }
+   ],
+   "piles": {
+    "draw": 7,
+    "discard": 5,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 40,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "12",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 0,
+    "front_price": null,
+    "blocked": false,
+    "fires_next": false,
+    "empty": true,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "skill",
+    "pulse_amount": 5,
+    "pulse_unit": "block",
+    "reading": "Charge 0 \u2014 memory empty",
+    "run_out_index": -1,
+    "queue": []
+   },
+   "ledger": []
+  },
+  {
+   "index": 6,
+   "verb": "play",
+   "command": "play \"Gorou \u2014 Inuzaka All-Round Defense\" on \"Nibbit\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 64,
+   "max_hp": 80,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WATERS_EDGE",
+     "name": "Water's Edge",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_PEARL_BARRAGE_TURN",
+     "name": "Tidal Barrage",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-SAYU_DARUMA_GIFT",
+     "name": "Sayu \u2014 Muji-Muji Daruma",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-GOROU_INUZAKA_CHARGE",
+     "name": "Gorou \u2014 Inuzaka All-Round Defense",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-TO_THE_FRONT",
+     "name": "To the Front!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 2,
+    "discard": 6,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 40,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 0,
+    "front_price": null,
+    "blocked": false,
+    "fires_next": false,
+    "empty": true,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "none",
+    "pulse_amount": 0,
+    "pulse_unit": "none",
+    "reading": "Charge 0 \u2014 memory empty",
+    "run_out_index": -1,
+    "queue": []
+   },
+   "ledger": [
+    {
+     "index": 5,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-GOROU_INUZAKA_CHARGE",
+     "card_name": "Gorou \u2014 Inuzaka All-Round Defense",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 7,
+   "verb": "play",
+   "command": "play \"Tidal Barrage\" on \"Nibbit\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 64,
+   "max_hp": 80,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 1,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 2,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WATERS_EDGE",
+     "name": "Water's Edge",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_PEARL_BARRAGE_TURN",
+     "name": "Tidal Barrage",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-SAYU_DARUMA_GIFT",
+     "name": "Sayu \u2014 Muji-Muji Daruma",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-TO_THE_FRONT",
+     "name": "To the Front!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 2,
+    "discard": 6,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 34,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 1,
+    "front_price": 0,
+    "blocked": false,
+    "fires_next": true,
+    "empty": false,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "attack",
+    "pulse_amount": 4,
+    "pulse_unit": "damage",
+    "reading": "Charge 1 / 0 \u2014 Gorou \u2014 Inuzaka All-Round Defense fires next turn",
+    "run_out_index": -1,
+    "queue": [
+     {
+      "name": "Gorou \u2014 Inuzaka All-Round Defense",
+      "cost": 0,
+      "price": 0,
+      "target": "Nibbit",
+      "blocked": false,
+      "affordable": true,
+      "state": "payable",
+      "ephemeral": false,
+      "rule": "exhaust"
+     }
+    ]
+   },
+   "ledger": [
+    {
+     "index": 6,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-PROTO_PEARL_BARRAGE_TURN",
+     "card_name": "Tidal Barrage",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 8,
+   "verb": "play",
+   "command": "play \"Sayu \u2014 Muji-Muji Daruma\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 64,
+   "max_hp": 80,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 2,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 4,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WATERS_EDGE",
+     "name": "Water's Edge",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-SAYU_DARUMA_GIFT",
+     "name": "Sayu \u2014 Muji-Muji Daruma",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 2,
+    "discard": 7,
+    "exhaust": 2
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 23,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 2,
+    "front_price": 0,
+    "blocked": false,
+    "fires_next": true,
+    "empty": false,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "attack",
+    "pulse_amount": 4,
+    "pulse_unit": "damage",
+    "reading": "Charge 2 / 0 \u2014 Gorou \u2014 Inuzaka All-Round Defense fires next turn",
+    "run_out_index": -1,
+    "queue": [
+     {
+      "name": "Gorou \u2014 Inuzaka All-Round Defense",
+      "cost": 0,
+      "price": 0,
+      "target": "Nibbit",
+      "blocked": false,
+      "affordable": true,
+      "state": "payable",
+      "ephemeral": false,
+      "rule": "exhaust"
+     }
+    ]
+   },
+   "ledger": [
+    {
+     "index": 7,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-SAYU_DARUMA_GIFT",
+     "card_name": "Sayu \u2014 Muji-Muji Daruma",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 9,
+   "verb": "play",
+   "command": "play \"Water's Edge\" on \"Nibbit\"",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 1,
+   "max_energy": 3,
+   "hp": 64,
+   "max_hp": 80,
+   "block": 4,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 2,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 4,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1,
+     "BLOCK_NEXT_TURN_POWER": 4
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WATERS_EDGE",
+     "name": "Water's Edge",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 2,
+    "discard": 8,
+    "exhaust": 2
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 23,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 2,
+    "front_price": 0,
+    "blocked": false,
+    "fires_next": true,
+    "empty": false,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "skill",
+    "pulse_amount": 5,
+    "pulse_unit": "block",
+    "reading": "Charge 2 / 0 \u2014 Gorou \u2014 Inuzaka All-Round Defense fires next turn",
+    "run_out_index": -1,
+    "queue": [
+     {
+      "name": "Gorou \u2014 Inuzaka All-Round Defense",
+      "cost": 0,
+      "price": 0,
+      "target": "Nibbit",
+      "blocked": false,
+      "affordable": true,
+      "state": "payable",
+      "ephemeral": false,
+      "rule": "exhaust"
+     }
+    ]
+   },
+   "ledger": [
+    {
+     "index": 8,
+     "meter": "spark",
+     "turn": 2,
+     "card": "KLEEMOD-WATERS_EDGE",
+     "card_name": "Water's Edge",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 10,
+   "verb": "end turn",
+   "command": "end turn",
+   "state_type": "monster",
+   "turn": 2,
+   "battle_turn": 0,
+   "energy": 0,
+   "max_energy": 3,
+   "hp": 64,
+   "max_hp": 80,
+   "block": 4,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 2,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 4,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1,
+     "BLOCK_NEXT_TURN_POWER": 4
+    }
+   },
+   "hand": [],
+   "piles": {
+    "draw": 2,
+    "discard": 9,
+    "exhaust": 2
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 17,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "6",
+       "title": "Aggressive"
+      },
+      {
+       "type": "Defend",
+       "label": "",
+       "title": "Defensive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 2,
+    "front_price": 0,
+    "blocked": false,
+    "fires_next": true,
+    "empty": false,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "attack",
+    "pulse_amount": 4,
+    "pulse_unit": "damage",
+    "reading": "Charge 2 / 0 \u2014 Gorou \u2014 Inuzaka All-Round Defense fires next turn",
+    "run_out_index": -1,
+    "queue": [
+     {
+      "name": "Gorou \u2014 Inuzaka All-Round Defense",
+      "cost": 0,
+      "price": 0,
+      "target": "Nibbit",
+      "blocked": false,
+      "affordable": true,
+      "state": "payable",
+      "ephemeral": false,
+      "rule": "exhaust"
+     }
+    ]
+   },
+   "ledger": []
+  },
+  {
+   "index": 11,
+   "verb": "play",
+   "command": "play \"Water's Edge+\" on \"Nibbit\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 80,
+   "block": 4,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 2,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 4,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WATERS_EDGE",
+     "name": "Water's Edge+",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": true,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-WATERS_EDGE",
+     "name": "Water's Edge",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-WATERS_EDGE",
+     "name": "Water's Edge",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 0,
+    "exhaust": 2
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 12,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 2,
+    "front_price": null,
+    "blocked": false,
+    "fires_next": false,
+    "empty": true,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "none",
+    "pulse_amount": 0,
+    "pulse_unit": "none",
+    "reading": "Charge 2 \u2014 memory empty",
+    "run_out_index": -1,
+    "queue": []
+   },
+   "ledger": [
+    {
+     "index": 9,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-GOROU_INUZAKA_CHARGE",
+     "card_name": "Gorou \u2014 Inuzaka All-Round Defense",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 10,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-WATERS_EDGE",
+     "card_name": "Water's Edge+",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 12,
+   "verb": "play",
+   "command": "play \"Water's Edge (1)\" on \"Nibbit\"",
+   "state_type": "monster",
+   "turn": 3,
+   "battle_turn": 0,
+   "energy": 2,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 80,
+   "block": 4,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 2,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 4,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-WATERS_EDGE",
+     "name": "Water's Edge",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-WATERS_EDGE",
+     "name": "Water's Edge",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 6,
+    "discard": 1,
+    "exhaust": 2
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "NIBBIT_0",
+     "name": "Nibbit",
+     "hp": 3,
+     "max_hp": 46,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Buff",
+       "label": "",
+       "title": "Empower"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 2,
+    "front_price": null,
+    "blocked": false,
+    "fires_next": false,
+    "empty": true,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "attack",
+    "pulse_amount": 4,
+    "pulse_unit": "damage",
+    "reading": "Charge 2 \u2014 memory empty",
+    "run_out_index": -1,
+    "queue": []
+   },
+   "ledger": [
+    {
+     "index": 11,
+     "meter": "spark",
+     "turn": 3,
+     "card": "KLEEMOD-WATERS_EDGE",
+     "card_name": "Water's Edge",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 13,
+   "verb": "play",
+   "command": "play \"To the Front!\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 80,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_PEARL_BARRAGE_TURN",
+     "name": "Tidal Barrage",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-TO_THE_FRONT",
+     "name": "To the Front!",
+     "kind": "Skill",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "FUZZY_WURM_CRAWLER_0",
+     "name": "Fuzzy Wurm Crawler",
+     "hp": 57,
+     "max_hp": 57,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 0,
+    "front_price": null,
+    "blocked": false,
+    "fires_next": false,
+    "empty": true,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "none",
+    "pulse_amount": 0,
+    "pulse_unit": "none",
+    "reading": "Charge 0 \u2014 memory empty",
+    "run_out_index": -1,
+    "queue": []
+   },
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-TO_THE_FRONT",
+     "card_name": "To the Front!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 14,
+   "verb": "play",
+   "command": "play \"Shinobu \u2014 Thundergrust\" on \"Fuzzy Wurm Crawler\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 80,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 0,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 0,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-SHINOBU_THUNDERGRUST",
+     "name": "Shinobu \u2014 Thundergrust",
+     "kind": "Attack",
+     "energy_cost": "0",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_PEARL_BARRAGE_TURN",
+     "name": "Tidal Barrage",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 0,
+    "exhaust": 0
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "FUZZY_WURM_CRAWLER_0",
+     "name": "Fuzzy Wurm Crawler",
+     "hp": 57,
+     "max_hp": 57,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 0,
+    "front_price": 3,
+    "blocked": true,
+    "fires_next": false,
+    "empty": false,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "none",
+    "pulse_amount": 0,
+    "pulse_unit": "none",
+    "reading": "Charge 0 / 3 \u2014 Coral Guard blocked",
+    "run_out_index": 0,
+    "queue": [
+     {
+      "name": "Coral Guard",
+      "cost": 1,
+      "price": 3,
+      "target": null,
+      "blocked": true,
+      "affordable": false,
+      "state": "runs_out",
+      "ephemeral": true,
+      "rule": "muster"
+     }
+    ]
+   },
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-TO_THE_FRONT",
+     "card_name": "To the Front!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SHINOBU_THUNDERGRUST",
+     "card_name": "Shinobu \u2014 Thundergrust",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  },
+  {
+   "index": 15,
+   "verb": "play",
+   "command": "play \"Tidal Barrage\" on \"Fuzzy Wurm Crawler\"",
+   "state_type": "monster",
+   "turn": 1,
+   "battle_turn": 0,
+   "energy": 3,
+   "max_energy": 3,
+   "hp": 62,
+   "max_hp": 80,
+   "block": 0,
+   "meters": {
+    "resources": {
+     "KLEEMOD_BURST": 0,
+     "KLEEMOD_CHARGE": 1,
+     "KLEEMOD_ENCORE": 0,
+     "KLEEMOD_FANFARE": 0,
+     "KLEEMOD_FANFARE_CAP_BONUS": 0,
+     "KLEEMOD_FANFARE_FLOOR": 0,
+     "KLEEMOD_FURINA_BURST": 0,
+     "KLEEMOD_KOKOMI_BURST": 2,
+     "KLEEMOD_SPOTLIGHT_MODE": 0,
+     "KLEEMOD_SPOTLIGHT_MOVED": 0,
+     "KLEEMOD_SPOTLIGHT_PLAYS": 0,
+     "KLEEMOD_SPOTLIGHT_SPEND_BOOST": 0
+    },
+    "powers": {
+     "KURAGE_SUMMON_POWER": 1
+    }
+   },
+   "hand": [
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-PROTO_PEARL_BARRAGE_TURN",
+     "name": "Tidal Barrage",
+     "kind": "Attack",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "AnyEnemy",
+     "can_play": true
+    },
+    {
+     "id": "KLEEMOD-CORAL_GUARD",
+     "name": "Coral Guard",
+     "kind": "Skill",
+     "energy_cost": "1",
+     "upgraded": false,
+     "target_type": "Self",
+     "can_play": true
+    }
+   ],
+   "piles": {
+    "draw": 9,
+    "discard": 1,
+    "exhaust": 1
+   },
+   "enemy_count": 1,
+   "enemies": [
+    {
+     "entity_id": "FUZZY_WURM_CRAWLER_0",
+     "name": "Fuzzy Wurm Crawler",
+     "hp": 50,
+     "max_hp": 57,
+     "block": 0,
+     "intents": [
+      {
+       "type": "Attack",
+       "label": "4",
+       "title": "Aggressive"
+      }
+     ]
+    }
+   ],
+   "kurage_memory": {
+    "bank": 1,
+    "front_price": 3,
+    "blocked": true,
+    "fires_next": false,
+    "empty": false,
+    "summon": true,
+    "base_kit": true,
+    "pulse_kind": "attack",
+    "pulse_amount": 4,
+    "pulse_unit": "damage",
+    "reading": "Charge 1 / 3 \u2014 Coral Guard blocked",
+    "run_out_index": 0,
+    "queue": [
+     {
+      "name": "Coral Guard",
+      "cost": 1,
+      "price": 3,
+      "target": null,
+      "blocked": true,
+      "affordable": false,
+      "state": "runs_out",
+      "ephemeral": true,
+      "rule": "muster"
+     },
+     {
+      "name": "Shinobu \u2014 Thundergrust",
+      "cost": 0,
+      "price": 0,
+      "target": "Fuzzy Wurm Crawler",
+      "blocked": false,
+      "affordable": true,
+      "state": "held",
+      "ephemeral": true,
+      "rule": "exhaust"
+     }
+    ]
+   },
+   "ledger": [
+    {
+     "index": 1,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-TO_THE_FRONT",
+     "card_name": "To the Front!",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 2,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-SHINOBU_THUNDERGRUST",
+     "card_name": "Shinobu \u2014 Thundergrust",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    },
+    {
+     "index": 3,
+     "meter": "spark",
+     "turn": 1,
+     "card": "KLEEMOD-PROTO_PEARL_BARRAGE_TURN",
+     "card_name": "Tidal Barrage",
+     "before": 0,
+     "price_paid": 0,
+     "gains": {},
+     "after": 0,
+     "entries": []
+    }
+   ]
+  }
+ ]
+}

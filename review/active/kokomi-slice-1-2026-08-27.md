@@ -995,3 +995,129 @@ CANDIDATE is a candidate, and the accept-to-sheet signoff — re-authoring onto 
 real sheet, ruling the numbers, bumping the stamp, commissioning the art —
 stays [USER]'s one-way door, which is the whole reason this registration was
 written.
+
+---
+
+## `KOKOMI-SLICE1-WF` — RUN AND GRADED
+
+**RUN 2026-08-30 on `0.2.1786+proto.dirty`** (`-p:PrototypeCards=true`, game
+v0.111.0 `public-beta`), branch `bt3-w5-run`. **Three fights, three separate
+game sessions** — the whole-fight lifecycle cap is one per session, so the game
+was relaunched and torn down between each. The kit was ON throughout
+(`KurageMemoryLaw.AlwaysOn` is `true` in a `+proto` build), which is
+contamination 3 as registered.
+
+| fight | sealed record | run seed | arms granted |
+|---|---|---|---|
+| **F1** | `review/qa/blindplay/20260831-025000/` | `1L130R6XTSRQ` | Tidal Barrage |
+| **F2** | `review/qa/blindplay/20260831-025720/` | (sidecar `embark-20260830-225629`) | Shinobu — Sanctifying Circle, Thoma — Crimson Guard, Itto — Superlative Guard |
+| **F3** | `review/qa/blindplay/20260831-030325/` | (sidecar `embark-20260830-230248`) | Shinobu — Warding Ring, Itto — Oni Rush |
+
+Each ran `--max-actions 24 --max-refusals 2`, all three terminated
+`max_actions`, **0 refusals across all three**. Codex meter, unsmoothed: **5h
+8% / week 1%** before F1, **5h 28% / week 4%** after F3 — **well inside**
+`EB-227`'s guard (85% of the window, 50% of the week). **`EB-184` was closed
+live in this window's phase 1**, which discharged the one precondition R227's
+countersign left standing, so F3 ran.
+
+**The operator drove to the first Monster room on each run, at zero Codex
+cost**, and the seat's first page was the combat screen, as registered.
+**Neow, by `KLEESPARK-W4` §19.5's rule** — *the boon that changes neither the
+deck's card list nor the counted ratio, and if more than one qualifies, the
+first the screen prints*:
+
+| fight | boons offered | taken | why |
+|---|---|---|---|
+| F1 | Arcane Scroll / **Neow's Talisman** / Cursed Pearl | **Neow's Talisman** | the other two ADD a card (a Rare, and Greed); the Talisman upgrades in place and changes no card LIST |
+| F2 | Scroll Boxes / **Fishing Rod** / Hefty Tablet | **Fishing Rod** | the other two add a pack and a Rare-plus-Injury |
+| F3 | **Winged Boots** / Lost Coffer / Dowsing Rod | **Winged Boots** | the other two add a card reward and a Dowsing |
+
+**A note that belongs to `EB-243` and is recorded here because this window
+found it:** *Fishing Rod* — the relic `KLEESPARK-BT3`'s boards had declared —
+is a **Neow boon**, offered here and taken. So the run-start "gift" those
+boards named is the boon the staging path takes off a seed-derived offer, which
+is exactly why it differed per seed and why a single registered name was wrong.
+
+### The slate, graded mechanically
+
+**The unit is ONE COMPLETE FIGHT** and each session's action budget carried it
+past that fight; **every grade below is counted on the FIRST COMPLETE FIGHT
+only**, and later pages are recorded and graded nowhere. Two readings are
+disclosed before the grades because they are readings and not counts: the
+falsifiers name `turn-*/reply.json` as their artefact and the driver writes one
+of those per ACTION rather than per player turn, so "combat turn" is read as
+"an action carrying a `thinking` sentence"; and `WF3`'s *"turns ended with
+`end turn`"* is read on the `end turn` snapshots themselves.
+
+#### Arm A — Tidal Barrage (F1)
+
+| slot | grade | the reading |
+|---|---|---|
+| `WF1` | **PREDICTED** (≥ 2) | **2** actions name it. Action 6: *"Exhaust immediately activates Pearl of Wisdom … **before Tidal Barrage can scale from the Exhaust**"* — an Exhaust source played BEFORE the card, said in those words. Action 7: *"**One card has already Exhausted, so Tidal Barrage is now stronger**, and will Exhaust another card"* — the running count as the reason to order the turn. **Whole-turn counting produced sequencing in a fight, not only on a board built to reward it.** |
+| `WF2` | **PREDICTED** (≥ 1) | One resolution at **2 Exhausts** — Gorou's, then the card's own. The wire has the arithmetic: Nibbit **34 → 23**, so Tidal Barrage dealt **11**, which is the sheet's `base 5 + 3 × 2` exactly. The page showed a live preview move **5 → 8** after Gorou and then delivered 11. `WF1` is therefore readable rather than confounded. |
+
+**A registration note, not a grade.** `WF2`'s falsifier says *"whose observation
+shows a damage figure above the base rung"*; the printed face is a formula with
+a live preview number, not a resolved figure, so the count was taken on the
+falsifier's own *"i.e."* clause — the turn held ≥ 2 Exhausts at resolution — and
+confirmed against the wire's HP delta. The tester named the preview and could
+not explain it: *"Tidal Barrage's printed damage changed from 5 to 8 after Gorou
+without an explicit explanation on the screen."*
+
+#### Arms B-p, C-p, D-p — the cost-line price (F2)
+
+| slot | grade | the reading |
+|---|---|---|
+| `WF3` | **SPLIT** (1, threshold 2) | **One** turn ended with a priced row in hand that the turn's starting energy could have paid for alone: turn 1's `end turn` held **Thoma — Crimson Guard (3)** against a starting 3. The other two `end turn`s held no priced row at all — one on an empty hand. Registered consequence: *"the price binds but thinly; the arms advance and the re-author carries an explicit note that the 3-energy rung is the whole mechanism."* |
+| `WF4` | **SPLIT** (1, threshold 3) | **One** action names a priced row together with a line forgone — action 16, *"Itto immediately deals more than the remaining 8 HP, ending the fight **without relying on Poison timing or another random companion**"*. **This is the marginal one and it is disclosed as marginal:** the other two priced-row plays (actions 6 and 14) name only what the card itself bought, and on a stricter reading that takes *"forgo the turn's other line"* to require a named CARD, `WF4` reads **0 = MISS**. The grade taken is SPLIT, on the falsifier's second clause as written; a reader who reads that clause narrowly should read MISS, and both readings sit in the same region — **the price is paid far more often than it is named.** |
+| `WF5` | **PREDICTED** (< 50%) | **0 of 3** priced-row plays resolved below the printed 3 — every one of Itto ×2 and Shinobu ×1 shows `energy_cost: 3` on its own page. **The Muster discount is real and it landed elsewhere:** action 1's *To the Front!* converted a Coral Guard into a 0-cost *Gorou — General's War Banner* and the tester named the discount in those words, but no Muster ever discounted a PRICED row. The kit does not defuse the price. |
+
+#### Arms B-e, D-e — exclusive modes (F3)
+
+| slot | grade | the reading |
+|---|---|---|
+| `WF6` | **MISS** (0 Block-mode plays) | **0** on the literal falsifier, and **the denominator has to travel with it.** *Itto — Oni Rush* was held and played **once**, choosing *"Deal 14 damage"* on a page where the enemy stood at **10 HP** and that mode was exactly lethal. ***Shinobu — Warding Ring never reached the hand at all***, so the PREDICTED band — *"≥ 1 per row"* — was **unreachable by construction**, and contamination 1 (*"every slot is conditional on holding the row"*) applies to that half. The registered consequence of a MISS is that the two `either` rows RETURN; **a RETURN moves no number by itself** (R215 B, Guardrail-7), and Shinobu's half of it rests on evidence the fight never produced. **The honest act this grade licenses is a rerun with both rows held, not a design edit.** |
+| `WF7` | **MISS** (0, threshold 2) | Neither the play nor the mode selection names the forgone Block as something given up: *"choosing this card's 14-damage mode should end the fight immediately and avoid the incoming attack"*, then *"this option is lethal and prevents its 11-damage attack."* Registered consequence, quoted: *"mechanical exclusivity with no named cost is a **legibility finding, not a design return**."* On a denominator of one mode choice. |
+| `WF8` | **PREDICTED, and VACUOUSLY so** | **0** fires replayed a granted `either` row, which satisfies *"≤ 1"* — but **no granted `either` row ever entered the memory**, so the interaction the slot exists to test was never posed. The one fire of the fight replayed *Gorou* at price 0; the queue's other entries were a Mustered *Coral Guard* (price 3) and the SHIPPED *Itto — Superlative Superstrength* (price 3), neither a granted row. The threshold is a ceiling, so absence passes it as written; **the grade is recorded as registered and its vacuity is recorded beside it.** |
+
+### What this round bought, and what it did not
+
+- **Arm A is the clear result.** Both its slots PREDICTED on their registered
+  thresholds, and the wire's own arithmetic (11 damage on two Exhausts) shows
+  the mechanism doing in a fight what the staged boards said it did. Under the
+  slot's own decision column that makes arm A an **ADVANCE-to-sheet candidate**
+  and its re-author unblocked — **a candidate, and the accept-to-sheet signoff
+  stays [USER]'s one-way door**, which is the whole reason this registration
+  was written.
+- **The three priced arms carry a matched pair of SPLITs.** The price binds,
+  once, in a four-turn fight; it is named, once, and marginally. `WF5` clears
+  the confound the flag introduced — the Muster discount never touched a priced
+  row — so `WF3`'s reading is not confounded in the direction contamination 3
+  warned about. Under `WF3`'s own decision column a SPLIT advances the three
+  arms **with the 3-energy rung named explicitly in the re-author**.
+- **The two exclusive arms are the weak half of the round.** `WF6` MISSES on
+  one lethal-range play of one of the two rows, `WF7` MISSES on the same single
+  choice, and `WF8` passes on an empty denominator. **What the three of them
+  jointly show is that the fight was too short and one row never arrived** —
+  three turns, one `either` play, one memory fire. The registered consequences
+  stand as written and nothing is edited on them.
+- **No number, threshold, sheet row or constant moved, and no row was accepted
+  to a sheet.** Every sentence the tester wrote is R217 G iteration feedback,
+  and every observation is about a prototype row on a `+proto` build (R213 B).
+
+### Recorded, and graded nowhere (R101b)
+
+- **The jellyfish's own text disagrees with what it does — a THIRD independent
+  witness.** F1's fight record: *"the jellyfish's displayed end-turn action
+  changed according to cards played even though its headline text only described
+  Hydro damage."* F3's run record says the same from the other side: *"The
+  jellyfish's end-of-turn action seemed to follow the last card played."* Both
+  corroborate **`EB-247`**, minted the same night off `KURAGECAD-W1` — three
+  witnesses now, across two characters and three sessions.
+- **The kit reads as the engine to a blind player.** All three run records name
+  Exhaust → Charge → memory as the character's spine without being asked, and
+  F2's names the memory's own affordability as a tension: *"the memory queue
+  also encouraged Charge generation while sometimes making that investment feel
+  inaccessible."* That is the scarcity `KURAGECAD-W1`'s enriched deck could not
+  produce, seen here on a deck nobody enriched. **It grades nothing in either
+  packet** and is written down because the next kurage cell will want it.

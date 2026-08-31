@@ -93,10 +93,17 @@ assumptions:
      more, so the reading that follows is taken after the enemy has taken
      its telegraphed turn."
 
+# DISCLOSURE (`EB-243`, R212 re-draft): this block declared "Fishing Rod" when
+# it was registered; the wire at seed `R805DJ56LZHM` carries "Scroll Boxes" as
+# the run-start gift -- a DIFFERENT gift from `t01`'s, so the gift is seed-
+# derived and not a constant of the staging path. The relic pair is RE-DRAFTED
+# to what is true now and disclosed rather than re-signed. The R231 countersign
+# stands, the slate `G1`-`G4` is untouched, and the `hp.first: 46` leg matched
+# the wire unchanged.
 expects:
   relics:
     - "Pounding Surprise"
-    - "Fishing Rod"
+    - "Scroll Boxes"
   hp:
     first: 46
 
