@@ -1376,23 +1376,39 @@ never Claude's reading of it, and never a keyword the grader was shown.
 **The §2.7b rule binds every count below.** On a one-member stage rotation is a
 no-op, so **no slot may count a one-member board toward any test about which
 member is front, about rotation, or about a positional price.** The one-member
-board is required (see "Required boards") and it is read for the other half of
-slot 1 only.
+board is required (see "Required boards"), and it is **RECORDED and NOT
+GRADED**: no slot counts it toward any denominator.
+*Revised 2026-08-30 on the pair review's correction: the one-member board was
+said to serve "the other half of slot 1", but neither of slot 1's halves counts
+it — half (i) reads multi-member boards and half (ii) reads the full-stage
+board — so its true purpose is stated instead. It is staged because §2.7b
+forbids pricing any element on rotation, and it is the board a starter deck
+actually has; it is read to see what the trigger line looks like when rotation
+is a no-op, and it grades nothing.*
 
 **Slot 1 — does the board read as a board?**
+*Revised 2026-08-30 on the pair review's correction: the requirement asked for
+three multi-member boards (six forms) while the UNREACHED rule fired only below
+two, so on exactly two staged boards the threshold "4 of 6" was unreachable
+against a denominator of 4 — UNREACHED now fires below three multi-member
+boards, and the threshold is stated as a proportion so a larger denominator
+closes too.*
 *Predicted — DRAFTED 2026-08-30 under R212 item 2 (R227 pick 4), from `F3` (1)
 front-performs-then-rotates, `F13` (2) trigger line on the face and Evoke as a
 keyword, `F14` (2) the slot showing trigger AND Evoke at current Focus, and
 §2.7b's staged-board rule:* **both halves hold.** **(i)** On the
 **multi-member** boards — at least three of them, so a denominator of at least
-six forms — **at least 4 of 6 forms** name a specific member (by name or by
+six forms — **at least two thirds of those forms (at least 4 of 6 on the
+minimum three-board staging)** name a specific member (by name or by
 slot) as a reason for the line taken **and** name a play of their own that made
 a member perform (a Companion play, a deploy, or an Evoke). **(ii)** On the
 full-stage board, **at least 1 form names which member is FRONT** as a reason.
 *Grading rule:* both halves = **PREDICTED**; exactly one = **SPLIT**; neither =
-**MISS**. On half (i), 2–3 of 6 grades **SPLIT** on its own and 0–1 grades
-**MISS**. The multi-member form denominator is printed with the grade.
-*UNREACHED when:* fewer than **two** multi-member boards are staged, or fewer
+**MISS**. On half (i), at least one third but under two thirds of the forms
+(2–3 of 6 on the minimum staging) grades **SPLIT** on its own, and under one
+third (0–1 of 6) grades **MISS**. The multi-member form denominator is printed
+with the grade.
+*UNREACHED when:* fewer than **three** multi-member boards are staged, or fewer
 than two graders read a board — the denominator cannot pose the question. A
 one-member board is never counted here and never makes this slot UNREACHED.
 *Decision it changes:* **PREDICTED** licenses the §7 display work to proceed on
@@ -1480,6 +1496,11 @@ does **not** license a starter change: `F16` is read here only as the reason an
 Evoke card is in hand at all.
 
 **Slot 4 — is a full meter felt as a payoff?**
+*Revised 2026-08-30 on the pair review's correction: half (i) read "3 of 4
+forms" off a single near-cap board, which yields only two forms, so the
+threshold could not close. The board count is fixed rather than the threshold —
+the near-cap arm is staged as TWO boards (four forms) and the drafted "3 of 4"
+stands unmoved.*
 *Predicted — DRAFTED 2026-08-30 under R212 item 2 (R227 pick 4), from `F8` (1)
 the shipped additive Focus shape, `F9` (1) the cap left at
 `FANFARE_CAP_FRACTION = 0.5` with drafted `raise_fanfare_cap` carriers, `F10`
@@ -1487,17 +1508,20 @@ the shipped additive Focus shape, `F9` (1) the cap left at
 value, Focus tier and next turn's decayed value, and `SALON_FOCUS_PER = 10`
 (`tier0/constants.py:445` on 2026-08-30 — the value has not moved, its line
 has; §2.1's table quotes the line it had at `77eea5f`):* **both halves hold**,
-on a pair of boards
-identical but for the meter — one staged within one Focus tier of the cap (39
-at 78 HP, Focus **+3**) and one staged below 10 held Fanfare (Focus **+0**).
-**(i)** On the near-cap board, **at least 3 of 4 forms name the Focus bonus** —
+on **three** boards identical but for the meter and the stage: **two** staged
+within one Focus tier of the cap (39 at 78 HP, Focus **+3**), differing only in
+which member is front, and **one** staged below 10 held Fanfare (Focus **+0**)
+as the control.
+**(i)** Across the **two near-cap boards' 4 forms**, **at least 3 of 4 forms
+name the Focus bonus** —
 the +3, or a member's raised number — as a reason for the line taken.
 **(ii)** **At least 1 form names next turn's decayed value** (the `F15` (1)
 preview) as part of deciding to act now rather than later.
 *Grading rule:* both = **PREDICTED**; exactly one = **SPLIT**; neither =
 **MISS**. Denominators printed with the grade.
-*UNREACHED when:* no board is staged within one Focus tier of the cap — the
-payoff was never on screen; **or**, for half (ii) alone, the build under test
+*UNREACHED when:* fewer than **two** boards are staged within one Focus tier of
+the cap — the payoff was never on screen on a denominator that can carry half
+(i)'s threshold; **or**, for half (ii) alone, the build under test
 does not render the decay preview, in which case (ii) is UNREACHED, the slot
 grades on (i) alone, and the record says so.
 *Decision it changes:* **PREDICTED** says +3 at the shipped ceiling is felt,
@@ -1649,12 +1673,24 @@ Claude decision.
 **Required boards, from §2.7b.** At least one staged board carries **exactly
 one Salon member**, because that is the board on which rotation is a no-op and
 any positional pricing is zero — and it is the board a starter deck actually
-has. And at least one carries a **full stage with a deploy in hand**, because
+has. It is **RECORDED and NOT GRADED** and counts toward no slot's denominator
+(*revised 2026-08-30 on the pair review's correction: it was previously said to
+be read for a half of slot 1, which counts no one-member board*). And at least
+one carries a **full stage with a deploy in hand**, because
 the deploy-Evokes rule is new law and has never been played — and slot 6 asks
 that same board to carry a **dedicated Evoke card in hand beside the deploy,
 printing an aim at a member that is not the front one** (redrafted 2026-08-30
 with slot 6), so the two Evoke routes are read against each other on one turn
 as they are now ruled.
+
+**The staging minimum the counts above imply** (*added 2026-08-30 on the pair
+review's correction, so every threshold is reachable on the boards this slate
+actually stages*): at least **three boards carrying two or more Salon members**
+(slot 1 half (i)'s denominator of six forms — slot 3's three damage boards
+satisfy it on their own, and slot 4's two near-cap boards and slot 6's
+full-stage board also count), and at least **two boards within one Focus tier
+of the cap** (slot 4 half (i)'s denominator of four forms). Below either
+minimum the slot in question is UNREACHED, not graded on a short denominator.
 
 **Who grades:** the Codex seat, blind, per `EB-149`, two graders per turn,
 every graded line replayed per `EB-170`.
