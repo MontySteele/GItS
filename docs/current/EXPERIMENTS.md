@@ -277,8 +277,10 @@ carried while it was active is in the commit message that retired it.
   intent and commit DRAFTED before the run, then countersigned in batch; the
   work is BACKLOG `M13` →
   `review/active/regret-margin-registration-2026-08-12.md`.
-- **Charge reads per turn (`EB-78`)** — **DRAFT, unrun**, §5's prediction slots
-  blank; §5.1 is where *repeatable reads dominant* becomes a number.
+- **Charge reads per turn (`EB-78`)** — **SLATE DRAFTED, unrun**: §5 is
+  `X9READ-S1`, seven slots `X1`–`X7`, and §5.4 is where *repeatable reads
+  dominant* became a number — `p50` > 5 reads per turn AND the repeatable
+  sources > 50% of reads, or the ruled double read > 50% of attack plays.
   **Instrument:** `resources.note_charge_read` — emit-only, count-only, tagged
   per source. **Cell:** resolved Charge reads per completed player turn.
   **Status:** descriptive, so it grades no design and cannot on its own fire a
