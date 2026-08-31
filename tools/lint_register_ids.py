@@ -597,8 +597,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
         12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
         74, 78, 80, 83, 84, 116, 128,
-        153, 154, 155,
-        156, 157, 158, 159, 160, 161, 162, 163,
+        154, 158, 159, 160, 161, 162, 163,
         180, 181, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
         # 202/203 were minted 2026-08-29 by the KLEESPARK-R1 relayed review
@@ -756,13 +755,52 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # was written under the OLD reading; re-planning that CLOSED round
         # reports ceiling 0 against threshold 1, and `slots.yaml` is NOT
         # edited -- a published measurement stands as published.
+        # 157 LEFT OPEN_IDS 2026-08-30 with its row: one pin. The manifest's
+        # BaseLib `min_version` was 3.3.6, a floor nothing compared to
+        # anything; it is now 3.4.5, the release this machine compiles against,
+        # the assembly vault's `PIN.json` records and the installed Workshop
+        # item reports -- the same number STATE.md's pin block carries.
+        # `tier0/tests/test_eb157_baselib_pin.py` is the gate: manifest vs
+        # STATE.md, plus a curated enumeration of the BaseLib types we call so
+        # a reach for a new API meets the pin. RESIDUAL UNKNOWN, disclosed
+        # rather than closed: the 3.3.6 SURFACE could not be obtained (Steam
+        # serves only a Workshop item's current version and no older copy
+        # exists here or in the vault), so the enumeration was taken against
+        # 3.4.5 and whether those symbols exist in 3.3.6 is still unknown.
+        # Raising the floor to the verified number is what makes it harmless.
+        # 156 LEFT OPEN_IDS 2026-08-30 with its row: the per-fight telemetry
+        # row now reads `ReactionEffects.ResolvedThisCombat(combat, player)`,
+        # a per-seat counter keyed exactly like `BombPower`'s detonation
+        # totals next door. `TotalResolved` is UNCHANGED and still global --
+        # that scope is a sealed ruling (red-pen R1) about GAMEPLAY, and the
+        # defect was sampling it into a per-seat ROW. A dealer-less reaction
+        # belongs to no seat, so the seats sum to at most the team-wide count;
+        # that asymmetry is pinned, not hidden. `understudy/README.md`'s schema
+        # line is corrected. Tests: `KleeTests/ReactionSeatCountTests.cs`.
+        # 155 LEFT OPEN_IDS 2026-08-30 with its row: KleeSelfCheck rule R20
+        # sweeps this assembly's `KLEEMOD-` keyword CONSTANTS -- found by
+        # reflection, never a curated list, because the failure being fixed IS
+        # the commit that adds a key and forgets its row -- for a `.title` row
+        # in `card_keywords`. The three salon-member keys were hoisted out of a
+        # switch body in the same commit, since a key that is only a literal
+        # inside a method is one reflection cannot see. Seen to fail in
+        # `klee-mod/KleeTests/KeywordTitleRowTests.cs`.
+        # 153 LEFT OPEN_IDS 2026-08-30 with its row: `tools/lint_power_icons.py`
+        # (ci lane) bites on both shapes the row named -- a concrete
+        # `PowerModel` with no `PathFor` case, no `IconExempt` entry and no
+        # `ICON_DEBT` row, and an aura element whose icon path `PathFor` builds
+        # by CONCATENATION with nothing behind it. Both are exercised against
+        # synthetic input in `tier0/tests/test_eb153_power_icons_lint.py`. The
+        # seven powers the row names ship as named debt rather than a silent
+        # pass: no icon was invented for any of them.
         # 236 LEFT OPEN_IDS 2026-08-30 with its row: `board_design_findings`
         # in `--plan-only` walks EVERY order of play with relic gains counted
         # (`both_buyable`, R229's strong form) and refuses a hand the Energy
         # pays for whole (`no_forced_trade`). BT1's four boards fail it --
         # `t02` on four both-buyable orders -- and BT2's three pass. It is
         # deliberately NOT a `ci` lint: a tree-wide sweep would refuse a
-        # closed round's published boards. The lint count stays 29.
+        # closed round's published boards. The lint count is 30 since
+        # EB-153 added `power-icons` (2026-08-30).
         # 238 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word for
         # word -- "a staged page shows the relic line and a form quotes it".
         # KLEESPARK-BT2's pages printed the run's relics and `t01`'s shadow form

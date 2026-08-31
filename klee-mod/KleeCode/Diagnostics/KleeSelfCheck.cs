@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using BaseLib.Abstracts;
 using BaseLib.Utils;
@@ -72,6 +73,12 @@ internal static class KleeSelfCheck
             // sweep looked at.
             CheckPowerIcons();
 
+            // R20 (EB-155). Not per-character either, and for the same
+            // reason: a hover-tip keyword belongs to the SYSTEM that raises
+            // it, and both keys that shipped raw belonged to a rider and a
+            // meter rather than to any roster's card pool.
+            CheckKeywordTitleRows();
+
             // R19 (G-A5a). Furina's Fanfare arithmetic against vectors derived
             // from the sim. This is where the C# port is executed against the
             // design of record IN THE GAME; `klee-mod/KleeTests` (EB-105) now
@@ -118,13 +125,13 @@ internal static class KleeSelfCheck
 
     // Distinct rule labels that can actually reach the log:
     //   R1, R2, R3, R3a, R3b, R3c, R3d, R4, R5, R6a, R6b, R7, R8, R9, R10, R11,
-    //   R12, R13, R19
+    //   R12, R13, R19, R20
     // This was 8 while R5/R6a/R6b were documented but unattributable -- the
     // helpers that emit them hardcoded R4 and R6, so those three strings could
     // never appear. Fixing the labels is what makes the count honest. Note
     // R4 and R5 come from a `rule` parameter, so grepping for Fail("R... will
     // not find them; count the call sites, not the literals.
-    private const int RuleCount = 19;
+    private const int RuleCount = 20;
 
     private static void Fail(string rule, string detail) => Findings.Add($"[{rule}] {detail}");
 
@@ -444,6 +451,79 @@ internal static class KleeSelfCheck
             }
         }
     }
+
+    /// <summary>
+    /// R20 (EB-155): every custom-keyword / hover-tip key this assembly names
+    /// has a TITLE row in the `card_keywords` table.
+    ///
+    /// R4 walks the card pool and R8 walks the powers, so a keyword that
+    /// belongs to NEITHER -- a rider tip, a meter's word, a salon member's
+    /// hover -- was covered by nothing. Raw keys reached live builds twice:
+    /// `Blocking Notes+` rendered "card_keywords.KLEEMOD-COMPANION_RIDER.title"
+    /// on a card-reward screen in 0.2-589, and `Reinforcements` rendered
+    /// "card_keywords.KLEEMOD-MUSTER.title" on a shop screen in 0.2-634. Both
+    /// were found by a person looking at a screen.
+    ///
+    /// THE KEYS ARE FOUND BY REFLECTION, NOT BY A LIST, which is the whole
+    /// point: a curated list would need updating in the same commit that adds
+    /// the key, and the failure being fixed IS the commit that adds a key and
+    /// forgets its row. A `const string` whose value is a bare
+    /// `KLEEMOD-SOMETHING` -- no dot, so not a fully-qualified loc key like
+    /// SlyGrant's `.selectionScreenPrompt` -- is a keyword id by construction
+    /// in this assembly.
+    ///
+    /// ONLY TITLES. Bodies are deliberately built live for most of these tips
+    /// (SalonMemberTips, TurnEndAttribution, KokomiRiderTips) because they
+    /// quote constants and per-player caps, so a description row would be the
+    /// wrong thing to demand -- see the KleeMod.cs blocks, which say so at
+    /// each one.
+    /// </summary>
+    private static void CheckKeywordTitleRows()
+    {
+        var table = LocManager.Instance.GetTable("card_keywords");
+        foreach (var (owner, keyword) in KeywordIds(typeof(KleeMod).Assembly))
+        {
+            var key = $"{keyword}.title";
+            if (!table.HasEntry(key))
+            {
+                Fail("R20", $"{owner}: no title row for keyword "
+                          + $"\"{keyword}\" in table \"card_keywords\". The UI "
+                          + "renders the raw key wherever this tip is raised. "
+                          + "Add the row to KleeMod.InjectLocStrings' "
+                          + "keywordFallback, beside the tips already there.");
+                continue;
+            }
+
+            CheckLocSyntax(owner, key, table.GetRawText(key));
+        }
+    }
+
+    /// <summary>
+    /// R20's key discovery, factored out of the table lookup so it can be
+    /// exercised headlessly (`klee-mod/KleeTests`): `LocManager` is inside the
+    /// headless boundary, reflection over our own constants is not.
+    ///
+    /// Returns (owner, keyword id) pairs, one per distinct id, ordered.
+    /// </summary>
+    internal static IEnumerable<(string Owner, string Keyword)> KeywordIds(
+        Assembly assembly)
+        => assembly.GetTypes()
+            .SelectMany(t => t.GetFields(BindingFlags.Public | BindingFlags.NonPublic
+                                       | BindingFlags.Static | BindingFlags.FlattenHierarchy))
+            .Where(f => f.IsLiteral && !f.IsInitOnly
+                     && f.FieldType == typeof(string))
+            .Select(f => (Owner: $"{f.DeclaringType?.Name}.{f.Name}",
+                          Keyword: f.GetRawConstantValue() as string))
+            .Where(row => row.Keyword != null && KeywordId.IsMatch(row.Keyword))
+            .GroupBy(row => row.Keyword!, StringComparer.Ordinal)
+            .OrderBy(g => g.Key, StringComparer.Ordinal)
+            .Select(g => (g.First().Owner, g.Key));
+
+    /// <summary>A bare keyword id: `KLEEMOD-` and no dot. A constant carrying
+    /// a dot is already a fully-qualified loc key (SlyGrant's prompt) and
+    /// belongs to whatever table declares it, not to this rule.</summary>
+    private static readonly Regex KeywordId =
+        new(@"^KLEEMOD-[A-Z0-9_]+$", RegexOptions.Compiled);
 
     private static void CheckCharacterAssets(CharacterModel character)
     {
