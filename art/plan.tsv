@@ -1151,14 +1151,33 @@ breathless	ImageGen/images/cards/furina/breathless.png	500	380	cover_autocrop	co
 # -- run 7: A7 + six Curtain Call power sigils (validate.ps1 $pckDeferred) --
 #    NO rank 1 on purpose: a rank-1 row would write the out-path, and S12 fails a
 #    deferred path that IS in the pck. The deferral stays valid until a pick lands.
+#    ONE HAS LANDED: R231 picked stagehands_encore's sigil (see its rows below),
+#    so that face carries a rank 1 and its $pckDeferred entry is gone. The other
+#    six in this block are unchanged and still deferred.
 power_furina_unheard_confession	ImageGen/images/furina/powers/unheard_confession.png	256	256	contain	center	shortlist	2	png	Animula Choragi.png		icon
 power_furina_unheard_confession	ImageGen/images/furina/powers/unheard_confession.png	256	256	contain	center	shortlist	3	png	Item Fontaine Attunement.png		icon
 power_furina_fortissimo_guard	ImageGen/images/furina/powers/fortissimo_guard.png	256	256	contain	center	shortlist	2	png	Item Fontaine Completeness.png		icon
 power_furina_fortissimo_guard	ImageGen/images/furina/powers/fortissimo_guard.png	256	256	contain	center	shortlist	3	png	Sword Hydro.png		icon
 power_furina_stagehands	ImageGen/images/furina/powers/stagehands.png	256	256	contain	center	shortlist	2	png	Item Movable Small Spotlight.png		icon
 power_furina_stagehands	ImageGen/images/furina/powers/stagehands.png	256	256	contain	center	shortlist	3	png	Icon Opera Epiclese.png		icon
-power_furina_stagehands_encore	ImageGen/images/furina/powers/stagehands_encore.png	256	256	contain	center	shortlist	2	png	Item Ovations That Ceased Upon Festivity.png		icon
-power_furina_stagehands_encore	ImageGen/images/furina/powers/stagehands_encore.png	256	256	contain	center	shortlist	3	png	Item Festival Spotlight.png		icon
+# R231, 2026-08-30, Art-debt pick 1 -- THE SIGIL COLLISION IS RULED.
+# power_furina_ovation_trickle and power_furina_stagehands_encore both nominated
+# `Item Ovations That Ceased Upon Festivity` at rank 2, which is the collision the
+# QUEUE Art-debt row carried. [USER] ruled: OVATION TRICKLE KEEPS `Ovations That
+# Ceased`, and STAGEHANDS ENCORE MOVES to `Item Festival Spotlight`. So encore's
+# claim on the shared title is RETIRED (commented out below rather than demoted --
+# a live row would leave the collision in the record after it was settled), and
+# Festival Spotlight is promoted from rank 3 to rank 1 and applied.
+# ovation_trickle is NOT re-applied: the ruling awards it the contested title, it
+# already holds it in its own shortlist, and its effective rank 1 (Item Furina
+# Banquet) is untouched. Nothing about the ruling asked for its pixels to move.
+# THIS FACE LEAVES THE DEFERRED LIST. klee-mod/build/validate.ps1's $pckDeferred
+# carried 'furina/powers/stagehands_encore.png' as art deliberately not made yet,
+# and S12 checks that list in BOTH directions -- a deferred path that IS in the
+# pck fails. The run-7 block above says the deferral stays valid until a pick
+# lands; a pick has landed, so the entry is removed in the same commit.
+# power_furina_stagehands_encore	ImageGen/images/furina/powers/stagehands_encore.png	256	256	contain	center	shortlist	2	png	Item Ovations That Ceased Upon Festivity.png		icon
+power_furina_stagehands_encore	ImageGen/images/furina/powers/stagehands_encore.png	256	256	contain	center	shortlist	1	png	Item Festival Spotlight.png		icon
 power_furina_courtroom_drama	ImageGen/images/furina/powers/courtroom_drama.png	256	256	contain	center	shortlist	2	png	Item Fontaine Judgment.png		icon
 power_furina_courtroom_drama	ImageGen/images/furina/powers/courtroom_drama.png	256	256	contain	center	shortlist	3	png	Icon The Duke's Office.png		icon
 power_furina_the_gallery_stirs	ImageGen/images/furina/powers/the_gallery_stirs.png	256	256	contain	center	shortlist	2	png	Item Fontaine Big News.png		icon
@@ -1176,8 +1195,9 @@ confiscated	ImageGen/images/cards/klee/confiscated.png	500	380	cover_autocrop	co
 #     rank >= 2 BY DESIGN: art_process promotes only rank 1, so a candidate set
 #     lands without making a pick. Do not renumber to rank 1 without a ruling.
 #     watch_of_the_shallows is a NEW card (EB-26) that arrived after the Kokomi
-#     art pass and therefore has NO rank 1 at all -- art_coverage bills it MISSING
-#     until [USER] picks. Portrait.png is deliberately NOT offered: its five valid
+#     art pass and carried NO rank 1 at all until R231 (A10) ruled one in -- see
+#     the 2026-08-30 proposal block below, where the promoted row now lives; these
+#     three stay candidates. Portrait.png is deliberately NOT offered: its five valid
 #     cover anchors (y0.33/0.41/0.50/0.59/0.67) are all claimed and a sixth would
 #     render pixel-identical (L12).
 watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	y0.16	shortlist	2	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
@@ -1187,21 +1207,54 @@ watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500
 #     NOT a pick). Built by tools/art_source_census.py's own method -- every row
 #     below takes an UNCLAIMED (source, anchor) slot off the free_anchors column of
 #     docs/current/art/kokomi-source-census.tsv, so nothing displaces an incumbent.
-#     Ranks stay >= 5 BY DESIGN, for the same reason the run-9 block above stays
-#     >= 2: art_process promotes only rank 1, so a candidate set lands without
-#     making a pick, and that block's 'do not renumber to rank 1 without a ruling'
-#     still binds this face. The proposal ORDER is P1=rank 5, P2=rank 6, P3=rank 7.
-#     P1 Profile x0.55 -- splash, figure legible, the composed standing read a ward
-#        power wants; free anchor on a source whose only rank-1 claim is x0.64.
+#     The ranks stayed >= 5 while the reservation held: the run-9 block above says
+#     'do not renumber to rank 1 without a ruling', and that written reservation
+#     bound this face even though R212 delegates rank-1 application generally.
+#
+#     RULED 2026-08-30 -- R231 (A10) IS THAT RULING. P1 is PROMOTED to rank 1 and
+#     is the effective pick; the reservation is discharged for this face only. The
+#     remaining proposals close up behind it (P2 = rank 5, P3 = rank 6) and the
+#     run-9 candidates keep ranks 2-4.
+#     P1 -> RANK 1, Profile x0.55 -- splash, figure legible, the composed standing
+#        read a ward power wants; free anchor on a source whose only rank-1 claim
+#        was x0.64.
 #     P2 Namecard The Deep x0.50 -- literally a shallows: coral and a shoal, no
 #        figure. Environment art as a card face is §6 open question 2 and STILL
 #        UNANSWERED; offered because ebb_tide already ships this source at rank 1,
 #        so the precedent exists, not because the question is settled.
-#     P3 Profile x0.36 -- same source, tighter on her; the fallback if P1 reads busy.
-watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	x0.55	shortlist	5	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
-watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	x0.50	shortlist	6	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
-watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	x0.36	shortlist	7	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+#     P3 Profile x0.36 -- same source, tighter on her. NO LONGER A LIVE FALLBACK:
+#        R231's raise_the_sashimono swap took that anchor as its effective pick,
+#        and Profile has no third free anchor (census range [0.36, 0.64], reuse
+#        cap 6). Kept in the record so the next reader sees the slot is spent, not
+#        overlooked; re-picking here needs a different source.
+watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	x0.55	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	x0.50	shortlist	5	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
+watch_of_the_shallows	ImageGen/images/cards/kokomi/watch_of_the_shallows.png	500	380	cover	x0.36	shortlist	6	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
 # EB-121: shortlists for EB-69's fourteen fill faces (R198). Ranks 1-2 are UNCLAIMED (source, anchor) slots from the recounted census (docs/current/art/kokomi-source-census.tsv); rank 3 keeps the shipped convention of one deliberate kit-art option that must never be the default.
+#
+# THE FOUR HELD RARES ARE RELEASED -- R231, 2026-08-30, Art-debt pick 2.
+# cf67c59b applied ten of the fourteen and HELD all_hands, gyorin_formation,
+# the_gunbai_turns and what_the_tokoyo_took, because §6's question 3 -- which Rare
+# wears the `Character Details 1` crop, L9's one exception -- could only be
+# answered on an unfilled Rare, and filling all four would have left the answer
+# reachable only by re-cropping shipped art. [USER] answered it: the exception goes
+# to ALL_HANDS; the other three release to the rank 1s printed below and are
+# applied unchanged. No plan row moves for those three -- the release is a state
+# change, not a re-pick, and the rows already say what the pixels are.
+#
+# ALL_HANDS IS THE RULED FACE AND CANNOT BE RENDERED YET -- a fetch window, not a
+# doubt. `Sangonomiya Kokomi Character Details 1.png` is NOT in art/raw/ and has
+# NO art/SOURCES.tsv row at any rank: the family was banned by title read-across
+# before the hunt ever downloaded it, so it was never fetched, and this pass is
+# forbidden to fetch. art_lint.APPROVED_FAMILY_EXCEPTIONS (R151) already licenses
+# the SOURCE and R231 now names the CARD, so both halves of the permission exist
+# and only the bytes are missing; the row below stays on the Character Card Golden
+# y0.33 crop it already ships, which is honest about what is on disk. Writing a
+# rank-1 row for a title with no raw file would render nothing and lie in the plan.
+# NEXT ACTION when a fetch window opens: fetch Details 1, hand-crop it under the
+# R151 exception, and swap this rank 1. Same shape and the same blocker as
+# what_the_tokoyo_returns, whose rank-1 source is on disk but cleared nowhere
+# (EB-163's one live gap).
 the_gunbai_turns	ImageGen/images/cards/kokomi/the_gunbai_turns.png	500	380	cover	y0.22	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
 the_gunbai_turns	ImageGen/images/cards/kokomi/the_gunbai_turns.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Sangonomiya Kokomi Expression 1.png		sticker	kokomi_pool
 the_gunbai_turns	ImageGen/images/cards/kokomi/the_gunbai_turns.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
@@ -1212,6 +1265,8 @@ what_the_tokoyo_took	ImageGen/images/cards/kokomi/what_the_tokoyo_took.png	500	3
 what_the_tokoyo_took	ImageGen/images/cards/kokomi/what_the_tokoyo_took.png	500	380	cover_autocrop	contain@0.10	shortlist	2	png	Side by Side We Venture Character Kokomi.png		sticker	kokomi_pool
 what_the_tokoyo_took	ImageGen/images/cards/kokomi/what_the_tokoyo_took.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Princess of Watatsumi.png		vfx	kokomi_pool
 gyorin_formation	ImageGen/images/cards/kokomi/gyorin_formation.png	500	380	cover	y0.56	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
+# gyorin_formation r2 is SPENT, not available: R231 (A11) gave Profile x0.36 to
+# raise_the_sashimono as an effective pick. Kept so the slot reads as claimed.
 gyorin_formation	ImageGen/images/cards/kokomi/gyorin_formation.png	500	380	cover	x0.36	shortlist	2	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
 gyorin_formation	ImageGen/images/cards/kokomi/gyorin_formation.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Ceremonial Garment Buff Icon.png		vfx	kokomi_pool
 council_at_bourou	ImageGen/images/cards/kokomi/council_at_bourou.png	500	380	cover	y0.67	shortlist	1	png	Sangonomiya Kokomi Character Card Golden.png		tcg	kokomi_pool
@@ -1226,8 +1281,25 @@ open_the_stores	ImageGen/images/cards/kokomi/open_the_stores.png	500	380	cover_a
 what_the_tokoyo_returns	ImageGen/images/cards/kokomi/what_the_tokoyo_returns.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Icon Emoji Paimon's Paintings 39 Sangonomiya Kokomi.png		sticker	kokomi_pool
 what_the_tokoyo_returns	ImageGen/images/cards/kokomi/what_the_tokoyo_returns.png	500	380	cover	y0.33	shortlist	2	png	Bake-Kurage Summon.png		vfx	kokomi_pool
 what_the_tokoyo_returns	ImageGen/images/cards/kokomi/what_the_tokoyo_returns.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Nereid's Ascension Ceremonial Garment Attack Preview.gif		vfx	kokomi_pool
-raise_the_sashimono	ImageGen/images/cards/kokomi/raise_the_sashimono.png	500	380	cover	y0.78	shortlist	1	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
-raise_the_sashimono	ImageGen/images/cards/kokomi/raise_the_sashimono.png	500	380	cover	x0.55	shortlist	2	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+# R231 (A11), 2026-08-30: raise_the_sashimono SWAPS to its rank-2 FIGURE crop.
+# cf67c59b flagged the shipped rank 1 for the eye -- the Platinum y0.78 band is a
+# TCG card BACKGROUND (fish pattern, no figure) and the crop shows card-frame
+# corners -- and [USER] ruled the figure crop in. open_the_stores, flagged in the
+# same breath, was ruled to STAY on its applied rank 1 and is untouched below.
+#
+# THE ANCHOR MOVED AND THE PICK DID NOT. The rank-2 row read Profile x0.55, but
+# R231 (A10) gave that exact (source, anchor) slot to watch_of_the_shallows in the
+# same slate. Two kokomi_pool rows on one title with an IDENTICAL crop is L7, and
+# the rendered files would be byte-identical (L12) -- the two rules that exist
+# precisely because a plan can differ on paper and not on the card. Profile's only
+# other free anchor is x0.36 (census range [0.36, 0.64], four slots, x0.64 claimed
+# by hold_the_narrows), so the figure crop lands there. The SOURCE is the ruled
+# one; the anchor is derived, one-way, and the only value that renders at all.
+# Consequence recorded where it bites: watch_of_the_shallows' P3 and
+# gyorin_formation's rank 2 both named Profile x0.36 as a fallback and no longer
+# have it. Their comment blocks say so.
+raise_the_sashimono	ImageGen/images/cards/kokomi/raise_the_sashimono.png	500	380	cover	x0.36	shortlist	1	png	Sangonomiya Kokomi Profile.png		splash	kokomi_pool
+raise_the_sashimono	ImageGen/images/cards/kokomi/raise_the_sashimono.png	500	380	cover	y0.78	shortlist	2	png	Sangonomiya Kokomi Character Card Platinum.png		tcg	kokomi_pool
 raise_the_sashimono	ImageGen/images/cards/kokomi/raise_the_sashimono.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Talent Nereid's Ascension.png		vfx	kokomi_pool
 crane_wing	ImageGen/images/cards/kokomi/crane_wing.png	500	380	cover	x0.59	shortlist	1	png	Sangonomiya Kokomi Wish.png		splash	kokomi_pool
 crane_wing	ImageGen/images/cards/kokomi/crane_wing.png	500	380	cover	x0.69	shortlist	2	png	Namecard Background Sangonomiya Kokomi The Deep.png		splash	kokomi_pool
@@ -1308,29 +1380,32 @@ power_kokomi_princess_of_watatsumi	ImageGen/images/kokomi/powers/princess_of_wat
 power_kokomi_princess_of_watatsumi	ImageGen/images/kokomi/powers/princess_of_watatsumi.png	256	256	contain	center	shortlist	3	png	Side by Side We Venture Character Kokomi.png		icon
 # --- 2026-08-30 art pass: KLEE SPARES HUNT for the three uncommons the Sparks
 #     redesign added (hold_the_line, powder_charge, smoke_and_sparks). Every row
-#     below is rank >= 2 BY DESIGN -- art_process promotes only rank 1, so this
-#     candidate set lands WITHOUT making a pick. These are PROPOSALS, not picks.
+#     below was rank >= 2 BY DESIGN when the hunt landed, because art_process
+#     promotes only rank 1 and the set had to arrive WITHOUT making a pick.
 #
-#     WHY NOT APPLIED. R212 delegates 'apply shortlist rank 1' for art, but there
-#     is no Klee art-pass requirements doc and no written Klee SOURCING policy at
-#     HEAD -- only the registers (restated in furina-art-pass-requirements.md §2,
-#     'use the Klee art-pass registers and lint rules') and the lint. Klee's pool
-#     was instead ratified eyes-on, card by card, over three red-pen rounds
-#     (archived klee-art-redpen-round2/round3), and nothing since has replaced
-#     that with a written delegation. So the shortlist is offered and the promotion
-#     to rank 1 is one word from [USER].
+#     PROMOTED BY R231 (A9), 2026-08-30. The blocker was never a doubt about the
+#     crops: R212 delegates 'apply shortlist rank 1' for art, but there is no Klee
+#     art-pass requirements doc and no written Klee SOURCING policy at HEAD --
+#     only the registers (restated in furina-art-pass-requirements.md §2, 'use the
+#     Klee art-pass registers and lint rules') and the lint. Klee's pool was
+#     ratified eyes-on instead, card by card, over three red-pen rounds (archived
+#     klee-art-redpen-round2/round3), and nothing since had replaced that with a
+#     written delegation. R231 is that word: the three P1s are PICKS now and the
+#     rows below carry them at rank 1. The P2/P3 fallbacks keep their order at
+#     ranks 2 and 3.
 #
 #     SOURCE POOL. Klee cards carry NO source_group, so strict L1 binds: one
 #     effective source per card, no reuse. Only FIVE Klee-register titles are
-#     unclaimed at rank 1 (tools/art_source_census.py --character klee): Klee
-#     Portrait, Statue of The Seven - Jumbo Sparks 'n' Splash Statue, Klee Birthday
-#     2022 - Shorts, Klee Shorts 2023-06-12, Item Jumbo Sparks 'n' Splash Statue.
-#     All five are already in art/SOURCES.tsv and already on disk -- no fetch was
-#     run for this pass. The three P1s below take three DISTINCT titles, so the set
-#     is L1-clean if promoted together. The July claim in 6f1b969 that 'every Klee
-#     illustration is claimed at rank 1' is STALE; these five arrived after it.
+#     unclaimed at rank 1 when the hunt ran (tools/art_source_census.py --character
+#     klee): Klee Portrait, Statue of The Seven - Jumbo Sparks 'n' Splash Statue,
+#     Klee Birthday 2022 - Shorts, Klee Shorts 2023-06-12, Item Jumbo Sparks 'n'
+#     Splash Statue. All five are already in art/SOURCES.tsv and already on disk --
+#     no fetch was run for this pass or for the promotion. The three picks take
+#     three DISTINCT titles, so the promoted set is L1-clean. The July claim in
+#     6f1b969 that 'every Klee illustration is claimed at rank 1' is STALE; these
+#     five arrived after it.
 #
-#     P1 = rank 2, P2 = rank 3, P3 = rank 4 in each shortlist.
+#     P1 = rank 1 (PICKED, R231 A9), P2 = rank 2, P3 = rank 3 in each shortlist.
 #     powder_charge  P1 Klee Portrait y0.44 -- the bomb satchel and the Dodoco pouch
 #        sit dead centre of the crop; the most literal content match in the pool.
 #     hold_the_line  P1 Statue of The Seven y0.45 -- her statue planted against the
@@ -1340,12 +1415,12 @@ power_kokomi_princess_of_watatsumi	ImageGen/images/kokomi/powers/princess_of_wat
 #     smoke_and_sparks  P1 Klee Shorts 2023-06-12 y0.50 -- chibi Klee grinning in
 #        balloons and spray; the misdirection read. y0.38 is deliberately NOT
 #        offered: the GENSHIN IMPACT wordmark is burnt into that band (L9's shape).
-powder_charge	ImageGen/images/cards/klee/powder_charge.png	500	380	cover	y0.44	shortlist	2	png	Klee Portrait.png		splash
-powder_charge	ImageGen/images/cards/klee/powder_charge.png	500	380	cover	y0.75	shortlist	3	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash
-powder_charge	ImageGen/images/cards/klee/powder_charge.png	500	380	cover_autocrop	contain@0.08	shortlist	4	png	Item Jumbo Sparks 'n' Splash Statue.png		item
-hold_the_line	ImageGen/images/cards/klee/hold_the_line.png	500	380	cover	y0.45	shortlist	2	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash
-hold_the_line	ImageGen/images/cards/klee/hold_the_line.png	500	380	cover	y0.32	shortlist	3	png	Klee Portrait.png		splash
-hold_the_line	ImageGen/images/cards/klee/hold_the_line.png	500	380	cover	y0.50	shortlist	4	png	Klee Birthday 2022 - Shorts.png		splash
-smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y0.50	shortlist	2	png	Klee Shorts 2023-06-12.png		splash
-smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y0.38	shortlist	3	png	Klee Birthday 2022 - Shorts.png		splash
-smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y0.65	shortlist	4	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash
+powder_charge	ImageGen/images/cards/klee/powder_charge.png	500	380	cover	y0.44	shortlist	1	png	Klee Portrait.png		splash
+powder_charge	ImageGen/images/cards/klee/powder_charge.png	500	380	cover	y0.75	shortlist	2	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash
+powder_charge	ImageGen/images/cards/klee/powder_charge.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Jumbo Sparks 'n' Splash Statue.png		item
+hold_the_line	ImageGen/images/cards/klee/hold_the_line.png	500	380	cover	y0.45	shortlist	1	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash
+hold_the_line	ImageGen/images/cards/klee/hold_the_line.png	500	380	cover	y0.32	shortlist	2	png	Klee Portrait.png		splash
+hold_the_line	ImageGen/images/cards/klee/hold_the_line.png	500	380	cover	y0.50	shortlist	3	png	Klee Birthday 2022 - Shorts.png		splash
+smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y0.50	shortlist	1	png	Klee Shorts 2023-06-12.png		splash
+smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y0.38	shortlist	2	png	Klee Birthday 2022 - Shorts.png		splash
+smoke_and_sparks	ImageGen/images/cards/klee/smoke_and_sparks.png	500	380	cover	y0.65	shortlist	3	png	Statue of The Seven - Jumbo Sparks 'n' Splash Statue.png		splash
