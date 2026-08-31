@@ -72,17 +72,43 @@ triggered an Elemental Reaction, 1 more if the Companion is upgraded, capped at
 3 per play.** The declaration is keyed on the **pool**, not on Prune
 (`effects.klee_personal_companion_spark` returns early only when the card is not
 a Personal Companion, or when its `personal_pool` is not the player's character),
-so both cards below fall under it automatically the day their rows exist. In
-practice: **Card 1 mints 2 Sparks on a normal play** — it applies an off-element
-aura into Klee's Pyro, so it reacts — and **3 upgraded, which is the cap**;
-**Card 2 mints 1, and 2 upgraded**, because it is Pyro and reacts with nothing
-Klee herself puts up.
+so both cards below fall under it automatically the day their rows exist. The
+four numbers are the shipped constants (`tier0/constants.py:201-204`:
+`KLEE_COMPANION_SPARK_BASE = 1`, `..._REACTION_BONUS = 1`,
+`..._UPGRADED_BONUS = 1`, `..._MAX_PER_PLAY = 3`).
 
-That rider is worth roughly what `snap` prints (6 damage **and** a Spark, at
-common). So a Personal Companion body printed level with `snap` is `snap` plus a
-free Spark, and the honest correction is to print the body one step below the
-Klee card it is being compared to. Both faces below do that deliberately, and
-§4.4 and §5.4 show the arithmetic.
+**The reaction limb is conditional, and earlier drafting of this packet
+overstated it.** A Companion applies **its own** element and never Klee's:
+`_element_for` (`tier0/engine/effects.py:572`) returns `card.element` for an
+effect carrying `applies_element`, and its docstring says so in as many words —
+*"Cards with their own element (companions) apply that instead"*, and *"Companion
+cards are exempt from cadence entirely"*. So Card 1's Electro does not meet
+Klee's Pyro by being played; it meets a Pyro aura only if the target is
+**already carrying one**, which in practice means Klee's own catalyst attacks put
+it there on an earlier play in the same fight. Into a bare target the play
+does not react.
+
+The corrected yields, per play:
+
+| play | Sparks |
+|---|---|
+| Personal Companion, no reaction | **1** |
+| Personal Companion, no reaction, **upgraded** | **2** |
+| Personal Companion, **reaction** | **2** |
+| Personal Companion, reaction, **upgraded** | **3** (the cap) |
+
+That is one table for **both** cards. Card 1 sits on the reaction rows only when
+a Pyro aura is already standing; Card 2 (Pyro, and applying nothing) sits on the
+no-reaction rows always. **Card 1 mints 1 Spark into a bare target (2 upgraded)
+and 2 onto a standing Pyro aura (3 upgraded, the cap); Card 2 mints 1, and 2
+upgraded.**
+
+The rider is therefore worth **the Spark half of `snap`, not `snap`'s whole
+body** — one Spark on a normal play, a second only when the board was already set
+up. It is still a real free rider on every play, so the honest correction is
+still to print the body one step below the Klee card it is being compared to;
+what changes is the size of the discount that buys, which §4.4 and §5.4 now
+argue on the corrected numbers.
 
 **Fact two — the upgrade of any Personal Companion is worth +1 Spark before its
 printed delta.** The kit reads the upgraded suffix off the card id, so the
@@ -108,9 +134,14 @@ The field narrows further by element. Card 1's job requires an **off-element**
 applier, because Klee prints no off-element aura (LAW: reactions are earned, not
 given) and an off-element application onto her Pyro is what makes the play react
 — which is the kit's +1. Electro is the pool's thinnest 4-star element (one row,
-Fischl's) and Pyro–Electro **Overload** is implemented as a splash to every
-living enemy plus Weak on the reacted target, which is a real body and not a
-flavour note. Card 2's job is Bomb-facing and wants a Pyro name.
+Fischl's) and Pyro–Electro **Overload** is implemented as **6 damage to every
+living enemy plus Weak 1 on the reacted target** (`tier0/engine/reactions.py:154-161`
+— `for other in state.living_enemies: _splash(state, other, C.OVERLOAD_SPLASH)`
+then `powers.apply_power(state, enemy, "weak", C.OVERLOAD_WEAK)`, with
+`OVERLOAD_SPLASH = 6` and `OVERLOAD_WEAK = 1` at `tier0/constants.py:47-48`),
+which is a real body and not a flavour note. It is also the reason the aura
+precondition in §2 matters: that body arrives only on the plays that find a Pyro
+aura already up. Card 2's job is Bomb-facing and wants a Pyro name.
 
 The specific names are picks `K1` and `K3`. The faces below are written on their
 defaults.
@@ -136,11 +167,17 @@ Two of them, and both are Klee-only reads:
   Dealt to Kokomi or Furina the rider is dead text, which is the test the
   Personal/Universal split is for: this card would be a brick anywhere else, and
   that is *allowed* here and forbidden on a Universal card.
-- **It is built to fire Klee's own kit trigger.** Klee's attacks are
-  catalyst-grade and apply Pyro, so an Electro application lands on a Pyro aura
-  and Overloads — which pays the *Little Hexenzirkul* reaction bonus, splashes
-  every living enemy, and applies Weak. The card's Spark contribution is real
-  and is **entirely on Klee's side of LAW's line**: the face grants nothing.
+- **It is built to fire Klee's own kit trigger — on a board Klee has already
+  touched.** Klee's attacks are catalyst-grade and apply Pyro; the Companion
+  applies its **own** Electro (`effects.py:572`), so the Overload happens when
+  the Electro lands on a Pyro aura Klee's earlier attack left standing. When it
+  does, it splashes 6 to every living enemy, applies Weak 1, and pays the
+  *Little Hexenzirkul* reaction bonus (2 Sparks, 3 upgraded). When the target is
+  bare it is a plain Electro application and the play mints 1 (2 upgraded).
+  **The sequencing is the card's skill expression, not a rounding error**, and
+  it is why the reaction limb is not priced into the printed body. Either way
+  the card's Spark contribution is **entirely on Klee's side of LAW's line**:
+  the face grants nothing.
 
 Nothing here needs a mechanic that has not landed. `damage` with
 `applies_element`, and `bonus_vs_bombed`, are both emitted today by
@@ -150,8 +187,10 @@ sheets.
 ### 4.3 The upgrade path
 
 `{damage: +2}` — 5 → 7, so 8 → 10 against a bombed target. One axis, visible on
-the offer screen, and it rides the free +1 Spark from fact two. The alternative
-axis is pick `K6`.
+the offer screen, and it rides the free +1 Spark from fact two — which the row
+writes as `kit_spark: +1` beside the damage delta (§8, note one: the key carries
+no effect delta and is checked against the constant). The alternative axis is
+pick `K6`.
 
 ### 4.4 At-rarity parity — argued against three named Klee commons
 
@@ -166,12 +205,36 @@ Klee's 1-cost common Attacks, printed:
 **Card 1 is 5, ceiling 8; upgraded 7, ceiling 10.** Base 5 is the **lowest**
 1-cost Attack number on Klee's common sheet and equals `fischl_nightrider`, the
 Universal Electro common it will sit beside. The ceiling of 8 equals `sizzle`'s
-*base* and is 6 short of `sizzle`'s ceiling. Add the kit's 2 Sparks (3 upgraded,
-at the cap) and the card lands **at `snap` and under `sizzle`** — an unremarkable
-member of the band, which is exactly what test 4 asks for.
+*base* and is 6 short of `sizzle`'s ceiling.
 
-The rider is honestly conditional: on an empty Bomb board this is a 5-damage
-1-cost Attack, which is under every Klee common on the table.
+**The full-kit accounting, on the corrected reaction rule (§2) and with
+Overload's actual body counted.** Four lines, because the play is two different
+cards depending on whether Klee has already put Pyro on the target:
+
+| line | on the target | elsewhere on the board | Sparks minted |
+|---|---|---|---|
+| bare target, base | 5 (8 vs bombed) | — | **1** |
+| bare target, upgraded | 7 (10 vs bombed) | — | **2** |
+| standing Pyro aura, base | 5 + 6 splash = 11 (14 vs bombed), Weak 1 | 6 to each other living enemy | **2** |
+| standing Pyro aura, upgraded | 7 + 6 splash = 13 (16 vs bombed), Weak 1 | 6 to each other living enemy | **3** (cap) |
+
+The splash and the Weak are **Overload's** body, not the card's — any off-element
+applier landing on Klee's Pyro gets the same, and the reacted rows are therefore
+priced as a reward for sequencing rather than as printed power.
+
+**Where that lands the card.** The two rows a player actually gets most of the
+time are the bare-target rows, and they are **1 Spark on a 5-damage 1-cost
+Attack** — strictly under `snap` (6 damage *and* a Spark), and far under
+`sizzle`'s 14 ceiling. The reacted base row (11 on the target, 2 Sparks) is above
+`snap` and beneath `sizzle`'s ceiling on one body; on a three-body board its
+**total** damage (11 + 6 + 6 = 23) exceeds every 1-cost Klee common, which is the
+one place the card is genuinely strong — and it is strong exactly on the turn the
+player spent an earlier card setting up. The upgraded reacted row is the cap in
+both senses. Taken across the four lines the card is an unremarkable member of
+the band with a sequencing ceiling, which is what test 4 asks for.
+
+The Bomb rider is honestly conditional on top of all four: on an empty Bomb board
+this is a 5-damage 1-cost Attack, which is under every Klee common on the table.
 
 ### 4.5 What it is FOR in a run
 
@@ -217,7 +280,8 @@ it a card you build around, which is right for a common.
 
 `{bomb_damage: +2}` — the Bombs go 5 → 7. The key bumps `bomb_damage` wherever it
 appears, including inside a conditional, so it reaches the gated branch, and it
-keeps the Spark read printed on **both** faces. The alternative — upgrading the
+keeps the Spark read printed on **both** faces. The row carries `kit_spark: +1`
+beside it, for the reason §8 note one gives. The alternative — upgrading the
 gate away with `{condition: unconditional}` — is pick `K5`, and it is not the
 default for a stated reason: an upgrade that deletes the engine interaction turns
 a Personal Companion into a Universal one on its better face.
@@ -237,10 +301,31 @@ the rarity step buys, and the `has_spark` gate is what pays for it. Against
 three (10 or 15 pending). Against `hold_the_line` it costs no Sparks but delivers
 5 Block where that card delivers about 11 in practice.
 
-**The honest failure floor, stated rather than found later:** on an empty bank
-this card is 5 Block for 1 Energy, which is `duck_and_cover` — a **Basic**. An
-uncommon that can read as a Basic is a real cost, and it is the price of a gate
-this soft. Note also that the only shipped Spark predicate is `has_spark`, which
+**The honest failure floor, stated rather than found later — and it is a floor on
+the FACE, not on the play.** On an empty bank the *printed* card is 5 Block for
+1 Energy, which is `duck_and_cover` — a **Basic**. But the kit rider still fires:
+`effects.klee_personal_companion_spark` is called from `_finish_play`
+(`tier0/engine/combat.py:626`) **after** `effects.resolve_card` has run, so the
+`has_spark` gate is evaluated on the bank as it stood *before* the play — the
+card can never gate itself on its own Spark — and an empty-bank Amber still
+leaves the player **1 Spark richer (2 upgraded)**. The full-kit accounting:
+
+| board | bank at play | printed body resolves as | kit Sparks this play | bank after | later refund |
+|---|---|---|---|---|---|
+| 1 enemy | 0 | 5 Block | **+1** (+2 upgraded) | 1 (2) | — |
+| 1 enemy | ≥1 | 5 Block + 1 Bomb at 5 (7 upgraded) | **+1** (+2 upgraded) | bank+1 (bank+2) | **+1** when that Bomb pops |
+| 3 enemies | 0 | 5 Block | **+1** (+2 upgraded) | 1 (2) | — |
+| 3 enemies | ≥1 | 5 Block + 3 Bombs at 5 (7 upgraded) | **+1** (+2 upgraded) | bank+1 (bank+2) | **+3** as they pop |
+
+(The refund column is *Pounding Surprise*, Klee's starting relic: +1 Spark per
+Bomb detonation. It is the loop §5.2 describes, written as numbers.)
+
+So the true floor is **5 Block and a Spark for 1 Energy**, not a Basic — and the
+empty-bank play is self-correcting, because it hands over the Spark that arms the
+*next* copy. An uncommon whose printed face can read as a Basic is still a real
+cost and the packet does not withdraw that; what it withdraws is the claim that
+the empty-bank play gives you nothing but Block. That the floor is this soft is
+also the price of the gate being this easy. Note also that the only shipped Spark predicate is `has_spark`, which
 is *greater than zero*: a "two or more" gate is not expressible today and would
 be engine work, so the gate is genuinely easy to satisfy in any deck that has
 looked at a Spark. That is a reason the body is printed at `mine_toss`'s number
@@ -285,6 +370,17 @@ bank, because for the first time an un-spent Spark is worth something.
    caused. It is Prune's own predicate, which makes it the most redundant of the
    three against the card the set already has.
 
+**Note — `+3` re-argued against the corrected table (§2, §4.4), rather than
+assumed.** The correction moved the card **down**, not up: the ordinary play is
+1 Spark and no splash, where the earlier draft credited it with 2 Spark and an
+Overload every time. A rider that pays only on an armed target is therefore
+sitting on a *weaker* base than the one `+3` was first sized against, so `+3`
+does not break — if anything the corrected floor argues it is on the low side.
+The counterweight is the reacted-and-bombed line, 14 on the target at base and 16
+upgraded, which is the highest single number in the packet; it is reached only by
+holding a Bomb board **and** a standing Pyro aura, i.e. by playing two cards
+first. The default stands at `3` and no value moved.
+
 **`K3` — which companion carries Card 2.**
 1. **Amber — Explosive Puppet** *(DEFAULT)*. Baron Bunny is a placed decoy that
    explodes, which is a Bomb in everything but name; Amber is Pyro; and
@@ -314,7 +410,16 @@ consequence.**
    cost clause, and machinery that exists. **Not recommended, and listed only so
    the option is visibly declined:** the one card using it is under an open
    design question whose collapse condition has not been posed, and a second card
-   copying the pattern now would prejudge it.
+   copying the pattern now would prejudge it. **Sequencing status, corrected:**
+   that collapse condition **has** now been posed — `KLEESPARK-W5` ran
+   2026-08-30 and `B1` came back **UNREACHED**, at **one** opportunity page
+   against a registered floor of **four**, so R230's collapse did not fire and
+   could not have. The honest wording is therefore *"unresolved after an
+   under-denominator read"*, not *"has not been posed"*. The consequence for
+   this pick is unchanged: an under-denominator read licenses nothing, the
+   question is still open, and a second card copying the pattern would still
+   prejudge it. Option 1 remains the default on exactly the reasoning it
+   already had.
 
 **`K5` — Card 2's upgrade axis.**
 1. **`{bomb_damage: +2}`** *(DEFAULT)* — Bombs 5 → 7, gate kept on both faces.
@@ -362,7 +467,10 @@ and the names are [USER]'s to settle at any time without moving anything else.
   `zero_cost_attacks_up` or the retiring threshold.
 - **Nothing that prejudges the open Bag-of-Tricks question**, its collapse
   condition, or the mode-head price pattern — see pick `K4` option 3, which is
-  declined on exactly that ground.
+  declined on exactly that ground. The condition is **unresolved after an
+  under-denominator read** (`KLEESPARK-W5`, 2026-08-30: `B1` UNREACHED at one
+  opportunity page against a floor of four), which is a different state from
+  unposed and reaches the same conclusion here.
 - **No home-nation weight change.** `SAME_NATION_REWARD_SHARE` holds at 0.5 under
   `P7`, and the re-measurement `P7` attaches is owed **after** these rows land,
   not from this packet.
@@ -396,11 +504,37 @@ ids below are proposed strings and mint with the rows.
 
 ```yaml
 # docs/klee-upgrades.yaml — PROSPECTIVE
-razor_claw_and_thunder:    {damage: +2}          # 5 -> 7; rider unchanged at +3
-amber_explosive_puppet:    {bomb_damage: +2}     # 5 -> 7 inside the conditional
+razor_claw_and_thunder:    {damage: +2, kit_spark: +1}      # 5 -> 7; rider unchanged at +3
+amber_explosive_puppet:    {bomb_damage: +2, kit_spark: +1} # 5 -> 7 inside the conditional
 ```
 
-Two notes for whoever lands them.
+Four notes for whoever lands them.
+
+**`kit_spark: +1` is not an optional garnish — it is how the sheet writes the
+kit's upgraded limb.** The key is defined at `tier0/content/upgrades.py:565`, and
+its comment is explicit that it applies **no effect delta** (there is nothing on
+the face to bump, which is the point of LAW:145's clause) and is **not** a silent
+no-op either: the engine expresses it at play time by reading the upgraded flag
+in `effects.klee_personal_companion_spark`, and the codegen emits the matching
+play-time comment instead of flagging a missing upgrade path. The comment is
+equally explicit that **the value is checked rather than trusted** — "the row must
+name a card the kit actually reaches, and must agree with the constant" — so `+1`
+is not a choice here: it is `KLEE_COMPANION_SPARK_UPGRADED_BONUS`
+(`tier0/constants.py:203`) written on the sheet. A row omitting the key would
+under-describe the upgrade; a row saying `+2` would fail the check. Prune's
+`{kit_spark: +1}` is the same fact already written down (§2, fact two).
+
+**The parity test becomes a three-card enumeration AT THE FOLD.**
+`tier0/tests/test_eb219_prune_kit_spark.py` currently enumerates the four
+(upgraded × reacted) yields for the **single** Personal Companion that exists —
+its `FACE_PARITY` map and `test_prune_pays_exactly_what_her_face_used_to_pay`
+are written against `prune_witch_hunt` by id. When these two rows land, that
+enumeration must become an enumeration over **all three** Personal Companions,
+since the declaration is keyed on the pool and not on Prune (the file's own
+`test_a_shared_pool_companions_swirl_mints_nothing` is the other half of that
+scoping). **No test is edited today** — the sheet rows are fold-gated, so a test
+enumerating cards that do not exist would be red on arrival. This is a note for
+the fold, not a task.
 
 **`role_c` on Card 2 is the weakest field on either row.** The vocabulary is
 applier / buffer / trigger. Card 2 applies nothing, buffs nothing and triggers
@@ -411,3 +545,92 @@ for it, and that is a taxonomy question rather than a card question.
 
 **Neither row carries art.** Two portraits are owed at the fold, on the ordinary
 art path, under the R212 ladder's art clause.
+
+---
+
+## 9. R235 — RULED 2026-08-31 (the `K1`–`K6` slate)
+
+**Provenance.** [USER] reviewed §6's six picks with their external GPT seat and
+relayed its recommendation on 2026-08-31: **all six defaults**, plus **four
+corrections to be made before the faces are signed**. The main session
+fact-checked all four against the repo and **all four are CONFIRMED**; they are
+this branch's amendment commit, and they were landed *before* this ruling so the
+signature falls on a packet that is true. The ruling is recorded under the
+**standing both-agreed authorization** (the seat and the session agree, so it
+lands without a fresh ask), with the **usual veto window** — [USER] may strike or
+change any line below and nothing downstream has moved in the meantime.
+
+### 9.1 The six picks — all six defaults RULED
+
+| pick | RULED | the face it fixes |
+|---|---|---|
+| `K1` | **option 1 — Razor, *Claw and Thunder*** | Card 1's carrier: Electro, the pool's thinnest 4-star element, and a peer rather than a chaperone |
+| `K2` | **option 1 — `bonus_vs_bombed 3`** | Card 1 reads the **Bomb board**, the read no other card in the set takes |
+| `K3` | **option 1 — Amber, *Explosive Puppet*** | Card 2's carrier: Pyro, and Baron Bunny is a Bomb in everything but name |
+| `K4` | **option 1 — read the bank (`has_spark`)** | Card 2 adds **no Spark sink**, so the sink program is untouched |
+| `K5` | **option 1 — `{bomb_damage: +2}`** | the upgrade keeps the gate printed on **both** faces |
+| `K6` | **option 1 — `{damage: +2}`** | Card 1's upgrade pays in both the reaction deck and the demolition deck |
+
+Both faces therefore stand exactly as §4.1 and §5.1 print them, with §8's
+prospective rows as amended (each now carrying `kit_spark: +1`).
+
+**`K2` was re-argued, not waved through.** Amendment 1 moved Card 1's ordinary
+play *down* — 1 Spark and no Overload, where the draft credited every play with a
+reaction — so `+3` sits on a weaker base than the one it was first sized against.
+The corrected table does not break it, and the note under `K2` records the
+counterweight (14 on a reacted, bombed target at base; 16 upgraded) so the fold
+inherits the argument rather than the conclusion. **The ruled value stays at 3.**
+
+### 9.2 The four amendments — all CONFIRMED and landed
+
+1. **Razor's Spark arithmetic.** A Companion applies its own element
+   (`tier0/engine/effects.py:572`), so the reaction limb is conditional on a
+   standing Pyro aura: **1 / 2 / 2 / 3** across (bare, upgraded-bare, reacted,
+   upgraded-reacted), against `KLEE_COMPANION_SPARK_*`
+   (`tier0/constants.py:201-204`). Overload's body verified in the engine and
+   quoted as the code has it: **6 damage to every living enemy plus Weak 1 on the
+   reacted target** (`tier0/engine/reactions.py:154-161`; `OVERLOAD_SPLASH = 6`,
+   `OVERLOAD_WEAK = 1`). The review's numbers and the code's numbers agree.
+2. **Amber's floor.** The kit rider fires after the play resolves
+   (`tier0/engine/combat.py:626`), so an empty-bank Amber still mints 1 Spark
+   (2 upgraded) and the gate can never read the card's own grant. §5.4 now carries
+   the bank-0 / bank-≥1 × one-enemy / three-enemy block with per-line totals.
+3. **`kit_spark: +1` on both prospective upgrade rows**
+   (`tier0/content/upgrades.py:565` — no effect delta, and the value is *checked*
+   against the constant rather than trusted), with the fold-time note that
+   `tier0/tests/test_eb219_prune_kit_spark.py`'s single-Personal enumeration must
+   become an enumeration over all three. **No test is edited today**; the rows are
+   fold-gated.
+4. **The Bag-of-Tricks sequencing prose.** Corrected to *"unresolved after an
+   under-denominator read"* — `KLEESPARK-W5` (2026-08-30) returned `B1`
+   **UNREACHED** at one opportunity page against a registered floor of four.
+   `K4`'s reasoning survives unchanged: an under-denominator read licenses
+   nothing.
+
+### 9.3 Two things this ruling also settles
+
+**`role_c` on Card 2 stays `buffer`, and no fourth global role word is minted.**
+§8's note flagged the field as the weakest on either row and asked whether the
+taxonomy wants a word for "places Bombs". It does not need one **here**, because
+the field is not load-bearing in the only place it is read: `tier05/draft.py`
+gives special treatment to exactly one value — `_is_applier` (`draft.py:236-237`,
+`return card.role_c == "applier"`), consulted at the deck-composition and
+valuation sites — and every non-`applier` value is treated identically. So
+`buffer` and a hypothetical fourth word are the same value to the drafter, the
+flag **resolves as answered**, and **the taxonomy question does not travel to the
+fold**. If a later card makes the drafter read a second role value, that is when
+the vocabulary question becomes real.
+
+**`P5a` (Rare Personal access) stays DEFERRED — reaffirmed.** Nothing in this
+slate touches it: both faces are 4-star, neither argues for a Rare, and neither
+depends on one existing. R234 `P5a` remains open on its own terms and continues
+to bar any Rare Personal design until it is answered.
+
+### 9.4 What this ruling does NOT do
+
+It mints no `EB` and no `M` row, moves no register, writes no sheet row, and
+edits no test. `EB-251` keeps its gate: **the rows land at the Burst retirement
+fold and not before**, per R234 `P3`. §7's list of untouched things stands as
+written, as amended.
+
+Next free ids as of this landing: R236 / `EB-253` / `M70`.
