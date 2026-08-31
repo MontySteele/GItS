@@ -279,7 +279,9 @@ CEILINGS: dict[str, int] = {
     # EB-241 minted 2026-08-30 by R231 A3: `Card.is_junk` is rarity-only,
     # and the fix is scheduled AT the Kokomi fold because it moves shipped
     # numbers and rides the fold's already-required re-baseline.
-    "EB": 241,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-242 minted 2026-08-30 by the live-acceptance window: BT3's staged
+    # boards declare a relic the wire does not carry on their pinned seed.
+    "EB": 242,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -599,10 +601,33 @@ CEILINGS: dict[str, int] = {
 # That second half is the whole mechanism — see rule 6 in the docstring.
 OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
-        12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
+        # 40 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word for
+        # word -- "the five `GetNode`s resolve LIVE". On `0.2.1786+proto.dirty`
+        # the boot log reads `convention scene ok:
+        # res://furina/ui/energy_counter.tscn root=Control` with no
+        # `has no node named` warning for any of the five, and a live Furina
+        # combat (seed `07G8YGNTQHKX`, 42 actions, 1 fight, 0 defects) logs
+        # `[BaseLib] Auto-converted 'res://furina/ui/energy_counter.tscn' from
+        # Control to NEnergyCounter` and then plays on. That line IS the hard
+        # cast: `NEnergyCounter._Ready` GetNodes all five and throws on a null,
+        # so a run that continues past it is the five resolving. `godot.log`
+        # carries no exception on the session.
+        12, 15, 32, 33, 34, 35, 38, 41, 53, 65, 70, 71,
         74, 78, 80, 83, 84, 116, 128,
         154, 158, 159, 160, 161, 163,
-        180, 181, 183, 184,
+        # 184 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word for
+        # word -- "the Block mode replays with no target". Live on
+        # `0.2.1786+proto.dirty`, `understudy/scenarios/eb184-modal-block-no-
+        # target.yaml`: `{"action": "play_card", "card_index": 5, "mode":
+        # "Gain 3 Block, applying no element"}` with NO `target` key answers
+        # `status: ok` and the bridge's own message says the chosen mode "aims
+        # at nobody"; player Block 0 -> 3, both expects held. The other half is
+        # its twin `eb184-modal-damage-needs-target.yaml`, SEEN TO FAIL by
+        # construction: the same card, the same absent target, the DAMAGE mode
+        # named, is still refused "Card requires a target ... The chosen mode
+        # aims at one enemy". A fix that switched aiming off would pass the
+        # first file and fail the second, which is why there are two.
+        180, 181, 183,
         189, 191, 193, 194, 195, 196, 197, 198,
         # 192 was minted 2026-08-29 and CLOSED 2026-08-30 by R231 A8: the
         # `regent_forge` canon package -- a regex union of Regent's Stars
@@ -869,9 +894,24 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 240 minted 2026-08-30 by KLEESPARK-BT2 §24.6: printing the relics
         # immediately falsified a printed assumption, and the preflight's
         # assumption check cannot see the wire's relic list.
-        240,
+        # 240 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word for
+        # word -- "one board's refusal seen live". All THREE committed
+        # `klee-sparks-bt2r` boards were staged as they stand (R101b: read,
+        # never edited) against `0.2.1786+proto.dirty`, and all three were
+        # refused before a packet was written, each naming the mismatch:
+        # "hp: the board declares 'first' at 55 and the wire reads 45" (t01),
+        # 46 (t02), 40 (t03) -- exactly the three live bodies the row names.
+        # The CONTROL half holds too: a correct current-world board (a scratch
+        # copy of `klee-sparks-bt3/t01`, relic leg corrected) stages clean,
+        # packet sha256 be932c77, so the preflight refuses a false assumption
+        # and not a board. The control's first attempt refused on the RELIC
+        # leg and that is a real find -- BACKLOG `EB-242`.
         # 241 minted 2026-08-30 by R231 A3, gated on the Kokomi fold.
         241,
+        # 242 minted 2026-08-30 by EB-240's live control: BT3's boards declare
+        # a relic pair the wire does not carry on their pinned seed, so the
+        # round cannot stage until they are re-drafted.
+        242,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
