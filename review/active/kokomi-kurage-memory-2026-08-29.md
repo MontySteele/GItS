@@ -3885,8 +3885,9 @@ appears as a **COMPARATOR, never a threshold** and never a falsifier.
 **THE GRANT, named before the run, and its direction declared.** `C8` came back
 SPLIT — the median drafted deck holds **3** Exhaust rows — and §15.6 read that
 as leaving this leg free to draft or to grant. **It grants**, because a blind
-session cannot be asked to draft its way to a developed deck inside 40 actions,
-and it grants a set that **does not exceed the sim's own median**:
+session cannot be asked to draft its way to a developed deck inside 40 actions.
+**What it grants is an INTENTIONALLY ENRICHED STRESS DECK** — it stresses the
+queue on purpose, and it is kept for exactly that reason:
 
 | granted | why it is there | the door it opens |
 |---|---|---|
@@ -3896,12 +3897,34 @@ and it grants a set that **does not exceed the sim's own median**:
 | `bennett_fantastic_voyage` ×1 | a **1-cost** Companion that prints Exhaust, so a PRICED memory at 3 Charge exists and the 3× rule can bind at all | **Exhaust**, price 3 |
 | `waterspout` ×1 | a non-Companion Exhaust row: it pays 1 Charge and it does **not** enrol | income, and the readability case that separates the two |
 
-**The error direction of the grant, one way.** Three Exhaust-printing rows is
-the sim's median and not above it, so the live deck is **no richer** in memory
-fuel than a drafted one. A queue that runs long here can only run longer on a
-drafted deck; a jam observed is therefore a **FLOOR**, and a rhythm observed is
-not inflated by the grant. Two Companions against two Musters is likewise the
-thinner half of §15.6's 61/39 door split.
+**The deck is ENRICHED, and no error direction may be claimed from it.**
+*Revised 2026-08-30 on the pair review's correction: this paragraph previously
+said three granted Exhaust rows made the live deck "no richer" than a drafted
+one, that a queue running long here could only run longer on a drafted deck,
+and that a jam observed was therefore a FLOOR. **All three claims were wrong at
+their first premise** — they counted only the grant and forgot the starter.*
+Kokomi's twelve-card starter already prints an Exhaust row: `gorou_inuzaka_charge`
+(cost 0, `exhaust: true`, `tier0/content/characters/kokomi.yaml:104`), the very
+card [USER]'s free-replay example names. Sucrose, Bennett and Waterspout make
+**FOUR Exhaust printers** in the live deck against the sim's drafted median of
+**three** — richer, not equal — and `conscription_notice` is a second Muster
+door that can enrol *further* rows mid-fight, above whatever the deck printed.
+So:
+
+- **This deck OVER-SAMPLES enrolment pressure.** It is a stress deck, staged
+  deliberately, and every queue observation on it is taken under more fuel than
+  a median drafted deck carries.
+- **A jam observed here is NOT a floor and licenses NOTHING beyond returning
+  the pick** §15.6 already opened. It is not evidence that a drafted deck jams,
+  it does not bound how a drafted queue behaves, and no monotonic extrapolation
+  runs from this deck to a typical one in either direction.
+- **A clean run here does NOT clear a drafted deck either.** One fight, one
+  deck, one seat: absence of a jam under this much fuel is not a result about
+  less fuel — the fight sampled a different deck, not a milder one.
+
+Two Companions against two Musters is the thinner half of §15.6's 61/39 door
+split, which is a fact about the door mix and is not a compensating discount on
+any of the above.
 
 #### 15.8.3 What refuses a slot, and what refuses the session
 
@@ -3943,7 +3966,7 @@ forecast rows (`EB-229`). None is read off prose written after the fact.
 |---|---|---|---|---|---|
 | `K1` | **READABILITY — can the blind player read the memory off the live frame?** Two halves, the two facts §14's element prints as separate lines: (a) does anything fire at the start of the next turn, and (b) where does the Charge run out. Asked BEFORE the line is played, so it is a forecast and not a description. | **Half (a) correct on ≥ 5 of the first 6 QUEUED pages, AND half (b) correct on ≥ 5 of the first 6 QUEUED pages.** | Each answer against that page's own snapshot: (a) against `fires_next` / `blocked`, (b) against `run_out_index` — naming the entry, or saying the bank covers the queue. Both halves = **PASS**; one = **SPLIT**; neither = **MISS**. **A wrong call in the FIRES direction is the serious one** and is reported separately. | fewer than 6 QUEUED pages. Half (b) is separately UNREACHED where **no** page carries `run_out_index ≥ 0` — the bank never ran out, which is a DOSE observation and not a display result | **PASS**: the element reads on a live page, and `EB-198`'s acceptance is discharged **for the page mirror** (§15.8.6 — the tie is folded in deliberately and its limit is stated there). **MISS**: the rebuild §14 shipped is still not readable, which is a DISPLAY finding, filed to `BACKLOG` as a page or element row, and **never** a re-price and never a dose change. |
 | `K2` | **THE CADENCE, live.** Does the memory fire on a regular beat when a player, not a pilot, is steering? This is the slot §15.6's `C1` / `C2` staged, asked where a reader is looking. | **The memory fires on ≥ 25% of combat pages.** | FIRE pages ÷ combat pages. **≥ 25% = PASS; 10% to < 25% = SPLIT; < 10% = MISS.** | **fewer than 8 combat pages** — the honest small-denominator rule: one fight is one fight | **PASS**: the beat survives contact with a player and the rhythm is real on the page as well as in the counts. **MISS**: the live beat is nothing like the sim's, and the FIRST question is which of the two seats is wrong — an instrument question before a design one, and no constant moves on it. **THE BAND IS DELIBERATELY WIDE AND ONE FIGHT CAN NEITHER CONFIRM NOR REFUTE 60.9%.** §15.6's rates ride beside this slot as a COMPARATOR and are not its threshold: a live share inside the band is not evidence the sim number is right, and one outside it is not evidence it is wrong. |
-| `K3` | **THE TAIL, and whether it JAMS — R231's live re-read of the uncapped queue.** `C7` was a SPLIT about a distribution; this is about a page. Two clauses, both required. | **(i) ZERO jam episodes, AND (ii) on the LONGEST-QUEUE page of the session, `K1`'s two halves are both correct.** | (i) counted off consecutive snapshots by §15.8.3's definition; (ii) that page's forecast answers against its own snapshot. Both = **PASS**; one = **SPLIT**; neither = **MISS**. Peak queue length, and the queue length at every page, ride beside it and are graded by nothing. | fewer than 8 combat pages, or no page with a queue of ≥ 4 — a tail that never appeared was not examined, and **the absence of a long queue in one fight is not evidence that the tail is fine** | **PASS**: the uncapped queue is readable and does not jam on a live page; **no cap is proposed, derived or implied in either direction** (R231 A2). **MISS**: the tail is where the rule stops being legible, and it goes back to [USER] as the numbered pick §15.6 already opened — *cap, drain, or nothing* — as a pick and never as an edit made here. |
+| `K3` | **THE TAIL, and whether it JAMS — R231's live re-read of the uncapped queue.** `C7` was a SPLIT about a distribution; this is about a page. Two clauses, both required. | **(i) ZERO jam episodes, AND (ii) on the LONGEST-QUEUE page of the session, `K1`'s two halves are both correct.** | (i) counted off consecutive snapshots by §15.8.3's definition; (ii) that page's forecast answers against its own snapshot. Both = **PASS**; one = **SPLIT**; neither = **MISS**. Peak queue length, and the queue length at every page, ride beside it and are graded by nothing. | fewer than 8 combat pages, or no page with a queue of ≥ 4 — a tail that never appeared was not examined, and **the absence of a long queue in one fight is not evidence that the tail is fine** | **PASS**: the uncapped queue is readable and does not jam **on this deck's live pages**; **no cap is proposed, derived or implied in either direction** (R231 A2), and — *revised 2026-08-30 on the pair review's correction* — a PASS on §15.8.2's INTENTIONALLY ENRICHED deck (four Exhaust printers against the sim's drafted median of three, plus a second Muster door) **does NOT clear a drafted deck**: this fight over-sampled enrolment pressure, and a clean read under extra fuel is not a reading about less. **MISS**: the tail is where the rule stops being legible, and it goes back to [USER] as the numbered pick §15.6 already opened — *cap, drain, or nothing* — as a pick and never as an edit made here. **A jam here is not a floor and extrapolates to nothing**: what it licenses is exactly the return of that pick. |
 | `K4` | **IS IT HERS? — steering INTO the memory.** The `P3`-shaped question `KURAGEMEM002` could only ask backwards. A rhythm nobody plays toward is weather, not an engine. | **≥ 3 of the first 10 combat pages carry a STEER, AND at least one of them names a Muster-door play** (sacrificing a card to a Muster, in the player's own words, whatever they call it). | Both off the forecast rows and `thinking`. Both = **PASS**; one = **SPLIT**; neither = **MISS**. | fewer than 10 combat pages | **PASS**: the memory is an input to her turns, and §15.6's `C5` spam worry is answered in the right direction — she plays toward it rather than being played by it. **MISS**: the beat happens TO the player, which is a legibility-and-teaching finding (page and wording), filed to `BACKLOG`; it is **not** licence to change the dose, the 3× price or the one-per-turn latch. |
 | `K5` | **THE BLOCK, named and unblocked.** [USER]'s own clause, on the first page it bites. §15.6 says the block is an act-1 state; a live fight is act 1. | **On the FIRST blocked page of the session, both halves: (a) the player says the memory is BLOCKED, distinctly from empty, and (b) names a play or a source that would unblock it.** | That page's answers against its snapshot's `blocked`. Both = **PASS**; one = **SPLIT**; neither = **MISS**. *"Not enough Charge yet, I will wait"* with no named source is the registered example of (b) failing. | **no blocked page occurs** — itself an observation about the dose at the granted deck's size, and inferred from in neither direction | **PASS**: the block teaches itself on the page, as §14's rebuild intended. **MISS**: the block is still the state the display loses, and it reopens the display row — **not** the question of whether an unaffordable front should be skippable, which is [USER]'s and is not on trial here. |
 
@@ -3998,8 +4021,17 @@ not have. Therefore:
   or did not steer by it, even while being asked about it every page;
 - **`K2` is inflated in the PASS direction** by the same mechanism, which is one
   more reason its band is wide and its comparator is not its threshold;
-- **`K3`(i), the jam clause, runs the other way**: a prompted player avoids jams
-  a silent one walks into, so **a jam episode observed is a FLOOR**.
+- **`K3`(i), the jam clause, runs the other way *for this contamination*:** a
+  prompted player avoids jams a silent one walks into, so the forecast channel
+  alone would make an observed jam a floor. *Revised 2026-08-30 on the pair
+  review's correction: **that floor does not survive the deck.** §15.8.2's
+  grant is an intentionally enriched stress deck — four Exhaust printers
+  against the sim's drafted median of three, plus a second Muster door — and it
+  pushes the jam clause the opposite way, over-sampling enrolment pressure. The
+  two contaminations point in opposite directions with no way to net them on
+  one fight, so **`K3`(i) carries NO declared error direction**: an observed
+  jam is neither a floor nor a ceiling, and it licenses only the return of
+  §15.6's pick.*
 
 That trade is taken for the reason `KLEESPARK-W5` took it: the alternative is
 mining `thinking` prose for a pre-commitment nobody was asked to make, which is
@@ -4028,8 +4060,16 @@ took that half with sighted captures. So:
 
 #### 15.8.7 Contaminations, blind spots, and what this cell does NOT license
 
-1. **The deck is GRANTED, not drafted**, as §15.8.2 lists. Nothing here is a
-   drafted-economy reading, and `C8`'s SPLIT is not re-opened by it.
+1. **The deck is GRANTED, not drafted, and it is ENRICHED**, as §15.8.2 lists.
+   Nothing here is a drafted-economy reading, and `C8`'s SPLIT is not re-opened
+   by it. *Revised 2026-08-30 on the pair review's correction: the starter's own
+   `gorou_inuzaka_charge` prints Exhaust, so the granted deck carries FOUR
+   Exhaust printers against the sim's drafted median of three, and
+   `conscription_notice` can enrol more mid-fight. **This cell over-samples
+   enrolment pressure by construction. No result on it extrapolates to a
+   typical drafted deck in either direction** — a jam here is not a floor and
+   is not evidence a drafted queue jams; a clean run here does not clear a
+   drafted deck.*
 2. **`+proto` build, prototype surface.** Every observation is about a prototype
    row and a flagged engine rule (R215 B). Nothing is quotable as balance.
 3. **One fight, one seat, one deck, one build.** Every denominator below ten is
@@ -4049,7 +4089,10 @@ took that half with sighted captures. So:
    not two samples of one population, and a live page is a third thing again.
 
 **This cell licenses NONE of the following, registered before the run so it
-cannot be argued after:** a cap, a drain or any move to `KURAGE_QUEUE_CAP`
+cannot be argued after** (*and, revised 2026-08-30 on the pair review's
+correction, the list now explicitly includes any extrapolation from this
+enriched deck to a drafted one — in either direction, from a jam or from a
+clean run*)**:** a cap, a drain or any move to `KURAGE_QUEUE_CAP`
 (R231 A2); a move to `KURAGE_MEMORY_COST_PER_ENERGY`, to the one-per-turn latch
 or to any dose constant; a change to the memory's entry doors; an Ethereal
 carrier anywhere (R231, deferred); a sheet move or an accept-to-sheet signoff

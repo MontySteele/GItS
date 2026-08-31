@@ -367,9 +367,17 @@ carried while it was active is in the commit message that retired it.
   Its sim sibling `KURAGECAD-S1` is finished and sits in the published table
   above; the live leg inherits from it the staging SHAPE and **no threshold**.
   **Unit:** one `understudy.blindplay session` on a `+proto` build, Codex seat,
-  Kokomi's flagged starter plus five GRANTED rows (§15.8.2 — three Exhaust
-  printers, the sim's own median and not above it, so a jam observed live is a
-  FLOOR). **Slate:** `K1` readability off the live page — does anything fire
+  Kokomi's flagged starter plus five GRANTED rows (§15.8.2 — an
+  **INTENTIONALLY ENRICHED STRESS DECK**: the starter's own
+  `gorou_inuzaka_charge` prints Exhaust, so with Sucrose, Bennett and
+  Waterspout the live deck carries FOUR Exhaust printers against the sim's
+  drafted median of three, and `conscription_notice` can enrol more mid-fight.
+  *Revised 2026-08-30 on the pair review's correction: this previously read
+  "three Exhaust printers, the sim's own median and not above it, so a jam
+  observed live is a FLOOR" — the count forgot the starter. **The cell
+  over-samples enrolment pressure and extrapolates to no drafted deck in
+  either direction**: a jam here is not a floor, a clean run here clears
+  nothing, and what a jam licenses is the return of §15.6's cap pick.*). **Slate:** `K1` readability off the live page — does anything fire
   next turn, and where does the Charge run out — which folds in `EB-198`'s blind
   read deliberately, for the page mirror only (§15.8.6); `K2` the live beat on a
   deliberately wide band (≥ 25% of combat pages), with `S1`'s 60.9% riding as a
