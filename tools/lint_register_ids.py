@@ -353,11 +353,12 @@ CEILINGS: dict[str, int] = {
                  # against the pre-fix build first.
                  # EB-192/193 minted 2026-08-29 by the Klee Sparks research
                  # pass, both confirmed defects found decompiling the pinned
-                 # 0.111.0 build. EB-192: the `regent_forge` canon package is
-                 # a regex artifact fusing Regent's Stars with the unrelated
-                 # Forge card, so the anchor `klee/spark` is measured against
-                 # is about half a different mechanic -- [USER]'s
-                 # measurement-law call. OPEN. EB-193: the base-game pool
+                 # 0.111.0 build. EB-192: the `regent_forge` canon package
+                 # was a regex artifact fusing Regent's Stars with the
+                 # unrelated Forge card, so the anchor `klee/spark` was
+                 # measured against about half a different mechanic. CLOSED
+                 # 2026-08-30 by R231 A8 -- rebuilt as `regent_stars` from
+                 # the census, both anchors re-baselined. EB-193: the base-game pool
                  # extractor requires a decimal `...m` literal and so drops
                  # every int-typed var, leaving `game_ref/regent.json` with
                  # no Star amounts at all. OPEN.
@@ -602,7 +603,14 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         74, 78, 80, 83, 84, 116, 128,
         154, 158, 159, 160, 161, 162, 163,
         180, 181, 183, 184,
-        189, 191, 192, 193, 194, 195, 196, 197, 198,
+        189, 191, 193, 194, 195, 196, 197, 198,
+        # 192 was minted 2026-08-29 and CLOSED 2026-08-30 by R231 A8: the
+        # `regent_forge` canon package -- a regex union of Regent's Stars
+        # with the unrelated Forge card -- was rebuilt as `regent_stars`
+        # from the Star-touching cards only, membership taken from
+        # `docs/current/research/regent-stars-economy.md` sec.2/3.5/3.6 and
+        # locked to it by test, and the klee/spark and kokomi/commander
+        # anchors were re-baselined on it. It leaves OPEN_IDS with its row.
         # 202/203 were minted 2026-08-29 by the KLEESPARK-R1 relayed review
         # and LEFT OPEN_IDS with their rows the same day, both BUILT under
         # R222: the slot-reachability check (`understudy/slot_plan.py`, a

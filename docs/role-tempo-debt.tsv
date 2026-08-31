@@ -35,6 +35,7 @@
 # already had in play, not one the batch opened. Filling it is Phase 3's
 # business (Spotlight content). No floor moved to absorb it; none may.
 #
+#
 # SAID OUT LOUD HERE, 2026-08-25 (EB-118 Phase-3 Window 1): 17 -> 18. The
 # cell that ARRIVES is furina/spotlight frontload|mid, and it is the SAME
 # SHAPE as the entry above -- inherited coverage, disclosed rather than
@@ -63,6 +64,20 @@
 # sinks derive solves against cells klee already covers, and all three
 # Kokomi rows are rewrites inside pools whose gaps are elsewhere.
 #
+# SAID OUT LOUD HERE, 2026-08-30 (EB-192 / R231): 17 -> 18, and it is a
+# change of SUBJECT rather than a regression. The canon anchor that
+# klee/spark and kokomi/commander are measured against was REBUILT:
+# `regent_forge` was a regex union of Regent's Stars with the unrelated
+# Forge card and ran about half Forge-only, and `regent_stars` replaces it
+# with the decompile-sourced census (generators, spenders, readers). The
+# package goes 19 -> 35 members, every one of its cells moves, and four
+# cells it used to sit at zero in stop being identity exemptions. Three
+# rows move: klee/spark block|mid LEAVES (its floor fell 10.5 -> 5.7 and
+# klee/spark already covered it), while klee/spark frontload|early and
+# klee/generic scaling|mid ARRIVE (the anchor's frontload|early demand
+# rose 21.1 -> 37.1; the DEFAULT floor set gained scaling|mid once the
+# Regent package stopped being zero there). Nobody wrote or deleted a
+# card.
 # Every line is a COVERAGE GAP in a pool. No line names a card, and none
 # ever can: this lint is floors-only (charter A0.2(1)).
 character	archetype	cell
@@ -75,11 +90,12 @@ klee	demolition	block|mid
 klee	demolition	frontload|early
 klee	demolition	scaling|mid
 klee	demolition	velocity|mid
+klee	generic	scaling|mid
 klee	reaction	block|late
 klee	reaction	scaling|late
 klee	reaction	scaling|mid
 klee	spark	block|late
-klee	spark	block|mid
+klee	spark	frontload|early
 kokomi	priest	scaling|late
 kokomi	priest	velocity|late
 kokomi	priest	velocity|mid
