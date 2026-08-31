@@ -331,6 +331,34 @@ carried while it was active is in the commit message that retired it.
   §11.6) — the C# arm does not exist, and R213's gate stands (nothing
   implements before Klee closes). **Gate:** the C# arm, then game time →
   `review/active/furina-reframe-2026-08-29.md` §6.3.
+- **`X9READ-S2` — Kokomi's charge reads per turn, re-read on the corrected
+  instrument** — **DRAFTED 2026-08-31, UNRUN, NOT COUNTERSIGNED.** Offered for
+  the next batch countersign (R212(2)). It is what QUEUE `M69`'s default
+  option (2) waits on: `W9` fired on Limb A at 58.91%, and `EB-242` then
+  proved 74.96% of the pooled `bonus_formula` reads were the pilot's
+  valuation calls. The subtraction in the packet's §9.4 leaves the firing
+  standing at **51.68%** — a margin of +1.68 pp — but that is post-hoc
+  arithmetic on the graded seed, not a measurement, so `W9` is re-evaluated on
+  a fresh seed against an instrument that never counted deliberation.
+  **Slate:** seven slots at packet §10.4, `X1b`–`X7b`, every threshold a
+  literal; `X1b` and `X4b` RE-DRAFTED (§9.4's erratum removed the per-turn
+  pulse floor both rested on), `X3b`, `X5b`, `X6b` and `X7b` carried, `X2b`
+  tightened to `≤ 2` on §5.1's unmoved ceiling. Each slot discloses the §9
+  number as CONTEXT that grades nothing, since the slate is drafted with the
+  graded read in hand (R212: re-draft and disclose, never re-sign). `R5` is
+  added and is the instrument's self-check — the `card: None` count on
+  `bonus_formula` reads must be ZERO, and a non-zero value invalidates the
+  read rather than grading a slot. **Cell:** §4's shape unchanged —
+  `RT12/D18/P11/C21`, `kokomi`, all three archetypes, hunter, `assigned`,
+  realistic, 600 runs each of three arms, `jobs=1`, 1-hour ceiling — at a
+  FRESH seed, PROPOSED 23; seed 11 is spent and may not be reused. `n`, the
+  seed and the ceiling are [USER] slots as before. **A non-firing is a real
+  outcome:** it says the composition `W9` was written to catch was a property
+  of the instrument, which is `M69` pick (1) reached by measurement. A second
+  firing updates `M69`'s reading and mints nothing. **Gate:** `EB-242`'s fix
+  merged to `main` (a run before it measures the old instrument), then the
+  countersign, then game-free sim time →
+  `review/active/charge-reads-per-turn-registration-2026-08-13.md` §10.
 
 New registrations add a pointer here and land their packet under
 `review/active/`. When one is graded, it moves to the **Graded** table above —

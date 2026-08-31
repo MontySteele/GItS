@@ -436,8 +436,10 @@ def _expected_damage(state: CombatState, card: Card) -> float:
                             * target.powers.get(rider["power"], 0))
             if "bonus_formula" in fx:       # detonation / fanfare formulas
                 try:
-                    per_hit += effects._bonus_formula(state,
-                                                      fx["bonus_formula"])
+                    # valuation=True (EB-242): an estimate, not a play, so it
+                    # ticks no reads-per-turn instrument.
+                    per_hit += effects._bonus_formula(
+                        state, fx["bonus_formula"], valuation=True)
                 except ValueError:
                     pass
             # Spotlight empowerment is real damage the pilot should see --
@@ -552,7 +554,11 @@ def _raw_block(state: CombatState, card: Card) -> float:
         # printed number and blocks with the wrong card. Same helper the
         # engine calls, so the estimate cannot drift from what resolves.
         if "bonus_formula" in fx:
-            amount += effects._bonus_formula(state, fx["bonus_formula"])
+            # valuation=True (EB-242): the same helper the engine calls, so
+            # the estimate cannot drift -- and the same reason it must not
+            # tally, because pricing a blocker is not blocking with it.
+            amount += effects._bonus_formula(state, fx["bonus_formula"],
+                                             valuation=True)
         times = fx.get("times", 1)
         if times == "exhausted_this_card":
             times = _estimated_exhausts(state, card)

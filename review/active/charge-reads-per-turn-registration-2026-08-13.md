@@ -607,3 +607,179 @@ and this paragraph is the disclosure that goes with them.
 5. **The three archetypes differ**, and `R1` shows they carried the pooled
    predicates unevenly — `assist` does not fire Limb A, and `priest` carries
    `X5` and the maximum turn by itself.
+
+---
+
+## 10. `X9READ-S2` — the re-read on the corrected instrument
+
+**DRAFTED 2026-08-31. UNRUN. NOT COUNTERSIGNED.** Offered for the next batch
+countersign under R212(2) (*prediction slates: DRAFTED from written intent,
+committed before any run, batch-countersigned*). No seed has been spent on it
+and no number below was read off any run of this cell. **Sections 1–9 are a
+published record and are unedited by this one (R101b).** This section is a
+NEW registration that reuses this packet's instrument, questions and cell
+shape; it does not re-grade `X9READ-S1` and does not re-sign it.
+
+### 10.1 Why there is a second read at all
+
+`W9` fired on Limb A at **58.91%**, and §9.4 then measured that **74.96%** of
+the pooled `bonus_formula` reads were the pilot's own valuation calls rather
+than plays — `EB-242`. §9.4 also did the subtraction: **with the estimates
+removed the repeatable share is 51.68% and Limb A STILL FIRES**, margin
+**+1.68 pp** rather than +8.91 pp. So the firing does not depend on the
+defect; **the margin does**, and it falls to under two points on an
+instrument that was never meant to count those calls at all.
+
+That is the whole reason for this cell. QUEUE `M69`'s **default option (2)**
+is *re-read after `EB-242`, then rule*, and its gate is `EB-242`. The
+subtraction in §9.4 is **post-hoc arithmetic on one seed's record**, not a
+measurement: it was computed after the grade, on the graded seed, by splitting
+one source on a field. **`W9`'s re-evaluation on a fresh seed against an
+instrument that never counted deliberation is the point of this section**, and
+it is the only thing that can turn a +1.68 pp post-hoc margin into a reading
+[USER] can rule on.
+
+### 10.2 The gate, and what must be true before this runs
+
+1. **`EB-242`'s fix is MERGED.** The instrument this slate is drafted against
+   is the corrected one: `effects._bonus_formula` takes a keyword-only
+   `valuation` flag, the two pilot sites (`pilot/policy.py`, the damage
+   estimate and the block estimate) pass `valuation=True`, and the
+   `note_charge_read` tick fires on the resolve path only. Locked by
+   `tier0/tests/test_eb242_valuation_is_not_a_read.py`. **A run taken before
+   that fix is on `main` measures the old instrument and grades nothing
+   here.**
+2. **The batch countersign.** [USER]'s, and unspent.
+3. **§4's stamp law.** If the open `RT`/`C` window moves before this runs, the
+   cell is re-stamped BEFORE the freeze, disclosed, and the slate is
+   re-drafted rather than re-signed.
+4. **Nothing else changes.** No other engine edit, no sheet edit and no
+   constants move may land between the countersign and the run, or the two
+   reads are not comparable and this section says so rather than quoting a
+   difference.
+
+### 10.3 Cell and sample plan — §4's shape, one fresh seed
+
+Identical to §4 except the seed, restated as literals so nothing is inherited
+by implication:
+
+- **Cell:** `RT12/D18/P11/C21`, `PILOT_WEIGHTS_VERSION` 6 — the same cell §9's
+  run was taken at. Re-stamped before the freeze if the window moves.
+- **Character:** `kokomi` only, all three archetypes (`priest`, `commander`,
+  `assist`), reported separately and pooled for every graded predicate.
+- **Route / policy / acts:** hunter route, `assigned` policy, realistic, all
+  registered acts, `jobs=1` — §9's run, field for field.
+- **`n`:** **600 runs per archetype, 1,800 total.** §4's figure, unchanged, so
+  the two reads' sample sizes match and a moved number is a moved number
+  rather than a moved denominator.
+- **Seed — [USER] slot.** PROPOSED **23**. It must be a seed this instrument
+  has never run: **11 is spent** (§9) and may not be reused, because a re-read
+  on the graded seed would be the §9.4 subtraction with extra steps.
+- **Cost ceiling — [USER] slot.** PROPOSED **1 hour wall-clock,
+  stop-and-report**, as §4. §9's run took 53 seconds of it.
+- **Command:** `python -m tier05.exp_x9read_s1 --json
+  review/qa/x9read-s2/record.json` at the seed the fill records. The
+  experiment script and the grader are unchanged; only the instrument beneath
+  them is corrected, which is exactly the comparison being made.
+
+### 10.4 The slate — seven slots, re-drafted from §5's written intent
+
+**Every threshold is a literal.** Each slot states (i) the intent it is
+drafted from, which is §5.3's own written intent as corrected by §9.4's
+erratum, (ii) its bands, and (iii) the §9 number as **CONTEXT** — disclosed
+because this slate is drafted with the graded read in hand, and pretending
+otherwise would be the dishonesty R212's *re-draft and disclose* clause exists
+to prevent. **A context number is not a prediction and grades nothing.**
+
+**THE ERRATUM THAT MOVES THE INTENT.** §5.0(3) drafted every slot against *a
+floor of one `kurage_pulse` per turn*, on `KURAGE_ALWAYS_ON = True`. §9.4 read
+the conditional: that constant is used only under `C.KURAGE_MEMORY`, which is
+the shipped quarantine `False`, so **there is no per-turn pulse floor at this
+cell**. The jellyfish is the card-summoned one at `KURAGE_DURATION = 1`, and
+74.6% of §9's sampled turns carried no pulse at all. Where a §5.3 slot's
+prediction rested on that floor, the intent below is re-drafted; where it did
+not, the band is carried over unchanged and says so.
+
+| # | slot | the intent, re-drafted | bands, as literals | data source | UNREACHED when | §9 context (grades nothing) |
+|---|---|---|---|---|---|---|
+| `X1b` | **Mean reads per completed turn, pooled.** | **RE-DRAFTED, twice over.** §5.3's *"just above the floor of 1"* rested on a floor that is not there, and the mean it was drafted against also carried the pilot's estimates. With no pulse floor and no deliberation, the typical turn contains no read at all and the mean is carried by the minority of turns that attack into a live Garment. | **≥ 0.30 and < 1.00 = PREDICTED; 1.00 to < 2.00 = SPLIT; ≥ 2.00 or < 0.30 = MISS.** A MISS-LOW is INVALID rather than quiet and is read against `X7b`'s truncation cross-check, exactly as §5.3 rules it. | mean of `charge_reads_turn`.`total` over sampled player turns | fewer than 5,000 sampled player turns | 0.618 as graded; **0.526** implied by §9.4's subtraction |
+| `X2b` | **p90 reads per completed turn, pooled.** | **CARRIED, with its ceiling intact.** §5.1's derived ceiling of 5 is unmoved — all four of its rows were re-verified at this cell — and removing deliberation can only lower a percentile, never raise one. | **≤ 2 = PREDICTED; 3 to 5 = SPLIT; > 5 = MISS.** | p90 of `charge_reads_turn`.`total` | fewer than 5,000 sampled player turns | **2.00**, PREDICTED against §5.3's looser `≤ 3` |
+| `X3b` | **Max reads observed in one turn.** | **CARRIED VERBATIM, and this is the slot the re-read exists to make testable.** §5.3's band was `≤ 8` (base energy 5, doubled-energy envelope 8, 13 at the extreme). §9 returned 15 and that MISS was `EB-242` itself — 14 of those 15 reads were estimates. On the corrected instrument the band measures what it was written to measure: whether a cost-reduction or free-play route multiplies reads. | **≤ 8 = PREDICTED; 9 to 13 = SPLIT; > 13 = MISS.** A MISS is a BACKLOG finding about the ROUTE, filed with its own seed and turn, and is not by itself a Charge finding. | max of `charge_reads_turn`.`total` | never — a max is defined on any non-empty sample | **15** (seed 11, `priest`, run 446, act 2, turn 3 — 14 estimates and one resolution) |
+| `X4b` | **Share of completed-turn reads from `garment`, pooled.** | **RE-DRAFTED.** §5.3 predicted `< 50%` because *"the pulse should carry the plurality"*; with no pulse floor that reasoning is gone, and removing the estimates raises the Garment's share by shrinking the denominator. The band is kept anyway — the Garment is the one reader unbounded within a turn, and `< 50%` is the number that says it is not most of what reads the bank. It is now a genuinely close call and is drafted as one. | **< 50% = PREDICTED; 50% to 65% = SPLIT; > 65% = MISS.** | `garment` ÷ all, both summed from `charge_reads_turn`.`by_source` over completed turns | fewer than 5,000 reads summed across sampled turns' `by_source` | 38.93% as graded; **45.79%** implied by §9.4's subtraction — 4.2 pp inside the band |
+| `X5b` | **Share of completed-turn reads from `bonus_formula`, pooled.** | **CARRIED, and it is the slot `EB-242` most directly moves.** §5.3's intent — three printed riders, one on curve, each needing to be drafted and then drawn, so the smallest source by a distance — was never tested, because three quarters of what the instrument counted here was the pilot pricing cards it did not play. | **< 15% = PREDICTED; 15% to 30% = SPLIT; > 30% = MISS.** | `bonus_formula` ÷ all, from `by_source` over completed turns | fewer than 5,000 reads summed across sampled turns' `by_source` | 19.98% as graded (SPLIT); **5.88%** implied by §9.4's subtraction |
+| `X6b` | **Double-read share of attack plays.** | **CARRIED VERBATIM.** Four independent conditions; §9 returned 0.22% against a `< 5%` band and Limb B missed by 49.78 pp. The estimates are not plays, so the corrected number can only fall or hold — which makes a RISE the informative outcome. | **< 5% of attack plays = PREDICTED; 5% to 15% = SPLIT; > 15% = MISS.** | `charge_read` events segmented by `play` boundaries, never by `card` id | fewer than 1,000 attack plays | **0.22%** (391 of 176,995) |
+| `X7b` | **Direction of the tail against turn number.** | **CARRIED.** The count is play-shaped, not bank-shaped, so it should rise as the bank gate of §5.0(2) opens and then flatten. The estimates were themselves play-shaped, so the corrected gap should hold its direction and narrow. | **Rises and gap < 1.0 = PREDICTED; rises and gap ≥ 1.0 = SPLIT; flat or falls = MISS.** | `charge_reads_turn`.`total` bucketed by `turn`; the §2.1 truncation cross-check reported beside it and graded by nothing | fewer than 2,000 sampled turns at turn number ≥ 6 | turns 1–5 **0.536** → turns 6+ **0.942**, gap **+0.405**, PREDICTED |
+
+**RECORDED AND NOT GRADED**, unchanged from §5.3: `R1` the per-archetype
+tables and the full `mean / p50 / p90 / p99 / max` set, `R2` the same per
+`kind`, `R3` the bank size at read time, `R4` the truncation magnitude. Two
+are added, both descriptive and both grading nothing:
+
+- `R5` **the `card: None` count on `bonus_formula` reads. It must be ZERO.**
+  It is the corrected instrument's own self-check: `card: None` on that source
+  is the signature §9.4 found `EB-242` by, and a non-zero count means the fix
+  is not in the tree that ran. A non-zero `R5` INVALIDATES the read rather
+  than grading any slot.
+- `R6` the `kurage_pulse` share and the count of sampled turns carrying no
+  pulse, which §5.4 requires beside any firing and which §9 reported at
+  41.09% and 74.6%.
+
+### 10.5 `W9` re-evaluated — the point of the cell
+
+**The trigger is `W9` as written at §5.4, unchanged, on the corrected
+instrument.** Nothing about the predicate is re-drafted; the only thing that
+moves is what the instrument counts.
+
+- **Limb A — composition: `garment` + `bonus_formula` `> 50%`** of
+  completed-turn reads, summed from `by_source`. **CONTEXT, grading nothing:
+  §9 graded 58.91%, and §9.4's subtraction implies 51.68% — a margin of
+  +1.68 pp.**
+- **Limb B — the double read `> 50%` of attack plays.** Context: 0.22%.
+- **Severity indicator, gating nothing:** `p50` reads per sampled turn against
+  §5.1's derived ceiling of 5. Context: `p50` 0.00, QUIET.
+- **Reported beside any firing, as §5.4 requires:** the `kurage_pulse` share
+  and the no-pulse turn count (`R6`).
+
+**What a firing does and does not do.** It returns `X9` to [USER] as a
+numbered pick and nothing else — no nerf, no cap, no dedupe, no budget
+(R213 B / R215 B, Guardrail-7). `M69` is already open and already carries
+`W9`'s first firing, so a second firing **updates that row's reading; it does
+not mint a new one**.
+
+**And a non-firing is a real outcome, not a null.** If Limb A comes in at or
+under 50% on a fresh seed with deliberation excluded, then the composition
+`W9` was written to catch was, at this cell, a property of the instrument and
+not of the game — which is the answer `M69` pick (1) describes, reached by
+measurement rather than by assertion.
+
+### 10.6 Blind spots — §5.3's five, restated, plus one this cell adds
+
+The five stand exactly as §9.5 restates them: the §2.1 truncation, the
+pilot-shaped sample, one seat, no balance claim, and the archetypes carrying
+the pooled predicates unevenly (`assist` did not fire Limb A). §9.5's second
+item loses half its bite — the pilot's deliberation is no longer inside the
+tally — and keeps the other half: a human who plays toward the double read can
+only make `X4b` and `X6b` larger, so both remain floors.
+
+**Added, and specific to a re-read:** the two reads share a cell, a sample
+size, a route and a script, and differ in a seed AND an instrument. A
+difference between them therefore cannot be attributed to `EB-242` alone by
+subtraction; the seed moved too. This slate is graded on ITS OWN bands, which
+is why every one of them is a literal, and any sentence comparing the two
+reads' numbers is a remark and not a grade.
+
+### 10.7 Grading and sequencing
+
+**Blind, in §6's fixed order**, unchanged: (1) batch countersign, (2) any
+grader change lands as its own commit before the run — none is expected, the
+grader is unchanged, (3) run, (4) grade blind against §10.4 without editing
+it, (5) the grade updates `M69`'s reading. `R5` is read FIRST and a non-zero
+value stops the grade.
+
+**Sequencing:** after `EB-242` is merged (§10.2) and outside any open freeze,
+on the settle-first plan every queued registration honours. It moves no
+version and opens no window.
+
+## Countersign line for §10 — one word, [USER]: COUNTERSIGN / REVISE / DECLINE
+
+> _unsigned — DRAFTED 2026-08-31, offered for the next batch countersign_

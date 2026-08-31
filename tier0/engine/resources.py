@@ -302,7 +302,12 @@ def note_charge_read(state: CombatState, kind: str,
     (`tier0/pilot/policy.py`, workshop §3.4). Those are estimates of what a
     card is worth, not resolutions -- the same distinction KNOB_READS draws
     at the Garment divisor, where the tick "counts real resolutions, not
-    estimates". An instrument that counted them would report the pilot's
+    estimates". Declared here from the first day and IMPLEMENTED 2026-08-31
+    (EB-242): until then `_bonus_formula` ticked on every call including the
+    pilot's, and 74.96% of the `bonus_formula` reads `X9READ-S1` pooled were
+    deliberation. Both sites now pass `valuation=True`, and the default is the
+    resolve path so a new resolve site cannot opt out by forgetting.
+    An instrument that counted them would report the pilot's
     deliberation as if it were the player's turn.
 
     Threshold reads are also absent, because there are none to skip: the flat
