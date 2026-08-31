@@ -56,9 +56,18 @@ SIZE is a production choice, not a read fact: 256x256, power of two, headroom
 over the shipped 74px energy icon. The scene scales `Control`s, so the author
 at `EB-40` can resize without a re-render.
 
-Usage: python tools/gen_energy_orb_layers.py     # deterministic, no args
+Usage:
+  python tools/gen_energy_orb_layers.py                    # candidates + sheet
+  python tools/gen_energy_orb_layers.py --apply set_a_fontaine   # place a set
+
+RULED 2026-08-30 -- R231 answered QUEUE `M19` with **set A, Fontaine Hydro**,
+which was the register's own default. `--apply` writes that set's five layers to
+`ImageGen/images/furina/ui/energy_orb/` and writes nothing else. The bare run is
+unchanged and still places nothing: production and placement are different acts
+and this file keeps them apart on purpose.
 """
 import math
+import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter
@@ -296,10 +305,15 @@ def write_sheet():
 </style>
 <h1>EB-88 — candidate Hydro orb layer sets for Furina's energy counter</h1>
 <div class="warn">
-<b>PRODUCTION ONLY. No pick is made or implied here</b> — the pick is [USER]'s at QUEUE
-<code>M19</code>, and <code>EB-40</code>'s scene work stays gated behind it. Nothing on this page
-writes to an <code>ImageGen/</code> out-path and there is no <code>art/plan.tsv</code> row, so
-<code>art_process</code> cannot promote any of it.
+<b>RULED — <code>R231</code>, 2026-08-30: <code>M19</code> is <u>SET A, FONTAINE HYDRO</u></b>, which was
+this register's own default. Its five layers are applied to
+<code>ImageGen/images/furina/ui/energy_orb/</code> by
+<code>gen_energy_orb_layers.py --apply set_a_fontaine</code>; B and C stay on the page as the
+record of what the pick was made against. <b>The ART is all that landed.</b>
+<code>EB-40</code>'s scene work — <code>NEnergyCounter</code>'s five <code>GetNode</code>s — is a
+separate act by a different hand and is UNBLOCKED, not done; until it lands these files change
+nothing in-game. The bare run of this script still places nothing, and there is still no
+<code>art/plan.tsv</code> row, so <code>art_process</code> cannot promote any of it.
 <p><b>Two things on this page are inferences, not reads.</b> (1) The layer ROLES — which of the five
 is glow / body / caustic / bezel / gloss — are derived from the <code>NEnergyCounter</code> class
 contract, not copied from the base scene: <code>SlayTheSpire2.pck</code> is <code>GDPC</code> pack
@@ -325,9 +339,73 @@ appears on empty turns only.</p>
 """
 
 
+SHAPES = {"set_a_fontaine": (6, 0), "set_b_opera": (5, 8), "set_c_tidal": (9, 16)}
+
+# --apply's destination. A DIRECTORY of its own under Furina's ui/ namespace,
+# not five loose files beside select_portrait.png, because these five are one
+# indivisible set: the scene stacks them and any one of them alone is not an
+# orb. The subdirectory is also why art_ledger's STALE-OUTPUT sweep stays quiet
+# -- it globs each expected surface's own directory and does not recurse -- and
+# that silence is correct rather than lucky: no C# asks for these paths yet, so
+# there is no expected surface to claim them until EB-40 authors the scene.
+APPLY_DIR = ROOT / "ImageGen" / "images" / "furina" / "ui" / "energy_orb"
+
+# The five filenames this script owns at the out-path. Spelled out rather than
+# derived from LAYERS so art_lint's L11 rot check -- which greps this file for
+# each declared GENERATOR_OWNED basename -- can actually find them.
+APPLIED_FILES = (
+    "layer1_backglow.png",
+    "layer2_body.png",
+    "layer3_caustics.png",
+    "layer4_ring.png",
+    "layer5_gloss.png",
+)
+
+
+def apply_set(slug):
+    """Write ONE set's five layers to the shipping tree. M19's execution.
+
+    Separate from the candidate run and explicitly argued: everything else here
+    is production, and production must never place. This places, so it takes an
+    explicit set slug and refuses anything else -- there is no default and no
+    bare-invocation path into it, which is the same lesson art_process's
+    `--assets` records (a gate is not a batch, and a bare run that promotes
+    every rank 1 is how unruled art reaches the tree).
+
+    ART ONLY. The five PNGs are the whole of what this writes. Wiring them into
+    a scene is `EB-40`, which has to author `NEnergyCounter`'s five `GetNode`s
+    and is a separate act by a different hand; nothing here touches C# or a
+    .tscn, and until that work lands these files change nothing in-game.
+    """
+    match = [s for s in SETS if s[0] == slug]
+    if not match:
+        raise SystemExit(
+            f"--apply: unknown set '{slug}'. Known: "
+            + ", ".join(s[0] for s in SETS))
+    _slug, name, pal, _note = match[0]
+    lobes, petals = SHAPES[slug]
+    layers = build_set(slug, pal, lobes, petals)
+    APPLY_DIR.mkdir(parents=True, exist_ok=True)
+    for _, layer, _, _ in LAYERS:
+        dest = APPLY_DIR / f"{layer}.png"
+        layers[layer].save(dest)
+        print(f"applied: {dest.relative_to(ROOT).as_posix()}")
+    print(f"{len(LAYERS)} layers of '{name}' placed under "
+          f"{APPLY_DIR.relative_to(ROOT).as_posix()}")
+
+
 def main():
+    argv = sys.argv[1:]
+    if argv and argv[0] == "--apply":
+        if len(argv) != 2:
+            raise SystemExit("usage: gen_energy_orb_layers.py --apply <set-slug>")
+        apply_set(argv[1])
+        return
+    if argv:
+        raise SystemExit(
+            "usage: gen_energy_orb_layers.py [--apply <set-slug>]")
     OUT.mkdir(parents=True, exist_ok=True)
-    shapes = {"set_a_fontaine": (6, 0), "set_b_opera": (5, 8), "set_c_tidal": (9, 16)}
+    shapes = SHAPES
     for slug, _name, pal, _note in SETS:
         d = OUT / slug
         d.mkdir(exist_ok=True)
