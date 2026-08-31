@@ -907,11 +907,18 @@ returns to [USER] only when its trigger fires.
   completed player turn; nothing reads the tally back, so it is not a budget and
   cannot become one by accident). Declared blind spot: the sample rides
   `turn_close`, which a turn ending in the last kill or the player's death never
-  reaches, so the truncation is toward the BUSY end. **Trigger:** a reads-per-turn
-  reading or a live playtest shows repeatable reads dominant — "dominant" is not
-  a number yet, and §5.1 of
-  `review/active/charge-reads-per-turn-registration-2026-08-13.md` is the slot
-  that makes it one, and that slot is [USER]'s (BACKLOG `EB-78`).
+  reaches, so the truncation is toward the BUSY end — measured 2026-08-30 at 46
+  turns of 106,907, carrying zero reads between them. **THE TRIGGER HAS FIRED.**
+  `X9READ-S1` was countersigned (R233), run and graded 2026-08-30 at
+  `RT12/D18/P11/C21`: the repeatable readers are **58.91%** of completed-turn
+  reads against `W9` Limb A's `> 50%` (51.68% with `EB-242`'s pilot-estimate
+  reads removed), while the ruled double read lands on **0.22%** of attack plays
+  and Limb B does not fire. The severity indicator is QUIET — `p50` 0 reads per
+  turn, and the pulse floor the slate was drafted against does not exist at this
+  cell (`KURAGE_ALWAYS_ON` is read only under the quarantined `KURAGE_MEMORY`).
+  **`X9` is back with [USER] as QUEUE `M69`**, a numbered pick and nothing else:
+  the read nerfs, caps, dedupes and budgets nothing (packet §9; `EB-78` closed
+  on it).
 
 (Migrated from the retired watch-items docket, frozen at tag
 `pre-simplification-2026-08-06`; `W5` added 2026-08-10, `W6`–`W8` at `EB-69`

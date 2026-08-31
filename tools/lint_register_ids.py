@@ -279,7 +279,10 @@ CEILINGS: dict[str, int] = {
     # EB-241 minted 2026-08-30 by R231 A3: `Card.is_junk` is rarity-only,
     # and the fix is scheduled AT the Kokomi fold because it moves shipped
     # numbers and rides the fold's already-required re-baseline.
-    "EB": 241,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-242 minted 2026-08-30 by the X9READ-S1 graded read: the
+    # reads-per-turn instrument tallies the pilot's valuation calls as reads
+    # (packet §9.4), which §2 declares it does not do.
+    "EB": 242,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -529,7 +532,11 @@ CEILINGS: dict[str, int] = {
     # holding round-2 staging since 2026-08-29 without ever reaching this
     # register: the Charge accrual rule. It is a pick between design
     # directions and option (1) amends LAW R80, so it is [USER]'s twice over.
-    "M": 68,     # M62 minted 2026-08-29 by R221 A: the criterion that
+    # M69 minted 2026-08-30 by the X9READ-S1 graded read: `W9` fired on
+    # Limb A (repeatable readers 58.91% of completed-turn reads, and 51.68%
+    # with `EB-242`'s pilot-estimate reads removed), and a firing's whole act
+    # is to return X9 to [USER] as a numbered pick.
+    "M": 69,     # M62 minted 2026-08-29 by R221 A: the criterion that
                  # retires the fresh-Opus control form from every packet of
                  # a blind-QA round to the spot-check rate. The threshold is
                  # a number, so it is [USER]'s.
@@ -600,7 +607,13 @@ CEILINGS: dict[str, int] = {
 OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
         12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
-        74, 78, 80, 83, 84, 116, 128,
+        74, 80, 83, 84, 116, 128,
+        # 78 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word
+        # for word -- "it runs, slate first". `X9READ-S1` was countersigned
+        # (R233), the grader landed with its tests before the run, the run
+        # took 1,800 runs in 53 s of a 1-hour ceiling, and the seven slots
+        # came back 4 PREDICTED / 1 SPLIT / 2 MISS. `W9` fired on Limb A, and
+        # a firing lives in QUEUE (`M69`), not in this row.
         154, 158, 159, 160, 161, 163,
         180, 181, 183, 184,
         189, 191, 193, 194, 195, 196, 197, 198,
@@ -872,6 +885,16 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         240,
         # 241 minted 2026-08-30 by R231 A3, gated on the Kokomi fold.
         241,
+        # 242 minted 2026-08-30 by the X9READ-S1 graded read (packet §9.4):
+        # the reads-per-turn instrument counts the PILOT's estimates as
+        # reads. `pilot/policy.py:439` and `:555` call
+        # `effects._bonus_formula` with no card, and its `_per_charge` branch
+        # ticks `note_charge_read` unconditionally -- so 9,893 of the 13,198
+        # pooled `bonus_formula` reads (74.96%) are deliberation, which §2 of
+        # the packet declares deliberately NOT counted. It is the whole of
+        # `X3`'s MISS (a 15-read turn, 14 of them estimates) and it moves
+        # `X5` and `X1`; the published grades stand as graded (R101b).
+        242,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -930,7 +953,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # published grade standing as graded (R101b); SceneSlots stays at 4 as
     # harmless headroom; and the energy orb takes A Fontaine Hydro, which
     # lifts EB-40's gate. Ceilings never come down.
-    "M": frozenset({13, 26, 45}),
+    # M69 minted 2026-08-30 by the X9READ-S1 graded read and OPEN with its
+    # row: R188's watch trigger fired, so X9 returns as a numbered pick.
+    "M": frozenset({13, 26, 45, 69}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
