@@ -598,7 +598,8 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     and 4), LAW:145 taken as the relayed rewrite (b) with the packet's own
     tightening — "directly" defined, "cheaply repeatable" kept — also
     prospective, so **no `LAW.md` line moved**; and `F1`, `F13`, `F14` at
-    option (2) with the other thirteen at their defaults, Slot 6 kept.
+    option (2) with the other thirteen at their defaults, Slot 6 kept —
+    `F5` has since moved to option (2) on the slot-6 ruling below.
     Her Burst fold is one of R220 B's three, and it is the last of them.
     **SLICE 1 IS BUILT IN THE SIM (2026-08-30, `furina-slice-1`, §11 of the
     packet), behind five flags that all ship OFF.** The core loop, and only
@@ -608,7 +609,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     with the Focus term applied three times, performing is the only thing that
     mints Fanfare, and R228's one-mode priced Spotlight rides along because it
     spends the same buffer. `tier0/engine/furina_reframe.py` holds the flags
-    (module constants, not `constants.py` — §6.1), 47 tests pin both sides of
+    (module constants, not `constants.py` — §6.1), 48 tests pin both sides of
     every leg, and with the flags off the engine is byte-identical to shipped.
     **No stamp moves, nothing is deployed and nothing is measured: turning
     `_MANUAL` or `_METER` on is a `CONSTANTS_VERSION` event and a landed step
@@ -621,12 +622,28 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     reading it. **The sequencing gate stands: nothing implements before Klee
     closes** (R213) is read here as what it says — this is a build, and the
     run still waits its turn.
-    **Slot 6 was probed early and reads CONFIRMED on the arithmetic** (§11.5):
+    **Slot 6 was probed early and read CONFIRMED on the arithmetic** (§11.5):
     on a full stage a deploy over the top gets the identical Evoke plus the
     replacement's performance, two more Fanfare and a still-full stage, for
-    one LESS Encore than the dedicated Evoke card. It returns `F7` and §4.2's
-    full-stage rule to [USER] as ONE numbered pick, and the blind read still
-    owns the half the arithmetic cannot answer.
+    one LESS Encore than the dedicated Evoke card. That returned `F7` and
+    §4.2's full-stage rule to [USER] as ONE numbered pick, and **the slot-6
+    ruling (2026-08-30) took it: the dedicated Evoke now CHOOSES which member
+    it removes (front when the card names nobody), while full-stage deployment
+    goes on automatically evoking the front as the reward for filling the
+    stage.** Encore buys deliberate control; the free route stays free.
+    **A1 IS BUILT** (`furina-a1-evoke-choice`, §11.6): a `member:` ARGUMENT on
+    the shipped `salon_bow` verb — not a new op, so the priced-op set is
+    identical and **no `DRAFTER_VERSION` moves** — inside the same flag family,
+    still all OFF, with a lock proving the deploy path cannot be aimed. `F5`
+    moves from option (1) to (2) and is ANSWERED. Slice 1's tests go 39 → 48
+    and the slot-6 instrument 7 → 11; its arithmetic arm still prints §11.5's
+    published table byte for byte (R101b) and the new arm measures the axis the
+    aim added. **The prediction slate's slots 2, 3 and 6 are REDRAFTED in place
+    against the moved world, each with its disclosure line; slots 1, 4, 5 and 7
+    are byte-identical — and the slate as a whole still AWAITS ITS ONE BATCH
+    COUNTERSIGN, never re-signed** (R212). The blind read still owns the half
+    the arithmetic cannot answer: whether a player can SEE that the aim is
+    worth the Encore.
   - **Build and grading rhythm (facts, not rulings).** CI takes a
     **docs-only fast path** (`tools/ci_changed_paths.py`) and runs pytest
     under xdist with a pip cache — the pytest job is ~3.5 min, from ~5.
