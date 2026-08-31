@@ -307,7 +307,9 @@ CEILINGS: dict[str, int] = {
     # EB-252 minted 2026-08-30 by the role-tempo staleness find: the
     # baseline docs predate the 0.111.0 port, and a clean regen moves
     # floors onto Klee -- so the re-baseline ships disclosed, filed here.
-    "EB": 252,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-253 minted 2026-08-31 by the EB-242 fix: note_fanfare_read has
+    # the same valuation exposure, left for its own disclosed commit.
+    "EB": 253,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -1115,6 +1117,11 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # Klee, so the re-baseline is a disclosed act, not a silent regen
         # (three canon states preserved as dated vault files).
         252,
+        # 253 minted 2026-08-31 by the EB-242 fix: the pilot's fanfare
+        # valuations tick note_fanfare_read through the same helper --
+        # fixed separately because it moves a published measurement's
+        # source; the EB-242 test file pins the exposure.
+        253,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
