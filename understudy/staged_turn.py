@@ -127,7 +127,7 @@ from typing import Any, Sequence
 
 import yaml
 
-from understudy import bridge, face_defects, qa_packet, scenario
+from understudy import adapter, bridge, face_defects, qa_packet, scenario
 
 REPO = Path(__file__).resolve().parents[1]
 TURN_DIR = Path(__file__).resolve().parent / "turns"
@@ -579,7 +579,15 @@ def _parse_forecast(raw: Any) -> list[str]:
 
 # ------------- EB-240: the assumptions the wire can be asked about ---------
 
-EXPECTS_KEYS = ("relics", "hp")
+EXPECTS_KEYS = ("relics", "hp", "intent")
+
+# The two fields an `expects.intent` entry may carry, and the vocabulary is
+# `adapter._intent`'s, not the wire's: `kind` is `attack` or the zero-damage
+# beat every non-damaging telegraph parses to, `amount` is the number the
+# label prints. Written in the board's own existing spelling -- `board:`
+# enemies already carry `intent: {kind: attack, amount: 16}` for the shadow
+# sim -- so a board declares its telegraph in one vocabulary, not two.
+INTENT_KEYS = ("kind", "amount", "times")
 
 
 def _parse_expects(raw: Any) -> dict[str, Any]:
@@ -588,7 +596,7 @@ def _parse_expects(raw: Any) -> dict[str, Any]:
     does: a declaration that is silently reinterpreted is a declaration that
     can be false without anybody being told.
 
-    Two keys, and both are optional inside it:
+    Three keys, and all are optional inside it:
 
       * `relics:` a list of the run's relics by PRINTED NAME, and it means
         EXACTLY that list -- an extra relic on the wire is a mismatch, which
@@ -597,15 +605,25 @@ def _parse_expects(raw: Any) -> dict[str, Any]:
         symbols) to the HP the board expects to READ. It is for a body no
         `set_hp` step writes; a body one does write is checked automatically
         and does not need declaring.
+      * `intent:` a mapping of `who` to the TELEGRAPH the board expects that
+        enemy to be showing -- `{kind: attack, amount: 16}`, `kind` required
+        and the numbers optional (`EB-244`). It is the leg BT3 needed: the
+        encounter is generated from the seed and no staging step writes an
+        intent, so a board is free to say what the enemy is about to do and
+        be wrong, and both BT3 boards were. Declared and not automatic, for
+        the reason relics are: the `board:` mirror's enemy names are the
+        SHADOW SIM's symbols ("Act 1 enemy"), not wire symbols, so there is
+        no name to resolve a mirror against.
     """
     if raw in (None, "", {}):
         return {}
     if not isinstance(raw, dict) or not raw:
         raise TurnError(
             "'expects' is a mapping of wire facts this board asserts -- "
-            "'relics' (a list of printed names, meaning exactly those) and "
-            "'hp' (who -> the HP the board expects to read). Omit it and the "
-            "board asserts nothing a machine can check")
+            "'relics' (a list of printed names, meaning exactly those), "
+            "'hp' (who -> the HP the board expects to read) and 'intent' "
+            "(who -> the telegraph it expects to be showing). Omit it and "
+            "the board asserts nothing a machine can check")
     unknown = sorted(k for k in raw if k not in EXPECTS_KEYS)
     if unknown:
         raise TurnError(
@@ -632,6 +650,40 @@ def _parse_expects(raw: Any) -> dict[str, Any]:
                 "'expects.hp' is a mapping of who -> whole-number HP, e.g. "
                 "{player: 42, first: 55}")
         out["hp"] = {str(k).strip(): int(v) for k, v in hp.items()}
+    if "intent" in raw:
+        intent = raw["intent"]
+        if not isinstance(intent, dict) or not intent or not all(
+                isinstance(k, str) and k.strip() for k in intent):
+            raise TurnError(
+                "'expects.intent' is a mapping of who -> the telegraph the "
+                "board expects, e.g. {first: {kind: attack, amount: 16}}")
+        declared: dict[str, dict[str, Any]] = {}
+        for who, spec in intent.items():
+            if not isinstance(spec, dict) or not spec.get("kind") \
+                    or not isinstance(spec.get("kind"), str) \
+                    or not str(spec["kind"]).strip():
+                raise TurnError(
+                    f"'expects.intent[{who!r}]' needs a 'kind' -- 'attack', "
+                    f"or the zero-damage beat every non-damaging telegraph "
+                    f"reads as; got {spec!r}")
+            unknown = sorted(k for k in spec if k not in INTENT_KEYS)
+            if unknown:
+                raise TurnError(
+                    f"'expects.intent[{who!r}]' knows "
+                    f"{', '.join(INTENT_KEYS)} and nothing else; got "
+                    f"{', '.join(unknown)}. A field nobody reads is an "
+                    f"assumption that looks checked and is not")
+            entry: dict[str, Any] = {"kind": str(spec["kind"]).strip()}
+            for num in ("amount", "times"):
+                if num in spec:
+                    if not isinstance(spec[num], int) \
+                            or isinstance(spec[num], bool):
+                        raise TurnError(
+                            f"'expects.intent[{who!r}].{num}' is a whole "
+                            f"number; got {spec[num]!r}")
+                    entry[num] = int(spec[num])
+            declared[str(who).strip()] = entry
+        out["intent"] = declared
     return out
 
 
@@ -660,6 +712,18 @@ def _declared_hp(turn: StagedTurn) -> dict[str, int]:
     return out
 
 
+def _intent_words(spec: dict[str, Any]) -> str:
+    """One telegraph in the board's own vocabulary: `attack 16`, `attack 7
+    x3`, `block 0`. Only the fields present are spoken, so a declaration by
+    kind alone is quoted back as kind alone."""
+    out = str(spec.get("kind") or "?")
+    if "amount" in spec:
+        out += f" {spec['amount']}"
+    if spec.get("times", 1) not in (None, 1):
+        out += f" x{spec['times']}"
+    return out
+
+
 def wire_assumption_preflight(turn: StagedTurn,
                               state: dict[str, Any]) -> None:
     """`EB-240`. Refuse a staged board whose declared facts are not the wire's.
@@ -681,6 +745,18 @@ def wire_assumption_preflight(turn: StagedTurn,
     step sets -- and a board that declares none is not thereby asserting none,
     it is asserting nothing, which is the state every board written before
     this row is in.
+
+    THE THIRD LEG (`EB-244`) is the enemy's TELEGRAPH, and it is the same
+    class of falsehood on the one fact the first two could not see. The
+    encounter is generated from the seed and no staging step writes an
+    intent, so a board can say what the enemy is about to do and be wrong:
+    both `KLEESPARK-BT3` boards printed "one enemy telegraphing an attack for
+    16" while `t01` drew a Debuff and `t02` an attack for 12. It was causal,
+    not cosmetic -- `t01` holds no Attack, so against a Debuff no intent
+    could change the line, both deciding forms were refused
+    `intent_insensitive`, and `G1`/`G2`/`G4` graded UNREACHED. Declared, like
+    relics, because the `board:` mirror names its enemies in the shadow sim's
+    vocabulary and those names resolve against no wire.
 
     RAISED AT STAGE TIME, ON THE LIVE STATE, so the refusal lands before a
     packet is written, before a reader is paid for and before a grade exists
@@ -720,6 +796,32 @@ def wire_assumption_preflight(turn: StagedTurn,
             problems.append(
                 f"hp: the board declares {who!r} at {amount} and the wire "
                 f"reads {live_hp if live_hp is not None else '(no hp field)'}")
+
+    # EB-244: the telegraph. Read through `adapter._intent`, which is the
+    # parse the pilot and the falsifier already take -- so a board is checked
+    # against the intent the machinery ACTS on, not against a label somebody
+    # transcribed. The printed telegraph is carried into the message as well
+    # (`qa_packet._intent`), because "block 0" is what a Debuff parses to and
+    # is not what the page said.
+    for who, want in sorted((turn.expects.get("intent") or {}).items()):
+        blob = scenario._who_blob(state, who)
+        if not blob:
+            problems.append(
+                f"intent: the board declares {who!r} showing "
+                f"{_intent_words(want)} and the wire has no such creature "
+                f"to read")
+            continue
+        raw = blob.get("intents") or blob.get("intent")
+        live = adapter._intent(raw)[0]
+        if any(live.get(k) != v for k, v in want.items()):
+            printed = qa_packet._intent(raw)
+            shown = ", ".join(x for x in (printed["kind"], printed["label"],
+                                          printed["text"]) if x)
+            problems.append(
+                f"intent: the board declares {who!r} showing "
+                f"{_intent_words(want)} and the wire telegraphs "
+                f"{_intent_words(live)}"
+                + (f" -- the page prints {shown!r}" if shown else ""))
 
     if problems:
         raise TurnError(

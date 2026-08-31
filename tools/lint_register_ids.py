@@ -998,7 +998,23 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # Debuff no intent could change the line, both deciding forms were
         # refused `intent_insensitive`, and G1/G2/G4 all graded UNREACHED --
         # F2 UNREACHED for the fourth round running.
-        244,
+        #
+        # 244 LEFT OPEN_IDS 2026-08-31 with its row, on its acceptance word
+        # for word -- "a board declaring an intent the wire lacks is refused
+        # at stage". `expects:` grew an optional `intent` leg in the style of
+        # the two it had: `{who: {kind: attack, amount: 16}}`, `kind`
+        # required and the numbers optional, refused rather than coerced,
+        # compared through `adapter._intent` so a board is checked against
+        # the parse the pilot and the falsifier already act on, and quoted
+        # back beside the telegraph the page actually printed. Nine cases in
+        # `tier0/tests/test_staged_turn.py`, 7 of them seen to FAIL first --
+        # including BT3's own two committed boards, read and never edited
+        # (R101b), whose mirrored `attack 16` is refused against the Debuff
+        # and the attack for 12 they drew. The two that pass red are the
+        # untouched-behaviour guards: a board declaring no intent is asked
+        # nothing, which is where every board written before this row is.
+        # The row's GATE -- a repaired BT3 round -- is a RUN and is not
+        # discharged here; the leg it was waiting for exists.
         # 245/246 minted 2026-08-30 by KLEESPARK-W5 (packet section 25.6.3).
         # 245: blindplay session asked for a FIGHT RECORD on a card_select
         # observation -- Bag of Tricks' own Choose one mode screen, which is
