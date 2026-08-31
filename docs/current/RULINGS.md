@@ -243,8 +243,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R231 | 2026-08-30 | landed: the sitting slate whole -- slot 6 ruled to a third design, four QUEUE rows closed, two narrowed | `65b2451` |
 | R232 | 2026-08-30 | landed: the costs battery asks the ledger's question now, and the mark stays at 4/6 | `3f5887a` |
 | R233 | 2026-08-30 | landed: the countersign batch, three revised slates signed as one | `0fb6417` |
+| R234 | 2026-08-30 | landed: the companion-cards slate ruled whole, and the program runs parallel | `630234b` |
 
-232 rows over the R1..R233 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 121 from a commit message, 0 unresolved.
+233 rows over the R1..R234 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 122 from a commit message, 0 unresolved.
 
 1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
 
