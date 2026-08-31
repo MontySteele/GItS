@@ -311,8 +311,9 @@ CEILINGS: dict[str, int] = {
     # the same valuation exposure, left for its own disclosed commit.
     # EB-254..EB-258 minted 2026-08-31 by the triage of [USER]'s manual solo
     # Kokomi playtest (`review/active/kokomi-playtest-triage-2026-08-31.md`),
-    # five rows, all OPEN: 254 the Muster keyword prints its -1 with no
-    # duration while four sibling faces print `this turn`; 255 the unlinted
+    # five rows: 254 the Muster keyword printed its -1 with no
+    # duration while four sibling faces print `this turn` (CLOSED
+    # 2026-08-31); 255 the unlinted
     # "every starter card is basic" invariant, false on `an_invitation`
     # (SHIPPED) and `to_the_front` (flagged), contaminating `_committed_share`;
     # 256 an unwinnable-and-unloseable stall is reachable and no instrument
@@ -1141,13 +1142,15 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # source; the EB-242 test file pins the exposure.
         253,
         # 254-258 minted 2026-08-31 by the triage of [USER]'s manual solo
-        # Kokomi playtest, all five OPEN. The world it was played on is the
-        # reason four of them exist: `0.2.1786+proto.dirty` was still
-        # installed, so a manual session ran on a dev build carrying both
-        # prototype arms. 254 the Muster keyword prints "costs 1 less" with
-        # no duration, against four sibling faces that print `this turn` --
-        # the build is `AddThisCombat` and the ruled memory price depends on
-        # that, so the face is what moves, not the number. 255 `draft.py`'s
+        # Kokomi playtest. The world it was played on is the reason four of
+        # them exist: `0.2.1786+proto.dirty` was still installed, so a manual
+        # session ran on a dev build carrying both prototype arms. 254 the
+        # Muster keyword printed "costs 1 less" with no duration, against four
+        # sibling faces that print `this turn` -- the build is
+        # `AddThisCombat` and the ruled memory price depends on that, so the
+        # face was what moved, not the number: CLOSED 2026-08-31, the tip
+        # reads "costs 1 less this combat" and both pins moved with it.
+        # 255 `draft.py`'s
         # "every starter card is basic" is an unchecked comment, false on
         # SHIPPED `an_invitation` and on flagged `to_the_front`, and
         # `_committed_share` excludes by RARITY, so a starter reads back as a
@@ -1157,7 +1160,6 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # package before a measured run or a handoff, and a manual playtest
         # is neither. 258 a second un-golded resource keyword on a face,
         # which also falsifies the generator comment claiming there is one.
-        254,
         255,
         256,
         257,

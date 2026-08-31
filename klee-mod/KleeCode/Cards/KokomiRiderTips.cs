@@ -171,6 +171,21 @@ public static class KokomiRiderTips
     /// cannot leave nine card faces and this definition disagreeing -- which
     /// is exactly the failure mode the restatements had.
     ///
+    /// `EB-254`: THE DISCOUNT NAMES ITS DURATION, and the duration is the
+    /// COMBAT. `KokomiConscript.Recruit` writes the modifier with
+    /// `EnergyCost.AddThisCombat`, the sim twin rewrites `recruit.cost` on the
+    /// combat token itself, and the memory price rule is built on that
+    /// permanence -- a Muster's own -1 counts on the recruit's entry precisely
+    /// because it is NOT a temporary combat discount (packet §11.7). The tip
+    /// shipped the phrase bare while four sibling faces in the same pool print
+    /// "cost 1 less THIS TURN" for a genuinely turn-scoped rider
+    /// (`honor_guard`, `crane_wing`, `friendly_visit`, and `all_hands`, which
+    /// prints the Muster and a `this turn` cost_mod in one sentence), so a
+    /// reader trained by those four read the elision as the same duration.
+    /// `playtest 2026-08-31 B2` is that reader. "this combat" is the game's
+    /// own word for the scope -- `secret_stash` prints "They cost 0 this
+    /// combat" for the same kind of modifier.
+    ///
     /// `EB-214` / R224 item 6 (`M54` pick 1): RULE 1 IS PRINTED HERE, and only
     /// under the flag. The blind run graded `P3` at 0 of 10 turns and 0 of six
     /// Musters naming a Memory consequence -- every Muster target was chosen
@@ -192,7 +207,7 @@ public static class KokomiRiderTips
     /// THE `#if` IS THE WHOLE GUARANTEE. The release build's preprocessed
     /// source for this method is character-for-character what it was, so the
     /// shipped keyword text cannot move; `tier0/tests/test_kurage_base_kit.py`
-    /// and `KokomiKeywordTextTests` pin both halves.
+    /// and `KokomiMusterKeywordTests` pin both halves.
     /// </summary>
     public static IEnumerable<IHoverTip> ForMuster(
         IEnumerable<IHoverTip> inherited, CardModel card)
@@ -203,8 +218,8 @@ public static class KokomiRiderTips
             new LocString(Table, MusterKey + ".title"),
             $"[gold]Muster N[/gold]: transform N cards in your hand into "
           + $"random Inazuma [gold]Companion[/gold] cards. Each costs "
-          + $"{cheaper} less and [gold]Exhausts[/gold]. Kit cards and "
-          + "Companions you already hold are never chosen."
+          + $"{cheaper} less this combat and [gold]Exhausts[/gold]. Kit "
+          + "cards and Companions you already hold are never chosen."
 #if PROTOTYPE_CARDS
           + " A [gold]Muster[/gold] creates a memory of the card it ate, and "
           + "the recruit creates a second when it burns. A memory replays for "

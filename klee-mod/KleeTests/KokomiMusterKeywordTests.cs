@@ -28,16 +28,30 @@ namespace KleeMod.Tests;
 /// </summary>
 public class KokomiMusterKeywordTests
 {
-    /// <summary>The literal chunks of R78's definition, which is what ships.
-    /// Split the way the source splits them so a re-wrap of the source is not
-    /// a false failure, while a WORDING change is a real one.</summary>
+    /// <summary>The literal chunks of R78's definition as `EB-254` amended it,
+    /// which is what ships. Split the way the source splits them so a re-wrap
+    /// of the source is not a false failure, while a WORDING change is a real
+    /// one.
+    ///
+    /// `EB-254` MOVED THE DISCOUNT'S DURATION INTO THE SENTENCE, and that is
+    /// the only thing that moved. The build is `EnergyCost.AddThisCombat`
+    /// (`KokomiConscript.Recruit`), so "this combat" is the true scope; the
+    /// bare phrase was the defect, because four sibling Companion faces print
+    /// "cost 1 less this turn" for a rider that really is turn-scoped and a
+    /// reader took the elision for the same duration
+    /// (`playtest 2026-08-31 B2`).</summary>
     private static readonly string[] Shipped =
     {
         "[gold]Muster N[/gold]: transform N cards in your hand into ",
         "random Inazuma [gold]Companion[/gold] cards. Each costs ",
-        " less and [gold]Exhausts[/gold]. Kit cards and ",
-        "Companions you already hold are never chosen.",
+        " less this combat and [gold]Exhausts[/gold]. Kit ",
+        "cards and Companions you already hold are never chosen.",
     };
+
+    /// <summary>The phrase `EB-254` retired. A pin on the new words alone
+    /// would still pass if somebody re-added the bare clause beside them.
+    /// </summary>
+    private const string Bare = " less and [gold]Exhausts[/gold].";
 
     private static string Blob()
         => string.Concat(Il.Strings(Il.Method("KokomiRiderTips", "ForMuster"))
@@ -51,6 +65,15 @@ public class KokomiMusterKeywordTests
         {
             Assert.Contains(chunk, blob, StringComparison.Ordinal);
         }
+    }
+
+    [Fact]
+    public void The_discount_never_ships_without_its_duration_again()
+    {
+        // `EB-254`, the red half: the keyword's -1 is rest-of-COMBAT and the
+        // sentence must say so. The bare clause is what a reader mistook for
+        // the `this turn` its four siblings print.
+        Assert.DoesNotContain(Bare, Blob(), StringComparison.Ordinal);
     }
 
 #if PROTOTYPE_CARDS

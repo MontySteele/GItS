@@ -734,7 +734,18 @@ def test_five_starter_fights_run_to_completion_under_the_base_kit(base_kit):
 #
 # BOTH SIGNS. The rule must be inside `#if PROTOTYPE_CARDS` -- a release build
 # must not be able to print a sentence about a jellyfish whose type it does
-# not compile -- and the shipped definition must be word for word R78's.
+# not compile -- and the shipped definition must be word for word R78's, as
+# EB-254 amended it.
+#
+# EB-254: THE DISCOUNT NAMES ITS DURATION. The keyword's -1 is written with
+# EnergyCost.AddThisCombat on the C# side and rewrites recruit.cost on the sim
+# side's combat token; neither is a dated modifier, and the memory price rule
+# depends on exactly that permanence (a Muster's own -1 counts on the
+# recruit's entry BECAUSE it is not a temporary combat discount). The tip
+# shipped the clause bare while four sibling Companion faces print "cost 1
+# less this turn" for a rider that really is turn-scoped, and playtest
+# 2026-08-31 B2 read the elision as the same duration. "this combat" is the
+# game's own word for the scope (secret_stash: "They cost 0 this combat").
 # --------------------------------------------------------------------------
 
 TIPS = (
@@ -749,9 +760,14 @@ RULE_ONE = (
 SHIPPED_MUSTER_TEXT = (
     "[gold]Muster N[/gold]: transform N cards in your hand into ",
     "random Inazuma [gold]Companion[/gold] cards. Each costs ",
-    " less and [gold]Exhausts[/gold]. Kit cards and ",
-    "Companions you already hold are never chosen.",
+    " less this combat and [gold]Exhausts[/gold]. Kit ",
+    "cards and Companions you already hold are never chosen.",
 )
+
+# EB-254's red half. A pin on the new words alone would still pass if the bare
+# clause came back beside them, and "no duration" is the defect rather than
+# "wrong duration" -- so the retired phrase is asserted absent by name.
+BARE_DISCOUNT = " less and [gold]Exhausts[/gold]."
 
 
 def _for_muster_body():
@@ -785,8 +801,9 @@ def test_the_muster_keyword_states_the_price_from_the_constant(base_kit):
 
 
 def test_the_shipped_muster_keyword_did_not_move():
-    """THE RELEASE PIN, and it takes no fixture: with the flag off this is the
-    text R78 shipped, and every added word is inside the quarantined span."""
+    """THE RELEASE PIN, and it takes no fixture: with the flag off this is
+    R78's text as EB-254 amended it, and every added word is inside the
+    quarantined span."""
     body = _for_muster_body()
     released = body.replace(_quarantined_span(body), "")
 
@@ -794,3 +811,8 @@ def test_the_shipped_muster_keyword_did_not_move():
         assert chunk in released, chunk
     for phrase in RULE_ONE + ("Charge", "memory"):
         assert phrase not in released, phrase
+
+
+def test_the_muster_discount_never_ships_without_its_duration_again():
+    """EB-254. The -1 is rest-of-COMBAT and the sentence has to say so."""
+    assert BARE_DISCOUNT not in _for_muster_body()
