@@ -7268,6 +7268,146 @@ forbids acting on would be the wrong kind of thrift.
 
 ---
 
+## 25.6 `KLEESPARK-W5` — RUN AND GRADED
+
+**RUN 2026-08-30 on `0.2.1786+proto.dirty`** (game v0.111.0, `public-beta`),
+sealed record `review/qa/blindplay/20260831-022129/record.md`, wire snapshots
+`wire.json` beside it. Run seed `UVPVUS1BVEQ0`, read back off the wire
+(`EB-191`). `arms_granted: KLEEMOD-PROTO_SPARK_MODE_BOMBS`, matched to the
+embark sidecar by run seed. 40 actions, termination `max_actions`, 0 refusals,
+**19 combat pages** carrying a command, forecast asked on all 19 with **0
+answered short**.
+
+**Preconditions, each checked and none assumed.** R225's soak gate green
+(`bounded seed=ZGWG4HHCRZCU actions=52 fights=3 defects=0`, reversibility log
+all REVERTED). The pck contract check empty — the diff from `cc6f323c` over
+every mod and pck source path is empty, so the pack is the one phase 1 built
+and validated. The printed-Spark-price stop rule **checked rather than
+assumed**: the only top-level printed Spark price on any combat page is
+*Ka-pow!* at **1**, which is the sheet's, on every page it appeared; *Bag of
+Tricks* prints its price at the head of a `choose_one` mode, which is R225's
+mode-head clause, and no page disagreed with the sheet. Game lock absent, Steam
+running, the build proven read-only to carry the row before anything was
+granted. Codex meter, unsmoothed: **5h 0% / week 35%** immediately before,
+**5h 1% / week 0% (rolled over, resets Sep 06 22:26)** immediately after.
+
+**Neow.** Three boons were offered — *Kaleidoscope* (obtain 2 card rewards from
+other characters), *Scroll Boxes* (choose 1 of 2 packs of cards to add to your
+Deck) and *Silken Tress* (lose all Gold; enchant all cards in your first card
+reward with Glam). Two rewrite the deck, exactly as §25.3.4 item 5 predicted.
+The operator took **Silken Tress**, the only deck-neutral boon offered, by
+`W4` §19.5's registered rule.
+
+### 25.6.1 The definitions, counted off the wire
+
+| | count | how it was counted |
+|---|---|---|
+| combat pages | **19** | pages of the sealed record whose screen is combat and which carried a command; one `wire.json` snapshot each |
+| pages with *Bag of Tricks* in hand | **5** | snapshots 4, 5, 10, 11, 17 |
+| printed Spark bank on those pages | 1, 2, 0, 2, **4** | the meter row, never a reconstruction |
+| **OPPORTUNITY PAGES** — bank ≥ 3 **and** the card in hand **and** ≥ 1 affordable detonator | **1** | snapshot 17 only (bank 4; Kaboom! 1, Jumpy Dumpty 2, Fish-Flavored Bait 1, Ka-pow! 0 against 3 Energy) |
+| **PRICED-MODE TAKES** | **1** | snapshot 17: the tester chose *"Spend 3 Sparks: place 3 Bombs dealing 5"* on the mode screen, its own command |
+| **FREE-MODE TAKES** (the one-Bomb mode at a bank ≥ 3) | **0** | *Bag of Tricks* was played exactly once in the session |
+| pages carrying a **PRESERVED-SPARK REASON** | **6 of 19** | forecast answers on actions 8, 9, 17, 32, 34, 35 |
+
+### 25.6.2 The slate, graded mechanically
+
+| slot | grade | the reading, and the rule it comes from |
+|---|---|---|
+| `B1` — R230's collapse condition | **UNREACHED** | *"UNREACHED where fewer than 4 opportunity pages occur."* **One** occurred. The floor was written as a floor on purpose — *"two-of-two is not a habit"* — and one-of-one is less than that again. **The collapse did not fire and, on this denominator, could not have.** Per the slot's own words, *"a fight that never posed the question has measured the GENERATOR and not the card"*: nothing is inferred, **no [USER] row opens**, and the act is another fight, not a reading. |
+| `B2` — the one-Spark trade is NAMED | **PREDICTED, threshold 1** | Snapshot 17 is a page where both modes were affordable at a bank of 4, and the tester's own pre-commit answer on that page names what the bank was being kept for and the refund that unties it: *"Keeping the 3 Sparks for later Spark-priced cards; the three detonations should refund them through Pounding Surprise."* Five further pages name it unprompted (actions 8, 9, 17, 34, 35), and the fight record adds the counterfactual in the tester's own words: *"That would have retained the initial Sparks but given up 15 Bomb damage."* The threshold is 1 and the observed count is 6. |
+| `B3` — the up-front liquidity BINDS | **PREDICTED, threshold 1** | The card reached the hand on **5** pages, which clears the denominator rule of 3. On **3** of them the bank stood at 1 or 2 and the priced mode was therefore unavailable (snapshots 4, 5, 11); on a fourth the bank stood at 0. The threshold is 1. R230's *"real liquidity, locked up"* clause is graded live for the first time and it holds: the bank was below the price more often than it was above it. |
+| `B4` — the delayed refund at fight scale | **MISSED** | The falsifier as registered: *"every priced-mode take has a detonator in hand."* The one priced-mode take had **four** affordable Attacks in hand and the refund arrived inside the same turn (snapshot 18's ledger: `Jumpy Dumpty … gains {relic:pounding_surprise/detonation: 3}`, bank 1 → 4). `B4` is UNREACHED only *"where the priced mode is never taken"*, and it was taken, so the falsifier applies and the slot MISSES. **The denominator is one take**, and that is said here rather than argued later. A MISS licenses nothing on its own (§25.4). |
+| `B5` — RECORDED AND NOT GRADED | recorded | **Per-fight peak printed Spark bank: 2, 2, 4** over the session's three fights. **Priced-mode takes 1, free-mode takes 0.** **Pages carrying a preserved-Spark reason: 6 of 19.** Beside `W3`'s 4.0 and `W4`'s 5.5 medians and **NOT a comparison** (§19.2 item 1) — a comparator, never a threshold. |
+
+**The `B1` clauses, read for the record and graded nowhere.** Because a reader
+will ask: clause (ii) held (zero free-mode takes) and clause (iii) **failed** —
+six pages carry a preserved-Spark reason where the collapse requires zero. So
+even had the denominator been reached, clause (iii) alone refuses the collapse.
+**This is written down, not graded**: `B1` is UNREACHED, an UNREACHED slot is
+not a pass and not a fail, and no reading is taken off it. The declared error
+direction bites here exactly as §25.3.3 said it would — asking *what are you
+giving up* on every page makes a preserved-Spark reason easier to produce, so
+clause (iii)'s failure is the weakest of the three observations and the one
+most owed to the channel.
+
+### 25.6.3 THE INSTRUMENT FINDING — the sealed record carries FOUR fight records for THREE fights
+
+The record prints fights 1, 2, 3 and 4. **There were three.** The transcript
+says why, and the tester said it first.
+
+`blindplay session` demanded a fight record on a **`card_select`** observation
+— *Bag of Tricks*' own *Choose one* mode screen, which is the middle of a play
+and not the end of a fight (transcript rows 132–134). The tester wrote a whole
+fight record there, believing the fight had ended, and its item 6 is that
+confusion in full: *"playing Bag of Tricks immediately ended the fight even
+though its printed three Bombs appeared to total only 15 damage against an
+enemy with 44 HP, and I was not shown a mode-selection screen"*. The enemy was
+at 44 HP on snapshot 17 and still at 44 on snapshot 18; the fight ran on for two
+more pages. Its item 6 in the next record names the mechanism directly: *"the
+game asked for a fight record before Bag of Tricks had actually finished
+resolving."*
+
+**What it did and did not touch.** It spent one Codex call on a phantom record
+and put a false end-of-fight in a sealed record (which stands as published,
+R101b — it is annotated here, never rewritten). It did **not** touch a graded
+slot: `B1`–`B5` are counted off `wire.json` snapshots and forecast rows, both
+of which are per-page and complete, and the mode WAS the tester's own free
+choice one row later. **It is `EB-245`.**
+
+**A second thing the same three rows show, and the tester named it too**
+(*"the gold markup was also part of the option's required name"*): the printed
+option name reaches the observation and the command **with its BBCode intact**
+— `choose "Spend 3 [gold]Sparks[/gold]: place 3 [gold]Bombs[/gold] dealing 5"`.
+`understudy/scenario.py` folds those tags out for the staged-turn packet and
+`blindplay`'s own screen render does not, so a blind tester must type markup to
+name a printed choice. **It is `EB-246`.**
+
+### 25.6.4 Contaminations, restated after the fact because they bit
+
+1. **The deck is GRANTED, not drafted.** One copy of the arm's one row
+   (`proto_spark_mode_bombs`) into a Klee starter — the literal reading of
+   *"the arm's rows"*, the registration naming no count. That single copy is
+   the whole of why `B1`'s denominator came in at one: the card reached the
+   hand on five pages and the bank was at or above its price on one of them.
+   **The generator was measured, not the card**, which is `W1'`'s finding and
+   `W3`'s again, and this cell now records it a third time.
+2. **`+proto` build, prototype surface** — nothing here is quotable as balance
+   (R215 B).
+3. ***Pounding Surprise* present by design** (R230), and every income figure is
+   a FLOOR: the ratio cannot see a kit declaration or the relic's
+   per-detonation gain.
+4. **`EB-235` was not folded in.** `proto_true_spark_knight` was not granted
+   and was not drafted; nothing here is evidence about it either way.
+5. **R217 G rides on every sentence the tester wrote** — one model's account,
+   never validation, never balance evidence, never approval.
+
+### 25.6.5 What this leaves
+
+- **R230's collapse condition did not fire, and that is not a pass.** §25.3.1
+  says it in advance: *"a refused collapse decides nothing either — it is the
+  absence of a failure, not a pass, and it does not advance the row to the
+  sheet."* Here it is weaker still, because the condition was UNREACHED rather
+  than refused. **The arm stands exactly where R230 put it. No number moved,
+  no threshold moved, and no [USER] row opens on this cell.**
+- **`B2` and `B3` are the two things this fight did buy**, and they are the two
+  halves of R230's rewritten intent that a staged board could not reach: a
+  player who was not told what to look for named the liquidity in their own
+  words, and the bank was genuinely below the price most of the time the card
+  was in hand. Both are PREDICTED at a threshold of 1 and neither is a balance
+  claim.
+- **`B4` MISSED on a denominator of one take.** What it says is that the one
+  time the priced mode was taken, the hand held a detonator — which is the
+  easy case, not the delayed one. `BT3` was supposed to buy the delayed case
+  off a board and its `G1` is UNREACHED; this fight did not buy it either.
+- **`EB-224` still owes the delayed half.** Two cells were spent on it tonight
+  and neither reached it.
+- **`EB-245` and `EB-246` are minted** — the phantom fight record on a
+  `card_select` screen, and the BBCode leaking into a printed option name.
+  Both are instrument rows and both gate nothing that ran tonight.
+
+---
+
 ## 26. `EB-211` — the `costs` category now costs something, and what it OWES
 
 **Written 2026-08-30 on branch `understudy-instruments-2`. This is instrument

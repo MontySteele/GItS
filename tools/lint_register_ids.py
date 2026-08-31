@@ -291,7 +291,10 @@ CEILINGS: dict[str, int] = {
     # has a relics leg and an hp leg and no intent leg. Both BT3 boards
     # declared a telegraphed attack for 16 and the wire carried a Debuff on
     # t01 and an attack for 12 on t02.
-    "EB": 244,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-245/246 minted 2026-08-30 by the KLEESPARK-W5 whole fight: the
+    # phantom fight record a card_select overlay triggers mid-play, and
+    # the BBCode a printed option name carries into the blind render.
+    "EB": 246,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -969,6 +972,22 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # refused `intent_insensitive`, and G1/G2/G4 all graded UNREACHED --
         # F2 UNREACHED for the fourth round running.
         244,
+        # 245/246 minted 2026-08-30 by KLEESPARK-W5 (packet section 25.6.3).
+        # 245: blindplay session asked for a FIGHT RECORD on a card_select
+        # observation -- Bag of Tricks' own Choose one mode screen, which is
+        # the middle of a play. The sealed record carries FOUR fight records
+        # for THREE fights and the phantom one reports the fight over while
+        # the enemy stood at 44/44; it cost a Codex call and put a falsehood
+        # in a sealed record. It touched no graded slot: B1-B5 are counted off
+        # per-page wire snapshots and forecast rows, and the mode was still the
+        # tester's own free choice one transcript row later.
+        # 246: the printed option name reaches the blind observation AND the
+        # command with its markup intact -- choose "Spend 3 [gold]Sparks[/gold]
+        # : place 3 [gold]Bombs[/gold] dealing 5". scenario.py folds those tags
+        # out for the staged packet and the blind render does not, so one
+        # choice has two printed names. The W5 tester named it unprompted.
+        245,
+        246,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

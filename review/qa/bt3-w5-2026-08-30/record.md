@@ -59,3 +59,46 @@ Identical to the plan §25.2 printed before the round was registered, with the
 spot-check rate at 1 as §25.2 directs (the Codex seat decides every board — a
 DESIGN round under `M64`(1) / R224; fresh-Opus is not seated, the row being
 `authored_by: [claude]`; the local seat sits SHADOW).
+
+## `KLEESPARK-BT3` — RUN, and the grade
+
+Full results at packet §25.5. In one line each: **`G1` UNREACHED** (both
+deciding Codex forms REFUSED `intent_insensitive` — the slot's own rule),
+**`G2` UNREACHED** (its declared subset), **`G3` PREDICTED 2 of 2** (both forms
+carried the forecast; `EB-239`'s repair holds on its second round), **`G4`
+UNREACHED** (`EB-209`). Both boards staged clean on the re-drafted relics.
+
+The refusals are not the graders'. Both boards declared *"one enemy
+telegraphing an attack for 16"*; live, `t01` drew a **Debuff** intent and `t02`
+an attack for **12**. `EB-240`'s `expects:` has no `intent` leg → **`EB-244`**.
+
+Codex: 2 calls of a cap of 6. The pair read was not taken (§25.5.4).
+
+## `KLEESPARK-W5` — RUN, and the grade
+
+Sealed session `20260831-022129`, seed `UVPVUS1BVEQ0`, 40 actions, 19 combat
+pages, forecast channel ON and answered on all 19. Full results at §25.6.
+
+| slot | grade |
+|---|---|
+| `B1` R230's collapse condition | **UNREACHED** — 1 opportunity page against a floor of 4. **The collapse did not fire and could not have.** |
+| `B2` the one-Spark trade NAMED | **PREDICTED** (threshold 1, observed 6) |
+| `B3` the up-front liquidity BINDS | **PREDICTED** (threshold 1, observed 3 of 5 pages the card reached hand) |
+| `B4` the delayed refund at fight scale | **MISSED** on its registered falsifier, denominator one take |
+| `B5` | recorded: peak bank 2 / 2 / 4, priced takes 1, free takes 0, preserved-Spark reasons 6 of 19 |
+
+Preconditions all checked: soak gate `fights=3 defects=0`, pck contract diff
+empty, printed-Spark-price stop rule checked page by page (Ka-pow! 1, the
+sheet's, no disagreement), Neow's only deck-neutral boon (*Silken Tress*) taken
+by the operator per `W4` §19.5.
+
+Minted here: **`EB-245`** (a `card_select` overlay triggers a phantom fight
+record — the sealed record carries FOUR for THREE fights) and **`EB-246`**
+(BBCode leaks into a printed option name). Neither touched a graded slot.
+
+| meter | reading |
+|---|---|
+| before BT3 | 5h 0% (rolled over) / week 28% |
+| after BT3's second deciding read | 5h 0% / week 35% |
+| before W5 | 5h 0% / week 35% |
+| after W5 | 5h 1% / week 0% (rolled over, resets Sep 06 22:26) |
