@@ -297,7 +297,14 @@ CEILINGS: dict[str, int] = {
     # EB-247/248 minted 2026-08-30 by KURAGECAD-W1: the jellyfish's own
     # text disagrees with the pulse it delivers, and the memory's price
     # cannot be derived from the printed face on a discounted entry.
-    "EB": 248,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-249/250/251 minted 2026-08-30 by the register-reconcile pass, which
+    # is where R234 section 5.3 and the companion packet's section 2.6 both
+    # said their engineering would mint -- neither document filed a row, on
+    # purpose, because the id space is not theirs to spend: the two-halved
+    # companion-distinctness gap, the downward-only rarity fallback the
+    # colorless anchor made reachable, and the two Klee Personal Companion
+    # card drafts the ruling owes.
+    "EB": 251,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -1006,6 +1013,39 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # to the queued 3, and the tester said so in those words.
         247,
         248,
+        # 249/250/251 minted 2026-08-30 by the register-reconcile pass, all
+        # three named in writing before the pass and filed nowhere.
+        # 249: `tools/card_distinctness_report.py` is two-halved. Its `SHEETS`
+        # list (`:195-198`) globs `docs/*-cards.yaml` and then appends
+        # `mondstadt-companions.yaml` and nothing else, so Fontaine's and
+        # Inazuma's companion sheets are ABSENT from the instrument's input --
+        # a different failure from the size exemption at `GATE_MIN_POOL = 30`
+        # (`:263`), which is what the packet was reading when it found this.
+        # And there is no taxonomy filter, so adding the sheets alone would
+        # count Personal and `guest_star` rows inside a metric that measures
+        # the DRAFTABLE Universal pool -- Fontaine proves it, three of its
+        # nineteen rows being cameos no player can draft. Neither half bites
+        # today (17/19/15, all exempt); both bite the moment a pool reaches 30,
+        # which is what P4 is for. Companion packet section 2.6; R234 5.3.
+        # 250: `tier05/rewards.py:220` `_RARITY_FALLBACK` is
+        # `{"rare": "uncommon", "uncommon": "common"}` -- a ladder with no rung
+        # under `common`, walked by `while rarity not in pool` at `:251-252`
+        # and `:260-261`. Every pool this repository ships has commons, so the
+        # ladder has always terminated; a colorless-SHAPED pool does not, and
+        # the anchor read off the assembly says why -- 0 commons of 65, and the
+        # base game's own `CardFactory.RollForRarity` falls FORWARD rather than
+        # back precisely because a pool can lack a tier. The row exists because
+        # the anchor made a latent crash reachable, not because anything has
+        # crashed. `docs/current/research/colorless-anchor-2026-08-30.md`.
+        # 251: the two Klee Personal Companion card drafts R234 owes at its
+        # section 5.3 (P2 and P5), 4-star, against P5a's standing bar for a
+        # Rare. Design DRAFTING, which the R212 ladder makes Claude's; the pick
+        # between genuinely different directions, and P5a itself, stay
+        # [USER]'s. It is a row and not a QUEUE line because nothing here asks
+        # him anything yet. Sheet rows are gated on the Burst fold (P3).
+        249,
+        250,
+        251,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
