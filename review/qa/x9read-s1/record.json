@@ -1,0 +1,490 @@
+{
+  "archetypes": [
+    "priest",
+    "commander",
+    "assist"
+  ],
+  "arms": {
+    "assist": {
+      "attack_plays": 52829,
+      "bank_max": {
+        "bonus_formula": 43,
+        "garment": 64,
+        "kurage_pulse": 73
+      },
+      "bank_mean": {
+        "bonus_formula": 4.477528089887641,
+        "garment": 11.84692082111437,
+        "kurage_pulse": 5.862056610533859
+      },
+      "bank_median": {
+        "bonus_formula": 2.0,
+        "garment": 10,
+        "kurage_pulse": 4
+      },
+      "by_act": {
+        "0": {
+          "early_mean": 0.32967565929069415,
+          "late_mean": 0.5733990147783251,
+          "mean": 0.3778156166382875,
+          "turns": 20555
+        },
+        "1": {
+          "early_mean": 0.4742880280739641,
+          "late_mean": 0.9830757910228108,
+          "mean": 0.6108423027550114,
+          "turns": 10127
+        },
+        "2": {
+          "early_mean": 0.7575431034482759,
+          "late_mean": 1.2660098522167487,
+          "mean": 0.8488063660477454,
+          "turns": 1131
+        }
+      },
+      "by_source": {
+        "bonus_formula": 1424,
+        "garment": 5115,
+        "kurage_pulse": 8373
+      },
+      "cell": "kokomi/assist (pilot assist), route hunter, policy assigned, relics + potions, all registered acts",
+      "combats": 5713,
+      "completed_reads": 14912,
+      "double_plays": 31,
+      "double_share": 0.0005867989172613526,
+      "early_mean": 0.38881282216494845,
+      "early_turns": 24832,
+      "gap": 0.3642311543427152,
+      "late_mean": 0.7530439765076636,
+      "late_turns": 6981,
+      "levels": {
+        "max": 9,
+        "mean": 0.46873919466884606,
+        "n": 31813,
+        "p50": 0.0,
+        "p90": 1.0,
+        "p99": 3.0
+      },
+      "per_kind": {
+        "bonus_formula": {
+          "max": 9,
+          "mean": 0.04476157545657436,
+          "n": 31813,
+          "p50": 0.0,
+          "p90": 0.0,
+          "p99": 2.0
+        },
+        "garment": {
+          "max": 5,
+          "mean": 0.16078332757049005,
+          "n": 31813,
+          "p50": 0.0,
+          "p90": 1.0,
+          "p99": 3.0
+        },
+        "kurage_pulse": {
+          "max": 1,
+          "mean": 0.26319429164178165,
+          "n": 31813,
+          "p50": 0.0,
+          "p90": 1.0,
+          "p99": 1.0
+        }
+      },
+      "raw_reads": {
+        "bonus_formula": 1424,
+        "garment": 5115,
+        "kurage_pulse": 8373
+      },
+      "raw_total": 14912,
+      "reads_dropped": 0,
+      "repeatable_share": 0.4385059012875536,
+      "seconds": 15.0,
+      "share": {
+        "bonus_formula": 0.09549356223175966,
+        "garment": 0.343012339055794,
+        "kurage_pulse": 0.5614940987124464
+      },
+      "turns": 31813,
+      "turns_dropped": 12,
+      "turns_opened": 31825,
+      "turns_without_pulse": 23440
+    },
+    "commander": {
+      "attack_plays": 66812,
+      "bank_max": {
+        "bonus_formula": 43,
+        "garment": 67,
+        "kurage_pulse": 57
+      },
+      "bank_mean": {
+        "bonus_formula": 5.428217821782178,
+        "garment": 13.638134851138354,
+        "kurage_pulse": 7.7829813924315285
+      },
+      "bank_median": {
+        "bonus_formula": 3.0,
+        "garment": 12.0,
+        "kurage_pulse": 5.0
+      },
+      "by_act": {
+        "0": {
+          "early_mean": 0.3699631591066083,
+          "late_mean": 0.7000307976593779,
+          "mean": 0.4219409282700422,
+          "turns": 20619
+        },
+        "1": {
+          "early_mean": 0.6994240460763139,
+          "late_mean": 1.140779702970297,
+          "mean": 0.7988706079196877,
+          "turns": 14344
+        },
+        "2": {
+          "early_mean": 1.007094295004434,
+          "late_mean": 1.4223602484472049,
+          "mean": 1.0735038490191209,
+          "turns": 4027
+        }
+      },
+      "by_source": {
+        "bonus_formula": 1212,
+        "garment": 13704,
+        "kurage_pulse": 9566
+      },
+      "cell": "kokomi/commander (pilot commander), route hunter, policy assigned, relics + potions, all registered acts",
+      "combats": 7457,
+      "completed_reads": 24482,
+      "double_plays": 52,
+      "double_share": 0.0007783032988085973,
+      "early_mean": 0.552483760630119,
+      "early_turns": 31867,
+      "gap": 0.4128398389767882,
+      "late_mean": 0.9653235996069072,
+      "late_turns": 7123,
+      "levels": {
+        "max": 10,
+        "mean": 0.6279045909207489,
+        "n": 38990,
+        "p50": 0.0,
+        "p90": 2.0,
+        "p99": 4.0
+      },
+      "per_kind": {
+        "bonus_formula": {
+          "max": 10,
+          "mean": 0.03108489356245191,
+          "n": 38990,
+          "p50": 0.0,
+          "p90": 0.0,
+          "p99": 2.0
+        },
+        "garment": {
+          "max": 5,
+          "mean": 0.35147473711208,
+          "n": 38990,
+          "p50": 0.0,
+          "p90": 2.0,
+          "p99": 3.0
+        },
+        "kurage_pulse": {
+          "max": 1,
+          "mean": 0.245344960246217,
+          "n": 38990,
+          "p50": 0.0,
+          "p90": 1.0,
+          "p99": 1.0
+        }
+      },
+      "raw_reads": {
+        "bonus_formula": 1212,
+        "garment": 13704,
+        "kurage_pulse": 9566
+      },
+      "raw_total": 24482,
+      "reads_dropped": 0,
+      "repeatable_share": 0.6092639490237726,
+      "seconds": 20.6,
+      "share": {
+        "bonus_formula": 0.04950575933338779,
+        "garment": 0.5597581896903848,
+        "kurage_pulse": 0.39073605097622743
+      },
+      "turns": 38990,
+      "turns_dropped": 13,
+      "turns_opened": 39003,
+      "turns_without_pulse": 29424
+    },
+    "priest": {
+      "attack_plays": 57354,
+      "bank_max": {
+        "bonus_formula": 51,
+        "garment": 71,
+        "kurage_pulse": 67
+      },
+      "bank_mean": {
+        "bonus_formula": 6.126680552925582,
+        "garment": 14.734897870491091,
+        "kurage_pulse": 7.810320478001087
+      },
+      "bank_median": {
+        "bonus_formula": 4.0,
+        "garment": 13,
+        "kurage_pulse": 6
+      },
+      "by_act": {
+        "0": {
+          "early_mean": 0.46589984896014874,
+          "late_mean": 0.8219518938346696,
+          "mean": 0.5277231049877587,
+          "turns": 20831
+        },
+        "1": {
+          "early_mean": 0.8642849703155921,
+          "late_mean": 1.3372763993075591,
+          "mean": 0.9897451595622561,
+          "turns": 13067
+        },
+        "2": {
+          "early_mean": 1.23117033603708,
+          "late_mean": 1.4262672811059909,
+          "mean": 1.2703703703703704,
+          "turns": 2160
+        }
+      },
+      "by_source": {
+        "bonus_formula": 10562,
+        "garment": 6903,
+        "kurage_pulse": 9205
+      },
+      "cell": "kokomi/priest (pilot priest), route hunter, policy assigned, relics + potions, all registered acts",
+      "combats": 6575,
+      "completed_reads": 26670,
+      "double_plays": 308,
+      "double_share": 0.005370157268891446,
+      "early_mean": 0.6461931957534774,
+      "early_turns": 28541,
+      "gap": 0.4482593784117481,
+      "late_mean": 1.0944525741652256,
+      "late_turns": 7517,
+      "levels": {
+        "max": 15,
+        "mean": 0.7396416883909257,
+        "n": 36058,
+        "p50": 0.0,
+        "p90": 2.0,
+        "p99": 5.0
+      },
+      "per_kind": {
+        "bonus_formula": {
+          "max": 15,
+          "mean": 0.29291696710854737,
+          "n": 36058,
+          "p50": 0.0,
+          "p90": 1.0,
+          "p99": 4.0
+        },
+        "garment": {
+          "max": 5,
+          "mean": 0.19144156636530035,
+          "n": 36058,
+          "p50": 0.0,
+          "p90": 1.0,
+          "p99": 3.0
+        },
+        "kurage_pulse": {
+          "max": 1,
+          "mean": 0.25528315491707804,
+          "n": 36058,
+          "p50": 0.0,
+          "p90": 1.0,
+          "p99": 1.0
+        }
+      },
+      "raw_reads": {
+        "bonus_formula": 10562,
+        "garment": 6903,
+        "kurage_pulse": 9205
+      },
+      "raw_total": 26670,
+      "reads_dropped": 0,
+      "repeatable_share": 0.6548556430446194,
+      "seconds": 17.2,
+      "share": {
+        "bonus_formula": 0.3960254968128984,
+        "garment": 0.258830146231721,
+        "kurage_pulse": 0.3451443569553806
+      },
+      "turns": 36058,
+      "turns_dropped": 21,
+      "turns_opened": 36079,
+      "turns_without_pulse": 26853
+    }
+  },
+  "grades": [
+    {
+      "grade": "MISS",
+      "read": "mean 0.618 reads per turn over 106861 sampled player turns",
+      "slot": "X1",
+      "threshold": ">= 1.0 and < 2.0 PREDICTED; 2.0 to < 3.0 SPLIT; >= 3.0 or < 1.0 MISS"
+    },
+    {
+      "grade": "PREDICTED",
+      "read": "p90 2.00 reads per turn",
+      "slot": "X2",
+      "threshold": "<= 3 PREDICTED; 4 to 5 SPLIT; > 5 MISS"
+    },
+    {
+      "grade": "MISS",
+      "read": "max 15 reads in one turn",
+      "slot": "X3",
+      "threshold": "<= 8 PREDICTED; 9 to 13 SPLIT; > 13 MISS"
+    },
+    {
+      "grade": "PREDICTED",
+      "read": "garment 38.93% of 66064 completed-turn reads",
+      "slot": "X4",
+      "threshold": "< 50% PREDICTED; 50-65% SPLIT; > 65% MISS"
+    },
+    {
+      "grade": "SPLIT",
+      "read": "bonus_formula 19.98% of 66064 completed-turn reads",
+      "slot": "X5",
+      "threshold": "< 15% PREDICTED; 15-30% SPLIT; > 30% MISS"
+    },
+    {
+      "grade": "PREDICTED",
+      "read": "391 of 176995 attack plays carry both reads (0.22%)",
+      "slot": "X6",
+      "threshold": "< 5% PREDICTED; 5-15% SPLIT; > 15% MISS"
+    },
+    {
+      "grade": "PREDICTED",
+      "read": "turns 1-5 mean 0.536 (n=85240) -> turns 6+ mean 0.942 (n=21621); gap +0.405",
+      "slot": "X7",
+      "threshold": "rises and gap < 1.0 PREDICTED; rises and gap >= 1.0 SPLIT; flat or falls MISS"
+    }
+  ],
+  "packet": "review/active/charge-reads-per-turn-registration-2026-08-13.md \u00a75",
+  "pooled": {
+    "attack_plays": 176995,
+    "bank_max": {
+      "bonus_formula": 51,
+      "garment": 71,
+      "kurage_pulse": 73
+    },
+    "bank_mean": {
+      "bonus_formula": 5.884603727837551,
+      "garment": 13.57627711686494,
+      "kurage_pulse": 7.199712643678161
+    },
+    "bank_median": {
+      "bonus_formula": 4.0,
+      "garment": 12.0,
+      "kurage_pulse": 5.0
+    },
+    "by_act": {
+      "0": {
+        "early_mean": 0.3892836866936826,
+        "late_mean": 0.6933357744415964,
+        "mean": 0.44285138295298765,
+        "turns": 62005
+      },
+      "1": {
+        "early_mean": 0.6963942820567527,
+        "late_mean": 1.1675870858113848,
+        "mean": 0.8145878842772657,
+        "turns": 37538
+      },
+      "2": {
+        "early_mean": 1.032797747225443,
+        "late_mean": 1.3989071038251366,
+        "mean": 1.096884394643345,
+        "turns": 7318
+      }
+    },
+    "by_source": {
+      "bonus_formula": 13198,
+      "garment": 25722,
+      "kurage_pulse": 27144
+    },
+    "combats": 19745,
+    "completed_reads": 66064,
+    "double_plays": 391,
+    "double_share": 0.0022091019520325433,
+    "early_mean": 0.5361801970905679,
+    "early_turns": 85240,
+    "gap": 0.40549687612528706,
+    "late_mean": 0.9416770732158549,
+    "late_turns": 21621,
+    "levels": {
+      "max": 15,
+      "mean": 0.6182236737443969,
+      "n": 106861,
+      "p50": 0.0,
+      "p90": 2.0,
+      "p99": 4.0
+    },
+    "per_kind": {
+      "bonus_formula": {
+        "max": 15,
+        "mean": 0.1235062370743302,
+        "n": 106861,
+        "p50": 0.0,
+        "p90": 0.0,
+        "p99": 4.0
+      },
+      "garment": {
+        "max": 5,
+        "mean": 0.24070521518608284,
+        "n": 106861,
+        "p50": 0.0,
+        "p90": 1.0,
+        "p99": 3.0
+      },
+      "kurage_pulse": {
+        "max": 1,
+        "mean": 0.2540122214839839,
+        "n": 106861,
+        "p50": 0.0,
+        "p90": 1.0,
+        "p99": 1.0
+      }
+    },
+    "raw_reads": {
+      "bonus_formula": 13198,
+      "garment": 25722,
+      "kurage_pulse": 27144
+    },
+    "raw_total": 66064,
+    "reads_dropped": 0,
+    "repeatable_share": 0.5891256962945023,
+    "seconds": 53.1,
+    "share": {
+      "bonus_formula": 0.19977597481230322,
+      "garment": 0.3893497214821991,
+      "kurage_pulse": 0.4108743037054977
+    },
+    "turns": 106861,
+    "turns_dropped": 46,
+    "turns_opened": 106907,
+    "turns_without_pulse": 79717
+  },
+  "registration": "X9READ-S1",
+  "runs_per_archetype": 600,
+  "seed": 11,
+  "stamp": "RT12/D18/P11/C21",
+  "w9": {
+    "double_share": 0.0022091019520325433,
+    "fired": true,
+    "kurage_pulse_share": 0.4108743037054977,
+    "limb_a": true,
+    "limb_a_margin": 0.08912569629450229,
+    "limb_b": false,
+    "limb_b_margin": -0.49779089804796745,
+    "p50": 0.0,
+    "repeatable_share": 0.5891256962945023,
+    "severity": "quiet",
+    "turns_without_pulse": 79717
+  }
+}

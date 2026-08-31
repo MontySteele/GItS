@@ -1,14 +1,15 @@
-# Charge reads per turn — a descriptive distribution: SLATE DRAFTED, UNRUN
+# Charge reads per turn — a descriptive distribution: RUN AND GRADED
 
-> **STATUS: SLATE DRAFTED. NOT COUNTERSIGNED. UNRUN.** §5 is the slate
-> `X9READ-S1`, **DRAFTED by Claude from written intent under R212(2) and
-> committed before any run**, with §5.4's `W9` watch trigger and its number for
-> *dominant* travelling with it. Nothing in this packet may be run until the
-> **batch countersign** lands — the same gate every registration in
-> `docs/current/EXPERIMENTS.md` sits behind. §4's `n`, seed and cost ceiling are
-> still [USER]'s PROPOSED slots (§5.2).
+> **STATUS: COUNTERSIGNED (R233, 2026-08-30). RUN AND GRADED 2026-08-30 at
+> `RT12/D18/P11/C21`.** §5 is the slate `X9READ-S1`, DRAFTED by Claude from
+> written intent under R212(2) and committed before any run, with §5.4's `W9`
+> watch trigger travelling with it. §4's three PROPOSED slots were
+> countersigned as proposed — 600 runs per archetype, seed 11, a 1-hour
+> stop-and-report ceiling. **§9 is the graded read**, and §5 is unedited by it
+> (R101b). **`W9` FIRED on Limb A**, so a QUEUE row was minted: `M69`.
 >
-> Owner of the countersign: [USER]. Register row: BACKLOG `EB-78` (2).
+> Register rows: BACKLOG `EB-78` (2), CLOSED on this run; QUEUE `M69`;
+> BACKLOG `EB-242`, minted by §9.
 
 ---
 
@@ -455,4 +456,154 @@ world it would be stamped against.
 
 ## Countersign line — one word, [USER]: COUNTERSIGN / REVISE / DECLINE
 
-> **[ ]**
+> **[COUNTERSIGN]** — R233, 2026-08-30, in the three-slate batch, after the
+> narrow revisions the pair review asked for. Five-day veto standing.
+
+---
+
+## 9. The graded read — `X9READ-S1`, 2026-08-30
+
+**Blind, in §6's fixed order.** The countersign landed (R233); the grader
+landed as its own commit with its unit tests and no run of the registered cell
+had been taken (`tier05/charge_telemetry.py`, `tier05/exp_x9read_s1.py`,
+20 tests); then the run; then this grade, compared against §5.3 without editing
+it. §5 is unedited by this section.
+
+**The run.** `python -m tier05.exp_x9read_s1 --json review/qa/x9read-s1/record.json`
+at `RT12/D18/P11/C21`, `kokomi`, hunter route, `assigned` policy, realistic,
+all registered acts, `jobs=1`, seed 11, 600 runs each of `priest`, `commander`
+and `assist` — 1,800 runs, all three arms **COMPLETE**. Wall clock **53
+seconds** against the 1-hour ceiling, so nothing is partial and no slot quotes
+a truncated sample. Raw record: `review/qa/x9read-s1/record.json`, unedited
+stdout and stderr beside it, post-grade diagnostics in
+`review/qa/x9read-s1/diagnostics.txt`.
+
+**What was measured.** 19,745 combats, **106,861 sampled player turns**,
+66,064 reads on completed turns, 176,995 attack plays.
+
+### 9.1 The slate, graded
+
+| # | the number | grade |
+|---|---|---|
+| `X1` | mean **0.618** reads per sampled turn (n=106,861) | **MISS** (low) |
+| `X2` | p90 **2.00** | **PREDICTED** |
+| `X3` | max **15** in one turn | **MISS** |
+| `X4` | `garment` **38.93%** of 66,064 completed-turn reads | **PREDICTED** |
+| `X5` | `bonus_formula` **19.98%** | **SPLIT** |
+| `X6` | **391** of 176,995 attack plays carry both reads — **0.22%** | **PREDICTED** |
+| `X7` | turns 1–5 mean 0.536 (n=85,240) → turns 6+ mean 0.942 (n=21,621), gap **+0.405** | **PREDICTED** |
+
+**4 PREDICTED / 1 SPLIT / 2 MISS / 0 UNREACHED.** Every UNREACHED rule was
+cleared with room: the smallest margin is `X7`'s, at 21,621 late turns against
+a floor of 2,000.
+
+### 9.2 `W9` — **IT FIRED**, on Limb A, alone
+
+- **Limb A — the composition: `garment` + `bonus_formula` = 58.91%** of
+  completed-turn reads, against a threshold of `> 50%`. **FIRES**, margin
+  **+8.91 pp**.
+- **Limb B — the double read: 0.22%** of attack plays against `> 50%`. Does
+  not fire, margin **−49.78 pp**. R188's ruled stack is not the baseline; it
+  is rarer than the slate's own PREDICTED band.
+- **Severity indicator, which gates nothing: `p50` = 0.00** reads per turn,
+  i.e. **QUIET** — far under §5.1's derived ceiling of 5. The median turn of
+  this world contains **no read at all**.
+- **Named beside the firing, as §5.4 requires:** the `kurage_pulse` share is
+  **41.09%**, and **79,717 of 106,861 sampled turns (74.6%) carry no pulse**.
+  The composition IS tipped by an absent summon, and §9.4 says why.
+
+**`W9`'s act is discharged and is the only act taken here:** QUEUE `M69` is
+minted as a numbered pick list. Nothing is nerfed, capped, deduped or
+budgeted, and this section fires nothing else.
+
+### 9.3 `R1`–`R4`, recorded and graded by nothing
+
+**`R1` — per archetype** (pooled predicates can be carried by one arm; blind
+spot 5 said to check, and the check bites):
+
+| arm | turns | mean | p50 | p90 | p99 | max | repeatable | double |
+|---|---|---|---|---|---|---|---|---|
+| `priest` | 36,058 | 0.740 | 0.00 | 2.00 | 5.00 | 15 | **65.49%** | 0.54% |
+| `commander` | 38,990 | 0.628 | 0.00 | 2.00 | 4.00 | 10 | **60.93%** | 0.08% |
+| `assist` | 31,813 | 0.469 | 0.00 | 1.00 | 3.00 | 9 | **43.85%** | 0.06% |
+
+Limb A fires on `priest` and `commander` and does **not** fire on `assist`.
+`X5` is carried by `priest` alone (`bonus_formula` 39.60%, against 4.95% on
+`commander` and 9.55% on `assist`); the pooled SPLIT is one arm's number
+diluted by two.
+
+**`R2` — per kind, per sampled turn:** `kurage_pulse` mean 0.254, p90 1,
+**max 1** (the once-per-turn bound holds exactly); `garment` mean 0.241, p90 1,
+p99 3, max 5; `bonus_formula` mean 0.124, p90 0, p99 4, max 15.
+
+**`R3` — the bank at read time** (a SIZE; no slot grades it, no trigger reads
+it). Median 12 at a `garment` read against 5 at a `kurage_pulse` read; means
+13.58 / 7.20 / 5.88 (`garment` / `kurage_pulse` / `bonus_formula`); maxima 71 /
+73 / 51. The Garment reads a bank more than twice the pulse's, because it is
+an attack-window reader and the window opens late.
+
+**`R4` — the truncation, in turns:** 106,907 turns opened, 106,861 sampled —
+**46 dropped (0.043%)**, and those 46 carried **zero** reads between them. The
+raw `charge_read` stream and the summed completed-turn `by_source` are both
+**66,064**, so `X7`'s cross-check measures a drop of exactly nothing at this
+cell. §2.1's caveat is not retired by that — it is a measurement of this world,
+not a repeal — but no count in §9.1 is meaningfully a floor for the reason
+§2.1 gave.
+
+### 9.4 What the two MISSes mean, read against §5.3's own decision columns
+
+**`X1` MISS is a MISS-LOW, and §5.3 says a MISS-low means "the instrument is
+not seeing the pulse and the read is INVALID, not quiet — see `X7`'s
+cross-check".** The cross-check exonerates the instrument: nothing was
+dropped. The pulse is not being missed; **it is not there.** §5.0(3) drafted
+every slot against a floor of one pulse per turn on the strength of
+`KURAGE_ALWAYS_ON = True`. **Erratum, read off the code after the grade:**
+every use of that constant in the tree is conjoined with `C.KURAGE_MEMORY`
+(`loader.py:939`, `combat.py:1391`, `effects.py:3755`), its own comment says
+*"READ ONLY WHEN KURAGE_MEMORY IS ON"* (`constants.py:700`), and
+`KURAGE_MEMORY = False` is the shipped quarantine (`:695`). The always-on base
+kit is OFF at this cell; the jellyfish is the v0.4 card-summoned one at
+`KURAGE_DURATION = 1`, standing for a single turn per play of `bake_kurage`.
+§5.0(3)'s re-verification read both constants and missed the conditional
+between them. §5.0 stands as written (R101b); this is the correction.
+
+**`X3` MISS is an instrument defect, not the route its decision column
+hypothesised.** The column expected "a cost-reduction or free-play route
+multiplying reads", to be filed in BACKLOG with the run's own seed and turn.
+Filed: **seed 11, `priest`, run index 446, act 2, turn 3 — 15 reads, all
+`bonus_formula`.** The log of that turn (diagnostics §2) shows six reads
+landing **before the turn's first play** and **14 of the 15 carrying
+`card: None`**. A resolution cannot: both engine sites pass the resolving card
+(`effects.py:1085`, `:1212`). `card: None` is the PILOT'S VALUATION path —
+`tier0/pilot/policy.py:439` and `:555` call `effects._bonus_formula` with no
+card, and the `_per_charge` branch (`effects.py:107`) ticks `note_charge_read`
+unconditionally. **§2 declares those two sites deliberately NOT counted:**
+*"Counting them would report deliberation as if it were play."* The instrument
+counts them. That is BACKLOG **`EB-242`**, minted here.
+
+**How far the defect reaches, measured rather than asserted** (diagnostics §3,
+same seed, `bonus_formula` split on whether the read carried a card):
+**9,893 of 13,198 pooled `bonus_formula` reads — 74.96% — are estimates.**
+With them removed, the repeatable share is **51.68%** and **`W9`'s Limb A
+still fires**; the margin falls from +8.91 pp to **+1.68 pp**. `X5` would read
+5.88% (PREDICTED) rather than 19.98% (SPLIT), and `X1`'s mean would fall
+further below its band. **Nothing above is re-graded on those numbers** — the
+grades are what the committed predicates returned on the committed instrument,
+and this paragraph is the disclosure that goes with them.
+
+### 9.5 The five blind spots, restated rather than dropped
+
+1. **§2.1's truncation.** Declared, and measured at this cell: 46 turns,
+   0 reads (`R4`). The shares remain estimates with an unsigned error, not
+   bounds — that is a property of a proportion, not of this sample size.
+2. **Pilot-shaped, not player-shaped.** A human who plays toward the double
+   read can only make `X4` and `X6` larger, so `X6`'s 0.22% is a FLOOR and its
+   PREDICTED is the weakest of the four. The same clause now cuts twice: the
+   pilot's deliberation is also inside the `bonus_formula` tally (`EB-242`).
+3. **One seat, and the sim is not the mod.** No co-op claim and no claim about
+   the C# Kokomi is drawn from any number here.
+4. **No number here is quotable as balance** (R213 B / R215 B, Guardrail-7).
+   This grades no design and fires no nerf; `W9` minted a QUEUE row.
+5. **The three archetypes differ**, and `R1` shows they carried the pooled
+   predicates unevenly — `assist` does not fire Limb A, and `priest` carries
+   `X5` and the maximum turn by itself.

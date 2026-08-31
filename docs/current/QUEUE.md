@@ -30,6 +30,7 @@
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
 | `S4-G6` | **Ask:** declare Kokomi's HP stability band from design intent — never revisable against the playtest that grades it (D5). **Pick:** (1) Claude drafts it from written intent, countersigned before the confirmatory protocol — **RULED (R231)**; (2) at the table; (3) DARK. **Gate:** the exploratory run first, the confirmatory after (R175) | OPEN — mechanism ANSWERED (R231), the band still owed | user-queue §2; `DEC-D5` clauses 2–4; R156; R175; R212; R231 |
+| `M69` | **Ask:** rule on `X9` — `W9` FIRED on Limb A: repeatable readers are **58.91%** of completed-turn reads (**51.68%** without `EB-242`'s pilot reads), both over R188's 50%. Severity QUIET (`p50` 0). **Pick:** (1) R188 STANDS, no read budget; (2) re-read after `EB-242`, then rule — **default**; (3) open a dedupe/cap options packet. **Gate:** `EB-242` for (2) | OPEN — the graded read is in | R188; R233; `charge-reads-per-turn-registration-2026-08-13.md` §5.4, §9 |
 | `S4-G14` | **Ask:** run the Kokomi confirmatory protocol and rule on its written question list — an exploratory run cannot be graded, and this one fills the Answers block. **Eyes-on:** `docs/current/playtest/kokomi-playtest-protocol.md`, question by question. **Gate:** the sequence R175 fixed — post-wave exploratory run → `S4-G6`'s band declaration → this run; plus `EB-53`'s remnant | OPEN — table time | user-queue §2/§7; R115; R152; R175 |
 
 ## 2. Shop, pricing, and money
