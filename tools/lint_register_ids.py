@@ -953,7 +953,21 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # the packet declares deliberately NOT counted. It is the whole of
         # `X3`'s MISS (a 15-read turn, 14 of them estimates) and it moves
         # `X5` and `X1`; the published grades stand as graded (R101b).
-        242,
+        #
+        # 242 LEFT OPEN_IDS 2026-08-31 with its row, on its acceptance word
+        # for word -- "a valuation call tallies nothing, on a test seen to
+        # FAIL". `tier0/tests/test_eb242_valuation_is_not_a_read.py` was seen
+        # to fail 5 of 6 before the fix (the pilot's damage estimate alone
+        # tallied `{'bonus_formula': 1}`) and passes 6 of 6 after.
+        # `_bonus_formula` grew a keyword-only `valuation` flag, DEFAULTING
+        # to the resolve path so a new resolve site cannot opt out by
+        # forgetting, and the two pilot sites (`policy.py` `_expected_damage`
+        # and `_raw_block`) pass `valuation=True`. What a RESOLVED play
+        # tallies is untouched and is pinned by its own case in the same
+        # file, as is the untouched fanfare leg of the same helper -- that
+        # instrument has its own registration and is not in this row's scope.
+        # The published X9READ-S1 grades stand as graded (R101b); the re-read
+        # M69 pick (2) waits on is DRAFTED in the same branch, unrun.
         # 243 minted 2026-08-30 by EB-240's live control: BT3's boards declare
         # a relic pair the wire does not carry on their pinned seed, so the
         # round cannot stage until they are re-drafted (renumbered from
