@@ -307,7 +307,9 @@ CEILINGS: dict[str, int] = {
     # EB-252 minted 2026-08-30 by the role-tempo staleness find: the
     # baseline docs predate the 0.111.0 port, and a clean regen moves
     # floors onto Klee -- so the re-baseline ships disclosed, filed here.
-    "EB": 252,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-253 minted 2026-08-31 by the EB-242 fix: note_fanfare_read has
+    # the same valuation exposure, left for its own disclosed commit.
+    "EB": 253,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -953,7 +955,21 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # the packet declares deliberately NOT counted. It is the whole of
         # `X3`'s MISS (a 15-read turn, 14 of them estimates) and it moves
         # `X5` and `X1`; the published grades stand as graded (R101b).
-        242,
+        #
+        # 242 LEFT OPEN_IDS 2026-08-31 with its row, on its acceptance word
+        # for word -- "a valuation call tallies nothing, on a test seen to
+        # FAIL". `tier0/tests/test_eb242_valuation_is_not_a_read.py` was seen
+        # to fail 5 of 6 before the fix (the pilot's damage estimate alone
+        # tallied `{'bonus_formula': 1}`) and passes 6 of 6 after.
+        # `_bonus_formula` grew a keyword-only `valuation` flag, DEFAULTING
+        # to the resolve path so a new resolve site cannot opt out by
+        # forgetting, and the two pilot sites (`policy.py` `_expected_damage`
+        # and `_raw_block`) pass `valuation=True`. What a RESOLVED play
+        # tallies is untouched and is pinned by its own case in the same
+        # file, as is the untouched fanfare leg of the same helper -- that
+        # instrument has its own registration and is not in this row's scope.
+        # The published X9READ-S1 grades stand as graded (R101b); the re-read
+        # M69 pick (2) waits on is DRAFTED in the same branch, unrun.
         # 243 minted 2026-08-30 by EB-240's live control: BT3's boards declare
         # a relic pair the wire does not carry on their pinned seed, so the
         # round cannot stage until they are re-drafted (renumbered from
@@ -984,7 +1000,23 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # Debuff no intent could change the line, both deciding forms were
         # refused `intent_insensitive`, and G1/G2/G4 all graded UNREACHED --
         # F2 UNREACHED for the fourth round running.
-        244,
+        #
+        # 244 LEFT OPEN_IDS 2026-08-31 with its row, on its acceptance word
+        # for word -- "a board declaring an intent the wire lacks is refused
+        # at stage". `expects:` grew an optional `intent` leg in the style of
+        # the two it had: `{who: {kind: attack, amount: 16}}`, `kind`
+        # required and the numbers optional, refused rather than coerced,
+        # compared through `adapter._intent` so a board is checked against
+        # the parse the pilot and the falsifier already act on, and quoted
+        # back beside the telegraph the page actually printed. Nine cases in
+        # `tier0/tests/test_staged_turn.py`, 7 of them seen to FAIL first --
+        # including BT3's own two committed boards, read and never edited
+        # (R101b), whose mirrored `attack 16` is refused against the Debuff
+        # and the attack for 12 they drew. The two that pass red are the
+        # untouched-behaviour guards: a board declaring no intent is asked
+        # nothing, which is where every board written before this row is.
+        # The row's GATE -- a repaired BT3 round -- is a RUN and is not
+        # discharged here; the leg it was waiting for exists.
         # 245/246 minted 2026-08-30 by KLEESPARK-W5 (packet section 25.6.3).
         # 245: blindplay session asked for a FIGHT RECORD on a card_select
         # observation -- Bag of Tricks' own Choose one mode screen, which is
@@ -1030,6 +1062,23 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # nineteen rows being cameos no player can draft. Neither half bites
         # today (17/19/15, all exempt); both bite the moment a pool reaches 30,
         # which is what P4 is for. Companion packet section 2.6; R234 5.3.
+        #
+        # 249 LEFT OPEN_IDS 2026-08-31 with its row, on its acceptance word
+        # for word -- "three sheets read, Personal and guest-star out". Both
+        # halves seen to FAIL first, together, in
+        # `tier0/tests/test_eb249_distinctness_input.py`: 6 of its 8 cases
+        # failed before the change and all 8 pass after. (a) `SHEETS` globs
+        # `docs/*-companions.yaml` instead of naming one file, so a fourth
+        # nation's sheet arrives on its own. (b) `universal_rows` drops any
+        # row carrying `personal_pool` or `guest_star` -- the loader's own
+        # predicate, stated here because this tool reads sheets and not the
+        # index -- applied after the read, so an unparseable sheet is still
+        # the hard failure it was. Mondstadt reads 16 rather than 17 (Prune),
+        # Fontaine 16 rather than 19 (three cameos), Inazuma 15 whole. All
+        # three are under GATE_MIN_POOL and are skipped by size exactly as
+        # Mondstadt already was; the three character pools are unmoved at
+        # 84/79/76 and the ratified debt is unmoved at klee/uniq,
+        # kokomi/uniq and kokomi/maxclu, each pinned by its own case.
         # 250: `tier05/rewards.py:220` `_RARITY_FALLBACK` is
         # `{"rare": "uncommon", "uncommon": "common"}` -- a ladder with no rung
         # under `common`, walked by `while rarity not in pool` at `:251-252`
@@ -1040,20 +1089,45 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # back precisely because a pool can lack a tier. The row exists because
         # the anchor made a latent crash reachable, not because anything has
         # crashed. `docs/current/research/colorless-anchor-2026-08-30.md`.
+        #
+        # 250 LEFT OPEN_IDS 2026-08-31 with its row, on its acceptance word
+        # for word -- "a commonless pool rolls its offers, on a test seen to
+        # FAIL". `tier05/tests/test_eb250_commonless_pool_rolls.py` was seen
+        # to fail 4 of 6 first, on the row's own `KeyError` raised at
+        # `rewards.py:252`, and passes 6 of 6 after. The ladder now offers a
+        # roll its own tier, then the tiers BELOW in the order they have
+        # always been tried, then the tiers above -- the base game's
+        # fall-forward for the end the downward walk used to run off, and
+        # byte-identical for every pool that already resolved. Down is still
+        # first deliberately: the wrapping walk taken whole would re-point
+        # the reference pools' rare rolls from uncommon to common and move
+        # every archived number taken on them, and two of the six cases pin
+        # exactly that. The `distinct=True` ladder keeps its downward-only
+        # step -- a different question -- with a `seen` set so a resolvable
+        # step forward cannot spin.
         # 251: the two Klee Personal Companion card drafts R234 owes at its
         # section 5.3 (P2 and P5), 4-star, against P5a's standing bar for a
         # Rare. Design DRAFTING, which the R212 ladder makes Claude's; the pick
         # between genuinely different directions, and P5a itself, stay
         # [USER]'s. It is a row and not a QUEUE line because nothing here asks
         # him anything yet. Sheet rows are gated on the Burst fold (P3).
-        249,
-        250,
         251,
         # 252 minted 2026-08-30: the role-tempo baseline predates 0.111.0; a
         # full regen moves floors and reads two NEW coverage findings on
         # Klee, so the re-baseline is a disclosed act, not a silent regen
         # (three canon states preserved as dated vault files).
-        252,
+        #
+        # 252 LEFT OPEN_IDS 2026-08-31 with its row, on its acceptance word
+        # for word -- "the coverage gate green on the 0.111.0 canon". The
+        # re-baseline branch regenerated the canon from the 0.111.0 `sts2.dll`
+        # and re-pinned the two NEW Klee findings the regen reads, each with
+        # its arithmetic said out loud in the debt list's header; the gate
+        # runs 20 findings against 20 pins. The ceiling stays where it is.
+        # 253 minted 2026-08-31 by the EB-242 fix: the pilot's fanfare
+        # valuations tick note_fanfare_read through the same helper --
+        # fixed separately because it moves a published measurement's
+        # source; the EB-242 test file pins the exposure.
+        253,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
