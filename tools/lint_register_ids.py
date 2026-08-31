@@ -937,7 +937,21 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # a relic pair the wire does not carry on their pinned seed, so the
         # round cannot stage until they are re-drafted (renumbered from
         # EB-242 at the fold; X9READ-S1's mint keeps 242).
-        243,
+        #
+        # 243 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word
+        # for word -- "both BT3 boards stage". The gift was read OFF THE WIRE
+        # at both pinned seeds before anything was re-drafted, by staging each
+        # board AS COMMITTED and taking its refusal as the reading: `t01`
+        # (`YX7PB48WR7R4`) carries *Stone Humidifier* and `t02`
+        # (`R805DJ56LZHM`) carries *Scroll Boxes* -- a DIFFERENT gift on each,
+        # so the registered single name assumed a constant the staging path
+        # does not have. Both `expects.relics` blocks were re-drafted to what
+        # is true now with a disclosure line in each board and in the MANIFEST
+        # (R212: a moved world means re-draft and disclose, never re-sign; the
+        # R231 countersign stands and the slate G1-G4 is untouched), the
+        # re-draft was committed BEFORE the round ran, and both boards then
+        # staged clean through the EB-240 preflight. Both `hp.first` legs
+        # (40 and 46) matched the wire unchanged.
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

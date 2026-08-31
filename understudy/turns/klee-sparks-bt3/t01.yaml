@@ -134,10 +134,15 @@ assumptions:
 # `EB-240`. The structured half of the block above -- the facts a machine can
 # compare against the wire, in a shape with one meaning. The stage REFUSES on
 # a mismatch, which is the whole point of declaring them.
+# DISCLOSURE (`EB-243`, R212 re-draft): this block declared "Fishing Rod" when
+# it was registered; the wire at seed `YX7PB48WR7R4` carries "Stone Humidifier"
+# as the run-start gift, so the relic pair is RE-DRAFTED to what is true now
+# and disclosed rather than re-signed. The R231 countersign stands, the slate
+# `G1`-`G4` is untouched, and the `hp.first: 40` leg matched the wire unchanged.
 expects:
   relics:
     - "Pounding Surprise"
-    - "Fishing Rod"
+    - "Stone Humidifier"
   hp:
     first: 40
 

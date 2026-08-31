@@ -106,6 +106,16 @@ printed two assumptions that were false:
   while the page printed **two**, *Pounding Surprise* and *Fishing Rod* (the
   run-start gift the staging path takes; it does nothing in a combat). Both are
   now DECLARED and compared against the wire's relic list.
+  **DISCLOSURE (`EB-243`, R212 re-draft, 2026-08-30).** Both boards registered
+  the gift as *Fishing Rod*; read off the wire before this round ran, the gift
+  is *Stone Humidifier* on `t01`'s seed `YX7PB48WR7R4` and *Scroll Boxes* on
+  `t02`'s seed `R805DJ56LZHM` — a DIFFERENT gift on each, so it is seed-derived
+  and not a constant of the staging path, which is what the single registered
+  name assumed. Both `expects.relics` blocks are **re-drafted to what is true
+  now and the change is disclosed, never re-signed**: the R231 countersign
+  stands, the slate `G1`–`G4` is untouched, no threshold moves, and the
+  `hp.first` legs (40 and 46) matched the wire unchanged. The re-draft was
+  committed BEFORE the round ran.
 - every board wrote `set_hp: {who: first, amount: 55}` and the bodies read
   **45 / 46 / 40**. These boards write **no enemy HP at all**: they declare the
   body the seed is recorded at (40 and 46) and the stage refuses on a different
