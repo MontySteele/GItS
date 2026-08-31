@@ -191,20 +191,28 @@ def test_exactly_two_pools_admit_a_token_layer(censused):
 def test_the_admitted_token_layers_cash_out_through_rares_only(censused):
     """The shape of the two token archetypes canon prints.
 
-    The first: twelve cards name the token, eight make one, and exactly one
-    card reads the count -- a rare. The second (R178): ten name it, six make
-    one, two read it, both rare. Each is as broad as a named power layer in
-    its own pool and cashes out through one or two cards, which is the
+    The first: thirteen cards name the token, nine make one, and exactly one
+    card reads the count -- a rare. The second (R178): eleven name it, six
+    make one, two read it, both rare. Each is as broad as a named power layer
+    in its own pool and cashes out through one or two cards, which is the
     census's headline shape everywhere else too -- and NEITHER prints a common
     payoff, which is the regularity §3.1 rests on.
+
+    RE-BASELINED on sts2.dll 0.111.0 (EB-252, 2026-08-31). The breadth counts
+    were [12, 10] mentions and [8, 6] generators against the 0.107.1 pools;
+    0.111.0 added three printed cards to every canon pool and one of them
+    lands in each layer (the first gains a generator with its mention). The
+    load-bearing half did not move: the payoff rarities are still {rare: 1}
+    and {rare: 2}, so "no common payoff" -- the regularity §3.1 rests on --
+    survives the new world rather than being restated around it.
     """
     layers = sorted(
         (a for blk in censused.values()
          for name, a in blk["archetypes"].items()
          if name.startswith(census.TOKEN_PREFIX)),
         key=lambda a: -a["mentions"])
-    assert [a["mentions"] for a in layers] == [12, 10]
-    assert [a["generators"] for a in layers] == [8, 6]
+    assert [a["mentions"] for a in layers] == [13, 11]
+    assert [a["generators"] for a in layers] == [9, 6]
     assert [a["payoffs_by_rarity"] for a in layers] == [{"rare": 1},
                                                         {"rare": 2}]
     assert {a["kind"] for a in layers} == {"identity"}
