@@ -276,7 +276,10 @@ CEILINGS: dict[str, int] = {
     # integration reproduced and then diagnosed off the quoted save path --
     # it is a cross-SESSION leak, and the standing "rerun the file alone"
     # workaround is the reason nobody had looked.
-    "EB": 240,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-241 minted 2026-08-30 by R231 A3: `Card.is_junk` is rarity-only,
+    # and the fix is scheduled AT the Kokomi fold because it moves shipped
+    # numbers and rides the fold's already-required re-baseline.
+    "EB": 241,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -597,16 +600,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
         12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
         74, 78, 80, 83, 84, 116, 128,
-        154, 158, 159, 160, 161, 163,
-        # EB-162 LEFT OPEN_IDS 2026-08-30 with its row, closed by the art pass:
-        # Dodoco Tales stopped wearing Pounding Surprise's icon. The shortlist
-        # was hunted entirely from material already in art/raw and already
-        # cleared through art/SOURCES.tsv -- no fetch -- and rank 1 was APPLIED
-        # under R212(1), which the row itself delegated ("Claude picks, [USER]
-        # vetoes on the sheet"). Source: Item Dodoco's Bomb-Tastic Adventure,
-        # the in-game picture book "Dodoco Tales" is named for. The sheet is
-        # art/contact_sheet_eb162_dodoco_tales.html, gitignored Tier F, cited
-        # by path. The number is permanently un-re-mintable; the ceiling holds.
+        154, 158, 159, 160, 161, 162, 163,
         180, 181, 183, 184,
         189, 191, 192, 193, 194, 195, 196, 197, 198,
         # 202/203 were minted 2026-08-29 by the KLEESPARK-R1 relayed review
@@ -637,7 +631,11 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 211/212 minted 2026-08-29 by the KLEESPARK-R2 relayed review (packet
         # section 13.8): the battery's costs category passes on silence, and its
         # intent category is self-report.
-        211, 212,
+        # 211 CLOSED 2026-08-30 by R232 and left OPEN_IDS with its row: the
+        # ledger shipped on 2026-08-30, and the re-pick of the six sealed
+        # `costs` boards -- the only thing its acceptance was still waiting on
+        # -- is R232's. The ceiling above holds the number.
+        212,
         # 206 was minted AND CLOSED on 2026-08-29 by the two-instance funnel
         # build -- it left OPEN_IDS in the same commit that closed it, with
         # the ceiling above holding the number so nothing re-takes it.
@@ -864,6 +862,8 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # immediately falsified a printed assumption, and the preflight's
         # assumption check cannot see the wire's relic list.
         240,
+        # 241 minted 2026-08-30 by R231 A3, gated on the Kokomi fold.
+        241,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -916,10 +916,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # the selector aims a Companion and costs Encore. M45(4) is answered with
     # it; M45 itself stays until its other six calls are answered. Ceilings
     # never come down.
-    # M19 LEFT OPEN_IDS 2026-08-30 with its row: R231 answered it with set A
-    # (Fontaine Hydro), the five orb layers are applied, and the number is
-    # permanently un-re-mintable by the act of this deletion.
-    "M": frozenset({10, 13, 14, 16, 26, 45}),
+    # M10, M14, M16 and M19 LEFT OPEN_IDS 2026-08-30 with their rows,
+    # closed by R231: the Fontaine Rares close APPROVED with Neuvillette
+    # shipping as-is; the companion-channel trigger closed as NOISE, the
+    # published grade standing as graded (R101b); SceneSlots stays at 4 as
+    # harmless headroom; and the energy orb takes A Fontaine Hydro, which
+    # lifts EB-40's gate. Ceilings never come down.
+    "M": frozenset({13, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
@@ -927,9 +930,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
 # on these, so there is no ceiling — the set IS the manifest, with the same
 # rot semantics as OPEN_IDS. A retired `S4-G7` is therefore refused the same
 # way a retired `EB-53` would be: it is simply not in here.
+# S4-G11 left this manifest 2026-08-30 with its row, ruled in all three parts
+# by R231: Backstroke KEPT, Tengu Flurry KEPT with `chinowa_ward` renamed
+# `chinju_ward`, and the EB-82 Grave conversion taking the Liyue / Nameless
+# Cairn labels. S4-G6 STAYS -- R231 answered only its MECHANISM.
 OPEN_IRREGULAR: frozenset[str] = frozenset({
     "CC-G1", "CC-G2",
-    "S4-G6", "S4-G11", "S4-G12", "S4-G14", "S4-G17",
+    "S4-G6", "S4-G12", "S4-G14", "S4-G17",
     "SKIP-10.9",
 })
 

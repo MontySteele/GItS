@@ -22,10 +22,13 @@ funnel has actually seen:
     paid and the bank after, scored against the costs and the bank the PACKET
     prints. The second half is `EB-211`: with only the first, a form that
     never mentioned a price PASSED, and a 4-of-6 mark was satisfiable by
-    SILENCE. **The six sealed `costs` items below were picked for the first
-    half and are OWED a re-pick against the second — that is [USER]'s call
-    and it is written up in `review/active/klee-sparks-2026-08-29.md`
-    section 26, not taken here.**
+    SILENCE. **R232 (2026-08-30) then RE-PICKED the six sealed items against
+    the second half.** The picking rule in the battery file is now the
+    LEDGER's question — a printed Energy bank, two DISTINCT non-zero costs
+    jointly payable out of it, and both Spark shapes across the six — and the
+    pre-re-pick six are kept in that same file, labelled and UNSCORED, as the
+    `free-claim-regression` set. **The mark did not move in the same step:
+    R232 kept costs at 4 of 6 so that a failure stays attributable.**
   * **intent** (R213's fourth question) — the enemy's telegraph must be part
     of the decision. Scored with the `intent_insensitive` falsifier itself,
     for the same reason.
@@ -40,8 +43,9 @@ blind spot that returned it (targets, `EB-203`) with the two categories it
 still reads.
 
 WHERE THE BOARDS COME FROM. `understudy/battery/battery.yaml`, and every item
-names a SEALED packet under `review/qa/` from a closed round — `kokomi-slice2`,
-`klee-slice1-r3`, `klee-sparks-r1`. No new board is staged and no game is
+names a SEALED packet under `review/qa/` from a closed round — `kokomi-slice1`,
+`kokomi-slice2`, `klee-slice1-r3`, `klee-sparks-r1` since R232's re-pick
+widened `costs` to a fourth round. No new board is staged and no game is
 launched: a requalification that cost a launch would be run rarely, which is
 the opposite of what it is for. The packets are read-only here; nothing is
 written into a closed turn directory (R101b), and a battery read lands in its
@@ -106,13 +110,44 @@ class Threshold:
         return self.per_category[category]
 
 
+REGRESSION_KEY = "free_claim_regression"
+
+
 def load_battery(path: Path | None = None) -> list[Item]:
+    """The SCORED items, and only those: `items:`, never the regression set.
+
+    R232 (2026-08-30) kept the pre-re-pick `costs` six in the battery file
+    under `free_claim_regression:` and removed them from R223 qualification
+    scoring. THIS FUNCTION IS WHERE "REMOVED FROM SCORING" IS TRUE: it reads
+    one key. `load_regression` is the only other door, and nothing in the
+    qualification path opens it.
+    """
+    return _items_under(path, "items")
+
+
+def load_regression(path: Path | None = None) -> list[Item]:
+    """The `free-claim-regression` set — LABELLED, UNSCORED, R232's.
+
+    The six boards the OLD `costs` rule picked, kept whole because they remain
+    the record's sharpest ones for the FIRST half of `score_costs` (the
+    "X is free" misread, `misreads.free_card_misreads`, still shipped and
+    still checked). A caller that wants them has to ask for them by name, and
+    no caller in the qualification path does.
+    """
+    return _items_under(path, REGRESSION_KEY, optional=True)
+
+
+def _items_under(path: Path | None, section: str,
+                 *, optional: bool = False) -> list[Item]:
     p = Path(path or BATTERY_FILE)
     blob = yaml.safe_load(p.read_text(encoding="utf-8"))
-    if not isinstance(blob, Mapping) or not isinstance(blob.get("items"), list):
-        raise BatteryError(f"{p}: a battery is a mapping with an 'items' list")
+    if optional and isinstance(blob, Mapping) and section not in blob:
+        return []
+    if not isinstance(blob, Mapping) or not isinstance(blob.get(section), list):
+        raise BatteryError(
+            f"{p}: a battery is a mapping with an {section!r} list")
     items: list[Item] = []
-    for i, raw in enumerate(blob["items"]):
+    for i, raw in enumerate(blob[section]):
         if not isinstance(raw, Mapping):
             raise BatteryError(f"{p}: item {i} is a mapping")
         for key in ("id", "category", "turn_id"):

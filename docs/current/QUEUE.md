@@ -29,32 +29,48 @@
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `S4-G6` | **Ask:** declare Kokomi's HP stability band from design intent — never revisable against the playtest that grades it (D5). **Pick:** (1) Claude drafts the band DRAFTED from written design intent and you countersign in batch — **default** (R212(2)); (2) declare it at the table; (3) leave it DARK (`band = None`). **Gate:** the post-wave EXPLORATORY run comes first, the confirmatory protocol run after (R175) | OPEN — declare | user-queue §2; `DEC-D5` clauses 2–4; R156; R175; R212 |
+| `S4-G6` | **Ask:** declare Kokomi's HP stability band from design intent — never revisable against the playtest that grades it (D5). **Pick:** (1) Claude drafts it from written intent, countersigned before the confirmatory protocol — **RULED (R231)**; (2) at the table; (3) DARK. **Gate:** the exploratory run first, the confirmatory after (R175) | OPEN — mechanism ANSWERED (R231), the band still owed | user-queue §2; `DEC-D5` clauses 2–4; R156; R175; R212; R231 |
 | `S4-G14` | **Ask:** run the Kokomi confirmatory protocol and rule on its written question list — an exploratory run cannot be graded, and this one fills the Answers block. **Eyes-on:** `docs/current/playtest/kokomi-playtest-protocol.md`, question by question. **Gate:** the sequence R175 fixed — post-wave exploratory run → `S4-G6`'s band declaration → this run; plus `EB-53`'s remnant | OPEN — table time | user-queue §2/§7; R115; R152; R175 |
 
 ## 2. Shop, pricing, and money
 
-| ID | Decision needed | Status | Provenance |
-|---|---|---|---|
-| `M14` | **Ask:** the companion channel's redesign trigger FIRED — re-price, re-stock, or leave it. **Pick:** (1) noise, close it — **default**: only condition 4 fired, mean Δ −0.07 pp, inside every interval; (2) reopen the design; (3) re-run at n = 2,000. **Context:** 28.6% of offers arrive unaffordable; relic buys run +1.7 pp in companion visits. **Gate:** none; measurement closed | OPEN — design call | R149; R182; graded 2026-08-26 → review/active/shop-rerun-registration-2026-08-10.md §8 |
+**R231 (2026-08-30) closed `M14` at option (1), NOISE.** The published trigger
+result stands exactly as graded (R101b): only condition 4 fired, the mean Δ is
+−0.07 pp with no interval separation and mixed character signs, and a
+narrowly-crossed zero is not grounds for a redesign against a 20.7% slot-one
+purchase rate. The affordability figures stay diagnostic context, not a finding.
+
+**Nothing is open in this section.**
 
 ## 3. Eyes-on reviews and taste
 
+**R231 (2026-08-30) closed three rows out of this section.** `S4-G11`, the
+name/lore eye-read, was ruled in all three parts: *Backstroke* is KEPT (canon
+already supplies *Pressurized Floe* and *Shattering Pressure*, so the invented
+subtitle distinguishes without stealing); *Tengu Flurry* is KEPT and
+`chinowa_ward` is RENAMED **`chinju_ward`**, anchoring to Chinju Forest instead
+of an unexplained real-world ritual term; and the `EB-82` Grave conversion takes
+the Liyue / Nameless Cairn labels. `M16` closed at option (1) — `SceneSlots`
+stays at 4 as harmless headroom. `M19` closed at option (1) — **A Fontaine
+Hydro** for Furina's five-layer energy orb, which lifts `EB-40`'s gate. Two more
+narrowed rather than closed, and stand below.
+
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `S4-G11` | **Ask:** read card names and lore by eye before shipping. **Eyes-on:** (a) *Backstroke* on `freminet_pressurized_floe`, not canon; (b) `EB-83`'s `tengu_flurry` / `chinowa_ward`; (c) the `EB-82` Grave labels. **Pick, (a):** (1) keep; (2) rename — canon is taken by `freminet_shattering_pressure`, and *Backstroke* is load-bearing in two sheets. **Gate:** R179 — prove neither id nor name is read | OPEN — eyes-on | user-queue §2; `tier0/DECISIONS.md` entry 75 + R29d; R157; R184 |
 | `S4-G12` / `CC-G1` / `CC-G2` | **Ask:** approve or veto the twelve Curtain Call faces and the A0 smoke, by eye. **Eyes-on:** the `S4-G12` sheet, regenerated over all six gate rows. The re-hunt set is **FOUR** (`warmup_act`, `crowd_work`, `tempo_change`, `audience_participation`) — `standing_room_only` overturned and `grand_gala` displaced (R166); the A0 smoke is PARTIAL. **Gate:** none; materials produced | OPEN — materials ready | user-queue §2; `review/active/art-runs-2026-08-08.md`; R166 |
 | `S4-G17` | **Ask:** three running-game looks, no full playtest. **Eyes-on:** `AS2-D5` the salon; `AS2-B5` motion and facing taste; `AS2-E2` icon picks (canonical in the Art debt row). **Gate:** none — captures are staged and manifested | OPEN — urgency reduced (hover-targets closed pt.4; B5 "not noticed") | user-queue §2/§7; `docs/animation-sprint-2-plan.md` (B5/D5/E2); `review/active/livegame-captures-2026-08-08.md` |
-| `M16` | **Ask:** `EB-53` capture `C7` is unreachable — Sparks 'n' Splash is Klee-only and Bake-Kurage Kokomi-only, so no creature holds all four end-of-turn sources. **R224 moved the premise:** its item 2 retires *Bake-Kurage* under the re-authoring, leaving three sources and a reachable maximum of two. **Pick:** (1) keep `SceneSlots` at 4 as headroom — **default**; (2) re-spec `C7` to what is reachable. **Gate:** the post-wave playtest (R170) | OPEN — the playtest | `EB-53`; R170; R224 |
 | `M26` | **Ask:** accept or amend the end-of-turn docket by eye (`EB-53` item 17a). **Eyes-on:** does the end of turn read legibly; is the per-seat position doing the attribution work; is the chip's prominence right. Frames in `art/eb52_captures/` and `understudy/logs/frames/`. **Caveat:** no frame isolates the electro (Oz) leg, so the pyro→electro ORDER falls to this look. **Gate:** none — 6 of 9 captures taken | OPEN — eyes-on | BACKLOG `EB-53` §7; live verification 2026-08-08 |
-| S8 + S10 galleries | **Ask:** taste calls on two galleries — eight flagged potions/relics (S8), and enemies that could be reskinned rather than redesigned (S10). **Pick, per flagged body:** (1) RESKIN — **default** where the Genshin body is verified, five of six; (2) REDESIGN. Globe Head's silhouette is unresolved. **Gate:** none; both galleries are written | OPEN — taste | user-queue §4; `dossiers/content/potion-relic-conversion-gallery.md`; `dossiers/remap/reskin-gallery.md` |
-| Art debt | **Ask:** accept or re-hunt the one art pick a rank order cannot settle; everything else ships under R212(1). **Eyes-on:** `grand_gala` r6, provisional. The sigil collision and Kokomi's `Character Details 1` Rare were RULED by R231 and applied. **Gate:** none | OPEN — taste | user-queue §8; `review/active/art-runs-2026-08-08.md`; `art/kokomi-art-pass-requirements.md` §6; R167; R171; R231 |
+| S8 + S10 galleries | **Ask:** one body is left — **Globe Head**, whose silhouette is unresolved. R231 ruled RESKIN for the five verified bodies; execution rides the enemy-remap wave. **Pick:** (1) RESKIN; (2) REDESIGN — no default, the silhouette is the whole question. **Gate:** none; both galleries are written | OPEN — narrowed to Globe Head (R231) | user-queue §4; `dossiers/content/potion-relic-conversion-gallery.md`; `dossiers/remap/reskin-gallery.md`; R231 |
+| Art debt | **Ask:** one pick is left — accept or replace `grand_gala` r6, which is provisional. R231 settled the other two (the sigil collision, and Kokomi's `Character Details 1` exception). **Pick:** (1) accept r6; (2) re-hunt. **Gate:** none | OPEN — narrowed to `grand_gala` r6 (R231) | user-queue §8; `review/active/art-runs-2026-08-08.md`; `art/kokomi-art-pass-requirements.md` §6; R167; R171; R231 |
 
 ## 4. Fontaine Rares close-out
 
-| ID | Decision needed | Status | Provenance |
-|---|---|---|---|
-| `M10` | **Ask:** approve the Fontaine Rares close — the full card review, with the v1.7 lore/naming audit riding on it. **Eyes-on:** the sprint's cards and the v1.7 lore/naming pass. Neuvillette **ships as-is** to unblock and carries a redesign later. **Gate:** none; the `C2` countersign was given (R165). The four companion art picks (Navia / Clorinde / Neuvillette / Arlecchino) now ship under R212(1), veto on the sheet | OPEN — closes on the full card review | user-queue §10; R165; R212 |
+**R231 (2026-08-30) closed `M10`: the Fontaine Rares close is APPROVED**, with
+the v1.7 lore/naming audit riding on it, and **Neuvillette ships as-is**
+carrying its later redesign. The four companion art picks continue to ship
+under R212(1), veto on the sheet.
+
+**Nothing is open in this section.**
 
 ## 5. Post-playtest design calls
 
