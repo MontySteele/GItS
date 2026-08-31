@@ -307,7 +307,22 @@ CEILINGS: dict[str, int] = {
     # EB-252 minted 2026-08-30 by the role-tempo staleness find: the
     # baseline docs predate the 0.111.0 port, and a clean regen moves
     # floors onto Klee -- so the re-baseline ships disclosed, filed here.
-    "EB": 252,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-254..EB-258 minted 2026-08-31 by the triage of [USER]'s manual solo
+    # Kokomi playtest (`review/active/kokomi-playtest-triage-2026-08-31.md`),
+    # five rows, all OPEN: 254 the Muster keyword prints its -1 with no
+    # duration while four sibling faces print `this turn`; 255 the unlinted
+    # "every starter card is basic" invariant, false on `an_invitation`
+    # (SHIPPED) and `to_the_front` (flagged), contaminating `_committed_share`;
+    # 256 an unwinnable-and-unloseable stall is reachable and no instrument
+    # can see it; 257 a dev `+proto` package survives a window teardown into
+    # an unattended manual session with no signal; 258 a second un-golded
+    # resource keyword on a face (SYS-9), plus the comment saying there is
+    # only one. EB-253 IS DELIBERATELY NOT MINTED -- the triage was told to
+    # start at 254, so the ceiling jumps over 253. Rule 5 permits that: it
+    # checks DEFINED ids, so an unissued number below the ceiling is a gap
+    # rather than a finding, and 253 stays available to whatever reserved it,
+    # spendable only by a mint that records itself here like every other.
+    "EB": 258,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -1054,6 +1069,28 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # Klee, so the re-baseline is a disclosed act, not a silent regen
         # (three canon states preserved as dated vault files).
         252,
+        # 254-258 minted 2026-08-31 by the triage of [USER]'s manual solo
+        # Kokomi playtest, all five OPEN. The world it was played on is the
+        # reason four of them exist: `0.2.1786+proto.dirty` was still
+        # installed, so a manual session ran on a dev build carrying both
+        # prototype arms. 254 the Muster keyword prints "costs 1 less" with
+        # no duration, against four sibling faces that print `this turn` --
+        # the build is `AddThisCombat` and the ruled memory price depends on
+        # that, so the face is what moves, not the number. 255 `draft.py`'s
+        # "every starter card is basic" is an unchecked comment, false on
+        # SHIPPED `an_invitation` and on flagged `to_the_front`, and
+        # `_committed_share` excludes by RARITY, so a starter reads back as a
+        # draft. 256 the Gorou/Metallicize stall against the Lagavulin
+        # Matriarch -- unwinnable AND unloseable, and no engine has a
+        # no-progress detector to notice. 257 R217 D restores the release
+        # package before a measured run or a handoff, and a manual playtest
+        # is neither. 258 a second un-golded resource keyword on a face,
+        # which also falsifies the generator comment claiming there is one.
+        254,
+        255,
+        256,
+        257,
+        258,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
