@@ -279,8 +279,16 @@ carried while it was active is in the commit message that retired it.
   `review/active/regret-margin-registration-2026-08-12.md`.
 - **Charge reads per turn (`EB-78`)** — **SLATE DRAFTED, unrun**: §5 is
   `X9READ-S1`, seven slots `X1`–`X7`, and §5.4 is where *repeatable reads
-  dominant* became a number — `p50` > 5 reads per turn AND the repeatable
-  sources > 50% of reads, or the ruled double read > 50% of attack plays.
+  dominant* became a number — the repeatable sources > 50% of the reads counted
+  on completed turns fires by itself (`p50` > 5 reads per turn rides beside a
+  firing as a SEVERITY INDICATOR, not as a condition), or the ruled double read
+  > 50% of attack plays. *Revised 2026-08-30 on the pair review's correction:
+  the level was a mandatory conjunct, and since a firing merely returns the
+  question to [USER] the conjunction carried too much false-negative risk; the
+  share slots and the trigger also moved from raw `charge_read` events to
+  completed turns' `charge_reads_turn`.`by_source`, which the emit already
+  carries. The packet is re-stamped to the live cell, and it is still DRAFTED,
+  unrun and uncountersigned.*
   **Instrument:** `resources.note_charge_read` — emit-only, count-only, tagged
   per source. **Cell:** resolved Charge reads per completed player turn.
   **Status:** descriptive, so it grades no design and cannot on its own fire a
