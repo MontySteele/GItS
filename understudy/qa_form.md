@@ -37,7 +37,12 @@ reads it.
   "q3_what_it_gave_up": "...",
   "q4_different_intent": "...",
   "q4_changed": true,
-  "forecast": ["0", "3", "0"]
+  "forecast": ["0", "3", "0"],
+  "price_ledger": [
+    {"card": "Bake-Kurage", "energy_before": 3, "energy_price": 1,
+     "energy_after": 2, "spark_before": null, "spark_price": null,
+     "spark_after": null}
+  ]
 }
 ```
 
@@ -57,6 +62,30 @@ reads it.
 | `q1`–`q4` | the four answers, in prose |
 | `q4_changed` | the fourth answer as a boolean, so a refusal cannot hinge on parsing prose. `false` REFUSES the form; so does a `q4` that reads as a flat "no" |
 | `forecast` | OPTIONAL, and required only where the packet printed a **Before you decide** block. One answer per numbered question, in that order, written **before** the line is chosen. A board that asks and gets fewer answers than questions is REFUSED `forecast_missing` |
+| `price_ledger` | OPTIONAL to the falsifiers and REQUIRED by the requalification battery (`EB-211`). One entry per play, in the line's order: `energy_before`, `energy_price`, `energy_after`, and the three `spark_*` twins — `null` where the packet prints no such bank. Bookkeeping in the page's own numbers, never a justification |
+
+## The price ledger (`EB-211`)
+
+R223's battery marks a seat on **costs**, and that category used to run one
+check — *did the reader call a priced card free?* — and pass whenever it found
+nothing. A form that never mentioned a price passed it, so the mark was
+satisfiable by **silence**.
+
+So the form carries what the reader spent. One entry per play, in the line's
+order, in the numbers the **packet** prints: the bank that play started with,
+the price on the card, and the bank it left. The chain is the point — entry
+two starts where entry one ended, and entry one starts at the Energy printed
+under **You**. Where the packet prints a Spark bank the three `spark_*` fields
+say the same thing about it; where it prints none they are `null`, because a
+meter the page does not show asked no question.
+
+`understudy/qualify.py`'s `score_costs` scores it against the printed costs and
+the printed bank, and a form with no ledger **FAILS** the category. Everything
+else reads it as optional: no falsifier requires it, `staged_turn.load_form`
+does not look at it, and every form sealed before it existed loads unchanged
+(R101b). The one relaxation is a card whose printed body gives Energy back —
+its `energy_after` may sit above the subtraction, because a printed refund is
+not a reader's arithmetic error.
 
 ## The forecast, where a board asks for one (`EB-236` (d), `EB-229`'s twin)
 

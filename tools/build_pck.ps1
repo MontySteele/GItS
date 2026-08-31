@@ -70,7 +70,37 @@ function Invoke-RepoPython {
     Invoke-NativeCaptured $py @Arguments
 }
 
+# --- EB-154: sweep BOTH MegaDot logs, against an anchored pattern set -------
+# The import log used to be swept with `Select-String 'ERROR'` -- case
+# INSENSITIVE and UNANCHORED, so it matched a path containing "error" and
+# missed every failure Godot reports without an `ERROR:` prefix
+# (`Unrecognized dependency:`, `Failed loading resource`, `Cannot open file`).
+# The export was checked by EXIT CODE ONLY, and Godot's headless exporter
+# reports a missing referenced texture and exits 0: a dropped dependency
+# shipped with the build green.
+#
+# The matching itself lives in `tools/godot_log_sweep.py` and not here,
+# because PS 5.1 semantics cannot be executed from pytest
+# (`test_repo_python_convention.py`) -- a sweep written in PowerShell could
+# only ever be pinned as source text, and what has to be right is the
+# matching. The log is written beside the scratch project so a failed build
+# leaves the evidence on disk.
+function Assert-GodotLogClean {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][object[]]$Log,
+          [Parameter(Mandatory = $true)][ValidateSet('import', 'export')][string]$Stage)
+    $logPath = Join-Path $work "megadot-$Stage.log"
+    [IO.File]::WriteAllText($logPath, ($Log | Out-String))
+    $sweep = Invoke-RepoPython (Join-Path $repo 'tools\godot_log_sweep.py') $logPath --stage $Stage
+    $sweep | Write-Host
+    if ($LASTEXITCODE -ne 0) {
+        throw "MegaDot $Stage reported failures (see $logPath)."
+    }
+}
+
 if (-not (Test-Path $MegaDot)) { throw "MegaDot editor not found at $MegaDot (pass -MegaDot)." }
+# The sweep above always runs, so the venv is a hard requirement of this
+# script rather than of its WebP branch alone.
+if (-not (Test-Path $py))      { throw "No venv python at $py; tools/godot_log_sweep.py cannot run and the import/export logs would go unread." }
 if (-not (Test-Path $src))     { throw "Art source not found at $src." }
 
 # Fresh scratch project every run: stale .godot import caches from a previous
@@ -770,12 +800,14 @@ if ($webp.Count -gt 0) {
 Write-Host "Importing assets (MegaDot headless)..." -ForegroundColor Cyan
 $importLog = Invoke-NativeCaptured $MegaDot --headless --path $work --import
 if ($LASTEXITCODE -ne 0) { $importLog | Write-Host; throw "MegaDot import failed ($LASTEXITCODE)." }
-$importErrors = $importLog | Select-String 'ERROR'
-if ($importErrors) { $importErrors | Write-Host; throw "MegaDot import reported errors." }
+Assert-GodotLogClean -Log $importLog -Stage 'import'
 
 Write-Host "Exporting pack..." -ForegroundColor Cyan
 $exportLog = Invoke-NativeCaptured $MegaDot --headless --path $work --export-pack 'pck' (Join-Path $work 'klee.pck')
 if ($LASTEXITCODE -ne 0) { $exportLog | Write-Host; throw "MegaDot export failed ($LASTEXITCODE)." }
+# The half that was never checked at all: the exporter reports a missing
+# referenced texture and exits 0.
+Assert-GodotLogClean -Log $exportLog -Stage 'export'
 
 $pck = Join-Path $work 'klee.pck'
 if (-not (Test-Path $pck) -or (Get-Item $pck).Length -lt 1024) { throw "Export produced no usable pck at $pck." }

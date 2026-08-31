@@ -257,17 +257,27 @@ internal static class PlayTelemetry
                 // REACTIONS RIDE ALONG, because the counter already exists and
                 // sampling it costs one read (the hand-back's "cheap now"
                 // condition). Measurement only: no reaction constant is
-                // touched by this file. `TotalResolved` is GLOBAL rather than
-                // per-player -- in co-op both seats' reactions land in every
-                // seat's row, and a reader who does not know that would divide
-                // by the wrong denominator.
+                // touched by this file.
+                //
+                // EB-156: this used to sample `ReactionEffects.TotalResolved`,
+                // which is GLOBAL -- deliberately so, and sealed as a RULING
+                // (red-pen 2026-07-26 R1: in co-op your partner's Overload
+                // satisfies your Chevreuse). Sampling it into a PER-SEAT row
+                // was the error, not the counter: both seats' reactions landed
+                // in every seat's row, and a reader dividing by that seat's
+                // turns or cards used the wrong denominator.
+                // `ResolvedThisCombat` is the per-seat counter, keyed the way
+                // BombPower's detonation totals next door are. A dealer-less
+                // reaction belongs to no seat, so the seats' own numbers sum
+                // to at most the team-wide one, never more.
+                var mine = ReactionEffects.ResolvedThisCombat(combat, player);
                 if (record.ReactionsAtStart < 0)
                 {
-                    record.ReactionsAtStart = ReactionEffects.TotalResolved;
+                    record.ReactionsAtStart = mine;
                 }
 
                 record.ReactionsByTurn.Add(new[]
-                    { round, ReactionEffects.TotalResolved - record.ReactionsAtStart });
+                    { round, mine - record.ReactionsAtStart });
                 record.MetersByTurn.Add(new[]
                 {
                     round,

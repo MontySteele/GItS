@@ -96,7 +96,12 @@ def _manifest(**overrides) -> dict:
     return m
 
 
-BASELIB_OK = {"BaseLib": {"id": "BaseLib", "version": "v3.3.8"}}
+# An INSTALLED BaseLib that satisfies the manifest's floor. Raised from
+# v3.3.8 to v3.4.5 by `EB-157`, which reconciled that floor from an
+# unchecked 3.3.6 to the release the repo actually builds against; these
+# arms are about the OTHER findings, so a fixture that trips the BaseLib
+# rule would drown every one of them in the same line.
+BASELIB_OK = {"BaseLib": {"id": "BaseLib", "version": "v3.4.5"}}
 
 
 # --- the version stamp (audit 3.6) -----------------------------------------

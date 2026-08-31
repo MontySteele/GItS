@@ -752,7 +752,34 @@ def form_schema() -> dict[str, Any]:
     is what an omitted one meant, and `staged_turn.forecast_answers` already
     reads a missing `forecast` as the empty list. The field is DECLARED, not
     a loosening -- `additionalProperties` stays `False`.
+
+    `price_ledger` (`EB-211`) is listed on the SAME rule, and it is what makes
+    R223's `costs` category cost something. That category only ever FAILED a
+    positive misread -- `qualify.score_costs` ran the "X is free" check and
+    PASSED on no hits -- so a form that never mentioned a price passed it and
+    a 4-of-6 mark was satisfiable by SILENCE. The ledger is the reader saying,
+    per play, what the bank was, what the play cost, and what the bank became,
+    in the board's own printed numbers, so the category has something to be
+    wrong about. It is nullable so that every sealed form, every replay and
+    every hand-written form still loads unchanged (R101b): only
+    `qualify.score_costs` requires it, and there it is required ABSOLUTELY --
+    a null ledger is the silence this row closes.
     """
+    price = {
+        "type": "object",
+        "properties": {
+            "card": {"type": "string"},
+            "energy_before": {"type": "integer"},
+            "energy_price": {"type": "integer"},
+            "energy_after": {"type": "integer"},
+            "spark_before": {"type": ["integer", "null"]},
+            "spark_price": {"type": ["integer", "null"]},
+            "spark_after": {"type": ["integer", "null"]},
+        },
+        "required": ["card", "energy_before", "energy_price", "energy_after",
+                     "spark_before", "spark_price", "spark_after"],
+        "additionalProperties": False,
+    }
     play = {
         "type": "object",
         "properties": {"card": {"type": "string"},
@@ -785,11 +812,12 @@ def form_schema() -> dict[str, Any]:
             "q4_changed": {"type": "boolean"},
             "forecast": {"type": ["array", "null"],
                          "items": {"type": "string"}},
+            "price_ledger": {"type": ["array", "null"], "items": price},
         },
         "required": ["turn_id", "packet_sha256", "grader", "chosen_line",
                      "q1_what_did_you_play", "q2_other_line_considered",
                      "q3_what_it_gave_up", "q4_different_intent",
-                     "q4_changed", "forecast"],
+                     "q4_changed", "forecast", "price_ledger"],
         "additionalProperties": False,
     }
 

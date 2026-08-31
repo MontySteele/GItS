@@ -13,7 +13,8 @@ import copy
 from typing import Optional, Sequence
 
 from tier0 import constants as C
-from tier0.engine import powers, reactions, resources, statuses
+from tier0.engine import (furina_reframe, powers, reactions, resources,
+                          statuses)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy, KurageMemory,
                                 grant_sly_autoplay,
@@ -634,6 +635,13 @@ def center_stage_active(state: CombatState, card: Card) -> bool:
     card is ICharacterCard { CharacterId: "furina" }`.
     """
     p = state.player
+    if furina_reframe.spotlight_active(p):
+        # R228 (1): Center Stage retires, so its half is False everywhere --
+        # including under the upgraded relic, which is why this test sits
+        # ABOVE the both-modes branch. "Both modes at once" is meaningless
+        # with one mode, and the relic's re-authoring is deferred with the
+        # rest of the sheet work (§11).
+        return False
     if both_spotlight_modes(state):
         return bool(p.character_id and card.character == p.character_id)
     return p.spotlight == p.character_id
@@ -1391,9 +1399,21 @@ def _op_energy(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("energy", amount=amount)
 
 
-def _salon_amount(state: CombatState, base: int, note: bool = True) -> int:
+def _salon_amount(state: CombatState, base: int, note: bool = True,
+                  focus_mult: int = 1) -> int:
     """A Salon member numeric amount (Salon v2): base + the Fanfare Focus
     term (+1 per SALON_FOCUS_PER held, read live) + Grand Salon.
+
+    `focus_mult` is the Furina reframe's `F6` (1) shape, and it is 1 on every
+    shipped path: an Evoke applies the SAME Focus term N times, so there is
+    one divisor and one number on screen and the face can print "x N". The
+    multiplier lands on the Focus term ALONE and never on the printed base --
+    that is what makes it "much stronger Fanfare scaling" rather than a bigger
+    card. The prospective scaling invariant (packet §3.1 amendment 4,
+    countersigned PROSPECTIVE by R224) is satisfied structurally here and not
+    by discipline: this function is reached only from a member's damage and
+    Block, so Chevalmarin's Encore refund and an aura's stack count have no
+    path to the Focus term, multiplied or not.
 
     `note=False` returns the SAME number without filing the `fanfare_read`
     census row (EB-144). It exists for the pilot, which forecasts what a
@@ -1413,24 +1433,37 @@ def _salon_amount(state: CombatState, base: int, note: bool = True) -> int:
     # Clamped: a negative meter must not chip the stage. Negative member
     # ticks are the exact reading that would look like a bug rather than a
     # cost (Track C.2, PROPOSED semantics, flagged for review).
-    focus = resources.readable(p) // C.SALON_FOCUS_PER
+    focus = (resources.readable(p) // C.SALON_FOCUS_PER) * focus_mult
     return base + focus + p.powers.get("salon_damage_up", 0)
 
 
-def _salon_bow(state: CombatState, member: str) -> None:
+def _salon_bow(state: CombatState, member: str, evoked: bool = False) -> None:
     """The displaced member's final bow (Salon v2, rework plan §1): its
     UNIQUE payoff. No Encore upkeep, Focus/Grand-Salon scaled numerics,
-    feeds the Burst meter like a tick."""
+    feeds the Burst meter like a tick.
+
+    `evoked=True` is the Furina reframe's EVOKE (§4.4), and it changes exactly
+    two things: the Focus term is applied `EVOKE_FOCUS_MULT` times instead of
+    once (`F6` (1)), and the performance mints the larger Fanfare amount
+    (§4.1). Everything else about a bow -- which end of the queue it takes,
+    the aura, the Encore refund, the riders -- is the shipped bow, because the
+    packet's own §2.2 finding is that the bow ALREADY IS the Defect-evoke
+    analogue and the reframe renames it rather than rebuilding it. Both
+    changes are inert unless `FURINA_REFRAME_EVOKE` / `_METER` are on, so an
+    `evoked=True` call on a release build is the shipped bow exactly.
+    """
     p = state.player
     spec = C.SALON_MEMBERS[member]["bow"]
+    mult = furina_reframe.evoke_focus_mult(p) if evoked else 1
     dmg = spec.get("damage", 0)
     if dmg and state.living_enemies:
         enemy = state.rng.choice(state.living_enemies)
-        deal_damage_to_enemy(state, enemy, _salon_amount(state, dmg),
+        deal_damage_to_enemy(state, enemy,
+                             _salon_amount(state, dmg, focus_mult=mult),
                              element="hydro", source="salon_final_bow")
     blk = spec.get("block", 0)
     if blk:
-        amt = _salon_amount(state, blk)
+        amt = _salon_amount(state, blk, focus_mult=mult)
         p.block += amt
         state.emit("block", amount=amt)
     if spec.get("aura_all"):
@@ -1452,6 +1485,14 @@ def _salon_bow(state: CombatState, member: str) -> None:
     if enc2:
         resources.gain_encore(state, enc2, "salon_bow_encore")
     state.emit("salon_final_bow", member=member)
+    if evoked:
+        # A SECOND event rather than a field on the shipped one: `salon_final_bow`
+        # is read by the instruments and by tests that compare whole rows, and a
+        # new key on it would move a shipped record for a reason no shipped
+        # build has. §4.1's mint rides here -- an Evoke mints the larger amount
+        # because it costs a member -- and both are inert with the flags off.
+        state.emit("salon_evoke", member=member, focus_mult=mult)
+        furina_reframe.mint_for_evoke(state, member)
 
 
 def salon_slots(player) -> int:
@@ -1486,11 +1527,28 @@ def _deploy_salon_members(state: CombatState, amount: int,
                     if member == "random" else member)
         if len(p.salon) >= salon_slots(p):
             state.salon_replacements_this_card += 1
-            _salon_bow(state, p.salon.pop(0))
+            # THE FULL-STAGE EVOKE (reframe §4.2, RULED). The mechanism does
+            # not move one line: [USER]'s "overcrowding the stage still forces
+            # out an Evoke" is this displacement bow, and the reframe renames
+            # it. What the flag adds is that the displaced member's bow is an
+            # EVOKE -- multiplied Focus, the larger mint -- which is the exact
+            # asymmetry the packet's slate slot 6 was written to measure
+            # against a dedicated Evoke card. Flag off, it is the shipped bow.
+            _salon_bow(state, p.salon.pop(0),
+                       evoked=furina_reframe.manual_active(p))
         p.salon.append(entering)
         # `entering`, not `member`: an observer of this event wants to know
         # WHO took the stage, and "random" is not a member.
         state.emit("salon_deploy", member=entering, company=list(p.salon))
+        # DEPLOY PERFORMS (reframe §4.2, RULED: "most deploy cards deploy AND
+        # make that member perform once immediately"), so a deploy pays on the
+        # turn it is played. The member that performs is the one that just
+        # ENTERED, not the front of the queue: the card's promise is about the
+        # member it names. It resolves through `salon_member_act`, the one
+        # implementation, so the upkeep price, the dry three-quarters and the
+        # Focus term are inherited rather than restated.
+        if furina_reframe.manual_active(p):
+            salon_member_act(state, entering)
         # Fortissimo Guard (Curtain Call B, R85): block per DEPLOY, per
         # deployment event rather than per card -- Full Ensemble's three
         # deploys are three cues. Direct add + emit, the _salon_bow block
@@ -1858,6 +1916,53 @@ def _op_spend_encore(state: CombatState, fx: dict, card: Card) -> None:
                                  "spend_encore_op", card.id)
 
 
+def _spotlight_designate_one_mode(state: CombatState) -> None:
+    """R228 option (1): ONE MODE, PRICED.
+
+    Center Stage retires -- its only mechanical payoff, `FANFARE_PER_SPOTLIGHT
+    _CARD`, is already retired by the reframe's §4.1, so a two-mode selector
+    would be choosing between a multiplier and a no-op. Guest Cast and
+    `SPOTLIGHT_BASE_MULT` stay exactly as they ship. What changes is what the
+    selector IS: the shipped two-line heuristic (E4's finding: the heuristic
+    is not a lean toward a mode, it IS the collapse rule) becomes one aim with
+    a price, paid in Encore -- the reframe's own aiming currency.
+
+    THE RISK IS NAMED IN THE RULING AND IT IS NOT SOFTENED HERE: this is a
+    THIRD claim on one unbounded buffer, beside Encore's deferred Block and
+    the Evoke price, and R228 rules that the price is MEASURED (a slate slot
+    staged as a matched pair against slot 2) rather than assumed away.
+
+    UNPAID IS A NO-OP, NOT A DISCOUNT. A designation that could not be paid
+    for leaves the Spotlight where it was and says so, because the alternative
+    -- aiming for free when the buffer is empty -- is exactly the "free when
+    under-priced" failure the ruling flags.
+
+    WHAT IS DEFERRED, so the absence is not read as a decision: R228's
+    selector "aims a Companion", and this slice aims the Companion CATEGORY
+    (the shipped `SPOTLIGHT_GUEST_CAST` sentinel) rather than a named
+    Companion. The named-target half needs a new target type on the
+    designation and a face that can print it; §11 of the packet carries it as
+    deferred with its reason.
+    """
+    p = state.player
+    if p.spotlight == C.SPOTLIGHT_GUEST_CAST:
+        # Already aimed. Re-aiming at the same target buys nothing, so it
+        # cannot be allowed to bill for nothing either.
+        state.emit("spotlight_designate_redundant")
+        return
+    price = furina_reframe.SPOTLIGHT_DESIGNATE_ENCORE_COST
+    if p.encore < price:
+        state.emit("spotlight_designate_unpaid", price=price,
+                   encore=p.encore)
+        return
+    resources.spend_encore(state, price, "spotlight_designate")
+    p.spotlight = C.SPOTLIGHT_GUEST_CAST
+    state.spotlight_moved_this_turn = True
+    state.spotlight_moves_this_combat += 1
+    state.emit("spotlight_designated", character=C.SPOTLIGHT_GUEST_CAST,
+               mode="guest_cast")
+
+
 def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
     """Choose between Center Stage and Guest Cast.
 
@@ -1868,6 +1973,9 @@ def _op_spotlight_designate(state: CombatState, fx: dict, card: Card) -> None:
     the selector defaults to Center Stage. The diagnostic override retains
     forced self/companion arms for experiments."""
     p = state.player
+    if furina_reframe.spotlight_active(p):
+        _spotlight_designate_one_mode(state)
+        return
     companion_in_hand = any(c.is_companion and not c.kit_card for c in p.hand)
     companion_anywhere = any(
         c.is_companion and not c.kit_card
@@ -1976,10 +2084,22 @@ def _op_salon_bow(state: CombatState, fx: dict, card: Card) -> None:
     a way the player cannot see coming from the stage itself.
     """
     p = state.player
+    # THE REFRAME'S EVOKE IS THIS VERB (§4.4), not a new one, and that is a
+    # deliberate refusal to register an op. `salon_bow`'s own docstring already
+    # calls itself "the Defect-evoke analogue"; the packet's §2.2 finding is
+    # that the Evoke SHIPS and the reframe renames it. Registering a
+    # `salon_evoke` op would have changed the priced-op set, which is a
+    # DRAFTER_VERSION bump -- a stamp event, and a slice that is supposed to
+    # move no stamp cannot buy one for a synonym. With the flag on, this verb
+    # applies the Focus term `EVOKE_FOCUS_MULT` times and mints the larger
+    # Fanfare; with it off it is the shipped bow to the digit. The Encore
+    # price is the card's printed `encore_cost` (`F7` (1)), which is shipped
+    # machinery: playability gate, then spend, both before this op resolves.
+    evoked = furina_reframe.evoke_active(p)
     for _ in range(_amount(state, fx.get("amount", 1))):
         if not p.salon:
             break
-        _salon_bow(state, p.salon.pop(0))
+        _salon_bow(state, p.salon.pop(0), evoked=evoked)
     p.powers["salon_member"] = len(p.salon)
 
 
@@ -3728,7 +3848,17 @@ def _enrol_memory(state: CombatState, card: Card, *,
         state.emit("kurage_memory_refused", card=card.id, rule=rule,
                    reason="copy" if card.from_kurage_memory else "already")
         return False
-    if card.is_junk:
+    if card.is_junk or card.type == "status":
+        # THE `type` LIMB IS NOT REDUNDANT and it is the reason a run could
+        # die. `Card.is_junk` is a RARITY test, and `engine.statuses`
+        # synthesizes its six clogs with `rarity="basic"`, `type="status"` --
+        # so a Toxic a Muster ate passed this door, enrolled, and then could
+        # not be rebuilt at the fire (a status is in no loader index at all,
+        # EB-123's own seam). The docstring above already says a Status can
+        # never enter; this is that sentence, made true for the synthesized
+        # half as well. `is_junk` itself is NOT touched: it is shipped, the
+        # conscript pool and the Charge funnel read it, and narrowing it
+        # would move numbers outside this quarantine.
         state.emit("kurage_memory_refused", card=card.id, rule=rule,
                    reason="junk")
         return False
@@ -4000,8 +4130,13 @@ def kurage_fire(state: CombatState, manual: bool = False) -> bool:
     state.kurage_queue.pop(0)
     if not manual:
         state.kurage_fired_this_turn = True
-    from tier0.content import loader                # late import (cycle)
-    token = loader.get_card(entry.card_id)
+    # `token_card`, NOT `loader.get_card`: the one door from a stored card ID
+    # back to a fresh instance, which asks the loader first and opens the
+    # status door only inside the handler for the loader's own KeyError
+    # (EB-123). Every id the loader resolves resolves identically; the only
+    # behaviour that can differ is behaviour that used to be a crash, and this
+    # path crashed a tier-0.5 run on a remembered `status_toxic`.
+    token = token_card(entry.card_id)
     token.from_kurage_memory = True
     token.kurage_remembered = True
     # The copy is not an Exhaust EVENT (see `_remove_from_combat`): clearing
@@ -4093,13 +4228,22 @@ def kurage_memory_pulse(state: CombatState) -> None:
     p = state.player
     kind = state.kurage_last_card_type
     target = kurage_target(state)
+    # `charge` RIDES EVERY EMIT BELOW, and it is not decoration: the shipped
+    # pulse's own emit carries it, and `tier05.kurage_telemetry.trace` reads
+    # `ev["charge"]` off EVERY `kurage_pulse` row without a default -- so a
+    # memory-branch pulse that omitted the field raised `KeyError` the moment
+    # a tier-0.5 run was taken with the flag on, which is why no run-level
+    # arm on this rule had ever completed. The bank is not READ by the rule
+    # any more (that is the whole of the v3 rewrite), but it is still the
+    # bank at pulse time and it is what the telemetry column means.
     if not kind:
         state.emit("kurage_pulse", amount=0, kind="none", landed=False,
-                   memory=True)
+                   memory=True, charge=p.charge)
         return
     if kind == "attack":
         state.emit("kurage_pulse", amount=C.KURAGE_PULSE_BASE, kind=kind,
-                   landed=bool(state.living_enemies), memory=True)
+                   landed=bool(state.living_enemies), memory=True,
+                   charge=p.charge)
         if target is not None:
             deal_damage_to_enemy(state, target, C.KURAGE_PULSE_BASE,
                                  element="hydro", source="companion")
@@ -4114,12 +4258,13 @@ def kurage_memory_pulse(state: CombatState) -> None:
             # not need a body, which is the branch's other honest half.
             resources.gain_charge(state, C.CHARGE_PER_EXHAUST, "kurage_pulse")
             state.emit("kurage_pulse", amount=C.CHARGE_PER_EXHAUST, kind=kind,
-                       landed=True, memory=True)
+                       landed=True, memory=True, charge=p.charge)
         else:
             # v2's PICK C1, kept implemented: pure Hydro application, no
             # number. Nothing lands on an empty board -- an aura needs a body.
             state.emit("kurage_pulse", amount=0, kind=kind,
-                       landed=target is not None, memory=True)
+                       landed=target is not None, memory=True,
+                       charge=p.charge)
             if target is not None:
                 reactions.apply_aura(state, target, "hydro",
                                      source="kurage_pulse")
@@ -4138,7 +4283,7 @@ def kurage_memory_pulse(state: CombatState) -> None:
         # branch in `player_turn_end_triggers`, so nothing that ships moved.
         blk = C.KURAGE_MEMORY_PULSE_BLOCK
         state.emit("kurage_pulse", amount=blk, kind=kind, landed=True,
-                   memory=True)
+                   memory=True, charge=p.charge)
         if blk:
             p.block += blk
             state.emit("block", amount=blk)
@@ -4681,7 +4826,19 @@ def player_turn_start_triggers(state: CombatState) -> None:
     n = p.powers.get("encore_per_turn", 0)         # All the World's a Stage
     if n:
         resources.gain_encore(state, n, source="encore_per_turn")
-    salon_tick(state)                                   # Furina (kickoff §5)
+    if furina_reframe.manual_active(p):
+        # THE SINGLE BIGGEST CHANGE IN THE REFRAME (§4.2 / §2.2): members do
+        # not auto-play. There is no end-of-turn Salon path, so suppressing
+        # this one call removes the automatic engine entirely -- the stage now
+        # performs only when a Companion play, a deploy or an Evoke makes it.
+        # The suppression is LOUD rather than silent: an instrument that
+        # counted upkeeps must be able to tell "no members" from "no upkeep
+        # exists any more", and R177's fuel finding was measured on the row
+        # this event replaces.
+        if p.salon:
+            state.emit("salon_upkeep_suppressed", members=len(p.salon))
+    else:
+        salon_tick(state)                               # Furina (kickoff §5)
     # Nicole -- REDESIGNED 2026-07-26 (red-pen, item 4). Was "+N flat attack
     # damage, and 4 Block each turn"; is now "gain N Strength and 4 Block each
     # turn". The rationale on the record: a 2-cost Power must clear a high bar
@@ -4777,6 +4934,15 @@ def salon_member_act(state: CombatState, member: str) -> bool:
     if p.burst_max:
         # §1 particle economy
         resources.gain_burst(state, C.SALON_TICK_BURST, "salon_tick")
+    # THE REFRAME'S ONE MINT SITE for a member that performs and STAYS
+    # (§4.1). It is here, inside the single implementation of a member
+    # acting, rather than at the three callers -- the Companion trigger, the
+    # deploy-performs clause and the `salon_perform` card -- because "a member
+    # performing mints Fanfare, and nothing else does" is one rule and a rule
+    # with three copies is a rule that drifts. Inert unless the meter leg is
+    # on. An Evoke does NOT pass through here (it is a bow) and mints the
+    # larger amount at its own site.
+    furina_reframe.mint_for_performance(state, member)
     return True
 
 
