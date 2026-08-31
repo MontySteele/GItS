@@ -1,4 +1,5 @@
-"""Every face that names a METER must carry that meter's keyword tip.
+"""Every face that names a METER must carry that meter's keyword tip, and
+every face that names a RESOURCE must print it as a keyword.
 
 WHY (run B6, R213 E1 / R215 D). The mod has two named meters and neither had
 rules text on any face. R215 D found that Kokomi's Charge-gaining cards print
@@ -44,6 +45,40 @@ BOTH DIRECTIONS.
 WHAT IT DOES NOT ASSERT. Not a tip's WORDING, not the accrual rates, not that
 a definition is correct -- the tip classes build those from the constants and
 the suite covers them. Not that a face SHOULD name a meter. The join only.
+
+THE SECOND CHECK: GOLDING (`EB-258`)
+------------------------------------
+The tip half above answers "is the word explained". This half answers the
+question one step earlier: "does the word LOOK like a term at all". A resource
+printed in body text is a noun; the same resource in `[gold]` is a keyword the
+reader knows to hover. Every resource on the roster's faces is gold-wrapped
+except where somebody typed the sentence by hand and forgot -- and the forget
+is invisible, because an un-golded word renders as perfectly ordinary prose.
+Same failure shape as the tip join, which is why it is a second table in this
+file rather than a seventh lint: one word, two surfaces that have to agree
+about it.
+
+It is here rather than in the METERS table because the two properties are
+NOT co-extensive. `Energy` is a resource the whole roster prints and no tip
+defines -- it is the base game's own, and a tip requirement on it would be
+false. `Encore` and `Fanfare` are Furina's and have their own explanations.
+So the rows are separate: `METERS` says "this word needs a definition
+attached", `RESOURCE_WORDS` says "this word is a keyword wherever it is
+printed", and a word can be in either, both, or neither.
+
+`EB-258`'s provenance: *Undertow* shipped `Sly: Gain 1 Energy` un-golded while
+`SaltLine` printed `[gold]Exhaust[/gold]` and `DriftwoodCharm` printed
+`[gold]Charge[/gold]` beside it, and `gen_klee_cards.py` carried a comment
+calling `swelling_overture` "the only un-golded resource keyword on a face" --
+false by then in thirteen places. A comment is not a lock, which is the whole
+argument for this half.
+
+WHAT THE GOLDING HALF DOES NOT ASSERT. Not `Block`, and that is a deliberate
+line rather than an oversight: Block is the base game's defensive stat, it is
+un-golded on seventeen faces today, and whether it reads as a keyword at all
+is a taste call on somebody else's roster -- filed, not fixed here. Not the
+SENTENCE a resource sits in, not whether the face should name it, and not
+markup outside a face (a hover tip is not a face).
 
 Run: python tools/lint_keyword_meters.py
 Exit 1 with findings on stdout.
@@ -97,7 +132,30 @@ METERS = (
           owner=None),
 )
 
+# `EB-258`. The resources a face prints as KEYWORDS, longest first so
+# "Burst Energy" is consumed before the bare "Energy" inside it.
+RESOURCE_WORDS = (
+    "Burst Energy",
+    "Charge",
+    "Encore",
+    "Fanfare",
+    "Sparks",
+    "Spark",
+    "Energy",
+)
+
 _STRING = re.compile(r'"((?:[^"\\]|\\.)*)"')
+
+# A `[gold]...[/gold]` span. Non-greedy: the faces nest nothing, and a greedy
+# read would swallow every word between the first open and the last close --
+# which would make this half pass on exactly the faces it was written for.
+_GOLD = re.compile(r"\[gold\](.*?)\[/gold\]")
+
+# An interpolation token: `{Sparks:diff()}`, `{Cards:plural:|s}`,
+# `{SpotlightSystem.FanfarePerCenterStagePlay}`. These carry VARIABLE NAMES
+# that happen to spell resources, and the player never sees the name -- only
+# the number it resolves to. Golding one would put markup inside a token.
+_VAR = re.compile(r"\{[^{}]*\}")
 
 
 def _descriptions(text: str) -> list[str]:
@@ -120,6 +178,33 @@ def _descriptions(text: str) -> list[str]:
                 depth -= 1
             i += 1
         out.append(" ".join(_STRING.findall(text[match.end():i - 1])))
+    return out
+
+
+def ungolded_resources(description: str) -> list[str]:
+    """The resource words this face prints as plain prose, in order.
+
+    Golded spans and interpolation tokens are blanked before the search, so a
+    word inside either is invisible here -- that is what "already a keyword"
+    and "not player-visible text" mean, spelled once.
+    """
+    chars = list(description)
+    for span in _GOLD.finditer(description):
+        for i in range(span.start(1), span.end(1)):
+            chars[i] = "\0"
+    for token in _VAR.finditer(description):
+        for i in range(token.start(), token.end()):
+            chars[i] = "\0"
+    masked = "".join(chars)
+
+    out: list[str] = []
+    for word in RESOURCE_WORDS:
+        for hit in re.finditer(r"\b" + re.escape(word) + r"\b", masked):
+            out.append(word)
+            # Consume it, so the "Energy" inside an un-golded "Burst Energy"
+            # is reported once, under the longer name that is the real word.
+            masked = masked[:hit.start()] + "\0" * len(word) + \
+                masked[hit.end():]
     return out
 
 
@@ -170,6 +255,14 @@ def findings(root: Path = CARD_ROOT,
                 out.append(
                     f"{rel}: names {meter.word} but does not attach "
                     f"{meter.attach.rstrip('(')} -- {named[0]!r}")
+        # `EB-258`, the golding half. Per description rather than per file:
+        # a card with an upgraded face can have the markup on one and not the
+        # other, and the reader sees whichever one they hold.
+        for description in descriptions:
+            for word in ungolded_resources(description):
+                out.append(
+                    f"{rel}: prints {word} as plain text, not a "
+                    f"[gold]{word}[/gold] keyword -- {description!r}")
     return out
 
 
@@ -178,11 +271,13 @@ def main() -> int:
     for line in bad:
         print(line)
     if bad:
-        print(f"\n{len(bad)} face(s) name a meter without its keyword tip.")
+        print(f"\n{len(bad)} face(s) name a meter without its keyword tip, "
+              "or a resource without its markup.")
         return 1
     words = " and ".join(meter.word for meter in METERS)
     print(f"lint_keyword_meters: every face naming {words} carries the "
-          "keyword.")
+          f"keyword, and all {len(RESOURCE_WORDS)} resource words are golded "
+          "wherever a face prints them.")
     return 0
 
 

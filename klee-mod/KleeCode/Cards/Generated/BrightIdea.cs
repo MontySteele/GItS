@@ -37,7 +37,7 @@ public sealed class BrightIdea : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bright Idea"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. Discard a random card. Gain 1 Energy."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. Discard a random card. Gain 1 [gold]Energy[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

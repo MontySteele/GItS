@@ -706,10 +706,18 @@
    # discard 1 (Bright Idea parity — generic padding, exactly what this sweep removes). PROPOSED.
 - {id: deep_breath, name: "Deep Breath", register: private, cost: 1, type: skill, rarity: uncommon, solve: [block, frontload, scaling, velocity], tempo_band: {fight: [early, mid, late], run: [early]}, archetypes: [generic, fanfare], role: glue, exhaust: true,
    effects: [{op: choose_one, modes: [
-              {label: "Gain 1 Energy and 2 Encore",
+              {label: "Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold]",
                effects: [{op: energy, amount: 1}, {op: gain_encore, amount: 2}]},
-              {label: "Spend 3 Encore: draw 3",
+              {label: "Spend 3 [gold]Encore[/gold]: draw 3",
                effects: [{op: spend_encore, amount: 3}, {op: draw, amount: 3}]}]}]}
+   # EB-258: BOTH LABELS ARE GOLDED. A mode label IS face text -- it prints inside the
+   # card's "Choose one: A | B." line and again on the option the player picks -- so the
+   # resources in it are keywords like any other, and these two were the last authored
+   # (rather than emitted) faces still naming Energy and Encore in plain prose.
+   # `Spend 3 [gold]Sparks[/gold]` on the Klee side is the precedent. It does put two
+   # more labels inside `EB-246`'s set (a marked-up option name reaching the blind
+   # render unfolded); that row's fix is to share scenario.py's stripper, not to strip
+   # the faces, so the direction is unchanged.
    # EB-118 Phase 2C: the MODAL PROTOTYPE. R192 chose this card; R194 ruled the pair
    # (Option A, [USER] 2026-08-23). Mode 1 is the card as it shipped, unchanged -- the
    # Sugar-Rush-parity buffer body players already know -- so the conversion adds a

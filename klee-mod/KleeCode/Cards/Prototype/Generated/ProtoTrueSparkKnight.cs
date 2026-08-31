@@ -38,7 +38,7 @@ public sealed class ProtoTrueSparkKnight : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Spark Knight's Oath"),
-        ("description", "Your Attacks that do not already cost [gold]Spark[/gold] cost 3 [gold]Spark[/gold] instead of their Energy cost."),
+        ("description", "Your Attacks that do not already cost [gold]Spark[/gold] cost 3 [gold]Spark[/gold] instead of their [gold]Energy[/gold] cost."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

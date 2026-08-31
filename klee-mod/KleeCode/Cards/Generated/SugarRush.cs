@@ -40,7 +40,7 @@ public sealed class SugarRush : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sugar Rush"),
-        ("description", "Gain 1 Energy. Gain 1 [gold]Spark[/gold]."),
+        ("description", "Gain 1 [gold]Energy[/gold]. Gain 1 [gold]Spark[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

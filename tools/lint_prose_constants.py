@@ -136,14 +136,13 @@ ALLOWED: dict[tuple[str, str, str], str] = {
         "The 1 is the floor on a card's energy cost -- a rule of the base "
         "game's cost arithmetic, with no constant behind it -- and again it "
         "is the word `cost` doing the joining.",
-    ("klee-mod/KleeCode/Cards/Furina/Generated/DeepBreath.cs",
-     "KurageMemoryLaw.CostPerEnergy", "3"):
-        "Deep Breath is a FURINA card and reads 'Gain 1 Energy and 2 Encore | "
-        "Spend 3 Encore: draw 3.' -- that 3 is an Encore price on Furina's "
-        "meter. The Kurage's memory multiplier is Kokomi's, it is behind a "
-        "quarantine flag, and the only thing joining them is the word "
-        "`Energy` appearing in a different clause of the same face. Changing "
-        "the memory's 3x must not touch this string, and vice versa.",
+    # DROPPED by `EB-258`. The entry excused Deep Breath's "Spend 3 Encore"
+    # against `KurageMemoryLaw.CostPerEnergy`, and the ONLY thing that ever
+    # joined them was the bare word `Energy` sitting in the face's other
+    # clause. Golding the resources broke that join at the source: the face
+    # now reads "[gold]Energy[/gold]", the coincidence does not arise, and the
+    # lint reported the excuse as no longer matching -- which is the whole
+    # point of it reporting stale entries.
 }
 
 

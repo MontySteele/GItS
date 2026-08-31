@@ -44,7 +44,7 @@ public sealed class MoonlitOffering : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Moonlit Offering"),
-        ("description", "Gain {Energy:diff()} Energy. Draw {Cards:diff()} card{Cards:plural:|s}. Discard a random card."),
+        ("description", "Gain {Energy:diff()} [gold]Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}. Discard a random card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
