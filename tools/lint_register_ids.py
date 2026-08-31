@@ -286,7 +286,12 @@ CEILINGS: dict[str, int] = {
     # boards declare a relic the wire does not carry on their pinned seed
     # (renumbered from EB-242 at the fold: two parallel windows both took
     # the next free id; X9READ-S1's mint keeps 242).
-    "EB": 243,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-244 minted 2026-08-30 by the KLEESPARK-BT3 round: a staged board can
+    # declare an enemy INTENT the wire does not carry, because EB-240 expects:
+    # has a relics leg and an hp leg and no intent leg. Both BT3 boards
+    # declared a telegraphed attack for 16 and the wire carried a Debuff on
+    # t01 and an attack for 12 on t02.
+    "EB": 244,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -952,6 +957,18 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # re-draft was committed BEFORE the round ran, and both boards then
         # staged clean through the EB-240 preflight. Both `hp.first` legs
         # (40 and 46) matched the wire unchanged.
+        # 244 minted 2026-08-30 by the KLEESPARK-BT3 round (packet section
+        # 25.5.2): the third leg of the same class as EB-240 and EB-243 -- a
+        # board asserting a fact the wire does not carry -- on the one leg the
+        # expects: block does not check. The encounter is generated from the
+        # seed and the board writes no intent, so both boards notes and
+        # board: mirror printed "one enemy telegraphing an attack for 16"
+        # while t01 drew a Debuff intent and t02 an attack for 12. It is
+        # causal, not cosmetic: t01 holds no Attack in hand, so against a
+        # Debuff no intent could change the line, both deciding forms were
+        # refused `intent_insensitive`, and G1/G2/G4 all graded UNREACHED --
+        # F2 UNREACHED for the fourth round running.
+        244,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
