@@ -316,6 +316,32 @@ carried while it was active is in the commit message that retired it.
   no seed pinned →
   `review/active/kokomi-slice-1-2026-08-27.md`, *Whole-fight blind play*.
 
+- **`EB183-MF` — Muster's Charge subsidy asked at the FUNNEL, the fifth matched
+  pair (`EB-183`)** — **DRAFTED 2026-08-30, unrun, not countersigned.** Drafted
+  by Claude from written design intent and committed before any board is staged
+  or any seed is spent (R212 item 2); offered for batch countersign. **Why:**
+  R216 D deferred Muster's Charge subsidy into R213 E1, and that deferral has
+  TWO readings. Slice 2 asked the first — the subsidy's SIGN, on a card — and
+  those four arms retired under R227 / `M67` (1), which retired arms that PRICE
+  Charge. The second reading prices nothing: *recruits from an order that paid
+  for them pay no Charge when they Exhaust*, a property of the exhaust FUNNEL
+  and of no effect list. R213 E1 stays open until both are asked. **Unit:** one
+  staged turn per half, blind-graded, shipped half first to discover the seed;
+  the deciding read must be GPT, since the row is `authored_by: [claude]`
+  (R217 C). **Slate:** `MF1` the face teaches the waiver (1 of 1 forms), `MF2`
+  the deciding second line on the prototype half DIFFERS from the shipped
+  half's — a match answers R213 E1's second reading NULL, which closes the gate
+  — `MF3` the grader's stated reason mentions the bank at all, `MF4` recorded
+  and not graded (was a recruit played at all). **Contaminations:** granted
+  deck and a hand set through a dev door, `+proto` build, FOUR energy rather
+  than the four pairs' three (the difference lands one play later, on a
+  recruit's rotation), no seed pinned, and a closeness reading that cannot
+  separate the halves — the pilot values an order by what it puts in hand, so
+  the blind seat is the pair's only reading. **Gate:** [USER]'s countersign on
+  the R226 reading in §1 as well as on the slate, then game time. Boards
+  `understudy/turns/eb183-muster-funnel/`; no board staged, no seed pinned →
+  `review/active/eb183-muster-funnel-2026-08-30.md` §4.
+
 - **`KLEESPARK-BT3` and `KLEESPARK-W5` — the two cells R230 left owed
   (`EB-224`)** — **DRAFTED 2026-08-30, unrun, not countersigned.** Drafted by
   Claude from written design intent and committed before any board is staged

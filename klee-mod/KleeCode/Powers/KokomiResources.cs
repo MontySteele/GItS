@@ -506,6 +506,10 @@ public sealed class KokomiResourceHooks : AbstractModel
         // hook broadcast. The memory is per fight; this is the only line that
         // starts a fight with an empty one.
         KurageMemory.ClearForNewCombat();
+        // EB-183's stamp set rides the same line for the same reason: a
+        // recruit is a combat-local instance, so a set that outlived a fight
+        // would be a slow leak of dead CardModels and, worse, a stale waiver.
+        MusterSubsidy.ClearForNewCombat();
         await KurageMemory.InstallAll();
     }
 #endif
@@ -562,7 +566,25 @@ public sealed class KokomiResourceHooks : AbstractModel
         // unnarrowed -- her own cards AND original Companions, at 1 per
         // Exhaust. v3 retires v2's Companion carve-out, so there is nothing to
         // add here: the shipped line already is v3's rule.
-        KokomiResources.GainCharge(owner, ExhaustCharge(owner));
+        var exhaustCharge = ExhaustCharge(owner);
+#if PROTOTYPE_CARDS
+        // QUARANTINED (R213 E1 / EB-183) -- THE FUNNEL CHECK, and the second
+        // half of R216 D's deferred question. Slice 2 asked the subsidy as a
+        // card's effect list (the order SPENDS Charge); this asks it as a
+        // property of the funnel: a recruit whose order paid its cost down
+        // pays no Charge back when it rotates out. Written only by
+        // KokomiConscript.RollRecruit on a `subsidy: waived` order, which no
+        // shipped card carries, so the set is empty on every shipped pool.
+        //
+        // CHARGE ONLY. The Burst particle below is untouched -- R216 D's
+        // sentence is about the finisher meter, and moving two meters would
+        // make the arm unattributable. Sim twin: refpowers.after_card_exhausted.
+        if (MusterSubsidy.IsWaived(card))
+        {
+            exhaustCharge = 0;
+        }
+#endif
+        KokomiResources.GainCharge(owner, exhaustCharge);
         KokomiResources.GainBurst(owner, ExhaustBurst(owner));
 #if PROTOTYPE_CARDS
         // RULE 2 -- ENTRY ON EXHAUST. OUTSIDE the relic gate above,

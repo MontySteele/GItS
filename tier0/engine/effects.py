@@ -4325,6 +4325,29 @@ def kurage_memory_pulse(state: CombatState) -> None:
             state.emit("block", amount=blk)
 
 
+def _conscript_subsidy_waived(fx: dict) -> bool:
+    """Does this conscript op waive its recruits' Charge wage? (EB-183.)
+
+    QUARANTINED (R213 E1) -- prototype surface only, on the same bargain as
+    `spend_charge` above: the key is the door, the door is greppable, and no
+    shipped card carries it. The value vocabulary is CLOSED and unknown values
+    RAISE rather than defaulting quietly, because a typo'd `subsidy: waved`
+    that silently meant "paid" would make an arm read as its own control.
+
+      paid   -- the shipped rule and the default. The order cheapens the
+                recruit AND the recruit pays CHARGE_PER_EXHAUST when it
+                rotates out (R216 D's "so blocking with one also advances
+                Kokomi's finisher").
+      waived -- R216 D's OTHER reading, the one EB-183 exists to ask: the
+                order already paid, so the recruit's Exhaust pays nothing.
+    """
+    value = fx.get("subsidy", "paid")
+    if value not in ("paid", "waived"):
+        raise ValueError(
+            f"conscript subsidy must be 'paid' or 'waived', got {value!r}")
+    return value == "waived"
+
+
 def _op_conscript(state: CombatState, fx: dict, card: Card) -> None:
     """Conscript (kickoff §2.3, the Commander verb).
 
@@ -4347,14 +4370,28 @@ def _op_conscript(state: CombatState, fx: dict, card: Card) -> None:
     same argument as transform_in_hand)."""
     from tier0.content import loader                # late import (cycle)
     pool = loader.companion_pool(fx.get("nation", "inazuma"))
+    waived = _conscript_subsidy_waived(fx)
     for _ in range(_amount(state, fx.get("amount", 1))):
         recruit = copy.deepcopy(state.rng.choice(pool))
+        printed = recruit.cost
         if "cost_override" in fx:
             recruit.cost = fx["cost_override"]
         elif isinstance(recruit.cost, int):
             recruit.cost = max(0, recruit.cost + C.CONSCRIPT_COST_DELTA)
         recruit.exhaust = True
         recruit.conscripted = True
+        # QUARANTINED (prototype surface only, R213 E1 / EB-183). The stamp's
+        # ONE writer. `waived` is the op key -- no shipped card carries it --
+        # and the second half is the DERIVED reading of "a PAID order" (R212's
+        # derived-not-picked lane): the order paid only if it actually put the
+        # recruit below its printed cost. A `cost_override` that lands on the
+        # printed number, or a delta that floors at 0 on an already-free
+        # recruit, moved no energy and therefore bought no waiver. One-way
+        # error direction: the doubt stamps NOTHING and the recruit pays the
+        # shipped wage.
+        if waived and isinstance(printed, int) \
+                and isinstance(recruit.cost, int) and recruit.cost < printed:
+            recruit.muster_subsidised = True
         if fx.get("mode") == "create":
             _add_token(state, recruit, "hand")
             continue

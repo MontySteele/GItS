@@ -56,13 +56,21 @@ public static class KokomiConscript
     /// </summary>
     public const string Nation = "inazuma";
 
+    /// <param name="subsidyWaived">
+    /// QUARANTINED (R213 E1 / EB-183), prototype surface only. Do this order's
+    /// recruits waive their Charge wage when they Exhaust? The sim twin is the
+    /// <c>subsidy: waived</c> key on the conscript op, which no shipped card
+    /// carries -- so on every shipped face this is the default and the
+    /// parameter is unread. See <c>Powers/Prototype/MusterSubsidy.cs</c>.
+    /// </param>
     public static async Task Run(
         PlayerChoiceContext choiceContext, Player owner, CardModel source,
-        int amount, bool createMode, int? costOverride)
+        int amount, bool createMode, int? costOverride,
+        bool subsidyWaived = false)
     {
         for (var i = 0; i < amount; i++)
         {
-            var recruit = RollRecruit(owner, costOverride);
+            var recruit = RollRecruit(owner, costOverride, subsidyWaived);
             if (recruit == null) return;        // no pool: whiff, not a crash
 
             if (createMode)
@@ -131,7 +139,8 @@ public static class KokomiConscript
     /// The discount is applied to the INSTANCE, never to the canonical model
     /// -- mutating the model would discount every future copy in the run.
     /// </summary>
-    private static CardModel? RollRecruit(Player owner, int? costOverride)
+    private static CardModel? RollRecruit(
+        Player owner, int? costOverride, bool subsidyWaived = false)
     {
         var pool = CompanionRoster.All
             .Where(card => (card as ICompanionCard)?.Nation == Nation)
@@ -180,6 +189,22 @@ public static class KokomiConscript
         {
             recruit.EnergyCost.AddThisCombat(delta, reduceOnly: false);
         }
+
+#if PROTOTYPE_CARDS
+        // QUARANTINED (R213 E1 / EB-183) -- THE STAMP, and its one writer.
+        // `delta < 0` is the DERIVED reading of "a PAID order" (R212's
+        // derived-not-picked lane), not a picked rule: the order paid only if
+        // it actually put the recruit below its printed cost. A cost_override
+        // landing ON the canonical number, or the flat -1 flooring at 0 on an
+        // already-free recruit, moved no energy and so bought no waiver. The
+        // error direction is one-way -- the doubt stamps NOTHING and the
+        // recruit pays the shipped wage. Sim twin: `_op_conscript`'s
+        // `recruit.cost < printed`.
+        if (subsidyWaived && delta < 0)
+        {
+            MusterSubsidy.NoteWaived(recruit);
+        }
+#endif
 
         // "Gains Exhaust". CardKeyword.Exhaust is declared per MODEL and is
         // not settable per instance; ExhaustOnNextPlay is the instance-level

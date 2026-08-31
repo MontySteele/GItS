@@ -4225,6 +4225,15 @@ def _conscript_phrase(eff: dict) -> str:
         # replaced, not stacked with -- KokomiConscript.RollRecruit treats
         # cost_override as reaching the target ABSOLUTELY.
         phrase += f", at cost {int(eff['cost_override'])}"
+    if eff.get("subsidy") == "waived":
+        # QUARANTINED (R213 E1 / EB-183). The deviation is the WAGE, and it is
+        # a rule the Muster keyword's own definition does not carry: the tip
+        # says the recruit costs 1 less and Exhausts, and every Kokomi reader
+        # has learned that an Exhaust of her own card pays Charge. A card that
+        # takes that back has to print it, on the same "deviations write out
+        # only the deviation" rule as the two clauses above.
+        phrase += (". Units mustered by this order pay no [gold]Charge[/gold] "
+                   "when they Exhaust")
     return phrase
 
 
@@ -4756,11 +4765,19 @@ def build_body(
 
         elif op == "conscript":
             override = eff.get("cost_override")
+            # QUARANTINED (R213 E1 / EB-183). The argument is APPENDED ONLY
+            # when the row asks for it, so every shipped conscript face emits
+            # byte-identically to what it emitted before the key existed --
+            # the parameter is optional C#-side for exactly that reason.
+            waived = ""
+            if eff.get("subsidy") == "waived":
+                waived = ", subsidyWaived: true"
             lines.append(
                 "await KokomiConscript.Run(choiceContext, Owner, this, "
                 f"{int(eff.get('amount', 1))}, "
                 f"createMode: {'true' if eff.get('mode') == 'create' else 'false'}, "
-                f"costOverride: {override if override is not None else 'null'});")
+                f"costOverride: "
+                f"{override if override is not None else 'null'}{waived});")
 
         elif op == "gain_encore":
             if salon_calc_rider(card, eff) is not None:

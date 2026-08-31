@@ -234,6 +234,27 @@ class Card:
     # ask §6.7: a conscripted companion is SELF-sourced for SUPPORT_CARRY /
     # control-provenance purposes — she paid a card of her own deck for it.
     conscripted: bool = False
+    # QUARANTINED (prototype surface only, R213 E1 / EB-183). The SECOND
+    # reading of R216 D's Muster subsidy, and the one slice 2 could not put on
+    # a card: slice 2 flipped the SIGN of the order's Charge line, which is an
+    # effect list; this reading is a property of the exhaust FUNNEL. A recruit
+    # whose order PAID FOR IT -- the order reduced the recruit's cost below its
+    # printed one -- pays no Charge when it Exhausts, so one order cannot both
+    # cheapen the unit AND be waged for rotating it out.
+    #
+    # THE STAMP IS WRITTEN AT ONE DOOR (`effects._op_conscript`, on a
+    # `subsidy: waived` conscript op) and READ AT ONE DOOR
+    # (`refpowers.after_card_exhausted`'s funnel). No shipped card carries the
+    # op key, so on every shipped pool this field is False on every instance
+    # and the funnel branch is dead -- which is the byte-identity guard
+    # tier0/tests/test_eb183_muster_subsidy_funnel.py pins.
+    #
+    # SCOPED TO THE ORDER, NOT TO THE FUNNEL AT LARGE, deliberately: R226's
+    # signed Charge LAW says the funnel does NOT narrow (her own cards AND
+    # original Companions, Companions INCLUDED). A blanket Companion carve-out
+    # would contradict that text; a prototype ORDER whose own recruits waive
+    # their wage asks the open question without touching the shipped rule.
+    muster_subsidised: bool = False
     # QUARANTINED (C.KURAGE_MEMORY, v3). Two combat-local provenance stamps of
     # the same class as `conscripted` above and `generated_by_guest_star`
     # below, and both are the difference between a rule and a loop:
