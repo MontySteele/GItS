@@ -119,7 +119,13 @@ python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full
   only (`extract_base_game_pool.py:96`, `:145-150`).
 - **The canon baseline is read STRUCTURALLY (Cmds, DynamicVars, TargetType,
   reached models), never off card text** — that keeps card text out of the
-  process and makes the tag-through real (`canon_role_tempo.py:14-33`).
+  process and makes the tag-through real (`canon_role_tempo.py:14-33`). **One
+  exception, declared:** the `regent_stars` package's membership is a curated
+  list cited to `docs/current/research/regent-stars-economy.md`, because a
+  Star price is a cost FIELD on the model and leaves no mark in a card body a
+  structural read could find (EB-192 / R231, `canon_role_tempo.py`
+  `REGENT_STARS`). It is locked to that census by test, and the committed
+  baseline stays percentages-only either way.
 - **Parity lints are total by construction**: an unclassified `public const int`
   or an unpriced `OPS` key is a FINDING, not a skip
   (`lint_constant_parity.py:19-27`, `lint_op_parity.py:26-40`). `lint_vendor_pin`

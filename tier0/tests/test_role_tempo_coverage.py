@@ -147,6 +147,107 @@ def test_every_anchor_carries_a_reason():
         assert len(why) > 60, name
 
 
+# --- the Regent Stars anchor (EB-192 / R231) --------------------------------
+#
+# The anchor `klee/spark` and `kokomi/commander` are measured against used to
+# be `regent_forge`, a regex union of Regent's Stars with the unrelated Forge
+# card: ten of its nineteen members never touched a Star and no `ForgeStars`
+# symbol exists in the assembly. R231 rebuilt it from Star-touching cards
+# only. A curated member list is only as honest as its citation, so these
+# lock it to the decompile-sourced census it claims to be -- a card the census
+# does not carry cannot enter the package without failing here.
+
+CENSUS = REPO / "docs" / "current" / "research" / "regent-stars-economy.md"
+# Named in the census's reader section but not in any CARD pool: they are
+# relics (census 1.3). The package is a subset of a canon card pool.
+CENSUS_RELICS = {"GalacticDust", "MiniRegent"}
+
+
+def _census_section(start: str, end: str) -> str:
+    text = CENSUS.read_text(encoding="utf-8")
+    i = text.index(start)
+    return text[i:text.index(end, i)]
+
+
+def _census_table_names(start: str, end: str) -> set:
+    """The first column of every row whose first cell is a single card id."""
+    import re
+    out = set()
+    for line in _census_section(start, end).splitlines():
+        hit = re.match(r"^\|\s*`(\w+)`\s*\|", line)
+        if hit:
+            out.add(hit.group(1))
+    return out
+
+
+def test_the_star_generator_list_is_the_censuss_generator_table():
+    from tools import canon_role_tempo as crt
+    names = _census_table_names("## 2. Full generator census", "## 3. Spending")
+    assert names, "the census generator table moved"
+    assert set(crt.STAR_GENERATORS) == names, sorted(
+        set(crt.STAR_GENERATORS) ^ names)
+
+
+def test_the_star_spender_list_is_the_censuss_spender_table():
+    from tools import canon_role_tempo as crt
+    names = _census_table_names("### 3.5 Every spender",
+                                "### 3.6 Cards that read Stars")
+    assert names, "the census spender table moved"
+    assert set(crt.STAR_SPENDERS) == names, sorted(
+        set(crt.STAR_SPENDERS) ^ names)
+
+
+def test_the_star_reader_list_is_the_censuss_reader_section():
+    """The census names the two Powers by their power type, which is what the
+    card applies; the card is the same name without the suffix."""
+    import re
+    section = _census_section("### 3.6 Cards that read Stars",
+                              "## 4. Persistence")
+    named = set()
+    for line in section.splitlines():
+        if line.startswith("- **"):
+            named |= set(re.findall(r"\*\*`(\w+)`\*\*", line))
+    assert named, "the census reader section moved"
+    cards = {n[:-len("Power")] if n.endswith("Power") else n
+             for n in named - CENSUS_RELICS}
+    from tools import canon_role_tempo as crt
+    assert set(crt.STAR_READERS) == cards, sorted(set(crt.STAR_READERS) ^ cards)
+
+
+def test_the_package_is_exactly_the_three_census_lists():
+    from tools import canon_role_tempo as crt
+    assert crt.REGENT_STARS == crt.Curated(
+        crt.STAR_GENERATORS + crt.STAR_SPENDERS + crt.STAR_READERS)
+    character, selector, _why = crt.PACKAGES["regent_stars"]
+    assert character == "Regent"
+    assert selector is crt.REGENT_STARS
+
+
+def test_a_curated_package_ignores_the_body_markers_entirely():
+    """The failure EB-192 records was membership by REGEX. A Forge card whose
+    body names every retired marker is still not a Stars card, and a Stars
+    spender's body names none of them -- a Star price is a cost FIELD, which
+    is why this package cannot be drawn structurally at all."""
+    from tools import canon_role_tempo as crt
+    pool = [{"name": "BeatIntoShape", "mentions": ["ForgeStars", "Stars"]},
+            {"name": "FallingStar", "mentions": []}]
+    members = crt.package_members(pool, crt.REGENT_STARS)
+    assert [c["name"] for c in members] == ["FallingStar"]
+
+
+def test_the_invented_forge_stars_marker_is_gone_for_good():
+    """No `ForgeStars` type, method, field or loc key exists in the 0.111.0
+    assembly (census 0). A marker naming one cannot come back."""
+    from tools import canon_role_tempo as crt
+    assert "regent_forge" not in crt.PACKAGES, sorted(crt.PACKAGES)
+    marker_names = {name for _pattern, name in crt.MECHANIC_MARKERS}
+    assert "ForgeStars" not in marker_names, marker_names
+    for _character, selector, _why in crt.PACKAGES.values():
+        if isinstance(selector, crt.Curated):
+            continue
+        assert "ForgeStars" not in selector, selector
+
+
 # --- the vocabulary ---------------------------------------------------------
 
 def test_the_vocabulary_is_the_charters_amended_one():
