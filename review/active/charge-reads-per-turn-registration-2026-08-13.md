@@ -119,16 +119,22 @@ firing condition is R188's, and it names a *reading* plus [USER]'s judgement.
 
 ## 4. World, cell and sample plan
 
-- **Cell:** `RT10/D14/P7/C9` at the time of drafting. Stamp law applies —
-  **if the open `RT`/`C` window moves before this runs, the packet is
-  re-stamped before the freeze, not after the read.**
+- **Cell:** **`RT12/D18/P11/C21`**, with `PILOT_WEIGHTS_VERSION` **6** — the
+  live cell, read off `docs/current/STATE.md` on 2026-08-30. *Revised
+  2026-08-30 on the pair review's correction: the packet was stamped
+  `RT10/D14/P7/C9` at drafting (2026-08-13) and the world has moved four
+  stamps since, so it is re-stamped here — before the freeze and before any
+  run, as this bullet's own rule requires — and no number in §5 was read off a
+  run at either cell, so nothing is re-graded and the slate is not re-signed.*
+  Stamp law still applies: **if the open `RT`/`C` window moves again before
+  this runs, the packet is re-stamped before the freeze, not after the read.**
 - **Character:** `kokomi` only; the bank is hers. All three archetypes
   (`priest`, `commander`, `assist`), reported separately, since exhaust rate
   and reader density differ per plan.
 - **Pilot / drafter:** the standing values for the cell, unchanged. This
   measurement moves no version and opens no window.
 - **`n` per archetype — [USER] slot.** PROPOSED at **600 runs per archetype**,
-  the ratified cell's figure, giving three arms and 1,800 runs. The quantity is
+  the ratified cell's figure and **unchanged at the re-stamped cell**, giving three arms and 1,800 runs. The quantity is
   per-TURN, so the turn count is roughly two orders of magnitude larger than the
   run count and the tail statistics are the binding constraint, not the mean.
 - **Seed — [USER] slot.** PROPOSED at the cell's standing seed, recorded in the
@@ -162,25 +168,33 @@ design act downstream of a fired trigger.
 They are stated here because each one changes what a number below *means*, and
 because a registered read may not discover its own instrument at grading time.
 All three are corrections to §2's prose, not to the instrument; the instrument
-is unchanged and untouched by this commit.
+is unchanged and untouched by this commit. *Re-verified against code
+2026-08-30 at the re-stamped cell: all three facts still hold, and the two line
+numbers moved (`effects.py:4628` → **`:4664`**, `:4627` → **`:4657`**,
+`:5071` → **`:5107`**) — cited below at their current lines. `note_charge_read`
+is `tier0/engine/resources.py:270` and the per-turn emit is
+`tier0/engine/combat.py:1049`.*
 
 1. **The Garment tallies once per attack PLAY, not per target.** §2's table says
    *"once per attack play per target"*. The tick at
-   `tier0/engine/effects.py:4628` sits on the per-card resolution path, outside
+   `tier0/engine/effects.py:4664` sits on the per-card resolution path, outside
    any target loop, so an attack that hits every enemy tallies **one** read.
    Every count below is therefore a count of *resolutions*, not of damage
    applications, and an AoE Garment turn does not inflate it.
 2. **The Garment tick is gated on a non-empty bank** (`and p.charge` at
-   `effects.py:4627`). A turn played at bank 0 tallies **no** `garment` read
+   `effects.py:4657`). A turn played at bank 0 tallies **no** `garment` read
    even though the rider resolved — as zero. The pulse tick
-   (`effects.py:5071`) carries **no such gate** and fires every turn the summon
+   (`effects.py:5107`) carries **no such gate** and fires every turn the summon
    stands, at bank 0 included. The asymmetry biases the `garment` share
    **downward** on early turns and is a one-way error direction.
 3. **`KURAGE_ALWAYS_ON = True` is the shipped v4 base kit.** The jellyfish is
    installed at the start of every one of her combats and never expires, so the
    `kurage_pulse` read is present on **essentially every sampled player turn**
    and is the floor of the distribution, not an occasional term. Every
-   prediction below is drafted against that floor.
+   prediction below is drafted against that floor. *Re-verified 2026-08-30:
+   `KURAGE_ALWAYS_ON = True` (`tier0/constants.py:700`) and the Kurage Memory
+   rework is still quarantined OFF (`KURAGE_MEMORY = False`, `:695`), so the
+   per-turn pulse this slate is drafted against is the shipped one.*
 
 ### 5.1 The derived ceiling — **5 reads per turn**, and how it is derived
 
@@ -202,6 +216,13 @@ energy, a cost reduction, or a free play. That is the arithmetic meaning of
 "repeatable reads dominating a turn", and it is derived, not picked: change any
 of the four rows above and the 5 moves with it.
 
+*Re-verified against code and sheet 2026-08-30 at the re-stamped cell:
+`BASE_ENERGY_PER_TURN = 3` still sits at `tier0/constants.py:9`, and
+`docs/kokomi-cards.yaml` still prints exactly three `bonus_formula:
+1_per_2_charge` rows — `all_streams_flow` (`:416`), `nereids_ascension`
+(`:700`), `gyorin_formation` (`:850`) — so all four rows of the table above,
+and therefore the **5**, are unmoved by the stamp move.*
+
 ### 5.2 What is still [USER]'s
 
 Unchanged by R212 and unchanged here. §4's three PROPOSED slots — **`n` per
@@ -219,13 +240,34 @@ it reads. `charge_reads_turn` carries `total` and `by_source`; `charge_read`
 carries `kind`, `card`, `bank`, `turn`. No slot reads a field that does not
 exist today.
 
+*Revised 2026-08-30 on the pair review's correction — the share slots read
+COMPLETED turns.* `X4`, `X5` and §5.4's composition share previously divided
+raw `charge_read` events by raw `charge_read` events, which is **not** a
+sample of turns: §2.1's truncation drops the turn that killed the last enemy,
+and that turn's attack-side (`garment`, `bonus_formula`) reads still land in
+the raw stream while its `kurage_pulse` never does — the pulse rides
+`turn_close` behind the same door as the sample. A raw proportion therefore
+**over-states the repeatable share by an unknown amount and is a floor on
+nothing**. All three now sum `charge_reads_turn`.`by_source` across sampled
+(i.e. completed) player turns, so numerator and denominator come from the same
+turns. **Instrument fact, verified against code before this revision was
+written, requiring no build:** the `by_source` field already exists and is
+already per-completed-turn — `tier0/engine/combat.py:1049-1051` emits
+`charge_reads_turn` with `total=sum(state.charge_reads_this_turn.values())`
+and `by_source=dict(state.charge_reads_this_turn)`; `note_charge_read` tallies
+that dict per source (`resources.py:313`) and the turn boundary clears it
+(`combat.py:811`). Nothing is added to the emit; the grader sums a field that
+ships today. The raw `charge_read` stream keeps exactly two jobs here —
+`X7`'s truncation cross-check and `X6`'s play-boundary segmentation, neither of
+which is a per-turn share.
+
 | # | slot | prediction, and the intent it is drafted from | falsifier, mechanically | data source | UNREACHED when | the decision the outcome changes |
 |---|---|---|---|---|---|---|
 | `X1` | **Q1 mean reads per turn, pooled.** The pulse is a floor of 1 on essentially every turn (§5.0(3)); everything above 1 is the repeatable machinery. The Garment holds for only a few turns of a fight and the pool prints one on-curve reader, so the mean should sit just above the floor. | **≥ 1.0 and < 2.0.** | Mean of `charge_reads_turn`.`total` over all sampled player turns. **≥ 1.0 and < 2.0 = PREDICTED; 2.0 to < 3.0 = SPLIT; ≥ 3.0 or < 1.0 = MISS.** | `charge_reads_turn`.`total` | fewer than 5,000 sampled player turns | **PREDICTED**: the typical turn is a pulse turn and the repeatable readers are texture on top — the descriptive number R188's trigger was missing now exists and reads quiet. **MISS high**: the repeatable readers add more than two reads to the average turn, and §5.4's level limb is the thing to look at. **MISS low** (< 1.0): the instrument is not seeing the pulse and the read is INVALID, not quiet — see `X7`'s cross-check. |
 | `X2` | **Q1 p90 reads per turn, pooled.** A busy turn is a Garment turn with two attacks landing beside the pulse. That is 3. The ninetieth percentile should reach a busy turn and stop short of the §5.1 ceiling. | **≤ 3.** | p90 of `charge_reads_turn`.`total`. **≤ 3 = PREDICTED; 4 to 5 = SPLIT; > 5 = MISS.** | `charge_reads_turn`.`total` | fewer than 5,000 sampled player turns | **PREDICTED**: nine turns in ten sit at or under a pulse-plus-two-attacks turn. **SPLIT**: the busy turn reaches the printed ceiling but does not pass it — inside what the kit explains. **MISS**: one turn in ten is above what base energy and the printed pool can produce, which is the first evidence the level limb of §5.4 is live. |
 | `X3` | **Q1 max reads per turn observed.** The ceiling is 5 at base energy (§5.1). The cell runs a realistic loadout, so one energy potion or relic proc can roughly double the plays in a turn; twice the play budget is `1 + 6 + 1 = 8`, and a doubled-energy turn spending every point on cost-1 attacks with both printed attack readers drafted is about 13. | **≤ 8.** | Max of `charge_reads_turn`.`total`. **≤ 8 = PREDICTED; 9 to 13 = SPLIT; > 13 = MISS.** | `charge_reads_turn`.`total` | never — a max is defined on any non-empty sample | **PREDICTED**: the extreme turn is a one-potion turn and nothing else. **SPLIT**: the extreme turn is inside the doubled-energy envelope; recorded, not escalated. **MISS**: a turn exists that neither base energy nor a doubled-energy turn explains, i.e. a cost-reduction or free-play route is multiplying reads. That is a **BACKLOG** finding about the route, filed with the run's own seed and turn, and it is NOT by itself a Charge finding — the bank did nothing. |
-| `X4` | **Q2 share of reads from `garment`, pooled.** The Garment holds for a few turns of a fight and the pulse holds for all of them (§5.0(3)), and the tick is bank-gated (§5.0(2)). The pulse should carry the plurality of all reads. | **< 50%.** | `garment` events ÷ all `charge_read` events. **< 50% = PREDICTED; 50% to 65% = SPLIT; > 65% = MISS.** | `charge_read`.`kind` | fewer than 5,000 `charge_read` events | **PREDICTED**: the naturally-bounded reader is the bulk of the reads, and the composition limb of §5.4 is not live. **MISS**: the Garment — the one unbounded-within-the-turn reader — is most of what reads the bank, which is precisely the composition R188's "repeatable" names. |
-| `X5` | **Q2 share of reads from `bonus_formula`, pooled.** Three printed riders in a pool of that size, one uncommon and two rares (one of them a skill), each needing to be drafted and then drawn. This should be the smallest of the three sources by a distance. | **< 15%.** | `bonus_formula` events ÷ all `charge_read` events. **< 15% = PREDICTED; 15% to 30% = SPLIT; > 30% = MISS.** | `charge_read`.`kind` | fewer than 5,000 `charge_read` events | **PREDICTED**: the printed readers are a deckbuilding flavour, and the workshop's §6 scope boundary — whether they belong with the kit sources — is worth little either way, which is a finding the boundary question can be closed with. **MISS**: the printed readers are a third of all reads, the §6 boundary is load-bearing after all, and it returns to [USER] as a numbered pick about scope, never as an edit made here. |
+| `X4` | **Q2 share of reads from `garment`, pooled.** The Garment holds for a few turns of a fight and the pulse holds for all of them (§5.0(3)), and the tick is bank-gated (§5.0(2)). The pulse should carry the plurality of all reads. | **< 50%.** | `garment` reads ÷ all reads, **both summed from `charge_reads_turn`.`by_source` over sampled (completed) player turns** — not off the raw `charge_read` stream, which mixes truncated turns' attack-side reads with completed turns' pulses (§5.3's revision note). **< 50% = PREDICTED; 50% to 65% = SPLIT; > 65% = MISS.** | `charge_reads_turn`.`by_source` | fewer than 5,000 reads summed across sampled turns' `by_source` | **PREDICTED**: the naturally-bounded reader is the bulk of the reads, and the composition limb of §5.4 is not live. **MISS**: the Garment — the one unbounded-within-the-turn reader — is most of what reads the bank, which is precisely the composition R188's "repeatable" names. |
+| `X5` | **Q2 share of reads from `bonus_formula`, pooled.** Three printed riders in a pool of that size, one uncommon and two rares (one of them a skill), each needing to be drafted and then drawn. This should be the smallest of the three sources by a distance. | **< 15%.** | `bonus_formula` reads ÷ all reads, **both summed from `charge_reads_turn`.`by_source` over sampled (completed) player turns** (§5.3's revision note). **< 15% = PREDICTED; 15% to 30% = SPLIT; > 30% = MISS.** | `charge_reads_turn`.`by_source` | fewer than 5,000 reads summed across sampled turns' `by_source` | **PREDICTED**: the printed readers are a deckbuilding flavour, and the workshop's §6 scope boundary — whether they belong with the kit sources — is worth little either way, which is a finding the boundary question can be closed with. **MISS**: the printed readers are a third of all reads, the §6 boundary is load-bearing after all, and it returns to [USER] as a numbered pick about scope, never as an edit made here. |
 | `X6` | **Q3 double-read share of attack plays.** The R188 stack needs one of exactly **two** printed attack readers drafted AND drawn AND played while the Garment holds AND the bank non-empty. Four conditions, each independently unlikely. | **< 5% of attack plays.** | Attack plays carrying **both** a `bonus_formula` and a `garment` `charge_read` inside the same `play` segment, ÷ all attack plays. **< 5% = PREDICTED; 5% to 15% = SPLIT; > 15% = MISS.** | `charge_read` events segmented by `play` boundaries — **NOT by `card` id**, since a card played twice in a turn would collide. The grader must do the segmentation and it is an owed pre-run build (§5.5) | fewer than 1,000 attack plays | **PREDICTED**: the double read is the rare deckbuilding reward R188 ruled it, measured for the first time and behaving like one. **MISS**: the intended stack is a routine event rather than a reward, which is the exact reading R188's deferral said would bring the question back — §5.4's Limb B. |
 | `X7` | **Q4 direction of the tail against turn number.** The bank only grows, but the read COUNT is play-shaped, not bank-shaped — so intent says the count rises only through the bank gate of §5.0(2) opening on early turns, and then flattens. A count that keeps climbing with turn number is the shape *"watch act 3"* was written about. | **Mean reads/turn on turns ≥ 6 exceeds turns 1–5, and the gap is < 1.0 read.** | `charge_reads_turn`.`total` bucketed by `turn`. **Rises and gap < 1.0 = PREDICTED; rises and gap ≥ 1.0 = SPLIT; flat or falls = MISS.** Reported beside it, graded by nothing: the same split per act, and **the §2.1 truncation cross-check** — total `charge_read` events against summed `charge_reads_turn`.`total`, which measures exactly how much the killing-turn truncation drops. | `charge_reads_turn`.`total`, `charge_read` | fewer than 2,000 sampled turns at turn number ≥ 6 | **PREDICTED**: reads do not scale with the fight the way the bank does, and the standing *"watch act 3"* caveat is about the SIZE of a read, not the number of them — a distinction that has never been on the record. **SPLIT**: late turns carry a whole extra read; recorded against the act-3 caveat and carried to whoever reads the pulse-size telemetry beside it. **MISS**: the intent is wrong in the direction that matters least (fewer reads late), and §5.4's limbs are unaffected. |
 
@@ -246,8 +288,15 @@ decision attached:
 **Contamination and blind spots, stated before the run.**
 
 1. **§2.1's truncation.** The final turn of most fights contributes no sample and
-   the loss is toward the BUSY end. Every number above is therefore a **floor**,
-   and `X7`'s cross-check is the only measurement of how much of a floor.
+   the loss is toward the BUSY end. Every **count** above — `X1`–`X3`'s levels
+   and `X7`'s buckets — is therefore a **floor**, and `X7`'s cross-check is the
+   only measurement of how much of a floor. *Revised 2026-08-30 on the pair
+   review's correction: **the SHARES are not floors in either direction.**
+   `X4` and `X5` are proportions, and a proportion moves both ways when a turn
+   is dropped — which is also why they now read completed turns' `by_source`
+   rather than the raw stream (§5.3). A dropped turn removes its pulse and its
+   attack-side reads together, so a share computed on completed turns is an
+   estimate with an unsigned error, not a bound; only its inputs are bounded.*
 2. **Pilot-shaped, not player-shaped** (§8). The pilot does not steer toward a
    Garment turn, does not hold a printed reader for a Garment window, and does
    not sequence attacks to stack reads. A human who plays toward the double read
@@ -279,19 +328,37 @@ workshop's own words rather than a pick.
 **`W9` FIRES — `X9` returns to [USER] at QUEUE as a numbered pick — if EITHER
 of the following holds on the graded report. Nothing else fires it.**
 
-**Limb A — the turn is dominated. BOTH halves must hold:**
+**Limb A — the composition is dominated. ONE condition, and it fires by
+itself:**
 
-- **A1, the level: `p50` reads per sampled player turn is `> 5`** — strictly
-  above §5.1's derived ceiling. The *median* turn contains more reads than the
-  printed kit can produce at base energy with everything live.
-- **A2, the composition: `garment` + `bonus_formula` together are `> 50%` of all
-  `charge_read` events.** "Dominant" in plain English is *more than half*, and
-  there is exactly one non-repeatable reader for them to be more than half of.
+- **A, the composition: `garment` + `bonus_formula` together are `> 50%` of all
+  reads, summed from `charge_reads_turn`.`by_source` over sampled (completed)
+  player turns** (§5.3's revision note — not the raw `charge_read` stream).
+  "Dominant" in plain English is *more than half*, and there is exactly one
+  non-repeatable reader for them to be more than half of.
 
-Both, because either alone is degenerate: A2 alone fires on any run where the
-summon happened not to stand, and A1 alone could in principle be reached without
-the repeatable readers being what got it there. `X1`–`X4` are the slots that
-carry these two quantities.
+**Reported alongside any firing, as a SEVERITY INDICATOR and not as a
+condition: `p50` reads per sampled player turn, and whether it exceeds §5.1's
+derived ceiling of 5.** A firing with `p50 > 5` is a loud one — the *median*
+turn contains more reads than the printed kit can produce at base energy with
+everything live. A firing with `p50 ≤ 5` is a quiet one: the composition has
+tipped while the level has not. Both fire; the indicator tells [USER] which
+kind of question is coming back, and it grades nothing on its own.
+
+*Revised 2026-08-30 on the pair review's correction: `p50 > 5` was a mandatory
+conjunct beside the composition share, and the conjunction carried far too much
+false-negative risk for what firing actually does. **Firing merely returns the
+question to [USER] as a numbered pick** — it nerfs nothing (see "A candidate,
+not a verdict" below) — so a trigger that stays silent while the repeatable
+readers carry most of the bank's reads, purely because the median turn is
+short, fails at the one job R188 gave it. The old defence of the conjunction
+was that A2 alone "fires on any run where the summon happened not to stand";
+that is now handled where it belongs, in the reading rather than the predicate:
+a firing report states the `kurage_pulse` share and the count of sampled turns
+carrying no pulse, so a composition tipped by an absent summon is visible on
+its face. The level survives as the severity indicator above, unchanged in
+definition and still the pooled `p50` of §3's Q1, recorded at `R1`.* `X4` and
+`X5` carry the firing quantity; §3's Q1 statistics carry the indicator.
 
 **Limb B — the ruled double read has become the baseline: the `X6` share of
 attack plays is `> 50%`.** R188 ruled the double read *intended stacking*
@@ -301,9 +368,10 @@ reward; it is the default, and the thing R188 ruled on has changed shape. Fifty
 percent is the same plain-English *dominant*, applied to the quantity R188's own
 sentence is about.
 
-**Expressible in §3's columns, as the packet requires.** A1 is §3's Q1 `p50`; A2
-is §3's Q2 shares; Limb B is §3's Q3. No limb names a quantity this measurement
-does not produce, and nothing is added at grading time.
+**Expressible in §3's columns, as the packet requires.** Limb A is §3's Q2
+shares; Limb B is §3's Q3; the severity indicator is §3's Q1 `p50`. No limb
+names a quantity this measurement does not produce, and nothing is added at
+grading time.
 
 **A candidate, not a verdict.** Firing `W9` mints a QUEUE row and reopens the
 question. It nerfs nothing, caps nothing, dedupes nothing and budgets nothing.
@@ -311,18 +379,21 @@ Whether Charge changes is a design act, downstream, and [USER]'s — and the
 `strict=True` xfail on `EB-78`'s row is what stops the suite if a cap, a dedupe
 or a late budget ever lands without one.
 
-**THE ONE JUDGEMENT CALL, flagged in place.** The **5** is derived (§5.1) and
-the **50%**s are the plain meaning of *dominant*. What is **judged** is that
-A1's level rides the **`p50`** rather than the mean, the `p90` or the `p99`.
-The defence, and the reason it errs in a known single direction: §2.1's
-truncation drops the final turn of most fights and drops it toward the **busy**
-end, so the observed upper tail is the least trustworthy part of this
-distribution and the median is the statistic the truncation corrupts least.
-Hanging the trigger on the median therefore makes `W9` **harder** to fire than a
-tail-based trigger would — the error direction is toward NOT reopening `X9`,
-which is the conservative direction for a trigger whose whole job is to raise a
-candidate rather than to settle anything. **If [USER] prefers a tail limb, that
-is a revision at the countersign and this is the sentence to revise.**
+**THE ONE JUDGEMENT CALL, flagged in place** (*restated 2026-08-30 with the
+`p50` demoted — the call moved with it, it did not disappear*). The **5** is
+derived (§5.1) and the **50%**s are the plain meaning of *dominant*. What is
+**judged** is that the **severity indicator** rides the `p50` rather than the
+mean, the `p90` or the `p99`. §2.1's truncation drops the final turn of most
+fights and drops it toward the **busy** end, so the observed upper tail is the
+least trustworthy part of this distribution and the median is the statistic the
+truncation corrupts least — which is why the median is the honest thing to
+report beside a firing. **What is no longer judged is the trigger's own
+sensitivity:** the median used to gate the firing, and hanging the gate on the
+most truncation-resistant statistic made `W9` harder to fire in a direction
+nobody had priced. Now the level cannot suppress a firing at all; it only
+labels one. **If [USER] prefers the level back as a conjunct, or a tail
+statistic as the indicator, that is a revision at the countersign and this is
+the paragraph to revise.**
 
 ### 5.5 What is owed BEFORE the run, in this order
 
@@ -332,7 +403,11 @@ Nothing here has been built and nothing has been run.
 2. **The grader**, committed in its own commit before the run: every falsifier
    above must be one of its printed fields, including `X6`'s `play`-boundary
    segmentation, which the instrument does not do for it (§5.3, `X6`'s data
-   source).
+   source). *Added 2026-08-30 with the share revision:* the grader sums
+   `charge_reads_turn`.`by_source` over completed turns for `X4`, `X5` and
+   §5.4's Limb A — a field that already ships, so no emit-side build is owed —
+   and it prints, beside any `W9` firing, the `p50` severity indicator, the
+   `kurage_pulse` share, and the count of sampled turns carrying no pulse.
 3. **The stamp check** (§4): if the open `RT`/`C` window moved since drafting,
    the packet is re-stamped **before** the freeze and the move is disclosed.
 4. **The run**, then **blind grading** against §5.3 without editing it, in §6's

@@ -279,8 +279,16 @@ carried while it was active is in the commit message that retired it.
   `review/active/regret-margin-registration-2026-08-12.md`.
 - **Charge reads per turn (`EB-78`)** — **SLATE DRAFTED, unrun**: §5 is
   `X9READ-S1`, seven slots `X1`–`X7`, and §5.4 is where *repeatable reads
-  dominant* became a number — `p50` > 5 reads per turn AND the repeatable
-  sources > 50% of reads, or the ruled double read > 50% of attack plays.
+  dominant* became a number — the repeatable sources > 50% of the reads counted
+  on completed turns fires by itself (`p50` > 5 reads per turn rides beside a
+  firing as a SEVERITY INDICATOR, not as a condition), or the ruled double read
+  > 50% of attack plays. *Revised 2026-08-30 on the pair review's correction:
+  the level was a mandatory conjunct, and since a firing merely returns the
+  question to [USER] the conjunction carried too much false-negative risk; the
+  share slots and the trigger also moved from raw `charge_read` events to
+  completed turns' `charge_reads_turn`.`by_source`, which the emit already
+  carries. The packet is re-stamped to the live cell, and it is still DRAFTED,
+  unrun and uncountersigned.*
   **Instrument:** `resources.note_charge_read` — emit-only, count-only, tagged
   per source. **Cell:** resolved Charge reads per completed player turn.
   **Status:** descriptive, so it grades no design and cannot on its own fire a
@@ -385,9 +393,17 @@ carried while it was active is in the commit message that retired it.
   Its sim sibling `KURAGECAD-S1` is finished and sits in the published table
   above; the live leg inherits from it the staging SHAPE and **no threshold**.
   **Unit:** one `understudy.blindplay session` on a `+proto` build, Codex seat,
-  Kokomi's flagged starter plus five GRANTED rows (§15.8.2 — three Exhaust
-  printers, the sim's own median and not above it, so a jam observed live is a
-  FLOOR). **Slate:** `K1` readability off the live page — does anything fire
+  Kokomi's flagged starter plus five GRANTED rows (§15.8.2 — an
+  **INTENTIONALLY ENRICHED STRESS DECK**: the starter's own
+  `gorou_inuzaka_charge` prints Exhaust, so with Sucrose, Bennett and
+  Waterspout the live deck carries FOUR Exhaust printers against the sim's
+  drafted median of three, and `conscription_notice` can enrol more mid-fight.
+  *Revised 2026-08-30 on the pair review's correction: this previously read
+  "three Exhaust printers, the sim's own median and not above it, so a jam
+  observed live is a FLOOR" — the count forgot the starter. **The cell
+  over-samples enrolment pressure and extrapolates to no drafted deck in
+  either direction**: a jam here is not a floor, a clean run here clears
+  nothing, and what a jam licenses is the return of §15.6's cap pick.*). **Slate:** `K1` readability off the live page — does anything fire
   next turn, and where does the Charge run out — which folds in `EB-198`'s blind
   read deliberately, for the page mirror only (§15.8.6); `K2` the live beat on a
   deliberately wide band (≥ 25% of combat pages), with `S1`'s 60.9% riding as a
