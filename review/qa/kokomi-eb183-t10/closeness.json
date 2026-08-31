@@ -1,0 +1,57 @@
+{
+ "source": "declared board (prototype route)",
+ "falsifier": "decision-closeness (R213 F)",
+ "dominance_gap": 0.5,
+ "quotability": "a falsifier reading of the TURN, quotable under R215 B's exception to the prototype clause; never a claim that a decision is fun and never comparable across turns",
+ "guardrail": "staged board: this hand and this board were set by hand through a dev door, so nothing measured here is comparable to any run, and nothing here is a claim about whether the turn is fun",
+ "applicable": true,
+ "verdict": "SURVIVES",
+ "gap": 0.285,
+ "top1": 20.7,
+ "top2": 14.8,
+ "lines_considered": 14,
+ "playouts": 26,
+ "plays_refused": 0,
+ "pilot": "generic",
+ "lines": [
+  {
+   "cards": [
+    "Coral Guard",
+    "Water's Edge",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 20.7
+  },
+  {
+   "cards": [
+    "Coral Guard",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 14.8
+  },
+  {
+   "cards": [
+    "Water's Edge",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 14.8
+  },
+  {
+   "cards": [
+    "Bounty of the Isles",
+    "Coral Guard",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 14.6
+  },
+  {
+   "cards": [
+    "Bounty of the Isles",
+    "Water's Edge",
+    "All Streams Flow to the Sea"
+   ],
+   "score": 14.6
+  }
+ ],
+ "reason": "no line dominates by more than the derived gap"
+}
