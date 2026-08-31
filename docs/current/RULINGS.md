@@ -240,7 +240,7 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R228 | 2026-08-30 | landed: sink set 4 + 6 as fold baseline, M68 (1) one-mode priced Spotlight, EB-235 minted | `071f280` |
 | R229 | 2026-08-30 | landed: Bag of Tricks refund accepted as a test condition, arm AT RISK under a pre-registered return | `b3c33d0` |
 | R230 | 2026-08-30 | landed: Bag of Tricks' refund accepted as a deliberate BRIDGE mechanic, option (3) qualified | `9e5560c` |
-| R231 | 2026-08-30 | art rulings applied: the last four Rares land, three Klee spares get picks, and one sigil moves | `6181278` |
+| R231 | 2026-08-30 | landed: the sitting slate whole -- slot 6 ruled to a third design, four QUEUE rows closed, two narrowed | `65b2451` |
 | R232 | 2026-08-30 | landed: the costs battery asks the ledger's question now, and the mark stays at 4/6 | `3f5887a` |
 
 231 rows over the R1..R232 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 120 from a commit message, 0 unresolved.
