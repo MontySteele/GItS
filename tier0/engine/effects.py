@@ -55,8 +55,21 @@ def _amount(state: CombatState, val) -> int:
 
 
 def _bonus_formula(state: CombatState, formula: str,
-                   card: Optional[Card] = None) -> int:
+                   card: Optional[Card] = None, *,
+                   valuation: bool = False) -> int:
     """Scaling riders on a damage or block amount.
+
+    `valuation=True` says THIS CALL IS AN ESTIMATE, not a resolution (EB-242).
+    The pilot prices a rider through this exact helper on purpose -- that is
+    what keeps its price from drifting from what resolving the card pays --
+    but a price is not a play, so an estimate must not tick the reads-per-turn
+    instrument. `resources.note_charge_read` declared the two pilot sites out
+    of scope from the day it landed, and §2 of the charge registration says
+    deliberation is deliberately NOT counted; the flag is that declaration
+    made executable. Everything else -- both engine resolve sites, and the
+    suite's direct probes of the primitive -- is a resolution and tallies
+    exactly what it always did, because the DEFAULT is the resolve path and
+    the exemption has to be asked for.
 
     Two grammars, and the difference is deliberate:
 
@@ -104,8 +117,12 @@ def _bonus_formula(state: CombatState, formula: str,
         # Kokomi finisher reads (kickoff §2.2): Charge is READ, never
         # consumed. Rate limits (Rare / Exhaust / cost >= 2) live on the
         # card rows, not here — this is only the arithmetic.
-        resources.note_charge_read(state, "bonus_formula",
-                                   card=card.id if card else None)
+        #
+        # EB-242: the tick is on the RESOLVE path only. A pilot valuation
+        # reaches the same arithmetic and must leave the instrument alone.
+        if not valuation:
+            resources.note_charge_read(state, "bonus_formula",
+                                       card=card.id if card else None)
         return int(n) * (state.player.charge // int(m))
     if what == "encore" and m.isdigit():
         # Curtain Call C (R85): damage reading the held buffer -- Body
