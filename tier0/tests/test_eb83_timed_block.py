@@ -2,7 +2,7 @@
 built as UNUSED MACHINERY.
 
 The row's one live blocker was an engine op: Toric Toughness's replacement
-(designed-not-shipped as *Chinowa Ward*) prints "gain X Block at the start of
+(designed-not-shipped as *Chinju Ward*) prints "gain X Block at the start of
 your next 2 turns", and tier0 had no way to say it. `block_next_turn` is a
 one-shot bank popped whole at the next turn start, and `powers` is a
 `name -> int` map, so a power carrying *(amount, turns remaining)* had nowhere
@@ -10,8 +10,8 @@ to put its second number.
 
 It is built FIRST AND ALONE, on the EB-82 admission rule: an engine surface is
 never invented inline inside a conversion. The two replacement cards and the
-Wood Carvings conversion are [USER]-gated (the RT window, and the S4-G11
-name eye-read), so this lands with NO CARRIER at all.
+Wood Carvings conversion are [USER]-gated (the RT window; the S4-G11 name
+eye-read was discharged by R231), so this lands with NO CARRIER at all.
 
 The first tests below pin that carrier-lessness -- which is the stamp-free
 claim, and therefore the claim that no measured number moved. The rest drive

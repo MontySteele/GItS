@@ -598,6 +598,16 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     tightening — "directly" defined, "cheaply repeatable" kept — also
     prospective, so **no `LAW.md` line moved**; and `F1`, `F13`, `F14` at
     option (2) with the other thirteen at their defaults, Slot 6 kept.
+    **R231 (2026-08-30) then RULED slot 6 (`F7` + §4.2) to [USER]'s own
+    revised design:** removal STAYS, but a dedicated Evoke CHOOSES which
+    member to remove, while full-stage deployment continues to auto-Evoke the
+    FRONT — so Encore buys deliberate control and overflow deployment stays
+    the reward for filling the stage. **`F5` changes front-only → player
+    choice**, which moves the written world under the Furina prediction slots
+    (at least 2 and 3, plus any `F5`-touching slot): those slots are OWED a
+    REDRAFT-AND-DISCLOSE under R212 before the five-prediction countersign,
+    and none of the five is countersigned. Implementation follows on a Furina
+    branch once `furina-slice-1` merges.
     **Nothing implements before Klee closes** (R213). Her Burst fold is one of R220 B's
     three, and it is the last of them.
   - **Build and grading rhythm (facts, not rulings).** CI takes a
@@ -766,15 +776,33 @@ sink set is kept as the FOLD BASELINE with no third granted-deck batch (options
 option (1), one-mode priced Spotlight, so no `M`-row is open on either. So what
 remains here returns only WITH EVIDENCE or
 WITH TABLE TIME: Klee `PICK 1` (reopens if the income reads short), `M45`'s five
-(after `S4-G14`), Slot 6's fork (only on confirmation), `S4-G6`'s band (Claude
-drafts, after the Kokomi fold), and `S4-G14` itself. The slate's third section in
+(after `S4-G14`), `S4-G6`'s band (Claude drafts from written intent — the
+mechanism ruled at R231 — after the Kokomi fold), and `S4-G14` itself. Slot 6's
+fork is no longer among them: R231 RULED it. The slate's third section in
 `review/active/sitting-2026-08-30.md` carries that list.
 
+**R231 (2026-08-30) landed the sitting slate whole and emptied most of what was
+left here.** `M14` closed as NOISE — the published trigger result stands exactly
+as graded (R101b), −0.07 pp with no interval separation against a 20.7% slot-one
+purchase rate. `S4-G11` was ruled in all three parts: *Backstroke* KEPT, *Tengu
+Flurry* KEPT with `chinowa_ward` renamed **`chinju_ward`**, and the `EB-82` Grave
+conversion taking the Liyue / Nameless Cairn labels. `M16` closed at
+`SceneSlots = 4` as headroom; `M10` closed with the Fontaine Rares approved and
+Neuvillette shipping as-is; `M19` closed at **A Fontaine Hydro**, which lifts
+`EB-40`'s gate. `S4-G6`'s MECHANISM is answered (Claude drafts from written
+intent, countersigned before the confirmatory run) while the band itself stays
+owed. Two rows NARROWED rather than closed — `S8`+`S10` to **Globe Head** alone,
+and Art debt to **`grand_gala` r6** alone. R231 also ruled Furina's slot 6 (`F7`
+/ §4.2) to [USER]'s own revised design — removal stays, a dedicated Evoke CHOOSES
+which member to remove, and full-stage deployment keeps auto-Evoking the front —
+which moves the written world under the Furina prediction slots and OWES a
+redraft-and-disclose under R212 before any countersign. `EB-241` is minted.
+
 Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
-stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
-countersign (`M14`); the name/lore and art eyes-on pile
-(`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
-Art debt); the Fontaine Rares close-out (`M10`); and — after **R224
+stability-band declaration (`S4-G6`, mechanism answered) and her protocol
+playtest (`S4-G14`); the art eyes-on pile
+(`S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M26`, `S8`+`S10` = Globe Head,
+Art debt = `grand_gala` r6); and — after **R224
 (2026-08-30) closed `M49`, `M50`, `M52`, `M54`, `M56`, `M57`, `M59` and `M60`**
 — **`M47`, `M55` and `M64` with them, and `M67` by R227, so NO prototype-slice
 row is open.**

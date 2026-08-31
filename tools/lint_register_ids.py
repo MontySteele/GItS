@@ -276,7 +276,10 @@ CEILINGS: dict[str, int] = {
     # integration reproduced and then diagnosed off the quoted save path --
     # it is a cross-SESSION leak, and the standing "rerun the file alone"
     # workaround is the reason nobody had looked.
-    "EB": 240,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-241 minted 2026-08-30 by R231 A3: `Card.is_junk` is rarity-only,
+    # and the fix is scheduled AT the Kokomi fold because it moves shipped
+    # numbers and rides the fold's already-required re-baseline.
+    "EB": 241,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -785,6 +788,8 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # immediately falsified a printed assumption, and the preflight's
         # assumption check cannot see the wire's relic list.
         240,
+        # 241 minted 2026-08-30 by R231 A3, gated on the Kokomi fold.
+        241,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -837,7 +842,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # the selector aims a Companion and costs Encore. M45(4) is answered with
     # it; M45 itself stays until its other six calls are answered. Ceilings
     # never come down.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
+    # M10, M14, M16 and M19 LEFT OPEN_IDS 2026-08-30 with their rows,
+    # closed by R231: the Fontaine Rares close APPROVED with Neuvillette
+    # shipping as-is; the companion-channel trigger closed as NOISE, the
+    # published grade standing as graded (R101b); SceneSlots stays at 4 as
+    # harmless headroom; and the energy orb takes A Fontaine Hydro, which
+    # lifts EB-40's gate. Ceilings never come down.
+    "M": frozenset({13, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
@@ -845,9 +856,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
 # on these, so there is no ceiling — the set IS the manifest, with the same
 # rot semantics as OPEN_IDS. A retired `S4-G7` is therefore refused the same
 # way a retired `EB-53` would be: it is simply not in here.
+# S4-G11 left this manifest 2026-08-30 with its row, ruled in all three parts
+# by R231: Backstroke KEPT, Tengu Flurry KEPT with `chinowa_ward` renamed
+# `chinju_ward`, and the EB-82 Grave conversion taking the Liyue / Nameless
+# Cairn labels. S4-G6 STAYS -- R231 answered only its MECHANISM.
 OPEN_IRREGULAR: frozenset[str] = frozenset({
     "CC-G1", "CC-G2",
-    "S4-G6", "S4-G11", "S4-G12", "S4-G14", "S4-G17",
+    "S4-G6", "S4-G12", "S4-G14", "S4-G17",
     "SKIP-10.9",
 })
 
