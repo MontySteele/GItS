@@ -1054,6 +1054,22 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # back precisely because a pool can lack a tier. The row exists because
         # the anchor made a latent crash reachable, not because anything has
         # crashed. `docs/current/research/colorless-anchor-2026-08-30.md`.
+        #
+        # 250 LEFT OPEN_IDS 2026-08-31 with its row, on its acceptance word
+        # for word -- "a commonless pool rolls its offers, on a test seen to
+        # FAIL". `tier05/tests/test_eb250_commonless_pool_rolls.py` was seen
+        # to fail 4 of 6 first, on the row's own `KeyError` raised at
+        # `rewards.py:252`, and passes 6 of 6 after. The ladder now offers a
+        # roll its own tier, then the tiers BELOW in the order they have
+        # always been tried, then the tiers above -- the base game's
+        # fall-forward for the end the downward walk used to run off, and
+        # byte-identical for every pool that already resolved. Down is still
+        # first deliberately: the wrapping walk taken whole would re-point
+        # the reference pools' rare rolls from uncommon to common and move
+        # every archived number taken on them, and two of the six cases pin
+        # exactly that. The `distinct=True` ladder keeps its downward-only
+        # step -- a different question -- with a `seen` set so a resolvable
+        # step forward cannot spin.
         # 251: the two Klee Personal Companion card drafts R234 owes at its
         # section 5.3 (P2 and P5), 4-star, against P5a's standing bar for a
         # Rare. Design DRAFTING, which the R212 ladder makes Claude's; the pick
@@ -1061,7 +1077,6 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # [USER]'s. It is a row and not a QUEUE line because nothing here asks
         # him anything yet. Sheet rows are gated on the Burst fold (P3).
         249,
-        250,
         251,
         # 252 minted 2026-08-30: the role-tempo baseline predates 0.111.0; a
         # full regen moves floors and reads two NEW coverage findings on
