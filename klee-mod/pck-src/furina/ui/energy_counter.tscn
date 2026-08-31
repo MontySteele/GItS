@@ -1,0 +1,116 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Texture2D" path="res://furina/ui/energy_orb/layer1_backglow.png" id="1_backglow"]
+[ext_resource type="Texture2D" path="res://furina/ui/energy_orb/layer2_body.png" id="2_body"]
+[ext_resource type="Texture2D" path="res://furina/ui/energy_orb/layer5_gloss.png" id="3_gloss"]
+[ext_resource type="Texture2D" path="res://furina/ui/energy_orb/layer3_caustics.png" id="4_caustics"]
+[ext_resource type="Texture2D" path="res://furina/ui/energy_orb/layer4_ring.png" id="5_ring"]
+
+[node name="FurinaEnergyCounter" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 128.0
+offset_bottom = 128.0
+pivot_offset = Vector2(64, 64)
+
+[node name="EnergyVfxBack" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -64.0
+offset_top = -64.0
+offset_right = 64.0
+offset_bottom = 64.0
+mouse_filter = 2
+
+[node name="Layers" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -64.0
+offset_top = -64.0
+offset_right = 64.0
+offset_bottom = 64.0
+mouse_filter = 2
+
+[node name="BackGlow" type="TextureRect" parent="Layers"]
+layout_mode = 0
+offset_right = 128.0
+offset_bottom = 128.0
+pivot_offset = Vector2(64, 64)
+mouse_filter = 2
+texture = ExtResource("1_backglow")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Body" type="TextureRect" parent="Layers"]
+layout_mode = 0
+offset_right = 128.0
+offset_bottom = 128.0
+pivot_offset = Vector2(64, 64)
+mouse_filter = 2
+texture = ExtResource("2_body")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Gloss" type="TextureRect" parent="Layers"]
+layout_mode = 0
+offset_right = 128.0
+offset_bottom = 128.0
+pivot_offset = Vector2(64, 64)
+mouse_filter = 2
+texture = ExtResource("3_gloss")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RotationLayers" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -64.0
+offset_top = -64.0
+offset_right = 64.0
+offset_bottom = 64.0
+mouse_filter = 2
+
+[node name="Caustics" type="TextureRect" parent="RotationLayers"]
+layout_mode = 0
+offset_right = 128.0
+offset_bottom = 128.0
+pivot_offset = Vector2(64, 64)
+mouse_filter = 2
+texture = ExtResource("4_caustics")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Ring" type="TextureRect" parent="RotationLayers"]
+layout_mode = 0
+offset_right = 128.0
+offset_bottom = 128.0
+pivot_offset = Vector2(64, 64)
+mouse_filter = 2
+texture = ExtResource("5_ring")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Label" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -64.0
+offset_top = -20.0
+offset_right = 64.0
+offset_bottom = 20.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.04, 0.09, 0.16, 0.9)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+vertical_alignment = 1
+text = ""
+
+[node name="EnergyVfxFront" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -64.0
+offset_top = -64.0
+offset_right = 64.0
+offset_bottom = 64.0
+mouse_filter = 2

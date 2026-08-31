@@ -29,7 +29,7 @@ packages:
   defect_orbs: {character: Defect, n: 41}
   necro_summons: {character: Necrobinder, n: 22}
   ironclad_strength: {character: Ironclad, n: 8}
-  regent_forge: {character: Regent, n: 19}
+  regent_stars: {character: Regent, n: 35}
 
 default:
   mandatory:
@@ -37,15 +37,15 @@ default:
     "frontload|late": 16.7
     "frontload|mid": 8.3
     "scaling|late": 4.5
+    "scaling|mid": 4.5
   identity_only:
     "block|early": [ironclad_strength, silent_poison]
     "block|late": [ironclad_strength]
     "block|mid": [ironclad_strength, silent_poison]
-    "scaling|early": [ironclad_strength, necro_summons, regent_forge, silent_poison]
-    "scaling|mid": [regent_forge]
-    "velocity|early": [ironclad_strength, necro_summons, regent_forge, silent_poison]
+    "scaling|early": [ironclad_strength, necro_summons, silent_poison]
+    "velocity|early": [ironclad_strength, necro_summons, silent_poison]
     "velocity|late": [ironclad_strength, necro_summons, silent_poison]
-    "velocity|mid": [ironclad_strength, regent_forge, silent_poison]
+    "velocity|mid": [ironclad_strength, silent_poison]
 
 anchored:
   "furina/fanfare":
@@ -109,31 +109,39 @@ anchored:
       "scaling|mid": 8.3
     identity_only: ["block|early", "block|mid", "scaling|early", "velocity|early", "velocity|late", "velocity|mid"]
   "klee/spark":
-    package: regent_forge
-    n: 19
+    package: regent_stars
+    n: 35
     mandatory:
-      "block|early": 5.3
-      "block|late": 10.5
-      "block|mid": 10.5
-      "frontload|early": 21.1
-      "frontload|late": 26.3
-      "frontload|mid": 21.1
-      "scaling|late": 10.5
-      "velocity|late": 26.3
-    identity_only: ["scaling|early", "scaling|mid", "velocity|early", "velocity|mid"]
+      "block|early": 11.4
+      "block|late": 11.4
+      "block|mid": 5.7
+      "frontload|early": 37.1
+      "frontload|late": 34.3
+      "frontload|mid": 28.6
+      "scaling|early": 2.9
+      "scaling|late": 22.9
+      "scaling|mid": 5.7
+      "velocity|early": 2.9
+      "velocity|late": 8.6
+      "velocity|mid": 5.7
+    identity_only: []
   "kokomi/commander":
-    package: regent_forge
-    n: 19
+    package: regent_stars
+    n: 35
     mandatory:
-      "block|early": 5.3
-      "block|late": 10.5
-      "block|mid": 10.5
-      "frontload|early": 21.1
-      "frontload|late": 26.3
-      "frontload|mid": 21.1
-      "scaling|late": 10.5
-      "velocity|late": 26.3
-    identity_only: ["scaling|early", "scaling|mid", "velocity|early", "velocity|mid"]
+      "block|early": 11.4
+      "block|late": 11.4
+      "block|mid": 5.7
+      "frontload|early": 37.1
+      "frontload|late": 34.3
+      "frontload|mid": 28.6
+      "scaling|early": 2.9
+      "scaling|late": 22.9
+      "scaling|mid": 5.7
+      "velocity|early": 2.9
+      "velocity|late": 8.6
+      "velocity|mid": 5.7
+    identity_only: []
   "kokomi/priest":
     package: defect_orbs
     n: 41

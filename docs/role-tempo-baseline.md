@@ -147,8 +147,20 @@ population to be the canon **package** instead.
 A package is the subset of a canon pool whose card bodies name one
 mechanic layer, **on either side** — the card that applies Poison and
 the card that reads the stack are both poison cards. Membership is
-structural (`mentions` off the decompiled body), so no hand-drawn card
-list enters this file.
+structural (`mentions` off the decompiled body) for four of the five.
+
+**`regent_stars` is the exception, and it is disclosed rather than
+hidden (EB-192 / R231).** A Star price is a second COST FIELD on the
+card model, not a call in its body, and no spender’s rules text names
+its price — so a body regex sees the generators and none of the
+spenders. What this package used to be, `regent_forge`, was a regex
+union that fused Stars with the unrelated **Forge** card and ran about
+half Forge-only. Membership now comes from the decompile-sourced census
+in `docs/current/research/regent-stars-economy.md` (§2 every generator,
+§3.5 every spender, §3.6 the readers), held as an explicit list in
+`tools/canon_role_tempo.py::REGENT_STARS` and locked to that note by
+test. The list is base-game material and stays out of this file, which
+is percentages-only exactly as before.
 
 | package | character | cards | what shape it is |
 |---|---|---|---|
@@ -156,35 +168,35 @@ list enters this file.
 | `defect_orbs` | Defect | 41 | persistent entities that sit on the board and fire on their own schedule, plus the Power that scales them. |
 | `necro_summons` | Necrobinder | 22 | a card deploys a persistent body, the body acts on its own schedule, and the pool is built around how many are out. |
 | `ironclad_strength` | Ironclad | 8 | an UNBOUNDED per-attack additive that every attack in the deck inherits. |
-| `regent_forge` | Regent | 19 | a spendable run-and-fight resource that cards both generate and consume. |
+| `regent_stars` | Regent | 35 | a per-combat bank that cards gain, spend as a second printed price, and read. |
 
 **The sizes are the point**: 8–41 cards against GItS archetypes at
 11–32. The two sides are finally the same kind of object.
 
 ### The (solve × fight-band) matrix, per PACKAGE (% of package)
 
-| cell | silent_poison | defect_orbs | necro_summons | ironclad_strength | regent_forge |
+| cell | silent_poison | defect_orbs | necro_summons | ironclad_strength | regent_stars |
 |---|---|---|---|---|---|
-| `block\|early` | 0.0 | 7.3 | 27.3 | 0.0 | 5.3 |
-| `block\|late` | 8.3 | 26.8 | 45.5 | 0.0 | 10.5 |
-| `block\|mid` | 0.0 | 17.1 | 36.4 | 0.0 | 10.5 |
-| `frontload\|early` | 8.3 | 22.0 | 27.3 | 12.5 | 21.1 |
-| `frontload\|late` | 16.7 | 61.0 | 68.2 | 50.0 | 26.3 |
-| `frontload\|mid` | 8.3 | 34.1 | 63.6 | 25.0 | 21.1 |
-| `scaling\|early` | 0.0 | 12.2 | 0.0 | 0.0 | 0.0 |
-| `scaling\|late` | 41.7 | 73.2 | 4.5 | 75.0 | 10.5 |
-| `scaling\|mid` | 8.3 | 29.3 | 4.5 | 12.5 | 0.0 |
+| `block\|early` | 0.0 | 7.3 | 27.3 | 0.0 | 11.4 |
+| `block\|late` | 8.3 | 26.8 | 45.5 | 0.0 | 11.4 |
+| `block\|mid` | 0.0 | 17.1 | 36.4 | 0.0 | 5.7 |
+| `frontload\|early` | 8.3 | 22.0 | 27.3 | 12.5 | 37.1 |
+| `frontload\|late` | 16.7 | 61.0 | 68.2 | 50.0 | 34.3 |
+| `frontload\|mid` | 8.3 | 34.1 | 63.6 | 25.0 | 28.6 |
+| `scaling\|early` | 0.0 | 12.2 | 0.0 | 0.0 | 2.9 |
+| `scaling\|late` | 41.7 | 73.2 | 4.5 | 75.0 | 22.9 |
+| `scaling\|mid` | 8.3 | 29.3 | 4.5 | 12.5 | 5.7 |
 | `support\|late` | 0.0 | 2.4 | 4.5 | 0.0 | 0.0 |
 | `support\|mid` | 0.0 | 0.0 | 4.5 | 0.0 | 0.0 |
 | `sustain\|early` | 0.0 | 0.0 | 4.5 | 0.0 | 0.0 |
 | `sustain\|late` | 0.0 | 0.0 | 4.5 | 0.0 | 0.0 |
 | `sustain\|mid` | 0.0 | 0.0 | 4.5 | 0.0 | 0.0 |
-| `utility\|early` | 8.3 | 0.0 | 0.0 | 0.0 | 0.0 |
-| `utility\|late` | 75.0 | 17.1 | 9.1 | 12.5 | 31.6 |
-| `utility\|mid` | 33.3 | 4.9 | 4.5 | 0.0 | 0.0 |
-| `velocity\|early` | 0.0 | 2.4 | 0.0 | 0.0 | 0.0 |
-| `velocity\|late` | 0.0 | 12.2 | 0.0 | 0.0 | 26.3 |
-| `velocity\|mid` | 0.0 | 4.9 | 9.1 | 0.0 | 0.0 |
+| `utility\|early` | 8.3 | 0.0 | 0.0 | 0.0 | 11.4 |
+| `utility\|late` | 75.0 | 17.1 | 9.1 | 12.5 | 22.9 |
+| `utility\|mid` | 33.3 | 4.9 | 4.5 | 0.0 | 14.3 |
+| `velocity\|early` | 0.0 | 2.4 | 0.0 | 0.0 | 2.9 |
+| `velocity\|late` | 0.0 | 12.2 | 0.0 | 0.0 | 8.6 |
+| `velocity\|mid` | 0.0 | 4.9 | 9.1 | 0.0 | 5.7 |
 
 Read the `necro_summons` column beside `silent_poison` and the
 charter's §2 diagnosis stops being a claim. The summon package covers
@@ -222,7 +234,7 @@ floor is the **minimum of the five** — the old rule with the population
 repaired. A min-of-canon floor cannot fail any canon package, which is
 what the standing stop-and-surface rule requires.
 
-**4 default-mandatory cells; 8 identity-only cells.** The default set
+**5 default-mandatory cells; 7 identity-only cells.** The default set
 is small, and that is a finding rather than a weakness: across five
 canon packages the only universally-covered jobs are *deal damage at every band* and *scale late*. Everything else is identity.
 
@@ -232,17 +244,17 @@ canon packages the only universally-covered jobs are *deal damage at every band*
 | `frontload\|late` | 16.7 |
 | `frontload\|mid` | 8.3 |
 | `scaling\|late` | 4.5 |
+| `scaling\|mid` | 4.5 |
 
 | identity-only cell (never linted by default) | packages at zero |
 |---|---|
 | `block\|early` | ironclad_strength, silent_poison |
 | `block\|late` | ironclad_strength |
 | `block\|mid` | ironclad_strength, silent_poison |
-| `scaling\|early` | ironclad_strength, necro_summons, regent_forge, silent_poison |
-| `scaling\|mid` | regent_forge |
-| `velocity\|early` | ironclad_strength, necro_summons, regent_forge, silent_poison |
+| `scaling\|early` | ironclad_strength, necro_summons, silent_poison |
+| `velocity\|early` | ironclad_strength, necro_summons, silent_poison |
 | `velocity\|late` | ironclad_strength, necro_summons, silent_poison |
-| `velocity\|mid` | ironclad_strength, regent_forge, silent_poison |
+| `velocity\|mid` | ironclad_strength, silent_poison |
 
 **ANCHORED floors** apply to an archetype that names a canon package
 in `tools/canon_role_tempo.py::ARCHETYPE_ANCHORS`. The floor is **the
@@ -267,8 +279,8 @@ none either.
 | `furina/spotlight` | `ironclad_strength` | 8 | `frontload\|early` 12.5, `frontload\|late` 50.0, `frontload\|mid` 25.0, `scaling\|late` 75.0, `scaling\|mid` 12.5 | `block\|early`, `block\|late`, `block\|mid`, `scaling\|early`, `velocity\|early`, `velocity\|late`, `velocity\|mid` |
 | `klee/demolition` | `necro_summons` | 22 | `block\|early` 27.3, `block\|late` 45.5, `block\|mid` 36.4, `frontload\|early` 27.3, `frontload\|late` 68.2, `frontload\|mid` 63.6, `scaling\|late` 4.5, `scaling\|mid` 4.5, `velocity\|mid` 9.1 | `scaling\|early`, `velocity\|early`, `velocity\|late` |
 | `klee/reaction` | `silent_poison` | 12 | `block\|late` 8.3, `frontload\|early` 8.3, `frontload\|late` 16.7, `frontload\|mid` 8.3, `scaling\|late` 41.7, `scaling\|mid` 8.3 | `block\|early`, `block\|mid`, `scaling\|early`, `velocity\|early`, `velocity\|late`, `velocity\|mid` |
-| `klee/spark` | `regent_forge` | 19 | `block\|early` 5.3, `block\|late` 10.5, `block\|mid` 10.5, `frontload\|early` 21.1, `frontload\|late` 26.3, `frontload\|mid` 21.1, `scaling\|late` 10.5, `velocity\|late` 26.3 | `scaling\|early`, `scaling\|mid`, `velocity\|early`, `velocity\|mid` |
-| `kokomi/commander` | `regent_forge` | 19 | `block\|early` 5.3, `block\|late` 10.5, `block\|mid` 10.5, `frontload\|early` 21.1, `frontload\|late` 26.3, `frontload\|mid` 21.1, `scaling\|late` 10.5, `velocity\|late` 26.3 | `scaling\|early`, `scaling\|mid`, `velocity\|early`, `velocity\|mid` |
+| `klee/spark` | `regent_stars` | 35 | `block\|early` 11.4, `block\|late` 11.4, `block\|mid` 5.7, `frontload\|early` 37.1, `frontload\|late` 34.3, `frontload\|mid` 28.6, `scaling\|early` 2.9, `scaling\|late` 22.9, `scaling\|mid` 5.7, `velocity\|early` 2.9, `velocity\|late` 8.6, `velocity\|mid` 5.7 | — |
+| `kokomi/commander` | `regent_stars` | 35 | `block\|early` 11.4, `block\|late` 11.4, `block\|mid` 5.7, `frontload\|early` 37.1, `frontload\|late` 34.3, `frontload\|mid` 28.6, `scaling\|early` 2.9, `scaling\|late` 22.9, `scaling\|mid` 5.7, `velocity\|early` 2.9, `velocity\|late` 8.6, `velocity\|mid` 5.7 | — |
 | `kokomi/priest` | `defect_orbs` | 41 | `block\|early` 7.3, `block\|late` 26.8, `block\|mid` 17.1, `frontload\|early` 22.0, `frontload\|late` 61.0, `frontload\|mid` 34.1, `scaling\|early` 12.2, `scaling\|late` 73.2, `scaling\|mid` 29.3, `velocity\|early` 2.4, `velocity\|late` 12.2, `velocity\|mid` 4.9 | — |
 
 The anchor claims themselves — one line of provenance each — live in
