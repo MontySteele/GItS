@@ -134,3 +134,82 @@ OPEN. Minted: **`EB-247`** (the jellyfish's text disagrees with its pulse) and
 face). No number, threshold or constant moved; no [USER] row opens.
 
 Meter: **5h 1% / week 0%** before, **5h 8% / week 1%** after.
+
+## `KOKOMI-SLICE1-WF` — RUN, and the grades (queue extension)
+
+Countersigned by R227; `EB-184`, its one remaining precondition, closed in this
+window's phase 1, so all three fights were unblocked. Three fights in **three
+separate game sessions** — the whole-fight cap is one per session, so the game
+was relaunched and torn down between each. Full results in the slice-1 packet.
+
+| fight | session | grades |
+|---|---|---|
+| **F1** — Tidal Barrage | `20260831-025000`, seed `1L130R6XTSRQ` | `WF1` **PREDICTED**, `WF2` **PREDICTED** |
+| **F2** — the three priced rows | `20260831-025720` | `WF3` **SPLIT** (1 of 2), `WF4` **SPLIT** (1 of 3, marginal), `WF5` **PREDICTED** (0 of 3 discounted) |
+| **F3** — the two `either` rows | `20260831-030325` | `WF6` **MISS** (0 Block-mode plays), `WF7` **MISS** (0 of 2), `WF8` **PREDICTED and vacuously so** |
+
+`--max-actions 24 --max-refusals 2` on each, all three terminated
+`max_actions`, **0 refusals across all three**. Neow: *Neow's Talisman*,
+*Fishing Rod*, *Winged Boots* — in each case the only boon that adds no card.
+
+**Arm A carries the round** and is an ADVANCE-to-sheet CANDIDATE; the
+accept-to-sheet signoff stays [USER]'s. The three priced arms split — the price
+binds once and is named once — with `WF5` clearing the Muster-discount confound.
+The two exclusive arms are the weak half, and the denominator travels with the
+grade: *Itto — Oni Rush* was played once at exactly lethal range and
+*Shinobu — Warding Ring* never reached the hand, so `WF6`'s PREDICTED band was
+unreachable by construction. **Nothing was accepted to a sheet and no number
+moved.**
+
+A third independent witness to `EB-247` appears here, on a different character
+and two more sessions.
+
+## Teardown — final state, proved
+
+```
+PID: NONE - SlayTheSpire2.exe is not running
+steam_appid.txt present: False
+mods\STS2_MCP present: False
+mods\klee manifest version: 0.2.1786+proto.dirty
+```
+
+Every session in this window tore down its own reversibility ledger and printed
+all four rows REVERTED — five sessions in all (BT3's two staging attempts and
+its round, `KLEESPARK-W5`, `KURAGECAD-W1`, and the three `KOKOMI-SLICE1-WF`
+fights).
+
+| # | change | state |
+|---|---|---|
+| 1 | `steam_appid.txt` (2868840) at the game root | **REVERTED** (absent) |
+| 2 | `mods\STS2_MCP\` from vendor pin `55e0648` | **REVERTED** (absent) |
+| 3 | `SlayTheSpire2.exe` launched directly | **REVERTED** (PID proven gone) |
+| 4 | `FastMode=Instant`, `TimeScale=3.0` via `/gits/speed` | **REVERTED** (captured originals restored) |
+
+The mod package is deliberately NOT reverted: `0.2.1786+proto.dirty` was phase
+1's product and this window reused it without rebuilding. `deploy.ps1` restores
+the release build before any measured run or handoff (R217 D).
+
+## Codex meter, every reading unsmoothed
+
+| when | reading |
+|---|---|
+| before BT3 | 5h 0% (rolled over) / week 28% |
+| after BT3's second deciding read | 5h 0% / week 35% |
+| before `KLEESPARK-W5` | 5h 0% / week 35% |
+| after `KLEESPARK-W5` | 5h 1% / week 0% (rolled over, resets Sep 06 22:26) |
+| after `KURAGECAD-W1` | 5h 8% / week 1% |
+| after WF F1 | 5h 13% / week 2% |
+| after WF F2 | 5h 25% / week 4% |
+| after WF F3 | 5h 28% / week 4% |
+
+`EB-227`'s guard (85% of the five-hour window, 50% of the week) was never
+approached.
+
+## Ids minted in this window
+
+`EB-244` (a board can declare an enemy intent the wire does not carry),
+`EB-245` (a `card_select` overlay triggers a phantom fight record), `EB-246`
+(BBCode in a printed option name), `EB-247` (the jellyfish's text disagrees
+with its pulse — three witnesses), `EB-248` (a discounted memory entry's price
+is not derivable from the printed face). **Next free: `R234` / `EB-249` /
+`M70`.** No `M` row was minted: no registered trigger opened a [USER] pick.
