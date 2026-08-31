@@ -2,7 +2,8 @@
 
 **DRAFT. Nothing here is countersigned.** No shipped number moves, no card
 sheet is edited, no code is written, no register row is minted. The picks below
-are numbered P1 to P9 **inside this document only** — those labels are local
+are numbered P1 to P9, plus one sub-pick P5a, **inside this document only** —
+those labels are local
 handles for a conversation, not identifiers, and they do not reserve or consume
 anything in any register. If a pick is ruled, whoever records the ruling mints
 the row.
@@ -200,8 +201,11 @@ character's engine, so it is not a contract violation as written. But it is a
 Universal card whose whole payoff is *the Companion pool itself*, which makes
 its power level a function of how many Companions the deck holds — and it is the
 exact loop the playtest complained about
-(`review/active/eb148-companion-audit-2026-08-27.md:40-45`, which classes it a
-"subsidy engine" alongside Albedo's Solar Isotoma). See P6.
+(`review/active/eb148-companion-audit-2026-08-27.md:40-47`, which classes it a
+"subsidy engine" alongside Albedo's Solar Isotoma). **It is the only card in the
+pool of this kind:** Albedo shares the audit's subsidy-engine label but triggers
+on attacking an aura-bearing enemy, which is element synergy rather than
+Companion density — P6 separates them and explains why.
 
 ### 2.3 The defence audit, which is the same problem seen from another angle
 
@@ -294,14 +298,30 @@ starts evaluating it.** The tool's own history is the warning — the exemption
 "swallowed OFFICIAL:silent whole while she was under 30", and for two days the
 anchor added to ratify the gate was never evaluated by it (`:168-170`).
 
-**A separate defect, found while verifying the above and not fixed here:** the
-tool's `SHEETS` list globs `docs/*-cards.yaml` and then appends
-**`mondstadt-companions.yaml` only** (`tools/card_distinctness_report.py:194-198`).
-Fontaine's and Inazuma's companion sheets are not in the instrument's input at
-all — not exempt-by-size, but absent. Under the current sizes nothing changes
-either way, since all three are under 30. It would change if a pool grew. This
-is an audit finding to be triaged in the normal way; it is deliberately **not**
-filed by this packet, which mints nothing.
+**A separate defect, found while verifying the above and not fixed here. It is
+two-fold, and the second half only becomes visible once the taxonomy in §3
+exists.**
+
+*(a) Input coverage.* The tool's `SHEETS` list globs `docs/*-cards.yaml` and
+then appends **`mondstadt-companions.yaml` only**
+(`tools/card_distinctness_report.py:195-198`). Fontaine's and Inazuma's
+companion sheets are not in the instrument's input at all — not exempt-by-size,
+but absent.
+
+*(b) No taxonomy filter.* If the missing sheets were simply added today, the
+instrument would count **Personal and guest-star rows inside a pool metric that
+should be measuring the draftable Universal pool.** Fontaine is the case that
+proves it: three of its nineteen rows are `guest_star` cameos that no player can
+draft (§2.1), and under §3.1 a Personal Companion is balanced against its
+owner's character sheet rather than against the companion pool — so neither kind
+belongs in a distinctness reading of the Universal pool. Fixing (a) without (b)
+would produce numbers that look like coverage and are not.
+
+Under the current sizes neither half changes anything, since all three pools are
+under 30 and exempt. Both would bite the moment a pool grew (P4). This is
+engineering debt rather than a design question: it becomes a row on the
+register-reconcile branch **after tonight's runs land**, and it is deliberately
+**not** filed by this packet, which mints nothing.
 
 ---
 
@@ -467,8 +487,12 @@ Inazuma Companions — Shinobu, Thoma and Itto
 (`review/active/kokomi-slice-1-2026-08-27.md:66-92`; tally at `:780-782`;
 registration and R227 countersign at `:791-812`). The registration exists
 because those six ADVANCE results currently feed *nothing registered*, and the
-accept-to-sheet step is a one-way door (`:815-825`). One arm is still blocked:
-`EB-184` precedes the Itto exclusive-mode arm and is unfixed (`:806-810`).
+accept-to-sheet step is a one-way door (`:815-825`). The slice packet records
+`EB-184` as preceding the Itto exclusive-mode arm (`:806-810`), but **that block
+is gone: `EB-184` CLOSED on 2026-08-30 on its live replay**
+(`docs/current/STATE.md:345-347`, `:726`), in the wave merge that is this
+branch's own base commit, and BACKLOG no longer carries the row. All arms are
+unblocked. **The read itself is still ungraded.**
 
 **So: whether Inazuma's shape family is "priced defence" or "exclusive-mode
 defence" — or neither — is not a question this packet answers. It is the
@@ -480,15 +504,21 @@ argued on the evidence's timing rather than on a shape conclusion.
 
 ## 5. The picks
 
-Numbered P1 to P9, this document only. Each is a real fork. Where a default is
+Numbered P1 to P9 plus the sub-pick P5a, this document only. **P1 is SETTLED
+(Mondstadt first, [USER], 2026-08-30); the rest are open.** Each is a real fork.
+Where a default is
 defensible it is marked; where the material genuinely does not choose, no
 default is marked and that is stated.
 
 ---
 
-### P1 — Which nation goes first
+### P1 — Which nation goes first — **SETTLED 2026-08-30 by [USER]: Mondstadt first**
 
-Answer 1 says one nation at a time. This is the pick that starts the clock.
+Answer 1 says one nation at a time. This is the pick that starts the clock, and
+it is answered: **[USER] took option A on 2026-08-30.** The formal ruling number
+lands with the whole slate later; this line records the pick as answered, not as
+ratified. The three options are kept below unedited, because the arguments
+against A are the risks the Mondstadt slice now has to carry.
 
 **Option A — Mondstadt (Klee).** *Claude's recommendation.*
 - Klee is the compatibility baseline character (`docs/current/STATE.md:83`), so
@@ -514,9 +544,10 @@ Answer 1 says one nation at a time. This is the pick that starts the clock.
   means the first nation's shape family is settled by a measurement rather than
   by taste.
 - Kokomi's fold is upcoming, so the sheet is going to be opened anyway.
-- *Cost:* the WF has not been graded, one arm is blocked on `EB-184`
-  (`kokomi-slice-1-2026-08-27.md:806-810`), and starting a slice on an ungraded
-  read invites reading results early, which measurement law forbids. It is also
+- *Cost:* the WF has not been graded — starting a slice on an ungraded read
+  invites reading results early, which measurement law forbids. (The arm that
+  was blocked on `EB-184` is no longer blocked: that row CLOSED 2026-08-30,
+  §4.3.) It is also
   the pool with the heaviest existing defensive load (60% Block), so the taxonomy
   work and the Block work would arrive tangled.
 
@@ -629,29 +660,131 @@ C. **Unbounded, governed by rarity only** — as many as the character's engine
 (`docs/current/LAW.md:104-113`) and may be deck-warping by design, so each one
 enlarges the surface the delete-test has to be re-run against.
 
+#### P5a — How a Rare Personal Companion would ever be acquired
+
+**This sub-pick exists because the answer today is "it could not be."** A Rare
+Personal Companion is **unreachable through every live channel**, and that is a
+structural fact rather than an oversight anyone has ruled on. The chain,
+verified end to end:
+
+1. **Rare means 5-star.** The sheet law is "4-star = common/uncommon
+   (multi-card kits allowed). 5-star = rare, ONE card each, max 3"
+   (`docs/mondstadt-companions.yaml:4`), and LAW carries the same grade
+   (`docs/current/LAW.md:98-103`).
+2. **Personal cards are excluded from every banner roster.**
+   `five_star_roster` gathers a nation's banner-eligible 5-stars and filters
+   `c.personal_pool is None and not c.guest_star`
+   (`tier05/rewards.py:130-141`). A Personal 5-star is therefore never on any
+   banner, in any run, by construction.
+3. **Off-banner 5-stars are dropped from every offer pool.** `_banner_filtered`
+   keeps a card only if `c.star != 5 or c.id in banner`
+   (`tier05/rewards.py:199-204`).
+4. **Both live channels run through that filter.** Rewards apply it before the
+   `personal_pool in (None, character_id)` check
+   (`tier05/rewards.py:339-342`), and the shop's `eligible` calls
+   `rewards._banner_filtered` before its own personal-pool check
+   (`tier05/shop.py:150-157`).
+
+So a Personal 5-star can never be *on* a banner (step 2) and is filtered out
+everywhere *off* banner (steps 3–4). The two conditions are exhaustive.
+
+**The contrast that shows this is specific to Rares:** 4-star Personals are
+perfectly reachable for their owner. Both channels admit
+`personal_pool in (None, character)`, and 4-stars are never banner-gated —
+`_banner_filtered`'s docstring says so in as many words. Prune is Uncommon, so
+the one Personal Companion that exists has never met this wall.
+
+**Options.**
+
+a. **Owner-only banner bypass.** The banner filter stops applying to a Personal
+   5-star in its owner's run; it stays filtered for everyone else. *Smallest
+   change, and it preserves the banner as the availability governor for the
+   shared pool while letting a character's own Rare behave like the rest of her
+   kit.*
+b. **Personal 5-stars participate in the owner's banner.** They enter
+   `five_star_roster` when the run character owns them, and compete for the
+   featured slots like any other Rare. *Keeps one governor for all 5-stars, but
+   a character's own signature Rare can then be rolled out of her own run —
+   and with `BANNER_FEATURED_SLOTS = 3`, adding Personal cards to a nation's
+   roster also makes the shared Rares scarcer for their owner.*
+c. **Run-start access only.** No draft channel at all; a Personal Rare arrives,
+   if at all, through the declinable run-start offer LAW already permits — the
+   R160 amendment's "optional, visible run-start offer ... the
+   randomized-starter family, not new Neow machinery"
+   (`docs/current/LAW.md:114-120`), whose mechanism exists and is nation- and
+   role-locked (`tier0/content/loader.py:1140`;
+   `tier05/tests/test_m5.py:55-101`). *Uses machinery that is already built and
+   already lawful. Makes a Personal Rare a run-shaping opening choice rather
+   than a mid-run find, which is a different card design.*
+d. **No Personal Rares at all.** The Personal flavor caps at Uncommon, and the
+   current unreachability becomes the rule rather than a defect. *Costs
+   nothing, and is honest about where the code already is.*
+
+**No default marked.** The written intent does not choose: answer 4 gives
+Personal Companions a balance rule "at equivalent rarity" without naming which
+rarities exist, and answer 3 calls them "a subset of a character's draftable
+pool" — which argues they should be *draftable*, and so argues against (d), but
+does not pick between (a), (b) and (c). That is a design fork, and §5's rule is
+that a fork is a pick.
+
+*Note on scope:* if P5 lands on option A (one Personal per character, Prune the
+model) this sub-pick can stay unanswered indefinitely, since nothing would be
+authored at Rare. Under B or C it has to be answered before the first Rare
+Personal is authored, not after — authoring an unreachable card is the one
+outcome none of the four options wants.
+
 ---
 
-### P6 — Pool-payoff cards: are they Universal, Personal, or a third thing
+### P6 — Density payoff: is a Universal card allowed to pay out on Companion plays
 
-`navia_cannon_fire_support` ("whenever you play a Companion card, gain 3 Block")
-and `albedo_solar_isotoma` are Universal cards whose payoff is the pool itself
-(§2.2, and EB-148's "subsidy engine" classification at `:40-45`).
+**This pick has been narrowed. It previously bundled Navia and Albedo together,
+and they are two different mechanisms** — EB-148 grouped them as "subsidy
+engines" because both hand out free Block after one purchase
+(`review/active/eb148-companion-audit-2026-08-27.md:40-47`), which is a true
+statement about *defence economy* and not about what they trigger on.
 
-A. **Universal, unchanged.** They name no character engine, so they pass the
-   contract as written. *Leaves a Universal card whose power scales with
-   Companion density — and Companion density is exactly what Furina's and
-   Kokomi's engines reward, so the same card is quietly stronger in two decks.*
-B. **A named third category** — pool-payoff Companions, balanced globally but
-   priced against Companion density rather than against a rarity band.
-C. **Universal, but bounded** — the contract gains one sentence forbidding a
-   Universal card from paying out on Companion plays, and these two are
-   re-authored onto a different trigger.
+- **`navia_cannon_fire_support`** triggers on **"whenever you play a Companion
+  card"** (`docs/fontaine-companions.yaml:98-101`) — literally the pool paying
+  the pool. Its power is a function of Companion *density*, and Companion
+  density is exactly what Kokomi's Charge funnel and Furina's member trigger
+  already reward, so the same card is quietly stronger in two specific decks
+  while naming neither.
+- **`albedo_solar_isotoma`** triggers on **attacking an enemy that bears an
+  aura** (`docs/mondstadt-companions.yaml:83-84`). That is element synergy. Any
+  deck that applies elements turns it on, which is every deck in the game, and
+  its strength does not scale with how many Companions are drafted.
+
+**So Albedo is not this pick's subject at all.** He returns to ordinary Universal
+balancing under §3.2 — an aura-conditional Rare Power, judged against the
+Universal Rare band like any other, with no taxonomy question attached. The
+Navia/Albedo overlap the Fontaine sheet flags as "FLAGGED, NOT RESOLVED"
+(`docs/fontaine-companions.yaml:106-109`) remains a real balance overlap between
+two Geo block engines; it is a power-level question for whoever prices them, not
+a taxonomy one, and this packet does not settle it.
+
+**What is left, and it is only Navia and any future density-payoff design:**
+
+A. **Universal, unchanged.** It names no character engine, so it passes the
+   contract as written. *Accepts that a Universal card's power varies with a
+   deck property two shipped engines are built to maximise.*
+B. **A named third category** — pool-payoff Companions, a taxonomy of their own,
+   balanced globally but priced against Companion density rather than a rarity
+   band.
+C. **Universal, but bounded or costed** — no new taxonomy. The contract gains
+   one sentence about what a Universal card may pay out on a Companion play, and
+   the affected card is re-authored to fit: a cap, a cost, or a different
+   trigger.
 
 **No default marked.** This is a design-direction fork, not a hygiene call: A
 and C are opposite readings of whether "the pool paying the pool" is a feature
-or the loop the playtest complained about. The sheet itself already flags the
-Navia/Albedo overlap as "FLAGGED, NOT RESOLVED"
-(`docs/fontaine-companions.yaml:106-109`).
+or the loop the playtest complained about.
+
+*On the external review's suggestion, for the record:* "Universal but
+bounded/costed, no third taxonomy" is **option C applied per-card once the split
+above is made** — it is not a fourth option, and reading it as one would
+double-count the position. What the split changes is its scope: before the split C
+would have re-authored Albedo too, and after it, C touches Navia and leaves
+Albedo alone.
 
 ---
 
@@ -752,9 +885,10 @@ result.
 
 **Tonight.** `KOKOMI-SLICE1-WF` runs. It is the only companion-shape evidence in
 the project, it is about Inazuma, and it is why §4.3 concludes nothing. When it
-grades, P1's Inazuma argument and §4.3's shape reading both become answerable.
+grades, §4.3's shape reading becomes answerable — which matters for the *second*
+nation now that P1 is settled on Mondstadt, not for the first.
 
-**Relative to the Klee arc.** If P1 lands on Mondstadt, this slice and the Klee
+**Relative to the Klee arc.** P1 is settled on Mondstadt, so this slice and the Klee
 arc share a sheet. The Spark redesign is pending (`M48` pick 6), and Klee's
 `PICK 1` reopens only if the income reads short
 (`docs/current/STATE.md:823-825`). A Mondstadt companion slice should sit
@@ -775,7 +909,7 @@ things behind those flags. A Fontaine companion slice cannot settle Fontaine's
 shape family while the hook that reads Companion plays is unflipped, because the
 value of every Fontaine Companion in Furina's hands changes when it flips.
 
-**The sequence this implies, if P1 lands on A:** Mondstadt now (contract proved
+**The sequence P1's answer implies:** Mondstadt now (contract proved
 on the baseline character with the built exemplar) → Inazuma after the fold and
 with the WF graded → Fontaine after the reframe's flags flip. That is answer 1's
 "one nation at a time, then work outward" with the outward order chosen by which
