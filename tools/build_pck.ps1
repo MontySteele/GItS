@@ -244,6 +244,22 @@ foreach ($character in 'furina', 'kokomi') {
     }
 }
 
+# EB-40 / R231: the five Hydro orb layers for furina\ui\energy_counter.tscn.
+# Its own block because the loop above is deliberately NON-recursive (one
+# Get-ChildItem per surface directory), so a subdirectory under ui\ ships only
+# if something asks for it -- and these five are one indivisible set that
+# gen_energy_orb_layers.py --apply places in a directory of its own. If they
+# are absent the scene still exports, with five ExtResource misses that
+# Assert-GodotLogClean turns into a failed build rather than a silent
+# textureless orb.
+$orbSrc = Join-Path $src 'furina\ui\energy_orb'
+if (-not (Test-Path $orbSrc)) { Note-Skip 'furina\ui\energy_orb' $orbSrc } else {
+    $to = Join-Path $work 'furina\ui\energy_orb'
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    $files = Get-ChildItem $orbSrc -Filter *.png -ErrorAction SilentlyContinue
+    if ($files) { Copy-Item $files.FullName -Destination $to }
+}
+
 # Furina can be tested before her art pass lands, but her resource PATHS must
 # still be character-specific. Fill only missing Furina files from Klee; a real
 # Furina file at the canonical path always wins.
