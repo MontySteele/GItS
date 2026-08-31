@@ -279,7 +279,14 @@ CEILINGS: dict[str, int] = {
     # EB-241 minted 2026-08-30 by R231 A3: `Card.is_junk` is rarity-only,
     # and the fix is scheduled AT the Kokomi fold because it moves shipped
     # numbers and rides the fold's already-required re-baseline.
-    "EB": 241,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-242 minted 2026-08-30 by the X9READ-S1 graded read: the
+    # reads-per-turn instrument tallies the pilot's valuation calls as reads
+    # (packet §9.4), which §2 declares it does not do.
+    # EB-243 minted 2026-08-30 by the live-acceptance window: BT3's staged
+    # boards declare a relic the wire does not carry on their pinned seed
+    # (renumbered from EB-242 at the fold: two parallel windows both took
+    # the next free id; X9READ-S1's mint keeps 242).
+    "EB": 243,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -529,7 +536,11 @@ CEILINGS: dict[str, int] = {
     # holding round-2 staging since 2026-08-29 without ever reaching this
     # register: the Charge accrual rule. It is a pick between design
     # directions and option (1) amends LAW R80, so it is [USER]'s twice over.
-    "M": 68,     # M62 minted 2026-08-29 by R221 A: the criterion that
+    # M69 minted 2026-08-30 by the X9READ-S1 graded read: `W9` fired on
+    # Limb A (repeatable readers 58.91% of completed-turn reads, and 51.68%
+    # with `EB-242`'s pilot-estimate reads removed), and a firing's whole act
+    # is to return X9 to [USER] as a numbered pick.
+    "M": 69,     # M62 minted 2026-08-29 by R221 A: the criterion that
                  # retires the fresh-Opus control form from every packet of
                  # a blind-QA round to the spot-check rate. The threshold is
                  # a number, so it is [USER]'s.
@@ -599,10 +610,39 @@ CEILINGS: dict[str, int] = {
 # That second half is the whole mechanism — see rule 6 in the docstring.
 OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
-        12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
-        74, 78, 80, 83, 84, 116, 128,
+        # 40 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word for
+        # word -- "the five `GetNode`s resolve LIVE". On `0.2.1786+proto.dirty`
+        # the boot log reads `convention scene ok:
+        # res://furina/ui/energy_counter.tscn root=Control` with no
+        # `has no node named` warning for any of the five, and a live Furina
+        # combat (seed `07G8YGNTQHKX`, 42 actions, 1 fight, 0 defects) logs
+        # `[BaseLib] Auto-converted 'res://furina/ui/energy_counter.tscn' from
+        # Control to NEnergyCounter` and then plays on. That line IS the hard
+        # cast: `NEnergyCounter._Ready` GetNodes all five and throws on a null,
+        # so a run that continues past it is the five resolving. `godot.log`
+        # carries no exception on the session.
+        12, 15, 32, 33, 34, 35, 38, 41, 53, 65, 70, 71,
+        # 78 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word
+        # for word -- "it runs, slate first". `X9READ-S1` was countersigned
+        # (R233), the grader landed with its tests before the run, the run
+        # took 1,800 runs in 53 s of a 1-hour ceiling, and the seven slots
+        # came back 4 PREDICTED / 1 SPLIT / 2 MISS. `W9` fired on Limb A, and
+        # a firing lives in QUEUE (`M69`), not in this row.
+        74, 80, 83, 84, 116, 128,
         154, 158, 159, 160, 161, 163,
-        180, 181, 183, 184,
+        # 184 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word for
+        # word -- "the Block mode replays with no target". Live on
+        # `0.2.1786+proto.dirty`, `understudy/scenarios/eb184-modal-block-no-
+        # target.yaml`: `{"action": "play_card", "card_index": 5, "mode":
+        # "Gain 3 Block, applying no element"}` with NO `target` key answers
+        # `status: ok` and the bridge's own message says the chosen mode "aims
+        # at nobody"; player Block 0 -> 3, both expects held. The other half is
+        # its twin `eb184-modal-damage-needs-target.yaml`, SEEN TO FAIL by
+        # construction: the same card, the same absent target, the DAMAGE mode
+        # named, is still refused "Card requires a target ... The chosen mode
+        # aims at one enemy". A fix that switched aiming off would pass the
+        # first file and fail the second, which is why there are two.
+        180, 181, 183,
         189, 191, 193, 194, 195, 196, 197, 198,
         # 192 was minted 2026-08-29 and CLOSED 2026-08-30 by R231 A8: the
         # `regent_forge` canon package -- a regex union of Regent's Stars
@@ -869,9 +909,35 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 240 minted 2026-08-30 by KLEESPARK-BT2 §24.6: printing the relics
         # immediately falsified a printed assumption, and the preflight's
         # assumption check cannot see the wire's relic list.
-        240,
+        # 240 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word for
+        # word -- "one board's refusal seen live". All THREE committed
+        # `klee-sparks-bt2r` boards were staged as they stand (R101b: read,
+        # never edited) against `0.2.1786+proto.dirty`, and all three were
+        # refused before a packet was written, each naming the mismatch:
+        # "hp: the board declares 'first' at 55 and the wire reads 45" (t01),
+        # 46 (t02), 40 (t03) -- exactly the three live bodies the row names.
+        # The CONTROL half holds too: a correct current-world board (a scratch
+        # copy of `klee-sparks-bt3/t01`, relic leg corrected) stages clean,
+        # packet sha256 be932c77, so the preflight refuses a false assumption
+        # and not a board. The control's first attempt refused on the RELIC
+        # leg and that is a real find -- BACKLOG `EB-243`.
         # 241 minted 2026-08-30 by R231 A3, gated on the Kokomi fold.
         241,
+        # 242 minted 2026-08-30 by the X9READ-S1 graded read (packet §9.4):
+        # the reads-per-turn instrument counts the PILOT's estimates as
+        # reads. `pilot/policy.py:439` and `:555` call
+        # `effects._bonus_formula` with no card, and its `_per_charge` branch
+        # ticks `note_charge_read` unconditionally -- so 9,893 of the 13,198
+        # pooled `bonus_formula` reads (74.96%) are deliberation, which §2 of
+        # the packet declares deliberately NOT counted. It is the whole of
+        # `X3`'s MISS (a 15-read turn, 14 of them estimates) and it moves
+        # `X5` and `X1`; the published grades stand as graded (R101b).
+        242,
+        # 243 minted 2026-08-30 by EB-240's live control: BT3's boards declare
+        # a relic pair the wire does not carry on their pinned seed, so the
+        # round cannot stage until they are re-drafted (renumbered from
+        # EB-242 at the fold; X9READ-S1's mint keeps 242).
+        243,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -930,7 +996,9 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # published grade standing as graded (R101b); SceneSlots stays at 4 as
     # harmless headroom; and the energy orb takes A Fontaine Hydro, which
     # lifts EB-40's gate. Ceilings never come down.
-    "M": frozenset({13, 26, 45}),
+    # M69 minted 2026-08-30 by the X9READ-S1 graded read and OPEN with its
+    # row: R188's watch trigger fired, so X9 returns as a numbered pick.
+    "M": frozenset({13, 26, 45, 69}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

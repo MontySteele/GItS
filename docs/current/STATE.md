@@ -185,15 +185,25 @@ deploy label from R218 on rides the pin above; live numbers were never
 comparable across a game build anyway (R95), and the sim references no game
 assembly and is unaffected.
 
-The installed build is **`0.2.1627+proto.dirty`** (2026-08-30), a dev package
-built from `kuragemem002-rerun` `10799139` — an INTEGRATION of
-`eb214-muster-keyword` and `eb216-wire-snapshot`, **both of which landed on
-`main` in #211** — deployed for the `KURAGEMEM002` rerun and left installed. It
-carries BOTH prototype arms — Kokomi's Kurage-memory base kit and Klee's Spark
-alternative-cost rows — behind the `-p:PrototypeCards=true` compile switch.
-R225's gate: `python -m understudy.soak --runs 1 --character KLEEMOD-KLEE
---max-fights 3` answers `bounded  seed=XAK56TVB9QDL  actions=56  fights=3
-defects=0`, reversibility log all REVERTED. Its predecessor was
+The installed build is **`0.2.1786+proto.dirty`** (2026-08-30), a dev package
+built from `live-acceptance-2026-08-30` off `main` `cc6f323c`, deployed for the
+live-acceptance window below and left installed. It carries BOTH prototype
+arms — Kokomi's Kurage-memory base kit and Klee's Spark alternative-cost rows —
+behind the `-p:PrototypeCards=true` compile switch. `validate.ps1` OK; pack
+**9,776,476 bytes, contract `roster-pck-v3`, 144 resources**, pck build id
+`20260830-212957+cc6f323c`. R225's gate: `python -m understudy.soak --runs 1
+--character KLEEMOD-KLEE --max-fights 3` answers `bounded  seed=AR2G3FZJXB75
+actions=55  fights=3  defects=0`, reversibility log all REVERTED.
+**Three resource surfaces reach the game for the first time in this pack** —
+`furina/ui/energy_counter.tscn` with its five `furina/ui/energy_orb/` layers
+(`EB-40`) and `klee/relics/dodoco_tales.png` (`EB-162`, whose `MISSING-PACKED`
+ledger line clears here; seven remain, none Klee's). **`EB-40`, `EB-184` and
+`EB-240` all took their live acceptance on it** —
+`review/qa/live-acceptance-2026-08-30/` — and `EB-183`'s flag stayed invisible:
+its whole surface is the quarantined `proto_muster_subsidy_funnel` row and no
+shipped caller waives the subsidy. Its predecessor was
+`0.2.1627+proto.dirty`, built from `kuragemem002-rerun` `10799139` for the
+`KURAGEMEM002` rerun, and before that
 `0.2.1608+proto.dirty`, built from `eb222-badge-disposed-texture` `fa1fffe`
 (main `23acafd` plus the `EB-222` fix). Two lifecycle
 throws had capped every whole fight at one fight since `0.2.1353+proto` —
@@ -334,7 +344,10 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     worked**; Sanctifying Circle **ADVANCES**, Blazing Ooyoroi RETURNS on
     an implementation defect rather than its board (`EB-184`: a modal
     typed Attack demands a target on its targetless Block mode, so that
-    line cannot replay). Slice tally: six ADVANCE, one open RETURN.
+    line cannot replay). **`EB-184` is CLOSED (2026-08-30): the refused
+    line replays live on `0.2.1786+proto.dirty` and the damage mode still
+    demands a target, so the arm's RETURN can be re-run whenever the
+    slice's order reaches it.** Slice tally: six ADVANCE, one open RETURN.
     Advance means whole-fight play next, not ship.
   - **Blind-play testimony** (R217 G — iteration feedback, never
     validation): the FIRST run carrying a prototype arm is session
@@ -710,9 +723,8 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     (R224, item 19)**: Rummage FOLDS into the §14 mixed-pool deck rather
     than being staged as a separate fight for the same hybrid-price
     question, and Slow Burn's fight is HELD until `M60`/`EB-199` settle
-    what its Burst rider becomes. What is owed next is the boot fix that
-    unblocks the sealed Kokomi
-    run and slice 1's `EB-184`. R224's seven rows `EB-213`–`EB-219` are
+    what its Burst rider becomes. `EB-184` is CLOSED on its live replay
+    (2026-08-30). R224's seven rows `EB-213`–`EB-219` are
     all CLOSED as of 2026-08-30 — the upgrade channel, the Muster keyword
     and its rerun, the description channel, the per-turn wire snapshot, the
     summon dial's deletion, the Spark-only migration and Prune's re-author.
@@ -907,11 +919,18 @@ returns to [USER] only when its trigger fires.
   completed player turn; nothing reads the tally back, so it is not a budget and
   cannot become one by accident). Declared blind spot: the sample rides
   `turn_close`, which a turn ending in the last kill or the player's death never
-  reaches, so the truncation is toward the BUSY end. **Trigger:** a reads-per-turn
-  reading or a live playtest shows repeatable reads dominant — "dominant" is not
-  a number yet, and §5.1 of
-  `review/active/charge-reads-per-turn-registration-2026-08-13.md` is the slot
-  that makes it one, and that slot is [USER]'s (BACKLOG `EB-78`).
+  reaches, so the truncation is toward the BUSY end — measured 2026-08-30 at 46
+  turns of 106,907, carrying zero reads between them. **THE TRIGGER HAS FIRED.**
+  `X9READ-S1` was countersigned (R233), run and graded 2026-08-30 at
+  `RT12/D18/P11/C21`: the repeatable readers are **58.91%** of completed-turn
+  reads against `W9` Limb A's `> 50%` (51.68% with `EB-242`'s pilot-estimate
+  reads removed), while the ruled double read lands on **0.22%** of attack plays
+  and Limb B does not fire. The severity indicator is QUIET — `p50` 0 reads per
+  turn, and the pulse floor the slate was drafted against does not exist at this
+  cell (`KURAGE_ALWAYS_ON` is read only under the quarantined `KURAGE_MEMORY`).
+  **`X9` is back with [USER] as QUEUE `M69`**, a numbered pick and nothing else:
+  the read nerfs, caps, dedupes and budgets nothing (packet §9; `EB-78` closed
+  on it).
 
 (Migrated from the retired watch-items docket, frozen at tag
 `pre-simplification-2026-08-06`; `W5` added 2026-08-10, `W6`–`W8` at `EB-69`
