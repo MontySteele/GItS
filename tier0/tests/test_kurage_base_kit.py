@@ -816,3 +816,61 @@ def test_the_shipped_muster_keyword_did_not_move():
 def test_the_muster_discount_never_ships_without_its_duration_again():
     """EB-254. The -1 is rest-of-COMBAT and the sentence has to say so."""
     assert BARE_DISCOUNT not in _for_muster_body()
+
+
+# --------------------------------------------------------------------------
+# EB-247: THE END-OF-TURN DOCKET'S JELLYFISH ROW
+#
+# The buff face and the fielding tip are pinned in C# (KurageBuffFaceTests),
+# where the strings can be READ off the compiled builders. The docket's row is
+# three delegates in a table initialiser -- there is no headless creature to
+# call them with -- so it is pinned here, on its source, the same way the
+# Muster keyword above is. Two claims, both quarantined:
+#
+#   * the preview must NOT be `PulseDamage` / `PulseMultiplier`. Those are the
+#     retired `4 + 3 per Charge` arithmetic; the pulse reads the bank not at
+#     all under the memory rule, so the chip was previewing a number the hit
+#     does not deal and flagging it "raised" off an amp that amplifies
+#     nothing.
+#   * the row must not append "Lasts N more turn(s)". EB-197 removed that
+#     countdown from the buff itself and this was the surface that kept it --
+#     the stacks are clamped to 1 and never tick.
+# --------------------------------------------------------------------------
+
+DOCKET = (
+    pathlib.Path(__file__).resolve().parents[2]
+    / "klee-mod" / "KleeCode" / "Powers" / "TurnEndAttribution.cs")
+
+
+def _kurage_docket_row():
+    """The `kurage` row of the docket table, signature to close."""
+    text = DOCKET.read_text(encoding="utf-8-sig")
+    start = text.index('Key = "kurage"')
+    return text[start:text.index("\n        },", start)]
+
+
+def _prototype_span(body):
+    """The CODE only a `-p:PrototypeCards=true` build compiles.
+
+    Comment lines are dropped. The block below names the retired accessors in
+    prose -- saying WHY they are gone is the point of it -- and a raw substring
+    read would take the explanation for the thing explained.
+    """
+    start = body.index("#if PROTOTYPE_CARDS")
+    live = body[start:body.index("#else", start)]
+    return "\n".join(line for line in live.splitlines()
+                     if not line.lstrip().startswith("//"))
+
+
+def test_the_docket_previews_the_pulse_the_memory_rule_actually_fires():
+    """EB-247. The chip reads the wire's forecast, not the retired rate."""
+    live = _prototype_span(_kurage_docket_row())
+
+    assert "KurageMemory.Forecast(" in live
+    assert "PulseDamage" not in live
+    assert "PulseMultiplier" not in live
+
+
+def test_the_docket_row_prints_no_countdown_under_the_memory_rule():
+    """EB-197's fact, on the surface that still appended it."""
+    assert "Lasts" not in _prototype_span(_kurage_docket_row())

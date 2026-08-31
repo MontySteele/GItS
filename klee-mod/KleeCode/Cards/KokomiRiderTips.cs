@@ -285,6 +285,44 @@ public static class KokomiRiderTips
     /// </summary>
     public static string PulseBody(Creature? owner, bool inCombat)
     {
+#if PROTOTYPE_CARDS
+        // `EB-247`. QUARANTINED. Under the memory rule the pulse reads the
+        // bank NOT AT ALL -- it keys on the type of the last card Kokomi
+        // played this turn and pays a flat number per branch. Everything below
+        // this block quotes `KuragePulsePerCharge`, which is exactly the term
+        // that retired, so under the flag the rate paragraph would be a
+        // falsehood on two more surfaces: the fielding cards' hover tip, and
+        // the end-of-turn docket, which asks this method for the same
+        // paragraph (TurnEndAttribution's `kurage` slot, one copy by design).
+        //
+        // The live half is READ FROM THE WIRE. `KurageMemory.Forecast` is the
+        // same kind/unit/amount triple the observed-board payload publishes,
+        // so the tip, the docket and the wire cannot say three things about
+        // one pulse -- which is what the three `EB-247` witnesses caught them
+        // doing.
+        {
+            var rule =
+                "The pulse answers the LAST card you played this turn, at the "
+              + $"END of your turn: Attack -> {KokomiConstants.KuragePulseBase} "
+              + "damage and [gold]Hydro[/gold]; Skill -> "
+              + $"{Powers.KurageMemory.KurageMemoryLaw.PulseBlock} Block; "
+              + "Power -> "
+              + (Powers.KurageMemory.KurageMemoryLaw.PowerPulse == "charge"
+                    ? $"{KokomiConstants.ChargePerExhaust} [gold]Charge[/gold]"
+                    : "[gold]Hydro[/gold]")
+              + ". No card played, no pulse.";
+            if (owner == null || !inCombat) return rule;
+
+            var (kind, unit, amount) =
+                Powers.KurageMemory.Forecast(owner);
+            var next = kind == "none"
+                ? "You have played nothing yet this turn: no pulse."
+                : $"Last card played: {kind}. The next pulse is "
+                  + $"{amount} {unit}.";
+            return $"{rule} {next} Playing another card of a different type "
+                 + "before you end the turn changes it.";
+        }
+#else
         // R73/A2: in combat the rate is the AMPED one. Before Sun and Moon
         // raises the multiplier, and a tip that kept quoting the base would
         // understate the pulse by exactly the card the player just bought --
@@ -302,5 +340,6 @@ public static class KokomiRiderTips
         return $"{rate} You hold {charge} Charge: the next pulse hits for "
              + $"{KurageSummonPower.PulseDamage(owner)}. Charge banked before "
              + "the pulse counts, so the number can still move.";
+#endif
     }
 }
