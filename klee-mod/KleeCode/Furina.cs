@@ -104,8 +104,36 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
         ?? KleePck.Path("furina/model/combat_visuals.tscn");
     public override string? CustomIconPath =>
         KleePck.Path("furina/ui/character_icon.tscn");
+    /// <summary>Furina's own Hydro energy orb (EB-40), with the base game's
+    /// Ironclad counter as the fallback Klee and Kokomi still return.
+    ///
+    /// The scene is SCRIPT-LESS, like every other scene in the pack: BaseLib
+    /// registers whatever path this property returns for auto-conversion and
+    /// says so at boot — <c>Registered scene '...' for auto-conversion to
+    /// NEnergyCounter</c> — which is what satisfies the hard cast at
+    /// <c>NEnergyCounter.cs:168</c> (<c>Instantiate&lt;NEnergyCounter&gt;</c>).
+    /// A script ext_resource could not do the job anyway: the pck is exported
+    /// from a scratch project holding no game code, so the reference would
+    /// fail MegaDot's import and take the whole build down with it.
+    ///
+    /// The scene carries the five nodes <c>_Ready</c> resolves non-null —
+    /// <c>Label</c>, <c>%Layers</c>, <c>%RotationLayers</c>,
+    /// <c>%EnergyVfxBack</c>, <c>%EnergyVfxFront</c> — and fills the two
+    /// stacks with R231's set A layers: backglow / body / gloss static under
+    /// %Layers, caustics then ring under %RotationLayers, whose children
+    /// <c>_Process</c> spins at delta·num·(i+1) degrees. The layer ROLES are
+    /// an inference from the class contract, not a copy of the base scene:
+    /// SlayTheSpire2.pck is PACK_DIR_ENCRYPTED, so ironclad_energy_counter
+    /// .tscn cannot be read off disk (furina-art-pass §8).
+    ///
+    /// The <c>??</c> matters: a stale pck returns null from KleePck.Path, and
+    /// a null override falls through to the id-derived path that does not
+    /// exist — the R9 preload crash — so the base counter is named here
+    /// rather than left to the getter.
+    /// </summary>
     public override string? CustomEnergyCounterPath =>
-        "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
+        KleePck.Path("furina/ui/energy_counter.tscn")
+        ?? "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
     public override string? CustomTrailPath =>
         "res://scenes/vfx/card_trail_ironclad.tscn";
     public override string? CustomMapMarkerPath =>

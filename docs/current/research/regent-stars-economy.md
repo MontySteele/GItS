@@ -18,8 +18,8 @@ below are given as `<namespace>/<File>.cs` relative to the decompile root.
 embedded in `SlayTheSpire2.pck` (`LocManager.cs:128` `LocalizationAssetDir =>
 "res://localization"`). Sixteen language blocks; English quoted throughout.
 
-**The correction.** `tools/canon_role_tempo.py:126` mints a marker called
-`ForgeStars`:
+**The correction, and it has since been ACTED ON (EB-192 / R231).**
+`tools/canon_role_tempo.py` used to mint a marker called `ForgeStars`:
 
 ```python
 (re.compile(r"ForgeCmd\.|GainStars|\bStars\b"), "ForgeStars"),
@@ -37,12 +37,19 @@ unrelated Regent mechanics** into one 19-card "package":
   combat, and adds the amount of damage to it."* Forge is a growing 0-cost
   attack card, closer to Ironclad's Strength than to a spendable bank.
 
-Of the 19 members of `regent_forge`, ten are Forge-only cards that never touch
-a Star. That matters for `klee/spark`, which is anchored to `regent_forge`
-(`docs/role-tempo-baseline.md:270`): **the anchor's cell percentages are
-computed over a population that is roughly half a different mechanic.** This
-note does not change the anchor — that is a measurement-law call — it records
-that the number is not what its name says.
+Of the 19 members of that `regent_forge` package, ten were Forge-only cards
+that never touch a Star, and `klee/spark` was anchored to it: **the anchor's
+cell percentages were computed over a population that was roughly half a
+different mechanic.**
+
+**R231 rebuilt the anchor from Star-touching cards only.** The package is now
+`regent_stars`, and its membership is **this note's census** — §2 (every
+generator), §3.5 (every spender), §3.6 (the readers) — held as an explicit
+list in `tools/canon_role_tempo.py::REGENT_STARS`, because a Star price is a
+cost FIELD rather than a call in a card body (§3.1) and so no body regex can
+ever draw this package. `tier0/tests/test_role_tempo_coverage.py` fails if
+that list drifts from the three sections below, which makes those sections
+load-bearing: **edit them only from the assembly.**
 
 Everything from §1 down is about **Stars only**, re-derived from the assembly.
 

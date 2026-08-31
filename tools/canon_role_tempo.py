@@ -120,10 +120,18 @@ CONSUMES_ONLY = re.compile(r"OrbCmd\.Evoke|ForgeCmd\.Forge|PlayerCmd\.GainStars"
 MENTIONS = re.compile(r"\b(\w+(?:Power|Orb))\b")
 # Mechanic layers that are commands rather than types, so MENTIONS cannot see
 # them. Each maps a call shape to the marker name a package matches on.
+#
+# THERE IS NO `ForgeStars` MARKER, AND THERE MUST NOT BE ONE (EB-192, R231).
+# It used to sit here as `ForgeCmd\.|GainStars|\bStars\b`, and it was an
+# invented union of two unrelated Regent mechanics: Stars (a spendable
+# resource) and Forge (a growing 0-cost attack card, `ForgeCmd.Forge`, which
+# never touches a Star). No `ForgeStars` symbol exists in the 0.111.0
+# assembly. See `docs/current/research/regent-stars-economy.md` §0 and §3.1.
+# The Star layer is drawn as a curated package instead -- REGENT_STARS below
+# says why a regex over card bodies structurally cannot draw it.
 MECHANIC_MARKERS = (
     (re.compile(r"\bOsty\w*\b|OstyCmd\."), "Osty"),
     (re.compile(r"OrbCmd\.|\bOrbs?\b"), "OrbLayer"),
-    (re.compile(r"ForgeCmd\.|GainStars|\bStars\b"), "ForgeStars"),
     (re.compile(r"ExhaustPile|CardPileCmd\.Exhaust|CardLocation\.Exhaust"),
      "ExhaustLayer"),
 )
@@ -285,8 +293,59 @@ def pool_percentages(cards: list[dict]) -> dict:
 #
 # A card is IN a package when its own decompiled body names the layer, on
 # either side of the mechanic: the card that applies Poison and the card that
-# reads the stack are both poison cards. Membership is therefore structural and
-# nothing here is a hand-drawn card list.
+# reads the stack are both poison cards. Membership is therefore structural,
+# for four of the five packages.
+#
+# THE FIFTH IS CURATED, AND THE REASON IS STRUCTURAL TOO (EB-192, R231).
+# A Star price is not a call in a card's body at all: it is a second COST
+# FIELD on the model (`CardModel.CanonicalStarCost`, checked beside energy in
+# `PlayerCombatState.HasEnoughResourcesFor`), and not one spender's rules text
+# mentions its price -- the badge carries it. So a regex over card bodies can
+# see the eleven generators and NONE of the twenty-three spenders, which is
+# how the old `ForgeStars` union came to be half Forge cards. The population
+# is instead taken from the decompile-sourced census in
+# `docs/current/research/regent-stars-economy.md` -- §2 (every generator),
+# §3.5 (every spender), §3.6 (the readers). That note is the authority; the
+# lists below are it, and `tier0/tests/test_role_tempo_coverage.py` fails if
+# they drift from it or admit a card the census does not carry.
+class Curated(frozenset):
+    """An explicit member list, cited to a decompile-sourced census.
+
+    Used where structural membership is not merely inconvenient but wrong:
+    the layer leaves no mark in the card bodies the classifier can read.
+    """
+
+
+# Every card that GAINS Stars -- census §2 (`PlayerCmd.GainStars`,
+# `StarNextTurnPower`, or `GenesisPower`). Eleven.
+STAR_GENERATORS = (
+    "Venerate", "GatherLight", "Glow", "HiddenCache", "SolarStrike",
+    "Convergence", "KnockoutBlow", "RoyalGamble", "ShiningStrike", "BigBang",
+    "Genesis",
+)
+# Every card that carries a Star PRICE -- census §3.5 (`CanonicalStarCost >= 0`
+# or `HasStarCostX`). Twenty-three. `RoyalGamble` is deliberately in both
+# lists: it pays 5 and gains 9. One census name, the co-op-only
+# `Constellation`, is not in `extract_base_game_pool`'s Regent extract at all
+# (that pass reads 88 of the pool's 91 cards), so the package materialises at
+# 35 of 36 members. The list stays the CENSUS -- membership is its
+# intersection with whatever the pool extract carries -- because shrinking the
+# census to match an extractor gap would hide the gap.
+STAR_SPENDERS = (
+    "FallingStar", "AstralPulse", "CloakOfStars", "CrescentSpear",
+    "GuidingStar", "Alignment", "Constellation", "Devastate", "GammaBlast",
+    "ParticleWall", "Quasar", "Reflect", "Resonance", "RoyalGamble",
+    "Stardust", "Comet", "DecisionsDecisions", "DyingStar", "NeutronAegis",
+    "SevenStars", "TheSmith", "MeteorShower", "TheSealedThrone",
+)
+# Cards that READ Stars without spending them -- census §3.6, card side only
+# (the two relic payoffs it also lists are not in a card pool). `Radiate`
+# scales on Stars gained this turn, `CrescentSpear` on how many Star-costed
+# cards the deck holds, and the two Powers are named there by their power
+# type, which is what their card applies.
+STAR_READERS = ("Radiate", "CrescentSpear", "ChildOfTheStars", "BlackHole")
+REGENT_STARS = Curated(STAR_GENERATORS + STAR_SPENDERS + STAR_READERS)
+
 PACKAGES = {
     "silent_poison": (
         "Silent", ("PoisonPower",),
@@ -311,11 +370,12 @@ PACKAGES = {
         "Ironclad's strength package: an UNBOUNDED per-attack additive that "
         "every attack in the deck inherits. The canon unbounded-meter "
         "precedent named in R91/2b."),
-    "regent_forge": (
-        "Regent", ("ForgeStars", "StarNextTurnPower"),
-        "Regent's Forge/Stars package: a spendable run-and-fight resource "
-        "that cards both generate and consume. The canon shape for a meter "
-        "with a spend verb on it."),
+    "regent_stars": (
+        "Regent", REGENT_STARS,
+        "Regent's Stars package: a per-combat bank that cards gain, spend as "
+        "a second printed price, and read. The canon shape for a meter with a "
+        "spend verb on it. Forge is NOT in here -- it is a separate Regent "
+        "mechanic and the old package fused the two (EB-192)."),
 }
 
 # WHICH CANON PACKAGE EACH GItS ARCHETYPE IS MEASURED AGAINST.
@@ -370,9 +430,10 @@ ARCHETYPE_ANCHORS = {
         "schedule. Same object class as a summon; the payoff shape is where "
         "the two are compared."),
     ("klee", "spark"): (
-        "regent_forge",
+        "regent_stars",
         "Sparks accumulate and are SPENT at a threshold for a free attack. A "
-        "generate-bank-spend resource is Regent's Forge/Stars shape."),
+        "generate-bank-spend resource is Regent's Stars shape: gained by some "
+        "cards, priced onto others, read by a few."),
     ("klee", "reaction"): (
         "silent_poison",
         "Apply a state to the enemy, then play the card that cashes it. That "
@@ -383,23 +444,34 @@ ARCHETYPE_ANCHORS = {
         "The Bake-Kurage is a board entity that pulses on its own each turn "
         "end -- an orb with a jellyfish drawn on it."),
     ("kokomi", "commander"): (
-        "regent_forge",
+        "regent_stars",
         "Charge is generated, banked and SPENT through Burst. A meter with a "
-        "spend verb is Regent's Forge/Stars shape."),
+        "spend verb is Regent's Stars shape, and Stars is the canon bank that "
+        "is also a printed price."),
 }
 
 
-def package_members(cards: list[dict], markers: tuple[str, ...]) -> list[dict]:
-    """Every card in the pool whose body names any of the package's markers."""
-    wanted = set(markers)
+def package_members(cards: list[dict],
+                    selector: tuple[str, ...] | Curated) -> list[dict]:
+    """The package's membership out of one canon pool.
+
+    Two selector shapes, and which one a package uses is a statement about
+    the mechanic rather than a convenience: a tuple of MARKERS matches any
+    card whose decompiled body names the layer, and a `Curated` set matches
+    card NAMES against a census, for a layer that leaves no readable mark in
+    a card body at all (EB-192 / R231 -- see REGENT_STARS).
+    """
+    if isinstance(selector, Curated):
+        return [c for c in cards if c["name"] in selector]
+    wanted = set(selector)
     return [c for c in cards if wanted & set(c.get("mentions") or ())]
 
 
 def derive_package_stats(cards_by_char: dict[str, list[dict]]) -> dict:
     """{package: percentages}, computed over the package's own membership."""
     out: dict[str, dict] = {}
-    for name, (character, markers, _why) in PACKAGES.items():
-        members = package_members(cards_by_char[character], markers)
+    for name, (character, selector, _why) in PACKAGES.items():
+        members = package_members(cards_by_char[character], selector)
         if not members:
             continue
         stats = pool_percentages(members)
@@ -704,13 +776,25 @@ def write_docs(payload: dict) -> None:
         "A package is the subset of a canon pool whose card bodies name one",
         "mechanic layer, **on either side** — the card that applies Poison and",
         "the card that reads the stack are both poison cards. Membership is",
-        "structural (`mentions` off the decompiled body), so no hand-drawn card",
-        "list enters this file.",
+        "structural (`mentions` off the decompiled body) for four of the five.",
+        "",
+        "**`regent_stars` is the exception, and it is disclosed rather than",
+        "hidden (EB-192 / R231).** A Star price is a second COST FIELD on the",
+        "card model, not a call in its body, and no spender’s rules text names",
+        "its price — so a body regex sees the generators and none of the",
+        "spenders. What this package used to be, `regent_forge`, was a regex",
+        "union that fused Stars with the unrelated **Forge** card and ran about",
+        "half Forge-only. Membership now comes from the decompile-sourced census",
+        "in `docs/current/research/regent-stars-economy.md` (§2 every generator,",
+        "§3.5 every spender, §3.6 the readers), held as an explicit list in",
+        "`tools/canon_role_tempo.py::REGENT_STARS` and locked to that note by",
+        "test. The list is base-game material and stays out of this file, which",
+        "is percentages-only exactly as before.",
         "",
         "| package | character | cards | what shape it is |",
         "|---|---|---|---|",
     ]
-    for name, (character, _markers, why) in PACKAGES.items():
+    for name, (character, _selector, why) in PACKAGES.items():
         if name not in per_pkg:
             continue
         short = why.split(":", 1)[-1].strip().split(".")[0]
