@@ -23,11 +23,12 @@ running high. They do. Per-pool printed card counts, DLL:
 | Necrobinder | 91 | 4 | 20 | 38 | 27 | 2 | 91 |
 | Regent | 91 | 4 | 20 | 38 | 27 | 2 | 91 |
 
-DLL total across the five pools: **454**. The wiki route's own
-per-pool numbers sum to **456**, so the wiki runs
-0–1 high per pool — the overage is
-flat, not concentrated, which is what a wiki-lists-a-few-extra story
-looks like and not what a we-are-reading-a-different-pool story would.
+DLL total across the five pools: **454**. The wiki route's own per-pool
+numbers sum to **456**, so the wiki runs 0–1 high per pool, and the
+overage is uneven — Ironclad 1, Silent 1, Defect 0, Necrobinder 0, Regent
+0, the largest being 1. An overage of that size is what a
+wiki-lists-a-few-extra story looks like and not what a
+we-are-reading-a-different-pool story would.
 
 **The charter's "402 canon cards total" was an arithmetic slip and is**
 **now CORRECTED (R92/3a).** Its own per-pool wiki figures sum to 456;
@@ -35,7 +36,10 @@ the DLL sum is **454** and the draftable subtotal is **425**
 (5 × 85 common+uncommon+rare). R92/3a corrected the charter header to
 the sums of the day (439/410, the 0.107 pools); the live figures are
 the two above.
-No percentage anywhere moved: every one of them is within-pool.
+The correction is to a header count and nothing else: **no GItS
+coverage percentage moved.** The canon percentages here are all
+within-pool, and they do move when the DLL's pools do — the 0.111.0
+pools moved many of them.
 
 The pools are startlingly regular: **every** character ships exactly
 20 common, 38 uncommon, 27 rare and 2 ancient. Rarity mix is therefore
@@ -140,9 +144,9 @@ play-graded only (D4 clause, written in at birth).
 ## 5. The canon PACKAGES — the comparison population (R90/1c)
 
 **This section is the repair.** §§2–4 above are whole-pool numbers, and
-the first lint run applied them to an archetype's sub-pool: an 88-card
-canon character spread across everything it does, versus 11–32 GItS
-cards all pointed at one plan. An archetype's per-cell density is
+the first lint run applied them to an archetype's sub-pool: a 90–91-card
+canon character spread across everything it does, versus 14–34
+GItS cards all pointed at one plan. An archetype's per-cell density is
 structurally higher, the bar was generous by construction, and Furina
 cleared some floors by 40–60 points. R90 rules the comparison
 population to be the canon **package** instead.
@@ -173,8 +177,10 @@ is percentages-only exactly as before.
 | `ironclad_strength` | Ironclad | 10 | an UNBOUNDED per-attack additive that every attack in the deck inherits. |
 | `regent_stars` | Regent | 36 | a per-combat bank that cards gain, spend as a second printed price, and read. |
 
-**The sizes are the point**: 8–41 cards against GItS archetypes at
-11–32. The two sides are finally the same kind of object.
+**The sizes are the point**: 10–42 cards against the 12 declared
+GItS archetypes at 14–34. The two sides are finally the same
+kind of object. Both spans are derived here, from the packages in the
+table above and from the three sheets, so neither can go stale.
 
 ### The (solve × fight-band) matrix, per PACKAGE (% of package)
 

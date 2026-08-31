@@ -30,12 +30,14 @@ WHAT IT READS
 
 R90/1c IS WHY THE POPULATION CHANGED. (Citation repaired 2026-08-06 per Q15 /
 R117 -- this file carried F14's misattribution three times over; clause 1c is
-R90's, not R91's.) The first run compared a GItS archetype
-(11-32 cards, one plan) against a whole canon character (88 cards spread across
+R90's, not R91's.) The first run compared a GItS archetype (one plan, a few
+dozen cards) against a whole canon character (nearly a hundred, spread across
 everything), so the bar was generous by construction and Furina cleared some
 floors by 40-60 points. The comparison population is now the canon PACKAGE --
 Silent's poison cards, Defect's orb cards, Necrobinder's summon cards -- which
-run 8-41 and are the same kind of object as an archetype.
+are the same order of size as an archetype, and the same kind of object. The
+two spans are not written down here: they move with the DLL and with the
+sheets, and sec. 5 of docs/role-tempo-baseline.md derives and prints both.
 
 A-G1 CLOSED 2026-08-04 (R91). The tags this reads are LANDED on the sheets, so
 the old "PROVISIONAL, nothing has been written to a sheet" banner is gone. What

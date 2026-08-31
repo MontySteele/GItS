@@ -7,8 +7,9 @@
 #
 # R90/1c: the comparison population is a canon PACKAGE (the cards that
 # touch one mechanic layer, generate side and read side both), not a
-# whole 88-card canon pool. Packages run 8-41 cards, the same order as
-# a GItS archetype.
+# whole canon pool. Packages run 10-42 cards, the same order as
+# a GItS archetype (14-34). Both spans are derived; see sec. 5
+# of docs/role-tempo-baseline.md.
 #
 # `default:` -- for an archetype with no named anchor. A cell is
 # mandatory when all five packages are non-zero in it; the floor is the
