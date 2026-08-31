@@ -415,15 +415,13 @@ silently expand this pass.
 to Klee for them. `select_bg` and `transition_wipe` still share by design (the
 two sanctioned fallback lines). `energy_icon_74/22` deferred — see below.
 
-**`energy_icon_74` / `energy_icon_22` have no consumer yet.** No C# in the mod
-references them, and `Furina.cs` currently points `CustomEnergyCounterPath` at
-the base game's `ironclad_energy_counter.tscn`. Producing them changes nothing
-in-game until someone authors a Furina energy-counter scene. Keep them in the
-bill — they are real §11 smoke-test items — but treat the scene as the blocking
-work, not the art.
+**`energy_icon_74` / `energy_icon_22` still have no consumer.** No C# in the mod
+references them, and the counter scene `EB-40` authored draws the orb from the
+five `energy_orb/` layers, not from these two. Keep them in the bill — they are
+real §11 smoke-test items — but nothing reads them today.
 
-**The orb layers landed 2026-08-30 (`R231`, ex-`M19`), and the scene is still
-the blocking work.** `EB-88` produced three candidate five-layer sets
+**The orb layers landed 2026-08-30 (`R231`, ex-`M19`); the scene followed at
+`EB-40`.** `EB-88` produced three candidate five-layer sets
 procedurally — there is no wiki register for a glow, a body, a caustic band, a
 bezel and a gloss, and `art_hunt` on Hydro returns the same dead sigil pool the
 Kokomi pass documented. [USER] picked **set A, Fontaine Hydro**, the
@@ -432,12 +430,15 @@ are applied at `ImageGen/images/furina/ui/energy_orb/layer{1..5}_*.png` by
 `python tools/gen_energy_orb_layers.py --apply set_a_fontaine`, and are declared
 in `art_lint.GENERATOR_OWNED` so no plan row can ever claim those paths. Sets B
 and C stay on `art/contact_sheet_eb88_energy_orb.html` as the record of what the
-pick was made against. **`EB-40` is unblocked, not done:** the layer ROLES —
-which of the five is glow / body / caustic / bezel / gloss, and which two belong
-under `%RotationLayers` — are an inference from the `NEnergyCounter` class
-contract, not a copy of the base scene, because `SlayTheSpire2.pck` is
-`PACK_DIR_ENCRYPTED` and `ironclad_energy_counter.tscn` cannot be read off disk.
-Nothing changes in-game until that scene exists.
+pick was made against. **`EB-40` authored the scene against those layers**
+(`klee-mod/pck-src/furina/ui/energy_counter.tscn`, script-less: BaseLib
+auto-converts the registered path into the `NEnergyCounter` the game casts to).
+The layer ROLES it wires — backglow / body / gloss static under `%Layers`,
+caustics then ring under `%RotationLayers` — remain an inference from the
+`NEnergyCounter` class contract, not a copy of the base scene, because
+`SlayTheSpire2.pck` is `PACK_DIR_ENCRYPTED` and `ironclad_energy_counter.tscn`
+cannot be read off disk. So are the node TYPES. Nothing is proven in-game until
+the scene is instantiated on a dev build — the live half `EB-40` still owes.
 
 ### Klee fallback fill — how §11's "no Klee assets" is actually checked
 

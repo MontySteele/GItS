@@ -36,6 +36,10 @@ internal static class KleeSceneTelemetry
         "furina/ui/character_icon.tscn",
         "furina/ui/char_select_bg_furina.tscn",
         "furina/ui/salon_stage.tscn",
+        // EB-40: her own Hydro energy orb. Klee and Kokomi still return the
+        // base game's ironclad counter, so a miss here is Furina-only and
+        // otherwise silent -- she just keeps wearing the red orb.
+        "furina/ui/energy_counter.tscn",
         // Kokomi. combat.tscn is EXPECTED MISSING until her art pass lands --
         // she runs on the combat_visuals.tscn fallback, which the pck builder
         // fills from Klee. Listed anyway, because "expected missing" and
@@ -77,6 +81,16 @@ internal static class KleeSceneTelemetry
         // Without ChipLabel1 the docket renders slots with no numbers, which
         // is the exact silent failure this table exists to make loud.
         ("shared/turn_end_docket.tscn", "ChipLabel1"),
+        // EB-40, and NOT of the inert kind the paragraph above describes:
+        // NEnergyCounter._Ready GetNodes all five non-null, so a rename here
+        // does not quietly turn a feature off -- it throws while the combat
+        // HUD is being built. Listed so the boot log names the missing node
+        // before a combat does.
+        ("furina/ui/energy_counter.tscn", "Label"),
+        ("furina/ui/energy_counter.tscn", "Layers"),
+        ("furina/ui/energy_counter.tscn", "RotationLayers"),
+        ("furina/ui/energy_counter.tscn", "EnergyVfxBack"),
+        ("furina/ui/energy_counter.tscn", "EnergyVfxFront"),
     };
 
     public static void LogStatus()

@@ -601,7 +601,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
         12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
         74, 78, 80, 83, 84, 116, 128,
-        154, 158, 159, 160, 161, 162, 163,
+        154, 158, 159, 160, 161, 163,
         180, 181, 183, 184,
         189, 191, 193, 194, 195, 196, 197, 198,
         # 192 was minted 2026-08-29 and CLOSED 2026-08-30 by R231 A8: the
@@ -846,7 +846,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # pays for whole (`no_forced_trade`). BT1's four boards fail it --
         # `t02` on four both-buyable orders -- and BT2's three pass. It is
         # deliberately NOT a `ci` lint: a tree-wide sweep would refuse a
-        # closed round's published boards. The lint count is 30 since
+        # closed round's published boards. The lint count is 31 since conflict-markers (2026-08-30), 30 since
         # EB-153 added `power-icons` (2026-08-30).
         # 238 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word for
         # word -- "a staged page shows the relic line and a form quotes it".
