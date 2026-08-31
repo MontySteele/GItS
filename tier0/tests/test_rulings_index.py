@@ -464,3 +464,18 @@ def test_the_lint_is_registered_in_the_ci_lane():
     assert len(rows) == 1, "rulings-index is not in the registry exactly once"
     assert rows[0].lane == "ci"
     assert not reg.registry_gaps()
+
+
+def test_the_landing_beats_an_earlier_leading_subject(fixture_repo):
+    """Two subjects lead with the same id -- "R16 art rulings applied", an
+    execution commit, then "R16 landed: ...". Earliest-wins would anchor the
+    ruling at the execution; the landing commit carries the ruling words, so
+    a subject whose id is followed by "landed" is promoted above LEAD
+    (first seen on R231, 2026-08-30)."""
+    mod = _configured(fixture_repo)
+    _commit(fixture_repo, "R16 art rulings applied: the execution, not the ruling")
+    _commit(fixture_repo, "R16 landed: the sixteenth ruling, as ruled")
+    _cite(fixture_repo, "See R16." + chr(10))
+    rows = _rows(mod.render()[0])
+    assert "the sixteenth ruling, as ruled" in rows["R16"][1]
+    assert rows["R16"][2].strip("`") == mod.commits()[0].short

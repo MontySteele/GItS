@@ -31,7 +31,8 @@ WHAT SLICE 1 IMPLEMENTS (the five ruled sentences, and nothing else):
            a deploy onto a full stage EVOKES the front member to make room
            (§4.2, all three RULED). An empty stage does nothing extra, and
            says so in the log.
-  EVOKE    The Evoke verb: the front member (`F5` (1)), the Focus term applied
+  EVOKE    The Evoke verb: the member the card NAMES, front when it names
+           none (`F5`, as the slot-6 ruling revised it), the Focus term applied
            `EVOKE_FOCUS_MULT` times instead of once (`F6` (1), the printed
            multiplier), priced in Encore through the card's shipped
            `encore_cost` field (`F7` (1)).
@@ -134,6 +135,49 @@ def evoke_focus_mult(player) -> int:
     is off, which is what makes the `salon_evoke` op resolve exactly like the
     shipped `salon_bow` in a release world."""
     return EVOKE_FOCUS_MULT if evoke_active(player) else 1
+
+
+# ----------------------------------------------------------------------
+# The aimed Evoke -- the slot-6 ruling, 2026-08-30.
+# ----------------------------------------------------------------------
+EVOKE_TARGET_FRONT = "front"      # the sentinel a card prints when it does not
+                                  # aim: written out rather than left implicit,
+                                  # so "unstated" and "front" are the SAME
+                                  # word on a face and in a row.
+EVOKE_TARGET_ABSENT = -1          # the named member is not on the stage. The
+                                  # caller says so out loud (D4) and takes the
+                                  # front, which is what an unaimed Evoke does.
+
+
+def evoke_target_index(player, named=None) -> int:
+    """Which member the dedicated Evoke takes: the index into `player.salon`.
+
+    THE RULE, from the slot-6 ruling (2026-08-30, [USER]): the dedicated Evoke
+    lets the card CHOOSE which member it removes, and the FRONT is what it
+    takes when nothing is named. The full-stage deploy path is untouched and
+    stays automatic-front -- it never calls this function -- because the same
+    ruling keeps the overflow Evoke as the reward for filling the stage, and
+    what Encore now buys is the deliberate aim the free route structurally
+    lacks.
+
+    WHY THIS IS NOT A NEW OP, checked rather than assumed. `tools/lint_op_
+    parity.py` compares the KEY SET of `tier0.engine.effects.OPS` against
+    `tier05.draft.STATIC_OP_PRICING`; the drafter's `_op_price` branches on the
+    op name and reads no argument of it. An extra `member:` ARGUMENT on the
+    shipped `salon_bow` verb therefore leaves the priced-op set identical, so
+    it is not a `DRAFTER_VERSION` event -- which is the same reasoning slice 1
+    used to refuse a `salon_evoke` synonym op, applied to its own next step.
+    A new op would have bought a stamp for a verb the engine already has.
+
+    FLAG-GATED, so the shipped engine cannot be aimed. With
+    `FURINA_REFRAME_EVOKE` off this returns 0 whatever a row names, which is
+    the front member the shipped bow has always popped.
+    """
+    if not named or named == EVOKE_TARGET_FRONT or not evoke_active(player):
+        return 0
+    if named not in player.salon:
+        return EVOKE_TARGET_ABSENT
+    return player.salon.index(named)
 
 
 # ----------------------------------------------------------------------

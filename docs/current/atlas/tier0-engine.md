@@ -268,8 +268,9 @@ trip over is assuming it is dead code.
 Built FIRST AND ALONE on the `EB-82` admission rule — an engine surface is
 never invented inline inside a conversion — so it lands with **no carrier at
 all**: no card on any sheet prints it, and no live `RT/D/P/C` integer moved.
-The two replacement cards (*Tengu Flurry*, *Chinowa Ward*) and the Wood
-Carvings conversion are [USER]-gated.
+The two replacement cards (*Tengu Flurry*, *Chinju Ward* — names ruled at
+R231, 2026-08-30) and the Wood Carvings conversion are still [USER]-gated on
+the `RT` window.
 
 - **What it is.** `{op: block_at_turn_start, amount: <int|count>, turns: <int>}`
   — "gain `amount` Block at the start of each of your next `turns` turns"

@@ -56,7 +56,11 @@
                           # SOFTER than the real card, not harsher.
 
 - id: curse_decay
-  name: "Decay"
+  name: "Rot of the Chasm"
+  # RENAMED from "Decay" by R231 (2026-08-30), the S4-G11 eye-read
+  # taking Grave of the Forgotten's Nameless Cairn variant. This curse
+  # has exactly one grantor -- that event -- so the Liyue name is scoped
+  # to it. The id, cost, type and rarity are untouched.
   cost: 0
   type: status
   rarity: curse

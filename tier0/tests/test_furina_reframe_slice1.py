@@ -327,13 +327,47 @@ def test_the_displacement_bow_is_not_an_evoke_with_the_flag_off():
     assert _events(st, "salon_evoke") == []
 
 
+def test_the_full_stage_deploy_evokes_the_front_and_cannot_be_aimed(
+        manual, evoke, monkeypatch):
+    """THE LOCK on the other half of the slot-6 ruling. Overflow deployment
+    keeps evoking the FRONT automatically -- that is the reward for filling
+    the stage, and the aim is what Encore buys on the dedicated card instead.
+
+    Two assertions, because one of them alone could pass by luck. First: the
+    deploy's own `member:` names who ENTERS, and the member who LEAVES is the
+    front regardless of it -- here the card names the very member sitting at
+    the back, and the usher still takes the bow. Second, and structurally:
+    the chooser is booby-trapped for the length of this deploy, so a future
+    edit that routed the overflow bow through it fails HERE rather than
+    quietly erasing the asymmetry the ruling created on purpose.
+    """
+    st = _staged(["usher", "crabaletta", "chevalmarin"], encore=9)
+
+    def _never(*a, **kw):
+        raise AssertionError("the overflow Evoke must not consult the aim")
+
+    monkeypatch.setattr(FR, "evoke_target_index", _never)
+
+    effects.resolve_card(st, _deploy("chevalmarin"))
+
+    assert _events(st, "salon_final_bow")[0]["member"] == "usher"
+    assert _events(st, "salon_evoke")[0]["member"] == "usher"
+    assert st.player.salon == ["crabaletta", "chevalmarin", "chevalmarin"]
+
+
 # ======================================================================
-# 4. EVOKE -- §4.4, F5 (1), F6 (1), F7 (1)
+# 4. EVOKE -- §4.4, F5 (player's choice, front by default), F6 (1), F7 (1)
 # ======================================================================
 
-def _evoke_card(encore_cost=0):
+def _evoke_card(encore_cost=0, member=None):
+    """`member=None` prints no aim, which under the slot-6 ruling IS the front
+    member -- so every test written before the ruling still means what it
+    meant. `member="..."` is the aimed Evoke the ruling added."""
+    fx = {"op": "salon_bow"}
+    if member is not None:
+        fx["member"] = member
     return _card(id="reframe_test_evoke", encore_cost=encore_cost,
-                 effects=[{"op": "salon_bow"}])
+                 effects=[fx])
 
 
 def test_the_bow_is_the_shipped_bow_with_the_flag_off():
@@ -361,15 +395,110 @@ def test_an_evoke_applies_the_focus_term_n_times(evoke):
     assert _events(st, "salon_evoke")[0]["focus_mult"] == FR.EVOKE_FOCUS_MULT
 
 
-def test_an_evoke_expends_the_front_member(evoke):
-    """`F5` (1): the same end of the same queue the trigger performs, the bow
-    takes and a full-stage deploy displaces. One order, one lesson."""
+def test_an_unaimed_evoke_expends_the_front_member(evoke):
+    """`F5` as the slot-6 ruling revised it: the card may aim, and the FRONT is
+    what it takes when it names nobody. This is the same end of the same queue
+    the trigger performs, the shipped bow takes and a full-stage deploy
+    displaces -- so the default keeps "one order, one lesson" for every card
+    that does not pay to break it."""
     st = _staged(["usher", "crabaletta"], encore=9)
 
     effects.resolve_card(st, _evoke_card())
 
     assert st.player.salon == ["crabaletta"]
     assert st.player.powers["salon_member"] == 1
+
+
+def test_the_front_sentinel_is_the_same_thing_written_out(evoke):
+    """`member: front` and no `member:` at all are one rule, not two: the
+    sentinel exists so a row can say what it means instead of relying on a
+    reader knowing what an absent key implies."""
+    for aim in (None, FR.EVOKE_TARGET_FRONT):
+        st = _staged(["usher", "crabaletta"], encore=9)
+
+        effects.resolve_card(st, _evoke_card(member=aim))
+
+        assert st.player.salon == ["crabaletta"], aim
+
+
+def test_an_aimed_evoke_takes_the_member_the_card_names(evoke):
+    """THE RULING: a dedicated Evoke chooses which member it removes. Each of
+    the three is named in turn off the same board, so what is pinned is the
+    aim itself and not one member's luck of the queue order."""
+    stage = ["usher", "crabaletta", "chevalmarin"]
+    for aimed in stage:
+        st = _staged(stage, encore=9)
+
+        effects.resolve_card(st, _evoke_card(member=aimed))
+
+        assert aimed not in st.player.salon, aimed
+        assert st.player.salon == [m for m in stage if m != aimed], aimed
+        assert st.player.powers["salon_member"] == 2, aimed
+        assert _events(st, "salon_final_bow")[0]["member"] == aimed, aimed
+        assert _events(st, "salon_evoke")[0]["member"] == aimed, aimed
+
+
+def test_the_aim_is_ignored_with_the_evoke_leg_off():
+    """The byte-identical guard, in this file's standing shape. A row carrying
+    an aim on a release build is the shipped bow: front member, one Focus
+    term, no `salon_evoke` event. The choice is a thing the leg GIVES."""
+    stage = ["usher", "crabaletta", "chevalmarin"]
+    st = _staged(stage, encore=9, fanfare=3 * C.SALON_FOCUS_PER)
+    printed = C.SALON_MEMBERS["usher"]["bow"]["block"]
+
+    effects.resolve_card(st, _evoke_card(member="chevalmarin"))
+
+    assert st.player.salon == ["crabaletta", "chevalmarin"]
+    assert st.player.block == printed + 3
+    assert _events(st, "salon_evoke") == []
+
+
+def test_an_aim_at_an_absent_member_takes_the_front_and_says_so(evoke):
+    """An aimed card that cannot find its member is an UNAIMED Evoke, never a
+    wasted one -- and under D4 the miss is emitted, because the aim leaves no
+    trace in the state afterwards for a display to read."""
+    st = _staged(["usher", "crabaletta"], encore=9)
+
+    effects.resolve_card(st, _evoke_card(member="chevalmarin"))
+
+    assert st.player.salon == ["crabaletta"]
+    assert [ev["member"] for ev in _events(st, "salon_evoke_target_absent")
+            ] == ["chevalmarin"]
+
+
+def test_the_absent_aim_is_not_emitted_when_the_member_is_there(evoke):
+    st = _staged(["usher", "crabaletta"], encore=9)
+
+    effects.resolve_card(st, _evoke_card(member="crabaletta"))
+
+    assert _events(st, "salon_evoke_target_absent") == []
+
+
+def test_an_unknown_member_name_is_refused(evoke):
+    """The deploy verb raises on an unknown member and so does this one: a
+    typo that quietly degraded into "the front member" is the one failure an
+    aimed Evoke could hide for a whole sprint."""
+    st = _staged(["usher"], encore=9)
+
+    with pytest.raises(ValueError):
+        effects.resolve_card(st, _evoke_card(member="paimon"))
+
+
+def test_a_repeated_aimed_evoke_takes_the_named_member_then_the_front(evoke):
+    """`amount: 2` with an aim resolves the aim FIRST and then behaves like an
+    unaimed Evoke, because there is only one of each member on a stage. Pinned
+    so the second bow's target is a stated rule rather than an accident of the
+    loop."""
+    st = _staged(["usher", "crabaletta", "chevalmarin"], encore=9)
+    card = _card(id="reframe_test_evoke_x2",
+                 effects=[{"op": "salon_bow", "amount": 2,
+                           "member": "chevalmarin"}])
+
+    effects.resolve_card(st, card)
+
+    assert st.player.salon == ["crabaletta"]
+    assert [ev["member"] for ev in _events(st, "salon_evoke")] == [
+        "chevalmarin", "usher"]
 
 
 def test_an_empty_meter_makes_the_multiplier_worth_nothing(evoke):

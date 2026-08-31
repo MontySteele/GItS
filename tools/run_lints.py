@@ -147,6 +147,10 @@ REGISTRY: tuple[Lint, ...] = (
     # for months with every gate green -- and its second shape (the aura path
     # built by string concatenation) has no case for anyone to forget.
     _ci("power-icons",          "tools/lint_power_icons.py"),
+    # 2026-08-30: three marker lines shipped to main inside BACKLOG.md when a
+    # fold fixed a DUPLICATE-row finding without reading its context. Markers
+    # are invisible to every register lint, so they get their own gate.
+    _ci("conflict-markers",     "tools/lint_conflict_markers.py"),
     _ci("op-parity",            "tools/lint_op_parity.py"),
     _ci("sly-grammar",          "tools/lint_sly_grammar.py"),
     _ci("codegen-staleness",    "tools/gen_roster_cards.py", "--check"),

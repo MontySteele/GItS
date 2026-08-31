@@ -7124,7 +7124,52 @@ start where the last one ended, and the arithmetic must subtract. **A form with
 no ledger FAILS.** The field is nullable everywhere else, so every sealed form
 and every replay loads unchanged, and no falsifier requires it.
 
-### 26.1 What this OWES [USER], and is not taking
+### 26.1 What this OWED [USER] — RULED by R232 (2026-08-30)
+
+**R232 answered both halves of what this section put up.** The six sealed
+`costs` items were RE-PICKED against the ledger's question, and R223's mark of
+4 of 6 was deliberately LEFT ALONE. In plain words, the two reasons:
+
+- **The items should ask the question the scorer asks.** Keeping the old six
+  would have preserved comparability with the seat's earlier reads while
+  weakening what the category actually measures, and validity wins that trade.
+- **Do not move the boards and the bar in the same step.** The ledger already
+  made the category materially harder; changing the pass mark at the same time
+  would leave any later failure impossible to attribute. 4 of 6 stands for the
+  first properly selected run, and the revisit is gated on accumulated
+  evidence rather than scheduled.
+
+**What that meant in the file.** The picking rule in
+`understudy/battery/battery.yaml` is now the LEDGER's rule: a board qualifies
+when the packet prints an Energy bank, when the hand prints **two different
+non-zero prices that are jointly payable out of that bank** — so a real line
+moves the bank by two different amounts and a reader who subtracts the same
+number every play cannot land right by habit — and when the six between them
+cover **both Spark shapes**, boards that print a Spark bank and boards that do
+not. Four of the old six fail that rule and moved out: `kokomi-slice2-t02` and
+`-t06` print a bank of 2 against prices of 1, 1, 1 and 2, so no two different
+prices are ever payable together; `klee-slice1-r3-t03` and `-t04` print no
+non-zero price but 1, and neither does any other board in that round. The two
+that stayed are `klee-sparks-r1-t04` and `-t05`, and they are the two that
+carry the printed Spark bank. Four `kokomi-slice1` boards fill the gap, which
+widens the battery from three closed rounds to four. The honest cost is that
+`costs` is now a Kokomi-only category: Klee's printed hands are almost all 0s
+and 1s, and only two sealed Klee boards clear the rule at all. The Klee
+vocabulary is carried by `targets` (four of six) and `intent` (two of six).
+
+**The old six are KEPT, labelled and unscored**, as a `free-claim-regression`
+set in the same file — they remain the sharpest boards in the record for the
+FIRST half of `score_costs`, the "X is free" misread, which still ships.
+`qualify.load_battery` reads only the scored list, `qualify.load_regression`
+is the only other door, and the tests pin the separation in both directions.
+The re-pick and the drops are both pinned executably in
+`tier0/tests/test_eb211_price_ledger.py`, and the four dropped boards are
+asserted to FAIL the new rule, so a rule nothing fails cannot creep back in.
+
+**What follows stands as it was written**, as the statement of the question
+R232 answered.
+
+### 26.2 What this OWED [USER], as it was put up
 
 **The six sealed `costs` items need re-picking, and that is [USER]'s call, not
 this branch's.** The battery file states the rule those six were chosen on:

@@ -242,9 +242,9 @@ RETRIEVAL POINT (`git show <hash>`, or `git show <hash>:<ledger path>`).
 | R230 | 2026-08-30 | landed: Bag of Tricks' refund accepted as a deliberate BRIDGE mechanic, option (3) qualified | `9e5560c` |
 | R231 | 2026-08-30 | art rulings applied: the last four Rares land, three Klee spares get picks, and one sigil moves | `6181278` |
 
-230 rows over the R1..R231 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 119 from a commit message, 0 unresolved.
+230 rows over the R1..R232 namespace — 111 resolved from the retired ledgers (83 from the current-law digest, 1 from a ledger heading, 27 from a bold ledger definition), 119 from a commit message, 0 unresolved.
 
-1 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28.
+2 id(s) omitted — neither cited under `docs/current/` nor resolvable from history: R28, R232.
 
 Ledger retrieval point: `3907837` (tag `pre-simplification-2026-08-06`); ledger paths `tier0/DECISIONS.md`, `tier0/DECISIONS-archive-R39-R99.md`, `klee-mod/DECISIONS.md`.
 
