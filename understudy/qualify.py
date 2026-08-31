@@ -14,10 +14,21 @@ funnel has actually seen:
   * **targets** (EB-203) — a card whose printed effects aim at ONE enemy must
     carry a target, and a card that aims at nobody must not. Both directions,
     because "always name an enemy" passes the first half and is not literacy.
-  * **costs** (EB-186, Klee slice 1 round 1) — the reader must not call a card
-    free that the packet prints a cost for. `understudy/misreads.py` is the
-    check, unchanged and shared, so a battery pass means the same thing a
-    round's post-read check means.
+  * **costs** (EB-186, Klee slice 1 round 1; EB-211) — TWO halves since
+    2026-08-30. The reader must not call a card free that the packet prints a
+    cost for (`understudy/misreads.py`, the shipped check, unchanged and
+    shared, so a battery pass means what a round's post-read check means) —
+    **and** must carry a `price_ledger`: per play, the bank before, the price
+    paid and the bank after, scored against the costs and the bank the PACKET
+    prints. The second half is `EB-211`: with only the first, a form that
+    never mentioned a price PASSED, and a 4-of-6 mark was satisfiable by
+    SILENCE. **R232 (2026-08-30) then RE-PICKED the six sealed items against
+    the second half.** The picking rule in the battery file is now the
+    LEDGER's question — a printed Energy bank, two DISTINCT non-zero costs
+    jointly payable out of it, and both Spark shapes across the six — and the
+    pre-re-pick six are kept in that same file, labelled and UNSCORED, as the
+    `free-claim-regression` set. **The mark did not move in the same step:
+    R232 kept costs at 4 of 6 so that a failure stays attributable.**
   * **intent** (R213's fourth question) — the enemy's telegraph must be part
     of the decision. Scored with the `intent_insensitive` falsifier itself,
     for the same reason.
@@ -32,8 +43,9 @@ blind spot that returned it (targets, `EB-203`) with the two categories it
 still reads.
 
 WHERE THE BOARDS COME FROM. `understudy/battery/battery.yaml`, and every item
-names a SEALED packet under `review/qa/` from a closed round — `kokomi-slice2`,
-`klee-slice1-r3`, `klee-sparks-r1`. No new board is staged and no game is
+names a SEALED packet under `review/qa/` from a closed round — `kokomi-slice1`,
+`kokomi-slice2`, `klee-slice1-r3`, `klee-sparks-r1` since R232's re-pick
+widened `costs` to a fourth round. No new board is staged and no game is
 launched: a requalification that cost a launch would be run rarely, which is
 the opposite of what it is for. The packets are read-only here; nothing is
 written into a closed turn directory (R101b), and a battery read lands in its
@@ -52,6 +64,7 @@ the sealed record can honestly support.
 from __future__ import annotations
 
 import json
+import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -97,13 +110,44 @@ class Threshold:
         return self.per_category[category]
 
 
+REGRESSION_KEY = "free_claim_regression"
+
+
 def load_battery(path: Path | None = None) -> list[Item]:
+    """The SCORED items, and only those: `items:`, never the regression set.
+
+    R232 (2026-08-30) kept the pre-re-pick `costs` six in the battery file
+    under `free_claim_regression:` and removed them from R223 qualification
+    scoring. THIS FUNCTION IS WHERE "REMOVED FROM SCORING" IS TRUE: it reads
+    one key. `load_regression` is the only other door, and nothing in the
+    qualification path opens it.
+    """
+    return _items_under(path, "items")
+
+
+def load_regression(path: Path | None = None) -> list[Item]:
+    """The `free-claim-regression` set — LABELLED, UNSCORED, R232's.
+
+    The six boards the OLD `costs` rule picked, kept whole because they remain
+    the record's sharpest ones for the FIRST half of `score_costs` (the
+    "X is free" misread, `misreads.free_card_misreads`, still shipped and
+    still checked). A caller that wants them has to ask for them by name, and
+    no caller in the qualification path does.
+    """
+    return _items_under(path, REGRESSION_KEY, optional=True)
+
+
+def _items_under(path: Path | None, section: str,
+                 *, optional: bool = False) -> list[Item]:
     p = Path(path or BATTERY_FILE)
     blob = yaml.safe_load(p.read_text(encoding="utf-8"))
-    if not isinstance(blob, Mapping) or not isinstance(blob.get("items"), list):
-        raise BatteryError(f"{p}: a battery is a mapping with an 'items' list")
+    if optional and isinstance(blob, Mapping) and section not in blob:
+        return []
+    if not isinstance(blob, Mapping) or not isinstance(blob.get(section), list):
+        raise BatteryError(
+            f"{p}: a battery is a mapping with an {section!r} list")
     items: list[Item] = []
-    for i, raw in enumerate(blob["items"]):
+    for i, raw in enumerate(blob[section]):
         if not isinstance(raw, Mapping):
             raise BatteryError(f"{p}: item {i} is a mapping")
         for key in ("id", "category", "turn_id"):
@@ -194,17 +238,139 @@ def score_targets(form: Mapping[str, Any], turn_dir: Path) -> tuple[bool, str]:
 
 
 def score_costs(form: Mapping[str, Any], turn_dir: Path) -> tuple[bool, str]:
-    """`misreads.free_card_misreads`, the shipped check, on the reader's prose."""
+    """Two halves: the "X is free" misread, and the PRICE LEDGER (`EB-211`).
+
+    THE CATEGORY USED TO BE HALF A CHECK. It ran `free_card_misreads` over the
+    reader's prose and PASSED on no hits, so a form that never mentioned a
+    price passed `costs` and R223's mark of 4 of 6 was satisfiable by silence
+    (`review/active/klee-sparks-2026-08-29.md` section 13.8, claim 3). Silence
+    now FAILS: the reader states, per play and in the board's own printed
+    numbers, the bank before, the price paid, and the bank after.
+
+    WHAT IS CHECKED, AND ALL OF IT OFF THE PACKET. Nothing here opens a sheet;
+    the question is whether the reading matches the page the reader was shown.
+
+      * one ledger entry per play in `chosen_line`, in that order, naming the
+        same printed titles;
+      * `energy_price` equal to the `Cost:` the packet PRINTS for that card;
+      * the first `energy_before` equal to the Energy the packet prints, and
+        every later one equal to the previous `energy_after` -- the chain,
+        which is what a bank IS;
+      * `energy_after == energy_before - energy_price`, RELAXED to
+        `>= energy_before - energy_price` for a card whose printed body says
+        it gains or refunds Energy (`EB-238`'s Pounding Surprise class): a
+        card that hands Energy back inside the turn is not a reader's
+        arithmetic error, and a check that called it one would be exactly the
+        false FAIL `misreads.py` refuses to ship;
+      * the Spark half on the same rules where the packet PRINTS a Spark bank
+        -- chain, never negative -- and required NULL where it does not. The
+        packet prints a Spark price in a card's own prose rather than as a
+        number of its own, so `spark_price` is not checked against a printed
+        value; the bank it moves is.
+
+    A ledger longer or shorter than the line, an entry out of order, a
+    non-integer where an integer is required: each is a FAIL naming the play.
+    """
     from understudy import misreads, staged_turn
-    packet = turn_dir / "packet.md"
-    if not packet.is_file():
+    packet_path = turn_dir / "packet.md"
+    if not packet_path.is_file():
         return False, "no packet.md for this item"
+    packet = packet_path.read_text(encoding="utf-8")
+
     hits = misreads.free_card_misreads(
-        packet.read_text(encoding="utf-8"),
-        misreads.prose_of(dict(form), staged_turn.QUESTIONS))
+        packet, misreads.prose_of(dict(form), staged_turn.QUESTIONS))
     if hits:
         return False, "; ".join(hits)
-    return True, "no card the packet prices was called free"
+
+    line = list(form.get("chosen_line") or [])
+    if not line:
+        return False, "the form names no cards played"
+    ledger = form.get("price_ledger")
+    if not isinstance(ledger, list) or not ledger:
+        return False, ("the form carries no `price_ledger` -- it is silent on "
+                       "every price, and silence is not a reading of the "
+                       "board's costs (EB-211)")
+    if len(ledger) != len(line):
+        return False, (f"the ledger has {len(ledger)} entr(ies) for a line of "
+                       f"{len(line)} play(s); one per play, in order")
+
+    costs = misreads.printed_costs(packet)
+    banks = misreads.printed_banks(packet)
+    problems: list[str] = []
+    prev_energy = banks.get("energy")
+    spark_printed = banks.get("spark")
+    prev_spark = spark_printed
+
+    for i, (play, entry) in enumerate(zip(line, ledger), 1):
+        title = str(play.get("card") or "")
+        where = f"play {i} ({title})"
+        if not isinstance(entry, Mapping):
+            problems.append(f"{where}: the ledger entry is not an object")
+            continue
+        if (str(entry.get("card") or "").strip().casefold()
+                != title.strip().casefold()):
+            problems.append(
+                f"{where}: the ledger names {entry.get('card')!r} here -- one "
+                f"entry per play, in the line's own order")
+            continue
+        nums = {k: entry.get(k) for k in
+                ("energy_before", "energy_price", "energy_after")}
+        bad = [k for k, v in nums.items()
+               if not isinstance(v, int) or isinstance(v, bool)]
+        if bad:
+            problems.append(f"{where}: {', '.join(sorted(bad))} must be a "
+                            f"whole number of Energy")
+            continue
+        printed = next((v for k, v in costs.items()
+                        if k.casefold() == title.strip().casefold()), None)
+        if printed is not None and nums["energy_price"] != printed:
+            problems.append(f"{where}: the ledger pays {nums['energy_price']}, "
+                            f"the packet prints Cost: {printed}")
+        if prev_energy is not None and nums["energy_before"] != prev_energy:
+            problems.append(
+                f"{where}: the bank enters at {nums['energy_before']} where "
+                f"the board left it at {prev_energy}")
+        spent = nums["energy_before"] - nums["energy_price"]
+        # The relaxation is keyed to an ENERGY gain and nothing else. "Gain 5
+        # Block" is most Skills in the game, and matching it would relax the
+        # arithmetic on nearly every board -- which is the check not existing.
+        body = misreads.printed_body(packet, title).casefold()
+        gains = bool(re.search(r"(?:gain|regain)\s+\d*\s*energy|refund"
+                               r"|energy back", body))
+        if nums["energy_after"] < spent or (nums["energy_after"] != spent
+                                            and not gains):
+            problems.append(
+                f"{where}: {nums['energy_before']} - {nums['energy_price']} "
+                f"is {spent}, and the ledger leaves the bank at "
+                f"{nums['energy_after']}")
+        prev_energy = nums["energy_after"]
+
+        sk = {k: entry.get(k) for k in
+              ("spark_before", "spark_price", "spark_after")}
+        if spark_printed is None:
+            if any(v is not None for v in sk.values()):
+                problems.append(f"{where}: the packet prints no Spark bank, "
+                                f"so the Spark half of the entry is null")
+            continue
+        bad = [k for k, v in sk.items()
+               if not isinstance(v, int) or isinstance(v, bool)]
+        if bad:
+            problems.append(f"{where}: the packet prints a Spark bank, so "
+                            f"{', '.join(sorted(bad))} is a whole number")
+            continue
+        if prev_spark is not None and sk["spark_before"] != prev_spark:
+            problems.append(
+                f"{where}: Spark enters at {sk['spark_before']} where the "
+                f"board left it at {prev_spark}")
+        if sk["spark_after"] < 0 or sk["spark_price"] < 0:
+            problems.append(f"{where}: a Spark bank does not go negative")
+        prev_spark = sk["spark_after"]
+
+    if problems:
+        return False, "; ".join(problems)
+    return True, (f"no card the packet prices was called free, and the ledger "
+                  f"prices all {len(line)} play(s) against the printed costs "
+                  f"and the printed bank")
 
 
 def score_intent(form: Mapping[str, Any], turn_dir: Path) -> tuple[bool, str]:

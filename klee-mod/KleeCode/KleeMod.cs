@@ -219,10 +219,11 @@ public static class KleeMod
                     // the TITLES are rows -- the bodies are built live in
                     // SalonMemberTips, because the numbers live in
                     // SalonConstants and the cap is a per-player stat.
-                    ["KLEEMOD-SALON_CRABALETTA.title"] =
+                    [Cards.SalonMemberTips.CrabalettaKey + ".title"] =
                         "Mademoiselle Crabaletta",
-                    ["KLEEMOD-SALON_USHER.title"] = "Gentilhomme Usher",
-                    ["KLEEMOD-SALON_CHEVALMARIN.title"] =
+                    [Cards.SalonMemberTips.UsherKey + ".title"] =
+                        "Gentilhomme Usher",
+                    [Cards.SalonMemberTips.ChevalmarinKey + ".title"] =
                         "Surintendante Chevalmarin",
                     [Cards.SalonMemberTips.SalonRulesKey + ".title"] =
                         "Salon",

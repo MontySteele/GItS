@@ -276,7 +276,10 @@ CEILINGS: dict[str, int] = {
     # integration reproduced and then diagnosed off the quoted save path --
     # it is a cross-SESSION leak, and the standing "rerun the file alone"
     # workaround is the reason nobody had looked.
-    "EB": 240,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-241 minted 2026-08-30 by R231 A3: `Card.is_junk` is rarity-only,
+    # and the fix is scheduled AT the Kokomi fold because it moves shipped
+    # numbers and rides the fold's already-required re-baseline.
+    "EB": 241,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -598,8 +601,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     "EB": frozenset({
         12, 15, 32, 33, 34, 35, 38, 40, 41, 53, 65, 70, 71,
         74, 78, 80, 83, 84, 116, 128,
-        153, 154, 155,
-        156, 157, 158, 159, 160, 161, 162, 163,
+        154, 158, 159, 160, 161, 162, 163,
         180, 181, 183, 184,
         189, 191, 193, 194, 195, 196, 197, 198,
         # 192 was minted 2026-08-29 and CLOSED 2026-08-30 by R231 A8: the
@@ -637,7 +639,11 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 211/212 minted 2026-08-29 by the KLEESPARK-R2 relayed review (packet
         # section 13.8): the battery's costs category passes on silence, and its
         # intent category is self-report.
-        211, 212,
+        # 211 CLOSED 2026-08-30 by R232 and left OPEN_IDS with its row: the
+        # ledger shipped on 2026-08-30, and the re-pick of the six sealed
+        # `costs` boards -- the only thing its acceptance was still waiting on
+        # -- is R232's. The ceiling above holds the number.
+        212,
         # 206 was minted AND CLOSED on 2026-08-29 by the two-instance funnel
         # build -- it left OPEN_IDS in the same commit that closed it, with
         # the ceiling above holding the number so nothing re-takes it.
@@ -722,7 +728,39 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # prints the Bomb's own amount, carried by a plain "BombDamage" var
         # instead of the attack-var family, and the lock was seen to FAIL on
         # all seventeen shipped faces first.
-        231, 232,
+        #
+        # 232 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word
+        # for word -- "two concurrent sessions stay green". The row's
+        # diagnosis was half right and the fix is the other half: `tmp_path`
+        # is ALREADY session-unique (`pytest-2295` and `pytest-2296` are two
+        # base directories), so nothing shared a save tree -- a path out of
+        # 2295 reached 2296's assertion over the WIRE, because the lane tests
+        # bound the FIXED loopback port 15599 and on Windows a second process
+        # binds it too, silently, with the FIRST binder answering everybody.
+        # Every server in that file now binds port 0 and reads its port back,
+        # `_LaneServer` refuses `allow_reuse_address` so a future constant
+        # fails at the bind rather than quietly, and `_lane_bridge` no longer
+        # TAKES a port. Seen to FAIL: with a squatter holding 15599, the old
+        # file's named test fails `DID NOT RAISE LaneCrossed` where the new
+        # one passes; two concurrent sessions of the old file give 1 failed /
+        # 13 passed against 14 passed, and of the new file 91 passed twice.
+        #
+        # 231 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word
+        # for word -- "teardown proves the PID gone before the marker, lock
+        # seen to FAIL". `embark --teardown` rebuilds the session from the
+        # ledger on disk and so holds no `Popen`; `_kill` found `proc is
+        # None`, did nothing, and `_stop_game` returned "process terminated"
+        # anyway. Two halves: `_launch` writes the pid onto the launch entry
+        # (the only copy that outlives the process that made it), and
+        # `_kill_and_prove` polls the process table for up to
+        # `PID_EXIT_TIMEOUT_S` and RAISES on a survivor, so `_step` records
+        # NOT REVERTED naming the image still holding the number. An
+        # unanswerable probe counts as ALIVE, and a pre-change ledger with no
+        # pid refuses rather than assumes. `halt_spin`'s marker goes through
+        # the same proof. SEEN TO FAIL against a live pid (this python
+        # process, `taskkill` stubbed, real `tasklist`): old soak.py wrote
+        # REVERTED / "process terminated", new soak.py writes NOT REVERTED /
+        # "pid N (python.exe) is STILL ALIVE".
         # 233/234 minted 2026-08-30 by the post-merge review: the scorer/pool
         # half of KLEESPARK-S1's S3 miss, and the memory-cadence read on a
         # developed deck the kurage packet defers.
@@ -764,13 +802,52 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # was written under the OLD reading; re-planning that CLOSED round
         # reports ceiling 0 against threshold 1, and `slots.yaml` is NOT
         # edited -- a published measurement stands as published.
+        # 157 LEFT OPEN_IDS 2026-08-30 with its row: one pin. The manifest's
+        # BaseLib `min_version` was 3.3.6, a floor nothing compared to
+        # anything; it is now 3.4.5, the release this machine compiles against,
+        # the assembly vault's `PIN.json` records and the installed Workshop
+        # item reports -- the same number STATE.md's pin block carries.
+        # `tier0/tests/test_eb157_baselib_pin.py` is the gate: manifest vs
+        # STATE.md, plus a curated enumeration of the BaseLib types we call so
+        # a reach for a new API meets the pin. RESIDUAL UNKNOWN, disclosed
+        # rather than closed: the 3.3.6 SURFACE could not be obtained (Steam
+        # serves only a Workshop item's current version and no older copy
+        # exists here or in the vault), so the enumeration was taken against
+        # 3.4.5 and whether those symbols exist in 3.3.6 is still unknown.
+        # Raising the floor to the verified number is what makes it harmless.
+        # 156 LEFT OPEN_IDS 2026-08-30 with its row: the per-fight telemetry
+        # row now reads `ReactionEffects.ResolvedThisCombat(combat, player)`,
+        # a per-seat counter keyed exactly like `BombPower`'s detonation
+        # totals next door. `TotalResolved` is UNCHANGED and still global --
+        # that scope is a sealed ruling (red-pen R1) about GAMEPLAY, and the
+        # defect was sampling it into a per-seat ROW. A dealer-less reaction
+        # belongs to no seat, so the seats sum to at most the team-wide count;
+        # that asymmetry is pinned, not hidden. `understudy/README.md`'s schema
+        # line is corrected. Tests: `KleeTests/ReactionSeatCountTests.cs`.
+        # 155 LEFT OPEN_IDS 2026-08-30 with its row: KleeSelfCheck rule R20
+        # sweeps this assembly's `KLEEMOD-` keyword CONSTANTS -- found by
+        # reflection, never a curated list, because the failure being fixed IS
+        # the commit that adds a key and forgets its row -- for a `.title` row
+        # in `card_keywords`. The three salon-member keys were hoisted out of a
+        # switch body in the same commit, since a key that is only a literal
+        # inside a method is one reflection cannot see. Seen to fail in
+        # `klee-mod/KleeTests/KeywordTitleRowTests.cs`.
+        # 153 LEFT OPEN_IDS 2026-08-30 with its row: `tools/lint_power_icons.py`
+        # (ci lane) bites on both shapes the row named -- a concrete
+        # `PowerModel` with no `PathFor` case, no `IconExempt` entry and no
+        # `ICON_DEBT` row, and an aura element whose icon path `PathFor` builds
+        # by CONCATENATION with nothing behind it. Both are exercised against
+        # synthetic input in `tier0/tests/test_eb153_power_icons_lint.py`. The
+        # seven powers the row names ship as named debt rather than a silent
+        # pass: no icon was invented for any of them.
         # 236 LEFT OPEN_IDS 2026-08-30 with its row: `board_design_findings`
         # in `--plan-only` walks EVERY order of play with relic gains counted
         # (`both_buyable`, R229's strong form) and refuses a hand the Energy
         # pays for whole (`no_forced_trade`). BT1's four boards fail it --
         # `t02` on four both-buyable orders -- and BT2's three pass. It is
         # deliberately NOT a `ci` lint: a tree-wide sweep would refuse a
-        # closed round's published boards. The lint count stays 29.
+        # closed round's published boards. The lint count is 30 since
+        # EB-153 added `power-icons` (2026-08-30).
         # 238 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word for
         # word -- "a staged page shows the relic line and a form quotes it".
         # KLEESPARK-BT2's pages printed the run's relics and `t01`'s shadow form
@@ -793,6 +870,8 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # immediately falsified a printed assumption, and the preflight's
         # assumption check cannot see the wire's relic list.
         240,
+        # 241 minted 2026-08-30 by R231 A3, gated on the Kokomi fold.
+        241,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -845,7 +924,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # the selector aims a Companion and costs Encore. M45(4) is answered with
     # it; M45 itself stays until its other six calls are answered. Ceilings
     # never come down.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
+    # M10, M14, M16 and M19 LEFT OPEN_IDS 2026-08-30 with their rows,
+    # closed by R231: the Fontaine Rares close APPROVED with Neuvillette
+    # shipping as-is; the companion-channel trigger closed as NOISE, the
+    # published grade standing as graded (R101b); SceneSlots stays at 4 as
+    # harmless headroom; and the energy orb takes A Fontaine Hydro, which
+    # lifts EB-40's gate. Ceilings never come down.
+    "M": frozenset({13, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families
@@ -853,9 +938,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
 # on these, so there is no ceiling — the set IS the manifest, with the same
 # rot semantics as OPEN_IDS. A retired `S4-G7` is therefore refused the same
 # way a retired `EB-53` would be: it is simply not in here.
+# S4-G11 left this manifest 2026-08-30 with its row, ruled in all three parts
+# by R231: Backstroke KEPT, Tengu Flurry KEPT with `chinowa_ward` renamed
+# `chinju_ward`, and the EB-82 Grave conversion taking the Liyue / Nameless
+# Cairn labels. S4-G6 STAYS -- R231 answered only its MECHANISM.
 OPEN_IRREGULAR: frozenset[str] = frozenset({
     "CC-G1", "CC-G2",
-    "S4-G6", "S4-G11", "S4-G12", "S4-G14", "S4-G17",
+    "S4-G6", "S4-G12", "S4-G14", "S4-G17",
     "SKIP-10.9",
 })
 

@@ -800,6 +800,20 @@ decision with a payoff rather than a loss), and it gives the player a second
 way to Evoke without drafting an Evoke card — which matters at the starter,
 where there is one.
 
+**The overflow Evoke is AUTOMATIC AND FRONT-ONLY, by ruling (2026-08-30, the
+slot-6 ruling), and that is the reward rather than an oversight.** Slot 6's
+probe (§11.5) found the free route dominating the paid one on every axis
+arithmetic can see, and returned `F7` and this rule to [USER] together as one
+numbered pick. He kept this rule exactly as written — *"full-stage deployment
+continues automatically evoking the front … overflow deployment remains the
+satisfying reward for filling the stage"* — and paid the other side instead, by
+giving the dedicated Evoke a member CHOICE (`F5`, §4.4). The two halves are one
+design: the free Evoke is bigger and dumb, the paid Evoke is smaller and
+aimed, and a deploy card may never name which member it displaces. That last
+clause is load-bearing — a `member:` argument on a deploy row would erase the
+only axis the dedicated Evoke has, so the engine refuses it by construction and
+a test locks it.
+
 **The roster.** [USER] named the shape: "damage / block / scaling / (at high
 rarity) energy, just like Defect does". Today's three cover damage, Block and
 aura-application; there is no scaling member and no energy member. The redraft
@@ -918,11 +932,17 @@ runs itself.
 
 ### 4.4 The Evoke rule
 
-**Which member.** The front, again — `_op_salon_bow` already takes leftmost
-and calls itself "the Defect-evoke analogue". Using the same end for trigger,
-Evoke and full-stage displacement is what makes `salon_rotate` the single
-aiming verb for all three, and that property is what keeps the two hooks
-complementary rather than two systems to track.
+**Which member — RULED (2026-08-30, the slot-6 ruling).** **The card chooses,
+and the front is what it takes when the card names nobody.** `_op_salon_bow`
+already takes leftmost and calls itself "the Defect-evoke analogue"; the aim
+is an ARGUMENT on that verb, so an Evoke printing no target is the leftmost
+exactly as before and `salon_rotate` stays the free aiming verb for every card
+that does not pay to skip it. What the aim costs is the Encore the Evoke
+family already prints under `F7` — [USER]'s own sentence is *"Encore then buys
+deliberate control"*. The trigger and the full-stage displacement are
+UNCHANGED and stay front-only, so "one order, one lesson" is still the rule the
+player learns first, and the aimed Evoke is the one thing in the kit that buys
+its way out of it.
 
 **What "much stronger Fanfare scaling" means as a shape.** Today the Focus
 term adds `held_fanfare // SALON_FOCUS_PER` to every member numeric,
@@ -954,15 +974,18 @@ where D3 bites — an Evoke that pays a big Block *and* advances the engine at
 full rate without a binding cost is a subsidy, and the Encore price is the
 binding cost.
 
-**Picks — F5. Which member Evoke expends.**
-
-1. **The front member — the same end as the trigger, the same end
-   `salon_bow` takes, and the same end a full-stage deploy displaces.**
-   *(Claude's recommendation.)*
-2. The player chooses. More control, a modal on every Evoke, and it breaks the
-   "one order, one lesson" property that §4.2's full-stage rule now depends on.
-3. Evoke takes the *back* member, so trigger and Evoke consume from opposite
-   ends. Interesting, and it doubles what the player must track.
+**`F5`. Which member Evoke expends — ANSWERED 2026-08-30 at option (2), the
+player chooses, with the front as the default when a card names nobody.**
+[USER] took the slot-6 pick this way: *"keep removal, but let a dedicated Evoke
+choose which member to remove."* The objection recorded against option (2) when
+it was drafted — that a choice breaks the "one order, one lesson" property
+§4.2's full-stage rule depends on — is answered by the shape rather than
+waived: the choice lives on the dedicated Evoke ALONE, the trigger and the
+overflow displacement keep taking the front, and an Evoke card that prints no
+target is the front too. What a player must learn is still one order; what a
+player may BUY, with the Encore `F7` already prices, is an exception to it.
+Option (3), the back member, is not taken and is not live: opposite-end
+consumption doubles what the player tracks and buys nothing the aim does not.
 
 **Picks — F6. What "much stronger Fanfare scaling" means.**
 
@@ -1331,6 +1354,18 @@ picks it comes from. The slate is **DRAFTED and UNCOUNTERSIGNED**; it is
 offered for BATCH countersign under R212, and it is signed once — a moved world
 means re-drafting the affected slots and disclosing the diff, never re-signing.
 
+**REDRAFT DISCLOSURE — 2026-08-30, the slot-6 ruling.** The world moved before
+the batch countersign was taken: `F5` is answered at option (2) (§4.4, the
+dedicated Evoke aims and the overflow deploy does not), so every slot whose
+written world contains an Evoke card had to be redrafted against the revised
+design rather than signed as drafted. **Slots 2, 3 and 6 are REDRAFTED in
+place, each carrying its own one-line disclosure. Slots 1, 4, 5 and 7 are
+byte-identical — the ruling does not touch the trigger, the meter, the drain
+card or the co-op observation.** Nothing here has ever been countersigned and
+nothing is re-signed: **the slate as a whole still awaits ONE batch
+countersign**, now in its redrafted form, and it is still committed before any
+run.
+
 **How a slot is counted, stated once for the whole slate.** Boards are staged,
 not played; each staged board is read by **two independent blind graders**
 (`EB-149`), so **one board yields two forms**, and every graded line is
@@ -1372,11 +1407,20 @@ because this slot cannot tell a display failure from a rules failure. **SPLIT**
 buys one repaired staged round, not a design change.
 
 **Slot 2 — is trigger-versus-Evoke a real decision?**
+*Redrafted 2026-08-30: the slot-6 ruling moved the written world — old text
+superseded in place.*
 *Predicted — DRAFTED 2026-08-30 under R212 item 2 (R227 pick 4), from `F6` (1)
 the printed ×N Evoke multiplier on the same Focus term and `F7` (1) every Evoke
-card carrying a printed `encore_cost`, against §4.2's deploy rules:* **both
-halves hold**, on a matched pair of boards built so that Evoking now and
-triggering twice more are within one card of each other (R213 F closeness).
+card carrying a printed `encore_cost`, against §4.2's deploy rules, and
+redrafted against `F5` = (2):* **both halves hold**, on a matched pair of
+boards built so that Evoking now and triggering twice more are within one card
+of each other (R213 F closeness), and on which **the Evoke card in hand prints
+NO aim**. That last clause is the redraft: under `F5` = (2) an Evoke card may
+name its member, and a form that takes the Evoke line *because it can aim* is
+answering slot 6's question rather than this one. Slot 2 asks whether the
+multiplier and the price make Evoking a real decision against triggering
+twice, so the card it stages is the unaimed Evoke — the front member, which is
+what an Evoke printing no target takes.
 **(i) The graders do NOT agree**: across the pair's **4 forms**, at least one
 takes the Evoke line and at least one takes the trigger line. **(ii) The price
 is read**: **at least 3 of 4 forms** name the printed ×N multiplier **and** the
@@ -1385,37 +1429,52 @@ Encore cost in the reasoning for the line they took.
 **MISS**. The 4-form denominator is printed with the grade.
 *UNREACHED when:* the closeness check (R213 F) fails on the pair before the
 round runs — the two lines were not within one card of each other, so the
-boards never posed a decision and nothing about `F6` or `F7` is learned; **or**
-fewer than two graders read either board.
+boards never posed a decision and nothing about `F6` or `F7` is learned;
+**or** the staged Evoke card prints an aim, which makes the pair slot 6's
+board and not this one; **or** fewer than two graders read either board.
 *Decision it changes:* **PREDICTED** validates `F6` (1) and `F7` (1) as priced
 and lets the Evoke family go to build; it licenses **no** re-price and **no**
 new member row. **MISS with every form on the Evoke line** says the multiplier
 is too large or the Encore price too small; **MISS with every form on the
 trigger line** says the opposite. Either way it returns `F6` and `F7` to [USER]
 as ONE numbered pick with this round as the reading — Claude does not settle
-the direction. It does **not** license reopening `F5` (which member Evoke
-expends) or §4.2's full-stage rule; that asymmetry is slot 6's ground and only
-slot 6 may reopen it.
+the direction. It does **not** license reopening `F5` or §4.2's full-stage
+rule: both are now ANSWERED (the card aims, the overflow deploy does not), and
+a slot staging an unaimed Evoke is by construction the wrong instrument to
+reopen the aim with. Slot 6 is the only slot that reads the two Evoke routes
+against each other.
 
 **Slot 3 — does Encore feel like two things?**
+*Redrafted 2026-08-30: the slot-6 ruling moved the written world — old text
+superseded in place.*
 *Predicted — DRAFTED 2026-08-30 under R212 item 2 (R227 pick 4), from `F7` (1)
 the printed `encore_cost` on Evoke and `F16` (1) the starter's one cheap Evoke
 card, against §3's Encore keep-list (unbounded, absorbing after Block and
-before HP):* **both halves hold**, across a set of at least three boards
-staging real incoming damage, built so that holding Encore as Block is the
-correct line on at least one and the wrong line on at least one. **(i)** On the
+before HP), and redrafted against `F5` = (2):* **both halves hold**, across a
+set of at least three boards staging real incoming damage, built so that
+holding Encore as Block is the correct line on at least one and the wrong line
+on at least one — and, as the redraft requires, **every board carries at least
+two Salon members**. That is the new staging constraint: under `F5` = (2) the
+Encore price buys *control* as well as a bigger bow ("Encore then buys
+deliberate control"), and on a one-member stage there is nothing to aim at, so
+the price would be read against half of what it now buys. **(i)** On the
 board where holding is correct, **at least 1 of 2 forms declines the Evoke and
 names Encore's absorbing job as the reason**. **(ii)** Across the slot's forms,
 **at least 3 name Encore in BOTH roles** — as the Evoke's price and as the
-buffer — at least once each.
+buffer — at least once each. A form that names the AIM as what the price buys
+counts toward the price role: that is the same role, more precisely stated.
 *Grading rule:* both = **PREDICTED**; exactly one = **SPLIT**; neither =
 **MISS**. The form denominator is printed with the grade.
 *UNREACHED when:* no staged board puts incoming damage at or above the printed
-Encore, so the buffer's job is never live and the slot reads only the price.
+Encore, so the buffer's job is never live and the slot reads only the price;
+**or** the boards staged carry one member each, so the price is read against
+half of what it buys.
 *Decision it changes:* **PREDICTED** says Encore's double job is felt and `F7`
 (1) stands; it licenses nothing else. **MISS** returns `F7` to [USER] as a
 numbered pick between (1) keeping the Encore price and (3) moving the Evoke
-price to energy. It does **not** license touching Encore's defensive job, which
+price to energy — and it returns them with the note that under `F5` = (2) the
+price is now the only thing standing between the aim and a free control verb,
+which is a consideration for [USER]'s pick and not a recommendation in it. It does **not** license touching Encore's defensive job, which
 is LAW (`docs/current/LAW.md:192-194`) and not this packet's to move, and it
 does **not** license a starter change: `F16` is read here only as the reason an
 Evoke card is in hand at all.
@@ -1477,7 +1536,9 @@ read. **SPLIT** buys one repaired staged round with the holding value printed
 on the board, not a design change.
 
 **Slot 6 — is the Encore-spending Evoke family worth its price? — DRAFT,
-unrun, added after the slate was drafted.** Prompted by external review
+unrun, added after the slate was drafted.**
+*Redrafted 2026-08-30: the slot-6 ruling moved the written world — old text
+superseded in place.* Prompted by external review
 relayed by [USER] (their own GPT chat, no seat authority). Slot 2 matches an
 Evoke against *triggering twice more*; nothing matches it against the **other**
 way to Evoke. Under §4.2 a deploy onto a full stage Evokes the front member to
@@ -1489,29 +1550,60 @@ lighter. If that asymmetry is as large as it reads, the family [USER]'s brief
 calls central ("Encore … spent down to direct the Stage via Evoke-style
 plays") is strictly inferior to a deploy card on every full stage.
 
+**THE ARITHMETIC HALF WAS PROBED AND THE PICK WAS TAKEN.** §11.5 staged this
+board in the simulator before any grader saw it and found the dedicated Evoke
+dominated on every axis the instrument measures. That returned `F7` and §4.2's
+full-stage rule to [USER] as one numbered pick, and **he took it on 2026-08-30
+by giving the dedicated Evoke the thing the deploy structurally cannot have**:
+the member choice (`F5` = (2), §4.4), with the overflow deploy left automatic
+and front-only as the reward for filling the stage. The blind half of slot 6
+has never run, so what it asks is redrafted here against the design as it now
+stands rather than against the design that produced the domination.
+
 *The matched comparison:* one staged board, full stage, both a full-stage
-deploy card and a dedicated Evoke card in hand, built so the two lines are
-within one card of each other on the turn.
+deploy card and a **dedicated Evoke card that PRINTS AN AIM** in hand, built so
+the two lines are within one card of each other on the turn, and staged so that
+**the member worth removing is not the front one** — that is the whole board
+now, because a front-aimed Evoke on a full stage is the dominated line §11.5
+already measured and posing it again would ask a question that has been
+answered on paper.
 
-*Predicted — DRAFT, derived from the ruled text, not blank:* a **majority of
-blind graders take the deploy line**, and **no form names an advantage the
-dedicated Evoke has** that the deploy does not (beyond aiming a specific
-member, which `F5` pick 1 also denies it). This is a directional prediction
-only; it is not countersignable until `F1`–`F16` are answered, like the five
-slots above.
+*Predicted — REDRAFT, derived from the ruled text, not blank:* the two lines
+read as a real choice rather than one line and one trap. **(i)** Across the
+board's **2 forms**, **at least 1 names the aim** — removing that member rather
+than the front one — as a reason for the line it took, whichever line that is.
+**(ii)** **No form describes the dedicated Evoke as strictly worse**, i.e. no
+form's recorded reasoning says the deploy does everything the Evoke does. This
+is a directional prediction only; like the five slots above it is not
+countersignable on its own and rides the batch.
 
-*Falsified if:* graders split on the pair, **or** any form names holding the
-board size, the Encore spend, or the Evoke's alternative effect as the reason
-the dedicated Evoke is the better line.
+*Grading rule:* both = **PREDICTED**; exactly one = **SPLIT**; neither =
+**MISS**.
 
-*Decision it changes:* confirmation returns `F7` and §4.2's full-stage rule
-together — either the deploy's free Evoke has to carry a cost (Encore, or a
-reduced performance), or the dedicated Evoke family needs something the deploy
-cannot give it. Falsification retires the objection.
+*UNREACHED when:* the board's best removal IS the front member, so the aim
+buys nothing and the pair collapses back onto §11.5's arithmetic; **or** fewer
+than two graders read it.
 
-**Ordering (2026-08-30):** slot 6 is staged FIRST among the six, because a
-confirmation here returns `F7` and §4.2 together and would re-open the picks
-the other five slots' predictions are drafted from.
+*Falsified if:* every form takes the deploy line **and** none of them names the
+aim — which would say that the axis the ruling added is not one a player can
+see from the board, and that the price is buying something invisible.
+
+*Decision it changes:* **PREDICTED** says the aim is legible and the Evoke
+family stands as ruled; it licenses no re-price and no change to §4.2.
+**MISS** returns `F7` and §4.2's full-stage rule to [USER] **again**, as one
+numbered pick, now with a played reading behind it — price the deploy's free
+Evoke, raise or drop the Evoke's Encore price, or give the family an effect the
+deploy cannot copy. Claude does not settle the direction, and a MISS here
+licenses **no** engine change on its own: the aim is built and flagged off, and
+turning it on is a separate step.
+
+**Ordering (2026-08-30, redrafted with slot 6):** slot 6 no longer needs to run
+first. It was ordered first because a confirmation would re-open the picks the
+other five predictions are drafted from — and that is exactly what happened,
+before any grader was involved: §11.5's arithmetic confirmed it, the pick
+returned, and [USER] answered it. The picks are answered, so the ordering
+constraint is discharged and the six may be staged in any order the funnel
+finds convenient.
 
 **Slot 7 — the co-op queue-rotation cost. OBSERVATION SLOT: RECORDED and NOT
 GRADED.** Added 2026-08-30 under R212 item 2 (R227 pick 4), from §3's co-op
@@ -1559,8 +1651,10 @@ one Salon member**, because that is the board on which rotation is a no-op and
 any positional pricing is zero — and it is the board a starter deck actually
 has. And at least one carries a **full stage with a deploy in hand**, because
 the deploy-Evokes rule is new law and has never been played — and slot 6 asks
-that same board to carry a **dedicated Evoke card in hand beside the deploy**,
-so the two Evoke routes are read against each other on one turn.
+that same board to carry a **dedicated Evoke card in hand beside the deploy,
+printing an aim at a member that is not the front one** (redrafted 2026-08-30
+with slot 6), so the two Evoke routes are read against each other on one turn
+as they are now ruled.
 
 **Who grades:** the Codex seat, blind, per `EB-149`, two graders per turn,
 every graded line replayed per `EB-170`.
@@ -1735,7 +1829,7 @@ can be signed independently.
 | **F2** | 4.2 | Do the slots stay at 3, and does the cap lever get a second carrier? |
 | **F3** | 4.3 | Which member does a Companion play trigger — front-then-rotate, front-and-stay, player's choice, or random? |
 | **F4** | 4.3 | How often may the trigger fire — once per Companion, capped per turn, or once per turn? |
-| **F5** | 4.4 | Which member does Evoke expend — front, player's choice, or back? |
+| **F5** | 4.4 | Which member does Evoke expend — front, player's choice, or back? **ANSWERED 2026-08-30: (2), the card chooses, front when it names nobody.** |
 | **F6** | 4.4 | What does "much stronger Fanfare scaling" mean — a multiplier on the Focus term, a steeper rate, proportional, or none? |
 | **F7** | 4.4 | Does Evoke cost Encore on every card, only on the Block-paying cards, or not at all? |
 | **F8** | 4.5 | Does the Focus term keep its shipped shape, go per-member-type, or go proportional? |
@@ -1834,3 +1928,235 @@ R219 slate branch owns those and is unmerged. What is owed when they next open:
 8. **No `EB` row is minted by this packet.** The §2.7 findings are design
    constraints and doc corrections, not engineering defects. Next free `EB` id
    is **`EB-194`** and it stays free.
+
+---
+
+## 11. Slice 1 — what was built, and what was deliberately left out
+
+**2026-08-30. Branch `furina-slice-1`, cut from `main` at `79db9a4a`.** This is
+the first code the reframe has ever had. Everything above it was paper.
+
+Written before the code and committed before it, because a slice that decides
+its own scope after the fact is not a slice — it is whatever happened to get
+finished.
+
+### 11.1 The one sentence
+
+**Slice 1 builds the core loop in the simulator, behind flags that are all off,
+and builds nothing else.** The loop is: the stage stops playing by itself, a
+Companion play makes one member perform, Furina's own card Evokes one for
+Encore, performing is what mints Fanfare, and Fanfare scales the stage. R228's
+Spotlight ruling rides along because it touches the same currency.
+
+Nothing is deployed, nothing is run, no card the player can draw has changed,
+and no version stamp moves. **R213's sequencing gate is untouched: nothing
+implements before Klee closes, and this is a build, not a run.** With the flags
+off — which is how they ship — the engine is the engine that was there this
+morning, and a test says so before it says anything else.
+
+### 11.2 What is in
+
+Five things, chosen because they are the smallest set that can pose the
+questions the packet's own slate asks.
+
+1. **Members stop playing by themselves.** The turn-start upkeep is suppressed
+   for Furina. There is no other automatic Salon path in the game, so removing
+   that one call removes the automatic engine entirely. The stage now performs
+   only when the player makes it perform.
+2. **A Companion play makes the front member perform, then sends it to the back
+   of the queue.** Once per Companion card played, as many times a turn as you
+   have Companions to play. An empty stage does nothing extra and says so in
+   the log, so a display can tell the player why nothing happened.
+3. **Deploy cards pay on the turn they are played.** A deploy makes the member
+   it deployed perform once; a deploy onto a full stage Evokes the front member
+   to make room. Both were ruled, and the second one is the rule the engine
+   already had under a different name.
+4. **Evoke.** Furina's own card takes a member off the stage — **the one the
+   card names, and the front one when it names nobody** (the slot-6 ruling,
+   §11.6) — applies the Fanfare bonus three times instead of once, and is paid
+   for in Encore through the printed cost line the game already supports. Below
+   the price the card is simply unplayable, which is the shipped behaviour for
+   that field.
+5. **Fanfare is minted by performing, and by nothing else.** A member that
+   performs and stays mints the small amount; one that performs and leaves
+   mints the larger. The four things that used to mint it — losing HP, spending
+   Encore, absorbing with Encore, playing a Spotlighted card — mint nothing.
+   Decay is untouched, which matters: the decay is the only reason "hold a full
+   meter" is a decision rather than a wait.
+
+And R228's Spotlight ruling, because it spends the same Encore: **one mode,
+priced.** Center Stage retires, Guest Cast and its 1.5 multiplier are exactly
+what they ship, and aiming the light costs Encore. An aim that cannot be paid
+for does not happen, rather than happening for free.
+
+### 11.3 What is out, and why each
+
+Every one of these is a thing a reader might expect to find and will not.
+
+- **The fourth Salon member** (`F1` = 2, the scaling member). It is a new
+  member row, a new set of numbers and a new thing the player has to learn, and
+  none of the questions this slice asks needs it. It is the obvious slice-2
+  opener.
+- **The drain card and the cap-raisers** (`F9`, `F11`, `F12`). These are sheet
+  rows. Sheet edits are a stamp event under LAW and they happen after the
+  architecture has a verdict, which is the packet's own §7 rule, not a
+  preference.
+- **The starter deltas** (`F16`). Same reason, plus a stronger one: a starter
+  change is what a player meets in fight one, and it should be decided with a
+  played fight behind it rather than in front of it.
+- **The display work** (`F13`, `F14`, `F15`). It is C# and art, and it is
+  worth doing once the rules underneath it are known to be worth showing.
+- **Aiming the Spotlight at a named Companion.** R228 says the selector aims a
+  Companion; this slice aims the Companion category, which is the sentinel the
+  engine already has. A named target needs a new kind of target and a card face
+  that can print it, and neither is a small change.
+- **Retiring Furina's Burst meter.** It is one of three folds on a different
+  branch (R220 B) and hers lands last of the three. Doing it here would take
+  that branch's work hostage.
+- **The C# engine leg, and the prototype card rows that would ride on it.**
+  This is the one deferral worth arguing rather than asserting. Prototype rows
+  are staged for a *dev build* and read by blind graders through the real game.
+  The rules this slice adds live in the simulator only, so a card printed into
+  a dev build today would say "Evoke" on its face and do a plain final bow in
+  the player's hands — a card that lies to the person grading it, which is
+  worse than no card. The rows and the C# behaviour are one unit of work and
+  they belong together, in slice 2.
+
+### 11.4 How this gets read later
+
+Nothing here is evidence of anything. The engine can say what a line pays; it
+cannot say whether a player can see what a line pays, and that is what the
+packet's slate is for. Slice 1's job is to make the slate's boards possible to
+build, and its own tests are pinned in that spirit: every behavioural test is a
+pair, the same board with the flag on and with it off, because the failure that
+would actually matter tonight is a leg leaking into a game somebody is playing.
+
+The one thing the slice was asked to look at directly is slot 6, and §11.5
+carries what it found.
+
+### 11.5 The slot 6 probe — what the two Evoke routes actually pay
+
+Slot 6 was added to the slate after it was drafted, out of a worry someone
+raised: under the ruled §4.2 a deploy onto a full stage Evokes the front member
+**for nothing**, lands a replacement, and performs the replacement, while a
+dedicated Evoke card pays Encore, expends the front member and puts nothing
+back. The packet ordered it staged **first** among the six, because if it is
+real it reopens the picks the other five predictions are drafted from.
+
+It can be looked at before any grader sees a board, because half of it is
+arithmetic, and slice 1 was asked to do that. `tier0/tests/test_furina_reframe_
+slot6.py` stages the packet's own required board — a full stage, both cards in
+hand, one turn — and plays each line on identical copies of it.
+
+**The board.** Three members (a full stage), 30 held Fanfare (the top Focus
+tier, +3, with room left so a mint is not lost against the ceiling), 9 Encore,
+both cards costing 1 energy, the Evoke card printing a price of 2 Encore. The
+only thing that changes between rows is which member is at the front.
+
+| front member | line | damage | Block | Fanfare | Encore spent | stage after |
+|---|---|---|---|---|---|---|
+| Usher | deploy over the top | 9 | 18 | +7 | 1 | 3 |
+| Usher | dedicated Evoke | 0 | 18 | +5 | 2 | 2 |
+| Crabaletta | deploy over the top | 32 | 0 | +7 | 1 | 3 |
+| Crabaletta | dedicated Evoke | 23 | 0 | +5 | 2 | 2 |
+| Chevalmarin | deploy over the top | 9 | 0 | +7 | **−2** | 3 |
+| Chevalmarin | dedicated Evoke | 0 | 0 | +5 | **−1** | 2 |
+
+*(Negative Encore spend is a refund: Chevalmarin's Evoke hands Encore back.
+Under R215 B these are prototype numbers and none of them is quotable as a
+balance fact anywhere; the reading below is structural.)*
+
+**The plain reading. On this board the dedicated Evoke is dominated on every
+axis measured, and it is not close.** The deploy card gets *the identical
+Evoke* — the same member, off the same end of the queue, with the same
+tripled Fanfare bonus — and then gets three more things on top of it: the
+replacement's performance (worth 9 more damage or Block in every row), two more
+Fanfare, and a stage that is still full instead of one member short. It also
+spends **one less** Encore doing it, because the only Encore it pays is the
+upkeep of the performance it bought, while the Evoke card pays a printed price
+of 2 on top of nothing.
+
+So the worry reads as confirmed on the arithmetic: as the rules are currently
+ruled, **a player holding both cards over a full stage has no reason to play
+the Evoke** — and "Encore, spent down to direct the Stage via Evoke-style
+plays" is the sentence in [USER]'s own brief that the Evoke family exists to
+deliver.
+
+**Three honest limits on that reading, stated so it is not over-read.**
+
+1. **This is one board, and it is the board the asymmetry is worst on** — a
+   FULL stage. The dedicated Evoke has a job the deploy cannot do at all on a
+   stage of one or two: it takes a member off without putting one on, and there
+   is no member to displace. What the probe shows is that on the board where
+   both cards are live, one dominates.
+2. **The arithmetic is not the question slot 6 asks.** Slot 6 asks whether
+   blind graders take the deploy line and whether any of them names an
+   advantage the Evoke has. A dominated line that reads as dominant is a
+   different (and worse) finding than a dominated line that reads as a real
+   choice, and only a grader can tell the two apart. The probe does not
+   pre-empt that read; it says what the graders' board will do.
+3. **Nothing was measured about alternative effects**, because none is built.
+   Chevalmarin's Evoke is the one alternative-shaped effect that ships, and
+   the row above shows it giving Encore back — which is a *shape* the deploy
+   route also gets, since the deploy Evokes her too.
+
+**No fix is proposed here, and that is deliberate.** Slot 6's own text says a
+confirmation returns `F7` and §4.2's full-stage rule to [USER] **together, as
+one numbered pick**, and that Claude does not settle the direction. The
+directions the probe makes visible, offered as material for that pick rather
+than as a recommendation, are: price the deploy's Evoke (Encore, or a reduced
+performance); give the dedicated Evoke something the deploy structurally cannot
+give (aiming a member other than the front, or an effect only the dedicated
+card unlocks); or accept the asymmetry as the intended reward for building a
+full stage and let the Evoke family be a small-stage tool. The instrument stays
+in the tree, and the test that would go red if any of those changed the answer
+is `test_the_dedicated_evoke_wins_on_no_measured_axis`.
+
+### 11.6 A1 — the pick §11.5 returned, taken and built
+
+**2026-08-30. Branch `furina-a1-evoke-choice`, cut from `main` at `a21d9665`.**
+§11.5 returned `F7` and §4.2's full-stage rule to [USER] as one numbered pick.
+He took it, and took **two** of the three directions §11.5 laid out at once —
+the second and the third, which turn out to be the same design read from two
+ends: **give the dedicated Evoke something the deploy structurally cannot
+give, and keep the deploy's free Evoke free, as the reward.**
+
+**What changed.** The dedicated Evoke aims: the card names which member it
+removes, and an Evoke that names nobody takes the front, so every row written
+before tonight means what it always meant. The full-stage deploy is untouched
+— it Evokes the front, automatically, and may never name a member. `F5` moves
+from option (1) to option (2) and §4.4 carries the ruled text; §4.2 records the
+overflow rule as kept **by ruling** rather than by default.
+
+**What it cost the tree.** One argument on `salon_bow`, which is the Evoke
+verb rather than a synonym for it. `tools/lint_op_parity.py` compares the KEY
+SET of `effects.OPS` against the drafter's priced-op table and `_op_price`
+reads no argument of an op, so the priced-op set is identical and **no
+`DRAFTER_VERSION` bump was bought** — slice 1's own reason for refusing a
+`salon_evoke` op, applied to slice 1's next step and checked rather than
+assumed. Same flag family, still all OFF, no stamp moved, nothing deployed and
+nothing run.
+
+**What the tests say now.** Slice 1's file goes 39 → 48 and pins the aim on
+each of the three members, the `member: front` sentinel, the flag-off guard,
+the absent-member fallback and its emitted event, the refusal of an unknown
+member name, and a **lock on the deploy path**: the chooser is booby-trapped
+for the length of a full-stage deploy, so an edit that ever routed the overflow
+bow through it fails there instead of quietly erasing the asymmetry.
+
+The slot-6 instrument goes 7 → 11 and grows a second arm. **The first arm is
+untouched and still prints §11.5's table byte for byte** — the unaimed Evoke is
+dominated on every axis, exactly as published, and that record stands as
+published (R101b). The test that carried the finding is renamed from
+`test_the_dedicated_evoke_wins_on_no_measured_axis` to
+`test_the_unaimed_evoke_wins_on_no_measured_axis`, because that is what it
+always measured and now has to say so. Beside it,
+`test_the_dedicated_evoke_takes_a_member_the_deploy_cannot` measures what the
+ruling added: on a full stage the aimed Evoke removes a chosen **non-front**
+member and leaves the front standing, which no deploy card can do at any price.
+
+**The limit, unchanged from §11.5.** Arithmetic can say the aim is an axis; it
+cannot say a player standing over the two cards can see it. That is slot 6's
+blind read, which has still never run, and slot 6's prediction is redrafted in
+§6.3 against this design rather than against the one that produced the
+domination.

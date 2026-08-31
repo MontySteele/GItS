@@ -155,11 +155,25 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
 
     protected override string IconBaseName => "burning_blood";
 
+    // EB-162 (2026-08-30). BOTH of these read `klee/relics/pounding_surprise.png`
+    // until this change, so Dodoco Tales and Pounding Surprise drew ONE icon and
+    // were indistinguishable in the relic bar. That is not two relics a player
+    // has to hold at once by luck: Touch of Orobas UPGRADES the starter, so the
+    // swap itself is the moment both names are on screen for the same picture.
+    // The distinct icon is `art/plan.tsv:relic_dodoco_tales`, rank 1 applied
+    // under R212(1) from Item Dodoco's Bomb-Tastic Adventure -- the in-game
+    // picture book about Dodoco, which is what "Dodoco Tales" names.
+    //
+    // KleePck.Path returns null until the resource is IN the pck, and the pck
+    // contract is derived by tools/build_pck.ps1, never hand-written
+    // (test_roster_runtime_contracts). Until the next build_pck the `??` falls
+    // through to base, i.e. burning_blood -- still not Pounding Surprise's icon,
+    // so the defect this row names does not reappear in the interval.
     public override string PackedIconPath =>
-        KleePck.Path("klee/relics/pounding_surprise.png") ?? base.PackedIconPath;
+        KleePck.Path("klee/relics/dodoco_tales.png") ?? base.PackedIconPath;
 
     protected override string BigIconPath =>
-        KleePck.Path("klee/relics/pounding_surprise.png") ?? base.BigIconPath;
+        KleePck.Path("klee/relics/dodoco_tales.png") ?? base.BigIconPath;
 
     /// <summary>
     /// The companion reward slot rides along UNCHANGED. It is not part of the

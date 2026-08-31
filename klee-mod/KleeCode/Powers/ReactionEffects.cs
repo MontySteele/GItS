@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using KleeMod.Elements;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
@@ -222,6 +224,63 @@ internal static class ReactionEffects
         && target.CombatState?.Encounter?.RoomType == RoomType.Boss
         && !target.Powers.OfType<MinionPower>().Any();
 
+    /// <summary>
+    /// EB-156 — REACTIONS RESOLVED THIS COMBAT, PER SEAT, FOR TELEMETRY ONLY.
+    ///
+    /// WHY THIS IS NOT A FIX TO <see cref="TotalResolved"/>. That counter's
+    /// global scope is a SEALED RULING (red-pen 2026-07-26 R1, and the note on
+    /// <see cref="ReactionTriggeredThisTurn"/> above): in co-op your partner's
+    /// Overload satisfies your Chevreuse, because a Reaction is a fact about
+    /// the BOARD both players stand on. Nothing here changes that, and nothing
+    /// here is read by a card, a relic or a formula.
+    ///
+    /// What was wrong was the TELEMETRY. `PlayTelemetry` sampled the global
+    /// counter into each seat's per-fight row, so in co-op both seats'
+    /// reactions landed in every seat's row and a reader dividing by that
+    /// seat's turns, cards or damage used the wrong denominator. The row is a
+    /// per-seat record; a team-wide number in it is a measurement error, not a
+    /// design position. So the fix is a SECOND counter with the honest scope,
+    /// keyed exactly the way <see cref="BombPower.DetonationsThisCombat"/>
+    /// next door is keyed -- the pattern this repo already pinned for the same
+    /// question.
+    ///
+    /// CONSEQUENCE, NAMED RATHER THAN HIDDEN: a reaction with no dealer (a
+    /// corpse detonation, an orphaned application) increments the global
+    /// counter and no seat's. The per-seat numbers therefore SUM TO AT MOST
+    /// the team-wide one, never more. Solo they are the same number whenever
+    /// the dealer is known.
+    ///
+    /// Not a leak, for the reason the bomb counters are not: the dictionary is
+    /// cleared whenever the combat instance changes, so it holds at most the
+    /// current combat's players.
+    /// </summary>
+    private static ICombatState? _resolvedCombat;
+    private static readonly Dictionary<Player, int> _resolvedByPlayer = new();
+
+    public static int ResolvedThisCombat(ICombatState? combatState, Player? player)
+    {
+        if (combatState == null || player == null
+            || !ReferenceEquals(combatState, _resolvedCombat))
+        {
+            return 0;
+        }
+        return _resolvedByPlayer.TryGetValue(player, out var count) ? count : 0;
+    }
+
+    private static void RecordResolved(ICombatState? combatState, Creature? dealer)
+    {
+        if (combatState == null) return;
+        if (!ReferenceEquals(combatState, _resolvedCombat))
+        {
+            _resolvedCombat = combatState;
+            _resolvedByPlayer.Clear();
+        }
+        var player = dealer?.Player;
+        if (player == null) return;
+        _resolvedByPlayer[player] =
+            (_resolvedByPlayer.TryGetValue(player, out var n) ? n : 0) + 1;
+    }
+
     public static async Task Resolve(
         PlayerChoiceContext choiceContext,
         Reaction reaction,
@@ -233,6 +292,7 @@ internal static class ReactionEffects
         if (reaction != Reaction.None)
         {
             TotalResolved++;
+            RecordResolved(target.CombatState, dealer);
 
             // Courtroom Drama (R85): the FIRST reaction of the turn puts its
             // target on the stand. Counted PER DEALER -- the sim's

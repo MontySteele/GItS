@@ -41,6 +41,7 @@ rather than a design dial -- under decay the ceiling does not bind.
 from __future__ import annotations
 
 from tier0 import constants as C
+from tier0.engine import furina_reframe
 from tier0.engine.state import CombatState
 
 
@@ -366,7 +367,13 @@ def spend_encore(state: CombatState, n: int, source: str = UNATTRIBUTED,
     if spent:
         p.encore -= spent
         state.emit("encore_spent", amount=spent, source=source, card=card)
-        gain_fanfare(state, spent * C.FANFARE_PER_ENCORE_SPENT, "encore_spent")
+        if not furina_reframe.meter_active(p):
+            # RETIRED UNDER `FURINA_REFRAME_METER` (§4.1): deliberate Encore
+            # spend mints nothing by itself -- it mints through the
+            # performance it buys. The branch is left inert rather than
+            # deleted so the OFF arm runs the shipped rule byte for byte.
+            gain_fanfare(state, spent * C.FANFARE_PER_ENCORE_SPENT,
+                         "encore_spent")
         if p.burst_max:
             gain_burst(state, spent * C.BURST_PER_ENCORE_SPENT,
                        "encore_spent")
@@ -440,8 +447,12 @@ def absorb_into_encore(state: CombatState, dmg: int,
     if absorbed:
         p.encore -= absorbed
         state.emit("encore_absorb", amount=absorbed, source=source)
-        gain_fanfare(state, absorbed * C.FANFARE_PER_ENCORE_ABSORBED,
-                     "encore_absorbed")
+        if not furina_reframe.meter_active(p):
+            # RETIRED UNDER `FURINA_REFRAME_METER` (§4.1). Absorbing a hit is
+            # Encore doing its FIRST job, and under the reframe only the stage
+            # performing mints.
+            gain_fanfare(state, absorbed * C.FANFARE_PER_ENCORE_ABSORBED,
+                         "encore_absorbed")
     return dmg - absorbed
 
 
@@ -537,4 +548,10 @@ def note_player_hp_loss(state: CombatState, n: int) -> None:
         return
     state.hp_lost_this_turn += n
     state.player_damage_events += 1
+    if furina_reframe.meter_active(state.player):
+        # RETIRED UNDER `FURINA_REFRAME_METER` (§4.1), and with it the design
+        # invariant "every point of damage past Block prints exactly 1
+        # Fanfare" and the test that asserts it. The flux BOOKKEEPING above
+        # stays -- other instruments read it -- and only the mint goes.
+        return
     gain_fanfare(state, n * C.FANFARE_PER_HP_LOST, "hp_lost")

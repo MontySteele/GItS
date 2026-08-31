@@ -438,9 +438,30 @@ GENERATOR_OWNED = {
     # is no wiki art for one of OUR meters to plan a row against.
     "ImageGen/images/furina/powers/encore.png":             "gen_meter_glyphs.py",
     "ImageGen/images/kokomi/powers/charge.png":             "gen_meter_glyphs.py",
+    # R231 answered QUEUE M19 with set A (Fontaine Hydro), so Furina's energy
+    # counter has art. Procedural like the salon chips and the meter glyphs and
+    # for the same reason: an orb layer is a glow, a body, a caustic band, a
+    # bezel and a gloss, and the wiki has no such register to plan a row
+    # against (the generator's docstring records the hunt that proved it). Five
+    # entries rather than one, because L11's rot check greps the named script
+    # for each basename and one composite name would guard nothing.
+    "ImageGen/images/furina/ui/energy_orb/layer1_backglow.png": "gen_energy_orb_layers.py",
+    "ImageGen/images/furina/ui/energy_orb/layer2_body.png":     "gen_energy_orb_layers.py",
+    "ImageGen/images/furina/ui/energy_orb/layer3_caustics.png": "gen_energy_orb_layers.py",
+    "ImageGen/images/furina/ui/energy_orb/layer4_ring.png":     "gen_energy_orb_layers.py",
+    "ImageGen/images/furina/ui/energy_orb/layer5_gloss.png":    "gen_energy_orb_layers.py",
     "ImageGen/images/kokomi/summon/bake_kurage.png":        "cut_kurage_summon.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
+    # EB-163: Klee's locked select portrait is DERIVED, like Furina's and
+    # Kokomi's above -- but by art_process itself, which desaturates whatever
+    # select_portrait.png a plan row produced (the sp_outs loop). Furina's and
+    # Kokomi's were declared here because their own generators own them; Klee's
+    # never was, so the one derived surface with no declared producer was the
+    # one the ledger could not answer "where did this come from" about. A plan
+    # row claiming it would source the locked variant from the wiki instead of
+    # from the portrait it has to agree with, which is exactly what L11 stops.
+    "ImageGen/images/ui/select_portrait_locked.png":        "art_process.py",
     # EB-37: derived from each character's own char_icon.png, so a plan row
     # claiming one of these would be sourcing a halo from the wiki instead of
     # from the fill it has to agree with.

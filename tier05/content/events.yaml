@@ -333,12 +333,16 @@ act3:
     # and cannot see that Forgotten Soul is worth far more to an Exhaust deck
     # than to any other, exactly as it cannot tell one named card from
     # another. Inventing a per-relic number here would be a tune.
-    # FLAVOR: labels are the source event's own, PROVISIONAL pending the
-    # S4-G11-pattern eye-read -- the gallery's three variants ship unchosen,
-    # the same way Field of Man-Sized Holes did.
+    # FLAVOR: RULED (R231, 2026-08-30) at the S4-G11 eye-read. The conversion
+    # takes the gallery's variant 1, THE NAMELESS CAIRN (Liyue / Wangsheng
+    # Funeral Parlor): the two option labels below, the relic renamed
+    # "Lingering Soul" (relics.yaml, event: header) and the curse renamed
+    # "Rot of the Chasm" (tier0 curses.yaml). Both of those rows have exactly
+    # one grantor -- this event -- so the rename is scoped to it. No mechanic,
+    # id, cost or effect moved; this is a NAME pass only.
     options:
-      - {label: "Accept the Forgotten Soul", relic_id: forgotten_soul}
-      - {label: "Confront with Truth", curse: curse_decay,
+      - {label: "Accept the Lingering Soul", relic_id: forgotten_soul}
+      - {label: "Recite the True Name", curse: curse_decay,
          enchant: {name: souls_power}}
 
   - id: the_trial
