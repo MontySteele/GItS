@@ -54,6 +54,7 @@ import argparse
 import json
 import re
 import sys
+import textwrap
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -288,8 +289,10 @@ def pool_percentages(cards: list[dict]) -> dict:
 # higher than a whole pool's, so the bar was generous by construction and
 # Furina cleared some floors by 40-60 points. R90 (Ruling 1c) rules the
 # comparison population to be the canon PACKAGE: the subset of a canon pool
-# that touches one mechanic layer. Those run 6-33 cards -- the same order as a
-# GItS archetype -- so the two sides are finally the same kind of object.
+# that touches one mechanic layer. Those run the same order of size as a GItS
+# archetype -- so the two sides are finally the same kind of object. Both
+# spans move with the DLL and with the sheets, so neither is written down
+# here; §5 of docs/role-tempo-baseline.md derives and prints them.
 #
 # A card is IN a package when its own decompiled body names the layer, on
 # either side of the mechanic: the card that applies Poison and the card that
@@ -667,6 +670,30 @@ def _table(per_char: dict, extract_key: str, rows: list[str]) -> list[str]:
     return out
 
 
+def _span(values) -> str:
+    """`lo–hi`, or a bare number when the span is a point. An en dash, to
+    match the surrounding prose."""
+    lo, hi = min(values), max(values)
+    return f"{lo}" if lo == hi else f"{lo}–{hi}"
+
+
+def gits_archetype_sizes() -> list[int]:
+    """Every DECLARED GItS archetype's card count, off the three sheets.
+
+    This is the other half of the R90/1c size comparison, and it is derived
+    for the same reason the canon half is: both sides move. The doc used to
+    carry a hand-written span for each, and both went stale -- the canon side
+    when the DLL grew, the GItS side every time a sheet did.
+    """
+    sizes: list[int] = []
+    for path in rt.SHEETS.values():
+        rows = rt.load_rows(path)
+        for archetype in rt.declared_archetypes(path):
+            sizes.append(len([r for r in rows
+                              if archetype in (r.get("archetypes") or [])]))
+    return sorted(sizes)
+
+
 def write_docs(payload: dict) -> None:
     per_char, floors = payload["stats"], payload["floors"]
     cell_keys = sorted({k for s in per_char.values() for k in s["fight_cells"]})
@@ -701,24 +728,74 @@ def write_docs(payload: dict) -> None:
             f"{r.get('common', 0)} | {r.get('uncommon', 0)} | "
             f"{r.get('rare', 0)} | {r.get('ancient', 0)} | {WIKI[name]} |")
     total = sum(s["n"] for s in per_char.values())
+    over = {name: WIKI[name] - stats["n"] for name, stats in per_char.items()}
+    overage = _span(over.values())
+    # The shape of the overage, DERIVED. This sentence used to say "flat, not
+    # concentrated" in hand-written prose, and the 0.111.0 pools falsified it
+    # the day they landed (the overages went 1/1/0/0/0). Nothing here is
+    # written down that the table above does not already carry.
+    if min(over.values()) == max(over.values()):
+        over_shape = (f"and the overage is flat at {max(over.values())} per "
+                      "pool rather than concentrated in one of them")
+    else:
+        over_shape = ("and the overage is uneven — "
+                      + ", ".join(f"{name} {n}" for name, n
+                                  in sorted(over.items(), key=lambda kv:
+                                            (-kv[1], kv[0])))
+                      + f", the largest being {max(over.values())}")
+    draftable_each = sorted({
+        sum(stats["rarities"].get(r, 0)
+            for r in ("common", "uncommon", "rare"))
+        for stats in per_char.values()})
+    draftable = sum(
+        stats["rarities"].get(r, 0) for stats in per_char.values()
+        for r in ("common", "uncommon", "rare"))
+    each = (f"5 × {draftable_each[0]}" if len(draftable_each) == 1
+            else " + ".join(str(x) for x in draftable_each))
+    mix = sorted({tuple(stats["rarities"].get(r, 0) for r in
+                        ("common", "uncommon", "rare", "ancient"))
+                  for stats in per_char.values()})
+    lines += [""]
+    lines += textwrap.wrap(
+        f"DLL total across the five pools: **{total}**. The wiki route's own "
+        f"per-pool numbers sum to **{sum(WIKI.values())}**, so the wiki runs "
+        f"{overage} high per pool, {over_shape}. An overage of that size is "
+        "what a wiki-lists-a-few-extra story looks like and not what a "
+        "we-are-reading-a-different-pool story would.", 74,
+        break_on_hyphens=False, break_long_words=False)
     lines += [
-        "",
-        f"DLL total across the five pools: **{total}**. The wiki route's own",
-        f"per-pool numbers sum to **{sum(WIKI.values())}**, so the wiki runs",
-        "3–4 high per pool exactly as the charter predicted — the overage is",
-        "flat, not concentrated, which is what a wiki-lists-a-few-extra story",
-        "looks like and not what a we-are-reading-a-different-pool story would.",
         "",
         "**The charter's \"402 canon cards total\" was an arithmetic slip and is**",
         "**now CORRECTED (R92/3a).** Its own per-pool wiki figures sum to 456;",
-        f"the DLL sum is **{total}** and the draftable subtotal is **410**",
-        "(5 × 82 common+uncommon+rare). The charter header now reads 439/410.",
-        "No percentage anywhere moved: every one of them is within-pool.",
+        f"the DLL sum is **{total}** and the draftable subtotal is "
+        f"**{draftable}**",
+        f"({each} common+uncommon+rare). R92/3a corrected the charter header to",
+        "the sums of the day (439/410, the 0.107 pools); the live figures are",
+        "the two above.",
+        "The correction is to a header count and nothing else: **no GItS",
+        "coverage percentage moved.** The canon percentages here are all",
+        "within-pool, and they do move when the DLL's pools do — the 0.111.0",
+        "pools moved many of them.",
         "",
-        "The pools are startlingly regular: **every** character ships exactly",
-        "20 common, 36 uncommon, 26 rare and 2 ancient. Rarity mix is therefore",
-        "not an identity lever in canon at all — a fact worth having before",
-        "anyone argues a GItS pool's shape from its rarity split.",
+    ]
+    if len(mix) == 1:
+        c, u, ra, a = mix[0]
+        lines += [
+            "The pools are startlingly regular: **every** character ships "
+            "exactly",
+            f"{c} common, {u} uncommon, {ra} rare and {a} ancient. Rarity mix "
+            "is therefore",
+            "not an identity lever in canon at all — a fact worth having before",
+            "anyone argues a GItS pool's shape from its rarity split.",
+        ]
+    else:
+        lines += [
+            "The pools no longer share one rarity mix; the per-pool split is "
+            "in the",
+            "table above. Anyone arguing a GItS pool's shape from its rarity",
+            "split should read that table rather than a single canon figure.",
+        ]
+    lines += [
         "",
         "## 1. `solve` coverage, per pool (% of pool, multi-tagged)",
         "",
@@ -761,14 +838,18 @@ def write_docs(payload: dict) -> None:
     lines += _table(per_char, "rarity_cells", rar_keys)
     per_pkg = payload["packages"]
     pkg_keys = sorted({k for s in per_pkg.values() for k in s["fight_cells"]})
+    pkg_span = _span([s["n"] for s in per_pkg.values()])
+    gits_sizes = gits_archetype_sizes()
+    gits_span = _span(gits_sizes)
     lines += [
         "",
         "## 5. The canon PACKAGES — the comparison population (R90/1c)",
         "",
         "**This section is the repair.** §§2–4 above are whole-pool numbers, and",
-        "the first lint run applied them to an archetype's sub-pool: an 88-card",
-        "canon character spread across everything it does, versus 11–32 GItS",
-        "cards all pointed at one plan. An archetype's per-cell density is",
+        "the first lint run applied them to an archetype's sub-pool: a "
+        f"{_span([s['n'] for s in per_char.values()])}-card",
+        f"canon character spread across everything it does, versus {gits_span}",
+        "GItS cards all pointed at one plan. An archetype's per-cell density is",
         "structurally higher, the bar was generous by construction, and Furina",
         "cleared some floors by 40–60 points. R90 rules the comparison",
         "population to be the canon **package** instead.",
@@ -802,8 +883,11 @@ def write_docs(payload: dict) -> None:
                      f"{short}. |")
     lines += [
         "",
-        "**The sizes are the point**: 8–41 cards against GItS archetypes at",
-        "11–32. The two sides are finally the same kind of object.",
+        f"**The sizes are the point**: {pkg_span} cards against the "
+        f"{len(gits_sizes)} declared",
+        f"GItS archetypes at {gits_span}. The two sides are finally the same",
+        "kind of object. Both spans are derived here, from the packages in the",
+        "table above and from the three sheets, so neither can go stale.",
         "",
         "### The (solve × fight-band) matrix, per PACKAGE (% of package)",
         "",
@@ -946,8 +1030,13 @@ def write_docs(payload: dict) -> None:
         "#",
         "# R90/1c: the comparison population is a canon PACKAGE (the cards that",
         "# touch one mechanic layer, generate side and read side both), not a",
-        "# whole 88-card canon pool. Packages run 8-41 cards, the same order as",
-        "# a GItS archetype.",
+        # ASCII spans here: this file is a YAML comment block written in the
+        # same plain ASCII as the rest of its header.
+        f"# whole canon pool. Packages run {pkg_span.replace('–', '-')} cards, "
+        "the same order as",
+        f"# a GItS archetype ({gits_span.replace('–', '-')}). Both spans are "
+        "derived; see sec. 5",
+        "# of docs/role-tempo-baseline.md.",
         "#",
         "# `default:` -- for an archetype with no named anchor. A cell is",
         "# mandatory when all five packages are non-zero in it; the floor is the",

@@ -219,6 +219,60 @@ def _roll_rarity(rng: random.Random) -> str:
 # rares at all), and a substituted screen beats an empty one.
 _RARITY_FALLBACK = {"rare": "uncommon", "uncommon": "common"}
 
+# EB-250: and the ladder UP, for the end the downward one walks off. A pool
+# with no common tier used to raise `KeyError: 'common'` out of the middle of
+# a reward screen, because `while rarity not in pool` had nowhere left to
+# step. That pool is not hypothetical -- the base game's own colorless pool
+# has 0 commons of 65.
+#
+# THE BASE GAME'S DIRECTION, which is what this adopts. There is no
+# renormalisation for a missing tier anywhere in its assembly:
+# `CardFactory.RollForRarity` rolls normally and `GetNextAllowedRarity` walks
+# `GetNextHighestRarityWithWrapping` (Basic -> Common -> Uncommon -> Rare ->
+# Common) until it lands on a rarity the filtered pool actually contains, so
+# a Common roll against a colorless-only pool silently becomes Uncommon --
+# not re-rolled (`research/colorless-anchor-2026-08-30.md` §6.3).
+#
+# WHY DOWN IS STILL TRIED FIRST, and why this is not simply the wrapping
+# walk. Taking the wrap whole would re-point the REFERENCE pools' rare rolls
+# from uncommon to common -- those pools have no rares, that step is the one
+# they have always taken, and every archived number on them was taken with
+# it. So `_rarity_ladder` offers the downward tiers first, in the order they
+# have always been tried, and the upward ones only after: identical for every
+# pool that used to resolve, and defined for the one that used to raise.
+_RARITY_FALLBACK_UP = {"common": "uncommon", "uncommon": "rare"}
+
+
+def _rarity_ladder(rarity: str) -> list[str]:
+    """The tiers a roll of `rarity` will accept, in the order it tries them:
+    itself, then down while there is a step down, then up."""
+    ladder = [rarity]
+    step = rarity
+    while step in _RARITY_FALLBACK:
+        step = _RARITY_FALLBACK[step]
+        ladder.append(step)
+    step = rarity
+    while step in _RARITY_FALLBACK_UP:
+        step = _RARITY_FALLBACK_UP[step]
+        ladder.append(step)
+    return ladder
+
+
+def _present_rarity(pool: dict[str, list[Card]], rarity: str) -> str:
+    """The first tier of `rarity`'s ladder the pool actually holds.
+
+    Raises rather than returning a tier that is not there: `roll_card_offers`
+    has already refused an empty pool above, so nothing reaching here can
+    legitimately have no tier at all, and a silent `None` would push the
+    failure one frame further from its cause.
+    """
+    for step in _rarity_ladder(rarity):
+        if step in pool:
+            return step
+    raise ValueError(
+        f"no rarity tier in the pool for a {rarity!r} roll -- the pool holds "
+        f"{sorted(pool)}, which the ladder cannot reach from {rarity!r}")
+
 
 def roll_card_offers(rng: random.Random, character_id: str, n: int,
                      card_rarity: str | None = None,
@@ -234,7 +288,8 @@ def roll_card_offers(rng: random.Random, character_id: str, n: int,
     `distinct=True` is the event screens' setting: an offer never repeats a
     card already on the same screen, so a declared N-wide choice really is
     N cards. When the rolled tier holds nothing new the ladder steps down
-    exactly as an absent tier does. `distinct=False` reproduces
+    exactly as an absent tier does -- downward only, on its own question
+    (EB-250). `distinct=False` reproduces
     `roll_rewards`' historical draw -- same rng consumption, same picks, so
     archived post-fight numbers are untouched.
     """
@@ -248,17 +303,27 @@ def roll_card_offers(rng: random.Random, character_id: str, n: int,
     taken: set[str] = set()
     for _ in range(n):
         rarity = card_rarity or _roll_rarity(rng)
-        while rarity not in pool:            # ref pool may lack a rarity
-            rarity = _RARITY_FALLBACK[rarity]
+        rarity = _present_rarity(pool, rarity)   # pool may lack a rarity
         cands = pool[rarity]
         if distinct:
+            # This second walk asks a DIFFERENT question -- a tier whose
+            # cards are all already on the screen -- and it keeps its
+            # downward-only step, because a screen that has exhausted the
+            # commons wants the uncommons, not a wrap back to where it
+            # started. `seen` is what makes that safe now that a step can
+            # resolve forward: without it a commonless pool would step
+            # `uncommon -> common`, resolve `common` back to `uncommon`, and
+            # spin on a tier it had already rejected.
+            seen = {rarity}
             while all(c.id in taken for c in cands):
                 nxt = _RARITY_FALLBACK.get(rarity)
                 if nxt is None:
                     break
+                nxt = _present_rarity(pool, nxt)
+                if nxt in seen:
+                    break
                 rarity = nxt
-                while rarity not in pool:
-                    rarity = _RARITY_FALLBACK[rarity]
+                seen.add(rarity)
                 cands = pool[rarity]
             cands = [c for c in cands if c.id not in taken] or [
                 c for cs in pool.values() for c in cs if c.id not in taken]

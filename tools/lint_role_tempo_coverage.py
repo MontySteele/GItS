@@ -30,12 +30,14 @@ WHAT IT READS
 
 R90/1c IS WHY THE POPULATION CHANGED. (Citation repaired 2026-08-06 per Q15 /
 R117 -- this file carried F14's misattribution three times over; clause 1c is
-R90's, not R91's.) The first run compared a GItS archetype
-(11-32 cards, one plan) against a whole canon character (88 cards spread across
+R90's, not R91's.) The first run compared a GItS archetype (one plan, a few
+dozen cards) against a whole canon character (nearly a hundred, spread across
 everything), so the bar was generous by construction and Furina cleared some
 floors by 40-60 points. The comparison population is now the canon PACKAGE --
 Silent's poison cards, Defect's orb cards, Necrobinder's summon cards -- which
-run 8-41 and are the same kind of object as an archetype.
+are the same order of size as an archetype, and the same kind of object. The
+two spans are not written down here: they move with the DLL and with the
+sheets, and sec. 5 of docs/role-tempo-baseline.md derives and prints both.
 
 A-G1 CLOSED 2026-08-04 (R91). The tags this reads are LANDED on the sheets, so
 the old "PROVISIONAL, nothing has been written to a sheet" banner is gone. What
@@ -162,6 +164,36 @@ DEBT_HEADER = (
     "# rose 21.1 -> 37.1; the DEFAULT floor set gained scaling|mid once the\n"
     "# Regent package stopped being zero there). Nobody wrote or deleted a\n"
     "# card.\n"
+    "#\n"
+    "# SAID OUT LOUD HERE, 2026-08-31 (EB-252): 18 -> 20, and both arrivals\n"
+    "# are canon-POPULATION moves, not pool regressions. The local sts2.dll\n"
+    "# went 0.107.1 -> 0.111.0 and every canon pool gained three cards\n"
+    "# (87/88 -> 90/91), so all five packages were recounted: silent_poison\n"
+    "# 12 -> 13, defect_orbs 41 -> 42, ironclad_strength 8 -> 10, regent_stars\n"
+    "# 35 -> 36. Not one Klee number moved by a tenth; the floors moved under\n"
+    "# them.\n"
+    "#\n"
+    "# klee/generic block|late ARRIVES because the cell had never been\n"
+    "# MEASURED. ironclad_strength sat at 0.0% there, which made `block|late`\n"
+    "# an identity exemption in the DEFAULT set; one of that package's two new\n"
+    "# members blocks in the late band (10.0%), so all five are non-zero and\n"
+    "# the cell becomes mandatory at 7.7% -- silent_poison's 1-of-13, the\n"
+    "# minimum. What it then measures is real sheet shape and not an\n"
+    "# instrument fault: ten of the twenty klee/generic cards carry `block`\n"
+    "# and nine of them are early-band only, so ONE card still blocks late\n"
+    "# (5.0%). Klee's generic defence is front-loaded and expires; the\n"
+    "# instrument simply started asking.\n"
+    "#\n"
+    "# klee/spark scaling|early ARRIVES on a raised anchor. The Regent package\n"
+    "# gained a second early-band scaler, so the demand went 2.9% (1-of-35) ->\n"
+    "# 5.6% (2-of-36) while klee/spark stayed at one card (4.2%, 1-of-24). It\n"
+    "# was clearing a ONE-CARD canon floor by 1.3 points and now misses a\n"
+    "# two-card one -- a thin pass that was always one canon card from\n"
+    "# failing, now disclosed rather than opened.\n"
+    "#\n"
+    "# Nobody wrote or deleted a card for either line, and no floor was moved\n"
+    "# to absorb them; none may be. Both are offered to [USER] as DEBT at the\n"
+    "# PR, and merging accepts them as debt.\n"
     "# Every line is a COVERAGE GAP in a pool. No line names a card, and none\n"
     "# ever can: this lint is floors-only (charter A0.2(1)).\n"
     "character\tarchetype\tcell\n")

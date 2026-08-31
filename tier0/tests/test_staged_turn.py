@@ -1461,10 +1461,19 @@ def test_the_staged_packet_prints_the_runs_relics():
 
 
 def _bt2_wire(*, relics=("Pounding Surprise", "Fishing Rod"), enemy_hp=45,
-              player_hp=42):
+              player_hp=42, intents=None):
     """The board `KLEESPARK-BT2` ACTUALLY staged, field for field: two relics
     where every board asserted one, and a body at 45 where every board wrote
-    55. Both are recorded at klee-sparks §24.9 and neither moved a grade."""
+    55. Both are recorded at klee-sparks §24.9 and neither moved a grade.
+
+    `intents` is the wire's telegraph list in the shape the bridge sends it
+    (EB-244) -- the same field `adapter._intent` and the blind page both read.
+    Absent by default, which is the state every case written before that row
+    was checked against."""
+    enemy = {"id": "e1", "name": "Act 1 enemy", "hp": enemy_hp,
+             "max_hp": enemy_hp, "block": 0, "status": []}
+    if intents is not None:
+        enemy["intents"] = list(intents)
     return {
         "state_type": "battle",
         "player": {"hp": player_hp, "max_hp": 62, "block": 0, "energy": 3,
@@ -1472,11 +1481,18 @@ def _bt2_wire(*, relics=("Pounding Surprise", "Fishing Rod"), enemy_hp=45,
                    "relics": [{"id": f"KLEEMOD-{n.upper().replace(' ', '_')}",
                                "name": n, "description": "", "counter": None}
                               for n in relics]},
-        "battle": {"round": 4, "turn": 4,
-                   "enemies": [{"id": "e1", "name": "Act 1 enemy",
-                                "hp": enemy_hp, "max_hp": enemy_hp,
-                                "block": 0, "status": []}]},
+        "battle": {"round": 4, "turn": 4, "enemies": [enemy]},
     }
+
+
+# The two telegraphs `KLEESPARK-BT3` actually drew, against the one both its
+# boards declared. `t01` drew the Debuff and `t02` the attack for 12.
+BT3_DEBUFF = [{"type": "DebuffStrong", "title": "Strategic",
+               "label": "", "description": "Applies a debuff."}]
+BT3_ATTACK_12 = [{"type": "Attack", "title": "Attack",
+                  "label": "12", "description": "Deals 12 damage."}]
+BT3_ATTACK_16 = [{"type": "Attack", "title": "Attack",
+                  "label": "16", "description": "Deals 16 damage."}]
 
 
 def _bt2_board(**over):
@@ -1624,3 +1640,138 @@ def test_bt2s_own_published_boards_are_what_this_check_was_seen_to_fail_on():
         # And the same board against the body it declared stages clean.
         staged_turn.wire_assumption_preflight(
             turn, _bt2_wire(enemy_hp=55, player_hp=mine))
+
+
+# --- EB-244: the third leg, the enemy's INTENT ------------------------------
+#
+# EB-240 gave `expects:` a relics leg and an hp leg and nothing that could see
+# a TELEGRAPH. The encounter is generated from the seed and no staging step
+# writes an intent, so a board is free to say what the enemy is about to do
+# and be wrong. `KLEESPARK-BT3` was: both boards' notes and their `board:`
+# mirror printed "one enemy telegraphing an attack for 16" while `t01` drew a
+# Debuff and `t02` an attack for 12. It was causal, not cosmetic -- `t01`
+# holds no Attack, so against a Debuff no intent could change the line, both
+# deciding forms were refused `intent_insensitive`, and `G1`/`G2`/`G4` all
+# graded UNREACHED.
+
+
+def test_a_board_declaring_an_intent_the_wire_lacks_is_refused():
+    """SEEN TO FAIL ON BT3's OWN DECLARATION. The board says attack 16, the
+    wire telegraphs a Debuff, and the refusal names both."""
+    turn = _bt2_board(
+        expects={"intent": {"first": {"kind": "attack", "amount": 16}}})
+    with pytest.raises(staged_turn.TurnError) as e:
+        staged_turn.wire_assumption_preflight(
+            turn, _bt2_wire(enemy_hp=55, intents=BT3_DEBUFF))
+    msg = str(e.value)
+    assert "intent:" in msg and "'first'" in msg
+    assert "attack 16" in msg
+    assert "Strategic" in msg          # what the page actually printed
+    assert "EB-240" in msg             # the same refusal, one more leg
+
+
+def test_the_same_declaration_against_the_other_boards_wire():
+    """`t02`'s half: the right KIND and the wrong NUMBER, which is the
+    quieter of the two and the one a reader would do arithmetic on."""
+    turn = _bt2_board(
+        expects={"intent": {"first": {"kind": "attack", "amount": 16}}})
+    with pytest.raises(staged_turn.TurnError) as e:
+        staged_turn.wire_assumption_preflight(
+            turn, _bt2_wire(enemy_hp=55, intents=BT3_ATTACK_12))
+    assert "attack 16" in str(e.value) and "attack 12" in str(e.value)
+
+
+def test_a_board_whose_intent_is_the_wires_stages():
+    """The green case: the board BT3 believed it had."""
+    turn = _bt2_board(
+        expects={"intent": {"first": {"kind": "attack", "amount": 16}}})
+    staged_turn.wire_assumption_preflight(
+        turn, _bt2_wire(enemy_hp=55, intents=BT3_ATTACK_16))
+
+
+def test_an_intent_may_be_declared_by_kind_alone():
+    """`amount` is optional, because a board that only needs *it attacks*
+    should not have to assert a number it does not depend on -- and a board
+    that declares the number gets the number checked."""
+    turn = _bt2_board(expects={"intent": {"first": {"kind": "attack"}}})
+    staged_turn.wire_assumption_preflight(
+        turn, _bt2_wire(enemy_hp=55, intents=BT3_ATTACK_12))
+    with pytest.raises(staged_turn.TurnError):
+        staged_turn.wire_assumption_preflight(
+            turn, _bt2_wire(enemy_hp=55, intents=BT3_DEBUFF))
+
+
+def test_a_non_damaging_telegraph_is_declarable_too():
+    """The Debuff has a name in this vocabulary -- `adapter._intent` reads
+    every non-damaging telegraph as a zero-damage beat, and a board that
+    means *it does not attack me this turn* must be able to say so."""
+    turn = _bt2_board(
+        expects={"intent": {"first": {"kind": "block", "amount": 0}}})
+    staged_turn.wire_assumption_preflight(
+        turn, _bt2_wire(enemy_hp=55, intents=BT3_DEBUFF))
+    with pytest.raises(staged_turn.TurnError):
+        staged_turn.wire_assumption_preflight(
+            turn, _bt2_wire(enemy_hp=55, intents=BT3_ATTACK_12))
+
+
+def test_an_intent_declared_for_a_creature_the_wire_lacks_is_refused():
+    """Same rule the hp leg follows: a symbol that resolves to nobody is a
+    board about a fight that is not on the screen, not *nothing to check*."""
+    wire = _bt2_wire(enemy_hp=55)
+    wire["battle"]["enemies"] = []
+    turn = _bt2_board(
+        staging=[{"give": {"card": "KLEEMOD-KABOOM", "pile": "hand"}},
+                 {"set_hp": {"who": "player", "amount": 42}},
+                 {"read": "the staged board"}],
+        expects={"intent": {"first": {"kind": "attack", "amount": 16}}})
+    with pytest.raises(staged_turn.TurnError) as e:
+        staged_turn.wire_assumption_preflight(turn, wire)
+    assert "no such creature" in str(e.value)
+
+
+def test_a_board_that_declares_no_intent_is_asked_nothing_about_one():
+    """The leg is OPTIONAL, exactly like relics: a board that declares no
+    intent is not thereby asserting the wire has none, it is asserting
+    nothing -- which is the state every board written before this row is in,
+    and the state the published BT2 boards must keep."""
+    turn = _bt2_board()
+    assert "intent" not in turn.expects
+    staged_turn.wire_assumption_preflight(
+        turn, _bt2_wire(enemy_hp=55, intents=BT3_DEBUFF))
+
+
+def test_the_intent_leg_refuses_a_shape_it_cannot_mean_one_thing_by():
+    """Refused, never coerced -- the rule the rest of `expects:` follows."""
+    for bad in ({"intent": {"first": "attack 16"}},
+                {"intent": {"first": {}}},
+                {"intent": {"first": {"amount": 16}}},
+                {"intent": {"first": {"kind": ""}}},
+                {"intent": {"first": {"kind": "attack", "amount": "16"}}},
+                {"intent": {"first": {"kind": "attack", "damage": 16}}},
+                {"intent": {"": {"kind": "attack"}}},
+                {"intent": {}},
+                {"intent": []}):
+        with pytest.raises(staged_turn.TurnError):
+            _bt2_board(expects=bad)
+
+
+def test_bt3s_own_published_boards_declare_the_intent_they_drew():
+    """THE ROW'S ACCEPTANCE ON THE FILES THEMSELVES. Both `KLEESPARK-BT3`
+    boards mirror `intent: {kind: attack, amount: 16}` on their `board:`
+    half. Parsed as committed and put in front of the wire that round
+    actually had, the declaration each one would make is refused."""
+    import yaml
+    boards = sorted((TURNS / "klee-sparks-bt3").glob("t0*.yaml"))
+    assert len(boards) == 2
+    for path, live in zip(boards, (BT3_DEBUFF, BT3_ATTACK_12)):
+        blob = yaml.safe_load(path.read_text(encoding="utf-8"))
+        mirrored = blob["board"]["enemies"][0]["intent"]
+        assert mirrored == {"kind": "attack", "amount": 16}
+        turn = staged_turn.parse(blob, path)
+        probe = staged_turn._parse_expects({"intent": {"first": mirrored}})
+        wire = _bt2_wire(enemy_hp=int(blob["board"]["enemies"][0]["hp"]),
+                         player_hp=int(blob["board"]["hp"]), intents=live)
+        turn.expects.update(probe)
+        with pytest.raises(staged_turn.TurnError) as e:
+            staged_turn.wire_assumption_preflight(turn, wire)
+        assert "intent:" in str(e.value)
