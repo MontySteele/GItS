@@ -463,9 +463,23 @@ def test_each_category_scores_the_failure_it_was_written_for():
         {"q1_what_did_you_play": "Duck and Cover is free so I played it"},
         QA / turn)
     assert not ok or "Duck and Cover" not in why  # only fires where priced
-    ok, _ = qualify.score_costs({"q1_what_did_you_play": "I blocked"},
-                                QA / turn)
-    assert ok
+    # EB-211: the RIGHT answer is no longer "said nothing about a price".
+    # `{"q1_what_did_you_play": "I blocked"}` PASSED this category until
+    # 2026-08-30, which is the whole reason the ledger exists; a pass now
+    # costs a ledger the printed costs and the printed bank agree with.
+    silent = {"chosen_line": [{"card": "Kaboom!"}, {"card": "Duck and Cover"}],
+              "q1_what_did_you_play": "I blocked"}
+    ok, why = qualify.score_costs(silent, QA / turn)
+    assert not ok and "silent on every price" in why
+    priced = dict(silent, price_ledger=[
+        {"card": "Kaboom!", "energy_before": 3, "energy_price": 1,
+         "energy_after": 2, "spark_before": 1, "spark_price": 0,
+         "spark_after": 1},
+        {"card": "Duck and Cover", "energy_before": 2, "energy_price": 1,
+         "energy_after": 1, "spark_before": 1, "spark_price": 0,
+         "spark_after": 1}])
+    ok, why = qualify.score_costs(priced, QA / turn)
+    assert ok, why
 
     ok, _ = qualify.score_intent({"q4_different_intent": "no"}, QA / turn)
     assert not ok
@@ -841,6 +855,13 @@ def _bt2_answered_form() -> dict:
         "q3_what_it_gave_up": "c", "q4_different_intent": "yes",
         "q4_changed": True,
         "forecast": ["0", "3", "0"],
+        # EB-211, and it rides the same rule as `forecast`: declared on the
+        # strict schema, so a reply that carries it is not refused
+        # `undeclared:` and one that omits it is refused `missing:`.
+        "price_ledger": [{"card": "Bag of Tricks", "energy_before": 3,
+                          "energy_price": 1, "energy_after": 2,
+                          "spark_before": 3, "spark_price": 3,
+                          "spark_after": 0}],
     }
 
 

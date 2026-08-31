@@ -55,7 +55,11 @@ no commentary:
   "q2_other_line_considered": "<prose, or 'none'>",
   "q3_what_it_gave_up": "<prose>",
   "q4_different_intent": "<prose>",
-  "q4_changed": true
+  "q4_changed": true,
+  "price_ledger": [{"card": "<printed card title>",
+                    "energy_before": 3, "energy_price": 1, "energy_after": 2,
+                    "spark_before": null, "spark_price": null,
+                    "spark_after": null}]
 }
 ```
 
@@ -67,6 +71,16 @@ If a card you played asks you to **Exhaust a card**, say which one on that
 play as `"exhaust": "<the printed title>"`. If a card says **Choose one**, say
 which half you took as `"choose": "<the printed text of that option>"`. Leave
 both out for a card that asks neither.
+
+**`price_ledger` — what each play cost you.** One entry per play in
+`chosen_line`, in the same order, in the page's own numbers: the bank you
+started that play with, the price the card prints, and the bank you were left
+holding. Start from the meters printed under **You**, and carry the running
+total from one play to the next. If the page prints a **Spark** bank (or
+another spendable meter), fill the three `spark_*` fields the same way; if it
+prints none, leave all three `null`. This is bookkeeping, not an opinion, and
+it is not a fifth question: it does not ask you to justify the line, only to
+say what it cost.
 
 <PACKET>
 

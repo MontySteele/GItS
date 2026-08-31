@@ -80,6 +80,44 @@ def printed_costs(packet_md: str) -> dict[str, int]:
     return costs
 
 
+def printed_body(packet_md: str, title: str) -> str:
+    """The printed lines under one card's heading, or "" if it is not shown."""
+    heads = list(_CARD_HEAD.finditer(packet_md or ""))
+    for i, head in enumerate(heads):
+        if head.group(1).strip().casefold() != str(title).strip().casefold():
+            continue
+        end = heads[i + 1].start() if i + 1 < len(heads) else len(packet_md)
+        return packet_md[head.end():end]
+    return ""
+
+
+def printed_banks(packet_md: str) -> dict[str, int]:
+    """`{"energy": N, "spark": N, ...}` for every bank the packet's "You"
+    block prints, keyed by the meter's own lower-cased printed name.
+
+    EB-211. The costs category needs the bank a price is paid OUT OF, and the
+    packet prints it a line under the HP: `- Energy 3`, `- Spark 3 — ...`.
+    Read the same way `printed_costs` reads a cost, and for the same reason:
+    the question is what the reader was SHOWN. A meter the packet does not
+    print is ABSENT from the mapping rather than zero -- the two mean
+    different things to a ledger, and a board with no Spark line asked no
+    Spark question.
+    """
+    banks: dict[str, int] = {}
+    head = re.search(r"^##\s+You\s*$", packet_md or "", re.MULTILINE)
+    if not head:
+        return banks
+    rest = packet_md[head.end():]
+    stop = re.search(r"^##\s+", rest, re.MULTILINE)
+    block = rest[:stop.start()] if stop else rest
+    for line in block.splitlines():
+        m = re.match(r"^-\s*([A-Za-z][A-Za-z ]*?)\s+(\d+)\s*(?:\S.*)?$",
+                     line.strip())
+        if m:
+            banks[m.group(1).strip().casefold()] = int(m.group(2))
+    return banks
+
+
 def free_card_misreads(packet_md: str, text: str) -> list[str]:
     """Every "<card> is free" claim in the prose that the packet contradicts.
 

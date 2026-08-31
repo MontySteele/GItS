@@ -713,7 +713,39 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # prints the Bomb's own amount, carried by a plain "BombDamage" var
         # instead of the attack-var family, and the lock was seen to FAIL on
         # all seventeen shipped faces first.
-        231, 232,
+        #
+        # 232 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word
+        # for word -- "two concurrent sessions stay green". The row's
+        # diagnosis was half right and the fix is the other half: `tmp_path`
+        # is ALREADY session-unique (`pytest-2295` and `pytest-2296` are two
+        # base directories), so nothing shared a save tree -- a path out of
+        # 2295 reached 2296's assertion over the WIRE, because the lane tests
+        # bound the FIXED loopback port 15599 and on Windows a second process
+        # binds it too, silently, with the FIRST binder answering everybody.
+        # Every server in that file now binds port 0 and reads its port back,
+        # `_LaneServer` refuses `allow_reuse_address` so a future constant
+        # fails at the bind rather than quietly, and `_lane_bridge` no longer
+        # TAKES a port. Seen to FAIL: with a squatter holding 15599, the old
+        # file's named test fails `DID NOT RAISE LaneCrossed` where the new
+        # one passes; two concurrent sessions of the old file give 1 failed /
+        # 13 passed against 14 passed, and of the new file 91 passed twice.
+        #
+        # 231 LEFT OPEN_IDS 2026-08-30 with its row, on its acceptance word
+        # for word -- "teardown proves the PID gone before the marker, lock
+        # seen to FAIL". `embark --teardown` rebuilds the session from the
+        # ledger on disk and so holds no `Popen`; `_kill` found `proc is
+        # None`, did nothing, and `_stop_game` returned "process terminated"
+        # anyway. Two halves: `_launch` writes the pid onto the launch entry
+        # (the only copy that outlives the process that made it), and
+        # `_kill_and_prove` polls the process table for up to
+        # `PID_EXIT_TIMEOUT_S` and RAISES on a survivor, so `_step` records
+        # NOT REVERTED naming the image still holding the number. An
+        # unanswerable probe counts as ALIVE, and a pre-change ledger with no
+        # pid refuses rather than assumes. `halt_spin`'s marker goes through
+        # the same proof. SEEN TO FAIL against a live pid (this python
+        # process, `taskkill` stubbed, real `tasklist`): old soak.py wrote
+        # REVERTED / "process terminated", new soak.py writes NOT REVERTED /
+        # "pid N (python.exe) is STILL ALIVE".
         # 233/234 minted 2026-08-30 by the post-merge review: the scorer/pool
         # half of KLEESPARK-S1's S3 miss, and the memory-cadence read on a
         # developed deck the kurage packet defers.

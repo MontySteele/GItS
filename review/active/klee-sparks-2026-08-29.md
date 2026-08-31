@@ -7097,3 +7097,51 @@ measures the half that ruling left owed, and `KLEESPARK-W5` carries the failure
 condition that ruling wrote. The only thing either can do to the direction is
 what R230 already said one of them could: fire the collapse, and send the arm
 back to [USER] as a numbered pick.
+
+---
+
+## 26. `EB-211` — the `costs` category now costs something, and what it OWES
+
+**Written 2026-08-30 on branch `understudy-instruments-2`. This is instrument
+work, and it is PROSPECTIVE: no sealed form is re-scored, no published battery
+result moves, and the seat's recorded FAIL at 10 of 18 under R223 stands
+exactly as published (R101b).**
+
+Section 13.8's third claim was right. The battery's `costs` category ran one
+check — did the reader call a card free that the packet prints a price for? —
+and PASSED whenever it found nothing. A form that never mentioned a price
+passed the category, so R223's mark of 4 of 6 was satisfiable by silence, and
+the only thing `costs` could actually catch was a reader who volunteered the
+misread in prose.
+
+The form now carries a **price ledger**: one entry per play, in the line's
+order, in the numbers the packet prints — the bank that play started with, the
+price on the card, and the bank it left, with the same three fields for Spark
+where the board prints a Spark bank. `qualify.score_costs` scores it against
+the printed costs and the printed bank: the price must match the printed
+`Cost:`, the first entry must start at the printed Energy, each entry must
+start where the last one ended, and the arithmetic must subtract. **A form with
+no ledger FAILS.** The field is nullable everywhere else, so every sealed form
+and every replay loads unchanged, and no falsifier requires it.
+
+### 26.1 What this OWES [USER], and is not taking
+
+**The six sealed `costs` items need re-picking, and that is [USER]'s call, not
+this branch's.** The battery file states the rule those six were chosen on:
+*the hand must print at least two non-zero costs, so a "free" claim has
+something to be wrong about.* That rule was written for a check that could only
+fire on a positive claim. A ledger asks a different question — can this reader
+track a bank across a line? — and the boards that ask it best are not
+necessarily the six that were picked to bait a "free" claim: a board wants a
+bank a line can actually exhaust, and a Spark bank that moves, before it is
+worth a slot. Choosing which sealed boards those are is a judgement about what
+the instrument should measure, and it lands on top of a second question that is
+already [USER]'s: **R223's mark of 4 of 6 was answered against a category that
+was half as hard**, so whether 4 is still the right number is part of the same
+call.
+
+All six items remain in the battery and remain scorable — each prints a bank
+and prices at least two cards in hand, which
+`tier0/tests/test_eb211_price_ledger.py` pins — so nothing is broken while the
+pick is open. What is NOT done here, deliberately: no item was swapped, no
+`why:` was rewritten, and the `threshold:` block is untouched.
