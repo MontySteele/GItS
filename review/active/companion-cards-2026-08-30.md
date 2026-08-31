@@ -1,12 +1,17 @@
 # Companion cards — the opening design packet
 
-**DRAFT. Nothing here is countersigned.** No shipped number moves, no card
-sheet is edited, no code is written, no register row is minted. The picks below
-are numbered P1 to P9, plus one sub-pick P5a, **inside this document only** —
-those labels are local
-handles for a conversation, not identifiers, and they do not reserve or consume
-anything in any register. If a pick is ruled, whoever records the ruling mints
-the row.
+**Drafted 2026-08-30, and RULED the same day — see §5, R234.** §1 to §4 are the
+evidence the packet was drafted on and are unchanged by the ruling. §6 keeps the
+pick bodies exactly as they were put to [USER], each now carrying a one-line
+answer, because a ruling is only readable against the options it chose between.
+
+Still true of this file after the ruling: **no shipped number moves, no card
+sheet is edited, no code is written, and no register row is minted here.** The
+picks are numbered P1 to P9, plus one sub-pick P5a, **inside this document
+only** — those labels are local handles for a conversation, not identifiers, and
+they do not reserve or consume anything in any register. The engineering the
+ruling creates is named as owed in §5.3 and its rows mint on the
+register-reconcile branch, not from this packet.
 
 Written 2026-08-30 on branch `companion-slice-1`, based on main `4c50cbf1`.
 
@@ -502,23 +507,133 @@ argued on the evidence's timing rather than on a shape conclusion.
 
 ---
 
-## 5. The picks
+## 5. The ruling — R234 (2026-08-30)
 
-Numbered P1 to P9 plus the sub-pick P5a, this document only. **P1 is SETTLED
-(Mondstadt first, [USER], 2026-08-30); the rest are open.** Each is a real fork.
-Where a default is
-defensible it is marked; where the material genuinely does not choose, no
-default is marked and that is stated.
+**Provenance.** A GPT review relayed by [USER] on 2026-08-30, plus this session's
+verified fact-check of it, plus [USER]'s own convergence with both. Signed under
+the standing both-agreed authorization. Every pick below is answered; the pick
+bodies in §6 are left exactly as drafted so that each answer can be read against
+the options it chose between.
+
+### 5.1 The answers
+
+**P1 — which nation first. MONDSTADT.** [USER] directly. The first slice is
+Mondstadt's, and the arguments made against it in §6 are the risks that slice
+now carries rather than reasons to revisit.
+
+**P2 — what slice 1 delivers. THE TAXONOMY PLUS TWO NEW KLEE PERSONAL CARDS** —
+three in total with Prune. **No Universal expansion in slice 1.** This is the
+drafted option B, sized: it proves the half of the concept that is new, because
+Personal Companions are currently n=1, and it deliberately leaves the
+colorless-replacement half alone until the anchor P8 orders exists.
+
+**P3 — the three undispositioned `burst_energy` faces. RESOLVED INSIDE THE
+SHARED BURST-RETIREMENT FOLD.** Barbara, Sucrose's Astable and Bennett's Passion
+are either rewritten as generic Universal effects or their riders retired, and
+that work happens **in the fold, not in this slice**. Three things are ruled out
+by name: **no grandfathering**, so the drafted option B is rejected; **none of
+the three becomes a Klee-specific hook**, so the Prune manoeuvre is not the
+template here — these are Universal cards and they stay Universal; and none is
+re-authored as its own errand ahead of the fold. Durin's feed is already ruled
+RETIRE in that same fold, so all four now travel together.
+
+**P4 — the 30-card floor. DECOUPLE.** It is an instrument threshold, not a
+content target. Pool size is set by what a nation's shape family needs. The
+drafted option C.
+
+**P5 — how many Personal Companions per character. A LONG-TERM RANGE OF THREE TO
+FIVE, STARTING AT THREE.** The drafted option B, with the entry point named.
+
+**P5a — the Rare Personal tier. DEFERRED, and the sub-pick STAYS OPEN.** None of
+options (a) through (d) is taken. The open sub-pick **gates any Rare Personal
+design**: no Rare Personal Companion may be authored until it is answered, and
+**slice 1 promises none** — its three Klee Personals sit at 4-star, where the
+acquisition chain in §6 shows the channels already work. This is the one place
+the ruling deliberately leaves a fork standing, and it is left standing because
+authoring an unreachable card is the outcome all four options exist to prevent.
+
+**P6 — density payoff. SPLIT, AS AMENDED, AND RULED PER CARD.**
+**Navia takes option C — Universal, but bounded or costed.** **Albedo returns to
+ordinary Universal balancing**, since his trigger is element synergy rather than
+Companion density. **No third taxonomy is created**, so the drafted option B is
+rejected outright.
+
+**P7 — the home-nation weight. `SAME_NATION_REWARD_SHARE` HOLDS AT 0.5.** The
+drafted option A, with a condition attached: **re-measure the actual home-nation
+and Personal appearance rates after the Personal set lands, and before any
+tuning.** The constant is not defended on principle — it is held because nothing
+has measured it since the taxonomy existed, and the measurement now has a
+trigger.
+
+**P8 — the missing colorless anchor. PRODUCED IN PARALLEL, AND IT IS A
+PRECONDITION.** The anchor is not sequenced ahead of the Personal work and does
+not block it, but it **must exist before any Universal Uncommon or Rare is added
+or repriced.** This is stronger than the drafted option C: banking the question
+becomes an actual gate on the Universal half rather than a re-check.
+
+**P9 — per-nation shape. AN AUTHORING CONSTRAINT, SCOPED TO UNIVERSALS.** The
+drafted option B, with the scope stated: **Personal cards follow character
+identity, not nation shape**, and where a nation's shape family and the global
+brick test disagree, **the brick test takes precedence over home-nation
+synergy.** That last clause is the one that keeps §3.1's Universal definition
+load-bearing: a card is not allowed to become a brick elsewhere because it fit
+its nation's family well.
+
+### 5.2 The sequencing program, as ruled
+
+Parallel, not serial. The order below is a dependency order, not a queue.
+
+1. **Now, in parallel:** Mondstadt taxonomy and the two Klee Personal drafts on
+   one side; the colorless anchor's production and the companion-instrument
+   repair (§2.6) on the other. Neither waits on the other.
+2. **Gated on the Burst fold:** the sheet changes, and P3's three rewrites. They
+   land in the fold, so nothing here sets their date.
+3. **Then:** whole-fight proof of the Mondstadt slice → Inazuma → Fontaine.
+
+This is what "one nation at a time, then work outward" (answer 1) looks like once
+the work that is *not* nation-shaped — an anchor, an instrument — is allowed to
+run beside it rather than in front of it.
+
+### 5.3 What the ruling owes, and mints nowhere
+
+The slate creates engineering. It is named here so it is not rediscovered, and
+**no identifier is minted for any of it** — the rows mint on the
+register-reconcile branch after tonight's runs land.
+
+- **Produce the colorless anchor** (P8): the reference §2.4 could not find, and
+  now a precondition on the Universal half.
+- **Repair the companion instrument** (§2.6): both halves — the missing sheets,
+  and the taxonomy filter that keeps Personal and guest-star rows out of a
+  Universal-pool metric.
+- **Draft the two new Klee Personal cards** (P2, P5): 4-star, under P5a's
+  standing bar against a Rare.
+
+Three things the ruling explicitly does *not* owe: a Rare Personal design (P5a
+gates it), any Universal card (P2 excludes it from slice 1), and any change to
+`SAME_NATION_REWARD_SHARE` (P7 holds it pending a measurement).
 
 ---
 
-### P1 — Which nation goes first — **SETTLED 2026-08-30 by [USER]: Mondstadt first**
+## 6. The picks
+
+Numbered P1 to P9 plus the sub-pick P5a, this document only. **All are ANSWERED
+by R234 (§5), except P5a, which R234 deliberately leaves OPEN.** The bodies below
+are kept exactly as they were put to [USER] — each is a real fork, defaults are
+marked where one was defensible, and where the material genuinely did not choose,
+no default was marked and that is stated. Nothing here has been rewritten to
+agree with the answer it got; the one-line RULED pointer at the head of each pick
+is the whole of the ruling's footprint in this section.
+
+---
+
+### P1 — Which nation goes first
+
+**RULED (R234): Mondstadt.** See §5.1.
 
 Answer 1 says one nation at a time. This is the pick that starts the clock, and
-it is answered: **[USER] took option A on 2026-08-30.** The formal ruling number
-lands with the whole slate later; this line records the pick as answered, not as
-ratified. The three options are kept below unedited, because the arguments
-against A are the risks the Mondstadt slice now has to carry.
+[USER] took option A directly on 2026-08-30. The three options are kept below
+unedited, because the arguments against A are the risks the Mondstadt slice now
+has to carry.
 
 **Option A — Mondstadt (Klee).** *Claude's recommendation.*
 - Klee is the compatibility baseline character (`docs/current/STATE.md:83`), so
@@ -559,7 +674,7 @@ against A are the risks the Mondstadt slice now has to carry.
   section is a stable base.
 - *Cost:* that same closure is the argument against. Fontaine is the pool most
   recently ruled on, so it is the pool where a fresh slice most risks looking
-  like a reopening — and §6 forbids that. It also has the most in flight: the
+  like a reopening — and §7 forbids that. It also has the most in flight: the
   reframe's own whole-fight read is pending
   (`docs/current/STATE.md:600-603`), and its Companion hook is the most
   entangled engine of the three.
@@ -575,6 +690,8 @@ answer 1's "work outward" it makes a strong *second*.
 ---
 
 ### P2 — What "first nation" actually means as a deliverable
+
+**RULED (R234): option B, sized — taxonomy plus two new Klee Personal cards, three with Prune, no Universal expansion in slice 1.** See §5.1.
 
 A. **Taxonomy only.** Flag every existing Mondstadt row Personal or Universal,
    fix the contract violations, ship no new cards. *Cheapest; proves the
@@ -595,6 +712,8 @@ anchor (P8).
 ---
 
 ### P3 — The existing contract violations: re-author or grandfather
+
+**RULED (R234): none of the drafted options as written — the three riders are resolved inside the shared Burst-retirement fold, no grandfathering, and none becomes a Klee-specific hook.** See §5.1.
 
 The three undispositioned `burst_energy` faces (§2.2 — Barbara, Sucrose's
 Astable, Bennett's Passion; Durin is already ruled RETIRE).
@@ -622,6 +741,8 @@ deletes.
 
 ### P4 — The 30-card floor: target or hazard
 
+**RULED (R234): option C — decouple.** See §5.1.
+
 Stated as the fork in §3.3.
 
 A. **Target.** Each nation's pool is grown to 30+ draftable cards, and passing
@@ -643,6 +764,8 @@ instrument's input) becomes load-bearing under A and B and does not under C.*
 
 ### P5 — How many Personal Companions per character
 
+**RULED (R234): option B — three to five long-term, starting at three.** See §5.1.
+
 Personal Companions are currently n=1 across the whole roster.
 
 A. **One per character.** Prune is the model; the Personal flavor is a signature
@@ -661,6 +784,8 @@ C. **Unbounded, governed by rarity only** — as many as the character's engine
 enlarges the surface the delete-test has to be re-run against.
 
 #### P5a — How a Rare Personal Companion would ever be acquired
+
+**RULED (R234): DEFERRED — this sub-pick stays OPEN and gates any Rare Personal design; slice 1 promises none.** See §5.1.
 
 **This sub-pick exists because the answer today is "it could not be."** A Rare
 Personal Companion is **unreachable through every live channel**, and that is a
@@ -724,7 +849,7 @@ d. **No Personal Rares at all.** The Personal flavor caps at Uncommon, and the
 Personal Companions a balance rule "at equivalent rarity" without naming which
 rarities exist, and answer 3 calls them "a subset of a character's draftable
 pool" — which argues they should be *draftable*, and so argues against (d), but
-does not pick between (a), (b) and (c). That is a design fork, and §5's rule is
+does not pick between (a), (b) and (c). That is a design fork, and §6's rule is
 that a fork is a pick.
 
 *Note on scope:* if P5 lands on option A (one Personal per character, Prune the
@@ -736,6 +861,8 @@ outcome none of the four options wants.
 ---
 
 ### P6 — Density payoff: is a Universal card allowed to pay out on Companion plays
+
+**RULED (R234): split, per card — Navia takes option C (bounded or costed); Albedo returns to ordinary Universal balancing; no third taxonomy.** See §5.1.
 
 **This pick has been narrowed. It previously bundled Navia and Albedo together,
 and they are two different mechanisms** — EB-148 grouped them as "subsidy
@@ -790,6 +917,8 @@ Albedo alone.
 
 ### P7 — Whether the 50% home-nation weight is the right number
 
+**RULED (R234): option A — 0.5 holds, with a re-measurement owed after the Personal set lands.** See §5.1.
+
 `SAME_NATION_REWARD_SHARE = 0.5` (`tier0/constants.py:1420`) predates the
 Personal/Universal split and was set when the home-nation pool was the only pool
 with a balance story.
@@ -813,6 +942,8 @@ channels, not both.
 
 ### P8 — Whether this slice produces the missing colorless anchor
 
+**RULED (R234): produced in parallel, and a precondition on any Universal Uncommon or Rare.** See §5.1.
+
 §2.4: `game_ref/` contains no colorless pool data, so "slightly better than
 native cards of equal rarity" (answer 4) currently has no referent.
 
@@ -834,6 +965,8 @@ C. **Proceed, but bank the question** — design to the character-sheet reading
 
 ### P9 — Whether "per-nation shapes" is a constraint or an observation
 
+**RULED (R234): option B, scoped to Universals — Personal cards follow character identity, and the brick test outranks home-nation synergy.** See §5.1.
+
 Answer 2 says shapes are per-nation. Two readings:
 
 A. **Observation.** Each nation happens to have a character and a lore frame, so
@@ -852,7 +985,7 @@ result.
 
 ---
 
-## 6. What this slice does not touch
+## 7. What this slice does not touch
 
 - **The Fontaine Rares are CLOSED and stay closed.** R231 closed `M10` with the
   close approved, the v1.7 lore/naming audit riding on it, and **Neuvillette
@@ -881,7 +1014,14 @@ result.
 
 ---
 
-## 7. Sequencing
+## 8. Sequencing — the constraints the ruled program was built on
+
+**§5.2 is the ruled program and this section is its reasoning.** Where the two
+differ in shape, §5.2 governs: R234 made the program **parallel**, so the anchor
+and the instrument repair run beside the Mondstadt work rather than behind it,
+and the serial reading at the end of this section is superseded on that point.
+The dependencies below are unchanged by the ruling and are why the parallel form
+is safe.
 
 **Tonight.** `KOKOMI-SLICE1-WF` runs. It is the only companion-shape evidence in
 the project, it is about Inazuma, and it is why §4.3 concludes nothing. When it
@@ -909,11 +1049,19 @@ things behind those flags. A Fontaine companion slice cannot settle Fontaine's
 shape family while the hook that reads Companion plays is unflipped, because the
 value of every Fontaine Companion in Furina's hands changes when it flips.
 
-**The sequence P1's answer implies:** Mondstadt now (contract proved
-on the baseline character with the built exemplar) → Inazuma after the fold and
-with the WF graded → Fontaine after the reframe's flags flip. That is answer 1's
-"one nation at a time, then work outward" with the outward order chosen by which
-evidence lands when, rather than by pool size.
+**The nation order these three constraints imply** — and the half of the drafted
+sequence R234 kept: Mondstadt now (contract proved on the baseline character with
+the built exemplar) → Inazuma after the fold and with the WF graded → Fontaine
+after the reframe's flags flip. That is answer 1's "one nation at a time, then
+work outward", with the outward order chosen by which evidence lands when rather
+than by pool size.
+
+**What R234 changed about it:** the drafted version read this as one serial
+queue, which would have put the colorless anchor and the instrument repair behind
+a nation. Neither is nation-shaped, and neither blocks the Personal drafting, so
+§5.2 runs them in parallel and gates only what genuinely depends on something —
+the Universal half on the anchor (P8), and the sheet rewrites on the Burst fold
+(P3).
 
 ---
 
