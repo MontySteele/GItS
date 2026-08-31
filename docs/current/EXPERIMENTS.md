@@ -348,24 +348,33 @@ carried while it was active is in the commit message that retired it.
   `review/active/klee-sparks-2026-08-29.md` §25.
 
 - **`KURAGECAD-W1` — the Kurage memory's cadence across a WHOLE FIGHT
-  (`EB-234`, second leg)** — **REGISTERED AS OWED, not drafted, not run.** Its
-  sim sibling `KURAGECAD-S1` is finished and sits in the published table
-  above. **Why it is separate:**
-  `EB-234`'s next action is *"sim first, then a whole fight"*, and the sim leg
-  answered the count questions on a drafted deck while leaving every question a
-  reader's page answers untouched. **Unit:** one complete fight on a DEVELOPED
-  Kokomi deck under `C.KURAGE_MEMORY`, through `understudy.blindplay session`,
-  with `EB-229`'s forecast channel available and its error direction declared at
-  drafting. **Gate: GAME TIME** — a `+proto` build, a staged deck and an
-  operator. **What it inherits from the sim leg, and only this:** the staging
-  SHAPE. `C1`/`C2`/`C4` came back a RHYTHM and not a jam — the memory fires on
-  three turns in five and the block is an act-1 state that fades — so the live
-  fight is staged to watch whether that rhythm is legible, forecastable and hers;
-  and `C8`'s SPLIT leaves it free to draft or to grant its Exhaust rows.
-  **What it may NOT inherit: any threshold.** A sim count and a reader's page are
-  not the same evidence, so its slate is drafted fresh from written intent when
-  its board is known — deliberately not before →
-  `review/active/kokomi-kurage-memory-2026-08-29.md` §15.7.
+  (`EB-234`, second leg)** — **DRAFTED AND COMMITTED, NOT RUN, NOT
+  COUNTERSIGNED.** The slate is `review/active/kokomi-kurage-memory-2026-08-29.md`
+  §15.8, drafted under R212 item 2 and committed before anything is staged; the
+  ruling that authorised it authorised **the drafting and the RHYTHM shape
+  only, and explicitly did not countersign a blank registration**, so the
+  countersign is a later batch act.
+  Its sim sibling `KURAGECAD-S1` is finished and sits in the published table
+  above; the live leg inherits from it the staging SHAPE and **no threshold**.
+  **Unit:** one `understudy.blindplay session` on a `+proto` build, Codex seat,
+  Kokomi's flagged starter plus five GRANTED rows (§15.8.2 — three Exhaust
+  printers, the sim's own median and not above it, so a jam observed live is a
+  FLOOR). **Slate:** `K1` readability off the live page — does anything fire
+  next turn, and where does the Charge run out — which folds in `EB-198`'s blind
+  read deliberately, for the page mirror only (§15.8.6); `K2` the live beat on a
+  deliberately wide band (≥ 25% of combat pages), with `S1`'s 60.9% riding as a
+  COMPARATOR that one fight can neither confirm nor refute; `K3` the tail —
+  zero jam episodes AND the longest-queue page still readable — which is the ruled
+  live re-read of the UNCAPPED queue and licenses no cap in either direction;
+  `K4` steering INTO the memory; `K5` the block named and unblocked on the first
+  page it bites; `K6` the four levers RECORDED AND NOT GRADED, because one fight
+  cannot ground them. **`EB-229`'s forecast channel is ON** with three
+  prospective questions and its error direction declared one way: the asking
+  points the player at the element every turn, so a PASS on `K1`/`K3`(ii)/`K4`/
+  `K5` is a CEILING and a jam episode observed is a FLOOR. **Ethereal is
+  DEFERRED by the same ruling — no slot demands a carrier. Gate: GAME TIME** — a `+proto`
+  build, the deploy, an operator and the seat's window; 45-call cap →
+  `review/active/kokomi-kurage-memory-2026-08-29.md` §15.8.
 
 New registrations add a pointer here and land their packet under
 `review/active/`. When one is graded, it moves to the **Graded** table above —
