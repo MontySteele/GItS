@@ -260,16 +260,77 @@ def test_the_battery_covers_every_category_to_its_floor():
 
 
 def test_every_battery_packet_is_a_sealed_one_already_on_disk():
-    """No new board: every item names a packet a closed round already wrote."""
-    for item in qualify.load_battery():
+    """No new board: every item names a packet a closed round already wrote.
+
+    The regression set is held to the same rule — it is unscored, not
+    unpinned, and a rotted turn_id in it is still a rotted turn_id.
+    """
+    for item in qualify.load_battery() + qualify.load_regression():
         assert (QA / item.turn_id / "packet.md").is_file(), item.turn_id
 
 
-def test_the_battery_draws_on_three_rounds():
-    """A seat tuned on one character's vocabulary may not qualify on it."""
-    rounds = {local_tester.round_slug([i.turn_id])
-              for i in qualify.load_battery()}
-    assert rounds == {"kokomi-slice2", "klee-slice1-r3", "klee-sparks-r1"}
+def test_the_battery_draws_on_four_rounds_and_both_characters():
+    """A seat tuned on one character's vocabulary may not qualify on it.
+
+    Three rounds until R232 (2026-08-30), four after it: the `costs` re-pick
+    reached into `kokomi-slice1` because `klee-slice1-r3` prints no non-zero
+    cost but 1 and so asks the ledger nothing.
+    """
+    items = qualify.load_battery()
+    rounds = {local_tester.round_slug([i.turn_id]) for i in items}
+    assert rounds == {"kokomi-slice1", "kokomi-slice2",
+                      "klee-slice1-r3", "klee-sparks-r1"}
+    by_character = {"kokomi": 0, "klee": 0}
+    for item in items:
+        by_character[item.turn_id.split("-")[0]] += 1
+    assert min(by_character.values()) >= 6, by_character
+
+
+# ------------------------------- R232: the free-claim regression set, kept --
+#
+# R232 (2026-08-30): "Preserve the old six as a labeled 'free-claim
+# regression' set if useful, but remove them from R223 qualification scoring."
+# Kept and removed are two claims, so they are two locks.
+
+def test_the_regression_set_is_the_old_six_and_is_still_there():
+    """KEPT. The pre-re-pick `costs` selection, whole, by turn_id."""
+    kept = {i.turn_id for i in qualify.load_regression()}
+    assert kept == {"kokomi-slice2-t02", "kokomi-slice2-t06",
+                    "klee-slice1-r3-t03", "klee-slice1-r3-t04",
+                    "klee-sparks-r1-t04", "klee-sparks-r1-t05"}
+
+
+def test_the_regression_set_is_not_scored(monkeypatch):
+    """REMOVED FROM SCORING, and pinned on the ids rather than the boards.
+
+    Two of the old six were re-picked into the battery on the new rule, so
+    the turn_ids overlap on purpose and only the ITEM ids can carry the
+    separation. A run scores the `items:` list and nothing else.
+    """
+    scored = qualify.load_battery()
+    regression = qualify.load_regression()
+    assert regression, "the set is supposed to be kept, not emptied"
+    assert not ({i.id for i in scored} & {i.id for i in regression})
+
+    monkeypatch.setattr(qualify, "SCORERS",
+                        {c: lambda _f, _d: (True, "fixture")
+                         for c in qualify.CATEGORIES})
+    card = qualify.run_battery(
+        scored, reader=lambda i: {"category": i.category},
+        threshold=qualify.load_threshold())
+    graded = {r["item"] for r in card["items"]}
+    assert graded == {i.id for i in scored}
+    assert not (graded & {i.id for i in regression})
+
+
+def test_a_battery_file_with_no_regression_set_still_loads(tmp_path):
+    """The key is OPTIONAL: a custom `--battery` file is not obliged to carry
+    R232's history, and a missing set is an empty one, never an error."""
+    path = tmp_path / "battery.yaml"
+    path.write_text("items:\n  - {id: C1, category: costs, "
+                    "turn_id: kokomi-slice1-t03, why: x}\n", encoding="utf-8")
+    assert qualify.load_regression(path) == []
+    assert [i.id for i in qualify.load_battery(path)] == ["C1"]
 
 
 # ============================================ R223: the pass mark applied ====

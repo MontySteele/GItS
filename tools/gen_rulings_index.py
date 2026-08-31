@@ -395,6 +395,15 @@ ROUND_TAG = re.compile(r"\(R\d+-[A-Z]\)")
 # commit that records the ruling itself.
 DRAFT_SUBJECT = re.compile(r"\bDRAFT\b")
 
+# The mirror case (first seen on R231, 2026-08-30): two same-day subjects both
+# lead with the id -- 'R231 art rulings applied' (an execution commit) and
+# 'R231 landed: ...' (the landing carrying the ruled words). Earliest-wins
+# anchored the ruling at the execution. A subject whose id is followed by the
+# word 'landed' is the landing by house convention and is promoted ABOVE
+# LEAD, so the landing wins regardless of commit order.
+LANDED_SUBJECT = re.compile(r"^\s*\**R\d+\s+landed\b", re.IGNORECASE)
+LANDING = -1  # sorts above LEAD in the selection key
+
 
 def subject_ids(subject: str) -> dict[int, int]:
     """id -> tier, for what a subject records: leading, named, or in a range."""
@@ -446,6 +455,10 @@ def commit_entries(log: list[Commit]) -> dict[int, Entry]:
             subj = {n: NEARBY for n in subj}
             tiers = {n: NEARBY for n in tiers}
         tiers.update(subj)
+        if LANDED_SUBJECT.match(c.subject):
+            m = SUBJ_LEAD.match(c.subject)
+            if m:
+                tiers[int(m.group(1))] = LANDING
         for n, tier in tiers.items():
             if not 1 <= n <= R_CEILING:
                 continue
