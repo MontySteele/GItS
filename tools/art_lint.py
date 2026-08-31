@@ -441,6 +441,15 @@ GENERATOR_OWNED = {
     "ImageGen/images/kokomi/summon/bake_kurage.png":        "cut_kurage_summon.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
+    # EB-163: Klee's locked select portrait is DERIVED, like Furina's and
+    # Kokomi's above -- but by art_process itself, which desaturates whatever
+    # select_portrait.png a plan row produced (the sp_outs loop). Furina's and
+    # Kokomi's were declared here because their own generators own them; Klee's
+    # never was, so the one derived surface with no declared producer was the
+    # one the ledger could not answer "where did this come from" about. A plan
+    # row claiming it would source the locked variant from the wiki instead of
+    # from the portrait it has to agree with, which is exactly what L11 stops.
+    "ImageGen/images/ui/select_portrait_locked.png":        "art_process.py",
     # EB-37: derived from each character's own char_icon.png, so a plan row
     # claiming one of these would be sourcing a halo from the wiki instead of
     # from the fill it has to agree with.
