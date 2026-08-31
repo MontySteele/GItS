@@ -915,9 +915,13 @@ $pckDeferred = @{
         'Curtain Call power, mechanics-only sprint. Block per Salon deploy.'
     'furina/powers/stagehands.png' =
         'Curtain Call power, mechanics-only sprint. Block per Salon bow.'
-    'furina/powers/stagehands_encore.png' =
-        'Curtain Call power, mechanics-only sprint. The Encore half of ' +
-        'Stagehands -- a separate power, so a separate sigil when art lands.'
+    # 'furina/powers/stagehands_encore.png' LEFT THIS LIST on 2026-08-30. R231
+    # (Art-debt pick 1) ruled the sigil collision: Ovation Trickle keeps
+    # `Ovations That Ceased`, and the Encore half moves to `Item Festival
+    # Spotlight`, which is applied. The art has landed, so the promise this
+    # entry made is discharged -- and the entry had to go rather than stay,
+    # because S12 checks the list in BOTH directions and a deferred path that
+    # IS in the pck is a failure.
     'furina/powers/courtroom_drama.png' =
         'Curtain Call power, mechanics-only sprint. First reaction each turn.'
     'furina/powers/the_gallery_stirs.png' =

@@ -57,8 +57,10 @@ string beside every row:
 Evidence is taken, in order, from (1) the `tier` column of the row in
 art/SOURCES.tsv for that output, (2) a `Tier X` declaration in the module
 docstring of the generator that owns the out-path (art_lint.GENERATOR_OWNED),
-(3) nothing -- in which case the row is `unclassified` and says why. An
-unclassified row is a QUESTION FOR [USER], never a default of either category.
+(3) the CANDIDATE row the out-path's crop was promoted from -- see
+`_read_candidate_rows`, added for EB-163 -- (4) nothing, in which case the row
+is `unclassified` and says why. An unclassified row is a QUESTION FOR [USER],
+never a default of either category.
 
 The two coverages are reported SEPARATELY and are never summed into one
 "coverage" number: a build that is 100% covered by private placeholders is 0%
@@ -69,6 +71,14 @@ CHECKS
     MISSING-PACKED       the mod asks for a pck resource that the build
                          contract does not contain
     MISSING-RENDER       an expected surface has no rendered output on disk
+    PROVENANCE-GAP       a rendered output that EXISTS resolves to no recorded
+                         origin at all -- no SOURCES.tsv row at its own path,
+                         no candidate row behind the crop it was promoted from,
+                         and no GENERATOR_OWNED declaration. EB-163's
+                         acceptance. Deliberately disjoint from MISSING-RENDER:
+                         a surface with no bytes is an ART BILL, not an
+                         unrecorded origin, and the two debts are paid by
+                         different work
     STALE-ROW            an art/SOURCES.tsv provenance row points at a
                          rendered output that no longer exists
     STALE-OUTPUT         a rendered file that no expected surface claims
@@ -409,6 +419,33 @@ class Ledger:
                                             pick, lineno)
         return out
 
+    def _read_candidate_rows(self) -> dict:
+        """out-path -> (source_url, tier, line no) via the CANDIDATE row.
+
+        EB-163, the first of the three provenance kinds. A shortlist face is
+        cleared through art/SOURCES.tsv at the CANDIDATE key --
+        `art/candidates/<asset_id>/r<rank>.png` -- because that is the file
+        `tools/art_fetch` wrote. `art_process --apply-picks` then COPIES that
+        exact file to the out-path, so the out-path's bytes are the candidate's
+        bytes and the candidate's row is the out-path's provenance. Reading
+        only the out-path key made 265 fully-recorded surfaces report "no
+        SOURCES.tsv row", which is what most of EB-163's count was: a join the
+        ledger did not make, not a clearance nobody obtained.
+
+        Keyed on the EFFECTIVE rank held in `self._plan`, never on picks.tsv --
+        that file is a gitignored local scratch and a ledger may not depend on
+        it. If the effective rank has no candidate row the out-path falls
+        through to the real gap check rather than borrowing a sibling rank's
+        clearance: two ranks are two different pictures.
+        """
+        out = {}
+        for outp, (asset_id, _t, _r, rank, _pick, _ln) in self._plan.items():
+            key = f"art/candidates/{asset_id}/r{rank}.png"
+            row = self._sources.get(key)
+            if row is not None:
+                out[outp] = (*row, key)
+        return out
+
     def _generator_tiers(self, generator_owned: dict) -> dict:
         """out-path -> (category, evidence, generator, derives_from_tier_f)."""
         sources = self._sources
@@ -661,6 +698,10 @@ class Ledger:
         if rendered and rendered in self._gen_tiers:
             cat, ev, _gen, _df = self._gen_tiers[rendered]
             return cat, ev
+        if rendered and rendered in self._cand_sources:
+            _url, tier, lineno, key = self._cand_sources[rendered]
+            cat = TIER_CATEGORY.get(tier.strip().upper(), "unclassified")
+            return cat, f"{SOURCES_TSV}:{lineno} tier={tier} (candidate row {key})"
         return "unclassified", "no SOURCES.tsv row and no generator declaration"
 
     def _source_for(self, rendered: str):
@@ -675,6 +716,14 @@ class Ledger:
                 return (f"wiki:{plan[1]}",
                         f"{PLAN_TSV}:{plan[5]}; {SOURCES_TSV}:{lineno}")
             return f"url:{url}", f"{SOURCES_TSV}:{lineno}"
+        if rendered in self._cand_sources:
+            _url, _tier, lineno, key = self._cand_sources[rendered]
+            plan = self._plan.get(rendered)
+            title = plan[1] if plan else key
+            return (f"wiki:{title}",
+                    f"{PLAN_TSV}:{plan[5]}; {SOURCES_TSV}:{lineno} "
+                    f"(candidate row {key})" if plan
+                    else f"{SOURCES_TSV}:{lineno} (candidate row {key})")
         plan = self._plan.get(rendered)
         if plan:
             return f"wiki:{plan[1]}", f"{PLAN_TSV}:{plan[5]}"
@@ -685,6 +734,7 @@ class Ledger:
     def _build(self):
         self._sources = self._read_sources()
         self._plan = self._read_plan()
+        self._cand_sources = self._read_candidate_rows()
         self._lint_reg = module_constants(
             self._p(ART_LINT),
             ("GENERATOR_OWNED", "PENDING_UNDERSIZE", "KNOWN_UNDERSIZED",
@@ -704,6 +754,7 @@ class Ledger:
         self._check_stale_outputs()
         self._check_unintended_fallbacks()
         self._check_rights_inheritance()
+        self._check_provenance_gaps()
         self._check_packed_unexpected()
 
     def _build_card_rows(self):
@@ -930,6 +981,35 @@ class Ledger:
                     f"records as Tier F -- a derived output cannot be cleaner "
                     f"than its input"))
 
+    def _check_provenance_gaps(self):
+        """PROVENANCE-GAP: shipped bytes that resolve to no recorded origin.
+
+        EB-163's acceptance, made checkable: "every packed output resolves to a
+        ledger row or a declared generator". A row is a gap only when ALL THREE
+        of the recorded provenances miss it -- its own art/SOURCES.tsv row, the
+        candidate row its crop was promoted from, and an art_lint
+        GENERATOR_OWNED declaration.
+
+        SCOPED TO FILES THAT EXIST. A surface with no rendered output is an ART
+        BILL (art_coverage's MISSING column, and MISSING-RENDER here), not a
+        provenance gap: there are no bytes whose origin could be unrecorded,
+        and counting the two together is what made the original figure read as
+        one number when it is two different kinds of debt. Fixing an art bill
+        by writing it a provenance row would be the worse defect of the two.
+        """
+        for row in self.rows:
+            out = row.rendered_output
+            if not out or not row.rendered_present:
+                continue
+            if (out in self._sources or out in self._cand_sources
+                    or out in self._gen_tiers):
+                continue
+            self.findings.append(Finding(
+                "PROVENANCE-GAP", f"file:{out}",
+                f"{row.surface_id} ships bytes with no {SOURCES_TSV} row at "
+                f"this path, no candidate row behind it, and no "
+                f"{ART_LINT} GENERATOR_OWNED declaration"))
+
     def _check_packed_unexpected(self):
         expected = {r.packed_path[len("res://"):]
                     for r in self.rows if r.packed_path.startswith("res://")}
@@ -971,7 +1051,7 @@ class Ledger:
 # Report
 # --------------------------------------------------------------------------
 
-DEFECT_CHECKS = ("MISSING-PACKED", "STALE-ROW", "STALE-OUTPUT",
+DEFECT_CHECKS = ("MISSING-PACKED", "PROVENANCE-GAP", "STALE-ROW", "STALE-OUTPUT",
                  "UNINTENDED-FALLBACK", "RIGHTS-INHERITANCE")
 
 
@@ -1060,7 +1140,8 @@ def report(ledger: Ledger, out=sys.stdout) -> None:
     by_check: dict[str, list[Finding]] = {}
     for f in ledger.findings:
         by_check.setdefault(f.check, []).append(f)
-    for check in ("MISSING-PACKED", "UNINTENDED-FALLBACK", "RIGHTS-INHERITANCE",
+    for check in ("MISSING-PACKED", "PROVENANCE-GAP", "UNINTENDED-FALLBACK",
+                  "RIGHTS-INHERITANCE",
                   "STALE-ROW", "STALE-OUTPUT", "MISSING-RENDER"):
         items = by_check.get(check, [])
         w(f"\n{check} -- {len(items)}\n")

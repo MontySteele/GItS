@@ -422,6 +422,23 @@ in-game until someone authors a Furina energy-counter scene. Keep them in the
 bill — they are real §11 smoke-test items — but treat the scene as the blocking
 work, not the art.
 
+**The orb layers landed 2026-08-30 (`R231`, ex-`M19`), and the scene is still
+the blocking work.** `EB-88` produced three candidate five-layer sets
+procedurally — there is no wiki register for a glow, a body, a caustic band, a
+bezel and a gloss, and `art_hunt` on Hydro returns the same dead sigil pool the
+Kokomi pass documented. [USER] picked **set A, Fontaine Hydro**, the
+conservative read that sits closest to the base game's own orb. The five layers
+are applied at `ImageGen/images/furina/ui/energy_orb/layer{1..5}_*.png` by
+`python tools/gen_energy_orb_layers.py --apply set_a_fontaine`, and are declared
+in `art_lint.GENERATOR_OWNED` so no plan row can ever claim those paths. Sets B
+and C stay on `art/contact_sheet_eb88_energy_orb.html` as the record of what the
+pick was made against. **`EB-40` is unblocked, not done:** the layer ROLES —
+which of the five is glow / body / caustic / bezel / gloss, and which two belong
+under `%RotationLayers` — are an inference from the `NEnergyCounter` class
+contract, not a copy of the base scene, because `SlayTheSpire2.pck` is
+`PACK_DIR_ENCRYPTED` and `ironclad_energy_counter.tscn` cannot be read off disk.
+Nothing changes in-game until that scene exists.
+
 ### Klee fallback fill — how §11's "no Klee assets" is actually checked
 
 As of `def4c50`, `build_pck.ps1` copies eight required assets from Klee's

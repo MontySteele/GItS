@@ -4,13 +4,13 @@ Sangonomiya Kokomi Card.png	splash	1080	1920	pixels	y	0.24	0.74	6	6		range restr
 Sangonomiya Kokomi Character Card Showcase.png	splash	700	2646	pixels	y	0.1005	0.8995	6	6		
 Sangonomiya Kokomi Multi Wish.png	splash	320	1024	pixels	y	0.1187	0.8812	6	0	0.12 0.27 0.42 0.58 0.73 0.88	upscale x1.56
 Sangonomiya Kokomi Character Card Golden.png	tcg	420	720	pixels	y	0.2217	0.7783	6	6		upscale x1.19
-Sangonomiya Kokomi Character Card Platinum.png	tcg	420	720	pixels	y	0.2217	0.7783	6	6		upscale x1.19
+Sangonomiya Kokomi Character Card Platinum.png	tcg	420	720	pixels	y	0.2217	0.7783	6	5	0.78	upscale x1.19
 Sangonomiya Kokomi Character Card.png	tcg	420	720	pixels	y	0.2217	0.7783	6	6		upscale x1.19
 Bake-Kurage Summon.png	vfx	420	720	pixels	y	0.2217	0.7783	6	2	0.22 0.33 0.56 0.78	upscale x1.19
 Namecard Background Sangonomiya Kokomi The Deep.png	splash	840	400	pixels	x	0.3133	0.6867	5	1	0.31 0.41 0.5 0.69	
 Sangonomiya Kokomi Portrait.png	splash	4900	5700	pixels	y	0.3265	0.6735	5	5		
 Sangonomiya Kokomi Wish.png	splash	2048	1024	pixels	x	0.3289	0.6711	5	6		
-Sangonomiya Kokomi Profile.png	splash	2400	1320	pixels	x	0.3618	0.6382	4	2	0.36 0.55	
+Sangonomiya Kokomi Profile.png	splash	2400	1320	pixels	x	0.3618	0.6382	4	4		
 Character Sangonomiya Kokomi Full Wish.png	splash	1568	1553	pixels	y	0.3838	0.6162	3	3		
 Sangonomiya Kokomi Introduction Card.jpg	splash	2250	2250	pixels	y	0.38	0.62	3	3		
 Item Sango Pearl Wild.png	item	797	798	pixels	-			1	1		single-anchor register

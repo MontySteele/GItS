@@ -2,12 +2,52 @@
 
 > **Lifecycle: LIVING** — expected to change; read it to work on the project.
 
-**Date:** 2026-07-25 (census recounted and `EB-69`'s fourteen shortlisted 2026-08-26)
-**Status:** card shortlists built for every face on the sheet but
-`watch_of_the_shallows`, awaiting the [USER] taste pass; `EB-69`'s fourteen are
-shortlisted and rendered but **NOT applied** — their rank 1 is a proposal, not
-a provisional pick, and `art_coverage` bills all fourteen as MISSING until the
-picks land; **character-shell track DONE** — see §5a
+**Date:** 2026-07-25 (census recounted and `EB-69`'s fourteen shortlisted
+2026-08-26; ten applied 2026-08-30, the last four released the same night by
+`R231`)
+**Status: THE KOKOMI PERSONAL SHEET IS FULL.** All 76 faces hold a rank-1 plan
+row and all 76 carry a crop in `ImageGen/images/cards/kokomi/`; the census
+agrees (`76 faces … 76 hold a rank-1 plan row; 0 unfilled`). `R231` ruled the
+three questions that were holding the tail:
+
+- **The four held Rares are released.** `EB-69`'s fourteen were applied ten and
+  held four on 2026-08-30, and the hold was structural rather than a doubt
+  about the crops: `all_hands`, `gyorin_formation`, `the_gunbai_turns` and
+  `what_the_tokoyo_took` were the sheet's last four unfilled **Rares**, so §6's
+  question 3 — which Rare wears the `Character Details 1` crop, L9's one
+  exception — could only be answered on one of them. [USER] answered it: the
+  exception goes to **`all_hands`**, and the other three release to their
+  rank 1s. All four are applied and their bytes were verified byte-identical to
+  what applying rank 1 produces.
+- **`all_hands` wears its rank 1 for now, and the ruled crop is a fetch away.**
+  Both halves of the permission now exist — `art_lint`'s
+  `APPROVED_FAMILY_EXCEPTIONS` (R151) licenses the SOURCE and `R231` names the
+  CARD — but `Sangonomiya Kokomi Character Details 1.png` **is not in
+  `art/raw/` and has no `art/SOURCES.tsv` row at any rank.** The family was
+  banned by title read-across before the hunt ever downloaded it, so it was
+  never fetched. Until a fetch window opens, `all_hands` keeps the
+  `Character Card Golden` y0.33 crop it already ships, which is honest about
+  what is on disk; a rank-1 row for a title with no raw file would render
+  nothing and lie in the plan.
+- **`watch_of_the_shallows` has a pick.** `R231` promoted its census-derived
+  P1 — `Sangonomiya Kokomi Profile` x0.55 — to rank 1, discharging the run-9
+  block's "do not renumber to rank 1 without a ruling" for that one face.
+- **`raise_the_sashimono` swapped to its figure crop.** The applied rank 1 was
+  a TCG card background band with frame corners in it; the ruling took the
+  rank-2 **figure** crop instead. Its printed anchor (Profile x0.55) had just
+  been given to `watch_of_the_shallows` in the same slate, and two
+  `kokomi_pool` rows on one title with an identical crop is L7 with
+  byte-identical files behind it (L12), so the pick lands on Profile's only
+  other free anchor, **x0.36**. The source is the ruled one; the anchor is
+  derived. `open_the_stores`, flagged in the same breath, was ruled to STAY.
+
+Sheets: `art/contact_sheet_r231_2026-08-30.html` for the R231 faces and
+`art/contact_sheet_art_pass_2026-08-30.html` for the pass before it (local —
+contact sheets are Tier F and gitignored). Kokomi bill: **0 MISSING**, was 15
+before the pass and 5 before `R231`. One debt survives and is not an art bill:
+`what_the_tokoyo_returns` ships bytes whose rank-1 source is cleared NOWHERE in
+`SOURCES.tsv`, which is `EB-163`'s one live `PROVENANCE-GAP` and needs the same
+fetch window `all_hands` does. **character-shell track DONE** — see §5a
 **Canonical content:** `docs/kokomi-cards.yaml`, `docs/inazuma-companions.yaml`
 **Bill owner:** `tools/art_coverage.py` — if this doc and the tool disagree, the tool is right (the lesson of the Furina bill correction).
 
@@ -23,8 +63,13 @@ picks land; **character-shell track DONE** — see §5a
 (`tools/art_source_census.py`) and the deficit is **gone**: **34 viable
 distinct sources yielding 93 (source, anchor) slots** against 76 faces, which
 is **+17 slots of headroom**. The recount also produced the shortlists, so all
-fourteen `EB-69` faces now hold ranked plan rows and the only unfilled face on
-the sheet is `watch_of_the_shallows`, which predates the fill. Earlier:
+fourteen `EB-69` faces hold ranked plan rows. (The one face left unfilled *by
+plan row* — which is what the census counts — was `watch_of_the_shallows`,
+which predates the fill; `R231` gave it a rank 1 on 2026-08-30 and the census
+now reports **0 unfilled**. Holding a rank-1 row and having a crop placed are
+two different states, and the 2026-08-30 pass was the first time the sheet held
+both at once for different faces — for one evening, between the ten applied and
+the four Rares released.) Earlier:
 2026-08-23, `EB-69` — the personal-sheet row reads **76**; the ruled 14-card
 pool fill landed (R198) and is 14 faces this table carries and the art pass had
 not yet produced, read at the time as 6 slots SHORT. Earlier: 2026-07-26,
@@ -41,7 +86,8 @@ sheet-moved-projection-did-not shape as the five defects in the Neap Tide
 addendum, with the art bill as the projection.)*
 
 The shell track shipped (§5a, commit `68fb11b`) and the faces carry applied
-provisional rank-1 picks (`6f1b969`); what remains is the [USER] taste pass —
+provisional rank-1 picks (`6f1b969`, and ten more 2026-08-30); what remains is
+the [USER] taste pass —
 `docs/current/QUEUE.md`, the "Art debt" row — named rather than numbered,
 because QUEUE's section numbers move as rows close. She ships playable on Klee's
 assets via `build_pck.ps1`'s `Copy-KokomiFallback`, so **the game looks
@@ -389,5 +435,12 @@ hashes — the extraction is proven not to have moved one of her pixels.
    on-theme for the priest lane but contain no character. Furina's pass
    rejected an empty-corridor screenshot as "a random hallway". Is a *shrine*
    different from a *hallway*, or is the same ban in force?
-3. **Character Details 1.** Banned as a family, but the illustration under the
-   text is her best key art. Do you want a manual crop of it for a Rare?
+3. **Character Details 1. ANSWERED — `R231`, 2026-08-30: `all_hands`.** Banned
+   as a family, but the illustration under the text is her best key art, and
+   the question gated four faces because they were the last four unfilled
+   Rares. The answer released all four: `gyorin_formation`,
+   `the_gunbai_turns` and `what_the_tokoyo_took` ship their rank 1s, and
+   `all_hands` is the one card licensed to wear the hand-crop. What is left is
+   not a question but a **fetch**: the source has never been downloaded (see
+   the Status block), so `all_hands` ships its rank 1 in the meantime and the
+   swap is the next action when a fetch window opens.
