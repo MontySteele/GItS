@@ -701,24 +701,56 @@ def write_docs(payload: dict) -> None:
             f"{r.get('common', 0)} | {r.get('uncommon', 0)} | "
             f"{r.get('rare', 0)} | {r.get('ancient', 0)} | {WIKI[name]} |")
     total = sum(s["n"] for s in per_char.values())
+    over = sorted(WIKI[name] - stats["n"] for name, stats in per_char.items())
+    overage = (f"{over[0]}" if over[0] == over[-1] else f"{over[0]}–{over[-1]}")
+    draftable_each = sorted({
+        sum(stats["rarities"].get(r, 0)
+            for r in ("common", "uncommon", "rare"))
+        for stats in per_char.values()})
+    draftable = sum(
+        stats["rarities"].get(r, 0) for stats in per_char.values()
+        for r in ("common", "uncommon", "rare"))
+    each = (f"5 × {draftable_each[0]}" if len(draftable_each) == 1
+            else " + ".join(str(x) for x in draftable_each))
+    mix = sorted({tuple(stats["rarities"].get(r, 0) for r in
+                        ("common", "uncommon", "rare", "ancient"))
+                  for stats in per_char.values()})
     lines += [
         "",
         f"DLL total across the five pools: **{total}**. The wiki route's own",
         f"per-pool numbers sum to **{sum(WIKI.values())}**, so the wiki runs",
-        "3–4 high per pool exactly as the charter predicted — the overage is",
+        f"{overage} high per pool — the overage is",
         "flat, not concentrated, which is what a wiki-lists-a-few-extra story",
         "looks like and not what a we-are-reading-a-different-pool story would.",
         "",
         "**The charter's \"402 canon cards total\" was an arithmetic slip and is**",
         "**now CORRECTED (R92/3a).** Its own per-pool wiki figures sum to 456;",
-        f"the DLL sum is **{total}** and the draftable subtotal is **410**",
-        "(5 × 82 common+uncommon+rare). The charter header now reads 439/410.",
+        f"the DLL sum is **{total}** and the draftable subtotal is "
+        f"**{draftable}**",
+        f"({each} common+uncommon+rare). R92/3a corrected the charter header to",
+        "the sums of the day (439/410, the 0.107 pools); the live figures are",
+        "the two above.",
         "No percentage anywhere moved: every one of them is within-pool.",
         "",
-        "The pools are startlingly regular: **every** character ships exactly",
-        "20 common, 36 uncommon, 26 rare and 2 ancient. Rarity mix is therefore",
-        "not an identity lever in canon at all — a fact worth having before",
-        "anyone argues a GItS pool's shape from its rarity split.",
+    ]
+    if len(mix) == 1:
+        c, u, ra, a = mix[0]
+        lines += [
+            "The pools are startlingly regular: **every** character ships "
+            "exactly",
+            f"{c} common, {u} uncommon, {ra} rare and {a} ancient. Rarity mix "
+            "is therefore",
+            "not an identity lever in canon at all — a fact worth having before",
+            "anyone argues a GItS pool's shape from its rarity split.",
+        ]
+    else:
+        lines += [
+            "The pools no longer share one rarity mix; the per-pool split is "
+            "in the",
+            "table above. Anyone arguing a GItS pool's shape from its rarity",
+            "split should read that table rather than a single canon figure.",
+        ]
+    lines += [
         "",
         "## 1. `solve` coverage, per pool (% of pool, multi-tagged)",
         "",

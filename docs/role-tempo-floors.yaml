@@ -25,22 +25,22 @@
 # is a legal identity).
 
 packages:
-  silent_poison: {character: Silent, n: 12}
-  defect_orbs: {character: Defect, n: 41}
+  silent_poison: {character: Silent, n: 13}
+  defect_orbs: {character: Defect, n: 42}
   necro_summons: {character: Necrobinder, n: 22}
-  ironclad_strength: {character: Ironclad, n: 8}
-  regent_stars: {character: Regent, n: 35}
+  ironclad_strength: {character: Ironclad, n: 10}
+  regent_stars: {character: Regent, n: 36}
 
 default:
   mandatory:
-    "frontload|early": 8.3
-    "frontload|late": 16.7
-    "frontload|mid": 8.3
+    "block|late": 7.7
+    "frontload|early": 7.7
+    "frontload|late": 7.7
+    "frontload|mid": 7.7
     "scaling|late": 4.5
     "scaling|mid": 4.5
   identity_only:
     "block|early": [ironclad_strength, silent_poison]
-    "block|late": [ironclad_strength]
     "block|mid": [ironclad_strength, silent_poison]
     "scaling|early": [ironclad_strength, necro_summons, silent_poison]
     "velocity|early": [ironclad_strength, necro_summons, silent_poison]
@@ -50,14 +50,14 @@ default:
 anchored:
   "furina/fanfare":
     package: silent_poison
-    n: 12
+    n: 13
     mandatory:
-      "block|late": 8.3
-      "frontload|early": 8.3
-      "frontload|late": 16.7
-      "frontload|mid": 8.3
-      "scaling|late": 41.7
-      "scaling|mid": 8.3
+      "block|late": 7.7
+      "frontload|early": 7.7
+      "frontload|late": 7.7
+      "frontload|mid": 7.7
+      "scaling|late": 38.5
+      "scaling|mid": 7.7
     identity_only: ["block|early", "block|mid", "scaling|early", "velocity|early", "velocity|late", "velocity|mid"]
   "furina/salon":
     package: necro_summons
@@ -75,14 +75,15 @@ anchored:
     identity_only: ["scaling|early", "velocity|early", "velocity|late"]
   "furina/spotlight":
     package: ironclad_strength
-    n: 8
+    n: 10
     mandatory:
-      "frontload|early": 12.5
-      "frontload|late": 50.0
-      "frontload|mid": 25.0
-      "scaling|late": 75.0
-      "scaling|mid": 12.5
-    identity_only: ["block|early", "block|late", "block|mid", "scaling|early", "velocity|early", "velocity|late", "velocity|mid"]
+      "block|late": 10.0
+      "frontload|early": 10.0
+      "frontload|late": 40.0
+      "frontload|mid": 20.0
+      "scaling|late": 70.0
+      "scaling|mid": 20.0
+    identity_only: ["block|early", "block|mid", "scaling|early", "velocity|early", "velocity|late", "velocity|mid"]
   "klee/demolition":
     package: necro_summons
     n: 22
@@ -99,65 +100,65 @@ anchored:
     identity_only: ["scaling|early", "velocity|early", "velocity|late"]
   "klee/reaction":
     package: silent_poison
-    n: 12
+    n: 13
     mandatory:
-      "block|late": 8.3
-      "frontload|early": 8.3
-      "frontload|late": 16.7
-      "frontload|mid": 8.3
-      "scaling|late": 41.7
-      "scaling|mid": 8.3
+      "block|late": 7.7
+      "frontload|early": 7.7
+      "frontload|late": 7.7
+      "frontload|mid": 7.7
+      "scaling|late": 38.5
+      "scaling|mid": 7.7
     identity_only: ["block|early", "block|mid", "scaling|early", "velocity|early", "velocity|late", "velocity|mid"]
   "klee/spark":
     package: regent_stars
-    n: 35
+    n: 36
     mandatory:
-      "block|early": 11.4
-      "block|late": 11.4
-      "block|mid": 5.7
-      "frontload|early": 37.1
-      "frontload|late": 34.3
-      "frontload|mid": 28.6
-      "scaling|early": 2.9
-      "scaling|late": 22.9
-      "scaling|mid": 5.7
-      "velocity|early": 2.9
-      "velocity|late": 8.6
-      "velocity|mid": 5.7
+      "block|early": 13.9
+      "block|late": 11.1
+      "block|mid": 5.6
+      "frontload|early": 36.1
+      "frontload|late": 36.1
+      "frontload|mid": 30.6
+      "scaling|early": 5.6
+      "scaling|late": 25.0
+      "scaling|mid": 8.3
+      "velocity|early": 5.6
+      "velocity|late": 11.1
+      "velocity|mid": 8.3
     identity_only: []
   "kokomi/commander":
     package: regent_stars
-    n: 35
+    n: 36
     mandatory:
-      "block|early": 11.4
-      "block|late": 11.4
-      "block|mid": 5.7
-      "frontload|early": 37.1
-      "frontload|late": 34.3
-      "frontload|mid": 28.6
-      "scaling|early": 2.9
-      "scaling|late": 22.9
-      "scaling|mid": 5.7
-      "velocity|early": 2.9
-      "velocity|late": 8.6
-      "velocity|mid": 5.7
+      "block|early": 13.9
+      "block|late": 11.1
+      "block|mid": 5.6
+      "frontload|early": 36.1
+      "frontload|late": 36.1
+      "frontload|mid": 30.6
+      "scaling|early": 5.6
+      "scaling|late": 25.0
+      "scaling|mid": 8.3
+      "velocity|early": 5.6
+      "velocity|late": 11.1
+      "velocity|mid": 8.3
     identity_only: []
   "kokomi/priest":
     package: defect_orbs
-    n: 41
+    n: 42
     mandatory:
-      "block|early": 7.3
-      "block|late": 26.8
-      "block|mid": 17.1
-      "frontload|early": 22.0
-      "frontload|late": 61.0
-      "frontload|mid": 34.1
-      "scaling|early": 12.2
-      "scaling|late": 73.2
-      "scaling|mid": 29.3
+      "block|early": 7.1
+      "block|late": 28.6
+      "block|mid": 19.0
+      "frontload|early": 21.4
+      "frontload|late": 59.5
+      "frontload|mid": 33.3
+      "scaling|early": 11.9
+      "scaling|late": 71.4
+      "scaling|mid": 28.6
       "velocity|early": 2.4
-      "velocity|late": 12.2
-      "velocity|mid": 4.9
+      "velocity|late": 11.9
+      "velocity|mid": 4.8
     identity_only: []
 
 never_linted: [utility, support, sustain]
