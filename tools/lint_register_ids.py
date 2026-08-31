@@ -294,7 +294,10 @@ CEILINGS: dict[str, int] = {
     # EB-245/246 minted 2026-08-30 by the KLEESPARK-W5 whole fight: the
     # phantom fight record a card_select overlay triggers mid-play, and
     # the BBCode a printed option name carries into the blind render.
-    "EB": 246,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-247/248 minted 2026-08-30 by KURAGECAD-W1: the jellyfish's own
+    # text disagrees with the pulse it delivers, and the memory's price
+    # cannot be derived from the printed face on a discounted entry.
+    "EB": 248,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -988,6 +991,21 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # choice has two printed names. The W5 tester named it unprompted.
         245,
         246,
+        # 247/248 minted 2026-08-30 by KURAGECAD-W1 (kurage packet section
+        # 15.9.5). Both are DISPLAY and WORDING rows, which is the destination
+        # K1's and K4's decision columns name; neither is a re-price, a dose
+        # change or a move to any constant (R231 A2).
+        # 247: the Bake-Kurage's persistent buff promises damage scaling with
+        # Charge while the pulse it actually delivers is 4 damage or 5 Block
+        # depending on the last card played. The blind tester named it in BOTH
+        # fight records, unprompted, and the wire's pulse_kind agrees with the
+        # tester rather than with the text.
+        # 248: a Muster-discounted Thoma prints cost 2 on the sheet and enrols
+        # at cost 1 / price 3. The 3x rule is applied correctly to the card's
+        # EFFECTIVE cost; what the player cannot do is get from the printed 2
+        # to the queued 3, and the tester said so in those words.
+        247,
+        248,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.

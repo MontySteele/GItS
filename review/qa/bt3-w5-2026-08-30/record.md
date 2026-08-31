@@ -102,3 +102,35 @@ record — the sealed record carries FOUR for THREE fights) and **`EB-246`**
 | after BT3's second deciding read | 5h 0% / week 35% |
 | before W5 | 5h 0% / week 35% |
 | after W5 | 5h 1% / week 0% (rolled over, resets Sep 06 22:26) |
+
+## `KURAGECAD-W1` — RUN, and the grade
+
+**NOT blocked.** The deployed world was proven to carry what §15.8 assumes
+before the session, read-only and five ways (§15.9.0): the manifest reads
+`0.2.1786+proto.dirty`; `embark --arm proto_kurages_oath_memory` was accepted,
+which `--arm` refuses on a non-`+proto` build; `Kokomi.StartingDeck` slot eleven
+is `#if PROTOTYPE_CARDS → KurageMemory.StarterSlotEleven()`; `KurageMemory` and
+`KurageMemoryCard` are both in the deployed `klee.dll` with
+`KurageMemoryLaw.AlwaysOn = true`; and every one of the 22 wire snapshots
+carries a populated `kurage_memory` block with `base_kit: true`.
+
+Sealed session `20260831-023544`, seed `0EEMNL2RE8UY`, 40 actions, 22 combat
+pages, all three forecast questions answered on all 22. Full results §15.9.
+
+| slot | grade |
+|---|---|
+| `K1` readability | **half (a) PASS 6 of 6**; **half (b) UNREACHED** (`run_out_index` −1 on every page) |
+| `K2` the live cadence | **SPLIT** — 3 fires ÷ 22 pages = 13.6%, inside the 10%–<25% band |
+| `K3` the tail | **UNREACHED** — peak queue 3, no page reached 4 |
+| `K4` is it hers? | **SPLIT** — 3 STEERs on the first 10 pages, none naming a Muster door |
+| `K5` the block | **UNREACHED** — zero blocked pages |
+| `K6` | recorded: 2 of 3 fires at price 0, 6 exhaust / 1 muster, 0 blocked, peak 3 and 2, fires 2 and 1, all five granted rows reached play |
+
+**One cause, three UNREACHEDs: the Charge was never scarce.** The enriched
+stress deck over-samples enrolment and under-samples scarcity, and scarcity is
+what `K1`(b), `K3` and `K5` were about. `EB-198` is half discharged and stays
+OPEN. Minted: **`EB-247`** (the jellyfish's text disagrees with its pulse) and
+**`EB-248`** (a discounted entry's price is not derivable from the printed
+face). No number, threshold or constant moved; no [USER] row opens.
+
+Meter: **5h 1% / week 0%** before, **5h 8% / week 1%** after.

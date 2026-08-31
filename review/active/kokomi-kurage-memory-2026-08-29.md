@@ -4098,3 +4098,178 @@ or to any dose constant; a change to the memory's entry doors; an Ethereal
 carrier anywhere (R231, deferred); a sheet move or an accept-to-sheet signoff
 for `proto_kurages_oath_memory`; any LAW or measurement-law change; and any
 claim about win rate, balance or fun (R215 B, Guardrail-7).
+
+---
+
+## 15.9 `KURAGECAD-W1` — RUN AND GRADED
+
+**RUN 2026-08-30 on `0.2.1786+proto.dirty`** (`-p:PrototypeCards=true`, game
+v0.111.0 `public-beta`), branch `bt3-w5-run`. Sealed record
+`review/qa/blindplay/20260831-023544/record.md`, wire snapshots `wire.json`
+beside it. Run seed `0EEMNL2RE8UY`, read back off the wire (`EB-191`). 40
+actions, termination `max_actions`, 0 refusals, **22 combat pages**, forecast
+channel ON with all three questions and **0 answered short**. Codex meter,
+unsmoothed: **5h 1% / week 0%** before, **5h 8% / week 1%** after.
+
+### 15.9.0 The build was PROVEN to carry the arm before the session, read-only
+
+§15.8.3 refuses the session where the installed build is not proven `+proto`
+and read-only for the granted row. Five checks, none of them assumed:
+
+1. The deployed `mods\klee\manifest.json` reads **`0.2.1786+proto.dirty`**.
+2. `embark --arm proto_kurages_oath_memory` was **accepted** — `--arm` refuses a
+   prototype id unless the deployed build is `+proto`, so the acceptance is
+   itself the proof, taken live.
+3. `Kokomi.StartingDeck` slot eleven is `#if PROTOTYPE_CARDS →
+   KurageMemory.StarterSlotEleven()` with `ModelDb.Card<BakeKurage>()` in the
+   `#else`, so §15.2's starter substitution is in the deployed build **by
+   construction**.
+4. `KurageMemory` (the rule) and `KurageMemoryCard` (§14's element) both appear
+   in the deployed `klee.dll`; `KurageMemoryLaw.AlwaysOn` is `true` in the
+   source those types were compiled from.
+5. Confirmed on the wire once the run opened: every one of the 22 snapshots
+   carries a populated `kurage_memory` block with `base_kit: true` and
+   `summon: true`.
+
+**Nothing the slate assumes was dead in the world that ran.** All five granted
+rows reached play and four of the five touched the memory as §15.8.2 said they
+would — including *Waterspout*, which paid its Charge and did **not** enrol,
+which is the readability case that separates income from enrolment and it
+behaved exactly as written.
+
+**Neow.** Three boons — *Neow's Torment* (add 1 Neow's Fury to your Deck),
+*Golden Pearl* (gain 150 Gold), *Neow's Bones* (2 random Neow Relics, add 1
+random Curse). The operator took **Golden Pearl**, the only deck-neutral boon
+offered, by `KLEESPARK-W4` §19.5's registered rule.
+
+### 15.9.1 The definitions, counted off the wire
+
+| | count | how it was counted |
+|---|---|---|
+| combat pages | **22** | pages whose screen is combat and which carried a command; one snapshot each |
+| QUEUED pages (`empty: false`) | **17** | snapshots 3–5, 7–9, 11–14, 16–22 |
+| pages with `blocked: true` | **0** | the wire's own field, on every page |
+| pages with `run_out_index ≥ 0` | **0** | `-1` on all 22 — the bank never ran out |
+| peak queue length | **3** (fight 1), **2** (fight 2) | the `queue` array |
+| FIRES | **3** | see the disclosure below |
+| enrolments, by rule | **6 `exhaust` / 1 `muster`** | Sucrose, Bennett ×2, Gorou ×2, Thoma / Tactical Retreat |
+| turns | **5** | fight 1 turns 1–3, fight 2 turns 1–2 |
+
+**A DISCLOSED SUBSTITUTION in how FIRES were counted.** §15.8.3 defines a FIRE
+as *"that page's fight log carrying the memory's own play at the start of the
+turn the page opens."* **The sealed record carries no per-page fight log**, so
+the fires were read off the wire instead — a turn-opening page whose queue is
+shorter than the previous turn's last page, with the departed entry being that
+page's front. It is a stricter reading, not a looser one (a fire that left no
+queue transition would be missed, never invented), and each of the three is
+named: snapshot **6** (Sucrose, front price 0, queue 1 → 0), snapshot **10**
+(Bennett, front price 3, queue 1 → 0), snapshot **20** (Gorou, front price 0,
+queue 2 → 1). The substitution is disclosed because a definition read off a
+different artefact than the one registered is a change to the instrument, even
+when it points the safe way.
+
+### 15.9.2 The slate, graded mechanically
+
+| slot | grade | the reading, and the rule it comes from |
+|---|---|---|
+| `K1` READABILITY | **half (a) PASS at 6 of 6; half (b) UNREACHED** | (a) On the first six QUEUED pages (snapshots 3, 4, 5, 7, 8, 9) the tester's answer 1 matched that page's own `fires_next` **and named the front card**, six times out of six — *"YES — Sucrose — Astable Anemohypostasis"* ×3, then *"YES — Bennett — Fantastic Voyage"* ×3, against a front of exactly that. The threshold is ≥ 5 of 6. **No wrong call in the FIRES direction on any page of the session.** (b) is UNREACHED by its own separate rule: **no page carries `run_out_index ≥ 0`** — the bank never ran out, which the registration calls *"a DOSE observation and not a display result"*. The tester answered *"YES"* (the Charge covers everything) on all 22 pages and was right on all 22, and that is exactly the answer the rule declines to count. |
+| `K2` THE CADENCE, live | **SPLIT** | 3 FIRE pages ÷ 22 combat pages = **13.6%**, inside the registered band *"10% to < 25% = SPLIT"*. `S1`'s 60.9% rides beside it as a **COMPARATOR and not its threshold**, and the registration says in advance that one fight can neither confirm nor refute it. **The denominator asymmetry is recorded, not argued**: a fire is a property of a TURN and a page is a PLAY, so a turn with four plays offers one fire against four pages. On the per-TURN denominator the session read 3 of 5, and that number is a comparator too and grades nothing. |
+| `K3` THE TAIL | **UNREACHED** | *"UNREACHED where … no page with a queue of ≥ 4."* The peak was **3**. Clause (i) would have held — **zero jam episodes**, `blocked` false on every page — but the tail this slot exists to examine never appeared, and the registration is explicit that *"the absence of a long queue in one fight is not evidence that the tail is fine."* **No cap, drain or dose is proposed, derived or implied in either direction** (R231 A2), and §15.6's pick does not return on this. |
+| `K4` IS IT HERS? | **SPLIT** | Clause 1 **holds**: 3 of the first 10 combat pages carry a STEER (actions 4, 9, 13 — *"Sucrose …; keeping Charge for later costlier memories"*, *"Bennett …; keeping Charge for its replay"*, *"Gorou …; keeping Charge for later paid memories"*), against a threshold of 3. Clause 2 **fails**: none of those three names a Muster-door play. The session's one Muster STEER — *"the card Call to Arms Musters; keeping Charge for that new memory"* — is at action 15, the **twelfth** combat page, outside the window the slot registered. Both = PASS, one = SPLIT. |
+| `K5` THE BLOCK | **UNREACHED** | *"UNREACHED where no blocked page occurs."* **None did**, on any of 22 pages. The registration calls that *"an observation about the dose at the granted deck's size, and inferred from in neither direction"*, and nothing is inferred from it here. |
+
+**ONE CAUSE, THREE UNREACHEDS, and it is worth saying plainly.** `K1`(b), `K3`
+and `K5` are all UNREACHED for the same reason: **the Charge was never scarce.**
+The bank climbed to 8 while the longest queue was 3 and the most expensive front
+cost 3, so nothing was ever blocked, nothing ever ran out and no tail formed.
+§15.8.2 declared the deck **INTENTIONALLY ENRICHED** and warned it over-samples
+enrolment pressure; what this fight shows is that the same grant **under-samples
+SCARCITY**, and scarcity is what three of the five slots were about. That is a
+fact about the deck, not about the rule: **no result here extrapolates to a
+drafted deck in either direction** (§15.8.7 item 1), and a clean, unblocked,
+never-exhausted queue on four Exhaust printers and a second Muster door clears
+nothing at all.
+
+### 15.9.3 `K6` — RECORDED AND NOT GRADED
+
+No threshold, no falsifier, no decision attached, and **no number below may be
+quoted as balance or as a comparison against the sim arm** (R213 B / R215 B).
+
+- **The 3× price and the free replay.** Of the three fires, the fronts cost
+  **0** (Sucrose), **3** (Bennett) and **0** (Gorou) — **2 of 3 at price 0**.
+  Beside §15.6's 57.2% and **NOT a comparison**.
+- **The one-fire-per-turn latch.** One instance: fight 2's turn-2 opening, where
+  the queue held two payable entries (Gorou at 0, Bennett at 3) and exactly one
+  fired.
+- **The block's incidence.** **0 of 22 pages**, beside `C4`'s 10.78%, same
+  caveat.
+- **The two doors.** **6 `exhaust` / 1 `muster`**, beside `C3`'s 61 / 39, same
+  caveat.
+- **Peak queue, fires per fight, and the granted rows' fate.** Peak 3 and 2;
+  fires 2 and 1. All five granted rows reached play: *Sucrose*, *Bennett* and
+  *Gorou* enrolled by Exhaust, *Call to Arms* (`conscription_notice`) enrolled
+  *Tactical Retreat* by Muster, *Kurage's Oath* (`proto_kurages_oath_memory`)
+  was played, and *Waterspout* paid its Charge and did **not** enrol.
+
+### 15.9.4 The `EB-198` tie — HALF discharged, and the row STAYS OPEN
+
+`EB-198`'s acceptance is *"a blind tester says off a live frame whether the next
+memory fires, **and** where the Charge runs out."* `K1` answers the first half
+at **6 of 6** and the second half was **never posed** — the bank never ran out,
+so there was nothing to point at. §15.8.6 gives the row's closure to [USER] *"on
+a record that says exactly which half was read"*, and this is that sentence:
+**the fires half is read and clean; the run-out half is unread.** `EB-198`
+therefore **stays OPEN**, and its next action is a fight in which the Charge is
+actually short of the queue — which this deck, by its own enrichment, could not
+produce.
+
+### 15.9.5 Out of slot — recorded, and two rows filed
+
+Both are **display and wording** findings, which is the destination `K1`'s and
+`K4`'s decision columns name; neither is a re-price, a dose change or a move to
+any constant, and neither grades a slot.
+
+- **The jellyfish's own text disagrees with what it does** (`EB-247`). Both
+  fight records name it independently and unprompted: *"its persistent buff said
+  it dealt damage scaling with Charge, but the memory forecast sometimes said it
+  would give Block or deal only 4 damage"*, and again *"Its main text promised
+  damage scaling with Charge, while the turn forecast often showed only 4 damage
+  or 5 Block depending on the last card played."* The wire agrees with the
+  tester: `pulse_kind` alternates `attack 4 damage` / `skill 5 block` page by
+  page with the last card played, while the power's printed text promises
+  Charge-scaled damage.
+- **The memory's price cannot be derived from the printed face** (`EB-248`).
+  The tester: *"Thoma's replay cost was 3 Charge despite text suggesting replay
+  cost was based on the card's printed cost of 2."* The wire confirms it and
+  explains it: `thoma_crimson_ooyoroi` prints **cost 2** on the sheet, the
+  Muster that produced this copy discounted it, and the queue entry reads
+  `cost: 1, price: 3`. The 3× rule is applied correctly to the card's EFFECTIVE
+  cost; what the player cannot do is get from the printed 2 to the queued 3.
+  **This is legibility, not arithmetic** — the rule is right and the page cannot
+  be read.
+
+Also recorded and grading nothing: the tester reports *"Bennett granted Strength
+without an obvious visible Strength status or increased Water's Edge damage"*,
+which is a Companion-face question outside this cell's scope and is left where
+it lies rather than filed on one unreplicated sentence.
+
+### 15.9.6 What this leaves
+
+- **The element reads.** Six of six on the fires half, with the front card named
+  every time, is the strongest thing this fight bought — and it is a **CEILING**
+  by §15.8.5's declared error direction, taken with the player pointed at the
+  memory every single page.
+- **The beat is real but thin on this denominator**, and `K2`'s SPLIT is what a
+  wide band on one fight was written to produce. Nothing about `S1`'s 60.9% is
+  confirmed or refuted, exactly as registered.
+- **The memory is an input to her turns, but the MUSTER door is not** — `K4`'s
+  SPLIT is precisely that shape, and the one Muster steer arriving two pages
+  late is a fact about when the door was drawn, not a reading about the door.
+- **`K3` and `K5` are UNREACHED and license nothing.** §15.6's cap pick does not
+  return, no dose moves, and the uncapped queue is neither cleared nor
+  questioned by a fight that never filled it.
+- **`EB-234`'s live half is answered only in part.** The rhythm is legible; the
+  scarcity half of it was never posed. **The act that follows is another fight
+  on a deck that can run the Charge out — not a reading, and not a constant.**
+- **No [USER] row opens on this cell**, and no number, threshold or constant
+  moved.
