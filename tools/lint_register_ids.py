@@ -846,7 +846,10 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # the selector aims a Companion and costs Encore. M45(4) is answered with
     # it; M45 itself stays until its other six calls are answered. Ceilings
     # never come down.
-    "M": frozenset({10, 13, 14, 16, 19, 26, 45}),
+    # M19 LEFT OPEN_IDS 2026-08-30 with its row: R231 answered it with set A
+    # (Fontaine Hydro), the five orb layers are applied, and the number is
+    # permanently un-re-mintable by the act of this deletion.
+    "M": frozenset({10, 13, 14, 16, 26, 45}),
 }
 
 # The series whose ids are not a prefix plus an integer: sprint-gate families

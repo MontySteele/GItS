@@ -773,8 +773,8 @@ drafts, after the Kokomi fold), and `S4-G14` itself. The slate's third section i
 Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
 countersign (`M14`); the name/lore and art eyes-on pile
-(`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `M19`, `S8`+`S10`,
-Art debt); the Fontaine Rares close-out (`M10`); and — after **R224
+(`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `S8`+`S10`,
+Art debt, now one pick wide — R231 ruled `M19` and two of its three); the Fontaine Rares close-out (`M10`); and — after **R224
 (2026-08-30) closed `M49`, `M50`, `M52`, `M54`, `M56`, `M57`, `M59` and `M60`**
 — **`M47`, `M55` and `M64` with them, and `M67` by R227, so NO prototype-slice
 row is open.**

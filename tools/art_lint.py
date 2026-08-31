@@ -438,6 +438,18 @@ GENERATOR_OWNED = {
     # is no wiki art for one of OUR meters to plan a row against.
     "ImageGen/images/furina/powers/encore.png":             "gen_meter_glyphs.py",
     "ImageGen/images/kokomi/powers/charge.png":             "gen_meter_glyphs.py",
+    # R231 answered QUEUE M19 with set A (Fontaine Hydro), so Furina's energy
+    # counter has art. Procedural like the salon chips and the meter glyphs and
+    # for the same reason: an orb layer is a glow, a body, a caustic band, a
+    # bezel and a gloss, and the wiki has no such register to plan a row
+    # against (the generator's docstring records the hunt that proved it). Five
+    # entries rather than one, because L11's rot check greps the named script
+    # for each basename and one composite name would guard nothing.
+    "ImageGen/images/furina/ui/energy_orb/layer1_backglow.png": "gen_energy_orb_layers.py",
+    "ImageGen/images/furina/ui/energy_orb/layer2_body.png":     "gen_energy_orb_layers.py",
+    "ImageGen/images/furina/ui/energy_orb/layer3_caustics.png": "gen_energy_orb_layers.py",
+    "ImageGen/images/furina/ui/energy_orb/layer4_ring.png":     "gen_energy_orb_layers.py",
+    "ImageGen/images/furina/ui/energy_orb/layer5_gloss.png":    "gen_energy_orb_layers.py",
     "ImageGen/images/kokomi/summon/bake_kurage.png":        "cut_kurage_summon.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
