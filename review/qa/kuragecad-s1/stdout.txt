@@ -1,0 +1,59 @@
+KURAGECAD-S1 — the Kurage memory's CADENCE, measured DRAFTED.
+  REGISTRATION: review/active/kokomi-kurage-memory-2026-08-29.md §15 (slate §15.4), committed before this file and before this run.
+  world stamp RT12/D18/P11/C21   cell kokomi/commander (pilot commander), route hunter, policy assigned, relics + potions, all registered acts
+  NOT A BALANCE READ (R213 B / R215 B). Counts only; the pilot values the queue at zero, so every number is a FLOOR.
+  ARM = C.KURAGE_MEMORY ON: the v4 base kit, the starter swap and the pool swap.
+  CONTROL = flag OFF, same cell and seeds: RECORDED, NOT GRADED.
+
+flag OFF (shipped Kokomi) — CONTROL, NOT GRADED
+    runs 600   fights 7457   player turns 39003   card plays 156431
+    turn state       FIRE   0.00%   BLOCKED   0.00%   EMPTY   0.00%   no event 100.00%
+    act 1            FIRE   0.00%   BLOCKED   0.00%   EMPTY   0.00%   n=20619
+    act 2            FIRE   0.00%   BLOCKED   0.00%   EMPTY   0.00%   n=14357
+    act 3            FIRE   0.00%   BLOCKED   0.00%   EMPTY   0.00%   n=4027
+    enrolments       0   Exhaust 0.0%   Muster 0.0%
+    fires            0   free 0.0%   median price 0.0   median bank 0.0
+    spam             copies 0.00% of plays   memory-only turns 0.00%
+    queue length     median 0.0   p95 0.0   max 0   queue-full events 0
+    fires per run    mean 0.00   median 0.0   max 0   per fight 0.00
+    refusals         {}
+    drafted deck     median 2.0 Exhaust cards (mean 2.52)   Ethereal decks 87
+    mean deck size 23.9   runs won 4.3%   NOT A BALANCE CLAIM (R215 B)
+
+flag ON  (the memory) — GRADED
+    runs 600   fights 13587   player turns 78126   card plays 395926
+    turn state       FIRE  60.90%   BLOCKED  10.78%   EMPTY  28.29%   no event   0.03%
+    act 1            FIRE  47.14%   BLOCKED  19.16%   EMPTY  33.69%   n=26491
+    act 2            FIRE  66.16%   BLOCKED   7.92%   EMPTY  25.84%   n=33403
+    act 3            FIRE  71.24%   BLOCKED   3.81%   EMPTY  24.95%   n=18232
+    enrolments       108177   Exhaust 61.0%   Muster 39.0%
+    fires            47577   free 57.2%   median price 0.0   median bank 5.0
+    spam             copies 12.02% of plays   memory-only turns 1.73%
+    queue length     median 2.0   p95 9.0   max 31   queue-full events 0
+    fires per run    mean 79.30   median 81.0   max 141   per fight 3.50
+    refusals         {'junk': 895, 'already': 1314}
+    drafted deck     median 3.0 Exhaust cards (mean 3.26)   Ethereal decks 165
+    mean deck size 31.3   runs won 26.7%   NOT A BALANCE CLAIM (R215 B)
+
+THE SLATE, graded against §15.4's registered thresholds:
+  C1  PREDICTED   60.90% of 78126 player turns FIRE
+      threshold: >= 20% PREDICTED, 5-20% SPLIT, < 5% MISS
+  C2  PREDICTED   act 1 47.14% (n=26491) -> act 3 71.24% (n=18232)
+      threshold: act 3 > act 1 AND act 3 >= 1.25 x act 1
+  C3  PREDICTED   Exhaust 61.0% / Muster 39.0% of 108177 enrolments
+      threshold: Exhaust >= 50% AND Muster >= 20%
+  C4  PREDICTED   BLOCKED on 10.78% of turns (EMPTY 28.29%, ungraded)
+      threshold: <= 25% PREDICTED, 25-50% SPLIT, > 50% MISS
+  C5  PREDICTED   memory copies 12.02% of 395926 plays; memory-only turns 1.73%
+      threshold: copies <= 25% of plays AND memory-only <= 10% of turns
+  C6  SPLIT       57.2% of 47577 fires are free (median price 0.0, median bank 5.0)
+      threshold: <= 50% PREDICTED, 50-75% SPLIT, > 75% MISS
+  C7  SPLIT       queue median 2.0, p95 9.0, max 31
+      threshold: median <= 3 AND p95 <= 8
+  C8  SPLIT       median 3.0 Exhaust cards per final deck (mean 3.26)
+      threshold: >= 4 PREDICTED, 2-4 SPLIT, < 2 MISS
+  C9  MISS        165 decks and 0 enrolments hold an Ethereal card
+      threshold: exactly 0 and 0 PREDICTED, anything > 0 MISS
+
+  5 PREDICTED / 3 SPLIT / 1 MISS / 0 UNREACHED
+record written to review/qa/kuragecad-s1/record.json

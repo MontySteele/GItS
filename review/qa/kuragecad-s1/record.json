@@ -1,0 +1,179 @@
+{
+  "arms": {
+    "off": {
+      "blocked_share": 0.0,
+      "by_act": {
+        "0": {
+          "blocked_share": 0.0,
+          "empty_share": 0.0,
+          "fire_share": 0.0,
+          "turns": 20619
+        },
+        "1": {
+          "blocked_share": 0.0,
+          "empty_share": 0.0,
+          "fire_share": 0.0,
+          "turns": 14357
+        },
+        "2": {
+          "blocked_share": 0.0,
+          "empty_share": 0.0,
+          "fire_share": 0.0,
+          "turns": 4027
+        }
+      },
+      "decksize_mean": 23.928333333333335,
+      "empty_share": 0.0,
+      "enrolments": 0,
+      "ethereal_decks": 87,
+      "ethereal_enrolments": 0,
+      "exhaust_mean": 2.525,
+      "exhaust_median": 2.0,
+      "fights": 7457,
+      "fire_bank_median": 0.0,
+      "fire_price_median": 0.0,
+      "fire_share": 0.0,
+      "fires": 0,
+      "fires_per_fight_mean": 0,
+      "fires_per_run_max": 0,
+      "fires_per_run_mean": 0,
+      "fires_per_run_median": 0.0,
+      "free_fire_share": 0.0,
+      "memory_only_share": 0.0,
+      "memory_play_share": 0.0,
+      "no_state_share": 1.0,
+      "plays": 156431,
+      "qlen_max": 0,
+      "qlen_median": 0.0,
+      "qlen_p95": 0.0,
+      "queue_full_events": 0,
+      "refusals": {},
+      "rule_share": {
+        "exhaust": 0.0,
+        "muster": 0.0
+      },
+      "runs": 600,
+      "turns": 39003,
+      "win_share": 0.043333333333333335
+    },
+    "on": {
+      "blocked_share": 0.1077618206486957,
+      "by_act": {
+        "0": {
+          "blocked_share": 0.1916499943376996,
+          "empty_share": 0.3369068740326904,
+          "fire_share": 0.47144313162961005,
+          "turns": 26491
+        },
+        "1": {
+          "blocked_share": 0.07924437924737299,
+          "empty_share": 0.25841990240397567,
+          "fire_share": 0.661587282579409,
+          "turns": 33403
+        },
+        "2": {
+          "blocked_share": 0.03811978938130759,
+          "empty_share": 0.24945151382185168,
+          "fire_share": 0.7124286967968407,
+          "turns": 18232
+        }
+      },
+      "decksize_mean": 31.336666666666666,
+      "empty_share": 0.28294037836315694,
+      "enrolments": 108177,
+      "ethereal_decks": 165,
+      "ethereal_enrolments": 0,
+      "exhaust_mean": 3.256666666666667,
+      "exhaust_median": 3.0,
+      "fights": 13587,
+      "fire_bank_median": 5,
+      "fire_price_median": 0,
+      "fire_share": 0.6089778050840949,
+      "fires": 47577,
+      "fires_per_fight_mean": 3.501655994700817,
+      "fires_per_run_max": 141,
+      "fires_per_run_mean": 79.295,
+      "fires_per_run_median": 81.0,
+      "free_fire_share": 0.5717468524707316,
+      "memory_only_share": 0.017254179146506926,
+      "memory_play_share": 0.12016639473032839,
+      "no_state_share": 0.00031999590405242814,
+      "plays": 395926,
+      "qlen_max": 31,
+      "qlen_median": 2,
+      "qlen_p95": 9.0,
+      "queue_full_events": 0,
+      "refusals": {
+        "already": 1314,
+        "junk": 895
+      },
+      "rule_share": {
+        "exhaust": 0.6101481830703385,
+        "muster": 0.3898518169296616
+      },
+      "runs": 600,
+      "turns": 78126,
+      "win_share": 0.26666666666666666
+    }
+  },
+  "cell": "kokomi/commander (pilot commander), route hunter, policy assigned, relics + potions, all registered acts",
+  "grades": [
+    {
+      "grade": "PREDICTED",
+      "read": "60.90% of 78126 player turns FIRE",
+      "slot": "C1",
+      "threshold": ">= 20% PREDICTED, 5-20% SPLIT, < 5% MISS"
+    },
+    {
+      "grade": "PREDICTED",
+      "read": "act 1 47.14% (n=26491) -> act 3 71.24% (n=18232)",
+      "slot": "C2",
+      "threshold": "act 3 > act 1 AND act 3 >= 1.25 x act 1"
+    },
+    {
+      "grade": "PREDICTED",
+      "read": "Exhaust 61.0% / Muster 39.0% of 108177 enrolments",
+      "slot": "C3",
+      "threshold": "Exhaust >= 50% AND Muster >= 20%"
+    },
+    {
+      "grade": "PREDICTED",
+      "read": "BLOCKED on 10.78% of turns (EMPTY 28.29%, ungraded)",
+      "slot": "C4",
+      "threshold": "<= 25% PREDICTED, 25-50% SPLIT, > 50% MISS"
+    },
+    {
+      "grade": "PREDICTED",
+      "read": "memory copies 12.02% of 395926 plays; memory-only turns 1.73%",
+      "slot": "C5",
+      "threshold": "copies <= 25% of plays AND memory-only <= 10% of turns"
+    },
+    {
+      "grade": "SPLIT",
+      "read": "57.2% of 47577 fires are free (median price 0.0, median bank 5.0)",
+      "slot": "C6",
+      "threshold": "<= 50% PREDICTED, 50-75% SPLIT, > 75% MISS"
+    },
+    {
+      "grade": "SPLIT",
+      "read": "queue median 2.0, p95 9.0, max 31",
+      "slot": "C7",
+      "threshold": "median <= 3 AND p95 <= 8"
+    },
+    {
+      "grade": "SPLIT",
+      "read": "median 3.0 Exhaust cards per final deck (mean 3.26)",
+      "slot": "C8",
+      "threshold": ">= 4 PREDICTED, 2-4 SPLIT, < 2 MISS"
+    },
+    {
+      "grade": "MISS",
+      "read": "165 decks and 0 enrolments hold an Ethereal card",
+      "slot": "C9",
+      "threshold": "exactly 0 and 0 PREDICTED, anything > 0 MISS"
+    }
+  ],
+  "packet": "review/active/kokomi-kurage-memory-2026-08-29.md \u00a715",
+  "registration": "KURAGECAD-S1",
+  "stamp": "RT12/D18/P11/C21"
+}
