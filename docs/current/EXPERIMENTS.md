@@ -311,6 +311,26 @@ carried while it was active is in the commit message that retired it.
   the R226 reading in §1 as well as on the slate, then game time. Boards
   `understudy/turns/eb183-muster-funnel/`; no board staged, no seed pinned →
   `review/active/eb183-muster-funnel-2026-08-30.md` §4.
+- **The Furina reframe slate — the orb-board Salon read on staged boards** —
+  **COUNTERSIGNED (R233, 2026-08-30), UNRUN.** Registered here 2026-08-30 by
+  the register-reconcile pass, which found the signed slate carried in its
+  packet and pointed to from nowhere. **Slate:** seven slots at packet §6.3 —
+  slots 1–5 DRAFTED 2026-08-30 from R224's answered `F`-picks, slot 6
+  redrafted on the slot-6 ruling, slot 7 a co-op OBSERVATION. Slots 2, 3 and 6
+  carry the R212 redraft disclosure (`F5` moved to option (2)); slots 1, 4, 5
+  and 7 are byte-identical to the draft. R233 signed the redrafted form in the
+  batch of three, on the narrow revision the pair review asked for — the
+  denominators reconciled so every threshold closes on the boards the slate
+  stages. Signed once, never re-signed. **Unit:** staged boards, two
+  independent blind graders per board (`EB-149`), so one board is two forms;
+  a slot's denominator is FORMS and every graded line is replayed (`EB-170`).
+  The one-member board is RECORDED AND NOT GRADED (§2.7b: rotation is a no-op
+  on one member, so no slot may price anything on it). **Why it is UNRUN and
+  legitimately so:** the boards need `proto_` rows on a dev build, and the
+  reframe has code only in the simulator behind flags that are all off (§11,
+  §11.6) — the C# arm does not exist, and R213's gate stands (nothing
+  implements before Klee closes). **Gate:** the C# arm, then game time →
+  `review/active/furina-reframe-2026-08-29.md` §6.3.
 
 New registrations add a pointer here and land their packet under
 `review/active/`. When one is graded, it moves to the **Graded** table above —

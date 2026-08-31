@@ -809,6 +809,12 @@ pins none.
 > Attack-typed `choose_one` target demand is unfixed, so `WF6` cannot be
 > answered for Itto — Oni Rush until it lands. `F1` and `F2` are unblocked.
 
+*Pointer, added 2026-08-30: the registration above has since RUN — see
+`KOKOMI-SLICE1-WF` — RUN AND GRADED below, where `EB-184` is recorded closed
+live in that window's phase 1, which discharged the last standing precondition
+and let `F3` run. The blockquote is the signature as it was given and is not
+edited (R101b).*
+
 **Why it exists.** Six of slice 1's seven arms read ADVANCE across four rounds,
 and the decision inventory of 2026-08-30 found that those six results feed
 **nothing registered**. They land only on the accept-to-sheet signoff — the

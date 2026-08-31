@@ -958,6 +958,20 @@ gen_prototype_cards: prototype surface up to date
 ruling, §4–§5's proposals) and committed before any seed run, per R212(2) and
 `EXPERIMENTS.md`'s pre-registration rule. It is offered for batch countersign.
 
+> **COUNTERSIGNED and RUN — recorded 2026-08-30, and the banner above is left
+> as the record of what was drafted (R101b).** The offer was taken: `M51`,
+> verbatim, *"M51 countersigned, let's get Klee moving and see how things
+> look."* — which §11.0 records as countersigning **this slate, `P1`–`P6`**,
+> under R212(2), together with the eleven as-built calls at §10.11. Signed
+> once and never re-signed (R212). It then RAN as `KLEESPARK-R1`, the
+> registration committed before a board was staged, on `0.2.1481+proto`, world
+> `main` @ `d974303`, and **§11.5 is the grade, slot by slot** — including
+> `P1`'s MISS and the 2026-08-29 ERRATUM that corrects the INSTRUMENT and
+> re-grades nothing. **All six slots are graded**, tally 2 PREDICTED (`P3`,
+> `P6`) / 2 SPLIT (`P2`, `P4`) / 2 MISS (`P1`, `P5`), the two sim slots off
+> `tier05/exp_klee_sparks_r1.py`. This section is not the `KLEESPARK-W1` slate (§12.3) or the
+> round-2 slate (§13), each of which carries its own status.
+
 **The decisive question, and it is a D2/D4 question rather than a winrate one:
 does a Spark-priced Attack create a spend-versus-hold decision the reader can
 see on the page?** The base rule failed D2 because the bank had one destination

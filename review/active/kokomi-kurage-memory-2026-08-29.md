@@ -1634,6 +1634,11 @@ The grade goes in blind. Nothing below may be revised against the run that
 grades it (D5, R101b): a moved world means re-drafting the affected slots and
 disclosing the diff, never re-signing.
 
+*Pointer, added 2026-08-30: this slate is no longer unrun — §13.8, THE SEALED
+RUN — GRADED 2026-08-29, is its grade, and §13.9 carries `KURAGEMEM002`'s
+rerun. The banner above is the pre-registration as registered and is not
+edited (R101b).*
+
 The arm has no card row and never had one (`docs/prototype-surface.yaml`, the
 declared-not-rowed block), so nothing here bumps a stamp, moves a sheet or
 touches a drafted number.
@@ -3835,6 +3840,18 @@ been launched, and no number below was chosen after seeing a result. **R231
 authorises the drafting and the staging shape — *"authorize drafting and
 staging it as a rhythm fight, but do not countersign a blank registration"* —
 and the countersign is a separate act that has not happened.**
+
+> **COUNTERSIGNED (R233, 2026-08-30): `KURAGECAD-W1` is SIGNED**, in the batch
+> of three, on the pair review's narrow revision — [USER]'s *"REVISE all three
+> on the narrow points above; countersign immediately afterward"*. The
+> revision this slate carried is that **the granted deck is relabelled an
+> intentionally enriched stress deck and the jam-is-a-floor claim is
+> WITHDRAWN**; nothing else in the slate moved. Signed once and never
+> re-signed (R212, `EXPERIMENTS.md` *Countersign once*). R233 released it to
+> run at its own gate, game time — **and it HAS RUN: see §15.9,
+> `KURAGECAD-W1` — RUN AND GRADED, 2026-08-30** on `0.2.1786+proto.dirty`,
+> sealed record `review/qa/blindplay/20260831-023544/`. The registration text
+> above stands as registered and is not edited by either act (R101b).
 
 **One hygiene edit is disclosed with this section.** §15.7's closing sentence
 said the slate was not drafted there because its gate was undischarged; R231

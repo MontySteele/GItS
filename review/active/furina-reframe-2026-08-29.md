@@ -1,9 +1,18 @@
 # Furina reframe — the design packet
 
-> **Lifecycle: ACTIVE.** A design packet, not law. §3 is a DRAFT ruling
-> awaiting [USER]'s countersign; §9 is what returns to him. Nothing here has
-> moved a shipped number, a sheet row, a constant, a register entry or a line
-> of `LAW.md`. No code was written for it.
+> **Lifecycle: ACTIVE.** A design packet, not law. **§3's ruling text is
+> COUNTERSIGNED**: the direction by `R220 A` (2026-08-30, from [USER]'s brief
+> and his four answers) and the text itself by `R224`'s `M52` C1, recorded at
+> §9. The picks §9 returned are ANSWERED across `R224`, `R226`, `R228` and
+> `R231`. **§3.1's LAW text was signed AS PROSPECTIVE (R213), which is not the
+> same act: no line of `LAW.md` has moved, and §3.1 amendment 4 — the
+> Fanfare scaling invariant, carried at §3.1, §4.5 and §9 — still rides as
+> PROSPECTIVE and uncountersigned exactly as those passages publish it.**
+> **Code exists now, and only in the simulator:** slice 1 is BUILT behind
+> flags that are all off (§11) and `A1` is built on top of it (§11.6). Nothing
+> here has moved a shipped number, a sheet row, a constant or a version stamp;
+> nothing is deployed and nothing is run. R213's sequencing gate stands —
+> nothing implements before Klee closes.
 >
 > **This packet SUPERSEDES `review/active/furina-e4-2026-08-29.md` on paper**
 > — specifically its §3 ruling text, its §4 architecture, its §7.1 reader
@@ -1365,6 +1374,19 @@ card or the co-op observation.** Nothing here has ever been countersigned and
 nothing is re-signed: **the slate as a whole still awaits ONE batch
 countersign**, now in its redrafted form, and it is still committed before any
 run.
+
+> **COUNTERSIGNED (R233, 2026-08-30): the §6.3 slate is SIGNED**, in the batch
+> of three, **in its redrafted form** — [USER] adopted the pair review's
+> *"REVISE all three on the narrow points above; countersign immediately
+> afterward"*, and this packet's revision is the one that batch names: the
+> slate's denominators reconciled so every threshold closes on the boards it
+> actually stages. Signed once and never re-signed (R212, `EXPERIMENTS.md`
+> *Countersign once*): a moved world means re-drafting the affected slots and
+> disclosing the diff, never a second signature. **The slate is still UNRUN**
+> — R233 lets each of the three run at its own gate, and this one's gate is
+> the staged reads of the reframe program, which do not exist yet. The drafted
+> text above and its redraft disclosure stand as the record of what was
+> drafted (R101b); this signature edits none of it.
 
 **How a slot is counted, stated once for the whole slate.** Boards are staged,
 not played; each staged board is read by **two independent blind graders**
