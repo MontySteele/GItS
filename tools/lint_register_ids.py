@@ -304,7 +304,10 @@ CEILINGS: dict[str, int] = {
     # companion-distinctness gap, the downward-only rarity fallback the
     # colorless anchor made reachable, and the two Klee Personal Companion
     # card drafts the ruling owes.
-    "EB": 251,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    # EB-252 minted 2026-08-30 by the role-tempo staleness find: the
+    # baseline docs predate the 0.111.0 port, and a clean regen moves
+    # floors onto Klee -- so the re-baseline ships disclosed, filed here.
+    "EB": 252,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -1046,6 +1049,11 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         249,
         250,
         251,
+        # 252 minted 2026-08-30: the role-tempo baseline predates 0.111.0; a
+        # full regen moves floors and reads two NEW coverage findings on
+        # Klee, so the re-baseline is a disclosed act, not a silent regen
+        # (three canon states preserved as dated vault files).
+        252,
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
