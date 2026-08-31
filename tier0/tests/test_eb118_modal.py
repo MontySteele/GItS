@@ -396,6 +396,12 @@ def test_deep_breaths_modes_are_the_ruled_pair():
     gain (EB-119); what moved is only its two amounts, 2/2 -> 3/3, so that the
     chooser has a board it takes each mode on (the crossover pin lives in
     `test_eb118_mode_chooser`).
+
+    EB-258 golded the two resources in the labels. A label is FACE TEXT --
+    it prints inside the card's "Choose one: A | B." line and again on the
+    option the player picks -- so Energy and Encore are keywords there like
+    anywhere else. The markup moved; neither body did, which is what the
+    `effects` half above is for.
     """
     dbreath = loader._card_index()["deep_breath"]
     fx, = dbreath.effects
@@ -404,7 +410,8 @@ def test_deep_breaths_modes_are_the_ruled_pair():
         [{"op": "energy", "amount": 1}, {"op": "gain_encore", "amount": 2}],
         [{"op": "spend_encore", "amount": 3}, {"op": "draw", "amount": 3}]]
     assert [m["label"] for m in fx["modes"]] == [
-        "Gain 1 Energy and 2 Encore", "Spend 3 Encore: draw 3"]
+        "Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold]",
+        "Spend 3 [gold]Encore[/gold]: draw 3"]
 
 
 def test_the_frame_is_mode_independent():

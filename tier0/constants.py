@@ -2670,7 +2670,15 @@ CONSTANTS_VERSION = 21
 # rule, marked PROSPECTIVE. No row, no number and no field moved, so
 # `CONSTANTS_VERSION` does not bump -- the digest is a fingerprint over bytes
 # and the bytes include comments (R225 precedent).
-SHEET_DIGEST = "12531a9826dc794b09b9c9e97ab8019d3626979b75127ecb6072109c3962d7d7"
+#
+# `EB-258` (2026-08-31) re-pins it for a DISPLAY-MARKUP edit on the same
+# footing: `deep_breath`'s two `choose_one` labels gained `[gold]` around
+# Energy and Encore. A label is face text and nothing else -- no row, no
+# number, no field, no pool membership, and `tier05/draft.py` prices modes off
+# `effects` and never reads the label -- so the shelf does not renumber and
+# `CONSTANTS_VERSION` does not bump. Same reasoning as R226, one surface over:
+# the digest covers bytes, and these bytes are what a player reads.
+SHEET_DIGEST = "77a31a32647ff1ba3d5844e45955de781289cc8adbccbe0efadbdf5efe299656"
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

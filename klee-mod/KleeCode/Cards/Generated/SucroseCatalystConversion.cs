@@ -51,7 +51,7 @@ public sealed class SucroseCatalystConversion : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Catalyst Conversion"),
-        ("description", "Gain 1 Energy. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Gain 1 [gold]Energy[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

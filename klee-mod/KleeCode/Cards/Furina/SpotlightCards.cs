@@ -25,7 +25,8 @@ public sealed class EtherealSpotlight : CustomCardModel, ICharacterCard
         ("title", "Ethereal Spotlight"),
         ("description",
             "Choose [gold]Center Stage[/gold] or [gold]Guest Cast[/gold]. "
-          + "Center Stage makes Furina cards generate Fanfare. Guest Cast "
+          + "Center Stage makes Furina cards generate [gold]Fanfare[/gold]. "
+          + "Guest Cast "
           + "empowers all Companion cards."),
     };
 
@@ -85,7 +86,8 @@ public sealed class CenterStageOption : CustomCardModel
         ("description",
             // EB-89: the rate is interpolated, not printed.
             $"Spotlight Furina. Her cards generate "
-          + $"{SpotlightSystem.FanfarePerCenterStagePlay} Fanfare when "
+          + $"{SpotlightSystem.FanfarePerCenterStagePlay} [gold]Fanfare[/gold] "
+          + "when "
           + "played, but receive no numeric boost."),
     };
 
@@ -116,7 +118,8 @@ public sealed class GuestCastOption : CustomCardModel
         ("title", "Guest Cast"),
         ("description",
             "Spotlight every Companion card. Their printed damage and Block "
-          + "are 50% stronger, but their plays do not generate Fanfare."),
+          + "are 50% stronger, but their plays do not generate "
+          + "[gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

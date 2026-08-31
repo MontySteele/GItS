@@ -51,7 +51,7 @@ public sealed class Undertow : CustomCardModel, IElementalCard, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undertow"),
-        ("description", "Deal {CalculatedDamage:diff()} damage, already including the cards [gold]Exhausted[/gold]. If 3 or more cards are [gold]Exhausted[/gold]: draw 1 card. [gold]Sly[/gold]: Gain 1 Energy."),
+        ("description", "Deal {CalculatedDamage:diff()} damage, already including the cards [gold]Exhausted[/gold]. If 3 or more cards are [gold]Exhausted[/gold]: draw 1 card. [gold]Sly[/gold]: Gain 1 [gold]Energy[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -363,10 +363,18 @@ def test_the_prototypes_upgrade_is_the_ruled_cost_line():
 
 def test_the_prototypes_face_prints_the_choice_as_ordinary_text():
     """Rails: "Choose one:" is a sentence, not a keyword. One face, two
-    labels, no tooltip and nothing registered."""
+    labels, no tooltip and nothing registered.
+
+    EB-258 golded the RESOURCES inside the labels, which leaves that claim
+    exactly where it was: `[gold]` is colour on a term the game already
+    explains elsewhere, and the rail is about "Choose one:" never becoming a
+    registered keyword with a tooltip behind it. The `KleeKeywords` assertion
+    below is the half that says so, and it did not move.
+    """
     src = _deep_breath_cs()
-    assert ('("description", "Choose one: Gain 1 Energy and 2 Encore | '
-            'Spend 3 Encore: draw 3."),') in src
+    assert ('("description", "Choose one: Gain 1 [gold]Energy[/gold] and 2 '
+            '[gold]Encore[/gold] | Spend 3 [gold]Encore[/gold]: draw 3."),'
+            ) in src
     assert "KleeKeywords" not in src
 
 

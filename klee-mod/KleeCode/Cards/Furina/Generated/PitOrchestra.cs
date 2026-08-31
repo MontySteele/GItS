@@ -41,7 +41,7 @@ public sealed class PitOrchestra : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stagehands"),
-        ("description", "Whenever a [gold]Salon Member[/gold] takes its final bow, gain {PowerAmount:diff()} Block. Whenever a [gold]Salon Member[/gold] takes its final bow, gain 2 Encore."),
+        ("description", "Whenever a [gold]Salon Member[/gold] takes its final bow, gain {PowerAmount:diff()} Block. Whenever a [gold]Salon Member[/gold] takes its final bow, gain 2 [gold]Encore[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
