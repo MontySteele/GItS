@@ -653,10 +653,32 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     published table byte for byte (R101b) and the new arm measures the axis the
     aim added. **The prediction slate's slots 2, 3 and 6 are REDRAFTED in place
     against the moved world, each with its disclosure line; slots 1, 4, 5 and 7
-    are byte-identical — and the slate as a whole still AWAITS ITS ONE BATCH
-    COUNTERSIGN, never re-signed** (R212). The blind read still owns the half
-    the arithmetic cannot answer: whether a player can SEE that the aim is
-    worth the Encore.
+    are byte-identical — and the slate was then COUNTERSIGNED WHOLE by R233
+    (2026-08-30) in that redrafted form, in the batch of three, signed once
+    and never re-signed** (R212). It is **UNRUN**, and its gate is the C# arm
+    that slice 1 deferred: a dev build has to carry the rows before a board
+    can be staged. The blind read still owns the half the arithmetic cannot
+    answer: whether a player can SEE that the aim is worth the Encore.
+  - **Companion cards — R234 RULED THE SLATE WHOLE, MONDSTADT FIRST**
+    (`review/active/companion-cards-2026-08-30.md` §5). Nine picks plus `P5a`,
+    all answered in one ruling except `P5a`, which R234 deliberately leaves
+    OPEN — the standing bar a Personal Companion Rare would have to clear
+    before one is designed. The program runs in **parallel** with the roster
+    work rather than behind it, one nation at a time, and **Mondstadt (Klee)
+    goes first**: it is the compatibility baseline, and the
+    Personal/Universal contract physically exists only there — Prune is the
+    one `personal_pool` card in the game, already through the move from card
+    face to kit declaration with parity tests. Slice 1 is Personal only; no
+    Universal card, and `SAME_NATION_REWARD_SHARE` is HELD pending a
+    measurement. **The colorless anchor P8 required is PRODUCED**
+    (`docs/current/research/colorless-anchor-2026-08-30.md`) — a census read
+    off the shipped assembly, replacing the borrowed StS1 band every companion
+    pricing argument had rested on, and its load-bearing finding is that the
+    base game's colorless pool has **no common tier at all**. The engineering
+    the ruling owes is now filed: `EB-249` (the distinctness instrument, both
+    halves), `EB-250` (the downward-only rarity fallback the anchor made
+    reachable) and `EB-251` (the two Klee Personal card drafts). No sheet row
+    has moved and none moves before the Burst fold.
   - **Build and grading rhythm (facts, not rulings).** CI takes a
     **docs-only fast path** (`tools/ci_changed_paths.py`) and runs pytest
     under xdist with a pip cache — the pytest job is ~3.5 min, from ~5.
