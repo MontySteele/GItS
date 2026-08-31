@@ -951,3 +951,72 @@
    cost: 0, type: skill, rarity: uncommon, solve: [utility], archetypes: [spark, generic], role: glue,
    effects: [{op: spend_spark, amount: 2},
              {op: apply_power, power: vulnerable, amount: 3, target: enemy}]}
+
+# =============================================================================
+# EB-183 -- MUSTER'S CHARGE SUBSIDY, READ AS A FUNNEL PROPERTY. ONE row, one
+# arm, and it is the FIFTH matched pair of a question the first four could not
+# finish asking.
+#
+# R216 D deferred the subsidy into R213 E1 rather than settling it, in these
+# words: *a Mustered Companion costs 1 less, Exhausts, and pays 1 Charge, so
+# blocking with one also advances Kokomi's finisher*. That sentence has TWO
+# readings, and Kokomi slice 2 could only put one of them on a card.
+#
+#   SLICE 2's reading -- the subsidy's SIGN. The order SPENDS Charge instead
+#   of paying it (`proto_charge_muster_price`, "Watatsumi Levy"). That lives
+#   in an EFFECT LIST, and it RETIRED with the rest of slice 2 under R227 /
+#   M67 (1) -- every arm that priced Charge on a card retired as authored.
+#
+#   THIS reading -- the recruits of an order that PAID FOR THEM pay no Charge
+#   when they Exhaust. It is not an effect list at all: it is a property of
+#   the exhaust FUNNEL, so it wants a flag on the RECRUIT plus a check where
+#   the wage is paid. Nothing in slice 2 could express it, which is why it was
+#   minted as `EB-183` instead of being smuggled into a card row.
+#
+# THIS ROW IS NOT A RETIRED ARM, AND THE DISTINCTION IS THE ONE R227 DREW. It
+# prints NO Charge price and reads the bank at no point; R226's Charge LAW
+# ("no card prints a Charge price, no card reads the bank proportionally") is
+# untouched by it. What it moves is an accrual the order already paid for.
+#
+# WHAT IT IS COHERENT WITH, AND WHERE THE TENSION IS -- disclosed, not buried.
+# R226 signed the accrual rule as PROSPECTIVE law: 1 per Exhaust of one of her
+# own cards, COMPANIONS INCLUDED, and it explicitly did NOT apply v3 §4(iii)'s
+# Companion-exclusion clause -- "the funnel does not narrow". This row does
+# not narrow the funnel either: it narrows ONE PROTOTYPE ORDER's own recruits,
+# by the order's own printed text, and every other Exhaust on the board pays
+# exactly what R226 says it pays. A blanket carve-out would have contradicted
+# signed text; that is why the flag is stamped by the ORDER and not keyed on
+# "is a Companion". [USER] countersigns the pair before it is staged, and this
+# paragraph is the thing being countersigned.
+#
+# HOW IT IS BUILT (both engines, default OFF, no shipped number moved):
+#   sim:  `subsidy: waived` on the conscript op stamps
+#         `Card.muster_subsidised` (`effects._op_conscript`); the funnel reads
+#         it (`refpowers.after_card_exhausted`) and pays 0 Charge. Burst is
+#         untouched. Tests: tier0/tests/test_eb183_muster_subsidy_funnel.py.
+#   mod:  `KokomiConscript.Run(..., subsidyWaived: true)` stamps
+#         `Powers/Prototype/MusterSubsidy.cs`, a `Compile Remove`d file, and
+#         the funnel seam in `KokomiResources.cs` sits inside
+#         `#if PROTOTYPE_CARDS`. Tests: KleeTests/MusterSubsidyTests.cs.
+#   "A PAID ORDER" IS DERIVED, NOT PICKED (R212): the order paid only if it
+#         actually put the recruit BELOW its printed cost. A recruit that
+#         prints 0 gets no discount (the delta floors) and therefore keeps its
+#         wage. The error direction is one-way -- the doubt always pays the
+#         SHIPPED wage.
+#
+# NAME. Provisional and mine (R179), and deliberately an ordinary Inazuma card
+# name rather than one that names the experiment: the blind grader reads
+# printed titles.
+#
+# Shipped twin: `mass_mobilization` / "Rally the Isles" (docs/kokomi-cards.yaml
+# -- 2 Energy, Uncommon Skill, Muster 2 AND gain 1 Charge). Cost, type, rarity
+# and the Muster COUNT are unmoved, exactly as slice 2's arm 4 held them; the
+# only thing that moves is where the Charge line sits and which way it points.
+#
+# THE DELETION RULE AT THE TOP OF THIS FILE BINDS THIS ROW: it leaves when the
+# arm is accepted or rejected.
+# =============================================================================
+- {id: proto_muster_subsidy_funnel, name: "Bounty of the Isles", character: kokomi,
+   authored_by: [claude],
+   cost: 2, type: skill, rarity: uncommon,
+   effects: [{op: conscript, amount: 2, subsidy: waived}]}

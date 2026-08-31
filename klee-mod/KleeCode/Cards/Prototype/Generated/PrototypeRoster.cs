@@ -76,6 +76,7 @@ public static class PrototypeRoster
         new()
         {
             ModelDb.Card<ProtoKuragesOathMemory>(),
+            ModelDb.Card<ProtoMusterSubsidyFunnel>(),
             ModelDb.Card<ProtoPearlBarrageTurn>(),
         };
 

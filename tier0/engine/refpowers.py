@@ -342,6 +342,25 @@ def after_card_exhausted(state: CombatState, card: Card,
         if C.KURAGE_MEMORY and getattr(card, "from_kurage_memory", False):
             charge = 0
             burst = 0
+        # QUARANTINED (prototype surface only, R213 E1 / EB-183) -- THE FUNNEL
+        # CHECK, and the second half of R216 D's deferred question. Slice 2
+        # asked the subsidy as a card's effect list (the order SPENDS Charge);
+        # this asks it as a property of the funnel: a recruit whose order paid
+        # its cost down pays no Charge back when it rotates out. Written only
+        # by `effects._op_conscript` on a `subsidy: waived` op, which no
+        # shipped card carries, so this branch is dead on every shipped pool.
+        #
+        # CHARGE ONLY. The BURST particle is untouched, and that is the
+        # question as R216 D posed it -- "pays 1 Charge, so blocking with one
+        # also advances Kokomi's finisher". Zeroing Burst too would ask a
+        # second question inside the first and make the arm unattributable.
+        #
+        # The `kind` above is unchanged (`exhaust_muster`), so C5's separate
+        # conscript-income bucket still counts the rotation; what moves is the
+        # amount, which is the honest record -- the recruit DID rotate, and it
+        # was paid nothing for it.
+        if getattr(card, "muster_subsidised", False):
+            charge = 0
         resources.gain_charge(state, charge, kind)
         if p.burst_max:
             resources.gain_burst(state, burst, kind)
