@@ -631,7 +631,11 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # 211/212 minted 2026-08-29 by the KLEESPARK-R2 relayed review (packet
         # section 13.8): the battery's costs category passes on silence, and its
         # intent category is self-report.
-        211, 212,
+        # 211 CLOSED 2026-08-30 by R232 and left OPEN_IDS with its row: the
+        # ledger shipped on 2026-08-30, and the re-pick of the six sealed
+        # `costs` boards -- the only thing its acceptance was still waiting on
+        # -- is R232's. The ceiling above holds the number.
+        212,
         # 206 was minted AND CLOSED on 2026-08-29 by the two-instance funnel
         # build -- it left OPEN_IDS in the same commit that closed it, with
         # the ceiling above holding the number so nothing re-takes it.
