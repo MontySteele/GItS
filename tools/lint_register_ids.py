@@ -1116,7 +1116,13 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # full regen moves floors and reads two NEW coverage findings on
         # Klee, so the re-baseline is a disclosed act, not a silent regen
         # (three canon states preserved as dated vault files).
-        252,
+        #
+        # 252 LEFT OPEN_IDS 2026-08-31 with its row, on its acceptance word
+        # for word -- "the coverage gate green on the 0.111.0 canon". The
+        # re-baseline branch regenerated the canon from the 0.111.0 `sts2.dll`
+        # and re-pinned the two NEW Klee findings the regen reads, each with
+        # its arithmetic said out loud in the debt list's header; the gate
+        # runs 20 findings against 20 pins. The ceiling stays where it is.
         # 253 minted 2026-08-31 by the EB-242 fix: the pilot's fanfare
         # valuations tick note_fanfare_read through the same helper --
         # fixed separately because it moves a published measurement's
