@@ -3,12 +3,9 @@
 > **Lifecycle: REFERENCE** — frozen record; read when cited, not maintained.
 > Re-run the tool (§1) against a new build rather than editing the numbers.
 
-**Produced under:** the companion slate of 2026-08-30, **pick P8** — the anchor
-was ruled owed before any Universal Companion Uncommon or Rare is added or
-repriced. *(The slate's ruling number is deliberately not written here: it
-lands on another branch tonight and is not issued in HEAD, so citing it would
-trip `lint_r_numbers` and claim an id this branch does not own. Add the number
-when the slate merges.)*
+**Produced under:** the companion slate of 2026-08-30, **`R234` pick P8** — the
+anchor was ruled owed before any Universal Companion Uncommon or Rare is added
+or repriced.
 **Date:** 2026-08-30. **Static analysis only:** the game was never launched,
 nothing was deployed, and no file under the install was written.
 
