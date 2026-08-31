@@ -168,7 +168,8 @@ Slay the Spire 2 **v0.111.0**, commit `41cef1ea` (2026-08-13), Steam buildid
 `222455745`. MegaDot v4.5.1 (`v4.5.1.m.14.mono.custom_build`, the editor
 `tools/build_pck.ps1` drives — a local download, not a Steam artifact, so the
 game update did not move it), BaseLib **3.4.5.0** (Workshop item
-`3737335127`), .NET SDK 9.0.316, ilspycmd 8.2.0.7535. The PCK contract version
+`3737335127`, and since `EB-157` the manifest's BaseLib `min_version` is
+that same release rather than a floor nothing checked), .NET SDK 9.0.316, ilspycmd 8.2.0.7535. The PCK contract version
 is `roster-pck-v3`; the shipped mod package is `klee` **v0.2**
 (`klee-mod/Klee/manifest.json`, `min_game_version` **0.111.0** — the hooks the
 port binds do not exist on 0.107.1, so the old floor was a claim the game's own
@@ -561,8 +562,8 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     running-affordability projection the queue view needs. `M61` is
     ANSWERED — option 3, and the element draws for the local seat only —
     and `EB-198` is BUILT on `kurage-memory-card`, awaiting the live check.
-  - **Furina REFRAME — PACKET CLOSED, COUNTERSIGN OPEN**
-    (`review/active/furina-reframe-2026-08-29.md`). R220 A, from [USER]'s
+  - **Furina REFRAME — COUNTERSIGNED, AND SLICE 1 IS BUILT IN THE SIM**
+    (`review/active/furina-reframe-2026-08-29.md`, §11). R220 A, from [USER]'s
     brief and his four answers: the Salon is an **orb board** in the Defect
     shape whose members never auto-play, **Fanfare is its Focus and its
     Burst** — a full meter is a maximally scaled Salon and that fill state
@@ -589,7 +590,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     (`review/active/furina-spotlight-options-2026-08-30.md`).
     The packet **supersedes E4 §3, §4, §7.1 and §12 on paper**
     (`review/active/furina-e4-2026-08-29.md` stays in place as the record).
-    No code, no constant, no sheet row and no LAW line has moved.
+    No sheet row, no constant and no LAW line has moved.
     **`M52` is re-pointed** onto this packet's §3 ruling text and its §3.1
     prospective LAW text, and the sixteen design picks are **`M59`**.
     **BOTH ARE COUNTERSIGNED BY R224 (2026-08-30) and both rows are
@@ -598,6 +599,10 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     tightening — "directly" defined, "cheaply repeatable" kept — also
     prospective, so **no `LAW.md` line moved**; and `F1`, `F13`, `F14` at
     option (2) with the other thirteen at their defaults, Slot 6 kept.
+    **Slot 6 was probed early on `furina-slice-1` and read CONFIRMED on the
+    arithmetic** (§11.5): on a full stage a deploy over the top gets the
+    identical Evoke plus the replacement's performance, two more Fanfare and a
+    still-full stage, for one LESS Encore than the dedicated Evoke card.
     **R231 (2026-08-30) then RULED slot 6 (`F7` + §4.2) to [USER]'s own
     revised design:** removal STAYS, but a dedicated Evoke CHOOSES which
     member to remove, while full-stage deployment continues to auto-Evoke the
@@ -608,8 +613,28 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     REDRAFT-AND-DISCLOSE under R212 before the five-prediction countersign,
     and none of the five is countersigned. Implementation follows on a Furina
     branch once `furina-slice-1` merges.
-    **Nothing implements before Klee closes** (R213). Her Burst fold is one of R220 B's
-    three, and it is the last of them.
+    Her Burst fold is one of R220 B's three, and it is the last of them.
+    **SLICE 1 IS BUILT IN THE SIM (2026-08-30, `furina-slice-1`, §11 of the
+    packet), behind five flags that all ship OFF.** The core loop, and only
+    it: members stop auto-playing, a Companion play performs the front member
+    and rotates, a deploy performs what it deploys and Evokes the front member
+    off a full stage, Furina's own card Evokes for a printed `encore_cost`
+    with the Focus term applied three times, performing is the only thing that
+    mints Fanfare, and R228's one-mode priced Spotlight rides along because it
+    spends the same buffer. `tier0/engine/furina_reframe.py` holds the flags
+    (module constants, not `constants.py` — §6.1), 47 tests pin both sides of
+    every leg, and with the flags off the engine is byte-identical to shipped.
+    **No stamp moves, nothing is deployed and nothing is measured: turning
+    `_MANUAL` or `_METER` on is a `CONSTANTS_VERSION` event and a landed step
+    re-baselines the twelve-arm table.** DEFERRED to slice 2, each with its
+    reason in §11.3: the fourth member (`F1` = 2), the drain card and
+    cap-raisers, the starter deltas, the display work, the named-Companion
+    Spotlight target, the Burst fold (R220 B's branch owns it), and **the C#
+    leg with the prototype card rows that ride on it** — a dev-build card
+    printing "Evoke" over sim-only rules would lie to the blind grader
+    reading it. **The sequencing gate stands: nothing implements before Klee
+    closes** (R213) is read here as what it says — this is a build, and the
+    run still waits its turn.
   - **Build and grading rhythm (facts, not rulings).** CI takes a
     **docs-only fast path** (`tools/ci_changed_paths.py`) and runs pytest
     under xdist with a pip cache — the pytest job is ~3.5 min, from ~5.

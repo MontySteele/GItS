@@ -140,6 +140,13 @@ REGISTRY: tuple[Lint, ...] = (
     # see it. One row per meter inside that file -- Charge and Burst, and the
     # next meter is a row there rather than a seventh lint here.
     _ci("keyword-meters",       "tools/lint_keyword_meters.py"),
+    # EB-153. The same family read one surface over: those six ask whether a
+    # card's WORDS are honest, this asks whether a power has a BADGE at all.
+    # Its question is answered at boot by KleeSelfCheck R13 and nowhere the
+    # repo can see, which is how seven powers kept the base-game placeholder
+    # for months with every gate green -- and its second shape (the aura path
+    # built by string concatenation) has no case for anyone to forget.
+    _ci("power-icons",          "tools/lint_power_icons.py"),
     _ci("op-parity",            "tools/lint_op_parity.py"),
     _ci("sly-grammar",          "tools/lint_sly_grammar.py"),
     _ci("codegen-staleness",    "tools/gen_roster_cards.py", "--check"),

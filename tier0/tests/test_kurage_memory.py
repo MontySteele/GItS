@@ -678,3 +678,49 @@ def test_five_fights_run_to_completion_under_the_flag(memory):
                               seed=seed)
         assert st.over or not st.living_enemies or not st.player.alive
         assert not [e for e in st.log if e["event"] == "UNIMPLEMENTED"]
+
+
+# --------------------------------------------------------------------------
+# THE THREE RUN-LEVEL REPAIRS (2026-08-30, ahead of `KURAGECAD-S1`)
+#
+# All three were found the same way: the first tier-0.5 RUN ever taken with
+# the flag on. Each one killed the run outright, which is why the sim arm
+# `EB-234` asks for had never completed, and each is inside the quarantine.
+# --------------------------------------------------------------------------
+
+def test_a_synthesized_status_never_enters_the_memory(memory):
+    """`Card.is_junk` is a RARITY test and `engine.statuses` builds its clogs
+    at `rarity="basic"`, so the door's Status/Curse clause did not cover the
+    half of the Status family the ENGINE makes. A Muster that ate a Toxic
+    enrolled it and the fire then could not rebuild it."""
+    from tier0.engine import statuses
+    for sid in statuses.status_ids():
+        st = kokomi_state()
+        effects.note_kurage_muster(st, statuses.make_status(sid))
+        assert st.kurage_queue == []
+        assert [e for e in st.log if e["event"] == "kurage_memory_refused"
+                and e["reason"] == "junk"]
+
+
+def test_the_fire_rebuilds_through_the_token_door_not_the_raw_loader(memory):
+    """EB-123's seam, on this path. An id the loader has never heard of used
+    to raise `KeyError` out of `kurage_fire` and take the run with it."""
+    st = armed([queued(0, "status_dazed")], charge=5)
+    assert effects.kurage_fire(st) is True
+    assert st.kurage_queue == []
+
+
+def test_the_memory_branch_pulse_prints_the_bank_like_the_shipped_one(memory):
+    """`tier05.kurage_telemetry.trace` reads `ev["charge"]` off EVERY
+    `kurage_pulse` row with no default, so a memory-branch pulse that omitted
+    the field raised `KeyError` on the first fight of any tier-0.5 run."""
+    from tier05 import kurage_telemetry
+    for kind in (None, "attack", "power", "skill"):
+        st = kokomi_state()
+        st.player.powers["kurage_summon"] = 1
+        st.player.charge = 4
+        st.kurage_last_card_type = kind
+        effects.kurage_memory_pulse(st)
+        rows = [e for e in st.log if e["event"] == "kurage_pulse"]
+        assert rows and all("charge" in e for e in rows), kind
+        kurage_telemetry.trace(st.log)          # the reduction, unguarded

@@ -88,10 +88,19 @@ public static class SalonMemberTips
     /// </summary>
     public static string KeyFor(SalonMember member) => member switch
     {
-        SalonMember.Crabaletta => "KLEEMOD-SALON_CRABALETTA",
-        SalonMember.Usher => "KLEEMOD-SALON_USHER",
-        _ => "KLEEMOD-SALON_CHEVALMARIN",
+        SalonMember.Crabaletta => CrabalettaKey,
+        SalonMember.Usher => UsherKey,
+        _ => ChevalmarinKey,
     };
+
+    // EB-155. Named constants rather than three literals inside the switch
+    // above, for the same reason the rule that reads them exists: R20 sweeps
+    // this assembly's `KLEEMOD-` keyword CONSTANTS for a `.title` row, and a
+    // key that is only ever a literal in a method body is a key that sweep
+    // cannot see. Raw keys have reached live builds twice from that blind spot.
+    public const string CrabalettaKey = "KLEEMOD-SALON_CRABALETTA";
+    public const string UsherKey = "KLEEMOD-SALON_USHER";
+    public const string ChevalmarinKey = "KLEEMOD-SALON_CHEVALMARIN";
 
     /// <summary>What this member does on stage and on the way out. Numbers
     /// come from SalonConstants, so a repricing cannot leave the tooltip
