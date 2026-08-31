@@ -1044,6 +1044,23 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # nineteen rows being cameos no player can draft. Neither half bites
         # today (17/19/15, all exempt); both bite the moment a pool reaches 30,
         # which is what P4 is for. Companion packet section 2.6; R234 5.3.
+        #
+        # 249 LEFT OPEN_IDS 2026-08-31 with its row, on its acceptance word
+        # for word -- "three sheets read, Personal and guest-star out". Both
+        # halves seen to FAIL first, together, in
+        # `tier0/tests/test_eb249_distinctness_input.py`: 6 of its 8 cases
+        # failed before the change and all 8 pass after. (a) `SHEETS` globs
+        # `docs/*-companions.yaml` instead of naming one file, so a fourth
+        # nation's sheet arrives on its own. (b) `universal_rows` drops any
+        # row carrying `personal_pool` or `guest_star` -- the loader's own
+        # predicate, stated here because this tool reads sheets and not the
+        # index -- applied after the read, so an unparseable sheet is still
+        # the hard failure it was. Mondstadt reads 16 rather than 17 (Prune),
+        # Fontaine 16 rather than 19 (three cameos), Inazuma 15 whole. All
+        # three are under GATE_MIN_POOL and are skipped by size exactly as
+        # Mondstadt already was; the three character pools are unmoved at
+        # 84/79/76 and the ratified debt is unmoved at klee/uniq,
+        # kokomi/uniq and kokomi/maxclu, each pinned by its own case.
         # 250: `tier05/rewards.py:220` `_RARITY_FALLBACK` is
         # `{"rare": "uncommon", "uncommon": "common"}` -- a ladder with no rung
         # under `common`, walked by `while rarity not in pool` at `:251-252`
@@ -1076,7 +1093,6 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         # between genuinely different directions, and P5a itself, stay
         # [USER]'s. It is a row and not a QUEUE line because nothing here asks
         # him anything yet. Sheet rows are gated on the Burst fold (P3).
-        249,
         251,
         # 252 minted 2026-08-30: the role-tempo baseline predates 0.111.0; a
         # full regen moves floors and reads two NEW coverage findings on
