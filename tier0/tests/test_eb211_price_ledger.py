@@ -279,12 +279,78 @@ def test_the_grader_prompt_asks_for_the_ledger():
         assert "price_ledger" in text, doc
 
 
-@pytest.mark.parametrize("item", [i for i in qualify.load_battery()
-                                  if i.category == "costs"])
-def test_every_sealed_costs_board_can_still_be_priced(item):
-    """The re-pick is [USER]'s (section 26), but the six boards must at least
-    remain SCORABLE: each prints a bank and prices its hand, so a ledger
-    against it is possible to write and possible to check."""
+# ================================ R232: the re-picked `costs` six, pinned ===
+#
+# R232 (2026-08-30) took the re-pick section 26 owed. The battery file states
+# the new rule in prose; this is the same rule as an executable predicate, so
+# a later addition made "by taste" is caught by CI rather than by a reader.
+
+
+def _asks_the_ledgers_question(packet: str) -> tuple[bool, str]:
+    """R232's picking rule, (a) and (b), against one printed packet."""
+    bank = misreads.printed_banks(packet).get("energy")
+    if bank is None:
+        return False, "the packet prints no Energy bank, so no chain is scored"
+    priced = sorted({c for c in misreads.printed_costs(packet).values() if c})
+    if len(priced) < 2:
+        return False, (f"the hand prints one non-zero cost ({priced}) -- every "
+                       f"line over it moves the bank by the same number")
+    if priced[0] + priced[1] > bank:
+        return False, (f"the two cheapest different prices are {priced[0]} and "
+                       f"{priced[1]}, and the bank is {bank}: no line pays "
+                       f"both, so the chain never takes two different steps")
+    return True, f"bank {bank} pays {priced[0]} then {priced[1]}"
+
+
+_COSTS_ITEMS = [i for i in qualify.load_battery() if i.category == "costs"]
+
+
+@pytest.mark.parametrize("item", _COSTS_ITEMS, ids=lambda i: i.turn_id)
+def test_every_costs_board_asks_the_ledgers_question(item):
+    """R232's rule (a) and (b): a printed Energy bank, and two DIFFERENT
+    non-zero prices jointly payable out of it, so the chain has to take two
+    different steps and a reflex subtractor cannot land right by habit."""
+    packet = (QA / item.turn_id / "packet.md").read_text(encoding="utf-8")
+    ok, why = _asks_the_ledgers_question(packet)
+    assert ok, f"{item.turn_id}: {why}"
+
+
+def test_the_costs_six_carry_both_spark_shapes():
+    """R232's rule (c). The Spark half of an entry is scored where the packet
+    prints a Spark bank and required NULL where it does not, so the six have
+    to contain both or one of those two failures is untestable."""
+    with_spark, without = [], []
+    for item in _COSTS_ITEMS:
+        packet = (QA / item.turn_id / "packet.md").read_text(encoding="utf-8")
+        target = (with_spark if "spark" in misreads.printed_banks(packet)
+                  else without)
+        target.append(item.turn_id)
+    assert len(with_spark) >= 2, with_spark
+    assert len(without) >= 2, without
+
+
+@pytest.mark.parametrize("turn_id, why", [
+    ("kokomi-slice2-t02", "an Energy bank of 2 against 1, 1, 1 and 2"),
+    ("kokomi-slice2-t06", "an Energy bank of 2 against 1, 1, 1 and 2"),
+    ("klee-slice1-r3-t03", "no non-zero cost but 1"),
+    ("klee-slice1-r3-t04", "no non-zero cost but 1"),
+])
+def test_the_boards_r232_dropped_really_do_fail_the_new_rule(turn_id, why):
+    """SEEN TO FAIL. A picking rule nothing fails is not a rule, and these are
+    the four boards the re-pick actually moved out: each is a real sealed
+    packet, and each is refused for the reason the battery file gives."""
+    packet = (QA / turn_id / "packet.md").read_text(encoding="utf-8")
+    ok, _ = _asks_the_ledgers_question(packet)
+    assert not ok, f"{turn_id} was dropped for {why} and now passes"
+
+
+@pytest.mark.parametrize("item", qualify.load_regression(),
+                         ids=lambda i: i.id)
+def test_the_regression_set_stays_scorable_on_the_half_it_was_picked_for(item):
+    """R232 kept the old six as a labelled `free-claim-regression` set. Kept
+    means still usable: each prints a bank and prices at least two cards, so
+    `free_card_misreads` -- the first half of `score_costs`, still shipped --
+    still has something to be wrong about on every one of them."""
     packet = (QA / item.turn_id / "packet.md").read_text(encoding="utf-8")
     assert "energy" in misreads.printed_banks(packet)
     assert sum(1 for c in misreads.printed_costs(packet).values() if c) >= 2

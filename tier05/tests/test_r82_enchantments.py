@@ -361,20 +361,20 @@ def test_the_grave_confront_branch_locks_without_an_exhaust_card():
     st = _st()
     labels = [o["label"] for o in
               events.available(events.get_event("grave_of_the_forgotten"), st)]
-    assert labels == ["Accept the Forgotten Soul"]
+    assert labels == ["Accept the Lingering Soul"]
 
 
 def test_the_grave_confront_branch_opens_once_a_card_exhausts():
     st = _st(deck_ids=list(loader.starting_deck("klee")) + ["sugar_rush"])
     labels = [o["label"] for o in
               events.available(events.get_event("grave_of_the_forgotten"), st)]
-    assert labels == ["Accept the Forgotten Soul", "Confront with Truth"]
+    assert labels == ["Accept the Lingering Soul", "Recite the True Name"]
 
 
 def test_confronting_costs_decay_and_clears_the_cards_exhaust():
     st = _st(deck_ids=list(loader.starting_deck("klee")) + ["sugar_rush"])
     event = events.get_event("grave_of_the_forgotten")
-    opt = next(o for o in event["options"] if o["label"] == "Confront with Truth")
+    opt = next(o for o in event["options"] if o["label"] == "Recite the True Name")
     events.resolve(random.Random(0), event, opt, st)
     assert "curse_decay" in st.deck_ids
     enchanted = [c for c in st.deck_ids
@@ -393,7 +393,7 @@ def test_accepting_grants_forgotten_soul_and_arms_the_exhaust_hook():
     st = _st()
     event = events.get_event("grave_of_the_forgotten")
     opt = next(o for o in event["options"]
-               if o["label"] == "Accept the Forgotten Soul")
+               if o["label"] == "Accept the Lingering Soul")
     events.resolve(random.Random(0), event, opt, st, held=held)
     assert st.relics_granted == ["forgotten_soul"]
     assert {"hook": "damage_per_exhaust", "amount": 1} in held.combat_effects

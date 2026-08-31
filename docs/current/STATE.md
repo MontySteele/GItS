@@ -598,7 +598,8 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     and 4), LAW:145 taken as the relayed rewrite (b) with the packet's own
     tightening — "directly" defined, "cheaply repeatable" kept — also
     prospective, so **no `LAW.md` line moved**; and `F1`, `F13`, `F14` at
-    option (2) with the other thirteen at their defaults, Slot 6 kept.
+    option (2) with the other thirteen at their defaults, Slot 6 kept —
+    `F5` has since moved to option (2) on the slot-6 ruling below.
     Her Burst fold is one of R220 B's three, and it is the last of them.
     **SLICE 1 IS BUILT IN THE SIM (2026-08-30, `furina-slice-1`, §11 of the
     packet), behind five flags that all ship OFF.** The core loop, and only
@@ -608,7 +609,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     with the Focus term applied three times, performing is the only thing that
     mints Fanfare, and R228's one-mode priced Spotlight rides along because it
     spends the same buffer. `tier0/engine/furina_reframe.py` holds the flags
-    (module constants, not `constants.py` — §6.1), 47 tests pin both sides of
+    (module constants, not `constants.py` — §6.1), 48 tests pin both sides of
     every leg, and with the flags off the engine is byte-identical to shipped.
     **No stamp moves, nothing is deployed and nothing is measured: turning
     `_MANUAL` or `_METER` on is a `CONSTANTS_VERSION` event and a landed step
@@ -621,12 +622,28 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     reading it. **The sequencing gate stands: nothing implements before Klee
     closes** (R213) is read here as what it says — this is a build, and the
     run still waits its turn.
-    **Slot 6 was probed early and reads CONFIRMED on the arithmetic** (§11.5):
+    **Slot 6 was probed early and read CONFIRMED on the arithmetic** (§11.5):
     on a full stage a deploy over the top gets the identical Evoke plus the
     replacement's performance, two more Fanfare and a still-full stage, for
-    one LESS Encore than the dedicated Evoke card. It returns `F7` and §4.2's
-    full-stage rule to [USER] as ONE numbered pick, and the blind read still
-    owns the half the arithmetic cannot answer.
+    one LESS Encore than the dedicated Evoke card. That returned `F7` and
+    §4.2's full-stage rule to [USER] as ONE numbered pick, and **the slot-6
+    ruling (2026-08-30) took it: the dedicated Evoke now CHOOSES which member
+    it removes (front when the card names nobody), while full-stage deployment
+    goes on automatically evoking the front as the reward for filling the
+    stage.** Encore buys deliberate control; the free route stays free.
+    **A1 IS BUILT** (`furina-a1-evoke-choice`, §11.6): a `member:` ARGUMENT on
+    the shipped `salon_bow` verb — not a new op, so the priced-op set is
+    identical and **no `DRAFTER_VERSION` moves** — inside the same flag family,
+    still all OFF, with a lock proving the deploy path cannot be aimed. `F5`
+    moves from option (1) to (2) and is ANSWERED. Slice 1's tests go 39 → 48
+    and the slot-6 instrument 7 → 11; its arithmetic arm still prints §11.5's
+    published table byte for byte (R101b) and the new arm measures the axis the
+    aim added. **The prediction slate's slots 2, 3 and 6 are REDRAFTED in place
+    against the moved world, each with its disclosure line; slots 1, 4, 5 and 7
+    are byte-identical — and the slate as a whole still AWAITS ITS ONE BATCH
+    COUNTERSIGN, never re-signed** (R212). The blind read still owns the half
+    the arithmetic cannot answer: whether a player can SEE that the aim is
+    worth the Encore.
   - **Build and grading rhythm (facts, not rulings).** CI takes a
     **docs-only fast path** (`tools/ci_changed_paths.py`) and runs pytest
     under xdist with a pip cache — the pytest job is ~3.5 min, from ~5.
@@ -793,15 +810,33 @@ sink set is kept as the FOLD BASELINE with no third granted-deck batch (options
 option (1), one-mode priced Spotlight, so no `M`-row is open on either. So what
 remains here returns only WITH EVIDENCE or
 WITH TABLE TIME: Klee `PICK 1` (reopens if the income reads short), `M45`'s five
-(after `S4-G14`), Slot 6's fork (only on confirmation), `S4-G6`'s band (Claude
-drafts, after the Kokomi fold), and `S4-G14` itself. The slate's third section in
+(after `S4-G14`), `S4-G6`'s band (Claude drafts from written intent — the
+mechanism ruled at R231 — after the Kokomi fold), and `S4-G14` itself. Slot 6's
+fork is no longer among them: R231 RULED it. The slate's third section in
 `review/active/sitting-2026-08-30.md` carries that list.
 
+**R231 (2026-08-30) landed the sitting slate whole and emptied most of what was
+left here.** `M14` closed as NOISE — the published trigger result stands exactly
+as graded (R101b), −0.07 pp with no interval separation against a 20.7% slot-one
+purchase rate. `S4-G11` was ruled in all three parts: *Backstroke* KEPT, *Tengu
+Flurry* KEPT with `chinowa_ward` renamed **`chinju_ward`**, and the `EB-82` Grave
+conversion taking the Liyue / Nameless Cairn labels. `M16` closed at
+`SceneSlots = 4` as headroom; `M10` closed with the Fontaine Rares approved and
+Neuvillette shipping as-is; `M19` closed at **A Fontaine Hydro**, which lifts
+`EB-40`'s gate. `S4-G6`'s MECHANISM is answered (Claude drafts from written
+intent, countersigned before the confirmatory run) while the band itself stays
+owed. Two rows NARROWED rather than closed — `S8`+`S10` to **Globe Head** alone,
+and Art debt to **`grand_gala` r6** alone. R231 also ruled Furina's slot 6 (`F7`
+/ §4.2) to [USER]'s own revised design — removal stays, a dedicated Evoke CHOOSES
+which member to remove, and full-stage deployment keeps auto-Evoking the front —
+which moves the written world under the Furina prediction slots and OWES a
+redraft-and-disclose under R212 before any countersign. `EB-241` is minted.
+
 Every row below is OPEN in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
-stability-band declaration (`S4-G6`) and her protocol playtest (`S4-G14`); the shop-rerun slate entry and
-countersign (`M14`); the name/lore and art eyes-on pile
-(`S4-G11`, `S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M16`, `M26`, `S8`+`S10`,
-Art debt, now one pick wide — R231 ruled `M19` and two of its three); the Fontaine Rares close-out (`M10`); and — after **R224
+stability-band declaration (`S4-G6`, mechanism answered) and her protocol
+playtest (`S4-G14`); the art eyes-on pile
+(`S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M26`, `S8`+`S10` = Globe Head,
+Art debt = `grand_gala` r6); and — after **R224
 (2026-08-30) closed `M49`, `M50`, `M52`, `M54`, `M56`, `M57`, `M59` and `M60`**
 — **`M47`, `M55` and `M64` with them, and `M67` by R227, so NO prototype-slice
 row is open.**

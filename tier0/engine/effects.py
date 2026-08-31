@@ -1534,6 +1534,15 @@ def _deploy_salon_members(state: CombatState, amount: int,
             # EVOKE -- multiplied Focus, the larger mint -- which is the exact
             # asymmetry the packet's slate slot 6 was written to measure
             # against a dedicated Evoke card. Flag off, it is the shipped bow.
+            #
+            # AUTOMATIC AND FRONT-ONLY, BY RULING (slot 6, 2026-08-30). This
+            # path deliberately does NOT go through
+            # `furina_reframe.evoke_target_index`: overflow deployment keeps
+            # evoking the front for free as the reward for filling the stage,
+            # and the aim is the thing the dedicated Evoke buys with Encore.
+            # `pop(0)` here is the answer to slot 6, not an omission -- a
+            # future `member:` on a deploy row would erase the asymmetry the
+            # ruling created on purpose.
             _salon_bow(state, p.salon.pop(0),
                        evoked=furina_reframe.manual_active(p))
         p.salon.append(entering)
@@ -2082,8 +2091,24 @@ def _op_salon_bow(state: CombatState, fx: dict, card: Card) -> None:
     Inert on an empty stage, silently: "take a bow" with no company is a
     no-op, not an error, so the card is never unplayable and never wasted in
     a way the player cannot see coming from the stage itself.
+
+    `member:` AIMS THE EVOKE (the slot-6 ruling, 2026-08-30). The card names
+    which member it removes; unstated -- and `member: front`, the same thing
+    written out -- is the leftmost, so every row written before the ruling
+    means exactly what it always meant, explicitly rather than by accident.
+    The aim is `FURINA_REFRAME_EVOKE`'s to give: with the leg off the argument
+    is ignored and this verb pops the front, which is the shipped bow. It is
+    an ARGUMENT on this verb and not a new op, deliberately, for the reason
+    `furina_reframe.evoke_target_index` carries in full.
     """
     p = state.player
+    named = fx.get("member")
+    if named not in (None, furina_reframe.EVOKE_TARGET_FRONT):
+        # The deploy verb refuses an unknown member name and so does this one:
+        # a typo in a row must not degrade quietly into "the front member",
+        # which is the one failure an aimed Evoke could hide indefinitely.
+        if named not in C.SALON_MEMBERS:
+            raise ValueError(f"unknown salon member {named!r}")
     # THE REFRAME'S EVOKE IS THIS VERB (§4.4), not a new one, and that is a
     # deliberate refusal to register an op. `salon_bow`'s own docstring already
     # calls itself "the Defect-evoke analogue"; the packet's §2.2 finding is
@@ -2099,7 +2124,18 @@ def _op_salon_bow(state: CombatState, fx: dict, card: Card) -> None:
     for _ in range(_amount(state, fx.get("amount", 1))):
         if not p.salon:
             break
-        _salon_bow(state, p.salon.pop(0), evoked=evoked)
+        idx = furina_reframe.evoke_target_index(p, named)
+        if idx == furina_reframe.EVOKE_TARGET_ABSENT:
+            # Named a member who is not on the stage. NOT silent, for the same
+            # D4 reason `salon_rotate_whiffed` exists: the aim is invisible in
+            # the state afterwards, so a display that wants to say "she called
+            # for Crabaletta and Crabaletta was not there" must be able to.
+            # The Evoke still happens, on the front -- an aimed card that
+            # cannot find its member is an unaimed Evoke, never a wasted one.
+            state.emit("salon_evoke_target_absent", member=named,
+                       company=list(p.salon))
+            idx = 0
+        _salon_bow(state, p.salon.pop(idx), evoked=evoked)
     p.powers["salon_member"] = len(p.salon)
 
 

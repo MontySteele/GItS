@@ -28,6 +28,16 @@ for them.
 NO DESIGN FIX IS PROPOSED HERE, and that is deliberate under R212: what the
 probe finds returns `F7` and §4.2's full-stage rule to [USER] together, as one
 numbered pick, and Claude does not settle it.
+
+2026-08-30 -- [USER] TOOK THAT PICK, and this file grew a second half. The
+ruling keeps removal and gives the dedicated Evoke a member CHOICE, while
+full-stage deployment goes on automatically evoking the front: Encore now buys
+deliberate control, and overflow deployment stays the reward for filling the
+stage. The arithmetic arm above is untouched and still reports what it always
+reported -- the deploy pays more per energy, and §11.5's published rows stand
+as published (R101b). The arm below measures what the ruling ADDED: the one
+axis the deploy structurally cannot reach, which is taking a chosen member
+that is not at the front.
 """
 
 import random
@@ -98,12 +108,20 @@ def _deploy_card():
                           "amount": 1, "member": "crabaletta"}])
 
 
-def _evoke_card():
+def _evoke_card(aim=None):
     """The dedicated Evoke: the same energy, a printed Encore price (`F7`
-    (1)), and it puts nothing back on the stage."""
+    (1)), and it puts nothing back on the stage.
+
+    `aim` is what the slot-6 ruling added -- the card names which member it
+    removes. `aim=None` prints no aim and takes the front, which is the card
+    the published §11.5 rows were measured with, so those rows are still
+    exactly what this file produces."""
+    fx = {"op": "salon_bow"}
+    if aim is not None:
+        fx["member"] = aim
     return Card(id="slot6_evoke", name="evoke", cost=1, type="skill",
                 character="furina", encore_cost=EVOKE_ENCORE_PRICE,
-                effects=[{"op": "salon_bow"}])
+                effects=[fx])
 
 
 def _measure(front, card):
@@ -185,13 +203,17 @@ def test_the_deploy_line_leaves_the_stage_bigger():
         assert evoke["stage"] == C.SALON_MEMBER_SLOTS - 1, front
 
 
-def test_the_dedicated_evoke_wins_on_no_measured_axis():
-    """THE FINDING, stated as the test that would go red if it stopped being
-    true. On this board there is no axis the instrument measures -- output,
-    mint, price, board size -- on which paying Encore to Evoke beats deploying
-    over the top. If a later change gives the dedicated Evoke something the
-    deploy cannot give it (an alternative effect, an aimed member, a
-    positional payoff), this test is where that shows up.
+def test_the_unaimed_evoke_wins_on_no_measured_axis():
+    """THE PUBLISHED FINDING, unchanged: with no aim printed on it, the
+    dedicated Evoke is dominated on every axis this instrument measures --
+    output, mint, price, board size. §11.5's rows are what this arm produces
+    and they stand as published (R101b).
+
+    This is now HALF the picture rather than all of it, and the half the
+    slot-6 ruling did not move: the ruling kept the free overflow Evoke and
+    kept its price at nothing, so on the arithmetic the deploy still buys more
+    per energy. What the ruling added is measured by the test below, and the
+    two together are the honest reading of this board.
     """
     for front in ("usher", "crabaletta", "chevalmarin"):
         deploy, evoke = _lines(front)
@@ -200,6 +222,93 @@ def test_the_dedicated_evoke_wins_on_no_measured_axis():
         assert evoke["fanfare"] <= deploy["fanfare"], front
         assert evoke["encore_spent"] >= deploy["encore_spent"], front
         assert evoke["stage"] <= deploy["stage"], front
+
+
+# ======================================================================
+# What the slot-6 ruling ADDED: the axis the deploy structurally cannot
+# reach. "Keep removal, but let a dedicated Evoke choose which member to
+# remove; full-stage deployment continues automatically evoking the front."
+# ======================================================================
+
+def test_the_deploy_can_only_ever_take_the_front_member():
+    """The deploy half of the ruling, pinned as the thing that did NOT move.
+    Whichever member the deploy card names -- and it names the one ENTERING --
+    the member it takes off a full stage is the front, on every rotation of
+    the board. This is what makes the aim below an axis rather than a
+    preference."""
+    for front in ("usher", "crabaletta", "chevalmarin"):
+        st = _board(front)
+        _play(st, _deploy_card())
+
+        gone = [ev["member"] for ev in st.log
+                if ev["event"] == "salon_evoke"]
+        assert gone == [front], front
+
+
+def test_the_dedicated_evoke_takes_a_member_the_deploy_cannot():
+    """THE FINDING AS THE RULING LEFT IT, stated as the test that goes red if
+    it stops being true. On the packet's own full-stage board there is now one
+    thing the dedicated Evoke does that no deploy card can do at any price:
+    it takes a member that is NOT at the front off the stage, chosen. The
+    deploy's overflow Evoke is automatic and front-only by ruling, so this is
+    a structural difference and not a number that could be tuned away.
+
+    The arithmetic above is unchanged and still says the deploy pays more.
+    Whether a player standing over the two cards can SEE that the aim is worth
+    the Encore is slot 6's blind read, and no engine test can stand in for
+    one -- which is the same limit §11.5 recorded for the original probe.
+    """
+    stage_after = {}
+    for front in ("usher", "crabaletta", "chevalmarin"):
+        # The member at the BACK of the queue: the one the deploy route can
+        # never reach on this board, because a full-stage deploy pops index 0.
+        back = _board(front).player.salon[-1]
+        st = _board(front)
+
+        _play(st, _evoke_card(aim=back))
+
+        gone = [ev["member"] for ev in st.log if ev["event"] == "salon_evoke"]
+        assert gone == [back], front
+        assert back not in st.player.salon, front
+        assert st.player.salon[0] == front, front   # the front is UNTOUCHED
+        stage_after[front] = list(st.player.salon)
+
+    # Three different boards, three different members removed: the aim is the
+    # variable, and the board it leaves behind is different in each.
+    assert len({tuple(v) for v in stage_after.values()}) == 3
+
+
+def test_the_aimed_payoff_is_the_chosen_members_own():
+    """Damage, Block, Fanfare and the Encore refund all route through the
+    member the card NAMED, not through the front one. Pinned as an
+    equivalence, which is the strongest form available here: aiming member X
+    from any rotation pays exactly what an unaimed Evoke pays on the board
+    where X happens to be front. Usher prints Block, Crabaletta damage and
+    Chevalmarin an Encore refund, so the three rows also cover the three
+    shapes the shipped roster has."""
+    for aimed in ("usher", "crabaletta", "chevalmarin"):
+        unaimed = _measure(aimed, _evoke_card())
+        for front in ("usher", "crabaletta", "chevalmarin"):
+            got = _measure(front, _evoke_card(aim=aimed))
+            assert got == unaimed, (aimed, front)
+
+
+def test_the_aim_is_the_evoke_legs_to_give(monkeypatch):
+    """The flag-off guard this file owes, in the slice-1 style. With
+    `FURINA_REFRAME_EVOKE` off, a card carrying an aim is the shipped bow: it
+    takes the front member and the printed aim does nothing. Nothing about the
+    aim can reach a build where the leg is off."""
+    monkeypatch.setattr(FR, "FURINA_REFRAME_EVOKE", False)
+
+    for front in ("usher", "crabaletta", "chevalmarin"):
+        back = _board(front).player.salon[-1]
+        st = _board(front)
+
+        _play(st, _evoke_card(aim=back))
+
+        assert [ev["member"] for ev in st.log
+                if ev["event"] == "salon_final_bow"] == [front], front
+        assert back in st.player.salon, front
 
 
 def test_the_asymmetry_is_the_flags_doing_and_not_the_shipped_engine(
