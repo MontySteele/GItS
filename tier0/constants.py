@@ -411,7 +411,7 @@ FANFARE_DECAY_FRACTION = 0.20 # PROPORTIONAL decay, as a fraction of the
 # NUMBERS RATIFIED 2026-08-13 (R187, QUEUE M24). The rework plan's "every
 # NUMBER below is PROPOSED pending red-pen" banner used to sit on this line
 # and it was the last unsigned gate on the six member values; the derivation
-# it was signed against is review/active/eb77-salon-summon-damage-derivation.md.
+# it was signed against is review/ruled/eb77-salon-summon-damage-derivation.md.
 # The six values below are UNCHANGED by the countersign -- signing moved no
 # number, so this is not a CONSTANTS_VERSION event. Recorded because the
 # banner's absence is otherwise indistinguishable from nobody having written
@@ -655,7 +655,7 @@ CONSCRIPT_COST_DELTA = -1     # kickoff §2.3: a conscripted card costs 1
                               # less (floor 0) and gains Exhaust.
 
 # --- THE KURAGE'S MEMORY: a QUARANTINED rule prototype, VERSION 3
-# (review/active/kokomi-kurage-memory-2026-08-29.md sec.11). NOT SHIPPED, NOT
+# (review/ruled/kokomi-kurage-memory-2026-08-29.md sec.11). NOT SHIPPED, NOT
 # MEASURED, and no number taken off this arm is quotable anywhere -- the
 # R213 B / R215 B principle applied to a RULE rather than to a card row:
 # the quarantined surface exists to be PLAYED, not measured.
@@ -1557,7 +1557,7 @@ BANNER_FEATURED_SLOTS = 3
 # CONSTANTS_VERSION 10 (window 2 of the 2026-08-13 correctness batch, EB-104).
 # C9's "further errata may join" clause is SPENT: it holds only "until a
 # number is published under this stamp", and the twelve-arm standing table of
-# 2026-08-13 (`review/active/sitting-reads-2026-08-13.md`, commit 445b2ff) is
+# 2026-08-13 (`review/records/sitting-reads-2026-08-13.md`, commit 445b2ff) is
 # published at RT11/D14/P7/C9. So this opens C10 rather than widening C9.
 # Contents -- the tier0 ENGINE half of the EB-104 batch, seven combat-kernel
 # behaviour fixes, each against a named authority and none of them a tuning
@@ -1766,7 +1766,7 @@ BANNER_FEATURED_SLOTS = 3
 # the SAME window on its own ground (15 -> 16, below): each field once,
 # together, at the end of the window, which is the shape RT11/C10 took.
 # THE RE-BASELINE IS TAKEN AT THIS BUMP:
-# `review/active/sitting-reads-2026-08-24-c13-d16.md`. It is TEN of the twelve
+# `review/records/sitting-reads-2026-08-24-c13-d16.md`. It is TEN of the twelve
 # arms, and the shortfall is an instrument loss disclosed there and filed as
 # BACKLOG `EB-128`: the gitignored `game_ref/` tree was destroyed on this
 # machine a fourth time, so `real_ironclad` and `real_silent` cannot be loaded
@@ -1790,7 +1790,7 @@ BANNER_FEATURED_SLOTS = 3
 # landing.
 # WHY A SEPARATE WINDOW FROM C13 rather than an amendment to it: C13 CLOSED,
 # and its re-baseline was published under it
-# (`review/active/sitting-reads-2026-08-24-c13-d16.md`). A stamp integer labels
+# (`review/records/sitting-reads-2026-08-24-c13-d16.md`). A stamp integer labels
 # a world, and a published number cannot be moved into a world it was not taken
 # in -- so a sheet edit after the close is a new window, the way C13 itself was
 # a new window over C12's landed debt rather than an edit to C12's note.
@@ -1877,7 +1877,7 @@ BANNER_FEATURED_SLOTS = 3
 # per (c). Nothing else in combat moves, because no body moved. Archive
 # banners go where the numbers are published; nothing is rewritten (R101b).
 # AND THE ATTRIBUTION CAVEAT IS PART OF THE WINDOW, pre-registered before it
-# opened (`review/active/eb118-w1-preregistration-2026-08-24.md` §3): NO causal
+# opened (`review/records/eb118-w1-preregistration-2026-08-24.md` §3): NO causal
 # role-versus-tag claim may be read out of a tier-0.5 number taken after this
 # bump, because both fields feed the same scorer. The window is ONE window by
 # ruling (R202 call (7)), not a 1a/1b split, and the honest repair if such a
@@ -2678,7 +2678,13 @@ CONSTANTS_VERSION = 21
 # `effects` and never reads the label -- so the shelf does not renumber and
 # `CONSTANTS_VERSION` does not bump. Same reasoning as R226, one surface over:
 # the digest covers bytes, and these bytes are what a player reads.
-SHEET_DIGEST = "77a31a32647ff1ba3d5844e45955de781289cc8adbccbe0efadbdf5efe299656"
+# 2026-09-01 re-pins it on the same precedent, for the sheet comment diet: the
+# long comment blocks moved out of the six sheets into
+# `docs/notes/<sheet>-provenance.md`, verbatim and keyed by row id, and
+# `tools/lint_sheet_comment_blocks.py` now caps what may grow back. The rows
+# were checked byte-for-byte before and after, so no row, number or field
+# moved and `CONSTANTS_VERSION` does not bump.
+SHEET_DIGEST = "a273ca5b36fac24f6304b4382adda26b1405eee2db54f5c0ad44e326d4b516ff"
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:
@@ -2836,7 +2842,7 @@ SHEET_DIGEST = "77a31a32647ff1ba3d5844e45955de781289cc8adbccbe0efadbdf5efe299656
 # D15 before its blind grade could have invalidated it. Step (4), the blind
 # grade, landed 2026-08-24; this is step (5). The re-baseline stamp law asks
 # for lands WITH this bump, in the same window and no other change beside
-# it: `review/active/sitting-reads-2026-08-24.md`, the twelve-arm table at
+# it: `review/records/sitting-reads-2026-08-24.md`, the twelve-arm table at
 # `RT12/D15/P7/C11`.
 # DRAFTER_VERSION 16 (EB-118 Phase 2, 2026-08-24) -- THE INERT TERMS GO LIVE.
 # No drafter CODE moved and no dial VALUE moved in this window. What moved is
@@ -2884,7 +2890,7 @@ SHEET_DIGEST = "77a31a32647ff1ba3d5844e45955de781289cc8adbccbe0efadbdf5efe299656
 # ONE WINDOW, and each field that moves in it moves on its own ground: `C`
 # 12 -> 13 above (the sheet and engine content), `RT` and `P` untouched.
 # The re-baseline this bump owes is the same table C13 owes, and it is taken
-# ONCE for both: `review/active/sitting-reads-2026-08-24-c13-d16.md`.
+# ONCE for both: `review/records/sitting-reads-2026-08-24-c13-d16.md`.
 # DRAFTER_VERSION 17 (EB-118 Phase-3 Window 3, R211, 2026-08-25) -- ONE NEW
 # DIAL AND ONE NEW PRICED CONDITION, and this is the first bump in the series
 # where the drafter learns a COST rather than a value.

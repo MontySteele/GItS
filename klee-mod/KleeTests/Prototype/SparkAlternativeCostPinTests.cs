@@ -14,7 +14,7 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// THE SPARKS ALTERNATIVE COST, pinned
-/// (review/active/klee-sparks-2026-08-29.md sec.10; sim twin
+/// (review/ruled/klee-sparks-2026-08-29.md sec.10; sim twin
 /// <c>tier0/tests/test_spark_alt_cost.py</c>).
 ///
 /// This whole file is compiled only under <c>-p:PrototypeCards=true</c>

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """PostToolUse/Edit|Write: a hand edit under `game_ref/` owes the vault a backup.
 
-Correction D. OPERATIONS.md: *"Run the backup after ANY restore, extraction, or
+Correction D. operations/game-ref-backup.md: *"Run the backup after ANY
+restore, extraction, or
 hand edit of `game_ref/`"*. `game_ref/` is gitignored, decompile-derived, and
 half of it is thirteen hand-authored pass layers no tool can regenerate; it has
 been destroyed FOUR times. `git` cannot notice a hand edit there -- the tree is
@@ -9,7 +10,7 @@ ignored, so `git status` is clean by construction and nothing downstream ever
 asks. This hook is the only place in the pipeline that sees the edit happen.
 
 WHY IT REMINDS INSTEAD OF MIRRORING, and this is the honest part. The tool
-OPERATIONS names is `python -m tools.backup_game_ref`, a full mirror of the
+operations/game-ref-backup.md names is `python -m tools.backup_game_ref`, a full mirror of the
 tree into `C:\\Users\\Monty\\OneDrive\\GItS-vault\\game_ref`. It does not
 prompt -- it is safe to type unattended, and its ten-file guard is the reason
 it exists -- but PostToolUse fires on EVERY Edit and Write, and a per-edit

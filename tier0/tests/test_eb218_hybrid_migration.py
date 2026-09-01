@@ -1,7 +1,7 @@
 """EB-218 -- the three hybrid spenders go SPARK-ONLY under the flag.
 
 R224 (2026-08-30) took sec.14.3 option (5) of
-`review/active/klee-sparks-2026-08-29.md` and ruled its branch: `powder_charge`,
+`review/ruled/klee-sparks-2026-08-29.md` and ruled its branch: `powder_charge`,
 `hold_the_line` and `smoke_and_sparks` -- the three shipped Klee spenders whose
 payoff is not a plain Attack, all three HYBRIDS at 1 Energy AND `spend_spark 2`
 -- migrate to 0 Energy with the price paid WHOLLY in Sparks. It is a

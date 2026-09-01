@@ -190,7 +190,7 @@ def planned_art(path: Path = ART_PLAN) -> set[str]:
     """The out-paths `art/plan.tsv` declares a producer for.
 
     CRLF + UTF-8, read the way the art pipeline's own rule says to (see
-    OPERATIONS.md, "Art pipeline"): the last column stops matching otherwise.
+    docs/current/operations/art.md): the last column stops matching otherwise.
     """
     with path.open(encoding="utf-8", newline="") as fh:
         return {row[1].strip() for row in csv.reader(fh, delimiter="\t")

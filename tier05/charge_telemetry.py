@@ -1,7 +1,7 @@
 """`X9READ-S1` — the GRADER for Kokomi's charge reads per turn (`EB-78` (2)).
 
 THE REGISTRATION IS ELSEWHERE AND CAME FIRST:
-`review/active/charge-reads-per-turn-registration-2026-08-13.md` §5, drafted
+`review/records/charge-reads-per-turn-registration-2026-08-13.md` §5, drafted
 under R212(2) and committed before any run, revised 2026-08-30 on the pair
 review's correction and COUNTERSIGNED under R233. This module PREDICTS
 NOTHING. Every threshold it grades against is quoted from §5.3 / §5.4 as a

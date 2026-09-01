@@ -1,3 +1,5 @@
+Status: OPEN (BACKLOG EB-74; merging staged/eb74-lever2-b-alone is the pull)
+
 # EB-74 — Kokomi's lever 2: the candidates, side by side
 
 > **Lifecycle: ACTIVE.** This is the options packet BACKLOG `EB-74` owes QUEUE
@@ -106,7 +108,7 @@ table is not in the tree.
 ## 2. The numbers you already have, and how far to trust them
 
 The standing read quoted by `S4-G13`, from
-`review/active/sitting-reads-2026-08-08.md` §2. n=3000, seed 20260729.
+`review/records/sitting-reads-2026-08-08.md` §2. n=3000, seed 20260729.
 
 | arm | winrate | 95% interval | k/n |
 |---|---|---|---|
@@ -548,7 +550,7 @@ all.** Both sentences are true of the same table.
 
 ### 6.3 What the census does and does not contain
 
-`review/active/payoff-census-2026-08-08.md` contains **zero GItS roster
+`review/ruled/payoff-census-2026-08-08.md` contains **zero GItS roster
 numbers**. Its §0 says so — it reads canonical content only, the extracted pools
 under `game_ref/` — and its closing note repeats it. The only occurrence of
 "Assist" in the file is the aims table. **So the census is evidence about the
@@ -729,7 +731,7 @@ process call with a standing effect, and the packet takes no position on it.
 | The pre-registered fork; "INCONCLUSIVE BY NON-OBSERVATION" | same file, §"PRE-REGISTERED FORK for playtest three" |
 | R79's verb-partition law and its Rare+self-Exhaust carve-out | `docs/kokomi-cards.yaml:39-44`; `docs/current/LAW.md:266-270` |
 | Note A9, the double wage, the source split's purpose | `tier0/constants.py:327-357` |
-| The standing winrate table and its stamp | `review/active/sitting-reads-2026-08-08.md` §2 |
+| The standing winrate table and its stamp | `review/records/sitting-reads-2026-08-08.md` §2 |
 | Starter deck, the 12-card ruling, `randomized_starter` | `tier0/content/characters/kokomi.yaml:60-105` |
 | `tactical_retreat`'s G6 conversion and the P9 prediction | `docs/kokomi-cards.yaml:123-138` |
 | Gorou is the only `exhaust: true` starter | `docs/inazuma-companions.yaml:29` |
@@ -738,14 +740,14 @@ process call with a standing effect, and the packet takes no position on it.
 | Sheet counts by tag, role and rarity | `docs/kokomi-cards.yaml`, 62 rows, counted 2026-08-13 |
 | No assist limb; `_generic_core_counts`; the two gate constants | `tier05/draft.py:281-321, 383-424, 1219`; `tier0/constants.py:1205` |
 | `EB-69`'s adopted shape, 62 → 76, one batch | `docs/current/BACKLOG.md` `EB-69`; R157 |
-| `D14` pinned; the six-step order | `review/active/payoff-reach-reregistration.md`; R121; `docs/current/BACKLOG.md` `EB-43` |
+| `D14` pinned; the six-step order | `review/records/payoff-reach-reregistration.md`; R121; `docs/current/BACKLOG.md` `EB-43` |
 | `C` = 9; the stamp table | `docs/current/STATE.md` |
 | Card-sheet edits are `CONSTANTS_VERSION` bumps | `docs/current/LAW.md:318-331`; R179 / M15 |
 | One variable per window; settle-first; the open `RT`/`C` batch | `docs/current/EXPERIMENTS.md` |
-| R185's ruled aims; Assist LOW | `review/active/payoff-census-2026-08-08.md:774-791`; `review/active/payoff-reach-reregistration.md` §6.2; commit `02cd295` |
-| R186 committing the aims as predictions; grading rule P5 | `review/active/payoff-reach-reregistration.md` §6; commit `825d302`; `tier05/exp_payoff_reach.py:58-71` |
+| R185's ruled aims; Assist LOW | `review/ruled/payoff-census-2026-08-08.md:774-791`; `review/records/payoff-reach-reregistration.md` §6.2; commit `02cd295` |
+| R186 committing the aims as predictions; grading rule P5 | `review/records/payoff-reach-reregistration.md` §6; commit `825d302`; `tier05/exp_payoff_reach.py:58-71` |
 | R178 moved only MEDIUM; role-tempo byte-identical | commit `96d8a84` |
-| Canon bands LOW/MEDIUM/HIGH/TOP; "band NAMES, not the third decimal" | `review/active/payoff-census-2026-08-08.md` §5.1-5.2, §7.2 |
+| Canon bands LOW/MEDIUM/HIGH/TOP; "band NAMES, not the third decimal" | `review/ruled/payoff-census-2026-08-08.md` §5.1-5.2, §7.2 |
 | The census contains no roster number | same, §0 and closing note |
 | Static-leg figures for her three arms | `tier05.exp_payoff_reach.static_leg`, read-only pass, 2026-08-13 |
 | `burst_max: 20` ratified as R139 | `tier0/content/characters/kokomi.yaml:26-45`; `docs/current/STATE.md` Lifecycle |

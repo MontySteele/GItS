@@ -23,6 +23,15 @@
 > otherwise. Where a row needs a supporting evidence packet, it points to
 > `→ review/active/<packet>`.
 
+> **NO NEW `M` IDS ARE MINTED AFTER 2026-09-01.** The M series stops; existing
+> `M` rows close in place and are neither renumbered nor deleted. A new pick is
+> named by its packet section until it is ruled, and by its `R` number after.
+> This register holds [USER]'s A/B/C picks only: (A) a design direction a brief
+> cannot settle, (B) eyes-on taste, (C) money, one-way doors, a staged balance
+> lever, LAW or measurement-law amendments. D, E and F picks are applied by
+> Claude at their default and disclosed, never recorded here
+> (`CLAUDE.md` §Norms).
+
 ---
 
 ## 1. Kokomi — band, playtest, and levers
@@ -58,11 +67,11 @@ narrowed rather than closed, and stand below.
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `S4-G12` / `CC-G1` / `CC-G2` | **Ask:** approve or veto the twelve Curtain Call faces and the A0 smoke, by eye. **Eyes-on:** the `S4-G12` sheet, regenerated over all six gate rows. The re-hunt set is **FOUR** (`warmup_act`, `crowd_work`, `tempo_change`, `audience_participation`) — `standing_room_only` overturned and `grand_gala` displaced (R166); the A0 smoke is PARTIAL. **Gate:** none; materials produced | OPEN — materials ready | user-queue §2; `review/active/art-runs-2026-08-08.md`; R166 |
-| `S4-G17` | **Ask:** three running-game looks, no full playtest. **Eyes-on:** `AS2-D5` the salon; `AS2-B5` motion and facing taste; `AS2-E2` icon picks (canonical in the Art debt row). **Gate:** none — captures are staged and manifested | OPEN — urgency reduced (hover-targets closed pt.4; B5 "not noticed") | user-queue §2/§7; `docs/animation-sprint-2-plan.md` (B5/D5/E2); `review/active/livegame-captures-2026-08-08.md` |
+| `S4-G12` / `CC-G1` / `CC-G2` | **Ask:** approve or veto the twelve Curtain Call faces and the A0 smoke, by eye. **Eyes-on:** the `S4-G12` sheet, regenerated over all six gate rows. The re-hunt set is **FOUR** (`warmup_act`, `crowd_work`, `tempo_change`, `audience_participation`) — `standing_room_only` overturned and `grand_gala` displaced (R166); the A0 smoke is PARTIAL. **Gate:** none; materials produced | OPEN — materials ready | user-queue §2; `review/ruled/art-runs-2026-08-08.md`; R166 |
+| `S4-G17` | **Ask:** three running-game looks, no full playtest. **Eyes-on:** `AS2-D5` the salon; `AS2-B5` motion and facing taste; `AS2-E2` icon picks (canonical in the Art debt row). **Gate:** none — captures are staged and manifested | OPEN — urgency reduced (hover-targets closed pt.4; B5 "not noticed") | user-queue §2/§7; `docs/animation-sprint-2-plan.md` (B5/D5/E2); `review/records/livegame-captures-2026-08-08.md` |
 | `M26` | **Ask:** accept or amend the end-of-turn docket by eye (`EB-53` item 17a). **Eyes-on:** does the end of turn read legibly; is the per-seat position doing the attribution work; is the chip's prominence right. Frames in `art/eb52_captures/` and `understudy/logs/frames/`. **Caveat:** no frame isolates the electro (Oz) leg, so the pyro→electro ORDER falls to this look. **Gate:** none — 6 of 9 captures taken | OPEN — eyes-on | BACKLOG `EB-53` §7; live verification 2026-08-08 |
 | S8 + S10 galleries | **Ask:** one body is left — **Globe Head**, whose silhouette is unresolved. R231 ruled RESKIN for the five verified bodies; execution rides the enemy-remap wave. **Pick:** (1) RESKIN; (2) REDESIGN — no default, the silhouette is the whole question. **Gate:** none; both galleries are written | OPEN — narrowed to Globe Head (R231) | user-queue §4; `dossiers/content/potion-relic-conversion-gallery.md`; `dossiers/remap/reskin-gallery.md`; R231 |
-| Art debt | **Ask:** one pick is left — accept or replace `grand_gala` r6, which is provisional. R231 settled the other two (the sigil collision, and Kokomi's `Character Details 1` exception). **Pick:** (1) accept r6; (2) re-hunt. **Gate:** none | OPEN — narrowed to `grand_gala` r6 (R231) | user-queue §8; `review/active/art-runs-2026-08-08.md`; `art/kokomi-art-pass-requirements.md` §6; R167; R171; R231 |
+| Art debt | **Ask:** one pick is left — accept or replace `grand_gala` r6, which is provisional. R231 settled the other two (the sigil collision, and Kokomi's `Character Details 1` exception). **Pick:** (1) accept r6; (2) re-hunt. **Gate:** none | OPEN — narrowed to `grand_gala` r6 (R231) | user-queue §8; `review/ruled/art-runs-2026-08-08.md`; `art/kokomi-art-pass-requirements.md` §6; R167; R171; R231 |
 
 ## 4. Fontaine Rares close-out
 
@@ -77,14 +86,14 @@ under R212(1), veto on the sheet.
 
 | ID | Decision needed | Status | Provenance |
 |---|---|---|---|
-| `M45` | **Ask:** ratify the pass's six open calls as ONE slate (R206). **Pick (adopt / defer, audit first):** (1) `salon_rotate` reader / timing; (2) `smoke_and_sparks` re-body / cut; (3) `Win10`/`Win11` on choices / state; (4) Spotlight: ANSWERED R228 = one mode, priced; (5) `depths_judgment` flat-14 / rescale; (6) Kokomi Block cluster accept / amend; (7) Charge lever: `S4-G13`. **Gate:** the playtest | OPEN — after the playtest | R206; review/active/richness-playtest-brief-2026-08-26.md |
+| `M45` | **Ask:** ratify the pass's six open calls as ONE slate (R206). **Pick (adopt / defer, audit first):** (1) `salon_rotate` reader / timing; (2) `smoke_and_sparks` re-body / cut; (3) `Win10`/`Win11` on choices / state; (4) Spotlight: ANSWERED R228 = one mode, priced; (5) `depths_judgment` flat-14 / rescale; (6) Kokomi Block cluster accept / amend; (7) Charge lever: `S4-G13`. **Gate:** the playtest | OPEN — after the playtest | R206; review/ruled/richness-playtest-brief-2026-08-26.md |
 
 ## 6. Prototype slices (R213) — held arms, re-authored kits, and the rules under them
 
 Each row points at the packet section that carries the options in full; the
 packet is the argument and this is the register.
 
-→ **`review/active/sitting-2026-08-30.md` is CLOSED by R224 (2026-08-30).**
+→ **`review/ruled/sitting-2026-08-30.md` is CLOSED by R224 (2026-08-30).**
 Every row it covered has left this register — `M47`, `M49`, `M50`, `M52`,
 `M54`, `M55`, `M56`, `M57`, `M59`, `M60`, `M64` — along with the Klee round-2
 picks, the §14 direction and its migration branch, the Burst retirement's five

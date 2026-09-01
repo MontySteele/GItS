@@ -131,7 +131,7 @@ DEBT_HEADER = (
     "# 25.0%), and after it holds 17 of which 4 do (23.5%). Nobody deleted a\n"
     "# frontload card and nothing was lost: a card that was never doing the job\n"
     "# stopped being counted as though it were. The measurement and its\n"
-    "# arithmetic are published at review/active/eb118-w1-postread-2026-08-25.txt\n"
+    "# arithmetic are published at review/records/eb118-w1-postread-2026-08-25.txt\n"
     "# (the pre-registration's build-time fact (b)); this note is the register\n"
     "# carrying it, which the header above requires and W1's landing missed.\n"
     "# Window 2 (2026-08-25) moved this list by NOTHING: tighten_the_cords went\n"

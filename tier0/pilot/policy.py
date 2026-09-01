@@ -1067,7 +1067,7 @@ ENRAGE_TAX_TURNS = 2.0      # future attack turns a +Strength grant is priced
 # SPENT -- so the three `C19` sinks (`powder_charge`, `hold_the_line`,
 # `smoke_and_sparks`) bought their payoff for free at score time and the
 # standing read had to publish their contribution as a FLOOR
-# (`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`).
+# (`review/records/sitting-reads-2026-08-25-c19-d17-p10.md`).
 #
 # THE LEDGER WAS THE DEFECT, not the eagerness. A gain worth +0.7 and a spend
 # worth 0.0 is an arbitrage the scorer could see: `sparkly_treasure` (gain 1,

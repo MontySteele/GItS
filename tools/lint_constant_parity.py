@@ -146,7 +146,7 @@ MIRRORED: dict[str, object] = {
     # gate's own blind spot: the fraction was an inline `/ 2` in FanfareCap,
     # so it appeared in neither MIRRORED nor UNMIRRORED and the lint's
     # "every balance number in the mod lives twice" promise did not cover
-    # LAW.md:189's headline "%maxHP". Naming it on the C# side is what makes
+    # the Furina identity record's headline "%maxHP". Naming it on the C# side is what makes
     # it visible here.
     "FurinaResourceConstants.FanfareCapFraction": C.FANFARE_CAP_FRACTION,
     "SalonConstants.DryDamageMultiplier": C.SALON_DRY_DAMAGE_MULT,
@@ -159,7 +159,7 @@ MIRRORED: dict[str, object] = {
     "KitBurstConstants.VolleyHits": C.SPARKS_N_SPLASH_HITS,
     "KitBurstConstants.VolleyHitDamage": C.SPARKS_N_SPLASH_HIT_DMG,
     "SparkPower.Threshold": C.SPARKS_FOR_FREE_ATTACK,
-    # The Sparks alternative-cost arm (review/active/klee-sparks-2026-08-29.md
+    # The Sparks alternative-cost arm (review/ruled/klee-sparks-2026-08-29.md
     # sec.5). MIRRORED and not UNMIRRORED even though the class is
     # quarantined: the tier0 counterpart exists and is the SAME number, and
     # this pairing is the only thing that would catch one side being repriced
@@ -231,7 +231,7 @@ MIRRORED: dict[str, object] = {
     # release build). Quarantined is not exempt: a prototype arm measured on a
     # number the sim never chose is exactly the failure this lint exists for,
     # and these three are the only numeric constants the rule has. Spec:
-    # review/active/kokomi-kurage-memory-2026-08-29.md sec.11.4.
+    # review/ruled/kokomi-kurage-memory-2026-08-29.md sec.11.4.
     "KurageMemoryLaw.CostPerEnergy": C.KURAGE_MEMORY_COST_PER_ENERGY,
     "KurageMemoryLaw.PulseBlock": C.KURAGE_MEMORY_PULSE_BLOCK,
     "KurageMemoryLaw.QueueCap": C.KURAGE_QUEUE_CAP,

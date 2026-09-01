@@ -1,3 +1,5 @@
+Status: OPEN (pick P5a; P1-P9 answered by R234)
+
 # Companion cards — the opening design packet
 
 **Drafted 2026-08-30, and RULED the same day — see §5, R234.** §1 to §4 are the
@@ -97,7 +99,7 @@ contract.
 mechanism is a hook on Companion play, fired as the pair `salon_perform` then
 `salon_rotate`, and it is expressly "fired by a hook on Companion play rather
 than by a card"
-(`review/active/furina-reframe-2026-08-29.md:884-889`, §4.3). Nothing is printed
+(`review/ruled/furina-reframe-2026-08-29.md:884-889`, §4.3). Nothing is printed
 on any Companion. `docs/current/STATE.md:617-625` records the slice as built in
 the sim behind five flags that all ship OFF.
 
@@ -121,7 +123,7 @@ C# power all quote — is **countersigned but PROSPECTIVE** under R213, and no
 > character-owned engine may respond to a Companion play and generate its
 > resource where that character's kit explicitly declares the trigger and bounds
 > the amount generated per Companion play.**"
-> (`review/active/burst-retirement-2026-08-29.md:335-340`, countersigned R224 at
+> (`review/ruled/burst-retirement-2026-08-29.md:335-340`, countersigned R224 at
 > `:371-374`; `docs/current/STATE.md:609-613` and `:863-869` record the
 > prospective standing.)
 
@@ -149,7 +151,7 @@ Counted directly from the sheets:
 | **Total** | **51** | **24** | **18** | **9** | **48** | **1** | **3** |
 
 The 51 matches the EB-148 audit's independent count
-(`review/active/eb148-companion-audit-2026-08-27.md:16-19`: 17 Mondstadt, 19
+(`review/records/eb148-companion-audit-2026-08-27.md:16-19`: 17 Mondstadt, 19
 Fontaine including 3 cameos, 15 Inazuma).
 
 **The headline: under the new taxonomy, exactly one draftable card in fifty-one
@@ -179,7 +181,7 @@ carries an Exhaust guard whose retained purpose is written on the card
 `WITCHS_FLAME_BURST` **RETIRE**, on the reasoning that "Durin is a companion,
 and LAW:145 ... says signature-resource generation stays kit-scoped and never
 cheaply repeatable from companions"
-(`review/active/burst-retirement-2026-08-29.md:638`), and R224 ruled the retire
+(`review/ruled/burst-retirement-2026-08-29.md:638`), and R224 ruled the retire
 holds "under either LAW:145 reading" (`:647-648`). The other three have not been
 dispositioned.
 
@@ -206,7 +208,7 @@ character's engine, so it is not a contract violation as written. But it is a
 Universal card whose whole payoff is *the Companion pool itself*, which makes
 its power level a function of how many Companions the deck holds — and it is the
 exact loop the playtest complained about
-(`review/active/eb148-companion-audit-2026-08-27.md:40-47`, which classes it a
+(`review/records/eb148-companion-audit-2026-08-27.md:40-47`, which classes it a
 "subsidy engine" alongside Albedo's Solar Isotoma). **It is the only card in the
 pool of this kind:** Albedo shares the audit's subsidy-engine label but triggers
 on attacking an aura-bearing enemy, which is element synergy rather than
@@ -489,7 +491,7 @@ these shapes: six of slice 1's seven arms ADVANCED across four rounds, and the
 arms are the exclusive-modes ("choose one: damage | Block") and cost-line-price
 ("the shipped effects to the digit, and one more energy") re-authorings of three
 Inazuma Companions — Shinobu, Thoma and Itto
-(`review/active/kokomi-slice-1-2026-08-27.md:66-92`; tally at `:780-782`;
+(`review/ruled/kokomi-slice-1-2026-08-27.md:66-92`; tally at `:780-782`;
 registration and R227 countersign at `:791-812`). The registration exists
 because those six ADVANCE results currently feed *nothing registered*, and the
 accept-to-sheet step is a one-way door (`:815-825`). The slice packet records
@@ -733,7 +735,7 @@ C. **Re-author on contact** — each is fixed the next time its card is opened f
    date by which these must be legal.
 
 *A caveat that belongs with this pick:* the Burst meter itself is mid-retirement
-(`review/active/burst-retirement-2026-08-29.md`, eight LAW blocks countersigned
+(`review/ruled/burst-retirement-2026-08-29.md`, eight LAW blocks countersigned
 prospective). Re-authoring a `burst_energy` feed now may be work that the fold
 deletes.
 
@@ -867,7 +869,7 @@ outcome none of the four options wants.
 **This pick has been narrowed. It previously bundled Navia and Albedo together,
 and they are two different mechanisms** — EB-148 grouped them as "subsidy
 engines" because both hand out free Block after one purchase
-(`review/active/eb148-companion-audit-2026-08-27.md:40-47`), which is a true
+(`review/records/eb148-companion-audit-2026-08-27.md:40-47`), which is a true
 statement about *defence economy* and not about what they trigger on.
 
 - **`navia_cannon_fire_support`** triggers on **"whenever you play a Companion

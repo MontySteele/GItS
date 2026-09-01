@@ -1,3 +1,5 @@
+Status: OPEN (picks 1-4, the four threshold proposals)
+
 # P2: what counts as a "hard state"? — a proposal, with the first numbers
 
 **For [USER]. One decision, and it is a decision you already reserved.**

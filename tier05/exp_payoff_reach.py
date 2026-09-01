@@ -1,6 +1,6 @@
 """Payoff reach, all nine roster archetypes — the registered sprint's reader.
 
-The instrument of `review/active/payoff-reach-reregistration.md` §6.4, built
+The instrument of `review/records/payoff-reach-reregistration.md` §6.4, built
 because that section names the build as owed: the only committed reach printer
 is `tier05/exp_furina_ghostcheck.py`, whose payoff column is
 `draft._reads_fanfare` — Furina-fanfare-specific, and blind to eight of the

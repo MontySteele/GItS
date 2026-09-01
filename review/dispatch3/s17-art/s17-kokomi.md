@@ -152,7 +152,7 @@ All seven are **256×256 RGBA**, `ImageGen/images/kokomi/powers/`, written
 
 **Fallback:** `KleePowerIcons.PathFor` ends in `_ => null`, and a null there
 renders the base game's `NOPE` placeholder — that is the defect `EB-67` was
-opened on (`review/active/eb67-kokomi-icons-2026-08-26.md` §1). There is no
+opened on (`review/records/eb67-kokomi-icons-2026-08-26.md` §1). There is no
 Klee-borrowing fallback for `powers/`; `Copy-KokomiFallback` covers only the
 nine UI/model relatives listed at `tools/build_pck.ps1:268-276`.
 
@@ -378,8 +378,8 @@ Headroom that does exist, from the same census:
 |---|---|---|
 | Kokomi's 61 shipped faces | **provisional rank-1 picks applied; [USER] taste pass NOT taken** | `kokomi-art-pass-requirements.md` §1 and the QUEUE "Art debt" row (`docs/current/QUEUE.md:53`, OPEN — taste). Sheets: `art/contact_sheet_kokomi-{identity,commander,priest,assist}.html`, all written 2026-08-13 01:31 |
 | The 14 `EB-69` fill faces | **shortlisted and rendered, rank 1 is a PROPOSAL not a provisional pick, NOT applied** | requirements §1; `art/contact_sheet_eb121_kokomi_fill.html` (2026-08-26 16:08) |
-| `watch_of_the_shallows` | **candidate set only, no rank 1 by design** | `art/plan.tsv:1145-1154`; `review/active/art-runs-2026-08-08.md:293-297` (run 9a); sheet `art/contact_sheet_run9_watch_of_the_shallows.html` |
-| The 8 `EB-67` icons | **rank 1 APPLIED under R212(1); [USER] veto still open on the sheet; acceptance is ONE live look, not taken** | `docs/current/BACKLOG.md:80`; `review/active/eb67-kokomi-icons-2026-08-26.md` §§2,5,6; sheet `art/contact_sheet_eb67_kokomi_icons.html` (2026-08-26 19:50, verified to carry exactly those 8 ids) |
+| `watch_of_the_shallows` | **candidate set only, no rank 1 by design** | `art/plan.tsv:1145-1154`; `review/ruled/art-runs-2026-08-08.md:293-297` (run 9a); sheet `art/contact_sheet_run9_watch_of_the_shallows.html` |
+| The 8 `EB-67` icons | **rank 1 APPLIED under R212(1); [USER] veto still open on the sheet; acceptance is ONE live look, not taken** | `docs/current/BACKLOG.md:80`; `review/records/eb67-kokomi-icons-2026-08-26.md` §§2,5,6; sheet `art/contact_sheet_eb67_kokomi_icons.html` (2026-08-26 19:50, verified to carry exactly those 8 ids) |
 | Character shell (9 surfaces) | **DONE 2026-07-25**, commit `68fb11b`, picks applied at `6f1b969` | requirements §5a |
 | `Character Details 1` manual crop for a Rare | **OPEN — [USER] taste**, L9's one named exception | `docs/current/QUEUE.md:53` pick (2); requirements §2 and §6 Q3 |
 | `art-runs-2026-08-08.md` Kokomi rows | **REVIEW BUNDLE — "No pick was made and no pick may be read into these files"** | that file's header, lines 3-5 |
@@ -393,7 +393,7 @@ Headroom that does exist, from the same census:
 "snake_ring"`, a real Silent relic icon, described in its own doc comment as
 *"FALLBACK ICON while her art pass is outstanding"*. But the 2026-08-08 live
 capture that opened `EB-67` recorded the Pearl of Wisdom relic drawing `NOPE`
-(`review/active/eb67-kokomi-icons-2026-08-26.md` §1). Both cannot be right.
+(`review/records/eb67-kokomi-icons-2026-08-26.md` §1). Both cannot be right.
 Pick: (1) the live look that closes `EB-67` settles it and nothing else is
 needed; (2) treat the declared fallback as untrusted and open a row.
 *Not resolvable from source — it needs the game.*

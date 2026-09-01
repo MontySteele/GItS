@@ -1,6 +1,6 @@
 """`KLEESPARK-S1`'s instrument (`tier05/exp_klee_sparks_s1.py`), pinned.
 
-The registration is `review/active/klee-sparks-2026-08-29.md` §17 and it was
+The registration is `review/ruled/klee-sparks-2026-08-29.md` §17 and it was
 committed before the instrument; the instrument was committed before the run.
 What this file pins is the three things a reader of the record has to be able
 to trust WITHOUT re-running it:

@@ -14,7 +14,7 @@ ruling forbids, one row deep, and it would be the row nobody ever deletes.
 The cost of that choice is stated rather than hidden: with an empty surface the
 committed C# proves only that an empty surface compiles. The proof that a REAL
 prototype card compiles is a manual step recorded in the packet
-(`review/active/eb147-prototype-surface-2026-08-27.md`): stage the fixture, run
+(`review/ruled/eb147-prototype-surface-2026-08-27.md`): stage the fixture, run
 the dev codegen, `dotnet build -p:PrototypeCards=true`, revert. That is
 deliberately not automated here -- the suite has no game assembly to build
 against.

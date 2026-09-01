@@ -3,7 +3,8 @@
 
 The battery is fifteen CI invocations plus five that only ever run locally,
 and until now the only way to run it was to paste twenty lines from
-`OPERATIONS.md` / `.github/workflows/repo.yml` one at a time. Pasted serially
+`docs/current/operations/lints.md` / `.github/workflows/repo.yml` one at a
+time. Pasted serially
 they cost the sum of their runtimes; run as separate processes they cost the
 slowest one, because each is an independent short-lived Python process with no
 shared state -- they read committed files and exit.
@@ -62,7 +63,7 @@ ROOT = Path(__file__).resolve().parent.parent
 #              `--lane ci`. Putting them in repo.yml is [USER]'s edit, not this
 #              branch's -- so this lane is a SUPERSET of that job today, and
 #              the divergence is written down rather than assumed away.
-#   local   -- OPERATIONS.md "Local-only (not in CI)"; a runner has no art and
+#   local   -- operations/lints.md "Local-only (not in CI)"; a runner has no art and
 #              no game, so these answer questions CI structurally cannot ask
 #   suite   -- already exercised by pytest (tools/README.md "Suite-gated");
 #              excluded from the default run because `pytest` covers them, and
@@ -106,7 +107,7 @@ def _library(name: str, script: str, note: str) -> Lint:
     return Lint(name, "library", (script,), note)
 
 
-# Order is the CI file's order, then OPERATIONS' local list, then the
+# Order is the CI file's order, then operations/lints.md's local list, then the
 # suite-gated remainder. Concurrency makes the order cosmetic; it is kept
 # readable so this table can be diffed against repo.yml by eye.
 REGISTRY: tuple[Lint, ...] = (
@@ -212,6 +213,8 @@ REGISTRY: tuple[Lint, ...] = (
     _ci("stamp-rows",           "tools/lint_stamp_rows.py"),
     _ci("sheet-stamp",          "tools/lint_sheet_stamp.py"),
     _ci("experiments-active",   "tools/lint_experiments_active.py"),
+    # The review tree's three directories, and the paths that cite them.
+    _ci("review-status",        "tools/lint_review_status.py"),
     # The hooks under tools/hooks/ are the only code here that no test imports
     # and no lint reads -- they run out of process, on stdin JSON. A refusal
     # that quietly stopped refusing looks exactly like a session that never
@@ -234,6 +237,10 @@ REGISTRY: tuple[Lint, ...] = (
     _suite("recall-exhaust",           "tools/lint_recall_exhaust.py"),
     _suite("register-isolation",       "tools/lint_register_isolation.py"),
     _suite("sheet-comments",           "tools/lint_sheet_comments.py"),
+    # The other half of the sheet-comment pair (2026-09-01): `sheet-comments`
+    # checks that the prose on a sheet is TRUE, this one checks that there is
+    # not too much of it for an agent to open the sheet cheaply.
+    _suite("sheet-comment-blocks",     "tools/lint_sheet_comment_blocks.py"),
     _suite("strict-domination",        "tools/lint_strict_domination.py"),
     _suite("upgrade-comment-arith",    "tools/lint_upgrade_comment_arithmetic.py"),
     _suite("upgrade-coverage",         "tools/lint_upgrade_coverage.py"),

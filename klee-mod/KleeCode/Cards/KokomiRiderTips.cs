@@ -193,7 +193,7 @@ public static class KokomiRiderTips
     /// diagnosis was wording, not dose. So the rule joins the keyword's OWN
     /// text rather than becoming a second tip: "hover text is that keyword's
     /// detail, and 'tooltip' is not a third surface"
-    /// (review/active/sitting-2026-08-30.md, item 6).
+    /// (review/ruled/sitting-2026-08-30.md, item 6).
     ///
     /// The sentence is the packet's §11.7 v3 ruled wording ("a Muster now
     /// creates a memory of the card it ate, and the recruit creates a second

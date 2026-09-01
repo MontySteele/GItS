@@ -1,0 +1,96 @@
+==============================================================================
+PROVENANCE HEADER -- below it is the instrument's own stdout, unedited.
+==============================================================================
+registration  review/records/shop-rerun-registration-2026-08-10.md  §2, §4
+              slate ENTERED and packet COUNTERSIGNED 2026-08-26 ([USER]);
+              this run is §7.1 step (1) and it is the first run of this cell
+run date      2026-08-26
+world         RT12/D17/P10/C19
+              verified by §7.1 step (0) immediately before the run, at the
+              same commit:  PYTHONPATH=. python -c "from tier05 import cells;
+              v=cells.CANONICAL.versions; print('RT{RT}/D{D}/P{P}/C{C}'
+              .format(**v))"  ->  RT12/D17/P10/C19
+              The instrument's own first stdout line below prints the live
+              stamp independently (EB-141(a)) and agrees.
+commit        603de9f1f324e98ab49606e390ae65fc42089942
+              branch sitting-m14-2026-08-26, off main 1b31e0b -- the M14
+              sitting worktree. The run was taken at this SHA, with the
+              entered slate and the countersign already committed.
+instrument    tier05/exp_shop_companion_channel.py
+n / seed      1,000 per arm per character / 20260725
+              3 characters x 2 arms x 1,000 = 6,000 runs
+arms          companions off vs companions on; klee/demolition,
+              furina/salon, kokomi/priest
+command       PYTHONPATH=. python -m tier05.exp_shop_companion_channel 1000
+wall clock    183 seconds (exit 0)
+------------------------------------------------------------------------------
+THREE DEVIATIONS FROM §7.1's LITERAL TEXT, recorded rather than glossed. None
+of them is a registered parameter -- n, seed, arms, characters and world are
+exactly as entered.
+ (1) The interpreter is `python`, not `python3`. This is Windows, where
+     `python3` is not on PATH; same CPython, same module, same entry point.
+ (2) The artifact is named for the date the run was TAKEN, 2026-08-26, not for
+     the `shop-rerun-results-2026-08-25.txt` filename §7.1 forecast when it was
+     written on 2026-08-25. A file dated 2026-08-25 would make a false
+     provenance claim.
+ (3) The stdout was transcoded cp1252 -> UTF-8 and CRLF -> LF for committing.
+     The instrument writes `§` to a Windows console, so its raw bytes are
+     cp1252; the repo's text is UTF-8. No character changed and no line moved;
+     this is a byte re-encoding, declared here because the repo's encoding rule
+     is that every text read/write declares its encoding.
+------------------------------------------------------------------------------
+WHY THIS HEADER EXISTS. The instrument prints the live RT/D/P/C (EB-141(a),
+26b4b2c, 2026-08-25) but still does not route through a `Cell` (EB-141(b),
+gated on this grade). The printed stamp names the world; it cannot name the
+registration, the commit or the n. Binding those to this stdout is what makes
+the report citable under R68, and that is this header's whole job (§4, §7.1
+step (2)).
+
+STDERR IS REPRODUCED AT THE FOOT of this file rather than dropped. It is three
+pre-existing house-rule relic-skip UserWarnings (`bronze_scales`,
+`oddly_smooth_stone`, `juzu_bracelet`), unrelated to this cell and unchanged by
+it. No error, no traceback; exit code 0.
+
+THE GRADE IS NOT IN THIS FILE. It is §8 of the registration packet, written
+against §5 as committed before this run existed.
+==============================================================================
+
+RT12/D17/P10/C19
+§4.7 companion channel -- 1000 runs/arm, seed 20260725
+
+klee     demolition   off   4.0%  on   4.8%  delta +0.80pp  (on 95% CI 3.6%-6.3%)
+furina   salon        off   3.5%  on   2.6%  delta -0.90pp  (on 95% CI 1.8%-3.8%)
+kokomi   priest       off   0.9%  on   0.8%  delta -0.10pp  (on 95% CI 0.4%-1.6%)
+
+P1  slot-1 buy rate: 20.7% (1183/5709 visits)   IN BAND (10-35%)
+P2  mean winrate delta: -0.07pp   OUT OF BAND (positive, <= +2.00pp)
+P3  slot-2 purchases: 92.7% uncommon of 1130   IN BAND (>= 60%, DIAGNOSTIC)
+    slot-2 OFFERED mix: {'rare': 706, 'uncommon': 5003}
+    total gold spent on companions: 188250
+
+CROWD-OUT CHECK (does the channel take gold from the other doors, or just get there first?)
+    removals   off       0   on       0     +0.0%
+    relics     off    1672   on     990    -40.8%
+    gold_left  off  557004   on  519722     -6.7%
+
+NEW  MONEY AT THE DOOR, AND DURING THE VISIT (what gold could not reach, and when)
+NEW      gold on arrival: mean  153.5  median  129  min 0  max 999  (5709 visits)
+NEW      slot 1: 4078/5709 offers affordable on arrival (71.4%)
+NEW      slot 2: 4080/5709 offers affordable on arrival (71.5%)
+NEW      unaffordable on arrival: 3260 (slot 1 rare x437, slot 1 uncommon x1194, slot 2 rare x435, slot 2 uncommon x1194)
+NEW      preferred picks priced out mid-visit: 531 (298 after earlier buys in the same visit, 233 unaffordable from the door) -- slot 1 rare x121, slot 1 uncommon x130, slot 2 rare x131, slot 2 uncommon x149
+NEW      shelf entries stranded at loop exit: 15376 (15085 on the gold guard, 291 on a policy skip) -- character shelf common x5357, character shelf rare x430, character shelf uncommon x3165, slot 1 rare x419, slot 1 uncommon x2780, slot 2 rare x436, slot 2 uncommon x2789
+
+NEW  CROWD-OUT AT VISIT RESOLUTION (a companion buy always precedes the relic shelf in the same visit)
+NEW      companion bought     2071 visits   relic also bought    332 (16.0%)
+NEW      none bought          3638 visits   relic also bought    521 (14.3%)
+
+==============================================================================
+STDERR, verbatim (three pre-existing house-rule warnings; exit code was 0):
+==============================================================================
+C:\Users\Monty\Documents\GitHub\GItS-m14\tier05\relics.py:78: UserWarning: relic 'bronze_scales' SKIPPED: Thorns now exists (2026-07-27); un-skipping is a [USER] ruling because it arms a relic and moves the tier 0.5 world -- not implemented, not faked (house rule).
+  return dict(_pool().get("neow") or {})
+C:\Users\Monty\Documents\GitHub\GItS-m14\tier05\relics.py:78: UserWarning: relic 'oddly_smooth_stone' SKIPPED: Dexterity now exists (2026-07-27); un-skipping is a [USER] ruling because it arms a relic and moves the tier 0.5 world -- not implemented, not faked (house rule).
+  return dict(_pool().get("neow") or {})
+C:\Users\Monty\Documents\GitHub\GItS-m14\tier05\relics.py:78: UserWarning: relic 'juzu_bracelet' SKIPPED: held relics have no channel into maps.resolve_unknown -- not implemented, not faked (house rule).
+  return dict(_pool().get("neow") or {})

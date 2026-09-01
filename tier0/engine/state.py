@@ -486,7 +486,8 @@ class Bomb:
 def fanfare_cap_base_term(max_hp: int) -> int:
     """The Fanfare ceiling's BASE term, taken from LIVE max HP (EB-97).
 
-    LAW.md:189 says "Fanfare is capped at %maxHP", and the mod reads it that
+    `docs/current/characters/furina-identity-record.md` (ex-LAW) says
+    "Fanfare is capped at %maxHP", and the mod reads it that
     way every time it is asked: `FurinaResources.FanfareCap` computes
     `FanfareCapFraction * creature.MaxHp + capBonus` from the creature's
     CURRENT MaxHp. tier0 used to freeze the base term at the sheet's printed
@@ -700,8 +701,9 @@ class Enemy(Fighter):
     is_boss: bool = False
     # NC-7 alpha (Q13 / R117, verbatim "I'd say A"): the sim's mechanical
     # mirror of the game's `MinionPower` fact -- the assembly's ONLY
-    # per-creature "secondary enemy" concept (reflection findings recorded in
-    # review/parity-sweep/noncard-triage-memo.md, NC-7 EXECUTION NOTE).
+    # per-creature "secondary enemy" concept (reflection findings recorded
+    # at `git show pre-simplification-2026-08-06:review/parity-sweep/
+    # noncard-triage-memo.md`, NC-7 EXECUTION NOTE).
     # Read by reactions._react: in a boss ROOM, only minion-flagged creatures
     # can be Frozen; every other creature takes the Vulnerable substitution.
     # Set True by combat's summon intent (the game applies MinionPower to
@@ -983,7 +985,7 @@ class CombatState:
     # and owns that uniqueness; readers walk the list as-is.
     companions_played: list[str] = field(default_factory=list)
     # --- THE KURAGE'S MEMORY (QUARANTINED, C.KURAGE_MEMORY; the proposal at
-    # review/active/kokomi-kurage-memory-2026-08-29.md). Every field below is
+    # review/ruled/kokomi-kurage-memory-2026-08-29.md). Every field below is
     # written ONLY inside a flag branch, so with the flag off they hold their
     # defaults for the life of every fight and nothing reads them.
     #

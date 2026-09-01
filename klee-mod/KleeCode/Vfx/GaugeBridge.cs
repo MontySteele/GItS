@@ -234,7 +234,7 @@ public static class GaugeBridge
         // Charge meter plus the whole queue, drawn as LINES into the shared
         // gauge scene's one %ValueLabel because the strip was built under a
         // "NO NEW ART" constraint. It was correct and unreadable, which is the
-        // finding `EB-198` closed on (review/active/kokomi-kurage-memory-
+        // finding `EB-198` closed on (review/ruled/kokomi-kurage-memory-
         // 2026-08-29.md sec.14.2: two frames, both true, both misread).
         //
         // [USER] retired it: "let's do one better and actually remove the bar

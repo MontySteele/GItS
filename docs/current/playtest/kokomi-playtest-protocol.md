@@ -46,7 +46,7 @@ her twelve-card starter reaches an Exhaust exactly once, so a cold opening
 grades a character the player never met. The scripted opening it uses instead —
 priest-weighted early picks plus one granted Exhaust payoff, a grant that makes
 that run non-comparable and is therefore not this protocol's run — is written
-up at `review/active/richness-playtest-brief-2026-08-26.md`.
+up at `review/ruled/richness-playtest-brief-2026-08-26.md`.
 
 ---
 

@@ -41,7 +41,7 @@ becomes 5.0% on three shipped options in acts 1 and 2 for every character;
 No drafter or pilot code moved, so `D` and `P` were untouched and the
 payoff-reach `D14` pin stood; `C` moved in the same window on its own ground.
 **No v11 run-layer number carries across.** **Re-baselined at the bump** — the
-twelve-arm standing table `review/active/sitting-reads-2026-08-13.md`.
+twelve-arm standing table `review/records/sitting-reads-2026-08-13.md`.
 
 `RT11` beneath it was the coordinated 2026-08-13 window (`EB-82` + `EB-85`),
 batched into one bump because both are `RUNTEMPLATE` content and neither was
@@ -121,7 +121,7 @@ combat + tier-0.5. `EB-144` provably cannot move the `ref_*` anchors (they
 print no conditional — asserted by test); `EB-129`'s event valuation is
 generic, and the anchor ARMS did move by a few runs in 3000, inside interval
 (§4.2 of the read below).** **The re-baseline was TAKEN at
-`RT12/D18/P11/C20`** (`review/active/sitting-reads-2026-08-26-c20-d18-p11.md`,
+`RT12/D18/P11/C20`** (`review/records/sitting-reads-2026-08-26-c20-d18-p11.md`,
 `main` = `190e598`, 2026-08-26) **and its caveat check graded all three of the
 standing read's diagnostic caveats CLEARED against code** — the hold-versus-spend
 term is subtracted inside `_score`, both blind predicates and both Salon verbs
@@ -262,7 +262,7 @@ five-to-two). `kokomi` near-duplicates hold at 29 against an untouched limit of
 76%.
 
 **The standing read this window owed is TAKEN and PUBLISHED**
-(`review/active/sitting-reads-2026-08-25-c19-d17-p10.md`), **DIAGNOSTIC-SCOPED
+(`review/records/sitting-reads-2026-08-25-c19-d17-p10.md`), **DIAGNOSTIC-SCOPED
 and NOT the Phase-4 milestone table** (R211 item 7): the pilot has no
 hold-versus-spend term for Sparks, and its scorer reads neither Furina row's
 state nor Tide of Names' payout, so those numbers are floors and a null result
@@ -357,5 +357,5 @@ what `secret_stash` produces.
 rows leaving `target: random_enemy`, `bomb_damage_per_rotation` as a new engine
 power with a once-per-turn latch, `lasting_impression`'s `{encore: +2}`, and
 `deep_breath`'s conversion to `choose_one`. `C13` is the world
-`review/active/sitting-reads-2026-08-24-c13-d16.md` was read in; that table is
+`review/records/sitting-reads-2026-08-24-c13-d16.md` was read in; that table is
 superseded by the `C19` read and stands as published (R101b).

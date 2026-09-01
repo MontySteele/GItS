@@ -899,7 +899,7 @@ APPLY_POWERS = {
     "spark_threshold_down": ("SparkThresholdDownPower", None,
         "You need {X} fewer [gold]Spark[/gold] for your Attacks to cost 0."),
     # THE STRICT RARE POWER (PICK 5 wording (1), sub-pick (a); the independent
-    # seat FOLLOWS on both -- review/active/klee-sparks-2026-08-29.md sec.9).
+    # seat FOLLOWS on both -- review/ruled/klee-sparks-2026-08-29.md sec.9).
     # QUARANTINED: `SparkAttackCostPower` lives in `Powers/Prototype/` and is
     # compiled only under `-p:PrototypeCards=true`, so the only row that may
     # name this power is a `proto_` row on the prototype surface, which is
@@ -7409,7 +7409,7 @@ def emit(
         interfaces += ", IExhaustRetriever"
 
     # PICK 8 option 2 -- THE COST BADGE'S ONE NUMBER
-    # (review/active/klee-sparks-2026-08-29.md sec.6.4). A card whose row prints
+    # (review/ruled/klee-sparks-2026-08-29.md sec.6.4). A card whose row prints
     # a TOP-LEVEL `spend_spark` declares that price on the interface, and the
     # IsPlayable gate below reads it back through `SparkCost.PriceOf` instead of
     # carrying its own literal. Until this landed the price existed ONLY inside

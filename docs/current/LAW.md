@@ -20,8 +20,8 @@ which are their own source of truth.**
    Genshin fangame in StS2 clothes. StS2 conventions (energy, rarity, intents,
    keyword style) win over Genshin fidelity when they conflict.
 2. **Reactions are earned, not given** (Combat, below).
-3. **Character identity = statline asymmetry** — declared, not measured-gated
-   (see Design governance).
+3. **Character identity is not pinned here** (moved out 2026-09-01) — it lives
+   in the character's brief, or `docs/current/characters/*-identity-record.md`.
 4. **Co-op is amplified, never required** — every character clears solo.
 
 When two rules below conflict, the higher pillar wins.
@@ -158,118 +158,18 @@ combat grammar comes with us. (principles §1)
   self-replacing card is a cycling engine whatever else it does). (R109 X2; R114
   FLAG-1)
 
-## Character identity — Klee
+## Character identity — moved out of LAW (2026-09-01)
 
-- **Pyro, catalyst-grade:** every attack applies Pyro, base numbers run low;
-  enables any reaction, triggers none alone. (klee §1)
-- **Declared statline is load-bearing:** elite A1 (frontload) and A6
-  (utility/AoE); weak A3 (block) and A4 (sustain ~0.5). **Her scaling never tops
-  her frontload — A2 < A1 and A2 ≤ 4.0** (Klee-scoped, not mod-wide), scaling
-  powers stack-capped. (klee §2, §9; R52 ask 3)
-- **Bombs detonate at the start of Klee's turn,** early on any Attack-card hit;
-  multiple bombs stack independently, each keeping its own damage. (klee §3)
-- **Repeatable spark generation satisfies one of two limbs:** it sits at
-  Uncommon+, or no sub-Rare card is simultaneously a spark source and a draw
-  enabler — infinite sparks unreachable at Common (an unboundedness test, not a
-  ban on Common spark-minting). X-cost attacks are exempt from spark-spend.
-  (R109 X7 + [USER] annotation; R34)
-- **The Burst (Sparks 'n' Splash) is kit, not loot:** never draftable, granted to
-  hand on meter fill, casting empties the whole meter (overflow lost at cast),
-  re-granted on refill, carries Retain. (principles §2.4, v1.9)
-- **Detonation lifesteal patches A4 at relic rarity, not card rarity.** (klee §5)
+Per-character identity statements left LAW under the machinery review's change
+6. They are not law any more: they are revised by a sentence in the character's
+brief, with no amendment ceremony.
 
-## Character identity — Furina
-
-- **Hydro, skill-grade support-protagonist:** modest numbers, scaling routes
-  through others (elite A4 sustain + A6 utility; weak A1 + A7). (furina §1, §2)
-- **Spotlight runs in exactly two modes** (the retired self-Spotlight model is
-  not law): **CENTER STAGE** designates Furina — her cards generate Fanfare, no
-  numeric bonus; **GUEST CAST** designates the Companion *category* — companion
-  cards get the +50% multiplier and Spotlight texture, generate no Fanfare. The
-  `character:` field, invalid-target rule, freely-movable persisting designation,
-  inert duplicate selectors, per-player registry, and the per-turn Spotlighted-card
-  cap stay live. (R41; principles §4.5 v1.14; furina §3)
-- **Encore is an unbounded per-combat buffer** absorbing after Block and before
-  HP (overdraw drains true HP); **Encore absorption credits A4, never A3.**
-  (principles v1.10; furina §2, §4)
-- **Fanfare is capped at %maxHP; generation is activity-based, never passive**
-  *(Encore's per-turn-trickle ban carries the same Ancient carve-out: R127)*.
-  Design invariant: **every point of damage past Block prints exactly 1 Fanfare.**
-  Live legs: HP lost / Encore spent / Encore absorbed / Spotlighted card played.
-  Cards use printed `Fanfare Cap +X` (raises cap) and `Fanfare +X` (full grant,
-  rare POWER payoff only); cards raise a permanent floor (`gain_fanfare_floor`),
-  not the cap. **`Fanfare Cap +X` is an AVAILABLE EXPLICIT VERB, not a rider
-  every Power carries** — a card prints it when raising the ceiling is that
-  card's job. The incidental carriers were removed along with the register
-  lint that required one on every Power (`EB-118` §5.2, 2026-08-24; lint `R7`
-  retired, `R6` untouched — the full grant is still a rare-POWER payoff).
-  Fanfare is a global pool on Furina surviving Spotlight moves.
-  (principles v1.12 RATIFIED; furina §4; R41; R114 FLAG-3; EB-118 §5.2)
-- **Delete-test applies unmodified, no detector carve-outs:** deleting Furina's
-  cards from a winning Spotlight deck must gut it; companions winning anyway is
-  `SUPPORT_CARRY`. **Self-carry must not be the median-best plan** (Salon and
-  Spotlight beat self-carry at median draft quality; self-carry owns the ceiling
-  only on cracked-Rare draws). The Ethereal Spotlight selector is kit machinery
-  and does not count toward A5. (furina §8, §2; R61)
-- **Guest Star generators — four guardrails:** this-combat-only; generators
-  Exhaust; equal-rarity (sub-Rare cannot create 5-star Rares); pull only from the
-  shared companion pool + purpose-built Guest Star sets, never playable pools.
-  Guest cameos are Furina-personal-pool only. (furina §9; principles §4.5; D2)
-- **Fontaine Cryo-convergence is managed in kit, not roster exclusion:**
-  Charlotte and Freminet each get one Cryo-applying card; Chevreuse is the
-  authored Overload/Vaporize counterweight (buff other routes, never nerf
-  freeze); Fontaine's zero 4-star Electro is scarce by construction, not a bug.
-  Freminet is one applier + one defensive/trigger + one enabler — no fake-support
-  reflavor of a DPS kit. (furina §10)
-
-## Character identity — Kokomi
-
-- **No self-damage anywhere** in her kit or personal pool (extends to shared-pool
-  errata); her risk axis is tempo and card economy only. (Law 1)
-- **No healing exception:** the conjunctive healing law stands unmodified for
-  her; her healer fantasy is Block, Charge, and prevention — no healing
-  amendment, ever. (Law 2; R52 ask 1)
-- **Flawless Strategy: Kokomi cannot gain Strength** — any Strength she would
-  gain becomes Charge. (Law 3)
-- **Deck-size grammar:** in her personal pool, Common cards never increase deck
-  size (net delta ≤ 0); only Uncommon/Rare may create cards. Machine-checked;
-  her personal pool only. (Law 4)
-- **Charge is spent by the Bake-Kurage and by nothing else** — uncapped, accrued
-  at 1 per Exhaust of one of her own cards, Companions included, Status and Curse
-  excluded; card-event-driven with no passive accrual *(Ancient carve-out: R127,
-  see card-sheet rules)*. It has exactly one destination: at the threshold the
-  jellyfish pays it to play the front of its memory for 0 energy, one card per
-  turn. **No card prints a Charge price and no card reads the bank
-  proportionally** — the firewall R80 built against Regent-Stars convergence
-  moves from "never spent" to "spent one way, by the kit, on tempo and never on
-  magnitude." The engine is kit-level (relic + starter), never draft-gated; the
-  relic holds only bookkeeping, all payoff magnitude lives in cards.
-  ***PROSPECTIVE (R213), countersigned R226:*** *this bullet binds when
-  `C.KURAGE_MEMORY` flips; until the flip the shipped rule is the one it
-  replaces — **Charge is never spent**, read but never consumed.*
-  (kokomi §0, §2.1; R80 amended by R226; R16)
-- **The Bake-Kurage's memory can hold one of her own non-Companion cards.**
-  Every Companion-only reading of the memory is wrong under Rule 1.
-  ***PROSPECTIVE (R213), countersigned R226:*** *binds when `C.KURAGE_MEMORY`
-  flips.* (kokomi §11.7; R226)
-- **A memory copy is removed from combat and is not an Exhaust.** It is a
-  lifecycle statement, not an implementation detail, and it binds every
-  exhaust-counting row on her sheet. ***PROSPECTIVE (R213), countersigned
-  R226:*** *binds when `C.KURAGE_MEMORY` flips.* (kokomi §11.7; R226)
-- **Elite pair A2 Scaling + A6 Utility;** acceptance signature is HP-trajectory
-  flatness (the stability band); ward prevention stays reported telemetry, never
-  axis-credited. Canonical archetypes: priest / commander / assist (+ generic).
-  (R51; R66)
-- **Rotation law: Kokomi only Exhausts her own cards.** A Status or a Curse is
-  never one of her cards: Muster and every chosen-Exhaust card never select
-  one, and no Charge (or Burst particle) accrues from a Status/Curse exhaust
-  by any route. Discard is unchanged. An explicit `filter:` on a card is the
-  opt-in (Dodge Roll's shape); a dedicated Uncommon/Rare that can eat those
-  types is reserved future design space. ([USER] 2026-08-23)
-- **VOICE LAW: Exhaust is rotation, never sacrifice.** Weak/Vulnerable enter her
-  pool only as riders on exhaust/Sly engine pieces. Conscripted companions count
-  as self-sourced kit for `SUPPORT_CARRY`; drafted Inazuma-pool cards count
-  normally. (R55; R51; R52 ask 7)
+- **Klee** → `docs/current/characters/klee-identity-record.md` (the brief
+  `review/active/klee-brief-2026-09-01.md` is the live artefact; its §3 is the
+  live rule list).
+- **Furina** → `docs/current/characters/furina-identity-record.md`.
+- **Kokomi** → `docs/current/characters/kokomi-identity-record.md`.
+- **Roster-wide statline lines** → `docs/current/characters/roster-identity-record.md`.
 
 ## Roster
 
@@ -281,11 +181,9 @@ combat grammar comes with us. (principles §1)
   signature subsystem; three archetypes (default / draft-gated ceiling /
   velocity) separated by card-slot competition; ~75-card pool; talent-relic +
   kit-Burst + character relics/potions. (principles §3)
-- **Identity = statline asymmetry:** every character scores 4–5 on exactly two of
-  seven axes and ≤2 on at least one; the weakness is load-bearing. This is
-  **declared design intent, not a measured acceptance gate** — the measured axis
-  numbers stay reportable-only (see Design governance). **Every character clears
-  solo; co-op is amplified, never required.** (principles Pillars 3–4)
+- **Every character clears solo; co-op is amplified, never required.**
+  (principles Pillar 4). The statline half of this bullet moved out of LAW
+  2026-09-01 → `docs/current/characters/roster-identity-record.md`.
 - **Co-op mechanics arrive as multiplayer-only CARDS, never as modifications to a
   character's base kit.** A character's basic functionality is identical solo and
   in co-op; co-op depth is added by a few multiplayer-only cards — the route
@@ -337,9 +235,8 @@ combat grammar comes with us. (principles §1)
   in the unique-names namespace, reserved names annotated with the owning kind. A
   full-sheet reserved-names lint runs before any C-milestone; the naming/lore
   audit is [USER]-only and eyes-on. (R69; R29d)
-- **Distinctness gate (red test):** uniq ≥ 70, maxclu ≤ 5, neardup ≤ 0.40/card;
-  `top%`/`vocab` carry no permanent gate; a partial-pool anchor can only loosen a
-  threshold, never certify it. (R81)
+- **Distinctness gate (red test).** Measurement law: moved to
+  `EXPERIMENTS.md` sec.The distinctness gate on 2026-09-01. (R81)
 - **Enchantment support is a minimal per-card rider;** the run-wide enchantment
   subsystem stays outside the parity world. Encore Performance is 0-cost with no
   energy-positive loop; copies inherit printed bounds; kit cards are not legal
@@ -349,118 +246,37 @@ combat grammar comes with us. (principles §1)
   each character needs one Ancient card, gated by a deploy lint that fails on an
   empty ledger. (klee-mod Ancient ruling)
 - **A material card-sheet edit is a world change and lands under a
-  `CONSTANTS_VERSION` bump.** *"A card-sheet edit that materially changes the
-  drafted or combat world — card additions or removals, cost changes,
-  effect-number changes, rarity moves — is a world change. It lands under a
-  `CONSTANTS_VERSION` bump like any other balance constant, and numbers are not
-  comparable across it."* The sheets sit outside the `RT/D/P/C` stamp, so
-  without this rule two worlds differing in whether a card exists at all are
-  indistinguishable to a reader of the stamp. **Rename amendment:** a
-  *cosmetic* rename is exempt from the bump **only when neither the card id nor
-  the display name is read mechanically** — and the burden is on the renamer to
-  establish that, because at least one relic reads both. `card_name_damage_bonus`
-  matches a **substring** against the card id **OR** the display name
-  (`tier0/engine/relics.py:385-398`); its one carrier is `strike_dummy`,
-  substring `"strike"`, `+3` to attacks only, FROZEN. A rename that adds or
-  removes such a substring on either field moves damage and is not cosmetic.
-  (R179; M15 draft text ratified as written, amended on the rename clause)
-  **Role/archetype amendment (RATIFIED 2026-08-24, R202):** a change to a card's
-  `role` or `archetypes` is a material card-sheet edit because both fields are
-  mechanically read by drafting. It requires a `CONSTANTS_VERSION` bump, and
-  drafted-world numbers are not comparable across it.
+  `CONSTANTS_VERSION` bump.** Stamp law: moved to `EXPERIMENTS.md`
+  sec.A material card-sheet edit is a world change on 2026-09-01, with
+  the rename and role/archetype amendments. (R179; R202)
 
 ## Design governance & measurement authority
 
-- **The simulator's authority is relative deltas and structural findings, not
-  absolute human-play winrates;** a ratification resting on an absolute winrate
-  rests on the wrong number. (principles §7)
-- **Seven-axis numbers are reportable, not load-bearing:** **all seven** axes are
-  permanently CLOSED as reportable-only (never a gate, target, or justification
-  to move a value). There is **no "Fanfare axis"** — R118's term names no axis;
-  Fanfare is a Furina mechanic that falls under **scaling**, and the per-axis
-  disposition therefore collapses to one disposition for all seven. (principles
-  §7; D3; R90 Q7; R118; R138)
 - **Every archetype passes aura-starvation / bricking checks in the sim before
   implementation;** test packages model plausible drafts, never monocultures.
   (principles Guardrail 4)
-- **Ratified 1000-fight winrate bands change only by ruling, with archives;**
-  small-n heuristic locks may be retuned to measured-noise reality only with a
-  dated comment and disclosure. Authored Tier-0 25-card batteries are
-  ceiling-saturated and keep only their matchup floors; Tier 0.5 owns the
-  upper-power comparison. (R62; R47)
-- **No number measured on a prototype row is quotable** — not in a packet, not
-  in a register, not in a commit message. The quarantined prototype surface
-  exists to be played, not to be measured against the shipped world: its rows
-  reach no pool, no digest, no balance report and no stamp, so a figure taken
-  off one has no comparable. The single exception is the decision-closeness
-  falsifier (R213 F), which reads the TURN rather than the row. (R213 B; R215)
-- Measurement *method* (stamp law, one-variable windows, versioning,
-  pre-registration + blind grading, instrument visibility) is in `EXPERIMENTS.md`.
+- What a measured number may be used for -- the simulator's authority,
+  the seven axes, the ratified winrate bands, and the rule that no number
+  measured on a prototype row is quotable -- moved to `EXPERIMENTS.md`
+  sec.What a measured number may be used for on 2026-09-01. Method
+  (stamp law, one-variable windows, versioning, pre-registration and blind
+  grading, instrument visibility) was already there.
 
-### Design charter (R217)
+### Design charter (R217) - now a checklist
 
-Nine rules that bind card and pool design. They are qualitative by
-construction: each is a question a reader answers about a card, a package or a
-pool, not a number a report computes.
-
-1. **D1 — Character brief before pool construction.** No pool is built before
-   its character has a short [USER]-owned brief: the player promise; two or
-   three core verbs; one or two recurring tensions; the three archetype loops;
-   the bridges among them; the intended weakness; what the starting relic and
-   starter deck teach; and the failure modes to avoid, named. A tension
-   sentence *summarises* the character — it does not mandate that every card
-   serve one mechanic. Zhongli's brief is the entry gate of his deep dive.
-2. **D2 — Player-controlled leverage.** Every persistent resource and every
-   automatic engine must feed a decision the player can steer: timing,
-   targeting, placement, acquisition, conversion, or forgoing. "Watch it rise
-   until the number is large" is not a decision. The control must be reachable
-   early and reliably — starter kit, starting relic, base system, or the
-   ordinary pool — not only through a rare.
-3. **D3 — Benefits carry binding prices.** Defence and engine advancement may
-   share a card, but not both at full rate without a binding cost: energy or
-   tempo, a below-rate half, mutually exclusive outcomes, target or timing
-   awkwardness, a card or resource spent, identity position, a future draw or
-   deck cost, or the loss of another action. The counterfactual test: remove
-   the defence — is what remains still a full-rate play the player already
-   wanted? If yes, the defence was a subsidy.
-4. **D4 — Visible and live effects.** At the decision point the player can
-   perceive and forecast the consequences that matter, through the card, a
-   keyword, a persistent UI element or a character rule — not necessarily
-   verbatim on every face. Text that cannot bind in the shipped world,
-   invisible feeds and misleading calculated displays are defects. A rare
-   intentional edge case is not removed for being rare.
-5. **D5 — Simple surfaces, deep interactions.** Richness comes from
-   interactions — between cards, enemies, energy, draw order, piles, targets
-   and future turns — not from clauses on faces. Commons establish the verbs
-   and stay concise. Any added line of text must alter a decision.
-6. **D6 — Every card has a place.** Each card has one primary decision home:
-   acquisition and build; combat (sequencing, targeting, holding, conversion,
-   timing); teaching or utility, deliberately plain; or bridge. Plain cards are
-   legal and necessary, and a pool of them is not a defect to be edited away.
-7. **D7 — Mesh without preassembly.** Each pool carries linear signposts AND
-   modular tools. No preassembled deck; no archetype written in a private
-   language only its own cards speak; bridges exist so combinations arrive
-   unexpectedly. Shared-verb and hook counts describe a pool — they are never
-   acceptance bands.
-8. **D8 — Distinct play patterns.** Archetypes differ in how turns and drafts
-   unfold, not in the label on a bigger number. Damage may stay terminal; the
-   route, cadence, constraint, targeting, transformation, control or economy
-   must differ. One non-scalar payoff does not rescue an otherwise automatic
-   loop.
-9. **D9 — Shared layer and starting tutorial.** Companion packages connect to
-   both character verbs and universal verbs; not every Companion card needs a
-   hook, but every package needs a distinctive identity. The starting relic and
-   starter deck introduce the central verbs and one recurring tension from
-   fight one, with visible triggers and no invisible feed.
-
-**Provisional through the Klee slice**, then reviewed. **Nothing here is a
-numeric band and nothing here gates:** hook share, bridge %, payoff-role %,
-scalar-payoff %, random-target %, Powers-per-universal-verb count, plain-card
-%, word count and "turns with a named alternative" rate are descriptive only.
-No subjective front-matter fields enter card YAML, and there is no waiver
-mechanism. Decision closeness (R213 F) remains the only numeric design
-falsifier, and it falsifies one way. (R217 — drafted by GPT, sharpened by
-Claude, ratified by [USER].)
+- **The nine rules D1 to D9 left LAW on 2026-09-01** (machinery review,
+  change 6) and are the checklist a brief, a package and a sheet are read
+  against: `docs/current/kit-checklist.md`. They are qualitative by
+  construction, they are a review instrument rather than a gate rows pass,
+  and they are provisional through the Klee slice.
+- **Nothing in that checklist is a numeric band and nothing in it gates:**
+  hook share, bridge %, payoff-role %, scalar-payoff %, random-target %,
+  Powers-per-universal-verb count, plain-card %, word count and "turns with
+  a named alternative" rate are descriptive only. No subjective
+  front-matter fields enter card YAML, and there is no waiver mechanism.
+  **Decision closeness (R213 F) remains the only numeric design falsifier,
+  and it falsifies one way.** (R217, drafted by GPT, sharpened by Claude,
+  ratified by [USER].)
 
 ## Engineering invariants
 

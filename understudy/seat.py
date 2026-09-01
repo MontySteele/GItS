@@ -278,7 +278,8 @@ REFUSAL_REASONS = {
                         "already knows is wrong",
     # EB-190. The one refusal that is about WHO WROTE THE ROW rather than
     # about the seat's transcript or the packet's faces. R217 C fixes the
-    # roles at two families and OPERATIONS' doctrine-seat block says why: a
+    # roles at two families and operations/understudy-seats.md's doctrine-seat
+    # block says why: a
     # seat that grades a row its own family authored has graded its own work,
     # and the outcome is not evidence. Klee slice 1 is the case.
     "seat_authored_row": "the turn under this seat carries a prototype row "
@@ -290,7 +291,7 @@ REFUSAL_REASONS = {
 # ------------------------------------------------- the review seat's brief --
 #
 # EB-190, third limb. The doctrine / pair-review seat's OUTPUT SHAPE is
-# protocol (OPERATIONS "Doctrine seat protocol"), and until now it lived only
+# protocol (operations/understudy-seats.md), and until now it lived only
 # in whichever prompt file the operator happened to write that round. A
 # protocol re-typed per round is a protocol that drifts, and the drift already
 # cost a round: the seat supplied Rummage's replacement text verbatim, it was
@@ -327,14 +328,14 @@ of that line; naming the fix moves you across it.
 # clause. The other job is the PAIR READ, which runs AFTER a round -- shipped
 # half against prototype half, with the forms, the verdicts and the live
 # replays inline -- and its output is the round's five questions and
-# RETURN / ADVANCE / ESCALATE.
+# NOT PLAYABLE / PLAYABLE / ESCALATE.
 #
 # Klee ROUND 3 is where the single protocol bit. `EB-190` shipped one text and
 # prepended it to every `seat review`, and its two strongest lines -- "It
 # overrides anything below that conflicts with it" and "That is the whole
 # output" -- do exactly what they say: the round-3 pair read came back as two
 # lines, "PAIR A: FOLLOWS", "PAIR B: FOLLOWS", with no reading and no
-# ADVANCE/RETURN, because the seat obeyed the protocol over the brief. Round 3
+# verdict, because the seat obeyed the protocol over the brief. Round 3
 # was the first pair read since that door landed, so it was the first run that
 # could find it.
 #
@@ -352,17 +353,18 @@ You are reading a COMPLETED blind-QA round: for each arm, a shipped half and a
 prototype half of the same board, the graders' verbatim forms, the falsifier's
 verdict on each form, and what the live game did when each graded line was
 replayed. Your output is, PER ARM: the brief's numbered questions answered in
-order, and a judgment of RETURN, ADVANCE or ESCALATE.
+order, and a judgment of NOT PLAYABLE, PLAYABLE or ESCALATE.
 
 You may NOT supply card text, a number, a mode, a rewritten row, or any other
 remedy. A remedy you volunteer is DISCARDED unread, and the reasoning that
 produced it is discarded with it -- so a judgment that leans on your remedy is
 a judgment that gets thrown away. You may say that an arm's BOARD did not ask
-its question and RETURN it for that; you may not design the replacement board.
+its question and read it NOT PLAYABLE for that; you may not design the
+replacement board.
 Where a number has to be chosen it is derived by lifting a value off a shipped
 card, and that is not your job.
 
-ADVANCE means the arm is worth asking again with whole-fight play. It is NOT
+PLAYABLE means the arm is worth asking again with whole-fight play. It is NOT
 ship approval, not a balance reading and not validation, and nothing you write
 here is any of those.
 
@@ -1249,7 +1251,7 @@ def cmd_review(args) -> int:
         print(f"  offending phrase(s): {', '.join(asks)}", file=sys.stderr)
         print("  The seat answers FOLLOWS / REQUIRES_MODIFICATION and NAMES "
               "THE CLAUSE. A remedy it volunteers is discarded (R217 C; "
-              "OPERATIONS 'Doctrine seat protocol').", file=sys.stderr)
+              "operations/understudy-seats.md).", file=sys.stderr)
         return 1
 
     # The rows this brief covers, resolved the same way `grade` resolves them
@@ -1353,8 +1355,8 @@ def main(argv: list[str] | None = None) -> int:
                         "proposal against a charter and answers FOLLOWS / "
                         "REQUIRES_MODIFICATION plus the clause. `pair` reads "
                         "a COMPLETED round -- forms, verdicts and replays -- "
-                        "and answers the brief's questions plus RETURN / "
-                        "ADVANCE / ESCALATE. Both forbid a remedy")
+                        "and answers the brief's questions plus NOT PLAYABLE / "
+                        "PLAYABLE / ESCALATE. Both forbid a remedy")
     r.add_argument("--model", default="")
     r.add_argument("--out", default="")
     r.add_argument("--dry-run", action="store_true")

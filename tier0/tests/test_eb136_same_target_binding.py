@@ -14,7 +14,7 @@ WHAT THE RULING SAID, all three halves ([USER] 2026-08-25, "full parity"):
 
 WHERE EACH VERDICT COMES FROM. Nothing here is argued from taste; every pin
 below traces to a decompiled fact recorded in
-`review/active/eb136-blast-radius-2026-08-25.md`:
+`review/records/eb136-blast-radius-2026-08-25.md`:
 
   * `AttackCommand.Execute` refilters its one-element `GetPossibleTargets()`
     by `IsAlive` on EVERY hit and breaks on empty, and `CombatState

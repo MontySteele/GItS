@@ -47,8 +47,8 @@ so that nothing already ruled or already agendized is re-listed. Result:
 | Checked against | Result |
 |---|---|
 | `docs/current/QUEUE.md` (all 5 sections, 14 open rows) | **One overlap only** — the row `S8 + S10 galleries` in §3. Nothing else in QUEUE touches the enemy, boss, Ancient, or event galleries. That row is **linked below, not re-listed**. |
-| The 2026-08-08 sitting agenda | **Present in HEAD** at `review/active/sitting-agenda-2026-08-08.md`; it carries a `2026-08-10 — HISTORICAL` banner at line 3. Its item 19 walked S8 + S10 (`:470-476`) and its item 26 walked `M7` / the Enchant op (`:570-579`). Both are covered by the link block below. |
-| `review/active/sitting-reads-2026-08-26-c20-d18-p11.md` (the current sitting reads) | **No overlap.** That packet is a twelve-arm measurement re-baseline at `RT12/D18/P11/C20` — its sections are the caveat check, the cell, the three number tables, and the blast-radius discussion. It contains no world-track, lore, enemy, boss, or conversion item. |
+| The 2026-08-08 sitting agenda | **Present in HEAD** at `review/ruled/sitting-agenda-2026-08-08.md`; it carries a `2026-08-10 — HISTORICAL` banner at line 3. Its item 19 walked S8 + S10 (`:470-476`) and its item 26 walked `M7` / the Enchant op (`:570-579`). Both are covered by the link block below. |
+| `review/records/sitting-reads-2026-08-26-c20-d18-p11.md` (the current sitting reads) | **No overlap.** That packet is a twelve-arm measurement re-baseline at `RT12/D18/P11/C20` — its sections are the caveat check, the cell, the three number tables, and the blast-radius discussion. It contains no world-track, lore, enemy, boss, or conversion item. |
 | `M46` | **ABSENT in this checkout.** `grep -rn "M46" docs/ review/` returns nothing; the highest live id in `QUEUE.md` is `M45` (§5, "ratify the pass's seven open calls as ONE slate"). Recorded here as the charter's §0.4 asks, and treated as non-existent for dedupe purposes. |
 
 ### Already ruled or already agendized — LINKED, not re-listed
@@ -565,6 +565,6 @@ Recorded, not fixed — this agenda writes only itself.
 *Compiled 2026-08-26 from HEAD of the primary checkout. Sources: the five
 finished galleries named in §0, `docs/current/QUEUE.md`,
 `docs/current/BACKLOG.md`, `docs/current/RULINGS.md`, `docs/current/STATE.md`,
-`docs/current/LAW.md`, `review/active/sitting-agenda-2026-08-08.md`, and
-`review/active/sitting-reads-2026-08-26-c20-d18-p11.md`. No file outside
+`docs/current/LAW.md`, `review/ruled/sitting-agenda-2026-08-08.md`, and
+`review/records/sitting-reads-2026-08-26-c20-d18-p11.md`. No file outside
 `review/dispatch3/` was modified.*

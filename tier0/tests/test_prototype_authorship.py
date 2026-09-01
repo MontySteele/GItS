@@ -1,7 +1,8 @@
 """EB-190: recorded authorship, and the seat refusing its own family's work.
 
 R217 C fixes the roles at two model families -- Claude authors, GPT grades and
-reviews -- and OPERATIONS' "Doctrine seat protocol" says why: a seat that
+reviews -- and operations/understudy-seats.md's "Doctrine seat protocol" says
+why: a seat that
 writes a row and then grades it has graded its own work, and the outcome is
 not evidence. Klee slice 1 is the case that made it mechanical.
 
@@ -315,7 +316,8 @@ def test_seat_review_passes_a_clean_brief_and_prepends_the_protocol(tmp_path,
 
 
 def test_the_protocol_carries_the_whole_rule():
-    """The four clauses OPERATIONS' doctrine-seat block names, in the text the
+    """The four clauses the doctrine-seat block of
+    operations/understudy-seats.md names, in the text the
     seat is actually handed -- not in whichever prompt file the round used."""
     text = seat.REVIEW_PROTOCOL
     assert "FOLLOWS" in text and "REQUIRES_MODIFICATION" in text
@@ -341,12 +343,12 @@ def test_the_pair_read_has_its_own_output_shape_and_the_same_ban():
     assert pair != doctrine
 
     # The pair read's own output shape, which the doctrine text forbids.
-    for token in ("RETURN", "ADVANCE", "ESCALATE", "numbered questions"):
+    for token in ("NOT PLAYABLE", "PLAYABLE", "ESCALATE", "numbered questions"):
         assert token in pair, token
     assert "FOLLOWS" not in pair
-    # ...and it says plainly what ADVANCE is not.
+    # ...and it says plainly what PLAYABLE is not.
     flat = " ".join(pair.split())
-    assert "ADVANCE means the arm is worth asking again with whole-fight play" \
+    assert "PLAYABLE means the arm is worth asking again with whole-fight play" \
         in flat
     assert "It is NOT ship approval, not a balance reading and not validation" \
         in flat
@@ -378,7 +380,7 @@ def test_the_committed_pair_reads_are_run_in_the_pair_role(tmp_path, capsys):
     the prompt, and the line the operator reads names the role."""
     brief = tmp_path / "prompt.txt"
     brief.write_text(f"Review {CLEAN_TURN}. Answer the five questions and "
-                     f"give RETURN, ADVANCE or ESCALATE.", encoding="utf-8")
+                     f"give NOT PLAYABLE, PLAYABLE or ESCALATE.", encoding="utf-8")
     assert seat.main(["review", str(brief), "--role", "pair",
                       "--dry-run"]) == 0
     out = capsys.readouterr().out

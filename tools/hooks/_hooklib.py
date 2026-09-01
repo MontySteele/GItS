@@ -2,7 +2,7 @@
 """Shared plumbing for the Claude Code hooks under `tools/hooks/`.
 
 WHY HOOKS AT ALL. Correction D of the 2026-08-26 governance audit: Claude
-treats `CLAUDE.md` and `OPERATIONS.md` as CONTEXT, not as enforced
+treats `CLAUDE.md` and `docs/current/operations/` as CONTEXT, not as enforced
 configuration. A prose rule -- "never `git add -A`", "remove a worktree with
 `purge_worktree`" -- is advice that a long session can lose. A `PreToolUse`
 hook is the enforcement layer: exit 2 and the tool call does not happen,

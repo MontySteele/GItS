@@ -271,5 +271,5 @@ would otherwise get wrong:
   never runtime legality, and a poolless prototype would throw "You monster!"
   the first time a staged turn drew it.
 
-Commands and the deletion rule: `docs/current/OPERATIONS.md`, "Prototype
-surface". Packet: `review/active/eb147-prototype-surface-2026-08-27.md`.
+Commands and the deletion rule: `docs/current/operations/prototype.md`, "Prototype
+surface". Packet: `review/ruled/eb147-prototype-surface-2026-08-27.md`.

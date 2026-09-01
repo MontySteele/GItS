@@ -20,7 +20,7 @@ namespace KleeMod.Tests;
 /// THE KURAGE'S MEMORY v3 (QUARANTINED) -- what the headless bite-check can
 /// actually reach, and nothing beyond it.
 ///
-/// Spec: review/active/kokomi-kurage-memory-2026-08-29.md sec.11. Rule:
+/// Spec: review/ruled/kokomi-kurage-memory-2026-08-29.md sec.11. Rule:
 /// klee-mod/KleeCode/Powers/Prototype/KurageMemory.cs. Sim twin:
 /// tier0/tests/test_kurage_memory.py, which tests the whole rule because the
 /// sim has an engine to run it in.
@@ -426,7 +426,7 @@ public class KurageMemoryPinTests
     //
     // THE ONE DISPLAY FACT WITH NO RESOLUTION-SIDE EXPRESSION TO BORROW, and
     // therefore the one that needed a function and a fixture of its own
-    // (review/active/kokomi-kurage-memory-2026-08-29.md sec.14.4). The engine
+    // (review/ruled/kokomi-kurage-memory-2026-08-29.md sec.14.4). The engine
     // only ever fires ONE memory, so nothing in it asks how far down the queue
     // the bank reaches -- but the pile view the memory card opens has to answer
     // exactly that, front first, red at the shortfall and red for everything

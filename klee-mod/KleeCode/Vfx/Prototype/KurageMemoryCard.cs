@@ -22,7 +22,7 @@ namespace KleeMod.Vfx;
 
 /// <summary>
 /// THE KURAGE MEMORY CARD -- [USER]'s direction, `M61` = option 3
-/// (review/active/kokomi-kurage-memory-2026-08-29.md §14; §14.8 is the pick,
+/// (review/ruled/kokomi-kurage-memory-2026-08-29.md §14; §14.8 is the pick,
 /// §14.1 is [USER]'s five quotes and IS the spec). This retires the
 /// `kokomi_memory` strip that used to draw the whole queue as text into the
 /// shared gauge's one label.
@@ -573,7 +573,7 @@ internal static class KurageMemoryCard
 internal static class KurageMemoryText
 {
     /// <summary>R224 item 7's sentence, and nothing added to it
-    /// (review/active/sitting-2026-08-30.md, item 7).</summary>
+    /// (review/ruled/sitting-2026-08-30.md, item 7).</summary>
     internal static readonly string ChargeSource =
         $"Gain {KokomiConstants.ChargePerExhaust} Charge when a card of "
       + "yours Exhausts";
@@ -597,7 +597,7 @@ internal static class KurageMemoryPileRing
     /// hold a sentence, so the line goes at the head of the click-through pile
     /// view -- the only text-bearing memory surface left. "Stir" is NOT built.
     ///
-    /// The wording is R224's, verbatim (review/active/sitting-2026-08-30.md,
+    /// The wording is R224's, verbatim (review/ruled/sitting-2026-08-30.md,
     /// item 7), and it is a rules sentence rather than a live read: the bank
     /// itself is on the HUD, and repeating it here would be the division of
     /// labour §14.3 exists to keep.

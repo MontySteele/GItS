@@ -241,7 +241,7 @@ green.
    she takes the cast's top, Ironclad's 80 (Defect 75 / Regent 75 / Silent
    70 / Necrobinder 66). Also energy 3, starter deck composition incl.
    reserved companion slots. All numbers knobs; alternatives 82 and 78 are
-   recorded in `review/active/roster-hp-scalers-2026-08-29.md`.
+   recorded in `review/records/roster-hp-scalers-2026-08-29.md`.
 9. Raiden disposition (§4).
 10. Naming/lore audit — card-name candidates herein are placeholders; audit
     is irreplaceable and [USER]-only. Reserved-names lint runs on the full

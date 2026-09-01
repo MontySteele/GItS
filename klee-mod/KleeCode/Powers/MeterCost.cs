@@ -64,7 +64,7 @@ public interface IMeterPricedCard
 ///
 /// <c>EB-220</c> generalises what <see cref="SparkCost"/> did for Sparks. The
 /// Spark cost badge was built (PICK 8 option 2,
-/// review/active/klee-sparks-2026-08-29.md sec.6.4) on a single rule: the badge
+/// review/ruled/klee-sparks-2026-08-29.md sec.6.4) on a single rule: the badge
 /// renders the exact expression the playability gate charges, so a price a
 /// player reads off a card face cannot drift from the price the engine takes.
 /// [USER] then asked for the same badge on Encore and Charge, so the READ has

@@ -1,3 +1,5 @@
+Status: OPEN (picks 1-9 ruled; the live Paper artefact through the Prototype build)
+
 # Klee — character brief, draft 4
 
 **Written 2026-09-01 on branch `kit-overhaul-2026-09-01`. Paper only.** No sheet,

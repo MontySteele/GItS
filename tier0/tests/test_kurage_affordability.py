@@ -1,6 +1,6 @@
 """THE AFFORDABILITY RUN, and the fixture that stops the two engines drifting.
 
-Spec: `review/active/kokomi-kurage-memory-2026-08-29.md` §14.4. The rule is the
+Spec: `review/ruled/kokomi-kurage-memory-2026-08-29.md` §14.4. The rule is the
 running subtraction the memory CARD's pile view paints: front first, blue while
 the bank still reaches, red at the entry it cannot reach, and red for every
 entry behind that one — [USER]'s "also red", which is true because

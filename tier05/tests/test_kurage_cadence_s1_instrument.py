@@ -1,6 +1,6 @@
 """`KURAGECAD-S1`'s instrument (`tier05/exp_kurage_cadence_s1.py`), pinned.
 
-The registration is `review/active/kokomi-kurage-memory-2026-08-29.md` §15 and
+The registration is `review/ruled/kokomi-kurage-memory-2026-08-29.md` §15 and
 it was committed before the instrument; the instrument is committed before the
 run. What this file pins is the three things a reader of the record has to be
 able to trust WITHOUT re-running it:

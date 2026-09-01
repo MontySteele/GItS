@@ -3,7 +3,7 @@
 `force_cards` exists so two arms can run on the SAME seeds with one deck
 holding an extra copy of a named card and the other not -- the register's
 "two decks on the same seeds, one with a copy forced in, one without". The
-registration (`review/active/eb17p-registration-draft-2026-08-08.md` §2.2,
+registration (`review/records/eb17p-registration-draft-2026-08-08.md` §2.2,
 §10) buys its pairing with two properties, and this file is where both are
 pinned rather than assumed:
 

@@ -3816,7 +3816,7 @@ def _op_summon_kurage(state: CombatState, fx: dict, card: Card) -> None:
 # --------------------------------------------------------------------------
 # THE KURAGE'S MEMORY (QUARANTINED, C.KURAGE_MEMORY). Everything below is
 # unreachable with the flag off -- each entry point returns on the flag
-# before touching anything. review/active/kokomi-kurage-memory-2026-08-29.md
+# before touching anything. review/ruled/kokomi-kurage-memory-2026-08-29.md
 # --------------------------------------------------------------------------
 
 def _kokomi_memory_live(state: CombatState) -> bool:
@@ -4064,7 +4064,7 @@ KURAGE_HELD = "held"
 def kurage_affordability(prices: Sequence[int], bank: int) -> list[str]:
     """THE AFFORDABILITY RUN -- the running subtraction over the queue.
 
-    Spec: `review/active/kokomi-kurage-memory-2026-08-29.md` sec.14.4, which is
+    Spec: `review/ruled/kokomi-kurage-memory-2026-08-29.md` sec.14.4, which is
     [USER]'s direction for the card element that replaced the strip. The HUD
     answers "does the next one fire" (one comparison, no forecast); the PILE
     VIEW answers "how far do I get", and this is that answer.

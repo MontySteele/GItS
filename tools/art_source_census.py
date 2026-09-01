@@ -40,7 +40,7 @@ which is what licenses using it to price the unclaimed ones.
 
 Stdlib + Pillow + PyYAML. `art/raw/` is gitignored Tier F and exists only on
 the art-bearing main checkout; `--art-root` points there from a worktree
-(NEVER link it in -- OPERATIONS.md "Worktrees"). Without the pixels the census
+(NEVER link it in -- operations/worktrees.md). Without the pixels the census
 still runs off `NATIVE_DIMS` below and says so.
 """
 import argparse
@@ -350,7 +350,7 @@ def main():
     ap.add_argument("--art-root", type=Path, default=ROOT,
                     help="checkout whose art/raw/ holds the pixels; a worktree "
                          "has none, so point this at the main checkout by "
-                         "ABSOLUTE path (never link it in -- OPERATIONS.md)")
+                         "ABSOLUTE path (never link it in -- operations/worktrees.md)")
     ap.add_argument("--reuse-cap", type=int, default=REUSE_CAP,
                     help=f"crop-reuse budget: max anchors from one source "
                          f"(default {REUSE_CAP}, the shipped plan's own maximum)")

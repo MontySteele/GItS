@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """PreToolUse/Bash|PowerShell: a `git push` runs the fast lane and the CI lints first, or it does not run.
 
-Correction D. OPERATIONS.md's ratified discipline ([USER] 2026-08-24) reads
+Correction D. operations/test.md's ratified discipline ([USER] 2026-08-24) reads
 *"before any push -- the FULL suite and the full lint battery"*. That sentence
 has been true and unenforced: nothing has ever stopped a push that was never
 tested, and a push is the last moment the repo can refuse.

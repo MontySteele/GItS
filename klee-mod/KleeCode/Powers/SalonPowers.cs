@@ -42,7 +42,7 @@ public static class SalonConstants
     // red-pen" from the 2026-07-23 rework until the countersign; no value
     // moved when the banner came off, so no world stamp moved either. The
     // derivation signed against is
-    // review/active/eb77-salon-summon-damage-derivation.md, and the sim-side
+    // review/ruled/eb77-salon-summon-damage-derivation.md, and the sim-side
     // half of this banner is tier0/constants.py above SALON_MEMBERS.
     public const int CrabalettaTick = 6;
     public const int CrabalettaBow = 14;

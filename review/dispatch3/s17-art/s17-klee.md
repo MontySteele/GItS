@@ -148,7 +148,7 @@ staging makes one possible.
 | `hold_the_line` | **MISSING** (uncommon skill) | **no plan row at all** | never hunted | — | no source hunted; see §3.2 |
 | `powder_charge` | **MISSING** (uncommon skill) | **no plan row at all** | never hunted | — | same |
 | `smoke_and_sparks` | **MISSING** (uncommon skill) | **no plan row at all** | never hunted | — | same |
-| `confiscated` | **MISSING**, and it is a **C#-only token**, not a sheet row | r2 `Klee Shorts 2023-06-12.png`, r3 `Klee Birthday 2022 - Shorts.png` (`art/plan.tsv:1142-1143`) — **there is no r1** | candidates staged by art run 8 (`review/active/art-runs-2026-08-08.md:181`), sheet `art/contact_sheet_eb54_eb36.html` — **sheet is dead, §7.1** | — | needs an r1 or a promotion of r2/r3; that is a taste call |
+| `confiscated` | **MISSING**, and it is a **C#-only token**, not a sheet row | r2 `Klee Shorts 2023-06-12.png`, r3 `Klee Birthday 2022 - Shorts.png` (`art/plan.tsv:1142-1143`) — **there is no r1** | candidates staged by art run 8 (`review/ruled/art-runs-2026-08-08.md:181`), sheet `art/contact_sheet_eb54_eb36.html` — **sheet is dead, §7.1** | — | needs an r1 or a promotion of r2/r3; that is a taste call |
 | `spark_knight_style` | shipped, but **byte-identical to `kaboom.png`** | **plan row commented out** (`art/plan.tsv:179-200`) — ruled to the rehunt pile 2026-07-27 | RULED: kaboom keeps `Klee Character Card`, this one re-hunts (`art_lint.py:725-745`) | **duplicate, allowlisted** `KNOWN_IDENTICAL` | new art not yet hunted; `art_coverage` still counts it *covered*, which is correct-by-rule and misleading-by-eye |
 | `catalytic_conversion` / `spark_collection` | both shipped, **byte-identical to each other** | both effectively `Item Dodoco's Marvelous Magic.png` | **PENDING RED-PEN**, allowlisted in `art_lint.PENDING_RED_PEN:302` and `KNOWN_IDENTICAL:709`; both lines print in the baseline run (L1 + L12) | **duplicate + source collision** | needs a re-pick on one side — taste |
 | `no_holding_back` | shipped | r1 `Klee Multi Wish.png` (`art/plan.tsv:145`) | flagged `L6 WARN` in the baseline run (cover trims ~76% of source height — possible head/limb clip); candidate sheet `art/contact_sheet_eb39_no_holding_back.html` — **dead, §7.1** | — | eyes-on |
@@ -178,7 +178,7 @@ are already staged as rank-2/3 candidates** for `confiscated` and
 
 So: **the already-fetched pool contains zero unclaimed Klee card faces.** This
 is the same shape as the Furina exhaustion finding
-(`review/active/art-runs-2026-08-08.md:428-433`), which was recorded for Furina
+(`review/ruled/art-runs-2026-08-08.md:428-433`), which was recorded for Furina
 only.
 
 **This does not say the wiki is exhausted** — only the local fetched pool as
@@ -241,7 +241,7 @@ Not this family's problem, noted so the joined ledger does not blur them.)
 
 ### 4.1 The two weak marks
 
-`review/active/art-runs-2026-08-08.md:59-72` names four icons that "have no
+`review/ruled/art-runs-2026-08-08.md:59-72` names four icons that "have no
 good source and are flagged for re-hunt, not presented as good". **Two are in
 Klee's namespace:** `power_friendly_visit` and `power_study_buddy`. Both keep
 their incumbent rank-1; r2/r3 candidates were staged
@@ -416,7 +416,7 @@ and `art_process.py` contains no delete (`shutil` is only used for `copyfile`,
 `:271`, `:317`). The likeliest explanation on the evidence is that the older
 candidates lived in worktrees that have since been purged — the identical
 failure is already recorded once, for the `S4-G12` sheet, at
-`review/active/art-runs-2026-08-08.md:79-81` ("the old one lived in a retired
+`review/ruled/art-runs-2026-08-08.md:79-81` ("the old one lived in a retired
 worktree"). Stated as a hypothesis, not a finding.
 
 **The repair is cheap and needs no network.** I checked every one of the **173

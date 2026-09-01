@@ -1,6 +1,6 @@
 """EB-188: the door that lets a blind whole-fight run carry a prototype arm.
 
-The gate after a pair read ADVANCES an arm is whole-fight blind play, and it
+The gate after a pair read reads an arm PLAYABLE is whole-fight blind play, and it
 could not run for ANY arm: prototype rows are quarantined out of every pool by
 construction, so a blind run cannot draw one. `understudy/embark.py --arm`
 grants the row into the STARTING DECK once the run is open, through the dev

@@ -9,7 +9,7 @@ face.
 
 WHY IT IS ONLY NOW LEGAL. The written Spark-cost clause said the spend must
 stay at the CARD's top level; the doctrine seat held the arm on it twice
-(`review/active/klee-slice-1-2026-08-29.md` sec.6.1 and sec.6.1.1). R225
+(`review/ruled/klee-slice-1-2026-08-29.md` sec.6.1 and sec.6.1.1). R225
 amended the clause on 2026-08-30 to read TOP LEVEL **or** the HEAD of a
 `choose_one` MODE, and nothing nested or conditional. The seat's other clause,
 D4, was already RESOLVED by `EB-182` -- which is the machinery this row runs

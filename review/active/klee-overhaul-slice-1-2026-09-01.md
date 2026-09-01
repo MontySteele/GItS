@@ -1,3 +1,5 @@
+Status: OPEN (Paper artefact; build not started)
+
 # Klee overhaul, slice one: the rules, the starter, and 28 cards (Paper stage)
 
 Written 2026-09-01 against the ruled brief (`klee-brief-2026-09-01.md`, all
