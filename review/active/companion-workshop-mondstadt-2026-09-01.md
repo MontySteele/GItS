@@ -30,12 +30,19 @@ engine. That is what a card from outside your pool looks like in StS2.
 
 A companion Common has no base-game model, so here is the one I propose.
 
-- **A Common imports the character's move, at Strike-and-Defend rate.**
-  No premium. Its value is the verb, not the number. The test: cover the
+- **A Common imports the character's move, and beats a Strike.** Its
+  value is the verb first and the number second. The test: cover the
   character's name and read the card. If it could be called "Strike" or
   "Defend", it is a brick. "Deal 6, applies Cryo" fails: it is a Cryo
   Strike. "Gain 4 Block; when this Block absorbs damage, apply Cryo to the
   attacker" passes: it is Diona's paws.
+- **A Common is priced like the character's own Common,** and a
+  character's Common beats a Strike and a Defend outright, because a
+  Strike is the card you remove. For one energy that is about 9 damage or
+  8 Block plain, or 6 to 7 with a rider that matters, or a 0 cost. "One
+  energy for a plain 6" is a terrible card, in your words. An Uncommon
+  Exhaust body is compared against Silent's Dash (10 and 10 for 2) and
+  Backflip; a Rare that costs 3 must be able to end the fight.
 - **An Uncommon is the colorless shape.** A splash worth more than a
   character card of the same cost, paid for with a condition, a drawback,
   or Exhaust, and often free.
@@ -82,7 +89,7 @@ longer exists.
 
 ## 3. The rewrites and the stand-ins, one character at a time
 
-Printed text only; numbers are placeholders. C / U / R. "Stand-in" means
+Printed text only; numbers are the first honest price, not a claim. C / U / R. "Stand-in" means
 Klee-only, own name, in place of the Universal named. Element applies on
 Attacks as the sheet already does.
 
