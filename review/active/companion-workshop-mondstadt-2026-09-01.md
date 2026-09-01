@@ -57,6 +57,14 @@ A companion Common has no base-game model, so here is the one I propose.
   own readers and any future Hexerei character's carry the payoff. Tagged
   in-game: Albedo, Klee, Durin, Venti, Fischl, Razor, Sucrose, Mona, Varka,
   Nicole, Prune.
+- **An applier on this sheet targets a chosen enemy, or applies twice.**
+  Mondstadt is balanced around Klee, and her Attacks put Pyro on whatever
+  she hits, so a random Hydro or Cryo lands on her own aura, reacts with
+  no damage behind it, and wastes the multiplier. A chosen target lets her
+  sequence it; "twice" (on her own stand-ins and Personals) makes the
+  first application eat the Pyro and the second land.
+- **A Power has no turn limit.** A Power cannot be reapplied, so a timed
+  effect is a Skill with Exhaust; a Power lasts the fight.
 - **A stand-in is a whole Klee-only card with its own name**, in place of
   one named Universal, per the ruled structure. Its text may print Klee's
   verbs. It is authored only where the kit gives a Klee-shaped idea; "no
@@ -100,7 +108,7 @@ Attacks as the sheet already does.
 - **Signature Mix** (U, 1, Skill, Exhaust): Apply 2 Weak to all enemies.
   For 2 turns, at the start of your turn gain 4 Block. *The field.*
 - **Stand-in for Icy Paws: Shaken, Not Purred** (C): Gain 6 Block. Apply
-  Cryo to a random enemy. If a Bomb goes off this turn, gain 5 Block.
+  Cryo to target enemy twice. If a Bomb goes off this turn, gain 5 Block.
   *Cryo under a Bomb is Melt; the shield pays for the loud turn.*
 
 ### Noelle (Geo, the maid who wants to be a knight; no row today)
@@ -124,11 +132,12 @@ Attacks as the sheet already does.
 
 ### Barbara (Hydro, the idol deaconess, Jean's sister)
 
-- **Let the Show Begin♪** (C, 1, Skill): Gain 6 Block. Apply Hydro to a
-  random enemy. *Same shape as Diona's, priced the same; the Melody Loop
+- **Let the Show Begin♪** (C, 1, Skill): Gain 6 Block. Apply Hydro to
+  target enemy. *Same shape as Diona's, priced the same; the Melody Loop
   does apply Wet.*
 - **Melody Loop** (U, 1, Skill, Exhaust): Gain 4 Block. For 3 turns, at the start
-  of your turn apply Hydro to a random enemy. *A persistent applier. For Klee, a
+  of your turn apply Hydro to target enemy. *A persistent applier on a
+  chosen body. For Klee, a
   Vaporize every turn; for anyone, a reaction engine.*
 - **No stand-in earned.** Her healing is Rare-and-Exhaust by law and she is
   a 4-star. Shining Miracle♪ is retired as a name until a Rare can carry it.
@@ -158,9 +167,10 @@ Attacks as the sheet already does.
 
 - **Nightrider** (C, 1, Attack, Hexerei): Deal 7, Electro. If Oz is out, Oz
   attacks now. *The raven answers her.*
-- **Oz, at Your Side** (U, 1, Power, Hexerei): 5 Electro damage to a random
-  enemy at the end of each turn, for 3 turns. *Already a verb; re-priced
-  from 3.*
+- **Oz, at Your Side** (U, 1, Power, Hexerei): At the end of your turn, Oz
+  deals 5 Electro damage to a random enemy. *Already a verb. The turn
+  limit is gone: a Power cannot be reapplied, so Oz stays out, which is
+  his C1.*
 - **Hexerei stand-in for Nightrider: Undone Be Thy Sinful Hex** (C): Deal
   7, Electro. Whenever an Electro reaction happens this turn, deal 5
   Electro damage to a random enemy. *Family-generic.*
@@ -196,17 +206,19 @@ Attacks as the sheet already does.
 
 ### Durin (Pyro 5-star, Albedo's brother, "Big Brother Durin", Hexerei)
 
-- **Binary Form** (R, 1, Power, Hexerei, choose one when played): *White*:
-  enemies take 25% more damage from reactions. *Dark*: your Pyro Attacks
-  that react deal 6 more. *The two forms, and it no longer eats Klee's
-  Pyro; it rewards her spending it.*
+- **Binary Form** (R, 2, Power, Hexerei): Deal 10 Pyro damage to all
+  enemies, then choose one for the fight. *White*: enemies take 50% more
+  damage from reactions. *Dark*: your Pyro Attacks that react deal 8
+  more. *The two forms with a body in front of them, and it no longer
+  eats Klee's Pyro; it rewards her spending it.*
 - **No separate stand-in.** Both forms are family-generic already.
 
 ### Nicole (Pyro 5-star, the prophetess of the Hexenzirkel, Hexerei; Nod-Krai native, in the Mondstadt pool by the coven)
 
-- **Revelation, Uncreated Light** (R, 1, Skill, Exhaust, Hexerei): Gain 8
-  Block and 1 Strength. Next turn, gain 1 Strength. *Grace of Kenosis
-  becoming Theosis when she stays.*
+- **Revelation, Uncreated Light** (R, 2, Power, Hexerei): At the start of
+  your turn, gain 5 Block. If you had Block left at the end of your last
+  turn, also gain 2 Strength. *Grace of Kenosis becomes Theosis when she
+  stays on the field; the Rare pays for holding the line.*
 - **Hexerei stand-in: Ladder of Divine Ascent** (R Power): Whenever you play
   a Hexerei card, deal 6 damage of that card's element to a random enemy.
   *The Arcane Projection. This is a density payoff and may not live on a
@@ -215,10 +227,11 @@ Attacks as the sheet already does.
 
 ### Prune (Anemo, the witch hunter, Klee's coven, Hexerei)
 
-- **Personal, coven. Ring-A-Ding-Ding! Hexhunter Chime** (U, 1, Skill):
-  Swirl. The next Bomb you set off this turn deals the swirled element
-  instead of Pyro. *Her hammer takes the element it swirled; so does the
-  bomb. The off-element bomb, by companion, as ruled.*
+- **Personal, coven. Ring-A-Ding-Ding! Hexhunter Chime** (U, 1, Attack):
+  Deal 8 Anemo damage. Swirl. The next Bomb you set off this turn deals
+  the swirled element instead of Pyro. *Her hammer takes the element it
+  swirled; so does the bomb. The off-element bomb, by companion, as
+  ruled, with a body on the card.*
 
 ### Razor (Electro, the wolf boy, Hexerei; returns to Universal per Klee pick 6)
 
@@ -298,8 +311,9 @@ kit, pointed at her bombs.
   Gain 4 Block. If a Bomb went off this turn, draw 1. *She rolls in, she
   rolls out, and she is gone before the bang.*
 - **Qiqi — Herald of Frost** (U, 1, Skill, Exhaust): For 3 turns, at the
-  start of your turn apply Cryo to a random enemy and gain 3 Block. *The
-  Herald follows her; Cryo under a bomb is Melt every turn.*
+  start of your turn apply Cryo twice to a random enemy and gain 3 Block.
+  *The Herald follows her; the first Cryo eats her Pyro, the second sits
+  under the bomb, and the bomb Melts every turn.*
 - **Yaoyao — Yuegui: Throwing Mode** (U, 1, Skill, Exhaust): For 3 turns,
   at the end of your turn Bomb 3 on a random enemy. *Radishes.*
 
@@ -362,3 +376,11 @@ gains an 8 to all on play; Baron Bunny to 8, Fiery Rain to 4 three times;
 Lightning Rose to 5; the Lightfall Sword to 8 plus 5; Ravaging Confession
 to 9; Starfrost Swirl to 5; Sayu's coven Block to 4, Qiqi's to 3,
 Yaoyao's radishes to Bomb 3.
+
+Your second set of notes, same day: Oz loses its turn limit (a Power
+cannot be reapplied); Durin and Nicole are raised to Rare payoffs, Durin
+with a 10 to all in front of the form and 50% / plus 8 behind it, Nicole
+as a Power that pays Block every turn and Strength for holding it;
+every Hydro and Cryo applier now targets a chosen enemy, and Klee's own
+stand-ins and Personals apply twice, because a random application lands
+on her Pyro and wastes the reaction; Prune gets an 8-damage body.
