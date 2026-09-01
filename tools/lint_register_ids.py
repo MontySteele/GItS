@@ -1151,7 +1151,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
     # every row it covered closed. M47 took option (3), build per-mode
     # playability (EB-182) first then re-ask, and EB-182 now names its two
     # consumers; M55 took (5) re-scoped to the pile view and folds into
-    # EB-214; M64 took the SPLIT -- Codex decides any round that can ADVANCE
+    # EB-214; M64 took the SPLIT -- Codex decides any round that can read PLAYABLE
     # an arm, fresh-Opus rounds are INSTRUMENT rounds -- written into
     # OPERATIONS' Local tester seat section. The rest:
     # the pilot's obsolete Charge term closed, the Kurage-memory redesign's

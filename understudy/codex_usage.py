@@ -3,7 +3,7 @@
 WHY THIS EXISTS. The Codex seat spends a third party's metered quota on a
 $20/month plan, and until now nothing in this tree could see the meter. The
 standing rule -- three Codex calls per graded turn (R217, and `M64`'s split
-where an ADVANCE round buys roughly seven) -- is a BUDGET, written down in
+where a PLAYABLE round buys roughly seven) -- is a BUDGET, written down in
 `OPERATIONS.md` and obeyed by hand. Obeyed by hand is fine for a sitting
 somebody is watching. It is not fine for an overnight run, where the
 failure mode is that the seat burns the week's window at 02:00 and every

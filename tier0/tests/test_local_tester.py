@@ -1301,7 +1301,7 @@ def test_the_ledger_write_is_serialized_and_the_grades_carry_no_lane():
     assert isinstance(staged_turn.LEDGER_LOCK, type(threading.Lock()))
     rows = [{"turn_id": "t01", "slots": ["S1"]},
             {"turn_id": "t02", "slots": ["S1"]}]
-    grades = {"t01": ["ADVANCE", "ADVANCE"], "t02": []}
+    grades = {"t01": ["PLAYABLE", "PLAYABLE"], "t02": []}
     state = local_tester.slot_state(rows, grades)
     assert state["S1"].startswith("DECIDED")
 

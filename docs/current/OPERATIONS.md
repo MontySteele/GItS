@@ -608,7 +608,7 @@ at most once, and never overrides an answer the form carries.
 
 **Who grades, since R217 A, as amended 2026-09-01.** [USER] plays **at rule
 changes; the seats play the rest.** He fills no calibration forms at any point:
-the independent seat's form NOT-PLAYABLEs a prototype or reads it PLAYABLE with
+the independent seat's form RETURNS a prototype or reads it PLAYABLE with
 no [USER] involvement, and two seats materially disagreeing ESCALATES. His play
 is whole fights on a `+proto` build at the four rule-change milestones
 (`CLAUDE.md` §Norms), which the funnel does not grade and does not wait on. So
@@ -695,8 +695,8 @@ not the shape.
 - **`--role pair`** — the PAIR READ, run AFTER a round: shipped half against
   prototype half, with the forms, the falsifier's verdicts and the live
   replays inline. Answers the round's numbered questions per arm and ends each
-  with **RETURN / ADVANCE / ESCALATE**, and the protocol says in the seat's own
-  prompt that ADVANCE is not ship approval, not a balance reading and not
+  with **RETURN / PLAYABLE / ESCALATE**, and the protocol says in the seat's own
+  prompt that PLAYABLE is not ship approval, not a balance reading and not
   validation (R217 G).
 
 **Klee round 3 is why the roles are split.** `EB-190` shipped ONE protocol and
@@ -848,15 +848,16 @@ and the verdict is `verdict-local-<slug>.json` as before. The prompt is
 `seat.build_prompt`'s, unchanged, so the two seats cannot drift apart, and the
 `packet_sha256` pin and every refusal `local_seat` already kept are inherited
 whole. **Grader work, whole-fight blind play and the doctrine gate stay with
-the Codex seat**, and an ADVANCE here is not validation, not balance evidence
+the Codex seat**, and a PLAYABLE here is not validation, not balance evidence
 and not ship approval.
 
 **Who holds the DECIDING chair (R224, `M64`) — a SPLIT, by what the round can
-do.** A round that can **ADVANCE an arm** gets the **Codex seat deciding every
-board** — roughly seven Codex calls a round against the standing three, and
-that cost is accepted because an ADVANCE resting on a same-family read is not
-author-disjoint (R217 C). A round that is an **INSTRUMENT round** — a repair,
-a bench, anything on which **no ADVANCE rests** — stays on the **fresh-Opus**
+do.** A round that can read **an arm PLAYABLE** gets the **Codex seat deciding
+every board** — roughly seven Codex calls a round against the standing three,
+and that cost is accepted because a PLAYABLE resting on a same-family read is
+not author-disjoint (R217 C). A round that is an **INSTRUMENT round** — a
+repair, a bench, anything on which **no PLAYABLE rests** — stays on the
+**fresh-Opus**
 deciding form, which R222 B seats. The round's own registration says which it
 is, before it runs.
 
@@ -1299,13 +1300,13 @@ vendored bridge's own version and never ours — run seed read back off the
 wire, prompt sha256, action count, termination reason) and the model's
 records verbatim under the R217 G label. The author's own model family is refused as tester (R217 C). Beside it, `wire.json` carries the **per-turn wire snapshot** (`EB-216` / `M56`): one machine-written row per play and per `end turn` — turn, energy, every meter (BaseLib's registered resources AND the power-shaped ones, which is where Sparks ride), the hand with its printed energy and Spark prices, the Kurage queue strip where the build serves one, and the enemy count with intents — lifted off the API and **never shown to the tester**, because the tester's page is the grading surface and this is the grader's (R101b); each row also carries the **meter ledger** the play minted (R225: `before / price paid / gains by source / after`, read after the POST off `GET /api/v1/gits/meter_ledger`, with `blindplay.read_snapshots` and `blindplay.meter_plays` as the grader's read — instrument only, and nothing already published is re-graded on it).
 
-**After ADVANCE.** A prototype arm the pair read ADVANCES goes to **whole-fight
+**After PLAYABLE.** A prototype arm the pair read calls PLAYABLE goes to **whole-fight
 blind play on a dev build**, automatically. It is the next gate, not a pick, and
 nobody is asked for a form to start it. It has not run for any arm yet, and the
 reason is structural: prototype rows are quarantined out of every pool, so a
 blind run cannot draw one. Until `EB-188` lands the door — a `+proto` pool
 inclusion, or the dev door granting a named arm into the starting deck — the
-gate is **blocked, not skipped**, and an arm that reads ADVANCE waits there
+gate is **blocked, not skipped**, and an arm that reads PLAYABLE waits there
 rather than moving on without it.
 
 **One round, one branch.** A funnel round runs on its own branch cut from the

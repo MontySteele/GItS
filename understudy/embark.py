@@ -20,7 +20,7 @@ nothing torn down. What comes next is a person running
     python -m understudy.embark --character klee --arm proto_spark_priced_draw
     python -m understudy.embark --teardown                     # put it all back
 
-THE PROTOTYPE ARM DOOR (`EB-188`). The gate after a pair read ADVANCES an arm
+THE PROTOTYPE ARM DOOR (`EB-188`). The gate after a pair read reads an arm PLAYABLE
 is whole-fight blind play, automatically -- and it could not run for any arm,
 because prototype rows are quarantined out of every pool by construction, so a
 blind run cannot DRAW one. `--arm <proto id>` (repeatable) is the smallest

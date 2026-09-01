@@ -341,12 +341,12 @@ def test_the_pair_read_has_its_own_output_shape_and_the_same_ban():
     assert pair != doctrine
 
     # The pair read's own output shape, which the doctrine text forbids.
-    for token in ("RETURN", "ADVANCE", "ESCALATE", "numbered questions"):
+    for token in ("RETURN", "PLAYABLE", "ESCALATE", "numbered questions"):
         assert token in pair, token
     assert "FOLLOWS" not in pair
-    # ...and it says plainly what ADVANCE is not.
+    # ...and it says plainly what PLAYABLE is not.
     flat = " ".join(pair.split())
-    assert "ADVANCE means the arm is worth asking again with whole-fight play" \
+    assert "PLAYABLE means the arm is worth asking again with whole-fight play" \
         in flat
     assert "It is NOT ship approval, not a balance reading and not validation" \
         in flat
@@ -378,7 +378,7 @@ def test_the_committed_pair_reads_are_run_in_the_pair_role(tmp_path, capsys):
     the prompt, and the line the operator reads names the role."""
     brief = tmp_path / "prompt.txt"
     brief.write_text(f"Review {CLEAN_TURN}. Answer the five questions and "
-                     f"give RETURN, ADVANCE or ESCALATE.", encoding="utf-8")
+                     f"give RETURN, PLAYABLE or ESCALATE.", encoding="utf-8")
     assert seat.main(["review", str(brief), "--role", "pair",
                       "--dry-run"]) == 0
     out = capsys.readouterr().out

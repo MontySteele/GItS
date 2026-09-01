@@ -327,14 +327,14 @@ of that line; naming the fix moves you across it.
 # clause. The other job is the PAIR READ, which runs AFTER a round -- shipped
 # half against prototype half, with the forms, the verdicts and the live
 # replays inline -- and its output is the round's five questions and
-# RETURN / ADVANCE / ESCALATE.
+# RETURN / PLAYABLE / ESCALATE.
 #
 # Klee ROUND 3 is where the single protocol bit. `EB-190` shipped one text and
 # prepended it to every `seat review`, and its two strongest lines -- "It
 # overrides anything below that conflicts with it" and "That is the whole
 # output" -- do exactly what they say: the round-3 pair read came back as two
 # lines, "PAIR A: FOLLOWS", "PAIR B: FOLLOWS", with no reading and no
-# ADVANCE/RETURN, because the seat obeyed the protocol over the brief. Round 3
+# verdict, because the seat obeyed the protocol over the brief. Round 3
 # was the first pair read since that door landed, so it was the first run that
 # could find it.
 #
@@ -352,7 +352,7 @@ You are reading a COMPLETED blind-QA round: for each arm, a shipped half and a
 prototype half of the same board, the graders' verbatim forms, the falsifier's
 verdict on each form, and what the live game did when each graded line was
 replayed. Your output is, PER ARM: the brief's numbered questions answered in
-order, and a judgment of RETURN, ADVANCE or ESCALATE.
+order, and a judgment of RETURN, PLAYABLE or ESCALATE.
 
 You may NOT supply card text, a number, a mode, a rewritten row, or any other
 remedy. A remedy you volunteer is DISCARDED unread, and the reasoning that
@@ -362,7 +362,7 @@ its question and RETURN it for that; you may not design the replacement board.
 Where a number has to be chosen it is derived by lifting a value off a shipped
 card, and that is not your job.
 
-ADVANCE means the arm is worth asking again with whole-fight play. It is NOT
+PLAYABLE means the arm is worth asking again with whole-fight play. It is NOT
 ship approval, not a balance reading and not validation, and nothing you write
 here is any of those.
 
@@ -1354,7 +1354,7 @@ def main(argv: list[str] | None = None) -> int:
                         "REQUIRES_MODIFICATION plus the clause. `pair` reads "
                         "a COMPLETED round -- forms, verdicts and replays -- "
                         "and answers the brief's questions plus RETURN / "
-                        "ADVANCE / ESCALATE. Both forbid a remedy")
+                        "PLAYABLE / ESCALATE. Both forbid a remedy")
     r.add_argument("--model", default="")
     r.add_argument("--out", default="")
     r.add_argument("--dry-run", action="store_true")
