@@ -1,4 +1,4 @@
-Status: OPEN (picks 1 to 8)
+Status: OPEN (picks ruled 2026-09-01; slice one in progress)
 
 # Kokomi — character brief, draft 2
 
@@ -423,7 +423,9 @@ ramp by being a turn ahead of it, and Exert is what she paid to be there.
 
 ## 13. Defaults taken, and the things that are genuinely yours
 
-Numbered picks. Each has a default in italics.
+**Ruled 2026-09-01: all eight at their defaults.** Your words are in the
+commit. The list stands as it was put, so the ruling can be read against
+it.
 
 1. **How healing is bounded.** (1) *The pulse: 2 on a held turn, 8 per
    combat, on the relic; card Mends Uncommon and up, all Exhaust; nothing
@@ -458,7 +460,20 @@ Numbered picks. Each has a default in italics.
 Picks 6 and 7 are taken at their defaults unless you say otherwise. The
 rest are design picks.
 
-## 14. What this document does not do
+## 14. What this document does not do, and two things to watch
+
+Two watch items from the ruling, carried into the slice-one gate and the
+Balance stage:
+
+- **How easy it is to stay fully healed across a run.** The measure is her
+  HP at fight exit against Ironclad's on the same fights, by fight class
+  (hallway, elite, boss), and how often a fight ends with the pulse budget
+  unspent. If she leaves hallways at entry HP more often than he does, the
+  pulse or Exert moves before anything else.
+- **The Commander loop is only as good as the companion cards.** Its
+  strength is measured after the companion workshop, not before, and a
+  weak Commander read before then is not a Kokomi defect.
+
 
 It does not author the sheet, price a card, or claim a winrate. It does
 not decide any Watatsumi relic beyond the Casket. It does not author a
