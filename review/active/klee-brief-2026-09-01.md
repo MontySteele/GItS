@@ -267,7 +267,7 @@ decision she just made:
 | **Grounded** (Uncommon Power) | Start of turn, if no Bomb went off last turn: Block | Jean's solitary confinement: behave and you are safe | Cook |
 | **Run Away!** (Common, 0 energy) | Block, more if a Bomb went off this turn | *Fleeing Sunlight*: she runs after the bang | Spray |
 | **Sorry, Jean...** (Common) | Remove one of your Bombs; Block equal to its size | Jean confiscates the bomb | Cook's emergency exit |
-| **Her friends** (Personal Companions) | Block or a shield when an explosion happens, on the companion's face | Diona, Barbara, Noelle look after her; Albedo cleans up | All, drafted |
+| **Her friends** (companions) | Block or a shield when an explosion happens, printed on the companion card | Diona, Barbara, Noelle look after her; Albedo cleans up | All, drafted |
 
 Against a boss that hits harder than Grounded plus a Duck and Cover, she must
 cash early and small, which is exactly the situation she hates. Against three
@@ -291,7 +291,7 @@ lore splits her people in two, and this brief proposes that her Personal
 Companions split the same way. **The draft question becomes: am I Jean's Klee
 or Alice's Klee?**
 
-### 7.1 Jean's Klee — the grown-ups, as Klee-only faces on Mondstadt Universals
+### 7.1 Jean's Klee — the grown-ups, as Klee-only stand-ins in the Mondstadt companion slot
 
 The people who look after her: Diona, Noelle, Barbara, Kaeya, and at Rare,
 Albedo and Jean. Their hook is defence keyed to explosions, which is her
@@ -299,45 +299,69 @@ team in the source game (shielders around a glass cannon) and her story
 (the people who clean up after her). This path leans Cook: it makes the
 quiet turns safe.
 
-**They are not Personals.** They are Mondstadt, so the reward slot's 50%
-home-nation weight already puts them in front of Klee. What they need is a
-Klee-only *face*.
+**They do not take a share of her reward slot.** They are Mondstadt, so
+the slot's 50% home-nation weight already puts them in front of Klee. What
+they need is a Klee-only *stand-in*.
 
-**What a face is, exactly.** A face is a whole second card, not a second
-line. It has the same name, the same art, the same rarity and the same
-reward odds as the ordinary Universal, and its own text, written from
-scratch for Klee. When the companion slot rolls Diona for Klee, Klee is
-handed Diona's Klee face instead. Everyone else is handed the ordinary
-Diona and never sees the face. Two things follow. The ordinary card's text
-does not change, so R234 P6 (no density on Universals) is untouched. And
-the face's text is one normal card's worth, because it does not carry the
-ordinary text underneath it. A face is not "the Universal plus a Klee
-line": that would print dead text on every other character's copy. And it
-is not "a generic card tuned so Klee likes it": that is just a good
-Universal, and it is the fallback for any grown-up who does not earn a
-face.
+**What a stand-in is, exactly.** A stand-in is a whole card of its own,
+not a second line on the Universal. It is a Personal Companion (Klee-only,
+by R234's definition) that stands in for one named Universal in the
+companion slot. When the slot rolls "Diona — Icy Paws" for Klee, she is
+handed the stand-in instead. Everyone else is handed "Diona — Icy Paws"
+and never learns a stand-in exists. Same character, same art, same rarity,
+same odds. Its own name and its own text, one normal card's worth. Two
+things follow. The Universal's text does not change, so R234 P6 (no
+density on Universals) is untouched. And a stand-in is not "the Universal
+plus a Klee line", which would print dead text on every other character's
+copy. It is not "a generic card tuned so Klee likes it" either. That is
+just a good Universal, and it is the fallback for any grown-up who does not
+earn a stand-in.
 
-The machinery is the pool-substitution seam Kokomi's Oath uses: a map from
-the ordinary id to the Klee id, per character (`loader._pool_substitutions`).
-Today that map gates her own card pool only. The companion slot rolls from
-a character-blind pool (`rewards.companion_pool`), so the face swap sits one
-step later, at hand-off: roll the ordinary card with the ordinary weights,
-then swap the id if Klee has a face for it. Offer odds do not move. In
-co-op, both Dionas can be on the table at once, so the face carries a small
-frame marker; the name stays the same.
+**Names are unique, by a law that already exists.** Every display name
+the player can see is unique across all six card sheets and the relic
+list (LAW, R69; `tools/lint_unique_names.py` runs over the companion
+sheets too, and CI runs it). Draft 4 said a stand-in shares the
+Universal's name. That would have failed the lint, and it would have made
+the cards impossible to talk about. Your rule, 2026-09-01: cards with a
+given name are unique, so a stand-in gets its own. The companion sheets
+already name every card "Character — Move", one move per card, so a
+stand-in is simply another move of the same character: "Diona — Icy Paws"
+for everyone, "Diona — Signature Mix" for Klee. No naming law changes. On
+the sheet a stand-in row carries `personal_pool: klee` and
+`replaces: <the Universal's id>`.
 
-A face costs no reward-slot share and no art, because it reuses the
-Universal's illustration. That is why the count here can be generous where
-the Personal count cannot.
+**How the swap works.** The pool-substitution seam Kokomi's Oath uses is a
+map from an ordinary id to a replacement id, per character
+(`loader._pool_substitutions`). Today that map gates her own card pool
+only. The companion slot rolls from a character-blind pool
+(`rewards.companion_pool`), so the swap sits one step later, at hand-off:
+roll the Universal with the ordinary weights, then hand Klee the stand-in's
+id if she has one for that card. Offer odds do not move.
 
-Candidates, hook stated, no numbers: Diona (when a Bomb goes off, gain
-Block; and Cryo, so Melt), Noelle (when a Mine goes off, gain Block), Kaeya
-(a cover story: Grounded pays this turn even though something went off),
-Barbara (a Bomb went off this turn: heal, Rare-tier by the healing law, so
-this one waits), Albedo (Isotoma reads explosions), Jean (the ultimate
-Grounded). Albedo and Jean are 5-star, but a face on a Rare Universal rides
-that Universal's own acquisition, so **R234 P5a, which is about how a Rare
-Personal is acquired, is not triggered.** The sub-pick can stay open.
+**What it costs, and R234 P5.** A stand-in costs no reward-slot share and
+no art, because it reuses the Universal's illustration. That is why the
+count here can be generous where the slot-sharing Personal count cannot.
+P5's "three to five Personals" exists because a Personal takes a share of
+her reward slot; a stand-in takes none, so it does not count toward P5.
+That is a reading of P5, not an amendment. Say so if you read it
+differently.
+
+**A stand-in needs a Universal to stand in for.** Today the Mondstadt
+sheet has Diona (1 card), Kaeya (1), Barbara (2) and Albedo (1). Noelle
+and Jean have no Universal yet, so their stand-ins wait on their
+Universals, which the Mondstadt pool wants anyway.
+
+Candidates, hook stated, no numbers, names as candidates for your naming
+audit: "Diona — Signature Mix" (when a Bomb goes off, gain Block; and
+Cryo, so Melt), "Noelle — Sweeping Time" (when a Mine goes off, gain
+Block), "Kaeya — Cold-Blooded Strike" (a cover story: Grounded pays this
+turn even though something went off), "Barbara — Glorious Season" (a Bomb
+went off this turn: heal, Rare-tier by the healing law, so this one waits),
+"Albedo — Tectonic Tide" (Isotoma reads explosions), "Jean — Dandelion
+Breeze" (the ultimate Grounded). Albedo and Jean are 5-star, but a stand-in
+on a Rare Universal rides that Universal's own acquisition, so **R234 P5a,
+which is about how a slot-sharing Rare Personal is acquired, is not
+triggered.** The sub-pick can stay open.
 
 ### 7.2 Alice's Klee — the Little Hexenzirkel, off-region, the only Personals
 
@@ -350,7 +374,7 @@ suggested, through a companion.
 **These are the Personals, one card each, four in total.** They have to be:
 Liyue, Inazuma and Nod-Krai cards compete in the wildcard half of the
 reward slot against every other nation, so without the Personal channel Klee
-would never see her own coven. Personals cost what faces do not, a share of
+would never see her own coven. Personals cost what stand-ins do not, a share of
 her reward slot and their own art, which is why the Personal count stays
 small and off-region. The imaginary friends (Dodoco, Popcorn, Descartes,
 Gena, Yuegui) are the reserve if a fifth is wanted; R234 P5's "three to
@@ -369,7 +393,7 @@ five" holds.
 - **Sayu** (Anemo, sneaky, sleepy). Tempo: Swirl to spread Pyro to every
   enemy, and a Run Away! rider, because Sayu is the one who runs away
   professionally. Sayu already has three Inazuma Universal cards for
-  Kokomi; her Klee-personal face is a fourth card with a different name.
+  Kokomi; her Klee stand-in is a fourth card with its own name.
 - **Yaoyao** (Dendro, which this mod does not have). Her Yuegui throws
   radishes: a small summon that plants a Bomb 2 on a random enemy at the end
   of each turn. Free planting is Spray's fuel and needs no element at all,
@@ -392,8 +416,9 @@ line, never the card's body (D6: every card has a place alone).
   re-measure of Personal appearance rates becomes load-bearing with six of
   them instead of three.
 - **Count.** Four Personals, one per coven member, sits inside R234 P5's
-  "three to five". The grown-ups are faces, not Personals, so they do not
-  count against it and do not dilute the coven's appearance rate.
+  "three to five". The grown-ups are stand-ins, which take no share of the
+  slot, so they do not count against it and do not dilute the coven's
+  appearance rate.
 - **Name and art collisions.** Sayu's fourth card; Qiqi and Yaoyao have no
   Liyue pool yet, so their first cards would be Klee's; art for children in
   the StS style is the scarce input.
@@ -425,23 +450,22 @@ makes Hexerei a *family* rather than a path, and it changes the shape of
    1 less; when one triggers a reaction, the next Bomb set off this turn
    deals that element"). Varka, Nicole or Durin, when they ship, write their
    own readers against the same tag, and inherit every tagged card for free.
-3. **Hexerei faces are the exception, not the rule.** A card gets a
-   Hexerei-only face (the Universal face for everyone else, the Hexerei face
-   for Klee and future Hexerei characters, by the pool-substitution seam
-   Kokomi's Oath already uses) only when the extra line is *family-generic*
-   witchcraft, never a Klee verb: Sucrose's Swirl spreading to all enemies,
-   Albedo's Isotoma reading reactions, Prune's absorbing Swirl. A Hexerei
-   line that says "when a Bomb goes off" is a Klee line wearing a family
-   badge and would be dead for Varka; it belongs on a Klee reader instead.
-   Mechanically a Hexerei face is a Personal whose owner is a family:
-   `personal_pool` becomes a list, and no third taxonomy is created, which
-   keeps faith with R234 P6.
+3. **Hexerei stand-ins are the exception, not the rule.** A Universal gets
+   a Hexerei stand-in (its own name and text, dealt to Klee and to future
+   Hexerei characters in place of the Universal, by the same swap as §7.1)
+   only when the idea is *family-generic* witchcraft, never a Klee verb:
+   Sucrose's Swirl spreading to all enemies, Albedo's Isotoma reading
+   reactions. A stand-in that says "when a Bomb goes off" is a Klee card
+   wearing a family badge and would be dead for Varka; that idea belongs on
+   a Klee reader instead. Mechanically a Hexerei stand-in is a Personal
+   whose owner is a family: `personal_pool` becomes a list, and no third
+   taxonomy is created, which keeps faith with R234 P6.
 
 **So the coven path (§7.2) shrinks to what is actually Klee's:** the Little
 Hexenzirkel Personals (Prune, Sayu, Yaoyao, Qiqi) are hers alone because
 they are her coven; the witches (Fischl, Sucrose, Albedo, Durin, Nicole,
 Mona, Razor, Venti, Varka) reach her through the tag and, for a few of
-them, a family face. The grown-ups path (§7.1) is unchanged.
+them, a family stand-in. The grown-ups path (§7.1) is unchanged.
 
 **How many cards in the pile.** The roster template's "~75-card pool" is a
 convention, not a law, and a 75-card pool of near-duplicates (the
@@ -453,24 +477,27 @@ band:
 |---|---|---|---|
 | Klee's own pool | about 60 | 4 basics; Cook, Spray and React at 14 to 16 each; 8 to 10 bridges, defence and utility; 8 Rares including the three rule-breakers | authoring, art |
 | Personals | 4, up to 5 | The coven, one card each; an imaginary friend as the fifth | reward-slot share, art |
-| Caretaker faces | 4 to 6 | Klee-only lines on Diona, Noelle, Kaeya, Barbara, Albedo, Jean | authoring only |
-| Hexerei faces | as many as earn one, 6 to 10 | Family-generic lines on Fischl, Sucrose, Albedo, Razor, Mona, Venti, Durin, Nicole, Varka; inherited by future Hexerei characters | authoring only |
+| Caretaker stand-ins | 4 to 6 | Klee-only cards standing in for Diona, Kaeya, Barbara, Albedo today; Noelle and Jean once they have a Universal | authoring only |
+| Hexerei stand-ins | as many as earn one, 6 to 10 | Family-generic cards standing in for Fischl, Sucrose, Albedo, Durin, Nicole today, and Razor, Mona, Venti, Varka once they have Universals; inherited by future Hexerei characters | authoring only |
 | Klee-side readers | 3 to 4 | Inside the 60, keyed to the Hexerei tag and the Mondstadt nation tag | counted above |
 
-Faces cost no art and no share of the reward slot, because a face replaces
-the Universal only when Klee is the one dealt it. That is why the face
-count can go as high as good ideas exist, which is your instinct, and why
-the Personal count should not: a Personal is a card that competes in her
-slot and needs its own illustration. **The workshop item this creates:** one
-page per Mondstadt and Hexerei character, from the source kit to a face
-idea, with "block or attack for X" refused at the door. That is a later
-sitting and not this brief.
+Stand-ins cost no art and no share of the reward slot, because a stand-in
+replaces the Universal only when Klee is the one dealt it. That is why the
+stand-in count can go as high as good ideas exist, which is your instinct,
+and why the slot-sharing Personal count should not: such a Personal
+competes in her slot and needs its own illustration. A stand-in needs a
+Universal to stand in for, so the count is bounded by the Mondstadt pool
+(17 rows today) and grows with it. **The workshop item this creates:** one
+page per Mondstadt and Hexerei character, from the source kit to a
+stand-in idea, with "block or attack for X" refused at the door. That is a
+later sitting and not this brief.
 
-Roughly 75 to 85 faces only Klee sees, on top of the Universal pool at its
+Roughly 75 to 85 cards only Klee sees, on top of the Universal pool at its
 nation weighting. It is smaller than the shipped 79-card sheet on her own
 side and larger in what the player can do with it. If the sheet draft finds
-fewer than 60 live cards, stop at the number that is live and let the face
-layer carry the breadth. The delete-test still governs: Personals and faces
+fewer than 60 live cards, stop at the number that is live and let the
+stand-in layer carry the breadth. The delete-test still governs: Personals
+and stand-ins
 are her cards, so deleting them gutting the deck is allowed, but deleting
 *only* her own 60 must gut it too, or the companions are carrying.
 
@@ -702,17 +729,18 @@ otherwise:**
    text ("also goes off when its enemy attacks you"), staying at two*
    [default]. (2) Log the amendment for a third keyword with compensating
    cuts. (3) Make all four keywords and amend the rule.
-6. **The companion structure (§7).** (1) *Personals are the coven only, one
+6. **The companion structure (§7). Ruled 2026-09-01 at the default, with
+   the naming rule.** (1) *Slot-sharing Personals are the coven only, one
    card each: Prune (re-authored with the element-absorbing Swirl), Sayu,
-   Qiqi, Yaoyao. The grown-ups are Klee-only faces on their Mondstadt
-   Universals. Hexerei faces as many as earn one. Razor and Amber return to
-   the Universal pool. R234 P5 holds at "three to five"; P5a stays open and
-   untriggered* [default, from your 2026-09-01 note]. (2) Grown-ups as
-   Personals too, eight or more, and P5 amended. (3) Coven Personals only,
-   no caretaker faces; the grown-ups stay plain Universals and Klee's own
-   cards carry all the defence. Underneath it, whether Hexerei faces exist
-   in slice one at all: my default is tag plus readers first, faces when a
-   specific card earns one.
+   Qiqi, Yaoyao. The grown-ups are Klee-only stand-ins, each with its own
+   name, in place of their Mondstadt Universals. Hexerei stand-ins as many
+   as earn one. Razor and Amber return to the Universal pool. R234 P5 holds
+   at "three to five"; P5a stays open and untriggered* [ruled]. (2)
+   Grown-ups as slot-sharing Personals too, eight or more, and P5 amended.
+   (3) Coven Personals only, no caretaker stand-ins; the grown-ups stay
+   plain Universals and Klee's own cards carry all the defence. Underneath
+   it, whether Hexerei stand-ins exist in slice one at all: my default is
+   tag plus readers first, stand-ins when a specific card earns one.
 7. **The React loop and the law.** (1) *Companion-fed, as the law stands*
    [default]. (2) Give Klee one own-kit off-element source, a LAW amendment.
 8. **The scaling cap in LAW.** (1) *Strike "A2 ≤ 4.0, scaling never tops
@@ -795,3 +823,18 @@ Hexerei passive, Prune's absorbing hammer), game8 and the Phantasmal Pals
 event guides for the Little Hexenzirkel's founding, members and imaginary
 friends. The fandom wiki refuses automated reads, so its pages are cited by
 name only.
+
+## 17. Draft 4 amendments, same day
+
+- **"Face" became "stand-in", and every stand-in has its own name.** Your
+  question ("how exactly would that work without making the card text
+  massive?") showed §7.1's "a second face with one engine line" read as an
+  addendum. It is a whole card. Then your rule: cards with a given name are
+  unique. That rule is already LAW (R69) and already linted across the
+  companion sheets, so draft 4's "same name" line would have failed CI.
+  Stand-ins now follow the sheets' "Character — Move" naming, and the word
+  "face" is retired here because this repo already uses it for the printed
+  side of a card.
+- **R234 P5 reading recorded:** stand-ins take no reward-slot share, so
+  they do not count toward "three to five". Pick 6 ruled at the default
+  with the naming rule.

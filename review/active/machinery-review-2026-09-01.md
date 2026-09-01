@@ -303,6 +303,18 @@ kit milestones, and you read documents written to be read.
     summarised. **Replaces** the habit, and the standing assumption that
     review work routes through the seat before it reaches you.
 
+12. **Who does which work, by model.** Your rule, 2026-09-01: design
+    work, meaning briefs, card design, loop and archetype thinking, and any
+    taste judgement, is done by Fable directly and never delegated. Opus
+    stays the main coding agent, but it does not author card designs: its
+    taste for cards is the reason the shipped sheets read the way they do.
+    Simple exploratory work, such as assembling a packet or a census from
+    files named in advance, goes to Sonnet. Basic lookups, a value in a
+    file, a line in a dossier, go to Haiku. **Replaces** the standing
+    "delegate all substantive work to Opus" rule, which had Opus writing
+    design prose because Fable budget was scarce; the budget is still
+    scarce, and this is where it is spent.
+
 ## 8. What stays exactly as it is
 
 The lints, the tests, the soak, the bite-check, the two-family independence
@@ -314,8 +326,10 @@ worktree rules, and the rule that Claude never deploys without a go.
 ## 9. The picks
 
 **Ruled 2026-09-01: all six at their defaults**, with the limit in §7
-(change 2 as amended, change 11). The words are in the commit. What follows
-is the list as it was put, kept so the ruling can be read against it.
+(change 2 as amended, change 11). Change 12 (model routing) was added the
+same day at your instruction and is ruled as written. The words are in the
+commits. What follows is the list as it was put, kept so the ruling can be
+read against it.
 
 1. **The three-stage gate (change 1) and the fun gate (change 2).** (1)
    *Adopt both; the Klee brief is the first Paper artefact, and the first
