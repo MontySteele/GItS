@@ -1,4 +1,4 @@
-# Klee — character brief, draft 3
+# Klee — character brief, draft 4
 
 **Written 2026-09-01 on branch `kit-overhaul-2026-09-01`. Paper only.** No sheet,
 no code, no register row, no stamp moves. This is the D1 brief the charter asks
@@ -8,10 +8,11 @@ read in fifteen minutes and argued with.
 
 Draft 1 was written before the same exercise was done for a canon character
 (`ironclad-brief-calibration-2026-09-01.md`); draft 2 was revised against that
-calibration (§14). **Draft 3 answers your three notes:** the rules
-contradiction, auto-detonation, and the lore audit with the squishiness
-question (§15, and the audit itself in §2). `git diff` on this file shows the
-words.
+calibration (§14). Draft 3 answered three notes: the rules contradiction,
+auto-detonation, and the lore audit with the squishiness question (§15, and
+the audit in §2). **Draft 4 records the picks taken on draft 3 and answers
+pick 6 with the Little Hexenzirkel lore: two companion paths (§7, §16).**
+`git diff` on this file shows the words.
 
 ---
 
@@ -71,7 +72,10 @@ here. "Shipped" means it exists on the current sheet in some form.
 | Albedo, her caretaker | Cleans up her messes; her big brother | no | Rare Personal Companion, once R234 P5a is answered (§7) |
 | Diona, Barbara, Noelle, Sucrose | The friends who look after her | Diona is a plain Universal | Personal Companions are her **babysitters**: defence hooked to explosions (§7) |
 | Alice, her mother | Taught her bombs; the Teyvat Travel Guide; far more destructive than Klee | no | The rule-breaking Rares are Alice's recipes (§5) |
-| Dodoco | Stuffed toy from her mother; her first friend | card name only | A relic candidate: Klee starts combat with a Bomb already planted (§13) |
+| Dodoco | Stuffed toy from her mother; her first friend; one of the Little Hexenzirkel's "imaginary friends" | card name only | A relic candidate: Klee starts combat with a Bomb already planted (§13) |
+| Hexerei passive (Luna III) | With two or more Hexerei characters in the party, Klee gains **Boom Badges from attacks, up to 3**, powering her charged attack | the old "at 3 Sparks" rule, unknowingly | Confirms Sparks as a small bank spent on a big hit, and that the source game itself counts to three |
+| The Little Hexenzirkel (Luna VII) | Klee founded her own coven in Chinju Forest after Alice's challenge: Qiqi, Yaoyao, Sayu, then Prune; "little" because they all still have growing to do; each brings an imaginary friend | Prune's card only | Her second companion path: **her own coven**, off-region on purpose (§7) |
+| Prune (Luna VII) | Self-styled witch hunter from Nod-Krai chasing Alice, who "kidnapped" her imaginary friend Descartes so that Klee would make a friend; Anemo; her hammer **absorbs the element she Swirls** | Prune — Witch Hunt (Swirl, Klee-personal) | The canonical way to give Klee an off-element bomb: Prune's Swirl converts the next explosion (§7) |
 | The Red Knight of Stormbearer Mountains | Too many charges, half a mountain gone | no | The Big One's flavour; the Cook loop's signature moment |
 | Fish blasting | Her hobby; gets her confiscated | Fish Blasting, adds Confiscated | Kept as is: AoE with a cost card |
 
@@ -279,23 +283,91 @@ cannot be cooked unless the bombs are Mines. She feels the missing Block the
 way Ironclad feels the missing draw, and a Diona in the reward screen reads
 as relief for the same reason Whirlwind does for him.
 
-## 7. The companion layer, for her
+## 7. The companion layer, for her: two paths
 
 R234 gives Klee three to five Personal Companions and drafted two on
-2026-08-31 (Razor and Amber, offence hooks; paper only, not landed). This
-brief proposes re-pointing them: **Klee's Personal Companions are her
-babysitters, and their hook is defence keyed to explosions.** That is her
-team in the source game (shielders and a healer around a glass cannon) and
-it is her story (the people who clean up after her). It also gives the
-companion layer a per-character identity that Kokomi's muster and Furina's
-performers do not have: Klee's friends protect her.
+2026-08-31 (Razor and Amber, offence hooks; paper only, not landed). The new
+lore splits her people in two, and this brief proposes that her Personal
+Companions split the same way. **The draft question becomes: am I Jean's Klee
+or Alice's Klee?**
 
-Candidates at 4-star, with the hook stated and no numbers: Diona (when a
-Bomb goes off, gain Block), Noelle (when a Mine goes off, gain Block),
-Barbara (a Bomb went off this turn: heal, Rare-tier by the healing law, so
-this one waits), Sucrose (Swirl, and a card for each explosion). Albedo and
-Jean are 5-star and therefore Rare Personals, which R234 P5a currently bars;
-they are the strongest reason to answer that sub-pick. Prune stays.
+### 7.1 Jean's Klee — the grown-ups, Mondstadt, defence
+
+The people who look after her: Diona, Noelle, Barbara, Kaeya, and at Rare,
+Albedo and Jean. Their hook is defence keyed to explosions, which is her
+team in the source game (shielders around a glass cannon) and her story
+(the people who clean up after her). This path leans Cook: it makes the
+quiet turns safe.
+
+Candidates at 4-star, hook stated, no numbers: Diona (when a Bomb goes off,
+gain Block; and Cryo, so Melt), Noelle (when a Mine goes off, gain Block),
+Kaeya (a cover story: Grounded pays this turn even though something went
+off), Barbara (a Bomb went off this turn: heal, Rare-tier by the healing
+law, so this one waits). Albedo and Jean are 5-star and therefore Rare
+Personals, which R234 P5a bars for now; they are the strongest reason to
+answer that sub-pick.
+
+### 7.2 Alice's Klee — the Little Hexenzirkel, off-region, witchcraft
+
+Her own coven: Prune, Sayu, Qiqi, Yaoyao, and their imaginary friends. Their
+hook is offence and tempo through witchcraft, which in this mod's terms is
+elements, reactions and free plants. This path leans Spray and React, and
+it answers your note on Pyro being a weak reaction payoff in the way you
+suggested, through a companion:
+
+- **Prune** (Anemo, in the sheet already). In the source game her hammer
+  absorbs whatever element she Swirls. Here: Swirl, and **the next Bomb set
+  off this turn deals the Swirled element instead of Pyro.** Klee's own Pyro,
+  which is on every enemy she has touched, stops being the thing that eats
+  the aura and becomes the aura the bomb reacts with. A cooked 20 that Swirls
+  Hydro into itself and lands on her Pyro is the React loop's real payoff,
+  and it needs no LAW change: the off-element still comes from a companion.
+- **Qiqi** (Cryo). The Cryo applier the coven brings: Melt is the strongest
+  amplifier in the table. Her herbal side is healing and waits on the
+  healing law like Barbara.
+- **Sayu** (Anemo, sneaky, sleepy). Tempo: Swirl to spread Pyro to every
+  enemy, and a Run Away! rider, because Sayu is the one who runs away
+  professionally. Sayu already has three Inazuma Universal cards for
+  Kokomi; her Klee-personal face is a fourth card with a different name.
+- **Yaoyao** (Dendro, which this mod does not have). Her Yuegui throws
+  radishes: a small summon that plants a Bomb 2 on a random enemy at the end
+  of each turn. Free planting is Spray's fuel and needs no element at all,
+  like Gorou's element-less Geo.
+- **The imaginary friends** (Popcorn the boar, Descartes, Gena, Yuegui) are
+  the coven's Oz-style summons if a fourth or fifth card is wanted.
+
+**The coven bonus.** The source game gates Hexerei passives on having two
+Hexerei characters in the party. The mirror here: a Little Hexenzirkel
+Personal has a second line that turns on once another coven card has been
+played this combat. Two witches make a circle. This is a density payoff, so
+it stays on Personals only (R234 P6: never on Universals), and it is a bonus
+line, never the card's body (D6: every card has a place alone).
+
+### 7.3 What is tricky about it, honestly
+
+- **Off-region Personals.** Prune already proves the mechanism: a card can
+  be `personal_pool: klee` whatever its nation. What the shop's home-region
+  slot does with a Personal from Liyue is a real question, and the P7
+  re-measure of Personal appearance rates becomes load-bearing with six of
+  them instead of three.
+- **Count.** Two paths of three is six Personals, above R234 P5's "three to
+  five, starting at three". Fewer than three per path and a path is a
+  coincidence rather than a plan.
+- **Name and art collisions.** Sayu's fourth card; Qiqi and Yaoyao have no
+  Liyue pool yet, so their first cards would be Klee's; art for children in
+  the StS style is the scarce input.
+- **Hexerei on Universals.** Fischl, Sucrose, Albedo, Durin and Nicole are
+  Hexerei in the source game and Universals here. The temptation is to
+  print "Hexerei" density on them. R234 P6 says no, and it is right.
+
+### 7.4 Why it is worth it
+
+It gives the draft a second identity axis that is *not* about damage: who
+is looking after Klee. Cook with the grown-ups reads as the child being
+kept safe; Spray and React with the coven reads as the child running her
+own show. Both are her. No other character in the mod has a companion
+choice that says something about who they are, and this one is written in
+the source game's own most recent chapter.
 
 ## 8. What fight one teaches
 
@@ -516,13 +588,15 @@ otherwise:**
    text ("also goes off when its enemy attacks you"), staying at two*
    [default]. (2) Log the amendment for a third keyword with compensating
    cuts. (3) Make all four keywords and amend the rule.
-6. **Personal Companions re-pointed to her babysitters (§7).** (1) *Yes:
-   re-draft the two 08-31 faces as Diona and Noelle with explosion-keyed
-   defence hooks; Razor and Amber return to the Universal pool* [default].
-   (2) Keep Razor and Amber, add babysitters as the fourth and fifth. (3)
-   Keep the 08-31 faces as drafted. And underneath it, **R234 P5a** (may a
-   Rare Personal exist) now has a concrete reason to be answered: Albedo and
-   Jean.
+6. **Two companion paths (§7).** (1) *Yes: six Personals, three per path.
+   Grown-ups: Diona, Noelle, Kaeya. Coven: Prune (re-authored with the
+   element-absorbing Swirl), Sayu, Yaoyao. Razor and Amber return to the
+   Universal pool. R234 P5 moves to "three to six, in two named paths"*
+   [default]. (2) One path only, the grown-ups, at three. (3) Both paths at
+   two each, four total, inside the current P5 range. Underneath it, **R234
+   P5a** (may a Rare Personal exist) now has a concrete reason to be
+   answered on both sides: Albedo and Jean for the grown-ups, Alice herself
+   for the coven.
 7. **The React loop and the law.** (1) *Companion-fed, as the law stands*
    [default]. (2) Give Klee one own-kit off-element source, a LAW amendment.
 8. **The scaling cap in LAW.** (1) *Strike "A2 ≤ 4.0, scaling never tops
@@ -583,3 +657,25 @@ character asks (which bomb, and when); a survival answer that is hers and
 not a shield; and a starter whose plan is obvious and whose branches are
 visible on the first reward screen. Draft 3 claims the first three. The
 fourth is the sheet's job.
+
+## 16. Draft 3 → draft 4: the picks taken, and the coven
+
+**Picks ruled on draft 3:** 1 to 4 at their defaults; 5 ruled as "raise the
+keyword limit as high as needed to keep card text down" (a LAW amendment,
+yours, now made: *Bomb*, *Spark*, *Set off*, *Mine* all print as keywords);
+7 to 9 at their defaults, with your note that a plain Pyro hit is a weak
+reaction payoff because Klee's own Pyro has already eaten the aura.
+
+**Pick 6 re-posed.** You asked for the Little Hexenzirkel lore first. §7 is
+rewritten on it: two paths, the grown-ups and the coven, three Personals
+each. The coven path is also the answer to your Pyro note: Prune's Swirl
+converts the next explosion to the Swirled element, so Klee's ubiquitous
+Pyro becomes the aura the bomb reacts with rather than the thing that eats
+it. Off-element bombs arrive through a companion, exactly as you suggested,
+and the law on earned reactions does not move.
+
+**Lore sources for draft 4:** genshin.gg and GameWith for the kits (Klee's
+Hexerei passive, Prune's absorbing hammer), game8 and the Phantasmal Pals
+event guides for the Little Hexenzirkel's founding, members and imaginary
+friends. The fandom wiki refuses automated reads, so its pages are cited by
+name only.
