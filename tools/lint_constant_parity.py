@@ -235,6 +235,18 @@ MIRRORED: dict[str, object] = {
     "KurageMemoryLaw.CostPerEnergy": C.KURAGE_MEMORY_COST_PER_ENERGY,
     "KurageMemoryLaw.PulseBlock": C.KURAGE_MEMORY_PULSE_BLOCK,
     "KurageMemoryLaw.QueueCap": C.KURAGE_QUEUE_CAP,
+    # The Klee overhaul, slice one (QUARANTINED, R213 B -- the rules engine
+    # lives under klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd
+    # out of a release build). Quarantined is not exempt, for the same reason
+    # the Kurage's three above are not: these four numbers ARE the rules
+    # (`review/active/klee-brief-2026-09-01.md` sec.3), and a prototype played
+    # on a number the sim never declared is exactly this lint's failure. They
+    # are placeholders and not claims -- but they are the placeholders both
+    # sides have to agree on.
+    "KleeOverhaulLaw.BombGrowth": C.KLEE_OVERHAUL_BOMB_GROWTH,
+    "KleeOverhaulLaw.WorkshopGrowth": C.KLEE_OVERHAUL_WORKSHOP_GROWTH,
+    "KleeOverhaulLaw.AliceGrowth": C.KLEE_OVERHAUL_ALICE_GROWTH,
+    "KleeOverhaulLaw.SparkPerExplosion": C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION,
 }
 
 # --------------------------------------------------------------------------

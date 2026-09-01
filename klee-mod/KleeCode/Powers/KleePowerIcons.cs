@@ -41,6 +41,25 @@ internal static class KleePowerIcons
         // spark_threshold_down and the re-authored card keeps the id, the
         // rarity and the cost. No new art for a prototype row, per the slice.
         SparkAttackCostPower => KleePck.Path("klee/powers/spark_threshold_down.png"),
+        // QUARANTINED (the Klee overhaul, slice one). Every one of these borrows
+        // the icon of the shipped power whose job it takes over, for the reason
+        // the row above gives: art is commissioned when a slice is ACCEPTED, and
+        // a prototype that shipped new art would be paying for a card that may
+        // be deleted next week. The Bomb itself borrows the shipped Bomb badge,
+        // which is also the "reuse the existing badge rendering" the slice's
+        // sec.5 asks for in as many words.
+        ProtoBombPower => KleePck.Path("klee/powers/bomb.png"),
+        ExplosivesWorkshopGrowthPower =>
+            KleePck.Path("klee/powers/bomb_damage_up.png"),
+        AlicesRecipePower =>
+            KleePck.Path("klee/powers/bomb_damage_up.png"),
+        ChainedReactionsPower =>
+            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
+        EndOfTurnSetOffPower =>
+            KleePck.Path("klee/powers/sparks_n_splash.png"),
+        BombReactionSparkPower =>
+            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        GroundedPower => KleePck.Path("klee/powers/spark_per_turn.png"),
 #endif
         ReactionBonusSparkEnergyPower => KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AmpReactionUpPower => KleePck.Path("klee/powers/amp_reaction_up.png"),

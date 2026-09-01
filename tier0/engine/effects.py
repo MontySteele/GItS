@@ -2977,6 +2977,12 @@ PREDICATE_NAMES = frozenset({
     # count prefix; the COUNTS are reachable as amounts.
     "exhaust_selection_has_companion",
     "exhaust_selection_has_personal",
+    # The Klee overhaul's two per-turn reads (QUARANTINED, C.KLEE_OVERHAUL).
+    # Registered so the slice's rows load and validate; the chain REFUSES them
+    # for the same reason the arm's ops refuse, and for the same one sentence:
+    # slice one is C# first and the sim is not brought up.
+    "bomb_went_off_this_turn",
+    "bomb_reacted_this_turn",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -3159,6 +3165,20 @@ def _predicate(state: CombatState, name: str) -> bool:
         # Chevreuse Vanguard's Valor. RULED: ANY reaction counts, not
         # Overload-only -- must never be a dead draw off-Pyro/Electro.
         return state.reactions_this_turn > 0
+    if name == "bomb_went_off_this_turn" or name == "bomb_reacted_this_turn":
+        # THE KLEE OVERHAUL'S TWO PER-TURN READS (QUARANTINED,
+        # C.KLEE_OVERHAUL). Registered above so the slice's rows load and
+        # validate, and REFUSED here for the reason its ops are refused: the
+        # arm is C# first and the sim is not brought up for slice one, so the
+        # honest answer is not False -- False would let Run Away!, Sizzle and
+        # Grounded report a game this engine never played. Neither predicate
+        # is a synonym for `reaction_triggered_this_turn`, which counts every
+        # reaction rather than a BOMB's.
+        raise NotImplementedError(
+            f"predicate {name!r} belongs to the KLEE_OVERHAUL arm, which is "
+            "C# FIRST -- the mod answers it behind "
+            "`-p:PrototypeCards=true -p:KleeOverhaul=true` "
+            "(KleeOverhaulLedger) and the sim is not brought up for slice one.")
     if name == "killed_target":
         return state.kills_this_card > 0
     if name == "drew_skill_this_card":
@@ -4549,6 +4569,37 @@ def _op_remember_card(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("remembered_card", card=pick.id, power=fx["power"])
 
 
+# ---------------------------------------------------------------------------
+# THE KLEE OVERHAUL'S OPS -- REGISTERED AND UNIMPLEMENTED, ON PURPOSE.
+#
+# Slice one of the overhaul (`review/active/klee-overhaul-slice-1-2026-09-01.md`
+# sec.5) is C# FIRST by the ruled process: "All of it goes behind the prototype
+# switch, C# first... The Python sim is not brought up for slice one." The mod
+# owns these eight verbs; tier0 owns none of them yet.
+#
+# THEY ARE STILL REGISTERED, because the loader validates op NAMES at load
+# (`_validate_effect_vocabulary`), so an unregistered op means the slice's rows
+# cannot be STAGED at all -- not loaded, not validated, not emitted. Registering
+# them is what lets `docs/prototype-surface.yaml` carry the slice and what makes
+# `tools/lint_op_parity.py` force a drafter pricing decision for each one now,
+# while the author still knows the answer.
+#
+# THEY RAISE RATHER THAN NO-OP, and that is the whole point of the shape. A
+# silent stub is the worst possible stand-in: the sim would keep running, keep
+# emitting, and keep reporting numbers for a card whose printed text never
+# happened. `UNPARSEABLE` discipline, one layer down -- an unimplemented rule
+# fails loudly at the moment somebody tries to measure it.
+def _op_klee_overhaul_unbuilt(state: CombatState, fx: dict,
+                              card: Card) -> None:
+    raise NotImplementedError(
+        f"card {card.id!r}: op {fx['op']!r} belongs to the KLEE_OVERHAUL arm, "
+        "which is C# FIRST -- the mod implements it behind "
+        "`-p:PrototypeCards=true -p:KleeOverhaul=true` and the sim is not "
+        "brought up for slice one (the slice packet sec.5). Registering the "
+        "op lets the row be staged and priced; resolving it here would report "
+        "numbers for a rule this engine never ran.")
+
+
 OPS = {
     "damage": _op_damage,
     "block": _op_block,
@@ -4605,6 +4656,17 @@ OPS = {
     # `spend_charge` above. No card, no sheet row, no C#; the hook the
     # acceleration keyword ("Stir", provisional) will call if it is authored.
     "play_front_memory": _op_play_front_memory,
+    # --- Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) ---
+    # Registered so the rows load, priced so the drafter is honest, resolved by
+    # nothing -- see `_op_klee_overhaul_unbuilt` for why raising is the shape.
+    "set_off": _op_klee_overhaul_unbuilt,
+    "plant_bomb": _op_klee_overhaul_unbuilt,
+    "grow_bombs": _op_klee_overhaul_unbuilt,
+    "merge_bombs": _op_klee_overhaul_unbuilt,
+    "remove_bomb_for_block": _op_klee_overhaul_unbuilt,
+    "damage_set_off_total": _op_klee_overhaul_unbuilt,
+    "double_set_off": _op_klee_overhaul_unbuilt,
+    "draw_per_set_off": _op_klee_overhaul_unbuilt,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,

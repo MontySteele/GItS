@@ -703,6 +703,18 @@ def test_no_doc_reasserts_the_refuted_pre_draw_order():
 
 CO_TENANCY_LEDGER = {
     "BeforeSideTurnStart": {
+        ("Powers/Prototype/ProtoBombPower.cs", "ProtoBombPower"):
+            "QUARANTINED (the Klee overhaul, C.KLEE_OVERHAUL). Enemy-attached, "
+            "and it GROWS rather than detonating -- rule 7 of the ruled brief "
+            "is that nothing fires by itself, so this tenant deals no damage "
+            "and applies no element. THE ORDERING QUESTION, answered: the "
+            "resource it writes is its own charge list, which no co-tenant of "
+            "this broadcast reads or writes; the shipped BombPower beside it "
+            "owns a DIFFERENT power and under the arm no card places one. The "
+            "corpse sweep it runs first can PLACE a charge (rule 3's jump), "
+            "and that is likewise private to this power. No sim twin orders "
+            "it, because slice one is C# first and tier0 refuses the arm's "
+            "ops",
         ("Powers/BombPower.cs", "BombPower"):
             "turn-start detonation of last turn's bombs (enemy-attached; "
             "sim: combat.py detonate_bombs)",
@@ -759,6 +771,14 @@ CO_TENANCY_LEDGER = {
             "the broadcast",
     },
     "AfterPlayerTurnStart": {
+        ("Powers/Prototype/KleeOverhaulPowers.cs", "GroundedPower"):
+            "QUARANTINED (the Klee overhaul). Raw per-turn Block mint on a "
+            "condition, the same shape as MetallicizePower below. THE "
+            "ORDERING QUESTION, answered: it READS the overhaul ledger's "
+            "last-turn explosion count and WRITES only Block. Nothing else "
+            "in the mod writes that ledger outside a card play or an "
+            "explosion, both of which are strictly later than this broadcast, "
+            "so no co-tenant can move the number it reads",
         ("Powers/CompanionPowers.cs", "CelestialGiftPower"):
             "per-turn Strength + Block mint; its body notes the sim's "
             "Strength-then-Block order is bookkeeping, not a dependency",
@@ -812,6 +832,15 @@ CO_TENANCY_LEDGER = {
             "there is nothing here to model",
     },
     "BeforeSideTurnEnd": {
+        ("Powers/Prototype/KleeOverhaulPowers.cs", "EndOfTurnSetOffPower"):
+            "QUARANTINED (the Klee overhaul). Sparks 'n' Splash, the ONE "
+            "power in the slice that fires without a card saying so -- the "
+            "brief's own 'Breaks rule 7'. THE ORDERING QUESTION, answered: it "
+            "sets off one random enemy's overhaul Bombs, which is damage plus "
+            "a Spark plus the ledger's counters, and no co-tenant of this "
+            "broadcast reads any of the three. It shares the Spark bank with "
+            "nothing here (the kit-grant check reads the BURST meter) and the "
+            "overhaul Bomb pile with nothing at all",
         ("Powers/CompanionPowers.cs", "SolarIsotomaPower"):
             "duration tick-down of itself, player side",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):

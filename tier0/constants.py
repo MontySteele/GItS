@@ -166,6 +166,117 @@ SPARK_ALT_POOL_SUBS: dict[str, str] = {
     "hold_the_line": "proto_hold_the_line_spark",        # Dig In,       uncommon
     "smoke_and_sparks": "proto_smoke_and_sparks_spark",  # Powder Smoke, uncommon
 }
+
+# =============================================================================
+# THE KLEE OVERHAUL, SLICE ONE -- R213 B PROTOTYPE ARM, QUARANTINED.
+#
+# The ruled brief `review/active/klee-brief-2026-09-01.md` sec.3 replaces Klee's
+# whole rule set: a Bomb is a numbered charge that GROWS and never goes off by
+# itself, only a card that says *Set off* pops one, a Bomb whose enemy dies
+# JUMPS, each explosion mints one Spark, a Mine is a Bomb that also answers the
+# enemy's attack on her, and nothing fires by itself.
+#
+# THE ARM IS A THIRD ARM, NOT A REPLACEMENT. `SPARK_ALT_COST_ENABLED` above and
+# `KURAGE_MEMORY` below are untouched and their rows, constants and tests stand:
+# a flag whose purpose is to let two economies be measured side by side cannot
+# be edited by the arm that came after it.
+#
+# WHAT MOVES WHEN IT IS ON, exhaustively (every site names this constant):
+#   * loader._starter_ids       -- Klee's ten opening cards become the slice's
+#                                  ten (WHOLE replacement, not a substitution:
+#                                  the brief sec.8 prints all ten).
+#   * loader.pool_replacement   -- her offerable pool becomes the 28 slice rows
+#                                  and nothing else. Read at the ONE seam
+#                                  `tier05.rewards.character_pool` already
+#                                  reads, so every offer surface moves at once.
+#   * loader._card_prototype    -- `proto_` ids resolve, the way the Sparks arm
+#                                  opens the same door for its two starter rows.
+# Nothing else in either engine reads it. FLAG OFF IS BYTE-IDENTICAL TO TODAY,
+# pinned by `tier0/tests/test_klee_overhaul.py` rather than intended.
+#
+# THE C# TWIN is `KleeMod.Powers.Prototype.KleeOverhaul.Enabled`, compiled only
+# under `-p:PrototypeCards=true` and defaulted from the `KLEE_OVERHAUL` compile
+# constant (`-p:KleeOverhaul=true`). The sim is NOT brought up for slice one
+# (the slice packet sec.5: "C# first, per the ruled process"), so tier0
+# registers the new ops and refuses to resolve them rather than guessing at a
+# second implementation of an unplayed rule.
+KLEE_OVERHAUL = False
+
+# THE FOUR NUMBERS THE RULES CARRY, and they are the brief's placeholders, not
+# claims (slice packet sec.1: "No number in it is a claim"). They are named here
+# because the C# mirrors must be compared BY VALUE -- an unnamed literal in the
+# mod is exactly what `tools/lint_constant_parity.py` exists to refuse.
+KLEE_OVERHAUL_BOMB_GROWTH = 2        # rule 1: every Bomb, start of her turn
+KLEE_OVERHAUL_WORKSHOP_GROWTH = 1    # Explosives Workshop: +1 more
+KLEE_OVERHAUL_ALICE_GROWTH = 4       # Alice's Recipe: 4 INSTEAD of 2
+KLEE_OVERHAUL_SPARK_PER_EXPLOSION = 1  # rule 4, and the relic's whole body
+
+# THE STARTER, WHOLE (brief sec.8; slice packet sec.3). Ten cards, five ids, in
+# the printed order. This is a REPLACEMENT and not a substitution list because
+# every one of the ten moves: the shipped Ka-boom! has no *Set off* clause and
+# the shipped Pop! places a bomb that detonates itself, so there is no shipped
+# starter card the new rules leave standing.
+KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
+    "proto_ko_kaboom", "proto_ko_kaboom", "proto_ko_kaboom",
+    "proto_ko_kapow",
+    "proto_ko_duck_and_cover", "proto_ko_duck_and_cover",
+    "proto_ko_duck_and_cover", "proto_ko_duck_and_cover",
+    "proto_ko_pop",
+    "proto_ko_jumpy_dumpty",
+)
+
+# THE OFFERABLE POOL, WHOLE (slice packet sec.4). `_pool_substitutions` cannot
+# express this -- it is a one-for-one map and this is "her pool is these and
+# nothing else" -- so `loader.pool_replacement` is its sibling seam, read at the
+# same single door.
+#
+# TWENTY-SEVEN OF THE PACKET'S TWENTY-EIGHT. Vermillion Pact is NOT here, and
+# the packet's own sec.5 is what leaves it out: "Vermillion Pact is the one item
+# on this list that touches shared reaction code; if it costs more than a day it
+# drops out of slice one and is tested in slice two." It does. Its rule is not
+# "react twice", it is "the aura the explosion CONSUMED is still there for the
+# Attack behind it", and every reaction in the mod runs through one funnel that
+# removes the aura and pays out Burst, Courtroom Drama and the amplifier
+# multiplier on the way past -- so making one hit not consume means either
+# re-applying between the explosion and the card's damage (which moves what a
+# third hit sees and re-fires every on-apply hook) or threading a flag through
+# shared code every character's reactions would have to be re-checked against.
+# The reasoning is recorded in `VermillionPactNotBuilt`, and the row is off the
+# surface rather than staged as a card whose face would lie. The pool is
+# therefore 11 Common, 11 Uncommon, 5 Rare.
+KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
+    # Cook (8)
+    "proto_ko_fish_flavored_bait",
+    "proto_ko_pocket_fireworks",
+    "proto_ko_chain_fuse",
+    "proto_ko_explosives_workshop",
+    "proto_ko_careful_arrangement",
+    "proto_ko_big_badda_boom",
+    "proto_ko_the_big_one",
+    "proto_ko_alices_recipe",
+    # Spray (8)
+    "proto_ko_mine_toss",
+    "proto_ko_fwoosh",
+    "proto_ko_tinder_toss",
+    "proto_ko_quick_fuse",
+    "proto_ko_bang_bang",
+    "proto_ko_rapid_fire",
+    "proto_ko_chained_reactions",
+    "proto_ko_sparks_n_splash",
+    # React (4 of 5; Vermillion Pact is out, see above)
+    "proto_ko_sizzle",
+    "proto_ko_perfect_timing",
+    "proto_ko_flame_dance",
+    "proto_ko_catalytic_converter",
+    # Currencies and defence (7)
+    "proto_ko_ammo_scavenging",
+    "proto_ko_powder_charge",
+    "proto_ko_dig_in",
+    "proto_ko_sugar_rush",
+    "proto_ko_run_away",
+    "proto_ko_grounded",
+    "proto_ko_sorry_jean",
+)
 BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played
 BURST_PER_REACTION = 5        # burst energy per reaction triggered
 

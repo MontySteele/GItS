@@ -30,6 +30,29 @@
   <PropertyGroup Condition="'$(PrototypeCards)' == 'true'">
     <DefineConstants>$(DefineConstants);PROTOTYPE_CARDS</DefineConstants>
   </PropertyGroup>
+
+  <!-- THE KLEE OVERHAUL ARM (the ruled brief klee-brief-2026-09-01.md sec.3,
+       slice one klee-overhaul-slice-1-2026-09-01.md).
+
+           dotnet build ... -p:PrototypeCards=true -p:KleeOverhaul=true
+
+       A SECOND property rather than a third quarantine, because it gates an
+       ARM and not a compilation unit. Everything the arm owns already lives
+       under Powers/Prototype/** and Cards/Prototype/**, which the block below
+       removes from a release build, so this property compiles nothing new
+       and cannot reach a release build even if somebody passes it alone. All
+       it moves is KleeOverhaul.Enabled's default, which the two wiring seams
+       (Klee.StartingDeck and KleeCardPool.FilterThroughEpochs) read at
+       runtime. The rules engine compiles either way on purpose: the headless
+       pins must exercise the rules AND assert the flag-off wiring in ONE
+       build, exactly as KleeTests.csproj already argues for PROTOTYPE_CARDS.
+
+       The Sparks arm and the Kurage's memory are UNTOUCHED by this. A dev
+       build compiles all three; with this property absent the overhaul arm is
+       inert and the Sparks arm owns Klee's starter exactly as before. -->
+  <PropertyGroup Condition="'$(KleeOverhaul)' == 'true'">
+    <DefineConstants>$(DefineConstants);KLEE_OVERHAUL</DefineConstants>
+  </PropertyGroup>
   <ItemGroup Condition="'$(PrototypeCards)' != 'true'">
     <Compile Remove="Cards/Prototype/**/*.cs" />
     <!-- The same quarantine, for a RULE rather than a card. Two arms use it and

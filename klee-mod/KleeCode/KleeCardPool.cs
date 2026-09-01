@@ -43,6 +43,27 @@ public sealed class KleeCardPool : CardPoolModel
     protected override IEnumerable<CardModel> FilterThroughEpochs(
         UnlockState unlockState, IEnumerable<CardModel> cards)
     {
+#if PROTOTYPE_CARDS
+        // QUARANTINED, THE KLEE OVERHAUL'S ONE POOL SEAM (slice one sec.6: the
+        // 28 rows are "Klee's only reward pool" for the prototype run; sim twin
+        // `tier0.content.loader.pool_replacement`, read at the one door
+        // `tier05.rewards.character_pool` already reads).
+        //
+        // A REPLACEMENT AND NOT A FILTER. Every shipped Klee card is written
+        // against rules this arm retires -- a shipped Bomb detonates itself, a
+        // shipped Attack pops one early -- so a reward screen that could still
+        // offer one would be offering a card whose printed text is no longer
+        // what happens. `GenerateAllCards` is UNTOUCHED, so `CardModel.Pool`
+        // still resolves for every shipped card and nothing throws "You
+        // monster!"; only what may be GENERATED moves, which is the same split
+        // the off-pool list below uses and for the same reason.
+        //
+        // With `KleeOverhaul.Enabled` off this branch does not run.
+        if (Powers.KleeOverhaul.Enabled)
+        {
+            return Powers.KleeOverhaulRoster.OfferablePool();
+        }
+#endif
         return base.FilterThroughEpochs(unlockState, cards)
             .Where(c => !KleeOffPoolCards.Ids.Contains(c.Id));
     }

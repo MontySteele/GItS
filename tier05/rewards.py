@@ -52,6 +52,28 @@ def character_pool(character_id: str) -> dict[str, list[Card]]:
                 continue
             pool.setdefault(c.rarity, []).append(c)
         return pool
+    # THE QUARANTINED WHOLE-POOL REPLACEMENT (`loader.pool_replacement`, behind
+    # `C.KLEE_OVERHAUL`): None on every flag-off tree, so this branch does not
+    # exist there. It sits at the SAME door as the one-for-one substitution
+    # below because it answers the same question -- "which ids can be offered
+    # to this character" -- and a second door would be a second answer.
+    #
+    # The rows are read through `peek_card`, which is the only reader that can
+    # resolve a `proto_` id at all (`loader._card_prototype`'s flagged branch);
+    # `_card_index` still carries none of them, so the R213 quarantine is
+    # unchanged and the surface remains invisible to digests, balance reports
+    # and every stamp. Off-table rarities are DROPPED rather than refiled, the
+    # same rule the general loop below applies -- an anchor's pool must not be
+    # the one place the rarity vocabulary is lenient, and neither must this.
+    replacement = loader.pool_replacement(character_id)
+    if replacement is not None:
+        pool = {}
+        for cid in replacement:
+            c = loader.peek_card(cid)
+            if c.rarity not in C.RARITY_ODDS:
+                continue
+            pool.setdefault(c.rarity, []).append(c)
+        return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
     index = loader._card_index()
     # The QUARANTINED offerable-pool swap, and the only one there is
     # (`loader._pool_substitutions`, behind `C.KURAGE_MEMORY`): {} on every
