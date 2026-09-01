@@ -224,6 +224,65 @@ and the ledger prints the UNRUN rows so the trade is visible in the record.
   sweepable surface left** — whether to sweep a shared weight anyway is
   [USER]'s call, not an integration's.
 
+## Measurement authority (moved out of LAW, 2026-09-01)
+
+Three blocks of `LAW.md` were measurement law rather than design or
+engineering law, so they live here. They are moved verbatim, with their old
+line ranges named. LAW keeps a one-line pointer at each site.
+
+### What a measured number may be used for (was LAW lines 272 to 296)
+
+- **The simulator's authority is relative deltas and structural findings, not
+  absolute human-play winrates;** a ratification resting on an absolute winrate
+  rests on the wrong number. (principles §7)
+- **Seven-axis numbers are reportable, not load-bearing:** **all seven** axes are
+  permanently CLOSED as reportable-only (never a gate, target, or justification
+  to move a value). There is **no "Fanfare axis"** — R118's term names no axis;
+  Fanfare is a Furina mechanic that falls under **scaling**, and the per-axis
+  disposition therefore collapses to one disposition for all seven. (principles
+  §7; D3; R90 Q7; R118; R138)
+- **Ratified 1000-fight winrate bands change only by ruling, with archives;**
+  small-n heuristic locks may be retuned to measured-noise reality only with a
+  dated comment and disclosure. Authored Tier-0 25-card batteries are
+  ceiling-saturated and keep only their matchup floors; Tier 0.5 owns the
+  upper-power comparison. (R62; R47)
+- **No number measured on a prototype row is quotable** — not in a packet, not
+  in a register, not in a commit message. The quarantined prototype surface
+  exists to be played, not to be measured against the shipped world: its rows
+  reach no pool, no digest, no balance report and no stamp, so a figure taken
+  off one has no comparable. The single exception is the decision-closeness
+  falsifier (R213 F), which reads the TURN rather than the row. (R213 B; R215)
+
+### A material card-sheet edit is a world change (was LAW lines 249 to 269)
+
+- **A material card-sheet edit is a world change and lands under a
+  `CONSTANTS_VERSION` bump.** *"A card-sheet edit that materially changes the
+  drafted or combat world — card additions or removals, cost changes,
+  effect-number changes, rarity moves — is a world change. It lands under a
+  `CONSTANTS_VERSION` bump like any other balance constant, and numbers are not
+  comparable across it."* The sheets sit outside the `RT/D/P/C` stamp, so
+  without this rule two worlds differing in whether a card exists at all are
+  indistinguishable to a reader of the stamp. **Rename amendment:** a
+  *cosmetic* rename is exempt from the bump **only when neither the card id nor
+  the display name is read mechanically** — and the burden is on the renamer to
+  establish that, because at least one relic reads both. `card_name_damage_bonus`
+  matches a **substring** against the card id **OR** the display name
+  (`tier0/engine/relics.py:385-398`); its one carrier is `strike_dummy`,
+  substring `"strike"`, `+3` to attacks only, FROZEN. A rename that adds or
+  removes such a substring on either field moves damage and is not cosmetic.
+  (R179; M15 draft text ratified as written, amended on the rename clause)
+  **Role/archetype amendment (RATIFIED 2026-08-24, R202):** a change to a card's
+  `role` or `archetypes` is a material card-sheet edit because both fields are
+  mechanically read by drafting. It requires a `CONSTANTS_VERSION` bump, and
+  drafted-world numbers are not comparable across it.
+
+
+### The distinctness gate (was LAW lines 238 to 240)
+
+- **Distinctness gate (red test):** uniq ≥ 70, maxclu ≤ 5, neardup ≤ 0.40/card;
+  `top%`/`vocab` carry no permanent gate; a partial-pool anchor can only loosen a
+  threshold, never certify it. (R81)
+
 ## Graded
 
 The published record. A graded registration stands as published and is never
