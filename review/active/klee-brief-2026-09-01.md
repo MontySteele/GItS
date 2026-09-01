@@ -1,4 +1,4 @@
-# Klee — character brief, draft 1
+# Klee — character brief, draft 2
 
 **Written 2026-09-01 on branch `kit-overhaul-2026-09-01`. Paper only.** No sheet,
 no code, no register row, no stamp moves. This is the D1 brief the charter asks
@@ -6,9 +6,10 @@ for and the shipped kit never had: the player promise, the verbs, the tension,
 the three loops, the weakness, and what fight one teaches. It is written to be
 read in fifteen minutes and argued with.
 
-Draft 1 is deliberately written **before** the same exercise is done for a
-canon character. Draft 2 will be revised against that calibration, and the
-revision will be shown as a diff so you can see what the calibration changed.
+Draft 1 was written before the same exercise was done for a canon character
+(`ironclad-brief-calibration-2026-09-01.md`). Draft 2 is revised against that
+calibration. §14 lists exactly what changed and why; `git diff` on this file
+shows the words.
 
 ---
 
@@ -22,9 +23,15 @@ Before any card is authored, three questions, answered in this document:
    different reasons at once, with a real cost either way? (§4)
 3. **Fight one.** Does the starter deck put that tension on the table on turn
    one of fight one, with nothing hidden? (§8, §11 script A)
+4. **Borrowed systems.** Which of her payoffs live in the mod's shared layer
+   rather than on her own cards? (§3 rule 5, §5.5)
+5. **The rule each Rare breaks.** Does each loop have a Rare that rewrites one
+   sentence of how she works, not just a bigger number? (§5)
+6. **What the relic pays for.** Which verb is affordable only because the
+   relic exists? (§8)
 
 If any answer is no, the kit is one-dimensional and no amount of card
-authoring fixes it.
+authoring fixes it. Questions 4 to 6 were added by the calibration.
 
 ---
 
@@ -61,18 +68,22 @@ Six sentences. If a rule is not here, it is a card.
 
 1. **Bomb.** A numbered charge on an enemy. At the start of Klee's turn every
    Bomb grows by **2** (placeholder). A Bomb never goes off on its own.
-2. **Set off.** When one of Klee's Attack cards hits an enemy, every Bomb on
-   that enemy goes off, dealing its number as Pyro damage. **The explosions
-   resolve before the Attack's own damage.** (So the cooked number is the one
-   that reacts, and a killing blow from the Attack does not waste the bomb.)
+2. **Set off.** When any Attack card Klee plays hits an enemy, a companion's
+   Attack included, every Bomb on that enemy goes off, dealing its number as
+   Pyro damage. **The explosions resolve before the Attack's own damage.** (So
+   the cooked number is the one that reacts, and a killing blow from the
+   Attack does not waste the bomb.)
 3. **Jump.** If an enemy dies with Bombs on it, they jump to a random enemy at
    their current size. Overkill is redistributed, not wasted.
 4. **Spark.** Each Bomb that goes off gives Klee 1 Spark. Sparks are her second
    currency: some cards cost Sparks instead of energy, printed as a cost badge.
    No cap. Sparks are lost at the end of combat.
-5. **Pyro.** Every Klee Attack applies Pyro, and so does every explosion. She
-   enables any reaction and triggers none alone. Off-element auras come from
-   companions, as the law says now.
+5. **Pyro.** Every Klee Attack applies Pyro, and so does every explosion. An
+   explosion is an ordinary Pyro hit: every shared rule that touches a hit
+   touches it, so Vulnerable and Weak on the enemy, Strength on Klee, and
+   every reaction in the element table apply to a cooked bomb without a word
+   printed on her cards. She enables any reaction and triggers none alone.
+   Off-element auras come from companions, as the law says now.
 6. **Nothing fires by itself.** No start-of-turn detonation, no automatic free
    attack, no "at 3 Sparks". Every explosion is her card, her Attack, or her
    Rare.
@@ -82,7 +93,8 @@ Spark count. That is the whole rules display.
 
 ## 4. The contested thing
 
-**The Bomb on the board is the thing she wants two ways at once.**
+**The Bomb on the board is the thing she wants two ways at once. A bomb is
+both her shield and her damage, and she can only have one of them at a time.**
 
 - While it sits, it grows, and her best defensive cards read it (Block per
   Bomb on the board). Cooking is safer than it looks, as long as she keeps
@@ -123,6 +135,9 @@ Few bombs, grown large, cashed with one heavy Attack. The boss plan.
   pay for the follow-up.
 - **The decision every turn:** "is it big enough, or can I afford one more
   turn?" The enemy's intent answers it.
+- **The Rare that breaks a rule:** Slow Fuse (Power): her Attacks no longer
+  set off Bombs; only her Skills and Quick Fuse do. Rule 2 is gone, and she
+  can hit the bombed enemy every turn while it cooks. Barricade's job.
 - **Weakness:** hallways with three small enemies, and anything that hits
   harder than her Block can grow.
 
@@ -141,6 +156,10 @@ Sparks for the next one. The hallway plan and the Shiv analogue.
   bombs, the Sparks pay for two more Attacks, and the turn does not end.
 - **The decision every turn:** where to send the random hits to keep the chain
   alive, and when to stop cashing and leave one bomb cooking for the Block.
+- **The Rare that breaks a rule:** Sparks 'n' Splash (Power): at the end of
+  her turn, set off a random enemy's Bombs. Rule 6 is gone; something now
+  fires by itself, and the Spray deck stops needing an Attack in hand to keep
+  the chain alive.
 - **Weakness:** one big enemy with Block, and running out of bombs, which means
   running out of Sparks.
 
@@ -161,6 +180,10 @@ Electro. The multiplier lands on the cooked number, not the card's number.
   on the way out.
 - **The decision every turn:** cash now for the plain number, or wait one turn
   for the aura and risk the enemy's swing.
+- **The Rare that breaks a rule:** Vermillion Pact (Power): when an explosion
+  reacts, the Attack that set it off reacts too. The shared "one aura, consumed
+  by the first hit" rule is broken for her chain, so the whole cash turn is
+  multiplied and not just the bomb.
 - **Weakness:** she cannot apply the second element herself. Without an
   applier in hand this deck is a slightly worse Cook deck, which is fine, and
   it is the archetype that gets better in co-op without needing it.
@@ -176,6 +199,29 @@ Electro. The multiplier lands on the cooked number, not the card's number.
 - Any Pyro-applying companion play into a cooked bomb. React reaches into both
   other loops rather than needing its own.
 
+### 5.5 Currencies, and which way they cross
+
+Ironclad's verbs turn HP into energy, cards, Block and damage, and cards into
+Block, draw, energy and damage. Draft 1 of this brief turned bombs into
+damage, Sparks and Block, and Sparks into attacks and Skills, and nothing
+reached cards or energy. Draft 2 adds the missing directions and names where
+they live:
+
+- **Bombs → damage** (rule 2), **→ Sparks** (rule 4), **→ Block** (Hide and
+  Seek, Common).
+- **Bombs → cards:** Ammo Scavenging (Common, 1 energy): plant a Bomb 4, then
+  draw a card for each Bomb that went off this turn. Cashing now also refills
+  the hand, which is Dark Embrace's job for Burn.
+- **Sparks → attacks** (Fwoosh! and friends, Common), **→ Block and setup**
+  (Dig In, Powder Charge, Uncommon), **→ energy only at Rare:** Sugar Rush
+  (Rare, 2 Sparks, exhaust): gain 2 energy and draw 1. Below Rare, Sparks
+  never become energy, or they are a second energy pool.
+- **Reactions → Sparks:** Catalytic Converter (Uncommon Power): a reacting
+  explosion gives 2 Sparks instead of 1. React feeds Spray.
+
+Every currency reaches every other one somewhere in the pool, at the rarity
+that keeps it a discovery rather than a default.
+
 ## 6. The intended weakness
 
 **She cannot stall.** Her Block is either plain and small, or borrowed from
@@ -186,6 +232,15 @@ small, which is exactly the situation she hates.
 
 The weakness is load-bearing because it is what makes cooking a bet rather
 than a free upgrade.
+
+**Where the player feels it.** On the draft screen: every Block card she is
+offered is 5 for 1 energy and never scales except through bombs, her draw is
+two Commons, and half her Attacks pick their own targets. On the map: an
+act-2 hallway with three enemies that each hit for 10 cannot be cooked, so
+Spray is the only line and a Spray deck without enough Spark Attacks is a
+deck of Pop!s. She feels the missing Block the way Ironclad feels the missing
+draw, and the companion pool's plain Block bodies read as relief for the same
+reason Whirlwind does for him.
 
 ## 7. What is deliberately gone from the shipped kit
 
@@ -206,7 +261,11 @@ Bomb 5), Jumpy Dumpty (2 energy: 8 damage to a random enemy twice, then plant
 a Bomb 6 on each enemy it hit).
 
 Relic, Pounding Surprise: the Spark rule in §3. It is the only free Spark
-source.
+source, and it **pays for a whole verb**: every Spark-priced card in the pool
+is playable only because explosions mint Sparks. Without the relic, Spray is
+a deck of dead cards, which is exactly Burning Blood's relationship to
+Ironclad's Bleed. The player meets the relic's job on turn two of fight one,
+when the first explosion turns Ka-pow! from a blank into a free 7.
 
 Turn one, fight one, the player sees: a 0-cost card that puts a 5 on an
 enemy, three Attacks that would collect it, and a card in hand that costs a
@@ -410,3 +469,33 @@ It does not author the 75-card sheet, price a single card, or claim a
 winrate. It does not touch Kokomi, whose brief is next, or the companion
 layer, whose role is decided after both briefs. Nothing here is a ruling; the
 six items above are picks and everything else is a default with a veto.
+
+## 14. What the calibration changed (draft 1 → draft 2)
+
+The Ironclad exercise found the format sound and five of its lines missing.
+Each became an edit here:
+
+1. **Borrowed systems made explicit** (§3 rule 5, §0 question 4). Ironclad's
+   fun is mostly the base game's shared systems paying out on his cards. Klee
+   cannot borrow Strength and Exhaust the same way, so draft 2 states that an
+   explosion is an ordinary Pyro hit, which lets the mod's own shared layer
+   (elements, reactions, Vulnerable, Weak, Strength) pay out on bombs with no
+   private text. Rule 2 now also lets a companion's Attack set off bombs.
+2. **One rule-breaking Rare per loop** (§5.1 to §5.3, §0 question 5). Slow
+   Fuse breaks rule 2, Sparks 'n' Splash breaks rule 6, Vermillion Pact breaks
+   the shared one-aura rule for her chain. Draft 1's Rares were bigger
+   numbers.
+3. **The weakness felt through the draft screen and the map, not only the
+   fight** (§6). Draft 1 said "she cannot stall"; draft 2 says where the
+   player meets that.
+4. **What the relic pays for, not only what it teaches** (§8, §0 question 6).
+   Pounding Surprise makes the Spray verb affordable the way Burning Blood
+   makes Bleed affordable.
+5. **Currencies cross in every direction** (§5.5). Draft 1 never turned bombs
+   into cards or Sparks into energy. Draft 2 adds both, at the rarity that
+   keeps them discoveries.
+
+What the calibration did not change: the promise, the three verbs, the six
+rules, the contested thing, the three loops, the starter, the failure modes,
+the three-board test, and the turn scripts all stood. The format's questions
+1 to 3 were the right questions; 4 to 6 were missing.
