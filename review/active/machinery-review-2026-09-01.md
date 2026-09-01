@@ -313,7 +313,9 @@ worktree rules, and the rule that Claude never deploys without a go.
 
 ## 9. The picks
 
-Numbered, with the default I will build on unless you say otherwise.
+**Ruled 2026-09-01: all six at their defaults**, with the limit in §7
+(change 2 as amended, change 11). The words are in the commit. What follows
+is the list as it was put, kept so the ruling can be read against it.
 
 1. **The three-stage gate (change 1) and the fun gate (change 2).** (1)
    *Adopt both; the Klee brief is the first Paper artefact, and the first
