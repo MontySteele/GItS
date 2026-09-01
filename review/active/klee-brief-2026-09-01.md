@@ -360,7 +360,72 @@ line, never the card's body (D6: every card has a place alone).
   Hexerei in the source game and Universals here. The temptation is to
   print "Hexerei" density on them. R234 P6 says no, and it is right.
 
-### 7.4 Why it is worth it
+### 7.4 Hexerei as a shared tag, and how many cards go in Klee's pile
+
+Your refinement, taken: **Klee is herself Hexerei**, so the source game's
+"two Hexerei in the party" is, for her, "Klee plus any Hexerei card." That
+makes Hexerei a *family* rather than a path, and it changes the shape of
+§7.2 and §7.3 for the better in three ways.
+
+1. **Hexerei is a one-word tag on companion cards, with no effect of its
+   own.** Fischl, Sucrose, Albedo, Razor, Mona, Venti, Durin, Nicole, Varka
+   and Prune carry it because they carry it in the source game. A tag is not
+   an engine interaction, so the Universal contract (R234 §1.2) is untouched
+   and Kokomi and Furina see the same card with a dead trait, exactly as a
+   Natlan tag would be dead for a Mondstadt character in the source game.
+2. **Klee's own cards read the tag.** This is where the Klee-specific payoff
+   lives, and it is the Prune mechanism generalized: her kit already mints
+   Sparks in response to a Personal play (`KLEE_COMPANION_SPARK_*`); it can
+   respond to a Hexerei play the same way. Three or four readers, no more,
+   as a bridge into the companion layer and not a fourth loop: a Common
+   ("if you played a Hexerei card this turn, plant a Bomb"), an Uncommon
+   Power ("whenever you play a Hexerei card, plant a Bomb 3 on a random
+   enemy" or "…gain a Spark"), a Rare ("Alice's Letters: Hexerei cards cost
+   1 less; when one triggers a reaction, the next Bomb set off this turn
+   deals that element"). Varka, Nicole or Durin, when they ship, write their
+   own readers against the same tag, and inherit every tagged card for free.
+3. **Hexerei faces are the exception, not the rule.** A card gets a
+   Hexerei-only face (the Universal face for everyone else, the Hexerei face
+   for Klee and future Hexerei characters, by the pool-substitution seam
+   Kokomi's Oath already uses) only when the extra line is *family-generic*
+   witchcraft, never a Klee verb: Sucrose's Swirl spreading to all enemies,
+   Albedo's Isotoma reading reactions, Prune's absorbing Swirl. A Hexerei
+   line that says "when a Bomb goes off" is a Klee line wearing a family
+   badge and would be dead for Varka; it belongs on a Klee reader instead.
+   Mechanically a Hexerei face is a Personal whose owner is a family:
+   `personal_pool` becomes a list, and no third taxonomy is created, which
+   keeps faith with R234 P6.
+
+**So the coven path (§7.2) shrinks to what is actually Klee's:** the Little
+Hexenzirkel Personals (Prune, Sayu, Yaoyao, Qiqi) are hers alone because
+they are her coven; the witches (Fischl, Sucrose, Albedo, Durin, Nicole,
+Mona, Razor, Venti, Varka) reach her through the tag and, for a few of
+them, a family face. The grown-ups path (§7.1) is unchanged.
+
+**How many cards in the pile.** The roster template's "~75-card pool" is a
+convention, not a law, and a 75-card pool of near-duplicates (the
+distinctness lint has hers at 63% unique today) is worse than a smaller one
+where every card is live. My recommendation, as a starting shape and not a
+band:
+
+| Layer | Count | What it is |
+|---|---|---|
+| Klee's own pool | about 60 | 4 basics; Cook, Spray and React at 14 to 16 each; 8 to 10 bridges, defence and utility; 8 Rares including the three rule-breakers |
+| Personals | 6 | Grown-ups 3, coven 3 (pick 6) |
+| Hexerei faces | 4 to 6 | Family-generic lines on the witches who want one |
+| Klee-side Hexerei readers | 3 to 4 | Inside the 60, counted above |
+
+That is roughly 70 faces that only Klee sees, plus the tag on every
+Hexerei Universal, plus the Universal pool at its nation weighting. It is
+smaller than the shipped 79-card sheet on her own side and larger in what
+the player can do with it. If the sheet draft finds fewer than 60 live
+cards, the answer is to stop at the number that is live and let the Hexerei
+layer carry the breadth, which is your option and I agree with it. The
+delete-test still governs: Personals and Hexerei faces are her cards, so
+deleting them gutting the deck is allowed, but deleting *only* her own 60
+must gut it too, or the companions are carrying.
+
+### 7.5 Why it is worth it
 
 It gives the draft a second identity axis that is *not* about damage: who
 is looking after Klee. Cook with the grown-ups reads as the child being
