@@ -59,7 +59,13 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
     {
         ("title", "Pounding Surprise"),
         ("description",
+#if KLEE_OVERHAUL
+            // The arm's cards say "Set off" for the action and "goes off"
+            // for the event; the relic uses the event word there.
             "Whenever a [gold]Bomb[/gold] goes off, gain 1 [gold]Spark[/gold]. "
+#else
+            "Whenever a [gold]Bomb[/gold] detonates, gain 1 [gold]Spark[/gold]. "
+#endif
           + CompanionSlot.RewardSlotDescription),
     };
 
