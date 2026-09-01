@@ -301,11 +301,34 @@ quiet turns safe.
 
 **They are not Personals.** They are Mondstadt, so the reward slot's 50%
 home-nation weight already puts them in front of Klee. What they need is a
-Klee-only *face*: the Universal face everyone else sees, and a second face
-with one engine line that only Klee is dealt, by the same pool-substitution
-seam Kokomi's Oath uses. A face costs no reward-slot share and no art,
-because it reuses the Universal's illustration. That is why the count here
-can be generous where the Personal count cannot.
+Klee-only *face*.
+
+**What a face is, exactly.** A face is a whole second card, not a second
+line. It has the same name, the same art, the same rarity and the same
+reward odds as the ordinary Universal, and its own text, written from
+scratch for Klee. When the companion slot rolls Diona for Klee, Klee is
+handed Diona's Klee face instead. Everyone else is handed the ordinary
+Diona and never sees the face. Two things follow. The ordinary card's text
+does not change, so R234 P6 (no density on Universals) is untouched. And
+the face's text is one normal card's worth, because it does not carry the
+ordinary text underneath it. A face is not "the Universal plus a Klee
+line": that would print dead text on every other character's copy. And it
+is not "a generic card tuned so Klee likes it": that is just a good
+Universal, and it is the fallback for any grown-up who does not earn a
+face.
+
+The machinery is the pool-substitution seam Kokomi's Oath uses: a map from
+the ordinary id to the Klee id, per character (`loader._pool_substitutions`).
+Today that map gates her own card pool only. The companion slot rolls from
+a character-blind pool (`rewards.companion_pool`), so the face swap sits one
+step later, at hand-off: roll the ordinary card with the ordinary weights,
+then swap the id if Klee has a face for it. Offer odds do not move. In
+co-op, both Dionas can be on the table at once, so the face carries a small
+frame marker; the name stays the same.
+
+A face costs no reward-slot share and no art, because it reuses the
+Universal's illustration. That is why the count here can be generous where
+the Personal count cannot.
 
 Candidates, hook stated, no numbers: Diona (when a Bomb goes off, gain
 Block; and Cryo, so Melt), Noelle (when a Mine goes off, gain Block), Kaeya
