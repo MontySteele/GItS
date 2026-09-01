@@ -63,7 +63,18 @@ param(
     [string]$Configuration = 'Release',
     # Passed through to validate.ps1 S7, same meaning as on deploy.ps1: an
     # acknowledgement of a stale local game_ref, not a fix.
-    [switch]$AllowIncompleteGameRef
+    [switch]$AllowIncompleteGameRef,
+    # THE KLEE OVERHAUL ARM (the ruled brief klee-brief-2026-09-01.md sec.3,
+    # slice one klee-overhaul-slice-1-2026-09-01.md). Adds -p:KleeOverhaul=true
+    # to the build below, which is the ONLY thing that turns the arm on:
+    # without it a dev build compiles the arm's types and never reaches them,
+    # and Klee's starter and pool are the Sparks arm's exactly as before. Sim
+    # twin: C.KLEE_OVERHAUL, which ships False.
+    #
+    # A SWITCH HERE AND NOWHERE ELSE, the same arrangement the prototype
+    # property has: the release scripts must not be able to name it, and this
+    # is the one file the release path never calls.
+    [switch]$KleeOverhaul
 )
 
 $ErrorActionPreference = 'Stop'
@@ -135,8 +146,11 @@ if ($LASTEXITCODE -ne 0) {
 }
 $genOut | ForEach-Object { Write-Host "  $_" }
 
-Write-Host "Building ($Configuration) WITH the prototype surface..." -ForegroundColor Magenta
-& dotnet build $csproj -c $Configuration -v minimal --nologo -p:PrototypeCards=true
+$armLabel = if ($KleeOverhaul) { ' AND the Klee overhaul arm' } else { '' }
+Write-Host "Building ($Configuration) WITH the prototype surface$armLabel..." -ForegroundColor Magenta
+$buildArgs = @('-p:PrototypeCards=true')
+if ($KleeOverhaul) { $buildArgs += '-p:KleeOverhaul=true' }
+& dotnet build $csproj -c $Configuration -v minimal --nologo @buildArgs
 if ($LASTEXITCODE -ne 0) { throw "Build failed." }
 
 $dll = Join-Path $root "KleeCode\bin\$Configuration\klee.dll"
@@ -166,6 +180,13 @@ Write-Host "  ordinary play is unchanged and no reward roll can offer one." -For
 Write-Host "  Reach a row only by id, through the understudy grant tooling." -ForegroundColor Magenta
 Write-Host "  DO NOT hand this build to a co-op partner, and run" -ForegroundColor Magenta
 Write-Host "  klee-mod\build\deploy.ps1 to put the release build back." -ForegroundColor Magenta
+if ($KleeOverhaul) {
+    Write-Host ""
+    Write-Host "*** KLEE OVERHAUL ARM ON ***" -ForegroundColor Magenta
+    Write-Host "  Klee's starter and her WHOLE reward pool are slice one's rows." -ForegroundColor Magenta
+    Write-Host "  Her shipped 79 cards cannot be offered while this build is in." -ForegroundColor Magenta
+    Write-Host "  Bombs never go off by themselves; only a Set off card pops one." -ForegroundColor Magenta
+}
 Write-Host ""
 
 if ($version.IsDirty) {
