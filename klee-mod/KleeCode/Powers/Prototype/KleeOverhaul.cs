@@ -1,4 +1,4 @@
-namespace KleeMod.Powers.Prototype;
+namespace KleeMod.Powers;
 
 /// <summary>
 /// THE KLEE OVERHAUL SWITCH, C# side. Twin of tier0's <c>C.KLEE_OVERHAUL</c>.

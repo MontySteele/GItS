@@ -12,7 +12,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
-namespace KleeMod.Powers.Prototype;
+namespace KleeMod.Powers;
 
 /// <summary>
 /// Explosives Workshop: "At the start of your turn, your Bombs grow by 1 more."
@@ -240,7 +240,7 @@ public sealed class GroundedPower : PowerModel, ILocalizationProvider
 ///
 /// THE ROW IS OFF THE SURFACE. This type is not a stand-in and there is no card
 /// pointing at it: an unbuilt rule that shipped as a live card would be a face
-/// that lies, which is the defect class D4 already names. The class stays as
+/// that lies, which is the defect D4 already names. The type stays as
 /// the written record of the decision and its reason.
 /// </summary>
 internal static class VermillionPactNotBuilt

@@ -990,3 +990,41 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 # arm is accepted or rejected.
 # =============================================================================
 ```
+
+## before proto_ko_kaboom
+
+```
+# =============================================================================
+# THE KLEE OVERHAUL, SLICE ONE (`review/active/klee-overhaul-slice-1-2026-09-01.md`,
+# against the ruled brief `klee-brief-2026-09-01.md` sec.3 and sec.8).
+#
+# NO NUMBER BELOW IS A CLAIM. The slice packet says so in its sec.1: the numbers
+# are placeholders so the cards can be played, and the Balance stage prices them
+# later with the measurement law.
+#
+# THESE ROWS ARE REACHABLE, unlike every row above them. Under `C.KLEE_OVERHAUL`
+# / `-p:KleeOverhaul=true` the first five ARE Klee's ten-card starter and the
+# rest ARE her whole offerable pool -- `loader._starter_ids` and
+# `loader.pool_replacement` in the sim, `Klee.StartingDeck` and
+# `KleeCardPool.FilterThroughEpochs` in the mod. With the flag off none of them
+# can be reached by any path, which is the acceptance condition
+# (`tier0/tests/test_klee_overhaul.py`).
+#
+# EVERY ROW CARRIES ITS OWN `description:`. That is the surface's own face
+# channel (EB-215) and here it is load-bearing twice over: the printed text is
+# the SLICE PACKET's, so what a seat plays is what the packet ruled; and the
+# arm's eight ops have no renderer in `build_description`, because writing one
+# would be inventing English for rules that may not survive the Prototype gate.
+#
+# VERMILLION PACT IS NOT HERE. The packet's sec.5 lets it drop -- "the one item
+# on this list that touches shared reaction code; if it costs more than a day it
+# drops out of slice one" -- and it does; the reasoning is in
+# `KleeOverhaulPowers.VermillionPactNotBuilt`. A row for an unbuilt rule would
+# be a face that lies.
+#
+# ONE DISPLAY NAME IS SUFFIXED. "Sparks 'n' Splash (proto)": the shipped card of
+# that name is Klee's KIT Burst card, which is granted by the meter and is
+# therefore still reachable in the same run as this Power. Every other name here
+# is the packet's own, because the shipped card that shares it cannot be reached
+# while the flag is on.
+```

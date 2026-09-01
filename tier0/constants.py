@@ -225,11 +225,25 @@ KLEE_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
     "proto_ko_jumpy_dumpty",
 )
 
-# THE OFFERABLE POOL, WHOLE (slice packet sec.4). 28 rows, 11 Common, 11
-# Uncommon, 6 Rare, in the packet's own order: Cook, Spray, React, then the
-# currencies and the defences. `_pool_substitutions` cannot express this -- it
-# is a one-for-one map and this is "her pool is these and nothing else" -- so
-# `loader.pool_replacement` is its sibling seam, read at the same single door.
+# THE OFFERABLE POOL, WHOLE (slice packet sec.4). `_pool_substitutions` cannot
+# express this -- it is a one-for-one map and this is "her pool is these and
+# nothing else" -- so `loader.pool_replacement` is its sibling seam, read at the
+# same single door.
+#
+# TWENTY-SEVEN OF THE PACKET'S TWENTY-EIGHT. Vermillion Pact is NOT here, and
+# the packet's own sec.5 is what leaves it out: "Vermillion Pact is the one item
+# on this list that touches shared reaction code; if it costs more than a day it
+# drops out of slice one and is tested in slice two." It does. Its rule is not
+# "react twice", it is "the aura the explosion CONSUMED is still there for the
+# Attack behind it", and every reaction in the mod runs through one funnel that
+# removes the aura and pays out Burst, Courtroom Drama and the amplifier
+# multiplier on the way past -- so making one hit not consume means either
+# re-applying between the explosion and the card's damage (which moves what a
+# third hit sees and re-fires every on-apply hook) or threading a flag through
+# shared code every character's reactions would have to be re-checked against.
+# The reasoning is recorded in `VermillionPactNotBuilt`, and the row is off the
+# surface rather than staged as a card whose face would lie. The pool is
+# therefore 11 Common, 11 Uncommon, 5 Rare.
 KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Cook (8)
     "proto_ko_fish_flavored_bait",
@@ -249,12 +263,11 @@ KLEE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_ko_rapid_fire",
     "proto_ko_chained_reactions",
     "proto_ko_sparks_n_splash",
-    # React (5)
+    # React (4 of 5; Vermillion Pact is out, see above)
     "proto_ko_sizzle",
     "proto_ko_perfect_timing",
     "proto_ko_flame_dance",
     "proto_ko_catalytic_converter",
-    "proto_ko_vermillion_pact",
     # Currencies and defence (7)
     "proto_ko_ammo_scavenging",
     "proto_ko_powder_charge",

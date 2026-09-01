@@ -2,12 +2,6 @@ using System;
 using System.Collections.Generic;
 using HarmonyLib;
 using MegaCrit.Sts2.Core.Models;
-#if PROTOTYPE_CARDS
-// QUARANTINED. Imported rather than qualified inline so every switch arm below
-// reads as a bare type name -- which is what `tools/lint_power_icons.py` parses
-// to decide whether a power has an icon case at all.
-using KleeMod.Powers.Prototype;
-#endif
 
 namespace KleeMod.Powers;
 

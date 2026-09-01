@@ -294,6 +294,17 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # KokomiConscript.Run. All three have verified call sites in
                   # klee-mod/KleeCode/Powers -- the whitelist stays honest.
                   "gain_charge", "summon_kurage", "conscript",
+                  # THE KLEE OVERHAUL, SLICE ONE (QUARANTINED, R213 B -- the
+                  # rules engine lives in klee-mod/KleeCode/Powers/Prototype
+                  # and is Compile Remove'd out of a release build, so the only
+                  # rows that may print these are `proto_` rows on the
+                  # prototype surface, compiled under the same switch). Eight
+                  # verbs, every one with a verified call site on
+                  # `ProtoBombPower` or `KleeOverhaulLedger`; the whitelist
+                  # stays honest.
+                  "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+                  "remove_bomb_for_block", "damage_set_off_total",
+                  "double_set_off", "draw_per_set_off",
                   # EB-122 (EB-69's fill): the turn-scoped Sly grant. Rides
                   # SlyGrant.Grant, whose whole shape is Hand Trick's --
                   # CardSelectCmd.FromHand filtered to non-Sly Skills, then
@@ -500,6 +511,16 @@ PREDICATES_CS = {
         "CurtainCallHooks.EnemyIntendsAttack(Owner.Creature)",
     "hp_lost_this_turn":
         "CurtainCallHooks.HpLostThisTurn(Owner.Creature)",
+    # THE KLEE OVERHAUL's two per-turn reads (QUARANTINED). Both come off
+    # `KleeOverhaulLedger`, which is the ONE place the arm's counters are
+    # written, so a card and the power that feeds it cannot disagree about
+    # what an explosion was. `bomb_reacted_this_turn` is NOT a synonym for
+    # `reaction_triggered_this_turn`: that one counts every reaction and this
+    # one counts a BOMB's, which is the whole of the React loop.
+    "bomb_went_off_this_turn":
+        "KleeOverhaulLedger.For(Owner.Creature).SetOffThisTurn > 0",
+    "bomb_reacted_this_turn":
+        "KleeOverhaulLedger.For(Owner.Creature).ReactedThisTurn > 0",
 }
 
 # The if-clause each predicate renders on the card.
@@ -514,6 +535,10 @@ PREDICATE_TEXT = {
         "If you moved the [gold]Spotlight[/gold] this turn",
     "enemy_intends_attack": "If an enemy intends to attack",
     "hp_lost_this_turn": "If you have lost HP this turn",
+    "bomb_went_off_this_turn": "If a [gold]Bomb[/gold] went off this turn",
+    "bomb_reacted_this_turn":
+        "If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] "
+        "this turn",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -847,7 +872,13 @@ def _modal_reason(eff: dict) -> str | None:
 # resolve_card: the repeat excludes only the repeat machinery). The repeated
 # body lands inside a for-block, so those other effects must not declare
 # method-scope locals a second time -- restrict them to declaration-free ops.
-REPEAT_SAFE_OPS = {"damage", "block", "draw", "gain_spark", "burst_energy"}
+REPEAT_SAFE_OPS = {"damage", "block", "draw", "gain_spark", "burst_energy",
+                   # The Klee overhaul (QUARANTINED). Perfect Timing is
+                   # the slice's one repeat-conditional and its body is a
+                   # Set off plus damage, so `set_off` has to be legal
+                   # inside the repeated block. It qualifies on the rule
+                   # as written: one awaited call, no method-scope local.
+                   "set_off"}
 
 # The same restriction for a repeat an UPGRADE appends (`add: {op:
 # repeat_this}`, R130's take_your_bow+). Superset of REPEAT_SAFE_OPS by
@@ -860,6 +891,13 @@ UPGRADE_REPEAT_OPS = REPEAT_SAFE_OPS | {"salon_bow", "salon_rotate",
 # Field whitelists for the bomb ops (UNPARSEABLE discipline: an unknown
 # field encodes a mechanic; block loudly, never approximate).
 DETONATE_FIELDS = {"op", "target", "bonus"}
+# The Klee overhaul's own, same discipline (QUARANTINED, C.KLEE_OVERHAUL).
+SET_OFF_FIELDS = {"op", "target", "times", "damage", "aura"}
+PLANT_BOMB_FIELDS = {"op", "target", "size", "mine", "payload_mine_all"}
+GROW_BOMBS_FIELDS = {"op", "target", "amount"}
+MERGE_BOMBS_FIELDS = {"op", "target", "growth"}
+SET_OFF_TARGETS = {"enemy", "random_enemy", "all_enemies"}
+PLANT_BOMB_TARGETS = {"enemy", "random_enemy", "all_enemies"}
 MOVE_BOMBS_FIELDS = {"op", "target", "bonus"}
 MODIFY_BOMBS_FIELDS = {"op", "scope", "bonus"}
 CHANCE_BOMB_FIELDS = {"op", "chance", "bomb_damage"}
@@ -917,6 +955,28 @@ APPLY_POWERS = {
     "spark_attack_cost": ("SparkAttackCostPower", None,
         "Your Attacks that do not already cost [gold]Spark[/gold] cost 3 "
         "[gold]Spark[/gold] instead of their [gold]Energy[/gold] cost."),
+    # THE KLEE OVERHAUL, SLICE ONE (QUARANTINED, R213 B). Every class below
+    # lives in klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out of
+    # a release build, so the only rows that may name one are `proto_` rows on
+    # the prototype surface -- compiled under the same switch. The {X} templates
+    # are here for form; every slice row carries its own `description:`, which is
+    # the surface's own face channel (EB-215).
+    "ko_bomb_growth_up": ("ExplosivesWorkshopGrowthPower", None,
+        "At the start of your turn, your [gold]Bombs[/gold] grow by {X} more."),
+    "ko_alices_recipe": ("AlicesRecipePower", None,
+        "Your [gold]Bombs[/gold] grow by 4 instead of 2."),
+    "ko_chained_reactions": ("ChainedReactionsPower", None,
+        "Whenever one of your [gold]Bombs[/gold] goes off, place a {X} "
+        "[gold]Bomb[/gold] on a random enemy."),
+    "ko_end_turn_set_off": ("EndOfTurnSetOffPower", None,
+        "At the end of your turn, [gold]Set off[/gold] a random enemy's "
+        "[gold]Bombs[/gold]."),
+    "ko_bomb_reaction_spark": ("BombReactionSparkPower", None,
+        "Whenever one of your [gold]Bombs[/gold] triggers an "
+        "[gold]Elemental Reaction[/gold], gain {X} extra [gold]Spark[/gold]."),
+    "ko_grounded": ("GroundedPower", None,
+        "At the start of your turn, if none of your [gold]Bombs[/gold] went "
+        "off last turn, gain {X} Block."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
@@ -1346,7 +1406,14 @@ TARGET_CS = {
 # therefore reads `cardPlay.Target` at resolution. Kept beside TARGET_CS so
 # the two cannot drift: every entry here maps through TARGET_CS["enemy"].
 AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
-              "apply_aura", "swirl")
+              "apply_aura", "swirl",
+              # The Klee overhaul's aimed verbs. EB-142 is the reason these
+              # are here on the day the ops land rather than the day a card
+              # softlocks: an aiming op dereferences `cardPlay.Target`
+              # wherever it sits, so a card whose ONLY aimed op is one of
+              # these would otherwise emit `TargetType.Self` and throw on
+              # every play.
+              "set_off", "plant_bomb", "grow_bombs", "merge_bombs")
 
 
 def _aims_at_chosen_enemy(eff: dict) -> bool:
@@ -1736,6 +1803,74 @@ def blocked_reason(
             amt = eff.get("amount")
             if not isinstance(amt, int) and _x_formula_reason(card, amt):
                 return _x_formula_reason(card, amt)
+        # THE KLEE OVERHAUL'S EIGHT (QUARANTINED, C.KLEE_OVERHAUL). UNPARSEABLE
+        # discipline throughout: a field the emitter does not understand
+        # encodes a mechanic, and every number is required to be a literal int
+        # because a prototype whose printed number the emitter cannot read is a
+        # prototype the player cannot be shown.
+        if op == "set_off":
+            unknown = set(eff) - SET_OFF_FIELDS
+            if unknown:
+                return f"set_off field(s) {sorted(unknown)} not understood"
+            if eff.get("target") not in SET_OFF_TARGETS:
+                return f"set_off target '{eff.get('target')}'"
+            for key in ("times", "damage"):
+                value = eff.get(key)
+                if value is not None and (not isinstance(value, int)
+                                          or value <= 0):
+                    return f"set_off {key} must be a positive literal int"
+            if eff.get("aura") not in (None, "non_pyro"):
+                return f"set_off aura filter '{eff.get('aura')}'"
+            if eff.get("times", 1) > 1 and eff.get("target") != "random_enemy":
+                # `times` is a re-ROLL, not a repeat: Tinder Toss hits two
+                # random enemies. On an aimed or all-enemies Set off it would
+                # mean something else on each engine, so it is refused.
+                return "set_off times is random_enemy only"
+        if op == "plant_bomb":
+            unknown = set(eff) - PLANT_BOMB_FIELDS
+            if unknown:
+                return f"plant_bomb field(s) {sorted(unknown)} not understood"
+            if eff.get("target") not in PLANT_BOMB_TARGETS:
+                return f"plant_bomb target '{eff.get('target')}'"
+            size = eff.get("size")
+            if not isinstance(size, int) or size <= 0:
+                return "plant_bomb size must be a positive literal int"
+            if not isinstance(eff.get("mine", False), bool):
+                return "plant_bomb mine must be a literal bool"
+            payload = eff.get("payload_mine_all", 0)
+            if not isinstance(payload, int) or payload < 0:
+                return "plant_bomb payload_mine_all must be a literal int >= 0"
+        if op == "grow_bombs":
+            unknown = set(eff) - GROW_BOMBS_FIELDS
+            if unknown:
+                return f"grow_bombs field(s) {sorted(unknown)} not understood"
+            if eff.get("target") != "enemy":
+                return f"grow_bombs target '{eff.get('target')}'"
+            if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
+                return "grow_bombs amount must be a positive literal int"
+        if op == "merge_bombs":
+            unknown = set(eff) - MERGE_BOMBS_FIELDS
+            if unknown:
+                return f"merge_bombs field(s) {sorted(unknown)} not understood"
+            if eff.get("target") != "enemy":
+                return f"merge_bombs target '{eff.get('target')}'"
+            growth = eff.get("growth", 0)
+            if not isinstance(growth, int) or growth < 0:
+                return "merge_bombs growth must be a literal int >= 0"
+        if op in {"remove_bomb_for_block", "double_set_off",
+                  "draw_per_set_off"}:
+            # No fields at all: each is one whole printed clause, and any
+            # number they might carry is a rule's, not a card's.
+            unknown = set(eff) - {"op"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+        if op == "damage_set_off_total":
+            unknown = set(eff) - {"op", "target"}
+            if unknown:
+                return (f"damage_set_off_total field(s) {sorted(unknown)} "
+                        "not understood")
+            if eff.get("target") not in {"enemy", "all_enemies"}:
+                return f"damage_set_off_total target '{eff.get('target')}'"
         if op in {"salon_rotate", "salon_perform"}:
             # EB-118 §5.5. Same field discipline as the meter ops above,
             # with `amount` OPTIONAL: one rotation and one act are the
@@ -4589,6 +4724,15 @@ def build_body(
     # Predicate snapshots: the sim resets its per-card counters at
     # resolve_card START, so the C# diff bases are captured at the top of
     # OnPlay, before any effect resolves -- not at the conditional's site.
+    # THE KLEE OVERHAUL's per-PLAY memory, opened at the top of the body for
+    # the same reason the snapshots below are (QUARANTINED). "The total size of
+    # the Bombs set off" is a question about THIS play, and the ledger's counter
+    # is otherwise per turn -- so a second Big Badda Boom in one turn would read
+    # the first one's explosions too. Emitted only for a card that asks.
+    if any(e.get("op") == "damage_set_off_total"
+           for e in _effects_everywhere(card)):
+        lines.append(
+            "KleeOverhaulLedger.For(Owner.Creature).BeginPlay();")
     preds = {e["if"] for e in card["effects"] if e.get("op") == "conditional"}
     if "reaction_triggered_by_this" in preds:
         lines.append("var reactionsAtStart = ReactionEffects.TotalResolved;")
@@ -5008,6 +5152,93 @@ def build_body(
                 "Owner.Creature, this);\n"
                 "        }"
             )
+
+        # ---- THE KLEE OVERHAUL, SLICE ONE (QUARANTINED) -------------------
+        # Every arm below is ONE awaited call into `ProtoBombPower` or one
+        # read off `KleeOverhaulLedger`, and that is deliberate rather than
+        # tidy: the rules live in the power, so a card cannot express a
+        # variant of a rule by being generated differently. It is also what
+        # makes `set_off` legal inside a repeat-conditional (Perfect Timing):
+        # no method-scope local is declared.
+        elif op == "set_off":
+            damage = int(eff.get("damage", 0))
+            times = int(eff.get("times", 1))
+            aura = "true" if eff.get("aura") == "non_pyro" else "false"
+            if eff["target"] == "enemy":
+                _target_guard(lines, ctx)
+                lines.append(
+                    "await ProtoBombPower.SetOffAimed("
+                    "choiceContext, cardPlay.Target, Owner.Creature, this, "
+                    f"cardPlay, {damage});")
+            elif eff["target"] == "all_enemies":
+                lines.append(
+                    "await ProtoBombPower.SetOffAll("
+                    "choiceContext, Owner.Creature, this, cardPlay, "
+                    f"{damage}, nonPyroAuraOnly: {aura});")
+            else:   # random_enemy, re-rolled per `times` (Tinder Toss)
+                lines.append(
+                    "await ProtoBombPower.SetOffRandom("
+                    "choiceContext, Owner.Creature, this, cardPlay, "
+                    f"{damage}, {times});")
+
+        elif op == "plant_bomb":
+            size = int(eff["size"])
+            mine = "true" if eff.get("mine") else "false"
+            payload = int(eff.get("payload_mine_all", 0))
+            if eff["target"] == "enemy":
+                _target_guard(lines, ctx)
+                lines.append(
+                    "await ProtoBombPower.Place(choiceContext, "
+                    f"cardPlay.Target, {size}, isMine: {mine}, "
+                    f"payloadMineAll: {payload}, Owner.Creature, this);")
+            elif eff["target"] == "all_enemies":
+                lines.append(
+                    "await ProtoBombPower.PlaceOnAll(choiceContext, "
+                    f"Owner.Creature, {size}, isMine: {mine}, "
+                    f"payloadMineAll: {payload}, cardSource: this);")
+            else:
+                lines.append(
+                    "await ProtoBombPower.PlaceOnRandom("
+                    f"choiceContext, Owner.Creature, {size}, isMine: {mine}, "
+                    f"payloadMineAll: {payload}, cardSource: this);")
+
+        elif op == "grow_bombs":
+            _target_guard(lines, ctx)
+            lines.append(
+                "ProtoBombPower.GrowOn(cardPlay.Target, "
+                f'Owner.Creature, {int(eff["amount"])});')
+
+        elif op == "merge_bombs":
+            _target_guard(lines, ctx)
+            lines.append(
+                "await ProtoBombPower.MergeAllTo(choiceContext, "
+                f'cardPlay.Target, Owner.Creature, {int(eff.get("growth", 0))}, '
+                "this);")
+
+        elif op == "remove_bomb_for_block":
+            # The Block IS the removed Bomb's own size, so the two halves are
+            # one call and cannot disagree; there is no printed number here for
+            # a face to get wrong.
+            lines.append(
+                "await ProtoBombPower.RemoveLargestForBlockAndGain("
+                "choiceContext, Owner.Creature);")
+
+        elif op == "damage_set_off_total":
+            _target_guard(lines, ctx)
+            lines.append(
+                "await ProtoBombPower.DealSetOffTotal("
+                "choiceContext, cardPlay.Target, Owner.Creature, this, "
+                "cardPlay);")
+
+        elif op == "double_set_off":
+            lines.append(
+                "KleeOverhaulLedger.For(Owner.Creature)"
+                ".ArmDoubling();")
+
+        elif op == "draw_per_set_off":
+            lines.append(
+                "await ProtoBombPower.DrawPerSetOff("
+                "choiceContext, Owner);")
 
         elif op == "discard":
             # G6: an upgradeable count reads the VAR, so the loop bound and
@@ -5751,6 +5982,28 @@ def _repeat_body(card: dict, ctx: dict, skip: dict | None,
             body.append(
                 "await SalonMemberPower.PerformLeftmost("
                 f"choiceContext, Owner.Creature, {int(eff.get('amount', 1))});")
+        elif op == "set_off":
+            # The Klee overhaul's Perfect Timing is the slice's one repeat, and
+            # its replayed body IS a Set off plus the card's own hit -- both of
+            # which the one call below carries. An op listed in REPEAT_SAFE_OPS
+            # and missing here would emit an EMPTY repeat block, which is a
+            # card that says "play this again" and replays nothing.
+            damage = int(eff.get("damage", 0))
+            times = int(eff.get("times", 1))
+            aura = "true" if eff.get("aura") == "non_pyro" else "false"
+            if eff["target"] == "enemy":
+                body.append(
+                    "await ProtoBombPower.SetOffAimed(choiceContext, "
+                    f"cardPlay.Target, Owner.Creature, this, cardPlay, {damage});")
+            elif eff["target"] == "all_enemies":
+                body.append(
+                    "await ProtoBombPower.SetOffAll(choiceContext, "
+                    f"Owner.Creature, this, cardPlay, {damage}, "
+                    f"nonPyroAuraOnly: {aura});")
+            else:
+                body.append(
+                    "await ProtoBombPower.SetOffRandom(choiceContext, "
+                    f"Owner.Creature, this, cardPlay, {damage}, {times});")
     pad = " " * indent
     return "\n".join(pad + s.replace("\n", "\n" + " " * 4) for s in body)
 

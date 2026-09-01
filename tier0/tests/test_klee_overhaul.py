@@ -157,13 +157,19 @@ def test_the_starter_is_ten_cards_five_ids():
     assert ids.count("proto_ko_jumpy_dumpty") == 1
 
 
-def test_the_pool_is_twenty_eight_distinct_rows():
-    """Slice packet sec.4. The count is the slice's own scope statement --
-    'the ten-card starter plus 28 pool cards' -- so it is pinned, not
-    described."""
+def test_the_pool_is_the_slices_rows_minus_vermillion_pact():
+    """Slice packet sec.4, less the one row its sec.5 allows to drop.
+
+    The count is pinned rather than described because it is the slice's own
+    scope statement, and because the ABSENCE is the load-bearing half: an
+    unbuilt rule staged as a live card would be a face that lies (D4). See
+    `VermillionPactNotBuilt` for the reasoning and `C.KLEE_OVERHAUL_POOL_IDS`
+    for the record.
+    """
     ids = C.KLEE_OVERHAUL_POOL_IDS
-    assert len(ids) == 28
-    assert len(set(ids)) == 28
+    assert len(ids) == 27
+    assert len(set(ids)) == 27
+    assert "proto_ko_vermillion_pact" not in ids
     assert not set(ids) & set(C.KLEE_OVERHAUL_STARTER_IDS)
 
 
@@ -177,7 +183,52 @@ def test_the_numbers_are_the_briefs_placeholders():
     assert C.KLEE_OVERHAUL_SPARK_PER_EXPLOSION == 1
 
 
-# --- 3. THE OPS ARE REGISTERED AND REFUSE TO RUN ---------------------------
+# --- 3. THE FLAG ON: the rows are reachable, and only these rows -----------
+
+def test_the_starter_resolves_to_the_slices_ten_cards(overhaul):
+    """`starting_deck` is the ONE seam both the tier 0 battery and the tier 0.5
+    run read, so this is what she opens with on either path."""
+    ids = loader.starting_deck("klee")
+    assert ids == list(C.KLEE_OVERHAUL_STARTER_IDS)
+    assert all(cid.startswith("proto_ko_") for cid in ids)
+    # And each one is a real, loadable, validated card -- not just a string.
+    for cid in set(ids):
+        card = loader.get_card(cid)
+        assert card.character == "klee"
+        assert card.id == cid
+
+
+def test_the_offerable_pool_is_the_slice_and_nothing_else(overhaul):
+    """`rewards.character_pool` is the single source of truth for every offer
+    surface -- fight rewards, the shop, every event card screen and the tier
+    0.5 drafter -- so this one assertion covers all five."""
+    pool = rewards.character_pool("klee")
+    ids = {c.id for cards in pool.values() for c in cards}
+    assert ids == set(C.KLEE_OVERHAUL_POOL_IDS)
+    assert not any(cid.startswith("proto_ko_")
+                   and cid in C.KLEE_OVERHAUL_STARTER_IDS for cid in ids)
+
+
+def test_the_pool_keeps_the_packets_rarity_split(overhaul):
+    """11 Common, 11 Uncommon, 5 Rare -- the packet's sec.4 count with
+    Vermillion Pact removed. Pinned because the rarity buckets ARE the offer
+    odds: a row filed in the wrong tier changes how often it is seen."""
+    pool = rewards.character_pool("klee")
+    assert {r: len(cs) for r, cs in sorted(pool.items())} == {
+        "common": 11, "uncommon": 11, "rare": 5}
+
+
+def test_no_other_character_moves_under_the_flag(overhaul):
+    """The seam is Klee's alone. A flag that quietly re-pooled Furina would
+    make every number measured on her incomparable."""
+    for character in ("furina", "kokomi"):
+        assert loader.pool_replacement(character) is None
+        ids = {c.id for cards in rewards.character_pool(character).values()
+               for c in cards}
+        assert not any(cid.startswith("proto_ko_") for cid in ids)
+
+
+# --- 4. THE OPS ARE REGISTERED AND REFUSE TO RUN ---------------------------
 
 def test_every_new_op_is_registered():
     """The loader validates `op:` NAMES at load (`_validate_effect_vocabulary`),

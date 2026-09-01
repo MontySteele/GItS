@@ -93,7 +93,30 @@ public sealed class Klee : CustomCharacterModel
     /// exists. Keeping the template here makes character-select/self-check
     /// reads stable; only actual new-run creation resolves the random pair.
     /// </remarks>
-    public override IEnumerable<CardModel> StartingDeck => new CardModel[]
+    public override IEnumerable<CardModel> StartingDeck
+    {
+        get
+        {
+#if PROTOTYPE_CARDS
+            // QUARANTINED, THE KLEE OVERHAUL'S ONE STARTER SEAM (the ruled
+            // brief klee-brief-2026-09-01.md sec.8; sim twin
+            // `tier0/content/loader._starter_ids`, the same one seam). It comes
+            // FIRST because the two prototype arms are ALTERNATIVES, not
+            // layers: the Sparks substitutions below are priced inside rules
+            // this arm retires, and a dev build compiles both. With
+            // `KleeOverhaul.Enabled` off -- which is every build that did not
+            // ask for `-p:KleeOverhaul=true` -- this branch does not run and
+            // the list below is byte for byte what it was.
+            if (Powers.KleeOverhaul.Enabled)
+            {
+                return Powers.KleeOverhaulRoster.StartingDeck();
+            }
+#endif
+            return Template;
+        }
+    }
+
+    private static CardModel[] Template => new CardModel[]
     {
 #if PROTOTYPE_CARDS
         // QUARANTINED, THE SPARKS ARM'S ONE STARTER SEAM

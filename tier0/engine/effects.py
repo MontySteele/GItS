@@ -2977,6 +2977,12 @@ PREDICATE_NAMES = frozenset({
     # count prefix; the COUNTS are reachable as amounts.
     "exhaust_selection_has_companion",
     "exhaust_selection_has_personal",
+    # The Klee overhaul's two per-turn reads (QUARANTINED, C.KLEE_OVERHAUL).
+    # Registered so the slice's rows load and validate; the chain REFUSES them
+    # for the same reason the arm's ops refuse, and for the same one sentence:
+    # slice one is C# first and the sim is not brought up.
+    "bomb_went_off_this_turn",
+    "bomb_reacted_this_turn",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -3159,6 +3165,20 @@ def _predicate(state: CombatState, name: str) -> bool:
         # Chevreuse Vanguard's Valor. RULED: ANY reaction counts, not
         # Overload-only -- must never be a dead draw off-Pyro/Electro.
         return state.reactions_this_turn > 0
+    if name == "bomb_went_off_this_turn" or name == "bomb_reacted_this_turn":
+        # THE KLEE OVERHAUL'S TWO PER-TURN READS (QUARANTINED,
+        # C.KLEE_OVERHAUL). Registered above so the slice's rows load and
+        # validate, and REFUSED here for the reason its ops are refused: the
+        # arm is C# first and the sim is not brought up for slice one, so the
+        # honest answer is not False -- False would let Run Away!, Sizzle and
+        # Grounded report a game this engine never played. Neither predicate
+        # is a synonym for `reaction_triggered_this_turn`, which counts every
+        # reaction rather than a BOMB's.
+        raise NotImplementedError(
+            f"predicate {name!r} belongs to the KLEE_OVERHAUL arm, which is "
+            "C# FIRST -- the mod answers it behind "
+            "`-p:PrototypeCards=true -p:KleeOverhaul=true` "
+            "(KleeOverhaulLedger) and the sim is not brought up for slice one.")
     if name == "killed_target":
         return state.kills_this_card > 0
     if name == "drew_skill_this_card":

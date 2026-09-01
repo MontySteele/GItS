@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 
-namespace KleeMod.Powers.Prototype;
+namespace KleeMod.Powers;
 
 /// <summary>
 /// RULE 7's TWO COUNTERS, and the two memories the cards that read them need.

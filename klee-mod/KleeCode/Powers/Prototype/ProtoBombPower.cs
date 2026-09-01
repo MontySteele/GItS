@@ -5,6 +5,7 @@ using BaseLib.Abstracts;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
@@ -15,7 +16,7 @@ using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
-namespace KleeMod.Powers.Prototype;
+namespace KleeMod.Powers;
 
 /// <summary>
 /// THE OVERHAUL'S BOMB (rules 1, 2, 3 and 6 of the ruled brief's sec.3).
@@ -31,10 +32,10 @@ namespace KleeMod.Powers.Prototype;
 /// WHY THIS IS A SEPARATE POWER AND NOT A MODE ON <see cref="BombPower"/>.
 /// Rule 7 is "nothing fires by itself", and the shipped Bomb's whole lifecycle
 /// is two automatic detonations -- <c>BeforeSideTurnStart</c> and the
-/// early pop in <c>AfterDamageReceived</c>. Teaching one class to be both would
+/// early pop in <c>AfterDamageReceived</c>. Teaching one type to be both would
 /// put a runtime branch inside every one of those hooks, in the file whose
 /// per-placer instancing, suppression arbiter and death-teardown compensation
-/// are the mod's most load-bearing co-op work. A second power costs a class and
+/// are the mod's most load-bearing co-op work. A second power costs one type and
 /// buys the acceptance condition outright: under the flag no card places a
 /// <see cref="BombPower"/>, so "no automatic detonation of any kind" is a
 /// property of what is on the board rather than of a branch somebody remembers.
@@ -254,7 +255,127 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         GrowBy(GrowthFor(Applier));
     }
 
-    // ---- rule 2: Set off ------------------------------------------------
+    // ---- rule 2: Set off, and the four card-facing spellings of it -------
+
+    /// <summary>
+    /// "Set off. Deal N." on an AIMED card (Kaboom!, Ka-pow!, Big Badda Boom,
+    /// The Big One, Bang Bang!, Quick Fuse, Sizzle, Perfect Timing).
+    ///
+    /// THE ORDER IS THE RULE: the Bombs go off first, one at a time, and the
+    /// card's own damage lands after. That is rule 2's second half, and it is
+    /// held HERE rather than by the order two emitted statements happen to sit
+    /// in, so a card cannot get it wrong by being generated differently.
+    /// <paramref name="damage"/> of 0 is a Set off with no Attack behind it.
+    /// </summary>
+    public static async Task SetOffAimed(
+        PlayerChoiceContext choiceContext, Creature? target, Creature applier,
+        CardModel cardSource, CardPlay cardPlay, int damage)
+    {
+        if (target == null) return;
+        await SetOff(choiceContext, target, applier, cardSource);
+        await DealCardDamage(choiceContext, target, damage, cardSource, cardPlay);
+    }
+
+    /// <summary>
+    /// "Set off each enemy that has a non-Pyro aura" (Flame Dance), and the
+    /// unfiltered all-enemies form beside it.
+    ///
+    /// The aura filter reads the board as it stands when the card resolves, so
+    /// an enemy whose aura an earlier explosion in the same play consumed is
+    /// no longer eligible -- which is what "each enemy that HAS" says.
+    /// </summary>
+    public static async Task SetOffAll(
+        PlayerChoiceContext choiceContext, Creature applier,
+        CardModel cardSource, CardPlay cardPlay, int damage,
+        bool nonPyroAuraOnly)
+    {
+        var combat = applier.CombatState;
+        if (combat == null) return;
+
+        foreach (var enemy in combat.HittableEnemies.ToList())
+        {
+            if (enemy.IsDead) continue;
+            if (nonPyroAuraOnly)
+            {
+                var aura = AuraCmd.Find(enemy);
+                if (aura == null || aura.Element == Element.Pyro) continue;
+            }
+            await SetOff(choiceContext, enemy, applier, cardSource);
+            await DealCardDamage(choiceContext, enemy, damage, cardSource, cardPlay);
+        }
+    }
+
+    /// <summary>
+    /// "Set off and deal N, to a random enemy", <paramref name="times"/> times
+    /// (Fwoosh!, Tinder Toss, Rapid Fire).
+    ///
+    /// RULE 2's LAST SENTENCE: "For random-target Attacks, per target hit." So
+    /// the roll happens once per hit and each rolled enemy's Bombs go off
+    /// before that hit lands -- four rolls is four Set offs, not one Set off
+    /// and four hits. The candidates are re-read each time, so a hit that
+    /// killed its target cannot be rolled again.
+    /// </summary>
+    public static async Task SetOffRandom(
+        PlayerChoiceContext choiceContext, Creature applier,
+        CardModel cardSource, CardPlay cardPlay, int damage, int times)
+    {
+        var combat = applier.CombatState;
+        if (combat == null) return;
+
+        for (var i = 0; i < times; i++)
+        {
+            var candidates = combat.HittableEnemies.Where(e => !e.IsDead).ToList();
+            if (candidates.Count == 0) return;
+            var target = combat.RunState.Rng.CombatTargets.NextItem(candidates);
+            if (target == null) return;
+
+            await SetOff(choiceContext, target, applier, cardSource);
+            await DealCardDamage(choiceContext, target, damage, cardSource, cardPlay);
+        }
+    }
+
+    /// <summary>The card's OWN hit, after its explosions. A powered Attack from
+    /// Klee, so it applies Pyro through her cadence exactly as any other Attack
+    /// of hers does; the explosions above went through the elemental pipeline
+    /// directly, because they are not card damage.</summary>
+    private static async Task DealCardDamage(
+        PlayerChoiceContext choiceContext, Creature target, int damage,
+        CardModel cardSource, CardPlay cardPlay)
+    {
+        if (damage <= 0 || target.IsDead) return;
+        await DamageCmd.Attack(damage)
+            .FromCard(cardSource, cardPlay)
+            .Targeting(target)
+            .WithHitFx("vfx/vfx_attack_slash")
+            .Execute(choiceContext);
+    }
+
+    /// <summary>
+    /// Big Badda Boom's second clause: "Then deal damage equal to the total
+    /// size of the Bombs set off." Read off the ledger, because by now the pile
+    /// is gone -- which is exactly why the number is remembered rather than
+    /// recomputed.
+    /// </summary>
+    public static async Task DealSetOffTotal(
+        PlayerChoiceContext choiceContext, Creature? target, Creature applier,
+        CardModel cardSource, CardPlay cardPlay)
+    {
+        if (target == null) return;
+        var total = KleeOverhaulLedger.For(applier).SizeSetOffThisPlay;
+        await DealCardDamage(choiceContext, target, total, cardSource, cardPlay);
+    }
+
+    /// <summary>Ammo Scavenging: "Draw a card for each of your Bombs that went
+    /// off this turn." Rule 7's first counter, spent.</summary>
+    public static async Task DrawPerSetOff(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        var creature = player.Creature;
+        if (creature == null) return;
+        var count = KleeOverhaulLedger.For(creature).SetOffThisTurn;
+        if (count <= 0) return;
+        await CardPileCmd.Draw(choiceContext, count, player);
+    }
 
     /// <summary>
     /// RULE 2. Every Bomb on <paramref name="target"/> goes off, ONE AT A TIME,
@@ -536,6 +657,37 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         }
     }
 
+    /// <summary>Mine Toss: one charge on EVERY enemy. A snapshot, so a payload
+    /// firing mid-sweep cannot change who is swept.</summary>
+    public static async Task PlaceOnAll(
+        PlayerChoiceContext choiceContext, Creature applier, int size,
+        bool isMine, int payloadMineAll, CardModel? cardSource)
+    {
+        var combat = applier.CombatState;
+        if (combat == null) return;
+        foreach (var enemy in combat.HittableEnemies.ToList())
+        {
+            if (enemy.IsDead) continue;
+            await Place(choiceContext, enemy, size, isMine, payloadMineAll,
+                        applier, cardSource);
+        }
+    }
+
+    /// <summary>Jumpy Dumpty: one charge on a random living enemy.</summary>
+    public static async Task PlaceOnRandom(
+        PlayerChoiceContext choiceContext, Creature applier, int size,
+        bool isMine, int payloadMineAll, CardModel? cardSource)
+    {
+        var combat = applier.CombatState;
+        if (combat == null) return;
+        var candidates = combat.HittableEnemies.Where(e => !e.IsDead).ToList();
+        if (candidates.Count == 0) return;
+        var target = combat.RunState.Rng.CombatTargets.NextItem(candidates);
+        if (target == null) return;
+        await Place(choiceContext, target, size, isMine, payloadMineAll,
+                    applier, cardSource);
+    }
+
     /// <summary>
     /// Chain Fuse: every Bomb on ONE enemy grows by <paramref name="amount"/>.
     /// This placer's piles only, for the same reason Set off reads only hers.
@@ -625,6 +777,18 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             await PowerCmd.Remove(best);
         }
         return removed.Size;
+    }
+
+    /// <summary>Sorry, Jean..., whole: remove the largest Bomb and gain Block
+    /// equal to its size. ONE call, so the number removed and the number gained
+    /// are the same number by construction and no printed value can drift from
+    /// either.</summary>
+    public static async Task RemoveLargestForBlockAndGain(
+        PlayerChoiceContext choiceContext, Creature applier)
+    {
+        var size = await RemoveLargestForBlock(choiceContext, applier);
+        if (size <= 0) return;
+        await CreatureCmd.GainBlock(applier, size, ValueProp.Unpowered, null);
     }
 
     /// <summary>Big Badda Boom's second clause reads this: the total size this
