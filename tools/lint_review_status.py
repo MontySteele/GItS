@@ -70,7 +70,9 @@ CITING_FILES = ("CLAUDE.md", "AGENTS.md")
 CITING_EXT = {".py", ".md", ".tsv", ".yaml", ".yml", ".ps1", ".json", ".txt"}
 # understudy/turns holds staged run artifacts: the paths in them are the
 # record of what a past run was handed, not a pointer this repo maintains.
-CITING_SKIP = ("understudy/turns",)
+# understudy/logs holds gitignored raw seat output (stderr, prompts as sent):
+# never rewritten (R101b), never in CI, so never scanned.
+CITING_SKIP = ("understudy/turns", "understudy/logs")
 
 CITATION = re.compile(r"review/[A-Za-z0-9._/-]*[A-Za-z0-9]")
 # This file's own self-test strings are examples, not pointers.
