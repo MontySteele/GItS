@@ -291,7 +291,7 @@ lore splits her people in two, and this brief proposes that her Personal
 Companions split the same way. **The draft question becomes: am I Jean's Klee
 or Alice's Klee?**
 
-### 7.1 Jean's Klee — the grown-ups, Mondstadt, defence
+### 7.1 Jean's Klee — the grown-ups, as Klee-only faces on Mondstadt Universals
 
 The people who look after her: Diona, Noelle, Barbara, Kaeya, and at Rare,
 Albedo and Jean. Their hook is defence keyed to explosions, which is her
@@ -299,21 +299,39 @@ team in the source game (shielders around a glass cannon) and her story
 (the people who clean up after her). This path leans Cook: it makes the
 quiet turns safe.
 
-Candidates at 4-star, hook stated, no numbers: Diona (when a Bomb goes off,
-gain Block; and Cryo, so Melt), Noelle (when a Mine goes off, gain Block),
-Kaeya (a cover story: Grounded pays this turn even though something went
-off), Barbara (a Bomb went off this turn: heal, Rare-tier by the healing
-law, so this one waits). Albedo and Jean are 5-star and therefore Rare
-Personals, which R234 P5a bars for now; they are the strongest reason to
-answer that sub-pick.
+**They are not Personals.** They are Mondstadt, so the reward slot's 50%
+home-nation weight already puts them in front of Klee. What they need is a
+Klee-only *face*: the Universal face everyone else sees, and a second face
+with one engine line that only Klee is dealt, by the same pool-substitution
+seam Kokomi's Oath uses. A face costs no reward-slot share and no art,
+because it reuses the Universal's illustration. That is why the count here
+can be generous where the Personal count cannot.
 
-### 7.2 Alice's Klee — the Little Hexenzirkel, off-region, witchcraft
+Candidates, hook stated, no numbers: Diona (when a Bomb goes off, gain
+Block; and Cryo, so Melt), Noelle (when a Mine goes off, gain Block), Kaeya
+(a cover story: Grounded pays this turn even though something went off),
+Barbara (a Bomb went off this turn: heal, Rare-tier by the healing law, so
+this one waits), Albedo (Isotoma reads explosions), Jean (the ultimate
+Grounded). Albedo and Jean are 5-star, but a face on a Rare Universal rides
+that Universal's own acquisition, so **R234 P5a, which is about how a Rare
+Personal is acquired, is not triggered.** The sub-pick can stay open.
+
+### 7.2 Alice's Klee — the Little Hexenzirkel, off-region, the only Personals
 
 Her own coven: Prune, Sayu, Qiqi, Yaoyao, and their imaginary friends. Their
 hook is offence and tempo through witchcraft, which in this mod's terms is
 elements, reactions and free plants. This path leans Spray and React, and
 it answers your note on Pyro being a weak reaction payoff in the way you
-suggested, through a companion:
+suggested, through a companion.
+
+**These are the Personals, one card each, four in total.** They have to be:
+Liyue, Inazuma and Nod-Krai cards compete in the wildcard half of the
+reward slot against every other nation, so without the Personal channel Klee
+would never see her own coven. Personals cost what faces do not, a share of
+her reward slot and their own art, which is why the Personal count stays
+small and off-region. The imaginary friends (Dodoco, Popcorn, Descartes,
+Gena, Yuegui) are the reserve if a fifth is wanted; R234 P5's "three to
+five" holds.
 
 - **Prune** (Anemo, in the sheet already). In the source game her hammer
   absorbs whatever element she Swirls. Here: Swirl, and **the next Bomb set
@@ -350,9 +368,9 @@ line, never the card's body (D6: every card has a place alone).
   slot does with a Personal from Liyue is a real question, and the P7
   re-measure of Personal appearance rates becomes load-bearing with six of
   them instead of three.
-- **Count.** Two paths of three is six Personals, above R234 P5's "three to
-  five, starting at three". Fewer than three per path and a path is a
-  coincidence rather than a plan.
+- **Count.** Four Personals, one per coven member, sits inside R234 P5's
+  "three to five". The grown-ups are faces, not Personals, so they do not
+  count against it and do not dilute the coven's appearance rate.
 - **Name and art collisions.** Sayu's fourth card; Qiqi and Yaoyao have no
   Liyue pool yet, so their first cards would be Klee's; art for children in
   the StS style is the scarce input.
@@ -408,22 +426,30 @@ distinctness lint has hers at 63% unique today) is worse than a smaller one
 where every card is live. My recommendation, as a starting shape and not a
 band:
 
-| Layer | Count | What it is |
-|---|---|---|
-| Klee's own pool | about 60 | 4 basics; Cook, Spray and React at 14 to 16 each; 8 to 10 bridges, defence and utility; 8 Rares including the three rule-breakers |
-| Personals | 6 | Grown-ups 3, coven 3 (pick 6) |
-| Hexerei faces | 4 to 6 | Family-generic lines on the witches who want one |
-| Klee-side Hexerei readers | 3 to 4 | Inside the 60, counted above |
+| Layer | Count | What it is | What it costs |
+|---|---|---|---|
+| Klee's own pool | about 60 | 4 basics; Cook, Spray and React at 14 to 16 each; 8 to 10 bridges, defence and utility; 8 Rares including the three rule-breakers | authoring, art |
+| Personals | 4, up to 5 | The coven, one card each; an imaginary friend as the fifth | reward-slot share, art |
+| Caretaker faces | 4 to 6 | Klee-only lines on Diona, Noelle, Kaeya, Barbara, Albedo, Jean | authoring only |
+| Hexerei faces | as many as earn one, 6 to 10 | Family-generic lines on Fischl, Sucrose, Albedo, Razor, Mona, Venti, Durin, Nicole, Varka; inherited by future Hexerei characters | authoring only |
+| Klee-side readers | 3 to 4 | Inside the 60, keyed to the Hexerei tag and the Mondstadt nation tag | counted above |
 
-That is roughly 70 faces that only Klee sees, plus the tag on every
-Hexerei Universal, plus the Universal pool at its nation weighting. It is
-smaller than the shipped 79-card sheet on her own side and larger in what
-the player can do with it. If the sheet draft finds fewer than 60 live
-cards, the answer is to stop at the number that is live and let the Hexerei
-layer carry the breadth, which is your option and I agree with it. The
-delete-test still governs: Personals and Hexerei faces are her cards, so
-deleting them gutting the deck is allowed, but deleting *only* her own 60
-must gut it too, or the companions are carrying.
+Faces cost no art and no share of the reward slot, because a face replaces
+the Universal only when Klee is the one dealt it. That is why the face
+count can go as high as good ideas exist, which is your instinct, and why
+the Personal count should not: a Personal is a card that competes in her
+slot and needs its own illustration. **The workshop item this creates:** one
+page per Mondstadt and Hexerei character, from the source kit to a face
+idea, with "block or attack for X" refused at the door. That is a later
+sitting and not this brief.
+
+Roughly 75 to 85 faces only Klee sees, on top of the Universal pool at its
+nation weighting. It is smaller than the shipped 79-card sheet on her own
+side and larger in what the player can do with it. If the sheet draft finds
+fewer than 60 live cards, stop at the number that is live and let the face
+layer carry the breadth. The delete-test still governs: Personals and faces
+are her cards, so deleting them gutting the deck is allowed, but deleting
+*only* her own 60 must gut it too, or the companions are carrying.
 
 ### 7.5 Why it is worth it
 
@@ -653,15 +679,17 @@ otherwise:**
    text ("also goes off when its enemy attacks you"), staying at two*
    [default]. (2) Log the amendment for a third keyword with compensating
    cuts. (3) Make all four keywords and amend the rule.
-6. **Two companion paths (§7).** (1) *Yes: six Personals, three per path.
-   Grown-ups: Diona, Noelle, Kaeya. Coven: Prune (re-authored with the
-   element-absorbing Swirl), Sayu, Yaoyao. Razor and Amber return to the
-   Universal pool. R234 P5 moves to "three to six, in two named paths"*
-   [default]. (2) One path only, the grown-ups, at three. (3) Both paths at
-   two each, four total, inside the current P5 range. Underneath it, **R234
-   P5a** (may a Rare Personal exist) now has a concrete reason to be
-   answered on both sides: Albedo and Jean for the grown-ups, Alice herself
-   for the coven.
+6. **The companion structure (§7).** (1) *Personals are the coven only, one
+   card each: Prune (re-authored with the element-absorbing Swirl), Sayu,
+   Qiqi, Yaoyao. The grown-ups are Klee-only faces on their Mondstadt
+   Universals. Hexerei faces as many as earn one. Razor and Amber return to
+   the Universal pool. R234 P5 holds at "three to five"; P5a stays open and
+   untriggered* [default, from your 2026-09-01 note]. (2) Grown-ups as
+   Personals too, eight or more, and P5 amended. (3) Coven Personals only,
+   no caretaker faces; the grown-ups stay plain Universals and Klee's own
+   cards carry all the defence. Underneath it, whether Hexerei faces exist
+   in slice one at all: my default is tag plus readers first, faces when a
+   specific card earns one.
 7. **The React loop and the law.** (1) *Companion-fed, as the law stands*
    [default]. (2) Give Klee one own-kit off-element source, a LAW amendment.
 8. **The scaling cap in LAW.** (1) *Strike "A2 ≤ 4.0, scaling never tops
