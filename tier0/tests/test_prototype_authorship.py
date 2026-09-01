@@ -1,7 +1,8 @@
 """EB-190: recorded authorship, and the seat refusing its own family's work.
 
 R217 C fixes the roles at two model families -- Claude authors, GPT grades and
-reviews -- and OPERATIONS' "Doctrine seat protocol" says why: a seat that
+reviews -- and operations/understudy-seats.md's "Doctrine seat protocol" says
+why: a seat that
 writes a row and then grades it has graded its own work, and the outcome is
 not evidence. Klee slice 1 is the case that made it mechanical.
 
@@ -315,7 +316,8 @@ def test_seat_review_passes_a_clean_brief_and_prepends_the_protocol(tmp_path,
 
 
 def test_the_protocol_carries_the_whole_rule():
-    """The four clauses OPERATIONS' doctrine-seat block names, in the text the
+    """The four clauses the doctrine-seat block of
+    operations/understudy-seats.md names, in the text the
     seat is actually handed -- not in whichever prompt file the round used."""
     text = seat.REVIEW_PROTOCOL
     assert "FOLLOWS" in text and "REQUIRES_MODIFICATION" in text

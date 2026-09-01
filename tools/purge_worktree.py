@@ -89,7 +89,7 @@ IRREPLACEABLE: dict[str, str] = {
                  "worktree BEFORE removing anything (BACKLOG EB-128)"),
     "game_ref_backup": ("a `game_ref/` backup -- exactly what the 2026-08-24 "
                         "purge destroyed. Backups never live in worktrees "
-                        "(OPERATIONS.md); the vault is the restore point"),
+                        "(operations/game-ref-backup.md); the vault is the restore point"),
     "sts2_decompiled": "decompiled base-game material, re-extracted by hand",
     "game_assets": "extracted base-game assets, re-extracted by hand",
     "art": "Tier F art (art/raw, art/candidates, the capture packets)",
@@ -247,7 +247,7 @@ def report(worktree: Path, unexpected: list[str]) -> str:
     lines += [
         "",
         "Move anything you care about OUT of the worktree first (backups "
-        "never live in worktrees -- OPERATIONS.md), then either re-run with "
+        "never live in worktrees -- operations/worktrees.md), then either re-run with "
         "--acknowledge or add the path to EXPECTED in this file if it is "
         "genuinely cheap to lose.",
     ]

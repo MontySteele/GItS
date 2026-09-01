@@ -278,7 +278,8 @@ REFUSAL_REASONS = {
                         "already knows is wrong",
     # EB-190. The one refusal that is about WHO WROTE THE ROW rather than
     # about the seat's transcript or the packet's faces. R217 C fixes the
-    # roles at two families and OPERATIONS' doctrine-seat block says why: a
+    # roles at two families and operations/understudy-seats.md's doctrine-seat
+    # block says why: a
     # seat that grades a row its own family authored has graded its own work,
     # and the outcome is not evidence. Klee slice 1 is the case.
     "seat_authored_row": "the turn under this seat carries a prototype row "
@@ -290,7 +291,7 @@ REFUSAL_REASONS = {
 # ------------------------------------------------- the review seat's brief --
 #
 # EB-190, third limb. The doctrine / pair-review seat's OUTPUT SHAPE is
-# protocol (OPERATIONS "Doctrine seat protocol"), and until now it lived only
+# protocol (operations/understudy-seats.md), and until now it lived only
 # in whichever prompt file the operator happened to write that round. A
 # protocol re-typed per round is a protocol that drifts, and the drift already
 # cost a round: the seat supplied Rummage's replacement text verbatim, it was
@@ -1250,7 +1251,7 @@ def cmd_review(args) -> int:
         print(f"  offending phrase(s): {', '.join(asks)}", file=sys.stderr)
         print("  The seat answers FOLLOWS / REQUIRES_MODIFICATION and NAMES "
               "THE CLAUSE. A remedy it volunteers is discarded (R217 C; "
-              "OPERATIONS 'Doctrine seat protocol').", file=sys.stderr)
+              "operations/understudy-seats.md).", file=sys.stderr)
         return 1
 
     # The rows this brief covers, resolved the same way `grade` resolves them

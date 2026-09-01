@@ -6,7 +6,7 @@
 > dormant / no-spend class below.** One of six governing files, no overlap:
 > [USER] design / taste / behavior / money calls live in **QUEUE.md**, settled
 > rules in **LAW.md**, shipped facts in **STATE.md**, commands in
-> **OPERATIONS.md**. Identifiers are preserved from their source registers;
+> **OPERATIONS.md** and the files it indexes. Identifiers are preserved from their source registers;
 > closed items are in git history (tag `pre-simplification-2026-08-06`).
 
 > **Every row is four things: current scope / next action / gate / acceptance.**

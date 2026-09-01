@@ -2721,7 +2721,8 @@ def game_version(wire: Any = None) -> tuple[str, str]:
     moved under this tool once already (R218, v0.107.1 -> v0.111.0 mid-sitting).
 
     `release_info.json` in the install root is the game's own statement of its
-    version, and it is the first of the four facts `OPERATIONS.md` names for
+    version, and it is the first of the four facts
+    `operations/understudy-seats.md` names for
     confirming a pin. Cheaper and steadier than the two alternatives: reading
     `release=v...` out of `godot.log` means scanning a file that reaches
     gigabytes on a bad run, and Steam's `appmanifest` buildid names a build

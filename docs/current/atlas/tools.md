@@ -93,7 +93,7 @@ python3 -m pytest tier0/tests/test_sheet_lints.py tier0/tests/test_art_lint_full
   on the art-bearing checkout; `art_process.py` and `art_contact_sheet.py` both
   take an absolute `--art-root` so a branch's `plan.tsv` renders against those
   pixels without a junction `git worktree remove` could follow
-  (`OPERATIONS.md`, "Worktrees"). `art_process --assets` renders candidates
+  (`operations/worktrees.md`). `art_process --assets` renders candidates
   ONLY — nothing is placed and the manifest is untouched, so a gate review
   cannot promote an unreviewed rank 1 into the shipping tree.
 - **No plan row may claim an out-path a generator owns (L11)**, and the curated

@@ -100,7 +100,7 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
   window otherwise). **NAMING, as of 2026-08-26: the CONTENT windows are
   `Win1`/`Win2`/`Win2b`/`Win3`/`Win10`/`Win11`**, spelled `W1`–`W3`/`W10`/`W11`
   in older packets — `W1`–`W9` are the watch register below, and `W4` is
-  separately the pilot-weight sweep (EXPERIMENTS `W4`, run per `OPERATIONS.md`).
+  separately the pilot-weight sweep (EXPERIMENTS `W4`, run per `operations/simulate.md`).
   **Both windows are FROZEN by R213 (2026-08-26) until the design
   course-correction below reports.** The **Phase-4 milestone read is
   TAKEN**: the three diagnostic caveats' repairs landed as the one `P11` window
@@ -508,7 +508,8 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     (`answer_truncated` a hard refusal with no partial filing, the family
     non-authorable, periodic seat review, and review of any line that
     spends a resource before a resource-reading play);
-    `understudy/local_tester.py` is the mechanism and OPERATIONS' **Local
+    `understudy/local_tester.py` is the mechanism and
+    operations/understudy-seats.md's **Local
     tester seat** section is the amended rule. The periodic-review rate is
     settled at N = 4 (`M58`, answered by R220 G).
   - **Funnel throughput — R221 BUILT AND PROVEN LIVE; R222 D and R223 in
@@ -690,7 +691,8 @@ picks and the §14 direction with its Spark-only migration branch (`EB-218`);
 `M47` at option (3), build per-mode playability (`EB-182`) then re-ask; `M55`
 at (5) re-scoped to the pile view, folded into `EB-214`; `M64` at a SPLIT —
 Codex decides any round that can ADVANCE an arm, fresh-Opus rounds are
-INSTRUMENT rounds, the rule written into OPERATIONS' *Local tester seat*
+INSTRUMENT rounds, the rule written into operations/understudy-seats.md's
+*Local tester seat*
 section; Rummage folded into the §14 mixed-pool deck and Slow Burn's fight
 HELD on `EB-199`; the Spark drain sequenced after the mixed-pool read; and the
 burst packet's architecture paragraph plus **all eight** §3.2 LAW blocks

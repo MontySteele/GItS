@@ -16,7 +16,9 @@ repo.
   - [USER]'s open A/B/C picks, and nothing else → `docs/current/QUEUE.md`
   - the one engineering register → `docs/current/BACKLOG.md`
   - measurement law + active registrations → `docs/current/EXPERIMENTS.md`
-  - build / test / sim / codegen / art / worktrees → `docs/current/OPERATIONS.md`
+  - build / test / sim / codegen / art / worktrees →
+    `docs/current/OPERATIONS.md`, a 71-line index into
+    `docs/current/operations/`; open the one file the task names
   - a ruling cited by number → `docs/current/RULINGS.md` (generated index:
     id, date, one line, and the commit or ledger to retrieve its words from)
   - stamp history (what a past RT/D/P/C level covered) → `docs/current/STAMPS.md`
@@ -55,7 +57,7 @@ git show <commit>:<path>
   the shipped sheet. **Measurement law (`EXPERIMENTS.md` pre-registration,
   blind grading, stamps) binds only at Balance:** a Prototype arm gets no
   slate, no countersign, no register row and no re-baseline. Stage procedure,
-  files and commands: `OPERATIONS.md` §*The three-stage gate*.
+  files and commands: `docs/current/operations/stage-gate.md`.
 - **[USER] plays when a RULE changes, never when a card does:** after a brief
   is ruled, at the first build of a kit's rules, when a loop is added or a rule
   in the brief's rule list is rewritten, and at a release candidate. Between
@@ -120,8 +122,8 @@ git show <commit>:<path>
   measurement record stands as published, struck rather than rewritten
   (R101b).
 - **One worktree per workstream, sibling directories only.** Never link a
-  gitignored asset directory into a worktree (`OPERATIONS.md` has the rule and
-  the reason).
+  gitignored asset directory into a worktree
+  (`docs/current/operations/worktrees.md` has the rule and the reason).
 - **One batch per sitting** (R206, amended by R212): the sitting's decisions
   are assembled by Claude and recorded as ONE slate under ONE ruling — don't
   mint transient register rows for answers already in hand.

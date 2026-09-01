@@ -1,7 +1,8 @@
 """EB-190: WHO WROTE A PROTOTYPE ROW, and the one door that reads it.
 
 R217 C fixes the roles at two families -- **Claude authors, GPT grades and
-reviews** -- and OPERATIONS' "Doctrine seat protocol" records why: a seat that
+reviews** -- and operations/understudy-seats.md's "Doctrine seat protocol"
+records why: a seat that
 writes a row and then grades it has graded its own work, and the outcome is
 not evidence. Klee slice 1 is the case that made this mechanical rather than
 procedural: the seat re-authored Rummage's text and picked Slow Burn's number,
@@ -65,7 +66,8 @@ AUTHOR_FAMILY = "claude"
 # the local-model experiment's governance.
 #
 #   * `AUTHORABLE_FAMILIES` is what `authored_by:` may name -- who may WRITE a
-#     prototype row. Closed at two, and NOT being widened: OPERATIONS'
+#     prototype row. Closed at two, and NOT being widened:
+#     operations/understudy-seats.md's
 #     "Doctrine seat protocol" says "there is no third family and none is
 #     being added", and a locally served model has authored nothing here and
 #     may author nothing.

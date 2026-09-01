@@ -228,7 +228,7 @@ def main():
                          "and receives the sheet. art/candidates/ is "
                          "gitignored Tier F and lives only on the main "
                          "checkout, which a worktree reaches by ABSOLUTE path "
-                         "and never by a link (OPERATIONS.md 'Worktrees').")
+                         "and never by a link (operations/worktrees.md).")
     args = ap.parse_args()
     art_root = args.art_root.resolve()
 

@@ -387,7 +387,7 @@ def test_sly_autoplay_marker_is_not_priced_as_an_op():
 # --- 4. the canon path, against a SYNTHETIC tree ----------------------------
 #
 # This worktree has no `game_ref/`, on purpose (it is gitignored, and
-# OPERATIONS forbids linking one in). The canon reader is therefore
+# operations/worktrees.md forbids linking one in). The canon reader is therefore
 # exercised against fixture files shaped like the real extraction surface:
 # a `<Character>CardPool` type naming `ModelDb.Card<X>` types, each of
 # which is a `CardModel` subclass -- exactly what
@@ -730,7 +730,8 @@ def test_canon_corpus_on_a_missing_tree_is_a_reason_not_a_crash(tmp_path):
 # ours. It used to be `(REPO / "game_ref").exists()`, and that is a different
 # question from the one the tool answers: the canon half decompiles `sts2.dll`
 # through `klee-mod/local.props` and never reads `game_ref/` at all. A sibling
-# worktree carries local.props but no gitignored `game_ref/` (OPERATIONS
+# worktree carries local.props but no gitignored `game_ref/`
+# (operations/worktrees.md
 # forbids linking one in), so the tool printed the COMPLETE report there while
 # this module predicted the honest stop -- a false failure in every DLL-backed
 # worktree. Asking `ccr.canon_source()` is asking the same door `canon_corpus`

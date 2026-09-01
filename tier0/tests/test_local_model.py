@@ -231,7 +231,8 @@ def test_the_hosted_families_are_unmoved(model, family):
 
 def test_local_is_recognised_but_may_not_author_a_row():
     """The asymmetry, pinned. `local` is a family the refusal can NAME; it is
-    not a family that may write a prototype row -- OPERATIONS' doctrine block
+    not a family that may write a prototype row --
+    # operations/understudy-seats.md's doctrine block
     fixes the authoring roles at two and this does not widen them."""
     assert authorship.LOCAL_FAMILY in authorship.FAMILIES
     assert authorship.LOCAL_FAMILY not in authorship.AUTHORABLE_FAMILIES

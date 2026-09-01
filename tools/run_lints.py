@@ -3,7 +3,8 @@
 
 The battery is fifteen CI invocations plus five that only ever run locally,
 and until now the only way to run it was to paste twenty lines from
-`OPERATIONS.md` / `.github/workflows/repo.yml` one at a time. Pasted serially
+`docs/current/operations/lints.md` / `.github/workflows/repo.yml` one at a
+time. Pasted serially
 they cost the sum of their runtimes; run as separate processes they cost the
 slowest one, because each is an independent short-lived Python process with no
 shared state -- they read committed files and exit.
@@ -62,7 +63,7 @@ ROOT = Path(__file__).resolve().parent.parent
 #              `--lane ci`. Putting them in repo.yml is [USER]'s edit, not this
 #              branch's -- so this lane is a SUPERSET of that job today, and
 #              the divergence is written down rather than assumed away.
-#   local   -- OPERATIONS.md "Local-only (not in CI)"; a runner has no art and
+#   local   -- operations/lints.md "Local-only (not in CI)"; a runner has no art and
 #              no game, so these answer questions CI structurally cannot ask
 #   suite   -- already exercised by pytest (tools/README.md "Suite-gated");
 #              excluded from the default run because `pytest` covers them, and
@@ -106,7 +107,7 @@ def _library(name: str, script: str, note: str) -> Lint:
     return Lint(name, "library", (script,), note)
 
 
-# Order is the CI file's order, then OPERATIONS' local list, then the
+# Order is the CI file's order, then operations/lints.md's local list, then the
 # suite-gated remainder. Concurrency makes the order cosmetic; it is kept
 # readable so this table can be diffed against repo.yml by eye.
 REGISTRY: tuple[Lint, ...] = (

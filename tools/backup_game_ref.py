@@ -16,7 +16,8 @@ The vault is `C:\\Users\\Monty\\OneDrive\\GItS-vault\\game_ref`, ruled by
 precisely because it is NOT a directory git or a worktree teardown can reach:
 the 2026-08-24 loss took both prior backup copies because they lived inside
 worktrees, and `git worktree remove` deletes gitignored content out of a clean
-worktree. **Backups never live in worktrees** -- see OPERATIONS.md.
+worktree. **Backups never live in worktrees** -- see
+docs/current/operations/game-ref-backup.md.
 
 Source resolution: the repo root is taken from this script's own location, so
 the tool works from whatever checkout it is invoked in. That is a convenience,

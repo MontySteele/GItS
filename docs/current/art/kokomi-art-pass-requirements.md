@@ -345,7 +345,7 @@ first thing scarcity spends.
    then `python tools/art_contact_sheet.py --assets <ids>` → the artifact the
    taste pass reads. From a worktree both take `--art-root <main checkout>`;
    the art trees are gitignored and must **never** be linked in
-   (`OPERATIONS.md`, "Worktrees").
+   (`operations/worktrees.md`).
 6. **[USER] taste pass** — the picks are not mine to make. Klee's took three
    red-pen rounds (`docs/archive/klee-art-redpen-round2.md`, `round3.md`) and Furina's
    rejected 13 of batch 1.

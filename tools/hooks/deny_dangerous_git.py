@@ -5,7 +5,7 @@ Correction D. Each rule below was, until this file existed, a sentence in a
 document -- and a sentence is context, not configuration. These four were
 chosen because each one has already cost this repo something:
 
-  1. **`git add -A` / `git add .` / `git add --all`.** OPERATIONS' Worktrees
+  1. **`git add -A` / `git add .` / `git add --all`.** operations/worktrees.md
      section: *"Stage explicitly; never `git add -A`. Read the `--stat` before
      you push -- one unexpected filename is the whole signal."* A blanket add
      in a tree that carries gitignored art, decompile output and local props
@@ -122,7 +122,7 @@ def verdict(tokens: list[str], repo: Path | None = None) -> str:
         if hit:
             return (f"DENIED by tools/hooks/deny_dangerous_git.py: "
                     f"`git add {' '.join(hit)}` stages everything. "
-                    f"OPERATIONS.md: stage explicitly and read the --stat "
+                    f"operations/worktrees.md: stage explicitly and read the --stat "
                     f"before you push -- one unexpected filename is the whole "
                     f"signal. Name the paths.")
 

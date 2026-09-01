@@ -51,7 +51,8 @@ Windows-only concern and a CI runner has no business pretending otherwise.
 
 VERIFYING IT: `powercfg /requests` while a run is up prints the holder under
 `SYSTEM:`, named by the executable that asked -- the python running the
-harness. See `OPERATIONS.md` beside the funnel's lock text.
+harness. See `docs/current/operations/understudy-seats.md` beside the
+funnel's lock text.
 """
 
 from __future__ import annotations

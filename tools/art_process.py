@@ -23,7 +23,7 @@ shortlist  -> art/candidates/<asset_id>/r<rank>.png at target dims,
                  manifest untouched (a gate review must not promote a rank 1).
 --art-root PATH  read art/raw/ and write art/candidates/ under PATH instead of
                  this checkout -- how a worktree reaches the main checkout's
-                 gitignored art WITHOUT linking it in (OPERATIONS.md).
+                 gitignored art WITHOUT linking it in (operations/worktrees.md).
 
 Derived extras: ui/select_portrait_locked.png (desaturated+darkened).
 Updates art/manifest.csv status/tier/source columns in place.
@@ -372,7 +372,7 @@ def main():
 
     # --art-root: read the pixels from ANOTHER checkout. `art/raw/` and
     # `art/candidates/` are gitignored Tier F and exist only on the art-bearing
-    # main checkout, and OPERATIONS.md "Worktrees" forbids linking them into a
+    # main checkout, and operations/worktrees.md forbids linking them into a
     # worktree -- `git worktree remove` follows a junction and deletes what it
     # finds, which has destroyed non-regenerable files. So a worktree points at
     # the main checkout by ABSOLUTE path instead. Only the art/ tree moves;
