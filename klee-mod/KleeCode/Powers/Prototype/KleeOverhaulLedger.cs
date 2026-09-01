@@ -38,15 +38,20 @@ namespace KleeMod.Powers;
 ///
 /// NOT A LEAK: the whole table is dropped when the combat instance changes, so
 /// it holds at most the current combat's seats.
+///
+/// PUBLIC, for the reason <c>Diagnostics.MeterLedger</c> gives: KleeTests is a
+/// separate assembly and these counters are what three defence cards and two
+/// payoffs read, so an IL-shape assertion standing in for the arithmetic would
+/// be checking the wrong thing.
 /// </summary>
-internal sealed class KleeOverhaulLedger
+public sealed class KleeOverhaulLedger
 {
     private static object? _combat;
     private static readonly Dictionary<Creature, KleeOverhaulLedger> _byKlee = new();
 
     /// <summary>This Klee's ledger for this combat, rolled to this round and
     /// created on first ask.</summary>
-    internal static KleeOverhaulLedger For(Creature klee)
+    public static KleeOverhaulLedger For(Creature klee)
     {
         var combat = (object?)klee.CombatState;
         if (!ReferenceEquals(_combat, combat))
@@ -64,24 +69,24 @@ internal sealed class KleeOverhaulLedger
     }
 
     /// <summary>Test seam: forget everything. The mod never calls it.</summary>
-    internal static void ResetAll()
+    public static void ResetAll()
     {
         _combat = null;
         _byKlee.Clear();
     }
 
     /// <summary>Counter one: Bombs that went off this turn.</summary>
-    internal int SetOffThisTurn { get; private set; }
+    public int SetOffThisTurn { get; private set; }
 
     /// <summary>Counter two: Bombs whose explosion caused a reaction this turn.</summary>
-    internal int ReactedThisTurn { get; private set; }
+    public int ReactedThisTurn { get; private set; }
 
     /// <summary>Counter one, as it stood at the end of last turn. Grounded's
     /// whole read: "if none of your Bombs went off LAST turn".</summary>
-    internal int SetOffLastTurn { get; private set; }
+    public int SetOffLastTurn { get; private set; }
 
     /// <summary>Total SIZE set off since the current card play began.</summary>
-    internal int SizeSetOffThisPlay { get; private set; }
+    public int SizeSetOffThisPlay { get; private set; }
 
     private bool _doubleNextSetOff;
     private int _round = -1;
@@ -89,7 +94,7 @@ internal sealed class KleeOverhaulLedger
     /// <summary>One explosion landed, for <paramref name="size"/>. THE ONE
     /// write site for both counters and the play memory, so the three can never
     /// disagree about what an explosion is.</summary>
-    internal void NoteExplosion(bool reacted, int size)
+    public void NoteExplosion(bool reacted, int size)
     {
         SetOffThisTurn++;
         SizeSetOffThisPlay += size;
@@ -98,13 +103,13 @@ internal sealed class KleeOverhaulLedger
 
     /// <summary>A card play begins: the play-scoped size memory starts empty.
     /// Emitted at the top of the body of any card that reads it.</summary>
-    internal void BeginPlay() => SizeSetOffThisPlay = 0;
+    public void BeginPlay() => SizeSetOffThisPlay = 0;
 
     /// <summary>The Big One arms this; the next Set off spends it.</summary>
-    internal void ArmDoubling() => _doubleNextSetOff = true;
+    public void ArmDoubling() => _doubleNextSetOff = true;
 
     /// <summary>Read and clear. The Set off that consumes it is "this way".</summary>
-    internal bool TakeDoubling()
+    public bool TakeDoubling()
     {
         var armed = _doubleNextSetOff;
         _doubleNextSetOff = false;
@@ -113,11 +118,11 @@ internal sealed class KleeOverhaulLedger
 
     /// <summary>Read without clearing: a Mine answering an enemy attack must
     /// not eat the doubling a card armed for its own Set off.</summary>
-    internal bool PeekDoubling() => _doubleNextSetOff;
+    public bool PeekDoubling() => _doubleNextSetOff;
 
     /// <summary>Roll the per-turn counters to <paramref name="round"/>. Public
     /// to the pins so a turn boundary can be exercised without a combat.</summary>
-    internal void RollTo(int round)
+    public void RollTo(int round)
     {
         if (round == _round) return;
         SetOffLastTurn = round == _round + 1 ? SetOffThisTurn : 0;

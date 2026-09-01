@@ -127,8 +127,15 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// <summary>How many of this pile's charges are Mines -- the fuse mark.</summary>
     public int MineCount => _charges.Count(c => c.IsMine);
 
-    /// <summary>The charges, for the pins. Never handed out to a mutator.</summary>
-    internal IReadOnlyList<ProtoCharge> Charges => _charges;
+    /// <summary>The charges, for the pins. Never handed out to a mutator.
+    ///
+    /// PUBLIC, like the pure mutators below and for the reason
+    /// <c>Diagnostics.MeterLedger</c> gives one file over: KleeTests is a
+    /// separate assembly, the arithmetic here is what every rule in the arm
+    /// rests on, and the alternative was an <c>InternalsVisibleTo</c> nothing
+    /// else in this mod needs or an IL-shape assertion standing in for the
+    /// arithmetic itself.</summary>
+    public IReadOnlyList<ProtoCharge> Charges => _charges;
 
     /// <summary>The badge shows the total size, not the count -- the shipped
     /// Bomb's ruling (2026-07-20), for its own reason: an enemy-side number
@@ -155,7 +162,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     // ---- the pure mutations (no commands, nothing that can kill) -------
 
     /// <summary>Rule 1's growth, applied to this pile. PURE.</summary>
-    internal void GrowBy(int amount)
+    public void GrowBy(int amount)
     {
         if (amount == 0 || _charges.Count == 0) return;
         for (var i = 0; i < _charges.Count; i++)
@@ -167,7 +174,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
 
     /// <summary>Add one charge. PURE -- the APPLY that creates the pile is the
     /// caller's.</summary>
-    internal void AddCharge(ProtoCharge charge)
+    public void AddCharge(ProtoCharge charge)
     {
         _charges.Add(charge);
         SyncDisplay();
@@ -180,7 +187,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// pile (the shipped Bomb's EB-138 discipline, and rule 3's jump needs the
     /// same guarantee for the same reason).
     /// </summary>
-    internal List<ProtoCharge>? TakeAll()
+    public List<ProtoCharge>? TakeAll()
     {
         if (_charges.Count == 0) return null;
         var taken = new List<ProtoCharge>(_charges);
@@ -191,7 +198,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
 
     /// <summary>Empty only the MINES, leaving plain Bombs where they are.
     /// Rule 6: an attack on Klee pops the Mines and nothing else. PURE.</summary>
-    internal List<ProtoCharge>? TakeMines()
+    public List<ProtoCharge>? TakeMines()
     {
         var mines = _charges.Where(c => c.IsMine).ToList();
         if (mines.Count == 0) return null;
@@ -202,7 +209,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
 
     /// <summary>Remove ONE charge by index and hand it back. Sorry, Jean...'s
     /// primitive. PURE.</summary>
-    internal ProtoCharge? TakeAt(int index)
+    public ProtoCharge? TakeAt(int index)
     {
         if (index < 0 || index >= _charges.Count) return null;
         var charge = _charges[index];
@@ -220,7 +227,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// of 2"). Replace-then-add is the only reading that leaves both faces
     /// true, and the brief's own gloss on Alice is "Breaks rule 1".
     /// </summary>
-    internal static int GrowthFor(Creature? klee)
+    public static int GrowthFor(Creature? klee)
     {
         if (klee == null) return KleeOverhaulLaw.BombGrowth;
         var baseGrowth = klee.Powers.OfType<AlicesRecipePower>().Any()
@@ -809,12 +816,12 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
     /// and the same list an explosion consumes. Cleared whenever the combat
     /// instance changes, so it holds at most this combat's piles.
     /// </summary>
-    internal static class Register
+    public static class Register
     {
         private static ICombatState? _combat;
         private static readonly List<ProtoBombPower> _piles = new();
 
-        internal static void Note(ProtoBombPower pile)
+        public static void Note(ProtoBombPower pile)
         {
             Rebase(pile.CombatState);
             if (!_piles.Contains(pile)) _piles.Add(pile);
@@ -823,7 +830,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         /// <summary>Piles whose enemy is dead or gone AND that still carry
         /// charges: what a jump owes. Emptied as it is claimed, so a second
         /// sweep in the same beat finds nothing.</summary>
-        internal static List<Claimed> Claim(ICombatState combatState)
+        public static List<Claimed> Claim(ICombatState combatState)
         {
             Rebase(combatState);
             var owed = new List<Claimed>();
@@ -842,7 +849,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
             return owed;
         }
 
-        internal static void Rebase(ICombatState? combatState)
+        public static void Rebase(ICombatState? combatState)
         {
             if (ReferenceEquals(_combat, combatState)) return;
             _combat = combatState;
@@ -850,7 +857,7 @@ public sealed class ProtoBombPower : PowerModel, ILocalizationProvider
         }
 
         /// <summary>Charges taken off a pile whose enemy is gone.</summary>
-        internal readonly record struct Claimed(
+        public readonly record struct Claimed(
             Creature Owner, Creature? Applier, IReadOnlyList<ProtoCharge> Charges);
     }
 }
