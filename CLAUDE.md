@@ -12,8 +12,9 @@ repo.
   BACKLOG.
 - **On demand, by task:**
   - governing constraints → `docs/current/LAW.md`
-  - open decisions owned by [USER] → `docs/current/QUEUE.md`
-  - open engineering work → `docs/current/BACKLOG.md`
+  - the yes/no checks a kit sheet is read against → `docs/current/kit-checklist.md`
+  - [USER]'s open A/B/C picks, and nothing else → `docs/current/QUEUE.md`
+  - the one engineering register → `docs/current/BACKLOG.md`
   - measurement law + active registrations → `docs/current/EXPERIMENTS.md`
   - build / test / sim / codegen / art / worktrees → `docs/current/OPERATIONS.md`
   - a ruling cited by number → `docs/current/RULINGS.md` (generated index:
@@ -48,11 +49,22 @@ git show <commit>:<path>
 
 ## Norms
 
+- **A kit moves Paper → Prototype → Balance.** *Paper* is a brief and sheet
+  drafts, ruled on taste. *Prototype* is a `+proto` build with the rules
+  implemented, graded on fun by [USER]'s play and by seat rounds. *Balance* is
+  the shipped sheet. **Measurement law (`EXPERIMENTS.md` pre-registration,
+  blind grading, stamps) binds only at Balance:** a Prototype arm gets no
+  slate, no countersign, no register row and no re-baseline. Stage procedure,
+  files and commands: `OPERATIONS.md` §*The three-stage gate*.
+- **[USER] plays when a RULE changes, never when a card does:** after a brief
+  is ruled, at the first build of a kit's rules, when a loop is added or a rule
+  in the brief's rule list is rewritten, and at a release candidate. Between
+  those the seats (Opus, GPT, Qwen) drive every playtest round, and no work
+  waits on [USER] playing.
 - **Hygiene fixes** (typos, dead references, obvious defects) are normal
   commits — no per-item authorization needed.
-- **Design, behavior, taste, or money** calls go to [USER] via `QUEUE.md`.
-  Don't settle them yourself, except where the ladder below authorizes it.
-- **The delegation ladder (R212) — Claude decides and ships, no ask:** art
+- **The delegation ladder (R212, extended 2026-09-01) — Claude decides and
+  ships, no ask:** art
   picks (apply shortlist rank 1, commit the contact sheet; `art_lint` still
   bites, [USER] vetoes on the sheet); prediction slates (DRAFTED from written
   intent, committed before any run, batch-countersigned — signed once, since a
@@ -61,17 +73,48 @@ git show <commit>:<path>
   hash + read); hygiene inside registered packets (R101b still binds inside a
   countersigned prediction block); derived-not-picked numbers (one-way error
   direction, archive scope, one constant) and provisional names proved
-  cosmetic by lint (R179). **Still [USER]'s:** eyes-on taste, merging a staged
-  balance lever, money, one-way doors, LAW / measurement-law amendments, and a
-  pick between genuinely different design directions.
-- **Anything that still returns to [USER] is a NUMBERED PICK LIST, never a
-  blank to fill.**
-- **Experiments** keep pre-registration and blind grading — see
-  `EXPERIMENTS.md`. No looking at results before the grade is in.
-- **Audit findings triage three ways:** confirmed defect → `BACKLOG.md`;
-  design / taste / behavior call → `QUEUE.md`; false positive or
-  non-actionable → nowhere permanent. Raw audit output is PR text or a temp
-  artifact, never committed prose.
+  cosmetic by lint (R179); and **every D / E / F pick**, meaning (D) a number
+  the sim decides, (E) a process or hygiene call, (F) an item already ruled and
+  re-asked. A D/E/F pick is taken at its stated default, disclosed in the slate
+  as APPLIED, and never queued; [USER] vetoes within five days.
+  **Still [USER]'s, the A/B/C picks:** (A) a design direction a brief cannot
+  settle, (B) eyes-on taste, (C) money, one-way doors, merging a staged balance
+  lever, and LAW or measurement-law amendments.
+- **An A/B/C pick returns as a NUMBERED PICK LIST with a marked default,**
+  never a blank to fill. The one exception is a genuine design fork with no
+  defensible default, which is put as an open question with a blank paragraph,
+  on purpose.
+- **A question already ruled is closed by its ruling id.** Cite the id instead
+  of re-asking. A re-ask that does not state, in one line, the new fact that
+  reopens it is a defect in the packet that raised it.
+- **Anything [USER] reads is plain English, about two pages,** every claim
+  checkable against a named file or number, no register dialect, ending in the
+  numbered picks. **Never route Claude's writing through GPT to summarise it
+  for [USER];** GPT reviews designs and playtests only, and a document that
+  needs a summary is rewritten instead. `STATE.md` stays near 150 lines, a
+  packet past 1,000 lines is split by decision, and a ruled packet leaves
+  `review/active/` for `review/ruled/`.
+- **Model routing.** Design work (briefs, card design, loops and archetypes,
+  any taste judgement) is the main Claude session's (Fable) and is never
+  delegated. Opus subagents do coding, builds and tests and author no card
+  designs. Sonnet does simple exploratory work such as assembling a packet or a
+  census from files named in advance. Haiku does single-value lookups.
+- **Two registers, and nothing else mints ids.** `BACKLOG.md` is the one
+  engineering register and keeps the `EB` ids; `QUEUE.md` holds [USER]'s A/B/C
+  picks only and is empty most of the time. **No new `M` ids after
+  2026-09-01:** existing ones close in place, and a new pick is named by its
+  packet section until it is ruled and then by its `R` number.
+- **Claude merges plumbing PRs.** A plumbing PR touches no card-sheet number,
+  no balance constant, no `LAW.md` or `EXPERIMENTS.md` text and no design prose
+  for [USER]. With CI green, Claude merges it (`gh pr merge --merge`, matching
+  this repo's merge-commit history) and says so in the turn. Everything else is
+  PR = [USER], stacked in one batch per sitting; main's push rule is unchanged.
+- **Experiments** keep pre-registration and blind grading at the Balance stage
+  — see `EXPERIMENTS.md`. No looking at results before the grade is in.
+- **Audit findings triage three ways:** confirmed defect → `BACKLOG.md`; an
+  A/B/C call → `QUEUE.md`; false positive or non-actionable → nowhere
+  permanent. Raw audit output is PR text or a temp artifact, never committed
+  prose.
 - **Closed items leave HEAD.** No strikethroughs, no supersession banners —
   edit in place. [USER]'s verbatim words belong in the commit message, not a
   doc. The one exception is existing LAW, not a carve-out: a published

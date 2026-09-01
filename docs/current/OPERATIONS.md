@@ -16,6 +16,14 @@ index of what to type, not how it works.
   `.venv/bin/python tools/<x>.py` (Windows: `.venv/Scripts/python`).
 - `tools/` is an implicit namespace package: both `python3 tools/x.py` and
   `from tools import x` work.
+- **The GitHub CLI IS installed** (`gh` 2.98.0, `C:\Program Files\GitHub CLI`,
+  installed 2026-09-01; the older note that it was missing is retired). Auth is
+  interactive and is [USER]'s one-time step: `gh auth login`. Once authed,
+  Claude merges **plumbing** PRs itself on green CI with
+  `gh pr merge <n> --merge` (merge commits, which is what this repo's history
+  carries) and says so in the turn; a plumbing PR is defined in `CLAUDE.md`
+  §Norms. Everything else is still PR = [USER]. `gh` never pushes to `main`,
+  which stays rule-protected.
 
 ## Mechanisms — what is enforced, and by what
 
@@ -384,12 +392,49 @@ under `upgrades.no_upgrade_path`. Depth: `docs/current/atlas/klee-mod-cards.md`.
   further down a mode body is a consequence, not a price, and is refused where
   it resolves as it always was.
 
+## The three-stage gate (Paper / Prototype / Balance)
+
+A kit moves Paper → Prototype → Balance (`CLAUDE.md` §Norms). Each stage asks
+for one kind of evidence and exits on it.
+
+**Paper, gated by taste.** Artefacts: the character brief and the sheet drafts,
+written to `review/active/<character>-brief-<date>.md` and read against
+`docs/current/kit-checklist.md`. No build, no flag, no register row, no
+commands. **Exit:** [USER] has read the brief and ruled its picks.
+
+**Prototype, gated by play.** Rows go on `docs/prototype-surface.yaml` and are
+built in **C# first** (next section). Deploy with
+`klee-mod\build\deploy_proto.ps1`, run the three-fight soak, then play.
+**Measurement law does not bind here:** no prediction slate, no countersign, no
+registration, no stamp, no re-baseline, and no number taken off a prototype row
+is quotable (LAW, *Design governance*). The evidence is [USER]'s two fights at
+a rule change plus the seats' rounds through the funnel. **Exit:** the rules
+survive play, or a rule is rewritten and the brief edited by a sentence.
+
+**Balance, gated by measurement.** Accepted rows are re-authored onto the
+character's real sheet under a `CONSTANTS_VERSION` bump and deleted from the
+prototype surface in the same commit; `EXPERIMENTS.md` binds in full from here
+(pre-registration, blind grading, stamps, bands, and the twelve-arm
+re-baseline where one is owed). **Exit:** the re-baseline publishes.
+
 ## Prototype surface (`EB-147`) — quarantined, dev-only
 
 `docs/prototype-surface.yaml` is ONE staging sheet for cards being TRIED, for
 every character at once (each row names its owner with `character:`, and every
 id starts `proto_`). A separate dev-only generator builds it; the default
 generator run does not touch it.
+
+**C# FIRST, sim at Balance.** A new kit rule is implemented in the C# mod
+(`klee-mod/`) behind the prototype switch and nowhere else, and the Python sim
+(tier0 / tier0.5) is brought up only once the rule survives the Prototype gate.
+The switch is the MSBuild property `PrototypeCards`, which defines the
+`PROTOTYPE_CARDS` compile constant
+(`klee-mod/KleeCode/KleeCode.csproj:30-31`, mirrored for the headless tests at
+`klee-mod/KleeTests/KleeTests.csproj:36-37`), driven by
+`-p:PrototypeCards=true` on the build and by `klee-mod\build\deploy_proto.ps1`.
+The sim's job before Balance is degenerate-loop and dead-card detection off the
+sheet draft, which needs no engine mirror; a two-engine build before the rule
+is settled is a tax on the stage that wants taste, not numbers.
 
 ```sh
 .venv/Scripts/python tools/gen_prototype_cards.py           # emit the dev-only C#
@@ -561,10 +606,13 @@ OPERATOR's answer for a form written before those keys existed whose q1 prose
 names the choice unambiguously; it is logged as `source: "operator"`, consumed
 at most once, and never overrides an answer the form carries.
 
-**Who grades, since R217 A.** [USER] plays **no** forms and no calibration
-turns during iteration: the independent seat's form RETURNS a prototype or
-ADVANCES it with no [USER] involvement, and two seats materially disagreeing
-ESCALATES. So the ledger's `user` grader row stays empty **by rule**, and the
+**Who grades, since R217 A, as amended 2026-09-01.** [USER] plays **at rule
+changes; the seats play the rest.** He fills no calibration forms at any point:
+the independent seat's form NOT-PLAYABLEs a prototype or reads it PLAYABLE with
+no [USER] involvement, and two seats materially disagreeing ESCALATES. His play
+is whole fights on a `+proto` build at the four rule-change milestones
+(`CLAUDE.md` §Norms), which the funnel does not grade and does not wait on. So
+the ledger's `user` grader row stays empty **by rule**, and the
 down-weighting it feeds — a grader whose question two keeps disagreeing with
 [USER]'s losing its solo SURVIVES — is **DORMANT**: the pin stays in code and
 nothing exercises it. `stage --hold` (attaches to a running game and leaves the

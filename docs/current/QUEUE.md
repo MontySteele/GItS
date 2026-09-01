@@ -23,6 +23,15 @@
 > otherwise. Where a row needs a supporting evidence packet, it points to
 > `→ review/active/<packet>`.
 
+> **NO NEW `M` IDS ARE MINTED AFTER 2026-09-01.** The M series stops; existing
+> `M` rows close in place and are neither renumbered nor deleted. A new pick is
+> named by its packet section until it is ruled, and by its `R` number after.
+> This register holds [USER]'s A/B/C picks only: (A) a design direction a brief
+> cannot settle, (B) eyes-on taste, (C) money, one-way doors, a staged balance
+> lever, LAW or measurement-law amendments. D, E and F picks are applied by
+> Claude at their default and disclosed, never recorded here
+> (`CLAUDE.md` §Norms).
+
 ---
 
 ## 1. Kokomi — band, playtest, and levers
