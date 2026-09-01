@@ -2,14 +2,12 @@
 
 > **What currently ships** — roster, systems, versions — and the pointers into
 > everything else. Snapshot only, near 150 lines by rule (`CLAUDE.md` §Norms).
-> Detail lives where it is linked: stamp history → [`STAMPS.md`](STAMPS.md);
-> open [USER] picks → [`QUEUE.md`](QUEUE.md); engineering →
-> [`BACKLOG.md`](BACKLOG.md); rules → [`LAW.md`](LAW.md); measurement law and
-> registrations → [`EXPERIMENTS.md`](EXPERIMENTS.md); commands →
-> [`OPERATIONS.md`](OPERATIONS.md); per-workstream status, build-environment
-> detail and the [USER] pointer pile → [`workstreams.md`](workstreams.md);
-> blessed mechanisms → [`watch-register.md`](watch-register.md); subsystem
-> depth → [`atlas/`](atlas/).
+> Where the detail went: [`STAMPS.md`](STAMPS.md) stamp history ·
+> [`QUEUE.md`](QUEUE.md) picks · [`BACKLOG.md`](BACKLOG.md) engineering ·
+> [`LAW.md`](LAW.md) rules · [`EXPERIMENTS.md`](EXPERIMENTS.md) measurement law
+> · [`OPERATIONS.md`](OPERATIONS.md) commands ·
+> [`workstreams.md`](workstreams.md) workstream status, build detail and the
+> [USER] pile · [`watch-register.md`](watch-register.md) · [`atlas/`](atlas/).
 
 ## Live cell
 
@@ -27,36 +25,32 @@ level covered and archived is in [`STAMPS.md`](STAMPS.md), not here.
 
 **Standing baseline:** `review/active/sitting-reads-2026-08-26-c20-d18-p11.md`,
 twelve arms at `RT12/D18/P11/C20` (`main` = `190e598`) in ONE pass with
-`game_ref/` present: `real_ironclad` **5.2%** win / **65.5%** act-1,
-`real_silent` **1.1%** / **54.0%**. **No interval separation on any arm and no
-control set**, which it says itself. Its §0 grades the predecessor's three
-scorer caveats CLEARED against code, so under R211 item 7 it is both the
-standing re-baseline and the Phase-4 milestone table, **and that milestone read
-is TAKEN**. It supersedes `sitting-reads-2026-08-25-c19-d17-p10.md`, which
-stands as published (R101b).
+`game_ref/` present: `real_ironclad` **5.2%** / **65.5%** act-1, `real_silent`
+**1.1%** / **54.0%**; **no interval separation on any arm and no control set**,
+which it says itself. Its §0 grades the predecessor's three scorer caveats
+CLEARED, so under R211 item 7 it is both the standing re-baseline and the
+Phase-4 milestone table, **and that read is TAKEN**. It supersedes the
+`c19-d17-p10` read, which stands as published (R101b).
 
 Pinned, and NOT part of the run-cell stamp: `A6_INSTRUMENT_VERSION = 2`
 (`tier0/harness/axes.py`, anchored additively so `ref_ironclad` stays 3.00; v1
-and v2 A6 numbers are discontinuous by design); heuristic pilot weights in
+and v2 A6 numbers are discontinuous by design), and heuristic pilot weights in
 `content/pilots/archetypes.yaml` and `pilot/policy.py`, `STOKE_*` deliberately
-not in `constants.py`; `RUN_NODE_TEMPLATE = "NNNRETN$ERB"`, DEAD since `RT` v6
-and kept only as the archived-world name; **Acts** (`RUN_ACTS`) `act1` 3 easy
-fights, `act2` "the Hive" 2, `act3` "Glory" 2; **Map** `MAP_FLOORS 16`,
-treasure 8, rest 14, boss 15, `MAX_EDGES 3`, `MAX_FLOOR_WIDTH 6`,
-`MAP_PATHS 6`, room odds `N .53 / ? .22 / R .12 / E .08 / $ .05`.
+not in `constants.py`. The act and map shape reads live off `tier0/constants.py`
+(`RUN_ACTS`, `MAP_*`, `ROOM_ODDS`); `RUN_NODE_TEMPLATE` is DEAD since `RT` v6,
+kept only as the archived world's name.
 
 ## Lifecycle
 
 - **Tier 0 v0.1 — LOCKED.** Frozen v2 errata: non-boss Frozen is soft control
-  (−50% next action + Shatter on the first Attack hit), bosses take Vulnerable
-  2 (R44). The v0.1 scorecard baseline and median identity are
-  regression-locked (`test_errata.V02_MEDIAN`).
+  (−50% next action + Shatter on the first Attack hit), bosses take Vulnerable 2
+  (R44); the v0.1 scorecard baseline and median identity are regression-locked
+  (`test_errata.V02_MEDIAN`).
 - **Tier 0.5 M5 — SHIPPED.** The live run model is the real StS2 map; the M5–M8
-  archive world was the v1 run template, never compared across template
-  versions unlabeled.
-- **Kokomi meter-20 — RATIFIED (R139);** the dead v0.3 W1 comparator is not
-  rebuilt. **Roster slot 4 — Zhongli countersigned (R108), not scheduled;** the
-  pre-slot-4 gate is the roster registry (`tier0/roster.py`).
+  archive world was the v1 run template, never compared across template versions
+  unlabeled. **Kokomi meter-20 — RATIFIED (R139);** the dead v0.3 W1 comparator
+  is not rebuilt. **Roster slot 4 — Zhongli countersigned (R108), unscheduled;**
+  the pre-slot-4 gate is the roster registry (`tier0/roster.py`).
 
 ## Roster
 
@@ -68,36 +62,31 @@ Ship order is stable and meaningful (`tier0/roster.py`); reports print it.
 | `furina` | Furina | 78 | Fontaine | Hydro, Skill-grade | salon | salon, spotlight, fanfare |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro, catalyst cadence | priest | priest, commander, assist |
 
-Klee is the compatibility baseline. Companion pools ship per nation
-(`docs/mondstadt-companions.yaml`, `fontaine-`, `inazuma-`). HP sits against
-the base cast (Ironclad 80, Defect 75, Regent 75, Silent 70, Necrobinder 66, in
-`game_ref/*_char_facts.yaml`): Furina 60 → **78** and Kokomi 70 → **80** by
-**R219 F**, both canonical HP-scalers, Klee low by design. Every measured table
-quoting a Furina or Kokomi row predates that and is stale under R68 until a
+Klee is the compatibility baseline; companion pools ship per nation
+(`docs/<nation>-companions.yaml`). HP sits against the base cast (Ironclad 80,
+Defect 75, Regent 75, Silent 70, Necrobinder 66): Furina 60 → **78** and Kokomi
+70 → **80** by **R219 F**, both canonical HP-scalers, Klee low by design, so
+every measured table quoting a Furina or Kokomi row is stale under R68 until a
 re-baseline (`review/active/roster-hp-scalers-2026-08-29.md` lists which).
 
-**Reference anchors** (measurement anchors, NOT roster members):
-`ref_ironclad`, `real_ironclad`, `ref_silent`, `real_silent`
-(`tier0/roster.py:165-171`); the scoring anchor is `("ref_ironclad",
-"starter")` under the `generic` pilot, normalized so every axis reads `3.0`.
-The `real_*` variants need a local `game_ref/` tree, gitignored and absent on a
-fresh clone; both pools verify (ironclad 76, silent 87). Still owed there:
-three hand-authored `*_char_facts.yaml` that no roster arm reads, [USER]'s to
-supply (`EB-128`). The rest of that row is done: the OneDrive backup is ruled
-and mirrored, `tools/purge_worktree.py` refuses a purge that would take
-gitignored data, and a missing reference layer fails loudly at load.
+**Reference anchors** (measurement anchors, NOT roster members): `ref_ironclad`,
+`real_ironclad`, `ref_silent`, `real_silent` (`tier0/roster.py:165-171`), the
+scoring anchor being `("ref_ironclad", "starter")` under the `generic` pilot,
+normalized so every axis reads `3.0`. The `real_*` variants need a local
+`game_ref/` tree, gitignored and absent on a fresh clone; both pools verify
+(ironclad 76, silent 87). Still owed: three hand-authored `*_char_facts.yaml`
+that no roster arm reads, [USER]'s to supply (`EB-128`).
 
 ## Content inventory
 
 Live sim inventory (`atlas/tier0-pilot-roster.md` §2): **322 cards in the
 loader index** (3 acquisition-only Ancient rows, leaving the 319 the atlas
-quotes), **5 character sheets** (3 roster + 2 reference), **6 encounters, 15
-pilot weight sets**; battery encounters FROZEN
-(`content/encounters/battery.yaml`). The three card sheets carry `tempo_band:`
-and hold **239 personal rows** (Klee 79 / Furina 84 / Kokomi 76). Balance
-numbers live in `tier0/content/characters/*.yaml`, the ratified artifact, not
-in the registry. Furina's pool carries **zero** `raise_fanfare_cap` riders and
-register lint `R7` retired with them.
+quotes), **5 character sheets**, **6 encounters, 15 pilot weight sets**;
+battery encounters FROZEN (`content/encounters/battery.yaml`). The three card
+sheets carry `tempo_band:` and hold **239 personal rows** (79 / 84 / 76).
+Balance numbers live in `tier0/content/characters/*.yaml`, the ratified
+artifact. Furina's pool carries **zero** `raise_fanfare_cap` riders, register
+lint `R7` retiring with them.
 
 ## Mod card coverage (generated)
 
@@ -113,10 +102,10 @@ and both curated codegen-debt registers are empty.
 
 Slay the Spire 2 **v0.111.0**, commit `41cef1ea`, buildid `24724944`, appid
 `2868840`, branch **`public-beta`**, `main_assembly_hash` `222455745`. MegaDot
-v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316,
-ilspycmd 8.2.0.7535. PCK contract `roster-pck-v3`; shipped package `klee`
-**v0.2**, `min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214)
-with the `+proto` dev mark beside it (R217 D). The **installed build is
+v4.5.1, BaseLib **3.4.5.0** (Workshop `3737335127`), .NET SDK 9.0.316, ilspycmd
+8.2.0.7535, PCK contract `roster-pck-v3`, package `klee` **v0.2** with
+`min_game_version` 0.111.0. Deploy stamps **`MAJOR.AUTO`** (R214) with the
+`+proto` dev mark beside it (R217 D). The **installed build is
 `0.2.1786+proto.dirty`** (2026-08-30), a dev package carrying both prototype
 arms behind `-p:PrototypeCards=true`; the **last RELEASE package deployed is
 `0.2.1357`** (2026-08-29). Pin history and the per-build narrative:
@@ -124,48 +113,48 @@ arms behind `-p:PrototypeCards=true`; the **last RELEASE package deployed is
 
 ## Systems
 
-- **tier0 combat kernel** — op interpreter, powers, statuses, reactions,
-  resources; 7-axis scorecard, anchor `(ref_ironclad, starter) = 3.0`, frozen
-  battery. **No axis value gates anything (R204):** axis values and
-  declared-identity comparisons are reportable diagnostics only, and ratified
-  1,000-fight `winrate_bands` are unaffected. (`atlas/tier0-engine.md`)
+Depth for each is in [`atlas/`](atlas/); these are one line apiece.
+
+- **tier0 combat kernel** — ops, powers, statuses, reactions, resources; 7-axis
+  scorecard anchored at `(ref_ironclad, starter) = 3.0`, frozen battery.
+  **No axis value gates anything (R204):** axis values and declared-identity
+  comparisons are reportable diagnostics only, and ratified 1,000-fight
+  `winrate_bands` are unaffected.
 - **tier0.5 run sim + drafter** — run model, acts, runner, draft, and the real
-  StS2 16-floor map/route policy. (`atlas/tier05-sim-core.md`, `-economy`,
-  `-metrics`)
+  StS2 16-floor map/route policy.
 - **understudy** — the bot playtest bridge driving the real game (Guardrail-7,
   no-fun rule), plus the targeted-scenario harness and the `GitsDebugState`
-  board-setup door, attended only. (`atlas/understudy.md`)
+  board-setup door, attended only.
 - **klee-mod** — the C# character mod (`KleeCode/`), the PCK build/deploy
   pipeline, and a headless C# test project. Co-op's automated backstop is
-  partial; transport and anything needing a live `CombatState` is play-only.
-  (`atlas/klee-mod-cards.md`, `-runtime`, `-build-pck`)
-- **vendor STS2_MCP bridge** — the vendored wire contract the understudy
-  speaks. **art pipeline** — `ImageGen/` art staged into the roster mod and
-  packed by `tools/build_pck.ps1`. (`atlas/vendor-sts2-mcp.md`, `atlas/tools.md`)
+  partial: transport and anything needing a live `CombatState` is play-only.
+- **vendor STS2_MCP bridge** — the wire contract the understudy speaks.
+  **art pipeline** — `ImageGen/` art staged into the roster mod and packed by
+  `tools/build_pck.ps1`.
 
 ## Active workstreams
 
-Status only, one line each. The narrative, the round-by-round records and every
-citation are in [`workstreams.md`](workstreams.md).
+Status only, one line each; the narrative, the round records and every citation
+are in [`workstreams.md`](workstreams.md).
 
 - **Design course-correction (R213 / R217 / R218)** — the frame the rest runs
-  inside: quarantined prototype surface, the independent seat, and Kokomi →
-  Klee → Furina in sequence with the shared Burst retirement last (R220 B).
+  inside: quarantined prototype surface, the independent seat, Kokomi → Klee
+  → Furina in sequence with the shared Burst retirement last (R220 B).
 - **Klee** — brief draft 4 is the live Paper artefact; slice 1's three arms are
   through their pair reads; the Sparks re-author is built behind
   `SPARK_ALT_COST_ENABLED`; *Bag of Tricks* is `EB-224` under R230.
 - **Kokomi** — slice 1 done, slice 2 RETIRED (R227); the Kurage memory is base
   kit behind `C.KURAGE_MEMORY`, display rebuild `EB-198`, cadence read `EB-234`.
-- **Furina** — the reframe is countersigned (R220 A) and slice 1 is built in
-  the sim behind five flags that all ship OFF; Spotlight ruled one-mode priced
-  (R228); the C# arm is deferred.
-- **Companion cards** — R234 ruled the slate whole, Mondstadt first, running in
+- **Furina** — the reframe is countersigned (R220 A), slice 1 is built in the
+  sim behind five flags that all ship OFF, Spotlight is ruled one-mode priced
+  (R228), and the C# arm is deferred.
+- **Companion cards** — R234 ruled the slate whole, Mondstadt first, in
   parallel; `EB-249` / `EB-250` / `EB-251` are what it owes.
-- **Richness-pass deferred families** — `Win10` (Klee bomb-board readers) and
-  `Win11` (Furina Encore spenders): named, neither open, both FROZEN by R213.
-- **Also live** — funnel throughput (R221, lanes and read-workers proven at
-  1.35× on reads), enemy remapping, the Furina and Kokomi art passes,
-  animation sprint 2, and the axis-validity Track A / Track E logs.
+- **Deferred content families** — `Win10` (Klee bomb-board readers) and `Win11`
+  (Furina Encore spenders): named, neither open, both FROZEN by R213.
+- **Also live** — funnel throughput (R221, lanes and read-workers at 1.35× on
+  reads), enemy remapping, the Furina and Kokomi art passes, animation sprint 2,
+  the axis-validity Track A / Track E logs.
 
 ## Open [USER] pile
 
@@ -173,11 +162,7 @@ Every open row is in [`QUEUE.md`](QUEUE.md) and owned by [USER]: Kokomi's
 stability band (`S4-G6`, mechanism answered at R231) and her protocol playtest
 (`S4-G14`); `M69` on the Charge read budget; the art eyes-on pile
 (`S4-G12`/`CC-G1`/`CC-G2`, `S4-G17`, `M26`, Globe Head, `grand_gala` r6); and
-`M45`'s five post-playtest calls. **No prototype-slice row is open.** How that
-pile emptied is in [`workstreams.md`](workstreams.md).
-
-## Watch register
-
-Nine blessed mechanisms, each with a named quantity and a named trigger, in
-[`watch-register.md`](watch-register.md). `W9` has FIRED and is back with
-[USER] as QUEUE `M69`; the other eight are dormant.
+`M45`'s five post-playtest calls. **No prototype-slice row is open.** How the
+pile emptied is in [`workstreams.md`](workstreams.md). The nine blessed
+mechanisms are in [`watch-register.md`](watch-register.md): `W9` has FIRED and
+is back with [USER] as `M69`, the other eight are dormant.
