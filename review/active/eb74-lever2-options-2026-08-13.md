@@ -548,7 +548,7 @@ all.** Both sentences are true of the same table.
 
 ### 6.3 What the census does and does not contain
 
-`review/active/payoff-census-2026-08-08.md` contains **zero GItS roster
+`review/ruled/payoff-census-2026-08-08.md` contains **zero GItS roster
 numbers**. Its §0 says so — it reads canonical content only, the extracted pools
 under `game_ref/` — and its closing note repeats it. The only occurrence of
 "Assist" in the file is the aims table. **So the census is evidence about the
@@ -742,10 +742,10 @@ process call with a standing effect, and the packet takes no position on it.
 | `C` = 9; the stamp table | `docs/current/STATE.md` |
 | Card-sheet edits are `CONSTANTS_VERSION` bumps | `docs/current/LAW.md:318-331`; R179 / M15 |
 | One variable per window; settle-first; the open `RT`/`C` batch | `docs/current/EXPERIMENTS.md` |
-| R185's ruled aims; Assist LOW | `review/active/payoff-census-2026-08-08.md:774-791`; `review/active/payoff-reach-reregistration.md` §6.2; commit `02cd295` |
+| R185's ruled aims; Assist LOW | `review/ruled/payoff-census-2026-08-08.md:774-791`; `review/active/payoff-reach-reregistration.md` §6.2; commit `02cd295` |
 | R186 committing the aims as predictions; grading rule P5 | `review/active/payoff-reach-reregistration.md` §6; commit `825d302`; `tier05/exp_payoff_reach.py:58-71` |
 | R178 moved only MEDIUM; role-tempo byte-identical | commit `96d8a84` |
-| Canon bands LOW/MEDIUM/HIGH/TOP; "band NAMES, not the third decimal" | `review/active/payoff-census-2026-08-08.md` §5.1-5.2, §7.2 |
+| Canon bands LOW/MEDIUM/HIGH/TOP; "band NAMES, not the third decimal" | `review/ruled/payoff-census-2026-08-08.md` §5.1-5.2, §7.2 |
 | The census contains no roster number | same, §0 and closing note |
 | Static-leg figures for her three arms | `tier05.exp_payoff_reach.static_leg`, read-only pass, 2026-08-13 |
 | `burst_max: 20` ratified as R139 | `tier0/content/characters/kokomi.yaml:26-45`; `docs/current/STATE.md` Lifecycle |

@@ -426,7 +426,7 @@ option that cannot be walked back by a follow-up tuning pass.
 ### 5.4 One interaction that applies to Option C (and to any option that moves `role:`)
 
 The sheet's **`role:`** field is authored data that `tier05/draft.py` reads,
-and it is what the payoff census counts (`review/active/payoff-census-2026-08-08.md`
+and it is what the payoff census counts (`review/ruled/payoff-census-2026-08-08.md`
 §"What a payoff is"; `tools/payoff_census.py`). `elemental_ecstasy` is
 currently **`role: glue`**.
 

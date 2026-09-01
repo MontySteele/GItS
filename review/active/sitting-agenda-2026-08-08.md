@@ -213,7 +213,7 @@ Then aim each roster archetype high, medium or low inside the census bands. That
 aim **is** the `Q-C` answer. Also state a direction and a threshold for Q-A and
 Q-B.
 
-**What to look at.** `review/active/payoff-census-2026-08-08.md`, whose §7 states
+**What to look at.** `review/ruled/payoff-census-2026-08-08.md`, whose §7 states
 the three asks. Also `review/active/payoff-reach-reregistration.md` §5.
 
 **What it unblocks.** See section C.

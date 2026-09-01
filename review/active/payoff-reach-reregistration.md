@@ -260,7 +260,7 @@ to this registration, **before the sprint's instrument runs**. Steps (3)–(6)
 of the countersigned execution order are untouched by it and no step reorders.
 
 Authored 2026-08-12. Aims per **R185**; rubric per **R178**; bands per
-`review/active/payoff-census-2026-08-08.md` §5. Q-A / Q-B predictions per
+`review/ruled/payoff-census-2026-08-08.md` §5. Q-A / Q-B predictions per
 [USER]'s sign-off of the same date.
 
 ### 6.1 (2b) The candidate bands, carried over with their amendment history
@@ -292,7 +292,7 @@ payoffs than any canonical archetype does, and the sheets do.
 
 **Pool size is NOT the explanation, and the census says so in its own §0.**
 Each of the five canonical pools holds **82 draftable cards**
-(`review/active/payoff-census-2026-08-08.md` §0: 20 common / 36 uncommon /
+(`review/ruled/payoff-census-2026-08-08.md` §0: 20 common / 36 uncommon /
 26 rare in all five). The three GItS reward pools hold **71** (Klee 29/28/14),
 **76** (Furina 23/35/18) and — **currently** — **56** (Kokomi 27/20/9), the
 last of which rises to **70** once the already-registered `EB-69` fill lands

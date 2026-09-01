@@ -95,13 +95,16 @@ def _manifest_pin() -> str:
 def _state_pin() -> str:
     """The number in STATE.md's `Mod build environment (pinned)` block.
 
-    Read from the CURRENT block only. The paragraph after it is `Pin history`
-    and names the number this one replaced; a reader that took the last match
-    in the file would gate on the retired pin.
+    Read from the CURRENT block only, which is bounded by the next `##`
+    heading. Pin history moved to `docs/current/workstreams.md` on 2026-09-01
+    (the prose diet) and names the number this one replaced; a reader that took
+    the last match anywhere would gate on the retired pin.
     """
     text = STATE.read_text(encoding="utf-8")
     block = text[text.index("## Mod build environment (pinned)"):]
-    block = block[:block.index("**Pin history.**")]
+    nxt = block.find(chr(10) + '## ', 1)
+    if nxt != -1:
+        block = block[:nxt]
     return re.search(r"BaseLib\s+\*\*([0-9.]+)\*\*", block).group(1)
 
 
