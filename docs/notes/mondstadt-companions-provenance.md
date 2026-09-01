@@ -1,0 +1,121 @@
+# mondstadt-companions.yaml - comment provenance
+
+Long comment blocks that used to sit in `docs/mondstadt-companions.yaml`. They
+moved here on 2026-09-01 so an agent reading the sheet loads rows,
+not prose. Blocks are verbatim and in sheet order.
+
+A heading names the row the block was attached to. `before <id>`
+means a column-0 section note that sat above that row. `header` is
+the file header. Blocks of three lines or fewer stayed in the sheet.
+
+## header
+
+```
+# Lifecycle: LIVING — expected to change; read it to work on the project. Status index: docs/registry/identifiers.md §15.  (lint-ok)
+# Mondstadt companion pool — v0.1 (ships with Klee)
+# Shared colorless-style pool. Roles: applier | buffer | trigger (see principles doc §4.3)
+# 4-star = common/uncommon (multi-card kits allowed). 5-star = rare, ONE card each, max 3.
+# Companion cards route power through the player character.
+# G2 (Serenitea Sweep, 2026-07-26): this line opened "Companion cards NEVER
+# scale and route power..." -- contradicted by USER RULING 1 of 2026-07-21
+# (klee-mod/DECISIONS.md:1524, "the cards should be upgrade-able as per the
+# sheet"). MaxUpgradeLevel 0 is gone; companions emit real upgrade paths from
+# the merged upgrade index, and the mod now reproduces the power curve tier05
+# had already been measuring at rest sites. EVERY companion upgrades today, in
+# both engines: the sim's UNAPPLIABLE set is empty, and the two cards this line
+# used to name as exceptions both carry live deltas (durin_witchs_flame
+# {power_amount: +2}, nicole_celestial_gift {cost: -1} since 2026-07-26).
+# The half that SURVIVED the ruling is kept above: power routes through the
+# player character. That is the design law; "never scale" was an
+# implementation detail that got overruled.
+```
+
+## barbara_melody
+
+```
+   # Song inspires: reliable one-energy defense plus a small Burst-meter rider.
+   # RENAMED to canon 2026-08-10 ([USER], QUEUE N3+N4): "Soothing Melody" named no Barbara talent; her Skill is
+   # "Let the Show Begin♪" — the trailing eighth note IS part of the canon name, not decoration. Ids are not slugs of
+   # titles here, so `barbara_melody` is unchanged and no art key or C# class moved.
+```
+
+## sucrose_gust
+
+```
+   # RARITY BUMP common -> uncommon, per sitting 2026-08-06 family X2 ("infinite cycling engines
+   # gated to Uncommon rarity or higher. If this is Common, it needs a bump."). This row is
+   # `sayu_naptime`'s exact shape: 0-cost, non-exhaust, draws its own replacement, so it is
+   # hand- and energy-neutral and cycles without bound. Rarity field ONLY -- no stat touched.
+   # Sweep: docs/archive/track-t-audits-2026-08-06.md sec.1.
+```
+
+## sucrose_astable
+
+```
+   # R62 (red-pen 2026-07-25): the v1.11a numbers are RESTORED and main's interim rebalance is
+   # SUPERSEDED. The earlier flag asked whether the Exhaust was load-bearing as a guard -- capping
+   # burst_energy from becoming a repeatable / multi-copy Burst battery (§2.4 meter tuning, §4.3
+   # enabler-not-carry). Monty's grading: Bursts are not priced strongly enough today for that worry
+   # to bind (replaying this card to buy a Burst is not worth the energy), so the guard costs nothing
+   # to keep and the free-cost reprice stands on its own. Guard RETAINED as cheap insurance against a
+   # future Burst reprice, not because it currently binds. Both versions fixed the same complaint --
+   # the card was dominated by sucrose_gust, which is free and also swirls.
+```
+
+## sucrose_catalyst_conversion
+
+```
+   # v1.11a, PROPOSED: the neutral-energy FIXER the shared pool owed every character (§4.7 audit).
+   # Production-analog gated as enabler utility (0-cost, one-shot, Exhaust). Anemo leaves no aura, so it
+   # is a clean fixer rather than stealth reaction-fuel -- draftable by ANY character to patch an
+   # energy/tempo gap, exactly as base colorless let any kit grab Production. The audit's corrected
+   # framing is the point: the pool must cover gaps for any character present or future, so "a current
+   # character self-provides energy" was the wrong test.
+   # NOTE: §4.7 calls this "reliably shoppable at shop slot-1". That shop channel is UNBUILT -- see the
+   # header of §4.7 in teyvat-spire-design-principles.md. Today this card reaches players only through
+   # the free reward slot, like every other companion.
+```
+
+## nicole_celestial_gift
+
+```
+   # REDESIGNED 2026-07-26 [USER] at the red-pen, superseding both worksheet options. Was a static
+   # "+2 flat damage on your attacks, 4 Block each turn"; is now a per-turn STRENGTH ratchet plus the
+   # same Block. Rationale on the record: a 2-cost Power has to clear a high bar -- the anchors cited
+   # were Silent's damage-to-Weak at 1, Ironclad's +4-Strength-per-turn at 3, and Defect's
+   # double-first-card at 3 -- and SCALING is what earns the slot where a flat bonus did not.
+   # The amount is Strength PER TURN, not a total. Block is a constant (CELESTIAL_GIFT_BLOCK) because
+   # nothing on the card scales it and the upgrade is cost-only.
+   # HISTORY worth keeping: this card is why tools/lint_upgrade_coverage.py exists. Its old upgrade was
+   # {block_per_turn: +2}, which neither the sim nor the generator could express because the Block is a
+   # constant rather than a card field -- so the sheet looked fine, the SIM upgraded the card, and the
+   # LIVE card's OnUpgrade() was an empty method. The 2026-07-25 playtest found it by playing it.
+```
+
+## prune_witch_hunt
+
+```
+   # Swirl already spreads the consumed aura to every enemy; targeting ALL
+   # cascaded through those freshly spread auras and over-triggered reactions.
+   # The fallback is mutually exclusive with Swirl, so Prune has a Defend-sized
+   # body when drawn alone.
+   #
+   # SHE NO LONGER GRANTS SPARKS OFF HER OWN FACE (EB-219). She used to print
+   # `gain_spark 1` inside the conditional AND `gain_spark 1` unconditionally at
+   # top level -- two Sparks on a successful Swirl, one on a whiff, three
+   # upgraded -- and LAW:145 as countersigned (R224, 2026-08-30) says (lint-ok: 145 is a LAW clause number, not a card number)
+   # "Companion cards may not themselves grant signature resources." The grant
+   # moved WHOLE into Klee's kit, which is the other half of that clause: "A
+   # character-owned engine may respond to a Companion play and generate its
+   # resource where that character's kit explicitly declares the trigger and
+   # bounds the amount generated per Companion play." The declaration is
+   # constants.KLEE_COMPANION_SPARK_* ("Little Hexenzirkul"), the engine site is
+   # effects.klee_personal_companion_spark, and the player's yield is UNCHANGED
+   # -- 1 / 2 / 2 / 3, the same four numbers this row used to pay.
+   #
+   # The `then: []` branch is deliberate and is not a stub: the conditional
+   # still decides, it simply has nothing left to pay on the success side now
+   # that the Spark is the kit's. The Block is the whole of the failure side and
+   # stays here, because Block is not a signature resource and LAW:145 does not (lint-ok: 145 is a LAW clause number, not a card number)
+   # reach it. Her cost, her Swirl and her non-Exhaust body are untouched.
+```

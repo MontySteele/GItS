@@ -2670,7 +2670,14 @@ CONSTANTS_VERSION = 21
 # rule, marked PROSPECTIVE. No row, no number and no field moved, so
 # `CONSTANTS_VERSION` does not bump -- the digest is a fingerprint over bytes
 # and the bytes include comments (R225 precedent).
-SHEET_DIGEST = "a5a3d9659b36ca403d260dfcde21f4a0bf336b4c570f9907ba4918910af3cd05"
+#
+# 2026-09-01 re-pins it on the same precedent, for the sheet comment diet: the
+# long comment blocks moved out of the six sheets into
+# `docs/notes/<sheet>-provenance.md`, verbatim and keyed by row id, and
+# `tools/lint_sheet_comment_blocks.py` now caps what may grow back. The rows
+# were checked byte-for-byte before and after, so no row, number or field
+# moved and `CONSTANTS_VERSION` does not bump.
+SHEET_DIGEST = "097e497597e7a04950224844e13d48cb232f2655be23956bcd14215c1bc5b873"
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

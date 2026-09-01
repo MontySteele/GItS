@@ -26,8 +26,10 @@ WHAT IS CHECKED, in three parts.
    `.md` carries the status for them.
 
 2. DEAD CITATIONS. Every `review/...` path cited under `docs/current/`,
-   `CLAUDE.md`, `AGENTS.md`, `tools/`, `tier0/`, `tier05/` or `understudy/`
-   must exist. Two forms are deliberately not checked: a `git show <commit>:`
+   `docs/notes/`, `CLAUDE.md`, `AGENTS.md`, `tools/`, `tier0/`, `tier05/` or
+   `understudy/` must exist. `docs/notes/` is in scope because the sheet
+   comment diet moved sheet prose there, citations and all, and a path that
+   rots in a sidecar is as dead as one that rots in a register. Two forms are deliberately not checked: a `git show <commit>:`
    retrieval path, which names a file that left HEAD on purpose (CLAUDE.md
    sec.History retrieval), and a glob or template (`*`, `{`, `<`).
 
@@ -62,7 +64,8 @@ RECORD = re.compile(r"^Status: RECORD$")
 SUPERSEDED = re.compile(r"^Status: SUPERSEDED by \S+$")
 
 # Where a citation of a review path is a live pointer rather than history.
-CITING_ROOTS = ("docs/current", "tools", "tier0", "tier05", "understudy")
+CITING_ROOTS = ("docs/current", "docs/notes", "tools", "tier0", "tier05",
+                "understudy")
 CITING_FILES = ("CLAUDE.md", "AGENTS.md")
 CITING_EXT = {".py", ".md", ".tsv", ".yaml", ".yml", ".ps1", ".json", ".txt"}
 # understudy/turns holds staged run artifacts: the paths in them are the

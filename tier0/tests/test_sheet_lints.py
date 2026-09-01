@@ -246,6 +246,96 @@ def test_the_comment_lint_still_catches_real_drift(tmp_path):
     assert "comment cites 8" in res.stdout
 
 
+# --- the sheet comment diet (2026-09-01) ----------------------------------
+#
+# [USER]: agent-facing docs should not load an agent's context window with
+# useless information. `docs/furina-cards.yaml` was 825 comment lines in
+# 1,024; `docs/kokomi-cards.yaml` 820 in 1,024. The prose was not deleted, it
+# moved to `docs/notes/<sheet>-provenance.md` keyed by row id, and this gate
+# is what keeps it from growing back one block at a time.
+
+def test_no_sheet_carries_a_long_comment_block():
+    res = subprocess.run(
+        [sys.executable,
+         str(REPO / "tools" / "lint_sheet_comment_blocks.py")],
+        capture_output=True, text=True)
+    assert res.returncode == 0, res.stdout + res.stderr
+    # Denominator, not just a verdict: a sweep that read no sheet must not
+    # read like a clean one.
+    assert "comment block(s)" in res.stdout, res.stdout
+    assert "scope: 0 sheet(s)" not in res.stdout, res.stdout
+
+
+def test_the_comment_diet_lint_catches_a_regrown_block(tmp_path):
+    """The red half, both caps, and the per-line marker."""
+    lint = str(REPO / "tools" / "lint_sheet_comment_blocks.py")
+
+    def run(body):
+        sheet = tmp_path / "probe-cards.yaml"
+        sheet.write_text(body, encoding="utf-8")
+        return subprocess.run([sys.executable, lint, str(sheet)],
+                              capture_output=True, text=True)
+
+    row = ('- {id: probe, name: "Probe", cost: 1, type: attack,'
+           ' rarity: common,\n'
+           '   effects: [{op: damage, amount: 10, target: enemy}]}\n')
+
+    # Three lines under a row is the cap and passes.
+    ok = run(row + "".join(f"   # note {n}\n" for n in range(3)))
+    assert ok.returncode == 0, ok.stdout
+
+    # Four does not.
+    bad = run(row + "".join(f"   # note {n}\n" for n in range(4)))
+    assert bad.returncode == 1, bad.stdout
+    assert "4 comment line(s), cap 3" in bad.stdout
+
+    # The per-line marker drops exactly its own line from the count, so the
+    # same four lines pass with one marked and fail again with none.
+    marked = run(row + "   # note 0  # lint-comment-ok\n"
+                 + "".join(f"   # note {n}\n" for n in range(1, 4)))
+    assert marked.returncode == 0, marked.stdout
+
+    # A file header may run to twelve, and thirteen is a finding.
+    twelve = run("".join(f"# header {n}\n" for n in range(12)) + "\n" + row)
+    assert twelve.returncode == 0, twelve.stdout
+    thirteen = run("".join(f"# header {n}\n" for n in range(13)) + "\n" + row)
+    assert thirteen.returncode == 1, thirteen.stdout
+    assert "the file header is 13 comment line(s), cap 12" in thirteen.stdout
+
+
+def test_every_sheet_the_diet_gate_should_read_is_in_its_scope():
+    """The scope defect G1 found on the comment lint, checked up front.
+
+    A cap that quietly skipped a sheet would read CLEAN on the file most
+    likely to regrow prose. Every docs sheet is either swept or named in
+    EXCLUDED with a reason in the docstring.
+    """
+    sys.path.insert(0, str(REPO / "tools"))
+    import lint_sheet_comment_blocks as diet     # noqa: E402
+
+    swept = {p.name for p in diet.sheets()}
+    on_disk = {p.name for p in (REPO / "docs").glob("*.yaml")}
+    assert on_disk - swept == set(diet.EXCLUDED), sorted(on_disk - swept)
+    assert "prototype-surface.yaml" in swept
+
+
+def test_a_moved_block_left_a_sidecar_behind():
+    """The prose moved; it was not deleted. One sidecar per dieted sheet, and
+    the sheet says where it went -- a diet whose sidecar nobody can find from
+    the sheet is a deletion with extra steps."""
+    notes = REPO / "docs" / "notes"
+    for sheet in ("furina-cards", "kokomi-cards", "klee-cards",
+                  "fontaine-companions", "inazuma-companions",
+                  "mondstadt-companions", "furina-upgrades",
+                  "klee-upgrades", "kokomi-upgrades", "ancient-upgrades",
+                  "ref-ironclad-upgrades"):
+        note = notes / f"{sheet}-provenance.md"
+        assert note.exists(), note
+        assert note.read_text(encoding="utf-8").count("\n## ") >= 1, note
+        head = (loader.DOCS_DIR / f"{sheet}.yaml").read_text(encoding="utf-8")
+        assert f"docs/notes/{sheet}-provenance.md" in head, sheet
+
+
 # --- L4 / L7 (S1 parity sweep) --------------------------------------------
 
 def test_no_scanner_reads_effects_as_a_flat_list():
