@@ -146,7 +146,7 @@ MIRRORED: dict[str, object] = {
     # gate's own blind spot: the fraction was an inline `/ 2` in FanfareCap,
     # so it appeared in neither MIRRORED nor UNMIRRORED and the lint's
     # "every balance number in the mod lives twice" promise did not cover
-    # LAW.md:189's headline "%maxHP". Naming it on the C# side is what makes
+    # the Furina identity record's headline "%maxHP". Naming it on the C# side is what makes
     # it visible here.
     "FurinaResourceConstants.FanfareCapFraction": C.FANFARE_CAP_FRACTION,
     "SalonConstants.DryDamageMultiplier": C.SALON_DRY_DAMAGE_MULT,

@@ -1369,7 +1369,7 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # EB-97: re-derive the base term from LIVE max HP first. tier05 rebuilds
     # the Player from the sheet and only THEN assigns the run's real max HP
     # (`tier05/model.py`), so without this the whole run would fight on the
-    # printed-HP ceiling -- the deviation from LAW.md:189 the mod never had.
+    # printed-HP ceiling -- the deviation from the Furina identity record the mod never had.
     sync_fanfare_cap_to_max_hp(player)
     player.fanfare_cap = player.fanfare_cap_base
     player.fanfare_floor = 0

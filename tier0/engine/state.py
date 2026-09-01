@@ -486,7 +486,8 @@ class Bomb:
 def fanfare_cap_base_term(max_hp: int) -> int:
     """The Fanfare ceiling's BASE term, taken from LIVE max HP (EB-97).
 
-    LAW.md:189 says "Fanfare is capped at %maxHP", and the mod reads it that
+    `docs/current/characters/furina-identity-record.md` (ex-LAW) says
+    "Fanfare is capped at %maxHP", and the mod reads it that
     way every time it is asked: `FurinaResources.FanfareCap` computes
     `FanfareCapFraction * creature.MaxHp + capBonus` from the creature's
     CURRENT MaxHp. tier0 used to freeze the base term at the sheet's printed

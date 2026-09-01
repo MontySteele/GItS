@@ -402,7 +402,7 @@ def test_the_two_new_cap_writers_also_rewind_between_fights():
 def test_fanfare_cap_base_term_follows_live_max_hp():
     """EB-97. The ceiling's base term is LIVE max HP, not the sheet's `hp:`.
 
-    LAW.md:189 ("Fanfare is capped at %maxHP") and the mod agree --
+    The Furina identity record ("Fanfare is capped at %maxHP") and the mod agree --
     `FurinaResources.FanfareCap` reads `creature.MaxHp` every time it is
     asked, and `KleeTests/DerivationPinTests` pins that as the authority.
     tier0 used to derive the cap ONCE from the printed 60 and re-seat that
