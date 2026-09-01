@@ -310,7 +310,7 @@ CEILINGS: dict[str, int] = {
     # EB-253 minted 2026-08-31 by the EB-242 fix: note_fanfare_read has
     # the same valuation exposure, left for its own disclosed commit.
     # EB-254..EB-258 minted 2026-08-31 by the triage of [USER]'s manual solo
-    # Kokomi playtest (`review/active/kokomi-playtest-triage-2026-08-31.md`),
+    # Kokomi playtest (`review/ruled/kokomi-playtest-triage-2026-08-31.md`),
     # five rows: 254 the Muster keyword printed its -1 with no
     # duration while four sibling faces print `this turn` (CLOSED
     # 2026-08-31); 255 the unlinted

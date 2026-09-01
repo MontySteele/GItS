@@ -1,3 +1,5 @@
+Status: SUPERSEDED by review/active/kokomi-brief-2026-09-01.md
+
 # Kokomi playtest triage — [USER]'s manual solo run, 2026-08-31
 
 > **What this is.** House triage of [USER]'s notes from a manual solo Kokomi
@@ -11,7 +13,7 @@
 > delivered taste ("companion card spam feels uninteresting"), the ask is what
 > to DO about it — never whether he is right.
 
-> **Lifecycle: ACTIVE** — the record of this triage; the asks in §4 are open.
+> **Lifecycle: SUPERSEDED (2026-09-01)** — the kit this triage examined is being replaced under the Kokomi brief; the T1 to T6 asks are moot, the BACKLOG rows it minted stand.
 
 ---
 
