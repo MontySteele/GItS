@@ -355,6 +355,25 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "move_bombs": [_hook("private", "bombs", "use")],
     "modify_bombs": [_hook("private", "bombs", "use")],
     "chance_bomb_per_detonation": [_hook("private", "bombs", "write")],
+    # --- Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) ---
+    # The arm is C# first and tier0 refuses to resolve these eight, but the
+    # connectivity vocabulary is about what state an op MOVES, which the
+    # printed rule already settles (`klee-brief-2026-09-01.md` sec.3) and which
+    # does not wait on an implementation. `set_off` also mints Sparks, so it
+    # writes the bank as well as spending the pile -- that is rule 4, and it is
+    # the whole reason the two loops connect.
+    "set_off": [_hook("private", "bombs", "use"),
+                _hook("private", "sparks", "write")],
+    "plant_bomb": [_hook("private", "bombs", "write")],
+    "grow_bombs": [_hook("private", "bombs", "use")],
+    "merge_bombs": [_hook("private", "bombs", "use")],
+    "remove_bomb_for_block": [_hook("private", "bombs", "use"),
+                              _hook("shared", "block_held", "write")],
+    "damage_set_off_total": [_hook("private", "bombs", "read")],
+    "double_set_off": [_hook("private", "bombs", "read")],
+    "draw_per_set_off": [_hook("private", "bombs", "read"),
+                         _hook("shared", "draw_pile", "use"),
+                         _hook("shared", "hand_contents", "write")],
     "gain_spark": [_hook("private", "sparks", "write")],
     # A competing use for the bank, mirroring spend_encore: the Sparks paid
     # here are Sparks the threshold cash-out no longer reaches (packet 4.5).

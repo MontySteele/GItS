@@ -765,7 +765,7 @@ def _card_prototype(card_id: str) -> Card:
         base = copy.deepcopy(index[base_id] if base_id in index
                              else _substituted_card_index()[base_id])
         card = upgrades.apply_upgrade(base)
-    elif (C.SPARK_ALT_COST_ENABLED
+    elif ((C.SPARK_ALT_COST_ENABLED or C.KLEE_OVERHAUL)
             and plain.startswith(PROTOTYPE_ID_PREFIX)):
         # THE ONE DOOR THE SPARK ARM OPENS INTO THE QUARANTINE, and it is
         # exactly as wide as it has to be. `_starter_ids` substitutes two
@@ -781,6 +781,11 @@ def _card_prototype(card_id: str) -> Card:
         # still not populated with prototypes, so pools, rewards, drafts and
         # digests remain structurally unable to see them -- the quarantine
         # that matters is membership, and membership does not move here.
+        #
+        # THE KLEE OVERHAUL RIDES THE SAME DOOR, for the same reason and no
+        # wider: `_starter_ids` returns ten `proto_ko_` id STRINGS and
+        # `pool_replacement` returns twenty-eight more, and every one of them
+        # is resolved back through here by the run layer on each reward screen.
         card = _prototype_index()[plain]
     else:
         index = _card_index()
@@ -947,6 +952,16 @@ def _starter_ids(spec: dict) -> list[str]:
                 f"the {add!r} substitution has nothing to replace")
         ids[ids.index(drop)] = add
 
+    # THE KLEE OVERHAUL takes the starter WHOLE, and it is tested FIRST because
+    # it and the Sparks arm cannot both own these ten slots. The overhaul
+    # retires the rules the Sparks substitutions are priced inside -- Ka-boom!
+    # gains a *Set off* clause it never had and Pop!'s bomb stops detonating
+    # itself -- so the two are ALTERNATIVES, not layers, and a tree with both
+    # flags on is the overhaul's tree. Nothing about the Sparks arm is edited:
+    # with `KLEE_OVERHAUL` off the branch below is reached exactly as before.
+    if character == "klee" and C.KLEE_OVERHAUL:
+        return list(C.KLEE_OVERHAUL_STARTER_IDS)
+
     if character == "klee" and C.SPARK_ALT_COST_ENABLED:
         for drop, add in C.SPARK_ALT_STARTER_SUBS:
             if drop not in ids:
@@ -1008,6 +1023,35 @@ def pool_substitutions(character_id: str) -> dict[str, str]:
     `starting_deck` is the door onto `_starter_ids`."""
     spec = _character_index().get(character_id)
     return _pool_substitutions(spec) if spec else {}
+
+
+def pool_replacement(character_id: str) -> list[str] | None:
+    """The character's WHOLE offerable pool, or None to keep the shipped one.
+
+    THE SIBLING OF `pool_substitutions`, AND IT EXISTS BECAUSE THE OTHER SHAPE
+    CANNOT SAY THIS. `_pool_substitutions` is a one-for-one map: it swaps a
+    shipped id for a prototype at the same rarity and leaves everything else
+    where it was. The Klee overhaul's slice one asks for something the map has
+    no grammar for -- "her offerable pool is these 28 rows and nothing else" --
+    because the overhaul retires the rules every other Klee card is written
+    against (a shipped bomb detonates itself; an overhaul bomb waits to be
+    *Set off*), so a run that could still be offered the shipped 79 would be
+    offered cards that no longer describe what happens.
+
+    IT IS THE SAME SINGLE DOOR. `tier05.rewards.character_pool` is the one
+    source of truth for "which ids can be offered to this character" -- fight
+    rewards, the shop, every event card screen and the tier 0.5 drafter read it
+    and nothing else -- and this is read THERE, beside `pool_substitutions`,
+    rather than at the five mouths. Two seams at one door, not a second door.
+
+    WITH `C.KLEE_OVERHAUL` OFF this returns None for every character and
+    `character_pool` is byte-for-byte what it has always been. That is the
+    acceptance condition on the flag, pinned by
+    `tier0/tests/test_klee_overhaul.py` rather than intended.
+    """
+    if character_id == "klee" and C.KLEE_OVERHAUL:
+        return list(C.KLEE_OVERHAUL_POOL_IDS)
+    return None
 
 
 @lru_cache(maxsize=1)

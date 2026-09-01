@@ -40,6 +40,16 @@
     <Compile Remove="Prototype/**/*.cs" />
   </ItemGroup>
 
+  <!-- The Klee overhaul arm, mirrored here so `-p:KleeOverhaul=true` builds
+       the test project too. The arm's pins do NOT need it: the rules engine
+       compiles under PrototypeCards alone and `KleeOverhaul.Enabled` is
+       settable, so one build asserts both sides of the switch. This exists so
+       a dev running the game's own build line over the tests gets the same
+       DefineConstants and cannot hit a "property means nothing here" surprise. -->
+  <PropertyGroup Condition="'$(KleeOverhaul)' == 'true'">
+    <DefineConstants>$(DefineConstants);KLEE_OVERHAUL</DefineConstants>
+  </PropertyGroup>
+
   <!-- THE BRIDGE'S PORT RESOLVER, compiled into this assembly rather than
        referenced. `vendor/STS2_MCP/gits/GitsPort.cs` is deliberately free of
        Godot, Harmony and game types precisely so the one decision that must

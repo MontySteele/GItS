@@ -591,6 +591,15 @@ def _added_card_value(fx: dict) -> float:
     return STATIC_GENERATED_CARD_VALUE
 
 
+#: The Klee overhaul's eight verbs (slice one, QUARANTINED behind
+#: `C.KLEE_OVERHAUL`). Named as a set rather than eight `if op ==` arms because
+#: they take ONE pricing decision between them -- see `_op_price`.
+KLEE_OVERHAUL_OPS = frozenset((
+    "set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+    "remove_bomb_for_block", "damage_set_off_total", "double_set_off",
+    "draw_per_set_off"))
+
+
 def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
     """The DRAFTER_VERSION 13 static price of one effect dict.
 
@@ -694,6 +703,21 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         return STATIC_SALON_ROTATE_VALUE
     if op == "spotlight_designate":
         return STATIC_SPOTLIGHT_DESIGNATE_VALUE
+
+    # -- the Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) --------
+    if op in KLEE_OVERHAUL_OPS:
+        # ZERO, and a DELIBERATE zero. The arm is C# FIRST (the slice packet
+        # sec.5) -- tier0 registers these eight verbs and REFUSES to resolve
+        # them, so there is no sim behaviour for a price to approximate and a
+        # guessed number would be a claim about a rule this engine has never
+        # run. No `docs/*-cards.yaml` row prints any of them, no pool, digest
+        # or stamp can see one, and with `C.KLEE_OVERHAUL` off the rows are
+        # unreachable by draft at all -- so every drafted number in the world
+        # is byte-identical with and without this branch, and DRAFTER_VERSION
+        # does not move. When the slice survives the Prototype gate and the
+        # sim arm is built, THAT is the change that prices these and archives
+        # the old world.
+        return 0.0
 
     # -- cards from nowhere ------------------------------------------------
     if op in ("generate_guest_star", "generate_from_pool"):
@@ -1894,6 +1918,17 @@ STATIC_OP_PRICING: dict[str, str] = {
                          "and no drafted number moves)",
     "gain_fanfare_floor": "STATIC_FANFARE_FLOOR_VALUE per point (v9)",
     "grow_damage": "one discounted future redraw",
+    # --- the Klee overhaul, slice one (QUARANTINED, C.KLEE_OVERHAUL) ------
+    # One rationale, eight ops, because it is ONE decision: the arm is C#
+    # first, tier0 refuses to resolve any of them, and a price is an estimate
+    # of behaviour that does not exist here yet. See `_op_price`.
+    **{op: "ZERO: the KLEE_OVERHAUL arm is C# FIRST and tier0 refuses to "
+            "resolve it, so there is no sim behaviour to price (slice packet "
+            "sec.5; prototype surface only -- no shipped row prints it and no "
+            "drafted number moves)"
+       for op in ("set_off", "plant_bomb", "grow_bombs", "merge_bombs",
+                  "remove_bomb_for_block", "damage_set_off_total",
+                  "double_set_off", "draw_per_set_off")},
     # --- damage/Block-shaped, new in v13 ---------------------------------
     "block_next_turn": "printed Block at STATIC_DELAYED_BLOCK_SHARE",
     "block_at_turn_start": "printed Block at STATIC_DELAYED_BLOCK_SHARE, once "
