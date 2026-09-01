@@ -164,8 +164,9 @@ Per-character identity statements left LAW under the machinery review's change
 6. They are not law any more: they are revised by a sentence in the character's
 brief, with no amendment ceremony.
 
-- **Klee** → `review/active/klee-brief-2026-09-01.md` §18 (the brief is the
-  live artefact; its §3 is the live rule list).
+- **Klee** → `docs/current/characters/klee-identity-record.md` (the brief
+  `review/active/klee-brief-2026-09-01.md` is the live artefact; its §3 is the
+  live rule list).
 - **Furina** → `docs/current/characters/furina-identity-record.md`.
 - **Kokomi** → `docs/current/characters/kokomi-identity-record.md`.
 - **Roster-wide statline lines** → `docs/current/characters/roster-identity-record.md`.

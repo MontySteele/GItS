@@ -76,14 +76,12 @@ git show <commit>:<path>
   cosmetic by lint (R179); and **every D / E / F pick**, meaning (D) a number
   the sim decides, (E) a process or hygiene call, (F) an item already ruled and
   re-asked. A D/E/F pick is taken at its stated default, disclosed in the slate
-  as APPLIED, and never queued; [USER] vetoes within five days.
+  as APPLIED, and never queued; [USER] vetoes.
   **Still [USER]'s, the A/B/C picks:** (A) a design direction a brief cannot
   settle, (B) eyes-on taste, (C) money, one-way doors, merging a staged balance
   lever, and LAW or measurement-law amendments.
 - **An A/B/C pick returns as a NUMBERED PICK LIST with a marked default,**
-  never a blank to fill. The one exception is a genuine design fork with no
-  defensible default, which is put as an open question with a blank paragraph,
-  on purpose.
+  never a blank to fill.
 - **A question already ruled is closed by its ruling id.** Cite the id instead
   of re-asking. A re-ask that does not state, in one line, the new fact that
   reopens it is a defect in the packet that raised it.
@@ -93,7 +91,8 @@ git show <commit>:<path>
   for [USER];** GPT reviews designs and playtests only, and a document that
   needs a summary is rewritten instead. `STATE.md` stays near 150 lines, a
   packet past 1,000 lines is split by decision, and a ruled packet leaves
-  `review/active/` for `review/ruled/`.
+  `review/active/` for `review/ruled/`, and a measurement record or
+  registration for `review/records/`.
 - **Model routing.** Design work (briefs, card design, loops and archetypes,
   any taste judgement) is the main Claude session's (Fable) and is never
   delegated. Opus subagents do coding, builds and tests and author no card

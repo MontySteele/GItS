@@ -608,7 +608,7 @@ at most once, and never overrides an answer the form carries.
 
 **Who grades, since R217 A, as amended 2026-09-01.** [USER] plays **at rule
 changes; the seats play the rest.** He fills no calibration forms at any point:
-the independent seat's form RETURNS a prototype or reads it PLAYABLE with
+the independent seat's form reads a prototype NOT PLAYABLE or PLAYABLE with
 no [USER] involvement, and two seats materially disagreeing ESCALATES. His play
 is whole fights on a `+proto` build at the four rule-change milestones
 (`CLAUDE.md` §Norms), which the funnel does not grade and does not wait on. So
@@ -695,7 +695,7 @@ not the shape.
 - **`--role pair`** — the PAIR READ, run AFTER a round: shipped half against
   prototype half, with the forms, the falsifier's verdicts and the live
   replays inline. Answers the round's numbered questions per arm and ends each
-  with **RETURN / PLAYABLE / ESCALATE**, and the protocol says in the seat's own
+  with **NOT PLAYABLE / PLAYABLE / ESCALATE**, and the protocol says in the seat's own
   prompt that PLAYABLE is not ship approval, not a balance reading and not
   validation (R217 G).
 
@@ -713,7 +713,8 @@ rewritten row: a remedy it volunteers is **discarded**, and Claude re-derives
 from the named clause. Where a number has to be chosen, Claude derives it by
 the shipped-face rule (lift the value off a shipped card, never invent a
 breakpoint) and the seat only confirms that the derived row FOLLOWS. A pair
-read MAY say an arm's BOARD did not ask its question and RETURN it for that;
+read MAY say an arm's BOARD did not ask its question and read it NOT PLAYABLE
+for that;
 it may not design the replacement board.
 
 The reason is R217 C: independence is by MODEL FAMILY, author against grader. A

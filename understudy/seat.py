@@ -327,7 +327,7 @@ of that line; naming the fix moves you across it.
 # clause. The other job is the PAIR READ, which runs AFTER a round -- shipped
 # half against prototype half, with the forms, the verdicts and the live
 # replays inline -- and its output is the round's five questions and
-# RETURN / PLAYABLE / ESCALATE.
+# NOT PLAYABLE / PLAYABLE / ESCALATE.
 #
 # Klee ROUND 3 is where the single protocol bit. `EB-190` shipped one text and
 # prepended it to every `seat review`, and its two strongest lines -- "It
@@ -352,13 +352,14 @@ You are reading a COMPLETED blind-QA round: for each arm, a shipped half and a
 prototype half of the same board, the graders' verbatim forms, the falsifier's
 verdict on each form, and what the live game did when each graded line was
 replayed. Your output is, PER ARM: the brief's numbered questions answered in
-order, and a judgment of RETURN, PLAYABLE or ESCALATE.
+order, and a judgment of NOT PLAYABLE, PLAYABLE or ESCALATE.
 
 You may NOT supply card text, a number, a mode, a rewritten row, or any other
 remedy. A remedy you volunteer is DISCARDED unread, and the reasoning that
 produced it is discarded with it -- so a judgment that leans on your remedy is
 a judgment that gets thrown away. You may say that an arm's BOARD did not ask
-its question and RETURN it for that; you may not design the replacement board.
+its question and read it NOT PLAYABLE for that; you may not design the
+replacement board.
 Where a number has to be chosen it is derived by lifting a value off a shipped
 card, and that is not your job.
 
@@ -1353,7 +1354,7 @@ def main(argv: list[str] | None = None) -> int:
                         "proposal against a charter and answers FOLLOWS / "
                         "REQUIRES_MODIFICATION plus the clause. `pair` reads "
                         "a COMPLETED round -- forms, verdicts and replays -- "
-                        "and answers the brief's questions plus RETURN / "
+                        "and answers the brief's questions plus NOT PLAYABLE / "
                         "PLAYABLE / ESCALATE. Both forbid a remedy")
     r.add_argument("--model", default="")
     r.add_argument("--out", default="")

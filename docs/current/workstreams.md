@@ -133,8 +133,8 @@ Status only. Open decisions are in [`QUEUE.md`](QUEUE.md); engineering tasks in
     fold, so it is one of R220's three and it is the last of them.
     **The independent seat**
     ([USER]'s ChatGPT/Codex subscription through `understudy/seat.py`;
-    independence by model FAMILY) RETURNS a prototype or ADVANCES it with
-    no [USER] form; two seats disagreeing ESCALATES; SURVIVES is never ship
+    independence by model FAMILY) reads a prototype PLAYABLE or NOT
+    PLAYABLE with no [USER] form; two seats disagreeing ESCALATES; SURVIVES is never ship
     approval. [USER] owns briefs, direction picks, money, final signoff.
   - **Instruments live.** Staged turns, blind packets, the four-question
     form and closeness (`EB-149`); exact hand (`EB-165`); replay of every

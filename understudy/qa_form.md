@@ -123,6 +123,6 @@ reason for the two optional keys.
 refused the turn. `SURVIVES` means **not yet falsified** — it is not a pass, a
 score, or an opinion. A turn that survives has its line **replayed live** on
 the staged board — the grader's arithmetic set against what the game actually
-did — and then goes to the seat's pair read, which RETURNS an arm or ADVANCES
-it. **[USER] plays no forms and no turns during iteration** (R217 A); a
+did — and then goes to the seat's pair read, which reads an arm PLAYABLE or
+NOT PLAYABLE. **[USER] plays no forms and no turns during iteration** (R217 A); a
 SURVIVES is never ship approval.

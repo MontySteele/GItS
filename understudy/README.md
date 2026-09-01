@@ -426,8 +426,8 @@ the whole board as somebody else's, which is what it actually was.
 refused if true; procedurally, a fresh agent with the packet inline).
 
 **R217 A changed who grades.** [USER] plays no forms and no calibration turns
-during iteration; an independent seat's form RETURNS or ADVANCES a prototype on
-its own, and two seats materially disagreeing ESCALATES. `ledger` still fills
+during iteration; an independent seat's form reads a prototype PLAYABLE or NOT
+PLAYABLE on its own, and two seats materially disagreeing ESCALATES. `ledger` still fills
 in per-question agreement and still computes `survives_alone` — a grader whose
 question two disagrees with [USER]'s on 3 of its last 5 shared turns loses it —
 but with no `user` rows arriving by rule, that down-weighting is **DORMANT**:
