@@ -1167,6 +1167,7 @@ OPEN_IDS: dict[str, frozenset[int]] = {
         255,
         256,
         257,
+        259, 260, 261,  # Klee overhaul round 1, 2026-09-01
     }),
     # M46 left OPEN_IDS with its row when R218 answered it (2026-08-28); the
     # ceiling stays at 46, because ceilings never come down.
@@ -1552,7 +1553,7 @@ def self_test() -> list[str]:
                    f"this is the failure EB-127 was filed about: {retired}")
 
     unbumped = _run({Q: "", B: "| `EB-138` | fresh |"},
-                    ceilings={"EB": 137}, open_ids={"EB": {138, 259, 260, 261}},
+                    ceilings={"EB": 137}, open_ids={"EB": {138}},
                     open_irregular=set())
     if not any(f.startswith("UNRECORDED MINT:") for f in unbumped):
         bad.append(f"self-test: rule 4 (mint above an un-bumped ceiling) did "
