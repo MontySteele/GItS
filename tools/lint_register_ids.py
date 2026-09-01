@@ -323,7 +323,7 @@ CEILINGS: dict[str, int] = {
     # only one (CLOSED 2026-08-31 -- it was the twenty-fourth, not the
     # second). (253 was minted in parallel by the EB-242 fix the same day;
     # both landed at the fold, so the numbering closes with no gap.)
-    "EB": 258,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
+    "EB": 261,   # EB-239/240 minted 2026-08-30 by KLEESPARK-BT2 (Klee Sparks
                  # packet section 24). 239 is the forecast's FORM half --
                  # `EB-236` item (d) shipped the packet and the falsifier and
                  # not the field, so the reply schema both seats answer
@@ -1552,7 +1552,7 @@ def self_test() -> list[str]:
                    f"this is the failure EB-127 was filed about: {retired}")
 
     unbumped = _run({Q: "", B: "| `EB-138` | fresh |"},
-                    ceilings={"EB": 137}, open_ids={"EB": {138}},
+                    ceilings={"EB": 137}, open_ids={"EB": {138, 259, 260, 261}},
                     open_irregular=set())
     if not any(f.startswith("UNRECORDED MINT:") for f in unbumped):
         bad.append(f"self-test: rule 4 (mint above an un-bumped ceiling) did "
