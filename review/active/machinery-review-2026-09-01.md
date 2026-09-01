@@ -214,8 +214,10 @@ side effect on design.
 
 ## 7. What I would change
 
-Ten changes. Each names what it replaces and carries a default. You veto on
-sight.
+Eleven changes. Each names what it replaces and carries a default. You veto
+on sight. **Your one limit, stated 2026-09-01 and built into changes 2 and
+11:** nothing waits on your playtesting that a seat could drive; you play at
+kit milestones, and you read documents written to be read.
 
 1. **Three stages, three kinds of evidence.** *Paper* is gated by your taste:
    a brief and turn scripts, read in fifteen minutes. *Prototype* is gated by
@@ -225,13 +227,23 @@ sight.
    no register row, no re-baseline. **Replaces** the current single path where
    all three are asked for together. This is the change; the rest are
    consequences.
-2. **Restore the human fun gate, and keep it cheap.** The calibration forms
-   failed because they asked you to grade turns. The fun gate asks you to
-   play two fights on a `+proto` build and answer one question, chosen in the
-   brief before the build exists (for Klee: "did you ever choose to cook?").
-   Seats keep legibility, defects and independence. Nothing else can see fun
-   and the machinery says so. **Replaces** R217 A's blanket "no turns during
-   iteration," which was aimed at forms, not play.
+2. **Restore the human fun gate, at kit milestones only.** The calibration
+   forms failed because they asked you to grade turns. The fun gate asks you
+   to play two fights on a `+proto` build and answer one question, chosen in
+   the brief before the build exists (for Klee: "did you ever choose to
+   cook?"). **It fires when a rule changes, not when a card changes:** after
+   the brief is read, once when a kit's rules first exist on a build, once
+   when a loop is added or a rule in the brief's rule list is rewritten, and
+   once at the release candidate. Everything between those is driven by the
+   seats: Opus, GPT or Qwen play whole fights on the build through the
+   understudy bridge and report observations (what they played, what they
+   never played, where the decision was forced), which is what card
+   iteration needs and what they are allowed to claim. A card change never
+   waits on you. Seats keep legibility, defects and independence; nothing
+   else can see fun and the machinery says so. **Replaces** R217 A's blanket
+   "no turns during iteration," which was aimed at forms, not play, and
+   bounds the replacement so that your play is the rarest event in the
+   pipeline rather than a gate on it.
 3. **Default-and-veto everywhere.** Classes D, E and F are applied by Claude
    and disclosed in the slate as APPLIED, with the five-day veto R212 already
    has. Only A, B and C return, and every one of those carries a default.
@@ -277,6 +289,19 @@ sight.
     defaults, and is empty most of the time. The M series stops; a pick is
     named by its packet section until it is ruled and then by its R number.
     **Replaces** three id series and the collisions between them.
+11. **A writing standard for anything you read, and no relay through GPT.**
+    The loop you described is real: dense prose you cannot read in the time
+    you have gets handed to GPT to digest, GPT and Claude then negotiate a
+    recommendation, and you take it without checking the source. That loop
+    is where "default at 94%" comes from. Two rules break it. First, a
+    document meant for you is plain English, two pages, every claim
+    checkable against a named file or number, no register dialect, and it
+    ends with the picks; if it cannot be read in fifteen minutes it is not
+    finished. Second, GPT's job is independent review of designs and
+    playtests, never a summary of Claude's writing for you. If a document
+    needs a summary before you can read it, the document is rewritten, not
+    summarised. **Replaces** the habit, and the standing assumption that
+    review work routes through the seat before it reaches you.
 
 ## 8. What stays exactly as it is
 
@@ -293,9 +318,10 @@ Numbered, with the default I will build on unless you say otherwise.
 1. **The three-stage gate (change 1) and the fun gate (change 2).** (1)
    *Adopt both; the Klee brief is the first Paper artefact, and the first
    Prototype gate is two fights by you on a Klee `+proto` build once the sheet
-   is drafted* [default]. (2) Adopt the stages but keep you out of play; find
-   another fun instrument. I have none to offer and neither does the
-   machinery.
+   is drafted; after that you play only when a rule changes, and seats drive
+   every round in between* [default, as amended by you on 2026-09-01]. (2)
+   Adopt the stages but keep you out of play; find another fun instrument. I
+   have none to offer and neither does the machinery.
 2. **Default-and-veto (changes 3 and 4).** (1) *Adopt as written* [default].
    (2) Adopt for D and E only, keep F returning.
 3. **Split LAW (change 6).** (1) *Move character identity into the briefs and
