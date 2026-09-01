@@ -130,10 +130,10 @@ Universals unless marked.
 
 ### Arataki Itto (Geo 5-star, the oni who lost 780 beetle fights)
 
-- **Superlative Superstrength** (R, 2, Attack, Exhaust): Deal 14, Geo. Gain
-  12 Block. *Both halves, on an Exhaust body, against Dash's 10 and 10.
-  The choose-one from the R216 rounds is dropped: it split a card that is
-  fine whole.*
+- **Superlative Superstrength** (R, 2, Attack): Deal 14, Geo. Gain 12
+  Block. *Both halves, no Exhaust (your note, 2026-09-01), against Dash's
+  10 and 10. The choose-one from the R216 rounds is dropped: it split a
+  card that is fine whole.*
 
 ### Raiden Shogun (Electro 5-star, the Archon whose decree started the war)
 
@@ -173,7 +173,10 @@ Universals unless marked.
   Exhaust): Swirl all enemies. If you are above 70% HP, deal 18 Anemo
   damage to all enemies. Otherwise, Mend 10. *The Snack. The one true heal
   in the pool, Rare and Exhaust as the law says, and it only heals the
-  hurt.*
+  hurt. Mend is the Kokomi brief's keyword with its one rule, heal never
+  above the HP you entered the fight with, and on a Universal it is the
+  same keyword for every character: the build bounds it at entry HP, so
+  the 10 stays (your question, 2026-09-01).*
 - **Chiori — Fluttering Hasode** (U, 1, Skill, Exhaust): Summon Tamoto: for
   3 turns, at the end of your turn deal 6 Geo damage to a random enemy,
   ignoring Block. *The doll that cuts armour. Unblockable damage is the
@@ -231,8 +234,8 @@ and the re-prices are: War Banner to 2 Dexterity for 2 turns; Fuuin Dash to
 8 on a random enemy; the Daruma to 6 and 6; Naptime reversed so the free
 half is the Block; Sanctifying Ring to 5 and 5 a turn; Crimson Ooyoroi to
 5 and 3 per Attack at cost 1 so there is a turn to play it; Tengu
-Stormcall to 5 and 5; Superlative Superstrength to 14 and 12 on the
-Exhaust body, choose-one dropped; Musou no Hitotachi loses Exhaust and the
+Stormcall to 5 and 5; Superlative Superstrength to 14 and 12 with no
+Exhaust, choose-one dropped; Musou no Hitotachi loses Exhaust and the
 cap; Kazuha Slash becomes 10 to all with a Swirl on each; the Sakura
 gains your Strength and starts at 4; Soumetsu to 8, 8 and 16; Kyouka to
 plus 4 and a 12; Heartstopper to 6 base; Surprise Dispatch to 8 and 10;
@@ -240,3 +243,12 @@ the Snack to 18 or Mend 10; Tamoto to 6 ignoring Block. Gorou's Attack,
 Thundergrust, Blazing Barrier and the Personal were raised under the same
 rule without a note from you, and the rule itself was corrected on your
 second note: a Common beats a Strike, it does not match one.
+
+## 9. Conditionally approved (2026-09-01, same day)
+
+Your read of the re-priced draft: Itto can lose Exhaust (done, §3); is
+Mizuki's Mend 10 bounded so it never heals over the HP you entered the
+fight with, fine if so, otherwise 5 (it is, by the keyword's one rule, and
+§3 now says so on the row, so the 10 stays); the four picks in §7 at their
+defaults. The document is approved on those terms, and the build follows
+the Mondstadt one under the same flag.
