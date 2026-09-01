@@ -35,11 +35,40 @@ public sealed class KurageSummonPower : PowerModel, ILocalizationProvider
     {
         ("title", "Bake-Kurage"),
         ("description",
-            "At the end of your turn, the jellyfish deals "
-          + $"{KokomiConstants.KuragePulseBase} plus "
-          + $"{KokomiConstants.KuragePulsePerCharge} per [gold]Charge[/gold] "
-          + "damage and applies [gold]Hydro[/gold] to a random enemy. "
 #if PROTOTYPE_CARDS
+            // `EB-247`. THE PULSE HALF, REWRITTEN. Under the memory rule this
+            // power does not read the bank at all: `KurageMemory.Pulse` keys
+            // on the TYPE of the last card Kokomi played this turn and pays a
+            // flat number per branch (packet "The pulse -- keyed to the last
+            // card played", R219 D). The shipped sentence still promised
+            // `4 + 3 per Charge`, and three witnesses caught it -- both of
+            // `KURAGECAD-W1`'s fight records, unprompted ("its persistent buff
+            // said it dealt damage scaling with Charge, but the memory
+            // forecast sometimes said it would give Block or deal only 4
+            // damage"), and the wire, whose `pulse_kind` alternates
+            // `attack 4` / `skill 5 block` page by page. A fourth landed on
+            // KOKOMI-SLICE1-WF.
+            //
+            // THE BRANCH THE OLD TEXT HID IS THE ONE THAT MATTERS MOST. The
+            // Attack branch is `KuragePulseBase`, FLAT and
+            // Strength-independent -- and it is the only line of damage a
+            // Strength-drained deck still has, which is the single escape from
+            // `EB-256`'s stall. A player reading `4 + 3x Charge` off a drained
+            // bank has no reason to try it.
+            //
+            // Every number is interpolated from the law it is printed from,
+            // the discipline the tips already keep, and the Power branch reads
+            // its MODE rather than assuming one.
+            "At the end of your turn, the jellyfish answers the last card you "
+          + "played this turn. After an Attack: it deals "
+          + $"{KokomiConstants.KuragePulseBase} damage and applies "
+          + "[gold]Hydro[/gold] to a random enemy. After a Skill: it grants "
+          + $"{KurageMemory.KurageMemoryLaw.PulseBlock} Block. After a Power: "
+          + (KurageMemory.KurageMemoryLaw.PowerPulse == "charge"
+                ? $"it banks {KokomiConstants.ChargePerExhaust} "
+                  + "[gold]Charge[/gold]. "
+                : "it applies [gold]Hydro[/gold] to a random enemy. ")
+          + "If you played no card at all, it does nothing. "
             // `EB-197`. QUARANTINED. Under the memory rule the stacks stop
             // being a countdown: KurageSummon.Field clamps them to 1, FirePulse
             // returns before TickDownDuration, and under v4's base kit the
@@ -52,6 +81,10 @@ public sealed class KurageSummonPower : PowerModel, ILocalizationProvider
             // DOES have, in the strip's words.
           + "It stays on the field for the whole fight."),
 #else
+            "At the end of your turn, the jellyfish deals "
+          + $"{KokomiConstants.KuragePulseBase} plus "
+          + $"{KokomiConstants.KuragePulsePerCharge} per [gold]Charge[/gold] "
+          + "damage and applies [gold]Hydro[/gold] to a random enemy. "
           + "Lasts {Amount} more turn{Amount:plural:|s}."),
 #endif
     };

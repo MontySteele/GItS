@@ -41,7 +41,7 @@ public sealed class TempoChange : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Double Time"),
-        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. If you have a [gold]Salon Member[/gold]: gain 1 Energy."),
+        ("description", "Draw {Cards:diff()} card{Cards:plural:|s}. If you have a [gold]Salon Member[/gold]: gain 1 [gold]Energy[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -41,7 +41,7 @@ public sealed class DirectorsCut : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Director's Cut"),
-        ("description", "If you moved the [gold]Spotlight[/gold] this turn: gain 1 Energy and draw {Cards:diff()} card{Cards:plural:|s}. Otherwise: draw {DrawElse:diff()} card{DrawElse:plural:|s}."),
+        ("description", "If you moved the [gold]Spotlight[/gold] this turn: gain 1 [gold]Energy[/gold] and draw {Cards:diff()} card{Cards:plural:|s}. Otherwise: draw {DrawElse:diff()} card{DrawElse:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

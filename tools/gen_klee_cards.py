@@ -583,7 +583,17 @@ def predicate_text(name: str) -> str | None:
     hit = _ENCORE_BAR.match(name)
     if hit:
         # [gold] like its Fanfare/Charge siblings above -- swelling_overture
-        # shipped the only un-golded resource keyword on a face (SYS-9).
+        # shipped an un-golded resource keyword on a face (SYS-9).
+        #
+        # IT WAS NEVER THE ONLY ONE, and this comment used to say it was.
+        # `EB-258` counted twenty-three more when somebody finally looked:
+        # every `energy` op on every face, four Furina POWER_TEXT rows naming
+        # Encore, two hand-authored `choose_one` labels on `deep_breath`, and
+        # three hand-written Spotlight faces naming Fanfare. All golded in the
+        # same commit. The count is not restated here, because a number in a
+        # comment is exactly what went stale the first time --
+        # `tools/lint_keyword_meters.py` holds it now, over the emitted faces,
+        # and it was seen to FAIL on all twenty-four before the fix.
         return f"If you have at least {hit.group(1)} [gold]Encore[/gold]"
     hit = _LEFTMOST_MEMBER.match(name)
     if hit and SALON_MEMBER_CS.get(hit.group(1), "null") != "null":
@@ -906,7 +916,7 @@ APPLY_POWERS = {
     # charges three. The face text is sec.5's proposal unchanged.
     "spark_attack_cost": ("SparkAttackCostPower", None,
         "Your Attacks that do not already cost [gold]Spark[/gold] cost 3 "
-        "[gold]Spark[/gold] instead of their Energy cost."),
+        "[gold]Spark[/gold] instead of their [gold]Energy[/gold] cost."),
     "amp_reaction_up": ("AmpReactionUpPower", None,
         "[gold]Vaporize[/gold] and [gold]Melt[/gold] amplify {X}% more."),
     "bomb_and_spark_per_turn": ("BombAndSparkPerTurnPower", None,
@@ -1028,10 +1038,12 @@ APPLY_POWERS = {
     "spotlight_flat_damage_turn": ("SpotlightFlatDamageTurnPower", None,
         "[gold]Spotlighted[/gold] Companion damage gains {X} this turn."),
     "ovation_spend_boost": ("OvationSpendBoostPower", None,
-        "Whenever you spend Encore, [gold]Spotlighted[/gold] Companion "
+        "Whenever you spend [gold]Encore[/gold], [gold]Spotlighted[/gold] "
+        "Companion "
         "numbers are {X}% stronger this turn."),
     "spotlight_encore_first": ("SpotlightEncoreFirstPower", None,
-        "The first [gold]Spotlighted[/gold] card each turn grants {X} Encore."),
+        "The first [gold]Spotlighted[/gold] card each turn grants {X} "
+        "[gold]Encore[/gold]."),
     # Curtain Call's activity-triggered set (R85), ported by the "Take a Bow"
     # consolidation sprint. Every one of them pays on an EVENT the player
     # caused rather than on a turn tick -- see Powers/CurtainCallPowers.cs for
@@ -1044,13 +1056,14 @@ APPLY_POWERS = {
         "{X} Block."),
     "salon_bow_encore": ("SalonBowEncorePower", None,
         "Whenever a [gold]Salon Member[/gold] takes its final bow, gain "
-        "{X} Encore."),
+        "{X} [gold]Encore[/gold]."),
     "cross_examination": ("CrossExaminationPower", None,
         "The first [gold]Elemental Reaction[/gold] you trigger each turn "
         "applies {X} [gold]Vulnerable[/gold] and {X} [gold]Weak[/gold] to "
         "its target."),
     "encore_spend_draw": ("EncoreSpendDrawPower", None,
-        "The first time you spend Encore each turn, draw {X} card{XS}."),
+        "The first time you spend [gold]Encore[/gold] each turn, draw "
+        "{X} card{XS}."),
     "first_attack_draw": ("FirstAttackDrawPower", None,
         "The first Attack you play each turn draws {X} card{XS}."),
     # A7 (2026-07-29): the last sheet card to reach C#. The trigger lives in
@@ -5832,7 +5845,7 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
             # anywhere in her kit), so there is no overdraw to print.
             bits.append(f'spend {int(e["amount"])} [gold]Charge[/gold]')
         elif op == "energy":
-            bits.append(f"gain {int(e['amount'])} Energy")
+            bits.append(f"gain {int(e['amount'])} [gold]Energy[/gold]")
         elif op == "place_bomb":
             n, d = e["amount"], int(e["bomb_damage"])
             where = _bomb_where(e["target"], n == 1)
@@ -6520,8 +6533,9 @@ def build_description(card: dict) -> str:
             # Same defect as the play emitter: an upgradeable amount printed
             # its BASE forever. The var renders the diff so the face, the
             # upgrade preview and the energy actually gained all agree.
-            parts.append("Gain {Energy:diff()} Energy."
-                         if energy_upgrade(card) else f"Gain {n} Energy.")
+            parts.append("Gain {Energy:diff()} [gold]Energy[/gold]."
+                         if energy_upgrade(card)
+                         else f"Gain {n} [gold]Energy[/gold].")
 
         elif op == "scry_discard":
             n = int(eff["amount"])

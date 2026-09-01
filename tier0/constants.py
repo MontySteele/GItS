@@ -2671,13 +2671,20 @@ CONSTANTS_VERSION = 21
 # `CONSTANTS_VERSION` does not bump -- the digest is a fingerprint over bytes
 # and the bytes include comments (R225 precedent).
 #
+# `EB-258` (2026-08-31) re-pins it for a DISPLAY-MARKUP edit on the same
+# footing: `deep_breath`'s two `choose_one` labels gained `[gold]` around
+# Energy and Encore. A label is face text and nothing else -- no row, no
+# number, no field, no pool membership, and `tier05/draft.py` prices modes off
+# `effects` and never reads the label -- so the shelf does not renumber and
+# `CONSTANTS_VERSION` does not bump. Same reasoning as R226, one surface over:
+# the digest covers bytes, and these bytes are what a player reads.
 # 2026-09-01 re-pins it on the same precedent, for the sheet comment diet: the
 # long comment blocks moved out of the six sheets into
 # `docs/notes/<sheet>-provenance.md`, verbatim and keyed by row id, and
 # `tools/lint_sheet_comment_blocks.py` now caps what may grow back. The rows
 # were checked byte-for-byte before and after, so no row, number or field
 # moved and `CONSTANTS_VERSION` does not bump.
-SHEET_DIGEST = "097e497597e7a04950224844e13d48cb232f2655be23956bcd14215c1bc5b873"
+SHEET_DIGEST = "a273ca5b36fac24f6304b4382adda26b1405eee2db54f5c0ad44e326d4b516ff"
 # Ruling R2.3: the drafter MODEL has its own version stamp, same archive
 # discipline as CONSTANTS_VERSION. v1 = plan-committed scorer with no
 # power awareness (M5-M7 reports are its archive). v2 = M7 ruling R2:

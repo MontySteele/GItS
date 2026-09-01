@@ -171,6 +171,21 @@ public static class KokomiRiderTips
     /// cannot leave nine card faces and this definition disagreeing -- which
     /// is exactly the failure mode the restatements had.
     ///
+    /// `EB-254`: THE DISCOUNT NAMES ITS DURATION, and the duration is the
+    /// COMBAT. `KokomiConscript.Recruit` writes the modifier with
+    /// `EnergyCost.AddThisCombat`, the sim twin rewrites `recruit.cost` on the
+    /// combat token itself, and the memory price rule is built on that
+    /// permanence -- a Muster's own -1 counts on the recruit's entry precisely
+    /// because it is NOT a temporary combat discount (packet §11.7). The tip
+    /// shipped the phrase bare while four sibling faces in the same pool print
+    /// "cost 1 less THIS TURN" for a genuinely turn-scoped rider
+    /// (`honor_guard`, `crane_wing`, `friendly_visit`, and `all_hands`, which
+    /// prints the Muster and a `this turn` cost_mod in one sentence), so a
+    /// reader trained by those four read the elision as the same duration.
+    /// `playtest 2026-08-31 B2` is that reader. "this combat" is the game's
+    /// own word for the scope -- `secret_stash` prints "They cost 0 this
+    /// combat" for the same kind of modifier.
+    ///
     /// `EB-214` / R224 item 6 (`M54` pick 1): RULE 1 IS PRINTED HERE, and only
     /// under the flag. The blind run graded `P3` at 0 of 10 turns and 0 of six
     /// Musters naming a Memory consequence -- every Muster target was chosen
@@ -192,7 +207,7 @@ public static class KokomiRiderTips
     /// THE `#if` IS THE WHOLE GUARANTEE. The release build's preprocessed
     /// source for this method is character-for-character what it was, so the
     /// shipped keyword text cannot move; `tier0/tests/test_kurage_base_kit.py`
-    /// and `KokomiKeywordTextTests` pin both halves.
+    /// and `KokomiMusterKeywordTests` pin both halves.
     /// </summary>
     public static IEnumerable<IHoverTip> ForMuster(
         IEnumerable<IHoverTip> inherited, CardModel card)
@@ -203,8 +218,8 @@ public static class KokomiRiderTips
             new LocString(Table, MusterKey + ".title"),
             $"[gold]Muster N[/gold]: transform N cards in your hand into "
           + $"random Inazuma [gold]Companion[/gold] cards. Each costs "
-          + $"{cheaper} less and [gold]Exhausts[/gold]. Kit cards and "
-          + "Companions you already hold are never chosen."
+          + $"{cheaper} less this combat and [gold]Exhausts[/gold]. Kit "
+          + "cards and Companions you already hold are never chosen."
 #if PROTOTYPE_CARDS
           + " A [gold]Muster[/gold] creates a memory of the card it ate, and "
           + "the recruit creates a second when it burns. A memory replays for "
@@ -270,6 +285,44 @@ public static class KokomiRiderTips
     /// </summary>
     public static string PulseBody(Creature? owner, bool inCombat)
     {
+#if PROTOTYPE_CARDS
+        // `EB-247`. QUARANTINED. Under the memory rule the pulse reads the
+        // bank NOT AT ALL -- it keys on the type of the last card Kokomi
+        // played this turn and pays a flat number per branch. Everything below
+        // this block quotes `KuragePulsePerCharge`, which is exactly the term
+        // that retired, so under the flag the rate paragraph would be a
+        // falsehood on two more surfaces: the fielding cards' hover tip, and
+        // the end-of-turn docket, which asks this method for the same
+        // paragraph (TurnEndAttribution's `kurage` slot, one copy by design).
+        //
+        // The live half is READ FROM THE WIRE. `KurageMemory.Forecast` is the
+        // same kind/unit/amount triple the observed-board payload publishes,
+        // so the tip, the docket and the wire cannot say three things about
+        // one pulse -- which is what the three `EB-247` witnesses caught them
+        // doing.
+        {
+            var rule =
+                "The pulse answers the LAST card you played this turn, at the "
+              + $"END of your turn: Attack -> {KokomiConstants.KuragePulseBase} "
+              + "damage and [gold]Hydro[/gold]; Skill -> "
+              + $"{Powers.KurageMemory.KurageMemoryLaw.PulseBlock} Block; "
+              + "Power -> "
+              + (Powers.KurageMemory.KurageMemoryLaw.PowerPulse == "charge"
+                    ? $"{KokomiConstants.ChargePerExhaust} [gold]Charge[/gold]"
+                    : "[gold]Hydro[/gold]")
+              + ". No card played, no pulse.";
+            if (owner == null || !inCombat) return rule;
+
+            var (kind, unit, amount) =
+                Powers.KurageMemory.Forecast(owner);
+            var next = kind == "none"
+                ? "You have played nothing yet this turn: no pulse."
+                : $"Last card played: {kind}. The next pulse is "
+                  + $"{amount} {unit}.";
+            return $"{rule} {next} Playing another card of a different type "
+                 + "before you end the turn changes it.";
+        }
+#else
         // R73/A2: in combat the rate is the AMPED one. Before Sun and Moon
         // raises the multiplier, and a tip that kept quoting the base would
         // understate the pulse by exactly the card the player just bought --
@@ -287,5 +340,6 @@ public static class KokomiRiderTips
         return $"{rate} You hold {charge} Charge: the next pulse hits for "
              + $"{KurageSummonPower.PulseDamage(owner)}. Charge banked before "
              + "the pulse counts, so the number can still move.";
+#endif
     }
 }

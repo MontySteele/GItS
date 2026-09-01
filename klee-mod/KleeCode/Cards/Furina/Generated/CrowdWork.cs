@@ -41,7 +41,7 @@ public sealed class CrowdWork : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Gallery Stirs"),
-        ("description", "The first time you spend Encore each turn, draw {PowerAmount:diff()} card{PowerAmount:plural:|s}."),
+        ("description", "The first time you spend [gold]Encore[/gold] each turn, draw {PowerAmount:diff()} card{PowerAmount:plural:|s}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

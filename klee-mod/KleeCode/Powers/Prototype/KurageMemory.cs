@@ -1137,6 +1137,34 @@ public static class KurageMemory
         return snapshot;
     }
 
+    /// <summary>
+    /// `EB-247`. THE PULSE THE NEXT TURN END WOULD FIRE, in the wire's own
+    /// three words -- kind, unit, amount.
+    ///
+    /// Public because three surfaces print this pulse and they were allowed to
+    /// disagree with it: the persistent buff promised `4 + 3x Charge`, the
+    /// end-of-turn docket previewed `KurageSummonPower.PulseDamage` (the same
+    /// retired arithmetic) and marked it amped, and the fielding tip quoted
+    /// the rate. The wire was the only one telling the truth --
+    /// `pulse_kind` alternates `attack 4` / `skill 5 block` page by page, and
+    /// `KURAGECAD-W1`'s tester named the disagreement in BOTH fight records.
+    /// So the display now reads the same three fields the wire publishes,
+    /// through the same private helpers, and cannot fork from them again --
+    /// the Furina legibility rule (preview and effect must not be able to
+    /// drift), applied one surface further out.
+    ///
+    /// `none` is a real answer and not an absence: Kokomi playing no card at
+    /// all this turn means no pulse, which is the D3 half of the rule.
+    /// </summary>
+    public static (string Kind, string Unit, int Amount) Forecast(
+        Creature? owner)
+    {
+        var player = owner?.Player;
+        if (player == null) return ("none", "none", 0);
+        return (PulseKind(player), PulseUnit(player),
+                PulseAmount(player, owner));
+    }
+
     private static string PulseKind(Player player) =>
         !PlayedAnything.Contains(player) ? "none"
         : LastCardType.TryGetValue(player, out var t)

@@ -44,7 +44,7 @@ public sealed class DeepBreath : CustomCardModel, ICharacterCard, IModalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Deep Breath"),
-        ("description", "Choose one: Gain 1 Energy and 2 Encore | Spend 3 Encore: draw 3."),
+        ("description", "Choose one: Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold] | Spend 3 [gold]Encore[/gold]: draw 3."),
     };
 
     // EB-184: what each mode does about AIMING, in sheet order.
@@ -54,7 +54,7 @@ public sealed class DeepBreath : CustomCardModel, ICharacterCard, IModalCard
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Gain 1 Energy and 2 Encore", "Spend 3 Encore: draw 3" };
+        new[] { "Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold]", "Spend 3 [gold]Encore[/gold]: draw 3" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };
@@ -99,7 +99,7 @@ public sealed class DeepBreath : CustomCardModel, ICharacterCard, IModalCard
             ModalChoice.CreateOption<DeepBreathModeB>(Owner),
         };
         var modeIndex = await ModalChoice.SelectAffordableMode(choiceContext, Owner, modeOptions, ModePrices);
-        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 1 Energy and 2 Encore", "Spend 3 Encore: draw 3" }[modeIndex]);
+        ModalChoice.RecordChoice(this, modeIndex, new[] { "Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold]", "Spend 3 [gold]Encore[/gold]: draw 3" }[modeIndex]);
         if (modeIndex == 0)
         {
             await PlayerCmd.GainEnergy(1, Owner);
@@ -127,8 +127,8 @@ public sealed class DeepBreathModeA : ModalOptionCard
 {
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Gain 1 Energy and 2 Encore"),
-        ("description", "Gain 1 Energy and 2 Encore"),
+        ("title", "Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold]"),
+        ("description", "Gain 1 [gold]Energy[/gold] and 2 [gold]Encore[/gold]"),
     };
 }
 
@@ -141,8 +141,8 @@ public sealed class DeepBreathModeB : ModalOptionCard, IMeterPricedCard
 {
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Spend 3 Encore: draw 3"),
-        ("description", "Spend 3 Encore: draw 3"),
+        ("title", "Spend 3 [gold]Encore[/gold]: draw 3"),
+        ("description", "Spend 3 [gold]Encore[/gold]: draw 3"),
     };
 
     /// <summary>EB-220: the price this MODE prints, read off

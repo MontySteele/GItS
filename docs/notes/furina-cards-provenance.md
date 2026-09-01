@@ -774,6 +774,19 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
 
 ## deep_breath
 
+Added on main 2026-08-31 (EB-258), merged into the diet 2026-09-01:
+
+```
+   # EB-258: BOTH LABELS ARE GOLDED. A mode label IS face text -- it prints inside the
+   # card's "Choose one: A | B." line and again on the option the player picks -- so the
+   # resources in it are keywords like any other, and these two were the last authored
+   # (rather than emitted) faces still naming Energy and Encore in plain prose.
+   # `Spend 3 [gold]Sparks[/gold]` on the Klee side is the precedent. It does put two
+   # more labels inside `EB-246`'s set (a marked-up option name reaching the blind
+   # render unfolded); that row's fix is to share scenario.py's stripper, not to strip
+   # the faces, so the direction is unchanged.
+```
+
 ```
    # EB-118 Phase 2C: the MODAL PROTOTYPE. R192 chose this card; R194 ruled the pair
    # (Option A, [USER] 2026-08-23). Mode 1 is the card as it shipped, unchanged -- the
@@ -1099,4 +1112,10 @@ the file header. Blocks of three lines or fewer stayed in the sheet.
    # "Stacks grant flat power bonuses" (kickoff §4), the card. Reads the pool, spends nothing.
    # CAP DROPPED (user ruling 2026-07-24, uncap-all): +1/copy per 10 Fanfare is additive in copies. Same A/B as
    # the salon cap; fanfare-plan win-rate is sub-1% today, so the drop is inert now and reversible if that changes.
+```
+
+## before deep_breath (section note kept off the sheet)
+
+```
+# Promoted at Curtain Call (R85) -- see each card's own comment
 ```

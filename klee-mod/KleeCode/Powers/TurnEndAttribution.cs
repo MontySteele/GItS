@@ -227,6 +227,30 @@ public static class TurnEndAttribution
             SpritePath = KurageSprite,
             Find = First<KurageSummonPower>,
             TurnsLeft = Amount<KurageSummonPower>,
+#if PROTOTYPE_CARDS
+            // `EB-247`. QUARANTINED, and it is this whole docket row that
+            // moves. Under the memory rule `PulseDamage` and `PulseMultiplier`
+            // are the retired arithmetic -- the pulse reads the bank not at
+            // all -- so the chip previewed a number the hit does not deal and
+            // flagged it "raised" off an amp that no longer amplifies
+            // anything. The preview reads the same forecast the wire and the
+            // fielding tip do, through `KurageMemory.Forecast`.
+            Preview = static creature =>
+            {
+                var (kind, _, amount) = KurageMemory.Forecast(creature);
+                return kind == "none" ? "-" : amount.ToString();
+            },
+            // NOTHING RAISES THIS PULSE ANY MORE. Every branch is a flat law
+            // constant, so the chip has no amped state to mark, and claiming
+            // one would be the same class of falsehood as the number above.
+            Buffed = static _ => false,
+            // NO DURATION SENTENCE. Same fact `EB-197` settled on the buff
+            // itself: the stacks are clamped to 1 and never tick, so "Lasts N
+            // more turn(s)" was a countdown the power does not have -- and
+            // this was the one surface still appending it.
+            Body = static creature =>
+                Cards.KokomiRiderTips.PulseBody(creature, inCombat: true),
+#else
             // THE ASK, literally: the pulse's damage, before end of turn,
             // through the accessor the hit uses.
             Preview = static creature =>
@@ -243,6 +267,7 @@ public static class TurnEndAttribution
             Body = static creature =>
                 Cards.KokomiRiderTips.PulseBody(creature, inCombat: true)
               + $" Lasts {Amount<KurageSummonPower>(creature)} more turn(s).",
+#endif
             Resolve = static async (creature, choiceContext) =>
             {
                 foreach (var hydro in creature.Powers
