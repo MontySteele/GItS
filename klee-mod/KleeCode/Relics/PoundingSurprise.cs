@@ -30,6 +30,13 @@ namespace KleeMod.Relics;
 /// registers the type itself, which is all StartingRelics needs.
 /// </summary>
 public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
+#if PROTOTYPE_CARDS
+    // QUARANTINED. Under the Klee overhaul the relic IS the Spark rule (the
+    // ruled brief sec.8), so it listens to the arm's explosion bus as well as
+    // to the shipped detonation bus. The seam is inside the switch, so a
+    // release build neither compiles the interface nor references it.
+    , Powers.IProtoExplosionListener
+#endif
 {
     public PoundingSurprise()
         : base(autoAdd: false)
@@ -122,4 +129,37 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
         await SparkPower.Gain(choiceContext, Owner.Creature, 1, cardSource: null,
             source: "relic:pounding_surprise/detonation");
     }
+
+#if PROTOTYPE_CARDS
+    /// <summary>
+    /// THE OVERHAUL'S RULE 4, and the whole of what this relic does under that
+    /// arm: one Spark per EXPLOSION.
+    ///
+    /// It is the same body as the shipped hook above, pointed at the arm's own
+    /// bus, because it is the same rule -- the brief simply makes it the only
+    /// Spark source there is ("Under this flag Sparks come ONLY from
+    /// explosions"). The relic's OTHER hook, the companion reward slot, is not
+    /// gated off: it is not a Spark rule and not a Bomb rule, and the slice's
+    /// React loop draws its appliers from that very slot (sec.4, "Appliers come
+    /// from the Mondstadt Universals already in her pool"). Turning it off
+    /// would delete a loop the slice is trying to test.
+    ///
+    /// The flag guard means a dev build running the SPARKS arm is untouched by
+    /// this: no proto Bomb exists there, so the bus never rings, but the guard
+    /// says so rather than relying on it.
+    /// </summary>
+    public async Task OnBombExploded(
+        PlayerChoiceContext choiceContext, Creature applier, Creature target,
+        int size, bool reacted)
+    {
+        if (!Powers.KleeOverhaul.Enabled) return;
+        if (applier.Player != Owner) return;    // co-op: your explosions only
+
+        Flash();
+        await SparkPower.Gain(
+            choiceContext, Owner.Creature,
+            Powers.KleeOverhaulLaw.SparkPerExplosion,
+            cardSource: null, source: "relic:pounding_surprise/explosion");
+    }
+#endif
 }

@@ -116,6 +116,13 @@ internal static class UpgradedStarterRelics
 /// never removes.
 /// </summary>
 public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
+#if PROTOTYPE_CARDS
+    // QUARANTINED, and the same seam Pounding Surprise takes: under the Klee
+    // overhaul this relic is the upgraded form of the Spark rule, so it listens
+    // to the arm's explosion bus too. Inside the switch, so a release build
+    // neither compiles the interface nor references it.
+    , Powers.IProtoExplosionListener
+#endif
 {
     /// <summary>
     /// Sparks per detonation. UNCHANGED from the base relic -- the upgrade is
@@ -217,6 +224,15 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         PlayerChoiceContext choiceContext, Player player)
     {
         if (player != Owner || player.PlayerCombatState?.TurnNumber != 1) return;
+#if PROTOTYPE_CARDS
+        // THE OVERHAUL GATES THIS HALF OFF. Rule 4 is "Sparks come ONLY from
+        // explosions" (the ruled brief sec.3), and the brief's relic paragraph
+        // turns on the relic being the ONLY free Spark source; an opening bank
+        // of three would hand the player the Spray loop's whole first turn
+        // before a single Bomb had gone off. The per-explosion half below
+        // stays, which is the rule the upgrade is an upgrade OF.
+        if (Powers.KleeOverhaul.Enabled) return;
+#endif
         Flash();
         await SparkPower.Gain(
             choiceContext, Owner.Creature, OpeningSparks, cardSource: null,
@@ -236,6 +252,25 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
             cardSource: null,
             source: "relic:explosive_frags/detonation");
     }
+
+#if PROTOTYPE_CARDS
+    /// <summary>The overhaul's rule 4 on the upgraded relic: the same one Spark
+    /// per explosion the base relic mints, so an act-2 Touch of Orobas cannot
+    /// silently take the arm's only income away.</summary>
+    public async Task OnBombExploded(
+        PlayerChoiceContext choiceContext, Creature applier, Creature target,
+        int size, bool reacted)
+    {
+        if (!Powers.KleeOverhaul.Enabled) return;
+        if (applier.Player != Owner) return;
+
+        Flash();
+        await SparkPower.Gain(
+            choiceContext, Owner.Creature,
+            Powers.KleeOverhaulLaw.SparkPerExplosion,
+            cardSource: null, source: "relic:explosive_frags/explosion");
+    }
+#endif
 }
 
 /// <summary>
