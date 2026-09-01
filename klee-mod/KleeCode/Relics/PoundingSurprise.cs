@@ -59,7 +59,7 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
     {
         ("title", "Pounding Surprise"),
         ("description",
-            "Whenever a [gold]Bomb[/gold] detonates, gain 1 [gold]Spark[/gold]. "
+            "Whenever a [gold]Bomb[/gold] goes off, gain 1 [gold]Spark[/gold]. "
           + CompanionSlot.RewardSlotDescription),
     };
 
